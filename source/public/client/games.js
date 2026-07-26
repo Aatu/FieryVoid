@@ -1,163 +1,151 @@
 "use strict";
 
+/*
+ * games.php — YOUR GAMES + JOIN GAMES lists.
+ *
+ * The server (DBManager::getPlayerGames / getLobbyGames) sends STRUCTURED rows: a plain
+ * game name plus flags (ladder, test, rules, map, counts). It used to send pre-built
+ * HTML in `name` — inline-styled "LADDER:" spans and a <br><span class="gameRules">
+ * fragment — which is why the cards could not be restyled without editing SQL result
+ * assembly. All presentation now lives in this file.
+ *
+ * Names are player-supplied text and are escaped on the way into the DOM. The previous
+ * version interpolated them into an HTML template unescaped.
+ */
 window.gamedata = {
 
 	waiting: true,
 	games: null,
 	thisplayer: 0,
 
-	createFireDiv: function createFireDiv(data) {
-		var target = document.getElementById("fireList");
-		target.innerHTML = "";
-
-		if (data) {
-			for (var i = 0; i < data.length; i++) {
-				var id = data[i].id;
-
-				var div = document.createElement("div");
-				div.className = "game slot clickableGames";
-
-				var link = document.createElement("a");
-				link.setAttribute("href", "game.php?gameid=" + id); //Amended during PHP8 update - DK 25.6.25
-				//link.innerHTML = "Anonymous Match" + " @ Turn " + data[i].turn;
-				link.innerHTML = data[i].name + " @ Turn " + data[i].turn;
-
-				div.appendChild(link);
-
-				target.appendChild(div);
-			}
-		} else {
-			var div = document.createElement("div");
-			div.className = "notfound";
-			div.innerHTML = "No recent games";
-
-			target.appendChild(div);
-		}
-
-		//target.appendChild(div); //moved inside if/else clause
-	},
-
 	parseServerData: function parseServerData(serverdata) {
-
 		if (serverdata == null) return;
-
 		this.games = serverdata;
-
-		this.createGames();
-		$('.lobby .game').on("click", this.clickLobbyGame);
-		$('.active .game').on("click", this.clickActiveGame);
+		this.renderGames();
 	},
 
-	createGames: function createGames() {
+	/*
+	 * Full re-render from state, every time.
+	 *
+	 * The old createGames() only ever APPENDED: the whole card build — including the
+	 * waitingForTurn highlight — sat behind an "is this card already in the DOM?" guard,
+	 * so a refetch could never update a card that already existed. A game that became
+	 * your turn kept showing the stale state until a full page reload. It also re-bound
+	 * click handlers on every call, accumulating duplicates on every BFCache restore.
+	 * Cards are now plain <a> elements, so there are no handlers to bind at all.
+	 */
+	renderGames: function renderGames() {
+		var active = [];
+		var lobby = [];
 
-		var gamehtml = '<div class="game slot clickableGames" data-gameid="{gameid}"><span class="lobbyname">{gamename}</span><br><span class="value players">Players: {players}/{maxplayers}</span></div>';
-		var activefound = false;
-		var lobbyfound = false;
-		//console.log("GAMES LOLS", this.games)
 		for (var i in this.games) {
 			var game = this.games[i];
-			var gameDOM = $('.game[data-gameid="' + game.id + '"]');
-			if (game.status == "ACTIVE") {
+			//the stampede-protection sentinel is a bare {status:'GENERATING'} row
+			if (!game || !game.id) continue;
 
-				if (gameDOM.length == 0) {
-					var html = '<div class="game slot clickableGames" data-gameid="{gameid}"><span class="activeName">{gamename}</span><br><span class="value players">Players: {players}/{maxplayers}</span></div>';
-					html = html.replace("{gameid}", game.id);
-					html = html.replace("{gamename}", game.name);
-
-					gameDOM = $(html);
-					gameDOM.find('.players').remove();
-					if (!game.waiting) gameDOM.addClass("waitingForTurn");
-
-					gameDOM.appendTo($('.gamecontainer.active'));
-					$('.gamecontainer.active').addClass("found");
-				}
-				activefound = true;
-			}
-
-			if (game.status == "LOBBY") {
-				if (gameDOM.length == 0) {
-					var html = gamehtml;
-					html = html.replace("{gameid}", game.id);
-					html = html.replace("{gamename}", game.name);
-					html = html.replace("{players}", game.playerCount);
-					html = html.replace("{maxplayers}", game.slots);
-
-
-					gameDOM = $(html);
-
-					if (game.test) {
-						gameDOM.addClass("game-type-fleettest");
-						gameDOM.find('.players').remove();
-					} else {
-						gameDOM.addClass("game-type-normal");
-						$('.players', gameDOM).html("Players: " + game.playerCount + "/" + game.slots);
-					}
-
-					gameDOM.appendTo($('.gamecontainer.lobby'));
-					$('.gamecontainer.lobby').addClass("found");
-				} else {
-					if (game.test) {
-						gameDOM.addClass("game-type-fleettest");
-						//$('.players', gameDOM).remove();
-						$('.players', gameDOM).html("<br>");
-					} else {
-						gameDOM.addClass("game-type-normal");
-						$('.players', gameDOM).html("Players: " + game.playerCount + "/" + game.slots);
-					}
-				}
-				lobbyfound = true;
-			}
+			if (game.status === "ACTIVE") active.push(game);
+			else if (game.status === "LOBBY") lobby.push(game);
 		}
 
-		$(".game").each(function () {
-			var id = $(this).data().gameid;
-			if (!gamedata.gameIdFound(id)) {
-				$(this).remove();
-			}
+		//Your-turn games first, then newest. Without this the lists arrive in DB order,
+		//and a player with a lot of games can have the ones waiting on them sitting
+		//below the fold of a scrolling list — which defeats the highlight.
+		active.sort(function (a, b) {
+			if (!a.waiting !== !b.waiting) return a.waiting ? 1 : -1;
+			return b.id - a.id;
 		});
+		lobby.sort(function (a, b) { return b.id - a.id; });
 
-		if (!lobbyfound) $(".gamecontainer.lobby").removeClass("found");
+		this.fillList(jQuery(".gamecontainer.active"), active,
+			"No active games.", "Create one, or join a game opposite.");
+		this.fillList(jQuery(".gamecontainer.lobby"), lobby,
+			"No games are starting right now.", "Create one to open a lobby.");
 
-		if (!activefound) $(".gamecontainer.active").removeClass("found");
+		var yourTurn = 0;
+		for (var a = 0; a < active.length; a++) if (!active[a].waiting) yourTurn++;
+
+		jQuery('[data-fv-count="active"]').text(
+			yourTurn ? yourTurn + " waiting on you"
+				: (active.length ? active.length + " active" : ""));
+		jQuery('[data-fv-count="lobby"]').text(lobby.length ? lobby.length + " open" : "");
 	},
 
-	getNumberOfPlayers: function getNumberOfPlayers(game) {
-		var count = 0;
-		for (var i in game.slots) {
-			if (game.slots[i].playerid != null) count++;
+	fillList: function fillList($well, games, emptyTitle, emptyHint) {
+		if ($well.length === 0) return;
+
+		if (games.length === 0) {
+			$well.html('<div class="fv-empty">' + this.escapeHtml(emptyTitle) +
+				"<br>" + this.escapeHtml(emptyHint) + "</div>");
+			return;
 		}
-		return count;
+
+		var html = "";
+		for (var i = 0; i < games.length; i++) html += this.gameCardHtml(games[i]);
+		$well.html(html);
 	},
 
-	gameIdFound: function gameIdFound(id) {
-		for (var i in this.games) {
-			if (this.games[i].id == id) return true;
-		}
+	gameCardHtml: function gameCardHtml(game) {
+		var isLobby = (game.status === "LOBBY");
+		var href = isLobby ? "gamelobby.php?gameid=" + game.id : "game.php?gameid=" + game.id;
+		//fleet-test games are all named after their creator ("Dougie's Game"); the label
+		//is what players recognise, so keep showing that rather than the row's name
+		var name = game.test ? "Fleet Builder" : (game.name || "Unnamed game");
 
-		return false;
-	},
+		var classes = ["fv-card"];
+		var tags = "";
 
-	isInGame: function isInGame(id) {
-
-		for (var i in this.games) {
-			if (this.games[i].id != id) continue;
-
-			for (var a in this.games[i].slots) {
-				if (this.games[i].slots[a].playerid == this.thisplayer) return true;
+		if (isLobby) {
+			if (game.test) {
+				classes.push("is-fleet");
+				tags += this.tagHtml("fleet", "Fleet Build Only");
+			} else {
+				//a joinable game keeps the green rail whether or not it is ranked — in this
+				//column the rail answers "can I join this?" and the tag answers "is it
+				//ranked?" (user 2026-07-26). Your Games still takes the gold rail, where
+				//there is no green to preserve.
+				classes.push("is-lobby");
+				if (game.ladder) tags += this.tagHtml("ladder", "Ladder");
 			}
+		} else {
+			//waiting == 0 means this player still owes an action in that game
+			classes.push(game.waiting ? "is-waiting" : "is-yourturn");
+			//is-ladder LAST: its gold rail wins over the your-turn rail while the
+			//your-turn fill stays (the precedence is documented in gamesPanel.css)
+			if (game.ladder) {
+				classes.push("is-ladder");
+				tags += this.tagHtml("ladder", "Ladder");
+			}
+			if (!game.waiting) tags += this.tagHtml("you", "Your turn");
 		}
 
-		return false;
+		var bits = [];
+		if (game.turn > 0) bits.push("TURN " + game.turn);
+		bits.push(game.test ? "SOLO" : (game.playerCount + "/" + game.slots + " PLAYERS"));
+		if (game.map) bits.push(this.mapLabel(game.map));
+		if (game.rules && game.rules.length) bits = bits.concat(game.rules);
+
+		return '<a class="' + classes.join(" ") + '" href="' + href +
+			'" title="' + this.escapeHtml(name) + '">' +
+			'<span class="fv-card-top">' +
+			'<span class="fv-card-name">' + this.escapeHtml(name) + "</span>" + tags +
+			"</span>" +
+			'<span class="fv-card-data">' + this.escapeHtml(bits.join(" · ")) + "</span>" +
+			"</a>";
 	},
 
-	clickActiveGame: function clickActiveGame(e) {
-		var id = $(this).data().gameid;
-		window.location = "game.php?gameid=" + id;
+	tagHtml: function tagHtml(kind, label) {
+		return '<span class="fv-tag fv-tag--' + kind + '">' + this.escapeHtml(label) + "</span>";
 	},
 
-	clickLobbyGame: function clickLobbyGame(e) {
-		var id = $(this).data().gameid;
-		window.location = "gamelobby.php?gameid=" + id;
+	//"42x30" reads better as "42×30"; "OPEN" passes through untouched
+	mapLabel: function mapLabel(map) {
+		return String(map).replace(/x/i, "×");
+	},
+
+	escapeHtml: function escapeHtml(value) {
+		return String(value == null ? "" : value).replace(/[&<>"']/g, function (c) {
+			return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+		});
 	},
 
 	submitFleetTest: function submitFleetTest() {

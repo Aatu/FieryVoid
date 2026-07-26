@@ -1,0 +1,763 @@
+/*
+ * gamesPanel.css — the games panel and the Recent Games window on games.php.
+ *
+ * Page-scoped ON PURPOSE: gamesNew.css is linked by 12 pages, so none of this belongs
+ * there. Linked only by games.php.
+ *
+ * Design direction: the page chrome is unchanged (same panel fill, 5px radius, #215a7a
+ * border, nebula backdrop). What changed is the game entry, which now uses the datasheet
+ * grammar of the in-game React SCS windows — square 1px internals, uppercase letter-spaced
+ * micro-labels, monospace numerals — so the landing page and the game screen read as one
+ * product. Roadmap item 6, applied here.
+ *
+ * Both display faces are already @imported by gamesNew.css (Orbitron, Bruno Ace SC); this
+ * page just never used them. Body text stays Arial, so the universal Arial rule in
+ * gamesNew.css keeps governing everything not named below.
+ */
+
+/* ── Tokens ────────────────────────────────────────────────────────────────────
+   Every value already existed either on games.php or in the in-game React theme
+   (client/UI/reactJs/styled/theme.js). Nothing new was invented. */
+:root {
+  --fv-panel: rgba(23, 39, 54, 0.92);
+  --fv-well: #04161c;                 /* theme.colors.panelBg */
+  --fv-card: #0a1c26;
+  --fv-card-hover: #102a36;
+
+  --fv-line: #215a7a;                 /* the landing page's border, unchanged */
+  --fv-line-soft: #1a3f55;
+  --fv-line-scs: #496791;             /* theme.colors.line */
+
+  --fv-text: #deebff;
+  --fv-text-dim: #7f9bb8;             /* theme.colors.textDim */
+  --fv-accent: #8bcaf2;
+
+  --fv-turn: #84a5ce;
+  --fv-turn-bg: #254d82d0;
+  --fv-lobby: #52b352;
+  --fv-ladder: #e6ac00;
+  --fv-fleet: #0d7ea3;
+  --fv-done: #2f4a52;
+  --fv-idle: #3a5a72;
+
+  /* Recent Games. --fv-mine is the lobby green under a second name: in that window green
+     means "you are in this one", which is a different statement from "this is a lobby", and
+     naming it separately means either can be retuned without disturbing the other.
+     --fv-mine-soft is a pastel of it for TEXT — #52b352 on the card fill is about 3.4:1,
+     the pastel is ~9:1. --fv-ended is muted rather than a signal red: an ended game is
+     over, not a problem. */
+  --fv-mine: #52b352;
+  --fv-mine-soft: #7ed576;
+  --fv-ended: #b76662;
+
+  --fv-mono: Consolas, "Lucida Console", monospace;   /* theme.fonts.mono */
+  --fv-display: "Orbitron", sans-serif;
+  --fv-hero: "Bruno Ace SC", sans-serif;
+}
+
+/* box-sizing is applied per component rather than globally with `*`: this page has
+   plenty of pre-existing layout that never assumed it. */
+.fv-well,
+.fv-card,
+.fv-btn,
+.fv-search,
+.fv-select,
+.fv-modal,
+.fv-modal-panel {
+  box-sizing: border-box;
+}
+
+/* ── Restore font inheritance in the subtrees this file owns ──────────────────
+   gamesNew.css opens with `* { font-family: Arial; }`. A universal selector matches every
+   element DIRECTLY, and a direct match always beats an inherited value regardless of
+   specificity — so a nested <span> or <strong> snaps back to Arial even when its parent
+   sets a display face. That is why "Welcome to Fiery Void!" rendered in two fonts (the
+   <strong> was Arial while the <h2> was Bruno Ace SC), and it was silently doing the same
+   to the <span>s inside the column headers. Neutralise it here, once, rather than naming
+   every nested element. Must stay ABOVE the rules that assign faces: equal specificity,
+   so source order decides. */
+.games-panel *,
+.fv-modal *,
+.news-panel h2 * {
+  font-family: inherit;
+}
+
+/* The news panel's one display-face moment. Bruno Ace SC is already the site's
+   page-level display face on faq.php and factions-tiers.php. The face has a single
+   weight, so <strong> keeps 400 and takes its emphasis from brightness instead — at 700
+   the browser would synthesise a faux-bold. */
+.news-panel h2 {
+  font-family: var(--fv-hero);
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: 0.4px;
+  text-wrap: balance;
+}
+
+.news-panel h2 strong {
+  font-weight: 400;
+  color: #ffffff;
+}
+
+/* ── The large panels ─────────────────────────────────────────────────────────
+   Same fill family as before, but lifted off the nebula instead of sitting flat on it:
+   a soft outer shadow for depth, a hairline highlight along the top inside edge, and one
+   directional accent stripe across the top. The stripe is a background LAYER rather than
+   a ::before, because #globalchat scrolls — an absolutely positioned pseudo-element would
+   scroll away with the chat log, a background does not.
+
+   Scoped to games.php deliberately: .news-panel / .chat-panel are shared with other pages
+   via gamesNew.css. If you like the treatment, promoting it there is a one-line move.
+   #globalchat is listed by id because gamesNew.css sets its background at id specificity. */
+.news-panel,
+.games-panel,
+.chat-panel,
+#globalchat {
+  border: 1px solid #2a6b8f;
+  border-radius: 6px;
+  background:
+    linear-gradient(90deg, rgba(139, 202, 242, 0.9), rgba(33, 90, 122, 0.85) 34%, transparent 72%) top left / 100% 2px no-repeat,
+    linear-gradient(180deg, rgba(27, 45, 62, 0.94), rgba(18, 32, 45, 0.94));
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(139, 202, 242, 0.1);
+}
+
+/* ── Grid ─────────────────────────────────────────────────────────────────── */
+.fv-games-grid {
+  display: grid;
+  grid-template-columns: 2.5fr 2.5fr 1fr;
+  gap: 15px;
+  align-items: start;
+}
+
+.fv-col {
+  min-width: 0;                       /* lets the cards' ellipsis engage */
+}
+
+/* Shared header row across all three columns. This is what replaces the
+   padding-top: 1rem + margin-top: 2rem magic numbers that used to fake the button
+   column's alignment with the two list headings. */
+.fv-col-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  font-family: var(--fv-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--fv-text);
+  padding: 8px 2px 5px;
+  border-bottom: 2px solid var(--fv-line);
+  margin-bottom: 8px;
+  white-space: nowrap;
+}
+
+.fv-col-head .fv-count-badge {
+  font-family: var(--fv-mono);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.4px;
+  color: var(--fv-text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The list container. Rounded like the panel (the site's feel), holding square
+   readouts (the game's feel). min-height keeps the two columns level when one is
+   empty — the old markup had no min-height and an unstyled placeholder, so an empty
+   column collapsed to a single line and the row read as broken. */
+.fv-well {
+  background: var(--fv-well);
+  border: 1px solid var(--fv-line-soft);
+  border-radius: 5px;
+  padding: 6px;
+  /* Taller than the first cut (was 132/340): the scrollbar was doing too much of the work
+     and only ~6 cards were visible at a time. ~9 now. */
+  min-height: 176px;
+  max-height: 520px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.fv-well::-webkit-scrollbar,
+.fv-modal-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.fv-well::-webkit-scrollbar-track,
+.fv-modal-body::-webkit-scrollbar-track {
+  background: #0c151a;
+}
+
+.fv-well::-webkit-scrollbar-thumb,
+.fv-modal-body::-webkit-scrollbar-thumb {
+  background: #2a4a66;
+  border-radius: 4px;
+}
+
+.fv-well::-webkit-scrollbar-thumb:hover,
+.fv-modal-body::-webkit-scrollbar-thumb:hover {
+  background: #3a6a96;
+}
+
+/* ── The card ─────────────────────────────────────────────────────────────────
+   An <a>, not a div with a click handler: keyboard reachable, middle-clickable, and
+   no handlers to accumulate on re-render. */
+.fv-card {
+  --rail: var(--fv-idle);
+  display: block;
+  padding: 5px 8px 6px;
+  background: var(--fv-card);
+  border: 1px solid var(--fv-line-soft);
+  border-left: 3px solid var(--rail);
+  color: var(--fv-text);
+  text-decoration: none;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.fv-card:hover {
+  background: var(--fv-card-hover);
+  border-color: var(--fv-line);
+  text-decoration: none;
+}
+
+.fv-card:focus-visible {
+  outline: 2px solid var(--fv-accent);
+  outline-offset: 2px;
+}
+
+.fv-card-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fv-card-name {
+  font-family: var(--fv-display);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex: 1;
+}
+
+/* display:block matters — these are spans, and without it the margin and the
+   ellipsis both stop working. */
+.fv-card-data {
+  display: block;
+  font-family: var(--fv-mono);
+  font-size: 10px;
+  letter-spacing: 0.2px;
+  color: var(--fv-text-dim);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+.fv-card-players {
+  display: block;
+  font-family: var(--fv-mono);
+  font-size: 10px;
+  color: #62798f;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+
+/* Micro tags */
+.fv-tag {
+  flex: none;
+  font-family: var(--fv-display);
+  font-size: 7.5px;
+  font-weight: 700;
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
+  padding: 1px 4px 0;
+  border: 1px solid currentColor;
+  color: var(--fv-text-dim);
+  line-height: 1.6;
+}
+
+/* Filled, not outlined, and in theme.js's textAccent rather than the rail's own blue:
+   an outlined #84a5ce tag sat on the #254d82 your-turn fill at about 1.4:1 and was barely
+   there. #C6E2FF on that fill is ~6:1, and it stays clearly distinct from the gold ladder
+   tag. This is the loudest tag on the page, which is right — it is the most important. */
+.fv-tag--you {
+  color: #C6E2FF;
+  background: rgba(198, 226, 255, 0.18);
+  border-color: #C6E2FF;
+}
+
+.fv-tag--ladder {
+  color: var(--fv-ladder);
+}
+
+.fv-tag--fleet {
+  color: var(--fv-accent);
+}
+
+/* Only Recent Games builds a "done" tag, so this needs no scoping. Outlined like the other
+   quiet tags — a filled red would out-shout the YOU tag on the same row. */
+.fv-tag--done {
+  color: var(--fv-ended);
+}
+
+/* The YOU tag in Recent Games, scoped to the window on purpose: the SAME class is the
+   YOUR TURN tag on the games panel, where it sits on the blue your-turn fill and is tuned
+   for contrast against it (see above). Green there would be a different claim — "your
+   turn" is an instruction, "you" is just membership — and would clash with the fill. */
+.fv-modal .fv-tag--you {
+  color: var(--fv-mine-soft);
+  background: rgba(82, 179, 82, 0.18);
+  border-color: var(--fv-mine-soft);
+}
+
+/* ── States ───────────────────────────────────────────────────────────────────
+   The rail carries state, so nothing else has to shout. Only "your turn" also fills
+   the card, because it is the one state that should interrupt you.
+
+   ORDER MATTERS: .is-ladder comes after .is-yourturn so that a ladder game which is
+   also your turn gets the gold rail while keeping the your-turn fill. games.js relies
+   on this and appends the classes in that order. */
+.fv-card.is-waiting {
+  --rail: var(--fv-idle);
+}
+
+.fv-card.is-lobby {
+  --rail: var(--fv-lobby);
+}
+
+.fv-card.is-fleet {
+  --rail: var(--fv-fleet);
+}
+
+.fv-card.is-done {
+  --rail: var(--fv-done);
+}
+
+.fv-card.is-done .fv-card-name {
+  color: #a8bccd;
+}
+
+/* Recent Games only: a game you are in. The tinted border is what makes the rail read as
+   deliberate rather than as a stray edge — the rail alone on an otherwise cold card is easy
+   to miss in a grid this dense.
+
+   border-left-color must be restated: `border-color` is a shorthand for all four sides, so
+   without it this rule would paint over the 3px rail set by .fv-card and the card would
+   lose its left edge entirely. Same reason it survives :hover — this rule comes later at
+   equal specificity, so the hover border-color no longer wins. */
+.fv-card.is-mine {
+  --rail: var(--fv-mine);
+  border-color: rgba(82, 179, 82, 0.4);
+  border-left-color: var(--rail);
+}
+
+.fv-card.is-mine:hover {
+  border-color: rgba(82, 179, 82, 0.65);
+  border-left-color: var(--rail);
+}
+
+/* Recent Games only: someone else's live game — the window's fallback state. It borrows the
+   fleet teal rather than the .is-waiting idle grey, which in a list that is MOSTLY other
+   people's games left almost every row looking switched off. No border tint here: that is
+   what separates your games from everyone else's at a glance. */
+.fv-card.is-active {
+  --rail: var(--fv-fleet);
+}
+
+.fv-card.is-yourturn {
+  --rail: var(--fv-turn);
+  background: var(--fv-turn-bg);
+  border-color: var(--fv-turn);
+}
+
+.fv-card.is-yourturn:hover {
+  background: #2c5a94d0;
+}
+
+.fv-card.is-ladder {
+  --rail: var(--fv-ladder);
+}
+
+.fv-empty {
+  margin: auto;
+  padding: 22px 10px;
+  text-align: center;
+  font-family: var(--fv-mono);
+  font-size: 11px;
+  color: #5f7688;
+  line-height: 1.7;
+}
+
+/* ── Action column ────────────────────────────────────────────────────────── */
+.fv-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Action controls.
+   These are now the same visual family as the Recent Games filter chips — the shaded
+   header-bar fill borrowed from the in-game chrome buttons — so everything on the page
+   that is a CONTROL reads as one thing and the cards, which are CONTENT, read as another.
+   Previously they were flat bright slabs in three unrelated hues next to the new lists.
+
+   All four are exactly the same height: flex centring plus one min-height, and one shared
+   font-size. Create Game used to be 14px against its neighbours' 13px, which is what made
+   it taller. It keeps the site's green, as a tint plus a brighter border rather than a
+   solid slab, so it still reads as the primary action without shouting. */
+.fv-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 34px;
+  padding: 8px 10px;
+  font-family: var(--fv-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+  color: var(--fv-text);
+  text-align: center;
+  text-decoration: none;
+  background: rgba(73, 103, 145, 0.25);
+  border: 1px solid var(--fv-line-scs);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.fv-btn:hover {
+  background: rgba(198, 226, 255, 0.14);
+  border-color: var(--fv-accent);
+  color: #fff;
+  text-decoration: none;
+}
+
+.fv-btn:focus-visible {
+  outline: 2px solid var(--fv-accent);
+  outline-offset: 2px;
+}
+
+/* Variants come after .fv-btn:hover so their own :hover rules win the tie. */
+.fv-btn--create {
+  background: rgba(60, 122, 60, 0.38);
+  border-color: #66b266;
+  color: #e6f4e6;
+}
+
+.fv-btn--create:hover {
+  background: rgba(82, 179, 82, 0.5);
+  border-color: #8cd48c;
+  color: #fff;
+}
+
+.fv-btn--fleet {
+  background: rgba(0, 77, 102, 0.5);
+  border-color: #587e8d;
+}
+
+.fv-btn--recent {
+  background: rgba(61, 92, 92, 0.5);
+  border-color: #69848f;
+}
+
+/* ── Recent Games window ──────────────────────────────────────────────────────
+   Same shell as the ladder window, wider (1040px) because the content is a card grid
+   rather than a table. Lives here rather than in ladder.css because recentgames.php is
+   only ever included by games.php — creategame.php includes ladder.php alone. */
+.fv-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: none;
+  background: rgba(0, 0, 0, 0.8);
+  overflow: auto;
+  padding: 40px 16px;
+}
+
+.fv-modal.is-open {
+  display: block;
+}
+
+.fv-modal-panel {
+  max-width: 1040px;
+  margin: 0 auto;
+  background: var(--fv-well);
+  border: 1px solid var(--fv-line-scs);
+  padding: 18px 20px 16px;
+  position: relative;
+}
+
+.fv-modal-title {
+  font-family: var(--fv-display);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  margin: 0 0 3px;
+}
+
+.fv-modal-sub {
+  margin: 0 0 14px;
+  font-size: 12.5px;
+  color: var(--fv-text-dim);
+}
+
+.fv-modal-close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  background: none;
+  border: 0;
+  padding: 0 4px;
+  font-size: 26px;
+  line-height: 1;
+  color: #8296a8;
+  cursor: pointer;
+}
+
+.fv-modal-close:hover {
+  color: #fff;
+}
+
+.fv-modal-close:focus-visible {
+  outline: 2px solid var(--fv-accent);
+  outline-offset: 2px;
+}
+
+/* Control bar */
+.fv-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Form controls follow .ladder-input so the two windows match. */
+.fv-search {
+  flex: 1 1 240px;
+  min-width: 180px;
+  padding: 6px 8px;
+  background: #000;
+  color: #fff;
+  border: 1px solid var(--fv-line-scs);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+}
+
+.fv-search::placeholder {
+  color: #5f7688;
+}
+
+.fv-search:focus-visible,
+.fv-select:focus-visible {
+  outline: 2px solid var(--fv-accent);
+  outline-offset: 1px;
+}
+
+.fv-chips {
+  display: flex;
+  gap: 6px;
+}
+
+/* Idle fill is the shaded header-bar blue used by the in-game chrome buttons, so the
+   chips read as controls rather than labels. */
+.fv-chip {
+  font-family: var(--fv-display);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 5px 9px;
+  background: rgba(73, 103, 145, 0.25);
+  border: 1px solid var(--fv-line-scs);
+  color: var(--fv-text-dim);
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.fv-chip:hover {
+  color: var(--fv-text);
+}
+
+.fv-chip[aria-pressed="true"] {
+  background: rgba(198, 226, 255, 0.14);
+  border-color: var(--fv-accent);
+  color: var(--fv-text);
+}
+
+/* A pressed chip lights in the colour of the thing it filters for, so the control bar and
+   the cards below it are speaking the same language: green = yours, gold = ladder. ACTIVE
+   keeps the neutral accent — it filters by state, and no card colour stands for it.
+   Two attribute selectors, so these outrank the generic pressed rule above regardless of
+   where they sit in the file. */
+.fv-chip[data-filter="mine"][aria-pressed="true"] {
+  background: rgba(82, 179, 82, 0.2);
+  border-color: var(--fv-mine);
+  color: var(--fv-mine-soft);
+}
+
+.fv-chip[data-filter="ladder"][aria-pressed="true"] {
+  background: rgba(230, 172, 0, 0.16);
+  border-color: var(--fv-ladder);
+  color: #f4d68a;
+}
+
+.fv-chip:focus-visible {
+  outline: 2px solid var(--fv-accent);
+  outline-offset: 2px;
+}
+
+.fv-sort {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--fv-mono);
+  font-size: 10.5px;
+  color: var(--fv-text-dim);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.fv-select {
+  padding: 5px 6px;
+  background: #000;
+  color: #fff;
+  border: 1px solid var(--fv-line-scs);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12.5px;
+}
+
+/* Always visible, so a filter left on from last time is never invisible. */
+.fv-count {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  margin: 9px 0 0;
+  font-family: var(--fv-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.5px;
+  color: var(--fv-text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.fv-clear {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-family: var(--fv-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.5px;
+  color: var(--fv-accent);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.fv-clear[hidden] {
+  display: none;
+}
+
+.fv-modal-body {
+  margin-top: 10px;
+  padding-top: 12px;
+  border-top: 1px solid #1e3a4a;
+  max-height: 66vh;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  gap: 6px;
+  align-content: start;
+}
+
+.fv-state {
+  grid-column: 1 / -1;
+  padding: 30px 10px;
+  text-align: center;
+  font-family: var(--fv-mono);
+  font-size: 12px;
+  color: #6d8496;
+  line-height: 1.8;
+}
+
+/* inline-flex, not inline-block: .fv-btn is a flex container now, and this sits inside a
+   text-align: center state message. */
+.fv-state .fv-btn {
+  display: inline-flex;
+  width: auto;
+  min-height: 0;
+  margin-top: 12px;
+  padding: 6px 14px;
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────────────
+   Replaces the old rule that kept FOUR columns below 600px — on a 390px phone that
+   left each column about 85px wide. */
+@media screen and (max-width: 900px) {
+  .fv-games-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .fv-actions {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .fv-actions .fv-btn {
+    width: auto;
+    flex: 1 1 140px;
+  }
+
+  .fv-actions .fv-col-head {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .fv-games-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .fv-modal {
+    padding: 16px 8px;
+  }
+
+  .fv-modal-panel {
+    padding: 16px 12px 12px;
+  }
+
+  .fv-modal-body {
+    grid-template-columns: 1fr;
+    max-height: none;
+  }
+
+  .fv-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .fv-sort {
+    justify-content: space-between;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .fv-card,
+  .fv-btn,
+  .fv-chip {
+    transition-duration: 0ms;
+  }
+}

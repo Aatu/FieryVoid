@@ -1763,6 +1763,74 @@ class DBManager
         return $games;
     }
 
+    /**
+     * Games with recent activity, for the Recent Games window on games.php.
+     *
+     * Site-wide, not per-player (same as getFirePhaseGames, which took a $playerid and
+     * then ignored it): the id is used only to flag which rows are the caller's, so the
+     * window's MINE filter has something to work with. `players` is what makes the
+     * name search possible.
+     *
+     * Deliberately plain rows — getFirePhaseGames constructed a full TacGamedata per row
+     * and JSON-encoded it, shipping background/creator/description/points to render one
+     * line of text.
+     *
+     * $days/$limit are ints from the caller, interpolated rather than bound: MariaDB is
+     * fussy about placeholders in INTERVAL and LIMIT.
+     */
+    public function getRecentGames($playerid, $days = 7, $limit = 100)
+    {
+        $days  = max(1, (int)$days);
+        $limit = max(1, (int)$limit);
+
+        //turn > 0 skips games still in creation/lobby.
+        $stmt = $this->connection->prepare("
+            SELECT g.id, g.name, g.turn, g.status, g.slots, g.gamespace, g.rules,
+                   COUNT(DISTINCT CASE WHEN p.playerid > 0 THEN p.playerid END) AS playerCount,
+                   MAX(CASE WHEN p.playerid = ? THEN 1 ELSE 0 END) AS mine,
+                   GROUP_CONCAT(DISTINCT pl.username ORDER BY pl.username SEPARATOR ', ') AS players,
+                   MAX(p.lastactivity) AS lastActivity
+            FROM tac_game g
+            JOIN tac_playeringame p ON p.gameid = g.id
+            LEFT JOIN player pl ON pl.id = p.playerid
+            WHERE g.turn > 0
+              AND p.lastactivity >= DATE_SUB(NOW(), INTERVAL $days DAY)
+            GROUP BY g.id
+            ORDER BY lastActivity DESC
+            LIMIT $limit
+        ");
+
+        $games = [];
+
+        if ($stmt) {
+            $stmt->bind_param('i', $playerid);
+            $stmt->bind_result($id, $gameName, $turn, $status, $slots, $gamespace, $rules,
+                               $playerCount, $mine, $players, $lastActivity);
+            $stmt->execute();
+            while ($stmt->fetch()) {
+                $desc = $this->describeGameRules($rules, $gamespace);
+                $games[] = [
+                    "id"           => $id,
+                    "name"         => $gameName,
+                    "turn"         => $turn,
+                    "status"       => $status,
+                    "playerCount"  => $playerCount,
+                    "slots"        => $slots,
+                    "map"          => $desc["map"],
+                    "rules"        => $desc["rules"],
+                    "ladder"       => $desc["ladder"],
+                    "test"         => $desc["test"],
+                    "mine"         => ((int)$mine === 1),
+                    "players"      => ($players === null) ? '' : $players,
+                    "lastActivity" => $lastActivity
+                ];
+            }
+            $stmt->close();
+        }
+
+        return $games;
+    }
+
 
     public function getTacGamedata($playerid, $gameid, $turn = null)
     {
@@ -1788,72 +1856,113 @@ class DBManager
     }
 
 
+    /**
+     * Decode a tac_game.rules blob into the flags + display chips the games lists need.
+     *
+     * Rule keys are only PRESENT when enabled (createGame.js deletes the disabled ones),
+     * which is why the old strpos($rules, 'friendlyFire') checks happened to work — but
+     * one server-side default writing false would have lit every chip. Decode instead.
+     * Note `rules` is sometimes the JSON array '[]' rather than an object, and may be
+     * NULL, so guard the decode.
+     */
+    private function describeGameRules($rulesJson, $gamespace) {
+        $r = json_decode((string)$rulesJson, true);
+        if (!is_array($r)) $r = array();
+
+        $chips = array();
+        $chips[] = !empty($r['initiativeCategories']) ? 'SIM MOV' : 'STD MOV';
+
+        //Terrain: count the actual features rather than trusting the keys' presence — a
+        //moons entry of {small:0,medium:0,large:0} is a game with no terrain in it, and
+        //that shape is common in the live data.
+        $asteroids = isset($r['asteroids']) ? (int)$r['asteroids'] : 0;
+        $moons     = (isset($r['moons']) && is_array($r['moons'])) ? $r['moons'] : array();
+        $moonCount = (int)($moons['small'] ?? 0) + (int)($moons['medium'] ?? 0) + (int)($moons['large'] ?? 0);
+        if ($asteroids > 0 || $moonCount > 0) $chips[] = 'TERRAIN';
+
+        if (!empty($r['allowMines']))   $chips[] = 'MINES';
+        if (!empty($r['desperate']))    $chips[] = 'DESPERATE';
+        if (!empty($r['friendlyFire'])) $chips[] = 'FRIENDLY FIRE';
+
+        $space = (string)$gamespace;
+
+        return array(
+            "map"    => ($space === '' || $space === '-1x-1') ? 'OPEN' : $space,
+            "rules"  => $chips,
+            "ladder" => !empty($r['ladder']),
+            "test"   => !empty($r['fleetTest'])
+        );
+    }
+
     public function getPlayerGames($playerid) {
-        //$stmt = $this->connection->prepare("select g.id, g.name, pg.waiting from tac_playeringame pg join tac_game g on pg.gameid = g.id where g.status = 'ACTIVE' AND pg.playerid = ?");
-		//enhance to include game rules:
+        //One row per ACTIVE game this player is still in.
+        //Returns STRUCTURED fields: presentation (the ladder tag, the rule chips) is the
+        //client's job. This used to bake inline-styled HTML into `name`, which is why the
+        //cards could not be restyled without editing SQL result assembly.
+        //playerCount is new — the client previously had no count for active games.
         $stmt = $this->connection->prepare("
-            SELECT g.id, g.name, pg.waiting, g.gamespace, g.rules
+            SELECT g.id, g.name, pg.waiting, g.gamespace, g.rules, g.slots, g.turn,
+                   (SELECT COUNT(DISTINCT playerid) FROM tac_playeringame
+                     WHERE gameid = g.id AND playerid > 0) AS playerCount
             FROM tac_playeringame pg
             JOIN tac_game g ON pg.gameid = g.id
             WHERE g.status = 'ACTIVE'
             AND pg.playerid = ?
             AND pg.surrendered IS NULL
-        ");  	    
+        ");
 
+        /* Keyed by game id while fetching, because the query returns one row per SLOT this
+           player holds: someone sitting in two slots of the same game got two identical
+           cards. (The old renderer hid it — it only appended a card that was not already in
+           the DOM. The current one re-renders from state, so both rows showed.)
+
+           `waiting` merges toward 0: it means "this player still owes an order", so if ANY
+           of their slots owes one the game is waiting on them and keeps the highlight. */
         $games = [];
-		
-		$nm = '';
+
         if ($stmt) {
             $stmt->bind_param('i', $playerid);
-            $stmt->bind_result($id, $gameName, $waiting, $gamespace, $rules);
+            $stmt->bind_result($id, $gameName, $waiting, $gamespace, $rules, $slots, $turn, $playerCount);
             $stmt->execute();
-			while ($stmt->fetch()) {
-				$nm = $gameName;
+            while ($stmt->fetch()) {
+                if (isset($games[$id])) {
+                    if ((int)$waiting === 0) $games[$id]["waiting"] = 0;
+                    continue;
+                }
 
-				if (strpos($rules, 'ladder')!==false){
-				    $nm = '<span style="font-weight:bold; color:gold; padding-right: 0px;">LADDER: </span>' . $gameName;
-                } else {                                    
-				    $nm = $gameName;
-                }                
-                /*$nm .= ' <br><span class="gameRules">(';
-			    //gamespace and rules: add to name!    
-				if ($gamespace == '-1x-1'){ //open map
-					$nm .= 'Open';
-				}else{ //fixed map
-					$nm .= $gamespace;
-				}
-				if (strpos($rules, 'initiativeCategories')!==false){//simultaneous movement
-					$nm  .= ', Sim Mov';
-				}else{//standard movement
-					$nm  .= ', Std Mov';
-				}
-                if (strpos($rules, 'moons') !== false || strpos($rules, 'asteroids') !== false) {
-                    $nm .= ', Terrain';
-                }             
-				if (strpos($rules, 'desperate')!==false){
-					$nm  .= ', Desparate';
-				}
-
-                $nm .= ')</span>';
-                */
-				
-				//attempt to fix "no highlight" bug - do highlight a game if no player is listed as active
-                $games[] = ["id" => $id, "name" => $nm, "waiting" => $waiting, "status" => "ACTIVE"];
+                $desc = $this->describeGameRules($rules, $gamespace);
+                $games[$id] = [
+                    "id"          => $id,
+                    "name"        => $gameName,
+                    "waiting"     => $waiting,
+                    "status"      => "ACTIVE",
+                    "turn"        => $turn,
+                    "playerCount" => $playerCount,
+                    "slots"       => $slots,
+                    "map"         => $desc["map"],
+                    "rules"       => $desc["rules"],
+                    "ladder"      => $desc["ladder"],
+                    "test"        => $desc["test"]
+                ];
             }
             $stmt->close();
         }
-		
-		//attempt to solve no highlight problem - do highlight the game if no player is listed as active
-				
-		foreach($games as $currLineId=>$currGameData) if($games[$currLineId]["waiting"] != 0){
-			//$games[$currLineId]["waiting"] = 0;
-			$currGameId = $games[$currLineId]["id"];
-			$sql = "SELECT DISTINCT slot FROM tac_playeringame WHERE gameid = $currGameId and waiting = 0 "; //are there players that are waiting for action?
-			$result = $this->query($sql);
-			if (($result == null) || (sizeof($result) == 0)){ //no such players do exist
-				$games[$currLineId]["waiting"] = 0;				
-			}
-		}
+
+        //back to a list: keyed by game id it would json_encode as an OBJECT, and the
+        //client iterates this as an array
+        $games = array_values($games);
+
+        //attempt to solve no highlight problem - do highlight the game if no player is listed as active
+
+        foreach($games as $currLineId=>$currGameData) if($games[$currLineId]["waiting"] != 0){
+            //$games[$currLineId]["waiting"] = 0;
+            $currGameId = $games[$currLineId]["id"];
+            $sql = "SELECT DISTINCT slot FROM tac_playeringame WHERE gameid = $currGameId and waiting = 0 "; //are there players that are waiting for action?
+            $result = $this->query($sql);
+            if (($result == null) || (sizeof($result) == 0)){ //no such players do exist
+                $games[$currLineId]["waiting"] = 0;
+            }
+        }
         return $games;
     }
 
@@ -1919,77 +2028,37 @@ class DBManager
     }
 
     public function getLobbyGames($userid) {
-        //$stmt = $this->connection->prepare("select g.id as parentGameId, g.name, g.slots, (select count(gameid) from tac_playeringame where gameid = parentGameId ) as numberOfPlayers from tac_game g WHERE  g.status = 'LOBBY';");
-		//above always returns playerCount = number of slots, let's try different approach (Marcin Sawicki):
-		//$stmt = $this->connection->prepare("select g.id as parentGameId, g.name, g.slots, (select count(distinct playerid) from tac_playeringame where gameid = parentGameId and playerid > 0 ) as numberOfPlayers from tac_game g WHERE  g.status = 'LOBBY';");    
-		//enhance to include game rules
-		$stmt = $this->connection->prepare("select g.id as parentGameId, g.name, g.slots, g.gamespace, g.rules, (select count(distinct playerid) from tac_playeringame where gameid = parentGameId and playerid > 0 ) as numberOfPlayers, (SELECT count(*) FROM tac_playeringame WHERE gameid = g.id AND playerid = ?) as userInGame from tac_game g WHERE  g.status = 'LOBBY';");    
-		
+        //Games waiting in the lobby. Query unchanged; only the row assembly changed —
+        //it used to build '<span style=...>LADDER: </span>' + name + '<br><span
+        //class="gameRules">(...)</span>' and replace the name outright with
+        //'Fleet Builder'. All three are presentation and now travel as flags.
+		$stmt = $this->connection->prepare("select g.id as parentGameId, g.name, g.slots, g.gamespace, g.rules, (select count(distinct playerid) from tac_playeringame where gameid = parentGameId and playerid > 0 ) as numberOfPlayers, (SELECT count(*) FROM tac_playeringame WHERE gameid = g.id AND playerid = ?) as userInGame from tac_game g WHERE  g.status = 'LOBBY';");
+
         $games = [];
-		$nm = '';
 
         if ($stmt) {
             $stmt->bind_param("i", $userid);
             $stmt->bind_result($id, $gameName, $slots, $gamespace, $rules, $playerCount, $userInGame);
-			//$stmt->bind_result($id, $gameName, $slots, $playerCount );
             $stmt->execute();
             while ($stmt->fetch()) {
+                $desc = $this->describeGameRules($rules, $gamespace);
+
                 // FILTER: If it's a Fleet Test game, and user is not in it, SKIP.
-                $rulesObj = json_decode($rules, true);
-                if (isset($rulesObj['fleetTest']) && $rulesObj['fleetTest'] == 1 && $userInGame == 0) {
+                if ($desc["test"] && $userInGame == 0) {
                     continue;
                 }
 
-				if (strpos($rules, 'ladder')!==false){
-				    $nm = '<span style="font-weight:bold; color:#52b352; padding-right: 0px;">LADDER: </span>' . $gameName;
-                } else {                                    
-				    $nm = $gameName;
-                }
-                $nm .= ' <br><span class="gameRules">(';
-			    //gamespace and rules: add to name!
-				if ($gamespace == '-1x-1'){ //open map
-					$nm .= 'Open';
-				}else{ //fixed map
-					$nm .= $gamespace;
-				}
-
-				if (strpos($rules, 'ladder')!==false){
-					$nm  .= ', Ranked';
-				}     
-
-				if (strpos($rules, 'initiativeCategories')!==false){//simultaneous movement
-					$nm  .= ', Sim. Mov';
-				}else{//standard movement
-					$nm  .= ', Std Mov';
-				}
-                if (strpos($rules, 'moons') !== false || strpos($rules, 'asteroids') !== false) {
-                    $nm .= ', Terrain';
-                } 
-				if (strpos($rules, 'allowMines')!==false){
-					$nm  .= ', Mines';
-				}                            
-				if (strpos($rules, 'desperate')!==false){
-					$nm  .= ', Desperate';
-				}
-				if (strpos($rules, 'friendlyFire')!==false){
-					$nm  .= ', Friendly Fire';
-				}                 
-
-                $nm .= ')</span>';
-
-                $fleetTest = false;
-                $ladder = false;
-                if (strpos($rules, 'ladder')!==false){
-                    $ladder = true;
-                }
-
-                //To mark Fleet Test games as Fleet Test in lobby
-                if (isset($rulesObj['fleetTest']) && $rulesObj['fleetTest'] == 1) {
-                    $nm = '<span style="color:#DEEBFF; font-weight:bold; padding-right: 0px; text-align: center">Fleet Builder</span>'; 
-                    $fleetTest = true;                    
-                }    
-
-                $games[] = ["id" => $id, "name" => $nm, "slots" => $slots, "playerCount" => $playerCount, "status" => "LOBBY", "test" => $fleetTest, "ladder" => $ladder];
+                $games[] = [
+                    "id"          => $id,
+                    "name"        => $gameName,
+                    "status"      => "LOBBY",
+                    "playerCount" => $playerCount,
+                    "slots"       => $slots,
+                    "map"         => $desc["map"],
+                    "rules"       => $desc["rules"],
+                    "ladder"      => $desc["ladder"],
+                    "test"        => $desc["test"]
+                ];
             }
             $stmt->close();
         }

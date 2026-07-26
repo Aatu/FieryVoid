@@ -51,6 +51,9 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
   <link href="styles/gamesNew.css" rel="stylesheet" type="text/css">
   <link href="styles/confirm.css" rel="stylesheet" type="text/css">
   <link href="styles/ladder.css" rel="stylesheet" type="text/css">
+  <!-- Page-scoped: the games panel + Recent Games window. Kept out of gamesNew.css,
+       which 12 pages share. -->
+  <link href="styles/gamesPanel.css" rel="stylesheet" type="text/css">
   <script src="<?php echo AssetLoader::getAssetUrl('client/lib/jquery-4.0.0.min.js'); ?>"></script>
   <script src="client/games.js"></script>
   <script src="client/ajaxInterface.js"></script>
@@ -58,6 +61,7 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
   <script src="client/mathlib.js"></script>
   <script src="client/UI/confirm.js"></script>
   <script src="client/ladder.js"></script>
+  <script src="client/recentGames.js"></script>
   
   <script>
     jQuery($ => {
@@ -65,12 +69,8 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       ajaxInterface.startPollingGames();
       gamedata.thisplayer = <?php echo $_SESSION["user"]; ?>;
       gamedata.defaultGameName = "<?php echo $defaultGameName; ?>";
-      gamedata.defaultBackground = "21.PurpleNebula.jpg";
+      gamedata.defaultBackground = "26.OrangeGalaxy.jpg";
     });
-    function loadFireList() {
-      ajaxInterface.getFirePhaseGames();
-    }
-
     // BFCache restore freshness (games list page).
     // games.php bakes its game list into the page at server-render time and
     // parses it once on jQuery ready. That handler does not re-fire when the
@@ -78,19 +78,14 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
     // from a game, or session restore on startup), so the lists come back
     // showing the stale render-time snapshot. There is no polling loop on this
     // page (startPollingGames is a no-op), so nothing refreshes on its own.
-    // On a persisted restore: force one immediate fetch of the games list, and
-    // refresh the recent-activity panel too if it has already been populated.
+    // On a persisted restore: force one immediate fetch of the games list.
+    // The Recent Games window needs nothing here — it fetches every time it opens.
     window.addEventListener("pageshow", function (event) {
       if (!event.persisted) return;                       // only BFCache restores
       if (typeof ajaxInterface === "undefined") return;
 
       ajaxInterface.submitingGames = false;               // a frozen in-flight XHR never completed
       ajaxInterface.requestAllGames();                    // refresh YOUR GAMES + JOIN GAMES
-
-      var fireList = document.getElementById("fireList");
-      if (fireList && fireList.children.length > 0) {
-        ajaxInterface.getFirePhaseGames();                // refresh RECENT ACTIVITY if shown
-      }
     });
   </script>
 </head>
@@ -147,34 +142,40 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       </ul>
     </div>
 
-    <p class="noteGames">Remember - When anything weird happens, press <kbd>Ctrl+F5</kbd> to reload page!  If that doesn't work report bugs via Discord link above.</p>
+    <!--<p class="noteGames">Remember - When anything weird happens, press <kbd>Ctrl+F5</kbd> to reload page!  If that doesn't work report bugs via Discord link above.</p>-->
   </section>
 
+<?php
+// The RECENT ACTIVITY column moved into the Recent Games window (recentgames.php); the
+// freed width went to the two lists, which are now ~460px instead of ~280px. Container
+// fills/radii live in gamesPanel.css — they used to be inline style attributes.
+?>
   <section class="games-panel">
-    <div class="games-grid four-cols">
-      <div>
-        <h3>YOUR GAMES</h3>
-        <!--<div class="gamecontainer active subpanel"> Old version with subpanel -->
-        <div class="gamecontainer active" style="background-color:#04161C; border-radius: 5px;">
-          <div class="notfound">No active games</div>
+    <div class="fv-games-grid">
+      <section class="fv-col" aria-labelledby="yourGamesHead">
+        <div class="fv-col-head" id="yourGamesHead">
+          <span>Your Games</span>
+          <span class="fv-count-badge" data-fv-count="active"></span>
         </div>
-      </div>
-      <div>
-        <h3>JOIN GAMES</h3>
-        <div class="gamecontainer lobby" style="background-color:#04161C; border-radius: 5px;">
-          <div class="notfound">No starting games</div>
+        <?php // placeholder is replaced by games.js on ready; it also covers the case
+              // where scripting is unavailable, so the wells never sit blank and unexplained ?>
+        <div class="fv-well gamecontainer active"><div class="fv-empty">Loading games&hellip;</div></div>
+      </section>
+
+      <section class="fv-col" aria-labelledby="joinGamesHead">
+        <div class="fv-col-head" id="joinGamesHead">
+          <span>Join Games</span>
+          <span class="fv-count-badge" data-fv-count="lobby"></span>
         </div>
-      </div>
-      <div>
-        <h3>RECENT ACTIVITY</h3>
-        <div id="fireList" class="gamecontainer fire" style="background-color:#04161C; border-radius: 5px;">
-        </div>
-      </div>
-      <div class="create-col">
-        <a class="btn btn-success create-game-btn" href="creategame.php">Create Game</a>
-        <button class="btn btn-secondary btn-fleet-test" onclick="gamedata.submitFleetTest()">Fleet Builder</button>
-        <button class="btn btn-secondary btn-ladder btn-view-ladder" data-show-calc="false">View Ladder</button>
-        <button class="btn btn-secondary btn-recent-games" onclick="loadFireList()">Recent Games</button>
+        <div class="fv-well gamecontainer lobby"><div class="fv-empty">Loading games&hellip;</div></div>
+      </section>
+
+      <div class="fv-col fv-actions">
+        <div class="fv-col-head"><span>Actions</span></div>
+        <a class="fv-btn fv-btn--create" href="creategame.php">Create Game</a>
+        <button class="fv-btn fv-btn--fleet" type="button" onclick="gamedata.submitFleetTest()">Fleet Builder</button>
+        <button class="fv-btn btn-ladder" type="button" data-show-calc="false">View Ladder</button>
+        <button class="fv-btn fv-btn--recent btn-recent-games" type="button">Recent Games</button>
       </div>
     </div>
   </section>
@@ -198,4 +199,5 @@ All trademarks and copyrights remain the property of their respective owners.
 
 </body>
 <?php include("ladder.php"); ?>
+<?php include("recentgames.php"); ?>
 </html>

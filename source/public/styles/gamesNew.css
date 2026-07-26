@@ -320,7 +320,7 @@ a:hover {
 }
 
 .news-panel .lead {
-  font-size: 1.2em;
+  font-size: 1.1em;
   margin-top: 0px;
   margin-bottom: 5px;
   color: #a0b8c8;
@@ -339,12 +339,15 @@ a:hover {
 }
 
 .resources h3 {
+  font-family: var(--fv-hero);  
   margin-right: 5px;
   margin-left: -1px;
-  font-size: 18px;
+  margin-top: 12px;
+  font-size: 20px;
   border-bottom: 2px solid #215a7a;
   padding-bottom: 2px;
   margin-bottom: 10px;
+  font-weight: normal;
 }
 
 .resources a {
@@ -382,7 +385,12 @@ a:hover {
   font-weight: normal;
 }
 
-/* Games Grid */
+/* Games Grid — RETIRED 2026-07-26 (games.php redesign). The games panel is now
+   .fv-games-grid in gamesPanel.css. These selectors match no element on any page:
+   .games-grid/.four-cols/.create-col were games.php-only, and .game-list never matched
+   anything at all — which is why the "No active games" placeholder rendered with no
+   colour and no padding. Kept commented, not deleted, until the redesign is live-stable.
+
 .games-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -408,6 +416,7 @@ a:hover {
   text-align: center;
   padding: 50px 0;
 }
+*/
 
 .btn {
   display: inline-block;
@@ -590,14 +599,16 @@ a:hover {
   border-radius: 4px;
 }
 
-/* 4-column layout */
+/* RETIRED 2026-07-26 — see the .games-grid note above. The 2rem/1rem magic numbers
+   here faked the button column's alignment with the list headings; gamesPanel.css gives
+   all three columns a shared header row instead.
+
 .games-grid.four-cols {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
 }
 
-/* Align create game column */
 .create-col {
   display: flex;
   flex-direction: column;
@@ -609,6 +620,7 @@ a:hover {
 .create-col .create-game-btn {
   margin-top: 2rem;
 }
+*/
 
 /* Top-left account links */
 
@@ -627,7 +639,9 @@ a:hover {
 }
 
 .top-right-row a {
-  color: 8bcaf2;
+  color: #8bcaf2;
+  /* was `8bcaf2` — no #, so the declaration was invalid and these links silently fell
+     back to the generic `a` colour on all 12 pages linking this file */
   text-decoration: none;
 }
 
@@ -798,16 +812,15 @@ kbd {
     margin-top: 20px;
   }
 
+  /* RETIRED 2026-07-26 — this kept FOUR columns on a phone at a 3px gap, which left
+     each one about 85px wide on a 390px screen. gamesPanel.css stacks them instead.
+
   .games-grid {
     grid-template-columns: repeat(4, 1fr);
-    /* keep 4 equal-width columns */
     gap: 3px;
-    /* minimal gap between columns */
     font-size: 1em;
-    /* slightly smaller text */
   }
 
-  /* 4-column layout */
   .games-grid.four-cols {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -817,8 +830,8 @@ kbd {
   .games-grid h3 {
     margin-bottom: 10px;
     font-size: 0.9em;
-    /* slightly smaller text */
   }
+  */
 
   .btn,
   .btn-primary,

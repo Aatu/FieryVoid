@@ -2,7 +2,7 @@
   <div class="modal-content ladder-modal-content">
     <span class="close-ladder">&times;</span>
     <h2>Online Ladder</h2>
-    <p class="ladder-faq-link">You can learn about how the Online Ladder work <a href="/faq.php#ladder">here</a>.</p>
+    <p class="ladder-faq-link">You can learn about how the Online Ladder works <a href="/faq.php#ladder">here</a>.</p>
 
     <div class="ladder-flex-container">
         <div id="ladderStandingsPane" class="ladder-standings">

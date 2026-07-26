@@ -251,6 +251,24 @@ class Manager{
 
 
     }
+
+    /**
+     * Recent Games window (games.php). Site-wide list of games with activity in the last
+     * $days days; $userid only flags which rows are the caller's. Not cached — it is
+     * fetched on demand when the player opens the window, not on every page load.
+     */
+    public static function getRecentGames($userid, $days = 7){
+        if (!is_numeric($userid))
+            return array();
+
+        try {
+            self::initDBManager();
+            return self::$dbManager->getRecentGames((int)$userid, $days);
+        }
+        catch(exception $e) {
+            throw $e;
+        }
+    }
     
     public static function shouldBeInGame($userid){
 		if (!is_numeric($userid))

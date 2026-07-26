@@ -1183,15 +1183,19 @@ window.ajaxInterface = {
     },
 
 
-    getFirePhaseGames: function getFirePhaseGames() {
+    // Recent Games window on games.php. Takes callbacks rather than hardcoding a
+    // renderer: the window owns its own loading/error states and must NOT raise the
+    // global exception dialog on a failed fetch (it shows "Try again" in place instead).
+    // Replaces getFirePhaseGames, whose endpoint built a full TacGamedata per row.
+    getRecentGames: function getRecentGames(onSuccess, onError) {
 
         ajaxInterface.ajaxWithRetry({
             type: 'GET',
-            url: 'firePhaseGames.php',
+            url: 'recentgameslist.php',
             dataType: 'json',
             data: {},
-            success: gamedata.createFireDiv,
-            error: ajaxInterface.errorAjax
+            success: onSuccess,
+            error: onError || ajaxInterface.errorAjax
         });
     },
 
