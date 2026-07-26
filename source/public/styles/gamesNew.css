@@ -336,6 +336,7 @@ a:hover {
 .resources {
   margin-bottom: 12px;
   font-size: 16px;
+    color: var(--fv-text);
 }
 
 .resources h3 {
