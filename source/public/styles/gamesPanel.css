@@ -923,7 +923,7 @@
   padding: 4px 4px 4px 0;
   color: #a9bccc;
   line-height: 1.45;
-  border-bottom: 1px solid rgba(33, 90, 122, 0.3);
+  /*border-bottom: 1px solid rgba(33, 90, 122, 0.3);*/
   transition: color 120ms ease;
 }
 
