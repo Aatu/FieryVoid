@@ -330,11 +330,17 @@ window.ShipIcon = function () {
 
         var sideArgs = this.getSideSpriteArgs(ship);
 
+        //teamColor goes to BOTH sprites: the selection ring is shown for every ship
+        //active in the current simultaneous-movement bracket, not just a ship the
+        //viewer can select, so it needs the per-team colour as much as the side
+        //circle does. Passing null here left 'teamN' unmatched in chooseTexture and
+        //collapsed every ring to the neutral orange one.
         this.ShipSelectedSprite = new window.ShipSelectedSprite(
             { width: spriteWidth, height: spriteHeight },
             -2,
             sideArgs.type,
-            true
+            true,
+            sideArgs.teamColor
         ).hide();
         this.mesh.add(this.ShipSelectedSprite.mesh);
 

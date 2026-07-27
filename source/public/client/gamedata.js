@@ -316,19 +316,29 @@ window.gamedata = {
         ];
     },
 
-    // Inline style for an observer's "active mover" IniGUI box, derived from the
-    // ship's team colour. Mirrors the .iniActive* CSS (border + translucent fill +
-    // glow) but keyed on team instead of mine/ally/enemy.
+    // Inline style for an "active mover" IniGUI box, derived from the ship's team
+    // colour. Mirrors the .iniActive* CSS (border + translucent fill + glow) but
+    // keyed on team instead of mine/ally/enemy.
+    //
+    // Border and glow use the IniGUI-darkened colour; the FILL must be derived from
+    // the FULL-strength palette instead. Taking the fill off the already-darkened
+    // colour compounded the two factors (0.65 * 0.22 = 0.14 of full strength) and
+    // produced a fill within a few points of the #iniTable background (#04161C) —
+    // visually no fill at all, just a border. The .iniActive* classes sit at roughly
+    // 0.30 of their border colour, so match that.
+    INI_ACTIVE_FILL: 0.30,
     getIniActiveTeamStyle: function getIniActiveTeamStyle(team) {
         var rgb = gamedata.getIniTeamColorRGB(team);
         var r = rgb[0];
         var g = rgb[1];
         var b = rgb[2];
-        // Dark, desaturated fill (~22% of the team colour) so the team-coloured
-        // text stays readable, matching the dim backgrounds the class versions use.
-        var fillR = Math.round(r * 0.22);
-        var fillG = Math.round(g * 0.22);
-        var fillB = Math.round(b * 0.22);
+
+        var full = gamedata.getTeamColorRGB(team);
+        var f = gamedata.INI_ACTIVE_FILL;
+        var fillR = Math.round(full[0] * f);
+        var fillG = Math.round(full[1] * f);
+        var fillB = Math.round(full[2] * f);
+
         return "border:1px solid rgb(" + r + "," + g + "," + b + ") !important;"
             + "background-color:rgba(" + fillR + "," + fillG + "," + fillB + ",0.9) !important;"
             + "box-shadow:0px 0px 3px rgb(" + r + "," + g + "," + b + ");";
