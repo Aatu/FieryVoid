@@ -34,11 +34,16 @@ if (isset($_POST["user"]) && isset($_POST["pass"]) && isset($_POST["pass2"])){
 
         if ($result === true){
             $userid = Manager::authenticatePlayer($_POST["user"], $_POST["pass"]);
-	
-            if ($userid != false){
+
+            // authenticatePlayer() returns an array on success, or one of the
+            // sentinel strings 'USER_NOT_FOUND' / 'WRONG_PASSWORD'. Both are
+            // truthy, so only an array may be indexed.
+            if (is_array($userid)){
                 $_SESSION["user"] = $userid['id'];
                 $_SESSION["access"] = $userid['access'];
                 header('Location: games.php');
+            }else{
+                $error = "<span style='color: red; margin-left: 3px'>Account created, but automatic login failed. Please <a href='index.php'>log in</a>.</span>";
             }
         }else if ($result === null){
             $error = "An internal server error occurred!";

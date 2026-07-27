@@ -3369,22 +3369,34 @@ class DBManager
             return false;
         }
 
+        //Name the columns explicitly. The player table gains columns over time
+        //(discord_id and friends), and a column-less INSERT ... VALUES fails at
+        //prepare() time with "Column count doesn't match value count" as soon as
+        //one is added.
         $hash = password_hash($password, PASSWORD_DEFAULT);
+        $inserted = false;
         if ($stmt = $this->connection->prepare("
             INSERT INTO
                 player
+                (username, password, accesslevel)
             VALUES
             (
-                null,
                 ?,
                 ?,
                 1
             );
             ")) {
             $stmt->bind_param('ss', $username, $hash);
-            $stmt->execute();
+            $inserted = $stmt->execute();
             $stmt->close();
         }
+
+        //Never report success for an insert that did not happen: DBManager runs
+        //with mysqli_report(MYSQLI_REPORT_ERROR) only, so DB errors surface as
+        //warnings rather than exceptions and would otherwise be swallowed here —
+        //leaving the caller to log in an account that was never created.
+        if (!$inserted)
+            throw new Exception("DBManager:registerPlayer, insert failed: " . $this->connection->error);
 
         return true;
     }
