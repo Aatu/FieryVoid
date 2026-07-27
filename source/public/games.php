@@ -98,8 +98,8 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
 <header class="pageheader">
   <img src="img/logo.png" alt="Fiery Void Logo" class="logo">
   <div class="top-right-row">
-    <a href="reg.php">Register new account</a>
-    <span>|</span>
+    <!--<a href="reg.php">Register new account</a>
+    <span>|</span>-->
     <a href="chpass.php">Change password</a>
     <span>|</span>
     <a href="profile.php">Set-Up Discord Notifications</a>
