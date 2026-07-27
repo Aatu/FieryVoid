@@ -931,6 +931,19 @@ window.PhaseStrategy = function () {
             this.showSystemInfo(ship, this.systemInfoState.system, this.systemInfoState.element, this.systemInfoState.menu);
         }
 
+        //Keep an open tooltip in step, the way onShipEwChanged does: toggling a Shading Field /
+        //Cloaking Device in the Pre-Turn phase moves the tooltip's Detected/Undetected line
+        //(shipManager.getStealthToggleForecast) and it would otherwise hold the old answer until
+        //the pointer left the ship and came back. Deliberately narrow - a forecast only exists for
+        //an own stealth ship during gamephase -1 - so the many other SystemDataChanged callers
+        //(weapon selection, power) don't start rebuilding a hovered tooltip out from under
+        //whatever the player is clicking in it.
+        if (this.shipTooltip && ship && ship.trueStealth
+            && this.shipTooltip.ships.length === 1 && this.shipTooltip.ships.includes(ship)
+            && shipManager.getStealthToggleForecast(ship) !== null) {
+            this.shipTooltip.update(ship, this.selectedShip);
+        }
+
         if (system
             && (system.ballistic
                 || system.hextarget //same for direct fire hextarget weapons - they use ballistic highlight...

@@ -1071,8 +1071,92 @@ window.shipManager = {
         return false;
     },
 
+    /*Pre-Turn/Deployment forecast for the stealth systems the player can still toggle
+      (Torvalus Shading Field, Trek Cloaking Device). The server only re-runs its detection
+      test when the phase ADVANCES (checkStealthNextPhase, called from Deployment->advance),
+      so the detected/detectedNew values the client holds during gamephase -1 describe the
+      PREVIOUS check and never move while the player switches the system on and off. This
+      re-runs the server's rule against the current toggle so the tooltip and ship window can
+      answer "would I be detected if I commit this?" - the same live feedback a Hyach stealth
+      ship already gets when it is assigned non-DEW EW (Stealth.isDetectedStealth reads the
+      EW live, and ShipEwChanged repaints).
+
+      Returns true (would be detected) / false (would stay hidden), or NULL when no forecast
+      applies - callers must then fall back to the stored server state untouched.
+      Deliberately own-team only: an enemy's pending toggle is not ours to see, and every
+      enemy-facing caller (shouldBeHidden, ballistic icons, replay) must keep reading the
+      committed values.*/
+    getStealthToggleForecast: function getStealthToggleForecast(ship) {
+        //Ordered cheapest-first: isDetected() runs this for every ship it is asked about, so the
+        //two plain property reads must reject the whole fleet before any function call happens.
+        if (!ship.trueStealth) return null; //nothing to forecast - the only ships that can hide
+        if (ship.mine) return null; //mines settle their own stealth, no Active toggle
+        if (gamedata.gamephase != -1) return null; //only while Deployment/Pre-Turn orders are open
+        if (gamedata.turn == 1) return null; //turn 1 Deployment never hides anyone (both isDetected* agree)
+        if (gamedata.replay) return null;
+        if (!gamedata.isMyorMyTeamShip(ship)) return null;
+        if (shipManager.isDestroyed(ship)) return null;
+        if (shipManager.getTurnDeployed(ship) > gamedata.turn) return null; //not on the board yet
+
+        if (ship.faction == "Torvalus Speculators") {
+            var shadingField = shipManager.systems.getSystemByName(ship, "ShadingField");
+            if (shadingField) return shadingField.forecastDetectionTorvalus(ship);
+            return null;
+        }
+
+        if (shipManager.getSpecialAbilityStealth(ship, "Cloaking")) {
+            var cloakingDevice = shipManager.systems.getSystemByName(ship, "CloakingDevice");
+            if (cloakingDevice) return cloakingDevice.forecastDetectionTrek(ship);
+            return null;
+        }
+
+        return null;
+    },
+
+    /*Shared enemy sweep for the stealth forecasts above: walks every live enemy unit and asks
+      getDetectionRange(otherShip) how far THAT unit can see, returning true as soon as one is
+      in range with line of sight. Mirrors the server's own loops (ShadingField::isDetected in
+      baseSystems.php, CloakingDevice::isDetected in customTrek.php) - same skips, same LoS
+      test - so the forecast matches what the phase advance will actually record.
+      Units that have not deployed yet are skipped on top of the server's skips: they are not
+      on the board, and their client-side position is whatever their last movement says.*/
+    isDetectedByAnyEnemy: function isDetectedByAnyEnemy(ship, getDetectionRange) {
+        var blockedHexes = gamedata.blockedHexes;
+        var shipPos = shipManager.getShipPosition(ship);
+
+        for (var i in gamedata.ships) {
+            var otherShip = gamedata.ships[i];
+            if (otherShip.team == ship.team) continue; //loose: team ids arrive as JSON and drift string/int
+            if (gamedata.isTerrain(otherShip.shipSizeClass, otherShip.userid)) continue;
+            if (shipManager.isDestroyed(otherShip)) continue;
+            if (shipManager.getTurnDeployed(otherShip) > gamedata.turn) continue;
+
+            var range = getDetectionRange(otherShip);
+            if (range <= 0) continue;
+
+            var distance = parseFloat(mathlib.getDistanceBetweenShipsInHex(ship, otherShip));
+            if (distance > range) continue;
+
+            //LoS is only worth testing on a map that actually has blocking hexes (as the server does)
+            if (blockedHexes && blockedHexes.length > 0
+                && mathlib.isLoSBlocked(shipPos, shipManager.getShipPosition(otherShip), blockedHexes)) continue;
+
+            return true;
+        }
+
+        return false;
+    },
+
     //Main Front End check on whether a stealth ship is detected or not, called in various places and diverts to appropriate systems.
     isDetected: function (ship) {
+        //A Shading Field / Cloaking Device the player can still toggle this phase is answered
+        //live rather than from the last committed check - see getStealthToggleForecast.
+        //trueStealth first so non-stealth callers never pay for the lookup.
+        if (ship.trueStealth) {
+            var forecast = shipManager.getStealthToggleForecast(ship);
+            if (forecast !== null) return forecast;
+        }
+
         if (ship.mine) {
             var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
             if (stealthSystem) {

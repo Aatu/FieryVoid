@@ -1315,6 +1315,24 @@ MineStealth.prototype.isMineRevealed = function (ship) {
 	return false;
 };
 
+/*Reveal state as the side that does NOT own the mine sees it - what the ship window's status
+  banner needs. isMineRevealed answers "may I see this mine's details", so it short-circuits
+  true for the owner; that is never the interesting question about your own mine, where what
+  you want to know is whether the enemy has scanned it yet. Detection and identification are
+  separate server-side (`detected` = teams that found it, `revealInfo` = teams that locked it
+  with OEW to learn its type), so a mine can sit detected-but-anonymous for turns.*/
+MineStealth.prototype.isMineRevealedToOpponent = function (ship) {
+	var myTeam = gamedata.getPlayerTeam();
+
+	if (ship.team !== myTeam) return this.isMineRevealed(ship); //someone else's mine: has MY team scanned it
+
+	if (this.revealInfo === true) return true; // Legacy fallback, as isMineRevealed keeps
+	if (!Array.isArray(this.revealInfo)) return false;
+
+	//Own mine: any OTHER team knowing what it is means the surprise is gone.
+	return this.revealInfo.some(function (team) { return team != myTeam; });
+};
+
 var Fighteradvsensors = function Fighteradvsensors(json, ship) {
 	ShipSystem.call(this, json, ship);
 };
@@ -3202,6 +3220,32 @@ ShadingField.prototype.flightHasLiveField = function (ship) {
 	}
 
 	return false;
+};
+
+/*What the server's checkStealthNextPhase (baseSystems.php) will record when the
+  Deployment/Pre-Turn phase advances, judged against the CURRENT Shading Mode toggle:
+  an unshaded ship is marked detected by every enemy team, a shaded one only by teams
+  with a unit inside 15 hexes and line of sight. Called only through
+  shipManager.getStealthToggleForecast, which owns the phase/ownership gating - this
+  function just states the rule.*/
+ShadingField.prototype.forecastDetectionTorvalus = function (ship, detection = 15) {
+	//A field that cannot work at all can't shade, whatever the toggle says.
+	if (ship.flight) {
+		if (!this.flightHasLiveField(ship)) return true;
+	} else {
+		if (shipManager.systems.isDestroyed(ship, this)) return true;
+		if (shipManager.power.isOffline(ship, this)) return true;
+	}
+
+	/*Read the toggle off THIS copy, not the canonical first-fighter field isDetectedTorvalus
+	  uses: detection state is only ever written to the first field, but Shading Mode is set on
+	  every live copy (doActivate/doDeactivate) and each fighter persists its own Shaded note.
+	  Callers reach this through shipManager.systems.getSystemByName, which skips dead fighters,
+	  so this is always a field the player's toggle actually touched.*/
+	if (!this.active) return true; //Not shaded: the server marks it detected by every enemy team.
+
+	//Shaded: flat 15 hex range, scanner ratings play no part (server: ShadingField::isDetected).
+	return shipManager.isDetectedByAnyEnemy(ship, function () { return detection; });
 };
 
 ShadingField.prototype.isDetectedTorvalus = function (ship, detection = 15) {

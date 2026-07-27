@@ -289,6 +289,45 @@ CloakingDevice.prototype.doIndividualNotesTransfer = function () {
     }
 };
 
+/*What the server's checkStealthNextPhase (customTrek.php) will record when the
+  Deployment/Pre-Turn phase advances, judged against the CURRENT cloak toggle: an
+  uncloaked ship is marked detected by every enemy team, a cloaked one only by teams
+  whose scanner rating reaches it with line of sight. Called only through
+  shipManager.getStealthToggleForecast, which owns the phase/ownership gating.*/
+CloakingDevice.prototype.forecastDetectionTrek = function (ship) {
+    //A cloak that cannot work at all can't hide the ship, whatever the toggle says.
+    if (shipManager.systems.isDestroyed(ship, this)) return true;
+    if (shipManager.power.isOffline(ship, this)) return true;
+    if (!this.active) return true; //Not cloaked: the server marks it detected by every enemy team.
+
+    return shipManager.isDetectedByAnyEnemy(ship, CloakingDevice.prototype.getDetectionRating);
+};
+
+/*How far one enemy unit can see a cloaked ship. Mirrors CloakingDevice::isDetected
+  (customTrek.php): scanner output (ELINT scanners included - ElintScanner extends
+  Scanner server-side), x1.5 for bases and ELINT ships, unmodified for everyone else;
+  a fighter flight uses half its offensive bonus. Disabled ships see nothing.*/
+CloakingDevice.prototype.getDetectionRating = function (otherShip) {
+    if (otherShip.flight) return Math.ceil((otherShip.offensivebonus || 0) / 2);
+    if (shipManager.isDisabled(otherShip)) return 0;
+
+    var scanners = shipManager.systems.getSystemListByName(otherShip, "scanner")
+        .concat(shipManager.systems.getSystemListByName(otherShip, "elintScanner"));
+
+    var totalDetection = 0;
+    for (var i = 0; i < scanners.length; i++) {
+        if (shipManager.systems.isDestroyed(otherShip, scanners[i])) continue;
+        if (shipManager.power.isOfflineOnTurn(otherShip, scanners[i], gamedata.turn)) continue;
+        totalDetection += scanners[i].output;
+    }
+
+    if (otherShip.base || shipManager.hasSpecialAbility(otherShip, "ELINT")) {
+        return Math.floor(totalDetection * 1.5);
+    }
+
+    return Math.floor(totalDetection);
+};
+
 CloakingDevice.prototype.isDetectedTrek = function (ship) {
     if (gamedata.gamephase == -1 && gamedata.turn == 1) return true;  //Do not hide in Turn 1 Deployment Phase.  
     if (shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed.       

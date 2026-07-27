@@ -1499,9 +1499,35 @@ const getStatusBanners = (ship) => {
 
     const banners = [];
 
-    //trueStealth ships: green "Undetected" (a Detected banner is deliberately omitted)
-    if (ship.trueStealth && isUndetected(ship)) {
-        banners.push({ key: 'undetected', color: theme.colors.statusOk, bg: 'rgba(50, 205, 50, 0.08)', text: 'Undetected' });
+    //Resolved once per render and threaded through: when a forecast is live it sweeps every enemy
+    //unit, so it is not something to ask for three times over on the way to two banners.
+    const stealthForecast = ship.trueStealth ? shipManager.getStealthToggleForecast(ship) : null;
+
+    /*trueStealth ships: green Undetected / red Detected. Mines split the detected half in two,
+      because the server tracks finding a mine and identifying it separately (MineStealth:
+      `detected` = teams that found it, `revealInfo` = teams that have locked it with OEW to
+      learn its type), so one can sit detected-but-anonymous for turns - amber until the type
+      is known, red after.
+      Read throughout from the OPPOSING side's point of view: on your own unit the question is
+      what the enemy has on it, on theirs it is what you have.*/
+    if (ship.trueStealth) {
+        if (isUndetected(ship, stealthForecast)) {
+            banners.push({ key: 'undetected', color: theme.colors.statusOk, bg: 'rgba(50, 205, 50, 0.08)', text: 'Undetected' });
+        } else if (ship.mine) {
+            const mineStealth = shipManager.systems.getSystemByName(ship, 'mineStealth');
+            //No stealth system at all means nothing is hiding it - treat as fully revealed.
+            if (!mineStealth || mineStealth.isMineRevealedToOpponent(ship)) {
+                banners.push({ key: 'detected', color: theme.colors.statusBad, bg: 'rgba(255, 80, 80, 0.10)', text: 'Detected - Revealed' });
+            } else {
+                banners.push({ key: 'detected', color: theme.colors.statusAlert, bg: 'rgba(255, 165, 0, 0.10)', text: 'Detected - Not Revealed' });
+            }
+        } else if (stealthForecast === true) {
+            //Nothing is committed until the Pre-Turn phase advances, so the pending Shading Field /
+            //Cloaking Device toggle is worded as the forecast it is rather than as fact.
+            banners.push({ key: 'detected', color: theme.colors.statusBad, bg: 'rgba(255, 80, 80, 0.10)', text: 'Would be Detected' });
+        } else {
+            banners.push({ key: 'detected', color: theme.colors.statusBad, bg: 'rgba(255, 80, 80, 0.10)', text: 'Detected' });
+        }
     }
 
     //this ship rides a host (e.g. breaching pod attached to its target)
@@ -1533,9 +1559,16 @@ const getStatusBanners = (ship) => {
   stealth system's per-team detected/detectedNew lists, which the plain isDetected
   call misses) so the banner can never claim Undetected while the tooltip says
   Detected. Loose compares kept deliberately — same as the tooltip.*/
-const isUndetected = (ship) => {
+const isUndetected = (ship, forecast) => {
     //deployment phase, deploying this turn: the tooltip always treats this as unseen
     if (gamedata.gamephase == -1 && shipManager.getTurnDeployed(ship) == gamedata.turn) return true;
+
+    /*A Shading Field / Cloaking Device the player can still toggle this phase is answered by the
+      caller's shipManager.getStealthToggleForecast - which is exactly what isDetected would return
+      anyway, so take it directly and skip the second sweep. It has to win outright: the stored
+      detected/detectedNew arrays the fallback below reads still hold the LAST committed check and
+      would pin the banner off for the whole Pre-Turn phase. Same guard as ShipTooltip.js.*/
+    if (forecast !== null && forecast !== undefined) return !forecast;
 
     let detected = shipManager.isDetected(ship);
 

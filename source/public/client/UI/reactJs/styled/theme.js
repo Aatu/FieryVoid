@@ -17,6 +17,7 @@ const theme = {
         warning: "#e1b000",                     //amber status (e.g. ROLLED banner)
         statusOk: "limegreen",                  //green status banners - matches the map tooltip (Undetected / Attached)
         statusAlert: "#e1b000",                  //orange alert banners - matches the map tooltip (boarding)
+        statusBad: "red",                       //red status banners - matches the map tooltip (Detected)
         enhText: "#d8be86",                     //Enhancements list body text - gold, matches the block's bronze border/title
         custom: "#cccc00",    
     },
