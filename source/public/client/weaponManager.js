@@ -3635,6 +3635,22 @@ window.weaponManager = {
                         list.push(d);
                     }
                 }
+                // A flight carries its defensive systems on the individual craft, and a capacity-pool
+                // absorber (Shield Projection) records what it soaked as a damage entry on ITSELF.
+                // Those entries live one level down, so without this the combat log reported a fully
+                // absorbed shot against a flight as "damaged for 0". Same fighter recursion as
+                // shipManager.systems.getSystem.
+                if (system.fighter) {
+                    for (var c in system.systems) {
+                        var fighterSystem = system.systems[c];
+                        for (var b in fighterSystem.damage) {
+                            var d = fighterSystem.damage[b];
+                            if (d.fireorderid == fire.id) {
+                                list.push(d);
+                            }
+                        }
+                    }
+                }
             }
 
             if (list.length > 0) {

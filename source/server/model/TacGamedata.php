@@ -328,19 +328,33 @@ class TacGamedata {
     
     public function getNewDamages(){
         $list = array();
-        
+
         foreach ($this->ships as $ship){
             foreach($ship->systems as $system){
                 foreach($system->damage as $damage){
                     if ($damage->updated == true)
                         $list[] = $damage;
                 }
-                
+                //Fighter subsystems can have damage entries as well - a flight keeps its defensive
+                //systems on the individual craft, and a capacity-pool absorber records what it
+                //soaked as a damage entry on ITSELF (ThoughtShield/ThirdspaceShield::absorbDamage).
+                //Without this loop none of that ever reached the database: the craft's shield pool
+                //never moved (so it absorbed forever and its rating display never changed) and the
+                //combat log had no absorption row to report. Mirrors getUpdatedCriticals() above.
+                if($system instanceof Fighter){
+                    foreach($system->systems as $subsystem){
+                        foreach($subsystem->damage as $damage){
+                            if ($damage->updated == true)
+                                $list[] = $damage;
+                        }
+                    }
+                }
+
             }
         }
-        
+
         return $list;
-    
+
     }
 
 	
