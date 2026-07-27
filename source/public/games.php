@@ -69,7 +69,11 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       ajaxInterface.startPollingGames();
       gamedata.thisplayer = <?php echo $_SESSION["user"]; ?>;
       gamedata.defaultGameName = "<?php echo $defaultGameName; ?>";
-      gamedata.defaultBackground = "26.OrangeGalaxy.jpg";
+      gamedata.defaultBackground = "21.PurpleNebula.jpg";
+
+      // Set here rather than in chat.php's markup: that file is also included by
+      // game.php, gamelobby.php and creategame.php, where "all players" would be wrong.
+      $("#globalchat .chatinput").attr("placeholder", "Message all players");
     });
     // BFCache restore freshness (games list page).
     // games.php bakes its game list into the page at server-render time and
@@ -90,7 +94,7 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
   </script>
 </head>
 
-<body  style="background: url('./img/maps/21.PurpleNebula.jpg') no-repeat center center fixed; background-size: cover;">
+<body  style="background: url('./img/maps/14.PlanetsNear.jpg') no-repeat center center fixed; background-size: cover;">
 <header class="pageheader">
   <img src="img/logo.png" alt="Fiery Void Logo" class="logo">
   <div class="top-right-row">
@@ -105,16 +109,27 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
 
 <main class="container">
   <section class="news-panel">
+    <div class="fv-panel-head">
+      <span> </span>
+      <span class="fv-panel-meta">Jul 2026</span>
+    </div>
+
     <h2>Welcome to <strong>Fiery Void!</strong></h2>
     <p class="lead">A free-to-play adaptation of the “Babylon 5 Wars” tabletop game, by Agents of Gaming!</p>
 
+<?php // The " | " separators are gone — .quick-links lays these out as chips, which are
+      // also a usable tap target on a phone. Each carries the colour of what it opens via
+      // its qk-* class; a link with no class falls back to the page accent, so adding one
+      // without a class still looks deliberate. ?>
 <div class="resources">
   <h3>Get Started</h3>
-  <a href="./starterGuide.php" target="_blank" rel="noopener noreferrer">Starter Guide</a> | 
-  <a href="https://www.youtube.com/playlist?list=PLTGKagm5KkMxB8oKBiIUeoBQTRYz2z0-3" target="_blank" rel="noopener noreferrer">Video Tutorials</a> | 
-  <a href="https://fieryvoidmogwaitools.netlify.app/" target="_blank" rel="noopener noreferrer">Tool Suite</a> | 
-  <a href="https://discord.gg/4jXarWusp4" target="_blank" rel="noopener noreferrer">Discord</a> | 
-  <a href="https://www.facebook.com/groups/fieryvoid" target="_blank" rel="noopener noreferrer">Facebook</a>
+  <div class="quick-links">
+    <a class="qk-guide" href="./starterGuide.php" target="_blank" rel="noopener noreferrer">Starter Guide</a>
+    <a class="qk-discord" href="https://discord.gg/4jXarWusp4" target="_blank" rel="noopener noreferrer">Discord</a>
+    <a class="qk-video" href="https://www.youtube.com/playlist?list=PLTGKagm5KkMxB8oKBiIUeoBQTRYz2z0-3" target="_blank" rel="noopener noreferrer">Video Tutorials</a>
+    <a class="qk-tools" href="https://fieryvoidmogwaitools.netlify.app/" target="_blank" rel="noopener noreferrer">Tool Suite</a>
+    <!--<a href="https://www.facebook.com/groups/fieryvoid" target="_blank" rel="noopener noreferrer">Facebook</a>-->
+  </div>
 </div>
 
 
@@ -128,18 +143,23 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       </div> 
     </div>
 
+    <?php // The month moved into the panel head bar's readout, so it is no longer a date
+          // that has to be edited in two places. The " - " after each title is gone too:
+          // the title renders as uppercase Orbitron in the accent and the body as Arial,
+          // which separates them without needing a punctuation mark.
+          //
+          // Per-entry highlight, unchanged: set --update-colour on the <li> and it
+          // recolours the title AND tints the rail. See the commented example below. ?>
     <div class="resources">
-      <h3>Latest Updates — July 2026</h3>
+      <h3>Latest Updates - July 2026</h3>
       <ul class="updates-list">
-        <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->    
-        <li><span class="update-title">KIRISHIAC LORDS</span> - A brand-new Ancient faction has been added to Fiery Void!</li>  
-        <li><span class="update-title">Ship Window Revamp</span> - Ship windows (SCS) have been updated in Game and Fleet Selection screens to improve appearance and functionality.</li> 
-        <li><span class="update-title">Discord Notifications</span> - You can now add your Discord account details in 'Set-Up Discord Notifications' to get a message when it's your turn. See Fiery Void FAQ for details!</li>           
-        <li><span class="update-title">Civilians and Raiders</span> - A plethora of official and custom Civilian ships added for a huge number of factions (thanks to Lunara).</li>          
-        <li><span class="update-title">Sh'lassan and Mentaban</span> - Added these two Small Race factions which utilise exported EA hulls (thanks to Lunara).</li>                                                              
-        <li><span class="update-title">General Fixes</span> - Many other small bug fixes/updates. Thanks for the reports!</li>
-        <!--<li style="--update-colour: var(--fv-text-dim)"><strong>General Fixes</strong> - Many other small bug fixes/updates. Thanks for the reports!</li>-->                     
-        <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
+        <!--<li style="--update-colour: #e05b52;"><span class="update-title">Merry Christmas from Fiery Void!</span></li>-->
+        <li><span class="update-title">Kirishiac Lords</span>A brand-new Ancient faction has been added to Fiery Void!</li>
+        <li><span class="update-title">Ship Window Revamp</span>Ship windows (SCS) have been updated in Game and Fleet Selection screens to improve appearance and functionality.</li>
+        <li><span class="update-title">Discord Notifications</span>You can now add your Discord account details in 'Set-Up Discord Notifications' to get a message when it's your turn. See Fiery Void FAQ for details!</li>
+        <li><span class="update-title">Civilians and Raiders</span>A plethora of official and custom Civilian ships added for a huge number of factions (thanks to Lunara).</li>
+        <li><span class="update-title">Sh'lassan and Mentaban</span>Added these two Small Race factions which utilise exported EA hulls (thanks to Lunara).</li>
+        <!--<li><span class="update-title">General Fixes</span>Many other small bug fixes/updates. Thanks for the reports!</li>-->
       </ul>
     </div>
 
@@ -152,6 +172,10 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
 // fills/radii live in gamesPanel.css — they used to be inline style attributes.
 ?>
   <section class="games-panel">
+    <div class="fv-panel-head">
+      <span>Games</span>
+    </div>
+
     <div class="fv-games-grid">
       <section class="fv-col" aria-labelledby="yourGamesHead">
         <div class="fv-col-head" id="yourGamesHead">
@@ -181,13 +205,32 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
     </div>
   </section>
 
-  <div id="globalchat" class="chat-panel" style="height:200px;">
-    <?php
-    $chatgameid = 0;
-    $chatelement = "#globalchat";
-    include("chat.php")
-    ?>
-  </div>
+<?php
+// .chat-panel is now a WRAPPER around #globalchat rather than the same element. It has
+// to be, because the head bar must sit outside the scrolling body — #globalchat scrolls,
+// so a header inside it would scroll away with the chat log.
+//
+// $chatelement stays "#globalchat": chat.php's JS selects the scrolling body, which is
+// still that id. Nothing in chat.php changes, which matters — game.php, gamelobby.php
+// and creategame.php include it too.
+//
+// The height moved off #globalchat's own inline style and onto the body below; it is a
+// little taller than the old 200px because the composer bar now has real padding of its
+// own, so less of the box is message list.
+?>
+  <section class="chat-panel">
+    <div class="fv-panel-head">
+      <span>Global Chat</span>
+      <span class="fv-panel-meta">All players</span>
+    </div>
+    <div id="globalchat" style="height:230px;">
+      <?php
+      $chatgameid = 0;
+      $chatelement = "#globalchat";
+      include("chat.php")
+      ?>
+    </div>
+  </section>
 </main>
 
 <footer class="site-disclaimer">

@@ -570,7 +570,76 @@ Re-verified: `node --check` clean, 25/25 client unit tests pass (two updated for
 and tag-label changes), stylesheet brace-balanced with all 20 referenced tokens defined,
 `games.php` and `gamesPanel.css` both serve 200.
 
+### Feedback round 2 — 2026-07-27 (news + chat panels)
+
+The games panel was accepted; the news and chat panels read as bland beside it. Reviewed
+and rebuilt via a browser-opened mockup (`_panelMockup.html`, delete after sign-off).
+
+**Governing idea, extending the status rail: the rail means "one entry in a log."**
+Everything that is *not* a log gets a different device, so the news panel reads as three
+kinds of thing instead of one wall of Arial:
+
+| Content | Device |
+|---|---|
+| log — game cards, Latest Updates | left rail |
+| navigation — Get Started | filled colour chips |
+| reference — Rules & Info | hairline rows |
+
+1. **Latest Updates** — `list-style: disc inside` + `margin-left: -35px` (a marker the
+   design never wanted, plus a negative-margin hack undoing the indent it caused) replaced
+   by a 2px rail with a real hanging indent. Title is uppercase Orbitron in the accent, body
+   drops to `#a9bccc`; the ` - ` separator in the markup is no longer needed. The
+   `--update-colour` knob still works and now tints the rail as well as the title.
+2. **Panel head bars** (`.fv-panel-head`) on all three panels — `BRIEFING · JUL 2026`,
+   `GAMES`, `GLOBAL CHANNEL · ALL PLAYERS`. **Replaces** the free-floating top accent
+   stripe from round 1 rather than adding to it, so the frame's device count is unchanged —
+   but the chat panel gains the label it never had and the update month lives in one place.
+3. **Chat rebuilt as a channel.** `.chat-panel` is now a WRAPPER around `#globalchat`, not
+   the same element — the head bar has to sit outside the scrolling body. The panel is a
+   flex column its rows fill edge to edge: head bar, scrolling log, and a **docked composer
+   bar**. Its own 30px side padding is dropped; each row carries an 18px gutter, which is
+   what stops the chat reading as a box inside a box. `chat.php` is untouched (three other
+   pages include it) — the flex column beats its inline height via one `!important`.
+   Timestamps are monospace + `tabular-nums`, so every username starts at the same x.
+   The input, the last raw browser control on the page (`border: 0` on a white default),
+   becomes a `›` prompt. Height 200 → 230px: the composer bar now has padding of its own.
+4. **Get Started** — five 16px links joined by literal `|` characters (the page's smallest
+   tap targets) became colour-coded chips, one `--chip` / `--chip-text` pair per `qk-*`
+   class. Hues are **desaturated** versions of the page's own: at full strength four
+   saturated chips in a row out-shouted the panel. Discord's is the brand's own, pulled
+   down to match. All four clear 4.5:1 (4.96–6.56 idle, 8.6–10.2 hover on white).
+5. **Rules & Info** links took the same face as `.update-title`. They had stayed Arial
+   because `gamesNew.css`'s `* { font-family: Arial }` matches the `<a>` **directly**, and
+   a direct match beats an inherited display face regardless of specificity — the third
+   time that trap has bitten on this page (see round 1 item 6).
+6. **Accent, dialled up a little** — a radial accent wash behind the masthead as a
+   background *layer*, and update rails at 58% accent mix. The `h2` takes the **same 3px
+   accent marker as the section heads**, so the panel's headings are one system top to
+   bottom; its text stays a single colour, because with the rail carrying the accent a
+   recoloured word inside the sentence was a second bid for the same attention. (An
+   accent-plus-bloom `Fiery Void!` was built first and reversed — the rail does it better.)
+7. **Logout** was `.btn-primary`, a solid `#215a7a` slab at 1.2em — the last control on the
+   page in its own language. Now the `.fv-btn` family. Page-scoped for free: only games.php
+   links `gamesPanel.css`, so `.btn-primary` is unchanged on the other 11 pages.
+
+Rejected during the round: corner brackets on the panels (a fifth frame device with nothing
+to say), and a 3px accent marker on the panel head titles — built, then removed as clutter.
+
+Verified: no BOM on either touched file, PHP open/close tags balanced 13/13, games.php HTML
+nesting clean, `gamesPanel.css` brace-balanced (143/143) with every referenced token defined
+except `--update-colour`, which is intentionally undefined and always has a fallback.
+**Not** verified: `php -l` and any browser render — Docker was down for this session.
+
+`.resources` / `.links` / `.updates-list` / `.update-title` / `.lead` / `.noteGames` are
+declared in the 12-page `gamesNew.css` but match **only games.php**, and three of them
+reference tokens defined only in `gamesPanel.css` (so `.resources h3` silently falls back to
+Arial on the other 11 pages). They are now fully overridden and should move — cleanup pass.
+
 ### Left for the user
+- **Browser test** of games.php — nothing in round 2 has been rendered. `_panelMockup.html`
+  (untracked, in `source/public/`) mirrors the new markup and links the production
+  stylesheets, so it previews the real thing over `file://` while Docker is down. Delete it
+  afterwards.
 - `ajaxInterface.js` changed, so **both legacy bundles regenerate** — `yarn watch:legacy`
   handles it; the two bundle files stay uncommitted as usual.
 - Browser test per §8, including the mobile breakpoints, which nothing above exercised.
