@@ -2458,7 +2458,14 @@ class GraviticMine extends Weapon{
             if ($mineWeapon->isOfflineOnTurn($gamedata->turn)) continue;
 
             foreach ($mineWeapon->fireOrders as $fo) {
-                if (isset($fo->damageclass) && $fo->damageclass === 'graviticShear') continue;
+                // Skip this weapon's own synthetic orders. Both 'graviticShear' (damage marker)
+                // and 'graviticPull' (per-target movement marker) carry the current turn and a
+                // hex in x/y - the pull marker's hex being where a unit was dragged TO. They are
+                // persisted, so if the PreFiring advance ever ran twice for one turn (retried or
+                // duplicated submit; $resolvedTurn is a per-request static and cannot catch that)
+                // the earlier run's pull hexes would be re-read here as extra mines.
+                if (isset($fo->damageclass)
+                    && ($fo->damageclass === 'graviticShear' || $fo->damageclass === 'graviticPull')) continue;
                 if ((int)$fo->turn !== (int)$gamedata->turn) continue; // only this turn's shots count
                 if (!isset($fo->x) || !isset($fo->y)) continue;
 
@@ -2684,7 +2691,21 @@ class GraviticMine extends Weapon{
         );
         $shearOrder->chosenLocation = $hitLocation;
         $shearOrder->pubnotes = " Sheared by conflicting Gravitic Mines.";
+
+        // Persist now to claim a real DB id, as applyMovement() does for the pull marker.
+        // Damage records copy $fireOrder->id at the moment damage is dealt; while the id was
+        // still -1 DBManager::submitDamages fell back to "any order from this shooter+weapon
+        // this turn that hit" and took the first row - this mine's own hex launch order - so
+        // shear damage was logged against the launch order instead of the shear order.
+        // addToDB=false afterwards stops PreFiringGamePhase inserting a duplicate; updated=true
+        // makes updateFireOrders write back the rolled/notes/shotshit set during resolution.
         $shearOrder->addToDB = true;
+        $newId = Manager::insertSingleFiringOrder($gamedata, $shearOrder);
+        if ($newId) {
+            $shearOrder->id = (int)$newId;
+        }
+        $shearOrder->addToDB = false;
+        $shearOrder->updated = true;
         $this->fireOrders[] = $shearOrder;
 
         GraviticMineHandler::$alreadyShearedTargetIds[$unit->id] = true;
@@ -2726,9 +2747,17 @@ class GraviticMine extends Weapon{
         //}
 
         if ($count === 2) {
-            // Line touches the unit's hex iff perpendicular distance ≤ ½ hex-width
-            // (Mathlib::hexCoToPixel uses unit hex-width = sqrt(3), so half-width = sqrt(3)/2).
-            $tolerance = sqrt(3) / 2;
+            // Rule: draw a line between the centres of the two mine hexes; if that line touches
+            // the unit's hex, the unit is eligible. How far the line may pass from the hex centre
+            // and still touch it depends on the line's ANGLE (see getHexTouchTolerance), so the
+            // tolerance is taken per-line rather than fixed at the flat-side half-width.
+            // The epsilon matters: a unit exactly on the line - mines in the same column with the
+            // unit one half-column off, a very ordinary layout - lands precisely ON the tolerance,
+            // where bare floating point was deciding shear-or-no-shear by ~1e-15.
+            $tolerance = $this->getHexTouchTolerance(
+                $minePx[1]['x'] - $minePx[0]['x'],
+                $minePx[1]['y'] - $minePx[0]['y']
+            ) + 1e-9;
             $dist = $this->pointToSegmentDistance($unitPx, $minePx[0], $minePx[1]);
             //Debug::log("    2-mine check: segDist={$dist} tolerance={$tolerance} inZone=" . ($dist <= $tolerance ? 'YES' : 'NO'));
             return $dist <= $tolerance;
@@ -2739,6 +2768,23 @@ class GraviticMine extends Weapon{
         $inside = $this->pointInPolygon($unitPx, $hull);
         //Debug::log("    3+-mine check: hullSize=" . count($hull) . " inside=" . ($inside ? 'YES' : 'NO'));
         return $inside;
+    }
+
+    /* Greatest distance a line of direction ($abx,$aby) may pass from a hex centre while still
+       touching that hex - i.e. the hex's half-width measured perpendicular to the line.
+       Mathlib::hexCoToPixel lays out pointy-top hexes of circumradius 1 (column spacing sqrt(3),
+       row spacing 1.5), so the vertices are (0,+/-1) and (+/-sqrt(3)/2,+/-0.5) and the answer is
+       max|n.v| over those vertices for the line's unit normal n. It runs from sqrt(3)/2 = 0.866
+       (line at 0/60 deg, crossing flat side to flat side) up to 1.0 (line at 30/90 deg, clipping
+       a corner), so a fixed sqrt(3)/2 misses every corner-clipping line. Never returns less than
+       sqrt(3)/2, so this can only ever make a unit MORE eligible than the old fixed value. */
+    private function getHexTouchTolerance($abx, $aby){
+        $len = sqrt($abx * $abx + $aby * $aby);
+        if ($len <= 1e-9) return sqrt(3) / 2; //both mines in one hex: no line to take a normal from, keep the flat-side value
+        $nx = -$aby / $len; //unit normal to the line
+        $ny =  $abx / $len;
+        $s  = sqrt(3) / 2;  //vertex x-offset
+        return max(abs($ny), abs($nx * $s + $ny * 0.5), abs($nx * $s - $ny * 0.5));
     }
 
     private function pointToSegmentDistance($p, $a, $b){
