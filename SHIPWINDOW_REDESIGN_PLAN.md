@@ -220,6 +220,173 @@ EW tooltip):** two user requests.
    `title={SHOW_EW_TARGET_TOOLTIP ? target.name : undefined}`. game.php only
    (interactive rows exist only where a map does).
 
+**Post-Stage-4 improvements round 8 (2026-07-22) — BUILT, awaiting user test
+(UI.bundle only, `yarn build`; four user requests):**
+1. **EW row labels colour-coded** (`ShipWindowEw.js`, game.php EW panel): only the
+   LABELS are tinted, never the values or target names. `EW_LABEL_COLORS` map +
+   `ewLabelColor()`; `RowLabel` took a `$color` prop. Muted pastels on the dark panel:
+   DEW white, CCEW+SDEW soft blue `#9dc3e6`, OEW+BDEW soft green `#9ccf97`, the two
+   detect rows ("Detect Mines"/"Detect Stealth") soft purple `#c2a7dd`, DIST+SOEW soft
+   orange `#e6b98f`. The user's spec had two overlaps (OEW under green AND orange; SDEW
+   under blue AND purple) — resolved: target SDEW→blue, the detect rows (the spec's
+   MDEW/SDEW)→purple, OEW→green, SOEW→orange. Retune via the one map.
+2. **Section-header text vertical alignment** (`ShipSection.js`): the section name
+   (`SectionName`, 8px arial) and structure readout (`StructureText`, 10px mono) both
+   got `line-height: 1` so `align-items:center` co-centres two tight glyph boxes instead
+   of the fonts' differing default line boxes (Consolas's large Windows line-gap made the
+   mono readout's box tall/centred while the smaller arial name read high — the
+   "top-aligned label vs centred value" jarring the user reported).
+3. **Lobby Hit Chart button moved to bottom-left** (`ShipWindow.js`, lobby grid only):
+   new `hcbtn` grid area carved from the bottom-LEFT cell by `buildTemplateAreas` (3rd
+   arg `withHcBtn`), mirroring `enh` bottom-right; `HitChartArea` component +
+   `renderLobbyHitChart()`. The manoeuvre-stats (`ManoeuvreStats`) stay top-left in
+   `ctrl`; the `ctrl` span stops above `hcbtn`. Net lobby symmetry: Ship Stats top-left /
+   datasheet top-right / Hit Chart+Art bottom-left / Enhancements bottom-right. The Hit
+   Chart popup now anchors to the button's actual position via `getAnchorBelow(ref)`
+   (lobby → `hitChartAreaRef`; game/compact → `controlsRef`), replacing the fixed
+   `top:78`/`72` — also fixes the game 3-button overlap from item 4.
+4. **"Ship Art" toggle** (`ShipWindow.js`, both pages): hides the sections/icons and
+   overlays the hull art in FULL colour (`ArtCover` opaque backdrop + `ArtCoverImage`,
+   the square nose-up `rotate(-90deg)` watermark treatment minus grayscale, at 88%), with
+   its own toggle to switch back. Per-window `state.showArt`; `toggleArt()`;
+   `artAvailable(ship)` (has imagePath, not a flight). Button placement: game.php →
+   between Hit Chart and Notes in the top-left `ctrl` block; lobby → beneath the moved Hit
+   Chart button in `hcbtn`. Icon is a CSS-drawn monochrome "picture" glyph (`ArtIcon`,
+   sun+mountain in a frame) — matching the codebase's no-emoji chrome convention
+   (cf. `StatsIcon`). Rendered for grid + compact/terrain windows; not flights.
+   Verified: esbuild JSX parse ×3 + bundle-resolve of ShipWindow.js. UI.bundle only.
+
+**Post-Stage-4 improvements round 9 (2026-07-22) — BUILT, awaiting user test
+(UI.bundle only; four refinements to round 8):**
+1. **Hit Chart button reverted to the lobby top-left** (`ShipWindow.js`): back in the
+   `ctrl` block above Ship Stats, exactly as pre-round-8 (`renderControls` renders it on
+   every page again; the round-8 bottom-left move undone). Its popup now anchors to the
+   button itself (`hitChartBtnRef` + `getAnchorBelow`) in the lobby so it stays attached
+   over the tall Ship Stats panel; game/Notes/compact still drop below the whole control
+   block.
+2. **Ship Art toggle bottom-aligned in the lobby** (`ShipWindow.js`): it KEEPS the
+   bottom-left grid cell (renamed `hcbtn`→`artbtn`; `ArtButtonArea`/`renderLobbyArt`;
+   `buildTemplateAreas` 3rd arg `withArtBtn = lobby && artAvailable`), now
+   `align-self: end` so it sits flush with the bottom of its section (was `start`/top).
+   Net lobby symmetry: Hit Chart+Ship Stats ↖ / datasheet ↗ / Ship Art ↙ / Enhancements ↘.
+   game.php keeps Ship Art between Hit Chart and Notes in `ctrl`.
+3. **Ship Art mode rebuilt to recolour-in-place** (`ShipWindow.js` + `ShipSection.js`):
+   the opaque `ArtCover`/`ArtCoverImage` overlay is GONE (it used a different 88% size, so
+   toggling nudged the image — the "resizing is jarring" report). Now the SAME
+   `WatermarkLayer` turns full colour via a `$art` prop (`filter:none; opacity:1`), and only
+   the `ShipSection` panels hide — `$hidden` → `visibility:hidden` (keeps grid footprint so
+   nothing resizes). Every chrome block stays visible per request (Hit Chart / Ship Stats /
+   Hangar Capacity / Notes / Enhancements / Electronic Warfare); the toggle itself stays in
+   place. Grid + compact/terrain; not flights/unrevealed-mines.
+4. **All chrome title/header bars vertically centred** (`ShipWindow.js` `CtrlButton`,
+   `ShipSection.js` `SectionHeader` texts, `ShipWindowEw.js` `EwTitle`, `ShipNotesPanel.js`
+   `BlockTitle`/`EnhTitle`/`StatsTitle`): unified to `display:flex; align-items:center;
+   min-height:15px; line-height:1;` horizontal-only padding — one consistent 15px bar. The
+   **healthbar**: the readout KEEPS the mono font the user prefers (`theme.fonts.mono`); the
+   arial name centres a touch high against it, so `SectionName` gets a 1px downward `top`
+   nudge to sit level (2026-07-22 follow-up — the interim "make both `theme.fonts.body`" was
+   reverted). CtrlButton/StatsTitle changed from baseline to center alignment.
+   Verified: esbuild JSX parse ×4 + bundle-resolve. UI.bundle only.
+
+**Post-Stage-4 improvements round 10 (2026-07-23) — BUILT, awaiting user test
+(UI.bundle only; three user requests, one of them the mobile pass):**
+1. **Lobby Ship Art button moved under Hit Chart** (`ShipWindow.js`): the round-8/9
+   bottom-left `artbtn` grid cell is GONE — `ArtButtonArea`, `renderLobbyArt()` and
+   `buildTemplateAreas`' third argument were removed, and `renderControls` renders the
+   toggle on every page (`artHere = artAvailable(ship)`, no lobby exception). Both pages
+   now read Hit Chart → Ship Art → (game: Notes / lobby: Ship Stats) as one stack.
+2. **Lobby watermark nudged down** (`ShipWindow.js`): `WatermarkLayer` gained an
+   `$offsetY` prop — `translate(-50%, calc(-50% + Npx))` applied BEFORE the `rotate(-90deg)`
+   so it is a screen-space nudge, not a nose-ward one — driven by the new
+   **`LOBBY_WATERMARK_OFFSET_Y` (20px, marked `>>> LOBBY WATERMARK NUDGE <<<`)**. Only the
+   lobby grid variant passes it: its Ship Stats / datasheet / Enhancements chrome is far
+   taller than game.php's, so the section cluster sits below the grid's midline while the
+   art stayed centred on the grid. game.php and compact/mine windows pass 0. One knob,
+   retune to taste.
+3. **Ship windows are draggable by touch** (`ShipWindow.js`): jQuery UI `draggable()` is
+   replaced by a pointer-events drag. jQuery UI's mouse widget binds mousedown/mousemove
+   only, so a finger produced no drag at all on either page. New
+   `onDragStart`/`onDragMove`/`onDragEnd`/`stopDragListening`: pointerdown on
+   `.shipwindow-drag-handle` (ignored inside `.shipwindow-nodrag`), the current geometry is
+   frozen into `left/top` (`getComputedStyle` used values, `offsetLeft/Top` fallback —
+   right-docked windows must leave `right` behind), `setPointerCapture` on the handle with
+   a document-listener fallback, and the per-side position memory is written on pointerup
+   exactly as the old `stop` callback did. `Header` gained **`touch-action: none`** so the
+   browser hands over the gesture instead of scrolling (matters in the lobby, the page that
+   scrolls). The position-restore path dropped jQuery too (`style.top/left`, `offsetWidth`).
+   **Round 3 (user test 2026-07-23): lobby GRID windows still would not drag by touch while
+   lobby FLIGHT windows did** — so the drag was rebuilt as TWO engines sharing
+   `isDragHandle`/`beginDrag`/`moveDrag`/`finishDrag`: pointer events for mouse/pen
+   (`pointerType === 'touch'` is now ignored there) and a real touch-event engine
+   (`onTouchDragStart/Move/End`, document-level `touchmove` with `{passive: false}` and
+   `preventDefault()`), because a pointer stream is CANCELLED the moment anything else
+   claims the gesture — long-press context menu, a scroll container taking over, a stale
+   captured node — while touch events keep firing. Both listeners now sit on the CONTAINER
+   and re-resolve the handle from `event.target`, so a header node React has replaced can't
+   leave the drag bound to a detached element (the other candidate cause). `findTouch`
+   tracks the drag's own `identifier`; pinches (2+ touches) are ignored. Diagnostic left in:
+   `window.FV_DRAG_DEBUG = true` logs which engine fires and whether the press landed on the
+   handle. The exact root cause could not be pinned down by static analysis — the rebuild
+   covers every candidate.
+   **Round 4 (user test 2026-07-23, lobby portrait)**: the console gave the real clue —
+   *"[Intervention] Ignored attempt to cancel a touchstart event with cancelable=false …
+   because scrolling is in progress"*. On the lobby (the one page that scrolls) a fling or
+   pull-to-refresh is frequently still running when the finger lands, and a touch the
+   browser has already committed to scrolling cannot be cancelled at all, so
+   `preventDefault()` was a no-op and the gesture belonged to the page. Four changes:
+   (a) the touch engine records the page scroll at drag start and **re-pins it on every
+   move** (`window.scrollTo`) — that holds the page still whether or not preventDefault is
+   honoured, and kills the fling; (b) both `preventDefault()` calls are guarded by
+   `event.cancelable`, so the Intervention warning stops; (c) `overscroll-behavior:
+   contain` on the small-screen container, so the window's own overflow scrolling can't
+   chain into the page or pull-to-refresh; (d) **finger-sized grab strip** — `Header`
+   (and `CloseButton`) go to 44px tall below 1024px with `HeaderName`'s line-height
+   following: the window is scaled DOWN to fit, so a big lobby window at scale ~0.6 turned
+   the 26px bar into ~15 visual px, a target you miss more often than you hit — and small
+   flight windows (scale near 1) kept a usable bar, which is why only THEY seemed to drag.
+4. **Touch-screen size fix — scale-to-fit** (`ShipWindow.js`, user choice from three
+   options): the ≤1024px media query no longer clamps `max-width: 100vw` (clamping the
+   LAYOUT width just squeezed the fixed-width sections into an internally-scrolling box —
+   "too wide in game.php, too narrow in the lobby"). Instead `applyScreenFit()` measures the
+   window's natural width (a transform never affects layout, so `offsetWidth` stays honest)
+   and CSS-scales the whole window to fit the screen: `scale = clamp(SCREEN_FIT_MIN 0.5,
+   min(availW / naturalW, availH / naturalH), SCREEN_FIT_MAX 1.75)` at `SCREEN_FIT_FILL`
+   0.99 of each axis, rounded to 2dp so poll re-renders can't jitter it, `transform-origin`
+   at the screen edge the window is docked to (top left / top right per side).
+   **Both axes, not just width (user test 2026-07-23, landscape game.php)**: a width-only
+   fit scaled the window UP to full screen width in landscape — where height is the scarce
+   dimension — and cut the bottom off. Natural dimensions are measured with the height
+   clamp lifted (inline `max-height: none` beats the media query's 100vh; absolutely
+   positioned children like the Hit Chart popup never count toward `offsetHeight`, so an
+   open popup can't shrink the window). `max-height` is written back as
+   `innerHeight / scale` because it is a LAYOUT value — otherwise a shrunk window keeps an
+   inner scrollbar for space it no longer needs, and a window bottoming out on
+   `SCREEN_FIT_MIN` scrolls instead of being cut off.
+   **Orientation-independent layout (user test 2026-07-23, round 2)**: the small-screen
+   window is now sized from CONTENT ONLY — `width: max-content` (terrain keeps its 250px)
+   plus the SAME variant `max-width` caps the desktop rule uses (flight 400px /
+   flightLobby 620px / none). `fit-content` and `auto` are available-width dependent, so
+   landscape's extra room let a flight window stretch its FighterList into one long row
+   and single-Primary ships (medium hulls / LCVs) spread out, while portrait wrapped them;
+   and the round-1 `max-width: none` had removed the flight cap that makes FighterList wrap
+   at all. With the viewport out of the layout, one fixed layout is scaled to whichever
+   screen it lands on. The dock also moved off the screen edge (`top: 8px`, `left`/`right`
+   4px) because a header flush at top: 0 sits under the browser's own top-edge gesture
+   area and is awkward to grab (user report); `SCREEN_FIT_FILL` dropped to 0.96 so the
+   inset stays visible on the opposite edge. Called on mount, on `resize`/
+   `orientationchange`, and in `componentDidUpdate` (content changes the natural width);
+   writes only when the scale or max-height actually moves. Drag compensates:
+   `dragStart.scale` divides the pointer delta, since `left/top` are unscaled layout px.
+   Knobs live together above `isSmallScreen()` (`>>> TOUCH-SCREEN FIT <<<`).
+5. **Fighter flights show Profile F/S** (`ShipNotesPanel.js` + `ShipInfo.js`): the lobby's
+   Flight Stats block gained a `Profile F/S` row (`forwardDefense*5 / sideDefense*5`, the
+   same formula and position as `ManoeuvreStats`' — flights carry those fields exactly like
+   ships; gamelobby.js resets them from the blueprint on edit and FtrPetals mutates them
+   live), and game.php's flight windows get the same numbers via a `Profile (F/S)` line in
+   `ShipInfo`'s flight block (Notes popup + ship-info popup, both pages). The map tooltip's
+   existing "Defence (F/S)" line is unchanged — it shows the range/EW-modified chance on top
+   of these base numbers. Verified: esbuild JSX parse + bundle-resolve ×3. UI.bundle only.
+
 **Stage 3 (2026-07-17) — COMPLETE (user-accepted after feedback rounds 1–5).** Two user riders (2026-07-17)
 refine §3.2: (1) the Hit Chart button sits in the same top-left position as
 game.php with the manoeuvre stats (TC/TD, Acc/Pivot/Roll, Profile, Ini, Agile)

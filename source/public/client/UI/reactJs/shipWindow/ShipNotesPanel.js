@@ -67,6 +67,13 @@ const Block = styled.div`
 `;
 
 const BlockTitle = styled.div`
+    /*flex-centred fixed-height bar (user request 2026-07-22): consistent vertical
+      centring across every chrome title/header bar in the ship window*/
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    min-height: 15px;
+    line-height: 1;
     font-size: 8px;
     letter-spacing: 0.8px;
     text-transform: uppercase;
@@ -80,7 +87,7 @@ const BlockTitle = styled.div`
     background-color: ${props => props.$gold ? 'rgba(169, 128, 56, 0.30)' : 'rgba(73, 103, 145, 0.25)'};
     border-bottom: 1px solid ${props => props.$gold ? '#8a6d3b' : theme.colors.line};
     margin: 0 -8px 3px;
-    padding: 2px 6px 2px 4px;
+    padding: 0 6px 0 4px;
 `;
 
 const Row = styled.div`
@@ -130,9 +137,12 @@ const StatsPanel = styled.div`
 
 const StatsTitle = styled.div`
     display: flex;
-    /*baseline (like the Hit Chart button) so the bar-graph's base sits on the text
-      baseline - align-items:center left the bottom-anchored bars reading low*/
-    align-items: baseline;
+    /*centred, matching the Hit Chart button and every other title bar (user request
+      2026-07-22); the bar-graph glyph centres alongside the text*/
+    align-items: center;
+    box-sizing: border-box;
+    min-height: 15px;
+    line-height: 1;
     gap: 4px; /*matches the Hit Chart button's icon/label gap so the title lines up*/
     font-size: 8px;
     letter-spacing: 0.5px;
@@ -143,7 +153,7 @@ const StatsTitle = styled.div`
     /*shaded header-bar blue, matching BlockTitle / the ctrl buttons*/
     background-color: rgba(73, 103, 145, 0.25);
     margin: -2px -4px 2px;
-    padding: 1px 4px;
+    padding: 0 4px;
     border-bottom: 1px solid ${theme.colors.line};
 `;
 
@@ -181,6 +191,12 @@ const AgileRow = styled.div`
   (Notes / Hangar Capacity / Flight Stats). Seeded from the former gold BlockTitle
   ($gold) look, so it starts identical - change anything below to taste.*/
 const EnhTitle = styled.div`
+    /*flex-centred fixed-height bar (user request 2026-07-22), matching BlockTitle*/
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    min-height: 15px;
+    line-height: 1;
     font-size: 8px;
     letter-spacing: 0.8px;
     text-transform: uppercase;
@@ -190,7 +206,7 @@ const EnhTitle = styled.div`
     background-color: rgba(169, 128, 56, 0.30);
     border-bottom: 1px solid #8a6d3b;
     margin: 0 -8px 3px;
-    padding: 2px 6px 2px 4px;
+    padding: 0 6px 0 4px;
 `;
 
 /*Enhancements as a standalone bottom-right grid panel (feedback round 3): keeping it
@@ -231,7 +247,7 @@ export const ManoeuvreStats = ({ ship }) => {
             {mobile && <StatRow><StatLabel>Accel/decel</StatLabel><StatValue>{ship.accelcost}</StatValue></StatRow>}
             {mobile && <StatRow><StatLabel>Pivot</StatLabel><StatValue>{ship.pivotcost}</StatValue></StatRow>}
             {mobile && <StatRow><StatLabel>Roll</StatLabel><StatValue>{ship.rollcost}</StatValue></StatRow>}
-            <StatRow><StatLabel>Profile F/S</StatLabel><StatValue>{ship.forwardDefense * 5}/{ship.sideDefense * 5}</StatValue></StatRow>
+            <StatRow><StatLabel>Profile - Front / Side</StatLabel><StatValue>{ship.forwardDefense * 5}/{ship.sideDefense * 5}</StatValue></StatRow>
             {mobile && <StatRow><StatLabel>Initiative</StatLabel><StatValue>{ship.iniativebonus}</StatValue></StatRow>}
 
         </StatsPanel>
@@ -295,6 +311,11 @@ class ShipNotesPanel extends React.Component {
                         <BlockTitle>Flight Stats</BlockTitle>
                         <StatRow><StatLabel>Armor F/S/A</StatLabel><StatValue>{shipManager.systems.getFlightArmour(ship)}</StatValue></StatRow>
                         <StatRow><StatLabel>Off. bonus</StatLabel><StatValue>{ship.offensivebonus * 5}</StatValue></StatRow>
+                        {/*flights carry forwardDefense/sideDefense exactly like ships (the
+                           lobby resets them from the blueprint on edit, and FtrPetals-style
+                           systems mutate them live), so the profile reads the same way as
+                           ManoeuvreStats' - user request 2026-07-23*/}
+                        <StatRow><StatLabel>Profile - Front  /Side</StatLabel><StatValue>{ship.forwardDefense * 5}/{ship.sideDefense * 5}</StatValue></StatRow>
                         <StatRow><StatLabel>Thrust</StatLabel><StatValue>{ship.freethrust}</StatValue></StatRow>
                         <StatRow><StatLabel>Initiative</StatLabel><StatValue>{ship.iniativebonus}</StatValue></StatRow>
                     </Block>

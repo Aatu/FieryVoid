@@ -48,6 +48,9 @@ const ShipSectionContainer = styled.div`
         return props.$wide ? '156px' : '128px';
     }};
     ${props => props.$minHeight ? `min-height: ${props.$minHeight}px;` : ''}
+    /*Ship Art toggle (item 3, 2026-07-22): hide the whole section (header + icons) but
+      keep its grid footprint so the window/watermark never resize while the art shows*/
+    ${props => props.$hidden ? 'visibility: hidden;' : ''}
     margin: ${props => props.$area ? '0' : '2px'};
 
     -webkit-user-select: none;
@@ -91,10 +94,18 @@ const SectionHeader = styled.div`
     }
 `;
 
+/*The structure readout keeps the mono (SCS datasheet) font the user prefers (2026-07-22
+  revert). Mono (Consolas) and the arial name centre at slightly different heights under
+  the header's align-items:center, so the name read a touch high against the readout (the
+  "top-aligned label vs centred value" report). Rather than force one font, the NAME gets
+  a small downward nudge to sit level with the readout, which stays the visual reference
+  (it already looked centred). Tweak the name's `top` if it needs a hair more/less.*/
 const SectionName = styled.span`
     position: relative;
+    top: 1px; /*nudge the name down to line up with the mono readout (2026-07-22)*/
     z-index: 1;
     font-size: 8px;
+    line-height: 1;
     letter-spacing: 0.8px;
     text-transform: uppercase;
     white-space: nowrap;
@@ -107,6 +118,7 @@ const StructureText = styled.span`
     z-index: 1;
     font-family: ${theme.fonts.mono};
     font-size: 10px;
+    line-height: 1;
     white-space: nowrap;
     color: ${props => props.$destroyed ? 'transparent' : theme.colors.text};
     filter: ${props => props.$destroyed ? 'blur(1px)' : 'none'};
@@ -124,7 +136,7 @@ const IconArea = styled.div`
 
 class ShipSection extends React.Component {
     render() {
-        const { ship, systems, location, displayLocation, area, valign, justify, wide, isTerrain, minHeight, nameOverride } = this.props;
+        const { ship, systems, location, displayLocation, area, valign, justify, wide, isTerrain, minHeight, nameOverride, hidden } = this.props;
 
         const structure = getStructure(systems);
         const health = structure ? getStructureLeft(ship, structure) : 0;
@@ -134,7 +146,7 @@ class ShipSection extends React.Component {
         const mirrored = displayLocation !== undefined && displayLocation !== location;
 
         return (
-            <ShipSectionContainer $location={location} $area={area} $valign={valign} $justify={justify} $wide={wide} $isTerrain={isTerrain} $minHeight={minHeight}>
+            <ShipSectionContainer $location={location} $area={area} $valign={valign} $justify={justify} $wide={wide} $isTerrain={isTerrain} $minHeight={minHeight} $hidden={hidden}>
                 {/*sections without structure exist purely for icon placement - no header*/}
                 {/*nameOverride: ships with a single side structure spread over both
                    quarter sections read plain "Port"/"Starboard" (set by ShipWindow)*/}

@@ -99,6 +99,10 @@ class ShipInfo extends React.Component {
 			<InfoContainer $tightBottom={tightBottom}>
 				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Offensive bonus: </Header>{displayOffensiveBonus * 5}</Entry>}
 				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Armor (F/S/A): </Header>{shipManager.systems.getFlightArmour(ship)}</Entry>}
+				{/*profile, same base numbers the ship window's stat panels show (user request
+				   2026-07-23); the map tooltip's "Defence (F/S)" line adds the range/EW
+				   modified chance on top of these*/}
+				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Profile - Front/Side: </Header>{ship.forwardDefense * 5}/{ship.sideDefense * 5}</Entry>}
 				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Thrust per turn: </Header>{ship.freethrust}</Entry>}
 				{ship.flight && isRevealed && <Entry key={reactKey++}>&nbsp;</Entry>}
 
