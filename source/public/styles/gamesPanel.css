@@ -380,6 +380,7 @@
 
 .fv-tag--ladder {
   color: var(--fv-ladder);
+  /*background: rgba(153, 115, 0, 0.233);*/
 }
 
 .fv-tag--fleet {
@@ -456,10 +457,15 @@
   --rail: var(--fv-fleet);
 }
 
+/* border-left-color must be restated for the same reason as .is-mine: border-color is a
+   four-side shorthand and would otherwise paint over the rail set by .fv-card. Restating it
+   as var(--rail) rather than a literal is what lets .is-ladder below still win the rail on a
+   card that is both — the variable resolves per element, so the later rule's --rail applies. */
 .fv-card.is-yourturn {
-  --rail: var(--fv-turn);
+  --rail: var(--fv-ladder);
   background: var(--fv-turn-bg);
   border-color: var(--fv-turn);
+  border-left-color: var(--rail);
 }
 
 .fv-card.is-yourturn:hover {
