@@ -844,12 +844,16 @@ class DBManager
 
     public function createGame($gamename, $background, $slots, $userid, $gamespace, $description, $rules = '{}')
     {
+        //Name the columns explicitly: a column-less INSERT ... VALUES breaks at
+        //prepare() time with "Column count doesn't match value count" the moment
+        //tac_game gains a column.
         $stmt = $this->connection->prepare("
-            INSERT INTO 
+            INSERT INTO
                 tac_game
+                (name, turn, phase, activeship, background, points, status,
+                 slots, creator, submitLock, gamespace, rules, description)
             VALUES
             (
-                null,
                 ?,
                 0,
                 -2,
@@ -866,6 +870,7 @@ class DBManager
             )
         ");
 
+        $gameid = null;
         if ($stmt) {
             //$gamename = $this->DBEscape($gamename);
             $background = $this->DBEscape($background);
@@ -881,10 +886,15 @@ class DBManager
                 $rules,
 		$description
             );
-            $stmt->execute();
+            if ($stmt->execute())
+                $gameid = $this->getLastInstertID();
             $stmt->close();
-            $gameid = $this->getLastInstertID();
         }
+
+        //Without this the failure is silent: $gameid stays unset and createSlots()
+        //below would go on to write orphan slots against it.
+        if (!$gameid)
+            throw new Exception("DBManager:createGame, insert failed: " . $this->connection->error);
 
         $this->createSlots($gameid, $slots);
 
