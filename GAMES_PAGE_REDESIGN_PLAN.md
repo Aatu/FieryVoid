@@ -687,8 +687,109 @@ stability, the dupe/full/half-empty/legacy-shape counts, and fleet-test `SOLO`.
 (your edit), but `Manager::getRecentGames($userid, $days = 7)` still passes **7** — the window
 is unchanged and the copy overstates it. One-word fix in `Manager.php:260`; say the word.
 
+### Feedback round 4 — 2026-07-28 (Ladder window restyled to match)
+
+Brings the Online Ladder window up to the Recent Games window's appearance. Roadmap item 6
+again; §10 had scoped it out, so this supersedes that line. **No ladder behaviour changed** —
+every id and class `ladder.js` binds to survives, and the three inline `display:none`
+attributes jQuery toggles stay in the markup.
+
+Files: `ladder.php`, `styles/ladder.css` (rewritten), `client/ladder.js`.
+
+1. **Shell** — the overlay/panel geometry of `.fv-modal` / `.fv-modal-panel`: fixed
+   `inset: 0` with 40px of its own padding as the gutter (`width: 80%` is gone, so a phone
+   stops wasting a fifth of itself), Orbitron uppercase title, dim 12.5px subtitle carrying
+   the FAQ link, control row, monospace count line, then a rule and the body. Cap moves
+   800 → **900px**: the calculator's fixed 300px column was squeezing the table. Still under
+   Recent Games' 1040px, which needs the width for a two-up card grid.
+2. **`.close-ladder` is a `<button>`**, not a floated `<span>` — focusable, Enter-able, with
+   an `aria-label` and a focus ring. `ladder.js` binds it by class through a delegated
+   handler, so the JS is untouched. It also gains the absolute top-right position the Recent
+   Games `×` has, which is what let the float hacks go.
+3. **Rows are the cards of this window.** Names in Orbitron, every numeral in Consolas with
+   `tabular-nums`, hairline separators, a hover fill, and **your own row takes the green
+   `is-mine` treatment** — tint plus a 3px rail — exactly as it reads in Recent Games. The
+   rail is an inset shadow on the first cell, not a border: the table collapses its borders.
+   Column headers are `.fv-panel-head`'s shaded bar, and **sticky**, so they survive a scroll
+   through a long ladder. Their underline is an inset shadow too — a collapsed table's borders
+   belong to the table, so a sticky cell scrolls away from its own border.
+
+   **Row scale, revised 2026-07-28 (user).** The first cut had wins/losses/ratio at 11px, the
+   smallest text in the window — the wrong place to be quiet, since they are what the table
+   exists to show. Now: numerals **13px**, rating **14.5px** (it stays the headline figure),
+   name 12px, base cell 12.5px, result tag 10px, headers 10px. And the cells are
+   `vertical-align: middle`, not the browser default `baseline`: a row carries three faces at
+   three sizes, and baseline alignment lines up the *feet* of the glyphs, which sat the
+   smaller columns visibly low. One shared `line-height: 1.45` keeps every row the same height.
+4. **The blocker was inline styles in the JS.** `fetchStandings` wrote `padding:8px;
+   border-bottom:1px solid #333` onto every `<td>`, which no stylesheet could reach. They are
+   classes now — `.ladder-cell` / `.ladder-cell-center` / `.ladder-rating-cell` /
+   `.ladder-row-highlight` already existed in `ladder.css` and were used only by the history
+   table; the standings table now uses them too. Same for the history result colours and the
+   calculator's result lines.
+5. **Account buttons moved into a control row** under the subtitle, where Recent Games keeps
+   its search and chips, and take the `.fv-btn` family look (shaded header-bar fill, Orbitron
+   micro-caps, square 1px border) — the same family as the games panel's action column. One
+   consequence: they stay visible in the match-history view, where they used to be hidden with
+   the standings pane. That is right — they are account actions, not standings actions.
+
+   Tints, all borrowed from elsewhere on the landing page rather than invented (user,
+   2026-07-28): **Register for Ladder** and **Populate Slots** take Create Game's green
+   (`.fv-btn--create`); **Remove Account** its own red; **Back** takes the Starter Guide chip's
+   cyan (`.quick-links .qk-guide`), fill formula included — 15% of the chip colour idle, 34% on
+   hover. Back is `#ladderModal #btnHistoryBack`, two ids, which is what keeps the *View Game*
+   links on the neutral fill despite sharing `.btn-ladder-inline`: Back moves you around the
+   window, those leave it. Register's `:disabled:hover` holds the idle green, so the button
+   ladder.js disables once you are registered does not light up under the cursor.
+6. **Count line** — `N ranked players`, switching to `N matches played` in the history view
+   and back again, mirroring `.fv-count`. The only genuinely new element; three small
+   `ladder.js` touches feed it.
+7. **Responsive** — below 760px the calculator unstacks from beside the table to under it and
+   its left divider becomes a top one. The window had no breakpoints at all before.
+
+**Scoping, and the trap in it.** `ladder.php` is included by `creategame.php` too, which links
+`ladder.css` but **not** `gamesPanel.css` — so the window has to paint itself with no other
+stylesheet present. Hence `ladder.css` carries its own `:root` copy of the 15 tokens it needs,
+with values identical to `gamesPanel.css` (verified equal; they must now be retuned together).
+That copy is safe on the other page: the three `gamesNew.css` rules that read `--fv-*`
+(`.resources`, `.resources h3`, `.update-title`) match no element on `creategame.php`.
+
+The second half of that trap: `creategame.php` also puts `.btn-ladder-inline` on its own
+"View Ladder" trigger, **outside** the window. So the old `.btn-ladder-inline` block is kept
+verbatim and the new look is applied as `#ladderModal .btn-ladder-inline` — that trigger renders
+exactly as it did. Same reason every other button rule is `#ladderModal`-scoped.
+
+`gamesNew.css`'s `* { font-family: Arial }` bit for the fourth time (rounds 1.6, 2.5): a
+universal selector matches every element **directly**, and a direct match beats an inherited
+display face regardless of specificity, so the nested `<span>`s would have snapped back to
+Arial. Neutralised once with `.ladder-modal-content * { font-family: inherit }`, which must stay
+above the face assignments — equal specificity, so source order decides. Note this file uses a
+`.ladder-modal-content` scope where `gamesPanel.css` uses `.fv-modal`; an `#ladderModal *` scope
+would have been specificity 1-0-0 and beaten every class-level face rule below it.
+
+**Three bugs fixed in passing**, all in lines that were being rewritten anyway:
+- **`color:00ff00`** — a missing `#` in `calculate()`, so the "opponent receives" line had never
+  once rendered green. It is `.bonus-text-green` now. (Same class of bug as `gamesNew.css:630`.)
+- **`fetchStandings` threw on `currentUser` null** — `data-isme="${(p.playerid == currentUser.id)}"`
+  is evaluated for every row, including when the server returns standings without a current user.
+- **Usernames and game names were interpolated into HTML unescaped.** `gamedata.escapeHtml` is
+  unreachable here (`games.js` is not loaded on `creategame.php`), so `ladder.js` carries a local
+  `esc()`. Closes the same hole the games list was hardened against on 2026-07-26.
+
+Verified: `php -l` and `node --check` clean, no BOM, CRLF preserved, `ladder.css` brace-balanced
+(75/75) with every referenced token defined; `games.php` and `creategame.php` both fetched 200
+with a seeded session and asserted against 25 markup checks each — new shell present, old floats
+and inline styles gone, all 19 JS-bound ids/classes intact; **39 node tests** over a stubbed
+`ladder.js` covering every row state, both empty states, the escaping, the null-`currentUser`
+regression, all three result colours, the count line's five messages, and a check that no class
+in the markup is unstyled.
+
+**Left for the user:** the browser pass. Docker's php container syncs the tree with
+`inotifywait`, which does not fire on Windows bind mounts, so PHP edits do not reach it until a
+restart — `start.sh`'s own rsync was run by hand, and `localhost/games.php` is serving this now.
+
 ## 10. Out of scope
 
-News panel content, chat panel, ladder modal internals (it only gains the shared shell and
-Esc), `firePhaseGames.php` deletion, and any change to how `game.php` handles a spectator
-opening a game from the Recent Games list.
+News panel content, chat panel, `firePhaseGames.php` deletion, and any change to how `game.php`
+handles a spectator opening a game from the Recent Games list. (The ladder window was listed
+here until round 4, which restyled it.)

@@ -1,9 +1,22 @@
 jQuery(function ($) {
+    /* Server strings (usernames, game names) are interpolated into HTML templates below.
+       gamedata.escapeHtml is not reachable here — games.js is not loaded on
+       creategame.php, which also opens this window — so the window carries its own. */
+    function esc(value) {
+        return String(value == null ? "" : value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+    }
+
     var ladder = {
         myUsername: "Me",     // Default fallback
         oppUsername: "Opponent", // Default fallback
         myPoints: 0,
         oppPoints: 0,
+        standingsCount: "",   // redisplayed by hideHistory when the history view closes
 
         init: function () {
             // Attach event listeners
@@ -167,7 +180,8 @@ jQuery(function ($) {
         },
 
         fetchStandings: function () {
-            $("#ladderTable tbody").html('<tr><td colspan="5" style="text-align:center;">Loading...</td></tr>');
+            $("#ladderTable tbody").html('<tr><td colspan="5" class="ladder-state">Loading standings&hellip;</td></tr>');
+            ladder.setCount("Loading standings…");
 
             if (typeof ajaxInterface === 'undefined') {
                 console.error("ajaxInterface not defined");
@@ -211,36 +225,47 @@ jQuery(function ($) {
                     sorted[i].ratio = (sorted[i].wins / (sorted[i].wins + sorted[i].losses) * 100) || 0;
                 }
 
+                /* The cells used to carry their padding, borders and colours as inline
+                   styles, which no stylesheet could reach. They are classes now
+                   (ladder.css) — same look as a Recent Games card row. */
                 for (var i = 0; i < sorted.length; i++) {
                     var p = sorted[i];
                     var name = p.username || "Player " + p.playerid;
+                    var isMe = !!(currentUser && p.playerid == currentUser.id);
 
-                    var rowStyle = "";
                     var rowClass = "ladder-row";
                     var rowTitle = "Click to copy rating to calculator";
 
-                    if (currentUser && p.playerid == currentUser.id) {
-                        rowStyle = "background-color: rgba(33, 90, 122, 0.3);";
+                    if (isMe) {
+                        rowClass += " ladder-row-highlight";
                         ladder.myUsername = name; // Ensure my username is set from list if possible
-                        // rowClass = ""; // REMOVED: Allow clicking for history
+                        // the row stays clickable: that is how you open your own history
                         rowTitle = "You";
                     }
 
-                    html += `<tr style="${rowStyle}" data-rating="${p.rating}" data-playerid="${p.playerid}" data-isme="${(p.playerid == currentUser.id)}" class="${rowClass}" title="${rowTitle}">
-                        <td style="padding:8px; border-bottom:1px solid #333;">${name}</td>
-                        <td style="text-align:center; padding:8px; border-bottom:1px solid #333; font-weight:bold; color:#8bcaf2;">${p.rating}</td>
-                        <td style="text-align:center; padding:8px; border-bottom:1px solid #333;">${p.wins}</td>
-                        <td style="text-align:center; padding:8px; border-bottom:1px solid #333;">${p.losses}</td>
-                        <td style="text-align:center; padding:8px; border-bottom:1px solid #333;">${p.ratio.toFixed(1)}%</td>
+                    html += `<tr data-rating="${p.rating}" data-playerid="${p.playerid}" data-isme="${isMe}" class="${rowClass}" title="${esc(rowTitle)}">
+                        <td class="ladder-cell ladder-name-cell">${esc(name)}</td>
+                        <td class="ladder-rating-cell">${p.rating}</td>
+                        <td class="ladder-cell-center ladder-num">${p.wins}</td>
+                        <td class="ladder-cell-center ladder-num">${p.losses}</td>
+                        <td class="ladder-cell-center ladder-num">${p.ratio.toFixed(1)}%</td>
                     </tr>`;
                 }
 
                 if (sorted.length === 0) {
-                    html = '<tr><td colspan="5" style="text-align:center;">No ranked players yet. Register to join!</td></tr>';
+                    html = '<tr><td colspan="5" class="ladder-state">No ranked players yet. Register to join!</td></tr>';
                 }
 
                 $("#ladderTable tbody").html(html);
+
+                ladder.standingsCount = sorted.length + (sorted.length === 1 ? " ranked player" : " ranked players");
+                ladder.setCount(ladder.standingsCount);
             });
+        },
+
+        /* The count line under the control row, mirroring the Recent Games window's. */
+        setCount: function (text) {
+            $("#ladderCount").text(text);
         },
 
         calculate: function () {
@@ -255,13 +280,15 @@ jQuery(function ($) {
             ladder.myPoints = gamePoints;
             ladder.oppPoints = gamePoints;
 
+            /* Classes, not inline colours — the green branch used to read
+               `style="color:00ff00"`, a missing `#`, so it never rendered green at all. */
             if (myRating < oppRating) {
-                result = `<span style="color:#ffcc00;">You receive ${bonusPoints} points</span>`;
-                result += `<span style="color:00ff00;"><br>Your opponent receives ${gamePoints} points</span><br><span style="font-size:11px; color:#aaa;">(${diff}% bonus)</span>`;
+                result = `<span class="bonus-text-yellow">You receive ${bonusPoints} points</span>`;
+                result += `<span class="bonus-text-green"><br>Your opponent receives ${gamePoints} points</span><br><span class="bonus-subtext">(${diff}% bonus)</span>`;
                 ladder.myPoints = bonusPoints;
             } else if (myRating > oppRating) {
-                result = `<span style="color:#ffcc00;">Your opponent receives ${bonusPoints} points</span>`;
-                result += `<span style="color:00ff00;"><br>You receive ${gamePoints} points</span><br><span style="font-size:11px; color:#aaa;">(${diff}% bonus)</span>`;
+                result = `<span class="bonus-text-yellow">Your opponent receives ${bonusPoints} points</span>`;
+                result += `<span class="bonus-text-green"><br>You receive ${gamePoints} points</span><br><span class="bonus-subtext">(${diff}% bonus)</span>`;
                 ladder.oppPoints = bonusPoints;
             } else {
                 result = "Ratings are equal. No handicap.";
@@ -319,34 +346,40 @@ jQuery(function ($) {
             $("#ladderStandingsPane").hide();
             $("#ladderHistoryPane").show();
             $("#historyPlayerName").text(name);
-            $("#ladderHistoryTable tbody").html('<tr><td colspan="4" style="text-align:center;">Loading...</td></tr>');
+            $("#ladderHistoryTable tbody").html('<tr><td colspan="4" class="ladder-state">Loading match history&hellip;</td></tr>');
+            ladder.setCount("Loading match history…");
 
             ajaxInterface.callServer("Manager::getLadderHistory", [playerid], function (data) {
                 var html = "";
-                if (!data || data.length === 0) {
-                    html = '<tr><td colspan="4" style="text-align:center;">No match history found.</td></tr>';
+                var count = (data && data.length) || 0;
+
+                if (count === 0) {
+                    html = '<tr><td colspan="4" class="ladder-state">No match history found.</td></tr>';
                 } else {
                     for (var i = 0; i < data.length; i++) {
                         var game = data[i];
-                        var statusColor = (game.status === 'WIN') ? '#00ff00' : ((game.status === 'LOSS') ? '#ff0000' : '#aaa');
+                        var statusClass = (game.status === 'WIN') ? 'ladder-result--win'
+                            : ((game.status === 'LOSS') ? 'ladder-result--loss' : 'ladder-result--draw');
                         // Opponent name or "Unknown"
                         var oppName = game.opponent_name || "Unknown";
 
                         html += `<tr>
-                            <td class="ladder-cell">${game.name} (#${game.id})</td>
-                            <td class="ladder-cell">${oppName}</td>
-                            <td class="ladder-cell-center" style="font-weight:bold; color:${statusColor};">${game.status}</td>
+                            <td class="ladder-cell ladder-name-cell">${esc(game.name)} (#${game.id})</td>
+                            <td class="ladder-cell">${esc(oppName)}</td>
+                            <td class="ladder-cell-center ladder-result ${statusClass}">${esc(game.status)}</td>
                             <td class="ladder-cell-center"><a href="game.php?gameid=${game.id}" class="btn-ladder-inline" target="_blank">View Game</a></td>
                         </tr>`;
                     }
                 }
                 $("#ladderHistoryTable tbody").html(html);
+                ladder.setCount(count + (count === 1 ? " match played" : " matches played"));
             });
         },
 
         hideHistory: function () {
             $("#ladderHistoryPane").hide();
             $("#ladderStandingsPane").show();
+            ladder.setCount(ladder.standingsCount);
         }
     };
 
