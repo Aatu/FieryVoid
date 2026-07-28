@@ -2763,11 +2763,33 @@ class GraviticMine extends Weapon{
             return $dist <= $tolerance;
         }
 
-        // 3+ mines: convex hull point-in-polygon.
+        // 3+ mines: the unit must be within the zone formed by the mines' arrangement - the convex
+        // hull of the mine hex centres.
         $hull = $this->convexHull($minePx);
-        $inside = $this->pointInPolygon($unitPx, $hull);
-        //Debug::log("    3+-mine check: hullSize=" . count($hull) . " inside=" . ($inside ? 'YES' : 'NO'));
-        return $inside;
+        if ($this->pointInPolygon($unitPx, $hull)) {
+            //Debug::log("    3+-mine check: hullSize=" . count($hull) . " centre inside=YES");
+            return true;
+        }
+
+        // A hex is included whole if the boundary lines cross ANY part of it, exactly as the
+        // 2-mine rule counts a line that merely touches the unit's hex - point-in-polygon alone
+        // tests the hex CENTRE, so it wrongly drops a hex the zone only partly overlaps. Walking
+        // the hull edges with the same per-angle tolerance also covers the degenerate case where
+        // every mine is collinear: convexHull discards the collinear middles, leaving a 2-point
+        // "hull" that pointInPolygon (n < 3) always rejects.
+        $sides = count($hull);
+        for ($i = 0, $j = $sides - 1; $i < $sides; $j = $i++) {
+            $tolerance = $this->getHexTouchTolerance(
+                $hull[$i]['x'] - $hull[$j]['x'],
+                $hull[$i]['y'] - $hull[$j]['y']
+            ) + 1e-9;
+            if ($this->pointToSegmentDistance($unitPx, $hull[$j], $hull[$i]) <= $tolerance) {
+                //Debug::log("    3+-mine check: hull edge {$j}-{$i} crosses the unit's hex");
+                return true;
+            }
+        }
+        //Debug::log("    3+-mine check: hullSize=" . count($hull) . " inside=NO");
+        return false;
     }
 
     /* Greatest distance a line of direction ($abx,$aby) may pass from a hex centre while still
