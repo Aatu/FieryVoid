@@ -45,7 +45,10 @@ window.combatLog = {
 
     },
 
-    logFireOrders: function logFireOrders(orders, printedLog = false, ships = null) {
+    // damageIndex is optional: showLog builds one for the whole printed log so each order is a
+    // map lookup instead of a full fleet sweep. The replay path (LogAnimation) renders one group
+    // at a time and passes none, which keeps the original sweep.
+    logFireOrders: function logFireOrders(orders, printedLog = false, ships = null, damageIndex = null) {
 
         orders = [].concat(orders);
 
@@ -105,7 +108,7 @@ window.combatLog = {
             if (fire.shots > 0) ordersC += 1;
             if (fire.shotshit > 0) ordersChit += 1;
             if (fire.intercepted > 0) ordersCintercepted += 1;
-            weaponManager.getDamagesCausedBy(fire, damages, ships);
+            weaponManager.getDamagesCausedBy(fire, damages, ships, damageIndex);
             var needed = fire.needed;
             //if (needed < 0) needed = 0; //I skip this - if intercepted below 0, let's show it.
             if (fire.shots > 0) { //ignore hit chance of purely technical fire orders
@@ -692,9 +695,14 @@ window.combatLog = {
         // Update the content of LogActual with the current turn and optional message
         document.getElementById('LogActual').innerHTML = html;
 
+        // One reverse map of damage entries by fire order id for the whole print, built from the
+        // same ship set logFireOrders will be handed (the printed log carries its own raw ships
+        // from replay.php, not gamedata.ships). Lives only for this call.
+        var damageIndex = weaponManager.buildDamageIndex(ships);
+
         // Process fire orders if any
         allFireOrders.forEach(function (logEntry) { // allFireOrders is an array of other arrays
-            combatLog.logFireOrders(logEntry, true, ships);
+            combatLog.logFireOrders(logEntry, true, ships, damageIndex);
         });
 
         // Show the LogActual div

@@ -3488,6 +3488,9 @@ window.weaponManager = {
 
 
     getAllPreFireOrdersForDisplayingAgainst: function getAllPreFireOrdersForDisplayingAgainst(target) {
+        //one reverse map for every order resolved against this target, instead of one full
+        //fleet sweep per order - see the note above getDamagesCausedBy
+        var damageIndex = weaponManager.buildDamageIndex(gamedata.ships);
         return gamedata.ships.reduce(function (fires, shooter) {
             return fires.concat(weaponManager.getAllFireOrders(shooter).filter(function (fire) {
                 return fire.targetid === target.id && (fire.type === "prefiring");
@@ -3505,7 +3508,7 @@ window.weaponManager = {
                 shooter: shooter,
                 weapon: shipManager.systems.getSystem(shooter, fireOrder.weaponid),
                 targetSystem: shipManager.systems.getSystem(target, fireOrder.calledid),
-                damagesCaused: weaponManager.getDamagesCausedBy(fireOrder).reduce(function (damages, damage) {
+                damagesCaused: weaponManager.getDamagesCausedBy(fireOrder, null, null, damageIndex).reduce(function (damages, damage) {
                     return damages.concat(damage.damages);
                 }, []).map(function (damage) {
                     return {
@@ -3529,6 +3532,9 @@ window.weaponManager = {
     },
 
     getAllFireOrdersForDisplayingAgainst: function getAllFireOrdersForDisplayingAgainst(target) {
+        //one reverse map for every order resolved against this target, instead of one full
+        //fleet sweep per order - see the note above getDamagesCausedBy
+        var damageIndex = weaponManager.buildDamageIndex(gamedata.ships);
         return gamedata.ships.reduce(function (fires, shooter) {
             return fires.concat(weaponManager.getAllFireOrders(shooter).filter(function (fire) {
                 return fire.targetid === target.id && (fire.type === "normal" || fire.type === "ballistic");
@@ -3546,7 +3552,7 @@ window.weaponManager = {
                 shooter: shooter,
                 weapon: shipManager.systems.getSystem(shooter, fireOrder.weaponid),
                 targetSystem: shipManager.systems.getSystem(target, fireOrder.calledid),
-                damagesCaused: weaponManager.getDamagesCausedBy(fireOrder).reduce(function (damages, damage) {
+                damagesCaused: weaponManager.getDamagesCausedBy(fireOrder, null, null, damageIndex).reduce(function (damages, damage) {
                     return damages.concat(damage.damages);
                 }, []).map(function (damage) {
                     return {
@@ -3615,55 +3621,134 @@ window.weaponManager = {
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
     },
 
-    getDamagesCausedBy: function getDamagesCausedBy(fire, damages, ships = null) {
+    /* ---- damage lookup by fire order -------------------------------------------------
+       getDamagesCausedBy answers "what did this shot do" by sweeping every ship, system and
+       fighter subsystem for entries stamped with the fire order's id. That is fine for a
+       one-off lookup, but the replay and log paths ask it once per fire order, so a turn with
+       many shots re-walks the whole fleet hundreds of times. A caller that is about to process
+       a BATCH of fire orders can build the reverse map once with buildDamageIndex() and pass it
+       in; the sweep is kept intact as the fallback, so any caller that passes no index behaves
+       exactly as before.
+
+       An index is deliberately never cached across calls. gamedata.setShipsFromJson rebuilds
+       ship objects in place on every poll (the ships ARRAY keeps its identity, so an array-keyed
+       cache would silently go stale), and a couple of display paths re-point system.damage at a
+       parent weapon's array (SystemIcon / shipwindow). Every index built here therefore lives
+       and dies inside one synchronous pass over data that cannot change underneath it. */
+
+    // Map key for a fire order id. The sweep compares with == so a numeric id and its string
+    // form match; String() reproduces that for every id shape in play (ints from the server,
+    // client-side composite strings like "12_3_1"). Real keys carry an "id:" prefix so the
+    // nullish key can never collide with an id that stringifies to the same word - this codebase
+    // does put the literal string "null" in fire orders (FireOrder.x/y). null and undefined
+    // share one key because null == undefined is true.
+    damageIndexKey: function damageIndexKey(fireorderid) {
+        if (fireorderid === null || fireorderid === undefined) return "nullish";
+        return "id:" + String(fireorderid);
+    },
+
+    // fire order id -> [{ship, damages}], ships in iteration order and each ship's entries in
+    // the same order the sweep would have collected them (system order, own damage before
+    // fighter-subsystem damage). One pass instead of one pass per fire order.
+    buildDamageIndex: function buildDamageIndex(ships) {
+        var shipsToIterate = ships || gamedata.ships;
+        var index = new Map();
+
+        function record(ship, d) {
+            var key = weaponManager.damageIndexKey(d.fireorderid);
+            var perShip = index.get(key);
+            if (!perShip) {
+                perShip = [];
+                index.set(key, perShip);
+            }
+            // a ship is walked to completion before the next one starts, so all of its entries
+            // for a given key are contiguous - the last bucket is this ship's if it has one
+            var bucket = perShip.length > 0 ? perShip[perShip.length - 1] : null;
+            if (!bucket || bucket.ship !== ship) {
+                bucket = { ship: ship, damages: [] };
+                perShip.push(bucket);
+            }
+            bucket.damages.push(d);
+        }
+
+        for (var i in shipsToIterate) {
+            var ship = shipsToIterate[i];
+            for (var a in ship.systems) {
+                var system = ship.systems[a];
+                for (var b in system.damage) record(ship, system.damage[b]);
+                if (system.fighter) {
+                    for (var c in system.systems) {
+                        var fighterSystem = system.systems[c];
+                        for (var e in fighterSystem.damage) record(ship, fighterSystem.damage[e]);
+                    }
+                }
+            }
+        }
+
+        return index;
+    },
+
+    getDamagesCausedBy: function getDamagesCausedBy(fire, damages, ships = null, index = null) {
 
         if (!damages) {
             damages = [];
         }
 
-        var shipsToIterate = ships || gamedata.ships;
+        var matches;
 
-        for (var i in shipsToIterate) {
-            var ship = shipsToIterate[i];
-            var list = Array();
+        if (index) {
+            matches = index.get(weaponManager.damageIndexKey(fire.id)) || [];
+        } else {
+            matches = [];
+            var shipsToIterate = ships || gamedata.ships;
 
-            for (var a in ship.systems) {
-                var system = ship.systems[a];
-                for (var b in system.damage) {
-                    var d = system.damage[b];
-                    if (d.fireorderid == fire.id) {
-                        list.push(d);
+            for (var i in shipsToIterate) {
+                var ship = shipsToIterate[i];
+                var list = Array();
+
+                for (var a in ship.systems) {
+                    var system = ship.systems[a];
+                    for (var b in system.damage) {
+                        var d = system.damage[b];
+                        if (d.fireorderid == fire.id) {
+                            list.push(d);
+                        }
                     }
-                }
-                // A flight carries its defensive systems on the individual craft, and a capacity-pool
-                // absorber (Shield Projection) records what it soaked as a damage entry on ITSELF.
-                // Those entries live one level down, so without this the combat log reported a fully
-                // absorbed shot against a flight as "damaged for 0". Same fighter recursion as
-                // shipManager.systems.getSystem.
-                if (system.fighter) {
-                    for (var c in system.systems) {
-                        var fighterSystem = system.systems[c];
-                        for (var b in fighterSystem.damage) {
-                            var d = fighterSystem.damage[b];
-                            if (d.fireorderid == fire.id) {
-                                list.push(d);
+                    // A flight carries its defensive systems on the individual craft, and a
+                    // capacity-pool absorber (Shield Projection) records what it soaked as a damage
+                    // entry on ITSELF. Those entries live one level down, so without this the combat
+                    // log reported a fully absorbed shot against a flight as "damaged for 0". Same
+                    // fighter recursion as shipManager.systems.getSystem.
+                    if (system.fighter) {
+                        for (var c in system.systems) {
+                            var fighterSystem = system.systems[c];
+                            for (var e in fighterSystem.damage) {
+                                var fd = fighterSystem.damage[e];
+                                if (fd.fireorderid == fire.id) {
+                                    list.push(fd);
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            if (list.length > 0) {
-                var found = false;
-                for (var a in damages) {
-                    var entry = damages[a];
-                    if (entry.ship.id == ship.id) {
-                        found = true;
-                        entry.damages = entry.damages.concat(list);
-                    }
-                }
-                if (!found) damages.push({ ship: ship, damages: list });
+                if (list.length > 0) matches.push({ ship: ship, damages: list });
             }
+        }
+
+        for (var m = 0; m < matches.length; m++) {
+            var match = matches[m];
+            var found = false;
+            for (var f in damages) {
+                var entry = damages[f];
+                if (entry.ship.id == match.ship.id) {
+                    found = true;
+                    entry.damages = entry.damages.concat(match.damages);
+                }
+            }
+            // copy: the caller owns what it gets back, and a shared index must stay intact for
+            // the next fire order in the batch
+            if (!found) damages.push({ ship: match.ship, damages: match.damages.slice() });
         }
 
         return damages;
