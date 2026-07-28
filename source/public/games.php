@@ -151,13 +151,13 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
           // Per-entry highlight, unchanged: set --update-colour on the <li> and it
           // recolours the title AND tints the rail. See the commented example below. ?>
     <div class="resources">
-      <h3>Latest Updates - July 2026</h3>
+      <h3>Latest Updates</h3>
       <ul class="updates-list">
         <!--<li style="--update-colour: #e05b52;"><span class="update-title">Merry Christmas from Fiery Void!</span></li>-->
-        <li><span class="update-title">Kirishiac Lords</span>A brand-new Ancient faction has been added to Fiery Void!</li>
+        <li><span class="update-title">THE KIRISHIAC LORDS</span>A brand-new Ancient faction has been added to Fiery Void!</li>
+        <li><span class="update-title">Landing Page</span>The Fiery Void Landing Page has received a refresh, with new Recent Game window and other layout changes.</li>        
         <li><span class="update-title">Ship Window Revamp</span>Ship windows (SCS) have been updated in Game and Fleet Selection screens to improve appearance and functionality.</li>
         <li><span class="update-title">Discord Notifications</span>You can now add your Discord account details in 'Set-Up Discord Notifications' to get a message when it's your turn. See Fiery Void FAQ for details!</li>
-        <li><span class="update-title">Civilians and Raiders</span>A plethora of official and custom Civilian ships added for a huge number of factions (thanks to Lunara).</li>
         <li><span class="update-title">Sh'lassan and Mentaban</span>Added these two Small Race factions which utilise exported EA hulls (thanks to Lunara).</li>
         <!--<li><span class="update-title">General Fixes</span>Many other small bug fixes/updates. Thanks for the reports!</li>-->
       </ul>

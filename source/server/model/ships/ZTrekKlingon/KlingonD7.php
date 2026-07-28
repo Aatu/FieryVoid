@@ -50,6 +50,7 @@ class KlingonD7 extends HeavyCombatVessel{
 	$this->addFrontSystem(new TrekKlingonLauncher(3, 0, 0, 270, 90));
 	$this->addFrontSystem(new TrekLightDisruptor(3, 0, 0, 240, 60));
 	$this->addFrontSystem(new TrekLightDisruptor(3, 0, 0, 300, 120));
+        $this->addFrontSystem(new CombatTransporter(3, 4, 1, 270, 90, 5, false));	
 
 	$warpNacelle = new TrekWarpDrive(4, 24, 0, 4); //armor, structure, power usage, impulse output
 		$impulseDrive->addThruster($warpNacelle);

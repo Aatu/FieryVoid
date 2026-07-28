@@ -88,71 +88,83 @@ var AncientParticleCutter = function AncientParticleCutter(json, ship) {
 AncientParticleCutter.prototype = Object.create(Particle.prototype);
 AncientParticleCutter.prototype.constructor = AncientParticleCutter;
 
+
+
 var NeutronBlaster = function NeutronBlaster(json, ship) {
     Weapon.call(this, json, ship);
 };
 NeutronBlaster.prototype = Object.create(Weapon.prototype);
 NeutronBlaster.prototype.constructor = NeutronBlaster;
-
 NeutronBlaster.prototype.initializationUpdate = function () {
-    if (this.firingMode == 2) {
-        this.data["Shots Remaining"] = this.guns - this.fireOrders.length;
-    } else {
-        delete this.data["Shots Remaining"];
-    }
+    // guns is 2 for Mode 1, 1 for Modes 2/3 - this works the same regardless.
+    this.data["Shots Remaining"] = this.guns - this.fireOrders.length;
     return this;
 };
-
-NeutronBlaster.prototype.doMultipleFireOrders = function (shooter, target, system) {
-
-    var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon.
-    /*
-    if (this.fireOrders.length > 0) {
-        if (this.fireOrders.length >= this.guns) {
-            // All guns already fired → retarget one gun by removing oldest fireorder.
-            this.fireOrders.splice(0, 1);
-        }
-    } 
-    */
-    if (this.firingMode == 2 && this.fireOrders.length >= this.guns) return;
-
-    var fireOrdersArray = []; // Store multiple fire orders
-
-    for (var s = 0; s < shotsOnTarget; s++) {
-        var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
-        var calledid = -1; //Raking, cannot called shot.       
-
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
-        if (chance < 1) continue;
-
-        var fire = {
-            id: fireid,
-            type: 'normal',
-            shooterid: shooter.id,
-            targetid: target.id,
-            weaponid: this.id,
-            calledid: calledid,
-            turn: gamedata.turn,
-            firingMode: this.firingMode,
-            shots: 1,
-            x: "null",
-            y: "null",
-            damageclass: 'Sweeping',
-            chance: chance,
-            hitmod: 0,
-            notes: "Split"
-        };
-
-        fireOrdersArray.push(fire); // Store each fire order
+/* True once this blaster has been held unfired long enough for the given mode - Mode N
+ * needs turnsloaded >= N (Mode 2 needs 2 turns of charge, Mode 3 needs 3). Hardcoded to
+ * turnsloaded rather than reading a normalload property, since normalload isn't known to
+ * be serialized to the client (mirrors how HypergravitonBlaster.js hardcodes its own
+ * turnsloaded thresholds rather than reading normalload). */
+NeutronBlaster.prototype.isCharged = function (blastersNeeded) {
+    return this.turnsloaded >= blastersNeeded;
+};
+/* True if this blaster AND enough other NeutronBlasters on the same ship are all charged
+ * for the currently-selected mode - the client-side mirror of the server's readyToCombine
+ * gate. For this weapon, the firing mode number IS the blasters-needed count (Mode 2 needs
+ * 2, Mode 3 needs 3), so no separate lookup table is needed. Used to stop the player from
+ * declaring an incomplete combine in the first place, rather than letting it commit and
+ * auto-miss (which would still cost every blaster involved its charge). */
+NeutronBlaster.prototype.readyToCombine = function (shooter) {
+    var blastersNeeded = this.firingMode;
+    if (blastersNeeded < 2) return true; //Mode 1 doesn't combine, nothing to gate
+    if (!this.isCharged(blastersNeeded)) return false;
+    var readyPartners = 0;
+    for (var i in shooter.systems) {
+        var sys = shooter.systems[i];
+        if (!sys || sys === this) continue;
+        if (!(sys instanceof NeutronBlaster)) continue;
+        if (sys.isCharged(blastersNeeded)) readyPartners++;
     }
-
-    return fireOrdersArray; // Return all fire orders
+    return readyPartners >= (blastersNeeded - 1);
 };
+/* Only reached at all when canSplitShots is true for the current mode - which, per
+ * $canSplitShotsArray, is Modes 2/3. Mode 1 goes through weaponManager.targetShip()'s
+ * default (non-split) path instead, which already handles firing twice per turn fine. */
+NeutronBlaster.prototype.doMultipleFireOrders = function (shooter, target, system) {
+    if (!this.readyToCombine(shooter)) return []; //not enough blasters charged - don't commit to firing
+    if (this.fireOrders.length >= this.guns) return []; //already declared (guns is 1 for every mode)
 
+    weaponManager.removeFiringOrder(shooter, this); //replace any prior order (e.g. re-targeting) now that we know this declaration will succeed
+
+    var calledid = -1; //Raking, cannot called shot.
+    var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
+    if (chance < 1) return [];
+
+    var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+    var fire = {
+        id: fireid,
+        type: 'normal',
+        shooterid: shooter.id,
+        targetid: target.id,
+        weaponid: this.id,
+        calledid: calledid,
+        turn: gamedata.turn,
+        firingMode: this.firingMode,
+        shots: 1,
+        x: "null",
+        y: "null",
+        damageclass: 'Sweeping',
+        chance: chance,
+        hitmod: 0
+    };
+    return [fire];
+};
 NeutronBlaster.prototype.checkFinished = function () {
-    if (this.firingMode == 2 && this.fireOrders.length >= this.guns) return true;
-    return false;
+    return this.fireOrders.length >= this.guns;
 };
+
+
+
 
 var NeutronBlasterFtr = function NeutronBlasterFtr(json, ship) {
     Weapon.call(this, json, ship);

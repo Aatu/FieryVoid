@@ -1197,13 +1197,14 @@ class NeutronBlaster extends Weapon{
  
     public $factionAge = 3;//Ancient weapon, which sometimes has consequences!
  
-  	public $gunsArray = array(1=>2, 2=>1, 3=>1); // mode 1: fires twice per blaster (uncombined); modes 2/3: single combined shot
+  	public $gunsArray = array(1=>1, 2=>1, 3=>1); // mode 1: fires twice per blaster (uncombined); modes 2/3: single combined shot
  
 	//technical variables for combined shot
 	public $isCombined = false;
 	public $alreadyConsidered = false;
 	
 	public $loadingtime = 1;
+	public $normalload = 3; //lets $turnsloaded climb as high as 3, so Mode 3's 3-turn cooldown can be checked
 	
 	public $uninterceptable = true; //Neutron Blaster is uninterceptable
 	public $intercept = 3; //intercept rating -3
@@ -1226,7 +1227,7 @@ class NeutronBlaster extends Weapon{
     public $rangePenalty = 0.5; 
 	public $rangePenaltyArray = array(1=>0.5, 2=>0.33, 3=>0.25);
 	public $fireControl = array(6, 1, 1); // fighters, <=mediums, <=capitals 
-	public $fireControlArray = array( 1=>array(6, 3, 3), 2=>array(3,5,5), 3=>array(null,6,6)); 
+	public $fireControlArray = array( 1=>array(6, 4, 2), 2=>array(4,4,4), 3=>array(null,6,6)); 
  
 	//number of blasters required to fire per mode (mode 2 needs 2 combined, mode 3 needs 3 combined)
 	public $blastersRequiredArray = array( 1=>1, 2=>2, 3=>3 );
@@ -1235,12 +1236,12 @@ class NeutronBlaster extends Weapon{
 	public $damageTypeArray = array( 1=>"Standard", 2=>"Raking", 3=>"Raking");
 	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 	public $weaponClassArray = array(1=>'Electromagnetic', 2=>'Electromagnetic', 3=>'Electromagnetic');
-    public $canSplitShots = false; //Allows Firing Mode 1 to split shots.
-    public $canSplitShotsArray = array(1=>true, 2=>false, 3=>false );          
+    public $canSplitShots = false; //not a real "split" - only used to route Modes 2/3 through doMultipleFireOrders, where the combine readiness gate lives
+    public $canSplitShotsArray = array(1=>false, 2=>true, 3=>true );          
 	
 	//rake size array
 	public $raking = 15;//more in higher modes
-	public $rakingArray = array( 1=>15, 2=>15, 3=>20 );
+	public $rakingArray = array( 1=>10, 2=>15, 3=>20 );
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc )
 	{
@@ -1263,10 +1264,12 @@ class NeutronBlaster extends Weapon{
 		}	    		
 		$this->data["Special"] .= "Uninterceptable. Capable of multiple modes of fire. Higher modes require combining multiple blasters on the same target.";   
 		$this->data["Special"] .= "<br>Firing modes available (Number of blasters per shot/damage output (and mode)/range penalty):";  
-		$this->data["Special"] .= "<br> - 1 Blaster: 1d10+10 Standard - 2 shots, -2.5/hex"; 
-		$this->data["Special"] .= "<br> - 2 Blasters: 4d10+20 Raking(15), -1.65/hex";
-		$this->data["Special"] .= "<br> - 3 Blasters: 5d10+30 Raking(20), -1.25/hex"; 
+		$this->data["Special"] .= "<br> - 1 Blaster: 1d10+10 Raking (10) - 2 shots, -2.5/hex"; 
+		$this->data["Special"] .= "<br> - 2 Blasters: 3d110+30 Raking(15), -1.65/hex";
+		$this->data["Special"] .= "<br> - 3 Blasters: 7d10+70 Raking(20), -1.25/hex"; 
+		$this->data["Special"] .= "<br>Mode 1 fires every turn. Mode 2 requires the 2 combining blasters be held unfired for 1 turn first (fires every other turn). Mode 3 requires the 3 combining blasters be held unfired for 2 turns first (fires every third turn).";
 		$this->data["Special"] .= "<br>If weapon is mis-declared (shot is declared but not enough blasters are allocated in appropriate mode) shot will automatically miss."; 
+		$this->data["Special"] .= "<br>If weapon is insufficient number of charged blasters for the selected mode, the blaster will not committ to firing."; 
 		$this->data["Special"] .= "<br>You must explicitly order this weapon to intercept.";		
 	}
  
@@ -1275,9 +1278,9 @@ class NeutronBlaster extends Weapon{
 			case 1:
 				return Dice::d(10, 1)+10; // fired individually, twice per blaster
 			case 2:
-				return Dice::d(10, 4)+20; // 1 shot from 2 combined blasters
+				return Dice::d(10, 3)+30; // 1 shot from 2 combined blasters
 			case 3:	
-				return Dice::d(10, 5)+30; // 1 shot from 3 combined blasters
+				return Dice::d(10, 7)+70; // 1 shot from 3 combined blasters
 			default: //should never go here
 				return Dice::d(10, 1)+10;
 		}
@@ -1289,10 +1292,10 @@ class NeutronBlaster extends Weapon{
 				$this->minDamage = 11; 
 				break;
 			case 2:
-				$this->minDamage = 24; 
+				$this->minDamage = 33; 
 				break;
 			case 3:
-				$this->minDamage = 35; 
+				$this->minDamage = 77; 
 				break;
 			default: //should never go here
 				$this->minDamage = 11;
@@ -1309,12 +1312,27 @@ class NeutronBlaster extends Weapon{
 				$this->maxDamage = 60; 
 				break;
 			case 3:
-				$this->maxDamage = 80; 
+				$this->maxDamage = 140; 
 				break;
 			default: //should never go here
 				$this->maxDamage = 20;
 				break;
 		}
+	}
+
+	/* Combine readiness gate: this blaster and every prospective combining partner must all
+	 * have turnsloaded >= blastersNeeded - i.e. the more blasters a mode needs, the longer
+	 * they must sit unfired first (Mode 2 needs 2 turns' worth of charge, Mode 3 needs 3).
+	 * Uses the engine's own $turnsloaded counter (the same property HypergravitonBlaster
+	 * reads directly for its load-based damage bonus) rather than reconstructing firing
+	 * history ourselves. */
+	protected function readyToCombine($gamedata, $firingShip, $subordinateOrders, $blastersNeeded){
+		if ($this->turnsloaded < $blastersNeeded) return false;
+		foreach ($subordinateOrders as $subOrder){
+			$subWeapon = $firingShip->getSystemById($subOrder->weaponid);
+			if ($subWeapon->turnsloaded < $blastersNeeded) return false;
+		}
+		return true;
 	}
 	
 	//hit chance calculation is standard - no power drain (unlike the weapon this was based on)
@@ -1357,14 +1375,27 @@ class NeutronBlaster extends Weapon{
 				}
 				if ($subordinateOrdersNo>=($blastersNeeded-1)) break;//enough subordinate weapons found! - exit loop
 			}						
-			if ($subordinateOrdersNo == ($blastersNeeded-1)){ //combining - set other combining weapons/fire orders to technical status!
-				foreach($subordinateOrders as $subOrder){
-					$subWeapon = $firingShip->getSystemById($subOrder->weaponid);
-					$subWeapon->isCombined = true;
-					$subWeapon->alreadyConsidered = true;
-					$subWeapon->doNotIntercept = true;
-				}				
-				$doCalculate = true;
+			if ($subordinateOrdersNo == ($blastersNeeded-1)){ //enough blasters found - but they also need to have been held ready long enough
+				$readyToCombine = $this->readyToCombine($gamedata, $firingShip, $subordinateOrders, $blastersNeeded);
+
+				if ($readyToCombine){ //combining - set other combining weapons/fire orders to technical status!
+					foreach($subordinateOrders as $subOrder){
+						$subWeapon = $firingShip->getSystemById($subOrder->weaponid);
+						$subWeapon->isCombined = true;
+						$subWeapon->alreadyConsidered = true;
+						$subWeapon->doNotIntercept = true;
+					}				
+					$doCalculate = true;
+				}else{//blasters found, but not all held ready long enough - mark technical and don't fire
+					$notes = "technical fire order - weapon mis-declared (all combining blasters must be held unfired long enough)";
+					$fireOrder->chosenLocation = 0;
+					$fireOrder->needed = 0;
+					$fireOrder->shots = 0;
+					$fireOrder->notes = $notes;
+					$fireOrder->updated = true;
+					$this->doNotIntercept = true;
+					$doCalculate = false;
+				}
 			}else{//not enough weapons to combine in this mode - mark technical and don't fire
 				$notes = "technical fire order - weapon mis-declared";
 				$fireOrder->chosenLocation = 0;
@@ -1383,6 +1414,8 @@ class NeutronBlaster extends Weapon{
 	}//endof function calculateHitBase
  
 }//endof class NeutronBlaster
+
+
 
 
 
