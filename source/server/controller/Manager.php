@@ -356,11 +356,42 @@ class Manager{
     public static function canCreateGame($userid){
         return true;
     }
+    //Usernames are rendered into HTML by the legacy lobby and chat code, which
+    //builds markup by string concatenation (e.g. gamelobby.js .playername, chat.php).
+    //Keeping HTML metacharacters out of the name at the door is what makes those
+    //call sites safe - do not relax this without escaping them first.
+    const USERNAME_MIN_LENGTH = 3;
+    const USERNAME_MAX_LENGTH = 45; //player.username is varchar(45)
+    const USERNAME_PATTERN = '[\p{L}\p{N} ._\-]+'; //shared with the pattern= attribute in reg.php
+
+    //Returns null when the name is acceptable, otherwise a message for the player.
+    //reg.php prints the message as raw HTML, so it is pre-encoded here.
+    public static function validateUsername($username) {
+        if ($username !== trim($username))
+            return "Username cannot start or end with a space.";
+
+        $length = mb_strlen($username);
+        if ($length < self::USERNAME_MIN_LENGTH || $length > self::USERNAME_MAX_LENGTH)
+            return "Username must be between " . self::USERNAME_MIN_LENGTH . " and "
+                 . self::USERNAME_MAX_LENGTH . " characters long.";
+
+        if (!preg_match('/^' . self::USERNAME_PATTERN . '$/u', $username))
+            return "Usernames may only contain letters, numbers, spaces and . _ - "
+                 . "&mdash; these characters are not allowed: &amp; &#039; &quot; &lt; &gt; \\";
+
+        return null;
+    }
+
     public static function registerPlayer($username, $password) {
         try {
+            //Enforced here rather than in reg.php so no future caller can bypass it.
+            $invalid = self::validateUsername($username);
+            if ($invalid !== null)
+                return $invalid;
+
             self::initDBManager();
             $ret =  self::$dbManager->registerPlayer($username, $password);
-                      
+
             return $ret;
         }
         catch(exception $e) {
