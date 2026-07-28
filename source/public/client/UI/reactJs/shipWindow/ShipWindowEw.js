@@ -9,6 +9,46 @@ import theme from "../styled/theme";
   the hover tooltip back.*/
 const SHOW_EW_TARGET_TOOLTIP = false;
 
+/*Colour-coded EW ROW LABELS (user request 2026-07-22) - only the labels are tinted,
+  never the values or the target names. Muted pastels: light enough to read on the dark
+  panel, distinct from the window's blue chrome without going garish.
+
+  The original spec had two overlaps, resolved here (edit this one map to retune):
+    - "SDEW" (the per-target Self-Defensive EW row) -> blue;
+    - the two detection rows ("Detect Mines"/"Detect Stealth", the spec's MDEW/SDEW
+      pair) -> purple;
+    - "OEW" -> green (it was listed under both green and orange);
+    - "SOEW" -> orange (pairs with DIST).
+  Any label not in the map keeps the default accent colour.*/
+const EW_LABEL_COLORS = {
+    'DEW': theme.colors.text,       //white
+    'CCEW': '#9dc3e6',              //soft blue
+    'SDEW': '#9dc3e6',              //soft blue
+    'OEW': '#9ccf97',               //soft green
+    'BDEW': '#9ccf97',              //soft green
+    'Detect Mines': '#c2a7dd',      //soft purple
+    'Detect Stealth': '#c2a7dd',    //soft purple
+    'DIST': '#e6b98f',              //soft orange
+    'SOEW': theme.colors.text,              //soft orange
+    'OEW_HOSTILE': '#e49b9b',       //soft red - pseudo-label, see ewLabelColor
+};
+
+/*OEW is the one CONTEXTUAL label (user request 2026-07-23): it keeps the green while the
+  window's ship is yours or a teammate's, and takes the OEW_HOSTILE red on anyone else's
+  ship - i.e. that OEW is being pointed at your side. Guarded by isPlayerInGame() because
+  an observer has no "side" (isMyorMyTeamShip is false for EVERY ship there, which would
+  paint every window's OEW red); observers keep the neutral green.
+
+  "OEW_HOSTILE" is a pseudo-label and can never collide with a real one: labels come from
+  ewEntry.type (OEW/DIST/SOEW/SDEW) or the literals in getShipRows.*/
+const ewLabelColor = (label, ship) => {
+    if (label === 'OEW' && ship && gamedata.isPlayerInGame() && !gamedata.isMyorMyTeamShip(ship)) {
+        return EW_LABEL_COLORS['OEW_HOSTILE'];
+    }
+
+    return EW_LABEL_COLORS[label] || theme.colors.textAccent;
+};
+
 /*EW panel (SHIPWINDOW_REDESIGN_PLAN.md Stages 1c/1e, vertical top-right layout after
   the 2026-07-16 feedback round): occupies the `ew` grid area - the top-right corner
   cell of the ship window's SCS grid - as a vertical list. Same numbers, same maths
@@ -40,6 +80,13 @@ const EwPanel = styled.div`
   HitChartPanel section names / ShipNotesPanel titles); nowrap keeps
   "Electronic Warfare" on one line in the 120px panel*/
 const EwTitle = styled.div`
+    /*flex-centred fixed-height bar so the title sits dead-centre, consistent with every
+      other chrome title/header bar (user request 2026-07-22)*/
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    min-height: 15px;
+    line-height: 1;
     font-size: 8px;
     letter-spacing: 0.5px;
     text-transform: uppercase;
@@ -48,7 +95,7 @@ const EwTitle = styled.div`
     color: ${theme.colors.text};
     background-color: rgba(73, 103, 145, 0.25);
     margin: -1px -2px 2px;
-    padding: 3px 4px;
+    padding: 0 4px;
     border-bottom: 1px solid ${theme.colors.line};
 `;
 
@@ -66,9 +113,9 @@ const RowLabel = styled.span`
     font-size: 8px;
     letter-spacing: 0.5px;
     text-transform: uppercase;
-    color: ${theme.colors.textAccent};
+    color: ${props => props.$color || theme.colors.textAccent};
     white-space: nowrap;
-    margin-left: 1px;     
+    margin-left: 1px;
 `;
 
 const RowValue = styled.span`
@@ -156,9 +203,9 @@ class ShipWindowEw extends React.Component {
 const getShipRows = ship => {
     let list = [];
 
-    list.push(<Row key={`dew-scs-${ship.id}`}><RowLabel>DEW</RowLabel><RowValue>{formatEW(ew.getDefensiveEW(ship))}</RowValue></Row>);
+    list.push(<Row key={`dew-scs-${ship.id}`}><RowLabel $color={ewLabelColor('DEW')}>DEW</RowLabel><RowValue>{formatEW(ew.getDefensiveEW(ship))}</RowValue></Row>);
     var CCEWamount = Math.max(0, ew.getCCEW(ship) - ew.getDistruptionEW(ship));
-    list.push(<Row key={`ccew-scs-${ship.id}`}><RowLabel>CCEW</RowLabel><RowValue>{formatEW(CCEWamount)}</RowValue></Row>);
+    list.push(<Row key={`ccew-scs-${ship.id}`}><RowLabel $color={ewLabelColor('CCEW')}>CCEW</RowLabel><RowValue>{formatEW(CCEWamount)}</RowValue></Row>);
 
     let bdew = ew.getBDEW(ship) * 0.25;
     let detectSEW = ew.getDetectSEW(ship); //Detect stealth
@@ -167,15 +214,15 @@ const getShipRows = ship => {
     if (shipManager.hasSpecialAbility(ship, "ConstrainedEW")) bdew = ew.getBDEW(ship) * 0.2;
 
     if (bdew) {
-        list.push(<Row key={`bdew-scs-${ship.id}`}><RowLabel>BDEW</RowLabel><RowValue>{formatEW(bdew)}</RowValue></Row>);
+        list.push(<Row key={`bdew-scs-${ship.id}`}><RowLabel $color={ewLabelColor('BDEW')}>BDEW</RowLabel><RowValue>{formatEW(bdew)}</RowValue></Row>);
     }
 
     if (detectMEW) {
-        list.push(<Row key={`DetectMEW-scs-${ship.id}`}><RowLabel>Detect Mines</RowLabel><RowValue>{formatEW(detectMEW)}</RowValue></Row>);
+        list.push(<Row key={`DetectMEW-scs-${ship.id}`}><RowLabel $color={ewLabelColor('Detect Mines')}>Detect Mines</RowLabel><RowValue>{formatEW(detectMEW)}</RowValue></Row>);
     }
 
     if (detectSEW) {
-        list.push(<Row key={`DetectSEW-scs-${ship.id}`}><RowLabel>Detect Stealth</RowLabel><RowValue>{formatEW(detectSEW)}</RowValue></Row>);
+        list.push(<Row key={`DetectSEW-scs-${ship.id}`}><RowLabel $color={ewLabelColor('Detect Stealth')}>Detect Stealth</RowLabel><RowValue>{formatEW(detectSEW)}</RowValue></Row>);
     }
 
     return list;
@@ -194,7 +241,7 @@ const getTargetRows = (ship, component) => {
 
             return (
                 <Row key={`${ewEntry.type}-scs-${ship.id}-${ewEntry.targetid}`}>
-                    <RowLabel>{ewEntry.type}</RowLabel>
+                    <RowLabel $color={ewLabelColor(ewEntry.type, ship)}>{ewEntry.type}</RowLabel>
                     <RowTarget
                         $interactive={interactive}
                         title={SHOW_EW_TARGET_TOOLTIP ? target.name : undefined}
