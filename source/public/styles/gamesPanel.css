@@ -359,7 +359,7 @@
   flex: none;
   font-family: var(--fv-display);
   font-size: 7.5px;
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: 0.9px;
   text-transform: uppercase;
   padding: 1px 4px 0;
@@ -374,7 +374,7 @@
    tag. This is the loudest tag on the page, which is right — it is the most important. */
 .fv-tag--you {
   color: #C6E2FF;
-  background: rgba(198, 226, 255, 0.18);
+  background: rgba(198, 225, 255, 0.103);
   border-color: #C6E2FF;
 }
 
@@ -541,7 +541,7 @@
 
 /* Variants come after .fv-btn:hover so their own :hover rules win the tie. */
 .fv-btn--create {
-  background: rgba(60, 122, 60, 0.38);
+  background: rgba(60, 122, 60, 0.671);
   border-color: #66b266;
   color: #e6f4e6;
 }
@@ -553,7 +553,7 @@
 }
 
 .fv-btn--fleet {
-  background: rgba(0, 77, 102, 0.5);
+  background: rgba(0, 77, 102, 0.692);
   border-color: #587e8d;
 }
 
