@@ -134,7 +134,120 @@ const IconArea = styled.div`
     padding: 1px 0 2px;
 `;
 
+/*Structure arc indicator (STRUCTURE_ARCS_PLAN.md): hovering (or long-pressing) a section's
+  health bar draws that section's facing wedge on the 3D icon, so a player can see at a glance
+  which bearings feed damage into the bar they are looking at. The header raises its OWN
+  StructureMouseOver/Out event rather than SystemMouseOver: the arc is all that's wanted here,
+  with no system-info tooltip and no interference with the weapon-arc show/hide. PhaseStrategy
+  handles it on game.php; the lobby's uiEvents handler ignores it (no map to draw on).
+
+  Touch mirrors SystemIcon: 400ms hold, 10px move cancels, plus the shared
+  window.lastTouchActiveTime guard against the ghost mouse events a tap emits afterwards.*/
 class ShipSection extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.longPressTimer = null;
+        this.touchActive = false;
+        this.arcShown = false; //so only a section that actually raised a wedge asks for the sweep
+        this.onStructureMouseOver = this.onStructureMouseOver.bind(this);
+        this.onStructureMouseOut = this.onStructureMouseOut.bind(this);
+        this.onStructureTouchStart = this.onStructureTouchStart.bind(this);
+        this.onStructureTouchMove = this.onStructureTouchMove.bind(this);
+        this.onStructureTouchEnd = this.onStructureTouchEnd.bind(this);
+        this.onStructureTouchCancel = this.onStructureTouchCancel.bind(this);
+    }
+
+    componentWillUnmount() {
+        if (this.longPressTimer) {
+            clearTimeout(this.longPressTimer);
+            this.longPressTimer = null;
+        }
+        //a section unmounting under the cursor/finger (window closed, turn refresh) never fires
+        //mouse-out, so its wedge would be left stranded on the map
+        this.hideStructureArc();
+    }
+
+    showStructureArc() {
+        const { ship, systems } = this.props;
+        this.arcShown = true;
+        window.uiEvents.relay('StructureMouseOver', { ship: ship, structure: getStructure(systems) });
+    }
+
+    hideStructureArc() {
+        if (!this.arcShown) return;
+        this.arcShown = false;
+        window.uiEvents.relay('StructureMouseOut');
+    }
+
+    onStructureMouseOver(event) {
+        if (this.touchActive) return;
+        if (window.lastTouchActiveTime && Date.now() - window.lastTouchActiveTime < 1000) return; //ghost mouseover after a tap
+
+        event.stopPropagation();
+        this.showStructureArc();
+    }
+
+    onStructureMouseOut(event) {
+        if (this.touchActive) return;
+        if (window.lastTouchActiveTime && Date.now() - window.lastTouchActiveTime < 1000) return;
+
+        event.stopPropagation();
+        this.hideStructureArc();
+    }
+
+    onStructureTouchStart(event) {
+        event.stopPropagation();
+        this.touchActive = true;
+        window.lastTouchActiveTime = Date.now();
+
+        if (this.longPressTimer) clearTimeout(this.longPressTimer);
+
+        const touch = event.touches[0];
+        this.touchStartX = touch.clientX;
+        this.touchStartY = touch.clientY;
+
+        this.longPressTimer = setTimeout(() => {
+            this.showStructureArc();
+            this.longPressTimer = null;
+        }, 400);
+    }
+
+    onStructureTouchMove(event) {
+        event.stopPropagation();
+        if (!this.longPressTimer) return;
+
+        const touch = event.touches[0];
+        if (Math.abs(touch.clientX - this.touchStartX) > 10 || Math.abs(touch.clientY - this.touchStartY) > 10) {
+            clearTimeout(this.longPressTimer);
+            this.longPressTimer = null;
+        }
+    }
+
+    onStructureTouchEnd(event) {
+        event.stopPropagation();
+        if (this.longPressTimer) { //short tap - the hold never completed, so no arc was shown
+            clearTimeout(this.longPressTimer);
+            this.longPressTimer = null;
+        } else {
+            this.hideStructureArc();
+        }
+
+        setTimeout(() => {
+            this.touchActive = false;
+        }, 300);
+    }
+
+    onStructureTouchCancel(event) {
+        event.stopPropagation();
+        if (this.longPressTimer) {
+            clearTimeout(this.longPressTimer);
+            this.longPressTimer = null;
+        }
+        this.touchActive = false;
+        this.hideStructureArc();
+    }
+
     render() {
         const { ship, systems, location, displayLocation, area, valign, justify, wide, isTerrain, minHeight, nameOverride, hidden } = this.props;
 
@@ -150,7 +263,15 @@ class ShipSection extends React.Component {
                 {/*sections without structure exist purely for icon placement - no header*/}
                 {/*nameOverride: ships with a single side structure spread over both
                    quarter sections read plain "Port"/"Starboard" (set by ShipWindow)*/}
-                {structure && <SectionHeader $health={health} $criticals={hasCriticals(structure)}>
+                {structure && <SectionHeader
+                    $health={health}
+                    $criticals={hasCriticals(structure)}
+                    onMouseOver={this.onStructureMouseOver}
+                    onMouseOut={this.onStructureMouseOut}
+                    onTouchStart={this.onStructureTouchStart}
+                    onTouchMove={this.onStructureTouchMove}
+                    onTouchEnd={this.onStructureTouchEnd}
+                    onTouchCancel={this.onStructureTouchCancel}>
                     <SectionName>{nameOverride || SECTION_NAMES[location] || ""}</SectionName>
                     <StructureText $destroyed={health === 0}>
                         {structure.maxhealth - damageManager.getDamage(ship, structure)}/{structure.maxhealth} A{shipManager.systems.getArmour(ship, structure)}

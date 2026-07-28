@@ -33,8 +33,14 @@ class Xill extends VreeCapital{
 		$this->addPrimarySystem(new Scanner(6, 14, 9, 10));
         $this->addPrimarySystem(new Engine(6, 16, 0, 9, 2));
 		$this->addPrimarySystem(new JumpEngine(6, 10, 5, 24));         			
-		$this->addPrimarySystem(new AntimatterShredder(4, 0, 0, 0, 360));  			
-		$this->addPrimarySystem(new AntimatterShredder(4, 0, 0, 0, 360));
+		//setArcRestriction: every primary-mounted Vree weapon can JAM. Whenever it is damaged it rolls
+		//a separate d20 (17+) and locks to the forward 330..30. See Weapon::testArcRestriction.
+		$shredder = new AntimatterShredder(4, 0, 0, 0, 360);
+		$shredder->setArcRestriction(330, 30);
+		$this->addPrimarySystem($shredder);
+		$shredder = new AntimatterShredder(4, 0, 0, 0, 360);
+		$shredder->setArcRestriction(330, 30);
+		$this->addPrimarySystem($shredder);
 		
 
         //$this->addFrontSystem(new GraviticThruster(5, 16, 0, 9, 1)); 

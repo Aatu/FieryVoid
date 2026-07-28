@@ -496,6 +496,16 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         const turn = incomingFire.fireOrder.turn;
 
         const critSystemsRaw = incomingFire.damagesCaused
+            // Absorption entries (Thirdspace / Thought / Trek shield projections, Shadow diffuser
+            // tendrils) are now linked to their fire order so the combat log can report them,
+            // which also brings them into damagesCaused. Those systems carry no ordinary
+            // criticals, so keep them out of the floating crit names.
+            .filter(damage =>
+                damage.damageclass !== "ThirdspaceShield"
+                && damage.damageclass !== "ThoughtShield"
+                && damage.damageclass !== "TrekShieldProjection"
+                && damage.damageclass !== "Tendril"
+            )
             .filter(damage =>
                 shipManager.criticals.sufferedCritThisTurn(damage.system, turn)
             )

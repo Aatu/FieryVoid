@@ -32,10 +32,33 @@ class Xixx extends VreeHCV{
 		$this->addPrimarySystem(new Scanner(4, 14, 9, 7));
         $this->addPrimarySystem(new Engine(4, 11, 0, 7, 2));
 		
-		$this->addPrimarySystem(new AntiprotonDefender(3, 0, 0, 0, 360));
-		$this->addPrimarySystem(new AntiprotonDefender(3, 0, 0, 0, 360));
-		$this->addPrimarySystem(new AntiprotonDefender(3, 0, 0, 0, 360));				
-		$this->addPrimarySystem(new AntiprotonGun(3, 0, 0, 0, 360));
+		//Turret mounts: the two weapons sharing a turret have their fire linked, so their targets must
+		//be within 60 degrees of each other (they are 360-degree mounts, so weapon arcs can't express
+		//this). The group tag doubles as the turret's display name shown in the system window.
+		//Turret 1 = two defenders, Turret 2 = defender + gun.
+		//setArcRestriction: every primary-mounted Vree weapon can JAM. Whenever it is damaged it rolls
+		//a separate d20 (17+) and locks to the forward 330..30 - and because a turret is one mount,
+		//a jam on either linked weapon restricts both. See Weapon::testArcRestriction.
+		$turretDefenderA = new AntiprotonDefender(3, 0, 0, 0, 360);
+		$turretDefenderA->linkedFiringGroup = 'Turret 1';
+		$turretDefenderA->linkedFiringSpread = 60;
+		$turretDefenderA->setArcRestriction(330, 30);
+		$this->addPrimarySystem($turretDefenderA);
+		$turretDefenderB = new AntiprotonDefender(3, 0, 0, 0, 360);
+		$turretDefenderB->linkedFiringGroup = 'Turret 1';
+		$turretDefenderB->linkedFiringSpread = 60;
+		$turretDefenderB->setArcRestriction(330, 30);
+		$this->addPrimarySystem($turretDefenderB);
+		$turretDefenderC = new AntiprotonDefender(3, 0, 0, 0, 360);
+		$turretDefenderC->linkedFiringGroup = 'Turret 2';
+		$turretDefenderC->linkedFiringSpread = 60;
+		$turretDefenderC->setArcRestriction(330, 30);
+		$this->addPrimarySystem($turretDefenderC);
+		$turretGun = new AntiprotonGun(3, 0, 0, 0, 360);
+		$turretGun->linkedFiringGroup = 'Turret 2';
+		$turretGun->linkedFiringSpread = 60;
+		$turretGun->setArcRestriction(330, 30);
+		$this->addPrimarySystem($turretGun);
 		
 		$thrust = new GraviticThruster(3, 12, 0, 7, 3);
 		$thrust->startArc = 240;

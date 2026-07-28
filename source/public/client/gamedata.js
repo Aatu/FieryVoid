@@ -316,19 +316,29 @@ window.gamedata = {
         ];
     },
 
-    // Inline style for an observer's "active mover" IniGUI box, derived from the
-    // ship's team colour. Mirrors the .iniActive* CSS (border + translucent fill +
-    // glow) but keyed on team instead of mine/ally/enemy.
+    // Inline style for an "active mover" IniGUI box, derived from the ship's team
+    // colour. Mirrors the .iniActive* CSS (border + translucent fill + glow) but
+    // keyed on team instead of mine/ally/enemy.
+    //
+    // Border and glow use the IniGUI-darkened colour; the FILL must be derived from
+    // the FULL-strength palette instead. Taking the fill off the already-darkened
+    // colour compounded the two factors (0.65 * 0.22 = 0.14 of full strength) and
+    // produced a fill within a few points of the #iniTable background (#04161C) —
+    // visually no fill at all, just a border. The .iniActive* classes sit at roughly
+    // 0.30 of their border colour, so match that.
+    INI_ACTIVE_FILL: 0.30,
     getIniActiveTeamStyle: function getIniActiveTeamStyle(team) {
         var rgb = gamedata.getIniTeamColorRGB(team);
         var r = rgb[0];
         var g = rgb[1];
         var b = rgb[2];
-        // Dark, desaturated fill (~22% of the team colour) so the team-coloured
-        // text stays readable, matching the dim backgrounds the class versions use.
-        var fillR = Math.round(r * 0.22);
-        var fillG = Math.round(g * 0.22);
-        var fillB = Math.round(b * 0.22);
+
+        var full = gamedata.getTeamColorRGB(team);
+        var f = gamedata.INI_ACTIVE_FILL;
+        var fillR = Math.round(full[0] * f);
+        var fillG = Math.round(full[1] * f);
+        var fillB = Math.round(full[2] * f);
+
         return "border:1px solid rgb(" + r + "," + g + "," + b + ") !important;"
             + "background-color:rgba(" + fillR + "," + fillG + "," + fillB + ",0.9) !important;"
             + "box-shadow:0px 0px 3px rgb(" + r + "," + g + "," + b + ");";
@@ -389,6 +399,28 @@ window.gamedata = {
             rgb = gamedata.getTeamColorRGB(slot.team);
         }
         return "rgb(" + Math.round(rgb[0]) + "," + Math.round(rgb[1]) + "," + Math.round(rgb[2]) + ")";
+    },
+
+    // Colour for a SHIP NAME / header in the combat log, keyed on the ship itself.
+    // Implements the same observer / 2-team / 3+-team rule as everything else:
+    // terrain is neutral white; observers and 3+-team participants get the absolute
+    // per-team palette (a single "ally" colour can't tell several teams apart);
+    // 2-team participants get relative mine=green / ally=blue / enemy=red, so your
+    // own fleet reads green even if you're team 2. Used for BOTH the "FIRE:" header
+    // (shooter) and the attacked ship's name (target) so one log line stays
+    // self-consistent. NOTE: unlike getFleetHeaderColorRGB this returns a COMPLETE
+    // declaration ("color:rgb(...);") ready to drop into a style attribute.
+    getShipLogColorCss: function getShipLogColorCss(ship) {
+        if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
+            return "color:#ffffff;";
+        }
+        if (!gamedata.isPlayerInGame() || gamedata.getDistinctTeamCount() !== 2) {
+            var rgb = gamedata.getTeamColorRGB(ship.team); // guards bad team values
+            return "color:rgb(" + Math.round(rgb[0]) + "," + Math.round(rgb[1]) + "," + Math.round(rgb[2]) + ");";
+        }
+        if (gamedata.isMyShip(ship)) return "color:rgb(50,205,50);";        // green (mine)
+        if (gamedata.isMyorMyTeamShip(ship)) return "color:rgb(51,173,255);"; // blue (ally)
+        return "color:rgb(255,80,80);";                                     // red (enemy)
     },
 
     isPlayerInGame: function isPlayerInGame() {

@@ -34,11 +34,36 @@ class XonnUpdated extends VreeCapital{
 		$this->addPrimarySystem(new Scanner(6, 18, 9, 10));
         $this->addPrimarySystem(new Engine(6, 18, 0, 10, 3));
 		$this->addPrimarySystem(new JumpEngine(7, 16, 6, 24));
-		$this->addPrimarySystem(new AntimatterShredder(4, 0, 0, 0, 360));		         			
-		$this->addPrimarySystem(new AntimatterShredder(4, 0, 0, 0, 360));
-		$this->addPrimarySystem(new AntimatterCannon(4, 0, 0, 0, 360));
-		$this->addPrimarySystem(new AntimatterCannon(4, 0, 0, 0, 360));
-		$this->addPrimarySystem(new AntimatterCannon(4, 0, 0, 0, 360));      							
+		//Turret mounts: the two weapons sharing a turret have their fire linked, so their targets must
+		//be within 60 degrees of each other (they are 360-degree mounts, so weapon arcs can't express
+		//this). The group tag doubles as the turret's display name shown in the system window.
+		//Turret 1 = shredder + cannon, Turret 2 = shredder + cannon; the third cannon is unturreted.
+		//setArcRestriction: every primary-mounted Vree weapon can JAM. Whenever it is damaged it rolls
+		//a separate d20 (17+) and locks to the forward 330..30 - and because a turret is one mount,
+		//a jam on either linked weapon restricts both. See Weapon::testArcRestriction.
+		$turretShredderA = new AntimatterShredder(4, 0, 0, 0, 360);
+		$turretShredderA->linkedFiringGroup = 'Turret 1';
+		$turretShredderA->linkedFiringSpread = 60;
+		$turretShredderA->setArcRestriction(330, 30);
+		$this->addPrimarySystem($turretShredderA);
+		$turretShredderB = new AntimatterShredder(4, 0, 0, 0, 360);
+		$turretShredderB->linkedFiringGroup = 'Turret 2';
+		$turretShredderB->linkedFiringSpread = 60;
+		$turretShredderB->setArcRestriction(330, 30);
+		$this->addPrimarySystem($turretShredderB);
+		$turretCannonA = new AntimatterCannon(4, 0, 0, 0, 360);
+		$turretCannonA->linkedFiringGroup = 'Turret 1';
+		$turretCannonA->linkedFiringSpread = 60;
+		$turretCannonA->setArcRestriction(330, 30);
+		$this->addPrimarySystem($turretCannonA);
+		$cannon = new AntimatterCannon(4, 0, 0, 0, 360);
+		$cannon->setArcRestriction(330, 30);
+		$this->addPrimarySystem($cannon);
+		$turretCannonB = new AntimatterCannon(4, 0, 0, 0, 360);
+		$turretCannonB->linkedFiringGroup = 'Turret 2';
+		$turretCannonB->linkedFiringSpread = 60;
+		$turretCannonB->setArcRestriction(330, 30);
+		$this->addPrimarySystem($turretCannonB);
 
         $thrust = new GraviticThruster(5, 20, 0, 10, 1);
 		$thrust->startArc = 300;

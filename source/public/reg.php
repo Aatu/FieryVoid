@@ -34,14 +34,22 @@ if (isset($_POST["user"]) && isset($_POST["pass"]) && isset($_POST["pass2"])){
 
         if ($result === true){
             $userid = Manager::authenticatePlayer($_POST["user"], $_POST["pass"]);
-	
-            if ($userid != false){
+
+            // authenticatePlayer() returns an array on success, or one of the
+            // sentinel strings 'USER_NOT_FOUND' / 'WRONG_PASSWORD'. Both are
+            // truthy, so only an array may be indexed.
+            if (is_array($userid)){
                 $_SESSION["user"] = $userid['id'];
                 $_SESSION["access"] = $userid['access'];
                 header('Location: games.php');
+            }else{
+                $error = "<span style='color: red; margin-left: 3px'>Account created, but automatic login failed. Please <a href='index.php'>log in</a>.</span>";
             }
         }else if ($result === null){
             $error = "An internal server error occurred!";
+        }else if (is_string($result)){
+            // Username failed validation - the message is already HTML-encoded.
+            $error = "<span style='color: red; margin-left: 3px'>" . $result . "</span>";
         }else{
             $error = "<span style='color: red; margin-left: 3px'>That username is already taken!</span>";
         }
@@ -92,7 +100,11 @@ if (isset($_POST["user"]) && isset($_POST["pass"]) && isset($_POST["pass2"])){
 
 				<tr class="reg-input-row">
                     <td><label for="user">Username:</label></td>
-                    <td><input class="reg-input-field" type="text" name="user" id="user"></input></td>
+                    <td><input class="reg-input-field" type="text" name="user" id="user"
+                               minlength="<?php echo Manager::USERNAME_MIN_LENGTH; ?>"
+                               maxlength="<?php echo Manager::USERNAME_MAX_LENGTH; ?>"
+                               pattern="<?php echo htmlspecialchars(Manager::USERNAME_PATTERN, ENT_QUOTES); ?>"
+                               title="Letters, numbers, spaces and . _ - only"></input></td>
                 </tr>
 				<tr class="reg-input-row">
                     <td><label for="pass">Password:</label></td>

@@ -15,7 +15,25 @@ window.ShipWindowManager = (function () {
         if (window.gamedata && window.gamedata.gamephase === -2) {
             return ship.userid == 0;
         }
-        return ship.team === window.gamedata.getPlayerTeam();
+
+        var myTeam = window.gamedata.getPlayerTeam();
+
+        /*VIEWER NOT IN THE GAME (2026-07-23 user report: "all windows open on the right and
+          only one can be open at once"). getPlayerTeam() returns UNDEFINED whenever no slot
+          matches the viewer - a spectator, an admin looking at someone else's game, or a
+          replay whose thisplayer never got set (gamedata.js:1987 skips the assignment when
+          gamedata.replay). Every ship then failed `ship.team === myTeam`, so every window
+          docked RIGHT and one-window-per-side collapsed to a single window.
+          Mirror gamedata.isMyOrTeamOneShip (gamedata.js): in game, own team is left; with no
+          viewer team, team 1 is the left/first side. Keeping the two in step means the
+          window docks on the side its team colour already implies.
+          Loose == throughout (as getPlayerTeam's own slot test uses): team ids arrive as
+          JSON and a string/int drift must never re-split the windows.*/
+        if (myTeam === undefined || myTeam === null) {
+            return ship.team == 1;
+        }
+
+        return ship.team == myTeam;
     }
 
     function ShipWindowManager(uiManager) {

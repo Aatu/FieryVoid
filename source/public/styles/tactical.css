@@ -969,6 +969,12 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     color: rgba(255, 166, 0, 0.781);
 }
 
+/* Shield-projection absorption line. Unscoped so it colours both the live replay
+   log (#log) and the printed turn log (#LogActual). */
+.shieldabsorb {
+    color: #6fb7ff;
+}
+
 #log .shiplink {
     color: #deebff;
 }

@@ -121,18 +121,28 @@ const StatLabel = styled.span`
 const StatValue = styled.span`
     font-family: ${theme.fonts.mono};
     font-size: 10px;
-    color: ${theme.colors.text};
+    /*$changed: this turn's live cost differs from the ship's own blueprint figure -
+      attached ships, docked LCVs, a reversing submarine (user request 2026-07-26).
+      Flagged in the custom-content yellow so a modified cost is never misread as the
+      hull's own stat.*/
+    color: ${props => props.$changed ? theme.colors.custom : theme.colors.text};
     margin-right: 5px;
 `;
 
 /*Manoeuvre block, styled as a sibling of the ctrl buttons and the datasheet panels
-  opposite - same 150px width (feedback 2026-07-17: chrome columns symmetric).*/
+  opposite - same 150px width (feedback 2026-07-17: chrome columns symmetric).
+  $bare (game.php Ship Stats popup, user request 2026-07-26): rows only. The popup already
+  has PopupHolder's frame and drops from a button that says "Ship Stats", so the panel's
+  own border and title bar were both saying it twice. Width is kept so the label/value
+  columns sit exactly where they do in the lobby block.*/
 const StatsPanel = styled.div`
     width: 150px;
     box-sizing: border-box;
+    ${props => props.$bare ? `
+    padding: 0;` : `
     background-color: ${theme.colors.panelBgGlass};
     border: 1px dotted ${theme.colors.line};
-    padding: 2px 4px 3px;
+    padding: 2px 4px 3px;`}
 `;
 
 const StatsTitle = styled.div`
@@ -160,8 +170,11 @@ const StatsTitle = styled.div`
 /*Small CSS bar-graph glyph left of the "Ship Stats" title so the title lines up with
   the Hit Chart button's ⊕ directly above it (user request 2026-07-18). Drawn in CSS
   rather than an emoji to stay monochrome and match the chrome; sized to the 12px
-  CtrlIcon footprint so "Ship Stats" starts at the same x as "Hit Chart".*/
-const StatsIcon = styled.span`
+  CtrlIcon footprint so "Ship Stats" starts at the same x as "Hit Chart".
+  Exported because game.php's Ship Stats control button reuses the exact same glyph
+  (user request 2026-07-26) - one definition, so the button and the block it opens can
+  never drift apart.*/
+export const StatsIcon = styled.span`
     display: inline-flex;
     align-items: flex-end;
     justify-content: center;
@@ -234,21 +247,115 @@ const EnhArea = styled.div`
 //legacy parity: TC/TD to two decimals, Profile as defense * 5, Ini raw
 const fix2 = (value) => (typeof value === 'number' ? value.toFixed(2) : value);
 
+const profileText = (front, side) => (front * 5) + '/' + (side * 5);
+
+//"<thrust> (<rate>)" - the ship tooltip's turn-cost format
+const costText = (thrust, rate) => thrust + ' (' + fix2(rate) + ')';
+
+/*The ship's stats AS THEY STAND THIS TURN, for the game.php Ship Stats popup (user
+  request 2026-07-26; the lobby has no game state and keeps the blueprint figures it
+  always showed). Every entry is paired with a `*Changed` flag - true when the live figure
+  differs from the ship's own blueprint one - which the renderer paints in the custom
+  yellow. A stat the SERVER already sends modified (an enhancement-raised initiative, a
+  crit-changed rate) is not "changed" by that test and correctly isn't flagged: it IS the
+  ship's current stat, and the delta this highlights is the transient one.
+
+  Deliberately NOT live: Accel/decel, Pivot and Roll are flat thrust costs the client
+  engine never modifies for ships - combat pivot (x1.5) exists only in the firing phase,
+  which only flights may pivot in (movement.canPivot), and game flight windows carry no
+  control block at all.*/
+const liveShipStats = (ship) => {
+    const manager = window.shipManager;
+    if (!manager) return null;
+
+    const stats = {};
+
+    /*PROFILE. The ProfileIncreased critical (marine sabotage, sensor/computer loss) adds
+      +1 to EVERY hit-location profile, exactly as weapon.php does at resolution time
+      (`$defence += $targetCnC->hasCritical("ProfileIncreased")`) - the crit rides the CnC
+      and each one is worth 5%. Deliberately EW-FREE (user request 2026-07-26): defensive
+      EW is a per-shot modifier applied on top, not a change to the hull's own profile.
+      The map tooltip's "Defence (F/S)" remains the place to read the EW-modified number.*/
+    const cnc = manager.systems ? manager.systems.getSystemByName(ship, "CnC") : null;
+    const profileMod = (cnc && manager.criticals)
+        ? manager.criticals.hasCritical(cnc, "ProfileIncreased")
+        : 0;
+    stats.profile = profileText(ship.forwardDefense + profileMod, ship.sideDefense + profileMod);
+    stats.profileChanged = profileMod !== 0;
+
+    /*INITIATIVE. Nothing to recompute: the server hands us the delta ready-made.
+      `iniativeadded` is (this turn's bonus + common modifiers) - the blueprint bonus,
+      filled in by ShipClasses::onConstructed expressly "for display to player". It covers
+      the sub-speed-5 penalty, the CnC criticals (comms disrupted, reduced initiative,
+      tractor-held, hangar ops, LCV launched) and per-hull rules alike. It is non-zero for
+      most ships most turns - the speed penalty alone is -10 per point under speed 5 - so
+      expect this row to be yellow far more often than the others.*/
+    const iniMod = ship.iniativeadded || 0;
+    stats.initiative = (ship.iniativebonus || 0) + iniMod;
+    stats.initiativeChanged = iniMod !== 0;
+
+    /*TURN COST / TURN DELAY. Arithmetic mirrors the ship tooltip's (UI/ShipTooltip.js,
+      itself a copy of movement.js calculateRequiredThrust) so the two readouts can never
+      disagree: `ceil(speed x rate)` THRUST, a turn never costing less than 1, plus a flat
+      +1 per docked LCV; the rate from getTurnCost/getTurnDelayCost already carries any
+      attached ships; a submarine reversing pays 1.33x on the turn (but not the delay).
+      Skipped when the engine or the ship's movement history is missing - every figure
+      derives from the last committed move - leaving the blueprint rates on show.*/
+    const move = manager.movement;
+    if (move && typeof move.getTurnCost === 'function' && ship.movement && ship.movement.length > 0) {
+        const speed = move.getSpeed(ship);
+        const lcv = move.getDockedLcvTurnSurcharge(ship);
+
+        const delayRate = move.getTurnDelayCost(ship);
+        //turn rate first, THEN the sub penalty, THEN the speed multiply - the tooltip's
+        //exact operand order, so no float rounding can flip a ceil() between the two
+        let turnRate = move.getTurnCost(ship);
+        if (ship.submarine && move.isGoingBackwards(ship)) turnRate = turnRate * 1.33;
+
+        const turnCost = Math.max(1, Math.ceil(speed * turnRate)) + lcv;
+        const turnDelay = Math.ceil(speed * delayRate) + lcv;
+
+        /*thrust for this turn, with the rate it came from in parens - the ship tooltip's
+          format. One deliberate divergence: the parenthesised turn rate here is the
+          EFFECTIVE one (post sub-reversing 1.33x), so the row's own arithmetic reads
+          straight; the tooltip prints the unmodified rate beside the modified thrust.*/
+        stats.turnCost = costText(turnCost, turnRate);
+        stats.turnDelay = costText(turnDelay, delayRate);
+
+        /*Highlight test compares the WHOLE rendered string against the one the hull's own
+          rate alone would produce (no attached ships, no docked LCVs, no sub penalty).
+          Comparing only the thrust missed the Primus-with-attached-claw case (game 4072,
+          user report 2026-07-26): a rate raised from e.g. 1.33 to 1.83 can still ceil() to
+          the same thrust at low speed, so the row displayed a changed rate in plain white.
+          Speed is common to both sides, so speed alone still can never light the row up.*/
+        stats.turnCostChanged = stats.turnCost !== costText(Math.max(1, Math.ceil(speed * ship.turncost)), ship.turncost);
+        stats.turnDelayChanged = stats.turnDelay !== costText(Math.ceil(speed * ship.turndelaycost), ship.turndelaycost);
+    }
+
+    return stats;
+};
+
 //Bases don't manoeuvre: only their Profile is relevant (feedback 2026-07-17),
 //so the movement rows are dropped for them.
+//`live` (game.php Ship Stats popup): show the stats as they stand THIS turn instead of
+//the blueprint ones, yellowing whatever the game state has moved. Each row falls back to
+//its blueprint figure on its own if the live one couldn't be worked out.
+//`bare`: rows only, no title bar or panel frame - for the popup, whose own frame and
+//button already carry both.
 //            {Boolean(ship.agile) && <AgileRow>Agile ship</AgileRow>} Can re-add if we want the Agile notification here too
-export const ManoeuvreStats = ({ ship }) => {
+export const ManoeuvreStats = ({ ship, live, bare }) => {
     const mobile = !ship.base;
+    const now = live ? liveShipStats(ship) : null;
     return (
-        <StatsPanel>
-            <StatsTitle><StatsIcon><i /><i /><i /></StatsIcon>Ship Stats</StatsTitle>
-            {mobile && <StatRow><StatLabel>Turn cost</StatLabel><StatValue>{fix2(ship.turncost)}</StatValue></StatRow>}
-            {mobile && <StatRow><StatLabel>Turn delay</StatLabel><StatValue>{fix2(ship.turndelaycost)}</StatValue></StatRow>}
+        <StatsPanel $bare={bare}>
+            {!bare && <StatsTitle><StatsIcon><i /><i /><i /></StatsIcon>Ship Stats</StatsTitle>}
+            {mobile && <StatRow><StatLabel>Turn cost</StatLabel><StatValue $changed={Boolean(now && now.turnCostChanged)}>{now && now.turnCost ? now.turnCost : fix2(ship.turncost)}</StatValue></StatRow>}
+            {mobile && <StatRow><StatLabel>Turn delay</StatLabel><StatValue $changed={Boolean(now && now.turnDelayChanged)}>{now && now.turnDelay ? now.turnDelay : fix2(ship.turndelaycost)}</StatValue></StatRow>}
             {mobile && <StatRow><StatLabel>Accel/decel</StatLabel><StatValue>{ship.accelcost}</StatValue></StatRow>}
             {mobile && <StatRow><StatLabel>Pivot</StatLabel><StatValue>{ship.pivotcost}</StatValue></StatRow>}
             {mobile && <StatRow><StatLabel>Roll</StatLabel><StatValue>{ship.rollcost}</StatValue></StatRow>}
-            <StatRow><StatLabel>Profile - Front / Side</StatLabel><StatValue>{ship.forwardDefense * 5}/{ship.sideDefense * 5}</StatValue></StatRow>
-            {mobile && <StatRow><StatLabel>Initiative</StatLabel><StatValue>{ship.iniativebonus}</StatValue></StatRow>}
+            <StatRow><StatLabel>Profile - Front / Side</StatLabel><StatValue $changed={Boolean(now && now.profileChanged)}>{now ? now.profile : profileText(ship.forwardDefense, ship.sideDefense)}</StatValue></StatRow>
+            {mobile && <StatRow><StatLabel>Initiative</StatLabel><StatValue $changed={Boolean(now && now.initiativeChanged)}>{now ? now.initiative : ship.iniativebonus}</StatValue></StatRow>}
 
         </StatsPanel>
     );
@@ -315,7 +422,7 @@ class ShipNotesPanel extends React.Component {
                            lobby resets them from the blueprint on edit, and FtrPetals-style
                            systems mutate them live), so the profile reads the same way as
                            ManoeuvreStats' - user request 2026-07-23*/}
-                        <StatRow><StatLabel>Profile - Front  /Side</StatLabel><StatValue>{ship.forwardDefense * 5}/{ship.sideDefense * 5}</StatValue></StatRow>
+                        <StatRow><StatLabel>Profile - Front / Side</StatLabel><StatValue>{ship.forwardDefense * 5}/{ship.sideDefense * 5}</StatValue></StatRow>
                         <StatRow><StatLabel>Thrust</StatLabel><StatValue>{ship.freethrust}</StatValue></StatRow>
                         <StatRow><StatLabel>Initiative</StatLabel><StatValue>{ship.iniativebonus}</StatValue></StatRow>
                     </Block>

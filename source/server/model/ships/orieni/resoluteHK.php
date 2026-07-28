@@ -27,10 +27,10 @@ class resoluteHK extends MediumShip{
         $this->rollcost = 999;
         $this->pivotcost = 999;
 		
-		$cA = new CargoBay(2, 30);
-		$cB = new CargoBay(2, 30);
-		$cC = new CargoBay(2, 30);
-		$cD = new CargoBay(2, 30);
+		$cA = new CargoBay(2, 29);
+		$cB = new CargoBay(2, 28);
+		$cC = new CargoBay(2, 28);
+		$cD = new CargoBay(2, 29);
 		
 		$cA->displayName = "Cargo Bay A";
 		$cB->displayName = "Cargo Bay B";
@@ -41,7 +41,7 @@ class resoluteHK extends MediumShip{
         $this->addPrimarySystem(new CnC(4, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 11, 2, 4));
         $this->addPrimarySystem(new Engine(3, 16, 0, 8, 3));
-		$this->addPrimarySystem(new Hangar(1, 4, 1));
+		$this->addPrimarySystem(new Hangar(1, 10, 1));
 		$this->addPrimarySystem(new Thruster(2, 13, 0, 4, 3));
 		$this->addPrimarySystem(new Thruster(2, 13, 0, 4, 4));
 		

@@ -263,6 +263,176 @@ window.weaponManager = {
         return false;
     },
 
+    //Smallest angular separation (0-180 deg) between two units as seen from a common observer.
+    //Used by the firing-link "within N degrees" rule (Vree linked primaries).
+    getBearingSeparation: function getBearingSeparation(observer, unitA, unitB) {
+        var a = mathlib.getCompassHeadingOfShip(observer, unitA);
+        var b = mathlib.getCompassHeadingOfShip(observer, unitB);
+        return weaponManager.getHeadingSeparation(a, b);
+    },
+
+    //Smallest angular separation (0-180 deg) between two compass headings.
+    getHeadingSeparation: function getHeadingSeparation(a, b) {
+        var diff = Math.abs(a - b) % 360;
+        return diff > 180 ? 360 - diff : diff;
+    },
+
+    //Compass heading, as seen from $firingUnit, of whatever a fire order is AIMED AT — a target
+    //ship (targetid > 0) or the target HEX of a hex-targeted order (targetid -1 with x/y set,
+    //e.g. Antimatter Shredder mode 1). Null if the order aims at neither (self-intercept, or a
+    //target ship that is no longer in gamedata).
+    //
+    //This is what lets the firing-link rule treat a hex order like any other: a turret is one
+    //mount, so where its hex-targeting weapon is pointed constrains its mate exactly as a ship
+    //target would, and vice versa. Before this, hex orders were skipped entirely and a Vree
+    //turret's Shredder and Cannon could point in completely opposite directions.
+    getFireOrderBearing: function getFireOrderBearing(firingUnit, fo) {
+        if (!fo) return null;
+        if (fo.targetid > 0) {
+            var target = gamedata.getShip(fo.targetid);
+            return target ? mathlib.getCompassHeadingOfShip(firingUnit, target) : null;
+        }
+        if (fo.x !== undefined && fo.x !== null && fo.y !== undefined && fo.y !== null) {
+            return mathlib.getCompassHeadingOfPoint(
+                shipManager.getShipPosition(firingUnit), new hexagon.Offset(fo.x, fo.y));
+        }
+        return null;
+    },
+
+    //Human-readable name for what a fire order is aimed at, for the "blocked" message.
+    getFireOrderAimLabel: function getFireOrderAimLabel(fo) {
+        if (!fo) return 'its paired target';
+        if (fo.targetid > 0) return (gamedata.getShip(fo.targetid) || {}).name || 'its paired target';
+        if (fo.x !== undefined && fo.y !== undefined) return 'the hex at ' + fo.x + ',' + fo.y;
+        return 'its paired target';
+    },
+
+    //Firing-link ("linkedFiringGroup") enforcement, evaluated AT TARGETING TIME (not at commit).
+    //Weapons sharing a non-null linkedFiringGroup ON THE SAME PARENT UNIT constrain each other:
+    //once a sibling in the group has declared a fire order this turn, the others are limited by it.
+    //  - linkedFiringSpread == null : all members must fire at the SAME target unit (Thunderbolt's
+    //                                 twin missile racks).
+    //  - linkedFiringSpread == N    : each member's target must lie within N degrees of every
+    //                                 already-targeted sibling's target, measured from the firing
+    //                                 unit (Vree linked primaries = 60; their 360-degree turrets
+    //                                 mean weapon arcs can't express this restriction themselves).
+    //Scope is per-fighter for flights (each fighter's group is independent, so different fighters in
+    //a flight may pick different targets) and whole-ship otherwise. The FIRST member to declare is
+    //always free.
+    //
+    //HEX ORDERS COUNT, in both directions (angular-spread groups only): a hex-targeted weapon on the
+    //turret (Antimatter Shredder mode 1) both CONSTRAINS its mate and IS CONSTRAINED by it — the
+    //turret is one physical mount, so it can only point one way. Pass `candidateHex` (a hexagon
+    //Offset) instead of `candidateTarget` when the candidate is a hex. Self-intercept orders, and
+    //orders whose target ship has vanished, still never constrain (no resolvable bearing).
+    //The same-unit rule (spread == null, Thunderbolt twin racks) is deliberately left ship-only —
+    //those groups contain no hex weapons and "same target UNIT" has no meaning for a hex.
+    //
+    //Returns null when the candidate is allowed, or an HTML reason string when blocked.
+    getLinkedFiringBlock: function getLinkedFiringBlock(firingUnit, weapon, candidateTarget, candidateHex) {
+        if (!weapon.linkedFiringGroup) return null;
+
+        var siblings;
+        if (firingUnit.flight) {
+            var fighter = shipManager.systems.getFighterBySystem(firingUnit, weapon.id);
+            siblings = fighter ? fighter.systems : [];
+        } else {
+            siblings = firingUnit.systems;
+        }
+
+        var spread = weapon.linkedFiringSpread;
+        var byHex = (candidateHex !== undefined && candidateHex !== null);
+
+        //Bearing of the candidate aim point, measured from the firing unit — the common currency
+        //the spread rule compares in, whether the candidate is a ship or a hex.
+        var candidateBearing = null;
+        if (spread != null) {
+            candidateBearing = byHex
+                ? mathlib.getCompassHeadingOfPoint(shipManager.getShipPosition(firingUnit), candidateHex)
+                : mathlib.getCompassHeadingOfShip(firingUnit, candidateTarget);
+        }
+
+        for (var i in siblings) {
+            var sib = siblings[i];
+            if (!sib || sib.id == weapon.id) continue; //can't link to itself
+            if (sib.linkedFiringGroup !== weapon.linkedFiringGroup) continue;
+
+            for (var j in sib.fireOrders) {
+                var fo = sib.fireOrders[j];
+                if (fo.turn != gamedata.turn || fo.rolled) continue;
+
+                if (spread == null || spread === undefined) {
+                    //Same-target-UNIT rule: ship orders only, and only a ship candidate can satisfy
+                    //or violate it — "the same target UNIT" is meaningless for a hex, so a hex
+                    //candidate is left unconstrained here rather than blocked outright. (No such
+                    //group contains a hex weapon today; this just keeps the rule honest.)
+                    if (byHex || !(fo.targetid > 0)) continue;
+                    if (fo.targetid == candidateTarget.id) continue; //same unit is always allowed
+                    var lockedName = weaponManager.getFireOrderAimLabel(fo);
+                    return "<b>" + weapon.displayName + "</b> must fire at the same target as its paired weapon (<b>" + lockedName + "</b>).";
+                }
+
+                //Angular-spread rule: any order with a resolvable bearing constrains, hex included.
+                if (!byHex && fo.targetid == candidateTarget.id) continue; //same unit is always allowed
+                var sibBearing = weaponManager.getFireOrderBearing(firingUnit, fo);
+                if (sibBearing === null || candidateBearing === null) continue;
+
+                if (weaponManager.getHeadingSeparation(candidateBearing, sibBearing) > spread) {
+                    var aimLabel = weaponManager.getFireOrderAimLabel(fo);
+                    return "<b>" + weapon.displayName + "</b>" + (byHex ? "'s target hex" : "'s target")
+                        + " must be within " + spread + "° of its paired weapon’s target (<b>" + aimLabel + "</b>).";
+                }
+            }
+        }
+        return null;
+    },
+
+    //Bearing (from $firingUnit) of the first live order declared this turn by a system — ship
+    //target OR target hex. Null if the system has no such order.
+    getFirstLiveOrderBearing: function getFirstLiveOrderBearing(firingUnit, system) {
+        if (!system || !system.fireOrders) return null;
+        for (var j in system.fireOrders) {
+            var fo = system.fireOrders[j];
+            if (fo.turn != gamedata.turn || fo.rolled) continue;
+            var bearing = weaponManager.getFireOrderBearing(firingUnit, fo);
+            if (bearing !== null) return bearing;
+        }
+        return null;
+    },
+
+    //The BEARING this weapon's linked group is committed to this turn — from THIS weapon's own
+    //declared order if it has one, otherwise from a sibling's (same linkedFiringGroup, same parent
+    //unit). Null if no member has declared. For an angular-spread group this is the centre of the
+    //weapon's reduced allowed arc. Used by ShipIcon.showWeaponArc to draw the reduced arc on hover -
+    //both for a sibling-locked weapon AND for a weapon that has itself locked a firing order. (Groups
+    //are two-weapon turrets in practice, so the first committed member is the relevant one.)
+    //A bearing rather than a target ship, so a hex-targeted order (Antimatter Shredder mode 1)
+    //centres the wedge just as a ship target does.
+    getLinkedGroupDeclaredBearing: function getLinkedGroupDeclaredBearing(firingUnit, weapon) {
+        if (!weapon.linkedFiringGroup) return null;
+
+        //Prefer this weapon's own committed order, so a locked weapon shows the wedge on its own aim.
+        var own = weaponManager.getFirstLiveOrderBearing(firingUnit, weapon);
+        if (own !== null) return own;
+
+        var siblings;
+        if (firingUnit.flight) {
+            var fighter = shipManager.systems.getFighterBySystem(firingUnit, weapon.id);
+            siblings = fighter ? fighter.systems : [];
+        } else {
+            siblings = firingUnit.systems;
+        }
+
+        for (var i in siblings) {
+            var sib = siblings[i];
+            if (!sib || sib.id == weapon.id) continue;
+            if (sib.linkedFiringGroup !== weapon.linkedFiringGroup) continue;
+            var b = weaponManager.getFirstLiveOrderBearing(firingUnit, sib);
+            if (b !== null) return b;
+        }
+        return null;
+    },
+
     //Is this firing mode actually fireable? A mode whose entire fireControlArray
     //entry is null (e.g. AMMO_DUM Dummy Missiles) can never fire, so it must not
     //count as live ammo. Detect by null FC rather than by mode name so any future
@@ -709,6 +879,12 @@ window.weaponManager = {
                     } else if (weapon.hextarget) {
                         // Don't show hit chance if targeting the hex.
                         $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hexTargeted"> Hex Targeted</span></div>').appendTo(f);
+                    } else if (weaponManager.getLinkedFiringBlock(selectedShip, weapon, ship) != null) {
+                        // Firing-linked weapon: this target is disallowed by a sibling's existing order
+                        // (a different unit, or outside the group's angular spread). Shown while aiming
+                        // so the restriction is visible before the click; the click itself is blocked
+                        // with the full reason in targetShip.
+                        $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="cannotTarget"> Linked Firing</span></div>').appendTo(f);
                     } else {
                         // LOS is not blocked, not hex targeted, show normal hit chance info, check Sweeping weapons first.
                         if (calledid != null && !weaponManager.canWeaponCall(weapon)) {
@@ -2383,6 +2559,7 @@ window.weaponManager = {
 
         var toUnselect = [];
         var splitTargeted = [];
+        var linkedWarned = {}; //firing-link groups already warned about this click (one popup per group)
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
 
@@ -2495,6 +2672,21 @@ window.weaponManager = {
                 debug && console.log("is on arc");
                 if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
                     debug && console.log("is in range");
+
+                    //Firing-link guard: a linked weapon's target is constrained by any sibling in its
+                    //group that has already declared (same target for Thunderbolt; within N degrees
+                    //for Vree). Placed here - after the arc/range pass - so we never nag when this
+                    //weapon couldn't have fired at the clicked unit anyway. The same-pass select-all
+                    //case is fine: the first sibling declares, the rest are then measured against it.
+                    var linkBlock = weaponManager.getLinkedFiringBlock(selectedShip, weapon, ship);
+                    if (linkBlock) {
+                        if (!linkedWarned[weapon.linkedFiringGroup]) {
+                            linkedWarned[weapon.linkedFiringGroup] = true;
+                            confirm.warning(linkBlock);
+                        }
+                        continue;
+                    }
+
                     if (weapon.hasSpecialTargeting) {
                         //Weapons that need a bespoke targeting flow (e.g. Hypergraviton Blaster's
                         //transfer-target ordering window) handle their own fire-order creation in
@@ -2658,10 +2850,11 @@ window.weaponManager = {
     targetHex: function targetHex(selectedShip, hexpos) {
         if (shipManager.isDestroyed(selectedShip)) return;
         if (!selectedShip.flight && shipManager.isDisabled(selectedShip)) return;
-        var hidden = weaponManager.isHidden(selectedShip); //Block invisible ships from firing where appropriate.        
+        var hidden = weaponManager.isHidden(selectedShip); //Block invisible ships from firing where appropriate.
 
         var toUnselect = Array();
         var splitTargeted = [];
+        var linkedWarned = {}; //one firing-link warning per group, not per weapon
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
 
@@ -2703,6 +2896,21 @@ window.weaponManager = {
             }
 
             if (weaponManager.checkConflictingFireOrder(selectedShip, weapon)) {
+                continue;
+            }
+
+            //Firing-link guard for HEX targeting — the mirror of the one in targetShip. A turret is
+            //one mount, so a hex-targeting weapon (Antimatter Shredder mode 1) must aim within its
+            //group's spread of whatever its mate has already declared, ship or hex alike. Without
+            //this a jammed Vree turret could shell a hex behind the ship while its cannon fired
+            //forward. Placed after the phase/conflict guards and before the arc test so we only
+            //nag about weapons that were otherwise eligible.
+            var linkBlock = weaponManager.getLinkedFiringBlock(selectedShip, weapon, null, hexpos);
+            if (linkBlock) {
+                if (!linkedWarned[weapon.linkedFiringGroup]) {
+                    linkedWarned[weapon.linkedFiringGroup] = true;
+                    confirm.warning(linkBlock);
+                }
                 continue;
             }
 
@@ -3280,6 +3488,9 @@ window.weaponManager = {
 
 
     getAllPreFireOrdersForDisplayingAgainst: function getAllPreFireOrdersForDisplayingAgainst(target) {
+        //one reverse map for every order resolved against this target, instead of one full
+        //fleet sweep per order - see the note above getDamagesCausedBy
+        var damageIndex = weaponManager.buildDamageIndex(gamedata.ships);
         return gamedata.ships.reduce(function (fires, shooter) {
             return fires.concat(weaponManager.getAllFireOrders(shooter).filter(function (fire) {
                 return fire.targetid === target.id && (fire.type === "prefiring");
@@ -3297,7 +3508,7 @@ window.weaponManager = {
                 shooter: shooter,
                 weapon: shipManager.systems.getSystem(shooter, fireOrder.weaponid),
                 targetSystem: shipManager.systems.getSystem(target, fireOrder.calledid),
-                damagesCaused: weaponManager.getDamagesCausedBy(fireOrder).reduce(function (damages, damage) {
+                damagesCaused: weaponManager.getDamagesCausedBy(fireOrder, null, null, damageIndex).reduce(function (damages, damage) {
                     return damages.concat(damage.damages);
                 }, []).map(function (damage) {
                     return {
@@ -3321,6 +3532,9 @@ window.weaponManager = {
     },
 
     getAllFireOrdersForDisplayingAgainst: function getAllFireOrdersForDisplayingAgainst(target) {
+        //one reverse map for every order resolved against this target, instead of one full
+        //fleet sweep per order - see the note above getDamagesCausedBy
+        var damageIndex = weaponManager.buildDamageIndex(gamedata.ships);
         return gamedata.ships.reduce(function (fires, shooter) {
             return fires.concat(weaponManager.getAllFireOrders(shooter).filter(function (fire) {
                 return fire.targetid === target.id && (fire.type === "normal" || fire.type === "ballistic");
@@ -3338,7 +3552,7 @@ window.weaponManager = {
                 shooter: shooter,
                 weapon: shipManager.systems.getSystem(shooter, fireOrder.weaponid),
                 targetSystem: shipManager.systems.getSystem(target, fireOrder.calledid),
-                damagesCaused: weaponManager.getDamagesCausedBy(fireOrder).reduce(function (damages, damage) {
+                damagesCaused: weaponManager.getDamagesCausedBy(fireOrder, null, null, damageIndex).reduce(function (damages, damage) {
                     return damages.concat(damage.damages);
                 }, []).map(function (damage) {
                     return {
@@ -3407,39 +3621,134 @@ window.weaponManager = {
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
     },
 
-    getDamagesCausedBy: function getDamagesCausedBy(fire, damages, ships = null) {
+    /* ---- damage lookup by fire order -------------------------------------------------
+       getDamagesCausedBy answers "what did this shot do" by sweeping every ship, system and
+       fighter subsystem for entries stamped with the fire order's id. That is fine for a
+       one-off lookup, but the replay and log paths ask it once per fire order, so a turn with
+       many shots re-walks the whole fleet hundreds of times. A caller that is about to process
+       a BATCH of fire orders can build the reverse map once with buildDamageIndex() and pass it
+       in; the sweep is kept intact as the fallback, so any caller that passes no index behaves
+       exactly as before.
+
+       An index is deliberately never cached across calls. gamedata.setShipsFromJson rebuilds
+       ship objects in place on every poll (the ships ARRAY keeps its identity, so an array-keyed
+       cache would silently go stale), and a couple of display paths re-point system.damage at a
+       parent weapon's array (SystemIcon / shipwindow). Every index built here therefore lives
+       and dies inside one synchronous pass over data that cannot change underneath it. */
+
+    // Map key for a fire order id. The sweep compares with == so a numeric id and its string
+    // form match; String() reproduces that for every id shape in play (ints from the server,
+    // client-side composite strings like "12_3_1"). Real keys carry an "id:" prefix so the
+    // nullish key can never collide with an id that stringifies to the same word - this codebase
+    // does put the literal string "null" in fire orders (FireOrder.x/y). null and undefined
+    // share one key because null == undefined is true.
+    damageIndexKey: function damageIndexKey(fireorderid) {
+        if (fireorderid === null || fireorderid === undefined) return "nullish";
+        return "id:" + String(fireorderid);
+    },
+
+    // fire order id -> [{ship, damages}], ships in iteration order and each ship's entries in
+    // the same order the sweep would have collected them (system order, own damage before
+    // fighter-subsystem damage). One pass instead of one pass per fire order.
+    buildDamageIndex: function buildDamageIndex(ships) {
+        var shipsToIterate = ships || gamedata.ships;
+        var index = new Map();
+
+        function record(ship, d) {
+            var key = weaponManager.damageIndexKey(d.fireorderid);
+            var perShip = index.get(key);
+            if (!perShip) {
+                perShip = [];
+                index.set(key, perShip);
+            }
+            // a ship is walked to completion before the next one starts, so all of its entries
+            // for a given key are contiguous - the last bucket is this ship's if it has one
+            var bucket = perShip.length > 0 ? perShip[perShip.length - 1] : null;
+            if (!bucket || bucket.ship !== ship) {
+                bucket = { ship: ship, damages: [] };
+                perShip.push(bucket);
+            }
+            bucket.damages.push(d);
+        }
+
+        for (var i in shipsToIterate) {
+            var ship = shipsToIterate[i];
+            for (var a in ship.systems) {
+                var system = ship.systems[a];
+                for (var b in system.damage) record(ship, system.damage[b]);
+                if (system.fighter) {
+                    for (var c in system.systems) {
+                        var fighterSystem = system.systems[c];
+                        for (var e in fighterSystem.damage) record(ship, fighterSystem.damage[e]);
+                    }
+                }
+            }
+        }
+
+        return index;
+    },
+
+    getDamagesCausedBy: function getDamagesCausedBy(fire, damages, ships = null, index = null) {
 
         if (!damages) {
             damages = [];
         }
 
-        var shipsToIterate = ships || gamedata.ships;
+        var matches;
 
-        for (var i in shipsToIterate) {
-            var ship = shipsToIterate[i];
-            var list = Array();
+        if (index) {
+            matches = index.get(weaponManager.damageIndexKey(fire.id)) || [];
+        } else {
+            matches = [];
+            var shipsToIterate = ships || gamedata.ships;
 
-            for (var a in ship.systems) {
-                var system = ship.systems[a];
-                for (var b in system.damage) {
-                    var d = system.damage[b];
-                    if (d.fireorderid == fire.id) {
-                        list.push(d);
+            for (var i in shipsToIterate) {
+                var ship = shipsToIterate[i];
+                var list = Array();
+
+                for (var a in ship.systems) {
+                    var system = ship.systems[a];
+                    for (var b in system.damage) {
+                        var d = system.damage[b];
+                        if (d.fireorderid == fire.id) {
+                            list.push(d);
+                        }
+                    }
+                    // A flight carries its defensive systems on the individual craft, and a
+                    // capacity-pool absorber (Shield Projection) records what it soaked as a damage
+                    // entry on ITSELF. Those entries live one level down, so without this the combat
+                    // log reported a fully absorbed shot against a flight as "damaged for 0". Same
+                    // fighter recursion as shipManager.systems.getSystem.
+                    if (system.fighter) {
+                        for (var c in system.systems) {
+                            var fighterSystem = system.systems[c];
+                            for (var e in fighterSystem.damage) {
+                                var fd = fighterSystem.damage[e];
+                                if (fd.fireorderid == fire.id) {
+                                    list.push(fd);
+                                }
+                            }
+                        }
                     }
                 }
-            }
 
-            if (list.length > 0) {
-                var found = false;
-                for (var a in damages) {
-                    var entry = damages[a];
-                    if (entry.ship.id == ship.id) {
-                        found = true;
-                        entry.damages = entry.damages.concat(list);
-                    }
-                }
-                if (!found) damages.push({ ship: ship, damages: list });
+                if (list.length > 0) matches.push({ ship: ship, damages: list });
             }
+        }
+
+        for (var m = 0; m < matches.length; m++) {
+            var match = matches[m];
+            var found = false;
+            for (var f in damages) {
+                var entry = damages[f];
+                if (entry.ship.id == match.ship.id) {
+                    found = true;
+                    entry.damages = entry.damages.concat(match.damages);
+                }
+            }
+            // copy: the caller owns what it gets back, and a shared index must stay intact for
+            // the next fire order in the batch
+            if (!found) damages.push({ ship: match.ship, damages: match.damages.slice() });
         }
 
         return damages;

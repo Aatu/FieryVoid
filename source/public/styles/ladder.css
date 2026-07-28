@@ -1,263 +1,692 @@
-/* Ladder Modal */
-#ladderModal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.8);
+/*
+ * ladder.css — the Online Ladder window (ladder.php + client/ladder.js).
+ *
+ * Linked by games.php and creategame.php, which both include ladder.php.
+ *
+ * The window mirrors the Recent Games window (recentgames.php, styled in
+ * gamesPanel.css): the same overlay, panel, Orbitron title, dim subtitle, control row,
+ * monospace count line and divided scrolling body — and the same card grammar applied
+ * to table rows. Square 1px internals, uppercase letter-spaced micro-labels, monospace
+ * tabular numerals, and the green "this one is yours" rail on your own standings row.
+ *
+ * Everything here is scoped inside #ladderModal / .ladder-modal-content except the
+ * .btn-ladder-inline family, which creategame.php also uses outside the window.
+ */
+
+/* ── Tokens ────────────────────────────────────────────────────────────────────
+   A copy of the subset gamesPanel.css :root defines, with identical values. It is a
+   copy on purpose: creategame.php includes ladder.php but links only ladder.css, so
+   this window has to paint itself with no other stylesheet present. On games.php
+   gamesPanel.css loads after this file and re-declares the same values, so the two
+   never disagree in practice — but they do have to be retuned together. */
+:root {
+  --fv-well: #04161c;                 /* theme.colors.panelBg */
+  --fv-card: #0a1c26;
+  --fv-card-hover: #102a36;
+
+  --fv-line: #215a7a;                 /* the landing page's border */
+  --fv-line-soft: #1a3f55;
+  --fv-line-scs: #496791;             /* theme.colors.line */
+  --fv-rule: #1e3a4a;                 /* the divider under a modal's control bar */
+
+  --fv-text: #deebff;
+  --fv-text-dim: #8ca5c0;             /* theme.colors.textDim */
+  --fv-accent: #8bcaf2;
+
+  --fv-mine: #52b352;
+  --fv-mine-soft: #7ed576;
+  --fv-ladder: #e6ac00;
+  --fv-ended: #b76662;
+
+  --fv-mono: Consolas, "Lucida Console", monospace;   /* theme.fonts.mono */
+  --fv-display: "Orbitron", sans-serif;               /* @imported by gamesNew.css */
 }
 
+/* gamesNew.css opens with `* { font-family: Arial }`, and a universal selector matches
+   every element DIRECTLY — a direct match beats an inherited display face regardless of
+   specificity, so nested spans snap back to Arial even when their parent sets Orbitron.
+   Neutralised once here for the whole window. MUST stay above the rules that assign
+   faces: they are the same specificity, so source order decides. */
+.ladder-modal-content * {
+  font-family: inherit;
+}
+
+.ladder-modal-content input,
+.ladder-modal-content select,
+.ladder-modal-content textarea,
+.ladder-modal-content button,
+.ladder-table-scroll,
+.ladder-modal-content .ladder-input {
+  box-sizing: border-box;
+}
+
+/* ── Shell ────────────────────────────────────────────────────────────────────
+   Same geometry as .fv-modal / .fv-modal-panel. `display: none` stays, because
+   ladder.js opens and closes the window with jQuery .show() / .hide(). */
+#ladderModal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  overflow: auto;
+  padding: 40px 16px;
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+/* max-width was 800px at `width: 80%`. The percentage is gone — the overlay's own
+   padding is the gutter now, so narrow screens stop wasting 20% of themselves — and the
+   cap moves to 900px so the 300px calculator column stops squeezing the table. Still
+   narrower than Recent Games' 1040px, which needs the width for a two-up card grid. */
 .ladder-modal-content {
-    background-color: #04161C;
-    margin: 5% auto;
-    padding: 20px;
-    border: 1px solid #496791;
-    width: 80%;
-    max-width: 800px;
-    color: #DEEBFF;
+  position: relative;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 18px 20px 16px;
+  background-color: var(--fv-well);
+  border: 1px solid var(--fv-line-scs);
+  color: var(--fv-text);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.ladder-modal-title {
+  font-family: var(--fv-display);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  margin: 0 0 3px;
+}
+
+.ladder-modal-sub {
+  margin: 0 0 12px;
+  font-size: 12.5px;
+  color: var(--fv-text-dim);
 }
 
 .ladder-faq-link a {
-    color: #8bcaf2;
+  color: var(--fv-accent);
 }
 
+.ladder-faq-link a:hover {
+  color: var(--fv-accent);
+  text-decoration: underline;
+}
+
+/* Was a floated <span>; it is a real <button> now, so it is focusable and Enter-able.
+   ladder.js binds it by class through a delegated handler, so nothing there changes. */
 .close-ladder {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  background: none;
+  border: 0;
+  padding: 0 4px;
+  font-size: 26px;
+  line-height: 1;
+  color: #8296a8;
+  cursor: pointer;
 }
 
 .close-ladder:hover,
 .close-ladder:focus {
-    color: #fff;
-    text-decoration: none;
-    cursor: pointer;
+  color: #fff;
+  text-decoration: none;
+  cursor: pointer;
 }
 
-/* Layout */
+.close-ladder:focus-visible {
+  outline: 2px solid var(--fv-accent);
+  outline-offset: 2px;
+}
+
+/* ── Control row + count line ──────────────────────────────────────────────────
+   Mirrors .fv-controls / .fv-count. The account buttons moved out of the Standings
+   heading and up here, where Recent Games keeps its search and chips. They stay visible
+   in the match-history view, which is correct — they are account actions, not
+   standings actions. */
+.ladder-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.ladder-count {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  margin: 9px 0 0;
+  min-height: 13px;
+  font-family: var(--fv-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.5px;
+  color: var(--fv-text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.ladder-modal-body {
+  margin-top: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--fv-rule);
+}
+
+/* ── Layout ───────────────────────────────────────────────────────────────── */
 .ladder-flex-container {
-    display: flex;
-    gap: 20px;
+  display: flex;
+  gap: 20px;
 }
-
-.ladder-table-scroll {
-    max-height: 60vh;
-    overflow-y: auto;
-    border: 1px solid #334455;
-}
-
-/* Custom Scrollbar for Webkit */
-.ladder-table-scroll::-webkit-scrollbar {
-    width: 8px;
-}
-
-.ladder-table-scroll::-webkit-scrollbar-track {
-    background: #0c151a;
-}
-
-.ladder-table-scroll::-webkit-scrollbar-thumb {
-    background: #2a4a66;
-    border-radius: 4px;
-}
-
-.ladder-table-scroll::-webkit-scrollbar-thumb:hover {
-    background: #3a6a96;
-}
-
 
 .ladder-standings {
-    flex: 1;
+  flex: 1;
+  min-width: 0;                       /* lets the name column's ellipsis engage */
 }
 
 .ladder-calculator {
-    flex: 0 0 300px;
-    padding-left: 20px;
-    border-left: 1px solid #496791;
+  flex: 0 0 300px;
+  padding-left: 20px;
+  border-left: 1px solid var(--fv-rule);
 }
 
-/* Buttons */
-.btn-register-ladder {
-    float: right;
-    font-size: 14px;
-    background: #215a7a;
-    color: #DEEBFF;
-    padding: 5px 10px;
-    cursor: pointer;
-    border-radius: 4px;
-    border: 1px solid #7298a7;
+/* Section heads: the games panel's .fv-col-head, at the size the modal wants. */
+.ladder-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 0 8px;
+  padding: 0 2px 5px;
+  font-family: var(--fv-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--fv-text);
+  border-bottom: 2px solid var(--fv-line);
 }
 
-.btn-remove-account {
-    float: right;
-    font-size: 14px;
-    background: #660000;
-    color: #DEEBFF;
-    padding: 5px 10px;
-    cursor: pointer;
-    border-radius: 4px;
-    border: 1px solid #990000;
+/* A username is identity — it keeps the case it was registered with. */
+.history-player-name {
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  text-transform: none;
+  color: var(--fv-accent);
 }
 
-.btn-remove-account:hover {
-    background: #c00;
+.ladder-table-scroll {
+  max-height: 60vh;
+  overflow-y: auto;
+  border: 1px solid var(--fv-line-soft);
+  border-radius: 5px;
+  background: var(--fv-card);
 }
 
+/* Custom Scrollbar for Webkit — same thin bar as .fv-well / .fv-modal-body */
+.ladder-table-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.ladder-table-scroll::-webkit-scrollbar-track {
+  background: #0c151a;
+}
+
+.ladder-table-scroll::-webkit-scrollbar-thumb {
+  background: #2a4a66;
+  border-radius: 4px;
+}
+
+.ladder-table-scroll::-webkit-scrollbar-thumb:hover {
+  background: #3a6a96;
+}
+
+/* ── Buttons ──────────────────────────────────────────────────────────────────
+   Everything below is scoped to #ladderModal because creategame.php puts
+   .btn-ladder-inline on its own "View Ladder" trigger OUTSIDE this window. That trigger
+   keeps the old look (this block, unchanged, plus createGame.css's overrides, which load
+   after this file on that page). */
 .btn-ladder-inline {
-    display: inline-block;
-    font-size: 13px;
-    background: #215a7a;
-    color: white;
-    padding: 2px 8px;
-    cursor: pointer;
-    border-radius: 4px;
-    border: 1px solid #7298a7;
-    margin-left: 10px;
-    text-decoration: none;
-    width: 100px;
-    text-align: center;
+  display: inline-block;
+  font-size: 13px;
+  background: #215a7a;
+  color: white;
+  padding: 2px 8px;
+  cursor: pointer;
+  border-radius: 4px;
+  border: 1px solid #7298a7;
+  margin-left: 10px;
+  text-decoration: none;
+  width: 100px;
+  text-align: center;
 }
 
-.btn-register-ladder:hover,
-.btn-ladder-inline:hover {
-    background: #2c7da0;
-    color: white;
+/* One family for the window's controls, the same one the games panel's action column and
+   the Recent Games filter chips use: the shaded header-bar fill borrowed from the in-game
+   chrome, uppercase Orbitron micro-caps, square 1px border. Variants tint the fill rather
+   than replacing it, so a destructive or primary action reads as louder without becoming
+   a different kind of object. */
+#ladderModal .btn-register-ladder,
+#ladderModal .btn-remove-account,
+#ladderModal .btn-ladder-inline,
+#ladderModal #btnCalculate,
+#ladderModal #btnPopulateSlots {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 12px;
+  font-family: var(--fv-display);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+  color: var(--fv-text);
+  text-align: center;
+  text-decoration: none;
+  background: rgba(73, 103, 145, 0.25);
+  border: 1px solid var(--fv-line-scs);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
 }
 
-#btnCalculate {
-    width: 100%;
-    padding: 5px;
-    background: #215a7a;
-    color: white;
-    border: none;
-    cursor: pointer;
-    border-radius: 4px;
-    border: 1px solid #7298a7;
+#ladderModal .btn-ladder-inline:hover,
+#ladderModal #btnCalculate:hover {
+  background: rgba(198, 226, 255, 0.14);
+  border-color: var(--fv-accent);
+  color: #fff;
+  text-decoration: none;
 }
 
-#btnCalculate:hover {
-    background: #5b80b0;
+#ladderModal .btn-register-ladder:focus-visible,
+#ladderModal .btn-remove-account:focus-visible,
+#ladderModal .btn-ladder-inline:focus-visible,
+#ladderModal #btnCalculate:focus-visible,
+#ladderModal #btnPopulateSlots:focus-visible {
+  outline: 2px solid var(--fv-accent);
+  outline-offset: 2px;
 }
 
-#btnPopulateSlots {
-    width: 100%;
-    padding: 5px;
-    background: #2a6633;
-    color: white;
-    border: none;
-    cursor: pointer;
-    border-radius: 4px;
-    border: 1px solid #66b266;
+/* Register for Ladder is this window's primary action, so it takes the Create Game
+   green — .fv-btn--create's exact values, copied rather than referenced because
+   gamesPanel.css is not linked by creategame.php. Tint plus a brighter border, not a
+   solid slab, same as #btnPopulateSlots below. */
+#ladderModal .btn-register-ladder {
+  background: rgba(60, 122, 60, 0.54);
+  border-color: #66b266;
+  color: #e6f4e6;
 }
 
-#btnPopulateSlots:hover {
-    background: #3a8a44;
+#ladderModal .btn-register-ladder:hover {
+  background: rgba(82, 179, 82, 0.5);
+  border-color: #8cd48c;
+  color: #fff;
 }
 
-/* Table */
+/* ladder.js disables this button and drops it to 0.5 opacity once you are registered.
+   Holding the idle green here is what stops a dead button lighting up under the cursor. */
+#ladderModal .btn-register-ladder:disabled:hover {
+  background: rgba(60, 122, 60, 0.671);
+  border-color: #66b266;
+  color: #e6f4e6;
+}
+
+#ladderModal .btn-remove-account {
+  background: rgba(150, 40, 40, 0.35);
+  border-color: #a35c5c;
+  color: #f0d2d2;
+}
+
+#ladderModal .btn-remove-account:hover {
+  background: rgba(190, 55, 55, 0.5);
+  border-color: #d08585;
+  color: #fff;
+}
+
+/* The inline "Back" / "View Game" size. */
+#ladderModal .btn-ladder-inline {
+  width: auto;
+  min-width: 86px;
+  margin-left: 0;
+  padding: 4px 10px;
+  font-size: 9px;
+  border-radius: 2px;
+}
+
+/* Back takes the Starter Guide chip's cyan (.quick-links .qk-guide in gamesPanel.css),
+   including that chip's fill formula: 15% of the chip colour idle, 34% on hover, text to
+   white. Two ids, so it outranks the .btn-ladder-inline rules above and below it whatever
+   their order — which is what keeps the "View Game" links in the history table on the
+   neutral fill. Back moves you around the window; those leave it. */
+#ladderModal #btnHistoryBack {
+  background: color-mix(in srgb, #2b9fc4 15%, transparent);
+  border-color: #2b9fc4;
+  color: #7fd3ec;
+}
+
+#ladderModal #btnHistoryBack:hover {
+  background: color-mix(in srgb, #2b9fc4 34%, transparent);
+  border-color: #2b9fc4;
+  color: #fff;
+}
+
+#ladderModal #btnHistoryBack:focus-visible {
+  outline-color: #7fd3ec;
+}
+
+#ladderModal #btnCalculate,
+#ladderModal #btnPopulateSlots {
+  display: flex;
+  width: 100%;
+  min-height: 32px;
+  margin-top: 4px;
+}
+
+/* Keeps the site's green as a tint plus a brighter border, the way the Create Game
+   button does on the games panel, rather than as a solid slab. */
+#ladderModal #btnPopulateSlots {
+  margin-top: 10px;
+  background: rgba(60, 122, 60, 0.671);
+  border-color: #66b266;
+  color: #e6f4e6;
+}
+
+#ladderModal #btnPopulateSlots:hover {
+  background: rgba(82, 179, 82, 0.5);
+  border-color: #8cd48c;
+  color: #fff;
+}
+
+/* ── Tables ───────────────────────────────────────────────────────────────────
+   The rows are the cards of this window, so they take the card's grammar: a name in
+   Orbitron, everything numeric in monospace with tabular figures, hairline separators,
+   and a hover fill. ladder.js used to write these paddings and borders as inline styles
+   on every <td>, which no stylesheet could reach; it now emits the classes below. */
 #ladderTable,
 #ladderHistoryTable {
-    width: 100%;
-    border-collapse: collapse;
+  width: 100%;
+  border-collapse: collapse;
 }
 
+/* Sticky, so the column labels survive a scroll through a long ladder. The solid
+   background layer under the gradient is what makes that readable — it is the same
+   shaded bar as .fv-panel-head on the games page. The underline is an inset shadow and
+   not a border because a collapsed table's borders belong to the table, not the cell,
+   so a sticky cell scrolls away from its own border. */
 #ladderTable th,
 #ladderHistoryTable th {
-    border-bottom: 1px solid #496791;
-    padding: 8px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 8px 8px 7px;
+  vertical-align: middle;
+  font-family: var(--fv-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+  color: #c6e2ff;
+  background: linear-gradient(180deg, rgba(73, 103, 145, 0.58), rgba(73, 103, 145, 0.22)), var(--fv-well);
+  box-shadow: inset 0 -1px 0 #2a6b8f;
 }
 
 #ladderTable th.text-left,
 #ladderHistoryTable th.text-left {
-    text-align: left;
+  text-align: left;
 }
 
 #ladderTable th.text-center,
 #ladderHistoryTable th.text-center {
-    text-align: center;
+  text-align: center;
 }
 
-.ladder-cell {
-    padding: 8px;
-    border-bottom: 1px solid #333;
+/* A row's cells carry three different faces at three different sizes, so they are
+   middle-aligned rather than left on the default `baseline`. Baseline alignment lines up
+   the feet of the glyphs, which with Orbitron beside Consolas beside a bolder Consolas
+   sits the smaller text visibly low in the row; middle centres each cell's box instead.
+   One shared line-height on top of that is what makes every row the same height. */
+.ladder-cell,
+.ladder-cell-center,
+.ladder-rating-cell {
+  padding: 7px 8px;
+  vertical-align: middle;
+  line-height: 1.45;
+  border-bottom: 1px solid var(--fv-line-soft);
+}
+
+.ladder-cell,
+.ladder-cell-center {
+  font-size: 12.5px;
 }
 
 .ladder-cell-center {
-    text-align: center;
-    padding: 8px;
-    border-bottom: 1px solid #333;
+  text-align: center;
 }
 
+/* The card name, at table scale. Not uppercased: these are usernames. Orbitron runs
+   wide and tall for its nominal size, so it sits a touch below the monospace columns
+   rather than matching them. */
+.ladder-name-cell {
+  font-family: var(--fv-display);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  max-width: 0;                       /* with table-layout auto this is what lets a */
+  width: 45%;                         /* long username ellipsise instead of stretching */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Wins / losses / ratio. These were 11px, the smallest text in the window, which is the
+   wrong place to be quiet — they are the numbers the table exists to show (user,
+   2026-07-28). */
+.ladder-num {
+  font-family: var(--fv-mono);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--fv-text-dim);
+}
+
+/* The headline figure of the row, so it stays a step above the rest. */
 .ladder-rating-cell {
-    text-align: center;
-    padding: 8px;
-    border-bottom: 1px solid #333;
-    font-weight: bold;
-    color: #8bcaf2;
+  text-align: center;
+  font-family: var(--fv-mono);
+  font-size: 14.5px;
+  font-weight: bold;
+  font-variant-numeric: tabular-nums;
+  color: var(--fv-accent);
 }
 
+/* Rows are click targets — the standings row copies a rating into the calculator, or
+   opens that player's match history when the calculator is hidden. */
+.ladder-row {
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.ladder-row:hover {
+  background-color: var(--fv-card-hover);
+}
+
+/* Your own row, mirroring .fv-card.is-mine in the Recent Games window: green means
+   "you are in this one". The rail is an inset shadow rather than a border because the
+   table collapses its borders, and the extra left padding keeps the name off it. */
 .ladder-row-highlight {
-    background-color: rgba(33, 90, 122, 0.3);
+  background-color: rgba(82, 179, 82, 0.1);
 }
 
-/* Forms */
+.ladder-row-highlight:hover {
+  background-color: rgba(82, 179, 82, 0.18);
+}
+
+.ladder-row-highlight td:first-child {
+  box-shadow: inset 3px 0 0 var(--fv-mine);
+  padding-left: 12px;
+  color: var(--fv-mine-soft);
+}
+
+/* Match history result column. These were inline colours written by ladder.js. Kept a
+   step below the standings numerals — it is a word, not a figure — but lifted with them
+   so it does not read as a footnote beside a 12.5px game name. */
+.ladder-result {
+  font-family: var(--fv-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.ladder-result--win {
+  color: var(--fv-mine-soft);
+}
+
+.ladder-result--loss {
+  color: var(--fv-ended);
+}
+
+.ladder-result--draw {
+  color: var(--fv-text-dim);
+}
+
+/* Loading / empty rows, mirroring .fv-state. */
+.ladder-state {
+  padding: 26px 10px;
+  text-align: center;
+  font-family: var(--fv-mono);
+  font-size: 12px;
+  color: #6d8496;
+  border-bottom: 0;
+}
+
+/* ── Calculator form ──────────────────────────────────────────────────────────
+   The labels become the same monospace micro-caps as the games panel's data rows, and
+   the fields follow .fv-search — which was itself written to follow .ladder-input, so
+   this closes that loop. */
 .ladder-input-group {
-    margin-bottom: 10px;
+  margin-bottom: 10px;
 }
 
 .ladder-label {
-    display: block;
+  display: block;
+  margin-bottom: 3px;
+  font-family: var(--fv-mono);
+  font-size: 10px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--fv-text-dim);
 }
 
 .ladder-input {
-    width: 100%;
-    padding: 5px;
-    background: #000;
-    color: #fff;
-    border: 1px solid #496791;
+  width: 100%;
+  padding: 6px 8px;
+  background: #000;
+  color: #fff;
+  border: 1px solid var(--fv-line-scs);
+  font-family: var(--fv-mono);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ladder-input:focus-visible {
+  outline: 2px solid var(--fv-accent);
+  outline-offset: 1px;
 }
 
 .ladder-static-value {
-    display: block;
-    padding: 0px;
-    color: #8bcaf2;
-    font-size: 1.2em;
-    font-weight: bold;
+  display: block;
+  padding: 2px 0 0;
+  font-family: var(--fv-mono);
+  font-size: 20px;
+  font-weight: bold;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  color: var(--fv-accent);
 }
 
 .ladder-calc-result {
-    margin-top: 20px;
-    font-weight: bold;
-    text-align: center;
+  margin-top: 16px;
+  font-family: var(--fv-mono);
+  font-size: 12px;
+  line-height: 1.7;
+  font-weight: bold;
+  text-align: center;
 }
 
-.ladder-disclaimer {
-    margin-top: 20px;
-    font-size: 12px;
-    color: #aaa;
-}
-
+/* Was `color: 00ff00` in ladder.js — a missing `#`, so the "opponent receives" line
+   silently rendered in the inherited colour. It is a class now, and green. */
 .bonus-text-green {
-    color: #00ff00;
+  color: var(--fv-mine-soft);
 }
 
 .bonus-text-yellow {
-    color: #ffcc00;
+  color: var(--fv-ladder);
 }
 
 .bonus-subtext {
-    font-size: 12px;
-    color: #aaa;
+  display: inline-block;
+  margin-top: 2px;
+  font-size: 10.5px;
+  font-weight: 400;
+  color: var(--fv-text-dim);
 }
 
-/* Custom Hooks for Future Styling */
-.history-player-name {
-    /* Add custom styles for player name in history modal here */
-    font-weight: bold;
-    color: #8bcaf2;
+.ladder-disclaimer {
+  margin-top: 16px;
+  font-family: var(--fv-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.4px;
+  line-height: 1.7;
+  color: #6d8496;
+}
+
+.ladder-foot {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid var(--fv-rule);
+  text-align: center;
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────────────
+   The calculator's 300px column and a table cannot share a phone. Below 760px the two
+   stack, and the divider between them turns from a left border into a top one. */
+@media screen and (max-width: 760px) {
+  #ladderModal {
+    padding: 16px 8px;
+  }
+
+  .ladder-modal-content {
+    padding: 16px 12px 12px;
+  }
+
+  .ladder-flex-container {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .ladder-calculator {
+    flex: 1 1 auto;
+    padding-left: 0;
+    padding-top: 14px;
+    border-left: 0;
+    border-top: 1px solid var(--fv-rule);
+  }
+
+  .ladder-table-scroll {
+    max-height: 46vh;
+  }
+
+  #ladderModal .ladder-controls .btn-register-ladder,
+  #ladderModal .ladder-controls .btn-remove-account {
+    flex: 1 1 140px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  #ladderModal .ladder-row,
+  #ladderModal .btn-register-ladder,
+  #ladderModal .btn-remove-account,
+  #ladderModal .btn-ladder-inline,
+  #ladderModal #btnCalculate,
+  #ladderModal #btnPopulateSlots {
+    transition-duration: 0ms;
+  }
 }

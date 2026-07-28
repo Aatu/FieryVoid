@@ -35,6 +35,7 @@ window.ShipIcon = function () {
         this.shipDirectionOfMovementSprite = null;
         this.shipDirectionOfProwSprite = null;
         this.weaponArcs = [];
+        this.structureArcs = []; //structure facing wedges (own array so they never fight the weapon arcs)
         this.hidden = false;
         this.BDEWSprite = null;
         this.MDEWSprite = null;
@@ -329,11 +330,17 @@ window.ShipIcon = function () {
 
         var sideArgs = this.getSideSpriteArgs(ship);
 
+        //teamColor goes to BOTH sprites: the selection ring is shown for every ship
+        //active in the current simultaneous-movement bracket, not just a ship the
+        //viewer can select, so it needs the per-team colour as much as the side
+        //circle does. Passing null here left 'teamN' unmatched in chooseTexture and
+        //collapsed every ring to the neutral orange one.
         this.ShipSelectedSprite = new window.ShipSelectedSprite(
             { width: spriteWidth, height: spriteHeight },
             -2,
             sideArgs.type,
-            true
+            true,
+            sideArgs.teamColor
         ).hide();
         this.mesh.add(this.ShipSelectedSprite.mesh);
 
@@ -561,6 +568,24 @@ window.ShipIcon = function () {
     };
 
 
+    /* Overlap of two circular arcs, or null if they don't overlap. Used to combine a jammed turret's
+       restricted arc (ReducedArcs critical) with its firing-link wedge - a weapon under both may only
+       bear where the two agree.
+
+       Assumes the two arcs together span less than 360 degrees, which is what makes the result a
+       single contiguous piece: two arcs can only overlap at BOTH ends (two separate pieces) when
+       their lengths sum past a full circle. Every mount this is used for is far below that (a 60
+       degree jam arc plus a 120 degree spread wedge), so the single-piece result is exact. */
+    function intersectArcs(a, b) {
+        var start = mathlib.isInArc(b.start, a.start, a.end) ? b.start
+                  : (mathlib.isInArc(a.start, b.start, b.end) ? a.start : null);
+        var end = mathlib.isInArc(b.end, a.start, a.end) ? b.end
+                : (mathlib.isInArc(a.end, b.start, b.end) ? a.end : null);
+
+        if (start === null || end === null) return null;
+        return { start: start, end: end };
+    }
+
     ShipIcon.prototype.showWeaponArc = function (ship, weapon) {
         if (!(weapon instanceof Weapon) && !(weapon instanceof Thruster) && !(weapon instanceof Shield)) return null; // Only show arcs for weapons
         if(weapon.stowed && weapon.stowedArcStart == null) return null; //stowed weapon with no stowed arc (Kirishiac Orbital docked) - non-operational, no arc to show. A stowed arc set (Heavy Orbital) keeps the weapon live: draw its current (reduced) arc.
@@ -599,12 +624,42 @@ window.ShipIcon = function () {
             if (isNaN(dis) || !isFinite(dis)) dis = hexDistance; // Fallback for non-weapon systems without rangePenalty
             if (weapon.range > 0 && dis > hexDistance * weapon.range) dis = hexDistance * weapon.range;
             var arcs = shipManager.systems.getArcs(ship, weapon);
+            var arcColour = "rgb(20,80,128)";
+
+            //Firing-link reduced arc (e.g. Vree turret): if this weapon shares an angular-spread
+            //group and any member has declared fire this turn (a sibling, OR this weapon itself once
+            //its own order is locked), it can now only bear within linkedFiringSpread degrees of that
+            //target. Draw that reduced wedge in a distinct amber colour so the restriction is visible
+            //on hover. The wedge is centred on the target's bearing and expressed in the same
+            //ship-frame as getArcs(), so the existing rotation maths below renders it correctly.
+            //
+            //A weapon can be under BOTH restrictions at once: a turret that has JAMMED (ReducedArcs
+            //critical - the server sends the reduced startArc/endArc) is no longer a full circle, and
+            //the link wedge still applies on top. Then only the OVERLAP can actually be fired into, so
+            //that is what gets drawn - and an empty overlap means the weapon cannot bear at all this
+            //turn, so no arc is shown. (For the Vree numbers the jam arc is 60 degrees and the spread
+            //is 60, so the overlap is always the whole jam arc; the intersection matters for any
+            //future mount whose restricted arc is wider than its spread.)
+            var baseArcLength = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
+            if (weapon.linkedFiringSpread != null) {
+                //A bearing, not a ship - the committed order may be on a HEX (Shredder mode 1).
+                var centreBearing = weaponManager.getLinkedGroupDeclaredBearing(ship, weapon);
+                if (centreBearing !== null) {
+                    var spread = weapon.linkedFiringSpread;
+                    var centreRel = mathlib.addToDirection(centreBearing, -this.getFacing());
+                    var wedge = { start: mathlib.addToDirection(centreRel, -spread), end: mathlib.addToDirection(centreRel, spread) };
+                    arcs = baseArcLength >= 360 ? wedge : intersectArcs(arcs, wedge);
+                    if (!arcs) return null; //restricted arc and link wedge don't overlap - nothing can be fired at
+                    arcColour = "rgb(170,95,25)"; //amber: reduced (linked) arc
+                }
+            }
+
             var arcLength = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
             var arcStart = mathlib.addToDirection(0, arcLength * -0.5);
             var arcFacing = mathlib.addToDirection(arcs.end, arcLength * -0.5);
 
             var geometry = new THREE.CircleGeometry(dis, 32, mathlib.degreeToRadian(arcStart), mathlib.degreeToRadian(arcLength));
-            var material = new THREE.MeshBasicMaterial({ color: new THREE.Color("rgb(20,80,128)"), opacity: 0.5, transparent: true });
+            var material = new THREE.MeshBasicMaterial({ color: new THREE.Color(arcColour), opacity: 0.5, transparent: true });
             var circle = new THREE.Mesh(geometry, material);
             circle.rotation.z = mathlib.degreeToRadian(-mathlib.addToDirection(arcFacing, -this.getFacing()));
             circle.position.z = -1;
@@ -757,6 +812,85 @@ window.ShipIcon = function () {
         this.weaponArcs.forEach(function (arc) {
             this.mesh.remove(arc);
         }, this);
+    };
+
+
+    /* Structure arc indicator (STRUCTURE_ARCS_PLAN.md). Hovering / long-pressing a section's
+       structure health bar in the ship window draws that section's facing coverage on the icon,
+       the sibling of showWeaponArc. The arcs are the ones getLocations() uses to allocate
+       incoming hits, filled onto the Structure by BaseShip::addSystem and carried in the STATIC
+       ship bundle, so nothing extra travels in gamedata.
+
+       Unlike a weapon, a structure has no range to size the wedge from - it uses a fixed radius
+       that clears the icon silhouette (the selection circle sits at size * 0.375) with a floor
+       for the smallest hulls. Own array + own hide, so weapon and structure arcs are independent. */
+    ShipIcon.prototype.showStructureArc = function (ship, structure) {
+        if (!structure || structure.name !== 'structure') return null;
+        if (structure.location == 0 && ship.shipSizeClass > 1) return null; //PRIMARY is hit from every facing - no wedge to draw
+        if (ship.flight) return null; //fighter flights have no sections
+        if (typeof structure.startArc !== 'number' || typeof structure.endArc !== 'number') return null;
+
+        var hexDistance = window.coordinateConverter.getHexDistance();
+        var dis = Math.max(this.size * 0.5, hexDistance * 0.75);
+
+        var arcs = shipManager.systems.getArcs(ship, structure); //applies the rolled-ship flip
+        var arcLength = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
+        var arcStart = mathlib.addToDirection(0, arcLength * -0.5);
+        var arcFacing = mathlib.addToDirection(arcs.end, arcLength * -0.5);
+
+        var thetaStart = mathlib.degreeToRadian(arcStart);
+        var thetaLength = mathlib.degreeToRadian(arcLength);
+
+        var geometry = new THREE.CircleGeometry(dis, 32, thetaStart, thetaLength);
+        //health-bar green (theme.colors.healthOk), so the wedge reads as "this bar's section"
+        var color = new THREE.Color("rgb(66,114,49)");
+        var material = new THREE.MeshBasicMaterial({ color: color, opacity: 0.5, transparent: true });
+        var circle = new THREE.Mesh(geometry, material);
+        circle.rotation.z = mathlib.degreeToRadian(-mathlib.addToDirection(arcFacing, -this.getFacing()));
+        circle.position.z = -1;
+        //outline, same idea as the BDEW hexagon's border: the fill alone bleeds into the map at
+        //low zoom, a crisper edge defines where the section's coverage actually stops. Drawn as a
+        //LINE rather than the BDEW's inset-hole ring so it stays 1px on screen at every zoom -
+        //a world-unit border would vanish when zoomed out on a wedge this small. Added as a CHILD
+        //so it inherits the wedge's rotation/position (and its removal).
+        circle.add(buildArcOutline(dis, thetaStart, thetaLength, color));
+        this.mesh.add(circle);
+        this.structureArcs.push(circle);
+
+        return null;
+    };
+
+    /* Perimeter of the pie wedge in the CircleGeometry's own local frame: apex, out along the
+       arc, back to the apex. A full-circle wedge skips the apex so no spurious radius line is
+       drawn across it. Segment count matches the fill's 32 so the two edges sit flush. */
+    function buildArcOutline(radius, thetaStart, thetaLength, color) {
+        var segments = 32;
+        var points = [];
+        var fullCircle = thetaLength >= Math.PI * 2 - 0.0001;
+
+        if (!fullCircle) points.push(new THREE.Vector3(0, 0, 0));
+
+        for (var i = 0; i <= segments; i++) {
+            var theta = thetaStart + (i / segments) * thetaLength;
+            points.push(new THREE.Vector3(radius * Math.cos(theta), radius * Math.sin(theta), 0));
+        }
+
+        if (!fullCircle) points.push(new THREE.Vector3(0, 0, 0));
+
+        var outline = new THREE.Line(
+            new THREE.BufferGeometry().setFromPoints(points),
+            new THREE.LineBasicMaterial({ color: color, opacity: 0.9, transparent: true })
+        );
+        outline.position.z = 0.01; //clear of the coplanar fill, still behind the ship sprite
+
+        return outline;
+    }
+
+    ShipIcon.prototype.hideStructureArcs = function () {
+        this.structureArcs.forEach(function (arc) {
+            this.mesh.remove(arc);
+        }, this);
+        this.structureArcs = [];
     };
 
     ShipIcon.prototype.showBDEW = function () {

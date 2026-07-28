@@ -413,6 +413,21 @@ class GunLost extends Critical{
     }
 }
 
+/*Turret jam: the mount is locked to a restricted firing arc (Vree saucer turrets jam to the
+forward 330..30). Scored by a SEPARATE d20 whenever an arc-restrictable mount is damaged - it is
+NOT an entry on the weapon critical chart, so it can land alongside a normal crit from the same
+hit. The restricted arc itself is a property of the MOUNT, declared per weapon instance with
+Weapon::setArcRestriction, and applied in Weapon::effectCriticals/changeFiringMode; this crit is
+purely the "jammed" marker. A turret is one physical mount, so Weapon::testArcRestriction stamps
+the crit on every weapon sharing the linkedFiringGroup, not only the one that was hit.*/
+class ReducedArcs extends Critical{
+    public $description = "Turret jammed - firing arc restricted";
+	public $repairPriority = 6;//worth clearing ahead of an average system, behind the really important ones
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+}
+
 //Antimatter has special ReducedRange critical
 class ReducedRangeAntimatter extends Critical{
     public $description = "Range penalty increased";//increase range by 3

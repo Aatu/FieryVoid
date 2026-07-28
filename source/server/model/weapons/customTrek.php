@@ -1182,20 +1182,25 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
 		return $this->getTotalDamage();
 	}
 	
-	public function absorbDamage($ship,$gamedata,$value){ //or dissipate, with negative value
-		$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, -1, false, false, "Absorb/Regenerate!", "TrekShieldProjection");
+	public function absorbDamage($ship,$gamedata,$value, $fireOrderid = -1){ //or dissipate, with negative value
+		//$fireOrderid ties what the projection soaked to the shot that caused it. The combat log finds
+		//a shot's damage by matching entries on fireorderid (weaponManager.getDamagesCausedBy), so
+		//without it a fully absorbed shot read as "damaged for 0" and looked like nothing happened.
+		//Regeneration from the projectors passes no id and stays unlinked (-1), so it is never
+		//reported as damage from a shot.
+		$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, $fireOrderid, false, false, "Absorb/Regenerate!", "TrekShieldProjection");
 		$damageEntry->updated = true;
 		$this->damage[] = $damageEntry;
 	}
-	
-	
-	
+
+
+
 	//decision whether this system can protect from damage - value used only for choosing strongest shield to balance load.
 	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false) {
 		$ship = $this->getUnit(); //GTS
 		if($damageWasDealt || $isUnderShield) return 0; //does not protect from overkill damage, just first impact. Also does not protect from internal damage.
 		if($ship->isCloaked) return 0; //shield is not active when cloaked    GTS
-		
+
 		$remainingCapacity = $this->getRemainingCapacity();
 		$protectionValue = 0;
 		if($remainingCapacity>0){
@@ -1212,12 +1217,12 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
 		$returnValues=array('dmg'=>$effectiveDamage, 'armor'=>$effectiveArmor);
 		$damageToAbsorb=$effectiveDamage; //shield works BEFORE armor
 		$damageAbsorbed=0;
-		
+
 		if($damageToAbsorb<=0) return $returnValues; //nothing to absorb
-		
+
 		$remainingCapacity = $this->getRemainingCapacity();
 		$absorbedDamage = 0;
-		
+
 		if($remainingCapacity>0) { //else projection does not protect
 			$absorbedFreely = 0;
 			//first, armor takes part
@@ -1227,7 +1232,7 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
 			$absorbedDamage = min($this->output - $this->armour, $remainingCapacity, $damageToAbsorb ); //no more than output (modified by already accounted for armor); no more than remaining capacity; no more than damage incoming
 			$damageToAbsorb += -$absorbedDamage;
 			if($absorbedDamage>0){ //mark!
-				$this->absorbDamage($target,$gamedata,$absorbedDamage);
+				$this->absorbDamage($target,$gamedata,$absorbedDamage, $fireOrder->id);//link to the shot so the combat log can report it
 			}
 			$returnValues['dmg'] = $damageToAbsorb;
 			$returnValues['armor'] = min($damageToAbsorb, $returnValues['armor']);
@@ -3594,8 +3599,10 @@ public $name = "TrekShieldProjection";
 		return $this->getTotalDamage();
 	}
 	
-	public function absorbDamage($ship,$gamedata,$value){ //or dissipate, with negative value
-		$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, -1, false, false, "Absorb/Regenerate!", "TrekShieldProjection");
+	public function absorbDamage($ship,$gamedata,$value, $fireOrderid = -1){ //or dissipate, with negative value
+		//$fireOrderid ties what the projection soaked to the shot that caused it - see the identical
+		//note on TrekShieldProjection::absorbDamage. Regeneration passes no id and stays unlinked (-1).
+		$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, $fireOrderid, false, false, "Absorb/Regenerate!", "TrekShieldProjection");
 		$damageEntry->updated = true;
 		$this->damage[] = $damageEntry;
 	}
@@ -3640,15 +3647,15 @@ public $name = "TrekShieldProjection";
 			$absorbedDamage = min($this->output - $this->armour, $remainingCapacity, $damageToAbsorb ); //no more than output (modified by already accounted for armor); no more than remaining capacity; no more than damage incoming
 			$damageToAbsorb += -$absorbedDamage;
 			if($absorbedDamage>0){ //mark!
-				$this->absorbDamage($target,$gamedata,$absorbedDamage);
+				$this->absorbDamage($target,$gamedata,$absorbedDamage, $fireOrder->id);//link to the shot so the combat log can report it
 			}
 			$returnValues['dmg'] = $damageToAbsorb;
 			$returnValues['armor'] = min($damageToAbsorb, $returnValues['armor']);
 		}
-		
+
 		return $returnValues;
 	} //endof function doProtect
-	    
+
 	function addProjector($projector){
 		if($projector) $this->projectorList[] = $projector;
 	}

@@ -122,7 +122,8 @@ window.FlightIcon = function () {
 
         var sideArgs = this.getSideSpriteArgs(ship);
 
-        this.ShipSelectedSprite = new window.ShipSelectedSprite({ width: this.size * 0.75, height: this.size * 0.75 }, -2, sideArgs.type, true).hide();
+        //teamColor goes to the selection ring as well as the side circle - see the note in ShipIcon.create
+        this.ShipSelectedSprite = new window.ShipSelectedSprite({ width: this.size * 0.75, height: this.size * 0.75 }, -2, sideArgs.type, true, sideArgs.teamColor).hide();
         this.mesh.add(this.ShipSelectedSprite.mesh);
 
         this.ShipSideSprite = new window.ShipSelectedSprite({ width: this.size * 0.75, height: this.size * 0.75 }, -2, sideArgs.type, false, sideArgs.teamColor).hide();

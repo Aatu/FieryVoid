@@ -28,7 +28,7 @@ class Stiletto extends FighterFlight{
 		
 	    $this->advancedArmor = true; 
         $this->gravitic = true;
-		$this->hangarRequired = '';
+		$this->hangarRequired = 'Stilettos';
 
         $this->maxFlightSize = 6;
 		$this->specialDropout = true; //Has special rules for dropout.  		

@@ -47,9 +47,15 @@ class ArmedMissileShuttleEA extends FighterFlight{
 			$this->enhancementOptionsEnabled[] = 'AMMO_FB';//add enhancement options for missiles - Class-FB
 			$this->enhancementOptionsEnabled[] = 'AMMO_DUM';//add enhancement options for missiles - Class-FDUM			
 			
-			$fighter->addFrontSystem(new AmmoFighterRack(330, 30, $ammoMagazine, false)); //$startArc, $endArc, $magazine, $base	
-			$fighter->addFrontSystem(new AmmoFighterRack(330, 30, $ammoMagazine, false)); //$startArc, $endArc, $magazine, $base	
-
+			//$fighter->addFrontSystem(new AmmoFighterRack(330, 30, $ammoMagazine, false)); //$startArc, $endArc, $magazine, $base
+			$rackA = new AmmoFighterRack(330, 30, $ammoMagazine, false); //$startArc, $endArc, $magazine, $base
+			$rackA->linkedFiringGroup = 'thunderboltMissiles';
+			$fighter->addFrontSystem($rackA);            	
+			//$fighter->addFrontSystem(new AmmoFighterRack(330, 30, $ammoMagazine, false)); //$startArc, $endArc, $magazine, $base	
+			$rackB = new AmmoFighterRack(330, 30, $ammoMagazine, false);
+			$rackB->linkedFiringGroup = 'thunderboltMissiles';
+			$fighter->addFrontSystem($rackB);
+            
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 			
 			

@@ -49,8 +49,22 @@ class Vymish extends MediumShip{
 		$thrust->startArc = 60;
 		$thrust->endArc = 120;
 		$this->addPrimarySystem($thrust);                    
-        $this->addPrimarySystem(new AntiprotonDefender(2, 0, 0, 0, 360));
-        $this->addPrimarySystem(new AntimatterCannon(2, 0, 0, 0, 360));
+        //These two share a single turret: their fire is linked, so their targets must be within
+        //60 degrees of each other (they are 360-degree mounts, so weapon arcs can't express this).
+        //The group tag doubles as the turret's display name shown in the system window ("Turret 1").
+        //setArcRestriction: every primary-mounted Vree weapon can JAM. Whenever it is damaged it rolls
+        //a separate d20 (17+) and locks to the forward 330..30 - and because a turret is one mount,
+        //a jam on either linked weapon restricts both. See Weapon::testArcRestriction.
+        $turretDefender = new AntiprotonDefender(2, 0, 0, 0, 360);
+        $turretDefender->linkedFiringGroup = 'Turret 1';
+        $turretDefender->linkedFiringSpread = 60;
+        $turretDefender->setArcRestriction(330, 30);
+        $this->addPrimarySystem($turretDefender);
+        $turretCannon = new AntimatterCannon(2, 0, 0, 0, 360);
+        $turretCannon->linkedFiringGroup = 'Turret 1';
+        $turretCannon->linkedFiringSpread = 60;
+        $turretCannon->setArcRestriction(330, 30);
+        $this->addPrimarySystem($turretCannon);
 		        
         $this->addFrontSystem(new AntiprotonDefender(2, 0, 0, 240, 0));
         $this->addFrontSystem(new AntiprotonDefender(2, 0, 0, 0, 120));

@@ -13,10 +13,21 @@ window.ShipSelectedSprite = function () {
     var TEXTURE_TERRAIN = null;
     var TEXTURE_TERRAIN_SELECTED = null;
 
-    // Per-team filled-circle textures for observers, keyed by team number.
-    // Only the non-selected (filled) circle is team-coloured: observers can't
-    // actually select a ship, so the dotted "selected" rings never apply.
+    // Per-team circle textures, keyed by team number ('team3' etc). Used whenever
+    // the caller works in the per-team palette rather than the relative
+    // mine/ally/enemy one (observers, and participants in a 3+-team game).
+    //
+    // BOTH the filled side circle AND the dotted selection ring need a team
+    // variant. An earlier version only built the filled one on the assumption
+    // that the dotted rings "never apply" without a selectable ship — but
+    // MovementPhaseStrategy.highlightUnmovedShips calls setSelected() on every
+    // ship active in the current simultaneous-movement bracket regardless of
+    // ownership, so the ring very much applies. Without a team variant the
+    // 'teamN' type fell off the end of chooseTexture() and every ship in the game
+    // got TEXTURE_NEUTRAL — the same orange ring the NotMoved sprite uses, which
+    // made "moving this bracket", "already moved" and team identity all identical.
     var TEXTURE_TEAM = {};
+    var TEXTURE_TEAM_SELECTED = {};
 
     function ShipSelectedSprite(size, z, type, selected, teamColor) {
 
@@ -28,32 +39,44 @@ window.ShipSelectedSprite = function () {
             createTextures();
         }
 
-        // teamColor is an sRGB [r,g,b]; supplied for observer ships so each team
-        // gets a distinct filled circle instead of the friend/foe colours.
-        if (teamColor && !selected) {
-            this.uniforms.spriteTexture.value = getTeamTexture(type, teamColor);
+        // teamColor is an sRGB [r,g,b]; supplied when each team needs its own
+        // circle instead of the friend/foe colours.
+        if (teamColor) {
+            this.uniforms.spriteTexture.value = getTeamTexture(type, teamColor, selected);
         } else {
             this.uniforms.spriteTexture.value = chooseTexture(type, selected);
         }
     }
 
-    function getTeamTexture(team, teamColor) {
-        if (!TEXTURE_TEAM[team]) {
-            TEXTURE_TEAM[team] = createTeamTexture(teamColor);
+    function getTeamTexture(team, teamColor, selected) {
+        var cache = selected ? TEXTURE_TEAM_SELECTED : TEXTURE_TEAM;
+
+        if (!cache[team]) {
+            cache[team] = createTeamTexture(teamColor, selected);
         }
-        return TEXTURE_TEAM[team];
+        return cache[team];
     }
 
-    function createTeamTexture(teamColor) {
+    function createTeamTexture(teamColor, selected) {
         var canvas = window.AbstractCanvas.create(TEXTURE_SIZE, TEXTURE_SIZE);
         var context = canvas.getContext("2d");
 
-        // Match the alpha treatment of the non-selected friend/foe filled circle.
         var rgb = Math.round(teamColor[0]) + "," + Math.round(teamColor[1]) + "," + Math.round(teamColor[2]);
-        context.strokeStyle = "rgba(" + rgb + ",0.40)";
-        context.fillStyle = "rgba(" + rgb + ",0.20)";
 
-        window.graphics.drawCircleAndFill(context, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE * 0.30, 4);
+        if (selected) {
+            // Match the alpha treatment of the selected friend/foe dotted rings.
+            // The team colour already carries the identity, so a single segment
+            // count is enough - 12 keeps it clearly apart from the 4-segment
+            // neutral ring that marks a ship as not yet moved.
+            context.strokeStyle = "rgba(" + rgb + ",0.50)";
+            context.fillStyle = "rgba(" + rgb + ",0.30)";
+            window.graphics.drawDottedCircle(context, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE * 0.23, TEXTURE_SIZE * 0.30, 12, 0.25);
+        } else {
+            // Match the alpha treatment of the non-selected friend/foe filled circle.
+            context.strokeStyle = "rgba(" + rgb + ",0.40)";
+            context.fillStyle = "rgba(" + rgb + ",0.20)";
+            window.graphics.drawCircleAndFill(context, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE * 0.30, 4);
+        }
 
         var tex = new THREE.CanvasTexture(canvas);
         tex.colorSpace = THREE.SRGBColorSpace;

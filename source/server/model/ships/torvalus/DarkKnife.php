@@ -32,8 +32,8 @@ class DarkKnife extends BaseShip{
 
 		$this->trueStealth = true; //For ships that can actually be hidden, not just jammer from range.  Important for Front End.		
 		$this->canPreOrder = true;		
-		//$this->fighters = array("normal"=>24);
-		$this->notes = "Can control 24 fighters";		
+		$this->fighters = array("Stilettos"=>24);
+		//$this->notes = "Can control 24 fighters";		
 		$this->notes .= '<br>Can skin dance'; 
 
 		/*Torvalus use their own enhancement set */		

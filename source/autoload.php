@@ -2558,6 +2558,7 @@ spl_autoload_register(
                 'razik' => '/server/model/ships/centauri/razik.php',
                 'reactor' => '/server/model/systems/baseSystems.php',
                 'recusant' => '/server/model/ships/StarWarsCloneWars/Recusant.php',
+                'reducedarcs' => '/server/model/cricialClasses.php',
                 'reduceddamage' => '/server/model/cricialClasses.php',
                 'reduceddamageantimatter' => '/server/model/cricialClasses.php',
                 'reducediniative' => '/server/model/cricialClasses.php',

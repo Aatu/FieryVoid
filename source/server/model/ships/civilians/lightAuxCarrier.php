@@ -26,14 +26,14 @@ class lightAuxCarrier extends MediumShip{
         $this->pivotcost = 999;
 		$this->iniativebonus = -20;
 		
-		$cA = new CargoBay(2, 20);
-		$cB = new CargoBay(2, 20);
-		$cC = new CargoBay(2, 20);
-		$cD = new CargoBay(2, 20);
-		$cE = new CargoBay(2, 20);
-		$cF = new CargoBay(2, 20);
-		$cG = new CargoBay(2, 20);
-		$cH = new CargoBay(2, 20);
+		$cA = new CargoBay(2, 19);
+		$cB = new CargoBay(2, 19);
+		$cC = new CargoBay(2, 19);
+		$cD = new CargoBay(2, 19);
+		$cE = new CargoBay(2, 19);
+		$cF = new CargoBay(2, 19);
+		$cG = new CargoBay(2, 19);
+		$cH = new CargoBay(2, 19);
 		
 		$cA->displayName = "Cargo Bay A";
 		$cB->displayName = "Cargo Bay B";

@@ -823,9 +823,9 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         </ul>
 <h5>Turrets</h5>
             <ul>
-<li>In tabletop, Vree weapons located on the primary section of Vree ships are grouped into turrets, 
-                which had the limitation that all weapons in one turret had to engage targets within 60 degrees of each other - and upon being hit, a turret may become locked. 
-                These limitations are not present in Fiery Void.</li>                                                 
+<li>Some Vree weapons located on the primary section of Vree ships are grouped into turrets, 
+                which have the limitation that all weapons in one turret must engage targets within 60 degrees of each other.  Additionally, whenever a turret weapon takes damage it rolls a d20 and on a roll of 17+ the whole turret becomes jammed to 60 degrees forward arc.
+                </li>                                                 
     </ul>
 <a class="back-to-top" href="#top">↩ Back to Top</a>
 

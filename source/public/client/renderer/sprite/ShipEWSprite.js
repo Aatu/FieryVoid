@@ -38,14 +38,14 @@ window.ShipEWSprite = function () {
             return;
         }
 
-        var a = 0.40;
+        var a = 0.4;
 
         if (DEW < 3) {
-            a = 0.70;
+            a = 0.5;
         }
 
-        context.strokeStyle = "rgba(144,185,208,0)";
-        context.fillStyle = "rgba(144,185,208," + a + ")";
+        context.strokeStyle = "rgba(20,80,128,0)";
+        context.fillStyle = "rgba(20,80,128," + a + ")";
 
         var r1 = getDEWStart();
         var r2 = getDEWStart() + DEW * 2.5;
@@ -67,14 +67,13 @@ window.ShipEWSprite = function () {
             return;
         }
 
-        var a = 0.70;
+        var a = 0.50;
 
         if (CCEW < 3) {
-            a = 0.90;
+            a = 0.60;
         }
-
-        context.strokeStyle = "rgba(20,80,128,0)";
-        context.fillStyle = "rgba(20,80,128," + a + ")";
+        context.strokeStyle = "rgba(144,185,208,0)";
+        context.fillStyle = "rgba(144,185,208," + a + ")";
 
         var r1 = getCCEWStart(DEW);
         var r2 = getCCEWStart(DEW) + CCEW * 3;

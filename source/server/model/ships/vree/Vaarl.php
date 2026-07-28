@@ -32,7 +32,11 @@ class Vaarl extends VreeHCV{
 		$this->addPrimarySystem(new ElintScanner(4, 20, 9, 12));
         $this->addPrimarySystem(new Engine(4, 11, 0, 7, 2));
 		$this->addPrimarySystem(new JumpEngine(6, 10, 4, 24));        			
-		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));		
+		//setArcRestriction: every primary-mounted Vree weapon can JAM. Whenever it is damaged it rolls
+		//a separate d20 (17+) and locks to the forward 330..30. See Weapon::testArcRestriction.
+		$cannon = new AntimatterCannon(3, 0, 0, 0, 360);
+		$cannon->setArcRestriction(330, 30);
+		$this->addPrimarySystem($cannon);
 		$thrust = new GraviticThruster(3, 12, 0, 7, 3);
 		$thrust->startArc = 240;
 		$thrust->endArc = 300;
