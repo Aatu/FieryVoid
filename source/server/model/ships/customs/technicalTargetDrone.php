@@ -9,7 +9,7 @@ class technicalTargetDrone extends VreeCapital
 		$this->pointCost = 5;
 		$this->faction = "Custom Ships";
 		$this->phpclass = "technicalTargetDrone";
-		$this->imagePath = "img/ships/kingshipScaled.png";
+		$this->imagePath = "img/ships/kirishiacLordship.png";
 		$this->canvasSize = 200;
 		$this->shipClass = "Target Drone - DO NOT USE";
 		$this->shipSizeClass = 3;
@@ -84,7 +84,8 @@ class technicalTargetDrone extends VreeCapital
         $this->addFrontSystem(new TrekKlingonLauncher(3, 10, 5, 270, 90));	
         $this->addFrontSystem(new TrekKlingonLauncher(3, 10, 5, 270, 90));	
 */
-//        $this->addFrontSystem(new CombatTransporter(3, 4, 1, 270, 90, 8, false));	
+        $this->addFrontSystem(new CombatTransporter(3, 4, 1, 270, 90, 5, false));	
+        $this->addFrontSystem(new CombatTransporter(3, 4, 1, 270, 90, 5, false));	
 
 
 
