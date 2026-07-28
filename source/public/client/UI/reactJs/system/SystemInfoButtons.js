@@ -257,7 +257,7 @@ class SystemInfoButtons extends React.Component {
 		e.stopPropagation(); e.preventDefault();
 		const { ship, system } = this.props;
 		weaponManager.onDeclareSelfInterceptSingleAll(ship, system);
-		if (weapon.canSplitShots) var finished = weapon.checkFinished();
+		if (system.canSplitShots) var finished = system.checkFinished();
 		if (finished) webglScene.customEvent('CloseSystemInfo');
 	}
 

@@ -138,11 +138,46 @@ FtrPolarityCannon.prototype = Object.create(Weapon.prototype);
 FtrPolarityCannon.prototype.constructor = FtrPolarityCannon;
 
 
+/* ---------------------------------------------------------------------------------
+ * Molecular Slicer Beams (Light / regular / Heavy)
+ *
+ * A Slicer's volley is TWO independent pools, both fixed by how long the weapon has been
+ * charging (and, for the Heavy, by firing mode - Raking never draws on more than two
+ * turns' worth of charge):
+ *     - damage DICE : d10s
+ *     - SET damage  : flat points added on top of the dice
+ * The player splits BOTH freely across as many shots as they like. Dice ride in the fire
+ * order's ->shots field (as they always have); the set-damage allocation rides in ->notes
+ * as "MSB|d:<dice>|s:<set>" - the same client->server channel the Hypergraviton Blaster
+ * uses for its transfer list (Manager.php copies notes onto the rehydrated FireOrder).
+ * molecular.php re-parses and re-clamps both pools server-side; never trust these numbers
+ * to arrive intact.
+ *
+ * Either pool can also be spent on DEFENCE instead: the self-interception dialog takes
+ * damage dice and whole blocks of SLICER_SET_DAMAGE_BLOCK set damage, and each die and
+ * each block committed becomes one selfIntercept fire order (= one incoming shot the
+ * Slicer may engage). The Light Slicer has no interception rating and is excluded.
+ * ------------------------------------------------------------------------------- */
+var SLICER_SET_DAMAGE_BLOCK = 6; //points of set damage that buy one self-intercept
+
 var MolecularSlicerBeamL = function MolecularSlicerBeamL(json, ship) {
 	Weapon.call(this, json, ship);
 };
 MolecularSlicerBeamL.prototype = Object.create(Weapon.prototype);
 MolecularSlicerBeamL.prototype.constructor = MolecularSlicerBeamL;
+
+//Dice / set-damage available by turns charged. Overridden by the heavier varieties; kept
+//in step with maxDiceArray + setDamageArray in molecular.php.
+MolecularSlicerBeamL.prototype.slicerPools = {
+	1: { dice: 4, set: 4 },
+	2: { dice: 6, set: 6 },
+	3: { dice: 8, set: 8 }
+};
+
+MolecularSlicerBeamL.prototype.getPools = function () {
+	var turns = Math.min(3, Math.max(1, this.turnsloaded));
+	return this.slicerPools[turns];
+};
 
 MolecularSlicerBeamL.prototype.getShotsUsed = function () {
 	var shotsUsed = 0;
@@ -152,71 +187,73 @@ MolecularSlicerBeamL.prototype.getShotsUsed = function () {
 	return shotsUsed;
 };
 
-MolecularSlicerBeamL.prototype.checkForWastedShots = function () {
-	var hasIntercept = false;
+/* Set damage committed to a single fire order. Freshly declared orders carry it in
+   ->setDam; an order that has round-tripped through the server (page reloaded after
+   submitting, before the turn resolves) only has the encoded ->notes token left, so fall
+   back to reading that. */
+MolecularSlicerBeamL.prototype.getOrderSetDamage = function (fireOrder) {
+	if (typeof fireOrder.setDam === 'number') return fireOrder.setDam;
+	if (typeof fireOrder.notes === 'string') {
+		var match = fireOrder.notes.match(/MSB\|d:(\d+)\|s:(\d+)/);
+		if (match) return parseInt(match[2], 10);
+	}
+	return 0;
+};
 
+MolecularSlicerBeamL.prototype.getSetDamageUsed = function () {
+	var used = 0;
 	for (var i = 0; i < this.fireOrders.length; i++) {
-		if(this.fireOrders[i].type == "selfIntercept"){
-		hasIntercept = true;	
-		break;
-		}
-	}	
-	
-	if(this.data["Remaining Dice"] == 0) return false	
-	//if(this.data["Remaining Dice"] > 0 && hasIntercept == true) return false
+		used += this.getOrderSetDamage(this.fireOrders[i]);
+	}
+	return used;
+};
 
-	return true;
+MolecularSlicerBeamL.prototype.getRemainingDice = function () {
+	return Math.max(0, this.getPools().dice - this.getShotsUsed());
+};
+
+MolecularSlicerBeamL.prototype.getRemainingSetDamage = function () {
+	return Math.max(0, this.getPools().set - this.getSetDamageUsed());
+};
+
+MolecularSlicerBeamL.prototype.checkForWastedShots = function () {
+	//Drives the "this ship still has shots left" warning at commit. Unspent capacity in
+	//either pool is simply lost, so flag both.
+	return (this.getRemainingDice() > 0 || this.getRemainingSetDamage() > 0);
 };
 
 MolecularSlicerBeamL.prototype.initializationUpdate = function () {
-	var shots = 0; //Initialise	
-	var minDam = 0;
-	var maxDam = 0;
+	var pools = this.getPools();
+	var defensiveDice = 0;
+	var defensiveSet = 0;
+	var defensiveShots = 0;
 
-	switch (this.turnsloaded) {
-		case 1:
-			shots = 4;
-			minDam = 8;
-			maxDam = 44;
-			break;
-		case 2:
-			shots = 6;
-			minDam = 12;
-			maxDam = 66;
-			break;
-		case 3:
-			shots = 8;
-			minDam = 16;
-			maxDam = 88;
-			break;
-		default:
-			shots = 16;
-			minDam = 16;
-			maxDam = 88;
-			break;
-	}
-	this.data["Max number of Dice"] = shots;
+	this.data["Max number of Dice"] = pools.dice;
+	this.data["Max Set Damage"] = pools.set;
 
 	if (gamedata.gamephase == 3) {
-		var isFiring = weaponManager.hasFiringOrder(this.ship, this);
-		var shotsUsed = this.getShotsUsed();
-		this.data["Defensive Dice"] = 0;
-		if (isFiring) {
-			for (var i in this.fireOrders) {
-				var fireOrder = this.fireOrders[i];
-				if (fireOrder.type == "selfIntercept") {
-					this.data["Defensive Dice"]++;
-					minDam -= 1; //Adjust damage values by 1d10.
-					maxDam -= 10;
-				}
-			}
-
+		for (var i in this.fireOrders) {
+			var fireOrder = this.fireOrders[i];
+			if (fireOrder.type != "selfIntercept") continue;
+			//Each self-intercept order costs one die OR one block of set damage and buys one
+			//engagement, so the two are reported as a single "Defensive Shots" count rather
+			//than as two separate lines the player has to add up.
+			defensiveShots++;
+			defensiveDice += fireOrder.shots;
+			defensiveSet += this.getOrderSetDamage(fireOrder);
 		}
-		this.data["Offensive Dice"] = shotsUsed - this.data["Defensive Dice"];
-		this.data["Remaining Dice"] = shots - shotsUsed;
+
+		this.data["Defensive Shots"] = defensiveShots;
+		this.data["Offensive Dice"] = this.getShotsUsed() - defensiveDice;
+		this.data["Remaining Dice"] = this.getRemainingDice();
+		this.data["Remaining Set Damage"] = this.getRemainingSetDamage();
 	}
 
-	this.data["Damage"] = "" + minDam + "-" + maxDam;
+	//Displayed damage is what the OFFENSIVE half of the volley can still produce, so
+	//anything already committed to self-interception comes off the top.
+	var dice = Math.max(0, pools.dice - defensiveDice);
+	var set = Math.max(0, pools.set - defensiveSet);
+	this.data["Damage"] = "" + (dice + set) + "-" + (dice * 10 + set);
 
 	return this;
 };
@@ -246,6 +283,7 @@ MolecularSlicerBeamL.prototype.doMultipleFireOrders = function (shooter, target,
 
 	// Validity Checks
 	var inputs = [];
+	var isFlight = target.flight;
 	for (var i in slicers) {
 		var slicer = slicers[i];
 
@@ -254,24 +292,33 @@ MolecularSlicerBeamL.prototype.doMultipleFireOrders = function (shooter, target,
 			return [];
 		}
 
-		// Ammo check
-		var remaining = slicer.data["Max number of Dice"] - slicer.getShotsUsed();
-		if (remaining <= 0) {
-			// Skip empty
-		} else {
-			var isFlight = target.flight;
-			inputs.push({
-				id: slicer.id,
-				label: slicer.displayName,
-				max: remaining,
-				value: isFlight ? 1 : remaining,
-				multiplier: isFlight
-			});
-		}
+		// Ammo check - either pool on its own is enough to declare a shot with
+		var remainingDice = slicer.getRemainingDice();
+		var remainingSet = slicer.getRemainingSetDamage();
+		if (remainingDice <= 0 && remainingSet <= 0) continue; //Skip empty
+
+		inputs.push({
+			id: slicer.id,
+			label: slicer.displayName,
+			max: remainingDice,
+			//A shot may be made of set damage alone, so committing 0 dice is legal.
+			min: 0,
+			value: isFlight ? Math.min(1, remainingDice) : remainingDice,
+			multiplier: isFlight,
+			extra: {
+				max: remainingSet,
+				//Ships: pour the whole remaining set-damage pool into this shot by default,
+				//mirroring the dice box. Fighters: default to none, since a flight rarely
+				//needs it and spending it here would starve the rest of the volley.
+				value: isFlight ? 0 : remainingSet,
+				min: 0,
+				label: 'damage'
+			}
+		});
 	}
 
 	if (inputs.length === 0) {
-		confirm.error("Molecular Slicer does not have enough damage dice to target another shot.");
+		confirm.error("Molecular Slicer does not have enough damage dice or set damage to target another shot.");
 		return;
 	}
 
@@ -281,8 +328,6 @@ MolecularSlicerBeamL.prototype.doMultipleFireOrders = function (shooter, target,
 			slicers[i].handlingInput = true;
 		}
 	}
-
-	var self = this;
 
 	// Callback function
 	var onConfirm = function (results) {
@@ -297,67 +342,50 @@ MolecularSlicerBeamL.prototype.doMultipleFireOrders = function (shooter, target,
 					break;
 				}
 			}
+			if (!weapon) continue;
 
-			if (weapon) {
-				// Calculate hit chance again? Or reuse?
-				// Reuse logic from loop below?
-				// We need to calculate chance for EACH weapon.
+			var damagePerShot = val.value;
+			var setPerShot = val.extra || 0;
+			var shotsToFire = val.count || 1;
 
-				var fireid, calledid, chance;
-				var shotsToFire = 1;
-				var damagePerShot = val;
+			if (damagePerShot <= 0 && setPerShot <= 0) continue; //nothing allocated to this weapon
 
-				if (typeof val === 'object') {
-					damagePerShot = val.value;
-					shotsToFire = val.count;
+			//Resolve the called system per weapon - don't reassign the shared `system`, or
+			//the second Slicer in the dialog would inherit the first one's walked-up parent.
+			var calledid = -1;
+			if (system && target.flight) { //Slicers CAN target individual fighters!
+				var calledSystem = system;
+				// When the system is a subsystem, make all damage go through the parent.
+				while (calledSystem.parentId > 0) {
+					calledSystem = shipManager.systems.getSystem(target, calledSystem.parentId);
 				}
+				calledid = calledSystem.id;
+			}
 
-	            if (system && target.flight) { //Slicers CAN target individual fighters!
-	                //check if weapon is eligible for called shot!
-	                //if (!weaponManager.canWeaponCall(weapon)) continue;
+			//Check valid shot?
+			var chance = window.weaponManager.calculateHitChange(shooter, target, weapon, calledid).hitChance;
+			if (chance < 1) continue;
 
-	                // When the system is a subsystem, make all damage go through
-                    // the parent.
-                    while (system.parentId > 0) {
-	                    system = shipManager.systems.getSystem(ship, system.parentId);
-	                }
-
-	                calledid = system.id;
-	            }else{
-					calledid = -1;
-				}	
-
-				//Check valid shot?
+			for (var s = 0; s < shotsToFire; s++) {
+				//Recalculated per shot: every order this weapon has already declared adds a
+				//further cumulative -5% (calculateSpecialHitChanceMod counts existing orders).
 				chance = window.weaponManager.calculateHitChange(shooter, target, weapon, calledid).hitChance;
-				if (chance < 1) continue;
-
-				for (var k = 0; k < shotsToFire; k++) {
-					chance = window.weaponManager.calculateHitChange(shooter, target, weapon, calledid).hitChance;
-					fireid = shooter.id + "_" + weapon.id + "_" + (weapon.fireOrders.length + 1);
-					weapon.resolveFireOrder(damagePerShot, shooter, target, fireid, calledid, chance);
-				}
+				var fireid = shooter.id + "_" + weapon.id + "_" + (weapon.fireOrders.length + 1);
+				weapon.resolveFireOrder(damagePerShot, setPerShot, shooter, target, fireid, calledid, chance);
 			}
 		}
 	};
 
-	if (inputs.length === 1 && inputs[0].id === this.id) {
-		if (target.flight) {
-			confirm.askForMultipleValues("Allocate damage dice (d10) and number of shots", inputs, onConfirm);
-		} else {
-			confirm.askForMultipleValues("How many damage dice (d10) do you want to use?", inputs, onConfirm);
-		}
+	if (isFlight) {
+		confirm.askForMultipleValues("Allocate damage dice (d10), shots and set damage", inputs, onConfirm);
 	} else {
-		if (target.flight) {
-			confirm.askForMultipleValues("Allocate damage dice (d10) and number of shots", inputs, onConfirm);
-		} else {
-			confirm.askForMultipleValues("Allocate damage dice (d10) for Molecular Slicers", inputs, onConfirm);
-		}
+		confirm.askForMultipleValues("Allocate damage dice (d10) and set damage", inputs, onConfirm);
 	}
 
 	return [];
 };
 
-MolecularSlicerBeamL.prototype.resolveFireOrder = function (dice, shooter, target, fireid, calledid, chance) {
+MolecularSlicerBeamL.prototype.resolveFireOrder = function (dice, setDam, shooter, target, fireid, calledid, chance) {
 	var fire = {
 		id: fireid,
 		type: 'normal',
@@ -368,12 +396,16 @@ MolecularSlicerBeamL.prototype.resolveFireOrder = function (dice, shooter, targe
 		turn: gamedata.turn,
 		firingMode: this.firingMode,
 		shots: dice,
+		setDam: setDam,
 		x: "null",
 		y: "null",
 		damageclass: 'Sweeping',
 		chance: chance,
 		hitmod: 5,
-		notes: "Split"
+		//"Split" stays as the long-standing split-shot marker; the MSB token carries this
+		//shot's dice/set-damage allocation to molecular.php, which strips it back out
+		//before anything is written to the fire order log.
+		notes: "Split MSB|d:" + dice + "|s:" + setDam
 	};
 
 	this.fireOrders.push(fire);
@@ -390,15 +422,110 @@ MolecularSlicerBeamL.prototype.resolveFireOrder = function (dice, shooter, targe
 };
 
 MolecularSlicerBeamL.prototype.checkSelfInterceptSystem = function () {
-	if ((this.data["Max number of Dice"] - this.getShotsUsed()) <= 0) return false;
+	//The Light Slicer has no interception rating and can never be committed to defensive
+	//fire (weaponManager.canSelfInterceptSingle rejects it on that basis too - stated here
+	//as well so the rule lives with the weapon).
+	if (this.intercept < 1) return false;
+	//Needs a spare die, or a whole spare block of set damage, to commit anything.
+	if (this.getRemainingDice() <= 0 && this.getRemainingSetDamage() < SLICER_SET_DAMAGE_BLOCK) return false;
 	return true;
 };
 
-MolecularSlicerBeamL.prototype.doMultipleSelfIntercept = function (ship) {
+/* Self-interception is declared through its own allocation dialog: the player commits a
+   number of damage dice AND/OR a number of whole blocks of set damage, and EACH die and
+   EACH block becomes one selfIntercept fire order. The server counts orders (not points)
+   when working out how many incoming shots the Slicer may engage, so one order per unit
+   of committed capacity is what makes the two ends agree.
 
-	for (var s = 0; s < 1; s++) {
+   weaponManager.onDeclareSelfInterceptSingleAll (right-click) calls doMultipleSelfIntercept
+   synchronously for every similar weapon on the ship, so collect whoever asks within the
+   current tick and open a SINGLE dialog for the lot instead of stacking one per weapon. */
+var slicerSelfInterceptQueue = [];   // [{ship, weapon}]
+var slicerSelfInterceptTimer = null;
+
+function openSlicerSelfInterceptDialog() {
+	slicerSelfInterceptTimer = null;
+	var queued = slicerSelfInterceptQueue;
+	slicerSelfInterceptQueue = [];
+	if (queued.length === 0) return;
+
+	var inputs = [];
+	for (var i = 0; i < queued.length; i++) {
+		var weapon = queued[i].weapon;
+		var maxDice = weapon.getRemainingDice();
+		var maxBlocks = Math.floor(weapon.getRemainingSetDamage() / SLICER_SET_DAMAGE_BLOCK);
+		if (maxDice <= 0 && maxBlocks <= 0) continue;
+
+		inputs.push({
+			id: weapon.id,
+			label: weapon.displayName,
+			max: maxDice,
+			min: 0,
+			value: maxDice > 0 ? 1 : 0,
+			extra: {
+				//Entered as POINTS of set damage rather than as a block count, so the number
+				//the player types is the number they see everywhere else on the weapon. The
+				//step keeps it on whole blocks - a part-block buys no interception.
+				max: maxBlocks * SLICER_SET_DAMAGE_BLOCK,
+				value: 0,
+				min: 0,
+				step: SLICER_SET_DAMAGE_BLOCK,
+				label: 'damage'
+			}
+		});
+	}
+
+	if (inputs.length === 0) {
+		confirm.error("Molecular Slicer has nothing left to commit to interception.");
+		return;
+	}
+
+	var header = "Commit to interception - 1 die or " + SLICER_SET_DAMAGE_BLOCK + " set damage per intercept";
+	confirm.askForMultipleValues(header, inputs, function (results) {
+		for (var id in results) {
+			var val = results[id];
+			var entry = null;
+			for (var k = 0; k < queued.length; k++) {
+				if (queued[k].weapon.id == id) {
+					entry = queued[k];
+					break;
+				}
+			}
+			if (!entry) continue;
+			//Back from points to whole blocks - one intercept order per block.
+			var blocks = Math.floor((val.extra || 0) / SLICER_SET_DAMAGE_BLOCK);
+			entry.weapon.addSelfInterceptOrders(entry.ship, val.value, blocks);
+		}
+	});
+}
+
+MolecularSlicerBeamL.prototype.doMultipleSelfIntercept = function (ship) {
+	for (var q = 0; q < slicerSelfInterceptQueue.length; q++) {
+		if (slicerSelfInterceptQueue[q].weapon === this) return; //already queued this tick
+	}
+	slicerSelfInterceptQueue.push({ ship: ship, weapon: this });
+
+	if (slicerSelfInterceptTimer !== null) return;
+	slicerSelfInterceptTimer = window.setTimeout(openSlicerSelfInterceptDialog, 0);
+};
+
+/* Creates one selfIntercept fire order per committed die and per committed block of set
+   damage. Orders are unshifted so they sit at the FRONT of the array: both the client's
+   hit-chance display and the server's calculateHitBase derive each offensive shot's
+   cumulative -5% from its index in this list, so defensive orders must come first for the
+   two ends to agree. */
+MolecularSlicerBeamL.prototype.addSelfInterceptOrders = function (ship, dice, blocks) {
+	var total = dice + blocks;
+	if (total <= 0) return;
+
+	for (var i = 0; i < total; i++) {
+		//Dice first, then the set-damage blocks. Each order spends exactly one or the other.
+		var usesDie = (i < dice);
+		var diceSpent = usesDie ? 1 : 0;
+		var setSpent = usesDie ? 0 : SLICER_SET_DAMAGE_BLOCK;
 		var fireid = ship.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
-		var fire = {
+
+		this.fireOrders.unshift({
 			id: fireid,
 			type: "selfIntercept",
 			shooterid: ship.id,
@@ -406,20 +533,25 @@ MolecularSlicerBeamL.prototype.doMultipleSelfIntercept = function (ship) {
 			weaponid: this.id,
 			calledid: -1,
 			turn: gamedata.turn,
-			firingMode: 1,
-			shots: 1,
+			firingMode: this.firingMode,
+			shots: diceSpent,
+			setDam: setSpent,
 			x: "null",
 			y: "null",
 			addToDB: true,
-			damageclass: this.data["Weapon type"].toLowerCase()
-		};
+			damageclass: this.data["Weapon type"].toLowerCase(),
+			//Self-intercept orders never pass through the server's calculateHitBase, so this
+			//token survives in the stored row (harmless - the combat log only prints orders
+			//with rolled !== 0). It is also what getOrderSetDamage reads back if the page is
+			//reloaded after submitting but before the turn resolves.
+			notes: "MSB|d:" + diceSpent + "|s:" + setSpent
+		});
 
-		this.fireOrders.unshift(fire); //Always insert selfIntercept orders first for hitMod to be applied correctly to offensive shots.
+		this.recalculateForIntercept(true); //each defensive order costs the offensive shots 5%
 	}
 
-	this.recalculateForIntercept(true);
-
 	webglScene.customEvent('SystemDataChanged', { ship: ship, system: this });
+	if (this.checkFinished()) weaponManager.unSelectWeapon(ship, this);
 };
 
 MolecularSlicerBeamL.prototype.calculateSpecialHitChanceMod = function (shooter, target, calledid) {
@@ -464,24 +596,9 @@ MolecularSlicerBeamL.prototype.recalculateForIntercept = function (add) {
 
 
 MolecularSlicerBeamL.prototype.checkFinished = function () {
-	var shots = 0; //Initialise
-
-	switch (this.turnsloaded) {
-		case 1:
-			shots = 4;
-			break;
-		case 2:
-			shots = 6;
-			break;
-		case 3:
-			shots = 8;
-			break;
-		default:
-			shots = 8;
-			break;
-	}
-	if (this.getShotsUsed() >= shots) return true;
-	return false;
+	//Nothing left to declare only once BOTH pools are spent - leftover set damage can still
+	//be poured into a dice-less shot, so dice running out alone isn't "finished".
+	return (this.getRemainingDice() <= 0 && this.getRemainingSetDamage() <= 0);
 };
 
 var MolecularSlicerBeamM = function MolecularSlicerBeamM(json, ship) {
@@ -490,78 +607,10 @@ var MolecularSlicerBeamM = function MolecularSlicerBeamM(json, ship) {
 MolecularSlicerBeamM.prototype = Object.create(MolecularSlicerBeamL.prototype);
 MolecularSlicerBeamM.prototype.constructor = MolecularSlicerBeamM;
 
-MolecularSlicerBeamM.prototype.initializationUpdate = function () {
-	var shots = 0; //Initialise	
-	var minDam = 0;
-	var maxDam = 0;
-
-	switch (this.turnsloaded) {
-		case 1:
-			shots = 8;
-			minDam = 20;
-			maxDam = 92;
-			break;
-		case 2:
-			shots = 12;
-			minDam = 36;
-			maxDam = 144;
-			break;
-		case 3:
-			shots = 16;
-			minDam = 42;
-			maxDam = 196;
-			break;
-		default:
-			shots = 16;
-			minDam = 42;
-			maxDam = 196;
-			break;
-	}
-	this.data["Max number of Dice"] = shots;
-
-	if (gamedata.gamephase == 3) {
-		var isFiring = weaponManager.hasFiringOrder(this.ship, this);
-		var shotsUsed = this.getShotsUsed();
-		this.data["Defensive Dice"] = 0;
-		if (isFiring) {
-			for (var i in this.fireOrders) {
-				var fireOrder = this.fireOrders[i];
-				if (fireOrder.type == "selfIntercept") {
-					this.data["Defensive Dice"]++;
-					minDam -= 1; //Adjust damage values by 1d10.
-					maxDam -= 10;
-				}
-			}
-
-		}
-		this.data["Offensive Dice"] = shotsUsed - this.data["Defensive Dice"];
-		this.data["Remaining Dice"] = shots - shotsUsed;
-	}
-
-	this.data["Damage"] = "" + minDam + "-" + maxDam;
-
-	return this;
-};
-
-MolecularSlicerBeamM.prototype.checkFinished = function () {
-	var shots = 0; //Initialise
-
-	switch (this.turnsloaded) {
-		case 1:
-			shots = 8;
-			break;
-		case 2:
-			shots = 12;
-			break;
-		case 3:
-			shots = 16;
-			break;
-		default:
-			shots = 16;
-			break;
-	}
-	if (this.getShotsUsed() >= shots) return true;
-	return false;
+MolecularSlicerBeamM.prototype.slicerPools = {
+	1: { dice: 8, set: 12 },
+	2: { dice: 12, set: 24 },
+	3: { dice: 16, set: 36 }
 };
 
 var MolecularSlicerBeamH = function MolecularSlicerBeamH(json, ship) {
@@ -570,73 +619,35 @@ var MolecularSlicerBeamH = function MolecularSlicerBeamH(json, ship) {
 MolecularSlicerBeamH.prototype = Object.create(MolecularSlicerBeamL.prototype);
 MolecularSlicerBeamH.prototype.constructor = MolecularSlicerBeamH;
 
+MolecularSlicerBeamH.prototype.slicerPools = {
+	1: { dice: 8, set: 12 },
+	2: { dice: 16, set: 24 },
+	3: { dice: 24, set: 36 }
+};
+
+MolecularSlicerBeamH.prototype.getPools = function () {
+	var turns = Math.min(3, Math.max(1, this.turnsloaded));
+	//Raking mode can never draw on a three-turn charge - it is capped at two turns' output
+	//(see setSystemDataWindow). Mirrored server-side by getEffectiveTurnsLoaded().
+	if (this.firingMode == 2) turns = Math.min(2, turns);
+	return this.slicerPools[turns];
+};
+
 MolecularSlicerBeamH.prototype.initializationUpdate = function () {
-	var shots = 0; //Initialise
-	var minDam = 0;
-	var maxDam = 0;
+	this.fireControl = this.fireControlArray[this.firingMode]; //reset
 
-	switch (this.turnsloaded) {
-		case 1:
-			shots = 8;
-			minDam = 20;
-			maxDam = 92;
-			break;
-		case 2:
-			shots = 16;
-			minDam = 40;
-			maxDam = 184;
-			break;
-		case 3:
-			shots = 24;
-			minDam = 60;
-			maxDam = 276;
-			break;
-		default:
-			shots = 24;
-			minDam = 60;
-			maxDam = 276;
-			break;
-	}
-
-	this.fireControl = this.fireControlArray[this.firingMode]; //reset 
+	//Pool sizes and the damage readout (including the Raking-at-full-charge cap) all come
+	//out of getPools(), so the base implementation covers them.
+	MolecularSlicerBeamL.prototype.initializationUpdate.call(this);
 
 	//Piercing Mode at 1 or 2 turn charge doesn't get -20% hitchance
 	//if(this.turnsloaded < 3 && (this.firingMode == 1 || this.firingMode == 3)){
-	if(this.turnsloaded < 3 && this.firingMode == 1){					
-		this.data["Fire control (fighter/med/cap)"] = '20/30/40';         
-	}		
-
-	this.data["Max number of Dice"] = shots;
-
-	if (gamedata.gamephase == 3) {
-		var isFiring = weaponManager.hasFiringOrder(this.ship, this);
-		var shotsUsed = this.getShotsUsed();
-		this.data["Defensive Dice"] = 0;
-		if (isFiring) {
-			for (var i in this.fireOrders) {
-				var fireOrder = this.fireOrders[i];
-				if (fireOrder.type == "selfIntercept") {
-					this.data["Defensive Dice"]++;
-					minDam -= 1; //Adjust damage values by 1d10.
-					maxDam -= 10;
-				}
-			}
-
-		}
-		this.data["Offensive Dice"] = shotsUsed - this.data["Defensive Dice"];
-		this.data["Remaining Dice"] = shots - shotsUsed;
+	if(this.turnsloaded < 3 && this.firingMode == 1){
+		this.data["Fire control (fighter/med/cap)"] = '20/30/40';
 	}
-
-	//if(this.turnsloaded == 3 && (this.firingMode == 2 || this.firingMode == 4)){
-	if(this.turnsloaded == 3 && this.firingMode == 2){		
-		minDam = 40;
-		maxDam = 184;		
-	}
-
-	this.data["Damage"] = "" + minDam + "-" + maxDam;
 
     if(this.startArcArray.length > 0){ //More than one arc e.g. Battlecruiser
-		this.data["Arc"] = this.startArcArray[0] + "..." + this.endArcArray[0] + ", " +  this.startArcArray[1] + "..." + this.endArcArray[1];		
+		this.data["Arc"] = this.startArcArray[0] + "..." + this.endArcArray[0] + ", " +  this.startArcArray[1] + "..." + this.endArcArray[1];
 	}
 
 	return this;
@@ -665,12 +676,17 @@ MolecularSlicerBeamH.prototype.isLegalToFireMode = function (shooter) {
 		const currentMode = this.firingMode;
 
 		for (let i = this.fireOrders.length - 1; i >= 0; i--) {
+			//Self-intercept orders are defensive and carry whatever mode the weapon happened
+			//to be set to when they were declared - they aren't a mode commitment, so they
+			//must not trip the Piercing/Raking mixing guard.
+			if (this.fireOrders[i].type === "selfIntercept") continue;
+
 			const existingMode = this.fireOrders[i].firingMode;
 
 			//const existingPiercing = (existingMode === 1 || existingMode === 3);
 			//const currentPiercing = (currentMode === 1 || currentMode === 3);
 			const existingPiercing = existingMode === 1;
-			const currentPiercing = currentMode === 1;			
+			const currentPiercing = currentMode === 1;
 
 			if (existingPiercing !== currentPiercing) {
 				confirm.error("You cannot mix Piercing and Raking modes whilst at full charge.");
@@ -689,6 +705,7 @@ MolecularSlicerBeamH.prototype.removeMultiModeSplit = function (ship, target) {
 		// Search from newest → oldest
 		for (let i = this.fireOrders.length - 1; i >= 0; i--) {
 			const fireOrder = this.fireOrders[i];
+			if (fireOrder.type === "selfIntercept") continue; //has its own remove button
 
 			if (this.firingMode == fireOrder.firingMode && fireOrder.targetid == target.id) {
 				// Remove the matching fire order
@@ -699,10 +716,16 @@ MolecularSlicerBeamH.prototype.removeMultiModeSplit = function (ship, target) {
 		}
 	}
 
-	// If NONE matched, remove the last fire order instead
-	if (!removed && this.fireOrders.length > 0) {
-		removed = true;
-		this.fireOrders.pop();  // removes last item
+	// If NONE matched, remove the last OFFENSIVE fire order instead. Self-intercept orders
+	// are peeled off with the dedicated intercept-remove button (which also fixes up the
+	// remaining shots' hit chances), so they must not be swept up here.
+	if (!removed) {
+		for (let i = this.fireOrders.length - 1; i >= 0; i--) {
+			if (this.fireOrders[i].type === "selfIntercept") continue;
+			this.fireOrders.splice(i, 1);
+			removed = true;
+			break;
+		}
 	}
 
 	// Always fire the events if something was removed
@@ -720,27 +743,6 @@ MolecularSlicerBeamH.prototype.removeAllMultiModeSplit = function (ship) {
 	}
 
 	webglScene.customEvent('SystemDataChanged', { ship: ship, system: this });
-};
-
-MolecularSlicerBeamH.prototype.checkFinished = function () {
-	var shots = 0; //Initialise
-
-	switch (this.turnsloaded) {
-		case 1:
-			shots = 8;
-			break;
-		case 2:
-			shots = 16;
-			break;
-		case 3:
-			shots = 24;
-			break;
-		default:
-			shots = 24;
-			break;
-	}
-	if (this.getShotsUsed() >= shots) return true;
-	return false;
 };
 
 var MultiphasedCutterL = function MultiphasedCutterL(json, ship) {
