@@ -7,8 +7,16 @@ window.combatLog = {
     critAnimations: {}, //Just a convenient place to have this array for AllWeaponFireAgainstShipAnimation to use   
     logCache: {}, // key: turn number, value: processed fire order data
 
+    // Clears the LIVE replay log only (#log). The printed log (#LogActual) owns its own
+    // lifecycle via showCurrent / showLog and must not be touched here.
     onTurnStart: function onTurnStart() {
-        $('.logentry').remove();
+        // Scoped to #log. An unscoped $('.logentry') also matched the PRINTED log's entry
+        // divs, and because the damage <ul> below is a SIBLING of its .logentry div rather
+        // than a child, that left #LogActual holding orphaned damage lists with their
+        // "FIRE:" headers stripped off - bare "<unit> damaged for N" lines. showPrevious /
+        // showNext call this and then fetch asynchronously, so those orphans stayed on
+        // screen until the response landed and showLog overwrote the container.
+        $('#log > .logentry').remove();
         // logFireOrders emits the damage <ul> as a SIBLING of its .logentry div
         // (the </div> closes before the <ul>), so it lands as a direct child of
         // #log and survives the .logentry removal. Clear those orphaned damage
@@ -605,6 +613,12 @@ window.combatLog = {
             combatLog.showLog(combatLog.logCache[turn].allFireOrders, combatLog.logCache[turn].ships);
             return;
         }
+
+        // Nothing is cached, so the container is about to sit there showing the PREVIOUS turn's
+        // print until the response arrives. Blank it now: showLog overwrites it wholesale anyway,
+        // and a stale turn on screen reads as if it belonged to the turn being requested. The
+        // cached branch above returns first, so it still renders in one synchronous step.
+        document.getElementById('LogActual').innerHTML = '';
 
         ajaxInterface.ajaxWithRetry({
             type: 'GET',
