@@ -81,7 +81,6 @@ window.combatLog = {
         var tooltipTextParts = [];
         var rollsTooltipTextParts = [];
         var shotIndex = 1;
-        var resolvedFire = null; //last order in this group that actually resolved - see the loop below
 
         for (var a in orders) {
 
@@ -97,18 +96,6 @@ window.combatLog = {
                     weapon.changeFiringMode();
                 }
             }
-
-            // Orders that were never resolved contribute nothing. Weapons that merge several
-            // declared orders into one volley (Ballistic / Phased Gravitic Torpedo saturation -
-            // see BallisticTorpedo::beforeFiringOrderResolution) fold the extra orders' shots
-            // into a single carrier order and drop the rest before hit chances are calculated,
-            // so those rows keep needed=0/rolled=0/shots=1 in the database forever. Counting
-            // them dragged the reported chance range down to "0% - x%" and inflated the shot
-            // total (3 torpedoes read as 5). Weapon::fire always stamps rolled, so rolled==0 is
-            // the reliable "this order never happened" marker - the same test
-            // weaponManager.getAllFireOrdersForDisplayingAgainst uses.
-            if (!fire.rolled) continue;
-            resolvedFire = fire;
 
             shots += fire.shots;
             shotshit += fire.shotshit;
@@ -239,13 +226,8 @@ window.combatLog = {
         var notestext = "";
         if (notes) notestext = '<span class="pubotes">' + notes + '</span>';
 
-        //The trailing per-order references below used whatever order the loop happened to end on,
-        //which for a merged torpedo volley is a dropped order with empty notes. Prefer the order
-        //that actually resolved.
-        var displayFire = resolvedFire || fire;
-
         var shortText = false;
-        if (weaponManager.doShortLogText(displayFire)) shortText = true;
+        if (weaponManager.doShortLogText(fire)) shortText = true;
 
         //Some orders don't need the full log text, e.g. Reactor overload, hyperspace jump.    
         if (shortText) {
@@ -258,7 +240,7 @@ window.combatLog = {
             }
         }
 
-        html += '<span class="notes"> ' + displayFire.notes + '</span>';
+        html += '<span class="notes"> ' + fire.notes + '</span>';
         //  html += damagehtml;
         html += '</span></div>';
 
