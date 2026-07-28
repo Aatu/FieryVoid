@@ -1117,6 +1117,8 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
 	protected $doCountForCombatValue = false; //don't count when estimating remaining combat value - shields are overloaded and regenerating all the time, do not represent permanent loss of combat ability
     
 	protected $possibleCriticals = array(); //no criticals possible
+
+public $canOffLine = true;
 	
 	//Shield Projections cannot be repaired at all!
 	public $repairPriority = 0;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
@@ -2808,15 +2810,19 @@ class CombatTransporter extends Weapon{
 	public $animationColor = array(50, 50, 50);
 	public $animationWidth = 0.2;
 
-	public $useOEW = false; 
-	public $range = 10;
+//	public $useOEW = false; 
+        public $rangePenalty = 0.66;
+        public $fireControl = array(null, 2, 2); // fighters, <mediums, <capitals
+//	public $range = 10;
   
 	public $noPrimaryHits = true; //cannot hit PRIMARY from outer table, should never happen.
 
 	public $calledShotMod = 0; //instead of usual -8
+
+	public $countShields = 0;
+	public $countShooterShields = 0;
 	
 	public $loadingtime = 1;
-	public $rangePenalty = 1;
 
 	public $noOverkill = true;
 	public $priority = 9;
@@ -2834,9 +2840,9 @@ class CombatTransporter extends Weapon{
 	);		
 
 	public $eliteMarines = false;
-	public $isBoardingAction = true;//For front end to recalculate hit chance.	
+//	public $isBoardingAction = true;//For front end to recalculate hit chance.	
 		
-	public $ammunition = 0; //limited number of Marine contingents.
+	public $ammunition = 5; //limited number of Marine contingents.
 
 		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $ammunition, $elite) 
 		{
@@ -2850,11 +2856,13 @@ class CombatTransporter extends Weapon{
 	
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);      
-		$this->data["Special"] = "<br>If on same hex as an enemy ship, and in arc, this weapon attempt to deliver Marines to that vessel.";	
+		$this->data["Special"] = "<br>Transporters can send Marines up to 10 hexes with a lock on, or 5 without.";	
+		$this->data["Special"] .= "<br>If either or origin unit or target unit has an active shield along the line of fire, the transport fails.";  		
 		$this->data["Special"] .= "<br>Marines may attempt three 'Missions' by selecting the appropriate Firing Mode.";  		
 		$this->data["Special"] .= "<br> - Capture Ship: Marines can attempt to overcome defenders on enemy ship and disable it."; 
 		$this->data["Special"] .= "<br> - Sabotage: Can be directed at a specific system (i.e. called shot) or for general sabotage operations on enemy ship."; 
 		$this->data["Special"] .= "<br> - Rescue: Scenarios only, Marines will board enemy ship and attempt to rescue target."; 
+		$this->data["Special"] .= "<br>Cannot be used against targets with Advance Armor."; 
 		$this->data["Special"] .= "<br>See 'Common Systems & Enhancements' file for full information on Boarding Actions.";  		                     
 		if($this->eliteMarines){
 			$this->data["Elite"] = "Yes";
@@ -2864,9 +2872,6 @@ class CombatTransporter extends Weapon{
 	    $this->data["Ammunition"] = $this->ammunition;					
 	}
 
-
-
-
        public function setAmmo($firingMode, $amount){
             $this->ammunition = $amount;
         }
@@ -2874,6 +2879,90 @@ class CombatTransporter extends Weapon{
 
 
 
+	protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){ //if shooter or target has active shield along line of fire, transport fails
+		if($target instanceof FighterFlight){ //for fighters - regular allocation
+			parent::beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
+			return;
+		}
+		
+		//first - find bearing from target to firing ship (needed to determine whether shield interacts with incoming shot)
+		$relativeBearing = $target->getBearingOnUnit($shooter);
+		$shooterBearing = $shooter->getBearingOnUnit($target);
+		//are there any active shields on the target?
+		$affectingShields = array();
+		foreach($target->systems as $shield){
+			if( ( ($shield instanceOf EMShield) 
+				|| ($shield instanceOf GraviticShield) 
+				|| ($shield instanceOf TrekShieldProjection) 
+				|| ($shield instanceOf SWRayShield) 
+				|| ($shield instanceOf AbsorbtionShield) //this is an actual shield!
+				)
+				&& (!$shield->isDestroyed()) //not destroyed
+				&& (!$shield->isOfflineOnTurn($gamedata->turn)) //powered up
+			   	&& (mathlib::isInArc($relativeBearing, $shield->startArc, $shield->endArc)) //actually in arc to affect
+			) {
+				$affectingShields[] = $shield;
+			}
+		}
+
+		//are there any active shields on the shooter?
+		$shooterShields = array();
+		foreach($shooter->systems as $shield){
+			if( ($shield instanceOf TrekShieldProjection) 
+				&& (!$shield->isDestroyed()) //not destroyed
+				&& (!$shield->isOfflineOnTurn($gamedata->turn)) //powered up
+			   	&& (mathlib::isInArc($shooterBearing, $shield->startArc, $shield->endArc)) //actually in arc to affect
+			) {
+				$shooterShields[] = $shield;
+			}
+		}
+
+		//count target shields
+		$countShields = count($affectingShields);
+		//count shooter shields
+		$countShooterShields = count($shooterShields);
+		if($countShields > 0){ //Transport fails due to active shield
+			$fireOrder->pubnotes .= "<br> Cannot transport through target's active shields.";
+			$fireOrder->needed = 0;
+			$fireOrder->updated = true;
+		} elseif ($countShooterShields > 0) {  //Transport fails due to own active shield
+			$fireOrder->pubnotes .= "<br> Cannot transport through own active shields.";
+			$fireOrder->needed = 0;
+			$fireOrder->updated = true;
+		} else {//otherwise hit normally (parent beforeDamage)
+			parent::beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
+			return;
+		}
+
+	}//endof function beforeDamage
+
+
+
+
+
+public function calculateHitBase($gamedata, $fireOrder)
+{
+    //Needs its own custom routine only for the Ancients check and chosenLocation tracking;
+    //the actual hit chance now comes from the standard engine calculation.
+    $shooter = $gamedata->getShipById($fireOrder->shooterid);	
+    $target = $gamedata->getShipById($fireOrder->targetid);			
+
+    if($target->factionAge > 2) {//Cannot attach to Ancients.  Might be impossible if Front End chance is also made 0%
+        $fireOrder->pubnotes .= "<br> Cannot transport to Ancient ships.";
+        $fireOrder->needed = 0;
+        $fireOrder->updated = true;						
+        return; 
+    }
+
+    parent::calculateHitBase($gamedata, $fireOrder); //Standard EW/lock-on hit calculation, range penalty and fire control already apply via normal Weapon properties.
+
+    $hitLoc = $target->getHitSection($shooter, $fireOrder->turn);
+    $fireOrder->chosenLocation = $hitLoc;//Need to mark this for successful shots to check if hitting Primary.									
+}//endof calculateHitBase
+
+
+
+/*
 	public function calculateHitBase($gamedata, $fireOrder)
 	{
 		//Needs it's own custom routine for hit chance.
@@ -2886,49 +2975,18 @@ class CombatTransporter extends Weapon{
 			$fireOrder->updated = true;						
 			return; 
 		}
-		
-		//Now roll to see if the Breaching Pod attaches on this turn.
-//		$shooterMove = $shooter->getLastMovement();
-//		$shooterSpeed = $shooterMove->speed;		
-		
-//		$targetMove = $target->getLastMovement();
-//		$targetSpeed = $targetMove->speed;
-//		$speedDifference = abs($targetSpeed - $shooterSpeed);//Calculate absolute difference in speed.
-//		if($shooter->faction == "Llort" || $shooter->faction == "ZNexus Sal-bez Coalition") $speedDifference -= 1;//Llort reduce speed difference by 1.
-			
-//		$finalSpeedDifference = 0;
-		
-//		if($finalSpeedDifference > $shooter->freethrust){//Pod cannot compensate enough for speed difference with available thrust.
-//			$fireOrder->needed = 0;
-//			$fireOrder->updated = true;
-//			$fireOrder->pubnotes .= "<br> The speed difference to target is too great and pod is unable to attach.";					
-//			return; 
-//		}
 
         $hitLoc = null;
         $hitLoc = $target->getHitSection($shooter, $fireOrder->turn);
 		
-//		if($targetSpeed > $shooterSpeed){//Target is moving faster, roll to attach.
 			$baseHitChance = 100;//Start with automatic hit.
-//			$speedChance = 	$finalSpeedDifference *10;//Each point of speed difference is 10% chance to miss.
-//			$finalHitChance = $baseHitChance - $speedChance;//Adjust hitchance.
 			$finalHitChance = $baseHitChance;
 			$fireOrder->needed = $finalHitChance;//Update fireOrder.		
 			$fireOrder->updated = true;	
 			$fireOrder->chosenLocation = $hitLoc;//Need to mark this for successful shots to check if hitting Primary.									
-//			return;
-//		}else{
-//			$fireOrder->needed = 100;
-//			$fireOrder->updated = true;
-//			$fireOrder->chosenLocation = $hitLoc;			
-//			return;
-//		}	
 		
 	}//endof calculateHitBase
-
-
-
-
+*/
 
        public function fire($gamedata, $fireOrder){ //note ammo usage
             parent::fire($gamedata, $fireOrder);
@@ -2960,7 +3018,11 @@ class CombatTransporter extends Weapon{
 		$rollMod = 0;
 		if($this->eliteMarines) $rollMod -= 1; //Elite Marines board more easily.
 
-		if($target->faction == "Narn Regime" || $target->faction == "Gaim Intelligence" )	$rollMod += 1; //Certain factions defend harder! 
+		if($target->faction == "Narn Regime" || $target->faction == "Gaim Intelligence" || $target->faction == "Escalation Wars Sshel'ath Alliance")	$rollMod += 1; //Certain factions defend harder! 
+
+		if($shooter->faction == "Llort")  $rollMod -= 1; //Llort should get bonus to Rescue and Capture, but making them elite feels incorrect.  Have instead made it easier for their marines to board. 	
+		if($shooter->faction == "Escalation Wars Sshel'ath Alliance")  $rollMod -= 1; //Sshel'ath physiology makes it easier for their marines to board. 	
+		if($shooter->faction == "Yolu Confederation")  $rollMod -= 2; //Yolu have -2 to deliver marines.	
 
 		$location = $fireOrder->chosenLocation ;
 		if($location == 0 && (!$target instanceof OSAT)) $rollMod -= 1; //Easier to deliver marines to destroyed sections i.e direct to Primary section.	       
@@ -3078,7 +3140,7 @@ class CombatTransporter extends Weapon{
 		}elseif($deliveryRoll >= 6 && $deliveryRoll <=8){//Unsuccessful delivery
 			$this->ammunition++;//Marines weren't eliminated, they just weren't delivered.  Give ammunition back to weapon.
 			Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
-			$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit was beaten back by defenders but managed to return safely to their pod.";
+			$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit was beaten back by defenders but managed to transport back to safety.";
 			Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.							
 			return;	
 		}else{//Roll result is 9 or over
@@ -3087,7 +3149,6 @@ class CombatTransporter extends Weapon{
 			return;
 		}			
 	}//endof onDamagedSystem() 		
-	
 	
 	public function getDamage($fireOrder){ //Damage is handled in criticalPhaseEffects()
 		return 0;
@@ -3099,7 +3160,7 @@ class CombatTransporter extends Weapon{
 	public function stripForJson() {
 			$strippedSystem = parent::stripForJson();    
 			$strippedSystem->ammunition = $this->ammunition;			
-			$strippedSystem->isBoardingAction = $this->isBoardingAction;                          
+//			$strippedSystem->isBoardingAction = $this->isBoardingAction;                          
 			return $strippedSystem;
 	}	
 	
