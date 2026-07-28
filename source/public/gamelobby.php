@@ -509,7 +509,16 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 
 		</script>
 	</head>
-	<body <?php if ($gamelobbydata && !empty($gamelobbydata->background)) echo 'style="background-image:url(img/maps/' . $gamelobbydata->background . ')"'; ?>>
+	<body <?php
+		// The background filename arrives from the client at game creation and is
+		// stored unescaped. Emit it only if it still looks like a plain image
+		// filename — that closes attribute breakout, CSS url() injection and path
+		// traversal in one check.
+		if ($gamelobbydata && !empty($gamelobbydata->background)
+			&& preg_match('/^[A-Za-z0-9._-]+\.(jpg|jpeg|png|gif|webp)$/i', $gamelobbydata->background)) {
+			echo 'style="background-image:url(img/maps/' . htmlspecialchars($gamelobbydata->background, ENT_QUOTES) . ')"';
+		}
+	?>>
 
   <header class="pageheader">
     <img src="img/logo.png" alt="Fiery Void Logo" class="logo">
@@ -532,7 +541,9 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
             ?>
             <div class="">
                 <!--<span class="panelheader">GAME NAME: </span>-->
-                <span class="panelsubheader game-name"> <?php print($isFleetTest ? '<span class="fleet-test-text">Fleet Builder</span>' : $gamelobbydata->name); ?></span>
+                <!-- The game name is player-supplied and stored unescaped, so it must be
+                     escaped here (the scenario description below does the same). -->
+                <span class="panelsubheader game-name"> <?php print($isFleetTest ? '<span class="fleet-test-text">Fleet Builder</span>' : htmlspecialchars($gamelobbydata->name)); ?></span>
             </div>
 
     <div class="lobby-split-container">
