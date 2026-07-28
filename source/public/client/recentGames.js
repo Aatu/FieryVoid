@@ -155,8 +155,12 @@ jQuery(function ($) {
                 return true;
             });
 
+            /* Ties keep the incoming order, which is the server's lastActivity DESC —
+               Array#sort is stable, so "highest players" reads as most players first,
+               newest first within each tier, with no explicit tiebreak needed. */
             rows.sort(function (a, b) {
                 if (s.sort === "turn") return (b.turn || 0) - (a.turn || 0);
+                if (s.sort === "players") return (b.playerCount || 0) - (a.playerCount || 0);
                 if (s.sort === "name") return String(a.name || "").localeCompare(String(b.name || ""));
                 return String(b.lastActivity || "").localeCompare(String(a.lastActivity || ""));
             });
@@ -211,7 +215,9 @@ jQuery(function ($) {
 
             var bits = [];
             if (game.turn > 0) bits.push("TURN " + game.turn);
-            bits.push(game.playerCount + "/" + game.slots + " PLAYERS");
+            //playerSlots, not slots — a player holding two seats of the same game would
+            //otherwise read as "2/3 players". See DBManager::playerSlots.
+            bits.push(game.playerCount + "/" + (game.playerSlots || game.slots) + " PLAYERS");
             if (game.map) bits.push(gamedata.mapLabel(game.map));
             if (game.rules && game.rules.length) bits = bits.concat(game.rules);
 

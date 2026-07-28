@@ -646,6 +646,47 @@ Arial on the other 11 pages). They are now fully overridden and should move — 
 - Stage 6 (self-hosting Orbitron / Bruno Ace SC) remains optional and separate — the faces
   are now load-critical on this page rather than nearly unused.
 
+### Feedback round 3 — 2026-07-28 (players sort + de-duplicated player count)
+
+1. **New sort: `Highest players`** in the Recent Games dropdown, between *Highest turn* and
+   *Game name A–Z* (`recentgames.php`, plus a `players` branch in `recentGames.apply`).
+   No tiebreak is written: `Array#sort` is stable and the filtered array arrives in the
+   server's `lastActivity DESC` order, so equal-sized games stay newest-first — which is
+   what you want given nearly every game on the site is 2-player.
+
+2. **`N/M PLAYERS` now counts people on both sides of the slash.** `tac_game.slots` counts
+   **seats**, and one player may hold several seats of the same game — game 4247 has three
+   slots with player 210 in two of them. The numerator was already
+   `COUNT(DISTINCT playerid)`, so that game advertised `2/3`: a third player who can never
+   arrive. New `DBManager::playerSlots($slots, $occupiedSlots, $playerCount)` subtracts the
+   doubled-up seats; 4247 now reads `2/2`.
+
+   The three queries each gained an `occupiedSlots` count (`COUNT(*) … playerid > 0`
+   beside the existing `COUNT(DISTINCT playerid)`) and emit a **new `playerSlots` key
+   alongside the untouched raw `slots`** — nothing that legitimately wants the seat count
+   silently gets a different number. Both card renderers read
+   `(game.playerSlots || game.slots)`, the fallback covering rows already in the 2s APCu
+   `getTacGames` cache across a deploy.
+
+   Applied to **all three** lists, not just the modal: Your Games and Join Games take their
+   count from the same rule, and 4247 is a Your Games card too. Lobbies are unaffected in
+   practice (an empty seat has `playerid = 0`, so it is never "doubled up").
+
+   Data check: exactly **one** game in the local DB has a doubled-up player (4247), and
+   **no** game has more `tac_playeringame` rows than `g.slots` — so `occupiedSlots <= slots`
+   holds and the clamps in `playerSlots` guard a malformed row rather than a real case.
+
+Verified: `php -l` clean on `DBManager.php` / `recentgames.php`, `node --check` clean on both
+JS files; all three query methods run against the real DB (4247 → `2/2` in `getRecentGames`
+**and** `getPlayerGames`, raw `slots` still 3; every other row unchanged); 16 node unit tests
+over `recentGames.apply` / `cardHtml` / `gameCardHtml` — the new sort in isolation and
+combined with the ACTIVE chip and the search box, the three existing sorts unchanged, tie
+stability, the dupe/full/half-empty/legacy-shape counts, and fleet-test `SOLO`.
+
+**Noticed in passing, not changed:** `recentgames.php`'s subtitle now says "the last 14 days"
+(your edit), but `Manager::getRecentGames($userid, $days = 7)` still passes **7** — the window
+is unchanged and the copy overstates it. One-word fix in `Manager.php:260`; say the word.
+
 ## 10. Out of scope
 
 News panel content, chat panel, ladder modal internals (it only gains the shared shell and

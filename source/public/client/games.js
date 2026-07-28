@@ -120,7 +120,11 @@ window.gamedata = {
 
 		var bits = [];
 		if (game.turn > 0) bits.push("TURN " + game.turn);
-		bits.push(game.test ? "SOLO" : (game.playerCount + "/" + game.slots + " PLAYERS"));
+		//playerSlots, not slots: a player holding two seats of the same game must not read
+		//as "2/3 players" — an opponent who can never arrive. See DBManager::playerSlots.
+		//Falls back to slots for a row cached under the old shape (APCu holds 2s).
+		bits.push(game.test ? "SOLO"
+			: (game.playerCount + "/" + (game.playerSlots || game.slots) + " PLAYERS"));
 		if (game.map) bits.push(this.mapLabel(game.map));
 		if (game.rules && game.rules.length) bits = bits.concat(game.rules);
 

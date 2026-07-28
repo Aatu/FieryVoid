@@ -1788,7 +1788,7 @@ class DBManager
      * $days/$limit are ints from the caller, interpolated rather than bound: MariaDB is
      * fussy about placeholders in INTERVAL and LIMIT.
      */
-    public function getRecentGames($playerid, $days = 7, $limit = 100)
+    public function getRecentGames($playerid, $days = 14, $limit = 100)
     {
         $days  = max(1, (int)$days);
         $limit = max(1, (int)$limit);
@@ -1797,6 +1797,7 @@ class DBManager
         $stmt = $this->connection->prepare("
             SELECT g.id, g.name, g.turn, g.status, g.slots, g.gamespace, g.rules,
                    COUNT(DISTINCT CASE WHEN p.playerid > 0 THEN p.playerid END) AS playerCount,
+                   COUNT(CASE WHEN p.playerid > 0 THEN 1 END) AS occupiedSlots,
                    MAX(CASE WHEN p.playerid = ? THEN 1 ELSE 0 END) AS mine,
                    GROUP_CONCAT(DISTINCT pl.username ORDER BY pl.username SEPARATOR ', ') AS players,
                    MAX(p.lastactivity) AS lastActivity
@@ -1815,7 +1816,7 @@ class DBManager
         if ($stmt) {
             $stmt->bind_param('i', $playerid);
             $stmt->bind_result($id, $gameName, $turn, $status, $slots, $gamespace, $rules,
-                               $playerCount, $mine, $players, $lastActivity);
+                               $playerCount, $occupiedSlots, $mine, $players, $lastActivity);
             $stmt->execute();
             while ($stmt->fetch()) {
                 $desc = $this->describeGameRules($rules, $gamespace);
@@ -1826,6 +1827,7 @@ class DBManager
                     "status"       => $status,
                     "playerCount"  => $playerCount,
                     "slots"        => $slots,
+                    "playerSlots"  => $this->playerSlots($slots, $occupiedSlots, $playerCount),
                     "map"          => $desc["map"],
                     "rules"        => $desc["rules"],
                     "ladder"       => $desc["ladder"],
@@ -1875,6 +1877,27 @@ class DBManager
      * Note `rules` is sometimes the JSON array '[]' rather than an object, and may be
      * NULL, so guard the decode.
      */
+    /**
+     * Denominator for the "N/M PLAYERS" readout, de-duplicated.
+     *
+     * tac_game.slots counts SEATS, not people, and one player may hold several seats of
+     * the same game (4247: three slots, two of them the same player). The numerator has
+     * always been COUNT(DISTINCT playerid), so a doubled-up player read as "2/3 players"
+     * — advertising a third player who can never arrive. Subtract the doubled-up seats so
+     * both sides of the slash count people: 2/2.
+     *
+     * Sent alongside the raw `slots`, not instead of it, so nothing that legitimately
+     * wants the seat count silently gets a different number.
+     *
+     * Every game in the data has exactly one tac_playeringame row per slot, so
+     * $occupiedSlots <= $slots holds; the clamps guard a malformed row rather than a
+     * case seen in practice.
+     */
+    private function playerSlots($slots, $occupiedSlots, $playerCount) {
+        $doubledUp = max(0, (int)$occupiedSlots - (int)$playerCount);
+        return max((int)$playerCount, (int)$slots - $doubledUp);
+    }
+
     private function describeGameRules($rulesJson, $gamespace) {
         $r = json_decode((string)$rulesJson, true);
         if (!is_array($r)) $r = array();
@@ -1913,7 +1936,9 @@ class DBManager
         $stmt = $this->connection->prepare("
             SELECT g.id, g.name, pg.waiting, g.gamespace, g.rules, g.slots, g.turn,
                    (SELECT COUNT(DISTINCT playerid) FROM tac_playeringame
-                     WHERE gameid = g.id AND playerid > 0) AS playerCount
+                     WHERE gameid = g.id AND playerid > 0) AS playerCount,
+                   (SELECT COUNT(*) FROM tac_playeringame
+                     WHERE gameid = g.id AND playerid > 0) AS occupiedSlots
             FROM tac_playeringame pg
             JOIN tac_game g ON pg.gameid = g.id
             WHERE g.status = 'ACTIVE'
@@ -1932,7 +1957,7 @@ class DBManager
 
         if ($stmt) {
             $stmt->bind_param('i', $playerid);
-            $stmt->bind_result($id, $gameName, $waiting, $gamespace, $rules, $slots, $turn, $playerCount);
+            $stmt->bind_result($id, $gameName, $waiting, $gamespace, $rules, $slots, $turn, $playerCount, $occupiedSlots);
             $stmt->execute();
             while ($stmt->fetch()) {
                 if (isset($games[$id])) {
@@ -1949,6 +1974,7 @@ class DBManager
                     "turn"        => $turn,
                     "playerCount" => $playerCount,
                     "slots"       => $slots,
+                    "playerSlots" => $this->playerSlots($slots, $occupiedSlots, $playerCount),
                     "map"         => $desc["map"],
                     "rules"       => $desc["rules"],
                     "ladder"      => $desc["ladder"],
@@ -2042,13 +2068,13 @@ class DBManager
         //it used to build '<span style=...>LADDER: </span>' + name + '<br><span
         //class="gameRules">(...)</span>' and replace the name outright with
         //'Fleet Builder'. All three are presentation and now travel as flags.
-		$stmt = $this->connection->prepare("select g.id as parentGameId, g.name, g.slots, g.gamespace, g.rules, (select count(distinct playerid) from tac_playeringame where gameid = parentGameId and playerid > 0 ) as numberOfPlayers, (SELECT count(*) FROM tac_playeringame WHERE gameid = g.id AND playerid = ?) as userInGame from tac_game g WHERE  g.status = 'LOBBY';");
+		$stmt = $this->connection->prepare("select g.id as parentGameId, g.name, g.slots, g.gamespace, g.rules, (select count(distinct playerid) from tac_playeringame where gameid = parentGameId and playerid > 0 ) as numberOfPlayers, (select count(*) from tac_playeringame where gameid = parentGameId and playerid > 0 ) as occupiedSlots, (SELECT count(*) FROM tac_playeringame WHERE gameid = g.id AND playerid = ?) as userInGame from tac_game g WHERE  g.status = 'LOBBY';");
 
         $games = [];
 
         if ($stmt) {
             $stmt->bind_param("i", $userid);
-            $stmt->bind_result($id, $gameName, $slots, $gamespace, $rules, $playerCount, $userInGame);
+            $stmt->bind_result($id, $gameName, $slots, $gamespace, $rules, $playerCount, $occupiedSlots, $userInGame);
             $stmt->execute();
             while ($stmt->fetch()) {
                 $desc = $this->describeGameRules($rules, $gamespace);
@@ -2064,6 +2090,7 @@ class DBManager
                     "status"      => "LOBBY",
                     "playerCount" => $playerCount,
                     "slots"       => $slots,
+                    "playerSlots" => $this->playerSlots($slots, $occupiedSlots, $playerCount),
                     "map"         => $desc["map"],
                     "rules"       => $desc["rules"],
                     "ladder"      => $desc["ladder"],
