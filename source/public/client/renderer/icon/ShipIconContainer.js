@@ -38,13 +38,27 @@ window.ShipIconContainer = function () {
             : 1;
     }
 
+    /* Icons used to be scaled down below zoom 0.5 (scale = 2 * zoom) so a ship held a constant size
+       on screen however far you zoomed in. The cost was that it decoupled the ship from the grid: at
+       full zoom-in a hull covered about a fifth of the hexes it should, and it dragged everything
+       parented to the icon along with it - the weapon/structure arcs, the EW blankets and the
+       straight-arc hex highlights all understated their reach at exactly the zoom you'd be using to
+       read them carefully.
+
+       Icons now hold their true world size at every zoom, so a hull and its arcs always cover the
+       hexes they actually occupy. Set ICON_SCALE_FOLLOWS_ZOOM back to true for the old
+       constant-screen-size behaviour. */
+    var ICON_SCALE_FOLLOWS_ZOOM = false;
+
     // Single source of truth for the per-zoom icon uniforms, shared by onZoomEvent
     // (all icons) and setShips (a single freshly-created icon).
     function applyZoomToIcon(icon, zoom) {
-        if (zoom <= 0.5) {
-            var newzoom = 2 * zoom;
-            icon.setScale(newzoom, newzoom);
-        }
+        // Set unconditionally. The old code only assigned inside the zoom <= 0.5 branch and never
+        // restored it, so a deep zoom-in left icons shrunk at every zoom after it - it only looked
+        // right because the zoom animation steps through the 0.5 boundary on the way back out and
+        // happened to leave the scale near 1.
+        var scale = (ICON_SCALE_FOLLOWS_ZOOM && zoom <= 0.5) ? 2 * zoom : 1;
+        icon.setScale(scale, scale);
 
         var alpha = zoom > 2 ? zoom - 2 : 0;
         if (alpha > 1) {

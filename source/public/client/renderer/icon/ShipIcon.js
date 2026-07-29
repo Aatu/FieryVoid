@@ -167,14 +167,18 @@ window.ShipIcon = function () {
 
     /* Below zoom 0.5 the zoom handler shrinks the whole icon (ShipIconContainer.applyZoomToIcon) so
        ships don't balloon on screen when you zoom right in. Anything measured in GRID units rather
-       than icon units has to sit that out - the straight-arc hex highlights have to stay the size of
-       a real hex or they stop lining up with the grid underneath them.
+       than icon units has to sit that out, or it silently lies about how far it reaches: a weapon's
+       10-hex arc drew as 4 hexes at full zoom-in, and the straight-arc hex highlights stopped lining
+       up with the grid they are drawn on top of.
 
        Such children are flagged with a gridLockedOffset (their offset from the icon in game units)
        and get the icon's scale cancelled back out here. The offset is divided too: a child's local
        position is multiplied by the parent's scale just as its geometry is. Routed through setScale
        because that is the single funnel for the icon's scale, so the correction can never go stale
-       while an arc is on screen and the player zooms. */
+       while an overlay is on screen and the player zooms.
+
+       Anything sized in ICON units stays out of this - the thruster icons and the direction arrows
+       are part of the ship's iconography and are meant to shrink with it. */
     function normaliseGridLockedChildren(mesh) {
         var scaleX = mesh.scale.x || 1;
         var scaleY = mesh.scale.y || 1;
@@ -188,6 +192,15 @@ window.ShipIcon = function () {
             child.position.x = offset.x / scaleX;
             child.position.y = offset.y / scaleY;
         });
+    }
+
+    /* Add an overlay whose size means something in hexes, so it holds that size however the icon is
+       rescaled. offset is the overlay's position relative to the icon in game units - omit it for
+       "centred on the icon", which is what every range overlay wants. */
+    function addGridLockedOverlay(mesh, overlay, offset) {
+        overlay.userData.gridLockedOffset = offset || { x: 0, y: 0 };
+        mesh.add(overlay);
+        normaliseGridLockedChildren(mesh);
     }
 
     ShipIcon.prototype.setScale = function (width, height) {
@@ -673,7 +686,7 @@ window.ShipIcon = function () {
                 var circle = new THREE.Mesh(geometry, material);
                 circle.rotation.z = mathlib.degreeToRadian(-mathlib.addToDirection(arcFacing, -this.getFacing()));
                 circle.position.z = -1;
-                this.mesh.add(circle);
+                addGridLockedOverlay(this.mesh, circle); //radius is a hex range - hold it against the icon's zoom rescale
                 this.weaponArcs.push(circle);
             }
 
@@ -721,7 +734,7 @@ window.ShipIcon = function () {
             var circle = new THREE.Mesh(geometry, material);
             circle.rotation.z = mathlib.degreeToRadian(-mathlib.addToDirection(arcFacing, -this.getFacing()));
             circle.position.z = -1;
-            this.mesh.add(circle);
+            addGridLockedOverlay(this.mesh, circle); //radius is a hex range - hold it against the icon's zoom rescale
             this.weaponArcs.push(circle);
 
         }
@@ -795,9 +808,59 @@ window.ShipIcon = function () {
     });
 
     //Shrink each highlighted hex slightly so the hex outlines read individually instead of merging
-    //into one solid beam. 1 = hexes touch edge to edge.
+    //into one solid beam. 1 = hexes touch edge to edge, which is what the cobalt border below is for.
     //var STRAIGHT_ARC_HEX_INSET = 0.94;
-    var STRAIGHT_ARC_HEX_INSET = 1;    
+    var STRAIGHT_ARC_HEX_INSET = 1;
+
+    var STRAIGHT_ARC_FILL_COLOUR = 0x11446e;
+    var STRAIGHT_ARC_BORDER_COLOUR = 0x063646; //cyan, brighter than the fill so the hex edges carry
+
+    /* A one-pixel outline around each highlighted hex, all of them in a single LineSegments so the
+       whole set is still one draw call.
+
+       LineBasicMaterial.linewidth is ignored by the WebGL renderer - normally a nuisance, here
+       exactly what is wanted: the border is one device pixel at every zoom level, so it neither
+       thickens as you zoom in nor thins away to nothing as you zoom out, the way a world-unit ring
+       would. Same reasoning as the structure wedge's outline (buildArcOutline).
+
+       An edge shared by two neighbouring hexes is emitted once. Drawn twice, a semi-transparent
+       border comes out visibly darker along the interior seams than around the outside. Keyed on the
+       edge midpoint at half-unit precision: genuinely shared edges land on exactly the same midpoint,
+       while inset hexes - whose facing edges really are two separate lines a few units apart - stay
+       distinct and both get drawn. */
+    function buildHexOutlines(centres, radius) {
+        var positions = [];
+        var drawn = {};
+
+        centres.forEach(function (centre) {
+            for (var corner = 0; corner < 6; corner++) {
+                var from = HEX_CORNERS[corner];
+                var to = HEX_CORNERS[(corner + 1) % 6];
+
+                var x1 = centre.x + from.x * radius;
+                var y1 = centre.y + from.y * radius;
+                var x2 = centre.x + to.x * radius;
+                var y2 = centre.y + to.y * radius;
+
+                var key = Math.round(x1 + x2) + ',' + Math.round(y1 + y2); //the midpoint, doubled
+                if (drawn[key]) continue;
+                drawn[key] = true;
+
+                positions.push(x1, y1, 0, x2, y2, 0);
+            }
+        });
+
+        var geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+
+        var outlines = new THREE.LineSegments(
+            geometry,
+            new THREE.LineBasicMaterial({ color: STRAIGHT_ARC_BORDER_COLOUR, opacity: 0.9, transparent: true })
+        );
+        outlines.position.z = 0.01; //clear of the coplanar fill, still behind the ship sprite
+
+        return outlines;
+    }
 
     /* A weapon that shoots straight (Transverse Drive, Warp Jump) can only reach the hexes lying on
        the six grid lines out of its own hex, so its arc is drawn as those actual hexes rather than
@@ -828,7 +891,7 @@ window.ShipIcon = function () {
         }
 
         var hexRadius = hexDistance / Math.sqrt(3); //hexDistance is centre-to-centre (the flat-to-flat width); this is centre-to-corner
-        var shapes = [];
+        var centres = [];
 
         for (var i = 0; i < 6; i++) {
             var dir = i * 60; // clockwise
@@ -844,32 +907,38 @@ window.ShipIcon = function () {
             var stepY = Math.sin(angle) * hexDistance;
 
             for (var step = 1; step <= maxHexes; step++) { //from 1: the ship's own hex is not highlighted
-                var centreX = stepX * step;
-                var centreY = stepY * step;
-                var shape = new THREE.Shape();
-
-                for (var corner = 0; corner < 6; corner++) {
-                    var x = centreX + HEX_CORNERS[corner].x * hexRadius * STRAIGHT_ARC_HEX_INSET;
-                    var y = centreY + HEX_CORNERS[corner].y * hexRadius * STRAIGHT_ARC_HEX_INSET;
-
-                    if (corner === 0) {
-                        shape.moveTo(x, y);
-                    } else {
-                        shape.lineTo(x, y);
-                    }
-                }
-
-                shape.closePath();
-                shapes.push(shape);
+                centres.push({ x: stepX * step, y: stepY * step });
             }
         }
 
-        if (!shapes.length) return;
+        if (!centres.length) return;
+
+        var radius = hexRadius * STRAIGHT_ARC_HEX_INSET;
+        var shapes = centres.map(function (centre) {
+            var shape = new THREE.Shape();
+
+            HEX_CORNERS.forEach(function (corner, index) {
+                var x = centre.x + corner.x * radius;
+                var y = centre.y + corner.y * radius;
+
+                if (index === 0) {
+                    shape.moveTo(x, y);
+                } else {
+                    shape.lineTo(x, y);
+                }
+            });
+
+            shape.closePath();
+            return shape;
+        });
 
         var hexes = new THREE.Mesh(
             new THREE.ShapeGeometry(shapes),
-            new THREE.MeshBasicMaterial({ color: 0x145080, opacity: 0.5, transparent: true })
+            new THREE.MeshBasicMaterial({ color: STRAIGHT_ARC_FILL_COLOUR, opacity: 0.5, transparent: true })
         );
+
+        //child, so it inherits the fill's rotation, grid-lock correction and removal
+        hexes.add(buildHexOutlines(centres, radius));
 
         hexes.rotation.z = mathlib.degreeToRadian(this.getFacing());
 
@@ -883,11 +952,9 @@ window.ShipIcon = function () {
         var iconPosition = this.getPosition();
         var hexCentre = window.coordinateConverter.fromHexToGame(window.coordinateConverter.fromGameToHex(iconPosition));
 
-        hexes.userData.gridLockedOffset = { x: hexCentre.x - iconPosition.x, y: hexCentre.y - iconPosition.y };
         hexes.position.z = -1;
 
-        this.mesh.add(hexes);
-        normaliseGridLockedChildren(this.mesh);
+        addGridLockedOverlay(this.mesh, hexes, { x: hexCentre.x - iconPosition.x, y: hexCentre.y - iconPosition.y });
         this.weaponArcs.push(hexes);
     };
 
@@ -938,7 +1005,11 @@ window.ShipIcon = function () {
         //a world-unit border would vanish when zoomed out on a wedge this small. Added as a CHILD
         //so it inherits the wedge's rotation/position (and its removal).
         circle.add(buildArcOutline(dis, thetaStart, thetaLength, color));
-        this.mesh.add(circle);
+        //Grid-locked with the weapon arcs. This one is the odd case: a structure has no range, so the
+        //radius is arbitrary (roughly the icon's own size) rather than a count of hexes. It is held
+        //fixed anyway so a section wedge and a weapon wedge - routinely on screen together - stay in
+        //the same proportion to each other at every zoom instead of only below 0.5.
+        addGridLockedOverlay(this.mesh, circle);
         this.structureArcs.push(circle);
 
         return null;
@@ -1041,7 +1112,7 @@ window.ShipIcon = function () {
         var border = new THREE.Mesh(new THREE.ShapeGeometry(borderShape), borderMaterial);
         hexagon.add(border);
 
-        this.mesh.add(hexagon);
+        addGridLockedOverlay(this.mesh, hexagon); //the 20-hex blanket has to cover 20 hexes at every zoom
         this.BDEWSprite = hexagon;
 
         return null;
@@ -1123,7 +1194,7 @@ window.ShipIcon = function () {
         var border = new THREE.Mesh(new THREE.ShapeGeometry(borderShape), borderMaterial);
         hexagon.add(border);
 
-        this.mesh.add(hexagon);
+        addGridLockedOverlay(this.mesh, hexagon); //the detection radius is a hex count - hold it
         this.MDEWSprite = hexagon;
 
         return null;
@@ -1283,7 +1354,15 @@ window.ShipIcon = function () {
             hexagon.add(edge2);
         }
 
-        this.mesh.add(hexagon);
+        /* dis is (size + 0.6) hexes - a Gravitic's move distance - so grid-lock it like the other
+           range overlays.
+
+           This also settles the clipping, which used to drift: the hexagon hangs off the TARGET's
+           icon while the planes are WORLD-space planes through the SHOOTER, so the icon's zoom
+           rescale changed the hexagon's world size while the planes stayed put, and the clipped wedge
+           came out differently at different zooms. Holding the hexagon's world size fixed makes both
+           sides of the clip zoom-invariant. */
+        addGridLockedOverlay(this.mesh, hexagon);
         this.shipHexagonSpritesMap.set(system, hexagon);
         /*
         //plane/arc helpers to troubleshoot arc placement.
