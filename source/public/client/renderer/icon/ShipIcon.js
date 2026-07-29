@@ -364,7 +364,39 @@ window.ShipIcon = function () {
 
         var movesByHexAndTurn = [];
 
-        if (movements && movements.length > 0 && movements[0]) {
+        /* Defensive normalisation. PHP's json_encode emits a JSON OBJECT rather than an
+           array whenever the server-side movement array has gaps in its integer keys -
+           i.e. any unset() that wasn't followed by array_values() (TacGamedata's hide*
+           helpers strip an enemy's in-progress moves while keeping start/deploy markers
+           and the Gravitic Augmenter's transient forced jink, which sits LAST). An object
+           has no .filter, so a single affected ship used to throw out of createIcon and
+           abort setShips' whole loop - the board came up empty. Object.values() walks
+           integer-like keys in ascending order, so the move order is preserved and a
+           server slip degrades to a correctly ordered array instead of a dead board.
+           Both branches warn: this should never happen, and we want it in the console. */
+        if (movements && !Array.isArray(movements) && typeof movements === 'object') {
+            console.warn('ShipIcon.consumeMovement: ship ' + this.shipId +
+                ' received movement as an object (gappy server array?); coercing.', movements);
+
+            var normalised = Object.values(movements);
+            // Also repair the shared gamedata ship, otherwise every array-only consumer
+            // (shipManager.movement's .length/.splice, ajaxInterface.construcGamedata,
+            // the attached-pod mirroring in PhaseStrategy) still trips over the object.
+            if (this.ship && this.ship.movement === movements) {
+                this.ship.movement = normalised;
+            }
+            movements = normalised;
+        }
+
+        if (!Array.isArray(movements)) {
+            if (movements !== undefined && movements !== null) {
+                console.warn('ShipIcon.consumeMovement: ship ' + this.shipId +
+                    ' received unusable movement; treating as empty.', movements);
+            }
+            movements = [];
+        }
+
+        if (movements.length > 0 && movements[0]) {
             this.defaultPosition = {
                 turn: movements[0].turn,
                 facing: movements[0].facing,
