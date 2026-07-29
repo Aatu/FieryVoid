@@ -65,7 +65,7 @@ class Manager{
                 
             self::$dbManager->endTransaction(false);
         }catch(exception $e) {
-            self::$dbManager->endTransaction(true);
+            if (self::$dbManager !== null) self::$dbManager->endTransaction(true);
             throw $e;
         }
     }
@@ -311,9 +311,7 @@ class Manager{
             return $gameid;
         }
         catch(exception $e) {
-            if (self::$dbManager) {
-                self::$dbManager->endTransaction(true);
-            }
+            if (self::$dbManager !== null) self::$dbManager->endTransaction(true);
             throw $e;
         }
     
@@ -599,7 +597,7 @@ class Manager{
             self::$dbManager->endTransaction(false);          
             return $gamedata;
         }catch(exception $e) {
-            self::$dbManager->endTransaction(true);
+            if (self::$dbManager !== null) self::$dbManager->endTransaction(true);
             $logid = Debug::error($e);
             return json_encode([
                 "error" => $e->getMessage(),
@@ -843,7 +841,7 @@ class Manager{
                 ]);
 
             } catch (Exception $e) {
-                self::$dbManager->endTransaction(true);
+                if (self::$dbManager !== null) self::$dbManager->endTransaction(true);
                 $logid = Debug::error($e);
                 return json_encode([
                     "error" => $e->getMessage(),
@@ -867,7 +865,7 @@ class Manager{
             return $fleets;
 
         } catch (Exception $e) {
-            self::$dbManager->endTransaction(true);
+            if (self::$dbManager !== null) self::$dbManager->endTransaction(true);
             $logid = Debug::error($e);
             return [];
         }
@@ -933,7 +931,7 @@ class Manager{
             }
 
         } catch (Exception $e) {
-            self::$dbManager->endTransaction(true);
+            if (self::$dbManager !== null) self::$dbManager->endTransaction(true);
             Debug::error($e);
             return []; // safe fallback
         }
@@ -960,7 +958,7 @@ class Manager{
             ]);
 
         } catch (Exception $e) {
-            self::$dbManager->endTransaction(true);
+            if (self::$dbManager !== null) self::$dbManager->endTransaction(true);
             $logid = Debug::error($e);
             return [];
         }
@@ -980,7 +978,7 @@ class Manager{
                 'newStatus' => $newStatus
             ];
         } catch (Exception $e) {
-            self::$dbManager->endTransaction(true);
+            if (self::$dbManager !== null) self::$dbManager->endTransaction(true);
             $logid = Debug::error($e);
             return [
                 'id'      => $id,
@@ -1219,8 +1217,8 @@ class Manager{
             return '{}';
 
         }catch(exception $e) {
-            self::$dbManager->endTransaction(true);
-            self::$dbManager->releasePlayerSubmitLock($gameid, $userid);
+            if (self::$dbManager !== null) self::$dbManager->endTransaction(true);
+            if (self::$dbManager !== null) self::$dbManager->releasePlayerSubmitLock($gameid, $userid);
             if (class_exists('DiscordNotifier')) DiscordNotifier::clear();   // rolled-back state must not ping
             $logid = Debug::error($e);
             return '{"error": "' .$e->getMessage() . '", "code":"'.$e->getCode().'", "logid":"'.$logid.'"}';
@@ -1284,7 +1282,7 @@ class Manager{
         }
         catch(Exception $e)
         {
-            self::$dbManager->endTransaction(true);
+            if (self::$dbManager !== null) self::$dbManager->endTransaction(true);
             self::$dbManager->releaseGameSubmitLock($gameid);
             throw $e;
         }
@@ -1379,8 +1377,8 @@ class Manager{
         }
         catch(Exception $e)
         {
-            self::$dbManager->endTransaction(true);
-            self::$dbManager->releaseGameSubmitLock($gameid);
+            if (self::$dbManager !== null) self::$dbManager->endTransaction(true);
+            if (self::$dbManager !== null) self::$dbManager->releaseGameSubmitLock($gameid);
             if (class_exists('DiscordNotifier')) DiscordNotifier::clear();   // rolled-back state must not ping
             throw $e;
         }
