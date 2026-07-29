@@ -682,6 +682,7 @@ class AutomatedMovement
             // Pick one co-located enemy ship for the whole flight to ram (range 0).
             $enemy = self::firstCoLocatedEnemy($flight, $gamedata);
             if (!$enemy) continue;
+            
 
             // One ram per LIVE fighter, on that fighter's own RammingAttack. Only the
             // first order carries the announcement note so the combat log shows it once.
@@ -740,6 +741,11 @@ class AutomatedMovement
             if ($enemy->mine) continue;
             if ($enemy->getTurnDeployed($gamedata) > $gamedata->turn) continue;
             if (Mathlib::getDistanceHex($flight, $enemy) > 0) continue; // range 0 only
+            // A half-phased Shadow unit cannot be rammed by a non-half-phased one (and an
+            // HK flight can never half-phase - only capital Shadow hulls have halfPhaseThrust),
+            // so calculateHitBaseRam would score it 0. Skip it here rather than emit a
+            // guaranteed-miss ram order (plus DB row + "HKs ram X!" note) per fighter.
+            if (Movement::isHalfPhased($enemy, $gamedata->turn)) continue;
 
             // Tie-break by combat-value-ish proxy: just take the first / nearest.
             $best = $enemy;
