@@ -103,17 +103,7 @@ class XonnUpdated extends VreeCapital{
 		$this->addRightAftSystem(new AntiprotonGun(3, 0, 0, 60, 180));
 		$this->addRightAftSystem(new AntiprotonGun(3, 0, 0, 60, 180));		
 		
-       
-        //0:primary, 1:front, 2:rear, 3:left, 4:right;
-		
-		/*remade for Tags!
-        $this->addFrontSystem(new Structure( 5, 36, true));
-        $this->addAftSystem(new Structure( 5, 36, true));
-        $this->addLeftFrontSystem(new Structure( 5, 36, true));
-        $this->addLeftAftSystem(new Structure( 5, 36, true));
-        $this->addRightFrontSystem(new Structure( 5, 36, true));
-        $this->addRightAftSystem(new Structure( 5, 36, true));   
-		*/
+
 		$structArmor = 5;
 		$structHP = 36;
 		

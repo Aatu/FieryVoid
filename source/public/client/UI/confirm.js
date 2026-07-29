@@ -1753,6 +1753,48 @@ window.confirm = {
 
         var container = $('<div class="multi-value-container"></div>').insertAfter(e.find('.multi-value-header'));
 
+        /* Themed replacement for the browser's number-input spinner. The native arrows are
+           drawn by the UA in its own colours - white on this dark purple dialog - and cannot
+           be recoloured: Firefox exposes no hook at all, and resetting the appearance of
+           Blink's ::-webkit-inner-spin-button also kills its click behaviour. So the native
+           pair is hidden (see .stepper-input in confirm.css) and replaced with these, which
+           are ordinary elements and therefore themeable.
+
+           They read min/max/step straight off the input - including the max that clampRow
+           rewrites as the shot count changes - and fire `change`, so a click runs exactly the
+           same clamp/readout path a native click would. */
+        var attachStepper = function (field) {
+            field.addClass('stepper-input');
+
+            var stepper = $('<span class="multi-value-stepper"></span>');
+            var up = $('<span class="multi-value-step up"></span>').appendTo(stepper);
+            var down = $('<span class="multi-value-step down"></span>').appendTo(stepper);
+
+            var nudge = function (direction) {
+                var step = parseInt(field.attr('step'));
+                var min = parseInt(field.attr('min'));
+                var max = parseInt(field.attr('max'));
+                if (isNaN(step) || step < 1) step = 1;
+
+                var current = parseInt(field.val());
+                if (isNaN(current)) current = isNaN(min) ? 0 : min;
+
+                var next = current + (direction * step);
+                if (!isNaN(min) && next < min) next = min;
+                if (!isNaN(max) && next > max) next = max;
+                if (next === current) return;
+
+                field.val(next).trigger('change');
+            };
+
+            // mousedown rather than click so holding the pointer down doesn't steal focus
+            // from the field mid-edit, and so the arrow responds on press like a real spinner.
+            up.on('mousedown', function (ev) { ev.preventDefault(); nudge(1); });
+            down.on('mousedown', function (ev) { ev.preventDefault(); nudge(-1); });
+
+            stepper.insertAfter(field);
+        };
+
         inputs.forEach(function (item) {
             var row = $('<div class="multi-value-row"></div>');
             var mainMin = (item.min !== undefined) ? item.min : 1;
@@ -1779,10 +1821,12 @@ window.confirm = {
             var countInput = null;
             if (item.multiplier) {
                 countInput = $('<input type="number" class="multiConfirmInput multi-value-input mult-input" data-id="' + item.id + '_mult" value="1" min="1" style="width:50px;">').appendTo(inputWrapper);
+                attachStepper(countInput);
                 $('<span class="multi-value-max" style="margin-left:5px; margin-right:10px; color:#DEFBFF;">shots</span>').appendTo(inputWrapper);
             }
 
             var input = $('<input type="number" class="multiConfirmInput multi-value-input main-input" data-id="' + item.id + '" value="' + initialValue + '" min="' + mainMin + '" ' + maxAttr + '>').appendTo(inputWrapper);
+            attachStepper(input);
             if (unitLabel) $('<span class="multi-value-max" style="margin-left:5px; color:#DEFBFF;">' + unitLabel + '</span>').appendTo(inputWrapper);
 
             var extraInput = null;
@@ -1790,6 +1834,7 @@ window.confirm = {
             if (hasExtra) {
                 var extraValue = (item.extra.value !== undefined) ? item.extra.value : extraMin;
                 extraInput = $('<input type="number" class="multiConfirmInput multi-value-input extra-input" data-id="' + item.id + '_extra" value="' + extraValue + '" min="' + extraMin + '" max="' + extraMax + '" step="' + extraStep + '" style="width:55px; margin-left:10px;">').appendTo(inputWrapper);
+                attachStepper(extraInput);
                 if (extraLabel) $('<span class="multi-value-max" style="margin-left:5px; color:#DEFBFF;">' + extraLabel + '</span>').appendTo(inputWrapper);
 
                 row.addClass('multi-value-row-pools');
