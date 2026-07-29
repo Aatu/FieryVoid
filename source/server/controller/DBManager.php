@@ -15,11 +15,15 @@ class DBManager
         if ($this->connection !== null)
             return $this->connection;
 
+        // Plain Exception, not the old CustomException: that class was never defined
+        // anywhere, so a failed connect threw "Class CustomException not found" — an
+        // Error, which catch(Exception) blocks in Manager cannot catch — masking the
+        // real DB error behind an uncatchable fatal.
         if (!$this->connection = mysqli_connect($host, $username, $password, $database, $port))
-            throw new CustomException(300, "DBManager:Construct, connection failed: " . mysqli_connect_error(), mysqli_connect_errno(), null);
+            throw new Exception("DBManager:Construct, connection failed: " . mysqli_connect_error() . " (" . mysqli_connect_errno() . ")", 300);
 
         if (!mysqli_select_db($this->connection, $database))
-            throw new CustomException(300, "DBManager:Construct, connection failed: " . mysqli_error($this->connection), mysqli_errno(), null);
+            throw new Exception("DBManager:Construct, database select failed: " . mysqli_error($this->connection) . " (" . mysqli_errno($this->connection) . ")", 300);
 
         mysqli_set_charset($this->connection, 'utf8');
     }
