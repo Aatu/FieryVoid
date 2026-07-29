@@ -44,11 +44,17 @@
 						||( $move->turn != $gamedata->turn )
 						||(!self::checkIsNewMove($gamedata, $ship, $move))){
                         unset($ship->movement[$i]);
-                       
+
                     }
 
                 }
-                
+
+                //Re-index: for a FighterFlight only the surviving new combat pivots are kept,
+                //at their ORIGINAL indices, so unset() leaves key gaps. Anything that later
+                //json_encodes this array would emit a JSON object and break the client's
+                //movements.filter(). Harmless no-op when the keys are already sequential.
+                $ship->movement = array_values($ship->movement);
+
             }else{
                 
             //These parts are never used since validateMovement is only called during FireGamePhase, and it has a mistake in it anyway... DK - Nov 2025    

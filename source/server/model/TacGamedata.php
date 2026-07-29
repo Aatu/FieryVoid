@@ -699,6 +699,10 @@ class TacGamedata {
                     if ($move->type == "deploy" && $move->turn == $this->turn)
                         unset($ship->movement[$i]);
                 }
+
+                //Re-index: deploy rows sit at the FRONT, so unsetting them leaves the array
+                //keyed from 1..n and json_encode would emit a JSON object, not an array.
+                $ship->movement = array_values($ship->movement);
             }
         }
     
@@ -897,6 +901,13 @@ class TacGamedata {
             foreach ($toDelete as $i) {
                 unset($ship->movement[$i]);
             }
+
+            //MUST re-index: the carve-outs above (start/deploy, the isRolled/isRolling/
+            //isPivoting markers, and forced moves) are scattered THROUGH the deleted block -
+            //the Gravitic Augmenter's forced free jink in particular is appended LAST - so
+            //unset() leaves gaps in the keys. json_encode turns a gappy array into a JSON
+            //OBJECT, and the client's consumeMovement then dies on movements.filter().
+            $ship->movement = array_values($ship->movement);
         }
     }
 
@@ -920,6 +931,10 @@ class TacGamedata {
                     unset($ship->movement[$i]);
                 }
             }
+
+            //Re-index so json_encode still emits an ARRAY - a transient move appended after
+            //the pivot (e.g. the Augmenter's forced jink) would otherwise leave a key gap.
+            $ship->movement = array_values($ship->movement);
         }
     }
 
