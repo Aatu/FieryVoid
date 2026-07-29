@@ -165,8 +165,34 @@ window.ShipIcon = function () {
     };
 
 
+    /* Below zoom 0.5 the zoom handler shrinks the whole icon (ShipIconContainer.applyZoomToIcon) so
+       ships don't balloon on screen when you zoom right in. Anything measured in GRID units rather
+       than icon units has to sit that out - the straight-arc hex highlights have to stay the size of
+       a real hex or they stop lining up with the grid underneath them.
+
+       Such children are flagged with a gridLockedOffset (their offset from the icon in game units)
+       and get the icon's scale cancelled back out here. The offset is divided too: a child's local
+       position is multiplied by the parent's scale just as its geometry is. Routed through setScale
+       because that is the single funnel for the icon's scale, so the correction can never go stale
+       while an arc is on screen and the player zooms. */
+    function normaliseGridLockedChildren(mesh) {
+        var scaleX = mesh.scale.x || 1;
+        var scaleY = mesh.scale.y || 1;
+
+        mesh.children.forEach(function (child) {
+            var offset = child.userData.gridLockedOffset;
+
+            if (!offset) return;
+
+            child.scale.set(1 / scaleX, 1 / scaleY, 1);
+            child.position.x = offset.x / scaleX;
+            child.position.y = offset.y / scaleY;
+        });
+    }
+
     ShipIcon.prototype.setScale = function (width, height) {
         this.mesh.scale.set(width, height, 1);
+        normaliseGridLockedChildren(this.mesh);
     };
 
     ShipIcon.prototype.consumeEW = function (ship) {
@@ -755,27 +781,44 @@ window.ShipIcon = function () {
     };
 
 
+    /* Corners of a pointy-top hex as unit offsets from its centre - the same 30/90/.../330 degree
+       corners mathlib.getHexCorners uses to build the grid, so a hexagon drawn from these lands
+       exactly on a grid hex.
+
+       They are emitted in the icon's LOCAL space and the finished mesh is then turned to the ship's
+       facing. That is safe without any per-facing correction because a pointy-top hexagon maps onto
+       itself under any 60 degree rotation and a ship's facing is always a multiple of 60
+       (mathlib.hexFacingToAngle) - the hexes stay grid-aligned however the ship is pointing. */
+    var HEX_CORNERS = [30, 90, 150, 210, 270, 330].map(function (degrees) {
+        var radians = degrees * Math.PI / 180;
+        return { x: Math.cos(radians), y: Math.sin(radians) };
+    });
+
+    //Shrink each highlighted hex slightly so the hex outlines read individually instead of merging
+    //into one solid beam. 1 = hexes touch edge to edge.
+    //var STRAIGHT_ARC_HEX_INSET = 0.94;
+    var STRAIGHT_ARC_HEX_INSET = 1;    
+
+    /* A weapon that shoots straight (Transverse Drive, Warp Jump) can only reach the hexes lying on
+       the six grid lines out of its own hex, so its arc is drawn as those actual hexes rather than
+       an approximating oblong. The firing ship's own hex is never a target, so the chains start one
+       hex out.
+
+       Every hex of every direction goes into ONE geometry: THREE.ShapeGeometry accepts an array of
+       shapes and triangulates them all into a single buffer. A range-3 weapon with a 360 degree arc
+       is 18 highlighted hexes but still one mesh, one material and one draw call - cheaper than the
+       up-to-six meshes the oblong version made, and no per-hex sprite. */
     ShipIcon.prototype.showStraightArcs = function (weapon, hexDistance, arcs) {
-        var dis = weapon.rangePenalty === 0
-            ? hexDistance * (weapon.range + 0.5)
-            : 50 / weapon.rangePenalty * hexDistance;
+        //Reach in whole hexes. Same rule the circular arcs use: a range penalty caps the useful
+        //reach where the penalty reaches 50, and weapon.range caps it again when it is set.
+        var maxHexes = weapon.rangePenalty === 0 ? weapon.range : Math.floor(50 / weapon.rangePenalty);
+        if (weapon.range > 0 && maxHexes > weapon.range) maxHexes = weapon.range;
+        if (isNaN(maxHexes) || !isFinite(maxHexes)) maxHexes = 1; // fallback for systems without a rangePenalty, as in the circular branch
+        if (maxHexes < 1) return; //genuinely no reach (e.g. a Warp Jump whose nacelle damage has taken its range to 0) - nothing to highlight
 
-        if (weapon.range > 0 && dis > hexDistance * (weapon.range + 0.5)) dis = hexDistance * (weapon.range + 0.5);
-
-        const shipFacing = this.getFacing(); // ship's facing in degrees
-
-        // Hex grid offsets for pointy-top hexes, clockwise
-        const hexDirOffsets = [
-            { x: 1, y: 0 },                         // 0° forward
-            { x: 0.5, y: -Math.sqrt(3) / 2 },         // 60° clockwise
-            { x: -0.5, y: -Math.sqrt(3) / 2 },        // 120°
-            { x: -1, y: 0 },                         // 180°
-            { x: -0.5, y: Math.sqrt(3) / 2 },         // 240°
-            { x: 0.5, y: Math.sqrt(3) / 2 },          // 300°
-        ];
         // Arc start/end relative to ship's facing
-        let arcStart = arcs.start % 360;
-        let arcEnd = arcs.end % 360;
+        var arcStart = arcs.start % 360;
+        var arcEnd = arcs.end % 360;
 
         if (arcStart === arcEnd) {
             arcStart = 0;
@@ -784,59 +827,68 @@ window.ShipIcon = function () {
             arcEnd += 360;
         }
 
-        // Helper to create rounded rectangle
-        function createRoundedRectShape(width, height, radius) {
-            const shape = new THREE.Shape();
-            const w = width;
-            const h = height;
-            const r = Math.min(radius, w / 2, h / 2);
+        var hexRadius = hexDistance / Math.sqrt(3); //hexDistance is centre-to-centre (the flat-to-flat width); this is centre-to-corner
+        var shapes = [];
 
-            shape.moveTo(-w / 2 + r, -h / 2);
-            shape.lineTo(w / 2 - r, -h / 2);
-            shape.quadraticCurveTo(w / 2, -h / 2, w / 2, -h / 2 + r);
-            shape.lineTo(w / 2, h / 2 - r);
-            shape.quadraticCurveTo(w / 2, h / 2, w / 2 - r, h / 2);
-            shape.lineTo(-w / 2 + r, h / 2);
-            shape.quadraticCurveTo(-w / 2, h / 2, -w / 2, h / 2 - r);
-            shape.lineTo(-w / 2, -h / 2 + r);
-            shape.quadraticCurveTo(-w / 2, -h / 2, -w / 2 + r, -h / 2);
-
-            return shape;
-        }
-
-        for (let i = 0; i < 6; i++) {
-            let dir = i * 60; // clockwise
+        for (var i = 0; i < 6; i++) {
+            var dir = i * 60; // clockwise
 
             // Wrap around for arc selection
-            let dirAdjusted = dir;
+            var dirAdjusted = dir;
             if (dirAdjusted < arcStart) dirAdjusted += 360;
+            if (dirAdjusted < arcStart || dirAdjusted > arcEnd) continue;
 
-            if (dirAdjusted >= arcStart && dirAdjusted <= arcEnd) {
-                const shape = createRoundedRectShape(dis, hexDistance * 0.85, hexDistance * 0.2);
-                const geometry = new THREE.ShapeGeometry(shape);
-                const material = new THREE.MeshBasicMaterial({
-                    color: 0x145080,
-                    opacity: 0.5,
-                    transparent: true
-                });
-                const lineArc = new THREE.Mesh(geometry, material);
+            //Bearings are clockwise, local space is counter-clockwise, hence the negated angle.
+            var angle = mathlib.degreeToRadian(-dir);
+            var stepX = Math.cos(angle) * hexDistance;
+            var stepY = Math.sin(angle) * hexDistance;
 
-                // Rotate relative to ship's facing
-                lineArc.rotation.z = mathlib.degreeToRadian(-dir);
+            for (var step = 1; step <= maxHexes; step++) { //from 1: the ship's own hex is not highlighted
+                var centreX = stepX * step;
+                var centreY = stepY * step;
+                var shape = new THREE.Shape();
 
-                // Position offset along the hex direction
-                lineArc.position.x = hexDirOffsets[i].x * dis / 2;
-                lineArc.position.y = hexDirOffsets[i].y * dis / 2;
-                lineArc.position.z = -1;
+                for (var corner = 0; corner < 6; corner++) {
+                    var x = centreX + HEX_CORNERS[corner].x * hexRadius * STRAIGHT_ARC_HEX_INSET;
+                    var y = centreY + HEX_CORNERS[corner].y * hexRadius * STRAIGHT_ARC_HEX_INSET;
 
-                // Rotate into ship's local space
-                lineArc.position.applyMatrix4(new THREE.Matrix4().makeRotationZ(mathlib.degreeToRadian(shipFacing)));
-                lineArc.rotation.z += mathlib.degreeToRadian(shipFacing);
+                    if (corner === 0) {
+                        shape.moveTo(x, y);
+                    } else {
+                        shape.lineTo(x, y);
+                    }
+                }
 
-                this.mesh.add(lineArc);
-                this.weaponArcs.push(lineArc);
+                shape.closePath();
+                shapes.push(shape);
             }
         }
+
+        if (!shapes.length) return;
+
+        var hexes = new THREE.Mesh(
+            new THREE.ShapeGeometry(shapes),
+            new THREE.MeshBasicMaterial({ color: 0x145080, opacity: 0.5, transparent: true })
+        );
+
+        hexes.rotation.z = mathlib.degreeToRadian(this.getFacing());
+
+        /* The icon is nudged off its hex centre when several ships share a hex
+           (ShipIconContainer.getHexOffset), and it sits between hexes mid-animation. These are grid
+           hexes - they have to sit on the grid, not on the sprite - so re-centre on the hex the icon
+           is currently over rather than on the icon itself.
+
+           The offset is recorded rather than applied: normaliseGridLockedChildren owns the position
+           and scale of a grid-locked child, so that both survive the icon being rescaled on zoom. */
+        var iconPosition = this.getPosition();
+        var hexCentre = window.coordinateConverter.fromHexToGame(window.coordinateConverter.fromGameToHex(iconPosition));
+
+        hexes.userData.gridLockedOffset = { x: hexCentre.x - iconPosition.x, y: hexCentre.y - iconPosition.y };
+        hexes.position.z = -1;
+
+        this.mesh.add(hexes);
+        normaliseGridLockedChildren(this.mesh);
+        this.weaponArcs.push(hexes);
     };
 
 
