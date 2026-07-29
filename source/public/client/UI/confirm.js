@@ -1720,6 +1720,33 @@ window.confirm = {
 
 
 
+    /* Numeric allocation dialog - one row per item, each row a main numeric input plus
+       two OPTIONAL companions:
+         item.multiplier   -> a "shots" count input; the main value is spent PER shot, so
+                              main * count must stay within item.max.
+         item.extra        -> a SECOND, independent pool for the same row, given as
+                              {max, value, min, label, step}. Used by the Molecular Slicer,
+                              which allocates damage dice and flat "set damage" from two
+                              separate pools in one go. An optional `step` makes the box move
+                              in whole units of that size (the Slicer's self-interception
+                              dialog spends set damage 6 points at a time), snapping typed
+                              values DOWN to a legal multiple when the field is left.
+       Rows carrying either companion return an object {value, count, extra}; plain rows
+       still return a bare number, which is what the older callers (Shadow Fighter Bomb,
+       simple dice pickers) expect.
+       item.min lets a caller allow 0 in the main box - a Slicer shot may be made entirely
+       of set damage with no dice committed at all.
+       item.unit overrides the label printed after the main input ('dice' by default when a
+       companion input is present, so the two boxes can't be confused for each other).
+
+       Constraint direction, when a row has all three boxes (the fighter-target Slicer
+       dialog): SHOTS is the driver. Shots are capped by the main pool (you cannot declare
+       more shots than you have dice to pay for), and the per-shot extra is then capped by
+       the shot count. So raising set damage never yanks the player's shot count down under
+       them - it just limits how much set damage each of those shots may carry.
+
+       Rows with an extra pool also print a live "left:" readout that drains as the player
+       types, so both pools can be watched without doing the arithmetic. */
     askForMultipleValues: function (msg, inputs, callback) {
         var e = $('<div class="confirm error multi-value-confirm"><div class="ui"><div class="confirmok"></div><div class="confirmcancel"></div></div></div>');
         $('<div class="multi-value-header">' + msg + '</div>').prependTo(e);
@@ -1728,113 +1755,171 @@ window.confirm = {
 
         inputs.forEach(function (item) {
             var row = $('<div class="multi-value-row"></div>');
+            var mainMin = (item.min !== undefined) ? item.min : 1;
+            var hasExtra = !!item.extra;
+            var extraMin = hasExtra ? ((item.extra.min !== undefined) ? item.extra.min : 0) : 0;
+            var extraMax = hasExtra ? item.extra.max : 0;
+            var extraStep = (hasExtra && item.extra.step > 0) ? item.extra.step : 1;
+            var unitLabel = item.unit || ((item.multiplier || hasExtra) ? 'dice' : null);
+            var extraLabel = hasExtra ? (item.extra.label || '') : '';
+
+            // Label reads "(Max: dice / extra)" when the row draws on two pools, so the
+            // player can see both ceilings without hovering the inputs.
             var maxDisplay = item.max;
-            if (item.multiplier) {
-                // If multiplier is on, max refers to TOTAL pool.
-                maxDisplay = item.max;
-            }
+            if (hasExtra) maxDisplay += ' / ' + extraMax;
             $('<span class="multi-value-label"><span class="multi-value-name">' + item.label + '</span> <span class="multi-value-max">(Max: ' + maxDisplay + ')</span></span>').appendTo(row);
 
-            var initialValue = (item.value !== undefined) ? item.value : (item.multiplier ? 1 : (item.max || 1));
+            var initialValue = (item.value !== undefined) ? item.value : (item.multiplier ? 1 : (item.max || mainMin));
             var maxAttr = (item.max !== undefined) ? 'max="' + item.max + '"' : '';
 
             var inputWrapper = $('<div style="display:flex; align-items:center;"></div>').appendTo(row);
 
-            var input = $('<input type="number" class="multiConfirmInput multi-value-input main-input" data-id="' + item.id + '" value="' + initialValue + '" min="1" ' + maxAttr + '>').appendTo(inputWrapper);
-
+            // Shots first when present: it is the driver the other two boxes hang off, and
+            // reading "3 shots of 4 dice + 6 set dmg" left-to-right matches how it is declared.
+            var countInput = null;
             if (item.multiplier) {
-                $('<span class="multi-value-max" style="margin-left:5px; color:#DEFBFF;">dice</span>').appendTo(inputWrapper);
-                // Multiplier input (count)
-                var countInput = $('<input type="number" class="multiConfirmInput multi-value-input mult-input" data-id="' + item.id + '_mult" value="1" min="1" style="width:50px;">').appendTo(inputWrapper);
-                $('<span class="multi-value-max" style="margin-left:5px; color:#DEFBFF;">shots</span>').appendTo(inputWrapper);
-                input.on("change", function () {
-                    var val = parseInt($(this).val());
-                    var count = parseInt(countInput.val());
-                    if (val < 1) { val = 1; $(this).val(1); }
-
-                    // If val * count > max, reduce count
-                    if (val * count > item.max) {
-                        count = Math.floor(item.max / val);
-                        if (count < 1) count = 1; // Should not happen if val <= max
-                        countInput.val(count);
-                    }
-                    // Also ensure val itself isn't > max (if count is 1)
-                    if (val > item.max) {
-                        val = item.max;
-                        $(this).val(val);
-                        countInput.val(1);
-                    }
-                });
-
-                countInput.on("input change keyup", function () {
-                    var count = parseInt($(this).val());
-                    var val = parseInt(input.val());
-                    if (isNaN(val) || val < 1) val = 1;
-
-                    // Let's cap count based on val.
-                    var maxCount = Math.floor(item.max / val);
-
-                    if (count > maxCount) {
-                        count = maxCount;
-                        $(this).val(count);
-                    }
-                    if (count < 1 && $(this).val() !== "") $(this).val(1);
-                });
-            } else {
-                if (item.max !== undefined) {
-                    // Cap on input (typing) as well as change
-                    input.on("input change keyup", function () {
-                        var val = parseInt($(this).val());
-                        var max = parseInt($(this).attr("max")); // Use attr as source of truth if updated, or item.max
-
-                        if (!isNaN(max)) {
-                            if (val > max) $(this).val(max);
-                            if (val < 1 && $(this).val() !== "") $(this).val(1);
-                        }
-                    });
-                }
+                countInput = $('<input type="number" class="multiConfirmInput multi-value-input mult-input" data-id="' + item.id + '_mult" value="1" min="1" style="width:50px;">').appendTo(inputWrapper);
+                $('<span class="multi-value-max" style="margin-left:5px; margin-right:10px; color:#DEFBFF;">shots</span>').appendTo(inputWrapper);
             }
 
-            // Store reference to multiplier config on the row/input for retrieval?
+            var input = $('<input type="number" class="multiConfirmInput multi-value-input main-input" data-id="' + item.id + '" value="' + initialValue + '" min="' + mainMin + '" ' + maxAttr + '>').appendTo(inputWrapper);
+            if (unitLabel) $('<span class="multi-value-max" style="margin-left:5px; color:#DEFBFF;">' + unitLabel + '</span>').appendTo(inputWrapper);
+
+            var extraInput = null;
+            var remainingSpan = null;
+            if (hasExtra) {
+                var extraValue = (item.extra.value !== undefined) ? item.extra.value : extraMin;
+                extraInput = $('<input type="number" class="multiConfirmInput multi-value-input extra-input" data-id="' + item.id + '_extra" value="' + extraValue + '" min="' + extraMin + '" max="' + extraMax + '" step="' + extraStep + '" style="width:55px; margin-left:10px;">').appendTo(inputWrapper);
+                if (extraLabel) $('<span class="multi-value-max" style="margin-left:5px; color:#DEFBFF;">' + extraLabel + '</span>').appendTo(inputWrapper);
+
+                row.addClass('multi-value-row-pools');
+                remainingSpan = $('<span class="multi-value-remaining"></span>').appendTo(row);
+            }
+
+            /* Single clamp routine for the whole row - the boxes constrain each other, so
+               fixing them up in one place avoids the handlers fighting over each other.
+               A box the player has just emptied is left alone until they finish typing.
+
+               `commit` is false while the player is still typing and true once they leave the
+               field (or click a spinner). Step snapping only happens on commit, so typing the
+               "1" of "12" into a step-6 box isn't instantly rewritten to 0 - but the pool
+               readout always reflects the snapped value, since that is what will be spent. */
+            var clampRow = function (commit) {
+                var val = parseInt(input.val());
+                if (isNaN(val)) {
+                    if (input.val() !== "") input.val(mainMin);
+                    val = mainMin;
+                } else {
+                    if (val < mainMin) val = mainMin;
+                    if (item.max !== undefined && val > item.max) val = item.max;
+                    input.val(val);
+                }
+
+                // Shots are capped by the MAIN pool only.
+                var count = 1;
+                if (countInput) {
+                    count = parseInt(countInput.val());
+                    if (isNaN(count) || count < 1) count = 1;
+
+                    var maxCount = (val > 0 && item.max !== undefined) ? Math.floor(item.max / val) : count;
+                    if (maxCount < 1) maxCount = 1;
+                    if (count > maxCount) count = maxCount;
+                    if (countInput.val() !== "") countInput.val(count);
+                }
+
+                var extraVal = 0;
+                if (extraInput) {
+                    // ...and the per-shot extra is then capped by the shot count, so the whole
+                    // volley still fits the pool without the shot count having to give way.
+                    // The ceiling is kept on a step boundary so the spinner can actually reach it.
+                    var perShotExtraMax = (count > 0) ? Math.floor(extraMax / count) : extraMax;
+                    perShotExtraMax = Math.floor(perShotExtraMax / extraStep) * extraStep;
+                    extraInput.attr('max', perShotExtraMax);
+
+                    extraVal = parseInt(extraInput.val());
+                    if (isNaN(extraVal)) {
+                        if (extraInput.val() !== "") extraInput.val(extraMin);
+                        extraVal = extraMin;
+                    } else {
+                        if (extraVal < extraMin) extraVal = extraMin;
+                        if (extraVal > perShotExtraMax) extraVal = perShotExtraMax;
+                        // A part-step buys nothing, so round down to the last whole step.
+                        extraVal = Math.floor(extraVal / extraStep) * extraStep;
+                        if (commit || parseInt(extraInput.val()) > perShotExtraMax) extraInput.val(extraVal);
+                    }
+                }
+
+                if (remainingSpan) {
+                    var mainLeft = Math.max(0, item.max - (val * count));
+                    var extraLeft = Math.max(0, extraMax - (extraVal * count));
+                    remainingSpan.text('left: ' + mainLeft + (unitLabel ? ' ' + unitLabel : '')
+                        + '  /  ' + extraLeft + (extraLabel ? ' ' + extraLabel : ''));
+                    remainingSpan.toggleClass('depleted', mainLeft === 0 && extraLeft === 0);
+                }
+            };
+
+            var clampTyping = function () { clampRow(false); };
+            var clampCommit = function () { clampRow(true); };
+
+            input.on("input keyup", clampTyping).on("change blur", clampCommit);
+            if (countInput) countInput.on("input keyup", clampTyping).on("change blur", clampCommit);
+            if (extraInput) extraInput.on("input keyup", clampTyping).on("change blur", clampCommit);
+            clampRow(true); //prime the readout with the pre-filled values
+
             input.data("hasMultiplier", !!item.multiplier);
+            input.data("hasExtra", hasExtra);
 
             row.appendTo(container);
         });
 
         $(".confirmok", e).on("click", function () {
             var results = {};
-            var valid = true;
             $(".multiConfirmInput.main-input", e).each(function () {
                 var id = $(this).data("id");
                 var val = parseInt($(this).val());
                 var max = parseInt($(this).attr("max"));
+                var min = parseInt($(this).attr("min"));
                 var hasMult = $(this).data("hasMultiplier");
+                var hasExtra = $(this).data("hasExtra");
 
-                if (isNaN(val) || val < 1) val = 1;
+                if (isNaN(min)) min = 1;
+                if (isNaN(val) || val < min) val = min;
+                if (!isNaN(max) && val > max) val = max;
 
+                if (!hasMult && !hasExtra) {
+                    results[id] = val; // Legacy shape - a bare number.
+                    return;
+                }
+
+                var count = 1;
                 if (hasMult) {
                     var multInput = $(this).siblings(".mult-input"); // Use traversal for safety
-                    var count = parseInt(multInput.val());
-                    if (isNaN(count)) count = 1;
-
-                    // Final safeguard
-                    if (val * count > max && !isNaN(max)) {
-                        // Clamp count?
-                        count = Math.floor(max / val);
-                        if (count < 1) count = 1;
-                    }
-
-                    results[id] = { value: val, count: count };
-                } else {
-                    if (!isNaN(max) && val > max) val = max;
-                    results[id] = val; // Keep legacy format for non-mult inputs? Or Standardize?
-                    // Previous implementation returned raw value.
-                    // Implementation plan says: "return data structure capable of handling multiplier"
-                    // IF I change this to always object, I break existing `L` logic unless I update it.
-                    // `L` expects `val` as number.
-                    // I'll keep it as number for non-mult, and object for mult.
-                    // `molecular.js` will handle the type check.
+                    count = parseInt(multInput.val());
+                    if (isNaN(count) || count < 1) count = 1;
+                    // Shots are bounded by the MAIN pool only (see the constraint note above).
+                    if (val > 0 && !isNaN(max) && val * count > max) count = Math.floor(max / val);
+                    if (count < 1) count = 1;
                 }
+
+                var extraVal = 0;
+                if (hasExtra) {
+                    // The extra input's max attribute is kept at the PER-SHOT ceiling by
+                    // clampRow (total pool / shot count), so clamping to it here also keeps
+                    // extraVal * count inside the pool.
+                    var extraField = $(this).siblings(".extra-input");
+                    var extraMax = parseInt(extraField.attr("max"));
+                    var extraMin = parseInt(extraField.attr("min"));
+                    var extraStep = parseInt(extraField.attr("step"));
+                    if (isNaN(extraMin)) extraMin = 0;
+                    if (isNaN(extraStep) || extraStep < 1) extraStep = 1;
+                    extraVal = parseInt(extraField.val());
+                    if (isNaN(extraVal) || extraVal < extraMin) extraVal = extraMin;
+                    if (!isNaN(extraMax) && extraVal > extraMax) extraVal = extraMax;
+                    // Snap here too: OK can be reached without the field ever blurring.
+                    extraVal = Math.floor(extraVal / extraStep) * extraStep;
+                }
+
+                results[id] = { value: val, count: count, extra: extraVal };
             });
 
             callback(results);

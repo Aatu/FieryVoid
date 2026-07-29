@@ -7,8 +7,16 @@ window.combatLog = {
     critAnimations: {}, //Just a convenient place to have this array for AllWeaponFireAgainstShipAnimation to use   
     logCache: {}, // key: turn number, value: processed fire order data
 
+    // Clears the LIVE replay log only (#log). The printed log (#LogActual) owns its own
+    // lifecycle via showCurrent / showLog and must not be touched here.
     onTurnStart: function onTurnStart() {
-        $('.logentry').remove();
+        // Scoped to #log. An unscoped $('.logentry') also matched the PRINTED log's entry
+        // divs, and because the damage <ul> below is a SIBLING of its .logentry div rather
+        // than a child, that left #LogActual holding orphaned damage lists with their
+        // "FIRE:" headers stripped off - bare "<unit> damaged for N" lines. showPrevious /
+        // showNext call this and then fetch asynchronously, so those orphans stayed on
+        // screen until the response landed and showLog overwrote the container.
+        $('#log > .logentry').remove();
         // logFireOrders emits the damage <ul> as a SIBLING of its .logentry div
         // (the </div> closes before the <ul>), so it lands as a direct child of
         // #log and survives the .logentry removal. Clear those orphaned damage
@@ -73,7 +81,6 @@ window.combatLog = {
         var tooltipTextParts = [];
         var rollsTooltipTextParts = [];
         var shotIndex = 1;
-        var resolvedFire = null; //last order in this group that actually resolved - see the loop below
 
         for (var a in orders) {
 
@@ -89,18 +96,6 @@ window.combatLog = {
                     weapon.changeFiringMode();
                 }
             }
-
-            // Orders that were never resolved contribute nothing. Weapons that merge several
-            // declared orders into one volley (Ballistic / Phased Gravitic Torpedo saturation -
-            // see BallisticTorpedo::beforeFiringOrderResolution) fold the extra orders' shots
-            // into a single carrier order and drop the rest before hit chances are calculated,
-            // so those rows keep needed=0/rolled=0/shots=1 in the database forever. Counting
-            // them dragged the reported chance range down to "0% - x%" and inflated the shot
-            // total (3 torpedoes read as 5). Weapon::fire always stamps rolled, so rolled==0 is
-            // the reliable "this order never happened" marker - the same test
-            // weaponManager.getAllFireOrdersForDisplayingAgainst uses.
-            if (!fire.rolled) continue;
-            resolvedFire = fire;
 
             shots += fire.shots;
             shotshit += fire.shotshit;
@@ -231,13 +226,8 @@ window.combatLog = {
         var notestext = "";
         if (notes) notestext = '<span class="pubotes">' + notes + '</span>';
 
-        //The trailing per-order references below used whatever order the loop happened to end on,
-        //which for a merged torpedo volley is a dropped order with empty notes. Prefer the order
-        //that actually resolved.
-        var displayFire = resolvedFire || fire;
-
         var shortText = false;
-        if (weaponManager.doShortLogText(displayFire)) shortText = true;
+        if (weaponManager.doShortLogText(fire)) shortText = true;
 
         //Some orders don't need the full log text, e.g. Reactor overload, hyperspace jump.    
         if (shortText) {
@@ -250,7 +240,7 @@ window.combatLog = {
             }
         }
 
-        html += '<span class="notes"> ' + displayFire.notes + '</span>';
+        html += '<span class="notes"> ' + fire.notes + '</span>';
         //  html += damagehtml;
         html += '</span></div>';
 
@@ -605,6 +595,12 @@ window.combatLog = {
             combatLog.showLog(combatLog.logCache[turn].allFireOrders, combatLog.logCache[turn].ships);
             return;
         }
+
+        // Nothing is cached, so the container is about to sit there showing the PREVIOUS turn's
+        // print until the response arrives. Blank it now: showLog overwrites it wholesale anyway,
+        // and a stale turn on screen reads as if it belonged to the turn being requested. The
+        // cached branch above returns first, so it still renders in one synchronous step.
+        document.getElementById('LogActual').innerHTML = '';
 
         ajaxInterface.ajaxWithRetry({
             type: 'GET',

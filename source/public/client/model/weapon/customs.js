@@ -421,70 +421,34 @@ var MolecularSlicerBeamA = function MolecularSlicerBeamA(json, ship) {
 MolecularSlicerBeamA.prototype = Object.create(MolecularSlicerBeamL.prototype);
 MolecularSlicerBeamA.prototype.constructor = MolecularSlicerBeamA;
 
+//Dice / set-damage pools by turns charged - kept in step with maxDiceArray +
+//setDamageArray on MolecularSlicerBeamA in customs.php. Everything else about the two-pool
+//allocation is inherited from MolecularSlicerBeamL (molecular.js).
+MolecularSlicerBeamA.prototype.slicerPools = {
+	1: { dice: 8, set: 12 },
+	2: { dice: 12, set: 24 },
+	3: { dice: 16, set: 36 }
+};
+
+MolecularSlicerBeamA.prototype.getPools = function () {
+	var turns = Math.min(3, Math.max(1, this.turnsloaded));
+	//Mode 2 is capped at two turns' output; mirrored server-side by getEffectiveTurnsLoaded().
+	if (this.firingMode == 2) turns = Math.min(2, turns);
+	return this.slicerPools[turns];
+};
+
 MolecularSlicerBeamA.prototype.initializationUpdate = function () {
-	var shots = 0; //Initialise
-	var minDam = 0;
-	var maxDam = 0;
+	this.fireControl = this.fireControlArray[this.firingMode]; //reset
 
-	switch (this.turnsloaded) {
-		case 1:
-			shots = 8;
-			minDam = 20;
-			maxDam = 92;
-			break;
-		case 2:
-			shots = 12;
-			minDam = 36;
-			maxDam = 144;
-			break;
-		case 3:
-			shots = 16;
-			minDam = 52;
-			maxDam = 196;
-			break;
-		default:
-			shots = 16;
-			minDam = 52;
-			maxDam = 196;
-			break;
-	}
-
-	this.fireControl = this.fireControlArray[this.firingMode]; //reset 
+	//Pool sizes and the damage readout (including the mode-2 cap) all come out of
+	//getPools(), so the base implementation covers them.
+	MolecularSlicerBeamL.prototype.initializationUpdate.call(this);
 
 	//Piercing Mode at 1 or 2 turn charge doesn't get -20% hitchance
 	//if(this.turnsloaded < 3 && (this.firingMode == 1 || this.firingMode == 3)){
-	if(this.turnsloaded < 3 && this.firingMode == 1){					
-		this.data["Fire control (fighter/med/cap)"] = '0/10/20';         
-	}		
-
-	this.data["Max number of Dice"] = shots;
-
-	if (gamedata.gamephase == 3) {
-		var isFiring = weaponManager.hasFiringOrder(this.ship, this);
-		var shotsUsed = this.getShotsUsed();
-		this.data["Defensive Dice"] = 0;
-		if (isFiring) {
-			for (var i in this.fireOrders) {
-				var fireOrder = this.fireOrders[i];
-				if (fireOrder.type == "selfIntercept") {
-					this.data["Defensive Dice"]++;
-					minDam -= 1; //Adjust damage values by 1d10.
-					maxDam -= 10;
-				}
-			}
-
-		}
-		this.data["Offensive Dice"] = shotsUsed - this.data["Defensive Dice"];
-		this.data["Remaining Dice"] = shots - shotsUsed;
+	if(this.turnsloaded < 3 && this.firingMode == 1){
+		this.data["Fire control (fighter/med/cap)"] = '0/10/20';
 	}
-
-	//if(this.turnsloaded == 3 && (this.firingMode == 2 || this.firingMode == 4)){
-	if(this.turnsloaded == 3 && this.firingMode == 2){		
-		minDam = 36;
-		maxDam = 144;		
-	}
-
-	this.data["Damage"] = "" + minDam + "-" + maxDam;
 
 	return this;
 };
@@ -512,12 +476,16 @@ MolecularSlicerBeamA.prototype.isLegalToFireMode = function (shooter) {
 		const currentMode = this.firingMode;
 
 		for (let i = this.fireOrders.length - 1; i >= 0; i--) {
+			//Self-intercept orders are defensive and carry whatever mode the weapon happened
+			//to be set to when declared - not a mode commitment, so skip them.
+			if (this.fireOrders[i].type === "selfIntercept") continue;
+
 			const existingMode = this.fireOrders[i].firingMode;
 
 			//const existingPiercing = (existingMode === 1 || existingMode === 3);
 			//const currentPiercing = (currentMode === 1 || currentMode === 3);
 			const existingPiercing = existingMode === 1;
-			const currentPiercing = currentMode === 1;			
+			const currentPiercing = currentMode === 1;
 
 			if (existingPiercing !== currentPiercing) {
 				confirm.error("You cannot mix Piercing and Raking modes whilst at full charge.");
@@ -536,6 +504,7 @@ MolecularSlicerBeamA.prototype.removeMultiModeSplit = function (ship, target) {
 		// Search from newest → oldest
 		for (let i = this.fireOrders.length - 1; i >= 0; i--) {
 			const fireOrder = this.fireOrders[i];
+			if (fireOrder.type === "selfIntercept") continue; //has its own remove button
 
 			if (this.firingMode == fireOrder.firingMode && fireOrder.targetid == target.id) {
 				// Remove the matching fire order
@@ -546,10 +515,16 @@ MolecularSlicerBeamA.prototype.removeMultiModeSplit = function (ship, target) {
 		}
 	}
 
-	// If NONE matched, remove the last fire order instead
-	if (!removed && this.fireOrders.length > 0) {
-		removed = true;
-		this.fireOrders.pop();  // removes last item
+	// If NONE matched, remove the last OFFENSIVE fire order instead. Self-intercept orders
+	// are peeled off with the dedicated intercept-remove button (which also fixes up the
+	// remaining shots' hit chances), so they must not be swept up here.
+	if (!removed) {
+		for (let i = this.fireOrders.length - 1; i >= 0; i--) {
+			if (this.fireOrders[i].type === "selfIntercept") continue;
+			this.fireOrders.splice(i, 1);
+			removed = true;
+			break;
+		}
 	}
 
 	// Always fire the events if something was removed
@@ -567,25 +542,4 @@ MolecularSlicerBeamA.prototype.removeAllMultiModeSplit = function (ship) {
 	}
 
 	webglScene.customEvent('SystemDataChanged', { ship: ship, system: this });
-};
-
-MolecularSlicerBeamA.prototype.checkFinished = function () {
-	var shots = 0; //Initialise
-
-	switch (this.turnsloaded) {
-		case 1:
-			shots = 8;
-			break;
-		case 2:
-			shots = 12;
-			break;
-		case 3:
-			shots = 16;
-			break;
-		default:
-			shots = 16;
-			break;
-	}
-	if (this.getShotsUsed() >= shots) return true;
-	return false;
 };
