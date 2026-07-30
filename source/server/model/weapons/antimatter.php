@@ -42,7 +42,7 @@
             parent::setSystemDataWindow($turn);
 			$this->data["Range brackets"] = 'No penalty up to ' . $this->rngNoPenalty . ' / Normal penalty up to ' . $this->rngNormalPenalty . ' / Double therafter ' ;
 			$this->data["X-dependent damage"] = $this->dmgEquation . ' ( max X = ' . $this->maxX . ')';
-            $this->data["Special"] = "Damage is dependent on hit roll, denoted as 'X', and equals difference between actual and needed to-hit roll divided by 5.";
+            $this->data["Special"] = "Damage depends on hit roll, denoted as 'X', and is the difference between actual and needed to-hit % divided by 5.";
 			$this->data["Special"] .= "<br>In case of no lock-on the range itself is doubled, not calculated penalty.";
 			if ($this->linkedFiringGroup !== null) {
 				$this->data["Special"] .= "<br>Mounted on " . $this->linkedFiringGroup;
@@ -565,9 +565,9 @@ class AntiprotonGun extends AntimatterWeapon{
 				$this->data["Special"] .= '<br>';
 			}
 			$this->data["Range brackets"] = 'Antimatter Cannon modes: No penalty up to ' . $this->rngNoPenaltyArray[2] . ' / Normal penalty up to ' . $this->rngNormalPenaltyArray[2] . ' / Double therafter ' ;	
-			$this->data["Special"] .= 'Shredder mode targets hex, and attacks all units within 1 hex of target hex. Will never hit firing unit itself.';
-			$this->data["Special"] .= '<br>Shredder rolls to hit for each attack, suffering no range penalty of any kind, and ignoring EW and jinking.';
-			$this->data["Special"] .= '<br>Fighter each suffer 1 attack, LCVs/MCVs/HCVs d3 attacks, Capital ships d6 and Enormous units d6+3.';
+			$this->data["Special"] .= 'Shredder targets hex, attacking all units within 1 hex of target hex. Never hits firing unit.';
+			$this->data["Special"] .= '<br>Shredder rolls to hit for each attack with no range penalty, and ignores EW and jinking.';
+			$this->data["Special"] .= '<br>Fighters suffer 1 attack, LCVs/MCVs/HCVs d3 attacks, Capital ships d6 and Enormous units d6+3.';
 			$this->data["Special"] .= '<br>Multiple Shredders are NOT cumulative. Shredder fire is not interceptable.'; //uninterceptability is due to technical reasons - with no fire order ID, interception will not be applied properly
 			$this->data["Special"] .= '<br>Remaining two modes are equal to Antimatter Cannon, without special features.';
         }
