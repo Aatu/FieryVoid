@@ -3768,8 +3768,8 @@ class MindriderCapital extends SixSidedShip{
         $locs = array();
         $locs[] = array("loc" => 31, "min" => 270, "max" => 360, "profile" => $this->forwardDefense);
         $locs[] = array("loc" => 41, "min" => 0, "max" => 90, "profile" => $this->sideDefense);
-        $locs[] = array("loc" => 32, "min" => 90, "max" => 180, "profile" => $this->forwardDefense);
-        $locs[] = array("loc" => 42, "min" => 180, "max" => 270, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 32, "min" => 180, "max" => 270, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 42, "min" => 90, "max" => 180, "profile" => $this->sideDefense);
         return $locs;
     }
 
