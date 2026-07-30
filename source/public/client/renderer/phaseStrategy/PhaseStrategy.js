@@ -748,6 +748,45 @@ window.PhaseStrategy = function () {
         });
     };
 
+    /* Ship-window EW panel hover (2026-07-30): hovering the BDEW or Detect Mines row raises that
+       ship's blanket / mine-detection area, the same overlay the map's own ship hover draws.
+
+       Deliberately only sweeps what it raised itself: if the overlay was already up - the pointer
+       came off the ship on the map, or a show-EW key is held - mouse-out leaves it alone instead of
+       clearing a display this hover never created. showBDEW/showMDEW are no-ops when the ship has
+       no rating (or, for mines, when none are on the board), hence testing the sprite afterwards
+       rather than assuming one appeared. */
+    PhaseStrategy.prototype.onEwRangeHover = function (payload) {
+        var icon = this.shipIconContainer.getById(payload.shipId);
+        if (!icon) return;
+
+        var mines = payload.type === 'MDEW';
+        var sprite = mines ? 'MDEWSprite' : 'BDEWSprite';
+
+        if (payload.active) {
+            if (icon[sprite]) return; //already displayed by something else - not ours to sweep
+            if (shipManager.shouldBeHidden(icon.ship)) return; //never draw an area at a hidden ship's position
+
+            if (mines) {
+                icon.showMDEW();
+            } else {
+                icon.showBDEW();
+            }
+
+            this.ewRangeHover = icon[sprite] ? { icon: icon, type: payload.type } : null;
+            return;
+        }
+
+        if (!this.ewRangeHover || this.ewRangeHover.icon !== icon || this.ewRangeHover.type !== payload.type) return;
+        this.ewRangeHover = null;
+
+        if (mines) {
+            icon.hideMDEW();
+        } else {
+            icon.hideBDEW();
+        }
+    };
+
     PhaseStrategy.prototype.createReplayUI = function (gamedata) {
         this.replayUI = new ReplayUI().activate();
     };

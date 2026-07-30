@@ -59,7 +59,12 @@ const ewLabelColor = (label, ship) => {
   shipManager.shouldBeHidden so stealthed/undeployed targets never leak position);
   hover emphasises that entry's EW line sprite on the map via the EwTargetHighlight
   custom event (EWIconContainer.highlightForTarget - a hidden target has no sprite, so
-  it safely no-ops).*/
+  it safely no-ops).
+
+  The BDEW and Detect Mines (MDEW) rows are hover-interactive in the same spirit
+  (2026-07-30): they raise the ship's blanket / mine-detection area on the map for as long
+  as the pointer rests on the row (EwRangeHover -> PhaseStrategy -> ShipIcon.showBDEW /
+  showMDEW). See setRangeOverlay.*/
 
 const EwPanel = styled.div`
     grid-area: ew;
@@ -121,6 +126,16 @@ const Row = styled.div`
     ${props => props.$target && css`
         padding-top: 3px;
         align-items: center;
+    `}
+
+    /*BDEW / Detect Mines rows raise the matching map overlay while hovered (see getShipRows), so
+      they carry the same faint affordance as an interactive target name - pointer cursor plus a
+      glow. Applied to the whole row because the whole row is the hover target, not just its label.*/
+    ${props => props.$hoverable && css`
+        cursor: pointer;
+        &:hover {
+            text-shadow: white 0 0 6px;
+        }
     `}
 `;
 
@@ -200,6 +215,30 @@ class ShipWindowEw extends React.Component {
             });
             this.activeHighlight = null;
         }
+
+        //same for a blanket/mine-detection area: a window closed under the cursor never fires
+        //mouse-out on the row that raised it
+        if (this.activeRangeOverlay) {
+            this.setRangeOverlay(this.activeRangeOverlay, false);
+        }
+    }
+
+    /*BDEW / Detect Mines row hover (user request 2026-07-30): while the pointer is on the row,
+      draw that ship's blanket-EW or mine-detection area on the map - the same overlays
+      ShipIcon.showBDEW/showMDEW raise when the ship itself is hovered on the map.
+
+      Routed through the relay as EwRangeHover so PhaseStrategy owns the icon lookup, the
+      position-leak guard and the "only sweep what this hover raised" bookkeeping; the lobby's
+      uiEvents handler ignores the event, having no map to draw on.*/
+    setRangeOverlay(type, active) {
+        if (!window.webglScene) return;
+
+        window.uiEvents.relay('EwRangeHover', {
+            shipId: this.props.ship.id,
+            type: type,
+            active: active
+        });
+        this.activeRangeOverlay = active ? type : null;
     }
 
     onTargetClick(target, event) {
@@ -238,7 +277,7 @@ class ShipWindowEw extends React.Component {
         return (
             <EwPanel>
                 <EwTitle>Electronic Warfare</EwTitle>
-                {getShipRows(ship)}
+                {getShipRows(ship, this)}
                 {getTargetRows(ship, this)}
             </EwPanel>
         );
@@ -246,8 +285,20 @@ class ShipWindowEw extends React.Component {
 
 }
 
-const getShipRows = ship => {
+const getShipRows = (ship, component) => {
     let list = [];
+
+    /*Props that turn a row into a map-overlay hover switch (BDEW / Detect Mines only). Like the
+      target rows, interactive only where a map exists to draw on - Boolean(window.webglScene) is
+      false in the lobby, which then gets a plain, unhoverable row.*/
+    const interactive = Boolean(window.webglScene);
+    const rangeHover = type => interactive
+        ? {
+            $hoverable: true,
+            onMouseEnter: () => component.setRangeOverlay(type, true),
+            onMouseLeave: () => component.setRangeOverlay(type, false)
+        }
+        : {};
 
     list.push(<Row key={`dew-scs-${ship.id}`}><RowLabel $color={ewLabelColor('DEW')}>DEW</RowLabel><RowValue>{formatEW(ew.getDefensiveEW(ship))}</RowValue></Row>);
     var CCEWamount = Math.max(0, ew.getCCEW(ship) - ew.getDistruptionEW(ship));
@@ -262,11 +313,11 @@ const getShipRows = ship => {
     if (shipManager.hasSpecialAbility(ship, "ConstrainedEW")) bdew = ew.getBDEW(ship) * 0.2;
 
     if (bdew) {
-        list.push(<Row key={`bdew-scs-${ship.id}`}><RowLabel $color={ewLabelColor('BDEW')}>BDEW</RowLabel><RowValue>{formatEW(bdew)}</RowValue></Row>);
+        list.push(<Row key={`bdew-scs-${ship.id}`} {...rangeHover('BDEW')}><RowLabel $color={ewLabelColor('BDEW')}>BDEW</RowLabel><RowValue>{formatEW(bdew)}</RowValue></Row>);
     }
 
     if (detectMEW) {
-        list.push(<Row key={`DetectMEW-scs-${ship.id}`}><RowLabel $color={ewLabelColor('Detect Mines')}>Detect Mines</RowLabel><RowValue>{formatEW(detectMEW)}</RowValue></Row>);
+        list.push(<Row key={`DetectMEW-scs-${ship.id}`} {...rangeHover('MDEW')}><RowLabel $color={ewLabelColor('Detect Mines')}>Detect Mines</RowLabel><RowValue>{formatEW(detectMEW)}</RowValue></Row>);
     }
 
     if (detectSEW) {
