@@ -76,7 +76,7 @@ const EwPanel = styled.div`
     box-sizing: border-box;
     background-color: ${theme.colors.panelBgGlass};
     border: 1px solid ${theme.colors.line};
-    padding: 3px 4px 3px;
+    padding: 2px 4px 2px;
 `;
 
 /*title bar spans the panel edge-to-edge (negative margins cancel EwPanel's padding)
@@ -111,20 +111,28 @@ const Row = styled.div`
     gap: 4px;
     font-size: 9px;
     color: ${theme.colors.text};
-    padding-top: 1px;
-    /*$target rows carry a wrappable ship name (see RowTarget), so they need more air than
-      the single-line ship rows: without it a name's second line sits as close to the NEXT
-      row's label as to its own first line, and the eye groups it with the wrong row.
+    /*ONE row pitch for the whole panel - ship rows and $target rows alike (user 2026-07-30).
+      It was 1px, which read as too tight between DEW and CCEW. The cause was not those rows
+      (they are the same component with the same props as every other ship row) but the panel
+      top: EwTitle's 2px bottom margin plus this padding gave DEW 3px of air above and 1px
+      below, so the eye took the 3px as the intended rhythm and the 1px as a mistake. Matching
+      the two settles it. At 1px the visible separation was mostly the fonts' own half-leading
+      - 10px Consolas values in a 9px row - rather than anything deliberate.
 
-      They also swap baseline alignment for centre: a target row's two children are the
-      TargetMain block (label + name, internally baseline-aligned) and the value, so
-      centring floats the value to the vertical middle of however many lines the name
-      took - level with the single line of a short name, midway between the two lines of
-      a wrapped one, with no line-counting needed. Ship rows KEEP baseline: their 8px
-      label and 10px value never wrap, and centring them would shift the value off the
-      label's baseline for no gain.*/
+      The first row still clears the title by 5px (2px title margin + 3px here) against 3px
+      between rows; that extra is wanted, since a header rule reads better with more clearance
+      than the rows it heads.*/
+    padding-top: 2px;
+    /*$target rows swap baseline alignment for centre: a target row's two children are the
+      TargetMain block (label + name, centred internally too) and the value, so centring
+      floats both to the vertical middle of however many lines the name took - level with
+      the single line of a short name, midway between the two lines of a wrapped one, with
+      no line-counting needed. Ship rows KEEP baseline: their 8px label and 10px value never
+      wrap, and centring them would shift the value off the label's baseline for no gain.
+
+      No padding override here any more - target rows deliberately sit at the same pitch as
+      ship rows, so they inherit it. Retune the panel's spacing at the padding-top above.*/
     ${props => props.$target && css`
-        padding-top: 3px;
         align-items: center;
     `}
 
@@ -140,8 +148,15 @@ const Row = styled.div`
 `;
 
 /*Label + name of a target row, grouped so the value outside can centre against the pair
-  (see Row's $target branch). Baseline-aligned internally, which is what keeps the label
-  level with the name's FIRST line rather than drifting down with it.*/
+  (see Row's $target branch).
+
+  Centred internally (user request 2026-07-30), so the label floats to the vertical middle of
+  however many lines the name took - the same treatment Row's $target branch already gives the
+  value on the other side. It was `baseline` before, which pinned the label to the name's FIRST
+  line and left it hanging high beside a wrapped name while the value sat centred; the row now
+  reads as one horizontally-aligned trio no matter how the name breaks. Costs a small baseline
+  shift on single-line names (the 8px label centres against the 9px name rather than sharing
+  its baseline) - the same trade the value already makes, and not noticeable at these sizes.*/
 const TargetMain = styled.div`
     display: flex;
     align-items: baseline;
@@ -178,8 +193,9 @@ const RowValue = styled.span`
   so an over-long name reads as truncated rather than silently cut. -webkit-line-clamp needs
   the legacy -webkit-box display and is the only cross-browser "N lines then ellipsis"
   (Chrome/Edge/Safari, Firefox 68+); the unprefixed `line-clamp` is there for when that
-  standardises. Row keeps align-items: baseline, so the label and value sit level with the
-  name's FIRST line.*/
+  standardises. Both the label (via TargetMain) and the value (via Row's $target branch) are
+  centred against however many lines the name takes, so they stay level with each other rather
+  than with any particular line of it.*/
 const RowTarget = styled.span`
     flex: 1 1 auto;
     min-width: 0;
