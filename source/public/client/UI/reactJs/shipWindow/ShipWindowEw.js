@@ -191,7 +191,7 @@ const RowTarget = styled.span`
     text-overflow: ellipsis;
     overflow-wrap: break-word; /*a single over-long token breaks instead of overflowing the column*/
     line-height: 1.2; /*tight, so the second line costs as little panel height as possible*/
-    text-align: right;
+    text-align: center;
     color: ${theme.colors.textAccent};
     ${props => props.$interactive && css`
         cursor: pointer;
