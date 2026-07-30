@@ -680,7 +680,11 @@ window.ShipIcon = function () {
             //distinction on screen: hex-edged means "these hexes are in reach", smooth means "this
             //way is covered, at any range".
             this.showCircularArc(SHIELD_ARC_RADIUS, shipManager.systems.getArcs(ship, weapon), SHIELD_ARC_COLOUR,
-                { borderColour: SHIELD_ARC_BORDER_COLOUR, borderOpacity: SHIELD_ARC_BORDER_OPACITY });
+                {
+                    fillOpacity: SHIELD_ARC_COLOUR_OPACITY,
+                    borderColour: SHIELD_ARC_BORDER_COLOUR,
+                    borderOpacity: SHIELD_ARC_BORDER_OPACITY
+                });
 
         } else if (weapon.shootsStraight) { //Some weapons can only fire in straight lines e.g. Transverse Drive.  Show rectangular arcs along hex lines instead.
             var arcs = shipManager.systems.getArcs(ship, weapon);
@@ -772,7 +776,7 @@ window.ShipIcon = function () {
        over the dark map reads a good deal hotter than cobalt does at the same alpha, so matching
        the numbers would NOT match the apparent brightness. Its outline stays at the shared border
        opacity, which is what keeps the restricted wedge crisply readable while its fill is quiet. */
-    var ARC_FILL_OPACITY = 0.3;                     //normal (cobalt) firing arc
+    var ARC_FILL_OPACITY = 0.35;                     //normal (cobalt) firing arc
     var ARC_BORDER_OPACITY = 0.7;                   //outline of every hex-edged arc, in the arc's own colour
     var REDUCED_ARC_COLOUR = "rgb(170,95,25)";      //amber: this weapon's arc is restricted this turn
     var REDUCED_ARC_FILL_OPACITY = 0.3;             //fainter than ARC_FILL_OPACITY - see above
@@ -837,8 +841,9 @@ window.ShipIcon = function () {
        matching *_OPACITY constants below are, and they are the ones to turn to soften an edge. */
     var SHIELD_ARC_RADIUS = 250;
     var SHIELD_ARC_COLOUR = "rgb(20,80,128)";
+    var SHIELD_ARC_COLOUR_OPACITY = 0.4; //under showCircularArc's default 0.5 - the fill is a backdrop for the border, not the read
     var SHIELD_ARC_BORDER_COLOUR = "rgb(35,100,200)"; //cobalt - lifted off the fill the way the structure wedge's outline is
-    var SHIELD_ARC_BORDER_OPACITY = 0.55; //softer than the structure wedge's 0.9: a shield is often on screen next to a weapon arc
+    var SHIELD_ARC_BORDER_OPACITY = 0.8; //softer than the structure wedge's 0.9: a shield is often on screen next to a weapon arc
 
     var INTERCEPT_ARC_RADIUS = 150;
     var INTERCEPT_ARC_COLOUR = "rgba(240, 237, 228)"; //off-white: no other overlay is neutral, so it can't be mistaken for a firing arc
