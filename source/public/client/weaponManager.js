@@ -1047,6 +1047,22 @@ window.weaponManager = {
             return onArc;
         }
 
+        //A split-arc mount (Shadow Heavy Slicer) bears in EVERY one of its arcs, exactly as
+        //isOnWeaponArc treats it for ship targets - and the live startArc/endArc is no guide to
+        //which one, since changeFiringMode indexes startArcArray by firing mode and a split pair
+        //sits at indices 0 and 1. Without this, picking intercept targets off incoming ballistics
+        //and hex targeting both saw one arbitrary arc of the pair.
+        if (weapon.splitArcs) {
+            var multipleArcs = shipManager.systems.getMultipleArcs(shooter, weapon);
+            if (multipleArcs.length) {
+                return multipleArcs.some(function (arc) {
+                    return mathlib.isInArc(targetCompassHeading,
+                        mathlib.addToDirection(arc.start, shooterFacing),
+                        mathlib.addToDirection(arc.end, shooterFacing));
+                });
+            }
+        }
+
         var arcs = shipManager.systems.getArcs(shooter, weapon);
         arcs.start = mathlib.addToDirection(arcs.start, shooterFacing);
         arcs.end = mathlib.addToDirection(arcs.end, shooterFacing);

@@ -966,27 +966,55 @@ window.ShipIcon = function () {
         if (weapon.specialArcs) return; //arc isn't a wedge at all (isPosOnSpecialArc decides it) - a wedge would misdescribe it
         if (getInterceptRating(weapon) <= 0) return;
 
-        var arc = this.showCircularArc(
-            INTERCEPT_ARC_RADIUS,
-            shipManager.systems.getArcs(ship, weapon), //the weapon's real bearing arc, jam critical and all - the linked-fire wedge restricts FIRING, not interception
-            INTERCEPT_ARC_COLOUR,
-            {
-                fillOpacity: INTERCEPT_ARC_FILL_OPACITY,
-                //Dotted, where every other wedge on the map is outlined solid. Doing the distinction
-                //twice - neutral colour AND broken line - is what lets the wedge be this faint and
-                //still read as its own thing rather than as an edge of the arc underneath it.
-                dashedBorder: true,
-                borderOpacity: INTERCEPT_ARC_BORDER_OPACITY,
-                labelTexture: getInterceptLabelTexture()
-            }
-        );
+        //ONE WEDGE PER ARC. A split-arc mount (Shadow Battlecruiser's Heavy Slicer) intercepts in
+        //every arc it has - the server tests the incoming bearing against all of them at once
+        //(mathlib::isInAnyArc in Firing::isLegalIntercept) - so all of them have to be drawn.
+        //
+        //getArcs() would give a single arc, and on a split mount not even a meaningful one: both
+        //changeFiringMode implementations index startArcArray by FIRING MODE (weapon.php and
+        //shipSystem.js updateFiringModeData), and a split pair is stored at indices 0 and 1, so
+        //selecting mode 1 leaves the live startArc/endArc holding the SECOND arc. That is why this
+        //wedge used to appear on the Heavy Slicer's rear arc alone.
+        var arcs = getInterceptArcs(ship, weapon);
 
-        //Every other range overlay sits at z -1, and this one shares the screen with the firing arc
-        //it belongs to. Two transparent meshes at the SAME depth are ordered by nothing more
-        //meaningful than the order they were created in, so lift this one clear: it is the smaller
-        //and much fainter of the two and has to be the one on top to be read at all.
-        arc.position.z = -0.9;
+        for (var i = 0; i < arcs.length; i++) {
+            var arc = this.showCircularArc(
+                INTERCEPT_ARC_RADIUS,
+                arcs[i], //the weapon's real bearing arc, jam critical and all - the linked-fire wedge restricts FIRING, not interception
+                INTERCEPT_ARC_COLOUR,
+                {
+                    fillOpacity: INTERCEPT_ARC_FILL_OPACITY,
+                    //Dotted, where every other wedge on the map is outlined solid. Doing the distinction
+                    //twice - neutral colour AND broken line - is what lets the wedge be this faint and
+                    //still read as its own thing rather than as an edge of the arc underneath it.
+                    dashedBorder: true,
+                    borderOpacity: INTERCEPT_ARC_BORDER_OPACITY,
+                    //Labelled individually rather than once for the pair: the wedges of a split mount
+                    //are on opposite sides of the hull, so an unlabelled one has nothing near it to
+                    //explain what it is.
+                    labelTexture: getInterceptLabelTexture()
+                }
+            );
+
+            //Every other range overlay sits at z -1, and this one shares the screen with the firing arc
+            //it belongs to. Two transparent meshes at the SAME depth are ordered by nothing more
+            //meaningful than the order they were created in, so lift this one clear: it is the smaller
+            //and much fainter of the two and has to be the one on top to be read at all.
+            arc.position.z = -0.9;
+        }
     };
+
+    /* Every arc this weapon can intercept in, as a list - one entry for an ordinary mount, one per
+       arc for a split mount. Falls back to the single live arc if a weapon claims splitArcs without
+       usable arrays, so a blueprint mistake costs the second wedge rather than the whole overlay. */
+    function getInterceptArcs(ship, weapon) {
+        if (weapon.splitArcs) {
+            var arcs = shipManager.systems.getMultipleArcs(ship, weapon);
+            if (arcs.length) return arcs;
+        }
+
+        return [shipManager.systems.getArcs(ship, weapon)];
+    }
 
     /* Intercept rating in this weapon's CURRENT firing mode. getInterceptRating() is where a weapon
        whose rating isn't a constant computes it (a Particle Impeder's climbs with its boost), and
