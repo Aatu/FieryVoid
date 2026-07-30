@@ -1193,6 +1193,15 @@
     align-items: stretch;
   }
 
+  /* flex-basis follows the MAIN axis, so stacking the bar re-points .fv-search's
+     `flex: 1 1 240px` at the block axis — the field asked to be 240px TALL. The
+     240px basis only ever meant "start 240px wide" in the row layout; stacked, the
+     input is already full width from align-items: stretch, so drop back to content
+     height. Landscape phones stay above 600px, which is why only portrait showed it. */
+  .fv-search {
+    flex: 0 0 auto;
+  }
+
   .fv-sort {
     justify-content: space-between;
   }
