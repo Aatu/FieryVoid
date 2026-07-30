@@ -772,7 +772,7 @@ window.ShipIcon = function () {
        over the dark map reads a good deal hotter than cobalt does at the same alpha, so matching
        the numbers would NOT match the apparent brightness. Its outline stays at the shared border
        opacity, which is what keeps the restricted wedge crisply readable while its fill is quiet. */
-    var ARC_FILL_OPACITY = 0.5;                     //normal (cobalt) firing arc
+    var ARC_FILL_OPACITY = 0.3;                     //normal (cobalt) firing arc
     var ARC_BORDER_OPACITY = 0.7;                   //outline of every hex-edged arc, in the arc's own colour
     var REDUCED_ARC_COLOUR = "rgb(170,95,25)";      //amber: this weapon's arc is restricted this turn
     var REDUCED_ARC_FILL_OPACITY = 0.3;             //fainter than ARC_FILL_OPACITY - see above
@@ -838,12 +838,12 @@ window.ShipIcon = function () {
     var SHIELD_ARC_RADIUS = 250;
     var SHIELD_ARC_COLOUR = "rgb(20,80,128)";
     var SHIELD_ARC_BORDER_COLOUR = "rgb(35,100,200)"; //cobalt - lifted off the fill the way the structure wedge's outline is
-    var SHIELD_ARC_BORDER_OPACITY = 0.6; //softer than the structure wedge's 0.9: a shield is often on screen next to a weapon arc
+    var SHIELD_ARC_BORDER_OPACITY = 0.55; //softer than the structure wedge's 0.9: a shield is often on screen next to a weapon arc
 
     var INTERCEPT_ARC_RADIUS = 150;
     var INTERCEPT_ARC_COLOUR = "rgba(240, 237, 228)"; //off-white: no other overlay is neutral, so it can't be mistaken for a firing arc
-    var INTERCEPT_ARC_FILL_OPACITY = 0.1; //barely a tint - the hex-edged firing arc underneath has to stay the thing you read first
-    var INTERCEPT_ARC_BORDER_OPACITY = 0.4; //the dotting already lightens the edge, so the dots themselves stay crisp
+    var INTERCEPT_ARC_FILL_OPACITY = 0.05; //barely a tint - the hex-edged firing arc underneath has to stay the thing you read first
+    var INTERCEPT_ARC_BORDER_OPACITY = 0.6; //the dotting already lightens the edge, so the dots themselves stay crisp
 
     var INTERCEPT_LABEL_TEXTURE = null;
 
@@ -976,10 +976,12 @@ window.ShipIcon = function () {
         //selecting mode 1 leaves the live startArc/endArc holding the SECOND arc. That is why this
         //wedge used to appear on the Heavy Slicer's rear arc alone.
         var arcs = getInterceptArcs(ship, weapon);
+        var interceptArcRange = INTERCEPT_ARC_RADIUS;
+        if(ship.flight) interceptArcRange = 100;
 
         for (var i = 0; i < arcs.length; i++) {
             var arc = this.showCircularArc(
-                INTERCEPT_ARC_RADIUS,
+                interceptArcRange,
                 arcs[i], //the weapon's real bearing arc, jam critical and all - the linked-fire wedge restricts FIRING, not interception
                 INTERCEPT_ARC_COLOUR,
                 {
