@@ -3796,7 +3796,7 @@ class HvyGraviticBolt extends Gravitic
         protected $setDamageArray = array(1 => 12, 2 => 24, 3 => 36);
 
 
-		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $startArc2 = null, $endArc2 = null){
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             if ( $maxhealth == 0 ) $maxhealth = 15;
             if ( $powerReq == 0 ) $powerReq = 15;     
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
