@@ -245,6 +245,14 @@ class Weapon extends ShipSystem
         $this->arcRestrictionThreshold = (int)$threshold;
     }
 
+    /*is this mount currently JAMMED? True means $startArc/$endArc are the reduced arc and are the
+    only arcs this weapon has - any per-mode/split entry in $startArcArray is a leftover of the
+    mount's original arcs and must be ignored (see Firing::isLegalIntercept). A method rather than a
+    public property on purpose: methods aren't serialised into the static ship blueprint.*/
+    public function isArcRestricted(){
+        return $this->arcRestricted;
+    }
+
     public $useOEW = true;
     public $useOEWArray = array();
     public $calledShotMod = -8;

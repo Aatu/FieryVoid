@@ -546,15 +546,31 @@ class Firing
         $relativeBearing = $firingweapon->getIncomingBearing($interceptingShip, $fire, $gd);
 
         //New arc check that checks split arcs like Heavy Slicer as well = DK Dec 2025
+        $interceptStartArcs = $weapon->startArcArray ?? [];
+        $interceptEndArcs = $weapon->endArcArray ?? [];
+
+        //TURRET JAM (ReducedArcs critical, Vree saucer turrets): a jammed mount is locked to its
+        //reduced arc, and that arc lives ONLY in startArc/endArc - changeFiringMode overwrites those
+        //and leaves startArcArray/endArcArray holding the mount's ORIGINAL full arcs. Handing the
+        //arrays to isInAnyArc would therefore let a jammed split-arc/per-mode mount go on
+        //intercepting right around the hull, while the client (which draws the intercept wedge from
+        //the live startArc/endArc alone) shows only the 60-degree forward wedge.
+        //Gated cheaply: almost no weapon has arc arrays at all, so the usual cost is one empty()
+        //test, and the isArcRestricted() call is only reached by the handful that do.
+        if (!empty($interceptStartArcs) && ($weapon instanceof Weapon) && $weapon->isArcRestricted()) {
+            $interceptStartArcs = array();
+            $interceptEndArcs = array();
+        }
+
         if (!mathlib::isInAnyArc(
             $relativeBearing,
             $weapon->startArc,
             $weapon->endArc,
-            $weapon->startArcArray ?? [],
-            $weapon->endArcArray ?? []
+            $interceptStartArcs,
+            $interceptEndArcs
         )) {
             return false;
-        }		
+        }
 
         /* //Old check for just main arcs
         if (!mathlib::isInArc($relativeBearing, $weapon->startArc, $weapon->endArc)) {
