@@ -80,7 +80,12 @@ class Weapon extends ShipSystem
 	public $canSplitShots = false; //For Front end to allow weapons to target different enemies in same firing round. 
 	public $canSplitShotsArray = array(); 
     protected $multiModeSplit = false; //If you want the Front End to see this, pass it in strpForJson() in weapon :)
-    protected $splitArcs = false; //Used to tell Front End that weapon has 2 or more separate arcs, passed manually via stripForJson()
+    /*this mount has 2 or more arcs LIVE AT ONCE, listed in startArcArray/endArcArray (see the
+    invariant documented there). PUBLIC, unlike most of these flags, because it decides how those
+    arrays are to be read and every reader needs it: changeFiringMode here, Firing::isLegalIntercept,
+    and the client - which gets it from the static blueprint as well as from stripForJson, so the
+    lobby reads the arrays the same way an in-game turn does.*/
+    public $splitArcs = false;
     public $overloadable = false;
 
     public $normalload = 0;
@@ -189,8 +194,25 @@ class Weapon extends ShipSystem
     public $minDamageArray = array();
     public $maxDamageArray = array();
 
-	//some weapons might use variable firing arc...	
-    public $startArcArray = array(); 
+	/*VARIABLE FIRING ARCS. These arrays carry one of TWO meanings, and $splitArcs is what says
+	which:
+
+	  $splitArcs = false - PER FIRING MODE, keyed by mode number (1-based, as every other
+	    *Array on this class is). changeFiringMode() swaps the live startArc/endArc to the
+	    entry for the new mode. Example: BSGLtKineticEnergyWeaponVA, wide in mode 1 and
+	    narrow in mode 2.
+
+	  $splitArcs = true - the mount's COMPLETE LIST of arcs, all live at once, keyed from 0
+	    (entry 0 repeats the constructor's startArc/endArc). Example: the Shadow
+	    Battlecruiser's Heavy Slicer, forward 300-60 plus aft 150-210.
+
+	The two keyings overlap at index 1, so applying the per-mode swap to a split mount used to
+	select arc [1] the moment mode 1 was chosen - which is every mount, since construction ends
+	in changeFiringMode(1). The live startArc/endArc then held the mount's SECOND arc, and
+	everything reading it single-arc (skindance front-arc test here, arc overlays and hex
+	targeting in the client) quietly described the wrong side of the ship. changeFiringMode()
+	now applies the swap only when the arrays mean modes.*/
+    public $startArcArray = array();
 	public $endArcArray = array();
 	
     public $exclusive = false; //for fighter guns - exclusive weapon can't bve fired together with others
@@ -2664,17 +2686,19 @@ full Advanced Armor effects (by rules) for reference:
 				
         if (isset($this->rakingArray[$i])) $this->raking = $this->rakingArray[$i];
         
-        if (isset($this->hextargetArray[$i])) $this->hextarget = $this->hextargetArray[$i];	
-	    
-        if (isset($this->startArcArray[$i])) $this->startArc = $this->startArcArray[$i];
-        if (isset($this->endArcArray[$i])) $this->endArc = $this->endArcArray[$i];
-	    
-		if (isset($this->ignoreAllEWArray[$i])) $this->ignoreAllEW = $this->ignoreAllEWArray[$i];	
-		if (isset($this->ignoreJinkingArray[$i])) $this->ignoreJinking = $this->ignoreJinkingArray[$i];	
-	    
-        if (isset($this->startArcArray[$i])) $this->startArc = $this->startArcArray[$i];
-        if (isset($this->endArcArray[$i])) $this->endArc = $this->endArcArray[$i];
-		
+        if (isset($this->hextargetArray[$i])) $this->hextarget = $this->hextargetArray[$i];
+
+		//ONLY when the arc arrays are keyed by mode. On a split-arc mount they are the list of arcs
+		//the weapon has all at once and index 1 is its second arc, not "the arc in mode 1" - see the
+		//invariant on $startArcArray. Such a mount keeps the constructor's arcs as its live pair.
+		if (!$this->splitArcs) {
+			if (isset($this->startArcArray[$i])) $this->startArc = $this->startArcArray[$i];
+			if (isset($this->endArcArray[$i])) $this->endArc = $this->endArcArray[$i];
+		}
+
+		if (isset($this->ignoreAllEWArray[$i])) $this->ignoreAllEW = $this->ignoreAllEWArray[$i];
+		if (isset($this->ignoreJinkingArray[$i])) $this->ignoreJinking = $this->ignoreJinkingArray[$i];
+
 		if (isset($this->hidetargetArray[$i])) $this->hidetarget = $this->hidetargetArray[$i];  // GTS
 		if (isset($this->noLockPenaltyArray[$i])) $this->noLockPenalty = $this->noLockPenaltyArray[$i];  // DK
 				

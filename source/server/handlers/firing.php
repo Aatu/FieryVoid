@@ -546,21 +546,21 @@ class Firing
         $relativeBearing = $firingweapon->getIncomingBearing($interceptingShip, $fire, $gd);
 
         //New arc check that checks split arcs like Heavy Slicer as well = DK Dec 2025
-        $interceptStartArcs = $weapon->startArcArray ?? [];
-        $interceptEndArcs = $weapon->endArcArray ?? [];
+        //
+        //ONLY a split-arc mount gets its arc arrays handed to isInAnyArc, because only there do the
+        //arrays mean "arcs held at once" (see the invariant on Weapon::$startArcArray). On every
+        //other weapon they are PER FIRING MODE, and passing those made a mount intercept across the
+        //union of all its modes' arcs - a BSGLtKineticEnergyWeaponVA in its narrow mode went on
+        //intercepting through the whole wide arc it does not currently have.
+        //
+        //TURRET JAM (ReducedArcs critical, Vree saucer turrets) drops the arrays too: a jammed mount
+        //is locked to its reduced arc, and that arc lives ONLY in startArc/endArc, so the arrays
+        //still hold the arcs the mount had before it jammed. Without this a jammed split mount would
+        //go on intercepting right around the hull.
+        $useSplitArcs = ($weapon instanceof Weapon) && $weapon->splitArcs && !$weapon->isArcRestricted();
 
-        //TURRET JAM (ReducedArcs critical, Vree saucer turrets): a jammed mount is locked to its
-        //reduced arc, and that arc lives ONLY in startArc/endArc - changeFiringMode overwrites those
-        //and leaves startArcArray/endArcArray holding the mount's ORIGINAL full arcs. Handing the
-        //arrays to isInAnyArc would therefore let a jammed split-arc/per-mode mount go on
-        //intercepting right around the hull, while the client (which draws the intercept wedge from
-        //the live startArc/endArc alone) shows only the 60-degree forward wedge.
-        //Gated cheaply: almost no weapon has arc arrays at all, so the usual cost is one empty()
-        //test, and the isArcRestricted() call is only reached by the handful that do.
-        if (!empty($interceptStartArcs) && ($weapon instanceof Weapon) && $weapon->isArcRestricted()) {
-            $interceptStartArcs = array();
-            $interceptEndArcs = array();
-        }
+        $interceptStartArcs = $useSplitArcs ? ($weapon->startArcArray ?? []) : [];
+        $interceptEndArcs = $useSplitArcs ? ($weapon->endArcArray ?? []) : [];
 
         if (!mathlib::isInAnyArc(
             $relativeBearing,

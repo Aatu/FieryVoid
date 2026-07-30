@@ -37,7 +37,7 @@ function compactSystemForStaticJson(array $system): array {
     $falseKeys = ['destroyed','jsClass','boostable','canOffLine','fighter','preFires',
                   'primary','isPrimaryTargetable','forceCriticalRoll',
                   'advancedArmor','hardAdvancedArmor','fixedPower',
-                  'stowed','outputDoubled'];
+                  'stowed','outputDoubled','splitArcs'];
     foreach ($falseKeys as $key) {
         if (isset($system[$key]) && $system[$key] === false) {
             unset($system[$key]);
