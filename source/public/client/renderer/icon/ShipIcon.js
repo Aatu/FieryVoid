@@ -798,10 +798,12 @@ window.ShipIcon = function () {
        corners mathlib.getHexCorners uses to build the grid, so a hexagon drawn from these lands
        exactly on a grid hex.
 
-       They are emitted in the icon's LOCAL space and the finished mesh is then turned to the ship's
-       facing. That is safe without any per-facing correction because a pointy-top hexagon maps onto
-       itself under any 60 degree rotation and a ship's facing is always a multiple of 60
-       (mathlib.hexFacingToAngle) - the hexes stay grid-aligned however the ship is pointing. */
+       The grid-aligned overlays (the EW blankets, the gravitic target area) use them as they are,
+       on an unrotated mesh. The weapon arcs emit them in the icon's LOCAL space and turn the
+       finished mesh to the ship's facing, which is safe without any per-facing correction because a
+       pointy-top hexagon maps onto itself under any 60 degree rotation and a ship's facing is always
+       a multiple of 60 (mathlib.hexFacingToAngle) - the hexes stay grid-aligned however the ship is
+       pointing. */
     var HEX_CORNERS = [30, 90, 150, 210, 270, 330].map(function (degrees) {
         var radians = degrees * Math.PI / 180;
         return { x: Math.cos(radians), y: Math.sin(radians) };
@@ -814,6 +816,82 @@ window.ShipIcon = function () {
 
     var STRAIGHT_ARC_FILL_COLOUR = 0x11446e;
     var STRAIGHT_ARC_BORDER_COLOUR = 0x08485e; //cyan, brighter than the fill so the hex edges carry
+
+    /* Centres of every hex within `range` steps of the origin hex, the origin included, as offsets
+       in game units. Both lattice vectors are real grid neighbour steps - direction 0 (due East) and
+       direction 1 - so the centres land exactly on grid hexes however far out they run: checked
+       against coordinateConverter.fromHexToGame over both row parities out to range 20, worst error
+       5e-13 game units.
+
+       Cube coordinates in disguise: a steps in direction 0 plus b steps in direction 1 is the cube
+       (a+b, -a, -b), whose distance from the origin is max(|a+b|, |a|, |b|). Clamping b to
+       [-range-a, range-a] as well as to [-range, range] is therefore exactly "within range", and
+       the count comes out at the expected 3*range*(range+1) + 1.
+
+       Offsets, not hexes, so no hexagon.Offset/Cube objects are built - a 20-hex BDEW blanket is
+       1261 of them. */
+    function hexCentresWithin(range, hexDistance) {
+        var centres = [];
+        //bearings are clockwise, game space is counter-clockwise, so direction 1 sits at math angle -60
+        var stepX = hexDistance * 0.5;
+        var stepY = -hexDistance * Math.sqrt(3) / 2;
+
+        for (var a = -range; a <= range; a++) {
+            var from = Math.max(-range, -a - range);
+            var to = Math.min(range, -a + range);
+
+            for (var b = from; b <= to; b++) {
+                centres.push({ x: a * hexDistance + b * stepX, y: b * stepY });
+            }
+        }
+
+        return centres;
+    }
+
+    /* A whole set of hexes as ONE indexed mesh: six vertices and four triangles each (a hexagon is
+       convex, so a fan from one corner covers it), all in a single buffer - one draw call whether
+       that is a three-hex arc arm or the 1261-hex BDEW blanket.
+
+       Built directly rather than through a THREE.Shape per hex + ShapeGeometry: the triangulation
+       of a hexagon is known, so there is nothing for a triangulator to work out, and the blanket is
+       built for every EW-showing ship at once. Indexing shares each corner between the triangles
+       that meet on it, which keeps the buffer to a third of the size an unindexed fan would need.
+
+       Distinct hexes never overlap, so the alpha needs no special handling. */
+    function buildHexFill(centres, radius, material) {
+        var positions = [];
+        var indices = [];
+
+        centres.forEach(function (centre, hex) {
+            var base = hex * 6;
+
+            HEX_CORNERS.forEach(function (corner) {
+                positions.push(centre.x + corner.x * radius, centre.y + corner.y * radius, 0);
+            });
+
+            for (var corner = 1; corner < 5; corner++) {
+                indices.push(base, base + corner, base + corner + 1);
+            }
+        });
+
+        var geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+        geometry.setIndex(indices);
+
+        return new THREE.Mesh(geometry, material);
+    }
+
+    /* Overlays measured in hexes have to sit on the GRID rather than on the sprite: an icon is
+       nudged off its hex centre when several ships share a hex (ShipIconContainer.getHexOffset) and
+       it sits between hexes mid-animation. This is the centre of the hex the icon is currently over,
+       plus the offset from the icon to it - the offset addGridLockedOverlay records so that
+       normaliseGridLockedChildren can hold both position and scale right through a zoom rescale. */
+    function getHexAnchor(icon) {
+        var position = icon.getPosition();
+        var centre = window.coordinateConverter.fromHexToGame(window.coordinateConverter.fromGameToHex(position));
+
+        return { centre: centre, offset: { x: centre.x - position.x, y: centre.y - position.y } };
+    }
 
     /* A one-pixel outline around each highlighted hex, all of them in a single LineSegments so the
        whole set is still one draw call.
@@ -831,35 +909,50 @@ window.ShipIcon = function () {
        Edges are keyed on their midpoint at half-unit precision. Two hexes sharing an edge produce
        exactly the same midpoint; inset hexes (STRAIGHT_ARC_HEX_INSET < 1), whose facing edges really
        are two separate lines a few units apart, key differently and both stay - correctly, because
-       then each hex is its own island and every edge of it IS an external edge. */
-    function buildHexOutlines(centres, radius) {
-        var edges = [];
-        var counts = {};
+       then each hex is its own island and every edge of it IS an external edge.
 
-        centres.forEach(function (centre) {
-            for (var corner = 0; corner < 6; corner++) {
-                var from = HEX_CORNERS[corner];
-                var to = HEX_CORNERS[(corner + 1) % 6];
+       Counted in one pass and emitted in a second rather than keeping 6 edge objects per hex around
+       in between: BDEW feeds this the whole 1261-hex blanket, for every ship showing EW at once.
 
-                var edge = {
-                    x1: centre.x + from.x * radius,
-                    y1: centre.y + from.y * radius,
-                    x2: centre.x + to.x * radius,
-                    y2: centre.y + to.y * radius
-                };
+       Colour and opacity default to the straight arcs' cobalt; the EW blankets and the gravitic
+       target area pass their own so each overlay keeps the colour it is recognised by. */
+    function buildHexOutlines(centres, radius, colour, opacity) {
+        var counts = new Map();
 
-                edge.key = Math.round(edge.x1 + edge.x2) + ',' + Math.round(edge.y1 + edge.y2); //the midpoint, doubled
-                counts[edge.key] = (counts[edge.key] || 0) + 1;
-                edges.push(edge);
-            }
+        /* The doubled midpoint packed into one number - the same identity the string
+           "x,y" carried, but without building 7566 keys' worth of strings for a blanket. The
+           offset keeps both halves non-negative; it holds for anything within ~189 hexes of the
+           icon, which is an order of magnitude past the largest overlay FV draws. */
+        function edgeKey(doubledX, doubledY) {
+            return (Math.round(doubledX) + 32768) * 65536 + Math.round(doubledY) + 32768;
+        }
+
+        function forEachEdge(handle) {
+            centres.forEach(function (centre) {
+                for (var corner = 0; corner < 6; corner++) {
+                    var from = HEX_CORNERS[corner];
+                    var to = HEX_CORNERS[(corner + 1) % 6];
+
+                    var x1 = centre.x + from.x * radius;
+                    var y1 = centre.y + from.y * radius;
+                    var x2 = centre.x + to.x * radius;
+                    var y2 = centre.y + to.y * radius;
+
+                    handle(x1, y1, x2, y2, edgeKey(x1 + x2, y1 + y2));
+                }
+            });
+        }
+
+        forEachEdge(function (x1, y1, x2, y2, key) {
+            counts.set(key, (counts.get(key) || 0) + 1);
         });
 
         var positions = [];
 
-        edges.forEach(function (edge) {
-            if (counts[edge.key] > 1) return; //interior seam - highlighted hex on both sides
+        forEachEdge(function (x1, y1, x2, y2, key) {
+            if (counts.get(key) > 1) return; //interior seam - highlighted hex on both sides
 
-            positions.push(edge.x1, edge.y1, 0, edge.x2, edge.y2, 0);
+            positions.push(x1, y1, 0, x2, y2, 0);
         });
 
         var geometry = new THREE.BufferGeometry();
@@ -867,7 +960,11 @@ window.ShipIcon = function () {
 
         var outlines = new THREE.LineSegments(
             geometry,
-            new THREE.LineBasicMaterial({ color: STRAIGHT_ARC_BORDER_COLOUR, opacity: 0.9, transparent: true })
+            new THREE.LineBasicMaterial({
+                color: colour === undefined ? STRAIGHT_ARC_BORDER_COLOUR : colour,
+                opacity: opacity === undefined ? 0.9 : opacity,
+                transparent: true
+            })
         );
         outlines.position.z = 0.01; //clear of the coplanar fill, still behind the ship sprite
 
@@ -879,10 +976,9 @@ window.ShipIcon = function () {
        an approximating oblong. The firing ship's own hex is never a target, so the chains start one
        hex out.
 
-       Every hex of every direction goes into ONE geometry: THREE.ShapeGeometry accepts an array of
-       shapes and triangulates them all into a single buffer. A range-3 weapon with a 360 degree arc
-       is 18 highlighted hexes but still one mesh, one material and one draw call - cheaper than the
-       up-to-six meshes the oblong version made, and no per-hex sprite. */
+       Every hex of every direction goes into ONE geometry (buildHexFill), so a range-3 weapon with a
+       360 degree arc is 18 highlighted hexes but still one mesh, one material and one draw call -
+       cheaper than the up-to-six meshes the oblong version made, and no per-hex sprite. */
     ShipIcon.prototype.showStraightArcs = function (weapon, hexDistance, arcs) {
         //Reach in whole hexes. Same rule the circular arcs use: a range penalty caps the useful
         //reach where the penalty reaches 50, and weapon.range caps it again when it is set.
@@ -926,47 +1022,20 @@ window.ShipIcon = function () {
         if (!centres.length) return;
 
         var radius = hexRadius * STRAIGHT_ARC_HEX_INSET;
-        var shapes = centres.map(function (centre) {
-            var shape = new THREE.Shape();
 
-            HEX_CORNERS.forEach(function (corner, index) {
-                var x = centre.x + corner.x * radius;
-                var y = centre.y + corner.y * radius;
-
-                if (index === 0) {
-                    shape.moveTo(x, y);
-                } else {
-                    shape.lineTo(x, y);
-                }
-            });
-
-            shape.closePath();
-            return shape;
-        });
-
-        var hexes = new THREE.Mesh(
-            new THREE.ShapeGeometry(shapes),
-            new THREE.MeshBasicMaterial({ color: STRAIGHT_ARC_FILL_COLOUR, opacity: 0.5, transparent: true })
-        );
+        var hexes = buildHexFill(centres, radius, new THREE.MeshBasicMaterial({
+            color: STRAIGHT_ARC_FILL_COLOUR,
+            opacity: 0.5,
+            transparent: true
+        }));
 
         //child, so it inherits the fill's rotation, grid-lock correction and removal
         hexes.add(buildHexOutlines(centres, radius));
 
         hexes.rotation.z = mathlib.degreeToRadian(this.getFacing());
-
-        /* The icon is nudged off its hex centre when several ships share a hex
-           (ShipIconContainer.getHexOffset), and it sits between hexes mid-animation. These are grid
-           hexes - they have to sit on the grid, not on the sprite - so re-centre on the hex the icon
-           is currently over rather than on the icon itself.
-
-           The offset is recorded rather than applied: normaliseGridLockedChildren owns the position
-           and scale of a grid-locked child, so that both survive the icon being rescaled on zoom. */
-        var iconPosition = this.getPosition();
-        var hexCentre = window.coordinateConverter.fromHexToGame(window.coordinateConverter.fromGameToHex(iconPosition));
-
         hexes.position.z = -1;
 
-        addGridLockedOverlay(this.mesh, hexes, { x: hexCentre.x - iconPosition.x, y: hexCentre.y - iconPosition.y });
+        addGridLockedOverlay(this.mesh, hexes, getHexAnchor(this).offset);
         this.weaponArcs.push(hexes);
     };
 
@@ -1060,6 +1129,15 @@ window.ShipIcon = function () {
         this.structureArcs = [];
     };
 
+    var BDEW_HEXES = 20; //the blanket is a fixed 20 hexes whatever the ship's BDEW rating
+
+    /* Blanket EW, drawn as the actual grid hexes it covers rather than a smooth hexagon
+       approximating them - same treatment as the straight weapon arcs, so "am I under that
+       blanket?" is answered by the hex the ship sits in instead of by eye.
+
+       The hexes a range-20 disc covers do NOT make a clean hexagon: every side of the union is a
+       zigzag, and the old smooth outline (a hexagon of circumradius 20.6 hexes, the extra 0.6 there
+       to reach the far corner of the 20th hex) cut across those hexes on both sides of it. */
     ShipIcon.prototype.showBDEW = function () {
         var BDEW = ew.getBDEW(this.ship);
         if (!BDEW || this.BDEWSprite) {
@@ -1067,64 +1145,25 @@ window.ShipIcon = function () {
         }
 
         var hexDistance = window.coordinateConverter.getHexDistance();
-        var dis = 20.6 * hexDistance; //Need the extra 0.6 just to cover the 20th hex visually - DK
+        var hexRadius = hexDistance / Math.sqrt(3); //hexDistance is centre-to-centre; this is centre-to-corner
+        var centres = hexCentresWithin(BDEW_HEXES, hexDistance);
 
         var color = gamedata.isMyShip(this.ship) ? new THREE.Color(160 / 255, 250 / 255, 100 / 255).convertSRGBToLinear() : new THREE.Color(255 / 255, 157 / 255, 0 / 255).convertSRGBToLinear();
 
-        // Create a hexagon shape
-        var hexShape = new THREE.Shape();
-        for (let i = 0; i < 6; i++) {
-            let angle = (i * Math.PI) / 3; // 60-degree increments
-            let x = dis * Math.cos(angle);
-            let y = dis * Math.sin(angle);
-            if (i === 0) {
-                hexShape.moveTo(x, y);
-            } else {
-                hexShape.lineTo(x, y);
-            }
-        }
-        hexShape.closePath();
-
-        var geometry = new THREE.ShapeGeometry(hexShape);
-        var material = new THREE.MeshBasicMaterial({ color: color, opacity: 0.2, transparent: true });
-        var hexagon = new THREE.Mesh(geometry, material);
+        var hexagon = buildHexFill(centres, hexRadius, new THREE.MeshBasicMaterial({
+            color: color,
+            opacity: 0.2,
+            transparent: true
+        }));
         hexagon.position.z = -1;
 
-        // Create a hexagon border with higher opacity (0.8) to define the boundaries
-        var borderShape = new THREE.Shape();
-        for (let i = 0; i < 6; i++) {
-            let angle = (i * Math.PI) / 3;
-            let x = dis * Math.cos(angle);
-            let y = dis * Math.sin(angle);
-            if (i === 0) borderShape.moveTo(x, y);
-            else borderShape.lineTo(x, y);
-        }
-        borderShape.closePath();
+        //Border in the same colour, defining where the blanket stops. Only the silhouette of the
+        //union is drawn, so this is the boundary of the blanket and not 1261 little hexagons.
+        //Child, so it inherits the fill's grid-lock correction and its removal.
+        hexagon.add(buildHexOutlines(centres, hexRadius, color, 0.5));
 
-        var holePath = new THREE.Path();
-        var lineWidth = 4;
-        var innerDis = dis - lineWidth;
-        for (let i = 0; i < 6; i++) {
-            let angle = (i * Math.PI) / 3;
-            let x = innerDis * Math.cos(angle);
-            let y = innerDis * Math.sin(angle);
-            if (i === 0) holePath.moveTo(x, y);
-            else holePath.lineTo(x, y);
-        }
-        holePath.closePath();
-        borderShape.holes.push(holePath);
-
-        var borderMaterial = new THREE.MeshBasicMaterial({
-            color: color,
-            opacity: 0.5,
-            transparent: true,
-            side: THREE.DoubleSide
-        });
-
-        var border = new THREE.Mesh(new THREE.ShapeGeometry(borderShape), borderMaterial);
-        hexagon.add(border);
-
-        addGridLockedOverlay(this.mesh, hexagon); //the 20-hex blanket has to cover 20 hexes at every zoom
+        //the blanket has to cover 20 hexes at every zoom, and sit on the grid rather than the sprite
+        addGridLockedOverlay(this.mesh, hexagon, getHexAnchor(this).offset);
         this.BDEWSprite = hexagon;
 
         return null;
@@ -1140,6 +1179,8 @@ window.ShipIcon = function () {
     // variable: a mine is detected when Detect Mines EW > distance + mine signature,
     // so the radius equals the ship's Detect Mines amount (in hexes) rather than the
     // fixed 20-hex BDEW blanket. Uses a single base colour (#5e338a) for all ships.
+    // Hex-mapped like the blanket - the range is a whole number of hexes, so the hexes
+    // themselves are what it should be showing.
     ShipIcon.prototype.showMDEW = function () {
         var MDEW = ew.getDetectMEW(this.ship);
         if (!MDEW || !gamedata.areMinesPresent || this.MDEWSprite) {
@@ -1147,66 +1188,26 @@ window.ShipIcon = function () {
         }
 
         var hexDistance = window.coordinateConverter.getHexDistance();
-        var dis = (MDEW + 0.6) * hexDistance; //Extra 0.6 to cover the outermost hex visually - matches showBDEW
+        var hexRadius = hexDistance / Math.sqrt(3);
+        var centres = hexCentresWithin(Math.floor(MDEW), hexDistance);
 
-        // Brightened a touch over BDEW (0.3 fill / solid border) so the purple reads clearly.
+        // Brightened a touch over BDEW (0.4 fill / stronger border) so the purple reads clearly.
         var color = new THREE.Color(0x5e338a).convertSRGBToLinear();
+        var colorBorder = new THREE.Color(0x8045ba).convertSRGBToLinear();
 
-        // Create a hexagon shape
-        var hexShape = new THREE.Shape();
-        for (let i = 0; i < 6; i++) {
-            let angle = (i * Math.PI) / 3; // 60-degree increments
-            let x = dis * Math.cos(angle);
-            let y = dis * Math.sin(angle);
-            if (i === 0) {
-                hexShape.moveTo(x, y);
-            } else {
-                hexShape.lineTo(x, y);
-            }
-        }
-        hexShape.closePath();
-
-        var geometry = new THREE.ShapeGeometry(hexShape);
-        var material = new THREE.MeshBasicMaterial({ color: color, opacity: 0.4, transparent: true });
-        var hexagon = new THREE.Mesh(geometry, material);
+        var hexagon = buildHexFill(centres, hexRadius, new THREE.MeshBasicMaterial({
+            color: color,
+            opacity: 0.4,
+            transparent: true
+        }));
         hexagon.position.z = -1;
 
-        // Create a hexagon border with a solid (fully opaque) outline to define the boundaries
-        var borderShape = new THREE.Shape();
-        for (let i = 0; i < 6; i++) {
-            let angle = (i * Math.PI) / 3;
-            let x = dis * Math.cos(angle);
-            let y = dis * Math.sin(angle);
-            if (i === 0) borderShape.moveTo(x, y);
-            else borderShape.lineTo(x, y);
-        }
-        borderShape.closePath();
+        //silhouette of the detection area, in the lighter purple - child, so it inherits the fill's
+        //grid-lock correction and its removal
+        hexagon.add(buildHexOutlines(centres, hexRadius, colorBorder, 0.6));
 
-        var holePath = new THREE.Path();
-        var lineWidth = 4;
-        var innerDis = dis - lineWidth;
-        for (let i = 0; i < 6; i++) {
-            let angle = (i * Math.PI) / 3;
-            let x = innerDis * Math.cos(angle);
-            let y = innerDis * Math.sin(angle);
-            if (i === 0) holePath.moveTo(x, y);
-            else holePath.lineTo(x, y);
-        }
-        holePath.closePath();
-        borderShape.holes.push(holePath);
-
-        var colorBorder = new THREE.Color(0x8045ba).convertSRGBToLinear();        
-        var borderMaterial = new THREE.MeshBasicMaterial({
-            color: colorBorder,
-            opacity: 0.6,
-            transparent: true,
-            side: THREE.DoubleSide
-        });
-
-        var border = new THREE.Mesh(new THREE.ShapeGeometry(borderShape), borderMaterial);
-        hexagon.add(border);
-
-        addGridLockedOverlay(this.mesh, hexagon); //the detection radius is a hex count - hold it
+        //the detection radius is a hex count - hold it, and sit it on the grid rather than the sprite
+        addGridLockedOverlay(this.mesh, hexagon, getHexAnchor(this).offset);
         this.MDEWSprite = hexagon;
 
         return null;
@@ -1218,65 +1219,68 @@ window.ShipIcon = function () {
         this.MDEWSprite = null;
     };
 
-    ShipIcon.prototype.showTargetedHexagonInArc = function (shooter, shooterIcon, system, size, color = null, opacity = null, lineWidth = 3) {
+    /* Where a shot can still go once a target is designated: every hex within `size` of the TARGET
+       that also lies inside the SHOOTER's firing arc. A Gravitic's net shows the hexes it could shove
+       its target into (size = the weapon's moveDistance); a Particle Repeater's shows where the rest
+       of a split burst may spill (size = 1). It hangs off the target's icon, which is why both ships
+       have to be passed in.
+
+       Hex-mapped like the weapon arcs: the area is the hexes it actually covers, so its edges land
+       on hex boundaries instead of slicing hexes in half and leaving the player to guess which side
+       a hex fell on.
+
+       That also disposes of the old construction - a smooth hexagon of (size + 0.6) hexes sliced by
+       two WORLD-space THREE.Plane clipping planes through the shooter, plus two more sheared meshes
+       to draw the cut edges. The planes belonged to one icon and the geometry to another, so the two
+       had to be kept in step across icons that rescale independently; an arc test per hex has no
+       such coupling, and the border falls out of the ordinary silhouette routine.
+
+       Arc membership is measured the way weaponManager.isPosOnWeaponArc measures it: the clockwise
+       compass bearing of the hex from the shooter's hex, against the weapon's arc turned into world
+       bearings by the shooter's facing. getArcs() is ship-frame and already roll-corrected. The
+       facing is read off the icon rather than the movement data so the overlay follows what is drawn
+       on screen while a ship is animating. */
+    ShipIcon.prototype.showTargetedHexagonInArc = function (shooter, shooterIcon, system, size, color = null, opacity = null) {
 
         //Check if we already have a sprite for this system, if so, remove it.
         if (this.shipHexagonSpritesMap.has(system)) {
             this.removeTargetedHexagonInArc(system);
         }
 
+        size = Math.floor(size);
+        if (isNaN(size) || size < 0) return; //no reach to show
+
         var hexDistance = window.coordinateConverter.getHexDistance();
+        var hexRadius = hexDistance / Math.sqrt(3);
+
         var systemArcs = shipManager.systems.getArcs(shooter, system);
+        /* Icon space is counter-clockwise and bearings are clockwise, hence the negated facing.
+           Rounded because getFacing() reads the sprite's rotation back out of radians and the round
+           trip leaves ~1e-14 of dust on it: isInArc rounds the BEARING to a whole degree but compares
+           it against the arc bounds raw, so an arc ending a hair under 120 silently drops every hex
+           sitting exactly on 120 - the whole edge of the wedge. Facings are multiples of 60 and arcs
+           are whole degrees, so rounding is exact, and it puts this in step with
+           weaponManager.isPosOnWeaponArc, which takes its facing straight from the movement data. */
+        var shooterFacing = mathlib.addToDirection(0, -Math.round(shooterIcon.getFacing()));
+        var arcStart = mathlib.addToDirection(systemArcs.start, shooterFacing);
+        var arcEnd = mathlib.addToDirection(systemArcs.end, shooterFacing);
 
-        //Setup the Hexagon Geometry
-        var dis = (size + 0.6) * hexDistance;
-        var hexShape = new THREE.Shape();
-        for (let i = 0; i < 6; i++) {
-            let angle = (i * Math.PI) / 3;
-            let x = dis * Math.cos(angle);
-            let y = dis * Math.sin(angle);
-            if (i === 0) hexShape.moveTo(x, y);
-            else hexShape.lineTo(x, y);
-        }
-        hexShape.closePath();
+        var anchor = getHexAnchor(this);
+        var shooterHexCentre = getHexAnchor(shooterIcon).centre;
 
-        var plane1 = new THREE.Plane();
-        var plane2 = new THREE.Plane();
-        var shooterRotation = shooterIcon.mesh.rotation.z;
+        //A 360 degree arc keeps every hex: getArcs returns start === end for one, and isInArc says
+        //yes to everything in that case.
+        var centres = hexCentresWithin(size, hexDistance).filter(function (centre) {
+            var bearing = mathlib.getCompassHeadingOfPoint(shooterHexCentre, {
+                x: anchor.centre.x + centre.x,
+                y: anchor.centre.y + centre.y
+            });
 
-        const TWO_PI = Math.PI * 2;
-        var offset = 0;
-        // Logic angles are CW (0=East, +CW). Visual are CCW. 
-        // We define CCW visual arc From -> To.
-        // VisStart = -LogicEnd. VisEnd = -LogicStart.
-        // Use the sprite's rotation, as the parent mesh doesn't rotate.
-        var shooterRotation = shooterIcon.shipSprite.mesh.rotation.z;
+            return mathlib.isInArc(bearing, arcStart, arcEnd);
+        });
 
-        var angleStart = mathlib.degreeToRadian(-(systemArcs.end + offset)) + shooterRotation;
-        var angleEnd = mathlib.degreeToRadian(-(systemArcs.start + offset)) + shooterRotation;
+        if (!centres.length) return; //the whole area is outside the arc - nothing to draw
 
-        var isSmallArc = false;
-        var is360Arc = Math.abs(systemArcs.start - systemArcs.end) === 360 || systemArcs.start === systemArcs.end;
-
-        // If start != end, we clips. If start == end, it's a 360 circle (no clips).
-        if (!is360Arc) {
-            // Calculate the angular span
-            var span = angleEnd - angleStart;
-            while (span < 0) span += TWO_PI;
-            while (span > TWO_PI) span -= TWO_PI;
-            isSmallArc = span < Math.PI;
-        }
-
-        var shooterWorldPos = new THREE.Vector3();
-        shooterIcon.mesh.getWorldPosition(shooterWorldPos);
-
-        // Plane 1: Start Edge. Point IN (CCW +90).
-        var normal1 = new THREE.Vector3(Math.cos(angleStart + Math.PI / 2), Math.sin(angleStart + Math.PI / 2), 0);
-        plane1.setFromNormalAndCoplanarPoint(normal1, shooterWorldPos);
-
-        // Plane 2: End Edge. Point IN (CW -90).
-        var normal2 = new THREE.Vector3(Math.cos(angleEnd - Math.PI / 2), Math.sin(angleEnd - Math.PI / 2), 0);
-        plane2.setFromNormalAndCoplanarPoint(normal2, shooterWorldPos);
         if (color == null) {
             color = new THREE.Color(0.1, 0.5, 0.1).convertSRGBToLinear()
         }
@@ -1285,104 +1289,23 @@ window.ShipIcon = function () {
             opacity = 0.3
         }
 
-        var hexMaterial = new THREE.MeshBasicMaterial({
+        var hexagon = buildHexFill(centres, hexRadius, new THREE.MeshBasicMaterial({
             color: color,
             opacity: opacity,
             transparent: true,
-            side: THREE.DoubleSide,
-            clippingPlanes: !is360Arc ? [plane1, plane2] : [],
-            clipIntersection: !isSmallArc
-        });
+            side: THREE.DoubleSide
+        }));
+        hexagon.position.z = -1;
 
-        var hexagon = new THREE.Mesh(new THREE.ShapeGeometry(hexShape), hexMaterial);
-        hexagon.position.set(0, 0, -1);
+        //Border in the caller's colour, fully opaque so the boundary carries over the pale fill.
+        //Silhouette only, so the arc's cut edges are drawn but the seams between hexes are not.
+        //Child, so it inherits the fill's grid-lock correction and its removal.
+        hexagon.add(buildHexOutlines(centres, hexRadius, color, 1));
 
-        var borderShape = new THREE.Shape();
-        for (let i = 0; i < 6; i++) {
-            let angle = (i * Math.PI) / 3;
-            let x = dis * Math.cos(angle);
-            let y = dis * Math.sin(angle);
-            if (i === 0) borderShape.moveTo(x, y);
-            else borderShape.lineTo(x, y);
-        }
-        borderShape.closePath();
-
-        var holePath = new THREE.Path();
-        var innerDis = dis - lineWidth;
-        for (let i = 0; i < 6; i++) {
-            let angle = (i * Math.PI) / 3;
-            let x = innerDis * Math.cos(angle);
-            let y = innerDis * Math.sin(angle);
-            if (i === 0) holePath.moveTo(x, y);
-            else holePath.lineTo(x, y);
-        }
-        holePath.closePath();
-        borderShape.holes.push(holePath);
-
-        var borderMaterial = new THREE.MeshBasicMaterial({
-            color: color,
-            opacity: 1,
-            transparent: true,
-            side: THREE.DoubleSide,
-            clippingPlanes: hexMaterial.clippingPlanes,
-            clipIntersection: hexMaterial.clipIntersection
-        });
-
-        var border = new THREE.Mesh(new THREE.ShapeGeometry(borderShape), borderMaterial);
-        hexagon.add(border);
-
-        // Add sheared edge borders for clipped arcs
-        if (!is360Arc) {
-            // Edge for Plane 1
-            var plane1_inner = new THREE.Plane().setFromNormalAndCoplanarPoint(
-                normal1.clone().negate(),
-                shooterWorldPos.clone().add(normal1.clone().multiplyScalar(lineWidth))
-            );
-            var edge1Material = new THREE.MeshBasicMaterial({
-                color: color,
-                opacity: 1,
-                transparent: true,
-                side: THREE.DoubleSide,
-                clippingPlanes: isSmallArc ? [plane1, plane1_inner, plane2] : [plane1, plane1_inner],
-                clipIntersection: false
-            });
-            var edge1 = new THREE.Mesh(new THREE.ShapeGeometry(hexShape), edge1Material);
-            hexagon.add(edge1);
-
-            // Edge for Plane 2
-            var plane2_inner = new THREE.Plane().setFromNormalAndCoplanarPoint(
-                normal2.clone().negate(),
-                shooterWorldPos.clone().add(normal2.clone().multiplyScalar(lineWidth))
-            );
-            var edge2Material = new THREE.MeshBasicMaterial({
-                color: color,
-                opacity: 1,
-                transparent: true,
-                side: THREE.DoubleSide,
-                clippingPlanes: isSmallArc ? [plane2, plane2_inner, plane1] : [plane2, plane2_inner],
-                clipIntersection: false
-            });
-            var edge2 = new THREE.Mesh(new THREE.ShapeGeometry(hexShape), edge2Material);
-            hexagon.add(edge2);
-        }
-
-        /* dis is (size + 0.6) hexes - a Gravitic's move distance - so grid-lock it like the other
-           range overlays.
-
-           This also settles the clipping, which used to drift: the hexagon hangs off the TARGET's
-           icon while the planes are WORLD-space planes through the SHOOTER, so the icon's zoom
-           rescale changed the hexagon's world size while the planes stayed put, and the clipped wedge
-           came out differently at different zooms. Holding the hexagon's world size fixed makes both
-           sides of the clip zoom-invariant. */
-        addGridLockedOverlay(this.mesh, hexagon);
+        //size is a count of hexes, so grid-lock it like the other range overlays, and anchor it on
+        //the target's hex rather than on its sprite
+        addGridLockedOverlay(this.mesh, hexagon, anchor.offset);
         this.shipHexagonSpritesMap.set(system, hexagon);
-        /*
-        //plane/arc helpers to troubleshoot arc placement.
-        var helper1 = new THREE.PlaneHelper(plane1, 1000, 0xff0000); // Red
-        var helper2 = new THREE.PlaneHelper(plane2, 1000, 0x00ff00); // Green
-        shooterIcon.mesh.parent.add(helper1);
-        shooterIcon.mesh.parent.add(helper2);
-        */
     };
 
     ShipIcon.prototype.removeTargetedHexagonInArc = function (system) {
