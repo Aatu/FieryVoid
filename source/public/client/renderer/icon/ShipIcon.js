@@ -658,7 +658,7 @@ window.ShipIcon = function () {
     }
 
     ShipIcon.prototype.showWeaponArc = function (ship, weapon) {
-        if (!(weapon instanceof Weapon) && !(weapon instanceof Thruster) && !(weapon instanceof Shield)) return null; // Only show arcs for weapons
+        if (!(weapon instanceof Weapon) && !(weapon instanceof Thruster) && !(weapon.defensiveSystem)) return null; // Only show arcs for weapons
         if(weapon.stowed && weapon.stowedArcStart == null) return null; //stowed weapon with no stowed arc (Kirishiac Orbital docked) - non-operational, no arc to show. A stowed arc set (Heavy Orbital) keeps the weapon live: draw its current (reduced) arc.
 
         var hexDistance = window.coordinateConverter.getHexDistance();
@@ -667,7 +667,7 @@ window.ShipIcon = function () {
 
             this.showThrusterIcon(ship, weapon); //Creates small thruster icon on relevant side of ship on hover over system.
 
-        } else if (weapon instanceof Shield) {
+        } else if (weapon.defensiveSystem) {
             //Shields are BEARING-based, not ranged: the wedge only says which way the shield faces,
             //and there is no reach in hexes to map onto the grid (a Shield is a ShipSystem, so it has
             //neither range nor rangePenalty). It keeps the smooth wedge it always had, at the same
