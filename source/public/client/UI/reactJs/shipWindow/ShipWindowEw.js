@@ -76,7 +76,7 @@ const EwPanel = styled.div`
     box-sizing: border-box;
     background-color: ${theme.colors.panelBgGlass};
     border: 1px solid ${theme.colors.line};
-    padding: 2px 4px 2px;
+    padding: 1px 4px 1px;
 `;
 
 /*title bar spans the panel edge-to-edge (negative margins cancel EwPanel's padding)
@@ -123,17 +123,20 @@ const Row = styled.div`
       between rows; that extra is wanted, since a header rule reads better with more clearance
       than the rows it heads.*/
     padding-top: 2px;
-    /*$target rows swap baseline alignment for centre: a target row's two children are the
-      TargetMain block (label + name, centred internally too) and the value, so centring
-      floats both to the vertical middle of however many lines the name took - level with
-      the single line of a short name, midway between the two lines of a wrapped one, with
-      no line-counting needed. Ship rows KEEP baseline: their 8px label and 10px value never
-      wrap, and centring them would shift the value off the label's baseline for no gain.
+    /*$target rows carry a wrappable ship name (see RowTarget), so they need more air than
+      the single-line ship rows: without it a name's second line sits as close to the NEXT
+      row's label as to its own first line, and the eye groups it with the wrong row.
 
-      No padding override here any more - target rows deliberately sit at the same pitch as
-      ship rows, so they inherit it. Retune the panel's spacing at the padding-top above.*/
+      They also swap baseline alignment for centre: a target row's two children are the
+      TargetMain block (label + name, internally baseline-aligned) and the value, so
+      centring floats the value to the vertical middle of however many lines the name
+      took - level with the single line of a short name, midway between the two lines of
+      a wrapped one, with no line-counting needed. Ship rows KEEP baseline: their 8px
+      label and 10px value never wrap, and centring them would shift the value off the
+      label's baseline for no gain.*/
     ${props => props.$target && css`
         align-items: center;
+        padding-top: 2px;        
     `}
 
     /*BDEW / Detect Mines rows raise the matching map overlay while hovered (see getShipRows), so
@@ -148,15 +151,8 @@ const Row = styled.div`
 `;
 
 /*Label + name of a target row, grouped so the value outside can centre against the pair
-  (see Row's $target branch).
-
-  Centred internally (user request 2026-07-30), so the label floats to the vertical middle of
-  however many lines the name took - the same treatment Row's $target branch already gives the
-  value on the other side. It was `baseline` before, which pinned the label to the name's FIRST
-  line and left it hanging high beside a wrapped name while the value sat centred; the row now
-  reads as one horizontally-aligned trio no matter how the name breaks. Costs a small baseline
-  shift on single-line names (the 8px label centres against the 9px name rather than sharing
-  its baseline) - the same trade the value already makes, and not noticeable at these sizes.*/
+  (see Row's $target branch). Baseline-aligned internally, which is what keeps the label
+  level with the name's FIRST line rather than drifting down with it.*/
 const TargetMain = styled.div`
     display: flex;
     align-items: baseline;
@@ -193,9 +189,8 @@ const RowValue = styled.span`
   so an over-long name reads as truncated rather than silently cut. -webkit-line-clamp needs
   the legacy -webkit-box display and is the only cross-browser "N lines then ellipsis"
   (Chrome/Edge/Safari, Firefox 68+); the unprefixed `line-clamp` is there for when that
-  standardises. Both the label (via TargetMain) and the value (via Row's $target branch) are
-  centred against however many lines the name takes, so they stay level with each other rather
-  than with any particular line of it.*/
+  standardises. Row keeps align-items: baseline, so the label and value sit level with the
+  name's FIRST line.*/
 const RowTarget = styled.span`
     flex: 1 1 auto;
     min-width: 0;
