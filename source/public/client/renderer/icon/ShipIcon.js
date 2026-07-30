@@ -695,6 +695,7 @@ window.ShipIcon = function () {
         } else { //Normal weapons with circular weapon arcs
             var arcs = shipManager.systems.getArcs(ship, weapon);
             var arcColour = "rgb(20,80,128)";
+            var arcFillOpacity = ARC_FILL_OPACITY;
 
             //Firing-link reduced arc (e.g. Vree turret): if this weapon shares an angular-spread
             //group and any member has declared fire this turn (a sibling, OR this weapon itself once
@@ -722,11 +723,12 @@ window.ShipIcon = function () {
                     var wedge = { start: mathlib.addToDirection(centreRel, -spread), end: mathlib.addToDirection(centreRel, spread) };
                     arcs = baseArcLength >= 360 ? wedge : intersectArcs(arcs, wedge);
                     if (!arcs) return null; //restricted arc and link wedge don't overlap - nothing can be fired at
-                    arcColour = "rgb(170,95,25)"; //amber: reduced (linked) arc
+                    arcColour = REDUCED_ARC_COLOUR; //amber: reduced (linked) arc
+                    arcFillOpacity = REDUCED_ARC_FILL_OPACITY;
                 }
             }
 
-            this.showRangeArc(getWeaponReachInHexes(weapon), hexDistance, [arcs], arcColour);
+            this.showRangeArc(getWeaponReachInHexes(weapon), hexDistance, [arcs], arcColour, arcFillOpacity);
         }
 
         return null;
@@ -761,6 +763,20 @@ window.ShipIcon = function () {
        envelope, the structure sections - where it says something different on purpose. */
     var MAX_ARC_HEXES = 60;
 
+    /* ---- Hex-edged range-arc strengths. THESE ARE THE KNOBS ---------------------------------
+       The colour itself is opaque (THREE.Color has no alpha - see the note further down), so how
+       strong an arc looks on the map is these opacities, not the rgb(). 0 = invisible fill,
+       1 = solid; raise for a stronger arc, lower for a fainter one.
+
+       The reduced (linked / jammed) arc is filled fainter than the normal one on purpose: amber
+       over the dark map reads a good deal hotter than cobalt does at the same alpha, so matching
+       the numbers would NOT match the apparent brightness. Its outline stays at the shared border
+       opacity, which is what keeps the restricted wedge crisply readable while its fill is quiet. */
+    var ARC_FILL_OPACITY = 0.5;                     //normal (cobalt) firing arc
+    var ARC_BORDER_OPACITY = 0.7;                   //outline of every hex-edged arc, in the arc's own colour
+    var REDUCED_ARC_COLOUR = "rgb(170,95,25)";      //amber: this weapon's arc is restricted this turn
+    var REDUCED_ARC_FILL_OPACITY = 0.3;             //fainter than ARC_FILL_OPACITY - see above
+
     /* A ranged weapon's arc, as the grid hexes it covers. arcsList is one or more ship-frame arcs -
        a split-arc mount hands both over at once, so its two regions share a single overlay and any
        hex they have in common is filled once rather than blended twice.
@@ -770,7 +786,7 @@ window.ShipIcon = function () {
        facing (a pointy-top hex maps onto itself under any 60 degree turn, and facings are always
        multiples of 60). No facing arithmetic on the arc bounds, and so no chance of float dust on
        one - the trap that cost showTargetedHexagonInArc a whole wedge edge. */
-    ShipIcon.prototype.showRangeArc = function (maxHexes, hexDistance, arcsList, colour) {
+    ShipIcon.prototype.showRangeArc = function (maxHexes, hexDistance, arcsList, colour, fillOpacity) {
         if (!maxHexes || !arcsList.length) return; //no reach, or nothing to bear with
 
         var loops = buildHexRegion(Math.min(maxHexes, MAX_ARC_HEXES), hexDistance, function (x, y) {
@@ -794,9 +810,10 @@ window.ShipIcon = function () {
         if (!loops.length) return;
 
         //Border in the arc's own colour, the way the structure wedge outlines itself, so the amber
-        //linked-fire arc stays amber.
+        //linked-fire arc stays amber. Fill strength is the caller's when it gives one - the amber
+        //arc is filled fainter than the cobalt one (see REDUCED_ARC_FILL_OPACITY).
         var arcColour = new THREE.Color(colour);
-        var hexes = buildRegionOverlay(loops, arcColour, 0.5, arcColour, 0.9);
+        var hexes = buildRegionOverlay(loops, arcColour, fillOpacity === undefined ? ARC_FILL_OPACITY : fillOpacity, arcColour, ARC_BORDER_OPACITY);
 
         hexes.rotation.z = mathlib.degreeToRadian(this.getFacing());
 
@@ -823,7 +840,7 @@ window.ShipIcon = function () {
     var SHIELD_ARC_BORDER_COLOUR = "rgb(35,100,200)"; //cobalt - lifted off the fill the way the structure wedge's outline is
     var SHIELD_ARC_BORDER_OPACITY = 0.6; //softer than the structure wedge's 0.9: a shield is often on screen next to a weapon arc
 
-    var INTERCEPT_ARC_RADIUS = 250;
+    var INTERCEPT_ARC_RADIUS = 150;
     var INTERCEPT_ARC_COLOUR = "rgba(240, 237, 228, 0.7)"; //off-white: no other overlay is neutral, so it can't be mistaken for a firing arc
     var INTERCEPT_ARC_FILL_OPACITY = 0.1; //barely a tint - the hex-edged firing arc underneath has to stay the thing you read first
     var INTERCEPT_ARC_BORDER_OPACITY = 0.35; //the dotting already lightens the edge, so the dots themselves stay crisp
@@ -1631,10 +1648,10 @@ window.ShipIcon = function () {
 
         // Brightened a touch over BDEW (0.4 fill / stronger border) so the purple reads clearly.
         var color = new THREE.Color(0x5e338a).convertSRGBToLinear();
-        var colorBorder = new THREE.Color(0x8045ba).convertSRGBToLinear();
+        var colorBorder = new THREE.Color(0x8c57c1).convertSRGBToLinear();
 
         //boundary of the detection area, in the lighter purple
-        var hexagon = buildRegionOverlay(loops, color, 0.4, colorBorder, 0.6);
+        var hexagon = buildRegionOverlay(loops, color, 0.4, colorBorder, 0.7);
 
         //the detection radius is a hex count - hold it, and sit it on the grid rather than the sprite
         addGridLockedOverlay(this.mesh, hexagon, getHexAnchor(this).offset);
