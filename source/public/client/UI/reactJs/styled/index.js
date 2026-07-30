@@ -1,4 +1,4 @@
-export {Container, ContainerRoundedRightBottom, Backdrop, ContainerRounded, ContainerRoundedRightSide} from "./Container";
+export {Container, ContainerShadowed, Backdrop} from "./Container";
 export {Title, SubTitle} from "./Title";
 export {Clickable} from "./Clickable";
 export {default as theme} from "./theme";

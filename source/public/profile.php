@@ -86,8 +86,10 @@
 	<head>
 		<title>FieryVoid</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-		<link href="styles/base.css" rel="stylesheet" type="text/css">
-        <link href="styles/gamesNew.css" rel="stylesheet" type="text/css">
+		<!-- Shared fv design tokens (roadmap item 6): MUST load before every other stylesheet. -->
+		<link href="<?php echo AssetLoader::getAssetUrl('styles/tokens.css'); ?>" rel="stylesheet" type="text/css">
+		<link href="<?php echo AssetLoader::getAssetUrl('styles/base.css'); ?>" rel="stylesheet" type="text/css">
+        <link href="<?php echo AssetLoader::getAssetUrl('styles/gamesNew.css'); ?>" rel="stylesheet" type="text/css">
 		<script src="<?php echo AssetLoader::getAssetUrl('client/lib/jquery-4.0.0.min.js'); ?>"></script>
 	</head>
     <body  style="background: url('./img/maps/14.PlanetsNear.jpg') no-repeat center center fixed; background-size: cover;">

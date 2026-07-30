@@ -99,12 +99,12 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 		<?php endif; ?>
 		<link rel="preload" href="<?php echo AssetLoader::getAssetUrl('client/UI/reactJs/UI.bundle.js'); ?>" as="script">
 
-		<link href="styles/base.css" rel="stylesheet" type="text/css">
-		<link href="styles/lobby.css" rel="stylesheet" type="text/css">
-		<link href="styles/confirm.css" rel="stylesheet" type="text/css">
-        <link href="styles/gamesNew.css" rel="stylesheet" type="text/css">
-        <!-- STAGE4-RETIRED legacy ship-window stylesheet (ship-window redesign Stage 4) - delete once the redesign is stable on live
-        <link href="styles/shipwindow.css" rel="stylesheet" type="text/css"> -->
+		<!-- Shared fv design tokens (roadmap item 6): MUST load before every other stylesheet. -->
+		<link href="<?php echo AssetLoader::getAssetUrl('styles/tokens.css'); ?>" rel="stylesheet" type="text/css">
+		<link href="<?php echo AssetLoader::getAssetUrl('styles/base.css'); ?>" rel="stylesheet" type="text/css">
+		<link href="<?php echo AssetLoader::getAssetUrl('styles/lobby.css'); ?>" rel="stylesheet" type="text/css">
+		<link href="<?php echo AssetLoader::getAssetUrl('styles/confirm.css'); ?>" rel="stylesheet" type="text/css">
+        <link href="<?php echo AssetLoader::getAssetUrl('styles/gamesNew.css'); ?>" rel="stylesheet" type="text/css">
         <!-- jQuery + jQuery-UI self-hosted (same-origin HTTP/2 + cache-control, no 3rd-party
              TLS). Both kept SYNCHRONOUS: the lobby's synchronous client/*.js scripts run
              during parse and expect $.fn.draggable present, so jQuery-UI must not defer

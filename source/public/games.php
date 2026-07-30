@@ -46,14 +46,16 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
   <meta name="viewport" content="width=device-width, initial-scale=1">  
   <title>Fiery Void - Games</title>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <link href="styles/base.css" rel="stylesheet" type="text/css">
-  <link href="styles/lobby.css" rel="stylesheet" type="text/css">
-  <link href="styles/gamesNew.css" rel="stylesheet" type="text/css">
-  <link href="styles/confirm.css" rel="stylesheet" type="text/css">
-  <link href="styles/ladder.css" rel="stylesheet" type="text/css">
+  <!-- Shared fv design tokens (roadmap item 6): MUST load before every other stylesheet. -->
+  <link href="<?php echo AssetLoader::getAssetUrl('styles/tokens.css'); ?>" rel="stylesheet" type="text/css">
+  <link href="<?php echo AssetLoader::getAssetUrl('styles/base.css'); ?>" rel="stylesheet" type="text/css">
+  <link href="<?php echo AssetLoader::getAssetUrl('styles/lobby.css'); ?>" rel="stylesheet" type="text/css">
+  <link href="<?php echo AssetLoader::getAssetUrl('styles/gamesNew.css'); ?>" rel="stylesheet" type="text/css">
+  <link href="<?php echo AssetLoader::getAssetUrl('styles/confirm.css'); ?>" rel="stylesheet" type="text/css">
+  <link href="<?php echo AssetLoader::getAssetUrl('styles/ladder.css'); ?>" rel="stylesheet" type="text/css">
   <!-- Page-scoped: the games panel + Recent Games window. Kept out of gamesNew.css,
        which 12 pages share. -->
-  <link href="styles/gamesPanel.css" rel="stylesheet" type="text/css">
+  <link href="<?php echo AssetLoader::getAssetUrl('styles/gamesPanel.css'); ?>" rel="stylesheet" type="text/css">
   <script src="<?php echo AssetLoader::getAssetUrl('client/lib/jquery-4.0.0.min.js'); ?>"></script>
   <script src="client/games.js"></script>
   <script src="client/ajaxInterface.js"></script>

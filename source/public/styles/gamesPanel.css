@@ -16,44 +16,11 @@
  */
 
 /* ── Tokens ────────────────────────────────────────────────────────────────────
-   Every value already existed either on games.php or in the in-game React theme
-   (client/UI/reactJs/styled/theme.js). Nothing new was invented. */
-:root {
-  --fv-panel: rgba(23, 39, 54, 0.92);
-  --fv-well: #04161c;                 /* theme.colors.panelBg */
-  --fv-card: #0a1c26;
-  --fv-card-hover: #102a36;
-
-  --fv-line: #215a7a;                 /* the landing page's border, unchanged */
-  --fv-line-soft: #1a3f55;
-  --fv-line-scs: #496791;             /* theme.colors.line */
-
-  --fv-text: #deebff;
-  --fv-text-dim: #8ca5c0;             /* theme.colors.textDim */
-  --fv-accent: #8bcaf2;
-
-  --fv-turn: #84a5ce;
-  --fv-turn-bg: #254d82d0;
-  --fv-lobby: #52b352;
-  --fv-ladder: #e6ac00;
-  --fv-fleet: #0d7ea3;
-  --fv-done: #2f4a52;
-  --fv-idle: #3a5a72;
-
-  /* Recent Games. --fv-mine is the lobby green under a second name: in that window green
-     means "you are in this one", which is a different statement from "this is a lobby", and
-     naming it separately means either can be retuned without disturbing the other.
-     --fv-mine-soft is a pastel of it for TEXT — #52b352 on the card fill is about 3.4:1,
-     the pastel is ~9:1. --fv-ended is muted rather than a signal red: an ended game is
-     over, not a problem. */
-  --fv-mine: #52b352;
-  --fv-mine-soft: #7ed576;
-  --fv-ended: #b76662;
-
-  --fv-mono: Consolas, "Lucida Console", monospace;   /* theme.fonts.mono */
-  --fv-display: "Orbitron", sans-serif;
-  --fv-hero: "Bruno Ace SC", sans-serif;
-}
+   The --fv-* set this file used to declare now lives in styles/tokens.css, linked
+   first on every page (roadmap item 6, Stage 1). It moved because ladder.css needed
+   a second copy of it — creategame.php includes ladder.php but does not link this
+   file — and two copies that "have to be retuned together" is a trap. Values are
+   unchanged; only the declaration site moved. */
 
 /* box-sizing is applied per component rather than globally with `*`: this page has
    plenty of pre-existing layout that never assumed it. */
@@ -558,14 +525,19 @@
   color: #fff;
 }
 
+/* These two were the last raw hex in an otherwise fully tokenised file. Both convert, not
+   just the #587e8d one: they sit side by side, and their old borders were two shades of the
+   same grey-teal, so tokenising only one would have left a blue border next to a grey one —
+   a mismatch that did not exist before. The fills still tell them apart, which is what was
+   actually doing that job. --fv-btn--create's green stays: it is a signal, not chrome. */
 .fv-btn--fleet {
   background: rgba(0, 77, 102, 0.692);
-  border-color: #587e8d;
+  border-color: var(--fv-line-scs);
 }
 
 .fv-btn--recent {
   background: rgba(61, 92, 92, 0.5);
-  border-color: #69848f;
+  border-color: var(--fv-line-scs);
 }
 
 /* ── Recent Games window ──────────────────────────────────────────────────────

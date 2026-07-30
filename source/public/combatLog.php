@@ -2,7 +2,7 @@
 
 ?>
 
-<link href="styles/chat.css" rel="stylesheet" type="text/css">
+<link href="<?php echo AssetLoader::getAssetUrl('styles/chat.css'); ?>" rel="stylesheet" type="text/css">
 
 
 <div id="combatLogContainer" class="chatcontainer">

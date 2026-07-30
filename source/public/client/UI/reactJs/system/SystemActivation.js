@@ -1,6 +1,11 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
+import theme from '../styled/theme';
 
+/* Borders only — see the note in system/PowerCapacitor.js. Note the asymmetry: only the
+   NON-weapon branch converts. The $isWeapon red (#b43131) is a signal, not chrome — it is
+   what tells you at a glance that the menu you opened belongs to a weapon — so it stays
+   exactly as it was. */
 const Container = styled.div`
     display: flex;
     flex-direction: column;
@@ -9,15 +14,15 @@ const Container = styled.div`
     min-width: 160px;
     opacity: 0.95 !important;
     background-color: ${props => props.$isWeapon ? 'rgba(32, 0, 32, 0.9)' : 'rgba(16, 26, 38, 0.9)'};
-    border: 1px solid ${props => props.$isWeapon ? '#b43131' : '#587e8d'};
+    border: 1px solid ${props => props.$isWeapon ? '#b43131' : theme.colors.line};
 `;
 
 const Header = styled.div`
     padding: 3px;
     background-color: ${props => props.$isWeapon ? '#571616' : '#215a7a'};
-    border: 1px solid ${props => props.$isWeapon ? '#b43131' : '#587e8d'};
-    border-bottom: 1px solid ${props => props.$isWeapon ? '#b43131' : '#587e8d'};
-    color: ${props => props.$isWeapon ? '#f2f2f2' : '#deebff'};
+    border: 1px solid ${props => props.$isWeapon ? '#b43131' : theme.colors.line};
+    border-bottom: 1px solid ${props => props.$isWeapon ? '#b43131' : theme.colors.line};
+    color: ${props => props.$isWeapon ? '#f2f2f2' : theme.colors.chromeText};
     text-align: center;
     font-size: 11px;
     margin-bottom: 2px;

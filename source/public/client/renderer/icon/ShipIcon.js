@@ -841,9 +841,9 @@ window.ShipIcon = function () {
     var SHIELD_ARC_BORDER_OPACITY = 0.6; //softer than the structure wedge's 0.9: a shield is often on screen next to a weapon arc
 
     var INTERCEPT_ARC_RADIUS = 150;
-    var INTERCEPT_ARC_COLOUR = "rgba(240, 237, 228, 0.7)"; //off-white: no other overlay is neutral, so it can't be mistaken for a firing arc
+    var INTERCEPT_ARC_COLOUR = "rgba(240, 237, 228)"; //off-white: no other overlay is neutral, so it can't be mistaken for a firing arc
     var INTERCEPT_ARC_FILL_OPACITY = 0.1; //barely a tint - the hex-edged firing arc underneath has to stay the thing you read first
-    var INTERCEPT_ARC_BORDER_OPACITY = 0.35; //the dotting already lightens the edge, so the dots themselves stay crisp
+    var INTERCEPT_ARC_BORDER_OPACITY = 0.4; //the dotting already lightens the edge, so the dots themselves stay crisp
 
     var INTERCEPT_LABEL_TEXTURE = null;
 

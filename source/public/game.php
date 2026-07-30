@@ -70,13 +70,13 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     <!-- ?v=mtime: .htaccess serves CSS with "access plus 1 month", so without a
          cache-buster a stylesheet edit can take up to a month to reach returning
          players. -->
+    <!-- Shared fv design tokens (roadmap item 6): MUST load before every other stylesheet. -->
+    <link href="<?php echo AssetLoader::getAssetUrl('styles/tokens.css'); ?>" rel="stylesheet" type="text/css">
     <link href="<?php echo AssetLoader::getAssetUrl('styles/tactical.css'); ?>" rel="stylesheet" type="text/css">
-    <!-- STAGE4-RETIRED legacy ship-window stylesheet (ship-window redesign Stage 4) - delete once the redesign is stable on live
-    <link href="styles/shipwindow.css" rel="stylesheet" type="text/css"> -->
-	<link href="styles/confirm.css" rel="stylesheet" type="text/css">
-    <link href="styles/replay.css" rel="stylesheet" type="text/css">
-    <link href="styles/shipTooltip.css" rel="stylesheet" type="text/css">
-<!--	<link href="styles/helper.css" rel="stylesheet" type="text/css">-->
+	<link href="<?php echo AssetLoader::getAssetUrl('styles/confirm.css'); ?>" rel="stylesheet" type="text/css">
+    <link href="<?php echo AssetLoader::getAssetUrl('styles/replay.css'); ?>" rel="stylesheet" type="text/css">
+    <link href="<?php echo AssetLoader::getAssetUrl('styles/shipTooltip.css'); ?>" rel="stylesheet" type="text/css">
+<!--	styles/helper.css was deleted (roadmap item 6, Stage 5) - it was dead, see helper.php -->
     <!-- jQuery + jQuery-UI self-hosted (same-origin HTTP/2 + cache-control, no 3rd-party TLS).
          Both kept SYNCHRONOUS: jQuery for the inline $(window).on("load") bootstrap below, and
          jQuery-UI alongside it so $.fn.draggable is guaranteed present for any drag path without

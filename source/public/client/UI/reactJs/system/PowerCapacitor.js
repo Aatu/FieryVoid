@@ -1,6 +1,12 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
+import theme from '../styled/theme';
 
+/* Roadmap item 6: only the BORDERS converted here. The plan defers system/*.js to a
+   Stage 5 tidy on the grounds that their hex values are mostly semantic state signals -
+   true of this file's fills, but these hairlines are plain chrome, and they were the last
+   legacy teal left in the React tree once the overlays and modals had moved. The #215a7a
+   header fill and the rgba body fill are this menu's own identity and are untouched. */
 const Container = styled.div`
     display: flex;
     flex-direction: column;
@@ -9,15 +15,15 @@ const Container = styled.div`
     min-width: 180px;
     opacity: 0.95;
     background-color: rgba(16, 26, 38, 0.9);
-    border: 1px solid #587e8d;
+    border: 1px solid ${theme.colors.line};
 `;
 
 const Header = styled.div`
     padding: 3px;
     background-color: #215a7a;
-    border: 1px solid #587e8d;
-    border-bottom: 1px solid #587e8d;    
-    color: #deebff;
+    border: 1px solid ${theme.colors.line};
+    border-bottom: 1px solid ${theme.colors.line};
+    color: ${theme.colors.chromeText};
     text-align: center;
     font-size: 12px;
     margin-bottom: 2px;

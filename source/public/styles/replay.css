@@ -1,17 +1,53 @@
+/*
+ * replay.css — the replay bar and its controls.
+ *
+ * FULLY CONVERGED on the SCS skin (roadmap item 6). This file went through three
+ * positions, so the history is worth one paragraph: it was first exempted wholesale on the
+ * grounds that its cyan told a viewer they were in replay mode rather than playing; then
+ * split by state, because the exemption was covering the "Replay" button that sits in the
+ * LIVE game screen where it signals nothing; and finally unified outright (user decision
+ * 2026-07-30) on the judgement that being in replay is obvious enough from the transport
+ * controls and the "Resume game" button without a separate palette to announce it.
+ *
+ * ⚠️ What matters if you touch the colours below is that the cyan was not flat - it
+ * encoded a THREE-STEP HIERARCHY, and that hierarchy is the part worth preserving:
+ *
+ *     resting transport glyphs   dim      #2c8090  ->  var(--fv-text-dim)
+ *     speed cluster / hover      accent   #49c4d4  ->  var(--fv-accent)
+ *     the RUNNING direction      brightest #d6f7fd ->  var(--fv-text-bright)
+ *
+ * The speed cluster was deliberately brighter than the transport glyphs so it read as a
+ * separate "setting" rather than another transport button, and the running button was
+ * brighter still so you could see at a glance which direction was playing. Keep those
+ * three steps distinct in whatever palette they are expressed in; collapsing them to one
+ * colour would lose real information.
+ */
 #replayUI {
     pointer-events: auto;
-    border: 1px solid #3a8694;
-    border-radius: 8px;
-    color: #cdeef5;
-    background-color: #08323b;
+    /* Matched to #phaseheader deliberately: they are siblings in the same top bar, so any
+       difference between them reads as a mistake. Includes the opacity - 0.92 -> 0.95 for
+       the alpha-compounding reason documented on #phaseheader (the old #08323b fill was
+       opaque; --fv-chrome-scs carries its own ~0.87 alpha and opacity multiplies with it). */
+    border: 1px solid var(--fv-line-scs);
+    border-radius: var(--fv-radius-chrome);
+    color: var(--fv-text);
+    background-color: var(--fv-chrome-scs);
     position: relative;
     margin-left: 10px;
+    /* Height is matched to #phaseheader ON PURPOSE — they sit side by side in the top bar,
+       so a 1px difference reads as a wobble (user report 2026-07-30). The arithmetic has to
+       be done by hand because the two are built differently: #phaseheader is
+       height 25 + padding-top 8 + 2px borders = 35, and this is min-height 25 + padding-top
+       8 + 2px borders = 35. It used to be padding-top: 7, which is where the missing pixel
+       came from. If you change the padding or the min-height here, change #phaseheader in
+       tactical.css to match — and note the ≤765px block below already matches it (21 + 3 +
+       2 = 26 against the header's 22 + 2 + 2), so leave that one alone. */
     min-height: 25px;
     height: auto;
-    padding-top: 7px;
+    padding-top: 8px;
     width: auto;
-    opacity: 0.92;
-    box-shadow: 5px 5px 10px black;
+    opacity: 0.95;
+    box-shadow: 5px 5px 10px var(--fv-overlay);
     display: none;
     flex-direction: row;
     align-items: flex-start;
@@ -32,20 +68,23 @@
     box-shadow: none;
 }
 
+/* Text buttons in both states: the lone "Replay" button while inactive, and
+   "Resume game" / Movement / Firing while active. One rule now that the two states share
+   a palette — the .inactive overrides that used to live here are gone. */
 #replayUI button {
     margin: 0 5px;
     background-color: transparent;
     border: none;
-    color: #cdeef5;
+    color: var(--fv-text);
     font-size: 16px;
     text-transform: uppercase;
     cursor: pointer;
-    text-shadow: black 0 0 10px, black 0 0 3px;
+    text-shadow: var(--fv-overlay) 0 0 10px, var(--fv-overlay) 0 0 3px;
     transition: color 0.15s ease, text-shadow 0.15s ease;
 }
 
 #replayUI button:hover {
-    text-shadow: #7fe7f5 0 0 10px, #7fe7f5 0 0 3px;
+    text-shadow: var(--fv-accent) 0 0 10px, var(--fv-accent) 0 0 3px;
 }
 
 #replayUI .selected-replay {
@@ -59,16 +98,16 @@
 
 #replayUI .replay-buttons button {
     font-size: 40px;
-    /* Darker cyan than the speed accent (#3fa9b8) so the speed cluster still
-       reads as the brighter, distinct control. */
-    color: #2c8090;
+    /* Step 1 of 3 (see the header note): dimmer than the speed cluster, so that cluster
+       still reads as the brighter, distinct control rather than another transport glyph. */
+    color: var(--fv-text-dim);
     /* Soft persistent glow on the dark base so the glyphs read as lit. */
-    text-shadow: black 0 0 10px, black 0 0 3px, #2c8090 0 0 12px;
+    text-shadow: var(--fv-overlay) 0 0 10px, var(--fv-overlay) 0 0 3px, var(--fv-text-dim) 0 0 12px;
 }
 
 #replayUI .replay-buttons button:hover {
-    color: #8fdfeb;
-    text-shadow: #7fe7f5 0 0 12px, #7fe7f5 0 0 4px;
+    color: var(--fv-text-bright);
+    text-shadow: var(--fv-accent) 0 0 12px, var(--fv-accent) 0 0 4px;
 }
 
 /* Speed control: −/+ buttons flanking a static rate readout. Both Play and
@@ -80,24 +119,23 @@
     margin: 0 8px;
 }
 
-/* Cyan/aqua accent: a complementary cool colour that pops against the
-   slate-blue transport buttons and marks the speed cluster as a separate
-   "setting". The selectors are specific enough to override the generic
-   .replay-buttons button colour/glow above. */
+/* Step 2 of 3: the accent. Brighter than the transport glyphs so the speed cluster reads
+   as a separate "setting" rather than another transport button. The selectors are specific
+   enough to override the generic .replay-buttons button colour/glow above. */
 #replayUI .replay-buttons .speed-control button#slower,
 #replayUI .replay-buttons .speed-control button#faster {
     font-size: 40px;
     line-height: 1;
     margin: 0 2px;
     padding: 0;
-    color: #49c4d4;
-    text-shadow: black 0 0 10px, black 0 0 3px, #3fa9b8 0 0 12px;
+    color: var(--fv-accent);
+    text-shadow: var(--fv-overlay) 0 0 10px, var(--fv-overlay) 0 0 3px, var(--fv-accent) 0 0 12px;
 }
 
 #replayUI .replay-buttons .speed-control button#slower:hover,
 #replayUI .replay-buttons .speed-control button#faster:hover {
-    color: #7fe7f5;
-    text-shadow: #7fe7f5 0 0 12px, #7fe7f5 0 0 4px;
+    color: var(--fv-text-bright);
+    text-shadow: var(--fv-accent) 0 0 12px, var(--fv-accent) 0 0 4px;
 }
 
 /* Fixed width so the rate digits changing (0.25× ↔ 8×) don't shift the
@@ -106,14 +144,13 @@
     font-size: 26px;
     min-width: 2.8em;
     text-align: center;
-    color: #49c4d4;
-    /*text-shadow: black 0 0 10px, black 0 0 3px, #3fa9b8 0 0 10px;*/
+    color: var(--fv-accent);
     transition: color 0.15s ease, text-shadow 0.15s ease;
 }
 
+/* Lit while the rate is anything other than 1x, so a non-default speed is visible. */
 #replayUI .speed-control.active .rate {
-    color: #7fe7f5;
-    /*text-shadow: #7fe7f5 0 0 12px, #7fe7f5 0 0 4px;*/
+    color: var(--fv-text-bright);
 }
 
 #replayUI .replay-container {
@@ -134,6 +171,7 @@
     display: none;
 }
 
+/* The floating transport panel, centred at the top of the screen while replaying. */
 #replayUI.active .replay-active {
     display: flex;
     flex-direction: column;
@@ -142,10 +180,10 @@
     left: 50vw;
     transform: translateX(-50%);
     top: 5px;
-    background-color: #093943a6;
-    border: 1px solid #49c4d4;
-    border-radius: 8px;
-    box-shadow: 5px 5px 10px black;
+    background-color: var(--fv-chrome-scs);
+    border: 1px solid var(--fv-line-scs);
+    border-radius: var(--fv-radius-chrome);
+    box-shadow: 5px 5px 10px var(--fv-overlay);
     z-index: 10000;
 }
 
@@ -153,11 +191,12 @@
     outline: none;
 }
 
-/* Running transport button (the active direction showing ❚❚): bright cyan glow
-   so it clearly reads as the live playback control. */
+/* Step 3 of 3, the brightest: the running transport button (the active direction, showing
+   ❚❚). It has to out-read both the resting glyphs and the speed cluster, because "which
+   way is it playing" is the one thing you look for while a replay runs. */
 #replayUI .replay-buttons button.active {
-    color: #d6f7fd;
-    text-shadow: #7fe7f5 0 0 14px, #d6f7fd 0 0 5px;
+    color: var(--fv-text-bright);
+    text-shadow: var(--fv-accent) 0 0 14px, var(--fv-text-bright) 0 0 5px;
 }
 
 #replayUI.loading .replay-buttons {
