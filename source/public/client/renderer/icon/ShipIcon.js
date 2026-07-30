@@ -813,7 +813,7 @@ window.ShipIcon = function () {
     var STRAIGHT_ARC_HEX_INSET = 1;
 
     var STRAIGHT_ARC_FILL_COLOUR = 0x11446e;
-    var STRAIGHT_ARC_BORDER_COLOUR = 0x063646; //cyan, brighter than the fill so the hex edges carry
+    var STRAIGHT_ARC_BORDER_COLOUR = 0x08485e; //cyan, brighter than the fill so the hex edges carry
 
     /* A one-pixel outline around each highlighted hex, all of them in a single LineSegments so the
        whole set is still one draw call.
@@ -823,31 +823,43 @@ window.ShipIcon = function () {
        thickens as you zoom in nor thins away to nothing as you zoom out, the way a world-unit ring
        would. Same reasoning as the structure wedge's outline (buildArcOutline).
 
-       An edge shared by two neighbouring hexes is emitted once. Drawn twice, a semi-transparent
-       border comes out visibly darker along the interior seams than around the outside. Keyed on the
-       edge midpoint at half-unit precision: genuinely shared edges land on exactly the same midpoint,
-       while inset hexes - whose facing edges really are two separate lines a few units apart - stay
-       distinct and both get drawn. */
+       Only the SILHOUETTE of the whole arc is outlined - an edge with a highlighted hex on both
+       sides is an interior seam and is dropped entirely, so the arms read as solid shapes rather than
+       as a string of beads. Every edge is counted first and only the ones appearing exactly once
+       survive, which is precisely the boundary of the union.
+
+       Edges are keyed on their midpoint at half-unit precision. Two hexes sharing an edge produce
+       exactly the same midpoint; inset hexes (STRAIGHT_ARC_HEX_INSET < 1), whose facing edges really
+       are two separate lines a few units apart, key differently and both stay - correctly, because
+       then each hex is its own island and every edge of it IS an external edge. */
     function buildHexOutlines(centres, radius) {
-        var positions = [];
-        var drawn = {};
+        var edges = [];
+        var counts = {};
 
         centres.forEach(function (centre) {
             for (var corner = 0; corner < 6; corner++) {
                 var from = HEX_CORNERS[corner];
                 var to = HEX_CORNERS[(corner + 1) % 6];
 
-                var x1 = centre.x + from.x * radius;
-                var y1 = centre.y + from.y * radius;
-                var x2 = centre.x + to.x * radius;
-                var y2 = centre.y + to.y * radius;
+                var edge = {
+                    x1: centre.x + from.x * radius,
+                    y1: centre.y + from.y * radius,
+                    x2: centre.x + to.x * radius,
+                    y2: centre.y + to.y * radius
+                };
 
-                var key = Math.round(x1 + x2) + ',' + Math.round(y1 + y2); //the midpoint, doubled
-                if (drawn[key]) continue;
-                drawn[key] = true;
-
-                positions.push(x1, y1, 0, x2, y2, 0);
+                edge.key = Math.round(edge.x1 + edge.x2) + ',' + Math.round(edge.y1 + edge.y2); //the midpoint, doubled
+                counts[edge.key] = (counts[edge.key] || 0) + 1;
+                edges.push(edge);
             }
+        });
+
+        var positions = [];
+
+        edges.forEach(function (edge) {
+            if (counts[edge.key] > 1) return; //interior seam - highlighted hex on both sides
+
+            positions.push(edge.x1, edge.y1, 0, edge.x2, edge.y2, 0);
         });
 
         var geometry = new THREE.BufferGeometry();
