@@ -663,6 +663,11 @@ window.ShipIcon = function () {
 
         var hexDistance = window.coordinateConverter.getHexDistance();
 
+        //Drawn BEFORE the firing-arc branches, because one of them can bail out early: a linked-fire
+        //wedge that doesn't overlap a jammed turret's arc means nothing can be FIRED at, but the
+        //weapon can still intercept, so its intercept wedge must survive that return.
+        this.showInterceptArc(ship, weapon);
+
         if (weapon instanceof Thruster) {
 
             this.showThrusterIcon(ship, weapon); //Creates small thruster icon on relevant side of ship on hover over system.
@@ -674,7 +679,8 @@ window.ShipIcon = function () {
             //one-hex radius the old NaN fallback gave it - which now also reads as a deliberate
             //distinction on screen: hex-edged means "these hexes are in reach", smooth means "this
             //way is covered, at any range".
-            this.showCircularArc(250, shipManager.systems.getArcs(ship, weapon), "rgb(20,80,128)");
+            this.showCircularArc(SHIELD_ARC_RADIUS, shipManager.systems.getArcs(ship, weapon), SHIELD_ARC_COLOUR,
+                { borderColour: SHIELD_ARC_BORDER_COLOUR, borderOpacity: SHIELD_ARC_BORDER_OPACITY });
 
         } else if (weapon.shootsStraight) { //Some weapons can only fire in straight lines e.g. Transverse Drive.  Show rectangular arcs along hex lines instead.
             var arcs = shipManager.systems.getArcs(ship, weapon);
@@ -751,7 +757,8 @@ window.ShipIcon = function () {
        60 hexes is past any engagement that happens on an FV map, so a weapon that nominally reaches
        further simply has its arc drawn to here. The point of the cap is not just cost: it is what
        lets EVERY ranged weapon be hex-mapped, so there is no second, smooth-edged look to jar
-       against. Shields are the one deliberate exception - see showWeaponArc. */
+       against. The smooth wedge is reserved for the BEARING-based overlays - shields, the intercept
+       envelope, the structure sections - where it says something different on purpose. */
     var MAX_ARC_HEXES = 60;
 
     /* A ranged weapon's arc, as the grid hexes it covers. arcsList is one or more ship-frame arcs -
@@ -797,23 +804,182 @@ window.ShipIcon = function () {
         this.weaponArcs.push(hexes);
     };
 
-    /* The smooth pie wedge every weapon arc used to be. Now only SHIELDS use it, deliberately - a
-       shield is bearing-based, so a smooth wedge is the honest picture and the contrast with the
-       hex-edged ranged arcs carries meaning. See showWeaponArc. dis is in game units, arcs is
-       ship-frame. */
-    ShipIcon.prototype.showCircularArc = function (dis, arcs, colour) {
+    /* ---- The bearing-based wedges: shields, and the intercept envelope ----------------------
+       Radii are in GAME UNITS, and one hex is coordinateConverter.getHexDistance() ~= 86.6 of them,
+       so 250 is a shade under three hexes. Change either number here and nothing else needs to move:
+       the outline, the label and the label's placement are all derived from the radius.
+
+       Neither wedge is a statement about range. A shield covers a direction at any distance, and
+       interception is decided purely by the bearing of the incoming shot (weaponManager.
+       isPosOnWeaponArc - no distance test anywhere in it), so both are drawn just far enough out to
+       be read at a glance.
+
+       A COLOUR HERE IS OPAQUE. THREE.Color has no alpha channel: a fourth component in an rgb()
+       string is parsed and then silently thrown away, so "rgb(35,100,200, 0.5)" renders as solid
+       cobalt, not half-strength cobalt. Transparency belongs to the material - that is what the
+       matching *_OPACITY constants below are, and they are the ones to turn to soften an edge. */
+    var SHIELD_ARC_RADIUS = 250;
+    var SHIELD_ARC_COLOUR = "rgb(20,80,128)";
+    var SHIELD_ARC_BORDER_COLOUR = "rgb(35,100,200)"; //cobalt - lifted off the fill the way the structure wedge's outline is
+    var SHIELD_ARC_BORDER_OPACITY = 0.6; //softer than the structure wedge's 0.9: a shield is often on screen next to a weapon arc
+
+    var INTERCEPT_ARC_RADIUS = 250;
+    var INTERCEPT_ARC_COLOUR = "rgba(240, 237, 228, 0.7)"; //off-white: no other overlay is neutral, so it can't be mistaken for a firing arc
+    var INTERCEPT_ARC_FILL_OPACITY = 0.1; //barely a tint - the hex-edged firing arc underneath has to stay the thing you read first
+    var INTERCEPT_ARC_BORDER_OPACITY = 0.35; //the dotting already lightens the edge, so the dots themselves stay crisp
+
+    var INTERCEPT_LABEL_TEXTURE = null;
+
+    /* "INTERCEPT" as a texture, drawn once on first use and shared by every wedge afterwards (only
+       one system's arcs are on screen at a time, but the icons rebuild their overlays on every
+       hover). Kept out of disposeOverlay's way by the fact that Material.dispose() doesn't touch
+       textures - the same reason the shared thruster icon survives.
+
+       The word is stroked in near-black before it is filled, so it stays legible where it crosses a
+       bright ship sprite or the fill of the arc underneath. */
+    function getInterceptLabelTexture() {
+        if (INTERCEPT_LABEL_TEXTURE) return INTERCEPT_LABEL_TEXTURE;
+
+        var canvas = document.createElement('canvas');
+        canvas.width = 256;
+        canvas.height = 64;
+
+        var context = canvas.getContext('2d');
+        context.font = 'bold 30px "Trebuchet MS", Helvetica, Arial, sans-serif';
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
+        context.lineJoin = 'round';
+        context.lineWidth = 6;
+        context.strokeStyle = 'rgba(0,12,20,0.9)';
+        context.strokeText('INTERCEPT', 128, 34);
+        context.fillStyle = INTERCEPT_ARC_COLOUR;
+        context.fillText('INTERCEPT', 128, 34);
+
+        INTERCEPT_LABEL_TEXTURE = new THREE.CanvasTexture(canvas);
+        INTERCEPT_LABEL_TEXTURE.colorSpace = THREE.SRGBColorSpace;
+
+        return INTERCEPT_LABEL_TEXTURE;
+    }
+
+    /* The wedge's label, in the CircleGeometry's own local frame - where the wedge is built centred
+       on +X, so sitting the label on that axis puts it on the arc's mid-bearing whatever the arc is.
+       Sized and placed as fractions of the radius: at 0.72 of the way out a 60 degree wedge is 2 x
+       0.72r x tan(30) wide, comfortably more than the 0.42r the word takes, so it stays inside its
+       own wedge. The 256x64 texture is 4:1, and so is the plane. */
+    function buildArcLabel(texture, radius) {
+        var label = new THREE.Mesh(
+            new THREE.PlaneGeometry(radius * 0.42, radius * 0.105),
+            new THREE.MeshBasicMaterial({ map: texture, transparent: true, opacity: 0.85 })
+        );
+
+        label.position.set(radius * 0.72, 0, 0.02); //clear of both the fill and the outline at 0.01
+
+        return label;
+    }
+
+    /* The smooth pie wedge every weapon arc used to be. Now only the BEARING-based overlays use it,
+       deliberately - a shield and an interceptor both answer "which way is covered?" rather than
+       "which hexes can I reach?", so the smooth shape is the honest picture for them and the
+       contrast with the hex-edged ranged arcs carries meaning. See showWeaponArc.
+
+       dis is in game units and arcs is ship-frame. options carries the trimmings - fillOpacity,
+       borderColour, dashedBorder, labelTexture - and left out entirely gives the plain half-opaque
+       wedge outlined solid in its own colour, which is what a shield was before any of this. */
+    ShipIcon.prototype.showCircularArc = function (dis, arcs, colour, options) {
+        options = options || {};
+
         var arcLength = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
         var arcStart = mathlib.addToDirection(0, arcLength * -0.5);
         var arcFacing = mathlib.addToDirection(arcs.end, arcLength * -0.5);
 
-        var geometry = new THREE.CircleGeometry(dis, 32, mathlib.degreeToRadian(arcStart), mathlib.degreeToRadian(arcLength));
-        var material = new THREE.MeshBasicMaterial({ color: new THREE.Color(colour), opacity: 0.5, transparent: true });
+        var thetaStart = mathlib.degreeToRadian(arcStart);
+        var thetaLength = mathlib.degreeToRadian(arcLength);
+
+        var geometry = new THREE.CircleGeometry(dis, 32, thetaStart, thetaLength);
+        var material = new THREE.MeshBasicMaterial({
+            color: new THREE.Color(colour),
+            opacity: options.fillOpacity === undefined ? 0.5 : options.fillOpacity,
+            transparent: true
+        });
         var circle = new THREE.Mesh(geometry, material);
         circle.rotation.z = mathlib.degreeToRadian(-mathlib.addToDirection(arcFacing, -this.getFacing()));
         circle.position.z = -1;
+
+        //Outline, on the same reasoning as the structure wedge's (buildArcOutline): a 1px LINE, not
+        //a world-unit ring, so the edge stays crisp at every zoom instead of fattening as you zoom
+        //in and vanishing as you zoom out. A CHILD, so it inherits the wedge's rotation, its
+        //grid-lock correction and its removal.
+        circle.add(buildArcOutline(
+            dis,
+            thetaStart,
+            thetaLength,
+            options.borderColour === undefined ? colour : options.borderColour,
+            options.dashedBorder,
+            options.borderOpacity
+        ));
+
+        if (options.labelTexture) {
+            var label = buildArcLabel(options.labelTexture, dis);
+            //Counter-rotated out of the wedge's own rotation so the word reads upright however the
+            //ship is pointing - safe because the map camera never rotates. Its POSITION still turns
+            //with the parent, which is what keeps it on the mid-bearing.
+            label.rotation.z = -circle.rotation.z;
+            circle.add(label);
+        }
+
         addGridLockedOverlay(this.mesh, circle); //radius is a hex range - hold it against the icon's zoom rescale
         this.weaponArcs.push(circle);
+
+        return circle;
     };
+
+    /* A weapon's INTERCEPT envelope, drawn alongside - and inside - its firing arc.
+
+       The hex-edged firing arc is exact about where a weapon can shoot, and that precision is
+       misleading about interception, which is a different question with a different answer: a shot
+       is interceptable if its bearing from this ship falls in the weapon's arc, full stop. There is
+       no hex test and no range test in that decision (weaponManager.isPosOnWeaponArc), so the
+       envelope is drawn as a smooth wedge - the same shape language as the shields, and the visible
+       opposite of "these hexes".
+
+       Deliberately small, faint and neutral: it sits on top of the firing arc, so it has to be
+       legible without competing with it. Ships that can't intercept never see it. */
+    ShipIcon.prototype.showInterceptArc = function (ship, weapon) {
+        if (weapon instanceof Thruster || weapon.defensiveSystem) return; //no interception from either
+        if (weapon.specialArcs) return; //arc isn't a wedge at all (isPosOnSpecialArc decides it) - a wedge would misdescribe it
+        if (getInterceptRating(weapon) <= 0) return;
+
+        var arc = this.showCircularArc(
+            INTERCEPT_ARC_RADIUS,
+            shipManager.systems.getArcs(ship, weapon), //the weapon's real bearing arc, jam critical and all - the linked-fire wedge restricts FIRING, not interception
+            INTERCEPT_ARC_COLOUR,
+            {
+                fillOpacity: INTERCEPT_ARC_FILL_OPACITY,
+                //Dotted, where every other wedge on the map is outlined solid. Doing the distinction
+                //twice - neutral colour AND broken line - is what lets the wedge be this faint and
+                //still read as its own thing rather than as an edge of the arc underneath it.
+                dashedBorder: true,
+                borderOpacity: INTERCEPT_ARC_BORDER_OPACITY,
+                labelTexture: getInterceptLabelTexture()
+            }
+        );
+
+        //Every other range overlay sits at z -1, and this one shares the screen with the firing arc
+        //it belongs to. Two transparent meshes at the SAME depth are ordered by nothing more
+        //meaningful than the order they were created in, so lift this one clear: it is the smaller
+        //and much fainter of the two and has to be the one on top to be read at all.
+        arc.position.z = -0.9;
+    };
+
+    /* Intercept rating in this weapon's CURRENT firing mode. getInterceptRating() is where a weapon
+       whose rating isn't a constant computes it (a Particle Impeder's climbs with its boost), and
+       plain Weapons just return this.intercept from it - but shields and thrusters reach this code
+       too and are not Weapons at all, hence the guard. */
+    function getInterceptRating(weapon) {
+        if (typeof weapon.getInterceptRating === 'function') return weapon.getInterceptRating() || 0;
+
+        return weapon.intercept || 0;
+    }
 
     ShipIcon.prototype.showThrusterIcon = function (ship, weapon) {
         var graphicSize = 32;
@@ -1263,28 +1429,142 @@ window.ShipIcon = function () {
 
     /* Perimeter of the pie wedge in the CircleGeometry's own local frame: apex, out along the
        arc, back to the apex. A full-circle wedge skips the apex so no spurious radius line is
-       drawn across it. Segment count matches the fill's 32 so the two edges sit flush. */
-    function buildArcOutline(radius, thetaStart, thetaLength, color) {
+       drawn across it. Segment count matches the fill's 32 so the two edges sit flush.
+
+       `dashed` dots the CURVE only and leaves the two radii solid - the wedge's sides are hard
+       edges (the weapon either bears or it doesn't), while the curve is the arbitrary one, drawn
+       where it is only so the wedge can be seen at all. Dotting says so. A full circle has no radii
+       and is dotted all the way round. `opacity` defaults to the 0.9 the structure wedge has
+       always used. */
+    function buildArcOutline(radius, thetaStart, thetaLength, color, dashed, opacity) {
         var segments = 32;
-        var points = [];
+        var curve = [];
         var fullCircle = thetaLength >= Math.PI * 2 - 0.0001;
+        var apex = new THREE.Vector3(0, 0, 0);
+        var i;
 
-        if (!fullCircle) points.push(new THREE.Vector3(0, 0, 0));
-
-        for (var i = 0; i <= segments; i++) {
+        for (i = 0; i <= segments; i++) {
             var theta = thetaStart + (i / segments) * thetaLength;
-            points.push(new THREE.Vector3(radius * Math.cos(theta), radius * Math.sin(theta), 0));
+            curve.push(new THREE.Vector3(radius * Math.cos(theta), radius * Math.sin(theta), 0));
         }
 
-        if (!fullCircle) points.push(new THREE.Vector3(0, 0, 0));
+        var material = new THREE.LineBasicMaterial({
+            color: color,
+            opacity: opacity === undefined ? 0.9 : opacity,
+            transparent: true
+        });
 
-        var outline = new THREE.Line(
-            new THREE.BufferGeometry().setFromPoints(points),
-            new THREE.LineBasicMaterial({ color: color, opacity: 0.9, transparent: true })
-        );
+        if (!dashed) {
+            //One unbroken run: apex, out along the arc, back to the apex. A full-circle wedge skips
+            //the apex so no spurious radius line is drawn across it.
+            var points = fullCircle ? curve : [apex].concat(curve, [apex]);
+
+            var line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), material);
+            line.position.z = 0.01; //clear of the coplanar fill, still behind the ship sprite
+
+            return line;
+        }
+
+        //Dots and solid radii go in ONE LineSegments - a dash and a radius are both just segments,
+        //so there is no reason to pay for a second geometry, material and draw call.
+        var positions = dashPolyline(curve, radius * ARC_DASH_LENGTH, radius * ARC_DASH_GAP, fullCircle);
+
+        if (!fullCircle) {
+            var last = curve[curve.length - 1];
+
+            positions.push(apex.x, apex.y, 0, curve[0].x, curve[0].y, 0);
+            positions.push(last.x, last.y, 0, apex.x, apex.y, 0);
+        }
+
+        var geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+
+        var outline = new THREE.LineSegments(geometry, material);
         outline.position.z = 0.01; //clear of the coplanar fill, still behind the ship sprite
 
         return outline;
+    }
+
+    /* Dash pattern for a dotted outline, as fractions of the wedge's radius so the dotting keeps its
+       proportions if the radius is retuned. At the 250 the intercept wedge uses these come out at 5
+       units on, 6 off - about 5px on, 6px off at default zoom. */
+    var ARC_DASH_LENGTH = 0.02;
+    var ARC_DASH_GAP = 0.024;
+
+    /* The same path as a DOTTED line: walk the polyline and emit the on-parts as separate segments,
+       for a LineSegments rather than a Line. Done as geometry instead of THREE's LineDashedMaterial
+       for two reasons - it needs no new symbol in the tree-shaken THREE shim, and the dash length
+       ends up measured along the real path rather than in the material's own scaled space.
+
+       The pattern is always STRETCHED to fit the path rather than left to stop wherever it happens
+       to run out, which is what would otherwise leave a ragged part-dash at one end. How it is
+       stretched depends on what the path is:
+
+       - `closed` (a full circle): a whole number of dash+gap periods, so the pattern meets itself
+         at the seam with a proper gap rather than two dashes butting together.
+       - open (a wedge's curve, running between two solid radii): a dash at BOTH ends, so the dotting
+         visibly joins the lines it runs between. That is n dashes with n-1 gaps between them, which
+         spans n-1+duty periods, not n. */
+    function dashPolyline(points, dashLength, gapLength, closed) {
+        var lengths = [];
+        var total = 0;
+        var i;
+
+        for (i = 1; i < points.length; i++) {
+            var length = Math.hypot(points[i].x - points[i - 1].x, points[i].y - points[i - 1].y);
+
+            lengths.push(length);
+            total += length;
+        }
+
+        if (!total) return [];
+
+        var duty = dashLength / (dashLength + gapLength);
+        var period;
+
+        if (closed) {
+            period = total / Math.max(1, Math.round(total / (dashLength + gapLength)));
+        } else {
+            //+gapLength in the count because n dashes need only n-1 gaps
+            var count = Math.max(1, Math.round((total + gapLength) / (dashLength + gapLength)));
+
+            period = total / (count - 1 + duty); //count 1 gives period = total/duty, i.e. one dash the whole way
+        }
+
+        var dash = period * duty;
+
+        var positions = [];
+        var walked = 0; //distance along the whole path at the start of the segment being walked
+
+        for (i = 1; i < points.length; i++) {
+            var from = points[i - 1];
+            var to = points[i];
+            var segment = lengths[i - 1];
+
+            if (segment > 0) {
+                //every dash that opens before this segment ends, clipped to the part inside it - a
+                //dash longer than one chord simply reappears in the next segment's pass
+                for (var start = Math.floor(walked / period) * period; start < walked + segment; start += period) {
+                    var on = Math.max(start, walked);
+                    var off = Math.min(start + dash, walked + segment);
+
+                    if (off <= on) continue;
+
+                    positions.push(
+                        from.x + (to.x - from.x) * (on - walked) / segment,
+                        from.y + (to.y - from.y) * (on - walked) / segment,
+                        0,
+                        from.x + (to.x - from.x) * (off - walked) / segment,
+                        from.y + (to.y - from.y) * (off - walked) / segment,
+                        0
+                    );
+                }
+            }
+
+            walked += segment;
+        }
+
+        return positions;
     }
 
     ShipIcon.prototype.hideStructureArcs = function () {
