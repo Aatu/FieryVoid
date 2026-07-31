@@ -817,12 +817,16 @@ if (false): ?>
         </div>
         
         
+        <!-- 40px bitmaps, not 16: on a coarse pointer drawShipMovementUI centres the
+             16px glyph inside a 34px transparent hit box, so the backing store has to
+             cover the box, not just the glyph. The parent div is overflow:hidden and
+             sized to the box, so the surplus is clipped and mouse layout is unchanged. -->
         <div id="accelerate" class="movement-icon" data-movement-type="Accelerate">
-            <canvas id="acceleratecanvas" width="16" height="16"></canvas>
+            <canvas id="acceleratecanvas" width="40" height="40"></canvas>
         </div>
-        
+
         <div id="deaccelerate" class="movement-icon" data-movement-type="Decelerate">
-            <canvas id="deacceleratecanvas" width="16" height="16"></canvas>
+            <canvas id="deacceleratecanvas" width="40" height="40"></canvas>
         </div>
         
         <div id="morejink" class="movement-icon" data-movement-type="Increase Jinking">
