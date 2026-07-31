@@ -22,7 +22,7 @@
     padding: 10px 10px 10px 10px;
     /*border: 1px solid #defbff44; */
     border: 1px solid var(--fv-line-scs);
-    background-color: var(--fv-well);
+    background-color: var(--fv-overlay);
     border-radius: var(--fv-radius-modal);
     -moz-border-radius: var(--fv-radius-modal);
     -webkit-border-radius: var(--fv-radius-modal);
