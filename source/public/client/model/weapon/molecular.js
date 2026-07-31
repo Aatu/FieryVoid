@@ -176,6 +176,7 @@ MolecularSlicerBeamL.prototype.slicerPools = {
 
 MolecularSlicerBeamL.prototype.getPools = function () {
 	var turns = Math.min(3, Math.max(1, this.turnsloaded));
+	if(gamedata.gamephase == -2) turns = 3; //Always max charge in gamelobby.
 	return this.slicerPools[turns];
 };
 
@@ -630,6 +631,7 @@ MolecularSlicerBeamH.prototype.getPools = function () {
 	//Raking mode can never draw on a three-turn charge - it is capped at two turns' output
 	//(see setSystemDataWindow). Mirrored server-side by getEffectiveTurnsLoaded().
 	if (this.firingMode == 2) turns = Math.min(2, turns);
+	if(gamedata.gamephase == -2) turns = 3; //Always max charge in gamelobby.	
 	return this.slicerPools[turns];
 };
 
