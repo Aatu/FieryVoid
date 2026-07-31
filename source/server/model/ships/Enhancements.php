@@ -3,6 +3,18 @@
 Most enhancements made are based on official ones, but they're changed and/or repointed
 */
 class Enhancements{
+
+    /* Choice-valued options (tuple index 7 = the list of things that may be picked - currently only
+       CHAM_DISG) have to enumerate every ship in the faction to build that list, and on a cold
+       faction-dir map that means constructing every ship class in the codebase: ~6s and ~170MB.
+       Only the BUY dialogs ever render the list, so the in-game blueprint path
+       (ShipLoader::getShipsByClass, run on every single game.php load) switches it off.
+       Default TRUE deliberately: a caller that forgets to disable it pays time, which is loud and
+       measurable, whereas a caller that wrongly got false would show an empty dropdown, which is
+       silent. In game the stored pick is resolved by NAME (getDisguiseLabel - one construction),
+       so nothing there needs the list. */
+    public static $offerChoiceLists = true;
+
     public static function compareEnhancements($enhA, $enhB)//to set them in order
 	//REVERSE order, as they're effectively reversed in front end too
     {
@@ -205,7 +217,9 @@ class Enhancements{
 	    changes behaviour. "None" is index 0 = "not taken" = no DB row, which is exactly what the
 	    existing machinery already produces for an untouched option.*/
 	  $enhID = 'CHAM_DISG';
-	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
+	  //self::$offerChoiceLists is false on the in-game blueprint path - building the pick list is far
+	  //too expensive to do on a page load that will never render it (see the property's comment).
+	  if(self::$offerChoiceLists && !in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
 		  $hasChameleonSuite = false;
 		  foreach ($ship->systems as $system){
 			if ($system instanceof ChameleonSensors){

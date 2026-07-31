@@ -2,8 +2,105 @@
 
 Implement the B5W Chameleon Sensors rules on the Centauri **Dargan Strike Cruiser**: an ELINT array that additionally disguises its ship as a different vessel, so that enemy players see a *different unit* on the map, in the ship window, in their targeting maths and **in the damage it appears to take** — until the deception is broken.
 
-> Test unit: `Dargan` ([dargan.php](source/server/model/ships/centauri/dargan.php)) — currently carries the note *"Chameleon Sensors (no effect in game)."*
-> Test container: gameID `3730` (`TacGamedata::$safeGameID`) or a fresh Docker game. Needs **two accounts on opposing teams** — every behaviour in this plan is invisible from the owning seat.
+> Test unit: `Dargan` ([dargan.php](source/server/model/ships/centauri/dargan.php)).
+> Test container: a fresh Docker game. Needs **two accounts on opposing teams** — every behaviour in this plan is invisible from the owning seat.
+
+---
+
+## STATUS — updated 2026-07-31
+
+| Stage | State |
+|---|---|
+| **0 — Baseline** | ✅ Built, in-game tested, committed |
+| **1 — Buy-time disguise choice** | ✅ Built, in-game tested, committed |
+| **2 — Reveal state machine** | ✅ Built, committed (HEAD `1f7660c34`). Two-account playtest of the reveal triggers still outstanding |
+| **3 — Identity swap** | ⬅️ **NEXT** |
+| 4-7 | Not started |
+
+**Nothing is visibly disguised yet.** Stages 0–2 are the machinery; Stage 3 is where an enemy first
+sees a different ship.
+
+Acceptance tests: `c:\tmp\css_stage0.php` (30 assertions), `css_stage1.php` (47), `css_stage2.php` (55).
+Stage 2's injects a stub `Manager::$dbManager` by reflection to capture the notes a sweep would write
+with no database — reuse that pattern.
+
+### What Stage 3 should build on
+
+- `BaseShip::isChameleonDisguisedFrom($team)` — **the** single question every masking site should ask.
+  All the ways a deception can end (destroyed, offline, switched off, revealed to that team) already
+  resolve inside it.
+- `BaseShip::getChameleonBlueprint()` — pristine, per-load cached instance of the simulacrum's class.
+- `TacGamedata::$chameleonPresent` — the per-load gate; tests the disguise CHOICE, not the live ability.
+
+### Decisions taken during implementation that differ from the text below
+
+1. **§D10b storage split.** The plan had the CLIENT write the chosen phpclass into
+   `enhancementOptions[i][1]`. That slot is also the option's display label in all four buy/edit
+   dialogs, so a pick rendered as `"kendariUpgraded (up to 42 levels, 0pts)"`. **The client now
+   submits only the INDEX**, and `Enhancements::getStoredEnhancementName()` resolves it to a phpclass
+   server-side — same bytes in `tac_enhancements`, correct label, and a doctored payload cannot name
+   an arbitrary class. Saved-fleet reload converts **name → index** against the rebuilt list.
+2. **§D8 toggle phase is 1 (Initial Orders)**, not Deployment/Firing — it sits alongside the power
+   on/offline control. Client `isTogglePhase()` and server `generateIndividualNotes` must agree.
+3. **§D8 shutdown is a PERMANENT reveal.** Dropped / offline / destroyed writes a real `revealedNow`
+   note rather than only reporting "not disguised right now"; otherwise a player could drop the
+   disguise for a turn and resume it. A **Firing-advance checkpoint** was added so a destroyed array
+   is recorded before the owner can self-repair it.
+4. **The toggle button is withdrawn once EVERY enemy team has seen through it** (in a 1v1, simply
+   "revealed"). Not while only some teams know — the disguise still has value against the rest.
+5. **§6.8 closed: the disguise costs 0 points.**
+6. **Reveal checkpoints take an explicit checkpoint name**, never `$gamedata->phase` — see trap 2 below.
+
+### Traps found while building (each one cost real time)
+
+1. **`getAllShips()` → `setEnhancementOptions()` → the disguise option is INFINITE RECURSION.**
+   `ShipLoader::getAllShips` calls `Enhancements::setEnhancementOptions` on every ship it builds, and
+   that is where `CHAM_DISG` is defined. `ShipLoader::getDisguiseCandidates()` is therefore
+   deliberately self-contained and must never call `getAllShips`.
+2. **Every phase's `advance()` sets the NEXT phase before its ship loop.** At Deployment advance the
+   gamedata already reads phase 1; at Initial Orders advance it already reads phase 2. Dispatching a
+   check on the phase silently runs it at the wrong checkpoint.
+3. **`generateIndividualNotes` runs in `process()`, on POST-side ships** — rebuilt from the POST with
+   no enhancements applied and no notes loaded. A check there that reads `chameleonDisguiseClass`
+   (set by an enhancement) returns early on every call and fails silently, forever. Server-authoritative
+   checks belong in `advance()`; only the toggle transfer belongs in `process()`.
+4. **`tac_individual_notes.notekey_human` is `varchar(40)`** and overflow **aborts the whole player
+   submission** with `(22001/1406) Data too long for column`. Keep reasons short; clamp anyway.
+5. **The lobby serves `source/public/static/json/<faction>.json`, not `getAllShips`** — any change to
+   enhancement options needs `php generateStaticShipFile.php` or the buy dialog shows stale options.
+6. **The gate must test the disguise CHOICE, not `isChameleonDisguised()`** — a destroyed array drops
+   the `ChameleonSensors` special ability, which is precisely the case the shutdown reveal records.
+7. **Three places render a bought enhancement as `name (count)`** — `lobbyEnhancements.apply()` plus
+   **two byte-identical blocks in gamelobby.js differing only by one indent level**. All now go
+   through `lobbyEnhancements.describeTaken()`.
+8. **Offering the choice list at all is a game-load path** (found 2026-07-31, game 4272 fatal).
+   `Enhancements::setEnhancementOptions` runs from `ShipLoader::getShipsByClass` on **every**
+   `game.php` load, so the `CHAM_DISG` block was calling `getDisguiseCandidates` →
+   `getShipClassnames($faction)` → **`getFactionDirMap()`, which constructs every ship class in the
+   codebase: 6.4 s and 176 MB, per page load** (on localhost the map cache is never *read*, only
+   written, so there is no warm path). On live that is an lsphp memory-limit 503 waiting to happen —
+   see the LiteSpeed memory note. Fixed with `Enhancements::$offerChoiceLists`, set false around the
+   `getShipsByClass` loop: only the buy dialogs need the list, and in game the stored pick already
+   resolves by name via `getDisguiseLabel()` (one construction). **Any future choice-valued option
+   inherits this — build pick lists only where they are rendered.**
+   The crash itself was a second bug it exposed: `getFactionDirMap` wrote its cache to a *shared*
+   `/tmp/fv_cache`, which CLI runs (`generateStaticShipFile.php`, the test harness — root under
+   `docker exec`) create first, leaving php-fpm (www-data) unable to write. And `@file_put_contents`
+   does **not** save you — `Manager.php` installs an error handler that throws `ErrorException` for
+   every warning *without* checking `error_reporting()`, so a suppressed warning is still fatal in
+   any request that has loaded Manager. The cache directory is now per-uid and writes are
+   `is_writable`-checked.
+
+### Corrections to the audit in §1
+
+- **Finding #24 overstated.** Two of the six name-based scanner lookups
+  ([baseSystems.js:1215](source/public/client/model/system/baseSystems.js#L1215),
+  [customTrek.js:376](source/public/client/model/weapon/customTrek.js#L376)) sit inside `/* */`
+  blocks, so the "Dargan contributes nothing to stealth detection" and "cannot see cloaked ships"
+  failures were never live. All six were routed through `getScannerList()` regardless.
+- **The suite cannot be voluntarily powered down.** `canOffLine` is `false` on `ShipSystem` and
+  nothing in the Scanner chain overrides it (§D8 intends this). "Switch off" is the Drop Disguise
+  toggle; the `isOfflineOnTurn` branch only catches a *forced* offline from a crit.
 
 ---
 
@@ -267,7 +364,10 @@ Tuple index 7 becomes the optional choice list — absent on every other enhance
 
 ## 4. Stages
 
-### Stage 0 — Baseline (shippable alone)
+> **Stages 0-2 are DONE — see the Status section at the top of this file for what actually shipped
+> and where it differs from the text below. The stage descriptions here are the original design.**
+
+### Stage 0 — Baseline (shippable alone) ✅ DONE
 1. Fix the dangling-`.` notes concatenation at [dargan.php:28-33](source/server/model/ships/centauri/dargan.php#L28-L33).
 2. Null-guard the damage and critical loaders (finding #7) — defensive, independent of this feature.
 3. `ChameleonSensors extends ElintScanner` (PHP): `$name = "chameleonSensors"`, `$displayName = "Chameleon Sensors"`, **`$specialAbilities = array("ELINT", "ChameleonSensors")` — declared whole, so `"ELINT"` survives (D0)**, rules text in `setSystemDataWindow` (spell out the reveal rules: proximity, thrust, ELINT/EW, weapons).
@@ -278,12 +378,12 @@ Tuple index 7 becomes the optional choice list — absent on every other enhance
 
 *Test:* Dargan loads with the new system in the ship window and **nothing else moves**. Specifically, ELINT behaviour is unchanged: notes still say "ELINT Sensors", the ship can still allocate SOEW / SDEW / BDEW / DIST, it still boosts as the highest sensor, it still counts as ELINT for stealth-detection and cloak-detection ranges, and lobby sensor enhancements still find its array.
 
-### Stage 1 — Buy-time disguise choice
+### Stage 1 — Buy-time disguise choice ✅ DONE
 `CHAM_DISG` option (D10), choice list from `ShipLoader::getAllShips($faction)`, `<select>` widget in all four `confirm.js` loops (finding #18), `setEnhancementsShip` case storing `$ship->chameleonDisguiseClass`, saved-fleet fix (D10b).
 
 *Test:* buy a Dargan, pick "Demos", save the fleet, reload it, start the game — the choice survives lobby → DB → game-load. **Leave a second Dargan on the default `None` and confirm it is byte-identical to a pre-Stage-1 Dargan** end to end. Every other ship's buy dialog is byte-identical.
 
-### Stage 2 — Reveal state machine
+### Stage 2 — Reveal state machine ✅ DONE
 `$active` + `$revealedTeams`, note keys `Disguised`/`Undisguised`/`revealedNow`/`revealedNextTurn`, `ShadingField`-style note sorting, destroyed/deactivated checks, client toggle per D8, and the blueprint-only checks:
 - proximity sweep at Movement advance (5 / 2 hexes, LoS-aware), plus a Deployment-advance pass for turn-1 deployments inside 5 hexes;
 - **thrust plausibility (D6b)** at Movement advance;
@@ -293,7 +393,7 @@ All three need only the disguise class blueprint, not the phantom sheet, so they
 
 *Test:* two accounts. State flips at 5 hexes, at 2 for a fighter, on killing the array, on switching it off, on out-accelerating the simulacrum — and never flips back. Turn 1 and a stationary ship do not trigger the thrust check; a real Involuntary Acceleration crit does not self-reveal. For D6c: disguised as a non-ELINT ship, 1 point of SOEW flips it (E1) while any amount of DEW alone does not; disguised as another ELINT ship, ELINT ops are free until total non-DEW EW passes the simulacrum's ceiling (E2). A Dargan left on `None` runs no checks at all. Team A revealing does not reveal team B. Nothing is visibly disguised yet.
 
-### Stage 3 — The identity swap
+### Stage 3 — The identity swap ⬅️ NEXT
 `BaseShip::stripForJsonDisguised()` per §3 (systems still from the **static blueprint**, pristine — the phantom arrives in Stage 4), `TacGamedata::applyChameleonDisguise()` from `deleteHiddenData()`, `chameleonRevealTag` + reload (D14).
 
 *Test:* enemy sees a Demos icon, ship window, point cost and notes; owner and teammates see the Dargan. `window.staticShips` on the enemy page has no `Dargan` key. Enemy closes to 5 hexes → reload → real Dargan with correct armour/arcs everywhere.
@@ -353,5 +453,5 @@ Weapon remapping for outgoing orders, `notes`/`pubnotes` scrub, class-presence m
 5. **The ELINT-type list in D6c/E1 is hardcoded** (`SOEW`, `SDEW`, `BDEW`, `DIST`, `JAM`). Any future ELINT-only EW type must be added to it or it becomes a silent hole in the reveal. Deriving the set instead of listing it is not currently possible — EW types are bare strings with no registry.
 6. **Losing `"ELINT"` on the CSS is a silent, total regression** (D0): the Dargan keeps working, just without half its purpose, and no error is raised. Worth an explicit assertion in the Stage 0 test rather than an eyeball check.
 7. **Enhancement tuple index 7** is a new convention. Additive and default-empty, but it touches the shared buy dialog — the regression surface is *every* ship's purchase flow. Test the four loops deliberately, including that an untouched dialog submits `None`.
-8. **Does the disguise cost points?** Assumed no — the CSS is baked into the Dargan's 750. Confirm before Stage 1; changing it later invalidates saved fleets.
+8. ~~**Does the disguise cost points?**~~ **CLOSED 2026-07-31: no, 0 points.**
 9. **Finished-game replay** (D15).
