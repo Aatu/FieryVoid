@@ -367,18 +367,12 @@ window.gamedata = {
 			for (var enhId in ship.enhancementOptions) {
 				var enhancement = ship.enhancementOptions[enhId];
 				// enhancement is an array: [id, readableName, numberTaken, limit, price, priceStep]
-				var count = enhancement[2];
-				var name = enhancement[1];
-				name = name.replace(/^(\(AMMO\)|\(LIGHT AMMO\)|\(MEDIUM AMMO\)|\(HEAVY AMMO\)|\(Option\))\s*/, '');
+				var name = lobbyEnhancements.describeTaken(enhancement); //null when not taken
 
-				if (count > 0) {
+				if (name !== null) {
+					name = name.replace(/^(\(AMMO\)|\(LIGHT AMMO\)|\(MEDIUM AMMO\)|\(HEAVY AMMO\)|\(Option\))\s*/, '');
 					hasEnhancements = true;
-					var entryHtml = '<div class="ship-enhancement-entry">- ' + name;
-					if (count > 1) {
-						entryHtml += ' (' + count + ')';
-					}
-					entryHtml += '</div>';
-					listHtml = entryHtml + listHtml; // Prepend to reverse order
+					listHtml = '<div class="ship-enhancement-entry">- ' + name + '</div>' + listHtml; // Prepend to reverse order
 				}
 			}
 
@@ -1621,18 +1615,12 @@ window.gamedata = {
 				for (var enhId in ship.enhancementOptions) {
 					var enhancement = ship.enhancementOptions[enhId];
 					// enhancement is an array: [id, readableName, numberTaken, limit, price, priceStep]
-					var count = enhancement[2];
-					var name = enhancement[1];
-					name = name.replace(/^(\(AMMO\)|\(LIGHT AMMO\)|\(MEDIUM AMMO\)|\(HEAVY AMMO\)|\(Option\))\s*/, '');
+					var name = lobbyEnhancements.describeTaken(enhancement); //null when not taken
 
-					if (count > 0) {
+					if (name !== null) {
+						name = name.replace(/^(\(AMMO\)|\(LIGHT AMMO\)|\(MEDIUM AMMO\)|\(HEAVY AMMO\)|\(Option\))\s*/, '');
 						hasEnhancements = true;
-						var entryHtml = '<div class="ship-enhancement-entry">- ' + name;
-						if (count > 1) {
-							entryHtml += ' (' + count + ')';
-						}
-						entryHtml += '</div>';
-						listHtml = entryHtml + listHtml; // Prepend to reverse order
+						listHtml = '<div class="ship-enhancement-entry">- ' + name + '</div>' + listHtml; // Prepend to reverse order
 					}
 				}
 

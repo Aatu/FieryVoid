@@ -37,6 +37,16 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
         $gameData->setActiveship($ship->id);
     }
 
+    // Chameleon Sensor Suite: the ELINT/EW plausibility checkpoint (D6c). Runs here rather than in
+    // process() because process() rebuilds ships from the POST without applying enhancements or
+    // loading notes - the disguise class and the reveal history are both absent on those objects.
+    // Note $gameData->phase already reads 2 by now, hence the explicit checkpoint name.
+    if (TacGamedata::$chameleonPresent) {
+        foreach ($gameData->ships as $ship) {
+            $ship->checkChameleonReveal($gameData, 'initial');
+        }
+    }
+
     $dbManager->updateGamedata($gameData);
 }
 

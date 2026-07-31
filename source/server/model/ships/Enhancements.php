@@ -194,8 +194,41 @@ class Enhancements{
 	  }	 
 
 
-	  //Elite Marines for Grappling Claws, cost: 40% craft price (round up), limit: 1	  	
-	  $enhID = 'ELT_MRN';	  
+	  /*Chameleon Sensor Suite: choose the vessel this ship projects the image of.
+	    Free - the suite is already paid for in the hull's point cost - and an OPTION, not an enhancement.
+
+	    This is the first CHOICE-valued entry, and it uses a new tuple slot: index 7 holds the list of
+	    array(phpclass, humanLabel) that may be picked, index 0 of which is always "None". numbertaken
+	    is then an INDEX into that list rather than a count, and the picked phpclass is mirrored into
+	    enhname so the choice survives a saved-fleet reload (which rebuilds the list from scratch and
+	    could otherwise renumber it). Index 7 is absent on every other enhancement, so nothing else
+	    changes behaviour. "None" is index 0 = "not taken" = no DB row, which is exactly what the
+	    existing machinery already produces for an untouched option.*/
+	  $enhID = 'CHAM_DISG';
+	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
+		  $hasChameleonSuite = false;
+		  foreach ($ship->systems as $system){
+			if ($system instanceof ChameleonSensors){
+				$hasChameleonSuite = true;
+				break;
+			}
+		  }
+		  if($hasChameleonSuite){
+			  $choices = ShipLoader::getDisguiseCandidates($ship->faction, $ship->phpclass);
+			  if(count($choices) > 1){ //something other than "None" to pick
+				  //Phrased so "<name>: <pick>" reads as a sentence wherever a bought option is listed
+				  //with its value - it has to match the in-game enhancementTooltip line below.
+				  $enhName = 'Disguised as';
+				  $enhLimit = count($choices) - 1; //highest valid index
+				  $enhPrice = 0; //free
+				  $enhPriceStep = 0;
+				  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true, $choices);
+			  }
+		  }
+	  }
+
+	  //Elite Marines for Grappling Claws, cost: 40% craft price (round up), limit: 1
+	  $enhID = 'ELT_MRN';
 	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option needs to be specifically enabled
 		  $enhName = 'Elite Marines';
 		  $enhLimit = 1;	
@@ -1817,6 +1850,46 @@ class Enhancements{
 		return in_array($enhID, $launcherMines, true);
 	}
 
+	/*What to persist in tac_enhancements.enhname (or tac_saved_enh.enhname) for one bought option.
+	  Normally just the human-readable name. For a CHOICE-valued option it is the PICK itself - a
+	  phpclass - resolved HERE, server-side, from the submitted index against a freshly built list:
+	  the client only ever submits an index, so a doctored payload cannot name an arbitrary class,
+	  and the option's index 1 stays the display label in every buy/edit dialog.
+	  Storing the name as well as the index is what makes the choice survive a saved-fleet reload -
+	  the candidate list is rebuilt from disk each time and could otherwise be silently renumbered by
+	  a ship being added to or retired from the faction.*/
+	public static function getStoredEnhancementName($ship, $enhancementEntry){
+		if($enhancementEntry[0] === 'CHAM_DISG'){
+			$choices = ShipLoader::getDisguiseCandidates($ship->faction, $ship->phpclass);
+			$index = (int)$enhancementEntry[2];
+			return isset($choices[$index][0]) ? $choices[$index][0] : '';
+		}
+		return $enhancementEntry[1];
+	}
+
+	/*Resolve a stored CHAM_DISG entry to a phpclass, or null for "None" / anything unresolvable.
+	  Two encodings have to be honoured, because the entry reaches here by two different routes:
+	    - IN GAME: DBManager rebuilds the tuple as [enhID, enhname, numbertaken, 0,0,0], so index 1 is
+	               the stored phpclass and there is no choice list left to index into.
+	    - IN LOBBY: the option still carries its choice list at index 7, and index 1 holds whatever the
+	               buy dialog wrote there.
+	  Prefer the NAME (it survives the list being rebuilt or reordered between sessions), fall back to
+	  the INDEX, and fall back to None rather than to an arbitrary ship if neither resolves - a choice
+	  that no longer exists must leave an ordinary working ship, not a randomly disguised one.*/
+	private static function resolveChameleonDisguise($ship, $entry){
+		$byName = isset($entry[1]) ? (string)$entry[1] : '';
+		if(ShipLoader::isLegalDisguise($ship->faction, $byName, $ship->phpclass)) return $byName;
+
+		$choices = (isset($entry[7]) && is_array($entry[7])) ? $entry[7] : null;
+		$index = (int)$entry[2];
+		if($choices !== null && isset($choices[$index][0])){
+			$byIndex = (string)$choices[$index][0];
+			if(ShipLoader::isLegalDisguise($ship->faction, $byIndex, $ship->phpclass)) return $byIndex;
+		}
+
+		return null; //None
+	}
+
 	/*enhancements for fighters - actual applying of chosen enhancements
 	*/
 	private static function setEnhancementsFighter($flight){
@@ -1978,7 +2051,10 @@ class Enhancements{
 			$enhCount = $entry[2];
 			$enhDescription = $entry[1];
 			if($enhCount > 0) {
-				if(!self::isAmmoEnhancement($enhID)){ //ammo already shows in the AmmoMagazine tooltip - keep it out of the Enhancements box
+				//CHAM_DISG is choice-valued, so enhDescription is a phpclass, not prose, and the count
+				//is an index - the generic line would read "kendariUpgraded (x7)". Its own case writes
+				//a proper line, and only for viewers entitled to know.
+				if(!self::isAmmoEnhancement($enhID) && $enhID !== 'CHAM_DISG'){ //ammo already shows in the AmmoMagazine tooltip - keep it out of the Enhancements box
 				if($ship->enhancementTooltip != "") $ship->enhancementTooltip .= "<br>";
 				//if($enhID == 'DEPLOY'){ //Special type of Enhancement, clarify what it means.
 				//	$ship->enhancementTooltip .= "Ship deploys on Turn $enhCount";
@@ -1993,7 +2069,20 @@ class Enhancements{
 					case 'DEPLOY':
 						//Amend value of turn that ship deploys on.
 						//$ship->deploysOnTurn = $enhCount;
-						break;						
+						break;
+
+					case 'CHAM_DISG': //Chameleon Sensor Suite - the vessel this ship pretends to be
+						$disguise = self::resolveChameleonDisguise($ship, $entry);
+						$ship->chameleonDisguiseClass = $disguise;
+						if($disguise !== null && $ship->isRevealedToCurrentViewer()){
+							//the disguise is the secret this whole system exists to keep - never put it
+							//in a payload built for an enemy (enemy payloads also drop enhancementTooltip
+							//wholesale once stripForJsonDisguised exists, but do not rely on that alone)
+							$label = ShipLoader::getDisguiseLabel($ship->faction, $disguise, $ship->phpclass);
+							if($ship->enhancementTooltip != "") $ship->enhancementTooltip .= "<br>";
+							$ship->enhancementTooltip .= "Disguised as: " . ($label !== null ? $label : $disguise);
+						}
+						break;
 
 					case 'ELITE_CREW': //Elite Crew: +5 Initiative, +2 Engine, +1 Sensors, +2 Reactor power, -1 Profile, -2 to critical results, +1 to hit all weapons
 						//fixed values

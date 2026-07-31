@@ -88,6 +88,9 @@ class BaseShip {
 	//null / '' means "None" - no disguise - which is the default and the fallback for anything
 	//unresolvable. NEVER serialize this: it is the secret the whole feature protects.
 	public $chameleonDisguiseClass = null;
+	//Per-load cache of the simulacrum's pristine blueprint (see getChameleonBlueprint). Transient -
+	//declared here so PHP 8.2+ doesn't deprecate the dynamic-property assignment.
+	public $chameleonBlueprint = null;
 
     public $canvasSize = 200;
 
@@ -1145,6 +1148,18 @@ class BaseShip {
         return false;
     }
 
+	/*Ship-level twin of ShipSystem::isRevealedToCurrentViewer(). True when the player this gamedata
+	  load is being built for may see this ship's private state: the owner and their teammates.
+	  Returns REVEALED when there is no viewer context (server-side turn processing, static ship
+	  generation) - so only ever use this to mask OUTGOING JSON, never in game logic.*/
+	public function isRevealedToCurrentViewer()
+	{
+		if (TacGamedata::$currentForPlayer === null) return true; //no viewer context
+		if ($this->userid == TacGamedata::$currentForPlayer) return true; //owner
+		if (TacGamedata::$currentForPlayerTeam !== null && $this->team == TacGamedata::$currentForPlayerTeam) return true; //teammate
+		return false;
+	}
+
 	/*Does this ship carry a LIVE Chameleon Sensor Suite?
 	  Rides on the special-ability list, which getSpecialAbilityList() refuses to fill for a system that is
 	  destroyed or offline - so a shot-out suite drops the ability (and with it the disguise) for free.
@@ -1160,6 +1175,55 @@ class BaseShip {
 	{
 		if (empty($this->chameleonDisguiseClass)) return false;
 		return $this->hasChameleonSensors();
+	}
+
+	/*The Chameleon suite itself, or null. Uses the special-ability index rather than a system scan,
+	  so it costs a hash lookup on the ships that have one and nothing at all on the ships that don't.*/
+	public function getChameleonSensors()
+	{
+		if (!$this->hasChameleonSensors()) return null;
+		return $this->getSpecialAbilitySystem("ChameleonSensors");
+	}
+
+	/*A pristine instance of the simulacrum's class, built once per load and cached on the ship.
+	  Every plausibility threshold reads from THIS rather than from a live copy: the limits a player
+	  plans around must not wander as the deception accumulates mirrored damage.
+	  Returns null when there is no disguise or the stored class no longer resolves.*/
+	public function getChameleonBlueprint()
+	{
+		if (empty($this->chameleonDisguiseClass)) return null;
+		if ($this->chameleonBlueprint !== null) return $this->chameleonBlueprint;
+		if (!class_exists($this->chameleonDisguiseClass)) return null;
+
+		$cls = $this->chameleonDisguiseClass;
+		$blueprint = new $cls(-1, $this->userid, '', $this->slot);
+		foreach ($blueprint->systems as $system){
+			$system->beforeTurn($blueprint, 0, 0);
+		}
+		$this->chameleonBlueprint = $blueprint;
+		return $this->chameleonBlueprint;
+	}
+
+	/*Reveal checkpoint, called from the Deployment and Movement advances. Gated twice over: the
+	  per-load TacGamedata::$chameleonPresent boolean means a game with no disguised ship never gets
+	  here at all, and isChameleonDisguised() means a Chameleon ship left on "None" doesn't either.*/
+	public function checkChameleonReveal($gamedata, $checkpoint = 'movement')
+	{
+		if (empty($this->chameleonDisguiseClass)) return;
+		//NOT isChameleonDisguised(): a destroyed or offlined array drops the ChameleonSensors special
+		//ability, and that is exactly the case the shutdown check exists to record.
+		$css = $this->getSystemByName("chameleonSensors");
+		if ($css instanceof ChameleonSensors) $css->checkChameleonReveal($gamedata, $checkpoint);
+	}
+
+	/*Is this ship's true identity still hidden from $team? The single question every masking site
+	  asks, so there is one place where all the ways a deception can end are accounted for.*/
+	public function isChameleonDisguisedFrom($team)
+	{
+		if (!$this->isChameleonDisguised()) return false;
+		$css = $this->getChameleonSensors();
+		if ($css === null) return false;
+		return $css->isDisguisedFrom($team, TacGamedata::$currentTurn);
 	}
 
     public function checkStealth($gamedata)

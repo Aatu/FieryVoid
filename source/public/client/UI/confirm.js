@@ -369,6 +369,61 @@ window.confirm = {
     },
 
 
+    /*Choice-valued enhancement widget - currently only the Chameleon disguise.
+      An enhancementOption whose index 7 is a list of [phpclass, label] pairs is a PICK, not a count:
+      numberTaken is an index into that list and index 0 is always "None" (= not taken = no DB row).
+
+      It deliberately reuses the very same .selectAmount.shpenh<N> element the +/- spinner uses, and
+      keeps the same data('count') / data('enhCost') / data('enhPrice') contract, so every read-back
+      loop (confirm.getTotalCost, gamedata.doBuy/doBuyBulk/doShipEdit) keeps working untouched - only
+      the widget changes. The client submits the INDEX only; the server turns it back into a phpclass
+      from its own copy of the list, so a doctored payload cannot name an arbitrary class.
+
+      Returns true if it took over the item, false if this is an ordinary counted enhancement.*/
+    applyEnhancementChoiceWidget: function applyEnhancementChoiceWidget(item, enhancement) {
+        var choices = enhancement[7];
+        if (!Array.isArray(choices) || choices.length < 2) return false;
+
+        var target = $(".selectAmount", item);
+
+        var selected = parseInt(enhancement[2], 10);
+        if (!(selected > 0) || selected >= choices.length) selected = 0;
+
+        var select = $('<select class="enhChoiceSelect"></select>');
+        for (var j = 0; j < choices.length; j++) {
+            $('<option></option>').attr("value", j).text(choices[j][1]).appendTo(select);
+        }
+        select.val(String(selected)); //option values are strings
+
+        //a spinner is meaningless for a pick - drop the typing/wheel handlers the loop just attached.
+        //.enhChoiceItem (confirm.css) empties the +/- column and widens the value box over it, so the
+        //dropdown ends on the same right edge as the spinners of the counted rows around it.
+        $(item).addClass("enhChoiceItem");
+        target.off();
+        target.attr("contenteditable", "false");
+        target.empty().append(select);
+        target.data('count', selected);
+        target.data('enhCost', 0);
+        target.data('enhOptionCost', 0);
+
+        select.on("change", function () {
+            var idx = parseInt($(this).val(), 10) || 0;
+            target.data('count', idx);
+            target.data('enhCost', 0);        //choices are free; keep the cost loops happy
+            target.data('enhOptionCost', 0);
+            confirm.getTotalCost();
+        });
+
+        //the counted-enhancement label builder appends "(up to N levels, 0pts)", which is nonsense
+        //for a pick - restate it plainly
+        var label = enhancement[1];
+        if (enhancement[6]) label = " <span style='color:rgb(224, 185, 57) ;'>(OPTION)</span> " + label;
+        $(".selectText", item).html(label);
+
+        return true;
+    },
+
+
     // Helper function to select all text on focus
     selectAllTextOnFocus: function () {
         var range = document.createRange();
@@ -652,6 +707,9 @@ window.confirm = {
 
             $(".plusButton", item).on("click", confirm.doOnPlusEnhancement);
             $(".minusButton", item).on("click", confirm.doOnMinusEnhancement);
+
+            //a choice-valued option (Chameleon disguise) swaps the spinner for a dropdown; no-op otherwise
+            confirm.applyEnhancementChoiceWidget(item, enhancement);
         }
         $('<div class="missileselect"><label>Here you may select any available Ammo, Options, and Enhancements.<br><span>(NOTE - For fighter flights, all fighters in flight will be similarly outfitted)</span></label></div>').prependTo(e);
 
@@ -983,6 +1041,9 @@ window.confirm = {
 
             $(".plusButton", item).on("click", confirm.doOnPlusEnhancement);
             $(".minusButton", item).on("click", confirm.doOnMinusEnhancement);
+
+            //a choice-valued option (Chameleon disguise) swaps the spinner for a dropdown; no-op otherwise
+            confirm.applyEnhancementChoiceWidget(item, enhancement);
         }
         $('<div class="missileselect"><label>Here you may select any available Ammo, Options, and Enhancements.<br><span>(NOTE - For fighter flights, all fighters in flight will be similarly outfitted)</span></label></div>').prependTo(e);
 
@@ -1206,6 +1267,9 @@ window.confirm = {
 
             $(".plusButton", item).on("click", confirm.doOnPlusEnhancement);
             $(".minusButton", item).on("click", confirm.doOnMinusEnhancement);
+
+            //a choice-valued option (Chameleon disguise) swaps the spinner for a dropdown; no-op otherwise
+            confirm.applyEnhancementChoiceWidget(item, enhancement);
         }
         $('<div class="missileselect"><label>Here you may select any available Ammo, Options, and Enhancements.<br><span>(NOTE - For fighter flights, all fighters in flight will be similarly outfitted)</span></label></div>').prependTo(e);
 
@@ -1409,6 +1473,9 @@ window.confirm = {
 
             $(".plusButton", item).on("click", confirm.doOnPlusEnhancement);
             $(".minusButton", item).on("click", confirm.doOnMinusEnhancement);
+
+            //a choice-valued option (Chameleon disguise) swaps the spinner for a dropdown; no-op otherwise
+            confirm.applyEnhancementChoiceWidget(item, enhancement);
         }
 
         if (ship.enhancementOptions && ship.enhancementOptions.length > 0) {

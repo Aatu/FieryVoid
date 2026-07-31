@@ -76,6 +76,13 @@ class MovementGamePhase implements Phase
                 $ship->checkStealth($latestgameData);
             }
 
+            // Chameleon Sensor Suite: proximity and thrust-plausibility reveal checkpoints. The
+            // static gate is false for every game without a disguised ship, so this costs one
+            // boolean test per ship in the overwhelming majority of games.
+            if (TacGamedata::$chameleonPresent) {
+                $ship->checkChameleonReveal($latestgameData, 'movement');
+            }
+
         }
 
         // Update game phase to Pre-Firing

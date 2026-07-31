@@ -166,6 +166,88 @@
 			return $ships;
 		}
 		
+		/* Chameleon Sensor Suite - the vessels a disguised ship may pretend to be.
+		   Per the rules: "any other kind of ship ... not a fighter ... not a base or enormous unit",
+		   and same faction only (FV colours icons by TEAM, so an enemy-faction disguise renders in
+		   the wrong colour and defeats itself).
+
+		   ⚠️ This deliberately does NOT go through getAllShips(): getAllShips() calls
+		   Enhancements::setEnhancementOptions() on every ship it builds, and that is where the
+		   disguise option is defined - calling back into getAllShips() from there is infinite
+		   recursion. Keep this self-contained.
+
+		   Returns a list of array(phpclass, humanLabel) sorted by phpclass, with index 0 always the
+		   "None" sentinel (empty phpclass) - the default, and the fallback for anything unresolvable.
+		   $excludePhpclass drops the disguising ship's own class (a Dargan cannot disguise as a Dargan).*/
+		public static function getDisguiseCandidates($faction, $excludePhpclass = null){
+			static $memo = array(); //per-request; the underlying construction is the expensive part
+
+			$key = (string)$faction;
+			if (!isset($memo[$key])){
+				$candidates = array();
+				foreach (self::getShipClassnames($faction) as $name){
+					if (!class_exists($name)) continue;
+					$ship = new $name(0, 0, "", 0, 0, false, false, array());
+					if ($ship->faction != $faction) continue;
+					if (!self::isLegalDisguiseTarget($ship)) continue;
+					$candidates[$ship->phpclass] = ($ship->shipClass !== '' ? $ship->shipClass : $ship->phpclass);
+				}
+				ksort($candidates); //stable order - the stored index means nothing without it
+				$memo[$key] = $candidates;
+			}
+
+			$list = array(array('', 'None - no disguise'));
+			foreach ($memo[$key] as $phpclass => $label){
+				if ($excludePhpclass !== null && $phpclass === $excludePhpclass) continue;
+				$list[] = array($phpclass, $label);
+			}
+			return $list;
+		}
+
+		/*Validate a STORED disguise choice and return its human label, or null if it is no longer
+		  legal (deleted ship class, faction changed, hull retired). One ship construction, memoized,
+		  so it is cheap enough to run on every in-game load of a disguised ship - which is where the
+		  choice list itself is not available. Shares isLegalDisguiseTarget() with
+		  getDisguiseCandidates() so the offered set and the accepted set can never drift.*/
+		public static function getDisguiseLabel($faction, $phpclass, $excludePhpclass = null){
+			static $memo = array();
+
+			if (empty($phpclass)) return null;                       //"None"
+			if ($phpclass === $excludePhpclass) return null;         //cannot disguise as itself
+
+			$key = (string)$faction . '|' . $phpclass;
+			if (!array_key_exists($key, $memo)){
+				$label = null;
+				if (class_exists($phpclass)){
+					$ship = new $phpclass(0, 0, "", 0, 0, false, false, array());
+					if ($ship->faction == $faction && self::isLegalDisguiseTarget($ship)){
+						$label = ($ship->shipClass !== '' ? $ship->shipClass : $ship->phpclass);
+					}
+				}
+				$memo[$key] = $label;
+			}
+			return $memo[$key];
+		}
+
+		public static function isLegalDisguise($faction, $phpclass, $excludePhpclass = null){
+			return self::getDisguiseLabel($faction, $phpclass, $excludePhpclass) !== null;
+		}
+
+		/*The shared predicate. A simulacrum must be a real, currently-buildable ship of a size the
+		  disguising hull could plausibly be mistaken for.*/
+		private static function isLegalDisguiseTarget($ship){
+			if ($ship instanceof FighterFlight) return false;        //"not a fighter"
+			if ($ship instanceof Terrain) return false;
+			if ($ship->base || $ship->smallBase) return false;       //"not a base"
+			if ($ship->osat || $ship->mine) return false;
+			if ($ship->Enormous) return false;                       //"not an enormous unit"
+			if ($ship->shipSizeClass < 0 || $ship->shipSizeClass > 3) return false;
+			//retired hulls: variantOf pointing at no real shipClass hides a ship from the lobby
+			//(see the variantOf sentinel convention) - it must not be offerable as a disguise either
+			if (in_array($ship->variantOf, array('NONE', 'OBSOLETE', 'OBSELETE'), true)) return false;
+			return true;
+		}
+
 		public static function getAllFactions(){
 			$names = self::getShipClassnames();
 			$factions = array();

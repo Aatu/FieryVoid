@@ -26,11 +26,8 @@ window.lobbyEnhancements = {
 		var tooltipParts = [];
 		for (let entry of ship.enhancementOptions) {
 			// ID, readableName, numberTaken, limit, price, priceStep
-			if (entry[2] > 0) {
-				var line = entry[1];
-				if (entry[2] > 1) line += " (" + entry[2] + ")"; //count in plain brackets, no "x"
-				tooltipParts.push(line);
-			}
+			var line = this.describeTaken(entry);
+			if (line !== null) tooltipParts.push(line);
 		}
 		ship.enhancementTooltip = tooltipParts.join("<br>");
 
@@ -39,6 +36,24 @@ window.lobbyEnhancements = {
 		} else {
 			this.setEnhancementsShip(ship);
 		}
+	},
+
+	/*One BOUGHT enhancement rendered for a human, or null if this one was not taken.
+	  Choice-valued options (index 7 = the list of things that can be picked) store an INDEX in
+	  numberTaken rather than a count, so the usual "name (n)" would read "Disguised as (31)" -
+	  render the pick instead, which also matches the wording the server writes into the in-game
+	  enhancement tooltip, so the lobby and the game agree.*/
+	describeTaken: function describeTaken(entry) {
+		var count = entry[2];
+		if (!(count > 0)) return null;
+
+		if (Array.isArray(entry[7])) {
+			var choice = entry[7][count];
+			if (!choice || !choice[0]) return null; //index 0, or out of range = "None" = nothing taken
+			return entry[1] + ": " + choice[1];
+		}
+
+		return entry[1] + (count > 1 ? " (" + count + ")" : ""); //count in plain brackets, no "x"
 	},
 
 	setEnhancementsShip: function setEnhancementsShip(ship) {

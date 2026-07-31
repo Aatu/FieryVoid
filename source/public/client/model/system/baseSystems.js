@@ -92,6 +92,75 @@ var ChameleonSensors = function ChameleonSensors(json, ship) {
 ChameleonSensors.prototype = Object.create(ElintScanner.prototype);
 ChameleonSensors.prototype.constructor = ChameleonSensors;
 
+/*The disguise toggle. SystemActivation renders the button for any system implementing
+  canActivate/canDeactivate and honours the two label getters, so no React work is needed here.
+  `hasDisguise` and `active` are sent by the server to the owner and their team ONLY - an enemy
+  receives hasDisguise:false, so the button never appears on a ship they are looking at.
+  Allowed in the Deployment/pre-turn phase and in Firing (effective next turn), the same convention
+  Hangar Ops and the Kirishiac Orbitals use.*/
+ChameleonSensors.prototype.isTogglePhase = function () {
+	return (gamedata.gamephase == 1);
+};
+
+/*Once every enemy team has seen through the deception there is nothing left to protect, so the
+  button is withdrawn entirely rather than offering a switch that changes nothing. In a 1v1 this is
+  simply "revealed". revealedTeams is sent to the owner and their team only.*/
+ChameleonSensors.prototype.isFullyRevealed = function () {
+	if (!Array.isArray(this.revealedTeams) || this.revealedTeams.length === 0) return false;
+
+	var myTeam = parseInt(this.ship.team, 10);
+	var enemyTeams = [];
+	for (var i in gamedata.slots) {
+		var team = parseInt(gamedata.slots[i].team, 10);
+		if (team !== myTeam && enemyTeams.indexOf(team) === -1) enemyTeams.push(team);
+	}
+	if (enemyTeams.length === 0) return false;
+
+	for (var j = 0; j < enemyTeams.length; j++) {
+		if (this.revealedTeams.indexOf(enemyTeams[j]) === -1) return false;
+	}
+	return true;
+};
+
+ChameleonSensors.prototype.canActivate = function () {
+	if (!this.hasDisguise || this.active) return false;
+	if (!this.isTogglePhase()) return false;
+	if (this.isFullyRevealed()) return false;
+	if (shipManager.systems.isDestroyed(this.ship, this)) return false;
+	if (shipManager.power.isOfflineOnTurn(this.ship, this, gamedata.turn)) return false;
+	return true;
+};
+
+ChameleonSensors.prototype.canDeactivate = function () {
+	if (!this.hasDisguise || !this.active) return false;
+	if (!this.isTogglePhase()) return false;
+	if (this.isFullyRevealed()) return false;
+	if (shipManager.systems.isDestroyed(this.ship, this)) return false;
+	return true;
+};
+
+ChameleonSensors.prototype.getActivateLabel = function () {
+	return "Disguise";
+};
+
+ChameleonSensors.prototype.getDeactivateLabel = function () {
+	return "Drop Disguise";
+};
+
+ChameleonSensors.prototype.doActivate = function () {
+	this.active = true;
+};
+
+ChameleonSensors.prototype.doDeactivate = function () {
+	this.active = false;
+};
+
+ChameleonSensors.prototype.doIndividualNotesTransfer = function () {
+	if (!this.isTogglePhase()) return false;
+	this.individualNotesTransfer = [this.active ? 1 : 0];
+	return true;
+};
+
 var Engine = function Engine(json, ship) {
 	ShipSystem.call(this, json, ship);
 };

@@ -391,7 +391,7 @@ public function addMoons($gameData, $dbManager, $smallCount, $mediumCount, $larg
                         //unit enhancements
                         foreach($ship->enhancementOptions as $enhancementEntry){ //ID,readableName,numberTaken,limit,price,priceStep
                             $enhID = $enhancementEntry[0];
-                            $enhName = $enhancementEntry[1];
+                            $enhName = Enhancements::getStoredEnhancementName($ship, $enhancementEntry); //choice-valued options store the PICK here, not the label
                             $enhNo = $enhancementEntry[2];
                             if ($enhNo > 0){ //actually taken
                                 $dbManager->submitEnhancement($gameData->id, $id, $enhID, $enhNo, $enhName);

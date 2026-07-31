@@ -158,45 +158,41 @@ class TacGamedata {
                 }
 
             }
-            $this->markUnavailableSetMarkers(); //Sets isStealthPresent and areMinesPresent too!
             $ship->onConstructed($this->turn, $this->phase, $this);
         }
 
-        $this->setChameleonPresent();
-    }
-
-    /*Chameleon Sensor Suite gate - see $chameleonPresent. Must run AFTER every ship's onConstructed(),
-      because that is what fills enabledSpecialAbilities and applies in-game enhancements (the disguise
-      choice is one of them).*/
-    private function setChameleonPresent()
-    {
-        self::$chameleonPresent = false;
-        foreach ($this->ships as $ship){
-            if ($ship->isChameleonDisguised()){
-                self::$chameleonPresent = true;
-                return;
-            }
-        }
+        //One sweep over the ships for all the per-game markers. This used to run INSIDE the loop
+        //above (so once per ship, each time walking every ship); moving it out is both cheaper and
+        //more accurate, because every ship is now fully constructed - which the Chameleon gate
+        //requires, since onConstructed() is what applies enhancements and fills special abilities.
+        $this->markUnavailableSetMarkers();
     }
 
     public function markUnavailableSetMarkers()
     {
+        self::$chameleonPresent = false; //before the phase guard: the static outlives a single load
         if ($this->phase < -1)
             return;
-        
+
         foreach ($this->ships as $ship)
         {
             $turnDeploys = $ship->getTurnDeployed($this);
-            
+
             if($turnDeploys > $this->turn){
                 $ship->unavailable = true;
-            } 
+            }
 
             //Just a convenient place to set Stealth/Mine variable since we're already going through ships in the game.
             if($ship->userid !== $this->forPlayer){
                 if($ship->trueStealth && !$ship instanceof Mine && !$ship->isDestroyed() && $ship->factionAge <= 2) $this->isStealthPresent = true; //Hyach and Trek cloaks atm.
                 if($ship instanceof Mine && !$ship->isDestroyed()) $this->areMinesPresent = true; //Marks that ENEMY mines are present.
-            }                
+            }
+
+            //Chameleon Sensor Suite gate - see $chameleonPresent. Tests the DISGUISE CHOICE, not
+            //isChameleonDisguised(): a destroyed or offlined array loses the ChameleonSensors special
+            //ability, and that is precisely the case the shutdown reveal has to record. A suite left
+            //on the default "None" still keeps the whole game on the common path.
+            if(!self::$chameleonPresent && !empty($ship->chameleonDisguiseClass)) self::$chameleonPresent = true;
         }
     }
     

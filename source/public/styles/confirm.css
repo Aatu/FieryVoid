@@ -103,6 +103,51 @@
     vertical-align: middle;
 }
 
+/*
+ * Choice-valued enhancement option (currently only the Chameleon disguise): a dropdown takes the
+ * place of the +/- spinner, so the value box has to hold a ship class name rather than a two-digit
+ * count. Applied by confirm.applyEnhancementChoiceWidget, which adds .enhChoiceItem to the row.
+ *
+ * The dropdown ends on the same right edge as the +/- spinners of the counted rows above and
+ * below it, so the stack reads as one column. That falls out of the arithmetic rather than being
+ * eyeballed: the row is .selectText | .selectAmount | .selectButtons in that order, so the
+ * dropdown has to absorb the spinner column's 14px (.plusButton is 12px wide + 1px border each
+ * side). 45% + 45% = the counted row's 83% + 7%, and the spinner column is emptied by collapsing
+ * it to zero width while LEAVING IT IN FLOW - display:none would also swallow the inline
+ * whitespace gap beside it and pull the dropdown 4-ish px left of the spinners.
+ * .selectAmount keeps its inherited border and padding so the two box models match exactly.
+ */
+.missileSelectItem.enhChoiceItem .selectText {
+    width: 45%;
+}
+
+.missileSelectItem.enhChoiceItem .selectAmount {
+    width: calc(45% + 14px);
+    text-align: left;
+}
+
+.missileSelectItem.enhChoiceItem .selectButtons {
+    visibility: hidden;
+    width: 0;
+    overflow: hidden;
+}
+
+.missileSelectItem.enhChoiceItem .selectAmount select {
+    width: 100%;
+    padding: 0;
+    border: none;
+    background-color: transparent;
+    color: #DEEBFF;
+    font: inherit;
+}
+
+/* The open dropdown list is drawn by the OS on a white background, so its text has to be dark -
+   the light colour above applies to the closed control sitting on the dark .selectAmount box. */
+.missileSelectItem.enhChoiceItem .selectAmount select option {
+    color: #000;
+    background-color: #fff;
+}
+
 .fighterAmount {
     display: inline-block;
     width: 7%;

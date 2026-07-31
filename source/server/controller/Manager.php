@@ -778,7 +778,7 @@ class Manager{
                     
                 foreach($ship->enhancementOptions as $enhancementEntry){ //ID,readableName,numberTaken,limit,price,priceStep
                     $enhID = $enhancementEntry[0];
-                    $enhName = $enhancementEntry[1];
+                    $enhName = Enhancements::getStoredEnhancementName($ship, $enhancementEntry); //choice-valued options store the PICK here, not the label
                     $enhNo = $enhancementEntry[2];
                     if ($enhNo > 0){ //actually taken
                         self::$dbManager->submitSavedEnhancement($listId, $shipId, $enhID, $enhNo, $enhName);
@@ -910,8 +910,23 @@ class Manager{
                     foreach ($ship->enhancementOptions as &$option) {
                         if ($option[0] === $enhID) {
                             $option[2] = $numberTaken;
+                            //Choice-valued options (index 7 = the list of things that can be picked)
+                            //store the PICK in enhname and only an INDEX into that list in numbertaken.
+                            //The list is rebuilt from disk on every load, so a ship added to or retired
+                            //from the faction silently renumbers it - re-derive the index from the name,
+                            //which is stable. An unresolvable name falls back to index 0 = "None".
+                            if (!empty($option[7]) && isset($enhEntry[2]) && $enhEntry[2] !== '') {
+                                $option[2] = 0;
+                                foreach ($option[7] as $choiceIndex => $choice) {
+                                    if ($choice[0] === $enhEntry[2]) {
+                                        $option[2] = $choiceIndex;
+                                        break;
+                                    }
+                                }
+                            }
                         }
                     }
+                    unset($option);
                 }
 
                 // Add Ammo
