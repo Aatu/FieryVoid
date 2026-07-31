@@ -768,9 +768,7 @@ window.gamedata = {
                 // New check to see if Scanner exists / has positive output before giving warning - DK 01/25
                 for (var i = hasNoEW.length - 1; i >= 0; i--) {
                     var ship = hasNoEW[i];
-                    const standardScanners = shipManager.systems.getSystemListByName(ship, "scanner");
-                    const elintScanners = shipManager.systems.getSystemListByName(ship, "elintScanner");
-                    const scanners = [...standardScanners, ...elintScanners];
+                    const scanners = shipManager.systems.getScannerList(ship, true);
 
                     // Check if all scanners for this ship are either destroyed or have output <= 0
                     var allScannersDisabled = scanners.every(function (scanner) {

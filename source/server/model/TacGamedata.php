@@ -13,6 +13,11 @@ class TacGamedata {
     //Shading Field) - never use for game logic; null = no viewer (server processing) = reveal.
     public static $currentForPlayer = null;
     public static $currentForPlayerTeam = null;
+    //Chameleon Sensor Suite gate. About one ship in 2000 carries the suite, and it only matters once a
+    //player has actively picked a simulacrum, so the ENTIRE feature hangs off this single per-load
+    //boolean - a game without a disguised ship pays for one false check and nothing else.
+    //Set in onConstructed(), after every ship has been constructed (enhancements included).
+    public static $chameleonPresent = false;
 
     public $id, $turn, $phase, $activeship, $name, $status, $points, $background, $creator, $gamespace, $description;
     public $ships = array();
@@ -155,6 +160,22 @@ class TacGamedata {
             }
             $this->markUnavailableSetMarkers(); //Sets isStealthPresent and areMinesPresent too!
             $ship->onConstructed($this->turn, $this->phase, $this);
+        }
+
+        $this->setChameleonPresent();
+    }
+
+    /*Chameleon Sensor Suite gate - see $chameleonPresent. Must run AFTER every ship's onConstructed(),
+      because that is what fills enabledSpecialAbilities and applies in-game enhancements (the disguise
+      choice is one of them).*/
+    private function setChameleonPresent()
+    {
+        self::$chameleonPresent = false;
+        foreach ($this->ships as $ship){
+            if ($ship->isChameleonDisguised()){
+                self::$chameleonPresent = true;
+                return;
+            }
         }
     }
 

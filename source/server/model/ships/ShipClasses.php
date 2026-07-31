@@ -84,6 +84,11 @@ class BaseShip {
 	
     public $enabledSpecialAbilities = array();
 
+	//Chameleon Sensor Suite: phpclass of the simulacrum this ship projects, chosen at purchase.
+	//null / '' means "None" - no disguise - which is the default and the fallback for anything
+	//unresolvable. NEVER serialize this: it is the secret the whole feature protects.
+	public $chameleonDisguiseClass = null;
+
     public $canvasSize = 200;
 
     public $outerSections = array(); //for determining hit locations in GUI: loc, min, max, call (loc is location id, min/max is for arc, call is true if location systems can be called)
@@ -1139,6 +1144,23 @@ class BaseShip {
 
         return false;
     }
+
+	/*Does this ship carry a LIVE Chameleon Sensor Suite?
+	  Rides on the special-ability list, which getSpecialAbilityList() refuses to fill for a system that is
+	  destroyed or offline - so a shot-out suite drops the ability (and with it the disguise) for free.
+	  Depends on onConstructed() having run, like every other hasSpecialAbility() caller.*/
+	public function hasChameleonSensors()
+	{
+		return $this->hasSpecialAbility("ChameleonSensors");
+	}
+
+	/*Is this ship actually projecting a simulacrum right now? A Chameleon ship left on the default "None"
+	  disguise is an ordinary ELINT ship and must stay on the common path - hence the disguise-class test.*/
+	public function isChameleonDisguised()
+	{
+		if (empty($this->chameleonDisguiseClass)) return false;
+		return $this->hasChameleonSensors();
+	}
 
     public function checkStealth($gamedata)
     {        

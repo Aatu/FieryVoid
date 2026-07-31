@@ -242,6 +242,32 @@ shipManager.systems = {
         return toReturn;
     },
 
+    /*Every sensor array on a ship, ELINT ones included. Mirrors the server's `instanceof Scanner` test.
+      Use this instead of matching name == "scanner" / "elintScanner": subclasses carry their own name
+      (eg. chameleonSensors) and a name list silently skips them.
+      isScanner is guarded because lobby fleet ships are jQuery.extend clones - method calls survive the
+      clone, but a system built from bare JSON may not have the method at all.*/
+    getScannerList: function getScannerList(ship, includeFighters) {
+        var toReturn = Array();
+        for (var i in ship.systems) {
+            var system = ship.systems[i];
+            if (includeFighters && system.fighter) {
+                for (var a in system.systems) {
+                    var figsys = system.systems[a];
+                    if (figsys.isScanner && figsys.isScanner()
+                        && (!shipManager.systems.isDestroyed(ship, figsys))) { //only on alive fighters!
+                        toReturn.push(figsys);
+                    }
+                }
+            }
+            if (system.isScanner && system.isScanner()) {
+                toReturn.push(system);
+            }
+        }
+
+        return toReturn;
+    },
+
     getSystemByNameInLoc: function getSystemByNameInLoc(ship, name, loc) {
         for (var i in ship.systems) {
             var system = ship.systems[i];

@@ -2597,7 +2597,11 @@ class DBManager
             $damageStmt->bind_result($id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields, $fireorderid, $destroyed, $undestroyed, $pubnotes, $damageclass);
             $damageStmt->execute();
             while ($damageStmt->fetch()) {
-                $gamedata->getShipById($shipid)->getSystemById($systemid)->setDamage(
+				$targetShip = $gamedata->getShipById($shipid);
+				if ($targetShip === null) continue; //shipid not in this gamedata (eg. Chameleon phantom sheets, which use negative ids) - not an error, just not ours to load here
+				$targetSystem = $targetShip->getSystemById($systemid);
+				if ($targetSystem === null) continue;
+                $targetSystem->setDamage(
                     new DamageEntry($id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields, $fireorderid, $destroyed, $undestroyed, $pubnotes, $damageclass)
                 );
             }
@@ -2639,9 +2643,14 @@ class DBManager
 						}
 					}
 
+					$targetShip = $gamedata->getShipById($shipid);
+					if ($targetShip === null) continue; //shipid not in this gamedata (eg. Chameleon phantom sheets, which use negative ids)
+					$targetSystem = $targetShip->getSystemById($systemid);
+					if ($targetSystem === null) continue;
+
 					$crit = new $type($id, $shipid, $systemid, $type, $turn, $turnEnd);
 					$crit->param = $param;
-					$gamedata->getShipById($shipid)->getSystemById($systemid)->setCritical(
+					$targetSystem->setCritical(
 						$crit,
 						$gamedata->turn
 					);

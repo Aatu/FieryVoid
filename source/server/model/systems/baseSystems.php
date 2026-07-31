@@ -2060,6 +2060,44 @@ class ElintScanner extends Scanner implements SpecialAbility{
 }
 
 
+/* Chameleon Sensor Suite - an ELINT array that additionally disguises its ship as a different vessel.
+   It IS the ship's ELINT array (it replaces ElintScanner in place), so "ELINT" MUST stay in $specialAbilities:
+   redeclaring the property in a subclass REPLACES the parent's array, and dropping "ELINT" would silently
+   strip SOEW/SDEW/Blanket Protection/Disruption/Jamming from the ship with no error raised.
+*/
+class ChameleonSensors extends ElintScanner implements SpecialAbility{
+    public $name = "chameleonSensors";
+    public $displayName = "Chameleon Sensors";
+    public $specialAbilities = array("ELINT", "ChameleonSensors");
+    public $iconPath = "elintArray.png";
+
+    function __construct($armour, $maxhealth, $powerReq, $output ){
+        parent::__construct($armour, $maxhealth, $powerReq, $output );
+    }
+
+    public function setSystemDataWindow($turn){
+	//parent::setSystemDataWindow($turn);
+	if (!isset($this->data["Special"])) {
+		$this->data["Special"] = '';
+	}else{
+		$this->data["Special"] .= '<br>';
+	}
+        $this->data["Special"] .= "<br>Chameleon Suite - In addition to normal ELINT operations (see FAQ), this array can project the image of a different vessel of the same faction. Enemies see the simulacrum - its icon, class, notes, defence profile and damage - in place of this ship.";
+        $this->data["Special"] .= "<br>The deception is broken if this ships moves, uses EW or weapons that the ship its disguised as could not do, or if an enemy unit closes to within 5 hexes (2 hexes for fighters and shuttles) with line of sight.";        
+		//$this->data["Special"] .= "<br>The simulacrum is chosen when the ship is purchased. 'None' means no disguise is projected.";
+        $this->data["Special"] .= "<br>Weapon arming status is masked from enemies at all times, even after the deception is revealed.";
+        $this->data["Special"] .= "<br>See Centauir section in 'Factions-Tiers' for mroe info.";		
+        //$this->data["Special"] .= "<br>The deception is broken, permanently and for that enemy team only, if:";
+        //$this->data["Special"] .= "<br> - an enemy unit closes to within 5 hexes (2 hexes for fighters and shuttles) with line of sight;";
+        //$this->data["Special"] .= "<br> - the ship changes speed by more than the simulacrum's engines could manage;";
+        //$this->data["Special"] .= "<br> - the ship runs ELINT operations the simulacrum could not run, or spends more EW than the simulacrum's sensors could produce;";
+        //$this->data["Special"] .= "<br> - the ship fires a weapon the simulacrum does not mount (revealed at the start of the following turn);";
+        //$this->data["Special"] .= "<br> - this array is destroyed, or the disguise is switched off.";
+    }
+
+}
+
+
 /*SW Scanners have boostability reduced to +2*/
 class SWScanner extends Scanner {
     public $name = "SWScanner";

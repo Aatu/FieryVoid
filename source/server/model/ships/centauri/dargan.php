@@ -25,14 +25,12 @@ class Dargan extends BaseShip{
         $this->rollcost = 2;
         $this->pivotcost = 3;
 	    
-	    $this->notes = 'Chameleon Sensors (no effect in game).'.
-	    $this->notes .= '<br>Rutarian-capable.'.
-		
-        
-         
+	    $this->notes = 'Chameleon Sensors - ELINT array that can also disguise this ship as another vessel of the same faction (chosen at purchase).';
+	    $this->notes .= '<br>Rutarian-capable.';
+
         $this->addPrimarySystem(new Reactor(6, 22, 0, 0));
         $this->addPrimarySystem(new CnC(7, 18, 0, 0));
-        $this->addPrimarySystem(new ElintScanner(6, 20, 4, 10));
+        $this->addPrimarySystem(new ChameleonSensors(6, 20, 4, 10)); //replaces ElintScanner IN PLACE - system ids are construction-order positional, do not move this line
         $this->addPrimarySystem(new Engine(6, 20, 0, 12, 2));
 	$this->addPrimarySystem(new Hangar(6, 14));
         $this->addPrimarySystem(new TwinArray(4, 6, 2, 90, 270));
@@ -77,7 +75,7 @@ class Dargan extends BaseShip{
             0=> array( //PRIMARY
                     8 => "Structure",
                     10 => "Twin Array",
-                    13 => "ELINT Scanner",
+                    13 => "Chameleon Sensors",
                     15 => "Engine",
                     17 => "Hangar",
                     19 => "Reactor",

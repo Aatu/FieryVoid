@@ -85,12 +85,10 @@ window.lobbyEnhancements = {
 							// System mods: Scanner
 							let strongestEScan = null;
 							let strongestEScanValue = -1;
-							for (let system of ship.systems) {
-								if (system.name == "scanner" || system.name == "elintScanner") {
-									if (system.output > strongestEScanValue) {
-										strongestEScanValue = system.output;
-										strongestEScan = system;
-									}
+							for (let system of shipManager.systems.getScannerList(ship)) {
+								if (system.output > strongestEScanValue) {
+									strongestEScanValue = system.output;
+									strongestEScan = system;
 								}
 							}
 							if (strongestEScanValue > 0) {
@@ -289,12 +287,10 @@ window.lobbyEnhancements = {
 						if (!ship.sensEnh) {
 							let strongestScan = null;
 							let strongestScanValue = -1;
-							for (let system of ship.systems) {
-								if (system.name == "scanner" || system.name == "elintScanner") {
-									if (system.output > strongestScanValue) {
-										strongestScanValue = system.output;
-										strongestScan = system;
-									}
+							for (let system of shipManager.systems.getScannerList(ship)) {
+								if (system.output > strongestScanValue) {
+									strongestScanValue = system.output;
+									strongestScan = system;
 								}
 							}
 							if (strongestScanValue > 0) {
@@ -477,12 +473,10 @@ window.lobbyEnhancements = {
 							// System mods: Scanner
 							let strongestPScan = null;
 							let strongestPScanValue = -1;
-							for (let system of ship.systems) {
-								if (system.name == "scanner" || system.name == "elintScanner") {
-									if (system.output > strongestPScanValue) {
-										strongestPScanValue = system.output;
-										strongestPScan = system;
-									}
+							for (let system of shipManager.systems.getScannerList(ship)) {
+								if (system.output > strongestPScanValue) {
+									strongestPScanValue = system.output;
+									strongestPScan = system;
 								}
 							}
 							if (strongestPScanValue > 0) {

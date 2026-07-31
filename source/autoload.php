@@ -509,6 +509,7 @@ spl_autoload_register(
                 'centurionmd' => '/server/model/ships/centauri/centurionMD.php',
                 'cestus' => '/server/model/ships/centauri_raiders/cestus.php',
                 'cestusraider' => '/server/model/ships/raiders/cestusRaider.php',
+                'chameleonsensors' => '/server/model/systems/baseSystems.php',
                 'chargedparticlegun' => '/server/model/weapons/customs.php',
                 'chargeempty' => '/server/model/cricialClasses.php',
                 'chargehalve' => '/server/model/cricialClasses.php',

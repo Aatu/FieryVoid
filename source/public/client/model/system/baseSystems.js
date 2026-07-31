@@ -84,6 +84,14 @@ var ElintScanner = function ElintScanner(json, ship) {
 ElintScanner.prototype = Object.create(Scanner.prototype);
 ElintScanner.prototype.constructor = ElintScanner;
 
+//Chameleon Sensor Suite - mirrors ChameleonSensors in baseSystems.php. Extends ElintScanner so
+//isScanner() stays true; the distinct class exists because createSystemFromJson does new window[Name].
+var ChameleonSensors = function ChameleonSensors(json, ship) {
+	ElintScanner.call(this, json, ship);
+};
+ChameleonSensors.prototype = Object.create(ElintScanner.prototype);
+ChameleonSensors.prototype.constructor = ChameleonSensors;
+
 var Engine = function Engine(json, ship) {
 	ShipSystem.call(this, json, ship);
 };
@@ -1204,9 +1212,7 @@ Stealth.prototype.isDetectedStealth = function (ship) {
 		if (!otherShip.flight) {
 			if (shipManager.isDisabled(otherShip)) continue; //Skip disabled ships               
 			// Not a fighter — use scanner systems for detection
-			const standardScanners = shipManager.systems.getSystemListByName(otherShip, "scanner");
-			const elintScanners = shipManager.systems.getSystemListByName(otherShip, "elintScanner");
-			const scanners = [...standardScanners, ...elintScanners];
+			const scanners = shipManager.systems.getScannerList(otherShip, true);
 
 			for (const scanner of scanners) {
 				if (!shipManager.systems.isDestroyed(otherShip, scanner) && !shipManager.power.isOfflineOnTurn(otherShip, scanner, gamedata.turn)) {
