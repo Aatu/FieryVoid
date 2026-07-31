@@ -871,12 +871,12 @@ React ship windows are stable on live. Removed with it: both commented `<link>`s
 gamelobby.php) and the dead `.shipwindow { position: fixed !important }` override that had
 been sitting commented at the top of lobby.css.
 
-⚠️ **The wider item-5 STAGE4-RETIRED sweep is now unblocked but NOT done** — it is a
-separate job and belongs to item 5, not here. It is roughly **60 sites across 15 files**:
-three whole JS files (`UI/shipwindow.js`, `UI/flightwindow.js`, `UI/systemInfo.js`), two
-large commented HTML template blocks (game.php ~555-719, gamelobby.php ~1136-1326), the
-commented `<script>` tags, and dozens of commented `shipWindowManager.*` call sites across
-power.js, movement.js, weaponManager.js, ships.js and others.
+✅ **The wider item-5 STAGE4-RETIRED sweep was EXECUTED 2026-07-31** (item 5's job, not
+item 6's — recorded in SHIPWINDOW_REDESIGN_PLAN.md "Stage 4 deletion pass"). It covered
+what was scoped here: three whole JS files (`UI/shipwindow.js`, `UI/flightwindow.js`,
+`UI/systemInfo.js`), both commented HTML template blocks, the commented `<script>` tags,
+and every commented `shipWindowManager.*` call site — **−2,904 lines**, and
+`grep -rn STAGE4-RETIRED source/` is now empty.
 
 **5. `ContainerRounded*` COLLAPSED.** `ContainerRounded`, `ContainerRoundedRightBottom` and
 `ContainerRoundedRightSide` differed only in which corners they rounded; once item 6 squared
@@ -930,7 +930,7 @@ legacy chrome values anywhere, and both are documented as the historical revert 
   first (see 3 above).
 - **`.confirm.multi-value-confirm`** — revisit when it is generalised to other multi-input
   weapons (see 2 above).
-- **The item-5 STAGE4-RETIRED sweep** — unblocked, scoped above, not started (see 4 above).
+- ~~**The item-5 STAGE4-RETIRED sweep**~~ — DONE 2026-07-31 (see 4 above).
 
 ### What Stage 4 inherits
 
