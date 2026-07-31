@@ -756,8 +756,8 @@ window.ShipIcon = function () {
        over the dark map reads a good deal hotter than cobalt does at the same alpha, so matching
        the numbers would NOT match the apparent brightness. Its outline stays at the shared border
        opacity, which is what keeps the restricted wedge crisply readable while its fill is quiet. */
-    var ARC_FILL_OPACITY = 0.35;                     //normal (cobalt) firing arc
-    var ARC_BORDER_OPACITY = 0.7;                   //outline of every hex-edged arc, in the arc's own colour
+    var ARC_FILL_OPACITY = 0.4;                     //normal (cobalt) firing arc
+    var ARC_BORDER_OPACITY = 0.8;                   //outline of every hex-edged arc, in the arc's own colour
     var REDUCED_ARC_COLOUR = "rgb(170,95,25)";      //amber: this weapon's arc is restricted this turn
     var REDUCED_ARC_FILL_OPACITY = 0.3;             //fainter than ARC_FILL_OPACITY - see above
 
