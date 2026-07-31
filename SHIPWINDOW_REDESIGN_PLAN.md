@@ -6,13 +6,17 @@ and the round-1–5 refinements recorded below). Stage 2 COMPLETE — exit tests
 passed 2026-07-17 (see the Stage 2 record below). Stage 3 COMPLETE —
 user-accepted 2026-07-17 after five in-lobby feedback rounds (records below).
 Stage 4 BUILT 2026-07-18 (retirement sweep + 2 refinements — record below),
-awaiting bundle rebuild + user test.**
+awaiting bundle rebuild + user test. **STAGE 4 DELETION PASS EXECUTED
+2026-07-31 — the commented-out code is now really gone; see the "Stage 4
+deletion pass" section at the end of this Stage 4 block.**
 
 **Stage 4 (2026-07-18) — BUILT, awaiting user test.** User rider: NOTHING is
 deleted — every retired piece is commented out in place under a single
 greppable marker, **`STAGE4-RETIRED`**, so the whole sweep can be found (and
 then really deleted) once the redesign has proven stable on live. Actual file
-deletion is now a deliberate future step, not part of this stage.
+deletion is now a deliberate future step, not part of this stage. *(That step
+happened on 2026-07-31 — the record below describes the 2026-07-18 commented-out
+state, which is the thing that was subsequently deleted.)*
 - **Script tags / CSS links / templates commented out** (not removed):
   - game.php: `styles/shipwindow.css` link; `UI/systemInfo.js`,
     `UI/shipwindow.js`, `UI/flightwindow.js` script tags (single-line `<!-- -->`
@@ -79,6 +83,76 @@ deletion is now a deliberate future step, not part of this stage.
   DevTools DOM, bundle sizes noted before/after; eyeball a Vorlon Heavy
   Cruiser (PORT/STBD headers), a trueStealth ship, a boarded ship and an
   attached breaching pod for the new banners.
+
+### Stage 4 deletion pass — EXECUTED 2026-07-31
+
+The live-stable rider is discharged. Everything the 2026-07-18 sweep commented
+out is now **actually deleted**. Net: **−2,904 lines, +4** (the 4 are two
+comment rewordings, below). `grep -rn STAGE4-RETIRED source/` returns **zero**
+hits; the marker survives only in this plan and in VISUAL_UNIFICATION_PLAN.md as
+historical record.
+
+- **3 files deleted** (`git rm`): `client/UI/shipwindow.js` (1,664),
+  `client/UI/flightwindow.js` (390), `client/UI/systemInfo.js` (126).
+  `styles/shipwindow.css` was already deleted 2026-07-30 by visual-unification
+  Stage 5.
+- **game.php** (−171): the 3 commented `<script>` tags; the
+  `<?php if (false): ?>` template block (`#shipwindowtemplatecontainer` +
+  `#hitChartTable`).
+- **gamelobby.php** (−284): the 3 commented `<script>` tags; the Stage 3c
+  legacy hover-glue comment block inside the lobby `weaponManager` stub; the
+  `window.shipWindowManager.addEW` stub; the legacy `#systemInfo` tooltip div;
+  the `if (false)` template block.
+- **36 single-line `//STAGE4-RETIRED` call sites**: power.js (16),
+  weaponManager.js (7), movement.js (5), defensive.js (2), ships.js (2),
+  gamedata.js (1), ajaxInterface.js (1), ShipIcon.js (1), PhaseStrategy.js (1).
+- **4 block comments**: weaponManager `onHoldfireClicked` + the
+  `onWeaponMouseover`→`doWeaponMouseout` hover glue; `ShipIcon.prototype.
+  createShipWindow`; `FlightIcon.prototype.createShipWindow`.
+- **Same-sweep earmarks worded differently** (found by grepping `Stage 4`, not
+  `STAGE4-RETIRED` — they would have been missed by the marker grep alone):
+  gamelobby.js ×4 ("delete in Stage 4": the `setEnhancements*` pair superseded
+  by `lobbyEnhancements.apply`, the legacy window destroy/rebuild, the legacy
+  re-open, and the whole superseded legacy open path, −61); `fleetList.js`
+  docked-flight legacy `flightWindowManager.open`; `botPanel.js` `setEW`
+  (Stage 2c dead code, −11).
+- **2 comment rewordings** (the only additions): `movement.js` §4.3 header and
+  `helpers/buildComplement.js` header both claimed the legacy originals were
+  "left there commented out until the Stage 4 retirement sweep" / "deleted
+  wholesale in Stage 4" — now past tense, since the file is gone.
+- **Deliberately NOT touched**: three *pre-existing* dead `/* … */` blocks that
+  predate this project and still name the legacy globals — ships.js:4–249
+  (`initShips`/`createHexShipDiv`, the canvas-era path; this is the block that
+  broke the parse in 2026-07-18 when a nested comment was attempted),
+  gamedata.js:34–79 (`selectShip`/`targetShip`), and
+  reactJs/system/SystemIcon.js:~779 (`addDuoSystem`). All three verified inside
+  block comments by a comment-state scanner. They are not part of this sweep;
+  clearing them is a separate optional cleanup.
+- **Verified**: `node --check` ×13 (all edited plain-JS files) — pass;
+  `php -l` on game.php + gamelobby.php — pass; leading bytes confirmed `<?php`
+  with **no BOM** on both (see arch_php_entry_bom_trap); inline `<script>`
+  blocks of both pages re-parsed with PHP spans stubbed — the edited blocks
+  parse clean; esbuild parse on buildComplement.js; bundle-legacy.js
+  `extractScriptSources` dry-run — 137 scripts for game.php / 47 for
+  gamelobby.php, **no retired file still bundled and no missing include**;
+  full-tree grep — every surviving `shipWindowManager.`/`flightWindowManager`/
+  `systemInfo.` reference is either the React `renderer/shipWindowManager.js`
+  or inside a comment.
+- ⚠️ **Process trap hit during this pass** (worth not repeating): a PowerShell
+  helper function used `Write-Output` for progress *and* returned the new file
+  text — PS merges both into the return collection, so the diagnostics were
+  **prepended to gamelobby.php as literal text before `<?php`**. `php -l`
+  still passed (the text is just inline HTML), so the lint was a false
+  all-clear; it would have broken the page at runtime via output-before-
+  `header()`. Caught by reviewing `git diff` for *added* lines. Two lessons:
+  in PS, write the file inside the function and return nothing, and never
+  treat `php -l` as proof a PHP edit is correct — diff the additions.
+  Related: the Docker container serves a **stale baked-in copy** of the source
+  (not a bind mount), so `php -l /usr/src/fieryvoid/...` lints the OLD file —
+  `docker cp` the file to `/tmp` and lint that instead.
+- **Still outstanding** (unchanged by this pass): `yarn build` — both legacy
+  bundles shrink (3 files drop out) and UI.bundle is untouched by the deletion
+  itself; then the §7 full sweep above.
 
 **Stage 4 feedback round 1 (2026-07-18) — applied:**
 1. **Enemy Rolled status invisible during Movement (pre-existing bug, user

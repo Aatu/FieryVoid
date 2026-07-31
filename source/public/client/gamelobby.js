@@ -3145,31 +3145,11 @@ window.gamedata = {
 		//Stage 3: single enhancement entry point (markers + apply flag were reset
 		//above, so this re-applies the kept/changed enhancements to the rebuilt ship)
 		lobbyEnhancements.apply(ship);
-		/* superseded by lobbyEnhancements.apply above - delete in Stage 4:
-		if (ship.flight) {
-			lobbyEnhancements.setEnhancementsFighter(ship);
-		} else {
-			lobbyEnhancements.setEnhancementsShip(ship);
-		}
-		*/
 
 		//The React window renders from this same mutated ship object, so no
 		//destroy/rebuild dance is needed - just re-render if it is open.
 		var wasVisible = window.shipWindowManagerReact
 			&& window.shipWindowManagerReact.ships.indexOf(ship) !== -1;
-
-		/* Stage 3c - legacy window destroy/rebuild, superseded by the React
-		   re-render below. Delete in Stage 4.
-		// Systems were replaced with fresh baseShip clones, so the old window DOM
-		// references stale objects. Destroy it and null the reference so that
-		// it can be recreated correctly with the new ship.id that updateFleet assigns.
-		var wasVisible = false;
-		if (ship.shipStatusWindow) {
-			wasVisible = ship.shipStatusWindow.is(":visible");
-			ship.shipStatusWindow.remove();
-			ship.shipStatusWindow = null;
-		}
-		*/
 
 		$(".confirm").remove();
 		gamedata.updateFleet(ship);
@@ -3177,11 +3157,6 @@ window.gamedata = {
 		if (wasVisible) {
 			window.shipWindowManagerReact.update();
 		}
-		/* Stage 3c - legacy re-open, superseded above. Delete in Stage 4.
-		if (wasVisible) {
-			gamedata.onShipContextMenu(ship.phpclass, ship.faction, ship.id, true);
-		}
-		*/
 		//gamedata.populateFleetDropdown();
 	},
 
@@ -3701,42 +3676,6 @@ window.gamedata = {
 		//Ship-window redesign Stage 3: the React window (same stack as game.php).
 		window.shipWindowManagerReact.open(ship);
 		return false;
-
-		/* Stage 3c - superseded legacy window path. Delete in Stage 4.
-		//Create ship window the first time it is requested ship window
-		if (!ship.shipStatusWindow) {
-			if (ship.flight) {
-				ship.shipStatusWindow = flightWindowManager.createShipWindow(ship);
-			} else {
-				ship.shipStatusWindow = shipWindowManager.createShipWindow(ship);
-			}
-
-			shipWindowManager.setData(ship);
-		}
-
-		//
-		if (fleetList) {
-			ship.shipStatusWindow.find(".topbar .value.name").html("");
-			ship.shipStatusWindow.find(".topbar .valueheader.name").html(ship.name);
-			ship.shipStatusWindow.find(".topbar .value.shipclass").html(ship.shipClass);
-			gamedata.fleetWindowOpen = true;
-		} else {
-			ship.shipStatusWindow.find(".topbar .valueheader.name").html("");
-			gamedata.fleetWindowOpen = false;
-		}
-
-		//Now add Enhancements and update system info.
-		if (ship.flight) {
-			lobbyEnhancements.setEnhancementsFighter(ship);
-		} else {
-			lobbyEnhancements.setEnhancementsShip(ship);
-		}
-
-		shipWindowManager.setData(ship);
-
-		shipWindowManager.open(ship);
-		return false;
-		*/
 	},
 
 

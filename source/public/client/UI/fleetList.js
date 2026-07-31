@@ -603,10 +603,6 @@ window.fleetListManager = {
         //the guard exists to protect.
         if (ship.removed && ship.flight) {
             window.webglScene.customEvent('OpenShipWindowFor', { ship: ship });
-            //Legacy flight window, kept commented until the Stage 4 retirement sweep:
-            //if (typeof flightWindowManager !== 'undefined' && flightWindowManager.open) {
-            //    flightWindowManager.open(ship);
-            //}
             return;
         }
 

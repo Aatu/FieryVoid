@@ -411,12 +411,10 @@ window.shipManager = {
         if (shipManager.isDestroyed(ship)) return;
 
         if (ship.userid == gamedata.thisplayer && (gamedata.gamephase == 1 || gamedata.gamephase > 2)) {
-            //STAGE4-RETIRED shipWindowManager.open(ship);
             gamedata.selectShip(ship, false);
             gamedata.shipStatusChanged(ship);
             drawEntities();
         } else {
-            //STAGE4-RETIRED shipWindowManager.open(ship);
         }
         return false;
     },

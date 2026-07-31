@@ -53,27 +53,7 @@ window.ShipIcon = function () {
         this.ship = ship;
         this.consumeMovement(ship.movement);
         this.consumeEW(ship);
-        //STAGE4-RETIRED this.createShipWindow(ship);
     };
-
-    /* STAGE4-RETIRED legacy status-window re-link (the legacy window DOM no longer
-       exists on any page). Delete once the redesign is stable on live.
-    ShipIcon.prototype.createShipWindow = function (ship) {
-        // Lazy: build the (expensive) legacy DOM status window only when it is first
-        // opened (shipWindowManager.open / ensureShipWindow). At load and on each turn
-        // refresh we only re-link to an already-built window — if a ship's window has
-        // never been opened, ship.shipStatusWindow stays null and setData no-ops.
-        // This removes the per-ship DOM build that blocked first paint in large games.
-        var element = jQuery(".shipwindow.ship_" + ship.id);
-
-        if (element.length) {
-            ship.shipStatusWindow = element;
-            shipWindowManager.setData(ship);
-        } else {
-            ship.shipStatusWindow = null;
-        }
-    };
-    */
 
     ShipIcon.prototype.setPosition = function (position) {
         this.mesh.position.x = position.x;

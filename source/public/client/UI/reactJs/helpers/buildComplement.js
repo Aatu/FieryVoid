@@ -1,8 +1,7 @@
 /*Fighter/shuttle complement of a ship as display rows for the lobby datasheet
   (ShipNotesPanel) — the port of legacy shipwindow.js updateNotes lines 423-530
-  (SHIPWINDOW_REDESIGN_PLAN.md Stage 3b). The legacy copy becomes unreachable in the
-  lobby the moment the React window takes over, so this is the only live version;
-  the legacy file is deleted wholesale in Stage 4.
+  (SHIPWINDOW_REDESIGN_PLAN.md Stage 3b). The legacy file was deleted wholesale in
+  the Stage 4 retirement sweep, so this is the only version.
 
   Returns an array of strings, e.g. ["6 Reska Light Fighters", "2 Shuttles"].
   Read-only: never mutates ship or its systems (blueprints share static data —

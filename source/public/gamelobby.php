@@ -147,13 +147,8 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
         <script src="client/mathlib.js"></script>
 		<script src="client/hangarShared.js"></script>
 		<script src="client/UI/confirm.js"></script>
-        <!-- STAGE4-RETIRED legacy ship-window scripts (ship-window redesign Stage 4) - single-line
-             comments so bundle-legacy.js skips them; delete once the redesign is stable on live -->
-        <!-- STAGE4-RETIRED <script src="client/UI/shipwindow.js"></script> -->
         <script src="client/UI/fleetList.js"></script>
         <script src="client/UI/gameInfo.js"></script>
-        <!-- STAGE4-RETIRED <script src="client/UI/flightwindow.js"></script> -->
-        <!-- STAGE4-RETIRED <script src="client/UI/systemInfo.js"></script> -->
         <script src="client/model/ship.js"></script>
         <script src="client/model/shipSystem.js"></script>
         <script src="client/model/systemFactory.js"></script>
@@ -212,79 +207,6 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
                 },
             }
 
-            /* Stage 3c — legacy ship-window hover glue (fed UI/systemInfo.js from
-               the old DOM windows), superseded by the React SystemIcon →
-               window.uiEvents → React SystemInfo path. Delete in Stage 4.
-
-                mouseoverTimer: null,
-                mouseOutTimer: null,
-                mouseoverSystem: null,
-
-                onWeaponMouseover: function(e){
-
-                    if (weaponManager.mouseOutTimer != null){
-                        clearTimeout(weaponManager.mouseOutTimer);
-                        weaponManager.mouseOutTimer = null;
-                    }
-
-                    if (weaponManager.mouseoverTimer != null)
-                        return;
-
-                    weaponManager.mouseoverSystem = $(this);
-                    weaponManager.mouseoverTimer = setTimeout(weaponManager.doWeaponMouseOver, 150);
-                },
-
-                onWeaponMouseOut: function(e){
-                    if (weaponManager.mouseoverTimer != null){
-                        clearTimeout(weaponManager.mouseoverTimer);
-                        weaponManager.mouseoverTimer = null;
-                    }
-
-                    weaponManager.mouseOutTimer = setTimeout(weaponManager.doWeaponMouseout, 50);
-                },
-
-                doWeaponMouseOver: function(e){
-                    if (weaponManager.mouseoverTimer != null){
-                        clearTimeout(weaponManager.mouseoverTimer);
-                        weaponManager.mouseoverTimer = null;
-                    }
-
-                    systemInfo.hideSystemInfo();
-
-                    var t = weaponManager.mouseoverSystem;
-
-                    var id = t.data("shipid");
-
-                    //Added button to view actual details of purchased ships, so need ot make sure right ship is called for correct tooltip info - DK 30.3.25
-                    if(gamedata.fleetWindowOpen){
-                        var ship = gamedata.getFleetShipById(id);
-                    }else{
-                        var ship = gamedata.getShip(id);
-                    }
-
-                    var system = null;
-
-                    if (t.hasClass("fightersystem")){
-                        system = shipManager.systems.getFighterSystem(ship, t.data("fighterid"), t.data("id"));
-                    }else{
-                        system = shipManager.systems.getSystem(ship, t.data("id"));
-                    }
-
-                    systemInfo.showSystemInfo(t, system, ship);
-                },
-
-                doWeaponMouseout: function(){
-                    if (weaponManager.mouseOutTimer != null){
-                        clearTimeout(weaponManager.mouseOutTimer);
-                        weaponManager.mouseOutTimer = null;
-                    }
-
-                    systemInfo.hideSystemInfo();
-
-                    weaponManager.mouseoverSystem = null;
-                },
-            */
-
             $(function(){
                 window.shipManager.movement.isRolled = function(ship)
                 {
@@ -292,14 +214,6 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
                 }
             });
 
-
-            /* STAGE4-RETIRED (ship-window redesign Stage 4): the legacy
-               window.shipWindowManager no longer exists (UI/shipwindow.js not
-               loaded), so this stub would throw. Delete once stable on live.
-            $(function(){
-                window.shipWindowManager.addEW = function(){};
-            });
-            */
 
             $(function(){
                 /* Lobby: your own purchased mines are always identified — there is
@@ -1003,12 +917,6 @@ $optionsUsed = '';
     <div id="shipWindowsReact" style="position:fixed; inset:0; pointer-events:none; z-index:10001;"></div>
     <div id="systemInfoReact" style="position:fixed; inset:0; pointer-events:none; z-index:20000;"></div>
 
-    <!-- STAGE4-RETIRED legacy UI/systemInfo.js tooltip container (ship-window redesign
-         Stage 4; the React SystemInfo mounts in #systemInfoReact above) - delete once stable on live
-    <div id="systemInfo">
-		<div class="name"><span class="name header">test</span></div>
-		<div class="datacontainer"></div>
-	</div> -->
                     
     <div id="lobbyTeamTemplate" style="display:none;">
         <div class="team-section" data-team-id="">
@@ -1130,198 +1038,6 @@ $optionsUsed = '';
         </div>
         
     </div>
-
-    <?php /* STAGE4-RETIRED legacy ship-window HTML templates (ship-window redesign Stage 4).
-             Never emitted (if false); delete this whole block once the redesign is stable on live. */
-    if (false): ?>
-    <div id="shipwindowtemplatecontainer" style="display:none;">
-        <div class="shipwindow ship">
-            <div class="topbar">
-                <span class="valueheader name">Name:</span><span class="value name">name here</span>
-                <span class="valueheader shipclass">Class:</span><span class="value shipclass">ship type class here</span>
-                <div class="close"></div>
-            </div>
-
-            <div id="shipSection_3" class="shipSection">
-                <table></table>
-            </div>
-
-            <table class="divider">
-                <tr>
-                    <td class="col1">
-                        <div class="icon"><img src="" alt="" border="" width="120" height="120"></div>
-                        <!--<div class="notes"></div> -->
-                    </td>                
-                    <td class="col2">
-                        <div id="shipSection_1" class="shipSection" style="margin-top: 15px">
-                            <table></table>
-                        </div>
-                        <div id="shipSection_0" class="shipSection primary" style="margin-top: 25px">
-                            <table></table>
-                        </div>
-                        <div id="shipSection_2" class="shipSection" style="margin-bottom: 20px">
-                            <table></table>
-                        </div>
-                    </td>
-                    <td class="col3">
-			<div class="notes"></div> <!-- Marcin Sawicki - here more readable -->
-                        <div class="EW" style="display:none;"><!-- Marcin Sawicki - at fleet selection EW window is useless! -->
-                            <div class="ewheader"><span class="header">ELECTRONIC WARFARE</span></div>
-                            <div class="EWcontainer">
-                                <div class="ewentry"><span class="valueheader">Defensive:</span><span class="value DEW"></span></div>
-                                <div class="ewentry CCEW"><span class="valueheader">Close combat:</span><span class="value CCEW"></span><div class="button1" data-ew="CCEW"></div><div class="button2" data-ew="CCEW"></div></div>
-                                <div class="ewentry BDEW"><span class="valueheader">Area defence:</span><span class="value BDEW"></span><div class="button1" data-ew="BDEW"></div><div class="button2" data-ew="BDEW"></div></div>
-                            </div>
-                        </div>
-                        <div id="shipSection_4" class="shipSection">
-                            <table></table>
-                        </div>
-                    </td>
-                </tr>
-            </table>
-            <div class="hitChartDiv"></div>     
-        </div>
-
-
-        <div class="shipwindow base" style="width: 450px;">
-            <div class="topbar">
-                <span class="valueheader name">Name:</span><span class="value name">name here</span>
-                <span class="valueheader shipclass">Class:</span><span class="value shipclass">ship type class here</span>
-                <div class="close"></div>
-            </div>
-
-            <div id="shipSection_3" class="shipSection" style="left: 0px; top: 180px">
-                <table id="31" style="border-bottom: 8px solid #7e9dc7"></table>
-                <table id="32"></table>
-            </div>
-
-            <table class="divider">
-                <tr>
-                    <td class="col1" style="width: 33%">
-                        <div class="icon" style="margin:auto;"><img src="" alt="" border="" width="120" height="120"></div>
-                    </td>                
-                    <td class="col2" style="width: 33%; border-left: 3px dotted #7e9dc7; border-right: 3px dotted #7e9dc7;">
-                        <div id="shipSection_1" class="shipSection" style="margin-top: 20px;">
-                            <table></table>
-                        </div>
-                        <div id="shipSection_0" class="shipSection primary" style="border-top: 3px dotted #7e9dc7; border-bottom: 3px dotted #7e9dc7; margin-top: 35px;">
-                            <table></table>
-                        </div>
-                        <div id="shipSection_2" class="shipSection" style="margin-top: 35px;">
-                            <table></table>
-                        </div>
-                    </td>
-                    <td class="col3" style="width: 33%">
-			<div class="notes"></div> <!-- Marcin Sawicki - here more readable -->
-                        <div class="EW" style="display:none;"><!-- Marcin Sawicki - at fleet selection EW window is useless! -->
-                            <div class="ewheader"><span class="header">ELECTRONIC WARFARE</span></div>
-                            <div class="EWcontainer">
-                                <div class="ewentry"><span class="valueheader">Defensive:</span><span class="value DEW"></span></div>
-                                <div class="ewentry CCEW"><span class="valueheader">Close combat:</span><span class="value CCEW"></span><div class="button1" data-ew="CCEW"></div><div class="button2" data-ew="CCEW"></div></div>
-                                <div class="ewentry BDEW"><span class="valueheader">Area defence:</span><span class="value BDEW"></span><div class="button1" data-ew="BDEW"></div><div class="button2" data-ew="BDEW"></div></div>
-                            </div>
-                        </div>
-                        <div id="shipSection_4" class="shipSection" style="right: 75px; top: 180px">
-                <table id="41" style="border-bottom: 8px solid #7e9dc7"></table>
-                <table id="42"></table>
-                        </div>
-                    </td>
-                </tr>
-            </table>
-            <div class="hitChartDiv"></div>     
-        </div>
-
-        <!--
-        <div class="shipwindow base">
-            <div class="topbar">
-                <span class="valueheader name">Name:</span><span class="value name">name here</span>
-                <span class="valueheader shipclass">base:</span><span class="value shipclass">ship type class here</span>
-                <div class="close"></div>
-            </div>
-
-            <div id="shipSection_3" class="shipSection">
-                <table id="31"></table>
-                <table id="32"></table>
-            </div>
-
-            <table class="divider">
-                <tr>
-                    <td class="col1">
-                        <div class="icon"><img src="" alt="" border="" width="120" height="120"></div>
-                        <div class="notes"></div>
-                    </td>                
-                    <td class="col2">
-                        <div id="shipSection_1" style="margin-top: 10px;" class="shipSection">
-                            <table></table>
-                        </div>
-                        <div id="shipSection_0" class="shipSection primary" style="margin-top: 10px;">
-                            <table></table>
-                        </div>
-                        <div id="shipSection_2" style="margin-top: 10px;" class="shipSection">
-                            <table></table>
-                        </div>
-                    </td>
-                    <td class="col3">
-                        <div class="EW">
-                            <div class="ewheader"><span class="header">ELECTRONIC WARFARE</span></div>
-                            <div class="EWcontainer">
-                                <div class="ewentry"><span class="valueheader">Defensive:</span><span class="value DEW"></span></div>
-                                <div class="ewentry CCEW"><span class="valueheader">Close combat:</span><span class="value CCEW"></span><div class="button1" data-ew="CCEW"></div><div class="button2" data-ew="CCEW"></div></div>
-                                <div class="ewentry BDEW"><span class="valueheader">Area defence:</span><span class="value BDEW"></span><div class="button1" data-ew="BDEW"></div><div class="button2" data-ew="BDEW"></div></div>
-                            </div>
-                        </div>
-                        <div id="shipSection_4" class="shipSection">
-                            <table id="41"></table>
-                            <table id="42" style="margin-top: 10px"></table>
-                        </div>
-                    </td>
-                </tr>
-            </table>
-            <div class="hitChartDiv"></div>     
-        </div>-->
-
-
-
-
-        <div class="shipwindow flight">
-            <div class="topbar">
-                <span class="valueheader name">Name:</span><span class="value name">name here</span>
-                <span class="valueheader shipclass">Class:</span><span class="value shipclass"></span>
-                <div class="close"></div>
-            </div>
-
-            <table class="divider">
-                <tr>
-                    <td class="fightercontainer 0"></td>
-                   <!---             <td class="fightercontainer 1"></td>
-                    <td class="fightercontainer 2"></td>
-                </tr>
-                <tr>
-                    <td class="fightercontainer 3"></td>
-                    <td class="fightercontainer 4"></td>
-                    <td class="fightercontainer 5"></td>        -->
-			<td>
-				<div class="notes"></div>
-			</td>
-                </tr>
-            </table>
-        </div>
-
-        <div class="shipwindow heavyfighter">
-            <div class="topbar">
-                <span class="valueheader name">Name:</span><span class="value name">name here</span>
-                <span class="valueheader shipclass">Class:</span><span class="value shipclass"></span>
-                <div class="close"></div>
-            </div>
-                    <table class="divider">
-                            <tr>
-                                    <td class="fightercontainer"></td>
-                            </tr>
-                    </table>
-        </div>
-
-    </div>
-    <?php endif; /* STAGE4-RETIRED legacy ship-window templates */ ?>
 
     <div class="missileSelectItem" style="display:none">
         <span>

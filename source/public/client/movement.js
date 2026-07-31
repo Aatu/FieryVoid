@@ -1904,8 +1904,8 @@ shipManager.movement = {
 
     /* ── Ship-window redesign Stage 2b (SHIPWINDOW_REDESIGN_PLAN.md §4.3) ──
        The four functions below moved here from the legacy shipWindowManager
-       (UI/shipwindow.js, originals left there commented out until the Stage 4
-       retirement sweep): they are movement logic, not window styling — they
+       (UI/shipwindow.js, deleted in the Stage 4 retirement sweep): they are
+       movement logic, not window styling — they
        mutate ship.movement and drive the React ShipThrust panel through the
        "AssignThrust" custom event. The legacy-DOM styling the originals also
        performed (thruster/assignThrust classes on the legacy window DOM,
@@ -2016,8 +2016,6 @@ shipManager.movement = {
 
         system.thrustwasted += wasted;
 
-        //STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, system);
-        //STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "engine"));
 
         return true;
     },
@@ -2074,8 +2072,6 @@ shipManager.movement = {
 
         system.thrustwasted -= wasted;
 
-        //STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, system);
-        //STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "engine"));
 
         return true;
     },
@@ -2370,7 +2366,6 @@ shipManager.movement = {
                         toDo--;
                     }
 
-                    //STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, thrusters[j]);
                     if (toDo < 1) {
                         break;
                     }

@@ -27,7 +27,6 @@ window.weaponManager = {
         if (gamedata.isMyShip(ship)) {
 
             system.changeFiringMode();
-            //STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, system);
 
             webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 
@@ -47,7 +46,6 @@ window.weaponManager = {
 
         if (gamedata.isMyShip(ship)) {
             system.setFiringMode(mode);
-            //STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, system);
             webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
         }
     },
@@ -99,127 +97,11 @@ window.weaponManager = {
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
     },
 
-    //STAGE4-RETIRED dead legacy-DOM handler: only ever bound by UI/shipwindow.js
-    //(no longer loaded). Line comments because of the inner block comment.
-    //Delete once the redesign is stable on live.
-    //onHoldfireClicked: function onHoldfireClicked(e) {
-    //    e.stopPropagation();
-    //    var shipwindow = $(".shipwindow").has($(this));
-    //    var systemwindow = $(".system").has($(this));
-    //    var ship = gamedata.getShip(shipwindow.data("ship"));
-    //    var system = shipManager.systems.getSystem(ship, systemwindow.data("id"));
-    //
-    //    if (gamedata.gamephase != 3 && !system.ballistic) return;
-    //
-    //    if (gamedata.gamephase != 1 && system.ballistic) return;
-    //
-    //    if (gamedata.gamephase != 5 && system.preFires) return;
-    //
-    //    if (ship.userid == gamedata.thisplayer) {
-    //        weaponManager.cancelFire(ship, system);
-    //    }
-    //    /* Cleaned 19.8.25 - DK
-    //    if (ship.userid == gamedata.thisplayer) {
-    //        if (!system.duoWeapon) {
-    //            weaponManager.cancelFire(ship, system);
-    //        } else {
-    //            systemwindow.removeClass("duofiring");
-    //
-    //            for (var i in system.weapons) {
-    //                var duoweapon = system.weapons[i];
-    //
-    //                if (weaponManager.hasFiringOrder(ship, duoweapon)) {
-    //                    weaponManager.cancelFire(ship, duoweapon);
-    //                }
-    //            }
-    //        }
-    //    }
-    //    */
-    //},
-
     cancelFire: function cancelFire(ship, system) {
         weaponManager.removeFiringOrder(ship, system);
         ballistics.updateList();
-        //STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, system);
         gamedata.shipStatusChanged(ship);
     },
-
-    /* STAGE4-RETIRED dead legacy-DOM hover glue: these handlers were only ever bound
-       by UI/shipwindow.js / UI/flightwindow.js (no longer loaded), and doWeaponMouseOver/
-       doWeaponMouseout reference the retired legacy systemInfo. The React SystemIcon →
-       uiEvents path replaced all of it. Delete once the redesign is stable on live.
-    onWeaponMouseover: function onWeaponMouseover(e) {
-        if (weaponManager.mouseOutTimer != null) {
-            clearTimeout(weaponManager.mouseOutTimer);
-            weaponManager.mouseOutTimer = null;
-        }
-
-        if (weaponManager.mouseoverTimer != null) return;
-
-        var id = $(this).data("shipid");
-        weaponManager.currentShip = gamedata.getShip(id);
-
-        if ($(this).hasClass("fightersystem")) {
-            weaponManager.currentSystem = shipManager.systems.getFighterSystem(weaponManager.currentShip, $(this).data("fighterid"), $(this).data("id"));
-        } else {
-            weaponManager.currentSystem = shipManager.systems.getSystem(weaponManager.currentShip, $(this).data("id"));
-        }
-
-        var targetElement = $(this);
-
-        weaponManager.mouseoverSystem = targetElement;
-
-        weaponManager.mouseoverTimer = setTimeout(weaponManager.doWeaponMouseOver, 150);
-    },
-
-    onWeaponMouseoverDuoSystem: function onWeaponMouseoverDuoSystem(e) {
-        // ignore this. We've already entered the parent of this duosystem
-    },
-
-    onWeaponMouseOutDuoSystem: function onWeaponMouseOutDuoSystem(e) {
-        // ignore this. We've already entered the parent of this duosystem
-    },
-
-    onWeaponMouseOut: function onWeaponMouseOut(e) {
-        if (weaponManager.mouseoverTimer != null) {
-            clearTimeout(weaponManager.mouseoverTimer);
-            weaponManager.mouseoverTimer = null;
-        }
-
-        weaponManager.mouseOutTimer = setTimeout(weaponManager.doWeaponMouseout, 50);
-    },
-
-    doWeaponMouseOver: function doWeaponMouseOver(e) {
-        if (weaponManager.mouseoverTimer != null) {
-            clearTimeout(weaponManager.mouseoverTimer);
-            weaponManager.mouseoverTimer = null;
-        }
-
-        systemInfo.hideSystemInfo();
-
-        if (weaponManager.mouseoverSystem == null) {
-            return;
-        }
-
-        var weapon = shipManager.systems.initializeSystem(weaponManager.currentSystem);
-        webglScene.customEvent('SystemMouseOver', {
-            ship: weaponManager.currentShip,
-            system: weapon,
-            element: weaponManager.mouseoverSystem
-        });
-    },
-
-    doWeaponMouseout: function doWeaponMouseout() {
-        if (weaponManager.mouseOutTimer != null) {
-            clearTimeout(weaponManager.mouseOutTimer);
-            weaponManager.mouseOutTimer = null;
-        }
-
-        systemInfo.hideSystemInfo();
-        weaponManager.mouseoverSystem = null;
-        webglScene.customEvent('SystemMouseOut');
-    },
-    STAGE4-RETIRED end */
 
     unSelectWeapon: function unSelectWeapon(ship, weapon) {
         for (var i = gamedata.selectedSystems.length - 1; i >= 0; i--) {
@@ -237,7 +119,6 @@ window.weaponManager = {
             */
         }
 
-        //STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, weapon);
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: weapon });
     },
 
@@ -584,12 +465,10 @@ window.weaponManager = {
                             ship: ship,
                             weapon: ship.systems[i].systems[b].weapon
                         });
-                        //STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, ship.systems[i].systems[b].weapon);
                     }
                 }
             }
         }
-        //STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, weapon);
         webglScene.customEvent('WeaponSelected', { ship: ship, weapon: weapon });
         //Moved to AFTER onWeaponSelected() in Fire phase strategy, to prevent prevent error when selecting a weapon and friendly fighter flight is selected unit - DK 6.25        
         gamedata.selectedSystems.push(weapon);
@@ -3633,7 +3512,6 @@ window.weaponManager = {
             }
         }
 
-        //STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, system);
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
     },
 

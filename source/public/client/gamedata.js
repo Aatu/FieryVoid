@@ -436,7 +436,6 @@ window.gamedata = {
     },
 
     shipStatusChanged: function shipStatusChanged(ship) {
-        //STAGE4-RETIRED shipWindowManager.setData(ship);
         gamedata.checkGameStatus();
         window.webglScene.receiveGamedata(this);
     },
