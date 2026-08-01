@@ -2155,6 +2155,18 @@ class ChameleonSensors extends ElintScanner implements SpecialAbility{
 		if ($immediate) $this->revealedTeams[] = (int)$teamId; //effective at once, in this load too
 	}
 
+	/*D3a - the phantom would die while the real ship flies on. A destroyed hull that keeps
+	  manoeuvring and shooting is a worse tell than anything else in this plan, so the deception
+	  ends instead, immediately and for every enemy team. Called from BaseShip after a mirrored
+	  allocation (D3); the caller does the clamping, this writes the reveal.*/
+	public function revealOnDivergentDestruction($gamedata, $reason = 'Simulacrum destroyed'){
+		$ship = $this->getUnit();
+		if ($ship === null) return;
+		foreach ($this->getEnemyTeams($gamedata, $ship) as $teamId){
+			$this->revealTo($gamedata, $ship, $teamId, true, $reason);
+		}
+	}
+
 	/*Have ALL enemy teams seen through this deception? Once they have there is nothing left to
 	  protect, so the toggle button is withdrawn (in a 1v1 this is simply "revealed").*/
 	public function isFullyRevealed($gamedata){

@@ -796,10 +796,11 @@ class BaseShip {
 
 		//The phantom is the sheet the enemy reads; the blueprint stays pristine because every
 		//plausibility threshold is measured against it.
-		$sheet = ($this->chameleonPhantom !== null) ? $this->chameleonPhantom : $blueprint;
+		$sheet = $this->getChameleonSheet();
 
 		$this->armChameleonSimulacrumWeapons($sheet);
 		$disguised = $sheet->stripForJson();
+		$this->reassignChameleonSheetIds($disguised);
 
 		//--- identity: needed to target it, team it and talk about it at all
 		$disguised->id     = $this->id;
@@ -848,6 +849,31 @@ class BaseShip {
 		unset($disguised->enhancementTooltip);
 
 		return $disguised;
+	}
+
+	/*The phantom's rows are stored under shipid = -realId (D2), which is a PERSISTENCE detail: it is
+	  how two sheets share one tac_damage table without colliding. The client must never see it.
+
+	  The combat log resolves each damage row with gamedata.getShip(d.shipid) before it can name the
+	  system that was hit (combatLog.js:290), and there is no ship with a negative id on the page -
+	  so an enemy who fired at a disguised ship got NO combat log entry for their own shot at all
+	  (found in playtest, game 4273). From the enemy's point of view this damage belongs to the ship
+	  they can see, which wears the real id.
+
+	  Safe to rewrite in place: ShipSystem::stripForJson already hands back CLONES of the damage and
+	  critical entries, so the phantom's own objects - the ones that get persisted - are untouched.*/
+	private function reassignChameleonSheetIds($disguised)
+	{
+		if (!isset($disguised->systems) || !is_array($disguised->systems)) return;
+
+		foreach ($disguised->systems as $system){
+			if (!empty($system->damage)){
+				foreach ($system->damage as $entry) $entry->shipid = $this->id;
+			}
+			if (!empty($system->criticals)){
+				foreach ($system->criticals as $crit) $crit->shipid = $this->id;
+			}
+		}
 	}
 
 	/*A ship's DEFAULT name is generated from its hull - "Dargan Strike Cruiser #2" - so an untouched
@@ -1403,6 +1429,22 @@ class BaseShip {
 		$phantom = new $cls(-(int)$this->id, $this->userid, $this->name, $this->slot);
 		$phantom->team = $this->team;
 
+		/*⚠️ THE PHANTOM MUST CARRY THE REAL SHIP'S MOVEMENT, and it is not optional.
+		  Every geometric question a ship is asked reads $this->movement: getFacingAngle(),
+		  getCoPos(), getBearingOnUnit(), Movement::isRolled(). getFacingAngle() returns 0 for an
+		  empty movement list rather than failing, so a phantom without this resolves every incoming
+		  shot as though it were facing due north at the origin - and quietly picks a plausible but
+		  WRONG hit section. That is how a laser that hit the real hull's starboard side landed on
+		  the simulacrum's aft (found in playtest, game 4273).
+		  The phantom occupies the same hex, facing the same way, by definition: it IS this ship as
+		  far as the enemy is concerned, and position and facing are the two things a disguise can
+		  never hide. Assigned after the movement load (getMovesForShips runs long before
+		  getChameleonPhantoms) and never written back - phantoms are not in $gamedata->ships, so no
+		  movement persistence sweep can see this.*/
+		$phantom->movement = $this->movement;
+		$phantom->rolled   = $this->rolled;
+		$phantom->rolling  = $this->rolling;
+
 		$this->chameleonPhantom = $phantom;
 		return $this->chameleonPhantom;
 	}
@@ -1432,6 +1474,149 @@ class BaseShip {
 			if (is_array($abilities)) {
 				$phantom->enabledSpecialAbilities = array_merge($phantom->enabledSpecialAbilities, $abilities);
 			}
+		}
+	}
+
+	/*The sheet an enemy reads: the phantom once one has been built, otherwise the pristine blueprint.
+	  One accessor so every masking site agrees about which object is "the simulacrum" - the fallback
+	  matters on any load that never reached DBManager::getChameleonPhantoms (POST-side rebuilds),
+	  where serving a pristine hull is safe and serving nothing is not.*/
+	public function getChameleonSheet()
+	{
+		if ($this->chameleonPhantom !== null) return $this->chameleonPhantom;
+		return $this->getChameleonBlueprint();
+	}
+
+	/*D4 - "resolve the fire using the simulated ship's defense ratings." Returns the SIMULACRUM's
+	  defence profile against a shot from $shooter, or null when this ship is not disguised from
+	  them - which is every shot in almost every game, and the only cost that path pays.
+
+	  The BEARING stays the real ship's: which way a hull points is observable, and the phantom has
+	  no movement of its own to derive one from. Only the profile VALUE comes off the fake sheet.
+	  doGetHitSectionBearing() is what makes that split possible - it takes a bearing and needs no
+	  position at all.
+
+	  Without this the server resolves against the real profile while the enemy's client previews
+	  against the fake one (finding #10), so predicted and actual hit chance disagree on every shot
+	  at a disguised ship - the one thing a player is guaranteed to notice.
+
+	  $launchPos is the ballistic firing hex; direct fire passes null and bears on the shooter.*/
+	public function getDisguisedProfileFor($shooter, $launchPos = null)
+	{
+		if (!TacGamedata::$chameleonPresent) return null;
+		if ($shooter === null) return null;
+		if (!$this->isChameleonDisguisedFrom($shooter->team)) return null;
+
+		$sheet = $this->getChameleonSheet();
+		if ($sheet === null) return null;
+
+		$relativeBearing = ($launchPos !== null)
+			? $this->getBearingOnPos($launchPos)
+			: $this->getBearingOnUnit($shooter);
+
+		$loc = $sheet->doGetHitSectionBearing($relativeBearing);
+		if (!is_array($loc) || !isset($loc["profile"])) return null;
+		return $loc["profile"];
+	}
+
+	/*D4, extended to DEW. Returns the defensive EW the SIMULACRUM appears to be running against a
+	  shooter who still believes the deception, or null when this ship is not disguised from them.
+
+	  Why this is needed at all: the client never reads the stored DEW entry. ew.getDefensiveEW() is
+	  an alias for getEWLeft() (ew.js:86/252), which is "sensor capacity MINUS everything spent on
+	  something else" - and the capacity an enemy sees belongs to the simulacrum. For an undisguised
+	  ship the two agree, because a player always allocates their whole suite; for a disguised one
+	  they cannot. Measured in playtest: a Dargan running OEW 8 + DEW 2 (10 of 10) inside a 9-EW
+	  Demos displayed DEW 1 to the enemy while the server resolved against 2, and the hit chance
+	  disagreed 103% vs 99% on every shot.
+
+	  This mirrors getEWLeft() term for term: the simulacrum's scanner output, minus the REAL non-DEW
+	  allocations (which the enemy receives unmasked and the client counts the same way). The boost
+	  term getEWLeft() adds for EW-boosted systems is zero on both sides, since the enemy's copy of
+	  this ship carries the simulacrum's systems with no power allocated to them.
+
+	  Consequence worth knowing: disguising as a smaller-sensor hull genuinely costs defensive EW,
+	  and a larger-sensor hull genuinely gains it. That is the same bargain D4 already strikes on the
+	  defence profile - the enemy resolves against the ship they believe they are shooting at.*/
+	public function getDisguisedDEWFor($shooter, $turn)
+	{
+		if (!TacGamedata::$chameleonPresent) return null;
+		if ($shooter === null) return null;
+		if (!$this->isChameleonDisguisedFrom($shooter->team)) return null;
+
+		$sheet = $this->getChameleonSheet();
+		if ($sheet === null) return null;
+
+		$ceiling = EW::getScannerOutput($sheet, $turn);
+		$spent   = $this->getAllEWExceptDEW($turn);
+		return max(0, $ceiling - $spent);
+	}
+
+	/*D9 - a called shot fired AT a disguised ship names a system on the simulacrum, and both hulls
+	  number their systems 0..N, so the raw id resolves on the real ship too: getSystemById()
+	  succeeds and lands the called shot on an arbitrary real system (finding #16). Game 4273 has
+	  phantom id 16 = Structure against real id 16 = Thruster, so this is not theoretical.
+
+	  Translate by what the shooter can actually SEE they aimed at - the system's class, then its
+	  display name. With no counterpart on the real hull the shot resolves as an ordinary,
+	  uncalled hit (-1) rather than landing somewhere arbitrary: the enemy called a system this ship
+	  does not have, and the sensible outcome is that the call simply fails.
+
+	  Returns the translated id. Callers keep the original for the phantom's own allocation, where
+	  it is valid by construction.*/
+	public function translateChameleonCalledId($calledid)
+	{
+		if ($calledid == -1) return -1;
+
+		$sheet = $this->getChameleonSheet();
+		if ($sheet === null) return $calledid;
+
+		$called = $sheet->getSystemById($calledid);
+		if ($called === null) return -1;
+
+		$wantedClass = get_class($called);
+		foreach ($this->systems as $system){
+			if (get_class($system) === $wantedClass) return $system->id;
+		}
+		foreach ($this->systems as $system){
+			if ($system->displayName === $called->displayName) return $system->id;
+		}
+		return -1;
+	}
+
+	/*D3a - divergent destruction. The two sheets have different armour and structure totals, so the
+	  phantom can die before the real ship does. A wreck that keeps flying, manoeuvring and shooting
+	  is a worse tell than the truth, so the deception ends there and then.
+
+	  The fatal entries are CLAMPED rather than left standing: the phantom must survive as a
+	  coherent sheet for the rest of this turn's resolution (later shots in the same volley still
+	  allocate against it), and the enemy learns the truth from the reveal instead. Undoing the
+	  destroyed flag is safe because a phantom rolls no criticals (D3c), so its state is a pure
+	  function of its damage list.
+
+	  The converse - the real ship dying first - is moot: destruction ends the deception anyway.*/
+	public function checkChameleonDivergentDestruction($gamedata)
+	{
+		if ($this->chameleonPhantom === null) return;
+		if ($this->isDestroyed()) return;                    //real ship dead: nothing left to protect
+		if (!$this->chameleonPhantom->isDestroyed()) return;
+
+		$clamped = false;
+		foreach ($this->chameleonPhantom->systems as $system){
+			foreach ($system->damage as $entry){
+				if (!$entry->destroyed) continue;
+				if ($entry->turn != $gamedata->turn) continue; //only this turn's kill is ours to undo
+				$entry->destroyed = false;
+				$entry->updated = true;
+				$clamped = true;
+			}
+			$system->destroyed = $system->isDestroyed();
+		}
+		if (!$clamped) return;
+
+		$css = $this->getChameleonSensors();
+		if ($css instanceof ChameleonSensors){
+			$css->revealOnDivergentDestruction($gamedata);
 		}
 	}
 

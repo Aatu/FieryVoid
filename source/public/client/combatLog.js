@@ -288,6 +288,14 @@ window.combatLog = {
                     }
 
                     var system = shipManager.systems.getSystem(gamedata.getShip(d.shipid), d.systemid);
+                    // A damage row whose ship or system cannot be resolved on this page must not be
+                    // able to kill the whole log: sufferedCritThisTurn() dereferences .criticals
+                    // immediately, so one unresolvable row threw a TypeError out of logFireOrders
+                    // and the viewer lost EVERY entry, including their own shots. Mirrors the null
+                    // guards on the server-side damage/critical loaders. (Seen with Chameleon
+                    // phantom rows, which are stored under a negative shipid that no client knows —
+                    // fixed at source in stripForJsonDisguised, guarded here as well.)
+                    if (!system) continue;
                     var damageDone = d.damage - d.armour;
                     var damageStopped = d.armour;
                     /*healing is up, so negative values are just fine

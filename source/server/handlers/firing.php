@@ -885,6 +885,14 @@ public static function firePreFiringWeapons($gamedata){
             }
         }
 
+        //Chameleon Sensor Suite (D9): a called shot AT a disguised ship names a system on the
+        //simulacrum. Both hulls number their systems 0..N, so the raw id resolves on the real ship
+        //too and lands the call on an arbitrary real system (finding #16). Translate ONCE, here,
+        //before any hit-chance maths - four separate places downstream do
+        //$target->getSystemById($fire->calledid) and none of them can tell a translated id from a
+        //raw one.
+        self::translateChameleonCalledShots($gamedata);
+
         //Uncontrolled Hunter-Killers that ended movement co-located with an enemy ram it
         //(no player to submit the ram order). Done before ram orders are gathered below.
         //$dbManager is threaded through so each automated ram FireOrder is persisted
@@ -933,7 +941,42 @@ public static function firePreFiringWeapons($gamedata){
             $weapon->calculateHitBase($gamedata, $fireOrder);
         }
 
-    }//endof function prepareFiring	
+    }//endof function prepareFiring
+
+    /*Chameleon Sensor Suite (D9). Rewrites every called shot aimed at a ship the SHOOTER still
+      sees as somebody else, so that a raw simulacrum system id never reaches getSystemById() on
+      the real hull. Runs once per resolution, before hit chances are calculated.
+
+      The original id is kept on the order as $chameleonCalledId: it is the id the shooter actually
+      aimed at, it is valid on the phantom by construction, and the mirrored allocation (D3) uses it
+      to aim pass 2 - so the enemy sees their called shot land where they called it, on the sheet
+      they can see.
+
+      Behind the per-load gate, so an ordinary game does not walk its fire orders for this at all.*/
+    private static function translateChameleonCalledShots($gamedata)
+    {
+        if (!TacGamedata::$chameleonPresent) return;
+
+        foreach ($gamedata->ships as $ship){
+            foreach ($ship->getAllFireOrders($gamedata->turn) as $fire){
+                if ($fire->calledid == -1) continue;
+                if ($fire->targetid == -1) continue;
+
+                $target = $gamedata->getShipById($fire->targetid);
+                if ($target === null) continue;
+                if (empty($target->chameleonDisguiseClass)) continue;
+
+                $shooter = $gamedata->getShipById($fire->shooterid);
+                if ($shooter === null) continue;
+                //Only a shooter who still believes it aimed at the simulacrum. A team that has seen
+                //through the deception is looking at the real hull and called a real system.
+                if (!$target->isChameleonDisguisedFrom($shooter->team)) continue;
+
+                $fire->chameleonCalledId = $fire->calledid;
+                $fire->calledid = $target->translateChameleonCalledId($fire->calledid);
+            }
+        }
+    }
 	
 	
 

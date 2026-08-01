@@ -240,6 +240,12 @@ class FireOrder{
     public $numInterceptors = 0; //number of intercepting weapons assigned
     public $resolutionOrder = -1; //actual order in which shot was resolved
 	public $priority = 0; //fire order priority, temporary only during fire resolution
+	/*Chameleon Sensor Suite (D9): the called-shot id AS THE SHOOTER AIMED IT, i.e. a system id on
+	  the simulacrum, kept when calledid is translated onto the real ship. The mirrored allocation
+	  (D3) aims pass 2 with this, since it is valid on the phantom by construction. Transient and
+	  server-side only - it never reaches the client or the database, and a POST-side rebuild drops
+	  it, which is correct: translation happens fresh on every resolution.*/
+	public $chameleonCalledId = null;
     
     function __construct(
         $id,

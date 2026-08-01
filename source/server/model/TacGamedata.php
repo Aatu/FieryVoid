@@ -370,14 +370,31 @@ class TacGamedata {
             }
         }
 
+        /*Chameleon phantom sheets (D2/D3). They are deliberately NOT in $this->ships, so the sweep
+          above cannot see them and their mirrored damage would be allocated in memory, rendered
+          once, and then silently lost on the next load. The plan assumed the existing machinery
+          carried them because assignDamageReturnOverkill stamps $target->id - it does, and the
+          negative id persists correctly, but only if the entry reaches this list in the first
+          place. Gated, so an ordinary game does not walk its ships twice.*/
+        if (self::$chameleonPresent){
+            foreach ($this->ships as $ship){
+                if ($ship->chameleonPhantom === null) continue;
+                foreach ($ship->chameleonPhantom->systems as $system){
+                    foreach ($system->damage as $damage){
+                        if ($damage->updated == true) $list[] = $damage;
+                    }
+                }
+            }
+        }
+
         return $list;
 
     }
 
-	
 
 
-    public function addDamageEntry($damage){    
+
+    public function addDamageEntry($damage){
         $ship = $this->getShipById($damage->shipid);
         $ship->addDamageEntry($damage);    
     }
