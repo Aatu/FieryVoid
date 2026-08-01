@@ -25,11 +25,15 @@
             if ($result === true){
                 $userid = Manager::authenticatePlayer($user, $passnew);
 		
-                if ($userid != false){
+                // Only an array means authenticated — 'USER_NOT_FOUND' and
+                // 'WRONG_PASSWORD' are truthy strings.
+                if (is_array($userid)){
  			$error = "Password change successful!";
  			$user = '';
  			$passold = '';
  			$_POST["user"] = '';
+                }else{
+ 			$error = "Password was changed, but re-checking it failed. Please try logging in.";
                 }
             }else if ($result === null){
                 $error = "An internal server error occurred!";

@@ -51,8 +51,15 @@ class ThunderboltStarfuryAM extends FighterFlight{
 			$this->enhancementOptionsEnabled[] = 'AMMO_DUM';//add enhancement options for missiles - Class-FD
 
             $fighter->addFrontSystem(new GatlingPulseCannon(330, 30));
-			$fighter->addFrontSystem(new AmmoFighterRack(330, 30, $ammoMagazine, false)); //$startArc, $endArc, $magazine, $base
-			$fighter->addFrontSystem(new AmmoFighterRack(330, 30, $ammoMagazine, false)); //$startArc, $endArc, $magazine, $base
+			//Both missile racks are firing-linked: the two missiles from one Thunderbolt must
+			//launch at the SAME target. Enforced client-side (weaponManager.getLinkedGroupTarget).
+			//Scoped per-fighter, so different fighters in the flight may still pick different targets.
+			$rackA = new AmmoFighterRack(330, 30, $ammoMagazine, false); //$startArc, $endArc, $magazine, $base
+			$rackA->linkedFiringGroup = 'thunderboltMissiles';
+			$fighter->addFrontSystem($rackA);
+			$rackB = new AmmoFighterRack(330, 30, $ammoMagazine, false);
+			$rackB->linkedFiringGroup = 'thunderboltMissiles';
+			$fighter->addFrontSystem($rackB);
 		
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack	
             

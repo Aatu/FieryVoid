@@ -4,7 +4,7 @@ class systemLiberator extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 4000;
+		$this->pointCost = 4700;
 		$this->faction = "The System";
 		$this->phpclass = "systemLiberator";
 		$this->imagePath = "img/ships/systemLiberator.png";

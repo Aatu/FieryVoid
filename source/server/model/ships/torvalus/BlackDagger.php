@@ -31,8 +31,8 @@ class BlackDagger extends BaseShip{
 
 		$this->trueStealth = false; //Alpha Shading Field does not grant true stealth		
 		$this->canPreOrder = false;		
-		//$this->fighters = array("normal"=>6);
-		$this->notes = "Can control 6 fighters";		
+		$this->fighters = array("Stilettos"=>6);
+		//$this->notes = "Can control 6 fighters";		
 		$this->notes .= '<br>Can skin dance'; 
 
 		/*Torvalus use their own enhancement set */		

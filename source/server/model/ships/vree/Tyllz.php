@@ -50,12 +50,13 @@ class Tyllz extends StarBaseSixSections
 
 		$this->addPrimarySystem(new Scanner(5, 18, 5, 9));
 		$this->addPrimarySystem(new Scanner(5, 18, 5, 9));
-		$this->addPrimarySystem(new AntimatterShredder(4, 0, 0, 0, 360));	         				
-		$this->addPrimarySystem(new AntimatterShredder(4, 0, 0, 0, 360));
-		$this->addPrimarySystem(new AntimatterShredder(4, 0, 0, 0, 360));	         				
-		$this->addPrimarySystem(new AntimatterShredder(4, 0, 0, 0, 360));
-		$this->addPrimarySystem(new AntimatterShredder(4, 0, 0, 0, 360));	         				
-		$this->addPrimarySystem(new AntimatterShredder(4, 0, 0, 0, 360));   
+		//setArcRestriction: every primary-mounted Vree weapon can JAM. Whenever it is damaged it rolls
+		//a separate d20 (17+) and locks to the forward 330..30. See Weapon::testArcRestriction.
+		for ($i = 0; $i < 6; $i++){
+			$shredder = new AntimatterShredder(4, 0, 0, 0, 360);
+			$shredder->setArcRestriction(330, 30);
+			$this->addPrimarySystem($shredder);
+		}
 		
         $this->addPrimarySystem(new Structure( 5, 90));
 

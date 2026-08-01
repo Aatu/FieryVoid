@@ -1315,6 +1315,24 @@ MineStealth.prototype.isMineRevealed = function (ship) {
 	return false;
 };
 
+/*Reveal state as the side that does NOT own the mine sees it - what the ship window's status
+  banner needs. isMineRevealed answers "may I see this mine's details", so it short-circuits
+  true for the owner; that is never the interesting question about your own mine, where what
+  you want to know is whether the enemy has scanned it yet. Detection and identification are
+  separate server-side (`detected` = teams that found it, `revealInfo` = teams that locked it
+  with OEW to learn its type), so a mine can sit detected-but-anonymous for turns.*/
+MineStealth.prototype.isMineRevealedToOpponent = function (ship) {
+	var myTeam = gamedata.getPlayerTeam();
+
+	if (ship.team !== myTeam) return this.isMineRevealed(ship); //someone else's mine: has MY team scanned it
+
+	if (this.revealInfo === true) return true; // Legacy fallback, as isMineRevealed keeps
+	if (!Array.isArray(this.revealInfo)) return false;
+
+	//Own mine: any OTHER team knowing what it is means the surprise is gone.
+	return this.revealInfo.some(function (team) { return team != myTeam; });
+};
+
 var Fighteradvsensors = function Fighteradvsensors(json, ship) {
 	ShipSystem.call(this, json, ship);
 };
@@ -3173,12 +3191,75 @@ ShadingField.prototype.getOutput = function (ship, system) {
 	return output;
 };
 
+//A flight carries a Shading Field on EVERY fighter, but the server only ever tracks detection
+//state on the FIRST fighter's copy: checkStealth resolves it via FighterFlight::getSystemByName
+//(first match, destroyed fighters NOT skipped) and writes its notes against that one system id.
+//Every other copy keeps the class default detected=true. So detection MUST be read from this one
+//instance, and it must NOT skip destroyed fighters - shipManager.systems.getSystemByName does skip
+//them, so it would drift onto a default-valued copy once the first fighter dies.
+ShadingField.prototype.getFlightField = function (ship) {
+	for (var i in ship.systems) {
+		var fighter = ship.systems[i];
+		if (!fighter.fighter) continue;
+
+		for (var a in fighter.systems) {
+			if (fighter.systems[a].name == "ShadingField") return fighter.systems[a];
+		}
+	}
+
+	return null;
+};
+
+//Collective shading: if one Shading Field is active they all are, and vice versa, so losing one
+//fighter's field does not unshade the flight - only once EVERY field is destroyed or offline does
+//shading stop. getSystemListByName already excludes destroyed fighters' systems.
+ShadingField.prototype.flightHasLiveField = function (ship) {
+	var fields = shipManager.systems.getSystemListByName(ship, "ShadingField");
+	for (var i = 0; i < fields.length; i++) {
+		if (!shipManager.power.isOffline(ship, fields[i])) return true;
+	}
+
+	return false;
+};
+
+/*What the server's checkStealthNextPhase (baseSystems.php) will record when the
+  Deployment/Pre-Turn phase advances, judged against the CURRENT Shading Mode toggle:
+  an unshaded ship is marked detected by every enemy team, a shaded one only by teams
+  with a unit inside 15 hexes and line of sight. Called only through
+  shipManager.getStealthToggleForecast, which owns the phase/ownership gating - this
+  function just states the rule.*/
+ShadingField.prototype.forecastDetectionTorvalus = function (ship, detection = 15) {
+	//A field that cannot work at all can't shade, whatever the toggle says.
+	if (ship.flight) {
+		if (!this.flightHasLiveField(ship)) return true;
+	} else {
+		if (shipManager.systems.isDestroyed(ship, this)) return true;
+		if (shipManager.power.isOffline(ship, this)) return true;
+	}
+
+	/*Read the toggle off THIS copy, not the canonical first-fighter field isDetectedTorvalus
+	  uses: detection state is only ever written to the first field, but Shading Mode is set on
+	  every live copy (doActivate/doDeactivate) and each fighter persists its own Shaded note.
+	  Callers reach this through shipManager.systems.getSystemByName, which skips dead fighters,
+	  so this is always a field the player's toggle actually touched.*/
+	if (!this.active) return true; //Not shaded: the server marks it detected by every enemy team.
+
+	//Shaded: flat 15 hex range, scanner ratings play no part (server: ShadingField::isDetected).
+	return shipManager.isDetectedByAnyEnemy(ship, function () { return detection; });
+};
+
 ShadingField.prototype.isDetectedTorvalus = function (ship, detection = 15) {
-	if (gamedata.gamephase == -1 && gamedata.turn == 1) return true;  //Do not hide in Turn 1 Deployment Phase.  
-	if (shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed.        
-	if (this.detected === true) return true; // Fallback support for boolean legacy saves
+	if (gamedata.gamephase == -1 && gamedata.turn == 1) return true;  //Do not hide in Turn 1 Deployment Phase.
+	if (shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed.
+
+	//A flight tracks detection on the first fighter's field ONLY, so re-resolve it here rather than
+	//trusting whichever copy the caller happened to find - every other copy holds the class default
+	//detected=true and would read as permanently revealed.
+	var field = (ship.flight && this.getFlightField(ship)) || this;
+
+	if (field.detected === true) return true; // Fallback support for boolean legacy saves
 	var myTeam = gamedata.getPlayerTeam();
-	if (Array.isArray(this.detectedNew) && this.detectedNew.includes(myTeam)) return true; // Already detected by our team.
+	if (Array.isArray(field.detectedNew) && field.detectedNew.includes(myTeam)) return true; // Already detected by our team.
 
 	if (myTeam === undefined) { // A third player viewing, only show detected ships if ALL teams can see them
 		var enemyTeams = [];
@@ -3192,7 +3273,7 @@ ShadingField.prototype.isDetectedTorvalus = function (ship, detection = 15) {
 		var allOthersDetected = (enemyTeams.length > 0);
 		for (var j = 0; j < enemyTeams.length; j++) {
 			var teamId = enemyTeams[j];
-			if (!Array.isArray(this.detectedNew) || this.detectedNew.indexOf(teamId) === -1) {
+			if (!Array.isArray(field.detectedNew) || field.detectedNew.indexOf(teamId) === -1) {
 				allOthersDetected = false;
 				break;
 			}
@@ -3201,8 +3282,14 @@ ShadingField.prototype.isDetectedTorvalus = function (ship, detection = 15) {
 		if (allOthersDetected) return true;
 	}
 
-	if (shipManager.systems.isDestroyed(ship, this)) return true;
-	if (shipManager.power.isOffline(ship, this)) return true;
+	if (ship.flight) {
+		//Judge shading flight-wide, not on the single (first-fighter) instance we read detection
+		//from - see flightHasLiveField.
+		if (!this.flightHasLiveField(ship)) return true;
+	} else {
+		if (shipManager.systems.isDestroyed(ship, this)) return true;
+		if (shipManager.power.isOffline(ship, this)) return true;
+	}
 
 	/* //Check server side at end of Movement/After Transverse Jump
 	if (gamedata.gamephase != 3 && gamedata.gamephase != 5) return false;  //Cannot only try to detect at start of Firing Phase (and Initial Phase should be handled on server via detected value).

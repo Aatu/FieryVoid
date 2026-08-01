@@ -7,7 +7,7 @@ import ShipSection from "./ShipSection";
 import ShipWindowEw from "./ShipWindowEw";
 import FighterList from "./FighterList";
 import HitChartPanel from "./HitChartPanel";
-import ShipNotesPanel, { ManoeuvreStats, EnhancementsPanel } from "./ShipNotesPanel";
+import ShipNotesPanel, { ManoeuvreStats, EnhancementsPanel, StatsIcon } from "./ShipNotesPanel";
 import ShipInfo from "../system/ShipInfo";
 
 /*"Digital SCS" ship window (SHIPWINDOW_REDESIGN_PLAN.md Stage 1): sections arranged
@@ -151,22 +151,18 @@ const Header = styled.div`
       without this a finger-drag on the header just scrolls the lobby)*/
     touch-action: none;
 
-    /*Touch screens get a finger-sized grab strip: the whole window is scaled DOWN to fit
-      the screen, so a big lobby window at scale 0.6 turned this bar into ~15 visual px -
-      a target you miss more often than you hit (2026-07-23 drag report). 44px is the
-      usual minimum touch target and survives the scaling.*/
-    @media (max-width: 1024px) {
-        height: 44px;
-    }
+    /*NO small-screen height override (user request 2026-07-23, round 12): the header
+      hugs its text on every screen, exactly like desktop, and shrinks with the rest of
+      the window. Round 10 had made it a flat 44px finger strip and round 11 counter-scaled
+      that to a constant ~44 VISUAL px - both read as a disproportionately fat bar once the
+      window was scaled down. Cost: the grab target is now 26px * scale (~13-16px on a
+      phone). If dragging turns fiddly again, grow the TARGET without growing the BAR (a
+      transparent hit-area) rather than restoring a taller header.*/
 `;
 
 const HeaderName = styled.span`
     font-size: 11px;
     line-height: 26px; /*centres the shared baseline within the 26px header bar*/
-
-    @media (max-width: 1024px) {
-        line-height: 44px; /*follows the taller touch grab strip above*/
-    }
     text-transform: uppercase;
     letter-spacing: 0.5px;
     white-space: nowrap;
@@ -203,13 +199,6 @@ const CloseButton = styled.div`
     margin-top: -2px;
     color: ${theme.colors.line};
     ${Clickable}
-
-    /*matches the taller touch header - keeps the ✕ centred in the bar and gives it a
-      finger-sized target of its own*/
-    @media (max-width: 1024px) {
-        height: 44px;
-        width: 30px;
-    }
 `;
 
 /*Hit Chart / Notes button stack, top-left of the window body (the empty corner cell
@@ -505,6 +494,9 @@ const GRID_JUSTIFY = { left: 'end', lfwd: 'end', laft: 'end', right: 'start', rf
 const GRID_LOCATIONS = [1, 3, 31, 32, 0, 4, 41, 42, 2];
 const COMPACT_LOCATIONS = [1, 3, 31, 0, 4, 41, 32, 2, 42];
 const QUARTER_LOCATIONS = [31, 32, 41, 42];
+//mid + quarter Port/Starboard: the locations that make buildTemplateAreas emit a
+//middle row, which is what blocks the ctrl/ew chrome spans (see LOBBY_WATERMARK_OFFSET_Y)
+const SIDE_LOCATIONS = [3, 4, 31, 41, 32, 42];
 
 class ShipWindow extends React.Component {
     constructor(props) {
@@ -516,11 +508,12 @@ class ShipWindow extends React.Component {
         //top-left control block; measuring the button rather than the whole block keeps the
         //lobby popup attached to it, above the Ship Stats panel)
         this.hitChartBtnRef = React.createRef();
-        //openPanel: clicked open (sticky until click-outside); hoverNotes: desktop
-        //hover peek on the Notes button/popup, hides shortly after mouse-out; showArt:
-        //Ship Art toggle - hides the sections and shows the hull art in full colour
-        this.state = { openPanel: null, hoverNotes: false, showArt: false }; //openPanel: null | 'hitchart' | 'notes'
-        this.notesHoverTimer = null;
+        //openPanel: clicked open (sticky until click-outside); hoverPanel: desktop
+        //hover peek on a button/popup, hides shortly after mouse-out (Notes, and Ship
+        //Stats since 2026-07-26); showArt: Ship Art toggle - hides the sections and
+        //shows the hull art in full colour
+        this.state = { openPanel: null, hoverPanel: null, showArt: false }; //both panels: null | 'hitchart' | 'shipstats' | 'notes'
+        this.panelHoverTimer = null;
         this.onDocumentPointerDown = this.onDocumentPointerDown.bind(this);
         this.onDragStart = this.onDragStart.bind(this);
         this.onDragMove = this.onDragMove.bind(this);
@@ -545,9 +538,14 @@ class ShipWindow extends React.Component {
       the height clamp lifted (inline max-height: none beats the media query's 100vh, and
       absolutely-positioned children like the Hit Chart popup never count toward
       offsetHeight, so an open popup can't shrink the window). max-height is then written
-      back as innerHeight / scale because it is a LAYOUT value - a shrunk window would
-      otherwise keep an inner scrollbar for space it no longer needs, and a window that
-      bottoms out on SCREEN_FIT_MIN still scrolls rather than being cut off.*/
+      back as a LAYOUT value (budget height / scale) - a shrunk window would otherwise keep
+      an inner scrollbar for space it no longer needs, and a window that bottoms out on the
+      floor still scrolls rather than being cut off.
+
+      The BUDGET is per page (round 11, >>> TOUCH-SCREEN FIT <<<): game.php only spends a
+      fraction of the screen so the tactical map underneath stays playable, the lobby fills
+      it. The header hugs its text and scales with everything else (round 12) - no special
+      handling.*/
     applyScreenFit() {
         const element = this.elementRef.current;
         if (!element) return;
@@ -563,23 +561,25 @@ class ShipWindow extends React.Component {
             return;
         }
 
+        const budget = screenFitBudget();
+
         //measure unclamped: a transform never affects layout, so offsetWidth/Height stay
         //honest, but the height clamp from the last fit has to come off first
-        const applied = element.style.maxHeight;
+        const appliedHeight = element.style.maxHeight;
         element.style.maxHeight = 'none';
         const naturalWidth = element.offsetWidth;
         const naturalHeight = element.offsetHeight;
-        element.style.maxHeight = applied;
+        element.style.maxHeight = appliedHeight;
         if (!naturalWidth || !naturalHeight) return;
 
-        const availableWidth = (document.documentElement.clientWidth || window.innerWidth) * SCREEN_FIT_FILL;
-        const availableHeight = (window.innerHeight || document.documentElement.clientHeight) * SCREEN_FIT_FILL;
+        const availableWidth = (document.documentElement.clientWidth || window.innerWidth) * budget.fillW;
+        const availableHeight = (window.innerHeight || document.documentElement.clientHeight) * budget.fillH;
         const fit = Math.min(availableWidth / naturalWidth, availableHeight / naturalHeight);
 
-        let scale = Math.min(SCREEN_FIT_MAX, Math.max(SCREEN_FIT_MIN, fit));
+        let scale = Math.min(budget.max, Math.max(budget.min, fit));
         scale = Math.round(scale * 100) / 100; //2dp: stops poll re-renders jittering the scale
 
-        const maxHeight = Math.round(window.innerHeight / scale);
+        const maxHeight = Math.round(availableHeight / scale);
         if (scale === this.screenFit && maxHeight === this.screenFitHeight) return; //nothing to write
 
         this.screenFit = scale;
@@ -940,23 +940,25 @@ class ShipWindow extends React.Component {
         this.stopDragListening();
         this.stopTouchDragListening();
         this.dragStart = null;
-        if (this.notesHoverTimer) clearTimeout(this.notesHoverTimer);
+        if (this.panelHoverTimer) clearTimeout(this.panelHoverTimer);
     }
 
-    onNotesHoverStart() {
-        if (this.notesHoverTimer) {
-            clearTimeout(this.notesHoverTimer);
-            this.notesHoverTimer = null;
+    //desktop hover peek, shared by the Notes and Ship Stats buttons (and their popups):
+    //hovering shows the panel, a click still pins it, and a clicked panel always wins
+    onPanelHoverStart(name) {
+        if (this.panelHoverTimer) {
+            clearTimeout(this.panelHoverTimer);
+            this.panelHoverTimer = null;
         }
-        if (!this.state.hoverNotes) this.setState({ hoverNotes: true });
+        if (this.state.hoverPanel !== name) this.setState({ hoverPanel: name });
     }
 
     //short grace period so the pointer can cross from the button into the popup
-    onNotesHoverEnd() {
-        if (this.notesHoverTimer) clearTimeout(this.notesHoverTimer);
-        this.notesHoverTimer = setTimeout(() => {
-            this.notesHoverTimer = null;
-            this.setState({ hoverNotes: false });
+    onPanelHoverEnd() {
+        if (this.panelHoverTimer) clearTimeout(this.panelHoverTimer);
+        this.panelHoverTimer = setTimeout(() => {
+            this.panelHoverTimer = null;
+            this.setState({ hoverPanel: null });
         }, 150);
     }
 
@@ -1007,6 +1009,25 @@ class ShipWindow extends React.Component {
         );
     }
 
+    /*Ship Stats button (game.php only, user request 2026-07-26): opens the lobby's
+      Ship Stats block as a popup. Same StatsIcon glyph as the lobby block, imported from
+      ShipNotesPanel so the two can't drift. Hover-peeks like the Notes button and pins on
+      click (user request 2026-07-26) - stats are a glance-at stat, not a read-through one.*/
+    renderStatsButton(wide) {
+        const { openPanel } = this.state;
+        return (
+            <CtrlButton
+                $wide={wide}
+                $active={openPanel === 'shipstats'}
+                onClick={this.togglePanel.bind(this, 'shipstats')}
+                onMouseEnter={this.onPanelHoverStart.bind(this, 'shipstats')}
+                onMouseLeave={this.onPanelHoverEnd.bind(this)}
+            >
+                <StatsIcon><i /><i /><i /></StatsIcon>Ship Stats
+            </CtrlButton>
+        );
+    }
+
     renderArtButton(wide) {
         return (
             <CtrlButton $wide={wide} $active={this.state.showArt} onClick={this.toggleArt.bind(this)}>
@@ -1022,8 +1043,8 @@ class ShipWindow extends React.Component {
                 $wide={wide}
                 $active={openPanel === 'notes'}
                 onClick={this.togglePanel.bind(this, 'notes')}
-                onMouseEnter={this.onNotesHoverStart.bind(this)}
-                onMouseLeave={this.onNotesHoverEnd.bind(this)}
+                onMouseEnter={this.onPanelHoverStart.bind(this, 'notes')}
+                onMouseLeave={this.onPanelHoverEnd.bind(this)}
             >
                 <CtrlIcon>✎</CtrlIcon>Notes
             </CtrlButton>
@@ -1031,14 +1052,16 @@ class ShipWindow extends React.Component {
     }
 
     /*Top-left control block, identical in structure on both pages (2026-07-23): Hit Chart,
-      then Ship Art, then game.php's Notes button / the lobby's manoeuvre stats. The lobby's
-      round-8/9 bottom-left `artbtn` grid cell is gone - the two toggles now always read as
-      one stack. Compact windows (mines/terrain) render the same block as a centred row.*/
+      then Ship Art, then game.php's Ship Stats button (2026-07-26), then game.php's Notes
+      button / the lobby's manoeuvre stats. The lobby's round-8/9 bottom-left `artbtn` grid
+      cell is gone - the two toggles now always read as one stack. Compact windows
+      (mines/terrain) render the same block as a centred row.*/
     renderControls(withHitChart, withNotes, compact, withStats) {
         const lobby = isLobby();
         const artHere = artAvailable(this.props.ship);
+        const statsBtnHere = statsAvailable(this.props.ship);
 
-        if (!withHitChart && !withNotes && !withStats && !artHere) return null;
+        if (!withHitChart && !withNotes && !withStats && !artHere && !statsBtnHere) return null;
 
         const wide = lobby; //150px datasheet panels in the lobby, 130px in game
 
@@ -1046,6 +1069,7 @@ class ShipWindow extends React.Component {
             <ControlsArea ref={this.controlsRef} $compact={compact}>
                 {withHitChart && this.renderHitChartButton(wide)}
                 {artHere && this.renderArtButton(wide)}
+                {statsBtnHere && this.renderStatsButton(wide)}
                 {withNotes && this.renderNotesButton(wide)}
                 {/*lobby: manoeuvre stats live under the buttons (user layout
                    decision 2026-07-17)*/}
@@ -1063,10 +1087,12 @@ class ShipWindow extends React.Component {
         if (!controls || !container) return null;
         //subtract the container's left border: the popup's `left` is measured from the
         //container's padding edge (inside the 1px border), but getBoundingClientRect
-        //reports outer-border coords - without this the popup sits 1px right of the buttons
+        //reports outer-border coords - without this the popup sits 1px right of the buttons.
+        //Divide by the touch-screen scale FIRST: rects are screen px on a transformed
+        //window but `left` is a layout value (see getAnchorBelow).
         return Math.round(
-            controls.getBoundingClientRect().left
-            - container.getBoundingClientRect().left
+            (controls.getBoundingClientRect().left - container.getBoundingClientRect().left)
+            / (this.screenFit || 1)
             - container.clientLeft
         );
     }
@@ -1081,24 +1107,32 @@ class ShipWindow extends React.Component {
         if (!el || !container) return { top: fallbackTop, left: this.getButtonLeft() };
         const eRect = el.getBoundingClientRect();
         const cRect = container.getBoundingClientRect();
+        /*getBoundingClientRect reports SCREEN px, and on a touch screen the window carries
+          a scale() transform - so a raw rect delta is `scale` times the layout offset the
+          popup's top/left actually want. Undo it (2026-07-23 round 11: harmless at the
+          near-1 scales round 10 produced, but the map-visibility budget shrinks windows far
+          enough that the popup was landing well above its button).*/
+        const scale = this.screenFit || 1;
         return {
-            left: Math.round(eRect.left - cRect.left - container.clientLeft),
-            top: Math.round(eRect.bottom - cRect.top - container.clientTop) + 4,
+            left: Math.round((eRect.left - cRect.left) / scale - container.clientLeft),
+            top: Math.round((eRect.bottom - cRect.top) / scale - container.clientTop) + 4,
         };
     }
 
     renderPopup(withHitChart, withNotes, top) {
         const { ship } = this.props;
-        const { openPanel, hoverNotes } = this.state;
+        const { openPanel, hoverPanel } = this.state;
 
-        //clicked panel wins; otherwise a desktop hover on the Notes button peeks the notes
-        const shown = openPanel || (hoverNotes && withNotes ? 'notes' : null);
+        //clicked panel wins; otherwise a desktop hover on the Notes / Ship Stats button
+        //peeks that panel. Only a rendered button can set hoverPanel, and each branch
+        //below re-checks its own availability, so no validation is needed here.
+        const shown = openPanel || hoverPanel;
         if (!shown) return null;
 
         //the lobby stacks Hit Chart + the tall Ship Stats panel in the control block, so
         //its Hit Chart popup drops from the BUTTON (staying attached to it, over Ship Stats)
         //rather than the whole block; game.php / Notes / compact drop below the whole block
-        //(keeps the popup clear of the buttons now that game.php stacks three of them).
+        //(keeps the popup clear of the buttons now that game.php stacks up to four).
         const anchorRef = (shown === 'hitchart' && isLobby()) ? this.hitChartBtnRef : this.controlsRef;
         const { top: anchorTop, left } = this.getAnchorBelow(anchorRef, top);
 
@@ -1106,6 +1140,27 @@ class ShipWindow extends React.Component {
             //$fit (feedback 2026-07-17, supersedes round 5's full-width span): the
             //geographic columns size themselves, so the popup shrink-wraps them
             return <PopupHolder ref={this.popupRef} $top={anchorTop} $left={left} $fit><HitChartPanel ship={ship} /></PopupHolder>;
+        }
+        if (shown === 'shipstats' && statsAvailable(ship)) {
+            /*the lobby's Ship Stats block (user request 2026-07-26) - a fixed-width panel,
+              so $fit shrink-wraps the popup around it. `live`: the rows read the game
+              state for THIS turn (turn costs as thrust with the rate in parens, profile
+              incl. the ProfileIncreased crit, initiative incl. its modifiers) and go
+              yellow where that has moved them off the hull's own figure. `bare`: rows
+              only - this popup's own frame and the button it drops from already say
+              "Ship Stats", so the block's title bar and border would say it twice.*/
+            return (
+                <PopupHolder
+                    ref={this.popupRef}
+                    $top={anchorTop}
+                    $left={left}
+                    $fit
+                    onMouseEnter={this.onPanelHoverStart.bind(this, 'shipstats')}
+                    onMouseLeave={this.onPanelHoverEnd.bind(this)}
+                >
+                    <ManoeuvreStats ship={ship} live bare />
+                </PopupHolder>
+            );
         }
         if (shown === 'notes' && withNotes) {
             return (
@@ -1115,15 +1170,16 @@ class ShipWindow extends React.Component {
                     $left={left}
                     $fit
                     $notes
-                    onMouseEnter={this.onNotesHoverStart.bind(this)}
-                    onMouseLeave={this.onNotesHoverEnd.bind(this)}
+                    onMouseEnter={this.onPanelHoverStart.bind(this, 'notes')}
+                    onMouseLeave={this.onPanelHoverEnd.bind(this)}
                 >
                     {/*ShipInfo itself decides whether to list enhancements inline: hidden
                        for full grid ships (they have the gold Enhancements box), shown for
                        mines / fighters / terrain (no box) - so no flag is needed here.
                        tightBottom drops its trailing blank line so PopupHolder's 5px
-                       bottom padding sets the gap under the last note.*/}
-                    <ShipInfo ship={ship} hideHitChart tightBottom />
+                       bottom padding sets the gap under the last note; compactText matches
+                       the Ship Stats popup's type (user request 2026-07-26).*/}
+                    <ShipInfo ship={ship} hideHitChart tightBottom compactText />
                 </PopupHolder>
             );
         }
@@ -1199,13 +1255,28 @@ class ShipWindow extends React.Component {
         //terrain + revealed mines keep the compact thumbnail variant; in the lobby
         //(purchased mines) the datasheet renders as a full-width block underneath
         if (isTerrain) {
+            /*Compact windows stack their action buttons ACROSS THE TOP of the very box the
+              art is centred in (ControlsArea $compact is full-width, z-index 2), so on a
+              mine - which has barely any systems, making the art most of the window - the
+              buttons sit squarely over the image (user report 2026-07-24). Nudge the art
+              down clear of them, the same screen-space trick as the lobby grid nudge.
+              Gated on the buttons EXISTING: renderControls returns null when the ship has
+              no hit chart, notes or art, and an offset with nothing on top of it would just
+              push the image off centre (the same mistake the lobby nudge made for
+              side-less hulls). Terrain proper is left alone - it wasn't reported, and its
+              windows carry enough system icons that the art is incidental.*/
+            const compactHasControls = withHitChart || withNotes || artAvailable(ship);
             return (<ShipWindowContainer ref={this.elementRef} onClick={shipWindowClicked} onContextMenu={e => { e.preventDefault(); e.stopPropagation(); }} $isMyTeam={isMyTeam} $variant="terrain">
                 {this.renderHeader(shipName, unitName, null)}
                 <CompactBody>
                     <ShipHitArea onClick={this.onShipClick.bind(this)} />
                     {/*Ship Art (item 3): the SAME watermark turns full colour in place while
                        the sections hide - no resize*/}
-                    <WatermarkLayer $img={window.AssetManager.getSmartImagePath(ship.imagePath)} $art={this.state.showArt} />
+                    <WatermarkLayer
+                        $img={window.AssetManager.getSmartImagePath(ship.imagePath)}
+                        $art={this.state.showArt}
+                        $offsetY={ship.mine && compactHasControls ? MINE_WATERMARK_OFFSET_Y : 0}
+                    />
                     {/*compact windows: vertical button list above the sections*/}
                     {this.renderControls(withHitChart, withNotes, true)}
                     {COMPACT_LOCATIONS.map(location => systemsByLocation[location].length > 0 && (
@@ -1239,11 +1310,12 @@ class ShipWindow extends React.Component {
                 {/*Ship Art (item 3): the SAME watermark turns full colour in place while the
                    sections hide - keeps the window/image at the exact same size (no resize).
                    $offsetY: the lobby's taller chrome pushes the sections below the grid
-                   midline, so the art follows them down (2026-07-23).*/}
+                   midline, so the art follows them down (2026-07-23) - but only on hulls
+                   whose side sections block the chrome spans (2026-07-24).*/}
                 <WatermarkLayer
                     $img={window.AssetManager.getSmartImagePath(ship.imagePath)}
                     $art={this.state.showArt}
-                    $offsetY={lobby ? LOBBY_WATERMARK_OFFSET_Y : 0}
+                    $offsetY={lobby && hasSideSections(systemsByLocation) ? LOBBY_WATERMARK_OFFSET_Y : 0}
                 />
                 {this.renderControls(withHitChart, withNotes, false, lobby && !ship.mine)}
                 {lobby ? <ShipNotesPanel ship={ship} grid hideEnhancements={withEnhPanel} /> : <ShipWindowEw ship={ship} />}
@@ -1305,20 +1377,32 @@ const shipWindowClicked = () => window.uiEvents.relay('CloseSystemInfo');
 const savedWindowPositions = { left: null, right: null };
 
 /*>>> TOUCH-SCREEN FIT <<< (user request 2026-07-23, ShipWindow.applyScreenFit). Below
-  this breakpoint the window is CSS-scaled to SCREEN_FIT_FILL of the screen in BOTH
-  dimensions (whichever binds - height is what binds in landscape); the min/max keep that
-  honest: never shrink past legibility, never blow a small window up into a poster. Raise
-  SCREEN_FIT_MIN if scaled-down text gets unreadable - the window then scrolls internally
-  instead of shrinking further. Same breakpoint as the ShipWindowContainer media query
-  that docks windows to the screen edge.*/
+  this breakpoint the window is CSS-scaled to fit a BUDGET - a fraction of the screen it
+  may cover - with the min/max keeping that honest: never shrink past legibility, never
+  blow a small window up into a poster.
+
+  Round 11 (2026-07-23) split the budget per page, because the two screens want opposite
+  things from a phone. game.php's window floats over the TACTICAL MAP, and a window that
+  fills the screen (round 10's flat 0.96 both ways, plus a 1.75 cap that MAGNIFIED small
+  windows up to the screen) leaves nothing of the map to play on - so it gets a genuine
+  budget: ~60% of the width, ~85% of the height, and it is never scaled ABOVE its natural
+  size. Docked to a screen edge, that keeps a usable strip of map beside the window. The
+  lobby has nothing behind it, so it keeps the round-10 fill-the-screen behaviour, which
+  is simply the most legible thing there.
+
+  Retuning: MAP_FIT is the pair of knobs to touch - lower fillW for more visible map,
+  raise it for bigger text. The min is the legibility floor: once the fit bottoms out on
+  it the window stops shrinking and scrolls internally instead. Same breakpoint as the
+  ShipWindowContainer media query that docks windows to the screen edge.*/
 const SMALL_SCREEN_QUERY = '(max-width: 1024px)';
-const SCREEN_FIT_MIN = 0.5;
-const SCREEN_FIT_MAX = 1.75;
-//how much of the screen a fitted window may cover - the slack leaves the docking inset
-//(4px/8px in the media query) visible on the opposite edge too
-const SCREEN_FIT_FILL = 0.96;
+//fillW/fillH: the share of screen width/height a fitted window may cover (the slack also
+//leaves the docking inset - 4px/8px in the media query - visible on the opposite edge)
+const MAP_FIT = { fillW: 0.60, fillH: 0.85, min: 0.40, max: 1 };    //game.php: map stays visible
+const LOBBY_FIT = { fillW: 0.96, fillH: 0.96, min: 0.50, max: 1.75 }; //lobby: nothing behind it
 
 const isSmallScreen = () => Boolean(window.matchMedia) && window.matchMedia(SMALL_SCREEN_QUERY).matches;
+
+const screenFitBudget = () => isLobby() ? LOBBY_FIT : MAP_FIT;
 
 //the still-down touch that started a drag (TouchList has no .find)
 const findTouch = (touches, identifier) => {
@@ -1336,8 +1420,27 @@ const isLobby = () => Boolean(window.gamedata) && window.gamedata.gamephase === 
   window, where the tall Ship Stats / datasheet / Enhancements chrome pushes the section
   cluster below the grid's vertical midline (user request 2026-07-23). game.php's chrome
   is short enough that its art already lines up, so it stays at 0. One knob - retune to
-  taste.*/
+  taste.
+
+  Only ships WITH side sections are pushed down (correction 2026-07-24): a middle row
+  makes buildTemplateAreas' ctrl/ew spans stop at row 1, so the tall lobby chrome inflates
+  that row alone and the sections sink. On a side-less hull (Heavy Combat Vessels, most
+  small craft) the same spans run the full height of the grid, the chrome shares the
+  window's height with the fwd/prim/aft column instead of stacking on top of it, and the
+  sections stay centred - nudging the art there only pulls it off them.*/
 const LOBBY_WATERMARK_OFFSET_Y = 20;
+
+//side sections present = buildTemplateAreas will emit at least one middle row
+const hasSideSections = (locations) => SIDE_LOCATIONS.some(location => locations[location].length > 0);
+
+/*>>> MINE WATERMARK NUDGE <<< the compact-window twin of the knob above (user request
+  2026-07-24): how far DOWN (px) a mine's art sits so the compact action-button stack,
+  which runs full-width across the TOP of the same box the art is centred in, stops
+  covering it. Its own constant rather than a shared one because the two windows are
+  different shapes and will retune independently. Applies on both pages - the compact
+  mine window and its button stack are identical in game and lobby - and only when
+  buttons actually render.*/
+const MINE_WATERMARK_OFFSET_Y = 20;
 
 /*Which side of the screen the window docks to. Single source of truth is
   ShipWindowManager.isLeftSide (renderer/shipWindowManager.js) so the manager's
@@ -1355,6 +1458,14 @@ const hasHitChart = (ship) => Boolean(ship.hitChart) && Object.keys(ship.hitChar
 //the Ship Art toggle (item 4) needs hull art to display and is meaningless for flight
 //windows (they show their fighters, not a single hull)
 const artAvailable = (ship) => Boolean(ship && ship.imagePath) && !ship.flight;
+
+/*Ship Stats popup button - game.php ONLY (user request 2026-07-26). The lobby already
+  shows the very same ManoeuvreStats block always-visible under the Hit Chart button, so
+  a button there would just duplicate it. Manoeuvre stats are meaningless for mines and
+  terrain (which is why the lobby hides the block for mines too), and game flight windows
+  render no control block at all, so both are excluded rather than shown empty.*/
+const statsAvailable = (ship) => Boolean(ship) && !isLobby() && !ship.flight && !ship.mine
+    && !window.gamedata.isTerrain(ship.shipSizeClass, ship.userid);
 
 const hasNotes = (ship) => Boolean(ship.notes)
     || Boolean(ship.enhancementTooltip)
@@ -1388,9 +1499,35 @@ const getStatusBanners = (ship) => {
 
     const banners = [];
 
-    //trueStealth ships: green "Undetected" (a Detected banner is deliberately omitted)
-    if (ship.trueStealth && isUndetected(ship)) {
-        banners.push({ key: 'undetected', color: theme.colors.statusOk, bg: 'rgba(50, 205, 50, 0.08)', text: 'Undetected' });
+    //Resolved once per render and threaded through: when a forecast is live it sweeps every enemy
+    //unit, so it is not something to ask for three times over on the way to two banners.
+    const stealthForecast = ship.trueStealth ? shipManager.getStealthToggleForecast(ship) : null;
+
+    /*trueStealth ships: green Undetected / red Detected. Mines split the detected half in two,
+      because the server tracks finding a mine and identifying it separately (MineStealth:
+      `detected` = teams that found it, `revealInfo` = teams that have locked it with OEW to
+      learn its type), so one can sit detected-but-anonymous for turns - amber until the type
+      is known, red after.
+      Read throughout from the OPPOSING side's point of view: on your own unit the question is
+      what the enemy has on it, on theirs it is what you have.*/
+    if (ship.trueStealth) {
+        if (isUndetected(ship, stealthForecast)) {
+            banners.push({ key: 'undetected', color: theme.colors.statusOk, bg: 'rgba(50, 205, 50, 0.08)', text: 'Undetected' });
+        } else if (ship.mine) {
+            const mineStealth = shipManager.systems.getSystemByName(ship, 'mineStealth');
+            //No stealth system at all means nothing is hiding it - treat as fully revealed.
+            if (!mineStealth || mineStealth.isMineRevealedToOpponent(ship)) {
+                banners.push({ key: 'detected', color: theme.colors.statusBad, bg: 'rgba(255, 80, 80, 0.10)', text: 'Detected - Revealed' });
+            } else {
+                banners.push({ key: 'detected', color: theme.colors.statusAlert, bg: 'rgba(255, 165, 0, 0.10)', text: 'Detected - Not Revealed' });
+            }
+        } else if (stealthForecast === true) {
+            //Nothing is committed until the Pre-Turn phase advances, so the pending Shading Field /
+            //Cloaking Device toggle is worded as the forecast it is rather than as fact.
+            banners.push({ key: 'detected', color: theme.colors.statusBad, bg: 'rgba(255, 80, 80, 0.10)', text: 'Would be Detected' });
+        } else {
+            banners.push({ key: 'detected', color: theme.colors.statusBad, bg: 'rgba(255, 80, 80, 0.10)', text: 'Detected' });
+        }
     }
 
     //this ship rides a host (e.g. breaching pod attached to its target)
@@ -1422,9 +1559,16 @@ const getStatusBanners = (ship) => {
   stealth system's per-team detected/detectedNew lists, which the plain isDetected
   call misses) so the banner can never claim Undetected while the tooltip says
   Detected. Loose compares kept deliberately — same as the tooltip.*/
-const isUndetected = (ship) => {
+const isUndetected = (ship, forecast) => {
     //deployment phase, deploying this turn: the tooltip always treats this as unseen
     if (gamedata.gamephase == -1 && shipManager.getTurnDeployed(ship) == gamedata.turn) return true;
+
+    /*A Shading Field / Cloaking Device the player can still toggle this phase is answered by the
+      caller's shipManager.getStealthToggleForecast - which is exactly what isDetected would return
+      anyway, so take it directly and skip the second sweep. It has to win outright: the stored
+      detected/detectedNew arrays the fallback below reads still hold the LAST committed check and
+      would pin the banner off for the whole Pre-Turn phase. Same guard as ShipTooltip.js.*/
+    if (forecast !== null && forecast !== undefined) return !forecast;
 
     let detected = shipManager.isDetected(ship);
 

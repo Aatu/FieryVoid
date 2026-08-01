@@ -54,8 +54,14 @@ class Vyreel extends MediumShip{
 		$thrust->startArc = 60;
 		$thrust->endArc = 120;
 		$this->addPrimarySystem($thrust);                    
-        $this->addPrimarySystem(new AntiprotonGun(2, 0, 0, 0, 360));
-        $this->addPrimarySystem(new AntiprotonGun(2, 0, 0, 0, 360));
+        //setArcRestriction: every primary-mounted Vree weapon can JAM. Whenever it is damaged it rolls
+        //a separate d20 (17+) and locks to the forward 330..30. See Weapon::testArcRestriction.
+        $gun = new AntiprotonGun(2, 0, 0, 0, 360);
+        $gun->setArcRestriction(330, 30);
+        $this->addPrimarySystem($gun);
+        $gun = new AntiprotonGun(2, 0, 0, 0, 360);
+        $gun->setArcRestriction(330, 30);
+        $this->addPrimarySystem($gun);
 		        
         $this->addFrontSystem(new AntiprotonDefender(2, 0, 0, 240, 0));
         $this->addFrontSystem(new AntiprotonDefender(2, 0, 0, 0, 120));

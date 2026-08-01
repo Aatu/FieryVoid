@@ -184,7 +184,14 @@ window.ShipTooltip = function () {
             if (gamedata.gamephase == -1 && shipManager.getTurnDeployed(ship) == gamedata.turn) {
                 toDisplay += '<span style="color:limegreen;">Deploying</span>; '; //Always say undetected on Deployment phase.  
             } else {
-                var isShipDetected = shipManager.isDetected(ship);
+                //A Shading Field / Cloaking Device still toggleable this phase is answered by
+                //shipManager.getStealthToggleForecast - which is what isDetected would return
+                //anyway, so take it directly rather than sweeping the enemy fleet twice. It has to
+                //win outright: the stored detected/detectedNew arrays the own-ship fallback below
+                //reads still hold the LAST committed check, and would otherwise pin the tooltip to
+                //"Detected" for the whole Pre-Turn phase no matter how the player toggles.
+                var forecast = shipManager.getStealthToggleForecast(ship);
+                var isShipDetected = (forecast !== null) ? forecast : shipManager.isDetected(ship);
                 var stealthSys = null;
 
                 if (ship.mine) {
@@ -197,7 +204,7 @@ window.ShipTooltip = function () {
                     stealthSys = shipManager.systems.getSystemByName(ship, "stealth");
                 }
 
-                if (!isShipDetected && ship.team == gamedata.getPlayerTeam()) {
+                if (!isShipDetected && forecast === null && ship.team == gamedata.getPlayerTeam()) {
                     if (stealthSys) {
                         if (Array.isArray(stealthSys.detected) && stealthSys.detected.length > 0) {
                             isShipDetected = true;
@@ -213,7 +220,10 @@ window.ShipTooltip = function () {
 
                 if (isShipDetected) {
                     var detectedTeamsStr = "";
-                    if (ship.team == gamedata.getPlayerTeam()) { //Only own player needs to see full team list that's detected their ship.
+                    //forecast !== null means the verdict came from the pending toggle, not from a
+                    //committed check - detectedNew still lists the teams from LAST time, so naming
+                    //them here would be wrong. The plain "Detected" is the honest answer.
+                    if (forecast === null && ship.team == gamedata.getPlayerTeam()) { //Only own player needs to see full team list that's detected their ship.
                         // Check if we have more than 2 teams in the game
                         var uniqueTeams = [];
                         for (var i in gamedata.slots) {

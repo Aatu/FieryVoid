@@ -3789,12 +3789,14 @@ class HvyGraviticBolt extends Gravitic
         public $canSplitShotsArray = array(1=>true, 2=>true);        
 	    protected $multiModeSplit = true; //Can split shots across different modes
 		public $specialHitChanceCalculation	= true;	 //To update targeting tooltip in Front End
-        private $damageDice = array();  
-        private $maxDiceArray = array(1=> 8, 2=> 12, 3=> 16);         			
-        private $uniqueIntercepts = array();	
+        //Only the pool tables (and the mode-2 cap in getEffectiveTurnsLoaded) differ from the
+        //Light Slicer - the dice/set-damage allocation, clamping and self-interception logic
+        //all live on MolecularSlicerBeamL (molecular.php).
+        protected $maxDiceArray = array(1 => 8, 2 => 12, 3 => 16);
+        protected $setDamageArray = array(1 => 12, 2 => 24, 3 => 36);
 
 
-		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $startArc2 = null, $endArc2 = null){           			
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $startArc2 = null, $endArc2 = null){
             if ( $maxhealth == 0 ) $maxhealth = 15;
             if ( $powerReq == 0 ) $powerReq = 15;     
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
@@ -3814,54 +3816,24 @@ class HvyGraviticBolt extends Gravitic
 			parent::setSystemDataWindow($turn);                 
 			$this->data["Special"] = "Uninterceptable. Ignores armor.";
 			$this->data["Special"] .= "<br>Always fired in Piercing (standard) mode, with ability to overkill.";           
-			$this->data["Special"] .= "<br>May choose to split shots between multiple targets, allocating a number to d10 damage dice to each one.";
-			$this->data["Special"] .= "<br>Each shot after the first attracts a cumulative -5% to hit modifier.";   			 
-			$this->data["Special"] .= "<br>Can fire accelerated for less damage:";  
-			$this->data["Special"] .= "<br> - 1 turn: 8d10+12"; 
-			$this->data["Special"] .= "<br> - 2 turns: 12d10+24"; 
+			$this->data["Special"] .= "<br>May choose to split shots between multiple targets, allocating both d10 damage dice and set damage freely to each one.";
+			$this->data["Special"] .= "<br>Each shot after the first attracts a cumulative -5% to hit modifier.";
+			$this->data["Special"] .= "<br>Can fire accelerated for less damage:";
+			$this->data["Special"] .= "<br> - 1 turn: 8d10+12";
+			$this->data["Special"] .= "<br> - 2 turns: 12d10+24";
 			$this->data["Special"] .= "<br> - 3 turns: 16d10+36";
-			$this->data["Special"] .= "<br>May spend 1d10 dice to gain -10 intercept, this is cumulative and suffers no degradation.";
-			$this->data["Special"] .= "<br>Each self-intercept dice committed increases the number of shots Slicer may intercept, as well as the total interception amount.";             
+			$this->data["Special"] .= "<br>May spend 1d10 dice, or " . $this->setDamageBlock . " set damage, to gain -10 intercept; this is cumulative and suffers no degradation.";
+			$this->data["Special"] .= "<br>Each self-intercept committed increases the number of shots Slicer may intercept, as well as the total interception amount.";
         }
 
-        public function beforeFiringOrderResolution($gamedata){ 
-            $this->guns = 0;          
-            $diceUsed = 0;
-            $maxDice = 0;         
-        
-            $loadedDice = $this->maxDiceArray[$this->turnsloaded] ?? 8;
-
-            if ($this->firingMode == 2) {                
-                $maxDice = min($this->maxDiceArray[2], $loadedDice);
-            } else {
-                $maxDice = min($this->maxDiceArray[3], $loadedDice);
-            }
-
-            //Search fireOrders
-            foreach ($this->fireOrders as $order) {
-                //Add +1 gun for each order like this so that intercept algorithms allow it any selfIntercepts                
-                $this->guns++;
-            
-                if($order->type == "normal"){ //Offensive shot.
-                    $this->damageDice[$order->id] = $order->shots; //Dice number is passed from front end as $order->shots variable.
-                    $diceUsed += $order->shots; //Dice number is passed from front end as $order->shots variable.                    
-                    $order->shots = 1; //Set to a single shot after capturing dice used for this shot.
-                }
-            
-                if($order->type == "selfIntercept"){ //Defensive shot.
-                    $diceUsed += 1; //Add intercept orders                                      
-                }                   
-            } 
-
-            if($diceUsed > 0){ //A shot was fired or Slicer was set to selfIntercept                            
-                $spareDice = $maxDice - $diceUsed;
-                while ($spareDice > 0){
-                    $this->guns++; //Add a new gun to increase intercept shots by 1                                
-                    $spareDice -= 1;                 
-                }                                     
-            }   
- 
-        }        
+        /* Mode 2 is capped at two turns' output (as on the Heavy Slicer this was derived
+         * from). One override carries that into both pools and the legacy fallback. */
+        protected function getEffectiveTurnsLoaded($fireOrder = null){
+            $mode = ($fireOrder !== null) ? $fireOrder->firingMode : $this->firingMode;
+            $loaded = min(3, max(1, $this->turnsloaded));
+            if ($mode == 2) $loaded = min(2, $loaded);
+            return $loaded;
+        }
 
 		public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder) {
             //If called shot on fighter, 0 called shot mod since Slicers can freely select which fighter to hit.		    
@@ -3891,72 +3863,6 @@ class HvyGraviticBolt extends Gravitic
             }            
             
 		}  
-
-    public function getInterceptionMod($gamedata, $intercepted){
-        //Slicers can freely combine their self-intercepts into a single strong intercept or multiple small ones. 
-        //Therefore, two self-intercepts at -10 would always be -20 e.g. no degradation.        
-        $allowedIntercepts = 0;
-
-        foreach ($this->fireOrders as $order){ //Need to  extract normal types from list fo fireOrder objects.        
-            if($order->type == "intercept"){ //A previous intercept
-                if(!(in_array($order->targetid, $this->uniqueIntercepts, true))) { //An intercept order with a targetid we haven't saved yet.
-                    $this->uniqueIntercepts[] = $order->targetid;
-                }
-            }else if($order->type == "selfIntercept"){
-                $allowedIntercepts++;               
-            }           
-        }
-        $noOfIntercepts = count($this->uniqueIntercepts);        
-
-        if($noOfIntercepts <= $allowedIntercepts){ //Still headroom to intercept based on number of selfIntercept orders committed by player.
-            return $this->intercept * 5;
-        }else{
-            return 0;
-        }
-
-    }//endof  getInterceptionMod   
-
-	public function getDamage($fireOrder) {
-		$damDice = 0;        
-        $nonDiceDam = 0;	
-        $noOfShots = 0;
-        $loadedtime = $this->turnsloaded;
-
-		if($this->firingMode == 2){//cannot use 3-turns power for shots other than Piercing            
-			$loadedtime = min(2,$loadedtime);
-		}
-
-        //Count number of non-intercept orders    
-        foreach ($this->fireOrders as $fOrder) {
-            if($fOrder->type == "normal"){ //Only count offensive shots for this.
-                $noOfShots++; //Add to shots total
-                //Now retrieve saved details of dice used that we input in beforeFiringOrderResolution()
-                foreach($this->damageDice as $id => $dice){
-                    if($id == $fireOrder->id) $damDice = $dice;
-                }
-            }    
-        }
-     
-	    // Determine base damage based on turns loaded          
-        switch($loadedtime){
-            case 1:
-                $nonDiceDam = 12;                    
-                break;
-            case 2:
-                $nonDiceDam = 24;                     
-                break;
-            case 3: 
-            default: //3 turns
-                $nonDiceDam = 36;                     		
-                break;
-        } 
-           
-        $nonDiceDam = floor($nonDiceDam/$noOfShots); //Split non-dice damage equally between offensve shots this turn.        
-        $finalDmg = Dice::d(10, $damDice) + $nonDiceDam;
-    
-        return $finalDmg;    		      
-	}
-
 
         public function setMinDamage(){
 			$loadedtime = $this->turnsloaded;

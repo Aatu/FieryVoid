@@ -7,8 +7,16 @@ window.combatLog = {
     critAnimations: {}, //Just a convenient place to have this array for AllWeaponFireAgainstShipAnimation to use   
     logCache: {}, // key: turn number, value: processed fire order data
 
+    // Clears the LIVE replay log only (#log). The printed log (#LogActual) owns its own
+    // lifecycle via showCurrent / showLog and must not be touched here.
     onTurnStart: function onTurnStart() {
-        $('.logentry').remove();
+        // Scoped to #log. An unscoped $('.logentry') also matched the PRINTED log's entry
+        // divs, and because the damage <ul> below is a SIBLING of its .logentry div rather
+        // than a child, that left #LogActual holding orphaned damage lists with their
+        // "FIRE:" headers stripped off - bare "<unit> damaged for N" lines. showPrevious /
+        // showNext call this and then fetch asynchronously, so those orphans stayed on
+        // screen until the response landed and showLog overwrote the container.
+        $('#log > .logentry').remove();
         // logFireOrders emits the damage <ul> as a SIBLING of its .logentry div
         // (the </div> closes before the <ul>), so it lands as a direct child of
         // #log and survives the .logentry removal. Clear those orphaned damage
@@ -45,7 +53,10 @@ window.combatLog = {
 
     },
 
-    logFireOrders: function logFireOrders(orders, printedLog = false, ships = null) {
+    // damageIndex is optional: showLog builds one for the whole printed log so each order is a
+    // map lookup instead of a full fleet sweep. The replay path (LogAnimation) renders one group
+    // at a time and passes none, which keeps the original sweep.
+    logFireOrders: function logFireOrders(orders, printedLog = false, ships = null, damageIndex = null) {
 
         orders = [].concat(orders);
 
@@ -92,7 +103,7 @@ window.combatLog = {
             if (fire.shots > 0) ordersC += 1;
             if (fire.shotshit > 0) ordersChit += 1;
             if (fire.intercepted > 0) ordersCintercepted += 1;
-            weaponManager.getDamagesCausedBy(fire, damages, ships);
+            weaponManager.getDamagesCausedBy(fire, damages, ships, damageIndex);
             var needed = fire.needed;
             //if (needed < 0) needed = 0; //I skip this - if intercepted below 0, let's show it.
             if (fire.shots > 0) { //ignore hit chance of purely technical fire orders
@@ -137,25 +148,9 @@ window.combatLog = {
             if (fire.pubnotes) notes += fire.pubnotes + " ";
         }
 
-        // The FIRE: header is coloured RELATIVE to the viewer (keyed on the
-        // shooter): participants see mine=green / ally=blue / enemy=red, so a
-        // 2-player team-2 reviewer still sees their own fleet green. Observers
-        // (not in the game) have no mine/ally/enemy, so they fall back to the
-        // absolute per-team palette. Terrain shooters are neutral white.
-        // (Ship NAMES, by contrast, use the absolute team colour below.)
-        var fireColor = "";
-        if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
-            fireColor = "color:#ffffff;";
-        } else if (!gamedata.isPlayerInGame()) {
-            var rgb = gamedata.getTeamColorRGB(ship.team);
-            fireColor = "color:rgb(" + Math.round(rgb[0]) + "," + Math.round(rgb[1]) + "," + Math.round(rgb[2]) + ");";
-        } else if (gamedata.isMyShip(ship)) {
-            fireColor = "color:rgb(50,205,50);";   // green (mine)
-        } else if (gamedata.isMyorMyTeamShip(ship)) {
-            fireColor = "color:rgb(51,173,255);";  // blue (ally)
-        } else {
-            fireColor = "color:rgb(255,80,80);";   // red (enemy)
-        }
+        // The FIRE: header is keyed on the shooter; see gamedata.getShipLogColorCss
+        // for the observer / 2-team / 3+-team rule it follows.
+        var fireColor = gamedata.getShipLogColorCss(ship);
 
         var html = '<div class="logentry fire-' + orders[0].id + '"><span class="logheader fire" style="' + fireColor + '">FIRE: </span><span>';
         html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name + '</span>';
@@ -204,23 +199,9 @@ window.combatLog = {
 
         var targettext = "";
         if (target) {
-            // Colour the attacked ship's name. Terrain has no meaningful team, so
-            // render it white. In a two-sided participant game the absolute team
-            // palette is ambiguous (your fleet could be "red"), so use a RELATIVE
-            // mine=green / enemy=red scheme instead. All other cases (multiplayer
-            // participant, observer) keep the absolute per-team palette so each
-            // specific ship is identifiable. getTeamColorRGB guards bad team values.
-            var targetColor;
-            if (gamedata.isTerrain(target.shipSizeClass, target.userid)) {
-                targetColor = "color:#ffffff;";
-            } else if (gamedata.isPlayerInGame() && gamedata.getDistinctTeamCount() === 2) {
-                targetColor = gamedata.isMyorMyTeamShip(target)
-                    ? "color:rgb(50,205,50);"   // green (mine/ally)
-                    : "color:rgb(255,80,80);";  // red (enemy)
-            } else {
-                var trgb = gamedata.getTeamColorRGB(target.team);
-                targetColor = "color:rgb(" + Math.round(trgb[0]) + "," + Math.round(trgb[1]) + "," + Math.round(trgb[2]) + ");";
-            }
+            // Same helper as the FIRE: header above, so shooter and target read
+            // consistently within one log line.
+            var targetColor = gamedata.getShipLogColorCss(target);
             targettext = '<span> at </span><span class="shiplink target" data-id="' + target.id + '" style="' + targetColor + 'font-weight:normal;">' + target.name + '</span>';
         }
 
@@ -279,9 +260,34 @@ window.combatLog = {
                 var disengagedFighters = [];
                 var destroyedFighters = [];
                 var damagehtml = "";
+                // Capacity spent soaking this fire order by shield projections (Thirdspace /
+                // Thought / Trek) and by Shadow diffuser tendrils. Each reported on its own line -
+                // see the exclusion below.
+                var shieldAbsorbed = 0;
+                var tendrilAbsorbed = 0;
                 for (var a in damages[i].damages) {
 
                     var d = damages[i].damages[a];
+
+                    // A shield projection or a diffuser tendril records what it absorbed as a damage
+                    // entry on ITSELF, tagged with its own class (the absorbDamage() of
+                    // ThirdspaceShield / ThoughtShield / TrekShieldProjection / DiffuserTendril).
+                    // That is absorber capacity spent, not damage to the ship, so it must stay out
+                    // of the ship's damage total - and out of the criticals and destroyed-systems
+                    // lists, which these systems never join. Each gets its own line below, so a
+                    // fully absorbed shot no longer reads as if nothing happened.
+                    if (d.damageclass === "ThirdspaceShield"
+                        || d.damageclass === "ThoughtShield"
+                        || d.damageclass === "TrekShieldProjection") {
+                        shieldAbsorbed += Number(d.damage); // never string-concatenate a JSON value
+                        continue;
+                    }
+                    if (d.damageclass === "Tendril") {
+                        tendrilAbsorbed += Number(d.damage);
+                        continue;
+                    }
+
+                    var system = shipManager.systems.getSystem(gamedata.getShip(d.shipid), d.systemid);
                     var damageDone = d.damage - d.armour;
                     var damageStopped = d.armour;
                     /*healing is up, so negative values are just fine
@@ -294,7 +300,6 @@ window.combatLog = {
 
                     totaldam += damageDone; //d.damage-d.armour;
                     armour += damageStopped; //d.armour;
-                    var system = shipManager.systems.getSystem(gamedata.getShip(d.shipid), d.systemid);
                     var comma = ",";
 
                     //New section to create critical entries when damage is done but system no destroyed.
@@ -368,6 +373,14 @@ window.combatLog = {
                 if (fire.damageclass == "HyperspaceJump") continue; //Do not show damage to Primary Structure when jumping to Hyperspace. 
 
                 html += '<li><span class="shiplink victim" data-id="' + ship.id + '" >' + victim.name + '</span> damaged for ' + totaldam + ' (total armour mitigation: ' + armour + ').</li>';
+
+                if (shieldAbsorbed > 0) {
+                    html += '<li><span class="shieldabsorb">Shields absorbed ' + shieldAbsorbed + ' damage.</span></li>';
+                }
+
+                if (tendrilAbsorbed > 0) {
+                    html += '<li><span class="shieldabsorb">Tendrils absorbed ' + tendrilAbsorbed + ' damage.</span></li>';
+                }
 
                 if (criticalshtml.length > 1) {
                     html += '<li>' + criticalshtml + '</li>';
@@ -583,6 +596,12 @@ window.combatLog = {
             return;
         }
 
+        // Nothing is cached, so the container is about to sit there showing the PREVIOUS turn's
+        // print until the response arrives. Blank it now: showLog overwrites it wholesale anyway,
+        // and a stale turn on screen reads as if it belonged to the turn being requested. The
+        // cached branch above returns first, so it still renders in one synchronous step.
+        document.getElementById('LogActual').innerHTML = '';
+
         ajaxInterface.ajaxWithRetry({
             type: 'GET',
             url: 'replay.php',
@@ -672,9 +691,14 @@ window.combatLog = {
         // Update the content of LogActual with the current turn and optional message
         document.getElementById('LogActual').innerHTML = html;
 
+        // One reverse map of damage entries by fire order id for the whole print, built from the
+        // same ship set logFireOrders will be handed (the printed log carries its own raw ships
+        // from replay.php, not gamedata.ships). Lives only for this call.
+        var damageIndex = weaponManager.buildDamageIndex(ships);
+
         // Process fire orders if any
         allFireOrders.forEach(function (logEntry) { // allFireOrders is an array of other arrays
-            combatLog.logFireOrders(logEntry, true, ships);
+            combatLog.logFireOrders(logEntry, true, ships, damageIndex);
         });
 
         // Show the LogActual div

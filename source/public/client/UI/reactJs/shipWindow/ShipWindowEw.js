@@ -21,15 +21,15 @@ const SHOW_EW_TARGET_TOOLTIP = false;
     - "SOEW" -> orange (pairs with DIST).
   Any label not in the map keeps the default accent colour.*/
 const EW_LABEL_COLORS = {
-    'DEW': theme.colors.text,       //white
-    'CCEW': '#9dc3e6',              //soft blue
-    'SDEW': '#9dc3e6',              //soft blue
-    'OEW': '#9ccf97',               //soft green
-    'BDEW': '#9ccf97',              //soft green
-    'Detect Mines': '#c2a7dd',      //soft purple
-    'Detect Stealth': '#c2a7dd',    //soft purple
+    'DEW': '#aecdea',               //soft blue
+    'CCEW': theme.colors.text,        //white     
+    'SDEW': '#9ac1e5',              //soft blue
+    'OEW': '#acd7a8',               //soft green
+    'BDEW': '#8ac785',              //soft green
+    'Detect Mines': '#bfa3db',      //soft purple
+    'Detect Stealth': '#ccb6e2',    //soft purple
     'DIST': '#e6b98f',              //soft orange
-    'SOEW': theme.colors.text,              //soft orange
+    'SOEW': theme.colors.text,        //soft orange
     'OEW_HOSTILE': '#e49b9b',       //soft red - pseudo-label, see ewLabelColor
 };
 
@@ -107,6 +107,32 @@ const Row = styled.div`
     font-size: 9px;
     color: ${theme.colors.text};
     padding-top: 1px;
+    /*$target rows carry a wrappable ship name (see RowTarget), so they need more air than
+      the single-line ship rows: without it a name's second line sits as close to the NEXT
+      row's label as to its own first line, and the eye groups it with the wrong row.
+
+      They also swap baseline alignment for centre: a target row's two children are the
+      TargetMain block (label + name, internally baseline-aligned) and the value, so
+      centring floats the value to the vertical middle of however many lines the name
+      took - level with the single line of a short name, midway between the two lines of
+      a wrapped one, with no line-counting needed. Ship rows KEEP baseline: their 8px
+      label and 10px value never wrap, and centring them would shift the value off the
+      label's baseline for no gain.*/
+    ${props => props.$target && css`
+        padding-top: 3px;
+        align-items: center;
+    `}
+`;
+
+/*Label + name of a target row, grouped so the value outside can centre against the pair
+  (see Row's $target branch). Baseline-aligned internally, which is what keeps the label
+  level with the name's FIRST line rather than drifting down with it.*/
+const TargetMain = styled.div`
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    flex: 1 1 auto;
+    min-width: 0; /*lets RowTarget shrink below its max-content width so the name can wrap*/
 `;
 
 const RowLabel = styled.span`
@@ -115,21 +141,41 @@ const RowLabel = styled.span`
     text-transform: uppercase;
     color: ${props => props.$color || theme.colors.textAccent};
     white-space: nowrap;
-    margin-left: 1px;
+    margin-left: 0px;
 `;
 
 const RowValue = styled.span`
     font-family: ${theme.fonts.mono};
     font-size: 10px;
-    margin-right: 2px;    
+    margin-right: 2px;
+    margin-left: 3px;          
 `;
 
+/*Ship names WRAP here rather than ellipsing on one line (user request 2026-07-24). The old
+  single-line `white-space: nowrap` made targets ambiguous whenever two ships shared a prefix
+  - "Shining Star Hunter-Killer flight #3" and "#4" both rendered as "Shining Star Hun..." -
+  and names in the corpus average 21 chars against a target column that fits roughly 15.
+
+  Wrap-in-place: the row keeps its LABEL / name / VALUE shape, the name just flows onto a
+  second line inside its own column, so the value column stays aligned down the panel.
+
+  Capped at TWO lines so no name can stretch the panel arbitrarily; the clamp still ellipses,
+  so an over-long name reads as truncated rather than silently cut. -webkit-line-clamp needs
+  the legacy -webkit-box display and is the only cross-browser "N lines then ellipsis"
+  (Chrome/Edge/Safari, Firefox 68+); the unprefixed `line-clamp` is there for when that
+  standardises. Row keeps align-items: baseline, so the label and value sit level with the
+  name's FIRST line.*/
 const RowTarget = styled.span`
     flex: 1 1 auto;
     min-width: 0;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
+    overflow-wrap: break-word; /*a single over-long token breaks instead of overflowing the column*/
+    line-height: 1.2; /*tight, so the second line costs as little panel height as possible*/
     text-align: right;
     color: ${theme.colors.textAccent};
     ${props => props.$interactive && css`
@@ -205,7 +251,9 @@ const getShipRows = ship => {
 
     list.push(<Row key={`dew-scs-${ship.id}`}><RowLabel $color={ewLabelColor('DEW')}>DEW</RowLabel><RowValue>{formatEW(ew.getDefensiveEW(ship))}</RowValue></Row>);
     var CCEWamount = Math.max(0, ew.getCCEW(ship) - ew.getDistruptionEW(ship));
-    list.push(<Row key={`ccew-scs-${ship.id}`}><RowLabel $color={ewLabelColor('CCEW')}>CCEW</RowLabel><RowValue>{formatEW(CCEWamount)}</RowValue></Row>);
+    if (CCEWamount > 0) {
+        list.push(<Row key={`ccew-scs-${ship.id}`}><RowLabel $color={ewLabelColor('CCEW')}>CCEW</RowLabel><RowValue>{formatEW(CCEWamount)}</RowValue></Row>);
+    }
 
     let bdew = ew.getBDEW(ship) * 0.25;
     let detectSEW = ew.getDetectSEW(ship); //Detect stealth
@@ -240,15 +288,17 @@ const getTargetRows = (ship, component) => {
             const target = gamedata.getShip(ewEntry.targetid);
 
             return (
-                <Row key={`${ewEntry.type}-scs-${ship.id}-${ewEntry.targetid}`}>
-                    <RowLabel $color={ewLabelColor(ewEntry.type, ship)}>{ewEntry.type}</RowLabel>
-                    <RowTarget
-                        $interactive={interactive}
-                        title={SHOW_EW_TARGET_TOOLTIP ? target.name : undefined}
-                        onClick={interactive ? component.onTargetClick.bind(component, target) : undefined}
-                        onMouseEnter={interactive ? () => component.setTargetHighlight(target, ewEntry.type, true) : undefined}
-                        onMouseLeave={interactive ? () => component.setTargetHighlight(target, ewEntry.type, false) : undefined}
-                    >{target.name}</RowTarget>
+                <Row $target key={`${ewEntry.type}-scs-${ship.id}-${ewEntry.targetid}`}>
+                    <TargetMain>
+                        <RowLabel $color={ewLabelColor(ewEntry.type, ship)}>{ewEntry.type}</RowLabel>
+                        <RowTarget
+                            $interactive={interactive}
+                            title={SHOW_EW_TARGET_TOOLTIP ? target.name : undefined}
+                            onClick={interactive ? component.onTargetClick.bind(component, target) : undefined}
+                            onMouseEnter={interactive ? () => component.setTargetHighlight(target, ewEntry.type, true) : undefined}
+                            onMouseLeave={interactive ? () => component.setTargetHighlight(target, ewEntry.type, false) : undefined}
+                        >{target.name}</RowTarget>
+                    </TargetMain>
                     <RowValue>{getAmount(ewEntry, ship)}</RowValue>
                 </Row>
             );

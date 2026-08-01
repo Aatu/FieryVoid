@@ -424,15 +424,30 @@
 		reflects it). Runs once per pulse.*/
 		protected function getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder)
 		{
-			$this->applyPhasing($target, $shooter, $pos, $gamedata);
+			/*A flight keeps its shields on the individual craft (eg. the System Drone's Shield Projection),
+			and the craft that takes this pulse is only picked later, inside damage(). So a flight is phased
+			per hit craft in doDamage() instead - asking here would have no craft to work with.*/
+			if (!($target instanceof FighterFlight)) $this->applyPhasing($target, $shooter, $pos, $gamedata);
 			return parent::getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
 		}
 
+		/*Flights only: the hit craft is known here, so phase THAT craft's shield (once per pulse - a flight
+		takes no overkill, so doDamage is not re-entered for the same hit). Skipped for a craft that is
+		already gone, as the pulse deals nothing to it.*/
+		protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null)
+		{
+			if (($target instanceof FighterFlight) && ($system instanceof Fighter) && ($system->getRemainingHealth() > 0)){
+				$this->applyPhasing($target, $shooter, $pos, $gamedata, $system);
+			}
+			parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
+		}
+
 		//Pick the one shield this hit will actually use and bank a single rolled crit on it.
-		private function applyPhasing($target, $shooter, $pos, $gamedata){
+		//$craft = the individual fighter hit (flights only); null for ships.
+		private function applyPhasing($target, $shooter, $pos, $gamedata, $craft = null){
 			$turn = $gamedata->turn;
 
-			$shield = $this->getPhasingShield($target, $shooter, $pos, $turn);
+			$shield = $this->getPhasingShield($target, $shooter, $pos, $turn, $craft);
 			if ($shield === null) return; //no shield protects this hit
 
 			// cap: base absorption pool for projection shields (not reflected in a damage mod), else the
@@ -448,15 +463,17 @@
 
 		//The single shield that protects this hit: the capacity-pool absorber if any (Thought/Thirdspace),
 		//otherwise the in-arc EM Shield with the greatest current damage reduction. Null if none applies.
-		private function getPhasingShield($target, $shooter, $pos, $turn){
+		private function getPhasingShield($target, $shooter, $pos, $turn, $craft = null){
 			//Younger races: the torpedo IGNORES non-EM shield absorption entirely (rules) - so it never
 			//phases a capacity-pool projection shield on a younger-race ship; only EM Shields (house rule)
 			//are still affected. (In practice projection shields only appear on Primordial/Ancient hulls.)
 			$youngerRace = ($target->factionAge <= 2);
 
-			//1) capacity-pool absorber (getSystemProtectingFromDamage picks exactly one)
+			//1) capacity-pool absorber (getSystemProtectingFromDamage picks exactly one).
+			//$craft is what tells a FighterFlight which craft's systems to search - it MUST be passed for a
+			//flight (a null craft there used to be a fatal, and now simply finds no protector).
 			if (!$youngerRace){
-				$protector = $target->getSystemProtectingFromDamage($shooter, $pos, $turn, $this, null, 0, false);
+				$protector = $target->getSystemProtectingFromDamage($shooter, $pos, $turn, $this, $craft, 0, false);
 				if ($protector instanceof ThoughtShield || $protector instanceof ThirdspaceShield){
 					return $protector;
 				}
@@ -468,7 +485,8 @@
 			//EM Shields reduce by the same amount and getDamageMod takes the max, so which of the equal
 			//ones we pick doesn't change the damage - only where the permanent crit lands.
 			$bearing = ($pos !== null) ? $target->getBearingOnPos($pos) : $target->getBearingOnUnit($shooter);
-			foreach ($target->systems as $sys){
+			$shieldHost = ($craft !== null) ? $craft->systems : $target->systems; //flight: shields sit on the craft
+			foreach ($shieldHost as $sys){
 				if (!($sys instanceof EMShield)) continue;
 				if ($sys->isDestroyed($turn-1) || $sys->isOfflineOnTurn($turn)) continue;
 				if (is_int($sys->startArc) && is_int($sys->endArc)){

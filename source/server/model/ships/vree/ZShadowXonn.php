@@ -39,33 +39,44 @@ class ZShadowXonn extends VreeCapital{
 		$scanner = new Scanner(6, 18, 9, 10);   
 		$scanner->markImproved();
         $this->addPrimarySystem($scanner);
-    $this->addPrimarySystem(new Engine(6, 18, 0, 10, 3));
+        $this->addPrimarySystem(new Engine(6, 18, 0, 10, 3));
 		$this->addPrimarySystem(new JumpEngine(7, 16, 6, 24));
-    /* replaced by Tagged instances!
-		$this->addPrimarySystem(new AntimatterShredder(4, 0, 0, 0, 360));		         			
-		$this->addPrimarySystem(new AntimatterShredder(4, 0, 0, 0, 360));
-    $this->addPrimarySystem(new MolecularSlicerBeamL(4, 0, 0, 0, 360));
-    $this->addPrimarySystem(new MolecularSlicerBeamL(4, 0, 0, 0, 360));
-    $this->addPrimarySystem(new MultiphasedCutter(4, 0, 0, 0, 360));  
-	*/
-		$weapon = new AntimatterShredder(4, 0, 0, 0, 360);
-		$weapon->addTag("Weapon");
-		$this->addPrimarySystem($weapon);
-		$weapon = new AntimatterShredder(4, 0, 0, 0, 360);
-		$weapon->addTag("Weapon");
-		$this->addPrimarySystem($weapon);
-		$weapon = new MolecularSlicerBeamL(4, 0, 0, 0, 360);
-		$weapon->addTag("Weapon");
-		$weapon->repairPriority = 6; //pool with heavy guns, let light ones take damage first
-		$this->addPrimarySystem($weapon);
-		$weapon = new MolecularSlicerBeamL(4, 0, 0, 0, 360);
-		$weapon->addTag("Weapon");
-		$weapon->repairPriority = 6; //pool with heavy guns, let light ones take damage first
-		$this->addPrimarySystem($weapon);
-		$weapon = new MultiphasedCutter(4, 0, 0, 0, 360);
-		$weapon->addTag("Weapon");
-		$weapon->repairPriority = 6; //pool with heavy guns, let light ones take damage first
-		$this->addPrimarySystem($weapon);
+		//Turret mounts: the two weapons sharing a turret have their fire linked, so their targets must
+		//be within 60 degrees of each other (they are 360-degree mounts, so weapon arcs can't express
+		//this). The group tag doubles as the turret's display name shown in the system window.
+		//Turret 1 = shredder + cannon, Turret 2 = shredder + cannon; the third cannon is unturreted.
+		//setArcRestriction: every primary-mounted Vree weapon can JAM. Whenever it is damaged it rolls
+		//a separate d20 (17+) and locks to the forward 330..30 - and because a turret is one mount,
+		//a jam on either linked weapon restricts both. See Weapon::testArcRestriction.
+		$turretShredderA = new AntimatterShredder(4, 0, 0, 0, 360);
+		$turretShredderA->linkedFiringGroup = 'Turret 1';
+		$turretShredderA->linkedFiringSpread = 60;
+		$turretShredderA->setArcRestriction(330, 30);
+		$this->addPrimarySystem($turretShredderA);
+
+		$turretShredderB = new AntimatterShredder(4, 0, 0, 0, 360);
+		$turretShredderB->linkedFiringGroup = 'Turret 2';
+		$turretShredderB->linkedFiringSpread = 60;
+		$turretShredderB->setArcRestriction(330, 30);
+
+		$turretCannonA = new MolecularSlicerBeamL(4, 0, 0, 0, 360);
+		$turretCannonA->repairPriority = 6; //pool with heavy guns, let light ones take damage first
+		$turretCannonA->linkedFiringGroup = 'Turret 1';
+		$turretCannonA->linkedFiringSpread = 60;
+		$turretCannonA->setArcRestriction(330, 30);		
+        $this->addPrimarySystem($turretCannonA);
+
+		$cannon = new MolecularSlicerBeamL(4, 0, 0, 0, 360);
+		$cannon->repairPriority = 6; //pool with heavy guns, let light ones take damage first
+		$cannon->setArcRestriction(330, 30);
+		$this->addPrimarySystem($cannon);		
+
+		$turretCannonB = new MultiphasedCutter(4, 0, 0, 0, 360);
+		$turretCannonB->repairPriority = 6; //pool with heavy guns, let light ones take damage first
+		$turretCannonB->linkedFiringGroup = 'Turret 2';
+		$turretCannonB->linkedFiringSpread = 60;
+		$turretCannonB->setArcRestriction(330, 30);
+		$this->addPrimarySystem($turretCannonB);		
     						
 
      
@@ -76,7 +87,8 @@ class ZShadowXonn extends VreeCapital{
           $tendril=new DiffuserTendril(12,'R');//absorbtion capacity,side
           $diffuser->addTendril($tendril);
           $this->addFrontSystem($tendril);
-        $this->addFrontSystem($diffuser);		
+        $this->addFrontSystem($diffuser);	
+
         $thrust = new GraviticThruster(5, 20, 0, 10, 1);
 		$thrust->startArc = 300;
 		$thrust->endArc = 60;
@@ -134,16 +146,17 @@ class ZShadowXonn extends VreeCapital{
           $diffuser->addTendril($tendril);
           $this->addLeftAftSystem($tendril);
         $this->addLeftAftSystem($diffuser);	
+
 		$thrust = new GraviticThruster(5, 20, 0, 10, 3);
 		$thrust->startArc = 240;
 		$thrust->endArc = 300;
 		$thrust->overkillArcStructures = array(31, 32); //overkill spills to whichever Port quarter is in arc
 		$this->addLeftSystem($thrust);
 		$weapon = new MultiphasedCutterL(3, 0, 0, 180, 300);
-		$weapon->addTag("Weapon");
+		//$weapon->addTag("Weapon");
 		$this->addLeftAftSystem($weapon);
 		$weapon = new MultiphasedCutterL(3, 0, 0, 180, 300);
-		$weapon->addTag("Weapon");
+		//$weapon->addTag("Weapon");
 		$this->addLeftAftSystem($weapon);	
     
         $diffuser = new EnergyDiffuser(4, 13, 3, 0, 120);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
@@ -156,10 +169,10 @@ class ZShadowXonn extends VreeCapital{
         $this->addRightFrontSystem($diffuser);	
 		
 		$weapon = new MultiphasedCutterL(3, 0, 0, 0, 120);
-		$weapon->addTag("Weapon");
+		//$weapon->addTag("Weapon");
 		$this->addRightFrontSystem($weapon);
 		$weapon = new MultiphasedCutterL(3, 0, 0, 0, 120);
-		$weapon->addTag("Weapon");
+		//$weapon->addTag("Weapon");
 		$this->addRightFrontSystem($weapon);
 				
 				
@@ -177,22 +190,12 @@ class ZShadowXonn extends VreeCapital{
 		$thrust->overkillArcStructures = array(41, 42); //overkill spills to whichever Stbd quarter is in arc
 		$this->addRightSystem($thrust);		
 		$weapon = new MultiphasedCutterL(3, 0, 0, 60, 180);
-		$weapon->addTag("Weapon");
+		//$weapon->addTag("Weapon");
 		$this->addRightAftSystem($weapon);
 		$weapon = new MultiphasedCutterL(3, 0, 0, 60, 180);
-		$weapon->addTag("Weapon");
+		//$weapon->addTag("Weapon");
 		$this->addRightAftSystem($weapon);
 		
-       
-        //0:primary, 1:front, 2:rear, 3:left, 4:right;
-	/* remade for Tags!
-        $this->addFrontSystem(new Structure( 5, 36, true));
-        $this->addAftSystem(new Structure( 5, 36, true));
-        $this->addLeftFrontSystem(new Structure( 5, 36, true));
-        $this->addLeftAftSystem(new Structure( 5, 36, true));
-        $this->addRightFrontSystem(new Structure( 5, 36, true));
-        $this->addRightAftSystem(new Structure( 5, 36, true));    
-	*/
 	
 		$structArmor = 5;
 		$structHP = 36;
@@ -250,42 +253,42 @@ class ZShadowXonn extends VreeCapital{
             1=> array(
                     4 => "TAG:Thruster",                  
                     9 => "TAG:Weapon",
-                    11 => "Energy Diffuser",
+                    10 => "Energy Diffuser",
                     17 => "Structure",
                     20 => "Primary",
            		 ),
             2=> array(
                     4 => "TAG:Thruster",                  
                     9 => "TAG:Weapon",
-                    11 => "Energy Diffuser",
+                    10 => "Energy Diffuser",
                     17 => "Structure",
                     20 => "Primary",
            		 ),
             31=> array(
                     4 => "TAG:Thruster",                  
                     9 => "TAG:Weapon",
-                    11 => "Energy Diffuser",
+                    10 => "Energy Diffuser",
                     17 => "Structure",
                     20 => "Primary",
            		 ),
             32=> array(
                     4 => "TAG:Thruster",                  
                     9 => "TAG:Weapon",
-                    11 => "Energy Diffuser",
+                    10 => "Energy Diffuser",
                     17 => "Structure",
                     20 => "Primary",
            		 ),
             41=> array(
                     4 => "TAG:Thruster",                  
                     9 => "TAG:Weapon",
-                    11 => "Energy Diffuser",
+                    10 => "Energy Diffuser",
                     17 => "Structure",
                     20 => "Primary",
            		 ),
        		42=> array(
                     4 => "TAG:Thruster",                  
                     9 => "TAG:Weapon",
-                    11 => "Energy Diffuser",
+                    10 => "Energy Diffuser",
                     17 => "Structure",
                     20 => "Primary",
            		 ),

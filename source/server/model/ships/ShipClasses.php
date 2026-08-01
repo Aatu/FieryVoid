@@ -1209,7 +1209,20 @@ class BaseShip {
 
 		if ($system instanceof Structure){
 			$this->structures[$loc] = $system->id;
-		}else if(($system->startArc ==0)&&($system->endArc ==0) && !($system instanceof Bulkhead)){ //20.01.2025 - add arc equal to section arc, if not set explicitly. Bulkheads protect by location only - giving them a section arc makes the arc gate in getSystemProtectingFromDamage falsely filter them out for shots from outside that arc.
+		}
+
+		//Structure arc indicator (STRUCTURE_ARCS_PLAN.md): Structures fall THROUGH to the same
+		//auto-arc fill as every other system (they used to be excluded, which is why a normal
+		//structure carried a null arc), so each section's Structure knows the facing range
+		//getLocations() uses to allocate hits there. Display only - hovering a section's health
+		//bar in the ship window draws that wedge on the icon (ShipIcon.showStructureArc), and the
+		//value rides the STATIC ship bundle, so gamedata is untouched. Combat never reads a
+		//structure's arc: "Structure" hit-chart entries resolve by location (getStructureSystem),
+		//the protection paths drop structures before the arc gate (doesProtectFromDamage < 1), and
+		//no hit chart uses TAG:Structure - the one arc-based structure selector. Hand-authored
+		//structure arcs (Vree/Centauri, Structure::createAsOuter) are non-zero, so the gate below
+		//leaves them exactly as written.
+		if(($system->startArc ==0)&&($system->endArc ==0) && !($system instanceof Bulkhead)){ //20.01.2025 - add arc equal to section arc, if not set explicitly. Bulkheads protect by location only - giving them a section arc makes the arc gate in getSystemProtectingFromDamage falsely filter them out for shots from outside that arc.
 			//if arc is not set - copy from location!
 			//systems belonging to ANOTHER section's structure block (structureHomeLocation -
 			//Kirishiac orbitals displayed on the L/R sections) take their HOME block's arc:
@@ -1671,6 +1684,10 @@ class BaseShip {
 		$chosenSystem = null;
 		$chosenValue=0;
 		if($this instanceOf FighterFlight){ //only subsystems of a particular fighter
+			//a flight keeps its defensive systems on the individual craft, so without a craft there is no
+			//list to search - callers that ask before a craft has been picked simply get no protector
+			//(rather than a fatal on $systemhit->systems)
+			if($systemhit === null) return null;
 			$listOfPotentialSystems = $systemhit->systems;
 		}else{ //all systems of a ship
 			$listOfPotentialSystems = $this->systems;

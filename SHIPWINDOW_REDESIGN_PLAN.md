@@ -387,6 +387,257 @@ EW tooltip):** two user requests.
    existing "Defence (F/S)" line is unchanged — it shows the range/EW-modified chance on top
    of these base numbers. Verified: esbuild JSX parse + bundle-resolve ×3. UI.bundle only.
 
+**Post-Stage-4 improvements round 11 (2026-07-23) — BUILT, awaiting user test
+(UI.bundle only; the small-screen size pass, user report "still taking up too much of
+the screen to be practical"):**
+1. **Per-page screen-fit budget** (`ShipWindow.js`, `>>> TOUCH-SCREEN FIT <<<`). Round 10
+   scaled the window to fill **0.96 of BOTH axes** and allowed a scale of up to **1.75** —
+   so on a phone every window covered essentially the whole screen, and a *small* window
+   (flight / mine) was actively **magnified** to get there. The single `SCREEN_FIT_*`
+   triple is replaced by two budget objects picked by page (`screenFitBudget()` →
+   `isLobby()`):
+   - **`MAP_FIT = { fillW: 0.60, fillH: 0.85, min: 0.40, max: 1 }`** — game.php. The window
+     floats over the tactical map, so it may cover ~60% of the width / 85% of the height
+     and is **never scaled above its natural size**. Docked to a screen edge that leaves a
+     usable strip of map beside it, which was the whole request.
+   - **`LOBBY_FIT = { fillW: 0.96, fillH: 0.96, min: 0.50, max: 1.75 }`** — unchanged
+     round-10 behaviour. The lobby has nothing behind the window, so filling the screen is
+     simply the most legible thing there; the user's complaint is map-specific ("in game
+     screen").
+   `fillW` is the knob to retune (lower = more map, smaller text); `min` is the legibility
+   floor — once the fit bottoms out on it the window stops shrinking and scrolls
+   internally instead, and `max-height` is now written from the BUDGET height (not
+   `innerHeight`), so a floored window still respects the budget.
+2. **Drag strip counter-scaled** (`Header` / `HeaderName` / `CloseButton` + `applyScreenFit`).
+   Round 10 gave touch screens a flat 44px header because a scaled-down window turned the
+   26px bar into ~15 visual px; the new budget shrinks windows much further, which would
+   have reproduced exactly that bug. The height is now the CSS variable
+   `--fv-touch-header` (44px fallback), written as `44 / scale` (capped at
+   `TOUCH_HEADER_MAX_PX` 120) so the grab target stays **~44 VISUAL px at any scale** — it
+   also fixes the lobby's 1.75× case, where the bar was a fat 77 visual px.
+   **No feedback loop**: the measuring pass forces the variable back to the base 44px
+   (same trick as lifting the `max-height` clamp), and the height ratio is solved WITH the
+   compensation folded in — the strip costs a constant `TOUCH_HEADER_PX` of the budget, so
+   `fit = min(availW/naturalW, (availH − 44)/(naturalH − 44))` and the fitted visual height
+   is exactly `scale·(natural − 44) + 44`.
+3. **Hit Chart / Notes popup anchoring fixed for scaled windows** (`getAnchorBelow`,
+   `getButtonLeft`): both measure with `getBoundingClientRect` (**screen** px, so a
+   transformed window reports `scale ×` the real offset) and assign the result to the
+   popup's `top`/`left` (**layout** px). The delta is now divided by `this.screenFit`.
+   Harmless at round 10's near-1 scales, but at 0.4–0.6 the popup was landing well above
+   its button, over the header.
+   Verified: esbuild JSX parse + bundle-resolve of ShipWindow.js. UI.bundle only — needs
+   `yarn build`. (Parse trap re-hit: a backtick in a comment INSIDE a styled-components
+   template literal ends the literal — CSS-comment prose must not quote identifiers in
+   backticks.)
+
+**Post-Stage-4 improvements round 12 (2026-07-23) — BUILT, awaiting user test
+(two user regression reports after round 11):**
+1. **Two windows on desktop restored + one-per-side split fixed for teamless viewers**
+   (`renderer/shipWindowManager.js` `isLeftSide`). User: "all windows now open on the
+   right-hand side, and only one window can be open at once" — the pre-React two-window
+   (own team left / enemy right) behaviour was gone. **Root cause**: `isLeftSide` docks a
+   window by `ship.team === gamedata.getPlayerTeam()`, and `getPlayerTeam()` returns
+   **undefined** whenever the viewer holds no slot — the common case being a **replay**,
+   where `gamedata.replay` makes [gamedata.js:1987] skip the `thisplayer = forPlayer`
+   assignment so `thisplayer` stays -1 (also a spectator / not-logged-in local session).
+   Every ship then failed the strict `===`, so all docked RIGHT, and the manager's
+   one-window-per-side filter (`isLeftSide(other) !== isLeftSide(new)`) collapsed to a
+   single window. The retired legacy window never showed this because it split by
+   `ship.userid == thisplayer` with a team-1 flip, not by team. **Fix**: mirror the
+   codebase's canonical `gamedata.isMyOrTeamOneShip` (gamedata.js) — in game, own team is
+   left; with no viewer team, **team 1 is the left side**; all comparisons loose `==`
+   (matching `getPlayerTeam`'s own slot test) so a JSON string/int drift can never
+   re-split the windows. Verified server-side that a real player's `ship.team`/`slot.team`
+   are clean ints (game 4252 via getTacGamedata) — so a logged-in player was never broken;
+   only the teamless-viewer path was. Desktop still docks own-team left / enemy right and
+   keeps both windows; the CSS placement (`$isMyTeam` → left/right 50px) is unchanged and
+   reads the same fixed `isLeftSide`.
+2. **Mobile header height reverted to hug its text** (`ShipWindow.js` Header /
+   HeaderName / CloseButton + `applyScreenFit`). User: the small-screen header was "much
+   taller than desktop, it should still just fit the height of the text". Round 10 had
+   made it a flat 44px touch strip and round 11 counter-scaled that to a constant ~44
+   VISUAL px — both read as a fat bar once the window shrank. All three `@media
+   (max-width:1024px)` height overrides and the `--fv-touch-header` variable are gone; the
+   header is a plain 26px bar on every screen and scales with the rest of the window
+   (~13–16 visual px on a phone). `applyScreenFit` dropped the header measure/write and its
+   folded-in height term (`TOUCH_HEADER_PX`/`TOUCH_HEADER_MAX_PX`/`screenFitHeader` all
+   removed); the fit is back to the plain `min(availW/naturalW, availH/naturalH)` against
+   the per-page budget. Cost noted in the Header comment: the grab target shrank with the
+   bar — if touch-drag turns fiddly, grow the hit-AREA (a transparent overlay) without
+   growing the visible bar, rather than restoring a taller header.
+   Verified: esbuild JSX parse + bundle-resolve (ShipWindow.js), `node --check`
+   (shipWindowManager.js). UI.bundle + game.legacy.bundle (shipWindowManager.js is in the
+   legacy bundle) — needs `yarn build`.
+
+**Post-Stage-4 improvements round 13 (2026-07-24) — BUILT, awaiting user test
+(UI.bundle only; one user report):**
+1. **Lobby watermark nudge now conditional on side sections** (`ShipWindow.js`). Round
+   10 item 2 pushed the lobby hull art down by `LOBBY_WATERMARK_OFFSET_Y` on **every**
+   lobby grid window; the user: on hulls without side sections (Heavy Combat Vessels) the
+   sections are not pushed down, so the offset only pulls the art off them. **Why the two
+   cases differ** — `buildTemplateAreas` extends the `ctrl` and `ew` chrome spans downward
+   only through rows whose side cell is free ([ShipWindow.js] `rows[i][0]/[2] === null`
+   loops). A hull WITH side sections names both side areas in its middle rows, blocking
+   those spans, so the tall lobby chrome (Ship Stats + datasheet + Enhancements) inflates
+   row 1 alone and the fwd/prim/aft cluster sinks below the grid's midline — the case the
+   nudge was written for. A hull WITHOUT them leaves every side cell free, the chrome
+   spans the full grid height and sits BESIDE the section column instead of stacking on
+   top of it, and the sections stay centred. **Fix**: new `SIDE_LOCATIONS = [3, 4, 31, 41,
+   32, 42]` (exactly the locations that make `buildTemplateAreas` emit a middle row) and
+   `hasSideSections(locations)`; the `WatermarkLayer` now gets
+   `lobby && hasSideSections(systemsByLocation) ? LOBBY_WATERMARK_OFFSET_Y : 0`. All keys
+   are pre-seeded by `sortIntoLocations`, so the `.length` reads are safe. game.php,
+   compact/mine and flight windows are untouched (still 0).
+2. **Mine art nudged down in the compact window** (`ShipWindow.js`, second user request
+   the same day). The compact variant's `ControlsArea $compact` is a **full-width stack
+   across the TOP** of `CompactBody` — the very box `WatermarkLayer` centres itself in —
+   so on a mine, which has few enough systems that the art is most of the window, the
+   Hit Chart / Ship Art / Notes buttons sit squarely over the image. New
+   **`MINE_WATERMARK_OFFSET_Y` (20px, `>>> MINE WATERMARK NUDGE <<<`)**, a knob of its
+   own rather than a share of the lobby one since the two windows are different shapes.
+   Applied as `ship.mine && compactHasControls`:
+   - **`ship.mine`** — the `isTerrain` branch serves terrain AND revealed mines; terrain
+     proper wasn't reported and carries enough icons that its art is incidental.
+   - **`compactHasControls` (`withHitChart || withNotes || artAvailable(ship)`)** —
+     mirrors `renderControls`' own null guard, so a mine with no buttons doesn't get its
+     art shoved off centre for chrome that isn't there. Same class of bug as item 1.
+   Both pages, deliberately: the compact mine window and its button stack are identical
+   in game and lobby, so a page split there would be arbitrary. Unrevealed mines
+   (`isUnrevealedMine`, its own earlier branch) render no controls and stay at 0.
+   Verified: esbuild JSX parse ×2. UI.bundle only — needs `yarn build`.
+
+**Post-Stage-4 improvements round 14 (2026-07-26) — BUILT, awaiting user test
+(UI.bundle only; one user request, game.php only):**
+1. **"Ship Stats" action button in the game.php ship window** (`ShipWindow.js` +
+   `ShipNotesPanel.js`), sitting **between Hit Chart and Ship Art** in the top-left
+   control stack and opening the lobby's Ship Stats block as a **click popup**, exactly
+   the way Hit Chart does. The popup body is the **existing `ManoeuvreStats` component
+   verbatim** — same "SHIP STATS" header bar, same CSS bar-graph `StatsIcon` glyph, same
+   rows (Turn cost / Turn delay / Accel-decel / Pivot / Roll / Profile F-S / Initiative,
+   with the `!ship.base` gate that leaves bases showing only Profile) — so the game and
+   lobby readouts cannot drift. `StatsIcon` is now **exported** from `ShipNotesPanel.js`
+   and reused directly by the button, for the same reason.
+   - **Wiring**: `openPanel` gained a third value `'shipstats'` (`null | 'hitchart' |
+     'shipstats' | 'notes'`) driving `renderStatsButton` + a new `renderPopup` branch;
+     `togglePanel` / the document-pointerdown outside-close / the `$active` button fill
+     are all generic and needed no change. The popup uses `$fit` (the stats panel is a
+     fixed 150px box, so it shrink-wraps) and the same `getAnchorBelow(this.controlsRef)`
+     anchor as game.php's Hit Chart — it drops below the whole button stack.
+   - **Where it appears**: new `statsAvailable(ship)` helper next to `artAvailable` —
+     `!isLobby() && !ship.flight && !ship.mine && !gamedata.isTerrain(...)`. The **lobby is
+     excluded because it already shows the identical block always-visible** under the Hit
+     Chart button (a button there would duplicate it); mines/terrain are excluded because
+     manoeuvre stats are meaningless for them (the lobby likewise hides the block for
+     mines), and game flight windows render no control block at all. `renderControls`'
+     all-empty null guard and the popup branch both consult the same helper, so a stale
+     `openPanel` can't render an orphan popup.
+2. **Live per-turn costs in that popup, blueprint deltas in yellow** (same-day follow-up;
+   the first cut showed the blueprint rates and the user asked for the movement engine's
+   live figures instead). `ManoeuvreStats` gained a **`live` prop** — passed only by
+   game.php's popup, so **the lobby block is untouched** (no game state there) — and a new
+   `liveManoeuvreStats(ship)` helper in `ShipNotesPanel.js`.
+   - **Turn cost / Turn delay** now read `THRUST (rate)`, e.g. `5 (1.00)`: the actual cost
+     to turn this turn. Arithmetic copied from the ship tooltip
+     ([UI/ShipTooltip.js:359-372], itself movement.js `calculateRequiredThrust`) so the two
+     readouts can't disagree — `ceil(speed × rate)`, a turn never below 1, plus a flat +1
+     per docked LCV (`getDockedLcvTurnSurcharge`); the rate comes from
+     `shipManager.movement.getTurnCost/getTurnDelayCost`, which already fold in **attached
+     ships**; a **reversing submarine** pays ×1.33 on the turn (not the delay), applied in
+     the tooltip's exact operand order so no float rounding can flip a `ceil` between them.
+     One deliberate divergence: the parenthesised turn rate is the EFFECTIVE (post-1.33)
+     one so the row's own arithmetic reads straight — the tooltip prints the unmodified
+     rate next to the modified thrust.
+   - **Yellow (`theme.colors.custom`) marks a moved cost**: new `$changed` prop on
+     `StatValue`, set when the live cost differs from the same figure recomputed from the
+     hull's OWN rate (`ship.turncost`/`turndelaycost`, no attachments/LCVs/sub penalty).
+     Speed cancels out of that comparison, so speed alone never lights it up; a rate the
+     SERVER already modified (crits) isn't flagged either, correctly — that IS the ship's
+     current stat.
+   - **Accel/decel, Pivot, Roll stay as sent**: they are flat thrust costs the client
+     engine doesn't modify for ships. Combat pivot (×1.5) exists only in the firing phase,
+     which only flights may pivot in (`canPivot`), and game flight windows render no
+     control block — so there is nothing live to show.
+   - Guards: the turn/delay block is skipped (→ blueprint fallback) when
+     `shipManager.movement` is absent or the ship has no movement history, since every
+     figure there derives from the last committed move. Mines/terrain were already excluded
+     by `statsAvailable`, keeping the popup strictly inside the set the tooltip already
+     proves safe for these calls.
+3. **Profile and Initiative given the same live treatment** (second follow-up the same
+   day). The helper is now `liveShipStats(ship)` (renamed from `liveManoeuvreStats`) and
+   returns a `*Changed` flag per stat; every row falls back to its blueprint figure on its
+   own if the live one can't be worked out.
+   - **Profile — deliberately EW-FREE, per the user**: only things that move the hull's own
+     profile count. That is the **`ProfileIncreased` critical** (marine sabotage via Wreak
+     Havoc, and scanner/computer loss), which rides the **CnC** and is worth **+1 to every
+     hit-location profile** (= +5% displayed) — mirroring what
+     [weapon.php:1802-1807] does at resolution time
+     (`$defence += $targetCnC->hasCritical("ProfileIncreased")`), since
+     `getHitSectionProfile` hands back raw `forwardDefense`/`sideDefense`
+     ([ShipClasses.php:2318-2321]). Read client-side with
+     `shipManager.criticals.hasCritical(cnc, "ProfileIncreased")` (counts crits in effect
+     this turn). Defensive EW stays out: it is a per-shot modifier applied on top, not a
+     change to the profile — the map tooltip's "Defence (F/S)"
+     (`weaponManager.calculateBaseHitChange`) remains the EW-modified readout.
+   - **Initiative — nothing to recompute**: the server already ships the delta.
+     `ship.iniativeadded` is `(this turn's bonus + common modifiers) − blueprint bonus`,
+     filled in by `ShipClasses::onConstructed` ([ShipClasses.php:1113-1116]) expressly
+     "for display to player", and covers the sub-speed-5 penalty
+     (`getCommonIniModifiers`: −10 per point under speed 5), the CnC criticals (comms
+     disrupted, reduced initiative, tractor-held, hangar ops, LCV launched) and per-hull
+     rules alike. Row shows `iniativebonus + iniativeadded`, yellow when the mod is
+     non-zero — **which is most ships most turns**, since the speed penalty alone fires
+     below speed 5. That is accurate, not a bug; flag it if it reads as noisy.
+   - Neither row carries a parenthesised second figure: unlike turn cost (where the *rate*
+     would otherwise vanish from the panel) these are in the same units as the blueprint
+     value, so the yellow alone carries the "modified" signal.
+4. **Popup renders the block `bare`** (third follow-up): rows only — no "SHIP STATS" title
+   bar, no dotted panel frame. Both were saying it twice, since the popup already has
+   `PopupHolder`'s frame and drops from a button labelled "Ship Stats". New `bare` prop on
+   `ManoeuvreStats` skips `StatsTitle` and switches `StatsPanel` to a `$bare` variant
+   (padding 0, no border/background); the 150px width is KEPT so the label/value columns
+   sit exactly where they do in the lobby block, and `StatLabel`/`StatValue`'s own 5px side
+   margins supply the inset the panel padding used to. The **lobby block is untouched** —
+   it passes neither `live` nor `bare`.
+5. **Button order swapped + Ship Stats hover-peeks** (fourth follow-up). Game stack is now
+   **Hit Chart → Ship Art → Ship Stats → Notes** (the two new buttons traded places; the
+   lobby, which renders no Ship Stats button, is unaffected). The Notes button's hover-peek
+   was **generalised to any panel** rather than duplicated: state `hoverNotes` (bool) →
+   **`hoverPanel`** (same vocabulary as `openPanel`), `onNotesHoverStart/End` →
+   **`onPanelHoverStart(name)`/`onPanelHoverEnd()`**, timer `notesHoverTimer` →
+   `panelHoverTimer`; both the Ship Stats button and its popup now carry the handlers, so
+   the pointer can cross from button into popup within the same 150ms grace. `renderPopup`
+   simplifies to `const shown = openPanel || hoverPanel` — only a rendered button can set
+   `hoverPanel` and every branch re-checks its own availability, so the old
+   `hoverNotes && withNotes` guard is redundant. Click still pins, a clicked panel still
+   wins, and `$active` still tracks `openPanel` only (hovering doesn't light the button) —
+   all exactly as Notes behaved.
+   Verified: esbuild JSX parse + bundle-resolve ×2 (ShipWindow.js, ShipNotesPanel.js),
+   plus a grep sweep confirming no `hoverNotes`/`notesHoverTimer`/`onNotesHover` references
+   survive.
+6. **Notes popup takes the Ship Stats popup's type** (fifth follow-up): 10px body in the
+   notes blue (`theme.colors.textAccent`, = `StatLabel`) and **10px upright** white
+   headings (= `StatValue`), replacing the tooltip stack's 12px body / 11px italic heading —
+   so the two popups dropping from adjacent buttons read as one datasheet. New
+   `compactText` prop on `ShipInfo`, applied as **component selectors** (`${Entry}` /
+   `${Header}`) inside `InfoContainer` rather than by editing the shared `Entry`/`Header`
+   in `SystemInfo.js`, which the system tooltips also render. Specificity works out on its
+   own (container class + component class beats the component's own single-class rule).
+   **Scope note**: only the Notes popup passes it. `SystemInfo`'s ship-level info popup
+   renders the same `ShipInfo` at the old 12px — extend by passing `compactText` there too
+   if that reads as inconsistent.
+7. **Fix: an attachment-raised turn rate could change the row without colouring it**
+   (user report, game 4072 — a Primus with an attached claw ship showed corrected Turn
+   cost / Turn delay in plain white). The highlight test compared only the **ceil'd thrust**,
+   but the row renders `thrust (rate)`: a rate raised from e.g. 1.33 to 1.83 by
+   `getTurnCost`'s attached-ship sum still ceils to the same thrust at low speed, so a
+   visibly changed row tested as unchanged. Both rows now compare the **whole rendered
+   string** against the one the hull's own rate alone would produce (new `costText(thrust,
+   rate)` helper builds both), so anything visible in the row can light it up. Speed is
+   still common to both sides, so speed alone still never does.
+   Verified: esbuild JSX parse + bundle-resolve ×3 (ShipWindow.js, ShipNotesPanel.js,
+   ShipInfo.js). UI.bundle only — needs `yarn build`.
+
 **Stage 3 (2026-07-17) — COMPLETE (user-accepted after feedback rounds 1–5).** Two user riders (2026-07-17)
 refine §3.2: (1) the Hit Chart button sits in the same top-left position as
 game.php with the manoeuvre stats (TC/TD, Acc/Pivot/Roll, Profile, Ini, Agile)

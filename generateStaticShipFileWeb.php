@@ -136,7 +136,7 @@ function compactSystemForStaticJson(array $system): array {
     }
     // Null / empty-string defaults
     $nullEmptyKeys = ['outputDisplay','specialAbilityValue','imagePath','iconPath',
-                      'individualNotesTransfer','outputType'];
+                      'individualNotesTransfer','outputType','linkedFiringGroup','linkedFiringSpread'];
     foreach ($nullEmptyKeys as $key) {
         if (array_key_exists($key, $system) && ($system[$key] === null || $system[$key] === '')) {
             unset($system[$key]);

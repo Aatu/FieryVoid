@@ -328,19 +328,33 @@ class TacGamedata {
     
     public function getNewDamages(){
         $list = array();
-        
+
         foreach ($this->ships as $ship){
             foreach($ship->systems as $system){
                 foreach($system->damage as $damage){
                     if ($damage->updated == true)
                         $list[] = $damage;
                 }
-                
+                //Fighter subsystems can have damage entries as well - a flight keeps its defensive
+                //systems on the individual craft, and a capacity-pool absorber records what it
+                //soaked as a damage entry on ITSELF (ThoughtShield/ThirdspaceShield::absorbDamage).
+                //Without this loop none of that ever reached the database: the craft's shield pool
+                //never moved (so it absorbed forever and its rating display never changed) and the
+                //combat log had no absorption row to report. Mirrors getUpdatedCriticals() above.
+                if($system instanceof Fighter){
+                    foreach($system->systems as $subsystem){
+                        foreach($subsystem->damage as $damage){
+                            if ($damage->updated == true)
+                                $list[] = $damage;
+                        }
+                    }
+                }
+
             }
         }
-        
+
         return $list;
-    
+
     }
 
 	
@@ -685,6 +699,10 @@ class TacGamedata {
                     if ($move->type == "deploy" && $move->turn == $this->turn)
                         unset($ship->movement[$i]);
                 }
+
+                //Re-index: deploy rows sit at the FRONT, so unsetting them leaves the array
+                //keyed from 1..n and json_encode would emit a JSON object, not an array.
+                $ship->movement = array_values($ship->movement);
             }
         }
     
@@ -883,6 +901,13 @@ class TacGamedata {
             foreach ($toDelete as $i) {
                 unset($ship->movement[$i]);
             }
+
+            //MUST re-index: the carve-outs above (start/deploy, the isRolled/isRolling/
+            //isPivoting markers, and forced moves) are scattered THROUGH the deleted block -
+            //the Gravitic Augmenter's forced free jink in particular is appended LAST - so
+            //unset() leaves gaps in the keys. json_encode turns a gappy array into a JSON
+            //OBJECT, and the client's consumeMovement then dies on movements.filter().
+            $ship->movement = array_values($ship->movement);
         }
     }
 
@@ -906,6 +931,10 @@ class TacGamedata {
                     unset($ship->movement[$i]);
                 }
             }
+
+            //Re-index so json_encode still emits an ARRAY - a transient move appended after
+            //the pivot (e.g. the Augmenter's forced jink) would otherwise leave a key gap.
+            $ship->movement = array_values($ship->movement);
         }
     }
 
@@ -922,24 +951,51 @@ class TacGamedata {
             }
 
             $isDetected = false;
-            foreach ($ship->systems as $system) {
-                if ($system instanceof Stealth || $system instanceof ShadingField || $system instanceof CloakingDevice) {
-                    if (isset($system->detectedNew) && is_array($system->detectedNew) && in_array($playerTeam, $system->detectedNew)) {
-                        $isDetected = true;
-                        break;
-                    }
-                    if (isset($system->detected) && $system->detected === true && (!isset($system->detectedNew) || empty($system->detectedNew))) {
-                        $isDetected = true;
-                        break;
+
+            if($ship instanceof FighterFlight){
+                //A flight's stealth systems live one level deeper, on each fighter. Detection state
+                //is tracked on the FIRST fighter's system ONLY: checkStealth resolves it via
+                //FighterFlight::getSystemByName (first match, destroyed fighters NOT skipped) and
+                //checkStealthNextPhase writes its notes against that one system id. Every other
+                //fighter's copy therefore keeps the class default detected=true / empty detectedNew,
+                //so scanning them all would report "detected" for a shaded flight forever.
+                $stealthSystem = null;
+                foreach ($ship->systems as $fighter){
+                    foreach ($fighter->systems as $sys){
+                        if ($sys instanceof Stealth || $sys instanceof ShadingField || $sys instanceof CloakingDevice) {
+                            $stealthSystem = $sys;
+                            break 2;
+                        }
                     }
                 }
-                if ($system instanceof MineStealth) {
-                    if (isset($system->detected) && is_array($system->detected) && in_array($playerTeam, $system->detected)) {
+
+                if ($stealthSystem) {
+                    if (isset($stealthSystem->detectedNew) && is_array($stealthSystem->detectedNew) && in_array($playerTeam, $stealthSystem->detectedNew)) {
                         $isDetected = true;
-                        break;
+                    } elseif (isset($stealthSystem->detected) && $stealthSystem->detected === true && empty($stealthSystem->detectedNew)) {
+                        $isDetected = true;
                     }
                 }
-            }
+            }else{
+                foreach ($ship->systems as $system) {
+                    if ($system instanceof Stealth || $system instanceof ShadingField || $system instanceof CloakingDevice) {
+                        if (isset($system->detectedNew) && is_array($system->detectedNew) && in_array($playerTeam, $system->detectedNew)) {
+                            $isDetected = true;
+                            break;
+                        }
+                        if (isset($system->detected) && $system->detected === true && (!isset($system->detectedNew) || empty($system->detectedNew))) {
+                            $isDetected = true;
+                            break;
+                        }
+                    }
+                    if ($system instanceof MineStealth) {
+                        if (isset($system->detected) && is_array($system->detected) && in_array($playerTeam, $system->detected)) {
+                            $isDetected = true;
+                            break;
+                        }
+                    }
+                }
+            }    
 
             if (!$isDetected) {
                 // Give it a dummy deploy movement completely off screen so the client doesn't crash reading position

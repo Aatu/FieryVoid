@@ -6753,8 +6753,13 @@ class DiffuserTendril extends ShipSystem{
 		return $this->getTotalDamage();
 	}
 	
-	public function absorbDamage($ship,$gamedata,$value){ //or dissipate, with negative value
-		$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, -1, false, false, "Absorb/Dissipate!", "Tendril");
+	public function absorbDamage($ship,$gamedata,$value, $fireOrderid = -1){ //or dissipate, with negative value
+		//$fireOrderid ties what the tendril soaked to the shot that caused it. The combat log finds a
+		//shot's damage by matching entries on fireorderid (weaponManager.getDamagesCausedBy), so
+		//without it a fully absorbed shot read as "damaged for 0" and looked like nothing happened.
+		//Dissipation and the docking-reabsorption in HangarOps pass no id and stay unlinked (-1), so
+		//they are never reported as damage from a shot.
+		$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, $fireOrderid, false, false, "Absorb/Dissipate!", "Tendril");
 		$damageEntry->updated = true;
 		$this->damage[] = $damageEntry;
 	}
@@ -6805,7 +6810,10 @@ class DiffuserTendrilFtr extends DiffuserTendril{
 		return $this->usedCapacityTotal;
 	}
 	
-	public function absorbDamage($ship,$gamedata,$value){ //or dissipate, with negative value
+	//$fireOrderid is accepted only to keep the signature compatible with the parent - a fighter
+	//tendril stores its absorption as individual notes, not as damage entries, so there is nothing
+	//for the combat log to link to. Fighter diffuser absorption stays invisible in the log.
+	public function absorbDamage($ship,$gamedata,$value, $fireOrderid = -1){ //or dissipate, with negative value
 		$this->usedCapacityTotal += $value; //running count
 		$this->thisTurnEntries[] = $value; //mark for database
 	}
@@ -7058,8 +7066,8 @@ by 4.
 		
 		if($mostSuitableAbsorbtion>0){ //appropriate tendril found!
 			$damageAbsorbed=min($damageToAbsorb,$mostSuitableAbsorbtion);
-			$returnValues['dmg']=$effectiveDamage-$damageAbsorbed;			
-			$mostSuitableTendril->absorbDamage($target,$gamedata,$damageAbsorbed);
+			$returnValues['dmg']=$effectiveDamage-$damageAbsorbed;
+			$mostSuitableTendril->absorbDamage($target,$gamedata,$damageAbsorbed, $fireOrder->id);//link to the shot so the combat log can report it
 		}
 		
 		return $returnValues;

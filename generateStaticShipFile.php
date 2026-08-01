@@ -54,7 +54,7 @@ function compactSystemForStaticJson(array $system): array {
     $nullEmptyKeys = ['outputDisplay','specialAbilityValue','imagePath','iconPath',
                       'individualNotesTransfer','outputType',
                       'stowedArcStart','stowedArcEnd','repairRestrictedTo','linkedOrbital',
-                      'structureHomeLocation'];
+                      'structureHomeLocation','linkedFiringGroup','linkedFiringSpread'];
     foreach ($nullEmptyKeys as $key) {
         if (array_key_exists($key, $system) && ($system[$key] === null || $system[$key] === '')) {
             unset($system[$key]);

@@ -2461,7 +2461,8 @@ class RammingAttack extends Weapon{
 				if($ship->isDestroyed()) continue; //Ignore destroyed ships
 				if($ship->isTerrain()) continue;	//Don't add other terrain.
 				if($ship->getTurnDeployed($gamedata) > $gamedata->turn)	continue; //Ship not deployed yet.		
-				//if ($ship instanceof FighterFlight && $shooter->Huge == 0) continue; //Not doing fighters except for very large terrain, change if and when skindancing introduced.	
+				if($this->isPhasedThroughTerrain($ship, $shooter, $gamedata)) continue; //Half-phased Shadow ships slip straight through terrain, provided they don't stop inside it.
+					//if ($ship instanceof FighterFlight && $shooter->Huge == 0) continue; //Not doing fighters except for very large terrain, change if and when skindancing introduced.	
 				$relevantShips[] = $ship;			
 			}
 
@@ -2722,35 +2723,54 @@ class RammingAttack extends Weapon{
 	}
 
 
+	//Every hex a Terrain unit occupies: its centre hex, plus the extra hexes given by an irregular hexOffsets shape or by a circular Huge radius.
+	private function getTerrainOccupiedHexes($terrain){
+		$terrainPosition = $terrain->getHexPos();
+		$occupiedHexes = array($terrainPosition); //Centre hex is always occupied.
+
+		if (property_exists($terrain, 'hexOffsets') && !empty($terrain->hexOffsets)) {
+			// 1. Irregular Shape defined by hexOffsets - hexOffsets lists only the EXTRA hexes
+			$move = $terrain->getLastMovement();
+			$facing = $move ? $move->facing : 0;
+			foreach ($terrain->hexOffsets as $offset) {
+				// Use accurate pixel-based rotation to get absolute hex position
+				$occupiedHexes[] = Mathlib::getRotatedHex($terrainPosition, $offset, $facing);
+			}
+		} else if ($terrain->Huge > 0) {
+			// 2. Standard Circular Shape defined by Huge radius
+			foreach (Mathlib::getNeighbouringHexes($terrainPosition, $terrain->Huge) as $n) {
+				$occupiedHexes[] = new OffsetCoordinate($n['q'], $n['r']);
+			}
+		}
+
+		return $occupiedHexes;
+	}//endof getTerrainOccupiedHexes()
+
+
+	//Shadow Association ships that half-phase during their movement pass harmlessly through terrain - but only if they don't END that movement inside it.
+	private function isPhasedThroughTerrain($ship, $terrain, $gamedata){
+		if($ship->faction !== 'Shadow Association') return false;
+		if(!Movement::isHalfPhased($ship, $gamedata->turn)) return false;
+
+		$finalMove = $ship->getLastTurnMovement($gamedata->turn+1); //last move of THIS turn, ie. where the ship came to rest
+		if(!$finalMove) return false;
+
+		foreach($this->getTerrainOccupiedHexes($terrain) as $hex){
+			if($hex->q == $finalMove->position->q && $hex->r == $finalMove->position->r) return false; //Stopped in the terrain - phasing does not save it.
+		}
+
+		return true;
+	}//endof isPhasedThroughTerrain()
+
+
 	private function checkForCollisions($relevantShips, $gamedata, $terrainPosition, $thisShip){
 	    $collisiontargets = array(); // Initialize array for fighters to be fired at.	
 		//$thisShip = $this->getUnit();
 		
 		if ($thisShip->Huge > 0 || (property_exists($thisShip, 'hexOffsets') && !empty($thisShip->hexOffsets))) {  //Terrain occupies more than just 1 hex!  Need to check all of its hexes.
 			// Terrain logic: Build list of ALL occupied hexes first.
-			$occupiedHexes = [];
+			$occupiedHexes = $this->getTerrainOccupiedHexes($thisShip);
 
-			if (property_exists($thisShip, 'hexOffsets') && !empty($thisShip->hexOffsets)) {
-				// 1. Irregular Shape defined by hexOffsets
-				$move = $thisShip->getLastMovement();
-				$facing = $move ? $move->facing : 0;
-
-				$occupiedHexes[] = $terrainPosition; // Center hex is always occupied; hexOffsets lists only the EXTRA hexes
-				foreach ($thisShip->hexOffsets as $offset) {
-					// Use accurate pixel-based rotation to get absolute hex position
-					$occupiedHexes[] = Mathlib::getRotatedHex($terrainPosition, $offset, $facing);
-				}
-			} else {
-				// 2. Standard Circular Shape defined by Huge radius
-				$occupiedHexes[] = $terrainPosition; // Center is always occupied for circular
-				if ($thisShip->Huge > 0) {
-					$neighbors = Mathlib::getNeighbouringHexes($terrainPosition, $thisShip->Huge);
-					foreach ($neighbors as $n) {
-						$occupiedHexes[] = new OffsetCoordinate($n['q'], $n['r']);
-					}
-				}
-			}
-	
 			foreach ($relevantShips as $ship) {  
 				$startMove = $ship->getLastTurnMovement($gamedata->turn);
 				if (!$startMove) continue;

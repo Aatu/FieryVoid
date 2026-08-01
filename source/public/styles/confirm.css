@@ -442,6 +442,122 @@
     /*margin-left: 5px;*/
 }
 
+/* Rows that allocate from TWO pools at once (the Molecular Slicer's dice + set damage
+   dialogs) carry a live "left: N dice / N set dmg" readout that drains as the player
+   types. It sits on its own line under the inputs.
+
+   The readout is taken OUT OF FLOW rather than wrapped as a flex item. A wrapping flex
+   container computes its max-content width as though every item shared one line, so a
+   wrapped readout gets ADDED to the row's natural width and then drops to line two -
+   sizing the dialog for a line it never occupies and leaving that much dead space beside
+   the inputs. Absolutely positioned children contribute nothing to intrinsic sizing, so
+   the dialog now shrinks to the inputs; the row reserves the readout's line as padding.
+
+   Both classes are created only by askForMultipleValues (the Slicer allocation dialogs);
+   the hangar and Fighter Bomb windows share .multi-value-row but never carry these, so
+   their layout is untouched. */
+.confirm.multi-value-confirm .multi-value-row.multi-value-row-pools {
+    position: relative;
+    padding-bottom: 20px;
+}
+
+.confirm.multi-value-confirm .multi-value-remaining {
+    position: absolute;
+    right: 5px;
+    bottom: 4px;
+    text-align: right;
+    white-space: nowrap;
+    font-size: 12px;
+    color: #DEFBFF;
+    opacity: 0.7;
+    font-family: 'Consolas', monospace;
+    letter-spacing: 0.5px;
+}
+
+/* Both pools spent - highlight rather than fade, so "nothing wasted" is visible at a glance. */
+.confirm.multi-value-confirm .multi-value-remaining.depleted {
+    color: #e14dff;
+    opacity: 1;
+}
+
+/* === Themed number steppers ==============================================
+   The browser's own number-input arrows are drawn by the UA in its colours -
+   white, which fights this dialog's purple - and there is no reliable way to
+   recolour them (Firefox exposes no hook; resetting the appearance of Blink's
+   ::-webkit-inner-spin-button also disables its clicks). So confirm.js's
+   attachStepper() hides the native pair and appends its own arrows, which are
+   plain elements and take the theme like anything else.
+
+   Scoped to .stepper-input, NOT to .multi-value-input: the hangar and Fighter
+   Bomb dialogs share that class and keep their native spinners. */
+.confirm.multi-value-confirm input.stepper-input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.confirm.multi-value-confirm input.stepper-input[type="number"]::-webkit-outer-spin-button,
+.confirm.multi-value-confirm input.stepper-input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+}
+
+.confirm.multi-value-confirm .multi-value-stepper {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-left: 3px;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* Hit area is the 16x12 box; the arrow itself is the ::before triangle centred in
+   it, so the glyph stays small while the target stays comfortable on touch. */
+.confirm.multi-value-confirm .multi-value-step {
+    display: block;
+    position: relative;
+    width: 16px;
+    height: 12px;
+    cursor: pointer;
+}
+
+.confirm.multi-value-confirm .multi-value-step::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    transition: border-color 0.15s ease;
+}
+
+.confirm.multi-value-confirm .multi-value-step.up::before {
+    border-bottom: 6px solid #a020c0;
+}
+
+.confirm.multi-value-confirm .multi-value-step.down::before {
+    border-top: 6px solid #a020c0;
+}
+
+.confirm.multi-value-confirm .multi-value-step.up:hover::before {
+    border-bottom-color: #e14dff;
+}
+
+.confirm.multi-value-confirm .multi-value-step.down:hover::before {
+    border-top-color: #e14dff;
+}
+
+.confirm.multi-value-confirm .multi-value-step:hover {
+    filter: drop-shadow(0 0 4px rgba(191, 0, 230, 0.75));
+}
+
+.confirm.multi-value-confirm .multi-value-step:active {
+    filter: drop-shadow(0 0 6px rgba(225, 77, 255, 0.9));
+}
+
 /* === Hangar Operations dialogs ============================================
    Steel/cyan theme for the four hangar confirm windows (Launch / Dock /
    DeployDock / DeployCarrierPicker). Layered on top of .multi-value-confirm

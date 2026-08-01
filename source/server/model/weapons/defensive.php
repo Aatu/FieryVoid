@@ -958,8 +958,21 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 			$this->damage[] = $damageEntry;
 		}
 
+		//DORMANT - see checkArmourDeduction(). Kept as a property so the intent stays visible and
+		//the behaviour can be switched on deliberately rather than by accident.
+		private $rakeArmourDedupe = false;
+
 		private function checkArmourDeduction($gamedata, $fireOrder){
 			$deductArmour = true;
+
+			//This "armour applies to the first rake only" dedupe has NEVER actually fired: it matches
+			//damage entries by fireorderid, and every shield entry carried a hardcoded -1 until
+			//absorbDamage started stamping the real id (so the combat log could report absorption).
+			//Enabling it now would change live combat maths, and it would over-apply: a fire order
+			//with several shots shares ONE id, so shots 2..n of that order would skip armour too.
+			//Flip $rakeArmourDedupe to true only as a deliberate rules change (and fix the per-shot
+			//case first).
+			if(!$this->rakeArmourDedupe) return $deductArmour;
 
 			foreach($this->damage as $damage){
 				if($damage->turn != $gamedata->turn) continue;//Only interested in this turn.
@@ -972,7 +985,12 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 		}//endof checkArmourDeduction
 		
 		public function absorbDamage($ship,$gamedata,$value, $fireOrderid = -1){ //or dissipate, with negative value
-			$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, -1, false, false, "Absorb/Regenerate!", "ThirdspaceShield");
+			//$fireOrderid ties what the shield soaked to the shot that caused it. The combat log finds
+			//a shot's damage by matching entries on fireorderid (weaponManager.getDamagesCausedBy), so
+			//without it a fully absorbed shot read as "damaged for 0" and looked like nothing happened.
+			//Regeneration/dissipation calls pass no id and stay unlinked (-1), so they are never
+			//reported as damage from a shot.
+			$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, $fireOrderid, false, false, "Absorb/Regenerate!", "ThirdspaceShield");
 			$damageEntry->updated = true;
 			$this->damage[] = $damageEntry;
 		}
@@ -1291,15 +1309,30 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 		}
 		
 		public function absorbDamage($ship,$gamedata,$value, $fireOrderid = -1){ //or dissipate, with negative value
-			$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, -1, false, false, "Absorb/Regenerate!", "ThoughtShield");
+			//$fireOrderid ties what the shield soaked to the shot that caused it - see the identical
+			//note on ThirdspaceShield::absorbDamage. Regeneration/dissipation calls pass no id and
+			//stay unlinked (-1).
+			$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, $fireOrderid, false, false, "Absorb/Regenerate!", "ThoughtShield");
 			if($gamedata->phase == 4) $damageEntry->updated = true; //Don't duplicate a damage save in PreFiring phase.
 			$this->damage[] = $damageEntry;
 		}
 		
 
+		//DORMANT - see checkShieldDeduction().
+		private $rakeShieldDedupe = false;
+
 		private function checkShieldDeduction($gamedata, $fireOrder){
 			$deductShieldRating = true;
 			//how to check it's this turn?  Check damage entries for this turn instead, with Shooter and Weapon ids?
+
+			//This "reinforcement charged on the first rake only" dedupe has NEVER actually fired: it
+			//matches damage entries by fireorderid, and every shield entry carried a hardcoded -1
+			//until absorbDamage started stamping the real id (so the combat log could report
+			//absorption). Enabling it now would change live combat maths for reinforced shields
+			//(defenceMod > 0), and it would over-apply: a fire order with several shots shares ONE
+			//id, so shots 2..n of that order would also skip the charge. Flip $rakeShieldDedupe to
+			//true only as a deliberate rules change (and fix the per-shot case first).
+			if(!$this->rakeShieldDedupe) return $deductShieldRating;
 
 			foreach($this->damage as $damage){
 				if($damage->turn != $gamedata->turn) continue;//Only interested in this turn.
