@@ -28,6 +28,7 @@ window.gamedata = {
     blockedHexes: Array(),
     isStealthPresent: false,
     areMinesPresent: false, //Marks that ENEMY mines are present.
+    identityReloadPending: false, //Chameleon Sensor Suite (D14) - a reveal has forced a page reload
 
     mouseOverShipId: -1,
 
@@ -2004,6 +2005,15 @@ getActiveShipName: function getActiveShipName() {
 
         if (!serverdata.id) return;
 
+        //Chameleon Sensor Suite (D14): window.staticShips is fixed at page load and carries only the
+        //blueprints of the ships this player could see THEN. When a disguise breaks mid-session the
+        //server starts sending the ship's true phpclass, which this page has no blueprint for - Ship()
+        //would build it from the JSON alone, with no armour, no arcs and no maxhealth. Reload instead,
+        //before anything on the page has been touched; reveals happen at most once per ship per game,
+        //at a turn boundary. Skipped in replay, where stepping across the reveal turn is SUPPOSED to
+        //change identity and a reload would throw the viewer out of the replay.
+        if (!gamedata.replay && gamedata.hasShipIdentityChanged(serverdata.ships)) return;
+
         gamedata.turn = serverdata.turn;
         gamedata.gamephase = serverdata.phase;
         gamedata.activeship = serverdata.activeship;
@@ -2039,6 +2049,30 @@ getActiveShipName: function getActiveShipName() {
         }
 
         gamedata.checkGameStatus();
+    },
+
+    /* Has a ship already on this page come back wearing a different hull? Triggers the reload and
+       returns true. Positional lookup first - the server sends ships in a stable order, so the
+       id-scan fallback is only reached when something was spawned or removed. */
+    hasShipIdentityChanged: function hasShipIdentityChanged(jsonShips) {
+        if (gamedata.identityReloadPending) return true;
+        if (!jsonShips) return false;
+
+        for (var i in jsonShips) {
+            var json = jsonShips[i];
+            var existing = (gamedata.ships[i] && gamedata.ships[i].id == json.id)
+                ? gamedata.ships[i]
+                : gamedata.getShip(json.id);
+
+            if (!existing || !existing.phpclass) continue;
+            if (existing.phpclass === json.phpclass && existing.faction === json.faction) continue;
+
+            gamedata.identityReloadPending = true;
+            window.location.reload();
+            return true;
+        }
+
+        return false;
     },
 
     setShipsFromJson: function setShipsFromJson(jsonShips) {

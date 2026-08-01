@@ -14,23 +14,110 @@ Implement the B5W Chameleon Sensors rules on the Centauri **Dargan Strike Cruise
 | **0 — Baseline** | ✅ Built, in-game tested, committed |
 | **1 — Buy-time disguise choice** | ✅ Built, in-game tested, committed |
 | **2 — Reveal state machine** | ✅ Built, committed (HEAD `1f7660c34`). Two-account playtest of the reveal triggers still outstanding |
-| **3 — Identity swap** | ⬅️ **NEXT** |
-| 4-7 | Not started |
+| **3 — Identity swap** | ✅ **COMPLETE** — built 2026-07-31, in-game tested and signed off 2026-08-01 (game 4273). Two defects found in the playtest and fixed, both weapon-arming (decision 4 below) |
+| **4 — Phantom sheet** | ✅ Built 2026-08-01, server-proven (19-assertion round trip + a 12-assertion gate check). **Browser test outstanding.** D12 dropped as unnecessary — see below |
+| 5-7 | Not started |
 
-**Nothing is visibly disguised yet.** Stages 0–2 are the machinery; Stage 3 is where an enemy first
-sees a different ship.
+**An enemy now sees a different ship.** What they see is still *pristine* — Stage 3 serves the
+simulacrum's blueprint, so the hull looks undamaged and unpowered; the phantom sheet is Stage 4.
 
-Acceptance tests: `c:\tmp\css_stage0.php` (30 assertions), `css_stage1.php` (47), `css_stage2.php` (55).
+Acceptance tests: `c:\tmp\css_stage0.php` (30 assertions), `css_stage1.php` (47), `css_stage2.php` (55),
+`css_stage3.php` (104, both seats of game 4272) + `css_stage3_reveal.php` (6, drives the state machine
+in memory) + `css_stage3_leak.php` (encodes the real enemy payload and greps it for "Dargan",
+"Chameleon", "ELINT" — 0 hits, with the owner's payload as the control at 10/15/15) +
+`css_stage3_arming.php` (25, game 4273 — no weapon reads null, accelerators read full charge, every
+firing mode reads fully loaded, and a real weapon forced to `turnsloaded = 0` does not change what
+the enemy sees).
 Stage 2's injects a stub `Manager::$dbManager` by reflection to capture the notes a sweep would write
 with no database — reuse that pattern.
 
-### What Stage 3 should build on
+### What Stage 3 built on
 
-- `BaseShip::isChameleonDisguisedFrom($team)` — **the** single question every masking site should ask.
-  All the ways a deception can end (destroyed, offline, switched off, revealed to that team) already
-  resolve inside it.
+- `BaseShip::isChameleonDisguisedFrom($team)` — **the** single question every masking site asks.
+  All the ways a deception can end (destroyed, offline, switched off, revealed to that team) resolve
+  inside it, **and as of Stage 3 so does the own-team check** — put there rather than at each call
+  site so a site that forgot it cannot show a player their own ally as a stranger.
 - `BaseShip::getChameleonBlueprint()` — pristine, per-load cached instance of the simulacrum's class.
 - `TacGamedata::$chameleonPresent` — the per-load gate; tests the disguise CHOICE, not the live ability.
+
+### Stage 3 decisions that differ from the text below
+
+1. **The disguise is applied from `prepareForPlayer()`, not from `deleteHiddenData()`.**
+   `deleteHiddenData` is skipped when `$all` is true, which is how a PAST turn is served
+   (`Manager::getReplayGameData` passes `$actualTurn > $turn`). Every other kind of hidden data is
+   public once its turn has resolved; a disguise is not, and scrubbing back a turn must not undress
+   the ship. Tested (`past-turn replay stays disguised`).
+2. **The payload is built by asking the BLUEPRINT to strip itself**, then patching the real
+   identity/position fields back in — rather than by editing the real ship's payload. The default for
+   any field is therefore "fake", not "real", so nothing leaks through a line somebody forgot to
+   write. The whole method is ~40 lines.
+3. **`chameleonRevealTag` was not needed.** The client compares each incoming ship's `phpclass` /
+   `faction` against the one already on the page (`gamedata.hasShipIdentityChanged`) and reloads on a
+   mismatch — no new field, and it covers every future cause of an identity change, not just reveals.
+   Skipped in replay, where stepping across the reveal turn is *supposed* to change identity.
+4. **NEW: weapon arming is masked (D11 brought forward).** Found in the game-4273 playtest: every
+   simulacrum weapon displayed **`null/<loadingtime>`**. A pristine blueprint has never had its
+   loading calculated — that runs off `tac_loading` against a real ship — so `turnsloaded` went out
+   as literal `null` and the client's label (`turnsloaded + '/' + loadingtime`,
+   [shipSystem.js:220](source/public/client/model/shipSystem.js#L220)) printed it.
+   `armChameleonSimulacrumWeapons()` sets every simulacrum weapon fully loaded, which is both the fix
+   and D11 itself: the only arming state that is plausible on every turn and tells the enemy nothing.
+   **"Fully loaded" is `max(loadingtime, normalload)`, NOT `loadingtime`** — an accelerator fires at
+   one turn of charge but only reaches full potential at `normalload` (a Plasma Accelerator is
+   `loadingtime 1 / normalload 3`), which is the real ship's own charge cap
+   ([weapon.php:1074](source/server/model/weapons/weapon.php#L1074)) and both client displays'
+   denominator (`SystemIcon` uses `normalload` outright,
+   [weaponManager.js:2292](source/public/client/weaponManager.js#L2292) reads the same `max`).
+   Arming to `loadingtime` alone made every accelerator read **`1/3`** — charged, but visibly not
+   full. Use the `normalload` *property*, not `getNormalLoad()`: boostable weapons override that
+   method to return `loadingtime + maxBoostLevel`, and claiming maximum boost on a phantom that
+   shows no power allocated (D12) would be a tell rather than a mask.
+   **Multi-mode weapons need `turnsloadedArray` mirrored key-for-key from `loadingtimeArray`** — the
+   client re-reads `turnsloaded` out of that array whenever it is present ([shipSystem.js:219](source/public/client/model/shipSystem.js#L219)),
+   so a scalar alone is discarded the moment the viewer looks at any mode.
+   What is left of D11 for Stage 7 is the *other* half: masking arming on a CSS ship that is **not**
+   disguised (`None`) or **already revealed**, which is the real ship's own payload and therefore a
+   different code path.
+5. **NEW: the ship's NAME is masked.** §3 said "pass through — warn the player in the buy dialog",
+   but the default name is generated from the hull ("Dargan Strike Cruiser #2"), so an untouched name
+   hands the enemy the answer and the deception is over before it starts. `getChameleonMaskedName()`
+   swaps any mention of the real `shipClass`/`phpclass` for the simulacrum's, keeping the player's own
+   words and numbering: *"Dargan Strike Cruiser #2" → "Altarian Destroyer #2"*, while
+   *"Lord Kiro's Revenge"* passes through untouched. This was the ONLY leak the payload grep found.
+
+### Stage 4 decisions that differ from the text below
+
+1. **D12 (phantom power synthesis) is DROPPED — its premise is false.** The plan assumed "a phantom
+   with zero power everywhere is a tell". `tac_power` holds only *exception* records (1 offline,
+   2 boost, 3 overload); **absence of entries is the normal, healthy state**. Measured on game 4273:
+   every real ship, on both seats, carries **zero** power entries across **all** systems, and a
+   system with none reads `isOfflineOnTurn() === false`. Synthesising anything would have made the
+   phantom the only ship on the board with power rows — the exact opposite of the intent.
+2. **Phantoms are built in `DBManager::getTacGamedata`, after `$gamedata->onConstructed()`** — not
+   "at the end of `getSystemDataForShips`" as §D2 says. That method only loads the raw
+   `tac_enhancements` rows; **`onConstructed()` is what applies them**, and the disguise class *is*
+   an enhancement. Building any earlier reads `null` and silently produces no phantom at all.
+3. **`BaseShip::finaliseChameleonPhantom()` is required and was not in the plan.** A phantom is not
+   a working sheet until `ShipSystem::onConstructed()` has run on it: that is what links each system
+   to its Structure block, applies criticals, and latches `$destroyed` off the damage list — and
+   `$destroyed` is the only thing `stripForJson()` sends. Without it a phantom system absorbed a
+   fatal damage entry and was still served to the enemy as intact (caught by the Stage 4 test).
+   It runs **after** the phantom's damage/criticals load, mirroring the real-ship order. It
+   deliberately does *not* call `$phantom->onConstructed()`, which would also run
+   `Enhancements::setEnhancements` (the phantom must never inherit the real ship's enhancements)
+   and recompute initiative (patched from the real ship anyway, D13).
+4. **Phantoms need their own `beforeTurn` sweep** in `TacGamedata::setPreTurnTasks()` — they are not
+   in `$this->ships` (D1), so the existing sweep misses them and their tooltips go out empty.
+
+### Known gaps left open by Stage 3 (all sequenced, none accidental)
+
+- **A disguised ship's own shots do not reach the enemy's combat log** — the systems served are the
+  blueprint's, so they carry no fire orders. Fixed by the weapon remap (D7, Stage 6).
+- **The hull looks undamaged and unpowered** to the enemy — no phantom sheet yet (Stage 4, D12).
+- **`calledid` from an enemy called shot is still a raw simulacrum system id** (finding #16) and will
+  land on an arbitrary real system. D9, Stage 5. Nothing new — Stage 3 is what makes it reachable.
+- **Hit-chance preview vs resolution disagree**: the enemy's client reads the fake defence profile off
+  the blueprint (finding #10) while the server still uses the real one. D4, Stage 5.
 
 ### Decisions taken during implementation that differ from the text below
 
@@ -393,16 +480,19 @@ All three need only the disguise class blueprint, not the phantom sheet, so they
 
 *Test:* two accounts. State flips at 5 hexes, at 2 for a fighter, on killing the array, on switching it off, on out-accelerating the simulacrum — and never flips back. Turn 1 and a stationary ship do not trigger the thrust check; a real Involuntary Acceleration crit does not self-reveal. For D6c: disguised as a non-ELINT ship, 1 point of SOEW flips it (E1) while any amount of DEW alone does not; disguised as another ELINT ship, ELINT ops are free until total non-DEW EW passes the simulacrum's ceiling (E2). A Dargan left on `None` runs no checks at all. Team A revealing does not reveal team B. Nothing is visibly disguised yet.
 
-### Stage 3 — The identity swap ⬅️ NEXT
+### Stage 3 — The identity swap ✅ DONE
 `BaseShip::stripForJsonDisguised()` per §3 (systems still from the **static blueprint**, pristine — the phantom arrives in Stage 4), `TacGamedata::applyChameleonDisguise()` from `deleteHiddenData()`, `chameleonRevealTag` + reload (D14).
+*(See the Stage 3 decisions at the top for the four places the build differs from this.)*
 
 *Test:* enemy sees a Demos icon, ship window, point cost and notes; owner and teammates see the Dargan. `window.staticShips` on the enemy page has no `Dargan` key. Enemy closes to 5 hexes → reload → real Dargan with correct armour/arcs everywhere.
 
-### Stage 4 — The phantom sheet
-Phantom construction (`-realId`, D2), the gated negative-shipid loaders, `stripForJsonDisguised` switching to phantom systems + phantom damage + phantom-derived `combatValue`, phantom power synthesis (D12).
+### Stage 4 — The phantom sheet ✅ DONE
+Phantom construction (`-realId`, D2), the gated negative-shipid loaders, `stripForJsonDisguised` switching to phantom systems + phantom damage + phantom-derived `combatValue`. ~~phantom power synthesis (D12)~~ — dropped, premise false (see Stage 4 decisions above).
 No mirrored resolution yet — the phantom exists and persists but is undamaged. This stage is about proving the plumbing: build → persist → reload → serve.
 
-*Test:* hand-insert a `tac_damage` row at `shipid = -N` and confirm it renders on the enemy's Demos and is invisible to the owner, survives a reload, and never reaches `$gamedata->ships`.
+*Test:* `c:\tmp\css_stage4.php` (19) does exactly the plan's test — inserts `tac_damage` rows at `shipid = -N` and confirms they render on the enemy's Demos, are invisible to the owner, accumulate across a reload, mark a simulacrum system destroyed **without** destroying the real ship, never reach `$gamedata->ships`, and move `combatValue` on the enemy's sheet alone (71.2 vs 100). Plus `css_stage4_gate.php` (12) — one phantom per disguised ship and the gate provably OFF in a game with none.
+
+> **Test trap:** pick a **Structure** (or weapon) for the combat-value assertion, never a Reactor or C&C. `calculateCombatValue` weights core systems at multiplier **0** by design ("functionality loss of key systems is noted" separately), so damaging one moves the CV not at all — which reads as a broken phantom when it is nothing of the kind.
 
 ### Stage 5 — Mirrored resolution
 The `Firing::fire()` wrapper (D3): one roll, one damage amount, two allocations. Fake-profile `needed` on the server (D4). Called-shot translation (D9). Divergent-destruction clamp + reveal (D3a).
@@ -414,7 +504,7 @@ Weapon remapping for outgoing orders, `notes`/`pubnotes` scrub, class-presence m
 
 *Test:* Dargan-as-Demos fires a Twin Array (Demos has them) → no reveal, enemy log shows a Demos Twin Array. Fires a Battle Laser → enemy log shows the substitute weapon this turn, disguise drops at the start of the next turn.
 
-### Stage 7 — Arming mask (D11), then optional refinements: weapon count/arc mismatch (D6 B/C), phantom criticals (D3c), dual-threshold resolution (D3b).
+### Stage 7 — Arming mask (D11) **for the ship's own payload** — the disguised payload already has it (Stage 3, decision 4). What remains is a CSS ship the enemy sees as *itself*: `None`, or revealed. Then optional refinements: weapon count/arc mismatch (D6 B/C), phantom criticals (D3c), dual-threshold resolution (D3b).
 
 ---
 

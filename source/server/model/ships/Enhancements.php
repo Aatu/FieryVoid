@@ -232,7 +232,7 @@ class Enhancements{
 			  if(count($choices) > 1){ //something other than "None" to pick
 				  //Phrased so "<name>: <pick>" reads as a sentence wherever a bought option is listed
 				  //with its value - it has to match the in-game enhancementTooltip line below.
-				  $enhName = 'Disguised as';
+				  $enhName = 'Chameleon Suite';
 				  $enhLimit = count($choices) - 1; //highest valid index
 				  $enhPrice = 0; //free
 				  $enhPriceStep = 0;

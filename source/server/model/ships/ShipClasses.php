@@ -91,6 +91,17 @@ class BaseShip {
 	//Per-load cache of the simulacrum's pristine blueprint (see getChameleonBlueprint). Transient -
 	//declared here so PHP 8.2+ doesn't deprecate the dynamic-property assignment.
 	public $chameleonBlueprint = null;
+	//Per-VIEWER marker: does the player this payload is being built for still see the simulacrum?
+	//Set by TacGamedata::applyChameleonDisguise() during prepareForPlayer() and consumed by
+	//stripForJson(). Transient and never persisted - the model is rebuilt per request, and the
+	//outgoing JSON is already cached per user (game_{id}_user_{uid}_json).
+	public $chameleonDisguisedForViewer = false;
+	//The phantom SHEET (D1/D2): a live ship of the simulacrum's class that accumulates its own
+	//damage under shipid = -realId, so the enemy sees a plausibly damaged hull rather than a
+	//pristine one. Distinct from chameleonBlueprint, which must stay pristine because every
+	//plausibility threshold is measured against it. Deliberately NOT in $gamedata->ships (D1) -
+	//it would then have to be excluded from initiative, movement, targeting, CPV and isFinished().
+	public $chameleonPhantom = null;
 
     public $canvasSize = 200;
 
@@ -626,6 +637,10 @@ class BaseShip {
 
 	
     public function stripForJson() {
+        //Chameleon Sensor Suite: for a viewer this ship is still hiding from, the whole payload is
+        //somebody else's. Marked once per load by TacGamedata::applyChameleonDisguise().
+        if ($this->chameleonDisguisedForViewer) return $this->stripForJsonDisguised();
+
         $strippedShip = new stdClass();
         $strippedShip->name = $this->name;
         $strippedShip->team = $this->team;
@@ -744,8 +759,166 @@ class BaseShip {
 		//$strippedShip->enhancementOptions = array(); // can remove - will be emptied in front end when ships are built - DK
         return $strippedShip;
     }
-	 
-                    
+
+	/*Chameleon Sensor Suite - the payload a viewer who still believes the deception receives: the
+	  SIMULACRUM's ship, wearing this ship's identity and position.
+
+	  Built by asking the blueprint to strip ITSELF rather than by editing this ship's payload, which
+	  is what makes the deception complete for nothing: phpclass, faction, systems (names, arcs,
+	  armour, hit chart, ELINT-ness), notes, point cost and combat value all come out of a pristine
+	  ship of the fake class, so the DEFAULT for any field is "fake" and nothing of the real ship can
+	  leak through a line somebody forgot to write. It also gets finding #5 for free - game.php
+	  builds window.staticShips from the phpclasses in this already-masked payload, so the enemy's
+	  page preloads the simulacrum's blueprint and never sees this hull's.
+
+	  Everything patched back in below is either observable with the naked eye or needed to interact
+	  with the unit at all (the §3 leak audit).
+
+	  STAGE 4 - the systems come from the PHANTOM SHEET when one exists: a live simulacrum-class ship
+	  carrying its own damage (D1/D2), so the hull the enemy sees can be visibly shot up. It falls
+	  back to the pristine blueprint whenever no phantom was built - a load that never reached
+	  DBManager::getChameleonPhantoms, e.g. POST-side ship reconstruction - which is exactly the
+	  Stage 3 behaviour and is always safe, just pristine.
+	  Still open: a disguised ship's own shots do not reach the enemy's combat log until its fire
+	  orders are remapped onto simulacrum weapons (D7, Stage 6), and nothing WRITES phantom damage
+	  until the mirrored resolution lands (D3, Stage 5) - Stage 4 is the read path.
+	  The one thing neither sheet states for itself is weapon arming - see
+	  armChameleonSimulacrumWeapons(), which is D11 brought forward because a sheet nobody has
+	  calculated loading for reads as literally null rather than as a plausible default.*/
+	public function stripForJsonDisguised() {
+		$blueprint = $this->getChameleonBlueprint();
+		if ($blueprint === null){
+			//Unresolvable simulacrum: tell the truth rather than invent something. Clearing the
+			//marker first is what stops the fallback recursing back into here via stripForJson().
+			$this->chameleonDisguisedForViewer = false;
+			return $this->stripForJson();
+		}
+
+		//The phantom is the sheet the enemy reads; the blueprint stays pristine because every
+		//plausibility threshold is measured against it.
+		$sheet = ($this->chameleonPhantom !== null) ? $this->chameleonPhantom : $blueprint;
+
+		$this->armChameleonSimulacrumWeapons($sheet);
+		$disguised = $sheet->stripForJson();
+
+		//--- identity: needed to target it, team it and talk about it at all
+		$disguised->id     = $this->id;
+		$disguised->userid = $this->userid;
+		$disguised->team   = $this->team;
+		$disguised->slot   = $this->slot;
+		$disguised->slotid = $this->slotid;
+		$disguised->name   = $this->getChameleonMaskedName($blueprint);
+
+		//--- observable with the naked eye
+		$disguised->movement    = $this->movement;   //position and facing are not hideable
+		$disguised->destroyed   = $this->destroyed;
+		$disguised->unavailable = $this->unavailable;
+		$disguised->rolled      = $this->rolled;
+		$disguised->rolling     = $this->rolling;
+		if ($this->spawned !== null && $this->spawned !== -1) $disguised->spawned = $this->spawned;
+		else unset($disguised->spawned);
+		unset($disguised->removed, $disguised->removedTurn);
+		if ($this->removed) {
+			$disguised->removed = true;
+			if ($this->removedTurn !== null) $disguised->removedTurn = $this->removedTurn;
+		}
+
+		//--- D13: initiative and turn delay go out REAL. Faking the number while the ship still
+		//moves in its true initiative order is a worse tell than the truth.
+		$disguised->iniative           = $this->iniative;
+		$disguised->unmodifiedIniative = $this->unmodifiedIniative;
+		$disguised->iniativeadded      = $this->iniativeadded;
+		$disguised->currentturndelay   = $this->currentturndelay;
+
+		//--- EW goes out real: it is public from phase 2 onward (finding #22) and it is the evidence
+		//the ELINT-plausibility reveal (D6c) acts on. Masking it would make the deception unbreakable.
+		unset($disguised->EW);
+		if (isset($this->EW) && !empty($this->EW)) $disguised->EW = $this->EW;
+
+		//--- attachments are RELATIONAL - the viewer is usually the other half of the grapple, and
+		//anything close enough to attach broke the disguise on proximity several turns ago.
+		unset($disguised->hasAttached, $disguised->attached, $disguised->hasAttachedFacing, $disguised->attachedFacing);
+		if (!empty($this->hasAttached))       $disguised->hasAttached       = $this->hasAttached;
+		if (!empty($this->attached))          $disguised->attached          = $this->attached;
+		if (!empty($this->hasAttachedFacing)) $disguised->hasAttachedFacing = $this->hasAttachedFacing;
+		if (!empty($this->attachedFacing))    $disguised->attachedFacing    = $this->attachedFacing;
+
+		//--- the spend and its breakdown name the real hull and its enhancements outright
+		$disguised->pointCostEnh = 0;
+		unset($disguised->enhancementTooltip);
+
+		return $disguised;
+	}
+
+	/*A ship's DEFAULT name is generated from its hull - "Dargan Strike Cruiser #2" - so an untouched
+	  name hands the enemy the answer and the deception is over before it starts. The §3 audit called
+	  for warning the player in the buy dialog; that is not enough when the leak is the default.
+
+	  Swap any mention of the real hull for the simulacrum's, keeping everything the player actually
+	  wrote, including their numbering: "Dargan Strike Cruiser #2" -> "Demos Heavy Warship #2", while
+	  "Lord Kiro's Revenge" is passed through untouched. shipClass is tried before phpclass because
+	  it is the longer, more specific string and consumes the shorter one.*/
+	private function getChameleonMaskedName($blueprint){
+		$name = $this->name;
+		if ($name === null || $name === '') return $name;
+
+		$mask = ($blueprint->shipClass !== '' && $blueprint->shipClass !== null)
+			? $blueprint->shipClass : $blueprint->phpclass;
+
+		foreach (array($this->shipClass, $this->phpclass) as $tell){
+			if ($tell === null || $tell === '') continue;
+			if (stripos($name, $tell) === false) continue;
+			$name = str_ireplace($tell, $mask, $name);
+		}
+		return $name;
+	}
+
+	/*D11 - "Chameleon suites mask the arming status of weapons ... even after the deception is
+	  revealed." The simulacrum is a pristine blueprint, and nothing ever calculates a blueprint's
+	  loading (that runs off tac_loading against a real ship), so every gun would go out with
+	  turnsloaded NULL and the enemy's system window would read "null/4".
+
+	  Fully loaded is both the fix and the rule: it is the only arming state that is plausible on
+	  every turn of every game and tells the enemy nothing. It must NOT mirror the real weapon -
+	  that is exactly the information D11 exists to withhold.
+
+	  "Fully loaded" is NOT loadingtime. An accelerator fires at one turn of charge but keeps
+	  charging to a harder-hitting maximum, and it is normalload that records that maximum: a
+	  Plasma Accelerator is loadingtime 1, normalload 3. The real ship's own charge cap is
+	  getNormalLoad() (weapon.php:1074), and both client displays agree - SystemIcon uses
+	  normalload outright as the denominator and weaponManager reads
+	  Math.max(loadingtime, normalload) (weaponManager.js:2292). So the value here is that same
+	  max, which is what makes an accelerator read 3/3 rather than 1/3. max() rather than
+	  normalload alone because a handful of weapons declare a normalload BELOW their loading time.
+
+	  Multi-mode weapons carry a loading time per firing mode, and the client re-reads turnsloaded
+	  out of turnsloadedArray whenever that array is present (shipSystem.js:219), so the array has
+	  to be mirrored key for key - keys are mode numbers, 1-based - or the masked scalar is
+	  discarded the moment the viewer looks at any mode. There is no normalloadArray, so the one
+	  normalload applies to every mode. Idempotent, so running it once per viewer against the
+	  per-load cached blueprint costs nothing and cannot drift.*/
+	private function armChameleonSimulacrumWeapons($blueprint)
+	{
+		foreach ($blueprint->systems as $system){
+			if (!($system instanceof Weapon)) continue;
+
+			//The PROPERTY, not getNormalLoad(): boostable weapons override that method to return
+			//loadingtime + maxBoostLevel, and claiming maximum boost on a phantom that shows no
+			//power allocated at all (D12) would be a tell rather than a mask.
+			$fullCharge = max($system->getLoadingTime(), (int)$system->normalload);
+			$system->turnsloaded = $fullCharge;
+
+			if (!empty($system->loadingtimeArray)){
+				$perMode = array();
+				foreach ($system->loadingtimeArray as $mode => $loadingtime){
+					$perMode[$mode] = max($loadingtime, (int)$system->normalload);
+				}
+				$system->turnsloadedArray = $perMode;
+			}
+		}
+	}
+
+
 
         public function getInitiativebonus($gamedata){
             if($this instanceof Terrain) return 0;
@@ -1204,6 +1377,64 @@ class BaseShip {
 		return $this->chameleonBlueprint;
 	}
 
+	/*The phantom sheet (D1): a LIVE ship of the simulacrum's class, hung off this one, which carries
+	  its own damage so an enemy sees a hull that has plausibly been shot at. Built once per load,
+	  by DBManager after enhancements have been applied - the disguise class comes FROM an
+	  enhancement, so anything earlier reads null and silently builds nothing.
+
+	  id = -realId (D2). That one choice is what makes the whole existing damage machinery work
+	  unchanged: assignDamageReturnOverkill stamps $target->id into every DamageEntry and
+	  submitDamages writes it positionally, so the phantom persists through tac_damage/tac_critical
+	  with no schema change. Negative ids cannot collide with real ones and are self-describing in
+	  the table. The two ordinary loaders skip them (they are not in $gamedata->ships, and both
+	  loaders null-guard); the phantoms are filled by the gated loaders instead.
+
+	  Returns null - meaning "no phantom, fall back to the pristine blueprint" - for a ship with no
+	  disguise or an unresolvable one.*/
+	public function buildChameleonPhantom()
+	{
+		if (empty($this->chameleonDisguiseClass)) return null;
+		if ($this->chameleonPhantom !== null) return $this->chameleonPhantom;
+		if (!class_exists($this->chameleonDisguiseClass)) return null;
+
+		$cls = $this->chameleonDisguiseClass;
+		//The real name/slot: the phantom IS this unit as far as the enemy is concerned, and
+		//stripForJsonDisguised() masks the name afterwards exactly as it does for the blueprint.
+		$phantom = new $cls(-(int)$this->id, $this->userid, $this->name, $this->slot);
+		$phantom->team = $this->team;
+
+		$this->chameleonPhantom = $phantom;
+		return $this->chameleonPhantom;
+	}
+
+	/*A phantom is not a working sheet until its systems have been constructed the way a real ship's
+	  are. ShipSystem::onConstructed() is what links each system to its Structure block, applies
+	  criticals, and latches $destroyed off the damage list - and $destroyed is the only thing
+	  stripForJson() sends, so without this a phantom system can absorb a fatal damage entry and
+	  still be served to the enemy as intact.
+
+	  Called by DBManager AFTER the phantom's criticals and damage are loaded, which is exactly the
+	  order real ships get them (getTacShips loads both before $gamedata->onConstructed()).
+
+	  Deliberately NOT $phantom->onConstructed(): that also runs Enhancements::setEnhancements - the
+	  phantom has no enhancements of its own and must never inherit this ship's, since the whole
+	  point is that it is a different, plainer vessel - and recomputes initiative, which is patched
+	  from the real ship anyway (D13). The special-ability merge is kept because system stripForJson
+	  paths consult it.*/
+	public function finaliseChameleonPhantom($turn, $phase)
+	{
+		if ($this->chameleonPhantom === null) return;
+
+		$phantom = $this->chameleonPhantom;
+		foreach ($phantom->systems as $system){
+			$system->onConstructed($phantom, $turn, $phase);
+			$abilities = $system->getSpecialAbilityList($phantom->enabledSpecialAbilities);
+			if (is_array($abilities)) {
+				$phantom->enabledSpecialAbilities = array_merge($phantom->enabledSpecialAbilities, $abilities);
+			}
+		}
+	}
+
 	/*Reveal checkpoint, called from the Deployment and Movement advances. Gated twice over: the
 	  per-load TacGamedata::$chameleonPresent boolean means a game with no disguised ship never gets
 	  here at all, and isChameleonDisguised() means a Chameleon ship left on "None" doesn't either.*/
@@ -1221,6 +1452,10 @@ class BaseShip {
 	public function isChameleonDisguisedFrom($team)
 	{
 		if (!$this->isChameleonDisguised()) return false;
+		//Own team always sees the truth - they have to, they are flying alongside it. This belongs
+		//here rather than at each call site precisely because this is the one question every masking
+		//site asks; a site that forgot the check would show a player their own ally as a stranger.
+		if ($team !== null && (int)$team === (int)$this->team) return false;
 		$css = $this->getChameleonSensors();
 		if ($css === null) return false;
 		return $css->isDisguisedFrom($team, TacGamedata::$currentTurn);

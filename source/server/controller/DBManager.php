@@ -1866,6 +1866,10 @@ class DBManager
         $gamedata->slots = $this->getSlotsInGame($gameid);
         $this->getTacShips($gamedata, $turn);
         $gamedata->onConstructed();
+        //Chameleon phantom sheets. Must follow onConstructed(): that is what applies enhancements,
+        //and the disguise class IS an enhancement. It also sets the $chameleonPresent gate this
+        //returns on immediately for every ordinary game.
+        $this->getChameleonPhantoms($gamedata, $turn);
 
 
         return $gamedata;
@@ -2684,6 +2688,126 @@ class DBManager
         }
 		*/
 
+    }
+
+    /*Chameleon Sensor Suite, Stage 4 - build every disguised ship's phantom sheet and fill it from
+      the negative-shipid rows in tac_damage / tac_critical (D1, D2).
+
+      Runs from getTacGamedata AFTER $gamedata->onConstructed(), which is the earliest point the
+      disguise class is known: it arrives as an ENHANCEMENT, and enhancements are applied by
+      BaseShip::onConstructed(). (The plan said "end of getSystemDataForShips" - that is too early,
+      because that method only loads the raw tac_enhancements rows, it does not apply them.)
+
+      Behind the per-load $chameleonPresent gate, so a game with no disguised ship runs one boolean
+      test and issues no extra queries at all.
+
+      NOTE on power: D12 called for synthesising a power entry per phantom system so the hull does
+      not look unpowered. Verified false and deliberately NOT done - tac_power holds only EXCEPTION
+      records (1 offline, 2 boost, 3 overload), so no entries is the normal healthy state that every
+      real ship on the board also has. Synthesising anything here would make the phantom the odd one
+      out, which is the opposite of the intent.*/
+    private function getChameleonPhantoms(TacGamedata $gamedata, $fetchTurn)
+    {
+        if (!TacGamedata::$chameleonPresent) return;
+
+        $phantoms = array(); //keyed by the NEGATIVE id, which is what the rows carry
+        $owners = array();
+        foreach ($gamedata->ships as $ship) {
+            $phantom = $ship->buildChameleonPhantom();
+            if ($phantom === null) continue;
+            $phantoms[$phantom->id] = $phantom;
+            $owners[] = $ship;
+        }
+
+        if (empty($phantoms)) return;
+
+        //Same order as the real ships get (criticals, then damage) so a system that is both
+        //critted and destroyed resolves identically on both sheets.
+        $this->getChameleonPhantomCriticals($gamedata, $phantoms, $fetchTurn);
+        $this->getChameleonPhantomDamage($gamedata, $phantoms, $fetchTurn);
+
+        //And only THEN construct the systems - onConstructed latches $destroyed off the damage
+        //list, so running it any earlier serves a fatally damaged phantom system as intact.
+        foreach ($owners as $ship) {
+            $ship->finaliseChameleonPhantom($gamedata->turn, $gamedata->phase);
+        }
+    }
+
+    private function getChameleonPhantomDamage(TacGamedata $gamedata, $phantoms, $fetchTurn)
+    {
+        $stmt = $this->connection->prepare(
+            "SELECT
+                id, shipid, gameid, turn, systemid, damage, armour, shields, fireorderid, destroyed, undestroyed, pubnotes, damageclass
+            FROM
+                tac_damage
+            WHERE
+                gameid = ? AND turn <= ? AND shipid < 0
+            ORDER BY
+                id ASC
+            " //id order guarantees destroyed/undestroyed entries resolve in sequence, as for real ships
+        );
+
+        if (!$stmt) return;
+
+        $stmt->bind_param('ii', $gamedata->id, $fetchTurn);
+        $stmt->bind_result($id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields, $fireorderid, $destroyed, $undestroyed, $pubnotes, $damageclass);
+        $stmt->execute();
+        while ($stmt->fetch()) {
+            if (!isset($phantoms[$shipid])) continue;   //a phantom for a ship not in this game, or no longer disguised
+            $system = $phantoms[$shipid]->getSystemById($systemid);
+            if ($system === null) continue;             //simulacrum changed since the row was written
+            $system->setDamage(
+                new DamageEntry($id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields, $fireorderid, $destroyed, $undestroyed, $pubnotes, $damageclass)
+            );
+        }
+        $stmt->close();
+    }
+
+    private function getChameleonPhantomCriticals(TacGamedata $gamedata, $phantoms, $fetchTurn)
+    {
+        /*Phantoms take damage but roll no criticals of their own (D3c) - Criticals::setCriticals
+          walks $gamedata->ships, which they are deliberately not in. This loader exists anyway so
+          that turning D3c on later is a resolution change only, with the read path already proven,
+          and so a hand-written row behaves. Mirrors getCriticalsForShips, including its
+          forced-offline carry-back from the previous turn.*/
+        $stmt = $this->connection->prepare(
+            "SELECT
+                id, shipid, systemid, type, turn, turnend, param
+            FROM
+                tac_critical
+            WHERE
+                gameid = ? AND turn <= ? AND (turnend = 0 OR turnend >= ?) AND shipid < 0
+            "
+        );
+
+        if (!$stmt) return;
+
+        $turnEnd = 0;
+        $turnBefore = $fetchTurn - 1;
+        $stmt->bind_param('iii', $gamedata->id, $fetchTurn, $turnBefore);
+        $stmt->bind_result($id, $shipid, $systemid, $type, $turn, $turnEnd, $param);
+        $stmt->execute();
+        while ($stmt->fetch()) {
+            $doAddCrit = false;
+            if (($turnEnd == 0) || ($turnEnd >= $fetchTurn)) $doAddCrit = true;
+            if (($type == 'ForcedOfflineOneTurn') || ($type == 'ForcedOfflineForTurns')) $doAddCrit = true;
+            if (!$doAddCrit) continue;
+
+            if (!isset($phantoms[$shipid])) continue;
+            if (!class_exists($type)) continue;         //never construct an arbitrary class from a DB string
+            $system = $phantoms[$shipid]->getSystemById($systemid);
+            if ($system === null) continue;
+
+            if ($param && ($param[0] == '{' || $param[0] == '[')) {
+                $decoded = json_decode($param, true);
+                if (is_array($decoded)) $param = $decoded;
+            }
+
+            $crit = new $type($id, $shipid, $systemid, $type, $turn, $turnEnd);
+            $crit->param = $param;
+            $system->setCritical($crit, $gamedata->turn);
+        }
+        $stmt->close();
     }
 
     private function getPowerForShips($gamedata, $fetchTurn)

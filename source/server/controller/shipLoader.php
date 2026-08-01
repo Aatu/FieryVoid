@@ -223,7 +223,7 @@
 				$memo[$key] = $candidates;
 			}
 
-			$list = array(array('', 'None - no disguise'));
+			$list = array(array('', 'None - No disguise'));
 			foreach ($memo[$key] as $phpclass => $label){
 				if ($excludePhpclass !== null && $phpclass === $excludePhpclass) continue;
 				$list[] = array($phpclass, $label);

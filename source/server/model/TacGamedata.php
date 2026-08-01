@@ -681,11 +681,12 @@ class TacGamedata {
     public function prepareForPlayer($all = false){
         $this->setWaiting();
         $this->calculateTurndelays();
-        if (!$all) {             
+        if (!$all) {
             $this->deleteHiddenData();
         }
         $this->setPreTurnTasks();
-        
+        $this->applyChameleonDisguise(); //after setPreTurnTasks: it reads live system state
+
         if ($this->status == "LOBBY"){
             $this->ships = array();
         }
@@ -698,11 +699,47 @@ class TacGamedata {
             foreach ($ship->systems as $system){
                 $system->beforeTurn($ship, $this->turn, $this->phase);
             }
-        
+
         }
-    
+
+        //Chameleon phantom sheets are deliberately NOT in $this->ships (D1), so the sweep above
+        //misses them and their system tooltips would go out empty. Same turn and phase as the real
+        //ships get - the phantom is meant to be indistinguishable from an ordinary hull.
+        if (!self::$chameleonPresent) return;
+        foreach ($this->ships as $ship){
+            if ($ship->chameleonPhantom === null) continue;
+            foreach ($ship->chameleonPhantom->systems as $system){
+                $system->beforeTurn($ship->chameleonPhantom, $this->turn, $this->phase);
+            }
+        }
     }
     
+    /*Chameleon Sensor Suite - decide, once per load, which ships THIS viewer sees as somebody else.
+      Marks the ships; BaseShip::stripForJson() does the swapping.
+
+      Called from prepareForPlayer() rather than from deleteHiddenData() deliberately.
+      deleteHiddenData is skipped when $all is true, which is how a PAST turn is served
+      (Manager::getReplayGameData passes $actualTurn > $turn). Every other kind of hidden data is
+      public once its turn has resolved - a disguise is not, and scrubbing back a turn must not
+      undress the ship.
+
+      Behind the per-load $chameleonPresent gate, so a game without a disguised ship pays one
+      boolean. isChameleonDisguisedFrom() carries every way a deception can end, including the
+      own-team check, so there is no policy in here at all.*/
+    private function applyChameleonDisguise(){
+        if (!self::$chameleonPresent) return;
+
+        foreach ($this->ships as $ship){
+            $ship->chameleonDisguisedForViewer = false;
+            if (empty($ship->chameleonDisguiseClass)) continue;
+            if ($ship->userid == $this->forPlayer) continue;
+            if (!$ship->isChameleonDisguisedFrom(self::$currentForPlayerTeam)) continue;
+            //a stored class that no longer resolves leaves an ordinary, honest ship (D10)
+            if ($ship->getChameleonBlueprint() === null) continue;
+            $ship->chameleonDisguisedForViewer = true;
+        }
+    }
+
     private function deleteHiddenData(){
         
         if ($this->phase == -1){
