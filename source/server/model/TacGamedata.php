@@ -703,6 +703,7 @@ class TacGamedata {
         }
         $this->setPreTurnTasks();
         $this->applyChameleonDisguise(); //after setPreTurnTasks: it reads live system state
+        $this->maskChameleonFireOrders(); //after applyChameleonDisguise: it reads the flag it sets
 
         if ($this->status == "LOBBY"){
             $this->ships = array();
@@ -757,8 +758,106 @@ class TacGamedata {
         }
     }
 
+    /*Chameleon Sensor Suite (D3b, Stage 7) - the per-viewer fire-order mask.
+
+      This is a masking site of a shape no other one in FV has, which is why it needed its own pass.
+      Every existing mask hides a ship's OWN private state from people who are not on its team. This
+      one hides state that lives on the SHOOTER's weapon, from the shooter themselves, because the
+      shooter is the deceived party: they must be shown the shot they think they took at the ship
+      they think they were shooting at. Only the disguised ship's own side sees the truth.
+
+      Three things are rewritten for a viewer who still believes the deception:
+
+        needed   - the simulacrum's threshold, so their combat log agrees with the hit chance their
+                   client previewed off the fake blueprint (finding #10);
+        shotshit - how many hits the PHANTOM took, which is what their damage entries show;
+        notes    - REBUILT rather than edited. Since Stage 7 the stored breakdown names the real
+                   hull outright ("defence: 16" on a ship the viewer believes has 14), and the
+                   client parses only two things out of this string, so the safe construction is to
+                   emit those two and nothing else. Same principle as stripForJsonDisguised(): the
+                   default for any field is "fake", never "real", so a field nobody thought about
+                   cannot leak. CSS is not protection - #log .notes is display:none, but devtools
+                   is not, and the whole feature assumes the enemy reads their own payload.
+
+      The CHAM: tag is stripped for EVERYONE, tag or no tag, disguised or not - one unconditional
+      pass, so there is no path on which it can reach a browser. Likewise notes are scrubbed for any
+      order at a disguised target even when no tag was written (a weapon with its own roll loop that
+      never reached Weapon::fire()'s tagging line): the numbers then stay real, but the breakdown
+      still goes.
+
+      Runs from prepareForPlayer(), not deleteHiddenData(), for the same reason applyChameleonDisguise
+      does: deleteHiddenData is skipped when $all is true, which is how a PAST turn is served, and
+      replaying back over a disguised turn must not undress the ship.*/
+    private function maskChameleonFireOrders(){
+        if (!self::$chameleonPresent) return;
+
+        $disguisedIds = array();
+        foreach ($this->ships as $ship){
+            if ($ship->chameleonDisguisedForViewer) $disguisedIds[$ship->id] = true;
+        }
+
+        foreach ($this->ships as $ship){
+            if ($ship instanceof FighterFlight) {
+                foreach ($ship->systems as $fighter){
+                    $this->maskChameleonFireOrdersOn($fighter, $disguisedIds);
+                }
+            } else {
+                $this->maskChameleonFireOrdersOn($ship, $disguisedIds);
+            }
+        }
+    }
+
+    private function maskChameleonFireOrdersOn($unit, $disguisedIds){
+        foreach ($unit->systems as $system){
+            foreach ($system->fireOrders as $fire){
+                $fire->chameleonFake = null; //transient resolution state, never serialised
+                $fire->notes = (string)$fire->notes;
+
+                $fake = null;
+                if (strpos($fire->notes, 'CHAM:') !== false){
+                    if (preg_match_all('/\s*CHAM:(-?\d+):(\d+)/', $fire->notes, $m)){
+                        $last = sizeof($m[1]) - 1;
+                        $fake = array((int)$m[1][$last], (int)$m[2][$last]);
+                    }
+                    $fire->notes = preg_replace('/\s*CHAM:-?\d+:\d+/', '', $fire->notes);
+                }
+
+                if (!isset($disguisedIds[$fire->targetid])) continue;
+
+                //notes rebuilt BEFORE needed is overwritten - the per-shot shift is measured off it
+                $fire->notes = $this->buildChameleonFireOrderNotes($fire, ($fake === null) ? $fire->needed : $fake[0]);
+                if ($fake === null) continue;
+
+                $fire->needed   = $fake[0];
+                $fire->shotshit = $fake[1];
+            }
+        }
+    }
+
+    /*The two fragments combatLog.js reads back out of a fire order's notes, and nothing else:
+      "Interception: n sources:m" (combatLog.js:117) and one "rolled: x, needed: y" per shot
+      (combatLog.js:137, which greens the roll when it beat the threshold). Every per-shot threshold
+      differs from the order's by the same grouping modifier, so shifting them all by one delta keeps
+      the dice tooltip consistent with the shots-hit count the viewer is shown.*/
+    private function buildChameleonFireOrderNotes($fire, $fakeNeeded){
+        $notes = '';
+        if (preg_match('/Interception: (\d+) sources:(\d+)/', $fire->notes, $m)){
+            $notes .= 'Interception: ' . $m[1] . ' sources:' . $m[2] . ', final to hit: ' . $fakeNeeded;
+        }
+
+        $delta = $fakeNeeded - $fire->needed;
+        if (preg_match_all('/rolled: (-?\d+), needed: (-?\d+)/', $fire->notes, $shots, PREG_SET_ORDER)){
+            $n = 0;
+            foreach ($shots as $shot){
+                $n++;
+                $notes .= ' FIRING SHOT ' . $n . ': rolled: ' . $shot[1] . ', needed: ' . ((int)$shot[2] + $delta) . "\n";
+            }
+        }
+        return $notes;
+    }
+
     private function deleteHiddenData(){
-        
+
         if ($this->phase == -1){
             foreach ($this->ships as $ship){
                 if ($ship->userid == $this->forPlayer)

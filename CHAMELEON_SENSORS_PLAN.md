@@ -7,7 +7,7 @@ Implement the B5W Chameleon Sensors rules on the Centauri **Dargan Strike Cruise
 
 ---
 
-## STATUS — updated 2026-07-31
+## STATUS — updated 2026-08-01
 
 | Stage | State |
 |---|---|
@@ -17,14 +17,13 @@ Implement the B5W Chameleon Sensors rules on the Centauri **Dargan Strike Cruise
 | **3 — Identity swap** | ✅ **COMPLETE** — built 2026-07-31, in-game tested and signed off 2026-08-01 (game 4273). Two defects found in the playtest and fixed, both weapon-arming (decision 4 below) |
 | **4 — Phantom sheet** | ✅ **COMPLETE** — built and in-game tested 2026-08-01 (game 4273: a heavy laser hit the real Dargan, the phantom did not, both logs correct) |
 | **5 — Mirrored resolution** | ✅ **COMPLETE** — built and in-game tested 2026-08-01 (game 4273). Four playtest bugs found and fixed; see below |
+| **7 — Dual-threshold resolution (D3b)** | ✅ **COMPLETE** — built 2026-08-01, server-proven (`css_stage7.php`, 44 assertions), browser test outstanding. Taken **before** Stage 6 because it is a balance fix, not a feature |
 | 6 — Fire orders FROM the disguised ship (D7) + weapon-plausibility reveal (D6) | Not started — **next** |
-| 7 — Dual-threshold resolution (D3b) | Not started. **Promoted from "optional refinement" to a required balance fix, 2026-08-01** |
 | 8 — Arming mask on the ship's own payload (D11), then optional refinements | Not started |
 
-> ⚠️ **Known live balance issue until Stage 7 lands:** a disguised ship is resolved against its
-> simulacrum's defence profile *and* simulacrum DEW, with a single threshold — so it is genuinely
-> harder to hit than it should be whenever it wears a smaller hull. Accepted knowingly as an interim
-> state; Stage 7 removes it.
+> ✅ **The Stage 7 balance issue is closed.** The real hull is resolved against its own profile and
+> its own DEW again; the simulacrum's numbers now govern the phantom sheet only. See Stage 7 below
+> for how large the bug actually was — measured on game 4273 it was **62% real vs 7% apparent**.
 
 **An enemy now sees a different ship.** What they see is still *pristine* — Stage 3 serves the
 simulacrum's blueprint, so the hull looks undamaged and unpowered; the phantom sheet is Stage 4.
@@ -298,6 +297,11 @@ damage()      : damage amount rolled ONCE
 
 Both passes see the same shots and the same damage totals, so the two sheets stay in lockstep; they diverge only in *where* the damage lands and how much armour eats. The enemy's combat log, damage bars and system-destroyed markers all read off pass 2 and are internally consistent. Nothing about pass 1 changes — the real ship takes exactly the damage it would have taken anyway.
 
+> **Amended by Stage 7 (D3b):** the two passes no longer always run together. There is still one roll
+> and one damage amount, but each pass is now gated on its own threshold, so a shot can land on one
+> sheet and not the other. `Weapon::damage()` runs pass 1 + a mirror gated on `neededFake`;
+> `Weapon::fireChameleonPhantomOnly()` runs pass 2 alone when the roll beat only the fake threshold.
+
 Seam: wrap `Firing::fire()` (finding #11), not `Weapon::fire()` — the latter is overridden by dozens of subclasses.
 
 **D3a — Divergent destruction: reveal. (Resolved.)**
@@ -308,10 +312,11 @@ The rules also allow a shot to beat the fake profile but not the real one (and v
 Recommendation: **ship the single-threshold model (D3).** Hit counts then agree for both players and only the damage narrative differs, which preserves everything the deception is actually for. If the full reading is wanted later, it is additive on the same seam — the real threshold goes in the DB, the fake one in a note keyed by fireorderid.
 
 **RESOLVED 2026-08-01 — D3b IS NOW IN SCOPE, as Stage 7, and it is a balance FIX rather than a
-refinement.** User's ruling: *"the intention of the Chameleon Sensors is absolutely not to make the
-real Dargan harder to hit — the defensive bonus from mimicking a small ship would be too great to
-allow."* That makes the single-threshold model incorrect, not merely incomplete: see Stage 7 below
-for what it requires. The analysis that produced the ruling is kept here.
+refinement. ✅ BUILT the same day; see Stage 7 below.** User's ruling: *"the intention of the
+Chameleon Sensors is absolutely not to make the real Dargan harder to hit — the defensive bonus from
+mimicking a small ship would be too great to allow."* That makes the single-threshold model
+incorrect, not merely incomplete. The analysis that produced the ruling is kept here, in the past
+tense where it describes behaviour Stage 7 has since removed.
 Observed: both players' combat logs showed the same hit chance, and the owner asked why they did not
 see their *real* vulnerability (profile 16 / ~109%) instead of the simulacrum's (14 / ~104%).
 
@@ -340,6 +345,13 @@ note blob keyed by fireorderid. **Now scheduled as Stage 7.**
 A phantom that soaks 30 damage without a single critical is a mild tell to an attentive opponent. Revisiting means a gated critical pass over phantoms in `FireGamePhase::advance`, writing to `tac_critical` under the negative shipid exactly as damage does — additive, no redesign.
 
 **D4 — To-hit uses the simulacrum's profile.**
+> ⚠️ **Superseded in part by Stage 7 (D3b).** D4 as written below made the simulacrum's profile the
+> *only* profile, which is what let the disguise reduce the real hull's chance of being hit. Since
+> Stage 7 it feeds the **second** threshold only: `getDisguisedProfileFor()` and
+> `getDisguisedDEWFor()` govern the phantom sheet and the deceived viewer's display, while the real
+> hull is resolved against its own profile and its own stored DEW. Everything else below still holds,
+> including the per-team asymmetry.
+
 *"Resolve the fire using the simulated ship's defense ratings."* The client already does this for free (finding #10 — it reads the fake blueprint), so the server must be made to agree or preview and resolution will silently disagree. Add to `BaseShip`:
 ```php
 public function getDisguisedProfileFor($shooter) //null unless disguised from $shooter's team
@@ -481,6 +493,18 @@ Tuple index 7 becomes the optional choice list — absent on every other enhance
 | `destroyed`, `unavailable`, `spawned`, `removed` | destruction ends the deception anyway | pass through |
 | `hangarRequired`, `hasAttached`/`attached`, `skinDancing`, `integratedFighterCount` | situational | drop unless the fake class would have them |
 
+**Plus one field that is NOT on this ship at all** (Stage 7, D3b). Every row above is a field on the
+disguised ship's own payload. The dual threshold adds a second, differently-shaped site: fire orders
+**on the shooter's weapon**, masked because their *target* is disguised from the viewer.
+`TacGamedata::maskChameleonFireOrders()` owns it, and it decides on three fields:
+
+| Field | Leaks? | Action |
+|---|---|---|
+| `needed` | **yes** — the real threshold is the real defence profile and real DEW, backwards | serve `neededFake` to any viewer the target is still disguised from |
+| `shotshit` | **yes** — the real hit count contradicts the phantom's damage | serve the phantom's count |
+| `notes` | **yes** — carries `defence: N, DEW: N, … goal, chance` in plain text, plus a per-shot `rolled/needed` list | **rebuilt** from the two fragments the client parses; everything else dropped. The `CHAM:` storage tag is stripped for every viewer without exception |
+| `pubnotes` | **not yet handled** — D7 / Stage 6 | unchanged by Stage 7 |
+
 ---
 
 ## 4. Stages
@@ -572,11 +596,24 @@ Weapon remapping for outgoing orders, `notes`/`pubnotes` scrub, class-presence m
 
 *Test:* Dargan-as-Demos fires a Twin Array (Demos has them) → no reveal, enemy log shows a Demos Twin Array. Fires a Battle Laser → enemy log shows the substitute weapon this turn, disguise drops at the start of the next turn.
 
-### Stage 7 — Dual-threshold resolution (D3b) — **the disguise must not make the real ship harder to hit**
+### Stage 7 — Dual-threshold resolution (D3b) ✅ DONE — **the disguise must not make the real ship harder to hit**
 
 User's ruling, 2026-08-01: the CSS is an information weapon, not a defensive one. A Dargan (profile
-16) wearing a Demos (14) is currently hit *less often than a Dargan*, and that bonus is too large to
-allow — so the single-threshold model has to go.
+16) wearing a Demos (14) was being hit *less often than a Dargan*, and that bonus is too large to
+allow — so the single-threshold model had to go.
+
+**How big the bug actually was.** Measured on game 4273 with the acceptance test: the real threshold
+is **62**, the simulacrum's is **7**. The profile difference (16 vs 14) accounts for only 10 points
+of that; the other 45 is **DEW**. `getDisguisedDEWFor()` returns *simulacrum sensor capacity minus
+non-DEW spend*, so a Dargan that allocates no EW at all "appears" to be running its simulacrum's
+entire suite as defensive EW — 9 points on a Demos, against the real ship's 0. Under one threshold
+that made the hull very nearly unhittable. It is now purely what the enemy *sees*.
+
+*Test:* `c:\tmp\css_stage7.php` (44). Both divergence directions resolve off one roll; the stored
+breakdown carries the real profile; the deceived shooter is served the simulacrum's threshold and the
+phantom's hit count while the disguised ship's own player is served the truth; the storage tag
+appears nowhere in an encoded payload; and game 4264 (no CSS) produces no second threshold, no tag
+and unchanged resolution. All eight earlier CSS suites still pass.
 
 The shape:
 
@@ -594,17 +631,91 @@ Both directions then work by construction, which is what the current model canno
 - `neededFake > neededReal` (large simulacrum): the phantom takes a hit the real hull does not. The
   phantom is a fiction; that is exactly its job.
 
-What it costs, and the traps already known:
-- **Two `shotshit` counts.** `tac_fireorder` stores one. Put the REAL values in the DB (authoritative
-  for the real ship) and the fake pair in a note keyed by fireorderid, per D3b's original sketch.
+#### Stage 7 decisions that differ from the text above
+
+1. **Storage is a tag on the fire order's own `notes`, not a note keyed by fireorderid.**
+   The plan sketched an `IndividualNote` blob keyed by fire-order id. That **silently loses every
+   order created DURING resolution** — reactor self-destructs, ramming transfers, AoE children all
+   still carry `id = -1` at the point the fake pair is known, and only get an id at write time.
+   `Weapon::fire()` instead appends ` CHAM:<neededFake>:<shotshitFake>` to `$fireOrder->notes`,
+   which is already persisted, already deleted with the order, and **already a machine-parsed
+   channel** — the client regexes `Interception: n sources:m` and `rolled: x, needed: y` out of it
+   ([combatLog.js:117](source/public/client/combatLog.js#L117),
+   [:137](source/public/client/combatLog.js#L137)). The fake pair therefore cannot outlive or desync
+   from the shot it belongs to, and no schema change was needed.
+   `TacGamedata::maskChameleonFireOrders()` strips the tag for **every** viewer, unconditionally,
+   before anything else — so there is no path on which it can reach a browser (proved by grepping an
+   encoded payload, the same test that caught the Stage 3 name leak).
+2. **The DB keeps the REAL pair; the fake pair is what gets substituted at serve time.** That is the
+   right way round for two reasons: the real values are authoritative for the real hull, and the
+   Stage 5 playtest complaint was precisely that the *owner* could not see their own true
+   vulnerability. They can now.
+3. **The masked `notes` are REBUILT, not edited.** Since `needed` went back to the real profile, the
+   stored breakdown says `defence: 16` on a ship the viewer believes has 14 — a direct leak, and
+   `#log .notes` being `display:none` is not protection when the whole feature assumes the enemy
+   reads their own payload. The mask emits only the two fragments the client actually parses and
+   nothing else, so the default for any field is "absent" rather than "real" — the same construction
+   principle as `stripForJsonDisguised()`. Per-shot thresholds are shifted by one constant delta, so
+   the dice-roll tooltip stays consistent with the shots-hit count.
+   Notes are scrubbed for **any** order at a disguised target, tag or no tag — a weapon with its own
+   roll loop writes no tag, and its breakdown must still go.
+4. **The phantom-only branch passes the PHANTOM as the target through `beforeDamage()`.** The obvious
+   implementation — call `beforeDamage($realShip, …)` and skip the real allocation — is wrong: the
+   35 `beforeDamage` overrides have real side effects on the target (EM shields absorb the shot,
+   fighters take `DisengagedFighter` crits, reactors take `OutputReduced`), so a shot that MISSED the
+   real hull would still have hit it. Handing the phantom in instead makes every one of those land on
+   the sheet the shot actually hit, with no flags and no special-casing. It works only because the
+   phantom carries the real ship's `movement` (the Stage 5 playtest fix) — every geometric read those
+   overrides make still resolves.
+5. **`$defenceFake`/`$dewFake` shadow their real counterparts through the whole of
+   `calculateHitBase`** rather than being applied as a delta at the end. `$dew` is zeroed at two
+   points (fighter direct fire, `ignoreAllEW`) and `$defence` is modified at three (ProfileIncreased
+   crit, Petals, a called shot at a flat-profile system); the shadow variables are mirrored at each,
+   so the two thresholds can only ever differ by the two terms the deception controls. The acceptance
+   test asserts exactly that identity.
+6. **A flat called-shot profile collapses the two thresholds.** `$calledProfileOverride` (Kirishiac
+   Orbitals, "targeted as if they were fighters") replaces the ship's bearing profile outright, and
+   it is read off the *translated* real system (D9), so there is no simulacrum number to diverge to.
+   Both thresholds take it. Deliberate.
+7. **Weapons with their own roll loop keep single-threshold behaviour — and that is the SAFE
+   default.** ~85 of the ~110 `fire()` overrides call `parent::fire()`, and 50 of the 80
+   `calculateHitBase` overrides call parent, so the seam covers nearly everything. The ~13 that roll
+   their own (AoE, mines, ramming, transverse jump, self-destruct, Gravitic rakes) now resolve on the
+   **real** threshold for both sheets, which is balance-correct by construction: making
+   `$fireOrder->needed` real again means every un-updated path became correct for free. What those
+   weapons lose is only the narrative divergence, and the deceived viewer sees the real numbers for
+   them because no tag is written.
+
+#### A pre-existing Stage 5 bug found and fixed here
+
+**Flash weapons were dealing their collateral splash twice.** `damageOneSheet()` opens with
+`if ($this->damageType == 'Flash') doCollateralDamage(...)`, which damages the **real** ships sharing
+the target's hex — and the phantom sits in the same hex as the ship it impersonates, so the mirrored
+pass ran it a second time. One shot, two lots of real splash damage to bystanders. Guarded with a new
+`BaseShip::$chameleonIsPhantom` marker set in `buildChameleonPhantom()`; the phantom pass may write to
+the simulacrum's sheet and nothing else.
+
+#### Still open, and still Stage 6's job
+
+A fire order's **`pubnotes`** is not masked (D7 schedules it). Stage 7 does not make this worse — it
+does not touch pubnotes at all — but note that a phantom-only hit currently produces an *empty*
+order-level pubnotes, because `fireChameleonPhantomOnly()` saves and restores it exactly as the mirror
+does. The per-system `DamageEntry` pubnotes still render, so the enemy sees the damage; when Stage 6
+masks pubnotes per viewer it should serve the phantom pass's narrative to the deceived side.
+
+#### What it cost, and the traps that were already known
+
+- **Two `shotshit` counts.** `tac_fireorder` stores one — see decision 1 for where the other lives.
 - **A NEW per-viewer masking site.** Fire orders live on the SHOOTER's weapon, and the shooter is
   usually not disguised — so this is masking keyed on the *target* being disguised from the viewer,
-  which no existing site does. It belongs in the §3 leak audit and the info-bleed map.
-- `Weapon::fire()` currently increments `$fireOrder->shotshit` once inside a single
-  `if ($rolled <= $needed)`. That block is the seam; the mirror in `damage()` stays where it is but
-  becomes conditional on its own threshold rather than riding pass 1's.
-- D4 keeps the simulacrum profile for `neededFake` **only**. `neededReal` must go back to the real
-  profile and the real stored DEW — i.e. `getDisguisedProfileFor()` / `getDisguisedDEWFor()` become
+  which no existing site does. Every other mask in FV hides a ship's own private state from people
+  not on its team; this one hides state from the shooter *themselves*, because the shooter is the
+  deceived party. Added to the §3 leak audit and to the info-bleed map.
+- `Weapon::fire()` incremented `$fireOrder->shotshit` once inside a single `if ($rolled <= $needed)`.
+  That block was the seam; the mirror in `damage()` stayed where it is and became conditional on its
+  own threshold rather than riding pass 1's.
+- D4 keeps the simulacrum profile for `neededFake` **only**. `neededReal` went back to the real
+  profile and the real stored DEW — `getDisguisedProfileFor()` / `getDisguisedDEWFor()` are now
   inputs to the fake threshold, not overrides of the only one.
 
 ### Stage 8 — Arming mask (D11) **for the ship's own payload** — the disguised payload already has it (Stage 3, decision 4). What remains is a CSS ship the enemy sees as *itself*: `None`, or revealed. Then optional refinements: weapon count/arc mismatch (D6 B/C), phantom criticals (D3c).
@@ -618,7 +729,8 @@ What it costs, and the traps already known:
 **Modified:**
 - [dargan.php](source/server/model/ships/centauri/dargan.php) — system swap, notes fix
 - [ShipClasses.php](source/server/model/ships/ShipClasses.php) — `hasChameleonSensors()`, `stripForJsonDisguised()`, `getDisguisedProfileFor()`, phantom construction + weapon map, reveal-sweep hook
-- [TacGamedata.php](source/server/model/TacGamedata.php) — static gate, `applyChameleonDisguise()`
+- [TacGamedata.php](source/server/model/TacGamedata.php) — static gate, `applyChameleonDisguise()`, `maskChameleonFireOrders()` + `buildChameleonFireOrderNotes()` (Stage 7)
+- [BaseClasses.php](source/server/model/BaseClasses.php) — `FireOrder::$chameleonCalledId` (Stage 5), `FireOrder::$chameleonFake` (Stage 7)
 - [DBManager.php](source/server/controller/DBManager.php) — null guards, gated phantom damage/critical loaders, phantom build step
 - [firing.php](source/server/handlers/firing.php) — mirrored resolution wrapper, called-shot translation, weapon-plausibility check
 - [movement.php](source/server/handlers/movement.php) — thrust-plausibility helper (D6b), alongside the existing `canAccelerate` / `doStuckEngine` acceleration maths

@@ -246,7 +246,24 @@ class FireOrder{
 	  server-side only - it never reaches the client or the database, and a POST-side rebuild drops
 	  it, which is correct: translation happens fresh on every resolution.*/
 	public $chameleonCalledId = null;
-    
+	/*Chameleon Sensor Suite (D3b, Stage 7): the SECOND to-hit threshold and its own hit tally, for a
+	  shot fired at a ship the shooter still sees as somebody else. null - and therefore free - for
+	  every shot in every game without one.
+
+	    'needed' : the threshold computed off the SIMULACRUM's profile and DEW. It governs the
+	               PHANTOM sheet and it is what the deceived viewer is shown, so their preview and
+	               their combat log agree. $this->needed keeps the REAL threshold, which governs the
+	               real hull - the disguise must never make the real ship harder to hit.
+	    'hit'    : how many hits the phantom took, counted alongside $shotshit (the real count).
+	    'mirror' : per-shot gate read by Weapon::mirrorChameleonDamage - false when this shot beat
+	               the real threshold but not the fake one. Defaults true everywhere else, so every
+	               other caller of damage() keeps the Stage 5 behaviour.
+
+	  ONE property rather than three so an ordinary game pays the same payload cost as
+	  $chameleonCalledId above: a single null. Transient - it is rebuilt at each resolution and the
+	  persisted form is the CHAM: tag Weapon::fire() appends to $notes.*/
+	public $chameleonFake = null;
+
     function __construct(
         $id,
         $type, 

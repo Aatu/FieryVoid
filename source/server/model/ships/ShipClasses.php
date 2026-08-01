@@ -102,6 +102,7 @@ class BaseShip {
 	//plausibility threshold is measured against it. Deliberately NOT in $gamedata->ships (D1) -
 	//it would then have to be excluded from initiative, movement, targeting, CPV and isFinished().
 	public $chameleonPhantom = null;
+	public $chameleonIsPhantom = false; //true on the phantom sheet itself, never on a real ship
 
     public $canvasSize = 200;
 
@@ -1444,6 +1445,10 @@ class BaseShip {
 		$phantom->movement = $this->movement;
 		$phantom->rolled   = $this->rolled;
 		$phantom->rolling  = $this->rolling;
+		//Lets an allocation pass tell which sheet it is on without inspecting the negative id.
+		//Weapon::damageOneSheet needs it: a Flash weapon's collateral splash hits the REAL ships
+		//sharing the hex, so the mirrored pass must not deal it a second time.
+		$phantom->chameleonIsPhantom = true;
 
 		$this->chameleonPhantom = $phantom;
 		return $this->chameleonPhantom;
