@@ -5,7 +5,20 @@ import theme from '../styled/theme';
 /* Borders only — see the note in system/PowerCapacitor.js. Note the asymmetry: only the
    NON-weapon branch converts. The $isWeapon red (#b43131) is a signal, not chrome — it is
    what tells you at a glance that the menu you opened belongs to a weapon — so it stays
-   exactly as it was. */
+   exactly as it was.
+
+   $isPurple is a third signal in the same spirit, for "this is an exotic ability, not ordinary
+   ship chrome". It reuses the Hyach Computer palette verbatim (system/HyachComputerList.js) so
+   the two menus read as one family rather than two near-misses. OPT-IN, driven by
+   `system.activationMenuPurple` on the client system object — not by a name match here, so the
+   React layer never has to know which classes exist. Chameleon Sensors is the first user. */
+const PURPLE = {
+    surface: 'rgba(32, 0, 32, 0.9)',
+    line: '#5d3564',
+    accent: '#7c4686',
+    text: '#f2f2f2',
+};
+
 const Container = styled.div`
     display: flex;
     flex-direction: column;
@@ -13,16 +26,16 @@ const Container = styled.div`
     width: 100%;
     min-width: 160px;
     opacity: 0.95 !important;
-    background-color: ${props => props.$isWeapon ? 'rgba(32, 0, 32, 0.9)' : 'rgba(16, 26, 38, 0.9)'};
-    border: 1px solid ${props => props.$isWeapon ? '#b43131' : theme.colors.line};
+    background-color: ${props => (props.$isWeapon || props.$isPurple) ? PURPLE.surface : 'rgba(16, 26, 38, 0.9)'};
+    border: 1px solid ${props => props.$isWeapon ? '#b43131' : props.$isPurple ? PURPLE.line : theme.colors.line};
 `;
 
 const Header = styled.div`
     padding: 3px;
-    background-color: ${props => props.$isWeapon ? '#571616' : '#215a7a'};
-    border: 1px solid ${props => props.$isWeapon ? '#b43131' : theme.colors.line};
-    border-bottom: 1px solid ${props => props.$isWeapon ? '#b43131' : theme.colors.line};
-    color: ${props => props.$isWeapon ? '#f2f2f2' : theme.colors.chromeText};
+    background-color: ${props => props.$isWeapon ? '#571616' : props.$isPurple ? PURPLE.line : '#215a7a'};
+    border: 1px solid ${props => props.$isWeapon ? '#b43131' : props.$isPurple ? PURPLE.line : theme.colors.line};
+    border-bottom: 1px solid ${props => props.$isWeapon ? '#b43131' : props.$isPurple ? PURPLE.line : theme.colors.line};
+    color: ${props => (props.$isWeapon || props.$isPurple) ? PURPLE.text : theme.colors.chromeText};
     text-align: center;
     font-size: 11px;
     margin-bottom: 2px;
@@ -34,9 +47,9 @@ const Row = styled.div`
     display: flex;
     align-items: center;
     padding: 1px 1px;
-    border-bottom: 1px solid #496791;
+    border-bottom: 1px solid ${props => props.$isPurple ? PURPLE.line : '#496791'};
     font-size: 12px;
-    color: #deebff;
+    color: ${props => props.$isPurple ? PURPLE.text : '#deebff'};
     justify-content: center;
 
     &:last-child {
@@ -58,12 +71,15 @@ const Controls = styled.div`
     padding: 2px;
 `;
 
+/* The IDLE chrome follows the theme; the active-state colours below deliberately do NOT. Green
+   "on" / red "off" is the same at-a-glance signal on every activatable system in the game, and
+   recolouring it per theme would trade a meaning for a decoration. */
 const ActionButton = styled.div`
     flex: 1;
     height: 18px;
-    background: #203348;
-    border: 1px solid #496791;
-    color: #deebff;
+    background: ${props => props.$isPurple ? PURPLE.line : '#203348'};
+    border: 1px solid ${props => props.$isPurple ? PURPLE.accent : '#496791'};
+    color: ${props => props.$isPurple ? PURPLE.text : '#deebff'};
     cursor: pointer;
     display: flex;
     justify-content: center;
@@ -74,17 +90,21 @@ const ActionButton = styled.div`
     user-select: none;
 
     &:hover {
-        background: #496791;
-        border: 1px solid #5d82b6ff;        
+        background: ${props => props.$isPurple ? '#5e3666' : '#496791'};
+        border: 1px solid ${props => props.$isPurple ? '#9a5aa6' : '#5d82b6ff'};
         color: #ffffff;
         opacity: 1;
     }
 
-    ${props => props.disabled && `
+    ${props => props.disabled && (props.$isPurple ? `
+        opacity: 0.3;
+        cursor: not-allowed;
+        &:hover { background: #4b2b51; color: #d8b9e6; border: 1px solid ${PURPLE.accent}; }
+    ` : `
         opacity: 0.3;
         cursor: not-allowed;
         &:hover { background: #203348; color: #deebff; }
-    `}
+    `)}
 
     ${props => (props.$active || (props.$variant === 'activate' && props.$isWeapon)) && props.$variant === 'activate' && !props.$isWeapon && `
         background: #1b5e20;
@@ -249,16 +269,19 @@ class SystemActivation extends Component {
         const showActivate = !single || this.canActivate();
         const showDeactivate = !system.weapon && (!single || this.canDeactivate());
 
+        //Opt-in purple chrome (see PURPLE above). A weapon menu keeps its red signal either way.
+        const isPurple = Boolean(system.activationMenuPurple) && !system.weapon;
+
         return (
-            <Container $isWeapon={system.weapon}>
-                <Header $isWeapon={system.weapon}>{system.displayName}</Header>
-                <Row>
+            <Container $isWeapon={system.weapon} $isPurple={isPurple}>
+                <Header $isWeapon={system.weapon} $isPurple={isPurple}>{system.displayName}</Header>
+                <Row $isPurple={isPurple}>
                     <Controls>
                         {showActivate && (
-                            <ActionButton onClick={() => this.handleActivate()} onContextMenu={(e) => this.handleActivateAll(e)} disabled={!this.canActivate()} $active={isActive} $variant="activate" $isWeapon={system.weapon}>{activateLabel}</ActionButton>
+                            <ActionButton onClick={() => this.handleActivate()} onContextMenu={(e) => this.handleActivateAll(e)} disabled={!this.canActivate()} $active={isActive} $variant="activate" $isWeapon={system.weapon} $isPurple={isPurple}>{activateLabel}</ActionButton>
                         )}
                         {showDeactivate && (
-                            <ActionButton onClick={() => this.handleDeactivate()} onContextMenu={(e) => this.handleDeactivateAll(e)} disabled={!this.canDeactivate()} $active={!isActive} $variant="deactivate">{deactivateLabel}</ActionButton>
+                            <ActionButton onClick={() => this.handleDeactivate()} onContextMenu={(e) => this.handleDeactivateAll(e)} disabled={!this.canDeactivate()} $active={!isActive} $variant="deactivate" $isPurple={isPurple}>{deactivateLabel}</ActionButton>
                         )}
                     </Controls>
                 </Row>

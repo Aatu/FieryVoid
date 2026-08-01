@@ -891,6 +891,7 @@ spl_autoload_register(
                 'damagereductionremoved' => '/server/model/cricialClasses.php',
                 'damagesystem' => '/server/model/cricialClasses.php',
                 'dargan' => '/server/model/ships/centauri/dargan.php',
+                'darganchameleon' => '/server/model/ships/centauri/darganChameleon.php',
                 'dargarian' => '/server/model/ships/HouseValheru/Dargarian.php',
                 'darius' => '/server/model/ships/HouseValheru/Darius.php',
                 'darkhawkam' => '/server/model/ships/drazi/darkhawkAM.php',

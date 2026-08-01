@@ -1,53 +1,56 @@
 <?php
-/* RETIRED HULL - do not add to this class, and do not put the Chameleon Sensor Suite back on it.
+/* The Dargan as it is meant to be flown: a Strike Cruiser whose ELINT array is a Chameleon Sensor
+   Suite, able to disguise the ship as another Centauri vessel.
 
-   This is the original Dargan: an ordinary ELINT Strike Cruiser. The Chameleon version lives in
-   darganChameleon.php as class DarganChameleon, and that is what the lobby now offers.
+   Why this is a separate class from Dargan rather than a change to it: games that are already in
+   progress on the live server hold ships with phpclass 'Dargan', and those ships were bought and
+   deployed as plain ELINT hulls. Retrofitting the suite onto that class would hand every one of
+   them a system they did not pay for, mid-game, and system ids are construction-order POSITIONAL
+   (see arch_positional_system_id_trap) - so every stored damage row, critical and individual note
+   keyed on an id at or after the array would land on the wrong system. Dargan is therefore frozen
+   in its original form and retired from the buy list with variantOf = 'NONE'; new purchases get
+   this class instead.
 
-   The split exists so that games ALREADY IN PROGRESS on live are not disturbed. Their ships carry
-   phpclass 'Dargan' and were bought as ELINT hulls; system ids are construction-order positional
-   (arch_positional_system_id_trap), so swapping the array here would silently re-point every stored
-   damage row, critical and individual note from that id onward. variantOf = 'NONE' is the standard
-   retirement sentinel - it hides the hull from fleet selection and from the Chameleon disguise
-   candidate list (ShipLoader::isLegalDisguiseTarget) without breaking a single existing game. */
-class Dargan extends BaseShip{
+   shipClass is deliberately IDENTICAL to the retired hull's. Players buy and name "Dargan Strike
+   Cruiser" exactly as before, and the retired class is invisible in the lobby, so there is nothing
+   to collide with. Everything the Chameleon machinery keys on is phpclass, not shipClass. */
+class DarganChameleon extends BaseShip{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 750;
 		$this->faction = "Centauri Republic";
-        $this->phpclass = "Dargan";
-        $this->variantOf = 'NONE'; //retired: superseded by DarganChameleon. See the note above.
+        $this->phpclass = "DarganChameleon";
         $this->imagePath = "img/ships/dargan.png";
         $this->shipClass = "Dargan Strike Cruiser";
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>12);
 		$this->customFighter = array("Rutarian"=>12);
         $this->limited = 10;
-	    
+
 	    $this->isd = 2258;
-        
+
         $this->forwardDefense = 15;
         $this->sideDefense = 16;
-        
+
         $this->turncost = 0.66;
         $this->turndelaycost = 0.50;
         $this->accelcost = 3;
         $this->rollcost = 2;
         $this->pivotcost = 3;
-	    
-	    $this->notes = 'Chameleon Sensors (no effect in game).';
+
+	    $this->notes = 'Chameleon Sensors - ELINT array that can also disguise this ship as another vessel.';
 	    $this->notes .= '<br>Rutarian-capable.';
 
         $this->addPrimarySystem(new Reactor(6, 22, 0, 0));
         $this->addPrimarySystem(new CnC(7, 18, 0, 0));
-        $this->addPrimarySystem(new ElintScanner(6, 20, 4, 10)); //ORIGINAL array - do not change, see the class note
+        $this->addPrimarySystem(new ChameleonSensors(6, 20, 4, 10)); //replaces ElintScanner IN PLACE - system ids are construction-order positional, do not move this line
         $this->addPrimarySystem(new Engine(6, 20, 0, 12, 2));
 	$this->addPrimarySystem(new Hangar(6, 14));
         $this->addPrimarySystem(new TwinArray(4, 6, 2, 90, 270));
-        
-		
+
+
         $this->addFrontSystem(new TwinArray(3, 6, 2, 180, 60));
         $this->addFrontSystem(new TwinArray(3, 6, 2, 180, 60));
 	$this->addFrontSystem(new TwinArray(3, 6, 2, 300, 180));
@@ -60,34 +63,34 @@ class Dargan extends BaseShip{
         $this->addAftSystem(new Thruster(4, 8, 0, 3, 2));
 	$this->addAftSystem(new Thruster(5, 14, 0, 6, 2));
         $this->addAftSystem(new Thruster(4, 8, 0, 3, 2));
-        
+
 	$this->addLeftSystem(new BattleLaser(3, 6, 6, 240, 0));
 	$this->addLeftSystem(new Mattercannon(3, 7, 4, 240, 0));
 	$this->addLeftSystem(new Thruster(5, 15, 0, 5, 3));
-		
+
 	$this->addRightSystem(new BattleLaser(3, 6, 6, 0, 120));
 	$this->addRightSystem(new Mattercannon(3, 7, 4, 0, 120));
 	$this->addRightSystem(new Thruster(5, 15, 0, 5, 4));
-		
 
-        
-        
+
+
+
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 5, 44));
         $this->addAftSystem(new Structure( 5, 44));
         $this->addLeftSystem(new Structure( 5, 52));
         $this->addRightSystem(new Structure( 5, 52));
         $this->addPrimarySystem(new Structure( 7, 39));
-	    
-	    
-	    
-  
+
+
+
+
 	//d20 hit chart
         $this->hitChart = array(
             0=> array( //PRIMARY
                     8 => "Structure",
                     10 => "Twin Array",
-                    13 => "ELINT Scanner",
+                    13 => "Chameleon Sensors",
                     15 => "Engine",
                     17 => "Hangar",
                     19 => "Reactor",
@@ -121,7 +124,7 @@ class Dargan extends BaseShip{
                     20 => "Primary",
             )
         );
-	    
+
     }
 }
 

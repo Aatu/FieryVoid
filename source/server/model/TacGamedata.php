@@ -18,6 +18,21 @@ class TacGamedata {
     //boolean - a game without a disguised ship pays for one false check and nothing else.
     //Set in onConstructed(), after every ship has been constructed (enhancements included).
     public static $chameleonPresent = false;
+    /*Second Chameleon gate, for the ONE effect that is a property of the suite rather than of the
+      deception: D11 arming masking, which applies to a CSS ship showing as ITSELF - left on "None",
+      or already revealed - and therefore cannot hang off $chameleonPresent. Tests the live special
+      ability, so a suite that is destroyed or offline stops masking on its own.*/
+    public static $chameleonSuitePresent = false;
+    /*Every team id in this game. Needed because ChameleonSensors::isDisguisedFrom() has to answer
+      "has EVERY team seen through this?" for an observer, and a system has no route to $gamedata.*/
+    public static $chameleonAllTeams = array();
+    /*D15, second half: a FINISHED game drops every deception so the post-mortem shows what actually
+      happened. Set from $this->status, read by applyChameleonDisguise() and maskChameleonArming().
+      Deliberately NOT implemented by forcing the two gates above to false: maskChameleonFireOrders()
+      still has to run, because stripping the CHAM: storage tag out of fire-order notes is
+      unconditional and must stay that way. With nothing marked disguised it is the only thing left
+      for that pass to do.*/
+    public static $chameleonDisclosed = false;
 
     public $id, $turn, $phase, $activeship, $name, $status, $points, $background, $creator, $gamespace, $description;
     public $ships = array();
@@ -171,6 +186,13 @@ class TacGamedata {
     public function markUnavailableSetMarkers()
     {
         self::$chameleonPresent = false; //before the phase guard: the static outlives a single load
+        self::$chameleonSuitePresent = false;
+        self::$chameleonDisclosed = ($this->status === "FINISHED"); //D15: the post-mortem sees everything
+        self::$chameleonAllTeams = array();
+        foreach ($this->slots as $slot){
+            $teamId = (int)$slot->team;
+            if (!in_array($teamId, self::$chameleonAllTeams, true)) self::$chameleonAllTeams[] = $teamId;
+        }
         if ($this->phase < -1)
             return;
 
@@ -193,6 +215,11 @@ class TacGamedata {
             //ability, and that is precisely the case the shutdown reveal has to record. A suite left
             //on the default "None" still keeps the whole game on the common path.
             if(!self::$chameleonPresent && !empty($ship->chameleonDisguiseClass)) self::$chameleonPresent = true;
+
+            //D11 (Stage 8) gate. Unlike the one above this DOES test the ability, because arming
+            //masking survives the reveal but not the loss of the array. hasSpecialAbility is an
+            //isset() on a map onConstructed() already filled, so this costs no systems walk.
+            if(!self::$chameleonSuitePresent && $ship->hasChameleonSensors()) self::$chameleonSuitePresent = true;
         }
     }
     
@@ -746,6 +773,12 @@ class TacGamedata {
       own-team check, so there is no policy in here at all.*/
     private function applyChameleonDisguise(){
         if (!self::$chameleonPresent) return;
+
+        //D15: once the game is over there is nothing left to protect and a post-mortem that still
+        //lied about which hull was which would be worse than useless. Leaves every ship's
+        //chameleonDisguisedForViewer at its false default, which switches off stripForJsonDisguised(),
+        //the fire-order remap and the per-viewer threshold mask in one move.
+        if (self::$chameleonDisclosed) return;
 
         foreach ($this->ships as $ship){
             $ship->chameleonDisguisedForViewer = false;

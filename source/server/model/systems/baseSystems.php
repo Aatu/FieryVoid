@@ -2192,8 +2192,37 @@ class ChameleonSensors extends ElintScanner implements SpecialAbility{
 		if (!$this->active) return false;
 		if ($this->isDestroyed($turn)) return false;      //a shot-out array projects nothing
 		if ($this->isOfflineOnTurn($turn)) return false;
-		if ($team === null) return false;                 //no team (observer) - see the truth
+		/*Observers (no team). D15 as written said "observers see the disguise", the code shipped the
+		  opposite, and the user's ruling of 2026-08-01 settles it in favour of the plan but with a
+		  condition: an observer sees the deception until it has broken against EVERY team, at which
+		  point there is nobody left it is hidden from and showing an observer a fiction is just
+		  wrong. Same shape as trueStealth, which hides a Torvalus hull from an observer for as long
+		  as the per-team detection list has any team missing from it (TacGamedata line ~1162: a null
+		  viewer team matches no entry in detectedNew).*/
+		if ($team === null) return !$this->isRevealedToEveryTeam();
 		return !in_array((int)$team, $this->revealedTeams, true);
+	}
+
+	/*"Has every OTHER team in this game seen through this?" - the observer's question, and the one
+	  isFullyRevealed() answers when it has a $gamedata to read slots from. A system does not, so the
+	  team list is taken off the per-load static TacGamedata::$chameleonAllTeams.
+
+	  Fails CLOSED: with no team list (server-side processing outside a real load, static ship
+	  generation) this returns false, so the observer keeps seeing the disguise. Showing a deception
+	  to somebody who should not have seen it is a cosmetic error; undressing a ship that is still
+	  hiding is a leak, and leaks are the failure mode this feature cannot have.*/
+	private function isRevealedToEveryTeam(){
+		$ship = $this->getUnit();
+		if ($ship === null) return false;
+		if (empty(TacGamedata::$chameleonAllTeams)) return false;
+
+		$sawSomebody = false;
+		foreach (TacGamedata::$chameleonAllTeams as $teamId){
+			if ((int)$teamId === (int)$ship->team) continue; //its own team never counts as deceived
+			$sawSomebody = true;
+			if (!in_array((int)$teamId, $this->revealedTeams, true)) return false;
+		}
+		return $sawSomebody;
 	}
 
 	/*Enemy teams in this game. Shared by every reveal checkpoint.*/
@@ -2418,6 +2447,13 @@ class ChameleonSensors extends ElintScanner implements SpecialAbility{
 			return;
 		}
 
+		//Runs at EVERY checkpoint, not just deployment. The rule is about fleet composition, so it
+		//bites on turn 1 at the Deployment advance - but a team whose Ancient units are held in
+		//reserve, or which surrenders a slot and gains one, must not get a free pass, and a Chameleon
+		//ship that deploys on turn 5 has to be caught too. Cheap: it returns on the first pass
+		//because revealTo() is idempotent per team, and after that revealedTeams short-circuits it.
+		$this->checkAncientSensors($gamedata, $ship);
+
 		if ($checkpoint === 'firing'){
 			$this->checkWeaponPlausibility($gamedata, $ship);
 			return;
@@ -2430,6 +2466,36 @@ class ChameleonSensors extends ElintScanner implements SpecialAbility{
 
 		$this->checkProximity($gamedata, $ship);
 		if ($checkpoint === 'movement') $this->checkThrustPlausibility($gamedata, $ship);
+	}
+
+	/* Ancient sensors see through it, full stop (user's ruling, 2026-08-01).
+
+	   "AdvancedSensors on Ancient faction ships ignore the Chameleon effect entirely - so if there is
+	   a unit on a team with factionAge 3 or more, Chameleon ships automatically lose their disguise
+	   at the start of the game."
+
+	   The operative test is factionAge >= 3 (3 = Ancient, 4 = Primordial: Shadows, Vorlons,
+	   Kirishiac, Mindriders, Thirdspace). The AdvancedSensors ability is NOT additionally required -
+	   the ruling is written as a property of the race, and every Ancient hull carries the ability
+	   anyway, so requiring both would only add a way for a sensor-crippled Shadow cruiser to be
+	   fooled. One line here if that turns out to be wanted.
+
+	   PER TEAM, exactly like checkProximity: in a 3-way game the Shadow player sees the real hull
+	   while the two young-race teams keep facing the simulacrum. Same model trueStealth uses.
+
+	   Reserves and destroyed units still count. This is a fleet-composition rule known before a shot
+	   is fired, not something the disguised ship can undo by killing the scout - and the reveal is
+	   permanent anyway, so excluding them would only create an ordering quirk on turn 1.*/
+	private function checkAncientSensors($gamedata, $ship){
+		foreach ($gamedata->ships as $otherShip){
+			$teamId = (int)$otherShip->team;
+			if ($teamId == $ship->team) continue;
+			if ($otherShip->isTerrain()) continue;                       //asteroids have a factionAge too
+			if ($otherShip->factionAge < 3) continue;
+			if (in_array($teamId, $this->revealedTeams, true)) continue; //already knows
+			//notekey_human is varchar(40) and overflow ABORTS the whole submission - 33 chars.
+			$this->revealTo($gamedata, $ship, $teamId, true, 'Ancient sensors see through it');
+		}
 	}
 
 	/*Close enough to look at it properly. Same shape as ShadingField::isDetected - hex range plus a

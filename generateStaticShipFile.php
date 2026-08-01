@@ -27,7 +27,8 @@ include_once __DIR__ . '/source/public/global.php';
  */
 function compactSystemForStaticJson(array $system): array {
     // Empty arrays
-    $emptyArrayKeys = ['damage','criticals','fireOrders','power','specialAbilities','critData'];
+    $emptyArrayKeys = ['damage','criticals','fireOrders','power','specialAbilities','critData',
+                       'revealedTeams'];
     foreach ($emptyArrayKeys as $key) {
         if (isset($system[$key]) && is_array($system[$key]) && empty($system[$key])) {
             unset($system[$key]);
@@ -63,7 +64,26 @@ function compactSystemForStaticJson(array $system): array {
     return $system;
 }
 
+/**
+ * SHIP-level stripping. Keep this function byte-identical to the one in
+ * generateStaticShipFileWeb.php — that is the copy the LIVE server runs, and a divergence there
+ * silently ships a bigger file to every visitor than the dev box ever sees.
+ *
+ * $serverOnlyShipKeys is not size-tuning for its own sake. The generator json_encode()s the RAW
+ * BaseShip object rather than going through BaseShip::stripForJson(), so every public property
+ * declared on BaseShip lands in the static file whether the client wants it or not. These six are
+ * Chameleon Sensor Suite server state; no client code reads any of them (grep the client tree —
+ * zero hits), and on 2,554 ships they were ~450KB of pure waste.
+ *
+ * ⚠️ Any future public server-only property added to BaseShip belongs in this list.
+ */
 function compactShipForStaticJson(array $ship): array {
+    $serverOnlyShipKeys = ['chameleonDisguiseClass','chameleonBlueprint','chameleonDisguisedForViewer',
+                           'chameleonPhantom','chameleonIsPhantom','chameleonWeaponMap'];
+    foreach ($serverOnlyShipKeys as $key) {
+        unset($ship[$key]);
+    }
+
     if (!empty($ship['systems'])) {
         foreach ($ship['systems'] as $i => $system) {
             if (is_array($system)) {

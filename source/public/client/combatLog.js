@@ -90,9 +90,18 @@ window.combatLog = {
             var weapon = shipManager.systems.getSystem(ship, fire.weaponid);
 
 
+            //Defensive: an order naming a mode this weapon does not declare made the loop below
+            //spin forever and hang the tab. The Chameleon fire-order remap can produce exactly that
+            //(a Twin Array in mode 2 substituted by a single-mode Plasma Accelerator) and is clamped
+            //server-side, but nothing structurally prevents another source of it, and the cost of
+            //being wrong here is the whole page. changeFiringMode() cycles, so the number of
+            //declared modes is a complete bound: if it has not matched after one full cycle, it
+            //never will.
+            if (!weapon) continue;
             var modeIteration = fire.firingMode; //change weapons data to reflect mode actually used
             if (modeIteration != weapon.firingMode) {
-                while (modeIteration != weapon.firingMode) { //will loop until correct mode is found
+                var modeGuard = weapon.firingModes ? Object.keys(weapon.firingModes).length : 1;
+                while (modeIteration != weapon.firingMode && modeGuard-- > 0) { //loops until the correct mode is found
                     weapon.changeFiringMode();
                 }
             }

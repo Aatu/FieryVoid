@@ -88,6 +88,10 @@ ElintScanner.prototype.constructor = ElintScanner;
 //isScanner() stays true; the distinct class exists because createSystemFromJson does new window[Name].
 var ChameleonSensors = function ChameleonSensors(json, ship) {
 	ElintScanner.call(this, json, ship);
+	//Opt-in flag read by reactJs/system/SystemActivation.js: render the Disguise / Drop Disguise
+	//menu in the Hyach Computer purple rather than standard ship chrome, so the exotic abilities
+	//read as one family. Set here rather than matched on by name in the React layer.
+	this.activationMenuPurple = true;
 };
 ChameleonSensors.prototype = Object.create(ElintScanner.prototype);
 ChameleonSensors.prototype.constructor = ChameleonSensors;
@@ -140,7 +144,7 @@ ChameleonSensors.prototype.canDeactivate = function () {
 };
 
 ChameleonSensors.prototype.getActivateLabel = function () {
-	return "Disguise";
+	return "Disguised";
 };
 
 ChameleonSensors.prototype.getDeactivateLabel = function () {

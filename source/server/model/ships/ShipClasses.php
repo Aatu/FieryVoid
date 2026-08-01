@@ -680,6 +680,11 @@ class BaseShip {
 
         $strippedShip->systems = array_map( function($system) {return $system->stripForJson();}, $this->systems);
 
+        //Chameleon Sensor Suite, D11 (Stage 8) - the other half of the arming mask. The DISGUISED
+        //payload has had this since Stage 3 (armChameleonSimulacrumWeapons); this is the same rule
+        //applied to a CSS ship the enemy sees as ITSELF, which is a different code path entirely.
+        if (TacGamedata::$chameleonSuitePresent) $this->maskChameleonArming($strippedShip);
+
         //With changes to how we cache ships, we sadly have to re-do this each time. DK - Dec 2025
         $this->notesFill();
 		$strippedShip->notes = $this->notes;                
@@ -1514,6 +1519,66 @@ class BaseShip {
 		if ($this->userid == TacGamedata::$currentForPlayer) return true; //owner
 		if (TacGamedata::$currentForPlayerTeam !== null && $this->team == TacGamedata::$currentForPlayerTeam) return true; //teammate
 		return false;
+	}
+
+	/*D11, Stage 8 - "Chameleon suites mask the arming status of weapons ... even after the deception
+	  is revealed."
+
+	  This is the one CSS effect that is a property of the SUITE rather than of the deception, so it
+	  is keyed on "this ship has a live array", not on "this ship is disguised". It therefore covers
+	  the two cases the Stage 3 mask cannot reach, both of which serve the ship's REAL payload:
+
+	    - a Chameleon ship left on the default "None" - an ordinary ELINT hull that still jams its
+	      arming readout, which is what makes "None" a real choice rather than a wasted slot;
+	    - a ship whose deception has already broken. The enemy now knows what it is looking at and
+	      still cannot tell which of its guns are hot.
+
+	  Applied to the STRIPPED clones, never to the live systems: $strippedShip->systems came from
+	  ShipSystem::stripForJson(), which hands back fresh stdClass objects, so nothing here can reach
+	  the objects the server resolves firing against or the ones the owner's own payload is built
+	  from. (Editing in place would be the same class of bug as mutating a FireOrder during the
+	  Stage 6 remap.)
+
+	  "Full charge" is max(loadingtime, normalload), NOT loadingtime - the property, not
+	  getNormalLoad(), which boostable weapons override to loadingtime + maxBoostLevel. Both of those
+	  are the same traps armChameleonSimulacrumWeapons() documents; the value has to match, or a
+	  revealed ship and a disguised one would mask to visibly different numbers.
+
+	  overloadturns is DROPPED rather than zeroed: absent already means "not overloading" to the
+	  client, and a masked ship that is quietly charging an overload must not advertise it.*/
+	private function maskChameleonArming($strippedShip)
+	{
+		if (TacGamedata::$chameleonDisclosed) return;   //D15: a finished game hides nothing
+		if ($this->isRevealedToCurrentViewer()) return; //owner and teammates always see the truth
+		if (!$this->hasChameleonSensors()) return;      //destroyed or offline array masks nothing
+
+		$realById = array();
+		foreach ($this->systems as $system){
+			if ($system instanceof Weapon) $realById[$system->id] = $system;
+		}
+		if (empty($realById)) return;
+
+		foreach ($strippedShip->systems as $sys){
+			if (!isset($realById[$sys->id])) continue;
+			if (!property_exists($sys, 'turnsloaded')) continue;
+			$real = $realById[$sys->id];
+
+			$sys->turnsloaded = max($real->getLoadingTime(), (int)$real->normalload);
+
+			//The client DISCARDS the scalar whenever turnsloadedArray is present
+			//(shipSystem.js:219), so a multi-mode weapon has to be masked key for key or the mask
+			//is silently thrown away the moment the viewer looks at any mode. There is no
+			//normalloadArray - the one normalload applies to every mode.
+			if (!empty($real->loadingtimeArray)){
+				$perMode = array();
+				foreach ($real->loadingtimeArray as $mode => $loadingtime){
+					$perMode[$mode] = max($loadingtime, (int)$real->normalload);
+				}
+				$sys->turnsloadedArray = $perMode;
+			}
+
+			unset($sys->overloadturns);
+		}
 	}
 
 	/*Does this ship carry a LIVE Chameleon Sensor Suite?

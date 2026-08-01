@@ -18,8 +18,21 @@ Implement the B5W Chameleon Sensors rules on the Centauri **Dargan Strike Cruise
 | **4 — Phantom sheet** | ✅ **COMPLETE** — built and in-game tested 2026-08-01 (game 4273: a heavy laser hit the real Dargan, the phantom did not, both logs correct) |
 | **5 — Mirrored resolution** | ✅ **COMPLETE** — built and in-game tested 2026-08-01 (game 4273). Four playtest bugs found and fixed; see below |
 | **7 — Dual-threshold resolution (D3b)** | ✅ **COMPLETE** — built 2026-08-01, server-proven (`css_stage7.php`, 44 assertions) and **DB-verified in game 4273** (see below). Taken **before** Stage 6 because it is a balance fix, not a feature |
-| **6 — Fire orders FROM the disguised ship (D7) + weapon-plausibility reveal (D6)** | ✅ **COMPLETE** — built 2026-08-01, server-proven (5 new suites, 103 assertions), browser test outstanding |
-| 8 — Arming mask on the ship's own payload (D11), then optional refinements | Not started — **next** |
+| **6 — Fire orders FROM the disguised ship (D7) + weapon-plausibility reveal (D6)** | ✅ **COMPLETE** — built 2026-08-01, server-proven, **DB-verified in game 4273** and browser-tested by the user 2026-08-01 |
+| **8 — Arming mask on the ship's own payload (D11) + the user's eight refinements** | ✅ **COMPLETE** — built 2026-08-01, server-proven (`css_stage8.php` 35, `css_stage8_teams.php` 18, `css_dargansplit.php` 30). Browser test outstanding |
+
+> **Stage 6 is DB-verified (game 4273, turn 1).** Every reveal the checkpoint wrote is the one the
+> corrected loadout table predicts, and no others: 876358 (Demos — shares no gun class with the
+> Dargan) revealed on `Fired Twin Array`; 876360 (Balvarix — no Battle Laser) on `Fired Battle
+> Laser`, while its *Matter Cannon* shot in the same turn wrote nothing because a Balvarix mounts
+> two; 876359 (Octurion — superset) fired a Battle Laser and was **not** revealed; 876355 (the
+> `None` control) wrote nothing at all. Both weapon reveals are `revealedNextTurn` at phase 4, both
+> proximity reveals `revealedNow` at phase 2.
+> The remap is confirmed on the served payload: the still-disguised Octurion's fire order goes out
+> on **weapon 33** (an Octurion Battle Laser) instead of the real weapon 20, with `notes` rebuilt to
+> only the two fragments combatLog.js parses, `pubnotes` empty, `calledid = -1`, and the matched
+> weapon's arming mirrored (`turnsloaded 1` of 3, exactly what the real gun reads). `CHAM:` and
+> `chameleonDisguise` are absent from both payloads.
 
 > **Stage 7 is DB-verified.** Game 4273 turn 1, fire order 497218 (G'Quan Heavy Laser → the Dargan
 > wearing a Demos): the row stores `needed = 109` with the REAL breakdown (`defence: 16, DEW: 2`) and
@@ -30,13 +43,11 @@ Implement the B5W Chameleon Sensors rules on the Centauri **Dargan Strike Cruise
 > Both sheets carry 45 points of damage on their own systems (real: Matter Cannon, Thruster, 2×
 > Structure; phantom: Heavy Array, 2× Structure).
 
-> **⚠️ One deviation from D15 found while verifying, NOT fixed — it is a design call, not a bug.**
-> `ChameleonSensors::isDisguisedFrom()` returns false for a null team, commented *"no team (observer)
-> - see the truth"*. D15 says the opposite: *"Observers (no team) see the disguise."* Confirmed live —
-> an observer seat is served the real Dargan while both players' seats behave correctly. Harmless in
-> a 1v1 with no spectator, but it means any observer sees through every disguise in the game.
-> Decide which reading is wanted; D15's own open question (drop all disguises once the game is
-> FINISHED) belongs with it.
+> ✅ **The D15 observer deviation is RESOLVED (user's ruling, 2026-08-01) — in favour of the plan.**
+> *"Game observers should never see through the disguise unless it is revealed to all teams in the
+> game already; this should match the current logic for trueStealth ships."* `isDisguisedFrom(null)`
+> now returns the disguise unless **every** team other than the ship's own is in `revealedTeams`.
+> See Stage 8 refinement 1 below for the shape and the fail-closed guard.
 
 > ✅ **The Stage 7 balance issue is closed.** The real hull is resolved against its own profile and
 > its own DEW again; the simulacrum's numbers now govern the phantom sheet only. See Stage 7 below
@@ -845,16 +856,169 @@ masks pubnotes per viewer it should serve the phantom pass's narrative to the de
   profile and the real stored DEW — `getDisguisedProfileFor()` / `getDisguisedDEWFor()` are now
   inputs to the fake threshold, not overrides of the only one.
 
-### Stage 8 — Arming mask (D11) **for the ship's own payload** — the disguised payload already has it (Stage 3, decision 4). What remains is a CSS ship the enemy sees as *itself*: `None`, or revealed. Then optional refinements: weapon count/arc mismatch (D6 B/C), phantom criticals (D3c).
+### Stage 8 — Arming mask (D11) for the ship's own payload, plus the user's eight refinements ✅ DONE
+
+The core was one rule with no code behind it yet: the disguised payload has masked arming since
+Stage 3, but a CSS ship the enemy sees as *itself* — left on `None`, or already revealed — was
+serving its real `turnsloaded`. `BaseShip::maskChameleonArming()` closes that, gated on a **second**
+static, `TacGamedata::$chameleonSuitePresent`.
+
+**Why a second gate.** `$chameleonPresent` deliberately tests the disguise CHOICE, because a
+destroyed array must not switch off the reveal that records its own destruction. D11 is the opposite
+case: it is a property of the *suite*, survives the reveal, and stops when the array does — so it
+tests `hasChameleonSensors()`, which is an `isset()` on the map `onConstructed()` already built and
+therefore costs no systems walk. The two gates answer different questions and neither can be reused
+for the other.
+
+- Applied to the **stripped clones**, never the live systems (same reason the Stage 6 remap clones
+  its fire orders: those objects are what firing resolves against and what the owner's payload is
+  built from).
+- Full charge is `max(loadingtime, normalload)` off the **property**, matching
+  `armChameleonSimulacrumWeapons()` exactly — a revealed ship and a disguised one must not mask to
+  visibly different numbers.
+- `turnsloadedArray` is masked key for key (the client discards the scalar when the array is
+  present), and `overloadturns` is **dropped**, since absent already reads as "not overloading".
+
+*Tests:* `css_stage8.php` (35). The discriminating case is real, not forced: on game 4273 the
+Balvarix Dargan's Battle Laser reads `1/3` and its Matter Cannon `1/2` to their owner, and `3` and
+`2` to the enemy.
+
+#### The eight refinements (user, 2026-08-01)
+
+1. **Observers.** Resolved in favour of D15 — see the STATUS note above. `isRevealedToEveryTeam()`
+   reads the team list off a new per-load static `TacGamedata::$chameleonAllTeams`, because a system
+   has no route to `$gamedata`. It **fails closed**: no team list (server-side processing, static
+   generation) means the observer keeps seeing the disguise. Showing a fiction to somebody who
+   should not have seen it is cosmetic; undressing a ship that is still hiding is a leak.
+2. **factions-tiers.php.** Two new blocks in the Centauri section: *Chameleon Sensors* (what it does
+   and how you buy it, including the "no defensive benefit" ruling and the permanent arming mask)
+   and *Seeing through a Chameleon disguise* (all six reveal routes, with the per-team model stated
+   outright).
+3. **Ancient sensors.** `checkAncientSensors()` — `factionAge >= 3` on any unit of a team reveals
+   every Chameleon ship to **that team**, immediately and permanently. Runs at every checkpoint, not
+   just deployment, so reserves and late-deploying Chameleon ships are both covered; it costs one
+   pass and then short-circuits on `revealedTeams`. Reserves and destroyed units count — this is a
+   fleet-composition rule, not something the disguised ship can undo by killing the scout.
+   **The `AdvancedSensors` ability is deliberately NOT also required**: the ruling is written as a
+   property of the race, every Ancient hull carries the ability anyway, and requiring both would
+   only add a way for a sensor-crippled Shadow cruiser to be fooled. One line if that is wanted.
+4. **Multi-team detection.** Already correct, and now *proven* rather than assumed. Proximity calls
+   `revealTo($teamId)` per detecting unit, so `revealedTeams` fills one team at a time — the same
+   model `Stealth::$detectedNew` uses. The whole-fleet checkpoints (thrust, EW, weapon plausibility,
+   shutdown) reveal to every enemy team, which is right: those are observable by everyone.
+   `css_stage8_teams.php` builds a synthetic 3-team board and shows a team-3 scout in the subject's
+   hex revealing to team 3 only, while team 2 keeps being served the simulacrum.
+5. **Offline / destroyed.** Already in place, verified rather than rebuilt. The shutdown block sits
+   *above* the checkpoint dispatch in `checkChameleonReveal()`, so `!active` / destroyed / offline is
+   tested at **all four** checkpoints — Deployment, Initial Orders (which is where a phase-1 power
+   change lands, alongside the EW checks), Movement (terrain collision) and Firing (after
+   `Criticals::setCriticals`, deliberately before the owner can self-repair).
+6. **DarganChameleon.** New class carrying the suite; `Dargan` rolled back to its original
+   `ElintScanner` form and retired with `variantOf = 'NONE'`. See the note in `dargan.php` — the
+   reason is not just tidiness, it is that system ids are construction-order positional, so
+   retrofitting the array onto the live class would re-point every stored damage row and critical
+   from that id onward. `shipClass` is identical on both, so players see no change; everything the
+   Chameleon machinery keys on is `phpclass`. *Tests:* `css_dargansplit.php` (30) proves the retired
+   hull is back to an ElintScanner at id 2, the new hull matches it slot-for-slot everywhere else,
+   and the retired one is offerable neither in the lobby nor as a disguise target.
+7. **Page reload on reveal.** Kept — see the analysis below.
+8. **Purple menu.** `SystemActivation` gains an opt-in `$isPurple` variant using the Hyach Computer
+   palette verbatim, driven by `system.activationMenuPurple` on the client system rather than a name
+   match in the React layer. Idle chrome follows the theme; the green/red **active-state** colours
+   deliberately do not, because that signal means the same thing on every activatable system.
+
+#### Refinement 7 — why the reload stays
+
+The question was whether `location.reload()` is too blunt, and whether it can eat a player's orders.
+
+**It cannot.** `ajaxInterface.pollGamedata()` returns immediately when `gamedata.waiting == false`,
+so the polling path that calls `parseServerData()` — and therefore `hasShipIdentityChanged()` — only
+runs while the player is **already committed and waiting**. The only other caller is
+`successSubmit`, which is the moment after a commit. There is no window in which uncommitted fire
+orders, plotted movement or EW allocation exist *and* a reload can fire. What is lost is UI state
+only: camera position, open windows, scroll.
+
+**And the alternative is a real leak.** `window.staticShips` is built in `game.php` from
+`$serverdata->ships` — the ships **as this viewer sees them**. A deceived enemy's page therefore
+holds the simulacrum's blueprint and not the Dargan's, which is why the reload is needed at all; and
+preloading the real blueprint would put a Dargan blueprint on the page of a player who can see no
+Dargan on the board. That is a devtools tell, and a decisive one.
+
+The remaining option — rebuilding just that one ship in place from JSON — is what `Ship()` would do
+with no blueprint: no armour, no arcs, no maxhealth (`systemFactory.js:76`). It would need the
+blueprint shipped anyway, so it reduces to the same leak.
+
+**D15 second half — a FINISHED game drops everything (user's ruling, 2026-08-01).** A third static,
+`TacGamedata::$chameleonDisclosed`, is set from `$this->status` in `markUnavailableSetMarkers()`.
+`applyChameleonDisguise()` and `maskChameleonArming()` both return on it, so every ship is served as
+itself and its real arming — including when the finished game is replayed turn by turn.
+
+> ⚠️ **This is deliberately NOT implemented by forcing the two gates to false.**
+> `maskChameleonFireOrders()` still has to run: stripping the ` CHAM:<n>:<h>` storage tag out of fire
+> order `notes` is unconditional and must stay that way, or a finished game would ship the tag to the
+> browser. With nothing marked disguised, that scrub is the only thing left for the pass to do.
+
+**Phantom criticals (D3c) stay unbuilt — user's call, and for a better reason than cost.** A crit on
+the phantom would feed back into the numbers the *reveal* checkpoints measure (engine output for the
+thrust check, scanner output for the EW ceiling), so a phantom accumulating criticals could drop its
+own disguise through a hull the enemy damaged only in fiction. Leave it.
+
+---
+
+## 7. Blast radius — what the CSS changed in shared code, and what it costs a game without one
+
+Every entry point is behind one of three per-load statics. Verified by reading every call site plus
+`c:\tmp\css_gateaudit.php`, which prints the first executable statement of all 32 CSS functions.
+
+| Shared seam | Change | Cost in a game with no CSS ship |
+|---|---|---|
+| `TacGamedata::markUnavailableSetMarkers()` | sets the three statics | one `!empty()` + one `hasSpecialAbility()` (an `isset` on a prebuilt map) per ship, plus a loop over `slots` (2–6 entries) |
+| `TacGamedata::prepareForPlayer()` | two new passes | two static-bool early returns |
+| `TacGamedata::getNewDamages()` | gated phantom sweep | one static bool |
+| `BaseShip::stripForJson()` | disguise branch + D11 mask | one property read + one static bool **per ship** |
+| `Weapon::calculateHitBase()` | `$defenceFake` / `$dewFake` shadows | two calls that return on a static bool, ~5 extra assignments, **per fire order** |
+| `Weapon::fire()` | `chameleonFake` branches | property reads against `null`, per shot |
+| `Weapon::damage()` | split into `damage()` / `damageOneSheet()` | one call returning on a static bool, per allocation |
+| `Enhancements::setEnhancementOptions()` | `CHAM_DISG` option | one `in_array` + one systems scan per ship — **only on the lobby/static path**; `getShipsByClass()` (every game page load) sets `$offerChoiceLists = false` in a `try/finally` |
+| 4 × `Phase::advance()` | reveal checkpoint | one static bool each |
+| `firing.php` called-shot translation | new pass | one static bool |
+| `DBManager::getTacGamedata()` | phantom build | one static bool |
+| `gamedata.js` poll | `hasShipIdentityChanged()` | N string comparisons per poll (~4s), every game |
+
+**Three findings worth keeping:**
+
+1. ⚠️ **`Weapon::damage()` was the only override in the codebase, and `damageOneSheet()` now has
+   exactly two (`Weapon`, `MatterCannon`).** Verified by grep, not assumed. The seven callers of
+   `damage()` are all weapon subclasses' own `fire()` loops, so they all get the mirror. **A new
+   weapon that overrides `damage()` instead of `damageOneSheet()` silently loses it** — that is the
+   one rule this split imposes on future work.
+2. ⚠️ **The static generators had DIVERGED, and the CSS was leaking six ship properties into them.**
+   `generateStaticShipFile.php` (local) stripped eight system keys that `generateStaticShipFileWeb.php`
+   (live) did not — so the live server was shipping a slightly bigger file than the dev box ever
+   saw. Worse, both generators `json_encode()` the **raw** `BaseShip` object rather than going
+   through `stripForJson()`, so all six public `chameleon*` properties landed in the static files on
+   **2,554 ships** — ~420KB of state no client code reads (grep the client tree: zero hits).
+   Both are fixed; `compactShipForStaticJson()` is now byte-identical in the two files and carries a
+   `$serverOnlyShipKeys` list. **Any future public server-only property on `BaseShip` belongs in it.**
+   Measured: 120.10 MB → 119.69 MB of static JSON.
+3. ⚠️ **`combatLog.js`'s firing-mode `while` loop is now bounded.** The Stage 6 remap could feed it a
+   mode the substitute does not declare, which hangs the tab; that case is clamped server-side, but
+   nothing structurally prevents another source, and the cost of being wrong is the whole page.
+   `changeFiringMode()` cycles, so the count of declared modes is a complete bound.
+
+Left open, and genuinely optional: weapon count/arc mismatch is **done** (folded into Stage 6), and
+phantom criticals (D3c) are declined above.
 
 ---
 
 ## 5. Files touched
 
-**New:** `ChameleonSensors` (PHP, next to `ElintScanner` in [baseSystems.php](source/server/model/systems/baseSystems.php)) + `ChameleonSensors` (JS, [baseSystems.js](source/public/client/model/system/baseSystems.js)). Two `autoload.php` lines **for the user to add**.
+**New:** `ChameleonSensors` (PHP, next to `ElintScanner` in [baseSystems.php](source/server/model/systems/baseSystems.php)) + `ChameleonSensors` (JS, [baseSystems.js](source/public/client/model/system/baseSystems.js)), and (Stage 8) [darganChameleon.php](source/server/model/ships/centauri/darganChameleon.php). `autoload.php` is regenerated by `scripts/fvbuild.ps1 -Autoload` — never hand-edited.
 
 **Modified:**
-- [dargan.php](source/server/model/ships/centauri/dargan.php) — system swap, notes fix
+- [dargan.php](source/server/model/ships/centauri/dargan.php) — **Stage 8: rolled BACK to the original ElintScanner build and retired with `variantOf = 'NONE'`.** The suite lives on `DarganChameleon` now
+- [factions-tiers.php](source/public/factions-tiers.php) — Stage 8: the player-facing Centauri rules entry
+- [SystemActivation.js](source/public/client/UI/reactJs/system/SystemActivation.js) — Stage 8: opt-in `$isPurple` chrome
 - [ShipClasses.php](source/server/model/ships/ShipClasses.php) — `hasChameleonSensors()`, `stripForJsonDisguised()`, `getDisguisedProfileFor()`, phantom construction + weapon map, reveal-sweep hook
 - [TacGamedata.php](source/server/model/TacGamedata.php) — static gate, `applyChameleonDisguise()`, `maskChameleonFireOrders()` + `buildChameleonFireOrderNotes()` (Stage 7)
 - [BaseClasses.php](source/server/model/BaseClasses.php) — `FireOrder::$chameleonCalledId` (Stage 5), `FireOrder::$chameleonFake` (Stage 7)
