@@ -2069,7 +2069,7 @@ class ChameleonSensors extends ElintScanner implements SpecialAbility{
     public $name = "chameleonSensors";
     public $displayName = "Chameleon Sensors";
     public $specialAbilities = array("ELINT", "ChameleonSensors");
-    public $iconPath = "elintArray.png";
+    public $iconPath = "ChameleonSensors.png";
 	public $canOffline = true;
 
     function __construct($armour, $maxhealth, $powerReq, $output ){
