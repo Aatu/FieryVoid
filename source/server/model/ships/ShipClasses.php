@@ -103,6 +103,8 @@ class BaseShip {
 	//it would then have to be excluded from initiative, movement, targeting, CPV and isFinished().
 	public $chameleonPhantom = null;
 	public $chameleonIsPhantom = false; //true on the phantom sheet itself, never on a real ship
+	//Per-load cache of the real weapon id -> simulacrum weapon id map (D7, Stage 6). Transient.
+	public $chameleonWeaponMap = null;
 
     public $canvasSize = 200;
 
@@ -802,6 +804,7 @@ class BaseShip {
 		$this->armChameleonSimulacrumWeapons($sheet);
 		$disguised = $sheet->stripForJson();
 		$this->reassignChameleonSheetIds($disguised);
+		$this->remapChameleonFireOrders($disguised);
 
 		//--- identity: needed to target it, team it and talk about it at all
 		$disguised->id     = $this->id;
@@ -877,6 +880,84 @@ class BaseShip {
 		}
 	}
 
+	/*D7 (Stage 6) - the disguised ship's OWN shots, moved onto the weapons the enemy can see.
+
+	  Until this existed a disguised ship simply had no combat log on the enemy's screen: they are
+	  served the simulacrum's systems, and fire orders live on the shooter's weapon, so every order
+	  this ship wrote stayed behind on a system the viewer does not have.
+
+	  Three things are rewritten on each order, and the order is CLONED before any of them: the
+	  FireOrder objects reached here by reference off the real weapon, they are the same objects the
+	  owner's payload serves and the ones that get persisted, so mutating them in place would corrupt
+	  the real record for a masking pass that is supposed to be per-viewer.
+
+	    weaponid   - the mapped simulacrum weapon (getChameleonWeaponMap)
+	    firingMode - CLAMPED, see the trap below
+	    notes      - rebuilt to the two fragments combatLog.js parses. The stored breakdown carries
+	                 the REAL weapon's fire control and range penalty, which name the weapon class
+	                 as surely as its id does. Thresholds are unchanged - they are true, and this
+	                 ship's target is not the disguised party here.
+	    pubnotes   - dropped. It is weapon-effect narrative ("Plasma cloud created on hex", "Beam is
+	                 stowed", "A Targeting Array malfunctions") and there is no safe subset.
+
+	  ⚠️ TRAP - firingMode must be clamped or the enemy's BROWSER HANGS. combatLog.js:93-98 does
+	     while (modeIteration != weapon.firingMode) { weapon.changeFiringMode(); }
+	  against the weapon it resolved from weaponid, and changeFiringMode cycles that weapon's own
+	  declared modes. A Dargan Twin Array firing in mode 2 (Split) remapped onto a Plasma
+	  Accelerator, which declares only mode 1, spins that loop forever. Clamping to mode 1 - which
+	  every weapon has - is safe because the mode is a property of the weapon the viewer thinks
+	  fired, not of the shot.*/
+	private function remapChameleonFireOrders($disguised)
+	{
+		if (!isset($disguised->systems) || !is_array($disguised->systems)) return;
+
+		$map = $this->getChameleonWeaponMap();
+		if (empty($map)) return;
+
+		//Where each simulacrum weapon ended up in the stripped payload, so orders can be dropped
+		//onto it by id rather than by position.
+		$byId = array();
+		foreach ($disguised->systems as $system){
+			if (isset($system->id)) $byId[$system->id] = $system;
+		}
+
+		foreach ($this->systems as $real){
+			if (!($real instanceof Weapon)) continue;
+			if (empty($real->fireOrders)) continue;
+			if (!isset($map[$real->id])) continue;
+
+			$fakeId = $map[$real->id];
+			if (!isset($byId[$fakeId])) continue;
+			$fake = $byId[$fakeId];
+
+			foreach ($real->fireOrders as $order){
+				$copy = clone $order;
+				$copy->weaponid   = $fakeId;
+				$copy->firingMode = $this->clampChameleonFiringMode($fakeId, $order->firingMode);
+				$copy->notes      = TacGamedata::buildChameleonFireOrderNotes($order->notes, $order->needed, $order->needed);
+				$copy->pubnotes   = '';
+				//A called shot names a system on THIS hull; the viewer holds the simulacrum's.
+				//There is no honest translation in this direction, so the call is simply not shown.
+				$copy->calledid   = -1;
+
+				if (!isset($fake->fireOrders) || !is_array($fake->fireOrders)) $fake->fireOrders = array();
+				$fake->fireOrders[] = $copy;
+			}
+		}
+	}
+
+	/*Mode 1 exists on every weapon; anything else has to be declared by the substitute itself. See
+	  the infinite-loop trap on remapChameleonFireOrders().*/
+	private function clampChameleonFiringMode($fakeId, $mode)
+	{
+		$sheet = $this->getChameleonSheet();
+		if ($sheet === null) return 1;
+		$fake = $sheet->getSystemById($fakeId);
+		if ($fake === null) return 1;
+		if (empty($fake->firingModes) || !is_array($fake->firingModes)) return 1;
+		return isset($fake->firingModes[$mode]) ? $mode : 1;
+	}
+
 	/*A ship's DEFAULT name is generated from its hull - "Dargan Strike Cruiser #2" - so an untouched
 	  name hands the enemy the answer and the deception is over before it starts. The §3 audit called
 	  for warning the player in the buy dialog; that is not enough when the leak is the default.
@@ -926,8 +1007,22 @@ class BaseShip {
 	  per-load cached blueprint costs nothing and cannot drift.*/
 	private function armChameleonSimulacrumWeapons($blueprint)
 	{
+		//STAGE 6: a simulacrum weapon matched to a real one of the SAME CLASS mirrors that weapon's
+		//arming instead of reading full - see mirrorChameleonWeaponArming() for why that is both
+		//necessary and safe. Everything unmatched keeps the D11 default below.
+		$mirrored = $this->getChameleonArmingMirror();
+
 		foreach ($blueprint->systems as $system){
 			if (!($system instanceof Weapon)) continue;
+
+			if (isset($mirrored[$system->id])){
+				$real = $mirrored[$system->id];
+				$system->turnsloaded = $real->turnsloaded;
+				if (!empty($system->loadingtimeArray) && !empty($real->turnsloadedArray)){
+					$system->turnsloadedArray = $real->turnsloadedArray;
+				}
+				continue;
+			}
 
 			//The PROPERTY, not getNormalLoad(): boostable weapons override that method to return
 			//loadingtime + maxBoostLevel, and claiming maximum boost on a phantom that shows no
@@ -943,6 +1038,67 @@ class BaseShip {
 				$system->turnsloadedArray = $perMode;
 			}
 		}
+	}
+
+	/*STAGE 6, user's request - "if the phantom is equipped with the same type of weapon and it is in
+	  arc of the shot just made, amend turnsloaded to simulate the phantom weapon recharging."
+
+	  A simulacrum gun that is SEEN to fire and still reads fully loaded is a tell, so a matched
+	  weapon has to show the recharge an honest simulacrum would. The implementation is one line
+	  because of an identity worth stating outright:
+
+	    a match is same-class by construction, so the two weapons have the same loadingtime and the
+	    same normalload, and therefore the SAME charge curve - the simulacrum weapon can simply
+	    mirror turnsloaded from the real weapon it is standing in for.
+
+	  Measured rather than assumed (game 4273): the G'Quan's Heavy Laser id 9, loadingtime 4, fired
+	  on turn 1 and read turnsloaded 1 on turn 2, while its unfired sibling id 6 read 4. So the
+	  engine's curve is "fires on turn L, still reads full for the rest of turn L, then 1 on L+1, 2
+	  on L+2, capped at full" - and mirroring reproduces it exactly, on every turn, across reloads
+	  and replays, with no new state.
+
+	  Why not derive it from firing history instead: fire orders are loaded for the CURRENT TURN
+	  ONLY (verified - a turn-2 load shows an empty fireOrders on a weapon that fired on turn 1), so
+	  "which turn did this weapon last fire" is not answerable without a new gated query over
+	  tac_fireorder. The real weapon's own turnsloaded already IS that answer.
+
+	  Twin Arrays need no special case, as the user noted: TwinArray and HeavyArray are both
+	  loadingtime 1, so mirroring reads 1 either way. Mattercannon (2) and BattleLaser (3) are the
+	  two that visibly recharge.
+
+	  Does this breach D11 ("arming status is masked, permanently")? No. The enemy watched a
+	  same-class weapon fire from that arc, so "this gun is reloading" is something they already saw,
+	  and consistency with an observed event is not a leak. Everything unmatched stays pinned at full
+	  charge, which is D11's default and still hides which of the ship's guns are actually hot.
+	  Accepted residual: a matched weapon at partial charge for an UNOBSERVED reason - a
+	  destroyed-then-repaired accelerator - also mirrors, and the enemy cannot tell that apart from a
+	  shot. Smaller than the two tells already accepted (D13 initiative, D3c no phantom criticals).
+
+	  Returns simulacrum weapon id => the real Weapon object it mirrors, same-class matches only.*/
+	private function getChameleonArmingMirror()
+	{
+		$mirror = array();
+		$map = $this->getChameleonWeaponMap();
+		if (empty($map)) return $mirror;
+
+		foreach ($this->systems as $real){
+			if (!($real instanceof Weapon)) continue;
+			if (!isset($map[$real->id])) continue;
+			if ($real->turnsloaded === null) continue; //nothing calculated to mirror
+
+			$fakeId = $map[$real->id];
+			if (isset($mirror[$fakeId])) continue; //tier-4 doubling up: first claim wins
+
+			$sheet = $this->getChameleonSheet();
+			$fake = ($sheet === null) ? null : $sheet->getSystemById($fakeId);
+			if ($fake === null) continue;
+			//Same class is the whole justification - a looser match has a different charge curve and
+			//mirroring it would produce a number no honest simulacrum could show.
+			if (get_class($fake) !== get_class($real)) continue;
+
+			$mirror[$fakeId] = $real;
+		}
+		return $mirror;
 	}
 
 
@@ -1490,6 +1646,111 @@ class BaseShip {
 	{
 		if ($this->chameleonPhantom !== null) return $this->chameleonPhantom;
 		return $this->getChameleonBlueprint();
+	}
+
+	/*D7 (Stage 6) - the real weapon -> simulacrum weapon map, built once per load.
+
+	  Why it has to exist: an enemy is served the SIMULACRUM's systems, so a fire order carrying a
+	  real Dargan weapon id names a system that does not exist on the sheet they hold. The combat log
+	  resolves it with shipManager.systems.getSystem(ship, fire.weaponid) (combatLog.js:90) and then
+	  dereferences the result immediately, so an unmapped id is not a cosmetic gap - it is a
+	  TypeError that kills the whole log, exactly like the negative-shipid bug Stage 5 hit.
+
+	  Matching is GREEDY and INJECTIVE, in four descending tiers:
+	    1. same weapon class, arc covers the real weapon's arc
+	    2. same weapon class, any arc
+	    3. any unused weapon in the same section/location
+	    4. any weapon at all (the last tier may reuse a mount)
+	  Injective through tiers 1-3 because two real guns firing must look like two simulacrum guns
+	  firing; tier 4 gives up on that rather than emit an id the client cannot resolve, and a ship
+	  reduced to tier 4 has already revealed itself under D6 anyway.
+
+	  Tiers 1 and 2 are the ones that matter: a same-class match is what makes the shot plausible
+	  (D6) and what lets the simulacrum weapon mirror the real one's recharge, which is only sound
+	  BECAUSE the classes match and their loading curves are therefore identical.
+
+	  Keyed and valued by system id, not by object, so it survives the clone that stripForJson makes.*/
+	public function getChameleonWeaponMap()
+	{
+		if ($this->chameleonWeaponMap !== null) return $this->chameleonWeaponMap;
+
+		$map = array();
+		$sheet = $this->getChameleonSheet();
+		if ($sheet === null){
+			$this->chameleonWeaponMap = $map;
+			return $map;
+		}
+
+		$fakeWeapons = array();
+		foreach ($sheet->systems as $system){
+			if ($system instanceof Weapon) $fakeWeapons[$system->id] = $system;
+		}
+		if (empty($fakeWeapons)){
+			$this->chameleonWeaponMap = $map;
+			return $map;
+		}
+
+		$realWeapons = array();
+		foreach ($this->systems as $system){
+			if ($system instanceof Weapon) $realWeapons[$system->id] = $system;
+		}
+
+		$taken = array();
+		//Tiers 1-3 in order, each a full pass over the still-unmapped real weapons, so a weapon that
+		//can be matched exactly is never consumed by a looser tier that ran first.
+		foreach (array(1, 2, 3) as $tier){
+			foreach ($realWeapons as $realId => $real){
+				if (isset($map[$realId])) continue;
+				foreach ($fakeWeapons as $fakeId => $fake){
+					if (isset($taken[$fakeId])) continue;
+					if (!$this->chameleonWeaponTierMatches($tier, $real, $fake)) continue;
+					$map[$realId]   = $fakeId;
+					$taken[$fakeId] = true;
+					break;
+				}
+			}
+		}
+
+		//Tier 4: something renderable, even if it doubles up.
+		$fallback = null;
+		foreach ($fakeWeapons as $fakeId => $fake){ $fallback = $fakeId; break; }
+		foreach ($realWeapons as $realId => $real){
+			if (!isset($map[$realId])) $map[$realId] = $fallback;
+		}
+
+		$this->chameleonWeaponMap = $map;
+		return $map;
+	}
+
+	private function chameleonWeaponTierMatches($tier, $real, $fake)
+	{
+		if ($tier == 3) return ($real->location === $fake->location);
+		if (get_class($real) !== get_class($fake)) return false;
+		if ($tier == 2) return true;
+		//Tier 1: the simulacrum mount must cover the directions the real mount covers. Compared as
+		//arc bounds rather than against a shot, because this map is built per LOAD and has no shot
+		//to reason about - the per-shot arc test that drives the reveal lives in ChameleonSensors.
+		return ($this->chameleonArcCovers($fake, $real->startArc, $real->endArc));
+	}
+
+	/*Does $fake's firing arc contain the whole of the arc [$start,$end]? Sampled every 30 degrees
+	  rather than solved, because arcs wrap past 360 and a handful of mounts carry SPLIT arcs (Vree
+	  turrets) that isInAnyArc already understands - reusing it keeps one definition of "in arc" in
+	  the codebase instead of a second, subtly different one here.*/
+	public function chameleonArcCovers($fake, $start, $end)
+	{
+		$startArcs = ($fake->splitArcs && !empty($fake->startArcArray)) ? $fake->startArcArray : array();
+		$endArcs   = ($fake->splitArcs && !empty($fake->endArcArray))   ? $fake->endArcArray   : array();
+
+		$span = (int)$end - (int)$start;
+		while ($span < 0) $span += 360;
+		if ($span == 0) $span = 360; //a 0..0 / 0..360 mount is all-round
+
+		for ($offset = 0; $offset <= $span; $offset += 30){
+			$bearing = ((int)$start + $offset) % 360;
+			if (!mathlib::isInAnyArc($bearing, $fake->startArc, $fake->endArc, $startArcs, $endArcs)) return false;
+		}
+		return true;
 	}
 
 	/*D4 - "resolve the fire using the simulated ship's defense ratings." Returns the SIMULACRUM's

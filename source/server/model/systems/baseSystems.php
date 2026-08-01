@@ -2088,7 +2088,8 @@ class ChameleonSensors extends ElintScanner implements SpecialAbility{
         $this->data["Special"] .= "<br>The deception is broken if this ships moves, uses EW or weapons that the ship its disguised as could not do, or if an enemy unit closes to within 5 hexes (2 hexes for fighters and shuttles) with line of sight.";        
 		//$this->data["Special"] .= "<br>The simulacrum is chosen when the ship is purchased. 'None' means no disguise is projected.";
         $this->data["Special"] .= "<br>Weapon arming status is masked from enemies at all times, even after the deception is revealed.";
-        $this->data["Special"] .= "<br>See Centauri section in 'Factions-Tiers' for more info.";		
+        $this->data["Special"] .= "<br>See Centauri section in 'Factions-Tiers' for more info.";
+        $this->addChameleonWeaponBriefing();
         //$this->data["Special"] .= "<br>The deception is broken, permanently and for that enemy team only, if:";
         //$this->data["Special"] .= "<br> - an enemy unit closes to within 5 hexes (2 hexes for fighters and shuttles) with line of sight;";
         //$this->data["Special"] .= "<br> - the ship changes speed by more than the simulacrum's engines could manage;";
@@ -2097,6 +2098,72 @@ class ChameleonSensors extends ElintScanner implements SpecialAbility{
         //$this->data["Special"] .= "<br> - this array is destroyed, or the disguise is switched off.";
     }
 
+
+	/*STAGE 6 - tell the player, in plain numbers, which of their guns the simulacrum can account for.
+
+	  This is deliberately here rather than as the client-side declaration-time warning §Stage 6
+	  sketched. That warning cannot be built as specified: the owner's page holds THIS ship's
+	  blueprint, not the simulacrum's (window.staticShips is built from the phpclasses in the
+	  viewer's own already-masked gamedata, finding #5), so the client has nothing to test against;
+	  and a per-weapon "this will reveal you" flag computed server-side would be wrong as often as
+	  right, because plausibility depends on the BEARING of the shot - the same Matter Cannon is
+	  covered against a target dead ahead and uncovered against one off the port bow (proved in the
+	  acceptance test at bearings 0 and 300). A standing loadout briefing is honest at every bearing;
+	  a static flag would not be.
+
+	  Own team only. It reaches nobody else in practice - an enemy who still believes the deception
+	  is served the simulacrum's systems, so this system is not in their payload at all - but a ship
+	  revealed to one team and not another does serve its real systems to the team that knows, and
+	  there is no reason to hand them a summary as well.*/
+	private function addChameleonWeaponBriefing(){
+		$ship = $this->getUnit();
+		if ($ship === null) return;
+		if (empty($ship->chameleonDisguiseClass)) return;
+		if (TacGamedata::$currentForPlayerTeam !== null
+			&& (int)TacGamedata::$currentForPlayerTeam !== (int)$ship->team) return;
+
+		$blueprint = $ship->getChameleonBlueprint();
+		if ($blueprint === null) return;
+
+		$real = array(); $fake = array();
+		foreach ($ship->systems as $s){
+			if (!($s instanceof Weapon) || $s instanceof RammingAttack) continue;
+			$cls = get_class($s);
+			$real[$cls] = (isset($real[$cls]) ? $real[$cls] : 0) + 1;
+		}
+		foreach ($blueprint->systems as $s){
+			if (!($s instanceof Weapon) || $s instanceof RammingAttack) continue;
+			$cls = get_class($s);
+			$fake[$cls] = (isset($fake[$cls]) ? $fake[$cls] : 0) + 1;
+		}
+		if (empty($real)) return;
+
+		$label = ($blueprint->shipClass !== '' && $blueprint->shipClass !== null)
+			? $blueprint->shipClass : $blueprint->phpclass;
+
+		$lines = array();
+		foreach ($real as $cls => $count){
+			$have = isset($fake[$cls]) ? $fake[$cls] : 0;
+			$name = $this->chameleonWeaponLabel($ship, $cls);
+			$lines[] = ($have === 0)
+				? "<br> - " . $name . ": you mount " . $count . ", the " . $label . " mounts NONE - firing one reveals you"
+				: "<br> - " . $name . ": you mount " . $count . ", the " . $label . " mounts " . $have;
+		}
+
+		$this->data["Special"] .= "<br><br>Disguised as: " . $label . ". Firing a weapon the simulacrum"
+			. " does not mount - or more of them than it can bring to bear in that arc - reveals this ship"
+			. " to that enemy team at the START OF THE NEXT TURN.";
+		$this->data["Special"] .= implode('', $lines);
+		$this->data["Special"] .= "<br>Arcs count: a mount the " . $label . " carries on the other side"
+			. " cannot cover your shot.";
+	}
+
+	private function chameleonWeaponLabel($ship, $cls){
+		foreach ($ship->systems as $s){
+			if (get_class($s) === $cls) return $s->displayName;
+		}
+		return $cls;
+	}
 
 	/* ---------------- Reveal state machine (Stage 2) ----------------
 	   Two pieces of state, both notes-backed in the ShadingField / Hyach-Stealth style:
@@ -2351,7 +2418,10 @@ class ChameleonSensors extends ElintScanner implements SpecialAbility{
 			return;
 		}
 
-		if ($checkpoint === 'firing') return; //shutdown check only
+		if ($checkpoint === 'firing'){
+			$this->checkWeaponPlausibility($gamedata, $ship);
+			return;
+		}
 
 		if ($checkpoint === 'initial'){
 			$this->checkEWPlausibility($gamedata, $ship);
@@ -2428,6 +2498,78 @@ class ChameleonSensors extends ElintScanner implements SpecialAbility{
 		$reason = 'Speed change ' . $deltaV . ' vs limit ' . $maxDeltaV;
 		foreach ($this->getEnemyTeams($gamedata, $ship) as $teamId){
 			$this->revealTo($gamedata, $ship, $teamId, true, $reason);
+		}
+	}
+
+	/* D6 (Stage 6) - "a weapon the simulacrum could not have fired."
+
+	   Not any fire order: the MISMATCH is what betrays you. A shot is plausible when the simulacrum
+	   mounts a weapon of the same class whose arc covers the shot that was actually taken - which is
+	   the plan's test A (class presence) with refinement C (arc) folded in, on the user's ruling:
+	   "if not in arc, then this counts as a reveal in the same way as if it fired a weapon the
+	   phantom is not equipped with", because the simulacrum could not physically have made that shot.
+
+	   Refinement B (count) then comes free, because the match is INJECTIVE: each firing weapon
+	   consumes a distinct simulacrum mount, so a Dargan firing three Matter Cannons while wearing a
+	   Balvarix - which mounts two - leaves the third with no counterpart and reveals. Two real guns
+	   firing have to look like two simulacrum guns firing.
+
+	   Timing is revealedNextTurn, unlike every other checkpoint: this check runs at the END of the
+	   Firing phase, after the enemy has already watched the shot land, and the note is stamped with
+	   the current turn so the masking test (note.turn < gamedata.turn) hides it until the turn rolls
+	   over. That is the tabletop reading - the discrepancy between what they saw fire and the damage
+	   it did is worked out afterwards, not as it happens.
+
+	   Runs off $servergamedata inside FireGamePhase::advance, after Firing::fireWeapons, so the
+	   orders are resolved and still in memory (they are not written until further down that method).*/
+	private function checkWeaponPlausibility($gamedata, $ship){
+		$blueprint = $ship->getChameleonBlueprint();
+		if ($blueprint === null) return;
+
+		//Blueprint, not the phantom: the limits a player plans around must not wander as the
+		//simulacrum accumulates mirrored damage. Same convention as D6b and D6c.
+		$fakeWeapons = array();
+		foreach ($blueprint->systems as $system){
+			if ($system instanceof Weapon) $fakeWeapons[$system->id] = $system;
+		}
+
+		$used = array();
+		$mismatch = null;
+
+		foreach ($ship->systems as $weapon){
+			if (!($weapon instanceof Weapon)) continue;
+			foreach ($weapon->fireOrders as $fire){
+				if ($fire->turn != $gamedata->turn) continue;
+				if ($fire->shots <= 0) continue;              //technical orders are not shots anyone saw
+
+				$target = $gamedata->getShipById($fire->targetid);
+				if ($target === null) continue;               //nothing observable to bear on
+
+				$bearing = $ship->getBearingOnUnit($target);
+
+				$matched = false;
+				foreach ($fakeWeapons as $fakeId => $fake){
+					if (isset($used[$fakeId])) continue;
+					if (get_class($fake) !== get_class($weapon)) continue;
+					$startArcs = ($fake->splitArcs && !empty($fake->startArcArray)) ? $fake->startArcArray : array();
+					$endArcs   = ($fake->splitArcs && !empty($fake->endArcArray))   ? $fake->endArcArray   : array();
+					if (!mathlib::isInAnyArc($bearing, $fake->startArc, $fake->endArc, $startArcs, $endArcs)) continue;
+					$used[$fakeId] = true;
+					$matched = true;
+					break;
+				}
+
+				if (!$matched && $mismatch === null) $mismatch = $weapon->displayName;
+			}
+		}
+
+		if ($mismatch === null) return;
+
+		//notekey_human is varchar(40) and OVERFLOW ABORTS THE WHOLE SUBMISSION - revealTo clamps,
+		//but keep the reason short at the source too.
+		$reason = 'Fired ' . $mismatch;
+		foreach ($this->getEnemyTeams($gamedata, $ship) as $teamId){
+			$this->revealTo($gamedata, $ship, $teamId, false, $reason);
 		}
 	}
 

@@ -17,9 +17,26 @@ Implement the B5W Chameleon Sensors rules on the Centauri **Dargan Strike Cruise
 | **3 — Identity swap** | ✅ **COMPLETE** — built 2026-07-31, in-game tested and signed off 2026-08-01 (game 4273). Two defects found in the playtest and fixed, both weapon-arming (decision 4 below) |
 | **4 — Phantom sheet** | ✅ **COMPLETE** — built and in-game tested 2026-08-01 (game 4273: a heavy laser hit the real Dargan, the phantom did not, both logs correct) |
 | **5 — Mirrored resolution** | ✅ **COMPLETE** — built and in-game tested 2026-08-01 (game 4273). Four playtest bugs found and fixed; see below |
-| **7 — Dual-threshold resolution (D3b)** | ✅ **COMPLETE** — built 2026-08-01, server-proven (`css_stage7.php`, 44 assertions), browser test outstanding. Taken **before** Stage 6 because it is a balance fix, not a feature |
-| 6 — Fire orders FROM the disguised ship (D7) + weapon-plausibility reveal (D6) | Not started — **next** |
-| 8 — Arming mask on the ship's own payload (D11), then optional refinements | Not started |
+| **7 — Dual-threshold resolution (D3b)** | ✅ **COMPLETE** — built 2026-08-01, server-proven (`css_stage7.php`, 44 assertions) and **DB-verified in game 4273** (see below). Taken **before** Stage 6 because it is a balance fix, not a feature |
+| **6 — Fire orders FROM the disguised ship (D7) + weapon-plausibility reveal (D6)** | ✅ **COMPLETE** — built 2026-08-01, server-proven (5 new suites, 103 assertions), browser test outstanding |
+| 8 — Arming mask on the ship's own payload (D11), then optional refinements | Not started — **next** |
+
+> **Stage 7 is DB-verified.** Game 4273 turn 1, fire order 497218 (G'Quan Heavy Laser → the Dargan
+> wearing a Demos): the row stores `needed = 109` with the REAL breakdown (`defence: 16, DEW: 2`) and
+> carries the tag ` CHAM:104:1`. Served back, the owner gets 109 and the full breakdown, the enemy
+> gets 104 with notes rebuilt to the two parsed fragments, and the tag appears in neither payload.
+> The two thresholds differ by exactly the profile term (16→14) and the DEW term (2→1) and nothing
+> else — 109 − 10 + 5 = 104 — which is the identity Stage 7 decision 5 exists to guarantee.
+> Both sheets carry 45 points of damage on their own systems (real: Matter Cannon, Thruster, 2×
+> Structure; phantom: Heavy Array, 2× Structure).
+
+> **⚠️ One deviation from D15 found while verifying, NOT fixed — it is a design call, not a bug.**
+> `ChameleonSensors::isDisguisedFrom()` returns false for a null team, commented *"no team (observer)
+> - see the truth"*. D15 says the opposite: *"Observers (no team) see the disguise."* Confirmed live —
+> an observer seat is served the real Dargan while both players' seats behave correctly. Harmless in
+> a 1v1 with no spectator, but it means any observer sees through every disguise in the game.
+> Decide which reading is wanted; D15's own open question (drop all disguises once the game is
+> FINISHED) belongs with it.
 
 > ✅ **The Stage 7 balance issue is closed.** The real hull is resolved against its own profile and
 > its own DEW again; the simulacrum's numbers now govern the phantom sheet only. See Stage 7 below
@@ -592,9 +609,119 @@ One roll, one damage amount, two allocations (D3). Fake-profile `needed` on the 
 > arithmetic, two spellings, one ULP apart at an exact half. It affects every ship in the game.
 
 ### Stage 6 — Fire orders from the disguised ship (D7) + weapon-plausibility reveal (D6)
-Weapon remapping for outgoing orders, `notes`/`pubnotes` scrub, class-presence mismatch test at Firing advance writing `revealedNextTurn`. Client-side warning at declaration ("firing this weapon will expose your disguise next turn") is the natural companion and belongs here.
+Weapon remapping for outgoing orders, `notes`/`pubnotes` scrub, plausibility test at Firing advance writing `revealedNextTurn`. Client-side warning at declaration ("firing this weapon will expose your disguise next turn") is the natural companion and belongs here.
 
-*Test:* Dargan-as-Demos fires a Twin Array (Demos has them) → no reveal, enemy log shows a Demos Twin Array. Fires a Battle Laser → enemy log shows the substitute weapon this turn, disguise drops at the start of the next turn.
+#### Corrections to the text above, from the user and from the working tree (2026-08-01)
+
+1. **Demos has `HeavyArray`, not `TwinArray`** — so the test below was written against a loadout
+   the ship does not have. Worse, the correction generalises: the Dargan mounts `TwinArray` ×5,
+   `Mattercannon` ×3, `BattleLaser` ×2, and a **Demos mounts `HeavyArray` ×2, `PlasmaAccelerator`,
+   `BallisticTorpedo` — not one weapon class in common.** A Dargan disguised as a Demos therefore
+   reveals on *any* shot it fires, and 4273's ship 876358 cannot exercise the "no reveal" path at all.
+   Use the other disguises already in that game, which cover every case:
+
+   | Simulacrum | Twin Array | Matter Cannon | Battle Laser | Exercises |
+   |---|---|---|---|---|
+   | Demos (876358) | — | — | — | every shot reveals |
+   | Altarian (876356/7) | 5 | 3 | — | class match, and Battle Laser as the sole mismatch |
+   | Balvarix (876360) | 5 | 2 | — | **count** mismatch (Dargan mounts 3 Matter Cannons) |
+   | Octurion (876359) | 12 | 6 | 6 | superset — nothing the Dargan fires can reveal it |
+
+2. **Arc is part of the base test, not a refinement (user's ruling).** *"If the phantom also is
+   equipped with the same type of weapon AND the phantom weapon is in arc of the shot just made"* →
+   plausible. *"If not in arc, then this counts as a reveal in the same way as if it fired a weapon
+   the phantom is not equipped with"* — because the simulacrum could not physically have made that
+   shot. So the plan's refinements **B (count)** and **C (arc)** are promoted into A and ship
+   together. Count falls out of arc matching for free once the match is **injective**: each real
+   weapon that fires consumes a distinct simulacrum weapon, so a Dargan firing three Matter Cannons
+   inside a Balvarix (which mounts two) leaves the third with no counterpart and reveals.
+   Timing is unchanged — `revealedNextTurn`, the same key an unmatched weapon class writes.
+
+3. **Simulated recharge on the matched simulacrum weapon (user's request).** A phantom gun that is
+   seen to fire and still reads *fully loaded* is a tell, so a matched weapon must show the recharge
+   an honest simulacrum would. The implementation is smaller than it looks, and it is *not* a new
+   arming model:
+
+   > **A match is same-class by construction, so the simulacrum weapon's charge curve is identical
+   > to the real weapon's — the phantom can simply mirror `turnsloaded` from its matched real
+   > weapon.**
+
+   Measured on 4273 to confirm the curve rather than assume it: the G'Quan's Heavy Laser id 9
+   (`loadingtime 4`) fired on turn 1 and reads `turnsloaded = 1` on turn 2, while its unfired sibling
+   id 6 reads 4. So the engine's curve is *fires on turn L → still reads full for the rest of turn L
+   → 1 on L+1, 2 on L+2, capped*. Mirroring reproduces it exactly, for free, and stays correct
+   across reloads and replays.
+   **This is why deriving it from firing history was rejected: fire orders are only loaded for the
+   CURRENT turn** (`$weapon->fireOrders` is empty for turn 1 on a turn-2 load — verified), so there is
+   no history to read without a new gated query. The real weapon's own `turnsloaded` already *is* the
+   answer.
+   The user's own observation that **Twin Arrays need no recharge handling is correct and needs no
+   special case**: `TwinArray` and `HeavyArray` are both `loadingtime 1`, so mirroring reads 1 either
+   way. `Mattercannon` is 2 and `BattleLaser` is 3, which are the two that visibly recharge.
+
+   **Relationship to D11.** D11 masks arming *permanently*. Mirroring a matched weapon does not
+   breach it: the enemy watched a same-class weapon fire from that arc, so "this gun is reloading" is
+   something they already saw. Everything unmatched stays pinned at full charge, which is the D11
+   default. Accepted residual: a matched weapon at partial charge for an *unobserved* reason (a
+   destroyed-then-repaired accelerator) also mirrors, and the enemy cannot distinguish that from a
+   shot — a smaller tell than the two already accepted (D13 initiative, D3c no phantom criticals).
+
+4. **⚠️ TRAP — remapping a fire order can HANG the enemy's browser.** `combatLog.js:93-98` does
+   ```js
+   while (modeIteration != weapon.firingMode) { weapon.changeFiringMode(); }
+   ```
+   on the weapon it resolved from `fire.weaponid`. If an order is remapped onto a substitute that
+   does not have the order's `firingMode`, that loop never terminates. A Dargan Twin Array fires in
+   mode 2 (*Split*); a `PlasmaAccelerator` has only mode 1. So the remap must **clamp `firingMode` to
+   a mode the substitute actually declares**, and must never emit a `weaponid` absent from the served
+   sheet — the same line dereferences `weapon` with no null guard.
+
+#### What Stage 6 actually built (2026-08-01)
+
+- **`BaseShip::getChameleonWeaponMap()`** — real weapon id → simulacrum weapon id, cached per load,
+  greedy and injective in four descending tiers (same class + arc covers → same class → same
+  section → anything). Tier 4 may double up rather than emit an id the client cannot resolve.
+- **`BaseShip::remapChameleonFireOrders()`**, called from `stripForJsonDisguised()`. **Orders are
+  CLONED** — they arrive by reference off the real weapon, are the same objects the owner's payload
+  serves and the ones that get persisted, so mutating them in place would corrupt the real record.
+  Rewrites `weaponid`, clamps `firingMode`, rebuilds `notes`, empties `pubnotes`, and forces
+  `calledid = -1` (a called shot names a system on the real hull; there is no honest translation in
+  this direction, so the call is simply not shown).
+- **`ChameleonSensors::checkWeaponPlausibility()`** at the Firing-advance checkpoint, writing
+  `revealedNextTurn`. Class + arc + injective count, per the ruling above.
+- **Arming mirror** in `armChameleonSimulacrumWeapons()` via `getChameleonArmingMirror()` —
+  same-class matches only.
+- **An owner-only weapon briefing on the CSS tooltip** listing, per weapon class, how many this ship
+  mounts against how many the simulacrum does, flagging the ones that reveal. This **replaces** the
+  client-side declaration warning the stage text asked for, which cannot be built as specified: the
+  owner's page holds this ship's blueprint and not the simulacrum's (finding #5), and a static
+  per-weapon flag would be wrong as often as right because plausibility depends on the shot's
+  BEARING — the same Matter Cannon is covered at bearing 0 and uncovered at 300 on an Altarian.
+
+*Tests:* `c:\tmp\css_stage6.php` (28 — the reveal state machine driven in memory against Altarian /
+Octurion / Balvarix / Demos, including the arc pair at bearings 0 and 300), `css_stage6_serve.php`
+(34 — the remap on live game 4273 for all three still-disguised ships), `css_stage6_edge.php` (8 —
+the discriminating arming case and the firingMode clamp), `css_stage6_leak.php` (20 — payload grep),
+`css_stage6_tooltip.php` (13). **All eleven earlier suites still pass: 485 assertions across 16
+suites, 0 failures.**
+
+#### Two findings worth keeping
+
+1. **The `firingMode` clamp is not theoretical.** On the Demos pairing a Dargan **Twin Array firing
+   in mode 2 (Split) maps onto a Plasma Accelerator, which declares only mode 1** — the exact input
+   that spins `combatLog.js`'s `while` loop forever. Caught by the acceptance test.
+2. **`"chameleonCalledId":null` and `"chameleonFake":null` are in EVERY fire order in EVERY game.**
+   They are declared public properties on `FireOrder`, so `json_encode` always emits them — measured
+   identical on an ordinary G'Quan. A naive grep for *"hameleon"* in a payload flags them; that is a
+   **false positive, not a leak** (both are always null when served, and they distinguish nothing).
+   Don't re-chase it, and don't write the next leak test against that substring.
+
+*Browser test:* Dargan-as-**Altarian** fires a Twin Array in arc (Altarian has them) → no reveal,
+enemy log shows an Altarian Twin Array recharging on schedule. Fires a **Battle Laser** (Altarian has
+none) → enemy log shows the substitute weapon this turn, disguise drops at the start of the next
+turn. Dargan-as-**Altarian** fires three Matter Cannons at bearing 0 against two bearing mounts →
+reveals on count. Dargan-as-**Octurion** fires anything → never reveals. Dargan-as-**Demos** reveals
+on its first shot of any kind.
 
 ### Stage 7 — Dual-threshold resolution (D3b) ✅ DONE — **the disguise must not make the real ship harder to hit**
 

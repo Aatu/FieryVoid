@@ -825,7 +825,20 @@ class TacGamedata {
                 if (!isset($disguisedIds[$fire->targetid])) continue;
 
                 //notes rebuilt BEFORE needed is overwritten - the per-shot shift is measured off it
-                $fire->notes = $this->buildChameleonFireOrderNotes($fire, ($fake === null) ? $fire->needed : $fake[0]);
+                $fire->notes = self::buildChameleonFireOrderNotes(
+                    $fire->notes, ($fake === null) ? $fire->needed : $fake[0], $fire->needed);
+
+                /*Order-level pubnotes describe what pass 1 did to the REAL hull, and under the dual
+                  threshold (Stage 7) that can flatly contradict what the viewer is shown: a shot
+                  that missed the real ship but hit the phantom carries " MISSED! " while the
+                  phantom's damage entries render underneath it. Most of the rest is weapon-effect
+                  narrative that names the mechanism outright. Dropped rather than filtered, on the
+                  same default-absent principle as the notes rebuild. The per-system DamageEntry
+                  pubnotes are untouched, so the viewer still gets the damage story.
+                  Deferred refinement: serve the PHANTOM pass's narrative instead of nothing, which
+                  needs pass 2's pubnotes captured and persisted the way the CHAM: tag is.*/
+                $fire->pubnotes = '';
+
                 if ($fake === null) continue;
 
                 $fire->needed   = $fake[0];
@@ -838,15 +851,21 @@ class TacGamedata {
       "Interception: n sources:m" (combatLog.js:117) and one "rolled: x, needed: y" per shot
       (combatLog.js:137, which greens the roll when it beat the threshold). Every per-shot threshold
       differs from the order's by the same grouping modifier, so shifting them all by one delta keeps
-      the dice tooltip consistent with the shots-hit count the viewer is shown.*/
-    private function buildChameleonFireOrderNotes($fire, $fakeNeeded){
+      the dice tooltip consistent with the shots-hit count the viewer is shown.
+
+      Shared with the Stage 6 mask on orders fired FROM a disguised ship, which passes the same value
+      for both thresholds: there the numbers are already true and it is the BREAKDOWN that leaks,
+      since it carries the real weapon's fire control and range penalty. One definition of "which
+      fragments survive" so the two masks cannot drift apart.*/
+    public static function buildChameleonFireOrderNotes($rawNotes, $fakeNeeded, $realNeeded){
+        $rawNotes = (string)$rawNotes;
         $notes = '';
-        if (preg_match('/Interception: (\d+) sources:(\d+)/', $fire->notes, $m)){
+        if (preg_match('/Interception: (\d+) sources:(\d+)/', $rawNotes, $m)){
             $notes .= 'Interception: ' . $m[1] . ' sources:' . $m[2] . ', final to hit: ' . $fakeNeeded;
         }
 
-        $delta = $fakeNeeded - $fire->needed;
-        if (preg_match_all('/rolled: (-?\d+), needed: (-?\d+)/', $fire->notes, $shots, PREG_SET_ORDER)){
+        $delta = $fakeNeeded - $realNeeded;
+        if (preg_match_all('/rolled: (-?\d+), needed: (-?\d+)/', $rawNotes, $shots, PREG_SET_ORDER)){
             $n = 0;
             foreach ($shots as $shot){
                 $n++;
