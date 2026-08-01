@@ -1802,7 +1802,7 @@ window.weaponManager = {
                  - shotMods.defensiveSystems
                  + shotMods.calledShot
                  + shotMods.otherTotal;
-        var hitChance = Math.round(goal / 20 * 100);
+        var hitChance = Math.round(goal * 5);
 
         //Build modifier list (zeros omitted)
         var modifiers = [];
