@@ -712,6 +712,40 @@ the screen to be practical"):**
    Verified: esbuild JSX parse + bundle-resolve ×3 (ShipWindow.js, ShipNotesPanel.js,
    ShipInfo.js). UI.bundle only — needs `yarn build`.
 
+**Post-Stage-4 improvements round 15 (2026-08-01) — BUILT, awaiting user test
+(UI.bundle only; one user request):**
+1. **Ship windows are +20% on a phone held UPRIGHT** (user: "a little too small on mobile
+   devices, whilst in portrait mode"). Portrait is the case round 11's budget treats
+   worst, and for a structural reason: the window's **layout** width is fixed
+   (`max-content` + the variant caps, made viewport-independent on purpose in round 10),
+   so the same ~600px window meets 60% of a 390px screen — 234px of budget — and the fit
+   bottoms out on the 0.40 legibility floor. Landscape has the width to spend and is left
+   exactly as it was.
+   - Each budget now carries its own **`portrait` multiplier** (`MAP_FIT` 1.20,
+     `LOBBY_FIT` 1), applied by `boostBudget()` to **`fillW`, `fillH` and `min`** when
+     `isSmallScreen() && isPortrait()` — the latter a new
+     `matchMedia('(orientation: portrait)')` helper beside `isSmallScreen`. Nothing else
+     in `applyScreenFit` changed; it already re-runs on `orientationchange`.
+   - **`max` is deliberately NOT boosted.** Raising it would magnify small windows (mines,
+     terrain, flights) above their natural size, which is precisely the round-10 behaviour
+     round 11 was asked to remove. `min` **is** boosted: a window big enough to bottom out
+     on the floor is exactly the one being called too small. Cost is a little more internal
+     scrolling on the largest hulls.
+   - New **`MAX_FILL = 0.98`** ceiling caps the boosted fills, so a multiplier can't push
+     `fillH` past 1 and hang the window's bottom off the screen (it docks at `top: 8px`,
+     and a fixed-position window can't be scrolled to).
+   - **The lobby gets `portrait: 1` (no boost) on purpose** — it already fills 0.96 of both
+     axes, so there is nowhere for +20% to go; all a boost would do there is raise the
+     floor and add scrolling. Flip that one number if the lobby is what felt small.
+   - Simulated across four device sizes before/after: iPhone-13 portrait big grid ship
+     0.40 → 0.48, medium 0.49 → 0.59, flight 0.59 → 0.70 (mine/terrain +6%, already near
+     natural size and capped by `max`); iPad portrait big ship 0.79 → 0.95; **landscape and
+     lobby unchanged at every size**. Side effect to watch: on a phone the biggest windows
+     now cover ~75% of the width rather than ~64%, so the strip of visible map is
+     correspondingly narrower — `MAP_FIT.portrait` is the one number to walk back.
+   Verified: esbuild bundle-resolve (`UI.js` whole tree) + a numeric simulation of
+   `applyScreenFit`'s maths. UI.bundle only — needs `yarn build`.
+
 **Stage 3 (2026-07-17) — COMPLETE (user-accepted after feedback rounds 1–5).** Two user riders (2026-07-17)
 refine §3.2: (1) the Hit Chart button sits in the same top-left position as
 game.php with the manoeuvre stats (TC/TD, Acc/Pivot/Roll, Profile, Ini, Agile)
