@@ -2349,7 +2349,11 @@ public function getStartLoading()
       Split out from damageOneSheet() so the mirror is written once and both allocation strategies
       inherit it - MatterCannon overrides the body (always hits Structure) and would otherwise need
       its own copy. Every subclass reaches damage() through beforeDamage(), so overriding the body
-      rather than the entry point is also what the 35 beforeDamage overrides already expect.*/
+      rather than the entry point is also what the 35 beforeDamage overrides already expect.
+
+      ⚠️ A weapon with its own allocation strategy overrides damageOneSheet(), NEVER this. Replacing
+      damage() drops the mirror pass silently - no error, no warning, just a simulacrum that quietly
+      stops taking hits from that one weapon while every other weapon keeps updating it.*/
     public function damage($target, $shooter, $fireOrder, $gamedata, $damage, $forcePrimary = false){
         $this->damageOneSheet($target, $shooter, $fireOrder, $gamedata, $damage, $forcePrimary);
         $this->mirrorChameleonDamage($target, $shooter, $fireOrder, $gamedata, $damage, $forcePrimary);
