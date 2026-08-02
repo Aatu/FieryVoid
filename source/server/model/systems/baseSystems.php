@@ -2322,6 +2322,17 @@ class ChameleonSensors extends ElintScanner implements SpecialAbility{
 		});
 	}
 
+	/*Set the moment a real toggle value arrives from the client. Manager.php consumes the transfer
+	  at PARSE time - it calls doIndividualNotesTransfer() as soon as it has built the system, which
+	  applies the value and clears the field - so by the time generateIndividualNotes runs there is
+	  nothing left to distinguish "the player clicked Drop Disguise" from "this commit carried no
+	  toggle at all". That difference matters: $active defaults to true on a freshly constructed
+	  system, so without this flag a commit that sent nothing would silently re-project a disguise
+	  the player had dropped.
+	  PROTECTED deliberately: a public property here would land in the static ship JSON, which
+	  json_encodes raw objects (see the static-bloat finding).*/
+	protected $toggleTransferReceived = false;
+
 	public function doIndividualNotesTransfer(){
 		//client sends 1 to project the disguise, 0 to drop it - as a bare value or a one-element
 		//array, depending on which client path built it, so accept both
@@ -2329,6 +2340,7 @@ class ChameleonSensors extends ElintScanner implements SpecialAbility{
 		if (is_array($transfer)) $transfer = (count($transfer) > 0) ? $transfer[0] : null;
 		if ($transfer === null || $transfer === "") return true;
 		$this->active = ((int)$transfer === 1);
+		$this->toggleTransferReceived = true;
 		$this->individualNotesTransfer = "";
 		return true;
 	}
@@ -2336,21 +2348,42 @@ class ChameleonSensors extends ElintScanner implements SpecialAbility{
 	/*Persists the toggle. Runs in InitialOrdersGamePhase::PROCESS - the only point at which the
 	  POST-side ship still carries what the player clicked (individualNotesTransfer). Phase 1 matches
 	  where the client offers the button, alongside the power on/offline control.
-	  The reveal checkpoints deliberately do NOT live here: process() rebuilds ships from the POST
-	  without applying enhancements or loading notes, so chameleonDisguiseClass and revealedTeams are
-	  both empty on those objects. They run from checkChameleonReveal() instead, off a real load.*/
+
+	  ⚠️ $this AND $this->getUnit() ARE POST-SIDE OBJECTS, and almost nothing on them is populated.
+	  Manager.php rebuilds a submitted ship with a bare `new $className($id,$userid,$name,$slot)`:
+	  onConstructed() never runs, so no enhancements are applied and no notes are loaded.
+	  chameleonDisguiseClass is therefore ALWAYS null here and revealedTeams ALWAYS empty. Testing
+	  either off the POST-side object disables the toggle silently and forever - which is exactly
+	  what an `if (empty($ship->chameleonDisguiseClass)) return;` guard on $ship did between
+	  2026-07-31 and 2026-08-01: not one Disguised/Undisguised note was ever written, and the button
+	  did nothing at all (fixed 2026-08-01). EVERYTHING except "what did the player just click" has
+	  to be read off the AUTHORITATIVE ship in $gameData, which is a full DBManager::getTacGamedata
+	  load. This is plan trap 3 biting the one thing the plan said was safe to leave in process().
+	  The reveal checkpoints stay out of here for the same reason - they run from
+	  checkChameleonReveal(), off a real load.*/
 	public function generateIndividualNotes($gameData, $dbManager){
-		$ship = $this->getUnit();
-		if ($ship === null) return;
+		$postShip = $this->getUnit();
+		if ($postShip === null) return;
 		if ($gameData->phase != 1) return;
 
+		$ship = $gameData->getShipById($postShip->id);
+		if ($ship === null) return;
+		$css = $ship->getSystemById($this->id);
+		if (!($css instanceof ChameleonSensors)) return;
+
+		/*Server-authoritative legality, mirroring what the client offers: no simulacrum to project,
+		  array destroyed or offline, or every enemy team has already seen through it. The button is
+		  withdrawn in all of those, so a value posted for one is not a player decision - and a
+		  doctored POST must not be able to flip a toggle that was never on offer.*/
+		if (!$css->canBeToggled($gameData)) return;
+
 		$this->doIndividualNotesTransfer();
+		//What the player clicked, if they clicked anything; otherwise the state the DB already
+		//holds, so a commit carrying no toggle cannot re-project a disguise that was dropped.
+		$active = $this->toggleTransferReceived ? $this->active : $css->active;
 
-		//a suite with no simulacrum has nothing to toggle - don't litter the table
-		if (empty($ship->chameleonDisguiseClass)) return;
-
-		$notekey = $this->active ? 'Disguised' : 'Undisguised';
-		$noteHuman = $this->active ? 'Projecting a disguise' : 'Disguise switched off';
+		$notekey = $active ? 'Disguised' : 'Undisguised';
+		$noteHuman = $active ? 'Projecting a disguise' : 'Disguise switched off';
 		$this->individualNotes[] = new IndividualNote(
 			-1, TacGamedata::$currentGameID, $gameData->turn, $gameData->phase,
 			$ship->id, $this->id, $notekey, $noteHuman, 1
@@ -2534,19 +2567,37 @@ class ChameleonSensors extends ElintScanner implements SpecialAbility{
 	   abs() covers deceleration too: a hull that stops dead faster than a Demos could is just as
 	   damning as one that sprints.*/
 	private function checkThrustPlausibility($gamedata, $ship){
-		if ($gamedata->turn < 2) return;                 //no previous turn to compare against
-
+		/*TURN 1 IS CHECKED, and it has to be. FV deploys warships at speed 0 and the whole of a
+		  ship's opening burn is plotted in turn 1's Movement phase, paying real thrust - so turn 1
+		  is the single most likely turn for a hull to out-accelerate its simulacrum. The baseline is
+		  the ship's DEPLOY move, which getLastTurnMovement() returns on the deployment turn because
+		  it exempts 'deploy' from its turn filter (and 'start' markers are skipped outright, so the
+		  baseline is never the pre-deployment speed). The same path covers a unit deploying from
+		  reserve on turn 5.
+		  Found in game 4274: a Dargan wearing an Octurion (maxDeltaV 2) accelerated 0 -> 4 on turn 1
+		  and was not revealed, because this used to return on turn < 2.*/
 		$thisTurn = $ship->getLastTurnMovement($gamedata->turn + 1);
 		$lastTurn = $ship->getLastTurnMovement($gamedata->turn);
 		if ($thisTurn === null || $lastTurn === null) return;
 		if ($thisTurn->turn != $gamedata->turn) return;  //did not move this turn
 
-		//An actual Involuntary Acceleration crit is not the player "doing" anything - excluding it
-		//stops a crit on the REAL ship from revealing the disguise all by itself.
-		if (!empty($thisTurn->forced)) return;
-
 		$deltaV = abs((int)$thisTurn->speed - (int)$lastTurn->speed);
-		if ($deltaV == 0) return;
+
+		/*An Involuntary Acceleration crit is not the player "doing" anything, and letting it reveal
+		  would turn a crit on the REAL ship into a self-inflicted unmasking.
+		  MovementOrder::$forced is DEAD on the server side - the client sends the field but
+		  tac_shipmovement has no column for it, so a loaded move always reads false and the guard
+		  that tested it never fired. The real marker is a 'speedchange' carrying preturn, which is
+		  what Movement::doStuckEngine writes (stamped with the FOLLOWING turn). Subtract those
+		  deltas rather than skipping the turn wholesale, so a stuck engine cannot be used as cover
+		  for a voluntary burn on the same turn.*/
+		foreach ($ship->movement as $move){
+			if ((int)$move->turn !== (int)$gamedata->turn) continue;
+			if ($move->type !== 'speedchange') continue;
+			if (empty($move->preturn)) continue;
+			$deltaV -= abs((int)$move->value);
+		}
+		if ($deltaV <= 0) return;
 
 		$blueprint = $ship->getChameleonBlueprint();
 		if ($blueprint === null) return;
@@ -2658,10 +2709,21 @@ class ChameleonSensors extends ElintScanner implements SpecialAbility{
 		//which OTHER teams have already seen through it.
 		if ($this->isRevealedToCurrentViewer()){
 			$ship = $this->getUnit();
-			$strippedSystem->active = $this->active;
-			$strippedSystem->revealedTeams = $this->revealedTeams;
 			//drives the toggle button: there is nothing to switch on or off without a simulacrum
-			$strippedSystem->hasDisguise = ($ship !== null && !empty($ship->chameleonDisguiseClass));
+			$hasDisguise = ($ship !== null && !empty($ship->chameleonDisguiseClass));
+			/*What travels is the EFFECTIVE projection state, not the raw toggle. The owner's ship
+			  window paints any system with active == true in the boosted yellow
+			  (SystemIcon.isBoosted reads system.active), and there are two cases where that told the
+			  player something untrue: a suite bought with no simulacrum has nothing to project, and
+			  one every enemy team has already seen through is projecting to nobody. Both are
+			  ordinary ELINT arrays at that point and must read as idle.
+			  Nothing is lost by folding them in here: hasDisguise and revealedTeams both travel, and
+			  the toggle button gates on those (canActivate / canDeactivate / isFullyRevealed), not
+			  on this flag. isRevealedToEveryTeam() fails closed, so an unusual load leaves the raw
+			  toggle showing rather than blanking a live deception.*/
+			$strippedSystem->active = ($this->active && $hasDisguise && !$this->isRevealedToEveryTeam());
+			$strippedSystem->revealedTeams = $this->revealedTeams;
+			$strippedSystem->hasDisguise = $hasDisguise;
 		}else{
 			$strippedSystem->active = false;
 			$strippedSystem->revealedTeams = array();

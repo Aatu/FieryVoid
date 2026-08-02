@@ -43,6 +43,56 @@ Implement the B5W Chameleon Sensors rules on the Centauri **Dargan Strike Cruise
 > Both sheets carry 45 points of damage on their own systems (real: Matter Cannon, Thruster, 2×
 > Structure; phantom: Heavy Array, 2× Structure).
 
+> ⚠️ **Playtest fixes from game 4274 (2026-08-01), the first Standard-Movement test.**
+> 1. **The D6b thrust check was dead on turn 1 — the turn that matters.** It opened with
+>    `if ($gamedata->turn < 2) return;`. FV deploys warships at **speed 0** and the whole opening
+>    burn is plotted in turn 1's Movement phase paying real thrust, so turn 1 is the likeliest turn
+>    for a hull to out-accelerate its simulacrum. Measured: Dargan #2 wearing an **Octurion**
+>    (limit `floor(10/4) = 2`) accelerated **0 → 4** and was not revealed. Guard removed; on a
+>    deployment turn the baseline is the **deploy move**, which `getLastTurnMovement()` returns
+>    because it exempts `'deploy'` from its turn filter (`'start'` markers are skipped outright, so
+>    the baseline is never the pre-deployment speed). Same path covers reserves deploying later.
+> 2. **`MovementOrder::$forced` is DEAD server-side** — the client sends it, `tac_shipmovement` has
+>    no column, so `if (!empty($thisTurn->forced)) return;` had never fired. The real marker of an
+>    Involuntary Acceleration is a **`'speedchange'` carrying `preturn`** (written by
+>    `Movement::doStuckEngine`, stamped with the following turn). Now **subtracted** from `$deltaV`
+>    rather than skipping the turn, so a stuck engine is not cover for a voluntary burn.
+> 3. **`active` is served as the EFFECTIVE projection state** (`$this->active && $hasDisguise &&
+>    !isRevealedToEveryTeam()`), because `SystemIcon.isBoosted` paints any `active` system in the
+>    boosted yellow: a Dargan on `None` and a Dargan every enemy had seen through both read as
+>    projecting. The toggle button gates on `hasDisguise` / `isFullyRevealed`, not on this flag, and
+>    `isRevealedToEveryTeam()` fails closed. The client no longer posts that display value back as a
+>    toggle decision.
+>
+> ⚠️ **4. The Disguise / Drop Disguise toggle had NEVER persisted — found and fixed 2026-08-01.**
+> `generateIndividualNotes` runs in `InitialOrdersGamePhase::process` on POST-side ships, which
+> `Manager.php` builds with a bare `new $className($id,$userid,$name,$slot)` — no `onConstructed()`,
+> so no enhancements and no notes, so `chameleonDisguiseClass` is always `null` and `revealedTeams`
+> always empty. The method's own `if (empty($ship->chameleonDisguiseClass)) return;` therefore fired
+> on **every** call: not one `Disguised`/`Undisguised` note was ever written and `$active` sat at the
+> default `true` forever. **Trap 3 below biting the one thing this plan said was safe to leave in
+> `process()`.** Everything except "what did the player just click" now resolves off
+> `$gameData->getShipById($ship->id)`, and legality goes through the authoritative system's
+> `canBeToggled()` — which also stops a doctored POST flipping a toggle that was never on offer.
+> Two things that make this subtle:
+> - **`Manager.php` consumes `individualNotesTransfer` at PARSE time**, so by the time
+>   `generateIndividualNotes` runs there is nothing left to tell "the player clicked" from "this
+>   commit carried no toggle". A new **protected** `$toggleTransferReceived` marks the difference;
+>   without it a commit that sent nothing would re-project a disguise the player had dropped, because
+>   `$active` defaults to `true` on a freshly constructed system. Protected rather than public so it
+>   stays out of both the payload and the static ship JSON.
+> - **`getChameleonSensors()` returns `null` on a POST-side ship** (it reads the special-ability
+>   index `onConstructed()` builds). Reach the suite by `getSystemById()` or by iterating
+>   `$ship->systems`.
+>
+> Acceptance: `c:\tmp\css_thrust4274.php` (29), `c:\tmp\css_toggle.php` (30), and `css_stage2.php`
+> extended to 64 — its toggle fixture now keeps the POST-side and authoritative ships as **separate
+> objects**, which the old single-ship fixture did not, and is why it never caught this.
+> **⚠️ Game 4274 was rolled back from turn 1 phase 3 to turn 1 phase 1 mid-session**, deleting every
+> note and every plotted move: drift is not only forward, so both new suites synthesise their
+> fixtures via `css_testkit.php` (`forceDisguised` / `forceRevealed` / `forceMovement`) rather than
+> reading live game state.
+
 > ✅ **The D15 observer deviation is RESOLVED (user's ruling, 2026-08-01) — in favour of the plan.**
 > *"Game observers should never see through the disguise unless it is revealed to all teams in the
 > game already; this should match the current logic for trueStealth ships."* `isDisguisedFrom(null)`

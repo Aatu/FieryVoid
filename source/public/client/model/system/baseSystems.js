@@ -161,6 +161,11 @@ ChameleonSensors.prototype.doDeactivate = function () {
 
 ChameleonSensors.prototype.doIndividualNotesTransfer = function () {
 	if (!this.isTogglePhase()) return false;
+	/*`active` arrives as the EFFECTIVE projection state (ChameleonSensors::stripForJson), so it
+	  reads false for a suite with no simulacrum and for one every enemy team has seen through -
+	  display truth, not a player decision. The toggle button is withdrawn in both cases
+	  (canActivate / canDeactivate), so never post that false back as if the player had clicked it.*/
+	if (!this.hasDisguise || this.isFullyRevealed()) return false;
 	this.individualNotesTransfer = [this.active ? 1 : 0];
 	return true;
 };
