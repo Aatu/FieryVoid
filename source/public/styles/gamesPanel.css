@@ -55,11 +55,19 @@
    The masthead takes the same 3px accent marker as the section heads below it, so the
    panel's headings are visibly one system top to bottom. The marker is also what lets
    the heading text stay a single colour — the accent moment is the rail now, not a
-   recoloured word inside the sentence. */
+   recoloured word inside the sentence.
+
+   The rail is an ABSOLUTE pseudo-element and the heading stays a block. It used to be a
+   flex row, which quietly cut the heading into two flex items — "Welcome to" and the
+   <strong>Fiery Void!</strong> — because a flex container wraps its bare text runs in
+   anonymous items. At desktop width they sat on one line and looked like a sentence, but
+   on a phone each item wrapped INSIDE itself and the heading read down the columns as
+   "Welcome Fiery / to Void!". Block layout keeps it one inline flow at every width. */
 .news-panel h2 {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  position: relative;
+  padding-left: 15px;
+  /* 3px rail + the 12px the flex `gap` used to provide */
+  min-height: 22px;
   font-family: var(--fv-hero);
   font-size: 26px;
   font-weight: 400;
@@ -70,10 +78,11 @@
 
 .news-panel h2::before {
   content: "";
-  flex: none;
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
   width: 3px;
-  align-self: stretch;
-  min-height: 22px;
   background: var(--fv-accent);
 }
 
@@ -1222,6 +1231,21 @@
 
   .chat-panel .chatinputTd::before {
     left: 24px;
+  }
+
+  /* ── Header: account row ────────────────────────────────────────────────────
+     gamesNew.css stacks .pageheader into a column here and leaves the account row on
+     `justify-content: flex-end`, so Change password / Set-Up Discord Notifications /
+     Logout hang off the RIGHT edge underneath a left-aligned logo — and the wrap point
+     lands mid-row, which makes the ragged edge read as an accident. Start-aligned, the
+     row shares the logo's left margin and each wrapped line begins in the same place.
+
+     Lives here rather than in gamesNew.css because that file is shared with 11 other
+     pages; games.php is the only one carrying .top-right-row, but the other file's rule
+     is the one being overridden, so the override belongs in the page-scoped sheet. */
+  .top-right-row {
+    justify-content: flex-start;
+    width: 100%;
   }
 }
 
