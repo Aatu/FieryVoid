@@ -54,6 +54,15 @@ class PlayerSlot {
     public $depx, $depy, $deptype, $depwidth, $depheight, $depavailable;
     public $playerid, $playername, $waiting, $surrendered; // ✅ include $waiting, surrendered
 
+    /*Chameleon Sensor Suite - how much this slot's fleet value, as THIS viewer computes it from the
+      rows they can see, overstates what the fleet actually cost. Non-zero only when a disguised ship
+      is wearing a simulacrum dearer than itself; see TacGamedata::setChameleonFleetValueAdjust().
+
+      Declared with a 0 default rather than passed to the constructor deliberately: the field then
+      ships on EVERY slot of EVERY game, so its presence says nothing. A field that appeared only on
+      the deceiving slot would be a louder tell than the arithmetic it exists to hide.*/
+    public $fleetValueAdjust = 0;
+
     function __construct(
         $playerid, $slot, $team, $lastturn, $lastphase, $name, $points,
         $depx, $depy, $deptype, $depwidth, $depheight, $depavailable,

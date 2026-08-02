@@ -748,6 +748,7 @@ class TacGamedata {
         $this->setPreTurnTasks();
         $this->applyChameleonDisguise(); //after setPreTurnTasks: it reads live system state
         $this->maskChameleonFireOrders(); //after applyChameleonDisguise: it reads the flag it sets
+        $this->setChameleonFleetValueAdjust(); //likewise - reads chameleonDisguisedForViewer
 
         if ($this->status == "LOBBY"){
             $this->ships = array();
@@ -805,6 +806,59 @@ class TacGamedata {
             //a stored class that no longer resolves leaves an ordinary, honest ship (D10)
             if ($ship->getChameleonBlueprint() === null) continue;
             $ship->chameleonDisguisedForViewer = true;
+        }
+    }
+
+    /*Chameleon Sensor Suite - stop a disguised fleet's visible point total EXCEEDING its budget.
+
+      The fleet list values every row off the blueprint the viewer was served (fleetList.js:370), so
+      a disguised ship contributes its SIMULACRUM's cost, and the header is a client-side sum of the
+      rows. When the simulacrum is dearer than the real hull that sum can climb above what the slot
+      was allowed to spend - a Dargan (750) wearing an Octurion (1350) puts its fleet 600 over - and
+      a fleet costing more than its budget is not merely suspicious, it is impossible. That is a
+      certain reveal available for no effort at all, which is the one worth removing.
+
+      So: cap the disguised ship's contribution at what it ACTUALLY cost (hull + enhancements) and
+      hand the client the overstatement to subtract from the header. Never negative - a CHEAPER
+      simulacrum is left exactly as it is, because a fleet that reads light is ordinary (players
+      leave points on the table) and inflating it back up would be a lie in the other direction.
+
+      ⚠️ This is a bar, not a wall, and is meant to be. The rows still show the simulacrum's own cost,
+      so a viewer who sums them and compares against this header recovers the difference - as does
+      anyone who reads gamedata.slots in devtools. Guiding constraint §0 stands: everything the
+      enemy's browser receives is public. What it buys is that the PASSIVE view - the number sitting
+      on screen - is no longer self-evidently impossible.
+
+      Why the adjustment is per SLOT and not a field on the disguised ship: any per-ship field marks
+      that ship. Being the one hull in the fleet carrying an unusual key is a far better clue than
+      the arithmetic this exists to bury, and it survives every reveal rule we have. PlayerSlot
+      declares $fleetValueAdjust with a 0 default so it ships on every slot of every game.
+
+      Not gated on $chameleonPresent for the reset - the zeroing has to be unconditional or a slot
+      could carry an adjustment from whatever the object held before. Only the sweep is gated.*/
+    private function setChameleonFleetValueAdjust(){
+        foreach ($this->slots as $slot) $slot->fleetValueAdjust = 0;
+
+        if (!self::$chameleonPresent) return;
+        if (self::$chameleonDisclosed) return; //D15: the post-mortem shows the real numbers
+
+        foreach ($this->ships as $ship){
+            if (!$ship->chameleonDisguisedForViewer) continue;
+            if (!isset($this->slots[$ship->slot])) continue;
+
+            $blueprint = $ship->getChameleonBlueprint();
+            if ($blueprint === null) continue; //cannot happen here - applyChameleonDisguise checked
+
+            //What the viewer's fleet list will add up for this row. Enhancements are masked to 0 on
+            //a disguised payload (ShipClasses::stripForJsonDisguised), so the row is the hull alone.
+            $shown = (float)$blueprint->pointCost;
+
+            //What it really cost. pointCostEnh2 is folded into pointCostEnh once a game is running
+            //(Manager.php:1026) but is summed here anyway so this cannot rot if that changes.
+            $paid = (float)$ship->pointCost + (float)$ship->pointCostEnh + (float)$ship->pointCostEnh2;
+
+            if ($shown <= $paid) continue; //cheaper simulacrum - nothing to cap
+            $this->slots[$ship->slot]->fleetValueAdjust += (int)round($shown - $paid);
         }
     }
 

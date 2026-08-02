@@ -570,6 +570,32 @@ Tuple index 7 becomes the optional choice list — absent on every other enhance
 
 **D15 — Observers and replay.** Observers (no team) see the disguise. Replays render from the same masked per-user payload, so each seat replays consistently. **Open question:** should a *finished* game drop all disguises for post-mortem? Recommend yes, gated on `$gamedata->status == 'FINISHED'`.
 
+**D16 — Fleet-value cap (user's ruling, 2026-08-02). ✅ BUILT the same day.**
+The fleet list values every row off the blueprint *this viewer* was served ([fleetList.js:370](source/public/client/UI/fleetList.js#L370)) and the header is a client-side sum of those rows ([fleetList.js:416-417](source/public/client/UI/fleetList.js#L416-L417)), so a disguised ship contributes its **simulacrum's** cost. That makes a fleet's visible total diverge from what it actually spent, in whichever direction the two hulls differ — and the enemy can reconstruct the honest figure exactly, because hull costs are public in the catalogue, `pointCostEnh` ships for every ship ([ShipClasses.php:693](source/server/model/ships/ShipClasses.php#L693)), and `slot.points` goes out whole for every slot ([TacGamedata.php:126](source/server/model/TacGamedata.php#L126)). Leftover points are the only noise, and the deltas are far larger than plausible leftover — a DarganChameleon is 750 against a Demos 575 (−175), an Altarian 510 (−240), a Haven 325 (−425), an **Octurion 1350 (+600)**.
+
+The two directions are not equally damaging:
+
+- **Cheaper simulacrum → the fleet reads light.** Suspicious, but ordinary: players leave points on the table all the time. **Left alone deliberately.** Inflating the total back up would be a lie in the other direction and would need fabricated value on innocent rows.
+- **Dearer simulacrum → the fleet reads over budget.** Not suspicious, **impossible** — no fleet can cost more than its slot allows. A free, certain reveal, and the one worth removing.
+
+So: cap each disguised ship's contribution at what it **actually** cost (hull + enhancements) and publish the overstatement per slot for the client to subtract from the header. `TacGamedata::setChameleonFleetValueAdjust()` → `PlayerSlot::$fleetValueAdjust`.
+
+Decisions inside it, each load-bearing:
+
+1. **Per SLOT, never per ship.** Any field hung on the disguised ship marks it, and being the one hull in the fleet carrying an unusual key is a better clue than the arithmetic this exists to bury. `PlayerSlot` declares `$fleetValueAdjust = 0` as a **property default rather than a constructor parameter**, so it ships on every slot of every game and its presence says nothing.
+2. **Rows keep showing the simulacrum's own cost.** Capping the row instead would keep rows and header summing but put *"Octurion — 750CP"* on screen against a catalogue cost any player can look up. A header that no longer sums is a quieter contradiction than a row that contradicts the rulebook.
+3. **Current value is scaled by the fleet-wide ratio, not adjusted separately.** At full health `curr == base`, so discounting base alone renders `3600/3000`. One field stays pinned at 0 instead of two.
+4. **The zeroing pass is unconditional**, only the sweep is gated on `$chameleonPresent` — otherwise a slot object could carry a stale adjustment into a game where the gate is off.
+5. **It lifts by itself.** Gated on `chameleonDisguisedForViewer`, so it clears per team on reveal, is never applied to a fleet's own owner or their allies, and `$chameleonDisclosed` drops it for the post-mortem.
+
+⚠️ **This is a bar, not a wall, and is meant to be.** A viewer who sums the rows and compares against the header still recovers the exact delta, as does anyone who reads `gamedata.slots` in devtools — §0 stands, everything the enemy's browser receives is public. What it buys is that the *passive* view, the number sitting on screen, is no longer self-evidently impossible.
+
+Rejected first, for the record, because both were ruled out by the user: **restricting the disguise list by cost** (deterministic, zero display change, but it removes hulls the player should be free to pick) and **masking enemy enhancement spend fleet-wide** (would bury the cheaper-simulacrum shortfall in genuinely unknown slack, but enhancement information is considered vital to share). A **per-choice price on `CHAM_DISG`** was rejected on cost: the enhancement tuple carries one `price`, so a cost-varying option means reworking all four buy-dialog loops (finding #18), and it reopens the §6.8 "disguise costs 0" decision.
+
+Acceptance: `c:\tmp\css_fleetvalue.php` (**123 assertions**, added to `css_runall.ps1`). Every expectation is derived from the live games rather than hardcoded, and §4 asserts the suite's own coverage so it cannot go vacuous as the playtest moves. Verified on all seven local games: 4264 is the no-Chameleon control (all zero); **4273 is the headline — the enemy's visible total 5210 caps to exactly the real spend 4610**; 4274 carries two dearer simulacra (Octurion +600, Primus +80 = 680) alongside four cheaper ones that correctly contribute nothing; 4270's four cheaper-only disguises leave the adjustment at 0 while the fleet reads 695 light, which is the intended asymmetry.
+
+> **Still open (offered, not built):** surfacing the shortfall to the OWNER in the CSS weapon briefing — *"Fleet value shown to Team 3: 175 CP below your actual spend"* — which would make the cost delta a plausibility dimension the player weighs at buy time, exactly as the thrust limit (D6b) and the EW ceiling (D6c) already are. The briefing is already gated on `isProjecting()` and already carries the per-team bracket, so it is a small addition in a file that exists.
+
 ---
 
 ## 3. Leak audit — every field an enemy currently receives
