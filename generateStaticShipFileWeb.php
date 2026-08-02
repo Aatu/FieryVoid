@@ -160,7 +160,7 @@ $count        = 0;    // MUST mirror getAllShipsStatic()'s $count — it becomes
 
 // Brotli pre-compression tallies for the deploy report at the end of this page.
 $brCount = 0; $brRawTotal = 0; $brCompTotal = 0;
-$brSampleRaw = 0; $brSampleBr = 0; $brSampleGz = 0; $brSampleName = '';
+$brSampleRaw = 0; $brSampleBr = 0; $brSampleQ4 = 0; $brSampleName = '';
 
 foreach ($names as $name) {
     if (!class_exists($name)) {
@@ -282,13 +282,23 @@ foreach ($factionOrder as $factionName) {
     if ($brPath !== null) {
         $brCount++;
         $brCompTotal += filesize($brPath);
-        // gzip the ONE largest faction as a like-for-like comparison against what
-        // mod_deflate was serving before. Only one file, so it costs ~0.1s, not 1.5s.
+        // Compress the ONE largest faction at quality 4 as a like-for-like baseline.
+        //
+        // q4 is NOT an arbitrary choice: it is exactly what this endpoint already did.
+        // gamelobbyloader.php pulls in global.php, which registers fv_compress_output()
+        // (compression_helper.php) as a shutdown function, and that calls
+        // brotli_compress($content, 4) on every single request. So the "before" here is
+        // runtime brotli q4 — NOT mod_deflate gzip, which never applied to this PHP
+        // endpoint. Comparing against gzip would flatter the result by ~5x.
+        //
+        // Only one file, so it costs ~0.03s.
         if (filesize($jsonPath) > $brSampleRaw) {
             $brSampleRaw  = filesize($jsonPath);
             $brSampleName = $factionName;
             $brSampleBr   = filesize($brPath);
-            $brSampleGz   = strlen(gzencode(file_get_contents($jsonPath), 6));
+            $brSampleQ4   = function_exists('brotli_compress')
+                ? strlen(brotli_compress(file_get_contents($jsonPath), 4))
+                : 0;
         }
     }
 
@@ -342,12 +352,14 @@ if ($brCount === 0) {
     printf(" &nbsp; - total on disk: %.1f MB raw &rarr; <strong>%.2f MB</strong> as .br (%.0f:1)<br/>\n",
         $brRawTotal / 1048576, $brCompTotal / 1048576,
         $brCompTotal > 0 ? $brRawTotal / $brCompTotal : 0);
-    if ($brSampleGz > 0) {
-        printf(" &nbsp; - largest faction (%s, %.2f MB): gzip would send %s KB, brotli sends "
-             . "<strong>%s KB</strong> &mdash; <strong>%.1fx smaller</strong> than before.<br/>\n",
+    if ($brSampleQ4 > 0) {
+        printf(" &nbsp; - largest faction (%s, %.2f MB): was <strong>%s KB</strong> "
+             . "(runtime brotli q4, recompressed on EVERY request by compression_helper.php), "
+             . "now <strong>%s KB</strong> pre-built at q9 &mdash; <strong>%.0f%% smaller "
+             . "payload and zero per-request compression CPU</strong>.<br/>\n",
             htmlspecialchars($brSampleName), $brSampleRaw / 1048576,
-            number_format($brSampleGz / 1024, 1), number_format($brSampleBr / 1024, 1),
-            $brSampleBr > 0 ? $brSampleGz / $brSampleBr : 0);
+            number_format($brSampleQ4 / 1024, 1), number_format($brSampleBr / 1024, 1),
+            $brSampleBr > 0 ? 100 * (1 - $brSampleBr / $brSampleQ4) : 0);
     }
     echo " &nbsp; <em>&rarr; This confirms the files were BUILT. To confirm they are being "
        . "SERVED, open the lobby with DevTools &gt; Network, click a faction, and check the "

@@ -159,11 +159,21 @@ class ShipCompactor
      * WHY PRE-COMPRESS, rather than compress per request:
      * these files change only on deploy, so the cost is paid once here instead of on every
      * visitor, which lets us use a far higher quality than an on-the-fly filter could
-     * afford. Measured on real ship data (4.34MB faction file):
-     *     gzip -6    281KB  0.07s      <- what .htaccess mod_deflate does today
-     *     brotli q5   43KB  0.06s
-     *     brotli q9   39KB  0.11s      <- what we use
+     * afford. Measured on a real 4.15MB faction file:
+     *     gzip -6    281KB  0.07s
+     *     brotli q4   52KB  0.03s
+     *     brotli q9   38KB  0.11s      <- what we use
      *     brotli q11  36KB  2.84s
+     *
+     * MIND THE BASELINE — the two consumers were NOT starting from the same place:
+     *   - static/json/<faction>.json is served by gamelobbyloader.php, a PHP endpoint. It
+     *     pulls in global.php, which registers fv_compress_output() (compression_helper.php)
+     *     as a shutdown function, and that ALREADY brotli-compressed every response — at
+     *     quality 4, recomputed on every single request. So here the win is q4 -> q9
+     *     (~26% smaller) PLUS eliminating ~25ms of compression CPU per faction open.
+     *   - a plain static .js served straight by Apache/LiteSpeed never reaches PHP, so its
+     *     baseline really is mod_deflate gzip, and the win there is the full ~7x.
+     * Do not quote the gzip figure for the JSON path; it flatters the result about 5x.
      *
      * QUALITY 9, DELIBERATELY NOT 11. q9 lands within 8% of q11's size for roughly 1/25th
      * the time. These generators run inside a LiteSpeed web request with a documented
