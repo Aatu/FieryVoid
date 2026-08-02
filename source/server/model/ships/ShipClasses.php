@@ -1883,36 +1883,28 @@ class BaseShip {
 		return max(0, $ceiling - $spent);
 	}
 
-	/*D9 - a called shot fired AT a disguised ship names a system on the simulacrum, and both hulls
-	  number their systems 0..N, so the raw id resolves on the real ship too: getSystemById()
-	  succeeds and lands the called shot on an arbitrary real system (finding #16). Game 4273 has
-	  phantom id 16 = Structure against real id 16 = Thruster, so this is not theoretical.
+	/*D9 - the system a called shot NAMES, resolved on the sheet the shooter was actually looking at.
 
-	  Translate by what the shooter can actually SEE they aimed at - the system's class, then its
-	  display name. With no counterpart on the real hull the shot resolves as an ordinary,
-	  uncalled hit (-1) rather than landing somewhere arbitrary: the enemy called a system this ship
-	  does not have, and the sensible outcome is that the call simply fails.
+	  For an ordinary shot that is this ship's own system. For a shot called at a Chameleon
+	  simulacrum it is the SIMULACRUM's, because Firing::withdrawChameleonCalledShots() has already
+	  cleared calledid off the real hull (the call does not translate - it fails, and the hit rolls
+	  on the ordinary chart for the bearing) while keeping the declared id on the order as
+	  $chameleonCalledId.
 
-	  Returns the translated id. Callers keep the original for the phantom's own allocation, where
-	  it is valid by construction.*/
-	public function translateChameleonCalledId($calledid)
+	  The distinction matters because the to-hit maths must still see a called shot: the shooter
+	  declared one, paid its penalty, and their own client previewed the number against this very
+	  system on the false sheet. Resolving it here rather than on the real hull is also the only
+	  correct reading - the real ship may mount nothing of the kind.
+
+	  Returns null when the order is not a called shot at all.*/
+	public function getCalledSystemAsAimed($fireOrder)
 	{
-		if ($calledid == -1) return -1;
+		if ($fireOrder->calledid != -1) return $this->getSystemById($fireOrder->calledid);
+		if ($fireOrder->chameleonCalledId === null) return null; //a genuinely uncalled shot
 
 		$sheet = $this->getChameleonSheet();
-		if ($sheet === null) return $calledid;
-
-		$called = $sheet->getSystemById($calledid);
-		if ($called === null) return -1;
-
-		$wantedClass = get_class($called);
-		foreach ($this->systems as $system){
-			if (get_class($system) === $wantedClass) return $system->id;
-		}
-		foreach ($this->systems as $system){
-			if ($system->displayName === $called->displayName) return $system->id;
-		}
-		return -1;
+		if ($sheet === null) return null;
+		return $sheet->getSystemById($fireOrder->chameleonCalledId);
 	}
 
 	/*D3a - divergent destruction. The two sheets have different armour and structure totals, so the

@@ -93,6 +93,16 @@ Implement the B5W Chameleon Sensors rules on the Centauri **Dargan Strike Cruise
 > fixtures via `css_testkit.php` (`forceDisguised` / `forceRevealed` / `forceMovement`) rather than
 > reading live game state.
 
+> ⚠️ **Playtest fix from game 4272 (2026-08-02) — D9 called-shot allocation was wrong, and is now
+> D9b.** Gorith fighters called a Matter Cannon on the **front** of the phantom; the shot resolved
+> correctly against the phantom, but on the real Dargan it landed on the **front** Matter Cannon
+> while the fighters were firing from **port**. The class-match D9 specified takes the first mount of
+> that class in *construction order*, so a call could reach a section the shot had no line on.
+> **User's ruling: don't translate — withdraw.** A call at a simulacrum forces `calledid = -1` on
+> the real hull, which then rolls the hit on its ordinary chart for the bearing, exactly like an
+> uncalled shot. The declared call still costs its to-hit penalty (resolved on the *simulacrum*, the
+> sheet the shooter priced it against) and still lands where called on the phantom. See **D9b**.
+
 > ✅ **The D15 observer deviation is RESOLVED (user's ruling, 2026-08-01) — in favour of the plan.**
 > *"Game observers should never see through the disguise unless it is revealed to all teams in the
 > game already; this should match the current logic for trueStealth ships."* `isDisguisedFrom(null)`
@@ -507,7 +517,18 @@ Allow the toggle in the **Deployment/pre-turn phase** and the **Firing phase** (
 Do **not** reuse power `canOffLine`: making the array offlineable would hand the player 4 free power and change ELINT balance.
 
 **D9 — Called shots at a disguised ship (finding #16).**
-Translate `calledid` **by system class/displayName** onto the real ship (a called shot at the phantom's Engine hits the real Engine); with no counterpart, force `calledid = -1` and resolve as an ordinary hit. Do it in `Firing::prepareFiring`/`validateFireOrders`, once, before hit-chance maths. Never let a raw phantom id reach `getSystemById`. The phantom's own pass-2 allocation uses the *original* `calledid`, which is valid on the phantom by construction.
+~~Translate `calledid` **by system class/displayName** onto the real ship (a called shot at the phantom's Engine hits the real Engine); with no counterpart, force `calledid = -1` and resolve as an ordinary hit.~~ **SUPERSEDED 2026-08-02 — see D9b.** Built as written in Stage 5, and the class-match turned out to be wrong in play.
+
+**D9b — Called shots are WITHDRAWN from the real hull, not translated (user's ruling, 2026-08-02).**
+Reported from game 4272: Gorith fighters called a Matter Cannon on the **front** of the phantom and the damage landed on the Dargan's **front** Matter Cannon while the fighters were firing from **port**. Class-matching takes the first mount of that class in *construction order*, so a call could reach around the hull to a section the shot never had a line on — the sort of thing no uncalled shot can do.
+
+So: force `calledid = -1` for **every** call at a simulacrum, not just the ones with no counterpart. The real ship rolls that hit on the ordinary chart, in the section its own bearing gives it, exactly like any uncalled shot. No new allocation machinery, and a disguised hull cannot be made a *better* target by being shot at through the mask (the §"must not make the real ship harder to hit" ruling, in the other direction).
+
+The declared call is not discarded — `Firing::withdrawChameleonCalledShots()` moves it to `FireOrder::$chameleonCalledId`, and two things still read it:
+- pass 2 aims with it, so the enemy watches their called shot land where they called it on the sheet they can see;
+- `BaseShip::getCalledSystemAsAimed()` resolves it **on the simulacrum** for `calculateHitBase` — the called-shot penalty, `getTargetProfileOverride()` and `getFireControlIndexOverride()`. The shooter pays for the call it declared, off the same false sheet its own client priced the shot against, so preview and resolution still agree (Stage 7 decision 5). Skipping the penalty instead would make a called shot at a disguised ship strictly better than a called shot at anything else.
+
+Still in `Firing::prepareFiring`, once, before hit-chance maths; a raw phantom id still never reaches `getSystemById` on the real hull.
 
 ### Presentation
 
@@ -631,9 +652,11 @@ No mirrored resolution yet — the phantom exists and persists but is undamaged.
 > **Test trap:** pick a **Structure** (or weapon) for the combat-value assertion, never a Reactor or C&C. `calculateCombatValue` weights core systems at multiplier **0** by design ("functionality loss of key systems is noted" separately), so damaging one moves the CV not at all — which reads as a broken phantom when it is nothing of the kind.
 
 ### Stage 5 — Mirrored resolution ✅ DONE
-One roll, one damage amount, two allocations (D3). Fake-profile `needed` on the server (D4). Called-shot translation (D9). Divergent-destruction clamp + reveal (D3a).
+One roll, one damage amount, two allocations (D3). Fake-profile `needed` on the server (D4). Called-shot handling (D9, **reworked to D9b on 2026-08-02**). Divergent-destruction clamp + reveal (D3a).
 
-*Test:* `c:\tmp\css_stage5.php` (26). Measured on game 4273: real Dargan profile **16** vs simulacrum **14**; 15 of 20 simulacrum system ids translate to a same-class real system and 5 correctly become uncalled shots; **the untranslated id would have hit the wrong system 15 times**; 12 damage allocates on both sheets; phantom rows reach `getNewDamages` carrying `shipid = -realId`; and a phantom driven to destruction while the real ship lives is clamped and writes `revealedNow/Team:2`.
+*Test:* `c:\tmp\css_stage5.php` (27). Measured on game 4273: real Dargan profile **16** vs simulacrum **14**; all 20 simulacrum system ids resolve on the simulacrum and none on the real hull; **the raw simulacrum id would have hit the wrong system 15 times**; 12 damage allocates on both sheets; phantom rows reach `getNewDamages` carrying `shipid = -realId`; and a phantom driven to destruction while the real ship lives is clamped and writes `revealedNow/Team:2`.
+
+*D9b test:* `c:\tmp\css_calledshot.php` (20). Fires a called shot from six bearings and confirms every hit on the real hull falls in that bearing's own section (or PRIMARY) while the aim points at a simulacrum system in a *different* section; confirms the withdrawal leaves both thresholds shifted by exactly `calledShotMod × 5` (real 62 → 22, simulacrum 7 → −33); and confirms an ally who sees the real hull, and a shot at the un-disguised control ship, are untouched.
 
 #### Stage 5 decisions that differ from the text above
 
@@ -641,7 +664,7 @@ One roll, one damage amount, two allocations (D3). Fake-profile `needed` on the 
 2. **The fire order must be saved and restored around pass 2.** It is one shared object threaded through the whole resolution and then persisted, so anything pass 2 leaves on it corrupts the REAL shot's record: `chosenLocation`, `linkedHit`, `armorIgnored`, `notes`, `pubnotes`, `updated`, `calledid`. `chosenLocation` is *cleared* rather than copied — the sheets have different sections and the phantom must pick its own.
 3. **`getNewDamages()` had to be taught about phantoms — §D2's claim was half true.** `assignDamageReturnOverkill` does stamp `$target->id` and the negative id does persist correctly, but `getNewDamages()` walks `$gamedata->ships`, which the phantom is deliberately not in. Without the added sweep the mirrored damage was allocated in memory, rendered once, and silently lost on the next load.
 4. **The two sheets are NOT expected to absorb identical totals.** They take the same incoming points and diverge by their own armour (measured: 19 vs 18 for a 12-point hit). An acceptance test asserting equality is testing the wrong invariant.
-5. **`FireOrder::$chameleonCalledId`** carries the id the shooter actually aimed at, so pass 2 can land the called shot where the enemy called it while pass 1 uses the translated real id.
+5. **`FireOrder::$chameleonCalledId`** carries the id the shooter actually aimed at, so pass 2 can land the called shot where the enemy called it. *(Updated 2026-08-02: pass 1 no longer uses a translated real id — under D9b it has no called id at all and rolls the hit on the ordinary chart.)*
 
 #### Stage 5 playtest fixes (game 4273) — three bugs found in play, all fixed
 
@@ -863,8 +886,10 @@ Both directions then work by construction, which is what the current model canno
    test asserts exactly that identity.
 6. **A flat called-shot profile collapses the two thresholds.** `$calledProfileOverride` (Kirishiac
    Orbitals, "targeted as if they were fighters") replaces the ship's bearing profile outright, and
-   it is read off the *translated* real system (D9), so there is no simulacrum number to diverge to.
-   Both thresholds take it. Deliberate.
+   it is read off the single system the call names, so there is no simulacrum number to diverge to.
+   Both thresholds take it. Deliberate. *(Under D9b that system is the **simulacrum's**, since a call
+   at a disguised ship is withdrawn from the real hull and resolved on the false sheet — which is
+   also the only sheet the shooter could have read the override off.)*
 7. **Weapons with their own roll loop keep single-threshold behaviour — and that is the SAFE
    default.** ~85 of the ~110 `fire()` overrides call `parent::fire()`, and 50 of the 80
    `calculateHitBase` overrides call parent, so the seam covers nearly everything. The ~13 that roll

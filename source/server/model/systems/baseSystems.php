@@ -2083,12 +2083,12 @@ class ChameleonSensors extends ElintScanner implements SpecialAbility{
 	}else{
 		$this->data["Special"] .= '<br>';
 	}
-        $this->data["Special"] .= "<br>Chameleon Suite - In addition to normal ELINT operations (see FAQ), this array can project the image of a different vessel of the same faction.";
-		$this->data["Special"] .= "<br>Enemies see the simulacrum - its icon, class, notes, defence profile and damage - in place of this ship.";
-        $this->data["Special"] .= "<br>The deception is broken if this ships moves, uses EW or weapons that the ship its disguised as could not do, or if an enemy unit closes to within 5 hexes (2 hexes for fighters and shuttles) with line of sight.";        
+        $this->data["Special"] .= "<br>Chameleon Suite - Provide ELINT operations (see FAQ) and can project the image of a different vessel.";
+		$this->data["Special"] .= "<br>Enemies see the simulacrum - icon, class, notes, defence profile and damage - instead of this ship.";
+        $this->data["Special"] .= "<br>Deception is broken if ship moves, uses EW or weapons that the simulacrum could not do, or if an enemy is within 5 hexes (2 hexes for fighters and shuttles).";        
 		//$this->data["Special"] .= "<br>The simulacrum is chosen when the ship is purchased. 'None' means no disguise is projected.";
-        $this->data["Special"] .= "<br>Weapon arming status is masked from enemies at all times, even after the deception is revealed.";
-        $this->data["Special"] .= "<br>See Centauri section in 'Factions-Tiers' for more info.";
+        $this->data["Special"] .= "<br>Weapon arming status is always masked from enemies.";
+        $this->data["Special"] .= "<br>More info in Centauri section of 'Factions-Tiers'.";
         $this->addChameleonWeaponBriefing();
         //$this->data["Special"] .= "<br>The deception is broken, permanently and for that enemy team only, if:";
         //$this->data["Special"] .= "<br> - an enemy unit closes to within 5 hexes (2 hexes for fighters and shuttles) with line of sight;";
@@ -2114,11 +2114,17 @@ class ChameleonSensors extends ElintScanner implements SpecialAbility{
 	  Own team only. It reaches nobody else in practice - an enemy who still believes the deception
 	  is served the simulacrum's systems, so this system is not in their payload at all - but a ship
 	  revealed to one team and not another does serve its real systems to the team that knows, and
-	  there is no reason to hand them a summary as well.*/
+	  there is no reason to hand them a summary as well.
+
+	  Withdrawn entirely once the deception is over (2026-08-02). The whole briefing is a statement
+	  about a risk - "firing this gun reveals you" - and once every enemy team has seen through the
+	  disguise there is no risk left to describe, only a page of advice about a fiction. Same gate,
+	  and for the same reason, as the "Disguised as" line in the Enhancements block.*/
 	private function addChameleonWeaponBriefing(){
 		$ship = $this->getUnit();
 		if ($ship === null) return;
 		if (empty($ship->chameleonDisguiseClass)) return;
+		if (!$this->isProjecting()) return;
 		if (TacGamedata::$currentForPlayerTeam !== null
 			&& (int)TacGamedata::$currentForPlayerTeam !== (int)$ship->team) return;
 
@@ -2146,15 +2152,16 @@ class ChameleonSensors extends ElintScanner implements SpecialAbility{
 			$have = isset($fake[$cls]) ? $fake[$cls] : 0;
 			$name = $this->chameleonWeaponLabel($ship, $cls);
 			$lines[] = ($have === 0)
-				? "<br> - " . $name . ": you mount " . $count . ", the " . $label . " mounts NONE - firing one reveals you"
+				? "<br> - " . $name . ": you mount " . $count . ", the " . $label . " mounts NONE"
 				: "<br> - " . $name . ": you mount " . $count . ", the " . $label . " mounts " . $have;
 		}
 
-		$this->data["Special"] .= "<br><br>Disguised as: " . $label . ". Firing a weapon the simulacrum"
-			. " does not mount - or more of them than it can bring to bear in that arc - reveals this ship"
-			. " to that enemy team at the START OF THE NEXT TURN.";
+		$this->data["Special"] .= "<br><br>Disguised as: " . $label . $this->getDeceivedTeamsLabel()
+			. ". Firing a weapon the simulacrum"
+			. " does not have - or more of them than it can bring to bear in that arc - reveals this ship";
+			//. " to that enemy team.";
 		$this->data["Special"] .= implode('', $lines);
-		$this->data["Special"] .= "<br>Arcs count: a mount the " . $label . " carries on the other side"
+		$this->data["Special"] .= "<br>Arcs count: the " . $label . " carries on the other side"
 			. " cannot cover your shot.";
 	}
 
@@ -2702,6 +2709,61 @@ class ChameleonSensors extends ElintScanner implements SpecialAbility{
 		return ($ship !== null && !empty($ship->chameleonDisguiseClass));
 	}
 
+	/*THE display question: is this suite still showing SOMEBODY a false face?
+
+	  Distinct from isDisguisedFrom($team), which answers it for one particular viewer. This is the
+	  fleet-wide version - "is the deception doing anything at all any more" - and it is what every
+	  OWNER-FACING readout should be gated on, because a line that describes a deception nobody is
+	  fooled by any longer is not merely redundant, it is wrong.
+
+	  Deliberately NOT testing isDestroyed/isOfflineOnTurn: both of those END the deception through
+	  the shutdown checkpoint, which writes a real permanent reveal to every enemy team, so they
+	  arrive here as revealedTeams and are already covered. Testing them directly would also be
+	  unreliable at one of the two call sites - Enhancements::setEnhancements runs BEFORE
+	  ShipSystem::onConstructed links $structureSystem, so isDestroyed() cannot yet see a system that
+	  fell off with its structure block.
+
+	  Fails CLOSED at every step (isRevealedToEveryTeam() returns false with no team list), so an
+	  unusual load keeps showing a live deception rather than blanking one.*/
+	public function isProjecting(){
+		$ship = $this->getUnit();
+		if ($ship === null || empty($ship->chameleonDisguiseClass)) return false; //nothing to project
+		if (!$this->active) return false;                                         //dropped by its owner
+		return !$this->isRevealedToEveryTeam();
+	}
+
+	/*Owner-facing suffix naming the enemy teams still taken in, e.g. " [for Team 3 only]". Appended
+	  to every "Disguised as: X" the owner is shown, because with more than one opponent that line
+	  otherwise hides the thing the player most needs: the deception can break against ONE team and
+	  stay perfectly good against the rest, and a reveal is per team and permanent.
+
+	  Empty string with a single opponent - "[for Team 2]" in a 1v1 restates the only possibility -
+	  and empty when nothing is deceived any more, which is the case isProjecting() already withholds
+	  the whole line for. "only" appears exactly when at least one enemy team HAS seen through it,
+	  so its presence is itself the signal that the deception is partly blown.
+
+	  Teams are named by number, matching the in-game fleet list ("TEAM " + slot.team,
+	  fleetList.js:276) - slot names are per SLOT, and a team can hold several.*/
+	public function getDeceivedTeamsLabel(){
+		$ship = $this->getUnit();
+		if ($ship === null) return '';
+
+		$enemyTeams = 0; $stillDeceived = array();
+		foreach (TacGamedata::$chameleonAllTeams as $teamId){
+			$teamId = (int)$teamId;
+			if ($teamId === (int)$ship->team) continue; //its own team is not being deceived
+			$enemyTeams++;
+			if (!in_array($teamId, $this->revealedTeams, true)) $stillDeceived[] = $teamId;
+		}
+		if ($enemyTeams < 2) return '';        //one opponent: naming them adds nothing
+		if (empty($stillDeceived)) return '';  //nobody left to deceive
+
+		sort($stillDeceived);
+		return ' [for ' . (count($stillDeceived) > 1 ? 'Teams ' : 'Team ')
+			. implode(', ', $stillDeceived)
+			. (count($stillDeceived) < $enemyTeams ? ' only' : '') . ']';
+	}
+
 	public function stripForJson(){
 		$strippedSystem = parent::stripForJson();
 		//The owner and their team need the toggle state to render the button and the tooltip.
@@ -2719,11 +2781,26 @@ class ChameleonSensors extends ElintScanner implements SpecialAbility{
 			  ordinary ELINT arrays at that point and must read as idle.
 			  Nothing is lost by folding them in here: hasDisguise and revealedTeams both travel, and
 			  the toggle button gates on those (canActivate / canDeactivate / isFullyRevealed), not
-			  on this flag. isRevealedToEveryTeam() fails closed, so an unusual load leaves the raw
-			  toggle showing rather than blanking a live deception.*/
-			$strippedSystem->active = ($this->active && $hasDisguise && !$this->isRevealedToEveryTeam());
+			  on this flag.*/
+			$strippedSystem->active = $this->isProjecting();
 			$strippedSystem->revealedTeams = $this->revealedTeams;
 			$strippedSystem->hasDisguise = $hasDisguise;
+
+			/*⚠️ WITHOUT THIS THE WEAPON BRIEFING NEVER REACHES THE BROWSER, and does so silently.
+			  ShipSystem::stripForJson does not send the $data dict at ALL, so the client's system
+			  tooltip is built entirely from window.staticShips - and the static blueprint is a
+			  PRISTINE ship with no disguise, on which addChameleonWeaponBriefing() returns at its
+			  own empty-chameleonDisguiseClass guard. Measured: live 1157 chars vs static 626, the
+			  difference being exactly the briefing. Every other per-instance tooltip in the codebase
+			  sends its dict the same way (~20 sites).
+
+			  Safe to send wholesale because systemFactory.js does Object.assign(staticBlueprint,
+			  systemJson) - `data` REPLACES the static dict rather than merging into it - and the
+			  live dict is a strict superset (same single 'Special' key, the live value starting
+			  with the static one verbatim). Sent for the owner in every state, not only while
+			  projecting: that is also what makes the briefing VANISH the moment the deception ends,
+			  rather than leaving the client on a stale static copy.*/
+			$strippedSystem->data = $this->data;
 		}else{
 			$strippedSystem->active = false;
 			$strippedSystem->revealedTeams = array();

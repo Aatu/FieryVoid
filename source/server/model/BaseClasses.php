@@ -241,10 +241,13 @@ class FireOrder{
     public $resolutionOrder = -1; //actual order in which shot was resolved
 	public $priority = 0; //fire order priority, temporary only during fire resolution
 	/*Chameleon Sensor Suite (D9): the called-shot id AS THE SHOOTER AIMED IT, i.e. a system id on
-	  the simulacrum, kept when calledid is translated onto the real ship. The mirrored allocation
-	  (D3) aims pass 2 with this, since it is valid on the phantom by construction. Transient and
-	  server-side only - it never reaches the client or the database, and a POST-side rebuild drops
-	  it, which is correct: translation happens fresh on every resolution.*/
+	  the simulacrum, kept when Firing::withdrawChameleonCalledShots() clears calledid so the call
+	  cannot land on an arbitrary system of the REAL hull (which rolls the hit on its own chart
+	  instead). Two things still read it: the mirrored allocation (D3) aims pass 2 with it, since it
+	  is valid on the phantom by construction, and BaseShip::getCalledSystemAsAimed() resolves it on
+	  the simulacrum so the called-shot to-hit maths still sees the call the shooter declared.
+	  Transient and server-side only - it never reaches the client or the database, and a POST-side
+	  rebuild drops it, which is correct: withdrawal happens fresh on every resolution.*/
 	public $chameleonCalledId = null;
 	/*Chameleon Sensor Suite (D3b, Stage 7): the SECOND to-hit threshold and its own hit tally, for a
 	  shot fired at a ship the shooter still sees as somebody else. null - and therefore free - for

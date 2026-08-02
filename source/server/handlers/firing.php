@@ -682,6 +682,13 @@ class Firing
             }
         }
 
+        //Chameleon Sensor Suite (D9): this phase runs its OWN calculateHitBase pass and
+        //firePreFiringWeapons() allocates real damage from it, so the withdrawal has to happen here
+        //too - otherwise a prefiring called shot at a disguised ship still reaches the real hull
+        //carrying a simulacrum system id. Idempotent: a second call sees calledid already -1 and
+        //skips the order, leaving $chameleonCalledId intact.
+        self::withdrawChameleonCalledShots($gamedata);
+
         $ambiguousFireOrders  = array();
         foreach ($gamedata->ships as $ship){
             foreach($ship->getAllFireOrders($gamedata->turn) as $fire){
@@ -887,11 +894,11 @@ public static function firePreFiringWeapons($gamedata){
 
         //Chameleon Sensor Suite (D9): a called shot AT a disguised ship names a system on the
         //simulacrum. Both hulls number their systems 0..N, so the raw id resolves on the real ship
-        //too and lands the call on an arbitrary real system (finding #16). Translate ONCE, here,
+        //too and lands the call on an arbitrary real system (finding #16). Withdraw it ONCE, here,
         //before any hit-chance maths - four separate places downstream do
-        //$target->getSystemById($fire->calledid) and none of them can tell a translated id from a
-        //raw one.
-        self::translateChameleonCalledShots($gamedata);
+        //$target->getSystemById($fire->calledid) and none of them can tell a foreign id from a
+        //real one.
+        self::withdrawChameleonCalledShots($gamedata);
 
         //Uncontrolled Hunter-Killers that ended movement co-located with an enemy ram it
         //(no player to submit the ram order). Done before ram orders are gathered below.
@@ -943,17 +950,31 @@ public static function firePreFiringWeapons($gamedata){
 
     }//endof function prepareFiring
 
-    /*Chameleon Sensor Suite (D9). Rewrites every called shot aimed at a ship the SHOOTER still
-      sees as somebody else, so that a raw simulacrum system id never reaches getSystemById() on
-      the real hull. Runs once per resolution, before hit chances are calculated.
+    /*Chameleon Sensor Suite (D9). Withdraws every called shot aimed at a ship the SHOOTER still
+      sees as somebody else, so that a simulacrum system id never reaches getSystemById() on the
+      real hull. Runs once per resolution, before hit chances are calculated.
 
-      The original id is kept on the order as $chameleonCalledId: it is the id the shooter actually
-      aimed at, it is valid on the phantom by construction, and the mirrored allocation (D3) uses it
-      to aim pass 2 - so the enemy sees their called shot land where they called it, on the sheet
-      they can see.
+      WITHDRAWN, NOT TRANSLATED (user's ruling, 2026-08-02). The shooter named a mount on a sheet
+      that is not this ship, and no mapping onto the real hull can be right. The class-match this
+      used to do took the first gun of that class in CONSTRUCTION ORDER: in game 4272 a shot called
+      at the simulacrum's forward Matter Cannon landed on the Dargan's forward Matter Cannon while
+      the Gorith fighters were firing from port. The call therefore simply FAILS on the real ship -
+      the hit rolls on the ordinary chart, for the section the shot's own bearing gives it, exactly
+      like any uncalled shot. That is also the cheap answer: no new allocation machinery, and the
+      real hull cannot be made a better target by being shot at through a mask.
+
+      The declared call is not thrown away, it moves to $chameleonCalledId:
+        - the mirrored allocation (D3) aims pass 2 with it, so the enemy still watches their called
+          shot land where they called it, on the sheet they can see;
+        - calculateHitBase() still resolves it - on the SIMULACRUM, via getCalledSystemAsAimed() -
+          for the called-shot penalty, the profile override and the fire-control category. The
+          shooter pays for the call they declared and the server's number matches the preview their
+          own client computed off that same false sheet, which is the Stage 7 decision-5 identity.
+          Skipping the penalty instead would make a called shot at a disguised ship strictly better
+          than a called shot at anything else.
 
       Behind the per-load gate, so an ordinary game does not walk its fire orders for this at all.*/
-    private static function translateChameleonCalledShots($gamedata)
+    private static function withdrawChameleonCalledShots($gamedata)
     {
         if (!TacGamedata::$chameleonPresent) return;
 
@@ -972,8 +993,15 @@ public static function firePreFiringWeapons($gamedata){
                 //through the deception is looking at the real hull and called a real system.
                 if (!$target->isChameleonDisguisedFrom($shooter->team)) continue;
 
+                //A ramming attack cannot be called (calculateHitBaseRam returns 0 for calledid !=
+                //-1, and the client refuses to offer it). Withdrawing one would turn a doctored
+                //illegal order into a legal ram, so rams keep whatever they arrived with and are
+                //rejected downstream exactly as they are today.
+                $weapon = $ship->getSystemById($fire->weaponid);
+                if ($weapon instanceof Weapon && $weapon->isRammingAttack) continue;
+
                 $fire->chameleonCalledId = $fire->calledid;
-                $fire->calledid = $target->translateChameleonCalledId($fire->calledid);
+                $fire->calledid = -1;
             }
         }
     }

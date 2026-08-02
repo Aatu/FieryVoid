@@ -1608,9 +1608,13 @@ public function getStartLoading()
         }
 
         $calledProfileOverride = null; //flat fighter-style profile of the called system (Kirishiac Orbitals - "targeted as if they were fighters")
-        if ($fireOrder->calledid != -1) {
-            $calledSystem = $target->getSystemById($fireOrder->calledid);
-            if ($calledSystem !== null) $calledProfileOverride = $calledSystem->getTargetProfileOverride();
+        /*Null when this is not a called shot. Chameleon (D9): a call at a disguised ship has had
+          calledid withdrawn so it cannot land on an arbitrary real system, and this resolves the
+          declared id on the SIMULACRUM instead - the sheet the shooter aimed at and the one their
+          client priced the shot against.*/
+        $calledSystem = $target->getCalledSystemAsAimed($fireOrder);
+        if ($calledSystem !== null) {
+            $calledProfileOverride = $calledSystem->getTargetProfileOverride();
             if ($calledProfileOverride === null) { //standard called shot
                 $mod += $this->getCalledShotMod();
                 if ($target->base) $mod += $this->getCalledShotMod();//called shots vs bases suffer double penalty!
@@ -1779,10 +1783,9 @@ public function getStartLoading()
             $mod -= ($CnC->hasCritical("ShadowPilotPain", $gamedata->turn));
         }
         $fcIndex = $target->getFireControlIndex();
-        if ($fireOrder->calledid != -1) { //called shot at a system that overrides FC category (Kirishiac Orbital: "targeted as if a fighter")
-            $calledFCSystem = $target->getSystemById($fireOrder->calledid);
-            if ($calledFCSystem !== null && $calledFCSystem->getFireControlIndexOverride() !== null) {
-                $fcIndex = $calledFCSystem->getFireControlIndexOverride();
+        if ($calledSystem !== null) { //called shot at a system that overrides FC category (Kirishiac Orbital: "targeted as if a fighter")
+            if ($calledSystem->getFireControlIndexOverride() !== null) {
+                $fcIndex = $calledSystem->getFireControlIndexOverride();
             }
         }
         $firecontrol = $this->fireControl[$fcIndex];
@@ -2395,9 +2398,10 @@ public function getStartLoading()
             'calledid'       => $fireOrder->calledid,
         );
 
-        //Aim pass 2 where the shooter actually aimed. calledid was translated onto the real hull
-        //(D9); the ORIGINAL id is a system on the simulacrum by construction, so the enemy sees
-        //their called shot land where they called it.
+        //Aim pass 2 where the shooter actually aimed. calledid was WITHDRAWN for the real hull
+        //(D9) - the real ship rolls this hit on its own chart - but the declared id is a system on
+        //the simulacrum by construction, so here the enemy sees their called shot land where they
+        //called it.
         if ($fireOrder->chameleonCalledId !== null) $fireOrder->calledid = $fireOrder->chameleonCalledId;
         $fireOrder->chosenLocation = null;              //the phantom picks its own section
         $fireOrder->linkedHit = null;

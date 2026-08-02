@@ -1904,6 +1904,17 @@ class Enhancements{
 		return null; //None
 	}
 
+	/*The ship's Chameleon suite, or null. Walks $ship->systems rather than going through
+	  BaseShip::getChameleonSensors(): this runs from BaseShip::onConstructed BEFORE the loop that
+	  fills the special-ability index that method reads, so the index is still empty here (the same
+	  trap a POST-side ship hits permanently).*/
+	private static function getChameleonSuite($ship){
+		foreach($ship->systems as $system){
+			if($system instanceof ChameleonSensors) return $system;
+		}
+		return null;
+	}
+
 	/*enhancements for fighters - actual applying of chosen enhancements
 	*/
 	private static function setEnhancementsFighter($flight){
@@ -2088,13 +2099,23 @@ class Enhancements{
 					case 'CHAM_DISG': //Chameleon Sensor Suite - the vessel this ship pretends to be
 						$disguise = self::resolveChameleonDisguise($ship, $entry);
 						$ship->chameleonDisguiseClass = $disguise;
-						if($disguise !== null && $ship->isRevealedToCurrentViewer()){
+						$chamSuite = self::getChameleonSuite($ship);
+						/*isProjecting(): once every enemy team has seen through the deception (or the
+						  owner has dropped it) this line stops being a reminder of what the enemy is
+						  looking at and becomes a lie - they are looking at a Dargan. Same question
+						  ChameleonSensors::stripForJson asks before it paints the array as active,
+						  asked through the same method so the two can never drift apart.*/
+						if($disguise !== null && $ship->isRevealedToCurrentViewer()
+							&& $chamSuite !== null && $chamSuite->isProjecting()){
 							//the disguise is the secret this whole system exists to keep - never put it
 							//in a payload built for an enemy (enemy payloads also drop enhancementTooltip
 							//wholesale once stripForJsonDisguised exists, but do not rely on that alone)
 							$label = ShipLoader::getDisguiseLabel($ship->faction, $disguise, $ship->phpclass);
 							if($ship->enhancementTooltip != "") $ship->enhancementTooltip .= "<br>";
-							$ship->enhancementTooltip .= "Disguised as: " . ($label !== null ? $label : $disguise);
+							//with more than one opponent, WHICH of them still believes it is the whole
+							//point - a reveal is per team and permanent (empty string in a 1v1)
+							$ship->enhancementTooltip .= "Disguised as: " . ($label !== null ? $label : $disguise)
+								. $chamSuite->getDeceivedTeamsLabel();
 						}
 						break;
 

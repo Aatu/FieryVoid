@@ -137,6 +137,7 @@ class TacGamedata {
 
     public function onConstructed(){
         self::$currentForPlayerTeam = $this->getPlayerTeam(); //viewer context (slots are loaded by now) - teammates see each other's hidden orders
+        $this->setChameleonTeamList();
         $this->setBlockedHexes();
         $this->waitingForThisPlayer = $this->getIsWaitingForThisPlayer();
         $this->doSortShips();
@@ -183,16 +184,32 @@ class TacGamedata {
         $this->markUnavailableSetMarkers();
     }
 
-    public function markUnavailableSetMarkers()
+    /*Every team in this game, on a static because a ShipSystem has no route back to $gamedata -
+      ChameleonSensors::isRevealedToEveryTeam() is the consumer, and through it the whole "is this
+      suite still projecting to anybody?" question.
+
+      Filled from onConstructed() ABOVE the per-ship sweep, not only from markUnavailableSetMarkers()
+      below it: Enhancements::setEnhancements runs inside that sweep and asks the same question when
+      it decides whether to write the "Disguised as" line. isRevealedToEveryTeam() fails CLOSED on an
+      empty list, so filling it afterwards would not have been a visible bug - it would silently have
+      answered "still projecting" on the first load of every request. Idempotent, and cheap enough
+      (one pass over the slots) that markUnavailableSetMarkers keeps calling it rather than relying
+      on the earlier call, since it is the one place that documents the whole marker set.*/
+    private function setChameleonTeamList()
     {
-        self::$chameleonPresent = false; //before the phase guard: the static outlives a single load
-        self::$chameleonSuitePresent = false;
-        self::$chameleonDisclosed = ($this->status === "FINISHED"); //D15: the post-mortem sees everything
         self::$chameleonAllTeams = array();
         foreach ($this->slots as $slot){
             $teamId = (int)$slot->team;
             if (!in_array($teamId, self::$chameleonAllTeams, true)) self::$chameleonAllTeams[] = $teamId;
         }
+    }
+
+    public function markUnavailableSetMarkers()
+    {
+        self::$chameleonPresent = false; //before the phase guard: the static outlives a single load
+        self::$chameleonSuitePresent = false;
+        self::$chameleonDisclosed = ($this->status === "FINISHED"); //D15: the post-mortem sees everything
+        $this->setChameleonTeamList();
         if ($this->phase < -1)
             return;
 

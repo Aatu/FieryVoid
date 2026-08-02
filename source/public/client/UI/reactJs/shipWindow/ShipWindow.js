@@ -347,7 +347,7 @@ const SectionGrid = styled.div`
     grid-template-areas: ${props => props.$areas};
     justify-content: center;
     gap: 8px;
-    padding: 8px;
+    padding: 5px 5px 5px 5px;
     box-sizing: border-box;
     width: 100%;
     overflow: hidden; /*clips the watermark now that the window itself is overflow: visible*/
