@@ -89,8 +89,31 @@ try {
             }
         }
         header('Pragma: cache');
+
+        // We may answer this URL with either a brotli or a plain/gzip body depending on
+        // what the caller advertised, so the response MUST vary on Accept-Encoding —
+        // otherwise a shared cache can hand the brotli body to a gzip-only client. This
+        // matters especially on the versioned path above, which is cached immutably.
+        header('Vary: Accept-Encoding');
+
+        // Serve the pre-built brotli copy when the client accepts it (written by
+        // precompressBrotli() in generateStaticShipFile*.php). This skips zlib entirely:
+        // no per-request compression of a multi-MB payload, and a far smaller body than
+        // gzip manages. Falls through to the plain JSON below when the .br is absent
+        // (dev box without the brotli extension) or the client didn't advertise br.
+        $brPath = $jsonPath . '.br';
+        if (is_readable($brPath) && strpos($_SERVER['HTTP_ACCEPT_ENCODING'] ?? '', 'br') !== false) {
+            ini_set('zlib.output_compression', 'Off'); // never gzip an already-brotli body
+            header('Content-Encoding: br');
+            header('X-LiteSpeed-No-Gzip: 1');
+            header('Content-Length: ' . filesize($brPath));
+            if (ob_get_length()) ob_clean();
+            readfile($brPath);
+            exit;
+        }
+
         // Buffer output, gzip is handled natively by zlib.output_compression
-        
+
         if(ob_get_length()) ob_clean();
         echo file_get_contents($jsonPath);
         exit;
