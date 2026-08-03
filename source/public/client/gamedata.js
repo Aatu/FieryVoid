@@ -321,6 +321,10 @@ window.gamedata = {
     // colour. Mirrors the .iniActive* CSS (border + translucent fill + glow) but
     // keyed on team instead of mine/ally/enemy.
     //
+    // Pass moved=true for the .iniActiveMoved equivalent: the ship is still the
+    // active mover but has already committed its movement, so the FILL is dropped
+    // and only the border + glow remain.
+    //
     // Border and glow use the IniGUI-darkened colour; the FILL must be derived from
     // the FULL-strength palette instead. Taking the fill off the already-darkened
     // colour compounded the two factors (0.65 * 0.22 = 0.14 of full strength) and
@@ -328,11 +332,17 @@ window.gamedata = {
     // visually no fill at all, just a border. The .iniActive* classes sit at roughly
     // 0.30 of their border colour, so match that.
     INI_ACTIVE_FILL: 0.30,
-    getIniActiveTeamStyle: function getIniActiveTeamStyle(team) {
+    getIniActiveTeamStyle: function getIniActiveTeamStyle(team, moved) {
         var rgb = gamedata.getIniTeamColorRGB(team);
         var r = rgb[0];
         var g = rgb[1];
         var b = rgb[2];
+
+        if (moved) {
+            // .iniActiveMoved equivalent: border + a slightly stronger glow, no fill.
+            return "border:1px solid rgb(" + r + "," + g + "," + b + ") !important;"
+                + "box-shadow:0px 0px 4px rgb(" + r + "," + g + "," + b + ");";
+        }
 
         var full = gamedata.getTeamColorRGB(team);
         var f = gamedata.INI_ACTIVE_FILL;
@@ -1833,9 +1843,18 @@ getActiveShipName: function getActiveShipName() {
             var active = window.SimultaneousMovementRule.isActiveMovementShip(ships[i]);
             if (active !== null) {
                 if (active === true && teamColorCss) {
-                    // Observers: style the active-mover box from the ship's team colour
-                    // instead of the mine/ally/enemy iniActive* classes.
-                    td.style.cssText += gamedata.getIniActiveTeamStyle(ships[i].team);
+                    // Observers / 3+-team participants: style the active-mover box from
+                    // the ship's team colour instead of the mine/ally/enemy iniActive*
+                    // classes. This branch short-circuits the .iniActiveMoved test below,
+                    // so it has to make the same "already moved" call itself — otherwise
+                    // the box keeps its fill for the whole phase in 3+-team games while
+                    // 2-team games correctly drop it once movement is committed. Gated on
+                    // isMyShip exactly like .iniActiveMoved, so it never reveals whether
+                    // another team's ship has moved yet.
+                    var teamMoved = gamedata.isMyShip(ships[i])
+                        && shipManager.movement.isMovementReady(ships[i])
+                        && shipManager.movement.hasDeletableMovements(ships[i]);
+                    td.style.cssText += gamedata.getIniActiveTeamStyle(ships[i].team, teamMoved);
                 } else if (active === true && gamedata.isMyShip(ships[i]) && shipManager.movement.isMovementReady(ships[i]) && shipManager.movement.hasDeletableMovements(ships[i])) {
                     td.classList.add("iniActiveMoved");
                 } else if (active === true && gamedata.isMyShip(ships[i])) {
