@@ -118,7 +118,7 @@ const ICON_SMALL = "22px";
    top - so centring the box does NOT centre what the eye sees, and no amount of flexbox fixes
    that. The alternative is re-cropping the art, which then has to stay cropped through every
    future redraw. A number in one place is cheaper. */
-const ICON_NUDGE_Y = "-5px";
+const ICON_NUDGE_Y = "-4px";
 const ICON_NUDGE_Y_SMALL = "-2px";
 
 /* Box geometry from theme.hud, shared with FullScreen, PlayerSettings and the EW strip.
