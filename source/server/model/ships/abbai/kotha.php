@@ -19,6 +19,7 @@ class Kotha extends FighterFlight{
         $this->jinkinglimit = 8;
         $this->turncost = 0.33;
         $this->iniativebonus = 90;
+        $this->notes = "Can deactivate shield to gain extra thrust";
         $this->populate();
     }
     
