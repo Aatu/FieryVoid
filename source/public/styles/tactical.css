@@ -1398,7 +1398,7 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     #phaseheader {
         width: auto;
         min-width: 220px;
-        max-width: 72vw;
+        max-width: 64vw;
         height: 22px;
         padding-top: 2px;
         padding-right: 45px;
