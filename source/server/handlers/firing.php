@@ -689,6 +689,10 @@ class Firing
         //skips the order, leaving $chameleonCalledId intact.
         self::withdrawChameleonCalledShots($gamedata);
 
+        //Pre-Firing resolves a phase EARLIER than the Fire Phase, so a fleet that conceded during
+        //Initial Orders or Movement would otherwise still get its pre-firing shots away here.
+        self::withdrawSurrenderedFireOrders($gamedata);
+
         $ambiguousFireOrders  = array();
         foreach ($gamedata->ships as $ship){
             foreach($ship->getAllFireOrders($gamedata->turn) as $fire){
@@ -900,6 +904,10 @@ public static function firePreFiringWeapons($gamedata){
         //real one.
         self::withdrawChameleonCalledShots($gamedata);
 
+        //A fleet that conceded part-way through the turn must not still be shooting when the
+        //phase resolves - see the method for why nothing downstream would have stopped it.
+        self::withdrawSurrenderedFireOrders($gamedata);
+
         //Uncontrolled Hunter-Killers that ended movement co-located with an enemy ram it
         //(no player to submit the ram order). Done before ram orders are gathered below.
         //$dbManager is threaded through so each automated ram FireOrder is persisted
@@ -1034,7 +1042,49 @@ public static function firePreFiringWeapons($gamedata){
         }
     } //endof function compareFiringOrders
 
-    
+    /* Withdraw every still-unresolved fire order belonging to a fleet that has surrendered.
+
+       Surrender is now possible in any phase, so a player can launch ballistics in Initial Orders
+       and concede during Movement or Firing with shots already in the air. Those orders sit in
+       tac_fireorder stamped with this turn and resolve normally at the end of the phase, so a
+       fleet that has left the game could still kill ships. Nothing downstream was going to stop
+       them either: fireWeapons() resolves orders from DESTROYED shooters on purpose ("ballistics
+       that have been fired must still be resolved"), and the getTurnDeployed guard that lifts a
+       surrendered fleet out of activation lists is not applied to the firing loops.
+
+       DETACHED, not deleted from the DB, using the same ->rejected + detachFireOrder convention as
+       the corrupt-order guard in validateFireOrders. Everything that resolves fire reads
+       $ship->getAllFireOrders(), so one detach removes the order from the priority sort, from
+       automateIntercept's incoming-shot list (defenders must not spend interceptors on a shot that
+       can no longer land) and from every fireWeapons loop. Keeping the row means the replay and
+       combat log of the final turn still show what was launched before the player left, which is
+       the point of keeping a surrendered fleet visible for that turn at all.
+
+       Their INTERCEPT orders need no handling here: interceptors are gathered by
+       getUnassignedInterceptors, which already skips ships whose getTurnDeployed exceeds the
+       current turn - and a surrendered slot reads as 999. Withdrawing whatever is attached is
+       still the right blanket rule: a fleet that has conceded does nothing at all.
+
+       Called from both prepareFiring and preparePreFiring, exactly like the chameleon withdrawal,
+       because Pre-Firing runs its own resolution pass a phase earlier. Idempotent - a second pass
+       finds the orders already detached. */
+    private static function withdrawSurrenderedFireOrders($gamedata)
+    {
+        foreach ($gamedata->ships as $ship) {
+            $slot = $gamedata->getSlotById($ship->slot);
+            if ($slot === null) continue;
+            if ($slot->surrendered === null) continue;
+            //Surrendered on a LATER turn than the one being resolved: this is a past turn being
+            //re-resolved, and the fleet was still playing at the time.
+            if ($slot->surrendered > $gamedata->turn) continue;
+
+            //getAllFireOrders builds a fresh array, so detaching inside the loop is safe.
+            foreach ($ship->getAllFireOrders($gamedata->turn) as $fire) {
+                $fire->rejected = true;
+                self::detachFireOrder($ship, $fire);
+            }
+        }
+    }
 
 	/*actual firing of weapons in normal Firing Phase
 	Marcin Sawicki, October 2017: at this stage, assume all necessary calculations (hit chance, target section), and only raw rolling remains!

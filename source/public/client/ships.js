@@ -1037,8 +1037,22 @@ window.shipManager = {
             var depTurn = slot.depavailable;
 
             if (slot.surrendered !== null) {
-                if (slot.surrendered <= gamedata.turn) { //Surrendered on this turn or before.
-                    depTurn = 999; //Artifically high number, so surrendered ships are no longer shown by game until one full team has surrendered! - DK
+                /* 999 is the "not on the board" sentinel — shouldBeHidden() and every
+                   deployed-yet check key off it, so a surrendered fleet vanishes from the game. - DK
+
+                   The cut-off differs between live play and replay. Live, it is immediate: the
+                   fleet is out the moment it concedes, which is what the server enforces
+                   (BaseShip::getTurnDeployed) and what Firing::withdrawSurrenderedFireOrders
+                   backs up by withdrawing whatever it still had in the air.
+
+                   Replay pushes it out by a turn. The turn a fleet surrendered ON still happened
+                   — its ships moved, fired and were fired at right up to the moment it left — so
+                   erasing it there replayed that turn onto a half-empty board (user report
+                   2026-08-03). Same idea as the isDestroyed line at the top of shouldBeHidden:
+                   replay deliberately shows what live play has already removed. */
+                var goneFromTurn = gamedata.replay ? gamedata.turn : gamedata.turn + 1;
+                if (slot.surrendered < goneFromTurn) {
+                    depTurn = 999;
                 }
             }
             return depTurn;

@@ -234,6 +234,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
                 window.UIManagerInstance = new window.UIManager($("body")[0]);
                 window.UIManagerInstance.PlayerSettings(window.Settings);
                 window.UIManagerInstance.FullScreen();
+                window.UIManagerInstance.Surrender();
                 window.UIManagerInstance.EwButtons();
                 _mark('UIManager (React mounts)');
 
@@ -429,7 +430,6 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
         <table class="uitable">
             <tr>
             <td class="committurn" style="display:none"><div class="ok" ></div></td>
-            <td class="surrender" style="display:none"></td>
             <td class="cancelturn" style="display:none"><div class="cancel" ></div></td>
             </tr>
         </table>
@@ -549,6 +549,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 <div id="systemInfoReact"></div>
 <div id="weaponList"></div>
 <div id="showEwButtons"></div>
+<div id="surrender"></div>
 <div id="fullScreen"></div>
 <div id="playerSettings"></div>
 <div id="shipThrust"></div>

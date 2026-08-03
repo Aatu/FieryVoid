@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import PlayerSettings from "./playerSettings/PlayerSettings";
 import ShipThrust from "./shipThrust/ShipThrust";
 import FullScreen from "./fullScreen/FullScreen";
+import Surrender from "./surrender/Surrender";
 import EwButtons from "./ewButtons/EwButtons";
 import WeaponList from "./system/WeaponList";
 import SystemInfo from "./system/SystemInfo";
@@ -44,6 +45,11 @@ class UIManager {
     FullScreen(args) {
         const root = this.getRoot("#fullScreen");
         if (root) root.render(<FullScreen {...args} />);
+    }
+
+    Surrender(args) {
+        const root = this.getRoot("#surrender");
+        if (root) root.render(<Surrender {...args} />);
     }
 
     PlayerSettings(args) {

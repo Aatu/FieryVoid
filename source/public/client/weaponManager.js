@@ -3335,6 +3335,36 @@ window.weaponManager = {
     },
     */
 
+    /* True once the SERVER has resolved this fire order, i.e. the dice have been rolled and
+       shotshit/needed/damage all mean something. The four callers below use it to decide whether
+       an order may be RENDERED AS A RESULT - a replay fire animation, a combat-log line.
+
+       This replaces `fire.rolled !== 0`, which was right about server data and wrong about the
+       client's own. An order the player has just declared is built as a plain object literal (see
+       setSelfIntercept and the weapon models' equivalents) that carries no `rolled` key at all, so
+       `undefined !== 0` passed the old test and the order was drawn as though it had been fired -
+       with `shotshit` equally absent, printing the literal "NaN/2 shots hit" (user report
+       2026-08-03).
+
+       Those locally-built objects survive far longer than they look like they should: while a
+       player waits, the APCu fast poll answers with a bare "{}" (gamedata.php), which
+       parseServerData discards without reaching setShipsFromJson - so nothing replaces them until
+       the server actually has news. Surrendering mid-wait then puts that same client into
+       ReplayPhaseStrategy over its own never-resolved orders, which Firing::withdrawSurrenderedFireOrders
+       has meanwhile withdrawn server-side. Re-fetching the turn already showed the correct log,
+       which is why the entries vanished on stepping away and back; this closes the window before
+       that fetch. Nothing about the hole is surrender-specific - any replay rendered over
+       unsubmitted local state would have hit the same NaN.
+
+       `> 0` rather than a bare truthy test, to match the server's own convention for the same
+       question (Firing::fireWeapons and the Weapon::fire family gate on `$fire->rolled > 0`, and
+       auto-hit weapons force `max(1, rolled)` purely to satisfy it). Verified equivalent to the
+       old test on real data: across the local corpus every persisted order has `rolled` 0 or
+       positive - never null, never negative - and no order with a recorded hit has `rolled` 0. */
+    isResolvedFireOrder: function isResolvedFireOrder(fire) {
+        return Number(fire.rolled) > 0;
+    },
+
     getAllHexTargetedBallistics: function () {
 
         var results = [];
@@ -3350,7 +3380,7 @@ window.weaponManager = {
                 var fireOrder = fires[f];
 
                 if (fireOrder.targetid !== -1) continue;
-                if (fireOrder.rolled === 0) continue;
+                if (!weaponManager.isResolvedFireOrder(fireOrder)) continue;
 
                 var weapon = shipManager.systems.getSystem(shooter, fireOrder.weaponid);
 
@@ -3391,7 +3421,7 @@ window.weaponManager = {
                 return fire.targetid === target.id && (fire.type === "prefiring");
             }));
         }, []).filter(function (fire) {
-            return fire.rolled !== 0;
+            return weaponManager.isResolvedFireOrder(fire);
         }).map(function (fireOrder) {
             var shooter = gamedata.getShip(fireOrder.shooterid);
             return {
@@ -3435,7 +3465,7 @@ window.weaponManager = {
                 return fire.targetid === target.id && (fire.type === "normal" || fire.type === "ballistic");
             }));
         }, []).filter(function (fire) {
-            return fire.rolled !== 0;
+            return weaponManager.isResolvedFireOrder(fire);
         }).map(function (fireOrder) {
             var shooter = gamedata.getShip(fireOrder.shooterid);
             return {
@@ -3836,7 +3866,7 @@ window.weaponManager = {
 
         // ✅ Combined filter: only keep orders from the given turn that have been rolled
         fires = fires.filter(function (fireOrder) {
-            return fireOrder.turn == turn && fireOrder.rolled !== 0;
+            return fireOrder.turn == turn && weaponManager.isResolvedFireOrder(fireOrder);
         });
 
         return fires;

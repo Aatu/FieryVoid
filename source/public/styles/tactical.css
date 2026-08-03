@@ -1444,10 +1444,10 @@ only screen and (max-height: 500px) and (orientation: landscape) {
         right: 5px;
     }
 
-    /* Scale down OK/Cancel/Surrender buttons if they appear in the phase header */
+    /* Scale down OK/Cancel buttons if they appear in the phase header.
+       (Surrender left this table on 2026-08-03 — it is a top-right HUD button now.) */
     #phaseheader .ok,
-    #phaseheader .cancel,
-    #phaseheader .surrender {
+    #phaseheader .cancel {
         width: 18px;
         height: 18px;
         background-size: cover;
@@ -1562,7 +1562,7 @@ only screen and (max-height: 500px) and (orientation: landscape) {
    which toggles .large), matching portrait behaviour. */
 @media only screen and (max-height: 500px) and (orientation: landscape) {
     /* Phase header — mirror the portrait mobile sizing (shorter bar, smaller
-       fonts, hidden finished/notlogged, scaled OK/Cancel/Surrender) so it
+       fonts, hidden finished/notlogged, scaled OK/Cancel) so it
        doesn't render at full desktop size in landscape. */
     #phaseheader {
         width: auto;
@@ -1599,8 +1599,7 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     }
 
     #phaseheader .ok,
-    #phaseheader .cancel,
-    #phaseheader .surrender {
+    #phaseheader .cancel {
         width: 18px;
         height: 18px;
         background-size: cover;

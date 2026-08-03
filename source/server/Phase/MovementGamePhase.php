@@ -414,24 +414,39 @@ class MovementGamePhase implements Phase
         }
     }
 
-    private function setNextActiveShip(TacGamedata $gameData, DBManager $dbManager) {
+    //Public rather than private since Aug 2026: Manager::handOverMovementActivation calls it to
+    //pass the activation on when the player holding it surrenders mid-phase.
+    public function setNextActiveShip(TacGamedata $gameData, DBManager $dbManager) {
         $next = false;
         $nextship = null;
         $firstship = null;
         foreach ($gameData->ships as $ship){
-            if($ship->isTerrain()) continue; //Ignore terrain like asteroids.
-            if($ship->mine) continue; //Ignore mines
-            if($ship->getTurnDeployed($gameData) > $gameData->turn) continue;
-            if ($firstship == null)
-                $firstship = $ship;
+            /* Whether this is the ship we are handing over FROM is decided independently of the
+               eligibility guards below, because the holder of the activation can itself have
+               become ineligible: a fleet whose player surrenders mid-phase starts reading as
+               undeployed (BaseShip::getTurnDeployed returns 999). Skipping the marker in that
+               case made the walk fall off the end of the list and advance() the entire Movement
+               Phase, cutting every remaining player's movement short. Ordering within the loop
+               body is otherwise unchanged - the marker is still set AFTER the successor test, so
+               a ship can never be handed the activation it already holds. */
+            $isCurrent = ($ship->id == $gameData->activeship);
 
-            //isDestroyed() also covers Hangar Ops $removed flights — see BaseShip::isDestroyed
-            if ($next && !$ship->isDestroyed() && !$ship->unavailable){
-                $nextship = $ship;
-                break;
+            $eligible = !$ship->isTerrain()     //Ignore terrain like asteroids.
+                && !$ship->mine                 //Ignore mines
+                && $ship->getTurnDeployed($gameData) <= $gameData->turn;
+
+            if ($eligible) {
+                if ($firstship == null)
+                    $firstship = $ship;
+
+                //isDestroyed() also covers Hangar Ops $removed flights — see BaseShip::isDestroyed
+                if ($next && !$ship->isDestroyed() && !$ship->unavailable){
+                    $nextship = $ship;
+                    break;
+                }
             }
 
-            if ($ship->id == $gameData->activeship)
+            if ($isCurrent)
                 $next = true;
         }
 

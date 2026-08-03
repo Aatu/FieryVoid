@@ -1989,14 +1989,11 @@ getActiveShipName: function getActiveShipName() {
         $(".committurn").hide();
     },
 
-    showSurrenderButton: function showSurrenderButton() {
-        $(".surrender").on('click', gamedata.onSurrenderClicked).show();
-    },
-
-    hideSurrenderButton: function hideSurrenderButton() {
-        $(".surrender").off('click', gamedata.onSurrenderClicked).hide();
-    },
-
+    /* showSurrenderButton/hideSurrenderButton are GONE (2026-08-03). Surrender is no longer a
+       cell in the Initial Orders phase header that a phase strategy shows and hides — it is a
+       permanent top-right HUD button (reactJs/surrender/Surrender.js) that decides its own
+       visibility. Note that the old helpers bound on the bare `.surrender` selector, which also
+       matched the surrender div inside confirm.confirmOrSurrender's dialog. */
 
     checkGameStatus: function checkGameStatus() {
 
@@ -2047,6 +2044,29 @@ getActiveShipName: function getActiveShipName() {
             gamedata.waiting = serverdata.waiting;
         }
         gamedata.status = serverdata.status;
+
+        /* A surrendered/finished game is frozen — nothing on the server can change again, so
+           there is nothing left to poll for. Not merely an optimisation: the poll would
+           otherwise run to its 300-request cap, because pollGamedata's `waiting == false` exit
+           can never fire once the game ends. PhaseDirector puts everyone into
+           ReplayPhaseStrategy at that point, which sets gamedata.replay, and the block just
+           above deliberately stops refreshing gamedata.waiting while replay is on — so
+           `waiting` stays pinned at the true that goToWaiting() set on submit.
+
+           Worse than the wasted requests: each live response rewinds gamedata.turn to the LIVE
+           turn while ReplayPhaseStrategy is showing an earlier one, and its update() answers by
+           re-fetching that turn from replay.php, which sets gamedata.turn back again — the two
+           fetches then ping-pong for as long as the poll keeps feeding them.
+
+           Keyed on the SERVER's status, deliberately, and placed here rather than in
+           pollGamedata: doSurrender() sets gamedata.status optimistically before the POST (it
+           has to — construcGamedata reads it into the payload), and in a 3+ team game one team
+           folding does NOT end the match. Trusting the local value would strand that player's
+           client on a stale board. */
+        if (gamedata.status === "SURRENDERED" || gamedata.status === "FINISHED") {
+            ajaxInterface.stopPolling();
+        }
+
         gamedata.elintShips = Array();
         gamedata.gamespace = serverdata.gamespace;
         gamedata.blockedHexes = serverdata.blockedHexes;
