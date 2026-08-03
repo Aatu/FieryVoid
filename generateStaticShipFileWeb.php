@@ -244,8 +244,35 @@ $genLog("streamed {$shipCount} ships across " . count($factionOrder) . ' faction
  *
  * TO RESTORE: un-comment the three blocks marked [shipsCombined] in this file (and the
  * matching ones in generateStaticShipFile.php), then re-enable the include in game.php /
- * gamelobby.php. The .htaccess brotli rewrite already handles shipsCombined.js.br, so
- * nothing is needed there.
+ * gamelobby.php.
+ *
+ * ALSO NEEDED IF RESTORING: source/public/.htaccess no longer has the rule that serves a
+ * pre-compressed .js.br. It was removed in 08.2026 because retiring this bundle left it
+ * with nothing to act on — a plain static .js is the only thing it ever matched, and there
+ * are none being pre-compressed. Restoring the bundle without it means visitors get the
+ * mod_deflate gzip copy (~5x bigger than the .br sitting next to it). The rule was:
+ *
+ *   <IfModule mod_rewrite.c>
+ *     RewriteEngine On
+ *     RewriteCond %{HTTP:Accept-Encoding} br
+ *     RewriteCond %{REQUEST_FILENAME}.br -f
+ *     RewriteRule ^(.+\.js)$ $1.br [QSA,L]
+ *   </IfModule>
+ *   <FilesMatch "\.js\.br$">
+ *     ForceType application/javascript
+ *     SetEnv no-gzip 1
+ *     <IfModule mod_headers.c>
+ *       Header set Content-Encoding br
+ *       Header append Vary Accept-Encoding
+ *       Header set X-LiteSpeed-No-Gzip "1"
+ *     </IfModule>
+ *   </FilesMatch>
+ *
+ * and the bundle cache rule needs to become <FilesMatch "\.bundle\.js(\.br)?$"> so a
+ * rewritten .br keeps its immutable Cache-Control instead of falling back to 1 month.
+ *
+ * (None of this affects the per-faction JSON: gamelobbyloader.php serves that .br itself
+ * in PHP and never depended on .htaccess.)
  *
  * [shipsCombined] 1/3 — open + seed the bundle
  * $combinedHandle = fopen($combinedFile, 'wb');
@@ -327,24 +354,36 @@ $genLog('all factions written');
 // There is no shell on this shared host, so this page IS the diagnostics. It answers
 // two questions on every deploy:
 //   1. did pre-compression actually RUN (is the extension present, were .br written)?
-//   2. how much is it saving versus the mod_deflate gzip we had before?
+//   2. how much is it saving versus the runtime brotli q4 we had before?
 //
-// It canNOT tell you whether the server is SERVING the .br — that depends on the
-// mod_rewrite block in source/public/.htaccess and on gamelobbyloader.php, and is only
-// observable from the client. Check that in the browser: DevTools > Network > open a
-// faction in the lobby > the gamelobbyloader.php request > Response Headers >
-// "content-encoding: br". See the note printed below.
+// It canNOT tell you whether the server is SERVING the .br — that is entirely up to
+// gamelobbyloader.php's own .br branch, and is only observable from the client. Check it
+// in the browser: DevTools > Network > open a faction in the lobby > the
+// gamelobbyloader.php request > Response Headers > "content-encoding: br", and watch the
+// transferred size drop. See the note printed below.
 echo "<br/><br/><strong>Brotli pre-compression</strong>:<br/>\n";
 if ($brCount === 0) {
-    $why = (!function_exists('brotli_compress_init') || !function_exists('brotli_compress_add'))
-        ? 'the brotli PHP extension (or its incremental API) is NOT available on this host'
-        : 'the extension is present but no .br file was written — check directory permissions';
+    $missingFn    = !function_exists('brotli_compress_init') || !function_exists('brotli_compress_add');
+    $missingConst = !defined('BROTLI_TEXT') || !defined('BROTLI_PROCESS') || !defined('BROTLI_FINISH');
+    if ($missingFn) {
+        $why = 'the brotli extension\'s incremental API (brotli_compress_init/_add) is NOT available';
+    } elseif ($missingConst) {
+        $why = 'the functions exist but the BROTLI_* constants do not — this binding names them '
+             . 'differently, so tell whoever maintains this and the call can be adapted';
+    } else {
+        $why = 'the extension is present but no .br file was written — check directory permissions';
+    }
     echo " &nbsp; - <strong>NOT active</strong>: $why.<br/>\n";
-    echo " &nbsp; &nbsp; Faction JSON will still be gzipped on the fly, exactly as before — "
-       . "nothing is broken, you are simply not getting the extra saving.<br/>\n";
+    echo " &nbsp; &nbsp; Faction JSON is still compressed on the fly by compression_helper.php "
+       . "(brotli q4), exactly as before — nothing is broken, you are simply not getting the "
+       . "extra ~26% saving or the per-request CPU back.<br/>\n";
     echo " &nbsp; &nbsp; brotli_compress(): " . (function_exists('brotli_compress') ? 'yes' : 'no')
        . " &nbsp; brotli_compress_init(): " . (function_exists('brotli_compress_init') ? 'yes' : 'no')
        . " &nbsp; brotli_compress_add(): " . (function_exists('brotli_compress_add') ? 'yes' : 'no')
+       . " &nbsp; BROTLI_TEXT/PROCESS/FINISH: "
+       . (defined('BROTLI_TEXT') ? 'yes' : 'no') . '/'
+       . (defined('BROTLI_PROCESS') ? 'yes' : 'no') . '/'
+       . (defined('BROTLI_FINISH') ? 'yes' : 'no')
        . "<br/>\n";
 } else {
     printf(" &nbsp; - <strong>ACTIVE</strong>: %d of %d faction files pre-compressed.<br/>\n",

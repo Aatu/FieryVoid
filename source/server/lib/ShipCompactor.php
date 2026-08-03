@@ -183,11 +183,10 @@ class ShipCompactor
      * measurable difference on this data, so PHP's binding exposing no lgwin costs nothing.
      *
      * STALE-FILE SAFETY: the .br is unlinked FIRST and only replaced via an atomic rename at
-     * the very end. A leftover .br from a previous run would be served in preference to the
-     * freshly written source (by the mod_rewrite block in source/public/.htaccess, or by
-     * gamelobbyloader.php) — i.e. every visitor would silently get OLD ship data while the
-     * source file on disk looked current. Failing closed (no .br, gzip fallback) is always
-     * correct; a stale .br is not.
+     * the very end. A leftover .br from a previous run would be served by gamelobbyloader.php
+     * in preference to the freshly written .json — i.e. every visitor would silently get OLD
+     * ship data while the source file on disk looked current. Failing closed (no .br, so the
+     * existing runtime compression handles it) is always correct; a stale .br is not.
      *
      * Returns the .br path on success, or null if the brotli extension is unavailable (the
      * Docker/dev box has no brotli — callers then simply fall back to gzip).
@@ -195,7 +194,15 @@ class ShipCompactor
     public static function precompressBrotli(string $path, int $quality = 9): ?string
     {
         @unlink($path . '.br');
-        if (!function_exists('brotli_compress_init') || !function_exists('brotli_compress_add')) {
+
+        // Check the CONSTANTS as well as the functions. Under PHP 8 a missing constant is a
+        // fatal Error, not a notice — and this runs inside the deploy generator, so a fatal
+        // here would abort the whole run partway through, leaving some faction files written
+        // and others not. Different brotli bindings do not all expose the same constant
+        // names, so verify rather than assume. If anything is missing we return null and the
+        // caller silently keeps its existing runtime compression.
+        if (!function_exists('brotli_compress_init') || !function_exists('brotli_compress_add')
+            || !defined('BROTLI_TEXT') || !defined('BROTLI_PROCESS') || !defined('BROTLI_FINISH')) {
             return null;
         }
         if (!is_readable($path)) {

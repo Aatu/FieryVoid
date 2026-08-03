@@ -29,43 +29,6 @@
   Header append Vary User-Agent
 </IfModule>
 
-# ── Pre-compressed (Brotli) static assets ───────────────────────────────────────
-# generateStaticShipFileWeb.php writes shipsCombined.js AND shipsCombined.js.br (see
-# precompressBrotli() there). Serve the .br to clients that advertise support for it.
-#
-# This is TRANSPARENT: static/ships.php still emits <script src="static/shipsCombined.js">,
-# and the rewrite swaps in the .br server-side. Nothing on the client changes.
-#
-# Why pre-built rather than compressing on the fly: the bundle only changes on deploy, so
-# compressing once at generation time buys a much higher quality level than a per-request
-# filter could afford. Measured on this data, gzip -6 gives 281KB per 4.34MB where brotli
-# q9 gives 39KB — roughly 7x smaller, for zero per-request CPU.
-#
-# The `-f` test means a missing .br (e.g. the Docker/dev box, which has no brotli
-# extension) simply falls through to the plain .js + mod_deflate gzip above.
-<IfModule mod_rewrite.c>
-  RewriteEngine On
-  RewriteCond %{HTTP:Accept-Encoding} br
-  RewriteCond %{REQUEST_FILENAME}.br -f
-  RewriteRule ^(.+\.js)$ $1.br [QSA,L]
-</IfModule>
-
-# The rewritten .br is a raw brotli stream. It must be labelled with the ORIGINAL media
-# type plus Content-Encoding: br, and must not be compressed a second time.
-#   - Vary is mandatory: without it a proxy/CDN can hand the brotli body to a client that
-#     never asked for it.
-#   - no-gzip / X-LiteSpeed-No-Gzip stop mod_deflate (and LiteSpeed's own static
-#     compression) from gzipping an already-compressed body.
-<FilesMatch "\.js\.br$">
-  ForceType application/javascript
-  SetEnv no-gzip 1
-  <IfModule mod_headers.c>
-    Header set Content-Encoding br
-    Header append Vary Accept-Encoding
-    Header set X-LiteSpeed-No-Gzip "1"
-  </IfModule>
-</FilesMatch>
-
 <IfModule mod_expires.c>
   ExpiresActive On
 
@@ -94,13 +57,7 @@
 # Long-term Caching for Bundled Assets
 # These assets are versioned via PHP (e.g. game.legacy.bundle.js?v=TIMESTAMP)
 # So we can safely cache them "forever" with the immutable flag.
-#
-# The optional (\.br)? matters: the Brotli rewrite above rewrites the request to
-# <name>.js.br, and Header/Expires directives are matched against the REWRITTEN
-# filename. Without it, pre-compressing a bundle would silently drop it from this
-# immutable rule down to the generic 1-month expiry. No bundle .br exists today —
-# this just makes the rule correct in advance if one ever does.
-<FilesMatch "\.bundle\.js(\.br)?$">
+<FilesMatch "\.bundle\.js$">
   <IfModule mod_headers.c>
     Header set Cache-Control "max-age=31536000, public, immutable"
   </IfModule>
