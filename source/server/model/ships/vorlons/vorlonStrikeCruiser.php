@@ -55,12 +55,20 @@ class VorlonStrikeCruiser extends VorlonCapitalShip{
 		$this->addAftSystem(new GraviticThruster(5, 20, 0, 7, 2));
 		
 		$GunA = new VorlonLightningGun(5, 0, 0, 240, 60, 'L', 'A');
-		$GunA2 = new VorlonLightningGun2(5, 0, 0, 240, 60, 'L', 'A'); 
+		$GunA->overkillArcStructures = array(1, 32);
+		$GunA->setStructureHome(array(1, 32));
+		$GunA2 = new VorlonLightningGun2(5, 0, 0, 240, 60, 'L', 'A');
+		$GunA2->overkillArcStructures = array(1, 32);
+		$GunA2->setStructureHome(array(1, 32)); 
 		$GunA->addMirror($GunA2);
 		$this->addLeftFrontSystem($GunA);
 		$this->addLeftFrontSystem($GunA2);
 		$GunB = new VorlonLightningGun(5, 0, 0, 240, 60, 'L', 'B');
+		$GunB->overkillArcStructures = array(1, 32);
+		$GunB->setStructureHome(array(1, 32));
 		$GunB2 = new VorlonLightningGun2(5, 0, 0, 240, 60, 'L', 'B'); 
+		$GunB2->overkillArcStructures = array(1, 32);
+		$GunB2->setStructureHome(array(1, 32));
 		$GunB->addMirror($GunB2);
 		$this->addLeftFrontSystem($GunB);
 		$this->addLeftFrontSystem($GunB2);
@@ -69,12 +77,20 @@ class VorlonStrikeCruiser extends VorlonCapitalShip{
         $this->addLeftSystem(new GraviticThruster(5, 20, 0, 6, 3));
 		
 		$GunC = new VorlonLightningGun(5, 0, 0, 300, 120, 'R', 'C');
+		$GunC->overkillArcStructures = array(1, 42);
+		$GunC->setStructureHome(array(1, 42));
 		$GunC2 = new VorlonLightningGun2(5, 0, 0, 300, 120, 'R', 'C'); 
+		$GunC2->overkillArcStructures = array(1, 42);
+		$GunC2->setStructureHome(array(1, 42));
 		$GunC->addMirror($GunC2);
 		$this->addRightFrontSystem($GunC);
 		$this->addRightFrontSystem($GunC2);
 		$GunD = new VorlonLightningGun(5, 0, 0, 300, 120, 'R', 'D');
+		$GunD->overkillArcStructures = array(1, 42);
+		$GunD->setStructureHome(array(1, 42));
 		$GunD2 = new VorlonLightningGun2(5, 0, 0, 300, 120, 'R', 'D'); 
+		$GunD2->overkillArcStructures = array(1, 42);
+		$GunD2->setStructureHome(array(1, 42));
 		$GunD->addMirror($GunD2);
 		$this->addRightFrontSystem($GunD);
 		$this->addRightFrontSystem($GunD2);
@@ -115,13 +131,13 @@ class VorlonStrikeCruiser extends VorlonCapitalShip{
 			),
 			32=> array( //Fwd
 				6 => "Thruster",
-				10 => "TAG:Lightning Gun",
+				10 => "31:Lightning Gun",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			42=> array( //Fwd
 				6 => "Thruster",
-				10 => "TAG:Lightning Gun",
+				10 => "41:Lightning Gun",
 				18 => "Structure",
 				20 => "Primary",
 			),

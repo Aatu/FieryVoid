@@ -5217,7 +5217,7 @@ class KirishiacOrbital extends ShipSystem{
 	while still docking to the front/aft structure block - destruction coupling, docked merge,
 	regeneration and SelfRepair all follow the home block, not the display section*/
 	public function setStructureHome($location){
-		$this->structureHomeLocation = $location;
+		parent::setStructureHome($location);
 		if ($this->pairedWeapon !== null) $this->pairedWeapon->structureHomeLocation = $location;
 	}
 
