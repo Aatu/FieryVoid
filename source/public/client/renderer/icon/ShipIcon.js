@@ -53,27 +53,7 @@ window.ShipIcon = function () {
         this.ship = ship;
         this.consumeMovement(ship.movement);
         this.consumeEW(ship);
-        //STAGE4-RETIRED this.createShipWindow(ship);
     };
-
-    /* STAGE4-RETIRED legacy status-window re-link (the legacy window DOM no longer
-       exists on any page). Delete once the redesign is stable on live.
-    ShipIcon.prototype.createShipWindow = function (ship) {
-        // Lazy: build the (expensive) legacy DOM status window only when it is first
-        // opened (shipWindowManager.open / ensureShipWindow). At load and on each turn
-        // refresh we only re-link to an already-built window — if a ship's window has
-        // never been opened, ship.shipStatusWindow stays null and setData no-ops.
-        // This removes the per-ship DOM build that blocked first paint in large games.
-        var element = jQuery(".shipwindow.ship_" + ship.id);
-
-        if (element.length) {
-            ship.shipStatusWindow = element;
-            shipWindowManager.setData(ship);
-        } else {
-            ship.shipStatusWindow = null;
-        }
-    };
-    */
 
     ShipIcon.prototype.setPosition = function (position) {
         this.mesh.position.x = position.x;
@@ -165,8 +145,47 @@ window.ShipIcon = function () {
     };
 
 
+    /* Below zoom 0.5 the zoom handler shrinks the whole icon (ShipIconContainer.applyZoomToIcon) so
+       ships don't balloon on screen when you zoom right in. Anything measured in GRID units rather
+       than icon units has to sit that out, or it silently lies about how far it reaches: a weapon's
+       10-hex arc drew as 4 hexes at full zoom-in, and the straight-arc hex highlights stopped lining
+       up with the grid they are drawn on top of.
+
+       Such children are flagged with a gridLockedOffset (their offset from the icon in game units)
+       and get the icon's scale cancelled back out here. The offset is divided too: a child's local
+       position is multiplied by the parent's scale just as its geometry is. Routed through setScale
+       because that is the single funnel for the icon's scale, so the correction can never go stale
+       while an overlay is on screen and the player zooms.
+
+       Anything sized in ICON units stays out of this - the thruster icons and the direction arrows
+       are part of the ship's iconography and are meant to shrink with it. */
+    function normaliseGridLockedChildren(mesh) {
+        var scaleX = mesh.scale.x || 1;
+        var scaleY = mesh.scale.y || 1;
+
+        mesh.children.forEach(function (child) {
+            var offset = child.userData.gridLockedOffset;
+
+            if (!offset) return;
+
+            child.scale.set(1 / scaleX, 1 / scaleY, 1);
+            child.position.x = offset.x / scaleX;
+            child.position.y = offset.y / scaleY;
+        });
+    }
+
+    /* Add an overlay whose size means something in hexes, so it holds that size however the icon is
+       rescaled. offset is the overlay's position relative to the icon in game units - omit it for
+       "centred on the icon", which is what every range overlay wants. */
+    function addGridLockedOverlay(mesh, overlay, offset) {
+        overlay.userData.gridLockedOffset = offset || { x: 0, y: 0 };
+        mesh.add(overlay);
+        normaliseGridLockedChildren(mesh);
+    }
+
     ShipIcon.prototype.setScale = function (width, height) {
         this.mesh.scale.set(width, height, 1);
+        normaliseGridLockedChildren(this.mesh);
     };
 
     ShipIcon.prototype.consumeEW = function (ship) {
@@ -364,7 +383,39 @@ window.ShipIcon = function () {
 
         var movesByHexAndTurn = [];
 
-        if (movements && movements.length > 0 && movements[0]) {
+        /* Defensive normalisation. PHP's json_encode emits a JSON OBJECT rather than an
+           array whenever the server-side movement array has gaps in its integer keys -
+           i.e. any unset() that wasn't followed by array_values() (TacGamedata's hide*
+           helpers strip an enemy's in-progress moves while keeping start/deploy markers
+           and the Gravitic Augmenter's transient forced jink, which sits LAST). An object
+           has no .filter, so a single affected ship used to throw out of createIcon and
+           abort setShips' whole loop - the board came up empty. Object.values() walks
+           integer-like keys in ascending order, so the move order is preserved and a
+           server slip degrades to a correctly ordered array instead of a dead board.
+           Both branches warn: this should never happen, and we want it in the console. */
+        if (movements && !Array.isArray(movements) && typeof movements === 'object') {
+            console.warn('ShipIcon.consumeMovement: ship ' + this.shipId +
+                ' received movement as an object (gappy server array?); coercing.', movements);
+
+            var normalised = Object.values(movements);
+            // Also repair the shared gamedata ship, otherwise every array-only consumer
+            // (shipManager.movement's .length/.splice, ajaxInterface.construcGamedata,
+            // the attached-pod mirroring in PhaseStrategy) still trips over the object.
+            if (this.ship && this.ship.movement === movements) {
+                this.ship.movement = normalised;
+            }
+            movements = normalised;
+        }
+
+        if (!Array.isArray(movements)) {
+            if (movements !== undefined && movements !== null) {
+                console.warn('ShipIcon.consumeMovement: ship ' + this.shipId +
+                    ' received unusable movement; treating as empty.', movements);
+            }
+            movements = [];
+        }
+
+        if (movements.length > 0 && movements[0]) {
             this.defaultPosition = {
                 turn: movements[0].turn,
                 facing: movements[0].facing,
@@ -587,51 +638,55 @@ window.ShipIcon = function () {
     }
 
     ShipIcon.prototype.showWeaponArc = function (ship, weapon) {
-        if (!(weapon instanceof Weapon) && !(weapon instanceof Thruster) && !(weapon instanceof Shield)) return null; // Only show arcs for weapons
+        if (!(weapon instanceof Weapon) && !(weapon instanceof Thruster) && !(weapon.defensiveSystem)) return null; // Only show arcs for weapons
         if(weapon.stowed && weapon.stowedArcStart == null) return null; //stowed weapon with no stowed arc (Kirishiac Orbital docked) - non-operational, no arc to show. A stowed arc set (Heavy Orbital) keeps the weapon live: draw its current (reduced) arc.
 
         var hexDistance = window.coordinateConverter.getHexDistance();
 
+        //Drawn BEFORE the firing-arc branches, because one of them can bail out early: a linked-fire
+        //wedge that doesn't overlap a jammed turret's arc means nothing can be FIRED at, but the
+        //weapon can still intercept, so its intercept wedge must survive that return.
+        this.showInterceptArc(ship, weapon);
+
         if (weapon instanceof Thruster) {
 
             this.showThrusterIcon(ship, weapon); //Creates small thruster icon on relevant side of ship on hover over system.
+
+        } else if (weapon.defensiveSystem) {
+            //Shields are BEARING-based, not ranged: the wedge only says which way the shield faces,
+            //and there is no reach in hexes to map onto the grid (a Shield is a ShipSystem, so it has
+            //neither range nor rangePenalty). It keeps the smooth wedge it always had, at the same
+            //one-hex radius the old NaN fallback gave it - which now also reads as a deliberate
+            //distinction on screen: hex-edged means "these hexes are in reach", smooth means "this
+            //way is covered, at any range".
+            this.showCircularArc(SHIELD_ARC_RADIUS, shipManager.systems.getArcs(ship, weapon), SHIELD_ARC_COLOUR,
+                {
+                    fillOpacity: SHIELD_ARC_COLOUR_OPACITY,
+                    borderColour: SHIELD_ARC_BORDER_COLOUR,
+                    borderOpacity: SHIELD_ARC_BORDER_OPACITY
+                });
 
         } else if (weapon.shootsStraight) { //Some weapons can only fire in straight lines e.g. Transverse Drive.  Show rectangular arcs along hex lines instead.
             var arcs = shipManager.systems.getArcs(ship, weapon);
             this.showStraightArcs(weapon, hexDistance, arcs);
 
         } else if (weapon.splitArcs) { //Some weapons might have two separate arcs, like Shadow Battlecruiser.
-            var dis = weapon.rangePenalty === 0 ? hexDistance * weapon.range : 50 / weapon.rangePenalty * hexDistance;
-            if (isNaN(dis) || !isFinite(dis)) dis = hexDistance; // Fallback for non-weapon systems without rangePenalty
-            if (weapon.range > 0 && dis > hexDistance * weapon.range) dis = hexDistance * weapon.range;
-            var allArcs = shipManager.systems.getMultipleArcs(ship, weapon);
-
-            for (const arcs of allArcs) {
-                var arcLength = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
-                var arcStart = mathlib.addToDirection(0, arcLength * -0.5);
-                var arcFacing = mathlib.addToDirection(arcs.end, arcLength * -0.5);
-                var geometry = new THREE.CircleGeometry(dis, 32, mathlib.degreeToRadian(arcStart), mathlib.degreeToRadian(arcLength));
-                var material = new THREE.MeshBasicMaterial({ color: new THREE.Color("rgb(20,80,128)"), opacity: 0.5, transparent: true });
-                var circle = new THREE.Mesh(geometry, material);
-                circle.rotation.z = mathlib.degreeToRadian(-mathlib.addToDirection(arcFacing, -this.getFacing()));
-                circle.position.z = -1;
-                this.mesh.add(circle);
-                this.weaponArcs.push(circle);
-            }
+            //One overlay for BOTH arcs rather than one per arc: the arcs are separate regions of the
+            //same set of reachable hexes, and drawing them as one keeps any hexes they share from
+            //being filled - and so alpha-blended - twice.
+            this.showRangeArc(getWeaponReachInHexes(weapon), hexDistance, shipManager.systems.getMultipleArcs(ship, weapon), "rgb(20,80,128)");
 
         } else { //Normal weapons with circular weapon arcs
-            var dis = weapon.rangePenalty === 0 ? hexDistance * weapon.range : 50 / weapon.rangePenalty * hexDistance;
-            if (isNaN(dis) || !isFinite(dis)) dis = hexDistance; // Fallback for non-weapon systems without rangePenalty
-            if (weapon.range > 0 && dis > hexDistance * weapon.range) dis = hexDistance * weapon.range;
             var arcs = shipManager.systems.getArcs(ship, weapon);
             var arcColour = "rgb(20,80,128)";
+            var arcFillOpacity = ARC_FILL_OPACITY;
 
             //Firing-link reduced arc (e.g. Vree turret): if this weapon shares an angular-spread
             //group and any member has declared fire this turn (a sibling, OR this weapon itself once
             //its own order is locked), it can now only bear within linkedFiringSpread degrees of that
             //target. Draw that reduced wedge in a distinct amber colour so the restriction is visible
             //on hover. The wedge is centred on the target's bearing and expressed in the same
-            //ship-frame as getArcs(), so the existing rotation maths below renders it correctly.
+            //ship-frame as getArcs(), so it drops straight into the same arc test as any other arc.
             //
             //A weapon can be under BOTH restrictions at once: a turret that has JAMMED (ReducedArcs
             //critical - the server sends the reduced startArc/endArc) is no longer a full circle, and
@@ -646,30 +701,317 @@ window.ShipIcon = function () {
                 var centreBearing = weaponManager.getLinkedGroupDeclaredBearing(ship, weapon);
                 if (centreBearing !== null) {
                     var spread = weapon.linkedFiringSpread;
-                    var centreRel = mathlib.addToDirection(centreBearing, -this.getFacing());
+                    //Rounded facing - see showTargetedHexagonInArc: getFacing() round-trips through
+                    //radians, and dust on an arc BOUND silently drops the hexes sitting exactly on it.
+                    var centreRel = mathlib.addToDirection(centreBearing, -Math.round(this.getFacing()));
                     var wedge = { start: mathlib.addToDirection(centreRel, -spread), end: mathlib.addToDirection(centreRel, spread) };
                     arcs = baseArcLength >= 360 ? wedge : intersectArcs(arcs, wedge);
                     if (!arcs) return null; //restricted arc and link wedge don't overlap - nothing can be fired at
-                    arcColour = "rgb(170,95,25)"; //amber: reduced (linked) arc
+                    arcColour = REDUCED_ARC_COLOUR; //amber: reduced (linked) arc
+                    arcFillOpacity = REDUCED_ARC_FILL_OPACITY;
                 }
             }
 
-            var arcLength = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
-            var arcStart = mathlib.addToDirection(0, arcLength * -0.5);
-            var arcFacing = mathlib.addToDirection(arcs.end, arcLength * -0.5);
-
-            var geometry = new THREE.CircleGeometry(dis, 32, mathlib.degreeToRadian(arcStart), mathlib.degreeToRadian(arcLength));
-            var material = new THREE.MeshBasicMaterial({ color: new THREE.Color(arcColour), opacity: 0.5, transparent: true });
-            var circle = new THREE.Mesh(geometry, material);
-            circle.rotation.z = mathlib.degreeToRadian(-mathlib.addToDirection(arcFacing, -this.getFacing()));
-            circle.position.z = -1;
-            this.mesh.add(circle);
-            this.weaponArcs.push(circle);
-
+            this.showRangeArc(getWeaponReachInHexes(weapon), hexDistance, [arcs], arcColour, arcFillOpacity);
         }
 
         return null;
     };
+
+    /* A weapon's reach in whole hexes. A range penalty caps the useful reach at the point the penalty
+       would reach 50, and weapon.range caps it again when it is set. Systems that land in the arc code
+       without being weapons at all (shields) have neither, and fall back to a single hex as they always
+       did. 0 means "no reach at all" - e.g. a Warp Jump whose nacelle damage has taken its range to
+       0 - and the callers draw nothing for it. */
+    function getWeaponReachInHexes(weapon) {
+        var maxHexes = weapon.rangePenalty === 0 ? weapon.range : Math.floor(50 / weapon.rangePenalty);
+
+        if (weapon.range > 0 && maxHexes > weapon.range) maxHexes = weapon.range;
+
+        maxHexes = Math.floor(maxHexes);
+        if (isNaN(maxHexes) || !isFinite(maxHexes)) maxHexes = 1;
+
+        return maxHexes < 1 ? 0 : maxHexes;
+    }
+
+    /* How far a weapon arc is drawn, at most. Reach is very often nominal rather than real: a
+       weapon with no declared range and a -1/2 hex penalty works out at 50 hexes, one at -1/4 at 200,
+       and the TestLaser in customs.php at -0.1/hex comes to 500. Those are "no practical range limit"
+       dressed up as a number, and drawing them literally means sweeping a quarter of a million grid
+       positions for an arc whose far side is several screens off the map.
+
+       60 hexes is past any engagement that happens on an FV map, so a weapon that nominally reaches
+       further simply has its arc drawn to here. The point of the cap is not just cost: it is what
+       lets EVERY ranged weapon be hex-mapped, so there is no second, smooth-edged look to jar
+       against. The smooth wedge is reserved for the BEARING-based overlays - shields, the intercept
+       envelope, the structure sections - where it says something different on purpose. */
+    var MAX_ARC_HEXES = 60;
+
+    /* ---- Hex-edged range-arc strengths. THESE ARE THE KNOBS ---------------------------------
+       The colour itself is opaque (THREE.Color has no alpha - see the note further down), so how
+       strong an arc looks on the map is these opacities, not the rgb(). 0 = invisible fill,
+       1 = solid; raise for a stronger arc, lower for a fainter one.
+
+       The reduced (linked / jammed) arc is filled fainter than the normal one on purpose: amber
+       over the dark map reads a good deal hotter than cobalt does at the same alpha, so matching
+       the numbers would NOT match the apparent brightness. Its outline stays at the shared border
+       opacity, which is what keeps the restricted wedge crisply readable while its fill is quiet. */
+    var ARC_FILL_OPACITY = 0.4;                     //normal (cobalt) firing arc
+    var ARC_BORDER_OPACITY = 0.8;                   //outline of every hex-edged arc, in the arc's own colour
+    var REDUCED_ARC_COLOUR = "rgb(170,95,25)";      //amber: this weapon's arc is restricted this turn
+    var REDUCED_ARC_FILL_OPACITY = 0.3;             //fainter than ARC_FILL_OPACITY - see above
+
+    /* A ranged weapon's arc, as the grid hexes it covers. arcsList is one or more ship-frame arcs -
+       a split-arc mount hands both over at once, so its two regions share a single overlay and any
+       hex they have in common is filled once rather than blended twice.
+
+       Built in the icon's LOCAL space, where a ship-frame bearing b sits at math angle -b, so the
+       arcs go in exactly as getArcs() gives them and the finished mesh is simply turned to the ship's
+       facing (a pointy-top hex maps onto itself under any 60 degree turn, and facings are always
+       multiples of 60). No facing arithmetic on the arc bounds, and so no chance of float dust on
+       one - the trap that cost showTargetedHexagonInArc a whole wedge edge. */
+    ShipIcon.prototype.showRangeArc = function (maxHexes, hexDistance, arcsList, colour, fillOpacity) {
+        if (!maxHexes || !arcsList.length) return; //no reach, or nothing to bear with
+
+        var loops = buildHexRegion(Math.min(maxHexes, MAX_ARC_HEXES), hexDistance, function (x, y) {
+            /* The ship's own hex is in arc whatever the arcs say. A target sharing your hex is at
+               range 0, which is inside every weapon's reach, and its bearing is genuinely undefined
+               - the game itself falls back to the previous turn's positions to get an arc out of it
+               (mathlib.getCompassHeadingOfShip), and ballistics ignore arc at range 0 outright. The
+               old pie wedge covered the centre too, so keeping it leaves the display unchanged where
+               the player is used to it. */
+            if (x === 0 && y === 0) return true;
+
+            var bearing = bearingFromOrigin(x, y);
+
+            for (var i = 0; i < arcsList.length; i++) {
+                if (mathlib.isInArc(bearing, arcsList[i].start, arcsList[i].end)) return true;
+            }
+
+            return false;
+        });
+
+        if (!loops.length) return;
+
+        //Border in the arc's own colour, the way the structure wedge outlines itself, so the amber
+        //linked-fire arc stays amber. Fill strength is the caller's when it gives one - the amber
+        //arc is filled fainter than the cobalt one (see REDUCED_ARC_FILL_OPACITY).
+        var arcColour = new THREE.Color(colour);
+        var hexes = buildRegionOverlay(loops, arcColour, fillOpacity === undefined ? ARC_FILL_OPACITY : fillOpacity, arcColour, ARC_BORDER_OPACITY);
+
+        hexes.rotation.z = mathlib.degreeToRadian(this.getFacing());
+
+        addGridLockedOverlay(this.mesh, hexes, getHexAnchor(this).offset);
+        this.weaponArcs.push(hexes);
+    };
+
+    /* ---- The bearing-based wedges: shields, and the intercept envelope ----------------------
+       Radii are in GAME UNITS, and one hex is coordinateConverter.getHexDistance() ~= 86.6 of them,
+       so 250 is a shade under three hexes. Change either number here and nothing else needs to move:
+       the outline, the label and the label's placement are all derived from the radius.
+
+       Neither wedge is a statement about range. A shield covers a direction at any distance, and
+       interception is decided purely by the bearing of the incoming shot (weaponManager.
+       isPosOnWeaponArc - no distance test anywhere in it), so both are drawn just far enough out to
+       be read at a glance.
+
+       A COLOUR HERE IS OPAQUE. THREE.Color has no alpha channel: a fourth component in an rgb()
+       string is parsed and then silently thrown away, so "rgb(35,100,200, 0.5)" renders as solid
+       cobalt, not half-strength cobalt. Transparency belongs to the material - that is what the
+       matching *_OPACITY constants below are, and they are the ones to turn to soften an edge. */
+    var SHIELD_ARC_RADIUS = 250;
+    var SHIELD_ARC_COLOUR = "rgb(20,80,128)";
+    var SHIELD_ARC_COLOUR_OPACITY = 0.4; //under showCircularArc's default 0.5 - the fill is a backdrop for the border, not the read
+    var SHIELD_ARC_BORDER_COLOUR = "rgb(35,100,200)"; //cobalt - lifted off the fill the way the structure wedge's outline is
+    var SHIELD_ARC_BORDER_OPACITY = 0.8; //softer than the structure wedge's 0.9: a shield is often on screen next to a weapon arc
+
+    var INTERCEPT_ARC_RADIUS = 150;
+    var INTERCEPT_ARC_COLOUR = "rgba(240, 237, 228)"; //off-white: no other overlay is neutral, so it can't be mistaken for a firing arc
+    var INTERCEPT_ARC_FILL_OPACITY = 0.05; //barely a tint - the hex-edged firing arc underneath has to stay the thing you read first
+    var INTERCEPT_ARC_BORDER_OPACITY = 0.6; //the dotting already lightens the edge, so the dots themselves stay crisp
+
+    var INTERCEPT_LABEL_TEXTURE = null;
+
+    /* "INTERCEPT" as a texture, drawn once on first use and shared by every wedge afterwards (only
+       one system's arcs are on screen at a time, but the icons rebuild their overlays on every
+       hover). Kept out of disposeOverlay's way by the fact that Material.dispose() doesn't touch
+       textures - the same reason the shared thruster icon survives.
+
+       The word is stroked in near-black before it is filled, so it stays legible where it crosses a
+       bright ship sprite or the fill of the arc underneath. */
+    function getInterceptLabelTexture() {
+        if (INTERCEPT_LABEL_TEXTURE) return INTERCEPT_LABEL_TEXTURE;
+
+        var canvas = document.createElement('canvas');
+        canvas.width = 256;
+        canvas.height = 64;
+
+        var context = canvas.getContext('2d');
+        context.font = 'bold 30px "Trebuchet MS", Helvetica, Arial, sans-serif';
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
+        context.lineJoin = 'round';
+        context.lineWidth = 6;
+        context.strokeStyle = 'rgba(0,12,20,0.9)';
+        context.strokeText('INTERCEPT', 128, 34);
+        context.fillStyle = INTERCEPT_ARC_COLOUR;
+        context.fillText('INTERCEPT', 128, 34);
+
+        INTERCEPT_LABEL_TEXTURE = new THREE.CanvasTexture(canvas);
+        INTERCEPT_LABEL_TEXTURE.colorSpace = THREE.SRGBColorSpace;
+
+        return INTERCEPT_LABEL_TEXTURE;
+    }
+
+    /* The wedge's label, in the CircleGeometry's own local frame - where the wedge is built centred
+       on +X, so sitting the label on that axis puts it on the arc's mid-bearing whatever the arc is.
+       Sized and placed as fractions of the radius: at 0.72 of the way out a 60 degree wedge is 2 x
+       0.72r x tan(30) wide, comfortably more than the 0.42r the word takes, so it stays inside its
+       own wedge. The 256x64 texture is 4:1, and so is the plane. */
+    function buildArcLabel(texture, radius) {
+        var label = new THREE.Mesh(
+            new THREE.PlaneGeometry(radius * 0.42, radius * 0.105),
+            new THREE.MeshBasicMaterial({ map: texture, transparent: true, opacity: 0.85 })
+        );
+
+        label.position.set(radius * 0.72, 0, 0.02); //clear of both the fill and the outline at 0.01
+
+        return label;
+    }
+
+    /* The smooth pie wedge every weapon arc used to be. Now only the BEARING-based overlays use it,
+       deliberately - a shield and an interceptor both answer "which way is covered?" rather than
+       "which hexes can I reach?", so the smooth shape is the honest picture for them and the
+       contrast with the hex-edged ranged arcs carries meaning. See showWeaponArc.
+
+       dis is in game units and arcs is ship-frame. options carries the trimmings - fillOpacity,
+       borderColour, dashedBorder, labelTexture - and left out entirely gives the plain half-opaque
+       wedge outlined solid in its own colour, which is what a shield was before any of this. */
+    ShipIcon.prototype.showCircularArc = function (dis, arcs, colour, options) {
+        options = options || {};
+
+        var arcLength = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
+        var arcStart = mathlib.addToDirection(0, arcLength * -0.5);
+        var arcFacing = mathlib.addToDirection(arcs.end, arcLength * -0.5);
+
+        var thetaStart = mathlib.degreeToRadian(arcStart);
+        var thetaLength = mathlib.degreeToRadian(arcLength);
+
+        var geometry = new THREE.CircleGeometry(dis, 32, thetaStart, thetaLength);
+        var material = new THREE.MeshBasicMaterial({
+            color: new THREE.Color(colour),
+            opacity: options.fillOpacity === undefined ? 0.5 : options.fillOpacity,
+            transparent: true
+        });
+        var circle = new THREE.Mesh(geometry, material);
+        circle.rotation.z = mathlib.degreeToRadian(-mathlib.addToDirection(arcFacing, -this.getFacing()));
+        circle.position.z = -1;
+
+        //Outline, on the same reasoning as the structure wedge's (buildArcOutline): a 1px LINE, not
+        //a world-unit ring, so the edge stays crisp at every zoom instead of fattening as you zoom
+        //in and vanishing as you zoom out. A CHILD, so it inherits the wedge's rotation, its
+        //grid-lock correction and its removal.
+        circle.add(buildArcOutline(
+            dis,
+            thetaStart,
+            thetaLength,
+            options.borderColour === undefined ? colour : options.borderColour,
+            options.dashedBorder,
+            options.borderOpacity
+        ));
+
+        if (options.labelTexture) {
+            var label = buildArcLabel(options.labelTexture, dis);
+            //Counter-rotated out of the wedge's own rotation so the word reads upright however the
+            //ship is pointing - safe because the map camera never rotates. Its POSITION still turns
+            //with the parent, which is what keeps it on the mid-bearing.
+            label.rotation.z = -circle.rotation.z;
+            circle.add(label);
+        }
+
+        addGridLockedOverlay(this.mesh, circle); //radius is a hex range - hold it against the icon's zoom rescale
+        this.weaponArcs.push(circle);
+
+        return circle;
+    };
+
+    /* A weapon's INTERCEPT envelope, drawn alongside - and inside - its firing arc.
+
+       The hex-edged firing arc is exact about where a weapon can shoot, and that precision is
+       misleading about interception, which is a different question with a different answer: a shot
+       is interceptable if its bearing from this ship falls in the weapon's arc, full stop. There is
+       no hex test and no range test in that decision (weaponManager.isPosOnWeaponArc), so the
+       envelope is drawn as a smooth wedge - the same shape language as the shields, and the visible
+       opposite of "these hexes".
+
+       Deliberately small, faint and neutral: it sits on top of the firing arc, so it has to be
+       legible without competing with it. Ships that can't intercept never see it. */
+    ShipIcon.prototype.showInterceptArc = function (ship, weapon) {
+        if (weapon instanceof Thruster || weapon.defensiveSystem) return; //no interception from either
+        if (weapon.specialArcs) return; //arc isn't a wedge at all (isPosOnSpecialArc decides it) - a wedge would misdescribe it
+        if (getInterceptRating(weapon) <= 0) return;
+
+        //ONE WEDGE PER ARC. A split-arc mount (Shadow Battlecruiser's Heavy Slicer) intercepts in
+        //every arc it has - the server tests the incoming bearing against all of them at once
+        //(mathlib::isInAnyArc in Firing::isLegalIntercept) - so all of them have to be drawn.
+        //
+        //getArcs() would give a single arc, and on a split mount not even a meaningful one: both
+        //changeFiringMode implementations index startArcArray by FIRING MODE (weapon.php and
+        //shipSystem.js updateFiringModeData), and a split pair is stored at indices 0 and 1, so
+        //selecting mode 1 leaves the live startArc/endArc holding the SECOND arc. That is why this
+        //wedge used to appear on the Heavy Slicer's rear arc alone.
+        var arcs = getInterceptArcs(ship, weapon);
+        var interceptArcRange = INTERCEPT_ARC_RADIUS;
+        if(ship.flight) interceptArcRange = 100;
+
+        for (var i = 0; i < arcs.length; i++) {
+            var arc = this.showCircularArc(
+                interceptArcRange,
+                arcs[i], //the weapon's real bearing arc, jam critical and all - the linked-fire wedge restricts FIRING, not interception
+                INTERCEPT_ARC_COLOUR,
+                {
+                    fillOpacity: INTERCEPT_ARC_FILL_OPACITY,
+                    //Dotted, where every other wedge on the map is outlined solid. Doing the distinction
+                    //twice - neutral colour AND broken line - is what lets the wedge be this faint and
+                    //still read as its own thing rather than as an edge of the arc underneath it.
+                    dashedBorder: true,
+                    borderOpacity: INTERCEPT_ARC_BORDER_OPACITY,
+                    //Labelled individually rather than once for the pair: the wedges of a split mount
+                    //are on opposite sides of the hull, so an unlabelled one has nothing near it to
+                    //explain what it is.
+                    labelTexture: getInterceptLabelTexture()
+                }
+            );
+
+            //Every other range overlay sits at z -1, and this one shares the screen with the firing arc
+            //it belongs to. Two transparent meshes at the SAME depth are ordered by nothing more
+            //meaningful than the order they were created in, so lift this one clear: it is the smaller
+            //and much fainter of the two and has to be the one on top to be read at all.
+            arc.position.z = -0.9;
+        }
+    };
+
+    /* Every arc this weapon can intercept in, as a list - one entry for an ordinary mount, one per
+       arc for a split mount. Falls back to the single live arc if a weapon claims splitArcs without
+       usable arrays, so a blueprint mistake costs the second wedge rather than the whole overlay. */
+    function getInterceptArcs(ship, weapon) {
+        if (weapon.splitArcs) {
+            var arcs = shipManager.systems.getMultipleArcs(ship, weapon);
+            if (arcs.length) return arcs;
+        }
+
+        return [shipManager.systems.getArcs(ship, weapon)];
+    }
+
+    /* Intercept rating in this weapon's CURRENT firing mode. getInterceptRating() is where a weapon
+       whose rating isn't a constant computes it (a Particle Impeder's climbs with its boost), and
+       plain Weapons just return this.intercept from it - but shields and thrusters reach this code
+       too and are not Weapons at all, hence the guard. */
+    function getInterceptRating(weapon) {
+        if (typeof weapon.getInterceptRating === 'function') return weapon.getInterceptRating() || 0;
+
+        return weapon.intercept || 0;
+    }
 
     ShipIcon.prototype.showThrusterIcon = function (ship, weapon) {
         var graphicSize = 32;
@@ -723,95 +1065,348 @@ window.ShipIcon = function () {
     };
 
 
-    ShipIcon.prototype.showStraightArcs = function (weapon, hexDistance, arcs) {
-        var dis = weapon.rangePenalty === 0
-            ? hexDistance * (weapon.range + 0.5)
-            : 50 / weapon.rangePenalty * hexDistance;
+    /* Corners of a pointy-top hex as unit offsets from its centre - the same 30/90/.../330 degree
+       corners mathlib.getHexCorners uses to build the grid, so a hexagon drawn from these lands
+       exactly on a grid hex.
 
-        if (weapon.range > 0 && dis > hexDistance * (weapon.range + 0.5)) dis = hexDistance * (weapon.range + 0.5);
+       The grid-aligned overlays (the EW blankets, the gravitic target area) use them as they are,
+       on an unrotated mesh. The weapon arcs emit them in the icon's LOCAL space and turn the
+       finished mesh to the ship's facing, which is safe without any per-facing correction because a
+       pointy-top hexagon maps onto itself under any 60 degree rotation and a ship's facing is always
+       a multiple of 60 (mathlib.hexFacingToAngle) - the hexes stay grid-aligned however the ship is
+       pointing. */
+    var HEX_CORNERS = [30, 90, 150, 210, 270, 330].map(function (degrees) {
+        var radians = degrees * Math.PI / 180;
+        return { x: Math.cos(radians), y: Math.sin(radians) };
+    });
 
-        const shipFacing = this.getFacing(); // ship's facing in degrees
+    var STRAIGHT_ARC_FILL_COLOUR = 0x11446e;
+    var STRAIGHT_ARC_BORDER_COLOUR = 0x08485e; //cyan, brighter than the fill so the hex edges carry
 
-        // Hex grid offsets for pointy-top hexes, clockwise
-        const hexDirOffsets = [
-            { x: 1, y: 0 },                         // 0° forward
-            { x: 0.5, y: -Math.sqrt(3) / 2 },         // 60° clockwise
-            { x: -0.5, y: -Math.sqrt(3) / 2 },        // 120°
-            { x: -1, y: 0 },                         // 180°
-            { x: -0.5, y: Math.sqrt(3) / 2 },         // 240°
-            { x: 0.5, y: Math.sqrt(3) / 2 },          // 300°
-        ];
-        // Arc start/end relative to ship's facing
-        let arcStart = arcs.start % 360;
-        let arcEnd = arcs.end % 360;
+    /* Axial neighbour steps, in the same order as the six hex directions: a steps along direction 0
+       (due East), b along direction 1. The rest fall out of n[d-1] + n[d+1] = n[d], which is why
+       direction 2 is b-a and direction 5 is a-b. */
+    var AXIAL_NEIGHBOURS = [[1, 0], [0, 1], [-1, 1], [-1, 0], [0, -1], [1, -1]];
 
-        if (arcStart === arcEnd) {
-            arcStart = 0;
-            arcEnd = 360;
-        } else if (arcEnd <= arcStart) {
-            arcEnd += 360;
-        }
+    /* Clockwise compass bearing of a point from the origin, 0 = East - the same convention and the
+       same answer as mathlib.getCompassHeadingOfPoint, without an object allocated per call and
+       without its two instanceof checks. An arc filter runs this once per hex in range, which at the
+       60-hex cap is nearly eleven thousand times. */
+    function bearingFromOrigin(x, y) {
+        var heading = mathlib.radianToDegree(Math.atan2(y, x));
 
-        // Helper to create rounded rectangle
-        function createRoundedRectShape(width, height, radius) {
-            const shape = new THREE.Shape();
-            const w = width;
-            const h = height;
-            const r = Math.min(radius, w / 2, h / 2);
+        return heading > 0 ? 360 - heading : Math.abs(heading);
+    }
 
-            shape.moveTo(-w / 2 + r, -h / 2);
-            shape.lineTo(w / 2 - r, -h / 2);
-            shape.quadraticCurveTo(w / 2, -h / 2, w / 2, -h / 2 + r);
-            shape.lineTo(w / 2, h / 2 - r);
-            shape.quadraticCurveTo(w / 2, h / 2, w / 2 - r, h / 2);
-            shape.lineTo(-w / 2 + r, h / 2);
-            shape.quadraticCurveTo(-w / 2, h / 2, -w / 2, h / 2 - r);
-            shape.lineTo(-w / 2, -h / 2 + r);
-            shape.quadraticCurveTo(-w / 2, -h / 2, -w / 2 + r, -h / 2);
+    /* The OUTLINE of a patch of grid hexes, as closed loops of points in game units relative to the
+       centre hex - everything the overlays need, because a region is drawn as one blanket polygon
+       with its boundary traced, not as a heap of individual hexagons.
 
-            return shape;
-        }
+       That is the whole point of working in loops. The hexes in a range-N patch grow with N SQUARED
+       - the 60-hex cap is 10,981 of them - while its boundary grows with N, 726 edges at that same
+       cap. Filling hex by hex meant a 790KB vertex buffer and 44,000 triangles for one hovered
+       weapon; the loops are a couple of hundred triangles and a few tens of KB, and the player sees
+       exactly the same thing: hex-true edges, flat colour inside.
 
-        for (let i = 0; i < 6; i++) {
-            let dir = i * 60; // clockwise
+       `accept(x, y, a, b)` decides membership - the arc tests live there - and is given both the
+       centre in game units and its axial coordinates. Members go into a flat axial grid so the
+       boundary sweep can ask "is my neighbour in?" with an array read rather than a hash lookup.
 
-            // Wrap around for arc selection
-            let dirAdjusted = dir;
-            if (dirAdjusted < arcStart) dirAdjusted += 360;
+       An edge of a member hex is on the boundary exactly when the neighbour across it is not a
+       member, which is a direct test - no counting every edge and keeping the singletons. Emitted
+       from corner (5-d) to corner (6-d) for direction d, which walks the region counter-clockwise
+       with the inside on the left, so outer boundaries come out counter-clockwise and any hole comes
+       out clockwise. buildRegionFill leans on that to tell one from the other. */
+    function buildHexRegion(range, hexDistance, accept) {
+        var stride = 2 * range + 1;
+        var members = new Uint8Array(stride * stride);
+        //bearings are clockwise, game space is counter-clockwise, so direction 1 sits at math angle -60
+        var stepX = hexDistance * 0.5;
+        var stepY = -hexDistance * Math.sqrt(3) / 2;
+        var radius = hexDistance / Math.sqrt(3); //hexDistance is centre-to-centre; this is centre-to-corner
+        var a, b;
 
-            if (dirAdjusted >= arcStart && dirAdjusted <= arcEnd) {
-                const shape = createRoundedRectShape(dis, hexDistance * 0.85, hexDistance * 0.2);
-                const geometry = new THREE.ShapeGeometry(shape);
-                const material = new THREE.MeshBasicMaterial({
-                    color: 0x145080,
-                    opacity: 0.5,
-                    transparent: true
-                });
-                const lineArc = new THREE.Mesh(geometry, material);
+        /* Cube coordinates in disguise: a steps in direction 0 plus b steps in direction 1 is the
+           cube (a+b, -a, -b), whose distance from the origin is max(|a+b|, |a|, |b|). Clamping b to
+           [-range-a, range-a] as well as to [-range, range] is therefore exactly "within range". */
+        for (a = -range; a <= range; a++) {
+            var last = Math.min(range, -a + range);
 
-                // Rotate relative to ship's facing
-                lineArc.rotation.z = mathlib.degreeToRadian(-dir);
-
-                // Position offset along the hex direction
-                lineArc.position.x = hexDirOffsets[i].x * dis / 2;
-                lineArc.position.y = hexDirOffsets[i].y * dis / 2;
-                lineArc.position.z = -1;
-
-                // Rotate into ship's local space
-                lineArc.position.applyMatrix4(new THREE.Matrix4().makeRotationZ(mathlib.degreeToRadian(shipFacing)));
-                lineArc.rotation.z += mathlib.degreeToRadian(shipFacing);
-
-                this.mesh.add(lineArc);
-                this.weaponArcs.push(lineArc);
+            for (b = Math.max(-range, -a - range); b <= last; b++) {
+                if (accept(a * hexDistance + b * stepX, b * stepY, a, b)) members[(a + range) * stride + (b + range)] = 1;
             }
         }
+
+        var edges = [];
+
+        for (a = -range; a <= range; a++) {
+            for (b = -range; b <= range; b++) {
+                if (!members[(a + range) * stride + (b + range)]) continue;
+
+                var centreX = a * hexDistance + b * stepX;
+                var centreY = b * stepY;
+
+                for (var d = 0; d < 6; d++) {
+                    var na = a + AXIAL_NEIGHBOURS[d][0];
+                    var nb = b + AXIAL_NEIGHBOURS[d][1];
+
+                    //outside the grid is outside the region, so those edges are boundary too
+                    if (na >= -range && na <= range && nb >= -range && nb <= range
+                        && members[(na + range) * stride + (nb + range)]) continue; //interior seam
+
+                    var from = HEX_CORNERS[(5 - d) % 6];
+                    var to = HEX_CORNERS[(6 - d) % 6];
+
+                    edges.push({
+                        x1: centreX + from.x * radius, y1: centreY + from.y * radius,
+                        x2: centreX + to.x * radius, y2: centreY + to.y * radius
+                    });
+                }
+            }
+        }
+
+        return chainLoops(edges);
+    }
+
+    /* Boundary edges into closed loops, by following each edge's end vertex to the edge that starts
+       there. Corner positions are rounded to whole game units to match them up: two hexes sharing a
+       corner compute it from different centres and land a rounding error apart, while genuinely
+       different corners are a hex side - 50 units - apart, so there is a wide margin either way.
+
+       A vertex normally has one outgoing edge, but where two parts of a region meet at a single
+       corner it has two; keeping a list per vertex and taking whichever is still unused walks such a
+       pinch as two loops that touch, which fills correctly. */
+    function chainLoops(edges) {
+        var outgoing = new Map();
+        var used = new Uint8Array(edges.length);
+        var loops = [];
+
+        function vertexKey(x, y) {
+            return (Math.round(x) + 32768) * 65536 + Math.round(y) + 32768;
+        }
+
+        edges.forEach(function (edge, index) {
+            var key = vertexKey(edge.x1, edge.y1);
+            var starting = outgoing.get(key);
+
+            if (starting) starting.push(index);
+            else outgoing.set(key, [index]);
+        });
+
+        function takeEdgeFrom(x, y) {
+            var starting = outgoing.get(vertexKey(x, y));
+
+            while (starting && starting.length) {
+                var next = starting.pop();
+
+                if (!used[next]) return next;
+            }
+
+            return -1;
+        }
+
+        edges.forEach(function (edge, index) {
+            if (used[index]) return;
+
+            var loop = [];
+            var current = index;
+
+            while (current !== -1 && !used[current]) {
+                used[current] = 1;
+                loop.push({ x: edges[current].x1, y: edges[current].y1 });
+                current = takeEdgeFrom(edges[current].x2, edges[current].y2);
+            }
+
+            if (loop.length > 2) loops.push(loop);
+        });
+
+        return loops;
+    }
+
+    //Shoelace. Positive is counter-clockwise, which buildHexRegion gives an outer boundary; a hole
+    //is wound the other way and comes out negative.
+    function getSignedArea(loop) {
+        var area = 0;
+
+        for (var i = 0, j = loop.length - 1; i < loop.length; j = i++) {
+            area += (loop[j].x - loop[i].x) * (loop[j].y + loop[i].y);
+        }
+
+        return area / 2;
+    }
+
+    //Ray cast along +x, counting crossings.
+    function isPointInLoop(point, loop) {
+        var inside = false;
+
+        for (var i = 0, j = loop.length - 1; i < loop.length; j = i++) {
+            if ((loop[i].y > point.y) === (loop[j].y > point.y)) continue;
+
+            if (point.x < (loop[j].x - loop[i].x) * (point.y - loop[i].y) / (loop[j].y - loop[i].y) + loop[i].x) inside = !inside;
+        }
+
+        return inside;
+    }
+
+    function traceLoop(path, loop) {
+        loop.forEach(function (point, index) {
+            if (index === 0) path.moveTo(point.x, point.y);
+            else path.lineTo(point.x, point.y);
+        });
+
+        path.closePath();
+
+        return path;
+    }
+
+    /* The blanket: one flat polygon per outer loop, holes punched where the region has them (the
+       straight arcs' six-pointed star has one, around the ship's own hex). Triangulated once by
+       ShapeGeometry into a single buffer - a few hundred triangles for an arc that would have been
+       tens of thousands drawn hexagon by hexagon.
+
+       DoubleSide because the triangulator's winding is its own business and this is a flat unlit
+       overlay: there is no cost to being visible from both sides and no way to be caught out. */
+    function buildRegionFill(loops, colour, opacity) {
+        var shapes = [];
+
+        loops.forEach(function (loop) {
+            if (getSignedArea(loop) > 0) shapes.push({ loop: loop, shape: traceLoop(new THREE.Shape(), loop) });
+        });
+
+        loops.forEach(function (loop) {
+            if (getSignedArea(loop) > 0) return;
+
+            //a hole sits inside exactly one outer loop, so any of its corners identifies the owner
+            var owner = shapes.find(function (candidate) { return isPointInLoop(loop[0], candidate.loop); });
+
+            if (owner) owner.shape.holes.push(traceLoop(new THREE.Path(), loop));
+        });
+
+        var material = new THREE.MeshBasicMaterial({
+            color: colour,
+            opacity: opacity,
+            transparent: true,
+            side: THREE.DoubleSide
+        });
+
+        return new THREE.Mesh(new THREE.ShapeGeometry(shapes.map(function (entry) { return entry.shape; })), material);
+    }
+
+    /* The region's boundary traced as lines, all loops in a single LineSegments so it stays one draw
+       call.
+
+       LineBasicMaterial.linewidth is ignored by the WebGL renderer - normally a nuisance, here
+       exactly what is wanted: the border is one device pixel at every zoom level, so it neither
+       thickens as you zoom in nor thins away to nothing as you zoom out, the way a world-unit ring
+       would. Same reasoning as the structure wedge's outline (buildArcOutline).
+
+       Colour and opacity default to the straight arcs' cobalt; the weapon arcs, EW blankets and
+       gravitic target area pass their own so each overlay keeps the colour it is recognised by. */
+    function buildRegionOutline(loops, colour, opacity) {
+        var positions = [];
+
+        loops.forEach(function (loop) {
+            loop.forEach(function (point, index) {
+                var next = loop[(index + 1) % loop.length];
+
+                positions.push(point.x, point.y, 0, next.x, next.y, 0);
+            });
+        });
+
+        var geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+
+        var outlines = new THREE.LineSegments(
+            geometry,
+            new THREE.LineBasicMaterial({
+                color: colour === undefined ? STRAIGHT_ARC_BORDER_COLOUR : colour,
+                opacity: opacity === undefined ? 0.9 : opacity,
+                transparent: true
+            })
+        );
+        outlines.position.z = 0.01; //clear of the coplanar fill, still behind the ship sprite
+
+        return outlines;
+    }
+
+    /* Fill plus outline as one mesh, ready to be positioned and added. The outline is a CHILD of the
+       fill so it inherits its rotation, its grid-lock correction and its removal. */
+    function buildRegionOverlay(loops, colour, fillOpacity, borderColour, borderOpacity) {
+        var fill = buildRegionFill(loops, colour, fillOpacity);
+
+        fill.add(buildRegionOutline(loops, borderColour, borderOpacity));
+        fill.position.z = -1;
+
+        return fill;
+    }
+
+    /* Overlays measured in hexes have to sit on the GRID rather than on the sprite: an icon is
+       nudged off its hex centre when several ships share a hex (ShipIconContainer.getHexOffset) and
+       it sits between hexes mid-animation. This is the centre of the hex the icon is currently over,
+       plus the offset from the icon to it - the offset addGridLockedOverlay records so that
+       normaliseGridLockedChildren can hold both position and scale right through a zoom rescale. */
+    function getHexAnchor(icon) {
+        var position = icon.getPosition();
+        var centre = window.coordinateConverter.fromHexToGame(window.coordinateConverter.fromGameToHex(position));
+
+        return { centre: centre, offset: { x: centre.x - position.x, y: centre.y - position.y } };
+    }
+
+    /* A weapon that shoots straight (Transverse Drive, Warp Jump) can only reach the hexes lying on
+       the six grid lines out of its own hex, so its arc is drawn as those actual hexes rather than
+       an approximating oblong. The firing ship's own hex is never a target, so the arms start one
+       hex out - which leaves the star with a hole in the middle when the arc is a full circle, and
+       that hole is the reason buildRegionFill knows how to punch one.
+
+       In axial terms the six grid lines are exactly the hexes with a, b or a+b zero, so membership
+       is that plus the same arc test every other overlay uses. */
+    ShipIcon.prototype.showStraightArcs = function (weapon, hexDistance, arcs) {
+        var maxHexes = getWeaponReachInHexes(weapon);
+        if (!maxHexes) return; //genuinely no reach (e.g. a Warp Jump whose nacelle damage has taken its range to 0) - nothing to highlight
+
+        //Capped like the circular arcs even though the six arms only grow linearly: buildHexRegion
+        //sweeps the whole range-N square looking for members, so the cost is the same either way.
+        var loops = buildHexRegion(Math.min(maxHexes, MAX_ARC_HEXES), hexDistance, function (x, y, a, b) {
+            if (a === 0 && b === 0) return false; //the ship's own hex is never a target
+            if (a !== 0 && b !== 0 && a + b !== 0) return false; //off the six grid lines
+
+            return mathlib.isInArc(bearingFromOrigin(x, y), arcs.start, arcs.end);
+        });
+
+        if (!loops.length) return;
+
+        var hexes = buildRegionOverlay(loops, STRAIGHT_ARC_FILL_COLOUR, 0.5);
+        hexes.rotation.z = mathlib.degreeToRadian(this.getFacing());
+
+        addGridLockedOverlay(this.mesh, hexes, getHexAnchor(this).offset);
+        this.weaponArcs.push(hexes);
     };
 
+
+    /* Every overlay here is rebuilt from scratch each time it is shown, so once one leaves the scene
+       its buffers are dead - but THREE frees a geometry's GPU memory on dispose(), not on remove().
+       That was survivable while an arc was a 32-segment pie wedge; a hex-mapped one runs to a few
+       hundred KB and hovering along a ship's weapon list builds one per system. Children (the
+       silhouette outline) go with their parent. Materials only ever reference shared textures
+       (the thruster icon), and Material.dispose() leaves those alone. */
+    function disposeOverlay(overlay) {
+        if (!overlay) return;
+
+        overlay.children.forEach(disposeOverlay);
+
+        if (overlay.geometry) overlay.geometry.dispose();
+        if (overlay.material) overlay.material.dispose();
+    }
 
     ShipIcon.prototype.hideWeaponArcs = function () {
         this.weaponArcs.forEach(function (arc) {
             this.mesh.remove(arc);
+            disposeOverlay(arc);
         }, this);
+
+        //The array was never emptied, so every arc ever drawn stayed referenced for the icon's whole
+        //lifetime - and re-removed on every subsequent hide. hideStructureArcs already got this right.
+        this.weaponArcs = [];
     };
 
 
@@ -854,7 +1449,11 @@ window.ShipIcon = function () {
         //a world-unit border would vanish when zoomed out on a wedge this small. Added as a CHILD
         //so it inherits the wedge's rotation/position (and its removal).
         circle.add(buildArcOutline(dis, thetaStart, thetaLength, color));
-        this.mesh.add(circle);
+        //Grid-locked with the weapon arcs. This one is the odd case: a structure has no range, so the
+        //radius is arbitrary (roughly the icon's own size) rather than a count of hexes. It is held
+        //fixed anyway so a section wedge and a weapon wedge - routinely on screen together - stay in
+        //the same proportion to each other at every zoom instead of only below 0.5.
+        addGridLockedOverlay(this.mesh, circle);
         this.structureArcs.push(circle);
 
         return null;
@@ -862,37 +1461,161 @@ window.ShipIcon = function () {
 
     /* Perimeter of the pie wedge in the CircleGeometry's own local frame: apex, out along the
        arc, back to the apex. A full-circle wedge skips the apex so no spurious radius line is
-       drawn across it. Segment count matches the fill's 32 so the two edges sit flush. */
-    function buildArcOutline(radius, thetaStart, thetaLength, color) {
+       drawn across it. Segment count matches the fill's 32 so the two edges sit flush.
+
+       `dashed` dots the CURVE only and leaves the two radii solid - the wedge's sides are hard
+       edges (the weapon either bears or it doesn't), while the curve is the arbitrary one, drawn
+       where it is only so the wedge can be seen at all. Dotting says so. A full circle has no radii
+       and is dotted all the way round. `opacity` defaults to the 0.9 the structure wedge has
+       always used. */
+    function buildArcOutline(radius, thetaStart, thetaLength, color, dashed, opacity) {
         var segments = 32;
-        var points = [];
+        var curve = [];
         var fullCircle = thetaLength >= Math.PI * 2 - 0.0001;
+        var apex = new THREE.Vector3(0, 0, 0);
+        var i;
 
-        if (!fullCircle) points.push(new THREE.Vector3(0, 0, 0));
-
-        for (var i = 0; i <= segments; i++) {
+        for (i = 0; i <= segments; i++) {
             var theta = thetaStart + (i / segments) * thetaLength;
-            points.push(new THREE.Vector3(radius * Math.cos(theta), radius * Math.sin(theta), 0));
+            curve.push(new THREE.Vector3(radius * Math.cos(theta), radius * Math.sin(theta), 0));
         }
 
-        if (!fullCircle) points.push(new THREE.Vector3(0, 0, 0));
+        var material = new THREE.LineBasicMaterial({
+            color: color,
+            opacity: opacity === undefined ? 0.9 : opacity,
+            transparent: true
+        });
 
-        var outline = new THREE.Line(
-            new THREE.BufferGeometry().setFromPoints(points),
-            new THREE.LineBasicMaterial({ color: color, opacity: 0.9, transparent: true })
-        );
+        if (!dashed) {
+            //One unbroken run: apex, out along the arc, back to the apex. A full-circle wedge skips
+            //the apex so no spurious radius line is drawn across it.
+            var points = fullCircle ? curve : [apex].concat(curve, [apex]);
+
+            var line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), material);
+            line.position.z = 0.01; //clear of the coplanar fill, still behind the ship sprite
+
+            return line;
+        }
+
+        //Dots and solid radii go in ONE LineSegments - a dash and a radius are both just segments,
+        //so there is no reason to pay for a second geometry, material and draw call.
+        var positions = dashPolyline(curve, radius * ARC_DASH_LENGTH, radius * ARC_DASH_GAP, fullCircle);
+
+        if (!fullCircle) {
+            var last = curve[curve.length - 1];
+
+            positions.push(apex.x, apex.y, 0, curve[0].x, curve[0].y, 0);
+            positions.push(last.x, last.y, 0, apex.x, apex.y, 0);
+        }
+
+        var geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+
+        var outline = new THREE.LineSegments(geometry, material);
         outline.position.z = 0.01; //clear of the coplanar fill, still behind the ship sprite
 
         return outline;
     }
 
+    /* Dash pattern for a dotted outline, as fractions of the wedge's radius so the dotting keeps its
+       proportions if the radius is retuned. At the 250 the intercept wedge uses these come out at 5
+       units on, 6 off - about 5px on, 6px off at default zoom. */
+    var ARC_DASH_LENGTH = 0.02;
+    var ARC_DASH_GAP = 0.024;
+
+    /* The same path as a DOTTED line: walk the polyline and emit the on-parts as separate segments,
+       for a LineSegments rather than a Line. Done as geometry instead of THREE's LineDashedMaterial
+       for two reasons - it needs no new symbol in the tree-shaken THREE shim, and the dash length
+       ends up measured along the real path rather than in the material's own scaled space.
+
+       The pattern is always STRETCHED to fit the path rather than left to stop wherever it happens
+       to run out, which is what would otherwise leave a ragged part-dash at one end. How it is
+       stretched depends on what the path is:
+
+       - `closed` (a full circle): a whole number of dash+gap periods, so the pattern meets itself
+         at the seam with a proper gap rather than two dashes butting together.
+       - open (a wedge's curve, running between two solid radii): a dash at BOTH ends, so the dotting
+         visibly joins the lines it runs between. That is n dashes with n-1 gaps between them, which
+         spans n-1+duty periods, not n. */
+    function dashPolyline(points, dashLength, gapLength, closed) {
+        var lengths = [];
+        var total = 0;
+        var i;
+
+        for (i = 1; i < points.length; i++) {
+            var length = Math.hypot(points[i].x - points[i - 1].x, points[i].y - points[i - 1].y);
+
+            lengths.push(length);
+            total += length;
+        }
+
+        if (!total) return [];
+
+        var duty = dashLength / (dashLength + gapLength);
+        var period;
+
+        if (closed) {
+            period = total / Math.max(1, Math.round(total / (dashLength + gapLength)));
+        } else {
+            //+gapLength in the count because n dashes need only n-1 gaps
+            var count = Math.max(1, Math.round((total + gapLength) / (dashLength + gapLength)));
+
+            period = total / (count - 1 + duty); //count 1 gives period = total/duty, i.e. one dash the whole way
+        }
+
+        var dash = period * duty;
+
+        var positions = [];
+        var walked = 0; //distance along the whole path at the start of the segment being walked
+
+        for (i = 1; i < points.length; i++) {
+            var from = points[i - 1];
+            var to = points[i];
+            var segment = lengths[i - 1];
+
+            if (segment > 0) {
+                //every dash that opens before this segment ends, clipped to the part inside it - a
+                //dash longer than one chord simply reappears in the next segment's pass
+                for (var start = Math.floor(walked / period) * period; start < walked + segment; start += period) {
+                    var on = Math.max(start, walked);
+                    var off = Math.min(start + dash, walked + segment);
+
+                    if (off <= on) continue;
+
+                    positions.push(
+                        from.x + (to.x - from.x) * (on - walked) / segment,
+                        from.y + (to.y - from.y) * (on - walked) / segment,
+                        0,
+                        from.x + (to.x - from.x) * (off - walked) / segment,
+                        from.y + (to.y - from.y) * (off - walked) / segment,
+                        0
+                    );
+                }
+            }
+
+            walked += segment;
+        }
+
+        return positions;
+    }
+
     ShipIcon.prototype.hideStructureArcs = function () {
         this.structureArcs.forEach(function (arc) {
             this.mesh.remove(arc);
+            disposeOverlay(arc);
         }, this);
         this.structureArcs = [];
     };
 
+    var BDEW_HEXES = 20; //the blanket is a fixed 20 hexes whatever the ship's BDEW rating
+
+    /* Blanket EW, drawn as the actual grid hexes it covers rather than a smooth hexagon
+       approximating them - same treatment as the straight weapon arcs, so "am I under that
+       blanket?" is answered by the hex the ship sits in instead of by eye.
+
+       The hexes a range-20 disc covers do NOT make a clean hexagon: every side of the union is a
+       zigzag, and the old smooth outline (a hexagon of circumradius 20.6 hexes, the extra 0.6 there
+       to reach the far corner of the 20th hex) cut across those hexes on both sides of it. */
     ShipIcon.prototype.showBDEW = function () {
         var BDEW = ew.getBDEW(this.ship);
         if (!BDEW || this.BDEWSprite) {
@@ -900,64 +1623,17 @@ window.ShipIcon = function () {
         }
 
         var hexDistance = window.coordinateConverter.getHexDistance();
-        var dis = 20.6 * hexDistance; //Need the extra 0.6 just to cover the 20th hex visually - DK
+        //no arc to test - the blanket covers every hex in range, so the region is the whole disc
+        var loops = buildHexRegion(BDEW_HEXES, hexDistance, function () { return true; });
 
         var color = gamedata.isMyShip(this.ship) ? new THREE.Color(160 / 255, 250 / 255, 100 / 255).convertSRGBToLinear() : new THREE.Color(255 / 255, 157 / 255, 0 / 255).convertSRGBToLinear();
 
-        // Create a hexagon shape
-        var hexShape = new THREE.Shape();
-        for (let i = 0; i < 6; i++) {
-            let angle = (i * Math.PI) / 3; // 60-degree increments
-            let x = dis * Math.cos(angle);
-            let y = dis * Math.sin(angle);
-            if (i === 0) {
-                hexShape.moveTo(x, y);
-            } else {
-                hexShape.lineTo(x, y);
-            }
-        }
-        hexShape.closePath();
+        //Border in the same colour, defining where the blanket stops. It traces the blanket's own
+        //zigzag boundary - 246 segments, not the edges of 1261 little hexagons.
+        var hexagon = buildRegionOverlay(loops, color, 0.2, color, 0.4);
 
-        var geometry = new THREE.ShapeGeometry(hexShape);
-        var material = new THREE.MeshBasicMaterial({ color: color, opacity: 0.2, transparent: true });
-        var hexagon = new THREE.Mesh(geometry, material);
-        hexagon.position.z = -1;
-
-        // Create a hexagon border with higher opacity (0.8) to define the boundaries
-        var borderShape = new THREE.Shape();
-        for (let i = 0; i < 6; i++) {
-            let angle = (i * Math.PI) / 3;
-            let x = dis * Math.cos(angle);
-            let y = dis * Math.sin(angle);
-            if (i === 0) borderShape.moveTo(x, y);
-            else borderShape.lineTo(x, y);
-        }
-        borderShape.closePath();
-
-        var holePath = new THREE.Path();
-        var lineWidth = 4;
-        var innerDis = dis - lineWidth;
-        for (let i = 0; i < 6; i++) {
-            let angle = (i * Math.PI) / 3;
-            let x = innerDis * Math.cos(angle);
-            let y = innerDis * Math.sin(angle);
-            if (i === 0) holePath.moveTo(x, y);
-            else holePath.lineTo(x, y);
-        }
-        holePath.closePath();
-        borderShape.holes.push(holePath);
-
-        var borderMaterial = new THREE.MeshBasicMaterial({
-            color: color,
-            opacity: 0.5,
-            transparent: true,
-            side: THREE.DoubleSide
-        });
-
-        var border = new THREE.Mesh(new THREE.ShapeGeometry(borderShape), borderMaterial);
-        hexagon.add(border);
-
-        this.mesh.add(hexagon);
+        //the blanket has to cover 20 hexes at every zoom, and sit on the grid rather than the sprite
+        addGridLockedOverlay(this.mesh, hexagon, getHexAnchor(this).offset);
         this.BDEWSprite = hexagon;
 
         return null;
@@ -966,6 +1642,7 @@ window.ShipIcon = function () {
 
     ShipIcon.prototype.hideBDEW = function () {
         this.mesh.remove(this.BDEWSprite);
+        disposeOverlay(this.BDEWSprite); //1261 hexes of buffers - see disposeOverlay
         this.BDEWSprite = null;
     };
 
@@ -973,6 +1650,8 @@ window.ShipIcon = function () {
     // variable: a mine is detected when Detect Mines EW > distance + mine signature,
     // so the radius equals the ship's Detect Mines amount (in hexes) rather than the
     // fixed 20-hex BDEW blanket. Uses a single base colour (#5e338a) for all ships.
+    // Hex-mapped like the blanket - the range is a whole number of hexes, so the hexes
+    // themselves are what it should be showing.
     ShipIcon.prototype.showMDEW = function () {
         var MDEW = ew.getDetectMEW(this.ship);
         if (!MDEW || !gamedata.areMinesPresent || this.MDEWSprite) {
@@ -980,66 +1659,17 @@ window.ShipIcon = function () {
         }
 
         var hexDistance = window.coordinateConverter.getHexDistance();
-        var dis = (MDEW + 0.6) * hexDistance; //Extra 0.6 to cover the outermost hex visually - matches showBDEW
+        var loops = buildHexRegion(Math.floor(MDEW), hexDistance, function () { return true; });
 
-        // Brightened a touch over BDEW (0.3 fill / solid border) so the purple reads clearly.
+        // Brightened a touch over BDEW (0.4 fill / stronger border) so the purple reads clearly.
         var color = new THREE.Color(0x5e338a).convertSRGBToLinear();
+        var colorBorder = new THREE.Color(0x8c57c1).convertSRGBToLinear();
 
-        // Create a hexagon shape
-        var hexShape = new THREE.Shape();
-        for (let i = 0; i < 6; i++) {
-            let angle = (i * Math.PI) / 3; // 60-degree increments
-            let x = dis * Math.cos(angle);
-            let y = dis * Math.sin(angle);
-            if (i === 0) {
-                hexShape.moveTo(x, y);
-            } else {
-                hexShape.lineTo(x, y);
-            }
-        }
-        hexShape.closePath();
+        //boundary of the detection area, in the lighter purple
+        var hexagon = buildRegionOverlay(loops, color, 0.4, colorBorder, 0.7);
 
-        var geometry = new THREE.ShapeGeometry(hexShape);
-        var material = new THREE.MeshBasicMaterial({ color: color, opacity: 0.4, transparent: true });
-        var hexagon = new THREE.Mesh(geometry, material);
-        hexagon.position.z = -1;
-
-        // Create a hexagon border with a solid (fully opaque) outline to define the boundaries
-        var borderShape = new THREE.Shape();
-        for (let i = 0; i < 6; i++) {
-            let angle = (i * Math.PI) / 3;
-            let x = dis * Math.cos(angle);
-            let y = dis * Math.sin(angle);
-            if (i === 0) borderShape.moveTo(x, y);
-            else borderShape.lineTo(x, y);
-        }
-        borderShape.closePath();
-
-        var holePath = new THREE.Path();
-        var lineWidth = 4;
-        var innerDis = dis - lineWidth;
-        for (let i = 0; i < 6; i++) {
-            let angle = (i * Math.PI) / 3;
-            let x = innerDis * Math.cos(angle);
-            let y = innerDis * Math.sin(angle);
-            if (i === 0) holePath.moveTo(x, y);
-            else holePath.lineTo(x, y);
-        }
-        holePath.closePath();
-        borderShape.holes.push(holePath);
-
-        var colorBorder = new THREE.Color(0x8045ba).convertSRGBToLinear();        
-        var borderMaterial = new THREE.MeshBasicMaterial({
-            color: colorBorder,
-            opacity: 0.6,
-            transparent: true,
-            side: THREE.DoubleSide
-        });
-
-        var border = new THREE.Mesh(new THREE.ShapeGeometry(borderShape), borderMaterial);
-        hexagon.add(border);
-
-        this.mesh.add(hexagon);
+        //the detection radius is a hex count - hold it, and sit it on the grid rather than the sprite
+        addGridLockedOverlay(this.mesh, hexagon, getHexAnchor(this).offset);
         this.MDEWSprite = hexagon;
 
         return null;
@@ -1048,68 +1678,72 @@ window.ShipIcon = function () {
 
     ShipIcon.prototype.hideMDEW = function () {
         this.mesh.remove(this.MDEWSprite);
+        disposeOverlay(this.MDEWSprite);
         this.MDEWSprite = null;
     };
 
-    ShipIcon.prototype.showTargetedHexagonInArc = function (shooter, shooterIcon, system, size, color = null, opacity = null, lineWidth = 3) {
+    /* Where a shot can still go once a target is designated: every hex within `size` of the TARGET
+       that also lies inside the SHOOTER's firing arc. A Gravitic's net shows the hexes it could shove
+       its target into (size = the weapon's moveDistance); a Particle Repeater's shows where the rest
+       of a split burst may spill (size = 1). It hangs off the target's icon, which is why both ships
+       have to be passed in.
+
+       Hex-mapped like the weapon arcs: the area is the hexes it actually covers, so its edges land
+       on hex boundaries instead of slicing hexes in half and leaving the player to guess which side
+       a hex fell on.
+
+       That also disposes of the old construction - a smooth hexagon of (size + 0.6) hexes sliced by
+       two WORLD-space THREE.Plane clipping planes through the shooter, plus two more sheared meshes
+       to draw the cut edges. The planes belonged to one icon and the geometry to another, so the two
+       had to be kept in step across icons that rescale independently; an arc test per hex has no
+       such coupling, and the border falls out of the ordinary silhouette routine.
+
+       Arc membership is measured the way weaponManager.isPosOnWeaponArc measures it: the clockwise
+       compass bearing of the hex from the shooter's hex, against the weapon's arc turned into world
+       bearings by the shooter's facing. getArcs() is ship-frame and already roll-corrected. The
+       facing is read off the icon rather than the movement data so the overlay follows what is drawn
+       on screen while a ship is animating. */
+    ShipIcon.prototype.showTargetedHexagonInArc = function (shooter, shooterIcon, system, size, color = null, opacity = null) {
 
         //Check if we already have a sprite for this system, if so, remove it.
         if (this.shipHexagonSpritesMap.has(system)) {
             this.removeTargetedHexagonInArc(system);
         }
 
+        size = Math.floor(size);
+        if (isNaN(size) || size < 0) return; //no reach to show
+
         var hexDistance = window.coordinateConverter.getHexDistance();
         var systemArcs = shipManager.systems.getArcs(shooter, system);
+        /* Icon space is counter-clockwise and bearings are clockwise, hence the negated facing.
+           Rounded because getFacing() reads the sprite's rotation back out of radians and the round
+           trip leaves ~1e-14 of dust on it: isInArc rounds the BEARING to a whole degree but compares
+           it against the arc bounds raw, so an arc ending a hair under 120 silently drops every hex
+           sitting exactly on 120 - the whole edge of the wedge. Facings are multiples of 60 and arcs
+           are whole degrees, so rounding is exact, and it puts this in step with
+           weaponManager.isPosOnWeaponArc, which takes its facing straight from the movement data. */
+        var shooterFacing = mathlib.addToDirection(0, -Math.round(shooterIcon.getFacing()));
+        var arcStart = mathlib.addToDirection(systemArcs.start, shooterFacing);
+        var arcEnd = mathlib.addToDirection(systemArcs.end, shooterFacing);
 
-        //Setup the Hexagon Geometry
-        var dis = (size + 0.6) * hexDistance;
-        var hexShape = new THREE.Shape();
-        for (let i = 0; i < 6; i++) {
-            let angle = (i * Math.PI) / 3;
-            let x = dis * Math.cos(angle);
-            let y = dis * Math.sin(angle);
-            if (i === 0) hexShape.moveTo(x, y);
-            else hexShape.lineTo(x, y);
-        }
-        hexShape.closePath();
+        var anchor = getHexAnchor(this);
+        var shooterHexCentre = getHexAnchor(shooterIcon).centre;
 
-        var plane1 = new THREE.Plane();
-        var plane2 = new THREE.Plane();
-        var shooterRotation = shooterIcon.mesh.rotation.z;
+        /* The region is measured from the TARGET but the arc from the SHOOTER, so unlike every other
+           overlay here the bearing is taken in world space - hence the offset back onto the target's
+           hex centre. A 360 degree arc keeps every hex: getArcs returns start === end for one, and
+           isInArc says yes to everything in that case. */
+        var loops = buildHexRegion(size, hexDistance, function (x, y) {
+            var bearing = mathlib.getCompassHeadingOfPoint(shooterHexCentre, {
+                x: anchor.centre.x + x,
+                y: anchor.centre.y + y
+            });
 
-        const TWO_PI = Math.PI * 2;
-        var offset = 0;
-        // Logic angles are CW (0=East, +CW). Visual are CCW. 
-        // We define CCW visual arc From -> To.
-        // VisStart = -LogicEnd. VisEnd = -LogicStart.
-        // Use the sprite's rotation, as the parent mesh doesn't rotate.
-        var shooterRotation = shooterIcon.shipSprite.mesh.rotation.z;
+            return mathlib.isInArc(bearing, arcStart, arcEnd);
+        });
 
-        var angleStart = mathlib.degreeToRadian(-(systemArcs.end + offset)) + shooterRotation;
-        var angleEnd = mathlib.degreeToRadian(-(systemArcs.start + offset)) + shooterRotation;
+        if (!loops.length) return; //the whole area is outside the arc - nothing to draw
 
-        var isSmallArc = false;
-        var is360Arc = Math.abs(systemArcs.start - systemArcs.end) === 360 || systemArcs.start === systemArcs.end;
-
-        // If start != end, we clips. If start == end, it's a 360 circle (no clips).
-        if (!is360Arc) {
-            // Calculate the angular span
-            var span = angleEnd - angleStart;
-            while (span < 0) span += TWO_PI;
-            while (span > TWO_PI) span -= TWO_PI;
-            isSmallArc = span < Math.PI;
-        }
-
-        var shooterWorldPos = new THREE.Vector3();
-        shooterIcon.mesh.getWorldPosition(shooterWorldPos);
-
-        // Plane 1: Start Edge. Point IN (CCW +90).
-        var normal1 = new THREE.Vector3(Math.cos(angleStart + Math.PI / 2), Math.sin(angleStart + Math.PI / 2), 0);
-        plane1.setFromNormalAndCoplanarPoint(normal1, shooterWorldPos);
-
-        // Plane 2: End Edge. Point IN (CW -90).
-        var normal2 = new THREE.Vector3(Math.cos(angleEnd - Math.PI / 2), Math.sin(angleEnd - Math.PI / 2), 0);
-        plane2.setFromNormalAndCoplanarPoint(normal2, shooterWorldPos);
         if (color == null) {
             color = new THREE.Color(0.1, 0.5, 0.1).convertSRGBToLinear()
         }
@@ -1118,109 +1752,33 @@ window.ShipIcon = function () {
             opacity = 0.3
         }
 
-        var hexMaterial = new THREE.MeshBasicMaterial({
-            color: color,
-            opacity: opacity,
-            transparent: true,
-            side: THREE.DoubleSide,
-            clippingPlanes: !is360Arc ? [plane1, plane2] : [],
-            clipIntersection: !isSmallArc
-        });
+        //Border in the caller's colour, fully opaque so the boundary carries over the pale fill.
+        var hexagon = buildRegionOverlay(loops, color, opacity, color, 1);
 
-        var hexagon = new THREE.Mesh(new THREE.ShapeGeometry(hexShape), hexMaterial);
-        hexagon.position.set(0, 0, -1);
-
-        var borderShape = new THREE.Shape();
-        for (let i = 0; i < 6; i++) {
-            let angle = (i * Math.PI) / 3;
-            let x = dis * Math.cos(angle);
-            let y = dis * Math.sin(angle);
-            if (i === 0) borderShape.moveTo(x, y);
-            else borderShape.lineTo(x, y);
-        }
-        borderShape.closePath();
-
-        var holePath = new THREE.Path();
-        var innerDis = dis - lineWidth;
-        for (let i = 0; i < 6; i++) {
-            let angle = (i * Math.PI) / 3;
-            let x = innerDis * Math.cos(angle);
-            let y = innerDis * Math.sin(angle);
-            if (i === 0) holePath.moveTo(x, y);
-            else holePath.lineTo(x, y);
-        }
-        holePath.closePath();
-        borderShape.holes.push(holePath);
-
-        var borderMaterial = new THREE.MeshBasicMaterial({
-            color: color,
-            opacity: 1,
-            transparent: true,
-            side: THREE.DoubleSide,
-            clippingPlanes: hexMaterial.clippingPlanes,
-            clipIntersection: hexMaterial.clipIntersection
-        });
-
-        var border = new THREE.Mesh(new THREE.ShapeGeometry(borderShape), borderMaterial);
-        hexagon.add(border);
-
-        // Add sheared edge borders for clipped arcs
-        if (!is360Arc) {
-            // Edge for Plane 1
-            var plane1_inner = new THREE.Plane().setFromNormalAndCoplanarPoint(
-                normal1.clone().negate(),
-                shooterWorldPos.clone().add(normal1.clone().multiplyScalar(lineWidth))
-            );
-            var edge1Material = new THREE.MeshBasicMaterial({
-                color: color,
-                opacity: 1,
-                transparent: true,
-                side: THREE.DoubleSide,
-                clippingPlanes: isSmallArc ? [plane1, plane1_inner, plane2] : [plane1, plane1_inner],
-                clipIntersection: false
-            });
-            var edge1 = new THREE.Mesh(new THREE.ShapeGeometry(hexShape), edge1Material);
-            hexagon.add(edge1);
-
-            // Edge for Plane 2
-            var plane2_inner = new THREE.Plane().setFromNormalAndCoplanarPoint(
-                normal2.clone().negate(),
-                shooterWorldPos.clone().add(normal2.clone().multiplyScalar(lineWidth))
-            );
-            var edge2Material = new THREE.MeshBasicMaterial({
-                color: color,
-                opacity: 1,
-                transparent: true,
-                side: THREE.DoubleSide,
-                clippingPlanes: isSmallArc ? [plane2, plane2_inner, plane1] : [plane2, plane2_inner],
-                clipIntersection: false
-            });
-            var edge2 = new THREE.Mesh(new THREE.ShapeGeometry(hexShape), edge2Material);
-            hexagon.add(edge2);
-        }
-
-        this.mesh.add(hexagon);
+        //size is a count of hexes, so grid-lock it like the other range overlays, and anchor it on
+        //the target's hex rather than on its sprite
+        addGridLockedOverlay(this.mesh, hexagon, anchor.offset);
         this.shipHexagonSpritesMap.set(system, hexagon);
-        /*
-        //plane/arc helpers to troubleshoot arc placement.
-        var helper1 = new THREE.PlaneHelper(plane1, 1000, 0xff0000); // Red
-        var helper2 = new THREE.PlaneHelper(plane2, 1000, 0x00ff00); // Green
-        shooterIcon.mesh.parent.add(helper1);
-        shooterIcon.mesh.parent.add(helper2);
-        */
     };
 
     ShipIcon.prototype.removeTargetedHexagonInArc = function (system) {
         if (this.shipHexagonSpritesMap.has(system)) {
             this.mesh.remove(this.shipHexagonSpritesMap.get(system));
+            disposeOverlay(this.shipHexagonSpritesMap.get(system));
             this.shipHexagonSpritesMap.delete(system);
         }
     }
 
+    //Map.forEach hands over (value, key), so the first argument is the MESH and the second the system
+    //it was drawn for - the parameter names here used to say the opposite. Called on phase teardown,
+    //so the map is emptied too rather than left holding every mesh the phase ever drew.
     ShipIcon.prototype.removeHexagonArcs = function () {
-        this.shipHexagonSpritesMap.forEach(function (system, arc, map) {
-            this.mesh.remove(system);
+        this.shipHexagonSpritesMap.forEach(function (hexagon) {
+            this.mesh.remove(hexagon);
+            disposeOverlay(hexagon);
         }, this);
+
+        this.shipHexagonSpritesMap.clear();
     };
 
     ShipIcon.prototype.positionAndFaceIcon = function (offset) {

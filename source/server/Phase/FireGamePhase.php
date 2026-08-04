@@ -24,7 +24,18 @@ class FireGamePhase implements Phase
 		foreach ($servergamedata->ships as $currShip){ //save system-specific information if necessary (separate loop - generate for all, THEN save for all!
 			$currShip->saveIndividualNotes($dbManager);
 		}
-		
+
+        // Chameleon Sensor Suite: firing is where the array gets shot out, and a destroyed array
+        // breaks the deception PERMANENTLY. Catching it here rather than at the next turn's
+        // checkpoint matters because the owner may self-repair it in between - without this the
+        // disguise would quietly come back.
+        if (TacGamedata::$chameleonPresent) {
+            foreach ($servergamedata->ships as $currShip) {
+                $currShip->checkChameleonReveal($servergamedata, 'firing');
+            }
+        }
+
+
 
         $newFireOrders = $servergamedata->getNewFireOrders();
         $dbManager->submitFireorders($servergamedata->id, $newFireOrders, $servergamedata->turn, 3);

@@ -16,6 +16,7 @@ var ShipSystem = function ShipSystem(json, ship) {
 	if (this.power === undefined) this.power = [];
 	if (this.specialAbilities === undefined) this.specialAbilities = [];
 	if (this.outputMod === undefined) this.outputMod = 0;
+	if (this.critRollMod === undefined) this.critRollMod = 0;
 	if (this.destroyed === undefined) this.destroyed = false;
 	if (this.individualNotesTransfer === undefined) this.individualNotesTransfer = "";
 };
@@ -401,15 +402,21 @@ Weapon.prototype.updateFiringModeData = function () {
 
 	if (!mathlib.arrayIsEmpty(this.specialRangeCalculationArray)) this.specialRangeCalculation = this.specialRangeCalculationArray[this.firingMode];//DK
 	if (!mathlib.arrayIsEmpty(this.specialHitChanceCalculationArray)) this.specialHitChanceCalculation = this.specialHitChanceCalculationArray[this.firingMode];//DK	
-	if (!mathlib.arrayIsEmpty(this.autoHitArray)) this.autoHit = this.autoHitArray[this.firingMode];//DK				
+	if (!mathlib.arrayIsEmpty(this.autoHitArray)) this.autoHit = this.autoHitArray[this.firingMode];//DK
 
 	//firing animation related...
 	if (!mathlib.arrayIsEmpty(this.animationArray)) this.animation = this.animationArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.animationColorArray)) this.animationColor = this.animationColorArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.animationExplosionScaleArray)) this.animationExplosionScale = this.animationExplosionScaleArray[this.firingMode];
 
-	if (!mathlib.arrayIsEmpty(this.startArcArray)) this.startArc = this.startArcArray[this.firingMode];
-	if (!mathlib.arrayIsEmpty(this.endArcArray)) this.endArc = this.endArcArray[this.firingMode];
+	//Per-mode arcs ONLY. A split-arc mount (Shadow Heavy Slicer) uses these same arrays for the list
+	//of arcs it holds at once, keyed from 0, so indexing them by mode would hand it its SECOND arc as
+	//the live pair. The server-side twin of this gate is in Weapon::changeFiringMode, where the
+	//invariant is documented.
+	if (!this.splitArcs) {
+		if (!mathlib.arrayIsEmpty(this.startArcArray)) this.startArc = this.startArcArray[this.firingMode];
+		if (!mathlib.arrayIsEmpty(this.endArcArray)) this.endArc = this.endArcArray[this.firingMode];
+	}
 
 	if (!mathlib.arrayIsEmpty(this.ignoreJinkingArray)) this.ignoreJinking = this.ignoreJinkingArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.ignoreAllEWArray)) this.ignoreAllEW = this.ignoreAllEWArray[this.firingMode];

@@ -70,13 +70,13 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     <!-- ?v=mtime: .htaccess serves CSS with "access plus 1 month", so without a
          cache-buster a stylesheet edit can take up to a month to reach returning
          players. -->
+    <!-- Shared fv design tokens (roadmap item 6): MUST load before every other stylesheet. -->
+    <link href="<?php echo AssetLoader::getAssetUrl('styles/tokens.css'); ?>" rel="stylesheet" type="text/css">
     <link href="<?php echo AssetLoader::getAssetUrl('styles/tactical.css'); ?>" rel="stylesheet" type="text/css">
-    <!-- STAGE4-RETIRED legacy ship-window stylesheet (ship-window redesign Stage 4) - delete once the redesign is stable on live
-    <link href="styles/shipwindow.css" rel="stylesheet" type="text/css"> -->
-	<link href="styles/confirm.css" rel="stylesheet" type="text/css">
-    <link href="styles/replay.css" rel="stylesheet" type="text/css">
-    <link href="styles/shipTooltip.css" rel="stylesheet" type="text/css">
-<!--	<link href="styles/helper.css" rel="stylesheet" type="text/css">-->
+	<link href="<?php echo AssetLoader::getAssetUrl('styles/confirm.css'); ?>" rel="stylesheet" type="text/css">
+    <link href="<?php echo AssetLoader::getAssetUrl('styles/replay.css'); ?>" rel="stylesheet" type="text/css">
+    <link href="<?php echo AssetLoader::getAssetUrl('styles/shipTooltip.css'); ?>" rel="stylesheet" type="text/css">
+<!--	styles/helper.css was deleted (roadmap item 6, Stage 5) - it was dead, see helper.php -->
     <!-- jQuery + jQuery-UI self-hosted (same-origin HTTP/2 + cache-control, no 3rd-party TLS).
          Both kept SYNCHRONOUS: jQuery for the inline $(window).on("load") bootstrap below, and
          jQuery-UI alongside it so $.fn.draggable is guaranteed present for any drag path without
@@ -234,6 +234,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
                 window.UIManagerInstance = new window.UIManager($("body")[0]);
                 window.UIManagerInstance.PlayerSettings(window.Settings);
                 window.UIManagerInstance.FullScreen();
+                window.UIManagerInstance.Surrender();
                 window.UIManagerInstance.EwButtons();
                 _mark('UIManager (React mounts)');
 
@@ -379,13 +380,8 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 	<script defer src="client/power.js"></script>
     <script defer src="client/UI/shipMovement.js"></script>
     <script defer src="client/UI/infowindow.js"></script>
-	<!-- STAGE4-RETIRED legacy ship-window scripts (ship-window redesign Stage 4) - single-line
-	     comments so bundle-legacy.js skips them; delete once the redesign is stable on live -->
-	<!-- STAGE4-RETIRED <script defer src="client/UI/systemInfo.js"></script> -->
-    <!-- STAGE4-RETIRED <script defer src="client/UI/shipwindow.js"></script> -->
     <script defer src="client/UI/fleetList.js"></script>
 	<script defer src="client/UI/gameInfo.js"></script>
-    <!-- STAGE4-RETIRED <script defer src="client/UI/flightwindow.js"></script> -->
 	<script defer src="client/UI/confirm.js"></script>
 	<script defer src="client/model/ship.js"></script>
     <script defer src="client/model/shipSystem.js"></script>
@@ -434,7 +430,6 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
         <table class="uitable">
             <tr>
             <td class="committurn" style="display:none"><div class="ok" ></div></td>
-            <td class="surrender" style="display:none"></td>
             <td class="cancelturn" style="display:none"><div class="cancel" ></div></td>
             </tr>
         </table>
@@ -550,176 +545,11 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     
 </div>
 
-<?php /* STAGE4-RETIRED legacy ship-window HTML templates (ship-window redesign Stage 4).
-         Never emitted (if false); delete this whole block once the redesign is stable on live. */
-if (false): ?>
-<div id="shipwindowtemplatecontainer" style="display:none;">
-
-    <div class="shipwindow ship">
-        <div class="topbar">
-            <span class="valueheader name">Name:</span><span class="value name">name here</span>
-            <span class="valueheader shipclass">Class:</span><span class="value shipclass">ship type class here</span>
-            <div class="close"></div>
-        </div>
-      
-               
-        <div id="shipSection_3" class="shipSection">
-            <table></table>
-        </div>    
-                        
-            
-		<table class="divider">
-			<tr>
-                <td class="col1">
-    				<div class="icon rotate90"><img src="" alt="" border="" width="120" height="120"></div>
-    				<div class="notes"></div>
-				</td>
-                <td class="col2">
-                    <div id="shipSection_1" class="shipSection" style="margin-top: 15px">
-                        <table></table>
-                    </div>
-                    <div id="shipSection_0" class="shipSection primary" style="margin-top: 25px; margin-bottom: 25px">
-                        <table></table>
-                    </div>
-                    <div id="shipSection_2" class="shipSection" style="margin-bottom: 25px">
-                        <table></table>
-                    </div>
-    			</td>
-                <td class="col3">
-                        <div class="EW" style="display:none;">
-                        <div class="ewheader">
-                            <span class="header">ELECTRONIC WARFARE</span>
-                        </div>
-                        <div class="EWcontainer">
-                            <div class="ewentry"><span class="valueheader">Defensive:</span><span class="value DEW"></span></div>
-                            <div class="ewentry CCEW"><span class="valueheader">Close combat:</span><span class="value CCEW"></span><div class="button1" data-ew="CCEW"></div><div class="button2" data-ew="CCEW"></div></div>
-                            <div class="ewentry BDEW"><span class="valueheader">Area defence:</span><span class="value BDEW"></span><div class="button1" data-ew="BDEW"></div><div class="button2" data-ew="BDEW"></div></div>
-                        </div>
-                        <div class="AA" style="display: none">
-                            <table class="AAtable" style="width: 100%; border: 1px solid #496791">
-                            </table>
-                        </div>
-                    </div>
-                    <div class ="buttons">
-                        <div class="HitChart" style="display: none">
-                        </div>
-                    </div>
-    				<div id="shipSection_4" class="shipSection">
-    					<table></table>
-    				</div>
-    			</td>
-            </tr>
-		</table>   
-        <div class="hitChartDiv">
-        </div>     
-    </div>
-
-
-    <div class="shipwindow base" style="width: 450px;">
-        <div class="topbar">
-            <span class="valueheader name">Name:</span><span class="value name">name here</span>
-            <span class="valueheader shipclass">base:</span><span class="value shipclass">ship type class here</span>
-            <div class="close"></div>
-        </div>
-
-        <div id="shipSection_3" class="shipSection" style="left: 0px; top: 180px">
-            <table id="31" style="border-bottom: 6px solid #7e9dc7"></table>
-            <table id="32"></table>
-        </div>
-
-        <table class="divider">
-            <tr>
-                <td class="col1" style="width: 33%">
-                    <div class="icon" style="margin:auto;"><img src="" alt="" border="" width="120" height="120"></div>
-                </td>                
-                <td class="col2" style="width: 33%; border-left: 6px solid #7e9dc7; border-right: 6px solid #7e9dc7;">
-                    <div id="shipSection_1" class="shipSection" style="margin-top: 20px;">
-                        <table></table>
-                    </div>
-                    <div id="shipSection_0" class="shipSection primary" style="border-top: 4px solid #7e9dc7; border-bottom: 4px solid #7e9dc7; margin-top: 35px;">
-                        <table></table>
-                    </div>
-                    <div id="shipSection_2" class="shipSection" style="margin-top: 35px;">
-                        <table></table>
-                    </div>
-                </td>
-                <td class="col3" style="width: 33%">
-                        <div class="EW" style="display:none;">
-                        <div class="ewheader"><span class="header">ELECTRONIC WARFARE</span></div>
-                        <div class="EWcontainer">
-                            <div class="ewentry"><span class="valueheader">Defensive:</span><span class="value DEW"></span></div>
-                            <div class="ewentry CCEW"><span class="valueheader">Close combat:</span><span class="value CCEW"></span><div class="button1" data-ew="CCEW"></div><div class="button2" data-ew="CCEW"></div></div>
-                            <div class="ewentry BDEW"><span class="valueheader">Area defence:</span><span class="value BDEW"></span><div class="button1" data-ew="BDEW"></div><div class="button2" data-ew="BDEW"></div></div>
-                            <div class="notes"></div>
-                        </div>
-                    </div>
-                    <div class ="buttons">
-                    </div>
-                    <div id="shipSection_4" class="shipSection" style="right: 75px; top: 180px">
-                <table id="41" style="border-bottom: 6px solid #7e9dc7"></table>
-            <table id="42"></table>
-                    </div>
-                </td>
-            </tr>
-        </table>
-        <div class="hitChartDiv"></div>     
-    </div>
-
-    <table id="hitChartTable">
-    </table>
-    
-    <div class="shipwindow flight">
-        <div class="topbar">
-            <span class="valueheader name">Name:</span><span class="value name">name here</span>
-        </div>
-        <div>
-            <span class="valueheader shipclass">Class:</span><span class="value shipclass"></span>
-            <div class="close"></div>
-        </div>
-		<table class="divider">
-			<tr>
-				<td class="fightercontainer 0"></td>
-				<td class="fightercontainer 1"></td>
-				<td class="fightercontainer 2"></td>
-			</tr>
-            <tr>
-                <td class="fightercontainer 3"></td>
-                <td class="fightercontainer 4"></td>
-                <td class="fightercontainer 5"></td>
-            </tr>
-            <tr>
-                <td class="fightercontainer 6"></td>
-                <td class="fightercontainer 7"></td>
-                <td class="fightercontainer 8"></td>
-            </tr>
-            <tr>
-                <td class="fightercontainer 9"></td>
-                <td class="fightercontainer 10"></td>
-                <td class="fightercontainer 11"></td>
-            </tr>
-		</table>
-    </div>
-
-    <div class="shipwindow heavyfighter">
-        <div class="topbar">
-            <span class="valueheader name">Name:</span><span class="value name">name here</span>
-            <span class="valueheader shipclass">Class:</span><span class="value shipclass"></span>
-            <div class="close"></div>
-        </div>
-                <table class="divider">
-                        <tr>
-                                <td class="fightercontainer"></td>
-                        </tr>
-                </table>
-    </div>
-
-</div>
-<?php endif; /* STAGE4-RETIRED legacy ship-window templates */ ?>
-
 <div id="shipWindowsReact"></div>
 <div id="systemInfoReact"></div>
 <div id="weaponList"></div>
 <div id="showEwButtons"></div>
+<div id="surrender"></div>
 <div id="fullScreen"></div>
 <div id="playerSettings"></div>
 <div id="shipThrust"></div>
@@ -817,12 +647,16 @@ if (false): ?>
         </div>
         
         
+        <!-- 40px bitmaps, not 16: on a coarse pointer drawShipMovementUI centres the
+             16px glyph inside a 34px transparent hit box, so the backing store has to
+             cover the box, not just the glyph. The parent div is overflow:hidden and
+             sized to the box, so the surplus is clipped and mouse layout is unchanged. -->
         <div id="accelerate" class="movement-icon" data-movement-type="Accelerate">
-            <canvas id="acceleratecanvas" width="16" height="16"></canvas>
+            <canvas id="acceleratecanvas" width="40" height="40"></canvas>
         </div>
-        
+
         <div id="deaccelerate" class="movement-icon" data-movement-type="Decelerate">
-            <canvas id="deacceleratecanvas" width="16" height="16"></canvas>
+            <canvas id="deacceleratecanvas" width="40" height="40"></canvas>
         </div>
         
         <div id="morejink" class="movement-icon" data-movement-type="Increase Jinking">

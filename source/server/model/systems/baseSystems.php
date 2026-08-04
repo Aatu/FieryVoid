@@ -2060,6 +2060,758 @@ class ElintScanner extends Scanner implements SpecialAbility{
 }
 
 
+/* Chameleon Sensor Suite - an ELINT array that additionally disguises its ship as a different vessel.
+   It IS the ship's ELINT array (it replaces ElintScanner in place), so "ELINT" MUST stay in $specialAbilities:
+   redeclaring the property in a subclass REPLACES the parent's array, and dropping "ELINT" would silently
+   strip SOEW/SDEW/Blanket Protection/Disruption/Jamming from the ship with no error raised.
+*/
+class ChameleonSensors extends ElintScanner implements SpecialAbility{
+    public $name = "chameleonSensors";
+    public $displayName = "Chameleon Sensors";
+    public $specialAbilities = array("ELINT", "ChameleonSensors");
+    public $iconPath = "ChameleonSensors.png";
+	public $canOffline = true;
+
+    function __construct($armour, $maxhealth, $powerReq, $output ){
+        parent::__construct($armour, $maxhealth, $powerReq, $output );
+    }
+
+    public function setSystemDataWindow($turn){
+	//parent::setSystemDataWindow($turn);
+	if (!isset($this->data["Special"])) {
+		$this->data["Special"] = '';
+	}else{
+		$this->data["Special"] .= '<br>';
+	}
+        $this->data["Special"] .= "<br>Chameleon Suite - Provide ELINT operations (see FAQ) and can project the image of a different vessel.";
+		$this->data["Special"] .= "<br>Enemies see the simulacrum - icon, class, notes, defence profile and damage - instead of this ship.";
+        $this->data["Special"] .= "<br>Deception is broken if ship moves, uses EW or weapons that the simulacrum could not do, or if an enemy is within 5 hexes (2 hexes for fighters and shuttles).";        
+		//$this->data["Special"] .= "<br>The simulacrum is chosen when the ship is purchased. 'None' means no disguise is projected.";
+        $this->data["Special"] .= "<br>Weapon arming status is always masked from enemies.";
+        $this->data["Special"] .= "<br>More info in Centauri section of 'Factions-Tiers'.";
+        $this->addChameleonWeaponBriefing();
+        //$this->data["Special"] .= "<br>The deception is broken, permanently and for that enemy team only, if:";
+        //$this->data["Special"] .= "<br> - an enemy unit closes to within 5 hexes (2 hexes for fighters and shuttles) with line of sight;";
+        //$this->data["Special"] .= "<br> - the ship changes speed by more than the simulacrum's engines could manage;";
+        //$this->data["Special"] .= "<br> - the ship runs ELINT operations the simulacrum could not run, or spends more EW than the simulacrum's sensors could produce;";
+        //$this->data["Special"] .= "<br> - the ship fires a weapon the simulacrum does not mount (revealed at the start of the following turn);";
+        //$this->data["Special"] .= "<br> - this array is destroyed, or the disguise is switched off.";
+    }
+
+
+	/*STAGE 6 - tell the player, in plain numbers, which of their guns the simulacrum can account for.
+
+	  This is deliberately here rather than as the client-side declaration-time warning §Stage 6
+	  sketched. That warning cannot be built as specified: the owner's page holds THIS ship's
+	  blueprint, not the simulacrum's (window.staticShips is built from the phpclasses in the
+	  viewer's own already-masked gamedata, finding #5), so the client has nothing to test against;
+	  and a per-weapon "this will reveal you" flag computed server-side would be wrong as often as
+	  right, because plausibility depends on the BEARING of the shot - the same Matter Cannon is
+	  covered against a target dead ahead and uncovered against one off the port bow (proved in the
+	  acceptance test at bearings 0 and 300). A standing loadout briefing is honest at every bearing;
+	  a static flag would not be.
+
+	  Own team only. It reaches nobody else in practice - an enemy who still believes the deception
+	  is served the simulacrum's systems, so this system is not in their payload at all - but a ship
+	  revealed to one team and not another does serve its real systems to the team that knows, and
+	  there is no reason to hand them a summary as well.
+
+	  Withdrawn entirely once the deception is over (2026-08-02). The whole briefing is a statement
+	  about a risk - "firing this gun reveals you" - and once every enemy team has seen through the
+	  disguise there is no risk left to describe, only a page of advice about a fiction. Same gate,
+	  and for the same reason, as the "Disguised as" line in the Enhancements block.*/
+	private function addChameleonWeaponBriefing(){
+		$ship = $this->getUnit();
+		if ($ship === null) return;
+		if (empty($ship->chameleonDisguiseClass)) return;
+		if (!$this->isProjecting()) return;
+		if (TacGamedata::$currentForPlayerTeam !== null
+			&& (int)TacGamedata::$currentForPlayerTeam !== (int)$ship->team) return;
+
+		$blueprint = $ship->getChameleonBlueprint();
+		if ($blueprint === null) return;
+
+		$real = array(); $fake = array();
+		foreach ($ship->systems as $s){
+			if (!($s instanceof Weapon) || $s instanceof RammingAttack) continue;
+			$cls = get_class($s);
+			$real[$cls] = (isset($real[$cls]) ? $real[$cls] : 0) + 1;
+		}
+		foreach ($blueprint->systems as $s){
+			if (!($s instanceof Weapon) || $s instanceof RammingAttack) continue;
+			$cls = get_class($s);
+			$fake[$cls] = (isset($fake[$cls]) ? $fake[$cls] : 0) + 1;
+		}
+		if (empty($real)) return;
+
+		$label = ($blueprint->shipClass !== '' && $blueprint->shipClass !== null)
+			? $blueprint->shipClass : $blueprint->phpclass;
+
+		$lines = array();
+		foreach ($real as $cls => $count){
+			$have = isset($fake[$cls]) ? $fake[$cls] : 0;
+			$name = $this->chameleonWeaponLabel($ship, $cls);
+			$lines[] = ($have === 0)
+				? "<br> - " . $name . ": you mount " . $count . ", the " . $label . " mounts NONE"
+				: "<br> - " . $name . ": you mount " . $count . ", the " . $label . " mounts " . $have;
+		}
+
+		$this->data["Special"] .= "<br><br>Disguised as: " . $label . $this->getDeceivedTeamsLabel()
+			. ". Firing a weapon the simulacrum"
+			. " does not have - or more of them than it can bring to bear in that arc - reveals this ship";
+			//. " to that enemy team.";
+		$this->data["Special"] .= implode('', $lines);
+		$this->data["Special"] .= "<br>Arcs count: the " . $label . " carries on the other side"
+			. " cannot cover your shot.";
+	}
+
+	private function chameleonWeaponLabel($ship, $cls){
+		foreach ($ship->systems as $s){
+			if (get_class($s) === $cls) return $s->displayName;
+		}
+		return $cls;
+	}
+
+	/* ---------------- Reveal state machine (Stage 2) ----------------
+	   Two pieces of state, both notes-backed in the ShadingField / Hyach-Stealth style:
+
+	   $active        - the player's toggle. Default ON: a ship whose owner picked a simulacrum is
+	                    projecting it. Round-trips through doIndividualNotesTransfer ->
+	                    generateIndividualNotes -> onIndividualNotesLoaded.
+	   $revealedTeams - enemy teams that have seen through the deception. PERMANENT: once a team is
+	                    in this list it never comes out, and switching the suite back on does not
+	                    restore the disguise for them.
+
+	   Two note keys rather than one flag is what buys the "next turn" delay for free. A reveal
+	   stamped 'revealedNow' applies from the turn it was written; 'revealedNextTurn' applies only
+	   once the turn has rolled over, which is what the weapon-plausibility check (Stage 6) needs -
+	   it runs at the END of a turn, after the enemy has already watched the shot land.*/
+	public $active = true;              //is the suite projecting? (player toggle, D8)
+	public $revealedTeams = array();    //teams this deception is broken against, permanently
+
+	public function isActivated(){
+		return $this->active;
+	}
+
+	/*THE question every consumer asks. Is this ship still wearing its false face, as far as $team
+	  is concerned? Everything that can end the deception funnels through here.*/
+	public function isDisguisedFrom($team, $turn){
+		if (!$this->active) return false;
+		if ($this->isDestroyed($turn)) return false;      //a shot-out array projects nothing
+		if ($this->isOfflineOnTurn($turn)) return false;
+		/*Observers (no team). D15 as written said "observers see the disguise", the code shipped the
+		  opposite, and the user's ruling of 2026-08-01 settles it in favour of the plan but with a
+		  condition: an observer sees the deception until it has broken against EVERY team, at which
+		  point there is nobody left it is hidden from and showing an observer a fiction is just
+		  wrong. Same shape as trueStealth, which hides a Torvalus hull from an observer for as long
+		  as the per-team detection list has any team missing from it (TacGamedata line ~1162: a null
+		  viewer team matches no entry in detectedNew).*/
+		if ($team === null) return !$this->isRevealedToEveryTeam();
+		return !in_array((int)$team, $this->revealedTeams, true);
+	}
+
+	/*"Has every OTHER team in this game seen through this?" - the observer's question, and the one
+	  isFullyRevealed() answers when it has a $gamedata to read slots from. A system does not, so the
+	  team list is taken off the per-load static TacGamedata::$chameleonAllTeams.
+
+	  Fails CLOSED: with no team list (server-side processing outside a real load, static ship
+	  generation) this returns false, so the observer keeps seeing the disguise. Showing a deception
+	  to somebody who should not have seen it is a cosmetic error; undressing a ship that is still
+	  hiding is a leak, and leaks are the failure mode this feature cannot have.*/
+	private function isRevealedToEveryTeam(){
+		$ship = $this->getUnit();
+		if ($ship === null) return false;
+		if (empty(TacGamedata::$chameleonAllTeams)) return false;
+
+		$sawSomebody = false;
+		foreach (TacGamedata::$chameleonAllTeams as $teamId){
+			if ((int)$teamId === (int)$ship->team) continue; //its own team never counts as deceived
+			$sawSomebody = true;
+			if (!in_array((int)$teamId, $this->revealedTeams, true)) return false;
+		}
+		return $sawSomebody;
+	}
+
+	/*Enemy teams in this game. Shared by every reveal checkpoint.*/
+	private function getEnemyTeams($gamedata, $ship){
+		$enemyTeams = array();
+		foreach ($gamedata->slots as $slot){
+			$teamId = (int)$slot->team;
+			if ($teamId != $ship->team && !in_array($teamId, $enemyTeams, true)) $enemyTeams[] = $teamId;
+		}
+		return $enemyTeams;
+	}
+
+	/*Write a reveal note for one team, unless that team already knows. $immediate picks the note key,
+	  and therefore whether it bites this turn or next. Notes are written straight to the DB because
+	  the reveal sweeps run inside phase advance(), outside the generateIndividualNotes/save pass.*/
+	private function revealTo($gamedata, $ship, $teamId, $immediate, $reason){
+		if (in_array((int)$teamId, $this->revealedTeams, true)) return; //already revealed
+		$notekey = $immediate ? 'revealedNow' : 'revealedNextTurn';
+		//tac_individual_notes.notekey_human is varchar(40) and silently FATALS the whole submission
+		//on overflow ("Data too long for column") - keep reasons short and clamp anyway
+		$note = new IndividualNote(
+			-1, $gamedata->id, $gamedata->turn, $gamedata->phase, $ship->id, $this->id,
+			$notekey, substr($reason, 0, 40), "Team:" . (int)$teamId
+		);
+		Manager::insertIndividualNote($note);
+		if ($immediate) $this->revealedTeams[] = (int)$teamId; //effective at once, in this load too
+	}
+
+	/*D3a - the phantom would die while the real ship flies on. A destroyed hull that keeps
+	  manoeuvring and shooting is a worse tell than anything else in this plan, so the deception
+	  ends instead, immediately and for every enemy team. Called from BaseShip after a mirrored
+	  allocation (D3); the caller does the clamping, this writes the reveal.*/
+	public function revealOnDivergentDestruction($gamedata, $reason = 'Simulacrum destroyed'){
+		$ship = $this->getUnit();
+		if ($ship === null) return;
+		foreach ($this->getEnemyTeams($gamedata, $ship) as $teamId){
+			$this->revealTo($gamedata, $ship, $teamId, true, $reason);
+		}
+	}
+
+	/*Have ALL enemy teams seen through this deception? Once they have there is nothing left to
+	  protect, so the toggle button is withdrawn (in a 1v1 this is simply "revealed").*/
+	public function isFullyRevealed($gamedata){
+		$ship = $this->getUnit();
+		if ($ship === null) return false;
+		$enemyTeams = $this->getEnemyTeams($gamedata, $ship);
+		if (empty($enemyTeams)) return false;
+		foreach ($enemyTeams as $teamId){
+			if (!in_array((int)$teamId, $this->revealedTeams, true)) return false;
+		}
+		return true;
+	}
+
+	private function addRevealedTeam($noteValue){
+		if (strpos($noteValue, 'Team:') !== 0) return;
+		$teamId = (int) substr($noteValue, 5);
+		if (!in_array($teamId, $this->revealedTeams, true)) $this->revealedTeams[] = $teamId;
+	}
+
+	public function onIndividualNotesLoaded($gamedata){
+		$this->sortNotes();
+
+		foreach ($this->individualNotes as $currNote){
+			switch($currNote->notekey){
+				case 'Disguised':
+					if($this->isToggleNoteCurrent($currNote, $gamedata)) $this->active = true;
+				break;
+				case 'Undisguised':
+					if($this->isToggleNoteCurrent($currNote, $gamedata)) $this->active = false;
+				break;
+				case 'revealedNow':
+					//written during the turn it happened, and observed as it happened
+					if($currNote->turn <= $gamedata->turn) $this->addRevealedTeam($currNote->notevalue);
+				break;
+				case 'revealedNextTurn':
+					//written at the END of a turn - invisible until the turn rolls over
+					if($currNote->turn < $gamedata->turn) $this->addRevealedTeam($currNote->notevalue);
+				break;
+			}
+		}
+
+		$this->individualNotes = array(); //memory only - does not touch the DB
+	}
+
+	/*Same currency rule ShadingField uses for its Shaded/Unshaded pair: this turn's note wins, and
+	  during the Deployment/pre-turn phase last turn's note still stands (it was written before the
+	  turn counter moved on).*/
+	private function isToggleNoteCurrent($note, $gamedata){
+		if ($note->turn == $gamedata->turn) return true;
+		return ($gamedata->phase == -1 && $note->turn == $gamedata->turn - 1);
+	}
+
+	private function sortNotes(){
+		usort($this->individualNotes, function($a, $b){
+			if ($a->turn == $b->turn) return ($a->phase < $b->phase) ? -1 : 1;
+			return ($a->turn < $b->turn) ? -1 : 1;
+		});
+	}
+
+	/*Set the moment a real toggle value arrives from the client. Manager.php consumes the transfer
+	  at PARSE time - it calls doIndividualNotesTransfer() as soon as it has built the system, which
+	  applies the value and clears the field - so by the time generateIndividualNotes runs there is
+	  nothing left to distinguish "the player clicked Drop Disguise" from "this commit carried no
+	  toggle at all". That difference matters: $active defaults to true on a freshly constructed
+	  system, so without this flag a commit that sent nothing would silently re-project a disguise
+	  the player had dropped.
+	  PROTECTED deliberately: a public property here would land in the static ship JSON, which
+	  json_encodes raw objects (see the static-bloat finding).*/
+	protected $toggleTransferReceived = false;
+
+	public function doIndividualNotesTransfer(){
+		//client sends 1 to project the disguise, 0 to drop it - as a bare value or a one-element
+		//array, depending on which client path built it, so accept both
+		$transfer = $this->individualNotesTransfer;
+		if (is_array($transfer)) $transfer = (count($transfer) > 0) ? $transfer[0] : null;
+		if ($transfer === null || $transfer === "") return true;
+		$this->active = ((int)$transfer === 1);
+		$this->toggleTransferReceived = true;
+		$this->individualNotesTransfer = "";
+		return true;
+	}
+
+	/*Persists the toggle. Runs in InitialOrdersGamePhase::PROCESS - the only point at which the
+	  POST-side ship still carries what the player clicked (individualNotesTransfer). Phase 1 matches
+	  where the client offers the button, alongside the power on/offline control.
+
+	  ⚠️ $this AND $this->getUnit() ARE POST-SIDE OBJECTS, and almost nothing on them is populated.
+	  Manager.php rebuilds a submitted ship with a bare `new $className($id,$userid,$name,$slot)`:
+	  onConstructed() never runs, so no enhancements are applied and no notes are loaded.
+	  chameleonDisguiseClass is therefore ALWAYS null here and revealedTeams ALWAYS empty. Testing
+	  either off the POST-side object disables the toggle silently and forever - which is exactly
+	  what an `if (empty($ship->chameleonDisguiseClass)) return;` guard on $ship did between
+	  2026-07-31 and 2026-08-01: not one Disguised/Undisguised note was ever written, and the button
+	  did nothing at all (fixed 2026-08-01). EVERYTHING except "what did the player just click" has
+	  to be read off the AUTHORITATIVE ship in $gameData, which is a full DBManager::getTacGamedata
+	  load. This is plan trap 3 biting the one thing the plan said was safe to leave in process().
+	  The reveal checkpoints stay out of here for the same reason - they run from
+	  checkChameleonReveal(), off a real load.*/
+	public function generateIndividualNotes($gameData, $dbManager){
+		$postShip = $this->getUnit();
+		if ($postShip === null) return;
+		if ($gameData->phase != 1) return;
+
+		$ship = $gameData->getShipById($postShip->id);
+		if ($ship === null) return;
+		$css = $ship->getSystemById($this->id);
+		if (!($css instanceof ChameleonSensors)) return;
+
+		/*Server-authoritative legality, mirroring what the client offers: no simulacrum to project,
+		  array destroyed or offline, or every enemy team has already seen through it. The button is
+		  withdrawn in all of those, so a value posted for one is not a player decision - and a
+		  doctored POST must not be able to flip a toggle that was never on offer.*/
+		if (!$css->canBeToggled($gameData)) return;
+
+		$this->doIndividualNotesTransfer();
+		//What the player clicked, if they clicked anything; otherwise the state the DB already
+		//holds, so a commit carrying no toggle cannot re-project a disguise that was dropped.
+		$active = $this->toggleTransferReceived ? $this->active : $css->active;
+
+		$notekey = $active ? 'Disguised' : 'Undisguised';
+		$noteHuman = $active ? 'Projecting a disguise' : 'Disguise switched off';
+		$this->individualNotes[] = new IndividualNote(
+			-1, TacGamedata::$currentGameID, $gameData->turn, $gameData->phase,
+			$ship->id, $this->id, $notekey, $noteHuman, 1
+		);
+	}
+
+	/* D6c - "ELINT the simulacrum could not have run."
+	   From Movement onward the enemy receives this ship's REAL EW entries, types included. A "Haven"
+	   carrying a BDEW entry, or spending 10 OEW when a Haven's whole sensor suite is 7, is
+	   self-evidently not a Haven - so the deception has to break on the evidence the enemy can
+	   already see. Modelled on Stealth::isDetectedInitial (the Hyach subs), but with a CONDITIONAL
+	   threshold, because a Dargan disguised as another ELINT ship is entitled to run ELINT.
+
+	   Timing is immediate: EW is hidden from everybody in phase 1 and public from phase 2 of this
+	   same turn, so a next-turn delay would leave the enemy staring for a full turn at evidence the
+	   game refuses to act on.*/
+	private function checkEWPlausibility($gameData, $ship){
+		if (!$this->active) return;                       //not disguised, nothing to give away
+		if (empty($ship->chameleonDisguiseClass)) return;
+		if ($this->isDestroyed() || $this->isOfflineOnTurn()) return;
+
+		$spent = $ship->getAllEWExceptDEW($gameData->turn);
+		if ($spent <= 0) return;                          //DEW alone never betrays anything (turtling)
+
+		$blueprint = $ship->getChameleonBlueprint();
+		if ($blueprint === null) return;
+
+		$reason = null;
+
+		//E1 - ELINT operations while disguised as a ship with no ELINT array at all.
+		//The type list is hardcoded because EW types are bare strings with no registry; any future
+		//ELINT-only type MUST be added here or it becomes a silent hole in the reveal.
+		$blueprintIsElint = false;
+		foreach ($blueprint->systems as $system){
+			if ($system instanceof ElintScanner){ $blueprintIsElint = true; break; }
+		}
+		if (!$blueprintIsElint){
+			$elintOnly = array('SOEW', 'SDEW', 'BDEW', 'DIST', 'JAM');
+			foreach ($ship->EW as $ew){
+				if ($ew->turn != $gameData->turn) continue;
+				if (in_array($ew->type, $elintOnly, true)){
+					$reason = 'ELINT op (' . $ew->type . ') on a non-ELINT hull';
+					break;
+				}
+			}
+		}
+
+		//E2 - more EW than the simulacrum's sensors could produce. Read from the BLUEPRINT, not from
+		//a damaged live copy: the ceiling must not wander as the disguise accumulates mirrored damage.
+		if ($reason === null){
+			$ceiling = EW::getScannerOutput($blueprint, $gameData->turn);
+			if ($spent > $ceiling){
+				$reason = 'EW spend ' . $spent . ' vs ceiling ' . $ceiling;
+			}
+		}
+
+		if ($reason === null) return;
+
+		foreach ($this->getEnemyTeams($gameData, $ship) as $teamId){
+			$this->revealTo($gameData, $ship, $teamId, true, $reason);
+		}
+	}
+
+	/* Proximity (5 hexes for ships, 2 for fighters and shuttles, LoS-permitting) and thrust
+	   plausibility. Both are observed as they happen, so both reveal immediately. Called from the
+	   Deployment and Movement advances via BaseShip::checkChameleonReveal.*/
+	/* Every reveal checkpoint enters here. $checkpoint is passed EXPLICITLY rather than read off
+	   $gamedata->phase, because each phase's advance() sets the NEXT phase before running its ship
+	   loop - at Deployment advance the gamedata already says phase 1, and at Initial Orders advance
+	   it already says phase 2. Dispatching on the phase would silently run the wrong checks.
+
+	   'deployment' - proximity only (catches a turn-1 deployment that lands inside 5 hexes)
+	   'initial'    - ELINT/EW plausibility (D6c)
+	   'movement'   - proximity + thrust plausibility (D6b); the primary checkpoint
+	   'firing'     - shutdown only (this is where the array gets shot out)*/
+	public function checkChameleonReveal($gamedata, $checkpoint = 'movement'){
+		$ship = $this->getUnit();
+		if ($ship === null) return;
+		if (empty($ship->chameleonDisguiseClass)) return;
+		if ($ship->isDestroyed()) return; //destruction ends the deception on its own
+
+		//Anything that stops the suite projecting breaks the deception PERMANENTLY: switching it back
+		//on, repairing the array or restoring its power does NOT put the mask back (D8). That
+		//permanence is the whole reason this writes a note rather than just reporting "not disguised
+		//right now" - without it, a player could drop the disguise for a turn and then resume it.
+		if (!$this->active || $this->isDestroyed() || $this->isOfflineOnTurn()){
+			if (!$this->active)              $reason = 'Disguise switched off';
+			else if ($this->isDestroyed())   $reason = 'Chameleon array destroyed';
+			else                             $reason = 'Chameleon array offline';
+
+			foreach ($this->getEnemyTeams($gamedata, $ship) as $teamId){
+				$this->revealTo($gamedata, $ship, $teamId, true, $reason);
+			}
+			return;
+		}
+
+		//Runs at EVERY checkpoint, not just deployment. The rule is about fleet composition, so it
+		//bites on turn 1 at the Deployment advance - but a team whose Ancient units are held in
+		//reserve, or which surrenders a slot and gains one, must not get a free pass, and a Chameleon
+		//ship that deploys on turn 5 has to be caught too. Cheap: it returns on the first pass
+		//because revealTo() is idempotent per team, and after that revealedTeams short-circuits it.
+		$this->checkAncientSensors($gamedata, $ship);
+
+		if ($checkpoint === 'firing'){
+			$this->checkWeaponPlausibility($gamedata, $ship);
+			return;
+		}
+
+		if ($checkpoint === 'initial'){
+			$this->checkEWPlausibility($gamedata, $ship);
+			return;
+		}
+
+		$this->checkProximity($gamedata, $ship);
+		if ($checkpoint === 'movement') $this->checkThrustPlausibility($gamedata, $ship);
+	}
+
+	/* Ancient sensors see through it, full stop (user's ruling, 2026-08-01).
+
+	   "AdvancedSensors on Ancient faction ships ignore the Chameleon effect entirely - so if there is
+	   a unit on a team with factionAge 3 or more, Chameleon ships automatically lose their disguise
+	   at the start of the game."
+
+	   The operative test is factionAge >= 3 (3 = Ancient, 4 = Primordial: Shadows, Vorlons,
+	   Kirishiac, Mindriders, Thirdspace). The AdvancedSensors ability is NOT additionally required -
+	   the ruling is written as a property of the race, and every Ancient hull carries the ability
+	   anyway, so requiring both would only add a way for a sensor-crippled Shadow cruiser to be
+	   fooled. One line here if that turns out to be wanted.
+
+	   PER TEAM, exactly like checkProximity: in a 3-way game the Shadow player sees the real hull
+	   while the two young-race teams keep facing the simulacrum. Same model trueStealth uses.
+
+	   Reserves and destroyed units still count. This is a fleet-composition rule known before a shot
+	   is fired, not something the disguised ship can undo by killing the scout - and the reveal is
+	   permanent anyway, so excluding them would only create an ordering quirk on turn 1.*/
+	private function checkAncientSensors($gamedata, $ship){
+		foreach ($gamedata->ships as $otherShip){
+			$teamId = (int)$otherShip->team;
+			if ($teamId == $ship->team) continue;
+			if ($otherShip->isTerrain()) continue;                       //asteroids have a factionAge too
+			if ($otherShip->factionAge < 3) continue;
+			if (in_array($teamId, $this->revealedTeams, true)) continue; //already knows
+			//notekey_human is varchar(40) and overflow ABORTS the whole submission - 33 chars.
+			$this->revealTo($gamedata, $ship, $teamId, true, 'Ancient sensors see through it');
+		}
+	}
+
+	/*Close enough to look at it properly. Same shape as ShadingField::isDetected - hex range plus a
+	  line-of-sight test - but the range depends on who is looking: a fighter or shuttle has to be
+	  almost on top of the hull, a ship's sensors do it from 5.*/
+	private function checkProximity($gamedata, $ship){
+		$blockedHexes = $gamedata->blockedHexes;
+		$pos = $ship->getHexPos();
+
+		foreach ($gamedata->ships as $otherShip){
+			$teamId = (int)$otherShip->team;
+			if ($teamId == $ship->team) continue;
+			if ($otherShip->isTerrain()) continue;
+			if ($otherShip->isDestroyed()) continue;
+			if ($otherShip->unavailable) continue;                      //not on the map yet
+			if (in_array($teamId, $this->revealedTeams, true)) continue; //already knows
+
+			$range = ($otherShip instanceof FighterFlight) ? 2 : 5;
+			if ($otherShip->shipSizeClass === 0) $range = 2;             //shuttles and other tiny craft
+
+			if (mathlib::getDistanceHex($ship, $otherShip) > $range) continue;
+
+			$otherPos = $otherShip->getHexPos();
+			if (!empty($blockedHexes) && Mathlib::isLoSBlocked($pos, $otherPos, $blockedHexes)) continue;
+
+			$this->revealTo($gamedata, $ship, $teamId, true, 'Enemy within ' . $range . ' hexes');
+		}
+	}
+
+	/* D6b - "acceleration the simulacrum could not have managed."
+	   The threshold reuses the involuntary-acceleration maths (Engine::doStuckEngine):
+	   floor(thrust / accelcost). It is read GENEROUSLY - the simulacrum's UNDAMAGED engine output -
+	   because the rule says "much faster than would normally be possible", and a false positive here
+	   is far more annoying to a player than a missed reveal.
+
+	   abs() covers deceleration too: a hull that stops dead faster than a Demos could is just as
+	   damning as one that sprints.*/
+	private function checkThrustPlausibility($gamedata, $ship){
+		/*TURN 1 IS CHECKED, and it has to be. FV deploys warships at speed 0 and the whole of a
+		  ship's opening burn is plotted in turn 1's Movement phase, paying real thrust - so turn 1
+		  is the single most likely turn for a hull to out-accelerate its simulacrum. The baseline is
+		  the ship's DEPLOY move, which getLastTurnMovement() returns on the deployment turn because
+		  it exempts 'deploy' from its turn filter (and 'start' markers are skipped outright, so the
+		  baseline is never the pre-deployment speed). The same path covers a unit deploying from
+		  reserve on turn 5.
+		  Found in game 4274: a Dargan wearing an Octurion (maxDeltaV 2) accelerated 0 -> 4 on turn 1
+		  and was not revealed, because this used to return on turn < 2.*/
+		$thisTurn = $ship->getLastTurnMovement($gamedata->turn + 1);
+		$lastTurn = $ship->getLastTurnMovement($gamedata->turn);
+		if ($thisTurn === null || $lastTurn === null) return;
+		if ($thisTurn->turn != $gamedata->turn) return;  //did not move this turn
+
+		$deltaV = abs((int)$thisTurn->speed - (int)$lastTurn->speed);
+
+		/*An Involuntary Acceleration crit is not the player "doing" anything, and letting it reveal
+		  would turn a crit on the REAL ship into a self-inflicted unmasking.
+		  MovementOrder::$forced is DEAD on the server side - the client sends the field but
+		  tac_shipmovement has no column for it, so a loaded move always reads false and the guard
+		  that tested it never fired. The real marker is a 'speedchange' carrying preturn, which is
+		  what Movement::doStuckEngine writes (stamped with the FOLLOWING turn). Subtract those
+		  deltas rather than skipping the turn wholesale, so a stuck engine cannot be used as cover
+		  for a voluntary burn on the same turn.*/
+		foreach ($ship->movement as $move){
+			if ((int)$move->turn !== (int)$gamedata->turn) continue;
+			if ($move->type !== 'speedchange') continue;
+			if (empty($move->preturn)) continue;
+			$deltaV -= abs((int)$move->value);
+		}
+		if ($deltaV <= 0) return;
+
+		$blueprint = $ship->getChameleonBlueprint();
+		if ($blueprint === null) return;
+		if ($blueprint->accelcost <= 0) return;
+
+		$thrust = 0;
+		foreach ($blueprint->systems as $system){
+			if ($system instanceof Engine) $thrust = max($thrust, $system->getOutput());
+		}
+		if ($thrust <= 0) return;                        //no engine to reason about - do not guess
+
+		$maxDeltaV = floor($thrust / $blueprint->accelcost);
+		if ($deltaV <= $maxDeltaV) return;
+
+		$reason = 'Speed change ' . $deltaV . ' vs limit ' . $maxDeltaV;
+		foreach ($this->getEnemyTeams($gamedata, $ship) as $teamId){
+			$this->revealTo($gamedata, $ship, $teamId, true, $reason);
+		}
+	}
+
+	/* D6 (Stage 6) - "a weapon the simulacrum could not have fired."
+
+	   Not any fire order: the MISMATCH is what betrays you. A shot is plausible when the simulacrum
+	   mounts a weapon of the same class whose arc covers the shot that was actually taken - which is
+	   the plan's test A (class presence) with refinement C (arc) folded in, on the user's ruling:
+	   "if not in arc, then this counts as a reveal in the same way as if it fired a weapon the
+	   phantom is not equipped with", because the simulacrum could not physically have made that shot.
+
+	   Refinement B (count) then comes free, because the match is INJECTIVE: each firing weapon
+	   consumes a distinct simulacrum mount, so a Dargan firing three Matter Cannons while wearing a
+	   Balvarix - which mounts two - leaves the third with no counterpart and reveals. Two real guns
+	   firing have to look like two simulacrum guns firing.
+
+	   Timing is revealedNextTurn, unlike every other checkpoint: this check runs at the END of the
+	   Firing phase, after the enemy has already watched the shot land, and the note is stamped with
+	   the current turn so the masking test (note.turn < gamedata.turn) hides it until the turn rolls
+	   over. That is the tabletop reading - the discrepancy between what they saw fire and the damage
+	   it did is worked out afterwards, not as it happens.
+
+	   Runs off $servergamedata inside FireGamePhase::advance, after Firing::fireWeapons, so the
+	   orders are resolved and still in memory (they are not written until further down that method).*/
+	private function checkWeaponPlausibility($gamedata, $ship){
+		$blueprint = $ship->getChameleonBlueprint();
+		if ($blueprint === null) return;
+
+		//Blueprint, not the phantom: the limits a player plans around must not wander as the
+		//simulacrum accumulates mirrored damage. Same convention as D6b and D6c.
+		$fakeWeapons = array();
+		foreach ($blueprint->systems as $system){
+			if ($system instanceof Weapon) $fakeWeapons[$system->id] = $system;
+		}
+
+		$used = array();
+		$mismatch = null;
+
+		foreach ($ship->systems as $weapon){
+			if (!($weapon instanceof Weapon)) continue;
+			foreach ($weapon->fireOrders as $fire){
+				if ($fire->turn != $gamedata->turn) continue;
+				if ($fire->shots <= 0) continue;              //technical orders are not shots anyone saw
+
+				$target = $gamedata->getShipById($fire->targetid);
+				if ($target === null) continue;               //nothing observable to bear on
+
+				$bearing = $ship->getBearingOnUnit($target);
+
+				$matched = false;
+				foreach ($fakeWeapons as $fakeId => $fake){
+					if (isset($used[$fakeId])) continue;
+					if (get_class($fake) !== get_class($weapon)) continue;
+					$startArcs = ($fake->splitArcs && !empty($fake->startArcArray)) ? $fake->startArcArray : array();
+					$endArcs   = ($fake->splitArcs && !empty($fake->endArcArray))   ? $fake->endArcArray   : array();
+					if (!mathlib::isInAnyArc($bearing, $fake->startArc, $fake->endArc, $startArcs, $endArcs)) continue;
+					$used[$fakeId] = true;
+					$matched = true;
+					break;
+				}
+
+				if (!$matched && $mismatch === null) $mismatch = $weapon->displayName;
+			}
+		}
+
+		if ($mismatch === null) return;
+
+		//notekey_human is varchar(40) and OVERFLOW ABORTS THE WHOLE SUBMISSION - revealTo clamps,
+		//but keep the reason short at the source too.
+		$reason = 'Fired ' . $mismatch;
+		foreach ($this->getEnemyTeams($gamedata, $ship) as $teamId){
+			$this->revealTo($gamedata, $ship, $teamId, false, $reason);
+		}
+	}
+
+	/*The in-game toggle. SystemActivation renders this automatically for any client system
+	  implementing canActivate/canDeactivate (no React work needed) - this is the server mirror.
+	  Allowed in the Deployment/pre-turn phase and in Firing (effective next turn), the same
+	  convention Hangar Ops and the Kirishiac Orbitals use.*/
+	public function canBeToggled($gamedata){
+		if ($gamedata->phase != 1) return false; //Initial Orders, alongside the power on/offline control
+		if ($this->isDestroyed($gamedata->turn) || $this->isOfflineOnTurn($gamedata->turn)) return false;
+		if ($this->isFullyRevealed($gamedata)) return false; //nothing left to hide
+		$ship = $this->getUnit();
+		return ($ship !== null && !empty($ship->chameleonDisguiseClass));
+	}
+
+	/*THE display question: is this suite still showing SOMEBODY a false face?
+
+	  Distinct from isDisguisedFrom($team), which answers it for one particular viewer. This is the
+	  fleet-wide version - "is the deception doing anything at all any more" - and it is what every
+	  OWNER-FACING readout should be gated on, because a line that describes a deception nobody is
+	  fooled by any longer is not merely redundant, it is wrong.
+
+	  Deliberately NOT testing isDestroyed/isOfflineOnTurn: both of those END the deception through
+	  the shutdown checkpoint, which writes a real permanent reveal to every enemy team, so they
+	  arrive here as revealedTeams and are already covered. Testing them directly would also be
+	  unreliable at one of the two call sites - Enhancements::setEnhancements runs BEFORE
+	  ShipSystem::onConstructed links $structureSystem, so isDestroyed() cannot yet see a system that
+	  fell off with its structure block.
+
+	  Fails CLOSED at every step (isRevealedToEveryTeam() returns false with no team list), so an
+	  unusual load keeps showing a live deception rather than blanking one.*/
+	public function isProjecting(){
+		$ship = $this->getUnit();
+		if ($ship === null || empty($ship->chameleonDisguiseClass)) return false; //nothing to project
+		if (!$this->active) return false;                                         //dropped by its owner
+		return !$this->isRevealedToEveryTeam();
+	}
+
+	/*Owner-facing suffix naming the enemy teams still taken in, e.g. " [for Team 3 only]". Appended
+	  to every "Disguised as: X" the owner is shown, because with more than one opponent that line
+	  otherwise hides the thing the player most needs: the deception can break against ONE team and
+	  stay perfectly good against the rest, and a reveal is per team and permanent.
+
+	  Empty string with a single opponent - "[for Team 2]" in a 1v1 restates the only possibility -
+	  and empty when nothing is deceived any more, which is the case isProjecting() already withholds
+	  the whole line for. "only" appears exactly when at least one enemy team HAS seen through it,
+	  so its presence is itself the signal that the deception is partly blown.
+
+	  Teams are named by number, matching the in-game fleet list ("TEAM " + slot.team,
+	  fleetList.js:276) - slot names are per SLOT, and a team can hold several.*/
+	public function getDeceivedTeamsLabel(){
+		$ship = $this->getUnit();
+		if ($ship === null) return '';
+
+		$enemyTeams = 0; $stillDeceived = array();
+		foreach (TacGamedata::$chameleonAllTeams as $teamId){
+			$teamId = (int)$teamId;
+			if ($teamId === (int)$ship->team) continue; //its own team is not being deceived
+			$enemyTeams++;
+			if (!in_array($teamId, $this->revealedTeams, true)) $stillDeceived[] = $teamId;
+		}
+		if ($enemyTeams < 2) return '';        //one opponent: naming them adds nothing
+		if (empty($stillDeceived)) return '';  //nobody left to deceive
+
+		sort($stillDeceived);
+		return ' [for ' . (count($stillDeceived) > 1 ? 'Teams ' : 'Team ')
+			. implode(', ', $stillDeceived)
+			. (count($stillDeceived) < $enemyTeams ? ' only' : '') . ']';
+	}
+
+	public function stripForJson(){
+		$strippedSystem = parent::stripForJson();
+		//The owner and their team need the toggle state to render the button and the tooltip.
+		//An enemy is told nothing: they must not learn that this ship has a disguise to drop, nor
+		//which OTHER teams have already seen through it.
+		if ($this->isRevealedToCurrentViewer()){
+			$ship = $this->getUnit();
+			//drives the toggle button: there is nothing to switch on or off without a simulacrum
+			$hasDisguise = ($ship !== null && !empty($ship->chameleonDisguiseClass));
+			/*What travels is the EFFECTIVE projection state, not the raw toggle. The owner's ship
+			  window paints any system with active == true in the boosted yellow
+			  (SystemIcon.isBoosted reads system.active), and there are two cases where that told the
+			  player something untrue: a suite bought with no simulacrum has nothing to project, and
+			  one every enemy team has already seen through is projecting to nobody. Both are
+			  ordinary ELINT arrays at that point and must read as idle.
+			  Nothing is lost by folding them in here: hasDisguise and revealedTeams both travel, and
+			  the toggle button gates on those (canActivate / canDeactivate / isFullyRevealed), not
+			  on this flag.*/
+			$strippedSystem->active = $this->isProjecting();
+			$strippedSystem->revealedTeams = $this->revealedTeams;
+			$strippedSystem->hasDisguise = $hasDisguise;
+
+			/*⚠️ WITHOUT THIS THE WEAPON BRIEFING NEVER REACHES THE BROWSER, and does so silently.
+			  ShipSystem::stripForJson does not send the $data dict at ALL, so the client's system
+			  tooltip is built entirely from window.staticShips - and the static blueprint is a
+			  PRISTINE ship with no disguise, on which addChameleonWeaponBriefing() returns at its
+			  own empty-chameleonDisguiseClass guard. Measured: live 1157 chars vs static 626, the
+			  difference being exactly the briefing. Every other per-instance tooltip in the codebase
+			  sends its dict the same way (~20 sites).
+
+			  Safe to send wholesale because systemFactory.js does Object.assign(staticBlueprint,
+			  systemJson) - `data` REPLACES the static dict rather than merging into it - and the
+			  live dict is a strict superset (same single 'Special' key, the live value starting
+			  with the static one verbatim). Sent for the owner in every state, not only while
+			  projecting: that is also what makes the briefing VANISH the moment the deception ends,
+			  rather than leaving the client on a stale static copy.*/
+			$strippedSystem->data = $this->data;
+		}else{
+			$strippedSystem->active = false;
+			$strippedSystem->revealedTeams = array();
+			$strippedSystem->hasDisguise = false;
+		}
+		return $strippedSystem;
+	}
+
+}
+
+
 /*SW Scanners have boostability reduced to +2*/
 class SWScanner extends Scanner {
     public $name = "SWScanner";
@@ -4465,7 +5217,7 @@ class KirishiacOrbital extends ShipSystem{
 	while still docking to the front/aft structure block - destruction coupling, docked merge,
 	regeneration and SelfRepair all follow the home block, not the display section*/
 	public function setStructureHome($location){
-		$this->structureHomeLocation = $location;
+		parent::setStructureHome($location);
 		if ($this->pairedWeapon !== null) $this->pairedWeapon->structureHomeLocation = $location;
 	}
 

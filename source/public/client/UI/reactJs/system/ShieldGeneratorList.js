@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import { Clickable } from "../styled";
+import theme from '../styled/theme';
 
+/* Borders only — see the note in system/PowerCapacitor.js, which shares this pattern. */
 const Container = styled.div`
     display: flex;
     flex-direction: column;
@@ -10,15 +12,15 @@ const Container = styled.div`
     min-width: 250px;
     opacity: 0.95;
     background-color: rgba(16, 26, 38, 0.9);
-    border: 1px solid #587e8d;
+    border: 1px solid ${theme.colors.line};
 `;
 
 const Header = styled.div`
     padding: 3px;
     background-color: #215a7a;
-    border: 1px solid #587e8d;
-    border-bottom: 1px solid #587e8d;    
-    color: #deebff;
+    border: 1px solid ${theme.colors.line};
+    border-bottom: 1px solid ${theme.colors.line};
+    color: ${theme.colors.chromeText};
     text-align: center;
     font-size: 12px;
     margin-bottom: 2px;

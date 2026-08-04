@@ -347,7 +347,7 @@ const SectionGrid = styled.div`
     grid-template-areas: ${props => props.$areas};
     justify-content: center;
     gap: 8px;
-    padding: 8px;
+    padding: 5px 5px 5px 5px;
     box-sizing: border-box;
     width: 100%;
     overflow: hidden; /*clips the watermark now that the window itself is overflow: visible*/
@@ -1393,16 +1393,50 @@ const savedWindowPositions = { left: null, right: null };
   Retuning: MAP_FIT is the pair of knobs to touch - lower fillW for more visible map,
   raise it for bigger text. The min is the legibility floor: once the fit bottoms out on
   it the window stops shrinking and scrolls internally instead. Same breakpoint as the
-  ShipWindowContainer media query that docks windows to the screen edge.*/
+  ShipWindowContainer media query that docks windows to the screen edge.
+
+  PORTRAIT BOOST (user request 2026-08-01): a phone held upright is the case the budget
+  treats worst - the window's LAYOUT width is fixed (max-content, viewport-independent by
+  design, see the media query above), so on a ~390px-wide screen 60% of the width has to
+  swallow a ~600px window and the fit bottoms out on the legibility floor. Landscape has
+  the width to spend and is not touched. Each budget therefore carries its own `portrait`
+  multiplier, applied to fillW/fillH/min only when the screen is BOTH small and upright.*/
 const SMALL_SCREEN_QUERY = '(max-width: 1024px)';
-//fillW/fillH: the share of screen width/height a fitted window may cover (the slack also
-//leaves the docking inset - 4px/8px in the media query - visible on the opposite edge)
-const MAP_FIT = { fillW: 0.60, fillH: 0.85, min: 0.40, max: 1 };    //game.php: map stays visible
-const LOBBY_FIT = { fillW: 0.96, fillH: 0.96, min: 0.50, max: 1.75 }; //lobby: nothing behind it
+const PORTRAIT_QUERY = '(orientation: portrait)';
+/*fillW/fillH: the share of screen width/height a fitted window may cover (the slack also
+  leaves the docking inset - 4px/8px in the media query - visible on the opposite edge).
+  portrait: what those two (and the floor) are multiplied by on an upright small screen -
+  1 = no boost. THE knob for "windows are too small on my phone".*/
+//game.php: map stays visible; +20% upright, where the map has vertical room to spare
+const MAP_FIT = { fillW: 0.60, fillH: 0.85, min: 0.40, max: 1, portrait: 1.20 };
+//lobby: nothing behind it, so it already fills the screen - a boost has nowhere to go
+const LOBBY_FIT = { fillW: 0.96, fillH: 0.96, min: 0.50, max: 1.75, portrait: 1.2 };
+//no fitted window may cover MORE than this share of an axis, however big the boost: the
+//docking inset (top: 8px) has to stay on screen or the window is cut off at the bottom
+const MAX_FILL = 0.98;
 
 const isSmallScreen = () => Boolean(window.matchMedia) && window.matchMedia(SMALL_SCREEN_QUERY).matches;
 
-const screenFitBudget = () => isLobby() ? LOBBY_FIT : MAP_FIT;
+const isPortrait = () => (Boolean(window.matchMedia)
+    ? window.matchMedia(PORTRAIT_QUERY).matches
+    : window.innerHeight >= window.innerWidth);
+
+/*The boost deliberately leaves `max` alone: raising it would let SMALL windows (mines,
+  terrain, flights) be magnified above their natural size, which is the round-10 behaviour
+  round 11 was asked to remove. `min` DOES move with it - a window big enough to bottom out
+  on the floor is exactly the one being called too small - at the cost of a little more
+  internal scrolling, and never above `max`.*/
+const boostBudget = (budget, factor) => (factor === 1 ? budget : {
+    fillW: Math.min(MAX_FILL, budget.fillW * factor),
+    fillH: Math.min(MAX_FILL, budget.fillH * factor),
+    min: Math.min(budget.max, budget.min * factor),
+    max: budget.max,
+});
+
+const screenFitBudget = () => {
+    const budget = isLobby() ? LOBBY_FIT : MAP_FIT;
+    return isPortrait() ? boostBudget(budget, budget.portrait) : budget;
+};
 
 //the still-down touch that started a drag (TouchList has no .find)
 const findTouch = (touches, identifier) => {

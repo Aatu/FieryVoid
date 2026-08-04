@@ -13,6 +13,7 @@ class ThunderboltStarfuryAM extends FighterFlight{
 		
         $this->isd = 2259;
         $this->notes = 'Needs updated hangars to handle.';
+        $this->notes .= 'Must launch both missiles at same target.';        
         
         $this->forwardDefense = 8;
         $this->sideDefense = 7;

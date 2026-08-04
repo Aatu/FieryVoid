@@ -546,15 +546,31 @@ class Firing
         $relativeBearing = $firingweapon->getIncomingBearing($interceptingShip, $fire, $gd);
 
         //New arc check that checks split arcs like Heavy Slicer as well = DK Dec 2025
+        //
+        //ONLY a split-arc mount gets its arc arrays handed to isInAnyArc, because only there do the
+        //arrays mean "arcs held at once" (see the invariant on Weapon::$startArcArray). On every
+        //other weapon they are PER FIRING MODE, and passing those made a mount intercept across the
+        //union of all its modes' arcs - a BSGLtKineticEnergyWeaponVA in its narrow mode went on
+        //intercepting through the whole wide arc it does not currently have.
+        //
+        //TURRET JAM (ReducedArcs critical, Vree saucer turrets) drops the arrays too: a jammed mount
+        //is locked to its reduced arc, and that arc lives ONLY in startArc/endArc, so the arrays
+        //still hold the arcs the mount had before it jammed. Without this a jammed split mount would
+        //go on intercepting right around the hull.
+        $useSplitArcs = ($weapon instanceof Weapon) && $weapon->splitArcs && !$weapon->isArcRestricted();
+
+        $interceptStartArcs = $useSplitArcs ? ($weapon->startArcArray ?? []) : [];
+        $interceptEndArcs = $useSplitArcs ? ($weapon->endArcArray ?? []) : [];
+
         if (!mathlib::isInAnyArc(
             $relativeBearing,
             $weapon->startArc,
             $weapon->endArc,
-            $weapon->startArcArray ?? [],
-            $weapon->endArcArray ?? []
+            $interceptStartArcs,
+            $interceptEndArcs
         )) {
             return false;
-        }		
+        }
 
         /* //Old check for just main arcs
         if (!mathlib::isInArc($relativeBearing, $weapon->startArc, $weapon->endArc)) {
@@ -665,6 +681,17 @@ class Firing
                 }
             }
         }
+
+        //Chameleon Sensor Suite (D9): this phase runs its OWN calculateHitBase pass and
+        //firePreFiringWeapons() allocates real damage from it, so the withdrawal has to happen here
+        //too - otherwise a prefiring called shot at a disguised ship still reaches the real hull
+        //carrying a simulacrum system id. Idempotent: a second call sees calledid already -1 and
+        //skips the order, leaving $chameleonCalledId intact.
+        self::withdrawChameleonCalledShots($gamedata);
+
+        //Pre-Firing resolves a phase EARLIER than the Fire Phase, so a fleet that conceded during
+        //Initial Orders or Movement would otherwise still get its pre-firing shots away here.
+        self::withdrawSurrenderedFireOrders($gamedata);
 
         $ambiguousFireOrders  = array();
         foreach ($gamedata->ships as $ship){
@@ -869,6 +896,18 @@ public static function firePreFiringWeapons($gamedata){
             }
         }
 
+        //Chameleon Sensor Suite (D9): a called shot AT a disguised ship names a system on the
+        //simulacrum. Both hulls number their systems 0..N, so the raw id resolves on the real ship
+        //too and lands the call on an arbitrary real system (finding #16). Withdraw it ONCE, here,
+        //before any hit-chance maths - four separate places downstream do
+        //$target->getSystemById($fire->calledid) and none of them can tell a foreign id from a
+        //real one.
+        self::withdrawChameleonCalledShots($gamedata);
+
+        //A fleet that conceded part-way through the turn must not still be shooting when the
+        //phase resolves - see the method for why nothing downstream would have stopped it.
+        self::withdrawSurrenderedFireOrders($gamedata);
+
         //Uncontrolled Hunter-Killers that ended movement co-located with an enemy ram it
         //(no player to submit the ram order). Done before ram orders are gathered below.
         //$dbManager is threaded through so each automated ram FireOrder is persisted
@@ -917,7 +956,63 @@ public static function firePreFiringWeapons($gamedata){
             $weapon->calculateHitBase($gamedata, $fireOrder);
         }
 
-    }//endof function prepareFiring	
+    }//endof function prepareFiring
+
+    /*Chameleon Sensor Suite (D9). Withdraws every called shot aimed at a ship the SHOOTER still
+      sees as somebody else, so that a simulacrum system id never reaches getSystemById() on the
+      real hull. Runs once per resolution, before hit chances are calculated.
+
+      WITHDRAWN, NOT TRANSLATED (user's ruling, 2026-08-02). The shooter named a mount on a sheet
+      that is not this ship, and no mapping onto the real hull can be right. The class-match this
+      used to do took the first gun of that class in CONSTRUCTION ORDER: in game 4272 a shot called
+      at the simulacrum's forward Matter Cannon landed on the Dargan's forward Matter Cannon while
+      the Gorith fighters were firing from port. The call therefore simply FAILS on the real ship -
+      the hit rolls on the ordinary chart, for the section the shot's own bearing gives it, exactly
+      like any uncalled shot. That is also the cheap answer: no new allocation machinery, and the
+      real hull cannot be made a better target by being shot at through a mask.
+
+      The declared call is not thrown away, it moves to $chameleonCalledId:
+        - the mirrored allocation (D3) aims pass 2 with it, so the enemy still watches their called
+          shot land where they called it, on the sheet they can see;
+        - calculateHitBase() still resolves it - on the SIMULACRUM, via getCalledSystemAsAimed() -
+          for the called-shot penalty, the profile override and the fire-control category. The
+          shooter pays for the call they declared and the server's number matches the preview their
+          own client computed off that same false sheet, which is the Stage 7 decision-5 identity.
+          Skipping the penalty instead would make a called shot at a disguised ship strictly better
+          than a called shot at anything else.
+
+      Behind the per-load gate, so an ordinary game does not walk its fire orders for this at all.*/
+    private static function withdrawChameleonCalledShots($gamedata)
+    {
+        if (!TacGamedata::$chameleonPresent) return;
+
+        foreach ($gamedata->ships as $ship){
+            foreach ($ship->getAllFireOrders($gamedata->turn) as $fire){
+                if ($fire->calledid == -1) continue;
+                if ($fire->targetid == -1) continue;
+
+                $target = $gamedata->getShipById($fire->targetid);
+                if ($target === null) continue;
+                if (empty($target->chameleonDisguiseClass)) continue;
+
+                $shooter = $gamedata->getShipById($fire->shooterid);
+                if ($shooter === null) continue;
+                //Only a shooter who still believes it aimed at the simulacrum. A team that has seen
+                //through the deception is looking at the real hull and called a real system.
+                if (!$target->isChameleonDisguisedFrom($shooter->team)) continue;
+
+                //A ramming attack cannot be called (calculateHitBaseRam returns 0 for calledid !=
+                //-1, and the client refuses to offer it). Withdrawing one would turn a doctored
+                //illegal order into a legal ram, so rams keep whatever they arrived with and are
+                //rejected downstream exactly as they are today.
+                $weapon = $ship->getSystemById($fire->weaponid);
+                if ($weapon instanceof Weapon && $weapon->isRammingAttack) continue;
+
+                $fire->chameleonCalledId = $fire->calledid;
+                $fire->calledid = -1;
+            }
+        }
+    }
 	
 	
 
@@ -947,7 +1042,49 @@ public static function firePreFiringWeapons($gamedata){
         }
     } //endof function compareFiringOrders
 
-    
+    /* Withdraw every still-unresolved fire order belonging to a fleet that has surrendered.
+
+       Surrender is now possible in any phase, so a player can launch ballistics in Initial Orders
+       and concede during Movement or Firing with shots already in the air. Those orders sit in
+       tac_fireorder stamped with this turn and resolve normally at the end of the phase, so a
+       fleet that has left the game could still kill ships. Nothing downstream was going to stop
+       them either: fireWeapons() resolves orders from DESTROYED shooters on purpose ("ballistics
+       that have been fired must still be resolved"), and the getTurnDeployed guard that lifts a
+       surrendered fleet out of activation lists is not applied to the firing loops.
+
+       DETACHED, not deleted from the DB, using the same ->rejected + detachFireOrder convention as
+       the corrupt-order guard in validateFireOrders. Everything that resolves fire reads
+       $ship->getAllFireOrders(), so one detach removes the order from the priority sort, from
+       automateIntercept's incoming-shot list (defenders must not spend interceptors on a shot that
+       can no longer land) and from every fireWeapons loop. Keeping the row means the replay and
+       combat log of the final turn still show what was launched before the player left, which is
+       the point of keeping a surrendered fleet visible for that turn at all.
+
+       Their INTERCEPT orders need no handling here: interceptors are gathered by
+       getUnassignedInterceptors, which already skips ships whose getTurnDeployed exceeds the
+       current turn - and a surrendered slot reads as 999. Withdrawing whatever is attached is
+       still the right blanket rule: a fleet that has conceded does nothing at all.
+
+       Called from both prepareFiring and preparePreFiring, exactly like the chameleon withdrawal,
+       because Pre-Firing runs its own resolution pass a phase earlier. Idempotent - a second pass
+       finds the orders already detached. */
+    private static function withdrawSurrenderedFireOrders($gamedata)
+    {
+        foreach ($gamedata->ships as $ship) {
+            $slot = $gamedata->getSlotById($ship->slot);
+            if ($slot === null) continue;
+            if ($slot->surrendered === null) continue;
+            //Surrendered on a LATER turn than the one being resolved: this is a past turn being
+            //re-resolved, and the fleet was still playing at the time.
+            if ($slot->surrendered > $gamedata->turn) continue;
+
+            //getAllFireOrders builds a fresh array, so detaching inside the loop is safe.
+            foreach ($ship->getAllFireOrders($gamedata->turn) as $fire) {
+                $fire->rejected = true;
+                self::detachFireOrder($ship, $fire);
+            }
+        }
+    }
 
 	/*actual firing of weapons in normal Firing Phase
 	Marcin Sawicki, October 2017: at this stage, assume all necessary calculations (hit chance, target section), and only raw rolling remains!

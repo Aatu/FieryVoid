@@ -65,7 +65,7 @@ class Manager{
                 
             self::$dbManager->endTransaction(false);
         }catch(exception $e) {
-            self::$dbManager->endTransaction(true);
+            if (self::$dbManager !== null) self::$dbManager->endTransaction(true);
             throw $e;
         }
     }
@@ -311,9 +311,7 @@ class Manager{
             return $gameid;
         }
         catch(exception $e) {
-            if (self::$dbManager) {
-                self::$dbManager->endTransaction(true);
-            }
+            if (self::$dbManager !== null) self::$dbManager->endTransaction(true);
             throw $e;
         }
     
@@ -599,7 +597,7 @@ class Manager{
             self::$dbManager->endTransaction(false);          
             return $gamedata;
         }catch(exception $e) {
-            self::$dbManager->endTransaction(true);
+            if (self::$dbManager !== null) self::$dbManager->endTransaction(true);
             $logid = Debug::error($e);
             return json_encode([
                 "error" => $e->getMessage(),
@@ -780,7 +778,7 @@ class Manager{
                     
                 foreach($ship->enhancementOptions as $enhancementEntry){ //ID,readableName,numberTaken,limit,price,priceStep
                     $enhID = $enhancementEntry[0];
-                    $enhName = $enhancementEntry[1];
+                    $enhName = Enhancements::getStoredEnhancementName($ship, $enhancementEntry); //choice-valued options store the PICK here, not the label
                     $enhNo = $enhancementEntry[2];
                     if ($enhNo > 0){ //actually taken
                         self::$dbManager->submitSavedEnhancement($listId, $shipId, $enhID, $enhNo, $enhName);
@@ -843,7 +841,7 @@ class Manager{
                 ]);
 
             } catch (Exception $e) {
-                self::$dbManager->endTransaction(true);
+                if (self::$dbManager !== null) self::$dbManager->endTransaction(true);
                 $logid = Debug::error($e);
                 return json_encode([
                     "error" => $e->getMessage(),
@@ -867,7 +865,7 @@ class Manager{
             return $fleets;
 
         } catch (Exception $e) {
-            self::$dbManager->endTransaction(true);
+            if (self::$dbManager !== null) self::$dbManager->endTransaction(true);
             $logid = Debug::error($e);
             return [];
         }
@@ -912,8 +910,23 @@ class Manager{
                     foreach ($ship->enhancementOptions as &$option) {
                         if ($option[0] === $enhID) {
                             $option[2] = $numberTaken;
+                            //Choice-valued options (index 7 = the list of things that can be picked)
+                            //store the PICK in enhname and only an INDEX into that list in numbertaken.
+                            //The list is rebuilt from disk on every load, so a ship added to or retired
+                            //from the faction silently renumbers it - re-derive the index from the name,
+                            //which is stable. An unresolvable name falls back to index 0 = "None".
+                            if (!empty($option[7]) && isset($enhEntry[2]) && $enhEntry[2] !== '') {
+                                $option[2] = 0;
+                                foreach ($option[7] as $choiceIndex => $choice) {
+                                    if ($choice[0] === $enhEntry[2]) {
+                                        $option[2] = $choiceIndex;
+                                        break;
+                                    }
+                                }
+                            }
                         }
                     }
+                    unset($option);
                 }
 
                 // Add Ammo
@@ -933,7 +946,7 @@ class Manager{
             }
 
         } catch (Exception $e) {
-            self::$dbManager->endTransaction(true);
+            if (self::$dbManager !== null) self::$dbManager->endTransaction(true);
             Debug::error($e);
             return []; // safe fallback
         }
@@ -960,7 +973,7 @@ class Manager{
             ]);
 
         } catch (Exception $e) {
-            self::$dbManager->endTransaction(true);
+            if (self::$dbManager !== null) self::$dbManager->endTransaction(true);
             $logid = Debug::error($e);
             return [];
         }
@@ -980,7 +993,7 @@ class Manager{
                 'newStatus' => $newStatus
             ];
         } catch (Exception $e) {
-            self::$dbManager->endTransaction(true);
+            if (self::$dbManager !== null) self::$dbManager->endTransaction(true);
             $logid = Debug::error($e);
             return [
                 'id'      => $id,
@@ -1089,9 +1102,12 @@ class Manager{
             */
 
             //New slot-based appraoch to surrendering - DK - Aug 2025
-            if ($status == "SURRENDERED") {
+            $isSurrender = ($status == "SURRENDERED");
+            $gameEndedNow = false; //set below if this surrender left one team or fewer standing
+
+            if ($isSurrender) {
                 // Step 1: Update this player's slot surrendered value with game turn when they surrender
-                self::$dbManager->updateSlotSurrendered($gameid, $userid, $gdS->turn); 
+                self::$dbManager->updateSlotSurrendered($gameid, $userid, $gdS->turn);
             }
 
             if ($gdS->status !== "SURRENDERED") {
@@ -1124,6 +1140,7 @@ class Manager{
 
                 // Step 4: End game if one or zero teams remain
                 if ($aliveCount <= 1) {
+                    $gameEndedNow = true;
                     self::$dbManager->updateGameStatus($gameid, "SURRENDERED");
                     // In-memory $gdS->status still holds the old value — flag the
                     // game explicitly so DiscordNotifier never pings a dead game.
@@ -1167,10 +1184,37 @@ class Manager{
                     // --- LADDER LOGIC END ---
                 }
             } else {
+                //Game is already over. Nothing left to record - but the transaction and the
+                //player submit lock taken above are still ours, and a bare return leaked both
+                //(the lock then sat until its 15-minute expiry).
+                self::$dbManager->endTransaction(false);
+                self::$dbManager->releasePlayerSubmitLock($gameid, $userid);
                 return "{}";
             }
 
+            /* Surrender is a phase-independent ACTION, not a set of orders, and since the button
+               moved out of the Initial Orders header into the top-right HUD it can arrive from
+               any phase. So it deliberately bypasses the submit gauntlet below:
+                 - "Turn already submitted" would reject a player who surrenders while waiting on
+                   opponents, which is now a perfectly normal thing to do;
+                 - the turn/phase/active-ship match tests only make sense for orders, and would
+                   reject a click made a moment after the phase rolled over;
+                 - running $phase->process() would commit whatever half-finished orders the client
+                   happened to be holding, and in the Movement phase would hand the activation on
+                   even when it belongs to somebody else.
+               completeSurrender() does the one thing that is actually required: stop the player
+               who just left from blocking the phase they left in. */
+            if ($isSurrender) {
+                self::completeSurrender($gdS, $userid, $gameEndedNow);
 
+                self::$dbManager->endTransaction(false);
+                self::$dbManager->releasePlayerSubmitLock($gameid, $userid);
+                self::touchGame($gameid);
+
+                if (class_exists('DiscordNotifier')) DiscordNotifier::flush(self::$dbManager, $gdS, $userid);
+
+                return '{}';
+            }
 
             if ($gameid != $gdS->id || $turn != $gdS->turn || $phase != $gdS->phase)
                 throw new Exception("Unexpected orders");
@@ -1219,14 +1263,109 @@ class Manager{
             return '{}';
 
         }catch(exception $e) {
-            self::$dbManager->endTransaction(true);
-            self::$dbManager->releasePlayerSubmitLock($gameid, $userid);
+            if (self::$dbManager !== null) self::$dbManager->endTransaction(true);
+            if (self::$dbManager !== null) self::$dbManager->releasePlayerSubmitLock($gameid, $userid);
             if (class_exists('DiscordNotifier')) DiscordNotifier::clear();   // rolled-back state must not ping
             $logid = Debug::error($e);
             return '{"error": "' .$e->getMessage() . '", "code":"'.$e->getCode().'", "logid":"'.$logid.'"}';
         }
-       
-        
+
+
+    }
+
+    /* Stop a player who has just surrendered from blocking the phase they surrendered in.
+       Records NO orders of any kind.
+
+       Every phase EXCEPT Movement is slot-gated - DBManager::checkIfPhaseReady counts the slots
+       whose lastturn/lastphase have caught up with the game - so marking the slot done is all it
+       takes; the next poll's advanceGameState picks it up. Movement is gated on the ACTIVE SHIP
+       instead (checkIfPhaseReady skips phase 2 outright), hence the hand-off below.
+
+       The slot IS still marked when the surrender ended the game ($gameEnded), even though that
+       looks pointless: if the opponents had already committed this phase, marking it is what lets
+       the turn roll on to the Fire Phase and Manager::changeTurn, which is what converts the
+       game's SURRENDERED status into FINISHED. Skipping it froze the game mid-phase instead - the
+       pre-2026-08 code got this for free, because a phase-1 surrender fell through into
+       InitialOrdersGamePhase::process() and that ends with exactly this updatePlayerStatus call.
+       Only the movement hand-off is suppressed on a game-ending surrender: nothing should be
+       activated on a dead board, and every client is already in replay mode.
+
+       Only the phase the player was actually sitting in needs covering: the surrendered slot is
+       auto-completed for every later phase by the advance() of the phase before it - see
+       DeploymentGamePhase, MovementGamePhase and PreFiringGamePhase, which all skip a slot whose
+       `surrendered` is set. */
+    private static function completeSurrender(TacGamedata $gdS, $userid, $gameEnded)
+    {
+        /* Whether the activation is sitting on this player's ships has to be answered BEFORE the
+           in-memory mirror below, which is precisely what makes their fleet invisible to
+           getActiveships(). Movement is the only phase where this matters. */
+        $activeBefore = ($gdS->phase == 2) ? $gdS->getActiveships() : array();
+        $handOverMovement = (!$gameEnded && $gdS->phase == 2 && count($gdS->getMyActiveShips()) > 0);
+
+        /* $gdS was loaded before updateSlotSurrendered() wrote the row, so mirror that write in
+           memory. Not cosmetic: BaseShip::getTurnDeployed() returns 999 for a slot with
+           `surrendered` set, and that single rule is what lifts the fleet out of every activation
+           list, initiative sweep and end-of-phase loop for the remainder of this request. */
+        foreach ($gdS->slots as $slot) {
+            if ($slot->playerid == $userid) {
+                $slot->surrendered = $gdS->turn;
+            }
+        }
+
+        //May already be marked done - surrendering while waiting on opponents is now normal, and
+        //a slot the previous advance() skipped forward must not be rolled backwards.
+        if (!$gdS->hasAlreadySubmitted($userid)) {
+            self::$dbManager->updatePlayerStatus($gdS->id, $userid, $gdS->phase, $gdS->turn);
+        }
+
+        self::$dbManager->setPlayerWaitingStatus($userid, $gdS->id, true);
+
+        if ($handOverMovement) {
+            self::handOverMovementActivation($gdS, $activeBefore);
+        }
+    }
+
+    /* Pass the Movement Phase activation on from a fleet that has just surrendered mid-phase.
+       $activeBefore is the active ship list as it stood before that fleet was flagged.
+
+       One hand-off is enough in both movement modes: the surrendered fleet now reads as
+       undeployed, so neither path can hand the activation straight back to it. */
+    private static function handOverMovementActivation(TacGamedata $gdS, array $activeBefore)
+    {
+        $movementPhase = new MovementGamePhase();
+
+        if (!$gdS->rules->hasRule("getNewActiveShip")) {
+            //Classic movement: one ship at a time, in ship order. setNextActiveShip() skips
+            //anything not deployed by this turn and advance()s the whole phase if nothing is left.
+            $movementPhase->setNextActiveShip($gdS, self::$dbManager);
+            return;
+        }
+
+        /* Simultaneous movement activates a whole initiative CATEGORY at a time. Anybody else in
+           the current category simply carries on; only when the surrendered fleet WAS the whole
+           category do we step down to the next one.
+
+           $activeBefore is passed to getNewActiveShip rather than $gdS->getActiveships(), which is
+           empty in exactly that case - and SimultaneousMovementRule::getNewActiveShip needs a
+           non-empty list to know which category it is stepping down FROM (it throws otherwise).
+           This is also why SimultaneousMovementRule::processMovement is not reused here. */
+        $stillActive = array();
+        foreach ($gdS->getActiveships() as $ship) {
+            $stillActive[] = $ship->id;
+        }
+
+        if (count($stillActive) === 0) {
+            $stillActive = $gdS->rules->callRule("getNewActiveShip", array($gdS, $activeBefore));
+        }
+
+        if (count($stillActive) > 0) {
+            $gdS->setActiveship($stillActive);
+            self::$dbManager->updateGamedata($gdS);
+            self::$dbManager->setPlayersWaitingStatusInGame($gdS->id, true);
+            $gdS->rules->callRule("setActiveShipPlayersNotWaiting", array($gdS, self::$dbManager));
+        } else {
+            $movementPhase->advance($gdS, self::$dbManager);
+        }
     }
 
     /* //Old method that didn't skip if no deployed ships - DK 2/6/25
@@ -1284,7 +1423,7 @@ class Manager{
         }
         catch(Exception $e)
         {
-            self::$dbManager->endTransaction(true);
+            if (self::$dbManager !== null) self::$dbManager->endTransaction(true);
             self::$dbManager->releaseGameSubmitLock($gameid);
             throw $e;
         }
@@ -1379,8 +1518,8 @@ class Manager{
         }
         catch(Exception $e)
         {
-            self::$dbManager->endTransaction(true);
-            self::$dbManager->releaseGameSubmitLock($gameid);
+            if (self::$dbManager !== null) self::$dbManager->endTransaction(true);
+            if (self::$dbManager !== null) self::$dbManager->releaseGameSubmitLock($gameid);
             if (class_exists('DiscordNotifier')) DiscordNotifier::clear();   // rolled-back state must not ping
             throw $e;
         }

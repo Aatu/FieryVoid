@@ -487,6 +487,27 @@ window.fleetListManager = {
             fleetlistline.appendTo(fleetlisttable);
         }
 
+        //Chameleon Sensor Suite: a disguised ship is valued off the simulacrum blueprint this viewer
+        //was served, so a simulacrum dearer than the real hull inflates the total above what the slot
+        //could legally spend — a fleet costing more than its budget is impossible, not just odd, and
+        //that is a free reveal. The server hands us the overstatement to take back off the header
+        //(TacGamedata::setChameleonFleetValueAdjust); it is 0 on every slot of every ordinary game,
+        //and 0 again for this fleet's owner, their allies, and everyone once the deception breaks.
+        //
+        //Rows are deliberately left showing the simulacrum's own cost — capping the ROW instead would
+        //put "Octurion — 750CP" on screen against a catalogue cost every player can look up, which is
+        //a plainer contradiction than a header that no longer sums.
+        //
+        //Current value is scaled rather than adjusted separately: at full health curr == base, so
+        //discounting base alone would render 3600/3000. The fleet-wide ratio keeps the pair coherent
+        //and needs no second field to stay pinned at 0.
+        var fleetValueAdjust = parseFloat(slot.fleetValueAdjust) || 0;
+        if (fleetValueAdjust > 0 && totalBaseValue > 0) {
+            var valueRatio = totalCurrValue / totalBaseValue;
+            totalBaseValue = Math.max(0, totalBaseValue - fleetValueAdjust);
+            totalCurrValue = Math.round(totalBaseValue * valueRatio);
+        }
+
         var phaseLabel = "Initial"
         switch (gamedata.gamephase) {
 
@@ -603,10 +624,6 @@ window.fleetListManager = {
         //the guard exists to protect.
         if (ship.removed && ship.flight) {
             window.webglScene.customEvent('OpenShipWindowFor', { ship: ship });
-            //Legacy flight window, kept commented until the Stage 4 retirement sweep:
-            //if (typeof flightWindowManager !== 'undefined' && flightWindowManager.open) {
-            //    flightWindowManager.open(ship);
-            //}
             return;
         }
 

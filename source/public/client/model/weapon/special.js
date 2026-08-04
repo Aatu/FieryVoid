@@ -150,6 +150,11 @@ var RammingAttack = function(json, ship)
 RammingAttack.prototype = Object.create( Weapon.prototype );
 RammingAttack.prototype.constructor = RammingAttack;
 
+RammingAttack.prototype.initializationUpdate = function() {
+    this.data["Range"] = 0; //Not 0.1.
+    return this;
+}    
+
 var LtEMWaveDisruptor = function(json, ship)
 {
     Weapon.call( this, json, ship);

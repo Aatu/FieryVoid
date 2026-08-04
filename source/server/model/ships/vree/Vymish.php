@@ -10,7 +10,7 @@ class Vymish extends MediumShip{
         $this->imagePath = "img/ships/VreeVymish.png";
         $this->shipClass = "Vymish Armed Trader";
   	    $this->canvasSize = 100;
-	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
+	    //$this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
 	    
 	    $this->isd = 2191;
 

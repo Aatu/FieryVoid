@@ -179,19 +179,30 @@ body {
     pointer-events: none;
 }
 
+/* The phase header. Roadmap item 6, Stage 4 surface 2: converged on the SCS language,
+   so it now paints the same line + fill as the React ship windows
+   (ShipWindowContainer in shipWindow/ShipWindow.js) instead of the 2011 teal.
+
+   ⚠️ The opacity moved from 0.85 to 0.95 and that is NOT a restyle - it is what keeps
+   the header as readable as it was. The old fill was OPAQUE (#0a3340), so 0.85 meant
+   0.85. --fv-chrome-scs carries its own alpha (#152029de, ~0.87), and element opacity
+   MULTIPLIES with it, so keeping 0.85 would have landed at ~0.74 effective - noticeably
+   more map showing through a strip that has text on it. 0.95 x 0.87 = ~0.83, which is
+   where it was, and it is the same pairing ShipWindowContainer uses. Retune the two
+   together or not at all. */
 #phaseheader {
-    border: 1px solid #587e8d;
-    border-radius: 8px;
-    color: #deebff;
-    background-color: #0a3340;
+    border: 1px solid var(--fv-line-scs);
+    border-radius: var(--fv-radius-chrome);
+    color: var(--fv-text);
+    background-color: var(--fv-chrome-scs);
     position: relative;
     height: 25px;
     width: auto;
     min-width: 500px;
-    opacity: 0.85;
-    -moz-box-shadow: 5px 5px 10px black;
-    -webkit-box-shadow: 5px 5px 10px black;
-    box-shadow: 5px 5px 10px black;
+    opacity: 0.95;
+    -moz-box-shadow: 5px 5px 10px var(--fv-overlay);
+    -webkit-box-shadow: 5px 5px 10px var(--fv-overlay);
+    box-shadow: 5px 5px 10px var(--fv-overlay);
     padding-top: 8px;
     padding-right: 45px;
     flex-shrink: 0;
@@ -288,7 +299,7 @@ body {
     z-index: 10000;
     position: absolute;
     left: 50%;
-    top: 100px;
+    top: 130px;
 
     border-radius: 7px;
     -moz-border-radius: 7px;
@@ -337,6 +348,19 @@ body {
     z-index: 201;
 }
 
+/* The map tooltip (ship names, hover detail).
+
+   Its twin is the styled-components Tooltip in client/UI/reactJs/common/Tooltip.js,
+   which covers systems, weapons and thrusters. The two are the SAME design declared
+   twice in two stacks - same black fill, same 0.65 opacity, same 7px radius, same
+   arial 12px, same z-index 7001 - and until roadmap item 6 Stage 3 they agreed only
+   by luck. Both now read the same tokens, so retuning one retunes both. If you change
+   anything here, change it there.
+
+   The 7px radius is kept ROUNDED on purpose while the rest of the screen goes square
+   at Stage 4: tooltips are transient and float over the map rather than docking to
+   chrome, and both stacks already agreed on 7px. Retune --fv-radius-tooltip if that
+   judgement changes. */
 #shipNameContainer,
 .shipNameContainer {
 
@@ -347,11 +371,11 @@ body {
     text-align: center;
     font-family: arial;
     font-size: 12px;
-    color: white;
-    background-color: black;
-    border-radius: 7px;
-    -moz-border-radius: 7px;
-    -webkit-border-radius: 7px;
+    color: var(--fv-text-bright);
+    background-color: var(--fv-overlay);
+    border-radius: var(--fv-radius-tooltip);
+    -moz-border-radius: var(--fv-radius-tooltip);
+    -webkit-border-radius: var(--fv-radius-tooltip);
     padding: 3px 15px 3px 15px;
     min-width: 140px;
     max-width: 320px;
@@ -462,6 +486,16 @@ body {
     display: none;
 }
 
+/* The log / info / chat panel. Roadmap item 6, Stage 4 surface 3.
+
+   Its fill was ALREADY the SCS panel colour (#04161C = theme.colors.panelBg), so only the
+   borders actually moved here - this surface was half-converged before item 6 started.
+   The opacity is left at 0.85 because --fv-well, unlike --fv-chrome-scs, has no alpha of
+   its own to multiply with (see the note on #phaseheader).
+
+   The body text colour is deliberately NOT touched: #7ba2ea is a considered choice, not
+   drift - the two commented-out alternatives below it are previous attempts that were
+   reverted. Changing it would restyle every log line, which is content, not chrome. */
 #logcontainer {
     width: 100%;
     max-width: 800px;
@@ -470,16 +504,16 @@ body {
     color: #7ba2ea;
     /*color: #e0e7ef;*/
     /* #deebff; */
-    background-color: #04161C;
-    border-top: 1px solid #587e8d;
-    border-right: 1px solid #587e8d;
-    border-left: 1px solid #587e8d;
+    background-color: var(--fv-well);
+    border-top: 1px solid var(--fv-line-scs);
+    border-right: 1px solid var(--fv-line-scs);
+    border-left: 1px solid var(--fv-line-scs);
     position: fixed;
     bottom: 0px;
     z-index: 10;
-    -moz-box-shadow: 5px 5px 10px black;
-    -webkit-box-shadow: 5px 5px 10px black;
-    box-shadow: 5px 5px 10px black;
+    -moz-box-shadow: 5px 5px 10px var(--fv-overlay);
+    -webkit-box-shadow: 5px 5px 10px var(--fv-overlay);
+    box-shadow: 5px 5px 10px var(--fv-overlay);
     font-family: arial;
     font-size: 12px;
     -webkit-transition: all 0.1s linear;
@@ -497,15 +531,26 @@ body {
     bottom: 0px;
 }
 
+/* The log / info / chat tabs.
+
+   ⚠️ The most arguable call in surface 3: these had 5px top corners, and rounded-top is a
+   strong "this is a tab" affordance. They follow --fv-radius-chrome (now 0) with the rest
+   of the legacy chrome rather than being carved out like the ini drawer, because unlike
+   the drawer the curve here is decoration rather than a cue about how the thing behaves -
+   the tabs sit in a row above a panel and read as tabs from position alone. Easy to
+   reverse if it looks wrong: give them their own token like --fv-radius-drawer.
+
+   The unselected fill (#020E12) is a one-off shade darker than the panel it fronts, which
+   is what makes an unselected tab recede; the selected tab matches the panel exactly. */
 .logUiEntry {
     position: absolute;
     top: -26px;
-    border-top: 1px solid #587e8d;
-    border-right: 1px solid #587e8d;
-    border-left: 1px solid #587e8d;
-    border-radius: 5px 5px 0px 0px;
-    -moz-border-radius: 5px 5px 0px 0px;
-    -webkit-border-radius: 5px 5px 0px 0px;
+    border-top: 1px solid var(--fv-line-scs);
+    border-right: 1px solid var(--fv-line-scs);
+    border-left: 1px solid var(--fv-line-scs);
+    border-radius: var(--fv-radius-chrome) var(--fv-radius-chrome) 0px 0px;
+    -moz-border-radius: var(--fv-radius-chrome) var(--fv-radius-chrome) 0px 0px;
+    -webkit-border-radius: var(--fv-radius-chrome) var(--fv-radius-chrome) 0px 0px;
     width: 100px;
     height: 18px;
     text-align: center;
@@ -521,8 +566,8 @@ body {
 
 .logUiEntry.selected {
     top: -25px;
-    background-color: #04161C;
-    color: #DEEBFF;
+    background-color: var(--fv-well);
+    color: var(--fv-text);
     font-weight: bold;
 }
 
@@ -618,11 +663,18 @@ body {
     background: transparent;
 }
 
+/* The log panel's scroll panes. Folded onto the shared scrollbar tokens (roadmap item 6,
+   Stage 4 surface 3) - this is the deferred half of Stage 1, which could only DEFINE the
+   tokens because collapsing four different thumb colours into one repaints three of them.
+
+   #iniGui above keeps its own alpha'd variants (#3c5574b6 / #5a7ea8d0) on purpose: it is
+   the drawer, which is already a standing exception, and its thumb is translucent so the
+   map reads through it. */
 #gameinfo::-webkit-scrollbar-track,
 #declarationsContainer::-webkit-scrollbar-track,
 #combatLogContainer::-webkit-scrollbar-track,
 .mine-deploy-group-list::-webkit-scrollbar-track {
-    background: #0d1620;
+    background: var(--fv-scroll-track);
 }
 
 #iniGui::-webkit-scrollbar-thumb {
@@ -634,7 +686,7 @@ body {
 #declarationsContainer::-webkit-scrollbar-thumb,
 #combatLogContainer::-webkit-scrollbar-thumb,
 .mine-deploy-group-list::-webkit-scrollbar-thumb {
-    background: #3c5574;
+    background: var(--fv-scroll-thumb);
 }
 
 #iniGui::-webkit-scrollbar-thumb:hover {
@@ -645,7 +697,7 @@ body {
 #declarationsContainer::-webkit-scrollbar-thumb:hover,
 #combatLogContainer::-webkit-scrollbar-thumb:hover,
 .mine-deploy-group-list::-webkit-scrollbar-thumb:hover {
-    background: #5a7ea8;
+    background: var(--fv-scroll-thumb-hover);
 }
 
 #combatLogButtons {
@@ -668,6 +720,11 @@ body {
     opacity: 0.95;
 }
 
+/* Only the BORDER converts here: it is chrome, and a teal outline inside a converted
+   panel reads as a miss. The #215a7a fill and 4px radius are left alone - that fill is
+   the button's own identity rather than panel chrome, and a small radius on a small
+   control is not what §5's squaring decision was about. Revisit by eye if the buttons
+   now look out of place against the squared panel. */
 #combatLogButtons input[type="button"] {
     font-size: 13px;
     cursor: pointer;
@@ -675,7 +732,7 @@ body {
     margin-right: 0px;
     margin-left: 3px;
     /* Add space between buttons */
-    border: 1px solid #587e8d;
+    border: 1px solid var(--fv-line-scs);
     background: #215a7a;
     border-radius: 4px;
     color: #e0e7ef;
@@ -732,6 +789,7 @@ body {
     color: #e0e7ef;
 }
 
+/* Border only, same reasoning as #combatLogButtons above. */
 #declarationsButtons input[type="button"] {
     font-size: 13px;
     cursor: pointer;
@@ -740,7 +798,7 @@ body {
     margin-right: 1px;
     margin-left: 2px;
     /* Add space between buttons */
-    border: 1px solid #587e8d;
+    border: 1px solid var(--fv-line-scs);
     background: #215a7a;
     border-radius: 4px;
     color: #e0e7ef;
@@ -751,15 +809,17 @@ body {
     color: #e0e7ef;
 }
 
+/* The bot panel's tab. Byte-for-byte the same pattern as .logUiEntry above and it sits in
+   the same bar, so it converts with the tabs - see the note there. */
 #expandBotPanel {
     position: absolute;
     top: -26px;
-    border-top: 1px solid #587e8d;
-    border-right: 1px solid #587e8d;
-    border-left: 1px solid #587e8d;
-    border-radius: 5px 5px 0px 0px;
-    -moz-border-radius: 5px 5px 0px 0px;
-    -webkit-border-radius: 5px 5px 0px 0px;
+    border-top: 1px solid var(--fv-line-scs);
+    border-right: 1px solid var(--fv-line-scs);
+    border-left: 1px solid var(--fv-line-scs);
+    border-radius: var(--fv-radius-chrome) var(--fv-radius-chrome) 0px 0px;
+    -moz-border-radius: var(--fv-radius-chrome) var(--fv-radius-chrome) 0px 0px;
+    -webkit-border-radius: var(--fv-radius-chrome) var(--fv-radius-chrome) 0px 0px;
     width: 100px;
     height: 18px;
     text-align: center;
@@ -1089,21 +1149,30 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     color: #2f5123;
 }
 
+/* The initiative drawer. Colours converged with the rest of the chrome (roadmap item 6,
+   Stage 4); the ROUNDING is a standing exception - see the border-radius note below. The
+   drawer stays distinct by SHAPE rather than by colour, which is the point of the
+   exception. Text keeps its own alpha (#deebffdc) rather than becoming flat --fv-text. */
 #iniGui {
     z-index: 10000;
-    border: 1px solid #587e8d;
+    border: 1px solid var(--fv-line-scs);
     color: #deebffdc;
-    background-color: #0a3340;
+    background-color: var(--fv-chrome-scs);
     margin-top: 45px;
     width: 260px;
     height: auto;
     position: absolute;
     display: inline-block;
-    opacity: 0.9;
-    box-shadow: 5px 5px 10px black;
+    /* 0.9 -> 0.95 for the same reason as #phaseheader: the old fill was opaque, the new
+       one carries ~0.87 alpha, and element opacity multiplies with it. See that note. */
+    opacity: 0.95;
+    box-shadow: 5px 5px 10px var(--fv-overlay);
     padding-top: 10px;
     padding-bottom: 10px;
-    border-radius: 0px 10px 10px 0px;
+    /* Rounded on the RIGHT-hand corners only, and staying that way: this panel is a
+       drawer anchored to the left screen edge and the curve is what makes it read as
+       sliding out. Standing exception to the item-6 squaring - see --fv-radius-drawer. */
+    border-radius: 0px var(--fv-radius-drawer) var(--fv-radius-drawer) 0px;
     max-height: 500px;
     overflow-y: auto;
 }
@@ -1242,17 +1311,22 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     /* Default open */
     width: 55px;
     height: 25px;
-    border: 1px solid #587e8d;
-    color: #deebff;
-    background-color: #0a3340;
-    opacity: 0.8;
-    -moz-box-shadow: 5px 5px 10px black;
-    -webkit-box-shadow: 5px 5px 10px black;
-    box-shadow: 5px 5px 10px black;
-    box-shadow: 5px 5px 10px black;
+    border: 1px solid var(--fv-line-scs);
+    color: var(--fv-text);
+    background-color: var(--fv-chrome-scs);
+    /* 0.8 -> 0.92: the new fill carries its own ~0.87 alpha and element opacity multiplies
+       with it, so 0.8 would have landed near 0.70. See the #phaseheader note. This tab is
+       deliberately a touch lighter than #iniGui's 0.95, as it was before. */
+    opacity: 0.92;
+    -moz-box-shadow: 5px 5px 10px var(--fv-overlay);
+    -webkit-box-shadow: 5px 5px 10px var(--fv-overlay);
+    box-shadow: 5px 5px 10px var(--fv-overlay);
     padding-top: 10px;
     padding-bottom: 10px;
-    border-radius: 0px 10px 10px 0px;
+    /* The drawer's pull-tab (it holds the #iniSlider pullIn/pullOut image). Rounded on
+       the right-hand corners to match #iniGui, and staying that way for the same reason
+       - see --fv-radius-drawer. Standing exception to the item-6 squaring. */
+    border-radius: 0px var(--fv-radius-drawer) var(--fv-radius-drawer) 0px;
 }
 
 #iniSlider {
@@ -1324,7 +1398,7 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     #phaseheader {
         width: auto;
         min-width: 220px;
-        max-width: 72vw;
+        max-width: 64vw;
         height: 22px;
         padding-top: 2px;
         padding-right: 45px;
@@ -1370,10 +1444,10 @@ only screen and (max-height: 500px) and (orientation: landscape) {
         right: 5px;
     }
 
-    /* Scale down OK/Cancel/Surrender buttons if they appear in the phase header */
+    /* Scale down OK/Cancel buttons if they appear in the phase header.
+       (Surrender left this table on 2026-08-03 — it is a top-right HUD button now.) */
     #phaseheader .ok,
-    #phaseheader .cancel,
-    #phaseheader .surrender {
+    #phaseheader .cancel {
         width: 18px;
         height: 18px;
         background-size: cover;
@@ -1488,7 +1562,7 @@ only screen and (max-height: 500px) and (orientation: landscape) {
    which toggles .large), matching portrait behaviour. */
 @media only screen and (max-height: 500px) and (orientation: landscape) {
     /* Phase header — mirror the portrait mobile sizing (shorter bar, smaller
-       fonts, hidden finished/notlogged, scaled OK/Cancel/Surrender) so it
+       fonts, hidden finished/notlogged, scaled OK/Cancel) so it
        doesn't render at full desktop size in landscape. */
     #phaseheader {
         width: auto;
@@ -1525,8 +1599,7 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     }
 
     #phaseheader .ok,
-    #phaseheader .cancel,
-    #phaseheader .surrender {
+    #phaseheader .cancel {
         width: 18px;
         height: 18px;
         background-size: cover;
@@ -1647,9 +1720,12 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     margin: 10px auto 0px;
     padding: 6px 10px;
     background: #3793c82a;
-    border: 1px solid #587e8d;
+    /* Border only, as with the other in-panel buttons: it sits inside the converted ini
+       drawer, so a teal outline would read as a miss. Its translucent blue fill and 5px
+       radius are the button's own identity and stay. */
+    border: 1px solid var(--fv-line-scs);
     border-radius: 5px;
-    color: #deebff;
+    color: var(--fv-text);
     font-family: arial, sans-serif;
     font-size: 13px;
     text-align: center;
@@ -1872,14 +1948,23 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     cursor: help;
 }
 
+/* Intercept + hit-chance tooltips — the THIRD tooltip family, joined to the other two
+   (roadmap item 6, Stage 4; user decision 2026-07-30). Stage 3 unified .shipNameContainer
+   with the React common/Tooltip.js; these two were painting teal chrome instead, which
+   made hover-transient information look like docked UI. They now share the black overlay
+   fill and --fv-radius-tooltip with the rest of the hover layer.
+
+   They keep their own border, padding and left-aligned multi-row layout: unlike the plain
+   map tooltip these carry tabulated combat numbers, and the border is what separates the
+   header row from the rows beneath it. */
 .custom-intercept-tooltip {
     position: fixed;
     z-index: 100000;
-    background: #0a3340d8;
-    border: 1px solid #587e8d;
+    background: var(--fv-overlay);
+    border: 1px solid var(--fv-line-scs);
     color: #deebffd5;
     padding: 6px 10px;
-    border-radius: 4px;
+    border-radius: var(--fv-radius-tooltip);
     font-size: 13px;
     pointer-events: none;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
@@ -1893,7 +1978,7 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     color: #deebffd5;
     margin-bottom: 4px;
     padding-bottom: 3px;
-    border-bottom: 1px solid #587e8d;
+    border-bottom: 1px solid var(--fv-line-scs);
 }
 
 .custom-intercept-tooltip .hctt-row {
@@ -1911,14 +1996,15 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     border-bottom-color: rgba(255, 0, 0, 0.548);
 }
 
+/* Sibling of .custom-intercept-tooltip above — same family, same reasoning. */
 .custom-hit-chance-tooltip {
     position: fixed;
     z-index: 100000;
-    background: #0a3340ec;
-    border: 1px solid #587e8d;
+    background: var(--fv-overlay);
+    border: 1px solid var(--fv-line-scs);
     color: #deebffd5;
     padding: 6px 10px;
-    border-radius: 4px;
+    border-radius: var(--fv-radius-tooltip);
     font-size: 13px;
     pointer-events: none;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
@@ -1932,7 +2018,7 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     color: #deebffd5;
     margin-bottom: 4px;
     padding-bottom: 3px;
-    border-bottom: 1px solid #587e8d;
+    border-bottom: 1px solid var(--fv-line-scs);
 }
 
 .custom-hit-chance-tooltip .hctt-row {

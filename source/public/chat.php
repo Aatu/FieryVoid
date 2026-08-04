@@ -7,7 +7,7 @@ if (! isset($chatelement))
     throw new Exception("\$chatelement is missing!");
 
 ?>
-<link href="styles/chat.css" rel="stylesheet" type="text/css">
+<link href="<?php echo AssetLoader::getAssetUrl('styles/chat.css'); ?>" rel="stylesheet" type="text/css">
 <script>
 (function(){
 

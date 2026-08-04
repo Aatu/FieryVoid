@@ -420,8 +420,15 @@ window.ReplayPhaseStrategy = function () {
         return this.currentTurn;
     }
 
+    // `<= 1`, not `== 1`: getInitialReplayTurn() legitimately starts this at 0 (turn 1, phase 1 or
+    // Deployment), and from there an == test let the button walk straight past the floor to
+    // turn -1, which replay.php rejects with a 400 and an AJAX error dialog. Only reachable at
+    // all now that surrender can drop a player into replay from the Deployment Phase of turn 1
+    // (user report 2026-08-03) - previously nothing but a spectator arriving at that exact moment
+    // could sit on replay turn 0. Both directions are already no-ops at 0, which is correct: turn
+    // 1 has not been played, so there is nothing on either side of it to show.
     function turnBack() {
-        if (this.replayTurn == 1 || this.loading) {
+        if (this.replayTurn <= 1 || this.loading) {
             return;
         }
 

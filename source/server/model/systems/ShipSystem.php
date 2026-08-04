@@ -295,10 +295,22 @@ public function setParentFighter($fighter) {
         if($ship->getHardAdvancedArmor()==true){  // GTS Hardened Advanced Armor
             $this->hardAdvancedArmor = true;
         }
-        $this->structureSystem = $ship->getStructureSystem($this->getStructureLocation());
+        $loc = $this->getStructureLocation();
+        if (is_array($loc)) {
+            $this->structureSystem = array();
+            foreach ($loc as $l) {
+                $this->structureSystem[] = $ship->getStructureSystem($l);
+            }
+        } else {
+            $this->structureSystem = $ship->getStructureSystem($loc);
+        }
         $this->effectCriticals();
         $this->destroyed = $this->isDestroyed();
     }
+    
+	public function setStructureHome($location){
+		$this->structureHomeLocation = $location;
+	}
 
     /*the section whose structure block this system belongs to - usually its own location,
     unless $structureHomeLocation redirects it (systems displayed apart from their block)*/
@@ -1356,7 +1368,20 @@ public function setParentFighter($fighter) {
 		/*18.02.2023: DO check base Structure for Structure, stopping at PRIMARY Structure :) */
         //if ( (!($this instanceof Structure)) && $this->structureSystem && $this->structureSystem->isDestroyed($prevTurn)) return true;
 		if ( !($this instanceof Structure) ) { //not Structure
-			if ($this->structureSystem && $this->structureSystem->isDestroyed($prevTurn) && !$this->survivesStructureDestruction) return true; //underlying Structure is destroyed
+			if ($this->structureSystem && !$this->survivesStructureDestruction) {
+                if (is_array($this->structureSystem)) {
+                    $allDestroyed = true;
+                    foreach ($this->structureSystem as $struct) {
+                        if ($struct && !$struct->isDestroyed($prevTurn)) {
+                            $allDestroyed = false;
+                            break;
+                        }
+                    }
+                    if ($allDestroyed) return true;
+                } else {
+                    if ($this->structureSystem->isDestroyed($prevTurn)) return true; //underlying Structure is destroyed
+                }
+            }
 		} else if ($this->location!=0) { //Structure (checked earlier) but not PRIMARY one
 			$primaryStruct = $this->unit->getStructureSystem(0);
 			if($primaryStruct && $primaryStruct->isDestroyed($prevTurn)) return true;

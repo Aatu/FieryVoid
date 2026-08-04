@@ -54,6 +54,15 @@ class PlayerSlot {
     public $depx, $depy, $deptype, $depwidth, $depheight, $depavailable;
     public $playerid, $playername, $waiting, $surrendered; // ✅ include $waiting, surrendered
 
+    /*Chameleon Sensor Suite - how much this slot's fleet value, as THIS viewer computes it from the
+      rows they can see, overstates what the fleet actually cost. Non-zero only when a disguised ship
+      is wearing a simulacrum dearer than itself; see TacGamedata::setChameleonFleetValueAdjust().
+
+      Declared with a 0 default rather than passed to the constructor deliberately: the field then
+      ships on EVERY slot of EVERY game, so its presence says nothing. A field that appeared only on
+      the deceiving slot would be a louder tell than the arithmetic it exists to hide.*/
+    public $fleetValueAdjust = 0;
+
     function __construct(
         $playerid, $slot, $team, $lastturn, $lastphase, $name, $points,
         $depx, $depy, $deptype, $depwidth, $depheight, $depavailable,
@@ -240,7 +249,33 @@ class FireOrder{
     public $numInterceptors = 0; //number of intercepting weapons assigned
     public $resolutionOrder = -1; //actual order in which shot was resolved
 	public $priority = 0; //fire order priority, temporary only during fire resolution
-    
+	/*Chameleon Sensor Suite (D9): the called-shot id AS THE SHOOTER AIMED IT, i.e. a system id on
+	  the simulacrum, kept when Firing::withdrawChameleonCalledShots() clears calledid so the call
+	  cannot land on an arbitrary system of the REAL hull (which rolls the hit on its own chart
+	  instead). Two things still read it: the mirrored allocation (D3) aims pass 2 with it, since it
+	  is valid on the phantom by construction, and BaseShip::getCalledSystemAsAimed() resolves it on
+	  the simulacrum so the called-shot to-hit maths still sees the call the shooter declared.
+	  Transient and server-side only - it never reaches the client or the database, and a POST-side
+	  rebuild drops it, which is correct: withdrawal happens fresh on every resolution.*/
+	public $chameleonCalledId = null;
+	/*Chameleon Sensor Suite (D3b, Stage 7): the SECOND to-hit threshold and its own hit tally, for a
+	  shot fired at a ship the shooter still sees as somebody else. null - and therefore free - for
+	  every shot in every game without one.
+
+	    'needed' : the threshold computed off the SIMULACRUM's profile and DEW. It governs the
+	               PHANTOM sheet and it is what the deceived viewer is shown, so their preview and
+	               their combat log agree. $this->needed keeps the REAL threshold, which governs the
+	               real hull - the disguise must never make the real ship harder to hit.
+	    'hit'    : how many hits the phantom took, counted alongside $shotshit (the real count).
+	    'mirror' : per-shot gate read by Weapon::mirrorChameleonDamage - false when this shot beat
+	               the real threshold but not the fake one. Defaults true everywhere else, so every
+	               other caller of damage() keeps the Stage 5 behaviour.
+
+	  ONE property rather than three so an ordinary game pays the same payload cost as
+	  $chameleonCalledId above: a single null. Transient - it is rebuilt at each resolution and the
+	  persisted form is the CHAM: tag Weapon::fire() appends to $notes.*/
+	public $chameleonFake = null;
+
     function __construct(
         $id,
         $type, 

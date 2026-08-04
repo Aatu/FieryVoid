@@ -80,7 +80,12 @@ class Weapon extends ShipSystem
 	public $canSplitShots = false; //For Front end to allow weapons to target different enemies in same firing round. 
 	public $canSplitShotsArray = array(); 
     protected $multiModeSplit = false; //If you want the Front End to see this, pass it in strpForJson() in weapon :)
-    protected $splitArcs = false; //Used to tell Front End that weapon has 2 or more separate arcs, passed manually via stripForJson()
+    /*this mount has 2 or more arcs LIVE AT ONCE, listed in startArcArray/endArcArray (see the
+    invariant documented there). PUBLIC, unlike most of these flags, because it decides how those
+    arrays are to be read and every reader needs it: changeFiringMode here, Firing::isLegalIntercept,
+    and the client - which gets it from the static blueprint as well as from stripForJson, so the
+    lobby reads the arrays the same way an in-game turn does.*/
+    public $splitArcs = false;
     public $overloadable = false;
 
     public $normalload = 0;
@@ -189,8 +194,25 @@ class Weapon extends ShipSystem
     public $minDamageArray = array();
     public $maxDamageArray = array();
 
-	//some weapons might use variable firing arc...	
-    public $startArcArray = array(); 
+	/*VARIABLE FIRING ARCS. These arrays carry one of TWO meanings, and $splitArcs is what says
+	which:
+
+	  $splitArcs = false - PER FIRING MODE, keyed by mode number (1-based, as every other
+	    *Array on this class is). changeFiringMode() swaps the live startArc/endArc to the
+	    entry for the new mode. Example: BSGLtKineticEnergyWeaponVA, wide in mode 1 and
+	    narrow in mode 2.
+
+	  $splitArcs = true - the mount's COMPLETE LIST of arcs, all live at once, keyed from 0
+	    (entry 0 repeats the constructor's startArc/endArc). Example: the Shadow
+	    Battlecruiser's Heavy Slicer, forward 300-60 plus aft 150-210.
+
+	The two keyings overlap at index 1, so applying the per-mode swap to a split mount used to
+	select arc [1] the moment mode 1 was chosen - which is every mount, since construction ends
+	in changeFiringMode(1). The live startArc/endArc then held the mount's SECOND arc, and
+	everything reading it single-arc (skindance front-arc test here, arc overlays and hex
+	targeting in the client) quietly described the wrong side of the ship. changeFiringMode()
+	now applies the swap only when the arrays mean modes.*/
+    public $startArcArray = array();
 	public $endArcArray = array();
 	
     public $exclusive = false; //for fighter guns - exclusive weapon can't bve fired together with others
@@ -243,6 +265,14 @@ class Weapon extends ShipSystem
         $this->reducedArcStart = (int)$startArc;
         $this->reducedArcEnd = (int)$endArc;
         $this->arcRestrictionThreshold = (int)$threshold;
+    }
+
+    /*is this mount currently JAMMED? True means $startArc/$endArc are the reduced arc and are the
+    only arcs this weapon has - any per-mode/split entry in $startArcArray is a leftover of the
+    mount's original arcs and must be ignored (see Firing::isLegalIntercept). A method rather than a
+    public property on purpose: methods aren't serialised into the static ship blueprint.*/
+    public function isArcRestricted(){
+        return $this->arcRestricted;
     }
 
     public $useOEW = true;
@@ -1532,6 +1562,24 @@ public function getStartLoading()
 
 
         $dew = $target->getDEW($gamedata->turn);
+        /*Chameleon Sensor Suite (D4, extended): resolve DEW off the SIMULACRUM's sensor suite for a
+          shooter who still believes the deception. Returns null - one static boolean - otherwise.
+          The enemy's client never reads the stored DEW entry: ew.getDefensiveEW() is an alias for
+          getEWLeft(), i.e. "capacity minus everything spent on something else", and the capacity it
+          sees is the simulacrum's. A Dargan spending OEW 8 + DEW 2 inside a 9-EW Demos therefore
+          DISPLAYS as DEW 1 while the server was using 2 - a permanent preview/resolution
+          disagreement (measured in playtest: 103% vs 99%).
+          Matching the client here rather than revealing on the overflow keeps the reveal rule as
+          "all EW except DEW" (a 10-EW Dargan would otherwise be exposed inside almost every
+          Centauri hull), and it is the same principle D4 already applies to the defence profile:
+          the enemy resolves against the ship they believe they are shooting at.
+
+          STAGE 7 (D3b): this no longer OVERRIDES $dew - it feeds the SECOND threshold only. $dew
+          stays real and governs the real hull, because the suite is an information weapon and must
+          never make the real ship harder to hit. $dewFake shadows it from here to the goal
+          calculation and has to be zeroed wherever $dew is (two sites below).*/
+        $disguisedDEW = $target->getDisguisedDEWFor($shooter, $gamedata->turn);
+        $dewFake = ($disguisedDEW !== null) ? $disguisedDEW : $dew;
         $bdew = EW::getBlanketDEW($gamedata, $target);
         $sdew = EW::getSupportedDEW($gamedata, $target);
         if ($this->useOEW) {
@@ -1560,9 +1608,13 @@ public function getStartLoading()
         }
 
         $calledProfileOverride = null; //flat fighter-style profile of the called system (Kirishiac Orbitals - "targeted as if they were fighters")
-        if ($fireOrder->calledid != -1) {
-            $calledSystem = $target->getSystemById($fireOrder->calledid);
-            if ($calledSystem !== null) $calledProfileOverride = $calledSystem->getTargetProfileOverride();
+        /*Null when this is not a called shot. Chameleon (D9): a call at a disguised ship has had
+          calledid withdrawn so it cannot land on an arbitrary real system, and this resolves the
+          declared id on the SIMULACRUM instead - the sheet the shooter aimed at and the one their
+          client priced the shot against.*/
+        $calledSystem = $target->getCalledSystemAsAimed($fireOrder);
+        if ($calledSystem !== null) {
+            $calledProfileOverride = $calledSystem->getTargetProfileOverride();
             if ($calledProfileOverride === null) { //standard called shot
                 $mod += $this->getCalledShotMod();
                 if ($target->base) $mod += $this->getCalledShotMod();//called shots vs bases suffer double penalty!
@@ -1609,6 +1661,7 @@ public function getStartLoading()
   
             if (!$this->ballistic) {
                 $dew = 0;
+                $dewFake = 0; //D3b: defensive EW does not apply to this shot at all, on either sheet
                 $bdew = 0;
                 $sdew = 0;
                 $oew = $effectiveOB;
@@ -1695,11 +1748,12 @@ public function getStartLoading()
 			$noLockPenalty = 0;
 			$jammerValue = 0;
 			$dew = 0;
+			$dewFake = 0; //D3b: as above - a weapon that ignores all EW ignores the simulacrum's too
 			$bdew = 0;
 			$sdew = 0;
 			$oew = 0;
 			$soew = 0;
-		}		
+		}
 
         //Special to-hit bonuses when shooting mines
         if($target instanceof Mine){
@@ -1729,10 +1783,9 @@ public function getStartLoading()
             $mod -= ($CnC->hasCritical("ShadowPilotPain", $gamedata->turn));
         }
         $fcIndex = $target->getFireControlIndex();
-        if ($fireOrder->calledid != -1) { //called shot at a system that overrides FC category (Kirishiac Orbital: "targeted as if a fighter")
-            $calledFCSystem = $target->getSystemById($fireOrder->calledid);
-            if ($calledFCSystem !== null && $calledFCSystem->getFireControlIndexOverride() !== null) {
-                $fcIndex = $calledFCSystem->getFireControlIndexOverride();
+        if ($calledSystem !== null) { //called shot at a system that overrides FC category (Kirishiac Orbital: "targeted as if a fighter")
+            if ($calledSystem->getFireControlIndexOverride() !== null) {
+                $fcIndex = $calledSystem->getFireControlIndexOverride();
             }
         }
         $firecontrol = $this->fireControl[$fcIndex];
@@ -1798,26 +1851,43 @@ public function getStartLoading()
             $hitLoc = $target->getHitSection($shooter, $fireOrder->turn);
             $defence = $target->getHitSectionProfile($shooter);
         }
-        
+
+        /*Chameleon Sensor Suite (D4): a shooter who still believes the deception is shooting at the
+          simulacrum's silhouette, so it is the simulacrum's defence profile they resolve against.
+          Returns null - and costs one static boolean - for every shot in a game with no disguised
+          ship. The enemy's client already previews with these numbers (it reads the fake blueprint,
+          finding #10), so this is what makes prediction and resolution agree.
+          Placed BEFORE the ProfileIncreased modifier deliberately: a C&C crit on the REAL ship still
+          applies, since that is about the hull actually being shot at, not the image of it.
+
+          STAGE 7 (D3b): as with DEW above, this feeds the SECOND threshold only. $defence stays real
+          - a Dargan (side 16) wearing a Demos (14) must still be hit as a Dargan.*/
+        $disguisedProfile = $target->getDisguisedProfileFor($shooter, $this->ballistic ? $launchPos : null);
+        $defenceFake = ($disguisedProfile !== null) ? $disguisedProfile : $defence;
+
+
         //This section added to count new critical that raises Defence profiles and add to hit chance - June 2024 DK
         if(!$target instanceof FighterFlight){
 	        $defenceMod = 0;
-	        $targetCnC = $target->getSystemByName("CnC");        
+	        $targetCnC = $target->getSystemByName("CnC");
 	        $defenceMod = $targetCnC->hasCritical("ProfileIncreased");
 	        $defence += $defenceMod;
-		}else{             
+	        $defenceFake += $defenceMod;
+		}else{
             if ($target->hasSpecialAbility("Petals")){ //Does ship have Petals system?
                 $petals = $target->getSystemByName("FtrPetals");
                 if($petals->isActive()){
 	                $defence += 1;
-                } 
-            }           
-        }    
-     
+	                $defenceFake += 1;
+                }
+            }
+        }
+
         //called shot at a system with a flat target profile ("targeted as if they were fighters" -
         //Kirishiac Orbitals): the system's own profile replaces the ship's bearing profile entirely
         if ($calledProfileOverride !== null) {
             $defence = $calledProfileOverride;
+            $defenceFake = $calledProfileOverride; //a flat system profile leaves no room for divergence
         }
 
         $goal = $defence + $hitBonuses - $hitPenalties;
@@ -1839,6 +1909,22 @@ public function getStartLoading()
         $fireOrder->needed = $change;
         $fireOrder->notes = $notes;
         $fireOrder->updated = true;
+
+        /*Chameleon Sensor Suite (D3b, Stage 7) - the second threshold. Identical arithmetic to
+          $goal above with the simulacrum's profile and DEW swapped in, so the two differ by exactly
+          the two terms the deception controls and by nothing else. Rounded separately rather than
+          derived as a delta: $hitBonuses carries fractional SOEW, and round() at an exact half is
+          where the pre-existing client/server +-1 lives.
+          Left null unless this ship is actually disguised from this shooter - which is what keeps
+          Weapon::fire() on its single-threshold path for every shot in every ordinary game.*/
+        if ($disguisedProfile !== null || $disguisedDEW !== null) {
+            $goalFake = $defenceFake + $hitBonuses - ($hitPenalties - $dew + $dewFake);
+            $fireOrder->chameleonFake = array(
+                'needed' => round($goalFake * 5),
+                'hit'    => 0,
+                'mirror' => true,
+            );
+        }
     } //endof calculateHitBase
     
     /*
@@ -1981,7 +2067,18 @@ public function getStartLoading()
             }
         }
 
+        /*D3b: no phantom sheet, no second threshold. calculateHitBase only needs the blueprint to
+          produce one, but there is nothing for it to GOVERN unless a phantom was built (it is not,
+          on a POST-side rebuild) - and a fake hit tally against a sheet that does not exist would
+          promise the enemy damage they will never be shown. Collapsing to null here puts the shot
+          back on the single real threshold, which is the correct answer for the real hull anyway.*/
+        if ($fireOrder->chameleonFake !== null && $target->chameleonPhantom === null) $fireOrder->chameleonFake = null;
+
         $fireOrder->needed -= $fireOrder->totalIntercept;
+        //D3b: interception is a property of the shot, not of the target's silhouette, so it costs
+        //both thresholds the same. Keeping them in step here is what makes the two differ by a
+        //CONSTANT the serve-time mask can apply to every per-shot line in $notes.
+        if ($fireOrder->chameleonFake !== null) $fireOrder->chameleonFake['needed'] -= $fireOrder->totalIntercept;
         $notes = "Interception: " . $fireOrder->totalIntercept . " sources:" . $fireOrder->numInterceptors . ", final to hit: " . $fireOrder->needed;
         $fireOrder->notes .= $notes;
 
@@ -2000,8 +2097,10 @@ public function getStartLoading()
         }
         for ($i = 0; $i < $shotsFired; $i++) {
             $needed = $fireOrder->needed;
+            $neededFake = ($fireOrder->chameleonFake !== null) ? $fireOrder->chameleonFake['needed'] : null;
             if ($this->damageType != 'Pulse') {//non-Pulse weapons may use $grouping, too!
                 $needed = $fireOrder->needed - $this->getShotHitChanceMod($i);
+                if ($neededFake !== null) $neededFake -= $this->getShotHitChanceMod($i);
             }
 
             //for linked shot: further shots will do the same as first!
@@ -2036,8 +2135,20 @@ public function getStartLoading()
 
 
 
-            //hit?
-            if ($rolled <= $needed) {
+            /*hit? Chameleon Sensor Suite (D3b, Stage 7): ONE roll, TWO thresholds. $needed is the
+              real one and always governs the real hull; $neededFake is the simulacrum's and governs
+              the phantom. Both directions of divergence then fall out by construction:
+                - small simulacrum ($neededFake < $needed): a roll in between hits the real ship
+                  while the enemy watches their shot miss - the deception paying off, with no
+                  defensive discount for the real hull;
+                - large simulacrum ($neededFake > $needed): the phantom takes a hit the real hull
+                  does not. The phantom is a fiction; that is exactly its job.
+              $neededFake is null for every shot that is not at a disguised ship, which collapses
+              this to the original single test.*/
+            $hitReal = ($rolled <= $needed);
+            $hitFake = ($neededFake === null) ? $hitReal : ($rolled <= $neededFake);
+
+            if ($hitReal) {
                 $hitsRemaining = 1;
 
                 if ($this->damageType == 'Pulse') { //possibly more than 1 hit from a shot
@@ -2049,8 +2160,26 @@ public function getStartLoading()
                     $fireOrder->shotshit++;
 					//19.12.2024 - clear any previous location for Vree-layout ships; this will be for entire volley - eg. single Pulse, but entire Raking shot
 					$target->clearVreeHitSectionChoice($shooter->id, $fireOrder);
-					
+
+                    if ($fireOrder->chameleonFake !== null) {
+                        //the mirror in damage() rides this shot only when the simulacrum was hit too
+                        if ($hitFake) $fireOrder->chameleonFake['hit']++;
+                        $fireOrder->chameleonFake['mirror'] = $hitFake;
+                    }
                     $this->beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
+                    if ($fireOrder->chameleonFake !== null) $fireOrder->chameleonFake['mirror'] = true;
+                }
+            } elseif ($hitFake) {
+                //Missed the real hull, beat the simulacrum's profile: the enemy watches their shot
+                //land on a ship that is not there. Resolved entirely on the phantom sheet.
+                $hitsRemaining = 1;
+                if ($this->damageType == 'Pulse') {
+                    $hitsRemaining = $this->rollPulses($gamedata->turn, $neededFake, $rolled);
+                }
+                while ($hitsRemaining > 0) {
+                    $hitsRemaining--;
+                    $fireOrder->chameleonFake['hit']++;
+                    $this->fireChameleonPhantomOnly($target, $shooter, $fireOrder, $pos, $gamedata);
                 }
             }
         }
@@ -2068,7 +2197,25 @@ public function getStartLoading()
         $fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
 		TacGamedata::$lastFiringResolutionNo++;    //note for further shots
 		$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!
-	    
+
+        /*D3b persistence. tac_fireorder stores ONE needed and ONE shotshit, and those stay REAL -
+          they are authoritative for the real hull and they are what the disguised ship's own player
+          must see (the Stage 5 playtest complaint was precisely that the owner could not see their
+          true vulnerability). The simulacrum's pair rides along as a tag on $notes, which is already
+          a machine-parsed channel (the client regexes "Interception: n sources:m" and
+          "rolled: x, needed: y" out of it) and is already persisted and already deleted with the
+          order - so the fake pair can never outlive or desync from the shot it belongs to.
+          Deliberately NOT the note-blob-keyed-by-fireorderid the plan sketched: orders created
+          DURING resolution (reactor self-destruct, ramming transfers, AoE children) still carry
+          id -1 at this point, so an id-keyed store silently loses them.
+          TacGamedata::maskChameleonFireOrders() strips this for every viewer without exception.*/
+        if ($fireOrder->chameleonFake !== null) {
+            //cast: round() hands back an integral FLOAT, and a stray ".0" would fall outside the
+            //strip regex and leave debris in the notes a viewer can read
+            $fireOrder->notes .= ' CHAM:' . (int)$fireOrder->chameleonFake['needed']
+                . ':' . (int)$fireOrder->chameleonFake['hit'];
+        }
+
     } //endof fire
 
     protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata)
@@ -2193,10 +2340,141 @@ public function getStartLoading()
 
 
 	/*forcePrimary = true means PRIMARY indication is not rechecked*/
+    /*Chameleon Sensor Suite (D3) - "damage to the disguised vessel should be rolled normally and
+      marked publicly on the false control sheet, but secretly recorded (using the appropriate hit
+      location rolls) on the CSS ship's sheet at the same time."
+
+      This is the seam for that: ONE to-hit roll and ONE damage amount (both already decided by the
+      caller), allocated TWICE - pass 1 on the real hull, pass 2 on the phantom. The two sheets see
+      identical shots and identical totals and diverge only in WHERE the damage lands and how much
+      armour eats it, which is exactly what the deception is for.
+
+      Split out from damageOneSheet() so the mirror is written once and both allocation strategies
+      inherit it - MatterCannon overrides the body (always hits Structure) and would otherwise need
+      its own copy. Every subclass reaches damage() through beforeDamage(), so overriding the body
+      rather than the entry point is also what the 35 beforeDamage overrides already expect.
+
+      ⚠️ A weapon with its own allocation strategy overrides damageOneSheet(), NEVER this. Replacing
+      damage() drops the mirror pass silently - no error, no warning, just a simulacrum that quietly
+      stops taking hits from that one weapon while every other weapon keeps updating it.*/
     public function damage($target, $shooter, $fireOrder, $gamedata, $damage, $forcePrimary = false){
+        $this->damageOneSheet($target, $shooter, $fireOrder, $gamedata, $damage, $forcePrimary);
+        $this->mirrorChameleonDamage($target, $shooter, $fireOrder, $gamedata, $damage, $forcePrimary);
+    }
+
+    /*Pass 2 of D3: the same shot, the same damage, allocated on the phantom sheet.
+
+      The phantom is one sheet shared by every enemy team, so it mirrors whenever the ship is still
+      projecting a disguise to ANYONE - including shots fired by a team that has already seen
+      through it. That is correct: a team who still believes needs to watch the simulacrum take the
+      hits everybody else can see landing.
+
+      Everything the real fire order carries is saved and restored around the pass. The order is a
+      single shared object threaded through the whole resolution and then persisted, so any state
+      pass 2 leaves behind - a hit location chosen against the phantom's sections, a doubled damage
+      narrative, a linked-shot system memory - would corrupt the REAL shot's record. chosenLocation
+      is deliberately cleared rather than copied: the sheets have different sections, and the
+      phantom must pick its own.*/
+    protected function mirrorChameleonDamage($target, $shooter, $fireOrder, $gamedata, $damage, $forcePrimary = false){
+        if (!TacGamedata::$chameleonPresent) return;
+        if ($target === null) return;
+        if ($target->chameleonPhantom === null) return;
+        if (!$target->isChameleonDisguised()) return;   //deception over for everyone: nothing to mirror
+        if ($target->chameleonPhantom->isDestroyed()) return;
+        /*D3b (Stage 7): this shot beat the real threshold. It only reaches the simulacrum as well if
+          it beat the simulacrum's - otherwise the enemy is watching a hull they think they missed.
+          Defaults true, so every caller of damage() that is not Weapon::fire()'s per-shot loop
+          (collateral chains, sub-orders, weapons with their own roll loop) keeps mirroring exactly
+          as it did in Stage 5.*/
+        if (is_array($fireOrder->chameleonFake) && !$fireOrder->chameleonFake['mirror']) return;
+
+        $saved = array(
+            'chosenLocation' => $fireOrder->chosenLocation,
+            'linkedHit'      => $fireOrder->linkedHit,
+            'armorIgnored'   => $fireOrder->armorIgnored,
+            'notes'          => $fireOrder->notes,
+            'pubnotes'       => $fireOrder->pubnotes,
+            'updated'        => $fireOrder->updated,
+            'calledid'       => $fireOrder->calledid,
+        );
+
+        //Aim pass 2 where the shooter actually aimed. calledid was WITHDRAWN for the real hull
+        //(D9) - the real ship rolls this hit on its own chart - but the declared id is a system on
+        //the simulacrum by construction, so here the enemy sees their called shot land where they
+        //called it.
+        if ($fireOrder->chameleonCalledId !== null) $fireOrder->calledid = $fireOrder->chameleonCalledId;
+        $fireOrder->chosenLocation = null;              //the phantom picks its own section
+        $fireOrder->linkedHit = null;
+
+        $this->damageOneSheet($target->chameleonPhantom, $shooter, $fireOrder, $gamedata, $damage, $forcePrimary);
+
+        $fireOrder->chosenLocation = $saved['chosenLocation'];
+        $fireOrder->linkedHit      = $saved['linkedHit'];
+        $fireOrder->armorIgnored   = $saved['armorIgnored'];
+        $fireOrder->notes          = $saved['notes'];
+        $fireOrder->pubnotes       = $saved['pubnotes'];
+        $fireOrder->updated        = $saved['updated'];
+        $fireOrder->calledid       = $saved['calledid'];
+
+        //D3a: a phantom that would die while the real ship flies on is a worse tell than the truth.
+        $target->checkChameleonDivergentDestruction($gamedata);
+    }
+
+    /*D3b (Stage 7), the other direction: this shot MISSED the real hull but beat the simulacrum's
+      profile, so it exists only on the false control sheet. A large simulacrum (a Dargan wearing an
+      Octurion or a Kraken) makes this common, and it is the deception over-performing rather than
+      failing - the enemy watches damage accumulate on a ship that never took it.
+
+      The phantom is passed as the TARGET through the ordinary beforeDamage() machinery rather than
+      the real ship, which is what keeps the 35 beforeDamage overrides honest: EM shields, dropout
+      criticals and every other on-hit side effect land on the sheet the shot actually hit, and the
+      real hull is not touched by a shot that missed it. The phantom carries the real ship's movement
+      (buildChameleonPhantom), so every geometric read those overrides make still works.
+
+      damage() then allocates on the phantom and its own mirror is a no-op, since a phantom has no
+      phantom of its own. Fire-order state is saved and restored exactly as the mirror does it, for
+      the same reason: the order is one shared object that is later persisted.*/
+    protected function fireChameleonPhantomOnly($target, $shooter, $fireOrder, $pos, $gamedata){
+        $phantom = $target->chameleonPhantom;
+        if ($phantom === null) return;          //no sheet built (POST-side rebuild): the shot simply misses
+        if ($phantom->isDestroyed()) return;
+
+        $saved = array(
+            'chosenLocation' => $fireOrder->chosenLocation,
+            'linkedHit'      => $fireOrder->linkedHit,
+            'armorIgnored'   => $fireOrder->armorIgnored,
+            'notes'          => $fireOrder->notes,
+            'pubnotes'       => $fireOrder->pubnotes,
+            'updated'        => $fireOrder->updated,
+            'calledid'       => $fireOrder->calledid,
+        );
+
+        if ($fireOrder->chameleonCalledId !== null) $fireOrder->calledid = $fireOrder->chameleonCalledId;
+        $fireOrder->chosenLocation = null;      //the phantom picks its own section
+        $fireOrder->linkedHit = null;
+        $phantom->clearVreeHitSectionChoice($shooter->id, $fireOrder);
+
+        $this->beforeDamage($phantom, $shooter, $fireOrder, $pos, $gamedata);
+
+        $fireOrder->chosenLocation = $saved['chosenLocation'];
+        $fireOrder->linkedHit      = $saved['linkedHit'];
+        $fireOrder->armorIgnored   = $saved['armorIgnored'];
+        $fireOrder->notes          = $saved['notes'];
+        $fireOrder->pubnotes       = $saved['pubnotes'];
+        $fireOrder->updated        = $saved['updated'];
+        $fireOrder->calledid       = $saved['calledid'];
+
+        $target->checkChameleonDivergentDestruction($gamedata);
+    }
+
+    protected function damageOneSheet($target, $shooter, $fireOrder, $gamedata, $damage, $forcePrimary = false){
 	    /*find details of shot, proceed to doDamage*/
-	    
-        if($this->damageType=='Flash'){ //damage units other than base target
+
+        /*Flash splash is dealt to the REAL ships sharing the target's hex, and a phantom sits in the
+          same hex as the ship it impersonates - so running this on the mirrored pass would deal the
+          collateral a second time, to real hulls, from one shot. The simulacrum's own sheet is the
+          only thing the phantom pass is allowed to write.*/
+        if($this->damageType=='Flash' && empty($target->chameleonIsPhantom)){ //damage units other than base target
             $flashDamageAmount = floor($damage/4); //other units on target hex receive 25% of damage dealt to target
 	        $this->doCollateralDamage($target, $shooter, $fireOrder, $gamedata, $flashDamageAmount);
         }
@@ -2656,17 +2934,19 @@ full Advanced Armor effects (by rules) for reference:
 				
         if (isset($this->rakingArray[$i])) $this->raking = $this->rakingArray[$i];
         
-        if (isset($this->hextargetArray[$i])) $this->hextarget = $this->hextargetArray[$i];	
-	    
-        if (isset($this->startArcArray[$i])) $this->startArc = $this->startArcArray[$i];
-        if (isset($this->endArcArray[$i])) $this->endArc = $this->endArcArray[$i];
-	    
-		if (isset($this->ignoreAllEWArray[$i])) $this->ignoreAllEW = $this->ignoreAllEWArray[$i];	
-		if (isset($this->ignoreJinkingArray[$i])) $this->ignoreJinking = $this->ignoreJinkingArray[$i];	
-	    
-        if (isset($this->startArcArray[$i])) $this->startArc = $this->startArcArray[$i];
-        if (isset($this->endArcArray[$i])) $this->endArc = $this->endArcArray[$i];
-		
+        if (isset($this->hextargetArray[$i])) $this->hextarget = $this->hextargetArray[$i];
+
+		//ONLY when the arc arrays are keyed by mode. On a split-arc mount they are the list of arcs
+		//the weapon has all at once and index 1 is its second arc, not "the arc in mode 1" - see the
+		//invariant on $startArcArray. Such a mount keeps the constructor's arcs as its live pair.
+		if (!$this->splitArcs) {
+			if (isset($this->startArcArray[$i])) $this->startArc = $this->startArcArray[$i];
+			if (isset($this->endArcArray[$i])) $this->endArc = $this->endArcArray[$i];
+		}
+
+		if (isset($this->ignoreAllEWArray[$i])) $this->ignoreAllEW = $this->ignoreAllEWArray[$i];
+		if (isset($this->ignoreJinkingArray[$i])) $this->ignoreJinking = $this->ignoreJinkingArray[$i];
+
 		if (isset($this->hidetargetArray[$i])) $this->hidetarget = $this->hidetargetArray[$i];  // GTS
 		if (isset($this->noLockPenaltyArray[$i])) $this->noLockPenalty = $this->noLockPenaltyArray[$i];  // DK
 				

@@ -16,6 +16,11 @@ class DeploymentGamePhase implements Phase
                 continue;
             }
             if($ship->trueStealth) $ship->checkStealth($gameData); //Extra check needed at start of turn for Stealth ships like Torvalus.
+
+            //Chameleon Sensor Suite: catches a turn-1 deployment that lands inside 5 hexes of an
+            //enemy. The end-of-Movement sweep is the primary one (positions do not change between
+            //Firing and the next Movement), but it would miss this case entirely.
+            if (TacGamedata::$chameleonPresent) $ship->checkChameleonReveal($gameData, 'deployment');
         }
 
         //Checks for late-deploying slots to see if next phases skipped - DK

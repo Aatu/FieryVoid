@@ -719,24 +719,24 @@ kbd {
 }
 
 /* Slot Card Styling */
-/* Games List Buttons - Moved from ladder.css */
-.btn-fleet-test {
-  background: #004d66;
-  border: 1px solid #587e8d;
 
-}
+/* The "Games List Buttons - Moved from ladder.css" block that used to sit here
+   (.btn-fleet-test / .btn-view-ladder / .btn-recent-games) was DELETED in roadmap item 6,
+   rather than restyled. Unifying them turned out to be the wrong fix, because none of the
+   three was actually painting anything:
 
-.btn-view-ladder {
-  /* Custom styles for View Ladder button */
-  border: 1px solid #587e8d;
-  background: #215a7a;
-}
+     .btn-fleet-test    - its only appearance in the markup is inside a commented-out
+                          <span> in creategame.php.
+     .btn-view-ladder   - zero references anywhere in the codebase.
+     .btn-recent-games  - STILL LIVE, but as a JS HOOK, not as styling. games.php renders
+                          <button class="fv-btn fv-btn--recent btn-recent-games">, and
+                          recentGames.js binds its click/focus to that class. The visual
+                          styling comes from .fv-btn + .fv-btn--recent in gamesPanel.css,
+                          which is linked AFTER this file and sets the full `border`
+                          shorthand - so the rule here was completely overridden.
 
-.btn-recent-games {
-  /* Custom styles for Recent Games button */
-  background: #3d5c5cb6;
-  border: 1px solid #69848f80;
-}
+   The class name stays in the markup because JS needs it. Style the Recent Games button
+   through .fv-btn--recent in gamesPanel.css. */
 
 /* Distinct styles for Lobby Game Types */
 .create-game-btn {

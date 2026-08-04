@@ -8,7 +8,6 @@ class VorlonHeavyCruiser extends VorlonCapitalShip{
 		$this->faction = "Vorlon Empire";
         $this->phpclass = "VorlonHeavyCruiser";
         $this->shipClass = "Heavy Cruiser";
-        //$this->variantOf = "Battle Destroyer";
         $this->imagePath = "img/ships/VorlonHeavyCruiser.png";
         $this->canvasSize = 250;
 	    $this->isd = 'Ancient';
@@ -63,12 +62,24 @@ class VorlonHeavyCruiser extends VorlonCapitalShip{
 		$this->addAftSystem(new GraviticThruster(5, 15, 0, 4, 2));
 		
 		
-        $this->addLeftFrontSystem(new VorlonLightningCannon(5, 0, 0, 240, 60, 'L'));
-        $this->addLeftFrontSystem(new VorlonLightningCannon(5, 0, 0, 240, 60, 'L'));
+        $lc1 = new VorlonLightningCannon(5, 0, 0, 240, 60, 'L');
+        $lc1->overkillArcStructures = array(1, 32);
+        $lc1->setStructureHome(array(1, 32));
+        $this->addLeftFrontSystem($lc1);
+        $lc2 = new VorlonLightningCannon(5, 0, 0, 240, 60, 'L');
+        $lc2->overkillArcStructures = array(1, 32);
+        $lc2->setStructureHome(array(1, 32));
+        $this->addLeftFrontSystem($lc2);
         $this->addLeftSystem(new GraviticThruster(5, 25, 0, 7, 3));
 		
-        $this->addRightFrontSystem(new VorlonLightningCannon(5, 0, 0, 300, 120, 'R'));
-        $this->addRightFrontSystem(new VorlonLightningCannon(5, 0, 0, 300, 120, 'R'));
+        $lc3 = new VorlonLightningCannon(5, 0, 0, 300, 120, 'R');
+        $lc3->overkillArcStructures = array(1, 42);
+        $lc3->setStructureHome(array(1, 42));
+        $this->addRightFrontSystem($lc3);
+        $lc4 = new VorlonLightningCannon(5, 0, 0, 300, 120, 'R');
+        $lc4->overkillArcStructures = array(1, 42);
+        $lc4->setStructureHome(array(1, 42));
+        $this->addRightFrontSystem($lc4);
         $this->addRightSystem(new GraviticThruster(5, 25, 0, 7, 4));
 		
 
@@ -108,13 +119,13 @@ class VorlonHeavyCruiser extends VorlonCapitalShip{
 			),
 			32=> array( //Fwd
 				6 => "Thruster",
-				10 => "TAG:Lightning Cannon",
+				10 => "31:Lightning Cannon",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			42=> array( //Fwd
 				6 => "Thruster",
-				10 => "TAG:Lightning Cannon",
+				10 => "41:Lightning Cannon",
 				18 => "Structure",
 				20 => "Primary",
 			),

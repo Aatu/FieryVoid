@@ -1,11 +1,31 @@
+/*
+ * confirm.css — the modal dialogs. Linked by game, gamelobby, games and creategame, so
+ * everything here lands on FOUR pages at once.
+ *
+ * Roadmap item 6, Stage 4 surface 4. Two notes on what was and was not converted:
+ *
+ * The border was ALREADY #496791 (= --fv-line-scs), so this surface was half-way there
+ * before item 6 touched it. The fill moves from `black` to --fv-well rather than to the
+ * translucent --fv-chrome-scs the map overlays use: a commit-confirmation dialog sits
+ * over a busy map and has to stay readable, and .confirm.warning below had already made
+ * exactly this choice (#04161C) on its own. Following the house precedent rather than
+ * inventing a third answer.
+ *
+ * The inline colours in client/UI/confirm.js are EXPLICITLY LEFT ALONE (§2.3 allows
+ * either converting them to classes or leaving them deliberately). There are 19 of them
+ * across 5 values, and they are overwhelmingly signals rather than chrome - amber
+ * rgb(224,185,57), red #ff7070, accent blue rgb(106,195,255), plus #DEFBFF and #bdbdbd
+ * for text. All of them were chosen to read on `black` and all still read on --fv-well,
+ * which is barely different in luminance, so the reskin does not strand them.
+ */
 .confirm {
     padding: 10px 10px 10px 10px;
     /*border: 1px solid #defbff44; */
-    border: 1px solid #496791;
-    background-color: black;
-    border-radius: 5px 5px 5px 5px;
-    -moz-border-radius: 5px 5px 5px 5px;
-    -webkit-border-radius: 5px;
+    border: 1px solid var(--fv-line-scs);
+    background-color: var(--fv-overlay);
+    border-radius: var(--fv-radius-modal);
+    -moz-border-radius: var(--fv-radius-modal);
+    -webkit-border-radius: var(--fv-radius-modal);
     position: fixed;
     width: 540px;
     max-width: 100%;
@@ -26,15 +46,15 @@
 }
 
 .confirm::-webkit-scrollbar-track {
-    background: #0d1620;
+    background: var(--fv-scroll-track);
 }
 
 .confirm::-webkit-scrollbar-thumb {
-    background: #3c5574;
+    background: var(--fv-scroll-thumb);
 }
 
 .confirm::-webkit-scrollbar-thumb:hover {
-    background: #5a7ea8;
+    background: var(--fv-scroll-thumb-hover);
 }
 
 .confirm .missileselect {
@@ -81,6 +101,51 @@
     padding: 3px 5px;
     text-align: right;
     vertical-align: middle;
+}
+
+/*
+ * Choice-valued enhancement option (currently only the Chameleon disguise): a dropdown takes the
+ * place of the +/- spinner, so the value box has to hold a ship class name rather than a two-digit
+ * count. Applied by confirm.applyEnhancementChoiceWidget, which adds .enhChoiceItem to the row.
+ *
+ * The dropdown ends on the same right edge as the +/- spinners of the counted rows above and
+ * below it, so the stack reads as one column. That falls out of the arithmetic rather than being
+ * eyeballed: the row is .selectText | .selectAmount | .selectButtons in that order, so the
+ * dropdown has to absorb the spinner column's 14px (.plusButton is 12px wide + 1px border each
+ * side). 45% + 45% = the counted row's 83% + 7%, and the spinner column is emptied by collapsing
+ * it to zero width while LEAVING IT IN FLOW - display:none would also swallow the inline
+ * whitespace gap beside it and pull the dropdown 4-ish px left of the spinners.
+ * .selectAmount keeps its inherited border and padding so the two box models match exactly.
+ */
+.missileSelectItem.enhChoiceItem .selectText {
+    width: 45%;
+}
+
+.missileSelectItem.enhChoiceItem .selectAmount {
+    width: calc(45% + 14px);
+    text-align: left;
+}
+
+.missileSelectItem.enhChoiceItem .selectButtons {
+    visibility: hidden;
+    width: 0;
+    overflow: hidden;
+}
+
+.missileSelectItem.enhChoiceItem .selectAmount select {
+    width: 100%;
+    padding: 0;
+    border: none;
+    background-color: transparent;
+    color: #DEEBFF;
+    font: inherit;
+}
+
+/* The open dropdown list is drawn by the OS on a white background, so its text has to be dark -
+   the light colour above applies to the closed control sitting on the dark .selectAmount box. */
+.missileSelectItem.enhChoiceItem .selectAmount select option {
+    color: #000;
+    background-color: #fff;
 }
 
 .fighterAmount {
@@ -215,9 +280,11 @@
     font-weight: bold;
 }
 
+/* This variant already used the SCS panel fill before item 6 — it is the precedent the
+   base .confirm rule above now follows. */
 .confirm.warning {
-    background-color: #04161C;
-    border: 1px solid #496791;
+    background-color: var(--fv-well);
+    border: 1px solid var(--fv-line-scs);
     color: #deebffd2;
     font-family: arial;
     font-size: 16px;
@@ -258,10 +325,14 @@
     width: 30px;
 }
 
+/* The wide labelled OK / Cancel buttons. Their fill is deliberately a step LIGHTER than
+   the dialog behind them - that contrast is the "this is a button" affordance - so the
+   translucent --fv-chrome-scs is right here even though the dialog itself is opaque:
+   composited over --fv-well it lands just above it, exactly as the old teal did. */
 .ui .confirmokoption {
-    border: 1px solid #496791;
-    border-radius: 5px;
-    background-color: #0a3340;
+    border: 1px solid var(--fv-line-scs);
+    border-radius: var(--fv-radius-modal);
+    background-color: var(--fv-chrome-scs);
     color: #DEFBFF;
     font-family: arial;
     font-size: 16px;
@@ -275,9 +346,9 @@
 
 
 .ui .confirmcanceloption {
-    border: 1px solid #496791;
-    border-radius: 5px;
-    background-color: #0a3340;
+    border: 1px solid var(--fv-line-scs);
+    border-radius: var(--fv-radius-modal);
+    background-color: var(--fv-chrome-scs);
     color: #DEFBFF;
     font-family: arial;
     font-size: 16px;

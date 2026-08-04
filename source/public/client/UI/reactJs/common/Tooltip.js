@@ -1,5 +1,6 @@
 import * as React from "react";
 import styled from 'styled-components';
+import theme from '../styled/theme';
 
 
 
@@ -14,18 +15,26 @@ class Component extends React.Component {
     }
 }
 
+/* The hover tooltip for systems, weapons and thrusters.
+
+   Its twin is .shipNameContainer in tactical.css - the jQuery map tooltip - which
+   declares the identical design a second time: same black fill, same 0.65 opacity, same
+   7px radius, same arial 12px, same z-index 7001. Two stacks, one look, and until
+   roadmap item 6 Stage 3 they agreed only by luck. Both now read the same tokens
+   (theme.radii.tooltip here, var(--fv-radius-tooltip) there), so a retune of one is a
+   retune of both. If you change anything here, change it there. */
 const Tooltip = styled(Component)`
     z-index:7001;
     opacity:0.65;
     position:absolute;
     text-align:center;
-    font-family:arial;
+    font-family:${theme.fonts.body};
     font-size:12px;
-    color:white;
-    background-color:black;
-    border-radius: 7px;
-    -moz-border-radius: 7px;
-    -webkit-border-radius: 7px;
+    color:${theme.colors.text};
+    background-color:${theme.colors.overlayBg};
+    border-radius: ${theme.radii.tooltip};
+    -moz-border-radius: ${theme.radii.tooltip};
+    -webkit-border-radius: ${theme.radii.tooltip};
     padding:3px 3px 3px 3px;
     padding-bottom: 8px;
 `;

@@ -90,9 +90,18 @@ window.combatLog = {
             var weapon = shipManager.systems.getSystem(ship, fire.weaponid);
 
 
+            //Defensive: an order naming a mode this weapon does not declare made the loop below
+            //spin forever and hang the tab. The Chameleon fire-order remap can produce exactly that
+            //(a Twin Array in mode 2 substituted by a single-mode Plasma Accelerator) and is clamped
+            //server-side, but nothing structurally prevents another source of it, and the cost of
+            //being wrong here is the whole page. changeFiringMode() cycles, so the number of
+            //declared modes is a complete bound: if it has not matched after one full cycle, it
+            //never will.
+            if (!weapon) continue;
             var modeIteration = fire.firingMode; //change weapons data to reflect mode actually used
             if (modeIteration != weapon.firingMode) {
-                while (modeIteration != weapon.firingMode) { //will loop until correct mode is found
+                var modeGuard = weapon.firingModes ? Object.keys(weapon.firingModes).length : 1;
+                while (modeIteration != weapon.firingMode && modeGuard-- > 0) { //loops until the correct mode is found
                     weapon.changeFiringMode();
                 }
             }
@@ -288,6 +297,14 @@ window.combatLog = {
                     }
 
                     var system = shipManager.systems.getSystem(gamedata.getShip(d.shipid), d.systemid);
+                    // A damage row whose ship or system cannot be resolved on this page must not be
+                    // able to kill the whole log: sufferedCritThisTurn() dereferences .criticals
+                    // immediately, so one unresolvable row threw a TypeError out of logFireOrders
+                    // and the viewer lost EVERY entry, including their own shots. Mirrors the null
+                    // guards on the server-side damage/critical loaders. (Seen with Chameleon
+                    // phantom rows, which are stored under a negative shipid that no client knows —
+                    // fixed at source in stripForJsonDisguised, guarded here as well.)
+                    if (!system) continue;
                     var damageDone = d.damage - d.armour;
                     var damageStopped = d.armour;
                     /*healing is up, so negative values are just fine

@@ -70,16 +70,40 @@ class VorlonDreadnought extends VorlonCapitalShip{
         $this->addAftSystem(new GraviticThruster(6, 20, 0, 6, 2));
 		
 		
-        $this->addLeftFrontSystem(new VorlonLightningCannon(6, 0, 0, 240, 60, 'L'));
-        $this->addLeftFrontSystem(new VorlonLightningCannon(6, 0, 0, 240, 60, 'L'));
-        $this->addLeftFrontSystem(new VorlonLightningCannon(6, 0, 0, 240, 60, 'L'));
-        $this->addLeftFrontSystem(new VorlonLightningCannon(6, 0, 0, 240, 60, 'L'));
+        $lc1 = new VorlonLightningCannon(6, 0, 0, 240, 60, 'L');
+        $lc1->overkillArcStructures = array(1, 32);
+        $lc1->setStructureHome(array(1, 32));
+        $this->addLeftFrontSystem($lc1);
+        $lc2 = new VorlonLightningCannon(6, 0, 0, 240, 60, 'L');
+        $lc2->overkillArcStructures = array(1, 32);
+        $lc2->setStructureHome(array(1, 32));
+        $this->addLeftFrontSystem($lc2);
+        $lc3 = new VorlonLightningCannon(6, 0, 0, 240, 60, 'L');
+        $lc3->overkillArcStructures = array(1, 32);
+        $lc3->setStructureHome(array(1, 32));
+        $this->addLeftFrontSystem($lc3);
+        $lc4 = new VorlonLightningCannon(6, 0, 0, 240, 60, 'L');
+        $lc4->overkillArcStructures = array(1, 32);
+        $lc4->setStructureHome(array(1, 32));
+        $this->addLeftFrontSystem($lc4);
         $this->addLeftSystem(new GraviticThruster(6, 35, 0, 9, 3));
 		
-        $this->addRightFrontSystem(new VorlonLightningCannon(6, 0, 0, 300, 120, 'R'));
-        $this->addRightFrontSystem(new VorlonLightningCannon(6, 0, 0, 300, 120, 'R'));
-        $this->addRightFrontSystem(new VorlonLightningCannon(6, 0, 0, 300, 120, 'R'));
-        $this->addRightFrontSystem(new VorlonLightningCannon(6, 0, 0, 300, 120, 'R'));
+        $lc5 = new VorlonLightningCannon(6, 0, 0, 300, 120, 'R');
+        $lc5->overkillArcStructures = array(1, 42);
+        $lc5->setStructureHome(array(1, 42));
+        $this->addRightFrontSystem($lc5);
+        $lc6 = new VorlonLightningCannon(6, 0, 0, 300, 120, 'R');
+        $lc6->overkillArcStructures = array(1, 42);
+        $lc6->setStructureHome(array(1, 42));
+        $this->addRightFrontSystem($lc6);
+        $lc7 = new VorlonLightningCannon(6, 0, 0, 300, 120, 'R');
+        $lc7->overkillArcStructures = array(1, 42);
+        $lc7->setStructureHome(array(1, 42));
+        $this->addRightFrontSystem($lc7);
+        $lc8 = new VorlonLightningCannon(6, 0, 0, 300, 120, 'R');
+        $lc8->overkillArcStructures = array(1, 42);
+        $lc8->setStructureHome(array(1, 42));
+        $this->addRightFrontSystem($lc8);
         $this->addRightSystem(new GraviticThruster(6, 35, 0, 9, 4));
 		
 		
@@ -122,13 +146,13 @@ class VorlonDreadnought extends VorlonCapitalShip{
 			),
 			32=> array( //actual Port
 				4 => "Thruster",
-				10 => "TAG:Lightning Cannon",
+				10 => "31:Lightning Cannon",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			42=> array( //actual Stbd
 				4 => "Thruster",
-				10 => "TAG:Lightning Cannon",
+				10 => "41:Lightning Cannon",
 				18 => "Structure",
 				20 => "Primary",
 			),

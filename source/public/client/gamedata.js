@@ -28,6 +28,7 @@ window.gamedata = {
     blockedHexes: Array(),
     isStealthPresent: false,
     areMinesPresent: false, //Marks that ENEMY mines are present.
+    identityReloadPending: false, //Chameleon Sensor Suite (D14) - a reveal has forced a page reload
 
     mouseOverShipId: -1,
 
@@ -320,6 +321,10 @@ window.gamedata = {
     // colour. Mirrors the .iniActive* CSS (border + translucent fill + glow) but
     // keyed on team instead of mine/ally/enemy.
     //
+    // Pass moved=true for the .iniActiveMoved equivalent: the ship is still the
+    // active mover but has already committed its movement, so the FILL is dropped
+    // and only the border + glow remain.
+    //
     // Border and glow use the IniGUI-darkened colour; the FILL must be derived from
     // the FULL-strength palette instead. Taking the fill off the already-darkened
     // colour compounded the two factors (0.65 * 0.22 = 0.14 of full strength) and
@@ -327,11 +332,17 @@ window.gamedata = {
     // visually no fill at all, just a border. The .iniActive* classes sit at roughly
     // 0.30 of their border colour, so match that.
     INI_ACTIVE_FILL: 0.30,
-    getIniActiveTeamStyle: function getIniActiveTeamStyle(team) {
+    getIniActiveTeamStyle: function getIniActiveTeamStyle(team, moved) {
         var rgb = gamedata.getIniTeamColorRGB(team);
         var r = rgb[0];
         var g = rgb[1];
         var b = rgb[2];
+
+        if (moved) {
+            // .iniActiveMoved equivalent: border + a slightly stronger glow, no fill.
+            return "border:1px solid rgb(" + r + "," + g + "," + b + ") !important;"
+                + "box-shadow:0px 0px 4px rgb(" + r + "," + g + "," + b + ");";
+        }
 
         var full = gamedata.getTeamColorRGB(team);
         var f = gamedata.INI_ACTIVE_FILL;
@@ -436,7 +447,6 @@ window.gamedata = {
     },
 
     shipStatusChanged: function shipStatusChanged(ship) {
-        //STAGE4-RETIRED shipWindowManager.setData(ship);
         gamedata.checkGameStatus();
         window.webglScene.receiveGamedata(this);
     },
@@ -769,9 +779,7 @@ window.gamedata = {
                 // New check to see if Scanner exists / has positive output before giving warning - DK 01/25
                 for (var i = hasNoEW.length - 1; i >= 0; i--) {
                     var ship = hasNoEW[i];
-                    const standardScanners = shipManager.systems.getSystemListByName(ship, "scanner");
-                    const elintScanners = shipManager.systems.getSystemListByName(ship, "elintScanner");
-                    const scanners = [...standardScanners, ...elintScanners];
+                    const scanners = shipManager.systems.getScannerList(ship, true);
 
                     // Check if all scanners for this ship are either destroyed or have output <= 0
                     var allScannersDisabled = scanners.every(function (scanner) {
@@ -1835,9 +1843,18 @@ getActiveShipName: function getActiveShipName() {
             var active = window.SimultaneousMovementRule.isActiveMovementShip(ships[i]);
             if (active !== null) {
                 if (active === true && teamColorCss) {
-                    // Observers: style the active-mover box from the ship's team colour
-                    // instead of the mine/ally/enemy iniActive* classes.
-                    td.style.cssText += gamedata.getIniActiveTeamStyle(ships[i].team);
+                    // Observers / 3+-team participants: style the active-mover box from
+                    // the ship's team colour instead of the mine/ally/enemy iniActive*
+                    // classes. This branch short-circuits the .iniActiveMoved test below,
+                    // so it has to make the same "already moved" call itself — otherwise
+                    // the box keeps its fill for the whole phase in 3+-team games while
+                    // 2-team games correctly drop it once movement is committed. Gated on
+                    // isMyShip exactly like .iniActiveMoved, so it never reveals whether
+                    // another team's ship has moved yet.
+                    var teamMoved = gamedata.isMyShip(ships[i])
+                        && shipManager.movement.isMovementReady(ships[i])
+                        && shipManager.movement.hasDeletableMovements(ships[i]);
+                    td.style.cssText += gamedata.getIniActiveTeamStyle(ships[i].team, teamMoved);
                 } else if (active === true && gamedata.isMyShip(ships[i]) && shipManager.movement.isMovementReady(ships[i]) && shipManager.movement.hasDeletableMovements(ships[i])) {
                     td.classList.add("iniActiveMoved");
                 } else if (active === true && gamedata.isMyShip(ships[i])) {
@@ -1972,14 +1989,11 @@ getActiveShipName: function getActiveShipName() {
         $(".committurn").hide();
     },
 
-    showSurrenderButton: function showSurrenderButton() {
-        $(".surrender").on('click', gamedata.onSurrenderClicked).show();
-    },
-
-    hideSurrenderButton: function hideSurrenderButton() {
-        $(".surrender").off('click', gamedata.onSurrenderClicked).hide();
-    },
-
+    /* showSurrenderButton/hideSurrenderButton are GONE (2026-08-03). Surrender is no longer a
+       cell in the Initial Orders phase header that a phase strategy shows and hides — it is a
+       permanent top-right HUD button (reactJs/surrender/Surrender.js) that decides its own
+       visibility. Note that the old helpers bound on the bare `.surrender` selector, which also
+       matched the surrender div inside confirm.confirmOrSurrender's dialog. */
 
     checkGameStatus: function checkGameStatus() {
 
@@ -2007,6 +2021,15 @@ getActiveShipName: function getActiveShipName() {
 
         if (!serverdata.id) return;
 
+        //Chameleon Sensor Suite (D14): window.staticShips is fixed at page load and carries only the
+        //blueprints of the ships this player could see THEN. When a disguise breaks mid-session the
+        //server starts sending the ship's true phpclass, which this page has no blueprint for - Ship()
+        //would build it from the JSON alone, with no armour, no arcs and no maxhealth. Reload instead,
+        //before anything on the page has been touched; reveals happen at most once per ship per game,
+        //at a turn boundary. Skipped in replay, where stepping across the reveal turn is SUPPOSED to
+        //change identity and a reload would throw the viewer out of the replay.
+        if (!gamedata.replay && gamedata.hasShipIdentityChanged(serverdata.ships)) return;
+
         gamedata.turn = serverdata.turn;
         gamedata.gamephase = serverdata.phase;
         gamedata.activeship = serverdata.activeship;
@@ -2021,6 +2044,29 @@ getActiveShipName: function getActiveShipName() {
             gamedata.waiting = serverdata.waiting;
         }
         gamedata.status = serverdata.status;
+
+        /* A surrendered/finished game is frozen — nothing on the server can change again, so
+           there is nothing left to poll for. Not merely an optimisation: the poll would
+           otherwise run to its 300-request cap, because pollGamedata's `waiting == false` exit
+           can never fire once the game ends. PhaseDirector puts everyone into
+           ReplayPhaseStrategy at that point, which sets gamedata.replay, and the block just
+           above deliberately stops refreshing gamedata.waiting while replay is on — so
+           `waiting` stays pinned at the true that goToWaiting() set on submit.
+
+           Worse than the wasted requests: each live response rewinds gamedata.turn to the LIVE
+           turn while ReplayPhaseStrategy is showing an earlier one, and its update() answers by
+           re-fetching that turn from replay.php, which sets gamedata.turn back again — the two
+           fetches then ping-pong for as long as the poll keeps feeding them.
+
+           Keyed on the SERVER's status, deliberately, and placed here rather than in
+           pollGamedata: doSurrender() sets gamedata.status optimistically before the POST (it
+           has to — construcGamedata reads it into the payload), and in a 3+ team game one team
+           folding does NOT end the match. Trusting the local value would strand that player's
+           client on a stale board. */
+        if (gamedata.status === "SURRENDERED" || gamedata.status === "FINISHED") {
+            ajaxInterface.stopPolling();
+        }
+
         gamedata.elintShips = Array();
         gamedata.gamespace = serverdata.gamespace;
         gamedata.blockedHexes = serverdata.blockedHexes;
@@ -2042,6 +2088,30 @@ getActiveShipName: function getActiveShipName() {
         }
 
         gamedata.checkGameStatus();
+    },
+
+    /* Has a ship already on this page come back wearing a different hull? Triggers the reload and
+       returns true. Positional lookup first - the server sends ships in a stable order, so the
+       id-scan fallback is only reached when something was spawned or removed. */
+    hasShipIdentityChanged: function hasShipIdentityChanged(jsonShips) {
+        if (gamedata.identityReloadPending) return true;
+        if (!jsonShips) return false;
+
+        for (var i in jsonShips) {
+            var json = jsonShips[i];
+            var existing = (gamedata.ships[i] && gamedata.ships[i].id == json.id)
+                ? gamedata.ships[i]
+                : gamedata.getShip(json.id);
+
+            if (!existing || !existing.phpclass) continue;
+            if (existing.phpclass === json.phpclass && existing.faction === json.faction) continue;
+
+            gamedata.identityReloadPending = true;
+            window.location.reload();
+            return true;
+        }
+
+        return false;
     },
 
     setShipsFromJson: function setShipsFromJson(jsonShips) {
