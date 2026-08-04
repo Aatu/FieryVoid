@@ -169,13 +169,22 @@ body {
 
 #topcontainer {
     position: absolute;
-    top: -3px;
+    /* top:0, not the old -3px. The negative offset was there to bleed the top border off
+       screen so the bar read as flush into the corner; the boxes inside now drop their top
+       border outright (the way the React HUD buttons already did), which gets the same look
+       AND makes their height the number in the CSS rather than that number minus 3. */
+    top: 0;
     left: -4px;
     z-index: 10000;
     display: flex;
     flex-direction: row;
     align-items: flex-start;
-    max-width: calc(100% - 120px);
+    /* Keep the whole row clear of the top-right HUD buttons. The reservation was 120px,
+       which was right for the two buttons that used to be there — Surrender joined them on
+       2026-08-03 and this was never widened, so a long phase/ship name grew the header
+       under the button strip. At z-index 10000 against their 4 that does not just look
+       wrong, it eats the taps. */
+    max-width: calc(100% - var(--fv-hud-strip) - 10px);
     pointer-events: none;
 }
 
@@ -192,20 +201,38 @@ body {
    together or not at all. */
 #phaseheader {
     border: 1px solid var(--fv-line-scs);
+    /* Flush into the top screen edge, same as the React HUD buttons (FullScreen.js et al
+       drop theirs for exactly this reason). See the note on #topcontainer's top:0. */
+    border-top: none;
     border-radius: var(--fv-radius-chrome);
     color: var(--fv-text);
     background-color: var(--fv-chrome-scs);
     position: relative;
-    height: 25px;
+    /* ONE height for the whole top row — --fv-hud-bar in tokens.css, which is derived from
+       the HUD buttons' box. border-box so the token IS the outer height and is directly
+       comparable to theirs; content-box plus a padding-top is how the three drifted apart. */
+    box-sizing: border-box;
+    height: var(--fv-hud-bar);
+    /* Centres the phase text in the bar. Replaces `padding-top: 8px`, which was tuned by eye
+       against a 25px content box and would have to be re-tuned at every font size — there
+       are three of those across the breakpoints below. */
+    display: flex;
+    align-items: center;
     width: auto;
-    min-width: 500px;
+    /* 500px is the width this bar WANTS, but as a hard floor (which is what a bare
+       min-width was, with flex-shrink: 0 beside it) it overflowed #topcontainer's
+       reservation instead of respecting it. min() lets it give way on a narrow window; the
+       subtracted 110px is the inactive "Replay" button that sits alongside it. */
+    min-width: min(500px, calc(100vw - var(--fv-hud-strip) - 110px));
     opacity: 0.95;
     -moz-box-shadow: 5px 5px 10px var(--fv-overlay);
     -webkit-box-shadow: 5px 5px 10px var(--fv-overlay);
     box-shadow: 5px 5px 10px var(--fv-overlay);
-    padding-top: 8px;
+    /* Hard backstop: the .value spans ellipsize, but nothing that lands in this bar should
+       be able to paint outside it over the HUD buttons whatever it is. */
+    overflow: hidden;
     padding-right: 45px;
-    flex-shrink: 0;
+    flex-shrink: 1;
     pointer-events: auto;
 }
 
@@ -219,6 +246,18 @@ body {
     margin-left: 10px;
     text-transform: uppercase;
     text-shadow: black 0 0 10px, black 0 0 3px;
+    /* These are flex items now. nowrap + min-width:0 + ellipsis is what makes a long phase
+       name or ship name give way gracefully: as inline spans they WRAPPED to a second line,
+       which in a fixed-height bar meant spilling out of the bottom of it. */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+/* "TURN: 3," is short and always worth its space, so it is the one that never gives. */
+#phaseheader .value.turn {
+    flex-shrink: 0;
 }
 
 #phaseheader .value.activeship {
@@ -238,9 +277,13 @@ body {
 
 }
 
+/* The commit / cancel tick pair, absolutely positioned in #phaseheader's padding box (the
+   45px reserved by its padding-right). Centred rather than pinned 2px from the top: the bar
+   is the full HUD height now, and a top-aligned tick sat visibly high in it. */
 .uitable {
     position: absolute;
-    top: 2px;
+    top: 50%;
+    transform: translateY(-50%);
     right: 10px;
 }
 
@@ -1158,7 +1201,12 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     border: 1px solid var(--fv-line-scs);
     color: #deebffdc;
     background-color: var(--fv-chrome-scs);
-    margin-top: 45px;
+    /* Clears the top bar, which grew from 32px to --fv-hud-bar (46px) when the row was
+       levelled with the HUD buttons — at the old 45px this drawer's top border landed 1px
+       INSIDE the phase header. 55px is the same 9px gap the EW strip keeps below those
+       buttons on the opposite edge (EwButtons.js Container, top: 55px), so the two columns
+       start level. #backDiv follows it, 20px lower, as it always was. */
+    margin-top: 55px;
     width: 260px;
     height: auto;
     position: absolute;
@@ -1303,8 +1351,10 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     display: inline-block;
     position: absolute;
     z-index: 10000;
-    margin-top: 65px;
-    margin-top: 65px;
+    /* 20px below #iniGui's top, as it has always been — moved with it when the drawer
+       dropped to clear the taller top bar. (The duplicate declaration this replaces was
+       just that: the same value written twice.) */
+    margin-top: 75px;
     left: 260px !important;
     margin-left: 0px !important;
     /* Override legacy JS */
@@ -1395,26 +1445,27 @@ only screen and (max-height: 500px) and (orientation: landscape) {
 }
 
 @media only screen and (max-width: 765px) {
+    /* The button strip shrinks with the buttons, so the reservation has to as well —
+       otherwise the bar gives up 45px of a phone's width for nothing. */
+    #topcontainer {
+        max-width: calc(100% - var(--fv-hud-strip-small) - 10px);
+    }
+
+    /* Height tracks the small HUD button box; the 70px subtracted from the min-width floor
+       is the small "Replay" button, as 110px is on desktop. The old `max-width: 64vw` is
+       gone: it was this file's own attempt at keeping clear of the buttons, and it could not
+       work because the SPANS overflowed the box it capped. #topcontainer's reservation is
+       the one guard now, and dropping the cap gives long phase names the rest of the width. */
     #phaseheader {
         width: auto;
-        min-width: 220px;
-        max-width: 64vw;
-        height: 22px;
-        padding-top: 2px;
+        min-width: min(220px, calc(100vw - var(--fv-hud-strip-small) - 70px));
+        height: var(--fv-hud-bar-small);
         padding-right: 45px;
     }
 
     #phaseheader .value {
         font-size: 12px;
         margin-left: 5px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        display: inline-block;
-        /* No hard per-span cap: let the phase name use the available header
-           width; ellipsis stays as a last-resort fallback for tiny screens. */
-        max-width: none;
-        vertical-align: bottom;
     }
 
     #phaseheader .value.activeship {
@@ -1439,8 +1490,9 @@ only screen and (max-height: 500px) and (orientation: landscape) {
         display: none;
     }
 
+    /* No `top` here — the base rule's 50% + translateY keeps the tick centred at any bar
+       height, so this only tightens the right-hand inset. */
     #phaseheader .uitable {
-        top: 2px;
         right: 5px;
     }
 
@@ -1561,27 +1613,23 @@ only screen and (max-height: 500px) and (orientation: landscape) {
    the log stays collapsed to its tabs until the user taps "Click!" (#expandBotPanel,
    which toggles .large), matching portrait behaviour. */
 @media only screen and (max-height: 500px) and (orientation: landscape) {
+    #topcontainer {
+        max-width: calc(100% - var(--fv-hud-strip-small) - 10px);
+    }
+
     /* Phase header — mirror the portrait mobile sizing (shorter bar, smaller
        fonts, hidden finished/notlogged, scaled OK/Cancel) so it
        doesn't render at full desktop size in landscape. */
     #phaseheader {
         width: auto;
-        min-width: 220px;
-        max-width: 72vw;
-        height: 22px;
-        padding-top: 2px;
+        min-width: min(220px, calc(100vw - var(--fv-hud-strip-small) - 70px));
+        height: var(--fv-hud-bar-small);
         padding-right: 45px;
     }
 
     #phaseheader .value {
         font-size: 12px;
         margin-left: 5px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        display: inline-block;
-        max-width: none;
-        vertical-align: bottom;
     }
 
     #phaseheader .value.activeship {
@@ -1594,7 +1642,6 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     }
 
     #phaseheader .uitable {
-        top: 2px;
         right: 5px;
     }
 

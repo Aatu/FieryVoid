@@ -69,9 +69,17 @@ const theme = {
     //are pitched to sit alongside the EW buttons, whose PNG art fills its tile edge to edge
     //(background-size: cover) - so if anything they err generous. Nudge these two values,
     //not the individual components.
+    //
+    //THESE TWO BOX SIZES ALSO SET THE HEIGHT OF THE WHOLE TOP BAR. #phaseheader and
+    //#replayUI sit in the same row and are matched to these buttons through
+    //--fv-hud-bar / --fv-hud-bar-small in styles/tokens.css (btn + the 1px bottom border
+    //these keep, the top one being dropped for the flush-to-edge look). The three used to
+    //be sized independently and came out 35 / 35 / 46. Change btn/btnSmall and you must
+    //change those tokens - and --fv-hud-strip, which reserves the row's width so the
+    //header cannot grow underneath these buttons.
     hud: {
-        btn: "45px",                            //button box, desktop
-        btnSmall: "30px",                       //button box, phones + short landscape
+        btn: "36px",                            //button box, desktop
+        btnSmall: "25px",                       //button box, phones + short landscape
         icon: "26px",                           //inline SVG inside the box (~58%)
         iconSmall: "17px",
         glyph: "32px",                          //text glyph inside the box (~71% - see above)

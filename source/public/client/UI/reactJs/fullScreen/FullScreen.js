@@ -62,16 +62,21 @@ class FullScreen extends React.Component {
    the odd one out among 45x45 neighbours - purely because the "FS" text needed the extra
    width; with an icon it does not, so it squares up with the rest.
 
-   `right` is DERIVED rather than hard-coded: this button sits to the left of
-   PlayerSettings, so its offset is that button's width plus the 10px gap the two have
-   always had. Previously these were literals (60px / 40px) that had to be re-guessed every
-   time either button was resized - and had already drifted to a 15px/14px gap. Now the
-   spacing survives any future change to the shared box size. */
+   `right` is DERIVED rather than hard-coded: this is the OUTERMOST of the three buttons in
+   the row, so the offset is two button widths plus the 10px gap each pair has. Previously
+   these were literals (60px / 40px) that had to be re-guessed every time either button was
+   resized - and had already drifted to a 15px/14px gap. Now the spacing survives any future
+   change to the shared box size.
+
+   It swapped places with Surrender on 2026-08-04 (user request): the row reads FullScreen,
+   Surrender, PlayerSettings left to right, where it used to read Surrender, FullScreen,
+   PlayerSettings. If you swap them back, the two `right` expressions here and in
+   Surrender.js are the whole change - nothing else encodes the order. */
 const MainButton = styled(ContainerShadowed)`
     width: ${theme.hud.btn};
     height: ${theme.hud.btn};
     position: fixed;
-    right: calc(${theme.hud.btn} + 10px);
+    right: calc((${theme.hud.btn} * 2) + 20px);
     top: 0;
     z-index: 4;
     display: flex;
@@ -91,7 +96,7 @@ const MainButton = styled(ContainerShadowed)`
     @media (max-width: 765px), (max-height: 500px) and (orientation: landscape) {
         width: ${theme.hud.btnSmall};
         height: ${theme.hud.btnSmall};
-        right: calc(${theme.hud.btnSmall} + 10px);
+        right: calc((${theme.hud.btnSmall} * 2) + 20px);
 
         svg {
             width: ${theme.hud.iconSmall};

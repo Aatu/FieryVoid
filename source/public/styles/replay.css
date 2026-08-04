@@ -29,28 +29,31 @@
        the alpha-compounding reason documented on #phaseheader (the old #08323b fill was
        opaque; --fv-chrome-scs carries its own ~0.87 alpha and opacity multiplies with it). */
     border: 1px solid var(--fv-line-scs);
+    /* Flush into the top screen edge, like #phaseheader and the React HUD buttons. */
+    border-top: none;
     border-radius: var(--fv-radius-chrome);
     color: var(--fv-text);
     background-color: var(--fv-chrome-scs);
     position: relative;
     margin-left: 10px;
     /* Height is matched to #phaseheader ON PURPOSE — they sit side by side in the top bar,
-       so a 1px difference reads as a wobble (user report 2026-07-30). The arithmetic has to
-       be done by hand because the two are built differently: #phaseheader is
-       height 25 + padding-top 8 + 2px borders = 35, and this is min-height 25 + padding-top
-       8 + 2px borders = 35. It used to be padding-top: 7, which is where the missing pixel
-       came from. If you change the padding or the min-height here, change #phaseheader in
-       tactical.css to match — and note the ≤765px block below already matches it (21 + 3 +
-       2 = 26 against the header's 22 + 2 + 2), so leave that one alone. */
-    min-height: 25px;
-    height: auto;
-    padding-top: 8px;
+       so a 1px difference reads as a wobble (user report 2026-07-30). It used to be matched
+       BY HAND, because the two were built differently (min-height + padding + borders, each
+       summing to 35), which is how the pair then ended up 11px shorter than the HUD buttons
+       on their other side. Both now take the same token and the same border-box, so there is
+       no arithmetic left to get wrong — and --fv-hud-bar is itself derived from the buttons,
+       so all four boxes in the row track one number. The ≤765px block below swaps in the
+       small variant; nothing else in either file needs touching. */
+    box-sizing: border-box;
+    height: var(--fv-hud-bar);
     width: auto;
     opacity: 0.95;
     box-shadow: 5px 5px 10px var(--fv-overlay);
     display: none;
     flex-direction: row;
-    align-items: flex-start;
+    /* center, not flex-start: the bar is taller than its content now, so the "Replay"
+       button has to be centred in it rather than sitting under the top edge. */
+    align-items: center;
     justify-content: center;
     font-family: arial;
     font-size: 16px;
@@ -219,16 +222,15 @@
        only screen and (max-height: 500px) and (orientation: landscape) {
     #replayUI {
         font-size: 12px;
-        min-height: 21px;
-        height: auto;
-        padding-top: 3px;
+        height: var(--fv-hud-bar-small);
         margin-left: 5px;
     }
 
+    /* No padding-top: it was compensating for the bar's old align-items: flex-start, and
+       with the bar centring its content it just pushes the label back off centre. */
     #replayUI button {
         font-size: 12px;
         margin: 0 3px;
-        padding-top: 3px;
     }
 
     #replayUI .replay-buttons button {

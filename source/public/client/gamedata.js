@@ -1713,9 +1713,9 @@ getActiveShipName: function getActiveShipName() {
     getPhasename: function getPhasename() {
         if (gamedata.gamephase == 1) return "INITIAL ORDERS";
 
-        if (gamedata.gamephase == 2) return "MOVEMENT ORDERS:";
+        if (gamedata.gamephase == 2) return "MOVEMENT:";
 
-        if (gamedata.gamephase == 5) return "PRE-FIRING ORDERS";
+        if (gamedata.gamephase == 5) return "PRE-FIRING";
 
         if (gamedata.gamephase == 3) return "FIRE ORDERS";
 

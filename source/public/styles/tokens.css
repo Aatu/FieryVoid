@@ -97,6 +97,29 @@
   --fv-radius-modal: 0px;             /* .confirm — squared, was 5px             */
   --fv-radius-tooltip: 7px;           /* both map tooltips — rounded ON PURPOSE   */
 
+  /* ── Top-bar HUD geometry ──────────────────────────────────────────────────
+     The strip along the top of game.php is FOUR boxes that have to read as one row:
+     #phaseheader and #replayUI on the left (tactical.css / replay.css), and the
+     Surrender / FullScreen / PlayerSettings buttons on the right (React, sized from
+     theme.hud). They were three independent height calculations and came out 35 / 35 / 46
+     (user report 2026-08-04). --fv-hud-bar / --fv-hud-bar-small are the shared OUTER
+     height — border-box, top border dropped on every box because the row is flush into the
+     screen edge — so matching them is now one value rather than three sums.
+
+     Derived from theme.hud.btn / btnSmall + the 1px bottom border those buttons keep.
+     Retune theme.hud and these follow, not the other way round.
+
+     --fv-hud-strip is how much of the right-hand edge the button row occupies:
+     3 boxes + the two 10px gaps between them (see the `right:` arithmetic in
+     Surrender.js / FullScreen.js). #topcontainer subtracts it so the phase header
+     cannot grow underneath the buttons — it is deliberately the width of ALL THREE even
+     though Surrender hides itself outside a live game, because a reservation that
+     changed with the button count would make the bar jump. */
+  --fv-hud-bar: 36px;                 /* theme.hud.btn 45px + 1px bottom border    */
+  --fv-hud-bar-small: 25px;           /* theme.hud.btnSmall 30px + 1px             */
+  --fv-hud-strip: 155px;              /* (45 x 3) + (10 x 2)                       */
+  --fv-hud-strip-small: 110px;        /* (30 x 3) + (10 x 2)                       */
+
   /* STANDING EXCEPTION — do NOT square this one when the chrome converges.
      The initiative panel (#iniGui) and its pull-tab (#backDiv) are a DRAWER and its
      HANDLE, anchored to the left screen edge: the rounding is only on the right-hand
