@@ -88,7 +88,7 @@ class ShipCompactor
         $nullEmptyKeys = ['outputDisplay','specialAbilityValue','imagePath','iconPath',
                           'individualNotesTransfer','outputType',
                           'stowedArcStart','stowedArcEnd','repairRestrictedTo','linkedOrbital',
-                          'linkedFiringGroup','linkedFiringSpread'];
+                          'structureHomeLocation','linkedFiringGroup','linkedFiringSpread'];
         foreach ($nullEmptyKeys as $key) {
             if (array_key_exists($key, $system) && ($system[$key] === null || $system[$key] === '')) {
                 unset($system[$key]);
