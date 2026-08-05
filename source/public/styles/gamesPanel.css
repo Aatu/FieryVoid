@@ -883,7 +883,8 @@
    strength it pulled the eye past everything around it.
 
    Chip text clears 4.5:1 on its own fill; hover goes to white. */
-.quick-links .qk-guide   { --chip: #2b9fc4; --chip-text: #7fd3ec; }
+
+.quick-links .qk-guide   { --chip: #66b266; --chip-text: #99cc99; }
 .quick-links .qk-discord { --chip: #8a6fc4; --chip-text: #bda6ea; }
 .quick-links .qk-video   { --chip: #ba8d12; --chip-text: #e1c16b; }
 .quick-links .qk-tools   { --chip: #58bada; --chip-text: #90d8ee; }
