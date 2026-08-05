@@ -9063,4 +9063,141 @@ class ThoughtWave extends Plasma{
 } //endof class ThoughtWave
 
 
+class PlanetCrackerBeam extends Weapon{
+	public $name = "PlanetCrackerBeam";
+    public $displayName = "Planet-Cracker Beam";
+    public $iconPath = "PlanetCrackerBeam.png";    
+	
+    public $range = 4;
+    public $firingMode = 1;
+    public $priorityAF = 1;
+    public $loadingtime = 1000;
+	//public $hextarget = true;
+    public $useOEW = false;
+	public $noLockPenalty = false;
+    
+    public $doNotIntercept = true;
+    public $uninterceptable = true;
+   	public $ignoreJinking = true;//weapon ignores jinking completely.
+	protected $hideFireOrdersFromEnemies = true; //psychic activation - invisible to enemies until it resolves (no launch hex/icon)
+
+    public $rangePenalty = 0;
+    public $fireControl = array(null, null, null); // fighters, <mediums, <capitals
+
+	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!   
+	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
+	public $firingModes = array(1=> "Planet Cracker"); 
+
+    public $animation = "laser";
+    public $animationExplosionScale = 15;   
+	public $animationColor = array(195, 235, 195);
+	//public $noProjectile = true; //Marker for front end to make projectile invisible for weapons that shouldn't have one.  		
+
+	protected $autoHit = true;//To show 100% hit chance in front end.
+   	//protected $noTargetHexIcon = true; //For Front End Hex icon display.
+	
+	public $autoFireOnly = true; //this weapon cannot manually fire by player at a target, just activated	
+	
+    protected $possibleCriticals = array();	
+	protected $shootsStraight = true; //Denotes for Front End to use Line Arcs, not circles.
+	protected $specialArcs = true;	//Denotes for Front End to redirect to weapon specific function to get arcs.			
+	public $repairPriority = 8;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+    public $ignoresLoS = true;	
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		if ( $maxhealth == 0 ) $maxhealth = 110;
+		if ( $powerReq == 0 ) $powerReq = 0;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	} 
+
+
+	public function beforeFiringOrderResolution($gamedata){
+
+
+		$firingOrders = $this->getFireOrders($gamedata->turn);
+		  
+		$hasFireOrder = null;
+				foreach ($firingOrders as $fireOrder) { 
+					   if ($fireOrder->type == 'normal') { 
+					  $hasFireOrder = $fireOrder;
+					  break; //no need to search further
+					  }
+				  }    			
+				  
+		  if($hasFireOrder==null) return; //no appropriate fire order, end of work
+  
+		  $thisShip = $this->getUnit();  	
+						
+		  //Have Second Sight Wave originate from firinf ship's locations.	
+		  $targetPos = $thisShip->getHexPos();
+		  $hasFireOrder->x = $targetPos->q;
+		  $hasFireOrder->y = $targetPos->r;
+		  
+		  //Correct any errors.
+		  if ($hasFireOrder->targetid != -1) {
+			  $hasFireOrder->targetid = -1; //correct the error
+			  $hasFireOrder->calledid = -1; //just in case
+		  }
+		  
+		  
+		  $allShips = $gamedata->ships;
+		  $relevantShips = array();
+  
+		  //Make a list of relevant ships e.g. all enemy ships.
+		  foreach($allShips as $ship){
+			  if($ship->isDestroyed()) continue;					  	  
+			  if ($ship->getTurnDeployed($gamedata) > $gamedata->turn) continue;  //Ignore targets that are not deployed yet!
+			  //Add a location check here, should only target ships in the FOUR hexees DIRECTLY in front of the ship.
+			  //Maybe a helper to get the 4 hexes above, then another helper checking ships location against the 4 hexes, if it matches then add to targets.				  			  	
+			  $relevantShips[] = $ship;	
+		  }
+	  
+		  foreach($relevantShips as $target){
+			  
+			//Now target all ships with a new fireOrder		
+  
+		  }
+		  
+	  } //endof beforeFiringOrderResolution
+
+	public function calculateHitBase($gamedata, $fireOrder)
+		{
+			$fireOrder->needed = 100; //always true
+			$fireOrder->updated = true;			
+		}              
+
+    public function fire($gamedata, $fireOrder)
+    {
+		//    $shooter = $gamedata->getShipById($fireOrder->shooterid);        
+	        $rolled = Dice::d(100);
+	        $fireOrder->rolled = $rolled; 
+			//$fireOrder->pubnotes .= "<br> Destroyed by Planet-Cracker Beam.";
+			if($rolled <= $fireOrder->needed){//HIT!
+				$fireOrder->shotshit++;		
+			}else{ //MISS!  Should never happen.
+				$fireOrder->pubnotes .= " MISSED! ";
+			}
+	}
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		$this->data["Special"] = 'Fire this weapon by clicking on icon and selecting Fire during the Firing phase.';
+		$this->data["Special"] .= '<br>Automatically destroys any unit in the four hexes directly in front of ship.';		
+	}	
+
+    public function getDamage($fireOrder){        return 10000;   }
+    public function setMinDamage(){     $this->minDamage = 10000 ;      }
+    public function setMaxDamage(){     $this->maxDamage = 10000 ;      }
+    
+    public function stripForJson() {
+        $strippedSystem = parent::stripForJson();    
+        $strippedSystem->shootsStraight = $this->shootsStraight;
+        $strippedSystem->specialArcs = $this->specialArcs;
+        $strippedSystem->autoHit = $this->autoHit;															                                        
+        return $strippedSystem;
+	} 
+	
+} //endof class PlanetCrackerBeam
+
+
 ?>

@@ -8,7 +8,7 @@ class VorlonPlanetKiller extends VorlonCapitalShip{
 		$this->faction = "Vorlon Empire";
         $this->phpclass = "VorlonPlanetKiller";
         $this->shipClass = "Planet Killer";
-        $this->imagePath = "img/ships/VorlonHeavyCruiser.png";
+        $this->imagePath = "img/ships/VorlonPlanetKiller.png";
         $this->canvasSize = 550;
 	    $this->isd = 'Ancient';
         $this->shipSizeClass = 4; 
@@ -46,7 +46,7 @@ class VorlonPlanetKiller extends VorlonCapitalShip{
 		$this->addPrimarySystem(new JumpEngine(8, 25, 0, 8));//Vorlon Jump Engines normally do use power (the only system onboard that does so), but still are counted as base running costs - in FV I simplify to 0 power requirement		
 		
 		
-        //$this->addFrontSystem(new PlanetCrackerBeam(8, 110, 0, 0, 0));
+        $this->addFrontSystem(new PlanetCrackerBeam(8, 110, 0, 0, 0));
         $this->addFrontSystem(new EMShield(6, 6, 0, 6, 240, 60));
         $this->addFrontSystem(new EMShield(6, 6, 0, 6, 300, 120));
         $this->addFrontSystem(new GraviticThruster(7, 30, 0, 9, 1));
