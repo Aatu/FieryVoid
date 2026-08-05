@@ -106,6 +106,12 @@ ChameleonSensors.prototype.isTogglePhase = function () {
 	return (gamedata.gamephase == 1);
 };
 
+ChameleonSensors.prototype.initializationUpdate = function () {
+	if(gamedata.gamephase == -2) this.active = false;
+
+	return this;	
+}
+	
 /*Once every enemy team has seen through the deception there is nothing left to protect, so the
   button is withdrawn entirely rather than offering a switch that changes nothing. In a 1v1 this is
   simply "revealed". revealedTeams is sent to the owner and their team only.*/
