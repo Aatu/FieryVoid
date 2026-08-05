@@ -1206,7 +1206,7 @@ only screen and (max-height: 500px) and (orientation: landscape) {
        INSIDE the phase header. 55px is the same 9px gap the EW strip keeps below those
        buttons on the opposite edge (EwButtons.js Container, top: 55px), so the two columns
        start level. #backDiv follows it, 20px lower, as it always was. */
-    margin-top: 55px;
+    margin-top: 45px;
     width: 260px;
     height: auto;
     position: absolute;
