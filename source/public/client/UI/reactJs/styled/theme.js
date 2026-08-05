@@ -83,7 +83,7 @@ const theme = {
         icon: "26px",                           //inline SVG inside the box (~58%)
         iconSmall: "17px",
         glyph: "30px",                          //text glyph inside the box (~71% - see above)
-        glyphSmall: "21px",
+        glyphSmall: "20px",
     },
 };
 
