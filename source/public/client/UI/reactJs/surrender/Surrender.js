@@ -123,15 +123,18 @@ const ICON_NUDGE_Y_SMALL = "-2px";
 
 /* Box geometry from theme.hud, shared with FullScreen, PlayerSettings and the EW strip.
 
-   `right` is DERIVED the same way FullScreen's is, one step further along: this button sits to
-   the left of FullScreen, which sits to the left of PlayerSettings, so the offset is two button
-   widths plus the 10px gap each pair has. Keeping it as arithmetic on theme.hud.btn means the
-   row survives any future change to the shared box size. */
+   `right` is DERIVED the same way FullScreen's is: this button sits between FullScreen and
+   PlayerSettings, so the offset is one button width plus the 10px gap each pair has. Keeping
+   it as arithmetic on theme.hud.btn means the row survives any future change to the shared
+   box size.
+
+   It swapped places with FullScreen on 2026-08-04 (user request) - it used to be the
+   outermost of the three. See the fuller note in FullScreen.js. */
 const MainButton = styled(ContainerShadowed)`
     width: ${theme.hud.btn};
     height: ${theme.hud.btn};
     position: fixed;
-    right: calc((${theme.hud.btn} * 2) + 20px);
+    right: calc(${theme.hud.btn} + 10px);
     top: 0;
     z-index: 4;
     display: flex;
@@ -159,7 +162,7 @@ const MainButton = styled(ContainerShadowed)`
     @media (max-width: 765px), (max-height: 500px) and (orientation: landscape) {
         width: ${theme.hud.btnSmall};
         height: ${theme.hud.btnSmall};
-        right: calc((${theme.hud.btnSmall} * 2) + 20px);
+        right: calc(${theme.hud.btnSmall} + 10px);
 
         img {
             width: ${ICON_SMALL};
