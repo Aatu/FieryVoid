@@ -297,7 +297,7 @@ Example:
 Perhaps you're looking to import 'styled-components/native'?
 Read more about this at https://www.styled-components.com/docs/basics#react-native`);var _v="__sc-".concat(yu,"__");Zt.NODE_ENV!=="production"&&Zt.NODE_ENV!=="test"&&typeof window<"u"&&(window[_v]||(window[_v]=0),window[_v]===1&&console.warn(`It looks like there are several instances of 'styled-components' initialized in this application. This may cause dynamic styles to not render properly, errors during the rehydration process, a missing theme prop, and makes your application bigger without good reason.
 
-See https://styled-components.com/docs/faqs#why-am-i-getting-a-warning-about-several-instances-of-module-on-the-page for more info.`),window[_v]+=1);const J={colors:{windowBg:"#152029de",panelBg:"#04161c",panelBgGlass:"rgba(4, 22, 28, 0.22)",line:"#496791",text:"#ffffff",textAccent:"#C6E2FF",healthOk:"#427231",healthCrit:"#ed6738",warning:"#e1b000",statusOk:"limegreen",statusAlert:"#e1b000",statusBad:"red",enhText:"#d8be86",custom:"#cccc00",chromeText:"#deebff",overlayBg:"black"},fonts:{body:"arial",mono:'Consolas, "Lucida Console", monospace'},radii:{modal:"0px",tooltip:"7px"},hud:{btn:"45px",btnSmall:"30px",icon:"26px",iconSmall:"17px",glyph:"32px",glyphSmall:"21px"}},LD=_.div`
+See https://styled-components.com/docs/faqs#why-am-i-getting-a-warning-about-several-instances-of-module-on-the-page for more info.`),window[_v]+=1);const J={colors:{windowBg:"#152029de",panelBg:"#04161c",panelBgGlass:"rgba(4, 22, 28, 0.22)",line:"#496791",text:"#ffffff",textAccent:"#C6E2FF",healthOk:"#427231",healthCrit:"#ed6738",warning:"#e1b000",statusOk:"limegreen",statusAlert:"#e1b000",statusBad:"red",enhText:"#d8be86",custom:"#cccc00",chromeText:"#deebff",overlayBg:"black"},fonts:{body:"arial",mono:'Consolas, "Lucida Console", monospace'},radii:{modal:"0px",tooltip:"7px"},hud:{btn:"36px",btnSmall:"25px",icon:"26px",iconSmall:"17px",glyph:"30px",glyphSmall:"20px"}},LD=_.div`
     border: 1px solid ${J.colors.line};
     color: ${J.colors.chromeText};
     background-color: ${J.colors.windowBg};
@@ -654,7 +654,7 @@ See https://styled-components.com/docs/faqs#why-am-i-getting-a-warning-about-sev
     width: ${J.hud.btn};
     height: ${J.hud.btn};
     position: fixed;
-    right: calc(${J.hud.btn} + 10px);
+    right: calc((${J.hud.btn} * 2) + 20px);
     top: 0;
     z-index: 4;
     display: flex;
@@ -674,7 +674,7 @@ See https://styled-components.com/docs/faqs#why-am-i-getting-a-warning-about-sev
     @media (max-width: 765px), (max-height: 500px) and (orientation: landscape) {
         width: ${J.hud.btnSmall};
         height: ${J.hud.btnSmall};
-        right: calc(${J.hud.btnSmall} + 10px);
+        right: calc((${J.hud.btnSmall} * 2) + 20px);
 
         svg {
             width: ${J.hud.iconSmall};
@@ -685,7 +685,7 @@ See https://styled-components.com/docs/faqs#why-am-i-getting-a-warning-about-sev
     width: ${J.hud.btn};
     height: ${J.hud.btn};
     position: fixed;
-    right: calc((${J.hud.btn} * 2) + 20px);
+    right: calc(${J.hud.btn} + 10px);
     top: 0;
     z-index: 4;
     display: flex;
@@ -713,7 +713,7 @@ See https://styled-components.com/docs/faqs#why-am-i-getting-a-warning-about-sev
     @media (max-width: 765px), (max-height: 500px) and (orientation: landscape) {
         width: ${J.hud.btnSmall};
         height: ${J.hud.btnSmall};
-        right: calc((${J.hud.btnSmall} * 2) + 20px);
+        right: calc(${J.hud.btnSmall} + 10px);
 
         img {
             width: ${E1};
