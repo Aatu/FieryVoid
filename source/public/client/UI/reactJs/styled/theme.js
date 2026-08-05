@@ -82,7 +82,7 @@ const theme = {
         btnSmall: "25px",                       //button box, phones + short landscape
         icon: "26px",                           //inline SVG inside the box (~58%)
         iconSmall: "17px",
-        glyph: "32px",                          //text glyph inside the box (~71% - see above)
+        glyph: "30px",                          //text glyph inside the box (~71% - see above)
         glyphSmall: "21px",
     },
 };
