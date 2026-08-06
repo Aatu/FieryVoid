@@ -1091,6 +1091,7 @@ PlanetCrackerBeam.prototype.doActivate = function () {
 				
 	// Push to arrays / fire orders
 	this.fireOrders.push(fire);
+    //Add something here to use Ballistic Sprites to highlight the four hexes in front of ship? 
 };   
 
 
