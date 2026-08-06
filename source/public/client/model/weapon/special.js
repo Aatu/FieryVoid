@@ -1094,7 +1094,10 @@ PlanetCrackerBeam.prototype.doActivate = function () {
     //Add something here to use Ballistic Sprites to highlight the four hexes in front of ship? 
 };   
 
-
+PlanetCrackerBeam.prototype.doDeactivate = function () {
+	weaponManager.removeFiringOrder(this.ship, this);
+    //Also clear Ballistic sprites somehow!
+};
 
 var ThoughtWave = function ThoughtWave(json, ship) {
     Weapon.call(this, json, ship);
