@@ -40,6 +40,10 @@ window.ShipIcon = function () {
         this.BDEWSprite = null;
         this.MDEWSprite = null;
         this.shipHexagonSpritesMap = new Map();
+        //Declared-area overlays (see showDeclaredArea), keyed by SYSTEM ID rather than by the system
+        //object: a gamedata poll rebuilds every ship and its systems, so an object key would go stale
+        //each poll and leak the old mesh while a duplicate was drawn over it.
+        this.declaredAreas = new Map();
         this.NotMovedSprite = null;
 
         this.selected = false;
@@ -1761,40 +1765,158 @@ window.ShipIcon = function () {
         this.shipHexagonSpritesMap.set(system, hexagon);
     };
 
-    /* The hexes a straight-ahead weapon will actually sweep once its order is DECLARED - the Vorlon
-       Planet Killer's Planet-Cracker Beam is the one that needs it, and the server sweeps exactly the
-       same line (PlanetCrackerBeam::getBeamHexes, off the same weapon range).
+    /* ---- Declared-area overlay -------------------------------------------------------------------
+       The hexes a weapon has COMMITTED to, drawn on its own ship's icon and left up until the order
+       is withdrawn. A different question from the arcs above, so it gets a different answer: an arc
+       says "where COULD this shoot" and lives only while the system is hovered; this says "where IS
+       this shot going", in its own colour, for as long as the order stands.
 
-       Not the same thing as showStraightArcs: that draws the whole six-armed reachability star, in
-       cobalt, while a system is HOVERED. This is the single forward arm, in the caller's colour, and
-       it stays up until the order is withdrawn - so it reads as "this is what I have committed to
-       destroy" rather than "this is where I could shoot".
+       Any weapon on your own side can raise one - it declares a shape from its own client class
+       (Weapon.getDeclaredArea) and PhaseStrategy.syncDeclaredAreas keeps the picture in step with its
+       fire orders. The shape is the only thing that varies between weapons, so it is the only thing a
+       caller has to name:
 
-       Same local-frame trick as the arcs: axial `a` steps along local direction 0 and the finished
-       mesh is turned to the ship's facing, so `b === 0 && a >= 1` is exactly the line of hexes off the
-       ship's nose whichever way it is pointing. It hangs off the SHOOTER's own icon (unlike
-       showTargetedHexagonInArc, which hangs off its target's), and lives in shipHexagonSpritesMap so
-       removeTargetedHexagonInArc and the phase-teardown removeHexagonArcs both reach it unchanged. */
-    ShipIcon.prototype.showForwardHexes = function (system, hexCount, colour, opacity) {
-        if (this.shipHexagonSpritesMap.has(system)) this.removeTargetedHexagonInArc(system);
+         'forward'  the straight line of hexes off the nose   - Planet-Cracker Beam
+         'arc'      the weapon's own wedge, out to its reach  - any ordinary directional mount
+         'radius'   every hex within reach, arc ignored       - an omnidirectional / area effect
 
-        hexCount = Math.floor(hexCount);
-        if (isNaN(hexCount) || hexCount < 1) return; //no reach - nothing to highlight
+       'arc' and 'radius' include the ship's OWN hex; 'forward' does not, because a beam fired down
+       the ship's nose cannot hit the hex it is fired from.
 
-        var hexDistance = window.coordinateConverter.getHexDistance();
-        var loops = buildHexRegion(hexCount, hexDistance, function (x, y, a, b) {
-            return b === 0 && a >= 1 && a <= hexCount; //straight ahead, starting one hex out
-        });
+       Everything else in the spec is optional and defaults to what the weapon itself says (see
+       resolveDeclaredArea) or, for the outline strength, to what the shape says - so opting a weapon
+       in is usually one line: `return { shape: 'arc' };`.
+
+       Built in the icon's LOCAL frame like the firing arcs - axial `a` steps along local direction 0
+       and the finished mesh is turned to the ship's facing, so 'forward' is the line off the nose and
+       'arc' is the weapon's wedge, whichever way the ship is pointing. */
+    var DECLARED_AREA_COLOUR = 0xd8c02a;        //yellow: reads as a declared kill zone, not as one more cobalt arc
+    var DECLARED_AREA_FILL_OPACITY = 0.35;
+
+    /* `directional` says whether turning the ship changes the region, and so whether the facing
+       belongs in the rebuild signature: a combat pivot must re-aim a 'forward' line or an 'arc'
+       wedge, while a 'radius' is symmetric under the 60 degree steps a facing takes and would only
+       be rebuilt for nothing.
+
+       `borderOpacity` is the shape's DEFAULT outline strength, which a spec can override. It belongs
+       to the shape rather than being one shared number because how hard an outline reads depends on
+       how much of it there is: a four-hex line wants a solid edge to be findable at all, while the
+       perimeter of a forty-hex blanket at the same strength is a bright ring around the whole map
+       - and the fainter the fill, the more the outline is all you see. */
+    var DECLARED_AREA_SHAPES = {
+        forward: {
+            directional: true,
+            borderOpacity: 0.8,
+            //starts one hex out - the firing ship's own hex is never a declared target
+            accept: function (spec) {
+                return function (x, y, a, b) { return b === 0 && a >= 1; };
+            }
+        },
+        arc: {
+            directional: true,
+            borderOpacity: 0.3,
+            accept: function (spec) {
+                //The ship's own hex counts, whatever the arc says - a unit sharing your hex is at
+                //range 0, inside every reach, and its bearing is genuinely undefined. Same call
+                //showRangeArc makes for the hovered arcs, so the two agree about the centre.
+                return function (x, y, a, b) {
+                    if (a === 0 && b === 0) return true;
+
+                    return mathlib.isInArc(bearingFromOrigin(x, y), spec.arcs.start, spec.arcs.end);
+                };
+            }
+        },
+        radius: {
+            directional: false,
+            borderOpacity: 0.3,
+            //everything in reach, centre hex included
+            accept: function (spec) {
+                return function () { return true; };
+            }
+        }
+    };
+
+    /* A caller's spec filled out with the weapon's own numbers, plus a signature that says whether an
+       overlay already on screen is still the right one. Returns null when there is nothing to draw.
+
+       The signature is what makes the sync cheap AND live: syncDeclaredAreas runs on every gamedata
+       poll and every SystemDataChanged, so rebuilding blindly would churn geometry constantly, while
+       never rebuilding would leave a stale overlay behind a combat pivot (which turns the ship, and so
+       turns 'forward' and 'arc' with it) or behind an arc narrowed by a jamming critical. */
+    ShipIcon.prototype.resolveDeclaredArea = function (system, spec) {
+        var shape = spec ? DECLARED_AREA_SHAPES[spec.shape] : null;
+        if (!shape) return null;
+
+        //Only the 'arc' shape reads the arcs, so only it pays for getArcs - and a system that somehow
+        //has none still gets a usable pair rather than throwing on .start below.
+        var arcs = spec.arcs;
+        if (arcs === undefined && spec.shape === 'arc') arcs = shipManager.systems.getArcs(this.ship, system);
+        if (!arcs) arcs = { start: 0, end: 0 }; //start === end - isInArc reads that as the full circle
+
+        var resolved = {
+            shape: spec.shape,
+            hexes: spec.hexes === undefined ? getWeaponReachInHexes(system) : spec.hexes,
+            arcs: arcs,
+            //null as well as undefined falls back - getAnimationColourCss returns null for a weapon
+            //that declares no animation colour, and THREE.Color(null) is not a colour
+            colour: (spec.color === undefined || spec.color === null) ? DECLARED_AREA_COLOUR : spec.color,
+            opacity: (spec.opacity === undefined || spec.opacity === null) ? DECLARED_AREA_FILL_OPACITY : spec.opacity,
+            borderOpacity: (spec.borderOpacity === undefined || spec.borderOpacity === null) ? shape.borderOpacity : spec.borderOpacity,
+            //rounded: getFacing() reads the sprite's rotation back out of radians, and mid-animation it
+            //is between facings - see showTargetedHexagonInArc for the same round trip
+            facing: shape.directional ? Math.round(this.getFacing()) : 0
+        };
+
+        resolved.hexes = Math.floor(resolved.hexes);
+        if (isNaN(resolved.hexes) || resolved.hexes < 1) return null; //no reach - nothing to show
+        resolved.hexes = Math.min(resolved.hexes, MAX_ARC_HEXES); //a nominal range of 100 is "no limit" dressed up as a number
+
+        resolved.signature = [resolved.shape, resolved.hexes, resolved.arcs.start, resolved.arcs.end,
+            resolved.colour, resolved.opacity, resolved.borderOpacity, resolved.facing].join('|');
+
+        return resolved;
+    };
+
+    ShipIcon.prototype.showDeclaredArea = function (system, spec) {
+        var resolved = this.resolveDeclaredArea(system, spec);
+
+        if (!resolved) {
+            this.removeDeclaredArea(system);
+            return;
+        }
+
+        var existing = this.declaredAreas.get(system.id);
+        if (existing && existing.signature === resolved.signature) return; //already up, and still correct
+
+        this.removeDeclaredArea(system);
+
+        var loops = buildHexRegion(resolved.hexes, window.coordinateConverter.getHexDistance(),
+            DECLARED_AREA_SHAPES[resolved.shape].accept(resolved));
 
         if (!loops.length) return;
 
-        //border in the same colour, fully opaque, so the swept hexes stay crisp over a busy map
-        var hexes = buildRegionOverlay(loops, colour, opacity, colour, 1);
-        hexes.rotation.z = mathlib.degreeToRadian(this.getFacing());
+        //border in the same colour, at the shape's own strength (see DECLARED_AREA_SHAPES)
+        var colour = new THREE.Color(resolved.colour);
+        var overlay = buildRegionOverlay(loops, colour, resolved.opacity, colour, resolved.borderOpacity);
 
-        //a count of hexes, so grid-locked and anchored on the hex rather than the sprite
-        addGridLockedOverlay(this.mesh, hexes, getHexAnchor(this).offset);
-        this.shipHexagonSpritesMap.set(system, hexes);
+        //Turned to the ship only for the shapes that mean something relative to it. A 'radius' is
+        //not one of them, and rotating it would be actively wrong mid-animation, when getFacing()
+        //reads back a part-way angle that is not a multiple of 60 and so would tilt the region off
+        //the grid.
+        if (DECLARED_AREA_SHAPES[resolved.shape].directional) overlay.rotation.z = mathlib.degreeToRadian(this.getFacing());
+
+        //measured in hexes, so grid-locked and anchored on the hex rather than on the sprite
+        addGridLockedOverlay(this.mesh, overlay, getHexAnchor(this).offset);
+        this.declaredAreas.set(system.id, { mesh: overlay, signature: resolved.signature });
+    };
+
+    ShipIcon.prototype.removeDeclaredArea = function (system) {
+        var existing = this.declaredAreas.get(system.id);
+        if (!existing) return;
+
+        this.mesh.remove(existing.mesh);
+        disposeOverlay(existing.mesh);
+        this.declaredAreas.delete(system.id);
     };
 
     ShipIcon.prototype.removeTargetedHexagonInArc = function (system) {

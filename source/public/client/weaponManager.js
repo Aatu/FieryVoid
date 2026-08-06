@@ -3068,12 +3068,6 @@ window.weaponManager = {
             }
         }
 
-        //A weapon that painted something on the map when its order was declared (the Planet-Cracker
-        //Beam's swept hexes) has to take it down again - and this is the ONE place that runs for
-        //every cancellation route, the weapon's own Deactivate button and the generic
-        //remove-fire-order button alike.
-        if (typeof system.onFireOrdersRemoved === 'function') system.onFireOrdersRemoved(ship);
-
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 
         //Stage S (S-f): clearing a Fighter Bomb order frees its launching fighters —

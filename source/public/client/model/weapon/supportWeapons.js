@@ -532,6 +532,28 @@ GraviticAugmenter.prototype.doDeactivate = function () {
 	weaponManager.removeFiringOrder(this.ship, this);
 };
 
+/* Mode 1 (Matter Weapon Enhancement) is the one mode with a real footprint: the server boosts and
+   degrades fire control for every unit in this Augmenter's own ARC and RANGE
+   (GraviticAugmenter::isShipInMatterAugmentRange), so the declared area is exactly the 'arc' shape
+   with the weapon's own numbers - nothing to pass but the shape.
+
+   Read off the ORDER's firingMode rather than the weapon's: initializationUpdate force-flips the
+   weapon to Mode 3 in the Pre-Firing phase, so this.firingMode is not a reliable record of what was
+   declared. Modes 2 and 3 name a single target ship, which the map already shows, so neither
+   declares an area.
+
+   Gated to Initial Orders - where the order is still editable (isSpentLocked) and where the area is
+   what the player is actually deciding about. Its own animation green at a low opacity, so a 20-hex
+   wedge does not swamp the units standing in it. */
+GraviticAugmenter.prototype.getDeclaredArea = function () {
+	if (gamedata.gamephase != 1) return null;
+
+	var order = this.getOrderThisTurn();
+	if (!order || order.firingMode != 1) return null;
+
+	return { shape: 'arc', color: this.getAnimationColourCss(), opacity: 0.05, borderOpacity: 0.2 };
+};
+
 /* Mode 3 (Gravity Shifting): the React menu sets the chosen direction (1=CW, 2=ACW) and
  * amount (1=60deg, 2=120deg) on the system. We encode them into the fire order's notes as
  * "GA|<dir>|<amt>" so the server (beforeFiringOrderResolution) can read them before

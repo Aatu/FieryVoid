@@ -1047,12 +1047,26 @@ SecondSight.prototype.doActivate = function () {
 		damageclass: 'Electromagnetic',
 		chance: 100,
 		hitmod: 0,
-		notes: "SecondSight" 
+		notes: "SecondSight"
 	};
-				
+
 	// Push to arrays / fire orders
 	this.fireOrders.push(fire);
-};   
+};
+
+/* Second Sight reaches every enemy unit on the board - beforeFiringOrderResolution has no position
+   or arc test at all - so the area it declares is a plain blanket of its own range, arc ignored.
+   That range is nominally 100 hexes, which ShipIcon caps at MAX_ARC_HEXES; the cap is well past any
+   engagement, so the blanket covers the map exactly as the effect does.
+
+   Its own animation orange at a low opacity: an area this large has to sit UNDER what the player is
+   reading rather than over it. See Weapon.prototype.getDeclaredArea. */
+SecondSight.prototype.getDeclaredArea = function () {
+	if(gamedata.gamephase != 3) return null;
+	if(this.fireOrders.length == 0) return null;
+
+	return { shape: 'radius', hexes: 40, opacity: 0.1, borderOpacity: 0.2 };
+};
 
 var PlanetCrackerBeam = function PlanetCrackerBeam(json, ship) {
     Weapon.call(this, json, ship);
@@ -1060,19 +1074,15 @@ var PlanetCrackerBeam = function PlanetCrackerBeam(json, ship) {
 PlanetCrackerBeam.prototype = Object.create(Weapon.prototype);
 PlanetCrackerBeam.prototype.constructor = PlanetCrackerBeam;
 
-//Yellow, so the swept hexes read as a declared kill zone rather than as one more blue firing arc.
-PlanetCrackerBeam.PLANET_CRACKER_COLOUR = 0xd8c02a;
-PlanetCrackerBeam.PLANET_CRACKER_OPACITY = 0.35;
-
 PlanetCrackerBeam.prototype.canActivate = function () {
 	if(gamedata.gamephase == 3 && this.fireOrders.length == 0) return true;
 	return false;
 };
 
-PlanetCrackerBeam.prototype.canDeactivate = function () {
-	if(gamedata.gamephase == 3 && this.fireOrders.length > 0) return true;
-	return false;
-};
+/* Deliberately NO canDeactivate: SystemActivation renders whenever a system can activate OR
+   deactivate, so declaring one kept the green menu on screen for a weapon that has already fired.
+   Second Sight and the Thought Wave behave the same way - once the order exists the menu goes and
+   the standard remove-fire-order button is how it gets withdrawn. */
 
 PlanetCrackerBeam.prototype.doActivate = function () {
 
@@ -1100,20 +1110,21 @@ PlanetCrackerBeam.prototype.doActivate = function () {
 
 	// Push to arrays / fire orders
 	this.fireOrders.push(fire);
-
-	//Mark the hexes the beam will sweep. The server picks the same line off the same weapon range
-	//(PlanetCrackerBeam::getBeamHexes), so what is highlighted is what will actually be destroyed.
-	this.showBeamHexes();
 };
 
-PlanetCrackerBeam.prototype.doDeactivate = function () {
-	weaponManager.removeFiringOrder(this.ship, this); //this also reaches onFireOrdersRemoved below, which clears the highlight
-};
+/* The hexes the beam will sweep, highlighted on the map for as long as the order stands. The server
+   picks the same line off the same weapon range (PlanetCrackerBeam::getBeamHexes), so what is
+   highlighted is what will actually be destroyed. Everything but the shape is left out on purpose:
+   the reach defaults to the weapon's own, which is the one number both ends already agree on, and
+   the colour to the shared declared-area yellow.
 
-//Called by weaponManager.removeFiringOrder, so the highlight is dropped whichever route the
-//player cancels by - the green Deactivate button OR the generic remove-fire-order button.
-PlanetCrackerBeam.prototype.onFireOrdersRemoved = function () {
-	this.hideBeamHexes();
+   Nothing calls this: PhaseStrategy.syncDeclaredAreas polls it, so the overlay follows the order in
+   and out of existence by itself. See Weapon.prototype.getDeclaredArea. */
+PlanetCrackerBeam.prototype.getDeclaredArea = function () {
+	if(gamedata.gamephase != 3) return null;
+	if(this.fireOrders.length == 0) return null;
+
+	return { shape: 'forward' };
 };
 
 /* The weapon carries specialArcs, so weaponManager.isPosOnWeaponArc hands every arc question here
@@ -1133,35 +1144,6 @@ PlanetCrackerBeam.prototype.isPosOnSpecialArc = function (shooter, position) {
 	return delta <= 0.5;
 };
 
-PlanetCrackerBeam.prototype.showBeamHexes = function () {
-	webglScene.customEvent("ShowForwardHexes", {
-		ship: this.ship,
-		system: this,
-		hexes: this.range,
-		color: PlanetCrackerBeam.PLANET_CRACKER_COLOUR,
-		opacity: PlanetCrackerBeam.PLANET_CRACKER_OPACITY
-	});
-};
-
-PlanetCrackerBeam.prototype.hideBeamHexes = function () {
-	webglScene.customEvent("RemoveForwardHexes", { ship: this.ship, system: this });
-};
-
-//The overlay to (re)draw for an already-declared order, or null when there is nothing to show.
-//A page reload mid-Firing-Phase rebuilds this weapon from gamedata with its order already in place
-//and doActivate never runs again, so FirePhaseStrategy.redrawDeclaredWeaponOverlays asks every
-//system this on entering the phase and raises the highlight itself.
-PlanetCrackerBeam.prototype.getDeclaredForwardHexes = function () {
-	if(gamedata.gamephase != 3) return null;
-	if(this.fireOrders.length == 0) return null;
-
-	return {
-		hexes: this.range,
-		color: PlanetCrackerBeam.PLANET_CRACKER_COLOUR,
-		opacity: PlanetCrackerBeam.PLANET_CRACKER_OPACITY
-	};
-};
-
 var ThoughtWave = function ThoughtWave(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -1169,7 +1151,8 @@ ThoughtWave.prototype = Object.create(Weapon.prototype);
 ThoughtWave.prototype.constructor = ThoughtWave;
 	
 ThoughtWave.prototype.canActivate = function () { 
-	if(gamedata.gamephase == 1 && this.fireOrders.length == 0) return true;
+    var ship = this.ship;
+	if(gamedata.gamephase == 1 && this.fireOrders.length == 0 && !shipManager.power.isOffline(ship, this)) return true;
 	return false; 
 };  
 
@@ -1194,12 +1177,25 @@ ThoughtWave.prototype.doActivate = function () {
 			damageclass: 'Plasma',
 			chance: 100,
 			hitmod: 0,
-			notes: "Thoughtwave" 
+			notes: "Thoughtwave"
 		};
-				
+
 		// Push to arrays / fire orders
 		this.fireOrders.push(fire);
-	};  
+	};
+
+/* Like Second Sight, the Thought Wave reaches every eligible unit on the board (every non-Mindrider
+   one) with no position or arc test, so it declares the same map-wide blanket - its own range, arc
+   ignored, capped by ShipIcon at MAX_ARC_HEXES.
+
+   In its own animation magenta at a low opacity, so a Second Sight and a Thought Wave up at once stay
+   tellable apart and neither drowns the map. Declared in Initial Orders, so gated to that phase. */
+ThoughtWave.prototype.getDeclaredArea = function () {
+	if(gamedata.gamephase != 1) return null;
+	if(this.fireOrders.length == 0) return null;
+
+	return { shape: 'radius', hexes: 40, color: this.getAnimationColourCss(), opacity: 0.1, borderOpacity: 0.2 };
+};
 
 
 var GrapplingClaw = function GrapplingClaw(json, ship) {
