@@ -258,13 +258,16 @@ window.gamedata = {
         }
     },
 
-    // Base team colours (sRGB 0-255), team 1..8. Teams 1-3 match the
-    // mine/enemy/ally colours used for participants so the two views stay
-    // consistent. Team 1 uses CSS limegreen (== combat-log FIRE: "mine" green);
-    // note the participant "mine" ship-icon overlay in getShipOverlayColor is
-    // intentionally a lighter green ([160,250,100]) and is NOT kept in sync.
-    // Team 3 is the SAME blue as the participant "ally" (user preference — a
-    // deeper/steel blue was tried but read too dark).
+    // Base team colours (sRGB 0-255), team 1..8, used when the game has
+    // EXACTLY two distinct teams (participant or observer) — see
+    // teamBaseColorsMultiTeam below for 3+ teams. Team 1 uses CSS limegreen
+    // (== combat-log FIRE: "mine" green); note the participant "mine"
+    // ship-icon overlay in getShipOverlayColor is intentionally a lighter
+    // green ([160,250,100]) and is NOT kept in sync. Teams 1-2 match the
+    // mine/enemy colours used by the 2-team relative scheme elsewhere in
+    // this file, so an observer's absolute view lines up with what a
+    // participant sees. Team 3 is the SAME blue as the participant "ally"
+    // (user preference — a deeper/steel blue was tried but read too dark).
     teamBaseColors: [
         [50, 205, 50],   // 1 Green  (== "mine")
         [255, 80, 80],   // 2 Red    (== "enemy")
@@ -276,12 +279,35 @@ window.gamedata = {
         [170, 90, 230]   // 8 Purple
     ],
 
+    // Same 8 hues, reordered for games with 3+ distinct teams (participant
+    // or observer both see the absolute palette once there's no single
+    // unambiguous "ally"/"enemy" — see getShipOverlayColor). Team 1 stays
+    // green ("mine" if you're on it), but red is pushed to the LAST slot
+    // instead of team 2: with only two teams "team 2 = red" reads as
+    // "enemy" by genre convention, but in a 3+-team game team 2 is just
+    // another team, not necessarily hostile. Red now only shows up once a
+    // game actually has all 8 teams in play.
+    teamBaseColorsMultiTeam: [
+        [50, 205, 50],   // 1 Green
+        [255, 150, 40],  // 2 Orange
+        [40, 230, 230],  // 3 Cyan
+        [170, 90, 230],  // 4 Purple
+        [240, 230, 60],  // 5 Yellow
+        [51, 173, 255],  // 6 Blue
+        [230, 40, 230],  // 7 Magenta
+        [255, 80, 80]    // 8 Red
+    ],
+
     // Raw sRGB [r,g,b] (0-255) team colour keyed on ship.team, for an observer.
     // Teams beyond 8 reuse the palette but lightened one step per full cycle.
     // Use this for canvas 2D (combat log, selection circles); getTeamColor()
-    // wraps it for sprite overlays (linear space).
+    // wraps it for sprite overlays (linear space). Uses teamBaseColors for an
+    // exactly-2-team game (so it matches the 2-team relative mine/ally/enemy
+    // scheme elsewhere in this file) and teamBaseColorsMultiTeam otherwise.
     getTeamColorRGB: function getTeamColorRGB(team) {
-        var palette = gamedata.teamBaseColors;
+        var palette = gamedata.getDistinctTeamCount() === 2
+            ? gamedata.teamBaseColors
+            : gamedata.teamBaseColorsMultiTeam;
         var count = palette.length;
 
         // Teams are 1-indexed; guard against missing/0 values.
