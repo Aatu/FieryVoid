@@ -1725,7 +1725,7 @@ getActiveShipName: function getActiveShipName() {
             if (shipManager.hasShipsToDeployThisTurn(gamedata.thisplayer)) {
                 return "DEPLOYMENT";
             } else {
-                return "PRE-TURN ORDERS";
+                return "PRE-TURN ACTIONS";
             }
         }
 
