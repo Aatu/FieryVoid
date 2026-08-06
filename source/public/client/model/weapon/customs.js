@@ -434,6 +434,7 @@ MolecularSlicerBeamA.prototype.getPools = function () {
 	var turns = Math.min(3, Math.max(1, this.turnsloaded));
 	//Mode 2 is capped at two turns' output; mirrored server-side by getEffectiveTurnsLoaded().
 	if (this.firingMode == 2) turns = Math.min(2, turns);
+	if(gamedata.gamephase == -2) turns = 3; //Always max charge in gamelobby.	    
 	return this.slicerPools[turns];
 };
 
