@@ -9142,13 +9142,13 @@ class PlanetCrackerBeam extends Weapon{
 		  
 		  $allShips = $gamedata->ships;
 		  $relevantShips = array();
+		  $relevantHexes = array();  //Populate with the 4 hexes in front of Planet Killer
   
 		  //Make a list of relevant ships e.g. all enemy ships.
 		  foreach($allShips as $ship){
 			  if($ship->isDestroyed()) continue;					  	  
 			  if ($ship->getTurnDeployed($gamedata) > $gamedata->turn) continue;  //Ignore targets that are not deployed yet!
-			  //Add a location check here, should only target ships in the FOUR hexees DIRECTLY in front of the ship.
-			  //Maybe a helper to get the 4 hexes above, then another helper checking ships location against the 4 hexes, if it matches then add to targets.				  			  	
+			  //Add a location check here against $relevantHexes, should only target ships in the FOUR hexees DIRECTLY in front of the ship (or Terrain with any part of it's area in those 4 hexes).				  			  	
 			  $relevantShips[] = $ship;	
 		  }
 	  
