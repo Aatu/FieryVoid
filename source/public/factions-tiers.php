@@ -1527,9 +1527,17 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             e.g. they actually try to intercept an incoming shot.</li>
         <li>Increased power levels are implemented as firing modes, so select this before targeting any enemy ships. Each offensive shot will be fired at the same power level.</li>                                                            
     </ul>
+<h5>Planet-Cracker Beam</h5>
+        <ul>
+<li>The signature weapon of the Vorlon Planet Killer, an Ancient superweapon meant for very specific scenarios rather than normal balanced play. Rather than being aimed at a target, it is activated during the Firing Phase and, once fired, automatically sweeps the four hexes directly ahead of the ship along its current facing.</li>
+        <li>Anything standing in those hexes - friend or foe alike, the beam does not discriminate - is automatically destroyed. This includes every hex of a multi-hex Terrain/Huge unit caught by the sweep, and every fighter of a Flight caught in it, not just one.</li>
+        <li>It cannot be intercepted, ignores jinking and Line of Sight, and always hits.</li>
+        <li>True to Vorlon psychic activation, the beam gives no warning: enemies see no launch marker or targeting hex before it resolves.</li>
+        <li>It has an extremely long recharge time, making it usable only once, or perhaps twice, in a battle of normal length.</li>
+    </ul>
 <h5>Vorlon Primordial Fighters</h5>
         <ul>
-<li>Super Heavy Fighters that use regular hangars, with one Primordial fighter counting as two heavy fighters for fleet design/hangar purposes. 
+<li>Super Heavy Fighters that use regular hangars, with one Primordial fighter counting as two heavy fighters for fleet design/hangar purposes.
             They are treated as rare variant of Heavy Fighters in FV except in Primordial times, where Assault Fighters should be treated as a common availability.</li>
     </ul>
 <h5>Skin Enhancements</h5>
