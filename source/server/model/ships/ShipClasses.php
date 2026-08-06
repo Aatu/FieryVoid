@@ -2708,18 +2708,56 @@ class BaseShip {
 
 
 
+    /* Two units in one hex have no real bearing on each other, so mathlib::getCompassHeadingOfShip
+       fakes one from direction of travel: it stands the unit back in the hex it came from and takes
+       the bearing from there. Forced Pre-Firing movement - Gravitic Mine pull, Gravity Net,
+       Transverse Drive, Warp Jump - appends a 'prefire' order that teleports the unit AFTER movement
+       is done, and a plain walk back then answers with the hex it was DRAGGED out of instead of the
+       hex it flew in from. That rotates the bearing by the drag angle and drops the target out of
+       arc even though a drag moves everything in the hex together and changes nothing between them.
+       So walk back from where movement itself left the unit, then slide that answer along the drag
+       vector - a rigid translation, which is what a drag actually is. Note the translation is
+       essential and not just tidiness: pairing a pre-drag origin with a post-drag destination is
+       wrong by the drag angle, a whole hex facing. hexCoToPixel is affine over cube coordinates, so
+       shifting the pixel pair is exactly shifting hexes and row parity looks after itself.
+       Undragged units take the original path below, unchanged.
+       Client twin: movement.js getPreviousLocation - keep the two in step. */
     public function getPreviousCoPos(){
         $pos = $this->getCoPos();
 
+        //Where the unit's own movement left it, ignoring any forced Pre-Firing shift.
+        $movedPos = null;
         for ($i = sizeof($this->movement)-1; $i>=0; $i--){
-            $move = $this->movement[$i];
-            $pPos = $move->getCoPos();
-
-            if ( $pPos["x"] != $pos["x"] || $pPos["y"] != $pos["y"])
-                return $pPos;
+            if ($this->movement[$i]->type == "prefire") continue;
+            $movedPos = $this->movement[$i]->getCoPos();
+            break;
         }
 
-        return $pos;
+        $dragged = ($movedPos !== null) && ($movedPos["x"] != $pos["x"] || $movedPos["y"] != $pos["y"]);
+        $anchor = $dragged ? $movedPos : $pos;
+
+        for ($i = sizeof($this->movement)-1; $i>=0; $i--){
+            $move = $this->movement[$i];
+            if ($dragged && $move->type == "prefire") continue;
+            //'start' is the off-board pre-deployment marker (x=+-30), not a position the unit was
+            //ever really at - the same row getLastTurnMovement skips, and real only for generated
+            //Terrain. It matters only on the dragged path: there the walk-back is anchored to the
+            //PRE-drag hex, so a unit that never left its deploy hex (mine, OSAT, base) matches every
+            //row and would otherwise run off the end of its history and answer with the marker.
+            if ($dragged && $move->type == "start" && $this->userid !== -5) continue;
+            $pPos = $move->getCoPos();
+
+            if ( $pPos["x"] != $anchor["x"] || $pPos["y"] != $anchor["y"]){
+                if (!$dragged) return $pPos;
+                return array("x" => $pPos["x"] + ($pos["x"] - $movedPos["x"]),
+                             "y" => $pPos["y"] + ($pos["y"] - $movedPos["y"]));
+            }
+        }
+
+        //Nothing to walk back to. A dragged unit that never moved under its own power (mine, OSAT,
+        //base) has no direction of travel, so the drag is the only motion there is: answer with the
+        //hex it was dragged out of, which is also what the old code did. Undragged, $pos as before.
+        return $dragged ? $movedPos : $pos;
     }
 
     public function getEWbyType($type, $turn, $target = null){

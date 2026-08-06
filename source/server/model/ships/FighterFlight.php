@@ -391,7 +391,9 @@ class FighterFlight extends BaseShip
         }	
 	}
 
-
+    /* getPreviousCoPos deliberately not overridden - this was a byte-for-byte copy of BaseShip's,
+    and getCoPos is not overridden either, so inheriting keeps one implementation. It has to
+    compensate for forced Pre-Firing movement and a second copy would only drift out of step. 
     public function getPreviousCoPos()
     {
         $pos = $this->getCoPos();
@@ -406,6 +408,7 @@ class FighterFlight extends BaseShip
 
         return $pos;
     }
+    */
 
     public function getDEW($turn)
     {
