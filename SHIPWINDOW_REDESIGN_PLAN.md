@@ -856,6 +856,65 @@ the screen to be practical"):**
      buttons and Ship Stats' live yellow figures, hover-or-long-press for system details, and
      click-the-artwork for unit details. `php -l` clean in the container (bind mount).
 
+**Post-Stage-4 improvements round 17 (2026-08-06) — BUILT, awaiting user test
+(UI.bundle + faq.php; two refinements to the round-16 resize grip):**
+1. **The remembered size is now per SIDE, not per page.** User report: resizing the right-hand
+   lobby window and closing it re-sized the *left* one, and opening a right window after
+   enlarging a left one opened it at the left one's size. Round 16 kept one page-level
+   `userScale`, on the reasoning that two windows at different scales look wrong together — but
+   the two sides show different things (own fleet vs enemy in game, the store vs your fleet in
+   the lobby) and are sized for different jobs. `sessionUserScale` is now `{left, right}` and
+   every accessor takes the side: `getUserScale(side)` / `setUserScale(side, value)` /
+   `readUserScale(side)` / `writeUserScale(side, value)`, persisted under
+   **`fv.shipwindow.userScale.left` / `.right`**. `readUserScale` falls back to the pre-split
+   bare key, so a size chosen before this change seeds both sides once instead of silently
+   resetting to 100%.
+   - New `side()` method (`isLeftWindow(ship) ? 'left' : 'right'`) is the single source: the
+     scale, the remembered drag position (`savedWindowPositions`, which open-coded the same
+     expression) and the grip's corner all key off it. Everything a side owns therefore agrees
+     by construction, and a window opening into a side picks that side's size up immediately —
+     the module-level-so-the-other-window-follows property of round 16, now scoped correctly.
+2. **The right-hand window's grip moved to the bottom-LEFT corner, and cannot be dragged past
+   the left edge of the screen.** The grip belongs on the corner that *moves*: a right-docked
+   window is pinned to the right edge and can only grow leftwards, so a bottom-right grip sat
+   on the one corner that stays still — the finger ran into the screen edge while the window
+   expanded out of the far side.
+   - `isMirroredGrip()` = `side() === 'right'`; `ResizeGrip` gained `$mirror`, which flips
+     `align-self` (flex-end→flex-start), the cursor (nwse→nesw), the gradient angle (315°→45°),
+     the `clip-path` triangle (`100% 0,100% 100%,0 100%` → `0 0,0 100%,100% 100%`) and the
+     direction the invisible finger pad reaches — always INTO the window, since the small-screen
+     container clips its overflow and a pad hanging outside would not be hit-testable.
+   - **`beginResize` anchors the corner opposite the grip.** Left-docked is unchanged (freeze
+     into left/top, switch the origin to `top left`, add back `width × (1 − scale)`).
+     Right-docked keeps the `top right` origin it already uses: freezing left/top there pins the
+     layout box, and with a top-right origin the painted right edge *is* the layout right edge,
+     so the window grows out to the left with no jump and nothing to add back. `resizeStart`
+     gained `flipX` (−1 mirrored) so the grip's x runs away from the anchor — dragging left is
+     what grows a right window — and `cornerScale` is fed `flipX × (clientX − originX)` with
+     `originX = rect.right`.
+   - **The left-edge cap** is `maxScale = originX / naturalWidth` (painted left = originX −
+     scale × width ≥ 0), stored at `beginResize` because the right edge is fixed for the whole
+     gesture, and applied in `moveResize` as `clampScale(min(maxScale, …))` — cap first, clamp
+     second, so the 0.35 legibility floor still wins on a screen too narrow for even a minimum
+     window. Left-docked windows keep `Infinity`: their far edge carries the grip *and* the ✕,
+     so `keepGripOnScreen` pans them back instead of refusing to grow.
+   - **`keepGripOnScreen` mirrors too**, and is now the backstop rather than the mechanism: it
+     nudges a window that overflows the edge its *grip* is on (left-docked pulled left off the
+     right, right-docked pushed right off the left) — the right-docked case only reachable when
+     the viewport itself got narrower after the fact (rotation, desktop resize). It never pushes
+     so far that the top-right ✕ leaves the screen: a window wider than the viewport keeps its
+     close button and loses its grip, the safer of the two.
+   - **faq.php** Ship Window block updated: which corner carries the grip and why, that the
+     right-hand window stops at the left edge, and that the two sides remember their sizes
+     separately. `php -l` clean in the container (bind mount).
+   Verified: esbuild bundle-resolve + vm evaluation of the whole React tree (self-tested
+   ReferenceError detector); styled-components server render of the **real** `ResizeGrip`
+   template (sliced out of the source) in both `$mirror` states — no `undefined`/`NaN`, both
+   triangles and pads as intended; numeric simulation of the mirrored grip maths — no jump at
+   rest (scale 1.000 at the resting projection, and with a 5px off-centre grab), left/down
+   grows, right/up shrinks, and the painted left edge lands on exactly 0 at the cap however far
+   the finger runs past it. UI.bundle only — needs `yarn build`.
+
 **Stage 3 (2026-07-17) — COMPLETE (user-accepted after feedback rounds 1–5).** Two user riders (2026-07-17)
 refine §3.2: (1) the Hit Chart button sits in the same top-left position as
 game.php with the manoeuvre stats (TC/TD, Acc/Pivot/Roll, Profile, Ini, Agile)
