@@ -1028,31 +1028,71 @@ SecondSight.prototype.canActivate = function () {
 
 SecondSight.prototype.doActivate = function () { 
 
-		var ship = this.ship;
-		var fireid = ship.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
-		var position = shipManager.getShipPosition(ship);			
+	var ship = this.ship;
+	var fireid = ship.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+	var position = shipManager.getShipPosition(ship);			
 
-		var fire = {
-			id: fireid,
-			type: 'normal',
-			shooterid: ship.id,
-			targetid: -1,
-			weaponid: this.id,
-			calledid: -1,
-			turn: gamedata.turn,
-			firingMode: this.firingMode,
-			shots: this.defaultShots,
-			x: position.q,
-			y: position.r,
-			damageclass: 'Electromagnetic',
-			chance: 100,
-			hitmod: 0,
-			notes: "SecondSight" 
-		};
+	var fire = {
+		id: fireid,
+		type: 'normal',
+		shooterid: ship.id,
+		targetid: -1,
+		weaponid: this.id,
+		calledid: -1,
+		turn: gamedata.turn,
+		firingMode: this.firingMode,
+		shots: this.defaultShots,
+		x: position.q,
+		y: position.r,
+		damageclass: 'Electromagnetic',
+		chance: 100,
+		hitmod: 0,
+		notes: "SecondSight" 
+	};
 				
-		// Push to arrays / fire orders
-		this.fireOrders.push(fire);
-	};   
+	// Push to arrays / fire orders
+	this.fireOrders.push(fire);
+};   
+
+var PlanetCrackerBeam = function SecondSight(json, ship) {
+    Weapon.call(this, json, ship);
+};
+PlanetCrackerBeam.prototype = Object.create(Weapon.prototype);
+PlanetCrackerBeam.prototype.constructor = PlanetCrackerBeam;
+	
+PlanetCrackerBeam.prototype.canActivate = function () { 
+	if(gamedata.gamephase == 3 && this.fireOrders.length == 0) return true;
+	return false; 
+};  
+
+PlanetCrackerBeam.prototype.doActivate = function () { 
+
+	var ship = this.ship;
+	var fireid = ship.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+	var position = shipManager.getShipPosition(ship);			
+
+	var fire = {
+		id: fireid,
+		type: 'normal',
+		shooterid: ship.id,
+		targetid: -1,
+		weaponid: this.id,
+		calledid: -1,
+		turn: gamedata.turn,
+		firingMode: this.firingMode,
+		shots: this.defaultShots,
+		x: position.q,
+		y: position.r,
+		damageclass: 'Electromagnetic',
+		chance: 100,
+		hitmod: 0,
+		notes: "PLantCracker" 
+	};
+				
+	// Push to arrays / fire orders
+	this.fireOrders.push(fire);
+};   
+
 
 
 var ThoughtWave = function ThoughtWave(json, ship) {

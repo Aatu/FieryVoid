@@ -13,7 +13,7 @@ class VorlonPlanetKiller extends VorlonCapitalShip{
 	    $this->isd = 'Ancient';
         $this->shipSizeClass = 4; 
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
-		$this->variantOf = "NONE";
+		//$this->variantOf = "NONE";
 				
         $this->gravitic = true;
 		$this->advancedArmor = true;   
