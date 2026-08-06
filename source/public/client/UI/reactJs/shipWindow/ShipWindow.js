@@ -135,7 +135,16 @@ const ShipWindowContainer = styled.div`
 `;
 
 const Header = styled.div`
-    position: relative;
+    /*sticky, not relative (2026-08-06): on a small screen the container is its own scroll
+      box (overflow-y: auto + the fitted max-height), and a plain header scrolls straight
+      out of it - the player then swipes what looks like the top of the window and gets the
+      body, with the only drag handle parked above the visible area. Sticky pins it to the
+      top of the scroll box, so the handle is always where the window's top edge is. On
+      desktop, where the container never scrolls, this renders identically to relative.
+      Still a containing block for the absolutely-positioned close button.*/
+    position: sticky;
+    top: 0;
+    z-index: 4; /*above the section grid (2) so the pinned bar is never drawn through*/
     background-color: ${theme.colors.panelBg};
     border-bottom: 1px solid ${theme.colors.line};
     height: 26px;
@@ -199,6 +208,55 @@ const CloseButton = styled.div`
     margin-top: -2px;
     color: ${theme.colors.line};
     ${Clickable}
+`;
+
+/*Bottom-right resize grip (user request 2026-08-06): drag it to scale the whole window,
+  double-click/double-tap to go back to 100%. The window's LAYOUT size is dictated by fixed
+  section/chrome widths and cannot reflow (see the container's media query), so "resize"
+  here means the same CSS scale applyScreenFit() already applies - the player's own
+  multiplier on top of the automatic fit. That is also why the mark sits in the flow as the
+  window's last row rather than floating over the bottom-right corner: nothing of the
+  datasheet is covered.
+
+  Sticky so it stays at the bottom of the window even when the window is scrolling
+  internally. The stripes are drawn on ::after so the ::before finger pad, which reaches up
+  and left of the 16px mark, is not clipped away with them (clip-path applies to the
+  element AND its pseudo-elements). The pad only reaches into the window - the small-screen
+  container clips its own overflow, so a pad hanging outside would not be hit-testable.*/
+const ResizeGrip = styled.div`
+    position: sticky;
+    bottom: 0;
+    align-self: flex-end;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    box-sizing: border-box;
+    z-index: 5;
+    cursor: nwse-resize;
+    /*the grip owns the gesture: without this a finger drag scrolls the window/page instead*/
+    touch-action: none;
+
+    &::after { /*three diagonal rules clipped to the corner triangle - the standard grip mark*/
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(315deg, ${theme.colors.line} 0 1.5px, transparent 1.5px 4px);
+        clip-path: polygon(100% 0, 100% 100%, 0 100%);
+        opacity: 0.85;
+    }
+
+    &::before { /*finger pad - see the note above*/
+        content: "";
+        position: absolute;
+        top: -${props => props.$pad}px;
+        left: -${props => props.$pad}px;
+        right: 0;
+        bottom: 0;
+    }
+
+    &:hover::after {
+        opacity: 1;
+    }
 `;
 
 /*Hit Chart / Notes button stack, top-left of the window body (the empty corner cell
@@ -522,8 +580,12 @@ class ShipWindow extends React.Component {
         this.onTouchDragMove = this.onTouchDragMove.bind(this);
         this.onTouchDragEnd = this.onTouchDragEnd.bind(this);
         this.onScreenResize = this.onScreenResize.bind(this);
-        this.screenFit = 1; //applied scale factor (touch screens; 1 = untransformed)
+        this.onGripDoubleClick = this.onGripDoubleClick.bind(this);
+        this.screenFit = 1; //TOTAL applied scale factor (auto fit x user scale; 1 = untransformed)
         this.screenFitHeight = null; //applied max-height (layout px) that goes with it
+        this.autoFit = 1; //the automatic half of screenFit (always 1 on desktop)
+        //the other half - the player's own multiplier from the resize grip - is deliberately
+        //NOT per-window state: see getUserScale
     }
 
     /*Touch-screen fit (user request 2026-07-23). The window's size is dictated by fixed
@@ -545,12 +607,22 @@ class ShipWindow extends React.Component {
       The BUDGET is per page (round 11, >>> TOUCH-SCREEN FIT <<<): game.php only spends a
       fraction of the screen so the tactical map underneath stays playable, the lobby fills
       it. The header hugs its text and scales with everything else (round 12) - no special
-      handling.*/
+      handling.
+
+      Since 2026-08-06 the applied scale is `autoFit x userScale`: the resize grip lets the
+      player set their own multiplier on top of the automatic fit (and on desktop, where the
+      fit is always 1, it is the only thing scaling the window). The two are kept apart so
+      rotating the device still re-fits sensibly around whatever size the player chose. The
+      product is clamped once, here, so nothing else has to worry about limits.*/
     applyScreenFit() {
         const element = this.elementRef.current;
         if (!element) return;
 
-        if (!isSmallScreen()) {
+        const small = isSmallScreen();
+        const userScale = getUserScale();
+
+        if (!small && userScale === 1) {
+            //desktop at natural size: no transform at all, exactly as before the grip existed
             if (this.screenFit !== 1 || this.screenFitHeight) {
                 element.style.transform = '';
                 element.style.transformOrigin = '';
@@ -558,44 +630,92 @@ class ShipWindow extends React.Component {
                 this.screenFit = 1;
                 this.screenFitHeight = null;
             }
+            this.autoFit = 1;
             return;
         }
 
-        const budget = screenFitBudget();
+        const natural = this.measureNatural();
+        if (!natural) return;
 
-        //measure unclamped: a transform never affects layout, so offsetWidth/Height stay
-        //honest, but the height clamp from the last fit has to come off first
-        const appliedHeight = element.style.maxHeight;
-        element.style.maxHeight = 'none';
-        const naturalWidth = element.offsetWidth;
-        const naturalHeight = element.offsetHeight;
-        element.style.maxHeight = appliedHeight;
-        if (!naturalWidth || !naturalHeight) return;
+        const budget = small ? screenFitBudget() : null;
+        const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
 
-        const availableWidth = (document.documentElement.clientWidth || window.innerWidth) * budget.fillW;
-        const availableHeight = (window.innerHeight || document.documentElement.clientHeight) * budget.fillH;
-        const fit = Math.min(availableWidth / naturalWidth, availableHeight / naturalHeight);
+        let fit = 1;
+        if (small) {
+            const availableWidth = (document.documentElement.clientWidth || window.innerWidth) * budget.fillW;
+            const availableHeight = viewportHeight * budget.fillH;
+            fit = Math.min(availableWidth / natural.width, availableHeight / natural.height);
+            fit = Math.min(budget.max, Math.max(budget.min, fit));
+        }
+        this.autoFit = fit;
 
-        let scale = Math.min(budget.max, Math.max(budget.min, fit));
+        let scale = clampScale(fit * userScale);
         scale = Math.round(scale * 100) / 100; //2dp: stops poll re-renders jittering the scale
 
-        const maxHeight = Math.round(availableHeight / scale);
+        /*The height clamp is a LAYOUT value (budget height / scale): a shrunk window would
+          otherwise keep an inner scrollbar for space it no longer needs, and one that bottoms
+          out on the legibility floor scrolls internally rather than being cut off. A window
+          the player has deliberately ENLARGED is them overriding the map budget, so its
+          allowance grows with the user scale - but never past MAX_FILL of the screen, or the
+          bottom of a top-docked window would hang off it. Desktop keeps no clamp (the
+          container has none in the first place).*/
+        let maxHeight = null;
+        if (small) {
+            const heightFill = Math.min(MAX_FILL, budget.fillH * Math.max(1, userScale));
+            maxHeight = Math.round(viewportHeight * heightFill / scale);
+        }
+
         if (scale === this.screenFit && maxHeight === this.screenFitHeight) return; //nothing to write
 
         this.screenFit = scale;
         this.screenFitHeight = maxHeight;
-        element.style.transformOrigin = isLeftWindow(this.props.ship) ? 'top left' : 'top right';
+        element.style.transformOrigin = this.transformOrigin();
         element.style.transform = scale === 1 ? '' : 'scale(' + scale + ')';
-        element.style.maxHeight = maxHeight + 'px';
+        element.style.maxHeight = maxHeight == null ? '' : maxHeight + 'px';
+
+        //NOT while the grip is being dragged: shifting the window mid-gesture would move the
+        //corner out from under the finger, and the projection measures from where the corner
+        //started - it would chase itself. finishGesture runs it once on release instead.
+        if (!this.resizeStart) this.keepGripOnScreen();
+    }
+
+    /*Natural (untransformed, unclamped) size in layout px. A transform never affects layout
+      so offsetWidth/Height stay honest, but the height clamp from the last fit has to come
+      off first - inline max-height: none beats the media query's, and absolutely-positioned
+      children like the Hit Chart popup never count toward offsetHeight, so an open popup
+      cannot shrink the window.*/
+    measureNatural() {
+        const element = this.elementRef.current;
+        if (!element) return null;
+
+        const appliedHeight = element.style.maxHeight;
+        element.style.maxHeight = 'none';
+        const width = element.offsetWidth;
+        const height = element.offsetHeight;
+        element.style.maxHeight = appliedHeight;
+
+        return (width && height) ? { width: width, height: height } : null;
+    }
+
+    /*Which corner stays put when the window is scaled. A docked window anchors to the edge
+      it docks to, so scaling can never push it off that edge. Once it has been RESIZED it is
+      positioned by explicit left/top (beginResize freezes the painted geometry) and anchors
+      top-left - which is what keeps the bottom-right grip under the finger as the window
+      grows. Plain drags deliberately do NOT switch the origin: a right-docked window's
+      painted box sits a constant naturalWidth * (1 - scale) left of its layout box, and
+      changing the origin mid-life would jump it by exactly that.*/
+    transformOrigin() {
+        if (this.resizeOrigin) return this.resizeOrigin;
+        return isLeftWindow(this.props.ship) ? 'top left' : 'top right';
     }
 
     onScreenResize() {
         this.applyScreenFit();
     }
 
-    /*Header drag (2026-07-23, replaces jQuery UI `draggable`, whose mouse widget binds
-      mousedown/mousemove only - a touchscreen never produced those, so windows could not
-      be moved by finger at all).
+    /*Header drag AND corner resize (drag 2026-07-23, replacing jQuery UI `draggable`, whose
+      mouse widget binds mousedown/mousemove only - a touchscreen never produced those, so
+      windows could not be moved by finger at all; resize 2026-08-06).
 
       TWO engines, deliberately: a MOUSE/PEN one on pointer events, and a separate TOUCH
       one on touch events. A single pointer-events path looked cleaner but is fragile on
@@ -608,14 +728,79 @@ class ShipWindow extends React.Component {
 
       Both engines DELEGATE from the window container and re-resolve the handle from the
       event target, so a header node React has since replaced can never leave the drag
-      wired to a detached element.
+      wired to a detached element. Both also carry BOTH gestures: which one a press starts is
+      decided once, at begin, from what it landed on, and everything after that goes through
+      moveGesture / finishGesture - two gestures can never run at the same time.
 
-      Contract unchanged: drag by `.shipwindow-drag-handle`, never from inside
-      `.shipwindow-nodrag` (the ✕), position remembered per side on release.*/
+      Contract: drag by `.shipwindow-drag-handle`, resize by `.shipwindow-resize-grip`, never
+      from inside `.shipwindow-nodrag` (the ✕); position remembered per side on release, the
+      chosen size remembered for every window (writeUserScale).*/
     isDragHandle(target) {
         if (!target || !target.closest) return false;
         if (target.closest('.shipwindow-nodrag')) return false;
         return Boolean(target.closest('.shipwindow-drag-handle'));
+    }
+
+    isResizeHandle(target) {
+        return Boolean(target && target.closest && target.closest('.shipwindow-resize-grip'));
+    }
+
+    /*Touch slop below the header (2026-08-06). A scaled-down window's header bar is only
+      26 * scale VISUAL px - 13 or so on a phone - so a finger aimed at it lands just below
+      about as often as it lands on it. A touch that misses LOW still drags, provided it hit
+      nothing but the window's own background (the ship-click underlay, which is what carries
+      `shipwindow-grab-slop`): everything interactive - the chrome buttons, section headers,
+      system icons - sits ABOVE that underlay and is therefore the event target itself, so
+      the slop can never steal a tap from any of them.
+
+      Measured in SCREEN px off the header's own rect, so it compensates for the window scale
+      by construction. Cost: in that thin band a tap no longer opens the ship-level info
+      popup. Set TOUCH_DRAG_SLOP to 0 to switch the whole behaviour off.*/
+    isDragSlop(target, clientY) {
+        if (!TOUCH_DRAG_SLOP || !target || !target.closest) return false;
+        if (!target.closest('.shipwindow-grab-slop')) return false;
+
+        const element = this.elementRef.current;
+        const header = element && element.querySelector('.shipwindow-drag-handle');
+        if (!header) return false;
+
+        const rect = header.getBoundingClientRect();
+        return clientY >= rect.top && clientY <= rect.bottom + TOUCH_DRAG_SLOP;
+    }
+
+    gestureActive() {
+        return Boolean(this.dragStart || this.resizeStart);
+    }
+
+    /*Double-press detection for the size reset, counted HERE rather than left to a DOM
+      dblclick (2026-08-06 refinement, user report: the grip's double-click did nothing with a
+      mouse). Touch has no dblclick at all, and on a mouse the grip never sees its own: this
+      window takes pointer capture on the CONTAINER at pointerdown, which retargets the
+      compatibility mouse events - so click/dblclick fire on the container, not on the grip
+      inside it - and `preventDefault()` on pointerdown suppresses them anyway on some
+      browsers. Both engines therefore count their own presses, at the one place both run.
+
+      BOTH handles reset the size (user request 2026-08-06): the grip, and the header too,
+      since the bottom-right corner of an enlarged or dragged window can be off screen. Keyed
+      by which handle was pressed, so grip-then-header is not a double press.
+
+      The reset lands on RELEASE, not on the second press, and only if neither press moved
+      (moveGesture cancels it) - full double-click semantics. That way a quick tap followed by
+      a real drag still drags, instead of the drag being swallowed as a reset.*/
+    notePress(kind, clientX, clientY) {
+        const now = Date.now();
+        const double = Boolean(this.lastPress)
+            && this.lastPress.kind === kind
+            && (now - this.lastPress.time) < DOUBLE_PRESS_MS;
+
+        this.lastPress = { kind: kind, time: now };
+        this.pressPoint = { x: clientX, y: clientY };
+        this.pendingReset = double;
+    }
+
+    cancelDoublePress() {
+        this.lastPress = null;
+        this.pendingReset = false;
     }
 
     beginDrag(clientX, clientY) {
@@ -632,27 +817,125 @@ class ShipWindow extends React.Component {
         if (!isFinite(left)) left = element.offsetLeft;
         if (!isFinite(top)) top = element.offsetTop;
 
-        //a screen-fitted window is CSS-scaled, so a 100px finger move is only 100/scale
-        //px of layout movement
-        this.dragStart = { x: clientX, y: clientY, left: left, top: top, scale: this.screenFit || 1 };
+        this.dragStart = { x: clientX, y: clientY, left: left, top: top };
+        this.positioned = true;
         element.style.left = left + 'px';
         element.style.top = top + 'px';
         element.style.right = 'auto';
         return true;
     }
 
+    /*Pointer deltas move left/top ONE FOR ONE - no division by the window scale (bug fixed
+      2026-08-06; it was the reported "the drag area seems to sit above the header, sometimes"
+      and it only ever showed up on touch screens, the only place the scale is not 1).
+      `transform: scale()` is applied AFTER layout about an origin that is itself a corner of
+      the element, so that corner maps to itself: the painted box moves exactly as far as
+      left/top do, whatever the scale. Dividing by 0.5 therefore ran the window away at twice
+      the speed of the finger, which after half a second of dragging leaves the finger well
+      ABOVE the header it is supposedly holding - and drops the drag the moment the pointer
+      leaves the window on a stream the browser has not captured.*/
     moveDrag(clientX, clientY) {
         const element = this.elementRef.current;
         if (!this.dragStart || !element) return;
 
-        const scale = this.dragStart.scale || 1;
-        element.style.left = (this.dragStart.left + (clientX - this.dragStart.x) / scale) + 'px';
-        element.style.top = (this.dragStart.top + (clientY - this.dragStart.y) / scale) + 'px';
+        element.style.left = (this.dragStart.left + (clientX - this.dragStart.x)) + 'px';
+        element.style.top = (this.dragStart.top + (clientY - this.dragStart.y)) + 'px';
+        this.clampIntoView();
     }
 
-    finishDrag() {
+    /*Resize grip (user request 2026-08-06). The window cannot reflow, so the grip drives the
+      user half of the CSS scale instead - see the ResizeGrip comment.
+
+      Two things are set up first. (1) The window is switched to an explicit left/top with a
+      TOP-LEFT transform origin, so its top-left corner stays put and the grip tracks the
+      finger as the window grows down-right. A right-docked window scales about its top-RIGHT
+      corner, which paints its box exactly `width * (1 - scale)` left of its layout box, so
+      adding that back to `left` in the same breath as changing the origin keeps the window
+      exactly where it is drawn - no jump, and no need to know anything about the containing
+      block (game.php positions these against the initial containing block, the lobby against
+      a fixed overlay). (2) The natural size and the finger's own starting projection are
+      captured once, so the maths below is a pure function of how far the finger has moved.*/
+    beginResize(clientX, clientY) {
         const element = this.elementRef.current;
+        if (!element) return false;
+
+        const natural = this.measureNatural();
+        if (!natural) return false;
+
+        //layout position, exactly as beginDrag reads it
+        const style = window.getComputedStyle(element);
+        let left = parseFloat(style.left);
+        let top = parseFloat(style.top);
+        if (!isFinite(left)) left = element.offsetLeft;
+        if (!isFinite(top)) top = element.offsetTop;
+
+        const scale = this.screenFit || 1;
+        if (this.transformOrigin() === 'top right') left += natural.width * (1 - scale);
+
+        element.style.left = left + 'px';
+        element.style.top = top + 'px';
+        element.style.right = 'auto';
+        element.style.transformOrigin = 'top left';
+        this.resizeOrigin = 'top left';
+        this.positioned = true;
+
+        //the grip's corner in SCREEN coords - the same space the pointer reports in
+        const rect = element.getBoundingClientRect();
+        this.resizeStart = {
+            originX: rect.left,
+            originY: rect.top,
+            width: natural.width,
+            height: natural.height,
+            scale: scale,
+            //where the finger's own projection started, so grabbing the grip off centre
+            //(or by its invisible finger pad) cannot make the window jump on the first move
+            base: cornerScale(natural.width, natural.height, clientX - rect.left, clientY - rect.top)
+        };
+        return true;
+    }
+
+    moveResize(clientX, clientY) {
+        const resize = this.resizeStart;
+        if (!resize) return;
+
+        const implied = cornerScale(resize.width, resize.height, clientX - resize.originX, clientY - resize.originY);
+        const total = clampScale(resize.scale + (implied - resize.base));
+        const next = Math.round((total / (this.autoFit || 1)) * 100) / 100;
+        if (next === getUserScale()) return;
+
+        setUserScale(next); //in memory only - storage is written once, on release
+        this.applyScreenFit();
+    }
+
+    moveGesture(clientX, clientY) {
+        //real movement means this press is a drag/resize, not half of a double-click
+        if (this.pressPoint
+            && (Math.abs(clientX - this.pressPoint.x) > DOUBLE_PRESS_SLOP
+                || Math.abs(clientY - this.pressPoint.y) > DOUBLE_PRESS_SLOP)) {
+            this.cancelDoublePress();
+        }
+
+        if (this.resizeStart) this.moveResize(clientX, clientY);
+        else this.moveDrag(clientX, clientY);
+    }
+
+    finishGesture() {
+        const element = this.elementRef.current;
+        const resized = Boolean(this.resizeStart);
         this.dragStart = null;
+        this.resizeStart = null;
+
+        //a second still press on the same handle, released still: back to 100% (notePress)
+        if (this.pendingReset) {
+            this.cancelDoublePress(); //so a third press doesn't count as another double
+            this.resetUserScale();
+        }
+
+        if (resized) {
+            writeUserScale(getUserScale()); //the chosen size is a setting, not a one-off
+            this.keepGripOnScreen(); //suppressed during the gesture - see applyScreenFit
+            this.clampIntoView();
+        }
 
         //remember where the player left this side's window (feedback 2026-07-17)
         if (element) {
@@ -663,15 +946,106 @@ class ShipWindow extends React.Component {
         }
     }
 
+    /*A window could be dragged (or, now, scaled) until its header sat off the top of the
+      screen, and a header that is off-screen can never be grabbed again - the window is
+      stranded, closeable only by its ✕ if that is still reachable (2026-08-06). Keep the
+      header row and a slice of the window on screen. Works off the PAINTED rect, so it is
+      right at any scale and for either transform origin, and only for windows the player has
+      actually placed - a docked small-screen window is positioned by the media query's
+      right/top and must not be converted to left/top behind its back.*/
+    clampIntoView(fullyOnScreen) {
+        const element = this.elementRef.current;
+        if (!element || !this.positioned) return;
+
+        const rect = element.getBoundingClientRect();
+        const viewWidth = document.documentElement.clientWidth || window.innerWidth;
+        const viewHeight = window.innerHeight || document.documentElement.clientHeight;
+
+        let dx = 0;
+        let dy = 0;
+        if (rect.top < 0) dy = -rect.top;
+        else if (rect.top > viewHeight - CLAMP_MARGIN) dy = (viewHeight - CLAMP_MARGIN) - rect.top;
+
+        /*`fullyOnScreen` (the size reset, not a drag): a window that has just SHRUNK may still
+          be sitting where keepGripOnScreen pushed it while it was too wide, with its left-hand
+          sections off screen for no reason any more. Only asked for where it can be granted -
+          and never during a drag, where pushing a window half off the left edge to see the map
+          under it is a perfectly good thing to want.*/
+        if (fullyOnScreen && rect.width <= viewWidth && rect.left < 0) dx = -rect.left;
+        else if (rect.right < CLAMP_MARGIN) dx = CLAMP_MARGIN - rect.right;
+        else if (rect.left > viewWidth - CLAMP_MARGIN) dx = (viewWidth - CLAMP_MARGIN) - rect.left;
+        if (!dx && !dy) return;
+
+        //left/top move the painted box one for one - see the note on moveDrag. The drag's own
+        //reference point is deliberately NOT adjusted: every move recomputes the position from
+        //it, so the window simply sticks at the boundary while the finger runs past and picks
+        //the finger up again the moment it comes back, with nothing accumulating either way.
+        element.style.left = ((parseFloat(element.style.left) || 0) + dx) + 'px';
+        element.style.top = ((parseFloat(element.style.top) || 0) + dy) + 'px';
+    }
+
+    /*Both ways out of an over-large window - the resize grip and the close ✕ - sit on its
+      RIGHT edge, so a window scaled wider than the screen from its left-hand dock would be
+      neither shrinkable nor closable until it had been panned back (2026-08-06). Whenever the
+      scale changes, an overflowing window is pulled left just far enough to bring that edge
+      back on screen; its left-hand sections go off screen instead, which is the trade the
+      player asked for by making it that big, and panning it back out afterwards is their call
+      (this never runs from a drag). Only ever moves a window LEFT, and only one that genuinely
+      overflows, so windows that fit - all of them, at the automatic size - are untouched.*/
+    keepGripOnScreen() {
+        const element = this.elementRef.current;
+        if (!element) return;
+
+        const overflow = element.getBoundingClientRect().right - (document.documentElement.clientWidth || window.innerWidth);
+        if (overflow <= 0) return;
+
+        //a still-docked window is placed by the media query's left/right, so switch it to an
+        //explicit left first (left/top move the painted box one for one at any scale or origin)
+        const style = window.getComputedStyle(element);
+        let left = parseFloat(style.left);
+        if (!isFinite(left)) left = element.offsetLeft;
+
+        element.style.left = (left - overflow) + 'px';
+        element.style.right = 'auto';
+        this.positioned = true;
+    }
+
+    //back to the automatic size (double-click the grip on a mouse, double-tap it on a
+    //touch screen): the escape hatch from a window scaled down to something unreadable
+    resetUserScale() {
+        if (getUserScale() === 1) return;
+        setUserScale(1);
+        writeUserScale(1);
+        this.applyScreenFit();
+        this.clampIntoView(true); //back to natural size, so put the whole window back on screen
+    }
+
+    onGripDoubleClick(event) {
+        event.stopPropagation();
+        this.resetUserScale();
+    }
+
     //--- mouse / pen (pointer events) ---
     onDragStart(event) {
         //set window.FV_DRAG_DEBUG = true in the console to see which engine fires and
         //whether the press landed on the handle (remote-debugging a touch device)
-        if (window.FV_DRAG_DEBUG) console.log('[shipwindow] pointerdown', event.pointerType, 'handle:', this.isDragHandle(event.target));
+        if (window.FV_DRAG_DEBUG) console.log('[shipwindow] pointerdown', event.pointerType, 'handle:', this.isDragHandle(event.target), 'grip:', this.isResizeHandle(event.target));
         if (event.pointerType === 'touch') return; //touch is handled by the touch engine below
         if (event.button != null && event.button > 0) return; //primary button only
-        if (!this.isDragHandle(event.target)) return;
-        if (!this.beginDrag(event.clientX, event.clientY)) return;
+
+        //the grip and the header share these listeners (and the capture/teardown below):
+        //the two gestures are mutually exclusive by construction that way
+        const resize = this.isResizeHandle(event.target);
+        if (!resize && !this.isDragHandle(event.target)) return;
+
+        //a second still press on the same handle inside DOUBLE_PRESS_MS resets the size on
+        //release; the gesture below still starts, and a moved gesture cancels the reset
+        this.notePress(resize ? 'grip' : 'header', event.clientX, event.clientY);
+
+        if (!(resize ? this.beginResize(event.clientX, event.clientY) : this.beginDrag(event.clientX, event.clientY))) {
+            this.cancelDoublePress(); //no gesture, so no release to apply a pending reset on
+            return;
+        }
 
         //capture on the container (not the header): the pointer routinely leaves the small
         //header bar mid-drag. Falls back to document listeners if capture is unavailable.
@@ -692,25 +1066,33 @@ class ShipWindow extends React.Component {
     }
 
     onDragMove(event) {
-        if (!this.dragStart || event.pointerId !== this.dragPointerId) return;
-        this.moveDrag(event.clientX, event.clientY);
+        if (!this.gestureActive() || event.pointerId !== this.dragPointerId) return;
+        this.moveGesture(event.clientX, event.clientY);
     }
 
     onDragEnd(event) {
-        if (!this.dragStart || (event && event.pointerId !== this.dragPointerId)) return;
+        if (!this.gestureActive() || (event && event.pointerId !== this.dragPointerId)) return;
         this.stopDragListening();
-        this.finishDrag();
+        this.finishGesture();
     }
 
     //--- touch ---
     onTouchDragStart(event) {
-        if (window.FV_DRAG_DEBUG) console.log('[shipwindow] touchstart', event.touches && event.touches.length, 'handle:', this.isDragHandle(event.target));
-        if (this.dragStart) return; //already dragging
+        if (window.FV_DRAG_DEBUG) console.log('[shipwindow] touchstart', event.touches && event.touches.length, 'handle:', this.isDragHandle(event.target), 'grip:', this.isResizeHandle(event.target));
+        if (this.gestureActive()) return; //already dragging or resizing
         if (!event.touches || event.touches.length !== 1) return; //ignore pinches
-        if (!this.isDragHandle(event.target)) return;
 
         const touch = event.touches[0];
-        if (!this.beginDrag(touch.clientX, touch.clientY)) return;
+        const resize = this.isResizeHandle(event.target);
+        if (!resize && !this.isDragHandle(event.target) && !this.isDragSlop(event.target, touch.clientY)) return;
+
+        //double-tap either handle to reset the size (the same counter the mouse uses)
+        this.notePress(resize ? 'grip' : 'header', touch.clientX, touch.clientY);
+
+        if (!(resize ? this.beginResize(touch.clientX, touch.clientY) : this.beginDrag(touch.clientX, touch.clientY))) {
+            this.cancelDoublePress(); //as above
+            return;
+        }
 
         this.touchDragId = touch.identifier;
         //Where the page sat when the drag began. preventDefault alone can't stop a scroll
@@ -734,9 +1116,9 @@ class ShipWindow extends React.Component {
 
     onTouchDragMove(event) {
         const touch = findTouch(event.touches, this.touchDragId);
-        if (!this.dragStart || !touch) return;
+        if (!this.gestureActive() || !touch) return;
 
-        this.moveDrag(touch.clientX, touch.clientY);
+        this.moveGesture(touch.clientX, touch.clientY);
 
         //hold the page where it was - see the note in onTouchDragStart
         const scroll = this.dragScroll;
@@ -752,7 +1134,7 @@ class ShipWindow extends React.Component {
         if (event && event.touches && findTouch(event.touches, this.touchDragId)) return;
 
         this.stopTouchDragListening();
-        if (this.dragStart) this.finishDrag();
+        if (this.gestureActive()) this.finishGesture();
     }
 
     stopTouchDragListening() {
@@ -909,13 +1291,15 @@ class ShipWindow extends React.Component {
             element.style.top = top + 'px';
             element.style.left = left + 'px';
             element.style.right = 'auto';
+            this.positioned = true; //placed by us, so clampIntoView may adjust it
         }
 
         //close the Hit Chart / Notes popup on any press outside it (2026-07-16 feedback)
         document.addEventListener('pointerdown', this.onDocumentPointerDown);
 
         //touch screens: scale the window to the screen width (and keep it right through
-        //rotation / browser-chrome resizes)
+        //rotation / browser-chrome resizes). This is also where the size the player set with
+        //the resize grip, in an earlier window or an earlier session, is applied.
         this.applyScreenFit();
         window.addEventListener('resize', this.onScreenResize);
         window.addEventListener('orientationchange', this.onScreenResize);
@@ -940,6 +1324,7 @@ class ShipWindow extends React.Component {
         this.stopDragListening();
         this.stopTouchDragListening();
         this.dragStart = null;
+        this.resizeStart = null;
         if (this.panelHoverTimer) clearTimeout(this.panelHoverTimer);
     }
 
@@ -990,9 +1375,30 @@ class ShipWindow extends React.Component {
         this.setState(state => ({ showArt: !state.showArt, openPanel: null }));
     }
 
+    /*Resize grip, bottom-right of every window variant (user request 2026-08-06: portrait
+      windows are still too small sometimes, and the right size differs per player/device).
+      Carries `shipwindow-nodrag` as well so it can never be mistaken for a drag handle if it
+      ever ends up inside one. The pointer/touch listeners are the container's own - see
+      onDragStart - which is also where the double-press reset is counted; the onDoubleClick
+      here is belt and braces for the paths where pointer capture is unavailable and the grip
+      does see its own dblclick (resetUserScale is idempotent, so both firing is harmless).*/
+    renderResizeGrip() {
+        return (
+            <ResizeGrip
+                className="shipwindow-resize-grip shipwindow-nodrag"
+                $pad={GRIP_TOUCH_PAD}
+                onDoubleClick={this.onGripDoubleClick}
+                title="Drag to resize this window — double-click to reset its size"
+            />
+        );
+    }
+
     renderHeader(shipName, unitName, tint) {
         return (
-            <Header className="shipwindow-drag-handle">
+            /*the bar's own tooltip (the name/class spans keep theirs) advertises both gestures -
+              double-press to reset the size is on the header as well as the grip, because an
+              enlarged or dragged window can have its bottom-right corner off screen*/
+            <Header className="shipwindow-drag-handle" title="Drag to move — double-click to reset window size">
                 <HeaderName $tint={tint} title={shipName}>{shipName}</HeaderName>
                 <HeaderClass title={unitName}>{unitName}</HeaderClass>
                 <CloseButton className="shipwindow-nodrag" onClick={this.close.bind(this)}>✕</CloseButton>
@@ -1224,6 +1630,7 @@ class ShipWindow extends React.Component {
                             <FlightArea><FighterList ship={ship} /></FlightArea>
                             <ShipNotesPanel ship={ship} />
                         </LobbyBody>
+                        {this.renderResizeGrip()}
                     </ShipWindowContainer>
                 )
             }
@@ -1232,6 +1639,7 @@ class ShipWindow extends React.Component {
                     {this.renderHeader(shipName, unitName, getHeaderTint(ship))}
                     <FighterList ship={ship} />
                     {renderStatusBanners(ship)}
+                    {this.renderResizeGrip()}
                 </ShipWindowContainer>
             )
         }
@@ -1240,10 +1648,11 @@ class ShipWindow extends React.Component {
             return (<ShipWindowContainer ref={this.elementRef} onClick={shipWindowClicked} onContextMenu={e => { e.preventDefault(); e.stopPropagation(); }} $isMyTeam={isMyTeam} $variant="terrain">
                 {this.renderHeader(shipName, unitName, null)}
                 <CompactBody>
-                    <ShipHitArea onClick={this.onShipClick.bind(this)} />
+                    <ShipHitArea className="shipwindow-grab-slop" onClick={this.onShipClick.bind(this)} />
                     <WatermarkLayer $img={window.AssetManager.getSmartImagePath(ship.imagePath)} />
                     <UnknownSystemIcon onMouseOver={this.onUnknownMouseOver.bind(this)} onMouseOut={this.onUnknownMouseOut.bind(this)} onTouchStart={this.onUnknownTouchStart.bind(this)} onTouchMove={this.onShipTouchMove.bind(this)} onTouchEnd={this.onShipTouchEnd.bind(this)} onTouchCancel={this.onShipTouchCancel.bind(this)}>?</UnknownSystemIcon>
                 </CompactBody>
+                {this.renderResizeGrip()}
             </ShipWindowContainer>)
         }
 
@@ -1269,7 +1678,7 @@ class ShipWindow extends React.Component {
             return (<ShipWindowContainer ref={this.elementRef} onClick={shipWindowClicked} onContextMenu={e => { e.preventDefault(); e.stopPropagation(); }} $isMyTeam={isMyTeam} $variant="terrain">
                 {this.renderHeader(shipName, unitName, null)}
                 <CompactBody>
-                    <ShipHitArea onClick={this.onShipClick.bind(this)} />
+                    <ShipHitArea className="shipwindow-grab-slop" onClick={this.onShipClick.bind(this)} />
                     {/*Ship Art (item 3): the SAME watermark turns full colour in place while
                        the sections hide - no resize*/}
                     <WatermarkLayer
@@ -1285,6 +1694,7 @@ class ShipWindow extends React.Component {
                 </CompactBody>
                 {renderStatusBanners(ship)}
                 {lobby && <ShipNotesPanel ship={ship} full />}
+                {this.renderResizeGrip()}
                 {this.renderPopup(withHitChart, withNotes, 72)}
             </ShipWindowContainer>)
         }
@@ -1306,7 +1716,7 @@ class ShipWindow extends React.Component {
         //game.php (feedback 2026-07-17; the EW panel itself is meaningless pre-game)
         const sectionGrid = (
             <SectionGrid $areas={areas}>
-                <ShipHitArea onClick={this.onShipClick.bind(this)} />
+                <ShipHitArea className="shipwindow-grab-slop" onClick={this.onShipClick.bind(this)} />
                 {/*Ship Art (item 3): the SAME watermark turns full colour in place while the
                    sections hide - keeps the window/image at the exact same size (no resize).
                    $offsetY: the lobby's taller chrome pushes the sections below the grid
@@ -1364,6 +1774,7 @@ class ShipWindow extends React.Component {
             {sectionGrid}
             {rolled && <StatusBanner>⟲ Rolled — port / starboard reversed</StatusBanner>}
             {renderStatusBanners(ship)}
+            {this.renderResizeGrip()}
             {this.renderPopup(withHitChart, withNotes)}
         </ShipWindowContainer>)
     }
@@ -1408,7 +1819,7 @@ const PORTRAIT_QUERY = '(orientation: portrait)';
   portrait: what those two (and the floor) are multiplied by on an upright small screen -
   1 = no boost. THE knob for "windows are too small on my phone".*/
 //game.php: map stays visible; +20% upright, where the map has vertical room to spare
-const MAP_FIT = { fillW: 0.60, fillH: 0.85, min: 0.40, max: 1, portrait: 1.20 };
+const MAP_FIT = { fillW: 0.60, fillH: 0.85, min: 0.40, max: 1, portrait: 1.40 };
 //lobby: nothing behind it, so it already fills the screen - a boost has nowhere to go
 const LOBBY_FIT = { fillW: 0.96, fillH: 0.96, min: 0.50, max: 1.75, portrait: 1.2 };
 //no fitted window may cover MORE than this share of an axis, however big the boost: the
@@ -1436,6 +1847,81 @@ const boostBudget = (budget, factor) => (factor === 1 ? budget : {
 const screenFitBudget = () => {
     const budget = isLobby() ? LOBBY_FIT : MAP_FIT;
     return isPortrait() ? boostBudget(budget, budget.portrait) : budget;
+};
+
+/*>>> WINDOW RESIZE GRIP <<< (user request 2026-08-06). The automatic fit above can only
+  guess how big a window should be; the grip lets the player say. It drives `userScale`, a
+  multiplier applied on top of the fit (and the only scaling on desktop, where the fit is 1),
+  so the two stay separable - rotating the device re-fits around the size the player chose
+  rather than throwing it away.
+
+  The limits are on the PRODUCT, in one place (clampScale, used by both applyScreenFit and
+  moveResize), so a phone window can be dragged from unreadably small up to three times its
+  natural size without the grip having to know anything about the per-page budgets.*/
+const RESIZE_MIN_SCALE = 0.35;
+const RESIZE_MAX_SCALE = 3;
+//how far the grip's invisible finger pad reaches up and left of its 16px mark. It sits above
+//the window's content (z-index 5), so keep it modest: on a compact mine window it overlaps
+//the bottom edge of whatever icon happens to end up in that corner.
+const GRIP_TOUCH_PAD = 6;
+//how far BELOW the header bar a touch may land and still drag the window (screen px, on the
+//window background only - see isDragSlop). 0 disables the behaviour.
+const TOUCH_DRAG_SLOP = 8;
+/*Size reset: how close together two presses on the same handle count as a double press, and
+  how far the pointer may wander before the press is a drag instead (see notePress). 400ms is
+  pitched between the ~300ms of a comfortable double-TAP and the ~500ms Windows allows a
+  double-CLICK - too short and a deliberate mouse double-click on the grip does nothing, which
+  is the complaint this replaced. False positives cost nothing here: both presses must also
+  hold still, and the reset only undoes a scaling the player can redo with one drag.*/
+const DOUBLE_PRESS_MS = 400;
+const DOUBLE_PRESS_SLOP = 6;
+//how much of a dragged window must stay on screen (px), so its header can always be grabbed
+const CLAMP_MARGIN = 40;
+//the chosen size is remembered per browser, not per window: "hard to judge the correct size
+//for different users" is a setting, and a player who has sized a window on their phone wants
+//the next one, and the next session, to open that way too. Storage can throw (private mode),
+//and a stored value from an older/odd build is clamped on the way in.
+const USER_SCALE_KEY = 'fv.shipwindow.userScale';
+
+const clampScale = (scale) => Math.min(RESIZE_MAX_SCALE, Math.max(RESIZE_MIN_SCALE, scale));
+
+/*The scale a bottom-right grip at (dx, dy) from the window's top-left corner implies, as the
+  least-squares fit of `dx = scale * width, dy = scale * height`. A uniform scale cannot track
+  both axes exactly, so both get a say in proportion to the window's own shape: dragging right
+  OR down grows it, diagonally most of all, and the reverse shrinks it - which is how a corner
+  grip is expected to behave. At the grip's own resting position it returns exactly the current
+  scale, so the maths and the mark agree.*/
+const cornerScale = (width, height, dx, dy) => (dx * width + dy * height) / (width * width + height * height);
+
+/*The chosen size is one value for the whole page, not per window: a player who has sized one
+  window has said how big they want ship windows, and the second window (there are at most
+  two, one per side) would look wrong at a different scale. Module-level also means the other
+  open window picks the new size up on its next render - every window re-runs applyScreenFit
+  on each gamedata poll - with no cross-window plumbing. Read lazily so storage is touched
+  once per page rather than once per window opened.*/
+let sessionUserScale = null;
+
+const getUserScale = () => {
+    if (sessionUserScale == null) sessionUserScale = readUserScale();
+    return sessionUserScale;
+};
+
+const setUserScale = (value) => {
+    sessionUserScale = value;
+};
+
+const readUserScale = () => {
+    try {
+        const stored = parseFloat(window.localStorage.getItem(USER_SCALE_KEY));
+        if (isFinite(stored) && stored > 0) return clampScale(stored);
+    } catch (e) { /*storage unavailable - natural size is a fine default*/ }
+    return 1;
+};
+
+const writeUserScale = (value) => {
+    try {
+        window.localStorage.setItem(USER_SCALE_KEY, String(value));
+    } catch (e) { /*as above: not being able to remember it is not worth an error*/ }
 };
 
 //the still-down touch that started a drag (TouchList has no .find)

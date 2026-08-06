@@ -806,6 +806,19 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 </ul>
             </li>
             <br>
+            <li><b>Ship Window (the Ship Control Sheer (SCS) that opens when you -rightclick a unit):</b>
+                <ul class="circle-list">
+                    <li>Drag the title bar - Move the window around the screen.  On a computer the next window you open on that side of the screen appears where you left the last one (until you reload the page).</li>
+                    <li>Drag the bottom-right corner - Resize the window.  The size you settle on is used by every ship window from then on, and is remembered on your device for your next session, so you can set it once to suit your screen (Note- drag it with your finger on touchscreen).</li>
+                    <li>Double-click the corner grip, or the title bar - Reset the window to its normal size (Note- double-tap on touchscreen).  The title bar does it too, so you can always get back even if you have made a window so large that its corner sits off the edge of the screen.</li>
+                    <li>Phones and tablets - Windows are scaled automatically to fit your screen before any resizing of your own, with extra size in portrait where space is tightest.  Anything that does not fit scrolls inside the window, and the title bar stays pinned to the top of it so it can always be dragged.</li>
+                    <li>Hit Chart / Ship Art / Ship Stats / Notes buttons - Click one to open its panel, click anywhere outside to close it (Ship Stats and Notes also peek on mouse hover).  Ship Stats shows this turn's actual turn cost, turn delay, profile and initiative, with any figure the current situation has changed shown in yellow.</li>
+                    <li>Ship Art - Shows the unit's artwork full colour in place of its sections; click the button again to go back.</li>
+                    <li>Hover a system - Show its details in the info panel (Note- press and hold on touchscreen; a plain tap is the action, e.g. power, firing or repair).</li>
+                    <li>Click the artwork behind the sections - Show the unit's own details rather than a system's.</li>
+                </ul>
+            </li>
+            <br>
             <li><b>During Deployment Phase:</b>
                 <ul class="circle-list">
                     <li>Shift & Left-click - Instantly deploy a ship to a hex already occupied by other units (Note- long press on touchscreen).  
