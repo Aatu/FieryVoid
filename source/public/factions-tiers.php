@@ -183,9 +183,9 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li><b>Implausible manoeuvring</b> — changing speed faster than the ship you are imitating could manage.</li>
             <li><b>Implausible ELINT</b> — running an ELINT operation the imitated hull has no array for, or spending more EW than its sensors could produce.</li>
             <li><b>Firing the wrong weapon</b> — a shot only looks convincing if the imitated ship mounts a weapon of the same class whose arc covers that shot, and each gun you fire has to be matched by a different one on the simulacrum. Fire more Matter Cannons than it carries and the extra one gives you away. This reveal takes effect at the start of the <i>following</i> turn — your opponent works out the discrepancy after the fact.</li>
-            <li><b>Losing the array</b> — destroyed, powered down or switched off, and the deception ends at once and permanently.</li>
+            <li><b>Losing the array</b> — if Chameleon sensros are destroyed, or switched off, the deception ends at once and permanently.</li>
             <li><b>Ancient sensors</b> — Ancient and Primordial races (Shadows, Vorlons, Kirishiac, Mindriders, Thirdspace) are never fooled at all. If any team fields such a unit, Chameleon ships are revealed to that team from the start of the game.</li>
-            <li>Once revealed, the ship stays revealed to that team for the rest of the game — repairing the array, restoring its power or switching the suite back on will not restore the illusion.</li>
+            <li>Once revealed, the ship stays revealed to that team for the rest of the game — switching the suite back on will not restore the illusion for example.</li>
     </ul>
 <h4 id="centauriwotc" >CENTAURI REPUBLIC (WoTCR)</h4>
     <p>The Centauri fleet from a few hundred years before the show era, representing the Wars of the Centauri Republic (WotCR) period.  
