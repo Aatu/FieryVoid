@@ -194,6 +194,25 @@ window.PhaseStrategy = function () {
         }
     };
 
+    /* A straight-ahead weapon (Planet-Cracker Beam) marking the hexes its declared order will sweep,
+       on its OWN icon. On the base strategy rather than on FirePhaseStrategy so the overlay survives
+       a phase change while the order still stands, and so a replay can raise it too. Removal is the
+       ordinary hexagon removal - the overlay lives in the same per-icon map, so phase teardown
+       (removeHexagonArcs) already collects it. */
+    PhaseStrategy.prototype.onShowForwardHexes = function (payload) {
+        var icon = this.shipIconContainer.getByShip(payload.ship);
+        if (!icon) return;
+
+        icon.showForwardHexes(payload.system, payload.hexes, payload.color, payload.opacity);
+    };
+
+    PhaseStrategy.prototype.onRemoveForwardHexes = function (payload) {
+        var icon = this.shipIconContainer.getByShip(payload.ship);
+        if (!icon) return;
+
+        icon.removeTargetedHexagonInArc(payload.system);
+    };
+
     PhaseStrategy.prototype.onScrollToShip = function (payload) {
         var icon = this.shipIconContainer.getById(payload.shipId)
         if (!shipManager.shouldBeHidden(icon.ship)) {

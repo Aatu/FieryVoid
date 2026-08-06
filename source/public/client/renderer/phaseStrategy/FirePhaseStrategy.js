@@ -25,7 +25,33 @@ window.FirePhaseStrategy = function () {
         this.setPhaseHeader("FIRE ORDERS");
         this.showAppropriateHighlight();
         this.showAppropriateEW();
+        this.redrawDeclaredWeaponOverlays();
         return this;
+    };
+
+    /* Weapons that paint a persistent map overlay for an order the player has already declared (the
+       Planet-Cracker Beam's swept hexes) redraw it here. doActivate raised it when the order was
+       made, but a page reload rebuilds the weapon from gamedata with its order already in place and
+       doActivate never runs again.
+
+       Drawn straight onto the icon rather than through webglScene.customEvent: the PhaseDirector
+       only assigns this.phaseStrategy once activate() has RETURNED, so an event raised from in here
+       would be relayed to the outgoing strategy, or dropped entirely on a fresh page load. */
+    FirePhaseStrategy.prototype.redrawDeclaredWeaponOverlays = function () {
+        this.shipIconContainer.getArray().forEach(function (icon) {
+            var ship = icon.ship;
+            if (!ship || !ship.systems) return;
+            if (!gamedata.isMyShip(ship)) return; //only your own declared orders are yours to see
+
+            ship.systems.forEach(function (system) {
+                if (typeof system.getDeclaredForwardHexes !== 'function') return;
+
+                var overlay = system.getDeclaredForwardHexes();
+                if (!overlay) return; //nothing declared on this weapon
+
+                icon.showForwardHexes(system, overlay.hexes, overlay.color, overlay.opacity);
+            });
+        });
     };
 
     FirePhaseStrategy.prototype.deactivate = function () {

@@ -1761,6 +1761,42 @@ window.ShipIcon = function () {
         this.shipHexagonSpritesMap.set(system, hexagon);
     };
 
+    /* The hexes a straight-ahead weapon will actually sweep once its order is DECLARED - the Vorlon
+       Planet Killer's Planet-Cracker Beam is the one that needs it, and the server sweeps exactly the
+       same line (PlanetCrackerBeam::getBeamHexes, off the same weapon range).
+
+       Not the same thing as showStraightArcs: that draws the whole six-armed reachability star, in
+       cobalt, while a system is HOVERED. This is the single forward arm, in the caller's colour, and
+       it stays up until the order is withdrawn - so it reads as "this is what I have committed to
+       destroy" rather than "this is where I could shoot".
+
+       Same local-frame trick as the arcs: axial `a` steps along local direction 0 and the finished
+       mesh is turned to the ship's facing, so `b === 0 && a >= 1` is exactly the line of hexes off the
+       ship's nose whichever way it is pointing. It hangs off the SHOOTER's own icon (unlike
+       showTargetedHexagonInArc, which hangs off its target's), and lives in shipHexagonSpritesMap so
+       removeTargetedHexagonInArc and the phase-teardown removeHexagonArcs both reach it unchanged. */
+    ShipIcon.prototype.showForwardHexes = function (system, hexCount, colour, opacity) {
+        if (this.shipHexagonSpritesMap.has(system)) this.removeTargetedHexagonInArc(system);
+
+        hexCount = Math.floor(hexCount);
+        if (isNaN(hexCount) || hexCount < 1) return; //no reach - nothing to highlight
+
+        var hexDistance = window.coordinateConverter.getHexDistance();
+        var loops = buildHexRegion(hexCount, hexDistance, function (x, y, a, b) {
+            return b === 0 && a >= 1 && a <= hexCount; //straight ahead, starting one hex out
+        });
+
+        if (!loops.length) return;
+
+        //border in the same colour, fully opaque, so the swept hexes stay crisp over a busy map
+        var hexes = buildRegionOverlay(loops, colour, opacity, colour, 1);
+        hexes.rotation.z = mathlib.degreeToRadian(this.getFacing());
+
+        //a count of hexes, so grid-locked and anchored on the hex rather than the sprite
+        addGridLockedOverlay(this.mesh, hexes, getHexAnchor(this).offset);
+        this.shipHexagonSpritesMap.set(system, hexes);
+    };
+
     ShipIcon.prototype.removeTargetedHexagonInArc = function (system) {
         if (this.shipHexagonSpritesMap.has(system)) {
             this.mesh.remove(this.shipHexagonSpritesMap.get(system));

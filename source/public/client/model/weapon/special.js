@@ -1054,22 +1054,31 @@ SecondSight.prototype.doActivate = function () {
 	this.fireOrders.push(fire);
 };   
 
-var PlanetCrackerBeam = function SecondSight(json, ship) {
+var PlanetCrackerBeam = function PlanetCrackerBeam(json, ship) {
     Weapon.call(this, json, ship);
 };
 PlanetCrackerBeam.prototype = Object.create(Weapon.prototype);
 PlanetCrackerBeam.prototype.constructor = PlanetCrackerBeam;
-	
-PlanetCrackerBeam.prototype.canActivate = function () { 
-	if(gamedata.gamephase == 3 && this.fireOrders.length == 0) return true;
-	return false; 
-};  
 
-PlanetCrackerBeam.prototype.doActivate = function () { 
+//Yellow, so the swept hexes read as a declared kill zone rather than as one more blue firing arc.
+PlanetCrackerBeam.PLANET_CRACKER_COLOUR = 0xd8c02a;
+PlanetCrackerBeam.PLANET_CRACKER_OPACITY = 0.35;
+
+PlanetCrackerBeam.prototype.canActivate = function () {
+	if(gamedata.gamephase == 3 && this.fireOrders.length == 0) return true;
+	return false;
+};
+
+PlanetCrackerBeam.prototype.canDeactivate = function () {
+	if(gamedata.gamephase == 3 && this.fireOrders.length > 0) return true;
+	return false;
+};
+
+PlanetCrackerBeam.prototype.doActivate = function () {
 
 	var ship = this.ship;
 	var fireid = ship.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
-	var position = shipManager.getShipPosition(ship);			
+	var position = shipManager.getShipPosition(ship);
 
 	var fire = {
 		id: fireid,
@@ -1086,17 +1095,71 @@ PlanetCrackerBeam.prototype.doActivate = function () {
 		damageclass: 'Electromagnetic',
 		chance: 100,
 		hitmod: 0,
-		notes: "PLantCracker" 
+		notes: "PlanetCracker"
 	};
-				
+
 	// Push to arrays / fire orders
 	this.fireOrders.push(fire);
-    //Add something here to use Ballistic Sprites to highlight the four hexes in front of ship? 
-};   
+
+	//Mark the hexes the beam will sweep. The server picks the same line off the same weapon range
+	//(PlanetCrackerBeam::getBeamHexes), so what is highlighted is what will actually be destroyed.
+	this.showBeamHexes();
+};
 
 PlanetCrackerBeam.prototype.doDeactivate = function () {
-	weaponManager.removeFiringOrder(this.ship, this);
-    //Also clear Ballistic sprites somehow!
+	weaponManager.removeFiringOrder(this.ship, this); //this also reaches onFireOrdersRemoved below, which clears the highlight
+};
+
+//Called by weaponManager.removeFiringOrder, so the highlight is dropped whichever route the
+//player cancels by - the green Deactivate button OR the generic remove-fire-order button.
+PlanetCrackerBeam.prototype.onFireOrdersRemoved = function () {
+	this.hideBeamHexes();
+};
+
+/* The weapon carries specialArcs, so weaponManager.isPosOnWeaponArc hands every arc question here
+   rather than testing a wedge. Its arc is not a wedge at all: it is the straight line of hexes off
+   the ship's nose, out to $range - the same set the server sweeps in PlanetCrackerBeam::getBeamHexes.
+   Same 0.5 degree tolerance as the Transverse Drive, which asks the same shape of question. */
+PlanetCrackerBeam.prototype.isPosOnSpecialArc = function (shooter, position) {
+	var shooterPos = shipManager.getShipPosition(shooter);
+
+	if (shooterPos.q == position.q && shooterPos.r == position.r) return false; //the ship's own hex is never swept
+	if (shooterPos.distanceTo(position) > this.range) return false;
+
+	var bearing = mathlib.getCompassHeadingOfPoint(shooterPos, position);
+	var delta = Math.abs(bearing - shipManager.getShipHeadingAngle(shooter)); //despite the name, that is the ship's FACING
+	if (delta > 180) delta = 360 - delta; //wrap around 360
+
+	return delta <= 0.5;
+};
+
+PlanetCrackerBeam.prototype.showBeamHexes = function () {
+	webglScene.customEvent("ShowForwardHexes", {
+		ship: this.ship,
+		system: this,
+		hexes: this.range,
+		color: PlanetCrackerBeam.PLANET_CRACKER_COLOUR,
+		opacity: PlanetCrackerBeam.PLANET_CRACKER_OPACITY
+	});
+};
+
+PlanetCrackerBeam.prototype.hideBeamHexes = function () {
+	webglScene.customEvent("RemoveForwardHexes", { ship: this.ship, system: this });
+};
+
+//The overlay to (re)draw for an already-declared order, or null when there is nothing to show.
+//A page reload mid-Firing-Phase rebuilds this weapon from gamedata with its order already in place
+//and doActivate never runs again, so FirePhaseStrategy.redrawDeclaredWeaponOverlays asks every
+//system this on entering the phase and raises the highlight itself.
+PlanetCrackerBeam.prototype.getDeclaredForwardHexes = function () {
+	if(gamedata.gamephase != 3) return null;
+	if(this.fireOrders.length == 0) return null;
+
+	return {
+		hexes: this.range,
+		color: PlanetCrackerBeam.PLANET_CRACKER_COLOUR,
+		opacity: PlanetCrackerBeam.PLANET_CRACKER_OPACITY
+	};
 };
 
 var ThoughtWave = function ThoughtWave(json, ship) {
