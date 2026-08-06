@@ -157,7 +157,7 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       <ul class="updates-list">
         <!--<li style="--update-colour: #e05b52;"><span class="update-title">Merry Christmas from Fiery Void!</span></li>-->
         <li><span class="update-title">THE KIRISHIAC LORDS</span>A brand-new Ancient faction has been added to Fiery Void!</li>
-        <li><span class="update-title">Chameleon Sensor Suite</span>The Centauri Dargan can now choose to disguise itself as another ship in Fleet Selection.</li> 
+        <li><span class="update-title">Chameleon Sensor Suite</span>The Centauri Dargan Strike Cruiser can now choose to disguise itself as another ship in Fleet Selection.</li> 
         <li><span class="update-title">Ship Windows & Arcs</span>Ship windows (SCS) and Weapon Arc icons have been updated to improve appearance and functionality.</li>               
         <li><span class="update-title">Landing Page</span>The Fiery Void Landing Page has received a refresh, with new Recent Game window and other layout changes.</li>        
         <li><span class="update-title">Discord Notifications</span>You can now add your Discord account details in 'Set-Up Discord Notifications' to get a message when it's your turn. See Fiery Void FAQ for details!</li>
