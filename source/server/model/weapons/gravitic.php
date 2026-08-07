@@ -25,12 +25,6 @@
         public $displayName = "Graviton Pulsar";
         public $animation = "bolt";
         public $animationColor = array(99, 255, 00);
-	    /*
-        public $trailColor = array(99, 255, 00);
-        public $projectilespeed = 12;
-        public $animationWidth = 3;
-        public $animationExplosionScale = 0.15;
-	*/
 	    
         public $boostable = true;
         public $boostEfficiency = 2;
@@ -184,12 +178,7 @@ class GraviticBolt extends Gravitic
         public $displayName = "Gravitic Bolt";
         public $animation = "bolt";
         public $animationColor = array(99, 255, 00);
-	/*
-        public $trailColor = array(99, 255, 00);
-        public $projectilespeed = 12;
-        public $animationWidth = 3;
-        public $animationExplosionScale = 0.20;
-	*/
+
         public $boostable = true;
         public $boostEfficiency = 2;
         public $maxBoostLevel = 2;
@@ -368,14 +357,9 @@ class GraviticBolt extends Gravitic
     {
         public $name = "graviticCannon";
         public $displayName = "Gravitic Cannon";
-        public $animation = "trail";
+        public $animation = "bolt";
         public $animationColor = array(99, 255, 00);
-	    /*
-        public $trailColor = array(99, 255, 00);
-        public $projectilespeed = 15;
-        public $animationWidth = 2;
-        public $animationExplosionScale = 0.15;
-	*/
+
         public $loadingtime = 1;
         public $priority = 5;
 
@@ -403,15 +387,8 @@ class GraviticBolt extends Gravitic
         public $name = "lightGraviticBolt";
         public $displayName = "Light Gravitic Bolt";
         public $iconPath = "lightGraviticBolt.png";
-        public $animation = "trail";
+        public $animation = "bolt";
         public $animationColor = array(99, 255, 00);
-	    /*
-        public $trailColor = array(99, 255, 00);
-        public $animationExplosionScale = 0.10;
-        public $projectilespeed = 12;
-        public $animationWidth = 2;
-        public $trailLength = 10;
-*/
 
         public $intercept = 2;
         public $loadingtime = 1;
@@ -448,15 +425,8 @@ class GraviticBolt extends Gravitic
         public $name = "ultraLightGraviticBolt";
         public $displayName = "Ultra Light Gravitic Bolt";
         public $iconPath = "lightGraviticBolt.png";
-        public $animation = "trail";
+        public $animation = "bolt";
         public $animationColor = array(99, 255, 00);
-	    /*
-        public $trailColor = array(99, 255, 00);
-        public $animationExplosionScale = 0.10;
-        public $projectilespeed = 12;
-        public $animationWidth = 2;
-        public $trailLength = 10;
-*/
 	    
         public $intercept = 2;
         public $loadingtime = 1;
