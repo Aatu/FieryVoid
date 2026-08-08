@@ -1,17 +1,25 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import theme from '../styled/theme';
-import CriticalEffectsSection, { critRowsFromMap } from './CriticalEffectsSection';
+import CriticalEffectsSection, { critRowsFromMap, CritSectionHeader } from './CriticalEffectsSection';
 import nonPassiveWheel from '../helpers/nonPassiveWheel';
 
 /* Pre-battle damage editor for ONE system of a bought lobby ship.
  * Design: PREBATTLE_DAMAGE_PLAN.md §5.2. State lives in window.battleDamage.
  *
- *   ┌ Apply Damage ────────────────────────────┐
- *   │ Structure   [-] [  8 ] [+]   ☐ Destroy   │
- *   ├ Critical Effects ────────────────────────┤   (only when crits are carried)
- *   │ Output altered by -1  (x2)               │
+ *   ┌ Apply Damage & Critical Effects ─────────┐
+ *   ├ Damage ──────────────────────────────────┤
+ *   │ Twin Array #14  [-] [  8 ] [+] ☐ Destroy │
+ *   ├ Critical Effects ────────────────────────┤
+ *   │ Output altered by -1      [-] [ 2 ] [+]  │
+ *   │ [ + Add effect…            ] ☐ All       │
  *   └──────────────────────────────────────────┘
+ *
+ * The damage row NAMES THE SYSTEM (user request 2026-08-08) rather than saying
+ * "Structure / 8": with several menus open, or on a ship carrying six Twin Arrays, the
+ * only thing that told them apart was which icon you happened to have clicked. The id is
+ * shown beside it because it is what the payload, tac_damage and the ship blueprint are
+ * all keyed by, so a report can name a system unambiguously.
  *
  * The field shows REMAINING HEALTH, not damage — that is the number on the SCS the
  * player is looking at. Wheel up heals, wheel down damages. Reaching 0 ticks Destroy,
@@ -22,7 +30,7 @@ import nonPassiveWheel from '../helpers/nonPassiveWheel';
 const Container = styled.div`
     display: flex;
     flex-direction: column;
-    margin-top: 5px;
+    margin-top: 0px;
     width: 100%;
     min-width: 200px;
     box-sizing: border-box;
@@ -55,6 +63,9 @@ const RowLabel = styled.div`
     flex: 1;
     min-width: 0;
     user-select: none;
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
 `;
 
 const ActionButton = styled.div`
@@ -120,8 +131,19 @@ const DestroyLabel = styled.label`
 `;
 
 const MaxText = styled.span`
+    flex: 0 0 auto;
     color: ${theme.colors.textDim};
     font-size: 10px;
+`;
+
+/* The system's name is the row label now, and a long one ("Antimatter Shredder") must not
+   push the ticker off the menu. */
+const SystemName = styled.span`
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 `;
 
 class ApplyDamageMenu extends Component {
@@ -236,11 +258,14 @@ class ApplyDamageMenu extends Component {
 
         return (
             <Container onClick={e => e.stopPropagation()}>
-                <Header>Apply Damage</Header>
+                <Header>Apply Damage & Critical Effects</Header>
+
+                <CritSectionHeader>Damage</CritSectionHeader>
 
                 <Row>
-                    <RowLabel>
-                        Structure <MaxText>/ {system.maxhealth}</MaxText>
+                    <RowLabel title={`${system.displayName || system.name} (system id ${system.id})`}>
+                        <SystemName>{system.displayName || system.name}</SystemName>
+                        <MaxText>#{system.id}</MaxText>
                     </RowLabel>
                     <ActionButton
                         title="More damage"

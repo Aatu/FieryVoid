@@ -9,7 +9,8 @@
  *
  *   preBattleDamage: {
  *     sys: { "<systemid>": { d: <int>, k: 0|1, c: {<critClass>: <count>}, p: {<critClass>: <int>} }, ... },
- *     ftr: { "<ordinal>":  { d: <int>, k: 0|1, c: {<critClass>: <count>}, p: {<critClass>: <int>} }, ... }
+ *     ftr: { "<ordinal>":  { d: <int>, k: 0|1, c: {<critClass>: <count>}, p: {<critClass>: <int>} }, ... },
+ *     mne: { "<ordinal>":  { d: <int> }, ... }
  *   }
  *
  *   d = total damage points (1 .. maxhealth); k = 1 when destroyed;
@@ -63,6 +64,17 @@ class PreBattleDamage
 
     const KIND_SYSTEM = 0;
     const KIND_FIGHTER = 1;
+    /* MINES. A bulk mine purchase is ONE lobby ship carrying bulkBuy = N, minted into N
+       separate tac_ship rows by BuyingGamePhase - the same "one object plus a number"
+       shape a flight has, which is why it gets ordinals rather than system ids. A mine
+       can carry only STRUCTURE damage: it has no criticals table worth the name and its
+       other systems are all untargetable, so the bucket's entries are {d} and nothing
+       else (user decision 2026-08-08). */
+    const KIND_MINE = 2;
+
+    /* bucket name => kind. THE list every loop walks, so adding a fourth kind is one
+       line here rather than six greps. */
+    const BUCKETS = array('sys' => self::KIND_SYSTEM, 'ftr' => self::KIND_FIGHTER, 'mne' => self::KIND_MINE);
 
     const MAX_CRIT_COUNT = 10;
     /* Ceiling on a stored crit param. Generous: the biggest real DamageReductionReduced
@@ -92,6 +104,55 @@ class PreBattleDamage
        stored even if it got this far. */
     private static $paramCriticals = array(
         'DamageReductionReduced',
+    );
+
+    /* ─────────────────────────────────────────────────────────────────────────────────
+       ⭐ PER-CLASS CRITICAL LIMITS — how many of one effect a unit may carry.
+       ─────────────────────────────────────────────────────────────────────────────────
+       Anything NOT named here may be carried up to MAX_CRIT_COUNT. A class listed here
+       is capped at the given number, in the lobby editor AND at every write boundary.
+
+       MIRRORS battleDamage.CRIT_LIMITS in source/public/client/battleDamage.js - edit
+       BOTH, exactly like the deny list. The server is the boundary that enforces; the
+       client copy stops the editor offering a count the server would silently clamp.
+
+       ⚠️ HOW THE FIRST PASS WAS DERIVED (2026-08-08), so a future edit can argue with it:
+       every entry below is a critical the game reads as a FLAG - the code asks
+       `if ($system->hasCritical('X'))` and never multiplies by the count, and the class
+       carries no outputMod - so a second instance changes nothing that can be observed.
+       Everything left off the list either multiplies by its count (ReducedIniative,
+       GunLost, ArmorReduced, PenaltyToHit, HalfEfficiency's `round($used/($crits+1))` …)
+       or stacks through effectCriticals' outputMod sum (the OutputReduced family,
+       FieldFluctuations), so capping those would change the rules rather than tidy them.
+
+       The two burnout results and OutputHalved are the judgement calls: they DO stack
+       arithmetically, but "efficiency halved" twice and "system non-functional" twice are
+       not things a B5W sheet can express - a second one is just a destroyed system. */
+    private static $critLimits = array(
+        //pure flags: asked as `if (hasCritical(...))`, never counted
+        'DamageReductionRemoved'     => 1,
+        'ReducedArcs'                => 1,   //turret jam; testArcRestriction already refuses to double up
+        'ContainmentBreach'          => 1,
+        'ChargeHalve'                => 1,
+        'ChargeEmpty'                => 1,
+        'FirstThrustIgnored'         => 3,
+        'FirstThrustIgnoredOneTurn'  => 1,
+        'ShipDisabled'               => 1,
+        'ShipDisabledOneTurn'        => 1,
+        'ForcedOfflineOneTurn'       => 1,
+        'OSATThrusterCrit'           => 1,
+        'GravThrusterCritIgnored'    => 1,
+        'AmmoExplosion'              => 1,   //a magazine only blows up once
+        'EngineShorted'              => 1,
+        'ControlsStuck'              => 1,
+        'TendrilDestroyed'           => 1,
+        //escalating results rather than stacking modifiers - see the note above
+        'PartialBurnout'             => 1,
+        'SevereBurnout'              => 1,
+        'OutputHalved'               => 1,
+        'OutputHalvedOneTurn'        => 1,
+        //param-carrying: the magnitude lives in `p` and the count is forced to 1 anyway
+        'DamageReductionReduced'     => 200,
     );
 
     /* D7: criticals that describe a MOMENT in a battle rather than a lasting wound are
@@ -246,6 +307,25 @@ class PreBattleDamage
         return array_fill_keys(self::$paramCriticals, true);
     }
 
+    /**
+     * How many of this critical one damage target may carry. See $critLimits.
+     * MAX_CRIT_COUNT for anything not named there.
+     */
+    public static function criticalLimit($type)
+    {
+        if (is_string($type) && isset(self::$critLimits[$type])) {
+            return (int)self::$critLimits[$type];
+        }
+
+        return self::MAX_CRIT_COUNT;
+    }
+
+    /** The whole table, for the client's editor. */
+    public static function criticalLimits()
+    {
+        return self::$critLimits;
+    }
+
     /** A stored param: a positive integer within MAX_CRIT_PARAM, or null. */
     private static function sanitiseParam($value)
     {
@@ -336,7 +416,52 @@ class PreBattleDamage
             if ($ftr) $clean['ftr'] = $ftr;
         }
 
+        //--- mines: keyed by copy ordinal 1..bulkBuy --------------------------
+        //A bulk mine purchase is one lobby object plus a number, exactly like a flight,
+        //so its per-copy damage is keyed by ordinal too. STRUCTURE ONLY: everything else
+        //on a mine is untargetable, and a mine has no criticals worth carrying - so the
+        //entry is {d} and a mine, like a fighter, is damaged but never destroyed (a mine
+        //you lost is one fewer in the bulk).
+        if (!$isFlight && !empty($ship->mine) && isset($raw['mne']) && is_array($raw['mne'])) {
+            $count = self::mineCount($ship);
+            $structure = self::mineStructure($ship);
+            $maxhealth = $structure ? (int)$structure->maxhealth : 0;
+            $mne = array();
+            foreach ($raw['mne'] as $key => $entry) {
+                if (!self::isIntish($key)) continue;
+                $ordinal = (int)$key;
+                if ($ordinal < 1 || $ordinal > $count) continue;
+                $e = self::sanitiseEntry($entry, $maxhealth, true, true);
+                if ($e) $mne[$ordinal] = $e;
+            }
+            if ($mne) $clean['mne'] = $mne;
+        }
+
         return $clean;
+    }
+
+    /** How many mines this one lobby object stands for (bulkBuy, floored at 1). */
+    public static function mineCount($ship)
+    {
+        if (!$ship || empty($ship->mine)) return 0;
+        $count = isset($ship->bulkBuy) ? (int)$ship->bulkBuy : 1;
+
+        return $count > 0 ? $count : 1;
+    }
+
+    /**
+     * The one system on a mine that can take damage: its Structure. Resolved by class
+     * rather than by id so it survives a blueprint edit, and it is the only target the
+     * mine bucket ever writes to.
+     */
+    public static function mineStructure($ship)
+    {
+        if (!$ship || empty($ship->systems)) return null;
+        foreach ($ship->systems as $system) {
+            if ($system instanceof Structure) return $system;
+        }
+
+        return null;
     }
 
     /**
@@ -350,11 +475,11 @@ class PreBattleDamage
      */
     public static function sanitiseSavedRows($ship, $damageRows, $critRows)
     {
-        $raw = array('sys' => array(), 'ftr' => array());
+        $raw = array('sys' => array(), 'ftr' => array(), 'mne' => array());
 
         foreach ((array)$damageRows as $row) {
             list($kind, $ref, $damage, $destroyed) = array_pad(array_values((array)$row), 4, 0);
-            $bucket = ((int)$kind === self::KIND_FIGHTER) ? 'ftr' : 'sys';
+            $bucket = self::bucketForKind($kind);
             $ref = (int)$ref;
             if (!isset($raw[$bucket][$ref])) $raw[$bucket][$ref] = array();
             if ((int)$damage > 0) $raw[$bucket][$ref]['d'] = (int)$damage;
@@ -363,7 +488,7 @@ class PreBattleDamage
 
         foreach ((array)$critRows as $row) {
             list($kind, $ref, $type, $amount, $param) = array_pad(array_values((array)$row), 5, null);
-            $bucket = ((int)$kind === self::KIND_FIGHTER) ? 'ftr' : 'sys';
+            $bucket = self::bucketForKind($kind);
             $ref = (int)$ref;
             if (!isset($raw[$bucket][$ref])) $raw[$bucket][$ref] = array();
             if (!isset($raw[$bucket][$ref]['c'])) $raw[$bucket][$ref]['c'] = array();
@@ -382,7 +507,7 @@ class PreBattleDamage
      * $damageOnly caps the damage one point short of destruction and drops `k` - see the
      * fighter branch of sanitise().
      */
-    private static function sanitiseEntry($entry, $maxhealth, $damageOnly = false)
+    private static function sanitiseEntry($entry, $maxhealth, $damageOnly = false, $noCriticals = false)
     {
         if (!is_array($entry)) return null;
         if ($maxhealth < 1) return null;
@@ -403,7 +528,7 @@ class PreBattleDamage
         if ($d > 0) $out['d'] = $d;
         if ($k) $out['k'] = 1;
 
-        if (isset($entry['c']) && is_array($entry['c'])) {
+        if (!$noCriticals && isset($entry['c']) && is_array($entry['c'])) {
             $rawParams = (isset($entry['p']) && is_array($entry['p'])) ? $entry['p'] : array();
             $c = array();
             $p = array();
@@ -411,7 +536,10 @@ class PreBattleDamage
                 if (!self::isValidCriticalType($type)) continue;
                 $count = (int)$count;
                 if ($count < 1) continue;
-                if ($count > self::MAX_CRIT_COUNT) $count = self::MAX_CRIT_COUNT;
+                //Per-class ceiling (default MAX_CRIT_COUNT) - some effects are flags the
+                //game reads once, so a second instance would be a wound that does nothing.
+                $limit = self::criticalLimit($type);
+                if ($count > $limit) $count = $limit;
 
                 if (self::isParamCriticalType($type)) {
                     //A param crit's magnitude is the SUM of its params, so N crits are
@@ -440,6 +568,14 @@ class PreBattleDamage
         return is_int($key) || (is_string($key) && preg_match('/^\d+$/', $key));
     }
 
+    /** The bucket a stored `kind` column belongs to; unknown kinds fall back to sys. */
+    private static function bucketForKind($kind)
+    {
+        $bucket = array_search((int)$kind, self::BUCKETS, true);
+
+        return $bucket === false ? 'sys' : $bucket;
+    }
+
     /* ------------------------------------------------------------------ *
      *  Splitting damage from criticals (D3)
      * ------------------------------------------------------------------ */
@@ -457,7 +593,7 @@ class PreBattleDamage
         $out = array();
         if (!is_array($payload)) return $out;
 
-        foreach (array('sys', 'ftr') as $bucket) {
+        foreach (array_keys(self::BUCKETS) as $bucket) {
             if (empty($payload[$bucket]) || !is_array($payload[$bucket])) continue;
             $kept = array();
             foreach ($payload[$bucket] as $ref => $entry) {
@@ -489,7 +625,7 @@ class PreBattleDamage
         $has = array('damage' => false, 'criticals' => false);
         if (!is_array($payload)) return $has;
 
-        foreach (array('sys', 'ftr') as $bucket) {
+        foreach (array_keys(self::BUCKETS) as $bucket) {
             if (empty($payload[$bucket]) || !is_array($payload[$bucket])) continue;
             foreach ($payload[$bucket] as $entry) {
                 if (!is_array($entry)) continue;
@@ -504,7 +640,11 @@ class PreBattleDamage
     public static function isEmpty($payload)
     {
         if (!is_array($payload)) return true;
-        return empty($payload['sys']) && empty($payload['ftr']);
+        foreach (array_keys(self::BUCKETS) as $bucket) {
+            if (!empty($payload[$bucket])) return false;
+        }
+
+        return true;
     }
 
     /* ------------------------------------------------------------------ *
@@ -538,18 +678,32 @@ class PreBattleDamage
      * the display and the rules (getTotalDamage sums, isDestroyed reads the flag), and it
      * is the shape stripForJson would collapse a long history into anyway.
      */
-    public static function toEntries($ship, $clean, $gameid, $shipid)
+    /**
+     * $mineOrdinal — which copy of a bulk-bought mine these rows are for. A mine payload
+     * is keyed by copy (1..bulkBuy) and BuyingGamePhase mints one tac_ship per copy, so
+     * the caller says which one it is writing and only that ordinal's entry is expanded.
+     * Null (every other unit) skips the `mne` bucket entirely.
+     */
+    public static function toEntries($ship, $clean, $gameid, $shipid, $mineOrdinal = null)
     {
         $parts = array('damage' => array(), 'criticals' => array());
         if (!is_array($clean) || !$ship) return $parts;
 
-        foreach (array('sys' => self::KIND_SYSTEM, 'ftr' => self::KIND_FIGHTER) as $bucket => $kind) {
+        foreach (self::BUCKETS as $bucket => $kind) {
             if (empty($clean[$bucket])) continue;
+            if ($kind === self::KIND_MINE && $mineOrdinal === null) continue;
 
             foreach ($clean[$bucket] as $ref => $entry) {
-                $system = ($kind === self::KIND_FIGHTER)
-                    ? self::fighterByOrdinal($ship, $ref)
-                    : $ship->getSystemById((int)$ref);
+                if ($kind === self::KIND_MINE && (int)$ref !== (int)$mineOrdinal) continue;
+
+                if ($kind === self::KIND_FIGHTER) {
+                    $system = self::fighterByOrdinal($ship, $ref);
+                } else if ($kind === self::KIND_MINE) {
+                    //every mine copy is the same blueprint, so the target is its Structure
+                    $system = self::mineStructure($ship);
+                } else {
+                    $system = $ship->getSystemById((int)$ref);
+                }
                 if (!$system) continue;
 
                 $destroyed = !empty($entry['k']) ? 1 : 0;
@@ -698,13 +852,87 @@ class PreBattleDamage
         return $out;
     }
 
+    /* ------------------------------------------------------------------ *
+     *  The catalogue — what a player may be OFFERED (plan §11.2)
+     * ------------------------------------------------------------------ */
+
+    /**
+     * The criticals this system may be offered in the lobby editor.
+     *
+     * ⚠️ A DIFFERENT QUESTION from isValidCriticalType, and deliberately so (plan §4.2's
+     * seam): that one asks "may this be STORED", and narrowing it to possibleCriticals
+     * would silently eat carried combat crits (AmmoExplosion, OSATThrusterCrit and
+     * friends are applied by bespoke code and appear in no possibleCriticals table). This
+     * one asks "what may a player INVENT here", which is the system's own hit-chart
+     * table, minus anything that would be refused on the way in anyway.
+     */
+    public static function offerableCriticalTypes($system)
+    {
+        if (!$system || !method_exists($system, 'getPossibleCriticalTypes')) return array();
+
+        $out = array();
+        foreach ($system->getPossibleCriticalTypes() as $type) {
+            if (self::isValidCriticalType($type)) $out[] = $type;
+        }
+
+        return $out;
+    }
+
+    /**
+     * Every storable Critical class in the game, for the editor's "all effects" list.
+     *
+     * The names are read out of cricialClasses.php - the single file that declares them -
+     * rather than from get_declared_classes(), which under the generated classmap
+     * autoloader only ever holds the handful already touched this request.
+     */
+    public static function allCriticalTypes()
+    {
+        static $cache = null;
+        if ($cache !== null) return $cache;
+
+        $cache = array();
+        $file = dirname(__FILE__) . '/cricialClasses.php';
+        $src = is_readable($file) ? file_get_contents($file) : '';
+        if ($src !== '' && preg_match_all('/^\s*class\s+(\w+)\s+extends\s+/m', $src, $matches)) {
+            foreach ($matches[1] as $type) {
+                if (self::isValidCriticalType($type)) $cache[] = $type;
+            }
+        }
+        sort($cache);
+
+        return $cache;
+    }
+
+    /**
+     * {critClass => label} for a list of classes, for the editor's picker. Param-carrying
+     * classes are omitted from describeCriticals for good reason (their text reads the
+     * param), but a picker still has to name them - so their label here is the wording
+     * WITHOUT the number, which is exactly what the client shows beside the param ticker.
+     */
+    public static function criticalCatalogueMeta($types)
+    {
+        $out = array();
+        foreach ((array)$types as $type) {
+            if (isset($out[$type])) continue;
+            $probe = self::critProbe($type);
+            $out[$type] = array(
+                'label'     => $probe ? $probe->getDescription() : $type,
+                'limit'     => self::criticalLimit($type),
+                'param'     => self::isParamCriticalType($type),
+                'transient' => self::isTransientCriticalType($type),
+            );
+        }
+
+        return $out;
+    }
+
     /** Every distinct critical class named anywhere in a payload. */
     private static function criticalTypesIn($clean)
     {
         $types = array();
         if (!is_array($clean)) return $types;
 
-        foreach (array('sys', 'ftr') as $bucket) {
+        foreach (array_keys(self::BUCKETS) as $bucket) {
             if (empty($clean[$bucket]) || !is_array($clean[$bucket])) continue;
             foreach ($clean[$bucket] as $entry) {
                 if (empty($entry['c']) || !is_array($entry['c'])) continue;

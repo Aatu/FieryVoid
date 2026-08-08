@@ -4,7 +4,10 @@ Status: **BUILT 2026-08-07, stages 0–6 complete. First browser play-through 20
 seven defects (§12, all fixed); a second pass added six refinements (§13, all done) — including
 the temporary/marine critical filter and lobby editing of carried criticals; a third pass added
 three more (§14) — terrain is never saved, removed criticals keep their row, and
-PARAM-CARRYING criticals are now carried between battles.**
+PARAM-CARRYING criticals are now carried between battles. A fourth pass (§15) added ELEVEN
+more, the largest of which retires §11 from "optional follow-up" to BUILT: criticals can now
+be ADDED in the lobby from a per-class catalogue, with per-class limits. §15 also adds a
+third payload bucket for MINES.**
 Created 2026-08-07; revised same day (flight finding, crit-authoring deferred to §11, independent
 damage/crit load toggles); revised again during implementation (**D8** — fighters are damaged,
 never destroyed; a lost fighter shrinks `flightSize`).
@@ -1267,3 +1270,188 @@ usable param is dropped at every boundary — its magnitude *is* the effect, so 
 **Outstanding: the user's browser test, `yarn build`, and (still) a static ship regen** for the
 two §12 `ShipCompactor` changes. `db/prebattleDamage.sql` must be applied to any DB that
 already has `tac_saved_crit`; it was applied locally.
+
+---
+
+## 15. Refinement round, 2026-08-08 (fourth pass)
+
+Eleven user requests. The big one is **§11 — critical AUTHORING in the lobby — which is now
+BUILT**, so D4 is retired. The other structural change is a **third payload bucket for MINES**.
+
+### 15.1 A THIRD BUCKET: `mne`, for bulk-bought mines
+
+A bulk mine purchase is ONE lobby object carrying `bulkBuy = N`, which `BuyingGamePhase`
+mints into N separate `tac_ship` rows — **exactly the "one object plus a number" shape a
+flight has** (§1.1). So mines get ordinals, not system ids, for the same reason flights do.
+
+```js
+mne: { "1": { d: 3 }, "2": { d: 6 } }        // ordinal 1..bulkBuy
+```
+
+* **STRUCTURE ONLY.** Every other system on a mine is `isTargetable = false`, and a mine
+  cannot carry a critical worth taking into the next battle — so the entry is `{d}` and
+  nothing else (`sanitiseEntry`'s new `$noCriticals` argument strips `c`/`p`).
+* **Damaged, never destroyed**, exactly like a fighter (D8): health floors at 1 and a mine
+  you lost is one fewer in the bulk.
+* `PreBattleDamage::BUCKETS` (and `battleDamage.BUCKETS`) is now **the** list every loop
+  walks — `filter`, `contents`, `isEmpty`, `criticalTypesIn`, `sanitiseSavedRows`,
+  `toEntries`, and the client twins. Adding a fourth kind is one line, not six greps.
+* `toEntries` gained a `$mineOrdinal` argument; `BuyingGamePhase` passes `$m + 1` from its
+  bulk loop, so each copy gets only its own row. Null for everything else, which skips the
+  bucket entirely.
+* **UI: `shipWindow/MineDamageMenu.js`** (new), a sibling of `FighterDamageMenu` — one row
+  per copy, opened from the compact window's structure bar. `canApplyPreBattleDamage` now
+  excludes mines (`!ship.mine`) and the new `canApplyMineDamage` gates the bar instead, so
+  a mine has no per-system menu at all. A mine whose structure is **1** (most proximity
+  mines) renders nothing: any damage would destroy it, and a destroyed mine is one you did
+  not buy.
+
+### 15.2 Mines are saved and reloaded as BULKS — and the count is finally stored
+
+Two bugs, one cause.
+
+**`tac_saved_ship` had nowhere to put `bulkBuy`.** The client POSTed it and
+`getSavedShipsFromJSON` read it, and then `submitSavedShip` dropped it on the floor — so a
+saved fleet of ten mines reloaded as **one**. Fixed with a `bulkbuy INT(11) NOT NULL
+DEFAULT 1` column (idempotent `ADD COLUMN IF NOT EXISTS` in `db/prebattleDamage.sql`),
+written by `submitSavedShip` and read back by `getSavedShips` (mines only — every other
+unit is one row per unit and stays that way).
+
+**Saving out of a live game wrote one row per mine.** Mid-battle each mine IS its own ship,
+so the survivors saved as N separate units and reloaded as N separate lines instead of the
+bulk they were bought as. `ajaxInterface.groupSaveableShips` now regroups live mines by
+phpclass into one row, and `summariseGroup` renumbers each copy's structure damage as its
+ordinal in that bulk. **Grouped only in a live game** — in the lobby they are already bulk
+rows, and merging two separate purchases of the same class would fuse two lines of the
+player's own fleet list.
+
+Also fixed in the same funnel: the saved-fleet **points** loop counted a bulk mine row
+ONCE, so a fleet's stored `points` was short by `(bulkBuy − 1)` units — and that figure is
+what the affordability check compares against on load.
+
+### 15.3 ⭐ §11 IS BUILT — criticals can be added in the lobby
+
+D4 ("no critical authoring in the lobby, for now") is retired. Everything §11.1 predicted
+was already in place; what landed is exactly what it said would be needed — one endpoint,
+one accessor, and flipping a prop.
+
+* **`ShipSystem::getPossibleCriticalTypes()`** — flattens and dedupes the protected
+  `$possibleCriticals` table. The table itself stays protected.
+* **`Manager::getSystemCriticals($phpclass, $flightSize)`** + **`source/public/systemCriticals.php`**
+  — ONE ship class per request, resolved through `ShipLoader::getShipsByClass` (never
+  `new $phpclass` on a client string, never `getAllShipsStatic(null)`), APCu-cached under
+  the deploy-versioned prefix.
+* **`PreBattleDamage::offerableCriticalTypes($system)`** is the **narrow** question — what
+  a player may INVENT here. ⚠️ It is deliberately NOT `isValidCriticalType`, which is the
+  wider STORABILITY test; narrowing that one would eat carried combat crits on reload
+  (§4.2's seam, and it still holds).
+* `allCriticalTypes()` reads the class names out of `cricialClasses.php` — the one file
+  that declares them — because the generated classmap autoloader means
+  `get_declared_classes()` only ever holds the handful already touched this request.
+* **UI**: `CriticalEffectsSection` gained a `<select>` picker plus an **"All"** switch
+  (§11.4's "narrow by default with an all-effects expander"). Adding is
+  `setValue(row, 1)` — the same door every ticker already used, so the preview, the buy
+  POST and the saved-fleet write all follow with no new wiring.
+  ⚠️ The picker appears as soon as the CATALOGUE arrives, not when it has something to
+  offer: a fighter's own hit chart lists no criticals at all, so gating on that would hide
+  the "All" switch that is the only route to them.
+
+### 15.4 Per-class critical LIMITS
+
+Some effects can only sensibly apply once. `PreBattleDamage::$critLimits` /
+`battleDamage.CRIT_LIMITS` are a **new mirrored pair, edited exactly like the deny list**;
+anything not named there keeps `MAX_CRIT_COUNT`. The server clamps in `sanitiseEntry`, the
+client in `setCriticals`, and the editor's `[+]` goes dead at the ceiling.
+
+**How the first pass was derived**, so a future edit can argue with it: every entry is a
+critical the game reads as a **flag** — the code asks `if ($system->hasCritical('X'))`,
+never multiplies by the count, and the class carries no `outputMod`. Everything left off
+either multiplies by its count (`ReducedIniative`, `GunLost`, `ArmorReduced`,
+`PenaltyToHit`, `HalfEfficiency`'s `round($used/($crits+1))` …) or stacks through
+`effectCriticals`' `outputMod` sum (the `OutputReduced` family, `FieldFluctuations`), so
+capping those would change the rules rather than tidy them. The two burnouts and
+`OutputHalved` are judgement calls: they stack arithmetically, but "efficiency halved"
+twice is not something a B5W sheet can say.
+
+### 15.5 ⭐ `survivesStructureDestruction` never reached the client at all
+
+**Symptom (user report, game 4283):** systems with the special structure-cascade properties
+"are not working properly".
+
+**Investigated first.** Both mechanisms were checked against the real data before touching
+anything:
+
+* the **array `structureHomeLocation`** path is CORRECT and already lives in the static
+  bundle — a Vorlon Light Cruiser's Lightning Cannons (`home = [1, 32]`) fall only when
+  BOTH the Front and Port-Aft structures are gone, in server and lobby preview alike;
+* the Xill in game 4283 also behaves correctly in both: its only pre-battle rows are the
+  two Port structures, and exactly the two Port guns fall;
+* **the real defect is `survivesStructureDestruction`: `ssd` is `undefined` on every system
+  of every static ship file.** §12.3 delivered it via `ShipCompactor::annotateSystems` —
+  correctly — but that only takes effect after a **static ship regen**, which has not been
+  run. So on any tree whose bundle is older than that change, a shield projection goes dark
+  with its section and nothing says why.
+
+**Fix: stop depending on the bundle's age.** The `systemCriticals.php` response §15.3 adds
+is built from a freshly constructed ship, so it carries `ssd` per system as well as the
+crit catalogue. `battleDamage.survivesStructureDestruction(ship, system)` asks the
+blueprint first and the catalogue second, and `applyToShip` kicks the (de-duplicated,
+one-per-ship-class-per-session) fetch and repaints when it lands. The `annotateSystems`
+route stays — after a regen the flag is there immediately and no request is needed.
+
+### 15.6 The other seven
+
+| # | Change |
+|---|---|
+| 1 | **`ApplyDamageMenu` names the system**: `Twin Array #14 [−][ 8 ][+] ☐ Destroy` instead of `Structure / 4`. With several menus open, or on a hull carrying six Twin Arrays, the only thing telling them apart was which icon you had clicked. The id rides along because it is what the payload, `tac_damage` and the blueprint are all keyed by. |
+| 2 | **A lobby flight's health bar reads FIGHTER 1**, not the flight total. §5.2's flight-level bar was on a card that is otherwise drawn as a single craft, so "48 / 48" read as a bug. The flight-wide figure stays where it means something — the caption of the per-ordinal menu the bar opens. |
+| 4 | **Save Fleet's default name is `<game name> T<turn>`** in a live game (the lobby keeps "Unnamed Fleet" — it has no game name). It is the only thing that tells two saves of the same fleet apart in the dropdown. The value is HTML-escaped into the attribute: it is now user-supplied text in a string that gets parsed as HTML. |
+| 7 | **The Ready confirm's pre-battle note is restyled.** It sits inside `confirm.confirm`'s `.confirm.error` shell — 16px bold `#c94b1d` — which shouted the whole sentence. Only `NOTE:` is a warning now (`.prebattle-note-label`, red); the rest is body text on the shared tokens. |
+| 8 | **A second SAVE FLEET beside the fleet loader**, so it is reachable without scrolling the whole buy panel on a phone. Same `.savebutton` hook, so the one handler drives both. The three controls in that row (Load a Fleet / Save Fleet / Ready) are now one EQUAL-WIDTH set at 150px — the dropdown's `min-width: 160px` against its own `width: 150px` had quietly made it 10px wider than the Ready beside it. |
+| 9 | **Small screens: the top row now matches the bottom of the buy panel.** `gamesNew.css` collapses every `.btn-*-lobby` to auto-width 0.9em at 600px, but `.readybutton-top` is deliberately independent of those classes and kept its fixed 150×27 — so the page showed two visibly different Ready buttons. Same numbers now, in `lobby.css`. |
+| 10b | **The `×` on a critical row is gone.** It did exactly what ticking the count to 0 does, and two controls for one action read as two actions. A row dropped to zero still stays on screen (§14.2). The damage block also gained a **`Damage` section header** in the same style as `Critical Effects` (`CritSectionHeader`, exported from that file so the two cannot drift). |
+| 11 | **Clicking a lobby ship window's background no longer raises the old ship-level popup** — the pre-redesign hit-chart/notes tooltip, which this window has had dedicated buttons for since Stage 1. It landed on top of whatever damage menu was open. Suppressed in `ShipWindow.onShipClick` rather than in the lobby's event handler, so the click still CLOSES an open menu, which is what clicking the backdrop should do. game.php is untouched — there the popup is the only route to that information. |
+
+Also fixed in passing: **`loadSavedFleet.php` never returned `critTransient`.** Manager has
+always produced it, but the response dropped it, so `doLoadFleet`'s third argument was
+always empty and no carried one-turn effect was ever tagged "(turn 1 only)" — §13.6's label
+had never actually appeared.
+
+### 15.7 Verification
+
+* `php -l` clean on every edited server file.
+* **Scratch PHP, 31 assertions**: crit limits clamp (`ReducedArcs` → 1, `OutputReduced1`
+  untouched); the whole `mne` lifecycle (ordinals validated against `bulkBuy`, damage
+  capped one short of destruction, `k` and criticals stripped, out-of-range ordinals
+  dropped, `contents`/`isEmpty`/`filter` seeing the new bucket); `toEntries` emitting ONE
+  row per mine ordinal against the mine's Structure and nothing without a `$mineOrdinal`;
+  `sanitiseSavedRows` round-tripping kind 2; the catalogue (storable-filtered `all`, per
+  system `crits`, `meta` carrying limit/param/transient); and ordinary ships unchanged.
+* **Catalogue endpoint**: builds for `Omega` (36 systems with entries), rejects a crafted
+  class name and an unknown class, keys a flight by ordinal, and **flags
+  `ThirdspaceAttackCraft` system 12 as `ssd`** — the flag the static bundle is missing.
+  Both maps are `(object)` cast so a 0-based system-id map cannot arrive as a JSON array.
+* **Node harness over the real `battleDamage.js` + `ajaxInterface.js`, 31 assertions**: the
+  mine bucket end to end including surviving `JSON.stringify` (the §12.1 trap); crit limits
+  and the catalogue override; **the `ssd` cascade — a shield falls without the flag and
+  survives with it, while an ordinary system in the same block still falls**; live-mine
+  regrouping (three mines → one row of `bulkBuy 3` with damage renumbered 1..3, the
+  undamaged copy absent, the ordinary ship untouched); the lobby keeping two separate
+  purchases; and the points fix. The JS limit table is asserted **key-for-key against the
+  PHP one**.
+* **React, 32 assertions**: the tree bundles and every changed component renders under
+  `renderToString` — which caught a real bug this round (`ship` used in
+  `CriticalEffectsSection.render` without being destructured, invisible to a parse check).
+  Asserted: the damage row shows the displayName and the id; the `Damage` header; no `×`;
+  the limit-1 ticker's ceiling; the picker hidden before the catalogue and present after,
+  offering the hit-chart classes and not the already-drawn ones; the mine menu's one row
+  per copy with no Destroy and no Critical Effects; a 1-structure mine rendering nothing;
+  and **the fighter bar reading `4 / 6` (fighter 1) rather than the flight total**.
+* **Replay harness: 154 pass / 1 fail** — the known stale game 4234, which fails identically
+  on a clean tree. Unchanged from the last round, i.e. no payload-shape regression.
+* Node `--check` on every edited legacy JS file.
+
+**Outstanding: the user's browser test, `yarn build`, and (still) a static ship regen** —
+though §15.5 means the regen is now an optimisation rather than a correctness dependency.
+`db/prebattleDamage.sql` must be applied to any DB that already has these tables (it now
+also adds `tac_saved_ship.bulkbuy`); it has been applied locally.

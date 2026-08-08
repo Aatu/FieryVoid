@@ -30,6 +30,11 @@ try {
         'list' => $fleetData['list'],
         'ships'   => $fleetData['ships'],
         'critDesc' => $fleetData['critDesc'] ?? [],
+        //{critClass => true} for the one-turn effects, so the lobby's critical list can
+        //label them "turn 1 only". Manager has always returned it; the response was
+        //dropping it on the floor, so gamedata.doLoadFleet's third argument was always
+        //empty and no carried one-turn effect was ever tagged.
+        'critTransient' => (object)($fleetData['critTransient'] ?? []),
     ], JSON_NUMERIC_CHECK);
 
 } catch (Exception $e) {

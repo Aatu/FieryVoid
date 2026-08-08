@@ -1,7 +1,7 @@
 import * as React from "react";
 import styled from "styled-components"
 import SystemIcon from "../system/SystemIcon"
-import { canApplyPreBattleDamage } from "../system/SystemInfoButtons"
+import { canApplyPreBattleDamage, canApplyMineDamage } from "../system/SystemInfoButtons"
 import theme from "../styled/theme";
 
 /*SCS-style section panel (SHIPWINDOW_REDESIGN_PLAN.md Stage 1a): dotted panel with a
@@ -181,6 +181,17 @@ class ShipSection extends React.Component {
             return;
         }
 
+        //A bought MINE has no per-system menu: only its structure can take damage, and a
+        //bulk purchase carries one number per copy, so the bar opens the per-copy editor.
+        if (canApplyMineDamage(ship)) {
+            event.stopPropagation();
+            this.hideStructureArc();
+            window.uiEvents.relay('MineDamageClicked', {
+                ship: ship, element: event.currentTarget
+            });
+            return;
+        }
+
         if (!structure || !canApplyPreBattleDamage(ship, structure)) return;
 
         event.stopPropagation();
@@ -287,7 +298,16 @@ class ShipSection extends React.Component {
         const { ship, systems, location, displayLocation, area, valign, justify, wide, isTerrain, minHeight, nameOverride, hidden } = this.props;
 
         const structure = getStructure(systems);
-        const health = structure ? getStructureLeft(ship, structure) : 0;
+        /*A bought bulk mine draws ONE window for N mines, and that window is MINE 1 - the
+          same convention a flight's fighter card follows. Its pre-battle damage lives per
+          copy in the payload rather than on the shared blueprint system, so the bar has to
+          read it from there or a damaged purchase would show a full structure bar.*/
+        const mineDamage = canApplyMineDamage(ship);
+        const mineLeft = mineDamage ? battleDamage.mineHealth(ship, 1) : 0;
+        const mineMax = mineDamage ? battleDamage.mineMaxHealth(ship) : 0;
+
+        const health = mineDamage ? (mineLeft / mineMax) * 100
+            : (structure ? getStructureLeft(ship, structure) : 0);
         const orderLocation = displayLocation !== undefined ? displayLocation : location;
         //rolled ship: this section is drawn on the opposite side - flip the icon art
         //horizontally so weapon/thruster facings match the drawn side
@@ -301,7 +321,7 @@ class ShipSection extends React.Component {
                 {structure && <SectionHeader
                     $health={health}
                     $criticals={hasCriticals(structure)}
-                    $damageable={canApplyPreBattleDamage(ship, structure)}
+                    $damageable={canApplyPreBattleDamage(ship, structure) || canApplyMineDamage(ship)}
                     onClick={this.onStructureClick}
                     onMouseOver={this.onStructureMouseOver}
                     onMouseOut={this.onStructureMouseOut}
@@ -311,7 +331,7 @@ class ShipSection extends React.Component {
                     onTouchCancel={this.onStructureTouchCancel}>
                     <SectionName>{nameOverride || SECTION_NAMES[location] || ""}</SectionName>
                     <StructureText $destroyed={health === 0}>
-                        {structure.maxhealth - damageManager.getDamage(ship, structure)}/{structure.maxhealth} A{shipManager.systems.getArmour(ship, structure)}
+                        {mineDamage ? mineLeft : structure.maxhealth - damageManager.getDamage(ship, structure)}/{mineDamage ? mineMax : structure.maxhealth} A{shipManager.systems.getArmour(ship, structure)}
                     </StructureText>
                 </SectionHeader>}
                 <IconArea>

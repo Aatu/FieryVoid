@@ -773,10 +773,22 @@ const canEditSelfRepairList = (ship, system) => canSelfRepairList(ship, system) 
    test) - so this can never light up in game.php, where every other can* predicate
    already requires a positive gamephase.
    Flights are excluded: their damage is per-fighter ORDINAL and is edited in
-   FighterDamageMenu instead (a fighter's individual weapons are not damageable). */
+   FighterDamageMenu instead (a fighter's individual weapons are not damageable).
+   MINES likewise: a bulk purchase is one object plus a count, its damage is per-copy
+   ORDINAL, and only its Structure can take any - so it gets MineDamageMenu (opened from
+   the section health bar) and no per-system menu at all. canApplyMineDamage is what says
+   the bar is still clickable for them. */
 export const canApplyPreBattleDamage = (ship, system) =>
-	gamedata.gamephase === -2 && ship && ship.userid != 0 && !ship.flight
+	gamedata.gamephase === -2 && ship && ship.userid != 0 && !ship.flight && !ship.mine
 	&& !isPseudoSystem(system);
+
+/* A bought lobby mine: the section health bar opens the synthetic per-copy editor.
+   Guarded on the mine having structure worth dialling - a 1-box proximity mine has
+   nothing to edit, since any damage at all would destroy it and a destroyed mine is
+   simply one you did not buy. */
+export const canApplyMineDamage = (ship) =>
+	gamedata.gamephase === -2 && ship && ship.userid != 0 && Boolean(ship.mine)
+	&& battleDamage.mineMaxHealth(ship) > 1;
 
 //A system with no structure of its own, hidden from the icon grid, or untargetable by
 //construction (RammingAttack and friends) is an ABILITY, not a box on the SCS.

@@ -2922,7 +2922,9 @@ window.gamedata = {
 
 		//Pre-battle damage (§5.3): the line below rebuilds the ship from its blueprint, so
 		//carry the payload across the rebuild (deep-cloned by battleDamage.clone).
-		var copiedFlightSize = ship.flightSize;
+		//The size that must not change under the payload is flightSize for a flight and
+		//bulkBuy for a bulk mine purchase - both key their damage by ordinal.
+		var copiedFlightSize = ship.mine ? ship.bulkBuy : ship.flightSize;
 		var copiedDamage = window.battleDamage ? battleDamage.clone(ship.preBattleDamage) : null;
 
 		ship = gamedata.getShipByType(ship.phpclass); //Faction already set if not already when we called copyShip()
@@ -3016,7 +3018,7 @@ window.gamedata = {
 		}
 
 		//Pre-battle damage (§5.3): render the carried payload onto the freshly built ship,
-		//and drop it if the copy was made at a different flight size.
+		//and drop it if the copy was made at a different flight size / mine count.
 		var copyDamageCleared = window.battleDamage
 			&& battleDamage.onShipRebuilt(ship, copiedFlightSize);
 
@@ -3206,10 +3208,13 @@ window.gamedata = {
 
 		//Pre-battle damage (§5.3): the edit above replaced ship.systems wholesale from the
 		//blueprint, so the preview has to be painted onto the new objects. A flight whose
-		//size changed loses its payload instead - ordinals past the new size would
-		//silently vanish, and clearing is the honest answer.
+		//size changed - or a bulk mine purchase whose COUNT changed - loses its payload
+		//instead: ordinals past the new size would silently vanish, and clearing is the
+		//honest answer.
+		var previousSize = originalShipData
+			? (ship.mine ? originalShipData.bulkBuy : originalShipData.flightSize) : null;
 		var damageCleared = window.battleDamage
-			&& battleDamage.onShipRebuilt(ship, originalShipData && originalShipData.flightSize);
+			&& battleDamage.onShipRebuilt(ship, previousSize);
 
 		//The React window renders from this same mutated ship object, so no
 		//destroy/rebuild dance is needed - just re-render if it is open.
@@ -3294,7 +3299,13 @@ window.gamedata = {
 		//carrying damaged or crippled units says so out loud. confirm.confirm renders HTML.
 		var readyMessage = "Are you sure you wish to ready your fleet?";
 		if (window.battleDamage && battleDamage.fleetHasDamage()) {
-			readyMessage += "<br><br><b>NOTE: this fleet includes units with pre-battle damage and/or critical effects.</b>";
+			//The dialog around this is .confirm.error - 16px bold #c94b1d - which shouted
+			//the whole sentence in warning colours. Only NOTE: is the warning; the rest is
+			//ordinary body text, so it carries its own class (see confirm.css).
+			readyMessage += '<span class="prebattle-note">'
+				+ '<span class="prebattle-note-label">NOTE:</span> '
+				+ 'this fleet includes units with pre-battle damage and/or critical effects.'
+				+ '</span>';
 		}
 
 		// Pass the submission function as a callback, not invoke it immediately
@@ -5098,6 +5109,14 @@ jQuery(function () {
 				uiManager.showFighterDamageMenu({
 					ship: payload.ship,
 					fighter: payload.fighter,
+					boundingBox: getBoundingBox(payload.element)
+				});
+				systemInfoState = { menu: true };
+				break;
+			//Same idea for a bought bulk mine purchase: one row per copy, structure only.
+			case 'MineDamageClicked':
+				uiManager.showMineDamageMenu({
+					ship: payload.ship,
 					boundingBox: getBoundingBox(payload.element)
 				});
 				systemInfoState = { menu: true };

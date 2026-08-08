@@ -789,7 +789,7 @@ class Manager{
                    §4.6). getSavedShipsFromJSON has already applied flightSize + populate(),
                    so fighter ordinals validate here too. */
                 $cleanDamage = PreBattleDamage::sanitise($ship, $ship->preBattleDamage ?? array());
-                foreach (array('sys' => PreBattleDamage::KIND_SYSTEM, 'ftr' => PreBattleDamage::KIND_FIGHTER) as $bucket => $kind) {
+                foreach (PreBattleDamage::BUCKETS as $bucket => $kind) {
                     foreach (($cleanDamage[$bucket] ?? array()) as $ref => $damageEntry) {
                         if (!empty($damageEntry['d']) || !empty($damageEntry['k'])) {
                             self::$dbManager->submitSavedDamage(
@@ -1023,6 +1023,108 @@ class Manager{
         ];
     }
 
+
+    /**
+     * Per-system critical CATALOGUE + cascade traits for ONE ship class, for the
+     * gamelobby's pre-battle damage editor (PREBATTLE_DAMAGE_PLAN.md §11.2).
+     *
+     * Two things the lobby cannot get any other way:
+     *
+     *  1. `crits` — what a system's hit chart can produce. $possibleCriticals is
+     *     PROTECTED, so it is in neither the static ship JSON (the generators json_encode
+     *     the object) nor stripForJson. Only the derived, storable-filtered list is
+     *     exposed, through ShipSystem::getPossibleCriticalTypes().
+     *  2. `ssd` — survivesStructureDestruction, likewise protected. It reaches the static
+     *     blueprint through ShipCompactor::annotateSystems, but only after a static
+     *     REGEN; serving it here as well means the lobby's structure cascade is right on
+     *     a tree whose bundle has not been rebuilt yet (a shield projection was going
+     *     dark with its section - user report 2026-08-08).
+     *
+     * ⚠️ ONE ship class per request, resolved through ShipLoader::getShipsByClass - never
+     * new $phpclass on a raw client string, and never getAllShipsStatic(null), which is
+     * the documented cause of the deploy 503 on the live LiteSpeed workers.
+     */
+    public static function getSystemCriticals($phpclass, $flightSize = 1)
+    {
+        if (!is_string($phpclass) || !preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $phpclass)) {
+            return ['error' => 'Unknown ship class'];
+        }
+
+        $flightSize = max(1, min(24, (int)$flightSize));
+
+        $prefix = self::getCachePrefix();
+        $cacheKey = "{$prefix}syscrits_{$phpclass}_{$flightSize}";
+        if (function_exists('apcu_fetch')) {
+            $cached = apcu_fetch($cacheKey);
+            if ($cached) return $cached;
+        }
+
+        $byFaction = ShipLoader::getShipsByClass([$phpclass]);
+        $ship = null;
+        foreach ($byFaction as $ships) {
+            if (isset($ships[$phpclass])) { $ship = $ships[$phpclass]; break; }
+        }
+        if (!$ship) return ['error' => 'Unknown ship class'];
+
+        $types = [];
+        $out = [
+            'phpclass'   => $phpclass,
+            'flightSize' => $flightSize,
+            'systems'    => new stdClass(),
+            'fighters'   => new stdClass(),
+        ];
+
+        if ($ship instanceof FighterFlight) {
+            //Ordinals, matching the `ftr` bucket: in the lobby a flight is one sample
+            //fighter plus a number, so every ordinal offers the same list. populate()
+            //first so fighterByOrdinal has something to walk.
+            $ship->flightSize = $flightSize;
+            $ship->populate();
+
+            $fighters = [];
+            for ($ordinal = 1; $ordinal <= $flightSize; $ordinal++) {
+                $fighter = PreBattleDamage::fighterByOrdinal($ship, $ordinal);
+                if (!$fighter) continue;
+                $crits = PreBattleDamage::offerableCriticalTypes($fighter);
+                $types = array_merge($types, $crits);
+                $fighters[(string)$ordinal] = $crits;
+            }
+            //(object) so the wire shape is always a MAP: system ids run from 0, so a PHP
+            //array keyed 0,1,2… json_encodes as a JSON ARRAY and the client's
+            //catalogue.systems[String(id)] lookup would be reading positions, not ids.
+            if ($fighters) $out['fighters'] = (object)$fighters;
+        } else {
+            $systems = [];
+            foreach ($ship->systems as $system) {
+                $entry = [];
+                $crits = PreBattleDamage::offerableCriticalTypes($system);
+                if ($crits) {
+                    $types = array_merge($types, $crits);
+                    $entry['crits'] = $crits;
+                }
+                //written only when TRUE, like ShipCompactor::annotateSystems
+                if (method_exists($system, 'getSurvivesStructureDestruction')
+                    && $system->getSurvivesStructureDestruction()) {
+                    $entry['ssd'] = true;
+                }
+                if ($entry) $systems[(string)$system->id] = $entry;
+            }
+            if ($systems) $out['systems'] = (object)$systems;   //map, not array - see above
+        }
+
+        //`all` is the editor's "every effect" expander - the narrow per-system list is
+        //what B5W would actually roll, but a scenario author reproducing a specific
+        //battle needs the crits that bespoke code applies (AmmoExplosion, LimpetBore …)
+        //and which appear in no possibleCriticals table.
+        $out['all'] = PreBattleDamage::allCriticalTypes();
+        $out['meta'] = PreBattleDamage::criticalCatalogueMeta(array_merge($types, $out['all']));
+
+        if (function_exists('apcu_store')) {
+            apcu_store($cacheKey, $out, 3600);
+        }
+
+        return $out;
+    }
 
     public static function deleteSavedFleet($id) {
         try {

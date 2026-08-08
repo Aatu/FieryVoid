@@ -258,11 +258,15 @@ class DBManager
         // Ensure the ship has a valid name
         $shipName = $ship->name ?: 'NAMELESS UNIT';
         $flightsize = $ship->flightSize ?? 1;
+        //Bulk purchases (mines) are ONE row carrying a count, exactly as the lobby buys
+        //them. Before this column existed the count was silently dropped and a saved
+        //fleet of 10 mines reloaded as 1.
+        $bulkbuy = max(1, (int)($ship->bulkBuy ?? 1));
 		$enhCostTotal = $ship->pointCostEnh + $ship->pointCostEnh2;
 
-        $sql = "INSERT INTO tac_saved_ship 
-                (userid, listid, name, phpclass, flightsize, enhvalue)
-                VALUES (?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO tac_saved_ship
+                (userid, listid, name, phpclass, flightsize, bulkbuy, enhvalue)
+                VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $this->connection->prepare($sql);
         if (!$stmt) {
@@ -270,12 +274,13 @@ class DBManager
         }
 
         $stmt->bind_param(
-            "iissii", 
+            "iissiii",
             $userid,
             $listId,
             $shipName,
             $ship->phpclass,
             $flightsize,
+            $bulkbuy,
             $enhCostTotal
         );
 
@@ -393,9 +398,9 @@ class DBManager
 
         $stmt = $this->connection->prepare(
             "SELECT
-                id, userid, name, phpclass, flightsize, enhvalue
+                id, userid, name, phpclass, flightsize, bulkbuy, enhvalue
             FROM
-                tac_saved_ship 
+                tac_saved_ship
             WHERE
                 listid = ?
             "
@@ -403,11 +408,15 @@ class DBManager
 
         if ($stmt) {
             $stmt->bind_param('i', $listid);
-            $stmt->bind_result($shipid, $userid, $name, $phpclass, $flightsize, $enhvalue);
+            $stmt->bind_result($shipid, $userid, $name, $phpclass, $flightsize, $bulkbuy, $enhvalue);
             $stmt->execute();
             while ($stmt->fetch()) {
                 $ship = new $phpclass($shipid, $userid, $name, 1);
                 if($ship instanceof FighterFlight) $ship->flightSize = $flightsize;
+                //Bulk purchases (mines) come back as the ONE unit the lobby bought plus
+                //its count, not as N separate units. Rows written before the column
+                //existed default to 1, which is exactly how they always behaved.
+                if (!empty($ship->mine)) $ship->bulkBuy = max(1, (int)$bulkbuy);
 				$ship->pointCostEnh = $enhvalue;
                 $ships[] = $ship;
             }

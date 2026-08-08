@@ -1712,12 +1712,28 @@ window.confirm = {
        passes it: the lobby has no battle to have produced a one-turn critical, so the box
        would be an unanswerable question there. */
     showSaveFleet: function showSaveFleet(callback, opts) {
-        var defaultName = 'Unnamed Fleet';
         opts = opts || {};
+
+        /* Saving out of a LIVE game names the fleet after the battle and the turn it was
+           taken from - "Second Contact T7" - which is the only thing that tells two saves
+           of the same fleet apart in the dropdown, and is what a campaign wants (user
+           request 2026-08-08). The field is focused and SELECTED below, so typing over it
+           still costs one keystroke. gamedata.name is set by parseServerData; the lobby
+           has no game name of its own, so it keeps the old placeholder. */
+        var defaultName = 'Unnamed Fleet';
+        if (window.gamedata && gamedata.name && gamedata.gamephase !== -2) {
+            defaultName = gamedata.name + ' T' + (gamedata.turn || 0);
+        }
+
+        //The default now comes from user-supplied text (the game name), and this string is
+        //parsed as HTML - so it is escaped into the attribute rather than concatenated raw.
+        var safeName = String(defaultName)
+            .replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+            .replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
         var body = '<label class="fleetDialogLabel" for="fleetNameInput">Fleet name</label>'
             + '<input type="text" id="fleetNameInput" name="fleetname" autocomplete="off"'
-            + ' value="' + defaultName + '">'
+            + ' value="' + safeName + '">'
             + '<label class="fleetDialogCheck">'
             + '<input type="checkbox" id="fleetPublicCheckbox">'
             + '<span>Let other players load this fleet using its ID</span></label>';

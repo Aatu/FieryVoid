@@ -294,17 +294,20 @@ class FighterIcon extends React.Component {
         }
 
         /* The lobby draws ONE fighter card for the whole flight (a flight there is one
-           sample fighter plus a number), so a bought flight's bar shows FLIGHT-LEVEL
-           state: total structure left across all `flightSize` fighters. Every fighter in
-           it is alive by construction — a lost one shrinks flightSize instead. Everything
-           else — game.php, replay, the store blueprint on the left — keeps the
-           per-fighter reading. */
+           sample fighter plus a number), and that card is FIGHTER 1 — so its bar reads
+           fighter 1's structure, not the flight's total (user report 2026-08-08: a total
+           of "48 / 48" on a card labelled like a single craft reads as a bug). The
+           flight-wide figure is still shown, in the place it means something: the caption
+           of the per-ordinal damage menu the bar opens.
+           Everything else — game.php, replay, the store blueprint on the left — keeps its
+           own per-fighter reading, which is what this already was. */
         const preBattle = this.canApplyPreBattleDamage();
-        const flightState = preBattle ? battleDamage.flightSummary(ship) : null;
 
-        const barHealth = flightState ? flightState.percent : getStructureLeft(ship, fighter);
-        const barText = flightState
-            ? `${flightState.remaining} / ${flightState.total}`
+        const barHealth = preBattle
+            ? (battleDamage.fighterHealth(ship, 1) / fighter.maxhealth) * 100
+            : getStructureLeft(ship, fighter);
+        const barText = preBattle
+            ? `${battleDamage.fighterHealth(ship, 1)} / ${fighter.maxhealth}`
             : `${fighter.maxhealth - damageManager.getDamage(ship, fighter)} / ${fighter.maxhealth}`;
 
         return (

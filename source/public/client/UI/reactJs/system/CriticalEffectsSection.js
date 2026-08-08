@@ -17,16 +17,21 @@ import nonPassiveWheel from '../helpers/nonPassiveWheel';
  * critical is an edit like any other, and an edit you can only undo by reloading the
  * whole fleet is a trap. The list of classes to keep drawing lives on the SHIP
  * (battleDamage.critMemory), not on this component, so closing and reopening the menu
- * does not quietly lose the row.
+ * does not quietly lose the row. There is deliberately NO ✕ button: it did exactly what
+ * ticking the count down to 0 does, and two controls for one action read as two actions.
  *
  * PARAM-CARRYING criticals (battleDamage.PARAM_CRITICALS — DamageReductionReduced today)
  * keep their magnitude in the crit's param rather than in a count, so their ticker edits
  * the PARAM and the label loses its trailing number: "Damage reduction reduced by [8]".
  *
- * Still no ADD (plan §11): the rows are what the fleet is carrying, and inventing a
- * critical from nothing needs the per-class catalogue endpoint §11.2 specifies. Removing
- * and reducing what a battle actually produced needs none of that — which is why this
- * half ships and that half does not.
+ * ADDING (plan §11, built 2026-08-08) comes from the per-class catalogue endpoint
+ * systemCriticals.php: a picker listing the criticals this system's own hit chart can
+ * produce, with an "all effects" switch for the ones bespoke code applies and no hit
+ * chart lists (AmmoExplosion, LimpetBore …). The picker only decides what is OFFERED —
+ * what may be STORED is PreBattleDamage::isValidCriticalType and is deliberately wider.
+ * Each class also has a LIMIT (battleDamage.CRIT_LIMITS, mirroring the PHP table): most
+ * effects stack, but the ones the game reads as a flag are capped at one, so the [+] goes
+ * dead rather than letting a player dial in a wound that does nothing.
  */
 
 const Section = styled.div`
@@ -124,14 +129,45 @@ const CountValue = styled.div`
     color: ${props => props.$empty ? '#6f6257' : '#ffffff'};
 `;
 
-const RemoveButton = styled(TickerButton)`
-    color: #ff8a80;
-    border-color: #7a4a4a;
+/* Exported so the damage row above the criticals can use the SAME section-header bar
+   (user request 2026-08-08: the Damage block had no header while Critical Effects did). */
+export const CritSectionHeader = SectionHeader;
 
-    &:hover {
-        background: #7a4a4a;
-        color: #ffffff;
-    }
+/* The add-an-effect row. A native <select> on purpose: it is the one control that gets
+   a usable list on a phone for free, and the lobby's damage menus are used on one. */
+const AddRow = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px 4px;
+`;
+
+const AddSelect = styled.select`
+    flex: 1;
+    min-width: 0;
+    height: 18px;
+    box-sizing: border-box;
+    padding: 0 2px;
+    font-family: inherit;
+    font-size: 10px;
+    color: ${theme.colors.chromeText};
+    background-color: #101a26;
+    border: 1px solid #496791;
+    outline: none;
+
+    &:focus { border-color: #6089c1; }
+`;
+
+const AllToggle = styled.label`
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    flex: 0 0 auto;
+    font-size: 9px;
+    letter-spacing: 0.3px;
+    color: ${theme.colors.textDim};
+    cursor: pointer;
+    user-select: none;
 `;
 
 /* Turn a {critClass: count} map (plus its {critClass: param} sibling and a description
@@ -166,6 +202,16 @@ class CriticalEffectsSection extends Component {
         super(props);
         //One wheel ref per critical class, cached — see helpers/nonPassiveWheel.
         this.wheelRefs = {};
+        //"all effects" is per-menu UI state: which list the picker offers, not fleet state.
+        this.state = { showAll: false };
+    }
+
+    /* The catalogue is per SHIP CLASS and fetched once per session; loadCatalogue
+       de-duplicates, so an already-fetched class costs a map lookup. The callback fires
+       only on a fresh arrival, so this repaints exactly once. */
+    componentDidMount() {
+        if (!this.props.editable) return;
+        battleDamage.loadCatalogue(this.props.ship, () => this.forceUpdate());
     }
 
     wheelRef(type) {
@@ -194,8 +240,11 @@ class CriticalEffectsSection extends Component {
         return row.isParam ? row.param : row.count;
     }
 
+    /* The ticker's ceiling: for a param class the PARAM's bound, otherwise the per-class
+       critical limit — most effects stack, but the ones the game reads as a flag are
+       capped at one so the [+] goes dead instead of storing a wound that does nothing. */
     maxValueOf(row) {
-        if (!row.isParam) return battleDamage.MAX_CRIT_COUNT;
+        if (!row.isParam) return battleDamage.critLimit(row.type);
         const spec = battleDamage.PARAM_CRITICALS[row.type];
         return Math.min(battleDamage.MAX_CRIT_PARAM, (spec && spec.max) || battleDamage.MAX_CRIT_PARAM);
     }
@@ -211,7 +260,7 @@ class CriticalEffectsSection extends Component {
                 map[row.type] = 1;                                  //collapsed: one crit, magnitude in the param
                 params[row.type] = Math.min(value, this.maxValueOf(row));
             } else {
-                map[row.type] = Math.min(value, battleDamage.MAX_CRIT_COUNT);
+                map[row.type] = Math.min(value, battleDamage.critLimit(row.type));
             }
         } else {
             //Dropping to 0 removes the effect from the payload. The ROW survives — the
@@ -264,12 +313,54 @@ class CriticalEffectsSection extends Component {
         return remembered.map(type => this.rowForType(type));
     }
 
+    /* What the picker offers: the catalogue's list for this target minus everything
+       already drawn (an on-screen row IS the way to put an effect back, so offering it
+       again would give one class two controls). Empty until the catalogue arrives, which
+       is why the whole add row hides itself rather than showing an empty dropdown. */
+    addableTypes(shownTypes) {
+        const { ship, kind, reference } = this.props;
+
+        const offered = battleDamage.offerableCriticals(ship, kind, reference, this.state.showAll);
+        const drawn = {};
+        shownTypes.forEach(type => { drawn[type] = true; });
+
+        return offered
+            .filter(type => !drawn[type])
+            .map(type => ({ type, label: this.pickerLabel(type) }))
+            .sort((a, b) => a.label.localeCompare(b.label));
+    }
+
+    /* A picker entry's wording. Param classes read their magnitude out of the payload,
+       which a not-yet-added effect has none of, so they use the same number-less label
+       their ticker row shows. */
+    pickerLabel(type) {
+        const spec = battleDamage.PARAM_CRITICALS[type];
+        if (spec) return spec.label;
+        const meta = battleDamage.critMeta(type);
+        if (meta && meta.label) return meta.label;
+        return battleDamage.critLabel(type, this.props.ship.preBattleCritDesc, 0);
+    }
+
+    /* Adding = setting the effect to ONE, through the same setValue every ticker uses,
+       so the payload has exactly one door. A param class starts at 1 too - a magnitude
+       the player then dials up. */
+    onAdd(type) {
+        if (!type) return;
+        this.setValue(this.rowForType(type), 1);
+    }
+
     render() {
-        const { rows, editable } = this.props;
+        const { ship, rows, editable } = this.props;
 
         //Read-only sections never lose a row, so they need no memory of their own.
         const shown = editable ? this.displayRows(rows) : (rows || []);
-        if (!shown.length) return null;
+        //The picker appears as soon as the catalogue is in - NOT only when it has
+        //something to offer. A fighter's own hit chart lists no criticals at all, so
+        //gating on `addable` would hide the "All" switch that is the only way to reach
+        //them, and the control would be permanently unreachable.
+        const catalogueReady = Boolean(editable && battleDamage.catalogueFor(ship));
+        const addable = catalogueReady ? this.addableTypes(shown.map(row => row.type)) : [];
+        if (!shown.length && !catalogueReady) return null;
 
         return (
             <Section>
@@ -296,14 +387,13 @@ class CriticalEffectsSection extends Component {
                                         {value}
                                     </CountValue>
                                     <TickerButton
-                                        title={row.isParam ? 'Increase' : 'One more'}
+                                        title={row.isParam ? 'Increase'
+                                            : (value >= max && max === 1
+                                                ? 'This effect only applies once'
+                                                : 'One more')}
                                         disabled={value >= max}
                                         onClick={() => this.step(row.type, 1)}
                                     >+</TickerButton>
-                                    <RemoveButton
-                                        title="Remove this critical effect (the row stays, so you can put it back)"
-                                        onClick={() => this.setValue(row, 0)}
-                                    >&times;</RemoveButton>
                                 </Controls>
                             ) : (
                                 row.count > 1 && <CritCount>(x{row.count})</CritCount>
@@ -311,6 +401,34 @@ class CriticalEffectsSection extends Component {
                         </CritRow>
                     );
                 })}
+
+                {/* Hidden until the catalogue arrives - an empty dropdown before then
+                    would read as a broken control rather than as one still loading. */}
+                {catalogueReady && (
+                    <AddRow>
+                        <AddSelect
+                            value=""
+                            disabled={addable.length === 0}
+                            title="Add a critical effect to this unit before the battle"
+                            onChange={e => this.onAdd(e.target.value)}
+                        >
+                            <option value="">
+                                {addable.length ? '+ Add effect…' : 'Nothing left to add'}
+                            </option>
+                            {addable.map(option => (
+                                <option key={option.type} value={option.type}>{option.label}</option>
+                            ))}
+                        </AddSelect>
+                        <AllToggle title="Offer every effect in the game, not just the ones this system's hit chart can roll">
+                            <input
+                                type="checkbox"
+                                checked={this.state.showAll}
+                                onChange={e => this.setState({ showAll: e.target.checked })}
+                            />
+                            All
+                        </AllToggle>
+                    </AddRow>
+                )}
             </Section>
         );
     }

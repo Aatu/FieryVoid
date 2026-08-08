@@ -1236,6 +1236,19 @@ class ShipWindow extends React.Component {
             return;
         }
 
+        /* SHIPWINDOW_REDESIGN: in the LOBBY a click on the window background raised the
+           old ship-level SystemInfo popup - the pre-redesign hit chart / notes tooltip,
+           which this window has had dedicated buttons for since Stage 1. Two ways to see
+           the same thing, one of them an accident of clicking the backdrop, and it landed
+           on top of whatever damage menu was open. Suppressed here rather than in the
+           lobby's uiEvents handler so the click still CLOSES an open menu, which is what
+           clicking the backdrop should do. game.php is untouched - the popup is the only
+           route to that information there. */
+        if (isLobby()) {
+            window.uiEvents.relay('CloseSystemInfo');
+            return;
+        }
+
         window.uiEvents.relay('SystemClicked', {
             ship: ship,
             system: ship,

@@ -410,10 +410,15 @@ public function addMoons($gameData, $dbManager, $smallCount, $mediumCount, $larg
                            key) would resolve the wrong system on it. The clone's systems
                            keep their original ->id values, and the rows are keyed by the
                            freshly minted $id, so every mine in the bulk still gets its own
-                           correct rows. */
+                           correct rows.
+                           $m + 1 is the MINE ORDINAL: a bulk mine purchase carries its
+                           damage per copy (bucket `mne`, keyed 1..bulkBuy), so each pass
+                           of this loop writes only its own copy's row. Null for anything
+                           that is not a mine, which skips that bucket entirely. */
+                        $mineOrdinal = (isset($ship->mine) && $ship->mine) ? ($m + 1) : null;
                         $clean = PreBattleDamage::sanitise($ship, $ship->preBattleDamage ?? array());
                         if ($clean) {
-                            $parts = PreBattleDamage::toEntries($ship, $clean, $gameData->id, $id);
+                            $parts = PreBattleDamage::toEntries($ship, $clean, $gameData->id, $id, $mineOrdinal);
                             if ($parts['damage']) {
                                 $dbManager->submitDamages($gameData->id, PreBattleDamage::TURN, $parts['damage']);
                             }

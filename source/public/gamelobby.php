@@ -805,12 +805,17 @@ $optionsUsed = '';
             <!-- Custom Saved Fleet Dropdown -->
             <div class="saved-fleet-wrapper">
                 <div id="fleetDropdownButton" class="fleet-dropdown-btn">
-                    Load a Fleet
+                    LOAD A FLEET
                 </div>
                 <div id="fleetDropdownList" class="fleet-dropdown-list">
                     <!-- populated dynamically -->
                 </div>
             </div>
+
+            <!-- Second SAVE FLEET, beside the loader (the other one is at the bottom of
+                 the buy panel, a long scroll away on a phone). Same .savebutton hook, so
+                 the single handler bound at the top of this file drives both. -->
+            <span class="btn savebutton savebutton-top">SAVE FLEET</span>
 
             <?php if(!$isFleetTest): ?>
             <span class="readybutton readybutton-top">READY</span>

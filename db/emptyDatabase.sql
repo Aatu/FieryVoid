@@ -487,6 +487,7 @@ CREATE TABLE `tac_saved_ship` (
   `name` VARCHAR(200) NOT NULL,
   `phpclass` VARCHAR(45) NOT NULL,
   `flightsize` INT(11) NOT NULL DEFAULT 0,
+  `bulkbuy` INT(11) NOT NULL DEFAULT 1,
   `enhvalue` INT(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `listid_key` (`listid`),

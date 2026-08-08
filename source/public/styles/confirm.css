@@ -1389,3 +1389,24 @@
         width: 92%;
     }
 }
+
+/* ── Pre-battle damage note in the lobby's Ready confirm ────────────────────────────
+   gamedata.onReadyClicked appends this line when the fleet carries pre-battle damage or
+   critical effects (PREBATTLE_DAMAGE_PLAN.md D1). It lands inside confirm.confirm's
+   `.confirm.error` shell, which is 16px BOLD #c94b1d - so the whole sentence read as an
+   alarm rather than as the footnote it is (user report 2026-08-08). Only the NOTE: label
+   is a warning; the sentence after it is body text on the shared tokens. */
+.confirm .prebattle-note {
+    display: block;
+    margin-top: 14px;
+    font-family: arial;
+    font-size: 14px;
+    font-weight: normal;
+    line-height: 1.4;
+    color: var(--fv-text);
+}
+
+.confirm .prebattle-note .prebattle-note-label {
+    font-weight: bold;
+    color: #ff7070;
+}

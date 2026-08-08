@@ -446,6 +446,44 @@ window.ajaxInterface = {
         return true;
     },
 
+    /* Collapse the saveable units into the ROWS a fleet list holds.
+       Everything is one row per unit, EXCEPT mines in a live game: the lobby buys them in
+       bulk (one object carrying bulkBuy = N) and BuyingGamePhase mints N separate ships
+       from it, so saving a battle's survivors one row at a time reloaded a fleet of ten
+       mines as ten separate units (user report 2026-08-08). Regrouping by class puts them
+       back in the shape they were bought in - and each copy's structure damage rides
+       along as its ordinal in the `mne` bucket.
+
+       Grouped only in a live game: in the lobby they are ALREADY bulk rows, and merging
+       two separate purchases of the same class would silently fuse two lines of the
+       player's fleet list into one.
+
+       Returns [{ ship, members }] - `ship` is the representative (the first, whose
+       enhancements/ammo/name the row takes), `members` every unit it stands for. */
+    groupSaveableShips: function groupSaveableShips(ships) {
+        var groups = [];
+        var mineGroups = {};
+        var groupMines = window.gamedata && gamedata.gamephase !== -2;
+
+        for (var i = 0; i < ships.length; i++) {
+            var ship = ships[i];
+
+            if (groupMines && ship.mine) {
+                var key = ship.phpclass;
+                if (!mineGroups[key]) {
+                    mineGroups[key] = { ship: ship, members: [] };
+                    groups.push(mineGroups[key]);
+                }
+                mineGroups[key].members.push(ship);
+                continue;
+            }
+
+            groups.push({ ship: ship, members: [ship] });
+        }
+
+        return groups;
+    },
+
     /* opts (all optional):
          includeTransient : also save one-turn / self-expiring criticals (game.php's
                             "save temporary critical effects" checkbox, off by default).
@@ -468,12 +506,21 @@ window.ajaxInterface = {
             var lship = gamedata.ships[i];
             if (!inFleet(lship)) continue;
             if (!ajaxInterface.isSaveableFleetShip(lship)) continue;
-            points += lship.pointCost;
+            //A lobby mine row is N mines at pointCost each - counting it once stored a
+            //fleet whose `points` was short by (bulkBuy - 1) units, and that figure is
+            //what the affordability check on load compares against.
+            points += lship.pointCost * (lship.mine ? (parseInt(lship.bulkBuy, 10) || 1) : 1);
         }
 
+        var saveable = [];
         for (var i in gamedata.ships) {
-            var ship = gamedata.ships[i];
-            if (!ajaxInterface.isSaveableFleetShip(ship)) continue;
+            if (ajaxInterface.isSaveableFleetShip(gamedata.ships[i])) saveable.push(gamedata.ships[i]);
+        }
+
+        var groups = ajaxInterface.groupSaveableShips(saveable);
+        for (var g = 0; g < groups.length; g++) {
+            var ship = groups[g].ship;
+            var members = groups[g].members;
             var newShip = {
                 'phpclass': ship.phpclass,
                 'userid': ship.userid,
@@ -485,6 +532,8 @@ window.ajaxInterface = {
             };
 
             if (ship.bulkBuy !== undefined) newShip.bulkBuy = ship.bulkBuy;
+            //A regrouped set of live mines is bought back as one bulk of that many.
+            if (members.length > 1) newShip.bulkBuy = members.length;
 
             newShip.systems = Array();
 
@@ -556,7 +605,7 @@ window.ajaxInterface = {
                 if (window.battleDamage) {
                     var damagePayload = (gamedata.gamephase === -2)
                         ? ship.preBattleDamage
-                        : battleDamage.summariseShip(ship, opts);
+                        : ajaxInterface.summariseGroup(members, opts);
                     if (!battleDamage.isEmpty(damagePayload)) {
                         newShip.preBattleDamage = damagePayload;
                     }
@@ -575,6 +624,25 @@ window.ajaxInterface = {
         };
 
         return saveData;
+    },
+
+    /* The wire-format payload for one ROW of the fleet list. A single unit is just
+       summariseShip; a REGROUPED set of live mines has each copy's structure damage
+       renumbered as its ordinal in the bulk, matching how BuyingGamePhase writes the
+       rows back out (one tac_ship per ordinal). */
+    summariseGroup: function summariseGroup(members, opts) {
+        if (!members || members.length === 0) return {};
+        if (members.length === 1) return battleDamage.summariseShip(members[0], opts);
+
+        var mne = {};
+        for (var i = 0; i < members.length; i++) {
+            var payload = battleDamage.summariseShip(members[i], opts);
+            //summariseShip gives a live mine its damage as ordinal 1 of a bulk of one.
+            var entry = payload && payload.mne && payload.mne['1'];
+            if (entry && entry.d) mne[String(i + 1)] = { d: entry.d };
+        }
+
+        return Object.keys(mne).length ? { mne: mne } : {};
     },
 
     getSavedFleets: function getSavedFleets(callback) {
@@ -638,6 +706,34 @@ window.ajaxInterface = {
             });
     },
 
+
+    /* Per-system critical CATALOGUE + cascade traits for one ship class, for the lobby's
+       pre-battle damage editor (PREBATTLE_DAMAGE_PLAN.md §11.2).
+
+       Deliberately NOT routed through ajaxInterface.submiting: that flag serialises the
+       page's ONE user-initiated request at a time, and this is a background lookup that
+       fires while a menu opens - sharing the flag would make a catalogue fetch swallow a
+       fleet load, or vice versa. battleDamage.loadCatalogue does its own de-duplication
+       per ship class. The callback always fires, with {success:false} on failure, so the
+       caller can cache the miss and stop asking. */
+    getSystemCriticals: function getSystemCriticals(phpclass, flightSize, callback) {
+        ajaxInterface.ajaxWithRetry({
+            type: 'POST',
+            url: 'systemCriticals.php',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ phpclass: phpclass, flightSize: flightSize || 1 }),
+            dataType: 'json',
+            cache: false,
+            timeout: 15000
+        })
+            .done(function (response) {
+                callback(response || { success: false });
+            })
+            .fail(function (xhr, textStatus, errorThrown) {
+                console.error("Failed to load system criticals:", textStatus, errorThrown);
+                callback({ success: false });
+            });
+    },
 
     changeFleetPublic: function changeFleetPublic(id, callback) {
         if (ajaxInterface.submiting) return;

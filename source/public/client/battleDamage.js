@@ -8,7 +8,8 @@
 
       ship.preBattleDamage = {
         sys: { "<systemid>": { d: <int>, k: 0|1, c: {<critClass>: <count>}, p: {<critClass>: <int>} }, ... },
-        ftr: { "<ordinal>":  { d: <int>, k: 0|1, c: {<critClass>: <count>}, p: {<critClass>: <int>} }, ... }
+        ftr: { "<ordinal>":  { d: <int>, k: 0|1, c: {<critClass>: <count>}, p: {<critClass>: <int>} }, ... },
+        mne: { "<ordinal>":  { d: <int> }, ... }
       }
 
   `c` counts criticals; `p` carries the integer magnitude of the few classes that keep
@@ -20,7 +21,9 @@
   static blueprint / buy-POST reconstruction / game load, and enhancements never add
   systems). FLIGHTS are keyed by fighter ORDINAL 1..flightSize, because in the lobby
   a flight is ONE sample fighter plus a number — the N fighters are minted server-side
-  by populate(), so per-fighter system ids do not exist here at all.
+  by populate(), so per-fighter system ids do not exist here at all. MINES are the same
+  shape (one object plus bulkBuy, minted into N ships by BuyingGamePhase) and so are
+  keyed by copy ORDINAL 1..bulkBuy; their damage always lands on that copy's Structure.
 
   Loaded on BOTH gamelobby.php (authoring + preview) and game.php (summariseShip, for
   "Save Current Fleet").
@@ -36,6 +39,17 @@ window.battleDamage = {
 
 	KIND_SYSTEM: 0,
 	KIND_FIGHTER: 1,
+	/* MINES. A bulk mine purchase is ONE lobby object carrying bulkBuy = N, minted into N
+	   separate ships server-side - the same "one object plus a number" shape a flight has,
+	   which is why it is keyed by ordinal rather than by system id. STRUCTURE ONLY: every
+	   other system on a mine is untargetable and a mine has no criticals worth carrying,
+	   so a `mne` entry is {d} and nothing else, and (like a fighter) a mine is damaged but
+	   never destroyed - one you lost is one fewer in the bulk. */
+	KIND_MINE: 2,
+
+	/* bucket name => kind. THE list every loop walks, so a fourth kind is one line here.
+	   Mirrors PreBattleDamage::BUCKETS. */
+	BUCKETS: { sys: 0, ftr: 1, mne: 2 },
 
 	/* PARAM-CARRYING CRITICALS. MIRRORS PreBattleDamage::$paramCriticals in PHP - add or
 	   remove a class in BOTH, exactly like the deny list below.
@@ -53,6 +67,52 @@ window.battleDamage = {
 	   here. `max` bounds the editor; the server clamps to MAX_CRIT_PARAM regardless. */
 	PARAM_CRITICALS: {
 		DamageReductionReduced: { label: 'Damage reduction reduced by', max: 100 }
+	},
+
+	/* ⭐ PER-CLASS CRITICAL LIMITS. MIRRORS PreBattleDamage::$critLimits in PHP - edit
+	   BOTH, exactly like the deny list. Anything not named here may be carried up to
+	   MAX_CRIT_COUNT; the server clamps regardless, this copy stops the editor offering a
+	   count that would be silently reduced.
+
+	   Every entry is a critical the game reads as a FLAG - `if (hasCritical('X'))`, never
+	   multiplied by the count, and no outputMod - so a second instance changes nothing
+	   observable. Effects that DO multiply by their count (ReducedIniative, GunLost,
+	   ArmorReduced, PenaltyToHit, HalfEfficiency…) or stack through outputMod (the
+	   OutputReduced family, FieldFluctuations) are deliberately absent. The burnouts and
+	   OutputHalved are the judgement calls: they stack arithmetically, but "efficiency
+	   halved" twice is not something a B5W sheet can say. */
+	CRIT_LIMITS: {
+		DamageReductionRemoved: 1,
+		ReducedArcs: 1,
+		ContainmentBreach: 1,
+		ChargeHalve: 1,
+		ChargeEmpty: 1,
+		FirstThrustIgnored: 1,
+		FirstThrustIgnoredOneTurn: 1,
+		ShipDisabled: 1,
+		ShipDisabledOneTurn: 1,
+		ForcedOfflineOneTurn: 1,
+		OSATThrusterCrit: 1,
+		GravThrusterCritIgnored: 1,
+		AmmoExplosion: 1,
+		EngineShorted: 1,
+		ControlsStuck: 1,
+		TendrilDestroyed: 1,
+		PartialBurnout: 1,
+		SevereBurnout: 1,
+		OutputHalved: 1,
+		OutputHalvedOneTurn: 1,
+		DamageReductionReduced: 1
+	},
+
+	/* How many of this critical one damage target may carry. The catalogue's `meta` (when
+	   it has been fetched for this ship class) is authoritative - it is built from the PHP
+	   table - and CRIT_LIMITS is the offline mirror used before it arrives. */
+	critLimit: function critLimit(type) {
+		var meta = battleDamage.critMeta(type);
+		if (meta && meta.limit > 0) return meta.limit;
+		var limit = battleDamage.CRIT_LIMITS[type];
+		return (limit > 0) ? limit : battleDamage.MAX_CRIT_COUNT;
 	},
 
 	isParamCritical: function isParamCritical(type) {
@@ -127,6 +187,99 @@ window.battleDamage = {
 	},
 
 	/* ---------------------------------------------------------------- *
+	 *  Catalogue (systemCriticals.php) — plan §11.2
+	 * ---------------------------------------------------------------- */
+
+	/* Per-SHIP-CLASS catalogue, fetched once per phpclass+flightSize per session:
+	     { systems: {<systemid>: {crits:[…], ssd:true}}, fighters: {<ordinal>: […]},
+	       meta: {<class>: {label, limit, param, transient}}, all: […] }
+
+	   Two consumers, both of which need something PROTECTED server-side and therefore
+	   absent from the static ship blueprints the lobby builds its windows from:
+
+	     1. the crit PICKER - $possibleCriticals is protected and in neither the static
+	        JSON nor stripForJson;
+	     2. the structure CASCADE - survivesStructureDestruction is protected too. It does
+	        reach the static blueprint via ShipCompactor::annotateSystems, but only after a
+	        static REGEN, so a shield projection went dark with its section on any tree
+	        whose bundle had not been rebuilt (user report 2026-08-08). Reading it here
+	        makes the preview right regardless of the bundle's age. */
+	catalogues: {},
+	catalogueRequests: {},
+
+	catalogueKey: function catalogueKey(ship) {
+		if (!ship || !ship.phpclass) return null;
+		return ship.phpclass + '/' + (ship.flight ? (parseInt(ship.flightSize, 10) || 1) : 1);
+	},
+
+	catalogueFor: function catalogueFor(ship) {
+		var key = battleDamage.catalogueKey(ship);
+		return key ? (battleDamage.catalogues[key] || null) : null;
+	},
+
+	/* Fetch it if we do not have it yet. `onLoaded` fires only on a fresh arrival, so a
+	   caller can re-render exactly once; already-cached is a synchronous no-op returning
+	   the catalogue. Failures are cached as an EMPTY catalogue so a broken endpoint costs
+	   one request per ship class, not one per menu open. */
+	loadCatalogue: function loadCatalogue(ship, onLoaded) {
+		var key = battleDamage.catalogueKey(ship);
+		if (!key) return null;
+		if (battleDamage.catalogues[key]) return battleDamage.catalogues[key];
+		if (battleDamage.catalogueRequests[key]) return null;
+		if (!window.ajaxInterface || typeof ajaxInterface.getSystemCriticals !== 'function') return null;
+
+		battleDamage.catalogueRequests[key] = true;
+		ajaxInterface.getSystemCriticals(ship.phpclass,
+			ship.flight ? (parseInt(ship.flightSize, 10) || 1) : 1,
+			function (response) {
+				delete battleDamage.catalogueRequests[key];
+				battleDamage.catalogues[key] = (response && response.success) ? response : {};
+				if (typeof onLoaded === 'function') onLoaded(battleDamage.catalogues[key]);
+			});
+
+		return null;
+	},
+
+	/* {label, limit, param, transient} for one critical class, from whichever catalogue
+	   has been fetched (they all carry the same global `meta`). */
+	critMeta: function critMeta(type) {
+		if (!type) return null;
+		for (var key in battleDamage.catalogues) {
+			var meta = battleDamage.catalogues[key] && battleDamage.catalogues[key].meta;
+			if (meta && meta[type]) return meta[type];
+		}
+		return null;
+	},
+
+	/* The criticals this damage target may be OFFERED. A DIFFERENT question from what may
+	   be stored (see PreBattleDamage::offerableCriticalTypes) - this is the system's own
+	   hit-chart table. `all` widens it to every storable class, for reproducing a crit
+	   that bespoke code applies and no hit chart lists. */
+	offerableCriticals: function offerableCriticals(ship, kind, ref, all) {
+		var catalogue = battleDamage.catalogueFor(ship);
+		if (!catalogue) return [];
+		if (all) return catalogue.all || [];
+
+		if (kind === battleDamage.KIND_FIGHTER) {
+			return (catalogue.fighters && catalogue.fighters[String(ref)]) || [];
+		}
+		var entry = catalogue.systems && catalogue.systems[String(ref)];
+		return (entry && entry.crits) || [];
+	},
+
+	/* Does this system survive its structure block being destroyed? Catalogue first (always
+	   current), then the static blueprint's own flag (present once the ship bundle has been
+	   regenerated). */
+	survivesStructureDestruction: function survivesStructureDestruction(ship, system) {
+		if (!system) return false;
+		if (system.survivesStructureDestruction) return true;
+
+		var catalogue = battleDamage.catalogueFor(ship);
+		var entry = catalogue && catalogue.systems && catalogue.systems[String(system.id)];
+		return Boolean(entry && entry.ssd);
+	},
+
+	/* ---------------------------------------------------------------- *
 	 *  State
 	 * ---------------------------------------------------------------- */
 
@@ -149,7 +302,7 @@ window.battleDamage = {
 			|| Array.isArray(ship.preBattleDamage)) {
 			ship.preBattleDamage = battleDamage.toPlainObject(ship.preBattleDamage);
 		}
-		['sys', 'ftr'].forEach(function (bucketName) {
+		Object.keys(battleDamage.BUCKETS).forEach(function (bucketName) {
 			if (Array.isArray(ship.preBattleDamage[bucketName])) {
 				ship.preBattleDamage[bucketName] =
 					battleDamage.toPlainObject(ship.preBattleDamage[bucketName]);
@@ -181,7 +334,9 @@ window.battleDamage = {
 	},
 
 	bucketName: function bucketName(kind) {
-		return (kind === battleDamage.KIND_FIGHTER || kind === 'ftr') ? 'ftr' : 'sys';
+		if (kind === battleDamage.KIND_FIGHTER || kind === 'ftr') return 'ftr';
+		if (kind === battleDamage.KIND_MINE || kind === 'mne') return 'mne';
+		return 'sys';
 	},
 
 	getEntry: function getEntry(ship, kind, ref) {
@@ -238,6 +393,65 @@ window.battleDamage = {
 		return battleDamage.setEntry(ship, battleDamage.KIND_FIGHTER, ordinal, patch);
 	},
 
+	/* ---------------------------------------------------------------- *
+	 *  Mines (synthetic per-copy state)
+	 * ---------------------------------------------------------------- */
+
+	/* How many mines this one lobby object stands for. */
+	mineCount: function mineCount(ship) {
+		if (!ship || !ship.mine) return 0;
+		var count = parseInt(ship.bulkBuy, 10);
+		return (count > 0) ? count : 1;
+	},
+
+	/* The only system on a mine that takes damage. Duck-typed on `name`, never
+	   `instanceof Structure`: lobby fleet ships are jQuery.extend clones with no
+	   prototype chain left. */
+	mineStructure: function mineStructure(ship) {
+		if (!ship || !ship.systems) return null;
+		for (var i in ship.systems) {
+			var system = ship.systems[i];
+			if (system && system.name === 'structure') return system;
+		}
+		return null;
+	},
+
+	mineMaxHealth: function mineMaxHealth(ship) {
+		var structure = battleDamage.mineStructure(ship);
+		return structure ? structure.maxhealth : 0;
+	},
+
+	/* Remaining structure of mine #ordinal. Like a fighter it floors at 1: a mine you lost
+	   is one fewer in the bulk, not a wreck with 0 structure. */
+	mineHealth: function mineHealth(ship, ordinal) {
+		var max = battleDamage.mineMaxHealth(ship);
+		var entry = battleDamage.getEntry(ship, battleDamage.KIND_MINE, ordinal);
+		if (!entry) return max;
+		return Math.max(0, max - (parseInt(entry.d, 10) || 0));
+	},
+
+	setMine: function setMine(ship, ordinal, entry) {
+		var cap = Math.max(0, battleDamage.mineMaxHealth(ship) - 1);
+		var patch = { k: 0 };
+		if (entry && entry.hasOwnProperty('d')) {
+			patch.d = Math.min(cap, parseInt(entry.d, 10) || 0);
+		}
+		return battleDamage.setEntry(ship, battleDamage.KIND_MINE, ordinal, patch);
+	},
+
+	/* {remaining, total, size} across every mine in the bulk, for the window's caption. */
+	mineSummary: function mineSummary(ship) {
+		var size = battleDamage.mineCount(ship);
+		var max = battleDamage.mineMaxHealth(ship);
+		var summary = { remaining: max * size, total: max * size, size: size };
+		if (!size || !max) return summary;
+
+		var remaining = 0;
+		for (var o = 1; o <= size; o++) remaining += battleDamage.mineHealth(ship, o);
+		summary.remaining = remaining;
+		return summary;
+	},
+
 	/* REPLACE a whole entry (a deep copy of it), criticals included, or remove it when
 	   given nothing. Used by the fighter menu's "apply to all" so propagation copies the
 	   ENTIRE entry rather than named d/k fields - when lobby crit authoring (§11) lands,
@@ -290,7 +504,9 @@ window.battleDamage = {
 				clean[type] = 1;
 				params[type] = param;
 			} else {
-				clean[type] = Math.min(n, battleDamage.MAX_CRIT_COUNT);
+				//Per-class ceiling (default MAX_CRIT_COUNT): some effects are flags the
+				//game reads once, so a second would be a wound that does nothing.
+				clean[type] = Math.min(n, battleDamage.critLimit(type));
 			}
 		}
 
@@ -366,11 +582,17 @@ window.battleDamage = {
 	   The exception is a FLIGHT whose size changed: ordinals past the new size would
 	   silently vanish, so the payload is dropped wholesale and the caller says so.
 	   Returns true when it cleared something. */
-	onShipRebuilt: function onShipRebuilt(ship, previousFlightSize) {
+	onShipRebuilt: function onShipRebuilt(ship, previousSize) {
 		var cleared = false;
 
-		if (ship && ship.flight && previousFlightSize !== undefined && previousFlightSize !== null
-			&& parseInt(previousFlightSize, 10) !== parseInt(ship.flightSize, 10)
+		//A flight's flightSize or a bulk mine's bulkBuy: ordinals past the new size would
+		//silently vanish, so the payload is dropped wholesale and the caller says so.
+		var currentSize = ship && ship.flight ? ship.flightSize
+			: (ship && ship.mine ? ship.bulkBuy : null);
+
+		if (currentSize !== null && currentSize !== undefined
+			&& previousSize !== undefined && previousSize !== null
+			&& parseInt(previousSize, 10) !== parseInt(currentSize, 10)
 			&& !battleDamage.isEmpty(battleDamage.peek(ship))) {
 			ship.preBattleDamage = {};
 			delete ship.preBattleCritSeen;
@@ -383,9 +605,10 @@ window.battleDamage = {
 
 	isEmpty: function isEmpty(payload) {
 		if (!payload || typeof payload !== 'object') return true;
-		var sys = payload.sys && Object.keys(payload.sys).length;
-		var ftr = payload.ftr && Object.keys(payload.ftr).length;
-		return !sys && !ftr;
+		return !Object.keys(battleDamage.BUCKETS).some(function (bucketName) {
+			var bucket = payload[bucketName];
+			return bucket && Object.keys(bucket).length > 0;
+		});
 	},
 
 	/* {damage, criticals} — mirrors PreBattleDamage::contents. */
@@ -393,7 +616,7 @@ window.battleDamage = {
 		var has = { damage: false, criticals: false };
 		if (!payload || typeof payload !== 'object') return has;
 
-		['sys', 'ftr'].forEach(function (bucketName) {
+		Object.keys(battleDamage.BUCKETS).forEach(function (bucketName) {
 			var bucket = payload[bucketName];
 			for (var ref in bucket) {
 				if (!bucket.hasOwnProperty(ref)) continue;
@@ -413,7 +636,7 @@ window.battleDamage = {
 		var out = {};
 		if (!payload || typeof payload !== 'object') return out;
 
-		['sys', 'ftr'].forEach(function (bucketName) {
+		Object.keys(battleDamage.BUCKETS).forEach(function (bucketName) {
 			var bucket = payload[bucketName];
 			if (!bucket) return;
 			var kept = {};
@@ -479,6 +702,18 @@ window.battleDamage = {
 
 		var payload = battleDamage.peek(ship) || {};
 		var critDesc = ship.preBattleCritDesc || {};
+
+		//The cascade below needs survivesStructureDestruction, which is protected
+		//server-side and only reaches the static blueprint after a ship-bundle regen. Kick
+		//the per-class catalogue (de-duplicated, one request per ship class per session)
+		//and repaint when it lands, so the preview is right on a tree whose bundle is old.
+		//The lobby is the only page that renders a preview at all.
+		if (window.gamedata && gamedata.gamephase === -2 && ship.userid != 0) {
+			battleDamage.loadCatalogue(ship, function () {
+				battleDamage.applyToShip(ship);
+				if (window.shipWindowManagerReact) window.shipWindowManagerReact.update();
+			});
+		}
 
 		var eachSystem = function (fn) {
 			for (var i in ship.systems) {
@@ -600,7 +835,10 @@ window.battleDamage = {
 				continue;
 			}
 
-			if (target.survivesStructureDestruction) continue;
+			//survivesStructureDestruction is PROTECTED server-side, so it reaches us
+			//either on the static blueprint (needs a ship-bundle regen) or through the
+			//per-class catalogue (always current) - this asks both.
+			if (battleDamage.survivesStructureDestruction(ship, target)) continue;
 
 			var home = (target.structureHomeLocation !== undefined
 				&& target.structureHomeLocation !== null)
@@ -740,6 +978,22 @@ window.battleDamage = {
 				if (entry) ftr[String(i + 1)] = entry;
 			}
 			if (Object.keys(ftr).length) payload.ftr = ftr;
+			return payload;
+		}
+
+		//A live mine is its OWN ship, so it summarises as ordinal 1 of a bulk of one;
+		//constructSavedShips then merges the group into a single saved unit and renumbers
+		//the ordinals over it. Structure only - a mine carries nothing else.
+		if (ship.mine) {
+			var structure = battleDamage.mineStructure(ship);
+			var mineEntry = structure
+				? battleDamage.summariseSystem(ship, structure, true, opts) : null;
+			//criticals never travel with a mine, whatever a battle put on it
+			if (mineEntry) {
+				delete mineEntry.c;
+				delete mineEntry.p;
+				if (mineEntry.d) payload.mne = { '1': { d: mineEntry.d } };
+			}
 			return payload;
 		}
 

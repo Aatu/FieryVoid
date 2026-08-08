@@ -60,6 +60,21 @@ class ShipSystem {
     public function getSurvivesStructureDestruction(){
         return $this->survivesStructureDestruction;
     }
+
+    /* The critical classes this system's hit chart can produce, flattened and deduped.
+       $possibleCriticals stays PROTECTED - only the derived list is exposed, and only for
+       the lobby's pre-battle crit picker (systemCriticals.php -> Manager::getSystemCriticals).
+       Keys of the table are rolls, values are a class name or an array of them. */
+    public function getPossibleCriticalTypes(){
+        $out = array();
+        foreach ($this->possibleCriticals as $value){
+            foreach ((is_array($value) ? $value : array($value)) as $type){
+                if (is_string($type) && $type !== '') $out[$type] = true;
+            }
+        }
+
+        return array_keys($out);
+    }
 	
     protected $parentSystem = null;
     protected $unit = null; //unit on which system is mounted
