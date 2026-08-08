@@ -44,7 +44,22 @@ class ShipSystem {
 	public $hardAdvancedArmor = false; //indicates that system has hardened advanced armor
     
     protected $structureSystem;
+    /* Stays PROTECTED, like $alwaysHideFireOrders and $hideFireOrdersFromEnemies above:
+       a public property here serialises into every raw-embedded weapon object (a
+       launcher's missileArray entries are json_encoded whole, not through stripForJson),
+       so making it public put `survivesStructureDestruction:false` on every ammo entry of
+       every gamedata poll. The gamelobby's damage preview needs it on the STATIC blueprint
+       only, and gets it there through getSurvivesStructureDestruction() +
+       ShipCompactor::annotateSystems - never through live gamedata. */
     protected $survivesStructureDestruction = false;
+
+    /* Does this system stay alive when its structure block is destroyed? Read by
+       ShipCompactor so the lobby's pre-battle damage preview can mirror isDestroyed()'s
+       structure cascade for it (the client's isDestroyed reads a server-computed boolean
+       and never re-derives one). */
+    public function getSurvivesStructureDestruction(){
+        return $this->survivesStructureDestruction;
+    }
 	
     protected $parentSystem = null;
     protected $unit = null; //unit on which system is mounted

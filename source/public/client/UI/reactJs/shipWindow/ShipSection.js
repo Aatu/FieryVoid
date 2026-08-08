@@ -1,6 +1,7 @@
 import * as React from "react";
 import styled from "styled-components"
 import SystemIcon from "../system/SystemIcon"
+import { canApplyPreBattleDamage } from "../system/SystemInfoButtons"
 import theme from "../styled/theme";
 
 /*SCS-style section panel (SHIPWINDOW_REDESIGN_PLAN.md Stage 1a): dotted panel with a
@@ -81,6 +82,9 @@ const SectionHeader = styled.div`
     background-color: black;
     border-bottom: 1px solid ${theme.colors.healthOk};
     overflow: hidden;
+    /*lobby pre-battle damage: the bar is the only way to reach a section's Structure,
+      which has no icon of its own in the grid*/
+    ${props => props.$damageable ? 'cursor: pointer;' : ''}
 
     /*structure health fill - the header line doubles as the section's health bar*/
     &::before {
@@ -149,6 +153,7 @@ class ShipSection extends React.Component {
         super(props);
         this.longPressTimer = null;
         this.touchActive = false;
+        this.ignoreNextClick = false; //set by a completed long-press, consumed by its ghost click
         this.arcShown = false; //so only a section that actually raised a wedge asks for the sweep
         this.onStructureMouseOver = this.onStructureMouseOver.bind(this);
         this.onStructureMouseOut = this.onStructureMouseOut.bind(this);
@@ -156,6 +161,33 @@ class ShipSection extends React.Component {
         this.onStructureTouchMove = this.onStructureTouchMove.bind(this);
         this.onStructureTouchEnd = this.onStructureTouchEnd.bind(this);
         this.onStructureTouchCancel = this.onStructureTouchCancel.bind(this);
+        this.onStructureClick = this.onStructureClick.bind(this);
+    }
+
+    /*Pre-battle damage (PREBATTLE_DAMAGE_PLAN.md §5.2): a section's Structure is deliberately
+      filtered OUT of the icon grid (filterStructure) - the health bar IS its icon - so the bar
+      is the only place a player can click to damage it. Relays the ordinary SystemClicked
+      event with the Structure system, so the lobby's existing handler opens the same
+      ApplyDamageMenu every other system uses, and destroying it runs battleDamage's mirror of
+      ShipSystem::isDestroyed's cascade over the section.
+      Gated on canApplyPreBattleDamage, so game.php is untouched: the bar has never been
+      clickable there and nothing else listens for a SystemClicked carrying a Structure.*/
+    onStructureClick(event) {
+        const { ship, systems } = this.props;
+        const structure = getStructure(systems);
+
+        if (this.ignoreNextClick) {
+            this.ignoreNextClick = false;
+            return;
+        }
+
+        if (!structure || !canApplyPreBattleDamage(ship, structure)) return;
+
+        event.stopPropagation();
+        this.hideStructureArc();
+        window.uiEvents.relay('SystemClicked', {
+            ship: ship, system: structure, element: event.currentTarget, showMenu: true
+        });
     }
 
     componentWillUnmount() {
@@ -230,6 +262,9 @@ class ShipSection extends React.Component {
             clearTimeout(this.longPressTimer);
             this.longPressTimer = null;
         } else {
+            //the hold DID complete, so this touch was "show me the arc", not "damage this
+            //section" - swallow the click the browser synthesises after touchend
+            this.ignoreNextClick = true;
             this.hideStructureArc();
         }
 
@@ -266,6 +301,8 @@ class ShipSection extends React.Component {
                 {structure && <SectionHeader
                     $health={health}
                     $criticals={hasCriticals(structure)}
+                    $damageable={canApplyPreBattleDamage(ship, structure)}
+                    onClick={this.onStructureClick}
                     onMouseOver={this.onStructureMouseOver}
                     onMouseOut={this.onStructureMouseOut}
                     onTouchStart={this.onStructureTouchStart}

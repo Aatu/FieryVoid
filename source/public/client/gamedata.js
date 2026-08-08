@@ -2113,6 +2113,14 @@ getActiveShipName: function getActiveShipName() {
             fleetListManager.displayFleetLists();
         }
 
+        /* SAVE FLEET tab (PREBATTLE_DAMAGE_PLAN.md §7.3). Its own bootstrap runs at
+           DOM-ready, when gamedata.ships is still empty - so "the viewer has ships in this
+           game" was false, the tab hid itself, and the only other refresh trigger was the
+           panel's own "onshow", which cannot fire while the tab is hidden. Refresh it here
+           instead: this is the one place ships actually arrive, and it also keeps the
+           "N units will be saved" line honest as units die during the battle. */
+        if (window.savedFleets) savedFleets.refreshSavePanel();
+
         gamedata.checkGameStatus();
     },
 

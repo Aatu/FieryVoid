@@ -349,6 +349,42 @@ window.gamedata = {
 		return true;
 	},
 
+	/* Broken-heart badge for a bought unit carrying pre-battle damage or criticals, as an
+	   HTML string ready to prepend to a fleet-list row. Empty string when it carries
+	   neither.
+	   ONE helper for BOTH row builders (updateFleet and constructFleetList): the badge has
+	   to be re-derived from the ship every time the fleet list is rebuilt, because the list
+	   is thrown away and rewritten from gamedata.ships on every slot select, remove and
+	   edit. The payload lives on the ship, so it always survives - it was only the markup
+	   that was being lost.
+	   Same icon the saved-fleet dropdown uses for a fleet carrying damage. */
+	damagedShipBadge: function damagedShipBadge(ship) {
+		if (!window.battleDamage || battleDamage.isEmpty(battleDamage.peek(ship))) return '';
+
+		var carried = battleDamage.contents(battleDamage.peek(ship));
+		var title = carried.damage && carried.criticals ? 'Carries pre-battle damage and critical effects'
+			: (carried.criticals ? 'Carries pre-battle critical effects' : 'Carries pre-battle damage');
+
+		return '<span class="shipDamagedBadge fa-solid fa-heart-crack" title="' + title + '"></span>';
+	},
+
+	/* Re-paint ONE fleet-list row's damage badge. Called by the React damage menus after
+	   every edit, so the badge appears/disappears as the player works rather than waiting
+	   for the next full fleet-list rebuild. Lobby-only: game.php's gamedata has no such
+	   method and the callers guard on typeof. */
+	refreshDamagedBadge: function refreshDamagedBadge(ship) {
+		if (!ship) return;
+
+		var row = $(".ship.bought").filter(function () {
+			return $(this).data("shipindex") == ship.id;
+		});
+		if (!row.length) return;
+
+		row.find(".shipDamagedBadge").remove();
+		var badge = gamedata.damagedShipBadge(ship);
+		if (badge) row.prepend(badge);
+	},
+
 	updateFleet: function updateFleet(ship) {
 		var a = 0;
 		for (var i in gamedata.ships) {
@@ -393,8 +429,15 @@ window.gamedata = {
 		}
 		displayCost = Math.ceil(displayCost);
 
+		//Pre-battle damage: broken-heart badge ahead of the name, so a damaged unit reads as
+		//damaged without opening its window. Built by the shared helper so this row and the
+		//one constructFleetList rebuilds cannot drift - the old ' (damaged)' suffix was
+		//written HERE ONLY and vanished at the next fleet-list rebuild.
+		var damageBadge = gamedata.damagedShipBadge(ship);
+
 		if (ship.mine && ship.bulkBuy) {
 			var h = $('<div class="ship bought slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '">' +
+				damageBadge +
 				'<span class="shipname name">' + displayName + '</span>' +
 				'<span class="boughtShiptype">' + displayType + '</span>' +
 				'<span class="boughtPointCost">' + displayCost + 'p</span>' +
@@ -406,6 +449,7 @@ window.gamedata = {
 				'</div>');
 		} else {
 			var h = $('<div class="ship bought slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '">' +
+				damageBadge +
 				'<span class="shipname name">' + displayName + '</span>' +
 				'<span class="boughtShiptype">' + displayType + '</span>' +
 				'<span class="boughtPointCost">' + displayCost + 'p</span>' +
@@ -1640,8 +1684,13 @@ window.gamedata = {
 			}
 			displayCost = Math.ceil(displayCost);
 
+			//Pre-battle damage: re-derived from the ship, not carried in the old markup -
+			//this rebuild is exactly where the previous ' (damaged)' suffix was lost.
+			var damageBadge = gamedata.damagedShipBadge(ship);
+
 			if (ship.mine && ship.bulkBuy) {
 				var h = $('<div class="ship bought slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '">' +
+					damageBadge +
 					'<span class="shipname name">' + displayName + '</span>' +
 					'<span class="boughtShiptype">' + displayType + '</span>' +
 					'<span class="boughtPointCost">' + displayCost + 'p</span>' +
@@ -1653,6 +1702,7 @@ window.gamedata = {
 					'</div>');
 			} else {
 				var h = $('<div class="ship bought slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '">' +
+					damageBadge +
 					'<span class="shipname name">' + displayName + '</span>' +
 					'<span class="boughtShiptype">' + displayType + '</span>' +
 					'<span class="boughtPointCost">' + displayCost + 'p</span>' +
@@ -2821,6 +2871,11 @@ window.gamedata = {
 		newShip.pointCost = copiedShip.pointCost;
 		newShip.flightSize = copiedShip.flightSize;
 		newShip.enhancementOptions = copiedShip.enhancementOptions ? [...copiedShip.enhancementOptions] : [];
+		//Pre-battle damage (§5.3): a copy starts equally damaged. DEEP clone - sharing the
+		//payload object would make editing either ship edit both.
+		if (window.battleDamage) {
+			newShip.preBattleDamage = battleDamage.clone(copiedShip.preBattleDamage);
+		}
 
 		// Copy ammo counts
 		if (newShip.flight && copiedShip.flight) {
@@ -2865,12 +2920,18 @@ window.gamedata = {
 			return;
 		}
 
-		ship = gamedata.getShipByType(ship.phpclass); //Faction already set if not already when we called copyShip()			
+		//Pre-battle damage (§5.3): the line below rebuilds the ship from its blueprint, so
+		//carry the payload across the rebuild (deep-cloned by battleDamage.clone).
+		var copiedFlightSize = ship.flightSize;
+		var copiedDamage = window.battleDamage ? battleDamage.clone(ship.preBattleDamage) : null;
+
+		ship = gamedata.getShipByType(ship.phpclass); //Faction already set if not already when we called copyShip()
 
 		var name = $(".confirm input").val();
 		ship.name = name;
 		ship.pointCost = newPointCost;
 		ship.userid = gamedata.thisplayer;
+		if (copiedDamage) ship.preBattleDamage = copiedDamage;
 
 		if (ship.flight) {
 			var flightSize = $(".fighterAmount").html();
@@ -2954,9 +3015,18 @@ window.gamedata = {
 			} else { }
 		}
 
+		//Pre-battle damage (§5.3): render the carried payload onto the freshly built ship,
+		//and drop it if the copy was made at a different flight size.
+		var copyDamageCleared = window.battleDamage
+			&& battleDamage.onShipRebuilt(ship, copiedFlightSize);
+
 		$(".confirm").remove();
 		gamedata.updateFleet(ship);
-		//gamedata.populateFleetDropdown();		
+
+		if (copyDamageCleared) {
+			confirm.warning("Flight size changed - the pre-battle damage was not copied to this flight.");
+		}
+		//gamedata.populateFleetDropdown();
 	},
 
 
@@ -3134,6 +3204,13 @@ window.gamedata = {
 		//above, so this re-applies the kept/changed enhancements to the rebuilt ship)
 		lobbyEnhancements.apply(ship);
 
+		//Pre-battle damage (§5.3): the edit above replaced ship.systems wholesale from the
+		//blueprint, so the preview has to be painted onto the new objects. A flight whose
+		//size changed loses its payload instead - ordinals past the new size would
+		//silently vanish, and clearing is the honest answer.
+		var damageCleared = window.battleDamage
+			&& battleDamage.onShipRebuilt(ship, originalShipData && originalShipData.flightSize);
+
 		//The React window renders from this same mutated ship object, so no
 		//destroy/rebuild dance is needed - just re-render if it is open.
 		var wasVisible = window.shipWindowManagerReact
@@ -3144,6 +3221,10 @@ window.gamedata = {
 
 		if (wasVisible) {
 			window.shipWindowManagerReact.update();
+		}
+
+		if (damageCleared) {
+			confirm.warning("Flight size changed - the pre-battle damage on this flight has been cleared.");
 		}
 		//gamedata.populateFleetDropdown();
 	},
@@ -3209,8 +3290,15 @@ window.gamedata = {
 			return;
 		}
 
+		//Pre-battle damage (D1): no rule gates it, so the Ready confirm is where a fleet
+		//carrying damaged or crippled units says so out loud. confirm.confirm renders HTML.
+		var readyMessage = "Are you sure you wish to ready your fleet?";
+		if (window.battleDamage && battleDamage.fleetHasDamage()) {
+			readyMessage += "<br><br><b>NOTE: this fleet includes units with pre-battle damage and/or critical effects.</b>";
+		}
+
 		// Pass the submission function as a callback, not invoke it immediately
-		confirm.confirm("Are you sure you wish to ready your fleet?", function () {
+		confirm.confirm(readyMessage, function () {
 			selectedSlot.lastphase = -2;
 			ajaxInterface.submitGamedata();
 			slotElement.addClass("ready");
@@ -3245,26 +3333,22 @@ window.gamedata = {
 
 	},
 
+	//The save half now lives in client/savedFleets.js so game.php can drive it too
+	//(PREBATTLE_DAMAGE_PLAN.md §7.1). The load/dropdown/delete UI stays here, where its
+	//cachedFleets / fleetDropdownList / fleetDropdownButton closures are.
 	onSaveClicked: function onSaveClicked() {
-		$(".confirm").remove();
-
-		confirm.showSaveFleet(gamedata.doSaveFleet);
+		savedFleets.saveCurrentFleet();
 	},
 
 	doSaveFleet: function doSaveFleet() {
-		var fleetname = $(".confirm input[name='fleetname']").val();
-		var isPublic = $("#fleetPublicCheckbox").is(":checked"); // ✅ true/false
+		savedFleets.doSaveCurrentFleet();
+	},
 
-		$(".confirm").remove();
-
-		// Submit fleet, then refresh list when done
-		ajaxInterface.submitSavedFleet(fleetname, isPublic, function (response) {
-			ajaxInterface.getSavedFleets(function (fleets) {
-				cachedFleets = fleets;
-				gamedata.populateFleetDropdown(cachedFleets);
-			});
-
-			confirm.warning(fleetname + " saved!. <br>(ID #" + response.listId + ")")
+	//Called by savedFleets after a successful save so the dropdown reflects the new fleet.
+	refreshSavedFleets: function refreshSavedFleets() {
+		ajaxInterface.getSavedFleets(function (fleets) {
+			cachedFleets = fleets;
+			gamedata.populateFleetDropdown(cachedFleets);
 		});
 	},
 	/*
@@ -3321,9 +3405,11 @@ window.gamedata = {
 			item.addEventListener('mouseleave', () => item.style.background = 'white');
 
 			// ✅ Load fleet if you click anywhere on item (except lock/delete)
+			//Pre-battle damage (D3): the confirm carries a checkbox per kind of saved
+			//state this fleet actually holds, each defaulted on.
 			item.addEventListener('click', () => {
-				confirm.confirm("Load your '" + fleet.name + "' fleet?", () => {
-					gamedata.loadSavedFleet(fleet.id);
+				confirm.showLoadFleet(fleet.name, { hasDamage: fleet.hasDamage, hasCrits: fleet.hasCrits }, (choices) => {
+					gamedata.loadSavedFleet(fleet.id, choices);
 					fleetDropdownList.style.display = 'none';
 					fleetDropdownButton.textContent = 'Load a Saved Fleet';
 				});
@@ -3358,6 +3444,19 @@ window.gamedata = {
 			if (fleet.userid == 0) {
 				nameSpan.style.marginLeft = '6px';
 			}
+
+			//Pre-battle damage: badge a fleet that carries battle damage and/or critical
+			//effects, so the state is visible before the load dialog asks about it.
+			let damageSpan = null;
+			if (fleet.hasDamage || fleet.hasCrits) {
+				damageSpan = document.createElement('span');
+				damageSpan.className = 'fa-solid fa-heart-crack';
+				damageSpan.style.color = '#c0392b';
+				damageSpan.style.marginLeft = '6px';
+				damageSpan.title = fleet.hasDamage && fleet.hasCrits
+					? 'Carries battle damage and critical effects'
+					: (fleet.hasDamage ? 'Carries battle damage' : 'Carries critical effects');
+			}
 			// Points
 			const pointsSpan = document.createElement('span');
 			pointsSpan.textContent = `${fleet.points}pts`;
@@ -3370,6 +3469,7 @@ window.gamedata = {
 
 			if (fleet.userid !== 0) item.appendChild(lockSpan);
 			item.appendChild(nameSpan);
+			if (damageSpan) item.appendChild(damageSpan);
 			item.appendChild(spacer);
 			item.appendChild(pointsSpan);
 
@@ -3447,44 +3547,48 @@ window.gamedata = {
 	},
 
 
-	loadSavedFleet: function loadSavedFleet(listId) {
+	//`choices` (optional) = {includeDamage, includeCriticals} from the load confirm (D3).
+	loadSavedFleet: function loadSavedFleet(listId, choices) {
 
 		var canAfford = gamedata.checkFleetCost(listId);
 
 		if (canAfford) {
 
-			ajaxInterface.loadSavedFleet(listId, function (response) {
+			ajaxInterface.loadSavedFleet(listId, choices || {}, function (response) {
 				//console.log("AJAX response:", ships); // debug raw response
 
 				if (response.ships && Array.isArray(response.ships) && response.ships.length > 0) {
-					gamedata.doLoadFleet(response.ships);
+					gamedata.doLoadFleet(response.ships, response.critDesc, response.critTransient);
 					fleetDropdownButton.textContent = 'Load a Saved Fleet';
 					//confirm.warning("Fleet loaded!");
 				} else {
 					console.error("Load failed:", response.ships);
-					confirm.warning("Failed to load fleet.");
+					confirm.fleetNotice("That fleet could not be loaded.");
 				}
 			});
 		} else {
-			confirm.warning("You cannot afford this fleet!");
+			confirm.fleetNotice("You cannot afford this fleet.");
 			return;
 		}
 	},
 
 	loadSavedFleetById: function loadSavedFleetById(listId) {
-		confirm.confirm("Load saved fleet with #ID " + listId + "?", () => {
-			gamedata.doLoadSavedFleetById(listId);
+		//A fleet loaded by typed ID is not in cachedFleets, so whether it carries damage
+		//or criticals is unknown here - showLoadFleet offers both boxes, and a flag for a
+		//kind the fleet does not have is simply a no-op server-side.
+		confirm.showLoadFleet("saved fleet with #ID " + listId, {}, (choices) => {
+			gamedata.doLoadSavedFleetById(listId, choices);
 			fleetDropdownList.style.display = 'none';
 			fleetDropdownButton.textContent = 'Load a Saved Fleet';
 		});
 	},
 
 
-	doLoadSavedFleetById: function doLoadSavedFleetById(listId) {
-		ajaxInterface.loadSavedFleet(listId, function (response) {
+	doLoadSavedFleetById: function doLoadSavedFleetById(listId, choices) {
+		ajaxInterface.loadSavedFleet(listId, choices || {}, function (response) {
 			//console.log("AJAX response:", response.ships); // debug raw response
 			if (response.list && !response.list.isPublic && response.list.userid !== gamedata.thisplayer) {
-				confirm.warning("Fleet cannot be loaded as it was not set-up to be shared by its owner");
+				confirm.fleetNotice("That fleet was not shared by its owner, so it cannot be loaded.");
 				return;
 			}
 
@@ -3500,27 +3604,32 @@ window.gamedata = {
 			const pointsAvailable = slot.points - spentPoints;
 			if (response.list && pointsAvailable < response.list.points) {
 				if (slot.points !== -1) { // Unlimited points				
-					confirm.warning("Failed to load fleet, you do not have enough points available (" + response.list.points + "pts needed)");
+					confirm.fleetNotice("Not enough points available for this fleet (" + response.list.points + "pts needed).");
 					return;
 				}
 			}
 
 			if (response.ships && Array.isArray(response.ships) && response.ships.length > 0) {
-				gamedata.doLoadFleet(response.ships);
+				gamedata.doLoadFleet(response.ships, response.critDesc, response.critTransient);
 				fleetDropdownButton.textContent = 'Load a Saved Fleet';
 				//confirm.warning("Fleet loaded!");
 			} else {
 				if (response.ships) console.error("Load failed:", response.ships);
-				confirm.warning("Failed to load fleet, ID may not exist.");
+				confirm.fleetNotice("No fleet found with that ID.");
 			}
 		});
 	},
 
-	doLoadFleet: function doLoadFleet(fleet) {
+	doLoadFleet: function doLoadFleet(fleet, critDesc, critTransient) {
 		if (!Array.isArray(fleet)) {
 			console.error("doLoadFleet: expected array, got", fleet);
 			return;
 		}
+
+		//Pre-battle damage (D3): kinds this fleet HAD that the player chose not to load.
+		//Reported once, after the load, so a mis-click is obvious rather than silent.
+		var declinedDamage = false;
+		var declinedCriticals = false;
 
 		for (var i = 0; i < fleet.length; i++) {
 			var listShip = fleet[i];
@@ -3553,7 +3662,36 @@ window.gamedata = {
 				ship.pointCost = ship.pointCost + ship.pointCostEnh;
 			}
 
+			/* Pre-battle damage (§6). The payload the server returned is ALREADY filtered
+			   to the player's choices - do NOT re-filter here, one filter server-side or
+			   the two can disagree about what actually gets written at buy time.
+			   preBattleAvailable is display-only and is dropped before the buy POST. */
+			if (window.battleDamage) {
+				//toPlainObject, not a bare assignment: an EMPTY payload comes back from PHP
+				//as the JSON array [], and an array silently drops sys/ftr again the moment
+				//the buy POST stringifies it (see battleDamage.get).
+				ship.preBattleDamage = battleDamage.toPlainObject(listShip.preBattleDamage);
+				ship.preBattleCritDesc = critDesc || {};
+				//{critClass: true} for the one-turn ones, so the editable critical list can
+				//label them "turn 1 only" instead of showing them as lasting wounds.
+				ship.preBattleCritTransient = critTransient || {};
+
+				var available = listShip.preBattleAvailable || {};
+				var loaded = battleDamage.contents(ship.preBattleDamage);
+				if (available.damage && !loaded.damage) declinedDamage = true;
+				if (available.criticals && !loaded.criticals) declinedCriticals = true;
+
+				battleDamage.applyToShip(ship);
+			}
+
 			gamedata.updateFleet(ship);
+		}
+
+		if (declinedDamage || declinedCriticals) {
+			var skipped = [];
+			if (declinedDamage) skipped.push("battle damage");
+			if (declinedCriticals) skipped.push("critical effects");
+			confirm.fleetNotice("Fleet loaded. Saved " + skipped.join(" and ") + " were not applied.");
 		}
 
 		//gamedata.populateFleetDropdown();
@@ -3574,10 +3712,10 @@ window.gamedata = {
 
 				fleetDropdownButton.textContent = 'Load a Saved Fleet';
 				gamedata.populateFleetDropdown(cachedFleets);
-				confirm.warning("Fleet availability changed to " + setting + "!");
+				confirm.fleetNotice("Fleet availability changed to " + setting + ".");
 			} else {
 				console.error("Load failed:", ships);
-				confirm.warning("Failed to change fleet availability");
+				confirm.fleetNotice("Failed to change fleet availability.");
 			}
 		});
 	},
@@ -3590,10 +3728,10 @@ window.gamedata = {
 				cachedFleets = cachedFleets.filter(f => f.id !== listId);
 				gamedata.populateFleetDropdown(cachedFleets);
 				//fleetDropdownButton.textContent = 'Load a Saved Fleet';
-				confirm.warning(fleetName + " deleted!");
+				confirm.fleetNotice(fleetName + " deleted.");
 			} else {
 				console.error("Delete failed:", response);
-				confirm.warning("Failed to delete " + fleetName + ".");
+				confirm.fleetNotice("Failed to delete " + fleetName + ".");
 			}
 		});
 	},
@@ -4899,35 +5037,92 @@ jQuery(function () {
 		return $(element)[0].getBoundingClientRect(); //jQuery-wrapped element
 	};
 
+	/*Which popup is open, and is it the STICKY (interactive) kind? Mirrors
+	  PhaseStrategy.systemInfoState: a hover popup is dismissed by mouse-out, an
+	  interactive menu survives until it is explicitly closed - otherwise moving the
+	  cursor off the icon to reach the menu's own buttons would close it.*/
+	var systemInfoState = null;
+
 	var showInfo = function (payload) {
+		if (systemInfoState && systemInfoState.menu) return;   //a sticky menu wins over hover
 		uiManager.showSystemInfo({
 			ship: payload.ship,
 			selectedShip: null,
 			system: payload.system,
 			boundingBox: getBoundingBox(payload.element)
 		});
+		systemInfoState = { menu: false };
+	};
+
+	/*Pre-battle damage (PREBATTLE_DAMAGE_PLAN.md §5.2) gave the lobby its first
+	  ACTIONABLE system menu, so a click now opens SystemInfoMenu when the system has
+	  something to offer (canDoAnything, via canShowSystemInfoMenu) and falls back to the
+	  read-only popup otherwise. Mirrors PhaseStrategy.showSystemInfo's menu branch.*/
+	var showMenu = function (payload) {
+		uiManager.showSystemInfoMenu({
+			ship: payload.ship,
+			selectedShip: null,
+			system: payload.system,
+			boundingBox: getBoundingBox(payload.element)
+		});
+		systemInfoState = { menu: true };
+	};
+
+	var hideInfo = function (force) {
+		if (!systemInfoState) return;
+		if (systemInfoState.menu && !force) return;
+		uiManager.hideSystemInfo();
+		systemInfoState = null;
 	};
 
 	window.uiEvents.setHandler(function (name, payload) {
 		switch (name) {
 			case 'SystemMouseOver':
 				if (payload.showInfo === false) {
-					uiManager.hideSystemInfo();
+					hideInfo(false);
 				} else {
 					showInfo(payload);
 				}
 				break;
 			case 'SystemClicked': //tap/click = show info too (the touch path relies on it)
-				showInfo(payload);
+				if (uiManager.canShowSystemInfoMenu(payload.ship, payload.system)) {
+					showMenu(payload);
+				} else {
+					hideInfo(true);
+					showInfo(payload);
+				}
+				break;
+			//Pre-battle damage: clicking a bought flight's fighter health bar opens the
+			//synthetic per-ordinal fighter menu in the same #systemInfoReact root.
+			case 'FighterDamageClicked':
+				uiManager.showFighterDamageMenu({
+					ship: payload.ship,
+					fighter: payload.fighter,
+					boundingBox: getBoundingBox(payload.element)
+				});
+				systemInfoState = { menu: true };
 				break;
 			case 'SystemMouseOut':
+				hideInfo(false);
+				break;
 			case 'CloseSystemInfo':
-				uiManager.hideSystemInfo();
+				hideInfo(true);
 				break;
 			case 'CloseShipWindow':
 				window.shipWindowManagerReact.close(payload.ship);
+				hideInfo(true);
 				break;
 			//everything else: game-only events with no meaning in the lobby
 		}
+	});
+
+	/*A sticky menu has no ✕ and the lobby has no webglScene to relay CloseSystemInfo,
+	  so a click anywhere outside it dismisses it. System icons and the menu's own body
+	  stop propagation, so this only sees clicks on the page behind them - the closest()
+	  test is belt-and-braces for anything inside the menu that does not.*/
+	$(document).on('click.preBattleDamageMenu', function (e) {
+		if (!systemInfoState || !systemInfoState.menu) return;
+		if (e.target && e.target.closest && e.target.closest('#systemInfoReact')) return;
+		hideInfo(true);
 	});
 });

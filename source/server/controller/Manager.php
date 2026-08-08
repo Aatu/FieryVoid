@@ -775,7 +775,7 @@ class Manager{
             // ✅ Now you can associate ships, enhancements, ammo with $listId
             foreach ($ships as $ship) {
                 $shipId = self::$dbManager->submitSavedShip($listId, $userid, $ship);
-                    
+
                 foreach($ship->enhancementOptions as $enhancementEntry){ //ID,readableName,numberTaken,limit,price,priceStep
                     $enhID = $enhancementEntry[0];
                     $enhName = Enhancements::getStoredEnhancementName($ship, $enhancementEntry); //choice-valued options store the PICK here, not the label
@@ -784,7 +784,29 @@ class Manager{
                         self::$dbManager->submitSavedEnhancement($listId, $shipId, $enhID, $enhNo, $enhName);
                     }
                 }
-                
+
+                /* Battle damage & criticals carried by this fleet (PREBATTLE_DAMAGE_PLAN.md
+                   §4.6). getSavedShipsFromJSON has already applied flightSize + populate(),
+                   so fighter ordinals validate here too. */
+                $cleanDamage = PreBattleDamage::sanitise($ship, $ship->preBattleDamage ?? array());
+                foreach (array('sys' => PreBattleDamage::KIND_SYSTEM, 'ftr' => PreBattleDamage::KIND_FIGHTER) as $bucket => $kind) {
+                    foreach (($cleanDamage[$bucket] ?? array()) as $ref => $damageEntry) {
+                        if (!empty($damageEntry['d']) || !empty($damageEntry['k'])) {
+                            self::$dbManager->submitSavedDamage(
+                                $listId, $shipId, $kind, $ref,
+                                $damageEntry['d'] ?? 0, $damageEntry['k'] ?? 0
+                            );
+                        }
+                        foreach (($damageEntry['c'] ?? array()) as $critType => $critCount) {
+                            //param is set only for the param-carrying classes and sanitise
+                            //has already bounded it to an integer; null for everything else.
+                            $critParam = $damageEntry['p'][$critType] ?? null;
+                            self::$dbManager->submitSavedCrit($listId, $shipId, $kind, $ref, $critType, $critCount, $critParam);
+                        }
+                    }
+                }
+
+
                 if($ship instanceof FighterFlight){
                         $firstFighter = $ship->systems[1];
                         $ammo = false;
@@ -872,18 +894,28 @@ class Manager{
     }   
 
 
-    public static function loadSavedFleet(int $listid): array
+    /**
+     * $includeDamage / $includeCriticals (D3): the two INDEPENDENT load toggles. All four
+     * combinations are valid - a fleet saved from a bloody battle can be reloaded pristine,
+     * damage-only, crits-only, or fully. Both default true, so an old caller that passes
+     * neither gets the whole fleet.
+     */
+    public static function loadSavedFleet(int $listid, bool $includeDamage = true, bool $includeCriticals = true): array
     {
 
         $fleet = [];
         $enhancementsByShip = [];
         $ammoByShip = [];
+        $damageByShip = [];
+        $critsByShip = [];
+        $critDesc = [];
+        $critTransient = [];   //{critClass => true} for the one-turn ones, for the lobby's label
         //$fleetPoints = 0;
 
         try {
             self::initDBManager();
             self::$dbManager->startTransaction();
-            
+
             $list = self::$dbManager->getSavedFleet($listid);
             // Load all ships for this fleet
             $ships = self::$dbManager->getSavedShips($listid);
@@ -892,6 +924,8 @@ class Manager{
             foreach ($ships as $ship) {
                 $enhancementsByShip[$ship->id] = self::$dbManager->getSavedEnhancementsForShip($ship->id);
                 $ammoByShip[$ship->id] = self::$dbManager->getSavedAmmoForShip($ship->id);
+                $damageByShip[$ship->id] = self::$dbManager->getSavedDamageForShip($ship->id);
+                $critsByShip[$ship->id] = self::$dbManager->getSavedCritsForShip($ship->id);
             }
 
             self::$dbManager->endTransaction(false);
@@ -938,6 +972,30 @@ class Manager{
                         $system->setAmmo($firingmode, $amount);
                     }
                 }
+
+                /* Battle damage & criticals this fleet carries (PREBATTLE_DAMAGE_PLAN.md §4.7).
+                   ⚠️ The toggle must prune the PAYLOAD, not just the preview:
+                   $ship->preBattleDamage is what the client carries and re-POSTs at buy time,
+                   so a declined kind left in it would be written to tac_damage/tac_critical
+                   anyway and the toggle would be a lie. Hence filter() runs BEFORE the payload
+                   is handed over, and applyToShip simply renders whatever survived.
+                   Ordinals validate against $ship->flightSize - getSavedShips deliberately
+                   leaves a flight at one fighter (§1.1), and the server populates from the
+                   stored size at buy time. */
+                $fullDamage = PreBattleDamage::sanitiseSavedRows(
+                    $ship,
+                    $damageByShip[$ship->id] ?? [],
+                    $critsByShip[$ship->id] ?? []
+                );
+                $available = PreBattleDamage::contents($fullDamage);   //what the fleet HAS - messaging only
+                $effective = PreBattleDamage::filter($fullDamage, $includeDamage, $includeCriticals);
+
+                $ship->preBattleDamage    = $effective;   //the EFFECTIVE payload - this is what gets re-POSTed
+                $ship->preBattleAvailable = $available;   //display-only, never submitted
+                PreBattleDamage::applyToShip($ship, $effective);
+                $critDesc      += PreBattleDamage::describeCriticals($effective);
+                $critTransient += PreBattleDamage::transientCriticals($effective);
+
 				foreach ($ship->systems as $system){
 					$system->beforeTurn($ship, 0, 0);
 				}
@@ -952,9 +1010,16 @@ class Manager{
         }
 
         // Return top-level array with points and ships
+        // critDesc: {critClass => description} for the criticals actually applied, so the
+        // lobby's SystemInfo popup can name a carried critical rather than showing its raw
+        // class name. Per-ship preBattleDamage / preBattleAvailable ride on the ship objects.
         return [
             'list' => $list,
-            'ships'  => $fleet
+            'ships'  => $fleet,
+            'critDesc' => $critDesc,
+            //which of those classes are one-turn effects, so the lobby's editable critical
+            //list can say so rather than showing them as permanent
+            'critTransient' => $critTransient
         ];
     }
 
@@ -1029,9 +1094,14 @@ class Manager{
                 $ship->flightSize = $value["flightSize"] ?? 1;
                 $ship->populate();
             }
-    
+
+            //Pre-battle damage (PREBATTLE_DAMAGE_PLAN.md §4.6). Raw here, validated by
+            //PreBattleDamage::sanitise in submitSavedFleet. Must stay AFTER populate():
+            //flight ordinals resolve by position in $ship->systems.
+            $ship->preBattleDamage = $value["preBattleDamage"] ?? array();
+
             $ship->enhancementOptions = $value["enhancementOptions"] ?? [];
-            
+
             // Map Mine deployment properties from frontend payload
             $ship->bulkBuy = $value["bulkBuy"] ?? 1;
     
@@ -1701,18 +1771,26 @@ class Manager{
             if (isset($value["bulkBuy"])) {
                 $ship->bulkBuy = $value["bulkBuy"];
             }
-    
+
             if ($ship instanceof FighterFlight) {
                 $ship->flightSize = $value["flightSize"] ?? 1;
                 $ship->populate();
             }
-    
+
+            //Pre-battle damage (PREBATTLE_DAMAGE_PLAN.md §4.3). Carried RAW here and
+            //validated by PreBattleDamage::sanitise at the one place it is consumed -
+            //BuyingGamePhase::process. Every other phase ignores the field, so a client
+            //cannot inject damage mid-game.
+            //⚠️ Must stay AFTER the populate() above: flight ordinals resolve by position
+            //in $ship->systems, so the fighters have to exist first.
+            $ship->preBattleDamage = $value["preBattleDamage"] ?? array();
+
             $ship->enhancementOptions = $value["enhancementOptions"] ?? [];
-    
+
             $systems = $value["systems"] ?? [];
             foreach ($systems as $i => $system) {
                 $sys = $ship->getSystemById($i);
-    
+
                 if (isset($system["power"]) && is_array($system["power"])) {
                     foreach ($system["power"] as $power) {
                         $powerEntry = new PowerManagementEntry(

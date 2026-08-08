@@ -142,6 +142,8 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
         <script src="client/criticals.js"></script>
         <script src="client/damage.js"></script>
         <script src="client/systems.js"></script>
+        <script src="client/battleDamage.js"></script>
+        <script src="client/savedFleets.js"></script>
         <script src="client/power.js"></script>
         <script src="client/movement.js"></script>
         <script src="client/mathlib.js"></script>
@@ -783,15 +785,27 @@ $optionsUsed = '';
 
 
         <div class="fleet-loading-container">
-            <label class="fleet-id-label-container">
-                <span class="Load-Fleet-by-ID">Load Fleet by #ID:</span>
-                <input type="text" id="fleetIdInput" value="" class="fleetIdInput">
-            </label>
+            <!-- A bare <input> gave phone keyboards a "Next" action key, because the page has
+                 more focusable fields after it (the chat panel), so pressing it moved focus
+                 there instead of firing the keydown handler and the fleet never loaded.
+                 The <form> is what actually fixes it: an input inside its OWN single-field
+                 form gets implicit submission, so the action key becomes Go/Enter rather than
+                 Next — no submit button is needed for that (HTML implicit submission), and
+                 there deliberately isn't one. enterkeyhint labels the key, inputmode/pattern
+                 bring up the numeric pad. -->
+            <form class="fleet-id-form" id="fleetIdForm" action="#" onsubmit="return false;">
+                <label class="fleet-id-label-container">
+                    <span class="Load-Fleet-by-ID">Load Fleet by #ID:</span>
+                    <input type="text" id="fleetIdInput" value="" class="fleetIdInput"
+                           inputmode="numeric" pattern="[0-9]*" enterkeyhint="go"
+                           autocomplete="off" aria-label="Load fleet by ID">
+                </label>
+            </form>
 
             <!-- Custom Saved Fleet Dropdown -->
             <div class="saved-fleet-wrapper">
                 <div id="fleetDropdownButton" class="fleet-dropdown-btn">
-                    Load a Saved Fleet
+                    Load a Fleet
                 </div>
                 <div id="fleetDropdownList" class="fleet-dropdown-list">
                     <!-- populated dynamically -->
@@ -802,6 +816,7 @@ $optionsUsed = '';
             <span class="readybutton readybutton-top">READY</span>
             <?php endif; ?>
         </div>
+
 
 
     </div>
@@ -841,6 +856,7 @@ $optionsUsed = '';
         });
 
         const fleetInput = document.getElementById("fleetIdInput");
+        const fleetIdForm = document.getElementById("fleetIdForm");
 
         // Sanitize input on each keystroke: allow only digits
         fleetInput.addEventListener("input", function() {
@@ -848,16 +864,30 @@ $optionsUsed = '';
             this.value = this.value.replace(/\D/g, "");
         });
 
-        // Trigger load on Enter key
+        function submitFleetId() {
+            const fleetId = fleetInput.value.trim();
+            if (fleetId === "" || isNaN(fleetId)) {
+                window.confirm.fleetNotice("Enter the numeric ID of the fleet you want to load.");
+                return;
+            }
+            fleetInput.blur();   // dismiss the on-screen keyboard before the dialog opens
+            gamedata.loadSavedFleetById(parseInt(fleetId, 10));
+        }
+
+        /* The form submit is the path that phone keyboards actually take (their GO key
+           submits the form rather than emitting an Enter keydown), and it is also what the
+           Load button fires. The keydown handler stays for desktop Enter and for any
+           keyboard that emits Enter without submitting - submitFleetId is idempotent, and
+           preventDefault stops the two firing twice for one press. */
+        fleetIdForm.addEventListener("submit", function(event) {
+            event.preventDefault();
+            submitFleetId();
+        });
+
         fleetInput.addEventListener("keydown", function(event) {
             if (event.key === "Enter") {
                 event.preventDefault();
-                const fleetId = this.value.trim();
-                if (fleetId !== "" && !isNaN(fleetId)) {
-                    gamedata.loadSavedFleetById(parseInt(fleetId, 10));
-                } else {
-                    console.warn("Please enter a valid numeric Fleet ID.");
-                }
+                submitFleetId();
             }
         });
 

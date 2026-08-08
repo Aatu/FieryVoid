@@ -1,5 +1,6 @@
 import * as React from "react";
 import styled from "styled-components"
+import { canApplyPreBattleDamage } from "./SystemInfoButtons";
 
 const HealthBar = styled.div`
     position: absolute;
@@ -185,10 +186,15 @@ class SystemIcon extends React.Component {
         let { system, ship } = this.props;
         system = shipManager.systems.initializeSystem(system);
 
-        if (gamedata.waiting || gamedata.replay) return;
+        //The lobby sets waiting:true, which is what keeps it read-only. Pre-battle damage
+        //(gamephase -2, own bought ship) is the one authoring action allowed there.
+        const preBattleDamage = canApplyPreBattleDamage(ship, system);
+
+        if ((gamedata.waiting || gamedata.replay) && !preBattleDamage) return;
 
         //clickableWhenDestroyed: a destroyed Kirishiac Orbital can still be recovered (docked) for regeneration, so its menu must stay reachable
-        if (shipManager.isDestroyed(ship) || (shipManager.isDestroyed(ship, system) && !system.clickableWhenDestroyed) /*|| shipManager.isAdrift(ship)*/) return;//should work with disabled ship after all!
+        //preBattleDamage also passes: you must be able to UN-destroy what you just destroyed.
+        if (!preBattleDamage && (shipManager.isDestroyed(ship) || (shipManager.isDestroyed(ship, system) && !system.clickableWhenDestroyed)) /*|| shipManager.isAdrift(ship)*/) return;//should work with disabled ship after all!
 
         //New block to allow called shots on allied ships
         if (gamedata.rules && gamedata.rules.friendlyFire === 1) {

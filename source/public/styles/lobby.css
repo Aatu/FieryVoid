@@ -291,6 +291,17 @@
     min-width: 150px;
 }
 
+/* Pre-battle damage badge, ahead of the unit's name in the bought-fleet list. The same
+   fa-heart-crack the saved-fleet dropdown uses for a fleet carrying damage, so the two
+   read as one idea. Written by gamedata.damagedShipBadge from BOTH row builders.
+   Sized to sit inside the name's line box so the row height does not change. */
+.shipDamagedBadge {
+    color: var(--fv-crit);
+    font-size: 12px;
+    margin-right: 5px;
+    vertical-align: baseline;
+}
+
 .shiptype {
     padding-left: 3px !important;
     font-weight: normal;
@@ -553,6 +564,17 @@
     text-align: right;
     margin-right: 5px;
     margin-left: 2px;
+}
+
+/* The ID field is wrapped in a one-input <form> so a phone keyboard offers Go/Enter
+   rather than a "Next" that just walks focus down to the chat panel. Purely structural -
+   the form must not introduce a line or any spacing of its own inside the flex row. */
+.fleet-id-form {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    border: 0;
 }
 
 /* Post-Refactor Inline Style Replacements */

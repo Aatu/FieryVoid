@@ -108,6 +108,17 @@ class BaseShip {
 
     public $canvasSize = 200;
 
+	//Pre-battle damage & fleet damage persistence (PREBATTLE_DAMAGE_PLAN.md).
+	//Compact wire-format payload: {sys:{<systemid>:{d,k,c}}, ftr:{<ordinal>:{d,k,c}}}.
+	//See PreBattleDamage for the format and all of its rules.
+	//INVARIANT: read by BuyingGamePhase::process ONLY. Every other phase ignores the
+	//field, so a client cannot inject damage mid-game by POSTing it in, say, Movement.
+	public $preBattleDamage = array();
+	//Display-only companion set by Manager::loadSavedFleet: {damage:bool, criticals:bool}
+	//describing what the SAVED FLEET carried, as opposed to what the player chose to
+	//load. Never submitted - construcGamedata must not copy it.
+	public $preBattleAvailable = null;
+
     public $outerSections = array(); //for determining hit locations in GUI: loc, min, max, call (loc is location id, min/max is for arc, call is true if location systems can be called)
    
     protected $activeHitLocations = array(); //$shooterID->targetSection ; no need for this to go public! just making sure that firing from one unit is assigned to one section

@@ -1617,34 +1617,139 @@ window.confirm = {
     },
     */
 
-    showSaveFleet: function showSaveFleet(callback) {
-        var e = $(this.whtml);
+    /* ── Saved-fleet dialogs ──────────────────────────────────────────────────────────
+       The three fleet windows (save, load, result notice) share the .fleetDialog skin in
+       confirm.css: the games.php window language - dark well, one hairline rule under a
+       spaced uppercase title, left-aligned body, labelled buttons on the bottom right -
+       rather than the 2011 centred-text-plus-icon-buttons look of the other confirms.
+       Deliberately scoped to this family rather than applied to .confirm as a whole:
+       every other dialog on both pages still uses the old skin.
 
-        /*
-        var points = 0;
-        for (var i in gamedata.ships) {
-            var lship = gamedata.ships[i];
-            if (lship.slot != gamedata.selectedSlot) continue;
-            points += lship.pointCost;
+       The buttons keep their .confirmok / .confirmcancel classes (that is what every
+       caller binds to) and take their visible text from data-label, so nothing about the
+       click plumbing changes. */
+    fleetDialogShell: function fleetDialogShell(title, subtitle, bodyHtml, okLabel) {
+        var e = $(confirm.whtml);
+        e.addClass("fleetDialog");
+
+        $('<div class="fleetDialogTitle">' + title + '</div>'
+            + (subtitle ? '<div class="fleetDialogSub">' + subtitle + '</div>' : '')
+            + '<div class="fleetDialogBody">' + (bodyHtml || '') + '</div>').prependTo(e);
+
+        $(".confirmok", e).attr("data-label", okLabel || "OK");
+        $(".confirmcancel", e).attr("data-label", "Cancel");
+
+        return e;
+    },
+
+    /* Result/status message for the saved-fleet flows ("Fleet saved", "Fleet deleted",
+       "…could not be loaded"). Same shell, one button, no cancel. Kept separate from the
+       generic confirm.warning so restyling the fleet family cannot reskin every warning
+       in the game. */
+    fleetNotice: function fleetNotice(msg, title) {
+        var e = confirm.fleetDialogShell(title || "Saved Fleets", "", '<p>' + msg + '</p>', "Close");
+        $(".confirmcancel", e).remove();
+
+        $(".confirmok", e).on("click", function () {
+            e.remove();
+        });
+
+        e.appendTo("body").fadeIn(250);
+    },
+
+    /* Load-a-saved-fleet confirm with the two INDEPENDENT pre-battle-damage toggles
+       (PREBATTLE_DAMAGE_PLAN.md D3). Each box is shown only when the fleet actually
+       carries that kind; `undefined`/`null` means "not known yet" (the load-by-ID path,
+       where the fleet is not in the cached list) and shows it.
+
+       Deliberately NOT built on confirm.confirm: that binds `$(".confirm").remove()`
+       BEFORE the callback, so a callback reading the checkboxes out of the document would
+       find nothing. This follows showSaveFleet's pattern instead - the callback reads its
+       inputs and removes the dialog itself. The callback receives
+       {includeDamage, includeCriticals}. */
+    showLoadFleet: function showLoadFleet(fleetName, opts, callback) {
+        opts = opts || {};
+        var showDamage = (opts.hasDamage === undefined || opts.hasDamage === null) ? true : Boolean(opts.hasDamage);
+        var showCrits = (opts.hasCrits === undefined || opts.hasCrits === null) ? true : Boolean(opts.hasCrits);
+
+        var body = '<p>Load your \'<b>' + fleetName + '</b>\' fleet into the selected slot?</p>';
+        if (showDamage) {
+            body += '<label class="fleetDialogCheck">'
+                + '<input type="checkbox" class="loadFleetDamage" checked>'
+                + '<span>Include saved battle damage</span></label>';
         }
-        */
-        var defaultName = 'Unnamed Fleet';
+        if (showCrits) {
+            body += '<label class="fleetDialogCheck">'
+                + '<input type="checkbox" class="loadFleetCrits" checked>'
+                + '<span>Include saved critical effects</span></label>';
+        }
 
-        // Fleet name input
-        $('<label>Enter Fleet Name:</label><input type="text" style="text-align:center" name="fleetname" value="' + defaultName + '"></input><br>').prependTo(e);
+        var e = confirm.fleetDialogShell(
+            "Load Fleet",
+            (showDamage || showCrits)
+                ? "This fleet carries state from a previous battle. Choose what to bring across."
+                : "",
+            body, "Load");
 
-        // Checkbox for "public" option
-        $('<label style="display:block; margin-top:8px; font-size: 12px"><input type="checkbox" id="fleetPublicCheckbox"> Tick this box to allow others to access this fleet via its ID</label><br>')
-            .insertAfter(e.find("input[name='fleetname']"));
-
-        $(".confirmok", e).on("click", callback);
+        $(".confirmok", e).on("click", function () {
+            //Read BEFORE the dialog is torn down.
+            var choices = {
+                includeDamage: showDamage ? $(".loadFleetDamage", e).is(":checked") : true,
+                includeCriticals: showCrits ? $(".loadFleetCrits", e).is(":checked") : true
+            };
+            $(".confirm").remove();
+            callback(choices);
+        });
         $(".confirmcancel", e).on("click", function () {
-            console.log("remove");
             $(".confirm").remove();
         });
 
         var a = e.appendTo("body");
         a.fadeIn(250);
+    },
+
+    /* opts.offerTransient — show the "temporary critical effects" choice. Only game.php
+       passes it: the lobby has no battle to have produced a one-turn critical, so the box
+       would be an unanswerable question there. */
+    showSaveFleet: function showSaveFleet(callback, opts) {
+        var defaultName = 'Unnamed Fleet';
+        opts = opts || {};
+
+        var body = '<label class="fleetDialogLabel" for="fleetNameInput">Fleet name</label>'
+            + '<input type="text" id="fleetNameInput" name="fleetname" autocomplete="off"'
+            + ' value="' + defaultName + '">'
+            + '<label class="fleetDialogCheck">'
+            + '<input type="checkbox" id="fleetPublicCheckbox">'
+            + '<span>Let other players load this fleet using its ID</span></label>';
+
+        /* Unticked by DEFAULT and deliberately so: a wound is worth carrying into the next
+           battle, a one-turn effect usually is not. Ticked, the kept effects are stamped at
+           turn 1 by the server so they actually bite during the first turn rather than
+           expiring as it begins. Marine/boarding markers are never saved either way - they
+           describe a boarding action in the battle just fought. */
+        if (opts.offerTransient) {
+            body += '<label class="fleetDialogCheck">'
+                + '<input type="checkbox" id="fleetTransientCritsCheckbox">'
+                + '<span>Also save <b>temporary</b> critical effects (one-turn effects).'
+                + '<br>They will be in effect during turn 1 of the next battle.</span></label>';
+        }
+
+        var e = confirm.fleetDialogShell(
+            "Save Fleet",
+            "Stores these units, their enhancements, ammo and any battle damage as a reusable fleet list.",
+            body,
+            "Save");
+
+        $(".confirmok", e).on("click", callback);
+        $(".confirmcancel", e).on("click", function () {
+            $(".confirm").remove();
+        });
+
+        var a = e.appendTo("body");
+        a.fadeIn(250);
+
+        //select the default name so typing over it needs no clearing first
+        $("#fleetNameInput", e).trigger("focus").trigger("select");
     },
 
 

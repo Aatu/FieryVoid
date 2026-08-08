@@ -15,6 +15,7 @@ import MineSettingsList from "./MineSettingsList";
 import ProximityMineSettingsList from "./ProximityMineSettingsList";
 import GraviticAugmenterMenu from "./GraviticAugmenterMenu";
 import MinorThoughtPulsarMenu from "./MinorThoughtPulsarMenu";
+import ApplyDamageMenu from "./ApplyDamageMenu";
 
 const Container = styled.div`
     display: flex;
@@ -547,6 +548,16 @@ class SystemInfoButtons extends React.Component {
 			return null;
 		}
 
+		//Lobby: pre-battle damage is the only action, and the rows below read plumbing
+		//that page does not load (weaponManager) - see the note on canDoAnything.
+		if (gamedata.gamephase === -2) {
+			return (
+				<Container>
+					<ApplyDamageMenu ship={ship} system={system} />
+				</Container>
+			);
+		}
+
 		return (
 			<Container>
 				{canSystemPowerSettings(ship, system) && <SystemPowerSettings ship={ship} system={system} />}
@@ -756,14 +767,44 @@ const canSelfRepairList = (ship, system) => gamedata.isMyShip(ship) && (system.n
 //Editable only in Initial Orders; elsewhere the menu is view-only.
 const canEditSelfRepairList = (ship, system) => canSelfRepairList(ship, system) && gamedata.gamephase === 1;
 
-export const canDoAnything = (ship, system) => canOffline(ship, system) || canOnline(ship, system)
-	|| canOverload(ship, system) || canStopOverload(ship, system) || canBoost(ship, system)
-	|| canDeBoost(ship, system) || canAddShots(ship, system) || canReduceShots(ship, system) || canRemoveFireOrderMulti(ship, system)
-	|| canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system)
-	|| canSelfIntercept(ship, system) || canRemIntercept(ship, system) || canAA(ship, system) || canBFCP(ship, system) || canSpec(ship, system) || canTSShield(ship, system)
-	|| canThoughtShield(ship, system) || canTSShieldGen(ship, system) || canThoughtShieldGen(ship, system)
-	|| canSelfRepairList(ship, system) || canActivate(ship, system) || canDeactivate(ship, system) || canPowerCapacitor(ship, system) || canSystemActivation(ship, system) || canSelectAllWeapons(ship, system)
-	|| canMineSettings(ship, system) || canProxMineSettings(ship, system) || canGraviticAugmenter(ship, system) || canMinorThoughtPulsar(ship, system);
+/* Pre-battle damage (PREBATTLE_DAMAGE_PLAN.md §5.2): allocate damage/destruction to a
+   BOUGHT ship in the gamelobby. gamephase -2 is the lobby and nothing else, and in the
+   lobby userid 0 marks the STORE blueprint (ShipWindowManager.isLeftSide uses the same
+   test) - so this can never light up in game.php, where every other can* predicate
+   already requires a positive gamephase.
+   Flights are excluded: their damage is per-fighter ORDINAL and is edited in
+   FighterDamageMenu instead (a fighter's individual weapons are not damageable). */
+export const canApplyPreBattleDamage = (ship, system) =>
+	gamedata.gamephase === -2 && ship && ship.userid != 0 && !ship.flight
+	&& !isPseudoSystem(system);
+
+//A system with no structure of its own, hidden from the icon grid, or untargetable by
+//construction (RammingAttack and friends) is an ABILITY, not a box on the SCS.
+const isPseudoSystem = (system) => !system
+	|| !(system.maxhealth > 0)
+	|| system.isTargetable === false
+	|| Boolean(system.hideInShipWindow)
+	|| Array.isArray(system.systems);   //a fighter unit inside a flight
+
+/* ⚠️ The gamelobby (gamephase -2) does NOT load client/weaponManager.js, and several
+   predicates below dereference `weaponManager` with no phase guard in front of it
+   (canAddShots, canRemoveFireOrderMulti, canRemoveFireOrder, canSelfIntercept…). Walking
+   them there is a ReferenceError, not a `false`. Pre-battle damage is the only action the
+   lobby offers and every other predicate requires a positive gamephase anyway, so answer
+   the question directly instead of evaluating them. Same branch in hasStyledMenu and in
+   render() below - all three walk the same list. */
+export const canDoAnything = (ship, system) => {
+	if (gamedata.gamephase === -2) return canApplyPreBattleDamage(ship, system);
+
+	return canOffline(ship, system) || canOnline(ship, system)
+		|| canOverload(ship, system) || canStopOverload(ship, system) || canBoost(ship, system)
+		|| canDeBoost(ship, system) || canAddShots(ship, system) || canReduceShots(ship, system) || canRemoveFireOrderMulti(ship, system)
+		|| canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system)
+		|| canSelfIntercept(ship, system) || canRemIntercept(ship, system) || canAA(ship, system) || canBFCP(ship, system) || canSpec(ship, system) || canTSShield(ship, system)
+		|| canThoughtShield(ship, system) || canTSShieldGen(ship, system) || canThoughtShieldGen(ship, system)
+		|| canSelfRepairList(ship, system) || canActivate(ship, system) || canDeactivate(ship, system) || canPowerCapacitor(ship, system) || canSystemActivation(ship, system) || canSelectAllWeapons(ship, system)
+		|| canMineSettings(ship, system) || canProxMineSettings(ship, system) || canGraviticAugmenter(ship, system) || canMinorThoughtPulsar(ship, system);
+};
 
 //powerLocked: system may not be voluntarily powered down right now (Antigravity Beam while its Kirishiac Orbital is deployed)
 const canOffline = (ship, system) => gamedata.gamephase === 1 && (system.canOffLine || system.powerReq > 0) && !system.powerLocked && !shipManager.power.isOffline(ship, system) && !shipManager.power.getBoost(system) && !weaponManager.hasFiringOrder(ship, system);
@@ -856,6 +897,9 @@ export const canSystemActivation = (ship, system) => {
 };
 
 export const hasStyledMenu = (ship, system) => {
+	//see the note on canDoAnything: no weaponManager in the lobby
+	if (gamedata.gamephase === -2) return canApplyPreBattleDamage(ship, system);
+
 	return canAA(ship, system) ||
 		canBFCP(ship, system) ||
 		canSpec(ship, system) ||

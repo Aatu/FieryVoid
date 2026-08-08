@@ -16,14 +16,20 @@ try {
         throw new Exception("Fleet ID missing");
     }
 
+    // Pre-battle damage (D3): the two INDEPENDENT load toggles. Absent = include, so an
+    // older client that sends neither keeps loading the whole fleet.
+    $includeDamage    = !isset($input['includeDamage'])    || (bool)$input['includeDamage'];
+    $includeCriticals = !isset($input['includeCriticals']) || (bool)$input['includeCriticals'];
+
     // Load ships from Manager
-    $fleetData = Manager::loadSavedFleet($listid);
+    $fleetData = Manager::loadSavedFleet($listid, $includeDamage, $includeCriticals);
 
     if(ob_get_length()) ob_clean();
     echo json_encode([
         'success' => true,
         'list' => $fleetData['list'],
         'ships'   => $fleetData['ships'],
+        'critDesc' => $fleetData['critDesc'] ?? [],
     ], JSON_NUMERIC_CHECK);
 
 } catch (Exception $e) {

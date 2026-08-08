@@ -364,11 +364,11 @@ window.ajaxInterface = {
         gamedata.goToWaiting();
     },
 
-    submitSavedFleet: function submitSavedFleet(fleetname, isPublic, callback) {
+    submitSavedFleet: function submitSavedFleet(fleetname, isPublic, callback, opts) {
         if (ajaxInterface.submiting) return;
         ajaxInterface.submiting = true;
         // Build the payload using your existing function
-        const saveData = ajaxInterface.constructSavedShips(fleetname, isPublic);
+        const saveData = ajaxInterface.constructSavedShips(fleetname, isPublic, opts);
 
         // Ensure ships is a JSON string
         if (typeof saveData.ships !== 'string') {
@@ -385,7 +385,7 @@ window.ajaxInterface = {
 
         if (!Array.isArray(shipsArray) || shipsArray.length === 0) {
             ajaxInterface.submiting = false;
-            window.confirm.error("You must have at least one ship before saving!", function () { });
+            window.confirm.fleetNotice("You must have at least one unit before saving a fleet.");
             return; // stop execution
         }
 
@@ -419,19 +419,61 @@ window.ajaxInterface = {
         });
     },
 
-    constructSavedShips: function constructSavedShips(fleetname, isPublic) {
+    /* Is this unit eligible to be written into a saved fleet?
+       Lobby: everything the player owns. game.php ("Save Current Fleet", PREBATTLE_DAMAGE_PLAN
+       §7.2): the SURVIVORS only, minus the mid-battle artefacts that make no sense in a fleet
+       list - destroyed/docked units, launched-fighter "Split" rows, spent mines and Chameleon
+       phantom sheets (which use NEGATIVE ids). */
+    isSaveableFleetShip: function isSaveableFleetShip(ship) {
+        if (!ship) return false;
+        if (ship.userid !== gamedata.thisplayer) return false;
+
+        /* TERRAIN is scenery, not fleet. Map terrain belongs to userid -5 and is already
+           excluded by the ownership test above, but terrain a player placed themselves is
+           bought into their own slot and rides their team, so nothing else here catches it -
+           an asteroid field would ride along in every saved fleet and be re-bought in the
+           next lobby. Excluded on BOTH pages: a fleet list is ships. (user report 2026-08-08) */
+        if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) return false;
+
+        //lobby: no battle state to filter on
+        if (gamedata.gamephase === -2) return true;
+
+        if (ship.id < 0) return false;                                  //Chameleon phantom sheet
+        if (ship.removed) return false;                                 //docked into a hangar
+        if (shipManager.isDestroyed(ship)) return false;                //dead, or a flight with no survivors
+        if (ship.mine && ship.spawned !== -1) return false;             //mine laid during the battle
+
+        return true;
+    },
+
+    /* opts (all optional):
+         includeTransient : also save one-turn / self-expiring criticals (game.php's
+                            "save temporary critical effects" checkbox, off by default).
+       An options object rather than a positional flag, matching loadSavedFleet, so a
+       future third choice does not re-sign this at every call site. */
+    constructSavedShips: function constructSavedShips(fleetname, isPublic, opts) {
 
         var saveships = Array();
         var points = 0;
+        //gamedata.selectedSlot is null in game.php (it is a lobby concept), which used to
+        //make every ship fail this filter and save the fleet at 0 points. Fall back to
+        //ownership there. Base pointCost only - damage is not a discount (D2).
+        var inFleet = function (lship) {
+            return (gamedata.selectedSlot === null || gamedata.selectedSlot === undefined)
+                ? ajaxInterface.isSaveableFleetShip(lship)
+                : lship.slot == gamedata.selectedSlot;
+        };
 
         for (var i in gamedata.ships) {
             var lship = gamedata.ships[i];
-            if (lship.slot != gamedata.selectedSlot) continue;
+            if (!inFleet(lship)) continue;
+            if (!ajaxInterface.isSaveableFleetShip(lship)) continue;
             points += lship.pointCost;
         }
 
         for (var i in gamedata.ships) {
             var ship = gamedata.ships[i];
+            if (!ajaxInterface.isSaveableFleetShip(ship)) continue;
             var newShip = {
                 'phpclass': ship.phpclass,
                 'userid': ship.userid,
@@ -449,6 +491,13 @@ window.ajaxInterface = {
             if (ship.userid === gamedata.thisplayer) {
 
                 var systems = Array();
+                //Saving OUT of a live game records the SURVIVING flight size (D8): a lost
+                //fighter is expressed by a smaller flight, not by a wreck riding along. In
+                //the lobby every fighter is alive, so the two agree.
+                var saveFlightSize = !ship.flight ? 0
+                    : ((window.battleDamage && gamedata.gamephase !== -2)
+                        ? battleDamage.survivingFlightSize(ship)
+                        : ship.flightSize);
 
                 for (var a in ship.systems) {
                     var system = ship.systems[a];
@@ -465,7 +514,7 @@ window.ajaxInterface = {
                                 for (var index in fightersystem.missileArray) {
                                     var amount = fightersystem.missileArray[index].amount;
                                     ammoArray[index] = amount;
-                                    newShip.pointCostEnh2 += fightersystem.missileArray[index].cost * amount * ship.flightSize;
+                                    newShip.pointCostEnh2 += fightersystem.missileArray[index].cost * amount * saveFlightSize;
                                 }
                             }
 
@@ -494,11 +543,24 @@ window.ajaxInterface = {
                 newShip.systems = systems;
 
                 if (ship.flight) {
-                    newShip.flightSize = ship.flightSize;
+                    newShip.flightSize = saveFlightSize;
                 }
 
                 //unit enhancements
                 newShip.enhancementOptions = ship.enhancementOptions;
+
+                /* Battle damage & criticals (PREBATTLE_DAMAGE_PLAN.md §6 / §7.2). In the
+                   lobby this is the payload the player authored; in a live game it is
+                   summariseShip's collapse of the battle so far - and for a flight its
+                   ordinals are numbered over the survivors, matching flightSize above. */
+                if (window.battleDamage) {
+                    var damagePayload = (gamedata.gamephase === -2)
+                        ? ship.preBattleDamage
+                        : battleDamage.summariseShip(ship, opts);
+                    if (!battleDamage.isEmpty(damagePayload)) {
+                        newShip.preBattleDamage = damagePayload;
+                    }
+                }
 
                 saveships.push(newShip);
             }
@@ -539,15 +601,27 @@ window.ajaxInterface = {
             });
     },
 
-    loadSavedFleet: function loadSavedFleet(listId, callback) {
+    /* opts (all optional) - an OBJECT, not positional booleans, so a future third kind of
+       saved state does not re-sign the function at every call site:
+         includeDamage    : load the fleet's saved battle damage      (default true)
+         includeCriticals : load the fleet's saved critical effects   (default true)
+       Legacy shape loadSavedFleet(listId, callback) still works. */
+    loadSavedFleet: function loadSavedFleet(listId, opts, callback) {
+        if (typeof opts === 'function') { callback = opts; opts = {}; }
+        opts = opts || {};
+
         if (ajaxInterface.submiting) return;
         ajaxInterface.submiting = true;
+
+        var body = { listid: listId };
+        if (opts.includeDamage !== undefined) body.includeDamage = Boolean(opts.includeDamage);
+        if (opts.includeCriticals !== undefined) body.includeCriticals = Boolean(opts.includeCriticals);
 
         ajaxInterface.ajaxWithRetry({
             type: 'POST', // POST to match PHP JSON reading
             url: 'loadSavedFleet.php',
             contentType: 'application/json; charset=utf-8',
-            data: JSON.stringify({ listid: listId }),
+            data: JSON.stringify(body),
             dataType: 'json',
             cache: false,
             timeout: 15000
@@ -825,6 +899,14 @@ window.ajaxInterface = {
 
                 //unit enhancements
                 newShip.enhancementOptions = ship.enhancementOptions;
+
+                //Pre-battle damage (PREBATTLE_DAMAGE_PLAN.md §6). Read ONLY by
+                //BuyingGamePhase::process, so this is inert in every other phase.
+                //preBattleAvailable is deliberately NOT sent: it records what a saved fleet
+                //HAD on offer, not what the player chose to load, and must never be written.
+                if (window.battleDamage && !battleDamage.isEmpty(ship.preBattleDamage)) {
+                    newShip.preBattleDamage = ship.preBattleDamage;
+                }
 
                 tidyships.push(newShip);
             }

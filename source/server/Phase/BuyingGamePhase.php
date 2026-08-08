@@ -397,7 +397,32 @@ public function addMoons($gameData, $dbManager, $smallCount, $mediumCount, $larg
                                 $dbManager->submitEnhancement($gameData->id, $id, $enhID, $enhNo, $enhName);
                             }
                         }
-                        
+
+                        /* Pre-battle damage & criticals (PREBATTLE_DAMAGE_PLAN.md §4.4).
+                           THE ONLY PLACE $ship->preBattleDamage is ever read - every other
+                           phase ignores the field, so a client cannot inject damage mid-game.
+                           Written at turn 0, which renders in the lobby, makes the structure
+                           cascade fire from Deployment on, and never matches a
+                           `turn == gamedata.turn` combat-log/replay filter.
+                           ⚠️ Systems are resolved against $ship, NOT $savedShip. For a
+                           bulk-bought mine $savedShip is a clone whose ->systems array was
+                           rebuilt 0-INDEXED, so BaseShip::getSystemById (an isset() on the
+                           key) would resolve the wrong system on it. The clone's systems
+                           keep their original ->id values, and the rows are keyed by the
+                           freshly minted $id, so every mine in the bulk still gets its own
+                           correct rows. */
+                        $clean = PreBattleDamage::sanitise($ship, $ship->preBattleDamage ?? array());
+                        if ($clean) {
+                            $parts = PreBattleDamage::toEntries($ship, $clean, $gameData->id, $id);
+                            if ($parts['damage']) {
+                                $dbManager->submitDamages($gameData->id, PreBattleDamage::TURN, $parts['damage']);
+                            }
+                            if ($parts['criticals']) {
+                                $dbManager->submitCriticals($gameData->id, $parts['criticals'], PreBattleDamage::TURN);
+                            }
+                        }
+
+
                         // Check if ship uses variable flight size
                         if($ship instanceof FighterFlight){
                             $dbManager->submitFlightSize($gameData->id, $id, $ship->flightSize);

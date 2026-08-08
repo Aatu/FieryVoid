@@ -321,23 +321,30 @@ class DBManager
     //All rows from tac_saved_list for a given userid
     public function getSavedFleets($userid) {
         $savedFleets = [];
+        //hasDamage / hasCrits drive the two INDEPENDENT load checkboxes (each is hidden
+        //when its flag is false) and the dropdown badge. Two EXISTS subqueries, so no
+        //extra round trip.
         $stmt = $this->connection->prepare(
-            "SELECT id, name, userid, points, isPublic
-            FROM tac_saved_list
-            WHERE userid = ? OR userid = 0
-            ORDER BY userid DESC, name ASC" // optional: user fleets first
+            "SELECT l.id, l.name, l.userid, l.points, l.isPublic,
+                EXISTS(SELECT 1 FROM tac_saved_damage d WHERE d.listid = l.id) AS hasDamage,
+                EXISTS(SELECT 1 FROM tac_saved_crit  c WHERE c.listid = l.id) AS hasCrits
+            FROM tac_saved_list l
+            WHERE l.userid = ? OR l.userid = 0
+            ORDER BY l.userid DESC, l.name ASC" // optional: user fleets first
         );
         if ($stmt) {
             $stmt->bind_param('i', $userid);
             $stmt->execute();
-            $stmt->bind_result($id, $name, $fleetUserId, $points, $isPublic); // renamed to avoid variable clash
+            $stmt->bind_result($id, $name, $fleetUserId, $points, $isPublic, $hasDamage, $hasCrits); // renamed to avoid variable clash
             while ($stmt->fetch()) {
                 $savedFleets[] = [
                     'id' => $id,
                     'name' => $name,
                     'userid' => $fleetUserId,
                     'points' => $points,
-                    'isPublic' => $isPublic
+                    'isPublic' => $isPublic,
+                    'hasDamage' => (bool) $hasDamage,
+                    'hasCrits' => (bool) $hasCrits
                 ];
             }
             $stmt->close();
@@ -350,15 +357,17 @@ class DBManager
         $savedFleet = null;
 
         $stmt = $this->connection->prepare(
-            "SELECT id, name, userid, points, isPublic
-            FROM tac_saved_list
-            WHERE id = ?"
+            "SELECT l.id, l.name, l.userid, l.points, l.isPublic,
+                EXISTS(SELECT 1 FROM tac_saved_damage d WHERE d.listid = l.id) AS hasDamage,
+                EXISTS(SELECT 1 FROM tac_saved_crit  c WHERE c.listid = l.id) AS hasCrits
+            FROM tac_saved_list l
+            WHERE l.id = ?"
         );
 
         if ($stmt) {
             $stmt->bind_param('i', $id);
             $stmt->execute();
-            $stmt->bind_result($id, $name, $userid, $points, $isPublic);
+            $stmt->bind_result($id, $name, $userid, $points, $isPublic, $hasDamage, $hasCrits);
 
             if ($stmt->fetch()) {
                 $savedFleet = [
@@ -366,7 +375,9 @@ class DBManager
                     'name' => $name,
                     'userid' => $userid,
                     'points' => $points,
-                    'isPublic' => (bool) $isPublic
+                    'isPublic' => (bool) $isPublic,
+                    'hasDamage' => (bool) $hasDamage,
+                    'hasCrits' => (bool) $hasCrits
                 ];
             }
 
@@ -452,9 +463,108 @@ class DBManager
                 {
                     $ammoEntry[] = array($systemid,$firingmode,$ammo);
                 }
-                $stmt->close();                
+                $stmt->close();
             }
         return $ammoEntry;
+    }
+
+    /* ---------------------------------------------------------------- *
+     *  Saved-fleet battle damage & criticals (PREBATTLE_DAMAGE_PLAN §4.5)
+     *  Modelled on submitSavedAmmo / getSavedAmmoForShip. $kind is
+     *  PreBattleDamage::KIND_SYSTEM (0, $ref = systemid) or KIND_FIGHTER
+     *  (1, $ref = fighter ordinal 1..flightSize).
+     * ---------------------------------------------------------------- */
+
+    public function submitSavedDamage($listid, $shipid, $kind, $ref, $damage, $destroyed)
+    {
+        $destroyed = $destroyed ? 1 : 0;
+
+        $stmt = $this->connection->prepare("
+            INSERT INTO tac_saved_damage
+                (listid, shipid, kind, ref, damage, destroyed)
+            VALUES (?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+                damage = VALUES(damage), destroyed = VALUES(destroyed)
+        ");
+        if (!$stmt) throw new Exception("DB error in submitSavedDamage (prepare): " . $this->connection->error);
+
+        $stmt->bind_param('iiiiii', $listid, $shipid, $kind, $ref, $damage, $destroyed);
+        $stmt->execute();
+        $stmt->close();
+    }
+
+    /* $param is the magnitude of a PARAM-CARRYING critical (DamageReductionReduced), or
+       null for the other 40-odd classes. PreBattleDamage::$paramCriticals is the
+       allow-list and sanitiseParam has already forced it to a bounded integer. */
+    public function submitSavedCrit($listid, $shipid, $kind, $ref, $type, $amount, $param = null)
+    {
+        $param = ($param === null || $param === '') ? null : (int)$param;
+
+        $stmt = $this->connection->prepare("
+            INSERT INTO tac_saved_crit
+                (listid, shipid, kind, ref, type, amount, param)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+                amount = VALUES(amount), param = VALUES(param)
+        ");
+        if (!$stmt) throw new Exception("DB error in submitSavedCrit (prepare): " . $this->connection->error);
+
+        //'i' binds a PHP null as SQL NULL, which is what an ordinary critical wants.
+        $stmt->bind_param('iiiisii', $listid, $shipid, $kind, $ref, $type, $amount, $param);
+        $stmt->execute();
+        $stmt->close();
+    }
+
+    public function getSavedDamageForShip($shipid){
+        $rows = array();
+        $stmt = $this->connection->prepare(
+                "SELECT
+                    kind, ref, damage, destroyed
+                FROM
+                    tac_saved_damage
+                WHERE
+                    shipid = ?
+                "
+            );
+            if ($stmt)
+            {
+                $stmt->bind_param('i', $shipid);
+                $stmt->bind_result($kind, $ref, $damage, $destroyed);
+                $stmt->execute();
+                while ($stmt->fetch())
+                {
+                    $rows[] = array($kind, $ref, $damage, $destroyed);
+                }
+                $stmt->close();
+            }
+        return $rows;
+    }
+
+    public function getSavedCritsForShip($shipid){
+        $rows = array();
+        $stmt = $this->connection->prepare(
+                "SELECT
+                    kind, ref, type, amount, param
+                FROM
+                    tac_saved_crit
+                WHERE
+                    shipid = ?
+                "
+            );
+            if ($stmt)
+            {
+                $stmt->bind_param('i', $shipid);
+                $stmt->bind_result($kind, $ref, $type, $amount, $param);
+                $stmt->execute();
+                while ($stmt->fetch())
+                {
+                    //param is NULL for every class but the param-carrying ones; rows
+                    //written before the column existed simply read back as NULL.
+                    $rows[] = array($kind, $ref, $type, $amount, $param);
+                }
+                $stmt->close();
+            }
+        return $rows;
     }
 
     public function changeAvailabilityFleet(int $id): int {
@@ -2651,6 +2761,13 @@ class DBManager
 					if ($targetShip === null) continue; //shipid not in this gamedata (eg. Chameleon phantom sheets, which use negative ids)
 					$targetSystem = $targetShip->getSystemById($systemid);
 					if ($targetSystem === null) continue;
+
+					//Defence in depth: the line below is `new $type(...)` on a string read
+					//straight out of the database, so a bad row would be arbitrary class
+					//instantiation on every load of this game. Every write path validates
+					//before storing (see PreBattleDamage::isValidCriticalType); this guards
+					//rows that are already there.
+					if (!class_exists($type) || !is_subclass_of($type, 'Critical')) continue;
 
 					$crit = new $type($id, $shipid, $systemid, $type, $turn, $turnEnd);
 					$crit->param = $param;
