@@ -100,6 +100,7 @@ class MindsEye extends SixSidedShip{
         //$this->addLeftFrontSystem(new MindriderThruster(6, 35, 0, 12, 3)); 
         $thrust = new MindriderThruster(6, 35, 0, 12, 3);
 		$thrust->overkillArcStructures = array(31, 32); //overkill spills to whichever Port quarter is in arc
+        $thrust->setStructureHome(array(31, 32));			
 		$this->addLeftSystem($thrust); 		
 					 	
 
@@ -113,6 +114,7 @@ class MindsEye extends SixSidedShip{
         //$this->addRightFrontSystem(new MindriderThruster(6, 35, 0, 12, 4));        
 		$thrust = new MindriderThruster(6, 35, 0, 12, 4);
 		$thrust->overkillArcStructures = array(41, 42); //overkill spills to whichever Stbd quarter is in arc
+        $thrust->setStructureHome(array(41, 42));			
 		$this->addRightSystem($thrust);  
             
 		$this->addLeftAftSystem(new SelfRepair(6, 6, 3)); //armor, structure, output 
