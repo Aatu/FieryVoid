@@ -3305,7 +3305,7 @@ window.gamedata = {
 			//the whole sentence in warning colours. Only NOTE: is the warning; the rest is
 			//ordinary body text, so it carries its own class (see confirm.css).
 			readyMessage += '<span class="prebattle-note">'
-				+ '<span class="prebattle-note-label">NOTE:</span> '
+				+ '<span class="prebattle-note-label">WARNING:</span> '
 				+ 'this fleet includes units with pre-battle damage and/or critical effects.'
 				+ '</span>';
 		}
@@ -3574,7 +3574,7 @@ window.gamedata = {
 
 				if (response.ships && Array.isArray(response.ships) && response.ships.length > 0) {
 					gamedata.doLoadFleet(response.ships, response.critDesc, response.critTransient);
-					fleetDropdownButton.textContent = 'Load a Saved Fleet';
+					fleetDropdownButton.textContent = 'LOAD A FLEET';
 					//confirm.warning("Fleet loaded!");
 				} else {
 					console.error("Load failed:", response.ships);
@@ -3594,7 +3594,7 @@ window.gamedata = {
 		confirm.showLoadFleet("saved fleet with #ID " + listId, {}, (choices) => {
 			gamedata.doLoadSavedFleetById(listId, choices);
 			fleetDropdownList.style.display = 'none';
-			fleetDropdownButton.textContent = 'Load a Saved Fleet';
+			fleetDropdownButton.textContent = 'LOAD A FLEET';
 		});
 	},
 
@@ -3626,7 +3626,7 @@ window.gamedata = {
 
 			if (response.ships && Array.isArray(response.ships) && response.ships.length > 0) {
 				gamedata.doLoadFleet(response.ships, response.critDesc, response.critTransient);
-				fleetDropdownButton.textContent = 'Load a Saved Fleet';
+				fleetDropdownButton.textContent = 'LOAD A FLEET';
 				//confirm.warning("Fleet loaded!");
 			} else {
 				if (response.ships) console.error("Load failed:", response.ships);
@@ -3742,7 +3742,7 @@ window.gamedata = {
 					if (fleet.id == response.id) cachedFleets[i].isPublic = response.newStatus;
 				}
 
-				fleetDropdownButton.textContent = 'Load a Saved Fleet';
+				fleetDropdownButton.textContent = 'LOAD A FLEET';
 				gamedata.populateFleetDropdown(cachedFleets);
 				confirm.fleetNotice("Fleet availability changed to " + setting + ".");
 			} else {
@@ -3759,7 +3759,7 @@ window.gamedata = {
 				// ✅ Only update UI after server confirms deletion
 				cachedFleets = cachedFleets.filter(f => f.id !== listId);
 				gamedata.populateFleetDropdown(cachedFleets);
-				//fleetDropdownButton.textContent = 'Load a Saved Fleet';
+
 				confirm.fleetNotice(fleetName + " deleted.");
 			} else {
 				console.error("Delete failed:", response);
