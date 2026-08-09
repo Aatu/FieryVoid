@@ -46,9 +46,6 @@
 		   so the usual ship-wide criticals do nothing on it; these four are the ones
 		   ShipClasses::getIniModifier reads off getSampleFighter():
 		     ReducedIniative        -10 initiative, permanent  (stacks per crit)
-		     ReducedIniativeOneTurn -10 initiative, turn 1 only
-		     Uncontrolled           -15 initiative, turn 1 only
-		     tmpinidown              -5 initiative, turn 1 only
 		   ⚠️ They are read off the SAMPLE fighter (ordinal 1) only, which is exactly why
 		   the lobby's flight editor writes criticals to every ordinal at once
 		   (battleDamage.REF_FLIGHT) rather than per craft.
@@ -57,7 +54,7 @@
 		   `grep -rn 'hasCritical("Foo"' source/server` and check the receiver is the
 		   fighter or the flight, not a C&C / thruster / weapon. */
 		protected $preBattleCriticals = array(
-			'ReducedIniative', 'PenaltyToHit',);
+			'ReducedIniative', 'tmpsensordown',);
 
 			
 		public $criticals = array();
