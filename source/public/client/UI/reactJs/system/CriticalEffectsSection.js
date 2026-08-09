@@ -462,7 +462,17 @@ class CriticalEffectsSection extends Component {
                 })}
 
                 {/* Hidden until the catalogue arrives - an empty dropdown before then
-                    would read as a broken control rather than as one still loading. */}
+                    would read as a broken control rather than as one still loading. 
+                    //Removed All toggle, to re-add place following fragment after </AddSelect> but before </AddRow>
+                        <AllToggle title="Also offer the effects that apply to any system, on top of this one's own">
+                            <CheckBox
+                                type="checkbox"
+                                checked={this.state.showAll}
+                                onChange={e => this.setState({ showAll: e.target.checked })}
+                            />
+                            <CheckText>All</CheckText>
+                        </AllToggle>                    
+                                                         */}
                 {catalogueReady && (
                     <AddRow>
                         <AddSelect
@@ -478,14 +488,7 @@ class CriticalEffectsSection extends Component {
                                 <option key={option.type} value={option.type}>{option.label}</option>
                             ))}
                         </AddSelect>
-                        <AllToggle title="Also offer the effects that apply to any system, on top of this one's own">
-                            <CheckBox
-                                type="checkbox"
-                                checked={this.state.showAll}
-                                onChange={e => this.setState({ showAll: e.target.checked })}
-                            />
-                            <CheckText>All</CheckText>
-                        </AllToggle>
+
                     </AddRow>
                 )}
             </Section>

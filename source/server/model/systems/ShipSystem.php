@@ -54,7 +54,7 @@ class ShipSystem {
        PROTECTED like $possibleCriticals, and exposed only as the derived list below: these
        tables must not ride the static ship JSON (the generators json_encode the object) or
        stripForJson. The lobby gets them from systemCriticals.php. */
-    protected $preBattleCriticals = array();
+    protected $preBattleCriticals = array('ArmorReduced');
 
     public $primary = false; //is this a core system?
     public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?	
