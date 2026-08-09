@@ -256,6 +256,19 @@ class CriticalEffectsSection extends Component {
        de-duplicates, so an already-fetched class costs a map lookup. The callback fires
        only on a fresh arrival, so this repaints exactly once. */
     componentDidMount() {
+        this.fetchCatalogue();
+    }
+
+    /* ⚠️ ALSO on update, not just on mount. The damage menus re-render into ONE React root
+       (#systemInfoReact), so opening a second ship's menu REUSES this instance with new
+       props rather than remounting it - componentDidMount would never run again and the new
+       ship's catalogue would never be requested. Cheap to repeat: loadCatalogue is keyed by
+       phpclass/flightSize and a cached class is a map lookup. */
+    componentDidUpdate(prevProps) {
+        if (prevProps.ship !== this.props.ship) this.fetchCatalogue();
+    }
+
+    fetchCatalogue() {
         if (!this.props.editable) return;
         battleDamage.loadCatalogue(this.props.ship, () => this.forceUpdate());
     }

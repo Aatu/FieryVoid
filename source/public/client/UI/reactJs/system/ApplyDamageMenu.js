@@ -163,11 +163,6 @@ class ApplyDamageMenu extends Component {
         //Built once, not in render(): a ref callback rebuilt every pass would detach and
         //reattach the native listener on every keystroke. See helpers/nonPassiveWheel.
         this.wheelRef = nonPassiveWheel(e => this.step(e.deltaY < 0 ? 1 : -1));
-        //Health the player had dialled in before ticking Destroy, so unticking gives it
-        //back instead of silently resetting to full (user report 2026-08-08). Lives on the
-        //component rather than in the payload: it is UI undo state, not fleet state, and
-        //the wire format must keep meaning exactly one thing.
-        this.healthBeforeDestroy = null;
     }
 
     entry() {
@@ -208,11 +203,18 @@ class ApplyDamageMenu extends Component {
     }
 
     /* Stash the current remaining health, unless it is already 0/destroyed (that would
-       overwrite the value we are trying to preserve). */
+       overwrite the value we are trying to preserve).
+
+       ⚠️ Kept on the SHIP, keyed by system id (battleDamage.rememberHealth), NEVER on this
+       component. UIManager.showSystemInfoMenu re-renders the same #systemInfoReact root, so
+       clicking a second system REUSES this instance with new props - React reconciles
+       same-type elements in place rather than remounting - and an instance field leaked
+       from one system to the next: destroy a 36-box Structure, destroy an 8-box gun, untick
+       the Structure, and it came back with EIGHT (user report 2026-08-08, Vree Xonn). */
     rememberHealth() {
+        const { ship, system } = this.props;
         if (this.isDestroyed()) return;
-        const remaining = this.remaining();
-        this.healthBeforeDestroy = remaining > 0 ? remaining : null;
+        battleDamage.rememberHealth(ship, battleDamage.KIND_SYSTEM, system.id, this.remaining());
     }
 
     setDestroyed(on) {
@@ -226,9 +228,11 @@ class ApplyDamageMenu extends Component {
         }
 
         //Un-destroying restores the health the player had dialled in before ticking
-        //Destroy; full health only when they never amended it.
-        const restored = (this.healthBeforeDestroy !== null && this.healthBeforeDestroy > 0)
-            ? Math.min(system.maxhealth, this.healthBeforeDestroy)
+        //Destroy; full health only when they never amended it. Clamped to THIS system's
+        //maxhealth, so even a stale value can never invent structure it does not have.
+        const remembered = battleDamage.healthMemory(ship, battleDamage.KIND_SYSTEM, system.id);
+        const restored = remembered > 0
+            ? Math.min(system.maxhealth, remembered)
             : system.maxhealth;
 
         battleDamage.setSystem(ship, system.id, { d: system.maxhealth - restored, k: 0 });

@@ -667,12 +667,56 @@ window.battleDamage = {
 		return seen;
 	},
 
+	/* ---------------------------------------------------------------- *
+	 *  Health-before-Destroy memory (editor only, never submitted)
+	 * ---------------------------------------------------------------- */
+
+	/* The remaining health a player had dialled in on ONE target before ticking Destroy,
+	   so unticking gives it back instead of silently resetting to full. 0 = nothing
+	   remembered (restore full health).
+
+	   ⚠️ WHY IT LIVES ON THE SHIP, keyed per target, and NOT on the React component.
+	   `UIManager.showSystemInfoMenu` re-renders the SAME #systemInfoReact root, so clicking
+	   a second system reuses the existing ApplyDamageMenu INSTANCE with new props - React
+	   reconciles same-type elements in the same position rather than remounting. An instance
+	   field therefore leaks from one system to the next: destroy a 36-box Structure, destroy
+	   an 8-box gun, untick the Structure, and it came back with EIGHT (user report,
+	   2026-08-08, Vree Xonn). Keyed per target it cannot bleed, and as a bonus the undo now
+	   survives closing and reopening the menu, exactly like critMemory beside it.
+
+	   Same lifetime rules as critMemory: never submitted (only `preBattleDamage` is copied
+	   into the buy/save payloads), dropped by clear() and by the flight-size branch of
+	   onShipRebuilt, and gone when the ship object is rebuilt - the memory is about an
+	   editing session, not about the fleet. */
+	healthMemory: function healthMemory(ship, kind, ref) {
+		if (!ship || !ship.preBattleHealthSeen) return 0;
+		var value = parseInt(ship.preBattleHealthSeen[battleDamage.bucketName(kind) + ':' + ref], 10);
+		return (value > 0) ? value : 0;
+	},
+
+	rememberHealth: function rememberHealth(ship, kind, ref, value) {
+		if (!ship) return;
+		if (!ship.preBattleHealthSeen || typeof ship.preBattleHealthSeen !== 'object') {
+			ship.preBattleHealthSeen = {};
+		}
+
+		var key = battleDamage.bucketName(kind) + ':' + ref;
+		var remaining = parseInt(value, 10);
+
+		if (remaining > 0) {
+			ship.preBattleHealthSeen[key] = remaining;
+		} else {
+			delete ship.preBattleHealthSeen[key];
+		}
+	},
+
 	/* Drop everything. Used when a flight's size changes (ordinals beyond the new size
 	   would silently vanish - clearing is honest) or a ship's phpclass changes. */
 	clear: function clear(ship) {
 		if (!ship) return;
 		ship.preBattleDamage = {};
 		delete ship.preBattleCritSeen;
+		delete ship.preBattleHealthSeen;
 		battleDamage.applyToShip(ship);
 	},
 
@@ -701,6 +745,7 @@ window.battleDamage = {
 			&& !battleDamage.isEmpty(battleDamage.peek(ship))) {
 			ship.preBattleDamage = {};
 			delete ship.preBattleCritSeen;
+			delete ship.preBattleHealthSeen;
 			cleared = true;
 		}
 

@@ -1761,7 +1761,62 @@ One consequence handled in the same edit: the interactive render draws its healt
 carries no damage of its own, so it would have drawn a FULL bar behind the destroyed blur.
 The bar is now explicitly 0 when destroyed, matching the bar-only render it replaces.
 
-### 17.5 Verification
+
+### 17.5 ⭐ THE MENU IS ONE REUSED COMPONENT — instance state bleeds between systems
+
+**Symptom (user, Vree Xonn).** Destroy a 36-box Structure. Destroy an 8-box Antiproton Gun.
+Untick the Structure — and it comes back with **8** health, not 36.
+
+**Root cause, and it is a pattern worth knowing rather than a one-off.**
+`UIManager.showSystemInfoMenu` re-renders `<SystemInfoMenu …>` into the SAME
+`#systemInfoReact` root, and the lobby's `SystemClicked` handler calls it directly with no
+unmount in between. React reconciles same-type elements in the same position by **updating
+props on the existing instance**, not by remounting — so clicking a second system reuses the
+one `ApplyDamageMenu` and every instance field survives the switch.
+
+§13.3's `this.healthBeforeDestroy` was therefore not "per system" at all. The gun overwrote
+the Structure's 36 with its own 8, and unticking restored `min(36, 8)`.
+
+**Fix: the memory moves onto the SHIP, keyed per target** — `battleDamage.healthMemory` /
+`rememberHealth`, storing under `ship.preBattleHealthSeen['sys:12']`. That is exactly where
+§14.2 put the removed-critical memory, and for the same reasons:
+
+| candidate | verdict |
+|---|---|
+| in the payload | **no** — `preBattleDamage` means one thing: what this unit carries into battle |
+| on the React component | **no** — the instance is shared across systems (this bug), and torn down on close |
+| **on the ship, keyed per target** | **yes** — cannot bleed, survives closing and reopening the menu, dies with the ship object so a fleet reload or lobby Edit starts clean, never submitted |
+
+Dropped by `clear()` and by `onShipRebuilt`'s flight-size branch, right beside
+`preBattleCritSeen`. `setDestroyed(false)` still clamps to the CURRENT system's `maxhealth`,
+so even a stale value could not invent structure a system does not have.
+
+**The same reuse bites `componentDidMount`.** `CriticalEffectsSection` fetched its per-class
+catalogue on mount only, so opening a second SHIP's menu — same instance, new `ship` prop —
+would never request that ship's catalogue. It has a `componentDidUpdate` now. (Not a live
+failure today, because `battleDamage.applyToShip` kicks the same de-duplicated fetch for
+every bought lobby ship; it was one refactor away from being one.)
+
+> **Rule for this file family:** any state a damage menu keeps on `this` is shared by every
+> system, ship and flight it is ever opened for. Per-target state belongs on the ship
+> (`battleDamage`), and anything that must happen per ship needs `componentDidUpdate` as well
+> as `componentDidMount`.
+
+**Verification.** Nine new assertions replaying the exact reported sequence through ONE
+component instance with the `system` prop swapped, as the real menu does: the Structure comes
+back at its own 36 and the gun at its own 8; a dialled-in 20 and 3 are each restored to the
+right system **from a freshly constructed component** (i.e. the undo survives closing the
+menu); the memory is on the ship, absent from the payload, and dropped by `clear()`.
+Self-tested by reintroducing the instance field — **four of them fail**, including the
+starred one that is the user's bug verbatim.
+
+### 17.6 Reported and NOT changed
+
+`CriticalEffectsSection`'s `this.state.showAll` is shared across systems by the same instance
+reuse §17.5 describes — tick "All" on one system and it is still ticked on the next. Left
+alone deliberately: it is a view preference rather than per-target state, and carrying it is
+the more useful behaviour.
+### 17.7 Verification
 
 * `php -l` clean on `PreBattleDamage.php`, `ShipSystem.php`, `fighter.php`.
 * **Scratch PHP, 20 assertions:** the general list is 12 entries, all storable, all carrying
@@ -1772,7 +1827,7 @@ The bar is now explicitly 0 when destroyed, matching the bar-only render it repl
   criticals**; the catalogue keys all 3 ordinals with identical lists and names every one of
   them in `meta`; an authored fighter crit survives `sanitise` and expands to a real turn-0
   `Critical`, while a transient one is stamped at `TRANSIENT_TURN`.
-* **React/Node, 36 assertions** (all of §16.8's, plus): **"All" ticked returns a strict
+* **React/Node, 45 assertions** (all of §16.8's, plus §17.5's nine): **"All" ticked returns a strict
   SUPERSET of unticked** — the system's own `GunLost`/`ReducedArcs`/`AmmoExplosion` still
   present, the general ones added on top, a class in both lists appearing once, and the same
   through a flight's REF_FLIGHT branch (self-tested: reverting to the replace behaviour
