@@ -291,7 +291,30 @@ window.UI = {
 
             var s = 40;
 
+            // The speed stack (- / + / move) is laid out along the facing axis and
+            // is unusable with a fingertip at mouse sizes: the +/- buttons are 16px
+            // boxes 5px apart, and the 52px move arrow starts 1px past the +. A
+            // touch covering all three resolves to whichever box its centre lands
+            // in, which is nearly always the move arrow.
+            //
+            // On a coarse pointer the +/- glyphs are drawn only slightly larger (20px,
+            // not the 30px that read as oversized) and get a transparent 32px hit box
+            // centred on them. That box is what needs the room, so + and move are
+            // pushed out until the boxes clear each other:
+            //   -  centre 56px, hits [40..72]   (unchanged from the mouse layout)
+            //   +  centre 92px, hits [76..108]
+            //   move centre 143px, hits [117..169]
+            // The minus deliberately keeps its mouse distance: any closer in and it
+            // crowds the ship icon. The 4.4px dead zone between the +/- boxes is the
+            // binding constraint on pulling them any closer together - below that a
+            // near-miss on the minus starts registering as an accelerate. Mouse layout
+            // is left exactly as it was.
+            var touch = window.matchMedia("(pointer: coarse)").matches;
+            var speedIconSize = touch ? 20 : 16;
+            var speedHitSize = touch ? 32 : 16;
+
             var move = UI.shipMovement.moveElement;
+            if (touch) dis = 102;
 
             if (shipManager.movement.canMove(ship)) {
                 UI.shipMovement.drawUIElement(move, pos.x, pos.y, s * 1.3, dis * 1.4, angle, "img/move.png", "movecanvas", shipHeading);
@@ -305,10 +328,10 @@ window.UI = {
                 UI.shipMovement.speedElement.html(shipManager.movement.getRemainingMovement(ship));
             }
 
-            dis = 55;
+            dis = touch ? 66 : 55;
             var acc = UI.shipMovement.accElement;
             if (shipManager.movement.canChangeSpeed(ship)) {
-                UI.shipMovement.drawUIElement(acc, pos.x, pos.y, 16, dis * 1.4, angle, "img/plus.png", "acceleratecanvas", 0);
+                UI.shipMovement.drawUIElement(acc, pos.x, pos.y, speedIconSize, dis * 1.4, angle, "img/plus.png", "acceleratecanvas", 0, speedHitSize);
             } else {
                 acc.hide();
             }
@@ -317,7 +340,7 @@ window.UI = {
             dis = 40;
             var deacc = UI.shipMovement.deaccElement;
             if (shipManager.movement.canChangeSpeed(ship)) {
-                UI.shipMovement.drawUIElement(deacc, pos.x, pos.y, 16, dis * 1.4, angle, "img/minus.png", "deacceleratecanvas", 0);
+                UI.shipMovement.drawUIElement(deacc, pos.x, pos.y, speedIconSize, dis * 1.4, angle, "img/minus.png", "deacceleratecanvas", 0, speedHitSize);
             } else {
                 deacc.hide();
             }
@@ -668,25 +691,29 @@ window.UI = {
             UI.shipMovement.currentHeading = heading;
         },
 
-        drawUIimage: function drawUIimage(canvas, path, s, angle) {
+        // box is the size of the clickable div; s is the size the icon is drawn at.
+        // They are the same unless a caller asks for hit slop, in which case the
+        // icon is centred in the larger box rather than sitting in its corner.
+        drawUIimage: function drawUIimage(canvas, path, s, angle, box) {
             var img = new Image();
             img.src = path;
 
             $(img).on("load", function () {
                 graphics.clearSmallCanvas(canvas);
-                graphics.drawAndRotate(canvas, s, s, s * 2, s * 2, angle, img);
+                graphics.drawAndRotate(canvas, box, box, s * 2, s * 2, angle, img);
             });
         },
 
-        drawUIElement: function drawUIElement(e, x, y, s, dis, angle, path, canvasid, shipHeading) {
+        drawUIElement: function drawUIElement(e, x, y, s, dis, angle, path, canvasid, shipHeading, hit) {
+            var box = hit || s;
             var UIpos = mathlib.getPointInDirection(dis, -angle, x, y);
-            e.css("top", UIpos.y - y - s * 0.5 + "px").css("left", UIpos.x - x - s * 0.5 + "px");
-            e.css("width", s + "px").css("height", s + "px");
+            e.css("top", UIpos.y - y - box * 0.5 + "px").css("left", UIpos.x - x - box * 0.5 + "px");
+            e.css("width", box + "px").css("height", box + "px");
             e.show();
             //$("#"+canvaid).css("top", "px").css("left", "px");
 
             var canvas = window.graphics.getCanvas(canvasid);
-            UI.shipMovement.drawUIimage(canvas, path, s, shipHeading);
+            UI.shipMovement.drawUIimage(canvas, path, s, shipHeading, box);
         },
 
         hide: function hide() {

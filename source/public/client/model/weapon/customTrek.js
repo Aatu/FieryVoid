@@ -311,8 +311,7 @@ CloakingDevice.prototype.getDetectionRating = function (otherShip) {
     if (otherShip.flight) return Math.ceil((otherShip.offensivebonus || 0) / 2);
     if (shipManager.isDisabled(otherShip)) return 0;
 
-    var scanners = shipManager.systems.getSystemListByName(otherShip, "scanner")
-        .concat(shipManager.systems.getSystemListByName(otherShip, "elintScanner"));
+    var scanners = shipManager.systems.getScannerList(otherShip, true);
 
     var totalDetection = 0;
     for (var i = 0; i < scanners.length; i++) {
@@ -373,9 +372,7 @@ CloakingDevice.prototype.isDetectedTrek = function (ship) {
         if (!otherShip.flight) {
             if (shipManager.isDisabled(otherShip)) continue; //Skip disabled ships               
             // Not a fighter — use scanner systems for detection
-            const standardScanners = shipManager.systems.getSystemListByName(otherShip, "scanner");
-            const elintScanners = shipManager.systems.getSystemListByName(otherShip, "elintScanner");
-            const scanners = [...standardScanners, ...elintScanners];
+            const scanners = shipManager.systems.getScannerList(otherShip, true);
 
             for (const scanner of scanners) {
                 if (!shipManager.systems.isDestroyed(otherShip, scanner) && !shipManager.power.isOfflineOnTurn(otherShip, scanner, gamedata.turn)) {

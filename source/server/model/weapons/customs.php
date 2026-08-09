@@ -3781,7 +3781,7 @@ class HvyGraviticBolt extends Gravitic
         public $weaponClass = "Molecular"; 
         public $startArcArray = array(); 
         public $endArcArray = array();        
-        protected $splitArcs = false; //Used to tell Front End that weapon has 2 or more separate arcs, passed manually via stripForJson()
+        public $splitArcs = false; //two arcs live at once when the ctor is given a second pair - see Weapon::$startArcArray
         
         //New variables to allow sweeping split shots.
         public $maxVariableShots = 16; //Default value, will be amended in front end anyway.
@@ -3796,7 +3796,7 @@ class HvyGraviticBolt extends Gravitic
         protected $setDamageArray = array(1 => 12, 2 => 24, 3 => 36);
 
 
-		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $startArc2 = null, $endArc2 = null){
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             if ( $maxhealth == 0 ) $maxhealth = 15;
             if ( $powerReq == 0 ) $powerReq = 15;     
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);

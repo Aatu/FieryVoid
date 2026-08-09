@@ -13,6 +13,26 @@ class TacGamedata {
     //Shading Field) - never use for game logic; null = no viewer (server processing) = reveal.
     public static $currentForPlayer = null;
     public static $currentForPlayerTeam = null;
+    //Chameleon Sensor Suite gate. About one ship in 2000 carries the suite, and it only matters once a
+    //player has actively picked a simulacrum, so the ENTIRE feature hangs off this single per-load
+    //boolean - a game without a disguised ship pays for one false check and nothing else.
+    //Set in onConstructed(), after every ship has been constructed (enhancements included).
+    public static $chameleonPresent = false;
+    /*Second Chameleon gate, for the ONE effect that is a property of the suite rather than of the
+      deception: D11 arming masking, which applies to a CSS ship showing as ITSELF - left on "None",
+      or already revealed - and therefore cannot hang off $chameleonPresent. Tests the live special
+      ability, so a suite that is destroyed or offline stops masking on its own.*/
+    public static $chameleonSuitePresent = false;
+    /*Every team id in this game. Needed because ChameleonSensors::isDisguisedFrom() has to answer
+      "has EVERY team seen through this?" for an observer, and a system has no route to $gamedata.*/
+    public static $chameleonAllTeams = array();
+    /*D15, second half: a FINISHED game drops every deception so the post-mortem shows what actually
+      happened. Set from $this->status, read by applyChameleonDisguise() and maskChameleonArming().
+      Deliberately NOT implemented by forcing the two gates above to false: maskChameleonFireOrders()
+      still has to run, because stripping the CHAM: storage tag out of fire-order notes is
+      unconditional and must stay that way. With nothing marked disguised it is the only thing left
+      for that pass to do.*/
+    public static $chameleonDisclosed = false;
 
     public $id, $turn, $phase, $activeship, $name, $status, $points, $background, $creator, $gamespace, $description;
     public $ships = array();
@@ -117,6 +137,7 @@ class TacGamedata {
 
     public function onConstructed(){
         self::$currentForPlayerTeam = $this->getPlayerTeam(); //viewer context (slots are loaded by now) - teammates see each other's hidden orders
+        $this->setChameleonTeamList();
         $this->setBlockedHexes();
         $this->waitingForThisPlayer = $this->getIsWaitingForThisPlayer();
         $this->doSortShips();
@@ -153,29 +174,69 @@ class TacGamedata {
                 }
 
             }
-            $this->markUnavailableSetMarkers(); //Sets isStealthPresent and areMinesPresent too!
             $ship->onConstructed($this->turn, $this->phase, $this);
+        }
+
+        //One sweep over the ships for all the per-game markers. This used to run INSIDE the loop
+        //above (so once per ship, each time walking every ship); moving it out is both cheaper and
+        //more accurate, because every ship is now fully constructed - which the Chameleon gate
+        //requires, since onConstructed() is what applies enhancements and fills special abilities.
+        $this->markUnavailableSetMarkers();
+    }
+
+    /*Every team in this game, on a static because a ShipSystem has no route back to $gamedata -
+      ChameleonSensors::isRevealedToEveryTeam() is the consumer, and through it the whole "is this
+      suite still projecting to anybody?" question.
+
+      Filled from onConstructed() ABOVE the per-ship sweep, not only from markUnavailableSetMarkers()
+      below it: Enhancements::setEnhancements runs inside that sweep and asks the same question when
+      it decides whether to write the "Disguised as" line. isRevealedToEveryTeam() fails CLOSED on an
+      empty list, so filling it afterwards would not have been a visible bug - it would silently have
+      answered "still projecting" on the first load of every request. Idempotent, and cheap enough
+      (one pass over the slots) that markUnavailableSetMarkers keeps calling it rather than relying
+      on the earlier call, since it is the one place that documents the whole marker set.*/
+    private function setChameleonTeamList()
+    {
+        self::$chameleonAllTeams = array();
+        foreach ($this->slots as $slot){
+            $teamId = (int)$slot->team;
+            if (!in_array($teamId, self::$chameleonAllTeams, true)) self::$chameleonAllTeams[] = $teamId;
         }
     }
 
     public function markUnavailableSetMarkers()
     {
+        self::$chameleonPresent = false; //before the phase guard: the static outlives a single load
+        self::$chameleonSuitePresent = false;
+        self::$chameleonDisclosed = ($this->status === "FINISHED"); //D15: the post-mortem sees everything
+        $this->setChameleonTeamList();
         if ($this->phase < -1)
             return;
-        
+
         foreach ($this->ships as $ship)
         {
             $turnDeploys = $ship->getTurnDeployed($this);
-            
+
             if($turnDeploys > $this->turn){
                 $ship->unavailable = true;
-            } 
+            }
 
             //Just a convenient place to set Stealth/Mine variable since we're already going through ships in the game.
             if($ship->userid !== $this->forPlayer){
                 if($ship->trueStealth && !$ship instanceof Mine && !$ship->isDestroyed() && $ship->factionAge <= 2) $this->isStealthPresent = true; //Hyach and Trek cloaks atm.
                 if($ship instanceof Mine && !$ship->isDestroyed()) $this->areMinesPresent = true; //Marks that ENEMY mines are present.
-            }                
+            }
+
+            //Chameleon Sensor Suite gate - see $chameleonPresent. Tests the DISGUISE CHOICE, not
+            //isChameleonDisguised(): a destroyed or offlined array loses the ChameleonSensors special
+            //ability, and that is precisely the case the shutdown reveal has to record. A suite left
+            //on the default "None" still keeps the whole game on the common path.
+            if(!self::$chameleonPresent && !empty($ship->chameleonDisguiseClass)) self::$chameleonPresent = true;
+
+            //D11 (Stage 8) gate. Unlike the one above this DOES test the ability, because arming
+            //masking survives the reveal but not the loss of the array. hasSpecialAbility is an
+            //isset() on a map onConstructed() already filled, so this costs no systems walk.
+            if(!self::$chameleonSuitePresent && $ship->hasChameleonSensors()) self::$chameleonSuitePresent = true;
         }
     }
     
@@ -353,14 +414,31 @@ class TacGamedata {
             }
         }
 
+        /*Chameleon phantom sheets (D2/D3). They are deliberately NOT in $this->ships, so the sweep
+          above cannot see them and their mirrored damage would be allocated in memory, rendered
+          once, and then silently lost on the next load. The plan assumed the existing machinery
+          carried them because assignDamageReturnOverkill stamps $target->id - it does, and the
+          negative id persists correctly, but only if the entry reaches this list in the first
+          place. Gated, so an ordinary game does not walk its ships twice.*/
+        if (self::$chameleonPresent){
+            foreach ($this->ships as $ship){
+                if ($ship->chameleonPhantom === null) continue;
+                foreach ($ship->chameleonPhantom->systems as $system){
+                    foreach ($system->damage as $damage){
+                        if ($damage->updated == true) $list[] = $damage;
+                    }
+                }
+            }
+        }
+
         return $list;
 
     }
 
-	
 
 
-    public function addDamageEntry($damage){    
+
+    public function addDamageEntry($damage){
         $ship = $this->getShipById($damage->shipid);
         $ship->addDamageEntry($damage);    
     }
@@ -664,11 +742,14 @@ class TacGamedata {
     public function prepareForPlayer($all = false){
         $this->setWaiting();
         $this->calculateTurndelays();
-        if (!$all) {             
+        if (!$all) {
             $this->deleteHiddenData();
         }
         $this->setPreTurnTasks();
-        
+        $this->applyChameleonDisguise(); //after setPreTurnTasks: it reads live system state
+        $this->maskChameleonFireOrders(); //after applyChameleonDisguise: it reads the flag it sets
+        $this->setChameleonFleetValueAdjust(); //likewise - reads chameleonDisguisedForViewer
+
         if ($this->status == "LOBBY"){
             $this->ships = array();
         }
@@ -681,13 +762,225 @@ class TacGamedata {
             foreach ($ship->systems as $system){
                 $system->beforeTurn($ship, $this->turn, $this->phase);
             }
-        
+
         }
-    
+
+        //Chameleon phantom sheets are deliberately NOT in $this->ships (D1), so the sweep above
+        //misses them and their system tooltips would go out empty. Same turn and phase as the real
+        //ships get - the phantom is meant to be indistinguishable from an ordinary hull.
+        if (!self::$chameleonPresent) return;
+        foreach ($this->ships as $ship){
+            if ($ship->chameleonPhantom === null) continue;
+            foreach ($ship->chameleonPhantom->systems as $system){
+                $system->beforeTurn($ship->chameleonPhantom, $this->turn, $this->phase);
+            }
+        }
     }
     
+    /*Chameleon Sensor Suite - decide, once per load, which ships THIS viewer sees as somebody else.
+      Marks the ships; BaseShip::stripForJson() does the swapping.
+
+      Called from prepareForPlayer() rather than from deleteHiddenData() deliberately.
+      deleteHiddenData is skipped when $all is true, which is how a PAST turn is served
+      (Manager::getReplayGameData passes $actualTurn > $turn). Every other kind of hidden data is
+      public once its turn has resolved - a disguise is not, and scrubbing back a turn must not
+      undress the ship.
+
+      Behind the per-load $chameleonPresent gate, so a game without a disguised ship pays one
+      boolean. isChameleonDisguisedFrom() carries every way a deception can end, including the
+      own-team check, so there is no policy in here at all.*/
+    private function applyChameleonDisguise(){
+        if (!self::$chameleonPresent) return;
+
+        //D15: once the game is over there is nothing left to protect and a post-mortem that still
+        //lied about which hull was which would be worse than useless. Leaves every ship's
+        //chameleonDisguisedForViewer at its false default, which switches off stripForJsonDisguised(),
+        //the fire-order remap and the per-viewer threshold mask in one move.
+        if (self::$chameleonDisclosed) return;
+
+        foreach ($this->ships as $ship){
+            $ship->chameleonDisguisedForViewer = false;
+            if (empty($ship->chameleonDisguiseClass)) continue;
+            if ($ship->userid == $this->forPlayer) continue;
+            if (!$ship->isChameleonDisguisedFrom(self::$currentForPlayerTeam)) continue;
+            //a stored class that no longer resolves leaves an ordinary, honest ship (D10)
+            if ($ship->getChameleonBlueprint() === null) continue;
+            $ship->chameleonDisguisedForViewer = true;
+        }
+    }
+
+    /*Chameleon Sensor Suite - stop a disguised fleet's visible point total EXCEEDING its budget.
+
+      The fleet list values every row off the blueprint the viewer was served (fleetList.js:370), so
+      a disguised ship contributes its SIMULACRUM's cost, and the header is a client-side sum of the
+      rows. When the simulacrum is dearer than the real hull that sum can climb above what the slot
+      was allowed to spend - a Dargan (750) wearing an Octurion (1350) puts its fleet 600 over - and
+      a fleet costing more than its budget is not merely suspicious, it is impossible. That is a
+      certain reveal available for no effort at all, which is the one worth removing.
+
+      So: cap the disguised ship's contribution at what it ACTUALLY cost (hull + enhancements) and
+      hand the client the overstatement to subtract from the header. Never negative - a CHEAPER
+      simulacrum is left exactly as it is, because a fleet that reads light is ordinary (players
+      leave points on the table) and inflating it back up would be a lie in the other direction.
+
+      ⚠️ This is a bar, not a wall, and is meant to be. The rows still show the simulacrum's own cost,
+      so a viewer who sums them and compares against this header recovers the difference - as does
+      anyone who reads gamedata.slots in devtools. Guiding constraint §0 stands: everything the
+      enemy's browser receives is public. What it buys is that the PASSIVE view - the number sitting
+      on screen - is no longer self-evidently impossible.
+
+      Why the adjustment is per SLOT and not a field on the disguised ship: any per-ship field marks
+      that ship. Being the one hull in the fleet carrying an unusual key is a far better clue than
+      the arithmetic this exists to bury, and it survives every reveal rule we have. PlayerSlot
+      declares $fleetValueAdjust with a 0 default so it ships on every slot of every game.
+
+      Not gated on $chameleonPresent for the reset - the zeroing has to be unconditional or a slot
+      could carry an adjustment from whatever the object held before. Only the sweep is gated.*/
+    private function setChameleonFleetValueAdjust(){
+        foreach ($this->slots as $slot) $slot->fleetValueAdjust = 0;
+
+        if (!self::$chameleonPresent) return;
+        if (self::$chameleonDisclosed) return; //D15: the post-mortem shows the real numbers
+
+        foreach ($this->ships as $ship){
+            if (!$ship->chameleonDisguisedForViewer) continue;
+            if (!isset($this->slots[$ship->slot])) continue;
+
+            $blueprint = $ship->getChameleonBlueprint();
+            if ($blueprint === null) continue; //cannot happen here - applyChameleonDisguise checked
+
+            //What the viewer's fleet list will add up for this row. Enhancements are masked to 0 on
+            //a disguised payload (ShipClasses::stripForJsonDisguised), so the row is the hull alone.
+            $shown = (float)$blueprint->pointCost;
+
+            //What it really cost. pointCostEnh2 is folded into pointCostEnh once a game is running
+            //(Manager.php:1026) but is summed here anyway so this cannot rot if that changes.
+            $paid = (float)$ship->pointCost + (float)$ship->pointCostEnh + (float)$ship->pointCostEnh2;
+
+            if ($shown <= $paid) continue; //cheaper simulacrum - nothing to cap
+            $this->slots[$ship->slot]->fleetValueAdjust += (int)round($shown - $paid);
+        }
+    }
+
+    /*Chameleon Sensor Suite (D3b, Stage 7) - the per-viewer fire-order mask.
+
+      This is a masking site of a shape no other one in FV has, which is why it needed its own pass.
+      Every existing mask hides a ship's OWN private state from people who are not on its team. This
+      one hides state that lives on the SHOOTER's weapon, from the shooter themselves, because the
+      shooter is the deceived party: they must be shown the shot they think they took at the ship
+      they think they were shooting at. Only the disguised ship's own side sees the truth.
+
+      Three things are rewritten for a viewer who still believes the deception:
+
+        needed   - the simulacrum's threshold, so their combat log agrees with the hit chance their
+                   client previewed off the fake blueprint (finding #10);
+        shotshit - how many hits the PHANTOM took, which is what their damage entries show;
+        notes    - REBUILT rather than edited. Since Stage 7 the stored breakdown names the real
+                   hull outright ("defence: 16" on a ship the viewer believes has 14), and the
+                   client parses only two things out of this string, so the safe construction is to
+                   emit those two and nothing else. Same principle as stripForJsonDisguised(): the
+                   default for any field is "fake", never "real", so a field nobody thought about
+                   cannot leak. CSS is not protection - #log .notes is display:none, but devtools
+                   is not, and the whole feature assumes the enemy reads their own payload.
+
+      The CHAM: tag is stripped for EVERYONE, tag or no tag, disguised or not - one unconditional
+      pass, so there is no path on which it can reach a browser. Likewise notes are scrubbed for any
+      order at a disguised target even when no tag was written (a weapon with its own roll loop that
+      never reached Weapon::fire()'s tagging line): the numbers then stay real, but the breakdown
+      still goes.
+
+      Runs from prepareForPlayer(), not deleteHiddenData(), for the same reason applyChameleonDisguise
+      does: deleteHiddenData is skipped when $all is true, which is how a PAST turn is served, and
+      replaying back over a disguised turn must not undress the ship.*/
+    private function maskChameleonFireOrders(){
+        if (!self::$chameleonPresent) return;
+
+        $disguisedIds = array();
+        foreach ($this->ships as $ship){
+            if ($ship->chameleonDisguisedForViewer) $disguisedIds[$ship->id] = true;
+        }
+
+        foreach ($this->ships as $ship){
+            if ($ship instanceof FighterFlight) {
+                foreach ($ship->systems as $fighter){
+                    $this->maskChameleonFireOrdersOn($fighter, $disguisedIds);
+                }
+            } else {
+                $this->maskChameleonFireOrdersOn($ship, $disguisedIds);
+            }
+        }
+    }
+
+    private function maskChameleonFireOrdersOn($unit, $disguisedIds){
+        foreach ($unit->systems as $system){
+            foreach ($system->fireOrders as $fire){
+                $fire->chameleonFake = null; //transient resolution state, never serialised
+                $fire->notes = (string)$fire->notes;
+
+                $fake = null;
+                if (strpos($fire->notes, 'CHAM:') !== false){
+                    if (preg_match_all('/\s*CHAM:(-?\d+):(\d+)/', $fire->notes, $m)){
+                        $last = sizeof($m[1]) - 1;
+                        $fake = array((int)$m[1][$last], (int)$m[2][$last]);
+                    }
+                    $fire->notes = preg_replace('/\s*CHAM:-?\d+:\d+/', '', $fire->notes);
+                }
+
+                if (!isset($disguisedIds[$fire->targetid])) continue;
+
+                //notes rebuilt BEFORE needed is overwritten - the per-shot shift is measured off it
+                $fire->notes = self::buildChameleonFireOrderNotes(
+                    $fire->notes, ($fake === null) ? $fire->needed : $fake[0], $fire->needed);
+
+                /*Order-level pubnotes describe what pass 1 did to the REAL hull, and under the dual
+                  threshold (Stage 7) that can flatly contradict what the viewer is shown: a shot
+                  that missed the real ship but hit the phantom carries " MISSED! " while the
+                  phantom's damage entries render underneath it. Most of the rest is weapon-effect
+                  narrative that names the mechanism outright. Dropped rather than filtered, on the
+                  same default-absent principle as the notes rebuild. The per-system DamageEntry
+                  pubnotes are untouched, so the viewer still gets the damage story.
+                  Deferred refinement: serve the PHANTOM pass's narrative instead of nothing, which
+                  needs pass 2's pubnotes captured and persisted the way the CHAM: tag is.*/
+                $fire->pubnotes = '';
+
+                if ($fake === null) continue;
+
+                $fire->needed   = $fake[0];
+                $fire->shotshit = $fake[1];
+            }
+        }
+    }
+
+    /*The two fragments combatLog.js reads back out of a fire order's notes, and nothing else:
+      "Interception: n sources:m" (combatLog.js:117) and one "rolled: x, needed: y" per shot
+      (combatLog.js:137, which greens the roll when it beat the threshold). Every per-shot threshold
+      differs from the order's by the same grouping modifier, so shifting them all by one delta keeps
+      the dice tooltip consistent with the shots-hit count the viewer is shown.
+
+      Shared with the Stage 6 mask on orders fired FROM a disguised ship, which passes the same value
+      for both thresholds: there the numbers are already true and it is the BREAKDOWN that leaks,
+      since it carries the real weapon's fire control and range penalty. One definition of "which
+      fragments survive" so the two masks cannot drift apart.*/
+    public static function buildChameleonFireOrderNotes($rawNotes, $fakeNeeded, $realNeeded){
+        $rawNotes = (string)$rawNotes;
+        $notes = '';
+        if (preg_match('/Interception: (\d+) sources:(\d+)/', $rawNotes, $m)){
+            $notes .= 'Interception: ' . $m[1] . ' sources:' . $m[2] . ', final to hit: ' . $fakeNeeded;
+        }
+
+        $delta = $fakeNeeded - $realNeeded;
+        if (preg_match_all('/rolled: (-?\d+), needed: (-?\d+)/', $rawNotes, $shots, PREG_SET_ORDER)){
+            $n = 0;
+            foreach ($shots as $shot){
+                $n++;
+                $notes .= ' FIRING SHOT ' . $n . ': rolled: ' . $shot[1] . ', needed: ' . ((int)$shot[2] + $delta) . "\n";
+            }
+        }
+        return $notes;
+    }
+
     private function deleteHiddenData(){
-        
+
         if ($this->phase == -1){
             foreach ($this->ships as $ship){
                 if ($ship->userid == $this->forPlayer)

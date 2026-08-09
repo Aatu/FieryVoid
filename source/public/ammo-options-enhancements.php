@@ -9,9 +9,11 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 <head>
   <meta charset="utf-8">
   <title>Fiery Void - About the Game</title>
-  <link href="styles/base.css" rel="stylesheet" type="text/css">
-  <link href="styles/lobby.css" rel="stylesheet" type="text/css">
-  <link href="styles/gamesNew.css" rel="stylesheet" type="text/css">    
+  <!-- Shared fv design tokens (roadmap item 6): MUST load before every other stylesheet. -->
+  <link href="<?php echo AssetLoader::getAssetUrl('styles/tokens.css'); ?>" rel="stylesheet" type="text/css">
+  <link href="<?php echo AssetLoader::getAssetUrl('styles/base.css'); ?>" rel="stylesheet" type="text/css">
+  <link href="<?php echo AssetLoader::getAssetUrl('styles/lobby.css'); ?>" rel="stylesheet" type="text/css">
+  <link href="<?php echo AssetLoader::getAssetUrl('styles/gamesNew.css'); ?>" rel="stylesheet" type="text/css">    
 </head>
 <body style="background: url('./img/webBackgrounds/aoe.jpg') no-repeat center center fixed; background-size: cover;">
 

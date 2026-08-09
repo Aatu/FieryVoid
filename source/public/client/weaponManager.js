@@ -27,7 +27,6 @@ window.weaponManager = {
         if (gamedata.isMyShip(ship)) {
 
             system.changeFiringMode();
-            //STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, system);
 
             webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 
@@ -47,7 +46,6 @@ window.weaponManager = {
 
         if (gamedata.isMyShip(ship)) {
             system.setFiringMode(mode);
-            //STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, system);
             webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
         }
     },
@@ -99,127 +97,11 @@ window.weaponManager = {
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
     },
 
-    //STAGE4-RETIRED dead legacy-DOM handler: only ever bound by UI/shipwindow.js
-    //(no longer loaded). Line comments because of the inner block comment.
-    //Delete once the redesign is stable on live.
-    //onHoldfireClicked: function onHoldfireClicked(e) {
-    //    e.stopPropagation();
-    //    var shipwindow = $(".shipwindow").has($(this));
-    //    var systemwindow = $(".system").has($(this));
-    //    var ship = gamedata.getShip(shipwindow.data("ship"));
-    //    var system = shipManager.systems.getSystem(ship, systemwindow.data("id"));
-    //
-    //    if (gamedata.gamephase != 3 && !system.ballistic) return;
-    //
-    //    if (gamedata.gamephase != 1 && system.ballistic) return;
-    //
-    //    if (gamedata.gamephase != 5 && system.preFires) return;
-    //
-    //    if (ship.userid == gamedata.thisplayer) {
-    //        weaponManager.cancelFire(ship, system);
-    //    }
-    //    /* Cleaned 19.8.25 - DK
-    //    if (ship.userid == gamedata.thisplayer) {
-    //        if (!system.duoWeapon) {
-    //            weaponManager.cancelFire(ship, system);
-    //        } else {
-    //            systemwindow.removeClass("duofiring");
-    //
-    //            for (var i in system.weapons) {
-    //                var duoweapon = system.weapons[i];
-    //
-    //                if (weaponManager.hasFiringOrder(ship, duoweapon)) {
-    //                    weaponManager.cancelFire(ship, duoweapon);
-    //                }
-    //            }
-    //        }
-    //    }
-    //    */
-    //},
-
     cancelFire: function cancelFire(ship, system) {
         weaponManager.removeFiringOrder(ship, system);
         ballistics.updateList();
-        //STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, system);
         gamedata.shipStatusChanged(ship);
     },
-
-    /* STAGE4-RETIRED dead legacy-DOM hover glue: these handlers were only ever bound
-       by UI/shipwindow.js / UI/flightwindow.js (no longer loaded), and doWeaponMouseOver/
-       doWeaponMouseout reference the retired legacy systemInfo. The React SystemIcon →
-       uiEvents path replaced all of it. Delete once the redesign is stable on live.
-    onWeaponMouseover: function onWeaponMouseover(e) {
-        if (weaponManager.mouseOutTimer != null) {
-            clearTimeout(weaponManager.mouseOutTimer);
-            weaponManager.mouseOutTimer = null;
-        }
-
-        if (weaponManager.mouseoverTimer != null) return;
-
-        var id = $(this).data("shipid");
-        weaponManager.currentShip = gamedata.getShip(id);
-
-        if ($(this).hasClass("fightersystem")) {
-            weaponManager.currentSystem = shipManager.systems.getFighterSystem(weaponManager.currentShip, $(this).data("fighterid"), $(this).data("id"));
-        } else {
-            weaponManager.currentSystem = shipManager.systems.getSystem(weaponManager.currentShip, $(this).data("id"));
-        }
-
-        var targetElement = $(this);
-
-        weaponManager.mouseoverSystem = targetElement;
-
-        weaponManager.mouseoverTimer = setTimeout(weaponManager.doWeaponMouseOver, 150);
-    },
-
-    onWeaponMouseoverDuoSystem: function onWeaponMouseoverDuoSystem(e) {
-        // ignore this. We've already entered the parent of this duosystem
-    },
-
-    onWeaponMouseOutDuoSystem: function onWeaponMouseOutDuoSystem(e) {
-        // ignore this. We've already entered the parent of this duosystem
-    },
-
-    onWeaponMouseOut: function onWeaponMouseOut(e) {
-        if (weaponManager.mouseoverTimer != null) {
-            clearTimeout(weaponManager.mouseoverTimer);
-            weaponManager.mouseoverTimer = null;
-        }
-
-        weaponManager.mouseOutTimer = setTimeout(weaponManager.doWeaponMouseout, 50);
-    },
-
-    doWeaponMouseOver: function doWeaponMouseOver(e) {
-        if (weaponManager.mouseoverTimer != null) {
-            clearTimeout(weaponManager.mouseoverTimer);
-            weaponManager.mouseoverTimer = null;
-        }
-
-        systemInfo.hideSystemInfo();
-
-        if (weaponManager.mouseoverSystem == null) {
-            return;
-        }
-
-        var weapon = shipManager.systems.initializeSystem(weaponManager.currentSystem);
-        webglScene.customEvent('SystemMouseOver', {
-            ship: weaponManager.currentShip,
-            system: weapon,
-            element: weaponManager.mouseoverSystem
-        });
-    },
-
-    doWeaponMouseout: function doWeaponMouseout() {
-        if (weaponManager.mouseOutTimer != null) {
-            clearTimeout(weaponManager.mouseOutTimer);
-            weaponManager.mouseOutTimer = null;
-        }
-
-        systemInfo.hideSystemInfo();
-        weaponManager.mouseoverSystem = null;
-        webglScene.customEvent('SystemMouseOut');
-    },
-    STAGE4-RETIRED end */
 
     unSelectWeapon: function unSelectWeapon(ship, weapon) {
         for (var i = gamedata.selectedSystems.length - 1; i >= 0; i--) {
@@ -237,7 +119,6 @@ window.weaponManager = {
             */
         }
 
-        //STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, weapon);
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: weapon });
     },
 
@@ -584,12 +465,10 @@ window.weaponManager = {
                             ship: ship,
                             weapon: ship.systems[i].systems[b].weapon
                         });
-                        //STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, ship.systems[i].systems[b].weapon);
                     }
                 }
             }
         }
-        //STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, weapon);
         webglScene.customEvent('WeaponSelected', { ship: ship, weapon: weapon });
         //Moved to AFTER onWeaponSelected() in Fire phase strategy, to prevent prevent error when selecting a weapon and friendly fighter flight is selected unit - DK 6.25        
         gamedata.selectedSystems.push(weapon);
@@ -1045,6 +924,22 @@ window.weaponManager = {
             var onArc = weapon.isPosOnSpecialArc(shooter, position);
             //confirm.error("Target hex is not in arc.");	          
             return onArc;
+        }
+
+        //A split-arc mount (Shadow Heavy Slicer) bears in EVERY one of its arcs, exactly as
+        //isOnWeaponArc treats it for ship targets - and the live startArc/endArc is no guide to
+        //which one, since changeFiringMode indexes startArcArray by firing mode and a split pair
+        //sits at indices 0 and 1. Without this, picking intercept targets off incoming ballistics
+        //and hex targeting both saw one arbitrary arc of the pair.
+        if (weapon.splitArcs) {
+            var multipleArcs = shipManager.systems.getMultipleArcs(shooter, weapon);
+            if (multipleArcs.length) {
+                return multipleArcs.some(function (arc) {
+                    return mathlib.isInArc(targetCompassHeading,
+                        mathlib.addToDirection(arc.start, shooterFacing),
+                        mathlib.addToDirection(arc.end, shooterFacing));
+                });
+            }
         }
 
         var arcs = shipManager.systems.getArcs(shooter, weapon);
@@ -1907,7 +1802,7 @@ window.weaponManager = {
                  - shotMods.defensiveSystems
                  + shotMods.calledShot
                  + shotMods.otherTotal;
-        var hitChance = Math.round(goal / 20 * 100);
+        var hitChance = Math.round(goal * 5);
 
         //Build modifier list (zeros omitted)
         var modifiers = [];
@@ -3440,6 +3335,36 @@ window.weaponManager = {
     },
     */
 
+    /* True once the SERVER has resolved this fire order, i.e. the dice have been rolled and
+       shotshit/needed/damage all mean something. The four callers below use it to decide whether
+       an order may be RENDERED AS A RESULT - a replay fire animation, a combat-log line.
+
+       This replaces `fire.rolled !== 0`, which was right about server data and wrong about the
+       client's own. An order the player has just declared is built as a plain object literal (see
+       setSelfIntercept and the weapon models' equivalents) that carries no `rolled` key at all, so
+       `undefined !== 0` passed the old test and the order was drawn as though it had been fired -
+       with `shotshit` equally absent, printing the literal "NaN/2 shots hit" (user report
+       2026-08-03).
+
+       Those locally-built objects survive far longer than they look like they should: while a
+       player waits, the APCu fast poll answers with a bare "{}" (gamedata.php), which
+       parseServerData discards without reaching setShipsFromJson - so nothing replaces them until
+       the server actually has news. Surrendering mid-wait then puts that same client into
+       ReplayPhaseStrategy over its own never-resolved orders, which Firing::withdrawSurrenderedFireOrders
+       has meanwhile withdrawn server-side. Re-fetching the turn already showed the correct log,
+       which is why the entries vanished on stepping away and back; this closes the window before
+       that fetch. Nothing about the hole is surrender-specific - any replay rendered over
+       unsubmitted local state would have hit the same NaN.
+
+       `> 0` rather than a bare truthy test, to match the server's own convention for the same
+       question (Firing::fireWeapons and the Weapon::fire family gate on `$fire->rolled > 0`, and
+       auto-hit weapons force `max(1, rolled)` purely to satisfy it). Verified equivalent to the
+       old test on real data: across the local corpus every persisted order has `rolled` 0 or
+       positive - never null, never negative - and no order with a recorded hit has `rolled` 0. */
+    isResolvedFireOrder: function isResolvedFireOrder(fire) {
+        return Number(fire.rolled) > 0;
+    },
+
     getAllHexTargetedBallistics: function () {
 
         var results = [];
@@ -3455,7 +3380,7 @@ window.weaponManager = {
                 var fireOrder = fires[f];
 
                 if (fireOrder.targetid !== -1) continue;
-                if (fireOrder.rolled === 0) continue;
+                if (!weaponManager.isResolvedFireOrder(fireOrder)) continue;
 
                 var weapon = shipManager.systems.getSystem(shooter, fireOrder.weaponid);
 
@@ -3496,7 +3421,7 @@ window.weaponManager = {
                 return fire.targetid === target.id && (fire.type === "prefiring");
             }));
         }, []).filter(function (fire) {
-            return fire.rolled !== 0;
+            return weaponManager.isResolvedFireOrder(fire);
         }).map(function (fireOrder) {
             var shooter = gamedata.getShip(fireOrder.shooterid);
             return {
@@ -3540,7 +3465,7 @@ window.weaponManager = {
                 return fire.targetid === target.id && (fire.type === "normal" || fire.type === "ballistic");
             }));
         }, []).filter(function (fire) {
-            return fire.rolled !== 0;
+            return weaponManager.isResolvedFireOrder(fire);
         }).map(function (fireOrder) {
             var shooter = gamedata.getShip(fireOrder.shooterid);
             return {
@@ -3617,7 +3542,6 @@ window.weaponManager = {
             }
         }
 
-        //STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, system);
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
     },
 
@@ -3942,7 +3866,7 @@ window.weaponManager = {
 
         // ✅ Combined filter: only keep orders from the given turn that have been rolled
         fires = fires.filter(function (fireOrder) {
-            return fireOrder.turn == turn && fireOrder.rolled !== 0;
+            return fireOrder.turn == turn && weaponManager.isResolvedFireOrder(fireOrder);
         });
 
         return fires;

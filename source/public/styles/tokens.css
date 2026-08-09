@@ -1,0 +1,163 @@
+/*
+ * tokens.css — the single :root token set for every Fiery Void page.
+ *
+ * Roadmap item 6 (visual unification), Stage 1. See VISUAL_UNIFICATION_PLAN.md.
+ *
+ * WHY THIS FILE EXISTS
+ * --------------------
+ * The games.php redesign introduced the --fv-* scheme and proved it works, but it
+ * declared the tokens inside gamesPanel.css and then had to declare a SECOND copy in
+ * ladder.css (creategame.php includes ladder.php without linking gamesPanel.css). Two
+ * copies that "have to be retuned together" is a bug waiting to happen, and a third copy
+ * would have been a trend. Both copies are now gone: this file is the only :root block.
+ *
+ * It is also what makes Stage 4 cheap. Per the plan's audit the palette across the 16
+ * stylesheets is already ~90% coherent — the visible mismatch between the legacy chrome
+ * and the item-5 SCS ship windows is GEOMETRY and TYPE, not colour. Naming the four
+ * corner radii below means the eventual "square everything" retune is a four-line change
+ * instead of a search-and-replace across 10,000 lines of CSS.
+ *
+ * HOW TO USE IT
+ * -------------
+ * Linked FIRST on every page, ahead of every other stylesheet, and versioned through
+ * AssetLoader::getAssetUrl() like all the others (Stage 0) — .htaccess caches text/css
+ * for a month, so an unversioned token edit would reach returning players as a half-
+ * retuned screen for up to that long.
+ *
+ * Nothing in here paints anything. It only declares values. Adding a token is cheap;
+ * changing one repaints every page at once, which is the point.
+ *
+ * SYNC CONTRACT WITH theme.js
+ * ---------------------------
+ * client/UI/reactJs/styled/theme.js is the styled-components half of the same palette.
+ * The two are deliberately kept as two files — a build step that generated one from the
+ * other is not worth a new pipeline dependency for ~30 values — and are kept honest by
+ * the cross-reference comments below. If you retune a value here that names a theme.js
+ * key, retune it there too (and vice versa), then `yarn build`.
+ */
+
+:root {
+
+  /* ── Surfaces ──────────────────────────────────────────────────────────────
+     Panels and window fills, darkest first. --fv-chrome and --fv-chrome-scs are
+     the two competing window bodies item 6 exists to reconcile: the 2011 legacy
+     teal and the item-5 desaturated SCS blue-grey. */
+  --fv-well: #04161c;                 /* theme.colors.panelBg                    */
+  --fv-card: #0a1c26;
+  --fv-card-hover: #102a36;
+  --fv-panel: rgba(23, 39, 54, 0.92); /* base.css .panel — the site-wide page panel */
+  --fv-chrome-scs: #152029de;         /* theme.colors.windowBg                   */
+  --fv-overlay: black;                /* map tooltips + shadows                  */
+
+  /* HISTORICAL — the 2011 chrome. Nothing paints with these any more; every surface that
+     did was converged in Stage 4. They are kept, rather than deleted, because they are the
+     documented revert path: putting the old look back means pointing the converted rules
+     at these two (and their theme.js twins, colors.chromeBg / colors.chromeLine) rather
+     than re-deriving the values from git history. Do not reach for them in new code. */
+  --fv-chrome: #0a3340;
+  --fv-line-chrome: #587e8d;
+
+  /* ── Lines ─────────────────────────────────────────────────────────────────
+     Three borders for the same job, one per world. Stage 4 converges the chrome
+     surfaces onto --fv-line-scs; --fv-line stays the landing page's own. */
+  --fv-line: #215a7a;                 /* the landing page's own border, unchanged */
+  --fv-line-soft: #1a3f55;
+  --fv-line-scs: #496791;             /* theme.colors.line — THE border now      */
+  --fv-rule: #1e3a4a;                 /* the divider under a modal's control bar */
+
+  /* ── Text ──────────────────────────────────────────────────────────────────
+     --fv-text-dim is NOT theme.colors.textDim (#7f9bb8): the landing page runs a
+     lighter dim for contrast over its nebula backdrop. Two deliberate values, so
+     don't "fix" either to match the other. */
+  --fv-text: #deebff;
+  --fv-text-bright: #ffffff;          /* theme.colors.text — text on the black overlay */
+  --fv-text-accent: #C6E2FF;          /* theme.colors.textAccent — bluish-white values */
+  --fv-text-dim: #8ca5c0;
+  --fv-accent: #8bcaf2;
+
+  /* ── Type ──────────────────────────────────────────────────────────────────
+     Body text is Arial everywhere and is not tokenised — gamesNew.css enforces it
+     with `* { font-family: Arial }`, and a universal selector matches every element
+     DIRECTLY, which beats an inherited face regardless of specificity. Anything
+     below has to be applied to the element itself, not to an ancestor. */
+  --fv-mono: Consolas, "Lucida Console", monospace;   /* theme.fonts.mono        */
+  --fv-display: "Orbitron", sans-serif;               /* @imported by gamesNew.css */
+  --fv-hero: "Bruno Ace SC", sans-serif;              /* @imported by gamesNew.css */
+
+  /* ── Geometry ──────────────────────────────────────────────────────────────
+     THE corner radius is the single most visible tell that a surface belongs to the
+     old world or the new one, so each of the four in play gets a name. Stage 4
+     retunes these and (mostly) nothing else.
+
+     Stage 4 has squared the React overlays (--fv-radius-pill, mirroring
+     theme.radii.pill). The two still at their 2011 values are simply not converted
+     yet — the jQuery surfaces that consume them hold literal hex to this day and
+     have to be pointed at the tokens first. */
+  --fv-radius-chrome: 0px;            /* #phaseheader + log tabs — squared, was 8px/5px */
+  --fv-radius-modal: 0px;             /* .confirm — squared, was 5px             */
+  --fv-radius-tooltip: 7px;           /* both map tooltips — rounded ON PURPOSE   */
+
+  /* ── Top-bar HUD geometry ──────────────────────────────────────────────────
+     The strip along the top of game.php is FOUR boxes that have to read as one row:
+     #phaseheader and #replayUI on the left (tactical.css / replay.css), and the
+     Surrender / FullScreen / PlayerSettings buttons on the right (React, sized from
+     theme.hud). They were three independent height calculations and came out 35 / 35 / 46
+     (user report 2026-08-04). --fv-hud-bar / --fv-hud-bar-small are the shared OUTER
+     height — border-box, top border dropped on every box because the row is flush into the
+     screen edge — so matching them is now one value rather than three sums.
+
+     Derived from theme.hud.btn / btnSmall + the 1px bottom border those buttons keep.
+     Retune theme.hud and these follow, not the other way round.
+
+     --fv-hud-strip is how much of the right-hand edge the button row occupies:
+     3 boxes + the two 10px gaps between them (see the `right:` arithmetic in
+     Surrender.js / FullScreen.js). #topcontainer subtracts it so the phase header
+     cannot grow underneath the buttons — it is deliberately the width of ALL THREE even
+     though Surrender hides itself outside a live game, because a reservation that
+     changed with the button count would make the bar jump. */
+  --fv-hud-bar: 36px;                 /* theme.hud.btn 45px + 1px bottom border    */
+  --fv-hud-bar-small: 25px;           /* theme.hud.btnSmall 30px + 1px             */
+  --fv-hud-strip: 155px;              /* (45 x 3) + (10 x 2)                       */
+  --fv-hud-strip-small: 110px;        /* (30 x 3) + (10 x 2)                       */
+
+  /* STANDING EXCEPTION — do NOT square this one when the chrome converges.
+     The initiative panel (#iniGui) and its pull-tab (#backDiv) are a DRAWER and its
+     HANDLE, anchored to the left screen edge: the rounding is only on the right-hand
+     corners, and that curve is what makes them read as sliding out rather than as
+     docked chrome. User decision 2026-07-30. It is deliberately its own token so a
+     future retune of --fv-radius-chrome cannot sweep it up by accident. */
+  --fv-radius-drawer: 10px;           /* #iniGui + #backDiv, right-hand corners    */
+
+  /* ── Scrollbars ────────────────────────────────────────────────────────────
+     The "site-standard scrollbar" is currently copy-pasted six times with four
+     different thumb colours. These are the games.php/ladder pair — the SCS-facing
+     ones — and are what the other copies converge on when they are rewired.
+     Rewiring is a visible change, so it belongs to Stage 4, not here. */
+  --fv-scroll-track: #0c151a;
+  --fv-scroll-thumb: #2a4a66;
+  --fv-scroll-thumb-hover: #3a6a96;
+
+  /* ── Status ────────────────────────────────────────────────────────────────
+     Signals, not chrome: these carry meaning and must survive any reskin intact.
+     The first three already agree across both stacks. */
+  --fv-ok: #427231;                   /* theme.colors.healthOk                   */
+  --fv-warn: #e1b000;                 /* theme.colors.warning                    */
+  --fv-crit: #ed6738;                 /* theme.colors.healthCrit                 */
+
+  /* Landing-page game states. --fv-mine is --fv-lobby's green under a second name:
+     "you are in this one" is a different statement from "this is a lobby", and
+     naming them apart means either can be retuned without disturbing the other.
+     --fv-mine-soft is a pastel of it for TEXT — #52b352 on the card fill is about
+     3.4:1, the pastel is ~9:1. --fv-ended is muted rather than a signal red: an
+     ended game is over, not a problem. */
+  --fv-turn: #84a5ce;
+  --fv-turn-bg: #254d82d0;
+  --fv-lobby: #52b352;
+  --fv-ladder: #e6ac00;
+  --fv-fleet: #0d7ea3;
+  --fv-done: #2f4a52;
+  --fv-idle: #3a5a72;
+  --fv-mine: #52b352;
+  --fv-mine-soft: #7ed576;
+  --fv-ended: #b76662;
+}

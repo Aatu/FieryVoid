@@ -1,6 +1,7 @@
 import * as React from "react";
 import styled from 'styled-components';
 import { Backdrop, Clickable } from "../styled";
+import theme from "../styled/theme";
 import { InputAndLabel } from "../common";
 
 
@@ -124,20 +125,25 @@ const Overlay = styled(Backdrop)`
 `;
 
 /* Compact modal card. Sits centred over the Backdrop; the panel itself scrolls
-   internally (Body) so it never overflows a short viewport. Palette + hairline
-   borders match the phase header / replay UI HUD. */
+   internally (Body) so it never overflows a short viewport.
+
+   Roadmap item 6, Stage 4 surface 4: this is a MODAL, so it converted with the .confirm
+   dialogs rather than with the map overlays, and it takes the same answers they did -
+   the opaque panel fill (a dialog has to stay readable over a busy map) and
+   theme.radii.modal. Its palette used to be tuned to the phase header, which has since
+   moved too, so the two still agree - they just agree on the SCS values now. */
 const Panel = styled.div`
     display: flex;
     flex-direction: column;
     width: 520px;
     max-width: calc(100% - 24px);
     max-height: 88vh;
-    background-color: #071f26;
-    border: 1px solid #587e8d;
-    border-radius: 8px;
+    background-color: ${theme.colors.panelBg};
+    border: 1px solid ${theme.colors.line};
+    border-radius: ${theme.radii.modal};
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.65);
-    color: #deebff;
-    font-family: arial;
+    color: ${theme.colors.chromeText};
+    font-family: ${theme.fonts.body};
     overflow: hidden;
 
     /* Portrait phones OR short landscape phones (wider than 765px). */
@@ -154,8 +160,8 @@ const Header = styled.div`
     justify-content: space-between;
     flex-shrink: 0;
     padding: 10px 8px 10px 16px;
-    background-color: #0a3340;
-    border-bottom: 1px solid #587e8d;
+    background-color: ${theme.colors.windowBg};
+    border-bottom: 1px solid ${theme.colors.line};
 `;
 
 const HeaderTitle = styled.span`

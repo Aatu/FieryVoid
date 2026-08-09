@@ -60,16 +60,6 @@ class Dice {
     }
 }
 
-// autoload.php does not include CustomException; it only surfaces on a DB
-// connect failure, masking the real error. Stub it (same as scratch scripts).
-if (!class_exists('CustomException')) {
-    class CustomException extends Exception {
-        public function __construct($code, $msg, $s = 0, $e = null) {
-            parent::__construct($msg, (int)$code);
-        }
-    }
-}
-
 class ReplayHarness {
 
     const CHECKS = array('snapshot', 'movement', 'tohit');

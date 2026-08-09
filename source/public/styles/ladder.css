@@ -14,33 +14,12 @@
  */
 
 /* ── Tokens ────────────────────────────────────────────────────────────────────
-   A copy of the subset gamesPanel.css :root defines, with identical values. It is a
-   copy on purpose: creategame.php includes ladder.php but links only ladder.css, so
-   this window has to paint itself with no other stylesheet present. On games.php
-   gamesPanel.css loads after this file and re-declares the same values, so the two
-   never disagree in practice — but they do have to be retuned together. */
-:root {
-  --fv-well: #04161c;                 /* theme.colors.panelBg */
-  --fv-card: #0a1c26;
-  --fv-card-hover: #102a36;
-
-  --fv-line: #215a7a;                 /* the landing page's border */
-  --fv-line-soft: #1a3f55;
-  --fv-line-scs: #496791;             /* theme.colors.line */
-  --fv-rule: #1e3a4a;                 /* the divider under a modal's control bar */
-
-  --fv-text: #deebff;
-  --fv-text-dim: #8ca5c0;             /* theme.colors.textDim */
-  --fv-accent: #8bcaf2;
-
-  --fv-mine: #52b352;
-  --fv-mine-soft: #7ed576;
-  --fv-ladder: #e6ac00;
-  --fv-ended: #b76662;
-
-  --fv-mono: Consolas, "Lucida Console", monospace;   /* theme.fonts.mono */
-  --fv-display: "Orbitron", sans-serif;               /* @imported by gamesNew.css */
-}
+   This file used to carry its own copy of the --fv-* set, because creategame.php
+   includes ladder.php but links only ladder.css, so the window had to be able to
+   paint itself with gamesPanel.css absent. Both copies are gone: the tokens now
+   live in styles/tokens.css, which is linked first on EVERY page — including
+   creategame.php — so there is nothing left to keep in sync (roadmap item 6,
+   Stage 1). Values are unchanged; only the declaration site moved. */
 
 /* gamesNew.css opens with `* { font-family: Arial }`, and a universal selector matches
    every element DIRECTLY — a direct match beats an inherited display face regardless of

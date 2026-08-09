@@ -204,7 +204,9 @@
 	}
 	    
 	    
-	public function damage($target, $shooter, $fireOrder, $gamedata, $damage, $forcePrimary = false){ //always hit Structure...
+	//The ALLOCATION strategy only - Weapon::damage() is the entry point and adds the Chameleon
+	//mirror pass (D3) around whichever strategy the weapon uses.
+	protected function damageOneSheet($target, $shooter, $fireOrder, $gamedata, $damage, $forcePrimary = false){ //always hit Structure...
 		if ($target->isDestroyed()) return;
 		$tmpLocation = $fireOrder->chosenLocation;	
 

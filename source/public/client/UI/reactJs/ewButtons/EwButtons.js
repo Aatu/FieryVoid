@@ -1,7 +1,8 @@
 
 import React from "react";
 import styled from "styled-components";
-import { ContainerRoundedRightSide, Clickable } from "../styled";
+import { ContainerShadowed, Clickable } from "../styled";
+import theme from "../styled/theme";
 
 class EwButtons extends React.Component {
     constructor(props) {
@@ -199,24 +200,32 @@ class EwButtons extends React.Component {
 const Container = styled.div`
     position: fixed;
     right: 0;
-    top: 60px;
+    top: 55px;
     z-index: 4;
 
     /* Narrow phones (portrait) OR short landscape phones: nudge up.
        Landscape phones report width > 765px, so key off short height too. */
     @media (max-width: 765px), (max-height: 500px) and (orientation: landscape) {
-        top: 50px;
+        top: 40px;
     }
 
 `;
 
-const MainButton = styled(ContainerRoundedRightSide)`
+/* Box geometry comes from theme.hud, shared with FullScreen and PlayerSettings so the
+   three HUD button families cannot drift apart again (they had - see the note in theme.js).
+
+   The old `font-size: 32px` / `20px` is GONE rather than tokenised: every button in this
+   strip is a PNG background-image, so nothing here has ever rendered text and the
+   font-size was doing nothing at all. It is exactly the "font-size used to scale the
+   buttons" pattern the other two files really did suffer from, left behind here as a
+   fossil. These icons scale with the BOX (background-size: cover), which is the behaviour
+   the other two were changed to match. */
+const MainButton = styled(ContainerShadowed)`
     display: flex;
-    width: 45px;
-    height: 45px;
+    width: ${theme.hud.btn};
+    height: ${theme.hud.btn};
     align-items: center;
     justify-content: center;
-    font-size: 32px;
     border-right: none;
     margin-top: 3px;
     background-repeat: no-repeat;
@@ -226,9 +235,8 @@ const MainButton = styled(ContainerRoundedRightSide)`
     /* Shrink on narrow phones (portrait) AND short landscape phones — a phone
        held sideways is wider than 765px, so also match on short viewport height. */
     @media (max-width: 765px), (max-height: 500px) and (orientation: landscape) {
-        width: 30px;
-        height: 30px;
-        font-size: 20px;
+        width: ${theme.hud.btnSmall};
+        height: ${theme.hud.btnSmall};
     }
 `;
 
@@ -238,19 +246,25 @@ const EEWButton = styled(MainButton)`
 const FEWButton = styled(MainButton)`
     background-image: url("./img/FEW.png");
 `;
+/* The untoggled branch of each button below repeats its own base fill and border. That
+   is not decoration - these are styled(MainButton) and MainButton is a Container variant,
+   so an untoggled branch left on the old teal would fight the shell it sits in. They
+   track the Container: theme.colors.windowBg / theme.colors.line (roadmap item 6, Stage 4).
+   The TOGGLED values are signals, not chrome - limegreen means "this is on" - so they are
+   deliberately left alone by the reskin. */
 const EBButton = styled(MainButton)`
     background-image: url("./img/ballisticTarget2.png");
     box-shadow: ${props => (props.$toggled ? "inset 0 0 15px 5px rgba(50, 205, 50, 0.4)" : "none")};
-    background-color: ${props => (props.$toggled ? "#1b533d" : "#0a3340")};
-    border: 1px solid ${props => (props.$toggled ? "limegreen" : "#587e8d")};
-    border-right: none;    
+    background-color: ${props => (props.$toggled ? "#1b533d" : theme.colors.windowBg)};
+    border: 1px solid ${props => (props.$toggled ? "limegreen" : theme.colors.line)};
+    border-right: none;
 `;
 const FBButton = styled(MainButton)`
     background-image: url("./img/ballisticLaunch2.png");
     box-shadow: ${props => (props.$toggled ? "inset 0 0 15px 5px rgba(50, 205, 50, 0.4)" : "none")};
-    background-color: ${props => (props.$toggled ? "#1b533d" : "#0a3340")};
-    border: 1px solid ${props => (props.$toggled ? "limegreen" : "#587e8d")};
-    border-right: none;    
+    background-color: ${props => (props.$toggled ? "#1b533d" : theme.colors.windowBg)};
+    border: 1px solid ${props => (props.$toggled ? "limegreen" : theme.colors.line)};
+    border-right: none;
 `;
 const LoSButton = styled(MainButton)`
     background-image: url("./img/los1.png");
@@ -258,7 +272,7 @@ const LoSButton = styled(MainButton)`
         props.$toggled
             ? "brightness(1.6) sepia(0.85) hue-rotate(60deg) saturate(4)"
             : "none"};
-    border: 1px solid ${props => (props.$toggled ? "limegreen" : "#587e8d")};
+    border: 1px solid ${props => (props.$toggled ? "limegreen" : theme.colors.line)};
     border-right: none;
 `;
 const HexButton = styled(MainButton)`
@@ -267,7 +281,7 @@ const HexButton = styled(MainButton)`
         props.$toggled
             ? "brightness(1.6) sepia(0.85) hue-rotate(60deg) saturate(4)"
             : "none"};
-    border: 1px solid ${props => (props.$toggled ? "limegreen" : "#587e8d")};
+    border: 1px solid ${props => (props.$toggled ? "limegreen" : theme.colors.line)};
     border-right: none;
 `;
 
@@ -276,7 +290,7 @@ const BgButton = styled(MainButton)`
         props.$toggled
             ? "brightness(1.6) sepia(0.85) hue-rotate(60deg) saturate(4)"
             : "none"};
-    border: 1px solid ${props => (props.$toggled ? "limegreen" : "#587e8d")};
+    border: 1px solid ${props => (props.$toggled ? "limegreen" : theme.colors.line)};
     border-right: none;
     position: relative;
 
@@ -300,13 +314,18 @@ const SoundButton = styled(MainButton)`
         props.$toggled
             ? 'url("./img/soundOn.png")'
             : 'url("./img/soundOff.png")'};
-    border: 1px solid #587e8d;
+    border: 1px solid ${theme.colors.line};
     border-right: none;
 `;
 
 export default EwButtons;
 
-/* //Old version without audio
+/* //Old version without audio.
+   ⚠️ DEAD, and NOT revivable by uncommenting - it would need porting first. Two reasons:
+   it calls `ContainerRoundedRightSide.extend`, which is the styled-components v3 API that
+   was removed in v4, and that component no longer exists at all (item 6 collapsed the
+   three ContainerRounded* variants into ContainerShadowed). Kept only as a record of the
+   pre-audio behaviour; it was deliberately left out of the item-6 reskin.
 import React from "react";
 import styled from "styled-components";
 import { ContainerRoundedRightSide, Clickable } from "../styled";

@@ -10,6 +10,7 @@ class ArmedShuttleEA extends FighterFlight{
         $this->shipClass = "Armed Shuttles";
         $this->imagePath = "img/ships/shuttle.png";
         $this->isd = 2200;
+        $this->notes = 'Must launch both missiles at same target.';          
         
 		Enhancements::nonstandardEnhancementSet($this, 'Shuttles');
         

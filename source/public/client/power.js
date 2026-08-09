@@ -982,8 +982,6 @@ shipManager.power = {
 
 		shipManager.power.setBoost(ship, system);
 		system.onBoostIncrease(); //To apply conditions/effects when a system is actually boosted.		
-		//STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, system);
-		//STAGE4-RETIRED if (!ship.flight) shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	},
 
@@ -1018,8 +1016,6 @@ shipManager.power = {
 		*/
 		shipManager.power.unsetBoost(ship, system);
 		system.onBoostDecrease();
-		//STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, system);
-		//STAGE4-RETIRED if (!ship.flight) shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	},
 
@@ -1046,8 +1042,6 @@ shipManager.power = {
 			array[i].power.push({ id: null, shipid: ship.id, systemid: array[i].id, type: 1, turn: gamedata.turn, amount: 0 });
 
 			shipManager.power.stopOverloading(ship, array[i]);
-			//STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, array[i]);
-			//STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 		}
 
 		webglScene.customEvent('SystemDataChanged', { ship: ship });
@@ -1093,8 +1087,6 @@ shipManager.power = {
 		if (system.overloadshots == 0) { //To prevent stop overload AFTER an initial sustained shot is fired.
 			shipManager.power.stopOverloading(ship, system);
 		}
-		//STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, system);
-		//STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 
 		if (system.weapon) {
 			weaponManager.unSelectWeapon(ship, system);
@@ -1139,8 +1131,6 @@ shipManager.power = {
 				continue; //cooldown crit — cannot be re-enabled by the player
 			} else if (shipManager.power.isOffline(ship, array[i])) {
 				shipManager.power.setOnline(ship, array[i]);
-				//STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, array[i]);
-				//STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 			}
 		}
 
@@ -1166,13 +1156,11 @@ shipManager.power = {
 		if (shipManager.power.isForcedOffline(ship, system)) return;
 
 		shipManager.power.setOnline(ship, system);
-		//STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, system);
 
 		if (system.name == "shieldGenerator" || system instanceof ThirdspaceShieldGenerator) {
 			system.onTurnOn(ship);
 		}
 
-		//STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	},
 
@@ -1188,8 +1176,6 @@ shipManager.power = {
 		console.log("I am boosting!")
 
 		shipManager.power.setOverloading(ship, system);
-		//STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, system);
-		//STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	},
 
@@ -1206,8 +1192,6 @@ shipManager.power = {
 		if (system.overloadshots < system.extraoverloadshots && system.overloadshots !== 0) return; //To prevent stop overload AFTER an initial sustained shot is fired.
 
 		shipManager.power.stopOverloading(ship, system);
-		//STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, system);
-		//STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
 

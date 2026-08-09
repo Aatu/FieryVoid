@@ -707,18 +707,32 @@ window.ajaxInterface = {
 
             if (ship.userid === gamedata.thisplayer) {
                 if (!(Object.keys(ship.attached).length !== 0 && !ship.detached)) {
-                    for (var a = ship.movement.length - 1; a >= 0; a--) {
+                    /* Ascending + push, NOT descending + assign-at-source-index. Writing
+                       each kept move back at its ORIGINAL index left a hole wherever a
+                       previous-turn move was skipped, so JSON.stringify emitted leading
+                       nulls and getShipsFromJSON turned each one into a junk MovementOrder
+                       (id -1, type null, turn 0, hex 0,0). submitMovement drops those on its
+                       turn check so the DB stayed clean, but MovementGamePhase's
+                       "$activeShip->movement = $ship->movement" copies them onto the
+                       authoritative ship - so the submit RESPONSE carried them and
+                       consumeMovement read defaultPosition off a phantom move at hex (0,0).
+                       Ascending order is required, not incidental: submitMovement inserts in
+                       array order and the resulting row ids are what orders replay. */
+                    for (var a = 0; a < ship.movement.length; a++) {
                         var move = ship.movement[a];
                         if (move.turn == gamedata.turn) {
-                            newShip.movement[a] = move;
+                            newShip.movement.push(move);
                         }
                     }
                 }
 
-                for (var a = ship.EW.length - 1; a >= 0; a--) {
+                //Same index-assign defect as the movement loop above. Benign today (submitEW
+                //skips entries whose turn isn't the current one, and validateEW is a no-op
+                //stub), but it padded the payload with the same nulls.
+                for (var a = 0; a < ship.EW.length; a++) {
                     var ew = ship.EW[a];
                     if (ew.turn == gamedata.turn) {
-                        newShip.EW[a] = ew;
+                        newShip.EW.push(ew);
                     }
                 }
 
@@ -840,7 +854,6 @@ window.ajaxInterface = {
             var ship = tidyships[i];
             ship.htmlContainer = null;
             ship.shipclickableContainer = null;
-            //STAGE4-RETIRED ship.shipStatusWindow = null;
             if (gamedata.isMyShip(ship)) {
                 for (var a = ship.movement.length - 1; a >= 0; a--) {
                     var move = ship.movement[a];

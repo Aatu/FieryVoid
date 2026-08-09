@@ -1,12 +1,24 @@
 <?php
+/* RETIRED HULL - do not add to this class, and do not put the Chameleon Sensor Suite back on it.
+
+   This is the original Dargan: an ordinary ELINT Strike Cruiser. The Chameleon version lives in
+   darganChameleon.php as class DarganChameleon, and that is what the lobby now offers.
+
+   The split exists so that games ALREADY IN PROGRESS on live are not disturbed. Their ships carry
+   phpclass 'Dargan' and were bought as ELINT hulls; system ids are construction-order positional
+   (arch_positional_system_id_trap), so swapping the array here would silently re-point every stored
+   damage row, critical and individual note from that id onward. variantOf = 'NONE' is the standard
+   retirement sentinel - it hides the hull from fleet selection and from the Chameleon disguise
+   candidate list (ShipLoader::isLegalDisguiseTarget) without breaking a single existing game. */
 class Dargan extends BaseShip{
-    
+
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
-        
+
 		$this->pointCost = 750;
 		$this->faction = "Centauri Republic";
         $this->phpclass = "Dargan";
+        $this->variantOf = 'NONE'; //retired: superseded by DarganChameleon. See the note above.
         $this->imagePath = "img/ships/dargan.png";
         $this->shipClass = "Dargan Strike Cruiser";
         $this->shipSizeClass = 3;
@@ -25,14 +37,12 @@ class Dargan extends BaseShip{
         $this->rollcost = 2;
         $this->pivotcost = 3;
 	    
-	    $this->notes = 'Chameleon Sensors (no effect in game).'.
-	    $this->notes .= '<br>Rutarian-capable.'.
-		
-        
-         
+	    $this->notes = 'Chameleon Sensors (no effect in game).';
+	    $this->notes .= '<br>Rutarian-capable.';
+
         $this->addPrimarySystem(new Reactor(6, 22, 0, 0));
         $this->addPrimarySystem(new CnC(7, 18, 0, 0));
-        $this->addPrimarySystem(new ElintScanner(6, 20, 4, 10));
+        $this->addPrimarySystem(new ElintScanner(6, 20, 4, 10)); //ORIGINAL array - do not change, see the class note
         $this->addPrimarySystem(new Engine(6, 20, 0, 12, 2));
 	$this->addPrimarySystem(new Hangar(6, 14));
         $this->addPrimarySystem(new TwinArray(4, 6, 2, 90, 270));

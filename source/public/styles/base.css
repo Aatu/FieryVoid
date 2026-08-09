@@ -35,23 +35,40 @@ a.link:hover {
 	font-style: normal;
 }
 
+/* The generic page panel — the box behind the login form, registration, profile, faq and
+   the rest of the 13 pages that link this file. Converged with the game screen (roadmap
+   item 6, user decision 2026-07-30) so the site reads as one product rather than as a
+   landing page bolted to a game.
+
+   Its border was ALREADY #496791, so only the fill and the corners actually moved.
+
+   ⚠️ The opacity went 0.9 -> 1 and that is not "turning off" the translucency, it is
+   moving it. The old fill was OPAQUE, so the 0.9 was the only thing letting the nebula
+   backdrop through — and it faded the CONTENT (form text) along with the box.
+   --fv-panel carries its own 0.92 alpha, so the box still shows the backdrop at
+   essentially the same strength while the text on top of it goes fully crisp. Set both
+   and you would multiply them, per the trap documented on tactical.css #phaseheader. */
 .panel {
-	opacity: 0.9;
+	opacity: 1;
 	padding: 10px;
-	border: 1px solid #496791;
-	background-color: #0a3340;
-	border-radius: 5px 5px 5px 5px;
-	-moz-border-radius: 5px 5px 5px 5px;
-	-webkit-border-radius: 5px;
+	border: 1px solid var(--fv-line-scs);
+	background-color: var(--fv-panel);
+	border-radius: var(--fv-radius-chrome);
+	-moz-border-radius: var(--fv-radius-chrome);
+	-webkit-border-radius: var(--fv-radius-chrome);
 	position: relative;
-	box-shadow: 0px 0px 20px black;
+	box-shadow: 0px 0px 20px var(--fv-overlay);
 }
 
+/* Nested inside .panel, so it has to follow it square — a rounded box inside a squared
+   one reads as an oversight. Its fill was already --fv-well; only the corners moved. The
+   #37465a hairline is a deliberately dimmer line than --fv-line-scs (it separates content
+   from content, not chrome from map) and has no token, so it stays as-is. */
 .subpanel {
 	padding: 2px;
-	background-color: #04161C;
+	background-color: var(--fv-well);
 	border: 1px solid #37465a;
-	border-radius: 5px;
+	border-radius: var(--fv-radius-chrome);
 	margin-top: 2px;
 }
 

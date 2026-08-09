@@ -235,9 +235,12 @@ const EnhArea = styled.div`
     margin-top: 0px;
     position: relative; /*above the watermark + ship-click underlay*/
     z-index: 1;
-    /*$wide: 150px in the lobby (matches the datasheet panels); 130px in game (user
-      2026-07-19: 150 too wide, matches the EW panel it sits below)*/
-    width: ${props => props.$wide ? '150px' : '130px'};
+    /*150px on BOTH screens (user 2026-08-02): the game.php box was 130px on the strength of
+      "matches the EW panel it sits below", but EwPanel is 150px (ShipWindowEw.js) - as are the
+      lobby's datasheet panels in the same column - so 130 was the odd one out and read as a
+      narrower box stacked under a wider one. One width for the whole right-hand column; change
+      it here and in EwPanel together.*/
+    width: 150px;
     box-sizing: border-box;
     font-size: 10px;
     line-height: 1.4;
@@ -367,9 +370,8 @@ export const ManoeuvreStats = ({ ship, live, bare }) => {
 export const EnhancementsPanel = ({ ship }) => {
     const enhLines = splitHtmlLines(ship.enhancementTooltip);
     if (enhLines.length === 0) return null;
-    const wide = Boolean(window.gamedata) && window.gamedata.gamephase === -2; //lobby: 150px; game.php: 130px
     return (
-        <EnhArea $wide={wide}>
+        <EnhArea>
             <Block $gold>
                 <EnhTitle>Enhancements</EnhTitle>
                 {enhLines.map((line, i) => <Row key={`enh-${i}`}>{line}</Row>)}

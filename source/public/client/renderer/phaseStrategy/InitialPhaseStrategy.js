@@ -24,7 +24,6 @@ window.InitialPhaseStrategy = function () {
         infowindow.informPhase(5000, function () { });
         this.selectFirstOwnShipOrActiveShip();
         gamedata.showCommitButton();
-        gamedata.showSurrenderButton();
 
         combatLog.showCurrent(); //Reset Combat Log printouts.
         fleetListManager.updateFleetList(); //marked destroyed/jumped ships               
@@ -35,7 +34,6 @@ window.InitialPhaseStrategy = function () {
     InitialPhaseStrategy.prototype.deactivate = function () {
         PhaseStrategy.prototype.deactivate.call(this, true);
 
-        gamedata.hideSurrenderButton();
         return this;
     };
 

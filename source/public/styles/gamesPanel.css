@@ -16,44 +16,11 @@
  */
 
 /* ── Tokens ────────────────────────────────────────────────────────────────────
-   Every value already existed either on games.php or in the in-game React theme
-   (client/UI/reactJs/styled/theme.js). Nothing new was invented. */
-:root {
-  --fv-panel: rgba(23, 39, 54, 0.92);
-  --fv-well: #04161c;                 /* theme.colors.panelBg */
-  --fv-card: #0a1c26;
-  --fv-card-hover: #102a36;
-
-  --fv-line: #215a7a;                 /* the landing page's border, unchanged */
-  --fv-line-soft: #1a3f55;
-  --fv-line-scs: #496791;             /* theme.colors.line */
-
-  --fv-text: #deebff;
-  --fv-text-dim: #8ca5c0;             /* theme.colors.textDim */
-  --fv-accent: #8bcaf2;
-
-  --fv-turn: #84a5ce;
-  --fv-turn-bg: #254d82d0;
-  --fv-lobby: #52b352;
-  --fv-ladder: #e6ac00;
-  --fv-fleet: #0d7ea3;
-  --fv-done: #2f4a52;
-  --fv-idle: #3a5a72;
-
-  /* Recent Games. --fv-mine is the lobby green under a second name: in that window green
-     means "you are in this one", which is a different statement from "this is a lobby", and
-     naming it separately means either can be retuned without disturbing the other.
-     --fv-mine-soft is a pastel of it for TEXT — #52b352 on the card fill is about 3.4:1,
-     the pastel is ~9:1. --fv-ended is muted rather than a signal red: an ended game is
-     over, not a problem. */
-  --fv-mine: #52b352;
-  --fv-mine-soft: #7ed576;
-  --fv-ended: #b76662;
-
-  --fv-mono: Consolas, "Lucida Console", monospace;   /* theme.fonts.mono */
-  --fv-display: "Orbitron", sans-serif;
-  --fv-hero: "Bruno Ace SC", sans-serif;
-}
+   The --fv-* set this file used to declare now lives in styles/tokens.css, linked
+   first on every page (roadmap item 6, Stage 1). It moved because ladder.css needed
+   a second copy of it — creategame.php includes ladder.php but does not link this
+   file — and two copies that "have to be retuned together" is a trap. Values are
+   unchanged; only the declaration site moved. */
 
 /* box-sizing is applied per component rather than globally with `*`: this page has
    plenty of pre-existing layout that never assumed it. */
@@ -88,11 +55,19 @@
    The masthead takes the same 3px accent marker as the section heads below it, so the
    panel's headings are visibly one system top to bottom. The marker is also what lets
    the heading text stay a single colour — the accent moment is the rail now, not a
-   recoloured word inside the sentence. */
+   recoloured word inside the sentence.
+
+   The rail is an ABSOLUTE pseudo-element and the heading stays a block. It used to be a
+   flex row, which quietly cut the heading into two flex items — "Welcome to" and the
+   <strong>Fiery Void!</strong> — because a flex container wraps its bare text runs in
+   anonymous items. At desktop width they sat on one line and looked like a sentence, but
+   on a phone each item wrapped INSIDE itself and the heading read down the columns as
+   "Welcome Fiery / to Void!". Block layout keeps it one inline flow at every width. */
 .news-panel h2 {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  position: relative;
+  padding-left: 15px;
+  /* 3px rail + the 12px the flex `gap` used to provide */
+  min-height: 22px;
   font-family: var(--fv-hero);
   font-size: 26px;
   font-weight: 400;
@@ -103,10 +78,11 @@
 
 .news-panel h2::before {
   content: "";
-  flex: none;
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
   width: 3px;
-  align-self: stretch;
-  min-height: 22px;
   background: var(--fv-accent);
 }
 
@@ -558,14 +534,19 @@
   color: #fff;
 }
 
+/* These two were the last raw hex in an otherwise fully tokenised file. Both convert, not
+   just the #587e8d one: they sit side by side, and their old borders were two shades of the
+   same grey-teal, so tokenising only one would have left a blue border next to a grey one —
+   a mismatch that did not exist before. The fills still tell them apart, which is what was
+   actually doing that job. --fv-btn--create's green stays: it is a signal, not chrome. */
 .fv-btn--fleet {
   background: rgba(0, 77, 102, 0.692);
-  border-color: #587e8d;
+  border-color: var(--fv-line-scs);
 }
 
 .fv-btn--recent {
   background: rgba(61, 92, 92, 0.5);
-  border-color: #69848f;
+  border-color: var(--fv-line-scs);
 }
 
 /* ── Recent Games window ──────────────────────────────────────────────────────
@@ -819,7 +800,7 @@
   display: flex;
   align-items: center;
   gap: 9px;
-  margin: 20px 0 10px;
+  margin: 15px 0 10px;
   padding: 0 0 6px;
   font-family: var(--fv-hero);
   font-size: 16px;
@@ -902,7 +883,8 @@
    strength it pulled the eye past everything around it.
 
    Chip text clears 4.5:1 on its own fill; hover goes to white. */
-.quick-links .qk-guide   { --chip: #2b9fc4; --chip-text: #7fd3ec; }
+
+.quick-links .qk-guide   { --chip: #66b266; --chip-text: #aad4aa; }
 .quick-links .qk-discord { --chip: #8a6fc4; --chip-text: #bda6ea; }
 .quick-links .qk-video   { --chip: #ba8d12; --chip-text: #e1c16b; }
 .quick-links .qk-tools   { --chip: #58bada; --chip-text: #90d8ee; }
@@ -1221,6 +1203,15 @@
     align-items: stretch;
   }
 
+  /* flex-basis follows the MAIN axis, so stacking the bar re-points .fv-search's
+     `flex: 1 1 240px` at the block axis — the field asked to be 240px TALL. The
+     240px basis only ever meant "start 240px wide" in the row layout; stacked, the
+     input is already full width from align-items: stretch, so drop back to content
+     height. Landscape phones stay above 600px, which is why only portrait showed it. */
+  .fv-search {
+    flex: 0 0 auto;
+  }
+
   .fv-sort {
     justify-content: space-between;
   }
@@ -1241,6 +1232,21 @@
 
   .chat-panel .chatinputTd::before {
     left: 24px;
+  }
+
+  /* ── Header: account row ────────────────────────────────────────────────────
+     gamesNew.css stacks .pageheader into a column here and leaves the account row on
+     `justify-content: flex-end`, so Change password / Set-Up Discord Notifications /
+     Logout hang off the RIGHT edge underneath a left-aligned logo — and the wrap point
+     lands mid-row, which makes the ragged edge read as an accident. Start-aligned, the
+     row shares the logo's left margin and each wrapped line begins in the same place.
+
+     Lives here rather than in gamesNew.css because that file is shared with 11 other
+     pages; games.php is the only one carrying .top-right-row, but the other file's rule
+     is the one being overridden, so the override belongs in the page-scoped sheet. */
+  .top-right-row {
+    justify-content: flex-start;
+    width: 100%;
   }
 }
 

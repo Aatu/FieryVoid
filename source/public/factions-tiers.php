@@ -9,9 +9,11 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 <head>
   <meta charset="utf-8">
   <title>Fiery Void - About the Game</title>
-  <link href="styles/base.css" rel="stylesheet" type="text/css">
-  <link href="styles/lobby.css" rel="stylesheet" type="text/css">
-  <link href="styles/gamesNew.css" rel="stylesheet" type="text/css">    
+  <!-- Shared fv design tokens (roadmap item 6): MUST load before every other stylesheet. -->
+  <link href="<?php echo AssetLoader::getAssetUrl('styles/tokens.css'); ?>" rel="stylesheet" type="text/css">
+  <link href="<?php echo AssetLoader::getAssetUrl('styles/base.css'); ?>" rel="stylesheet" type="text/css">
+  <link href="<?php echo AssetLoader::getAssetUrl('styles/lobby.css'); ?>" rel="stylesheet" type="text/css">
+  <link href="<?php echo AssetLoader::getAssetUrl('styles/gamesNew.css'); ?>" rel="stylesheet" type="text/css">    
 </head>
 <body style="background: url('./img/maps/3.StarFormation.jpg') no-repeat center center fixed; background-size: cover;">
 
@@ -163,8 +165,27 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <ul>
 <li>Primarily a defensive weapon that can intercept fire directed at a third party, provided the weapon is between the firing unit and its target.</li>   
             <li>In tabletop, it needs to be shut down to switch between offensive (anti-fighter) and defensive modes. There is no such requirement in Fiery Void, and Guardian Arrays can intercept or fire offensively at will.</li> 
-            <li>Also, the definition of "between" was changed. In FV the weapon is "between" the firing unit and its target if the bearing difference on them is at least 120 degrees (2 hex sides).</li> 
+            <li>Also, the definition of "between" was changed. In FV the weapon is "between" the firing unit and its target if the bearing difference on them is at least 120 degrees (2 hex sides).</li>
 
+    </ul>
+<h5>Chameleon Sensors:</h5>
+            <ul>
+<li>An ELINT array (with all the usual ELINT abilities) that can additionally disguise its ship as a different vessel. Carried by the Dargan Strike Cruiser.</li>
+            <li>When you buy the ship, the enhancement dialog offers a free "Chameleon Suite" choice: pick any other Centauri hull, or leave it on "None". Your enemies then see that ship — its silhouette, name, damage sheet, weapons and defensive ratings all belong to the vessel you picked, not to the Dargan. Your own team always sees the truth.</li>
+            <li>Shots at a disguised ship resolve against both sheets from a single die roll. Your opponent watches their shot land on the ship they think they are firing at, while the real damage goes on the real hull. <b>The disguise gives no defensive benefit</b> — a Dargan hiding inside a smaller hull is exactly as easy to hit as a Dargan.</li>
+            <li>Weapon arming status is always masked from your enemies, whether you are disguised or not, and it stays masked even after the deception is broken. They can never tell which of your guns are loaded.</li>
+            <li>The suite can be switched on and off in the Initial Orders phase, alongside the power controls. Switching it off is permanent — the disguise does not come back.</li>
+        </ul>
+<h5>Seeing through a Chameleon disguise:</h5>
+            <ul>
+<li>Detection is tracked <b>per team</b>, exactly as it is for stealth ships. In a multi-team game, a team that has seen through the deception faces the real ship while everyone else keeps facing the simulacrum.</li>
+            <li><b>Proximity</b> — an enemy ship within 5 hexes with line of sight sees through it immediately (2 hexes for fighters and shuttles).</li>
+            <li><b>Implausible manoeuvring</b> — changing speed faster than the ship you are imitating could manage.</li>
+            <li><b>Implausible ELINT</b> — running an ELINT operation the imitated hull has no array for, or spending more EW than its sensors could produce.</li>
+            <li><b>Firing the wrong weapon</b> — a shot only looks convincing if the imitated ship mounts a weapon of the same class whose arc covers that shot, and each gun you fire has to be matched by a different one on the simulacrum. Fire more Matter Cannons than it carries and the extra one gives you away. This reveal takes effect at the start of the <i>following</i> turn — your opponent works out the discrepancy after the fact.</li>
+            <li><b>Losing the array</b> — destroyed, powered down or switched off, and the deception ends at once and permanently.</li>
+            <li><b>Ancient sensors</b> — Ancient and Primordial races (Shadows, Vorlons, Kirishiac, Mindriders, Thirdspace) are never fooled at all. If any team fields such a unit, Chameleon ships are revealed to that team from the start of the game.</li>
+            <li>Once revealed, the ship stays revealed to that team for the rest of the game — repairing the array, restoring its power or switching the suite back on will not restore the illusion.</li>
     </ul>
 <h4 id="centauriwotc" >CENTAURI REPUBLIC (WoTCR)</h4>
     <p>The Centauri fleet from a few hundred years before the show era, representing the Wars of the Centauri Republic (WotCR) period.  
