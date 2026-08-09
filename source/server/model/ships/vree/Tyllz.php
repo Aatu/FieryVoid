@@ -2,6 +2,12 @@
 
 class Tyllz extends StarBaseSixSections
 {
+	//The only Vree hull that does not descend from VreeCapital/VreeHCV, but it is built the
+	//same way - six "Outer Structure" blocks in a ring - so it takes the same rule: a
+	//breached block does not destroy the systems shown in it.
+	//See $systemsSurviveStructureLoss on BaseShip (ShipClasses.php).
+	protected $systemsSurviveStructureLoss = true;
+
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
 

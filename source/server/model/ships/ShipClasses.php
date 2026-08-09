@@ -68,6 +68,27 @@ class BaseShip {
 	public $isCombatUnit = true; //is this a combat unit (as opposed to non-combat - transport, freighter, civilian, explorer, diplomatic ship, yacht...)
     public $bulkBuy = 1; //Variable to track mass purchases in Fleet Selection.
 
+	/* ⭐ THE OUTER-STRUCTURE-RING RULE (Vree saucers). On most hulls a Structure block IS
+	   the compartment its systems sit in, so losing the block takes the systems with it
+	   (ShipSystem::isDestroyed's cascade). On a Vree saucer the blocks are an outer RING
+	   around a disc whose systems are elsewhere, so a breached block does NOT destroy the
+	   systems shown in it - which is why a Xill that lost both Port structures kept firing
+	   its Port Antiproton Guns on the tabletop but not here (user report, game 4285).
+
+	   Set it on the HULL, not on 30 systems one at a time: addSystem below stamps
+	   ShipSystem::$survivesStructureDestruction on everything the hull mounts, so it is
+	   baked into the blueprint and therefore into the static ship bundle
+	   (ShipCompactor::annotateSystems), the crit-catalogue endpoint's `ssd`, the lobby's
+	   damage preview and every live ship, from ONE line per hull class.
+
+	   PROTECTED on purpose: this must not become a public ship property, or it rides every
+	   ship of every gamedata poll for the ~1% of hulls that set it. Nothing on the client
+	   needs the hull-level flag - the per-system one already has two delivery routes.
+
+	   Structures themselves are skipped: a Structure's own destruction rule is the
+	   PRIMARY-structure test in isDestroyed, and this flag has nothing to say about it. */
+	protected $systemsSurviveStructureLoss = false;
+
 	//non-combat ships cannot be taken in pickup battles by standard tourtnament rules
 	//rule of thumb is that if it has cargo bays, then it's not a combat ship - but it's far from proof
 	//eg. Pak'ma'ra and Orieni capital ships (combat ones) do have cargo bays, while eg. Emperor's transport or Grey Sharlin (non-combat ships) do not
@@ -2049,6 +2070,11 @@ class BaseShip {
 
 		if ($system instanceof Structure){
 			$this->structures[$loc] = $system->id;
+		} else if ($this->systemsSurviveStructureLoss){
+			//Outer-structure-ring hull (Vree saucers): a breached block does not take its
+			//systems with it. See $systemsSurviveStructureLoss above. Stamped here, at
+			//construction, so it reaches the static bundle and the catalogue for free.
+			$system->setSurvivesStructureDestruction(true);
 		}
 
 		//Structure arc indicator (STRUCTURE_ARCS_PLAN.md): Structures fall THROUGH to the same
@@ -4611,7 +4637,12 @@ class VorlonCapitalShip extends SixSidedShip{
 class VreeCapital extends SixSidedShip{
 
     protected $VreeHitLocations = true; //Value to indicate that all gunfire from the same ship may not hit same side on Vree capital ships
-    
+
+    //Vree saucer: the six "Outer Structure" blocks are a RING, not the compartments the
+    //systems live in, so a breached block does not destroy what is shown in it.
+    //See $systemsSurviveStructureLoss on BaseShip.
+    protected $systemsSurviveStructureLoss = true;
+
     public function getLocations(){
         //debug::log("getLocations");         
         $locs = array();
@@ -4629,9 +4660,12 @@ class VreeCapital extends SixSidedShip{
 
 
 class VreeHCV extends HeavyCombatVessel{
- 
+
     protected $VreeHitLocations = true; //Value to indicate that all gunfire from the same ship may not hit same side on Vree capital ships
-        
+
+    //Same outer-structure ring as the capitals — see VreeCapital above.
+    protected $systemsSurviveStructureLoss = true;
+
     public $shipSizeClass = 2;
         
 } //end of VreeHCV

@@ -814,8 +814,14 @@ $optionsUsed = '';
 
             <!-- Second SAVE FLEET, beside the loader (the other one is at the bottom of
                  the buy panel, a long scroll away on a phone). Same .savebutton hook, so
-                 the single handler bound at the top of this file drives both. -->
-            <span class="btn savebutton savebutton-top">SAVE FLEET</span>
+                 the single handler bound at the top of this file drives both.
+                 ⚠️ NO `btn` class, deliberately — .readybutton-top beside it has none
+                 either. gamesNew.css is linked AFTER lobby.css, and its `.btn` rule
+                 (border: none; display: inline-block) has the same specificity as
+                 `.savebutton-top`, so it WON: this button lost its border and its
+                 inline-flex centring while its twin at the bottom of the buy panel, which
+                 pairs `.btn` with the later `.btn-primary-lobby`, kept both. -->
+            <span class="savebutton savebutton-top">SAVE FLEET</span>
 
             <?php if(!$isFleetTest): ?>
             <span class="readybutton readybutton-top">READY</span>

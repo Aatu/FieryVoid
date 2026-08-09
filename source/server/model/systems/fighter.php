@@ -36,7 +36,29 @@
 
 
 		public $possibleCriticals = array();
-		
+
+		/* ⭐ Pre-battle criticals offerable on a FIGHTER. A flight has no hit chart of its
+		   own - $possibleCriticals above is empty and a fighter is destroyed rather than
+		   critted in play - so without this list the lobby's editor had nothing at all to
+		   offer a flight (user request 2026-08-08). See ShipSystem::$preBattleCriticals.
+
+		   ⚠️ EVERY ENTRY IS VERIFIED to be read in a FLIGHT context. A flight has no C&C,
+		   so the usual ship-wide criticals do nothing on it; these four are the ones
+		   ShipClasses::getIniModifier reads off getSampleFighter():
+		     ReducedIniative        -10 initiative, permanent  (stacks per crit)
+		     ReducedIniativeOneTurn -10 initiative, turn 1 only
+		     Uncontrolled           -15 initiative, turn 1 only
+		     tmpinidown              -5 initiative, turn 1 only
+		   ⚠️ They are read off the SAMPLE fighter (ordinal 1) only, which is exactly why
+		   the lobby's flight editor writes criticals to every ordinal at once
+		   (battleDamage.REF_FLIGHT) rather than per craft.
+
+		   Before adding to this list, prove the engine reads the critical for a flight:
+		   `grep -rn 'hasCritical("Foo"' source/server` and check the receiver is the
+		   fighter or the flight, not a C&C / thruster / weapon. */
+		protected $preBattleCriticals = array(
+			'ReducedIniative', 'PenaltyToHit',);
+
 			
 		public $criticals = array();
 		

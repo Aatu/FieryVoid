@@ -365,7 +365,9 @@ window.gamedata = {
 		var title = carried.damage && carried.criticals ? 'Carries pre-battle damage and critical effects'
 			: (carried.criticals ? 'Carries pre-battle critical effects' : 'Carries pre-battle damage');
 
-		return '<span class="shipDamagedBadge fa-solid fa-heart-crack" title="' + title + '"></span>';
+		//fa-screwdriver-wrench, not fa-heart-crack (user request 2026-08-08): a wound the
+		//unit is carrying INTO the battle reads as "needs repair", not as a death.
+		return '<span class="shipDamagedBadge fa-solid fa-screwdriver-wrench" title="' + title + '"></span>';
 	},
 
 	/* Re-paint ONE fleet-list row's damage badge. Called by the React damage menus after
@@ -3422,7 +3424,7 @@ window.gamedata = {
 				confirm.showLoadFleet(fleet.name, { hasDamage: fleet.hasDamage, hasCrits: fleet.hasCrits }, (choices) => {
 					gamedata.loadSavedFleet(fleet.id, choices);
 					fleetDropdownList.style.display = 'none';
-					fleetDropdownButton.textContent = 'Load a Saved Fleet';
+					fleetDropdownButton.textContent = 'LOAD A FLEET';
 				});
 			});
 
@@ -3461,7 +3463,9 @@ window.gamedata = {
 			let damageSpan = null;
 			if (fleet.hasDamage || fleet.hasCrits) {
 				damageSpan = document.createElement('span');
-				damageSpan.className = 'fa-solid fa-heart-crack';
+				//Same icon as gamedata.damagedShipBadge, so the dropdown and the fleet list
+				//read as one idea - change BOTH or neither.
+				damageSpan.className = 'fa-solid fa-screwdriver-wrench';
 				damageSpan.style.color = '#c0392b';
 				damageSpan.style.marginLeft = '6px';
 				damageSpan.title = fleet.hasDamage && fleet.hasCrits
@@ -3635,6 +3639,23 @@ window.gamedata = {
 		if (!Array.isArray(fleet)) {
 			console.error("doLoadFleet: expected array, got", fleet);
 			return;
+		}
+
+		/* 'Allow Mines' is a per-scenario rule, and a saved fleet outlives the game it was
+		   saved from: a fleet built where mines were allowed will happily carry its mine
+		   bulks into one where the buy panel never offers them (constructStore skips mines
+		   on the same test). Refuse the WHOLE load rather than quietly dropping the
+		   offending units - the fleet's stored `points` counted them, so a partial load
+		   would put a fleet on the table that the player never saved, at a cost the
+		   affordability check has already approved. Checked here because doLoadFleet is the
+		   one funnel both load paths (dropdown and load-by-#ID) come through. */
+		if (gamedata.rules && !gamedata.rules.allowMines && !gamedata.rules.fleetTest) {
+			for (var m = 0; m < fleet.length; m++) {
+				if (fleet[m] && fleet[m].mine) {
+					confirm.fleetNotice("Saved fleet contains units not available for this scenario");
+					return;
+				}
+			}
 		}
 
 		//Pre-battle damage (D3): kinds this fleet HAD that the player chose not to load.

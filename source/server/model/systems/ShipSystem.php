@@ -30,7 +30,32 @@ class ShipSystem {
     public $critRollMod = 0; //penalty tu critical damage roll: positive means crit is more likely, negative less likely (for this system)
     
     protected $possibleCriticals = array();
-	
+
+    /* ⭐ EXTRA criticals a player may AUTHOR on this system in the gamelobby, on top of
+       what its own hit chart ($possibleCriticals above) can roll. A FLAT list of class
+       names — no roll keys, because nothing rolls these:
+
+           protected $preBattleCriticals = array('AmmoExplosion', 'ReducedArcs');
+
+       Why it exists (user request 2026-08-08). Two gaps $possibleCriticals cannot fill:
+         1. effects real battles produce through BESPOKE code and no hit chart lists —
+            AmmoExplosion, OSATThrusterCrit, LimpetBore. They used to be reachable through
+            the editor's "All" switch, back when that offered every storable class in the
+            game; "All" is now a short curated general list
+            (PreBattleDamage::$generalCriticals), so anything system-specific belongs here,
+            on the system it is specific TO.
+         2. FIGHTERS, which have no hit chart at all — see Fighter::$preBattleCriticals.
+
+       ⚠️ Before adding a name, check the engine actually READS that critical in this
+       system's context: `grep -rn 'hasCritical("Foo"' source/server`. Most criticals are
+       scoped — PenaltyToHit and ReducedIniative are read off the ship's C&C, HalfEfficiency
+       off a thruster — so a plausible-looking entry can store a wound that does nothing.
+
+       PROTECTED like $possibleCriticals, and exposed only as the derived list below: these
+       tables must not ride the static ship JSON (the generators json_encode the object) or
+       stripForJson. The lobby gets them from systemCriticals.php. */
+    protected $preBattleCriticals = array();
+
     public $primary = false; //is this a core system?
     public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?	
     public $isTargetable = true; //false means it cannot be targeted at all by called shots! - good for technical systems :)
@@ -61,6 +86,17 @@ class ShipSystem {
         return $this->survivesStructureDestruction;
     }
 
+    /* Set it from OUTSIDE the class hierarchy - a SETTER rather than a public property,
+       deliberately, so the flag keeps the serialisation properties documented above.
+       Used by BaseShip::addSystem for hulls whose structure blocks are an outer RING
+       around the systems rather than the compartment holding them (the Vree saucers -
+       see $systemsSurviveStructureLoss in ShipClasses.php), where losing a block does not
+       take its systems with it. A subclass that hard-codes `true` (the shield
+       projections) is unaffected - nothing ever sets this to false. */
+    public function setSurvivesStructureDestruction($survives = true){
+        $this->survivesStructureDestruction = (bool)$survives;
+    }
+
     /* The critical classes this system's hit chart can produce, flattened and deduped.
        $possibleCriticals stays PROTECTED - only the derived list is exposed, and only for
        the lobby's pre-battle crit picker (systemCriticals.php -> Manager::getSystemCriticals).
@@ -71,6 +107,20 @@ class ShipSystem {
             foreach ((is_array($value) ? $value : array($value)) as $type){
                 if (is_string($type) && $type !== '') $out[$type] = true;
             }
+        }
+
+        return array_keys($out);
+    }
+
+    /* What the lobby's pre-battle editor may OFFER on this system: the hit chart above
+       PLUS $preBattleCriticals. Kept separate from getPossibleCriticalTypes(), which keeps
+       meaning exactly "what this system's hit chart can roll" - the two questions are
+       different and only one of them is a rules statement. */
+    public function getPreBattleCriticalTypes(){
+        $out = array();
+        foreach ($this->getPossibleCriticalTypes() as $type) $out[$type] = true;
+        foreach ($this->preBattleCriticals as $type){
+            if (is_string($type) && $type !== '') $out[$type] = true;
         }
 
         return array_keys($out);

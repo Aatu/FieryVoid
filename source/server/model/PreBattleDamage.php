@@ -201,6 +201,7 @@ class PreBattleDamage
         'DisengagedFighter',
         'ShadowFighterCutOff',
         'LimpetBoreTravelling',
+        'Uncontrolled',
         /* MARINE / BOARDING ACTIONS. A boarding action is a thing happening in THAT
            battle - there are no marines aboard when the next one starts, so carrying the
            marker would show "Marines are sabotaging this system" on a ship nobody has
@@ -868,10 +869,22 @@ class PreBattleDamage
      */
     public static function offerableCriticalTypes($system)
     {
-        if (!$system || !method_exists($system, 'getPossibleCriticalTypes')) return array();
+        if (!$system) return array();
+
+        //getPreBattleCriticalTypes() = the hit chart PLUS the system's own
+        //$preBattleCriticals extras (see the note on ShipSystem::$preBattleCriticals).
+        //The method_exists guard keeps this working against anything that is not a real
+        //ShipSystem.
+        if (method_exists($system, 'getPreBattleCriticalTypes')) {
+            $offered = $system->getPreBattleCriticalTypes();
+        } else if (method_exists($system, 'getPossibleCriticalTypes')) {
+            $offered = $system->getPossibleCriticalTypes();
+        } else {
+            return array();
+        }
 
         $out = array();
-        foreach ($system->getPossibleCriticalTypes() as $type) {
+        foreach ($offered as $type) {
             if (self::isValidCriticalType($type)) $out[] = $type;
         }
 
@@ -879,11 +892,53 @@ class PreBattleDamage
     }
 
     /**
-     * Every storable Critical class in the game, for the editor's "all effects" list.
+     * ⭐ THE GENERAL LIST — what the editor's "All" switch offers, on any system.
      *
-     * The names are read out of cricialClasses.php - the single file that declares them -
-     * rather than from get_declared_classes(), which under the generated classmap
-     * autoloader only ever holds the handful already touched this request.
+     * ⚠️ EDIT THIS ARRAY. It is the whole point of it: it is a hand-curated list, not a
+     * derived one, and it is meant to be argued with.
+     *
+     * It used to be "every storable Critical class in the game", scraped out of
+     * cricialClasses.php — 58 entries, most of which mean nothing on most systems
+     * (a Reactor cannot have a turret jammed, an Engine has no ammunition to explode),
+     * so the dropdown was unusable as a picker (user request 2026-08-08).
+     *
+     * HOW THE FIRST PASS WAS DERIVED, so a future edit can argue with it: every entry
+     * here is read GENERICALLY, by code that knows nothing about which system it is
+     * looking at —
+     *   - the OutputReduced ladder, OutputHalved(OneTurn), PartialBurnout and
+     *     SevereBurnout all work through their `outputMod` / `outputModPercentage`,
+     *     which ShipSystem::effectCriticals sums for EVERY system;
+     *   - ForcedOfflineOneTurn is read by ShipSystem::isOfflineOnTurn, likewise generic.
+     * Everything left off is scoped to something: a weapon (GunLost, ReducedRange,
+     * ReducedArcs, AmmoExplosion…), the C&C (ReducedIniative, PenaltyToHit,
+     * CommunicationsDisrupted, ProfileIncreased — all read as `$CnC->hasCritical(...)`),
+     * a thruster (HalfEfficiency, FirstThrustIgnored), a shield (DamageReduction*), or one
+     * faction's hull (TendrilDestroyed, ShadowPilotPain).
+     * `OutputReduced` and `OutputReducedOneTurn` are deliberately absent too: they carry
+     * NO outputMod of their own (they expect a setParam), so authoring one stores a wound
+     * that does nothing.
+     *
+     * ⚠️ THIS IS NOT THE STORABILITY TEST. Narrowing isValidCriticalType would eat
+     * carried combat crits on reload (plan §4.2's seam). This list only decides what the
+     * picker OFFERS with "All" ticked; a scenario author who wants a system-specific
+     * effect adds it to THAT SYSTEM's $preBattleCriticals, which is the mechanism that
+     * replaced "offer everything, everywhere".
+     */
+    public static $generalCriticals = array(
+        /*'OutputReduced1', 'OutputReduced2', 'OutputReduced3', 'OutputReduced4',
+        'OutputReduced6', 'OutputReduced8', 'OutputReduced10',
+        'OutputHalved', 'OutputHalvedOneTurn',
+        'PartialBurnout', 'SevereBurnout',
+        'ForcedOfflineOneTurn',*/
+        //Amended to just the one generic crit for now
+        'ArmorReduced',
+    );
+
+    /**
+     * The editor's "all effects" list: $generalCriticals, re-validated.
+     *
+     * Re-validated rather than trusted, so a typo or a name that later joins the deny
+     * list drops out here instead of being offered and then silently refused on write.
      */
     public static function allCriticalTypes()
     {
@@ -891,14 +946,9 @@ class PreBattleDamage
         if ($cache !== null) return $cache;
 
         $cache = array();
-        $file = dirname(__FILE__) . '/cricialClasses.php';
-        $src = is_readable($file) ? file_get_contents($file) : '';
-        if ($src !== '' && preg_match_all('/^\s*class\s+(\w+)\s+extends\s+/m', $src, $matches)) {
-            foreach ($matches[1] as $type) {
-                if (self::isValidCriticalType($type)) $cache[] = $type;
-            }
+        foreach (self::$generalCriticals as $type) {
+            if (self::isValidCriticalType($type)) $cache[] = $type;
         }
-        sort($cache);
 
         return $cache;
     }

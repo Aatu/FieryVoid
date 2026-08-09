@@ -47,6 +47,17 @@ window.battleDamage = {
 	   never destroyed - one you lost is one fewer in the bulk. */
 	KIND_MINE: 2,
 
+	/* ⭐ THE WHOLE FLIGHT, as a critical-effects target. Fighter ordinals are 1-based, so 0
+	   can never collide with a real one.
+
+	   The fighter menu used to draw a Critical Effects section under EVERY fighter row -
+	   six section headers, six pickers and six "All" switches on a flight of six, for a
+	   set of craft that are identical by construction. It now draws ONE, underneath all the
+	   health rows (user request 2026-08-08), and that section addresses the flight: reading
+	   it unions what the ordinals carry, writing it writes the same criticals to every
+	   ordinal. Per-fighter DAMAGE is untouched - that is what the rows above are for. */
+	REF_FLIGHT: 0,
+
 	/* bucket name => kind. THE list every loop walks, so a fourth kind is one line here.
 	   Mirrors PreBattleDamage::BUCKETS. */
 	BUCKETS: { sys: 0, ftr: 1, mne: 2 },
@@ -130,12 +141,23 @@ window.battleDamage = {
 	},
 
 	/* The label for one carried critical: param classes read their magnitude out of the
-	   payload, everything else uses the server's per-class description (falling back to
-	   the raw class name, which is what SystemInfo does too). */
+	   payload, everything else uses a per-class description.
+
+	   THREE sources, in order, because each covers a case the others cannot:
+	     1. critDesc — the server's describeCriticals map, sent with a LOADED fleet. Only
+	        ever holds the classes that fleet actually carried.
+	     2. the CATALOGUE's meta — every class the picker can offer. This is what names a
+	        critical the player has just ADDED in the lobby: it was in no loaded fleet, so
+	        critDesc has never heard of it and the row read as `OutputReduced1` instead of
+	        "Output altered by -1" (user report 2026-08-08).
+	     3. the raw class name, which is what SystemInfo falls back to as well. */
 	critLabel: function critLabel(type, critDesc, param) {
 		var spec = battleDamage.PARAM_CRITICALS[type];
 		if (spec) return spec.label + ' ' + (parseInt(param, 10) || 0);
-		return (critDesc && critDesc[type]) || type;
+		if (critDesc && critDesc[type]) return critDesc[type];
+
+		var meta = battleDamage.critMeta(type);
+		return (meta && meta.label) || type;
 	},
 
 	/* ⭐ THE DENY LIST — criticals that are NEVER carried between battles, by name.
@@ -252,19 +274,43 @@ window.battleDamage = {
 	},
 
 	/* The criticals this damage target may be OFFERED. A DIFFERENT question from what may
-	   be stored (see PreBattleDamage::offerableCriticalTypes) - this is the system's own
-	   hit-chart table. `all` widens it to every storable class, for reproducing a crit
-	   that bespoke code applies and no hit chart lists. */
+	   be STORED (see PreBattleDamage::offerableCriticalTypes) - this is the system's own
+	   list: its hit chart plus its $preBattleCriticals extras, both served per target by
+	   the catalogue.
+
+	   `all` WIDENS that list, it does not replace it. It adds the generally-applicable
+	   effects (PreBattleDamage::$generalCriticals, the catalogue's `all`) on top of what
+	   this system can do in its own right. Replacing was the first implementation and it
+	   was wrong in the obvious way: ticking "All" on a weapon HID Gun Lost and Turret
+	   jammed, the two effects most worth authoring there (user report 2026-08-08). */
 	offerableCriticals: function offerableCriticals(ship, kind, ref, all) {
 		var catalogue = battleDamage.catalogueFor(ship);
 		if (!catalogue) return [];
-		if (all) return catalogue.all || [];
 
+		var own;
 		if (kind === battleDamage.KIND_FIGHTER) {
-			return (catalogue.fighters && catalogue.fighters[String(ref)]) || [];
+			//Every craft in a flight is the same blueprint, so the flight-wide target
+			//(REF_FLIGHT) is offered ordinal 1's list.
+			var ordinal = battleDamage.isFlightRef(kind, ref) ? 1 : ref;
+			own = (catalogue.fighters && catalogue.fighters[String(ordinal)]) || [];
+		} else {
+			var entry = catalogue.systems && catalogue.systems[String(ref)];
+			own = (entry && entry.crits) || [];
 		}
-		var entry = catalogue.systems && catalogue.systems[String(ref)];
-		return (entry && entry.crits) || [];
+
+		if (!all) return own;
+
+		//Union, this system's own effects first. The picker sorts by label anyway, so the
+		//order only matters in that it decides which duplicate is dropped.
+		var seen = {};
+		var out = [];
+		own.concat(catalogue.all || []).forEach(function (type) {
+			if (!type || seen[type]) return;
+			seen[type] = true;
+			out.push(type);
+		});
+
+		return out;
 	},
 
 	/* Does this system survive its structure block being destroyed? Catalogue first (always
@@ -339,12 +385,64 @@ window.battleDamage = {
 		return 'sys';
 	},
 
+	isFlightRef: function isFlightRef(kind, ref) {
+		return kind === battleDamage.KIND_FIGHTER
+			&& parseInt(ref, 10) === battleDamage.REF_FLIGHT;
+	},
+
 	getEntry: function getEntry(ship, kind, ref) {
+		//The flight-wide critical target is SYNTHETIC - it has no bucket entry of its own,
+		//it is the union of what the ordinals carry (see REF_FLIGHT).
+		if (battleDamage.isFlightRef(kind, ref)) return battleDamage.flightCritEntry(ship);
+
 		var payload = battleDamage.peek(ship);
 		if (!payload) return null;
 		var bucket = payload[battleDamage.bucketName(kind)];
 		if (!bucket) return null;
 		return bucket[String(ref)] || null;
+	},
+
+	/* A read-only {c, p} standing for the WHOLE flight: every critical class any ordinal
+	   carries, at the highest count/param any of them carries it at. Null when the flight
+	   carries none, so the section renders as empty rather than as a row of zeroes.
+
+	   The max, not the first ordinal's: a fleet saved out of a real battle can legitimately
+	   have different criticals on different craft, and showing the worst of them is honest
+	   about what the flight is carrying. Editing then levels them (see setFlightCriticals) -
+	   which is the trade the one-section layout makes, and is what "apply to the flight"
+	   has to mean when the lobby draws a flight as a single card. */
+	flightCritEntry: function flightCritEntry(ship) {
+		var size = parseInt(ship && ship.flightSize, 10) || 0;
+		var entry = { c: {}, p: {} };
+
+		for (var ordinal = 1; ordinal <= size; ordinal++) {
+			var each = battleDamage.getEntry(ship, battleDamage.KIND_FIGHTER, ordinal) || {};
+			for (var type in (each.c || {})) {
+				if (!each.c.hasOwnProperty(type)) continue;
+				var count = parseInt(each.c[type], 10) || 0;
+				if (count > (entry.c[type] || 0)) entry.c[type] = count;
+			}
+			for (var ptype in (each.p || {})) {
+				if (!each.p.hasOwnProperty(ptype)) continue;
+				var param = parseInt(each.p[ptype], 10) || 0;
+				if (param > (entry.p[ptype] || 0)) entry.p[ptype] = param;
+			}
+		}
+
+		if (!Object.keys(entry.c).length) return null;
+		if (!Object.keys(entry.p).length) delete entry.p;
+		return entry;
+	},
+
+	/* Write one critical map to EVERY fighter in the flight, through the ordinary
+	   per-ordinal door so the clamps, the deny list and the param collapse all still
+	   apply. Each ordinal's damage is preserved (setCriticals only ever touches c/p). */
+	setFlightCriticals: function setFlightCriticals(ship, critMap, paramMap) {
+		var size = parseInt(ship && ship.flightSize, 10) || 0;
+		for (var ordinal = 1; ordinal <= size; ordinal++) {
+			battleDamage.setCriticals(ship, battleDamage.KIND_FIGHTER, ordinal, critMap, paramMap);
+		}
+		return battleDamage.flightCritEntry(ship);
 	},
 
 	/* Merge {d, k} into an entry, PRESERVING any criticals it already carries.
@@ -453,9 +551,10 @@ window.battleDamage = {
 	},
 
 	/* REPLACE a whole entry (a deep copy of it), criticals included, or remove it when
-	   given nothing. Used by the fighter menu's "apply to all" so propagation copies the
-	   ENTIRE entry rather than named d/k fields - when lobby crit authoring (§11) lands,
-	   criticals propagate too with no change here. */
+	   given nothing. Used by the mine menu's "apply to all" — a `mne` entry is only ever
+	   {d}, so copying it wholesale copies exactly what the row shows.
+	   The FIGHTER menu deliberately does NOT use this: since criticals there are authored
+	   for the whole flight at once (REF_FLIGHT), its propagate copies damage only. */
 	setWholeEntry: function setWholeEntry(ship, kind, ref, entry) {
 		var payload = battleDamage.get(ship);
 		var bucketName = battleDamage.bucketName(kind);
@@ -482,6 +581,12 @@ window.battleDamage = {
 	   with no usable param is dropped: its magnitude IS the effect, so storing it at 0
 	   would carry a wound that does nothing. */
 	setCriticals: function setCriticals(ship, kind, ref, critMap, paramMap) {
+		//The flight-wide target fans out to every ordinal (REF_FLIGHT). Done here rather
+		//than in the menu so the ONE door criticals enter a payload by stays one door.
+		if (battleDamage.isFlightRef(kind, ref)) {
+			return battleDamage.setFlightCriticals(ship, critMap, paramMap);
+		}
+
 		var payload = battleDamage.get(ship);
 		var bucketName = battleDamage.bucketName(kind);
 		var bucket = payload[bucketName] || (payload[bucketName] = {});
@@ -899,13 +1004,14 @@ window.battleDamage = {
 		return Math.max(0, max - (parseInt(entry.d, 10) || 0));
 	},
 
-	/* {critClass: count} for that ordinal. */
+	/* {critClass: count} for one ordinal, or for the WHOLE FLIGHT when passed REF_FLIGHT —
+	   which is what the menu's single Critical Effects section asks for. */
 	fighterCriticals: function fighterCriticals(ship, ordinal) {
 		var entry = battleDamage.getEntry(ship, battleDamage.KIND_FIGHTER, ordinal);
 		return (entry && entry.c) ? entry.c : {};
 	},
 
-	/* {critClass: param} for that ordinal — only the PARAM_CRITICALS classes appear. */
+	/* {critClass: param}, same references — only the PARAM_CRITICALS classes appear. */
 	fighterCriticalParams: function fighterCriticalParams(ship, ordinal) {
 		var entry = battleDamage.getEntry(ship, battleDamage.KIND_FIGHTER, ordinal);
 		return (entry && entry.p) ? entry.p : {};

@@ -374,7 +374,7 @@ class Uncontrolled extends Critical{
 }
 
 class ShipDisabledOneTurn extends Critical{
-    public $description = "Ship disabled for ";
+    public $description = "Ship disabled for 1 turn";
     public $oneturn = true;
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import theme from '../styled/theme';
-import CriticalEffectsSection, { critRowsFromMap, CritSectionHeader } from './CriticalEffectsSection';
+import CriticalEffectsSection, { critRowsFromMap, CritSectionHeader, CheckBox, CheckText } from './CriticalEffectsSection';
 import nonPassiveWheel from '../helpers/nonPassiveWheel';
 
 /* Pre-battle damage editor for ONE system of a bought lobby ship.
@@ -27,12 +27,22 @@ import nonPassiveWheel from '../helpers/nonPassiveWheel';
  * invariant server-side, so preview and game agree).
  */
 
+/* ⚠️ max-width is LOAD-BEARING, not cosmetic. This menu's only ancestor is
+   SystemInfoMenu's absolutely-positioned tooltip, which is SHRINK-TO-FIT (capped at
+   500px) - so every descendant's max-content width feeds straight back into how wide the
+   menu draws. The critical picker's <select> takes its intrinsic width from its LONGEST
+   OPTION, so ticking "All" (which swaps a handful of hit-chart entries for every storable
+   critical in the game) stretched the whole menu to the 500px ceiling (user report
+   2026-08-08). A max-width here clamps the max-content contribution at source, which is
+   the only thing that reins a <select> in: flex:1 / min-width:0 on the select itself let
+   it SHRINK but do not stop it ASKING. */
 const Container = styled.div`
     display: flex;
     flex-direction: column;
     margin-top: 0px;
     width: 100%;
     min-width: 200px;
+    max-width: 300px;
     box-sizing: border-box;
     opacity: 0.95;
     background-color: rgba(16, 26, 38, 0.9);
@@ -288,12 +298,12 @@ class ApplyDamageMenu extends Component {
                         onClick={() => this.step(1)}
                     >+</ActionButton>
                     <DestroyLabel $on={destroyed} title="Mark this system destroyed before the battle starts">
-                        <input
+                        <CheckBox
                             type="checkbox"
                             checked={destroyed}
                             onChange={e => this.setDestroyed(e.target.checked)}
                         />
-                        Destroy
+                        <CheckText>Destroy</CheckText>
                     </DestroyLabel>
                 </Row>
 

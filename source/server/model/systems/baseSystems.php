@@ -2917,7 +2917,8 @@ class CnC extends ShipSystem implements SpecialAbility {
 	
 	//C&C  is VERY important, although not as much as the reactor!
 	public $repairPriority = 9;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
-
+		protected $preBattleCriticals = array(
+			'ShipDisabled');
     
     protected $possibleCriticals = array(
     	//1=>"SensorsDisrupted", //not implemented! so I take it out 

@@ -16,6 +16,9 @@ import nonPassiveWheel from '../helpers/nonPassiveWheel';
  *   │ Fighter 2  [-][ 6 ][+]   │
  *   │  … up to flightSize      │
  *   │ [ Apply Fighter 1 to all]│
+ *   ├ Critical Effects ────────┤
+ *   │ Gun lost      [-][1][+]  │
+ *   │ [ + Add effect… ] ☐ All  │
  *   └──────────────────────────┘
  *
  * There is deliberately NO Destroy control: a fighter is only ever DAMAGED here. A dead
@@ -23,6 +26,13 @@ import nonPassiveWheel from '../helpers/nonPassiveWheel';
  * already freely adjustable via the lobby's Edit action - so a smaller flight IS the way
  * to say "I lost two". Part 2's in-game save follows the same rule and records only the
  * surviving craft. Health therefore floors at 1.
+ *
+ * ⭐ ONE Critical Effects section for the whole flight (user request 2026-08-08), under
+ * all the health rows, rather than one per fighter. A flight of six drew six section
+ * headers, six pickers and six "All" switches for six craft that are identical by
+ * construction. It addresses battleDamage.REF_FLIGHT: reading it unions what the ordinals
+ * carry, writing it writes the same criticals to every ordinal. Per-fighter DAMAGE is
+ * untouched - that is what the rows above are for.
  */
 
 const Tooltip = styled.div`
@@ -38,6 +48,10 @@ const Tooltip = styled.div`
     display: flex;
     flex-direction: column;
     min-width: 230px;
+    /*Shrink-to-fit, so the critical picker's <select> would otherwise stretch this to its
+      longest option the moment "All" is ticked - see the note on ApplyDamageMenu's
+      Container. A max-width is what clamps the max-content contribution.*/
+    max-width: 300px;
     box-sizing: border-box;
     opacity: 0.97;
     background-color: rgba(16, 26, 38, 0.95);
@@ -213,16 +227,18 @@ class FighterDamageMenu extends Component {
         this.setRemaining(ordinal, digits === '' ? 0 : parseInt(digits, 10));
     }
 
-    /* Copy fighter 1's WHOLE entry - damage, destroyed AND criticals - to every other
-       ordinal. Deliberately entry-shaped rather than field-shaped so lobby crit
-       authoring (§11) propagates for free. */
+    /* Copy fighter 1's DAMAGE to every other ordinal - and only its damage.
+       This used to copy the whole entry, criticals included, back when each fighter had
+       its own crit section. Criticals are now authored for the whole flight at once
+       (REF_FLIGHT), so carrying them here would do nothing at best and, on a fleet loaded
+       from a battle where only the other craft were crit, would silently wipe them. */
     propagate() {
         const { ship } = this.props;
         const size = parseInt(ship.flightSize, 10) || 0;
-        const source = battleDamage.getEntry(ship, battleDamage.KIND_FIGHTER, 1);
+        const damage = battleDamage.fighterMaxHealth(ship) - battleDamage.fighterHealth(ship, 1);
 
         for (let ordinal = 2; ordinal <= size; ordinal++) {
-            battleDamage.setWholeEntry(ship, battleDamage.KIND_FIGHTER, ordinal, source);
+            battleDamage.setFighter(ship, ordinal, { d: damage });
         }
         this.refresh();
     }
@@ -250,58 +266,56 @@ class FighterDamageMenu extends Component {
 
         for (let ordinal = 1; ordinal <= size; ordinal++) {
             const remaining = battleDamage.fighterHealth(ship, ordinal);
-            const critRows = critRowsFromMap(
-                battleDamage.fighterCriticals(ship, ordinal),
-                ship.preBattleCritDesc, ship.preBattleCritTransient,
-                battleDamage.fighterCriticalParams(ship, ordinal));
 
             rows.push(
-                <React.Fragment key={`ftr-${ordinal}`}>
-                    <Row>
-                        <RowLabel>Fighter {ordinal}</RowLabel>
-                        <ActionButton
-                            title="More damage"
-                            disabled={remaining <= 1}
-                            onClick={() => this.step(ordinal, -1)}
-                        >&minus;</ActionButton>
-                        {/*ref, not onWheel: React's own wheel listener is passive, so
-                           preventDefault there cannot stop the page scrolling behind it.*/}
-                        <ValueInput
-                            ref={this.wheelRef(ordinal)}
-                            type="text"
-                            value={remaining}
-                            onChange={e => this.onInput(ordinal, e)}
-                        />
-                        <ActionButton
-                            title="Repair"
-                            disabled={remaining >= max}
-                            onClick={() => this.step(ordinal, 1)}
-                        >+</ActionButton>
-                        <MaxText>/ {max}</MaxText>
-                    </Row>
-                    {/* Same editable rows as the system menu - a flight's carried criticals
-                        can be amended or removed per ordinal. */}
-                    <CriticalEffectsSection
-                        ship={ship}
-                        kind={battleDamage.KIND_FIGHTER}
-                        reference={ordinal}
-                        rows={critRows}
-                        editable
-                        onChange={() => this.refresh()}
+                <Row key={`ftr-${ordinal}`}>
+                    <RowLabel>Fighter {ordinal}</RowLabel>
+                    <ActionButton
+                        title="More damage"
+                        disabled={remaining <= 1}
+                        onClick={() => this.step(ordinal, -1)}
+                    >&minus;</ActionButton>
+                    {/*ref, not onWheel: React's own wheel listener is passive, so
+                       preventDefault there cannot stop the page scrolling behind it.*/}
+                    <ValueInput
+                        ref={this.wheelRef(ordinal)}
+                        type="text"
+                        value={remaining}
+                        onChange={e => this.onInput(ordinal, e)}
                     />
-                </React.Fragment>
+                    <ActionButton
+                        title="Repair"
+                        disabled={remaining >= max}
+                        onClick={() => this.step(ordinal, 1)}
+                    >+</ActionButton>
+                    <MaxText>/ {max}</MaxText>
+                </Row>
             );
         }
+
+        /* ONE section for the flight, below every health row. REF_FLIGHT unions what the
+           ordinals carry on the way in and writes to all of them on the way out. */
+        const flightCrits = battleDamage.flightCritEntry(ship) || {};
+        const critRows = critRowsFromMap(
+            flightCrits.c, ship.preBattleCritDesc, ship.preBattleCritTransient, flightCrits.p);
 
         return (
             <Tooltip $position={getPosition(boundingBox)} onClick={e => e.stopPropagation()}>
                 <Header>Fighter Damage</Header>
-                <Caption>{summary.remaining} / {summary.total} structure</Caption>
+
                 {rows}
                 {size > 1 && <PropagateButton
                     title="Copy Fighter 1's damage to every fighter in this flight"
                     onClick={() => this.propagate()}
                 >Apply Fighter 1 to all</PropagateButton>}
+                <CriticalEffectsSection
+                    ship={ship}
+                    kind={battleDamage.KIND_FIGHTER}
+                    reference={battleDamage.REF_FLIGHT}
+                    rows={critRows}
+                    editable
+                    onChange={() => this.refresh()}
+                />
             </Tooltip>
         );
     }

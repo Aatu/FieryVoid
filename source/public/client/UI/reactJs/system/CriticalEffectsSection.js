@@ -25,10 +25,11 @@ import nonPassiveWheel from '../helpers/nonPassiveWheel';
  * the PARAM and the label loses its trailing number: "Damage reduction reduced by [8]".
  *
  * ADDING (plan §11, built 2026-08-08) comes from the per-class catalogue endpoint
- * systemCriticals.php: a picker listing the criticals this system's own hit chart can
- * produce, with an "all effects" switch for the ones bespoke code applies and no hit
- * chart lists (AmmoExplosion, LimpetBore …). The picker only decides what is OFFERED —
- * what may be STORED is PreBattleDamage::isValidCriticalType and is deliberately wider.
+ * systemCriticals.php: a picker listing the criticals this system can carry in its own
+ * right (its hit chart plus its $preBattleCriticals extras), with an "All" switch that
+ * ADDS the generally-applicable effects on top — it widens the list, it never replaces
+ * it. The picker only decides what is OFFERED — what may be STORED is
+ * PreBattleDamage::isValidCriticalType and is deliberately wider than both.
  * Each class also has a LIMIT (battleDamage.CRIT_LIMITS, mirroring the PHP table): most
  * effects stack, but the ones the game reads as a flag are capped at one, so the [+] goes
  * dead rather than letting a player dial in a wound that does nothing.
@@ -37,6 +38,11 @@ import nonPassiveWheel from '../helpers/nonPassiveWheel';
 const Section = styled.div`
     display: flex;
     flex-direction: column;
+    /*The menus above are shrink-to-fit tooltips capped with a max-width; nothing in here
+      may ask to be wider than the menu it sits in.*/
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
     border-top: 1px solid ${theme.colors.line};
 `;
 
@@ -70,6 +76,9 @@ const CritRow = styled.div`
 const CritLabel = styled.div`
     flex: 1;
     min-width: 0;
+    /*"Damage reduction reduced by" and friends wrap inside the menu rather than widening
+      it - the menus are shrink-to-fit and capped.*/
+    overflow-wrap: anywhere;
 `;
 
 /* A one-turn effect is carried on a different promise from a lasting wound — it will be
@@ -133,6 +142,40 @@ const CountValue = styled.div`
    (user request 2026-08-08: the Damage block had no header while Critical Effects did). */
 export const CritSectionHeader = SectionHeader;
 
+/* ⭐ The checkbox + its word, as ONE aligned pair. Exported so "Destroy" in ApplyDamageMenu
+   and "All" here cannot drift apart.
+
+   Two separate things push a checkbox off its label, and BOTH have to be answered:
+
+   1. The UA's own `margin: 3px 3px 3px 4px` plus its intrinsic box make its MARGIN box
+      several pixels taller than the text beside it, so `align-items: center` faithfully
+      centres two boxes of different heights and the ink lands off-centre. Answered by
+      zeroing the margin, fixing the box, and giving the text `line-height: 1`.
+
+   2. ⚠️ `base.css` carries a GLOBAL `input[type="checkbox"] { position: relative; top: 2px }`
+      that nudges every checkbox in the app down by 2px. `input[type=…]` is specificity
+      0,1,1 and a styled-components class is 0,1,0, so the global rule BEATS this one and
+      the 2px offset survived the first fix (user report 2026-08-08). `&[type='checkbox']`
+      makes it 0,2,1 and takes it back — an explicit `top: 0` rather than an `!important`,
+      so the ordinary rule keeps applying to every other checkbox on the page. */
+export const CheckBox = styled.input`
+    margin: 0;
+    width: 12px;
+    height: 12px;
+    flex: 0 0 12px;
+    cursor: pointer;
+
+    &[type='checkbox'] {
+        position: relative;
+        top: 0;
+    }
+`;
+
+export const CheckText = styled.span`
+    flex: 0 0 auto;
+    line-height: 1;
+`;
+
 /* The add-an-effect row. A native <select> on purpose: it is the one control that gets
    a usable list on a phone for free, and the lobby's damage menus are used on one. */
 const AddRow = styled.div`
@@ -143,8 +186,11 @@ const AddRow = styled.div`
 `;
 
 const AddSelect = styled.select`
-    flex: 1;
+    flex: 1 1 auto;
+    /*Both needed: min-width:0 lets a flex item shrink below its content, width:100% stops
+      it claiming its longest option's width once the menu's max-width has bounded it.*/
     min-width: 0;
+    width: 100%;
     height: 18px;
     box-sizing: border-box;
     padding: 0 2px;
@@ -332,12 +378,11 @@ class CriticalEffectsSection extends Component {
 
     /* A picker entry's wording. Param classes read their magnitude out of the payload,
        which a not-yet-added effect has none of, so they use the same number-less label
-       their ticker row shows. */
+       their ticker row shows; everything else goes through critLabel, which is also what
+       draws the row once it has been added - one source, so the two cannot disagree. */
     pickerLabel(type) {
         const spec = battleDamage.PARAM_CRITICALS[type];
         if (spec) return spec.label;
-        const meta = battleDamage.critMeta(type);
-        if (meta && meta.label) return meta.label;
         return battleDamage.critLabel(type, this.props.ship.preBattleCritDesc, 0);
     }
 
@@ -413,19 +458,19 @@ class CriticalEffectsSection extends Component {
                             onChange={e => this.onAdd(e.target.value)}
                         >
                             <option value="">
-                                {addable.length ? '+ Add effect…' : 'Nothing left to add'}
+                                {addable.length ? '+ Add effect…' : 'Nothing to add'}
                             </option>
                             {addable.map(option => (
                                 <option key={option.type} value={option.type}>{option.label}</option>
                             ))}
                         </AddSelect>
-                        <AllToggle title="Offer every effect in the game, not just the ones this system's hit chart can roll">
-                            <input
+                        <AllToggle title="Also offer the effects that apply to any system, on top of this one's own">
+                            <CheckBox
                                 type="checkbox"
                                 checked={this.state.showAll}
                                 onChange={e => this.setState({ showAll: e.target.checked })}
                             />
-                            All
+                            <CheckText>All</CheckText>
                         </AllToggle>
                     </AddRow>
                 )}

@@ -7,7 +7,14 @@ three more (§14) — terrain is never saved, removed criticals keep their row, 
 PARAM-CARRYING criticals are now carried between battles. A fourth pass (§15) added ELEVEN
 more, the largest of which retires §11 from "optional follow-up" to BUILT: criticals can now
 be ADDED in the lobby from a per-class catalogue, with per-class limits. §15 also adds a
-third payload bucket for MINES.**
+third payload bucket for MINES. A fifth pass (§16) added seven, the largest of which is a
+FACTION RULES change rather than a feature fix: **§16.4, the Vree saucer's outer-structure
+ring — a breached block no longer destroys the systems shown in it.** §16 also collapses a
+flight's per-fighter critical sections into ONE flight-wide section (`REF_FLIGHT`). A sixth
+pass (§17) narrowed the crit picker's "All" list from 58 classes to a curated 12
+(`PreBattleDamage::$generalCriticals`) and gave every system a place to name its own extras
+(`ShipSystem::$preBattleCriticals`) — which is also what finally gives FIGHTERS anything to
+offer.**
 Created 2026-08-07; revised same day (flight finding, crit-authoring deferred to §11, independent
 damage/crit load toggles); revised again during implementation (**D8** — fighters are damaged,
 never destroyed; a lost fighter shrinks `flightSize`).
@@ -1455,3 +1462,326 @@ had never actually appeared.
 though §15.5 means the regen is now an optimisation rather than a correctness dependency.
 `db/prebattleDamage.sql` must be applied to any DB that already has these tables (it now
 also adds `tac_saved_ship.bulkbuy`); it has been applied locally.
+
+---
+
+## 16. Refinement round, 2026-08-08 (fifth pass)
+
+Seven requests. The structural one is **§16.4 — the Vree saucer's outer-structure ring**,
+which is a rules change to a whole faction rather than a bug in this feature; it landed
+here because pre-battle damage is what made it visible.
+
+### 16.1 The "All" switch stretched the menu to 500px
+
+**Symptom.** Ticking **All** in Critical Effects made `ApplyDamageMenu` "really wide".
+
+**Cause.** A `<select>` takes its intrinsic width from its **longest option**, and the only
+ancestor these menus have is `SystemInfoMenu`'s absolutely-positioned tooltip, which is
+**shrink-to-fit** (capped at 500px). So swapping a system's handful of hit-chart criticals
+for every storable class in the game handed the layout a much longer string to size to, and
+it took it — right up to the ceiling.
+
+`flex: 1` and `min-width: 0` on the select were already there and are not the fix: they let
+a flex item **shrink**, they do not stop it **asking**. What clamps a max-content
+contribution is a `max-width` on the box itself. Both menus now carry one
+(`ApplyDamageMenu`'s `Container`, `FighterDamageMenu`'s `Tooltip`, 300px), the section
+carries `min-width: 0; max-width: 100%`, and a long critical label wraps
+(`overflow-wrap: anywhere`) instead of widening the row. The dropdown *popup* still opens
+at its natural width, so nothing is lost by clipping the closed control.
+
+### 16.2 "Destroy" and "All" sat off-centre in their rows
+
+A default `<input type="checkbox">` carries the UA's own `margin: 3px 3px 3px 4px` plus its
+own intrinsic box, so its **margin box** is several pixels taller than the word beside it.
+`align-items: center` then faithfully centres two items of different heights and the ink
+ends up misaligned against the tickers and the value field.
+
+One exported pair, `CheckBox` + `CheckText` (in `CriticalEffectsSection.js`, beside
+`CritSectionHeader`, so the two labels cannot drift): margin zeroed, box fixed at 12x12,
+text at `line-height: 1`. Both items are then the same height and centring is exact.
+
+### 16.3 The top SAVE FLEET lost its border
+
+`gamelobby.php`'s second SAVE FLEET carried `class="btn savebutton savebutton-top"`.
+**`gamesNew.css` is linked AFTER `lobby.css`**, and its `.btn { border: none;
+display: inline-block; }` has the *same specificity* as `.savebutton-top`, so it won:
+that button rendered with no border and without the `inline-flex` centring, while its twin
+at the bottom of the buy panel — which pairs `.btn` with the **later** `.btn-primary-lobby`
+in the same file — kept both. Fixed by dropping `btn` from the class list, which is what
+`.readybutton-top` beside it has always done; `.savebutton-top` already declares everything
+`.btn` was providing. The row stays a 150px equal-width set (§15.6 item 8) on purpose.
+
+### 16.4 ⭐ THE VREE SAUCER RULE — systems survive their structure block
+
+**User report (game 4285):** a Xill's Antiproton Guns were destroyed along with the two
+Port structures, and should not have been.
+
+**Investigated before changing anything.** Everything the code was doing matched what the
+ship file says, and both mechanisms the report named turned out to be healthy:
+
+* the **array `structureHomeLocation`** path is correct — a Vorlon Light Cruiser's
+  `home = [1, 32]` cannons survive Front alone and fall only when Port-Aft goes too, while
+  the `[1, 42]` pair stays up;
+* **`ssd` DID reach the static bundle** after the user's regen (`Mindriders`, `The System`
+  and `Thirdspace` carry it), so §15.5's delivery is done;
+* the Xill's guns simply have **no structure home at all** — each is bound to exactly one
+  quarter (`#12 -> 31`, `#14 -> 32`) — so destroying both Port blocks correctly took both
+  Port guns.
+
+**The real answer is a faction rule, not a home-location fix** (user, 2026-08-08): on a Vree
+saucer the six "Outer Structure" blocks are a **ring around** the disc, not the compartment
+the systems sit in. So a breached block does **not** destroy what is shown in it — which
+makes what the system's structure home *is* academic there, unlike the Vorlon and Kirishiac
+hulls where the home is the whole point.
+
+Implemented on the **hull**, not on thirty systems one at a time:
+
+| piece | where |
+|---|---|
+| `protected $systemsSurviveStructureLoss = false;` | `BaseShip` (`ShipClasses.php`) |
+| stamps every non-Structure system it mounts | `BaseShip::addSystem` — every `addXSystem` variant routes through it |
+| `ShipSystem::setSurvivesStructureDestruction()` | a **setter**, so the property stays `protected` |
+| `= true` | `VreeCapital`, `VreeHCV`, and `Tyllz` (the one Vree hull that descends from neither) |
+
+Stamping at **construction** is what makes it free everywhere: the flag is baked into the
+blueprint, so it rides the static ship bundle (`ShipCompactor::annotateSystems`), the
+crit-catalogue endpoint's `ssd`, the lobby's damage preview and every live ship, from one
+line per hull class. **No client change was needed** — `battleDamage.survivesStructureDestruction`
+already asks the blueprint and then the catalogue, and the catalogue is built from a freshly
+constructed ship, so the preview is right even before the next static regen.
+
+⚠️ **`$systemsSurviveStructureLoss` is PROTECTED on purpose.** A public ship property would
+ride every ship of every gamedata poll to serve the ~1% of hulls that set it, and nothing on
+the client needs the hull-level flag — the per-system one already has two delivery routes.
+This is the same trap `$survivesStructureDestruction` itself documents (§12.3).
+
+Structures are skipped: a Structure's own destruction rule is the PRIMARY-structure test,
+and ship destruction still keys off the primary block alone, so a Vree saucer dies exactly
+when it did before.
+
+### 16.5 ONE Critical Effects section for a flight
+
+`FighterDamageMenu` drew a full Critical Effects section — header, rows, picker and "All"
+switch — **under every fighter row**. On a flight of six that is six of everything, for six
+craft that are identical by construction. There is now **one**, under all the health rows.
+
+It addresses a new reference, **`battleDamage.REF_FLIGHT` (0 — ordinals are 1-based, so it
+cannot collide)**, handled inside `battleDamage` rather than in the component, so the single
+door criticals enter a payload by stays a single door:
+
+* `getEntry(ship, KIND_FIGHTER, REF_FLIGHT)` returns a **synthetic** union — every class any
+  ordinal carries, at the highest count/param any of them carries it at. Nothing is written
+  to a `"0"` key; the payload shape is unchanged.
+* `setCriticals(…, REF_FLIGHT, …)` fans out to every ordinal through the ordinary
+  per-ordinal path, so the deny list, the per-class limits and the param collapse all still
+  apply. Each ordinal's **damage** is untouched — that is what the rows above are for.
+* `offerableCriticals(…, REF_FLIGHT, …)` is offered ordinal 1's catalogue list.
+
+The trade, stated plainly: a fleet saved out of a real battle can carry different criticals
+on different craft; the section shows the worst of them, and editing levels them. That is
+what "apply to the flight" has to mean on a card the lobby draws as a single craft.
+
+Consequence: **"Apply Fighter 1 to all" now copies damage only.** It used to copy the whole
+entry so that lobby crit authoring would propagate for free (§5.2) — with criticals authored
+flight-wide that would do nothing at best, and on a loaded fleet where only the *other* craft
+were crit it would silently wipe them.
+
+### 16.6 A saved fleet with mines is refused when the scenario has none
+
+'Allow Mines' is a per-scenario rule and a saved fleet outlives the game it came from, so a
+fleet built where mines were allowed happily carried its bulks into a lobby whose buy panel
+never offers them (`constructStore` skips mines on the same test). `doLoadFleet` — the one
+funnel both load paths come through — now refuses the **whole** load with
+*"Saved fleet contains units not available for this scenario"*.
+
+Refusing wholesale rather than dropping the offending units is deliberate: the fleet's stored
+`points` counted them, and the affordability check has already approved that figure, so a
+partial load would put a fleet on the table that the player never saved.
+
+### 16.7 The damaged badge is a wrench
+
+`fa-heart-crack` -> **`fa-screwdriver-wrench`** in both places that draw it
+(`gamedata.damagedShipBadge` for a bought unit, and the saved-fleet dropdown) — a wound a
+unit is carrying *into* a battle reads as "needs repair", not as a death. Font Awesome 6.5 is
+already linked on both pages, so it inherits the existing badge colour and size. Change both
+or neither; the comment on each says so.
+
+### 16.8 Verification
+
+* `php -l` clean on `ShipClasses.php`, `ShipSystem.php`, `Tyllz.php`, `gamelobby.php`.
+* **Scratch PHP, 13 assertions:** the Xill in game 4285's exact state — both Port structures
+  destroyed, **both Port Antiproton Guns alive**, the structures themselves still destroyed;
+  every non-Structure system on the hull flagged and **every Structure not**; a gun destroyed
+  *outright* still destroyed (the flag stops the cascade, not direct damage); `Vaarka`,
+  `Xixx`, `Tyllz` and `Xorr` fully flagged; **an Omega untouched (0 systems flagged)**; the
+  Vorlon LC's array-home cascade still firing and its `[1,42]` pair still surviving; shield
+  projections keeping their own hard-coded flag.
+* **Catalogue endpoint:** `Manager::getSystemCriticals('Xill', 1)` returns `ssd: true` on all
+  19 non-Structure systems, so the lobby preview is correct with no static regen.
+* **Replay harness: 154 pass / 1 fail** — the known stale game 4234, which fails identically
+  on a clean tree. Unchanged, i.e. the protected flag genuinely stays out of every payload
+  (this is the harness's own worked example — see §12.3).
+* **React, 20 assertions** under `renderToString` (bundled first, so a missing import throws
+  — self-tested against a deliberately broken import): the damage menu's system name and
+  `Destroy` in its own element; a `max-width` rule emitted; **exactly ONE "Critical Effects"
+  header on a flight of six, drawn after the last fighter row**, showing a critical only one
+  ordinal carries; the union taking the highest count; a REF_FLIGHT write reaching every
+  ordinal and a REF_FLIGHT clear clearing every ordinal, both leaving per-fighter damage
+  intact; **no `"0"` key ever written into the `ftr` bucket**; propagate copying damage while
+  leaving another ordinal's critical alone; the mine menu still one row per copy with no
+  Critical Effects section.
+* `node --check` on every edited legacy JS file.
+
+**Outstanding: the user's browser test, `yarn build`, and a static ship regen** — the regen
+now also picks up the Vree flags, though §15.5's catalogue route means the lobby is correct
+without it.
+
+---
+
+## 17. Refinement round, 2026-08-08 (sixth pass)
+
+Four requests, all against the crit editor §15.3 built. The structural one is §17.1: the
+"All" switch was answering the wrong question.
+
+### 17.1 ⭐ "All" offered 58 criticals; now it offers 12, and systems can add their own
+
+**Symptom (user).** "The 'All' crits checklist is too extensive — certain crits only make
+sense for certain systems." Correct: `allCriticalTypes()` scraped every storable class out
+of `cricialClasses.php`, so a Reactor was offered *Turret jammed* and an Engine was offered
+*Stored ammunition exploded*. Fifty-eight entries is a list, not a picker.
+
+**The second half of the same problem: fighters had NOTHING.** `Fighter::$possibleCriticals`
+is empty — a fighter is destroyed rather than critted in play — so the narrow list was blank
+for a flight and "All" was the *only* route to any effect at all. Curating "All" without
+fixing that would have left flights with no criticals whatsoever.
+
+So the two halves are one change: **narrow the general list, and give each system a place to
+name its own extras.**
+
+⭐ **"All" WIDENS the system's own list — it does not replace it.** The first cut had
+`battleDamage.offerableCriticals` return the general list *instead of* the per-target one
+when the switch was ticked, which was wrong in the obvious way: ticking "All" on a weapon
+**hid Gun Lost and Turret jammed**, the two effects most worth authoring there (user report,
+same day). It now returns the union, the system's own effects first, deduped — so the switch
+can only ever add. Done client-side, where both lists are already in hand; the catalogue
+keeps serving them separately because they answer different questions.
+
+**`PreBattleDamage::$generalCriticals`** — a hand-curated array, meant to be edited. Twelve
+entries, and the derivation is written on it so a future edit can argue with it: every one is
+read **generically**, by code that does not know which system it is looking at. The
+`OutputReduced` ladder, `OutputHalved(OneTurn)`, `PartialBurnout` and `SevereBurnout` all
+work through `outputMod` / `outputModPercentage`, which `ShipSystem::effectCriticals` sums
+for every system; `ForcedOfflineOneTurn` is read by `ShipSystem::isOfflineOnTurn`, likewise
+generic. Everything left off is **scoped** to a weapon (`GunLost`, `ReducedArcs`,
+`AmmoExplosion`…), to the C&C (`ReducedIniative`, `PenaltyToHit`, `ProfileIncreased` — all
+read as `$CnC->hasCritical(...)`), to a thruster (`HalfEfficiency`), to a shield
+(`DamageReduction*`) or to one faction's hull (`TendrilDestroyed`, `ShadowPilotPain`).
+`OutputReduced` and `OutputReducedOneTurn` are absent for a different reason: they carry no
+`outputMod` of their own, so authoring one stores a wound that does nothing.
+
+**`ShipSystem::$preBattleCriticals`** — a new per-system FLAT list of extra classes the
+editor may offer here, on top of the hit chart:
+
+```php
+protected $preBattleCriticals = array('AmmoExplosion', 'ReducedArcs');
+```
+
+It fills the two gaps `$possibleCriticals` cannot: effects real battles produce through
+bespoke code that no hit chart lists, and systems with no hit chart at all. `ShipSystem::getPreBattleCriticalTypes()`
+returns hit chart ∪ extras, and `PreBattleDamage::offerableCriticalTypes()` reads that.
+`getPossibleCriticalTypes()` keeps meaning exactly "what this system's hit chart can roll" —
+the two questions are different and only one of them is a rules statement.
+
+**Seeded on `Fighter`, and only with what is verified to work:**
+
+```php
+protected $preBattleCriticals = array(
+    'ReducedIniative', 'ReducedIniativeOneTurn', 'Uncontrolled', 'tmpinidown');
+```
+
+Those four are exactly what `ShipClasses::getIniModifier` reads off `getSampleFighter()` for
+a flight (−10 permanent, −10 one turn, −15 one turn, −5 one turn). A flight has no C&C, so
+the usual ship-wide criticals genuinely do nothing on one — which is why the list is short
+and why the comment tells the next editor to `grep -rn 'hasCritical("Foo"' source/server`
+and check the RECEIVER before adding a fifth.
+
+⚠️ They are read off the **sample fighter (ordinal 1) only** — which is independently why
+§16.5's flight-wide editor writes criticals to every ordinal rather than per craft.
+
+⚠️ **Neither list is the storability test.** `isValidCriticalType` stays wide; narrowing it
+would eat carried combat crits on reload (§4.2's seam, still holding after two rounds of
+pressure). And there is **no new mirror pair** — both lists are server-side only and reach
+the client through the catalogue endpoint, which the client already treats as authoritative.
+
+⚠️ **The catalogue is APCu-cached** under the deploy-versioned prefix, and the deploy version
+is the *mtime of the legacy bundle*. Editing a `$preBattleCriticals` table in PHP alone does
+not bump it, so a browser can keep seeing the old list for up to an hour; `yarn build`
+rewrites the bundle and orphans the cache, which is the normal path.
+
+### 17.2 An added critical was labelled by its class name
+
+`battleDamage.critLabel` consulted `critDesc` — the server's `describeCriticals` map — and
+then fell straight through to the raw class name. `critDesc` only ever holds the classes a
+LOADED FLEET actually carried, so a critical the player had just **added** in the lobby had
+never been in it: the row read `OutputReduced1` while the dropdown it came from read "Output
+altered by -1".
+
+`critLabel` now tries three sources in order: `critDesc`, then the **catalogue's `meta`**
+(which names every class the picker can offer), then the class name. `pickerLabel` delegates
+to it as well, so the option and the row it becomes cannot disagree.
+
+### 17.3 The checkbox nudge that survived §16.2
+
+`base.css` carries a **global** `input[type="checkbox"] { position: relative; top: 2px; }`
+that shifts every checkbox in the app down two pixels. `input[type=…]` is specificity 0,1,1;
+a styled-components class is 0,1,0 — so the global rule beat §16.2's fix and the offset
+survived it. `&[type='checkbox'] { top: 0 }` inside the styled component is 0,2,1 and takes
+it back, as an explicit value rather than an `!important` so the ordinary rule keeps applying
+to every other checkbox on the page.
+
+Worth remembering generally: **a bare styled-components class loses to any `[attr]`-qualified
+global selector.** Anything in `base.css` written as `tag[type=…]` outranks a styled
+component unless the component qualifies itself the same way.
+
+### 17.4 A system destroyed in the lobby could not be un-destroyed
+
+`SystemIcon.clickSystem` had the exception right all along — its destroyed bail lets
+`canApplyPreBattleDamage` through precisely so you can take back what you just destroyed.
+But `SystemIcon.render` returns **early**, before that, with a bar-only `<System>` carrying
+**no `onClick` at all**, so the click never reached the handler. The two guards disagreed and
+the render won.
+
+The early return now also passes `canApplyPreBattleDamage`, matching `clickableWhenDestroyed`
+(the destroyed Kirishiac Orbital, which has always kept its interactive render for the same
+kind of reason). Structure was never affected — it is clicked through the section header bar,
+which has no destroyed gate.
+
+One consequence handled in the same edit: the interactive render draws its health bar from
+`getStructureLeft`, which reads *damage*. A system destroyed by the **structure cascade**
+carries no damage of its own, so it would have drawn a FULL bar behind the destroyed blur.
+The bar is now explicitly 0 when destroyed, matching the bar-only render it replaces.
+
+### 17.5 Verification
+
+* `php -l` clean on `PreBattleDamage.php`, `ShipSystem.php`, `fighter.php`.
+* **Scratch PHP, 20 assertions:** the general list is 12 entries, all storable, all carrying
+  a genuinely generic effect (asserted by probing `outputMod`/`outputModPercentage`, with
+  `ForcedOfflineOneTurn` allowed through by name); no weapon- or C&C-scoped effect leaked in;
+  the two no-op `OutputReduced`/`OutputReducedOneTurn` are absent; an ordinary system still
+  offers exactly its hit chart; **an Aurora fighter now offers the four verified flight-scoped
+  criticals**; the catalogue keys all 3 ordinals with identical lists and names every one of
+  them in `meta`; an authored fighter crit survives `sanitise` and expands to a real turn-0
+  `Critical`, while a transient one is stamped at `TRANSIENT_TURN`.
+* **React/Node, 36 assertions** (all of §16.8's, plus): **"All" ticked returns a strict
+  SUPERSET of unticked** — the system's own `GunLost`/`ReducedArcs`/`AmmoExplosion` still
+  present, the general ones added on top, a class in both lists appearing once, and the same
+  through a flight's REF_FLIGHT branch (self-tested: reverting to the replace behaviour
+  fails three of them); an added crit whose
+  class only the CATALOGUE knows renders its description and not its class name; `critDesc`
+  still wins when it has the class; an unknown class still degrades to its own name; the
+  `[type=checkbox]`-qualified `top: 0` rule is emitted; **a destroyed lobby system keeps its
+  interactive render while the same system in a real game keeps the bar-only one**. That last
+  pair was self-tested by reverting the fix — it fails without it.
+* **Replay harness: 154 pass / 1 fail** — the known stale game 4234. The new
+  `$preBattleCriticals` is `protected`, so nothing reached a payload.
+* `node --check` on every edited legacy JS file.
