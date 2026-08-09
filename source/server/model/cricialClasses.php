@@ -256,7 +256,7 @@ class ForcedOfflineForTurns extends Critical{
 }
 
 class FirstThrustIgnored extends Critical{
-    public $description = "First point of channeled thrust lost";
+    public $description = "First channeled thrust lost";
     public $outputMod = -1;
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend);
@@ -264,7 +264,7 @@ class FirstThrustIgnored extends Critical{
 }
 
 class FirstThrustIgnoredOneTurn extends Critical{
-    public $description = "First point of channeled thrust lost";
+    public $description = "First channeled thrust lost";
     public $outputMod = -1;    
     public $oneturn = true;
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
