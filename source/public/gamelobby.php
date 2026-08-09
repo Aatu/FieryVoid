@@ -742,7 +742,7 @@ $optionsUsed = '';
                     <span class="filter-pipe-separator">|</span>  
 
                     <label class="name-filter-label-style">
-                        <span class="filter-by-name-text">Filter by Ship Name:</span>
+                        <span class="filter-by-name-text">Filter by Name:</span>
                         <input type="text" id="nameFilter" value="" class="name-input-style">
                     </label>
                     <!--<span class="filter-pipe-separator">|</span>-->
@@ -750,7 +750,7 @@ $optionsUsed = '';
                     <label class="isd-filter-label-style">
                         <span class="filter-by-isd-text">Filter by ISD:</span>
                         <input type="text" id="isdFilter" value="" class="isd-input-style">
-                        <span class="clickable resetFilters reset-filters-link-style">Reset Name/ISD</span>
+                        <span class="clickable resetFilters reset-filters-link-style">Reset Filters</span>
                     </label>
                 </div>
                 <div>
