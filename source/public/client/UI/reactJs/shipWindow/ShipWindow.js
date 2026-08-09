@@ -2041,7 +2041,7 @@ const isLobby = () => Boolean(window.gamedata) && window.gamedata.gamephase === 
   small craft) the same spans run the full height of the grid, the chrome shares the
   window's height with the fwd/prim/aft column instead of stacking on top of it, and the
   sections stay centred - nudging the art there only pulls it off them.*/
-const LOBBY_WATERMARK_OFFSET_Y = 20;
+const LOBBY_WATERMARK_OFFSET_Y = 35;
 
 //side sections present = buildTemplateAreas will emit at least one middle row
 const hasSideSections = (locations) => SIDE_LOCATIONS.some(location => locations[location].length > 0);
