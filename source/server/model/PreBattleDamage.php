@@ -78,12 +78,12 @@ class PreBattleDamage
        line here rather than six greps. */
     const BUCKETS = array('sys' => self::KIND_SYSTEM, 'ftr' => self::KIND_FIGHTER, 'mne' => self::KIND_MINE);
 
-    const MAX_CRIT_COUNT = 10;
+    const MAX_CRIT_COUNT = 5;
     /* Ceiling on a stored crit param. Generous: the biggest real DamageReductionReduced
        total is the whole rating of a Thought Shield, and a value larger than the system's
        own output simply floors the effect at zero. It exists so a crafted POST cannot
        write a nonsense integer, not to express a rule. */
-    const MAX_CRIT_PARAM = 100;
+    const MAX_CRIT_PARAM = 300;
 
     /* ─────────────────────────────────────────────────────────────────────────────────
        PARAM-CARRYING CRITICALS — the allow-list.
@@ -134,19 +134,18 @@ class PreBattleDamage
         //pure flags: asked as `if (hasCritical(...))`, never counted
         'DamageReductionRemoved'     => 1,
         'ReducedArcs'                => 1,   //turret jam; testArcRestriction already refuses to double up
+        'ArmorReduced'               => 10,
         'ContainmentBreach'          => 1,
         'ChargeHalve'                => 1,
         'ChargeEmpty'                => 1,
-        'FirstThrustIgnored'         => 3,
-        'FirstThrustIgnoredOneTurn'  => 1,
         'ShipDisabled'               => 1,
         'ShipDisabledOneTurn'        => 1,
         'ForcedOfflineOneTurn'       => 1,
         'OSATThrusterCrit'           => 1,
-        'GravThrusterCritIgnored'    => 1,
-        'AmmoExplosion'              => 1,   //a magazine only blows up once
-        'EngineShorted'              => 1,
-        'ControlsStuck'              => 1,
+        //'GravThrusterCritIgnored'    => 1,
+        //'AmmoExplosion'              => 1,   //a magazine only blows up once
+        //'EngineShorted'              => 1,
+        //'ControlsStuck'              => 1,
         'TendrilDestroyed'           => 1,
         //escalating results rather than stacking modifiers - see the note above
         'PartialBurnout'             => 1,
@@ -195,6 +194,10 @@ class PreBattleDamage
                stored - see $paramCriticals above. */
         //weapon-cooldown marker; always carries a real turnend, which the probe below
         //cannot detect because its turnend is a constructor argument with no default
+        'AmmoExplosion',
+        'GravThrusterCritIgnored',
+        'ControlsStuck',
+        'EngineShorted', 
         'ForcedOfflineForTurns',
         //Hangar Ops / state markers
         'DockedFighter',
@@ -931,7 +934,10 @@ class PreBattleDamage
      * replaced "offer everything, everywhere".
      */
     public static $generalCriticals = array(
-        'ArmorReduced',      //read of any targeted system by Weapon::getSystemArmourBase
+        // //ArmourRedcued added to shipSystem->$preBattleCrits instead of here since it was the only example for now.  
+        // And 'All' checkbox removed from crit section.  Leave in for now, in case useful later.        
+        //'ArmorReduced',      
+
     );
 
     /**

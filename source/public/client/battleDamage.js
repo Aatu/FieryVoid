@@ -34,8 +34,8 @@ window.battleDamage = {
 	TURN: 0,
 	DAMAGECLASS: 'PreGame',
 	PUBNOTES: 'Pre-battle damage',
-	MAX_CRIT_COUNT: 10,
-	MAX_CRIT_PARAM: 100,
+	MAX_CRIT_COUNT: 5,
+	MAX_CRIT_PARAM: 300,
 
 	KIND_SYSTEM: 0,
 	KIND_FIGHTER: 1,
@@ -95,19 +95,18 @@ window.battleDamage = {
 	CRIT_LIMITS: {
 		DamageReductionRemoved: 1,
 		ReducedArcs: 1,
+		ArmorReduced: 10,
 		ContainmentBreach: 1,
 		ChargeHalve: 1,
 		ChargeEmpty: 1,
-		FirstThrustIgnored: 3,
-		FirstThrustIgnoredOneTurn: 1,
 		ShipDisabled: 1,
 		ShipDisabledOneTurn: 1,
 		ForcedOfflineOneTurn: 1,
 		OSATThrusterCrit: 1,
-		GravThrusterCritIgnored: 1,
-		AmmoExplosion: 1,
-		EngineShorted: 1,
-		ControlsStuck: 1,
+		//GravThrusterCritIgnored: 1,
+		//AmmoExplosion: 1,
+		//EngineShorted: 1,
+		//ControlsStuck: 1,
 		TendrilDestroyed: 1,
 		PartialBurnout: 1,
 		SevereBurnout: 1,
@@ -184,11 +183,15 @@ window.battleDamage = {
 		   DamageReductionReduced's param is now stored (PARAM_CRITICALS above). Both are
 		   permanent wounds and both are now carried between battles. */
 		//weapon-cooldown marker carrying a real turnend
-		'ForcedOfflineForTurns',
+		'AmmoExplosion',
+        'GravThrusterCritIgnored',
+        'ControlsStuck',
+        'EngineShorted', 
+        'ForcedOfflineForTurns',
 		//Hangar Ops / state markers
 		'DockedFighter', 'SplitLaunchedFighter', 'LaunchedThisTurn',
 		'LCVLaunchedThisTurn', 'HangarOperations', 'OrbitalRepairing',
-		'DisengagedFighter', 'ShadowFighterCutOff', 'LimpetBoreTravelling',
+		'DisengagedFighter', 'ShadowFighterCutOff', 'LimpetBoreTravelling', 'Uncontrolled',
 		//marine / boarding actions - they belong to the battle being fought, not to the
 		//fleet: no marines are aboard when the next one starts
 		'Sabotage', 'SabotageElite', 'CaptureShip', 'CaptureShipElite',
