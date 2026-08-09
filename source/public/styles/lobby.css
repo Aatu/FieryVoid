@@ -292,8 +292,8 @@
 }
 
 /* Pre-battle damage badge, ahead of the unit's name in the bought-fleet list. The same
-   fa-heart-crack the saved-fleet dropdown uses for a fleet carrying damage, so the two
-   read as one idea. Written by gamedata.damagedShipBadge from BOTH row builders.
+   fa-screwdriver-wrench the saved-fleet dropdown uses for a fleet carrying damage, so the
+   two read as one idea. Written by gamedata.damagedShipBadge from BOTH row builders.
    Sized to sit inside the name's line box so the row height does not change. */
 .shipDamagedBadge {
     color: var(--fv-crit);
@@ -518,8 +518,8 @@
     /* One row of EQUAL-WIDTH controls: Load a Fleet | Save Fleet | Ready. min-width was
        160px against a 150px width, so this button was quietly 10px wider than the Ready
        button beside it (user request 2026-08-08: make them match). */
-    width: 150px;
-    min-width: 150px;
+    width: 140px;
+    min-width: 140px;
     height: 27px;
 }
 
@@ -790,10 +790,10 @@
     cursor: pointer;
     user-select: none;
     box-sizing: border-box;
-    min-width: 150px;
-    width: 150px;
+    min-width: 120px;
+    width: 120px;
     height: 27px;
-    margin-left: 0;
+    margin-left: 5px;
     line-height: normal;
 }
 
