@@ -937,8 +937,10 @@ window.confirm = {
             } else $(".totalUnitCostAmount").data("maxSize", 9);
         }
 
-        var pristineBaseShip = gamedata.getShipByType(ship.phpclass);
-        var pointCost = pristineBaseShip ? pristineBaseShip.pointCost : ship.pointCost;
+        //MUST be the bare hull: this dialog totals as base + enhancements. Falling back to
+        //ship.pointCost counted them twice, because doLoadFleet/doBuyShip have already folded them
+        //into it - see gamedata.getPristinePointCost. Unchanged when a blueprint is available.
+        var pointCost = gamedata.getPristinePointCost(ship);
         /*
         if (ship.maxFlightSize==3){ //for single-unit flight cost is for a fighter; for usual 6+ flight, for 6 craft (and 6 craft will be set)
             //but for 3-strong flight cost is still set for 6-strong flight...
@@ -1117,9 +1119,8 @@ window.confirm = {
 
             selectAmountItem.html(ship.flightSize);
 
-            var pristineBaseShip = gamedata.getShipByType(ship.phpclass);
-            var pristineBaseCost = pristineBaseShip ? pristineBaseShip.pointCost : ship.pointCost;
-            selectAmountItem.data('pV', Math.floor(pristineBaseCost / 6));
+            //per-craft cost of the BARE hull, for the same reason as the total above
+            selectAmountItem.data('pV', Math.floor(gamedata.getPristinePointCost(ship) / 6));
 
 
             selectAmountItem.on("wheel", confirm.handleMouseWheelFighter);

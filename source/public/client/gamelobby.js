@@ -2865,7 +2865,13 @@ window.gamedata = {
 
 		var newShip = gamedata.getShipByType(copiedShip.phpclass);
 		if (!newShip) {
-			gamedata.setShipsFromFaction(copiedShip.faction, [copiedShip]); //Loaded fleets may not have their faction set yet when editing, so do this now.
+			//Loaded fleets may not have their faction set yet when editing, so do this now.
+			//A copy at the BARE hull's cost, same reasoning as in doEditShip: copiedShip's pointCost
+			//includes its enhancements, and what is registered here becomes the blueprint every
+			//later lookup of this class finds.
+			var standIn = jQuery.extend({}, copiedShip);
+			standIn.pointCost = gamedata.getPristinePointCost(copiedShip);
+			gamedata.setShipsFromFaction(copiedShip.faction, [standIn]);
 			newShip = gamedata.getShipByType(copiedShip.phpclass);
 		}
 
@@ -3051,6 +3057,10 @@ window.gamedata = {
 		var ship = $(this).data().ship;
 		var originalShipData = $(this).data().originalShipData; //Fetch original data before edits?
 
+		//Captured BEFORE pointCost is overwritten with the dialog's total - by then it is no longer
+		//the bare hull's, and the no-blueprint stand-in below needs the bare one.
+		var pristinePointCost = gamedata.getPristinePointCost(ship);
+
 		if ($(".confirm .totalUnitCostAmount").length > 0) {
 			ship.pointCost = $(".confirm .totalUnitCostAmount").data("value");
 		}
@@ -3081,7 +3091,14 @@ window.gamedata = {
 
 		var baseShip = gamedata.getShipByType(ship.phpclass);
 		if (!baseShip) {
-			gamedata.setShipsFromFaction(ship.faction, [ship]); //Loaded fleets may not have their faction set yet when editing, so do this now.
+			//Loaded fleets may not have their faction set yet when editing, so do this now.
+			//Register a COPY carrying the BARE hull's cost, not `ship` itself: `ship` is holding the
+			//dialog's total by this point, and whatever is registered here becomes the blueprint
+			//every later lookup of this class finds - including the next edit of this same ship,
+			//which would then take an inflated cost as its baseline and double-count all over again.
+			var standIn = jQuery.extend({}, ship);
+			standIn.pointCost = pristinePointCost;
+			gamedata.setShipsFromFaction(ship.faction, [standIn]);
 			baseShip = gamedata.getShipByType(ship.phpclass);
 		}
 
@@ -3236,6 +3253,33 @@ window.gamedata = {
 		//gamedata.populateFleetDropdown();
 	},
 
+
+	/*The hull's PRISTINE point cost - what it costs with nothing bought on it.
+
+	  Normally that is simply the blueprint's, but gamedata.allShips is filled LAZILY, one faction
+	  at a time, as the player expands that faction in the store (onFactionClicked -> parseShips).
+	  Loading a saved fleet never triggers that, so a loaded ship routinely has no blueprint at all -
+	  which is what the "Loaded fleets may not have their faction set yet" fallbacks below are about.
+
+	  With no blueprint, derive it from the ship rather than falling back to ship.pointCost. Every
+	  path that writes pointCost folds the enhancement cost INTO it - doBuyShip and doEditShip store
+	  the buy dialog's total, doLoadFleet adds the saved enhvalue back on - and pointCostEnh /
+	  pointCostEnh2 hold exactly that folded-in amount, so subtracting them is correct on a bought,
+	  loaded or already-edited ship alike.
+
+	  This is not cosmetic. The edit dialog totals as base + enhancements, so a "base" that already
+	  contains the enhancements counts them twice: saved fleet 55 (Primus, hull 830 + 85 of
+	  enhancements = 915) opened its edit window at 1000 and cost 1000 if accepted unchanged.*/
+	getPristinePointCost: function getPristinePointCost(ship) {
+		var blueprint = gamedata.getShipByType(ship.phpclass);
+		if (blueprint) return blueprint.pointCost;
+
+		var base = ship.pointCost - (ship.pointCostEnh || 0) - (ship.pointCostEnh2 || 0);
+		//a flight's pointCost is scaled to the size it was bought or loaded at (doBuyShip,
+		//doLoadFleet), while the blueprint cost this stands in for is always the six-craft one
+		if (ship.flight && ship.flightSize > 0) base = (base / ship.flightSize) * 6;
+		return Math.round(base);
+	},
 
 	getShipByType: function getShipByType(type) {
 
