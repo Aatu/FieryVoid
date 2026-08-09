@@ -195,10 +195,11 @@ class PreBattleDamage
         //weapon-cooldown marker; always carries a real turnend, which the probe below
         //cannot detect because its turnend is a constructor argument with no default
         'AmmoExplosion',
-        'GravThrusterCritIgnored',
         'ControlsStuck',
         'EngineShorted', 
         'ForcedOfflineForTurns',
+        'GravThrusterCritIgnored',        
+        'MayOverheat',
         //Hangar Ops / state markers
         'DockedFighter',
         'SplitLaunchedFighter',

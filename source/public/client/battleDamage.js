@@ -184,10 +184,11 @@ window.battleDamage = {
 		   permanent wounds and both are now carried between battles. */
 		//weapon-cooldown marker carrying a real turnend
 		'AmmoExplosion',
-        'GravThrusterCritIgnored',
         'ControlsStuck',
         'EngineShorted', 
         'ForcedOfflineForTurns',
+        'GravThrusterCritIgnored',		
+        'MayOverheat',		
 		//Hangar Ops / state markers
 		'DockedFighter', 'SplitLaunchedFighter', 'LaunchedThisTurn',
 		'LCVLaunchedThisTurn', 'HangarOperations', 'OrbitalRepairing',
