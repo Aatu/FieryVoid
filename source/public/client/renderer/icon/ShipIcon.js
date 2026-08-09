@@ -778,13 +778,21 @@ window.ShipIcon = function () {
         if (!maxHexes || !arcsList.length) return; //no reach, or nothing to bear with
 
         var loops = buildHexRegion(Math.min(maxHexes, MAX_ARC_HEXES), hexDistance, function (x, y) {
-            /* The ship's own hex is in arc whatever the arcs say. A target sharing your hex is at
-               range 0, which is inside every weapon's reach, and its bearing is genuinely undefined
-               - the game itself falls back to the previous turn's positions to get an arc out of it
-               (mathlib.getCompassHeadingOfShip), and ballistics ignore arc at range 0 outright. The
-               old pie wedge covered the centre too, so keeping it leaves the display unchanged where
-               the player is used to it. */
-            if (x === 0 && y === 0) return true;
+            /* The ship's own hex is left OUT of the fill - deliberately, and NOT because it is out of
+               arc. By the rules it is in arc for every weapon on the ship: a target sharing your hex
+               is at range 0, inside every weapon's reach, and its bearing is genuinely undefined (the
+               game falls back to the previous turn's positions to get an arc out of it -
+               mathlib.getCompassHeadingOfShip - and ballistics ignore arc at range 0 outright).
+
+               That is exactly what made it worth dropping. Filling identically for every system
+               hovered, it told the player nothing, and it did so right on top of the icons - and a
+               hex holding two or three stacked ships is precisely where you are trying to read which
+               way the arcs point. Where the arc wraps round the centre it now reads as an unfilled
+               hex outlined in the arc's own colour (buildRegionFill punches the hole, the outline
+               traces it), so it is still legibly part of the region.
+
+               The declared-area overlay keeps ITS centre hex - see DECLARED_AREA_SHAPES. */
+            if (x === 0 && y === 0) return false;
 
             var bearing = bearingFromOrigin(x, y);
 
@@ -1817,8 +1825,14 @@ window.ShipIcon = function () {
             borderOpacity: 0.3,
             accept: function (spec) {
                 //The ship's own hex counts, whatever the arc says - a unit sharing your hex is at
-                //range 0, inside every reach, and its bearing is genuinely undefined. Same call
-                //showRangeArc makes for the hovered arcs, so the two agree about the centre.
+                //range 0, inside every reach, and its bearing is genuinely undefined.
+                //
+                //The hovered arcs (showRangeArc) deliberately do the OPPOSITE and leave their centre
+                //hex clear, so don't "fix" one to match the other: they answer different questions. A
+                //hover arc is a transient legibility aid, and a centre that fills the same way for
+                //every system on the ship earns nothing while covering the stacked icons underneath.
+                //A declared area names a shot that has actually been committed, and a unit in the
+                //firing ship's own hex is a legal target of it - so it stays in the region.
                 return function (x, y, a, b) {
                     if (a === 0 && b === 0) return true;
 
