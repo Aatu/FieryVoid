@@ -321,7 +321,7 @@ window.confirm = {
         if (noTaken < enhLimit) { //increase possible
             var newCount = noTaken + 1;
             target.data("count", newCount);
-            target.html(newCount);
+            confirm.enhShowLevel(target, newCount); //a stepped enhancement shows the quantity, not the level
             var cost = enhPrice + (noTaken * enhPriceStep); //base value, plus additional price charged for further levels
             var newCost = target.data("enhCost") + cost;
             target.data("enhCost", newCost);
@@ -352,7 +352,7 @@ window.confirm = {
         if (noTaken > 0) { //decrease possible
             var newCount = noTaken - 1;
             target.data("count", newCount);
-            target.html(newCount);
+            confirm.enhShowLevel(target, newCount); //a stepped enhancement shows the quantity, not the level
             var cost = enhPrice + (newCount * enhPriceStep); //base value, plus additional price charged for further levels
             var newCost = target.data("enhCost") - cost;
             target.data("enhCost", newCost);
@@ -424,6 +424,65 @@ window.confirm = {
     },
 
 
+    /*STEPPED enhancements - ones whose numberTaken is a quantity in fixed increments rather than a
+      count of things, so the spinner must SHOW the quantity while everything behind it keeps
+      working in levels. Extra Tendrils (SHAD_TEND) is the only one: level 1/2/3 buys 5/10/15
+      absorption capacity, and the player thinks in capacity.
+
+      These three helpers convert between the two and do NOTHING else. In particular they never
+      touch data('count') or data('value') - each handler keeps writing exactly the data keys it
+      always wrote, so the cost maths, the min/max clamps and every read-back loop
+      (confirm.getTotalCost, gamedata.doBuyShip / doBuyBulk / doEditShip, and the server, which
+      stores numbertaken) are untouched. With a step of 1 - every enhancement but Extra Tendrils -
+      they reduce to exactly the expressions they replaced.*/
+    enhDisplaySteps: { 'SHAD_TEND': 5 },
+
+    enhStepOf: function enhStepOf($el) {
+        return parseInt($el.data('displayStep'), 10) || 1;
+    },
+
+    /*The box read back as a LEVEL.*/
+    enhLevelShown: function enhLevelShown($el) {
+        var shown = parseInt($el.text(), 10) || 0;
+        var step = confirm.enhStepOf($el);
+        return (step > 1) ? Math.round(shown / step) : shown;
+    },
+
+    /*Show a LEVEL in the box, as the quantity that level buys.*/
+    enhShowLevel: function enhShowLevel($el, level) {
+        $el.text(level * confirm.enhStepOf($el));
+    },
+
+    /*Mark one spinner's step, from the enhancement's ID. Returns the step so the row label can
+      describe itself in the same units. Typing is switched off on a stepped field: the input
+      handler rewrites the box on every keystroke, so with a step of 5 a half-typed "1" of "10"
+      would snap to "0" and the second digit could never be entered. The +/- buttons and the wheel
+      remain, and a stepped enhancement has only a handful of levels.*/
+    applyEnhancementStep: function applyEnhancementStep($el, enhID) {
+        var step = confirm.enhDisplaySteps[enhID] || 1;
+        if (step > 1) {
+            $el.data('displayStep', step);
+            $el.attr("contenteditable", "false");
+        }
+        return step;
+    },
+
+    /*The "(up to N levels, Xpts ...)" suffix on an enhancement row's label. Shared by the buy,
+      bulk-buy and edit dialogs so they cannot drift. A stepped enhancement is described in the
+      quantity its spinner now shows; everything else keeps the original wording verbatim.*/
+    expandEnhancementName: function expandEnhancementName(enhName, enhLimit, enhPrice, enhPriceStep, enhStep) {
+        var out = enhName + ' (';
+        if (enhStep > 1) {
+            if (enhLimit > 1) out += 'up to ' + (enhLimit * enhStep) + ' capacity, ';
+            out += enhPrice + 'pts per ' + enhStep;
+        } else {
+            if (enhLimit > 1) out += 'up to ' + enhLimit + ' levels, ';
+            out += enhPrice + 'pts';
+            if ((enhPriceStep != 0) && (enhLimit > 1)) out += ' plus ' + enhPriceStep + 'pts per level';
+        }
+        return out + ')';
+    },
+
     // Helper function to select all text on focus
     selectAllTextOnFocus: function () {
         var range = document.createRange();
@@ -436,8 +495,7 @@ window.confirm = {
 
     // Helper function to handle input changes
     handleInputChange: function handleInputChange(e) {
-        var currentText = $(this).text();
-        var value = parseInt(currentText) || 0;
+        var value = confirm.enhLevelShown($(this)); //in LEVELS; identical to parseInt(text) unless stepped
 
         // Get the min and max limits
         var min = $(this).data('min');
@@ -456,7 +514,7 @@ window.confirm = {
         }
 
         // Update the displayed and stored value
-        $(this).text(value);
+        confirm.enhShowLevel($(this), value);
         $(this).data('value', value);
         $(this).data('count', value);
 
@@ -501,7 +559,7 @@ window.confirm = {
     handleMouseWheel: function handleMouseWheel(e) {
         e.preventDefault();
         var increment = (e.originalEvent.deltaY < 0) ? 1 : -1;
-        var value = parseInt($(this).text()) || 0;
+        var value = confirm.enhLevelShown($(this)); //in LEVELS - min/max and the cost maths both are
 
         // Get the min and max limits
         var min = $(this).data('min');
@@ -523,7 +581,7 @@ window.confirm = {
         }
 
         // Update the value and trigger the input change handler
-        $(this).text(value);
+        confirm.enhShowLevel($(this), value);
         $(this).data('value', value);
         $(this).trigger('input'); // Simulate an input change
     },
@@ -836,8 +894,7 @@ window.confirm = {
 
     // Helper function to handle input changes (edit mode)
     handleInputChangeEdit: function handleInputChangeEdit(e) {
-        var currentText = $(this).text();
-        var value = parseInt(currentText) || 0;
+        var value = confirm.enhLevelShown($(this)); //in LEVELS; identical to parseInt(text) unless stepped
         var oldCount = $(this).data('count');
 
         // Get the min and max limits
@@ -857,7 +914,7 @@ window.confirm = {
         }
 
         // Update displayed value
-        $(this).text(value);
+        confirm.enhShowLevel($(this), value);
         $(this).data('value', value);
         $(this).data('count', value);
 
@@ -975,7 +1032,11 @@ window.confirm = {
 
             var selectAmountItem = $(".selectAmount", item);
             selectAmountItem.attr("contenteditable", "true"); // Make it editable - DK 12.5.25
-            selectAmountItem.html(enhCount);
+            //Marked before the box is first written - a stepped enhancement shows the quantity its
+            //level buys, and this also switches typing off. Step 1 (everything but Extra Tendrils)
+            //leaves the row exactly as it was.
+            var enhStep = confirm.applyEnhancementStep(selectAmountItem, enhID);
+            confirm.enhShowLevel(selectAmountItem, enhCount);
             selectAmountItem.addClass("shpenh" + i);
             selectAmountItem.data('enhID', enhID);
             selectAmountItem.data('count', enhCount);
@@ -1022,17 +1083,7 @@ window.confirm = {
                 }
             }
 
-            var nameExpanded = enhName;
-            nameExpanded = nameExpanded + ' (';
-            if (enhLimit > 1) nameExpanded += 'up to ' + enhLimit + ' levels, ';
-            nameExpanded += enhPrice + 'pts';
-            //+ ' (up to ' + enhLimit + ' levels, ' + enhPrice + 'PV ';
-            if ((enhPriceStep != 0) && (enhLimit > 1)) {
-                nameExpanded = nameExpanded + ' plus ' + enhPriceStep + 'pts per level';
-            }
-            nameExpanded = nameExpanded + ')';
-
-            $(".selectText", item).html(nameExpanded);
+            $(".selectText", item).html(confirm.expandEnhancementName(enhName, enhLimit, enhPrice, enhPriceStep, enhStep));
             $(item).show();
 
             var plusButton = $(".plusButton", item);
@@ -1220,6 +1271,10 @@ window.confirm = {
             selectAmountItem.data('max', enhLimit);
             selectAmountItem.data('enhPrice', enhPrice);
             selectAmountItem.data('enhPriceStep', enhPriceStep);
+            //Marked here so the row knows its step before any handler reads the box. A stepped
+            //enhancement shows the quantity its level buys (and cannot be typed into); step 1 -
+            //every enhancement but Extra Tendrils - leaves the row exactly as it was.
+            var enhStep = confirm.applyEnhancementStep(selectAmountItem, enhID);
             //selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
             //selectAmountItem.data("firingMode", i);
 
@@ -1247,17 +1302,7 @@ window.confirm = {
                 }
             }
 
-            var nameExpanded = enhName;
-            nameExpanded = nameExpanded + ' (';
-            if (enhLimit > 1) nameExpanded += 'up to ' + enhLimit + ' levels, ';
-            nameExpanded += enhPrice + 'pts';
-            //+ ' (up to ' + enhLimit + ' levels, ' + enhPrice + 'PV ';
-            if ((enhPriceStep != 0) && (enhLimit > 1)) {
-                nameExpanded = nameExpanded + ' plus ' + enhPriceStep + 'pts per level';
-            }
-            nameExpanded = nameExpanded + ')';
-
-            $(".selectText", item).html(nameExpanded);
+            $(".selectText", item).html(confirm.expandEnhancementName(enhName, enhLimit, enhPrice, enhPriceStep, enhStep));
             $(item).show();
 
             var plusButton = $(".plusButton", item);
@@ -1437,6 +1482,10 @@ window.confirm = {
             selectAmountItem.data('max', enhLimit);
             selectAmountItem.data('enhPrice', enhPrice);
             selectAmountItem.data('enhPriceStep', enhPriceStep);
+            //Marked here so the row knows its step before any handler reads the box. A stepped
+            //enhancement shows the quantity its level buys (and cannot be typed into); step 1 -
+            //every enhancement but Extra Tendrils - leaves the row exactly as it was.
+            var enhStep = confirm.applyEnhancementStep(selectAmountItem, enhID);
 
             selectAmountItem.on("focus", confirm.selectAllTextOnFocus);
             selectAmountItem.on("input", confirm.handleInputChange);
@@ -1455,16 +1504,7 @@ window.confirm = {
                 }
             }
 
-            var nameExpanded = enhName;
-            nameExpanded = nameExpanded + ' (';
-            if (enhLimit > 1) nameExpanded += 'up to ' + enhLimit + ' levels, ';
-            nameExpanded += enhPrice + 'pts';
-            if ((enhPriceStep != 0) && (enhLimit > 1)) {
-                nameExpanded = nameExpanded + ' plus ' + enhPriceStep + 'pts per level';
-            }
-            nameExpanded = nameExpanded + ')';
-
-            $(".selectText", item).html(nameExpanded);
+            $(".selectText", item).html(confirm.expandEnhancementName(enhName, enhLimit, enhPrice, enhPriceStep, enhStep));
             $(item).show();
 
             var plusButton = $(".plusButton", item);

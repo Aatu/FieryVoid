@@ -803,6 +803,52 @@ class Enhancements{
 			}	
 	  }
 	  
+	  /*Extra Tendrils: a matched PAIR of new Diffuser Tendrils, port and starboard, grown on the
+	    ship's STRONGEST Energy Diffuser pair. One pair per ship - hence a single enhancement whose
+	    COUNT is the capacity in fives (1 = 5, 2 = 10, 3 = 15) rather than a number of tendrils.
+
+	    Shadow Association only, by explicit design decision: other factions do field Shadowtech
+	    diffusers (the Drakh omegaEpsilon, gaimRaxas, the Vree ZShadowXonn) but none of them get
+	    this refit, so the gate is the faction and not merely the presence of a diffuser.
+
+	    Capacity is capped at the SMALLEST tendril already on the hull - a bolt-on may not out-size
+	    what the hull grew for itself - so a ship whose smallest tendril is 10 is offered 5 and 10
+	    only, and one whose smallest is 30 gets the full 5/10/15.
+
+	    Cost is (capacity * 2) * the diffuser's rating, for the pair. That is strictly proportional
+	    to capacity, so ONE flat price per level with no step reproduces it exactly at every level:
+	    confirm.js totals a level as enhPrice + i*enhPriceStep, so enhPriceStep = 0 gives
+	    N * (10 * rating) = (5N * 2) * rating. Nothing here needs the choice-list widget.*/
+	  $enhID = 'SHAD_TEND';
+	  if($ship->faction === 'Shadow Association' && !in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
+		  //Rating of the strongest diffuser that actually HAS tendrils to grow alongside.
+		  $bestRating = 0;
+		  foreach ($ship->systems as $system){
+			if (($system instanceof EnergyDiffuser) && (count($system->tendrils) > 0)){
+				$bestRating = max($bestRating, $system->output);
+			}
+		  }
+		  //Smallest tendril anywhere on the hull - the cap on what may be bought.
+		  $smallestTendril = 0;
+		  foreach ($ship->systems as $system){
+			if ($system instanceof DiffuserTendril){
+				$smallestTendril = ($smallestTendril == 0) ? $system->maxhealth : min($smallestTendril, $system->maxhealth);
+			}
+		  }
+		  $enhLimit = min(3, (int)floor($smallestTendril/5)); //5/10/15, minus whatever the cap removes
+		  if(($bestRating > 0) && ($enhLimit > 0)){
+			  //The buy dialog appends the quantity and price itself ("up to 10 capacity, 150pts
+			  //per 5" - confirm.expandEnhancementName), so the name only has to say what it is.
+			  //No '&' in it: the buy dialog renders the name as HTML, but the ship window's
+			  //Enhancements panel renders the tooltip as React TEXT (splitHtmlLines strips tags),
+			  //so an entity would show up literally there.
+			  $enhName = 'Extra Tendrils (matched pair)';
+			  $enhPrice = 10 * $bestRating; //(5 capacity * 2) * rating - one level, for BOTH tendrils
+			  $enhPriceStep = 0; //flat: price is strictly proportional to capacity bought
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
+		  }
+	  }
+
 	//Spark Curtain: CUSTOM/CAMPAIGN ballistic defense (2+boost) for Spark Field, cost: 40 + 10/Spark Field present, limit: 1
 	  $enhID = 'SPARK_CURT';
 	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
@@ -1831,6 +1877,96 @@ class Enhancements{
 	    
     
   
+	/*Create the systems that an enhancement ADDS to a hull. Separate from setEnhancements(), which
+	  changes the numbers on systems that already exist, because the two must run at completely
+	  different moments:
+
+	    - setEnhancements() runs from BaseShip::onConstructed(), which DBManager::getTacGamedata
+	      calls only AFTER getTacShips() has read tac_critical and tac_damage.
+	    - a system that does not exist yet cannot be given its rows. getDamageForShips and
+	      getCriticalsForShips resolve every row through getSystemById() and SKIP - silently - what
+	      does not resolve. A tendril created as late as onConstructed() would therefore lose every
+	      point of energy it had absorbed on every single page load, because a tendril stores its
+	      absorbed energy AS damage (DiffuserTendril::absorbDamage).
+
+	  So this runs early, from DBManager::getTacShips, straight after the tac_enhancements rows are
+	  read and BEFORE the criticals/damage queries. It must do nothing but mount systems - every
+	  other effect of an enhancement still belongs in setEnhancements().
+
+	  New systems are APPENDED (BaseShip::addEnhancementSystem -> addSystem), so ids are stable in
+	  both directions: nothing already on the hull moves, and the new systems land on the same ids
+	  every load, because the same enhancement rows rebuild the same systems in the same order.*/
+	public static function addEnhancementSystems($ship){
+		if($ship->enhancementSystemsAdded) return; //once per ship object - see the property
+		$ship->enhancementSystemsAdded = true;
+		if($ship instanceof FighterFlight) return; //no enhancement mounts systems on a flight
+
+		foreach($ship->enhancementOptions as $entry){ //ID,readableName,numberTaken,limit,price,priceStep
+			$enhID = $entry[0];
+			$enhCount = (int)$entry[2];
+			if($enhCount <= 0) continue;
+			switch($enhID){
+				case 'SHAD_TEND': //Extra Tendrils
+					Enhancements::addExtraTendrils($ship, $enhCount);
+					break;
+			}
+		}
+	} //endof function addEnhancementSystems
+
+	/*Extra Tendrils (SHAD_TEND) - grow one new Diffuser Tendril of $enhCount*5 absorption capacity
+	  on each half of the ship's strongest Energy Diffuser pair.
+
+	  "The strongest pair" is the highest-rated diffuser on each SIDE. Shadow hulls mount their
+	  diffusers as mirror images, but not always two of them: the Battlecruiser has six, three
+	  port/starboard pairs rated 5, 10 and 20, where the top rating already picks out exactly one
+	  pair - but ShadowRegenBase has four ALL rated 20, two port and two starboard, one per quarter
+	  arc. Taking every diffuser at the top rating would hand that base four tendrils for the price
+	  of a pair, so at most one per side is taken, the first one found. That is stable across loads
+	  because construction order is. A hull with only one diffuser at the top rating grows a single
+	  tendril - there is no phantom other half to hang one on.
+
+	  Each new tendril copies its SECTION and its L/R artwork from a tendril already on that same
+	  diffuser, rather than deriving them from the diffuser's arc: tendril placement is per hull
+	  (usually the Port/Stbd sections, but front/aft on some customs), and matching a sibling is the
+	  only rule that is correct on all of them. That section doubles as the "side" for the one-per-
+	  side rule above.*/
+	private static function addExtraTendrils($ship, $enhCount){
+		$capacity = $enhCount * 5;
+
+		$bestRating = null;
+		foreach ($ship->systems as $system){
+			if (!($system instanceof EnergyDiffuser)) continue;
+			if (count($system->tendrils) == 0) continue; //nothing to match, and nothing to grow from
+			if (($bestRating === null) || ($system->output > $bestRating)) $bestRating = $system->output;
+		}
+		if($bestRating === null) return; //no diffuser with tendrils - option should never have been offered
+
+		//Collected first, then mounted: addEnhancementSystem appends to the very array being walked.
+		//Keyed by SIDE (the section the diffuser's own tendrils sit in) so at most one diffuser per
+		//side is picked - see the note above on ShadowRegenBase.
+		$targets = array();
+		foreach ($ship->systems as $system){
+			if (!($system instanceof EnergyDiffuser)) continue;
+			if (count($system->tendrils) == 0) continue;
+			if ($system->output != $bestRating) continue;
+			$side = $system->tendrils[0]->location;
+			if (isset($targets[$side])) continue; //this side already has its tendril
+			$targets[$side] = $system;
+		}
+
+		foreach ($targets as $diffuser){
+			$sibling = $diffuser->tendrils[0];
+			//iconPath is built as 'EnergyDiffuserTendril' . side . sizeBand . '.png' - the side is
+			//the only place the L/R choice survives on a constructed tendril.
+			$side = (strpos($sibling->iconPath, 'EnergyDiffuserTendrilL') === 0) ? 'L' : 'R';
+
+			$tendril = new DiffuserTendril($capacity, $side);
+			$tendril->addedByEnhancement = true; //no static blueprint entry - see ShipSystem
+			$ship->addEnhancementSystem($tendril, $sibling->location);
+			$diffuser->addTendrilSorted($tendril); //ordered list - largest first
+		}
+	} //endof function addExtraTendrils
+
 	/*actually enhances unit (sets enhancement options if enhancements themselves are empty)
 	*/
 	public static function setEnhancements($ship){
@@ -1839,7 +1975,7 @@ class Enhancements{
 			Enhancements::setEnhancementsFighter($ship);
 		}else{
 			Enhancements::setEnhancementsShip($ship);
-		}	
+		}
 		   
 		//clear array of options - no further point keeping it
 		//$ship->enhancementOptions = array();
@@ -2077,9 +2213,10 @@ class Enhancements{
 			$enhDescription = $entry[1];
 			if($enhCount > 0) {
 				//CHAM_DISG is choice-valued, so enhDescription is a phpclass, not prose, and the count
-				//is an index - the generic line would read "kendariUpgraded (x7)". Its own case writes
-				//a proper line, and only for viewers entitled to know.
-				if(!self::isAmmoEnhancement($enhID) && $enhID !== 'CHAM_DISG'){ //ammo already shows in the AmmoMagazine tooltip - keep it out of the Enhancements box
+				//is an index - the generic line would read "kendariUpgraded (x7)". SHAD_TEND's count is
+				//a capacity in fives, so the generic line would read "(x2)" where the player bought a
+				//10-capacity tendril. Both write their own line below.
+				if(!self::isAmmoEnhancement($enhID) && $enhID !== 'CHAM_DISG' && $enhID !== 'SHAD_TEND'){ //ammo already shows in the AmmoMagazine tooltip - keep it out of the Enhancements box
 				if($ship->enhancementTooltip != "") $ship->enhancementTooltip .= "<br>";
 				//if($enhID == 'DEPLOY'){ //Special type of Enhancement, clarify what it means.
 				//	$ship->enhancementTooltip .= "Ship deploys on Turn $enhCount";
@@ -2572,6 +2709,15 @@ class Enhancements{
 						}
 						break;
 						
+					case 'SHAD_TEND': //Extra Tendrils
+						//The tendrils themselves were mounted much earlier, by
+						//Enhancements::addEnhancementSystems from DBManager::getTacShips - see the note
+						//there on why they cannot wait until now. Nothing left to apply here; just
+						//report what was bought in ABSORPTION rather than in levels of five.
+						if($ship->enhancementTooltip != "") $ship->enhancementTooltip .= "<br>";
+						$ship->enhancementTooltip .= "Extra Tendrils: " . ($enhCount*5) . " Capacity";
+						break;
+
 					case 'SPARK_CURT': //Spark Curtain - direct effect is setting $output=$baseOutput for every Spark Field on board
 						foreach ($ship->systems as $system){
 							if ($system instanceof SparkField){

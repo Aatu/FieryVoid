@@ -2551,6 +2551,11 @@ class DBManager
             $this->getFlightSize($gamedata);
             //$this->flightSizeFix($ships); //Marcin Sawicki, October 2019: perhaps once there was a reason for "fixing" flight size, but I do not see it any more
             //$this->getAdaptiveArmourSettings($gamedata); //Adaptive Armor redone in a different way
+            //Enhancements are read here, ABOVE the criticals/damage queries, because an enhancement
+            //may MOUNT SYSTEMS (Extra Tendrils) and those queries silently drop any row whose
+            //systemid does not resolve - see getEnhancementsForShips. After getFlightSize, because
+            //FighterFlight::populate() rebuilds a flight's systems from scratch.
+            $this->getEnhancementsForShips($gamedata);
             $this->getIniativeForShips($gamedata, $turn);
             $this->getMovesForShips($gamedata, $turn);
             $this->getEWForShips($gamedata, $turn);
@@ -2713,6 +2718,36 @@ class DBManager
             $stmt->close();
         }
     }
+
+
+    /*tac_enhancements -> $ship->enhancementOptions, plus any systems an enhancement MOUNTS.
+      Called from getTacShips deliberately EARLY - before getCriticalsForShips/getDamageForShips.
+
+      Those two resolve every row through $ship->getSystemById() and skip, without complaint, any
+      row that does not resolve. So a system an enhancement creates has to already exist when they
+      run, or it silently loses its damage and criticals on every load - and for Extra Tendrils that
+      is not cosmetic: a tendril stores its absorbed energy AS damage, so it would come back empty
+      after every page refresh.
+
+      Only mounting happens here. APPLYING the enhancements (stat changes) stays where it was, in
+      BaseShip::onConstructed, which runs after all of this.*/
+    private function getEnhancementsForShips($gamedata)
+    {
+        $allEnhancements = $this->getEnhancementsForGame($gamedata->id);
+
+        foreach ($gamedata->ships as $ship){
+            $shipEnhancements = isset($allEnhancements[$ship->id]) ? $allEnhancements[$ship->id] : array();
+
+            if( count($shipEnhancements) == 0 ){ //no enhancements! add empty one just to show it's been read
+                $ship->enhancementOptions[] = array('NONE','-', 0,0,0,0); //[ID,readableName,numberTaken,limit,price,priceStep]
+            }
+            foreach($shipEnhancements as $entry){
+                $ship->enhancementOptions[] = array($entry[0],$entry[2], $entry[1],0,0,0);
+            }
+
+            Enhancements::addEnhancementSystems($ship);
+        }
+    } //endof function getEnhancementsForShips
 
 
     private function getEnhencementsForShip($shipID){
@@ -3134,8 +3169,12 @@ class DBManager
         }	    
 
 
+		//Enhancement info used to be read HERE. It moved UP, to getEnhancementsForShips, called
+		//from getTacShips before the criticals/damage queries - an enhancement may mount systems
+		//and those systems have to exist before their rows are read. See that method.
 		//get enhancement info - optimization: single query for all ships
-		$allEnhancements = $this->getEnhancementsForGame($gamedata->id);
+		/*
+        $allEnhancements = $this->getEnhancementsForGame($gamedata->id);
 		
 		foreach ($gamedata->ships as $ship){
              $shipEnhancements = isset($allEnhancements[$ship->id]) ? $allEnhancements[$ship->id] : array();
@@ -3147,7 +3186,8 @@ class DBManager
 				$ship->enhancementOptions[] = array($entry[0],$entry[2], $entry[1],0,0,0);
 			}
 		}
-		
+        */
+
 		//get individual notes for systems - optimization: single query
         $allNotes = $this->getIndividualNotesForGame($gamedata, $fetchTurn);
 

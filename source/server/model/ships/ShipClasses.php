@@ -129,6 +129,12 @@ class BaseShip {
 
     public $canvasSize = 200;
 
+	//Guard for Enhancements::addEnhancementSystems - the enhancement-mounted systems (Extra
+	//Tendrils) must be built exactly once per ship object. One request can load gamedata more than
+	//once (advanceGameState, then the phase's own load), and a second pass would mount a second
+	//pair. Transient, per object, never persisted.
+	public $enhancementSystemsAdded = false;
+
 	//Pre-battle damage & fleet damage persistence (PREBATTLE_DAMAGE_PLAN.md).
 	//Compact wire-format payload: {sys:{<systemid>:{d,k,c}}, ftr:{<ordinal>:{d,k,c}}}.
 	//See PreBattleDamage for the format and all of its rules.
@@ -2152,7 +2158,18 @@ class BaseShip {
         protected function addRightSystem($system){
             $this->addSystem($system, 4);
         }
-		
+
+		/*The single legitimate way to mount a system AFTER the hull's constructor has run - used
+		  only by Enhancements::addEnhancementSystems (Extra Tendrils), which is documented there.
+		  A named public method rather than making addSystem() public, so this exception stays
+		  greppable and obvious: everything else must build its systems in the constructor.
+
+		  Safe only because addSystem() APPENDS - ids are array indices, so every system already on
+		  the hull keeps the id its stored damage, power and fire orders refer to.*/
+		public function addEnhancementSystem($system, $loc){
+			$this->addSystem($system, $loc);
+		}
+
 		/* fill notes with information contained in various attributes, not so readily accessible to player*/
 		public function notesFill($sampleFighter = null){
 			//if (TacGamedata::$currentTurn >= 1){ //in later turns notes will be displayed from pre-compiled cache! no point generating them every time

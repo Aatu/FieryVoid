@@ -158,8 +158,21 @@ class ShipSystem {
 	public $overkillArcStructures = null;
 
 	protected $calledShotBonus = 0;//Some systems, like Aegis Sensor Pod are easier to hit with called shots.
-	protected $active = false;	//Needs to be passed to front end in stripForJson.  Denotes a system being active for any number of purposes / show as boosted	
+	protected $active = false;	//Needs to be passed to front end in stripForJson.  Denotes a system being active for any number of purposes / show as boosted
 	protected $initializeOnLoad	= false; //Runs initialisationUpdate() immediately on page loading, useful for updating tooltips immediately.  Needs passed in strpForJson().
+
+	/*A system MOUNTED BY AN ENHANCEMENT rather than by the hull's constructor (currently only
+	  Extra Tendrils - Enhancements::addEnhancementSystems, which sets this on everything it
+	  creates). It matters for one reason: such a system has NO entry in window.staticShips.
+
+	  That bundle is built per phpclass from a pristine hull (ShipLoader::getShipsByClass, which
+	  applies enhancement OPTIONS but never the enhancements themselves), and the client merges each
+	  system's lean gamedata payload ONTO its blueprint entry, falling back to the payload alone when
+	  there is no entry to merge (SystemFactory.createSystemsFromJson). stripForJson leans on that
+	  merge heavily - it omits maxhealth, armour, location, arcs, displayName, iconPath and the rest,
+	  because the blueprint already has them. With no blueprint, the payload IS the whole system,
+	  so those fields have to be sent explicitly: see addBlueprintFieldsForJson below.*/
+	public $addedByEnhancement = false;
 
 
 
@@ -291,7 +304,33 @@ public function setParentFighter($fighter) {
 
         return $strippedSystem;
     }
-	
+
+	/*The BLUEPRINT half of a system's client-side data - everything the static bundle would have
+	  supplied, which stripForJson deliberately leaves out to keep gamedata polls small. Only ever
+	  called for an $addedByEnhancement system (see that property for why it has no bundle entry);
+	  an ordinary system must keep sending the lean payload.
+
+	  Deliberately an explicit list rather than get_object_vars($this): several properties in scope
+	  here are object references that would recurse ($unit, $structureSystem, $parentSystem) or
+	  tables that must never ride a payload at all ($possibleCriticals / $preBattleCriticals - see
+	  the notes on those). Fields stripForJson has already decided are left alone, so a live value
+	  (a current outputDisplay, an enhancement-modified output) always wins over the static one.*/
+	protected function addBlueprintFieldsForJson($strippedSystem){
+		$blueprintFields = array(
+			'jsClass', 'displayName', 'iconPath', 'imagePath', 'location', 'startArc', 'endArc',
+			'armour', 'maxhealth', 'powerReq', 'outputType', 'outputDisplay', 'data',
+			'boostable', 'boostEfficiency', 'maxBoostLevel', 'preFires', 'canOffLine', 'fighter',
+			'primary', 'isPrimaryTargetable', 'isTargetable', 'hitChartName', 'hideInShipWindow',
+			'forceCriticalRoll', 'advancedArmor', 'hardAdvancedArmor', 'critRollMod',
+			'repairPriority', 'privateRepairOnly', 'structureHomeLocation', 'overkillArcStructures'
+		);
+		foreach ($blueprintFields as $field){
+			if (isset($strippedSystem->$field)) continue; //never clobber what stripForJson already sent
+			$strippedSystem->$field = $this->$field;
+		}
+		return $strippedSystem;
+	}
+
 	public function getCountForCombatValue(){
 		return $this->doCountForCombatValue;
 	}
