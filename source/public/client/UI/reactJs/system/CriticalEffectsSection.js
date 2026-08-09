@@ -7,11 +7,11 @@ import nonPassiveWheel from '../helpers/nonPassiveWheel';
  * a fighter ordinal (kind 1, ref = 1..flightSize). Rendered inside ApplyDamageMenu and
  * FighterDamageMenu, below the damage row. See PREBATTLE_DAMAGE_PLAN.md §5.2.
  *
- * `editable` (2026-08-08) lets a player AMEND or REMOVE the criticals a loaded fleet
- * brought with it: a [-][N][+] ticker on each row plus a × to drop it entirely. Every
- * change goes through battleDamage.setCriticals, which is the only way criticals ever
- * enter or leave a payload client-side, so the preview, the buy POST and the saved-fleet
- * write all follow with no extra wiring.
+ * `editable` gives the section its ADD / AMEND / REMOVE controls: a picker at the foot of
+ * the list and a [-][N][+] ticker on each row. Every change goes through
+ * battleDamage.setCriticals, which is the only way criticals ever enter or leave a payload
+ * client-side, so the preview, the buy POST and the saved-fleet write all follow with no
+ * extra wiring. Read-only (`editable` absent) is just the list.
  *
  * A row DROPPED TO ZERO STAYS ON SCREEN, empty, so it can be put back — removing a
  * critical is an edit like any other, and an edit you can only undo by reloading the
@@ -174,6 +174,7 @@ export const CheckBox = styled.input`
 export const CheckText = styled.span`
     flex: 0 0 auto;
     line-height: 1;
+    margin-top: 2px;
 `;
 
 /* The add-an-effect row. A native <select> on purpose: it is the one control that gets

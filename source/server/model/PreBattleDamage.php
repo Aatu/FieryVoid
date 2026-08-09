@@ -38,10 +38,12 @@
  * lobby, and Part 2's in-game save records the SURVIVING craft. Destroyed craft therefore
  * shrink the flight rather than riding along as wrecks.
  *
- * Criticals in v1 are only ever CAPTURED from a live game and CARRIED through
- * (live game -> saved fleet -> lobby -> game DB). Nothing in the lobby invents one.
- * The `c` key nonetheless exists everywhere so lobby crit authoring (plan §11) needs
- * no format change.
+ * Criticals reach a payload two ways: CAPTURED from a live game and carried through
+ * (live game -> saved fleet -> lobby -> game DB), or AUTHORED in the lobby from the
+ * per-class catalogue (plan §11, built 2026-08-08 - see offerableCriticalTypes and
+ * $generalCriticals below, and Manager::getSystemCriticals). Both arrive in the same
+ * `c`/`p` keys and go through the same validator, which is why authoring needed no
+ * change to the wire format.
  */
 class PreBattleDamage
 {
@@ -151,19 +153,22 @@ class PreBattleDamage
         'SevereBurnout'              => 1,
         'OutputHalved'               => 1,
         'OutputHalvedOneTurn'        => 1,
-        //param-carrying: the magnitude lives in `p` and the count is forced to 1 anyway
-        'DamageReductionReduced'     => 200,
+        //param-carrying: the magnitude lives in `p`, and sanitiseEntry forces the COUNT to
+        //1 for these classes whatever this table says. Listed at 1 so the number the
+        //catalogue serves the client agrees with what is actually stored - the client's
+        //critLimit() prefers the catalogue's meta over its own mirror, so a larger figure
+        //here would be a ceiling nothing honours.
+        'DamageReductionReduced'     => 1,
     );
 
     /* D7: criticals that describe a MOMENT in a battle rather than a lasting wound are
-       never stored. Anything `oneturn` is excluded generically below (a one-turn crit
-       stamped at turn 0 would set turnend = 1 and expire as turn 1 begins, i.e. it would
-       silently do nothing). This list adds the Hangar-Ops / transient state markers.
+       never stored. This list adds the Hangar-Ops / transient state markers on top of the
+       generic tests in isValidCriticalType.
        ⚠️ This is the STORABILITY test only. Do NOT narrow it to a system's
        possibleCriticals table: genuine combat crits (AmmoExplosion, OSATThrusterCrit,
        LimpetBore …) are applied by bespoke code and are absent from those tables, so
        narrowing would silently eat carried crits on every reload. "What may a player be
-       OFFERED" is a separate, narrower question — see plan §11. */
+       OFFERED" is a separate, narrower question — offerableCriticalTypes below. */
     /* ─────────────────────────────────────────────────────────────────────────────────
        ⭐ THE DENY LIST — the one place a critical is banned from saved fleets by NAME.
        ─────────────────────────────────────────────────────────────────────────────────
@@ -864,8 +869,10 @@ class PreBattleDamage
      * seam): that one asks "may this be STORED", and narrowing it to possibleCriticals
      * would silently eat carried combat crits (AmmoExplosion, OSATThrusterCrit and
      * friends are applied by bespoke code and appear in no possibleCriticals table). This
-     * one asks "what may a player INVENT here", which is the system's own hit-chart
-     * table, minus anything that would be refused on the way in anyway.
+     * one asks "what may a player INVENT here", which is the system's own hit-chart table
+     * PLUS its $preBattleCriticals extras, minus anything that would be refused on the way
+     * in anyway. The editor's "All" switch WIDENS this with $generalCriticals; it never
+     * replaces it.
      */
     public static function offerableCriticalTypes($system)
     {
@@ -900,23 +907,22 @@ class PreBattleDamage
      * It used to be "every storable Critical class in the game", scraped out of
      * cricialClasses.php — 58 entries, most of which mean nothing on most systems
      * (a Reactor cannot have a turret jammed, an Engine has no ammunition to explode),
-     * so the dropdown was unusable as a picker (user request 2026-08-08).
+     * so the dropdown was unusable as a picker (user request 2026-08-08). A curated 12
+     * replaced it, and that in turn was cut to the ONE below.
      *
-     * HOW THE FIRST PASS WAS DERIVED, so a future edit can argue with it: every entry
-     * here is read GENERICALLY, by code that knows nothing about which system it is
-     * looking at —
-     *   - the OutputReduced ladder, OutputHalved(OneTurn), PartialBurnout and
-     *     SevereBurnout all work through their `outputMod` / `outputModPercentage`,
-     *     which ShipSystem::effectCriticals sums for EVERY system;
-     *   - ForcedOfflineOneTurn is read by ShipSystem::isOfflineOnTurn, likewise generic.
-     * Everything left off is scoped to something: a weapon (GunLost, ReducedRange,
-     * ReducedArcs, AmmoExplosion…), the C&C (ReducedIniative, PenaltyToHit,
-     * CommunicationsDisrupted, ProfileIncreased — all read as `$CnC->hasCritical(...)`),
-     * a thruster (HalfEfficiency, FirstThrustIgnored), a shield (DamageReduction*), or one
-     * faction's hull (TendrilDestroyed, ShadowPilotPain).
-     * `OutputReduced` and `OutputReducedOneTurn` are deliberately absent too: they carry
-     * NO outputMod of their own (they expect a setParam), so authoring one stores a wound
-     * that does nothing.
+     * THE TEST FOR MEMBERSHIP is that the effect is read GENERICALLY, by code that knows
+     * nothing about which system it is looking at. ArmorReduced qualifies: weapon.php's
+     * getSystemArmourBase asks it of whatever system is being shot at. Almost nothing else
+     * does - the OutputReduced ladder and the burnouts work through effectCriticals' output
+     * sum, which is generic, but they read as noise on most systems; everything else is
+     * scoped to a weapon (GunLost, ReducedArcs, AmmoExplosion…), the C&C (ReducedIniative,
+     * PenaltyToHit, CommunicationsDisrupted), a thruster (HalfEfficiency,
+     * FirstThrustIgnored), a shield (DamageReduction*) or one faction's hull. Those belong
+     * on the SYSTEM, in its own $preBattleCriticals.
+     *
+     * ⚠️ `OutputReduced` and `OutputReducedOneTurn` must never be added: they carry no
+     * outputMod of their own (they expect a setParam), so authoring one stores a wound that
+     * does nothing.
      *
      * ⚠️ THIS IS NOT THE STORABILITY TEST. Narrowing isValidCriticalType would eat
      * carried combat crits on reload (plan §4.2's seam). This list only decides what the
@@ -925,13 +931,7 @@ class PreBattleDamage
      * replaced "offer everything, everywhere".
      */
     public static $generalCriticals = array(
-        /*'OutputReduced1', 'OutputReduced2', 'OutputReduced3', 'OutputReduced4',
-        'OutputReduced6', 'OutputReduced8', 'OutputReduced10',
-        'OutputHalved', 'OutputHalvedOneTurn',
-        'PartialBurnout', 'SevereBurnout',
-        'ForcedOfflineOneTurn',*/
-        //Amended to just the one generic crit for now
-        'ArmorReduced',
+        'ArmorReduced',      //read of any targeted system by Weapon::getSystemArmourBase
     );
 
     /**

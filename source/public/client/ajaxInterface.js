@@ -492,29 +492,29 @@ window.ajaxInterface = {
     constructSavedShips: function constructSavedShips(fleetname, isPublic, opts) {
 
         var saveships = Array();
+        var saveable = [];
         var points = 0;
-        //gamedata.selectedSlot is null in game.php (it is a lobby concept), which used to
-        //make every ship fail this filter and save the fleet at 0 points. Fall back to
-        //ownership there. Base pointCost only - damage is not a discount (D2).
-        var inFleet = function (lship) {
-            return (gamedata.selectedSlot === null || gamedata.selectedSlot === undefined)
-                ? ajaxInterface.isSaveableFleetShip(lship)
-                : lship.slot == gamedata.selectedSlot;
-        };
+
+        /* ONE pass, one isSaveableFleetShip call per ship: it is the filter for BOTH the
+           units written and the points figure, and on game.php it walks every system of
+           every ship (shipManager.isDestroyed).
+           gamedata.selectedSlot is a LOBBY concept and is null in game.php, which used to
+           make every ship fail the points filter and save the fleet at 0 points - so there
+           the saveable set simply IS the fleet. Base pointCost only: damage is not a
+           discount (D2). */
+        var slot = gamedata.selectedSlot;
+        var bySlot = (slot !== null && slot !== undefined);
 
         for (var i in gamedata.ships) {
             var lship = gamedata.ships[i];
-            if (!inFleet(lship)) continue;
             if (!ajaxInterface.isSaveableFleetShip(lship)) continue;
+            saveable.push(lship);
+
+            if (bySlot && lship.slot != slot) continue;
             //A lobby mine row is N mines at pointCost each - counting it once stored a
             //fleet whose `points` was short by (bulkBuy - 1) units, and that figure is
             //what the affordability check on load compares against.
             points += lship.pointCost * (lship.mine ? (parseInt(lship.bulkBuy, 10) || 1) : 1);
-        }
-
-        var saveable = [];
-        for (var i in gamedata.ships) {
-            if (ajaxInterface.isSaveableFleetShip(gamedata.ships[i])) saveable.push(gamedata.ships[i]);
         }
 
         var groups = ajaxInterface.groupSaveableShips(saveable);

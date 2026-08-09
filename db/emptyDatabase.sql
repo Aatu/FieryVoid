@@ -549,7 +549,9 @@ CREATE TABLE `tac_saved_ammo` (
 --
 -- Battle damage a saved fleet carries (PREBATTLE_DAMAGE_PLAN.md §4.1).
 -- kind = 0 -> `ref` is a ShipSystem id; kind = 1 -> `ref` is a fighter ordinal
--- 1..flightSize (per-fighter system ids do not exist in the lobby, see plan §1.1).
+-- 1..flightSize (per-fighter system ids do not exist in the lobby, see plan §1.1);
+-- kind = 2 -> `ref` is a MINE ordinal 1..bulkbuy (a bulk mine purchase is one lobby
+-- object plus a count, exactly like a flight; the damage lands on that copy's Structure).
 --
 
 DROP TABLE IF EXISTS `tac_saved_damage`;

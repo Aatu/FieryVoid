@@ -479,101 +479,175 @@ class DBManager
 
     /* ---------------------------------------------------------------- *
      *  Saved-fleet battle damage & criticals (PREBATTLE_DAMAGE_PLAN §4.5)
-     *  Modelled on submitSavedAmmo / getSavedAmmoForShip. $kind is
-     *  PreBattleDamage::KIND_SYSTEM (0, $ref = systemid) or KIND_FIGHTER
-     *  (1, $ref = fighter ordinal 1..flightSize).
+     *  $kind is PreBattleDamage::KIND_SYSTEM (0, $ref = systemid),
+     *  KIND_FIGHTER (1, $ref = fighter ordinal) or KIND_MINE (2, $ref =
+     *  mine ordinal).
+     *
+     *  ⚠️ BOTH SIDES ARE WHOLE-FLEET, keyed by listid, deliberately.
+     *  The first cut was per SHIP on the read side and per ROW on the
+     *  write side, which is what the shape of the data suggests - but a
+     *  fleet saved out of a bloody 20-ship battle is several hundred
+     *  damaged systems, so that was several hundred prepare/execute round
+     *  trips in ONE request. tac_saved_damage/tac_saved_crit both carry
+     *  listid with an index on it, so the whole fleet is two statements
+     *  each way. Matters on the live LiteSpeed workers, which have a hard
+     *  per-request budget.
      * ---------------------------------------------------------------- */
 
-    public function submitSavedDamage($listid, $shipid, $kind, $ref, $damage, $destroyed)
+    /* Rows per INSERT. A fleet is normally well under one chunk; chunking exists so a
+       pathological fleet cannot approach MySQL's 65,535-placeholder ceiling or build a
+       statement larger than max_allowed_packet. */
+    const SAVED_ROW_CHUNK = 200;
+
+    /**
+     * @param array $rows [[shipid, kind, ref, damage, destroyed], …]
+     */
+    public function submitSavedDamageRows($listid, array $rows)
     {
-        $destroyed = $destroyed ? 1 : 0;
+        foreach (array_chunk($rows, self::SAVED_ROW_CHUNK) as $chunk) {
+            $types = '';
+            $values = array();
+            $placeholders = array();
 
-        $stmt = $this->connection->prepare("
-            INSERT INTO tac_saved_damage
-                (listid, shipid, kind, ref, damage, destroyed)
-            VALUES (?, ?, ?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE
-                damage = VALUES(damage), destroyed = VALUES(destroyed)
-        ");
-        if (!$stmt) throw new Exception("DB error in submitSavedDamage (prepare): " . $this->connection->error);
+            foreach ($chunk as $row) {
+                $placeholders[] = '(?, ?, ?, ?, ?, ?)';
+                $types .= 'iiiiii';
+                $values[] = (int)$listid;
+                $values[] = (int)$row[0];
+                $values[] = (int)$row[1];
+                $values[] = (int)$row[2];
+                $values[] = (int)$row[3];
+                $values[] = !empty($row[4]) ? 1 : 0;
+            }
 
-        $stmt->bind_param('iiiiii', $listid, $shipid, $kind, $ref, $damage, $destroyed);
+            $this->executeBatchInsert(
+                "INSERT INTO tac_saved_damage
+                    (listid, shipid, kind, ref, damage, destroyed)
+                 VALUES " . implode(', ', $placeholders) . "
+                 ON DUPLICATE KEY UPDATE
+                    damage = VALUES(damage), destroyed = VALUES(destroyed)",
+                $types, $values, 'submitSavedDamageRows'
+            );
+        }
+    }
+
+    /**
+     * @param array $rows [[shipid, kind, ref, type, amount, param], …]
+     *
+     * `param` is the magnitude of a PARAM-CARRYING critical (DamageReductionReduced), or
+     * null for the other 40-odd classes. PreBattleDamage::$paramCriticals is the
+     * allow-list and sanitiseParam has already forced it to a bounded integer.
+     */
+    public function submitSavedCritRows($listid, array $rows)
+    {
+        foreach (array_chunk($rows, self::SAVED_ROW_CHUNK) as $chunk) {
+            $types = '';
+            $values = array();
+            $placeholders = array();
+
+            foreach ($chunk as $row) {
+                $param = (isset($row[5]) && $row[5] !== '') ? (int)$row[5] : null;
+                $placeholders[] = '(?, ?, ?, ?, ?, ?, ?)';
+                $types .= 'iiiisii';
+                $values[] = (int)$listid;
+                $values[] = (int)$row[0];
+                $values[] = (int)$row[1];
+                $values[] = (int)$row[2];
+                $values[] = (string)$row[3];
+                $values[] = (int)$row[4];
+                //'i' binds a PHP null as SQL NULL, which is what an ordinary critical wants.
+                $values[] = $param;
+            }
+
+            $this->executeBatchInsert(
+                "INSERT INTO tac_saved_crit
+                    (listid, shipid, kind, ref, type, amount, param)
+                 VALUES " . implode(', ', $placeholders) . "
+                 ON DUPLICATE KEY UPDATE
+                    amount = VALUES(amount), param = VALUES(param)",
+                $types, $values, 'submitSavedCritRows'
+            );
+        }
+    }
+
+    /* Prepare + bind + execute one multi-row INSERT.
+       ⚠️ call_user_func_array with an array of REFERENCES, not `bind_param($types,
+       ...$values)`: bind_param declares its arguments by reference, and unpacking a plain
+       array hands it temporaries. It happens to work on current PHP, but it is exactly the
+       kind of thing that changes between an 8.2 dev container and whatever lsphp the live
+       server is on - and this path writes a player's fleet. */
+    private function executeBatchInsert($sql, $types, array $values, $context)
+    {
+        $stmt = $this->connection->prepare($sql);
+        if (!$stmt) throw new Exception("DB error in $context (prepare): " . $this->connection->error);
+
+        $refs = array(&$types);
+        foreach ($values as $i => $ignored) $refs[] = &$values[$i];
+        call_user_func_array(array($stmt, 'bind_param'), $refs);
+
         $stmt->execute();
         $stmt->close();
     }
 
-    /* $param is the magnitude of a PARAM-CARRYING critical (DamageReductionReduced), or
-       null for the other 40-odd classes. PreBattleDamage::$paramCriticals is the
-       allow-list and sanitiseParam has already forced it to a bounded integer. */
-    public function submitSavedCrit($listid, $shipid, $kind, $ref, $type, $amount, $param = null)
+    /**
+     * Every damage row in a fleet, as shipid => [[kind, ref, damage, destroyed], …].
+     * ONE query for the whole fleet - see the note above.
+     */
+    public function getSavedDamageForList($listid)
     {
-        $param = ($param === null || $param === '') ? null : (int)$param;
-
-        $stmt = $this->connection->prepare("
-            INSERT INTO tac_saved_crit
-                (listid, shipid, kind, ref, type, amount, param)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE
-                amount = VALUES(amount), param = VALUES(param)
-        ");
-        if (!$stmt) throw new Exception("DB error in submitSavedCrit (prepare): " . $this->connection->error);
-
-        //'i' binds a PHP null as SQL NULL, which is what an ordinary critical wants.
-        $stmt->bind_param('iiiisii', $listid, $shipid, $kind, $ref, $type, $amount, $param);
-        $stmt->execute();
-        $stmt->close();
+        $byShip = array();
+        $stmt = $this->connection->prepare(
+            "SELECT
+                shipid, kind, ref, damage, destroyed
+            FROM
+                tac_saved_damage
+            WHERE
+                listid = ?
+            "
+        );
+        if ($stmt)
+        {
+            $stmt->bind_param('i', $listid);
+            $stmt->bind_result($shipid, $kind, $ref, $damage, $destroyed);
+            $stmt->execute();
+            while ($stmt->fetch())
+            {
+                $byShip[$shipid][] = array($kind, $ref, $damage, $destroyed);
+            }
+            $stmt->close();
+        }
+        return $byShip;
     }
 
-    public function getSavedDamageForShip($shipid){
-        $rows = array();
+    /**
+     * Every critical row in a fleet, as shipid => [[kind, ref, type, amount, param], …].
+     */
+    public function getSavedCritsForList($listid)
+    {
+        $byShip = array();
         $stmt = $this->connection->prepare(
-                "SELECT
-                    kind, ref, damage, destroyed
-                FROM
-                    tac_saved_damage
-                WHERE
-                    shipid = ?
-                "
-            );
-            if ($stmt)
+            "SELECT
+                shipid, kind, ref, type, amount, param
+            FROM
+                tac_saved_crit
+            WHERE
+                listid = ?
+            "
+        );
+        if ($stmt)
+        {
+            $stmt->bind_param('i', $listid);
+            $stmt->bind_result($shipid, $kind, $ref, $type, $amount, $param);
+            $stmt->execute();
+            while ($stmt->fetch())
             {
-                $stmt->bind_param('i', $shipid);
-                $stmt->bind_result($kind, $ref, $damage, $destroyed);
-                $stmt->execute();
-                while ($stmt->fetch())
-                {
-                    $rows[] = array($kind, $ref, $damage, $destroyed);
-                }
-                $stmt->close();
+                //param is NULL for every class but the param-carrying ones; rows
+                //written before the column existed simply read back as NULL.
+                $byShip[$shipid][] = array($kind, $ref, $type, $amount, $param);
             }
-        return $rows;
-    }
-
-    public function getSavedCritsForShip($shipid){
-        $rows = array();
-        $stmt = $this->connection->prepare(
-                "SELECT
-                    kind, ref, type, amount, param
-                FROM
-                    tac_saved_crit
-                WHERE
-                    shipid = ?
-                "
-            );
-            if ($stmt)
-            {
-                $stmt->bind_param('i', $shipid);
-                $stmt->bind_result($kind, $ref, $type, $amount, $param);
-                $stmt->execute();
-                while ($stmt->fetch())
-                {
-                    //param is NULL for every class but the param-carrying ones; rows
-                    //written before the column existed simply read back as NULL.
-                    $rows[] = array($kind, $ref, $type, $amount, $param);
-                }
-                $stmt->close();
-            }
-        return $rows;
+            $stmt->close();
+        }
+        return $byShip;
     }
 
     public function changeAvailabilityFleet(int $id): int {

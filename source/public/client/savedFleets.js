@@ -25,17 +25,25 @@ window.savedFleets = {
 		return ships;
 	},
 
-	/* {saveable, excluded} — how many of the viewer's units will and will not be written. */
+	/* {saveable, excluded, present} — how many of the viewer's units will and will not be
+	   written, and whether they have any units here at all.
+	   `present` answers canSaveCurrentFleet's question in the SAME walk, because this runs
+	   on every gamedata poll (see refreshSavePanel) and two passes over the ship list for
+	   two closely-related counts is one pass too many. It counts phantom sheets, exactly as
+	   canSaveCurrentFleet does; `saveable`/`excluded` do not. */
 	saveSummary: function saveSummary() {
-		var saveable = 0, owned = 0;
+		var saveable = 0, owned = 0, present = 0;
+		if (!window.gamedata || !gamedata.ships) return { saveable: 0, excluded: 0, present: false };
+
 		for (var i in gamedata.ships) {
 			var ship = gamedata.ships[i];
 			if (!ship || ship.userid !== gamedata.thisplayer) continue;
+			present++;
 			if (ship.id < 0) continue;   //Chameleon phantom sheet - not a unit the player owns
 			owned++;
 			if (ajaxInterface.isSaveableFleetShip(ship)) saveable++;
 		}
-		return { saveable: saveable, excluded: owned - saveable };
+		return { saveable: saveable, excluded: owned - saveable, present: present > 0 };
 	},
 
 	/* The viewer has units in this game at all? That, not the phase, is what gates the
@@ -94,23 +102,33 @@ window.savedFleets = {
 		}, { includeTransient: includeTransient });
 	},
 
+	//Last state written to the DOM, so an unchanged poll costs nothing - see below.
+	panelState: null,
+
 	/* game.php's SAVE FLEET panel: tab visibility, button state and the "N units will be
-	   saved" line. Recomputed every time the panel is shown, since ships die between
-	   openings. No-op in the lobby, which has no such panel. */
+	   saved" line. No-op in the lobby, which has no such panel.
+	   ⚠️ Called from gamedata.parseServerData, i.e. on EVERY POLL - that is what keeps the
+	   count honest as units die during the battle, but it also means everything here is on
+	   the hottest client path in the game. The ship walk is one pass (saveSummary answers
+	   both questions), and the four jQuery writes are skipped unless the numbers actually
+	   moved, which for most polls they have not. */
 	refreshSavePanel: function refreshSavePanel() {
 		var tab = $("#fleetSaveTab");
 		if (!tab.length) return;
 
-		var hasFleet = savedFleets.canSaveCurrentFleet();
+		var summary = savedFleets.saveSummary();
+		var hasFleet = summary.present;
+
+		var state = hasFleet + "/" + summary.saveable + "/" + summary.excluded;
+		if (state === savedFleets.panelState) return;
+		savedFleets.panelState = state;
+
 		//css(), not toggle(): jQuery's show() writes an INLINE display when a stylesheet
 		//rule is hiding the element, and the mobile breakpoint hides every .logUiEntry
 		//unless #logcontainer is .large - an inline display:block would pin this one tab
 		//open in the collapsed state. Clearing the property lets the CSS decide.
 		tab.css("display", hasFleet ? "" : "none");
-
-		var summary = savedFleets.saveSummary();
-		var canSave = hasFleet && summary.saveable > 0;
-		$("#fleetSaveButton").prop("disabled", !canSave);
+		$("#fleetSaveButton").prop("disabled", !(hasFleet && summary.saveable > 0));
 
 		var text;
 		if (!hasFleet) {

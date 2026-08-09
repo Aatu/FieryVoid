@@ -363,7 +363,13 @@ public function addMoons($gameData, $dbManager, $smallCount, $mediumCount, $larg
                 if ($ship->userid == $gameData->forPlayer){
 //Debug::log("bulkBuy " . $ship->bulkBuy);
                     $bulkBuy = isset($ship->bulkBuy) ? $ship->bulkBuy : 1;
-//Debug::log("bulkBuy2 " . $bulkBuy);                    
+//Debug::log("bulkBuy2 " . $bulkBuy);
+                    /* Pre-battle damage: validated ONCE per lobby unit, not once per copy.
+                       It depends only on $ship, so a bulk of 20 mines used to re-derive the
+                       identical payload 20 times; the loop below just picks its own ordinal
+                       out of the result. */
+                    $cleanPreBattle = PreBattleDamage::sanitise($ship, $ship->preBattleDamage ?? array());
+
                     for ($m = 0; $m < $bulkBuy; $m++) {
                         
                         // For mines, clone the ship object to save it individually without random movement
@@ -416,9 +422,8 @@ public function addMoons($gameData, $dbManager, $smallCount, $mediumCount, $larg
                            of this loop writes only its own copy's row. Null for anything
                            that is not a mine, which skips that bucket entirely. */
                         $mineOrdinal = (isset($ship->mine) && $ship->mine) ? ($m + 1) : null;
-                        $clean = PreBattleDamage::sanitise($ship, $ship->preBattleDamage ?? array());
-                        if ($clean) {
-                            $parts = PreBattleDamage::toEntries($ship, $clean, $gameData->id, $id, $mineOrdinal);
+                        if ($cleanPreBattle) {
+                            $parts = PreBattleDamage::toEntries($ship, $cleanPreBattle, $gameData->id, $id, $mineOrdinal);
                             if ($parts['damage']) {
                                 $dbManager->submitDamages($gameData->id, PreBattleDamage::TURN, $parts['damage']);
                             }

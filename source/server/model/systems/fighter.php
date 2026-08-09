@@ -43,12 +43,21 @@
 		   offer a flight (user request 2026-08-08). See ShipSystem::$preBattleCriticals.
 
 		   ⚠️ EVERY ENTRY IS VERIFIED to be read in a FLIGHT context. A flight has no C&C,
-		   so the usual ship-wide criticals do nothing on it; these four are the ones
-		   ShipClasses::getIniModifier reads off getSampleFighter():
+		   so the ship-wide criticals do nothing on one - PenaltyToHit was briefly listed
+		   here and is the cautionary example: weapon.php's read of it sits inside
+		   `if (!($shooter instanceof FighterFlight) ...)`, so authoring it on a flight
+		   stored a wound the engine never looks at. The entries here are read off the
+		   SAMPLE fighter (ordinal 1) by ShipClasses::getIniModifier:
 		     ReducedIniative        -10 initiative, permanent  (stacks per crit)
-		   ⚠️ They are read off the SAMPLE fighter (ordinal 1) only, which is exactly why
-		   the lobby's flight editor writes criticals to every ordinal at once
-		   (battleDamage.REF_FLIGHT) rather than per craft.
+		   ⚠️ Ordinal 1 ONLY, which is exactly why the lobby's flight editor writes
+		   criticals to every ordinal at once (battleDamage.REF_FLIGHT) rather than per
+		   craft.
+
+		   The other three the same branch reads are deliberately absent: Uncontrolled is
+		   on PreBattleDamage::$denyList (a Hunter-Killer control marker, not a wound), and
+		   ReducedIniativeOneTurn / tmpinidown are one-turn effects - storable, but they
+		   would be a turn-1-only initiative nudge on a flight that has not launched yet.
+		   Add either if that turns out to be wanted; both pass isValidCriticalType.
 
 		   Before adding to this list, prove the engine reads the critical for a flight:
 		   `grep -rn 'hasCritical("Foo"' source/server` and check the receiver is the

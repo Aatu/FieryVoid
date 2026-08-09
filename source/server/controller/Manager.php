@@ -772,6 +772,14 @@ class Manager{
             // Save fleet
             $listId = self::$dbManager->submitSavedList($name, $userid, $points, $isPublic);
 
+            /* Battle damage & criticals are collected across the WHOLE fleet and written
+               in two statements after the loop (PREBATTLE_DAMAGE_PLAN.md §4.6). A fleet
+               saved out of a bloody 20-ship battle is several hundred damaged systems,
+               and a row-at-a-time writer was a prepare/execute round trip for each of
+               them inside one request. */
+            $damageRows = array();
+            $critRows   = array();
+
             // ✅ Now you can associate ships, enhancements, ammo with $listId
             foreach ($ships as $ship) {
                 $shipId = self::$dbManager->submitSavedShip($listId, $userid, $ship);
@@ -787,25 +795,27 @@ class Manager{
 
                 /* Battle damage & criticals carried by this fleet (PREBATTLE_DAMAGE_PLAN.md
                    §4.6). getSavedShipsFromJSON has already applied flightSize + populate(),
-                   so fighter ordinals validate here too. */
+                   so fighter ordinals validate here too. Rows are accumulated, not written:
+                   the two batch writers run once, after the loop. */
                 $cleanDamage = PreBattleDamage::sanitise($ship, $ship->preBattleDamage ?? array());
                 foreach (PreBattleDamage::BUCKETS as $bucket => $kind) {
                     foreach (($cleanDamage[$bucket] ?? array()) as $ref => $damageEntry) {
                         if (!empty($damageEntry['d']) || !empty($damageEntry['k'])) {
-                            self::$dbManager->submitSavedDamage(
-                                $listId, $shipId, $kind, $ref,
+                            $damageRows[] = array(
+                                $shipId, $kind, $ref,
                                 $damageEntry['d'] ?? 0, $damageEntry['k'] ?? 0
                             );
                         }
                         foreach (($damageEntry['c'] ?? array()) as $critType => $critCount) {
                             //param is set only for the param-carrying classes and sanitise
                             //has already bounded it to an integer; null for everything else.
-                            $critParam = $damageEntry['p'][$critType] ?? null;
-                            self::$dbManager->submitSavedCrit($listId, $shipId, $kind, $ref, $critType, $critCount, $critParam);
+                            $critRows[] = array(
+                                $shipId, $kind, $ref,
+                                $critType, $critCount, $damageEntry['p'][$critType] ?? null
+                            );
                         }
                     }
                 }
-
 
                 if($ship instanceof FighterFlight){
                         $firstFighter = $ship->systems[1];
@@ -851,8 +861,12 @@ class Manager{
                                 }
                             }
                         }
-                    }                                   
+                    }
                 }
+
+                //Two statements for the whole fleet, however many wounds it carries.
+                if ($damageRows) self::$dbManager->submitSavedDamageRows($listId, $damageRows);
+                if ($critRows)   self::$dbManager->submitSavedCritRows($listId, $critRows);
 
                 self::$dbManager->endTransaction(false);
 
@@ -920,12 +934,16 @@ class Manager{
             // Load all ships for this fleet
             $ships = self::$dbManager->getSavedShips($listid);
 
+            //Battle damage & criticals: ONE query each for the whole fleet, keyed by
+            //listid, rather than two more per ship on top of the two below. Both tables
+            //carry listid with an index on it (db/prebattleDamage.sql).
+            $damageByShip = self::$dbManager->getSavedDamageForList($listid);
+            $critsByShip  = self::$dbManager->getSavedCritsForList($listid);
+
             // Load enhancements and ammo for all ships
             foreach ($ships as $ship) {
                 $enhancementsByShip[$ship->id] = self::$dbManager->getSavedEnhancementsForShip($ship->id);
                 $ammoByShip[$ship->id] = self::$dbManager->getSavedAmmoForShip($ship->id);
-                $damageByShip[$ship->id] = self::$dbManager->getSavedDamageForShip($ship->id);
-                $critsByShip[$ship->id] = self::$dbManager->getSavedCritsForShip($ship->id);
             }
 
             self::$dbManager->endTransaction(false);
@@ -1040,13 +1058,18 @@ class Manager{
      *     a tree whose bundle has not been rebuilt yet (a shield projection was going
      *     dark with its section - user report 2026-08-08).
      *
-     * ⚠️ ONE ship class per request, resolved through ShipLoader::getShipsByClass - never
-     * new $phpclass on a raw client string, and never getAllShipsStatic(null), which is
-     * the documented cause of the deploy 503 on the live LiteSpeed workers.
+     * ⚠️ ONE ship class per request, and never getAllShipsStatic(null), which is the
+     * documented cause of the deploy 503 on the live LiteSpeed workers.
+     * ⚠️ The class name comes STRAIGHT OFF THE WIRE, and ShipLoader::getShipsByClass does
+     * `new $name(...)` on whatever it is handed - so it is checked to be a BaseShip
+     * subclass first, not merely a syntactically valid identifier. Same rule, and the same
+     * reason, as the is_subclass_of($type, 'Critical') guard on the critical classes read
+     * out of tac_critical: never construct an arbitrary class from client or DB input.
      */
     public static function getSystemCriticals($phpclass, $flightSize = 1)
     {
-        if (!is_string($phpclass) || !preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $phpclass)) {
+        if (!is_string($phpclass) || !preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $phpclass)
+            || !is_subclass_of($phpclass, 'BaseShip')) {
             return ['error' => 'Unknown ship class'];
         }
 

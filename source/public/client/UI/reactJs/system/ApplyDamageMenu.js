@@ -311,8 +311,9 @@ class ApplyDamageMenu extends Component {
                     </DestroyLabel>
                 </Row>
 
-                {/* Carried criticals can be AMENDED or REMOVED here (2026-08-08); adding
-                    one from nothing still needs the §11 catalogue and is not offered. */}
+                {/* Criticals can be added, amended or removed here. The picker's contents
+                    come from the per-class catalogue (systemCriticals.php), which
+                    CriticalEffectsSection fetches for itself. */}
                 <CriticalEffectsSection
                     ship={ship}
                     kind={battleDamage.KIND_SYSTEM}

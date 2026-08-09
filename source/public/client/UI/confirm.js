@@ -1747,7 +1747,7 @@ window.confirm = {
             body += '<label class="fleetDialogCheck">'
                 + '<input type="checkbox" id="fleetTransientCritsCheckbox">'
                 + '<span>Also save <b>temporary</b> critical effects (one-turn effects).'
-                + '<br>They will be in effect during turn 1 of the next battle.</span></label>';
+                + '<br>They will be in effect from turn 1 of the next battle.</span></label>';
         }
 
         var e = confirm.fleetDialogShell(

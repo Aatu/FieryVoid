@@ -98,7 +98,7 @@ window.battleDamage = {
 		ContainmentBreach: 1,
 		ChargeHalve: 1,
 		ChargeEmpty: 1,
-		FirstThrustIgnored: 1,
+		FirstThrustIgnored: 3,
 		FirstThrustIgnoredOneTurn: 1,
 		ShipDisabled: 1,
 		ShipDisabledOneTurn: 1,
@@ -229,6 +229,16 @@ window.battleDamage = {
 	catalogues: {},
 	catalogueRequests: {},
 
+	/* {critClass: meta} flattened across every catalogue fetched so far. Every catalogue
+	   carries the same global `meta`, so a per-class question does not need to know which
+	   ship class it came from - and critMeta is asked once per critical inside applyToShip,
+	   which runs on every keystroke in the damage editor. Filling a flat index when a
+	   catalogue LANDS turns that from a scan of every cached catalogue into one lookup.
+	   ⚠️ INVARIANT: loadCatalogue below is the ONLY thing that writes `catalogues`, and it
+	   fills this in the same breath. Anything that ever populates `catalogues` by another
+	   route must fill this too, or critMeta will not see it. */
+	critMetaIndex: {},
+
 	catalogueKey: function catalogueKey(ship) {
 		if (!ship || !ship.phpclass) return null;
 		return ship.phpclass + '/' + (ship.flight ? (parseInt(ship.flightSize, 10) || 1) : 1);
@@ -255,8 +265,15 @@ window.battleDamage = {
 			ship.flight ? (parseInt(ship.flightSize, 10) || 1) : 1,
 			function (response) {
 				delete battleDamage.catalogueRequests[key];
-				battleDamage.catalogues[key] = (response && response.success) ? response : {};
-				if (typeof onLoaded === 'function') onLoaded(battleDamage.catalogues[key]);
+				var catalogue = (response && response.success) ? response : {};
+				battleDamage.catalogues[key] = catalogue;
+				//first entry wins, matching the scan this replaced
+				for (var type in (catalogue.meta || {})) {
+					if (!battleDamage.critMetaIndex[type]) {
+						battleDamage.critMetaIndex[type] = catalogue.meta[type];
+					}
+				}
+				if (typeof onLoaded === 'function') onLoaded(catalogue);
 			});
 
 		return null;
@@ -265,12 +282,7 @@ window.battleDamage = {
 	/* {label, limit, param, transient} for one critical class, from whichever catalogue
 	   has been fetched (they all carry the same global `meta`). */
 	critMeta: function critMeta(type) {
-		if (!type) return null;
-		for (var key in battleDamage.catalogues) {
-			var meta = battleDamage.catalogues[key] && battleDamage.catalogues[key].meta;
-			if (meta && meta[type]) return meta[type];
-		}
-		return null;
+		return type ? (battleDamage.critMetaIndex[type] || null) : null;
 	},
 
 	/* The criticals this damage target may be OFFERED. A DIFFERENT question from what may
@@ -573,9 +585,10 @@ window.battleDamage = {
 		return bucket[key];
 	},
 
-	/* §11 SEAM. Writes the `c` (and `p`) keys — the ONLY way criticals enter a payload
-	   client-side, so the preview, the buy POST and the saved-fleet write all follow from
-	   one place. A lobby crit picker would call exactly this and nothing else.
+	/* Writes the `c` (and `p`) keys — the ONE door criticals enter a payload by on the
+	   client, so the preview, the buy POST and the saved-fleet write all follow from a
+	   single place. The lobby's crit picker (CriticalEffectsSection) calls exactly this
+	   and nothing else, which is why adding authoring needed no other change.
 	   critMap  = {critClass: count}; an empty/falsy map clears the criticals half.
 	   paramMap = {critClass: int} for the PARAM_CRITICALS classes only. A param class
 	   with no usable param is dropped: its magnitude IS the effect, so storing it at 0
