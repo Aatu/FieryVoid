@@ -1211,6 +1211,7 @@ GrapplingClaw.prototype.initializationUpdate = function() {
         this.data["Attached to"] = hostShip.name;
     }
 
+    this.data["Range"] = 0; //Not 0.1.
 
 	return this;
 };
