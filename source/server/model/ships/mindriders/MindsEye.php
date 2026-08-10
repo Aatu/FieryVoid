@@ -8,7 +8,7 @@ class MindsEye extends SixSidedShip{
 		$this->pointCost = 8300;
 		$this->faction = "Mindriders";
         $this->phpclass = "MindsEye";
-        $this->imagePath = "img/ships/MindriderMindsEye0.png";
+        $this->imagePath = "img/ships/MindriderMindsEye.png";
         $this->shipClass = "Mind's Eye";
         $this->shipSizeClass = 3;
 	    $this->isd = 'Ancient';

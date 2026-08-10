@@ -7,7 +7,7 @@ class Thoughtforce extends MindriderCapital{
 		$this->pointCost = 3750;
 		$this->faction = "Mindriders";
         $this->phpclass = "Thoughtforce";
-        $this->imagePath = "img/ships/MindriderThoughtForce2.png";
+        $this->imagePath = "img/ships/MindriderThoughtForce1.png";
         $this->shipClass = "Thoughtforce";
         $this->shipSizeClass = 3;
 	    $this->isd = 'Ancient';
