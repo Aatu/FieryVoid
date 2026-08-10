@@ -82,13 +82,16 @@ window.DeploymentPhaseStrategy = function () {
         }
     };
 
+    //Returns TRUE only when the click actually placed the selected unit. onShipClicked uses
+    //that so a click which turns out not to be a placement can fall back to the ship tooltip
+    //instead of being silently swallowed. No other caller reads the value.
     DeploymentPhaseStrategy.prototype.onHexClicked = function (payload) {
         PhaseStrategy.prototype.onHexClicked.call(this, payload);
         var hex = payload.hex;
 
         if (!this.selectedShip || (shipManager.getTurnDeployed(this.selectedShip) < gamedata.turn)) {
             //No selected ship or ship has ALREADY deployed so don't allow re-deployment!
-            return;
+            return false;
         }
 
         if (validateDeploymentPosition(this.selectedShip, hex, this.deploymentSprites)) {
@@ -119,8 +122,12 @@ window.DeploymentPhaseStrategy = function () {
                 if (validateAllDeployment(this.gamedata, this.deploymentSprites)) {
                     gamedata.showCommitButton();
                 }
+
+                return true;
             }
         }
+
+        return false;
     };
 
     DeploymentPhaseStrategy.prototype.onShipsClicked = function (ships, payload) {
@@ -236,9 +243,23 @@ window.DeploymentPhaseStrategy = function () {
         if (this.gamedata.isMyShip(ship) && ((shipManager.getTurnDeployed(ship) == gamedata.turn)
             || (shipManager.getTurnDeployed(ship) < gamedata.turn) && ship.canPreOrder)) { //Own ship and deploys this turn, just select it. Means that late-deployers can't deploy on ships with canPreOrder (unless they click very edge of hex), but that's rare.
             this.selectShip(ship, payload);
-        } else { //Neither of the above is true, allow to deploy.  Even on hexes occupied by ships that deployed earlier in game.
-            this.onHexClicked(payload);
+            return;
         }
+
+        //Not a ship we can select, so try the click as a placement first — that is what lets a
+        //unit deploy onto a hex an earlier-deployed one already occupies. Unchanged behaviour;
+        //onHexClicked now just reports back whether it placed anything.
+        if (this.onHexClicked(payload)) return;
+
+        //Otherwise the click had nowhere to go and used to be swallowed in silence: clicking an
+        //enemy ship during Deployment/Pre-Turn (and any ship at all during Pre-Turn, where nothing
+        //is selected) did nothing whatsoever. Desktop players could still hover for the tooltip or
+        //right-click for the ship window, but a touchscreen has neither, so an enemy ship was
+        //completely uninspectable in these phases. Fall back to the standard ship tooltip menu —
+        //exactly what every other phase does with a click that isn't an order (PhaseStrategy.
+        //targetShip). Suppressed while the LoS ruler is up, which is the same rule selectShip
+        //follows: the tooltip covers the line being measured.
+        if (!gamedata.showLoS) this.targetShip(ship, payload);
     };
 
     DeploymentPhaseStrategy.prototype.setSelectedShip = function (ship) {
