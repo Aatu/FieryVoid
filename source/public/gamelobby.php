@@ -797,7 +797,10 @@ $optionsUsed = '';
                          that label's hit area, so clicking Reset also focused the ISD box. -->
                     <span class="clickable resetFilters reset-filters-link-style">Reset Filters</span>
                 </div>
-                <div>
+                <!-- points-readout is a flex row: these five pieces are different font
+                     sizes (and the checkbox carries base.css's global 2px nudge), so they
+                     are centred on the row rather than left to find a common baseline. -->
+                <div class="points-readout">
                     <!--<span class="remaining-points-container">
                         <span class="panelsmall points-bracket-style">(</span>
                         <span class="panelsmall remaining">0</span><span class="panelsmall remaining-points-units">pts left</span>

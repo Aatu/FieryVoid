@@ -714,20 +714,51 @@
     text-align: right;
 }
 
-/* Fleet Builder points cap. The input stands exactly where the word "Unlimited" sits
-   when the toggle is ticked, and matches .unlimited-points-text2's weight so the
-   header does not visibly change size as the two swap. */
+/* The points readout at the right of the filter row: "1200 / Unlimited pts [x]".
+   These pieces were four different font sizes (.panelsubheader 20px,
+   .unlimited-points-text2 18px, the cap input, the checkbox) and each was trying to find
+   its own baseline, so nothing lined up. A flex row with align-items: center makes the
+   alignment independent of the sizes, and one font-size across the group keeps the
+   figures, the word "Unlimited", the cap field and "pts" reading as one line of text. */
+.points-readout {
+    display: flex;
+    align-items: center;
+}
+
+/* Flex drops the whitespace between items, so siblings space themselves - except "pts",
+   which stays glued to the figure it belongs to ("3500pts", as it always read). */
+.points-readout > * + * {
+    margin-left: 5px;
+}
+
+.points-readout .max-points-units {
+    margin-left: 1px;
+}
+
+.points-readout .panelsubheader,
+.points-readout .unlimited-points-text2 {
+    font-size: 18px;
+    line-height: 1;
+}
+
+/* Fleet Builder points cap. Sized and weighted like the "Unlimited" text it replaces, so
+   the header does not jump as the two swap. */
 .max-points-input {
-    width: 72px;
+    width: 76px;
+    padding: 1px 3px;
     text-align: right;
     font-size: 16px;
     font-weight: bold;
-    vertical-align: middle;
+    line-height: 1;
 }
 
-.unlimited-points-toggle {
-    margin-left: 6px;
-    vertical-align: middle;
+/* ⚠️ base.css has a GLOBAL `input[type="checkbox"] { position: relative; top: 2px }`,
+   which would push this 2px below the centre the flex row just established. Two classes
+   (0,2,0) outrank that attribute selector (0,1,1), so an explicit value wins without
+   !important and every other checkbox on the page keeps the global nudge. */
+.points-readout .unlimited-points-toggle {
+    top: 0;
+    margin: 0 0 0 8px;
     cursor: pointer;
 }
 
