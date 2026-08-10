@@ -124,7 +124,7 @@ class Enhancements{
 			$unit->enhancementOptionsDisabled[] = 'ELITE_CREW';
 			$unit->enhancementOptionsDisabled[] = 'POOR_CREW'; 
 			$unit->enhancementOptionsDisabled[] = 'MAR_CONT';
-			$unit->enhancementOptionsDisabled[] = 'SLUGGISH'; 
+			//$unit->enhancementOptionsDisabled[] = 'SLUGGISH'; 
 			$unit->enhancementOptionsDisabled[] = 'IMPR_ENG'; 
 			$unit->enhancementOptionsDisabled[] = 'HANG_BP';
 			$unit->enhancementOptionsDisabled[] = 'HANG_MSW';
