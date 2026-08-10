@@ -378,7 +378,7 @@ CREATE TABLE `tac_ship` (
   `campaignY` int(11) DEFAULT NULL,
   `campaigngameid` int(11) DEFAULT NULL,
   `slot` int(11) NOT NULL DEFAULT '0',
-  `enhvalue` int(11) NOT NULL DEFAULT '0',
+  `enhvalue` decimal(10,2) NOT NULL DEFAULT '0.00',
   PRIMARY KEY (`id`),
   KEY `gameid` (`tacgameid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=28910 DEFAULT CHARSET=utf8;
@@ -488,7 +488,9 @@ CREATE TABLE `tac_saved_ship` (
   `phpclass` VARCHAR(45) NOT NULL,
   `flightsize` INT(11) NOT NULL DEFAULT 0,
   `bulkbuy` INT(11) NOT NULL DEFAULT 1,
-  `enhvalue` INT(11) NOT NULL DEFAULT 0,
+  -- DECIMAL, not INT: MINE_DMG is priced at 0.5/level, so a per-unit enhancement cost is
+  -- not always a whole number. See db/fractionalEnhancementValue.sql.
+  `enhvalue` DECIMAL(10,2) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `listid_key` (`listid`),
   CONSTRAINT `fk_ship_list`

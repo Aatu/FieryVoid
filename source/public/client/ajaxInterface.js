@@ -565,8 +565,15 @@ window.ajaxInterface = {
                 'team': ship.team,
                 'id': ship.id,
                 'name': ship.name,
-                'pointCostEnh': Math.round(ship.pointCostEnh),
-                'pointCostEnh2': Math.round(ship.pointCostEnh2)
+                /* ⚠️ NOT rounded. Not every enhancement is priced in whole points - MINE_DMG
+                   is 0.5 per level - while every figure that PRICES a fleet (fleetPointsTotal,
+                   gamedata.fleetCost) sums the real per-unit cost. Rounding here, and only
+                   here, is what made saved list #96 list at 2949 and reload at 2952: seven
+                   mines each quietly gained half a point and the mine premium multiplied the
+                   gap. Both enhvalue columns are DECIMAL so the fraction survives the round
+                   trip - see db/fractionalEnhancementValue.sql. */
+                'pointCostEnh': ship.pointCostEnh,
+                'pointCostEnh2': ship.pointCostEnh2
             };
 
             if (ship.bulkBuy !== undefined) newShip.bulkBuy = ship.bulkBuy;
@@ -903,8 +910,15 @@ window.ajaxInterface = {
                 'slot': ship.slot,
                 'id': ship.id,
                 'name': ship.name,
-                'pointCostEnh': Math.round(ship.pointCostEnh),
-                'pointCostEnh2': Math.round(ship.pointCostEnh2)
+                /* ⚠️ NOT rounded. Not every enhancement is priced in whole points - MINE_DMG
+                   is 0.5 per level - while every figure that PRICES a fleet (fleetPointsTotal,
+                   gamedata.fleetCost) sums the real per-unit cost. Rounding here, and only
+                   here, is what made saved list #96 list at 2949 and reload at 2952: seven
+                   mines each quietly gained half a point and the mine premium multiplied the
+                   gap. Both enhvalue columns are DECIMAL so the fraction survives the round
+                   trip - see db/fractionalEnhancementValue.sql. */
+                'pointCostEnh': ship.pointCostEnh,
+                'pointCostEnh2': ship.pointCostEnh2
             };
 
             if (ship.bulkBuy !== undefined) newShip.bulkBuy = ship.bulkBuy;

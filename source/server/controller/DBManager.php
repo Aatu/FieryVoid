@@ -199,7 +199,8 @@ class DBManager
     public function submitEnhValue($shipid, $enhValue)
     {
         $stmt = $this->connection->prepare("UPDATE `tac_ship` SET enhvalue = ? WHERE id = ?");
-        $stmt->bind_param('ii', $enhValue, $shipid);
+        //'d' — enhvalue is DECIMAL; see submitSavedShip.
+        $stmt->bind_param('di', $enhValue, $shipid);
         $stmt->execute();
         $stmt->close();
     }
@@ -273,8 +274,11 @@ class DBManager
             throw new Exception("DB prepare failed: " . $this->connection->error);
         }
 
+        //enhvalue binds as 'd', not 'i': a per-unit enhancement cost is not always whole
+        //(MINE_DMG is 0.5/level), and truncating it here made a fleet reload dearer than it
+        //was bought. See db/fractionalEnhancementValue.sql.
         $stmt->bind_param(
-            "iissiii",
+            "iissiid",
             $userid,
             $listId,
             $shipName,
@@ -420,7 +424,10 @@ class DBManager
                 //client by gamedata.isBulkRow - if the two disagreed, a saved OSAT bulk
                 //would reload as a single unit.
                 if ($ship->isBulkBought()) $ship->bulkBuy = max(1, (int)$bulkbuy);
-				$ship->pointCostEnh = $enhvalue;
+				//(float): mysqli hands a DECIMAL back as a STRING, and this value is
+				//json_encoded to the client, where `pointCost + pointCostEnh` would then
+				//CONCATENATE instead of adding. See db/fractionalEnhancementValue.sql.
+				$ship->pointCostEnh = (float)$enhvalue;
                 $ships[] = $ship;
             }
             $stmt->close();
@@ -2505,7 +2512,10 @@ class DBManager
             $stmt->execute();
             while ($stmt->fetch()) {
                 $ship = new $phpclass($id, $playerid, $name, $slot);
-				$ship->pointCostEnh = $enhvalue;
+				//(float): mysqli hands a DECIMAL back as a STRING, and this value is
+				//json_encoded to the client, where `pointCost + pointCostEnh` would then
+				//CONCATENATE instead of adding. See db/fractionalEnhancementValue.sql.
+				$ship->pointCostEnh = (float)$enhvalue;
             }
             $stmt->close();
         }
@@ -2535,7 +2545,10 @@ class DBManager
             $stmt->execute();
             while ($stmt->fetch()) {
                 $ship = new $phpclass($id, $playerid, $name, $slot);
-				$ship->pointCostEnh = $enhvalue;
+				//(float): mysqli hands a DECIMAL back as a STRING, and this value is
+				//json_encoded to the client, where `pointCost + pointCostEnh` would then
+				//CONCATENATE instead of adding. See db/fractionalEnhancementValue.sql.
+				$ship->pointCostEnh = (float)$enhvalue;
                 /*    if ($ship instanceof FighterFlight && $ship->superheavy === false){
                         debug::log("backwards adjust");
                         $ship->flightSize = 6;
