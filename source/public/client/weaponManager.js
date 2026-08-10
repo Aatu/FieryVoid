@@ -3412,6 +3412,26 @@ window.weaponManager = {
     },
 
 
+    /* Terrain collision return damage - bookkeeping, not an attack.
+
+       A ship crashing into an asteroid or moon is resolved entirely by the TERRAIN's
+       RammingAttack: it damages the ship (the "COLLISION!" order, which is what players want to
+       see), then applies return damage to itself. That return damage is dealt while the fire
+       order id is still -1, so DBManager::submitDamages has to reattach it by matching
+       shooter/target/weapon - and the collision order targets the SHIP, so it never matches.
+       RammingAttack::fire therefore invents this self-targeted 'AutoRam' order purely as
+       something for the damage to hang off.
+
+       Players read it as the asteroid shooting itself, alongside a collision entry that already
+       reports the damage they care about, so it is kept out of both the combat log and the replay
+       animation. Scoped to terrain shooters: a SHIP ramming an Enormous unit produces the same
+       order shape and still shows its own return damage exactly as before. */
+    isTerrainReturnDamage: function isTerrainReturnDamage(fire) {
+        if (!fire || fire.damageclass !== "AutoRam") return false;
+        var shooter = gamedata.getShip(fire.shooterid);
+        return !!shooter && gamedata.isTerrain(shooter.shipSizeClass, shooter.userid);
+    },
+
     getAllPreFireOrdersForDisplayingAgainst: function getAllPreFireOrdersForDisplayingAgainst(target) {
         //one reverse map for every order resolved against this target, instead of one full
         //fleet sweep per order - see the note above getDamagesCausedBy
@@ -3421,6 +3441,7 @@ window.weaponManager = {
                 return fire.targetid === target.id && (fire.type === "prefiring");
             }));
         }, []).filter(function (fire) {
+            if (weaponManager.isTerrainReturnDamage(fire)) return false;
             return weaponManager.isResolvedFireOrder(fire);
         }).map(function (fireOrder) {
             var shooter = gamedata.getShip(fireOrder.shooterid);
@@ -3465,6 +3486,7 @@ window.weaponManager = {
                 return fire.targetid === target.id && (fire.type === "normal" || fire.type === "ballistic");
             }));
         }, []).filter(function (fire) {
+            if (weaponManager.isTerrainReturnDamage(fire)) return false;
             return weaponManager.isResolvedFireOrder(fire);
         }).map(function (fireOrder) {
             var shooter = gamedata.getShip(fireOrder.shooterid);
@@ -3711,13 +3733,27 @@ window.weaponManager = {
 
 
     //Function called in Combat Log animation to check if a particular fireORder needs to use the full log message e.g. Reactor overlaods, Hyperspace jumps
-    doShortLogText: function doShortLogText(fire) {
+    //shooter is optional - only the terrain-crash rule below needs it, and it is the ship the log
+    //entry has already resolved from fire.shooterid.
+    doShortLogText: function doShortLogText(fire, shooter) {
         const shortLogTypes = [
             "HyperspaceJump", "JumpFailure", "SelfDestruct", "ContainmentBreach",
             "Reactor", "Sabotage", "WreakHavoc", "Capture", "Rescue", "LimpetBore",
             "MagazineExplosion", "NoHangar", "TerrainCollision", "HalfPhase", "TranverseCrit", "Boarding",
             "InadequateHangar", "HkJamming"
         ];
+
+        //A crash into Huge terrain (multi-hex asteroid, moon) reads like the small-asteroid
+        //TerrainCollision above: the "COLLISION!" pubnotes and the damage, without the
+        //"firing Ramming Attack ... 1/1 shots hit" wording, which describes the asteroid as
+        //shooting at the ship it was run into. Gated on the shooter actually being terrain,
+        //because the same damage class is reused for the auto-ram that follows a failed
+        //skin-dance against a non-terrain Enormous unit - those orders carry no pubnotes, so
+        //short text would print an empty entry.
+        if (fire.damageclass === "TerrainCrash" && shooter
+            && gamedata.isTerrain(shooter.shipSizeClass, shooter.userid)) {
+            return true;
+        }
 
         return shortLogTypes.includes(fire.damageclass);
     },
