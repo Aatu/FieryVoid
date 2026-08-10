@@ -19,6 +19,13 @@ window.gamedata = {
 	fleetWindowOpen: false,
 	gamespace: '',
 
+	/* Fleet Builder (fleetTest) points cap. The slot itself is ALWAYS unlimited in a
+	   builder lobby, so this optional override is what the buy panel, the affordability
+	   checks and the Fleet Checker measure against. null = unlimited (the default, and
+	   the only possible value in an ordinary lobby, where the markup is not rendered).
+	   Read through gamedata.getMaxPoints() and nowhere else. */
+	builderMaxPoints: null,
+
 
 	getPowerRating: function getPowerRating(factionName) {
 		var powerRating = '';
@@ -304,49 +311,118 @@ window.gamedata = {
 		return powerRating;
 	},
 
-	canAfford: function canAfford(ship) {
+	/* ⭐ THE point cap in force for the selected slot, and the ONLY place it is derived.
+	   Ordinary lobby: the slot's own points (-1 meaning unlimited).
+	   Fleet Builder: the slot is always -1, so an unticked "Unlimited" box substitutes the
+	   value typed into the buy panel. Display (calculateFleet), the affordability checks
+	   and the Fleet Checker all read it here, so the number the player is shown is exactly
+	   the number they are held to. */
+	getMaxPoints: function getMaxPoints() {
+		var selectedSlot = playerManager.getSlotById(gamedata.selectedSlot);
+		var slotPoints = selectedSlot ? selectedSlot.points : -1;
 
+		if (slotPoints != -1) return slotPoints;
+		return gamedata.builderMaxPoints === null ? -1 : gamedata.builderMaxPoints;
+	},
+
+	/* Is this fleet-list row a BULK purchase - ONE object standing for N identical units,
+	   minted into N ships by BuyingGamePhase? Mines always have been; OSATs joined them
+	   (user request 2026-08-10). Everything that prices, lists, names or saves a row asks
+	   here rather than testing .mine directly, so the two kinds cannot drift apart.
+
+	   ⚠️ `osat` is NOT only the ship-shaped OSAT hull. MicroSAT extends SuperHeavyFighter
+	   extends FighterFlight and sets osat = true, so a MicroSAT is a FLIGHT that lists
+	   under Immobile Structures - and with maxFlightSize 3 it needs the ship dialog's
+	   flight-size selector, which the bulk dialog has no equivalent for. Flights are
+	   therefore excluded here, EXCEPT the flight-shaped mines (MineClass), which have been
+	   bought in bulk all along and must keep behaving exactly as they do. */
+	isBulkRow: function isBulkRow(ship) {
+		if (!ship) return false;
+		if (ship.mine) return true;
+
+		return !!ship.osat && !ship.flight;
+	},
+
+	/* How many units this one row stands for (always >= 1). */
+	bulkCount: function bulkCount(ship) {
+		if (!gamedata.isBulkRow(ship)) return 1;
+		var count = parseInt(ship.bulkBuy, 10);
+		return (isNaN(count) || count < 1) ? 1 : count;
+	},
+
+	/* What this ONE row costs the fleet.
+	   ⭐ ONE pricing convention across every row: ship.pointCost is the cost of a SINGLE
+	   unit with its enhancements already folded in (doBuyShip, doBuyBulk and doLoadFleet
+	   all establish that), so a row is simply that times the number of units it stands
+	   for. Bulk rows used to keep their enhancements OUT of pointCost and re-add them at
+	   each display site, which broke the moment a bulk-bought unit went through the edit
+	   dialog (which writes the folded total) - and double-counted them on every loaded
+	   mine bulk.
+	   The mines-only 100pt premium and per-class surcharge are FLEET-level and live in
+	   fleetCost, not here. */
+	rowPointCost: function rowPointCost(ship) {
+		return ship.pointCost * gamedata.bulkCount(ship);
+	},
+
+	/* Total cost of the selected slot's fleet.
+	     pendingShip - a unit about to be bought, costed as if it were already in the list.
+	     excludeId   - a row to leave out (the ship being edited, whose new cost arrives as
+	                   pendingShip instead).
+	   ONE implementation for the points display and for every affordability check: the two
+	   used to be separate sums, and canAfford's ignored the mine premium entirely, so a
+	   fleet could be bought that the panel already showed as over budget. */
+	fleetCost: function fleetCost(pendingShip, excludeId) {
 		var slotid = gamedata.selectedSlot;
-		var selectedSlot = playerManager.getSlotById(slotid);
-
-		if (selectedSlot.points == -1) return true; // Unlimited points
-
 		var points = 0;
+		var unitPoints = 0;
+		var uniqueUnitClasses = [];
+
+		var tally = function (lship) {
+			if (lship.mine) {
+				unitPoints += gamedata.rowPointCost(lship);
+				if (uniqueUnitClasses.indexOf(lship.mineType) === -1) {
+					uniqueUnitClasses.push(lship.mineType);
+				}
+			} else {
+				points += gamedata.rowPointCost(lship);
+			}
+		};
+
 		for (var i in gamedata.ships) {
-			var lship = gamedata.ships[i];
-			if (lship.slot != slotid) continue;
-			points += lship.pointCost;
+			if (gamedata.ships[i].slot != slotid) continue;
+			if (excludeId !== undefined && gamedata.ships[i].id == excludeId) continue;
+			tally(gamedata.ships[i]);
 		}
 
-		points += ship.pointCost;
-		if (points > selectedSlot.points) return false;
+		if (pendingShip) tally(pendingShip);
 
-		return true;
+		//Mines are priced as a minefield: a flat 100pt to lay one at all, plus 10% for
+		//every mine CLASS beyond the first.
+		if (unitPoints > 0) {
+			var surchargeMultiplier = 1 + ((uniqueUnitClasses.length - 1) * 0.10);
+			points += Math.round((100 + unitPoints) * surchargeMultiplier);
+		}
+
+		return points;
+	},
+
+	canAfford: function canAfford(ship) {
+		var maxPoints = gamedata.getMaxPoints();
+		if (maxPoints == -1) return true; // Unlimited points
+
+		return gamedata.fleetCost(ship) <= maxPoints;
 	},
 
 	canAffordEdit: function canAffordEdit(ship) {
-
-		var slotid = gamedata.selectedSlot;
-		var selectedSlot = playerManager.getSlotById(slotid);
-
-		if (selectedSlot.points == -1) return true; // Unlimited points
-
-		var points = 0;
-		for (var i in gamedata.ships) {
-			var lship = gamedata.ships[i];
-			if (lship.slot != slotid) continue;
-			if (lship.id == ship.id) continue; //DOn't count this ship already in list!
-			points += lship.pointCost;
-		}
+		var maxPoints = gamedata.getMaxPoints();
+		if (maxPoints == -1) return true; // Unlimited points
 
 		if ($(".confirm .totalUnitCostAmount").length > 0) {
 			ship.pointCost = $(".confirm .totalUnitCostAmount").data("value");
 		}
 
-		points += ship.pointCost;
-		if (points > selectedSlot.points) return false;
-
-		return true;
+		//the edited ship is costed as `pendingShip`, so its OLD row must not also count
+		return gamedata.fleetCost(ship, ship.id) <= maxPoints;
 	},
 
 	/* Broken-heart badge for a bought unit carrying pre-battle damage or criticals, as an
@@ -387,6 +463,37 @@ window.gamedata = {
 		if (badge) row.prepend(badge);
 	},
 
+	/* The action links one fleet-list row offers, as an HTML string.
+	   Edit and Copy both rebuild ONE unit from its blueprint, which is meaningless for a
+	   row standing for several - so a bulk of 2+ gets Details/Remove only, as mines
+	   always have. A single-unit OSAT keeps the full set and behaves exactly as it did
+	   before OSATs became bulk-buyable; a mine never offers them at any count (every mine
+	   of a class is interchangeable and there is nothing on one to edit).
+	   ONE builder for both row-writing paths (updateFleet and constructFleetList), which
+	   previously carried two near-identical copies of this markup. */
+	rowActionsHtml: function rowActionsHtml(ship) {
+		var html = '<div class="ship-actions">' +
+			' <span class="showship clickable">Details</span> ';
+
+		if (!ship.mine && gamedata.bulkCount(ship) === 1) {
+			html += ' -<span class="editship clickable">Edit</span> ' +
+				' -<span class="copyship clickable">Copy</span> ';
+		}
+
+		return html + ' -<span class="remove clickable">Remove</span> </div>';
+	},
+
+	/* The name and cost a fleet-list row displays. A bulk row shows the whole purchase:
+	   "Gravitic Mine (10)" at the cost of all ten. */
+	rowDisplay: function rowDisplay(ship) {
+		var count = gamedata.bulkCount(ship);
+
+		return {
+			name: count > 1 ? ship.name + ' (' + count + ')' : ship.name,
+			cost: Math.ceil(gamedata.rowPointCost(ship))
+		};
+	},
+
 	updateFleet: function updateFleet(ship) {
 		var a = 0;
 		for (var i in gamedata.ships) {
@@ -419,17 +526,8 @@ window.gamedata = {
 			}
 		}
 
-		var displayCost = ship.pointCost;
 		var displayType = ship.shipClass;
-		var displayName = ship.name;
-
-		if (ship.mine && ship.bulkBuy) {
-			displayCost = ((ship.pointCost + (ship.pointCostEnh || 0) + (ship.pointCostEnh2 || 0)) * ship.bulkBuy);
-			if (ship.bulkBuy > 1) {
-				displayName = ship.name + ' (' + ship.bulkBuy + ')';
-			}
-		}
-		displayCost = Math.ceil(displayCost);
+		var display = gamedata.rowDisplay(ship);
 
 		//Pre-battle damage: broken-heart badge ahead of the name, so a damaged unit reads as
 		//damaged without opening its window. Built by the shared helper so this row and the
@@ -437,33 +535,14 @@ window.gamedata = {
 		//written HERE ONLY and vanished at the next fleet-list rebuild.
 		var damageBadge = gamedata.damagedShipBadge(ship);
 
-		if (ship.mine && ship.bulkBuy) {
-			var h = $('<div class="ship bought slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '">' +
-				damageBadge +
-				'<span class="shipname name">' + displayName + '</span>' +
-				'<span class="boughtShiptype">' + displayType + '</span>' +
-				'<span class="boughtPointCost">' + displayCost + 'p</span>' +
-				enhancementHtml +
-				'<div class="ship-actions">' +
-				' <span class="showship clickable">Details</span> ' +
-				' -<span class="remove clickable">Remove</span> ' +
-				'</div>' +
-				'</div>');
-		} else {
-			var h = $('<div class="ship bought slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '">' +
-				damageBadge +
-				'<span class="shipname name">' + displayName + '</span>' +
-				'<span class="boughtShiptype">' + displayType + '</span>' +
-				'<span class="boughtPointCost">' + displayCost + 'p</span>' +
-				enhancementHtml +
-				'<div class="ship-actions">' +
-				' <span class="showship clickable">Details</span> ' +
-				' -<span class="editship clickable">Edit</span> ' +
-				' -<span class="copyship clickable">Copy</span> ' +
-				' -<span class="remove clickable">Remove</span> ' +
-				'</div>' +
-				'</div>');
-		}
+		var h = $('<div class="ship bought slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '">' +
+			damageBadge +
+			'<span class="shipname name">' + display.name + '</span>' +
+			'<span class="boughtShiptype">' + displayType + '</span>' +
+			'<span class="boughtPointCost">' + display.cost + 'p</span>' +
+			enhancementHtml +
+			gamedata.rowActionsHtml(ship) +
+			'</div>');
 
 		$(".remove", h).bind("click", function () {
 			delete gamedata.ships[a];
@@ -476,15 +555,15 @@ window.gamedata = {
 			gamedata.onShipContextMenu(ship.phpclass, ship.faction, ship.id, true);
 		});
 
-		if (!ship.mine) {
-			$(".editship", h).on("click", function (e) {
-				gamedata.editShip(ship);
-			});
+		//No .mine guard needed: rowActionsHtml simply omits these links on a bulk row, so
+		//the selectors come back empty and .on() is a no-op.
+		$(".editship", h).on("click", function (e) {
+			gamedata.editShip(ship);
+		});
 
-			$(".copyship", h).on("click", function (e) {
-				gamedata.copyShip(ship);
-			});
-		}
+		$(".copyship", h).on("click", function (e) {
+			gamedata.copyShip(ship);
+		});
 
 		h.appendTo("#fleet");
 		gamedata.calculateFleet();
@@ -641,7 +720,9 @@ window.gamedata = {
 			var lship = gamedata.ships[i];
 			if (lship.slot != slotid) continue;
 
-			totalPointsSpent += lship.pointCost;
+			//rowPointCost, not pointCost: a bulk row (mines, OSATs) is N units, and this
+			//figure is what stands in for the fleet limit when the fleet has none.
+			totalPointsSpent += gamedata.rowPointCost(lship);
 
 			// 10%/33% deployment brackets use the BASE ship cost only (no ammo, no
 			// enhancements). lship.pointCost is overwritten at purchase to the post-
@@ -1047,7 +1128,12 @@ window.gamedata = {
 
 		} //end of loop at ships preparing data
 
-		var calcPoints = selectedSlot.points;
+		/* Every bracket and per-hull limit below scales off the fleet's POINT LIMIT, and
+		   getMaxPoints is the single place that answers what that limit is. In Fleet
+		   Builder that is the figure typed beside the "Unlimited" box once the player has
+		   unticked it; only a genuinely unlimited fleet still falls back to measuring
+		   itself against what it happens to have spent. */
+		var calcPoints = gamedata.getMaxPoints();
 		if (calcPoints == -1) { //If unlimited points, assess against points spent so far.
 			calcPoints = totalPointsSpent;
 		}
@@ -1674,49 +1760,21 @@ window.gamedata = {
 					enhancementHtml = '<div class="ship-enhancements">' + listHtml + '</div>';
 				}
 			}
-			var displayCost = ship.pointCost;
 			var displayType = ship.shipClass;
-			var displayName = ship.name;
-
-			if (ship.mine && ship.bulkBuy) {
-				displayCost = ((ship.pointCost + (ship.pointCostEnh || 0) + (ship.pointCostEnh2 || 0)) * ship.bulkBuy);
-				if (ship.bulkBuy > 1) {
-					displayName = ship.name + ' (' + ship.bulkBuy + ')';
-				}
-			}
-			displayCost = Math.ceil(displayCost);
+			var display = gamedata.rowDisplay(ship);
 
 			//Pre-battle damage: re-derived from the ship, not carried in the old markup -
 			//this rebuild is exactly where the previous ' (damaged)' suffix was lost.
 			var damageBadge = gamedata.damagedShipBadge(ship);
 
-			if (ship.mine && ship.bulkBuy) {
-				var h = $('<div class="ship bought slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '">' +
-					damageBadge +
-					'<span class="shipname name">' + displayName + '</span>' +
-					'<span class="boughtShiptype">' + displayType + '</span>' +
-					'<span class="boughtPointCost">' + displayCost + 'p</span>' +
-					enhancementHtml +
-					'<div class="ship-actions">' +
-					' <span class="showship clickable">Details</span> ' +
-					' -<span class="remove clickable">Remove</span> ' +
-					'</div>' +
-					'</div>');
-			} else {
-				var h = $('<div class="ship bought slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '">' +
-					damageBadge +
-					'<span class="shipname name">' + displayName + '</span>' +
-					'<span class="boughtShiptype">' + displayType + '</span>' +
-					'<span class="boughtPointCost">' + displayCost + 'p</span>' +
-					enhancementHtml +
-					'<div class="ship-actions">' +
-					' <span class="showship clickable">Details</span> ' +
-					' -<span class="editship clickable">Edit</span> ' +
-					' -<span class="copyship clickable">Copy</span> ' +
-					' -<span class="remove clickable">Remove</span> ' +
-					'</div>' +
-					'</div>');
-			}
+			var h = $('<div class="ship bought slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '">' +
+				damageBadge +
+				'<span class="shipname name">' + display.name + '</span>' +
+				'<span class="boughtShiptype">' + displayType + '</span>' +
+				'<span class="boughtPointCost">' + display.cost + 'p</span>' +
+				enhancementHtml +
+				gamedata.rowActionsHtml(ship) +
+				'</div>');
 			h.appendTo("#fleet");
 		}
 
@@ -1776,33 +1834,16 @@ window.gamedata = {
 		var slotid = gamedata.selectedSlot;
 		if (!slotid) return;
 
-		var selectedSlot = playerManager.getSlotById(slotid);
-		var points = 0;
-		var unitPoints = 0;
-		var uniqueUnitClasses = [];
+		var points = gamedata.fleetCost();
+		var maxPoints = gamedata.getMaxPoints();
 
-		for (var i in gamedata.ships) {
-			if (gamedata.ships[i].slot != slotid) continue;
-
-			if (gamedata.ships[i].mine) {
-				let mCount = gamedata.ships[i].bulkBuy || 1;
-				unitPoints += ((gamedata.ships[i].pointCost + (gamedata.ships[i].pointCostEnh || 0) + (gamedata.ships[i].pointCostEnh2 || 0)) * mCount);
-				if (!uniqueUnitClasses.includes(gamedata.ships[i].mineType)) {
-					uniqueUnitClasses.push(gamedata.ships[i].mineType);
-				}
-			} else {
-				points += gamedata.ships[i].pointCost;
-			}
-		}
-
-		if (unitPoints > 0) {
-			let uniqueClassCount = uniqueUnitClasses.length;
-			let surchargeMultiplier = 1 + ((uniqueClassCount - 1) * 0.10);
-			let totalUnitCost = (100 + unitPoints) * surchargeMultiplier;
-			points += Math.round(totalUnitCost);
-		}
-
-		var maxPoints = selectedSlot.points;
+		/* Fleet Builder with "Unlimited" unticked: the cap is a live input the player types
+		   into, so it takes the place of the .max readout rather than being written into it
+		   - rewriting .max here on every recalculation would destroy the field (and their
+		   caret) mid-keystroke. */
+		var capIsEditable = maxPoints != -1 && gamedata.builderMaxPoints !== null;
+		$('.max-points-input').toggle(capIsEditable);
+		$('.max').toggle(!capIsEditable);
 
 		if (maxPoints == -1) {
 			$('.max').html('<span class="unlimited-points-text2">Unlimited</span>');
@@ -1810,7 +1851,7 @@ window.gamedata = {
 			$('.remaining-points-container').hide();
 		} else {
 			var remainingPoints = maxPoints - points;
-			$('.max').html(selectedSlot.points);
+			if (!capIsEditable) $('.max').html(maxPoints);
 			$('.remaining').html(remainingPoints);
 			$('.max-points-units').show();
 			// Ensure container is shown, and units are visible inside it
@@ -2298,16 +2339,20 @@ window.gamedata = {
 					if (ship.flight && (ship.maxFlightSize != 1)) pointCostFull = pointCostFull + ' (' + pointCostFull / 6 + ' ea.)';//for fighters: display price per craft, too!
 					var sizeTag = (categoryIndex === 0) ? this.getFighterSizeTag(ship) : '';
 					var sizeTagHtml = sizeTag ? ' <span class="fightersize">' + sizeTag + '</span>' : '';
+					//data-cost is the BASE point cost the Cost filter reads (for a flight,
+					//the full-flight price shown in the row, not the per-craft one).
 					h = $('<div oncontextmenu="return false;" class="ship storeship" data-custom="'
 						+ isCustomShip + '" data-isd="'
 						+ ship.isd
+						+ '" data-cost="'
+						+ ship.pointCost
 						+ '"><span class="shiptype' + customShipHighlight + '">'
 						+ shipDisplayName + '</span>'
 						+ sizeTagHtml
 						+ '<span class="pointcost">'
 						+ pointCostFull + '</span> -<span class="addship clickable">Add to fleet</span> -<span class="showship clickable">Show details</span></div>');
 
-					let buyHandler = ship.mine ? this.buyBulk.bind(this, ship.phpclass) : this.buyShip.bind(this, ship.phpclass);
+					let buyHandler = gamedata.isBulkRow(ship) ? this.buyBulk.bind(this, ship.phpclass) : this.buyShip.bind(this, ship.phpclass);
 					$(".addship", h).on("click", buyHandler);
 					$(".showship", h).on("click", gamedata.onShipContextMenu.bind(this, ship.phpclass, faction, ship.id, false));
 
@@ -2329,13 +2374,15 @@ window.gamedata = {
 							+ isCustomShip
 							+ '" data-isd="'
 							+ shipV.isd
+							+ '" data-cost="'
+							+ shipV.pointCost
 							+ '"><span class="shiptype' + customShipHighlight + '">'
 							+ shipDisplayName + '</span>'
 							+ sizeTagHtmlV
 							+ '<span class="pointcost">'
 							+ pointCostFull + '</span> -<span class="addship clickable">Add to fleet</span> -<span class="showship clickable">Show details</span></div>');
 
-						let buyHandlerV = shipV.mine ? this.buyBulk.bind(this, shipV.phpclass) : this.buyShip.bind(this, shipV.phpclass);
+						let buyHandlerV = gamedata.isBulkRow(shipV) ? this.buyBulk.bind(this, shipV.phpclass) : this.buyShip.bind(this, shipV.phpclass);
 						$(".addship", h).on("click", buyHandlerV);
 						$(".showship", h).on("click", gamedata.onShipContextMenu.bind(this, shipV.phpclass, faction, ship.id, false));
 
@@ -2392,10 +2439,14 @@ window.gamedata = {
 		gamedata.applyCustomShipFilter();
 	},
 
-	//Function called by Custom and ISD filters.
+	//Function called by the Custom toggle and the Name / Cost / ISD filters.
 	applyCustomShipFilter: function () {
 		const showCustom = $("#toggleCustom").is(":checked");
 		const isdValue = parseInt($("#isdFilter").val(), 10);
+		//Cost filter: hide anything that costs MORE than the figure typed. Read once,
+		//outside the per-ship loop, like the other two.
+		const costValue = parseInt($("#costFilter").val(), 10);
+		const nameFilter = $("#nameFilter").val().toLowerCase().trim();
 
 		$(".faction").each(function () {
 			const $faction = $(this);
@@ -2405,14 +2456,15 @@ window.gamedata = {
 				const $ship = $(this);
 				const isCustom = $ship.data("custom") === true || $ship.data("custom") === "true";
 				const shipISD = parseInt($ship.data("isd"), 10);
+				const shipCost = parseFloat($ship.data("cost"));
 
 				let visible = true;
 
 				if (!showCustom && isCustom) visible = false;
 				if (!isNaN(isdValue) && shipISD > isdValue) visible = false;
+				if (!isNaN(costValue) && !isNaN(shipCost) && shipCost > costValue) visible = false;
 
 				// Name filter logic
-				const nameFilter = $("#nameFilter").val().toLowerCase().trim();
 				if (nameFilter.length > 0) {
 					const shipName = $ship.find(".shiptype").text().toLowerCase();
 					if (shipName.indexOf(nameFilter) === -1) visible = false;
@@ -2652,12 +2704,13 @@ window.gamedata = {
 		var ship = gamedata.getShipByType(shipclass);
 
 		ship.userid = gamedata.thisplayer;
+		//The class name is the STEM, not the final unit name: the SERVER numbers the
+		//minted copies "Gravitic Mine #1, #2, ..." (BuyingGamePhase::process). Same for
+		//OSATs as for mines - a bulk purchase is interchangeable units, so neither offers
+		//a name box.
 		ship.name = ship.shipClass;
 
 		ship.bulkBuy = parseInt(results.quantity);
-
-		// Calculate total cost stringently to afford check
-		let totalUnitCost = ship.pointCost * ship.bulkBuy;
 
 		ship.pointCostEnh = 0;
 		ship.pointCostEnh2 = 0;
@@ -2682,42 +2735,16 @@ window.gamedata = {
 			target = $(".selectAmount.shpenh" + enhNo);
 		}
 
-		totalUnitCost += (ship.pointCostEnh + ship.pointCostEnh2) * ship.bulkBuy;
+		//Fold the per-unit enhancement cost into pointCost, exactly as doBuyShip does with
+		//the dialog total. That single convention (see rowPointCost) is what lets a bulk
+		//row be priced, edited and saved by the same code as any other unit.
+		ship.pointCost = ship.pointCost + ship.pointCostEnh + ship.pointCostEnh2;
 
-		// Calculate cost of the fleet WITH this new Unit order
-		var slotid = gamedata.selectedSlot;
-		var selectedSlot = playerManager.getSlotById(slotid);
-		var points = 0;
-		var existingUnitPoints = 0;
-		var uniqueUnitClasses = [];
-
-		for (var i in gamedata.ships) {
-			if (gamedata.ships[i].slot != slotid) continue;
-			if (gamedata.ships[i].mine) {
-				existingUnitPoints += (gamedata.ships[i].pointCost + gamedata.ships[i].pointCostEnh + gamedata.ships[i].pointCostEnh2) * (gamedata.ships[i].bulkBuy || 1);
-				if (!uniqueUnitClasses.includes(gamedata.ships[i].mineType)) {
-					uniqueUnitClasses.push(gamedata.ships[i].mineType);
-				}
-			} else {
-				points += gamedata.ships[i].pointCost;
-			}
-		}
-
-		// Add new unit to totals
-		existingUnitPoints += totalUnitCost;
-		if (!uniqueUnitClasses.includes(ship.mineType)) {
-			uniqueUnitClasses.push(ship.mineType);
-		}
-
-		if (existingUnitPoints > 0) {
-			let uniqueClassCount = uniqueUnitClasses.length;
-			let surchargeMultiplier = 1 + ((uniqueClassCount - 1) * 0.10);
-			points += Math.round((100 + existingUnitPoints) * surchargeMultiplier);
-		}
-
-		var maxPoints = selectedSlot.points;
-
-		if (maxPoints != -1 && points > maxPoints) {
+		/* Cost of the fleet WITH this purchase in it. This used to be a second, hand-rolled
+		   copy of calculateFleet's sum; it is now the same fleetCost() the panel displays,
+		   so the "you cannot afford that" line can never disagree with the pts-left figure
+		   the player is looking at. */
+		if (!gamedata.canAfford(ship)) {
 			$(".confirm").remove();
 			window.confirm.error("You cannot afford that Unit purchase!", function () { });
 			return;
@@ -3350,7 +3377,7 @@ window.gamedata = {
 			//ordinary body text, so it carries its own class (see confirm.css).
 			readyMessage += '<span class="prebattle-note">'
 				+ '<span class="prebattle-note-label">WARNING:</span> '
-				+ 'this fleet includes units with pre-battle damage and/or critical effects.'
+				+ 'This fleet includes units with pre-battle damage and/or critical effects.'
 				+ '</span>';
 		}
 
@@ -3585,17 +3612,13 @@ window.gamedata = {
 		const fleet = cachedFleets.find(f => f.id === listId);
 
 		if (slot) { //sometimes slot hasn't been selected yet.
-			var slotPoints = slot.points ?? 0;
+			//getMaxPoints, not slot.points: a Fleet Builder slot is always unlimited, and
+			//the typed cap is what the rest of the panel is already enforcing.
+			var slotPoints = gamedata.getMaxPoints();
 
 			if (slotPoints === -1) return true; // Unlimited points
 
-			var spentPoints = 0;
-			for (var i in gamedata.ships) {
-				var lship = gamedata.ships[i];
-				if (lship.slot != gamedata.selectedSlot) continue;
-				spentPoints += lship.pointCost;
-			}
-			pointsAvailable = slotPoints - spentPoints;
+			pointsAvailable = slotPoints - gamedata.fleetCost();
 		}
 		if (!fleet) return false;
 		if (fleet.points > pointsAvailable) {
@@ -3652,17 +3675,12 @@ window.gamedata = {
 			}
 
 			//Need to add a check here of points here as it's not checked via Saved Fleet List, and return error if it's over what's allowed.
-			const slot = playerManager.getSlotById(gamedata.selectedSlot);
-
-			var spentPoints = 0;
-			for (var i in gamedata.ships) {
-				var lship = gamedata.ships[i];
-				if (lship.slot != gamedata.selectedSlot) continue;
-				spentPoints += lship.pointCost;
-			}
-			const pointsAvailable = slot.points - spentPoints;
+			//Same cap and same fleet-cost sum as the buy panel (getMaxPoints/fleetCost), so
+			//a Fleet Builder limit applies to a fleet loaded by #ID too.
+			const maxPoints = gamedata.getMaxPoints();
+			const pointsAvailable = maxPoints - gamedata.fleetCost();
 			if (response.list && pointsAvailable < response.list.points) {
-				if (slot.points !== -1) { // Unlimited points				
+				if (maxPoints !== -1) { // Unlimited points
 					confirm.fleetNotice("Not enough points available for this fleet (" + response.list.points + "pts needed).");
 					return;
 				}
@@ -3734,6 +3752,9 @@ window.gamedata = {
 				ship.pointCost = (ship.pointCost / 6) * ship.flightSize;
 			}
 
+			//pointCost is a SINGLE unit's cost with enhancements folded in (see
+			//rowPointCost), and a saved row stores the two apart - so add them back.
+			//For a bulk row that is the PER-UNIT figure; rowPointCost multiplies up.
 			if (ship.pointCostEnh !== 0) {
 				ship.pointCost = ship.pointCost + ship.pointCostEnh;
 			}

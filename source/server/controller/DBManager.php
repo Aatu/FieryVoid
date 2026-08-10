@@ -413,10 +413,13 @@ class DBManager
             while ($stmt->fetch()) {
                 $ship = new $phpclass($shipid, $userid, $name, 1);
                 if($ship instanceof FighterFlight) $ship->flightSize = $flightsize;
-                //Bulk purchases (mines) come back as the ONE unit the lobby bought plus
-                //its count, not as N separate units. Rows written before the column
-                //existed default to 1, which is exactly how they always behaved.
-                if (!empty($ship->mine)) $ship->bulkBuy = max(1, (int)$bulkbuy);
+                //Bulk purchases come back as the ONE unit the lobby bought plus its count,
+                //not as N separate units. Rows written before the column existed default
+                //to 1, which is exactly how they always behaved.
+                //isBulkBought() is the single definition (mines + OSATs), mirrored on the
+                //client by gamedata.isBulkRow - if the two disagreed, a saved OSAT bulk
+                //would reload as a single unit.
+                if ($ship->isBulkBought()) $ship->bulkBuy = max(1, (int)$bulkbuy);
 				$ship->pointCostEnh = $enhvalue;
                 $ships[] = $ship;
             }

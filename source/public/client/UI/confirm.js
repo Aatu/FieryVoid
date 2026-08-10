@@ -1540,6 +1540,10 @@ window.confirm = {
         // Unit Settings Fields
         var html = '<div class="unitSettings">';
         //html += '<div style="margin-bottom: 5px;">Mines will be placed randomly within the player\'s deployment zone boundaries based on the quantity specified. (NOTE: 10% class surcharge added separately to fleet total)</div>';
+
+        /* No name box, deliberately - for OSATs as well as mines (user request 2026-08-10).
+           A bulk purchase is interchangeable units, so they are named from the ship class
+           and numbered by BuyingGamePhase: "Gravitic Mine #1", "Sentry #2", ... */
         html += '<label>Quantity: <input type="number" id="bulkQuantity" value="1" min="1" style="width: 50px; text-align: center;"></label><br>';
         html += '</div>';
 

@@ -681,20 +681,54 @@
     font-size: 14px;    
 }
 
+/* "Filter by: Name [..] Cost [..] ISD [..]" - one lead-in label, then three fields.
+   The three label wrappers share their spacing so the row reads as one control. */
+.filter-by-text {
+    margin-right: 4px;
+    font-size: 14px;
+}
+
+.name-filter-label-style,
+.cost-filter-label-style,
 .isd-filter-label-style {
     margin-left: 5px;
     margin-top: 3px;
 }
 
+.filter-by-name-text,
+.filter-by-cost-text,
 .filter-by-isd-text {
     margin-right: 2px;
-    font-size: 14px;    
+    font-size: 14px;
 }
 
+.name-input-style {
+    height: 14px;
+    width: 120px;
+}
+
+.cost-input-style,
 .isd-input-style {
     width: 36px;
     height: 14px;
     text-align: right;
+}
+
+/* Fleet Builder points cap. The input stands exactly where the word "Unlimited" sits
+   when the toggle is ticked, and matches .unlimited-points-text2's weight so the
+   header does not visibly change size as the two swap. */
+.max-points-input {
+    width: 72px;
+    text-align: right;
+    font-size: 16px;
+    font-weight: bold;
+    vertical-align: middle;
+}
+
+.unlimited-points-toggle {
+    margin-left: 6px;
+    vertical-align: middle;
+    cursor: pointer;
 }
 
 .reset-isd-link-style {

@@ -371,12 +371,14 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 
 
             // ✅ Select All / None Tier checkboxes + toggle customs
+            // Every text filter, so the three reset paths below cannot forget one.
+            var shipFilterFields = "#isdFilter, #nameFilter, #costFilter";
+
             $('.tier-select-all').on('click', function () {
                 $('.tier-filter').prop('checked', true);
                 $('#toggleCustom').prop('checked', true).trigger('change');
-                $('#customSelect').val('showCustom'); // ✅ reset custom dropdown to Show Customs                
-                $('#isdFilter').val('');
-                $('#nameFilter').val('');
+                $('#customSelect').val('showCustom'); // ✅ reset custom dropdown to Show Customs
+                $(shipFilterFields).val('');
                 gamedata.applyCustomShipFilter();
                 updateTierFilter();
             });
@@ -384,8 +386,7 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
             $('.tier-select-none').on('click', function () {
                 $('.tier-filter').prop('checked', false);
                 $('#toggleCustom').prop('checked', false).trigger('change');
-                $('#isdFilter').val('');
-                $('#nameFilter').val('');
+                $(shipFilterFields).val('');
                 gamedata.applyCustomShipFilter();
                 updateTierFilter();
             });
@@ -397,15 +398,15 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
                 $(this).val(val);
             });
 
-            // Apply filter only when Enter key is pressed
-            $("#isdFilter").on("keypress", function (e) {
-                if (e.which === 13) {
-                    gamedata.applyCustomShipFilter();
-                }
+            // Same treatment for Cost - digits only, 5 is plenty for any point value
+            $("#costFilter").on("input", function () {
+                let val = $(this).val().replace(/\D/g, '');
+                if (val.length > 5) val = val.slice(0, 5);
+                $(this).val(val);
             });
 
-            // Apply filter only when Enter key is pressed (for consistency)
-            $("#nameFilter").on("keypress", function (e) {
+            // Apply filter only when Enter key is pressed
+            $("#isdFilter, #nameFilter, #costFilter").on("keypress", function (e) {
                 if (e.which === 13) {
                     gamedata.applyCustomShipFilter();
                 }
@@ -413,9 +414,40 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 
             // Reset filters when clicking "Reset Filters"
             $(".resetFilters").on("click", function () {
-                $("#isdFilter").val('');
-                $("#nameFilter").val('');
+                $(shipFilterFields).val('');
                 gamedata.applyCustomShipFilter();
+            });
+
+            /* Fleet Builder points cap (rendered only in a fleetTest lobby, so both
+               selectors come back empty and these binds are no-ops elsewhere).
+               gamedata.builderMaxPoints is the ONE piece of state: null = unlimited.
+               Everything downstream reads it through gamedata.getMaxPoints(). */
+            $('#unlimitedPointsToggle').on('change', function () {
+                if ($(this).is(':checked')) {
+                    gamedata.builderMaxPoints = null;
+                } else {
+                    var typed = parseInt($('#maxPointsInput').val(), 10);
+                    if (isNaN(typed) || typed < 0) {
+                        typed = 3500;
+                        $('#maxPointsInput').val(typed);
+                    }
+                    gamedata.builderMaxPoints = typed;
+                }
+                gamedata.calculateFleet();
+            });
+
+            $('#maxPointsInput').on('input', function () {
+                var typed = parseInt($(this).val(), 10);
+                //A blank/part-typed field keeps the last good cap rather than briefly
+                //reading as 0 and turning the whole fleet unaffordable.
+                if (isNaN(typed) || typed < 0) return;
+                gamedata.builderMaxPoints = typed;
+                gamedata.calculateFleet();
+            });
+
+            $('#maxPointsInput').on('blur', function () {
+                if (gamedata.builderMaxPoints === null) return;
+                $(this).val(gamedata.builderMaxPoints);
             });
 
             // Optional: initialize custom ship visibility
@@ -741,17 +773,29 @@ $optionsUsed = '';
                     <span class="clickable tier-select-none no-filters-link">No Filters</span>
                     <span class="filter-pipe-separator">|</span>  
 
+                    <span class="filter-by-text">Filter by:</span>
+
                     <label class="name-filter-label-style">
-                        <span class="filter-by-name-text">Filter by Name:</span>
+                        <span class="filter-by-name-text">Name</span>
                         <input type="text" id="nameFilter" value="" class="name-input-style">
                     </label>
-                    <!--<span class="filter-pipe-separator">|</span>-->
+
+                    <!-- Cost filter: hides anything costing MORE than the figure typed. -->
+                    <label class="cost-filter-label-style">
+                        <span class="filter-by-cost-text">Cost</span>
+                        <input type="text" id="costFilter" value="" class="cost-input-style"
+                               inputmode="numeric" pattern="[0-9]*">
+                    </label>
 
                     <label class="isd-filter-label-style">
-                        <span class="filter-by-isd-text">Filter by ISD:</span>
-                        <input type="text" id="isdFilter" value="" class="isd-input-style">
-                        <span class="clickable resetFilters reset-filters-link-style">Reset Filters</span>
+                        <span class="filter-by-isd-text">ISD</span>
+                        <input type="text" id="isdFilter" value="" class="isd-input-style"
+                               inputmode="numeric" pattern="[0-9]*">
                     </label>
+
+                    <!-- Outside the ISD <label> on purpose: a span inside a label is part of
+                         that label's hit area, so clicking Reset also focused the ISD box. -->
+                    <span class="clickable resetFilters reset-filters-link-style">Reset Filters</span>
                 </div>
                 <div>
                     <!--<span class="remaining-points-container">
@@ -761,7 +805,20 @@ $optionsUsed = '';
                     </span>-->
                     <span class="panelsubheader current">0</span>
                     <span class="panelsubheader">/</span>
-                    <span class="panelsubheader max">0</span><span class="panelsubheader max-points-units">pts</span>
+                    <span class="panelsubheader max">0</span><?php if ($isFleetTest): ?>
+                    <!-- Fleet Builder only. The slot itself is always unlimited server-side,
+                         so this optional cap is purely a client-side yardstick: it drives the
+                         points readout, the affordability checks and the Fleet Checker's
+                         bracket/hull limits (gamedata.getMaxPoints). It sits exactly where
+                         the word "Unlimited" does, and calculateFleet swaps the two - the
+                         value is NEVER written into .max, which is rewritten on every
+                         recalculation and would eat the field mid-keystroke. -->
+                    <input type="number" id="maxPointsInput" class="max-points-input" value="3500"
+                           min="0" step="50" style="display:none" aria-label="Maximum fleet points"><?php endif; ?><span class="panelsubheader max-points-units">pts</span><?php if ($isFleetTest): ?>
+                    <input type="checkbox" id="unlimitedPointsToggle" class="yellow-tick unlimited-points-toggle"
+                           checked title="Unlimited points - untick to build against a fixed limit"
+                           aria-label="Unlimited points">
+                    <?php endif; ?>
                 </div>
             </div>
 

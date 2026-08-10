@@ -511,10 +511,13 @@ window.ajaxInterface = {
             saveable.push(lship);
 
             if (bySlot && lship.slot != slot) continue;
-            //A lobby mine row is N mines at pointCost each - counting it once stored a
-            //fleet whose `points` was short by (bulkBuy - 1) units, and that figure is
-            //what the affordability check on load compares against.
-            points += lship.pointCost * (lship.mine ? (parseInt(lship.bulkBuy, 10) || 1) : 1);
+            //A lobby BULK row (mines, and OSATs since 2026-08-10) is N units at pointCost
+            //each - counting it once stored a fleet whose `points` was short by
+            //(bulkBuy - 1) units, and that figure is what the affordability check on load
+            //compares against. Keyed off bulkBuy alone rather than .mine: in a live game
+            //every ship reports 1 (the class default, never persisted), so this is exactly
+            //the old behaviour there.
+            points += lship.pointCost * (parseInt(lship.bulkBuy, 10) || 1);
         }
 
         var groups = ajaxInterface.groupSaveableShips(saveable);

@@ -3059,7 +3059,25 @@ public function getAllEWExceptDEW($turn){
 	public function isTerrain(){
         //If any of these conditions is true, indicates Terrain.
         if($this instanceof Terrain || $this->userid == -5 || $this->shipSizeClass == 5) return true;
-		return false; 
+		return false;
+	}
+
+	/* ⭐ Is this unit BOUGHT IN BULK - ONE lobby row carrying bulkBuy = N, minted into N
+	   separate ships by BuyingGamePhase::process? Mines always have been; OSATs joined
+	   them (user request 2026-08-10).
+
+	   THE MIRROR: gamedata.isBulkRow() in gamelobby.js answers the same question on the
+	   client. The two must agree - the lobby decides which buy dialog a store entry gets
+	   and how the fleet row is priced, this side decides whether a saved fleet's `bulkbuy`
+	   column is honoured and whether the minted copies are numbered. Edit both or neither.
+
+	   ⚠️ `osat` is not only the ship-shaped OSAT hull: MicroSAT extends SuperHeavyFighter
+	   extends FighterFlight and sets osat = true. It is a FLIGHT with a flight size the
+	   bulk dialog cannot express, so flights are excluded - EXCEPT the flight-shaped mines
+	   (MineClass), which have been bulk-bought all along. */
+	public function isBulkBought(){
+		if ($this->mine) return true;
+		return $this->osat && !($this instanceof FighterFlight);
 	}
 
     public function getTurnDeployed($gamedata){
