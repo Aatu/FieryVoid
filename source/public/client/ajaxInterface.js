@@ -484,6 +484,44 @@ window.ajaxInterface = {
         return groups;
     },
 
+    /* ⭐ What a fleet COSTS, as one number - the figure written to tac_saved_list.points,
+       which is both what the saved-fleet dropdown shows and what the affordability check
+       on load compares against.
+
+       Mines are not priced like other units: a fleet carrying any pays a flat 100pt
+       premium to lay a minefield at all, plus 10% for every mine CLASS beyond the first.
+       This function is the third statement of that rule, and the three must agree -
+       gamedata.fleetCost() (the lobby's live buy-panel total) and fleetList.js (a live
+       game's fleet list) are the other two. Saving used to sum bare pointCosts, so a
+       mined fleet always listed for less than it actually cost to buy.
+
+       A BULK row (mines, and OSATs since 2026-08-10) is N units at pointCost each. Keyed
+       off bulkBuy alone rather than .mine: in a live game every ship reports 1 (the class
+       default, never persisted), and its mines are already separate ships. */
+    fleetPointsTotal: function fleetPointsTotal(ships) {
+        var points = 0;
+        var minePoints = 0;
+        var mineClasses = [];
+
+        for (var i = 0; i < ships.length; i++) {
+            var lship = ships[i];
+            var cost = lship.pointCost * (parseInt(lship.bulkBuy, 10) || 1);
+
+            if (lship.mine) {
+                minePoints += cost;
+                if (mineClasses.indexOf(lship.mineType) === -1) mineClasses.push(lship.mineType);
+            } else {
+                points += cost;
+            }
+        }
+
+        if (minePoints > 0) {
+            points += Math.round((100 + minePoints) * (1 + ((mineClasses.length - 1) * 0.10)));
+        }
+
+        return points;
+    },
+
     /* opts (all optional):
          includeTransient : also save one-turn / self-expiring criticals (game.php's
                             "save temporary critical effects" checkbox, off by default).
@@ -493,7 +531,7 @@ window.ajaxInterface = {
 
         var saveships = Array();
         var saveable = [];
-        var points = 0;
+        var priced = [];
 
         /* ONE pass, one isSaveableFleetShip call per ship: it is the filter for BOTH the
            units written and the points figure, and on game.php it walks every system of
@@ -511,14 +549,11 @@ window.ajaxInterface = {
             saveable.push(lship);
 
             if (bySlot && lship.slot != slot) continue;
-            //A lobby BULK row (mines, and OSATs since 2026-08-10) is N units at pointCost
-            //each - counting it once stored a fleet whose `points` was short by
-            //(bulkBuy - 1) units, and that figure is what the affordability check on load
-            //compares against. Keyed off bulkBuy alone rather than .mine: in a live game
-            //every ship reports 1 (the class default, never persisted), so this is exactly
-            //the old behaviour there.
-            points += lship.pointCost * (parseInt(lship.bulkBuy, 10) || 1);
+            priced.push(lship);
         }
+
+        //Costed in one go rather than per ship: the mine premium is a FLEET-level figure.
+        var points = ajaxInterface.fleetPointsTotal(priced);
 
         var groups = ajaxInterface.groupSaveableShips(saveable);
         for (var g = 0; g < groups.length; g++) {
