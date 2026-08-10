@@ -778,17 +778,27 @@ const canEditSelfRepairList = (ship, system) => canSelfRepairList(ship, system) 
    ORDINAL, and only its Structure can take any - so it gets MineDamageMenu (opened from
    the section health bar) and no per-system menu at all. canApplyMineDamage is what says
    the bar is still clickable for them. */
+/* ⭐ Has the player already readied this fleet? Once they have, the fleet has been POSTed
+   and nothing authored afterwards is ever submitted - so every pre-battle damage editor
+   closes, exactly as buying, editing and removing units already do.
+   Asked of gamedata (gamelobby.js) rather than restated here, so this and the lobby's own
+   "You have already confirmed your fleet" refusals cannot drift apart. The typeof guard is
+   for game.php, whose gamedata has no such method - though the gamephase === -2 test in
+   front of every caller means it is never reached there. */
+const fleetIsCommitted = () =>
+	typeof gamedata.fleetIsCommitted === 'function' && gamedata.fleetIsCommitted();
+
 export const canApplyPreBattleDamage = (ship, system) =>
-	gamedata.gamephase === -2 && ship && ship.userid != 0 && !ship.flight && !ship.mine
-	&& !isPseudoSystem(system);
+	gamedata.gamephase === -2 && !fleetIsCommitted() && ship && ship.userid != 0
+	&& !ship.flight && !ship.mine && !isPseudoSystem(system);
 
 /* A bought lobby mine: the section health bar opens the synthetic per-copy editor.
    Guarded on the mine having structure worth dialling - a 1-box proximity mine has
    nothing to edit, since any damage at all would destroy it and a destroyed mine is
    simply one you did not buy. */
 export const canApplyMineDamage = (ship) =>
-	gamedata.gamephase === -2 && ship && ship.userid != 0 && Boolean(ship.mine)
-	&& battleDamage.mineMaxHealth(ship) > 1;
+	gamedata.gamephase === -2 && !fleetIsCommitted() && ship && ship.userid != 0
+	&& Boolean(ship.mine) && battleDamage.mineMaxHealth(ship) > 1;
 
 //A system with no structure of its own, hidden from the icon grid, or untargetable by
 //construction (RammingAttack and friends) is an ABILITY, not a box on the SCS.

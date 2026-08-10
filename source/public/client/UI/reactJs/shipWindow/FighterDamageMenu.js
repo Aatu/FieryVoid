@@ -307,7 +307,7 @@ class FighterDamageMenu extends Component {
                 {size > 1 && <PropagateButton
                     title="Copy Fighter 1's damage to every fighter in this flight"
                     onClick={() => this.propagate()}
-                >Apply Fighter 1 to all</PropagateButton>}
+                >Apply Fighter 1's damage to all</PropagateButton>}
                 <CriticalEffectsSection
                     ship={ship}
                     kind={battleDamage.KIND_FIGHTER}

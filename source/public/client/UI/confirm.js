@@ -964,18 +964,41 @@ window.confirm = {
     },
 
 
+    /* The pre-edit state an edit dialog hands to its callback, for two jobs: restoring the
+       row when the edits turn out to be unaffordable, and telling battleDamage what size
+       the payload's ordinals were keyed by BEFORE the edit.
+
+       ⭐ mine/flight/bulkBuy are carried for that second job. battleDamage.ordinalCount is
+       asked the question, and it reads those three - a snapshot without them answers null
+       for every unit, so a flight resized to 3 or a mine bulk cut from 10 to 5 would keep a
+       payload addressing ordinals that no longer exist. */
+    snapshotShip: function snapshotShip(ship) {
+        return {
+            name: ship.name,
+            pointCost: ship.pointCost,
+            flightSize: ship.flightSize,
+            /* ⚠️ Each ROW is copied too, not just the outer array. An enhancementOption is
+               itself an array and the dialog writes the chosen count into its index 2 in
+               place - so a shallow [...] snapshot shares those rows with the live ship and
+               "restore what it was" would hand back the counts it was just changed to. */
+            enhancementOptions: ship.enhancementOptions
+                ? ship.enhancementOptions.map(function (option) {
+                    return Array.isArray(option) ? option.slice() : option;
+                })
+                : [],
+            pointCostEnh: ship.pointCostEnh,
+            pointCostEnh2: ship.pointCostEnh2,
+            mine: ship.mine,
+            flight: ship.flight,
+            bulkBuy: ship.bulkBuy
+        };
+    },
+
     showShipEdit: function showShipEdit(ship, callback) {
         var e = $(this.whtml);
 
         // Store the original ship state before any edits
-        let originalShipData = {
-            name: ship.name,
-            pointCost: ship.pointCost,
-            flightSize: ship.flightSize,
-            enhancementOptions: ship.enhancementOptions ? [...ship.enhancementOptions] : [],
-            pointCostEnh: ship.pointCostEnh,
-            pointCostEnh2: ship.pointCostEnh2
-        };
+        let originalShipData = confirm.snapshotShip(ship);
 
         //variable flightsize
         var variableSize = confirm.getVariableSize(ship);
@@ -1442,8 +1465,26 @@ window.confirm = {
         a.fadeIn(250);
     },
 
-    showBuyBulk: function showBuyBulk(ship, callback) {
+    /* The bulk purchase dialog - quantity spinner, enhancements applied to every unit in
+       the row, and no name box (a bulk purchase is interchangeable units, named from the
+       ship class and numbered by BuyingGamePhase).
+
+       ONE function serves both BUYING a new bulk row and EDITING one already in the fleet.
+       `existing` is what switches it: falsy for a fresh purchase off a store blueprint,
+       truthy when `ship` is a bought row being re-opened. Deliberately not a second
+       showBulkEdit copy - the two would have to be kept in step over the quantity field,
+       every enhancement widget and the cost plumbing, and this file already carries one
+       stale clone of a handler that drifted that way. */
+    showBuyBulk: function showBuyBulk(ship, callback, existing) {
         var e = $(this.whtml);
+
+        /* ⚠️ MUST be the bare hull when re-opening a bought row: this dialog totals as base
+           + enhancements, and a bought row's pointCost ALREADY has its per-unit enhancements
+           folded in (the one pricing convention behind gamedata.rowPointCost). Feeding it
+           ship.pointCost would charge for them twice, and again on every subsequent edit.
+           Unchanged for a fresh purchase - a store blueprint's cost is pristine by
+           definition, and getPristinePointCost simply reads it back. */
+        var baseCost = existing ? gamedata.getPristinePointCost(ship) : ship.pointCost;
 
         // Added to support Enhancement select recalculations in getTotalCost()
         var totalTemplate = $(".totalUnitCost");
@@ -1451,9 +1492,9 @@ window.confirm = {
 
         $(".totalUnitCostText", totalItem).html("Total Purchase Cost");
         var totalCostAmountSpan = $(".totalUnitCostAmount", totalItem);
-        totalCostAmountSpan.html(ship.pointCost);
-        totalCostAmountSpan.data("value", ship.pointCost);
-        totalCostAmountSpan.data("baseCost", ship.pointCost);
+        totalCostAmountSpan.html(baseCost);
+        totalCostAmountSpan.data("value", baseCost);
+        totalCostAmountSpan.data("baseCost", baseCost);
         totalCostAmountSpan.addClass("totalBulkCostAmount");
         $(totalItem).show();
 
@@ -1467,17 +1508,33 @@ window.confirm = {
             var enhPriceStep = enhancement[5];
             var enhIsOption = enhancement[6];
 
+            //Re-opening a bought row starts from what it already carries; a fresh purchase
+            //starts empty. numberTaken is in LEVELS, which is what every spinner, limit and
+            //cost sum here works in.
+            var enhCount = existing ? (parseInt(enhancement[2], 10) || 0) : 0;
+
+            //The arithmetic series doOnPlusEnhancement/handleInputChange* maintain: level i
+            //(0-based) costs enhPrice + i*enhPriceStep. Seeded here so the running delta
+            //those handlers apply starts from the right place.
+            var initialEnhCost = 0;
+            for (let eCount = 0; eCount < enhCount; eCount++) {
+                initialEnhCost += enhPrice + (eCount * enhPriceStep);
+            }
+
             var template = $(".missileSelectItem");
             var item = template.clone(true).prependTo(e);
 
             var selectAmountItem = $(".selectAmount", item);
 
-            selectAmountItem.html("0");
             selectAmountItem.attr("contenteditable", "true");
             selectAmountItem.addClass("shpenh" + i);
             selectAmountItem.data('enhID', enhID);
-            selectAmountItem.data('count', 0);
-            selectAmountItem.data('enhCost', 0);
+            selectAmountItem.data('count', enhCount);
+            selectAmountItem.data('enhCost', initialEnhCost);
+            if (enhIsOption) {
+                selectAmountItem.data('enhOptionCost', initialEnhCost);
+                selectAmountItem.data('enhIsOption', true);
+            }
             selectAmountItem.data('min', 0);
             selectAmountItem.data('max', enhLimit);
             selectAmountItem.data('enhPrice', enhPrice);
@@ -1486,9 +1543,12 @@ window.confirm = {
             //enhancement shows the quantity its level buys (and cannot be typed into); step 1 -
             //every enhancement but Extra Tendrils - leaves the row exactly as it was.
             var enhStep = confirm.applyEnhancementStep(selectAmountItem, enhID);
+            confirm.enhShowLevel(selectAmountItem, enhCount);
 
             selectAmountItem.on("focus", confirm.selectAllTextOnFocus);
-            selectAmountItem.on("input", confirm.handleInputChange);
+            //The edit handler adjusts by the DELTA from the count already in the box, which is
+            //what a pre-populated row needs; the buy handler recomputes from zero.
+            selectAmountItem.on("input", existing ? confirm.handleInputChangeEdit : confirm.handleInputChange);
             selectAmountItem.on("keydown", confirm.preventNonNumericInput);
             selectAmountItem.on("wheel", confirm.handleMouseWheel);
 
@@ -1526,12 +1586,10 @@ window.confirm = {
         var totalTemplate = $(".totalUnitCost");
         var totalItem = totalTemplate.clone(true).prependTo(e);
 
-        var pointCost = ship.pointCost;
-
         $(".totalUnitCostText", totalItem).html("Cost Per Unit");
         var perUnitAmountSpan = $(".totalUnitCostAmount", totalItem);
-        perUnitAmountSpan.html(pointCost);
-        perUnitAmountSpan.data("value", pointCost);
+        perUnitAmountSpan.html(baseCost);
+        perUnitAmountSpan.data("value", baseCost);
         perUnitAmountSpan.addClass("costPerUnitSpan");
 
         $(totalItem).show();
@@ -1544,7 +1602,8 @@ window.confirm = {
         /* No name box, deliberately - for OSATs as well as mines (user request 2026-08-10).
            A bulk purchase is interchangeable units, so they are named from the ship class
            and numbered by BuyingGamePhase: "Gravitic Mine #1", "Sentry #2", ... */
-        html += '<label>Quantity: <input type="number" id="bulkQuantity" value="1" min="1" style="width: 50px; text-align: center;"></label><br>';
+        var quantity = existing ? (parseInt(ship.bulkBuy, 10) || 1) : 1;
+        html += '<label>Quantity: <input type="number" id="bulkQuantity" value="' + quantity + '" min="1" style="width: 50px; text-align: center;"></label><br>';
         html += '</div>';
 
         var settingsBlock = $(html).prependTo(e);
@@ -1570,7 +1629,7 @@ window.confirm = {
             confirm.getTotalCost();
         });
 
-        $('<label>Configure ' + ship.shipClass + ' Purchase:</label><br>').prependTo(e);
+        $('<label>' + (existing ? 'Edit your ' : 'Configure ') + ship.shipClass + ' Purchase:</label><br>').prependTo(e);
 
         $(".confirmok", e).on("click", function () {
             var q = parseInt($('#bulkQuantity', e).val());
@@ -1582,15 +1641,33 @@ window.confirm = {
             };
 
             var shipclass = $(this).data("shipclass");
-            callback(results, shipclass);
-            $(".confirm").remove();
+            //Read BEFORE the dialog is torn down - the edit callbacks rebuild the row from
+            //these, and doEditShip's habit of reading them off `this` would find nothing.
+            var editShip = $(this).data("ship");
+            var editOriginal = $(this).data("originalShipData");
+
+            /* ⚠️ The CALLBACK removes this dialog, not the handler. It cannot be removed
+               first - readBulkPurchase reads the enhancement spinners straight out of the
+               DOM - and it must not be removed afterwards either: confirm.error and
+               confirm.warning both build `<div class="confirm ...">`, so a trailing
+               $(".confirm").remove() here deleted the message the callback had just put up.
+               That is why an unaffordable bulk purchase used to fail silently. */
+            callback(results, shipclass, editShip, editOriginal);
         });
 
         $(".confirmcancel", e).on("click", function () {
             $(".confirm").remove();
         });
 
+        /* shipclass is what a fresh purchase resolves its blueprint from; `ship` is what an
+           edit rebuilds. BOTH are set on an edit because confirm.getMaxAmmoFit reads either
+           to work out how much (AMMO) fits in the magazine, and a row loaded from a saved
+           fleet may have no blueprint registered for its class at all. */
         $(".confirmok", e).data("shipclass", ship.phpclass);
+        if (existing) {
+            $(".confirmok", e).data("ship", ship);
+            $(".confirmok", e).data("originalShipData", confirm.snapshotShip(ship));
+        }
 
         var a = e.appendTo("body");
         confirm.getTotalCost();

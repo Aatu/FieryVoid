@@ -417,12 +417,37 @@ window.gamedata = {
 		var maxPoints = gamedata.getMaxPoints();
 		if (maxPoints == -1) return true; // Unlimited points
 
-		if ($(".confirm .totalUnitCostAmount").length > 0) {
+		/* ⚠️ Only the SHIP dialog is read back off the DOM here. The bulk dialog shows TWO
+		   spans carrying .totalUnitCostAmount - the per-unit cost and the whole row's total -
+		   so which one this picked up would come down to the order the templates happened to
+		   be prepended in. doEditBulk has already priced the ship through readBulkPurchase
+		   by the time it asks, which is the same arithmetic the dialog displays. */
+		if (!$(".confirm #bulkQuantity").length && $(".confirm .totalUnitCostAmount").length > 0) {
 			ship.pointCost = $(".confirm .totalUnitCostAmount").data("value");
 		}
 
 		//the edited ship is costed as `pendingShip`, so its OLD row must not also count
 		return gamedata.fleetCost(ship, ship.id) <= maxPoints;
+	},
+
+	/* ⭐ Has the selected slot's fleet been READIED? `lastphase >= "-2"` is the one test for
+	   that, and it is what every buy/edit/remove path already refuses on ("You have already
+	   confirmed your fleet"). Stated here so the React damage editors can ask the same
+	   question instead of re-deriving it.
+
+	   Pre-battle damage was the one thing still editable after Ready: the fleet has been
+	   POSTed by then, so anything authored afterwards is never submitted - the player is
+	   editing a fleet that no longer exists, and the ship window happily let them. Now the
+	   menus simply do not open.
+
+	   Lobby-only: game.php has no playerManager slots and never reaches this, because every
+	   caller tests gamephase === -2 first. Defensive anyway - a missing slot reads as NOT
+	   committed, which is the same answer the page starts with. */
+	fleetIsCommitted: function fleetIsCommitted() {
+		if (typeof playerManager === 'undefined' || !playerManager) return false;
+
+		var slot = playerManager.getSlotById(gamedata.selectedSlot);
+		return Boolean(slot) && slot.lastphase >= "-2";
 	},
 
 	/* Broken-heart badge for a bought unit carrying pre-battle damage or criticals, as an
@@ -464,23 +489,23 @@ window.gamedata = {
 	},
 
 	/* The action links one fleet-list row offers, as an HTML string.
-	   Edit and Copy both rebuild ONE unit from its blueprint, which is meaningless for a
-	   row standing for several - so a bulk of 2+ gets Details/Remove only, as mines
-	   always have. A single-unit OSAT keeps the full set and behaves exactly as it did
-	   before OSATs became bulk-buyable; a mine never offers them at any count (every mine
-	   of a class is interchangeable and there is nothing on one to edit).
+	   EVERY row gets the full set (user request 2026-08-10). A bulk row is edited and
+	   copied as a whole purchase - quantity plus the enhancements carried by every unit in
+	   it - through the bulk dialog rather than the ship one; editShip/copyShip pick which
+	   on isBulkRow, so nothing here has to know the difference.
+	   Copy on a bulk row is not just "raise the quantity": two rows of one class is the
+	   only way to hold two differently-enhanced batches of it (five mines with MINE_SIGN
+	   and five without). The lobby saves such rows separately - groupSaveableShips only
+	   merges mines outside gamephase -2 - and BuyingGamePhase's name counters run on
+	   across rows, so the second batch numbers #6, #7... rather than restarting.
 	   ONE builder for both row-writing paths (updateFleet and constructFleetList), which
 	   previously carried two near-identical copies of this markup. */
 	rowActionsHtml: function rowActionsHtml(ship) {
-		var html = '<div class="ship-actions">' +
-			' <span class="showship clickable">Details</span> ';
-
-		if (!ship.mine && gamedata.bulkCount(ship) === 1) {
-			html += ' -<span class="editship clickable">Edit</span> ' +
-				' -<span class="copyship clickable">Copy</span> ';
-		}
-
-		return html + ' -<span class="remove clickable">Remove</span> </div>';
+		return '<div class="ship-actions">' +
+			' <span class="showship clickable">Details</span> ' +
+			' -<span class="editship clickable">Edit</span> ' +
+			' -<span class="copyship clickable">Copy</span> ' +
+			' -<span class="remove clickable">Remove</span> </div>';
 	},
 
 	/* The name and cost a fleet-list row displays. A bulk row shows the whole purchase:
@@ -555,8 +580,8 @@ window.gamedata = {
 			gamedata.onShipContextMenu(ship.phpclass, ship.faction, ship.id, true);
 		});
 
-		//No .mine guard needed: rowActionsHtml simply omits these links on a bulk row, so
-		//the selectors come back empty and .on() is a no-op.
+		//No .mine guard needed: editShip/copyShip send a bulk row to the bulk dialog and
+		//anything else to the ship one, so this binding is the same for every row.
 		$(".editship", h).on("click", function (e) {
 			gamedata.editShip(ship);
 		});
@@ -2700,17 +2725,32 @@ window.gamedata = {
 		window.confirm.showBuyBulk(ship, gamedata.doBuyBulk);
 	},
 
-	doBuyBulk: function doBuyBulk(results, shipclass) {
-		var ship = gamedata.getShipByType(shipclass);
+	/* ⚠️ A ship's enhancementOptions, copied so that writing to the copy cannot reach the
+	   original. Each option is ITSELF an array whose index 2 holds the chosen count, and
+	   every buy/edit path writes that index in place - so a shallow [...] of the outer array
+	   leaves a copied row sharing its counts with the row it was copied from, and editing
+	   one silently rewrote the other. */
+	cloneEnhancementOptions: function cloneEnhancementOptions(ship) {
+		if (!ship || !ship.enhancementOptions) return [];
 
-		ship.userid = gamedata.thisplayer;
-		//The class name is the STEM, not the final unit name: the SERVER numbers the
-		//minted copies "Gravitic Mine #1, #2, ..." (BuyingGamePhase::process). Same for
-		//OSATs as for mines - a bulk purchase is interchangeable units, so neither offers
-		//a name box.
-		ship.name = ship.shipClass;
+		return ship.enhancementOptions.map(function (option) {
+			return Array.isArray(option) ? option.slice() : option;
+		});
+	},
 
-		ship.bulkBuy = parseInt(results.quantity);
+	/* ⭐ Read the bulk dialog's spinners onto `ship` and price the result. ONE reader for
+	   all three bulk paths (buy, edit, copy), so the pricing convention below is stated
+	   once instead of three times.
+
+	     baseCost - the BARE hull's cost, with no enhancements in it. Passed in rather than
+	                read off ship.pointCost, because on an edit or copy that field already
+	                has the previous enhancements folded in and re-folding compounds them.
+
+	   Every count is rewritten, including back down to 0: an edit that TAKES an enhancement
+	   away has to clear the option it was recorded in, or lobbyEnhancements.apply would
+	   re-apply it to the rebuilt unit for free. */
+	readBulkPurchase: function readBulkPurchase(ship, quantity, baseCost) {
+		ship.bulkBuy = parseInt(quantity, 10) || 1;
 
 		ship.pointCostEnh = 0;
 		ship.pointCostEnh2 = 0;
@@ -2721,11 +2761,12 @@ window.gamedata = {
 		var target = $(".selectAmount.shpenh" + enhNo);
 		while (typeof target.data("enhPrice") != 'undefined') { //as long as there are enhancements defined...
 			noTaken = target.data("count");
-			if (noTaken > 0) { //enhancement picked - note!
-				ship.enhancementOptions[enhNo][2] = noTaken;
-				if (!ship.enhancementOptions[enhNo][6]) { //this is an actual enhancement (as opposed to option) - note value!
+			ship.enhancementOptions[enhNo][2] = noTaken > 0 ? noTaken : 0;
+
+			if (noTaken > 0) { //enhancement picked - note value!
+				if (!ship.enhancementOptions[enhNo][6]) { //this is an actual enhancement (as opposed to option)
 					ship.pointCostEnh += target.data("enhCost"); // Cost is per-unit
-				} else { //this is an option - note value!
+				} else { //this is an option
 					ship.pointCostEnh2 += target.data("enhCost"); // Cost is per-unit
 				}
 			}
@@ -2738,7 +2779,21 @@ window.gamedata = {
 		//Fold the per-unit enhancement cost into pointCost, exactly as doBuyShip does with
 		//the dialog total. That single convention (see rowPointCost) is what lets a bulk
 		//row be priced, edited and saved by the same code as any other unit.
-		ship.pointCost = ship.pointCost + ship.pointCostEnh + ship.pointCostEnh2;
+		ship.pointCost = baseCost + ship.pointCostEnh + ship.pointCostEnh2;
+	},
+
+	doBuyBulk: function doBuyBulk(results, shipclass) {
+		var ship = gamedata.getShipByType(shipclass);
+
+		ship.userid = gamedata.thisplayer;
+		//The class name is the STEM, not the final unit name: the SERVER numbers the
+		//minted copies "Gravitic Mine #1, #2, ..." (BuyingGamePhase::process). Same for
+		//OSATs as for mines - a bulk purchase is interchangeable units, so neither offers
+		//a name box.
+		ship.name = ship.shipClass;
+
+		//A store blueprint's pointCost is pristine by definition.
+		gamedata.readBulkPurchase(ship, results.quantity, ship.pointCost);
 
 		/* Cost of the fleet WITH this purchase in it. This used to be a second, hand-rolled
 		   copy of calculateFleet's sum; it is now the same fleetCost() the panel displays,
@@ -2755,6 +2810,184 @@ window.gamedata = {
 		$(".confirm").remove();
 		gamedata.updateFleet(ship);
 		gamedata.calculateFleet();
+		gamedata.drawMapPreview(); // Redraw map to show unitfields
+	},
+
+	/* Re-open a bought bulk row and write the changes back. doEditShip's shape, minus
+	   everything a bulk row cannot have (no name box, no flight-size selector, no missile
+	   pickers - getMissileOptions returns nothing for a non-flight hull anyway), plus the
+	   quantity.
+
+	   The arguments come from the dialog's OK handler rather than off `this`, because the
+	   bulk dialog reads its fields and tears itself down before calling back. */
+	doEditBulk: function doEditBulk(results, shipclass, ship, originalShipData) {
+		if (!ship) return;
+
+		//Captured BEFORE pointCost is overwritten - by then it is no longer the bare hull's,
+		//and the no-blueprint stand-in below needs the bare one.
+		var pristinePointCost = gamedata.getPristinePointCost(ship);
+
+		gamedata.readBulkPurchase(ship, results.quantity, pristinePointCost);
+
+		if (!gamedata.canAffordEdit(ship)) {
+			//Put the row back exactly as it was before returning.
+			ship.name = originalShipData.name;
+			ship.pointCost = originalShipData.pointCost;
+			ship.bulkBuy = originalShipData.bulkBuy;
+			ship.enhancementOptions = originalShipData.enhancementOptions ? [...originalShipData.enhancementOptions] : [];
+			ship.pointCostEnh = originalShipData.pointCostEnh;
+			ship.pointCostEnh2 = originalShipData.pointCostEnh2;
+			$(".confirm").remove();
+			window.confirm.error("You cannot afford those edits!", function () { });
+			return;
+		}
+
+		var newPointCost = ship.pointCost;
+
+		//Remove old row from the Fleet List first - updateFleet re-adds it at the end.
+		var id = ship.id;
+		for (var i in gamedata.ships) {
+			if (gamedata.ships[i].id == id) {
+				delete gamedata.ships[i];
+				break;
+			}
+		}
+		$('.ship.bought.shipid_' + id).remove();
+
+		var baseShip = gamedata.getShipByType(ship.phpclass);
+		if (!baseShip) {
+			//Loaded fleets may not have their faction set yet when editing, so do this now.
+			//Register a COPY carrying the BARE hull's cost, not `ship` itself: `ship` is holding
+			//the folded total by this point, and whatever is registered here becomes the
+			//blueprint every later lookup of this class finds - including the next edit of this
+			//same row, which would then take an inflated cost as its baseline.
+			var standIn = jQuery.extend({}, ship);
+			standIn.pointCost = pristinePointCost;
+			gamedata.setShipsFromFaction(ship.faction, [standIn]);
+			baseShip = gamedata.getShipByType(ship.phpclass);
+		}
+
+		//Same reset list as doEditShip: EVERY enhancement-mutated ship-level stat must
+		//return to its blueprint value before re-applying, or enhancements kept through an
+		//edit compound on each pass.
+		ship.systems = baseShip.systems;
+		ship.notes = baseShip.notes;
+		ship.forwardDefense = baseShip.forwardDefense;
+		ship.sideDefense = baseShip.sideDefense;
+		ship.iniativebonus = baseShip.iniativebonus;
+		ship.critRollMod = baseShip.critRollMod;
+		ship.toHitBonus = baseShip.toHitBonus;
+		ship.turncost = baseShip.turncost;
+		ship.turndelaycost = baseShip.turndelaycost;
+		ship.pivotcost = baseShip.pivotcost;
+		ship.signature = baseShip.signature;
+		ship.detectedSignature = baseShip.detectedSignature;
+		ship.IFFSystem = baseShip.IFFSystem;
+
+		if (ship.flight) {
+			//the flight-shaped MineClass customs land here; a ship-shaped mine or OSAT does not
+			ship.freethrust = baseShip.freethrust;
+			ship.hasNavigator = baseShip.hasNavigator;
+			ship.offensivebonus = baseShip.offensivebonus;
+			lobbyEnhancements.resetEnhancementMarkersFighter(ship);
+		} else {
+			lobbyEnhancements.resetEnhancementMarkersShip(ship);
+		}
+
+		ship.pointCost = newPointCost;
+		ship.userid = gamedata.thisplayer;
+
+		//single enhancement entry point (markers reset above, so this re-applies the
+		//kept/changed enhancements to the rebuilt unit)
+		lobbyEnhancements.apply(ship);
+
+		//Pre-battle damage: the rebuild above replaced ship.systems wholesale, so the preview
+		//has to be painted onto the new objects. A bulk MINE keys its damage per copy, so
+		//lowering the quantity trims the copies that no longer exist; a bulk OSAT's damage is
+		//per-system and applies to every copy, so changing the quantity leaves it alone.
+		var damageTrimmed = window.battleDamage
+			&& battleDamage.onShipRebuilt(ship, battleDamage.ordinalCount(originalShipData));
+
+		//The React window renders from this same mutated ship object, so just re-render it.
+		var wasVisible = window.shipWindowManagerReact
+			&& window.shipWindowManagerReact.ships.indexOf(ship) !== -1;
+
+		$(".confirm").remove();
+		gamedata.updateFleet(ship);
+
+		if (wasVisible) {
+			window.shipWindowManagerReact.update();
+		}
+
+		if (damageTrimmed) {
+			confirm.warning("Quantity reduced - pre-battle damage on the units that were removed has been discarded.");
+		}
+
+		gamedata.drawMapPreview(); // Redraw map to show unitfields
+	},
+
+	/* Copy a bought bulk row. Opens the bulk dialog pre-filled with what the original
+	   carries, so the player can vary the quantity or the enhancements before accepting -
+	   which is the point of copying rather than raising the original's quantity. */
+	copyBulk: function copyBulk(copiedShip) {
+		var newShip = gamedata.getShipByType(copiedShip.phpclass);
+		if (!newShip) {
+			//Loaded fleets may not have their faction set yet, so register the class now - at
+			//the BARE hull's cost, same reasoning as in doEditBulk.
+			var standIn = jQuery.extend({}, copiedShip);
+			standIn.pointCost = gamedata.getPristinePointCost(copiedShip);
+			gamedata.setShipsFromFaction(copiedShip.faction, [standIn]);
+			newShip = gamedata.getShipByType(copiedShip.phpclass);
+		}
+
+		newShip.name = copiedShip.name;
+		//All three together: pointCost has the per-unit enhancements folded in, and
+		//getPristinePointCost peels them back off using the other two.
+		newShip.pointCost = copiedShip.pointCost;
+		newShip.pointCostEnh = copiedShip.pointCostEnh;
+		newShip.pointCostEnh2 = copiedShip.pointCostEnh2;
+		newShip.bulkBuy = copiedShip.bulkBuy;
+		newShip.enhancementOptions = gamedata.cloneEnhancementOptions(copiedShip);
+		//DEEP clone - sharing the payload object would make damaging either row damage both.
+		if (window.battleDamage) {
+			newShip.preBattleDamage = battleDamage.clone(copiedShip.preBattleDamage);
+		}
+
+		$(".confirm").remove();
+
+		window.confirm.showBuyBulk(newShip, gamedata.doCopyBulk, true);
+	},
+
+	doCopyBulk: function doCopyBulk(results, shipclass, ship, originalShipData) {
+		if (!ship) return;
+
+		//`ship` here is already a fresh blueprint clone built by copyBulk, so its systems
+		//need no rebuilding - only pricing and the payload carried across.
+		gamedata.readBulkPurchase(ship, results.quantity, gamedata.getPristinePointCost(ship));
+
+		if (!gamedata.canAfford(ship)) {
+			$(".confirm").remove();
+			window.confirm.error("You cannot afford that Unit purchase!", function () { });
+			return;
+		}
+
+		//The copy is a NEW purchase, so it is named from the class and numbered by the
+		//server exactly as a fresh bulk buy is - never after the row it came from.
+		ship.name = ship.shipClass;
+		ship.userid = gamedata.thisplayer;
+		ship.slot = gamedata.selectedSlot;
+
+		var damageTrimmed = window.battleDamage
+			&& battleDamage.onShipRebuilt(ship, battleDamage.ordinalCount(originalShipData));
+
+		$(".confirm").remove();
+		gamedata.updateFleet(ship);
+		gamedata.calculateFleet();
+
+		if (damageTrimmed) {
+			confirm.warning("Quantity reduced - pre-battle damage on the units that were removed was not copied.");
+		}
+
 		gamedata.drawMapPreview(); // Redraw map to show unitfields
 	},
 
@@ -2890,6 +3123,11 @@ window.gamedata = {
 			return false;
 		}
 
+		if (gamedata.isBulkRow(copiedShip)) {
+			gamedata.copyBulk(copiedShip);
+			return;
+		}
+
 		var newShip = gamedata.getShipByType(copiedShip.phpclass);
 		if (!newShip) {
 			//Loaded fleets may not have their faction set yet when editing, so do this now.
@@ -2905,7 +3143,9 @@ window.gamedata = {
 		newShip.name = copiedShip.name;
 		newShip.pointCost = copiedShip.pointCost;
 		newShip.flightSize = copiedShip.flightSize;
-		newShip.enhancementOptions = copiedShip.enhancementOptions ? [...copiedShip.enhancementOptions] : [];
+		//Rows copied, not just the outer array - see cloneEnhancementOptions. Copying a ship
+		//and then changing the copy's enhancements used to rewrite the original's counts too.
+		newShip.enhancementOptions = gamedata.cloneEnhancementOptions(copiedShip);
 		//Pre-battle damage (§5.3): a copy starts equally damaged. DEEP clone - sharing the
 		//payload object would make editing either ship edit both.
 		if (window.battleDamage) {
@@ -2958,8 +3198,10 @@ window.gamedata = {
 		//Pre-battle damage (§5.3): the line below rebuilds the ship from its blueprint, so
 		//carry the payload across the rebuild (deep-cloned by battleDamage.clone).
 		//The size that must not change under the payload is flightSize for a flight and
-		//bulkBuy for a bulk mine purchase - both key their damage by ordinal.
-		var copiedFlightSize = ship.mine ? ship.bulkBuy : ship.flightSize;
+		//bulkBuy for a bulk purchase - both key their damage by ordinal. Asked of
+		//battleDamage rather than named here, so this and onShipRebuilt cannot pick
+		//different fields for a unit that is both (the flight-shaped MineClass customs).
+		var copiedFlightSize = window.battleDamage ? battleDamage.ordinalCount(ship) : null;
 		var copiedDamage = window.battleDamage ? battleDamage.clone(ship.preBattleDamage) : null;
 
 		ship = gamedata.getShipByType(ship.phpclass); //Faction already set if not already when we called copyShip()
@@ -3053,15 +3295,16 @@ window.gamedata = {
 		}
 
 		//Pre-battle damage (§5.3): render the carried payload onto the freshly built ship,
-		//and drop it if the copy was made at a different flight size / mine count.
-		var copyDamageCleared = window.battleDamage
+		//and RESHAPE it if the copy was made at a different flight size / bulk count -
+		//a smaller copy drops the ordinals it no longer has, a larger one pads from #1.
+		var copyDamageDiscarded = window.battleDamage
 			&& battleDamage.onShipRebuilt(ship, copiedFlightSize);
 
 		$(".confirm").remove();
 		gamedata.updateFleet(ship);
 
-		if (copyDamageCleared) {
-			confirm.warning("Flight size changed - the pre-battle damage was not copied to this flight.");
+		if (copyDamageDiscarded) {
+			confirm.warning("Size reduced - pre-battle damage on the units above the new size was not copied.");
 		}
 		//gamedata.populateFleetDropdown();
 	},
@@ -3076,6 +3319,14 @@ window.gamedata = {
 		}
 
 		$(".confirm").remove();
+
+		//A bulk row is a whole PURCHASE - quantity plus the enhancements every unit in it
+		//carries - so it goes to the bulk dialog. The ship dialog has no quantity control,
+		//and its "Total cost" would read as one unit's while the fleet is charged for N.
+		if (gamedata.isBulkRow(ship)) {
+			window.confirm.showBuyBulk(ship, gamedata.doEditBulk, true);
+			return;
+		}
 
 		window.confirm.showShipEdit(ship, gamedata.doEditShip);
 	},
@@ -3254,12 +3505,12 @@ window.gamedata = {
 
 		//Pre-battle damage (§5.3): the edit above replaced ship.systems wholesale from the
 		//blueprint, so the preview has to be painted onto the new objects. A flight whose
-		//size changed - or a bulk mine purchase whose COUNT changed - loses its payload
-		//instead: ordinals past the new size would silently vanish, and clearing is the
-		//honest answer.
-		var previousSize = originalShipData
-			? (ship.mine ? originalShipData.bulkBuy : originalShipData.flightSize) : null;
-		var damageCleared = window.battleDamage
+		//SIZE changed - or a bulk row whose COUNT changed - is reshaped rather than wiped:
+		//shrinking drops the ordinals that no longer exist, growing pads the new ones from
+		//#1. Only the shrink is reported, because only a shrink loses anything.
+		var previousSize = (originalShipData && window.battleDamage)
+			? battleDamage.ordinalCount(originalShipData) : null;
+		var damageDiscarded = window.battleDamage
 			&& battleDamage.onShipRebuilt(ship, previousSize);
 
 		//The React window renders from this same mutated ship object, so no
@@ -3274,8 +3525,8 @@ window.gamedata = {
 			window.shipWindowManagerReact.update();
 		}
 
-		if (damageCleared) {
-			confirm.warning("Flight size changed - the pre-battle damage on this flight has been cleared.");
+		if (damageDiscarded) {
+			confirm.warning("Size reduced - pre-battle damage on the units above the new size has been discarded.");
 		}
 		//gamedata.populateFleetDropdown();
 	},

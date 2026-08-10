@@ -489,7 +489,49 @@ window.battleDamage = {
 		return entry;
 	},
 
+	/* ⭐ Systems that may be DAMAGED but never destroyed, and never dialled to 0 structure.
+	   Only reactors so far. Destroying the main reactor destroys the primary structure
+	   block (BaseShip::destroySection), and a ship whose primary structure is gone IS a
+	   destroyed ship (BaseShip::isDestroyed) - so a "damaged" ship bought that way would
+	   arrive at the battle already dead.
+
+	   ⚠️ Duck-typed on `name`, never `instanceof`: lobby fleet ships are jQuery.extend
+	   clones with no prototype chain left, so every instanceof against them is false (see
+	   the MineStructure lookup below, done the same way). 'reactor' is the shared name of
+	   Reactor, MagGravReactor, MagGravReactorTechnical, AdvancedSingularityDrive and
+	   SubReactor; SubReactorUniversal declares its own.
+
+	   MIRRORS PreBattleDamage::$indestructibleSystems - the server is the boundary that
+	   enforces, this copy stops the editor offering what the server would clamp. EDIT BOTH. */
+	INDESTRUCTIBLE_SYSTEMS: ['reactor', 'SubReactorUniversal'],
+
+	isIndestructible: function isIndestructible(system) {
+		return Boolean(system)
+			&& battleDamage.INDESTRUCTIBLE_SYSTEMS.indexOf(system.name) !== -1;
+	},
+
+	systemById: function systemById(ship, systemid) {
+		if (!ship || !ship.systems) return null;
+		for (var i in ship.systems) {
+			if (ship.systems[i] && ship.systems[i].id == systemid) return ship.systems[i];
+		}
+		return null;
+	},
+
+	/* The one write point for per-system damage, so an indestructible system cannot be
+	   killed by any route into it - the menu's Destroy tick, typing 0, or wheeling down. */
 	setSystem: function setSystem(ship, systemid, entry) {
+		var system = battleDamage.systemById(ship, systemid);
+
+		if (battleDamage.isIndestructible(system)) {
+			var cap = Math.max(0, (parseInt(system.maxhealth, 10) || 0) - 1);
+			var patch = { k: 0 };
+			if (entry && entry.hasOwnProperty('d')) {
+				patch.d = Math.min(cap, parseInt(entry.d, 10) || 0);
+			}
+			return battleDamage.setEntry(ship, battleDamage.KIND_SYSTEM, systemid, patch);
+		}
+
 		return battleDamage.setEntry(ship, battleDamage.KIND_SYSTEM, systemid, entry);
 	},
 
@@ -702,9 +744,9 @@ window.battleDamage = {
 	   survives closing and reopening the menu, exactly like critMemory beside it.
 
 	   Same lifetime rules as critMemory: never submitted (only `preBattleDamage` is copied
-	   into the buy/save payloads), dropped by clear() and by the flight-size branch of
-	   onShipRebuilt, and gone when the ship object is rebuilt - the memory is about an
-	   editing session, not about the fleet. */
+	   into the buy/save payloads), dropped by clear() and, per ordinal, by trimOrdinals,
+	   and gone when the ship object is rebuilt - the memory is about an editing session,
+	   not about the fleet. */
 	healthMemory: function healthMemory(ship, kind, ref) {
 		if (!ship || !ship.preBattleHealthSeen) return 0;
 		var value = parseInt(ship.preBattleHealthSeen[battleDamage.bucketName(kind) + ':' + ref], 10);
@@ -727,8 +769,10 @@ window.battleDamage = {
 		}
 	},
 
-	/* Drop everything. Used when a flight's size changes (ordinals beyond the new size
-	   would silently vanish - clearing is honest) or a ship's phpclass changes. */
+	/* Drop everything. For a ship whose phpclass changes, where nothing in the payload
+	   still refers to anything real.
+	   NOT for a resize any more - a flight or bulk row that changes size is reshaped by
+	   onShipRebuilt (trimOrdinals / padOrdinals) rather than emptied. */
 	clear: function clear(ship) {
 		if (!ship) return;
 		ship.preBattleDamage = {};
@@ -742,32 +786,137 @@ window.battleDamage = {
 		return JSON.parse(JSON.stringify(payload));
 	},
 
+	/* ⭐ The size whose ORDINALS this unit's payload is keyed by, or null for a unit that
+	   has no ordinals at all. ONE helper, because every caller that reports a "before" size
+	   to onShipRebuilt has to name the same field this does - otherwise the before/after
+	   comparison is between two different quantities and a resize goes unnoticed.
+
+	   ⚠️ MINE IS TESTED FIRST, and that order matters. The 8 flight-shaped MineClass customs
+	   are BOTH (`mine` = true, `flight` = true inherited from FighterFlight), and their
+	   damage is keyed by copy ordinal 1..bulkBuy like every other mine - never by fighter
+	   ordinal. Reading flightSize for them would compare a number that never changes.
+
+	   A bulk OSAT is deliberately null: its payload is per-SYSTEM and applies to every copy
+	   in the row (canApplyPreBattleDamage excludes mines only), so changing the quantity
+	   does not invalidate any of it. */
+	ordinalCount: function ordinalCount(ship) {
+		if (!ship) return null;
+		if (ship.mine) return battleDamage.mineCount(ship);
+		if (ship.flight) return ship.flightSize;
+		return null;
+	},
+
+	/* Which bucket an ordinal-keyed unit's payload lives in, or null if it has none.
+	   ⚠️ MINE FIRST, for the same reason as ordinalCount: the flight-shaped MineClass
+	   customs are both, and their damage is keyed by copy ordinal in `mne`. */
+	ordinalBucket: function ordinalBucket(ship) {
+		if (!ship) return null;
+		if (ship.mine) return 'mne';
+		if (ship.flight) return 'ftr';
+		return null;
+	},
+
 	/* Invalidation after the lobby rebuilds a ship's systems from its blueprint (Edit,
 	   Copy). The PAYLOAD survives on the ship object, so all that is normally needed is
 	   re-rendering the preview onto the new system objects.
-	   The exception is a FLIGHT whose size changed: ordinals past the new size would
-	   silently vanish, so the payload is dropped wholesale and the caller says so.
-	   Returns true when it cleared something. */
+
+	   A RESIZE is the exception. Both kinds of ordinal-keyed unit - a bulk row's copies and
+	   a flight's craft - are now RESHAPED rather than thrown away, because an ordinal is a
+	   stable identity: mine #3 (or fighter #3) is the same unit before and after the row
+	   changed size. So:
+
+	     shrink  - discard exactly the ordinals that no longer exist, keep the rest.
+	     grow    - keep everything and PAD the new ordinals with a copy of #1's state, so a
+	               flight bought "all lightly damaged" stays that way when it is enlarged
+	               instead of silently arriving pristine.
+
+	   This replaces dropping a resized flight's payload wholesale, which lost work on every
+	   size change (user report 2026-08-10). The flight-wide critical target (REF_FLIGHT) is
+	   ordinal 0 and synthetic - a union computed over the ordinals - so it is untouched by
+	   both passes and simply re-derives.
+
+	   Returns true when something was DISCARDED, so the caller can say so. Padding is not a
+	   loss and is never reported. */
 	onShipRebuilt: function onShipRebuilt(ship, previousSize) {
-		var cleared = false;
+		var discarded = false;
 
-		//A flight's flightSize or a bulk mine's bulkBuy: ordinals past the new size would
-		//silently vanish, so the payload is dropped wholesale and the caller says so.
-		var currentSize = ship && ship.flight ? ship.flightSize
-			: (ship && ship.mine ? ship.bulkBuy : null);
+		var currentSize = battleDamage.ordinalCount(ship);
+		var before = parseInt(previousSize, 10);
+		var after = parseInt(currentSize, 10);
 
-		if (currentSize !== null && currentSize !== undefined
+		var resized = currentSize !== null && currentSize !== undefined
 			&& previousSize !== undefined && previousSize !== null
-			&& parseInt(previousSize, 10) !== parseInt(currentSize, 10)
-			&& !battleDamage.isEmpty(battleDamage.peek(ship))) {
-			ship.preBattleDamage = {};
-			delete ship.preBattleCritSeen;
-			delete ship.preBattleHealthSeen;
-			cleared = true;
+			&& before !== after;
+
+		if (resized && !battleDamage.isEmpty(battleDamage.peek(ship))) {
+			if (after < before) {
+				discarded = battleDamage.trimOrdinals(ship, after);
+			} else {
+				battleDamage.padOrdinals(ship, before, after);
+			}
 		}
 
 		battleDamage.applyToShip(ship);
-		return cleared;
+		return discarded;
+	},
+
+	/* Drop every ordinal above `count`, along with the editor-only memories keyed to them.
+	   Returns true when anything was actually dropped - shrinking onto ordinals that were
+	   never damaged is not worth warning about. */
+	trimOrdinals: function trimOrdinals(ship, count) {
+		var payload = battleDamage.peek(ship);
+		var bucketName = battleDamage.ordinalBucket(ship);
+		if (!payload || !bucketName) return false;
+
+		var limit = parseInt(count, 10);
+		if (!(limit > 0)) return false;
+
+		var dropped = false;
+		var bucket = payload[bucketName];
+
+		for (var ref in bucket) {
+			if (!Object.prototype.hasOwnProperty.call(bucket, ref)) continue;
+			if (parseInt(ref, 10) <= limit) continue;
+
+			delete bucket[ref];
+			if (ship.preBattleCritSeen) delete ship.preBattleCritSeen[bucketName + ':' + ref];
+			if (ship.preBattleHealthSeen) delete ship.preBattleHealthSeen[bucketName + ':' + ref];
+			dropped = true;
+		}
+
+		if (bucket && Object.keys(bucket).length === 0) delete payload[bucketName];
+
+		return dropped;
+	},
+
+	/* Fill ordinals `from + 1` .. `to` with a DEEP copy of ordinal 1's entry. #1 is the
+	   sample the whole unit is described from elsewhere too (fighterMaxHealth, the lobby's
+	   "one sample fighter"), so it is the natural answer to "what does a new craft in this
+	   flight look like".
+	   Undamaged #1, or an ordinal that somehow already has an entry, leaves the slot empty -
+	   padding never overwrites. The editor-only crit/health memories are deliberately NOT
+	   copied: they describe an editing session, not the fleet, and a padded ordinal behaves
+	   exactly like a freshly loaded one without them. */
+	padOrdinals: function padOrdinals(ship, from, to) {
+		var payload = battleDamage.peek(ship);
+		var bucketName = battleDamage.ordinalBucket(ship);
+		if (!payload || !bucketName) return false;
+
+		var bucket = payload[bucketName];
+		var sample = bucket && bucket['1'];
+		if (!sample) return false;
+
+		var start = Math.max(1, parseInt(from, 10) || 0);
+		var end = parseInt(to, 10);
+		var padded = false;
+
+		for (var ordinal = start + 1; ordinal <= end; ordinal++) {
+			if (bucket[String(ordinal)]) continue;
+			bucket[String(ordinal)] = battleDamage.clone(sample);
+			padded = true;
+		}
+
+		return padded;
 	},
 
 	isEmpty: function isEmpty(payload) {
@@ -1181,6 +1330,10 @@ window.battleDamage = {
 	   emit `k`. Mirrors PreBattleDamage::sanitiseEntry's third argument. */
 	summariseSystem: function summariseSystem(ship, system, damageOnly, opts) {
 		if (!system || !(system.maxhealth > 0)) return null;
+
+		//A reactor is carried wounded, never as a wreck - the same rule the lobby editor
+		//enforces, applied here so a fleet saved OUT of a battle cannot reintroduce one.
+		if (battleDamage.isIndestructible(system)) damageOnly = true;
 
 		var entry = {};
 		var cap = damageOnly ? system.maxhealth - 1 : system.maxhealth;

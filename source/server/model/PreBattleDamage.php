@@ -395,7 +395,11 @@ class PreBattleDamage
                 $systemid = (int)$key;
                 $system = $ship->getSystemById($systemid);
                 if (!$system) continue;
-                $e = self::sanitiseEntry($entry, (int)$system->maxhealth);
+                //A reactor is carried WOUNDED, never as a wreck - see isIndestructible.
+                //Same third argument the fighter branch uses: cap one point short of
+                //destruction and drop `k`.
+                $e = self::sanitiseEntry($entry, (int)$system->maxhealth,
+                    self::isIndestructible($system));
                 if ($e) $sys[$systemid] = $e;
             }
             if ($sys) $clean['sys'] = $sys;
@@ -512,10 +516,38 @@ class PreBattleDamage
         return self::sanitise($ship, $raw);
     }
 
+    /* ─────────────────────────────────────────────────────────────────────────────────
+       ⭐ INDESTRUCTIBLE SYSTEMS — damageable, but never killed before the battle.
+       ─────────────────────────────────────────────────────────────────────────────────
+       Reactors only, so far. Destroying the main reactor destroys the primary structure
+       block (BaseShip::destroySection), and a ship whose primary structure is gone IS
+       destroyed (BaseShip::isDestroyed) - so a "damaged" ship bought with a dead reactor
+       would arrive at the battle already a wreck.
+
+       MIRRORS battleDamage.INDESTRUCTIBLE_SYSTEMS in source/public/client/battleDamage.js -
+       EDIT BOTH. This side is the boundary that enforces; the client copy only stops the
+       editor offering a state this would clamp away.
+
+       Matched on the system's NAME rather than by instanceof, so the two lists can be read
+       against each other literally (the client cannot use instanceof at all - lobby ships
+       are prototype-less clones). 'reactor' is the shared name of Reactor, MagGravReactor,
+       MagGravReactorTechnical, AdvancedSingularityDrive and SubReactor; SubReactorUniversal
+       declares its own.
+       ───────────────────────────────────────────────────────────────────────────────── */
+    private static $indestructibleSystems = array(
+        'reactor',
+        'SubReactorUniversal',
+    );
+
+    public static function isIndestructible($system)
+    {
+        return $system && in_array($system->name, self::$indestructibleSystems, true);
+    }
+
     /**
      * One {d,k,c} entry. Returns null when nothing survives.
      * $damageOnly caps the damage one point short of destruction and drops `k` - see the
-     * fighter branch of sanitise().
+     * fighter branch of sanitise() and isIndestructible above.
      */
     private static function sanitiseEntry($entry, $maxhealth, $damageOnly = false, $noCriticals = false)
     {

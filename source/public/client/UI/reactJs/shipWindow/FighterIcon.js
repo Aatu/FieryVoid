@@ -245,7 +245,13 @@ class FighterIcon extends React.Component {
        it clear of the fighter hover/long-press handlers on the card around it. */
     canApplyPreBattleDamage() {
         const { ship } = this.props;
-        return isLobby() && Boolean(ship) && ship.userid != 0 && Boolean(ship.flight);
+        //Closed once the fleet is readied - it has been POSTed by then, so anything
+        //authored afterwards would never be submitted. Same gate as the ship and mine
+        //editors (SystemInfoButtons), asked of gamedata so all three agree.
+        const committed = window.gamedata
+            && typeof gamedata.fleetIsCommitted === 'function' && gamedata.fleetIsCommitted();
+
+        return isLobby() && !committed && Boolean(ship) && ship.userid != 0 && Boolean(ship.flight);
     }
 
     onHealthBarClick(event) {

@@ -135,8 +135,9 @@ const DestroyLabel = styled.label`
     align-items: center;
     gap: 3px;
     flex: 0 0 auto;
-    cursor: pointer;
+    cursor: ${props => props.$disabled ? 'not-allowed' : 'pointer'};
     user-select: none;
+    opacity: ${props => props.$disabled ? 0.4 : 1};
     color: ${props => props.$on ? '#ff8a80' : theme.colors.textDim};
 `;
 
@@ -182,14 +183,30 @@ class ApplyDamageMenu extends Component {
         return Boolean(this.entry().k);
     }
 
+    /* A reactor may be damaged but not killed: destroying it destroys the primary structure
+       block, and a ship with no primary structure is a destroyed ship - so it would arrive
+       at the battle already dead. battleDamage.isIndestructible is the shared answer (PHP
+       twin: PreBattleDamage::isIndestructible) and battleDamage.setSystem clamps the write
+       regardless; this is what stops the UI OFFERING the state. */
+    isIndestructible() {
+        return battleDamage.isIndestructible(this.props.system);
+    }
+
+    /* The lowest structure this system may be left on: 1 for a reactor, 0 (destroyed) for
+       everything else. */
+    floor() {
+        return this.isIndestructible() ? 1 : 0;
+    }
+
     /* Write remaining health back as damage. Reaching 0 means destroyed, always. */
     setRemaining(value) {
         const { ship, system } = this.props;
         const max = system.maxhealth;
+        const floor = Math.min(this.floor(), max);
 
         let remaining = parseInt(value, 10);
         if (isNaN(remaining)) remaining = max;
-        remaining = Math.max(0, Math.min(max, remaining));
+        remaining = Math.max(floor, Math.min(max, remaining));
 
         const damage = max - remaining;
         const destroyed = remaining === 0 && max > 0;
@@ -219,6 +236,10 @@ class ApplyDamageMenu extends Component {
 
     setDestroyed(on) {
         const { ship, system } = this.props;
+
+        //The checkbox is disabled for these, so this is belt-and-braces against a future
+        //caller; battleDamage.setSystem would clamp the write in any case.
+        if (on && this.isIndestructible()) return;
 
         if (on) {
             this.rememberHealth();
@@ -266,6 +287,7 @@ class ApplyDamageMenu extends Component {
 
         const remaining = this.remaining();
         const destroyed = this.isDestroyed();
+        const indestructible = this.isIndestructible();
         const entry = this.entry();
         const critRows = critRowsFromMap(
             entry.c, ship.preBattleCritDesc, ship.preBattleCritTransient, entry.p);
@@ -282,8 +304,10 @@ class ApplyDamageMenu extends Component {
                         <MaxText>#{system.id}</MaxText>
                     </RowLabel>
                     <ActionButton
-                        title="More damage"
-                        disabled={destroyed}
+                        title={indestructible && remaining <= 1
+                            ? "A reactor cannot be destroyed before the battle"
+                            : "More damage"}
+                        disabled={destroyed || remaining <= this.floor()}
                         onClick={() => this.step(-1)}
                     >&minus;</ActionButton>
                     {/*ref, not onWheel: React's own wheel listener is passive, so
@@ -301,10 +325,20 @@ class ApplyDamageMenu extends Component {
                         disabled={destroyed || remaining >= system.maxhealth}
                         onClick={() => this.step(1)}
                     >+</ActionButton>
-                    <DestroyLabel $on={destroyed} title="Mark this system destroyed before the battle starts">
+                    {/* No Destroy for a reactor - the ship would arrive already dead. The
+                        label is kept (greyed, explained on hover) rather than removed, so
+                        the row does not reflow between systems as the player clicks about. */}
+                    <DestroyLabel
+                        $on={destroyed}
+                        $disabled={indestructible}
+                        title={indestructible
+                            ? "A reactor cannot be destroyed before the battle: losing it destroys the primary structure, which destroys the ship"
+                            : "Mark this system destroyed before the battle starts"}
+                    >
                         <CheckBox
                             type="checkbox"
                             checked={destroyed}
+                            disabled={indestructible}
                             onChange={e => this.setDestroyed(e.target.checked)}
                         />
                         <CheckText>Destroy</CheckText>
