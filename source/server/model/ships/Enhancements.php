@@ -96,22 +96,7 @@ class Enhancements{
 			$unit->enhancementOptionsEnabled[] = 'IMPR_SR';
 			$unit->enhancementOptionsEnabled[] = 'IMPR_TS';			
 			break;
-	
-		case 'ShadowShip':
-			Enhancements::blockStandardEnhancements($unit);
-			$unit->enhancementOptionsEnabled[] = 'IMPR_SR';
-			$unit->enhancementOptionsEnabled[] = 'SHAD_FTRL';
-			break;
-	  
-		case 'ShadowFighter':
-			Enhancements::blockStandardEnhancements($unit);
-			//$unit->enhancementOptionsEnabled[] = 'SHAD_CTRL';
-			break;	
 
-		case 'Terrain':
-			Enhancements::blockStandardEnhancements($unit);
-			break;	
-			
 		case 'Mines':
 			Enhancements::blockStandardEnhancements($unit);
 			$unit->enhancementOptionsEnabled[] = 'IFF_SYS';
@@ -132,12 +117,39 @@ class Enhancements{
 				$unit->enhancementOptionsEnabled[] = 'MINE_DMG';				
 			}
 
-			break;	  			
-	
+			break;	  				
+
+		case 'OSAT':
+			//Enhancements::blockStandardEnhancements($unit);
+			$unit->enhancementOptionsDisabled[] = 'ELITE_CREW';
+			$unit->enhancementOptionsDisabled[] = 'POOR_CREW'; 
+			$unit->enhancementOptionsDisabled[] = 'MAR_CONT';
+			$unit->enhancementOptionsDisabled[] = 'SLUGGISH'; 
+			$unit->enhancementOptionsDisabled[] = 'IMPR_ENG'; 
+			$unit->enhancementOptionsDisabled[] = 'HANG_BP';
+			$unit->enhancementOptionsDisabled[] = 'HANG_MSW';
+			$unit->enhancementOptionsDisabled[] = 'HANG_ORD';									 		
+			break;
+
+		case 'ShadowShip':
+			Enhancements::blockStandardEnhancements($unit);
+			$unit->enhancementOptionsEnabled[] = 'IMPR_SR';
+			$unit->enhancementOptionsEnabled[] = 'SHAD_FTRL';
+			break;
+	  
+		case 'ShadowFighter':
+			Enhancements::blockStandardEnhancements($unit);
+			//$unit->enhancementOptionsEnabled[] = 'SHAD_CTRL';
+			break;	
+
 		case 'Shuttles':
 			Enhancements::blockStandardEnhancements($unit);
 				$unit->enhancementOptionsEnabled[] = 'MAKE_MINE';			
-			break;				
+			break;		
+
+		case 'Terrain':
+			Enhancements::blockStandardEnhancements($unit);
+			break;	
 			
 		case 'ThirdspaceShip':
 			Enhancements::blockStandardEnhancements($unit);

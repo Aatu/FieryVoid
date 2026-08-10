@@ -49,6 +49,9 @@ class HyachTakaltiKal extends OSAT
 
 		$this->addPrimarySystem(new Structure(5, 116));
 
+		//Block some enhancements for OSAT units when bought
+		Enhancements::nonstandardEnhancementSet($this, 'OSAT');
+
 			$this->hitChart = array(
                 0=> array(
 					4 => "Structure",

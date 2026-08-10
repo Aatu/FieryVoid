@@ -34,6 +34,9 @@ class LessaOSAT extends OSAT
 		$this->addFrontSystem(new StdParticleBeam(3, 4, 1, 240, 120));
 
 		$this->addPrimarySystem(new Structure(4, 36));
+
+		//Block some enhancements for OSAT units when bought
+		Enhancements::nonstandardEnhancementSet($this, 'OSAT');
 		
 		
 		

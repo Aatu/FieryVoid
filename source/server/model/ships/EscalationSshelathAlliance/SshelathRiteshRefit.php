@@ -43,6 +43,9 @@ class SshelathRiteshRefit extends OSAT{
         
         $this->addPrimarySystem(new Structure(2, 20));
 
+        //Block some enhancements for OSAT units when bought
+        Enhancements::nonstandardEnhancementSet($this, 'OSAT');
+
 	//d20 hit chart
         $this->hitChart = array(
             0=> array( //PRIMARY
