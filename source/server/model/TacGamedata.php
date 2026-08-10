@@ -979,6 +979,69 @@ class TacGamedata {
         return $notes;
     }
 
+    /* Hangar Ops - deployment-phase dock masking (phase -1 only).
+       A flight (or LCV) a player chooses to START the game inside a carrier is docked the
+       moment THAT player commits their deployment - DeploymentGamePhase::process resolves it
+       immediately, long before the phase advances. The dock marks the flight $removed (which
+       isDestroyed() reports as true) and appends a hangarUsage entry on the carrier, so an
+       opponent who had not committed yet watched the flight vanish off the board, its fleet-list
+       row turn "Docked", and the carrier's hangar fill up: the whole hangar loadout leaked
+       before they had written their own orders. Undo both, for this turn's docks only, for any
+       viewer who does not own the ships - matching the deploy-move rule directly above (which
+       likewise hides a slot's placements from everyone but its owner).
+
+       Keying on the DOCK TURN is what keeps older docks public. Phase -1 is the first phase of
+       a turn, so the only dock that can carry dockedTurn == the current turn at this point is a
+       deploy-start dock submitted in this very phase; a fighter that landed during last turn's
+       Fire Phase carries dockedTurn == turn-1 and is left exactly as it is. The carrier pass runs
+       first and collects the ship ids from the entries it drops, so a unit is only ever un-removed
+       when a this-turn dock record is actually what took it off the board.
+
+       An un-removed flight falls back on its "start" movement row - every ship is given one at its
+       slot's deployment-box centre when the game is created - so it simply sits where every other
+       not-yet-placed enemy ship sits during Deployment and reveals nothing by reappearing. Runs
+       from deleteHiddenData, so the history/replay path ($all) keeps the real docked state. */
+    private function hideDeploymentDocks(){
+        $dockedIds = array();
+
+        foreach ($this->ships as $ship){
+            if ($ship->userid == $this->forPlayer) continue;
+
+            foreach ($ship->systems as $system){
+                if (!($system instanceof Hangar)) continue;
+
+                if (is_array($system->hangarUsage) && !empty($system->hangarUsage)){
+                    $kept = array();
+                    foreach ($system->hangarUsage as $entry){
+                        if (isset($entry['dockedTurn']) && (int)$entry['dockedTurn'] === (int)$this->turn){
+                            //Auto-filled default shuttles carry no dockedTurn, so only real
+                            //docks are ever dropped here.
+                            if (!empty($entry['dockedFlightId'])) $dockedIds[] = (int)$entry['dockedFlightId'];
+                            continue;
+                        }
+                        $kept[] = $entry;
+                    }
+                    $system->hangarUsage = $kept;
+                }
+
+                //LCV rails dock a WHOLE ship; the link snapshot carries its own dock turn.
+                if (!empty($system->isLCVRail) && is_array($system->lcvDocked)
+                    && (int)($system->lcvDocked['dockTurn'] ?? 0) === (int)$this->turn){
+                    if (!empty($system->lcvDocked['shipId'])) $dockedIds[] = (int)$system->lcvDocked['shipId'];
+                    $system->lcvDocked = null;
+                }
+            }
+        }
+
+        foreach ($dockedIds as $id){
+            $unit = $this->getShipById($id);
+            if (!$unit || !$unit->removed) continue;
+            if ($unit->removedTurn !== null && (int)$unit->removedTurn !== (int)$this->turn) continue;
+            $unit->removed = false;
+            $unit->removedTurn = null;
+        }
+    }
+
     private function deleteHiddenData(){
 
         if ($this->phase == -1){
@@ -997,8 +1060,10 @@ class TacGamedata {
                 //keyed from 1..n and json_encode would emit a JSON object, not an array.
                 $ship->movement = array_values($ship->movement);
             }
+
+            $this->hideDeploymentDocks();
         }
-    
+
         if ($this->phase == 1){
             foreach ($this->ships as $ship){
                 if ($ship->userid != $this->forPlayer){
