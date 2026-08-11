@@ -38,6 +38,9 @@ class Hemsar extends OSAT
 
 		$this->addPrimarySystem(new Structure(4, 25));
 
+		//Block some enhancements for OSAT units when bought
+		Enhancements::nonstandardEnhancementSet($this, 'OSAT');
+
 			$this->hitChart = array(
                 0=> array(
                         8 => "Structure",

@@ -745,6 +745,175 @@ the screen to be practical"):**
      correspondingly narrower — `MAP_FIT.portrait` is the one number to walk back.
    Verified: esbuild bundle-resolve (`UI.js` whole tree) + a numeric simulation of
    `applyScreenFit`'s maths. UI.bundle only — needs `yarn build`.
+   - **Follow-up (user, 2026-08-06):** `MAP_FIT.portrait` hand-tuned 1.20 → **1.40** and
+     `LOBBY_FIT.portrait` 1 → **1.2**. At 1.40 a phone-portrait big ship no longer *computes*
+     a fit at all — the boosted floor (`min` 0.40 × 1.40 = **0.56**) is above the width ratio,
+     so the scale IS the floor. Worth knowing before retuning: below ~1.4 the knob moves the
+     fit, above it the knob is the floor.
+
+**Post-Stage-4 improvements round 16 (2026-08-06) — BUILT, awaiting user test
+(UI.bundle only; two user reports):**
+1. **Drag-to-resize grip, bottom-right of every window variant.** Portrait windows were still
+   too small sometimes and "hard to judge the correct size for different users" — so the size
+   became the player's, not a constant. The window cannot reflow (its layout width is fixed
+   section/chrome widths, viewport-independent by round-10 design), so the grip drives the very
+   scale `applyScreenFit` already applies: **`screenFit = autoFit × userScale`**, the two halves
+   kept apart so rotating the device still re-fits around the size the player chose. Clamped
+   once, in `applyScreenFit`, to **0.35–3× (`clampScale`)**.
+   - `ResizeGrip` is the window's last flex child (`align-self: flex-end`, `position: sticky;
+     bottom: 0`) rather than an overlay in the corner: nothing of the datasheet is covered, and
+     it stays visible when the window scrolls internally. CSS-drawn mark (three diagonal rules
+     `clip-path`ed to the corner triangle, no emoji — cf. `ArtIcon`/`StatsIcon`) on `::after`,
+     so the `::before` finger pad (`GRIP_TOUCH_PAD` 6px up/left) is not clipped away with it.
+     Renders in all five variants: grid, compact/terrain, unrevealed mine, game flight, lobby
+     flight.
+   - Both existing engines carry it: `onDragStart` / `onTouchDragStart` decide **once**, from
+     what the press landed on, whether this gesture is a drag or a resize, then everything goes
+     through `moveGesture` / `finishGesture` (`gestureActive()`), so the two can never overlap.
+     Handle contract gains `.shipwindow-resize-grip` beside `.shipwindow-drag-handle`.
+   - **The maths** (`cornerScale`): the scale a bottom-right corner at (dx, dy) from the
+     window's top-left implies, as the least-squares fit of `dx = s·width, dy = s·height` — a
+     uniform scale cannot track both axes, so both get a say in proportion to the window's
+     shape. Applied as a **delta** from the finger's own starting projection, so grabbing the
+     grip off centre (or by its invisible pad) cannot make the window jump. `beginResize`
+     freezes the **painted** geometry into left/top and switches the origin to top-left (adding
+     back `width × (1 − scale)` for a right-docked window, whose box paints exactly that far
+     left of its layout box) — no jump, and no assumption about the containing block, which
+     differs between game.php (initial containing block) and the lobby (fixed overlay).
+   - **The chosen size is one page-level value** (`getUserScale`/`setUserScale`, persisted to
+     `localStorage` under `fv.shipwindow.userScale`, written once on release), not per-window
+     state: the second window would look wrong at a different scale, and the other open window
+     picks the new size up on its next poll render for free. **Double-click / double-tap the
+     grip resets to 100%** — the escape hatch from a window scaled down to nothing.
+   - Simulated: iPhone-13 portrait, 600×700 window — automatic 0.56 (336×392 px), and the grip
+     reaches 0.70 / 0.84 / 1.12 at userScale 1.25 / 1.5 / 2. Corner tracks the finger within a
+     few px until a clamp bites. `MAX_FILL`-based `max-height` keeps visual height ≤ 98% of the
+     screen at any scale (the surplus scrolls internally); **width is deliberately uncapped** —
+     capping it would allow only ~+14% on a phone, which is the complaint, not the fix.
+2. **Touch drag fixed at the root: the window moved at 1/scale the speed of the finger.**
+   The report — "the detection area for dragging seems to sit above the header sometimes,
+   instead of on the header itself" — is what that looks like. `moveDrag` divided the pointer
+   delta by the window scale, but `transform: scale()` is applied **after** layout about an
+   origin that is a corner of the element itself, so that corner maps to itself and the painted
+   box moves exactly as far as `left`/`top` do, at any scale. At a phone's 0.5 the window ran
+   away at **twice** the finger's speed, so a second into the drag the finger sat well above
+   the header it was holding — and only on touch screens, the only place the scale is not 1.
+   Now 1:1 (`getAnchorBelow`/`getButtonLeft` keep their division — there the delta is between
+   two points *inside* the transformed element, which really is scaled).
+   Three supporting fixes, all in the same "the handle is where it looks" family:
+   - **`Header` is `position: sticky; top: 0` (z-index 4).** On a small screen the container is
+     its own scroll box (`overflow-y: auto` + the fitted `max-height`), and a plain header
+     scrolls straight out of it — the only drag handle then sits above the visible area, which
+     is the other reading of the report. Identical rendering on desktop, where the container
+     never scrolls.
+   - **`clampIntoView`** keeps the header row and 40px (`CLAMP_MARGIN`) of a placed window on
+     screen: a window dragged above y=0 could never be grabbed again. Works off the painted
+     rect (right at any scale/origin), only for windows we placed, and does **not** adjust the
+     drag's reference point — so the window sticks at the boundary and picks the finger up again
+     when it comes back, with nothing accumulating.
+   - **`keepGripOnScreen`** pulls an over-large window left far enough to bring its right edge
+     back on screen whenever the scale changes (never during a drag, and never during the
+     resize gesture itself — shifting the window mid-gesture would move the corner out from
+     under the finger and the projection would chase itself). Both ways out of an over-large
+     window — grip and ✕ — live on that edge.
+   - **`TOUCH_DRAG_SLOP` (8 screen px)**: a touch that misses the ~13-visual-px header bar
+     **low** still drags, provided it hit nothing but the ship-click underlay
+     (`.shipwindow-grab-slop`). Everything interactive sits above that underlay and is
+     therefore the event target itself, so the slop can never steal a tap from a button, a
+     section header or a system icon. Measured off the header's own rect in screen px, so it
+     compensates for the scale by construction. Cost: in that thin band a tap no longer opens
+     the ship-level info popup. Set the constant to 0 to switch it off.
+   Verified: esbuild bundle-resolve + vm evaluation of the whole React tree (self-tested
+   ReferenceError detector), styled-components server render of the new `Header`/`ResizeGrip`
+   CSS (`top:-6px`, gradient, clip-path all as intended), and a numeric simulation of the grip
+   maths + `applyScreenFit` (defaults unchanged at userScale 1 on four device sizes).
+   UI.bundle only — needs `yarn build`.
+3. **Refinements, same day (three user requests).**
+   - **The grip's double-click did nothing with a mouse.** Root cause: the window takes
+     **pointer capture on the CONTAINER** at pointerdown, and capture retargets the
+     compatibility mouse events — so `click`/`dblclick` fire on the container, never on the grip
+     inside it (and `preventDefault()` on pointerdown suppresses them outright on some
+     browsers). Fix: both engines **count their own presses** (`notePress`) at the one place
+     they both already run, so mouse and touch share exactly one code path. The React
+     `onDoubleClick` stays as belt-and-braces for the capture-unavailable fallback path;
+     `resetUserScale` is idempotent, so both firing is harmless.
+   - **Double-press the HEADER resets the size too** (user: the bottom-right corner can be out
+     of view). `notePress` is keyed by which handle was pressed, so grip-then-header is not a
+     double press. Both handles now advertise it in a native `title` tooltip.
+   - **Proper double-click semantics, deliberately**: the reset lands on **release**, and only
+     if neither press moved more than `DOUBLE_PRESS_SLOP` (6px) — `moveGesture` cancels a
+     pending reset the moment the pointer really moves. The first cut fired on the second
+     *press*, which swallowed a quick tap-then-drag on the header as a reset.
+     `DOUBLE_PRESS_MS` is **400** — between a comfortable double-tap (~300ms) and Windows'
+     double-click allowance (~500ms); too short is exactly the reported symptom.
+     `clampIntoView` gained a `fullyOnScreen` argument, passed only by the reset, so a window
+     that has just shrunk is not left sitting where `keepGripOnScreen` had pushed it while it
+     was too wide (a drag still allows pushing a window half off the left edge on purpose).
+   - **faq.php** "Hot Keys & Useful Controls" gained a **Ship Window** block (before the
+     Deployment Phase one): drag the title bar to move / drag the corner to resize (remembered
+     for every window and the next session) / double-click either to reset, the automatic
+     phone-and-tablet scaling with its pinned title bar and internal scrolling, the four chrome
+     buttons and Ship Stats' live yellow figures, hover-or-long-press for system details, and
+     click-the-artwork for unit details. `php -l` clean in the container (bind mount).
+
+**Post-Stage-4 improvements round 17 (2026-08-06) — BUILT, awaiting user test
+(UI.bundle + faq.php; two refinements to the round-16 resize grip):**
+1. **The remembered size is now per SIDE, not per page.** User report: resizing the right-hand
+   lobby window and closing it re-sized the *left* one, and opening a right window after
+   enlarging a left one opened it at the left one's size. Round 16 kept one page-level
+   `userScale`, on the reasoning that two windows at different scales look wrong together — but
+   the two sides show different things (own fleet vs enemy in game, the store vs your fleet in
+   the lobby) and are sized for different jobs. `sessionUserScale` is now `{left, right}` and
+   every accessor takes the side: `getUserScale(side)` / `setUserScale(side, value)` /
+   `readUserScale(side)` / `writeUserScale(side, value)`, persisted under
+   **`fv.shipwindow.userScale.left` / `.right`**. `readUserScale` falls back to the pre-split
+   bare key, so a size chosen before this change seeds both sides once instead of silently
+   resetting to 100%.
+   - New `side()` method (`isLeftWindow(ship) ? 'left' : 'right'`) is the single source: the
+     scale, the remembered drag position (`savedWindowPositions`, which open-coded the same
+     expression) and the grip's corner all key off it. Everything a side owns therefore agrees
+     by construction, and a window opening into a side picks that side's size up immediately —
+     the module-level-so-the-other-window-follows property of round 16, now scoped correctly.
+2. **The right-hand window's grip moved to the bottom-LEFT corner, and cannot be dragged past
+   the left edge of the screen.** The grip belongs on the corner that *moves*: a right-docked
+   window is pinned to the right edge and can only grow leftwards, so a bottom-right grip sat
+   on the one corner that stays still — the finger ran into the screen edge while the window
+   expanded out of the far side.
+   - `isMirroredGrip()` = `side() === 'right'`; `ResizeGrip` gained `$mirror`, which flips
+     `align-self` (flex-end→flex-start), the cursor (nwse→nesw), the gradient angle (315°→45°),
+     the `clip-path` triangle (`100% 0,100% 100%,0 100%` → `0 0,0 100%,100% 100%`) and the
+     direction the invisible finger pad reaches — always INTO the window, since the small-screen
+     container clips its overflow and a pad hanging outside would not be hit-testable.
+   - **`beginResize` anchors the corner opposite the grip.** Left-docked is unchanged (freeze
+     into left/top, switch the origin to `top left`, add back `width × (1 − scale)`).
+     Right-docked keeps the `top right` origin it already uses: freezing left/top there pins the
+     layout box, and with a top-right origin the painted right edge *is* the layout right edge,
+     so the window grows out to the left with no jump and nothing to add back. `resizeStart`
+     gained `flipX` (−1 mirrored) so the grip's x runs away from the anchor — dragging left is
+     what grows a right window — and `cornerScale` is fed `flipX × (clientX − originX)` with
+     `originX = rect.right`.
+   - **The left-edge cap** is `maxScale = originX / naturalWidth` (painted left = originX −
+     scale × width ≥ 0), stored at `beginResize` because the right edge is fixed for the whole
+     gesture, and applied in `moveResize` as `clampScale(min(maxScale, …))` — cap first, clamp
+     second, so the 0.35 legibility floor still wins on a screen too narrow for even a minimum
+     window. Left-docked windows keep `Infinity`: their far edge carries the grip *and* the ✕,
+     so `keepGripOnScreen` pans them back instead of refusing to grow.
+   - **`keepGripOnScreen` mirrors too**, and is now the backstop rather than the mechanism: it
+     nudges a window that overflows the edge its *grip* is on (left-docked pulled left off the
+     right, right-docked pushed right off the left) — the right-docked case only reachable when
+     the viewport itself got narrower after the fact (rotation, desktop resize). It never pushes
+     so far that the top-right ✕ leaves the screen: a window wider than the viewport keeps its
+     close button and loses its grip, the safer of the two.
+   - **faq.php** Ship Window block updated: which corner carries the grip and why, that the
+     right-hand window stops at the left edge, and that the two sides remember their sizes
+     separately. `php -l` clean in the container (bind mount).
+   Verified: esbuild bundle-resolve + vm evaluation of the whole React tree (self-tested
+   ReferenceError detector); styled-components server render of the **real** `ResizeGrip`
+   template (sliced out of the source) in both `$mirror` states — no `undefined`/`NaN`, both
+   triangles and pads as intended; numeric simulation of the mirrored grip maths — no jump at
+   rest (scale 1.000 at the resting projection, and with a 5px off-centre grab), left/down
+   grows, right/up shrinks, and the painted left edge lands on exactly 0 at the cap however far
+   the finger runs past it. UI.bundle only — needs `yarn build`.
 
 **Stage 3 (2026-07-17) — COMPLETE (user-accepted after feedback rounds 1–5).** Two user riders (2026-07-17)
 refine §3.2: (1) the Hit Chart button sits in the same top-left position as

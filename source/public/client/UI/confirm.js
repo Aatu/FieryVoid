@@ -321,7 +321,7 @@ window.confirm = {
         if (noTaken < enhLimit) { //increase possible
             var newCount = noTaken + 1;
             target.data("count", newCount);
-            target.html(newCount);
+            confirm.enhShowLevel(target, newCount); //a stepped enhancement shows the quantity, not the level
             var cost = enhPrice + (noTaken * enhPriceStep); //base value, plus additional price charged for further levels
             var newCost = target.data("enhCost") + cost;
             target.data("enhCost", newCost);
@@ -352,7 +352,7 @@ window.confirm = {
         if (noTaken > 0) { //decrease possible
             var newCount = noTaken - 1;
             target.data("count", newCount);
-            target.html(newCount);
+            confirm.enhShowLevel(target, newCount); //a stepped enhancement shows the quantity, not the level
             var cost = enhPrice + (newCount * enhPriceStep); //base value, plus additional price charged for further levels
             var newCost = target.data("enhCost") - cost;
             target.data("enhCost", newCost);
@@ -424,6 +424,65 @@ window.confirm = {
     },
 
 
+    /*STEPPED enhancements - ones whose numberTaken is a quantity in fixed increments rather than a
+      count of things, so the spinner must SHOW the quantity while everything behind it keeps
+      working in levels. Extra Tendrils (SHAD_TEND) is the only one: level 1/2/3 buys 5/10/15
+      absorption capacity, and the player thinks in capacity.
+
+      These three helpers convert between the two and do NOTHING else. In particular they never
+      touch data('count') or data('value') - each handler keeps writing exactly the data keys it
+      always wrote, so the cost maths, the min/max clamps and every read-back loop
+      (confirm.getTotalCost, gamedata.doBuyShip / doBuyBulk / doEditShip, and the server, which
+      stores numbertaken) are untouched. With a step of 1 - every enhancement but Extra Tendrils -
+      they reduce to exactly the expressions they replaced.*/
+    enhDisplaySteps: { 'SHAD_TEND': 5 },
+
+    enhStepOf: function enhStepOf($el) {
+        return parseInt($el.data('displayStep'), 10) || 1;
+    },
+
+    /*The box read back as a LEVEL.*/
+    enhLevelShown: function enhLevelShown($el) {
+        var shown = parseInt($el.text(), 10) || 0;
+        var step = confirm.enhStepOf($el);
+        return (step > 1) ? Math.round(shown / step) : shown;
+    },
+
+    /*Show a LEVEL in the box, as the quantity that level buys.*/
+    enhShowLevel: function enhShowLevel($el, level) {
+        $el.text(level * confirm.enhStepOf($el));
+    },
+
+    /*Mark one spinner's step, from the enhancement's ID. Returns the step so the row label can
+      describe itself in the same units. Typing is switched off on a stepped field: the input
+      handler rewrites the box on every keystroke, so with a step of 5 a half-typed "1" of "10"
+      would snap to "0" and the second digit could never be entered. The +/- buttons and the wheel
+      remain, and a stepped enhancement has only a handful of levels.*/
+    applyEnhancementStep: function applyEnhancementStep($el, enhID) {
+        var step = confirm.enhDisplaySteps[enhID] || 1;
+        if (step > 1) {
+            $el.data('displayStep', step);
+            $el.attr("contenteditable", "false");
+        }
+        return step;
+    },
+
+    /*The "(up to N levels, Xpts ...)" suffix on an enhancement row's label. Shared by the buy,
+      bulk-buy and edit dialogs so they cannot drift. A stepped enhancement is described in the
+      quantity its spinner now shows; everything else keeps the original wording verbatim.*/
+    expandEnhancementName: function expandEnhancementName(enhName, enhLimit, enhPrice, enhPriceStep, enhStep) {
+        var out = enhName + ' (';
+        if (enhStep > 1) {
+            if (enhLimit > 1) out += 'up to ' + (enhLimit * enhStep) + ' capacity, ';
+            out += enhPrice + 'pts per ' + enhStep;
+        } else {
+            if (enhLimit > 1) out += 'up to ' + enhLimit + ' levels, ';
+            out += enhPrice + 'pts';
+            if ((enhPriceStep != 0) && (enhLimit > 1)) out += ' plus ' + enhPriceStep + 'pts per level';
+        }
+        return out + ')';
+    },
+
     // Helper function to select all text on focus
     selectAllTextOnFocus: function () {
         var range = document.createRange();
@@ -436,8 +495,7 @@ window.confirm = {
 
     // Helper function to handle input changes
     handleInputChange: function handleInputChange(e) {
-        var currentText = $(this).text();
-        var value = parseInt(currentText) || 0;
+        var value = confirm.enhLevelShown($(this)); //in LEVELS; identical to parseInt(text) unless stepped
 
         // Get the min and max limits
         var min = $(this).data('min');
@@ -456,7 +514,7 @@ window.confirm = {
         }
 
         // Update the displayed and stored value
-        $(this).text(value);
+        confirm.enhShowLevel($(this), value);
         $(this).data('value', value);
         $(this).data('count', value);
 
@@ -501,7 +559,7 @@ window.confirm = {
     handleMouseWheel: function handleMouseWheel(e) {
         e.preventDefault();
         var increment = (e.originalEvent.deltaY < 0) ? 1 : -1;
-        var value = parseInt($(this).text()) || 0;
+        var value = confirm.enhLevelShown($(this)); //in LEVELS - min/max and the cost maths both are
 
         // Get the min and max limits
         var min = $(this).data('min');
@@ -523,7 +581,7 @@ window.confirm = {
         }
 
         // Update the value and trigger the input change handler
-        $(this).text(value);
+        confirm.enhShowLevel($(this), value);
         $(this).data('value', value);
         $(this).trigger('input'); // Simulate an input change
     },
@@ -836,8 +894,7 @@ window.confirm = {
 
     // Helper function to handle input changes (edit mode)
     handleInputChangeEdit: function handleInputChangeEdit(e) {
-        var currentText = $(this).text();
-        var value = parseInt(currentText) || 0;
+        var value = confirm.enhLevelShown($(this)); //in LEVELS; identical to parseInt(text) unless stepped
         var oldCount = $(this).data('count');
 
         // Get the min and max limits
@@ -857,7 +914,7 @@ window.confirm = {
         }
 
         // Update displayed value
-        $(this).text(value);
+        confirm.enhShowLevel($(this), value);
         $(this).data('value', value);
         $(this).data('count', value);
 
@@ -907,18 +964,41 @@ window.confirm = {
     },
 
 
+    /* The pre-edit state an edit dialog hands to its callback, for two jobs: restoring the
+       row when the edits turn out to be unaffordable, and telling battleDamage what size
+       the payload's ordinals were keyed by BEFORE the edit.
+
+       ⭐ mine/flight/bulkBuy are carried for that second job. battleDamage.ordinalCount is
+       asked the question, and it reads those three - a snapshot without them answers null
+       for every unit, so a flight resized to 3 or a mine bulk cut from 10 to 5 would keep a
+       payload addressing ordinals that no longer exist. */
+    snapshotShip: function snapshotShip(ship) {
+        return {
+            name: ship.name,
+            pointCost: ship.pointCost,
+            flightSize: ship.flightSize,
+            /* ⚠️ Each ROW is copied too, not just the outer array. An enhancementOption is
+               itself an array and the dialog writes the chosen count into its index 2 in
+               place - so a shallow [...] snapshot shares those rows with the live ship and
+               "restore what it was" would hand back the counts it was just changed to. */
+            enhancementOptions: ship.enhancementOptions
+                ? ship.enhancementOptions.map(function (option) {
+                    return Array.isArray(option) ? option.slice() : option;
+                })
+                : [],
+            pointCostEnh: ship.pointCostEnh,
+            pointCostEnh2: ship.pointCostEnh2,
+            mine: ship.mine,
+            flight: ship.flight,
+            bulkBuy: ship.bulkBuy
+        };
+    },
+
     showShipEdit: function showShipEdit(ship, callback) {
         var e = $(this.whtml);
 
         // Store the original ship state before any edits
-        let originalShipData = {
-            name: ship.name,
-            pointCost: ship.pointCost,
-            flightSize: ship.flightSize,
-            enhancementOptions: ship.enhancementOptions ? [...ship.enhancementOptions] : [],
-            pointCostEnh: ship.pointCostEnh,
-            pointCostEnh2: ship.pointCostEnh2
-        };
+        let originalShipData = confirm.snapshotShip(ship);
 
         //variable flightsize
         var variableSize = confirm.getVariableSize(ship);
@@ -937,8 +1017,10 @@ window.confirm = {
             } else $(".totalUnitCostAmount").data("maxSize", 9);
         }
 
-        var pristineBaseShip = gamedata.getShipByType(ship.phpclass);
-        var pointCost = pristineBaseShip ? pristineBaseShip.pointCost : ship.pointCost;
+        //MUST be the bare hull: this dialog totals as base + enhancements. Falling back to
+        //ship.pointCost counted them twice, because doLoadFleet/doBuyShip have already folded them
+        //into it - see gamedata.getPristinePointCost. Unchanged when a blueprint is available.
+        var pointCost = gamedata.getPristinePointCost(ship);
         /*
         if (ship.maxFlightSize==3){ //for single-unit flight cost is for a fighter; for usual 6+ flight, for 6 craft (and 6 craft will be set)
             //but for 3-strong flight cost is still set for 6-strong flight...
@@ -973,7 +1055,11 @@ window.confirm = {
 
             var selectAmountItem = $(".selectAmount", item);
             selectAmountItem.attr("contenteditable", "true"); // Make it editable - DK 12.5.25
-            selectAmountItem.html(enhCount);
+            //Marked before the box is first written - a stepped enhancement shows the quantity its
+            //level buys, and this also switches typing off. Step 1 (everything but Extra Tendrils)
+            //leaves the row exactly as it was.
+            var enhStep = confirm.applyEnhancementStep(selectAmountItem, enhID);
+            confirm.enhShowLevel(selectAmountItem, enhCount);
             selectAmountItem.addClass("shpenh" + i);
             selectAmountItem.data('enhID', enhID);
             selectAmountItem.data('count', enhCount);
@@ -1020,17 +1106,7 @@ window.confirm = {
                 }
             }
 
-            var nameExpanded = enhName;
-            nameExpanded = nameExpanded + ' (';
-            if (enhLimit > 1) nameExpanded += 'up to ' + enhLimit + ' levels, ';
-            nameExpanded += enhPrice + 'pts';
-            //+ ' (up to ' + enhLimit + ' levels, ' + enhPrice + 'PV ';
-            if ((enhPriceStep != 0) && (enhLimit > 1)) {
-                nameExpanded = nameExpanded + ' plus ' + enhPriceStep + 'pts per level';
-            }
-            nameExpanded = nameExpanded + ')';
-
-            $(".selectText", item).html(nameExpanded);
+            $(".selectText", item).html(confirm.expandEnhancementName(enhName, enhLimit, enhPrice, enhPriceStep, enhStep));
             $(item).show();
 
             var plusButton = $(".plusButton", item);
@@ -1117,9 +1193,8 @@ window.confirm = {
 
             selectAmountItem.html(ship.flightSize);
 
-            var pristineBaseShip = gamedata.getShipByType(ship.phpclass);
-            var pristineBaseCost = pristineBaseShip ? pristineBaseShip.pointCost : ship.pointCost;
-            selectAmountItem.data('pV', Math.floor(pristineBaseCost / 6));
+            //per-craft cost of the BARE hull, for the same reason as the total above
+            selectAmountItem.data('pV', Math.floor(gamedata.getPristinePointCost(ship) / 6));
 
 
             selectAmountItem.on("wheel", confirm.handleMouseWheelFighter);
@@ -1219,6 +1294,10 @@ window.confirm = {
             selectAmountItem.data('max', enhLimit);
             selectAmountItem.data('enhPrice', enhPrice);
             selectAmountItem.data('enhPriceStep', enhPriceStep);
+            //Marked here so the row knows its step before any handler reads the box. A stepped
+            //enhancement shows the quantity its level buys (and cannot be typed into); step 1 -
+            //every enhancement but Extra Tendrils - leaves the row exactly as it was.
+            var enhStep = confirm.applyEnhancementStep(selectAmountItem, enhID);
             //selectAmountItem.data('launchers', confirm.getLaunchersPerFighter(ship));
             //selectAmountItem.data("firingMode", i);
 
@@ -1246,17 +1325,7 @@ window.confirm = {
                 }
             }
 
-            var nameExpanded = enhName;
-            nameExpanded = nameExpanded + ' (';
-            if (enhLimit > 1) nameExpanded += 'up to ' + enhLimit + ' levels, ';
-            nameExpanded += enhPrice + 'pts';
-            //+ ' (up to ' + enhLimit + ' levels, ' + enhPrice + 'PV ';
-            if ((enhPriceStep != 0) && (enhLimit > 1)) {
-                nameExpanded = nameExpanded + ' plus ' + enhPriceStep + 'pts per level';
-            }
-            nameExpanded = nameExpanded + ')';
-
-            $(".selectText", item).html(nameExpanded);
+            $(".selectText", item).html(confirm.expandEnhancementName(enhName, enhLimit, enhPrice, enhPriceStep, enhStep));
             $(item).show();
 
             var plusButton = $(".plusButton", item);
@@ -1396,8 +1465,26 @@ window.confirm = {
         a.fadeIn(250);
     },
 
-    showBuyBulk: function showBuyBulk(ship, callback) {
+    /* The bulk purchase dialog - quantity spinner, enhancements applied to every unit in
+       the row, and no name box (a bulk purchase is interchangeable units, named from the
+       ship class and numbered by BuyingGamePhase).
+
+       ONE function serves both BUYING a new bulk row and EDITING one already in the fleet.
+       `existing` is what switches it: falsy for a fresh purchase off a store blueprint,
+       truthy when `ship` is a bought row being re-opened. Deliberately not a second
+       showBulkEdit copy - the two would have to be kept in step over the quantity field,
+       every enhancement widget and the cost plumbing, and this file already carries one
+       stale clone of a handler that drifted that way. */
+    showBuyBulk: function showBuyBulk(ship, callback, existing) {
         var e = $(this.whtml);
+
+        /* ⚠️ MUST be the bare hull when re-opening a bought row: this dialog totals as base
+           + enhancements, and a bought row's pointCost ALREADY has its per-unit enhancements
+           folded in (the one pricing convention behind gamedata.rowPointCost). Feeding it
+           ship.pointCost would charge for them twice, and again on every subsequent edit.
+           Unchanged for a fresh purchase - a store blueprint's cost is pristine by
+           definition, and getPristinePointCost simply reads it back. */
+        var baseCost = existing ? gamedata.getPristinePointCost(ship) : ship.pointCost;
 
         // Added to support Enhancement select recalculations in getTotalCost()
         var totalTemplate = $(".totalUnitCost");
@@ -1405,9 +1492,9 @@ window.confirm = {
 
         $(".totalUnitCostText", totalItem).html("Total Purchase Cost");
         var totalCostAmountSpan = $(".totalUnitCostAmount", totalItem);
-        totalCostAmountSpan.html(ship.pointCost);
-        totalCostAmountSpan.data("value", ship.pointCost);
-        totalCostAmountSpan.data("baseCost", ship.pointCost);
+        totalCostAmountSpan.html(baseCost);
+        totalCostAmountSpan.data("value", baseCost);
+        totalCostAmountSpan.data("baseCost", baseCost);
         totalCostAmountSpan.addClass("totalBulkCostAmount");
         $(totalItem).show();
 
@@ -1421,24 +1508,47 @@ window.confirm = {
             var enhPriceStep = enhancement[5];
             var enhIsOption = enhancement[6];
 
+            //Re-opening a bought row starts from what it already carries; a fresh purchase
+            //starts empty. numberTaken is in LEVELS, which is what every spinner, limit and
+            //cost sum here works in.
+            var enhCount = existing ? (parseInt(enhancement[2], 10) || 0) : 0;
+
+            //The arithmetic series doOnPlusEnhancement/handleInputChange* maintain: level i
+            //(0-based) costs enhPrice + i*enhPriceStep. Seeded here so the running delta
+            //those handlers apply starts from the right place.
+            var initialEnhCost = 0;
+            for (let eCount = 0; eCount < enhCount; eCount++) {
+                initialEnhCost += enhPrice + (eCount * enhPriceStep);
+            }
+
             var template = $(".missileSelectItem");
             var item = template.clone(true).prependTo(e);
 
             var selectAmountItem = $(".selectAmount", item);
 
-            selectAmountItem.html("0");
             selectAmountItem.attr("contenteditable", "true");
             selectAmountItem.addClass("shpenh" + i);
             selectAmountItem.data('enhID', enhID);
-            selectAmountItem.data('count', 0);
-            selectAmountItem.data('enhCost', 0);
+            selectAmountItem.data('count', enhCount);
+            selectAmountItem.data('enhCost', initialEnhCost);
+            if (enhIsOption) {
+                selectAmountItem.data('enhOptionCost', initialEnhCost);
+                selectAmountItem.data('enhIsOption', true);
+            }
             selectAmountItem.data('min', 0);
             selectAmountItem.data('max', enhLimit);
             selectAmountItem.data('enhPrice', enhPrice);
             selectAmountItem.data('enhPriceStep', enhPriceStep);
+            //Marked here so the row knows its step before any handler reads the box. A stepped
+            //enhancement shows the quantity its level buys (and cannot be typed into); step 1 -
+            //every enhancement but Extra Tendrils - leaves the row exactly as it was.
+            var enhStep = confirm.applyEnhancementStep(selectAmountItem, enhID);
+            confirm.enhShowLevel(selectAmountItem, enhCount);
 
             selectAmountItem.on("focus", confirm.selectAllTextOnFocus);
-            selectAmountItem.on("input", confirm.handleInputChange);
+            //The edit handler adjusts by the DELTA from the count already in the box, which is
+            //what a pre-populated row needs; the buy handler recomputes from zero.
+            selectAmountItem.on("input", existing ? confirm.handleInputChangeEdit : confirm.handleInputChange);
             selectAmountItem.on("keydown", confirm.preventNonNumericInput);
             selectAmountItem.on("wheel", confirm.handleMouseWheel);
 
@@ -1454,16 +1564,7 @@ window.confirm = {
                 }
             }
 
-            var nameExpanded = enhName;
-            nameExpanded = nameExpanded + ' (';
-            if (enhLimit > 1) nameExpanded += 'up to ' + enhLimit + ' levels, ';
-            nameExpanded += enhPrice + 'pts';
-            if ((enhPriceStep != 0) && (enhLimit > 1)) {
-                nameExpanded = nameExpanded + ' plus ' + enhPriceStep + 'pts per level';
-            }
-            nameExpanded = nameExpanded + ')';
-
-            $(".selectText", item).html(nameExpanded);
+            $(".selectText", item).html(confirm.expandEnhancementName(enhName, enhLimit, enhPrice, enhPriceStep, enhStep));
             $(item).show();
 
             var plusButton = $(".plusButton", item);
@@ -1485,12 +1586,10 @@ window.confirm = {
         var totalTemplate = $(".totalUnitCost");
         var totalItem = totalTemplate.clone(true).prependTo(e);
 
-        var pointCost = ship.pointCost;
-
         $(".totalUnitCostText", totalItem).html("Cost Per Unit");
         var perUnitAmountSpan = $(".totalUnitCostAmount", totalItem);
-        perUnitAmountSpan.html(pointCost);
-        perUnitAmountSpan.data("value", pointCost);
+        perUnitAmountSpan.html(baseCost);
+        perUnitAmountSpan.data("value", baseCost);
         perUnitAmountSpan.addClass("costPerUnitSpan");
 
         $(totalItem).show();
@@ -1499,7 +1598,12 @@ window.confirm = {
         // Unit Settings Fields
         var html = '<div class="unitSettings">';
         //html += '<div style="margin-bottom: 5px;">Mines will be placed randomly within the player\'s deployment zone boundaries based on the quantity specified. (NOTE: 10% class surcharge added separately to fleet total)</div>';
-        html += '<label>Quantity: <input type="number" id="bulkQuantity" value="1" min="1" style="width: 50px; text-align: center;"></label><br>';
+
+        /* No name box, deliberately - for OSATs as well as mines (user request 2026-08-10).
+           A bulk purchase is interchangeable units, so they are named from the ship class
+           and numbered by BuyingGamePhase: "Gravitic Mine #1", "Sentry #2", ... */
+        var quantity = existing ? (parseInt(ship.bulkBuy, 10) || 1) : 1;
+        html += '<label>Quantity: <input type="number" id="bulkQuantity" value="' + quantity + '" min="1" style="width: 50px; text-align: center;"></label><br>';
         html += '</div>';
 
         var settingsBlock = $(html).prependTo(e);
@@ -1525,7 +1629,7 @@ window.confirm = {
             confirm.getTotalCost();
         });
 
-        $('<label>Configure ' + ship.shipClass + ' Purchase:</label><br>').prependTo(e);
+        $('<label>' + (existing ? 'Edit your ' : 'Configure ') + ship.shipClass + ' Purchase:</label><br>').prependTo(e);
 
         $(".confirmok", e).on("click", function () {
             var q = parseInt($('#bulkQuantity', e).val());
@@ -1537,15 +1641,33 @@ window.confirm = {
             };
 
             var shipclass = $(this).data("shipclass");
-            callback(results, shipclass);
-            $(".confirm").remove();
+            //Read BEFORE the dialog is torn down - the edit callbacks rebuild the row from
+            //these, and doEditShip's habit of reading them off `this` would find nothing.
+            var editShip = $(this).data("ship");
+            var editOriginal = $(this).data("originalShipData");
+
+            /* ⚠️ The CALLBACK removes this dialog, not the handler. It cannot be removed
+               first - readBulkPurchase reads the enhancement spinners straight out of the
+               DOM - and it must not be removed afterwards either: confirm.error and
+               confirm.warning both build `<div class="confirm ...">`, so a trailing
+               $(".confirm").remove() here deleted the message the callback had just put up.
+               That is why an unaffordable bulk purchase used to fail silently. */
+            callback(results, shipclass, editShip, editOriginal);
         });
 
         $(".confirmcancel", e).on("click", function () {
             $(".confirm").remove();
         });
 
+        /* shipclass is what a fresh purchase resolves its blueprint from; `ship` is what an
+           edit rebuilds. BOTH are set on an edit because confirm.getMaxAmmoFit reads either
+           to work out how much (AMMO) fits in the magazine, and a row loaded from a saved
+           fleet may have no blueprint registered for its class at all. */
         $(".confirmok", e).data("shipclass", ship.phpclass);
+        if (existing) {
+            $(".confirmok", e).data("ship", ship);
+            $(".confirmok", e).data("originalShipData", confirm.snapshotShip(ship));
+        }
 
         var a = e.appendTo("body");
         confirm.getTotalCost();
@@ -1617,34 +1739,155 @@ window.confirm = {
     },
     */
 
-    showSaveFleet: function showSaveFleet(callback) {
-        var e = $(this.whtml);
+    /* ── Saved-fleet dialogs ──────────────────────────────────────────────────────────
+       The three fleet windows (save, load, result notice) share the .fleetDialog skin in
+       confirm.css: the games.php window language - dark well, one hairline rule under a
+       spaced uppercase title, left-aligned body, labelled buttons on the bottom right -
+       rather than the 2011 centred-text-plus-icon-buttons look of the other confirms.
+       Deliberately scoped to this family rather than applied to .confirm as a whole:
+       every other dialog on both pages still uses the old skin.
 
-        /*
-        var points = 0;
-        for (var i in gamedata.ships) {
-            var lship = gamedata.ships[i];
-            if (lship.slot != gamedata.selectedSlot) continue;
-            points += lship.pointCost;
+       The buttons keep their .confirmok / .confirmcancel classes (that is what every
+       caller binds to) and take their visible text from data-label, so nothing about the
+       click plumbing changes. */
+    fleetDialogShell: function fleetDialogShell(title, subtitle, bodyHtml, okLabel) {
+        var e = $(confirm.whtml);
+        e.addClass("fleetDialog");
+
+        $('<div class="fleetDialogTitle">' + title + '</div>'
+            + (subtitle ? '<div class="fleetDialogSub">' + subtitle + '</div>' : '')
+            + '<div class="fleetDialogBody">' + (bodyHtml || '') + '</div>').prependTo(e);
+
+        $(".confirmok", e).attr("data-label", okLabel || "OK");
+        $(".confirmcancel", e).attr("data-label", "Cancel");
+
+        return e;
+    },
+
+    /* Result/status message for the saved-fleet flows ("Fleet saved", "Fleet deleted",
+       "…could not be loaded"). Same shell, one button, no cancel. Kept separate from the
+       generic confirm.warning so restyling the fleet family cannot reskin every warning
+       in the game. */
+    fleetNotice: function fleetNotice(msg, title) {
+        var e = confirm.fleetDialogShell(title || "Saved Fleets", "", '<p>' + msg + '</p>', "Close");
+        $(".confirmcancel", e).remove();
+
+        $(".confirmok", e).on("click", function () {
+            e.remove();
+        });
+
+        e.appendTo("body").fadeIn(250);
+    },
+
+    /* Load-a-saved-fleet confirm with the two INDEPENDENT pre-battle-damage toggles
+       (PREBATTLE_DAMAGE_PLAN.md D3). Each box is shown only when the fleet actually
+       carries that kind; `undefined`/`null` means "not known yet" (the load-by-ID path,
+       where the fleet is not in the cached list) and shows it.
+
+       Deliberately NOT built on confirm.confirm: that binds `$(".confirm").remove()`
+       BEFORE the callback, so a callback reading the checkboxes out of the document would
+       find nothing. This follows showSaveFleet's pattern instead - the callback reads its
+       inputs and removes the dialog itself. The callback receives
+       {includeDamage, includeCriticals}. */
+    showLoadFleet: function showLoadFleet(fleetName, opts, callback) {
+        opts = opts || {};
+        var showDamage = (opts.hasDamage === undefined || opts.hasDamage === null) ? true : Boolean(opts.hasDamage);
+        var showCrits = (opts.hasCrits === undefined || opts.hasCrits === null) ? true : Boolean(opts.hasCrits);
+
+        var body = '<p>Load your \'<b>' + fleetName + '</b>\' fleet into the selected slot?</p>';
+        if (showDamage) {
+            body += '<label class="fleetDialogCheck">'
+                + '<input type="checkbox" class="loadFleetDamage" checked>'
+                + '<span>Include saved battle damage</span></label>';
         }
-        */
-        var defaultName = 'Unnamed Fleet';
+        if (showCrits) {
+            body += '<label class="fleetDialogCheck">'
+                + '<input type="checkbox" class="loadFleetCrits" checked>'
+                + '<span>Include saved critical effects</span></label>';
+        }
 
-        // Fleet name input
-        $('<label>Enter Fleet Name:</label><input type="text" style="text-align:center" name="fleetname" value="' + defaultName + '"></input><br>').prependTo(e);
+        var e = confirm.fleetDialogShell(
+            "Load Fleet",
+            (showDamage || showCrits)
+                ? "This fleet carries state from a previous battle. Choose what to bring across."
+                : "",
+            body, "Load");
 
-        // Checkbox for "public" option
-        $('<label style="display:block; margin-top:8px; font-size: 12px"><input type="checkbox" id="fleetPublicCheckbox"> Tick this box to allow others to access this fleet via its ID</label><br>')
-            .insertAfter(e.find("input[name='fleetname']"));
-
-        $(".confirmok", e).on("click", callback);
+        $(".confirmok", e).on("click", function () {
+            //Read BEFORE the dialog is torn down.
+            var choices = {
+                includeDamage: showDamage ? $(".loadFleetDamage", e).is(":checked") : true,
+                includeCriticals: showCrits ? $(".loadFleetCrits", e).is(":checked") : true
+            };
+            $(".confirm").remove();
+            callback(choices);
+        });
         $(".confirmcancel", e).on("click", function () {
-            console.log("remove");
             $(".confirm").remove();
         });
 
         var a = e.appendTo("body");
         a.fadeIn(250);
+    },
+
+    /* opts.offerTransient — show the "temporary critical effects" choice. Only game.php
+       passes it: the lobby has no battle to have produced a one-turn critical, so the box
+       would be an unanswerable question there. */
+    showSaveFleet: function showSaveFleet(callback, opts) {
+        opts = opts || {};
+
+        /* Saving out of a LIVE game names the fleet after the battle and the turn it was
+           taken from - "Second Contact T7" - which is the only thing that tells two saves
+           of the same fleet apart in the dropdown, and is what a campaign wants (user
+           request 2026-08-08). The field is focused and SELECTED below, so typing over it
+           still costs one keystroke. gamedata.name is set by parseServerData; the lobby
+           has no game name of its own, so it keeps the old placeholder. */
+        var defaultName = 'Unnamed Fleet';
+        if (window.gamedata && gamedata.name && gamedata.gamephase !== -2) {
+            defaultName = gamedata.name + ' T' + (gamedata.turn || 0);
+        }
+
+        //The default now comes from user-supplied text (the game name), and this string is
+        //parsed as HTML - so it is escaped into the attribute rather than concatenated raw.
+        var safeName = String(defaultName)
+            .replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+            .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+        var body = '<label class="fleetDialogLabel" for="fleetNameInput">Fleet name</label>'
+            + '<input type="text" id="fleetNameInput" name="fleetname" autocomplete="off"'
+            + ' value="' + safeName + '">'
+            + '<label class="fleetDialogCheck">'
+            + '<input type="checkbox" id="fleetPublicCheckbox">'
+            + '<span>Let other players load this fleet using its ID</span></label>';
+
+        /* Unticked by DEFAULT and deliberately so: a wound is worth carrying into the next
+           battle, a one-turn effect usually is not. Ticked, the kept effects are stamped at
+           turn 1 by the server so they actually bite during the first turn rather than
+           expiring as it begins. Marine/boarding markers are never saved either way - they
+           describe a boarding action in the battle just fought. */
+        if (opts.offerTransient) {
+            body += '<label class="fleetDialogCheck">'
+                + '<input type="checkbox" id="fleetTransientCritsCheckbox">'
+                + '<span>Also save <b>temporary</b> critical effects (one-turn effects).'
+                + '<br>They will be in effect from turn 1 of the next battle.</span></label>';
+        }
+
+        var e = confirm.fleetDialogShell(
+            "Save Fleet",
+            "Stores these units, their enhancements, ammo and any battle damage as a reusable fleet list.",
+            body,
+            "Save");
+
+        $(".confirmok", e).on("click", callback);
+        $(".confirmcancel", e).on("click", function () {
+            $(".confirm").remove();
+        });
+
+        var a = e.appendTo("body");
+        a.fadeIn(250);
+
+        //select the default name so typing over it needs no clearing first
+        $("#fleetNameInput", e).trigger("focus").trigger("select");
     },
 
 

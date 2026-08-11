@@ -2724,7 +2724,8 @@ class RammingAttack extends Weapon{
 
 
 	//Every hex a Terrain unit occupies: its centre hex, plus the extra hexes given by an irregular hexOffsets shape or by a circular Huge radius.
-	private function getTerrainOccupiedHexes($terrain){
+	//Public static so other weapons that need a terrain unit's whole footprint can reuse it (PlanetCrackerBeam sweeps it) - it never touched $this.
+	public static function getTerrainOccupiedHexes($terrain){
 		$terrainPosition = $terrain->getHexPos();
 		$occupiedHexes = array($terrainPosition); //Centre hex is always occupied.
 
@@ -2755,7 +2756,7 @@ class RammingAttack extends Weapon{
 		$finalMove = $ship->getLastTurnMovement($gamedata->turn+1); //last move of THIS turn, ie. where the ship came to rest
 		if(!$finalMove) return false;
 
-		foreach($this->getTerrainOccupiedHexes($terrain) as $hex){
+		foreach(self::getTerrainOccupiedHexes($terrain) as $hex){
 			if($hex->q == $finalMove->position->q && $hex->r == $finalMove->position->r) return false; //Stopped in the terrain - phasing does not save it.
 		}
 
@@ -2769,7 +2770,7 @@ class RammingAttack extends Weapon{
 		
 		if ($thisShip->Huge > 0 || (property_exists($thisShip, 'hexOffsets') && !empty($thisShip->hexOffsets))) {  //Terrain occupies more than just 1 hex!  Need to check all of its hexes.
 			// Terrain logic: Build list of ALL occupied hexes first.
-			$occupiedHexes = $this->getTerrainOccupiedHexes($thisShip);
+			$occupiedHexes = self::getTerrainOccupiedHexes($thisShip);
 
 			foreach ($relevantShips as $ship) {  
 				$startMove = $ship->getLastTurnMovement($gamedata->turn);
@@ -9090,7 +9091,7 @@ class PlanetCrackerBeam extends Weapon{
 
     public $animation = "laser";
     public $animationExplosionScale = 15;   
-	public $animationColor = array(195, 235, 195);
+	public $animationColor = array(216, 192, 42); //yellow
 	//public $noProjectile = true; //Marker for front end to make projectile invisible for weapons that shouldn't have one.  		
 
 	protected $autoHit = true;//To show 100% hit chance in front end.
@@ -9128,37 +9129,120 @@ class PlanetCrackerBeam extends Weapon{
   
 		  $thisShip = $this->getUnit();  	
 						
-		  //Have Second Sight Wave originate from firinf ship's locations.	
+		  //Have the beam originate from the firing ship's own hex.
 		  $targetPos = $thisShip->getHexPos();
 		  $hasFireOrder->x = $targetPos->q;
 		  $hasFireOrder->y = $targetPos->r;
-		  
+
 		  //Correct any errors.
 		  if ($hasFireOrder->targetid != -1) {
 			  $hasFireOrder->targetid = -1; //correct the error
 			  $hasFireOrder->calledid = -1; //just in case
 		  }
-		  
-		  
+
+
 		  $allShips = $gamedata->ships;
 		  $relevantShips = array();
-  
-		  //Make a list of relevant ships e.g. all enemy ships.
+		  $relevantHexes = $this->getBeamHexes($thisShip); //the four hexes in a straight line directly in front of the Planet Killer
+
+		  //Make a list of relevant units - EVERY unit standing in the beam, friend or foe (this thing does not discriminate).
 		  foreach($allShips as $ship){
-			  if($ship->isDestroyed()) continue;					  	  
+			  if($ship === $thisShip) continue; //never itself
+			  if($ship->isDestroyed()) continue;
 			  if ($ship->getTurnDeployed($gamedata) > $gamedata->turn) continue;  //Ignore targets that are not deployed yet!
-			  //Add a location check here, should only target ships in the FOUR hexees DIRECTLY in front of the ship.
-			  //Maybe a helper to get the 4 hexes above, then another helper checking ships location against the 4 hexes, if it matches then add to targets.				  			  	
-			  $relevantShips[] = $ship;	
+			  if (!$this->isUnitInHexes($ship, $relevantHexes)) continue; //only units standing in the swept hexes - a multi-hex Terrain unit counts if ANY of its hexes is swept
+			  $relevantShips[] = $ship;
 		  }
-	  
+
 		  foreach($relevantShips as $target){
-			  
-			//Now target all ships with a new fireOrder		
-  
+
+			//Now target all units with a new fireOrder.
+			//A fighter flight is a single unit holding many fighters, and one order can only ever kill one of them
+			//(FighterFlight::getHitSystem allocates one hit to one fighter) - so declare one CALLED order per living
+			//fighter and the whole flight goes, which is what "destroys any unit in these hexes" has to mean for a flight.
+			if($target instanceof FighterFlight){
+				foreach($target->systems as $fighter){
+					if($fighter == null) continue;
+					if($fighter->isDestroyed()) continue;
+					$this->prepareFiringOrder($thisShip, $target, $fighter->id, $gamedata, $hasFireOrder);
+				}
+			}else{
+				$this->prepareFiringOrder($thisShip, $target, -1, $gamedata, $hasFireOrder);
+			}
+
 		  }
-		  
+
 	  } //endof beforeFiringOrderResolution
+
+
+	/*The hexes the beam sweeps: a straight line of $this->range hexes directly ahead of the ship, starting one hex
+	  out (the firing ship's own hex is never swept). Sized off $this->range so the server sweep and the client's
+	  yellow overlay - which sizes itself off the same number - cannot drift apart.*/
+	private function getBeamHexes($thisShip){
+		$hexes = array();
+		$origin = $thisShip->getHexPos();
+		$facing = $thisShip->getFacingAngle(); //absolute compass bearing, always a multiple of 60
+
+		for($i = 1; $i <= $this->range; $i++){
+			$hexes[] = Mathlib::moveInDirection($origin, $facing, $i);
+		}
+
+		return $hexes;
+	}//endof getBeamHexes()
+
+
+	/*Every hex a unit occupies - one hex for an ordinary ship, the whole footprint for a Terrain unit (irregular
+	  hexOffsets shape, or circular Huge radius). That is what lets a large moon be caught when the beam clips any
+	  part of its area rather than only its centre hex.*/
+	private function getUnitOccupiedHexes($unit){
+		if ($unit->Huge > 0 || (property_exists($unit, 'hexOffsets') && !empty($unit->hexOffsets))) {
+			return RammingAttack::getTerrainOccupiedHexes($unit);
+		}
+
+		return array($unit->getHexPos());
+	}//endof getUnitOccupiedHexes()
+
+
+	//True when any hex the unit occupies is one of the swept hexes.
+	private function isUnitInHexes($unit, $hexes){
+		foreach($this->getUnitOccupiedHexes($unit) as $unitHex){
+			foreach($hexes as $hex){
+				if($hex->q == $unitHex->q && $hex->r == $unitHex->r) return true;
+			}
+		}
+
+		return false;
+	}//endof isUnitInHexes()
+
+
+	/*One damage-dealing order per victim. $calledId names a particular fighter of a flight (-1 for everything else).
+
+	  Persisted IMMEDIATELY rather than left at id -1 with addToDB: damage records copy $fireOrder->id at the moment
+	  damage is dealt, and DBManager::submitDamages back-fills a -1 by querying "same gameid+turn+shooterid+weaponid,
+	  targetid = target OR -1, shotshit > 0" and taking the FIRST row, with no ORDER BY. This weapon always has
+	  several hitting orders under one weapon id (the activation marker plus one per victim), so without a real id
+	  every one of them risks having its damage logged against a sibling.*/
+	private function prepareFiringOrder($shooter, $target, $calledId, $gamedata, $originalFireOrder){
+
+		$newFireOrder = new FireOrder(
+			-1, "normal", $shooter->id, $target->id,
+			$this->id, $calledId, $gamedata->turn, $this->firingMode,
+			100, 0, 1, 0, 0, //needed, rolled, shots, shotshit, intercepted
+			$originalFireOrder->x, $originalFireOrder->y, $this->weaponClass, -1 //X, Y, damageclass, resolutionorder
+		);
+		$newFireOrder->pubnotes = " Caught in the Planet-Cracker Beam.";
+
+		$newFireOrder->addToDB = true;
+		$newId = Manager::insertSingleFiringOrder($gamedata, $newFireOrder);
+		if ($newId) {
+			$newFireOrder->id = (int)$newId;
+		}
+		$newFireOrder->addToDB = false; //already in the DB - stops FireGamePhase inserting a duplicate
+		$newFireOrder->updated = true;  //but DO write back the rolled/notes/shotshit set during resolution
+
+		$this->fireOrders[] = $newFireOrder;
+
+	}//endof function prepareFiringOrder
 
 	public function calculateHitBase($gamedata, $fireOrder)
 		{
@@ -9168,15 +9252,17 @@ class PlanetCrackerBeam extends Weapon{
 
     public function fire($gamedata, $fireOrder)
     {
-		//    $shooter = $gamedata->getShipById($fireOrder->shooterid);        
-	        $rolled = Dice::d(100);
-	        $fireOrder->rolled = $rolled; 
-			//$fireOrder->pubnotes .= "<br> Destroyed by Planet-Cracker Beam.";
-			if($rolled <= $fireOrder->needed){//HIT!
-				$fireOrder->shotshit++;		
-			}else{ //MISS!  Should never happen.
-				$fireOrder->pubnotes .= " MISSED! ";
-			}
+		//The activation order itself carries no target - it only marks the sweep in the combat log.
+		//The per-victim orders built in beforeFiringOrderResolution are what actually deal the damage.
+		if ($fireOrder->targetid == -1) {
+			$fireOrder->needed = 100;
+			$fireOrder->rolled = 0;
+			$fireOrder->shotshit = 0;
+			$fireOrder->pubnotes .= "<br>Planet-Cracker Beam sweeps the four hexes ahead.";
+			return;
+		}
+
+		parent::fire($gamedata, $fireOrder); //auto-hits on needed = 100, then allocates getDamage() as normal
 	}
 	
 	public function setSystemDataWindow($turn){

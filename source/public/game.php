@@ -377,6 +377,8 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     <script defer src="client/movement.js"></script>
     <script defer src="client/criticals.js"></script>
     <script defer src="client/systems.js"></script>
+    <script defer src="client/battleDamage.js"></script>
+    <script defer src="client/savedFleets.js"></script>
 	<script defer src="client/power.js"></script>
     <script defer src="client/UI/shipMovement.js"></script>
     <script defer src="client/UI/infowindow.js"></script>
@@ -744,7 +746,10 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
         </div>
         <div id="declarationsTab" data-select="#declarations" class="logUiEntry" style = "overflow-y: auto;"> <!-- fire and EW declarations review -->
             <span>DECLARATIONS</span>
-        </div>	    
+        </div>
+        <div id="fleetSaveTab" data-select="#fleetsave" class="logUiEntry"> <!-- save this game's fleet for reuse -->
+            <span>SAVE FLEET</span>
+        </div>
         <div id="chatTab" data-select="#chat" class="logUiEntry">
             <span>GAME CHAT</span>
         </div>
@@ -775,7 +780,21 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 	    include("declarations.php");
 	?>
     </div>
-    
+
+    <!-- Save Current Fleet (PREBATTLE_DAMAGE_PLAN.md §7.3). Colours come from
+         styles/tokens.css only - no new :root block. -->
+    <div id="fleetsave" class="logPanelEntry" style="display:none;">
+        <div id="fleetSavePanel">
+            <p>
+                Saves your surviving ships, their enhancements, ammo, and their current battle
+                damage and critical effects as a reusable fleet list. Load it from the game
+                lobby to continue a campaign.
+            </p>
+            <p id="fleetSaveSummary"></p>
+            <input type="button" id="fleetSaveButton" value="Save Current Fleet">
+        </div>
+    </div>
+
     <div id="chat" class="logPanelEntry" style="display:none;">
         <?php 
             $chatgameid = $gameid;

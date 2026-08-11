@@ -40,6 +40,10 @@ window.ShipIcon = function () {
         this.BDEWSprite = null;
         this.MDEWSprite = null;
         this.shipHexagonSpritesMap = new Map();
+        //Declared-area overlays (see showDeclaredArea), keyed by SYSTEM ID rather than by the system
+        //object: a gamedata poll rebuilds every ship and its systems, so an object key would go stale
+        //each poll and leak the old mesh while a duplicate was drawn over it.
+        this.declaredAreas = new Map();
         this.NotMovedSprite = null;
 
         this.selected = false;
@@ -774,13 +778,21 @@ window.ShipIcon = function () {
         if (!maxHexes || !arcsList.length) return; //no reach, or nothing to bear with
 
         var loops = buildHexRegion(Math.min(maxHexes, MAX_ARC_HEXES), hexDistance, function (x, y) {
-            /* The ship's own hex is in arc whatever the arcs say. A target sharing your hex is at
-               range 0, which is inside every weapon's reach, and its bearing is genuinely undefined
-               - the game itself falls back to the previous turn's positions to get an arc out of it
-               (mathlib.getCompassHeadingOfShip), and ballistics ignore arc at range 0 outright. The
-               old pie wedge covered the centre too, so keeping it leaves the display unchanged where
-               the player is used to it. */
-            if (x === 0 && y === 0) return true;
+            /* The ship's own hex is left OUT of the fill - deliberately, and NOT because it is out of
+               arc. By the rules it is in arc for every weapon on the ship: a target sharing your hex
+               is at range 0, inside every weapon's reach, and its bearing is genuinely undefined (the
+               game falls back to the previous turn's positions to get an arc out of it -
+               mathlib.getCompassHeadingOfShip - and ballistics ignore arc at range 0 outright).
+
+               That is exactly what made it worth dropping. Filling identically for every system
+               hovered, it told the player nothing, and it did so right on top of the icons - and a
+               hex holding two or three stacked ships is precisely where you are trying to read which
+               way the arcs point. Where the arc wraps round the centre it now reads as an unfilled
+               hex outlined in the arc's own colour (buildRegionFill punches the hole, the outline
+               traces it), so it is still legibly part of the region.
+
+               The declared-area overlay keeps ITS centre hex - see DECLARED_AREA_SHAPES. */
+            if (x === 0 && y === 0) return false;
 
             var bearing = bearingFromOrigin(x, y);
 
@@ -830,53 +842,89 @@ window.ShipIcon = function () {
     var INTERCEPT_ARC_FILL_OPACITY = 0.05; //barely a tint - the hex-edged firing arc underneath has to stay the thing you read first
     var INTERCEPT_ARC_BORDER_OPACITY = 0.6; //the dotting already lightens the edge, so the dots themselves stay crisp
 
-    var INTERCEPT_LABEL_TEXTURE = null;
+    /* ---- Wedge labels -----------------------------------------------------------------------
+       Off-white, on the same reasoning as INTERCEPT_ARC_COLOUR: no wedge fill on the map is
+       neutral, so a neutral word can never be mistaken for part of one. The structure wedge is
+       green and the intercept wedge is off-white, and the same lettering reads on both. */
+    var ARC_LABEL_COLOUR = 'rgba(240, 237, 228)';
+    var ARC_LABEL_FONT = 'bold 30px "Trebuchet MS", Helvetica, Arial, sans-serif';
+    var ARC_LABEL_CANVAS_HEIGHT = 64;   //the plane's height maps onto this, so it sets the glyph scale
+    var ARC_LABEL_PADDING = 8;          //room for the 6-wide stroke, so no glyph is clipped at the edge
+    var ARC_LABEL_PLACEMENT = 0.72;     //how far out along the arc's mid-bearing the word sits
 
-    /* "INTERCEPT" as a texture, drawn once on first use and shared by every wedge afterwards (only
-       one system's arcs are on screen at a time, but the icons rebuild their overlays on every
-       hover). Kept out of disposeOverlay's way by the fact that Material.dispose() doesn't touch
-       textures - the same reason the shared thruster icon survives.
+    var ARC_LABEL_TEXTURES = {};
+
+    /* A word as a texture, drawn once on first use and shared by every wedge that asks for it
+       afterwards (only one system's arcs are on screen at a time, but the icons rebuild their
+       overlays on every hover, and a section label is wanted on every hull the player hovers).
+       Kept out of disposeOverlay's way by the fact that Material.dispose() doesn't touch textures -
+       the same reason the shared thruster icon survives. The cache is bounded by the number of
+       distinct words: INTERCEPT plus the nine section names.
+
+       The canvas is fitted to the WORD rather than being a fixed 256 wide, so a short label
+       ("Aft") is drawn at the same glyph size as a long one ("INTERCEPT") instead of shrinking to
+       fit the same plane. Its aspect ratio goes back with the texture, which is what lets
+       buildArcLabel size the plane from a height alone.
 
        The word is stroked in near-black before it is filled, so it stays legible where it crosses a
        bright ship sprite or the fill of the arc underneath. */
-    function getInterceptLabelTexture() {
-        if (INTERCEPT_LABEL_TEXTURE) return INTERCEPT_LABEL_TEXTURE;
+    function getArcLabelTexture(text) {
+        if (ARC_LABEL_TEXTURES[text]) return ARC_LABEL_TEXTURES[text];
 
         var canvas = document.createElement('canvas');
-        canvas.width = 256;
-        canvas.height = 64;
-
         var context = canvas.getContext('2d');
-        context.font = 'bold 30px "Trebuchet MS", Helvetica, Arial, sans-serif';
+
+        //Measured before the resize and set up again after it: assigning width or height RESETS
+        //every bit of 2D context state, the font included.
+        context.font = ARC_LABEL_FONT;
+        canvas.width = Math.ceil(context.measureText(text).width) + ARC_LABEL_PADDING * 2;
+        canvas.height = ARC_LABEL_CANVAS_HEIGHT;
+
+        context.font = ARC_LABEL_FONT;
         context.textAlign = 'center';
         context.textBaseline = 'middle';
         context.lineJoin = 'round';
         context.lineWidth = 6;
         context.strokeStyle = 'rgba(0,12,20,0.9)';
-        context.strokeText('INTERCEPT', 128, 34);
-        context.fillStyle = INTERCEPT_ARC_COLOUR;
-        context.fillText('INTERCEPT', 128, 34);
+        context.strokeText(text, canvas.width / 2, 34);
+        context.fillStyle = ARC_LABEL_COLOUR;
+        context.fillText(text, canvas.width / 2, 34);
 
-        INTERCEPT_LABEL_TEXTURE = new THREE.CanvasTexture(canvas);
-        INTERCEPT_LABEL_TEXTURE.colorSpace = THREE.SRGBColorSpace;
+        var texture = new THREE.CanvasTexture(canvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
 
-        return INTERCEPT_LABEL_TEXTURE;
+        ARC_LABEL_TEXTURES[text] = { texture: texture, aspect: canvas.width / canvas.height };
+
+        return ARC_LABEL_TEXTURES[text];
+    }
+
+    /* The tallest a label can be drawn and still sit inside its own wedge. At the placement radius
+       a wedge is 2 x r x tan(half its angle) across, and a long word on a narrow section (an
+       eight-section base's quarter arcs) would otherwise hang out over both edges. Past 120 degrees
+       the wedge is wider than it is deep and the constraint stops meaning anything, hence the cap -
+       which also keeps tan() away from the vertical. The 0.9 leaves a margin off the edges. */
+    function fitArcLabel(height, aspect, radius, arcLength) {
+        var halfAngle = Math.min(arcLength, 120) / 2;
+        var available = 2 * radius * ARC_LABEL_PLACEMENT * Math.tan(mathlib.degreeToRadian(halfAngle)) * 0.9;
+
+        return height * aspect > available ? available / aspect : height;
     }
 
     /* The wedge's label, in the CircleGeometry's own local frame - where the wedge is built centred
        on +X, so sitting the label on that axis puts it on the arc's mid-bearing whatever the arc is.
-       Sized and placed as fractions of the radius: at 0.72 of the way out a 60 degree wedge is 2 x
-       0.72r x tan(30) wide, comfortably more than the 0.42r the word takes, so it stays inside its
-       own wedge. The 256x64 texture is 4:1, and so is the plane. */
-    function buildArcLabel(texture, radius) {
-        var label = new THREE.Mesh(
-            new THREE.PlaneGeometry(radius * 0.42, radius * 0.105),
-            new THREE.MeshBasicMaterial({ map: texture, transparent: true, opacity: 0.85 })
+       Placed as a fraction of the radius; sized from `height` (defaulting to the same 0.105r the
+       intercept label has always used) and the texture's own aspect, so the plane hugs the word. */
+    function buildArcLabel(label, radius, height) {
+        if (height === undefined) height = radius * 0.105;
+
+        var mesh = new THREE.Mesh(
+            new THREE.PlaneGeometry(height * label.aspect, height),
+            new THREE.MeshBasicMaterial({ map: label.texture, transparent: true, opacity: 0.85 })
         );
 
-        label.position.set(radius * 0.72, 0, 0.02); //clear of both the fill and the outline at 0.01
+        mesh.position.set(radius * ARC_LABEL_PLACEMENT, 0, 0.02); //clear of both the fill and the outline at 0.01
 
-        return label;
+        return mesh;
     }
 
     /* The smooth pie wedge every weapon arc used to be. Now only the BEARING-based overlays use it,
@@ -885,8 +933,9 @@ window.ShipIcon = function () {
        contrast with the hex-edged ranged arcs carries meaning. See showWeaponArc.
 
        dis is in game units and arcs is ship-frame. options carries the trimmings - fillOpacity,
-       borderColour, dashedBorder, labelTexture - and left out entirely gives the plain half-opaque
-       wedge outlined solid in its own colour, which is what a shield was before any of this. */
+       borderColour, dashedBorder, label (a getArcLabelTexture entry) - and left out entirely gives
+       the plain half-opaque wedge outlined solid in its own colour, which is what a shield was
+       before any of this. */
     ShipIcon.prototype.showCircularArc = function (dis, arcs, colour, options) {
         options = options || {};
 
@@ -920,8 +969,8 @@ window.ShipIcon = function () {
             options.borderOpacity
         ));
 
-        if (options.labelTexture) {
-            var label = buildArcLabel(options.labelTexture, dis);
+        if (options.label) {
+            var label = buildArcLabel(options.label, dis);
             //Counter-rotated out of the wedge's own rotation so the word reads upright however the
             //ship is pointing - safe because the map camera never rotates. Its POSITION still turns
             //with the parent, which is what keeps it on the mid-bearing.
@@ -979,7 +1028,7 @@ window.ShipIcon = function () {
                     //Labelled individually rather than once for the pair: the wedges of a split mount
                     //are on opposite sides of the hull, so an unlabelled one has nothing near it to
                     //explain what it is.
-                    labelTexture: getInterceptLabelTexture()
+                    label: getArcLabelTexture('INTERCEPT')
                 }
             );
 
@@ -1410,6 +1459,78 @@ window.ShipIcon = function () {
     };
 
 
+    /* What a section's wedge calls itself: the ship window's SECTION_NAMES word for word (see
+       reactJs/shipWindow/ShipSection.js) - MIRROR, EDIT BOTH. The wedge is raised by hovering the
+       section's health bar, so the map has to answer in the same words the bar does; a wedge
+       reading "Stbd Fwd" against a bar reading "Starboard Forward" would leave the player matching
+       up two vocabularies for no reason. Long names cost nothing here - buildArcLabel sizes the
+       plane to the word and fitArcLabel shrinks whatever will not fit its wedge.
+
+       Location 0 is PRIMARY, which showStructureArc only draws at all for the smallest hulls -
+       everything bigger takes primary hits from every facing and gets no wedge. 5 is the
+       structure-less placeholder section (the window gives it an empty name), and anything
+       unrecognised falls through to no label rather than to a wrong one: the wedge itself is still
+       worth drawing.
+
+       Not the last word on a quarter section - getSideStructureLabel below collapses one to its
+       plain side name on the hulls where that is what it really is, exactly as the window's
+       nameOverride does. */
+    var STRUCTURE_ARC_LABELS = {
+        0: 'Primary',
+        1: 'Forward',
+        2: 'Aft',
+        3: 'Port',
+        4: 'Starboard',
+        31: 'Port Fwd',
+        32: 'Port Aft',
+        41: 'Stbd Fwd',
+        42: 'Stbd Aft'
+    };
+
+    /* Sides whose quarter sections can collapse into one name, mid location FIRST - see
+       getSideStructureLabel. */
+    var STRUCTURE_SIDES = [
+        { locations: [3, 31, 32], label: 'Port' },
+        { locations: [4, 41, 42], label: 'Starboard' }
+    ];
+
+    /* MIRROR OF getSectionNameOverrides in reactJs/shipWindow/ShipWindow.js - EDIT BOTH.
+
+       A hull can use both quarter sections on a side purely to place systems while carrying only
+       ONE structure between them, and then there is no fore/aft distinction to draw: the section
+       is simply that side. Vorlon capitals are the case in point - VorlonCapitalShip::getLocations
+       puts the port structure in 32 and gives it the arc 210-330, the WHOLE port side, with 31 a
+       structureless weapons shelf that cannot be hit at all. Its wedge is a full 120 degree side,
+       so calling it "Port Aft" would misdescribe both the bar it feeds and the shape on screen.
+
+       A structure already sitting in the mid location (3/4) reads "Port"/"Starboard" from the table
+       anyway, hence the "not the first entry" test - the same reason the window's version compares
+       against side.locations[0].
+
+       hideInShipWindow is honoured so the count can never disagree with the window's; no structure
+       actually sets it, but the two rules are only worth mirroring if they mirror exactly. */
+    function getSideStructureLabel(ship, structure) {
+        var side = null;
+
+        STRUCTURE_SIDES.forEach(function (candidate) {
+            if (candidate.locations.indexOf(Number(structure.location)) > 0) side = candidate;
+        });
+
+        if (!side || !ship.systems) return null;
+
+        var withStructure = side.locations.filter(function (location) {
+            return ship.systems.some(function (system) {
+                return system.location == location && system.name === 'structure' && !system.hideInShipWindow;
+            });
+        });
+
+        return withStructure.length === 1 ? side.label : null;
+    }
+
+    function getStructureArcLabel(ship, structure) {
+        return getSideStructureLabel(ship, structure) || STRUCTURE_ARC_LABELS[structure.location] || null;
+    }
+
     /* Structure arc indicator (STRUCTURE_ARCS_PLAN.md). Hovering / long-pressing a section's
        structure health bar in the ship window draws that section's facing coverage on the icon,
        the sibling of showWeaponArc. The arcs are the ones getLocations() uses to allocate
@@ -1449,6 +1570,30 @@ window.ShipIcon = function () {
         //a world-unit border would vanish when zoomed out on a wedge this small. Added as a CHILD
         //so it inherits the wedge's rotation/position (and its removal).
         circle.add(buildArcOutline(dis, thetaStart, thetaLength, color));
+
+        /* The section's name across the wedge, the way the intercept envelope names itself - and
+           for the same reason. A wedge on its own says "damage from here", but not into WHICH bar,
+           and on an eight-section base the quarter arcs are neighbours a player has no way to tell
+           apart by shape. Named from the section rather than from the bearing on purpose: a ROLLED
+           ship's port wedge is drawn on the starboard side (getArcs applies the flip), and it is
+           still the Port bar it feeds - which is exactly what the label has to say.
+
+           Sized in HEXES rather than as a fraction of the wedge, so a corvette's label and a
+           dreadnought's read the same size on the map instead of scaling with the hull; the fit
+           keeps it inside a narrow section. hexDistance * 0.18 is the intercept label's own height
+           (0.105 x its 150 radius), so the two match wherever they appear together. */
+        var label = getStructureArcLabel(ship, structure);
+
+        if (label) {
+            var labelTexture = getArcLabelTexture(label);
+            var labelMesh = buildArcLabel(labelTexture, dis,
+                fitArcLabel(hexDistance * 0.18, labelTexture.aspect, dis, arcLength));
+
+            //upright however the ship is pointing - see showCircularArc's label
+            labelMesh.rotation.z = -circle.rotation.z;
+            circle.add(labelMesh);
+        }
+
         //Grid-locked with the weapon arcs. This one is the odd case: a structure has no range, so the
         //radius is arbitrary (roughly the icon's own size) rather than a count of hexes. It is held
         //fixed anyway so a section wedge and a weapon wedge - routinely on screen together - stay in
@@ -1759,6 +1904,166 @@ window.ShipIcon = function () {
         //the target's hex rather than on its sprite
         addGridLockedOverlay(this.mesh, hexagon, anchor.offset);
         this.shipHexagonSpritesMap.set(system, hexagon);
+    };
+
+    /* ---- Declared-area overlay -------------------------------------------------------------------
+       The hexes a weapon has COMMITTED to, drawn on its own ship's icon and left up until the order
+       is withdrawn. A different question from the arcs above, so it gets a different answer: an arc
+       says "where COULD this shoot" and lives only while the system is hovered; this says "where IS
+       this shot going", in its own colour, for as long as the order stands.
+
+       Any weapon on your own side can raise one - it declares a shape from its own client class
+       (Weapon.getDeclaredArea) and PhaseStrategy.syncDeclaredAreas keeps the picture in step with its
+       fire orders. The shape is the only thing that varies between weapons, so it is the only thing a
+       caller has to name:
+
+         'forward'  the straight line of hexes off the nose   - Planet-Cracker Beam
+         'arc'      the weapon's own wedge, out to its reach  - any ordinary directional mount
+         'radius'   every hex within reach, arc ignored       - an omnidirectional / area effect
+
+       'arc' and 'radius' include the ship's OWN hex; 'forward' does not, because a beam fired down
+       the ship's nose cannot hit the hex it is fired from.
+
+       Everything else in the spec is optional and defaults to what the weapon itself says (see
+       resolveDeclaredArea) or, for the outline strength, to what the shape says - so opting a weapon
+       in is usually one line: `return { shape: 'arc' };`.
+
+       Built in the icon's LOCAL frame like the firing arcs - axial `a` steps along local direction 0
+       and the finished mesh is turned to the ship's facing, so 'forward' is the line off the nose and
+       'arc' is the weapon's wedge, whichever way the ship is pointing. */
+    var DECLARED_AREA_COLOUR = 0xd8c02a;        //yellow: reads as a declared kill zone, not as one more cobalt arc
+    var DECLARED_AREA_FILL_OPACITY = 0.35;
+
+    /* `directional` says whether turning the ship changes the region, and so whether the facing
+       belongs in the rebuild signature: a combat pivot must re-aim a 'forward' line or an 'arc'
+       wedge, while a 'radius' is symmetric under the 60 degree steps a facing takes and would only
+       be rebuilt for nothing.
+
+       `borderOpacity` is the shape's DEFAULT outline strength, which a spec can override. It belongs
+       to the shape rather than being one shared number because how hard an outline reads depends on
+       how much of it there is: a four-hex line wants a solid edge to be findable at all, while the
+       perimeter of a forty-hex blanket at the same strength is a bright ring around the whole map
+       - and the fainter the fill, the more the outline is all you see. */
+    var DECLARED_AREA_SHAPES = {
+        forward: {
+            directional: true,
+            borderOpacity: 0.8,
+            //starts one hex out - the firing ship's own hex is never a declared target
+            accept: function (spec) {
+                return function (x, y, a, b) { return b === 0 && a >= 1; };
+            }
+        },
+        arc: {
+            directional: true,
+            borderOpacity: 0.3,
+            accept: function (spec) {
+                //The ship's own hex counts, whatever the arc says - a unit sharing your hex is at
+                //range 0, inside every reach, and its bearing is genuinely undefined.
+                //
+                //The hovered arcs (showRangeArc) deliberately do the OPPOSITE and leave their centre
+                //hex clear, so don't "fix" one to match the other: they answer different questions. A
+                //hover arc is a transient legibility aid, and a centre that fills the same way for
+                //every system on the ship earns nothing while covering the stacked icons underneath.
+                //A declared area names a shot that has actually been committed, and a unit in the
+                //firing ship's own hex is a legal target of it - so it stays in the region.
+                return function (x, y, a, b) {
+                    if (a === 0 && b === 0) return true;
+
+                    return mathlib.isInArc(bearingFromOrigin(x, y), spec.arcs.start, spec.arcs.end);
+                };
+            }
+        },
+        radius: {
+            directional: false,
+            borderOpacity: 0.3,
+            //everything in reach, centre hex included
+            accept: function (spec) {
+                return function () { return true; };
+            }
+        }
+    };
+
+    /* A caller's spec filled out with the weapon's own numbers, plus a signature that says whether an
+       overlay already on screen is still the right one. Returns null when there is nothing to draw.
+
+       The signature is what makes the sync cheap AND live: syncDeclaredAreas runs on every gamedata
+       poll and every SystemDataChanged, so rebuilding blindly would churn geometry constantly, while
+       never rebuilding would leave a stale overlay behind a combat pivot (which turns the ship, and so
+       turns 'forward' and 'arc' with it) or behind an arc narrowed by a jamming critical. */
+    ShipIcon.prototype.resolveDeclaredArea = function (system, spec) {
+        var shape = spec ? DECLARED_AREA_SHAPES[spec.shape] : null;
+        if (!shape) return null;
+
+        //Only the 'arc' shape reads the arcs, so only it pays for getArcs - and a system that somehow
+        //has none still gets a usable pair rather than throwing on .start below.
+        var arcs = spec.arcs;
+        if (arcs === undefined && spec.shape === 'arc') arcs = shipManager.systems.getArcs(this.ship, system);
+        if (!arcs) arcs = { start: 0, end: 0 }; //start === end - isInArc reads that as the full circle
+
+        var resolved = {
+            shape: spec.shape,
+            hexes: spec.hexes === undefined ? getWeaponReachInHexes(system) : spec.hexes,
+            arcs: arcs,
+            //null as well as undefined falls back - getAnimationColourCss returns null for a weapon
+            //that declares no animation colour, and THREE.Color(null) is not a colour
+            colour: (spec.color === undefined || spec.color === null) ? DECLARED_AREA_COLOUR : spec.color,
+            opacity: (spec.opacity === undefined || spec.opacity === null) ? DECLARED_AREA_FILL_OPACITY : spec.opacity,
+            borderOpacity: (spec.borderOpacity === undefined || spec.borderOpacity === null) ? shape.borderOpacity : spec.borderOpacity,
+            //rounded: getFacing() reads the sprite's rotation back out of radians, and mid-animation it
+            //is between facings - see showTargetedHexagonInArc for the same round trip
+            facing: shape.directional ? Math.round(this.getFacing()) : 0
+        };
+
+        resolved.hexes = Math.floor(resolved.hexes);
+        if (isNaN(resolved.hexes) || resolved.hexes < 1) return null; //no reach - nothing to show
+        resolved.hexes = Math.min(resolved.hexes, MAX_ARC_HEXES); //a nominal range of 100 is "no limit" dressed up as a number
+
+        resolved.signature = [resolved.shape, resolved.hexes, resolved.arcs.start, resolved.arcs.end,
+            resolved.colour, resolved.opacity, resolved.borderOpacity, resolved.facing].join('|');
+
+        return resolved;
+    };
+
+    ShipIcon.prototype.showDeclaredArea = function (system, spec) {
+        var resolved = this.resolveDeclaredArea(system, spec);
+
+        if (!resolved) {
+            this.removeDeclaredArea(system);
+            return;
+        }
+
+        var existing = this.declaredAreas.get(system.id);
+        if (existing && existing.signature === resolved.signature) return; //already up, and still correct
+
+        this.removeDeclaredArea(system);
+
+        var loops = buildHexRegion(resolved.hexes, window.coordinateConverter.getHexDistance(),
+            DECLARED_AREA_SHAPES[resolved.shape].accept(resolved));
+
+        if (!loops.length) return;
+
+        //border in the same colour, at the shape's own strength (see DECLARED_AREA_SHAPES)
+        var colour = new THREE.Color(resolved.colour);
+        var overlay = buildRegionOverlay(loops, colour, resolved.opacity, colour, resolved.borderOpacity);
+
+        //Turned to the ship only for the shapes that mean something relative to it. A 'radius' is
+        //not one of them, and rotating it would be actively wrong mid-animation, when getFacing()
+        //reads back a part-way angle that is not a multiple of 60 and so would tilt the region off
+        //the grid.
+        if (DECLARED_AREA_SHAPES[resolved.shape].directional) overlay.rotation.z = mathlib.degreeToRadian(this.getFacing());
+
+        //measured in hexes, so grid-locked and anchored on the hex rather than on the sprite
+        addGridLockedOverlay(this.mesh, overlay, getHexAnchor(this).offset);
+        this.declaredAreas.set(system.id, { mesh: overlay, signature: resolved.signature });
+    };
+
+    ShipIcon.prototype.removeDeclaredArea = function (system) {
+        var existing = this.declaredAreas.get(system.id);
+        if (!existing) return;
+
+        this.mesh.remove(existing.mesh);
+        disposeOverlay(existing.mesh);
+        this.declaredAreas.delete(system.id);
     };
 
     ShipIcon.prototype.removeTargetedHexagonInArc = function (system) {

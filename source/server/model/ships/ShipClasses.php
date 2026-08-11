@@ -68,6 +68,27 @@ class BaseShip {
 	public $isCombatUnit = true; //is this a combat unit (as opposed to non-combat - transport, freighter, civilian, explorer, diplomatic ship, yacht...)
     public $bulkBuy = 1; //Variable to track mass purchases in Fleet Selection.
 
+	/* ⭐ THE OUTER-STRUCTURE-RING RULE (Vree saucers). On most hulls a Structure block IS
+	   the compartment its systems sit in, so losing the block takes the systems with it
+	   (ShipSystem::isDestroyed's cascade). On a Vree saucer the blocks are an outer RING
+	   around a disc whose systems are elsewhere, so a breached block does NOT destroy the
+	   systems shown in it - which is why a Xill that lost both Port structures kept firing
+	   its Port Antiproton Guns on the tabletop but not here (user report, game 4285).
+
+	   Set it on the HULL, not on 30 systems one at a time: addSystem below stamps
+	   ShipSystem::$survivesStructureDestruction on everything the hull mounts, so it is
+	   baked into the blueprint and therefore into the static ship bundle
+	   (ShipCompactor::annotateSystems), the crit-catalogue endpoint's `ssd`, the lobby's
+	   damage preview and every live ship, from ONE line per hull class.
+
+	   PROTECTED on purpose: this must not become a public ship property, or it rides every
+	   ship of every gamedata poll for the ~1% of hulls that set it. Nothing on the client
+	   needs the hull-level flag - the per-system one already has two delivery routes.
+
+	   Structures themselves are skipped: a Structure's own destruction rule is the
+	   PRIMARY-structure test in isDestroyed, and this flag has nothing to say about it. */
+	protected $systemsSurviveStructureLoss = false;
+
 	//non-combat ships cannot be taken in pickup battles by standard tourtnament rules
 	//rule of thumb is that if it has cargo bays, then it's not a combat ship - but it's far from proof
 	//eg. Pak'ma'ra and Orieni capital ships (combat ones) do have cargo bays, while eg. Emperor's transport or Grey Sharlin (non-combat ships) do not
@@ -107,6 +128,23 @@ class BaseShip {
 	public $chameleonWeaponMap = null;
 
     public $canvasSize = 200;
+
+	//Guard for Enhancements::addEnhancementSystems - the enhancement-mounted systems (Extra
+	//Tendrils) must be built exactly once per ship object. One request can load gamedata more than
+	//once (advanceGameState, then the phase's own load), and a second pass would mount a second
+	//pair. Transient, per object, never persisted.
+	public $enhancementSystemsAdded = false;
+
+	//Pre-battle damage & fleet damage persistence (PREBATTLE_DAMAGE_PLAN.md).
+	//Compact wire-format payload: {sys:{<systemid>:{d,k,c}}, ftr:{<ordinal>:{d,k,c}}}.
+	//See PreBattleDamage for the format and all of its rules.
+	//INVARIANT: read by BuyingGamePhase::process ONLY. Every other phase ignores the
+	//field, so a client cannot inject damage mid-game by POSTing it in, say, Movement.
+	public $preBattleDamage = array();
+	//Display-only companion set by Manager::loadSavedFleet: {damage:bool, criticals:bool}
+	//describing what the SAVED FLEET carried, as opposed to what the player chose to
+	//load. Never submitted - construcGamedata must not copy it.
+	public $preBattleAvailable = null;
 
     public $outerSections = array(); //for determining hit locations in GUI: loc, min, max, call (loc is location id, min/max is for arc, call is true if location systems can be called)
    
@@ -2038,6 +2076,11 @@ class BaseShip {
 
 		if ($system instanceof Structure){
 			$this->structures[$loc] = $system->id;
+		} else if ($this->systemsSurviveStructureLoss){
+			//Outer-structure-ring hull (Vree saucers): a breached block does not take its
+			//systems with it. See $systemsSurviveStructureLoss above. Stamped here, at
+			//construction, so it reaches the static bundle and the catalogue for free.
+			$system->setSurvivesStructureDestruction(true);
 		}
 
 		//Structure arc indicator (STRUCTURE_ARCS_PLAN.md): Structures fall THROUGH to the same
@@ -2115,7 +2158,18 @@ class BaseShip {
         protected function addRightSystem($system){
             $this->addSystem($system, 4);
         }
-		
+
+		/*The single legitimate way to mount a system AFTER the hull's constructor has run - used
+		  only by Enhancements::addEnhancementSystems (Extra Tendrils), which is documented there.
+		  A named public method rather than making addSystem() public, so this exception stays
+		  greppable and obvious: everything else must build its systems in the constructor.
+
+		  Safe only because addSystem() APPENDS - ids are array indices, so every system already on
+		  the hull keeps the id its stored damage, power and fire orders refer to.*/
+		public function addEnhancementSystem($system, $loc){
+			$this->addSystem($system, $loc);
+		}
+
 		/* fill notes with information contained in various attributes, not so readily accessible to player*/
 		public function notesFill($sampleFighter = null){
 			//if (TacGamedata::$currentTurn >= 1){ //in later turns notes will be displayed from pre-compiled cache! no point generating them every time
@@ -2708,18 +2762,56 @@ class BaseShip {
 
 
 
+    /* Two units in one hex have no real bearing on each other, so mathlib::getCompassHeadingOfShip
+       fakes one from direction of travel: it stands the unit back in the hex it came from and takes
+       the bearing from there. Forced Pre-Firing movement - Gravitic Mine pull, Gravity Net,
+       Transverse Drive, Warp Jump - appends a 'prefire' order that teleports the unit AFTER movement
+       is done, and a plain walk back then answers with the hex it was DRAGGED out of instead of the
+       hex it flew in from. That rotates the bearing by the drag angle and drops the target out of
+       arc even though a drag moves everything in the hex together and changes nothing between them.
+       So walk back from where movement itself left the unit, then slide that answer along the drag
+       vector - a rigid translation, which is what a drag actually is. Note the translation is
+       essential and not just tidiness: pairing a pre-drag origin with a post-drag destination is
+       wrong by the drag angle, a whole hex facing. hexCoToPixel is affine over cube coordinates, so
+       shifting the pixel pair is exactly shifting hexes and row parity looks after itself.
+       Undragged units take the original path below, unchanged.
+       Client twin: movement.js getPreviousLocation - keep the two in step. */
     public function getPreviousCoPos(){
         $pos = $this->getCoPos();
 
+        //Where the unit's own movement left it, ignoring any forced Pre-Firing shift.
+        $movedPos = null;
         for ($i = sizeof($this->movement)-1; $i>=0; $i--){
-            $move = $this->movement[$i];
-            $pPos = $move->getCoPos();
-
-            if ( $pPos["x"] != $pos["x"] || $pPos["y"] != $pos["y"])
-                return $pPos;
+            if ($this->movement[$i]->type == "prefire") continue;
+            $movedPos = $this->movement[$i]->getCoPos();
+            break;
         }
 
-        return $pos;
+        $dragged = ($movedPos !== null) && ($movedPos["x"] != $pos["x"] || $movedPos["y"] != $pos["y"]);
+        $anchor = $dragged ? $movedPos : $pos;
+
+        for ($i = sizeof($this->movement)-1; $i>=0; $i--){
+            $move = $this->movement[$i];
+            if ($dragged && $move->type == "prefire") continue;
+            //'start' is the off-board pre-deployment marker (x=+-30), not a position the unit was
+            //ever really at - the same row getLastTurnMovement skips, and real only for generated
+            //Terrain. It matters only on the dragged path: there the walk-back is anchored to the
+            //PRE-drag hex, so a unit that never left its deploy hex (mine, OSAT, base) matches every
+            //row and would otherwise run off the end of its history and answer with the marker.
+            if ($dragged && $move->type == "start" && $this->userid !== -5) continue;
+            $pPos = $move->getCoPos();
+
+            if ( $pPos["x"] != $anchor["x"] || $pPos["y"] != $anchor["y"]){
+                if (!$dragged) return $pPos;
+                return array("x" => $pPos["x"] + ($pos["x"] - $movedPos["x"]),
+                             "y" => $pPos["y"] + ($pos["y"] - $movedPos["y"]));
+            }
+        }
+
+        //Nothing to walk back to. A dragged unit that never moved under its own power (mine, OSAT,
+        //base) has no direction of travel, so the drag is the only motion there is: answer with the
+        //hex it was dragged out of, which is also what the old code did. Undragged, $pos as before.
+        return $dragged ? $movedPos : $pos;
     }
 
     public function getEWbyType($type, $turn, $target = null){
@@ -2967,7 +3059,25 @@ public function getAllEWExceptDEW($turn){
 	public function isTerrain(){
         //If any of these conditions is true, indicates Terrain.
         if($this instanceof Terrain || $this->userid == -5 || $this->shipSizeClass == 5) return true;
-		return false; 
+		return false;
+	}
+
+	/* ⭐ Is this unit BOUGHT IN BULK - ONE lobby row carrying bulkBuy = N, minted into N
+	   separate ships by BuyingGamePhase::process? Mines always have been; OSATs joined
+	   them (user request 2026-08-10).
+
+	   THE MIRROR: gamedata.isBulkRow() in gamelobby.js answers the same question on the
+	   client. The two must agree - the lobby decides which buy dialog a store entry gets
+	   and how the fleet row is priced, this side decides whether a saved fleet's `bulkbuy`
+	   column is honoured and whether the minted copies are numbered. Edit both or neither.
+
+	   ⚠️ `osat` is not only the ship-shaped OSAT hull: MicroSAT extends SuperHeavyFighter
+	   extends FighterFlight and sets osat = true. It is a FLIGHT with a flight size the
+	   bulk dialog cannot express, so flights are excluded - EXCEPT the flight-shaped mines
+	   (MineClass), which have been bulk-bought all along. */
+	public function isBulkBought(){
+		if ($this->mine) return true;
+		return $this->osat && !($this instanceof FighterFlight);
 	}
 
     public function getTurnDeployed($gamedata){
@@ -4562,7 +4672,12 @@ class VorlonCapitalShip extends SixSidedShip{
 class VreeCapital extends SixSidedShip{
 
     protected $VreeHitLocations = true; //Value to indicate that all gunfire from the same ship may not hit same side on Vree capital ships
-    
+
+    //Vree saucer: the six "Outer Structure" blocks are a RING, not the compartments the
+    //systems live in, so a breached block does not destroy what is shown in it.
+    //See $systemsSurviveStructureLoss on BaseShip.
+    protected $systemsSurviveStructureLoss = true;
+
     public function getLocations(){
         //debug::log("getLocations");         
         $locs = array();
@@ -4580,9 +4695,12 @@ class VreeCapital extends SixSidedShip{
 
 
 class VreeHCV extends HeavyCombatVessel{
- 
+
     protected $VreeHitLocations = true; //Value to indicate that all gunfire from the same ship may not hit same side on Vree capital ships
-        
+
+    //Same outer-structure ring as the capitals — see VreeCapital above.
+    protected $systemsSurviveStructureLoss = true;
+
     public $shipSizeClass = 2;
         
 } //end of VreeHCV

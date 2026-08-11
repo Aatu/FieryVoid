@@ -1,5 +1,5 @@
 <?php
-class VorlonPlanetKiller extends VorlonCapitalShip{
+class VorlonPlanetKiller extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
@@ -11,9 +11,10 @@ class VorlonPlanetKiller extends VorlonCapitalShip{
         $this->imagePath = "img/ships/VorlonPlanetKiller.png";
         $this->canvasSize = 550;
 	    $this->isd = 'Ancient';
-        $this->shipSizeClass = 4; 
+        $this->shipSizeClass = 3; 
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
-		$this->variantOf = "NONE";
+		$this->Enormous = true;
+		//$this->variantOf = "NONE";
 				
         $this->gravitic = true;
 		$this->advancedArmor = true;   
@@ -27,6 +28,7 @@ class VorlonPlanetKiller extends VorlonCapitalShip{
         $this->rollcost = 99;
         $this->pivotcost = 99;
 		$this->iniativebonus = -10 *5;
+		$this->notes = "Only to be used in specific scenarios, not for normal battles";
         
 		/*Vorlons use their own enhancement set */		
 		Enhancements::nonstandardEnhancementSet($this, 'VorlonShip');

@@ -64,6 +64,15 @@ window.combatLog = {
         var count = 0;
         var ship = gamedata.getShip(orders[0].shooterid);
         var target = gamedata.getShip(orders[0].targetid);
+
+        // The terrain's own return damage from a collision is bookkeeping rather than an attack -
+        // see weaponManager.isTerrainReturnDamage. The replay path already filters it out before it
+        // reaches an animation or a log entry; this catches the PRINTED log, which reads fire orders
+        // straight from replay.php and so never passes through that filter.
+        if (orders.every(function (fire) { return weaponManager.isTerrainReturnDamage(fire); })) {
+            return null;
+        }
+
         var shots = 0;
         var shotshit = 0;
         var shotsintercepted = 0;
@@ -236,9 +245,18 @@ window.combatLog = {
         if (notes) notestext = '<span class="pubotes">' + notes + '</span>';
 
         var shortText = false;
-        if (weaponManager.doShortLogText(fire)) shortText = true;
+        if (weaponManager.doShortLogText(fire, ship)) shortText = true;
 
-        //Some orders don't need the full log text, e.g. Reactor overload, hyperspace jump.    
+        // A crash into a fighter flight is split server-side into one fire order per fighter, but
+        // only the first carries the "COLLISION!" pubnotes and DBManager::submitDamages hangs every
+        // fighter's damage off that same first order. In short form the rest have nothing left to
+        // say, so drop them rather than print a bare "FIRE: <terrain>" line. The replay path calls
+        // this one group at a time, so it is that path these empties would otherwise show up in.
+        if (shortText && !notes && damages.length === 0 && fire.damageclass === "TerrainCrash") {
+            return null;
+        }
+
+        //Some orders don't need the full log text, e.g. Reactor overload, hyperspace jump.
         if (shortText) {
             html += notestext;
         } else {

@@ -1,5 +1,6 @@
 import * as React from "react";
 import styled from "styled-components"
+import { canApplyPreBattleDamage } from "./SystemInfoButtons";
 
 const HealthBar = styled.div`
     position: absolute;
@@ -185,10 +186,15 @@ class SystemIcon extends React.Component {
         let { system, ship } = this.props;
         system = shipManager.systems.initializeSystem(system);
 
-        if (gamedata.waiting || gamedata.replay) return;
+        //The lobby sets waiting:true, which is what keeps it read-only. Pre-battle damage
+        //(gamephase -2, own bought ship) is the one authoring action allowed there.
+        const preBattleDamage = canApplyPreBattleDamage(ship, system);
+
+        if ((gamedata.waiting || gamedata.replay) && !preBattleDamage) return;
 
         //clickableWhenDestroyed: a destroyed Kirishiac Orbital can still be recovered (docked) for regeneration, so its menu must stay reachable
-        if (shipManager.isDestroyed(ship) || (shipManager.isDestroyed(ship, system) && !system.clickableWhenDestroyed) /*|| shipManager.isAdrift(ship)*/) return;//should work with disabled ship after all!
+        //preBattleDamage also passes: you must be able to UN-destroy what you just destroyed.
+        if (!preBattleDamage && (shipManager.isDestroyed(ship) || (shipManager.isDestroyed(ship, system) && !system.clickableWhenDestroyed)) /*|| shipManager.isAdrift(ship)*/) return;//should work with disabled ship after all!
 
         //New block to allow called shots on allied ships
         if (gamedata.rules && gamedata.rules.friendlyFire === 1) {
@@ -421,8 +427,14 @@ class SystemIcon extends React.Component {
         */
 
         //clickableWhenDestroyed systems (Kirishiac Orbital) keep the interactive render - a
-        //destroyed orbital can still be recovered (docked) for regeneration
-        if ((getDestroyed(ship, system) || destroyed) && !system.clickableWhenDestroyed) {
+        //destroyed orbital can still be recovered (docked) for regeneration.
+        //PRE-BATTLE DAMAGE keeps it too: clickSystem already lets that case through its
+        //destroyed bail so you can UN-destroy what you just destroyed, but this earlier
+        //return dropped onClick entirely, so the click never reached it and a system
+        //destroyed in the lobby could not be taken back (user report 2026-08-08).
+        if ((getDestroyed(ship, system) || destroyed)
+            && !system.clickableWhenDestroyed
+            && !canApplyPreBattleDamage(ship, system)) {
             return (
                 <System $background={getBackgroundImage(system)} $destroyed $mirror={mirror}><HealthBar $health="0" /></System>
             )
@@ -455,7 +467,11 @@ class SystemIcon extends React.Component {
                 $orderPending={hasPendingDockOrder(system)}
             >
                 <SystemText>{getText(ship, system)}</SystemText>
-                {(!fighter || hasCriticals(system)) && <HealthBar $scs={scs} $health={getStructureLeft(ship, system)} $criticals={hasCriticals(system)} $criticalsBenign={hasOnlyHangarOps(system)} $docked={hasDockedHealthbar(system)} />}
+                {/*A destroyed system shows an EMPTY bar, matching the non-interactive
+                   render above. It cannot just read getStructureLeft: a system destroyed
+                   by the STRUCTURE CASCADE (its block is gone, or the lobby preview said
+                   so) carries no damage of its own, so the bar would draw full.*/}
+                {(!fighter || hasCriticals(system)) && <HealthBar $scs={scs} $health={(getDestroyed(ship, system) || destroyed) ? 0 : getStructureLeft(ship, system)} $criticals={hasCriticals(system)} $criticalsBenign={hasOnlyHangarOps(system)} $docked={hasDockedHealthbar(system)} />}
             </System>
         )
     }

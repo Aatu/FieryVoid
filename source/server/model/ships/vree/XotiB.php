@@ -40,6 +40,9 @@ class XotiB extends OSAT
 
 		$this->addPrimarySystem(new Structure(4, 33));
 
+		//Block some enhancements for OSAT units when bought
+		Enhancements::nonstandardEnhancementSet($this, 'OSAT');
+
 			$this->hitChart = array(//Vree OSATs actually do NOT use "Weapon" tag on hit chart!
                 0=> array(
                         9 => "Structure",

@@ -1,6 +1,7 @@
 import * as React from "react";
 import styled from "styled-components"
 import SystemIcon from "../system/SystemIcon"
+import { canApplyPreBattleDamage, canApplyMineDamage } from "../system/SystemInfoButtons"
 import theme from "../styled/theme";
 
 /*SCS-style section panel (SHIPWINDOW_REDESIGN_PLAN.md Stage 1a): dotted panel with a
@@ -81,6 +82,9 @@ const SectionHeader = styled.div`
     background-color: black;
     border-bottom: 1px solid ${theme.colors.healthOk};
     overflow: hidden;
+    /*lobby pre-battle damage: the bar is the only way to reach a section's Structure,
+      which has no icon of its own in the grid*/
+    ${props => props.$damageable ? 'cursor: pointer;' : ''}
 
     /*structure health fill - the header line doubles as the section's health bar*/
     &::before {
@@ -149,6 +153,7 @@ class ShipSection extends React.Component {
         super(props);
         this.longPressTimer = null;
         this.touchActive = false;
+        this.ignoreNextClick = false; //set by a completed long-press, consumed by its ghost click
         this.arcShown = false; //so only a section that actually raised a wedge asks for the sweep
         this.onStructureMouseOver = this.onStructureMouseOver.bind(this);
         this.onStructureMouseOut = this.onStructureMouseOut.bind(this);
@@ -156,6 +161,44 @@ class ShipSection extends React.Component {
         this.onStructureTouchMove = this.onStructureTouchMove.bind(this);
         this.onStructureTouchEnd = this.onStructureTouchEnd.bind(this);
         this.onStructureTouchCancel = this.onStructureTouchCancel.bind(this);
+        this.onStructureClick = this.onStructureClick.bind(this);
+    }
+
+    /*Pre-battle damage (PREBATTLE_DAMAGE_PLAN.md §5.2): a section's Structure is deliberately
+      filtered OUT of the icon grid (filterStructure) - the health bar IS its icon - so the bar
+      is the only place a player can click to damage it. Relays the ordinary SystemClicked
+      event with the Structure system, so the lobby's existing handler opens the same
+      ApplyDamageMenu every other system uses, and destroying it runs battleDamage's mirror of
+      ShipSystem::isDestroyed's cascade over the section.
+      Gated on canApplyPreBattleDamage, so game.php is untouched: the bar has never been
+      clickable there and nothing else listens for a SystemClicked carrying a Structure.*/
+    onStructureClick(event) {
+        const { ship, systems } = this.props;
+        const structure = getStructure(systems);
+
+        if (this.ignoreNextClick) {
+            this.ignoreNextClick = false;
+            return;
+        }
+
+        //A bought MINE has no per-system menu: only its structure can take damage, and a
+        //bulk purchase carries one number per copy, so the bar opens the per-copy editor.
+        if (canApplyMineDamage(ship)) {
+            event.stopPropagation();
+            this.hideStructureArc();
+            window.uiEvents.relay('MineDamageClicked', {
+                ship: ship, element: event.currentTarget
+            });
+            return;
+        }
+
+        if (!structure || !canApplyPreBattleDamage(ship, structure)) return;
+
+        event.stopPropagation();
+        this.hideStructureArc();
+        window.uiEvents.relay('SystemClicked', {
+            ship: ship, system: structure, element: event.currentTarget, showMenu: true
+        });
     }
 
     componentWillUnmount() {
@@ -230,6 +273,9 @@ class ShipSection extends React.Component {
             clearTimeout(this.longPressTimer);
             this.longPressTimer = null;
         } else {
+            //the hold DID complete, so this touch was "show me the arc", not "damage this
+            //section" - swallow the click the browser synthesises after touchend
+            this.ignoreNextClick = true;
             this.hideStructureArc();
         }
 
@@ -252,7 +298,16 @@ class ShipSection extends React.Component {
         const { ship, systems, location, displayLocation, area, valign, justify, wide, isTerrain, minHeight, nameOverride, hidden } = this.props;
 
         const structure = getStructure(systems);
-        const health = structure ? getStructureLeft(ship, structure) : 0;
+        /*A bought bulk mine draws ONE window for N mines, and that window is MINE 1 - the
+          same convention a flight's fighter card follows. Its pre-battle damage lives per
+          copy in the payload rather than on the shared blueprint system, so the bar has to
+          read it from there or a damaged purchase would show a full structure bar.*/
+        const mineDamage = canApplyMineDamage(ship);
+        const mineLeft = mineDamage ? battleDamage.mineHealth(ship, 1) : 0;
+        const mineMax = mineDamage ? battleDamage.mineMaxHealth(ship) : 0;
+
+        const health = mineDamage ? (mineLeft / mineMax) * 100
+            : (structure ? getStructureLeft(ship, structure) : 0);
         const orderLocation = displayLocation !== undefined ? displayLocation : location;
         //rolled ship: this section is drawn on the opposite side - flip the icon art
         //horizontally so weapon/thruster facings match the drawn side
@@ -266,6 +321,8 @@ class ShipSection extends React.Component {
                 {structure && <SectionHeader
                     $health={health}
                     $criticals={hasCriticals(structure)}
+                    $damageable={canApplyPreBattleDamage(ship, structure) || canApplyMineDamage(ship)}
+                    onClick={this.onStructureClick}
                     onMouseOver={this.onStructureMouseOver}
                     onMouseOut={this.onStructureMouseOut}
                     onTouchStart={this.onStructureTouchStart}
@@ -274,7 +331,7 @@ class ShipSection extends React.Component {
                     onTouchCancel={this.onStructureTouchCancel}>
                     <SectionName>{nameOverride || SECTION_NAMES[location] || ""}</SectionName>
                     <StructureText $destroyed={health === 0}>
-                        {structure.maxhealth - damageManager.getDamage(ship, structure)}/{structure.maxhealth} A{shipManager.systems.getArmour(ship, structure)}
+                        {mineDamage ? mineLeft : structure.maxhealth - damageManager.getDamage(ship, structure)}/{mineDamage ? mineMax : structure.maxhealth} A{shipManager.systems.getArmour(ship, structure)}
                     </StructureText>
                 </SectionHeader>}
                 <IconArea>

@@ -125,8 +125,16 @@ class ShipCompactor
      */
     public static function compactShip(array $ship): array
     {
+        /* preBattleDamage / preBattleAvailable are pre-battle-damage state that only ever
+           exists on a ship the player has BOUGHT (the lobby authors it, the buy POST carries
+           it, loadSavedFleet fills it). On a blueprint they are always array()/null.
+           Dropping them is not only 40-odd bytes x 2,554 ships: `array()` encodes as the
+           JSON ARRAY [], and an array that later gets `sys`/`ftr` hung off it in the browser
+           STRINGIFIES BACK AS [] - which is exactly how every authored point of pre-battle
+           damage was lost on submit (fixed on the client side too, in battleDamage.get). */
         $serverOnlyShipKeys = ['chameleonDisguiseClass','chameleonBlueprint','chameleonDisguisedForViewer',
-                               'chameleonPhantom','chameleonIsPhantom','chameleonWeaponMap'];
+                               'chameleonPhantom','chameleonIsPhantom','chameleonWeaponMap',
+                               'preBattleDamage','preBattleAvailable'];
         foreach ($serverOnlyShipKeys as $key) {
             unset($ship[$key]);
         }
@@ -150,7 +158,48 @@ class ShipCompactor
     public static function compactShipObject($ship)
     {
         $arr = json_decode(json_encode($ship, JSON_PARTIAL_OUTPUT_ON_ERROR | JSON_UNESCAPED_UNICODE), true);
-        return is_array($arr) ? self::compactShip($arr) : $ship;
+        if (!is_array($arr)) return $ship;
+
+        self::annotateSystems($ship->systems, $arr['systems']);
+        return self::compactShip($arr);
+    }
+
+    /**
+     * Copy PROTECTED system flags the client needs onto the decoded blueprint.
+     *
+     * json_encode is what drops protected properties, which is normally exactly right — but
+     * a handful of them are rules the CLIENT has to reproduce, and the blueprint is the only
+     * place it can learn them. The alternative (making the property public) is a trap this
+     * codebase has hit before: a launcher's missileArray entries are raw weapon objects that
+     * are json_encoded WHOLE rather than through ShipSystem::stripForJson, so a public flag
+     * lands on every ammo entry of every live gamedata poll — see the comments on
+     * $alwaysHideFireOrders / $hideFireOrdersFromEnemies in weapon.php. Reading it through an
+     * accessor HERE keeps it to the static blueprint, which is the only consumer.
+     *
+     * Only survivesStructureDestruction so far, and only written when TRUE: the gamelobby's
+     * pre-battle damage preview mirrors ShipSystem::isDestroyed's structure cascade itself
+     * (battleDamage.cascadeStructure), and a shield projection must not go dark there when
+     * its section's structure is destroyed.
+     *
+     * Walks $decoded by the keys of $systems: json_encode preserves an array's keys, so the
+     * two are the same shape all the way down, nested flight subsystems included.
+     */
+    private static function annotateSystems($systems, array &$decoded)
+    {
+        if (!is_array($systems)) return;
+
+        foreach ($systems as $key => $system) {
+            if (!is_object($system) || !isset($decoded[$key]) || !is_array($decoded[$key])) continue;
+
+            if (method_exists($system, 'getSurvivesStructureDestruction')
+                && $system->getSurvivesStructureDestruction()) {
+                $decoded[$key]['survivesStructureDestruction'] = true;
+            }
+
+            if (!empty($system->systems) && !empty($decoded[$key]['systems'])) {
+                self::annotateSystems($system->systems, $decoded[$key]['systems']);
+            }
+        }
     }
 
     /**

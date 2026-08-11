@@ -7,7 +7,7 @@ class Consortium extends MindriderHCV{
 		$this->pointCost = 2125;
 		$this->faction = "Mindriders";
         $this->phpclass = "Consortium";
-        $this->imagePath = "img/ships/MindriderConsortium.png";
+        $this->imagePath = "img/ships/MindriderConsortium1.png";
         $this->shipClass = "Consortium";
         $this->shipSizeClass = 2;
 	    $this->isd = 'Ancient';

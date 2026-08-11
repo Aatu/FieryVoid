@@ -1236,3 +1236,177 @@
     background-color: #9e5a5a;
     box-shadow: 0 0 8px rgba(189, 128, 128, 0.55);
 }
+/* ── Saved-fleet dialogs ──────────────────────────────────────────────────────────────
+ * Save Fleet / Load Fleet / the fleet result notice, built by confirm.fleetDialogShell.
+ *
+ * These are the one dialog family that belongs to the games.php world rather than to the
+ * tactical map: they are library management, not orders. So they take that page's window
+ * language - dark well, a spaced uppercase title over one hairline rule, a left-aligned
+ * body, and labelled buttons on the bottom right - instead of the 2011 centred-text plus
+ * 30px ok.png/cancel.png icons every other .confirm still uses. Deliberately scoped to
+ * .fleetDialog: nothing else on either page changes.
+ *
+ * Everything paints from tokens.css. NOT --fv-display (Orbitron): that face is @imported
+ * by gamesNew.css, which gamelobby.php links and game.php does not - and Save Current
+ * Fleet runs on BOTH. Uppercase + letter-spacing in the inherited face gives the same
+ * masthead read on both pages with no third-party font fetch on the game screen.
+ *
+ * Placed last in the file on purpose: .confirm.fleetDialog and .confirm.warning have
+ * equal specificity, so source order is what lets the fleet notice override the warning
+ * skin it is built on. */
+/* No `display` here on purpose: .confirm is display:none and every dialog is revealed by
+   its own fadeIn(), so setting it would make these three appear un-faded and out of step
+   with the rest. */
+.confirm.fleetDialog {
+    width: 420px;
+    padding: 0;
+    text-align: left;
+    font-size: 13px;
+    background-color: var(--fv-well);
+    border: 2px solid var(--fv-line-scs);
+    color: var(--fv-text);
+}
+
+.confirm.fleetDialog .fleetDialogTitle {
+    padding: 13px 18px 3px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1.6px;
+    text-transform: uppercase;
+    color: var(--fv-text);
+}
+
+.confirm.fleetDialog .fleetDialogSub {
+    padding: 0 18px 12px;
+    font-size: 12.5px;
+    line-height: 1.45;
+    color: var(--fv-text-dim);
+}
+
+/* The rule sits under whichever of title/subtitle is last, so it is on the body rather
+   than on the subtitle - a notice with no subtitle still gets it. */
+.confirm.fleetDialog .fleetDialogBody {
+    padding: 14px 18px 4px;
+    border-top: 1px solid var(--fv-rule);
+}
+
+.confirm.fleetDialog .fleetDialogBody p {
+    margin: 0 0 4px;
+    line-height: 1.5;
+}
+
+.confirm.fleetDialog .fleetDialogLabel {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 12px;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--fv-text-dim);
+}
+
+.confirm.fleetDialog input[type="text"] {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 6px 8px;
+    background: #000;
+    color: var(--fv-text-bright);
+    border: 1px solid var(--fv-line-scs);
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+}
+
+.confirm.fleetDialog input[type="text"]:focus {
+    outline: 1px solid var(--fv-accent);
+    outline-offset: -1px;
+}
+
+.confirm.fleetDialog .fleetDialogCheck {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 11px;
+    font-size: 12.5px;
+    line-height: 1.4;
+    color: var(--fv-text-dim);
+    cursor: pointer;
+}
+
+.confirm.fleetDialog .fleetDialogCheck input[type="checkbox"] {
+    flex: 0 0 auto;
+    margin: 1px 0 0;
+}
+
+.confirm.fleetDialog .fleetDialogCheck:hover {
+    color: var(--fv-text);
+}
+
+/* Button row. The buttons keep their .confirmok/.confirmcancel classes so every existing
+   click binding still finds them; only the paint changes, and the label comes from the
+   data-label attribute confirm.fleetDialogShell sets. */
+.confirm.fleetDialog .ui {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin: 0;
+    padding: 14px 18px 16px;
+}
+
+.confirm.fleetDialog .ui .confirmok,
+.confirm.fleetDialog .ui .confirmcancel {
+    position: static;
+    width: auto;
+    min-width: 92px;
+    height: 28px;
+    padding: 0 16px;
+    background-image: none;
+    background-color: var(--fv-card);
+    border: 1px solid var(--fv-line-scs);
+    color: var(--fv-text);
+    font-size: 13px;
+    line-height: 26px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.confirm.fleetDialog .ui .confirmok::after,
+.confirm.fleetDialog .ui .confirmcancel::after {
+    content: attr(data-label);
+}
+
+.confirm.fleetDialog .ui .confirmok:hover,
+.confirm.fleetDialog .ui .confirmcancel:hover {
+    background-color: var(--fv-card-hover);
+    color: var(--fv-text-bright);
+}
+
+/* The affirmative action is the accent one, as on the games page cards. */
+.confirm.fleetDialog .ui .confirmok {
+    border-color: var(--fv-accent);
+}
+
+@media (max-width: 520px) {
+    .confirm.fleetDialog {
+        width: 92%;
+    }
+}
+
+/* ── Pre-battle damage note in the lobby's Ready confirm ────────────────────────────
+   gamedata.onReadyClicked appends this line when the fleet carries pre-battle damage or
+   critical effects (PREBATTLE_DAMAGE_PLAN.md D1). It lands inside confirm.confirm's
+   `.confirm.error` shell, which is 16px BOLD #c94b1d - so the whole sentence read as an
+   alarm rather than as the footnote it is (user report 2026-08-08). Only the NOTE: label
+   is a warning; the sentence after it is body text on the shared tokens. */
+.confirm .prebattle-note {
+    display: block;
+    margin-top: 14px;
+    font-family: arial;
+    font-size: 14px;
+    font-weight: normal;
+    line-height: 1.4;
+    color: var(--fv-text);
+}
+
+.confirm .prebattle-note .prebattle-note-label {
+    font-weight: bold;
+    color: #c94b1d;
+}

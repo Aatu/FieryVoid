@@ -56,14 +56,14 @@ class kirishiacConqueror extends SixSidedHCV{
 		$beamB = new MedAntigravityBeam(5, 6, 2, 210, 30, 'B');
 		$orbitalB->addOrbitalWeapon($beamB);
 		$orbitalB->setStructureHome(1); //front block, shown on the left section
-		$orbitalB->addTag('ORBITALFWD');
+		$orbitalB->addTag('Front Orbital');
 		$this->addLeftFrontSystem($orbitalB);
 		$this->addLeftFrontSystem($beamB);
 
 		$orbitalA = new KirishiacOrbitalLight(5, 15, 'C', 'A', -7, $orbitalHitChart);
 		$beamA = new MedAntigravityBeam(5, 6, 2, 270, 90, 'A');
 		$orbitalA->addOrbitalWeapon($beamA);
-		$orbitalA->addTag('ORBITALFWD');
+		$orbitalA->addTag('Front Orbital');
 		$this->addFrontSystem($orbitalA);
 		$this->addFrontSystem($beamA);
 
@@ -71,7 +71,7 @@ class kirishiacConqueror extends SixSidedHCV{
 		$beamC = new MedAntigravityBeam(5, 6, 2, 330, 150, 'C');
 		$orbitalC->addOrbitalWeapon($beamC);
 		$orbitalC->setStructureHome(1); //front block, shown on the right section
-		$orbitalC->addTag('ORBITALFWD');
+		$orbitalC->addTag('Front Orbital');
 		$this->addRightFrontSystem($orbitalC);
 		$this->addRightFrontSystem($beamC);
 		
@@ -86,14 +86,14 @@ class kirishiacConqueror extends SixSidedHCV{
 		$beamF = new MedAntigravityBeam(5, 6, 2, 150, 330, 'F');
 		$orbitalF->addOrbitalWeapon($beamF);
 		$orbitalF->setStructureHome(2); //aft block, shown on the left section
-		$orbitalF->addTag('ORBITALAFT');
+		$orbitalF->addTag('Aft Orbital');
 		$this->addLeftAftSystem($orbitalF);
 		$this->addLeftAftSystem($beamF);
 
 		$orbitalE = new KirishiacOrbitalLight(5, 15, 'C', 'E', -7, $orbitalHitChart);
 		$beamE = new MedAntigravityBeam(5, 6, 2, 90, 270, 'E');
 		$orbitalE->addOrbitalWeapon($beamE);
-		$orbitalE->addTag('ORBITALAFT');
+		$orbitalE->addTag('Aft Orbital');
 		$this->addAftSystem($orbitalE);
 		$this->addAftSystem($beamE);
 
@@ -101,7 +101,7 @@ class kirishiacConqueror extends SixSidedHCV{
 		$beamD = new MedAntigravityBeam(5, 6, 2, 30, 210, 'D');
 		$orbitalD->addOrbitalWeapon($beamD);
 		$orbitalD->setStructureHome(2); //aft block, shown on the right section
-		$orbitalD->addTag('ORBITALAFT');
+		$orbitalD->addTag('Aft Orbital');
 		$this->addRightAftSystem($orbitalD);
 		$this->addRightAftSystem($beamD);
 
@@ -129,13 +129,13 @@ class kirishiacConqueror extends SixSidedHCV{
 				4 => "Thruster",
 				8 => "Hypergraviton Beam",
 				10 => "Ultra Matter Cannon",
-				12 => "TAG:ORBITALFWD", //tag search is ship-wide: finds orbitals A-C on the left/front/right display sections; beams are only hit through the orbital sub-chart
+				12 => "TAG:Front Orbital", //tag search is ship-wide: finds orbitals A-C on the left/front/right display sections; beams are only hit through the orbital sub-chart
 				18 => "Structure",
 				20 => "Primary",
 			),
 			2=> array( //Aft
 				6 => "Thruster",
-				8 => "TAG:ORBITALAFT", //orbitals D-F
+				8 => "TAG:Aft Orbital", //orbitals D-F
 				18 => "Structure",
 				20 => "Primary",
 			),

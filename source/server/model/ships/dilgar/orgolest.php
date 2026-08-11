@@ -35,6 +35,9 @@ class Orgolest extends OSAT{
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         
         $this->addPrimarySystem(new Structure(2, 25));
+
+        //Block some enhancements for OSAT units when bought
+        Enhancements::nonstandardEnhancementSet($this, 'OSAT');
         
         	//d20 hit chart
         $this->hitChart = array(

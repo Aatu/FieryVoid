@@ -110,6 +110,7 @@ window.PhaseStrategy = function () {
         //this.refreshModifiedShips(); //Fix was actually server side, so comment this out for now in case sueful later - DK.
         this.ewIconContainer.hide();
         this.ballisticIconContainer.show();
+        this.syncAllDeclaredAreas(); //a poll rebuilds every ship, so re-read what each weapon has declared
     };
 
     /*// A same-phase poll (this.update, as opposed to a phase-change activate()) refreshes ship
@@ -145,6 +146,7 @@ window.PhaseStrategy = function () {
         this.createReplayUI(gamedata);
         this.showAppropriateHighlight();
         this.showAppropriateEW();
+        this.syncAllDeclaredAreas();
         return this;
     };
 
@@ -192,6 +194,47 @@ window.PhaseStrategy = function () {
         if (target && typeof target == 'function') {
             target.call(this, payload);
         }
+    };
+
+    /* Declared-area overlays (Weapon.getDeclaredArea / ShipIcon.showDeclaredArea) put in step with
+       what this ship's weapons have actually declared. State-driven rather than event-driven on
+       purpose: a weapon says what it wants shown and this decides when, so a weapon never has to
+       raise or tear down anything, and every route into and out of an order is covered by the one
+       mechanism - the activation menu, doDeactivate, the generic remove-fire-order button, a
+       server-side change arriving on a poll, and a page reload mid-phase (which rebuilds the weapon
+       with its order already in place, so its doActivate never runs again).
+
+       showDeclaredArea itself no-ops when what is already drawn is still correct, so calling this as
+       often as we do costs a walk of the ship's systems and nothing else.
+
+       OWN SIDE ONLY. A declared area says what a ship is ABOUT to do, which is precisely the thing
+       the per-viewer masking exists to keep from the other side (see the Planet-Cracker Beam's
+       hideFireOrdersFromEnemies - an enemy client is not sent the order at all, so its
+       getDeclaredArea would return null anyway). The gate is here rather than left to each weapon so
+       that a future opt-in whose orders AREN'T masked cannot quietly become an info leak.
+
+       On the base strategy so it holds in every phase. */
+    PhaseStrategy.prototype.syncDeclaredAreas = function (ship) {
+        if (!ship || !ship.systems) return;
+        if (!gamedata.isMyorMyTeamShip(ship)) return;
+
+        var icon = this.shipIconContainer.getByShip(ship);
+        if (!icon) return;
+
+        ship.systems.forEach(function (system) {
+            if (typeof system.getDeclaredArea !== 'function') return;
+
+            var spec = system.getDeclaredArea();
+
+            if (spec) icon.showDeclaredArea(system, spec);
+            else icon.removeDeclaredArea(system);
+        });
+    };
+
+    PhaseStrategy.prototype.syncAllDeclaredAreas = function () {
+        this.shipIconContainer.getArray().forEach(function (icon) {
+            this.syncDeclaredAreas(icon.ship);
+        }, this);
     };
 
     PhaseStrategy.prototype.onScrollToShip = function (payload) {
@@ -960,6 +1003,10 @@ window.PhaseStrategy = function () {
     PhaseStrategy.prototype.onSystemDataChanged = function (payload) {
         var ship = payload.ship;
         var system = payload.system;
+
+        //Declaring or withdrawing an order is a SystemDataChanged, so this is where a declared-area
+        //overlay appears and disappears in response to the player - see syncDeclaredAreas.
+        this.syncDeclaredAreas(ship);
 
         if (this.selectedShip === ship) {
             this.uiManager.showWeaponList({ ship: ship, gamePhase: gamedata.gamephase })

@@ -88,7 +88,7 @@ const isSurrenderAvailable = () => {
    onerror fallback to the .png - same treatment the ship and system icons get. Guarded because
    this component can render before the legacy bundle has defined window.AssetManager. */
 const iconPath = () => {
-    const path = "./img/surrender_icon.png";
+    const path = "./img/surrender_icon1.png";
     return window.AssetManager ? window.AssetManager.getSmartImagePath(path) : path;
 };
 

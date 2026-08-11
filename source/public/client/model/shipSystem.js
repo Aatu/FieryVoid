@@ -490,6 +490,52 @@ Weapon.prototype.checkForWastedShots = function () {
 	return false;
 };
 
+/* The map area this weapon has COMMITTED to, highlighted on its own ship's icon for as long as the
+   order stands - "this is where the shot is going", as opposed to the hover arcs' "this is where it
+   could go". Return null (the default) for a weapon that has nothing to show.
+
+   Mostly useful for weapons fired from the Activate menu, which declare an order without ever naming
+   a target, so nothing else on the map says what they are about to hit.
+
+   PhaseStrategy.syncDeclaredAreas polls this on phase entry, on every gamedata update and on every
+   SystemDataChanged - which is raised by the activation menu, by doDeactivate and by
+   weaponManager.removeFiringOrder - so the overlay follows the order in and out on its own. There is
+   nothing to call from doActivate/doDeactivate, and nothing to tear down.
+
+   The spec is { shape, hexes, arcs, color, opacity, borderOpacity }; only `shape` is required. The
+   rest default to the weapon's own reach, its own arcs, the shared declared-area yellow, and - for
+   the outline - to whatever suits the shape's size. Shapes are 'forward' (the straight line of hexes
+   off the nose, excluding the ship's own hex), 'arc' (the weapon's wedge out to its reach) and
+   'radius' (every hex in reach, arc ignored); the latter two include the ship's own hex. See
+   ShipIcon.showDeclaredArea.
+
+   So an ordinary directional weapon opts in with:
+
+       MyWeapon.prototype.getDeclaredArea = function () {
+           if (this.fireOrders.length === 0) return null;
+           return { shape: 'arc' };
+       };
+*/
+Weapon.prototype.getDeclaredArea = function () {
+	return null;
+};
+
+/* This weapon's firing-animation colour as a CSS string, which is what THREE.Color takes - so a
+   weapon can tint its declared area to match the shot the player is about to see, rather than
+   having a colour chosen for it twice.
+
+   A string rather than a THREE.Color so the model layer stays free of THREE (see the tree-shaken
+   bundle's window.THREE shim) and so it drops straight into a declared-area rebuild signature.
+   animationColor is [r,g,b] over 0-255 and may be overridden per firing mode, exactly as
+   AllWeaponFireAgainstShipAnimation reads it. Returns null when the weapon declares no colour. */
+Weapon.prototype.getAnimationColourCss = function () {
+	var colour = (this.animationColorArray && this.animationColorArray[this.firingMode]) || this.animationColor;
+
+	if (!Array.isArray(colour) || colour.length < 3) return null;
+
+	return 'rgb(' + colour[0] + ',' + colour[1] + ',' + colour[2] + ')';
+};
+
 var Ballistic = function Ballistic(json, ship) {
 	Weapon.call(this, json, ship);
 };

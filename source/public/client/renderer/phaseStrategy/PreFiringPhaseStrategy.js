@@ -22,7 +22,7 @@ window.PreFiringPhaseStrategy = function () {
 
         gamedata.showCommitButton();
 
-        this.setPhaseHeader("PRE-FIRING ORDERS");
+        this.setPhaseHeader("PRE-FIRING");
         this.showAppropriateHighlight();
         this.showAppropriateEW();
         return this;

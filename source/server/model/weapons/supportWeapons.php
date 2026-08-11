@@ -1673,7 +1673,7 @@ class GraviticAugmenter extends Weapon  implements SpecialAbility{
 
 				$target = $gamedata->getShipById($fireOrder->targetid);
 
-				if($target->gravitic || $target->factionAge >= 3){ 
+				if($target->gravitic){ 
 					$fireOrder->needed -= 15; //-15% to hit gravitic and/or Ancient targets. 
 				}    
 			break;
@@ -1725,7 +1725,7 @@ class GraviticAugmenter extends Weapon  implements SpecialAbility{
 		$rotationAmount    = ($this->rotationAmount == 2) ? 2 : 1;    //default 60 degrees
 
 		//Ships WITH gravitic drives (or Ancient) can only be turned a single 60deg facing.
-		if($ship->gravitic || $ship->factionAge >= 3){
+		if($ship->gravitic){
 			$rotationAmount = 1;
 		}
 

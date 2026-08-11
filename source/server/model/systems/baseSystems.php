@@ -2917,7 +2917,8 @@ class CnC extends ShipSystem implements SpecialAbility {
 	
 	//C&C  is VERY important, although not as much as the reactor!
 	public $repairPriority = 9;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
-
+		protected $preBattleCriticals = array(
+			'ShipDisabled');
     
     protected $possibleCriticals = array(
     	//1=>"SensorsDisrupted", //not implemented! so I take it out 
@@ -7518,9 +7519,13 @@ class DiffuserTendril extends ShipSystem{
 	
 		public function stripForJson(){
 			$strippedSystem = parent::stripForJson();
-			$strippedSystem->outputDisplay = $this->outputDisplay; //make sure that actual output is actually sent to front end...				
+			$strippedSystem->outputDisplay = $this->outputDisplay; //make sure that actual output is actually sent to front end...
+			//A tendril bought as an Extra Tendrils enhancement was not on the hull when the static
+			//blueprint was built, so the client has nothing to merge this onto - send the blueprint
+			//fields (capacity, artwork, section, arcs) with it. See ShipSystem::$addedByEnhancement.
+			if ($this->addedByEnhancement) $strippedSystem = $this->addBlueprintFieldsForJson($strippedSystem);
 			return $strippedSystem;
-		}	
+		}
 }//endof class DiffuserTendril
 
 
@@ -7662,6 +7667,23 @@ by 4.
 	
 	function addTendril($tendril){
 		if($tendril) $this->tendrils[] = $tendril;
+	}
+
+	/*Mount a tendril keeping the list in capacity order, largest first - for tendrils added after
+	  the hull was built (Extra Tendrils; every constructor-mounted one simply lists them in order
+	  and uses addTendril). The ORDER of this list is read, it is not decoration: criticalPhaseEffects
+	  destroys the LAST surviving tendril on a TendrilDestroyed critical - i.e. the smallest - and
+	  dissipates from the front. Appending blindly would make a fresh 15-capacity tendril the first
+	  thing a critical strips off the ship, and leave the biggest one waiting on dissipation.*/
+	function addTendrilSorted($tendril){
+		if(!$tendril) return;
+		foreach($this->tendrils as $index => $existing){
+			if($tendril->maxhealth > $existing->maxhealth){
+				array_splice($this->tendrils, $index, 0, array($tendril));
+				return;
+			}
+		}
+		$this->tendrils[] = $tendril; //smallest (or the only one) - goes last
 	}
 
 	public function setSystemDataWindow($turn){
