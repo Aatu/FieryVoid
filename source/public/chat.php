@@ -307,8 +307,12 @@ $chatcompact = !empty($chatcompact);
     }
 
             if(chat.checkTimesForLightup(chat.lastTimeStamp, chat.lastTimeChecked)){
-                var thisChat = chat.gameid == 0 ? "globalChatTab" : "chatTab";
-                if(document.getElementById(thisChat) && 
+                /* Only the in-game tab lights up. Global traffic is read in the lobby,
+                   where the player already sees it, so highlighting #globalChatTab in
+                   game.php just nagged about messages that were not about this game.
+                   var thisChat = chat.gameid == 0 ? "globalChatTab" : "chatTab"; */
+                var thisChat = chat.gameid == 0 ? null : "chatTab";
+                if(thisChat && document.getElementById(thisChat) &&
                    !document.getElementById(thisChat).classList.contains("selected")){
                     document.getElementById(thisChat).classList.add("newMessage");
                 }
