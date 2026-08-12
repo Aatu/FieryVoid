@@ -9793,8 +9793,8 @@ class MindriderHangar extends ShipSystem{
 		public function setSystemDataWindow($turn){
 				$unit = $this->getUnit();
 				if($unit instanceof FighterFlight){
-					$this->data["Special"] = "Jammer ability, even against Ancients.";
-					$this->data["Special"] .= "<br>Can use 'Shading Mode' by activating this system during Deployment/Pre-Turn Phase.";						
+					//$this->data["Special"] = "Jammer ability, even against Ancients.";
+					$this->data["Special"] = "<br>Can use 'Shading Mode' by activating this system during Deployment/Pre-Turn Phase.";						
 					$this->data["Special"] .= "<br>When Shading is activated, defense ratings are reduced by 15, and cannot be detected if over 15 hexes at the start or end of movement.";
 					$this->data["Special"] .= "<br>HOWEVER, the flight cannot fire any weapons on a turn when Shading is active.";
 					$this->data["Special"] .= "<br>This system also incorporates a small Jump Drive, with a 20 turn recharge.";									

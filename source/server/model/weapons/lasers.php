@@ -945,8 +945,8 @@
             public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
                 $this->data["Special"] = 'Uninterceptable.';
-				$this->data["Special"] .= "Does ".$this->raking." damage per rake.";                
-                $this->data["Special"] .= '<br>Can also fire in Piercing Mode.';
+				$this->data["Special"] .= "<br>Does ".$this->raking." damage per rake.";                
+                $this->data["Special"] .= '<br>Can fire in Piercing Mode.';
                 $this->data["Special"] .= "<br>Can be overcharged during Initial Orders to fire in Sustained mode AFTER a full recharge cycle.";
                 $this->data["Special"] .= '<br>When firing in Sustained mode, if the first shot hits, the next turns shot will hit the same target automatically.';
                 $this->data["Special"] .= '<br>Subsequent Sustained shots ignore any armour/shields that have applied to first shot.';   			
@@ -995,8 +995,8 @@
             public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
                 $this->data["Special"] = 'Uninterceptable.';
-				$this->data["Special"] .= "Does ".$this->raking." damage per rake.";                   
-                $this->data["Special"] .= '<br>Can also fire in Piercing Mode.';
+				$this->data["Special"] .= "<br>Does ".$this->raking." damage per rake.";                   
+                $this->data["Special"] .= '<br>Can fire in Piercing Mode.';
                 $this->data["Special"] .= "<br>Can be overcharged during Initial Orders to fire in Sustained mode AFTER a full recharge cycle.";
                 $this->data["Special"] .= '<br>When firing in Sustained mode, if the first shot hits, the next turns shot will hit the same target automatically.';
                 $this->data["Special"] .= '<br>Subsequent Sustained shots ignore any armour/shields that have applied to first shot.';   			
