@@ -216,7 +216,7 @@ const CloseButton = styled.div`
   here means the same CSS scale applyScreenFit() already applies - the player's own
   multiplier on top of the automatic fit. That is also why the mark sits in the flow as the
   window's last row rather than floating over the bottom corner: nothing of the datasheet is
-  covered.
+  covered. $overlap is the one exception - see renderStatusStrip.
 
   WHICH corner follows the dock ($mirror, user request 2026-08-06): bottom-RIGHT for a
   left-docked window, bottom-LEFT for a right-docked one. Each window is pinned to its screen
@@ -238,6 +238,10 @@ const ResizeGrip = styled.div`
     flex-shrink: 0;
     width: 16px;
     height: 16px;
+    /*$overlap: draw the mark ON TOP of the row above (a status banner) instead of taking a
+      row of its own - the negative margin is exactly the grip's own height, so the row above
+      keeps the window's bottom edge. See renderStatusStrip.*/
+    ${props => props.$overlap ? 'margin-top: -16px;' : ''}
     box-sizing: border-box;
     z-index: 5;
     cursor: ${props => props.$mirror ? 'nesw-resize' : 'nwse-resize'};
@@ -494,8 +498,13 @@ const StatusBanner = styled.div`
     box-sizing: border-box;
     /*equal top/bottom: the old 2px-top/3px-bottom made the text sit visibly high in
       the tinted strip (the border-top reads as a separator line, not banner fill,
-      so it doesn't compensate). At 9px uppercase every half-pixel shows.*/
-    padding: 3px 6px;
+      so it doesn't compensate). At 9px uppercase every half-pixel shows.
+
+      $grip: the resize grip is drawn in this banner's corner (renderStatusStrip), so the
+      16px mark plus the usual 6px gutter is reserved - on BOTH sides, because a one-sided
+      reserve would push the centred text off the window's midline, and which corner the
+      grip sits on follows the dock.*/
+    padding: 3px ${props => props.$grip ? '22px' : '6px'};
     text-align: center;
     font-size: 9px;
     letter-spacing: 2px;
@@ -1464,16 +1473,54 @@ class ShipWindow extends React.Component {
       up inside one. The pointer/touch listeners are the container's own - see onDragStart -
       which is also where the double-press reset is counted; the onDoubleClick here is belt and
       braces for the paths where pointer capture is unavailable and the grip does see its own
-      dblclick (resetUserScale is idempotent, so both firing is harmless).*/
-    renderResizeGrip() {
+      dblclick (resetUserScale is idempotent, so both firing is harmless).
+
+      `overlap`: draw it over the row above instead of below it - see renderStatusStrip.*/
+    renderResizeGrip(overlap) {
         return (
             <ResizeGrip
                 className="shipwindow-resize-grip shipwindow-nodrag"
                 $pad={GRIP_TOUCH_PAD}
                 $mirror={this.isMirroredGrip()}
+                $overlap={Boolean(overlap)}
                 onDoubleClick={this.onGripDoubleClick}
                 title="Drag to resize this window — double-click to reset its size"
             />
+        );
+    }
+
+    /*The window's bottom strip: the status banners, with the resize grip drawn ON TOP of the
+      last one rather than in a row below it (user request 2026-08-12). The grip had its own
+      flow row, so on any ship carrying a banner - ROLLED, Undetected, boarded, attached - the
+      banner was shunted up off the window's bottom edge and the 16px band beneath it read as
+      a stray gap. Overlapping costs the grip its row (ResizeGrip $overlap) and puts the mark
+      in the banner's corner, which is empty: the text is centred and the overlapped banner
+      reserves that corner on both sides ($grip), so the centring is untouched.
+
+      With no banner to sit on, the grip keeps its own row exactly as before - the alternative
+      is covering the corner of a section panel, which is what the grip was put in the flow to
+      avoid in the first place.
+
+      ROLLED is passed in rather than read here because it is a property of how the window is
+      DRAWN (the port/starboard columns are swapped), not of the ship's status; it leads the
+      list, as it did when it was rendered separately.*/
+    renderStatusStrip(ship, rolled) {
+        const banners = rolled
+            ? [{ key: 'rolled', text: '⟲ Rolled — port / starboard reversed' }].concat(getStatusBanners(ship))
+            : getStatusBanners(ship);
+
+        return (
+            <React.Fragment>
+                {banners.map((banner, index) => (
+                    <StatusBanner
+                        key={banner.key}
+                        $color={banner.color}
+                        $bg={banner.bg}
+                        $grip={index === banners.length - 1}
+                    >{banner.text}</StatusBanner>
+                ))}
+                {this.renderResizeGrip(banners.length > 0)}
+            </React.Fragment>
         );
     }
 
@@ -1722,8 +1769,7 @@ class ShipWindow extends React.Component {
                 <ShipWindowContainer ref={this.elementRef} onClick={shipWindowClicked} onContextMenu={e => { e.preventDefault(); e.stopPropagation(); }} $isMyTeam={isMyTeam} $variant="flight">
                     {this.renderHeader(shipName, unitName, getHeaderTint(ship))}
                     <FighterList ship={ship} />
-                    {renderStatusBanners(ship)}
-                    {this.renderResizeGrip()}
+                    {this.renderStatusStrip(ship)}
                 </ShipWindowContainer>
             )
         }
@@ -1776,9 +1822,10 @@ class ShipWindow extends React.Component {
                         <ShipSection key={`section-${ship.id}-${location}`} location={location} nameOverride={nameOverrides[location]} ship={ship} systems={systemsByLocation[location]} isTerrain hidden={this.state.showArt} />
                     ))}
                 </CompactBody>
-                {renderStatusBanners(ship)}
+                {/*lobby datasheet ahead of the strip: the grip has to stay on the window's
+                   bottom corner, and the lobby renders no status banners at all*/}
                 {lobby && <ShipNotesPanel ship={ship} full />}
-                {this.renderResizeGrip()}
+                {this.renderStatusStrip(ship)}
                 {this.renderPopup(withHitChart, withNotes, 72)}
             </ShipWindowContainer>)
         }
@@ -1856,9 +1903,7 @@ class ShipWindow extends React.Component {
         return (<ShipWindowContainer ref={this.elementRef} onClick={shipWindowClicked} onContextMenu={e => { e.preventDefault(); e.stopPropagation(); }} $isMyTeam={isMyTeam} $variant="ship">
             {this.renderHeader(shipName, unitName, getHeaderTint(ship))}
             {sectionGrid}
-            {rolled && <StatusBanner>⟲ Rolled — port / starboard reversed</StatusBanner>}
-            {renderStatusBanners(ship)}
-            {this.renderResizeGrip()}
+            {this.renderStatusStrip(ship, rolled)}
             {this.renderPopup(withHitChart, withNotes)}
         </ShipWindowContainer>)
     }
@@ -2207,10 +2252,6 @@ const isUndetected = (ship, forecast) => {
 
     return !detected;
 };
-
-const renderStatusBanners = (ship) => getStatusBanners(ship).map(banner => (
-    <StatusBanner key={banner.key} $color={banner.color} $bg={banner.bg}>{banner.text}</StatusBanner>
-));
 
 /*Ships that use both quarter sections on a side purely for system placement but have
   only ONE side structure (e.g. Vorlon capitals: the real Port structure lives in 32
