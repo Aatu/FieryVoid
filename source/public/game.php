@@ -287,6 +287,10 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     <script defer src="client/renderer/sprite/TextSprite.js"></script>
     <script defer src="client/renderer/sprite/HexNumberSprite.js"></script>    
     
+    <!-- Shared grid-overlay geometry: used by ShipIcon's arcs/EW blankets and by
+         BallisticIconContainer's terrain footprints and splash areas. -->
+    <script defer src="client/renderer/HexRegion.js"></script>
+
     <script defer src="client/renderer/icon/ShipIcon.js"></script>
     <script defer src="client/renderer/icon/FlightIcon.js"></script>
     <script defer src="client/renderer/icon/DeploymentIcon.js"></script>

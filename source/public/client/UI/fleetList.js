@@ -532,7 +532,7 @@ window.fleetListManager = {
                 turnTaken = "<span style='color:red'>&nbsp;&nbsp;[Surrendered on Turn " + slot.surrendered + "]</span>"; //Check surrendered first.
             }
         } else if (slot.waiting) {
-            turnTaken = "<span style='color:green;'>&nbsp;&nbsp;[Orders committed]</span>";
+            turnTaken = "<span style='color:rgb(50, 205, 50);'>&nbsp;&nbsp;[Orders committed]</span>";
         }
 
         var deploys = "";
@@ -579,7 +579,7 @@ window.fleetListManager = {
         if (slot.surrendered !== null && slot.surrendered <= gamedata.turn) {
             html = "<span style='color:red'>&nbsp;&nbsp;[Surrendered on Turn " + slot.surrendered + "]</span>";
         } else if (slot.waiting) {
-            html = "<span style='color:green'>&nbsp;&nbsp;[Orders committed]</span>";
+            html = "<span style='color:rgb(50, 205, 50)'>&nbsp;&nbsp;[Orders committed]</span>";
         }
 
         header.html(html);

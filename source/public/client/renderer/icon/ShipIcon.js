@@ -760,10 +760,10 @@ window.ShipIcon = function () {
        over the dark map reads a good deal hotter than cobalt does at the same alpha, so matching
        the numbers would NOT match the apparent brightness. Its outline stays at the shared border
        opacity, which is what keeps the restricted wedge crisply readable while its fill is quiet. */
-    var ARC_FILL_OPACITY = 0.4;                     //normal (cobalt) firing arc
-    var ARC_BORDER_OPACITY = 0.8;                   //outline of every hex-edged arc, in the arc's own colour
+    var ARC_FILL_OPACITY = 0.35;                     //normal (cobalt) firing arc
+    var ARC_BORDER_OPACITY = 0.9;                   //outline of every hex-edged arc, in the arc's own colour
     var REDUCED_ARC_COLOUR = "rgb(170,95,25)";      //amber: this weapon's arc is restricted this turn
-    var REDUCED_ARC_FILL_OPACITY = 0.3;             //fainter than ARC_FILL_OPACITY - see above
+    var REDUCED_ARC_FILL_OPACITY = 0.25;             //fainter than ARC_FILL_OPACITY - see above
 
     /* A ranged weapon's arc, as the grid hexes it covers. arcsList is one or more ship-frame arcs -
        a split-arc mount hands both over at once, so its two regions share a single overlay and any
@@ -788,7 +788,7 @@ window.ShipIcon = function () {
                hovered, it told the player nothing, and it did so right on top of the icons - and a
                hex holding two or three stacked ships is precisely where you are trying to read which
                way the arcs point. Where the arc wraps round the centre it now reads as an unfilled
-               hex outlined in the arc's own colour (buildRegionFill punches the hole, the outline
+               hex outlined in the arc's own colour (HexRegion.buildFill punches the hole, the outline
                traces it), so it is still legibly part of the region.
 
                The declared-area overlay keeps ITS centre hex - see DECLARED_AREA_SHAPES. */
@@ -1114,28 +1114,7 @@ window.ShipIcon = function () {
     };
 
 
-    /* Corners of a pointy-top hex as unit offsets from its centre - the same 30/90/.../330 degree
-       corners mathlib.getHexCorners uses to build the grid, so a hexagon drawn from these lands
-       exactly on a grid hex.
-
-       The grid-aligned overlays (the EW blankets, the gravitic target area) use them as they are,
-       on an unrotated mesh. The weapon arcs emit them in the icon's LOCAL space and turn the
-       finished mesh to the ship's facing, which is safe without any per-facing correction because a
-       pointy-top hexagon maps onto itself under any 60 degree rotation and a ship's facing is always
-       a multiple of 60 (mathlib.hexFacingToAngle) - the hexes stay grid-aligned however the ship is
-       pointing. */
-    var HEX_CORNERS = [30, 90, 150, 210, 270, 330].map(function (degrees) {
-        var radians = degrees * Math.PI / 180;
-        return { x: Math.cos(radians), y: Math.sin(radians) };
-    });
-
     var STRAIGHT_ARC_FILL_COLOUR = 0x11446e;
-    var STRAIGHT_ARC_BORDER_COLOUR = 0x08485e; //cyan, brighter than the fill so the hex edges carry
-
-    /* Axial neighbour steps, in the same order as the six hex directions: a steps along direction 0
-       (due East), b along direction 1. The rest fall out of n[d-1] + n[d+1] = n[d], which is why
-       direction 2 is b-a and direction 5 is a-b. */
-    var AXIAL_NEIGHBOURS = [[1, 0], [0, 1], [-1, 1], [-1, 0], [0, -1], [1, -1]];
 
     /* Clockwise compass bearing of a point from the origin, 0 = East - the same convention and the
        same answer as mathlib.getCompassHeadingOfPoint, without an object allocated per call and
@@ -1147,246 +1126,20 @@ window.ShipIcon = function () {
         return heading > 0 ? 360 - heading : Math.abs(heading);
     }
 
-    /* The OUTLINE of a patch of grid hexes, as closed loops of points in game units relative to the
-       centre hex - everything the overlays need, because a region is drawn as one blanket polygon
-       with its boundary traced, not as a heap of individual hexagons.
+    /* The region pipeline - a patch of grid hexes built into ONE blanket polygon with a hex-true
+       outline - moved to HexRegion.js so BallisticIconContainer can share it for terrain footprints
+       and weapon splash areas. The geometry is subtle enough (winding, hole nesting, corner
+       rounding) that a second copy of it would be a liability.
 
-       That is the whole point of working in loops. The hexes in a range-N patch grow with N SQUARED
-       - the 60-hex cap is 10,981 of them - while its boundary grows with N, 726 edges at that same
-       cap. Filling hex by hex meant a 790KB vertex buffer and 44,000 triangles for one hovered
-       weapon; the loops are a couple of hundred triangles and a few tens of KB, and the player sees
-       exactly the same thing: hex-true edges, flat colour inside.
-
-       `accept(x, y, a, b)` decides membership - the arc tests live there - and is given both the
-       centre in game units and its axial coordinates. Members go into a flat axial grid so the
-       boundary sweep can ask "is my neighbour in?" with an array read rather than a hash lookup.
-
-       An edge of a member hex is on the boundary exactly when the neighbour across it is not a
-       member, which is a direct test - no counting every edge and keeping the singletons. Emitted
-       from corner (5-d) to corner (6-d) for direction d, which walks the region counter-clockwise
-       with the inside on the left, so outer boundaries come out counter-clockwise and any hole comes
-       out clockwise. buildRegionFill leans on that to tell one from the other. */
+       These wrappers keep every call site below unchanged, and they bind LATE - reading
+       window.HexRegion when called rather than when this IIFE runs - so this file stays independent
+       of script order. */
     function buildHexRegion(range, hexDistance, accept) {
-        var stride = 2 * range + 1;
-        var members = new Uint8Array(stride * stride);
-        //bearings are clockwise, game space is counter-clockwise, so direction 1 sits at math angle -60
-        var stepX = hexDistance * 0.5;
-        var stepY = -hexDistance * Math.sqrt(3) / 2;
-        var radius = hexDistance / Math.sqrt(3); //hexDistance is centre-to-centre; this is centre-to-corner
-        var a, b;
-
-        /* Cube coordinates in disguise: a steps in direction 0 plus b steps in direction 1 is the
-           cube (a+b, -a, -b), whose distance from the origin is max(|a+b|, |a|, |b|). Clamping b to
-           [-range-a, range-a] as well as to [-range, range] is therefore exactly "within range". */
-        for (a = -range; a <= range; a++) {
-            var last = Math.min(range, -a + range);
-
-            for (b = Math.max(-range, -a - range); b <= last; b++) {
-                if (accept(a * hexDistance + b * stepX, b * stepY, a, b)) members[(a + range) * stride + (b + range)] = 1;
-            }
-        }
-
-        var edges = [];
-
-        for (a = -range; a <= range; a++) {
-            for (b = -range; b <= range; b++) {
-                if (!members[(a + range) * stride + (b + range)]) continue;
-
-                var centreX = a * hexDistance + b * stepX;
-                var centreY = b * stepY;
-
-                for (var d = 0; d < 6; d++) {
-                    var na = a + AXIAL_NEIGHBOURS[d][0];
-                    var nb = b + AXIAL_NEIGHBOURS[d][1];
-
-                    //outside the grid is outside the region, so those edges are boundary too
-                    if (na >= -range && na <= range && nb >= -range && nb <= range
-                        && members[(na + range) * stride + (nb + range)]) continue; //interior seam
-
-                    var from = HEX_CORNERS[(5 - d) % 6];
-                    var to = HEX_CORNERS[(6 - d) % 6];
-
-                    edges.push({
-                        x1: centreX + from.x * radius, y1: centreY + from.y * radius,
-                        x2: centreX + to.x * radius, y2: centreY + to.y * radius
-                    });
-                }
-            }
-        }
-
-        return chainLoops(edges);
+        return window.HexRegion.buildRegion(range, hexDistance, accept);
     }
 
-    /* Boundary edges into closed loops, by following each edge's end vertex to the edge that starts
-       there. Corner positions are rounded to whole game units to match them up: two hexes sharing a
-       corner compute it from different centres and land a rounding error apart, while genuinely
-       different corners are a hex side - 50 units - apart, so there is a wide margin either way.
-
-       A vertex normally has one outgoing edge, but where two parts of a region meet at a single
-       corner it has two; keeping a list per vertex and taking whichever is still unused walks such a
-       pinch as two loops that touch, which fills correctly. */
-    function chainLoops(edges) {
-        var outgoing = new Map();
-        var used = new Uint8Array(edges.length);
-        var loops = [];
-
-        function vertexKey(x, y) {
-            return (Math.round(x) + 32768) * 65536 + Math.round(y) + 32768;
-        }
-
-        edges.forEach(function (edge, index) {
-            var key = vertexKey(edge.x1, edge.y1);
-            var starting = outgoing.get(key);
-
-            if (starting) starting.push(index);
-            else outgoing.set(key, [index]);
-        });
-
-        function takeEdgeFrom(x, y) {
-            var starting = outgoing.get(vertexKey(x, y));
-
-            while (starting && starting.length) {
-                var next = starting.pop();
-
-                if (!used[next]) return next;
-            }
-
-            return -1;
-        }
-
-        edges.forEach(function (edge, index) {
-            if (used[index]) return;
-
-            var loop = [];
-            var current = index;
-
-            while (current !== -1 && !used[current]) {
-                used[current] = 1;
-                loop.push({ x: edges[current].x1, y: edges[current].y1 });
-                current = takeEdgeFrom(edges[current].x2, edges[current].y2);
-            }
-
-            if (loop.length > 2) loops.push(loop);
-        });
-
-        return loops;
-    }
-
-    //Shoelace. Positive is counter-clockwise, which buildHexRegion gives an outer boundary; a hole
-    //is wound the other way and comes out negative.
-    function getSignedArea(loop) {
-        var area = 0;
-
-        for (var i = 0, j = loop.length - 1; i < loop.length; j = i++) {
-            area += (loop[j].x - loop[i].x) * (loop[j].y + loop[i].y);
-        }
-
-        return area / 2;
-    }
-
-    //Ray cast along +x, counting crossings.
-    function isPointInLoop(point, loop) {
-        var inside = false;
-
-        for (var i = 0, j = loop.length - 1; i < loop.length; j = i++) {
-            if ((loop[i].y > point.y) === (loop[j].y > point.y)) continue;
-
-            if (point.x < (loop[j].x - loop[i].x) * (point.y - loop[i].y) / (loop[j].y - loop[i].y) + loop[i].x) inside = !inside;
-        }
-
-        return inside;
-    }
-
-    function traceLoop(path, loop) {
-        loop.forEach(function (point, index) {
-            if (index === 0) path.moveTo(point.x, point.y);
-            else path.lineTo(point.x, point.y);
-        });
-
-        path.closePath();
-
-        return path;
-    }
-
-    /* The blanket: one flat polygon per outer loop, holes punched where the region has them (the
-       straight arcs' six-pointed star has one, around the ship's own hex). Triangulated once by
-       ShapeGeometry into a single buffer - a few hundred triangles for an arc that would have been
-       tens of thousands drawn hexagon by hexagon.
-
-       DoubleSide because the triangulator's winding is its own business and this is a flat unlit
-       overlay: there is no cost to being visible from both sides and no way to be caught out. */
-    function buildRegionFill(loops, colour, opacity) {
-        var shapes = [];
-
-        loops.forEach(function (loop) {
-            if (getSignedArea(loop) > 0) shapes.push({ loop: loop, shape: traceLoop(new THREE.Shape(), loop) });
-        });
-
-        loops.forEach(function (loop) {
-            if (getSignedArea(loop) > 0) return;
-
-            //a hole sits inside exactly one outer loop, so any of its corners identifies the owner
-            var owner = shapes.find(function (candidate) { return isPointInLoop(loop[0], candidate.loop); });
-
-            if (owner) owner.shape.holes.push(traceLoop(new THREE.Path(), loop));
-        });
-
-        var material = new THREE.MeshBasicMaterial({
-            color: colour,
-            opacity: opacity,
-            transparent: true,
-            side: THREE.DoubleSide
-        });
-
-        return new THREE.Mesh(new THREE.ShapeGeometry(shapes.map(function (entry) { return entry.shape; })), material);
-    }
-
-    /* The region's boundary traced as lines, all loops in a single LineSegments so it stays one draw
-       call.
-
-       LineBasicMaterial.linewidth is ignored by the WebGL renderer - normally a nuisance, here
-       exactly what is wanted: the border is one device pixel at every zoom level, so it neither
-       thickens as you zoom in nor thins away to nothing as you zoom out, the way a world-unit ring
-       would. Same reasoning as the structure wedge's outline (buildArcOutline).
-
-       Colour and opacity default to the straight arcs' cobalt; the weapon arcs, EW blankets and
-       gravitic target area pass their own so each overlay keeps the colour it is recognised by. */
-    function buildRegionOutline(loops, colour, opacity) {
-        var positions = [];
-
-        loops.forEach(function (loop) {
-            loop.forEach(function (point, index) {
-                var next = loop[(index + 1) % loop.length];
-
-                positions.push(point.x, point.y, 0, next.x, next.y, 0);
-            });
-        });
-
-        var geometry = new THREE.BufferGeometry();
-        geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-
-        var outlines = new THREE.LineSegments(
-            geometry,
-            new THREE.LineBasicMaterial({
-                color: colour === undefined ? STRAIGHT_ARC_BORDER_COLOUR : colour,
-                opacity: opacity === undefined ? 0.9 : opacity,
-                transparent: true
-            })
-        );
-        outlines.position.z = 0.01; //clear of the coplanar fill, still behind the ship sprite
-
-        return outlines;
-    }
-
-    /* Fill plus outline as one mesh, ready to be positioned and added. The outline is a CHILD of the
-       fill so it inherits its rotation, its grid-lock correction and its removal. */
     function buildRegionOverlay(loops, colour, fillOpacity, borderColour, borderOpacity) {
-        var fill = buildRegionFill(loops, colour, fillOpacity);
-
-        fill.add(buildRegionOutline(loops, borderColour, borderOpacity));
-        fill.position.z = -1;
-
-        return fill;
+        return window.HexRegion.buildOverlay(loops, colour, fillOpacity, borderColour, borderOpacity);
     }
 
     /* Overlays measured in hexes have to sit on the GRID rather than on the sprite: an icon is
@@ -1405,7 +1158,7 @@ window.ShipIcon = function () {
        the six grid lines out of its own hex, so its arc is drawn as those actual hexes rather than
        an approximating oblong. The firing ship's own hex is never a target, so the arms start one
        hex out - which leaves the star with a hole in the middle when the arc is a full circle, and
-       that hole is the reason buildRegionFill knows how to punch one.
+       that hole is the reason HexRegion.buildFill knows how to punch one.
 
        In axial terms the six grid lines are exactly the hexes with a, b or a+b zero, so membership
        is that plus the same arc test every other overlay uses. */
@@ -1437,14 +1190,11 @@ window.ShipIcon = function () {
        That was survivable while an arc was a 32-segment pie wedge; a hex-mapped one runs to a few
        hundred KB and hovering along a ship's weapon list builds one per system. Children (the
        silhouette outline) go with their parent. Materials only ever reference shared textures
-       (the thruster icon), and Material.dispose() leaves those alone. */
+       (the thruster icon), and Material.dispose() leaves those alone.
+
+       Implementation moved to HexRegion.js with the rest of the pipeline; see the note there. */
     function disposeOverlay(overlay) {
-        if (!overlay) return;
-
-        overlay.children.forEach(disposeOverlay);
-
-        if (overlay.geometry) overlay.geometry.dispose();
-        if (overlay.material) overlay.material.dispose();
+        window.HexRegion.dispose(overlay);
     }
 
     ShipIcon.prototype.hideWeaponArcs = function () {
