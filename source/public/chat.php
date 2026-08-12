@@ -522,7 +522,23 @@ document.addEventListener("visibilitychange", function() {
         <div class="chatcomposer">
             <input class="chatinput" value="" name="chatinput" autocomplete="off"
                    placeholder="<?php echo htmlspecialchars($chatplaceholder, ENT_QUOTES, 'UTF-8'); ?>">
-            <button type="button" class="chatEmojiButton" aria-expanded="false" aria-label="Insert emoji">🙂</button>
+            <?php // A line-art face in currentColor rather than a 🙂 glyph: the colour
+                  // emoji was the one saturated yellow object on an otherwise blue-grey
+                  // bar, and it read as a message someone had already sent rather than as
+                  // a control. Inline SVG so it inherits the accent and can brighten on
+                  // hover — an <img> could do neither. ?>
+            <button type="button" class="chatEmojiButton" aria-expanded="false" aria-label="Insert emoji">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" stroke-width="1.6"/>
+                    <circle cx="9" cy="9.8" r="1.2" fill="currentColor"/>
+                    <circle cx="15" cy="9.8" r="1.2" fill="currentColor"/>
+                    <?php // Quadratic with the control point BELOW both ends (y grows
+                          // downward), so the curve bulges into a smile. Its ends sit at
+                          // x 7.8/16.2 to line up under the outer edge of each eye. ?>
+                    <path d="M7.8 13.6 Q12 17.6 16.2 13.6" fill="none" stroke="currentColor"
+                          stroke-width="1.6" stroke-linecap="round"/>
+                </svg>
+            </button>
         </div>
     </div>
 </div>

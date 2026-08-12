@@ -261,26 +261,39 @@
 
 /* ── Emoji ────────────────────────────────────────────────────────────────────
    The key that opens the picker. Same height and border as the input so the two read
-   as one control. */
+   as one control, and its face is line art in the accent rather than a colour 🙂 —
+   a saturated yellow disc was the loudest thing on the bar and looked like a message
+   rather than a button. */
 .fv-chat .chatEmojiButton {
     flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     width: 30px;
     height: 30px;
     padding: 0;
     background: #04161c;
     border: 1px solid #215a7a;
     border-radius: 2px;
-    color: var(--fv-text);
-    font-size: 15px;
-    line-height: 1;
+    color: var(--fv-accent);
     cursor: pointer;
-    transition: border-color 0.12s linear, background-color 0.12s linear;
+    transition: border-color 0.12s linear, background-color 0.12s linear,
+        color 0.12s linear;
+}
+
+/* The face is drawn in currentColor, so the button's own `color` is the only place
+   its shade is set — and the hover state below repaints it for free. */
+.fv-chat .chatEmojiButton svg {
+    display: block;
+    width: 17px;
+    height: 17px;
 }
 
 .fv-chat .chatEmojiButton:hover,
 .fv-chat .chatEmojiButton[aria-expanded="true"] {
     background: #0a2a36;
     border-color: var(--fv-accent);
+    color: var(--fv-text-accent);
 }
 
 .fv-chat .chatEmojiButton:focus-visible {
@@ -396,7 +409,11 @@
 
 .fv-chat-compact .chatEmojiButton {
     width: 27px;
-    font-size: 14px;
+}
+
+.fv-chat-compact .chatEmojiButton svg {
+    width: 16px;
+    height: 16px;
 }
 
 /* ══ The panel around it ══════════════════════════════════════════════════════
