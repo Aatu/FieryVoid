@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 if (! isset($chatgameid ))
     $chatgameid = 0;
@@ -6,13 +6,92 @@ if (! isset($chatgameid ))
 if (! isset($chatelement))
     throw new Exception("\$chatelement is missing!");
 
+/*
+ * OPTIONAL PANEL HEAD
+ * -------------------
+ * Set $chattitle before the include and this file renders its own head bar (see
+ * .fv-chat-head in chat.css); $chatmeta is the smaller readout on its right. Leave
+ * $chattitle unset and no bar is rendered at all — game.php wants that, because its
+ * chat already sits behind a labelled tab in a 150px panel with no room to spare, and
+ * games.php wants it because it supplies its own .fv-panel-head to match the news and
+ * games panels beside it.
+ *
+ * Both are consumed and unset at the end of this file: game.php includes chat.php
+ * TWICE, and a title left set by the first include would leak into the second.
+ */
+$chattitle = isset($chattitle) ? (string)$chattitle : null;
+$chatmeta  = isset($chatmeta)  ? (string)$chatmeta  : null;
+
+/*
+ * The composer's placeholder. Derived from $chatgameid rather than hard-coded in the
+ * markup, because "Message all players" is a lie in game.php's GAME CHAT tab — which
+ * is why games.php used to patch this attribute from its own ready handler. It does
+ * not need to any more; this file knows which chat it is.
+ */
+$chatplaceholder = isset($chatplaceholder)
+    ? (string)$chatplaceholder
+    : ((int)$chatgameid === 0 ? "Message all players" : "Message this game");
+
+/*
+ * Set $chatcompact for a chat that has to live somewhere tight — game.php's log panel
+ * is 150px until the player expands it, and there every pixel the composer takes is a
+ * line of message it takes away. See .fv-chat-compact in chat.css.
+ */
+$chatcompact = !empty($chatcompact);
 ?>
 <link href="<?php echo AssetLoader::getAssetUrl('styles/chat.css'); ?>" rel="stylesheet" type="text/css">
 <script>
 (function(){
 
     const POLL_INTERVAL = 6000;
-    const REQUEST_TIMEOUT = 5000;    
+    const REQUEST_TIMEOUT = 5000;
+
+    /* ── Emoji ────────────────────────────────────────────────────────────────
+       The picker's contents. Four short groups rather than one long grid: the
+       panel is scrollable, and a labelled group is findable in a way that row 6
+       of an undifferentiated wall of faces is not. Kept to what people actually
+       reach for in a game chat — this is a wargame's message bar, not a keyboard.
+
+       Anything in here is stored as an HTML numeric entity by the server (see
+       ChatManager::submitChatMessage), so it survives a 3-byte utf8 column. */
+    const EMOJI_GROUPS = [
+        { label: "Reactions", emoji: ["🙂","😀","😄","😆","🤣","😉","😍","😎","🤔","😐","🙄","😏","😴","😢","😭","😤","😡","🤯","😱","🥳"] },
+        { label: "Gestures",  emoji: ["👍","👎","👌","✌️","🤞","👏","🙏","💪","🫡","🖖","👀","🤷","🤦","👋","🤝"] },
+        { label: "Battle",    emoji: ["🚀","🛸","🛰️","🌌","⭐","💫","☄️","🔥","💥","⚡","🎯","🛡️","⚔️","💣","☠️","💀","🔧","⚙️","📡","🔋"] },
+        { label: "Signals",   emoji: ["✅","❌","❓","❗","⚠️","🎲","🏆","🥇","❤️","💔","🍺","🎉","⏳","🆘"] }
+    ];
+
+    /* Classic text smileys, swapped for the real thing as the message is sent (so
+       what is stored is what everyone sees, including anyone who never types them).
+       Longest token first — the alternation below is ordered, so ":-)" has to get a
+       look before ":)" or it would never match. */
+    const EMOTICONS = {
+        ":-)": "🙂",  ":)": "🙂",
+        ":-D": "😄",  ":D": "😄",
+        ";-)": "😉",  ";)": "😉",
+        ":-(": "🙁",  ":(": "🙁",
+        ":-P": "😛",  ":P": "😛",  ":p": "😛",
+        ":-O": "😮",  ":O": "😮",  ":o": "😮",
+        ":'(": "😢",
+        "xD": "😆",   "XD": "😆",
+        "<3": "❤️",
+        "\\o/": "🙌",
+        "o7": "🫡"
+    };
+
+    /* Only matched when the token stands alone between spaces, so "10:00" and a
+       smiley at the end of a URL are both left alone. The leading (^|\s) is a
+       capture rather than a lookbehind for Safari's sake — lookbehind is recent
+       there, and this file has to run on whatever the player brought. */
+    const EMOTICON_RE = new RegExp(
+        "(^|\\s)(" +
+        Object.keys(EMOTICONS)
+              .sort(function(a, b){ return b.length - a.length; })
+              .map(function(t){ return t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); })
+              .join("|") +
+        ")(?=\\s|$)", "g"
+    );
+
     // Define chat first
     var chat = {
 
@@ -42,10 +121,8 @@ if (! isset($chatelement))
             });
             $(chat.chatElement).on('onshow', chat.resizeChat);
 
-            var h = $(chat.chatElement + " .chatcontainer").height();
-            $(chat.chatElement + " .chatMessages").css("height", (h-20)+"px");
-            var c = $(chat.chatElement + " .chatMessages");
-            c.scrollTop(c[0].scrollHeight);
+            chat.initEmoji();
+            chat.scrollToBottom();
 
             // abort outstanding requests on navigation away
             $(window).on('beforeunload.chat', function(){
@@ -54,6 +131,110 @@ if (! isset($chatelement))
                 }
                 chat.polling = false;
                 chat.requesting = false;
+            });
+        },
+
+        /* The message list used to be sized from JS — `.chatMessages` got an inline
+           height of (container height - 20). chat.css lays the panel out as a flex
+           column now, so that measurement is both unnecessary and wrong (it fought
+           the flex row and needed an !important to beat). All that is left of it is
+           pinning the scroll to the newest message. */
+        scrollToBottom: function(){
+            var c = $(chat.chatElement + " .chatMessages");
+            if (c.length) c.scrollTop(c[0].scrollHeight);
+        },
+
+        /* ── Emoji picker ─────────────────────────────────────────────────────
+           Built here rather than printed as markup because chat.php is included
+           twice on game.php and this keeps the emitted HTML to one empty div. */
+        initEmoji: function(){
+            var panel  = $(chat.chatElement + " .chatEmojiPanel");
+            var button = $(chat.chatElement + " .chatEmojiButton");
+            if (!panel.length || !button.length) return;
+
+            EMOJI_GROUPS.forEach(function(group){
+                var g = $('<div class="chatEmojiGroup"></div>');
+                $('<div class="chatEmojiGroupLabel"></div>').text(group.label).appendTo(g);
+                var grid = $('<div class="chatEmojiGrid"></div>').appendTo(g);
+                group.emoji.forEach(function(glyph){
+                    $('<button type="button" class="chatEmojiKey" tabindex="-1"></button>')
+                        .attr("aria-label", "Insert " + glyph)
+                        .text(glyph)
+                        .appendTo(grid);
+                });
+                g.appendTo(panel);
+            });
+
+            // mousedown default = "move focus here", which would blur the input and,
+            // in game.php, hand the map's key handlers back the keyboard mid-message.
+            // Suppressing it on both the key and the panel keeps the caret where it is.
+            button.on("mousedown", function(e){ e.preventDefault(); });
+            panel.on("mousedown", function(e){ e.preventDefault(); });
+
+            button.on("click", function(e){
+                e.preventDefault();
+                e.stopPropagation();
+                chat.toggleEmojiPanel();
+            });
+
+            panel.on("click", ".chatEmojiKey", function(e){
+                e.preventDefault();
+                chat.insertAtCaret($(this).text());
+            });
+
+            // Anything outside this chat's own composer or picker closes its own panel.
+            // Each include registers its own handler; they do not fight, because each
+            // only ever looks at (and closes) its own element.
+            $(document).on("mousedown", function(e){
+                if (panel.prop("hidden")) return;
+                var target = $(e.target);
+                if (target.closest(chat.chatElement + " .chatinputTd").length) return;
+                if (target.closest(chat.chatElement + " .chatEmojiPanel").length) return;
+                chat.toggleEmojiPanel(false);
+            });
+        },
+
+        toggleEmojiPanel: function(show){
+            var panel  = $(chat.chatElement + " .chatEmojiPanel");
+            var button = $(chat.chatElement + " .chatEmojiButton");
+            if (!panel.length) return;
+
+            if (show === undefined) show = panel.prop("hidden");
+            if (show === !panel.prop("hidden")) return;      // already in that state
+
+            panel.prop("hidden", !show);
+            button.attr("aria-expanded", show ? "true" : "false");
+
+            // The picker takes its height out of the message list, so the list is a
+            // different size either side of this — without re-pinning it, opening the
+            // picker scrolls the newest messages out of sight.
+            chat.scrollToBottom();
+
+            if (show) $(chat.chatElement + " .chatinput").trigger("focus");
+        },
+
+        insertAtCaret: function(text){
+            var input = $(chat.chatElement + " .chatinput");
+            var el = input[0];
+            if (!el) return;
+
+            var start = el.selectionStart;
+            var end   = el.selectionEnd;
+
+            if (typeof start === "number" && typeof end === "number"){
+                el.value = el.value.slice(0, start) + text + el.value.slice(end);
+                var caret = start + text.length;
+                el.setSelectionRange(caret, caret);
+            }else{
+                el.value += text;
+            }
+            el.focus();
+        },
+
+        // ":)" -> "🙂", but only where the token stands on its own. See EMOTICON_RE.
+        applyEmoticons: function(text){
+            return text.replace(EMOTICON_RE, function(match, lead, token){
+                return lead + EMOTICONS[token];
             });
         },
 
@@ -66,10 +247,7 @@ if (! isset($chatelement))
         resizeChat: function(){
             chat.setLastTimeChecked();
             chat.removeNewMessageTag();
-            var h = $(chat.chatElement + " .chatcontainer").height();
-            $(chat.chatElement + " .chatMessages").css("height", (h-20)+"px");
-            var c = $(chat.chatElement + " .chatMessages");
-            c.scrollTop(c[0].scrollHeight);
+            chat.scrollToBottom();
             chat.getLastTimeChecked();
         },
 
@@ -83,12 +261,21 @@ if (! isset($chatelement))
 
         onKeyUp: function(e){
             e.stopPropagation();
+
+            // Escape closes the picker rather than the message, so a player who opened
+            // it by accident is not made to reach for the mouse to get out again.
+            if (e.keyCode == 27){
+                chat.toggleEmojiPanel(false);
+                return;
+            }
+
             if (e.keyCode == 13){
                 var input = $(this);
-                var value = input.val();
+                var value = chat.applyEmoticons(input.val());
                 if (value.length === 0) return;
 
                 input.val("");
+                chat.toggleEmojiPanel(false);
                 chat.submitChatMessage(value);
             }
         },
@@ -310,12 +497,40 @@ document.addEventListener("visibilitychange", function() {
 
 </script>
 
-<div class="chatcontainer">
+<?php // .fv-chat carries the panel styling; .chatcontainer is kept because combatLog.php
+      // and declarations.php share it and chat.css still holds their base rules. ?>
+<div class="chatcontainer fv-chat<?php echo $chatcompact ? ' fv-chat-compact' : ''; ?>">
+<?php if ($chattitle !== null): ?>
+    <div class="fv-chat-head">
+        <span><?php echo htmlspecialchars($chattitle, ENT_QUOTES, 'UTF-8'); ?></span>
+<?php   if ($chatmeta !== null): ?>
+        <span class="fv-chat-meta"><?php echo htmlspecialchars($chatmeta, ENT_QUOTES, 'UTF-8'); ?></span>
+<?php   endif; ?>
+    </div>
+<?php endif; ?>
     <div class="chatMessages"></div>
+    <?php // A row of the flex column, between the log and the composer — NOT a popup
+          // floating over them. Every one of the four hosts wraps the chat in a panel
+          // that clips (`.chat-panel` needs it for its rounded corners), so an absolutely
+          // positioned picker got its top cut off; in the flow it simply takes its space
+          // from the message list for as long as it is open, and cannot escape anything.
+          //
+          // Filled in by chat.initEmoji(). Empty in the markup so the two includes on
+          // game.php do not each ship the same ~70 glyphs down the wire. ?>
+    <div class="chatEmojiPanel" hidden></div>
     <div class="chatinputTd">
-        <input class="chatinput" value="" name="chatinput">
+        <div class="chatcomposer">
+            <input class="chatinput" value="" name="chatinput" autocomplete="off"
+                   placeholder="<?php echo htmlspecialchars($chatplaceholder, ENT_QUOTES, 'UTF-8'); ?>">
+            <button type="button" class="chatEmojiButton" aria-expanded="false" aria-label="Insert emoji">🙂</button>
+        </div>
     </div>
 </div>
+<?php
+// Consumed — game.php includes this file twice and the first include's title must not
+// leak into the second.
+unset($chattitle, $chatmeta, $chatplaceholder, $chatcompact);
+?>
 
 
 

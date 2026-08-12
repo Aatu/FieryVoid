@@ -799,18 +799,26 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
         </div>
     </div>
 
+    <?php
+    // No $chattitle on either of these: the chat already sits behind a labelled tab
+    // (GAME CHAT / CHAT), so chat.php's head bar would only repeat it and cost a line
+    // of the log panel. $chatcompact trims the composer for the same reason — see
+    // .fv-chat-compact in styles/chat.css.
+    ?>
     <div id="chat" class="logPanelEntry" style="display:none;">
-        <?php 
+        <?php
             $chatgameid = $gameid;
             $chatelement = "#chat";
+            $chatcompact = true;
             include("chat.php")
         ?>
     </div>
-    
+
     <div id="globalchat" class="logPanelEntry" style="display:none;">
-        <?php 
+        <?php
             $chatgameid = 0;
             $chatelement = "#globalchat";
+            $chatcompact = true;
             include("chat.php")
         ?>
     </div>

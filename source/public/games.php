@@ -72,10 +72,6 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       gamedata.thisplayer = <?php echo $_SESSION["user"]; ?>;
       gamedata.defaultGameName = "<?php echo $defaultGameName; ?>";
       gamedata.defaultBackground = "21.PurpleNebula.jpg";
-
-      // Set here rather than in chat.php's markup: that file is also included by
-      // game.php, gamelobby.php and creategame.php, where "all players" would be wrong.
-      $("#globalchat .chatinput").attr("placeholder", "Message all players");
     });
     // BFCache restore freshness (games list page).
     // games.php bakes its game list into the page at server-render time and
@@ -209,13 +205,17 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
   </section>
 
 <?php
-// .chat-panel is now a WRAPPER around #globalchat rather than the same element. It has
-// to be, because the head bar must sit outside the scrolling body — #globalchat scrolls,
+// .chat-panel is a WRAPPER around #globalchat rather than the same element. It has to
+// be, because the head bar must sit outside the scrolling body — #globalchat scrolls,
 // so a header inside it would scroll away with the chat log.
 //
 // $chatelement stays "#globalchat": chat.php's JS selects the scrolling body, which is
-// still that id. Nothing in chat.php changes, which matters — game.php, gamelobby.php
-// and creategame.php include it too.
+// still that id.
+//
+// This page keeps its own .fv-panel-head (so the chat matches the news and games panels
+// beside it) and therefore does NOT set $chattitle — creategame.php and gamelobby.php do,
+// and get chat.php's own head bar instead. Everything else about how the chat looks now
+// lives in styles/chat.css and is shared by all four pages.
 //
 // The height moved off #globalchat's own inline style and onto the body below; it is a
 // little taller than the old 200px because the composer bar now has real padding of its

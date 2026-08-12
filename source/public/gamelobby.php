@@ -994,13 +994,24 @@ $optionsUsed = '';
         <!-- ✅ Your inserted fleetcheck panel -->
         <div id="fleetcheck" class="panel large lobby fleet-check-panel-container"><p id="fleetchecktxt" class="fleet-check-text-style"><span></div>
 
-        <div id="globalchat" class="panel large lobby global-chat-wrapper">
+        <?php
+        // A PANEL WRAPPER around #globalchat rather than the same element, matching
+        // games.php and creategame.php: the head bar has to sit outside the scrolling
+        // body or it scrolls away with the message log. .fv-chat-panel (chat.css) takes
+        // over the padding and the flow; .panel.large.lobby keeps the lobby's own width,
+        // border and fill.
+        ?>
+        <section class="panel large lobby global-chat-wrapper fv-chat-panel">
+        <div id="globalchat">
         <?php
             $chatgameid = 0;
             $chatelement = "#globalchat";
+            $chattitle = "Global Chat";
+            $chatmeta = "All players";
             include("chat.php")
         ?>
         </div>
+        </section>
 
 <!--        <div id="globalhelp" class="helppanel">
         <?php

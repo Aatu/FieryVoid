@@ -1,3 +1,36 @@
+/*
+ * chat.css — THE chat panel, for every page that includes chat.php.
+ *
+ * Consumers: games.php (global), creategame.php (global), gamelobby.php (global) and
+ * game.php TWICE (#chat = this game, #globalchat = everyone). chat.php links this file
+ * itself, so it arrives on all of them without any page having to remember to.
+ *
+ * WHY THE .fv-chat SCOPE
+ * ---------------------
+ * .chatcontainer is NOT chat-only: combatLog.php and declarations.php reuse it as a
+ * generic "fill the log panel" box, and both link this stylesheet directly. So the plain
+ * .chatcontainer / .chatMessages rules at the top are the legacy contract those two still
+ * depend on, and everything the chat panel actually looks like hangs off .fv-chat, a class
+ * chat.php adds alongside. Restyling chat therefore cannot reach the combat log.
+ *
+ * WHERE IT CAME FROM
+ * ------------------
+ * This is the games.php chat look (gamesPanel.css, Aug 2026) promoted to the shared sheet
+ * so creategame / gamelobby / game get it too. gamesPanel.css keeps only what is genuinely
+ * page layout — the .chat-panel wrapper and its .fv-panel-head — and now sets its wider
+ * gutter through --fv-chat-gutter rather than by re-declaring the paddings.
+ *
+ * THE GUTTER
+ * ----------
+ * --fv-chat-gutter is the side inset shared by the head bar, the message list and the
+ * composer, so all three line up on one left edge. It is a variable because the four hosts
+ * want different values (a 1000px landing panel and a 150px in-game log tab are not the
+ * same room). Set it on the .fv-chat element, not on a descendant.
+ */
+
+/* ── Legacy container contract ────────────────────────────────────────────────
+   Shared with #combatLogContainer and #declarationsContainer. Leave alone unless you
+   are prepared to check both of those. */
 .chatcontainer {
     width: 100%;
     height: 100%;
@@ -9,7 +42,7 @@
 .chatMessages {
     height: 100%;
     overflow-x: hidden;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 .chatMessages::-webkit-scrollbar {
@@ -28,47 +61,7 @@
     background: #5a7ea8;
 }
 
-.chatinput {
-    border: 0;
-    padding: 0;
-    height: 20px;
-    width: 100%;
-    border-radius: 5px;
-}
-
-.chatmessage {
-    margin: 2px 5px 2px 5px;
-    /*font-size:11px;*/
-    font-size: 12px;
-    /*actual text will have larger, separate size*/
-}
-
-.chattime {
-    color: #DEEBFF;
-}
-
-.chatuser {
-    color: #DEEBFF;
-}
-
-.chatingame {
-    color: #b34119;
-}
-
-.chatuser.mine {
-    /*color:#2f5123;*/
-    color: #00D800;
-    /*green*/
-}
-
-.chattext {
-    /*color:#496791;*/
-    color: #BDEAFA;
-    /*white-ish*/
-    font-style: normal;
-    font-size: 15px;
-}
-
+/* Combat log / declarations game title. Not chat, but they link this file. */
 .gameName {
     display: block;
     color: #57b6ec;
@@ -79,6 +72,374 @@
     margin: 4px 0 12px 0;
     padding-bottom: 6px;
     text-decoration: underline;
-    /*border-bottom: 1px solid #3c5574;*/
     text-shadow: 0 0 4px rgba(179, 65, 25, 0.5);
+}
+
+/* ══ The chat panel ═══════════════════════════════════════════════════════════
+   A flex column of three rows — optional head bar, scrolling log, docked composer —
+   each running the full width of its host with its own gutter, so nothing floats in
+   an inset box inside the panel.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.fv-chat {
+    --fv-chat-gutter: 12px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* ── Optional panel head ──────────────────────────────────────────────────────
+   Rendered only when the including page sets $chattitle (creategame, gamelobby).
+   game.php deliberately does not: its chat already sits under a GAME CHAT / CHAT tab
+   and a 150px log panel has no vertical room to spare. games.php supplies its own
+   .fv-panel-head so the chat matches its sibling panels.
+
+   Deliberately a visual twin of gamesPanel.css's .fv-panel-head — same Orbitron
+   micro-caps, same wash, same hairline — but a separate class, because that one is
+   games.php page furniture and this has to work on pages that never load that file. */
+.fv-chat > .fv-chat-head {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 7px var(--fv-chat-gutter) 6px;
+    font-family: var(--fv-display);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.7px;
+    text-transform: uppercase;
+    color: #c6e2ff;
+    background: linear-gradient(180deg, rgba(73, 103, 145, 0.58), rgba(73, 103, 145, 0.22));
+    border-bottom: 1px solid #2a6b8f;
+}
+
+/* gamesNew.css runs `* { font-family: Arial }`, and a universal selector matches these
+   spans DIRECTLY — a direct match beats an inherited display face whatever the
+   specificity. So the face has to be re-asserted on the children, not just the bar. */
+.fv-chat > .fv-chat-head * {
+    font-family: inherit;
+}
+
+.fv-chat .fv-chat-meta {
+    font-family: var(--fv-mono);
+    font-weight: 400;
+    font-size: 10px;
+    letter-spacing: 0.7px;
+    color: var(--fv-text-dim);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── The log ──────────────────────────────────────────────────────────────────
+   `height: auto` undoes the .chatMessages base rule above. chat.php used to also set
+   an inline pixel height here from JS (container height - 20); that predated the flex
+   column and fought it, so it is gone — do not put it back, flex sizes this row now. */
+.fv-chat .chatMessages {
+    height: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;               /* was `scroll`: a permanently empty scrollbar gutter */
+    padding: 9px var(--fv-chat-gutter);
+}
+
+.fv-chat .chatMessages::-webkit-scrollbar {
+    width: 8px;
+}
+
+.fv-chat .chatMessages::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.fv-chat .chatMessages::-webkit-scrollbar-thumb {
+    background: var(--fv-scroll-thumb);
+    border-radius: 4px;
+}
+
+.fv-chat .chatMessages::-webkit-scrollbar-thumb:hover {
+    background: var(--fv-scroll-thumb-hover);
+}
+
+.fv-chat .chatmessage {
+    margin: 0 0 4px;
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+/* Monospace + tabular-nums makes every timestamp the same width, so every username
+   starts at the same x and the log reads as a readout rather than as ragged prose. */
+.fv-chat .chattime {
+    font-family: var(--fv-mono);
+    font-size: 10px;
+    letter-spacing: 0;
+    color: #89a2b8;
+    font-variant-numeric: tabular-nums;
+}
+
+.fv-chat .chatuser {
+    font-family: var(--fv-display);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.7px;
+    text-transform: uppercase;
+    color: var(--fv-accent);
+}
+
+.fv-chat .chatuser.mine {
+    color: var(--fv-mine-soft);
+}
+
+/* The emoji faces are the reason for the font list: Arial has no colour glyphs, and
+   without a named emoji face after it a browser can fall back to a mono outline (or a
+   tofu box on a bare Linux install). Naming all three platform fonts keeps a 🙂 a 🙂. */
+.fv-chat .chattext {
+    font-family: Arial, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+        "Segoe UI Symbol", sans-serif;
+    font-size: 13.5px;
+    color: #c8dced;
+    overflow-wrap: anywhere;        /* a pasted URL must not widen the panel */
+}
+
+/* ── The composer ─────────────────────────────────────────────────────────────
+   Docked to the foot of the panel, full width, rather than an input floating in a
+   gutter. The input itself used to be the last raw browser control on these pages:
+   `border: 0` on a white default, at the bottom of a dark panel. */
+.fv-chat .chatinputTd {
+    position: relative;
+    flex: none;
+    margin: 0;
+    padding: 9px var(--fv-chat-gutter) 10px;
+    background: rgba(4, 22, 28, 0.55);
+    border-top: 1px solid rgba(33, 90, 122, 0.55);
+}
+
+/* The prompt caret. 9px is the input's own left padding, so this lands inside it. */
+.fv-chat .chatinputTd::before {
+    content: "\203A";
+    position: absolute;
+    left: calc(var(--fv-chat-gutter) + 9px);
+    top: 50%;
+    transform: translateY(-50%);
+    margin-top: -1px;
+    font-family: var(--fv-mono);
+    font-size: 14px;
+    line-height: 1;
+    color: var(--fv-accent);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* The input and the emoji key are one row so the key sits INSIDE the field's visual
+   width rather than below it — the composer has to stay one bar tall on a 150px
+   in-game log panel. */
+.fv-chat .chatcomposer {
+    display: flex;
+    align-items: stretch;
+    gap: 6px;
+}
+
+.fv-chat .chatinput {
+    box-sizing: border-box;
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 30px;
+    padding: 0 10px 0 23px;
+    background: #04161c;
+    color: var(--fv-text);
+    border: 1px solid #215a7a;
+    border-radius: 2px;
+    font-size: 13px;
+}
+
+.fv-chat .chatinput::placeholder {
+    color: #5f7688;
+}
+
+.fv-chat .chatinput:focus {
+    outline: none;
+    border-color: var(--fv-accent);
+    box-shadow: 0 0 0 1px rgba(139, 202, 242, 0.35);
+}
+
+/* ── Emoji ────────────────────────────────────────────────────────────────────
+   The key that opens the picker. Same height and border as the input so the two read
+   as one control. */
+.fv-chat .chatEmojiButton {
+    flex: none;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    background: #04161c;
+    border: 1px solid #215a7a;
+    border-radius: 2px;
+    color: var(--fv-text);
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+    transition: border-color 0.12s linear, background-color 0.12s linear;
+}
+
+.fv-chat .chatEmojiButton:hover,
+.fv-chat .chatEmojiButton[aria-expanded="true"] {
+    background: #0a2a36;
+    border-color: var(--fv-accent);
+}
+
+.fv-chat .chatEmojiButton:focus-visible {
+    outline: none;
+    border-color: var(--fv-accent);
+    box-shadow: 0 0 0 1px rgba(139, 202, 242, 0.35);
+}
+
+/* A ROW of the flex column, sitting between the log and the composer — not a popup
+   floating above them. All four hosts wrap the chat in a panel that clips its overflow
+   (.chat-panel needs it for its rounded corners), so an absolute picker anchored to the
+   composer had its top sheared off. In the flow it borrows its height from the message
+   list while it is open and cannot escape anything.
+
+   max-height is a PERCENTAGE for the same reason: 45% of the chat leaves the log the
+   larger half whether the chat is a 230px landing panel or a 150px in-game tab, where a
+   fixed pixel height would have swallowed the whole thing. It resolves because .fv-chat
+   is height: 100% of a host that always has a definite height. */
+.fv-chat .chatEmojiPanel {
+    flex: 0 0 auto;
+    max-height: 45%;
+    overflow-y: auto;
+    padding: 6px var(--fv-chat-gutter) 8px;
+    background: #071e27;
+    border-top: 1px solid rgba(33, 90, 122, 0.55);
+}
+
+.fv-chat .chatEmojiPanel[hidden] {
+    display: none;
+}
+
+.fv-chat .chatEmojiPanel::-webkit-scrollbar {
+    width: 8px;
+}
+
+.fv-chat .chatEmojiPanel::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.fv-chat .chatEmojiPanel::-webkit-scrollbar-thumb {
+    background: var(--fv-scroll-thumb);
+    border-radius: 4px;
+}
+
+.fv-chat .chatEmojiGroupLabel {
+    font-family: var(--fv-display);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--fv-text-dim);
+    margin: 6px 0 4px;
+}
+
+.fv-chat .chatEmojiGroup:first-child .chatEmojiGroupLabel {
+    margin-top: 0;
+}
+
+/* auto-fill rather than a fixed column count: the same picker has to work in a 1000px
+   landing panel and in a 300px phone log tab, and this way it just reflows. */
+.fv-chat .chatEmojiGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(28px, 1fr));
+    gap: 2px;
+}
+
+.fv-chat .chatEmojiKey {
+    height: 26px;
+    padding: 0;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+        "Segoe UI Symbol", sans-serif;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.fv-chat .chatEmojiKey:hover,
+.fv-chat .chatEmojiKey:focus-visible {
+    outline: none;
+    background: #10333f;
+    border-color: #2a6b8f;
+}
+
+/* ── Compact ──────────────────────────────────────────────────────────────────
+   For a chat with no room to spend: game.php's log panel is 150px tall until the
+   player expands it, so the ~49px the composer costs at the default padding is a
+   third of the tab. Trimmed to ~40px, which is still a real control, and the gutter
+   comes in to match — a 12px inset on a panel that narrow is width the messages want.
+
+   Only the composer shrinks. The message type stays exactly the size it is elsewhere:
+   this is the chat players read DURING a game, and making it the smallest copy on the
+   site would be precisely backwards. */
+.fv-chat-compact {
+    --fv-chat-gutter: 9px;
+}
+
+.fv-chat-compact .chatMessages {
+    padding-top: 7px;
+    padding-bottom: 7px;
+}
+
+.fv-chat-compact .chatinputTd {
+    padding: 6px var(--fv-chat-gutter) 7px;
+}
+
+.fv-chat-compact .chatinput,
+.fv-chat-compact .chatEmojiButton {
+    height: 27px;
+}
+
+.fv-chat-compact .chatEmojiButton {
+    width: 27px;
+    font-size: 14px;
+}
+
+/* ══ The panel around it ══════════════════════════════════════════════════════
+   .fv-chat-panel is the chrome — border, fill, corners — and .fv-chat is the rows
+   inside it. creategame.php and gamelobby.php put it on a .panel so they keep their
+   page's own border and fill; only the padding and the flow are taken over here.
+
+   games.php uses its own .chat-panel (gamesPanel.css) instead, and game.php uses none
+   at all — its chat is a tab body inside #logcontainer, which is already the panel.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.fv-chat-panel {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;               /* lets the head bar run square to a rounded edge */
+}
+
+/* A page-level panel is 1000-1400px across, so it gets the wider gutter games.php runs
+   rather than the 12px default — that default is sized for game.php, where the chat is
+   a tab body in a 150px log panel and every pixel of width is a character of message. */
+.fv-chat-panel .fv-chat {
+    --fv-chat-gutter: 18px;
+}
+
+@media only screen and (max-width: 600px) {
+    .fv-chat-panel .fv-chat {
+        --fv-chat-gutter: 15px;
+    }
+}
+
+/* gamesNew.css styles #globalchat as a standalone box — its own fill, 10px of padding
+   and its own scrollbar. Inside a .fv-chat-panel it is only the flex body, so all of
+   that has to be unwound, and an id in the selector is what it takes to outrank an id.
+   #chat is listed for symmetry; no page currently wraps it. */
+.fv-chat-panel #globalchat,
+.fv-chat-panel #chat {
+    box-sizing: border-box;
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: hidden;               /* .chatMessages does the scrolling — not both */
 }
