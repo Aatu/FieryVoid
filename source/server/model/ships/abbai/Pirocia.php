@@ -58,8 +58,8 @@ class pirocia extends StarBaseSixSections
 
 		for ($i = 0; $i < sizeof($this->locations); $i++){
 
-			$min = 0 + ($i*60);
-			$max = 120 + ($i*60);
+			$min = (0 + ($i*60)) % 360;
+			$max = (120 + ($i*60)) % 360;
 
 			$struct = Structure::createAsOuter(4, 100,$min,$max);
 			$cargoBay = new CargoBay(4, 25);

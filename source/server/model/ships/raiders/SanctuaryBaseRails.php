@@ -47,8 +47,8 @@ class SanctuaryBaseRails extends StarBaseSixSections{
 		$this->addPrimarySystem(new HeavyPlasma(5, 8, 5, 0, 360));
 		$this->addPrimarySystem(new Structure( 5, 90));
 		for ($i = 0; $i < sizeof($this->locations); $i++){
-			$min = 0 + ($i*60);
-			$max = 120 + ($i*60);
+			$min = (0 + ($i*60)) % 360;
+			$max = (120 + ($i*60)) % 360;
 
 			$struct = Structure::createAsOuter(3, 76,$min,$max);
 			$hangar = new Hangar(3, 1, 1);

@@ -63,8 +63,8 @@ class HyachUtaraTor extends StarBaseSixSections{
 
 		for ($i = 0; $i < sizeof($this->locations); $i++){
 
-			$min = 0 + ($i*60);
-			$max = 120 + ($i*60);
+			$min = (0 + ($i*60)) % 360;
+			$max = (120 + ($i*60)) % 360;
 
 			$struct = Structure::createAsOuter(5, 150,$min,$max);
 			$hangar = new Hangar(5, 8, 6);
@@ -78,7 +78,9 @@ class HyachUtaraTor extends StarBaseSixSections{
 			$subReactor->endArc = $max;	
 
 			$systems = array(
-				new SpinalLaser(5, 12, 12, ($min+30), ($max-30)),
+				//narrowed 60 deg mount: wrap the derived bounds too, or the section whose $max wraps
+				//to 0 yields a negative endArc (mathlib::isInArc does not normalise its inputs)
+				new SpinalLaser(5, 12, 12, (($min+30) % 360), (($max-30+360) % 360)),
 				new BlastLaser(5, 10, 5, $min, $max),
 				new BlastLaser(5, 10, 5, $min, $max),
 				new Maser(5, 6, 3, $min, $max),
