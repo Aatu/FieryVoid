@@ -71,7 +71,7 @@ class Watchtower extends SmallStarBaseFourSections{
 				4 => "TAG:Twin Array",
 				8 => "TAG:Assault Laser",
 				9 => "TAG:Hangar",
-				10 => "TAG:Catapult",
+				10 => "TAG:LCV Rail",
 				18 => "Structure",
 				20 => "Primary",
 			);

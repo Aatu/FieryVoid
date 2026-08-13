@@ -74,7 +74,7 @@ class SanctuaryBase extends StarBaseSixSections{
 			$loc = $this->locations[$i];
 			$this->hitChart[$loc] = array(
 				3 => "TAG:Standard Particle Beam",
-				7 => "TAG:Cargo",
+				7 => "TAG:Cargo Bay",
 				8 => "TAG:Hangar",
 				9 => "TAG:Sub Reactor",
 				18 => "Structure",

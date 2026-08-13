@@ -89,7 +89,7 @@ class ProtectorateNorgath extends StarBaseSixSections{
 				3 => "TAG:Neutron Laser",
 				5 => "TAG:Fusion Cannon",
 				6 => "TAG:Hangar",
-				8 => "TAG:Cargo",
+				8 => "TAG:Cargo Bay",
 				9 => "TAG:Sub Reactor",
 				18 => "Structure",
 				20 => "Primary",
