@@ -3368,6 +3368,75 @@ public function getAllEWExceptDEW($turn){
         }
         return $foundLocation;
     }
+    /* Which section a BOARDING unit attaches to - breaching pods and grappling claws only.
+       DO NOT use for weapon fire.
+
+       Ordinary fire takes the arcs that CONTAIN the shooter's bearing and, where they overlap,
+       doGetHitSectionBearing rolls profile-weighted between them. On a six-section hull every
+       hex-edge bearing is ambiguous three ways, so which block a boarder grabbed was a roll the
+       player could neither predict nor plan around - and with per-section attachment limits a
+       clash now costs the whole attempt (and, once §3 of BOARDING_ATTACHMENT_PLAN lands, rams
+       the boarder into an Enormous base). So boarding gets a deterministic rule.
+
+       The rule (user ruling 2026-08-13): attach to the section whose arc is CENTRED on the hex
+       edge the unit crossed. A same-hex bearing is always a multiple of 60 degrees - hex facings
+       and hex neighbours both are - and every section arc is centred on one of those bearings,
+       so this maps the six approach directions straight onto 1/41/42/2/32/31 on a six-section
+       hull. Verified a NO-OP on every hull whose arcs do not overlap: there the containing arc
+       is already the nearest-centred one, so nothing about existing hulls changes.
+
+       Two sections equidistant from the entry edge is a genuine boundary rather than something
+       to invent an answer for - dead astern of a hull with no aft section, or head-on to a
+       port/starboard-only one - and falls through to getHitSection's existing roll.
+
+       Shares activeHitLocations with getHitSection, so a boarder's section and its own gunfire
+       agree exactly as two shots from one shooter already do, and so both fire orders of a
+       two-pod flight resolve to one section. */
+    public function getAttachSection($shooter, $turn){
+        if (!isset($this->activeHitLocations[$shooter->id])){
+            $pick = $this->doGetAttachSectionBearing($this->getBearingOnUnit($shooter));
+            if ($pick !== null) $this->activeHitLocations[$shooter->id] = $pick;
+        }
+
+        //Reads the pick back (or rolls the ordinary way when the bearing tied) and applies the
+        //destroyed-structure -> Primary redirect.
+        return $this->getHitSection($shooter, $turn);
+    }
+
+    //Section whose arc is centred nearest $relativeBearing; null if none contains the bearing
+    //or if two different sections are equally centred on it. See getAttachSection.
+    protected function doGetAttachSectionBearing($relativeBearing){
+        $best = null;
+        $bestDist = null;
+        $tied = false;
+
+        foreach ($this->getLocations() as $loc){
+            if (!mathlib::isInArc($relativeBearing, $loc["min"], $loc["max"])) continue;
+
+            $dist = mathlib::getAngleDistance($relativeBearing,
+                        mathlib::getArcCentre($loc["min"], $loc["max"]));
+
+            if ($bestDist === null || $dist < $bestDist - 0.001){
+                $bestDist = $dist;
+                $best = $loc;
+                $tied = false;
+            }elseif ($dist < $bestDist + 0.001 && (int)$loc["loc"] !== (int)$best["loc"]){
+                $tied = true; //two distinct sections equally centred - let the roll decide
+            }
+        }
+
+        if ($best === null || $tied) return null;
+
+        //Enrich with remHealth/armour to match what doGetHitSectionBearing returns. fillLocations
+        //answers NULL if a location has no Structure of its own, so fall back to the raw entry
+        //rather than losing the pick - the only fields activeHitLocations consumers read are
+        //"loc" and "profile", and getLocations already carries both.
+        $filled = $this->fillLocations(array($best));
+        if (!is_array($filled) || !isset($filled[0])) return $best;
+
+        return $filled[0];
+    }
+
     public function getHitSectionPos($pos, $turn, $returnDestroyed = false){ //returns value - location! THIS IS FOR BALLISTICS!
         $foundLocation = 0;
         $loc = $this->doGetHitSectionPos($pos); //finds array with relevant data!

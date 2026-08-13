@@ -120,6 +120,27 @@ window.mathlib = {
 		return a;
 	},
 
+	/* Bearing at the middle of an arc. start === end means a full circle, whose "centre" is
+	   simply opposite the start - which is what makes a catch-all 360 arc lose to any narrower
+	   one under getAngleDistance. Mirror of mathlib::getArcCentre (source/server/lib/mathlib.php);
+	   used by weaponManager.getAttachLocation to pick the section an arc is CENTRED on rather
+	   than merely contains. */
+	getArcCentre: function getArcCentre(start, end) {
+		start = start % 360;
+		end = end % 360;
+		var width = (end - start + 360) % 360;
+		if (width === 0) width = 360;
+
+		return (start + width / 2) % 360;
+	},
+
+	//Shortest angular separation between two bearings, 0-180. Mirror of mathlib::getAngleDistance.
+	getAngleDistance: function getAngleDistance(a, b) {
+		var d = Math.abs(a - b) % 360;
+
+		return (d > 180) ? 360 - d : d;
+	},
+
 	isInArc: function isInArc(direction, start, end) {
 		//direction: 300 start: 360 end: 240
 		direction = Math.round(direction);

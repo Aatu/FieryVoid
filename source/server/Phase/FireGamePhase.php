@@ -14,7 +14,9 @@ class FireGamePhase implements Phase
         $servergamedata = $dbManager->getTacGamedata($gameData->forPlayer, $gameData->id);
         Firing::prepareFiring($servergamedata, $dbManager); //Marcin Sawicki, October 2017: new approach: calculate base hit chance first!
         Firing::automateIntercept($servergamedata);
-        Firing::fireWeapons($servergamedata);
+        //$dbManager is threaded through so createFailedAttachRamOrders can persist each
+        //auto-ram FireOrder immediately (real DB id) before it resolves - see that method.
+        Firing::fireWeapons($servergamedata, $dbManager);
         Criticals::setCriticals($servergamedata);
 
 
