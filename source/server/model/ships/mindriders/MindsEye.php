@@ -152,7 +152,7 @@ class MindsEye extends SixSidedShip{
 				10 => "Thought Wave",
 				11 => "Thought Shield",
 				12 => "Hangar",	
-				14 => "Scanner",
+				14 => "ELINT Scanner",
 				16 => "Engine",
 				17 => "Jump Engine",
 				19 => "Reactor",

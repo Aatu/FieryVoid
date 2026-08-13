@@ -65,7 +65,7 @@ class Orrono extends BaseShip{
 			0=> array(
 				9 => "Structure",
 				12 => "Jump Engine",
-				15 => "Scanner",
+				15 => "ELINT Scanner",
 				17 => "Engine",
 				19 => "Reactor",
 				20 => "C&C",

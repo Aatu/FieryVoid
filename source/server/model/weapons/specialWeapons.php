@@ -4797,7 +4797,13 @@ class VorlonLightningCannon extends Weapon{
 class VorlonLightningGun extends Weapon{
 	public $name = "VorlonLightningGun";
 	public $displayName = "Lightning Gun";
-	
+	//the constructor rewrites displayName per instance ('Lightning Gun A'..'D' - the pairing letter),
+	//so a hit-chart entry naming the mount directly matched nothing. VorlonLightningCannon keeps its
+	//plain displayName, which is why the Dreadnought's "31:Lightning Cannon" works and the Strike
+	//Cruiser's "31:Lightning Gun" did not. Same fix as the Kirishiac Orbital: a stable chart alias.
+	//The 'Lightning Gun' TAG added in the constructor is unaffected - TAG: entries keep working.
+	public $hitChartName = "Lightning Gun";
+
 	public $animation = "laser";
 	public $animationColor = array(195, 235, 195);
 	

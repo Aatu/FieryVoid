@@ -2002,7 +2002,14 @@ class ElintScanner extends Scanner implements SpecialAbility{
     public $name = "elintScanner";
     public $displayName = "ELINT Scanner";
     public $specialAbilities = array("ELINT");
-    public $iconPath = "elintArray.png";   
+    public $iconPath = "elintArray.png";
+	//hit-chart alias (getSystemsByNameLoc matches displayName OR hitChartName): 26 hulls mount an
+	//ELINT array as their ONLY scanner and chart that band as plain "Scanner" - without the alias
+	//those rolls match nothing and silently drop through to Structure. Hulls that spell out
+	//"ELINT Scanner" keep working (displayName still matches); baradaTomguScoutCruiser charts both
+	//names but at different locations, so they still resolve to the intended array each.
+	//NOTE: TAG: lookups (getSystemsByTag) do NOT consult hitChartName - use a tag for those.
+	public $hitChartName = "Scanner";
 
     function __construct($armour, $maxhealth, $powerReq, $output ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );

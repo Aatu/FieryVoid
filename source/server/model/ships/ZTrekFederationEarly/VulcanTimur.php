@@ -88,7 +88,7 @@ class VulcanTimur extends MediumShip{
 			7 => "Structure",
 			9 => "Tractor Beam",
 			12 => "Hangar",			
-			14 => "Scanner",
+			14 => "ELINT Scanner",
 			16 => "Engine",
 			18 => "Reactor",
 			20 => "C&C",

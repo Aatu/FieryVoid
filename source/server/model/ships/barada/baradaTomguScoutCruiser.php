@@ -93,7 +93,7 @@ class baradaTomguScoutCruiser extends BaseShip{
 			0=> array(
 				9 => "Structure",
 				11 => "Jump Engine",
-				13 => "Scanner",
+				13 => "ELINT Scanner",
 				15 => "Engine",
 				18 => "Hangar",
 				19 => "Reactor",

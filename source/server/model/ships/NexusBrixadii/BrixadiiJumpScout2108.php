@@ -67,7 +67,7 @@ class BrixadiiJumpScout2108 extends BaseShipNoAft{
                     8 => "Structure",
                     10 => "Jump Engine",
                     12 => "Thruster",
-					14 => "Scanner",
+					14 => "ELINT Scanner",
                     16 => "Engine",
                     17 => "Hangar",
                     19 => "Reactor",
