@@ -391,8 +391,16 @@
 @media only screen and (max-width: 1024px) {}
 
 @media only screen and (max-width: 765px) {
+    /* .confirm is content-box with 10px of padding and a 1px border, so its `max-width:
+       100%` actually resolves to 100% + 22px: on a phone every plain confirm (the fleet
+       dropdown's availability and delete prompts among them) is wider than the screen and
+       hangs ~11px off BOTH edges - measured at a 390px viewport, box 412px, left -11px.
+       border-box makes the padding land inside the clamp, and the gutter keeps the border
+       off the screen edges. Same treatment the multi-value dialogs below already get. */
     .confirm {
         min-width: unset;
+        box-sizing: border-box;
+        max-width: calc(100% - 16px);
     }
 
     /* The multi-value and hangar confirm dialogs set fixed min-widths
@@ -1259,6 +1267,12 @@
    with the rest. */
 .confirm.fleetDialog {
     width: 420px;
+    /* Hard floor, independent of the phone rule at the foot of this block: the dialog can
+       never be wider than the screen it is on, at ANY viewport width, so a device that
+       falls between the breakpoints still gets a 16px gutter either side rather than a
+       panel hanging off both edges. border-box so the 2px border counts inside it. */
+    max-width: calc(100vw - 32px);
+    box-sizing: border-box;
     padding: 0;
     text-align: left;
     font-size: 13px;
@@ -1384,9 +1398,34 @@
     border-color: var(--fv-accent);
 }
 
-@media (max-width: 520px) {
+/* Phones and portrait tablets. `92%` of a 520px-or-narrower screen made this a near
+   full-width sheet, and between 521px and this breakpoint the desktop 420px was most of a
+   portrait screen - either way it read as far too wide for a one-line question (user
+   report 2026-08-14). A fixed compact width keeps it looking like a dialog at every
+   portrait size instead; on a screen too narrow to hold it the max-width above clamps it,
+   so this is a ceiling, not a floor. 765px matches the breakpoint the rest of this file
+   already uses. The padding comes in with it: 18px gutters inside a 340px panel is a lot
+   of the line to spend on air. */
+@media (max-width: 765px) {
     .confirm.fleetDialog {
-        width: 92%;
+        width: 340px;
+    }
+
+    .confirm.fleetDialog .fleetDialogTitle {
+        padding: 11px 14px 3px;
+    }
+
+    .confirm.fleetDialog .fleetDialogSub {
+        padding: 0 14px 10px;
+    }
+
+    .confirm.fleetDialog .fleetDialogBody {
+        padding: 12px 14px 4px;
+    }
+
+    .confirm.fleetDialog .ui {
+        gap: 8px;
+        padding: 12px 14px 14px;
     }
 }
 
