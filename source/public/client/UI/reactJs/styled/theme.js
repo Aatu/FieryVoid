@@ -39,6 +39,10 @@ const theme = {
                                                 //the converted surfaces kept this text colour, so it
                                                 //is still the right value to reach for on chrome.
         overlayBg: "black",                     //--fv-overlay     - map tooltips + .confirm
+        overlayBgSoft: "rgba(0, 0, 0, 0.65)",   //--fv-overlay-soft - the same, see-through as a FILL.
+        //                                        Element opacity fades TEXT as well as panel; putting the
+        //                                        translucency here keeps tooltip text at full strength.
+        //                                        Never combine with element opacity (alpha compounding).
     },
     fonts: {
         body: "arial",

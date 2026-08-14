@@ -507,6 +507,14 @@ window.PhaseStrategy = function () {
         this.showAppropriateEW();
 
         if (window.LosSprite) mathlib.clearLosSprite();
+
+        //Both of these mutate the scene (mesh z, facing sprites, EW lines) outside the
+        //animation list, so the render-loop invariant applies. A hover that ORIGINATES ON
+        //THE CANVAS is masked: webglScene.mouseMove already requested a render for the same
+        //event. A hover driven from the DOM — the hex picker's rows — produces no canvas
+        //event at all, so without this the icon never actually redraws and the raise and
+        //the heading/facing sprites simply never appear.
+        if (window.webglScene) window.webglScene.requestRender();
     };
 
     PhaseStrategy.prototype.onMouseOverShips = function (ships, payload) {
@@ -570,6 +578,12 @@ window.PhaseStrategy = function () {
         icon.showBDEW();
         icon.showMDEW();
         icon.setHighlighted(true);
+
+        //See the note in onMouseOutShips: setHighlighted raises the icon out of the pile
+        //and shows its prow/movement sprites, which is a scene mutation and therefore has
+        //to ask for a frame. Canvas-driven hovers get one for free from
+        //webglScene.mouseMove; DOM-driven ones (the hex picker) do not.
+        if (window.webglScene) window.webglScene.requestRender();
     };
 
     PhaseStrategy.prototype.showShipEW = function (ship) {
