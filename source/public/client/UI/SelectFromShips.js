@@ -42,7 +42,7 @@ window.SelectFromShips = function () {
     var CATEGORY_ORDER = ['ship', 'flight', 'mine', 'terrain'];
     var CATEGORY_LABEL = { ship: 'Ships', flight: 'Flights', mine: 'Mines', terrain: 'Terrain' };
 
-    var INI_TITLE = 'Initiative order — the movement group, as shown in the Order of Battle';
+    var INI_TITLE = 'Initiative order';
 
     // Which of the two shapes this instance takes. An anchored popover is the wrong form
     // on a phone: the anchor is under the finger that opened it, and there is no room
