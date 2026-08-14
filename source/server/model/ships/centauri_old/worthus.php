@@ -224,7 +224,7 @@ class Worthus extends SmallStarBaseFourSections{
 				9 => "TAG:Cargo Bay",
 				10 => "TAG:Sub Reactor",
 				11 => "TAG:External Hangar",
-				18 => "TAG:Outer Structure",
+				18 => "Structure",
 				20 => "Primary",
 			),
 			2=> array(
@@ -234,7 +234,7 @@ class Worthus extends SmallStarBaseFourSections{
 				9 => "TAG:Cargo Bay",
 				10 => "TAG:Sub Reactor",
 				11 => "TAG:External Hangar",
-				18 => "TAG:Outer Structure",
+				18 => "Structure",
 				20 => "Primary",
 			),	
 			3=> array(
@@ -244,7 +244,7 @@ class Worthus extends SmallStarBaseFourSections{
 				9 => "TAG:Cargo Bay",
 				10 => "TAG:Sub Reactor",
 				11 => "TAG:External Hangar",
-				18 => "TAG:Outer Structure",
+				18 => "Structure",
 				20 => "Primary",
 			),
 			4=> array(
@@ -254,7 +254,7 @@ class Worthus extends SmallStarBaseFourSections{
 				9 => "TAG:Cargo Bay",
 				10 => "TAG:Sub Reactor",
 				11 => "TAG:External Hangar",
-				18 => "TAG:Outer Structure",
+				18 => "Structure",
 				20 => "Primary",
 			),
 
