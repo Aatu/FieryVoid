@@ -988,6 +988,13 @@ window.SelectFromShips = function () {
     }
 
     HexPicker.prototype.activateShip = function (ship) {
+        //Selecting or targeting REBUILDS the tooltip (showShipTooltip destroys and
+        //recreates it), and the new one is anchored on the ship's icon — i.e. back on the
+        //hex, underneath this card. So the tooltip the player was reading beside the card
+        //jumps across the screen the instant they click a row. Hold where it was: capture
+        //before, re-pin after.
+        var anchor = captureTooltipAnchor.call(this);
+
         if (gamedata.gamephase === -1) {
             if (this.phaseStrategy.selectedShip) {
                 this.phaseStrategy.deselectShip(this.phaseStrategy.selectedShip);
@@ -1002,6 +1009,8 @@ window.SelectFromShips = function () {
                 this.destroy();
             }
         }
+
+        restoreTooltipAnchor.call(this, anchor);
     };
 
     // =========================================================================
@@ -1047,6 +1056,56 @@ window.SelectFromShips = function () {
 
         tooltip.element.css({ left: left + 'px', top: top + 'px' });
     };
+
+    // Where the tooltip is sitting right now, plus WHICH EDGE of it faces the card.
+    //
+    // The click tooltip is not the same size as the hover one it replaces — it carries a
+    // targeting block and a button row — so "don't move" cannot mean "same left/top" in
+    // every placement. It means: hold the edge that placeTooltipClear pinned against the
+    // card, and let the box grow away from it. Same reasoning as reflow() does for the
+    // card itself. `null` when there is no tooltip up, which is the no-op case.
+    function captureTooltipAnchor() {
+        var tooltip = this.phaseStrategy && this.phaseStrategy.shipTooltip;
+        if (!tooltip || !tooltip.element || !tooltip.element.length) return null;
+
+        var rect = tooltip.element[0].getBoundingClientRect();
+        if (!rect.width || !rect.height) return null;
+
+        //A card that has been closed by this very click can no longer be measured, so the
+        //side is decided HERE, while it is still on screen.
+        var edge = 'left';
+        if (this.sheet) {
+            edge = 'bottom';                    //sheet mode places the tooltip above the card
+        } else if (!this.destroyed && this.element.length) {
+            var card = this.element[0].getBoundingClientRect();
+            if (rect.right <= card.left) edge = 'right';    //flipped to the card's left side
+        }
+
+        return { tooltip: tooltip, rect: rect, edge: edge };
+    }
+
+    // Put the REBUILT tooltip back where the old one was. Does nothing when the click did
+    // not replace it (same instance = nothing moved, so nothing to correct).
+    function restoreTooltipAnchor(anchor) {
+        if (!anchor) return;
+
+        var tooltip = this.phaseStrategy && this.phaseStrategy.shipTooltip;
+        if (!tooltip || tooltip === anchor.tooltip) return;
+        if (!tooltip.element || !tooltip.element.length) return;
+
+        var node = tooltip.element[0];
+        var width = node.offsetWidth;
+        var height = node.offsetHeight;
+        if (!width || !height) return;
+
+        var left = (anchor.edge === 'right') ? anchor.rect.right - width : anchor.rect.left;
+        var top = (anchor.edge === 'bottom') ? anchor.rect.bottom - height : anchor.rect.top;
+
+        tooltip.element.css({
+            left: clamp(left, EDGE_MARGIN, window.innerWidth - width - EDGE_MARGIN) + 'px',
+            top: clamp(top, EDGE_MARGIN, window.innerHeight - height - EDGE_MARGIN) + 'px'
+        });
+    }
 
     // =========================================================================
     //  Header drag
