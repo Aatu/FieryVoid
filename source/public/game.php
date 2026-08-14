@@ -76,6 +76,9 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 	<link href="<?php echo AssetLoader::getAssetUrl('styles/confirm.css'); ?>" rel="stylesheet" type="text/css">
     <link href="<?php echo AssetLoader::getAssetUrl('styles/replay.css'); ?>" rel="stylesheet" type="text/css">
     <link href="<?php echo AssetLoader::getAssetUrl('styles/shipTooltip.css'); ?>" rel="stylesheet" type="text/css">
+    <!-- The hex stack picker (client/UI/SelectFromShips.js). Its own namespace and its own
+         file so it no longer shares .shipNameContainer with the hover tooltip above. -->
+    <link href="<?php echo AssetLoader::getAssetUrl('styles/hexPicker.css'); ?>" rel="stylesheet" type="text/css">
 <!--	styles/helper.css was deleted (roadmap item 6, Stage 5) - it was dead, see helper.php -->
     <!-- jQuery + jQuery-UI self-hosted (same-origin HTTP/2 + cache-control, no 3rd-party TLS).
          Both kept SYNCHRONOUS: jQuery for the inline $(window).on("load") bootstrap below, and

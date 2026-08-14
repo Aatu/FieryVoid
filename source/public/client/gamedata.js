@@ -343,6 +343,66 @@ window.gamedata = {
         ];
     },
 
+    // TONE-MAPPED team colour, for TEXT that sits beside a full-chroma mark of the same
+    // team. The hex picker (SELECT_FROM_SHIPS_PLAN.md §2.5) puts the raw palette on a 3px
+    // allegiance bar — where a strong colour reads as a signal precisely because there is
+    // so little of it — and this on the ship NAME, so an arbitrary team colour lands in the
+    // same brightness band as the four fixed allegiance tints instead of red shouting and
+    // blue sinking.
+    //
+    // Same shape and same reasoning as getIniTeamColorRGB above, which darkens the palette
+    // for the Order of Battle: a per-SURFACE transform of one shared palette, declared once
+    // rather than inlined at each call site. Saturation is CLAMPED (a colour that is
+    // already muted stays where it is) but lightness is NORMALISED to a fixed value — the
+    // whole point is that every team ends up equally bright. Returns integer sRGB [r,g,b].
+    MUTED_TEAM_SAT: 0.40,
+    MUTED_TEAM_LIGHT: 0.68,
+    getMutedTeamColorRGB: function getMutedTeamColorRGB(team) {
+        var rgb = gamedata.getTeamColorRGB(team);
+        var r = rgb[0] / 255, g = rgb[1] / 255, b = rgb[2] / 255;
+        var max = Math.max(r, g, b), min = Math.min(r, g, b);
+        var h = 0, s = 0, l = (max + min) / 2;
+
+        if (max !== min) {
+            var d = max - min;
+            s = (l > 0.5) ? d / (2 - max - min) : d / (max + min);
+            if (max === r) {
+                h = (g - b) / d + (g < b ? 6 : 0);
+            } else if (max === g) {
+                h = (b - r) / d + 2;
+            } else {
+                h = (r - g) / d + 4;
+            }
+            h /= 6;
+        }
+
+        s = Math.min(s, gamedata.MUTED_TEAM_SAT);
+        l = gamedata.MUTED_TEAM_LIGHT;
+
+        if (s === 0) {
+            var grey = Math.round(l * 255);
+            return [grey, grey, grey];
+        }
+
+        var q = (l < 0.5) ? l * (1 + s) : l + s - l * s;
+        var p = 2 * l - q;
+
+        function hueToChannel(t) {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1 / 6) return p + (q - p) * 6 * t;
+            if (t < 1 / 2) return q;
+            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+            return p;
+        }
+
+        return [
+            Math.round(hueToChannel(h + 1 / 3) * 255),
+            Math.round(hueToChannel(h) * 255),
+            Math.round(hueToChannel(h - 1 / 3) * 255)
+        ];
+    },
+
     // Inline style for an "active mover" IniGUI box, derived from the ship's team
     // colour. Mirrors the .iniActive* CSS (border + translucent fill + glow) but
     // keyed on team instead of mine/ally/enemy.
@@ -421,19 +481,27 @@ window.gamedata = {
     //     is ambiguous, so each team gets its own colour instead.
     // Returns a raw "rgb(r,g,b)" string (no "color:" prefix) so callers can drop
     // it straight into a style attribute.
+    //
+    // CONVERTED to the shared allegiance palette (SELECT_FROM_SHIPS_PLAN.md Stage 6).
+    // The three literals below are --fv-own / --fv-ally / --fv-enemy from tokens.css,
+    // and the per-team branch runs the tone-mapped palette, so this label sits in the
+    // same brightness band as the hex picker's ship names rather than at full chroma.
+    // ⚠️ Its sibling getShipLogColorCss BELOW is deliberately NOT converted — the two
+    // functions have the same shape, so read the divergence as intent, not as a bug.
     getFleetHeaderColorRGB: function getFleetHeaderColorRGB(slot) {
         var rgb;
         if (gamedata.isPlayerInGame() && gamedata.getDistinctTeamCount() === 2) {
             if (parseInt(slot.playerid, 10) === parseInt(gamedata.thisplayer, 10)) {
-                rgb = [50, 205, 50];    // green (mine)
+                rgb = [125, 191, 136];  // --fv-own   #7dbf88 (mine)
             } else if (parseInt(slot.team, 10) === parseInt(gamedata.getPlayerTeam(), 10)) {
-                rgb = [51, 173, 255];   // blue (ally)
+                rgb = [121, 174, 212];  // --fv-ally  #79aed4 (ally)
             } else {
-                rgb = [255, 80, 80];    // red (enemy)
+                rgb = [234, 106, 94];   // --fv-enemy #ea6a5e (enemy)
             }
         } else {
-            // Observer, or 3+-team participant: absolute per-team palette.
-            rgb = gamedata.getTeamColorRGB(slot.team);
+            // Observer, or 3+-team participant: absolute per-team palette, tone-mapped
+            // into the same band as the three fixed tints above.
+            rgb = gamedata.getMutedTeamColorRGB(slot.team);
         }
         return "rgb(" + Math.round(rgb[0]) + "," + Math.round(rgb[1]) + "," + Math.round(rgb[2]) + ")";
     },
@@ -447,6 +515,13 @@ window.gamedata = {
     // (shooter) and the attacked ship's name (target) so one log line stays
     // self-consistent. NOTE: unlike getFleetHeaderColorRGB this returns a COMPLETE
     // declaration ("color:rgb(...);") ready to drop into a style attribute.
+    //
+    // ⚠️ NOT CONVERTED to the shared allegiance palette, on purpose (user decision
+    // 2026-08-14, SELECT_FROM_SHIPS_PLAN.md Stage 6 item 3). Its sibling
+    // getFleetHeaderColorRGB ABOVE now runs the muted --fv-own/-ally/-enemy tints; this
+    // one keeps its own bright literals because the combat log is a dense scrolling wall
+    // of text where the stronger colours still earn their place. The two functions have
+    // the same shape and now disagree — that is intent, not drift.
     getShipLogColorCss: function getShipLogColorCss(ship) {
         if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
             return "color:#ffffff;";

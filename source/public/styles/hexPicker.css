@@ -1,0 +1,720 @@
+/*
+ * hexPicker.css — the Hex Stack Picker (client/UI/SelectFromShips.js).
+ *
+ * See SELECT_FROM_SHIPS_PLAN.md. This is the popup that appears when a click on the
+ * tactical map is ambiguous ("several units are stacked here, which one did you mean?")
+ * and, during Deployment, the surface that carries the DEPLOY / DOCK hex actions.
+ *
+ * WHY IT HAS ITS OWN FILE AND ITS OWN NAMESPACE
+ * ---------------------------------------------
+ * It used to borrow `.shipNameContainer` from tactical.css — the SAME class as the hover
+ * ShipTooltip, including that surface's `opacity: 0.65`. A hover tooltip should be
+ * see-through; a menu you are about to CLICK (and whose click commits a deployment) must
+ * not be. The two are now decoupled: nothing here touches a tooltip rule, and nothing in
+ * tactical.css reaches into `.fv-hexpicker`.
+ *
+ * The surface follows the `.confirm` recipe, not the tooltip recipe — opaque fill,
+ * --fv-line-scs border, --fv-radius-modal corners — because the picker's DOCK button can
+ * open confirm.hangarDeployDockCarrierPicker, and a translucent rounded tooltip spawning
+ * an opaque square dialog read as two different applications.
+ *
+ * NO :root BLOCK. tokens.css is the only one, site-wide (VISUAL_UNIFICATION_PLAN.md).
+ * The allegiance palette below is component-scoped on purpose: promoting it to tokens.css
+ * is Stage 6 of the plan and ships separately, after the picker has settled in play.
+ */
+
+.fv-hexpicker {
+
+    /* ── TUNING KNOBS ────────────────────────────────────────────────────────
+       Adjust here. No component rule below re-declares any of these.          */
+    --hp-header-h: 27px;
+    /* header / drag handle                         */
+    --hp-close: 21px;
+    /* the ✕ box inside it                          */
+    --hp-grab-h: 9px;
+    /* grab bar above the header, sheet only        */
+    --hp-act-h: 32px;
+    /* action button height (Deployment only)       */
+    --hp-row-h: 44px;
+    /* comfortable row                              */
+    --hp-row-h-dense: 34px;
+    /* dense row, engages above 8 units             */
+    --hp-art: 34px;
+    /* silhouette box, comfortable                  */
+    --hp-art-dense: 26px;
+    --hp-icon-btn: 32px;
+    /* details button box                           */
+    --hp-icon: 24px;
+    /* details icon inside it                       */
+    --hp-card-w: 320px;
+    --hp-sheet-max-w: 400px;
+    /* sheet width cap. Without it the sheet spans
+       left:8px..right:8px, which is fine on a 390px
+       phone but absurd on a landscape phone or a
+       finger-driven 1024px tablet.                 */
+    --hp-list-max: 60vh;
+    /* scroll cap on the LIST, not the card         */
+    --hp-dense-at: 8;
+    /* DOCUMENTATION ONLY — CSS cannot count rows.
+       The live threshold is DENSE_AT_UNITS in
+       SelectFromShips.js; keep the two in step. */
+
+    /* ── ALLEGIANCE PALETTE ──────────────────────────────────────────────────
+       Now the shared --fv-* allegiance set in tokens.css (Stage 6). It started
+       life here as a component-scoped --hp-* block so Stages 0-5 could not touch
+       any other surface; the values did not change when they moved out, only
+       their names. See tokens.css for why each allegiance has TWO renderings.
+
+       Per-row channels below are set by the allegiance class at the bottom of this
+       file, or overridden INLINE on the row by SelectFromShips' getTeamColorVars()
+       for observers and 3+-team games. These defaults only paint if a row somehow
+       carries no allegiance class at all. */
+    --row-name: var(--fv-text);
+    --row-bar: var(--fv-line-soft);
+
+    position: absolute;
+    z-index: 7001;
+    box-sizing: border-box;
+    width: var(--hp-card-w);
+    max-width: calc(100vw - 16px);
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    font-family: arial;
+    font-size: 12px;
+    color: var(--fv-text-dim);
+    background-color: var(--fv-overlay);
+    border: 1px solid var(--fv-line-scs);
+    border-radius: var(--fv-radius-modal);
+    opacity: 0;
+    transition: opacity 120ms ease-out;
+}
+
+/* Added one frame after the element is positioned, so the card fades in where it
+   belongs rather than sliding into place from wherever it first landed. */
+.fv-hexpicker.fv-hexpicker--in {
+    opacity: 1;
+}
+
+.fv-hexpicker *,
+.fv-hexpicker *::before,
+.fv-hexpicker *::after {
+    box-sizing: border-box;
+}
+
+/* ── Caret ───────────────────────────────────────────────────────────────────
+   Points at the hex the picker belongs to. Its `left` is written by JS AFTER the
+   card has been clamped into the viewport, so it keeps pointing at the anchor even
+   when the card had to slide sideways; JS hides it when the anchor ends up outside
+   the card entirely. Border-triangle rather than a rotated square so it cannot
+   inherit a stray background. */
+.fv-hexpicker__caret {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    pointer-events: none;
+}
+
+.fv-hexpicker--above .fv-hexpicker__caret {
+    bottom: -8px;
+    border-top: 8px solid var(--fv-line-scs);
+}
+
+.fv-hexpicker--below .fv-hexpicker__caret {
+    top: -8px;
+    border-bottom: 8px solid var(--fv-line-scs);
+}
+
+/* Dragged off its anchor: the caret would be pointing at nothing. */
+.fv-hexpicker--dragged .fv-hexpicker__caret {
+    display: none;
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+.fv-hexpicker__header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: var(--hp-header-h);
+    flex: 0 0 auto;
+    padding: 0 4px 0 10px;
+    border-bottom: 1px solid var(--fv-rule);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fv-text-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    /* The header is the drag handle, in BOTH shapes. touch-action:none stops the
+       browser claiming the gesture as a scroll before the pointermove handler ever
+       sees it — which is what made the sheet undraggable by finger. The list is a
+       separate element, so it still scrolls normally. */
+    cursor: move;
+    touch-action: none;
+    user-select: none;
+}
+
+.fv-hexpicker__title {
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.fv-hexpicker__coords {
+    font-family: var(--fv-mono);
+    letter-spacing: 0;
+    color: var(--fv-text-accent);
+}
+
+.fv-hexpicker__close {
+    flex: 0 0 auto;
+    width: var(--hp-close);
+    height: var(--hp-close);
+    padding: 0;
+    line-height: calc(var(--hp-close) - 2px);
+    text-align: center;
+    font-size: 14px;
+    font-family: arial;
+    color: var(--fv-text-dim);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--fv-radius-modal);
+    cursor: pointer;
+}
+
+.fv-hexpicker__close:hover {
+    color: var(--fv-text);
+    border-color: var(--fv-line-soft);
+    background: var(--fv-card-hover);
+}
+
+/* ── Actions (Deployment phase only) ─────────────────────────────────────────
+   DEPLOY takes the own-ship green and DOCK the accent blue: green = put it on the
+   map, blue = put it in a carrier. The literal `orange` / `cyan` of the old
+   .name-value-button-* pair are both retired, which leaves --fv-warn appearing
+   nowhere in this card at all. */
+.fv-hexpicker__actions {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 6px;
+    border-bottom: 1px solid var(--fv-rule);
+}
+
+.fv-hexpicker__action {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: var(--hp-act-h);
+    flex: 0 0 auto;
+    padding: 0 9px;
+    font-size: 11.5px;
+    letter-spacing: 0.06em;
+    text-align: left;
+    text-transform: uppercase;
+    background: rgba(20, 79, 128, 0.212);
+    border: 1px solid currentColor;
+    border-radius: var(--fv-radius-modal);
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.fv-hexpicker__action--deploy {
+    /* The TONE-MAPPED own-ship green, not the full-chroma --fv-own-signal: at button
+       size a saturated green would out-shout the rows, which is the same reasoning
+       that puts the strong colour on the 3px bar and nowhere else. */
+    color: var(--fv-own);
+}
+
+.fv-hexpicker__action--dock {
+    color: var(--fv-accent);
+}
+
+.fv-hexpicker__action:hover {
+    background: var(--fv-card-hover);
+}
+
+.fv-hexpicker__actionlabel {
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.fv-hexpicker__actionnote {
+    flex: 0 0 auto;
+    font-size: 10px;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--fv-text-dim);
+}
+
+/* ── List ────────────────────────────────────────────────────────────────────
+   The scroll cap is on the LIST, not on the card, so the header, the action
+   buttons and the close never scroll away.
+
+   The four gradients are the standard CSS scroll-shadow: two `local` covers
+   painted in the card fill that scroll away with the content, and two `scroll`
+   highlights pinned to the box that they uncover. --fv-overlay is the card fill,
+   so the covers are invisible against it until content sits underneath. */
+.fv-hexpicker__list {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: var(--hp-list-max);
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    background:
+        linear-gradient(var(--fv-overlay) 40%, rgba(0, 0, 0, 0)) top / 100% 16px no-repeat local,
+        linear-gradient(rgba(0, 0, 0, 0), var(--fv-overlay) 60%) bottom / 100% 16px no-repeat local,
+        radial-gradient(farthest-side at 50% 0, rgba(139, 202, 242, 0.22), rgba(0, 0, 0, 0)) top / 100% 7px no-repeat scroll,
+        radial-gradient(farthest-side at 50% 100%, rgba(139, 202, 242, 0.22), rgba(0, 0, 0, 0)) bottom / 100% 7px no-repeat scroll;
+}
+
+.fv-hexpicker__list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.fv-hexpicker__list::-webkit-scrollbar-track {
+    background: var(--fv-scroll-track);
+}
+
+.fv-hexpicker__list::-webkit-scrollbar-thumb {
+    background: var(--fv-scroll-thumb);
+}
+
+.fv-hexpicker__list::-webkit-scrollbar-thumb:hover {
+    background: var(--fv-scroll-thumb-hover);
+}
+
+/* ── Group headers ───────────────────────────────────────────────────────────
+   Present whenever two or more categories are in the hex, at ANY stack size. A
+   hex holding one ship and one asteroid field gets two headers for two rows; that
+   is the price of a structure the player can rely on rather than one that appears
+   at a size they have to discover. */
+.fv-hexpicker__grouphead {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    height: 20px;
+    padding: 0 8px 0 6px;
+    font-size: 9.5px;
+    font-family: arial;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-align: left;
+    color: var(--fv-text-dim);
+    background: var(--fv-well);
+    border: 0;
+    border-bottom: 1px solid var(--fv-rule);
+    cursor: pointer;
+}
+
+.fv-hexpicker__grouphead:hover {
+    color: var(--fv-text);
+    background: var(--fv-card);
+}
+
+.fv-hexpicker__fold {
+    flex: 0 0 auto;
+    width: 9px;
+    text-align: center;
+    font-size: 8px;
+    line-height: 1;
+    color: var(--fv-text-dim);
+}
+
+.fv-hexpicker__groupcount {
+    flex: 0 0 auto;
+    margin-left: auto;
+    font-family: var(--fv-mono);
+    letter-spacing: 0;
+}
+
+.fv-hexpicker__group--folded .fv-hexpicker__row,
+.fv-hexpicker__group--folded .fv-hexpicker__run {
+    display: none;
+}
+
+/* ── Rows ────────────────────────────────────────────────────────────────── */
+.fv-hexpicker__row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: var(--hp-row-h);
+    padding-right: 5px;
+    border-bottom: 1px solid var(--fv-line-soft);
+    cursor: pointer;
+}
+
+.fv-hexpicker__row:last-child {
+    border-bottom: 0;
+}
+
+.fv-hexpicker__row:hover {
+    background: var(--fv-card-hover);
+}
+
+.fv-hexpicker__row:hover .fv-hexpicker__name {
+    color: var(--fv-text);
+}
+
+/* 3px allegiance strip. Carries mine/ally/enemy/terrain so allegiance is no longer
+   encoded ONLY in text colour — it survives a long name, and it is the one place
+   the full-chroma signal colour is allowed to appear. */
+.fv-hexpicker__bar {
+    flex: 0 0 auto;
+    align-self: stretch;
+    width: 3px;
+    background: var(--row-bar);
+}
+
+/* Reserve the art box in CSS. The card is positioned from its MEASURED height
+   immediately after append; if a thumbnail loaded later and grew a row, the card
+   would silently drift off its anchor. */
+.fv-hexpicker__art {
+    flex: 0 0 auto;
+    position: relative;
+    width: var(--hp-art);
+    height: var(--hp-art);
+    margin-left: 5px;
+    object-fit: contain;
+    /* terrain art is much larger and rounder than a ship sprite — fit it, never crop */
+}
+
+/* Generic glyph for a mine whose name has been masked to the literal "Mine". The
+   real silhouette would identify the mine type that the text masking exists to
+   hide, so it is never rendered. A ring and a dot, in the row's own bar colour. */
+.fv-hexpicker__art--generic::before {
+    content: "";
+    position: absolute;
+    inset: 20%;
+    border: 2px solid var(--row-bar);
+    border-radius: 50%;
+    opacity: 0.85;
+}
+
+.fv-hexpicker__art--generic::after {
+    content: "";
+    position: absolute;
+    inset: 42%;
+    background: var(--row-bar);
+    border-radius: 50%;
+}
+
+.fv-hexpicker__text {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1px;
+    padding: 4px 0;
+}
+
+.fv-hexpicker__name {
+    font-size: 14.5px;
+    line-height: 1.15;
+    color: var(--row-name);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fv-hexpicker__meta {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+    font-size: 11px;
+    line-height: 1.2;
+    color: var(--fv-text-dim);
+}
+
+.fv-hexpicker__class {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Chips are STATEMENTS OF FACT, so they are all neutral — DEPLOYS T<N> included
+   (user decision 2026-08-14). That leaves no --fv-warn and no second accent hue
+   anywhere in the card; allegiance is the only colour that carries meaning here. */
+.fv-hexpicker__chip {
+    flex: 0 0 auto;
+    padding: 0 3px;
+    font-size: 8.5px;
+    line-height: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-variant: small-caps;
+    white-space: nowrap;
+    color: var(--fv-text-dim);
+    border: 1px solid var(--fv-line-soft);
+    border-radius: 0;
+}
+
+/* Initiative ORDER — the movement-group number the Order of Battle prints down its
+   left edge, not the raw initiative total. Ships that move together share one, which
+   is the thing actually worth knowing in a stacked hex.
+
+   No column header: the ~14px strip is not worth the vertical space in a surface
+   that has to absorb 20-row stacks. The `title` explains it, and is set on the
+   fine-pointer path ONLY — on touch this cell must stay completely inert so a press
+   on a 20px target next to the details button falls straight through to the row. */
+.fv-hexpicker__ini {
+    flex: 0 0 auto;
+    min-width: 18px;
+    text-align: right;
+    font-family: var(--fv-mono);
+    font-size: 12px;
+    color: var(--fv-text-dim);
+}
+
+.fv-hexpicker__details {
+    flex: 0 0 auto;
+    width: var(--hp-icon-btn);
+    height: var(--hp-icon-btn);
+    padding: 0;
+    background-color: transparent;
+    /* The icon players already know from the ship-tooltip menu (.openSCS in
+       shipTooltip.css). The source is 40x40 and --hp-icon is 20px, an exact 2:1
+       downscale that resamples cleanly.
+
+       Three declarations, last-valid-wins: the plain url() is the floor for anything
+       that understands neither image-set form; the prefixed one covers Safari < 17.
+
+       ⚠️ img/openShipDetails2x.png IS NOT IN THE REPO YET — it wants an 80x80 export of
+       the SAME artwork (recognisability is the whole reason for reusing this icon).
+       A NEW FILENAME, never an in-place replacement of the 40x40: .htaccess caches
+       images for a month and a CSS background cannot go through
+       AssetManager.getSmartImagePath(), so overwriting the existing file would reach
+       returning players as stale art for up to that long. */
+    background-image: url("../img/openShipDetails.png");
+    background-image: image-set(url("../img/openShipDetails.png") 1x,
+            url("../img/openShipDetails2x.png") 2x);
+    background-image: -webkit-image-set(url("../img/openShipDetails.png") 1x,
+            url("../img/openShipDetails2x.png") 2x);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: var(--hp-icon) var(--hp-icon);
+    border: 1px solid transparent;
+    border-radius: var(--fv-radius-modal);
+    opacity: 0.75;
+    cursor: pointer;
+}
+
+.fv-hexpicker__details:hover {
+    opacity: 1;
+    border-color: var(--fv-line-soft);
+    background-color: var(--fv-card-hover);
+}
+
+/* ── Collapsed identical run ─────────────────────────────────────────────────
+   Rows that would render IDENTICALLY are not a choice, they are a repetition.
+   Clicking expands the run in place, for the life of the picker. */
+.fv-hexpicker__run .fv-hexpicker__name {
+    color: var(--row-name);
+}
+
+.fv-hexpicker__expand {
+    flex: 0 0 auto;
+    font-size: 9.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fv-accent);
+}
+
+/* ── Hint footer ─────────────────────────────────────────────────────────── */
+.fv-hexpicker__hint {
+    flex: 0 0 auto;
+    height: 21px;
+    line-height: 20px;
+    padding: 0 10px;
+    border-top: 1px solid var(--fv-rule);
+    font-size: 9.5px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--fv-text-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── Allegiance classes ──────────────────────────────────────────────────────
+   One class carries BOTH renderings. getTeamColorVars() overrides the same two
+   custom properties inline on the row for observers and 3+-team games — inline
+   wins over the class, and the name and the bar both follow. */
+.fv-hexpicker__row.mine,
+.fv-hexpicker__run.mine {
+    --row-name: var(--fv-own);
+    --row-bar: var(--fv-own-signal);
+}
+
+.fv-hexpicker__row.ally,
+.fv-hexpicker__run.ally {
+    --row-name: var(--fv-ally);
+    --row-bar: var(--fv-ally-signal);
+}
+
+.fv-hexpicker__row.enemy,
+.fv-hexpicker__run.enemy {
+    --row-name: var(--fv-enemy);
+    --row-bar: var(--fv-enemy-signal);
+}
+
+.fv-hexpicker__row.terrain,
+.fv-hexpicker__run.terrain {
+    --row-name: var(--fv-neutral);
+    --row-bar: var(--fv-neutral-signal);
+}
+
+/* ── Dense tier ──────────────────────────────────────────────────────────────
+   Above --hp-dense-at UNITS in the hex (not rendered rows — a 20-stack that
+   collapses to 8 rows is still a dense hex). One line per row: the class moves
+   inline after the name instead of sitting beneath it. */
+.fv-hexpicker--dense .fv-hexpicker__row {
+    min-height: var(--hp-row-h-dense);
+}
+
+.fv-hexpicker--dense .fv-hexpicker__art {
+    width: var(--hp-art-dense);
+    height: var(--hp-art-dense);
+}
+
+.fv-hexpicker--dense .fv-hexpicker__text {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 6px;
+    padding: 2px 0;
+}
+
+.fv-hexpicker--dense .fv-hexpicker__name {
+    flex: 0 1 auto;
+    font-size: 13px;
+}
+
+.fv-hexpicker--dense .fv-hexpicker__meta {
+    flex: 1 1 auto;
+    overflow: hidden;
+}
+
+/* ── Sheet (mobile / coarse pointer) ─────────────────────────────────────────
+   An anchored popover is the wrong form on a phone: the anchor is under the finger
+   that opened it, and there is no room above a hex near the screen edge. Dock to the
+   bottom instead — never clipped, never off-screen, always thumb-reachable.
+
+   --hp-row-h-dense here is the 44px COARSE-POINTER FLOOR, not a taste value. A
+   mis-tap in this menu commits a deployment. Below 44px is a correctness regression. */
+.fv-hexpicker--sheet {
+    /* The header was 32px here against the card's 27px, on top of a 12px grab bar — the
+       one piece of chrome that grew on the screens with the least room for it. It is now
+       BELOW the card's height, and the ✕ inside it grows instead, which is the part that
+       is actually a tap target. */
+    --hp-header-h: 26px;
+    --hp-close: 24px;
+    --hp-act-h: 40px;
+    --hp-row-h: 52px;
+    --hp-row-h-dense: 44px;
+    --hp-icon-btn: 40px;
+    --hp-icon: 28px;
+    --hp-list-max: 55vh;
+
+    position: fixed;
+    left: 8px;
+    right: 8px;
+    bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+    top: auto;
+    /* left+right pin the sheet to both edges; max-width then caps it and the auto
+       inline margins centre what is left. On a 390px phone it still spans the screen
+       (the cap never bites); on a landscape phone or a finger-driven tablet it stops
+       being a 1000px-wide strip of mostly empty black. */
+    width: auto;
+    max-width: var(--hp-sheet-max-w);
+    margin-left: auto;
+    margin-right: auto;
+    transform: translateY(12px);
+    transition: opacity 120ms ease-out, transform 160ms ease-out;
+}
+
+/* Landscape phone: the screen is wide but very short, so the constraint flips from
+   width to height. Give the list less of the viewport and tighten the rows — still
+   never below the 44px coarse-pointer floor, which is a correctness bound. */
+@media (orientation: landscape) and (max-height: 500px) {
+    .fv-hexpicker--sheet {
+        --hp-row-h: 46px;
+        --hp-list-max: 46vh;
+        --hp-sheet-max-w: 460px;
+    }
+}
+
+.fv-hexpicker--sheet.fv-hexpicker--in {
+    transform: translateY(0);
+}
+
+.fv-hexpicker--sheet .fv-hexpicker__caret {
+    display: none;
+}
+
+.fv-hexpicker__grab {
+    flex: 0 0 auto;
+    display: none;
+    height: var(--hp-grab-h);
+    padding-top: 3px;
+    /* Part of the drag handle, so it needs the same gesture claim as the header. */
+    cursor: move;
+    touch-action: none;
+    user-select: none;
+}
+
+.fv-hexpicker__grab::before {
+    content: "";
+    display: block;
+    width: 42px;
+    height: 3px;
+    margin: 0 auto;
+    background: var(--fv-line-scs);
+    border-radius: 2px;
+    opacity: 0.7;
+}
+
+.fv-hexpicker--sheet .fv-hexpicker__grab {
+    display: block;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .fv-hexpicker,
+    .fv-hexpicker--sheet {
+        transition: none;
+        transform: none;
+    }
+}
+
+/* ── Focus ───────────────────────────────────────────────────────────────── */
+.fv-hexpicker:focus,
+.fv-hexpicker__row:focus,
+.fv-hexpicker__run:focus,
+.fv-hexpicker__action:focus,
+.fv-hexpicker__grouphead:focus,
+.fv-hexpicker__close:focus,
+.fv-hexpicker__details:focus {
+    outline: none;
+}
+
+.fv-hexpicker__row:focus-visible,
+.fv-hexpicker__run:focus-visible,
+.fv-hexpicker__action:focus-visible,
+.fv-hexpicker__grouphead:focus-visible,
+.fv-hexpicker__close:focus-visible,
+.fv-hexpicker__details:focus-visible {
+    outline: 1px solid var(--fv-accent);
+    outline-offset: -1px;
+}
