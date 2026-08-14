@@ -21,7 +21,11 @@ class Worthus extends SmallStarBaseFourSections{
 		$this->forwardDefense = 21;
 		$this->sideDefense = 21;
 		$this->isd = 2001;
+		$this->variantOf = "OBSELETE";
 		
+		/* replaced with proper two C&Cs!
+		$this->addPrimarySystem(new ProtectedCnC(7, 50, 0, 0)); //2x 6/25 C&C originally
+		*/
 		$cnc = new CnC(6, 25, 0, 0);
 		$cnc->startArc = 0;
 		$cnc->endArc = 360;
@@ -35,17 +39,17 @@ class Worthus extends SmallStarBaseFourSections{
 		//4 Hangars from between sections, plus small PRIMARY hangar for shuttles - I make them into one PRIMARY hangar with extra armor
 		$this->addPrimarySystem(new Hangar(7, 4));
 		//2 all-around Imperial Lasers on PRIMARY, plus four 90-degrees from between outer sections
-        	/*$this->addPrimarySystem(new ImperialLaser(5, 8, 5, 0, 90));
+        	$this->addPrimarySystem(new ImperialLaser(5, 8, 5, 0, 90));
         	$this->addPrimarySystem(new ImperialLaser(5, 8, 5, 90, 180));
         	$this->addPrimarySystem(new ImperialLaser(5, 8, 5, 180, 270));
-        	$this->addPrimarySystem(new ImperialLaser(5, 8, 5, 270, 360));*/
+        	$this->addPrimarySystem(new ImperialLaser(5, 8, 5, 270, 360));
         	$this->addPrimarySystem(new ImperialLaser(6, 8, 5, 0, 360));
         	$this->addPrimarySystem(new ImperialLaser(6, 8, 5, 0, 360));
 		//2 all-around Tactical Lasers on PRIMARY
         	$this->addPrimarySystem(new TacLaser(6, 5, 4, 0, 360));
         	$this->addPrimarySystem(new TacLaser(6, 5, 4, 0, 360));
 		//8 90-degrees Light Particle Beams from between outer sections
-        	/*$this->addPrimarySystem(new LightParticleBeamShip(5, 2, 1, 0, 90));
+        	$this->addPrimarySystem(new LightParticleBeamShip(5, 2, 1, 0, 90));
         	$this->addPrimarySystem(new LightParticleBeamShip(5, 2, 1, 0, 90));
         	$this->addPrimarySystem(new LightParticleBeamShip(5, 2, 1, 90, 180));
         	$this->addPrimarySystem(new LightParticleBeamShip(5, 2, 1, 90, 180));
@@ -53,211 +57,196 @@ class Worthus extends SmallStarBaseFourSections{
         	$this->addPrimarySystem(new LightParticleBeamShip(5, 2, 1, 180, 270));
         	$this->addPrimarySystem(new LightParticleBeamShip(5, 2, 1, 270, 360));
         	$this->addPrimarySystem(new LightParticleBeamShip(5, 2, 1, 270, 360));
-			*/
 
 			$this->addFrontSystem(new TacLaser(5, 5, 4, 300, 60));
         	$this->addFrontSystem(new LightParticleBeamShip(5, 2, 1, 300, 60));
         	$this->addFrontSystem(new LightParticleBeamShip(5, 2, 1, 300, 60));
+		/*replaced by TAGged versions
+			$this->addFrontSystem(new CargoBay(5, 25));
+			$this->addFrontSystem(new SubReactorUniversal(5, 25, 0, 0));
+		*/
 			$cargoBay = new CargoBay(5, 25);
 			$cargoBay->startArc = 270;
 			$cargoBay->endArc = 90;
-			$this->addFrontSystem($cargoBay);		
+			$this->addFrontSystem($cargoBay);
+			$hangar = new Hangar(5, 6);
+			$hangar->startArc = 270;
+			$hangar->endArc = 90;
+			$this->addFrontSystem($hangar);			
 			$subReactor = new SubReactorUniversal(5, 25, 0, 0);
 			$subReactor->startArc = 270;
 			$subReactor->endArc = 90;
-			$this->addFrontSystem($subReactor);			
+			$this->addFrontSystem($subReactor);
 
 			$this->addAftSystem(new TacLaser(5, 5, 4, 120, 240));
         	$this->addAftSystem(new LightParticleBeamShip(5, 2, 1, 120, 240));
         	$this->addAftSystem(new LightParticleBeamShip(5, 2, 1, 120, 240));
+		/*replaced by TAGged versions
+			$this->addAftSystem(new CargoBay(5, 25));
+			$this->addAftSystem(new SubReactorUniversal(5, 25, 0, 0));
+		*/
 			$cargoBay = new CargoBay(5, 25);
 			$cargoBay->startArc = 90;
 			$cargoBay->endArc = 270;
-			$this->addAftSystem($cargoBay);			
+			$this->addAftSystem($cargoBay);
+			$hangar = new Hangar(5, 6);
+			$hangar->startArc = 90;
+			$hangar->endArc = 270;
+			$this->addAftSystem($hangar);				
 			$subReactor = new SubReactorUniversal(5, 25, 0, 0);
 			$subReactor->startArc = 90;
 			$subReactor->endArc = 270;
 			$this->addAftSystem($subReactor);
-
-			//Fwd Port systems			
-			$hangar = new Hangar(5, 6, 6);
-			$hangar->startArc = 270;
-			$hangar->endArc = 360;
-			$hangar->addTag("External Hangar");				
-			$hangar->overkillArcStructures = array(1, 3); //overkill spills to whichever Port quarter is in arc					
-			$hangar->setStructureHome(array(1, 3));				
-			$this->addLeftFrontSystem($hangar);	
-			$impLaser = new ImperialLaser(5, 8, 5, 270, 360);
-			$impLaser->overkillArcStructures = array(1, 3); //overkill spills to whichever Port quarter is in arc		
-			$impLaser->addTag("Outer Imperial Laser");
-			$impLaser->setStructureHome(array(1, 3));			
-			$this->addLeftFrontSystem($impLaser);			
-			$lPBeam = new LightParticleBeamShip(5, 2, 1, 270, 360);
-			$lPBeam->overkillArcStructures = array(1, 3); //overkill spills to whichever Port quarter is in arc		
-			$lPBeam->addTag("Light Particle Beam");
-			$lPBeam->setStructureHome(array(1, 3));			
-			$this->addLeftFrontSystem($lPBeam);
-			$lPBeam2 = new LightParticleBeamShip(5, 2, 1, 270, 360);
-			$lPBeam2->overkillArcStructures = array(1, 3); //overkill spills to whichever Port quarter is in arc		
-			$lPBeam2->addTag("Light Particle Beam");
-			$lPBeam2->setStructureHome(array(1, 3));			
-			$this->addLeftFrontSystem($lPBeam2);			
-
+		
 			$this->addLeftSystem(new TacLaser(5, 5, 4, 210, 330));
         	$this->addLeftSystem(new LightParticleBeamShip(5, 2, 1, 210, 330));
         	$this->addLeftSystem(new LightParticleBeamShip(5, 2, 1, 210, 330));
+		/*replaced by TAGged versions
+			$this->addLeftSystem(new CargoBay(5, 25));
+			$this->addLeftSystem(new SubReactorUniversal(5, 25, 0, 0));
+		*/
 			$cargoBay = new CargoBay(5, 25);
 			$cargoBay->startArc = 180;
 			$cargoBay->endArc = 360;
-			$this->addLeftSystem($cargoBay);				
+			$this->addLeftSystem($cargoBay);
+			$hangar = new Hangar(5, 6);
+			$hangar->startArc = 180;
+			$hangar->endArc = 360;
+			$this->addLeftSystem($hangar);					
 			$subReactor = new SubReactorUniversal(5, 25, 0, 0);
 			$subReactor->startArc = 180;
 			$subReactor->endArc = 360;
 			$this->addLeftSystem($subReactor);
 		
-			//Fwd Aft systems			
-			$hangar = new Hangar(5, 6, 6);
-			$hangar->startArc = 180;
-			$hangar->endArc = 270;
-			$hangar->addTag("External Hangar");				
-			$hangar->overkillArcStructures = array(2, 3); //overkill spills to whichever Port quarter is in arc					
-			$hangar->setStructureHome(array(2, 3));				
-			$this->addLeftAftSystem($hangar);	
-			$impLaser = new ImperialLaser(5, 8, 5, 180, 270);
-			$impLaser->overkillArcStructures = array(2, 3); //overkill spills to whichever Port quarter is in arc		
-			$impLaser->addTag("Outer Imperial Laser");
-			$impLaser->setStructureHome(array(2, 3));			
-			$this->addLeftAftSystem($impLaser);			
-			$lPBeam = new LightParticleBeamShip(5, 2, 1, 180, 270);
-			$lPBeam->overkillArcStructures = array(2, 3); //overkill spills to whichever Port quarter is in arc		
-			$lPBeam->addTag("Light Particle Beam");
-			$lPBeam->setStructureHome(array(2, 3));			
-			$this->addLeftAftSystem($lPBeam);
-			$lPBeam2 = new LightParticleBeamShip(5, 2, 1, 180, 270);
-			$lPBeam2->overkillArcStructures = array(2, 3); //overkill spills to whichever Port quarter is in arc		
-			$lPBeam2->addTag("Light Particle Beam");
-			$lPBeam2->setStructureHome(array(2, 3));			
-			$this->addLeftAftSystem($lPBeam2);	
-
-			//Fwd Stbd systems			
-			$hangar = new Hangar(5, 6, 6);
-			$hangar->startArc = 0;
-			$hangar->endArc = 90;
-			$hangar->addTag("External Hangar");				
-			$hangar->overkillArcStructures = array(1, 4); //overkill spills to whichever Port quarter is in arc					
-			$hangar->setStructureHome(array(1, 4));				
-			$this->addRightFrontSystem($hangar);	
-			$impLaser = new ImperialLaser(5, 8, 5, 0, 90);
-			$impLaser->overkillArcStructures = array(1, 4); //overkill spills to whichever Port quarter is in arc		
-			$impLaser->addTag("Outer Imperial Laser");
-			$impLaser->setStructureHome(array(1, 4));			
-			$this->addRightFrontSystem($impLaser);			
-			$lPBeam = new LightParticleBeamShip(5, 2, 1, 0, 90);
-			$lPBeam->overkillArcStructures = array(1, 4); //overkill spills to whichever Port quarter is in arc		
-			$lPBeam->addTag("Light Particle Beam");
-			$lPBeam->setStructureHome(array(1, 4));			
-			$this->addRightFrontSystem($lPBeam);
-			$lPBeam2 = new LightParticleBeamShip(5, 2, 1, 0, 90);
-			$lPBeam2->overkillArcStructures = array(1, 4); //overkill spills to whichever Port quarter is in arc		
-			$lPBeam2->addTag("Light Particle Beam");
-			$lPBeam2->setStructureHome(array(1, 4));			
-			$this->addRightFrontSystem($lPBeam2);
-
 			$this->addRightSystem(new TacLaser(5, 5, 4, 30, 150));
         	$this->addRightSystem(new LightParticleBeamShip(5, 2, 1, 30, 150));
         	$this->addRightSystem(new LightParticleBeamShip(5, 2, 1, 30, 150));
+		/*replaced by TAGged versions
+			$this->addRightSystem(new CargoBay(5, 25));
+			$this->addRightSystem(new SubReactorUniversal(5, 25, 0, 0));
+		*/
+
 			$cargoBay = new CargoBay(5, 25);
 			$cargoBay->startArc = 0;
 			$cargoBay->endArc = 180;
-			$this->addRightSystem($cargoBay);					
+			$this->addRightSystem($cargoBay);
+			$hangar = new Hangar(5, 6);
+			$hangar->startArc = 0;
+			$hangar->endArc = 180;
+			$this->addRightSystem($hangar);						
 			$subReactor = new SubReactorUniversal(5, 25, 0, 0);
 			$subReactor->startArc = 0;
 			$subReactor->endArc = 180;
 			$this->addRightSystem($subReactor);
-
-			//Aft Stbd systems			
-			$hangar = new Hangar(5, 6, 6);
-			$hangar->startArc = 90;
-			$hangar->endArc = 180;
-			$hangar->addTag("External Hangar");			
-			$hangar->overkillArcStructures = array(2, 4); //overkill spills to whichever Port quarter is in arc					
-			$hangar->setStructureHome(array(2, 4));				
-			$this->addRightAftSystem($hangar);	
-			$impLaser = new ImperialLaser(5, 8, 5, 90, 180);
-			$impLaser->overkillArcStructures = array(2, 4); //overkill spills to whichever Port quarter is in arc		
-			$impLaser->addTag("Outer Imperial Laser");
-			$impLaser->setStructureHome(array(2, 4));			
-			$this->addRightAftSystem($impLaser);			
-			$lPBeam = new LightParticleBeamShip(5, 2, 1, 90, 180);
-			$lPBeam->overkillArcStructures = array(2, 4); //overkill spills to whichever Port quarter is in arc		
-			$lPBeam->addTag("Light Particle Beam");
-			$lPBeam->setStructureHome(array(2, 4));			
-			$this->addRightAftSystem($lPBeam);
-			$lPBeam2 = new LightParticleBeamShip(5, 2, 1, 90, 180);
-			$lPBeam2->overkillArcStructures = array(2, 4); //overkill spills to whichever Port quarter is in arc		
-			//$lPBeam->addTag("Light Particle Beam");
-			$lPBeam2->setStructureHome(array(2, 4));			
-			$this->addRightAftSystem($lPBeam2);		
-
-
+		
+		/*replaced by TAGed versions!
+		$this->addFrontSystem(new Structure( 5, 108));
+		$this->addAftSystem(new Structure( 5, 108));
+		$this->addLeftSystem(new Structure( 5, 108));
+		$this->addRightSystem(new Structure( 5, 108));
+		*/
 		$this->addPrimarySystem(new Structure( 6, 140));//needs to be called first for some reason - static call apparently fails for the first time...
-		$this->addFrontSystem(Structure::createAsOuter(5, 108, 300,60));
-		$this->addAftSystem(Structure::createAsOuter(5, 108, 120, 240));
-		$this->addLeftSystem(Structure::createAsOuter(5, 108, 210, 330));
-		$this->addRightSystem(Structure::createAsOuter(5, 108, 30, 150));		
+		$this->addFrontSystem(Structure::createAsOuter(5, 108, 270,90));
+		$this->addAftSystem(Structure::createAsOuter(5, 108, 90, 270));
+		$this->addLeftSystem(Structure::createAsOuter(5, 108, 180, 360));
+		$this->addRightSystem(Structure::createAsOuter(5, 108, 0, 180));		
 		
 		$this->hitChart = array(			
 			0=> array(
-				9 => "Structure",
-				11 => "Imperial Laser",
-				13 => "Tactical Laser",
-				16 => "Scanner",
-				17 => "Hangar", 
+				7 => "Structure",
+				8 => "Light Particle Beam",
+				10 => "Imperial Laser",
+				12 => "Tactical Laser",
+				15 => "Scanner",
+				17 => "Hangar", //a bit larger as it's now not hittable from the outside
 				18 => "Reactor",
 				20 => "TAG:C&C",
 			),
 			
+			
 			1=> array(
-				2 => "TAG:Outer Imperial Laser",
+				2 => "TAG:Imperial Laser",
 				5 => "TAG:Light Particle Beam",
 				7 => "TAG:Tactical Laser",
 				9 => "TAG:Cargo Bay",
 				10 => "TAG:Sub Reactor",
-				11 => "TAG:External Hangar",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			2=> array(
-				2 => "TAG:Outer Imperial Laser",
+				2 => "TAG:Imperial Laser",
 				5 => "TAG:Light Particle Beam",
 				7 => "TAG:Tactical Laser",
 				9 => "TAG:Cargo Bay",
 				10 => "TAG:Sub Reactor",
-				11 => "TAG:External Hangar",
 				18 => "Structure",
 				20 => "Primary",
 			),	
 			3=> array(
-				2 => "TAG:Outer Imperial Laser",
+				2 => "TAG:Imperial Laser",
 				5 => "TAG:Light Particle Beam",
 				7 => "TAG:Tactical Laser",
 				9 => "TAG:Cargo Bay",
 				10 => "TAG:Sub Reactor",
-				11 => "TAG:External Hangar",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			4=> array(
-				2 => "TAG:Outer Imperial Laser",
+				2 => "TAG:Imperial Laser",
 				5 => "TAG:Light Particle Beam",
 				7 => "TAG:Tactical Laser",
 				9 => "TAG:Cargo Bay",
 				10 => "TAG:Sub Reactor",
-				11 => "TAG:External Hangar",
 				18 => "Structure",
 				20 => "Primary",
 			),
-
+			
+			/*replaced with TAG system
+			1=> array(
+				1 => "0:Imperial Laser",
+				3 => "0:Light Particle Beam",
+				5 => "Light Particle Beam",
+				7 => "Tactical Laser",
+				9 => "Cargo Bay",
+				10 => "Sub Reactor",
+				11 => "0:Hangar",
+				18 => "Structure",
+				20 => "Primary",
+			),
+			2=> array(
+				1 => "0:Imperial Laser",
+				3 => "0:Light Particle Beam",
+				5 => "Light Particle Beam",
+				7 => "Tactical Laser",
+				9 => "Cargo Bay",
+				10 => "Sub Reactor",
+				11 => "0:Hangar",
+				18 => "Structure",
+				20 => "Primary",
+			),	
+			3=> array(
+				1 => "0:Imperial Laser",
+				3 => "0:Light Particle Beam",
+				5 => "Light Particle Beam",
+				7 => "Tactical Laser",
+				9 => "Cargo Bay",
+				10 => "Sub Reactor",
+				11 => "0:Hangar",
+				18 => "Structure",
+				20 => "Primary",
+			),
+			4=> array(
+				1 => "0:Imperial Laser",
+				3 => "0:Light Particle Beam",
+				5 => "Light Particle Beam",
+				7 => "Tactical Laser",
+				9 => "Cargo Bay",
+				10 => "Sub Reactor",
+				11 => "0:Hangar",
+				18 => "Structure",
+				20 => "Primary",
+			),
+			*/
 		);
 		
     }
