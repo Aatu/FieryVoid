@@ -550,10 +550,12 @@ window.ShipTooltip = function () {
             grid.append(cell);
         });
 
-        grid.appendTo(this.element.find('.namecontainer'));
+        //No name here means nothing for the container's bottom rule to underline — see
+        //.namecontainer--stack in shipTooltip.css.
+        this.element.find('.namecontainer').addClass('namecontainer--stack').append(grid);
 
         jQuery(".ballistics", this.element).hide();
-        this.addEntryElement("Zoom closer, or click to interact");
+        //this.addEntryElement("Zoom closer, or click to interact");
     }
 
     function showBallisticsTooltip(ballistics) { }

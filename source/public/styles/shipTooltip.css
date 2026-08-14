@@ -22,6 +22,15 @@
     border-bottom-color: var(--tt-name, var(--fv-neutral));
 }
 
+/* ...except on a STACKED hex, where the container holds the silhouette grid and no name
+   at all. A rule under a name reads as an underline; the same rule under a grid of
+   pictures reads as a stray line across the bottom of the tooltip, and there is no name
+   colour to paint it with either (see the --tt-name fallback above). ShipTooltip.js adds
+   this modifier on the multi-ship path only, so the single-ship tooltip is untouched. */
+.shipNameContainer .namecontainer--stack {
+    border-bottom-style: none;
+}
+
 /* The TARGETING / INCOMING section headings. `.fire` and `.ballistics` are each carried
    by two divs — this heading and the content beneath it — so the rule above the heading
    has to key on tt-head, or the content would grow a border of its own.
