@@ -37,6 +37,7 @@ window.SelectFromShips = function () {
     var CARET_HALF = 8;   // half the caret triangle's width
     var TOUCH_SLOP = 10;  // px of movement that cancels a long press
     var TOOLTIP_GAP = 10;  // gap between the card and the hover tooltip beside it
+    var FLIP_SLACK = 24;  // px of SPARE room the far side must offer before a flip
 
     var CATEGORY_ORDER = ['ship', 'flight', 'mine', 'terrain'];
     var CATEGORY_LABEL = { ship: 'Ships', flight: 'Flights', mine: 'Mines', terrain: 'Terrain' };
@@ -93,6 +94,9 @@ window.SelectFromShips = function () {
         this.longPressFired = false;
         this.previousFocus = null;
         this.hoveredShipId = null;
+        //Which side of the hex the card sits on, once positionSelf() has decided. Null
+        //until the first placement; see positionSelf for why it is then STICKY.
+        this.placement = null;
         //Set once the header has been dragged. Per-instance: the next opening re-anchors
         //on its own hex, so a dragged position is never remembered.
         this.dragged = false;
@@ -295,16 +299,41 @@ window.SelectFromShips = function () {
         var width = node.offsetWidth;
         var height = node.offsetHeight;
 
-        var left = point.x - width / 2;
-        var top = point.y - yOffset - height;
+        // How much height each side of the hex can actually hold.
+        var roomAbove = (point.y - yOffset) - EDGE_MARGIN;
+        var roomBelow = (window.innerHeight - EDGE_MARGIN) - (point.y + yOffset);
 
-        // Prefer above the hex; flip below when there is no room, so a stack near the top
-        // of the screen is not half off-screen (the old menu had no bounds check at all).
-        var below = false;
-        if (top < EDGE_MARGIN) {
-            top = point.y + yOffset;
-            below = true;
+        // The above/below choice is STICKY, and that is the whole point of this block.
+        //
+        // positionSelf() runs on EVERY zoom step and every scroll, and re-deciding from
+        // scratch each time is what made the card hop across its own hex mid-pinch: zoom
+        // changes the hex's viewport position AND yOffset (half the hex height, clamped
+        // 20..100), so a card that had flipped below because it did not fit above would
+        // find it fitted again a step later, jump up, then jump back on the next step.
+        // The player was doing one continuous gesture and the menu answered with two
+        // different layouts.
+        //
+        // So: decide once, on the first placement, exactly as before — prefer above.
+        // After that keep that side for as long as it still holds the card, and require
+        // FLIP_SLACK px of SPARE room on the far side before moving, so a hex parked on
+        // the boundary cannot oscillate between two answers that are both marginal.
+        // Neither side fitting keeps the current one and lets the clamp below deal with
+        // it, which is the least surprising of the bad options.
+        var fitsAbove = height <= roomAbove;
+        var fitsBelow = height <= roomBelow;
+        var below;
+
+        if (!this.placement) {
+            below = !fitsAbove;
+        } else if (this.placement === 'above') {
+            below = !fitsAbove && (height + FLIP_SLACK <= roomBelow);
+        } else {
+            below = !(!fitsBelow && (height + FLIP_SLACK <= roomAbove));
         }
+        this.placement = below ? 'below' : 'above';
+
+        var left = point.x - width / 2;
+        var top = below ? point.y + yOffset : point.y - yOffset - height;
 
         left = clamp(left, EDGE_MARGIN, window.innerWidth - width - EDGE_MARGIN);
         top = clamp(top, EDGE_MARGIN, window.innerHeight - height - EDGE_MARGIN);
@@ -354,29 +383,6 @@ window.SelectFromShips = function () {
         return (order > 0) ? order : null;
     }
 
-    function countActiveFighters(ship) {
-        var noOfFighters = 0;
-        ship.systems.forEach(ftr => {
-            //In replay, count fighters by their state AS OF the viewed turn
-            //(gamedata.turn is the replay turn). A fighter docked/destroyed
-            //THIS turn was still flying when this turn's combat happened, so
-            //it should still be counted — otherwise a flight that partial-docks
-            //3 of 6 on turn N shows "(3)" on turn N instead of the "(6)" that
-            //were present. Outside replay, fall back to the plain destroyed check.
-            var counted;
-            if (gamedata.replay) {
-                var turnDestroyed = damageManager.getTurnDestroyed(ship, ftr);
-                counted = (turnDestroyed === null || turnDestroyed >= gamedata.turn);
-            } else {
-                counted = !shipManager.systems.isDestroyed(ship, ftr);
-            }
-            if (counted) {
-                noOfFighters++;
-            }
-        });
-        return noOfFighters;
-    }
-
     function describe(ship) {
         var category = categoryOf(ship);
         var label = ship.name;
@@ -409,7 +415,9 @@ window.SelectFromShips = function () {
             category: category,
             label: label,
             masked: masked,
-            count: ship.flight ? countActiveFighters(ship) : null,
+            //Replay-aware active-fighter count; shared with the hover ShipTooltip's
+            //stack grid, which prints the same number over the flight's silhouette.
+            count: ship.flight ? shipManager.systems.getActiveFighterCount(ship) : null,
             shipClass: shipClass,
             chips: chips,
             art: masked ? null : ship.imagePath,
@@ -794,24 +802,45 @@ window.SelectFromShips = function () {
 
         row.append(jQuery('<span class="fv-hexpicker__bar"></span>'));
 
+        //The art sits in a wrapper so the fighter-count badge has something to be
+        //positioned against — an <img> cannot hold children. The wrapper is what carries
+        //the reserved box; the art fills it.
+        var thumb = jQuery('<span class="fv-hexpicker__thumb"></span>');
+
         if (descriptor.art && window.AssetManager) {
             //Same URL the map texture already fetched, so this is an HTTP cache hit
             //rather than a new download. The box is reserved in CSS: the card is
             //positioned from its MEASURED height right after append, so art that loaded
             //late and grew a row would drift the card off its anchor.
-            row.append(jQuery('<img class="fv-hexpicker__art" alt="">')
+            thumb.append(jQuery('<img class="fv-hexpicker__art" alt="">')
                 .attr('src', window.AssetManager.getSmartImagePath(descriptor.art))
                 .on('error', function () { jQuery(this).css('visibility', 'hidden'); }));
         } else {
-            row.append(jQuery('<span class="fv-hexpicker__art fv-hexpicker__art--generic"></span>'));
+            thumb.append(jQuery('<span class="fv-hexpicker__art fv-hexpicker__art--generic"></span>'));
         }
+
+        //A flight's living fighters, printed over the bottom-right of its silhouette
+        //rather than in front of its name — the same badge the hover tooltip's stack grid
+        //uses, so the two surfaces say it the same way. It leaves the name line to the
+        //name, which is what the player is reading the row for.
+        //
+        //`> 0` rather than `!== null` keeps the old truthiness gate: a flight with no
+        //fighters left should not be on the map at all, and a bare "0" over the art would
+        //read as an alarm rather than as information.
+        if (descriptor.count > 0) {
+            thumb.append(jQuery('<span class="fv-hexpicker__count"></span>').text(descriptor.count));
+        }
+
+        row.append(thumb);
 
         return row;
     }
 
-    //`count` leads the name and shares its font — "2 x Scion Breaching Pod", not
-    //"Scion Breaching Pod x2". The count is the thing being counted, so it reads as one
-    //phrase rather than as a name with a badge stuck on the end.
+    //`count` here is a REPETITION count — the collapsed-run row's "13 x Mine" — and it
+    //leads the name, sharing its font, because the count is the thing being counted and
+    //the two read as one phrase. A flight's FIGHTER count is a different statement about
+    //a single unit and is a badge over the art instead (see buildRowShell); real rows
+    //therefore pass no count at all.
     function buildText(descriptor, label, count) {
         var text = jQuery('<span class="fv-hexpicker__text"></span>');
 
@@ -850,7 +879,8 @@ window.SelectFromShips = function () {
         var ship = descriptor.ship;
 
         var row = buildRowShell(descriptor);
-        row.append(buildText(descriptor, descriptor.label, descriptor.count));
+        //No count in the name: a flight's fighter count is the badge over its art now.
+        row.append(buildText(descriptor, descriptor.label, null));
         row.append(buildIni(descriptor, this.sheet));
 
         var details = jQuery('<button type="button" class="fv-hexpicker__details"></button>')
@@ -938,6 +968,10 @@ window.SelectFromShips = function () {
         var descriptor = item.members[0];
 
         var row = buildRowShell(descriptor).addClass('fv-hexpicker__run');
+        //The run length DOES lead the name — "13 x Mine" is how many units collapsed
+        //here, a different statement from the badge the shell may have put over the art
+        //(how many fighters are in EACH of them). Both can be true at once: three
+        //identical 6-fighter flights read "3 x Nial Flight" with a "6" on the silhouette.
         row.append(buildText(descriptor, descriptor.label, item.members.length));
         row.append(buildIni(descriptor, this.sheet));
         row.append(jQuery('<span class="fv-hexpicker__expand"></span>').text('Show ' + item.members.length));

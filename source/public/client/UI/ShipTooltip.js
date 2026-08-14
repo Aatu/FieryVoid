@@ -2,10 +2,20 @@
 
 window.ShipTooltip = function () {
 
-    var HTML = '<div class="shipNameContainer">' + '<div class="namecontainer" style="border-bottom:1px solid white;margin-bottom:3px;"></div>' +
-        '<div class="fire" style=";margin:3px 0px 3px 0px; padding:2px 0px 0px 0px;border-top:1px solid white;color:red; text-decoration: bold;"><span>TARGETING</span></div>' +
-        '<div class="fire targeting"></div>' + '<div class="ballistics" style=";margin:3px 0px 3px 0px; padding:2px 0px 0px 0px;border-top:1px solid white;color:red;"><span>INCOMING:</span></div>' +
-        '<div class="ballistics incoming"></div>' + '<div class="buttons"></div>' + '</div>';
+    // Every rule this markup needs now lives in styles/shipTooltip.css. The `tt-head`
+    // class is what the two section headings (TARGETING / INCOMING) are styled by: it
+    // exists because `.fire` and `.ballistics` are each carried by TWO divs — the heading
+    // and the content beneath it — and only the heading wants the rule above it. The
+    // existing `.fire` / `.ballistics` / `.targeting` / `.incoming` classes are untouched;
+    // they are the selectors the show/hide and fill code below (and weaponManager) use.
+    var HTML = '<div class="shipNameContainer">'
+        + '<div class="namecontainer"></div>'
+        + '<div class="fire tt-head"><span>TARGETING</span></div>'
+        + '<div class="fire targeting"></div>'
+        + '<div class="ballistics tt-head"><span>INCOMING:</span></div>'
+        + '<div class="ballistics incoming"></div>'
+        + '<div class="buttons"></div>'
+        + '</div>';
 
     function ShipTooltip(selectedShip, ships, position, showTargeting, menu, hexagon, ballisticsMenu) {
         this.element = jQuery(HTML);
@@ -111,6 +121,11 @@ window.ShipTooltip = function () {
             }
         }
         jQuery('<span class="name value ' + getAllyClass(ship) + '"' + getNameStyle(ship) + '>' + shipNameDisplay + '</span>').appendTo(this.element.find('.namecontainer'));
+
+        //The rule under the name takes the NAME's own colour rather than a flat white —
+        //see .namecontainer in shipTooltip.css. One property, read by the CSS, so the two
+        //can never drift: getNameColor answers the same question getNameStyle does.
+        this.element.css('--tt-name', getNameColor(ship));
 
         var jinking = shipManager.movement.getJinking(ship) * 5;
         var flightArmour = shipManager.systems.getFlightArmour(ship);
@@ -472,20 +487,72 @@ window.ShipTooltip = function () {
         }
     }
 
+    // The hover tooltip for a STACKED hex — several units under one cursor, none of them
+    // committed to yet. It used to be a run-on comma-separated list of names, which is
+    // the least useful shape the information has: the map shows you silhouettes, so a
+    // wall of similar-coloured red text ("Nial Flight, Nial Flight, Sharlin, Mine, Mine")
+    // asked the player to read where they had just been looking.
+    //
+    // It is now a grid of the same silhouettes, each on the hex picker's 3px allegiance
+    // rail, with a flight's active fighter count printed over its art. That answers "what
+    // is in this hex" at a glance and — deliberately — nothing more: this surface is a
+    // PREVIEW. Identifying a particular unit is the picker's job, one click away, and
+    // duplicating it here is how these two got confused with each other in the first
+    // place (SELECT_FROM_SHIPS_PLAN.md §2.8).
+    //
+    // Touch is unaffected: there is no hover on a touchscreen, so this tooltip only ever
+    // appears for a mouse.
     function createForMultipleShips(ships) {
-        ships.forEach(function (ship, i) {
-            var comma = i < ships.length - 1 ? ',' : '';
+        var grid = jQuery('<div class="tt-stack"></div>');
+
+        ships.forEach(function (ship) {
             var shipNameDisplay = ship.name;
+            var masked = false;
             if (ship.mine) {
                 var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
                 if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
                     shipNameDisplay = "Mine";
+                    masked = true;
                 }
             }
-            jQuery('<span class="name value ' + getAllyClass(ship) + '"' + getNameStyle(ship) + '>' + shipNameDisplay + comma + ' </span>').appendTo(this.element.find('.namecontainer'));
 
-            $(".ballistics", this.element).hide();
-        }, this);
+            var cell = jQuery('<div class="tt-stack__cell"></div>').addClass(getAllyClass(ship));
+            //Observers and 3+-team games override the rail and count colours per team,
+            //exactly as the picker's rows do. Inline beats the allegiance class.
+            var teamVars = getTeamColorVars(ship);
+            if (teamVars) cell.attr('style', teamVars);
+
+            cell.append(jQuery('<span class="tt-stack__bar"></span>'));
+
+            //⚠️ A masked mine's imagePath still identifies the mine type that masking the
+            //NAME exists to hide — the same trap the picker's thumbnails have to dodge.
+            //It gets the generic glyph, never its own art.
+            if (!masked && ship.imagePath && window.AssetManager) {
+                //Same URL the map texture already fetched, so this is an HTTP cache hit
+                //rather than a new download.
+                cell.append(jQuery('<img class="tt-stack__art">')
+                    .attr('alt', shipNameDisplay)
+                    .attr('src', window.AssetManager.getSmartImagePath(ship.imagePath))
+                    //Fall back to the glyph rather than hiding: in a grid with no names
+                    //beside it, an empty cell says nothing at all.
+                    .on('error', function () {
+                        jQuery(this).replaceWith('<span class="tt-stack__art tt-stack__art--generic"></span>');
+                    }));
+            } else {
+                cell.append(jQuery('<span class="tt-stack__art tt-stack__art--generic"></span>'));
+            }
+
+            if (ship.flight === true) {
+                cell.append(jQuery('<span class="tt-stack__count"></span>')
+                    .text(shipManager.systems.getActiveFighterCount(ship)));
+            }
+
+            grid.append(cell);
+        });
+
+        grid.appendTo(this.element.find('.namecontainer'));
+
+        jQuery(".ballistics", this.element).hide();
         this.addEntryElement("Zoom closer, or click to interact");
     }
 
@@ -521,25 +588,67 @@ window.ShipTooltip = function () {
         return gamedata.isTerrain(ship.shipSizeClass, ship.userid) ? 'terrain' : (gamedata.isMyShip(ship) ? 'mine' : (gamedata.isMyorMyTeamShip(ship) ? 'ally' : 'enemy'));
     }
 
-    // Inline colour for the ship name, mirroring the fleetList / combat-log
-    // scheme (see gamedata.getFleetHeaderColorRGB):
-    //   - Terrain: neutral — keep the CSS 'terrain' class, no inline override.
-    //   - 2-team participant: relative mine/ally/enemy — keep the CSS class from
-    //     getAllyClass (limegreen / #33adff / red), so your fleet reads green.
-    //   - Observer, OR 3+-team participant: absolute per-team palette inline, so
-    //     each team is identifiable rather than everyone collapsing to red/blue.
-    function getNameStyle(ship) {
-        if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
-            return '';
-        }
+    // What the CSS allegiance classes below paint, as values rather than as classes. The
+    // shared --fv-* allegiance set in tokens.css; the tone-mapped tints, not the
+    // -signal twins, because these are for TEXT.
+    var ALLEGIANCE_NAME = {
+        mine: 'var(--fv-own)',
+        ally: 'var(--fv-ally)',
+        enemy: 'var(--fv-enemy)',
+        terrain: 'var(--fv-neutral)'
+    };
 
-        // 2-team participant keeps the relative CSS class scheme.
-        if (gamedata.isPlayerInGame() && gamedata.getDistinctTeamCount() === 2) {
+    // THE gate, in one place: does this ship take the absolute per-team palette, or the
+    // relative mine/ally/enemy CSS classes? Mirrors the fleetList / combat-log scheme
+    // (see gamedata.getFleetHeaderColorRGB):
+    //   - Terrain: neutral — always the CSS 'terrain' class, never a team colour.
+    //   - 2-team participant: relative mine/ally/enemy from getAllyClass, so your own
+    //     fleet reads green whichever team number you happen to be.
+    //   - Observer, OR 3+-team participant: absolute per-team palette, so each team is
+    //     identifiable rather than everyone collapsing to two colours.
+    function usesTeamColor(ship) {
+        if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) return false;
+        return !(gamedata.isPlayerInGame() && gamedata.getDistinctTeamCount() === 2);
+    }
+
+    // Inline colour for the ship name. Empty string on the class path — the CSS class
+    // from getAllyClass is already carrying it, and returning nothing is what lets it.
+    function getNameStyle(ship) {
+        if (!usesTeamColor(ship)) {
             return '';
         }
 
         var rgb = gamedata.getTeamColorRGB(ship.team);
         return ' style="color:rgb(' + Math.round(rgb[0]) + ',' + Math.round(rgb[1]) + ',' + Math.round(rgb[2]) + ');"';
+    }
+
+    // The colour the name will ACTUALLY render in — the same decision as getNameStyle,
+    // but resolved to a value on both arms instead of deferring to the class on one of
+    // them. The rule under the name is painted with it, so the two can never drift.
+    function getNameColor(ship) {
+        if (!usesTeamColor(ship)) {
+            return ALLEGIANCE_NAME[getAllyClass(ship)] || 'var(--fv-text)';
+        }
+
+        var rgb = gamedata.getTeamColorRGB(ship.team);
+        return 'rgb(' + Math.round(rgb[0]) + ',' + Math.round(rgb[1]) + ',' + Math.round(rgb[2]) + ')';
+    }
+
+    // The stack grid's two per-cell channels, for the observer / 3+-team case only.
+    // Byte-for-byte the same idea as SelectFromShips.getTeamColorVars: the RAW team
+    // colour on the 3px rail, where a full-chroma value reads as a signal precisely
+    // because there is so little of it, and a tone-mapped twin on the count badge, so an
+    // arbitrary team colour lands in the same brightness band as the four fixed tints.
+    function getTeamColorVars(ship) {
+        if (!usesTeamColor(ship)) return '';
+
+        var raw = gamedata.getTeamColorRGB(ship.team);
+        var toned = (typeof gamedata.getMutedTeamColorRGB === 'function')
+            ? gamedata.getMutedTeamColorRGB(ship.team)
+            : raw;
+
+        return '--row-bar:rgb(' + Math.round(raw[0]) + ',' + Math.round(raw[1]) + ',' + Math.round(raw[2]) + ');'
+            + '--row-name:rgb(' + Math.round(toned[0]) + ',' + Math.round(toned[1]) + ',' + Math.round(toned[2]) + ');';
     }
 
     // HK Jamming: true when the flight's sample fighter carries an Uncontrolled crit

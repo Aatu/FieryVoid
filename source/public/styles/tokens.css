@@ -73,7 +73,9 @@
   --fv-line: #215a7a;                 /* the landing page's own border, unchanged */
   --fv-line-soft: #1a3f55;
   --fv-line-scs: #496791;             /* theme.colors.line — THE border now      */
+  --fv-line-accent: #8bcaf2;  
   --fv-rule: #1e3a4a;                 /* the divider under a modal's control bar */
+
 
   /* ── Text ──────────────────────────────────────────────────────────────────
      --fv-text-dim is NOT theme.colors.textDim (#7f9bb8): the landing page runs a
@@ -174,9 +176,13 @@
      changes, add them there and re-declare the sync contract above.
 
      NOT YET CONVERTED, deliberately: gamedata.getShipLogColorCss (the combat log)
-     and the .enemy.name / .mine.name / .ally.name / .terrain.name rules in
-     tactical.css (the hover ShipTooltip) still hold their own bright literals. Both
-     are noted at their definitions. */
+     still holds its own bright literals — it is a dense scrolling wall of text where
+     the stronger colours still earn their place. Noted at its definition.
+
+     The hover ShipTooltip HAS since been converted: the .enemy.name / .mine.name /
+     .ally.name / .terrain.name rules in tactical.css, and the stack grid and the rule
+     under the name in shipTooltip.css. It sits SIDE BY SIDE with the picker — the
+     picker places it beside itself — so the mismatch had stopped being theoretical. */
   /* Text tints — equal perceived lightness, for NAMES and labels on a dark ground. */
   --fv-own: #7dbf88;
   --fv-ally: #79aed4;

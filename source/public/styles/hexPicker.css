@@ -132,14 +132,23 @@
     display: none;
 }
 
-/* ── Header ──────────────────────────────────────────────────────────────── */
+/* ── Header ──────────────────────────────────────────────────────────────────
+   The 3px left border is the same rail every ship row wears, so the card reads as
+   one column of stacked strips rather than as chrome sitting on top of a list. Both
+   this and the list below start at the card's content edge, so the rails line up
+   with no arithmetic. It takes --fv-line-scs — the card's own border colour — rather
+   than an allegiance signal, because the header belongs to no unit.
+
+   Padding-left drops 10px -> 7px so the border ADDS to the rail rather than to the
+   indent: the title still starts where it did. */
 .fv-hexpicker__header {
     display: flex;
     align-items: center;
     gap: 6px;
     height: var(--hp-header-h);
     flex: 0 0 auto;
-    padding: 0 4px 0 10px;
+    padding: 0 4px 0 7px;
+    border-left: 3px solid var(--fv-line-scs);
     border-bottom: 1px solid var(--fv-rule);
     font-size: 10.5px;
     letter-spacing: 0.08em;
@@ -304,7 +313,9 @@
     gap: 6px;
     width: 100%;
     height: 20px;
-    padding: 0 8px 0 6px;
+    /* Same rail as the header and the rows below it — see the header's note. 6px of
+       indent becomes 3px of rail + 3px of padding, so the fold caret does not move. */
+    padding: 0 8px 0 3px;
     font-size: 9.5px;
     font-family: arial;
     letter-spacing: 0.1em;
@@ -312,7 +323,8 @@
     text-align: left;
     color: var(--fv-text-dim);
     background: var(--fv-well);
-    border: 0;
+    border: 1px solid var(--fv-line-scs);;
+    border-left: 3px solid var(--fv-line-scs);
     border-bottom: 1px solid var(--fv-rule);
     cursor: pointer;
 }
@@ -328,7 +340,7 @@
     text-align: center;
     font-size: 8px;
     line-height: 1;
-    color: var(--fv-text-dim);
+    color: var(--fv-text-accent);
 }
 
 .fv-hexpicker__groupcount {
@@ -336,6 +348,7 @@
     margin-left: auto;
     font-family: var(--fv-mono);
     letter-spacing: 0;
+    color: var(--fv-text-accent);    
 }
 
 .fv-hexpicker__group--folded .fv-hexpicker__row,
@@ -378,15 +391,51 @@
 
 /* Reserve the art box in CSS. The card is positioned from its MEASURED height
    immediately after append; if a thumbnail loaded later and grew a row, the card
-   would silently drift off its anchor. */
-.fv-hexpicker__art {
+   would silently drift off its anchor.
+
+   The box lives on the WRAPPER, not on the art itself: an <img> cannot hold children,
+   so the fighter-count badge needs a positioned element around it. */
+.fv-hexpicker__thumb {
     flex: 0 0 auto;
     position: relative;
     width: var(--hp-art);
     height: var(--hp-art);
     margin-left: 5px;
+}
+
+.fv-hexpicker__art {
+    /* display:block matters now. As a direct flex item the span form of this element
+       was blockified for free; inside the wrapper it is an ordinary inline child, and
+       width/height do not apply to those. */
+    display: block;
+    position: relative;
+    width: 100%;
+    height: 100%;
     object-fit: contain;
     /* terrain art is much larger and rounder than a ship sprite — fit it, never crop */
+}
+
+/* A flight's living fighters, over the bottom-right of its silhouette. It used to lead
+   the name ("6 x Nial Flight"), which spent the row's most valuable line on a number and
+   pushed long names into an ellipsis. The hover tooltip's stack grid prints it exactly
+   this way (.tt-stack__count in shipTooltip.css) and the two surfaces appear together,
+   so they had better agree.
+
+   NOT to be confused with a collapsed run's "13 x Mine", which stays in the name: that
+   counts UNITS, this counts fighters inside one of them. Both can appear on one row. */
+.fv-hexpicker__count {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    min-width: 14px;
+    padding: 0 2px;
+    font-family: var(--fv-mono);
+    font-size: 10px;
+    line-height: 12px;
+    text-align: center;
+    color: var(--row-name);
+    background: var(--fv-overlay);
+    border: 1px solid var(--row-bar);
 }
 
 /* Generic glyph for a mine whose name has been masked to the literal "Mine". The
@@ -584,9 +633,18 @@
     min-height: var(--hp-row-h-dense);
 }
 
-.fv-hexpicker--dense .fv-hexpicker__art {
+.fv-hexpicker--dense .fv-hexpicker__thumb {
     width: var(--hp-art-dense);
     height: var(--hp-art-dense);
+}
+
+/* The badge scales with the art it sits on: at 26px the comfortable size would cover
+   over half the silhouette. */
+.fv-hexpicker--dense .fv-hexpicker__count {
+    min-width: 12px;
+    padding: 0 1px;
+    font-size: 9px;
+    line-height: 10px;
 }
 
 .fv-hexpicker--dense .fv-hexpicker__text {

@@ -174,6 +174,112 @@ Fix, in the row handlers:
 > ship legitimately keeps its arrows while another row is pressed. That is deterministic, not
 > intermittent, and lives in `ShipIcon`, outside this picker.
 
+### Feedback round 6 (2026-08-14) — all applied
+
+**1. `ShipTooltip`'s inline styles moved into `shipTooltip.css`, and the rule under the name
+now takes the name's own colour.** The tooltip's HTML string carried three `style="…"`
+attributes — `.namecontainer`'s bottom rule and the two `TARGETING` / `INCOMING` section
+headings. They are now four CSS rules; values came across unchanged, except
+`text-decoration: bold`, which was dropped because `bold` is not a text-decoration value and
+never did anything.
+
+The section headings needed a class of their own: **`.fire` and `.ballistics` are each
+carried by TWO divs** — the heading and the content beneath it — so a bare `.fire` rule
+would have put a white rule and red text on the targeting readout as well. Hence
+`tt-head`. The existing `.fire` / `.ballistics` / `.targeting` / `.incoming` classes are
+untouched; they are what the show/hide code and `weaponManager.targetingShipTooltip` select on.
+
+The rule under the name reads `border-bottom-color: var(--tt-name, var(--fv-neutral))`, and
+`createForSingleShip` writes `--tt-name` on the root element from a new **`getNameColor()`**.
+That function and `getNameStyle()` now share one gate, `usesTeamColor()`, so the line and the
+text cannot drift: terrain and 2-team participants resolve to the allegiance token the CSS
+class applies, observers and 3+-team games to the raw per-team `rgb()`. A **multi**-ship stack
+has several allegiances and no single answer, so it keeps the neutral fallback.
+
+> The static `#shipNameContainer` div at [game.php:570](source/public/game.php#L570) is a
+> separate element with the same inline styles and **no JS consumer at all** — the new rules
+> key on the CLASS, so it is untouched. Left alone deliberately; deleting dead markup is its
+> own change.
+
+**2. The picker's above/below choice is now STICKY** (`positionSelf`). `positionSelf()` runs
+on every zoom step and every scroll, and it re-decided the side from scratch each time. Zoom
+moves the hex in the viewport *and* changes `yOffset` (half the hex height, clamped 20–100),
+so a card that had flipped below because it did not fit above would find it fitted again a
+step later, jump up, and jump back on the next step — one continuous gesture, two different
+layouts.
+
+The first placement is unchanged (prefer above; the `!fitsAbove` test is algebraically the
+old `top < EDGE_MARGIN`). After that the card keeps its side for as long as that side still
+holds it, and needs `FLIP_SLACK` (24px) of **spare** room on the far side before moving, so a
+hex parked on the boundary cannot oscillate between two marginal answers. Neither side
+fitting keeps the current one and lets the clamp deal with it. Round 2 fixed the same class of
+jump for fold/expand via `reflow()`; this is the zoom/scroll half.
+
+**3. `createForMultipleShips` is a grid of silhouettes.** The hover tooltip for a stacked hex
+was a run-on comma-separated list of names — the least useful shape the information has, since
+the map has just shown the player those same silhouettes. It is now a wrapping grid of
+`tt-stack__cell`s: the picker's **3px allegiance rail**, the ship's art at 34px (`--hp-art`,
+so a unit does not change size between the two surfaces that appear side by side), and, for a
+flight, its **active fighter count printed over the art**. The `Zoom closer, or click to
+interact` line stays.
+
+* **The masked-mine rule applies here too.** An unrevealed mine's `imagePath` still identifies
+  the type that masking the name exists to hide, so it gets the generic ring-and-dot glyph —
+  the same trap, and the same fix, as the picker's thumbnails. A thumbnail that fails to load
+  falls back to the glyph rather than hiding, because in a grid with no names beside it an
+  empty cell says nothing.
+* Observers and 3+-team games get `--row-bar` / `--row-name` inline per cell, from a
+  `getTeamColorVars()` that mirrors the picker's.
+* Touch is unaffected — there is no hover on a touchscreen, so this surface only ever appears
+  for a mouse.
+
+**4. The replay-aware fighter count is now one function with two callers.**
+`shipManager.systems.getActiveFighterCount` in `systems.js`; `SelectFromShips`' private
+`countActiveFighters` is gone and both surfaces call it. It was about to be copied a third
+time, and the replay arm is the subtle part: inside replay a fighter destroyed **on** the
+viewed turn was still flying while that turn's combat happened and must still be counted.
+
+`tokens.css`'s allegiance note said the hover tooltip was "not yet converted" — stale since
+round 3, and now doubly so. Corrected.
+
+### Feedback round 7 (2026-08-14) — applied
+
+**1. The picker's flight count moved out of the name and onto the silhouette**, matching the
+badge round 6 gave the hover tooltip's stack grid. The name line reads `Nial Flight`, not
+`6 x Nial Flight`, and the `6` sits over the bottom-right of the art. The two surfaces appear
+together — the picker places the tooltip beside itself — so they now say the same thing the
+same way, and the row's most valuable line is spent on the name instead of on a number that
+was pushing long names into an ellipsis.
+
+* **This partially supersedes round 1, item 7.** That convention — count leads the name,
+  sharing its font — still holds for a **collapsed run**: `13 x Mine` counts *units*, and the
+  badge counts *fighters inside one unit*. They are different statements and both can appear
+  on one row, so three identical 6-fighter flights read `3 x Nial Flight` with a `6` on the
+  silhouette. `buildText` therefore keeps its `count` argument; real rows now pass `null`.
+* **New element `.fv-hexpicker__thumb`** wraps the art, because an `<img>` cannot hold
+  children and the badge needs something positioned to sit in. The reserved box moved to the
+  wrapper; the art fills it at 100%.
+  > ⚠️ `.fv-hexpicker__art` needed an explicit `display: block`. As a **direct flex item** its
+  > `<span>` form (the generic mine glyph) was blockified for free, so `width`/`height`
+  > applied; inside the wrapper it is an ordinary inline child, where they would not.
+* The badge shrinks in the dense tier — at a 26px silhouette the comfortable size would cover
+  over half of it.
+* Gated on `count > 0`, which is the old truthiness test: a flight with no fighters left
+  should not be on the map, and a bare `0` over the art would read as an alarm.
+
+**2. The header and the group heads wear the rail too**, in `--fv-line-scs` — the card's own
+border colour, not an allegiance signal, because neither belongs to a unit. The card now
+reads as one column of stacked strips rather than as chrome sitting on top of a list.
+
+A plain `border-left: 3px` rather than a pseudo-element: the header, the list, the groups and
+the rows all start at the card's content edge with no left padding between them, so the rails
+line up with no arithmetic. Each element's `padding-left` drops by 3px in exchange (header
+10→7, group head 6→3), so the border adds to the rail rather than to the indent and **the
+title and the fold caret do not move**.
+
+> The DEPLOY / DOCK actions deliberately keep their 6px inset and no rail. They are buttons,
+> not rows, and the inset is part of what says so.
+
 ### Local edit, kept
 
 The header now reads `N units in hex - Click to Select` and the hint footer is commented out — the

@@ -1,3 +1,157 @@
+/*
+ * shipTooltip.css — the hover ShipTooltip (client/UI/ShipTooltip.js).
+ *
+ * The tooltip's BOX lives in tactical.css (.shipNameContainer, shared with the static
+ * #shipNameContainer div in game.php). What follows is everything that used to be written
+ * as inline `style="..."` attributes inside ShipTooltip.js's HTML string, plus the stack
+ * grid. Values are carried across unchanged unless a comment says otherwise.
+ */
+
+/* The rule under the ship name takes the NAME's OWN colour instead of a flat white.
+   ShipTooltip.js writes --tt-name on the root element via getNameColor(), which resolves
+   the same allegiance/team decision the name span itself is painted by, so the line and
+   the text can never disagree.
+   The fallback is what a MULTI-ship stack gets: several allegiances under one cursor have
+   no single answer, and neutral is the honest one. */
+.shipNameContainer .namecontainer {
+    margin-bottom: 3px;
+    /* Longhands, not the `border-bottom` shorthand: only the COLOUR is dynamic, and
+       saying so keeps the width and style out of var() substitution entirely. */
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    border-bottom-color: var(--tt-name, var(--fv-neutral));
+}
+
+/* The TARGETING / INCOMING section headings. `.fire` and `.ballistics` are each carried
+   by two divs — this heading and the content beneath it — so the rule above the heading
+   has to key on tt-head, or the content would grow a border of its own.
+   `text-decoration: bold` came across from the inline style and was dropped: `bold` is
+   not a text-decoration value, so it never did anything. */
+.shipNameContainer .tt-head {
+    margin: 3px 0;
+    padding: 2px 0 0 0;
+    border-top: 1px solid white;
+    color: red;
+}
+
+/* ── Stack grid ──────────────────────────────────────────────────────────────
+   Hovering a hex with several units in it. A grid of the same silhouettes the map
+   draws, each on the hex picker's 3px allegiance rail, rather than the run-on list
+   of comma-separated names this used to be.
+
+   Sizes match the picker's comfortable row (--hp-art) on purpose: the two surfaces
+   appear together — the picker places this tooltip beside itself — and a unit should
+   not change size between them. */
+.shipNameContainer .tt-stack {
+    --tt-art: 34px;
+    /* silhouette box; the picker's --hp-art */
+
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px;
+    padding: 2px 0 4px;
+}
+
+/* .shipNameContainer sets `span { padding-top: 2px }` for its text entries, which would
+   otherwise reach the rail and the glyph — both spans — and knock the reserved art box
+   2px out of true. Border-box so the two explicit sizes below mean what they say. */
+.shipNameContainer .tt-stack,
+.shipNameContainer .tt-stack * {
+    box-sizing: border-box;
+}
+
+.shipNameContainer .tt-stack__cell {
+    /* Only paint if a cell somehow carries no allegiance class; the classes at the
+       bottom of this block, or ShipTooltip's inline per-team override, set both. */
+    --row-name: var(--fv-text);
+    --row-bar: var(--fv-line-soft);
+
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    border: 1px solid var(--fv-line-scs);    
+}
+
+.shipNameContainer .tt-stack__bar {
+    flex: 0 0 auto;
+    align-self: stretch;
+    width: 3px;
+    padding: 0;
+    background: var(--row-bar);
+}
+
+/* The box is reserved here rather than left to the image, so a thumbnail that loads
+   late cannot resize the tooltip after it has been positioned. */
+.shipNameContainer .tt-stack__art {
+    flex: 0 0 auto;
+    position: relative;
+    width: var(--tt-art);
+    height: var(--tt-art);
+    padding: 0;
+    object-fit: contain;
+    /* terrain art is much larger and rounder than a ship sprite — fit it, never crop */
+}
+
+/* Generic glyph: an unrevealed mine (whose real silhouette would identify the type the
+   name masking exists to hide) and any thumbnail that failed to load. A ring and a dot
+   in the cell's own rail colour, matching .fv-hexpicker__art--generic. */
+.shipNameContainer .tt-stack__art--generic::before {
+    content: "";
+    position: absolute;
+    inset: 20%;
+    border: 2px solid var(--row-bar);
+    border-radius: 50%;
+    opacity: 0.85;
+}
+
+.shipNameContainer .tt-stack__art--generic::after {
+    content: "";
+    position: absolute;
+    inset: 42%;
+    background: var(--row-bar);
+    border-radius: 50%;
+}
+
+/* Active fighters in a flight, over its art. Opaque fill and a rail-coloured border so
+   it stays readable against whatever the silhouette puts behind it. */
+.shipNameContainer .tt-stack__count {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    min-width: 14px;
+    padding: 0 2px;
+    font-family: var(--fv-mono);
+    font-size: 10px;
+    line-height: 12px;
+    text-align: center;
+    color: var(--row-name);
+    background: var(--fv-overlay);
+    border: 1px solid var(--row-bar);
+}
+
+/* One class carries both channels, as in hexPicker.css. */
+.shipNameContainer .tt-stack__cell.mine {
+    --row-name: var(--fv-own);
+    --row-bar: var(--fv-own-signal);
+}
+
+.shipNameContainer .tt-stack__cell.ally {
+    --row-name: var(--fv-ally);
+    --row-bar: var(--fv-ally-signal);
+}
+
+.shipNameContainer .tt-stack__cell.enemy {
+    --row-name: var(--fv-enemy);
+    --row-bar: var(--fv-enemy-signal);
+}
+
+.shipNameContainer .tt-stack__cell.terrain {
+    --row-name: var(--fv-neutral);
+    --row-bar: var(--fv-neutral-signal);
+}
+
 .shipNameContainer .buttons .menu .action-buttons {
     display: flex;
     margin: 10px 0;

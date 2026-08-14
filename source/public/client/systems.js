@@ -440,6 +440,34 @@ shipManager.systems = {
         return armour;
     },
 
+    //How many fighters of a flight are still flying — the "(N)" every surface prints
+    //beside a flight's name. Lives here because it has two consumers now: the hex picker
+    //(SelectFromShips) and the hover ShipTooltip's stack grid.
+    //
+    //REPLAY-AWARE, and that is the whole subtlety. Inside replay, gamedata.turn is the
+    //turn being VIEWED, so count each fighter by its state as of that turn: one
+    //docked or destroyed during turn N was still flying while turn N's combat happened.
+    //Counting it out would show a flight that partial-docked 3 of 6 on turn N as "(3)"
+    //on turn N itself, when "(6)" is what was on the board. Outside replay there is no
+    //past to reconstruct, so the plain destroyed check is the answer.
+    getActiveFighterCount: function getActiveFighterCount(ship) {
+        if (!ship || !ship.systems) return 0;
+
+        var count = 0;
+        ship.systems.forEach(function (ftr) {
+            var counted;
+            if (gamedata.replay) {
+                var turnDestroyed = damageManager.getTurnDestroyed(ship, ftr);
+                counted = (turnDestroyed === null || turnDestroyed >= gamedata.turn);
+            } else {
+                counted = !shipManager.systems.isDestroyed(ship, ftr);
+            }
+            if (counted) count++;
+        });
+
+        return count;
+    },
+
     //Total declared hangar slots on a ship (sum of maxhealth across Hangar systems).
     //Includes Hangars but not other system types.
     getTotalHangarCapacity: function getTotalHangarCapacity(ship) {
