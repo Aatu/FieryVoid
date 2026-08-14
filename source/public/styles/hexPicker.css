@@ -310,7 +310,7 @@
     z-index: 1;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 3px;
     width: 100%;
     height: 20px;
     /* Same rail as the header and the rows below it — see the header's note. 6px of
@@ -323,7 +323,7 @@
     text-align: left;
     color: var(--fv-text-dim);
     background: var(--fv-well);
-    border: 1px solid var(--fv-line-scs);;
+    border: 1px solid var(--fv-line-scs);
     border-left: 3px solid var(--fv-line-scs);
     border-bottom: 1px solid var(--fv-rule);
     cursor: pointer;
@@ -336,10 +336,11 @@
 
 .fv-hexpicker__fold {
     flex: 0 0 auto;
-    width: 9px;
+    width: 8px;
     text-align: center;
     font-size: 8px;
     line-height: 1;
+    padding-top: 2px;
     color: var(--fv-text-accent);
 }
 
