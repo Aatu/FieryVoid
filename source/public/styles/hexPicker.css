@@ -103,28 +103,35 @@
 }
 
 /* ── Caret ───────────────────────────────────────────────────────────────────
-   Points at the hex the picker belongs to. Its `left` is written by JS AFTER the
-   card has been clamped into the viewport, so it keeps pointing at the anchor even
-   when the card had to slide sideways; JS hides it when the anchor ends up outside
-   the card entirely. Border-triangle rather than a rotated square so it cannot
-   inherit a stray background. */
+   Points at the hex the picker belongs to. It runs down a VERTICAL edge, because
+   the card is anchored beside its hex rather than above or below it — the strip
+   under the hex belongs to the hover ShipTooltip, and the two surfaces appear
+   together (see the placement note in SelectFromShips.positionSelf).
+
+   Its `top` is written by JS AFTER the card has been clamped into the viewport, so
+   it keeps pointing at the anchor even when the card had to slide up or down; JS
+   hides it when the anchor ends up outside the card entirely. Border-triangle
+   rather than a rotated square so it cannot inherit a stray background. */
 .fv-hexpicker__caret {
     position: absolute;
     width: 0;
     height: 0;
-    border-left: 8px solid transparent;
-    border-right: 8px solid transparent;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
     pointer-events: none;
 }
 
-.fv-hexpicker--above .fv-hexpicker__caret {
-    bottom: -8px;
-    border-top: 8px solid var(--fv-line-scs);
+/* Card to the RIGHT of the hex: the caret is on the card's LEFT edge, pointing back
+   at the hex. On a zero-size box the border-RIGHT is the triangle whose flat side is
+   on the right and whose apex is on the left — so border-right points LEFT. */
+.fv-hexpicker--right .fv-hexpicker__caret {
+    left: -8px;
+    border-right: 8px solid var(--fv-line-accent);
 }
 
-.fv-hexpicker--below .fv-hexpicker__caret {
-    top: -8px;
-    border-bottom: 8px solid var(--fv-line-scs);
+.fv-hexpicker--left .fv-hexpicker__caret {
+    right: -8px;
+    border-left: 8px solid var(--fv-line-accent);
 }
 
 /* Dragged off its anchor: the caret would be pointing at nothing. */

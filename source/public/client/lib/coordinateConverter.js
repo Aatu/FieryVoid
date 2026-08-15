@@ -40,6 +40,13 @@ window.coordinateConverter = function () {
         return window.HexagonMath.getHexHeight() / this.zoom;
     };
 
+    //The other half of the pair above. A pointy-top hex is not square — height is
+    //2*HEX_SIZE and width sqrt(3)*HEX_SIZE — so anything clearing a hex SIDEWAYS
+    //(the hex stack picker anchors beside its hex) needs this, not the height.
+    coordinateConverter.prototype.getHexWidthViewport = function () {
+        return window.HexagonMath.getHexWidth() / this.zoom;
+    };
+
     coordinateConverter.prototype.getHexDistance = function () {
         var hex1 = new hexagon.Offset(0, 0);
         var hex2 = hex1.getNeighbourAtDirection(0);

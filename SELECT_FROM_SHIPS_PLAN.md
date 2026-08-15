@@ -11,6 +11,7 @@ No PHP, no serialisation, no gamedata shape change.
 |---|---|
 | `client/UI/SelectFromShips.js` | rewritten — `.fv-hexpicker` card/sheet, grouping, run-collapsing, dense tier, touch parity, keyboard/a11y |
 | `styles/hexPicker.css` | **new** — tuning-knob block, component-scoped `--hp-*` allegiance palette |
+| `client/lib/coordinateConverter.js` | **new** `getHexWidthViewport()` — the missing half of `getHexHeightViewport()`, needed once the card started clearing its hex sideways (round 8) |
 | `client/gamedata.js` | **new** `getMutedTeamColorRGB` + `MUTED_TEAM_SAT` / `MUTED_TEAM_LIGHT` (§2.5); `getFleetHeaderColorRGB` converted (Stage 6) |
 | `styles/tokens.css` | **new** `── Allegiance ──` group: the eight `--fv-own/-ally/-enemy/-neutral` values and their `-signal` twins (Stage 6) |
 | `client/renderer/phaseStrategy/PhaseStrategy.js` | `requestRender()` in `onMouseOverShip` / `onMouseOutShips` — see feedback round 1, item 6 |
@@ -279,6 +280,70 @@ title and the fold caret do not move**.
 
 > The DEPLOY / DOCK actions deliberately keep their 6px inset and no rail. They are buttons,
 > not rows, and the inset is part of what says so.
+
+### Feedback round 8 (2026-08-15) — the card moved to the SIDE of its hex
+
+**The symptom:** the hover/select ShipTooltip jumped around after a zoom in or out that
+followed using the picker.
+
+**The cause, and why it could not be fixed where it showed.** `placeTooltipClear()` moved
+the tooltip beside the card on hover, because the card was anchored ABOVE its hex and the
+tooltip anchors BELOW it — two surfaces competing for one strip of screen, with a tall
+clamped card reaching down over the tooltip's spot. But `ShipTooltip.reposition()` re-runs
+its own `positionElement` on every zoom and scroll step, and PhaseStrategy's callback list
+is `[repositionTooltip, positionMovementUI, repositionSelectFromShips]` — so the first zoom
+step snapped the tooltip back onto its hex, under the card, and nothing put it back. The
+picker was writing a position that another owner overwrote one frame later.
+
+**The fix (user proposal, 2026-08-15): vacate the strip.** The card is now anchored
+**beside** the hex — prefer the **right**, flip **left**, vertically centred on the hex —
+so the space below the hex stays the tooltip's, and the tooltip is simply left alone.
+A position nothing overrides cannot jump.
+
+```
+                        ┌───────────────────────────────┐
+                        │  5 UNITS IN HEX …         ✕   │
+                        ├───────────────────────────────┤
+                   ◀    │▏ ▨  Sharlin            2   ▣ │   caret on the LEFT edge,
+               (hex)    │▏ ▨  Nial Flight        —   ▣ │   level with the hex
+                        │▏ ▨  Mine               —   ▣ │
+                        └───────────────────────────────┘
+                ┌────────────────┐
+                │  ShipTooltip   │  ← its usual place, below the hex, untouched
+                └────────────────┘
+```
+
+| # | Change |
+|---|---|
+| 1 | **`positionSelf()` is horizontal.** `xOffset` = half the hex's **width** (clamped 20–100, exactly as `yOffset` was), `roomRight`/`roomLeft`, and the STICKY + `FLIP_SLACK` rule carried across unchanged with above→right and below→left. `top = point.y - height/2`. |
+| 2 | **`--above` / `--below` became `--right` / `--left`**, and the caret runs down a vertical edge: `border-top`/`border-bottom` transparent, `left:-8px` + `border-right` when the card is right of the hex, `right:-8px` + `border-left` when it is left. JS writes its `top` (was `left`) after the clamp. |
+| 3 | **New `placeCaret()`, shared by `positionSelf()` and `reflow()`.** `positionSelf` records `this.anchorPoint`; `reflow` re-derives the caret from it. |
+| 4 | **`reflow()` now always holds the TOP.** With no above/below there is no bottom edge to hold — and because the caret is re-derived from the anchor afterwards, holding the top is *also* what keeps the caret on the hex: the hex is fixed in screen space, so an unmoved card top still meets it at the same absolute height. `captureBox()` no longer needs `height`. |
+| 5 | **`placeTooltipClear()` is collision-only.** It rect-tests first and **returns without touching anything** in the normal case. That is the actual fix for the reported jump — the common path now writes no position at all, so there is nothing for the next `repositionTooltip` to undo. On a genuine overlap (a wide tooltip at low zoom, where the card clears the hex by only 20px) it applies the smallest correction that works: slide horizontally to the card's far side, keeping the tooltip's vertical relationship to the hex. Sheet mode lifts it above the sheet instead, since a sheet has no side. |
+| 6 | **`reposition()` re-applies it** after `positionSelf()`. In the collision case the nudge would otherwise last exactly one frame, for the same reason the old placement did. |
+| 7 | **`captureTooltipAnchor` / `restoreTooltipAnchor` are gone** (~45 lines). They existed only to hold the tooltip still across the rebuild a row click causes, which was needed because the picker owned the tooltip's position. It does not any more: the rebuilt tooltip lands in its own usual place, which is the right answer. `activateShip` just re-derives the collision nudge, and that is a no-op once the card has destroyed itself. |
+| 8 | **`coordinateConverter.getHexWidthViewport()`** — the missing half of the existing `getHexHeightViewport()` pair. A pointy-top hex is `2·HEX_SIZE` tall and `√3·HEX_SIZE` wide, so clearing one sideways is not the same number as clearing it vertically. |
+
+**Mobile is untouched.** `useSheet()` still catches every coarse pointer and every window
+≤765px, and `positionSelf()` still returns early in sheet mode, so a phone or tablet never
+takes the side placement at all — it keeps the bottom-docked sheet, its caret hidden, its
+drag-to-unpin intact. What sheet mode *does* gain is item 5: the press-preview tooltip is
+now left where it opens unless it actually runs into the sheet, instead of being flung to
+the top of the sheet every time.
+
+> ⚠️ **Known degradation, narrow desktop windows only.** A fine-pointer window between
+> ~766px (the sheet threshold) and ~850px, with the hex near the horizontal centre and the
+> map zoomed in (`xOffset` at its 100px cap), can fit the 320px card on neither side. As
+> before, the code keeps the current side and lets the clamp deal with it — the card then
+> overlaps the hex's edge by a few tens of pixels. It stays legible and the tooltip's
+> collision nudge still fires; it is the same class of degradation the old vertical
+> placement had for a card taller than the viewport.
+
+> The hover tooltip has **no viewport clamping of its own** (`ShipTooltip.positionElement`
+> writes `left`/`top` raw), so near a screen edge it can hang off. Pre-existing, and now
+> visible on the picker path too because the picker no longer clamps it as a side effect —
+> but it is exactly what a plain map hover does today, so it was left alone deliberately
+> rather than fixed only for this one caller.
 
 ### Local edit, kept
 

@@ -34,9 +34,10 @@ window.SelectFromShips = function () {
     var LONG_PRESS_MS = 500;   // matches webglScene's canvas long-press exactly
     var SHEET_MAX_WIDTH = 765;   // px; see useSheet()
     var EDGE_MARGIN = 8;   // viewport clamp inset
-    var CARET_HALF = 8;   // half the caret triangle's width
+    var CARET_HALF = 8;   // half the caret triangle. It runs down a VERTICAL edge, so
+    //                                 this is half its height, not half its width.
     var TOUCH_SLOP = 10;  // px of movement that cancels a long press
-    var TOOLTIP_GAP = 10;  // gap between the card and the hover tooltip beside it
+    var TOOLTIP_GAP = 10;  // gap left when the hover tooltip has to be slid clear
     var FLIP_SLACK = 24;  // px of SPARE room the far side must offer before a flip
 
     var CATEGORY_ORDER = ['ship', 'flight', 'mine', 'terrain'];
@@ -97,6 +98,9 @@ window.SelectFromShips = function () {
         //Which side of the hex the card sits on, once positionSelf() has decided. Null
         //until the first placement; see positionSelf for why it is then STICKY.
         this.placement = null;
+        //The hex's viewport point as of the last placement. reflow() re-places the caret
+        //from it after a fold, without re-running the side decision.
+        this.anchorPoint = null;
         //Set once the header has been dragged. Per-instance: the next opening re-anchors
         //on its own hex, so a dragged position is never remembered.
         this.dragged = false;
@@ -184,6 +188,13 @@ window.SelectFromShips = function () {
         }
 
         this.positionSelf();
+        //⚠️ This is what stops the hover tooltip jumping mid-zoom. PhaseStrategy's
+        //onZoom/onScroll callback list is [repositionTooltip, positionMovementUI,
+        //repositionSelectFromShips], so the tooltip has ALREADY been re-anchored on its
+        //own hex by the time we get here — any avoidance nudge applied when the row was
+        //first hovered is gone. Re-deriving it now makes the answer the same on every
+        //step of the gesture instead of only on the first.
+        this.placeTooltipClear();
 
         return true;
     };
@@ -229,29 +240,27 @@ window.SelectFromShips = function () {
     //  Positioning
     // =========================================================================
 
-    // Measure the card BEFORE a re-render, so reflow() below can hold an edge steady
+    // Measure the card BEFORE a re-render, so reflow() below can hold its top steady
     // across the size change. Null for a still-docked sheet, where the bottom edge is
     // pinned by CSS and the sheet grows upward on its own — but a sheet that has been
     // DRAGGED runs on left/top like a card and needs the same treatment.
     HexPicker.prototype.captureBox = function () {
         if (this.sheet && !this.dragged) return null;
-        return {
-            top: this.element[0].getBoundingClientRect().top,
-            height: this.element[0].offsetHeight
-        };
+        return { top: this.element[0].getBoundingClientRect().top };
     };
 
     // Re-place the card after folding a group or expanding a run — WITHOUT re-anchoring.
     //
-    // Calling positionSelf() here is what made the card jump: it re-runs the above/below
-    // decision from scratch, so a card that had flipped BELOW the hex because it was too
-    // tall to fit above would flip back ABOVE the moment a fold made it short enough. The
-    // player folds one group and the whole menu leaps across the hex.
+    // Calling positionSelf() here is what made the card jump: it re-runs the side
+    // decision from scratch, so a card that had flipped to the hex's LEFT because it was
+    // too wide to fit on the right would flip back the moment a fold changed anything.
+    // The player folds one group and the whole menu leaps across the hex.
     //
-    // Instead, hold one edge steady. Anchored above the hex, hold the BOTTOM: the caret
-    // stays on the hex and the card grows and shrinks upward, away from it. Anchored below
-    // — or dragged, where the card is wherever the player put it — hold the TOP, which is
-    // how every collapsible panel behaves. Then clamp, and never flip.
+    // Instead hold the TOP, which is how every collapsible panel behaves — and, because
+    // the caret is re-placed from the anchor afterwards, ALSO what keeps the caret on the
+    // hex: the hex is at a fixed screen position, so a card whose top has not moved still
+    // meets it at the same absolute height. The caret only disappears if a fold shrinks
+    // the card past the hex entirely, which takes folding away more than half of it.
     HexPicker.prototype.reflow = function (before) {
         if (!before) return;
 
@@ -259,15 +268,32 @@ window.SelectFromShips = function () {
         var width = node.offsetWidth;
         var height = node.offsetHeight;
 
-        var holdBottom = !this.dragged && this.element.hasClass('fv-hexpicker--above');
-        var top = holdBottom ? before.top + (before.height - height) : before.top;
-        var left = node.getBoundingClientRect().left;
+        var left = clamp(node.getBoundingClientRect().left,
+            EDGE_MARGIN, window.innerWidth - width - EDGE_MARGIN);
+        var top = clamp(before.top,
+            EDGE_MARGIN, window.innerHeight - height - EDGE_MARGIN);
 
-        this.element.css({
-            left: clamp(left, EDGE_MARGIN, window.innerWidth - width - EDGE_MARGIN) + 'px',
-            top: clamp(top, EDGE_MARGIN, window.innerHeight - height - EDGE_MARGIN) + 'px'
-        });
+        this.element.css({ left: left + 'px', top: top + 'px' });
+
+        if (!this.dragged) {
+            placeCaret.call(this, top, height);
+        }
     };
+
+    // Keep the caret level with the hex AFTER the clamp; hide it when the anchor ended up
+    // outside the card, where a caret would be pointing at nothing. The card is anchored
+    // beside its hex, so this runs down the card's vertical edge — `top` and `height` are
+    // the card's, and the anchor is the hex's viewport point recorded by positionSelf.
+    function placeCaret(top, height) {
+        if (!this.caretElement || !this.anchorPoint) return;
+
+        var caretY = this.anchorPoint.y - top;
+        if (caretY < CARET_HALF * 2 || caretY > height - CARET_HALF * 2) {
+            this.caretElement.hide();
+        } else {
+            this.caretElement.show().css('top', (caretY - CARET_HALF) + 'px');
+        }
+    }
 
     HexPicker.prototype.positionSelf = function () {
         // A sheet that re-anchored on pinch-zoom would jump around under the finger, and
@@ -285,74 +311,75 @@ window.SelectFromShips = function () {
             point = window.coordinateConverter.fromGameToViewPort(position);
         }
 
-        var yOffset = window.coordinateConverter.getHexHeightViewport() / 2;
-
-        if (yOffset > 100) {
-            yOffset = 100;
-        }
-
-        if (yOffset < 20) {
-            yOffset = 20;
-        }
+        // THE CARD SITS BESIDE ITS HEX, NOT ABOVE OR BELOW IT.
+        //
+        // Above/below is the obvious placement for a popover and it was the wrong one
+        // here, because the hover ShipTooltip is anchored BELOW the hex too — so the two
+        // surfaces were competing for one strip of screen. The picker won by shoving the
+        // tooltip out of the way (placeTooltipClear used to move it unconditionally), and
+        // that shove lasted exactly until the next zoom or scroll step: PhaseStrategy's
+        // onZoomCallbacks re-anchor the tooltip on its own hex, so it snapped back under
+        // the card and stayed there. Vacating the vertical strip entirely is what lets
+        // the tooltip simply open where it always opens.
+        //
+        // Half the hex's WIDTH, since the gap being cleared is now a horizontal one.
+        // Clamped exactly as the old yOffset was: at extreme zoom a raw half-hex is
+        // either a hairline or half the screen.
+        var xOffset = clamp(window.coordinateConverter.getHexWidthViewport() / 2, 20, 100);
 
         var node = this.element[0];
         var width = node.offsetWidth;
         var height = node.offsetHeight;
 
-        // How much height each side of the hex can actually hold.
-        var roomAbove = (point.y - yOffset) - EDGE_MARGIN;
-        var roomBelow = (window.innerHeight - EDGE_MARGIN) - (point.y + yOffset);
+        // How much width each side of the hex can actually hold.
+        var roomRight = (window.innerWidth - EDGE_MARGIN) - (point.x + xOffset);
+        var roomLeft = (point.x - xOffset) - EDGE_MARGIN;
 
-        // The above/below choice is STICKY, and that is the whole point of this block.
+        // The left/right choice is STICKY, and that is the whole point of this block.
         //
         // positionSelf() runs on EVERY zoom step and every scroll, and re-deciding from
         // scratch each time is what made the card hop across its own hex mid-pinch: zoom
-        // changes the hex's viewport position AND yOffset (half the hex height, clamped
-        // 20..100), so a card that had flipped below because it did not fit above would
-        // find it fitted again a step later, jump up, then jump back on the next step.
-        // The player was doing one continuous gesture and the menu answered with two
-        // different layouts.
+        // changes the hex's viewport position AND xOffset (half the hex width, clamped
+        // 20..100), so a card that had flipped left because it did not fit right would
+        // find it fitted again a step later, jump across, then jump back on the next
+        // step. The player was doing one continuous gesture and the menu answered with
+        // two different layouts.
         //
-        // So: decide once, on the first placement, exactly as before — prefer above.
-        // After that keep that side for as long as it still holds the card, and require
-        // FLIP_SLACK px of SPARE room on the far side before moving, so a hex parked on
-        // the boundary cannot oscillate between two answers that are both marginal.
-        // Neither side fitting keeps the current one and lets the clamp below deal with
-        // it, which is the least surprising of the bad options.
-        var fitsAbove = height <= roomAbove;
-        var fitsBelow = height <= roomBelow;
-        var below;
+        // So: decide once, on the first placement — prefer the RIGHT. After that keep
+        // that side for as long as it still holds the card, and require FLIP_SLACK px of
+        // SPARE room on the far side before moving, so a hex parked on the boundary
+        // cannot oscillate between two answers that are both marginal. Neither side
+        // fitting keeps the current one and lets the clamp below deal with it, which is
+        // the least surprising of the bad options.
+        var fitsRight = width <= roomRight;
+        var fitsLeft = width <= roomLeft;
+        var onLeft;
 
         if (!this.placement) {
-            below = !fitsAbove;
-        } else if (this.placement === 'above') {
-            below = !fitsAbove && (height + FLIP_SLACK <= roomBelow);
+            onLeft = !fitsRight;
+        } else if (this.placement === 'right') {
+            onLeft = !fitsRight && (width + FLIP_SLACK <= roomLeft);
         } else {
-            below = !(!fitsBelow && (height + FLIP_SLACK <= roomAbove));
+            onLeft = !(!fitsLeft && (width + FLIP_SLACK <= roomRight));
         }
-        this.placement = below ? 'below' : 'above';
+        this.placement = onLeft ? 'left' : 'right';
 
-        var left = point.x - width / 2;
-        var top = below ? point.y + yOffset : point.y - yOffset - height;
+        var left = onLeft ? point.x - xOffset - width : point.x + xOffset;
+        //Level with the hex rather than hanging off it: the caret then lands in the
+        //middle of the card's edge, and a fold has to eat more than half the card before
+        //the anchor drops off it (see reflow).
+        var top = point.y - height / 2;
 
         left = clamp(left, EDGE_MARGIN, window.innerWidth - width - EDGE_MARGIN);
         top = clamp(top, EDGE_MARGIN, window.innerHeight - height - EDGE_MARGIN);
 
         this.element.css({ left: left + 'px', top: top + 'px' });
         this.element
-            .toggleClass('fv-hexpicker--below', below)
-            .toggleClass('fv-hexpicker--above', !below);
+            .toggleClass('fv-hexpicker--left', onLeft)
+            .toggleClass('fv-hexpicker--right', !onLeft);
 
-        // Keep the caret pointing at the hex AFTER the clamp; hide it when the anchor
-        // ended up outside the card, where a caret would point at nothing.
-        if (this.caretElement) {
-            var caretX = point.x - left;
-            if (caretX < CARET_HALF * 2 || caretX > width - CARET_HALF * 2) {
-                this.caretElement.hide();
-            } else {
-                this.caretElement.show().css('left', (caretX - CARET_HALF) + 'px');
-            }
-        }
+        this.anchorPoint = point;
+        placeCaret.call(this, top, height);
     };
 
     // =========================================================================
@@ -988,13 +1015,6 @@ window.SelectFromShips = function () {
     }
 
     HexPicker.prototype.activateShip = function (ship) {
-        //Selecting or targeting REBUILDS the tooltip (showShipTooltip destroys and
-        //recreates it), and the new one is anchored on the ship's icon — i.e. back on the
-        //hex, underneath this card. So the tooltip the player was reading beside the card
-        //jumps across the screen the instant they click a row. Hold where it was: capture
-        //before, re-pin after.
-        var anchor = captureTooltipAnchor.call(this);
-
         if (gamedata.gamephase === -1) {
             if (this.phaseStrategy.selectedShip) {
                 this.phaseStrategy.deselectShip(this.phaseStrategy.selectedShip);
@@ -1010,24 +1030,43 @@ window.SelectFromShips = function () {
             }
         }
 
-        restoreTooltipAnchor.call(this, anchor);
+        //Selecting or targeting REBUILDS the tooltip — showShipTooltip destroys and
+        //recreates it — and the replacement is a different size, since it carries a
+        //targeting block and a button row. It lands in the tooltip's own usual place
+        //below the hex, which is now free, so there is nothing to correct in the normal
+        //case; this only re-derives the avoidance nudge for the one where the bigger box
+        //reaches under the card. A no-op once the card has been destroyed.
+        this.placeTooltipClear();
     };
 
     // =========================================================================
     //  Hover tooltip placement
     // =========================================================================
 
-    // Move the hover ShipTooltip clear of the card.
+    // Keep the hover ShipTooltip clear of the card — but ONLY when it is actually in the
+    // way. Doing nothing is the whole point of this function.
     //
-    // Left alone, showShipTooltip anchors it on the hovered ship's ICON — which is the
-    // hex this picker is anchored to, i.e. directly underneath the picker. That does two
-    // bad things at once: it hides the rows the player is reading, and when the tooltip
-    // lands under the cursor it takes the pointer off the row, which turns the
-    // enter/rebuild/leave sequence into a continuous flicker.
+    // It used to move the tooltip unconditionally, because the card was anchored above or
+    // below its hex and the tooltip anchors below it, so the two always collided. The
+    // trouble is that the tooltip re-anchors itself on its hex on every zoom and scroll
+    // step (PhaseStrategy.repositionTooltip), so a placement written here survived
+    // exactly one frame and then snapped back — the tooltip appeared to leap across the
+    // screen the moment the player touched the zoom. Now that the card sits BESIDE the
+    // hex, the tooltip's usual place below the hex is normally free, and the fix for the
+    // jump is to stop moving it: the position is then identical before, during and after
+    // the gesture because nothing is overriding it.
     //
-    // Card mode puts it beside the card, flipping to the other side when there is no
-    // room; sheet mode puts it above, since the sheet already owns the bottom edge.
+    // The overlap case remains real at low zoom, where a wide tooltip can still reach
+    // under a card only 20px clear of the hex. Then the smallest correction that works:
+    // slide the tooltip horizontally to the card's far side, keeping its vertical
+    // relationship to the hex. reposition() re-derives this on every step, so it is
+    // stable through a gesture rather than being undone by it.
+    //
+    // Sheet mode has no side to sit beside — it owns the whole bottom edge — so a
+    // collision there lifts the tooltip above the sheet instead.
     HexPicker.prototype.placeTooltipClear = function () {
+        if (this.destroyed) return;
+
         var tooltip = this.phaseStrategy && this.phaseStrategy.shipTooltip;
         if (!tooltip || !tooltip.element || !tooltip.element.length) return;
 
@@ -1036,76 +1075,46 @@ window.SelectFromShips = function () {
         var height = node.offsetHeight;
         if (!width || !height) return;
 
+        var tip = node.getBoundingClientRect();
         var card = this.element[0].getBoundingClientRect();
-        var left;
-        var top;
+        if (!card.width || !card.height) return;
+
+        //Not in the way: leave it EXACTLY where ShipTooltip put it. This is the common
+        //case now, and it is the one the player notices — an untouched tooltip cannot
+        //jump, because there is nothing for the next reposition to undo.
+        if (tip.right <= card.left || tip.left >= card.right
+            || tip.bottom <= card.top || tip.top >= card.bottom) {
+            return;
+        }
+
+        var left = tip.left;
+        var top = tip.top;
 
         if (this.sheet) {
-            left = clamp(card.left + (card.width - width) / 2,
-                EDGE_MARGIN, window.innerWidth - width - EDGE_MARGIN);
             top = card.top - TOOLTIP_GAP - height;
-            if (top < EDGE_MARGIN) top = EDGE_MARGIN;
         } else {
-            left = card.right + TOOLTIP_GAP;
-            if (left + width > window.innerWidth - EDGE_MARGIN) {
-                left = card.left - TOOLTIP_GAP - width;     //no room right, flip left
+            left = (this.placement === 'left')
+                ? card.right + TOOLTIP_GAP
+                : card.left - TOOLTIP_GAP - width;
+
+            //Pushed off the screen instead of clear of the card — try the other way
+            //before falling back on the clamp, which would leave it overlapping.
+            if (left < EDGE_MARGIN || left + width > window.innerWidth - EDGE_MARGIN) {
+                var alternative = (this.placement === 'left')
+                    ? card.left - TOOLTIP_GAP - width
+                    : card.right + TOOLTIP_GAP;
+                if (alternative >= EDGE_MARGIN
+                    && alternative + width <= window.innerWidth - EDGE_MARGIN) {
+                    left = alternative;
+                }
             }
-            left = clamp(left, EDGE_MARGIN, window.innerWidth - width - EDGE_MARGIN);
-            top = clamp(card.top, EDGE_MARGIN, window.innerHeight - height - EDGE_MARGIN);
         }
-
-        tooltip.element.css({ left: left + 'px', top: top + 'px' });
-    };
-
-    // Where the tooltip is sitting right now, plus WHICH EDGE of it faces the card.
-    //
-    // The click tooltip is not the same size as the hover one it replaces — it carries a
-    // targeting block and a button row — so "don't move" cannot mean "same left/top" in
-    // every placement. It means: hold the edge that placeTooltipClear pinned against the
-    // card, and let the box grow away from it. Same reasoning as reflow() does for the
-    // card itself. `null` when there is no tooltip up, which is the no-op case.
-    function captureTooltipAnchor() {
-        var tooltip = this.phaseStrategy && this.phaseStrategy.shipTooltip;
-        if (!tooltip || !tooltip.element || !tooltip.element.length) return null;
-
-        var rect = tooltip.element[0].getBoundingClientRect();
-        if (!rect.width || !rect.height) return null;
-
-        //A card that has been closed by this very click can no longer be measured, so the
-        //side is decided HERE, while it is still on screen.
-        var edge = 'left';
-        if (this.sheet) {
-            edge = 'bottom';                    //sheet mode places the tooltip above the card
-        } else if (!this.destroyed && this.element.length) {
-            var card = this.element[0].getBoundingClientRect();
-            if (rect.right <= card.left) edge = 'right';    //flipped to the card's left side
-        }
-
-        return { tooltip: tooltip, rect: rect, edge: edge };
-    }
-
-    // Put the REBUILT tooltip back where the old one was. Does nothing when the click did
-    // not replace it (same instance = nothing moved, so nothing to correct).
-    function restoreTooltipAnchor(anchor) {
-        if (!anchor) return;
-
-        var tooltip = this.phaseStrategy && this.phaseStrategy.shipTooltip;
-        if (!tooltip || tooltip === anchor.tooltip) return;
-        if (!tooltip.element || !tooltip.element.length) return;
-
-        var node = tooltip.element[0];
-        var width = node.offsetWidth;
-        var height = node.offsetHeight;
-        if (!width || !height) return;
-
-        var left = (anchor.edge === 'right') ? anchor.rect.right - width : anchor.rect.left;
-        var top = (anchor.edge === 'bottom') ? anchor.rect.bottom - height : anchor.rect.top;
 
         tooltip.element.css({
             left: clamp(left, EDGE_MARGIN, window.innerWidth - width - EDGE_MARGIN) + 'px',
             top: clamp(top, EDGE_MARGIN, window.innerHeight - height - EDGE_MARGIN) + 'px'
         });
-    }
+    };
 
     // =========================================================================
     //  Header drag
