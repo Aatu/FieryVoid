@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import styled from 'styled-components';
 import theme from '../styled/theme';
 import CriticalEffectsSection, { critRowsFromMap } from '../system/CriticalEffectsSection';
+import { MenuHeader, MENU_CHROME } from '../system/menuControls';
 import nonPassiveWheel from '../helpers/nonPassiveWheel';
 
 /* Pre-battle damage editor for a bought FLIGHT. Design: PREBATTLE_DAMAGE_PLAN.md §5.2.
@@ -53,22 +54,13 @@ const Tooltip = styled.div`
       Container. A max-width is what clamps the max-content contribution.*/
     max-width: 300px;
     box-sizing: border-box;
-    opacity: 0.97;
-    background-color: rgba(16, 26, 38, 0.95);
-    border: 1px solid ${theme.colors.line};
+    /*Fill and frame shared with the ship and mine editors - see ../system/menuControls. No
+      element opacity beside the fill's alpha: the two compound, and it faded the text.*/
+    background-color: ${MENU_CHROME.bg};
+    border: 1px solid ${MENU_CHROME.line};
 `;
 
-const Header = styled.div`
-    padding: 3px;
-    background-color: #215a7a;
-    border-bottom: 1px solid ${theme.colors.line};
-    color: ${theme.colors.chromeText};
-    text-align: center;
-    font-size: 12px;
-    font-weight: bold;
-    position: sticky;
-    top: 0;
-`;
+/* Header is MenuHeader from ../system/menuControls now, $sticky because this body scrolls. */
 
 const Caption = styled.div`
     text-align: center;
@@ -301,7 +293,7 @@ class FighterDamageMenu extends Component {
 
         return (
             <Tooltip $position={getPosition(boundingBox)} onClick={e => e.stopPropagation()}>
-                <Header>Fighter Damage</Header>
+                <MenuHeader $sticky>Fighter Damage</MenuHeader>
 
                 {rows}
                 {size > 1 && <PropagateButton

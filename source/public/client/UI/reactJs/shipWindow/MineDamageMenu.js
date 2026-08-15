@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import theme from '../styled/theme';
+import { MenuHeader, MENU_CHROME } from '../system/menuControls';
 import nonPassiveWheel from '../helpers/nonPassiveWheel';
 
 /* Pre-battle damage editor for a BULK MINE PURCHASE. Sibling of FighterDamageMenu, and
@@ -37,22 +38,13 @@ const Tooltip = styled.div`
     flex-direction: column;
     min-width: 210px;
     box-sizing: border-box;
-    opacity: 0.97;
-    background-color: rgba(16, 26, 38, 0.95);
-    border: 1px solid ${theme.colors.line};
+    /*Fill and frame shared with the ship and fighter editors - see ../system/menuControls.
+      No element opacity beside the fill's alpha: the two compound, and it faded the text.*/
+    background-color: ${MENU_CHROME.bg};
+    border: 1px solid ${MENU_CHROME.line};
 `;
 
-const Header = styled.div`
-    padding: 3px;
-    background-color: #215a7a;
-    border-bottom: 1px solid ${theme.colors.line};
-    color: ${theme.colors.chromeText};
-    text-align: center;
-    font-size: 12px;
-    font-weight: bold;
-    position: sticky;
-    top: 0;
-`;
+/* Header is MenuHeader from ../system/menuControls now, $sticky because this body scrolls. */
 
 const Caption = styled.div`
     text-align: center;
@@ -275,7 +267,7 @@ class MineDamageMenu extends Component {
 
         return (
             <Tooltip $position={getPosition(boundingBox)} onClick={e => e.stopPropagation()}>
-                <Header>Mine Damage</Header>
+                <MenuHeader $sticky>Mine Damage</MenuHeader>
                 <Caption>{summary.remaining} / {summary.total} structure</Caption>
                 {rows}
                 {count > 1 && <PropagateButton

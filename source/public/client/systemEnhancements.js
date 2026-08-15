@@ -167,11 +167,31 @@ window.systemEnhancements = {
 		return total;
 	},
 
-	/* How many refits this ship carries - drives the "System Enhancements (n)" summary. */
+	/* How many purchased ROWS this ship carries. Used only as a "has it got any?" test - the
+	   summary line counts SYSTEMS, see systemsEnhanced(). */
 	count: function count(ship) {
 		var n = 0;
 		this.rows(ship).forEach(function (row) {
 			if ((parseInt(row[2], 10) || 0) > 0) n++;
+		});
+		return n;
+	},
+
+	/* How many DISTINCT SYSTEMS carry a refit - what "System Enhancements (n)" reports.
+	   Systems, not rows: the number the player is being told is the number of ✦ badges they
+	   will find on the ship window, and a gun wearing both Gunsights and Advanced Defensive
+	   Targeting is still one enhanced gun (user request, 2026-08-15). Counting rows made the
+	   summary drift away from the badges for exactly the ships that had the most going on.
+	   ⚠️ MIRROR PAIR with the same count in Enhancements::setSystemEnhancements (PHP). */
+	systemsEnhanced: function systemsEnhanced(ship) {
+		var seen = {};
+		var n = 0;
+		this.rows(ship).forEach(function (row) {
+			if ((parseInt(row[2], 10) || 0) < 1) return;
+			var id = parseInt(row[6], 10);
+			if (seen[id]) return;
+			seen[id] = true;
+			n++;
 		});
 		return n;
 	},
@@ -541,9 +561,11 @@ window.systemEnhancements = {
 	   server writes into the in-game enhancementTooltip. Twelve separate lines would push
 	   the enh grid panel past the section cluster it sits beside, so this is deliberately
 	   a count with the detail left to each system's own SystemInfo tooltip.
-	   ⚠️ MIRROR PAIR with the same line in Enhancements::setEnhancementsShip. */
+	   The number is SYSTEMS ENHANCED, not refits bought - it is the count of ✦ badges on the
+	   ship window, which is what the player can actually go and look at.
+	   ⚠️ MIRROR PAIR with the same line in Enhancements::setSystemEnhancements (PHP). */
 	summaryLine: function summaryLine(ship) {
-		var n = this.count(ship);
+		var n = this.systemsEnhanced(ship);
 		return n > 0 ? 'System Enhancements (' + n + ')' : null;
 	},
 

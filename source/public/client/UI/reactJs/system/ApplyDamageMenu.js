@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import theme from '../styled/theme';
-import CriticalEffectsSection, { critRowsFromMap, CritSectionHeader, CheckBox, CheckText } from './CriticalEffectsSection';
+import CriticalEffectsSection, { critRowsFromMap, CheckBox, CheckText } from './CriticalEffectsSection';
 import SystemEnhancementsSection from './SystemEnhancementsSection';
 import nonPassiveWheel from '../helpers/nonPassiveWheel';
-import { ActionButton, ValueInput, SectionDivider } from './menuControls';
+import { ActionButton, ValueInput, SectionDivider, DamageSectionHeader, MenuHeader, MENU_CHROME } from './menuControls';
 
 /* Enhancement + pre-battle-damage editor for ONE system of a bought lobby ship.
  * Design: PREBATTLE_DAMAGE_PLAN.md §5.2 and WEAPON_ENHANCEMENTS_PLAN.md §6.1.
@@ -56,21 +56,15 @@ const Container = styled.div`
     min-width: 200px;
     max-width: 300px;
     box-sizing: border-box;
-    opacity: 0.95;
-    background-color: rgba(16, 26, 38, 0.9);
-    border: 1px solid ${theme.colors.line};
+    /*Fill and frame from ./menuControls, shared with the fighter and mine editors - see the
+      note there on why the title bar is no longer the old teal, and why none of the three
+      carries an element opacity any more.*/
+    background-color: ${MENU_CHROME.bg};
+    border: 1px solid ${MENU_CHROME.line};
 `;
 
-const Header = styled.div`
-    padding: 3px;
-    background-color: #215a7a;
-    border-bottom: 1px solid ${theme.colors.line};
-    color: ${theme.colors.chromeText};
-    text-align: center;
-    font-size: 12px;
-    opacity: 1 !important;
-    font-weight: bold;
-`;
+/* Header is MenuHeader from ./menuControls now - the three damage editors were carrying
+   three copies of one title bar. */
 
 const Row = styled.div`
     display: flex;
@@ -345,9 +339,9 @@ class ApplyDamageMenu extends Component {
 
         return (
             <Container onClick={e => e.stopPropagation()}>
-                <Header>{enhRows.length > 0
+                <MenuHeader>{enhRows.length > 0
                     ? "Add Enhancements & Damage"
-                    : "Apply Damage & Critical Effects"}</Header>
+                    : "Apply Damage & Critical Effects"}</MenuHeader>
 
                 <SystemEnhancementsSection
                     rows={enhRows}
@@ -355,7 +349,7 @@ class ApplyDamageMenu extends Component {
                 />
                 {enhRows.length > 0 && <SectionDivider />}
 
-                <CritSectionHeader>Damage</CritSectionHeader>
+                <DamageSectionHeader>Damage</DamageSectionHeader>
 
                 <Row>
                     <RowLabel title={`${system.displayName || system.name} (system id ${system.id})`}>

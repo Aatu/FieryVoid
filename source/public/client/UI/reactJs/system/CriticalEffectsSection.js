@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import styled from 'styled-components';
 import theme from '../styled/theme';
 import nonPassiveWheel from '../helpers/nonPassiveWheel';
+import { CritSectionHeader, SectionDivider } from './menuControls';
 
 /* Critical effects carried by ONE damage target — a system (kind 0, ref = systemid) or
  * a fighter ordinal (kind 1, ref = 1..flightSize). Rendered inside ApplyDamageMenu and
@@ -43,18 +44,14 @@ const Section = styled.div`
     min-width: 0;
     max-width: 100%;
     box-sizing: border-box;
-    border-top: 1px solid ${theme.colors.line};
+    /*No border-top: CritSectionHeader carries its own hairline, in the section's own hue,
+      and a rule here as well would double it.*/
 `;
 
-const SectionHeader = styled.div`
-    padding: 3px;
-    background-color: #1b3b50;
-    color: ${theme.colors.chromeText};
-    text-align: center;
-    font-size: 10px;
-    letter-spacing: 0.5px;
-    user-select: none;
-`;
+/* The bar itself lives in ./menuControls beside the damage and enhancement bars - three
+   tints of one geometry, in one file, so they cannot drift apart (see the comment there).
+   Aliased locally so the JSX below still reads as "this section's header". */
+const SectionHeader = CritSectionHeader;
 
 const CritRow = styled.div`
     display: flex;
@@ -138,9 +135,10 @@ const CountValue = styled.div`
     color: ${props => props.$empty ? '#6f6257' : '#ffffff'};
 `;
 
-/* Exported so the damage row above the criticals can use the SAME section-header bar
-   (user request 2026-08-08: the Damage block had no header while Critical Effects did). */
-export const CritSectionHeader = SectionHeader;
+/* The damage row above the criticals used to re-export this component's bar, because the
+   two were the same colour (user request 2026-08-08: the Damage block had no header while
+   Critical Effects did). They are now two tints of one geometry and both live in
+   ./menuControls, so ApplyDamageMenu imports DamageSectionHeader from there directly. */
 
 /* ⭐ The checkbox + its word, as ONE aligned pair. Exported so "Destroy" in ApplyDamageMenu
    and "All" here cannot drift apart.
@@ -423,6 +421,12 @@ class CriticalEffectsSection extends Component {
 
         return (
             <Section>
+                {/* The break from whatever editor sits above - the damage row in
+                    ApplyDamageMenu, the fighter grid in FighterDamageMenu. It lives HERE
+                    rather than at the two call sites because this component can decide to
+                    render nothing at all (no criticals, catalogue not in yet), and a
+                    divider left dangling over an empty gap reads as a broken menu. */}
+                <SectionDivider $chrome />
                 <SectionHeader>Critical Effects</SectionHeader>
                 {shown.map(row => {
                     const value = this.valueOf(row);

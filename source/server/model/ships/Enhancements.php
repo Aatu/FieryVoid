@@ -3737,19 +3737,28 @@ class Enhancements{
 		/* ONE summary line in the ship's Enhancements box, last, after the ship-level ones
 		   (§6.4). A line per refit would push the `enh` grid panel past the section cluster it
 		   sits beside; the detail lives in each system's own SystemInfo tooltip.
-		   Counted over rows that actually resolve below would be more honest, but the count
-		   has to be stable across the two sides and the client cannot see a drop - so both
-		   count the ROWS, and a dropped row is reported by the saved-fleet notice instead.
+
+		   ⭐ The number is DISTINCT SYSTEMS, not rows (user request 2026-08-15). It is the count
+		   of ✦ badges the player will find on the ship window, which is the thing they can go and
+		   look at; a gun wearing both Gunsights and Advanced Defensive Targeting is still one
+		   enhanced gun. Counting rows made the summary disagree with the badges on exactly the
+		   ships that had the most going on. ⚠️ MIRROR PAIR with systemEnhancements.systemsEnhanced
+		   (JS), which counts the same way for the lobby - the two numbers must agree.
+
+		   Counted over rows that actually resolve below would be more honest still, but the count
+		   has to be stable across the two sides and the client cannot see a drop - so both count
+		   the STORED rows, and a dropped row is reported by the saved-fleet notice instead.
+
 		   ⚠️ Written unconditionally here, because at construction time there is no viewer to ask.
 		   BaseShip::stripForJson takes it back off again for anyone outside the ship's team -
 		   see stripSystemEnhancementSummary(). */
-		$refitCount = 0;
+		$enhancedSystems = array();
 		foreach($ship->systemEnhancements as $row){
-			if(isset($row[2]) && (int)$row[2] > 0) $refitCount++;
+			if(isset($row[2]) && (int)$row[2] > 0 && isset($row[6])) $enhancedSystems[(int)$row[6]] = true;
 		}
-		if($refitCount > 0){
+		if(count($enhancedSystems) > 0){
 			if($ship->enhancementTooltip != "") $ship->enhancementTooltip .= "<br>";
-			$ship->enhancementTooltip .= self::systemEnhancementSummaryLine($refitCount);
+			$ship->enhancementTooltip .= self::systemEnhancementSummaryLine(count($enhancedSystems));
 		}
 
 		foreach($ship->systemEnhancements as $row){
