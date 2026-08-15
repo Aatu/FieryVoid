@@ -143,6 +143,7 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
         <script src="client/damage.js"></script>
         <script src="client/systems.js"></script>
         <script src="client/battleDamage.js"></script>
+        <script src="client/systemEnhancements.js"></script>
         <script src="client/savedFleets.js"></script>
         <script src="client/power.js"></script>
         <script src="client/movement.js"></script>

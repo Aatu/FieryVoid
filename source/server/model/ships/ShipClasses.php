@@ -33,6 +33,13 @@ class BaseShip {
     public $pointCost = 0;
     public $pointCostEnh = 0; //points spent on enhanements (in addition to crafts' own price), DOES NOT include cost of items being only technically enhancements (special missiles, Navigators...)
 	public $pointCostEnh2 = 0; //points spent on non-enhancements - separation actuallly exists only at fleet selection, afterwards it will be always 0 with points added to $pointCostEnh
+	/* THIRD cost bucket - points spent on PER-SYSTEM enhancements (WEAPON_ENHANCEMENTS_PLAN.md D5).
+	   It cannot share either bucket above: readBulkPurchase and doEditShip REWRITE pointCostEnh and
+	   pointCostEnh2 from zero off the buy dialog's spinners every time they run, and system
+	   enhancements are not in that dialog - so folding them in means an Edit silently REFUNDS every
+	   refit while leaving it applied. A separate field is the only version that survives an edit.
+	   ⚠️ getPristinePointCost must peel all three. */
+	public $pointCostSysEnh = 0;
 	public $combatValue = 100; //current combat value, as percentage of original
     public $spawned = -1; //To denote if a unit was spawned by DURING the game, e.g. doesn't count for CPV etc, show in Replay prior to it spawning
     public $removed = false; //Hangar Ops (B5W §10.1): set when a flight has docked. Hides from board/target lists without triggering destruction; record stays in DB for replay history.
@@ -181,8 +188,23 @@ class BaseShip {
 		public $enhancementOptions = array(); //ID,readableName,numberTaken,limit,price,priceStep
 		public $enhancementOptionsEnabled = array(); //enabled non-standard options - just IDs
 		public $enhancementOptionsDisabled = array(); //disabled standard options - jsut IDs
-		public $enhancementTooltip = ""; //to be displayed with ship name / class	
-	
+		public $enhancementTooltip = ""; //to be displayed with ship name / class
+
+		/* PER-SYSTEM enhancements (WEAPON_ENHANCEMENTS_PLAN.md §3.1). A SEPARATE array from
+		   enhancementOptions on purpose (D2): confirm.js renders one buy-dialog row per
+		   enhancementOptions INDEX and gamedata.readBulkPurchase walks .selectAmount.shpenh<N>
+		   by that same index until the first gap, so a sparse index list silently zeroes every
+		   enhancement after the gap. The two arrays also diverge at index 6 - isOption there,
+		   systemid here.
+		   Tuple: [enhID, humanName, count, limit, price, priceStep, systemid, sysname]
+		   Indices 0-5 match enhancementOptions so describeTaken and the price helpers work on both.
+		   ⚠️ Index 4 on a PURCHASE is the TOTAL points paid for the whole row (all `count` levels)
+		   - that is what tac_sys_enhancements.enhvalue stores and what a refund pays back. On an
+		   OFFER it is the price of ONE level. The two arrays never mix, and systemEnhancementOffers
+		   uses a leaner 5-slot shape of its own (Enhancements::setSystemEnhancementOptions). */
+		public $systemEnhancements = array();       //PURCHASED per-system refits
+		public $systemEnhancementOffers = array();  //what MAY be bought - lobby only, never sent back (D3)
+
     public $advancedArmor = false; //set to true if ship is equipped with advanced armor!
 	public $hardAdvancedArmor = false; // set to true if ship is equipped with hardented advanced armor - GTS
 	
@@ -731,9 +753,33 @@ class BaseShip {
 		$strippedShip->pointCostEnh = $this->pointCostEnh;
 		
 		//unit enhancements
-		if($this->enhancementTooltip !== ''){ //enhancements exist!
-			$strippedShip->enhancementTooltip = $this->enhancementTooltip;
+		/* ✦ The per-system refit SUMMARY is OWN-TEAM ONLY (user request, 2026-08-15): "System
+		   Enhancements (4)" on an enemy hull tells them far too much before a shot is fired. The
+		   ship-LEVEL lines stay public exactly as they always were, so this trims one line rather
+		   than hiding the box. If that leaves nothing, the ship falls back to sending no tooltip at
+		   all and skipping addUnitEnhancementsForJSON - which is precisely what a ship carrying only
+		   system enhancements did before this feature existed.
+		   ⚠️ Cosmetic hiding only, and §6.3 says so out loud: the enhanced shield output, armour and
+		   thrust still reach the enemy, because their own damage and hit-chance previews read them. */
+		$enhancementTooltip = $this->enhancementTooltip;
+		if($enhancementTooltip !== '' && !$this->isRevealedToCurrentViewer()){
+			$enhancementTooltip = Enhancements::stripSystemEnhancementSummary($enhancementTooltip);
+		}
+		if($enhancementTooltip !== ''){ //enhancements exist!
+			$strippedShip->enhancementTooltip = $enhancementTooltip;
 			$strippedShip = Enhancements::addUnitEnhancementsForJSON($this, $strippedShip);//modifies $strippedShip  object
+		}
+
+		/* The PURCHASED per-system refits, for the ✦ badge on the system icons. SystemIcon reads
+		   them through systemEnhancements.hasAny(), which is how the lobby has always lit the star -
+		   in game the array simply never reached the browser, so the badge was lobby-only (user
+		   report, 2026-08-15).
+		   OWN TEAM ONLY (D8), which is also what lets SystemIcon stay free of any client-side userid
+		   comparison: an enemy payload carries no rows, so hasAny() is false for the right reason.
+		   Sent verbatim - the in-game tuples come from getEnhancementsForShips with their limit and
+		   priceStep columns already zeroed, and nothing in game can buy or re-price them. */
+		if(!empty($this->systemEnhancements) && $this->isRevealedToCurrentViewer()){
+			$strippedShip->systemEnhancements = $this->systemEnhancements;
 		}
 
 		//Stage S (fleet-value attribution): for an integrated-fighter carrier, send the
@@ -1509,7 +1555,13 @@ class BaseShip {
     {	    
 		//enhancements (in game, NOT fleet selection!)
 		Enhancements::setEnhancements($this);
-	    
+		/* PER-SYSTEM enhancements, immediately after the ship-level ones and - critically - BEFORE
+		   the per-system onConstructed loop below. Shield::onConstructed derives tohitPenalty and
+		   damagePenalty from getOutput(), so a Hardened Shields refit applied AFTER that loop would
+		   absorb the bonus damage but not confer the bonus to-hit penalty: a half-working shield,
+		   which is far worse than a broken one because nobody notices. */
+		Enhancements::setSystemEnhancements($this);
+
         foreach ($this->systems as $system){
             $system->onConstructed($this, $turn, $phase);
             $abilities = $system->getSpecialAbilityList($this->enabledSpecialAbilities);
@@ -4564,6 +4616,27 @@ public function getPiercingLocations($shooter, $pos, $turn, $weapon){
         return $locs;
     }
 } //end of StarBaseFiveSections
+
+//Llort Base
+class UnevenStarBaseEightSections extends StarBase{
+
+
+    public function getLocations(){
+        //debug::log("getLocations");         
+        $locs = array();
+
+        $locs[] = array("loc" => 1, "min" => 300, "max" => 60, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 2, "min" => 120, "max" => 240, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 3, "min" => 180, "max" => 360, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 31, "min" => 240, "max" => 60, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 32, "min" => 180, "max" => 300, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 4, "min" => 0, "max" => 180, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 41, "min" => 0, "max" => 120, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 42, "min" => 60, "max" => 240, "profile" => $this->sideDefense);        
+
+        return $locs;
+    }
+} //end of StarBaseEightSections
 
 
 

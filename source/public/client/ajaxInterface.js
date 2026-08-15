@@ -656,6 +656,13 @@ window.ajaxInterface = {
                     }
                 }
 
+                /* Per-system enhancements (§5.3), same rules as the buy POST: sent when there is
+                   anything to send, re-validated and RE-PRICED server-side on load (§4.7.1), and
+                   the offer list is never sent at all. */
+                if (window.systemEnhancements && systemEnhancements.count(ship) > 0) {
+                    newShip.systemEnhancements = ship.systemEnhancements;
+                }
+
                 saveships.push(newShip);
             }
         }
@@ -1054,6 +1061,15 @@ window.ajaxInterface = {
                 //HAD on offer, not what the player chose to load, and must never be written.
                 if (window.battleDamage && !battleDamage.isEmpty(ship.preBattleDamage)) {
                     newShip.preBattleDamage = ship.preBattleDamage;
+                }
+
+                /* Per-system enhancements (WEAPON_ENHANCEMENTS_PLAN.md §5.3). Read ONLY by
+                   BuyingGamePhase::process, and re-derived there against a freshly built ship -
+                   the prices in these rows are a claim, not an authority (D4).
+                   systemEnhancementOffers is deliberately NEVER sent: it is blueprint data the
+                   server regenerates, and it is by far the bigger of the two arrays. */
+                if (window.systemEnhancements && systemEnhancements.count(ship) > 0) {
+                    newShip.systemEnhancements = ship.systemEnhancements;
                 }
 
                 tidyships.push(newShip);

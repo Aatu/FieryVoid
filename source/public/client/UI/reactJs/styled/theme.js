@@ -24,7 +24,18 @@ const theme = {
         statusOk: "limegreen",                  //green status banners - matches the map tooltip (Undetected / Attached)
         statusAlert: "#e1b000",                  //orange alert banners - matches the map tooltip (boarding)
         statusBad: "red",                       //red status banners - matches the map tooltip (Detected)
-        enhText: "#d8be86",                     //Enhancements list body text - gold, matches the block's bronze border/title
+        /* THE GOLD SET - "this was bought, it is not standard equipment".
+           enhText was already here; the other three were hex literals repeated in
+           ShipNotesPanel.js (Block $gold and EnhTitle). They were extracted when the
+           system-enhancement menu needed the same look (WEAPON_ENHANCEMENTS_PLAN.md §1), because
+           a second file copying the literals is exactly how two gold surfaces drift apart -
+           see [[project_visual_unification]]. Any new gold surface reads these four.
+           ⚠️ enhBg is a FILL with its own alpha, never element opacity: element opacity would
+           fade the text as well, and stacking the two compounds. */
+        enhText: "#d8be86",                     //Enhancements list body text
+        enhTitle: "#e8cf93",                    //Enhancements section-bar title - a shade brighter
+        enhBg: "rgba(169, 128, 56, 0.30)",      //Enhancements section-bar fill
+        enhLine: "#8a6d3b",                     //Enhancements border / divider - bronze
         custom: "#cccc00",
 
         //HISTORICAL - the 2011 map-overlay skin. Stage 4 converged every surface that wore

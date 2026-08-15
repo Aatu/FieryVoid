@@ -385,6 +385,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     <script defer src="client/criticals.js"></script>
     <script defer src="client/systems.js"></script>
     <script defer src="client/battleDamage.js"></script>
+    <script defer src="client/systemEnhancements.js"></script>
     <script defer src="client/savedFleets.js"></script>
 	<script defer src="client/power.js"></script>
     <script defer src="client/UI/shipMovement.js"></script>

@@ -1,7 +1,72 @@
 # System Enhancements — Implementation Plan
 
-Status: **DESIGN ONLY — nothing built.** Written 2026-08-12 against the tree at `d24a27ec7`;
-open questions O1–O6 answered by the user the same day and folded in (§9).
+Status: **BUILT 2026-08-15 — Stages 0–7 complete, automated tests green. Play-tested; refinement
+round 1 applied (see below).**
+Written 2026-08-12 against the tree at `d24a27ec7`; open questions O1–O6 answered by the user the
+same day and folded in (§9). Built against `e5ce444bb`.
+
+### What was verified, and how
+
+| Stage | Exit test | Result |
+|---|---|---|
+| 0 | scratch round-trip, FK cascade, DECIMAL-as-string | 17/17 |
+| 1 | offers per faction age, D6, exclusions, **Twin Array 32 / 48**, arc counting, payload size | 17/17 |
+| 2 | apply, shield penalties, mode switch, null FC, 10 doctored payloads | 26/26 |
+| 3 | pricing, idempotence, **two identical hulls**, copy, clear, D11 sweep (node) | 44/44 |
+| 4 | `renderToString` of both components + the combined menu (esbuild + evaluate) | 14/14 |
+| 5 | POST → sanitise → DB → game load → `onConstructed` applies | 17/17 |
+| 6 | save/reload, **and the three §4.7.1 drift cases** | 17/17 |
+| — | replay harness `check` (Stage 2 changes serialised fields) | **161 passed, 0 failed** |
+
+Manual Docker play-through is still the real gate (§8, last row) — nothing here tests the *rules*,
+only that the machinery does what it says.
+
+### ⚠️ Three deviations from this document, all deliberate
+
+1. **§2.1 is out of date: `interceptArray` DOES exist.** Missile launchers derive a per-mode
+   intercept rating from loaded ammo ([missile.php:1350](source/server/model/weapons/missile.php#L1350))
+   and `changeFiringMode` re-reads it over `->intercept`
+   ([weapon.php:2978](source/server/model/weapons/weapon.php#L2978)) — the same evaporate-on-mode-switch
+   hazard §2.2 flags for Gunsights. Measured over the whole corpus: **no currently-eligible weapon has
+   one**, so it is inert today. `SYS_ADT` mirrors the bump across modes anyway and says why.
+2. **The offer tuple is 5 slots, not 8.** §3.2 assumed offers would share the purchase shape and set
+   "under 1 KB per ship" as the condition for keeping the human name on the wire. Measured: the full
+   shape cost **1,921 bytes/ship** (2,557 classes, 85,025 offers). Dropping the label (the client holds
+   `LABELS`) and `sysname` (D13's check applies to a stored *purchase*, not an offer) gives **736
+   bytes/ship**, i.e. **+1.97% on `Earth Alliance.json`** — confirmed against the regenerated statics.
+3. **`SYS_GSGT` has a deny-list.** §2.2's rule offered Gunsights to 498 zero-damage mounts across 30
+   classes at the 4pt floor. Most of those *do* roll to hit and want it; a few are utility mounts that
+   would get nothing. Per the user's call, `Enhancements::$gunsightExcluded` names eight classes
+   (`AbbaiShieldProjector`, `AegisSensorPod`, `CombatTransporter`, `GrapplingClaw`, `GraviticShifter`,
+   `GromeTargetingArray`, `MicroJumpSystem`, `NexusChaffLauncher`) rather than a blanket
+   `maxDamage > 0` test, which would have taken the Burst Beams and Tractor Beams out with them.
+
+### One thing §5.2 did not anticipate
+
+`tac_saved_ship.enhvalue` stores all **three** cost buckets added together, and `getSavedShips` hands
+the lot back as `pointCostEnh` — so `loadSavedFleet` has to **split the stored total apart again**
+before setting `pointCostSysEnh`, or every refit is counted twice the moment the client adds the third
+bucket on. See the comment at that site.
+
+### Refinement round 1 — 2026-08-15, after the first play-test
+
+Five reports, all display-layer except the last. Verified: replay harness `check` **161 passed, 0
+failed**; a scratch build of a young hull with `SYS_ADT` + `SYS_GSGT` round-tripped through
+`onConstructed` → `beforeTurn` → `stripForJson` for an owner and for an enemy (17/17).
+
+| # | Report | Cause | Fix |
+|---|---|---|---|
+| 1 | The ✦ badge is too small, **and absent in game.php** | 7px on a 32px icon; and `stripForJson` never sent `systemEnhancements`, so `hasAny()` was false for every ship in game | 11px; `ShipClasses::stripForJson` sends the purchase rows, **own team only** via `isRevealedToCurrentViewer()` — which is also what keeps `SystemIcon` free of a client-side userid test |
+| 2 | Improved Thrust Rating's row price lags a step | The price column switched to the row's **running total** the moment a level was bought (12, then 12, 26, 42 for a 12/14/16 refit), which reads as a lagging price | The column now always quotes **the next level's cost**; at the limit it falls back to the spend, dimmed and labelled. The running total already had two homes (the section's "Refits: n pts" and the points panel) |
+| 3 | Hardened Shields / Armour / Thrust show in the ship window, **ADT and Gunsights do not** | ⭐ The user's own guess was right. `output` and `armour` are displayed from the **live field**; `intercept` and `fireControl` are quoted only through `$system->data`, which is baked into the static blueprint at generation time | Lobby: `systemEnhancements.syncInterceptData` / `syncFireControlData` rewrite the two entries in `apply()` (new object — `data` is shared by reference) |
+| 4 | ADT does not change the intercept rating in game.php either | Same cause. The rating **was** applied — `data` is even rebuilt from the enhanced value in `beforeTurn` — but `stripForJson` does not send `data` for an ordinary system, so the browser kept the blueprint's copy | `data` added to `SYS_ADT` / `SYS_GSGT`'s registry `serialise` list. Exactly the precedent `HyachSpecialists` sets at [weapon.php:455](source/server/model/weapons/weapon.php#L455) — *"Defence modifies intercept rating, show in system window"* |
+| 5 | "System Enhancements (n)" should not appear to other teams | D8 made the **badge** own-team-only and left the **summary line** public, which is the same tell in words | `Enhancements::stripSystemEnhancementSummary`, applied in `stripForJson`. The ship-**level** lines stay public as they always were; if that empties the tooltip the ship sends none, which is what a hull carrying only refits did before this feature existed |
+
+⚠️ **Items 3–5 do not change §6.3's ceiling.** The enemy still receives the enhanced `intercept` and
+`fireControl` (they were in `serialise` from day one) and now sees them in the tooltip too, so a
+veteran comparing a mount against the published SCS can still infer the refit. Item 5 hides the
+**label**, not the fact. Real masking is still §12, and the registry is still what makes it one line
+per entry.
 
 Extends the lobby's `ApplyDamageMenu` (PREBATTLE_DAMAGE_PLAN.md §5.2, §11) from a damage editor
 into an **"Add Enhancements & Damage"** editor: a gold enhancements section above the existing blue
@@ -685,9 +750,14 @@ if (window.systemEnhancements && systemEnhancements.count(ship) > 0) {
 
 ### 6.2 The gold star
 
-A 7×7 gold ✦ absolutely positioned `top:1px; left:1px` inside `System`
+A gold ✦ absolutely positioned `top:0; left:1px` inside `System`
 ([SystemIcon.js:43](source/public/client/UI/reactJs/system/SystemIcon.js#L43)), `z-index:1`,
-`pointer-events:none`, `text-shadow: black 0 0 3px`.
+`pointer-events:none`, `text-shadow: black 0 0 3px`. **11px** — it shipped at 7px, which was
+legible only if you already knew to look for it (refinement round 1).
+
+⚠️ It is driven by `ship.systemEnhancements`, so the array has to **reach the browser** — in the
+lobby it is local to that player, but in game it only arrives because `stripForJson` sends it, own
+team only. That was missed first time round and the badge was lobby-only.
 
 ⚠️ `SystemIcon` has **two return paths** — the destroyed short-circuit at
 [:435-441](source/public/client/UI/reactJs/system/SystemIcon.js#L435) and the interactive one. A
@@ -759,6 +829,11 @@ O3**. Do not imply otherwise in the tooltip text.
 * In **game.php**, the ship's `enhancementTooltip` is built server-side
   ([Enhancements.php:2226 region](source/server/model/ships/Enhancements.php#L2226)) — add the
   same one-line summary there so lobby and game agree, and note the mirror.
+* ⚠️ **The summary line is OWN-TEAM ONLY** (refinement round 1). It is written at construction
+  time, when there is no viewer to ask, and taken back off in `BaseShip::stripForJson` via
+  `Enhancements::stripSystemEnhancementSummary`. The string therefore exists once, as
+  `Enhancements::SYS_ENH_SUMMARY_PREFIX` — a literal at each end would drift the first time the
+  wording is nudged, and the only symptom would be an enemy quietly seeing it again.
 
 ---
 

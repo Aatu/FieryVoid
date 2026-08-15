@@ -3426,6 +3426,7 @@ spl_autoload_register(
                 'ultrapulsecannon' => '/server/model/weapons/pulse.php',
                 'uncontrolled' => '/server/model/cricialClasses.php',
                 'unevenbasefoursections' => '/server/model/ships/ShipClasses.php',
+                'unevenstarbaseeightsections' => '/server/model/ships/ShipClasses.php',
                 'unreliablebattlelaser' => '/server/model/weapons/lasers.php',
                 'unreliablemattercannon' => '/server/model/weapons/matter.php',
                 'unreliabletwinarray' => '/server/model/weapons/particle.php',

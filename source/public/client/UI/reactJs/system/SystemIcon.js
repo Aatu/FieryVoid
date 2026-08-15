@@ -1,5 +1,6 @@
 import * as React from "react";
 import styled from "styled-components"
+import theme from "../styled/theme";
 import { canApplyPreBattleDamage } from "./SystemInfoButtons";
 
 const HealthBar = styled.div`
@@ -38,6 +39,29 @@ const SystemText = styled.div`
     align-items: flex-end;
     justify-content: center;
     text-shadow: black 0 0 6px, black 0 0 6px;
+`;
+
+/* ✦ - "this system carries a bought enhancement" (WEAPON_ENHANCEMENTS_PLAN.md §6.2).
+   pointer-events:none so it never steals the icon's click; the text-shadow keeps it legible
+   over a light hull image.
+
+   ⚠️ COSMETIC ONLY, and the plan says so out loud (§6.3): several of the enhanced STAT
+   VALUES have to reach the enemy for their own hit-chance and damage previews to be right
+   (shield output, armour, thruster output), so the badge hides the LABEL, not the fact.
+   It is not an information-hiding mechanism - see §12 if real masking is ever wanted. */
+const EnhancementStar = styled.div`
+    position: absolute;
+    top: 0px;
+    left: 1px;
+    z-index: 1;
+    pointer-events: none;
+    /*11px on a 32px icon: the 7px it launched at was legible only if you already knew to
+      look for it (user report 2026-08-15). Still small enough to clear the icon art and the
+      [n/n] load counter, which sits along the BOTTOM edge.*/
+    font-size: 11px;
+    line-height: 11px;
+    color: ${theme.colors.enhTitle};
+    text-shadow: black 0 0 3px, black 0 0 3px, black 0 0 3px;
 `;
 
 const System = styled.div`
@@ -436,7 +460,10 @@ class SystemIcon extends React.Component {
             && !system.clickableWhenDestroyed
             && !canApplyPreBattleDamage(ship, system)) {
             return (
-                <System $background={getBackgroundImage(system)} $destroyed $mirror={mirror}><HealthBar $health="0" /></System>
+                <System $background={getBackgroundImage(system)} $destroyed $mirror={mirror}>
+                    {renderBadges(ship, system)}
+                    <HealthBar $health="0" />
+                </System>
             )
         }
 
@@ -466,6 +493,7 @@ class SystemIcon extends React.Component {
                 $docked={isDockedOrbital(system)}
                 $orderPending={hasPendingDockOrder(system)}
             >
+                {renderBadges(ship, system)}
                 <SystemText>{getText(ship, system)}</SystemText>
                 {/*A destroyed system shows an EMPTY bar, matching the non-interactive
                    render above. It cannot just read getStructureLeft: a system destroyed
@@ -476,6 +504,20 @@ class SystemIcon extends React.Component {
         )
     }
 }
+
+/* ⭐ Overlay markers for one system icon, extracted so the TWO return paths above cannot
+   drift: SystemIcon short-circuits for a destroyed system before the interactive render, and
+   a destroyed-but-enhanced system must STILL show its star - you paid for it (§6.2).
+
+   OWN-TEAM ONLY, decided server-side (D8): the star is driven by ship.systemEnhancements,
+   which only ever reaches the owner - in the LOBBY the array is local to that player's
+   browser, and in GAME the enemy's stripped payload carries none. There is deliberately no
+   client-side userid comparison here, matching the isRevealedToCurrentViewer pattern. */
+const renderBadges = (ship, system) => {
+    if (!window.systemEnhancements || !ship || !system) return null;
+    if (!systemEnhancements.hasAny(ship, system.id)) return null;
+    return <EnhancementStar title="Carries a system enhancement">✦</EnhancementStar>;
+};
 
 //A "spent & locked" Gravitic Augmenter shows the spent (dimmed) look, not the active-firing orange
 //border — its committed order is not being fired/edited in the current phase (see isSpentLocked).
