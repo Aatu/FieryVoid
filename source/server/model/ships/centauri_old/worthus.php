@@ -21,7 +21,7 @@ class Worthus extends SmallStarBaseFourSections{
 		$this->forwardDefense = 21;
 		$this->sideDefense = 21;
 		$this->isd = 2001;
-		$this->variantOf = "OBSELETE";
+		$this->variantOf = "OBSOLETE";
 		
 		/* replaced with proper two C&Cs!
 		$this->addPrimarySystem(new ProtectedCnC(7, 50, 0, 0)); //2x 6/25 C&C originally

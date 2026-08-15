@@ -22,7 +22,7 @@ class Brostilli extends SmallStarBaseFourSections
 		$this->iniativebonus = -200; //no voluntary movement anyway
 		$this->turncost = 0;
 		$this->turndelaycost = 0;
-		$this->variantOf = "OBSELETE";
+		$this->variantOf = "OBSOLETE";
 
 		$this->forwardDefense = 21;
 		$this->sideDefense = 21;
