@@ -12,6 +12,19 @@ window.BallisticSprite = function () {
     var TEXTURE_HEX_WHITE = null;
     var TEXTURE_HEX_CLEAR = null;
 
+    /* Lettered and imaged hexes are cached the same way the plain coloured ones are.
+       They used to be built per SPRITE, and a sprite is rebuilt every time BallisticIconContainer
+       consumes gamedata - which is every poll, every hex targeted and every ship targeted. Each
+       build was a fresh 512x512 canvas plus a CanvasTexture, and nothing ever freed them:
+       Material.dispose() deliberately does not touch textures, so they accumulated for the life of
+       the tab. The key covers everything that affects the pixels, so sharing is invisible, and the
+       set of texts is small and fixed (the firing-mode names plus "Reinforcement"). */
+    var TEXTURE_CACHE = {};
+
+    function getCachedTexture(key, build) {
+        return TEXTURE_CACHE[key] || (TEXTURE_CACHE[key] = build());
+    }
+
     function BallisticSprite(position, type, text = "", textColour = "#ffffff", imageSrc = null) {
         HexagonSprite.call(this, -100);
 
@@ -21,9 +34,15 @@ window.BallisticSprite = function () {
 
         // If an image source is provided, create a texture with the image
         if (imageSrc) {
-            this.uniforms.spriteTexture.value = createTextureWithImage(type, text, textColour, imageSrc);
+            this.uniforms.spriteTexture.value = getCachedTexture(
+                'image|' + type + '|' + text + '|' + textColour + '|' + imageSrc,
+                function () { return createTextureWithImage(type, text, textColour, imageSrc); }
+            );
         } else if (text) {
-            this.uniforms.spriteTexture.value = createTextureWithText(type, text, textColour || "#ffffff");
+            this.uniforms.spriteTexture.value = getCachedTexture(
+                'text|' + type + '|' + text + '|' + textColour,
+                function () { return createTextureWithText(type, text, textColour || "#ffffff"); }
+            );
         } else if (type instanceof THREE.Texture) {
             this.uniforms.spriteTexture.value = type;
         } else {

@@ -1851,13 +1851,58 @@ shipManager.movement = {
     },
 
 
+    /* Two units in one hex have no real bearing on each other, so mathlib.getCompassHeadingOfShip
+       fakes one from direction of travel: it stands the unit back in the hex it came from and takes
+       the bearing from there. Forced Pre-Firing movement - Gravitic Mine pull, Gravity Net,
+       Transverse Drive, Warp Jump - appends a 'prefire' order that teleports the unit AFTER movement
+       is done, and a plain walk back then answers with the hex it was DRAGGED out of instead of the
+       hex it flew in from. That rotates the bearing by the drag angle and drops the target out of
+       arc even though a drag moves everything in the hex together and changes nothing between them.
+       So walk back from where movement itself left the unit, then slide that answer along the drag
+       vector - a rigid translation, which is what a drag actually is. Note the translation is
+       essential and not just tidiness: pairing a pre-drag origin with a post-drag destination is
+       wrong by the drag angle, a whole hex facing. Done in cube space so row parity is handled.
+       Undragged units take the original path below, unchanged. */
     getPreviousLocation: function getPreviousLocation(ship) {
         var oPos = shipManager.getShipPosition(ship);
-        for (var i = ship.movement.length - 1; i >= 0; i--) {
-            var move = ship.movement[i];
-            if (!oPos.equals(new hexagon.Offset(move.position))) return move.position;
+        var i, move, pos;
+
+        //Where the unit's own movement left it, ignoring any forced Pre-Firing shift.
+        var movedPos = null;
+        for (i = ship.movement.length - 1; i >= 0; i--) {
+            if (ship.movement[i].type === "prefire") continue;
+            movedPos = new hexagon.Offset(ship.movement[i].position);
+            break;
         }
-        return oPos;
+
+        if (!movedPos || movedPos.equals(oPos)) { //never dragged, or dragged within its own hex
+            for (i = ship.movement.length - 1; i >= 0; i--) {
+                move = ship.movement[i];
+                if (!oPos.equals(new hexagon.Offset(move.position))) return move.position;
+            }
+            return oPos;
+        }
+
+        var drag = oPos.toCube().subtract(movedPos.toCube());
+        var isTerrain = gamedata.isTerrain(ship.shipSizeClass, ship.userid);
+        for (i = ship.movement.length - 1; i >= 0; i--) {
+            move = ship.movement[i];
+            if (move.type === "prefire") continue;
+            //'start' is the off-board pre-deployment marker (x=+-30), not a position the unit was
+            //ever really at - the same row getLastTurnMovement skips, and real only for Terrain.
+            //It matters only here on the dragged path: the walk-back is anchored to the PRE-drag
+            //hex, so a unit that never left its deploy hex (mine, OSAT, base) matches every row
+            //and would otherwise run off the end of its history and answer with the marker.
+            if (move.type === "start" && !isTerrain) continue;
+            pos = new hexagon.Offset(move.position);
+            if (!movedPos.equals(pos)) return pos.toCube().add(drag).toOffset();
+        }
+
+        //Nothing to walk back to. A dragged unit that never moved under its own power (mine, OSAT,
+        //base) has no direction of travel, so the drag is the only motion there is: answer with the
+        //hex it was dragged out of, which is also what the old code did. (Dragged path only - the
+        //undragged branch above returns oPos itself.)
+        return movedPos;
     },
 
     getAmountChanneledReal: function getAmountChanneledReal(ship, system, ignoreUncommitted) {

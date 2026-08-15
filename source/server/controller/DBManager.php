@@ -199,7 +199,8 @@ class DBManager
     public function submitEnhValue($shipid, $enhValue)
     {
         $stmt = $this->connection->prepare("UPDATE `tac_ship` SET enhvalue = ? WHERE id = ?");
-        $stmt->bind_param('ii', $enhValue, $shipid);
+        //'d' — enhvalue is DECIMAL; see submitSavedShip.
+        $stmt->bind_param('di', $enhValue, $shipid);
         $stmt->execute();
         $stmt->close();
     }
@@ -258,24 +259,32 @@ class DBManager
         // Ensure the ship has a valid name
         $shipName = $ship->name ?: 'NAMELESS UNIT';
         $flightsize = $ship->flightSize ?? 1;
+        //Bulk purchases (mines) are ONE row carrying a count, exactly as the lobby buys
+        //them. Before this column existed the count was silently dropped and a saved
+        //fleet of 10 mines reloaded as 1.
+        $bulkbuy = max(1, (int)($ship->bulkBuy ?? 1));
 		$enhCostTotal = $ship->pointCostEnh + $ship->pointCostEnh2;
 
-        $sql = "INSERT INTO tac_saved_ship 
-                (userid, listid, name, phpclass, flightsize, enhvalue)
-                VALUES (?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO tac_saved_ship
+                (userid, listid, name, phpclass, flightsize, bulkbuy, enhvalue)
+                VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $this->connection->prepare($sql);
         if (!$stmt) {
             throw new Exception("DB prepare failed: " . $this->connection->error);
         }
 
+        //enhvalue binds as 'd', not 'i': a per-unit enhancement cost is not always whole
+        //(MINE_DMG is 0.5/level), and truncating it here made a fleet reload dearer than it
+        //was bought. See db/fractionalEnhancementValue.sql.
         $stmt->bind_param(
-            "iissii", 
+            "iissiid",
             $userid,
             $listId,
             $shipName,
             $ship->phpclass,
             $flightsize,
+            $bulkbuy,
             $enhCostTotal
         );
 
@@ -321,23 +330,30 @@ class DBManager
     //All rows from tac_saved_list for a given userid
     public function getSavedFleets($userid) {
         $savedFleets = [];
+        //hasDamage / hasCrits drive the two INDEPENDENT load checkboxes (each is hidden
+        //when its flag is false) and the dropdown badge. Two EXISTS subqueries, so no
+        //extra round trip.
         $stmt = $this->connection->prepare(
-            "SELECT id, name, userid, points, isPublic
-            FROM tac_saved_list
-            WHERE userid = ? OR userid = 0
-            ORDER BY userid DESC, name ASC" // optional: user fleets first
+            "SELECT l.id, l.name, l.userid, l.points, l.isPublic,
+                EXISTS(SELECT 1 FROM tac_saved_damage d WHERE d.listid = l.id) AS hasDamage,
+                EXISTS(SELECT 1 FROM tac_saved_crit  c WHERE c.listid = l.id) AS hasCrits
+            FROM tac_saved_list l
+            WHERE l.userid = ? OR l.userid = 0
+            ORDER BY l.userid DESC, l.name ASC" // optional: user fleets first
         );
         if ($stmt) {
             $stmt->bind_param('i', $userid);
             $stmt->execute();
-            $stmt->bind_result($id, $name, $fleetUserId, $points, $isPublic); // renamed to avoid variable clash
+            $stmt->bind_result($id, $name, $fleetUserId, $points, $isPublic, $hasDamage, $hasCrits); // renamed to avoid variable clash
             while ($stmt->fetch()) {
                 $savedFleets[] = [
                     'id' => $id,
                     'name' => $name,
                     'userid' => $fleetUserId,
                     'points' => $points,
-                    'isPublic' => $isPublic
+                    'isPublic' => $isPublic,
+                    'hasDamage' => (bool) $hasDamage,
+                    'hasCrits' => (bool) $hasCrits
                 ];
             }
             $stmt->close();
@@ -350,15 +366,17 @@ class DBManager
         $savedFleet = null;
 
         $stmt = $this->connection->prepare(
-            "SELECT id, name, userid, points, isPublic
-            FROM tac_saved_list
-            WHERE id = ?"
+            "SELECT l.id, l.name, l.userid, l.points, l.isPublic,
+                EXISTS(SELECT 1 FROM tac_saved_damage d WHERE d.listid = l.id) AS hasDamage,
+                EXISTS(SELECT 1 FROM tac_saved_crit  c WHERE c.listid = l.id) AS hasCrits
+            FROM tac_saved_list l
+            WHERE l.id = ?"
         );
 
         if ($stmt) {
             $stmt->bind_param('i', $id);
             $stmt->execute();
-            $stmt->bind_result($id, $name, $userid, $points, $isPublic);
+            $stmt->bind_result($id, $name, $userid, $points, $isPublic, $hasDamage, $hasCrits);
 
             if ($stmt->fetch()) {
                 $savedFleet = [
@@ -366,7 +384,9 @@ class DBManager
                     'name' => $name,
                     'userid' => $userid,
                     'points' => $points,
-                    'isPublic' => (bool) $isPublic
+                    'isPublic' => (bool) $isPublic,
+                    'hasDamage' => (bool) $hasDamage,
+                    'hasCrits' => (bool) $hasCrits
                 ];
             }
 
@@ -382,9 +402,9 @@ class DBManager
 
         $stmt = $this->connection->prepare(
             "SELECT
-                id, userid, name, phpclass, flightsize, enhvalue
+                id, userid, name, phpclass, flightsize, bulkbuy, enhvalue
             FROM
-                tac_saved_ship 
+                tac_saved_ship
             WHERE
                 listid = ?
             "
@@ -392,12 +412,22 @@ class DBManager
 
         if ($stmt) {
             $stmt->bind_param('i', $listid);
-            $stmt->bind_result($shipid, $userid, $name, $phpclass, $flightsize, $enhvalue);
+            $stmt->bind_result($shipid, $userid, $name, $phpclass, $flightsize, $bulkbuy, $enhvalue);
             $stmt->execute();
             while ($stmt->fetch()) {
                 $ship = new $phpclass($shipid, $userid, $name, 1);
                 if($ship instanceof FighterFlight) $ship->flightSize = $flightsize;
-				$ship->pointCostEnh = $enhvalue;
+                //Bulk purchases come back as the ONE unit the lobby bought plus its count,
+                //not as N separate units. Rows written before the column existed default
+                //to 1, which is exactly how they always behaved.
+                //isBulkBought() is the single definition (mines + OSATs), mirrored on the
+                //client by gamedata.isBulkRow - if the two disagreed, a saved OSAT bulk
+                //would reload as a single unit.
+                if ($ship->isBulkBought()) $ship->bulkBuy = max(1, (int)$bulkbuy);
+				//(float): mysqli hands a DECIMAL back as a STRING, and this value is
+				//json_encoded to the client, where `pointCost + pointCostEnh` would then
+				//CONCATENATE instead of adding. See db/fractionalEnhancementValue.sql.
+				$ship->pointCostEnh = (float)$enhvalue;
                 $ships[] = $ship;
             }
             $stmt->close();
@@ -452,9 +482,182 @@ class DBManager
                 {
                     $ammoEntry[] = array($systemid,$firingmode,$ammo);
                 }
-                $stmt->close();                
+                $stmt->close();
             }
         return $ammoEntry;
+    }
+
+    /* ---------------------------------------------------------------- *
+     *  Saved-fleet battle damage & criticals (PREBATTLE_DAMAGE_PLAN §4.5)
+     *  $kind is PreBattleDamage::KIND_SYSTEM (0, $ref = systemid),
+     *  KIND_FIGHTER (1, $ref = fighter ordinal) or KIND_MINE (2, $ref =
+     *  mine ordinal).
+     *
+     *  ⚠️ BOTH SIDES ARE WHOLE-FLEET, keyed by listid, deliberately.
+     *  The first cut was per SHIP on the read side and per ROW on the
+     *  write side, which is what the shape of the data suggests - but a
+     *  fleet saved out of a bloody 20-ship battle is several hundred
+     *  damaged systems, so that was several hundred prepare/execute round
+     *  trips in ONE request. tac_saved_damage/tac_saved_crit both carry
+     *  listid with an index on it, so the whole fleet is two statements
+     *  each way. Matters on the live LiteSpeed workers, which have a hard
+     *  per-request budget.
+     * ---------------------------------------------------------------- */
+
+    /* Rows per INSERT. A fleet is normally well under one chunk; chunking exists so a
+       pathological fleet cannot approach MySQL's 65,535-placeholder ceiling or build a
+       statement larger than max_allowed_packet. */
+    const SAVED_ROW_CHUNK = 200;
+
+    /**
+     * @param array $rows [[shipid, kind, ref, damage, destroyed], …]
+     */
+    public function submitSavedDamageRows($listid, array $rows)
+    {
+        foreach (array_chunk($rows, self::SAVED_ROW_CHUNK) as $chunk) {
+            $types = '';
+            $values = array();
+            $placeholders = array();
+
+            foreach ($chunk as $row) {
+                $placeholders[] = '(?, ?, ?, ?, ?, ?)';
+                $types .= 'iiiiii';
+                $values[] = (int)$listid;
+                $values[] = (int)$row[0];
+                $values[] = (int)$row[1];
+                $values[] = (int)$row[2];
+                $values[] = (int)$row[3];
+                $values[] = !empty($row[4]) ? 1 : 0;
+            }
+
+            $this->executeBatchInsert(
+                "INSERT INTO tac_saved_damage
+                    (listid, shipid, kind, ref, damage, destroyed)
+                 VALUES " . implode(', ', $placeholders) . "
+                 ON DUPLICATE KEY UPDATE
+                    damage = VALUES(damage), destroyed = VALUES(destroyed)",
+                $types, $values, 'submitSavedDamageRows'
+            );
+        }
+    }
+
+    /**
+     * @param array $rows [[shipid, kind, ref, type, amount, param], …]
+     *
+     * `param` is the magnitude of a PARAM-CARRYING critical (DamageReductionReduced), or
+     * null for the other 40-odd classes. PreBattleDamage::$paramCriticals is the
+     * allow-list and sanitiseParam has already forced it to a bounded integer.
+     */
+    public function submitSavedCritRows($listid, array $rows)
+    {
+        foreach (array_chunk($rows, self::SAVED_ROW_CHUNK) as $chunk) {
+            $types = '';
+            $values = array();
+            $placeholders = array();
+
+            foreach ($chunk as $row) {
+                $param = (isset($row[5]) && $row[5] !== '') ? (int)$row[5] : null;
+                $placeholders[] = '(?, ?, ?, ?, ?, ?, ?)';
+                $types .= 'iiiisii';
+                $values[] = (int)$listid;
+                $values[] = (int)$row[0];
+                $values[] = (int)$row[1];
+                $values[] = (int)$row[2];
+                $values[] = (string)$row[3];
+                $values[] = (int)$row[4];
+                //'i' binds a PHP null as SQL NULL, which is what an ordinary critical wants.
+                $values[] = $param;
+            }
+
+            $this->executeBatchInsert(
+                "INSERT INTO tac_saved_crit
+                    (listid, shipid, kind, ref, type, amount, param)
+                 VALUES " . implode(', ', $placeholders) . "
+                 ON DUPLICATE KEY UPDATE
+                    amount = VALUES(amount), param = VALUES(param)",
+                $types, $values, 'submitSavedCritRows'
+            );
+        }
+    }
+
+    /* Prepare + bind + execute one multi-row INSERT.
+       ⚠️ call_user_func_array with an array of REFERENCES, not `bind_param($types,
+       ...$values)`: bind_param declares its arguments by reference, and unpacking a plain
+       array hands it temporaries. It happens to work on current PHP, but it is exactly the
+       kind of thing that changes between an 8.2 dev container and whatever lsphp the live
+       server is on - and this path writes a player's fleet. */
+    private function executeBatchInsert($sql, $types, array $values, $context)
+    {
+        $stmt = $this->connection->prepare($sql);
+        if (!$stmt) throw new Exception("DB error in $context (prepare): " . $this->connection->error);
+
+        $refs = array(&$types);
+        foreach ($values as $i => $ignored) $refs[] = &$values[$i];
+        call_user_func_array(array($stmt, 'bind_param'), $refs);
+
+        $stmt->execute();
+        $stmt->close();
+    }
+
+    /**
+     * Every damage row in a fleet, as shipid => [[kind, ref, damage, destroyed], …].
+     * ONE query for the whole fleet - see the note above.
+     */
+    public function getSavedDamageForList($listid)
+    {
+        $byShip = array();
+        $stmt = $this->connection->prepare(
+            "SELECT
+                shipid, kind, ref, damage, destroyed
+            FROM
+                tac_saved_damage
+            WHERE
+                listid = ?
+            "
+        );
+        if ($stmt)
+        {
+            $stmt->bind_param('i', $listid);
+            $stmt->bind_result($shipid, $kind, $ref, $damage, $destroyed);
+            $stmt->execute();
+            while ($stmt->fetch())
+            {
+                $byShip[$shipid][] = array($kind, $ref, $damage, $destroyed);
+            }
+            $stmt->close();
+        }
+        return $byShip;
+    }
+
+    /**
+     * Every critical row in a fleet, as shipid => [[kind, ref, type, amount, param], …].
+     */
+    public function getSavedCritsForList($listid)
+    {
+        $byShip = array();
+        $stmt = $this->connection->prepare(
+            "SELECT
+                shipid, kind, ref, type, amount, param
+            FROM
+                tac_saved_crit
+            WHERE
+                listid = ?
+            "
+        );
+        if ($stmt)
+        {
+            $stmt->bind_param('i', $listid);
+            $stmt->bind_result($shipid, $kind, $ref, $type, $amount, $param);
+            $stmt->execute();
+            while ($stmt->fetch())
+            {
+                //param is NULL for every class but the param-carrying ones; rows
+                //written before the column existed simply read back as NULL.
+                $byShip[$shipid][] = array($kind, $ref, $type, $amount, $param);
+            }
+            $stmt->close();
+        }
+        return $byShip;
     }
 
     public function changeAvailabilityFleet(int $id): int {
@@ -2309,7 +2512,10 @@ class DBManager
             $stmt->execute();
             while ($stmt->fetch()) {
                 $ship = new $phpclass($id, $playerid, $name, $slot);
-				$ship->pointCostEnh = $enhvalue;
+				//(float): mysqli hands a DECIMAL back as a STRING, and this value is
+				//json_encoded to the client, where `pointCost + pointCostEnh` would then
+				//CONCATENATE instead of adding. See db/fractionalEnhancementValue.sql.
+				$ship->pointCostEnh = (float)$enhvalue;
             }
             $stmt->close();
         }
@@ -2339,7 +2545,10 @@ class DBManager
             $stmt->execute();
             while ($stmt->fetch()) {
                 $ship = new $phpclass($id, $playerid, $name, $slot);
-				$ship->pointCostEnh = $enhvalue;
+				//(float): mysqli hands a DECIMAL back as a STRING, and this value is
+				//json_encoded to the client, where `pointCost + pointCostEnh` would then
+				//CONCATENATE instead of adding. See db/fractionalEnhancementValue.sql.
+				$ship->pointCostEnh = (float)$enhvalue;
                 /*    if ($ship instanceof FighterFlight && $ship->superheavy === false){
                         debug::log("backwards adjust");
                         $ship->flightSize = 6;
@@ -2358,6 +2567,11 @@ class DBManager
             $this->getFlightSize($gamedata);
             //$this->flightSizeFix($ships); //Marcin Sawicki, October 2019: perhaps once there was a reason for "fixing" flight size, but I do not see it any more
             //$this->getAdaptiveArmourSettings($gamedata); //Adaptive Armor redone in a different way
+            //Enhancements are read here, ABOVE the criticals/damage queries, because an enhancement
+            //may MOUNT SYSTEMS (Extra Tendrils) and those queries silently drop any row whose
+            //systemid does not resolve - see getEnhancementsForShips. After getFlightSize, because
+            //FighterFlight::populate() rebuilds a flight's systems from scratch.
+            $this->getEnhancementsForShips($gamedata);
             $this->getIniativeForShips($gamedata, $turn);
             $this->getMovesForShips($gamedata, $turn);
             $this->getEWForShips($gamedata, $turn);
@@ -2522,6 +2736,36 @@ class DBManager
     }
 
 
+    /*tac_enhancements -> $ship->enhancementOptions, plus any systems an enhancement MOUNTS.
+      Called from getTacShips deliberately EARLY - before getCriticalsForShips/getDamageForShips.
+
+      Those two resolve every row through $ship->getSystemById() and skip, without complaint, any
+      row that does not resolve. So a system an enhancement creates has to already exist when they
+      run, or it silently loses its damage and criticals on every load - and for Extra Tendrils that
+      is not cosmetic: a tendril stores its absorbed energy AS damage, so it would come back empty
+      after every page refresh.
+
+      Only mounting happens here. APPLYING the enhancements (stat changes) stays where it was, in
+      BaseShip::onConstructed, which runs after all of this.*/
+    private function getEnhancementsForShips($gamedata)
+    {
+        $allEnhancements = $this->getEnhancementsForGame($gamedata->id);
+
+        foreach ($gamedata->ships as $ship){
+            $shipEnhancements = isset($allEnhancements[$ship->id]) ? $allEnhancements[$ship->id] : array();
+
+            if( count($shipEnhancements) == 0 ){ //no enhancements! add empty one just to show it's been read
+                $ship->enhancementOptions[] = array('NONE','-', 0,0,0,0); //[ID,readableName,numberTaken,limit,price,priceStep]
+            }
+            foreach($shipEnhancements as $entry){
+                $ship->enhancementOptions[] = array($entry[0],$entry[2], $entry[1],0,0,0);
+            }
+
+            Enhancements::addEnhancementSystems($ship);
+        }
+    } //endof function getEnhancementsForShips
+
+
     private function getEnhencementsForShip($shipID){
 	$toReturn = array();
 	$stmt = $this->connection->prepare( //enhname will be used for info tooltip!
@@ -2651,6 +2895,13 @@ class DBManager
 					if ($targetShip === null) continue; //shipid not in this gamedata (eg. Chameleon phantom sheets, which use negative ids)
 					$targetSystem = $targetShip->getSystemById($systemid);
 					if ($targetSystem === null) continue;
+
+					//Defence in depth: the line below is `new $type(...)` on a string read
+					//straight out of the database, so a bad row would be arbitrary class
+					//instantiation on every load of this game. Every write path validates
+					//before storing (see PreBattleDamage::isValidCriticalType); this guards
+					//rows that are already there.
+					if (!class_exists($type) || !is_subclass_of($type, 'Critical')) continue;
 
 					$crit = new $type($id, $shipid, $systemid, $type, $turn, $turnEnd);
 					$crit->param = $param;
@@ -2934,8 +3185,12 @@ class DBManager
         }	    
 
 
+		//Enhancement info used to be read HERE. It moved UP, to getEnhancementsForShips, called
+		//from getTacShips before the criticals/damage queries - an enhancement may mount systems
+		//and those systems have to exist before their rows are read. See that method.
 		//get enhancement info - optimization: single query for all ships
-		$allEnhancements = $this->getEnhancementsForGame($gamedata->id);
+		/*
+        $allEnhancements = $this->getEnhancementsForGame($gamedata->id);
 		
 		foreach ($gamedata->ships as $ship){
              $shipEnhancements = isset($allEnhancements[$ship->id]) ? $allEnhancements[$ship->id] : array();
@@ -2947,7 +3202,8 @@ class DBManager
 				$ship->enhancementOptions[] = array($entry[0],$entry[2], $entry[1],0,0,0);
 			}
 		}
-		
+        */
+
 		//get individual notes for systems - optimization: single query
         $allNotes = $this->getIndividualNotesForGame($gamedata, $fetchTurn);
 

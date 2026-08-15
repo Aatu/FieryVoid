@@ -94,6 +94,7 @@ const HealthBar = styled.div`
     height: 16px;
     box-sizing: border-box;
     background-color: black;
+    cursor: ${props => props.$clickable ? 'pointer' : 'default'};
     color: ${props => props.$health === 0 ? 'transparent' : 'white'};
     font-family: arial;
     font-size: 11px;
@@ -126,6 +127,7 @@ const HealthBar = styled.div`
 const HealthText = styled.div`
     z-index: 1;
 `;
+
 
 
 
@@ -238,6 +240,32 @@ class FighterIcon extends React.Component {
         }, 300); // Clear touch active after giving click events time to fire/be ignored
     }
 
+    /* Pre-battle damage (PREBATTLE_DAMAGE_PLAN.md §5.2): the health bar of a BOUGHT
+       lobby flight opens the synthetic per-ordinal fighter editor. stopPropagation keeps
+       it clear of the fighter hover/long-press handlers on the card around it. */
+    canApplyPreBattleDamage() {
+        const { ship } = this.props;
+        //Closed once the fleet is readied - it has been POSTed by then, so anything
+        //authored afterwards would never be submitted. Same gate as the ship and mine
+        //editors (SystemInfoButtons), asked of gamedata so all three agree.
+        const committed = window.gamedata
+            && typeof gamedata.fleetIsCommitted === 'function' && gamedata.fleetIsCommitted();
+
+        return isLobby() && !committed && Boolean(ship) && ship.userid != 0 && Boolean(ship.flight);
+    }
+
+    onHealthBarClick(event) {
+        if (!this.canApplyPreBattleDamage()) return;
+        event.stopPropagation();
+        event.preventDefault();
+
+        window.uiEvents.relay('FighterDamageClicked', {
+            ship: this.props.ship,
+            fighter: this.props.fighter,
+            element: event.currentTarget
+        });
+    }
+
     render() {
         const { ship, fighter } = this.props;
 
@@ -271,12 +299,37 @@ class FighterIcon extends React.Component {
             overlay = <OverlayLabel $color="#ff5252">CUT OFF</OverlayLabel>;
         }
 
+        /* The lobby draws ONE fighter card for the whole flight (a flight there is one
+           sample fighter plus a number), and that card is FIGHTER 1 — so its bar reads
+           fighter 1's structure, not the flight's total (user report 2026-08-08: a total
+           of "48 / 48" on a card labelled like a single craft reads as a bug). The
+           flight-wide figure is still shown, in the place it means something: the caption
+           of the per-ordinal damage menu the bar opens.
+           Everything else — game.php, replay, the store blueprint on the left — keeps its
+           own per-fighter reading, which is what this already was. */
+        const preBattle = this.canApplyPreBattleDamage();
+
+        const barHealth = preBattle
+            ? (battleDamage.fighterHealth(ship, 1) / fighter.maxhealth) * 100
+            : getStructureLeft(ship, fighter);
+        const barText = preBattle
+            ? `${battleDamage.fighterHealth(ship, 1)} / ${fighter.maxhealth}`
+            : `${fighter.maxhealth - damageManager.getDamage(ship, fighter)} / ${fighter.maxhealth}`;
+
         return (
             <FighterIconContainer $docked={docked} onMouseOver={this.onSystemMouseOver.bind(this)} onMouseOut={this.onSystemMouseOut.bind(this)} onTouchStart={this.onFighterTouchStart.bind(this)} onTouchMove={this.onFighterTouchMove.bind(this)} onTouchEnd={this.onFighterTouchEnd.bind(this)} onTouchCancel={this.onFighterTouchCancel.bind(this)}>
                 <FadedContent $destroyed={destroyed} $img={window.AssetManager.getSmartImagePath(fighter.iconPath)}>
                     <Container>{toIcons(ship, fighter, getFwdSystems(fighter), destroyed)}</Container>
                     <ContainerSystems>{toIcons(ship, fighter, getAftSystems(fighter), destroyed)}</ContainerSystems>
-                    <HealthBar $health={getStructureLeft(ship, fighter)} $criticals={hasCriticals(fighter)} $criticalsBenign={hasOnlyLaunchedThisTurn(fighter)} $docked={docked}><HealthText>{fighter.maxhealth - damageManager.getDamage(ship, fighter)} / {fighter.maxhealth}</HealthText></HealthBar>
+                    <HealthBar
+                        $health={barHealth}
+                        $criticals={hasCriticals(fighter)}
+                        $criticalsBenign={hasOnlyLaunchedThisTurn(fighter)}
+                        $docked={docked}
+                        $clickable={preBattle}
+                        title={preBattle ? "Apply pre-battle damage to this flight" : undefined}
+                        onClick={this.onHealthBarClick.bind(this)}
+                    ><HealthText>{barText}</HealthText></HealthBar>
                 </FadedContent>
                 {overlay}
             </FighterIconContainer>

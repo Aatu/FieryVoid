@@ -52,6 +52,9 @@ class ChoukaBrimstoneHeavyOSATAM extends OSAT
 
 		$this->addPrimarySystem(new Structure(4, 60));
 
+		//Block some enhancements for OSAT units when bought
+		Enhancements::nonstandardEnhancementSet($this, 'OSAT');
+
 			$this->hitChart = array(
                 0=> array(
 					6 => "Structure",

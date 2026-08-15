@@ -142,6 +142,8 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
         <script src="client/criticals.js"></script>
         <script src="client/damage.js"></script>
         <script src="client/systems.js"></script>
+        <script src="client/battleDamage.js"></script>
+        <script src="client/savedFleets.js"></script>
         <script src="client/power.js"></script>
         <script src="client/movement.js"></script>
         <script src="client/mathlib.js"></script>
@@ -369,12 +371,14 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 
 
             // ✅ Select All / None Tier checkboxes + toggle customs
+            // Every text filter, so the three reset paths below cannot forget one.
+            var shipFilterFields = "#isdFilter, #nameFilter, #costFilter";
+
             $('.tier-select-all').on('click', function () {
                 $('.tier-filter').prop('checked', true);
                 $('#toggleCustom').prop('checked', true).trigger('change');
-                $('#customSelect').val('showCustom'); // ✅ reset custom dropdown to Show Customs                
-                $('#isdFilter').val('');
-                $('#nameFilter').val('');
+                $('#customSelect').val('showCustom'); // ✅ reset custom dropdown to Show Customs
+                $(shipFilterFields).val('');
                 gamedata.applyCustomShipFilter();
                 updateTierFilter();
             });
@@ -382,8 +386,7 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
             $('.tier-select-none').on('click', function () {
                 $('.tier-filter').prop('checked', false);
                 $('#toggleCustom').prop('checked', false).trigger('change');
-                $('#isdFilter').val('');
-                $('#nameFilter').val('');
+                $(shipFilterFields).val('');
                 gamedata.applyCustomShipFilter();
                 updateTierFilter();
             });
@@ -395,15 +398,15 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
                 $(this).val(val);
             });
 
-            // Apply filter only when Enter key is pressed
-            $("#isdFilter").on("keypress", function (e) {
-                if (e.which === 13) {
-                    gamedata.applyCustomShipFilter();
-                }
+            // Same treatment for Cost - digits only, 5 is plenty for any point value
+            $("#costFilter").on("input", function () {
+                let val = $(this).val().replace(/\D/g, '');
+                if (val.length > 5) val = val.slice(0, 5);
+                $(this).val(val);
             });
 
-            // Apply filter only when Enter key is pressed (for consistency)
-            $("#nameFilter").on("keypress", function (e) {
+            // Apply filter only when Enter key is pressed
+            $("#isdFilter, #nameFilter, #costFilter").on("keypress", function (e) {
                 if (e.which === 13) {
                     gamedata.applyCustomShipFilter();
                 }
@@ -411,9 +414,40 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 
             // Reset filters when clicking "Reset Filters"
             $(".resetFilters").on("click", function () {
-                $("#isdFilter").val('');
-                $("#nameFilter").val('');
+                $(shipFilterFields).val('');
                 gamedata.applyCustomShipFilter();
+            });
+
+            /* Fleet Builder points cap (rendered only in a fleetTest lobby, so both
+               selectors come back empty and these binds are no-ops elsewhere).
+               gamedata.builderMaxPoints is the ONE piece of state: null = unlimited.
+               Everything downstream reads it through gamedata.getMaxPoints(). */
+            $('#unlimitedPointsToggle').on('change', function () {
+                if ($(this).is(':checked')) {
+                    gamedata.builderMaxPoints = null;
+                } else {
+                    var typed = parseInt($('#maxPointsInput').val(), 10);
+                    if (isNaN(typed) || typed < 0) {
+                        typed = 3500;
+                        $('#maxPointsInput').val(typed);
+                    }
+                    gamedata.builderMaxPoints = typed;
+                }
+                gamedata.calculateFleet();
+            });
+
+            $('#maxPointsInput').on('input', function () {
+                var typed = parseInt($(this).val(), 10);
+                //A blank/part-typed field keeps the last good cap rather than briefly
+                //reading as 0 and turning the whole fleet unaffordable.
+                if (isNaN(typed) || typed < 0) return;
+                gamedata.builderMaxPoints = typed;
+                gamedata.calculateFleet();
+            });
+
+            $('#maxPointsInput').on('blur', function () {
+                if (gamedata.builderMaxPoints === null) return;
+                $(this).val(gamedata.builderMaxPoints);
             });
 
             // Optional: initialize custom ship visibility
@@ -739,19 +773,34 @@ $optionsUsed = '';
                     <span class="clickable tier-select-none no-filters-link">No Filters</span>
                     <span class="filter-pipe-separator">|</span>  
 
+                    <span class="filter-by-text">Filter by:</span>
+
                     <label class="name-filter-label-style">
-                        <span class="filter-by-name-text">Filter by Ship Name:</span>
+                        <span class="filter-by-name-text">Name</span>
                         <input type="text" id="nameFilter" value="" class="name-input-style">
                     </label>
-                    <!--<span class="filter-pipe-separator">|</span>-->
+
+                    <!-- Cost filter: hides anything costing MORE than the figure typed. -->
+                    <label class="cost-filter-label-style">
+                        <span class="filter-by-cost-text">Cost</span>
+                        <input type="text" id="costFilter" value="" class="cost-input-style"
+                               inputmode="numeric" pattern="[0-9]*">
+                    </label>
 
                     <label class="isd-filter-label-style">
-                        <span class="filter-by-isd-text">Filter by ISD:</span>
-                        <input type="text" id="isdFilter" value="" class="isd-input-style">
-                        <span class="clickable resetFilters reset-filters-link-style">Reset Name/ISD</span>
+                        <span class="filter-by-isd-text">ISD</span>
+                        <input type="text" id="isdFilter" value="" class="isd-input-style"
+                               inputmode="numeric" pattern="[0-9]*">
                     </label>
+
+                    <!-- Outside the ISD <label> on purpose: a span inside a label is part of
+                         that label's hit area, so clicking Reset also focused the ISD box. -->
+                    <span class="clickable resetFilters reset-filters-link-style">Reset Filters</span>
                 </div>
-                <div>
+                <!-- points-readout is a flex row: these five pieces are different font
+                     sizes (and the checkbox carries base.css's global 2px nudge), so they
+                     are centred on the row rather than left to find a common baseline. -->
+                <div class="points-readout">
                     <!--<span class="remaining-points-container">
                         <span class="panelsmall points-bracket-style">(</span>
                         <span class="panelsmall remaining">0</span><span class="panelsmall remaining-points-units">pts left</span>
@@ -759,7 +808,20 @@ $optionsUsed = '';
                     </span>-->
                     <span class="panelsubheader current">0</span>
                     <span class="panelsubheader">/</span>
-                    <span class="panelsubheader max">0</span><span class="panelsubheader max-points-units">pts</span>
+                    <span class="panelsubheader max">0</span><?php if ($isFleetTest): ?>
+                    <!-- Fleet Builder only. The slot itself is always unlimited server-side,
+                         so this optional cap is purely a client-side yardstick: it drives the
+                         points readout, the affordability checks and the Fleet Checker's
+                         bracket/hull limits (gamedata.getMaxPoints). It sits exactly where
+                         the word "Unlimited" does, and calculateFleet swaps the two - the
+                         value is NEVER written into .max, which is rewritten on every
+                         recalculation and would eat the field mid-keystroke. -->
+                    <input type="number" id="maxPointsInput" class="max-points-input" value="3500"
+                           min="0" step="50" style="display:none" aria-label="Maximum fleet points"><?php endif; ?><span class="panelsubheader max-points-units">pts</span><?php if ($isFleetTest): ?>
+                    <input type="checkbox" id="unlimitedPointsToggle" class="yellow-tick unlimited-points-toggle"
+                           checked title="Unlimited points - untick to build against a fixed limit"
+                           aria-label="Unlimited points">
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -783,25 +845,49 @@ $optionsUsed = '';
 
 
         <div class="fleet-loading-container">
-            <label class="fleet-id-label-container">
-                <span class="Load-Fleet-by-ID">Load Fleet by #ID:</span>
-                <input type="text" id="fleetIdInput" value="" class="fleetIdInput">
-            </label>
+            <!-- A bare <input> gave phone keyboards a "Next" action key, because the page has
+                 more focusable fields after it (the chat panel), so pressing it moved focus
+                 there instead of firing the keydown handler and the fleet never loaded.
+                 The <form> is what actually fixes it: an input inside its OWN single-field
+                 form gets implicit submission, so the action key becomes Go/Enter rather than
+                 Next — no submit button is needed for that (HTML implicit submission), and
+                 there deliberately isn't one. enterkeyhint labels the key, inputmode/pattern
+                 bring up the numeric pad. -->
+            <form class="fleet-id-form" id="fleetIdForm" action="#" onsubmit="return false;">
+                <label class="fleet-id-label-container">
+                    <span class="Load-Fleet-by-ID">Load Fleet by #ID:</span>
+                    <input type="text" id="fleetIdInput" value="" class="fleetIdInput"
+                           inputmode="numeric" pattern="[0-9]*" enterkeyhint="go"
+                           autocomplete="off" aria-label="Load fleet by ID">
+                </label>
+            </form>
 
             <!-- Custom Saved Fleet Dropdown -->
             <div class="saved-fleet-wrapper">
                 <div id="fleetDropdownButton" class="fleet-dropdown-btn">
-                    Load a Saved Fleet
+                    LOAD A FLEET
                 </div>
                 <div id="fleetDropdownList" class="fleet-dropdown-list">
                     <!-- populated dynamically -->
                 </div>
             </div>
 
+            <!-- Second SAVE FLEET, beside the loader (the other one is at the bottom of
+                 the buy panel, a long scroll away on a phone). Same .savebutton hook, so
+                 the single handler bound at the top of this file drives both.
+                 ⚠️ NO `btn` class, deliberately — .readybutton-top beside it has none
+                 either. gamesNew.css is linked AFTER lobby.css, and its `.btn` rule
+                 (border: none; display: inline-block) has the same specificity as
+                 `.savebutton-top`, so it WON: this button lost its border and its
+                 inline-flex centring while its twin at the bottom of the buy panel, which
+                 pairs `.btn` with the later `.btn-primary-lobby`, kept both. -->
+            <span class="savebutton savebutton-top">SAVE FLEET</span>
+
             <?php if(!$isFleetTest): ?>
             <span class="readybutton readybutton-top">READY</span>
             <?php endif; ?>
         </div>
+
 
 
     </div>
@@ -841,6 +927,7 @@ $optionsUsed = '';
         });
 
         const fleetInput = document.getElementById("fleetIdInput");
+        const fleetIdForm = document.getElementById("fleetIdForm");
 
         // Sanitize input on each keystroke: allow only digits
         fleetInput.addEventListener("input", function() {
@@ -848,16 +935,30 @@ $optionsUsed = '';
             this.value = this.value.replace(/\D/g, "");
         });
 
-        // Trigger load on Enter key
+        function submitFleetId() {
+            const fleetId = fleetInput.value.trim();
+            if (fleetId === "" || isNaN(fleetId)) {
+                window.confirm.fleetNotice("Enter the numeric ID of the fleet you want to load.");
+                return;
+            }
+            fleetInput.blur();   // dismiss the on-screen keyboard before the dialog opens
+            gamedata.loadSavedFleetById(parseInt(fleetId, 10));
+        }
+
+        /* The form submit is the path that phone keyboards actually take (their GO key
+           submits the form rather than emitting an Enter keydown), and it is also what the
+           Load button fires. The keydown handler stays for desktop Enter and for any
+           keyboard that emits Enter without submitting - submitFleetId is idempotent, and
+           preventDefault stops the two firing twice for one press. */
+        fleetIdForm.addEventListener("submit", function(event) {
+            event.preventDefault();
+            submitFleetId();
+        });
+
         fleetInput.addEventListener("keydown", function(event) {
             if (event.key === "Enter") {
                 event.preventDefault();
-                const fleetId = this.value.trim();
-                if (fleetId !== "" && !isNaN(fleetId)) {
-                    gamedata.loadSavedFleetById(parseInt(fleetId, 10));
-                } else {
-                    console.warn("Please enter a valid numeric Fleet ID.");
-                }
+                submitFleetId();
             }
         });
 

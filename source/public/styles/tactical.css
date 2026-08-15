@@ -677,6 +677,14 @@ body {
     left: 416px;
 }
 
+/* Every tab in this row is absolutely positioned with an explicit `left`, so a new one
+   with none defaults to left:auto and lands ON TOP of #logTab. SAVE FLEET is the
+   right-most tab, one 104px step (100px wide + 4px gap) past DECLARATIONS.
+   Hidden by savedFleets.refreshSavePanel when the viewer has no units in the game. */
+#fleetSaveTab.logUiEntry {
+    left: 520px;
+}
+
 #declarationsContainer {
     overflow-y: scroll;
     position: absolute;
@@ -905,6 +913,53 @@ only screen and (max-height: 500px) and (orientation: landscape) {
 #gameinfo.logPanelEntry {
     overflow-x: hidden;
     overflow-y: scroll;
+}
+
+/* Save Current Fleet panel (PREBATTLE_DAMAGE_PLAN.md §7.3). Tokens only - see
+   styles/tokens.css, which is the ONLY :root block on the page. */
+#logcontainer #fleetsave {
+    height: 100%;
+    width: 100%;
+    z-index: 10001;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+#fleetSavePanel {
+    padding: 8px 12px;
+    font-size: 13px;
+    font-style: normal;
+    color: var(--fv-text);
+    max-width: 640px;
+}
+
+#fleetSavePanel p {
+    margin: 0 0 8px 0;
+    line-height: 1.4;
+}
+
+#fleetSaveSummary {
+    color: var(--fv-text-dim);
+    font-size: 12px;
+}
+
+#fleetSaveButton {
+    font-size: 13px;
+    cursor: pointer;
+    padding: 4px 12px;
+    border: 1px solid var(--fv-line-scs);
+    background: var(--fv-line);
+    border-radius: var(--fv-radius-chrome);
+    color: var(--fv-text);
+}
+
+#fleetSaveButton:hover {
+    background: var(--fv-card-hover);
+}
+
+#fleetSaveButton:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
 }
 
 .combatTurn {
@@ -1539,6 +1594,11 @@ only screen and (max-height: 500px) and (orientation: landscape) {
         width: 15%;
     }
 
+    #logUI #fleetSaveTab {
+        left: 75%;
+        width: 15%;
+    }
+
     #logUI #expandBotPanel {
         right: 0px;
         left: auto;
@@ -1683,6 +1743,11 @@ only screen and (max-height: 500px) and (orientation: landscape) {
 
     #logUI #declarationsTab {
         left: 60%;
+        width: 15%;
+    }
+
+    #logUI #fleetSaveTab {
+        left: 75%;
         width: 15%;
     }
 

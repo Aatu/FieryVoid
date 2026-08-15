@@ -18,6 +18,10 @@ const SystemInfoTooltip = styled(Tooltip)`
     opacity: ${props => props.opacity || 0.8};
     border: 1px solid #496791;
     padding-bottom: 3px;
+    /*the lobby mounts #systemInfoReact inside a pointer-events: none fixed overlay
+      (same as #shipWindowsReact) - this menu is interactive, so it must opt back in.
+      No-op in game.php, where the mount point has no pointer-events override.*/
+    pointer-events: auto;
 `;
 
 const Entry = styled(TooltipEntry)`

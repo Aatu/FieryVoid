@@ -364,11 +364,11 @@ window.ajaxInterface = {
         gamedata.goToWaiting();
     },
 
-    submitSavedFleet: function submitSavedFleet(fleetname, isPublic, callback) {
+    submitSavedFleet: function submitSavedFleet(fleetname, isPublic, callback, opts) {
         if (ajaxInterface.submiting) return;
         ajaxInterface.submiting = true;
         // Build the payload using your existing function
-        const saveData = ajaxInterface.constructSavedShips(fleetname, isPublic);
+        const saveData = ajaxInterface.constructSavedShips(fleetname, isPublic, opts);
 
         // Ensure ships is a JSON string
         if (typeof saveData.ships !== 'string') {
@@ -385,7 +385,7 @@ window.ajaxInterface = {
 
         if (!Array.isArray(shipsArray) || shipsArray.length === 0) {
             ajaxInterface.submiting = false;
-            window.confirm.error("You must have at least one ship before saving!", function () { });
+            window.confirm.fleetNotice("You must have at least one unit before saving a fleet.");
             return; // stop execution
         }
 
@@ -419,36 +419,179 @@ window.ajaxInterface = {
         });
     },
 
-    constructSavedShips: function constructSavedShips(fleetname, isPublic) {
+    /* Is this unit eligible to be written into a saved fleet?
+       Lobby: everything the player owns. game.php ("Save Current Fleet", PREBATTLE_DAMAGE_PLAN
+       §7.2): the SURVIVORS only, minus the mid-battle artefacts that make no sense in a fleet
+       list - destroyed/docked units, launched-fighter "Split" rows, spent mines and Chameleon
+       phantom sheets (which use NEGATIVE ids). */
+    isSaveableFleetShip: function isSaveableFleetShip(ship) {
+        if (!ship) return false;
+        if (ship.userid !== gamedata.thisplayer) return false;
+
+        /* TERRAIN is scenery, not fleet. Map terrain belongs to userid -5 and is already
+           excluded by the ownership test above, but terrain a player placed themselves is
+           bought into their own slot and rides their team, so nothing else here catches it -
+           an asteroid field would ride along in every saved fleet and be re-bought in the
+           next lobby. Excluded on BOTH pages: a fleet list is ships. (user report 2026-08-08) */
+        if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) return false;
+
+        //lobby: no battle state to filter on
+        if (gamedata.gamephase === -2) return true;
+
+        if (ship.id < 0) return false;                                  //Chameleon phantom sheet
+        if (ship.removed) return false;                                 //docked into a hangar
+        if (shipManager.isDestroyed(ship)) return false;                //dead, or a flight with no survivors
+        if (ship.mine && ship.spawned !== -1) return false;             //mine laid during the battle
+
+        return true;
+    },
+
+    /* Collapse the saveable units into the ROWS a fleet list holds.
+       Everything is one row per unit, EXCEPT mines in a live game: the lobby buys them in
+       bulk (one object carrying bulkBuy = N) and BuyingGamePhase mints N separate ships
+       from it, so saving a battle's survivors one row at a time reloaded a fleet of ten
+       mines as ten separate units (user report 2026-08-08). Regrouping by class puts them
+       back in the shape they were bought in - and each copy's structure damage rides
+       along as its ordinal in the `mne` bucket.
+
+       Grouped only in a live game: in the lobby they are ALREADY bulk rows, and merging
+       two separate purchases of the same class would silently fuse two lines of the
+       player's fleet list into one.
+
+       Returns [{ ship, members }] - `ship` is the representative (the first, whose
+       enhancements/ammo/name the row takes), `members` every unit it stands for. */
+    groupSaveableShips: function groupSaveableShips(ships) {
+        var groups = [];
+        var mineGroups = {};
+        var groupMines = window.gamedata && gamedata.gamephase !== -2;
+
+        for (var i = 0; i < ships.length; i++) {
+            var ship = ships[i];
+
+            if (groupMines && ship.mine) {
+                var key = ship.phpclass;
+                if (!mineGroups[key]) {
+                    mineGroups[key] = { ship: ship, members: [] };
+                    groups.push(mineGroups[key]);
+                }
+                mineGroups[key].members.push(ship);
+                continue;
+            }
+
+            groups.push({ ship: ship, members: [ship] });
+        }
+
+        return groups;
+    },
+
+    /* ⭐ What a fleet COSTS, as one number - the figure written to tac_saved_list.points,
+       which is both what the saved-fleet dropdown shows and what the affordability check
+       on load compares against.
+
+       Mines are not priced like other units: a fleet carrying any pays a flat 100pt
+       premium to lay a minefield at all, plus 10% for every mine CLASS beyond the first.
+       This function is the third statement of that rule, and the three must agree -
+       gamedata.fleetCost() (the lobby's live buy-panel total) and fleetList.js (a live
+       game's fleet list) are the other two. Saving used to sum bare pointCosts, so a
+       mined fleet always listed for less than it actually cost to buy.
+
+       A BULK row (mines, and OSATs since 2026-08-10) is N units at pointCost each. Keyed
+       off bulkBuy alone rather than .mine: in a live game every ship reports 1 (the class
+       default, never persisted), and its mines are already separate ships. */
+    fleetPointsTotal: function fleetPointsTotal(ships) {
+        var points = 0;
+        var minePoints = 0;
+        var mineClasses = [];
+
+        for (var i = 0; i < ships.length; i++) {
+            var lship = ships[i];
+            var cost = lship.pointCost * (parseInt(lship.bulkBuy, 10) || 1);
+
+            if (lship.mine) {
+                minePoints += cost;
+                if (mineClasses.indexOf(lship.mineType) === -1) mineClasses.push(lship.mineType);
+            } else {
+                points += cost;
+            }
+        }
+
+        if (minePoints > 0) {
+            points += Math.round((100 + minePoints) * (1 + ((mineClasses.length - 1) * 0.10)));
+        }
+
+        return points;
+    },
+
+    /* opts (all optional):
+         includeTransient : also save one-turn / self-expiring criticals (game.php's
+                            "save temporary critical effects" checkbox, off by default).
+       An options object rather than a positional flag, matching loadSavedFleet, so a
+       future third choice does not re-sign this at every call site. */
+    constructSavedShips: function constructSavedShips(fleetname, isPublic, opts) {
 
         var saveships = Array();
-        var points = 0;
+        var saveable = [];
+        var priced = [];
+
+        /* ONE pass, one isSaveableFleetShip call per ship: it is the filter for BOTH the
+           units written and the points figure, and on game.php it walks every system of
+           every ship (shipManager.isDestroyed).
+           gamedata.selectedSlot is a LOBBY concept and is null in game.php, which used to
+           make every ship fail the points filter and save the fleet at 0 points - so there
+           the saveable set simply IS the fleet. Base pointCost only: damage is not a
+           discount (D2). */
+        var slot = gamedata.selectedSlot;
+        var bySlot = (slot !== null && slot !== undefined);
 
         for (var i in gamedata.ships) {
             var lship = gamedata.ships[i];
-            if (lship.slot != gamedata.selectedSlot) continue;
-            points += lship.pointCost;
+            if (!ajaxInterface.isSaveableFleetShip(lship)) continue;
+            saveable.push(lship);
+
+            if (bySlot && lship.slot != slot) continue;
+            priced.push(lship);
         }
 
-        for (var i in gamedata.ships) {
-            var ship = gamedata.ships[i];
+        //Costed in one go rather than per ship: the mine premium is a FLEET-level figure.
+        var points = ajaxInterface.fleetPointsTotal(priced);
+
+        var groups = ajaxInterface.groupSaveableShips(saveable);
+        for (var g = 0; g < groups.length; g++) {
+            var ship = groups[g].ship;
+            var members = groups[g].members;
             var newShip = {
                 'phpclass': ship.phpclass,
                 'userid': ship.userid,
                 'team': ship.team,
                 'id': ship.id,
                 'name': ship.name,
-                'pointCostEnh': Math.round(ship.pointCostEnh),
-                'pointCostEnh2': Math.round(ship.pointCostEnh2)
+                /* ⚠️ NOT rounded. Not every enhancement is priced in whole points - MINE_DMG
+                   is 0.5 per level - while every figure that PRICES a fleet (fleetPointsTotal,
+                   gamedata.fleetCost) sums the real per-unit cost. Rounding here, and only
+                   here, is what made saved list #96 list at 2949 and reload at 2952: seven
+                   mines each quietly gained half a point and the mine premium multiplied the
+                   gap. Both enhvalue columns are DECIMAL so the fraction survives the round
+                   trip - see db/fractionalEnhancementValue.sql. */
+                'pointCostEnh': ship.pointCostEnh,
+                'pointCostEnh2': ship.pointCostEnh2
             };
 
             if (ship.bulkBuy !== undefined) newShip.bulkBuy = ship.bulkBuy;
+            //A regrouped set of live mines is bought back as one bulk of that many.
+            if (members.length > 1) newShip.bulkBuy = members.length;
 
             newShip.systems = Array();
 
             if (ship.userid === gamedata.thisplayer) {
 
                 var systems = Array();
+                //Saving OUT of a live game records the SURVIVING flight size (D8): a lost
+                //fighter is expressed by a smaller flight, not by a wreck riding along. In
+                //the lobby every fighter is alive, so the two agree.
+                var saveFlightSize = !ship.flight ? 0
+                    : ((window.battleDamage && gamedata.gamephase !== -2)
+                        ? battleDamage.survivingFlightSize(ship)
+                        : ship.flightSize);
 
                 for (var a in ship.systems) {
                     var system = ship.systems[a];
@@ -465,7 +608,7 @@ window.ajaxInterface = {
                                 for (var index in fightersystem.missileArray) {
                                     var amount = fightersystem.missileArray[index].amount;
                                     ammoArray[index] = amount;
-                                    newShip.pointCostEnh2 += fightersystem.missileArray[index].cost * amount * ship.flightSize;
+                                    newShip.pointCostEnh2 += fightersystem.missileArray[index].cost * amount * saveFlightSize;
                                 }
                             }
 
@@ -494,11 +637,24 @@ window.ajaxInterface = {
                 newShip.systems = systems;
 
                 if (ship.flight) {
-                    newShip.flightSize = ship.flightSize;
+                    newShip.flightSize = saveFlightSize;
                 }
 
                 //unit enhancements
                 newShip.enhancementOptions = ship.enhancementOptions;
+
+                /* Battle damage & criticals (PREBATTLE_DAMAGE_PLAN.md §6 / §7.2). In the
+                   lobby this is the payload the player authored; in a live game it is
+                   summariseShip's collapse of the battle so far - and for a flight its
+                   ordinals are numbered over the survivors, matching flightSize above. */
+                if (window.battleDamage) {
+                    var damagePayload = (gamedata.gamephase === -2)
+                        ? ship.preBattleDamage
+                        : ajaxInterface.summariseGroup(members, opts);
+                    if (!battleDamage.isEmpty(damagePayload)) {
+                        newShip.preBattleDamage = damagePayload;
+                    }
+                }
 
                 saveships.push(newShip);
             }
@@ -513,6 +669,25 @@ window.ajaxInterface = {
         };
 
         return saveData;
+    },
+
+    /* The wire-format payload for one ROW of the fleet list. A single unit is just
+       summariseShip; a REGROUPED set of live mines has each copy's structure damage
+       renumbered as its ordinal in the bulk, matching how BuyingGamePhase writes the
+       rows back out (one tac_ship per ordinal). */
+    summariseGroup: function summariseGroup(members, opts) {
+        if (!members || members.length === 0) return {};
+        if (members.length === 1) return battleDamage.summariseShip(members[0], opts);
+
+        var mne = {};
+        for (var i = 0; i < members.length; i++) {
+            var payload = battleDamage.summariseShip(members[i], opts);
+            //summariseShip gives a live mine its damage as ordinal 1 of a bulk of one.
+            var entry = payload && payload.mne && payload.mne['1'];
+            if (entry && entry.d) mne[String(i + 1)] = { d: entry.d };
+        }
+
+        return Object.keys(mne).length ? { mne: mne } : {};
     },
 
     getSavedFleets: function getSavedFleets(callback) {
@@ -539,15 +714,27 @@ window.ajaxInterface = {
             });
     },
 
-    loadSavedFleet: function loadSavedFleet(listId, callback) {
+    /* opts (all optional) - an OBJECT, not positional booleans, so a future third kind of
+       saved state does not re-sign the function at every call site:
+         includeDamage    : load the fleet's saved battle damage      (default true)
+         includeCriticals : load the fleet's saved critical effects   (default true)
+       Legacy shape loadSavedFleet(listId, callback) still works. */
+    loadSavedFleet: function loadSavedFleet(listId, opts, callback) {
+        if (typeof opts === 'function') { callback = opts; opts = {}; }
+        opts = opts || {};
+
         if (ajaxInterface.submiting) return;
         ajaxInterface.submiting = true;
+
+        var body = { listid: listId };
+        if (opts.includeDamage !== undefined) body.includeDamage = Boolean(opts.includeDamage);
+        if (opts.includeCriticals !== undefined) body.includeCriticals = Boolean(opts.includeCriticals);
 
         ajaxInterface.ajaxWithRetry({
             type: 'POST', // POST to match PHP JSON reading
             url: 'loadSavedFleet.php',
             contentType: 'application/json; charset=utf-8',
-            data: JSON.stringify({ listid: listId }),
+            data: JSON.stringify(body),
             dataType: 'json',
             cache: false,
             timeout: 15000
@@ -564,6 +751,34 @@ window.ajaxInterface = {
             });
     },
 
+
+    /* Per-system critical CATALOGUE + cascade traits for one ship class, for the lobby's
+       pre-battle damage editor (PREBATTLE_DAMAGE_PLAN.md §11.2).
+
+       Deliberately NOT routed through ajaxInterface.submiting: that flag serialises the
+       page's ONE user-initiated request at a time, and this is a background lookup that
+       fires while a menu opens - sharing the flag would make a catalogue fetch swallow a
+       fleet load, or vice versa. battleDamage.loadCatalogue does its own de-duplication
+       per ship class. The callback always fires, with {success:false} on failure, so the
+       caller can cache the miss and stop asking. */
+    getSystemCriticals: function getSystemCriticals(phpclass, flightSize, callback) {
+        ajaxInterface.ajaxWithRetry({
+            type: 'POST',
+            url: 'systemCriticals.php',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ phpclass: phpclass, flightSize: flightSize || 1 }),
+            dataType: 'json',
+            cache: false,
+            timeout: 15000
+        })
+            .done(function (response) {
+                callback(response || { success: false });
+            })
+            .fail(function (xhr, textStatus, errorThrown) {
+                console.error("Failed to load system criticals:", textStatus, errorThrown);
+                callback({ success: false });
+            });
+    },
 
     changeFleetPublic: function changeFleetPublic(id, callback) {
         if (ajaxInterface.submiting) return;
@@ -695,8 +910,15 @@ window.ajaxInterface = {
                 'slot': ship.slot,
                 'id': ship.id,
                 'name': ship.name,
-                'pointCostEnh': Math.round(ship.pointCostEnh),
-                'pointCostEnh2': Math.round(ship.pointCostEnh2)
+                /* ⚠️ NOT rounded. Not every enhancement is priced in whole points - MINE_DMG
+                   is 0.5 per level - while every figure that PRICES a fleet (fleetPointsTotal,
+                   gamedata.fleetCost) sums the real per-unit cost. Rounding here, and only
+                   here, is what made saved list #96 list at 2949 and reload at 2952: seven
+                   mines each quietly gained half a point and the mine premium multiplied the
+                   gap. Both enhvalue columns are DECIMAL so the fraction survives the round
+                   trip - see db/fractionalEnhancementValue.sql. */
+                'pointCostEnh': ship.pointCostEnh,
+                'pointCostEnh2': ship.pointCostEnh2
             };
 
             if (ship.bulkBuy !== undefined) newShip.bulkBuy = ship.bulkBuy;
@@ -825,6 +1047,14 @@ window.ajaxInterface = {
 
                 //unit enhancements
                 newShip.enhancementOptions = ship.enhancementOptions;
+
+                //Pre-battle damage (PREBATTLE_DAMAGE_PLAN.md §6). Read ONLY by
+                //BuyingGamePhase::process, so this is inert in every other phase.
+                //preBattleAvailable is deliberately NOT sent: it records what a saved fleet
+                //HAD on offer, not what the player chose to load, and must never be written.
+                if (window.battleDamage && !battleDamage.isEmpty(ship.preBattleDamage)) {
+                    newShip.preBattleDamage = ship.preBattleDamage;
+                }
 
                 tidyships.push(newShip);
             }

@@ -2388,6 +2388,7 @@ spl_autoload_register(
                 'powercapacitor' => '/server/model/systems/baseSystems.php',
                 'powerlaser' => '/server/model/weapons/lasers.php',
                 'powermanagemententry' => '/server/model/BaseClasses.php',
+                'prebattledamage' => '/server/model/PreBattleDamage.php',
                 'prefiringgamephase' => '/server/Phase/PreFiringGamePhase.php',
                 'presidentialshuttle' => '/server/model/ships/Shuttle.php',
                 'preyhawk' => '/server/model/ships/drazi/preyhawk.php',

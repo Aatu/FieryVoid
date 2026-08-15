@@ -30,7 +30,32 @@ class ShipSystem {
     public $critRollMod = 0; //penalty tu critical damage roll: positive means crit is more likely, negative less likely (for this system)
     
     protected $possibleCriticals = array();
-	
+
+    /* ⭐ EXTRA criticals a player may AUTHOR on this system in the gamelobby, on top of
+       what its own hit chart ($possibleCriticals above) can roll. A FLAT list of class
+       names — no roll keys, because nothing rolls these:
+
+           protected $preBattleCriticals = array('AmmoExplosion', 'ReducedArcs');
+
+       Why it exists (user request 2026-08-08). Two gaps $possibleCriticals cannot fill:
+         1. effects real battles produce through BESPOKE code and no hit chart lists —
+            AmmoExplosion, OSATThrusterCrit, LimpetBore. They used to be reachable through
+            the editor's "All" switch, back when that offered every storable class in the
+            game; "All" is now a short curated general list
+            (PreBattleDamage::$generalCriticals), so anything system-specific belongs here,
+            on the system it is specific TO.
+         2. FIGHTERS, which have no hit chart at all — see Fighter::$preBattleCriticals.
+
+       ⚠️ Before adding a name, check the engine actually READS that critical in this
+       system's context: `grep -rn 'hasCritical("Foo"' source/server`. Most criticals are
+       scoped — PenaltyToHit and ReducedIniative are read off the ship's C&C, HalfEfficiency
+       off a thruster — so a plausible-looking entry can store a wound that does nothing.
+
+       PROTECTED like $possibleCriticals, and exposed only as the derived list below: these
+       tables must not ride the static ship JSON (the generators json_encode the object) or
+       stripForJson. The lobby gets them from systemCriticals.php. */
+    protected $preBattleCriticals = array('ArmorReduced');
+
     public $primary = false; //is this a core system?
     public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?	
     public $isTargetable = true; //false means it cannot be targeted at all by called shots! - good for technical systems :)
@@ -44,7 +69,62 @@ class ShipSystem {
 	public $hardAdvancedArmor = false; //indicates that system has hardened advanced armor
     
     protected $structureSystem;
+    /* Stays PROTECTED, like $alwaysHideFireOrders and $hideFireOrdersFromEnemies above:
+       a public property here serialises into every raw-embedded weapon object (a
+       launcher's missileArray entries are json_encoded whole, not through stripForJson),
+       so making it public put `survivesStructureDestruction:false` on every ammo entry of
+       every gamedata poll. The gamelobby's damage preview needs it on the STATIC blueprint
+       only, and gets it there through getSurvivesStructureDestruction() +
+       ShipCompactor::annotateSystems - never through live gamedata. */
     protected $survivesStructureDestruction = false;
+
+    /* Does this system stay alive when its structure block is destroyed? Read by
+       ShipCompactor so the lobby's pre-battle damage preview can mirror isDestroyed()'s
+       structure cascade for it (the client's isDestroyed reads a server-computed boolean
+       and never re-derives one). */
+    public function getSurvivesStructureDestruction(){
+        return $this->survivesStructureDestruction;
+    }
+
+    /* Set it from OUTSIDE the class hierarchy - a SETTER rather than a public property,
+       deliberately, so the flag keeps the serialisation properties documented above.
+       Used by BaseShip::addSystem for hulls whose structure blocks are an outer RING
+       around the systems rather than the compartment holding them (the Vree saucers -
+       see $systemsSurviveStructureLoss in ShipClasses.php), where losing a block does not
+       take its systems with it. A subclass that hard-codes `true` (the shield
+       projections) is unaffected - nothing ever sets this to false. */
+    public function setSurvivesStructureDestruction($survives = true){
+        $this->survivesStructureDestruction = (bool)$survives;
+    }
+
+    /* The critical classes this system's hit chart can produce, flattened and deduped.
+       $possibleCriticals stays PROTECTED - only the derived list is exposed, and only for
+       the lobby's pre-battle crit picker (systemCriticals.php -> Manager::getSystemCriticals).
+       Keys of the table are rolls, values are a class name or an array of them. */
+    public function getPossibleCriticalTypes(){
+        $out = array();
+        foreach ($this->possibleCriticals as $value){
+            foreach ((is_array($value) ? $value : array($value)) as $type){
+                if (is_string($type) && $type !== '') $out[$type] = true;
+            }
+        }
+
+        return array_keys($out);
+    }
+
+    /* What the lobby's pre-battle editor may OFFER on this system: the hit chart above
+       PLUS $preBattleCriticals. Kept separate from getPossibleCriticalTypes(), which keeps
+       meaning exactly "what this system's hit chart can roll" - the two questions are
+       different and only one of them is a rules statement. */
+    public function getPreBattleCriticalTypes(){
+        $out = array();
+        foreach ($this->getPossibleCriticalTypes() as $type) $out[$type] = true;
+        foreach ($this->preBattleCriticals as $type){
+            if (is_string($type) && $type !== '') $out[$type] = true;
+        }
+
+        return array_keys($out);
+    }
 	
     protected $parentSystem = null;
     protected $unit = null; //unit on which system is mounted
@@ -78,8 +158,21 @@ class ShipSystem {
 	public $overkillArcStructures = null;
 
 	protected $calledShotBonus = 0;//Some systems, like Aegis Sensor Pod are easier to hit with called shots.
-	protected $active = false;	//Needs to be passed to front end in stripForJson.  Denotes a system being active for any number of purposes / show as boosted	
+	protected $active = false;	//Needs to be passed to front end in stripForJson.  Denotes a system being active for any number of purposes / show as boosted
 	protected $initializeOnLoad	= false; //Runs initialisationUpdate() immediately on page loading, useful for updating tooltips immediately.  Needs passed in strpForJson().
+
+	/*A system MOUNTED BY AN ENHANCEMENT rather than by the hull's constructor (currently only
+	  Extra Tendrils - Enhancements::addEnhancementSystems, which sets this on everything it
+	  creates). It matters for one reason: such a system has NO entry in window.staticShips.
+
+	  That bundle is built per phpclass from a pristine hull (ShipLoader::getShipsByClass, which
+	  applies enhancement OPTIONS but never the enhancements themselves), and the client merges each
+	  system's lean gamedata payload ONTO its blueprint entry, falling back to the payload alone when
+	  there is no entry to merge (SystemFactory.createSystemsFromJson). stripForJson leans on that
+	  merge heavily - it omits maxhealth, armour, location, arcs, displayName, iconPath and the rest,
+	  because the blueprint already has them. With no blueprint, the payload IS the whole system,
+	  so those fields have to be sent explicitly: see addBlueprintFieldsForJson below.*/
+	public $addedByEnhancement = false;
 
 
 
@@ -211,7 +304,33 @@ public function setParentFighter($fighter) {
 
         return $strippedSystem;
     }
-	
+
+	/*The BLUEPRINT half of a system's client-side data - everything the static bundle would have
+	  supplied, which stripForJson deliberately leaves out to keep gamedata polls small. Only ever
+	  called for an $addedByEnhancement system (see that property for why it has no bundle entry);
+	  an ordinary system must keep sending the lean payload.
+
+	  Deliberately an explicit list rather than get_object_vars($this): several properties in scope
+	  here are object references that would recurse ($unit, $structureSystem, $parentSystem) or
+	  tables that must never ride a payload at all ($possibleCriticals / $preBattleCriticals - see
+	  the notes on those). Fields stripForJson has already decided are left alone, so a live value
+	  (a current outputDisplay, an enhancement-modified output) always wins over the static one.*/
+	protected function addBlueprintFieldsForJson($strippedSystem){
+		$blueprintFields = array(
+			'jsClass', 'displayName', 'iconPath', 'imagePath', 'location', 'startArc', 'endArc',
+			'armour', 'maxhealth', 'powerReq', 'outputType', 'outputDisplay', 'data',
+			'boostable', 'boostEfficiency', 'maxBoostLevel', 'preFires', 'canOffLine', 'fighter',
+			'primary', 'isPrimaryTargetable', 'isTargetable', 'hitChartName', 'hideInShipWindow',
+			'forceCriticalRoll', 'advancedArmor', 'hardAdvancedArmor', 'critRollMod',
+			'repairPriority', 'privateRepairOnly', 'structureHomeLocation', 'overkillArcStructures'
+		);
+		foreach ($blueprintFields as $field){
+			if (isset($strippedSystem->$field)) continue; //never clobber what stripForJson already sent
+			$strippedSystem->$field = $this->$field;
+		}
+		return $strippedSystem;
+	}
+
 	public function getCountForCombatValue(){
 		return $this->doCountForCombatValue;
 	}

@@ -40,6 +40,9 @@ class Kirva extends OSAT{
         
         $this->addPrimarySystem(new Structure(4, 25));
 
+        //Block some enhancements for OSAT units when bought
+        Enhancements::nonstandardEnhancementSet($this, 'OSAT');
+
 
 		
 		$this->hitChart = array(

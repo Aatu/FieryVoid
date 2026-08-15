@@ -2470,13 +2470,17 @@ public function getStartLoading()
     protected function damageOneSheet($target, $shooter, $fireOrder, $gamedata, $damage, $forcePrimary = false){
 	    /*find details of shot, proceed to doDamage*/
 
-        /*Flash splash is dealt to the REAL ships sharing the target's hex, and a phantom sits in the
-          same hex as the ship it impersonates - so running this on the mirrored pass would deal the
-          collateral a second time, to real hulls, from one shot. The simulacrum's own sheet is the
-          only thing the phantom pass is allowed to write.*/
-        if($this->damageType=='Flash' && empty($target->chameleonIsPhantom)){ //damage units other than base target
-            $flashDamageAmount = floor($damage/4); //other units on target hex receive 25% of damage dealt to target
-	        $this->doCollateralDamage($target, $shooter, $fireOrder, $gamedata, $flashDamageAmount);
+        $flashDamageAmount = 0; //also read further down, for other fighters in a hit flight - keep it defined on every path
+        if($this->damageType=='Flash'){
+            $flashDamageAmount = (int)round($damage/4, 0, PHP_ROUND_HALF_UP); //other units on target hex receive 25% of damage dealt to target, rounded up from .5
+
+            /*Flash splash is dealt to the REAL ships sharing the target's hex, and a phantom sits in the
+              same hex as the ship it impersonates - so running this on the mirrored pass would deal the
+              collateral a second time, to real hulls, from one shot. The simulacrum's own sheet is the
+              only thing the phantom pass is allowed to write.*/
+            if(empty($target->chameleonIsPhantom)){ //damage units other than base target
+	            $this->doCollateralDamage($target, $shooter, $fireOrder, $gamedata, $flashDamageAmount);
+            }
         }
 
 	    

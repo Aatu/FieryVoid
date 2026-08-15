@@ -53,6 +53,14 @@ window.lobbyEnhancements = {
 			return entry[1] + ": " + choice[1];
 		}
 
+		//Extra Tendrils: numberTaken is a CAPACITY in fives, not a number of tendrils, so the
+		//generic line would read "(2)" where the player bought a 10-capacity pair. Same wording
+		//the server writes into the in-game tooltip (Enhancements::setEnhancementsShip), so the
+		//lobby and the game agree.
+		if (entry[0] === 'SHAD_TEND') {
+			return "Extra Tendrils: " + (count * 5) + " Capacity";
+		}
+
 		return entry[1] + (count > 1 ? " (" + count + ")" : ""); //count in plain brackets, no "x"
 	},
 

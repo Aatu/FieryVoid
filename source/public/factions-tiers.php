@@ -183,9 +183,9 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li><b>Implausible manoeuvring</b> — changing speed faster than the ship you are imitating could manage.</li>
             <li><b>Implausible ELINT</b> — running an ELINT operation the imitated hull has no array for, or spending more EW than its sensors could produce.</li>
             <li><b>Firing the wrong weapon</b> — a shot only looks convincing if the imitated ship mounts a weapon of the same class whose arc covers that shot, and each gun you fire has to be matched by a different one on the simulacrum. Fire more Matter Cannons than it carries and the extra one gives you away. This reveal takes effect at the start of the <i>following</i> turn — your opponent works out the discrepancy after the fact.</li>
-            <li><b>Losing the array</b> — destroyed, powered down or switched off, and the deception ends at once and permanently.</li>
+            <li><b>Losing the array</b> — if Chameleon sensros are destroyed, or switched off, the deception ends at once and permanently.</li>
             <li><b>Ancient sensors</b> — Ancient and Primordial races (Shadows, Vorlons, Kirishiac, Mindriders, Thirdspace) are never fooled at all. If any team fields such a unit, Chameleon ships are revealed to that team from the start of the game.</li>
-            <li>Once revealed, the ship stays revealed to that team for the rest of the game — repairing the array, restoring its power or switching the suite back on will not restore the illusion.</li>
+            <li>Once revealed, the ship stays revealed to that team for the rest of the game — switching the suite back on will not restore the illusion for example.</li>
     </ul>
 <h4 id="centauriwotc" >CENTAURI REPUBLIC (WoTCR)</h4>
     <p>The Centauri fleet from a few hundred years before the show era, representing the Wars of the Centauri Republic (WotCR) period.  
@@ -1527,9 +1527,16 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             e.g. they actually try to intercept an incoming shot.</li>
         <li>Increased power levels are implemented as firing modes, so select this before targeting any enemy ships. Each offensive shot will be fired at the same power level.</li>                                                            
     </ul>
+<h5>Planet-Cracker Beam</h5>
+        <ul>
+<li>The signature weapon of the Vorlon Planet Killer, an Ancient superweapon meant for very specific scenarios rather than normal balanced play. Rather than being aimed at a target, it is activated during the Firing Phase and, once fired, automatically sweeps the four hexes directly ahead of the ship along its current facing.</li>
+        <li>Anything standing in those hexes - friend or foe alike, the beam does not discriminate - is automatically destroyed. This includes every hex of a multi-hex Terrain/Huge unit caught by the sweep, and every fighter of a Flight caught in it, not just one.</li>
+        <li>It cannot be intercepted, ignores jinking and Line of Sight, and always hits.</li>
+        <li>It has an extremely long recharge time, effectively making it usable only once per battle.</li>
+    </ul>
 <h5>Vorlon Primordial Fighters</h5>
         <ul>
-<li>Super Heavy Fighters that use regular hangars, with one Primordial fighter counting as two heavy fighters for fleet design/hangar purposes. 
+<li>Super Heavy Fighters that use regular hangars, with one Primordial fighter counting as two heavy fighters for fleet design/hangar purposes.
             They are treated as rare variant of Heavy Fighters in FV except in Primordial times, where Assault Fighters should be treated as a common availability.</li>
     </ul>
 <h5>Skin Enhancements</h5>

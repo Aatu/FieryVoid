@@ -537,6 +537,18 @@ MicroJumpSystem.prototype.isPosOnSpecialArc = function (shooter, target) {
     return false;
 };
 
+var TrekPhotonTorpKelly = function TrekPhotonTorpKelly(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TrekPhotonTorpKelly.prototype = Object.create(Weapon.prototype);
+TrekPhotonTorpKelly.prototype.constructor = TrekPhotonTorpKelly;
+
+var TrekPhaserKelly = function TrekPhaserKelly(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TrekPhaserKelly.prototype = Object.create(Weapon.prototype);
+TrekPhaserKelly.prototype.constructor = TrekPhaserKelly;
+
 var TrekShieldProjectionKelly = function TrekShieldProjectionKelly(json, ship) {
     ShipSystem.call(this, json, ship);
     this.defensiveType = "none";

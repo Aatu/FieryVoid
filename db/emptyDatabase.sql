@@ -378,7 +378,7 @@ CREATE TABLE `tac_ship` (
   `campaignY` int(11) DEFAULT NULL,
   `campaigngameid` int(11) DEFAULT NULL,
   `slot` int(11) NOT NULL DEFAULT '0',
-  `enhvalue` int(11) NOT NULL DEFAULT '0',
+  `enhvalue` decimal(10,2) NOT NULL DEFAULT '0.00',
   PRIMARY KEY (`id`),
   KEY `gameid` (`tacgameid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=28910 DEFAULT CHARSET=utf8;
@@ -487,7 +487,10 @@ CREATE TABLE `tac_saved_ship` (
   `name` VARCHAR(200) NOT NULL,
   `phpclass` VARCHAR(45) NOT NULL,
   `flightsize` INT(11) NOT NULL DEFAULT 0,
-  `enhvalue` INT(11) NOT NULL DEFAULT 0,
+  `bulkbuy` INT(11) NOT NULL DEFAULT 1,
+  -- DECIMAL, not INT: MINE_DMG is priced at 0.5/level, so a per-unit enhancement cost is
+  -- not always a whole number. See db/fractionalEnhancementValue.sql.
+  `enhvalue` DECIMAL(10,2) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `listid_key` (`listid`),
   CONSTRAINT `fk_ship_list`
@@ -539,6 +542,69 @@ CREATE TABLE `tac_saved_ammo` (
     FOREIGN KEY (`shipid`) REFERENCES `tac_saved_ship` (`id`)
     ON DELETE CASCADE,
   CONSTRAINT `fk_ammo_list`
+    FOREIGN KEY (`listid`) REFERENCES `tac_saved_list` (`id`)
+    ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+--
+-- Table structure for table `tac_saved_damage`
+--
+-- Battle damage a saved fleet carries (PREBATTLE_DAMAGE_PLAN.md §4.1).
+-- kind = 0 -> `ref` is a ShipSystem id; kind = 1 -> `ref` is a fighter ordinal
+-- 1..flightSize (per-fighter system ids do not exist in the lobby, see plan §1.1);
+-- kind = 2 -> `ref` is a MINE ordinal 1..bulkbuy (a bulk mine purchase is one lobby
+-- object plus a count, exactly like a flight; the damage lands on that copy's Structure).
+--
+
+DROP TABLE IF EXISTS `tac_saved_damage`;
+
+CREATE TABLE `tac_saved_damage` (
+  `listid`    INT(11)    NOT NULL,
+  `shipid`    INT(11)    NOT NULL,
+  `kind`      TINYINT(1) NOT NULL DEFAULT 0,
+  `ref`       INT(11)    NOT NULL,
+  `damage`    INT(11)    NOT NULL DEFAULT 0,
+  `destroyed` TINYINT(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`listid`,`shipid`,`kind`,`ref`),
+  KEY `idx_shipid` (`shipid`),
+  KEY `idx_listid` (`listid`),
+  CONSTRAINT `fk_dmg_ship`
+    FOREIGN KEY (`shipid`) REFERENCES `tac_saved_ship` (`id`)
+    ON DELETE CASCADE,
+  CONSTRAINT `fk_dmg_list`
+    FOREIGN KEY (`listid`) REFERENCES `tac_saved_list` (`id`)
+    ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+--
+-- Table structure for table `tac_saved_crit`
+--
+-- Critical effects a saved fleet carries. Same key shape as tac_saved_damage.
+-- `type` is a Critical subclass name and is validated on both write and read -
+-- DBManager::getCriticalsForShips does `new $type(...)` on the stored string.
+-- `param` carries the magnitude of a PARAM-CARRYING critical (DamageReductionReduced),
+-- where one crit represents a whole reduction rather than one point. INT rather than
+-- tac_critical's varchar(200): only integer params are ever allowed into a saved fleet
+-- (PreBattleDamage::$paramCriticals is the allow-list).
+--
+
+DROP TABLE IF EXISTS `tac_saved_crit`;
+
+CREATE TABLE `tac_saved_crit` (
+  `listid`   INT(11)      NOT NULL,
+  `shipid`   INT(11)      NOT NULL,
+  `kind`     TINYINT(1)   NOT NULL DEFAULT 0,
+  `ref`      INT(11)      NOT NULL,
+  `type`     VARCHAR(100) NOT NULL,
+  `amount`   INT(11)      NOT NULL DEFAULT 1,
+  `param`    INT(11)               DEFAULT NULL,
+  PRIMARY KEY (`listid`,`shipid`,`kind`,`ref`,`type`),
+  KEY `idx_shipid` (`shipid`),
+  KEY `idx_listid` (`listid`),
+  CONSTRAINT `fk_crit_ship`
+    FOREIGN KEY (`shipid`) REFERENCES `tac_saved_ship` (`id`)
+    ON DELETE CASCADE,
+  CONSTRAINT `fk_crit_list`
     FOREIGN KEY (`listid`) REFERENCES `tac_saved_list` (`id`)
     ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;

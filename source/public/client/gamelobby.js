@@ -19,6 +19,13 @@ window.gamedata = {
 	fleetWindowOpen: false,
 	gamespace: '',
 
+	/* Fleet Builder (fleetTest) points cap. The slot itself is ALWAYS unlimited in a
+	   builder lobby, so this optional override is what the buy panel, the affordability
+	   checks and the Fleet Checker measure against. null = unlimited (the default, and
+	   the only possible value in an ordinary lobby, where the markup is not rendered).
+	   Read through gamedata.getMaxPoints() and nowhere else. */
+	builderMaxPoints: null,
+
 
 	getPowerRating: function getPowerRating(factionName) {
 		var powerRating = '';
@@ -304,49 +311,212 @@ window.gamedata = {
 		return powerRating;
 	},
 
-	canAfford: function canAfford(ship) {
+	/* ⭐ THE point cap in force for the selected slot, and the ONLY place it is derived.
+	   Ordinary lobby: the slot's own points (-1 meaning unlimited).
+	   Fleet Builder: the slot is always -1, so an unticked "Unlimited" box substitutes the
+	   value typed into the buy panel. Display (calculateFleet), the affordability checks
+	   and the Fleet Checker all read it here, so the number the player is shown is exactly
+	   the number they are held to. */
+	getMaxPoints: function getMaxPoints() {
+		var selectedSlot = playerManager.getSlotById(gamedata.selectedSlot);
+		var slotPoints = selectedSlot ? selectedSlot.points : -1;
 
+		if (slotPoints != -1) return slotPoints;
+		return gamedata.builderMaxPoints === null ? -1 : gamedata.builderMaxPoints;
+	},
+
+	/* Is this fleet-list row a BULK purchase - ONE object standing for N identical units,
+	   minted into N ships by BuyingGamePhase? Mines always have been; OSATs joined them
+	   (user request 2026-08-10). Everything that prices, lists, names or saves a row asks
+	   here rather than testing .mine directly, so the two kinds cannot drift apart.
+
+	   ⚠️ `osat` is NOT only the ship-shaped OSAT hull. MicroSAT extends SuperHeavyFighter
+	   extends FighterFlight and sets osat = true, so a MicroSAT is a FLIGHT that lists
+	   under Immobile Structures - and with maxFlightSize 3 it needs the ship dialog's
+	   flight-size selector, which the bulk dialog has no equivalent for. Flights are
+	   therefore excluded here, EXCEPT the flight-shaped mines (MineClass), which have been
+	   bought in bulk all along and must keep behaving exactly as they do. */
+	isBulkRow: function isBulkRow(ship) {
+		if (!ship) return false;
+		if (ship.mine) return true;
+
+		return !!ship.osat && !ship.flight;
+	},
+
+	/* How many units this one row stands for (always >= 1). */
+	bulkCount: function bulkCount(ship) {
+		if (!gamedata.isBulkRow(ship)) return 1;
+		var count = parseInt(ship.bulkBuy, 10);
+		return (isNaN(count) || count < 1) ? 1 : count;
+	},
+
+	/* What this ONE row costs the fleet.
+	   ⭐ ONE pricing convention across every row: ship.pointCost is the cost of a SINGLE
+	   unit with its enhancements already folded in (doBuyShip, doBuyBulk and doLoadFleet
+	   all establish that), so a row is simply that times the number of units it stands
+	   for. Bulk rows used to keep their enhancements OUT of pointCost and re-add them at
+	   each display site, which broke the moment a bulk-bought unit went through the edit
+	   dialog (which writes the folded total) - and double-counted them on every loaded
+	   mine bulk.
+	   The mines-only 100pt premium and per-class surcharge are FLEET-level and live in
+	   fleetCost, not here. */
+	rowPointCost: function rowPointCost(ship) {
+		return ship.pointCost * gamedata.bulkCount(ship);
+	},
+
+	/* Total cost of the selected slot's fleet.
+	     pendingShip - a unit about to be bought, costed as if it were already in the list.
+	     excludeId   - a row to leave out (the ship being edited, whose new cost arrives as
+	                   pendingShip instead).
+	   ONE implementation for the points display and for every affordability check: the two
+	   used to be separate sums, and canAfford's ignored the mine premium entirely, so a
+	   fleet could be bought that the panel already showed as over budget. */
+	fleetCost: function fleetCost(pendingShip, excludeId) {
 		var slotid = gamedata.selectedSlot;
-		var selectedSlot = playerManager.getSlotById(slotid);
-
-		if (selectedSlot.points == -1) return true; // Unlimited points
-
 		var points = 0;
+		var unitPoints = 0;
+		var uniqueUnitClasses = [];
+
+		var tally = function (lship) {
+			if (lship.mine) {
+				unitPoints += gamedata.rowPointCost(lship);
+				if (uniqueUnitClasses.indexOf(lship.mineType) === -1) {
+					uniqueUnitClasses.push(lship.mineType);
+				}
+			} else {
+				points += gamedata.rowPointCost(lship);
+			}
+		};
+
 		for (var i in gamedata.ships) {
-			var lship = gamedata.ships[i];
-			if (lship.slot != slotid) continue;
-			points += lship.pointCost;
+			if (gamedata.ships[i].slot != slotid) continue;
+			if (excludeId !== undefined && gamedata.ships[i].id == excludeId) continue;
+			tally(gamedata.ships[i]);
 		}
 
-		points += ship.pointCost;
-		if (points > selectedSlot.points) return false;
+		if (pendingShip) tally(pendingShip);
 
-		return true;
+		//Mines are priced as a minefield: a flat 100pt to lay one at all, plus 10% for
+		//every mine CLASS beyond the first.
+		if (unitPoints > 0) {
+			var surchargeMultiplier = 1 + ((uniqueUnitClasses.length - 1) * 0.10);
+			points += Math.round((100 + unitPoints) * surchargeMultiplier);
+		}
+
+		return points;
+	},
+
+	canAfford: function canAfford(ship) {
+		var maxPoints = gamedata.getMaxPoints();
+		if (maxPoints == -1) return true; // Unlimited points
+
+		return gamedata.fleetCost(ship) <= maxPoints;
 	},
 
 	canAffordEdit: function canAffordEdit(ship) {
+		var maxPoints = gamedata.getMaxPoints();
+		if (maxPoints == -1) return true; // Unlimited points
 
-		var slotid = gamedata.selectedSlot;
-		var selectedSlot = playerManager.getSlotById(slotid);
-
-		if (selectedSlot.points == -1) return true; // Unlimited points
-
-		var points = 0;
-		for (var i in gamedata.ships) {
-			var lship = gamedata.ships[i];
-			if (lship.slot != slotid) continue;
-			if (lship.id == ship.id) continue; //DOn't count this ship already in list!
-			points += lship.pointCost;
-		}
-
-		if ($(".confirm .totalUnitCostAmount").length > 0) {
+		/* ⚠️ Only the SHIP dialog is read back off the DOM here. The bulk dialog shows TWO
+		   spans carrying .totalUnitCostAmount - the per-unit cost and the whole row's total -
+		   so which one this picked up would come down to the order the templates happened to
+		   be prepended in. doEditBulk has already priced the ship through readBulkPurchase
+		   by the time it asks, which is the same arithmetic the dialog displays. */
+		if (!$(".confirm #bulkQuantity").length && $(".confirm .totalUnitCostAmount").length > 0) {
 			ship.pointCost = $(".confirm .totalUnitCostAmount").data("value");
 		}
 
-		points += ship.pointCost;
-		if (points > selectedSlot.points) return false;
+		//the edited ship is costed as `pendingShip`, so its OLD row must not also count
+		return gamedata.fleetCost(ship, ship.id) <= maxPoints;
+	},
 
-		return true;
+	/* ⭐ Has the selected slot's fleet been READIED? `lastphase >= "-2"` is the one test for
+	   that, and it is what every buy/edit/remove path already refuses on ("You have already
+	   confirmed your fleet"). Stated here so the React damage editors can ask the same
+	   question instead of re-deriving it.
+
+	   Pre-battle damage was the one thing still editable after Ready: the fleet has been
+	   POSTed by then, so anything authored afterwards is never submitted - the player is
+	   editing a fleet that no longer exists, and the ship window happily let them. Now the
+	   menus simply do not open.
+
+	   Lobby-only: game.php has no playerManager slots and never reaches this, because every
+	   caller tests gamephase === -2 first. Defensive anyway - a missing slot reads as NOT
+	   committed, which is the same answer the page starts with. */
+	fleetIsCommitted: function fleetIsCommitted() {
+		if (typeof playerManager === 'undefined' || !playerManager) return false;
+
+		var slot = playerManager.getSlotById(gamedata.selectedSlot);
+		return Boolean(slot) && slot.lastphase >= "-2";
+	},
+
+	/* Broken-heart badge for a bought unit carrying pre-battle damage or criticals, as an
+	   HTML string ready to prepend to a fleet-list row. Empty string when it carries
+	   neither.
+	   ONE helper for BOTH row builders (updateFleet and constructFleetList): the badge has
+	   to be re-derived from the ship every time the fleet list is rebuilt, because the list
+	   is thrown away and rewritten from gamedata.ships on every slot select, remove and
+	   edit. The payload lives on the ship, so it always survives - it was only the markup
+	   that was being lost.
+	   Same icon the saved-fleet dropdown uses for a fleet carrying damage. */
+	damagedShipBadge: function damagedShipBadge(ship) {
+		if (!window.battleDamage || battleDamage.isEmpty(battleDamage.peek(ship))) return '';
+
+		var carried = battleDamage.contents(battleDamage.peek(ship));
+		var title = carried.damage && carried.criticals ? 'Carries pre-battle damage and critical effects'
+			: (carried.criticals ? 'Carries pre-battle critical effects' : 'Carries pre-battle damage');
+
+		//fa-screwdriver-wrench, not fa-heart-crack (user request 2026-08-08): a wound the
+		//unit is carrying INTO the battle reads as "needs repair", not as a death.
+		return '<span class="shipDamagedBadge fa-solid fa-screwdriver-wrench" title="' + title + '"></span>';
+	},
+
+	/* Re-paint ONE fleet-list row's damage badge. Called by the React damage menus after
+	   every edit, so the badge appears/disappears as the player works rather than waiting
+	   for the next full fleet-list rebuild. Lobby-only: game.php's gamedata has no such
+	   method and the callers guard on typeof. */
+	refreshDamagedBadge: function refreshDamagedBadge(ship) {
+		if (!ship) return;
+
+		var row = $(".ship.bought").filter(function () {
+			return $(this).data("shipindex") == ship.id;
+		});
+		if (!row.length) return;
+
+		row.find(".shipDamagedBadge").remove();
+		var badge = gamedata.damagedShipBadge(ship);
+		if (badge) row.prepend(badge);
+	},
+
+	/* The action links one fleet-list row offers, as an HTML string.
+	   EVERY row gets the full set (user request 2026-08-10). A bulk row is edited and
+	   copied as a whole purchase - quantity plus the enhancements carried by every unit in
+	   it - through the bulk dialog rather than the ship one; editShip/copyShip pick which
+	   on isBulkRow, so nothing here has to know the difference.
+	   Copy on a bulk row is not just "raise the quantity": two rows of one class is the
+	   only way to hold two differently-enhanced batches of it (five mines with MINE_SIGN
+	   and five without). The lobby saves such rows separately - groupSaveableShips only
+	   merges mines outside gamephase -2 - and BuyingGamePhase's name counters run on
+	   across rows, so the second batch numbers #6, #7... rather than restarting.
+	   ONE builder for both row-writing paths (updateFleet and constructFleetList), which
+	   previously carried two near-identical copies of this markup. */
+	rowActionsHtml: function rowActionsHtml(ship) {
+		return '<div class="ship-actions">' +
+			' <span class="showship clickable">Details</span> ' +
+			' -<span class="editship clickable">Edit</span> ' +
+			' -<span class="copyship clickable">Copy</span> ' +
+			' -<span class="remove clickable">Remove</span> </div>';
+	},
+
+	/* The name and cost a fleet-list row displays. A bulk row shows the whole purchase:
+	   "Gravitic Mine (10)" at the cost of all ten. */
+	rowDisplay: function rowDisplay(ship) {
+		var count = gamedata.bulkCount(ship);
+
+		return {
+			name: count > 1 ? ship.name + ' (' + count + ')' : ship.name,
+			cost: Math.ceil(gamedata.rowPointCost(ship))
+		};
 	},
 
 	updateFleet: function updateFleet(ship) {
@@ -381,43 +551,23 @@ window.gamedata = {
 			}
 		}
 
-		var displayCost = ship.pointCost;
 		var displayType = ship.shipClass;
-		var displayName = ship.name;
+		var display = gamedata.rowDisplay(ship);
 
-		if (ship.mine && ship.bulkBuy) {
-			displayCost = ((ship.pointCost + (ship.pointCostEnh || 0) + (ship.pointCostEnh2 || 0)) * ship.bulkBuy);
-			if (ship.bulkBuy > 1) {
-				displayName = ship.name + ' (' + ship.bulkBuy + ')';
-			}
-		}
-		displayCost = Math.ceil(displayCost);
+		//Pre-battle damage: broken-heart badge ahead of the name, so a damaged unit reads as
+		//damaged without opening its window. Built by the shared helper so this row and the
+		//one constructFleetList rebuilds cannot drift - the old ' (damaged)' suffix was
+		//written HERE ONLY and vanished at the next fleet-list rebuild.
+		var damageBadge = gamedata.damagedShipBadge(ship);
 
-		if (ship.mine && ship.bulkBuy) {
-			var h = $('<div class="ship bought slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '">' +
-				'<span class="shipname name">' + displayName + '</span>' +
-				'<span class="boughtShiptype">' + displayType + '</span>' +
-				'<span class="boughtPointCost">' + displayCost + 'p</span>' +
-				enhancementHtml +
-				'<div class="ship-actions">' +
-				' <span class="showship clickable">Details</span> ' +
-				' -<span class="remove clickable">Remove</span> ' +
-				'</div>' +
-				'</div>');
-		} else {
-			var h = $('<div class="ship bought slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '">' +
-				'<span class="shipname name">' + displayName + '</span>' +
-				'<span class="boughtShiptype">' + displayType + '</span>' +
-				'<span class="boughtPointCost">' + displayCost + 'p</span>' +
-				enhancementHtml +
-				'<div class="ship-actions">' +
-				' <span class="showship clickable">Details</span> ' +
-				' -<span class="editship clickable">Edit</span> ' +
-				' -<span class="copyship clickable">Copy</span> ' +
-				' -<span class="remove clickable">Remove</span> ' +
-				'</div>' +
-				'</div>');
-		}
+		var h = $('<div class="ship bought slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '">' +
+			damageBadge +
+			'<span class="shipname name">' + display.name + '</span>' +
+			'<span class="boughtShiptype">' + displayType + '</span>' +
+			'<span class="boughtPointCost">' + display.cost + 'p</span>' +
+			enhancementHtml +
+			gamedata.rowActionsHtml(ship) +
+			'</div>');
 
 		$(".remove", h).bind("click", function () {
 			delete gamedata.ships[a];
@@ -430,15 +580,15 @@ window.gamedata = {
 			gamedata.onShipContextMenu(ship.phpclass, ship.faction, ship.id, true);
 		});
 
-		if (!ship.mine) {
-			$(".editship", h).on("click", function (e) {
-				gamedata.editShip(ship);
-			});
+		//No .mine guard needed: editShip/copyShip send a bulk row to the bulk dialog and
+		//anything else to the ship one, so this binding is the same for every row.
+		$(".editship", h).on("click", function (e) {
+			gamedata.editShip(ship);
+		});
 
-			$(".copyship", h).on("click", function (e) {
-				gamedata.copyShip(ship);
-			});
-		}
+		$(".copyship", h).on("click", function (e) {
+			gamedata.copyShip(ship);
+		});
 
 		h.appendTo("#fleet");
 		gamedata.calculateFleet();
@@ -595,7 +745,9 @@ window.gamedata = {
 			var lship = gamedata.ships[i];
 			if (lship.slot != slotid) continue;
 
-			totalPointsSpent += lship.pointCost;
+			//rowPointCost, not pointCost: a bulk row (mines, OSATs) is N units, and this
+			//figure is what stands in for the fleet limit when the fleet has none.
+			totalPointsSpent += gamedata.rowPointCost(lship);
 
 			// 10%/33% deployment brackets use the BASE ship cost only (no ammo, no
 			// enhancements). lship.pointCost is overwritten at purchase to the post-
@@ -1001,7 +1153,12 @@ window.gamedata = {
 
 		} //end of loop at ships preparing data
 
-		var calcPoints = selectedSlot.points;
+		/* Every bracket and per-hull limit below scales off the fleet's POINT LIMIT, and
+		   getMaxPoints is the single place that answers what that limit is. In Fleet
+		   Builder that is the figure typed beside the "Unlimited" box once the player has
+		   unticked it; only a genuinely unlimited fleet still falls back to measuring
+		   itself against what it happens to have spent. */
+		var calcPoints = gamedata.getMaxPoints();
 		if (calcPoints == -1) { //If unlimited points, assess against points spent so far.
 			calcPoints = totalPointsSpent;
 		}
@@ -1628,43 +1785,21 @@ window.gamedata = {
 					enhancementHtml = '<div class="ship-enhancements">' + listHtml + '</div>';
 				}
 			}
-			var displayCost = ship.pointCost;
 			var displayType = ship.shipClass;
-			var displayName = ship.name;
+			var display = gamedata.rowDisplay(ship);
 
-			if (ship.mine && ship.bulkBuy) {
-				displayCost = ((ship.pointCost + (ship.pointCostEnh || 0) + (ship.pointCostEnh2 || 0)) * ship.bulkBuy);
-				if (ship.bulkBuy > 1) {
-					displayName = ship.name + ' (' + ship.bulkBuy + ')';
-				}
-			}
-			displayCost = Math.ceil(displayCost);
+			//Pre-battle damage: re-derived from the ship, not carried in the old markup -
+			//this rebuild is exactly where the previous ' (damaged)' suffix was lost.
+			var damageBadge = gamedata.damagedShipBadge(ship);
 
-			if (ship.mine && ship.bulkBuy) {
-				var h = $('<div class="ship bought slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '">' +
-					'<span class="shipname name">' + displayName + '</span>' +
-					'<span class="boughtShiptype">' + displayType + '</span>' +
-					'<span class="boughtPointCost">' + displayCost + 'p</span>' +
-					enhancementHtml +
-					'<div class="ship-actions">' +
-					' <span class="showship clickable">Details</span> ' +
-					' -<span class="remove clickable">Remove</span> ' +
-					'</div>' +
-					'</div>');
-			} else {
-				var h = $('<div class="ship bought slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '">' +
-					'<span class="shipname name">' + displayName + '</span>' +
-					'<span class="boughtShiptype">' + displayType + '</span>' +
-					'<span class="boughtPointCost">' + displayCost + 'p</span>' +
-					enhancementHtml +
-					'<div class="ship-actions">' +
-					' <span class="showship clickable">Details</span> ' +
-					' -<span class="editship clickable">Edit</span> ' +
-					' -<span class="copyship clickable">Copy</span> ' +
-					' -<span class="remove clickable">Remove</span> ' +
-					'</div>' +
-					'</div>');
-			}
+			var h = $('<div class="ship bought slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '">' +
+				damageBadge +
+				'<span class="shipname name">' + display.name + '</span>' +
+				'<span class="boughtShiptype">' + displayType + '</span>' +
+				'<span class="boughtPointCost">' + display.cost + 'p</span>' +
+				enhancementHtml +
+				gamedata.rowActionsHtml(ship) +
+				'</div>');
 			h.appendTo("#fleet");
 		}
 
@@ -1724,33 +1859,16 @@ window.gamedata = {
 		var slotid = gamedata.selectedSlot;
 		if (!slotid) return;
 
-		var selectedSlot = playerManager.getSlotById(slotid);
-		var points = 0;
-		var unitPoints = 0;
-		var uniqueUnitClasses = [];
+		var points = gamedata.fleetCost();
+		var maxPoints = gamedata.getMaxPoints();
 
-		for (var i in gamedata.ships) {
-			if (gamedata.ships[i].slot != slotid) continue;
-
-			if (gamedata.ships[i].mine) {
-				let mCount = gamedata.ships[i].bulkBuy || 1;
-				unitPoints += ((gamedata.ships[i].pointCost + (gamedata.ships[i].pointCostEnh || 0) + (gamedata.ships[i].pointCostEnh2 || 0)) * mCount);
-				if (!uniqueUnitClasses.includes(gamedata.ships[i].mineType)) {
-					uniqueUnitClasses.push(gamedata.ships[i].mineType);
-				}
-			} else {
-				points += gamedata.ships[i].pointCost;
-			}
-		}
-
-		if (unitPoints > 0) {
-			let uniqueClassCount = uniqueUnitClasses.length;
-			let surchargeMultiplier = 1 + ((uniqueClassCount - 1) * 0.10);
-			let totalUnitCost = (100 + unitPoints) * surchargeMultiplier;
-			points += Math.round(totalUnitCost);
-		}
-
-		var maxPoints = selectedSlot.points;
+		/* Fleet Builder with "Unlimited" unticked: the cap is a live input the player types
+		   into, so it takes the place of the .max readout rather than being written into it
+		   - rewriting .max here on every recalculation would destroy the field (and their
+		   caret) mid-keystroke. */
+		var capIsEditable = maxPoints != -1 && gamedata.builderMaxPoints !== null;
+		$('.max-points-input').toggle(capIsEditable);
+		$('.max').toggle(!capIsEditable);
 
 		if (maxPoints == -1) {
 			$('.max').html('<span class="unlimited-points-text2">Unlimited</span>');
@@ -1758,7 +1876,7 @@ window.gamedata = {
 			$('.remaining-points-container').hide();
 		} else {
 			var remainingPoints = maxPoints - points;
-			$('.max').html(selectedSlot.points);
+			if (!capIsEditable) $('.max').html(maxPoints);
 			$('.remaining').html(remainingPoints);
 			$('.max-points-units').show();
 			// Ensure container is shown, and units are visible inside it
@@ -2246,16 +2364,20 @@ window.gamedata = {
 					if (ship.flight && (ship.maxFlightSize != 1)) pointCostFull = pointCostFull + ' (' + pointCostFull / 6 + ' ea.)';//for fighters: display price per craft, too!
 					var sizeTag = (categoryIndex === 0) ? this.getFighterSizeTag(ship) : '';
 					var sizeTagHtml = sizeTag ? ' <span class="fightersize">' + sizeTag + '</span>' : '';
+					//data-cost is the BASE point cost the Cost filter reads (for a flight,
+					//the full-flight price shown in the row, not the per-craft one).
 					h = $('<div oncontextmenu="return false;" class="ship storeship" data-custom="'
 						+ isCustomShip + '" data-isd="'
 						+ ship.isd
+						+ '" data-cost="'
+						+ ship.pointCost
 						+ '"><span class="shiptype' + customShipHighlight + '">'
 						+ shipDisplayName + '</span>'
 						+ sizeTagHtml
 						+ '<span class="pointcost">'
 						+ pointCostFull + '</span> -<span class="addship clickable">Add to fleet</span> -<span class="showship clickable">Show details</span></div>');
 
-					let buyHandler = ship.mine ? this.buyBulk.bind(this, ship.phpclass) : this.buyShip.bind(this, ship.phpclass);
+					let buyHandler = gamedata.isBulkRow(ship) ? this.buyBulk.bind(this, ship.phpclass) : this.buyShip.bind(this, ship.phpclass);
 					$(".addship", h).on("click", buyHandler);
 					$(".showship", h).on("click", gamedata.onShipContextMenu.bind(this, ship.phpclass, faction, ship.id, false));
 
@@ -2277,13 +2399,15 @@ window.gamedata = {
 							+ isCustomShip
 							+ '" data-isd="'
 							+ shipV.isd
+							+ '" data-cost="'
+							+ shipV.pointCost
 							+ '"><span class="shiptype' + customShipHighlight + '">'
 							+ shipDisplayName + '</span>'
 							+ sizeTagHtmlV
 							+ '<span class="pointcost">'
 							+ pointCostFull + '</span> -<span class="addship clickable">Add to fleet</span> -<span class="showship clickable">Show details</span></div>');
 
-						let buyHandlerV = shipV.mine ? this.buyBulk.bind(this, shipV.phpclass) : this.buyShip.bind(this, shipV.phpclass);
+						let buyHandlerV = gamedata.isBulkRow(shipV) ? this.buyBulk.bind(this, shipV.phpclass) : this.buyShip.bind(this, shipV.phpclass);
 						$(".addship", h).on("click", buyHandlerV);
 						$(".showship", h).on("click", gamedata.onShipContextMenu.bind(this, shipV.phpclass, faction, ship.id, false));
 
@@ -2340,10 +2464,14 @@ window.gamedata = {
 		gamedata.applyCustomShipFilter();
 	},
 
-	//Function called by Custom and ISD filters.
+	//Function called by the Custom toggle and the Name / Cost / ISD filters.
 	applyCustomShipFilter: function () {
 		const showCustom = $("#toggleCustom").is(":checked");
 		const isdValue = parseInt($("#isdFilter").val(), 10);
+		//Cost filter: hide anything that costs MORE than the figure typed. Read once,
+		//outside the per-ship loop, like the other two.
+		const costValue = parseInt($("#costFilter").val(), 10);
+		const nameFilter = $("#nameFilter").val().toLowerCase().trim();
 
 		$(".faction").each(function () {
 			const $faction = $(this);
@@ -2353,14 +2481,15 @@ window.gamedata = {
 				const $ship = $(this);
 				const isCustom = $ship.data("custom") === true || $ship.data("custom") === "true";
 				const shipISD = parseInt($ship.data("isd"), 10);
+				const shipCost = parseFloat($ship.data("cost"));
 
 				let visible = true;
 
 				if (!showCustom && isCustom) visible = false;
 				if (!isNaN(isdValue) && shipISD > isdValue) visible = false;
+				if (!isNaN(costValue) && !isNaN(shipCost) && shipCost > costValue) visible = false;
 
 				// Name filter logic
-				const nameFilter = $("#nameFilter").val().toLowerCase().trim();
 				if (nameFilter.length > 0) {
 					const shipName = $ship.find(".shiptype").text().toLowerCase();
 					if (shipName.indexOf(nameFilter) === -1) visible = false;
@@ -2596,16 +2725,32 @@ window.gamedata = {
 		window.confirm.showBuyBulk(ship, gamedata.doBuyBulk);
 	},
 
-	doBuyBulk: function doBuyBulk(results, shipclass) {
-		var ship = gamedata.getShipByType(shipclass);
+	/* ⚠️ A ship's enhancementOptions, copied so that writing to the copy cannot reach the
+	   original. Each option is ITSELF an array whose index 2 holds the chosen count, and
+	   every buy/edit path writes that index in place - so a shallow [...] of the outer array
+	   leaves a copied row sharing its counts with the row it was copied from, and editing
+	   one silently rewrote the other. */
+	cloneEnhancementOptions: function cloneEnhancementOptions(ship) {
+		if (!ship || !ship.enhancementOptions) return [];
 
-		ship.userid = gamedata.thisplayer;
-		ship.name = ship.shipClass;
+		return ship.enhancementOptions.map(function (option) {
+			return Array.isArray(option) ? option.slice() : option;
+		});
+	},
 
-		ship.bulkBuy = parseInt(results.quantity);
+	/* ⭐ Read the bulk dialog's spinners onto `ship` and price the result. ONE reader for
+	   all three bulk paths (buy, edit, copy), so the pricing convention below is stated
+	   once instead of three times.
 
-		// Calculate total cost stringently to afford check
-		let totalUnitCost = ship.pointCost * ship.bulkBuy;
+	     baseCost - the BARE hull's cost, with no enhancements in it. Passed in rather than
+	                read off ship.pointCost, because on an edit or copy that field already
+	                has the previous enhancements folded in and re-folding compounds them.
+
+	   Every count is rewritten, including back down to 0: an edit that TAKES an enhancement
+	   away has to clear the option it was recorded in, or lobbyEnhancements.apply would
+	   re-apply it to the rebuilt unit for free. */
+	readBulkPurchase: function readBulkPurchase(ship, quantity, baseCost) {
+		ship.bulkBuy = parseInt(quantity, 10) || 1;
 
 		ship.pointCostEnh = 0;
 		ship.pointCostEnh2 = 0;
@@ -2616,11 +2761,12 @@ window.gamedata = {
 		var target = $(".selectAmount.shpenh" + enhNo);
 		while (typeof target.data("enhPrice") != 'undefined') { //as long as there are enhancements defined...
 			noTaken = target.data("count");
-			if (noTaken > 0) { //enhancement picked - note!
-				ship.enhancementOptions[enhNo][2] = noTaken;
-				if (!ship.enhancementOptions[enhNo][6]) { //this is an actual enhancement (as opposed to option) - note value!
+			ship.enhancementOptions[enhNo][2] = noTaken > 0 ? noTaken : 0;
+
+			if (noTaken > 0) { //enhancement picked - note value!
+				if (!ship.enhancementOptions[enhNo][6]) { //this is an actual enhancement (as opposed to option)
 					ship.pointCostEnh += target.data("enhCost"); // Cost is per-unit
-				} else { //this is an option - note value!
+				} else { //this is an option
 					ship.pointCostEnh2 += target.data("enhCost"); // Cost is per-unit
 				}
 			}
@@ -2630,42 +2776,30 @@ window.gamedata = {
 			target = $(".selectAmount.shpenh" + enhNo);
 		}
 
-		totalUnitCost += (ship.pointCostEnh + ship.pointCostEnh2) * ship.bulkBuy;
+		//Fold the per-unit enhancement cost into pointCost, exactly as doBuyShip does with
+		//the dialog total. That single convention (see rowPointCost) is what lets a bulk
+		//row be priced, edited and saved by the same code as any other unit.
+		ship.pointCost = baseCost + ship.pointCostEnh + ship.pointCostEnh2;
+	},
 
-		// Calculate cost of the fleet WITH this new Unit order
-		var slotid = gamedata.selectedSlot;
-		var selectedSlot = playerManager.getSlotById(slotid);
-		var points = 0;
-		var existingUnitPoints = 0;
-		var uniqueUnitClasses = [];
+	doBuyBulk: function doBuyBulk(results, shipclass) {
+		var ship = gamedata.getShipByType(shipclass);
 
-		for (var i in gamedata.ships) {
-			if (gamedata.ships[i].slot != slotid) continue;
-			if (gamedata.ships[i].mine) {
-				existingUnitPoints += (gamedata.ships[i].pointCost + gamedata.ships[i].pointCostEnh + gamedata.ships[i].pointCostEnh2) * (gamedata.ships[i].bulkBuy || 1);
-				if (!uniqueUnitClasses.includes(gamedata.ships[i].mineType)) {
-					uniqueUnitClasses.push(gamedata.ships[i].mineType);
-				}
-			} else {
-				points += gamedata.ships[i].pointCost;
-			}
-		}
+		ship.userid = gamedata.thisplayer;
+		//The class name is the STEM, not the final unit name: the SERVER numbers the
+		//minted copies "Gravitic Mine #1, #2, ..." (BuyingGamePhase::process). Same for
+		//OSATs as for mines - a bulk purchase is interchangeable units, so neither offers
+		//a name box.
+		ship.name = ship.shipClass;
 
-		// Add new unit to totals
-		existingUnitPoints += totalUnitCost;
-		if (!uniqueUnitClasses.includes(ship.mineType)) {
-			uniqueUnitClasses.push(ship.mineType);
-		}
+		//A store blueprint's pointCost is pristine by definition.
+		gamedata.readBulkPurchase(ship, results.quantity, ship.pointCost);
 
-		if (existingUnitPoints > 0) {
-			let uniqueClassCount = uniqueUnitClasses.length;
-			let surchargeMultiplier = 1 + ((uniqueClassCount - 1) * 0.10);
-			points += Math.round((100 + existingUnitPoints) * surchargeMultiplier);
-		}
-
-		var maxPoints = selectedSlot.points;
-
-		if (maxPoints != -1 && points > maxPoints) {
+		/* Cost of the fleet WITH this purchase in it. This used to be a second, hand-rolled
+		   copy of calculateFleet's sum; it is now the same fleetCost() the panel displays,
+		   so the "you cannot afford that" line can never disagree with the pts-left figure
+		   the player is looking at. */
+		if (!gamedata.canAfford(ship)) {
 			$(".confirm").remove();
 			window.confirm.error("You cannot afford that Unit purchase!", function () { });
 			return;
@@ -2676,6 +2810,184 @@ window.gamedata = {
 		$(".confirm").remove();
 		gamedata.updateFleet(ship);
 		gamedata.calculateFleet();
+		gamedata.drawMapPreview(); // Redraw map to show unitfields
+	},
+
+	/* Re-open a bought bulk row and write the changes back. doEditShip's shape, minus
+	   everything a bulk row cannot have (no name box, no flight-size selector, no missile
+	   pickers - getMissileOptions returns nothing for a non-flight hull anyway), plus the
+	   quantity.
+
+	   The arguments come from the dialog's OK handler rather than off `this`, because the
+	   bulk dialog reads its fields and tears itself down before calling back. */
+	doEditBulk: function doEditBulk(results, shipclass, ship, originalShipData) {
+		if (!ship) return;
+
+		//Captured BEFORE pointCost is overwritten - by then it is no longer the bare hull's,
+		//and the no-blueprint stand-in below needs the bare one.
+		var pristinePointCost = gamedata.getPristinePointCost(ship);
+
+		gamedata.readBulkPurchase(ship, results.quantity, pristinePointCost);
+
+		if (!gamedata.canAffordEdit(ship)) {
+			//Put the row back exactly as it was before returning.
+			ship.name = originalShipData.name;
+			ship.pointCost = originalShipData.pointCost;
+			ship.bulkBuy = originalShipData.bulkBuy;
+			ship.enhancementOptions = originalShipData.enhancementOptions ? [...originalShipData.enhancementOptions] : [];
+			ship.pointCostEnh = originalShipData.pointCostEnh;
+			ship.pointCostEnh2 = originalShipData.pointCostEnh2;
+			$(".confirm").remove();
+			window.confirm.error("You cannot afford those edits!", function () { });
+			return;
+		}
+
+		var newPointCost = ship.pointCost;
+
+		//Remove old row from the Fleet List first - updateFleet re-adds it at the end.
+		var id = ship.id;
+		for (var i in gamedata.ships) {
+			if (gamedata.ships[i].id == id) {
+				delete gamedata.ships[i];
+				break;
+			}
+		}
+		$('.ship.bought.shipid_' + id).remove();
+
+		var baseShip = gamedata.getShipByType(ship.phpclass);
+		if (!baseShip) {
+			//Loaded fleets may not have their faction set yet when editing, so do this now.
+			//Register a COPY carrying the BARE hull's cost, not `ship` itself: `ship` is holding
+			//the folded total by this point, and whatever is registered here becomes the
+			//blueprint every later lookup of this class finds - including the next edit of this
+			//same row, which would then take an inflated cost as its baseline.
+			var standIn = jQuery.extend({}, ship);
+			standIn.pointCost = pristinePointCost;
+			gamedata.setShipsFromFaction(ship.faction, [standIn]);
+			baseShip = gamedata.getShipByType(ship.phpclass);
+		}
+
+		//Same reset list as doEditShip: EVERY enhancement-mutated ship-level stat must
+		//return to its blueprint value before re-applying, or enhancements kept through an
+		//edit compound on each pass.
+		ship.systems = baseShip.systems;
+		ship.notes = baseShip.notes;
+		ship.forwardDefense = baseShip.forwardDefense;
+		ship.sideDefense = baseShip.sideDefense;
+		ship.iniativebonus = baseShip.iniativebonus;
+		ship.critRollMod = baseShip.critRollMod;
+		ship.toHitBonus = baseShip.toHitBonus;
+		ship.turncost = baseShip.turncost;
+		ship.turndelaycost = baseShip.turndelaycost;
+		ship.pivotcost = baseShip.pivotcost;
+		ship.signature = baseShip.signature;
+		ship.detectedSignature = baseShip.detectedSignature;
+		ship.IFFSystem = baseShip.IFFSystem;
+
+		if (ship.flight) {
+			//the flight-shaped MineClass customs land here; a ship-shaped mine or OSAT does not
+			ship.freethrust = baseShip.freethrust;
+			ship.hasNavigator = baseShip.hasNavigator;
+			ship.offensivebonus = baseShip.offensivebonus;
+			lobbyEnhancements.resetEnhancementMarkersFighter(ship);
+		} else {
+			lobbyEnhancements.resetEnhancementMarkersShip(ship);
+		}
+
+		ship.pointCost = newPointCost;
+		ship.userid = gamedata.thisplayer;
+
+		//single enhancement entry point (markers reset above, so this re-applies the
+		//kept/changed enhancements to the rebuilt unit)
+		lobbyEnhancements.apply(ship);
+
+		//Pre-battle damage: the rebuild above replaced ship.systems wholesale, so the preview
+		//has to be painted onto the new objects. A bulk MINE keys its damage per copy, so
+		//lowering the quantity trims the copies that no longer exist; a bulk OSAT's damage is
+		//per-system and applies to every copy, so changing the quantity leaves it alone.
+		var damageTrimmed = window.battleDamage
+			&& battleDamage.onShipRebuilt(ship, battleDamage.ordinalCount(originalShipData));
+
+		//The React window renders from this same mutated ship object, so just re-render it.
+		var wasVisible = window.shipWindowManagerReact
+			&& window.shipWindowManagerReact.ships.indexOf(ship) !== -1;
+
+		$(".confirm").remove();
+		gamedata.updateFleet(ship);
+
+		if (wasVisible) {
+			window.shipWindowManagerReact.update();
+		}
+
+		if (damageTrimmed) {
+			confirm.warning("Quantity reduced - pre-battle damage on the units that were removed has been discarded.");
+		}
+
+		gamedata.drawMapPreview(); // Redraw map to show unitfields
+	},
+
+	/* Copy a bought bulk row. Opens the bulk dialog pre-filled with what the original
+	   carries, so the player can vary the quantity or the enhancements before accepting -
+	   which is the point of copying rather than raising the original's quantity. */
+	copyBulk: function copyBulk(copiedShip) {
+		var newShip = gamedata.getShipByType(copiedShip.phpclass);
+		if (!newShip) {
+			//Loaded fleets may not have their faction set yet, so register the class now - at
+			//the BARE hull's cost, same reasoning as in doEditBulk.
+			var standIn = jQuery.extend({}, copiedShip);
+			standIn.pointCost = gamedata.getPristinePointCost(copiedShip);
+			gamedata.setShipsFromFaction(copiedShip.faction, [standIn]);
+			newShip = gamedata.getShipByType(copiedShip.phpclass);
+		}
+
+		newShip.name = copiedShip.name;
+		//All three together: pointCost has the per-unit enhancements folded in, and
+		//getPristinePointCost peels them back off using the other two.
+		newShip.pointCost = copiedShip.pointCost;
+		newShip.pointCostEnh = copiedShip.pointCostEnh;
+		newShip.pointCostEnh2 = copiedShip.pointCostEnh2;
+		newShip.bulkBuy = copiedShip.bulkBuy;
+		newShip.enhancementOptions = gamedata.cloneEnhancementOptions(copiedShip);
+		//DEEP clone - sharing the payload object would make damaging either row damage both.
+		if (window.battleDamage) {
+			newShip.preBattleDamage = battleDamage.clone(copiedShip.preBattleDamage);
+		}
+
+		$(".confirm").remove();
+
+		window.confirm.showBuyBulk(newShip, gamedata.doCopyBulk, true);
+	},
+
+	doCopyBulk: function doCopyBulk(results, shipclass, ship, originalShipData) {
+		if (!ship) return;
+
+		//`ship` here is already a fresh blueprint clone built by copyBulk, so its systems
+		//need no rebuilding - only pricing and the payload carried across.
+		gamedata.readBulkPurchase(ship, results.quantity, gamedata.getPristinePointCost(ship));
+
+		if (!gamedata.canAfford(ship)) {
+			$(".confirm").remove();
+			window.confirm.error("You cannot afford that Unit purchase!", function () { });
+			return;
+		}
+
+		//The copy is a NEW purchase, so it is named from the class and numbered by the
+		//server exactly as a fresh bulk buy is - never after the row it came from.
+		ship.name = ship.shipClass;
+		ship.userid = gamedata.thisplayer;
+		ship.slot = gamedata.selectedSlot;
+
+		var damageTrimmed = window.battleDamage
+			&& battleDamage.onShipRebuilt(ship, battleDamage.ordinalCount(originalShipData));
+
+		$(".confirm").remove();
+		gamedata.updateFleet(ship);
+		gamedata.calculateFleet();
+
+		if (damageTrimmed) {
+			confirm.warning("Quantity reduced - pre-battle damage on the units that were removed was not copied.");
+		}
+
 		gamedata.drawMapPreview(); // Redraw map to show unitfields
 	},
 
@@ -2811,16 +3123,34 @@ window.gamedata = {
 			return false;
 		}
 
+		if (gamedata.isBulkRow(copiedShip)) {
+			gamedata.copyBulk(copiedShip);
+			return;
+		}
+
 		var newShip = gamedata.getShipByType(copiedShip.phpclass);
 		if (!newShip) {
-			gamedata.setShipsFromFaction(copiedShip.faction, [copiedShip]); //Loaded fleets may not have their faction set yet when editing, so do this now.
+			//Loaded fleets may not have their faction set yet when editing, so do this now.
+			//A copy at the BARE hull's cost, same reasoning as in doEditShip: copiedShip's pointCost
+			//includes its enhancements, and what is registered here becomes the blueprint every
+			//later lookup of this class finds.
+			var standIn = jQuery.extend({}, copiedShip);
+			standIn.pointCost = gamedata.getPristinePointCost(copiedShip);
+			gamedata.setShipsFromFaction(copiedShip.faction, [standIn]);
 			newShip = gamedata.getShipByType(copiedShip.phpclass);
 		}
 
 		newShip.name = copiedShip.name;
 		newShip.pointCost = copiedShip.pointCost;
 		newShip.flightSize = copiedShip.flightSize;
-		newShip.enhancementOptions = copiedShip.enhancementOptions ? [...copiedShip.enhancementOptions] : [];
+		//Rows copied, not just the outer array - see cloneEnhancementOptions. Copying a ship
+		//and then changing the copy's enhancements used to rewrite the original's counts too.
+		newShip.enhancementOptions = gamedata.cloneEnhancementOptions(copiedShip);
+		//Pre-battle damage (§5.3): a copy starts equally damaged. DEEP clone - sharing the
+		//payload object would make editing either ship edit both.
+		if (window.battleDamage) {
+			newShip.preBattleDamage = battleDamage.clone(copiedShip.preBattleDamage);
+		}
 
 		// Copy ammo counts
 		if (newShip.flight && copiedShip.flight) {
@@ -2865,12 +3195,22 @@ window.gamedata = {
 			return;
 		}
 
-		ship = gamedata.getShipByType(ship.phpclass); //Faction already set if not already when we called copyShip()			
+		//Pre-battle damage (§5.3): the line below rebuilds the ship from its blueprint, so
+		//carry the payload across the rebuild (deep-cloned by battleDamage.clone).
+		//The size that must not change under the payload is flightSize for a flight and
+		//bulkBuy for a bulk purchase - both key their damage by ordinal. Asked of
+		//battleDamage rather than named here, so this and onShipRebuilt cannot pick
+		//different fields for a unit that is both (the flight-shaped MineClass customs).
+		var copiedFlightSize = window.battleDamage ? battleDamage.ordinalCount(ship) : null;
+		var copiedDamage = window.battleDamage ? battleDamage.clone(ship.preBattleDamage) : null;
+
+		ship = gamedata.getShipByType(ship.phpclass); //Faction already set if not already when we called copyShip()
 
 		var name = $(".confirm input").val();
 		ship.name = name;
 		ship.pointCost = newPointCost;
 		ship.userid = gamedata.thisplayer;
+		if (copiedDamage) ship.preBattleDamage = copiedDamage;
 
 		if (ship.flight) {
 			var flightSize = $(".fighterAmount").html();
@@ -2954,9 +3294,19 @@ window.gamedata = {
 			} else { }
 		}
 
+		//Pre-battle damage (§5.3): render the carried payload onto the freshly built ship,
+		//and RESHAPE it if the copy was made at a different flight size / bulk count -
+		//a smaller copy drops the ordinals it no longer has, a larger one pads from #1.
+		var copyDamageDiscarded = window.battleDamage
+			&& battleDamage.onShipRebuilt(ship, copiedFlightSize);
+
 		$(".confirm").remove();
 		gamedata.updateFleet(ship);
-		//gamedata.populateFleetDropdown();		
+
+		if (copyDamageDiscarded) {
+			confirm.warning("Size reduced - pre-battle damage on the units above the new size was not copied.");
+		}
+		//gamedata.populateFleetDropdown();
 	},
 
 
@@ -2970,12 +3320,24 @@ window.gamedata = {
 
 		$(".confirm").remove();
 
+		//A bulk row is a whole PURCHASE - quantity plus the enhancements every unit in it
+		//carries - so it goes to the bulk dialog. The ship dialog has no quantity control,
+		//and its "Total cost" would read as one unit's while the fleet is charged for N.
+		if (gamedata.isBulkRow(ship)) {
+			window.confirm.showBuyBulk(ship, gamedata.doEditBulk, true);
+			return;
+		}
+
 		window.confirm.showShipEdit(ship, gamedata.doEditShip);
 	},
 
 	doEditShip: function doEditShip() {
 		var ship = $(this).data().ship;
 		var originalShipData = $(this).data().originalShipData; //Fetch original data before edits?
+
+		//Captured BEFORE pointCost is overwritten with the dialog's total - by then it is no longer
+		//the bare hull's, and the no-blueprint stand-in below needs the bare one.
+		var pristinePointCost = gamedata.getPristinePointCost(ship);
 
 		if ($(".confirm .totalUnitCostAmount").length > 0) {
 			ship.pointCost = $(".confirm .totalUnitCostAmount").data("value");
@@ -3007,7 +3369,14 @@ window.gamedata = {
 
 		var baseShip = gamedata.getShipByType(ship.phpclass);
 		if (!baseShip) {
-			gamedata.setShipsFromFaction(ship.faction, [ship]); //Loaded fleets may not have their faction set yet when editing, so do this now.
+			//Loaded fleets may not have their faction set yet when editing, so do this now.
+			//Register a COPY carrying the BARE hull's cost, not `ship` itself: `ship` is holding the
+			//dialog's total by this point, and whatever is registered here becomes the blueprint
+			//every later lookup of this class finds - including the next edit of this same ship,
+			//which would then take an inflated cost as its baseline and double-count all over again.
+			var standIn = jQuery.extend({}, ship);
+			standIn.pointCost = pristinePointCost;
+			gamedata.setShipsFromFaction(ship.faction, [standIn]);
 			baseShip = gamedata.getShipByType(ship.phpclass);
 		}
 
@@ -3134,6 +3503,16 @@ window.gamedata = {
 		//above, so this re-applies the kept/changed enhancements to the rebuilt ship)
 		lobbyEnhancements.apply(ship);
 
+		//Pre-battle damage (§5.3): the edit above replaced ship.systems wholesale from the
+		//blueprint, so the preview has to be painted onto the new objects. A flight whose
+		//SIZE changed - or a bulk row whose COUNT changed - is reshaped rather than wiped:
+		//shrinking drops the ordinals that no longer exist, growing pads the new ones from
+		//#1. Only the shrink is reported, because only a shrink loses anything.
+		var previousSize = (originalShipData && window.battleDamage)
+			? battleDamage.ordinalCount(originalShipData) : null;
+		var damageDiscarded = window.battleDamage
+			&& battleDamage.onShipRebuilt(ship, previousSize);
+
 		//The React window renders from this same mutated ship object, so no
 		//destroy/rebuild dance is needed - just re-render if it is open.
 		var wasVisible = window.shipWindowManagerReact
@@ -3145,9 +3524,40 @@ window.gamedata = {
 		if (wasVisible) {
 			window.shipWindowManagerReact.update();
 		}
+
+		if (damageDiscarded) {
+			confirm.warning("Size reduced - pre-battle damage on the units above the new size has been discarded.");
+		}
 		//gamedata.populateFleetDropdown();
 	},
 
+
+	/*The hull's PRISTINE point cost - what it costs with nothing bought on it.
+
+	  Normally that is simply the blueprint's, but gamedata.allShips is filled LAZILY, one faction
+	  at a time, as the player expands that faction in the store (onFactionClicked -> parseShips).
+	  Loading a saved fleet never triggers that, so a loaded ship routinely has no blueprint at all -
+	  which is what the "Loaded fleets may not have their faction set yet" fallbacks below are about.
+
+	  With no blueprint, derive it from the ship rather than falling back to ship.pointCost. Every
+	  path that writes pointCost folds the enhancement cost INTO it - doBuyShip and doEditShip store
+	  the buy dialog's total, doLoadFleet adds the saved enhvalue back on - and pointCostEnh /
+	  pointCostEnh2 hold exactly that folded-in amount, so subtracting them is correct on a bought,
+	  loaded or already-edited ship alike.
+
+	  This is not cosmetic. The edit dialog totals as base + enhancements, so a "base" that already
+	  contains the enhancements counts them twice: saved fleet 55 (Primus, hull 830 + 85 of
+	  enhancements = 915) opened its edit window at 1000 and cost 1000 if accepted unchanged.*/
+	getPristinePointCost: function getPristinePointCost(ship) {
+		var blueprint = gamedata.getShipByType(ship.phpclass);
+		if (blueprint) return blueprint.pointCost;
+
+		var base = ship.pointCost - (ship.pointCostEnh || 0) - (ship.pointCostEnh2 || 0);
+		//a flight's pointCost is scaled to the size it was bought or loaded at (doBuyShip,
+		//doLoadFleet), while the blueprint cost this stands in for is always the six-craft one
+		if (ship.flight && ship.flightSize > 0) base = (base / ship.flightSize) * 6;
+		return Math.round(base);
+	},
 
 	getShipByType: function getShipByType(type) {
 
@@ -3209,8 +3619,21 @@ window.gamedata = {
 			return;
 		}
 
+		//Pre-battle damage (D1): no rule gates it, so the Ready confirm is where a fleet
+		//carrying damaged or crippled units says so out loud. confirm.confirm renders HTML.
+		var readyMessage = "Are you sure you wish to ready your fleet?";
+		if (window.battleDamage && battleDamage.fleetHasDamage()) {
+			//The dialog around this is .confirm.error - 16px bold #c94b1d - which shouted
+			//the whole sentence in warning colours. Only NOTE: is the warning; the rest is
+			//ordinary body text, so it carries its own class (see confirm.css).
+			readyMessage += '<span class="prebattle-note">'
+				+ '<span class="prebattle-note-label">WARNING:</span> '
+				+ 'This fleet includes units with pre-battle damage and/or critical effects.'
+				+ '</span>';
+		}
+
 		// Pass the submission function as a callback, not invoke it immediately
-		confirm.confirm("Are you sure you wish to ready your fleet?", function () {
+		confirm.confirm(readyMessage, function () {
 			selectedSlot.lastphase = -2;
 			ajaxInterface.submitGamedata();
 			slotElement.addClass("ready");
@@ -3245,26 +3668,22 @@ window.gamedata = {
 
 	},
 
+	//The save half now lives in client/savedFleets.js so game.php can drive it too
+	//(PREBATTLE_DAMAGE_PLAN.md §7.1). The load/dropdown/delete UI stays here, where its
+	//cachedFleets / fleetDropdownList / fleetDropdownButton closures are.
 	onSaveClicked: function onSaveClicked() {
-		$(".confirm").remove();
-
-		confirm.showSaveFleet(gamedata.doSaveFleet);
+		savedFleets.saveCurrentFleet();
 	},
 
 	doSaveFleet: function doSaveFleet() {
-		var fleetname = $(".confirm input[name='fleetname']").val();
-		var isPublic = $("#fleetPublicCheckbox").is(":checked"); // ✅ true/false
+		savedFleets.doSaveCurrentFleet();
+	},
 
-		$(".confirm").remove();
-
-		// Submit fleet, then refresh list when done
-		ajaxInterface.submitSavedFleet(fleetname, isPublic, function (response) {
-			ajaxInterface.getSavedFleets(function (fleets) {
-				cachedFleets = fleets;
-				gamedata.populateFleetDropdown(cachedFleets);
-			});
-
-			confirm.warning(fleetname + " saved!. <br>(ID #" + response.listId + ")")
+	//Called by savedFleets after a successful save so the dropdown reflects the new fleet.
+	refreshSavedFleets: function refreshSavedFleets() {
+		ajaxInterface.getSavedFleets(function (fleets) {
+			cachedFleets = fleets;
+			gamedata.populateFleetDropdown(cachedFleets);
 		});
 	},
 	/*
@@ -3321,11 +3740,13 @@ window.gamedata = {
 			item.addEventListener('mouseleave', () => item.style.background = 'white');
 
 			// ✅ Load fleet if you click anywhere on item (except lock/delete)
+			//Pre-battle damage (D3): the confirm carries a checkbox per kind of saved
+			//state this fleet actually holds, each defaulted on.
 			item.addEventListener('click', () => {
-				confirm.confirm("Load your '" + fleet.name + "' fleet?", () => {
-					gamedata.loadSavedFleet(fleet.id);
+				confirm.showLoadFleet(fleet.name, { hasDamage: fleet.hasDamage, hasCrits: fleet.hasCrits }, (choices) => {
+					gamedata.loadSavedFleet(fleet.id, choices);
 					fleetDropdownList.style.display = 'none';
-					fleetDropdownButton.textContent = 'Load a Saved Fleet';
+					fleetDropdownButton.textContent = 'LOAD A FLEET';
 				});
 			});
 
@@ -3358,6 +3779,21 @@ window.gamedata = {
 			if (fleet.userid == 0) {
 				nameSpan.style.marginLeft = '6px';
 			}
+
+			//Pre-battle damage: badge a fleet that carries battle damage and/or critical
+			//effects, so the state is visible before the load dialog asks about it.
+			let damageSpan = null;
+			if (fleet.hasDamage || fleet.hasCrits) {
+				damageSpan = document.createElement('span');
+				//Same icon as gamedata.damagedShipBadge, so the dropdown and the fleet list
+				//read as one idea - change BOTH or neither.
+				damageSpan.className = 'fa-solid fa-screwdriver-wrench';
+				damageSpan.style.color = '#c0392b';
+				damageSpan.style.marginLeft = '6px';
+				damageSpan.title = fleet.hasDamage && fleet.hasCrits
+					? 'Carries battle damage and critical effects'
+					: (fleet.hasDamage ? 'Carries battle damage' : 'Carries critical effects');
+			}
 			// Points
 			const pointsSpan = document.createElement('span');
 			pointsSpan.textContent = `${fleet.points}pts`;
@@ -3370,6 +3806,7 @@ window.gamedata = {
 
 			if (fleet.userid !== 0) item.appendChild(lockSpan);
 			item.appendChild(nameSpan);
+			if (damageSpan) item.appendChild(damageSpan);
 			item.appendChild(spacer);
 			item.appendChild(pointsSpan);
 
@@ -3426,17 +3863,13 @@ window.gamedata = {
 		const fleet = cachedFleets.find(f => f.id === listId);
 
 		if (slot) { //sometimes slot hasn't been selected yet.
-			var slotPoints = slot.points ?? 0;
+			//getMaxPoints, not slot.points: a Fleet Builder slot is always unlimited, and
+			//the typed cap is what the rest of the panel is already enforcing.
+			var slotPoints = gamedata.getMaxPoints();
 
 			if (slotPoints === -1) return true; // Unlimited points
 
-			var spentPoints = 0;
-			for (var i in gamedata.ships) {
-				var lship = gamedata.ships[i];
-				if (lship.slot != gamedata.selectedSlot) continue;
-				spentPoints += lship.pointCost;
-			}
-			pointsAvailable = slotPoints - spentPoints;
+			pointsAvailable = slotPoints - gamedata.fleetCost();
 		}
 		if (!fleet) return false;
 		if (fleet.points > pointsAvailable) {
@@ -3447,80 +3880,101 @@ window.gamedata = {
 	},
 
 
-	loadSavedFleet: function loadSavedFleet(listId) {
+	//`choices` (optional) = {includeDamage, includeCriticals} from the load confirm (D3).
+	loadSavedFleet: function loadSavedFleet(listId, choices) {
 
 		var canAfford = gamedata.checkFleetCost(listId);
 
 		if (canAfford) {
 
-			ajaxInterface.loadSavedFleet(listId, function (response) {
+			ajaxInterface.loadSavedFleet(listId, choices || {}, function (response) {
 				//console.log("AJAX response:", ships); // debug raw response
 
 				if (response.ships && Array.isArray(response.ships) && response.ships.length > 0) {
-					gamedata.doLoadFleet(response.ships);
-					fleetDropdownButton.textContent = 'Load a Saved Fleet';
+					gamedata.doLoadFleet(response.ships, response.critDesc, response.critTransient);
+					fleetDropdownButton.textContent = 'LOAD A FLEET';
 					//confirm.warning("Fleet loaded!");
 				} else {
 					console.error("Load failed:", response.ships);
-					confirm.warning("Failed to load fleet.");
+					confirm.fleetNotice("That fleet could not be loaded.");
 				}
 			});
 		} else {
-			confirm.warning("You cannot afford this fleet!");
+			confirm.fleetNotice("You cannot afford this fleet.");
 			return;
 		}
 	},
 
 	loadSavedFleetById: function loadSavedFleetById(listId) {
-		confirm.confirm("Load saved fleet with #ID " + listId + "?", () => {
-			gamedata.doLoadSavedFleetById(listId);
+		//A fleet loaded by typed ID is not in cachedFleets, so whether it carries damage
+		//or criticals is unknown here - showLoadFleet offers both boxes, and a flag for a
+		//kind the fleet does not have is simply a no-op server-side.
+		confirm.showLoadFleet("saved fleet with #ID " + listId, {}, (choices) => {
+			gamedata.doLoadSavedFleetById(listId, choices);
 			fleetDropdownList.style.display = 'none';
-			fleetDropdownButton.textContent = 'Load a Saved Fleet';
+			fleetDropdownButton.textContent = 'LOAD A FLEET';
 		});
 	},
 
 
-	doLoadSavedFleetById: function doLoadSavedFleetById(listId) {
-		ajaxInterface.loadSavedFleet(listId, function (response) {
+	doLoadSavedFleetById: function doLoadSavedFleetById(listId, choices) {
+		ajaxInterface.loadSavedFleet(listId, choices || {}, function (response) {
 			//console.log("AJAX response:", response.ships); // debug raw response
 			if (response.list && !response.list.isPublic && response.list.userid !== gamedata.thisplayer) {
-				confirm.warning("Fleet cannot be loaded as it was not set-up to be shared by its owner");
+				confirm.fleetNotice("That fleet was not shared by its owner, so it cannot be loaded.");
 				return;
 			}
 
 			//Need to add a check here of points here as it's not checked via Saved Fleet List, and return error if it's over what's allowed.
-			const slot = playerManager.getSlotById(gamedata.selectedSlot);
-
-			var spentPoints = 0;
-			for (var i in gamedata.ships) {
-				var lship = gamedata.ships[i];
-				if (lship.slot != gamedata.selectedSlot) continue;
-				spentPoints += lship.pointCost;
-			}
-			const pointsAvailable = slot.points - spentPoints;
+			//Same cap and same fleet-cost sum as the buy panel (getMaxPoints/fleetCost), so
+			//a Fleet Builder limit applies to a fleet loaded by #ID too.
+			const maxPoints = gamedata.getMaxPoints();
+			const pointsAvailable = maxPoints - gamedata.fleetCost();
 			if (response.list && pointsAvailable < response.list.points) {
-				if (slot.points !== -1) { // Unlimited points				
-					confirm.warning("Failed to load fleet, you do not have enough points available (" + response.list.points + "pts needed)");
+				if (maxPoints !== -1) { // Unlimited points
+					confirm.fleetNotice("Not enough points available for this fleet (" + response.list.points + "pts needed).");
 					return;
 				}
 			}
 
 			if (response.ships && Array.isArray(response.ships) && response.ships.length > 0) {
-				gamedata.doLoadFleet(response.ships);
-				fleetDropdownButton.textContent = 'Load a Saved Fleet';
+				gamedata.doLoadFleet(response.ships, response.critDesc, response.critTransient);
+				fleetDropdownButton.textContent = 'LOAD A FLEET';
 				//confirm.warning("Fleet loaded!");
 			} else {
 				if (response.ships) console.error("Load failed:", response.ships);
-				confirm.warning("Failed to load fleet, ID may not exist.");
+				confirm.fleetNotice("No fleet found with that ID.");
 			}
 		});
 	},
 
-	doLoadFleet: function doLoadFleet(fleet) {
+	doLoadFleet: function doLoadFleet(fleet, critDesc, critTransient) {
 		if (!Array.isArray(fleet)) {
 			console.error("doLoadFleet: expected array, got", fleet);
 			return;
 		}
+
+		/* 'Allow Mines' is a per-scenario rule, and a saved fleet outlives the game it was
+		   saved from: a fleet built where mines were allowed will happily carry its mine
+		   bulks into one where the buy panel never offers them (constructStore skips mines
+		   on the same test). Refuse the WHOLE load rather than quietly dropping the
+		   offending units - the fleet's stored `points` counted them, so a partial load
+		   would put a fleet on the table that the player never saved, at a cost the
+		   affordability check has already approved. Checked here because doLoadFleet is the
+		   one funnel both load paths (dropdown and load-by-#ID) come through. */
+		if (gamedata.rules && !gamedata.rules.allowMines && !gamedata.rules.fleetTest) {
+			for (var m = 0; m < fleet.length; m++) {
+				if (fleet[m] && fleet[m].mine) {
+					confirm.fleetNotice("Saved fleet contains units not available for this scenario");
+					return;
+				}
+			}
+		}
+
+		//Pre-battle damage (D3): kinds this fleet HAD that the player chose not to load.
+		//Reported once, after the load, so a mis-click is obvious rather than silent.
+		var declinedDamage = false;
+		var declinedCriticals = false;
 
 		for (var i = 0; i < fleet.length; i++) {
 			var listShip = fleet[i];
@@ -3549,11 +4003,43 @@ window.gamedata = {
 				ship.pointCost = (ship.pointCost / 6) * ship.flightSize;
 			}
 
+			//pointCost is a SINGLE unit's cost with enhancements folded in (see
+			//rowPointCost), and a saved row stores the two apart - so add them back.
+			//For a bulk row that is the PER-UNIT figure; rowPointCost multiplies up.
 			if (ship.pointCostEnh !== 0) {
 				ship.pointCost = ship.pointCost + ship.pointCostEnh;
 			}
 
+			/* Pre-battle damage (§6). The payload the server returned is ALREADY filtered
+			   to the player's choices - do NOT re-filter here, one filter server-side or
+			   the two can disagree about what actually gets written at buy time.
+			   preBattleAvailable is display-only and is dropped before the buy POST. */
+			if (window.battleDamage) {
+				//toPlainObject, not a bare assignment: an EMPTY payload comes back from PHP
+				//as the JSON array [], and an array silently drops sys/ftr again the moment
+				//the buy POST stringifies it (see battleDamage.get).
+				ship.preBattleDamage = battleDamage.toPlainObject(listShip.preBattleDamage);
+				ship.preBattleCritDesc = critDesc || {};
+				//{critClass: true} for the one-turn ones, so the editable critical list can
+				//label them "turn 1 only" instead of showing them as lasting wounds.
+				ship.preBattleCritTransient = critTransient || {};
+
+				var available = listShip.preBattleAvailable || {};
+				var loaded = battleDamage.contents(ship.preBattleDamage);
+				if (available.damage && !loaded.damage) declinedDamage = true;
+				if (available.criticals && !loaded.criticals) declinedCriticals = true;
+
+				battleDamage.applyToShip(ship);
+			}
+
 			gamedata.updateFleet(ship);
+		}
+
+		if (declinedDamage || declinedCriticals) {
+			var skipped = [];
+			if (declinedDamage) skipped.push("battle damage");
+			if (declinedCriticals) skipped.push("critical effects");
+			confirm.fleetNotice("Fleet loaded. Saved " + skipped.join(" and ") + " were not applied.");
 		}
 
 		//gamedata.populateFleetDropdown();
@@ -3572,12 +4058,12 @@ window.gamedata = {
 					if (fleet.id == response.id) cachedFleets[i].isPublic = response.newStatus;
 				}
 
-				fleetDropdownButton.textContent = 'Load a Saved Fleet';
+				fleetDropdownButton.textContent = 'LOAD A FLEET';
 				gamedata.populateFleetDropdown(cachedFleets);
-				confirm.warning("Fleet availability changed to " + setting + "!");
+				confirm.fleetNotice("Fleet availability changed to " + setting + ".");
 			} else {
 				console.error("Load failed:", ships);
-				confirm.warning("Failed to change fleet availability");
+				confirm.fleetNotice("Failed to change fleet availability.");
 			}
 		});
 	},
@@ -3589,11 +4075,11 @@ window.gamedata = {
 				// ✅ Only update UI after server confirms deletion
 				cachedFleets = cachedFleets.filter(f => f.id !== listId);
 				gamedata.populateFleetDropdown(cachedFleets);
-				//fleetDropdownButton.textContent = 'Load a Saved Fleet';
-				confirm.warning(fleetName + " deleted!");
+
+				confirm.fleetNotice(fleetName + " deleted.");
 			} else {
 				console.error("Delete failed:", response);
-				confirm.warning("Failed to delete " + fleetName + ".");
+				confirm.fleetNotice("Failed to delete " + fleetName + ".");
 			}
 		});
 	},
@@ -4899,35 +5385,100 @@ jQuery(function () {
 		return $(element)[0].getBoundingClientRect(); //jQuery-wrapped element
 	};
 
+	/*Which popup is open, and is it the STICKY (interactive) kind? Mirrors
+	  PhaseStrategy.systemInfoState: a hover popup is dismissed by mouse-out, an
+	  interactive menu survives until it is explicitly closed - otherwise moving the
+	  cursor off the icon to reach the menu's own buttons would close it.*/
+	var systemInfoState = null;
+
 	var showInfo = function (payload) {
+		if (systemInfoState && systemInfoState.menu) return;   //a sticky menu wins over hover
 		uiManager.showSystemInfo({
 			ship: payload.ship,
 			selectedShip: null,
 			system: payload.system,
 			boundingBox: getBoundingBox(payload.element)
 		});
+		systemInfoState = { menu: false };
+	};
+
+	/*Pre-battle damage (PREBATTLE_DAMAGE_PLAN.md §5.2) gave the lobby its first
+	  ACTIONABLE system menu, so a click now opens SystemInfoMenu when the system has
+	  something to offer (canDoAnything, via canShowSystemInfoMenu) and falls back to the
+	  read-only popup otherwise. Mirrors PhaseStrategy.showSystemInfo's menu branch.*/
+	var showMenu = function (payload) {
+		uiManager.showSystemInfoMenu({
+			ship: payload.ship,
+			selectedShip: null,
+			system: payload.system,
+			boundingBox: getBoundingBox(payload.element)
+		});
+		systemInfoState = { menu: true };
+	};
+
+	var hideInfo = function (force) {
+		if (!systemInfoState) return;
+		if (systemInfoState.menu && !force) return;
+		uiManager.hideSystemInfo();
+		systemInfoState = null;
 	};
 
 	window.uiEvents.setHandler(function (name, payload) {
 		switch (name) {
 			case 'SystemMouseOver':
 				if (payload.showInfo === false) {
-					uiManager.hideSystemInfo();
+					hideInfo(false);
 				} else {
 					showInfo(payload);
 				}
 				break;
 			case 'SystemClicked': //tap/click = show info too (the touch path relies on it)
-				showInfo(payload);
+				if (uiManager.canShowSystemInfoMenu(payload.ship, payload.system)) {
+					showMenu(payload);
+				} else {
+					hideInfo(true);
+					showInfo(payload);
+				}
+				break;
+			//Pre-battle damage: clicking a bought flight's fighter health bar opens the
+			//synthetic per-ordinal fighter menu in the same #systemInfoReact root.
+			case 'FighterDamageClicked':
+				uiManager.showFighterDamageMenu({
+					ship: payload.ship,
+					fighter: payload.fighter,
+					boundingBox: getBoundingBox(payload.element)
+				});
+				systemInfoState = { menu: true };
+				break;
+			//Same idea for a bought bulk mine purchase: one row per copy, structure only.
+			case 'MineDamageClicked':
+				uiManager.showMineDamageMenu({
+					ship: payload.ship,
+					boundingBox: getBoundingBox(payload.element)
+				});
+				systemInfoState = { menu: true };
 				break;
 			case 'SystemMouseOut':
+				hideInfo(false);
+				break;
 			case 'CloseSystemInfo':
-				uiManager.hideSystemInfo();
+				hideInfo(true);
 				break;
 			case 'CloseShipWindow':
 				window.shipWindowManagerReact.close(payload.ship);
+				hideInfo(true);
 				break;
 			//everything else: game-only events with no meaning in the lobby
 		}
+	});
+
+	/*A sticky menu has no ✕ and the lobby has no webglScene to relay CloseSystemInfo,
+	  so a click anywhere outside it dismisses it. System icons and the menu's own body
+	  stop propagation, so this only sees clicks on the page behind them - the closest()
+	  test is belt-and-braces for anything inside the menu that does not.*/
+	$(document).on('click.preBattleDamageMenu', function (e) {
+		if (!systemInfoState || !systemInfoState.menu) return;
+		if (e.target && e.target.closest && e.target.closest('#systemInfoReact')) return;
+		hideInfo(true);
 	});
 });

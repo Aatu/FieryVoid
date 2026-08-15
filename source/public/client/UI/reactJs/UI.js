@@ -10,6 +10,8 @@ import SystemInfo from "./system/SystemInfo";
 import SystemInfoMenu from "./system/SystemInfoMenu";
 import { canDoAnything } from "./system/SystemInfoButtons";
 import ShipWindowsContainer from "./shipWindow/ShipWindowsContainer";
+import FighterDamageMenu from "./shipWindow/FighterDamageMenu";
+import MineDamageMenu from "./shipWindow/MineDamageMenu";
 
 class UIManager {
 
@@ -95,6 +97,20 @@ class UIManager {
 
     canShowSystemInfoMenu(ship, system) {
         return canDoAnything(ship, system);
+    }
+
+    //Pre-battle damage: the synthetic per-ordinal fighter editor for a bought lobby
+    //flight. Reuses the #systemInfoReact root, so opening it replaces any system popup.
+    showFighterDamageMenu(args) {
+        const root = this.getRoot("#systemInfoReact");
+        if (root) root.render(<FighterDamageMenu {...args} />);
+    }
+
+    //Pre-battle damage: the synthetic per-copy editor for a bought bulk mine purchase.
+    //Same root, same lifecycle as the fighter one.
+    showMineDamageMenu(args) {
+        const root = this.getRoot("#systemInfoReact");
+        if (root) root.render(<MineDamageMenu {...args} />);
     }
 
     renderShipWindows(args) {

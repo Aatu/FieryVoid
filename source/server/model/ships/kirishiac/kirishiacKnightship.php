@@ -98,7 +98,7 @@ class KirishiacKnightship extends HeavyCombatVessel{
 		$hOrbitalA->addOrbitalWeapon($torpA);
         $hOrbitalA->addOrbitalSystem($selfRepairA);
 		$hOrbitalA->setStructureHome(0); //primary block, shown on the left section	
-		$hOrbitalA->addTag('HVYORBITAL');			
+		$hOrbitalA->addTag('Heavy Orbital');			
 		$this->addLeftSystem($torpA);
 		$this->addLeftSystem($hOrbitalA);
 		$this->addLeftSystem($selfRepairA);
@@ -110,7 +110,7 @@ class KirishiacKnightship extends HeavyCombatVessel{
 		$hOrbitalB->addOrbitalWeapon($torpB);
         $hOrbitalB->addOrbitalSystem($selfRepairB);
 		$hOrbitalB->setStructureHome(0); //primary block, shown on the right section
-		$hOrbitalB->addTag('HVYORBITAL');						
+		$hOrbitalB->addTag('Heavy Orbital');						
 		$this->addRightSystem($torpB);
 		$this->addRightSystem($hOrbitalB);
 		$this->addRightSystem($selfRepairB);
@@ -135,14 +135,14 @@ class KirishiacKnightship extends HeavyCombatVessel{
 			1=> array( //Fwd
 				4 => "Thruster",
                 7 => "Orbital",
-				12 => "TAG:HVYORBITAL", //tag search is ship-wide: finds orbitals A-C on the left/front/right display sections; beams are only hit through the orbital sub-chart
+				12 => "TAG:Heavy Orbital", //tag search is ship-wide: finds orbitals A-C on the left/front/right display sections; beams are only hit through the orbital sub-chart
 				18 => "Structure",
 				20 => "Primary",
 			),
 			2=> array( //Aft
 				4 => "Thruster",
                 7 => "Orbital",
-				12 => "TAG:HVYORBITAL", //tag search is ship-wide: finds orbitals A-C on the left/front/right display sections; beams are only hit through the orbital sub-chart
+				12 => "TAG:Heavy Orbital", //tag search is ship-wide: finds orbitals A-C on the left/front/right display sections; beams are only hit through the orbital sub-chart
 				18 => "Structure",
 				20 => "Primary",
 			),

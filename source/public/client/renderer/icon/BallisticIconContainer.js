@@ -11,6 +11,14 @@ window.BallisticIconContainer = function () {
 		this.hexNumberIcons = [];
 		this.hexNumbersGenerated = false;
 
+		/* Scene objects that depict something STABLE - a terrain unit's footprint, a splash area, a
+		   reinforcement marker - keyed so they are rebuilt only when what they depict changes.
+		   consumeGamedata runs on every server poll AND on every hex targeted, ship targeted and
+		   ballistic-line toggle; without this, clicking a target hex tore down and rebuilt every
+		   terrain overlay on the map. See syncSceneObject. */
+		this.sceneObjects = new Map();
+		this.iconsVisible = true;
+
 		// Track lines visibility state explicitly rather than inferring from existing sprites
 		this.friendlyLinesVisible = false;
 		this.enemyLinesVisible = false;
@@ -23,6 +31,7 @@ window.BallisticIconContainer = function () {
 		});
 
 		this.ballisticLineIcons.forEach(icon => icon.used = false);
+		this.sceneObjects.forEach(entry => entry.used = false);
 
 		const ballistics = replayData ?? weaponManager.getAllFireOrdersForAllShipsForTurn(gamedata.turn, 'ballistic');
 
@@ -49,12 +58,23 @@ window.BallisticIconContainer = function () {
 			if (!icon.used) {
 				if (icon.launchSprite) this.scene.remove(icon.launchSprite.mesh);
 				if (icon.targetSprite) {
-					if (icon.targetId !== -1) {
-						iconContainer.getById(icon.targetId).mesh.remove(icon.targetSprite.mesh);
-					} else {
-						this.scene.remove(icon.targetSprite.mesh);
-					}
+					// getById is a bare lookup on ShipIconContainer.iconsAsObject and returns undefined
+					// for an id it does not hold, so this used to be a crash waiting for a target ship
+					// to leave the board between polls. Fall back to the scene, which is where a sprite
+					// with no parent icon was added.
+					const targetIcon = icon.targetId !== -1 ? iconContainer.getById(icon.targetId) : null;
+
+					if (targetIcon) targetIcon.mesh.remove(icon.targetSprite.mesh);
+					else this.scene.remove(icon.targetSprite.mesh);
 				}
+
+				// scene.remove() does not free anything - THREE frees a material on dispose(). Every
+				// sprite carries its OWN cloned ShaderMaterial (webglSprite.create), and these are
+				// rebuilt on every poll, so skipping this leaked one material per hex per refresh.
+				// Textures are shared statics (see BallisticSprite's caches) and must NOT be disposed.
+				releaseSprite(icon.launchSprite);
+				if (icon.targetSprite !== icon.launchSprite) releaseSprite(icon.targetSprite);
+
 				return false;
 			}
 			return true;
@@ -63,7 +83,54 @@ window.BallisticIconContainer = function () {
 		generateBallisticLines.call(this);
 		generateTerrainHexes.call(this, gamedata);
 		generateReinforcementHexes.call(this, gamedata);
+		pruneSceneObjects.call(this);
 	};
+
+	//Material only: geometry is shared per size (webglSprite's cache) and textures are shared statics.
+	function releaseSprite(sprite) {
+		if (sprite) sprite.destroy();
+	}
+
+	/* A scene object rebuilt only when its `signature` changes. `build` returns
+	   { object, release } or null for "nothing to draw"; `release` frees whatever the object owns. */
+	function syncSceneObject(key, signature, build) {
+		const existing = this.sceneObjects.get(key);
+
+		if (existing && existing.signature === signature) {
+			existing.used = true;
+			return existing.object;
+		}
+
+		if (existing) releaseSceneObject.call(this, existing);
+
+		const built = build();
+
+		if (!built) {
+			this.sceneObjects.delete(key);
+			return null;
+		}
+
+		built.object.visible = this.iconsVisible;
+		this.scene.add(built.object);
+		this.sceneObjects.set(key, { object: built.object, release: built.release, signature: signature, used: true });
+
+		return built.object;
+	}
+
+	function releaseSceneObject(entry) {
+		this.scene.remove(entry.object);
+		entry.release(entry.object);
+	}
+
+	//Whatever nothing claimed this pass has gone from the board.
+	function pruneSceneObjects() {
+		this.sceneObjects.forEach((entry, key) => {
+			if (entry.used) return;
+
+			releaseSceneObject.call(this, entry);
+			this.sceneObjects.delete(key);
+		});
+	}
 
 	function generateBallisticLines() {
 		const oldIcons = this.ballisticLineIcons;
@@ -73,7 +140,10 @@ window.BallisticIconContainer = function () {
 
 		this.ballisticLineIcons = oldIcons.filter(icon => {
 			if (!icon.used) {
-				if (icon.lineSprite) this.scene.remove(icon.lineSprite.mesh);
+				if (icon.lineSprite) {
+					this.scene.remove(icon.lineSprite.mesh);
+					icon.lineSprite.destroy(); //same as the hex sprites: remove() frees nothing
+				}
 				return false;
 			}
 
@@ -87,16 +157,126 @@ window.BallisticIconContainer = function () {
 		});
 	}
 
+	/* Fill and border for a hex region, matched to the per-hex sprite textures they replace: the same
+	   colours at the same alphas BallisticSprite.getFillColorByType / getStrokeColorByType bake into
+	   the 512px hex textures, so a blanket reads as the tint the individual hexes used to.
+
+	   Tune HERE, not in the colours: a THREE colour carries no alpha, and setStyle parses a fourth
+	   component in "rgb(r,g,b,a)" and then silently DISCARDS it, so softening an edge means the
+	   opacity constant, never the colour string. */
+	const HEX_REGION_COLOURS = {
+		hexOrange: 0xfa6e05,
+		hexRed: 0xe6140a,
+		hexBlue: 0x00b8e6,
+		hexGreen: 0x00cc00,
+		hexYellow: 0xffff00,
+		hexPurple: 0x7f00ff,
+		hexWhite: 0xffffff
+	};
+	const HEX_REGION_FILL_OPACITY = 0.10;   //the 0.10 fill baked into the hex textures
+	const HEX_REGION_BORDER_OPACITY = 0.40; //lifted by hand; 0.40 is what the textures stroke at
+	const SPLASH_REGION_DIM = 0.7;          //splash hexes were drawn at sprite opacity 0.7 - "a bit less bright"
+	const HEX_REGION_Z = -101;              //just behind the hex sprites at -100, well clear of the grid at -500
+
+	/* A region's rim has to be the same THICKNESS as the rim of the hex sprite sitting in the middle
+	   of it, and a sprite's rim is baked into its texture - so it is a fixed number of game units and
+	   it scales with the map. A one-device-pixel line (the ship arcs' convention, and what these
+	   regions used at first) is 3.4x too thin at zoom 1 and drifts further at every other zoom, which
+	   reads as two different kinds of edge rather than one shape.
+
+	   Derived rather than eyeballed: BallisticSprite hands HexagonTexture.renderHexGrid a lineWidth
+	   of 10 on a 512px canvas whose hexagon has a circumradius of 512/4/cos(30) = 147.8px, and that
+	   texture is mapped onto a hexagon of circumradius Config.HEX_SIZE. So the stroke is
+	   10 x HEX_SIZE / 147.8 game units - 3.383 at the standard HEX_SIZE of 50 - and this follows
+	   HEX_SIZE if it ever changes. Read lazily: Config comes from an inline script in game.php that
+	   has not necessarily run when this file is evaluated. */
+	const SPRITE_TEXTURE_SIZE = 512;  //BallisticSprite.TEXTURE_SIZE
+	const SPRITE_STROKE_PIXELS = 10;  //the lineWidth it passes to renderHexGrid
+
+	function getHexSpriteStrokeWidth() {
+		const textureHexRadius = SPRITE_TEXTURE_SIZE / 4 / Math.cos(30 * Math.PI / 180);
+
+		return SPRITE_STROKE_PIXELS * (window.Config.HEX_SIZE / textureHexRadius);
+	}
+
+	/* A patch of grid hexes as ONE blanket polygon with a hex-true outline, instead of a textured
+	   quad per hex. Hexes in a radius-N patch grow with N SQUARED while the boundary grows with N:
+	   a radius-5 splash is 91 hexes but 66 boundary points, and it draws in two calls rather than 91.
+
+	   The region's own coordinates come out as game-space deltas from the centre hex (see
+	   HexRegion.buildRegionFromHexes), so placing it is just the centre hex's game position. No
+	   rotation, so none of ShipIcon's facing-rounding hazards apply; no grid-lock either, since these
+	   hang off the scene rather than off an icon that rescales with zoom. */
+	function buildHexRegionOverlay(centreHex, hexes, type, dim) {
+		const colour = HEX_REGION_COLOURS[type];
+		if (colour === undefined) return null; //hexClear and the 'ship' fallback have no region form
+
+		const loops = window.HexRegion.buildRegionFromHexes(centreHex, hexes, this.coordinateConverter.getHexDistance());
+		if (!loops.length) return null;
+
+		const overlay = window.HexRegion.buildOverlay(
+			loops,
+			colour, HEX_REGION_FILL_OPACITY * dim,
+			colour, HEX_REGION_BORDER_OPACITY * dim, getHexSpriteStrokeWidth()
+		);
+		const centre = this.coordinateConverter.fromHexToGame(centreHex);
+
+		overlay.position.set(centre.x, centre.y, HEX_REGION_Z);
+
+		return overlay;
+	}
+
+	/* Every hex a Terrain unit occupies, mirroring the server's authoritative
+	   SpecialWeapons::getTerrainOccupiedHexes (specialWeapons.php): the centre hex, plus either an
+	   irregular hexOffsets shape rotated to facing, or the FULL DISC of radius Huge.
+
+	   The disc is the correctness half of this change. The old per-sprite version called
+	   mathlib.getPerimeterHexes, which returns only the ring at exactly distance == Huge, so a
+	   radius-3 moon drew its centre hex and its rim with two unmarked rings in between - while the
+	   server counted all 37 hexes as occupied. */
+	function getTerrainOccupiedHexes(ship, position, facing) {
+		const hexes = [{ q: position.q, r: position.r }];
+
+		if (ship.hexOffsets && ship.hexOffsets.length) {
+			ship.hexOffsets.forEach(offset => hexes.push(mathlib.getRotatedHex(position, offset, facing)));
+		} else if (ship.Huge > 0) {
+			mathlib.getNeighbouringHexes(position, ship.Huge).forEach(hex => hexes.push(hex));
+		}
+
+		return hexes;
+	}
+
+	function generateTerrainHexes(gamedata) {
+		if (gamedata.gamephase === -1) return; //Don't bother during Deployment phase.
+
+		gamedata.ships.filter(ship => ship.Enormous && ship.shipSizeClass == 5 && !shipManager.isDestroyed(ship)).forEach(ship => {
+			const position = shipManager.getShipPosition(ship);
+			const move = shipManager.movement.getLastCommitedMove(ship);
+			const facing = move ? move.facing : 0;
+			const hexes = getTerrainOccupiedHexes(ship, position, facing);
+
+			//position + facing fix the footprint, so an unmoved moon is never rebuilt
+			syncSceneObject.call(this, 'terrain:' + ship.id, `${position.q},${position.r}|${facing}|${hexes.length}`, () => {
+				const overlay = buildHexRegionOverlay.call(this, position, hexes, 'hexWhite', 1);
+
+				return overlay && { object: overlay, release: window.HexRegion.dispose };
+			});
+		});
+	}
+
+	/* SUPERSEDED - kept for reference while the blanket version beds in. One BallisticSprite (one
+	   draw call, one cloned ShaderMaterial) per hex, rebuilt in full on every consumeGamedata, and
+	   drawing only the perimeter RING rather than the occupied disc.
+
 	function generateTerrainHexes(gamedata) {
 		if (gamedata.gamephase === -1) return; //Don't bother during Deployment phase.
 
 		gamedata.ships.filter(ship => ship.Enormous && ship.shipSizeClass == 5 && !shipManager.isDestroyed(ship)).forEach(ship => {
 			//gamedata.ships.filter(ship => ship.Huge > 0).forEach(ship => {
 			const position = shipManager.getShipPosition(ship);
-			/*const perimeterHexes = (ship.Huge === 2)
-				? mathlib.getPerimeterHexes(position, ship.Huge)
-				: mathlib.getNeighbouringHexes(position, ship.Huge);
-			*/
+			//const perimeterHexes = (ship.Huge === 2)
+			//	? mathlib.getPerimeterHexes(position, ship.Huge)
+			//	: mathlib.getNeighbouringHexes(position, ship.Huge);
 			const facing = shipManager.movement.getLastCommitedMove(ship).facing;
 			const perimeterHexes = mathlib.getPerimeterHexes(position, ship.Huge, ship.hexOffsets, facing); //Position + radius passed.
 
@@ -120,7 +300,12 @@ window.BallisticIconContainer = function () {
 			});
 		});
 	}
+	*/
 
+	/* Still one sprite per marker - a reinforcement hex is a single hex, so there is no region to
+	   build - but keyed like the regions so it survives a poll untouched. It was being rebuilt on
+	   every consumeGamedata, and a lettered BallisticSprite used to mint its own 512x512 canvas
+	   texture each time (now cached in BallisticSprite). */
 	function generateReinforcementHexes(gamedata) {
 		if (gamedata.gamephase == -1) return;
 
@@ -129,23 +314,37 @@ window.BallisticIconContainer = function () {
 			.forEach(ship => {
 				const pos = shipManager.movement.getPositionAtStartOfTurn(ship, gamedata.turn);
 
-				const posGame = this.coordinateConverter.fromHexToGame(pos);
-				const sprite = new BallisticSprite(posGame, "hexBlue", `Reinforcement`);
-				this.scene.add(sprite.mesh);
+				syncSceneObject.call(this, 'reinforcement:' + ship.id, `${pos.q},${pos.r}`, () => {
+					const sprite = new BallisticSprite(this.coordinateConverter.fromHexToGame(pos), "hexBlue", `Reinforcement`);
 
-				this.ballisticIcons.push({
-					id: -6,
-					shooterId: ship.id,
-					targetId: ship.id,
-					launchPosition: pos,
-					position: new hexagon.Offset(pos.x, pos.y),
-					launchSprite: sprite,
-					targetSprite: sprite,
-					used: true
+					return { object: sprite.mesh, release: () => releaseSprite(sprite) };
 				});
 			});
 	}
 
+
+	/* The whole affected area as one blanket, centre hex included. `size` is the radius in hexes and
+	   the area is the DISC of that radius - which is what the rules mean (IonFieldGenerator, for one,
+	   is documented as "affects all units within 2 hexes" and resolves with getShipsInDistance($target,
+	   2)) and what the old ring-of-sprites could not draw without one call per ring.
+
+	   The centre hex keeps its own target sprite, with the weapon's name on it, drawn on top at
+	   z = -100. */
+	function generateSplashHexes(id, position, shooterid, targetid, size, type) {
+		const centreHex = this.coordinateConverter.fromGameToHex(position);
+		const hexes = [{ q: centreHex.q, r: centreHex.r }].concat(mathlib.getNeighbouringHexes(centreHex, size));
+
+		syncSceneObject.call(this, 'splash:' + id, `${centreHex.q},${centreHex.r}|${size}|${type}`, () => {
+			const overlay = buildHexRegionOverlay.call(this, centreHex, hexes, type, SPLASH_REGION_DIM);
+
+			return overlay && { object: overlay, release: window.HexRegion.dispose };
+		});
+	}
+
+	/* SUPERSEDED - kept for reference while the blanket version beds in. One BallisticSprite per hex
+	   of the PERIMETER ring only (mathlib.getPerimeterHexes returns distance == radius, not <=), which
+	   is why callers passed a list of sizes - [1, 2] painted two rings to fill a radius-2 disc, while
+	   a lone [5] left the interior blank.
 
 	function generateSplashHexes(id, position, shooterid, targetid, size, type) {
 
@@ -172,6 +371,7 @@ window.BallisticIconContainer = function () {
 			});
 		});
 	}
+	*/
 
 
 	function createOrUpdateBallistic(ballistic, iconContainer, turn, replay = false) {
@@ -297,39 +497,38 @@ window.BallisticIconContainer = function () {
 				// but no targetPosition, which would make generateSplashHexes place hexes at 0,0 in Replay.
 				if (['Z - Antimine', 'Shredder', 'Energy Mine', 'Ion Storm', 'Jammer', '1-Blanket Shield', '3-Blanket Shade'].includes(modeName)) {
 					if ((gamedata.isMyOrTeamOneShip(shooter) || replay) && targetPosition) {
-						let sizes = [];
+						//A single RADIUS now, not a list of ring sizes: generateSplashHexes fills the whole
+						//disc in one region, so Ion Storm's old [1, 2] - ring 1 plus ring 2, the only way
+						//to cover a radius-2 area a ring at a time - is simply 2.
+						let size = 1; // Shredder / Energy Mine
 
 						switch (modeName) {
 							case 'Z - Antimine':
-								sizes = [3];
+								size = 3;
 								break;
 							case 'Ion Storm':
-								sizes = [1, 2];
+								size = 2;
 								break;
 							case 'Jammer':
-								sizes = [5];
+								size = 5;
 								break;
 							case '1-Blanket Shield':
-								sizes = [3];
+								size = 3;
 								break;
 							case '3-Blanket Shade':
-								sizes = [5];
+								size = 5;
 								break;
-							default: // Shredder / Energy Mine
-								sizes = [1];
 						}
 
-						sizes.forEach(size => {
-							generateSplashHexes.call(
-								this,
-								ballistic.id,
-								targetPosition,
-								ballistic.shooterid,
-								ballistic.targetid,
-								size,
-								match.type
-							);
-						});
+						generateSplashHexes.call(
+							this,
+							ballistic.id,
+							targetPosition,
+							ballistic.shooterid,
+							ballistic.targetid,
+							size,
+							match.type
+						);
 
 						splash = true;
 					}
@@ -417,6 +616,9 @@ window.BallisticIconContainer = function () {
 			icon.launchSprite?.hide();
 			icon.targetSprite?.hide();
 		});
+		//Remembered so a region built while hidden (consumeGamedata runs in both states) starts hidden.
+		this.iconsVisible = false;
+		this.sceneObjects.forEach(entry => entry.object.visible = false);
 		return this;
 	};
 
@@ -425,6 +627,8 @@ window.BallisticIconContainer = function () {
 			icon.launchSprite?.show();
 			icon.targetSprite?.show();
 		});
+		this.iconsVisible = true;
+		this.sceneObjects.forEach(entry => entry.object.visible = true);
 		return this;
 	};
 

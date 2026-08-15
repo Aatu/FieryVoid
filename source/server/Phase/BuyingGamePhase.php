@@ -308,6 +308,31 @@ public function addMoons($gameData, $dbManager, $smallCount, $mediumCount, $larg
     }
 }
 
+    /* The name a bulk purchase numbers its copies from - the row's own name, which the
+       lobby sets to the ship CLASS for mines and OSATs alike (neither bulk dialog offers
+       a name box).
+       A trailing " #<n>" is STRIPPED first: a fleet saved out of a live game keeps one
+       copy's real name ("Sentry #3") as the row name, and without this the next battle
+       would field "Sentry #3 #1". */
+    private function bulkNameStem($ship)
+    {
+        $stem = (isset($ship->name) && $ship->name !== '') ? $ship->name : $ship->shipClass;
+        $stem = preg_replace('/\s*#\d+$/', '', (string)$stem);
+
+        return ($stem === '') ? (string)$ship->shipClass : $stem;
+    }
+
+    /* "<stem> #N", N being the next number for this phpclass in this submission.
+       $counters is passed BY REFERENCE so the count runs on across separate purchases of
+       the same class. */
+    private function numberBulkCopy($stem, $phpclass, array &$counters)
+    {
+        if (!isset($counters[$phpclass])) $counters[$phpclass] = 0;
+        $counters[$phpclass]++;
+
+        return $stem . ' #' . $counters[$phpclass];
+    }
+
     public function getGamespace($gameData)
     {
         $gamespace = $gameData->gamespace; // Example value, could also be "-1x-1"
@@ -344,6 +369,16 @@ public function addMoons($gameData, $dbManager, $smallCount, $mediumCount, $larg
                 continue;
 
             $points = 0;
+
+            /* ⭐ Running "#N" counters for BULK-BOUGHT units, keyed by phpclass.
+               A bulk purchase is ONE lobby row minted into N ships here, so without this
+               every copy carries the identical name. Declared OUTSIDE the ship loop on
+               purpose: the count RUNS ON across the whole submission, so a second purchase
+               of the same class continues (#4, #5, ...) instead of restarting at #1.
+               Per phpclass, so mines and OSATs - and two different mine types - number
+               independently of each other. See numberBulkCopy() below. */
+            $bulkNameCounters = array();
+
             foreach ($ships as $ship){
 
                 if ($ship->slot != $slot->slot)
@@ -363,14 +398,32 @@ public function addMoons($gameData, $dbManager, $smallCount, $mediumCount, $larg
                 if ($ship->userid == $gameData->forPlayer){
 //Debug::log("bulkBuy " . $ship->bulkBuy);
                     $bulkBuy = isset($ship->bulkBuy) ? $ship->bulkBuy : 1;
-//Debug::log("bulkBuy2 " . $bulkBuy);                    
+//Debug::log("bulkBuy2 " . $bulkBuy);
+                    /* Pre-battle damage: validated ONCE per lobby unit, not once per copy.
+                       It depends only on $ship, so a bulk of 20 mines used to re-derive the
+                       identical payload 20 times; the loop below just picks its own ordinal
+                       out of the result. */
+                    $cleanPreBattle = PreBattleDamage::sanitise($ship, $ship->preBattleDamage ?? array());
+
+                    /* BaseShip::isBulkBought is the single definition of "bought through
+                       the bulk dialog" (mines + OSATs), mirrored client-side by
+                       gamedata.isBulkRow. Captured before the loop so the stem cannot pick
+                       up the suffix written on the previous pass. */
+                    $bulkNamed = $ship->isBulkBought();
+                    $bulkNameStem = $this->bulkNameStem($ship);
+
                     for ($m = 0; $m < $bulkBuy; $m++) {
-                        
+
+                        $copyName = $bulkNamed
+                            ? $this->numberBulkCopy($bulkNameStem, $ship->phpclass, $bulkNameCounters)
+                            : null;
+
                         // For mines, clone the ship object to save it individually without random movement
                         if (isset($ship->mine) && $ship->mine) {
                             $mineToSave = clone $ship;
                             $mineToSave->userid = $gameData->forPlayer; // Ensure ownership
-                            
+                            if ($copyName !== null) $mineToSave->name = $copyName;
+
                             // Deep clone systems so they don't share references and get overwritten
                             $clonedSystems = array();
                             foreach($ship->systems as $sys) {
@@ -378,11 +431,14 @@ public function addMoons($gameData, $dbManager, $smallCount, $mediumCount, $larg
                                 $clonedSystems[] = $clonedSys;
                             }
                             $mineToSave->systems = $clonedSystems;
-                            
+
                             $id = $dbManager->submitShip($gameData->id, $mineToSave, $gameData->forPlayer);
                             $mineToSave->id = $id; // Set the newly generated DB ID so it doesn't collide
                             $savedShip = $mineToSave;
                         } else {
+                            //Non-mine bulks (OSATs) submit the same object once per copy, so
+                            //the name is set on it each pass, before submitShip reads it.
+                            if ($copyName !== null) $ship->name = $copyName;
                             $id = $dbManager->submitShip($gameData->id, $ship, $gameData->forPlayer);
                             $ship->id = $id;
                             $savedShip = $ship;
@@ -397,7 +453,36 @@ public function addMoons($gameData, $dbManager, $smallCount, $mediumCount, $larg
                                 $dbManager->submitEnhancement($gameData->id, $id, $enhID, $enhNo, $enhName);
                             }
                         }
-                        
+
+                        /* Pre-battle damage & criticals (PREBATTLE_DAMAGE_PLAN.md §4.4).
+                           THE ONLY PLACE $ship->preBattleDamage is ever read - every other
+                           phase ignores the field, so a client cannot inject damage mid-game.
+                           Written at turn 0, which renders in the lobby, makes the structure
+                           cascade fire from Deployment on, and never matches a
+                           `turn == gamedata.turn` combat-log/replay filter.
+                           ⚠️ Systems are resolved against $ship, NOT $savedShip. For a
+                           bulk-bought mine $savedShip is a clone whose ->systems array was
+                           rebuilt 0-INDEXED, so BaseShip::getSystemById (an isset() on the
+                           key) would resolve the wrong system on it. The clone's systems
+                           keep their original ->id values, and the rows are keyed by the
+                           freshly minted $id, so every mine in the bulk still gets its own
+                           correct rows.
+                           $m + 1 is the MINE ORDINAL: a bulk mine purchase carries its
+                           damage per copy (bucket `mne`, keyed 1..bulkBuy), so each pass
+                           of this loop writes only its own copy's row. Null for anything
+                           that is not a mine, which skips that bucket entirely. */
+                        $mineOrdinal = (isset($ship->mine) && $ship->mine) ? ($m + 1) : null;
+                        if ($cleanPreBattle) {
+                            $parts = PreBattleDamage::toEntries($ship, $cleanPreBattle, $gameData->id, $id, $mineOrdinal);
+                            if ($parts['damage']) {
+                                $dbManager->submitDamages($gameData->id, PreBattleDamage::TURN, $parts['damage']);
+                            }
+                            if ($parts['criticals']) {
+                                $dbManager->submitCriticals($gameData->id, $parts['criticals'], PreBattleDamage::TURN);
+                            }
+                        }
+
+
                         // Check if ship uses variable flight size
                         if($ship instanceof FighterFlight){
                             $dbManager->submitFlightSize($gameData->id, $id, $ship->flightSize);

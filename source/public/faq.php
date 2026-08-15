@@ -36,11 +36,12 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <li><a href="#differences">DIFFERENCES FROM BABYLON 5 WARS</a></li>                        
         <li><a href="#mechanics">ADVANCED MECHANICS</a>
            <ul class="sub-list">
+                <li><a href="#savedfleets">Battle Damage &amp; Saving Fleets</a></li>
                 <li><a href="#boarding">Boarding Actions</a></li>
                 <li><a href="#called">Called Shots</a></li>
                 <li><a href="#delayed">Delayed Deployment</a></li>
                 <li><a href="#notifications">Discord Turn Notifications</a></li>
-                <li><a href="#elint">ELINT &amp; Electronic Warfare</a></li>
+                <li><a href="#elint">ELINT &amp; Electronic Warfare (EW)</a></li>
                 <li><a href="#enormous">Enormous Units</a></li>
                 <li><a href="#escorts">Fighter Escorts</a></li>
                 <li><a href="#hangar">Hangar Operations</a></li>
@@ -48,8 +49,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li><a href="#ladder">Online Ladder</a></li> 
                 <li><a href="#mines">Mines</a></li>                               
                 <li><a href="#ruler">Ruler Tool</a></li>
-                <li><a href="#savedfleets">Saved Fleets</a></li>
-                <li><a href="#skindancing">Skin Dancing</a></li>                                                       
+                <li><a href="#skindancing">Skin Dancing</a></li>                                                     
                 <li><a href="#stealth">Stealth Ships</a></li>
                 <li><a href="#terrain">Terrain</a></li>  
                 <li><a href="#useful">Useful Controls</a></li>
@@ -83,7 +83,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>There are no separate Power and Electronic Warfare (EW) phase. These are combined into a single Initial Orders phase, along with ballistic firing, which happens after the Initiative roll.</li>
         </ul>
 
-        <h3>Electronic Warfare (EW)</h3>
+        <h3>Electronic Warfare (EW) Summary</h3>
         <ul>
             <li>CCEW: Provides a lock on all enemy fighters within 10 hexes.</li>
             <li>Most activities requiring multiple EW points can now be done in fractions. For example, with Blanket DEW (5% per 4 points allocated), you may allocate 3 points and get around 4% Blanket DEW.</li>
@@ -91,12 +91,13 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>Disruption EW: CCEW is treated as one OEW target and affected appropriately.</li>
             <li>Disruption EW: Target locks weaker than 1 point but worth at least half a point provide half-lock (e.g., range penalties multiplied by 1.5 instead of being doubled).</li>
             <li>DEW Below 0: The B5 Wars rule about only a ship’s own DEW being able to bring its profile below 0 does not apply in Fiery Void.</li>
+            <li>Electronic Warfare is covered in more details in the 'ELINT &amp; Electronic Warfare (EW)' section below</li>
         </ul>
 
         <h3>Movement</h3>
         <ul>
             <li>Snap turn: Implemented as consecutive but separate turns. Turn delay is taken from the first turn only (shorten the first segment to shorten the snap turn).</li>
-            <li>Fighter Pivots: Fighters do not automatically return from pivots.</li>
+            <li>Extended turn: Movement turns across multiple game turns are not implemented.</li>
         </ul>
 
         <h3>Firing and Weapons</h3>
@@ -105,20 +106,114 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li><strong>Choosing Target Section:</strong> Automatically chosen based on target profiles and remaining structure. Fire from the same ship always hits same section, primary sections are avoided if alternatives exist.</li>
             <li><strong>Choosing System Hit:</strong> In-arc systems are prioritized before off-arc ones. Direction of damage is assumed to match the direction of the shot.</li>
             <li><strong>Targeting Fighters:</strong> The algorithm minimizes expected overall damage. You can manually target individual fighters, but it counts as a called shot with a -40% to-hit penalty.</li>
-            <li><strong>Fighter Dropouts:</strong> Occur during critical hits resolution (after firing at ships).</li>
+            <li><strong>Fighter Dropouts:</strong> These occur during critical hits resolution (after firing at ships).</li>
             <li><strong>Interception:</strong> Handled automatically, prioritizing the most powerful incoming shots. 1-turn recharge weapons intercept automatically if not fired; others require manual selection.</li>
-            <li><strong>Ballistic Damage:</strong> Resolved within relevant subphases instead of a separate ballistic damage subphase.</li>
-            <li><strong>Fighter Escorts:</strong> Fighters can intercept ballistics for ships they are escorting if they start and end their movement in the same hex (on Turn 1, any fighter may escort any ship).</li>
+            <li><strong>Ballistic Damage:</strong> Resolved within during normal fire resolution at the end of the turn, instead of a separate ballistic damage subphase.</li>
+            <li><strong>Fighter Escorts:</strong> Fighters can intercept ballistics for ships they are escorting if they start and end their movement in the same hex.</li>
             <li><strong>Ballistics & Jammers:</strong> Power and missile launches are simultaneous. Disabling jammers affects missile launches from the next turn, not the current one.</li>
             <li><strong>Multi-mode Weapons:</strong> Simplified — may switch freely (Guardian Array) or can be boosted for free during Initial Orders (EA Interceptors).</li>
             <li><strong>Piercing Attacks:</strong> Damage is split into 3 parts (or 2 if entry and exit are through the same section). Piercing vs. MCVs is reduced by 10%. EW penalties are already included in fire control values.</li>
-            <li><strong>Unit Positions:</strong> Range 0 targeting is allowed to compensate for imperfect relative positioning within the same hex.</li>
             <li><strong>Firing Modes:</strong> Always visible, meaning opponents can see missile types immediately.</li>
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
 
     <h2 id="mechanics">INFO ON ADVANCED MECHANICS</h2>
+
+        <h3 id="savedfleets" >Battle Damage &amp; Saving Fleets</h3>
+        <p>A saved fleet is a reusable shopping list: the units you bought, the enhancements and ammunition you gave them, and &mdash; if you want it &mdash;
+           the <b>battle damage and critical effects they are carrying</b>. That last part means you can save a fleet at the end of one battle and start the
+           next one with exactly the ships that survived it, dents and all, which is what makes linked scenarios and campaigns possible.
+           You can also apply damage by hand in Fleet Selection, if you want to set up a scenario without having fought the previous game.</p>
+
+        <ul>
+            <li><b>Saving a Fleet from Fleet Selection:</b> Build your fleet as normal, then click either of the <b>SAVE FLEET</b> buttons &mdash; one sits
+                at the top of the screen next to the fleet loader, the other at the bottom of the ship-buying panel. Give the fleet a name and click Save.
+                Your saved fleet is then available in this and every future game (as long as you have enough points to buy it) from the
+                <b>LOAD A FLEET</b> dropdown.
+                <ul class="circle-list">
+                    <li>Terrain is never saved, even if you placed it yourself &mdash; a fleet list is ships, and the scenario provides the scenery.</li>
+                    <li>Mines bought in bulk are saved as a bulk, so ten mines come back as ten mines rather than one.</li>
+                </ul>
+            </li>
+
+            <li><b>Loading a Saved Fleet:</b> Pick a slot, open the <b>LOAD A FLEET</b> dropdown and click the fleet you want. The whole fleet is bought
+                into your slot in one go. If the fleet costs more points than you have left, or contains units the scenario does not allow (mines in a
+                no-mines game, for example), the load is refused outright rather than partly applied.</li>
+
+            <li><b>Sharing Fleets and Loading with an ID:</b> Every saved fleet has a unique ID number. If the fleet is marked as shared &mdash; you can set
+                this when you save it, or toggle it later with the padlock symbol in the dropdown &mdash; you can give that ID to another player. They load
+                it by typing the number into the <b>Load Fleet by #ID</b> box and pressing Enter (or Go, on a phone). Fleets that have not been shared can
+                only be loaded by the player who saved them.</li>
+
+            <li><b>Saving a Fleet from a Game in Progress:</b> In any game, open the <b>SAVE FLEET</b> tab along the top of the log panel (next to LOG,
+                DECLARATIONS and GAME CHAT). It tells you how many of your units will be saved, then the <b>Save Current Fleet</b> button writes them out
+                as a normal saved fleet &mdash; but with all their accumulated damage and critical effects attached.
+                <ul class="circle-list">
+                    <li>The tab is available in <b>every phase</b>, and in finished games and replays too, so you can go back to a completed battle and
+                        save the winning side's survivors.</li>
+                    <li>Only <b>survivors</b> are saved. Destroyed ships, ships that docked into a hangar and left the battle, and mines you have already
+                        laid are all left out; the summary line tells you how many were excluded.</li>
+                    <li>Fighters are never saved as wrecks. If a flight of six lost two craft, it is saved as a flight of <b>four</b> damaged fighters
+                        &mdash; and because you are buying fewer craft next time, it costs proportionally less.</li>
+                    <li>By default only <b>lasting</b> wounds are saved. Tick <i>&quot;Also save temporary critical effects&quot;</i> if you want one-turn
+                        effects carried over as well; they will be in effect during turn 1 of the next battle and then expire. Marine and boarding markers
+                        are never saved &mdash; those belong to the battle you just fought.</li>
+                    <li>The fleet is named after the game and turn by default (for example <i>Second Contact T7</i>), which is what tells two saves of the
+                        same fleet apart in the dropdown. Type over it if you prefer something else.</li>
+                </ul>
+            </li>
+
+            <li><b>Loading a Damaged Fleet:</b> A fleet carrying battle damage or critical effects is marked with a spanner icon in the fleet dropdown.
+                When you load it, you are asked <b>two separate questions</b>: <i>Include saved battle damage</i> and <i>Include saved critical effects</i>.
+                Both are ticked by default, and each is only offered if the fleet actually has that kind of state. So the same saved fleet can be reloaded
+                pristine, damaged-but-uncritted, critted-but-repaired, or exactly as it ended the last battle &mdash; your choice, every time you load it.</li>
+
+            <li><b>Applying Battle Damage by Hand:</b> In Fleet Selection, any unit <b>you have bought</b> can be damaged before the battle starts. There is
+                no rule gating this &mdash; it is on the honour system, and it is meant for scenarios, campaigns and &quot;what if&quot; games. Open the
+                ship's window on the right-hand side and:
+                <ul class="circle-list">
+                    <li><b>Damage a system:</b> click its icon. A small <i>Apply Damage &amp; Critical Effects</i> menu opens. The number shown is the
+                        <b>remaining</b> structure boxes, not the damage &mdash; the same number you would read off the SCS. Use the &minus; and + buttons,
+                        type a value straight in, or roll the mouse wheel over the box (up repairs, down damages). Tick <b>Destroy</b> to knock the system
+                        out completely; untick it and the system comes back at whatever value you had dialled in before.</li>
+                    <li><b>Damage a section's Structure:</b> click the coloured <b>section header bar</b> (the one showing the section name and its
+                        structure total). Structure has no icon of its own &mdash; that bar is its icon. Destroying a section's Structure destroys the
+                        systems in that section, exactly as it would in a real game. (Vree saucers are the exception: their outer structure blocks are a
+                        ring around the disc rather than the compartments the systems sit in, so losing one does not take its systems with it.)</li>
+                    <li><b>Add critical effects:</b> underneath the damage row is a <i>Critical Effects</i> list. Use <b>+ Add effect&hellip;</b> to choose
+                        an effect that system can genuinely suffer, and the &minus; / + buttons to change how many of it it carries. Tick <b>All</b> to
+                        widen the list with effects that apply to any system. Some effects only ever apply once, and the + button goes grey when you reach
+                        that limit. Dropping an effect to zero leaves its row on screen so you can put it straight back.</li>
+                    <li><b>Damage a fighter flight:</b> click the flight's <b>health bar</b>. You get one row per craft, so you can wound individual
+                        fighters, plus <b>Apply Fighter 1 to all</b> to copy the first row across the flight. Critical effects are set <b>once for the whole
+                        flight</b> rather than per craft. There is no Destroy option: a dead fighter is simply one fewer in the flight, so use <b>Edit</b>
+                        on the flight to reduce its size instead.</li>
+                    <li><b>Damage bulk-bought mines:</b> click the mine's structure bar. You get one row per mine in the purchase, plus
+                        <b>Apply Mine 1 to all</b>. Mines take structure damage only, and cannot be destroyed &mdash; a mine you lost is one you did not
+                        buy.</li>
+                </ul>
+            </li>
+
+            <li><b>Things Worth Knowing:</b>
+                <ul class="circle-list">
+                    <li>Any unit carrying pre-battle damage or critical effects is marked with a <b>spanner</b> icon in your fleet list, so you can see at
+                        a glance which ships are going in wounded.</li>
+                    <li><b>Damage does not make a ship cheaper.</b> A crippled Omega costs exactly what a fresh one costs. (A shrunken fighter flight does
+                        cost less, but only because it is fewer fighters.)</li>
+                    <li>Clicking <b>READY</b> with damaged units in your fleet gives you an extra note in the confirmation, so nobody readies a wounded
+                        fleet by accident.</li>
+                    <li>If you <b>Edit</b> a flight and change its size &mdash; or change how many mines are in a bulk purchase &mdash; any damage you had
+                        applied to it is cleared, and you are told so. The damage is stored per craft, and there is no honest way to re-map it onto a
+                        different number of craft.</li>
+                    <li>Everything you apply here goes into the game exactly as if it had been inflicted in a previous turn, so it is visible to your
+                        opponents once the game starts, and the ships behave accordingly from Deployment onwards.</li>
+                </ul>
+            </li>
+        </ul>
+        <a class="back-to-top" href="#top">↩ Back to Top</a>
+
+
 
         <h3 id="boarding" style="margin-top: 15px;">Boarding Actions</h3>
         <ul>
@@ -318,7 +413,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
-        <h3 id="elint" >ELINT &amp; Electronic Warfare</h3>
+        <h3 id="elint" >ELINT &amp; Electronic Warfare (EW)</h3>
         <ul>
             <li>Every ship with a working Scanner generates Electronic Warfare (EW) points each turn, allocated during the Initial Orders phase.  
                 Dedicated <b>ELINT vessels</b> (those carrying an <b>ELINT Scanner</b>) can perform a number of additional, longer-ranged sensor operations on top of the standard EW functions available to any ship.</li>
@@ -688,14 +783,6 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
-        <h3 id="savedfleets" >Saved Fleets</h3>
-        <ul>
-            <li><b>Saving a Fleet:</b> While in Fleet Selection you can save any fleet that you are making for later.  Simply select your fleet as normal and when you're happy with your force click the 'Save Fleet' button and confirm your choice.
-             Your saved fleet will then become available in this and future sessions (providing you have sufficient points available) via the 'Load a Saved Fleet' dropdown button.</li>
-            <li><b>Sharing Fleets and Loading with ID:</b> Each saved fleet in Fiery Void has a unique ID, providing the fleet is marked as 'Shared' (and you can set this when you save a fleet or toggle it with the padlock symbol) you can give this ID to another player. 
-            They can then load the saved fleet by entering the fleet ID in the 'Load fleet by #ID' field and pressing Enter key.</li>
-        </ul>
-        <a class="back-to-top" href="#top">↩ Back to Top</a>
 
 
         <h3 id="skindancing" >Skin Dancing</h3>
@@ -803,6 +890,19 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                     <li>Right-click Cancel Firing Order - Cancel firing orders for all similar weapons.</li>
                     <li>Right-click Move Forward - Move forward using all remaining movement.</li>
                     <li>Richt-click + or - Jink Buttons - Sets jinking levels to maximum allowed or 0 respectively (Note- long press on touchscreen).                    
+                </ul>
+            </li>
+            <br>
+            <li><b>Ship Window (the Ship Control Sheer (SCS) that opens when you -rightclick a unit):</b>
+                <ul class="circle-list">
+                    <li>Drag the title bar - Move the window around the screen.  On a computer the next window you open on that side of the screen appears where you left the last one (until you reload the page).</li>
+                    <li>Drag the bottom corner grip - Resize the window.  The grip is on the corner facing away from the edge the window is docked to (bottom-right for a left-hand window, bottom-left for a right-hand one), so you always drag outwards to make it bigger; a right-hand window stops growing at the left edge of the screen.  The size you settle on is used by every later window on that side of the screen - the two sides are remembered separately - and is kept on your device for your next session, so you can set it once to suit your screen (Note- drag it with your finger on touchscreen).</li>
+                    <li>Double-click the corner grip, or the title bar - Reset the window to its normal size (Note- double-tap on touchscreen).  The title bar does it too, so you can always get back even if you have made a window so large that its corner sits off the edge of the screen.</li>
+                    <li>Phones and tablets - Windows are scaled automatically to fit your screen before any resizing of your own, with extra size in portrait where space is tightest.  Anything that does not fit scrolls inside the window, and the title bar stays pinned to the top of it so it can always be dragged.</li>
+                    <li>Hit Chart / Ship Art / Ship Stats / Notes buttons - Click one to open its panel, click anywhere outside to close it (Ship Stats and Notes also peek on mouse hover).  Ship Stats shows this turn's actual turn cost, turn delay, profile and initiative, with any figure the current situation has changed shown in yellow.</li>
+                    <li>Ship Art - Shows the unit's artwork full colour in place of its sections; click the button again to go back.</li>
+                    <li>Hover a system - Show its details in the info panel (Note- press and hold on touchscreen; a plain tap is the action, e.g. power, firing or repair).</li>
+                    <li>Click the artwork behind the sections - Show the unit's own details rather than a system's.</li>
                 </ul>
             </li>
             <br>
