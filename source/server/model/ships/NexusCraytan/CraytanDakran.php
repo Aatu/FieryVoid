@@ -3,7 +3,7 @@ class CraytanDakran extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
-        
+         
 	$this->pointCost = 625;
 	$this->faction = "Nexus Craytan Union";
         $this->phpclass = "CraytanDakran";
