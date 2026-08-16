@@ -107,20 +107,24 @@ class EnhancementRow extends Component {
                 <MenuRowLabel>
                     <MenuLabelText>{row.label}</MenuLabelText>
                 </MenuRowLabel>
-                {/* No $gold on the ticker or the well any more - the ink paints the bar, the
-                    rail, the label and the price, and never a control. See menuControls. */}
+                {/* The ticker wears this section's ink, like every other section's does - see
+                    SECTION_INK. This is the old $gold variant restored as one case of a
+                    general rule rather than as a one-off. */}
                 <ActionButton
+                    $ink={SECTION_INK.enh}
                     title="Remove a level"
                     disabled={row.count <= 0}
                     onClick={() => this.step(-1)}
                 >&minus;</ActionButton>
                 <ValueInput
                     ref={this.wheelRef}
+                    $ink={SECTION_INK.enh}
                     type="text"
                     value={row.count}
                     onChange={e => this.onInput(e)}
                 />
                 <ActionButton
+                    $ink={SECTION_INK.enh}
                     title={row.count >= row.max ? "Already at the maximum" : `Add a level (${row.nextPrice} pts)`}
                     disabled={row.count >= row.max}
                     onClick={() => this.step(1)}

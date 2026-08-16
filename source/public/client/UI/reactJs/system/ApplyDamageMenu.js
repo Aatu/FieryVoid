@@ -362,6 +362,7 @@ class ApplyDamageMenu extends Component {
                         <MaxText>#{system.id}</MaxText>
                     </RowLabel>
                     <ActionButton
+                        $ink={SECTION_INK.damage}
                         title={indestructible && remaining <= 1
                             ? "A reactor cannot be destroyed before the battle"
                             : "More damage"}
@@ -372,6 +373,7 @@ class ApplyDamageMenu extends Component {
                        preventDefault there cannot stop the page scrolling behind the menu.*/}
                     <ValueInput
                         ref={this.wheelRef}
+                        $ink={SECTION_INK.damage}
                         type="text"
                         $destroyed={destroyed}
                         disabled={destroyed}
@@ -379,6 +381,7 @@ class ApplyDamageMenu extends Component {
                         onChange={e => this.onInput(e)}
                     />
                     <ActionButton
+                        $ink={SECTION_INK.damage}
                         title="Repair"
                         disabled={destroyed || remaining >= system.maxhealth}
                         onClick={() => this.step(1)}

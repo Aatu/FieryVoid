@@ -186,10 +186,13 @@ const AddSelect = styled.select`
     font-size: 10px;
     color: ${MENU_CHROME.text};
     background-color: ${MENU_CHROME.well};
-    border: 1px solid ${MENU_CHROME.line};
+    /*Takes the section's ink like the tickers above it - it is the widest control in the
+      section, so leaving it on the chassis border was the one thing that still read as
+      unpainted once the tickers went rust.*/
+    border: 1px solid ${SECTION_INK.crit.rail};
     outline: none;
 
-    &:focus { border-color: ${MENU_CHROME.focus}; }
+    &:focus { border-color: ${SECTION_INK.crit.btnText}; }
 `;
 
 const AllToggle = styled.label`
@@ -432,6 +435,7 @@ class CriticalEffectsSection extends Component {
                             {editable ? (
                                 <Controls>
                                     <ActionButton
+                                        $ink={SECTION_INK.crit}
                                         title={row.isParam ? 'Reduce' : 'One fewer'}
                                         disabled={value <= 0}
                                         onClick={() => this.step(row.type, -1)}
@@ -440,6 +444,7 @@ class CriticalEffectsSection extends Component {
                                         {value}
                                     </CountValue>
                                     <ActionButton
+                                        $ink={SECTION_INK.crit}
                                         title={row.isParam ? 'Increase'
                                             : (value >= max && max === 1
                                                 ? 'This effect only applies once'

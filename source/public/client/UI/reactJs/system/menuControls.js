@@ -58,6 +58,55 @@ export const MENU_CHROME = {
     focus: '#4d6070',               //focused input border
 };
 
+/* ⭐ THE SECTION INKS. One entry per section, and every coloured thing that section owns is
+ * derived from it: the rail down its rows, and its ticker's fill, border and glyph.
+ *
+ * ⚠️ The tickers TAKE THE SECTION'S COLOUR (user request 2026-08-16), which reverses the rule
+ * this file carried for about an hour. That rule - "ink paints bars, rails and text, never a
+ * control" - was written against a chassis that was still a saturated blue, where a tinted
+ * control had to fight the chrome around it. Deep hull recedes far enough that the opposite
+ * problem showed up: a chassis ticker at L12 on a body at L5 barely registered, and the one
+ * interactive thing in each row was the quietest thing in it. Tinting them puts the emphasis
+ * back on what the player actually clicks.
+ *
+ * The three btnBg values are one lightness and one chroma in three hues (L12/S35, matching
+ * MENU_CHROME.btnBg exactly), so the tickers stay one control that changes colour rather than
+ * three differently-weighted buttons. btnText is each section's own rail lifted to ~L75.
+ *
+ * ⚠️ Solid hexes, not alphas over the body fill. MENU_CHROME.bg already carries 0.96, and
+ * layering a translucent fill on a translucent panel is the compounding trap the note on
+ * theme.colors.overlayBgSoft exists to warn about - it would also make the ticker's weight
+ * depend on whatever the tooltip happens to be floating over.
+ *
+ * Both SectionBody and ActionButton/ValueInput take one of these as $ink and read the part
+ * they need, so a section is one object at one call site and cannot half-change. */
+export const SECTION_INK = {
+    enh: {
+        rail: theme.colors.enhLine,     //#8a6d3b - bronze, from the shared gold set
+        btnBg: '#292114',
+        btnText: theme.colors.enhTitle, //#e8cf93
+    },
+    damage: {
+        rail: '#3d7a9c',                //the Damage bar's own hairline
+        btnBg: '#142129',
+        btnText: '#a4cde3',
+    },
+    crit: {
+        rail: '#a85c33',                //the Critical Effects bar's own hairline
+        btnBg: '#291914',
+        btnText: '#eab99e',
+    },
+};
+
+/* The fallback for a ticker drawn outside any section - shaped like a SECTION_INK entry so
+   the components below need only one code path. */
+const CHASSIS_INK = {
+    rail: MENU_CHROME.line,
+    btnBg: MENU_CHROME.btnBg,
+    btnText: MENU_CHROME.btnText,
+};
+const inkOf = props => props.$ink || CHASSIS_INK;
+
 export const MenuRow = styled.div`
     display: flex;
     align-items: center;
@@ -98,14 +147,18 @@ export const MenuHint = styled.span`
    own TickerButton, 18x16, identical colours, differing only in being smaller for no reason
    anyone could name. Folded in here at 24x18: one component, and bigger touch targets on the
    phones the lobby damage menus actually get used on. The crit rows lose 12px of label width
-   to it, which they were already wrapping inside. */
+   to it, which they were already wrapping inside.
+
+   $ink is one of SECTION_INK's entries; without it the button falls back to chassis. Hovering
+   fills with the section's rail colour, so the hover state is the same stripe the section is
+   already marked with rather than a fourth value to keep in step. */
 export const ActionButton = styled.div`
     width: 24px;
     height: 18px;
     flex: 0 0 24px;
-    background: ${MENU_CHROME.btnBg};
-    border: 1px solid ${MENU_CHROME.line};
-    color: ${MENU_CHROME.btnText};
+    background: ${props => inkOf(props).btnBg};
+    border: 1px solid ${props => inkOf(props).rail};
+    color: ${props => inkOf(props).btnText};
     cursor: pointer;
     display: flex;
     justify-content: center;
@@ -115,7 +168,7 @@ export const ActionButton = styled.div`
     user-select: none;
 
     &:hover {
-        background: ${MENU_CHROME.line};
+        background: ${props => inkOf(props).rail};
         color: #ffffff;
         opacity: 1;
     }
@@ -124,12 +177,18 @@ export const ActionButton = styled.div`
         opacity: 0.3;
         cursor: not-allowed;
         &:hover {
-            background: ${MENU_CHROME.btnBg};
-            color: ${MENU_CHROME.btnText};
+            background: ${inkOf(props).btnBg};
+            color: ${inkOf(props).btnText};
         }
     `}
 `;
 
+/* ⚠️ The well takes the section's BORDER but keeps the chassis fill and a white number.
+   It has to move with the buttons: [-] [ n ] [+] is one control, and tinting two thirds of it
+   is precisely the half-gold look the bronze variant used to have - bronze buttons either
+   side of a cold navy box. The NUMBER stays white in every section though, because it is data
+   rather than chrome, and a player comparing two open menus should not have to decide whether
+   a colour difference means anything. Red is reserved for one state. */
 export const ValueInput = styled.input`
     flex: 0 0 44px;
     width: 44px;
@@ -139,15 +198,13 @@ export const ValueInput = styled.input`
     text-align: center;
     font-family: ${theme.fonts.mono};
     font-size: 12px;
-    /*White in every section, gold included: the NUMBERS are chassis, so they read the same
-      whether the row above them is bronze, teal or rust. Red is reserved for one state.*/
     color: ${props => props.$destroyed ? '#ff8a80' : '#ffffff'};
     background-color: ${MENU_CHROME.well};
-    border: 1px solid ${MENU_CHROME.line};
+    border: 1px solid ${props => inkOf(props).rail};
     outline: none;
 
     &:focus {
-        border-color: ${MENU_CHROME.focus};
+        border-color: ${props => inkOf(props).btnText};
     }
 
     &:disabled {
@@ -236,12 +293,6 @@ const SectionBar = styled.div`
  *   - a background wash would carry its own alpha on top of MENU_CHROME.bg's 0.96, and
  *     alpha compounding is the trap theme.colors.overlayBgSoft exists to warn about.
  */
-export const SECTION_INK = {
-    enh: theme.colors.enhLine,   //#8a6d3b - bronze, the shared gold set
-    damage: '#3d7a9c',           //the Damage bar's own hairline
-    crit: '#a85c33',             //the Critical Effects bar's own hairline
-};
-
 export const SectionBody = styled.div`
     display: flex;
     flex-direction: column;
@@ -250,7 +301,7 @@ export const SectionBody = styled.div`
     min-width: 0;
     max-width: 100%;
     box-sizing: border-box;
-    box-shadow: inset 2px 0 0 ${props => props.$ink};
+    box-shadow: inset 2px 0 0 ${props => inkOf(props).rail};
 `;
 
 /* Bought equipment. Bronze, and the ✦ that marks the whole feature. */
@@ -267,8 +318,8 @@ export const EnhSectionHeader = styled(SectionBar)`
    slightly greener chassis purely because the chassis stopped being blue. */
 export const DamageSectionHeader = styled(SectionBar)`
     background-color: #23506b;
-    border-top: 1px solid ${SECTION_INK.damage};
-    border-bottom: 1px solid ${SECTION_INK.damage};
+    border-top: 1px solid ${SECTION_INK.damage.rail};
+    border-bottom: 1px solid ${SECTION_INK.damage.rail};
     color: #e8f2ff;
 `;
 
@@ -280,8 +331,8 @@ export const DamageSectionHeader = styled(SectionBar)`
    read more clearly than one. */
 export const CritSectionHeader = styled(SectionBar)`
     background-color: #6d3823;
-    border-top: 1px solid ${SECTION_INK.crit};
-    border-bottom: 1px solid ${SECTION_INK.crit};
+    border-top: 1px solid ${SECTION_INK.crit.rail};
+    border-bottom: 1px solid ${SECTION_INK.crit.rail};
     color: #ffece2;
 `;
 
