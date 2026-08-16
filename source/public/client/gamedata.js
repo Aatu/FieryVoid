@@ -606,6 +606,36 @@ window.gamedata = {
         return false;
     },
 
+    //The systems a canPreOrder ship switches on and off during the Deployment/Pre-Turn phase
+    //(gamephase -1), mapped system name -> the label the commit warning shows. Currently the
+    //two stealth toggles; a future pre-order system only has to be added here to be covered.
+    preOrderToggleSystems: {
+        "ShadingField": "Shading Field",
+        "CloakingDevice": "Cloaking Device"
+    },
+
+    //Deployment commit warning: labels of the pre-order toggles this ship could still switch
+    //ON but hasn't. The systems' own canActivate() already encodes the whole rule (gamephase
+    //-1, not already active, not offline this turn), so this stays correct if those conditions
+    //change; destroyed is tested separately because canActivate() doesn't look at it.
+    //One system answers for the whole unit, flights included: a flight's fields are toggled
+    //collectively, so getSystemByName's first match is enough and it stops there rather than
+    //walking every fighter. It must be a LIVE fighter's copy though, which is what that call
+    //returns - doActivate/doDeactivate skip destroyed fighters, so a dead one's field keeps
+    //whatever it held when it died and would read as unshaded on a flight that IS shaded.
+    getInactivePreOrderSystems: function getInactivePreOrderSystems(ship) {
+        var labels = [];
+        if (!ship || !ship.systems) return labels;
+        for (var name in gamedata.preOrderToggleSystems) {
+            var sys = shipManager.systems.getSystemByName(ship, name);
+            if (!sys) continue;
+            if (shipManager.systems.isDestroyed(ship, sys)) continue;
+            if (typeof sys.canActivate !== 'function' || !sys.canActivate()) continue;
+            labels.push(gamedata.preOrderToggleSystems[name]);
+        }
+        return labels;
+    },
+
     //Renders one ship name for a confirm/error dialog. `.ship-name` is the existing
     //styling hook (confirm.css); adding `.clickable` + data-shipid on top of it opts the
     //span into the delegated scroll-to-ship handler in UI/fleetList.js, exactly the way a
@@ -711,6 +741,44 @@ window.gamedata = {
                     }
                 }
             }
+
+            // CHECK for un-activated Pre-Turn systems (Shading Field / Cloaking Device)
+            // Deployment turn only. From the ship's second Pre-Turn phase onwards the player is
+            // looking at a unit already on the board, and leaving its field/cloak down is a real
+            // choice we shouldn't nag about every turn; the turn a ship ARRIVES it is easy to
+            // place it and commit without ever opening its ship window. Warning only, never a block.
+            var inactivePreOrder = {}; //label -> ships, so a mixed fleet gets one list per system
+            for (var i in gamedata.ships) {
+                var ship = gamedata.ships[i];
+                //canPreOrder first: a plain property read rejects the whole fleet bar a few units
+                //(Torvalus and Klingon hulls plus Stiletto flights), so nothing below runs for a
+                //normal ship. Mines carry the marker for their range settings, which the block
+                //above already warns about.
+                if (!ship.canPreOrder || ship.mine) continue;
+                if (ship.userid != gamedata.thisplayer) continue;
+                if (shipManager.getTurnDeployed(ship) != gamedata.turn) continue;
+                if (shipManager.isDestroyed(ship)) continue;
+
+                var labels = gamedata.getInactivePreOrderSystems(ship);
+                for (var l = 0; l < labels.length; l++) {
+                    if (!inactivePreOrder[labels[l]]) inactivePreOrder[labels[l]] = [];
+                    inactivePreOrder[labels[l]].push(ship);
+                }
+            }
+
+            var preOrderLabels = Object.keys(inactivePreOrder);
+            if (preOrderLabels.length > 0 && html !== '') html += "<br>"; //blank line off the mine warning above
+            for (var p = 0; p < preOrderLabels.length; p++) {
+                var preOrderShips = inactivePreOrder[preOrderLabels[p]];
+                html += "You have not activated the " + preOrderLabels[p] + " on: ";
+                html += "<br>";
+                for (var s = 0; s < preOrderShips.length; s++) {
+                    html += gamedata.shipNameSpan(preOrderShips[s]);
+                    html += "<br>";
+                }
+                html += "<br>";
+            }
+
             confirm.confirm(html + '<br><span class="commit-confirm-q">Are you sure you wish to commit your orders?</span>', gamedata.doCommit);
 
 
