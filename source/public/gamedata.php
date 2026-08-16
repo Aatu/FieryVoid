@@ -45,7 +45,36 @@ if (function_exists('apcu_fetch') && isset($_GET['gameid']) && isset($_GET['last
     // within the same millisecond could be classified differently by the two paths.
     if ($serverTime && $serverTime <= (float)$_GET['last_time'] + 0.001) {
          Manager::apcuLog("FAST-POLL EXEMPT game=$gameid serverTime=$serverTime last_time={$_GET['last_time']}");
-         echo "{}";
+
+         /*
+          * Piggyback the chat watermarks onto this otherwise-empty reply.
+          *
+          * A game.php tab polls this file every 4-8s while the game is live, and this
+          * exempt branch is the overwhelmingly common answer. Two extra apcu_fetch calls
+          * — no DB, no session, nothing — let that reply also say "and neither chat has
+          * anything new", which is the entire question chatdata.php exists to answer. The
+          * chat poller (window.fvChatPoll.observe) uses it to defer its own request, so a
+          * tab watching an active game stops polling for chat altogether while still
+          * learning about a new message within one gamedata interval.
+          *
+          * ONLY this branch is touched. The full-gamedata reply below is left exactly as
+          * it was — it is the response the whole game screen is built from, and it is not
+          * worth any risk for a saving that this branch already captures.
+          *
+          * Chat keys are NOT deploy-versioned (a message id means the same thing after a
+          * patch), so they use the bare db-name prefix, not Manager::getCachePrefix().
+          * A chat with no cached watermark is simply omitted; the client treats an absent
+          * entry as "no information" and falls back to polling for itself.
+          */
+         $chatParts = [];
+         $chatSeen = [];
+         foreach ([0, (int)$gameid] as $chatId) {
+             if (isset($chatSeen[$chatId])) continue;   // gameid 0 would duplicate the key
+             $chatSeen[$chatId] = true;
+             $cachedChat = apcu_fetch("{$database_name}_chat_last_id_{$chatId}");
+             if ($cachedChat !== false) $chatParts[] = "\"$chatId\":" . (int)$cachedChat;
+         }
+         echo $chatParts ? '{"chatIds":{' . implode(',', $chatParts) . '}}' : "{}";
          exit;
     }
     Manager::apcuLog("FAST-POLL MISS game=$gameid serverTime=" . var_export($serverTime, true) . " last_time={$_GET['last_time']} → full request");

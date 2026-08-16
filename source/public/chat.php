@@ -200,6 +200,53 @@ $chatcompact = !empty($chatcompact);
                 }, delay === undefined ? coordinator.interval() : delay);
             },
 
+            /* A freshness report that cost us no request of our own.
+               ─────────────────────────────────────────────────────────
+               game.php polls gamedata.php every 4-8s while a game is live, and that
+               file's APCu fast-poll reply now carries the same chat watermarks
+               chatdata.php would have returned (see gamedata.php). Called from
+               ajaxInterface.successRequest with that map.
+
+               Three outcomes:
+                 - a chat is BEHIND     -> real messages exist; fetch them right now
+                 - every chat CONFIRMED unchanged -> bank it as a quiet poll and push
+                   our own request out. This is what takes steady-state chat traffic on
+                   an active game to zero: as long as gamedata reports in more often
+                   than our own interval, our timer never reaches zero.
+                 - anything unknown     -> learn nothing, change nothing
+
+               Our own timer deliberately remains the floor. gamedata's interval decays
+               to 30s, then 30 minutes, then stops; chat must not inherit that, so when
+               the reports become rarer than our ladder, our timer simply fires first
+               and we are back to polling normally. */
+            observe: function(chatIds){
+                if (!chatIds) return;
+                var live = coordinator.live();
+                if (!live.length) return;
+
+                var behind = false, covered = 0;
+                live.forEach(function(c){
+                    var id = chatIds[c.gameid];
+                    if (id === undefined || id === null) return;   // nothing said about this chat
+                    covered++;
+                    if (c.lastid < id){
+                        behind = true;
+                        c.markHot();
+                    }
+                });
+
+                if (!covered) return;
+                if (behind){ coordinator.schedule(0); return; }
+
+                // Only a partial report — cannot conclude the page is up to date.
+                if (covered < live.length) return;
+
+                // Counted exactly as receive() counts an empty reply, so the ladder
+                // backs off the same way whether the news came free or was paid for.
+                live.forEach(function(c){ c.quietPolls++; });
+                coordinator.schedule();
+            },
+
             poll: function(){
                 /* A request is already in flight — drop this tick rather than stack a
                    second one. Note this returns WITHOUT rescheduling, which is correct

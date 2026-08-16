@@ -1202,6 +1202,17 @@ window.ajaxInterface = {
 
     successRequest: function successRequest(data) {
         ajaxInterface.submiting = false;
+
+        // gamedata.php's APCu fast-poll reply carries the chat watermarks as a free
+        // rider (see its FAST-POLL EXEMPT branch). Handing them to the chat poller lets
+        // it skip its own request entirely while this game is being actively polled.
+        // Guarded because chat is not present on every page that reaches this handler,
+        // and the coordinator is only built once chat.php has been included.
+        if (data && data.chatIds && window.fvChatPoll &&
+            typeof window.fvChatPoll.observe === 'function') {
+            window.fvChatPoll.observe(data.chatIds);
+        }
+
         if (data && data.error) {
             // "Omitting required data" is what the server returns for a gameid-less
             // request (e.g. a stray poll during a page restore before gamedata is
