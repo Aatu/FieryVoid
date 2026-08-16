@@ -20,7 +20,8 @@ const theme = {
         textDim: "#7f9bb8",                     //secondary labels
         healthOk: "#427231",                    //structure bar fill, healthy
         healthCrit: "#ed6738",                  //structure bar fill when criticals present
-        warning: "#e1b000",                     //amber status (e.g. ROLLED banner)
+        warning: "#e1b000",
+        warningSoft: "#e6b400",                     //amber status (e.g. ROLLED banner)
         statusOk: "limegreen",                  //green status banners - matches the map tooltip (Undetected / Attached)
         statusAlert: "#e1b000",                  //orange alert banners - matches the map tooltip (boarding)
         statusBad: "red",                       //red status banners - matches the map tooltip (Detected)

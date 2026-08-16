@@ -4,7 +4,7 @@ import theme from '../styled/theme';
 import nonPassiveWheel from '../helpers/nonPassiveWheel';
 import {
     MenuRow, MenuRowLabel, MenuLabelText,
-    ActionButton, ValueInput, EnhSectionHeader
+    ActionButton, ValueInput, EnhSectionHeader, SectionBody, SECTION_INK
 } from './menuControls';
 
 /* The gold half of "Add Enhancements & Damage" (WEAPON_ENHANCEMENTS_PLAN.md §6.1):
@@ -107,21 +107,20 @@ class EnhancementRow extends Component {
                 <MenuRowLabel>
                     <MenuLabelText>{row.label}</MenuLabelText>
                 </MenuRowLabel>
+                {/* No $gold on the ticker or the well any more - the ink paints the bar, the
+                    rail, the label and the price, and never a control. See menuControls. */}
                 <ActionButton
-                    $gold
                     title="Remove a level"
                     disabled={row.count <= 0}
                     onClick={() => this.step(-1)}
                 >&minus;</ActionButton>
                 <ValueInput
                     ref={this.wheelRef}
-                    $gold
                     type="text"
                     value={row.count}
                     onChange={e => this.onInput(e)}
                 />
                 <ActionButton
-                    $gold
                     title={row.count >= row.max ? "Already at the maximum" : `Add a level (${row.nextPrice} pts)`}
                     disabled={row.count >= row.max}
                     onClick={() => this.step(1)}
@@ -148,10 +147,12 @@ class SystemEnhancementsSection extends Component {
         return (
             <React.Fragment>
                 <EnhSectionHeader>✦ ENHANCEMENTS</EnhSectionHeader>
-                {rows.map(row => (
-                    <EnhancementRow key={row.enhID} row={row} onChange={onChange} />
-                ))}
-                {total > 0 && <Total>Refits: {total} pts</Total>}
+                <SectionBody $ink={SECTION_INK.enh}>
+                    {rows.map(row => (
+                        <EnhancementRow key={row.enhID} row={row} onChange={onChange} />
+                    ))}
+                    {total > 0 && <Total>Refits: {total} pts</Total>}
+                </SectionBody>
             </React.Fragment>
         );
     }

@@ -1,26 +1,32 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
-import theme from '../styled/theme';
 import CriticalEffectsSection, { critRowsFromMap, CheckBox, CheckText } from './CriticalEffectsSection';
 import SystemEnhancementsSection from './SystemEnhancementsSection';
 import nonPassiveWheel from '../helpers/nonPassiveWheel';
-import { ActionButton, ValueInput, SectionDivider, DamageSectionHeader, MenuHeader, MENU_CHROME } from './menuControls';
+import {
+    ActionButton, ValueInput, SectionDivider, DamageSectionHeader,
+    SectionBody, SECTION_INK, MENU_CHROME
+} from './menuControls';
 
 /* Enhancement + pre-battle-damage editor for ONE system of a bought lobby ship.
  * Design: PREBATTLE_DAMAGE_PLAN.md §5.2 and WEAPON_ENHANCEMENTS_PLAN.md §6.1.
  * State lives in window.battleDamage and window.systemEnhancements.
  *
- *   ┌ Add Enhancements & Damage ───────────────┐
- *   ├ ✦ ENHANCEMENTS ──────────────────────────┤  gold
- *   │ Gunsights            [-] [ 1 ] [+]   12p │
- *   │                          Refits: 30 pts  │
+ *   ┌ ✦ ENHANCEMENTS ──────────────────────────┐  bronze
+ *   ┃ Gunsights            [-] [ 1 ] [+]   12p │
+ *   ┃                          Refits: 30 pts  │
  *   ╞══════════════════════════════════════════╡  the hard visual break
- *   ├ Damage ──────────────────────────────────┤  blue
- *   │ Twin Array #14  [-] [  8 ] [+] ☐ Destroy │
- *   ├ Critical Effects ────────────────────────┤
- *   │ Output altered by -1      [-] [ 2 ] [+]  │
- *   │ [ + Add effect…            ] ☐ All       │
+ *   ├ Damage ──────────────────────────────────┤  teal
+ *   ┃ Twin Array #14  [-] [  8 ] [+] ☐ Destroy │
+ *   ├ Critical Effects ────────────────────────┤  rust
+ *   ┃ Output altered by -1      [-] [ 2 ] [+]  │
+ *   ┃ [ + Add effect…                        ] │
  *   └──────────────────────────────────────────┘
+ *
+ * The ┃ is the RAIL - each section's ink carried down its own rows (menuControls.SectionBody),
+ * which is what lets the bars name the sections without having to shout. There is no title
+ * bar: it said "Apply Damage & Critical Effects" over a Damage bar and a Critical Effects
+ * bar, which is its own contents joined by an ampersand (user request 2026-08-16).
  *
  * The two halves are deliberately one menu with a hard break, not two: the player is
  * dressing ONE system, and a refit and a wound are both things they are doing to it.
@@ -63,8 +69,9 @@ const Container = styled.div`
     border: 1px solid ${MENU_CHROME.line};
 `;
 
-/* Header is MenuHeader from ./menuControls now - the three damage editors were carrying
-   three copies of one title bar. */
+/* No header component here any more - see the sketch above. MenuHeader still lives in
+   ./menuControls for the fighter and mine menus, which have one section each and so need a
+   title to name the window. */
 
 const Row = styled.div`
     display: flex;
@@ -72,7 +79,7 @@ const Row = styled.div`
     gap: 5px;
     padding: 4px 6px;
     font-size: 11px;
-    color: ${theme.colors.chromeText};
+    color: ${MENU_CHROME.text};
 `;
 
 const RowLabel = styled.div`
@@ -96,12 +103,12 @@ const DestroyLabel = styled.label`
     cursor: ${props => props.$disabled ? 'not-allowed' : 'pointer'};
     user-select: none;
     opacity: ${props => props.$disabled ? 0.4 : 1};
-    color: ${props => props.$on ? '#ff8a80' : theme.colors.textDim};
+    color: ${props => props.$on ? '#ff8a80' : MENU_CHROME.dim};
 `;
 
 const MaxText = styled.span`
     flex: 0 0 auto;
-    color: ${theme.colors.textDim};
+    color: ${MENU_CHROME.dim};
     font-size: 10px;
 `;
 
@@ -340,10 +347,6 @@ class ApplyDamageMenu extends Component {
 
         return (
             <Container onClick={e => e.stopPropagation()}>
-                <MenuHeader>{enhRows.length > 0
-                    ? "Add Enhancements & Damage"
-                    : "Apply Damage & Critical Effects"}</MenuHeader>
-
                 <SystemEnhancementsSection
                     rows={enhRows}
                     onChange={(enhID, count) => this.setEnhancement(enhID, count)}
@@ -352,6 +355,7 @@ class ApplyDamageMenu extends Component {
 
                 <DamageSectionHeader>Damage</DamageSectionHeader>
 
+                <SectionBody $ink={SECTION_INK.damage}>
                 <Row>
                     <RowLabel title={`${system.displayName || system.name} (system id ${system.id})`}>
                         <SystemName>{system.displayName || system.name}</SystemName>
@@ -398,6 +402,7 @@ class ApplyDamageMenu extends Component {
                         <CheckText>Destroy</CheckText>
                     </DestroyLabel>
                 </Row>
+                </SectionBody>
 
                 {/* Criticals can be added, amended or removed here. The picker's contents
                     come from the per-class catalogue (systemCriticals.php), which
