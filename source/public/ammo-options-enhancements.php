@@ -559,7 +559,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>Points Cost: 8 per gun on the mount, multiplied by the rating you are upgrading from - so a single-gun weapon starting at rating 1 pays
               8, then 16, then 24. A Twin Array at rating 2 pays 32, then 48.</li>
             <li>Limit: The resulting rating cannot exceed 4, so a weapon already at 4 is not offered it at all.</li>
-            <li>Notes: Only weapons that already have an Interception rating can be improved.</li>
+            <li>Notes: Only weapons that already have an intercept rating can be improved.</li>
         </ul>
       </li>
       <li><strong>Gunsights</strong>
@@ -569,8 +569,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>Points Cost: 25% of the weapon's maximum damage (rounded up, minimum 4), multiplied by the number of guns on the mount.</li>
             <li>Limit: 1</li>
             <li>Notes: Weapons only. A handful of utility mounts that roll no meaningful attack - the Abbai Shield Projector, Aegis Sensor Pod, Combat
-              Transporter, Grappling Claw, Gravitic Shifter, Grome Targeting Array, Micro Jump System and Nexus Chaff Launcher - are excluded, as the
-              refit would do nothing for them.</li>
+              Transporter, Grappling Claw, Gravitic Shifter, Grome Targeting Array - are excluded, as the refit would do nothing for them.</li>
         </ul>
       </li>
       <li><strong>Hardened Shields</strong>
@@ -578,8 +577,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>Effect: +1 rating on that shield emitter. Both the damage it absorbs and the to-hit penalty it confers improve.</li>
             <li>Points Cost: 10 * the emitter's rating * the number of 60 degree arcs it covers (an all-round emitter counts as 6).</li>
             <li>Limit: 1 per emitter - but each emitter on the ship is bought separately.</li>
-            <li>Notes: EM Shields and Gravitic Shields only. The Abbai Shield Projector is a support weapon rather than a shield and cannot take it.
-              Stacks with the Vorlon Azure Skin faction enhancement.</li>
+            <li>Notes: EM Shields and Gravitic Shields only. The Abbai Shield Projector is a support weapon rather than a shield and cannot take it.</li>
         </ul>
       </li>
       <li><strong>Hardened Armour</strong>
@@ -596,7 +594,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>Effect: +1 thrust rating on that thruster, for every level bought.</li>
             <li>Points Cost: Twice the combined thrust rating of every thruster on the ship facing the same direction, then +2 for each further level.</li>
             <li>Limit: Up to double the thruster's original rating.</li>
-            <li>Notes: Thrusters only. Priced from the ship as designed, so buying Elite Crew does not change what a thruster refit costs.</li>
+            <li>Notes: Thrusters only. Priced from the ship as designed, so buying Elite Crew for example does not change what a thruster refit costs.</li>
         </ul>
       </li>
     </ul>
