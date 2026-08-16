@@ -273,6 +273,23 @@
     font-weight: normal;
 }
 
+/* Ship names the dialog listed that map to a real unit on the board: clicking one scrolls
+   the camera to it and closes the dialog (delegated handler in client/UI/fleetList.js, same
+   doScrollToShip the fleet list rows use; the close routes through the dialog's own cancel
+   control, so a commit prompt cancels rather than commits). Only spans carrying data-shipid
+   get .clickable, so unmarked names - ship classes, hidden ships, plain strings - keep the
+   flat styling above and stay inert. */
+.confirm .ship-name.clickable {
+    cursor: pointer;
+    text-decoration: underline dotted rgba(255, 255, 255, 0.35);
+    text-underline-offset: 3px;
+}
+
+.confirm .ship-name.clickable:hover {
+    color: rgb(106, 195, 255);
+    text-decoration-color: rgb(106, 195, 255);
+}
+
 /* The "Are you sure you wish to COMMIT…" question line in the commit-confirm
    dialogs (gamedata.js onCommitClicked). Bolded so the actual prompt stands
    out from the warning text listing ships above it. */

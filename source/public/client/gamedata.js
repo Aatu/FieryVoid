@@ -606,6 +606,27 @@ window.gamedata = {
         return false;
     },
 
+    //Renders one ship name for a confirm/error dialog. `.ship-name` is the existing
+    //styling hook (confirm.css); adding `.clickable` + data-shipid on top of it opts the
+    //span into the delegated scroll-to-ship handler in UI/fleetList.js, exactly the way a
+    //fleet list row does. Marking is deliberately conditional: a span with no data-shipid
+    //stays inert, so a caller with only a name string (or a ship class, or a hidden ship)
+    //still renders normally instead of producing a click that leaks a position or throws.
+    //`label` overrides the default "Name (Class)" text for the "- Name" list style.
+    shipNameSpan: function shipNameSpan(ship, label) {
+        if (!ship || !ship.id) {
+            return '<span class="ship-name">' + (label || ship || '') + '</span>';
+        }
+        var text = (label !== undefined && label !== null) ? label : (ship.name + ' (' + ship.shipClass + ')');
+        //Same two gates doScrollToShip applies, in the same order, so a dialog name behaves
+        //exactly like a fleet list row: a docked flight has no board position but opens its
+        //ship window, and shouldBeHidden (enemy/stealthed/not-yet-deployed) is never jumped to.
+        if (!(ship.removed && ship.flight) && shipManager.shouldBeHidden(ship)) {
+            return '<span class="ship-name">' + text + '</span>';
+        }
+        return '<span class="ship-name clickable" data-shipid="' + ship.id + '">' + text + '</span>';
+    },
+
     onCommitClicked: function onCommitClicked(e) {
 
         if (gamedata.waiting == true) return;
@@ -861,7 +882,7 @@ window.gamedata = {
                 html += "<br>";
                 for (var ship in selfDestructing) {
                     //html += selfDestructing[ship].name + " (" + selfDestructing[ship].shipClass + ")";
-                    html += '<span class="ship-name">' + selfDestructing[ship].name + ' (' + selfDestructing[ship].shipClass + ')</span>';
+                    html += gamedata.shipNameSpan(selfDestructing[ship]);
                     html += "<br>";
                 }
                 html += "<br>";
@@ -871,7 +892,7 @@ window.gamedata = {
                 html += "<br>";
                 for (var ship in jumping) {
                     //html += jumping[ship].name + " (" + jumping[ship].shipClass + ")";
-                    html += '<span class="ship-name">' + jumping[ship].name + ' (' + jumping[ship].shipClass + ')</span>';
+                    html += gamedata.shipNameSpan(jumping[ship]);
                     html += "<br>";
                 }
                 html += "<br>";
@@ -900,7 +921,7 @@ window.gamedata = {
                     html += "<br>";
                     for (var ship in hasNoEW) {
                         //html += hasNoEW[ship].name + " (" + hasNoEW[ship].shipClass + ")";
-                        html += '<span class="ship-name">' + hasNoEW[ship].name + ' (' + hasNoEW[ship].shipClass + ')</span>';
+                        html += gamedata.shipNameSpan(hasNoEW[ship]);
                         html += "<br>";
                     }
                     html += "<br>";
@@ -911,7 +932,7 @@ window.gamedata = {
                 html += "<br>";
                 for (var ship in notLaunching) {
                     //html += notLaunching[ship].name + " (" + notLaunching[ship].shipClass + ")";
-                    html += '<span class="ship-name">' + notLaunching[ship].name + ' (' + notLaunching[ship].shipClass + ')</span>';
+                    html += gamedata.shipNameSpan(notLaunching[ship]);
                     html += "<br>";
                 }
                 html += "<br>";
@@ -921,7 +942,7 @@ window.gamedata = {
                 html += "<br>";
                 for (var ship in notSetAA) {
                     //html += notSetAA[ship].name + " (" + notSetAA[ship].shipClass + ")";
-                    html += '<span class="ship-name">' + notSetAA[ship].name + ' (' + notSetAA[ship].shipClass + ')</span>';
+                    html += gamedata.shipNameSpan(notSetAA[ship]);
                     html += "<br>";
                 }
                 html += "<br>";
@@ -931,7 +952,7 @@ window.gamedata = {
                 html += "<br>";
                 for (var ship in notSetFC) {
                     //html += notSetFC[ship].name + " (" + notSetFC[ship].shipClass + ")";
-                    html += '<span class="ship-name">' + notSetFC[ship].name + ' (' + notSetFC[ship].shipClass + ')</span>';
+                    html += gamedata.shipNameSpan(notSetFC[ship]);
                     html += "<br>";
                 }
                 html += "<br>";
@@ -943,7 +964,7 @@ window.gamedata = {
                     //show actual surplus, too - like: Surplusser (PowerShip) - <10>
                     var surplusVal = shipManager.power.getReactorPower(powerSurplus[ship], shipManager.systems.getSystemByName(powerSurplus[ship], "reactor"));
                     //html += powerSurplus[ship].name + " (" + powerSurplus[ship].shipClass + "): <b>&#60;" + surplusVal + '&#62;</b>';
-                    html += '<span class="ship-name">' + powerSurplus[ship].name + ' (' + powerSurplus[ship].shipClass + '): <b>&#60;' + surplusVal + '&#62;</b></span>';
+                    html += gamedata.shipNameSpan(powerSurplus[ship], powerSurplus[ship].name + ' (' + powerSurplus[ship].shipClass + '): <b>&#60;' + surplusVal + '&#62;</b>');
                     html += "<br>";
                 }
                 html += "<br>";
@@ -971,7 +992,7 @@ window.gamedata = {
 
                 for (var j in zeroSpeedShips) {
                     var movingShip = zeroSpeedShips[j];
-                    html += '<span class="ship-name">' + movingShip.name + '</span><br>';
+                    html += gamedata.shipNameSpan(movingShip, movingShip.name) + '<br>';
                 }
             }
 
@@ -1071,7 +1092,7 @@ window.gamedata = {
                     html += "<br>";
                     for (var ship in hasNoFO) {
                         //html += hasNoFO[ship].name + " (" + hasNoFO[ship].shipClass + ")";
-                        html += '<span class="ship-name">' + hasNoFO[ship].name + ' (' + hasNoFO[ship].shipClass + ')</span>';
+                        html += gamedata.shipNameSpan(hasNoFO[ship]);
                         html += "<br>";
                     }
                 }
@@ -1081,7 +1102,7 @@ window.gamedata = {
                     html += "<br>";
                     for (var ship in hasSplitFO) {
                         //html += hasSplitFO[ship].name + " (" + hasSplitFO[ship].shipClass + ")";
-                        html += '<span class="ship-name">' + hasSplitFO[ship].name + ' (' + hasSplitFO[ship].shipClass + ')</span>';
+                        html += gamedata.shipNameSpan(hasSplitFO[ship]);
                         html += "<br>";
                     }
                 }
@@ -1181,7 +1202,7 @@ window.gamedata = {
                     html += "<br>";
                     for (var ship in hasNoFO) {
                         //html += hasNoFO[ship].name + " (" + hasNoFO[ship].shipClass + ")";
-                        html += '<span class="ship-name">' + hasNoFO[ship].name + ' (' + hasNoFO[ship].shipClass + ')</span>';
+                        html += gamedata.shipNameSpan(hasNoFO[ship]);
                         html += "<br>";
                     }
                 }
@@ -1191,7 +1212,7 @@ window.gamedata = {
                     html += "<br>";
                     for (var ship in hasSplitFO) {
                         //html += hasSplitFO[ship].name + " (" + hasSplitFO[ship].shipClass + ")";
-                        html += '<span class="ship-name">' + hasSplitFO[ship].name + ' (' + hasSplitFO[ship].shipClass + ')</span>';
+                        html += gamedata.shipNameSpan(hasSplitFO[ship]);
                         html += "<br>";
                     }
                 }
@@ -1203,7 +1224,7 @@ window.gamedata = {
                     html += "The following ships have not launched fighters:";
                     html += '</span><br>';
                     for (var ship in notLaunchedFighters) {
-                        html += '<span class="ship-name">' + notLaunchedFighters[ship].name + ' (' + notLaunchedFighters[ship].shipClass + ')</span>';
+                        html += gamedata.shipNameSpan(notLaunchedFighters[ship]);
                         html += "<br>";
                     }
                 }
@@ -1249,15 +1270,14 @@ window.gamedata = {
 
         //DEPLOYMENT PHASE
         if (gamedata.gamephase == -1) {
-            shipNames = shipManager.systems.getUnusedSpecialists();
+            var specialistShips = shipManager.systems.getUnusedSpecialists();
 
-            if (shipNames.length > 0) {
+            if (specialistShips.length > 0) {
                 var specialistsError = "The following ships have not selected Specialists:<br>";
 
-                for (var i in shipNames) {
-                    var shipName = shipNames[i];
-                    //specialistsError += "- " + shipName + "<br>";
-                    specialistsError += '<span class="ship-name">- ' + shipName + '</span><br>';
+                for (var i in specialistShips) {
+                    var specialistShip = specialistShips[i];
+                    specialistsError += gamedata.shipNameSpan(specialistShip, '- ' + specialistShip.name) + '<br>';
                 }
                 specialistsError += "<br>You need to choose Specialists for these ships.";
                 window.confirm.error(specialistsError, function () { });
@@ -1294,21 +1314,21 @@ window.gamedata = {
                     myDeployingCarriers.push(carrier);
                 }
 
-                var mustDockNames = [];
+                var mustDockFlights = [];
                 for (var hi = 0; hi < hangarDeployCandidates.length; hi++) {
                     var hdFlight = hangarDeployCandidates[hi];
                     for (var ci = 0; ci < myDeployingCarriers.length; ci++) {
                         if (window.DeploymentDock.eligibleHangarsForFlight(myDeployingCarriers[ci], hdFlight).length > 0) {
-                            mustDockNames.push(hdFlight.name);
+                            mustDockFlights.push(hdFlight);
                             break;
                         }
                     }
                 }
 
-                if (mustDockNames.length > 0) {
+                if (mustDockFlights.length > 0) {
                     var hangarDeployError = "The following flights must be deployed inside a Hangar:<br>";
-                    for (var mi = 0; mi < mustDockNames.length; mi++) {
-                        hangarDeployError += '<span class="ship-name">- ' + mustDockNames[mi] + '</span><br>';
+                    for (var mi = 0; mi < mustDockFlights.length; mi++) {
+                        hangarDeployError += gamedata.shipNameSpan(mustDockFlights[mi], '- ' + mustDockFlights[mi].name) + '<br>';
                     }
                     hangarDeployError += "<br>Dock them into a carrier's hangar before committing your orders.";
                     window.confirm.error(hangarDeployError, function () { });
@@ -1321,15 +1341,14 @@ window.gamedata = {
             //INITIAL ORDERS    
         } else if (gamedata.gamephase == 1) {
             //        	ajaxInterface.fastpolling=true;
-            var shipNames = shipManager.power.getShipsNegativePower();
+            var noPowerShips = shipManager.power.getShipsNegativePower();
 
-            if (shipNames.length > 0) {
+            if (noPowerShips.length > 0) {
                 var negPowerError = "The following ships have insufficient power:<br>";
 
-                for (var index in shipNames) {
-                    var name = shipNames[index];
-                    //negPowerError += "- " + name + "<br>";
-                    negPowerError += '<span class="ship-name">- ' + name + '</span><br>';
+                for (var index in noPowerShips) {
+                    var noPowerShip = noPowerShips[index];
+                    negPowerError += gamedata.shipNameSpan(noPowerShip, '- ' + noPowerShip.name) + '<br>';
                 }
                 negPowerError += "<br>You need to turn off systems before you can commit the turn.";
                 window.confirm.error(negPowerError, function () { });
@@ -1337,45 +1356,42 @@ window.gamedata = {
             }
 
             //We have one thrust-boosted weapon in Initial Orders Phase, let's put in a check for it and future - DK 26.11.24
-            shipNames = shipManager.movement.getShipsNegativeThrust();
+            var lowThrustShips = shipManager.movement.getShipsNegativeThrust();
 
-            if (shipNames.length > 0) {
+            if (lowThrustShips.length > 0) {
                 var negThrustError = "The following ships have insufficient Engine Thrust:<br>";
 
-                for (var index in shipNames) {
-                    var name = shipNames[index];
-                    //negThrustError += "- " + name + "<br>";
-                    negThrustError += '<span class="ship-name">- ' + name + '</span><br>';
+                for (var index in lowThrustShips) {
+                    var lowThrustShip = lowThrustShips[index];
+                    negThrustError += gamedata.shipNameSpan(lowThrustShip, '- ' + lowThrustShip.name) + '<br>';
                 }
                 negThrustError += "<br>You need to lower channelled thrust before you can commit the turn.";
                 window.confirm.error(negThrustError, function () { });
                 return false;
             }
 
-            shipNames = shipManager.power.getShipsGraviticShield();
+            var gravShieldShips = shipManager.power.getShipsGraviticShield();
 
-            if (shipNames.length > 0) {
+            if (gravShieldShips.length > 0) {
                 var tooManyShieldsError = "The following ships have too many active shields:<br>";
 
-                for (var i in shipNames) {
-                    var shipName = shipNames[i];
-                    //tooManyShieldsError += "- " + shipName + "<br>";
-                    tooManyShieldsError += '<span class="ship-name">- ' + shipName + '</span><br>';
+                for (var i in gravShieldShips) {
+                    var gravShieldShip = gravShieldShips[i];
+                    tooManyShieldsError += gamedata.shipNameSpan(gravShieldShip, '- ' + gravShieldShip.name) + '<br>';
                 }
                 tooManyShieldsError += "<br>You need to turn off shields or boost your shield generator before you can commit the turn.";
                 window.confirm.error(tooManyShieldsError, function () { });
                 return false;
             }
 
-            shipNames = shipManager.systems.getNegativeBFCP();
+            var negBFCPShips = shipManager.systems.getNegativeBFCP();
 
-            if (shipNames.length > 0) {
+            if (negBFCPShips.length > 0) {
                 var tooManyBFCPError = "The following ships have too many Bonus Fire Control Points (BFCP) set:<br>";
 
-                for (var i in shipNames) {
-                    var shipName = shipNames[i];
-                    //tooManyBFCPError += "- " + shipName + "<br>";
-                    tooManyBFCPError += '<span class="ship-name">- ' + shipName + '</span><br>';
+                for (var i in negBFCPShips) {
+                    var negBFCPShip = negBFCPShips[i];
+                    tooManyBFCPError += gamedata.shipNameSpan(negBFCPShip, '- ' + negBFCPShip.name) + '<br>';
                 }
                 tooManyBFCPError += "<br>You need to decrease the number of allocated BFCPs.";
                 window.confirm.error(tooManyBFCPError, function () { });
@@ -1397,15 +1413,14 @@ window.gamedata = {
                 return false;                
             }		
             */
-            shipNames = shipManager.systems.checkShieldGenValue();
+            var shieldGenShips = shipManager.systems.checkShieldGenValue();
 
-            if (shipNames.length > 0) {
+            if (shieldGenShips.length > 0) {
                 var shieldCapacityError = "The following ships have directed too much or too little power to their shields:<br>";
 
-                for (var i in shipNames) {
-                    var shipName = shipNames[i];
-                    //shieldCapacityError += "- " + shipName + "<br>";
-                    shieldCapacityError += '<span class="ship-name">- ' + shipName + '</span><br>';
+                for (var i in shieldGenShips) {
+                    var shieldGenShip = shieldGenShips[i];
+                    shieldCapacityError += gamedata.shipNameSpan(shieldGenShip, '- ' + shieldGenShip.name) + '<br>';
                 }
                 shieldCapacityError += "<br>You need to change their allocation of shield power.";
                 window.confirm.error(shieldCapacityError, function () { });
@@ -1480,7 +1495,7 @@ window.gamedata = {
                 errorText += "The following ships have too many EW points set:<br>";
                 for (var shipID in EWIncorrect) {
                     //errorText += EWIncorrect[shipID].name + " (" + EWIncorrect[shipID].shipClass + ")";
-                    errorText += '<span class="ship-name">' + EWIncorrect[shipID].name + ' (' + EWIncorrect[shipID].shipClass + ')</span>';
+                    errorText += gamedata.shipNameSpan(EWIncorrect[shipID]);
                     errorText += "<br>";
                 }
                 errorText += "<br>";
@@ -1489,7 +1504,7 @@ window.gamedata = {
                 errorText += "The following ships have too many EW points set:<br>";
                 for (var shipID in EWRestrictedIncorrect) {
                     //errorText += EWRestrictedIncorrect[shipID].name + " (" + EWRestrictedIncorrect[shipID].shipClass + ")";
-                    errorText += '<span class="ship-name">' + EWRestrictedIncorrect[shipID].name + ' (' + EWRestrictedIncorrect[shipID].shipClass + ')</span>';
+                    errorText += gamedata.shipNameSpan(EWRestrictedIncorrect[shipID]);
                     errorText += "<br>";
                 }
                 errorText += "<br>";
@@ -1498,7 +1513,7 @@ window.gamedata = {
                 errorText += "The following LCVs have too many EW points set on non-OEW:<br>";
                 for (var shipID in EWLCVIncorrect) {
                     //errorText += EWLCVIncorrect[shipID].name + " (" + EWLCVIncorrect[shipID].shipClass + ")";
-                    errorText += '<span class="ship-name">' + EWLCVIncorrect[shipID].name + ' (' + EWLCVIncorrect[shipID].shipClass + ')</span>';
+                    errorText += gamedata.shipNameSpan(EWLCVIncorrect[shipID]);
                     errorText += "<br>";
                 }
                 errorText += "<br>";
@@ -1509,7 +1524,7 @@ window.gamedata = {
                 errorText += "The following units are trying to launch more ordnance than available (see Ammunition Magazine):<br>";
                 for (var shipID in ammoMagazineError) {
                     //errorText += ammoMagazineError[shipID].name + " (" + ammoMagazineError[shipID].shipClass + ")";
-                    errorText += '<span class="ship-name">' + ammoMagazineError[shipID].name + ' (' + ammoMagazineError[shipID].shipClass + ')</span>';
+                    errorText += gamedata.shipNameSpan(ammoMagazineError[shipID]);
                     errorText += "<br>";
                 }
                 errorText += "<br>";
@@ -1519,7 +1534,7 @@ window.gamedata = {
                 errorText += "The following units are derelict and should be considered shut down - cancel all firing orders:<br>";
                 for (var shipID in derelictFiring) {
                     //errorText += derelictFiring[shipID].name + " (" + derelictFiring[shipID].shipClass + ")";
-                    errorText += '<span class="ship-name">' + derelictFiring[shipID].name + ' (' + derelictFiring[shipID].shipClass + ')</span>';
+                    errorText += gamedata.shipNameSpan(derelictFiring[shipID]);
                     errorText += "<br>";
                 }
                 errorText += "<br>";
@@ -1559,7 +1574,7 @@ window.gamedata = {
                     var pivoted = shipManager.movement.hasPivoted(pShip)
                     if (!pivoted.left && !pivoted.right) {
                         foundPShip = true;
-                        mustPivotError += '<span class="ship-name">- ' + pShip.name + '</span><br>';
+                        mustPivotError += gamedata.shipNameSpan(pShip, '- ' + pShip.name) + '<br>';
                     }
                 }
 
@@ -1568,7 +1583,7 @@ window.gamedata = {
                 //Limited thrust check to Hyach Specialist now for efficiency, but we can expand it as needed - DK
                 if (shipManager.hasSpecialAbility(tShip, "HyachSpecialists") && shipManager.movement.hasNegativeThrust(tShip)) {
                     foundTShip = true;
-                    negThrustError += '<span class="ship-name">- ' + tShip.name + '</span><br>';
+                    negThrustError += gamedata.shipNameSpan(tShip, '- ' + tShip.name) + '<br>';
                 }
 
             }
@@ -1646,7 +1661,7 @@ window.gamedata = {
                 var ammoMagError = "The following units are trying to fire more ordnance than available (see Ammunition Magazine):<br>";
                 for (var shipID in ammoMagazineError) {
                     //ammoMagError += ammoMagazineError[shipID].name + " (" + ammoMagazineError[shipID].shipClass + ")";
-                    ammoMagError += '<span class="ship-name">' + ammoMagazineError[shipID].name + ' (' + ammoMagazineError[shipID].shipClass + ')</span>';
+                    ammoMagError += gamedata.shipNameSpan(ammoMagazineError[shipID]);
                     ammoMagError += "<br>";
                 }
                 ammoMagError += "You need to reduce number of shots (or change mode) before you can commit the turn.";
@@ -1662,13 +1677,12 @@ window.gamedata = {
 
             //prevent Vorlons from borrowing future power for firing 
             //Capacitor-equipped ships cannot commit firing with negative power balance (they actively use power in this phase, AND they don't have any legal option of achieving negative balance by other means)
-            var shipNames = shipManager.power.getCapacitorShipsNegativePower();
-            if (shipNames.length > 0) {
+            var capacitorShips = shipManager.power.getCapacitorShipsNegativePower();
+            if (capacitorShips.length > 0) {
                 var negPowerError = "The following ships have insufficient power:<br>";
-                for (var index in shipNames) {
-                    var name = shipNames[index];
-                    //negPowerError += "- " + name + "<br>";
-                    negPowerError += '<span class="ship-name">- ' + name + '</span><br>';
+                for (var index in capacitorShips) {
+                    var capacitorShip = capacitorShips[index];
+                    negPowerError += gamedata.shipNameSpan(capacitorShip, '- ' + capacitorShip.name) + '<br>';
                 }
                 negPowerError += "You need to reduce your firing declarations before you can commit the turn.";
                 window.confirm.error(negPowerError, function () { });
@@ -1680,9 +1694,8 @@ window.gamedata = {
             if (batteryShips.length > 0) {
                 var negPowerError = "The following ships have insufficient plasma battery power:<br>";
                 for (var index in batteryShips) {
-                    var name = batteryShips[index];
-                    //negPowerError += "- " + name + "<br>";
-                    negPowerError += '<span class="ship-name">- ' + name + '</span><br>';
+                    var batteryShip = batteryShips[index];
+                    negPowerError += gamedata.shipNameSpan(batteryShip, '- ' + batteryShip.name) + '<br>';
                 }
                 negPowerError += "You need to reduce the number of unboosted Plasma Webs firing in Offensive Mode before you can commit the turn.";
                 window.confirm.error(negPowerError, function () { });
@@ -1717,7 +1730,7 @@ window.gamedata = {
                 var ammoMagError = "The following units are trying to fire more ordnance than available (see Ammunition Magazine):<br>";
                 for (var shipID in ammoMagazineError) {
                     //ammoMagError += ammoMagazineError[shipID].name + " (" + ammoMagazineError[shipID].shipClass + ")";
-                    ammoMagError += '<span class="ship-name">' + ammoMagazineError[shipID].name + ' (' + ammoMagazineError[shipID].shipClass + ')</span>';
+                    ammoMagError += gamedata.shipNameSpan(ammoMagazineError[shipID]);
                     ammoMagError += "<br>";
                 }
                 ammoMagError += "You need to reduce number of shots (or change mode) before you can commit the turn.";

@@ -1087,8 +1087,10 @@ shipManager.systems = {
     },
 
     //Looks for ships with Hyach Computer and lists any where the balance of BFCP is negative for error message.
+    //Returns ship OBJECTS, not names: the commit-error dialogs render these through
+    //gamedata.shipNameSpan, which needs ship.id to make the name clickable (scroll-to-ship).
     getNegativeBFCP: function getNegativeBFCP() {
-        var shipNames = new Array();
+        var ships = new Array();
         var counter = 0;
         for (var i in gamedata.ships) {
             var ship = gamedata.ships[i];
@@ -1103,16 +1105,17 @@ shipManager.systems = {
             var computer = (shipManager.systems.getSystemByName(ship, "hyachComputer"));
             if (shipManager.systems.isDestroyed(ship, computer)) continue;
             if (computer.BFCPtotal_used > computer.output) { //Is the total BFCP used greater than output and Computer NOT destroyed, usually due to damage to Computer.
-                shipNames[counter] = ship.name;
+                ships[counter] = ship;
                 counter++;
             }
         }
-        return shipNames;
+        return ships;
     },	//endof getNegativeBFCP
 
     //Looks for ships with Hyach Specialists and lists any where these have not been selected in Deployment Phase.
+    //Returns ship OBJECTS, not names - see getNegativeBFCP above.
     getUnusedSpecialists: function getUnusedSpecialists() {
-        var shipNames = new Array();
+        var ships = new Array();
         var counter = 0;
 
         for (var i in gamedata.ships) {
@@ -1129,17 +1132,18 @@ shipManager.systems = {
 
             var specialists = (shipManager.systems.getSystemByName(ship, "hyachSpecialists"));
             if (specialists.canSelectAnything()) { //Can anymore Specialists be selected?
-                shipNames[counter] = ship.name;
+                ships[counter] = ship;
                 counter++;
             }
         }
 
-        return shipNames;
+        return ships;
     },	//endof getUnusedSpecialists
 
     // Looks for ships with Thirdspace Shield Generators or ThoughtShieldGenerators and compiles a list of any with negative capacity.
+    //Returns ship OBJECTS, not names - see getNegativeBFCP above.
     checkShieldGenValue: function checkShieldGenValue() {
-        var shipNames = [];
+        var ships = [];
         var counter = 0;
         for (var i in gamedata.ships) {
             var ship = gamedata.ships[i];
@@ -1160,11 +1164,11 @@ shipManager.systems = {
             if (shipManager.systems.isDestroyed(ship, generator)) continue;
 
             if (generator.storedCapacity != 0) { // Generator is not zero, either too much or too little shield allocation.
-                shipNames[counter] = ship.name;
+                ships[counter] = ship;
                 counter++;
             }
         }
-        return shipNames;
+        return ships;
     }, // end of checkShieldGenValue
 
     getSystemListThrustBoosted: function getSystemListThrustBoosted(ship) { //For Nexus PLasma Charge, but coulod be used for other Thrust-boosted system - DK 25.3.24
