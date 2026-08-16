@@ -1429,19 +1429,47 @@ class SubReactorUniversal extends ShipSystem{
 			$newFireOrder=null;
 		}
 
-		//destroy primary structure
+		/*which block goes up? A sub reactor mounted on a PSEUDO-section (a "quarter" such as
+		31/32/41/42, whose systems are homed on TWO real blocks via setStructureHome) has no
+		structure block of its own - getStructureSystem() would silently fall back to PRIMARY
+		and take the entire base with it. Detected by the fallback: the block handed back sits
+		on a different location than we do.*/
 		$ownStruct = $ship->getStructureSystem($this->location);
-		if($ownStruct){			
+		$isPseudoSection = (!$ownStruct) || ($ownStruct->location != $this->location);
+
+		if($isPseudoSection){
+			/*immolate the quarter itself instead - everything displayed there dies, while both
+			real home blocks are left intact. Killing either of them would be out of proportion
+			(a quarter reactor is roughly half the size of a full section's) and killing both
+			would take out half the base.*/
+			foreach($ship->systems as $sys){
+				if($sys === $this) continue; //already destroyed - that is why we are here
+				if($sys->location != $this->location) continue; //not in this quarter
+				if($sys instanceof Structure) continue; //a quarter has none, but never take a block out this way
+				if($sys->isDestroyed()) continue;
+				$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $sys->id, $sys->getRemainingHealth(), 0, 0, -1, true, false, "", "Reactor");
+				$damageEntry->updated = true;
+				$sys->damage[] = $damageEntry;
+				if($rammingSystem){ //add extra data to damage entry - so firing order can be identified!
+						$damageEntry->shooterid = $ship->id; //additional field
+						$damageEntry->weaponid = $rammingSystem->id; //additional field
+				}
+			}
+			return;
+		}
+
+		//destroy own structure (systems on the section fall off with it)
+		if($ownStruct){
             $remaining = $ownStruct->getRemainingHealth();
             $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $ownStruct->id, $remaining, 0, 0, -1, true, false, "", "Reactor");
             $damageEntry->updated = true;
-            $ownStruct->damage[] = $damageEntry;			
+            $ownStruct->damage[] = $damageEntry;
 			if($rammingSystem){ //add extra data to damage entry - so firing order can be identified!
 					$damageEntry->shooterid = $ship->id; //additional field
 					$damageEntry->weaponid = $rammingSystem->id; //additional field
 			}
-        }	
-    } //endof function criticalPhaseEffects	
+        }
+    } //endof function criticalPhaseEffects
 	
 	
 	//critical - add to primary reactor instead!

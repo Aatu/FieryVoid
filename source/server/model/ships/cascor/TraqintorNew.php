@@ -89,8 +89,8 @@ class TraqintorNew extends SmallStarBaseFourSections{
 			$subReactor = new SubReactorUniversal(5, 14, 0, 0);
 			$subReactor->startArc = 270;
 			$subReactor->endArc = 360;
-			$hangar->overkillArcStructures = array(1, 3); //overkill spills to whichever Port quarter is in arc					
-			$hangar->setStructureHome(array(1, 3));				
+			$subReactor->overkillArcStructures = array(1, 3); //overkill spills to whichever Port quarter is in arc					
+			$subReactor->setStructureHome(array(1, 3));				
 			$this->addLeftFrontSystem($subReactor);	
 			$bolter1 = new DualIonBolter(5, 4, 4, 270, 360);
 			$bolter1->overkillArcStructures = array(1, 3); //overkill spills to whichever Port quarter is in arc					
@@ -132,8 +132,8 @@ class TraqintorNew extends SmallStarBaseFourSections{
 			$subReactor = new SubReactorUniversal(5, 14, 0, 0);
 			$subReactor->startArc = 180;
 			$subReactor->endArc = 270;
-			$hangar->overkillArcStructures = array(2, 3); //overkill spills to whichever Port quarter is in arc					
-			$hangar->setStructureHome(array(2, 3));				
+			$subReactor->overkillArcStructures = array(2, 3); //overkill spills to whichever Port quarter is in arc					
+			$subReactor->setStructureHome(array(2, 3));				
 			$this->addLeftAftSystem($subReactor);	
 			$bolter1 = new DualIonBolter(5, 4, 4, 180, 270);
 			$bolter1->overkillArcStructures = array(2, 3); //overkill spills to whichever Port quarter is in arc					
@@ -155,8 +155,8 @@ class TraqintorNew extends SmallStarBaseFourSections{
 			$subReactor = new SubReactorUniversal(5, 14, 0, 0);
 			$subReactor->startArc = 0;
 			$subReactor->endArc = 90;
-			$hangar->overkillArcStructures = array(1, 4); //overkill spills to whichever Port quarter is in arc					
-			$hangar->setStructureHome(array(1, 4));				
+			$subReactor->overkillArcStructures = array(1, 4); //overkill spills to whichever Port quarter is in arc					
+			$subReactor->setStructureHome(array(1, 4));				
 			$this->addRightFrontSystem($subReactor);	
 			$bolter1 = new DualIonBolter(5, 4, 4, 0, 90);
 			$bolter1->overkillArcStructures = array(1, 4); //overkill spills to whichever Port quarter is in arc					
@@ -198,8 +198,8 @@ class TraqintorNew extends SmallStarBaseFourSections{
 			$subReactor = new SubReactorUniversal(5, 14, 0, 0);
 			$subReactor->startArc = 90;
 			$subReactor->endArc = 180;
-			$hangar->overkillArcStructures = array(2, 4); //overkill spills to whichever Port quarter is in arc					
-			$hangar->setStructureHome(array(2, 4));				
+			$subReactor->overkillArcStructures = array(2, 4); //overkill spills to whichever Port quarter is in arc					
+			$subReactor->setStructureHome(array(2, 4));				
 			$this->addRightAftSystem($subReactor);	
 			$bolter1 = new DualIonBolter(5, 4, 4, 90, 180);
 			$bolter1->overkillArcStructures = array(2, 4); //overkill spills to whichever Port quarter is in arc					

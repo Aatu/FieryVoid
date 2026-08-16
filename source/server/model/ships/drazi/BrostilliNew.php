@@ -87,8 +87,8 @@ class BrostilliNew extends SmallStarBaseFourSections
 			$subReactorSide = new SubReactorUniversal(5, 13, 0, 0);
 			$subReactorSide->startArc = 270;
 			$subReactorSide->endArc = 360;			
-			$hangar->overkillArcStructures = array(1, 3); //overkill spills to whichever Port quarter is in arc					
-			$hangar->setStructureHome(array(1, 3));				
+			$subReactorSide->overkillArcStructures = array(1, 3); //overkill spills to whichever Port quarter is in arc					
+			$subReactorSide->setStructureHome(array(1, 3));				
 			$this->addLeftFrontSystem($subReactorSide);
 			$hvyCannon = new HvyParticleCannon(5, 12, 9, 270, 360);	
 			$hvyCannon->overkillArcStructures = array(1, 3); //overkill spills to whichever Port quarter is in arc					
@@ -130,8 +130,8 @@ class BrostilliNew extends SmallStarBaseFourSections
 			$subReactorSide = new SubReactorUniversal(5, 13, 0, 0);
 			$subReactorSide->startArc = 180;
 			$subReactorSide->endArc = 270;			
-			$hangar->overkillArcStructures = array(2, 3); //overkill spills to whichever Port quarter is in arc					
-			$hangar->setStructureHome(array(2, 3));				
+			$subReactorSide->overkillArcStructures = array(2, 3); //overkill spills to whichever Port quarter is in arc					
+			$subReactorSide->setStructureHome(array(2, 3));				
 			$this->addLeftAftSystem($subReactorSide);
 			$hvyCannon = new HvyParticleCannon(5, 12, 9, 180, 270);	
 			$hvyCannon->overkillArcStructures = array(2, 3); //overkill spills to whichever Port quarter is in arc					
@@ -157,8 +157,8 @@ class BrostilliNew extends SmallStarBaseFourSections
 			$subReactorSide = new SubReactorUniversal(5, 13, 0, 0);
 			$subReactorSide->startArc = 0;
 			$subReactorSide->endArc = 90;			
-			$hangar->overkillArcStructures = array(1, 4); //overkill spills to whichever Port quarter is in arc					
-			$hangar->setStructureHome(array(1, 4));				
+			$subReactorSide->overkillArcStructures = array(1, 4); //overkill spills to whichever Port quarter is in arc					
+			$subReactorSide->setStructureHome(array(1, 4));				
 			$this->addRightFrontSystem($subReactorSide);
 			$hvyCannon = new HvyParticleCannon(5, 12, 9, 0, 90);	
 			$hvyCannon->overkillArcStructures = array(1, 4); //overkill spills to whichever Port quarter is in arc					
@@ -200,8 +200,8 @@ class BrostilliNew extends SmallStarBaseFourSections
 			$subReactorSide = new SubReactorUniversal(5, 13, 0, 0);
 			$subReactorSide->startArc = 90;
 			$subReactorSide->endArc = 180;			
-			$hangar->overkillArcStructures = array(2, 4); //overkill spills to whichever Port quarter is in arc					
-			$hangar->setStructureHome(array(2, 4));				
+			$subReactorSide->overkillArcStructures = array(2, 4); //overkill spills to whichever Port quarter is in arc					
+			$subReactorSide->setStructureHome(array(2, 4));				
 			$this->addRightAftSystem($subReactorSide);
 			$hvyCannon = new HvyParticleCannon(5, 12, 9, 90, 180);	
 			$hvyCannon->overkillArcStructures = array(2, 4); //overkill spills to whichever Port quarter is in arc					
