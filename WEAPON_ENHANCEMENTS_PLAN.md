@@ -66,6 +66,21 @@ failed**; a scratch build of a young hull with `SYS_ADT` + `SYS_GSGT` round-trip
 | 6c | The menu's own title bar now clashes | Brightening the sections left the `#215a7a` title within ~12° of hue and a hair of luminance of the Damage bar — a fourth section rather than the window's name | Title moved to `#3f5a7d`: the **hue midpoint of its two blue children** (202° / 225°), low chroma beside them, brighter than all three bars, and roughly the **complement of the bronze** — which is what makes the gold pop. It is also the family `theme.colors.line` already belongs to (215°), so frame and title are siblings for free. Title + fill + border extracted to `MenuHeader` / `MENU_CHROME` and adopted by **all three** lobby damage editors, which were carrying three copies of one title bar. ⚠️ Element `opacity` dropped from all three containers — it compounded with the fill's alpha and faded the TEXT; `ApplyDamageMenu`'s `opacity: 1 !important` on the header was a no-op, since a child cannot opt out of an ancestor's group opacity |
 | 7 | "System Enhancements (n)" counts refits | It counted purchase ROWS | It counts **distinct systems**, both sides. The number is the count of ✦ badges on the ship window — the thing the player can go and look at — and a gun wearing both Gunsights and ADT is still one enhanced gun. `systemEnhancements.count()` keeps meaning rows (its two callers are `> 0` tests); the new `systemsEnhanced()` drives the line |
 
+### Refinement round 2 — 2026-08-16, second play-test
+
+One report, one cause. Buying a refit charged for it in the points panel but the **fleet-list row**
+showed neither the new cost nor the "System Enhancements (n)" line until the ship was edited or the
+fleet saved and reloaded.
+
+| # | Report | Cause | Fix |
+|---|---|---|---|
+| 8 | The refit's cost lands in the panel subheader's *current* total but not in the row's `boughtPointCost`, and the `ship-enhancement-entry` line does not appear — both correct after an Edit or a save/load | ⭐ `gamedata.calculateFleet()` writes `.current` / `.remaining` and **nothing else** — it has never touched a row. The row's cost span and its enhancement lines are written **at row-BUILD time only**, by `updateFleet` and `constructFleetList`; the only per-edit repaint that existed was `refreshDamagedBadge`, which re-derived the broken-heart badge and stopped there. So `ship.pointCost` and `ship.systemEnhancements` were both already right (which is why a rebuild showed them) — the markup simply was not re-read | `refreshDamagedBadge` → **`refreshFleetRow`**, which re-derives badge, name, cost **and** enhancement lines through the same three helpers the two row builders use (`damagedShipBadge` / `rowDisplay` / `enhancementListHtml`), never patching a field by hand. The enhancement block is re-inserted **before `.ship-actions`**, which is what keeps the rebuilt row in the builders' order. All three React damage editors call it |
+
+⚠️ The lesson is the one PREBATTLE_DAMAGE_PLAN.md §6 already recorded and this feature re-learned:
+**anything a menu can change mid-session needs a repaint path as well as a builder**, and the repaint
+must go through the builder's own helpers or the two drift. `refreshDamagedBadge` was that repaint
+path for exactly one of the three things a row displays.
+
 ⚠️ **Items 3–5 do not change §6.3's ceiling.** The enemy still receives the enhanced `intercept` and
 `fireControl` (they were in `serialise` from day one) and now sees them in the tooltip too, so a
 veteran comparing a mount against the published SCS can still infer the refit. Item 5 hides the

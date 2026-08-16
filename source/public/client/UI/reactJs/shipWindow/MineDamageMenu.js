@@ -217,9 +217,9 @@ class MineDamageMenu extends Component {
         const { ship } = this.props;
         battleDamage.applyToShip(ship);
         if (window.shipWindowManagerReact) window.shipWindowManagerReact.update();
-        //Keep the fleet-list row's broken-heart badge in step as we edit.
-        if (window.gamedata && typeof gamedata.refreshDamagedBadge === 'function') {
-            gamedata.refreshDamagedBadge(ship);
+        //Keep the fleet-list row (badge, cost, enhancement lines) in step as we edit.
+        if (window.gamedata && typeof gamedata.refreshFleetRow === 'function') {
+            gamedata.refreshFleetRow(ship);
         }
         this.forceUpdate();
     }

@@ -242,9 +242,10 @@ class ApplyDamageMenu extends Component {
 
         //Repaints icons, health bars and section headers of every open ship window.
         if (window.shipWindowManagerReact) window.shipWindowManagerReact.update();
-        //Lobby only: keep the fleet-list row's broken-heart badge in step as we edit.
-        if (window.gamedata && typeof gamedata.refreshDamagedBadge === 'function') {
-            gamedata.refreshDamagedBadge(ship);
+        //Lobby only: keep the fleet-list row - badge, point cost and the "System
+        //Enhancements (n)" line - in step as we edit.
+        if (window.gamedata && typeof gamedata.refreshFleetRow === 'function') {
+            gamedata.refreshFleetRow(ship);
         }
         this.forceUpdate();
 

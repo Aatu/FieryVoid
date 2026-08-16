@@ -519,11 +519,23 @@ window.gamedata = {
 		return hasEnhancements ? '<div class="ship-enhancements">' + listHtml + '</div>' : '';
 	},
 
-	/* Re-paint ONE fleet-list row's damage badge. Called by the React damage menus after
-	   every edit, so the badge appears/disappears as the player works rather than waiting
-	   for the next full fleet-list rebuild. Lobby-only: game.php's gamedata has no such
-	   method and the callers guard on typeof. */
-	refreshDamagedBadge: function refreshDamagedBadge(ship) {
+	/* Re-derive ONE fleet-list row's mutable content from the ship. Called by the React
+	   damage/enhancement menus after every edit, so the row keeps up as the player works
+	   rather than waiting for the next full fleet-list rebuild. Lobby-only: game.php's
+	   gamedata has no such method and the callers guard on typeof.
+
+	   ⭐ EVERYTHING here is re-derived through the same helpers the two row BUILDERS use
+	   (rowDisplay / damagedShipBadge / enhancementListHtml), never patched field by field.
+	   That is what stops this drifting away from updateFleet and constructFleetList - the
+	   badge did exactly that once already (PREBATTLE_DAMAGE_PLAN.md §6).
+
+	   ⚠️ Three things move when a per-system refit is bought, and until 2026-08-16 only the
+	   first was repainted: the badge, the row's POINT COST (calculateFleet updates the
+	   points panel, never the row) and the "System Enhancements (n)" line. The cost and the
+	   line were both only ever written at row-BUILD time, so a refit read as free and
+	   invisible until the player edited the ship or reloaded the fleet - while the panel
+	   subheader had already charged for it (user report 2026-08-16). */
+	refreshFleetRow: function refreshFleetRow(ship) {
 		if (!ship) return;
 
 		var row = $(".ship.bought").filter(function () {
@@ -534,6 +546,21 @@ window.gamedata = {
 		row.find(".shipDamagedBadge").remove();
 		var badge = gamedata.damagedShipBadge(ship);
 		if (badge) row.prepend(badge);
+
+		var display = gamedata.rowDisplay(ship);
+		row.find(".shipname").first().text(display.name);
+		row.find(".boughtPointCost").first().text(display.cost + 'p');
+
+		/* Re-inserted BEFORE .ship-actions rather than appended: the row is a block stack
+		   and the action links are always its last child, so appending would put the
+		   enhancement lines underneath them. */
+		row.find(".ship-enhancements").remove();
+		var enhancementHtml = gamedata.enhancementListHtml(ship);
+		if (enhancementHtml) {
+			var actions = row.find(".ship-actions").first();
+			if (actions.length) $(enhancementHtml).insertBefore(actions);
+			else row.append(enhancementHtml);
+		}
 	},
 
 	/* The action links one fleet-list row offers, as an HTML string.
