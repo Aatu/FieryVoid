@@ -1562,6 +1562,7 @@ spl_autoload_register(
                 'jydvorchan' => '/server/model/ships/raiders/JYDVorchan.php',
                 'kabrik' => '/server/model/ships/brakiri/kabrik.php',
                 'kaedashkadaam' => '/server/model/ships/llort/KaedashkadaAM.php',
+                'kaedashkadaamnew' => '/server/model/ships/llort/KaedashkadaAMNew.php',
                 'kalavaramnew' => '/server/model/ships/korlyan/KalavarAMNew.php',
                 'kalavarearlyamnew' => '/server/model/ships/korlyan/KalavarEarlyAMNew.php',
                 'kalavaroriginalam' => '/server/model/ships/korlyan/KalavarOriginalAM.php',
