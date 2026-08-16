@@ -130,6 +130,117 @@ $chatcompact = !empty($chatcompact);
         ")(?=\\s|$)", "g"
     );
 
+    /* ── Shared poll coordinator ──────────────────────────────────────────────
+       game.php includes this file TWICE — global chat and this game's chat — and each
+       include is its own IIFE with its own `chat`. They used to poll independently:
+       two requests every interval, two slots in ajaxInterface's single global request
+       queue, asking two questions that fit comfortably in one. Both are answered out
+       of the same APCu segment by the same process, so the second request bought
+       nothing but a round trip.
+
+       The loop therefore lives on `window`, not in the closure. Whichever include
+       starts first builds it; the second joins. One timer, one request carrying every
+       member's (gameid, lastid), one response fanned back out by gameid.
+
+       games.php and gamelobby.php include this file once, so there the coordinator has
+       a single member and behaves exactly as the old per-chat loop did.
+
+       Pacing is shared because the request is: interval() takes the MINIMUM over the
+       members, so a hot chat pulls its quiet neighbour along with it. That neighbour
+       costs nothing extra — it is the same request either way — and it keeps its own
+       quietPolls ladder, so it returns to its own rhythm as soon as the hot one cools. */
+    var coordinator = window.fvChatPoll;
+    if (!coordinator) {
+        coordinator = window.fvChatPoll = {
+            members: [],
+            timer: null,
+            requesting: false,
+
+            add: function(c){
+                if (coordinator.members.indexOf(c) === -1) coordinator.members.push(c);
+            },
+
+            live: function(){
+                return coordinator.members.filter(function(c){ return c.polling; });
+            },
+
+            interval: function(){
+                var live = coordinator.live();
+                var best = null;
+                for (var i = 0; i < live.length; i++){
+                    var v = live[i].pollInterval();
+                    if (best === null || v < best) best = v;
+                }
+                return best === null ? POLL_HIDDEN : best;
+            },
+
+            /* THE ONLY PLACE A POLL IS SCHEDULED, and it clears the pending timer
+               before setting a new one. That is deliberate: it makes two concurrent
+               poll chains impossible by construction.
+
+               They used to be very possible, and the cost was not a one-off doubling.
+               The visibilitychange handler cleared chat.polling on hide and then set
+               it and called requestChatdata() directly on show, while the previous
+               timeout was still pending — so both went on to schedule their own
+               successors. The `requesting` guard collapsed them only when they fired
+               at the same instant; a switch partway through the interval leaves them
+               staggered, and both chains survive. Measured against the old file: three
+               staggered tab switches left FOUR live chains, i.e. one extra permanent
+               chain per switch, growing for as long as the tab stays open, with no
+               symptom but the request count. */
+            schedule: function(delay){
+                if (coordinator.timer){
+                    clearTimeout(coordinator.timer);
+                    coordinator.timer = null;
+                }
+                if (!coordinator.live().length) return;
+                coordinator.timer = setTimeout(function(){
+                    coordinator.timer = null;
+                    coordinator.poll();
+                }, delay === undefined ? coordinator.interval() : delay);
+            },
+
+            poll: function(){
+                /* A request is already in flight — drop this tick rather than stack a
+                   second one. Note this returns WITHOUT rescheduling, which is correct
+                   but worth being explicit about: while a request is outstanding, the
+                   next poll is owned by that request's success/error handler, both of
+                   which call schedule(). ajaxWithRetry always ends in one or the other
+                   (and REQUEST_TIMEOUT bounds the wait), so the chain cannot be lost. */
+                if (coordinator.requesting) return;
+                var live = coordinator.live();
+                if (!live.length) return;       // everyone has unloaded; let the loop die
+                coordinator.requesting = true;
+
+                var spec = live.map(function(c){ return c.gameid + ":" + c.lastid; }).join(",");
+
+                ajaxInterface.ajaxWithRetry({
+                    type: 'GET',
+                    url: 'chatdata.php',
+                    dataType: 'json',
+                    timeout: REQUEST_TIMEOUT,
+                    data: { chats: spec },
+                    success: function(data){
+                        coordinator.requesting = false;
+                        live.forEach(function(c){
+                            // Numeric gameid indexes the string key fine — JS coerces.
+                            c.receive(data ? data[c.gameid] : null);
+                        });
+                        coordinator.schedule();
+                    },
+                    error: function(){
+                        coordinator.requesting = false;
+                        // Treat a failed poll as a quiet one AND double the wait, so a
+                        // server having a bad minute is not asked about it at the hot
+                        // interval by every chat on the page.
+                        live.forEach(function(c){ c.quietPolls++; });
+                        coordinator.schedule(coordinator.interval() * 2);
+                    }
+                }).fail(() => {});
+            }
+        };
+    }
+
     // Define chat first
     var chat = {
 
@@ -144,13 +255,11 @@ $chatcompact = !empty($chatcompact);
         playerid: <?php print(isset($_SESSION["user"]) ? (int)$_SESSION["user"] : 0); ?>,
         chatElement: <?php print("'$chatelement'") ?>,
 
-        /* The one live poll timer. Every schedule goes through schedulePoll(), which
-           clears this first — that is what makes "exactly one poll chain" an invariant
-           rather than a hope. There is no stored jqXHR to abort alongside it: what
+        /* The timer and the in-flight request both belong to the coordinator now, not
+           to this chat. Nor is there a stored jqXHR to abort: what
            ajaxInterface.ajaxWithRetry hands back is a plain $.Deferred().promise(),
            which has neither .abort() nor .readyState, so the abort this file used to
            attempt threw on every single poll and was swallowed by an empty catch. */
-        _pollTimer: null,
 
         hotUntil: 0,      // Date.now() before which we poll at POLL_HOT
         quietPolls: 0,    // consecutive polls that returned nothing; indexes POLL_LADDER
@@ -175,16 +284,13 @@ $chatcompact = !empty($chatcompact);
             chat.initEmoji();
             chat.scrollToBottom();
 
-            // Stand down on navigation away. In-flight requests cannot be aborted from
-            // here (see _pollTimer), but clearing the flag stops anything that lands
-            // from scheduling another round.
+            // Stand down on navigation away. In-flight requests cannot be aborted (see
+            // the note on the coordinator's timer), but dropping out of the members
+            // list is enough: the shared loop stops of its own accord once nothing is
+            // left polling, and re-times itself if the other chat on the page is.
             $(window).on('beforeunload.chat', function(){
                 chat.polling = false;
-                chat.requesting = false;
-                if(chat._pollTimer){
-                    clearTimeout(chat._pollTimer);
-                    chat._pollTimer = null;
-                }
+                coordinator.schedule();
             });
         },
 
@@ -378,8 +484,8 @@ $chatcompact = !empty($chatcompact);
 
             if(scroll) c.scrollTop(c[0].scrollHeight);
 
-            // Reported so requestChatdata can tell a live conversation from a quiet
-            // one and pace the next poll accordingly.
+            // Reported so receive() can tell a live conversation from a quiet one and
+            // pace the next poll accordingly.
             return scroll;
         },
 
@@ -410,7 +516,8 @@ $chatcompact = !empty($chatcompact);
         startPolling: function(){
             if(chat.polling) return;
             chat.polling = true;
-            chat.schedulePoll(0);   // first load: fill the panel immediately
+            coordinator.add(chat);
+            coordinator.schedule(0);   // first load: fill the panel immediately
         },
 
         // Something is happening in this chat — poll fast for the next HOT_DURATION.
@@ -429,29 +536,19 @@ $chatcompact = !empty($chatcompact);
             return POLL_LADDER[POLL_LADDER.length - 1][1];
         },
 
-        /* THE ONLY PLACE A POLL IS SCHEDULED, and it clears the pending timer before
-           setting a new one. That is deliberate: it makes two concurrent poll chains
-           impossible by construction.
-
-           They used to be very possible, and the cost was not a one-off doubling. The
-           visibilitychange handler cleared chat.polling on hide and then set it and
-           called requestChatdata() directly on show, while the previous timeout was
-           still pending — so both went on to schedule their own successors. The
-           `requesting` guard collapsed them only when they fired at the same instant;
-           a switch partway through the interval leaves them staggered, and both chains
-           survive. Measured against the old file: three staggered tab switches left
-           FOUR live chains, i.e. one extra permanent chain per switch, growing for as
-           long as the tab stays open, with no symptom but the request count. */
-        schedulePoll: function(delay){
-            if(chat._pollTimer){
-                clearTimeout(chat._pollTimer);
-                chat._pollTimer = null;
-            }
+        /* This chat's slice of a batched response — see coordinator.poll(). `slice` is
+           whatever chatdata.php returned under this gameid: [] for "nothing new" (which
+           is also what the APCu fast path returns without touching the database), a map
+           of messages keyed by id, or that one chat's own error. */
+        receive: function(slice){
             if(!chat.polling) return;
-            chat._pollTimer = setTimeout(function(){
-                chat._pollTimer = null;
-                chat.requestChatdata();
-            }, delay === undefined ? chat.pollInterval() : delay);
+
+            var arrived = false;
+            if(slice && slice.error) window.confirm.exception(slice, function(){});
+            else if(slice) arrived = chat.parseChatData(slice);
+
+            if(arrived) chat.markHot();
+            else chat.quietPolls++;
         },
 
         removeNewMessageTag: function(){
@@ -543,7 +640,7 @@ $chatcompact = !empty($chatcompact);
                            feel responsive, and this is the one poll guaranteed to miss
                            the APCu fast path (submitChatMessage has just raised the
                            cached id), so it is also the only one that costs a query. */
-                        chat.schedulePoll(300);
+                        coordinator.schedule(300);
                     },
                     error: function(jqXHR, textStatus){
                         attempt++;
@@ -562,44 +659,6 @@ $chatcompact = !empty($chatcompact);
         },
 
 
-        /* On the server this is the cheap one: chatdata.php answers an unchanged chat
-           out of APCu and exits before it opens a database connection or takes the
-           session lock, so the steady state here costs no queries at all. What it does
-           still cost is a slot in ajaxInterface's single global request queue, which is
-           shared with the gamedata poll — hence the pacing at the top of this file. */
-        requestChatdata: function(){
-            if(chat.requesting || !chat.polling) return;
-            chat.requesting = true;
-
-            ajaxInterface.ajaxWithRetry({
-                type: 'GET',
-                url: 'chatdata.php',
-                dataType: 'json',
-                timeout: REQUEST_TIMEOUT,
-                data: { gameid: chat.gameid, lastid: chat.lastid },
-                success: function(data){
-                    chat.requesting = false;
-                    if(!chat.polling) return;
-
-                    var arrived = false;
-                    if(data && data.error) window.confirm.exception(data, function(){});
-                    else if(data) arrived = chat.parseChatData(data);
-
-                    if(arrived) chat.markHot();
-                    else chat.quietPolls++;
-
-                    chat.schedulePoll();
-                },
-                error: function(){
-                    chat.requesting = false;
-                    // Treat a failed poll as a quiet one AND double the wait, so a server
-                    // having a bad minute is not asked about it at the hot interval.
-                    chat.quietPolls++;
-                    chat.schedulePoll(chat.pollInterval() * 2);
-                }
-            }).fail(() => {});
-        },
-
         successSubmit: function(data){
             if(data.error) window.confirm.exception(data, function(){});
         } // no comma here
@@ -608,18 +667,22 @@ $chatcompact = !empty($chatcompact);
 
 /* Re-pace on tab visibility rather than stopping and restarting.
 
-   This handler is where the poll-chain leak lived — see schedulePoll for what it cost.
-   chat.polling now means "this chat is alive" and is cleared only on unload; hiding
-   and showing simply re-times the one chain through schedulePoll(), which clears the
-   pending timer before setting the next and so cannot leave a second one behind. */
+   This handler is where the poll-chain leak lived — see coordinator.schedule for what
+   it cost. chat.polling now means "this chat is alive" and is cleared only on unload;
+   hiding and showing simply re-times the one shared chain through that method, which
+   clears the pending timer before setting the next and so cannot leave a second behind.
+
+   Both includes on game.php register a listener and both fire. That is harmless and
+   intended: each marks its OWN chat hot, and the two schedule() calls collapse onto
+   the single shared timer. */
 document.addEventListener("visibilitychange", function() {
     if (!chat.polling) return;
     if (document.hidden) {
-        chat.schedulePoll(POLL_HIDDEN);
+        coordinator.schedule(POLL_HIDDEN);
     } else {
         // Coming back is a sign of life, and the player wants to see what they missed.
         chat.markHot();
-        chat.schedulePoll(0);
+        coordinator.schedule(0);
     }
 });
 
