@@ -33,6 +33,14 @@ class TacGamedata {
       unconditional and must stay that way. With nothing marked disguised it is the only thing left
       for that pass to do.*/
     public static $chameleonDisclosed = false;
+    /*The post-mortem discloses everything: once a game has ENDED its replay shows the standing
+      logistics state that was own-team-only while it was being played (ordnance loads, hangar
+      contents, queued launch/dock orders). Read by ShipSystem::isDisclosedToCurrentViewer(), which
+      is the gate on those masks. Set from isGameOver(), so SURRENDERED counts as well as FINISHED -
+      most dead games never leave SURRENDERED. A static because a ShipSystem has no route back to
+      $gamedata; re-set on every load, since one request can build gamedata twice. Defaults false so
+      a load that never reached onConstructed() masks rather than discloses.*/
+    public static $currentGameFinished = false;
 
     public $id, $turn, $phase, $activeship, $name, $status, $points, $background, $creator, $gamespace, $description;
     public $ships = array();
@@ -137,6 +145,7 @@ class TacGamedata {
 
     public function onConstructed(){
         self::$currentForPlayerTeam = $this->getPlayerTeam(); //viewer context (slots are loaded by now) - teammates see each other's hidden orders
+        self::$currentGameFinished = $this->isGameOver(); //post-mortem discloses private logistics (ammo loads, hangar contents)
         $this->setChameleonTeamList();
         $this->setBlockedHexes();
         $this->waitingForThisPlayer = $this->getIsWaitingForThisPlayer();
@@ -240,6 +249,17 @@ class TacGamedata {
         }
     }
     
+    /*Has this game ENDED? Both terminal statuses count, and in practice SURRENDERED is the usual
+      one: a surrender that leaves one team standing writes SURRENDERED, and only a subsequent
+      Manager::changeTurn promotes it to FINISHED - which most dead games never reach, because the
+      turn stops rolling. (Local corpus at the time of writing: 118 SURRENDERED vs 1 FINISHED.)
+      Same pairing DiscordNotifier already uses to decide a game is over.
+      NOT to be confused with isFinished() below, which asks a different question entirely - whether
+      two hostile ships can still fight - and is a game-STATE test, not a status one.*/
+    public function isGameOver(){
+        return ($this->status === "FINISHED" || $this->status === "SURRENDERED");
+    }
+
     public function isFinished(){
         foreach ($this->slots as $slot)
         {

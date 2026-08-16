@@ -4585,7 +4585,41 @@ class Hangar extends ShipSystem{
 		$strippedSystem->excludeFromDefaultShuttles = !empty($this->excludeFromDefaultShuttles); //steers default shuttles away from this bay (boxes still count toward capacity)
 		$strippedSystem->inadequate = !empty($this->inadequate); //Inadequate Hangars (Unreliable): client renders the trait + launch-abort/landing-damage outcomes
 		$strippedSystem->allowedFighterClasses = is_array($this->allowedFighterClasses) ? array_values($this->allowedFighterClasses) : array(); //per-bay fighter-class allow-list (empty = unrestricted); client mirrors the dock/launch eligibility gate
-		$strippedSystem->hangarUsage = $this->hangarUsage;
+		/*Bay contents and any queued launch/dock orders are own-team-only.
+		  $hangarUsage names every stored craft, so it discloses the shuttle composition an
+		  opponent never watched load (a MinesweepingShuttle aboard is real intel) and the exact
+		  free-box count of a bay they might be planning to cripple. The pending*Order fields are
+		  the sharper leak of the two: they are COMMITTED-BUT-UNRESOLVED Firing-Phase orders, so
+		  an opponent who has not committed yet could read off which bay is about to launch, in
+		  which direction, or which flight is being recovered - the same bleed shape the
+		  deleteHiddenData rules exist to close, masked here instead because these ride the system
+		  payload rather than a fire order.
+		  EXTERNAL MOUNTS ARE EXEMPT FROM THE CONTENTS MASK, but NOT from the order mask: a
+		  catapult's superheavy, a fighter rail's fighters, a docking collar's LCV and a
+		  ShadowHangar's integrated fighters all ride OUTSIDE the hull, so whether the mount is
+		  occupied is plainly apparent to an opponent (user ruling, same reasoning that keeps a
+		  fighter's hardpoint ammo public in AmmoMagazine below). Only an ENCLOSED hangar bay
+		  conceals what is inside it. Their queued orders still mask - an intention to launch next
+		  turn is not something you can see by looking at the hull.
+		  ShadowHangar has a SECOND, independent reason to stay disclosed: fleetList's
+		  integratedFighterCarrierAdjust derives the held integrated-fighter count from these
+		  entries to net LAUNCHED fighters off the carrier's Order-of-Battle value, and blanking
+		  them would silently drop an enemy Shadow carrier's displayed value by its whole
+		  complement. It leaks nothing either way - integratedFighterCount and
+		  integratedFighterPerCraft already ship to every viewer, and every launched integrated
+		  fighter is a visible flight row, so held = purchased - visible regardless.
+		  $launchedThisTurn/$landedThisTurn stay public - they are incremented at turn resolution,
+		  by which point the opponent has watched the craft cross the map.*/
+		$disclosed = $this->isDisclosedToCurrentViewer();
+		$externalMount = !empty($this->isCatapult) || !empty($this->isRail)
+					  || !empty($this->isLCVRail) || !empty($this->isShadowHangar);
+		$disclosedUsage = $disclosed || $externalMount;
+		//A list, so the empty case is a JSON [] and every Array.isArray() consumer still matches.
+		$strippedSystem->hangarUsage = $disclosedUsage ? $this->hangarUsage : array();
+		//Tells the client the bay is UNKNOWN rather than EMPTY - without it refreshHangarTooltip
+		//would render a confident "0 / N slots" off the blanked list, which is a false statement
+		//rather than a withheld one.
+		if (!$disclosedUsage) $strippedSystem->hangarUsageHidden = true;
 		$strippedSystem->launchedThisTurn = $this->launchedThisTurn;
 		$strippedSystem->landedThisTurn = $this->landedThisTurn;
 		//Stage 15: only the primary hangar carries the carrier-level reload pool.
@@ -4619,15 +4653,25 @@ class Hangar extends ShipSystem{
 		}
 		//Send last-submitted pending orders so the client can pre-fill the
 		//launch/dock dialogs after a page reload (re-edit a queued order
-		//mid-Firing-Phase, or cancel a queued dock).
-		if ($this->pendingLaunchOrder !== null) $strippedSystem->pendingLaunchOrder = $this->pendingLaunchOrder;
-		if ($this->pendingDockOrder !== null)   $strippedSystem->pendingDockOrder   = $this->pendingDockOrder;
+		//mid-Firing-Phase, or cancel a queued dock). Own team only - see above.
+		//The client hydrates both into empty arrays when absent, so withholding
+		//them needs no client-side guard of its own.
+		if ($disclosed) {
+			if ($this->pendingLaunchOrder !== null) $strippedSystem->pendingLaunchOrder = $this->pendingLaunchOrder;
+			if ($this->pendingDockOrder !== null)   $strippedSystem->pendingDockOrder   = $this->pendingDockOrder;
+		}
 		//LCV Rails: ship the rail→LCV link + last-submitted LCV orders so the client
 		//tooltip/dialog renders the occupant and pre-fills/cancels a queued order.
+		//The link and the orders split across the two gates: $lcvDocked IS this mount's
+		//occupancy (a rail holds one whole LCV and carries no hangarUsage), so it follows
+		//$disclosedUsage - which an LCV rail always satisfies, being an external mount -
+		//while the queued orders follow $disclosed with every other pending order.
 		if (!empty($this->isLCVRail)) {
-			if (is_array($this->lcvDocked)) $strippedSystem->lcvDocked = $this->lcvDocked;
-			if ($this->pendingLcvDockOrder   !== null) $strippedSystem->pendingLcvDockOrder   = $this->pendingLcvDockOrder;
-			if ($this->pendingLcvLaunchOrder !== null) $strippedSystem->pendingLcvLaunchOrder = $this->pendingLcvLaunchOrder;
+			if ($disclosedUsage && is_array($this->lcvDocked)) $strippedSystem->lcvDocked = $this->lcvDocked;
+			if ($disclosed) {
+				if ($this->pendingLcvDockOrder   !== null) $strippedSystem->pendingLcvDockOrder   = $this->pendingLcvDockOrder;
+				if ($this->pendingLcvLaunchOrder !== null) $strippedSystem->pendingLcvLaunchOrder = $this->pendingLcvLaunchOrder;
+			}
 		}
 		return $strippedSystem;
 	}
@@ -10651,15 +10695,48 @@ class AmmoMagazine extends ShipSystem {
 	
  	public function stripForJson(){
 		$strippedSystem = parent::stripForJson();
-		$strippedSystem->data = $this->data; 
-		//$strippedSystem->data['Special'] = $this->data['Special']; 
-		$strippedSystem->remainingAmmo = $this->remainingAmmo;
+		$strippedSystem->data = $this->data;
+		//$strippedSystem->data['Special'] = $this->data['Special'];
+		$strippedSystem->output = $this->output;
+		$strippedSystem->capacity = $this->capacity;           //printed SCS value - public
+		$strippedSystem->remainingAmmo = $this->remainingAmmo; //round TOTAL - public, see below
+		/*The at-a-glance on-icon number. Sent EXPLICITLY because the base stripForJson does not
+		  transmit outputDisplay (it is a blueprint field) and the static blueprint is built from an
+		  EMPTY magazine - the rounds come from lobby enhancements - so the blueprint's copy is
+		  worthless here. SystemFactory.createSystemFromJson merges Object.assign(blueprint,
+		  liveJson), so this one wins. A STRING deliberately: SystemIcon's getText() lets a NUMERIC
+		  0 fall through to the generic display (`0 != ''` is false in JS) but returns a string "0",
+		  which is what makes an emptied magazine read 0 instead of going blank.*/
+		$strippedSystem->outputDisplay = (string)$this->remainingAmmo;
+
+		/*The ordnance TYPES are own-team-only; the round TOTAL is not. An opponent may see how much
+		  a magazine still holds - and its capacity, a printed SCS value - but not WHAT it holds:
+		  whether those rounds are Interceptors or Antifighter is what decides whether they commit
+		  missiles. So ammoCountArray/ammoSizeArray go (the sizes name the ordnance aboard even
+		  where a count has reached zero) while remainingAmmo/output/outputDisplay stay.
+		  EXEMPT - FIGHTERS: a fighter's missiles ride EXTERNAL HARDPOINTS, so the load is there to
+		  be seen and counted (B5W). A flight's magazine keeps reporting its types in full.
+		  Both client consumers of the type arrays are own-ship-scoped - the commit-time ammo check
+		  (gamedata.js, iterates myShips) through doVerifyAmmoUsage, and getMagazineFireableAmmo
+		  through checkOutOfAmmo - so an enemy viewer loses nothing it could act on.
+		  data['Special'] is REBUILT rather than dropped: AmmoMagazine is one of the few systems
+		  that transmits data[] live, and its prose repeats the same per-type breakdown. The two
+		  surviving lines mirror setSystemDataWindow's wording so the public half reads identically
+		  - keep them in step if that text changes. PHP arrays are value types, so writing to the
+		  stripped copy cannot reach $this->data.*/
+		$unit = $this->getUnit();
+		$isFighterMagazine = ($unit !== null && !empty($unit->flight));
+		if (!$isFighterMagazine && !$this->isDisclosedToCurrentViewer()){
+			$strippedSystem->data['Special'] = "Technical system, keeping track of consumable ammo."
+				. "<br>Total rounds: " . $this->remainingAmmo . "/" . $this->capacity
+				. "<br>Ordnance types are known only to its own fleet.";
+			return $strippedSystem;
+		}
+
 		$strippedSystem->ammoCountArray = $this->ammoCountArray;
 		$strippedSystem->ammoSizeArray = $this->ammoSizeArray;
-		$strippedSystem->output = $this->output;	
-		$strippedSystem->capacity = $this->capacity;
 		return $strippedSystem;
-	} 
+	}
 	
     //add new kind of ordnance: ammo to be used (CLASS INSTANCE!), number of rounds to add (number)
 	//to be called only AFTER AmmoMagazine itself is fitted to unit!

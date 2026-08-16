@@ -434,6 +434,24 @@ Hangar.prototype.refreshHangarTooltip = function () {
 		if (allowedLabel) this.data["Type"] = allowedLabel;
 	}
 
+	// Enemy/observer view of an ENCLOSED bay: Hangar::stripForJson withheld its contents
+	// (and any queued launch/dock orders) as own-team-only, sending hangarUsageHidden in
+	// their place. External mounts — catapults, fighter rails, docking collars, ShadowHangar
+	// bays — are exempt there and never reach this branch: their occupants ride outside the
+	// hull, so an opponent can see them and the normal projection below is correct.
+	// Report the bay as UNKNOWN and stop — running the projection below over the
+	// blanked list would render a confident "0 / N slots" and an empty stored-craft
+	// line, which states something false rather than withholding something true. The
+	// "Type" line above is blueprint-derived (the bay's declared category, printed on
+	// the SCS) so it stays. Own team, spectators of a FINISHED game, and every
+	// server-side caller never see this flag and take the full path.
+	if (this.hangarUsageHidden) {
+    	var currentHealth = shipManager.systems.getRemainingHealth(this)		
+		this.data["Capacity"] = currentHealth;
+		this.data["Stored Craft"] = "<br>???";
+		return;
+	}
+
 	// Hangar boxes a single stored craft occupies. A unitSize<1 craft (Vorlon
 	// Assault Fighter et al.) needs more than one box each; a unitSize>1 ultralight
 	// (Zorth) packs several per box and costs a FRACTIONAL 1/unitSize boxes (0.5).
@@ -998,6 +1016,20 @@ DockingCollar.prototype.doIndividualNotesTransfer = function () {
 // "(Recovering)" / "(Launching)" projection for queued orders this turn.
 DockingCollar.prototype.refreshHangarTooltip = function () {
 	if (!this.data) this.data = {};
+
+	// Safety net, not a live path: an LCV rail is an EXTERNAL mount, so Hangar::stripForJson
+	// exempts it from the contents mask and never raises this flag today (its occupant is
+	// plainly visible on the hull; only its queued LCV orders are withheld, and those
+	// hydrate to empty arrays on their own). Kept because the flag is written by shared
+	// inherited code — if a collar is ever put back inside the mask, the projection below
+	// would render a confident "0 / 1 slots" off the blanked link, which states something
+	// false rather than withholding something true.
+	if (this.hangarUsageHidden) {
+		this.data["Type"] = "LCVs";
+		this.data["Capacity"] = "Unknown";
+		this.data["Stored Craft"] = "<br>Contents not disclosed.";
+		return;
+	}
 
 	var lcvName = function (id) {
 		if (!id) return 'LCV';
