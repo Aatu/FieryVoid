@@ -43,8 +43,46 @@ $chatcompact = !empty($chatcompact);
 <script>
 (function(){
 
-    const POLL_INTERVAL = 6000;
+    /* ── Poll pacing ──────────────────────────────────────────────────────────
+       Chat used to poll on a flat 6s timer that never decayed. That is 600 requests
+       an hour per chat for as long as the tab is open, and game.php runs TWO of them
+       (global + this game), so an abandoned tab was 1200 requests an hour forever.
+
+       The server side of an unchanged chat is now free of the database — chatdata.php
+       answers it straight out of APCu (see ChatManager::submitChatMessage, which keeps
+       the last message id there) — but the request itself is not free. Every call made
+       through ajaxInterface.ajaxWithRetry is chained onto ONE global request queue, so
+       each chat poll is a slot the gamedata poll cannot have.
+
+       So spend the requests where they buy something: poll fast while a conversation
+       is actually happening, and stand down when it is not. HOT is entered when a
+       message arrives, when the player sends one, and when they focus the composer —
+       which between them cover every moment somebody is waiting on a reply. Otherwise
+       the interval walks up the ladder below, one rung per poll that came back empty.
+
+       Against the old flat 6s that is roughly 3x faster in conversation and roughly
+       3x fewer requests when nobody is talking. */
+    const POLL_HOT     = 2000;
+    const HOT_DURATION = 60000;   // stay hot this long after the last sign of life
+
+    /* Rungs are [consecutive empty polls, interval]. Read top-down, first match wins;
+       the last entry is the floor. Deliberately gentler than gamedata's decay (which
+       reaches 30 MINUTES) — gamedata has the whole game screen to tell a player that
+       something happened, whereas an unpolled chat is simply silent, so 15s is as far
+       as this is allowed to drift. */
+    const POLL_LADDER = [[3, 4000], [8, 6000], [20, 10000], [Infinity, 15000]];
+
+    /* Backgrounded tabs keep polling rather than stopping dead, so the CHAT tab can
+       still light up while the player is reading a rules PDF in another tab. Browsers
+       clamp background timers hard (and freeze them outright when the tab is fully
+       discarded), so this costs less than the arithmetic suggests. */
+    const POLL_HIDDEN = 60000;
+
     const REQUEST_TIMEOUT = 5000;
+
+    /* Retry ceiling for playerChatInfo.php. That endpoint has no APCu fast path — every
+       call is two real queries — so its retries have to terminate. See getLastTimeChecked. */
+    const TIME_CHECK_MAX_FAILS = 3;
 
     /* ── Emoji ────────────────────────────────────────────────────────────────
        The picker's contents. Four short groups rather than one long grid: the
@@ -106,8 +144,21 @@ $chatcompact = !empty($chatcompact);
         playerid: <?php print(isset($_SESSION["user"]) ? (int)$_SESSION["user"] : 0); ?>,
         chatElement: <?php print("'$chatelement'") ?>,
 
-        // place to store current jqXhr so we can abort on unload
-        _currentXhr: null,
+        /* The one live poll timer. Every schedule goes through schedulePoll(), which
+           clears this first — that is what makes "exactly one poll chain" an invariant
+           rather than a hope. There is no stored jqXHR to abort alongside it: what
+           ajaxInterface.ajaxWithRetry hands back is a plain $.Deferred().promise(),
+           which has neither .abort() nor .readyState, so the abort this file used to
+           attempt threw on every single poll and was swallowed by an empty catch. */
+        _pollTimer: null,
+
+        hotUntil: 0,      // Date.now() before which we poll at POLL_HOT
+        quietPolls: 0,    // consecutive polls that returned nothing; indexes POLL_LADDER
+
+        /* Bounded because the endpoint behind it, playerChatInfo.php, has no APCu fast
+           path — every call is two real queries. An unbounded retry there is a tab
+           quietly generating database load for as long as it stays open. */
+        timeCheckFails: 0,
 
         initInterface: function(){
             $(chat.chatElement + " .chatinput").on("keydown", function(e){
@@ -124,13 +175,16 @@ $chatcompact = !empty($chatcompact);
             chat.initEmoji();
             chat.scrollToBottom();
 
-            // abort outstanding requests on navigation away
+            // Stand down on navigation away. In-flight requests cannot be aborted from
+            // here (see _pollTimer), but clearing the flag stops anything that lands
+            // from scheduling another round.
             $(window).on('beforeunload.chat', function(){
-                if(chat._currentXhr && typeof chat._currentXhr.abort === "function"){
-                    try { chat._currentXhr.abort(); } catch(e){}
-                }
                 chat.polling = false;
                 chat.requesting = false;
+                if(chat._pollTimer){
+                    clearTimeout(chat._pollTimer);
+                    chat._pollTimer = null;
+                }
             });
         },
 
@@ -253,6 +307,10 @@ $chatcompact = !empty($chatcompact);
 
         onFocus: function(){
             if (window.windowEvents) windowEvents.chatfocus = true;
+            // A player with the caret in the composer is in the conversation, whether
+            // or not they have sent anything yet — go hot before they hit Enter, so
+            // the reply they are about to provoke does not arrive on a 15s timer.
+            chat.markHot();
         },
 
         onBlur: function(){
@@ -319,6 +377,10 @@ $chatcompact = !empty($chatcompact);
             }
 
             if(scroll) c.scrollTop(c[0].scrollHeight);
+
+            // Reported so requestChatdata can tell a live conversation from a quiet
+            // one and pace the next poll accordingly.
+            return scroll;
         },
 
         checkTimesForLightup: function(timeStamp, lastChecked){
@@ -348,7 +410,48 @@ $chatcompact = !empty($chatcompact);
         startPolling: function(){
             if(chat.polling) return;
             chat.polling = true;
-            setTimeout(chat.requestChatdata, 2000); //Set initial polling to 1 sec to load chat, then it'll go to 8secs.
+            chat.schedulePoll(0);   // first load: fill the panel immediately
+        },
+
+        // Something is happening in this chat — poll fast for the next HOT_DURATION.
+        markHot: function(){
+            chat.hotUntil = Date.now() + HOT_DURATION;
+            chat.quietPolls = 0;
+        },
+
+        // The delay to use for the next poll, given how the last few went.
+        pollInterval: function(){
+            if(document.hidden) return POLL_HIDDEN;
+            if(Date.now() < chat.hotUntil) return POLL_HOT;
+            for(var i = 0; i < POLL_LADDER.length; i++){
+                if(chat.quietPolls <= POLL_LADDER[i][0]) return POLL_LADDER[i][1];
+            }
+            return POLL_LADDER[POLL_LADDER.length - 1][1];
+        },
+
+        /* THE ONLY PLACE A POLL IS SCHEDULED, and it clears the pending timer before
+           setting a new one. That is deliberate: it makes two concurrent poll chains
+           impossible by construction.
+
+           They used to be very possible, and the cost was not a one-off doubling. The
+           visibilitychange handler cleared chat.polling on hide and then set it and
+           called requestChatdata() directly on show, while the previous timeout was
+           still pending — so both went on to schedule their own successors. The
+           `requesting` guard collapsed them only when they fired at the same instant;
+           a switch partway through the interval leaves them staggered, and both chains
+           survive. Measured against the old file: three staggered tab switches left
+           FOUR live chains, i.e. one extra permanent chain per switch, growing for as
+           long as the tab stays open, with no symptom but the request count. */
+        schedulePoll: function(delay){
+            if(chat._pollTimer){
+                clearTimeout(chat._pollTimer);
+                chat._pollTimer = null;
+            }
+            if(!chat.polling) return;
+            chat._pollTimer = setTimeout(function(){
+                chat._pollTimer = null;
+                chat.requestChatdata();
+            }, delay === undefined ? chat.pollInterval() : delay);
         },
 
         removeNewMessageTag: function(){
@@ -356,21 +459,41 @@ $chatcompact = !empty($chatcompact);
             document.getElementById(el)?.classList.remove("newMessage");
         },
 
+        /* ── playerChatInfo.php ───────────────────────────────────────────────
+           The read/write mark for "when did this player last look at this chat",
+           which drives the CHAT tab highlight. NOT on the poll loop — these fire on
+           init, on tab switch and on send — but every call is two real queries, with
+           no APCu fast path in front of them, so their retries must terminate.
+
+           They did not. An expired session used to be answered with a redirect to
+           index.php; jQuery followed it, failed to parse the HTML as JSON, and landed
+           in the error handler, which retried on a fixed timer — forever, at two
+           queries a time, for as long as the tab stayed open. playerChatInfo.php
+           returns 401 JSON now, and the counter below caps every other failure mode
+           the same way. A chat that gives up here still polls messages normally; all
+           that is lost is the unread highlight. */
+        timeCheckFailed: function(xhr, retry){
+            // 401 is terminal, not transient — retrying cannot produce a session.
+            if(xhr && xhr.status === 401) return;
+            if(++chat.timeCheckFails > TIME_CHECK_MAX_FAILS) return;
+            setTimeout(retry, 6000 * chat.timeCheckFails);
+        },
+
         setLastTimeChecked: function(){
             if (!chat.polling) return;
-            chat._currentXhr = ajaxInterface.ajaxWithRetry({
+            ajaxInterface.ajaxWithRetry({
                 type: 'POST',
                 url: 'playerChatInfo.php',
                 dataType: 'json',
                 data: { gameid: chat.gameid },
                 success: chat.successSetLastTimeChecked,
-                error: function(){ setTimeout(chat.setLastTimeChecked, POLL_INTERVAL * 2); }
+                error: function(xhr){ chat.timeCheckFailed(xhr, chat.setLastTimeChecked); }
             }).fail(() => {});
         },
 
         getLastTimeChecked: function(){
             if (!chat.polling) return;
-            chat._currentXhr = ajaxInterface.ajaxWithRetry({
+            ajaxInterface.ajaxWithRetry({
                 type: 'GET',
                 url: 'playerChatInfo.php',
                 dataType: 'json',
@@ -378,46 +501,55 @@ $chatcompact = !empty($chatcompact);
                 success: function(data){
                     if(!data || data.error){
                         if(data?.error) window.confirm.exception(data, function(){});
-                        setTimeout(chat.getLastTimeChecked, 6000);
+                        chat.timeCheckFailed(null, chat.getLastTimeChecked);
                         return;
                     }
+                    chat.timeCheckFails = 0;
                     chat.lastTimeChecked = data.lastCheckGame;
                 },
-                error: function(){ setTimeout(chat.getLastTimeChecked, 6000); }
+                error: function(xhr){ chat.timeCheckFailed(xhr, chat.getLastTimeChecked); }
             }).fail(() => {});
         },
 
         successSetLastTimeChecked: function(data){
             if(data.error) window.confirm.exception(data, function(){});
+            else chat.timeCheckFails = 0;
         },
 
-        successGetLastTimeChecked: function(data){
-            if(data.error) window.confirm.exception(data, function(){});
-            else chat.lastTimeChecked = data.lastCheckGame;
-        },
+        // (successGetLastTimeChecked removed — getLastTimeChecked handles its own
+        //  response inline, and the orphan copy here was never wired to anything.)
 
         submitChatMessage: function(message){
             chat.message = message;
+
+            // Sending is the strongest possible signal that this chat is live.
+            chat.markHot();
 
             // small retry limit and exponential backoff
             var attempt = 0;
             var maxAttempts = 4;
 
-            function doSend(delay){
+            function doSend(){
                 if (!chat.polling) return; // avoid when shutting down
-                chat._currentXhr = ajaxInterface.ajaxWithRetry({
+                ajaxInterface.ajaxWithRetry({
                     type: 'POST',
                     url: 'chatdata.php',
                     dataType: 'json',
                     data: { gameid: chat.gameid, message: message },
                     success: function(data){
                         chat.successSubmit(data);
+                        /* Pull it straight back rather than waiting out the timer: the
+                           sender seeing their own message land is what makes the chat
+                           feel responsive, and this is the one poll guaranteed to miss
+                           the APCu fast path (submitChatMessage has just raised the
+                           cached id), so it is also the only one that costs a query. */
+                        chat.schedulePoll(300);
                     },
                     error: function(jqXHR, textStatus){
                         attempt++;
                         if (attempt <= maxAttempts){
                             // backoff: 500ms, 1000ms, 2000ms, 4000ms ...
-                            setTimeout(function(){ doSend(); }, 500 * Math.pow(2, attempt-1));
+                            setTimeout(doSend, 500 * Math.pow(2, attempt-1));
                         } else {
                             console.error("Failed to submit chat message after " + maxAttempts + " attempts: " + textStatus);
                         }
@@ -430,45 +562,43 @@ $chatcompact = !empty($chatcompact);
         },
 
 
-requestChatdata: function(){
-  if(chat.requesting || !chat.polling) return;
-  chat.requesting = true;
+        /* On the server this is the cheap one: chatdata.php answers an unchanged chat
+           out of APCu and exits before it opens a database connection or takes the
+           session lock, so the steady state here costs no queries at all. What it does
+           still cost is a slot in ajaxInterface's single global request queue, which is
+           shared with the gamedata poll — hence the pacing at the top of this file. */
+        requestChatdata: function(){
+            if(chat.requesting || !chat.polling) return;
+            chat.requesting = true;
 
-  if(chat._currentXhr && chat._currentXhr.readyState !== 4){
-    try { chat._currentXhr.abort(); } catch(e){}
-  }
+            ajaxInterface.ajaxWithRetry({
+                type: 'GET',
+                url: 'chatdata.php',
+                dataType: 'json',
+                timeout: REQUEST_TIMEOUT,
+                data: { gameid: chat.gameid, lastid: chat.lastid },
+                success: function(data){
+                    chat.requesting = false;
+                    if(!chat.polling) return;
 
-  chat._currentXhr = ajaxInterface.ajaxWithRetry({
-    type: 'GET',
-    url: 'chatdata.php',
-    dataType: 'json',
-    timeout: REQUEST_TIMEOUT,
-    data: { gameid: chat.gameid, lastid: chat.lastid },
-    success: function(data){
-      chat.requesting = false;
-      if(!chat.polling) return;
-      if(!data.error) chat.parseChatData(data);
-      setTimeout(chat.requestChatdata, POLL_INTERVAL);
-    },
-    error: function(){
-      chat.requesting = false;
-      if(chat.polling) setTimeout(chat.requestChatdata, POLL_INTERVAL * 2);
-    }
-  }).fail(() => {});
-},
+                    var arrived = false;
+                    if(data && data.error) window.confirm.exception(data, function(){});
+                    else if(data) arrived = chat.parseChatData(data);
 
-        successRequest: function(data){
-            chat.requesting = false;
-            if(data.error){
-                window.confirm.exception(data, function(){});
-                // don't block further polling; schedule next attempt
-                setTimeout(chat.requestChatdata, 6000);
-            }else{
-                chat.parseChatData(data);
-                setTimeout(chat.requestChatdata, 6000);
-            }
+                    if(arrived) chat.markHot();
+                    else chat.quietPolls++;
+
+                    chat.schedulePoll();
+                },
+                error: function(){
+                    chat.requesting = false;
+                    // Treat a failed poll as a quiet one AND double the wait, so a server
+                    // having a bad minute is not asked about it at the hot interval.
+                    chat.quietPolls++;
+                    chat.schedulePoll(chat.pollInterval() * 2);
+                }
+            }).fail(() => {});
         },
-
 
         successSubmit: function(data){
             if(data.error) window.confirm.exception(data, function(){});
@@ -476,15 +606,20 @@ requestChatdata: function(){
 
     }//endof Chat
 
-// Pause/resume polling when the tab visibility changes
+/* Re-pace on tab visibility rather than stopping and restarting.
+
+   This handler is where the poll-chain leak lived — see schedulePoll for what it cost.
+   chat.polling now means "this chat is alive" and is cleared only on unload; hiding
+   and showing simply re-times the one chain through schedulePoll(), which clears the
+   pending timer before setting the next and so cannot leave a second one behind. */
 document.addEventListener("visibilitychange", function() {
+    if (!chat.polling) return;
     if (document.hidden) {
-        chat.polling = false; // stop polling while tab is hidden
+        chat.schedulePoll(POLL_HIDDEN);
     } else {
-        if (!chat.polling) {
-            chat.polling = true; // resume polling
-            chat.requestChatdata();
-        }
+        // Coming back is a sign of life, and the player wants to see what they missed.
+        chat.markHot();
+        chat.schedulePoll(0);
     }
 });
 

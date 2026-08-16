@@ -3,7 +3,31 @@
 require_once 'global.php';
 
 header('Content-Type: application/json; charset=utf-8');
-// APCu Fast Poll: Check early, BEFORE session start or DB connections
+// A poll response is never reusable, and global.php's session_cache_limiter('')
+// means PHP sends no cache headers of its own — say so explicitly rather than
+// leave it to an intermediary to guess.
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+
+/*
+ * SESSION LOCK — released before anything else happens.
+ *
+ * global.php has ALREADY called session_start(), so by the time this file runs the
+ * per-session file lock is held; PHP would not drop it until shutdown. That matters
+ * because a game.php tab runs THREE pollers against one session (this file twice —
+ * global chat and game chat — plus gamedata.php), and the file session handler
+ * serialises them all on that lock. gamedata.php closes at its top for exactly this
+ * reason; chatdata.php used to close further down, AFTER the fast-poll below had
+ * already exit()ed, so the cheapest request in the app was the one holding the lock
+ * longest. $_SESSION stays readable after the close — it simply stops being written.
+ */
+$playerid = $_SESSION['user'] ?? null;
+session_write_close();
+
+// APCu Fast Poll: answer an unchanged chat without a DB connection at all. Key and
+// prefix must match ChatManager (which writes it on every submit and re-seeds it
+// after every DB read) — deliberately NOT deploy-versioned like Manager's gamedata
+// prefix, because a chat message id means the same thing before and after a patch,
+// so surviving a deploy is the desired behaviour here.
 if (function_exists('apcu_fetch') && isset($_GET['gameid'], $_GET['lastid'])) {
     require_once dirname(__DIR__) . '/server/varconfig.php';
     $prefix = ($database_name ?? 'default') . '_';
@@ -25,13 +49,6 @@ require_once dirname(__DIR__) . '/server/controller/ChatManager.php';
 require_once dirname(__DIR__) . '/server/controller/DBManager.php';
 require_once dirname(__DIR__) . '/server/model/ChatMessage.php';
 require_once dirname(__DIR__) . '/server/lib/Debug.php';
-
-// --- Session handling ---
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-$playerid = $_SESSION['user'] ?? null;
-session_write_close(); // allow concurrent AJAX
 
 if (!$playerid) {
     http_response_code(401);
