@@ -3306,6 +3306,7 @@ spl_autoload_register(
                 'transbird' => '/server/model/ships/drazi/transbird.php',
                 'transversedrive' => '/server/model/weapons/supportWeapons.php',
                 'traqintor' => '/server/model/ships/cascor/traqintor.php',
+                'traqintornew' => '/server/model/ships/cascor/TraqintorNew.php',
                 'trashue' => '/server/model/ships/civilians/Trashue.php',
                 'trashuli' => '/server/model/ships/pakmara/Trashuli.php',
                 'tratharti' => '/server/model/ships/dilgar/tratharti.php',
