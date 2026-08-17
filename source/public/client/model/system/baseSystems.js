@@ -1960,7 +1960,7 @@ HyachSpecialists.prototype.constructor = HyachSpecialists;
 
 HyachSpecialists.prototype.getCurrClass = function () {
 	var ship = this.ship;
-	if ((gamedata.turn === shipManager.getTurnDeployed(ship)) && gamedata.gamephase == -1 && this.specCurrClass == '') {
+	if ((gamedata.turn === shipManager.getTurnPlaced(ship)) && gamedata.gamephase == -1 && this.specCurrClass == '') {
 		var classes = Object.keys(this.allSpec);
 		if (classes.length > 0) {
 			this.specCurrClass = classes[0];
@@ -1977,7 +1977,7 @@ HyachSpecialists.prototype.nextCurrClass = function () { //get next class for di
 	this.getCurrClass();
 	if (this.specCurrClass == '') return ''; //this would mean there are no classes whatsover!
 	var ship = this.ship;
-	if (gamedata.turn === shipManager.getTurnDeployed(ship) && gamedata.gamephase == -1) {
+	if (gamedata.turn === shipManager.getTurnPlaced(ship) && gamedata.gamephase == -1) {
 		var classes = Object.keys(this.allSpec);
 		var currId = -1;
 		for (var i = 0; i < classes.length; i++) {
@@ -2007,7 +2007,7 @@ HyachSpecialists.prototype.prevCurrClass = function () { //get previous class fo
 	this.getCurrClass();
 	if (this.specCurrClass == '') return ''; //this would mean there are no classes whatsover!
 	var ship = this.ship;
-	if (gamedata.turn === shipManager.getTurnDeployed(ship) && gamedata.gamephase == -1) {
+	if (gamedata.turn === shipManager.getTurnPlaced(ship) && gamedata.gamephase == -1) {
 		var classes = Object.keys(this.allSpec);
 		var currId = -1;
 		for (var i = 0; i < classes.length; i++) {
@@ -2038,7 +2038,7 @@ HyachSpecialists.prototype.canSelect = function () { //check if can increase rat
 	this.getCurrClass();
 	if (this.specCurrClass == '') return false; //this would mean there are no Specialist classes whatsover!
 	var ship = this.ship;
-	if ((gamedata.gamephase !== -1) || gamedata.turn != shipManager.getTurnDeployed(ship)) return false;//Can only be selected in deployment phase on turn the ship deploys.
+	if ((gamedata.gamephase !== -1) || gamedata.turn != shipManager.getTurnPlaced(ship)) return false;//Can only be selected in the Deployment phase the ship is PLACED in - for a reinforcement that is the turn BEFORE it arrives, and its only such phase.
 
 	var totalSpecSelected = Object.values(this.availableSpec).reduce((accumulator, currentValue) => accumulator + currentValue, 0);
 	if (totalSpecSelected >= this.specTotal) return false;
@@ -2054,7 +2054,7 @@ HyachSpecialists.prototype.canSelect = function () { //check if can increase rat
 HyachSpecialists.prototype.canUnselect = function () { //can unselect Specialists on turn the ship deploys.
 	this.getCurrClass();
 	var ship = this.ship;
-	if ((gamedata.gamephase !== -1) || gamedata.turn != shipManager.getTurnDeployed(ship)) return false;//Can only be selected in deployment phase on turn the ship deploys.
+	if ((gamedata.gamephase !== -1) || gamedata.turn != shipManager.getTurnPlaced(ship)) return false;//Can only be selected in the Deployment phase the ship is PLACED in - for a reinforcement that is the turn BEFORE it arrives, and its only such phase.
 	if (this.specCurrClass == '') return false; //this would mean there are no Specialists whatsover!
 
 	if (this.currSelectedSpec[this.specCurrClass]) return true;	//If it's filled, you can unselect.
@@ -2449,7 +2449,7 @@ HyachSpecialists.prototype.refreshData = function () {
 		if (!this.specAllocatedCount[currType]) this.specAllocatedCount[currType] = 0; //Will show 1 if selected but not used, 0 if selected and used.
 		this.data[entryName] = Math.max(0, this.availableSpec[currType] - this.specAllocatedCount[currType]);
 
-		if (this.availableSpec[currType] == 0 && (gamedata.turn == shipManager.getTurnDeployed(ship)) && gamedata.gamephase == -1) { //This way it's removed form list on Turn 1 whenever it's deselected.
+		if (this.availableSpec[currType] == 0 && (gamedata.turn == shipManager.getTurnPlaced(ship)) && gamedata.gamephase == -1) { //This way it's removed form list on Turn 1 whenever it's deselected.
 			delete this.data[entryName];
 		}
 
@@ -2459,7 +2459,7 @@ HyachSpecialists.prototype.refreshData = function () {
 	}
 
 	var totalSpecSelected = Object.values(this.availableSpec).reduce((accumulator, currentValue) => accumulator + currentValue, 0);
-	if ((gamedata.turn == shipManager.getTurnDeployed(ship)) && gamedata.gamephase == -1) { //Show Specialists selected in Turn 1 Initial Orders only, then change to showing Specilists used.
+	if ((gamedata.turn == shipManager.getTurnPlaced(ship)) && gamedata.gamephase == -1) { //Show Specialists selected in Turn 1 Initial Orders only, then change to showing Specilists used.
 		this.data["Specialists"] = totalSpecSelected + '/' + this.specTotal;
 	} else {
 		this.data["Specialists"] = this.specTotal - this.specTotal_used;

@@ -1793,18 +1793,22 @@ class Manager{
     }
   
 
-    //New function called in Manager::getTacGamedata() to search for slots that skip Deployment on Turn 1 - DK July 2025 
+    //New function called in Manager::getTacGamedata() to search for slots that skip Deployment on Turn 1 - DK July 2025
     public static function updateLateDeployments($gamedata){
-        foreach($gamedata->slots as $slot){    
+        foreach($gamedata->slots as $slot){
             if($slot->depavailable > 1){
-                $depTurn = $gamedata->getMinTurnDeployedSlot($slot->slot, $slot->depavailable);
-                if($depTurn > 1){ //Bases and Terrain will need to deploy on Turn 1 still
-                    //Set lastphase, and lastTurn for slot to intial phase on next turn.                
+                //PLACEMENT turn, not arrival turn: reinforcements pick their entry hexes a turn
+                //early (BaseShip::getTurnPlaced). So a slot arriving on turn 2 places during
+                //Turn 1's Deployment phase alongside the main fleets and must NOT be skipped
+                //here; only turn-3-and-later arrivals still sit Turn 1 out.
+                $placeTurn = $gamedata->getMinTurnPlacedSlot($slot->slot, $slot->depavailable);
+                if($placeTurn > 1){ //Bases and Terrain will need to deploy on Turn 1 still
+                    //Set lastphase, and lastTurn for slot to intial phase on next turn.
                     self::$dbManager->updatePlayerSlotPhase($gamedata->id, $slot->playerid, $slot->slot, -1, 1);
-                }        
-            }    
-        }           
-    }    
+                }
+            }
+        }
+    }
 
 
     private static function changeTurn($gamedata){

@@ -143,7 +143,9 @@ window.gamedata = {
         for (var i in gamedata.ships) {
             var ship = gamedata.ships[i];
 
-            if (shipManager.getTurnDeployed(ship) > gamedata.turn) continue;
+            //PLACEMENT turn: a reinforcement is selectable in the Deployment phase of the turn
+            //before it arrives, which is when the player picks its entry hex.
+            if (shipManager.getTurnPlaced(ship) > gamedata.turn) continue;
             //Stage 7 (Hangar Ops): skip flights queued for deployment-phase dock —
             //they're going into a hangar, not onto the map, so auto-selecting them
             //in deployment would be misleading.
@@ -690,21 +692,22 @@ window.gamedata = {
             var mines = [];
             var html = '';
 
-            // Mine ranges can only be set on the turn the mine first deploys; once deployed
-            // on an earlier turn the ranges are locked in. Only warn about mines deploying THIS
-            // turn - otherwise a later (delayed) deployment phase re-lists already-deployed mines
-            // whose transient mineSet flag was reset on page reload.
+            // Mine ranges can only be set on the turn the mine is PLACED (which for a late slot is
+            // the turn before it arrives); once placed on an earlier turn the ranges are locked
+            // in. Only warn about mines being placed THIS turn - otherwise a later (delayed)
+            // deployment phase re-lists already-placed mines whose transient mineSet flag was
+            // reset on page reload.
             var playerHasMines = gamedata.ships.some(function (ship) {
                 return ship.mine &&
                     ship.userid == gamedata.thisplayer &&
                     !shipManager.isDestroyed(ship) &&
-                    shipManager.getTurnDeployed(ship) == gamedata.turn;
+                    shipManager.getTurnPlaced(ship) == gamedata.turn;
             });
             if (playerHasMines) {
                 for (var i in gamedata.ships) {
                     var ship = gamedata.ships[i];
                     if (ship.userid == gamedata.thisplayer) {
-                        if (ship.mine && shipManager.getTurnDeployed(ship) == gamedata.turn) {
+                        if (ship.mine && shipManager.getTurnPlaced(ship) == gamedata.turn) {
                             mines.push(ship);
                         }
                     }
@@ -756,6 +759,9 @@ window.gamedata = {
                 //above already warns about.
                 if (!ship.canPreOrder || ship.mine) continue;
                 if (ship.userid != gamedata.thisplayer) continue;
+                //ARRIVAL turn, not placement turn: a field/cloak is only meaningful once the unit
+                //is on the board, and a late slot gets its own Pre-Turn phase on the turn it
+                //arrives (FireGamePhase's $doDeployment branch) - that is where the nag belongs.
                 if (shipManager.getTurnDeployed(ship) != gamedata.turn) continue;
                 if (shipManager.isDestroyed(ship)) continue;
 
@@ -1365,7 +1371,9 @@ window.gamedata = {
                 if (!flight.deploysInHangar) continue;
                 if (flight.pendingDeployDock) continue;
                 if (!gamedata.isMyShip(flight)) continue;
-                if (shipManager.getTurnDeployed(flight) != gamedata.turn) continue;
+                //Placement turn: a reinforcement flight is queued for its hangar during the
+                //Deployment phase of the turn before it arrives.
+                if (shipManager.getTurnPlaced(flight) != gamedata.turn) continue;
                 hangarDeployCandidates.push(flight);
             }
 
@@ -1378,7 +1386,7 @@ window.gamedata = {
                     var carrier = gamedata.ships[ck];
                     if (!carrier || !gamedata.isMyShip(carrier)) continue;
                     if (carrier.flight) continue;
-                    if (shipManager.getTurnDeployed(carrier) != gamedata.turn) continue;
+                    if (shipManager.getTurnPlaced(carrier) != gamedata.turn) continue;
                     myDeployingCarriers.push(carrier);
                 }
 
@@ -1386,6 +1394,10 @@ window.gamedata = {
                 for (var hi = 0; hi < hangarDeployCandidates.length; hi++) {
                     var hdFlight = hangarDeployCandidates[hi];
                     for (var ci = 0; ci < myDeployingCarriers.length; ci++) {
+                        //Only a carrier arriving on the SAME turn can hold it - being placed in the
+                        //same phase is not enough (turn-1 and turn-2 units are both placed on turn 1).
+                        //Otherwise this would block the commit over a berth the flight can't use.
+                        if (shipManager.getTurnDeployed(myDeployingCarriers[ci]) !== shipManager.getTurnDeployed(hdFlight)) continue;
                         if (window.DeploymentDock.eligibleHangarsForFlight(myDeployingCarriers[ci], hdFlight).length > 0) {
                             mustDockFlights.push(hdFlight);
                             break;

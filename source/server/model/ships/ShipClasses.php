@@ -3145,8 +3145,27 @@ public function getAllEWExceptDEW($turn){
             }
         }    
         
-        return $depTurn;           
-	} 
+        return $depTurn;
+	}
+
+
+    /*The turn this unit picks its ENTRY HEX, as opposed to the turn it is physically on the
+      board (getTurnDeployed above). Reinforcements place a turn EARLY: the player commits the
+      entry hexes during the Deployment phase of turn depTurn-1, those hexes show to everyone as
+      a blue "Jump Point" ballistic marker for the whole of that turn, and only then do the ships
+      arrive. Without the early placement an opponent got no warning whatsoever - a fresh fleet
+      simply materialised.
+
+      ONLY code answering "is this unit being placed right now?" may use this. Everything asking
+      "is this unit on the board?" - firing, movement, EW, masking, the unavailable flag - must
+      keep reading getTurnDeployed, which is unchanged.
+
+      Bases/OSATs/Terrain place and arrive together on turn 1, so they fall out of getTurnDeployed
+      already. The 999 surrender sentinel becomes 998, still far beyond any real turn.*/
+    public function getTurnPlaced($gamedata){
+        $depTurn = $this->getTurnDeployed($gamedata);
+        return ($depTurn > 1) ? ($depTurn - 1) : $depTurn;
+    }
 
 
     public function getBearingOnPos($pos){ //returns relative angle from this unit to indicated coordinates

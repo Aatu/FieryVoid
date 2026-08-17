@@ -2157,6 +2157,21 @@ const getStatusBanners = (ship) => {
 
     const banners = [];
 
+    /*NOT ON THE BOARD YET. Reinforcements pick their entry hex the turn BEFORE they arrive, so
+      a player can be looking at a fully-detailed ship window for a ship that will not exist for
+      another turn - and, on the placement turn, at one they are actively positioning. This is
+      the primary signal for that, in the same cyan the fleet list uses for its
+      "[Deploys on Turn N]" header. Placed FIRST so it heads the banner stack.
+      Deliberately keyed off getTurnDeployed (the board question), so it stays up for every phase
+      of every turn until the unit genuinely arrives - not just the phase it was placed in.*/
+    const deployTurn = shipManager.getTurnDeployed(ship);
+    if (deployTurn > window.gamedata.turn && deployTurn < 999) {
+        banners.push({
+            key: 'deploying', color: theme.colors.statusPending, bg: 'rgba(0, 184, 230, 0.10)',
+            text: 'Deploying on Turn ' + deployTurn
+        });
+    }
+
     //Resolved once per render and threaded through: when a forecast is live it sweeps every enemy
     //unit, so it is not something to ask for three times over on the way to two banners.
     const stealthForecast = ship.trueStealth ? shipManager.getStealthToggleForecast(ship) : null;
@@ -2218,8 +2233,10 @@ const getStatusBanners = (ship) => {
   call misses) so the banner can never claim Undetected while the tooltip says
   Detected. Loose compares kept deliberately — same as the tooltip.*/
 const isUndetected = (ship, forecast) => {
-    //deployment phase, deploying this turn: the tooltip always treats this as unseen
-    if (gamedata.gamephase == -1 && shipManager.getTurnDeployed(ship) == gamedata.turn) return true;
+    //deployment phase, being placed or arriving this turn: the tooltip always treats this as
+    //unseen. Two turns qualify now that placement and arrival are separate - see ShipTooltip.js.
+    if (gamedata.gamephase == -1 && (shipManager.getTurnPlaced(ship) == gamedata.turn
+        || shipManager.getTurnDeployed(ship) == gamedata.turn)) return true;
 
     /*A Shading Field / Cloaking Device the player can still toggle this phase is answered by the
       caller's shipManager.getStealthToggleForecast - which is exactly what isDetected would return

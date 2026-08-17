@@ -1632,6 +1632,37 @@ private function setWaiting() {
     }
 
 
+    /*The turn this SLOT gets its Deployment phase - the placement-turn twin of
+      getMinTurnDeployedSlot above. A late slot picks its entry hexes on depavailable-1 so the
+      resulting Jump Point markers give opponents a turn of warning; see BaseShip::getTurnPlaced.
+      Bases/OSATs/Terrain in the slot still force a turn-1 deployment, exactly as above - they
+      have to be placed manually before anything else happens.*/
+    public function getMinTurnPlacedSlot($slotid, $depavailable) {
+        $minTurnDeploy = $this->getMinTurnDeployedSlot($slotid, $depavailable);
+        return ($minTurnDeploy > 1) ? ($minTurnDeploy - 1) : $minTurnDeploy;
+    }
+
+
+    /*Has ANY ship in this slot already committed a deploy entry? (Destroyed ones count - a wreck
+      still proves the slot was placed.) Used only by the legacy
+      safety valve in FireGamePhase: a game that rolled past a late slot's placement turn under
+      the OLD (arrival-turn) rule would otherwise never be granted a Deployment phase at all and
+      its ships would be stranded off-board forever.
+      Deliberately "any", not "all": a slot can legitimately hold units with no deploy move of
+      their own (a flight queued for a hangar deploy-start dock writes no movement), so requiring
+      every ship to be placed would keep re-granting the phase for ever.*/
+    public function slotHasPlacedShips($slotid) {
+        foreach ($this->ships as $ship) {
+            if ($ship->slot != $slotid) continue;
+            if ($ship->userid == -5) continue; //generated terrain is never player-placed
+            foreach ($ship->movement as $move) {
+                if ($move->type == "deploy") return true;
+            }
+        }
+        return false;
+    }
+
+
     //A check for Manager in case there are no ships deployed at all, in which case just proceed to next phase. 
     public function areDeployedShips() {
         foreach ($this->ships as $ship) {

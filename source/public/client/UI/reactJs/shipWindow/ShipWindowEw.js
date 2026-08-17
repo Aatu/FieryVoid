@@ -275,16 +275,11 @@ class ShipWindowEw extends React.Component {
     render() {
         const { ship } = this.props;
 
-        const deployTurn = shipManager.getTurnDeployed(ship);
-        if (deployTurn > gamedata.turn) { //Selected ship is not deployed yet - DK May 2025
-            return (
-                <EwPanel>
-                    <EwTitle>Electronic Warfare</EwTitle>
-                    <Row key={`dew-scs-${ship.id}`}><RowLabel>Deploys on turn</RowLabel><RowValue>{deployTurn}</RowValue></Row>
-                </EwPanel>
-            );
-        }
-
+        /*An undeployed ship used to replace this whole panel with a lone "Deploys on turn N"
+          row. That message now lives where it belongs - the cyan "Deploying on Turn N" status
+          banner in ShipWindow's getStatusBanners, which is visible on every panel rather than
+          only this one - so the EW list simply renders as normal. It reads all zeroes for a
+          unit still off the board, which is the honest answer.*/
         return (
             <EwPanel>
                 <EwTitle>Electronic Warfare</EwTitle>

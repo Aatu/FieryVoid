@@ -1121,11 +1121,14 @@ shipManager.systems = {
         for (var i in gamedata.ships) {
             var ship = gamedata.ships[i];
             if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
-            var deployTurn = shipManager.getTurnDeployed(ship);
-            if (deployTurn !== gamedata.turn) continue;   //Don't bother checking for ships that haven't deployed yet.
+            //PLACEMENT turn, not arrival turn - Specialists are chosen in the Deployment phase
+            //the ship is PLACED in, which for a reinforcement is the turn before it arrives
+            //(and its only Deployment phase). The `unavailable` guard below has to go with it:
+            //a reinforcement being placed is unavailable BY DEFINITION until it arrives, so
+            //keeping it would silently skip exactly the ships this warning exists for.
+            if (shipManager.getTurnPlaced(ship) !== gamedata.turn) continue;
 
             if (shipManager.isDestroyed(ship)) continue;
-            if (ship.unavailable) continue;
             if (ship.flight) continue;
             if (ship.userid != gamedata.thisplayer) continue;
             if (!(shipManager.systems.getSystemByName(ship, "hyachSpecialists"))) continue; //Does it Specialists?

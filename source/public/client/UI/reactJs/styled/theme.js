@@ -25,6 +25,10 @@ const theme = {
         statusOk: "limegreen",                  //green status banners - matches the map tooltip (Undetected / Attached)
         statusAlert: "#e1b000",                  //orange alert banners - matches the map tooltip (boarding)
         statusBad: "red",                       //red status banners - matches the map tooltip (Detected)
+        /* Cyan "not here yet / changes next turn" status. Same #00b8e6 the fleet list already
+           uses for its "[Deploys on Turn N]" fleet header and FighterIcon uses for DOCKED, so a
+           pending arrival reads the same wherever it is shown. */
+        statusPending: "#00b8e6",
         /* THE GOLD SET - "this was bought, it is not standard equipment".
            enhText was already here; the other three were hex literals repeated in
            ShipNotesPanel.js (Block $gold and EnhTitle). They were extracted when the

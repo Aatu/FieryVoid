@@ -196,8 +196,12 @@ window.ShipTooltip = function () {
             rollPivotModifier -= 50;
         }
         if (ship.trueStealth) {
-            if (gamedata.gamephase == -1 && shipManager.getTurnDeployed(ship) == gamedata.turn) {
-                toDisplay += '<span style="color:limegreen;">Deploying</span>; '; //Always say undetected on Deployment phase.  
+            //Two turns can qualify now that placement and arrival are separate: the turn the unit
+            //picks its entry hex, and the turn it actually arrives (when a late slot gets its own
+            //Pre-Turn phase). Neither has a meaningful detection result to report.
+            if (gamedata.gamephase == -1 && (shipManager.getTurnPlaced(ship) == gamedata.turn
+                || shipManager.getTurnDeployed(ship) == gamedata.turn)) {
+                toDisplay += '<span style="color:limegreen;">Deploying</span>; '; //Always say undetected on Deployment phase.
             } else {
                 //A Shading Field / Cloaking Device still toggleable this phase is answered by
                 //shipManager.getStealthToggleForecast - which is what isDetected would return

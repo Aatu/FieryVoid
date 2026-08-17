@@ -4086,7 +4086,16 @@ class Hangar extends ShipSystem{
 	public function generateIndividualNotes($gamedata, $dbManager){
 		$ship = $this->getUnit();
 		if (!$ship) return;
-		if ($ship->getTurnDeployed($gamedata) > $gamedata->turn) return;
+		/* PLACEMENT turn, not arrival turn. The deploy-start dock block below is resolved RIGHT
+		   NOW rather than at end of turn, and for a reinforcement carrier "now" is the Deployment
+		   phase of the turn BEFORE it arrives - its only Deployment phase. Reading getTurnDeployed
+		   here returned before that block ever ran, so a queued dock was silently dropped: the
+		   carrier arrived correctly on turn N and its fighters appeared at their off-board 'start'
+		   markers instead of in the hangar (user report, game 4302).
+		   Safe to run a turn early: the launch/dock/LCV order blocks are all no-ops unless the
+		   client POSTed a matching transfer (impossible for a unit with no phases of its own), and
+		   every snapshot tail is change-detected, so nothing spurious is written. */
+		if ($ship->getTurnPlaced($gamedata) > $gamedata->turn) return;
 
 		//A destroyed carrier never processes launch/dock/pool orders, but it MUST
 		//still reach the hangarUsage snapshot tail below: Stage 18's carrier-

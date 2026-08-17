@@ -360,10 +360,22 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
         <h3  id="delayed">Delayed Deployment</h3>
         <ul>
-            <li>You can select this option in the Create Game screen, by setting the <b>'Deploys on Turn'</b> field in a Player Slot to the Turn you wish that slot to deploy, or ‘jump in’.  
+            <li>You can select this option in the Create Game screen, by setting the <b>'Deploys on Turn'</b> field in a Player Slot to the Turn you wish that slot to deploy, or ‘jump in’.
             Ships cannot jump into hexes occupied by terrain or Enormous units, so make sure you make the Deployment Zone large enough!</li>
-            <li>Ships which would normally have to set systems on Turn 1 and choose to deploy later (e.g. Hyach Specialists, Vorlon Adaptive Armor) will set these systems on the turn they deploy instead.</li>
-            <li>Terrain, Bases, and OSATS cannot deploy later in the game and will always deploy on Turn 1 even if the slot is set to deploy later.</li>
+            <li><b>You choose your entry hexes a turn early.</b> A slot set to deploy on Turn 5 gets its Deployment Phase on <b>Turn 4</b>, where you position every arriving unit
+            exactly as you would on Turn 1. Your units do not actually arrive until Turn 5 — through Turn 4 they cannot be seen, targeted, moved or fired, and they take no part in
+            any other phase. A slot set to deploy on Turn 2 therefore picks its hexes during the normal Turn 1 Deployment Phase, alongside everyone else.</li>
+            <li><b>Your opponents get one turn of warning.</b> From the moment you commit your Deployment Phase, every hex you chose is marked on the map for <i>all</i> players with a
+            blue <b>Jump Point</b> hex. Reinforcements no longer materialise out of nowhere — the enemy can see where a jump point is about to open and has a turn to react to it.
+            Only the hex is revealed, not what is coming through it (though the fleet list has always shown the composition of a delayed slot, marked <i>[Deploys on Turn N]</i>).
+            A Jump Point appears even for stealthed units: the jump point itself is visible, whatever arrives through it may not be.</li>
+            <li>Any unit that has not yet arrived shows a cyan <b>'Deploying on Turn N'</b> banner in its ship window, and is listed in the fleet list under a <i>[Deploys on Turn N]</i> header.</li>
+            <li>Fighters and LCVs belonging to a delayed slot can be <b>deployed inside the hangars and rails</b> of a carrier from the same slot, arranged during that slot's
+            Deployment Phase in the usual way.</li>
+            <li>Ships which would normally have to set systems on Turn 1 and choose to deploy later (e.g. Hyach Specialists) will set these systems during their Deployment Phase — that is,
+            on the turn they pick their entry hexes rather than the turn they arrive. Systems set in Initial Orders (e.g. Vorlon Adaptive Armor) are set as normal on the turn the unit arrives.</li>
+            <li>Terrain, Bases, and OSATS cannot deploy later in the game and will always deploy on Turn 1 even if the slot is set to deploy later. If a slot contains any of these
+            <i>and</i> delayed units, it gets a Turn 1 Deployment Phase for them and a second one later for its genuine reinforcements.</li>
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 

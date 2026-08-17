@@ -583,6 +583,17 @@ window.SelectFromShips = function () {
                     if (!s || s.flight) return;
                     if (!gamedata.isMyShip(s)) return;
                     if (!window.DeploymentDock.shipHasOpenableDockDialog(s)) return;
+                    //shipHasOpenableDockDialog only asks about the CARRIER. A deploy-docked flight
+                    //starts inside the hangar, so the two must join the board on the SAME turn —
+                    //and "both being placed this phase" does not imply that, since turn-1 and
+                    //turn-2 units are both placed on turn 1. See DeploymentDock.arrivesOnSameTurn.
+                    if (typeof window.DeploymentDock.arrivesOnSameTurn === 'function'
+                        && !window.DeploymentDock.arrivesOnSameTurn(s, flight)) return;
+                    //Same slot/owner, matching findPendingFlightsForCarrier (the tooltip route) and
+                    //HangarOps::validateDeployBayOrders, which rejects a cross-slot dock outright.
+                    //Without this the button offers a dock the server refuses at commit time.
+                    if (parseInt(s.slot, 10) !== parseInt(flight.slot, 10)) return;
+                    if (parseInt(s.userid, 10) !== parseInt(flight.userid, 10)) return;
                     //A bay-by-bay eligible list (whole flight fits one bay) is the
                     //common case. But the carrier's rails/bays are a COMBINED pool:
                     //a flight bigger than any single bay (e.g. 9 fighters vs 6-box
