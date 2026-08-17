@@ -283,6 +283,62 @@ window.ReplayAnimationStrategy = function () {
         // Track which hex fire order IDs are handled in prefire so animateWeaponFire can skip them
         var handledHexFireOrderIds = {};
 
+        /* Every fire order id in play, so isOwnHexPreFireMove below can tell a movement.value
+           that REFERENCES a fire order from one that merely happens to hold a number. */
+        var allFireOrderIds = new Set();
+        this.gamedata.ships.forEach(function (shp) {
+            weaponManager.getAllFireOrders(shp).forEach(function (f) {
+                allFireOrderIds.add(String(f.id));
+            });
+        });
+
+        /* Does this preFire movement belong to Pass 1 - i.e. was it caused by one of the
+           shooting ship's OWN hex-targeted preFire orders?
+
+           The guard this replaces exists to leave a move caused by ANOTHER ship's per-target
+           effect (a GraviticMine pulling its own launcher) to Pass 2, so the explosion plays
+           before the move. That intent is right, but movement.value is not the reliable key it
+           looks like, and self-displacement weapons stopped moving their sprite as a result:
+
+             - tac_shipmovement.value is varchar(100), so it reaches the client as a STRING,
+               while tac_fireorder.id is int(11) and arrives as a NUMBER. The old test used
+               Array.indexOf, which compares with ===, so the id path matched NOTHING. Pass 2
+               compares with == and was unaffected - which is exactly why mine pulls and
+               augmenter shifts kept working while hex-targeted self-jumps stopped.
+             - Transverse Drive and Warp Drive (MicroJumpSystem) do not put a fire order id in
+               value at all. doTransverseJump/doWarpJump store the jump DISTANCE, so no id
+               comparison of any kind can match them.
+
+           So: when value really does name a fire order, keep the original rule (ours only if
+           that order is one of this ship's own hex-targeted ones) - now string-normalised so it
+           can actually match. When value names no fire order, it is not a reference, and we fall
+           back to what is always true of a self-jump: the ship ended up in the hex its own
+           hex-targeted order was aimed at. Both jump weapons rewrite fireOrder.x/y when the jump
+           deviates, so the destination stays authoritative.
+
+           Gating the hex fallback on "value is not a fire-order reference" is what keeps it from
+           re-stealing the case the guard was added for: a GraviticMine pull carries a real fire
+           order id, and a launcher dragged into the very hex it lobbed the mine at would
+           otherwise match on destination. tac_fireorder.x/y are varchar too, hence Number() on
+           both sides rather than hexagon.Offset.equals, which compares with ===. */
+        var isOwnHexPreFireMove = function (movement, ownHexOrders) {
+            var value = String(movement.value);
+
+            if (allFireOrderIds.has(value)) {
+                return ownHexOrders.some(function (order) {
+                    return String(order.id) === value;
+                });
+            }
+
+            var destQ = Number(movement.position ? movement.position.q : NaN);
+            var destR = Number(movement.position ? movement.position.r : NaN);
+            if (!isFinite(destQ) || !isFinite(destR)) return false;
+
+            return ownHexOrders.some(function (order) {
+                return Number(order.x) === destQ && Number(order.y) === destR;
+            });
+        };
+
         shipList.forEach(function (ship) {
             var firesForThisShip = allHexBallistics.filter(function (f) {
                 return f && (f.shooter === ship || f.shooter === ship.id);
@@ -329,18 +385,20 @@ window.ReplayAnimationStrategy = function () {
                         }
 
                         // Only animate preFire moves caused by THIS ship's own hex-targeted
-                        // weapons (e.g. self-displacement like Hyperspace Jump). Moves caused
-                        // by another ship's per-target effect — e.g. a GraviticMine pulling
-                        // its own launcher — have movement.value pointing to that effect's
-                        // fire order, which isn't in `hexes`. Let Pass 2 handle them so the
-                        // explosion against the moved ship plays before the move (matching
-                        // the behaviour seen for non-launcher pulled ships).
-                        var ownHexFireOrderIds = hexes.map(function (h) { return h.fireOrder ? h.fireOrder.id : null; });
+                        // weapons (e.g. self-displacement like Transverse Drive / Warp Drive).
+                        // Moves caused by another ship's per-target effect — e.g. a GraviticMine
+                        // pulling its own launcher — are left to Pass 2 so the explosion against
+                        // the moved ship plays before the move (matching the behaviour seen for
+                        // non-launcher pulled ships). See isOwnHexPreFireMove for why this is not
+                        // the plain movement.value/fireOrder.id comparison it looks like it
+                        // should be.
+                        var ownHexOrders = hexes.map(function (h) { return h.fireOrder; })
+                            .filter(function (order) { return order; });
 
                         for (var i in shooterIcon.preFireMovements) {
                             var movement = shooterIcon.preFireMovements[i];
 
-                            if (ownHexFireOrderIds.indexOf(movement.value) === -1) {
+                            if (!isOwnHexPreFireMove(movement, ownHexOrders)) {
                                 continue;
                             }
 
