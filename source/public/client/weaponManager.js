@@ -3868,10 +3868,15 @@ window.weaponManager = {
         });
     },
 
-    getAllFireOrdersForDisplayingAgainst: function getAllFireOrdersForDisplayingAgainst(target) {
+    // damageIndex is optional, and follows the same convention as logFireOrders: a caller that
+    // asks about several targets in a row (the replay's fire pass, which now walks the fleet
+    // twice - once for multi-target volleys, once for everything else) builds ONE index and
+    // passes it in, so the fleet sweep happens once for the whole pass instead of once per
+    // target. Callers that pass nothing keep the original per-call sweep.
+    getAllFireOrdersForDisplayingAgainst: function getAllFireOrdersForDisplayingAgainst(target, damageIndex) {
         //one reverse map for every order resolved against this target, instead of one full
         //fleet sweep per order - see the note above getDamagesCausedBy
-        var damageIndex = weaponManager.buildDamageIndex(gamedata.ships);
+        if (!damageIndex) damageIndex = weaponManager.buildDamageIndex(gamedata.ships);
         return gamedata.ships.reduce(function (fires, shooter) {
             return fires.concat(weaponManager.getAllFireOrders(shooter).filter(function (fire) {
                 return fire.targetid === target.id && (fire.type === "normal" || fire.type === "ballistic");

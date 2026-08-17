@@ -515,7 +515,21 @@ window.ReplayAnimationStrategy = function () {
         }, this);
 
 
-        // Pass 2: Incoming Direct Fire (Standard Exchanges)
+        // One reverse damage map for both of the passes below, instead of one full fleet sweep
+        // per target per pass (see getAllFireOrdersForDisplayingAgainst). Safe to share: it is
+        // built from static replay data that neither pass mutates.
+        var damageIndex = weaponManager.buildDamageIndex(this.gamedata.ships);
+
+        // Pass 2a: Multi-target volleys (Antimatter Shredder, Hypergraviton Blaster).
+        // Runs BEFORE the per-target pass, so a volley opens the exchange as one event rather
+        // than being scattered through it. Note that build order also decides which animation
+        // claims a given system's floating crit name (window.combatLog.critAnimations is a
+        // build-time dedupe), so a system critted by both a volley and ordinary fire now shows
+        // its name on the volley.
+        var volleys = animateWeaponVolleys.call(this, time, logAnimation, shipList, damageIndex);
+        time = volleys.time;
+
+        // Pass 2b: Incoming Direct Fire (Standard Exchanges), minus anything a volley drew.
         shipList.forEach(function (ship) {
             var perShipAnimation = new AllWeaponFireAgainstShipAnimation(
                 ship,
@@ -525,7 +539,14 @@ window.ReplayAnimationStrategy = function () {
                 time,
                 this.scene,
                 this.movementAnimations,
-                logAnimation
+                logAnimation,
+                false,
+                {
+                    damageIndex: damageIndex,
+                    fireOrderFilter: function (fire) {
+                        return !volleys.handledIds.has(String(fire.id));
+                    }
+                }
             );
 
             this.animations.push(perShipAnimation);
@@ -536,6 +557,202 @@ window.ReplayAnimationStrategy = function () {
         }, this);
 
         return time;
+    }
+
+    // Gap between successive victims within one volley.
+    var VOLLEY_STAGGER = 400;
+
+    /* Multi-target volleys.
+     *
+     * A few weapons resolve ONE trigger pull into many separate fire orders against many
+     * different ships: the Antimatter Shredder (an area burst - one order per attack per unit
+     * within a hex of the aim point) and the Hypergraviton Blaster (a beam that hops from victim
+     * to victim, one synthetic order per hop). The per-target pass plays those back one ship at
+     * a time, each with its own 1.3s camera pan and 1s tail, so a Shredder catching five units
+     * costs something like fourteen seconds of replay to show a single instant.
+     *
+     * This pass pulls a volley's orders out of the per-target pass and plays them as one event:
+     * a single camera move, then the per-ship animations overlapped on a short stagger.
+     *
+     * Staggered rather than truly simultaneous, deliberately, for three reasons. It keeps each
+     * victim's own hit and damage visuals readable instead of piling them into one frame. It
+     * reads correctly for the Blaster, whose chain is genuinely sequential - each hop costs 20
+     * damage and needs the previous victim dead - so collapsing it to one instant would
+     * misrepresent the weapon. And it keeps the combat-log entries at distinct times, which is
+     * load-bearing: LogAnimation.calculateDisplay only ever routes an entry with a STRICTLY
+     * positive time difference into nextToDisplay, so two entries sharing an identical time
+     * would silently drop the second one. (Merging a volley into a single log entry is not an
+     * option either - combatLog.logFireOrders reads the target off orders[0] and renders one
+     * line for the whole group, so a cross-target group would name only the first victim.)
+     *
+     * Opting in is the volleyAnimation flag on the client weapon prototype. The whole mechanism
+     * is presentational, so nothing changes server-side or in the serialised payload.
+     */
+    function animateWeaponVolleys(time, logAnimation, shipList, damageIndex) {
+
+        var handledIds = new Set();
+
+        collectVolleys.call(this).forEach(function (volley) {
+
+            // Visit victims in the same order the per-target pass would, so a volley never
+            // re-orders units relative to the rest of the exchange.
+            var victims = shipList.filter(function (ship) {
+                return volley.targetIds.has(String(ship.id));
+            });
+
+            // A single-victim volley has nothing to overlap and would only lose its camera pan.
+            // Leave it to the per-target pass by not claiming its orders.
+            if (victims.length < 2) {
+                return;
+            }
+
+            volley.orderIds.forEach(function (id) {
+                handledIds.add(id);
+            });
+
+            var cameraDuration = 0;
+            var cameraPosition = getVolleyCameraPosition.call(this, volley, victims, time);
+            if (cameraPosition) {
+                var cameraAnimation = new CameraPositionAnimation(cameraPosition, time);
+                this.animations.push(cameraAnimation);
+                cameraDuration = cameraAnimation.getDuration();
+            }
+
+            var volleyDuration = 0;
+
+            victims.forEach(function (ship, index) {
+                var offset = index * VOLLEY_STAGGER;
+
+                var animation = new AllWeaponFireAgainstShipAnimation(
+                    ship,
+                    this.shipIconContainer,
+                    this.emitterContainer,
+                    this.gamedata,
+                    time + cameraDuration + offset,
+                    this.scene,
+                    this.movementAnimations,
+                    logAnimation,
+                    false,
+                    {
+                        damageIndex: damageIndex,
+                        skipCamera: true, //one shared pan for the whole volley, above
+                        fireOrderFilter: function (fire) {
+                            return volley.orderIds.has(String(fire.id));
+                        }
+                    }
+                );
+
+                this.animations.push(animation);
+
+                // Overlapping, so the volley lasts as long as its LONGEST victim takes to
+                // finish - not the sum, which is what the per-target pass charges.
+                volleyDuration = Math.max(volleyDuration, offset + animation.getDuration());
+            }, this);
+
+            if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
+                time += cameraDuration + volleyDuration;
+            }
+
+        }, this);
+
+        return { time: time, handledIds: handledIds };
+    }
+
+    /* Buckets this turn's fire orders into volleys, one per (shooter, volley-animated weapon).
+     * Both weapons that use this fire once per turn, so the weapon id identifies a single
+     * trigger pull; a weapon that could fire two volleys in one turn would need a finer key.
+     *
+     * The type and resolved filters mirror getAllFireOrdersForDisplayingAgainst exactly, so an
+     * id claimed here is always an id that pass would otherwise have drawn - a volley can never
+     * claim an order and then fail to draw it.
+     */
+    function collectVolleys() {
+
+        var volleys = [];
+        var byKey = {};
+
+        this.gamedata.ships.forEach(function (shooter) {
+
+            weaponManager.getAllFireOrders(shooter).forEach(function (fireOrder) {
+
+                if (fireOrder.turn != this.turn) return;
+                if (fireOrder.type !== "normal" && fireOrder.type !== "ballistic") return;
+
+                var weapon = shipManager.systems.getSystem(shooter, fireOrder.weaponid);
+                if (!weapon || !weapon.volleyAnimation) return;
+
+                var key = shooter.id + "-" + fireOrder.weaponid;
+                var volley = byKey[key];
+                if (!volley) {
+                    volley = {
+                        shooter: shooter,
+                        weapon: weapon,
+                        orderIds: new Set(),
+                        targetIds: new Set(),
+                        hex: null
+                    };
+                    byKey[key] = volley;
+                    volleys.push(volley);
+                }
+
+                if (fireOrder.targetid == -1) {
+                    // The aim point rather than a shot at anything. The Shredder's aiming order
+                    // is never resolved (AntimatterShredder::fire returns before rolling) so it
+                    // is never drawn, but it carries the hex the burst is centred on - which is
+                    // exactly where the camera wants to be.
+                    if (volley.hex === null) {
+                        var q = Number(fireOrder.x);
+                        var r = Number(fireOrder.y);
+                        // FireOrder.x/y can be null or the literal string "null" - see
+                        // weaponManager.damageIndexKey. Number(null) is 0, so null has to be
+                        // rejected explicitly rather than left to isFinite.
+                        if (fireOrder.x !== null && fireOrder.y !== null && isFinite(q) && isFinite(r)) {
+                            volley.hex = new hexagon.Offset(q, r);
+                        }
+                    }
+                    return;
+                }
+
+                if (!weaponManager.isResolvedFireOrder(fireOrder)) return;
+                if (weaponManager.isTerrainReturnDamage(fireOrder)) return;
+
+                volley.orderIds.add(String(fireOrder.id));
+                volley.targetIds.add(String(fireOrder.targetid));
+
+            }, this);
+
+        }, this);
+
+        return volleys;
+    }
+
+    /* Where to point the camera for a whole volley. The Shredder centres a burst on a hex and
+     * carries it on its aiming order, which is the right anchor - the burst is the event, not
+     * any one victim. The Blaster has no hex, so fall back to the first victim: the beam starts
+     * there and hops outward from it. */
+    function getVolleyCameraPosition(volley, victims, time) {
+
+        if (volley.hex) {
+            var hexPosition = window.coordinateConverter.fromHexToGame(volley.hex);
+            if (hexPosition && !isNaN(hexPosition.x) && !isNaN(hexPosition.y)) {
+                return hexPosition;
+            }
+        }
+
+        var icon = this.shipIconContainer.getByShip(victims[0]);
+        if (!icon) {
+            return null;
+        }
+
+        // Same rule the per-target pass uses for its own pan: a victim that was displaced by a
+        // pre-fire effect is shot at where it ENDED UP, so point at the last pre-fire position
+        // rather than at where the movement animation has it.
+        if (icon.preFireMovements && icon.preFireMovements.length > 0) {
+            var lastMove = icon.preFireMovements[icon.preFireMovements.length - 1];
+            return window.coordinateConverter.fromHexToGame(lastMove.position);
+        }
+
+        return FireAnimationHelper.getShipPositionAtTime(icon, time, this.movementAnimations);
     }
 
     function animateShipDestruction(time, logAnimation) {
