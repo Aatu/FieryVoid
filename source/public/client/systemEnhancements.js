@@ -196,11 +196,29 @@ window.systemEnhancements = {
 		return n;
 	},
 
-	/* Does THIS system carry any refit? Drives the gold star on the icon. */
+	/* Does THIS system carry any refit? Drives the gold star on the icon.
+
+	   ⭐ D13, exactly as apply() does it: a stored systemid is POSITIONAL, so a row naming a
+	   different system is describing somebody else's ship. Matching on the id alone lit a badge on
+	   three of an Omega's heavy lasers from rows bought on a Primus's thruster and twin arrays -
+	   apply() had already refused them, so the badge promised a bonus that was not there
+	   (game 4302, 2026-08-17). A badge must never appear where no effect was applied.
+
+	   The systemById lookup runs at most once, and only when a row actually claims this id - the
+	   common case is a ship with no refits at all, which leaves on the first line. */
 	hasAny: function hasAny(ship, systemid) {
+		var rows = this.rows(ship);
+		if (!rows.length) return false;
+
 		var id = parseInt(systemid, 10);
-		return this.rows(ship).some(function (row) {
-			return parseInt(row[6], 10) === id && (parseInt(row[2], 10) || 0) > 0;
+		var self = this;
+		var system;   //resolved lazily; false once looked up and not found
+		return rows.some(function (row) {
+			if (parseInt(row[6], 10) !== id) return false;
+			if ((parseInt(row[2], 10) || 0) < 1) return false;
+			if (!row[7]) return true;   //older rows carry no name - fall through on the id alone
+			if (system === undefined) system = self.systemById(ship, id) || false;
+			return system && String(system.name) === String(row[7]);
 		});
 	},
 
