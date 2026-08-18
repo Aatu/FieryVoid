@@ -196,18 +196,6 @@ class Enhancements{
 	*/
   public static function setEnhancementOptionsShip($ship){
 
-	  //Add option to delay the deployment of a ship, set as Enhancement so selection is remembered in the game itself.	
-	  //DO NOT PLACE ANY OPTIONS (E.G. ENH[6] = TRUE) ALPHABETICALLY BEFORE THIS!
-	  /*$enhID = 'DEPLOY';
-	  if(!in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is not disabled
-		  $enhName = 'Choose a turn to deploy this unit:';
-		  $enhLimit = 100;	
-		  $enhPrice = 0; //no cost
-		  $enhPriceStep = 0; //no ocst
-		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
-		  //technical ID, human readable name, number taken, maximum number to take, price for one, price increase for each further, is an option (rather than enhancement)
-	  }	*/ 
-
 	  //Elite Crew: +5 Initiative, +2 Engine, +1 Sensors, +2 Reactor power, -1 Profile, -2 to critical results
 	  //cost: +40% of ship cost (second time: +60%)
 	  //all Hangar-related advantages of original Elite Crew are skipped, and so is turn shortening
@@ -1570,18 +1558,6 @@ class Enhancements{
 	/* all fighter enhancement options - availability and cost calculation
 	*/
   public static function setEnhancementOptionsFighter($flight){
-
-	  //Add option to delay the deployment of a ship, set as Enhancement so selection is remembered in the game itself.
-	  //DO NOT PLACE ANY OPTIONS (E.G. ENH[6] = TRUE) ALPHABETICALLY BEFORE THIS!	  	
-	  /*$enhID = 'DEPLOY';
-	  if(!in_array($enhID, $flight->enhancementOptionsEnabled)){ //option is enabled
-		  $enhName = 'Choose which turn to deploy this unit:';
-		  $enhLimit = 100;	
-		  $enhPrice = 0; //no cost
-		  $enhPriceStep = 0; //no cost
-		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
-		  //technical ID, human readable name, number taken, maximum number to take, price for one, price increase for each further, is an option (rather than enhancement)
-	  }	 */
 
 	  //Elite Marines for Breaching Pods, cost: 40% craft price (round up), limit: 1	  	
 	  $enhID = 'ELT_MAR';	  
