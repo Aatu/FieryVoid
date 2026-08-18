@@ -65,7 +65,7 @@ class KalavarOriginalAM extends OSAT{
             0=> array(
                     10 => "Structure",
                     12 => "2:Thruster",
-		    		16 => "1:Class-L Missile Rack",
+		    		16 => "1:Class-S Missile Rack",
                     18 => "Scanner",
                     20 => "Reactor",
             )

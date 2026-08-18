@@ -87,7 +87,7 @@ class ShipCarrierCube extends BaseShip{
 	//$this->addRightSystem(new Hangar(4, 12)); 
 		$hangar2 = new Hangar(4, 12);
 		$hangar2->directions = array(0, 3); 
-		$this->addLeftSystem($hangar2);		   
+		$this->addRightSystem($hangar2);		   
         $this->addRightSystem(new MagGraviticThruster(4, 15, 0, 99, 4));
 	    
 		

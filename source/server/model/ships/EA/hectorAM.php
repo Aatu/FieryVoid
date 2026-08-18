@@ -70,10 +70,10 @@ class HectorAM extends OSAT{
 				20 => "2:Interceptor I",
 			),
 			1=> array(
-				20 => "PRIMARY",
+				20 => "Primary",
 			),
 			2=> array(
-				20 => "PRIMARY",
+				20 => "Primary",
 			),
         );
     }

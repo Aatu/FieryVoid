@@ -84,7 +84,7 @@ class wlcChlonasOnTainCVH extends BaseShipNoFwd{
           3=> array( //Port
             5 => "Thruster", //no differentiation Retro/side
             7 => "Hangar",
-            8 => "Matter Steram",
+            8 => "Matter Stream",
             10 => "Strike Laser",
             12 => "Light Gatling Mattergun",
             18 => "Structure",
@@ -93,7 +93,7 @@ class wlcChlonasOnTainCVH extends BaseShipNoFwd{
           4=> array( //Stbd
             5 => "Thruster", //no differentiation Retro/side
             7 => "Hangar",
-            8 => "Matter Steram",
+            8 => "Matter Stream",
             10 => "Strike Laser",
             12 => "Light Gatling Mattergun",
             18 => "Structure",

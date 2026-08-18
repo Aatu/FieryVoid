@@ -65,7 +65,7 @@ class Mantaka extends BaseShip{
             ),
             1=> array(
                     5 => "Thruster",
-            		8 => "Plasman Wave",
+            		8 => "Plasma Wave",
             		10 => "Heavy Plasma Cannon",
                     18 => "Structure",
                     20 => "Primary",

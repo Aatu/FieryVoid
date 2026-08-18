@@ -72,13 +72,13 @@ class ShipCargoHauler extends MediumShip{
 			1=> array(
 				5 => "Thruster",
 				8 => "Surge Cannon",
-				11 => "Cargo Bay",
+				11 => "0:Cargo Bay",
 				17 => "Structure",
 				20 => "Primary",
 			),
 			2=> array(
 				6 => "Thruster",
-				11 => "Cargo Bay",
+				11 => "0:Cargo Bay",
 				18 => "Structure",
 				20 => "Primary",
 			),

@@ -60,7 +60,7 @@ class CentauriJavelinFastCourier extends MediumShip{
         $this->hitChart = array (
         		0=> array (
         				6=>"Thruster",
-        				9=>"Cargo Bay",
+        				9=>"1:Cargo Bay",
         				11=>"Quarters",
         				12=>"Scanner",
         				15=>"Engine",

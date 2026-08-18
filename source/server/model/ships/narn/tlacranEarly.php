@@ -64,7 +64,7 @@ class TlacranEarly extends MediumShip{
         		),
         		2=> array(
         				6 => "Thruster",
-        				10 => "Hangar",	
+        				12 => "Cargo Bay",	
         				17 => "Structure",
         				20 => "Primary",
         		),

@@ -48,7 +48,7 @@ class Orgolest extends OSAT{
 		    		15 => "1:Light Laser",
                     17 => "Scanner",
                     19 => "Reactor",
-                    20 => "Scatter Pulsar",
+                    20 => "1:Scatter Pulsar",
             )
         );
         

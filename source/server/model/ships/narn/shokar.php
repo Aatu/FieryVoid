@@ -74,7 +74,7 @@ class ShoKar extends BaseShip{
 				8 => "Twin Array",
 				11 => "Light Pulse Cannon",
 				18 => "Structure",
-				20 => "primary",
+				20 => "Primary",
 			),
 			2=> array(
 				6 => "Thruster",

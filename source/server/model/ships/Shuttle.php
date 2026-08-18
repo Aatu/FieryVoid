@@ -78,7 +78,7 @@ class Shuttle extends FighterFlight
                 return array('img/ships/shuttleCascor.png', 'img/ships/shuttleCascor_large.png');                                         
             case 'Centauri Republic':
             case 'Centauri Republic (WotCR)': 
-                return array('img/ships/ShuttleCent.png', 'img/ships/ShuttleCent_large.png'); 
+                return array('img/ships/shuttleCent.png', 'img/ships/ShuttleCent_large.png'); 
             case 'Corillani Theocracy':
                 return array('img/ships/shuttleCorillani.png', 'img/ships/shuttleCorillani_large.png');
             case 'Deneth Tribes':
@@ -110,7 +110,7 @@ class Shuttle extends FighterFlight
             case 'Markab Theocracy':
                 return array('img/ships/shuttleMarkab.png', 'img/ships/shuttleMarkab_large.png');                 
             case 'Narn Regime':
-                return array('img/ships/ShuttleNarn.png', 'img/ships/ShuttleNarn_large.png'); 
+                return array('img/ships/ShuttleNarn.png', 'img/ships/shuttleNarn_large.png'); 
             case 'Orieni Imperium':
             case 'Great Crusade Orieni Imperium':
                 return array('img/ships/shuttleOrieni.png', 'img/ships/shuttleOrieni_large.png');

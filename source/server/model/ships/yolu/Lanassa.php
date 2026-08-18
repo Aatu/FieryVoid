@@ -49,7 +49,7 @@ class Lanassa extends OSAT
                 0=> array(
                         8 => "Structure",
                         11 => "2:Thruster",
-						14 => "1:Light Molecular Distruptor",
+						14 => "1:Light Molecular Disruptor",
 						15 => "1:Fusion Cannon",						
 						17 => "Scanner",
                         20 => "Reactor",

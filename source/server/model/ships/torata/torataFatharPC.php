@@ -87,14 +87,14 @@ class torataFatharPC extends BaseShip{
 			),
 			3=> array(
 				4 => "Thruster",
-				6 => "Laser Accelerator",
+				6 => "Plasma Accelerator",
 				8 => "Pentagon Array",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			4=> array(
 				4 => "Thruster",
-				6 => "Laser Accelerator",
+				6 => "Plasma Accelerator",
 				8 => "Pentagon Array",
 				18 => "Structure",
 				20 => "Primary",

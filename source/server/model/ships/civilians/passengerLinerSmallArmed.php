@@ -52,7 +52,7 @@ class passengerLinerSmallArmed extends LCV{
         		),
         		2=> array( //same as Fwd
         				10 => "Structure",
-						11 => "Light Particle Beam",
+						11 => "1:Light Particle Beam",
         				14 => "0:Quarters",
         				17 => "0:Engine",
         				19 => "0:Reactor",

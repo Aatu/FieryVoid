@@ -61,7 +61,7 @@ class Freebooter extends HeavyCombatVesselLeftRight{
 		$this->hitChart = array(
 			0=> array(
 					7 => "Structure",
-					11 => "Thruster",
+					11 => "TAG:Thruster",
 					15 => "Scanner",
 					16 => "Engine",
 					17 => "Hangar",

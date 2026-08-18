@@ -65,14 +65,14 @@ class Liuli extends HeavyCombatVesselLeftRight{
             3=> array(
                     5 => "Thruster",
                     9 => "Light Plasma Cannon",
-                    10 => "0:Particle Projector",
+                    10 => "1:Particle Projector",
                     18 => "Structure",
                     20 => "Primary",
             ),
             4=> array(
                     5 => "Thruster",
                     9 => "Light Plasma Cannon",
-                    10 => "0:Particle Projector",
+                    10 => "1:Particle Projector",
                     18 => "Structure",
                     20 => "Primary",
             ),

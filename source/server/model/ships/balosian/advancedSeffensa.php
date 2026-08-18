@@ -74,7 +74,7 @@ class AdvancedSeffensa extends BaseShip{
             ),
             2=> array(
                     7 => "Thruster",
-					10 => "Advanced Particle Beam",
+					10 => "1:Advanced Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
             ),

@@ -69,7 +69,7 @@ class PrivateerHactrus extends MediumShip{
         		1=> array (
         				5=>"Thruster",
         				7=>"Plasma Accelerator",
-        				9=>"Light Particle Beam",
+        				9=>"0:Light Particle Beam",
         				17=>"Structure",
         				20=>"Primary",
         		),

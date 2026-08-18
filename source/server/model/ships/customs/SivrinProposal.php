@@ -7,7 +7,7 @@ class SivrinProposal extends HeavyCombatVesselLeftRight{
 	$this->pointCost = 365;
 	$this->faction = "Custom Ships";
         $this->phpclass = "SivrinProposal";
-        $this->imagePath = "img/ships/Nexus/VelraxSivrin.png";
+        $this->imagePath = "img/ships/Nexus/velraxSivrin.png";
         $this->shipClass = "PROPOSAL Sivrin Gunship";
 	    $this->isd = 2023;
         $this->canvasSize = 95;
