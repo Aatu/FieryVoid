@@ -128,20 +128,6 @@ class VorlonLightCruiser extends VorlonCapitalShip{
 				18 => "Structure",
 				20 => "Primary",
 			),
-			31=> array( //Fwd
-				5 => "32:Thruster",
-				7 => "32:EM Shield",
-				11 => "TAG:Lightning Cannon",
-				18 => "32:Structure",
-				20 => "Primary",
-			),
-			41=> array( //Fwd
-				5 => "42:Thruster",
-				7 => "42:EM Shield",
-				11 => "TAG:Lightning Cannon",
-				18 => "42:Structure",
-				20 => "Primary",
-			),
 		);
 		
     }

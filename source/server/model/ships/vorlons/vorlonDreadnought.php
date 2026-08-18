@@ -156,18 +156,6 @@ class VorlonDreadnought extends VorlonCapitalShip{
 				18 => "Structure",
 				20 => "Primary",
 			),
-			31=> array( //virtual Port - redirects to actual Port systems!
-				4 => "32:Thruster",
-				10 => "TAG:Lightning Cannon",
-				18 => "32:Structure",
-				20 => "Primary",
-			),
-			41=> array( //actual Stbd - redirects to actual Stbd systems!
-				4 => "42:Thruster",
-				10 => "TAG:Lightning Cannon",
-				18 => "42:Structure",
-				20 => "Primary",
-			),
 		);
 		
     }
