@@ -4,10 +4,6 @@
 # is the record of known ship-data debt. Adding a line to it in a PR means
 # that PR added a known-broken ship entry - review it, do not rubber-stamp it.
 # Format:  check<TAB>ship<TAB>where<TAB>message
-chart	AlacanCacarasAAM	location 1	no such section on this hull - the chart is dead data
-chart	AlacanCacarasAAM	location 2	no such section on this hull - the chart is dead data
-chart	AlacanCacarasB	location 1	no such section on this hull - the chart is dead data
-chart	AlacanCacarasB	location 2	no such section on this hull - the chart is dead data
 chart	BrixadiiLauncherPlatform2107	location 1	no such section on this hull - the chart is dead data
 chart	BrixadiiLauncherPlatform2107	location 2	no such section on this hull - the chart is dead data
 chart	BrixadiiLauncherPlatformBase	location 1	no such section on this hull - the chart is dead data
@@ -64,15 +60,6 @@ chart	VelraxOSATEarly	location 1	no such section on this hull - the chart is dea
 chart	VelraxOSATEarly	location 2	no such section on this hull - the chart is dead data
 chart	VelraxOSATRefit	location 1	no such section on this hull - the chart is dead data
 chart	VelraxOSATRefit	location 2	no such section on this hull - the chart is dead data
-chart	cottenAlpha	location 4	hull section has NO hit chart - every hit there becomes a Structure hit
-chart	cottenBeta	location 4	hull section has NO hit chart - every hit there becomes a Structure hit
-chart	cottenGamma	location 4	hull section has NO hit chart - every hit there becomes a Structure hit
-chart	godAlphaAM	location 1	no such section on this hull - the chart is dead data
-chart	godAlphaAM	location 2	no such section on this hull - the chart is dead data
-chart	godBetaAM	location 1	no such section on this hull - the chart is dead data
-chart	godBetaAM	location 2	no such section on this hull - the chart is dead data
-chart	hectorAM	location 1	no such section on this hull - the chart is dead data
-chart	hectorAM	location 2	no such section on this hull - the chart is dead data
 chart	legionA	location 0	chart terminates at 30, not 20 - rolls 31..20 fall through to Structure
 chart	legionA	location 0	roll key 30 is outside 1..20
 chart	legionB	location 0	chart terminates at 30, not 20 - rolls 31..20 fall through to Structure
@@ -103,18 +90,6 @@ chart	skywatchAM	location 1	no such section on this hull - the chart is dead dat
 chart	skywatchAM	location 2	no such section on this hull - the chart is dead data
 chart	skywatchGCAM	location 1	no such section on this hull - the chart is dead data
 chart	skywatchGCAM	location 2	no such section on this hull - the chart is dead data
-chart	vorlonAsteroidDefenseGrid	location 1	no such section on this hull - the chart is dead data
-chart	vorlonAsteroidDefenseGrid	location 2	no such section on this hull - the chart is dead data
-chart	vorlonDreadnought	location 31	no such section on this hull - the chart is dead data
-chart	vorlonDreadnought	location 41	no such section on this hull - the chart is dead data
-chart	vorlonHeavyCarrier	location 31	no such section on this hull - the chart is dead data
-chart	vorlonHeavyCarrier	location 41	no such section on this hull - the chart is dead data
-chart	vorlonHeavyCruiser	location 31	no such section on this hull - the chart is dead data
-chart	vorlonHeavyCruiser	location 41	no such section on this hull - the chart is dead data
-chart	vorlonLightCruiser	location 31	no such section on this hull - the chart is dead data
-chart	vorlonLightCruiser	location 41	no such section on this hull - the chart is dead data
-chart	vorlonStrikeCruiser	location 31	no such section on this hull - the chart is dead data
-chart	vorlonStrikeCruiser	location 41	no such section on this hull - the chart is dead data
 dupkeys	GromeGrothAM	source/server/model/ships/grome/GromeGrothAM.php:101	roll key 20 is repeated (first written on line 95) - PHP keeps only the last, so the earlier entry is lost
 dupkeys	athenaAM	source/server/model/ships/EA/athenaAM.php:117	roll key 11 is repeated (first written on line 116) - PHP keeps only the last, so the earlier entry is lost
 dupkeys	athenaAM	source/server/model/ships/EA/athenaAM.php:153	roll key 6 is repeated (first written on line 152) - PHP keeps only the last, so the earlier entry is lost
@@ -452,10 +427,6 @@ hitchart	torataGoracFF	location 2, roll 9	no system named "Light Particle Beam" 
 hitchart	torataKalorBF	location 0, roll 17	no system named "Hangar" on location 0 - every hit here is silently rerouted to Structure
 hitchart	torataKalorBF	location 1, roll 12	no system named "0:Cargo Bay" on location 1 - every hit here is silently rerouted to Structure
 hitchart	torataKalorBF	location 2, roll 11	no system named "0:Cargo Bay" on location 2 - every hit here is silently rerouted to Structure
-hitchart	traqintor	location 1, roll 18	no system named "Outer Structure" on location 1 - every hit here is silently rerouted to Structure
-hitchart	traqintor	location 2, roll 18	no system named "Outer Structure" on location 2 - every hit here is silently rerouted to Structure
-hitchart	traqintor	location 3, roll 18	no system named "Outer Structure" on location 3 - every hit here is silently rerouted to Structure
-hitchart	traqintor	location 4, roll 18	no system named "Outer Structure" on location 4 - every hit here is silently rerouted to Structure
 hitchart	ulana	location 2, roll 9	no system named "Heavy Fusion Cannon" on location 2 - every hit here is silently rerouted to Structure
 hitchart	vulture	location 3, roll 9	no system named "Cargo" on location 3 - every hit here is silently rerouted to Structure
 hitchart	vulture	location 4, roll 9	no system named "Cargo" on location 4 - every hit here is silently rerouted to Structure
