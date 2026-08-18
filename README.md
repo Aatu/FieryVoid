@@ -340,6 +340,48 @@ The harness works for everyone, but **the baseline is per-developer and is never
 - Because baselines aren't shared, a FAIL is always meaningful *to the dev who sees it*: it means the current code changed engine behaviour relative to the games in their own DB. It never reflects someone else's data.
 - The `EXCLUDED_GAMES` list is shared (it's in the committed code). It's keyed by game id, so an entry that names a game another dev doesn't have simply does nothing for them — harmless. Only add ids there for games that are genuinely unmodellable, with a note saying why.
 
+# Ship-data validator (checkShipData.php):
+
+(from 18.8.2026) A companion to the replay harness that checks the *blueprints* rather than the play. It builds every ship class under `source/server/model/ships/` and asserts the invariants that nothing else in the toolchain checks. It needs no database and takes about 30 seconds for ~2,560 ships.
+
+    docker exec -w /usr/src/current fieryvoid-php-1 php checkShipData.php
+
+The reason it exists is that bad ship data fails **silently**. The clearest case is the hit chart: `getHitSystemByTable()` resolves a chart entry by calling `getSystemsByNameLoc($name, $location, ...)`, and a name that matches no system in that section returns an empty array, at which point the damage is quietly rerouted to that section's Structure. No error, no log — just a system that can never be hit directly, for the whole life of the ship. That is how `AlacanAtica` spent an unknown length of time with `"Light S-Missile Rackk"` on its starboard chart: every 5–6 against that section landed on Structure instead of the missile rack.
+
+It is deliberately a **runtime** validator, not a source parser. A static probe over the same data reports hundreds of false hits, because systems assigned to a local before `addLeftSystem($t1l)`, `displayName` overridden after construction, six-sided hulls whose location numbering differs, and the `"2:Thruster"` location-qualified name syntax all resolve perfectly well once the ship is actually built. Only an instantiated ship can answer "is this name reachable from this section".
+
+### What it checks
+
+- **construct** — the hull builds at all. This one always runs whatever the filters say: nothing else can be inspected on a ship that won't instantiate, and a hull that throws in its constructor takes the lobby's whole faction list down with it.
+- **hitchart** — every chart entry resolves to a real system in that section, via `displayName`, `hitChartName`, the `"LOC:Name"` redirect or the `"TAG:tag"` selector. Failures are classified, so the report says what to do: *probable typo for X*, *a system carries this as a TAG — write it "TAG:X"*, *that system exists but at location N — use the "LOC:Name" form*, *stray whitespace*, or nothing when there is no plausible intent. It also checks the `Primary` keyword's spelling: the main resolution path compares it case-sensitively, so `"PRIMARY"` is looked up as a system name, matches nothing and becomes a Structure hit — while the Flash and Piercing chart rebuilds uppercase first and therefore *do* match it. Same entry, different behaviour depending on which weapon fired, which is why that one is close to impossible to spot from play.
+- **chart** — chart shape: integer keys in 1..20, terminating at 20 (a chart ending at 17 lets rolls 18–20 fall through to Structure), no chart for a section the hull doesn't have, no hull section without a chart.
+- **dupkeys** — duplicate roll keys. This is the one check that *cannot* be done at runtime: PHP builds an array literal with the last value for a repeated key and says nothing, so by the time the ship exists the earlier entry is simply gone. It tokenises the file instead (`token_get_all`, not a regex — comments and nested arrays live inside these literals).
+- **image / sysimage** — `$imagePath` and per-system icons resolve to real files under `source/public/`, **case-exactly**. `file_exists()` is useless here: Windows dev is case-insensitive and live is not, so a case slip works on your machine and 404s only in production (see the `dockingCollar.webp` incident). Note the two icon conventions it honours — a ShipSystem's `$iconPath` is always resolved under `img/systemicons/` even when it contains slashes, while a Fighter's `$iconPath`/`$imagePath` are web-root relative.
+- **variantof** — `$variantOf` is empty, a known retirement sentinel (`NONE`/`OBSOLETE`/`OBSELETE`), or the `$shipClass` of a real ship. Anything else makes the ship invisible in the lobby: it is neither a base design nor nestable under one, which is exactly how a truncated sentinel silently retires a refit nobody meant to retire.
+- **hangar** — declared `$fighters[]` fit the hangar boxes, using `HangarOps::populateInitialHangarUsage`'s own arithmetic (capacity in BOXES, catapult/rail/LCV bays partitioned out on both sides, ultralights two to a box). An over-declaration is silently truncated at game start.
+- **arcs** — `startArc`/`endArc` numeric and within 0..360.
+- **ids** — system ids are positional and unique: `id == array index` for top-level systems. Persisted thrust, fire-order, power and critical rows are keyed by these ids, so a collision misroutes real saved data. It also walks the `1000+(id*10)+i` sub-weapon ids of duo/dual weapons and missile racks, which collide once a parent carries more than 10 sub-weapons — though as of 18.8.2026 no ship blueprint actually reaches that arm (the one `DualWeapon` subclass is commented out and `FighterMissileRack` lives inside flights), so treat it as a guard for the future rather than as live coverage.
+
+### The baseline
+
+The tree carries a large amount of pre-existing ship-data debt, so a plain "exit 1 on any violation" gate would be red forever and therefore ignored. The accepted state lives in **`tests/shipdata/baseline.txt`** and a normal run only fails on findings that are *not* in it. Fix something and it's reported as FIXED (never a failure); introduce something and the run fails naming it and only it.
+
+Unlike the replay harness's baseline, this one is derived purely from the repository — no database, no local games — so it is deterministic, portable and **committed**. Everyone gets the same gate on a fresh clone, and the baseline diff is itself reviewable: a PR that adds a line to `baseline.txt` is a PR that added a known-broken ship entry. Review it, don't rubber-stamp it.
+
+    php checkShipData.php --record        # accept the current state (ALL of it) as the new baseline
+    php checkShipData.php --no-baseline   # ignore the baseline; show the whole debt
+
+`--record` refuses to run alongside `--ship=` / `--faction=`, because a filtered record would write a baseline covering only the filtered ships and the next full run would report everything else as brand new — the same trap the replay harness has with `record --games=`.
+
+### Useful options
+
+- `--checks=hitchart,dupkeys` / `--skip=sysimage` — run a subset.
+- `--ship=Atica` / `--faction=Alacan` — narrow to one ship or faction while iterating.
+- `--max=0` — print every finding (default is 40 per check).
+- `--strict` — new warnings fail too, not just new errors.
+
+It runs as check 2 of 3 in `scripts\fvbuild.ps1 -Check`, before the replay harness — a broken hit-chart entry would otherwise surface there as a puzzling damage diff instead of as itself.
+
 # Maintenance tools need a key (08.2026)
 
 The three web-runnable maintenance tools -- `generateStaticShipFileWeb.php`, `generateStaticShipFile.php`
