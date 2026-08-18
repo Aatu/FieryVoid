@@ -199,34 +199,7 @@ window.ShipTooltipBallisticsMenu = function () {
                     .addClass('hit-chance-tooltip')
                     .attr('data-tooltip', tooltipText);
             }
-            /*
-			var hitchance = weaponManager.calculataBallisticHitChange(ballisticEntry);
-			var hitchanceNormalMode = ball.fireOrder.chance ?? ball.fireOrder.needed;	//Fireorder hitchance as locked in by Normal mode weapons.
-            var hitChanceLow = hitchance + ball.fireOrder.hitmod;	//To show the difference between lowest and highest hitchances in tooltip.
-            */
 
-/*
-            if(gamedata.replay){ //Replay is a bit weird with hit chances for normal split weapons.  So adjust here.
-                hitchance = weaponManager.calculateHitChange(ball.shooter, target, weapon, calledid)
-                if (ball.fireOrder.type == "normal" && amount > 1 && hitchance !== hitchanceNormalMode) {
-                    jQuery(".hitchange", ballElement).html('- Between: ' + hitchance + '% - ' + hitchanceNormalMode + '%');
-                } else if (ball.fireOrder.type == "normal") {
-                    jQuery(".hitchange", ballElement).html('- Approx: ' + hitchanceNormalMode + '%');
-                } else {
-                    jQuery(".hitchange", ballElement).html('- Approx: ' + hitchance + '%');
-                }
-            }else{      
-
-			if(ball.fireOrder.type == "normal" && amount > 1 && ball.fireOrder.hitmod){ //Method only works during targeting Normal types, not in Replay :(
-				var hitChanceLow = hitchance + ball.fireOrder.hitmod;	//To show the difference between lowest and highest hitchances in tooltip.	
-		        jQuery(".hitchange", ballElement).html('- Between: ' + hitChanceLow + '% - ' + hitchanceNormalMode + '%' ); 			
-			}else if(ball.fireOrder.type == "normal"){ //Where there's only 1 normal fireOrder or in Replay
-				jQuery(".hitchange", ballElement).html('- Approx: ' + hitchanceNormalMode + '%' ); 
-			}else{ //Everything else, e.g. all ballistics
-			    jQuery(".hitchange", ballElement).html('- Approx: ' + hitchance + '%' ); 
-			}
-
-            */
             /*
             if (this.allowIntercept) {
                 var interception = weaponManager.getInterception(ball.fireOrder) * 5;
