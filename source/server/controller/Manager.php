@@ -2050,7 +2050,7 @@ class Manager{
                 }
     
                 if (isset($system["individualNotesTransfer"])) {
-//GTS_Triad
+
                     if ($sys) {
                         $sys->individualNotesTransfer = $system["individualNotesTransfer"];
                         $sys->doIndividualNotesTransfer();
