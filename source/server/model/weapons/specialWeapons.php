@@ -2460,6 +2460,7 @@ class RammingAttack extends Weapon{
 			foreach($gamedata->ships as $ship){
 				if($ship->isDestroyed()) continue; //Ignore destroyed ships
 				if($ship->isTerrain()) continue;	//Don't add other terrain.
+				if($ship instanceof spawnMeteoroid || $ship instanceof spawnDustField) continue; // GTS_Triad
 				if($ship->getTurnDeployed($gamedata) > $gamedata->turn)	continue; //Ship not deployed yet.		
 				if($this->isPhasedThroughTerrain($ship, $shooter, $gamedata)) continue; //Half-phased Shadow ships slip straight through terrain, provided they don't stop inside it.
 					//if ($ship instanceof FighterFlight && $shooter->Huge == 0) continue; //Not doing fighters except for very large terrain, change if and when skindancing introduced.	
@@ -2471,8 +2472,11 @@ class RammingAttack extends Weapon{
 
 			foreach($collisiontargets as $targetid=>$location){
 				$target = $gamedata->getShipById($targetid);
+                if($targetid == $shooter->id) continue; // GTS_Triad - prevent terrain firing at itself
+				
 				$type = "TerrainCollision"; //Moving through asteroids hex, d10 * speed damage.
 				if($shooter->Huge > 0 ) $type = "TerrainCrash"; //Larger Terrain, like Moons.  Full ramming damage.
+                if(isset($shooter->terrainCollisionType)) $type = $shooter->terrainCollisionType; // GTS_Triad
 				$targetMovement = $target->getLastTurnMovement($gamedata->turn+1);
 				if (!$targetMovement) continue;
 
@@ -2903,7 +2907,7 @@ class RammingAttack extends Weapon{
 
 	public function calculateHitBase($gamedata, $fireOrder)
 	{		
-		if($fireOrder->damageclass == "TerrainCollision" || $fireOrder->damageclass == "TerrainCrash"){ //These attacks automatically hit.
+			if($fireOrder->damageclass == "TerrainCollision" || $fireOrder->damageclass == "TerrainCrash" || $fireOrder->damageclass == "MeteoroidCollision" || $fireOrder->damageclass == "DustCollision" || $fireOrder->damageclass == "WaveformCollision"){ // GTS_Triad 
 			$fireOrder->needed = 100; //always true
 			$fireOrder->updated = true;
 			//Skip parent as auto-hit, but also stop us overwriting chosenLocation which has already been set.
@@ -3000,6 +3004,8 @@ class RammingAttack extends Weapon{
 				return;
 			}	
 		}
+
+                if(($fireOrder->damageclass == 'MeteoroidCollision' || $fireOrder->damageclass == 'DustCollision' || $fireOrder->damageclass == 'WaveformCollision') && $this->getDamage($fireOrder) <= 0) return; // GTS
 		
 		parent::fire($gamedata, $fireOrder);
 
@@ -3018,10 +3024,11 @@ class RammingAttack extends Weapon{
 				if($collider) {
 					$fireOrder->chosenLocation = $this->getTerrainReturnHitLocation($target, $collider, $gamedata);
 				}
-			} else if($fireOrder->damageclass != 'TerrainCollision') {
+			} else if($fireOrder->damageclass != 'TerrainCollision' && $fireOrder->damageclass != 'MeteoroidCollision' && $fireOrder->damageclass != 'DustCollision') { // GTS_Triad
 				$fireOrder->chosenLocation = $this->getRamHitLocation($target, $gamedata, $targetPos);
 			}
 			//TerrainCollision (asteroids): return damage stays 0 via damageModRolled, so chosenLocation is not used meaningfully.
+			if($fireOrder->damageclass == 'MeteoroidCollision' || $fireOrder->damageclass == 'DustCollision' || $fireOrder->damageclass == 'WaveformCollision') return; // GTS_Triad
 
 			$damage = $this->getReturnDamage($fireOrder);
         		$damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);
@@ -3105,6 +3112,43 @@ class RammingAttack extends Weapon{
 			$diceRoll = Dice::d(10,1);		
 			$damage = $targetSpeed * $diceRoll;				
 			return $damage;
+			
+			
+        }else if($fireOrder->damageclass == 'MeteoroidCollision'){ // GTS
+            $targetMove = $target->getLastMovement(); // GTS
+            $targetSpeed = $targetMove ? $targetMove->speed : 1; // GTS
+            $modifier = 0; // GTS
+            if($targetSpeed <= 4) $modifier = -1; // GTS
+            if($targetSpeed > 12) $modifier = 1; // GTS
+            $hits = spawnMeteoroid::rollMeteorChart($target->shipSizeClass, ($target instanceof FighterFlight), $modifier); // GTS
+            if($hits <= 0) return 0; // GTS
+            $damage = 0; // GTS
+            for($h = 0; $h < $hits; $h++) $damage += spawnMeteoroid::getMeteorDamage($targetSpeed); // GTS
+            if(empty($target->advancedArmor)) $damage *= 2; // GTS - double damage for non-advanced armor
+            return $damage; // GTS
+
+		}else if($fireOrder->damageclass == 'DustCollision'){ // GTS
+            if(isset(spawnDustField::$dustDamagedThisTurn[$target->id]) && spawnDustField::$dustDamagedThisTurn[$target->id] == $gd->turn) return 0; // GTS
+            spawnDustField::$dustDamagedThisTurn[$target->id] = $gd->turn; // GTS
+            $targetMove = $target->getLastMovement(); // GTS
+            $targetSpeed = $targetMove ? $targetMove->speed : 0; // GTS
+            $damage = spawnDustField::getDustDamage($targetSpeed); // GTS
+            if(empty($target->advancedArmor)) $damage *= 2; // GTS - double damage for non-advanced armor
+            return $damage; // GTS
+
+
+
+		}else if($fireOrder->damageclass == 'WaveformCollision'){ // GTS
+        $targetMove = $target->getLastMovement(); // GTS
+        $targetSpeed = $targetMove ? $targetMove->speed : 0; // GTS
+        if($targetSpeed <= 0) return 0; // GTS
+        $damage = SpatialCutter::getWaveformDamage($target); // GTS
+        if(empty($target->advancedArmor)) $damage *= 2; // GTS
+        return $damage; // GTS
+			
+			
+			
+			
 		}else{
 			//modifier: +1 if greater Ini than target, +1 if head on, +1 if target is head on also
 			$modifier = 0;			

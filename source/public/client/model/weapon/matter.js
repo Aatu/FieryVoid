@@ -119,3 +119,37 @@ var WarriorRam = function WarriorRam(json, ship) {
 };
 WarriorRam.prototype = Object.create(Matter.prototype);
 WarriorRam.prototype.constructor = WarriorRam;
+
+// GTS_Triad
+var MatterBolt = function MatterBolt(json, ship) {
+    Matter.call(this, json, ship);
+};
+MatterBolt.prototype = Object.create(Matter.prototype);
+MatterBolt.prototype.constructor = MatterBolt;
+
+MatterBolt.prototype.initializationUpdate = function () {
+    delete this.data["Turns arming"];
+    this.outputDisplay = "1/1";
+    for (var shipId in gamedata.ships) {
+        var ship = gamedata.ships[shipId];
+        if (!ship || !ship.systems) continue;
+        for (var fId in ship.systems) {
+            var fighter = ship.systems[fId];
+            if (!fighter || !fighter.systems) continue;
+            for (var wId in fighter.systems) {
+                if (fighter.systems[wId] === this) {
+                    var alive = 0;
+                    for (var fId2 in ship.systems) {
+                        var f = ship.systems[fId2];
+                        if (f && !shipManager.systems.isDestroyed(ship, f)) {
+                            alive++;
+                        }
+                    }
+                    ship.offensivebonus = alive;
+                    return this;
+                }
+            }
+        }
+    }
+    return this;
+};

@@ -189,3 +189,10 @@ var PlasmaDriver = function PlasmaDriver(json, ship) {
 };
 PlasmaDriver.prototype = Object.create(Weapon.prototype);
 PlasmaDriver.prototype.constructor = PlasmaDriver;
+
+// GTS_Triad
+var SpatialCutter = function SpatialCutter(json, ship) {
+    Weapon.call(this, json, ship);
+};
+SpatialCutter.prototype = Object.create(Weapon.prototype);
+SpatialCutter.prototype.constructor = SpatialCutter;

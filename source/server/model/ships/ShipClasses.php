@@ -74,6 +74,7 @@ class BaseShip {
     public $SixSidedShip = false;
 	public $isCombatUnit = true; //is this a combat unit (as opposed to non-combat - transport, freighter, civilian, explorer, diplomatic ship, yacht...)
     public $bulkBuy = 1; //Variable to track mass purchases in Fleet Selection.
+	public $triadOrder = false; // Used to flag Triad: Order units for immunity from their Flare Generators   GTS_Triad
 
 	/* ⭐ THE OUTER-STRUCTURE-RING RULE (Vree saucers). On most hulls a Structure block IS
 	   the compartment its systems sit in, so losing the block takes the systems with it

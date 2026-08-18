@@ -2133,6 +2133,7 @@ class Manager{
                 }
     
                 if (isset($system["individualNotesTransfer"])) {
+
                     if ($sys) {
                         $sys->individualNotesTransfer = $system["individualNotesTransfer"];
                         $sys->doIndividualNotesTransfer();

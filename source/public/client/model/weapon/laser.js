@@ -240,3 +240,73 @@ var UnreliableBattleLaser = function UnreliableBattleLaser(json, ship) {
 };
 UnreliableBattleLaser.prototype = Object.create(Laser.prototype);
 UnreliableBattleLaser.prototype.constructor = UnreliableBattleLaser;
+
+//GTS_Triad
+var PhotonicPrismBeam = function PhotonicPrismBeam(json, ship) {
+    Weapon.call(this, json, ship);
+};
+PhotonicPrismBeam.prototype = Object.create(Weapon.prototype);
+PhotonicPrismBeam.prototype.constructor = PhotonicPrismBeam;
+
+PhotonicPrismBeam.prototype.initializationUpdate = function () {
+    //Show shots remaining for Mode 1 (Split) only.
+    if (this.firingMode == 1) {
+        this.data["Shots Remaining"] = this.guns - this.fireOrders.length;
+    } else {
+        delete this.data["Shots Remaining"];
+    }
+    return this;
+};
+
+/* Mode 1 (Split): Twin Array pattern - one click per shot, up to guns (3) shots.
+ * Each click assigns one shot to the clicked target. The player can click the same
+ * target multiple times or different targets for each shot.
+ * Modes 2-5: single shot - handled by the engine's default path (canSplitShots=false).
+ * Only Mode 1 reaches doMultipleFireOrders since canSplitShotsArray[1]=true only. */
+PhotonicPrismBeam.prototype.doMultipleFireOrders = function (shooter, target, system) {
+    var shotsOnTarget = 1; //one shot per click
+
+    //Cap at guns (3 for Mode 1, reduced by GunLost crits if ever applicable).
+    if (this.fireOrders.length >= this.guns) return;
+
+    var fireOrdersArray = [];
+    for (var s = 0; s < shotsOnTarget; s++) {
+        var calledid = -1;
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
+        if (chance < 1) continue;
+
+        var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+        var fire = {
+            id: fireid,
+            type: 'normal',
+            shooterid: shooter.id,
+            targetid: target.id,
+            weaponid: this.id,
+            calledid: calledid,
+            turn: gamedata.turn,
+            firingMode: this.firingMode,
+            shots: 1,
+            x: "null",
+            y: "null",
+            damageclass: 'Raking',
+            chance: chance,
+            hitmod: 0
+        };
+        fireOrdersArray.push(fire);
+    }
+    return fireOrdersArray;
+};
+
+PhotonicPrismBeam.prototype.checkFinished = function () {
+    //Mode 1: finished when all 3 shots are allocated.
+    if (this.firingMode == 1 && this.fireOrders.length >= this.guns) return true;
+    //Modes 2-5: always one shot, finished immediately after declaring.
+    if (this.firingMode != 1 && this.fireOrders.length >= 1) return true;
+    return false;
+};
+
+var LtPrismBeam = function LtPrismBeam(json, ship) {
+    Laser.call(this, json, ship);
+};
+LtPrismBeam.prototype = Object.create(Laser.prototype);
+LtPrismBeam.prototype.constructor = LtPrismBeam;
