@@ -2,6 +2,10 @@ import React, { Component } from 'react';
 import styled from 'styled-components';
 import theme from '../styled/theme';
 import nonPassiveWheel from '../helpers/nonPassiveWheel';
+import {
+    CritSectionHeader, SectionDivider, SectionBody, SECTION_INK,
+    ActionButton, MENU_CHROME
+} from './menuControls';
 
 /* Critical effects carried by ONE damage target — a system (kind 0, ref = systemid) or
  * a fighter ordinal (kind 1, ref = 1..flightSize). Rendered inside ApplyDamageMenu and
@@ -35,6 +39,11 @@ import nonPassiveWheel from '../helpers/nonPassiveWheel';
  * dead rather than letting a player dial in a wound that does nothing.
  */
 
+/* The bar and the rows are siblings, not nested: the bar spans the full width and the rail
+   descends from it down the body. Section is now just a plain wrapper for the two, so the
+   divider + bar + body stay one unit.
+   No border-top on it: CritSectionHeader carries its own hairline, in the section's own ink,
+   and a rule here as well would double it. */
 const Section = styled.div`
     display: flex;
     flex-direction: column;
@@ -43,19 +52,18 @@ const Section = styled.div`
     min-width: 0;
     max-width: 100%;
     box-sizing: border-box;
-    border-top: 1px solid ${theme.colors.line};
 `;
 
-const SectionHeader = styled.div`
-    padding: 3px;
-    background-color: #1b3b50;
-    color: ${theme.colors.chromeText};
-    text-align: center;
-    font-size: 10px;
-    letter-spacing: 0.5px;
-    user-select: none;
-`;
+/* The bar itself lives in ./menuControls beside the damage and enhancement bars - three
+   tints of one geometry, in one file, so they cannot drift apart (see the comment there).
+   Aliased locally so the JSX below still reads as "this section's header". */
+const SectionHeader = CritSectionHeader;
 
+/* ⚠️ The row colour is UNCHANGED and is meant to stay that way (user request 2026-08-16):
+   orange is the game's colour for a critical effect, so these rows keep theme.colors.warning.
+   What changed around them is that the section bar above is warm now too - it was indigo,
+   which is why the orange used to look like a stray beside the bronze Enhancements bar rather
+   than like the content of its own section. */
 const CritRow = styled.div`
     display: flex;
     align-items: center;
@@ -63,7 +71,7 @@ const CritRow = styled.div`
     gap: 6px;
     padding: 2px 8px;
     font-size: 11px;
-    color: ${theme.colors.warning};
+    color: ${theme.colors.warningSoft};
     user-select: none;
 
     /* An effect dialled down to nothing is not carried any more, but its row stays so it
@@ -88,12 +96,12 @@ const TransientTag = styled.span`
     margin-left: 4px;
     font-size: 9px;
     letter-spacing: 0.3px;
-    color: ${theme.colors.textDim};
+    color: ${MENU_CHROME.dim};
 `;
 
 const CritCount = styled.div`
     flex: 0 0 auto;
-    color: ${theme.colors.textDim};
+    color: ${MENU_CHROME.dim};
 `;
 
 const Controls = styled.div`
@@ -103,32 +111,10 @@ const Controls = styled.div`
     flex: 0 0 auto;
 `;
 
-const TickerButton = styled.div`
-    width: 18px;
-    height: 16px;
-    flex: 0 0 18px;
-    background: #203348;
-    border: 1px solid #496791;
-    color: #deebff;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 10px;
-    opacity: 0.9;
-
-    &:hover {
-        background: #496791;
-        color: #ffffff;
-        opacity: 1;
-    }
-
-    ${props => props.disabled && `
-        opacity: 0.3;
-        cursor: not-allowed;
-        &:hover { background: #203348; color: #deebff; }
-    `}
-`;
+/* TickerButton is gone - it was ActionButton at 18x16 with the same four colours, and one
+   control in two sizes is two places to fix the next time either is nudged. The rows are 12px
+   wider in the controls now, which they were already wrapping inside, and the touch targets
+   match the rest of the menu. */
 
 const CountValue = styled.div`
     flex: 0 0 20px;
@@ -138,9 +124,10 @@ const CountValue = styled.div`
     color: ${props => props.$empty ? '#6f6257' : '#ffffff'};
 `;
 
-/* Exported so the damage row above the criticals can use the SAME section-header bar
-   (user request 2026-08-08: the Damage block had no header while Critical Effects did). */
-export const CritSectionHeader = SectionHeader;
+/* The damage row above the criticals used to re-export this component's bar, because the
+   two were the same colour (user request 2026-08-08: the Damage block had no header while
+   Critical Effects did). They are now two tints of one geometry and both live in
+   ./menuControls, so ApplyDamageMenu imports DamageSectionHeader from there directly. */
 
 /* ⭐ The checkbox + its word, as ONE aligned pair. Exported so "Destroy" in ApplyDamageMenu
    and "All" here cannot drift apart.
@@ -197,12 +184,15 @@ const AddSelect = styled.select`
     padding: 0 2px;
     font-family: inherit;
     font-size: 10px;
-    color: ${theme.colors.chromeText};
-    background-color: #101a26;
-    border: 1px solid #496791;
+    color: ${MENU_CHROME.text};
+    background-color: ${MENU_CHROME.well};
+    /*Takes the section's ink like the tickers above it - it is the widest control in the
+      section, so leaving it on the chassis border was the one thing that still read as
+      unpainted once the tickers went rust.*/
+    border: 1px solid ${SECTION_INK.crit.rail};
     outline: none;
 
-    &:focus { border-color: #6089c1; }
+    &:focus { border-color: ${SECTION_INK.crit.btnText}; }
 `;
 
 const AllToggle = styled.label`
@@ -212,7 +202,7 @@ const AllToggle = styled.label`
     flex: 0 0 auto;
     font-size: 9px;
     letter-spacing: 0.3px;
-    color: ${theme.colors.textDim};
+    color: ${MENU_CHROME.dim};
     cursor: pointer;
     user-select: none;
 `;
@@ -423,7 +413,14 @@ class CriticalEffectsSection extends Component {
 
         return (
             <Section>
+                {/* The break from whatever editor sits above - the damage row in
+                    ApplyDamageMenu, the fighter grid in FighterDamageMenu. It lives HERE
+                    rather than at the two call sites because this component can decide to
+                    render nothing at all (no criticals, catalogue not in yet), and a
+                    divider left dangling over an empty gap reads as a broken menu. */}
+                <SectionDivider $chrome />
                 <SectionHeader>Critical Effects</SectionHeader>
+                <SectionBody $ink={SECTION_INK.crit}>
                 {shown.map(row => {
                     const value = this.valueOf(row);
                     const max = this.maxValueOf(row);
@@ -437,22 +434,24 @@ class CriticalEffectsSection extends Component {
 
                             {editable ? (
                                 <Controls>
-                                    <TickerButton
+                                    <ActionButton
+                                        $ink={SECTION_INK.crit}
                                         title={row.isParam ? 'Reduce' : 'One fewer'}
                                         disabled={value <= 0}
                                         onClick={() => this.step(row.type, -1)}
-                                    >&minus;</TickerButton>
+                                    >&minus;</ActionButton>
                                     <CountValue $empty={value <= 0} ref={this.wheelRef(row.type)}>
                                         {value}
                                     </CountValue>
-                                    <TickerButton
+                                    <ActionButton
+                                        $ink={SECTION_INK.crit}
                                         title={row.isParam ? 'Increase'
                                             : (value >= max && max === 1
                                                 ? 'This effect only applies once'
                                                 : 'One more')}
                                         disabled={value >= max}
                                         onClick={() => this.step(row.type, 1)}
-                                    >+</TickerButton>
+                                    >+</ActionButton>
                                 </Controls>
                             ) : (
                                 row.count > 1 && <CritCount>(x{row.count})</CritCount>
@@ -491,6 +490,7 @@ class CriticalEffectsSection extends Component {
 
                     </AddRow>
                 )}
+                </SectionBody>
             </Section>
         );
     }

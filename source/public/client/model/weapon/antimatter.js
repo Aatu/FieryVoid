@@ -112,3 +112,10 @@ var AntimatterShredder = function AntimatterShredder(json, ship) {
 };
 AntimatterShredder.prototype = Object.create(AntimatterWeapon.prototype);
 AntimatterShredder.prototype.constructor = AntimatterShredder;
+/* Replay: play this weapon's whole volley as one event rather than one victim at a time -
+ * see animateWeaponVolleys in ReplayAnimationStrategy. In Shredder mode the server turns a
+ * single trigger pull into one fire order per attack per unit within a hex of the aim point
+ * (AntimatterShredder::beforeFiringOrderResolution), which the default per-target pass would
+ * replay as a separate camera pan per victim. Purely presentational, so it lives on the
+ * client prototype - nothing is added to the serialised payload. */
+AntimatterShredder.prototype.volleyAnimation = true;

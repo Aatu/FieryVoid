@@ -3791,16 +3791,14 @@ class TrekPhaserKelly extends TrekPhaser{
 		}
 
         public function setSystemDataWindow($turn){
-		if (!isset($this->data["Special"])) {
-			$this->data["Special"] = '';
-		}else{
-			$this->data["Special"] .= '<br>';
-		}
-			$this->data["Special"] .= "Can fire accelerated ROF for less damage:";  
-			$this->data["Special"] .= "<br> - 1 turn: 1d10+4"; 
-			$this->data["Special"] .= "<br> - 2 turns: 2d10+14"; 
-			$this->data["Special"] .= "<br>Cannot be intercepted.";
-		}
+            parent::setSystemDataWindow($turn);			
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+				$this->data["Special"] .= "<br>Cannot be intercepted.";
+			}
 	
 		public function getDamage($fireOrder){
         	switch($this->turnsloaded){

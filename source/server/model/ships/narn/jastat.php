@@ -65,8 +65,8 @@ class JaStat extends StarBaseFiveSections{
 
 		for ($i = 0; $i < sizeof($this->locations); $i++){
 
-			$min = 270 + ($i*72);
-			$max = 90 + ($i*72);
+			$min = (270 + ($i*72)) % 360;
+			$max = (90 + ($i*72)) % 360;
 			
 			/*some systems need pre-definition to have arcs set for TAGs!*/
 			$struct = Structure::createAsOuter(5, 90,$min,$max);

@@ -988,6 +988,15 @@ window.confirm = {
                 : [],
             pointCostEnh: ship.pointCostEnh,
             pointCostEnh2: ship.pointCostEnh2,
+            /* The THIRD cost bucket and its rows (WEAPON_ENHANCEMENTS_PLAN.md D5). Snapshotted
+               for the same reason as the two above - a cancelled or unaffordable edit has to put
+               the row back exactly as it was, and per-system refits are points like any other.
+               DEEP-copied row by row for exactly the reason spelled out for enhancementOptions:
+               every write replaces a row in place. */
+            pointCostSysEnh: ship.pointCostSysEnh,
+            systemEnhancements: window.systemEnhancements
+                ? systemEnhancements.clone(ship.systemEnhancements)
+                : [],
             mine: ship.mine,
             flight: ship.flight,
             bulkBuy: ship.bulkBuy

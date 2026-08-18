@@ -228,13 +228,26 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 If the speed difference to target is greater than pod thrust rating it is simply unable to attach. 
                 If the target is moving faster, each point of speed difference is -10% chance to attach.  
                 Pods cannot attach to ships with Advanced Armor and certain factions like Llort have +1 to attach rolls.</li>
-            <li>There is a limit to how many pods can attach to enemy ships based on their size, 12 pods can attach to bases, 8 to Capital Ships, 4 to HCVs, 2 to Medium Ships and only 1 to LCVs and OSATS.   
-                If more than this number try to attach and/or deliver marines then extra attacks over these limits will automatically fail. 
-                In addition, if a Grappling Claw ship is already attached to a structure facing this will prevent any Breaching Pods from attaching to that location.</li>    
+            <li>Attachment is limited <strong>per structure section</strong>: at most two Breaching Pods may attach to any one section.
+                A hull's total therefore follows how many sections it actually has - a Capital Ship takes 2 per facing, an HCV 2 forward and 2 aft, a Medium Ship 2 in total,
+                and a Drazi Stormfalcon (which has no aft structure) takes 6 rather than 8.
+                <br>On a vessel with exterior structure blocks, the Primary section is reachable only once the exterior structure facing the pod has been destroyed, and it then holds
+                <strong>two pods for every destroyed exterior section</strong> - so a Capital Ship that has lost both its sides can carry four on its Primary, two arriving through each breach.
+                Medium Ships, LCVs and OSATs have no exterior structure blocks at all, so for them Primary is simply the hull and holds the usual two.
+                <br>An overall ceiling by hull size applies on top of this, so a vessel with an unusual number of sections (such as a six-sided Vree saucer) can never exceed what its class allows:
+                <strong>12</strong> for bases and Enormous units, <strong>8</strong> for Capital Ships, <strong>4</strong> for HCVs and <strong>2</strong> for Medium Ships and smaller.
+                LCVs and OSATs are a special case and support only a <strong>single attached craft</strong>, delivering one marine contingent.
+                <br>If more units try to attach and/or deliver marines than these limits allow, the extra attempts automatically fail.</li>
+            <li>Grappling Claw ships are limited to <strong>one per structure section</strong>, and a section held by a Grappling Claw admits no Breaching Pods at all.
+                Beyond that, only one vessel may grapple a Medium Ship or HCV, and a Capital Ship may be grappled by two vessels only, which must attach to opposite ends.
+                Bases and Enormous units have no such overall limit - one claw per section is their only restriction.</li>
             <li>Breaching Pods will remain attached to a vessel's facing structure block until they choose to Detach in the Movement Phase, or the vessel is destroyed 
                 (providing that the structure location the pod is attached to is NOT also destroyed).  If the structure block a pod is attached to IS destroyed before the Pod detaches, then the Pod is automatically destroyed.  
                 While attached, Pods match speed and heading with their host ship, and suffer -10 Initiative penalty.  When they Detach Pods will automatically face away from the host ship to which they were attached.</li>
-            <li>Units can shoot at attached pods, providing they are in arc of the structure location the pod is attached to, and will roll to hit them as normal. However any shot aimed at a pod will automatically hit the vessel it is attached to as well.</li>                 
+            <li>Units can shoot at attached pods, providing they are in arc of the structure location the pod is attached to, and will roll to hit them as normal. However any shot aimed at a pod will automatically hit the vessel it is attached to as well.
+                <br>Weapons that can never damage a ship are the exception - hex-targeted weapons such as the Pak'ma'ra Plasma Web damage the pod only, and leave its host untouched.</li>
+            <li>A unit that ends its movement on the same hex as an Enormous unit and fails to attach to it - or does not attempt an attachment at all - will <strong>ram</strong> it instead, resolved at the end of the Firing Phase.
+                Units that attach successfully never ram their host.  Since bases do not move, an attachment attempt on one succeeds automatically, so only an attachment that is actively <em>blocked</em> (a full section, Advanced Armour, an Ancient hull) will lead to a ram.</li>
             <br>               
             <li>After the attach roll, the Pod will attempt to deliver its marines by rolling on a d10 again on the following table, with a base chance of 50% to successfully board the vessel.  
                 Depending on the roll, unsuccessful marines may be lost in the attempt or return safely to their pod.</li>                           
@@ -347,10 +360,22 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
         <h3  id="delayed">Delayed Deployment</h3>
         <ul>
-            <li>You can select this option in the Create Game screen, by setting the <b>'Deploys on Turn'</b> field in a Player Slot to the Turn you wish that slot to deploy, or ‘jump in’.  
+            <li>You can select this option in the Create Game screen, by setting the <b>'Deploys on Turn'</b> field in a Player Slot to the Turn you wish that slot to deploy, or ‘jump in’.
             Ships cannot jump into hexes occupied by terrain or Enormous units, so make sure you make the Deployment Zone large enough!</li>
-            <li>Ships which would normally have to set systems on Turn 1 and choose to deploy later (e.g. Hyach Specialists, Vorlon Adaptive Armor) will set these systems on the turn they deploy instead.</li>
-            <li>Terrain, Bases, and OSATS cannot deploy later in the game and will always deploy on Turn 1 even if the slot is set to deploy later.</li>
+            <li><b>You choose your entry hexes a turn early.</b> A slot set to deploy on Turn 5 gets its Deployment Phase on <b>Turn 4</b>, where you position every arriving unit
+            exactly as you would on Turn 1. Your units do not actually arrive until Turn 5 — through Turn 4 they cannot be seen, targeted, moved or fired, and they take no part in
+            any other phase. A slot set to deploy on Turn 2 therefore picks its hexes during the normal Turn 1 Deployment Phase, alongside everyone else.</li>
+            <li><b>Your opponents get one turn of warning.</b> From the moment you commit your Deployment Phase, every hex you chose is marked on the map for <i>all</i> players with a
+            blue <b>Jump Point</b> hex. Reinforcements no longer materialise out of nowhere — the enemy can see where a jump point is about to open and has a turn to react to it.
+            Only the hex is revealed, not what is coming through it (though the fleet list has always shown the composition of a delayed slot, marked <i>[Deploys on Turn N]</i>).
+            A Jump Point appears even for stealthed units: the jump point itself is visible, whatever arrives through it may not be.</li>
+            <li>Any unit that has not yet arrived shows a cyan <b>'Deploying on Turn N'</b> banner in its ship window, and is listed in the fleet list under a <i>[Deploys on Turn N]</i> header.</li>
+            <li>Fighters and LCVs belonging to a delayed slot can be <b>deployed inside the hangars and rails</b> of a carrier from the same slot, arranged during that slot's
+            Deployment Phase in the usual way.</li>
+            <li>Ships which would normally have to set systems on Turn 1 and choose to deploy later (e.g. Hyach Specialists) will set these systems during their Deployment Phase — that is,
+            on the turn they pick their entry hexes rather than the turn they arrive. Systems set in Initial Orders (e.g. Vorlon Adaptive Armor) are set as normal on the turn the unit arrives.</li>
+            <li>Terrain, Bases, and OSATS cannot deploy later in the game and will always deploy on Turn 1 even if the slot is set to deploy later. If a slot contains any of these
+            <i>and</i> delayed units, it gets a Turn 1 Deployment Phase for them and a second one later for its genuine reinforcements.</li>
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 

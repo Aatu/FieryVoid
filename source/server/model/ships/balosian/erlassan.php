@@ -57,7 +57,7 @@ class Erlassan extends HeavyCombatVessel{
             0=> array(
                     7 => "Structure",
 					11 => "Thruster",
-					14 => "Scanner",
+					14 => "ELINT Scanner",
                     16 => "Engine",
                     17 => "Hangar",
                     19 => "Reactor",

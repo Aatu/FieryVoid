@@ -1003,7 +1003,18 @@ window.shipManager = {
     //Generic function called from various front end functions.  Checks if ships should be shown/interactable or not.
     shouldBeHidden: function (ship) {
         if (!gamedata.replay && shipManager.isDestroyed(ship)) return true; //Prevents lots of things from happening when a ship collides and dies to Terrain.
-        if (shipManager.getTurnDeployed(ship) > gamedata.turn) return true; //Not deployed yet.
+        if (shipManager.getTurnDeployed(ship) > gamedata.turn) {
+            /* Not deployed yet - with ONE exception. Reinforcements pick their entry hex during
+               the Deployment phase of the turn BEFORE they arrive (shipManager.getTurnPlaced), so
+               for that one phase the owner has to be able to see, select and place them. To
+               everyone else, and in every later phase of that same turn, they remain off-board:
+               the only thing anyone sees is the blue "Jump Point" ballistic marker at the hex
+               they committed to. Own-slot only - a teammate can't place your ships either. */
+            var placingNow = gamedata.gamephase == -1
+                && gamedata.isMyShip(ship)
+                && shipManager.getTurnPlaced(ship) == gamedata.turn;
+            if (!placingNow) return true;
+        }
         if (ship.spawned !== -1 && ship.spawned > gamedata.turn) return true; //Not spawned yet.
         //Hangar Ops: a partial-dock fragment ("- Split") is born removed=true with
         //spawned == removedTurn == the dock turn — it never existed on the board as
@@ -1060,12 +1071,36 @@ window.shipManager = {
     },
 
 
-    //True if the player still has at least one ship scheduled to deploy THIS turn.
-    //Future-turn arrivals are excluded — they don't keep the Deployment phase active.
+    /*The turn this unit picks its ENTRY HEX, as opposed to the turn it is physically on the
+      board (getTurnDeployed above). Mirrors BaseShip::getTurnPlaced on the server.
+
+      Reinforcements place a turn EARLY: the player commits entry hexes during the Deployment
+      phase of turn depTurn-1, and those hexes show to everyone as blue "Jump Point" markers for
+      the whole of that turn, so an arriving fleet no longer materialises without warning.
+
+      ONLY code answering "is this unit being placed right now?" may use this - the Deployment
+      phase strategy, its commit warnings, the deploy-start dock dialog. Everything asking "is
+      this unit on the board?" (firing, EW, power, movement, the OOB "[Deploys on Turn N]"
+      header) must keep reading getTurnDeployed.
+
+      Bases/OSATs/Terrain place and arrive on turn 1, and spawned units (mid-game mines, launched
+      flights) never see a Deployment phase at all, so both keep their deploy turn untouched.*/
+    getTurnPlaced: function getTurnPlaced(ship) {
+        if (ship.osat || ship.base || gamedata.isTerrain(ship.shipSizeClass, ship.userid)) return 1;
+        if (ship.spawned !== undefined && ship.spawned !== -1) return ship.spawned;
+
+        var depTurn = shipManager.getTurnDeployed(ship); //carries the 999 surrender sentinel
+        return (depTurn > 1) ? depTurn - 1 : depTurn;
+    },
+
+
+    //True if the player still has at least one ship to PLACE this turn — which for a late slot
+    //is the turn before it arrives. Anything placing later is excluded; those don't keep the
+    //Deployment phase active.
     hasShipsToDeployThisTurn: function hasShipsToDeployThisTurn(playerid) {
         for (const ship of gamedata.ships) {
             if (ship.userid !== playerid) continue;
-            if (shipManager.getTurnDeployed(ship) === gamedata.turn) return true;
+            if (shipManager.getTurnPlaced(ship) === gamedata.turn) return true;
         }
         return false;
     },

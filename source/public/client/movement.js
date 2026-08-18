@@ -1652,8 +1652,10 @@ shipManager.movement = {
     }, //endof function getRemainingEngineThrust
 
 
+    //Returns ship OBJECTS, not names: the commit-error dialogs render these through
+    //gamedata.shipNameSpan, which needs ship.id to make the name clickable (scroll-to-ship).
     getShipsNegativeThrust: function getShipsNegativeThrust() {
-        var shipNames = [];
+        var ships = [];
         var counter = 0;
 
         for (var i in gamedata.ships) {
@@ -1684,12 +1686,12 @@ shipManager.movement = {
             );
 
             if (hasNegativeThrust) {
-                shipNames[counter] = ship.name;
+                ships[counter] = ship;
                 counter++;
             }
         }
 
-        return shipNames;
+        return ships;
     },
 
     hasNegativeThrust: function hasNegativeThrust(ship) {

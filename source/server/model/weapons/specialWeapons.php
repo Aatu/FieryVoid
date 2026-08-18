@@ -2526,7 +2526,7 @@ class RammingAttack extends Weapon{
 		foreach($targetList as $targetID=>$target){
 			if(!$target->Enormous) continue; //only auto-ram Enormous units
 			if (isset($shooter->attached[$targetID])) continue; // Already attached to this Enormous unit, do not ram!
-		if($shooter->hasSpecialAbility("Attaches") && !$shooter instanceof Terrain) continue; //ignore pods/grapple ships for now as we assume they are attaching.						
+			if($shooter->hasSpecialAbility("Attaches") && !$shooter instanceof Terrain) continue; //ignore pods/grapple ships for now as we assume they are attaching.						
 			if($target instanceof Terrain) continue; //Terrain Enormous units are handled as collisions now.		
 			if($targetID == $shooter->id) continue; //do not ram self			
 			if($target->isDestroyed()) continue; //destroyed unit does not ram... and neither is rammed			
@@ -2764,8 +2764,32 @@ class RammingAttack extends Weapon{
 	}//endof isPhasedThroughTerrain()
 
 
+	/* Did this movement row take the unit into a NEW hex?
+
+	   move/slipleft/slipright are the only plotted types that change hex, so for a unit
+	   flying under its own power the type IS the test. An ATTACHED unit has no such rows:
+	   MovementGamePhase copies its host's entire plot onto it under the single type
+	   'attached' (specialWeapons is not alone in tripping over this - the mine detectors do
+	   too), so a breaching pod or grapple ship was carried through an asteroid field
+	   completely unharmed. For those rows compare positions instead, which is exactly
+	   equivalent, and keep reading the ATTACHED unit's own rows rather than its host's: the
+	   hexes are identical either way, but the mirrored facing carries the pod's attachment
+	   offset and that is what decides which of the POD's sections the collision strikes.
+
+	   The host is not double-damaged by this: it earns its own collision order from the same
+	   loop, and Firing::fire refuses to spill a TerrainCollision/TerrainCrash order from a
+	   pod onto its host precisely so the two do not stack. */
+	private static function isHexTransit($move, $previousPosition){
+		if ($move->type == "move" || $move->type == "slipleft" || $move->type == "slipright") return true;
+		if ($move->type != "attached") return false;
+		if ($previousPosition === null) return true;
+
+		return ($move->position->q != $previousPosition->q || $move->position->r != $previousPosition->r);
+	}//endof isHexTransit()
+
+
 	private function checkForCollisions($relevantShips, $gamedata, $terrainPosition, $thisShip){
-	    $collisiontargets = array(); // Initialize array for fighters to be fired at.	
+	    $collisiontargets = array(); // Initialize array for fighters to be fired at.
 		//$thisShip = $this->getUnit();
 		
 		if ($thisShip->Huge > 0 || (property_exists($thisShip, 'hexOffsets') && !empty($thisShip->hexOffsets))) {  //Terrain occupies more than just 1 hex!  Need to check all of its hexes.
@@ -2780,8 +2804,8 @@ class RammingAttack extends Weapon{
 		
 				foreach ($ship->movement as $shipMove) {
 					if ($shipMove->turn == $gamedata->turn) {
-						if ($shipMove->type == "move" || $shipMove->type == "slipleft" || $shipMove->type == "slipright") {
-							
+						if (self::isHexTransit($shipMove, $previousPosition)) {
+
 							// Check if shipMove position matches ANY occupied hex
 							$match = false;
 							foreach ($occupiedHexes as $hex) {
@@ -2817,7 +2841,7 @@ class RammingAttack extends Weapon{
 					if ($shipMove->turn == $gamedata->turn) {
 			
 						// Only interested in moves where ship enters a NEW hex!
-						if ($shipMove->type == "move" || $shipMove->type == "slipleft" || $shipMove->type == "slipright") {					
+						if (self::isHexTransit($shipMove, $previousPosition)) {
 							// Check if the position matches the asteroids, e.g. zero distance.
 							if ($terrainPosition->q == $shipMove->position->q && $terrainPosition->r == $shipMove->position->r) {
 								$relativeBearing = $this->getTempBearing($previousPosition, $terrainPosition, $ship, $previousFacing);
@@ -2901,7 +2925,7 @@ class RammingAttack extends Weapon{
 					if ($shipMove->turn == $gamedata->turn) {
 
 						// Only interested in moves where ship enters a NEW hex!
-						if ($shipMove->type == "move" || $shipMove->type == "slipleft" || $shipMove->type == "slipright") {
+						if (self::isHexTransit($shipMove, $previousPosition)) {
 							// Check if the position matches the asteroids, e.g. zero distance.
 							if ($shipPosition->q == $shipMove->position->q && $shipPosition->r == $shipMove->position->r) {
 								$relativeBearing = $this->getTempBearing($previousPosition, $shipPosition, $ship, $previousFacing);
@@ -2946,7 +2970,7 @@ class RammingAttack extends Weapon{
 
 		foreach ($ship->movement as $shipMove) {
 			if ($shipMove->turn != $gamedata->turn) continue;
-			if ($shipMove->type == "move" || $shipMove->type == "slipleft" || $shipMove->type == "slipright") {
+			if (self::isHexTransit($shipMove, $previousPosition)) {
 				foreach ($occupiedHexes as $hex) {
 					if ($hex->q == $shipMove->position->q && $hex->r == $shipMove->position->r) {
 						//Bearing FROM terrain centre TO ship's prior hex, relative to terrain's facing.
@@ -4773,7 +4797,13 @@ class VorlonLightningCannon extends Weapon{
 class VorlonLightningGun extends Weapon{
 	public $name = "VorlonLightningGun";
 	public $displayName = "Lightning Gun";
-	
+	//the constructor rewrites displayName per instance ('Lightning Gun A'..'D' - the pairing letter),
+	//so a hit-chart entry naming the mount directly matched nothing. VorlonLightningCannon keeps its
+	//plain displayName, which is why the Dreadnought's "31:Lightning Cannon" works and the Strike
+	//Cruiser's "31:Lightning Gun" did not. Same fix as the Kirishiac Orbital: a stable chart alias.
+	//The 'Lightning Gun' TAG added in the constructor is unaffected - TAG: entries keep working.
+	public $hitChartName = "Lightning Gun";
+
 	public $animation = "laser";
 	public $animationColor = array(195, 235, 195);
 	
@@ -7720,8 +7750,9 @@ class Marines extends Weapon implements SpecialAbility{
 	public $eliteMarines = false;
 	public $isBoardingAction = true;//For front end to recalculate hit chance.	
 
-	public static $boardedThisTurn = array();//Static variable to keep track of Marine actions on current turn (to prevent too many on a ship).			
-		 
+	public static $boardedThisTurn = array();//Static variable to keep track of Marine actions on current turn (to prevent too many on a ship).
+	public static $clawBoardedThisTurn = array();//Grappling Claw deliveries, kept OUT of the pod cap - see recordClawBoarding().
+
 	function __construct($startArc, $endArc, $damagebonus, $elite){
 		parent::__construct(0, 1, 0, $startArc, $endArc);
 		$this->eliteMarines = $elite;
@@ -7842,37 +7873,367 @@ class Marines extends Weapon implements SpecialAbility{
 	}
 
 
-	private function checkAttachedAmount($target, $gamedata, $fireOrder){
-		$tooMany = false;//Initialise
-        $shooterId = $fireOrder->shooterid;
-		$noOfPods = Marines::getAttachedPodCount($target, $gamedata, $shooterId);
+	/* ---------------------------------------------------------------------------
+	 * BOARDING ATTACHMENT - shared section helpers.
+	 *
+	 * Both Marines (breaching pods) and GrapplingClaw gate attachment through
+	 * isAttachBlocked() below, and the Trek Transporter reuses the counting helpers.
+	 * They live on Marines because Marines::$boardedThisTurn / getAttachedPodCount /
+	 * recordBoarding were already the shared home, so no new autoload entry is needed.
+	 *
+	 * Limits are per STRUCTURE SECTION, derived from the hull itself rather than from a
+	 * shipSizeClass table. getStructureSystem() falls back to Primary (0) for any location
+	 * with no Structure of its own, so an MCV/LCV/OSAT collapses locations 1 and 2 onto 0,
+	 * a Drazi Stormfalcon simply has no section 2, and a six-section starbase gets six
+	 * sections for free - no table to maintain, and hulls no size class can express come
+	 * out right. Primary needs no special case either: getHitSection() already returns 0
+	 * once the facing structure was destroyed as of turn-1, so section 0 only becomes
+	 * reachable when the rules say it should.
+	 * --------------------------------------------------------------------------- */
 
-		// Check if a Grappling Claw is already attached to this section
-		$targetLocation = $fireOrder->chosenLocation;
-		foreach ($target->hasAttached as $attachedShooterId => $location){
-            if ($attachedShooterId == $shooterId) continue; //Skip ourselves if already attached
+	//Section key for an attachment: the location of the Structure that actually covers it.
+	//Null only if a hull has no Primary Structure at all, which should never happen.
+	public static function resolveAttachSection($target, $location){
+		$struct = $target->getStructureSystem((int)$location);
+		return ($struct === null) ? 0 : (int)$struct->location;
+	}
 
-			if ($location == $targetLocation) {
-				$attachedShip = $gamedata->getShipById($attachedShooterId);
-				if (!($attachedShip instanceof FighterFlight)) {
-					// It's a claw-equipped vessel attached here!
-					return true; // Too many (prevent attachment)
-				}
+	//Slots this unit consumes on its section: live pods for a flight (every breaching-pod
+	//flight in the game is maxFlightSize 2), or the whole section for a claw ship.
+	public static function getAttachFootprint($unit){
+		if (!($unit instanceof FighterFlight)) return 1;
+
+		$live = 0;
+		foreach ($unit->systems as $pod){
+			if (!$pod->isDestroyed()) $live++;
+		}
+		return $live;
+	}
+
+	//An LCV or OSAT supports a single attached craft, full stop - pod flight or claw ship.
+	public static function isSingleAttachHull($target){
+		return ($target->hangarRequired == 'LCVs' || $target instanceof OSAT);
+	}
+
+	/* Hull-wide ceiling on attached pods, applied ON TOP of the two-per-section rule. The
+	   per-section rule alone would let a many-sectioned hull hold far more than its class
+	   ever should: a Vree saucer carries SIX outer Structure blocks plus Primary, which is
+	   seven sections and would otherwise be 14 pods.
+
+	   Enormous units and bases are exempt from the class table and take 12. They are all
+	   shipSizeClass 3, so the old `shipSizeClass > 3 => 12` branch never fired - size class 4
+	   was never implemented - and they silently landed in the capital branch. Gating on the
+	   Enormous/base flags is what that branch was reaching for. */
+	public static function getHullPodCap($target){
+		if ($target->base || $target->Enormous) return 12;
+		if ($target->shipSizeClass >= 3) return 8;   //capital
+		if ($target->shipSizeClass == 2) return 4;   //HCV
+		return 2;                                    //medium ship and smaller
+	}
+
+	//Opposite-ends pairing for the capital claw rule. Only 1<->2 and 3<->4 exist on a
+	//non-base capital hull, and Primary (0) is never a valid partner. Bases and Enormous
+	//units skip this test entirely (isAttachBlocked branch C) precisely because their
+	//locations - 1/41/42/2/32/31 on a six-section starbase - never match these pairs.
+	public static function isOppositeSection($a, $b){
+		$a = (int)$a;
+		$b = (int)$b;
+		if ($a == 0 || $b == 0) return false;
+		if ($a == 1) return ($b == 2);
+		if ($a == 2) return ($b == 1);
+		if ($a == 3) return ($b == 4);
+		if ($a == 4) return ($b == 3);
+		return false;
+	}
+
+	/* How many pods the PRIMARY section (0) can hold.
+	 *
+	 * On a hull with exterior Structures, pods reach Primary ONLY through a breach:
+	 * getHitSection redirects a hit to 0 exactly when the structure facing the shooter was
+	 * destroyed as of turn-1. So Primary's capacity is two per BREACHED exterior section -
+	 * a capital that has lost both sides can hold four on Primary, two arriving through
+	 * each hole - rather than a flat two. Zero while the hull is intact, which is correct:
+	 * with nothing breached there is no route to Primary in the first place.
+	 *
+	 * A hull with NO exterior structures (MCV, LCV, OSAT) keeps the flat two. For those,
+	 * section 0 IS the hull - getStructureSystem falls back to Primary for every location -
+	 * and nothing has to be destroyed to reach it.
+	 */
+	public static function getPrimaryPodCap($target, $turn){
+		$exterior = 0;
+		$breached = 0;
+
+		foreach ($target->systems as $system){
+			if (!($system instanceof Structure)) continue;
+			if ((int)$system->location === 0) continue;   //Primary itself is not a way in
+
+			$exterior++;
+			//turn-1 mirrors getHitSection, which only routes to Primary once the facing
+			//structure was destroyed as of the PREVIOUS turn.
+			if ($system->isDestroyed($turn - 1)) $breached++;
+		}
+
+		if ($exterior === 0) return 2;   //Primary is the hull's only section
+
+		return 2 * $breached;
+	}
+
+	//Distinct Structure locations on the hull, Primary included - how many sections a
+	//boarding unit can attach to. Same walk the section caps use, so a derived total can
+	//never exceed what could physically attach.
+	public static function countAttachSections($target){
+		$sections = array();
+		foreach ($target->systems as $system){
+			if ($system instanceof Structure) $sections[(int)$system->location] = true;
+		}
+		if (empty($sections)) return 1; //should never happen - every hull has a Primary
+		return count($sections);
+	}
+
+	/* Occupancy of every section of $target, as
+	 *   'sections' => sectionKey => array('pods'=>int, 'claws'=>int, 'units'=>int)
+	 * plus the hull-wide totals 'podTotal', 'clawTotal', 'unitTotal' and 'clawSections' (the
+	 * section keys currently holding a claw, in attachment order).
+	 *
+	 * Counts units ALREADY attached plus attach attempts approved earlier in this same
+	 * resolution pass - see getPendingAttachments for why the second group is essential.
+	 *
+	 * $skipId excludes the unit being tested, so re-checking an already-attached unit
+	 * never counts itself. Destroyed attached units are skipped: a dead claw ship must not
+	 * hold a section forever, and a wiped-out flight must not keep an LCV's only slot.
+	 */
+	public static function getSectionOccupancy($target, $gamedata, $skipId = -1){
+		$occ = array(
+			'sections'     => array(),
+			'podTotal'     => 0,
+			'clawTotal'    => 0,
+			'unitTotal'    => 0,
+			'clawSections' => array(),
+		);
+
+		$counted = array(); //unit ids already in the tally, so a pending order never doubles one
+
+		foreach ($target->hasAttached as $attachedId => $location){
+			if ($attachedId == $skipId) continue;
+
+			$unit = $gamedata->getShipById($attachedId);
+			if (!$unit) continue;
+			if ($unit->isDestroyed()) continue;
+
+			$counted[$unit->id] = true;
+			Marines::addSectionOccupant($occ, $target, $unit, $location);
+		}
+
+		foreach (Marines::getPendingAttachments($target, $gamedata, $skipId, $counted) as $pending){
+			Marines::addSectionOccupant($occ, $target, $pending['unit'], $pending['location']);
+		}
+
+		return $occ;
+	}
+
+	//Folds one occupant into the tally built by getSectionOccupancy. $location is the raw
+	//attachment location; the section key is resolved here.
+	private static function addSectionOccupant(&$occ, $target, $unit, $location){
+		$section = Marines::resolveAttachSection($target, $location);
+		if (!isset($occ['sections'][$section])){
+			$occ['sections'][$section] = array('pods' => 0, 'claws' => 0, 'units' => 0);
+		}
+
+		$occ['unitTotal']++;
+		$occ['sections'][$section]['units']++;
+
+		if ($unit instanceof FighterFlight){
+			$pods = Marines::getAttachFootprint($unit);
+			$occ['sections'][$section]['pods'] += $pods;
+			$occ['podTotal'] += $pods;
+		}else{
+			$occ['sections'][$section]['claws']++;
+			$occ['clawTotal']++;
+			$occ['clawSections'][] = $section;
+		}
+	}
+
+	/* Attach attempts on $target that have been APPROVED in this resolution pass but are
+	 * not in hasAttached yet, as unitId => array('unit'=>ship, 'location'=>rawLocation).
+	 *
+	 * WHY THIS EXISTS. Firing::prepareFiring calculates the hit chance of EVERY fire order
+	 * before Firing::fireWeapons resolves any of them, and hasAttached is only written at
+	 * resolution time (onDamagedSystem). So an occupancy tally built from hasAttached alone
+	 * shows every boarding order in a turn the same pre-turn state and they ALL pass the
+	 * section limits - which is exactly how four pod flights ended up stacked two-deep on
+	 * one Primus section and one Demos section in game 4300, filling those hulls' totals
+	 * and locking their remaining sections out.
+	 *
+	 * An order counts as approved once calculateHitBase has processed it and left a
+	 * non-zero 'needed' (every refusal sets it to 0), which is precisely the set walked
+	 * ahead of this one by prepareFiring - so sections go first-come-first-served in fire
+	 * order. 'updated' is what makes that test safe: it is false on every order loaded from
+	 * the database and true only once calculateHitBase has run on it in THIS pass.
+	 *
+	 * The reservation is optimistic - a pod that later misses its attach roll still held
+	 * the slot for this turn. That is the better trade: the roll is not known until a whole
+	 * phase later, and refusing at resolution instead would spend the marine contingent
+	 * before telling the player there was no room.
+	 *
+	 * A unit contributes at most ONE entry no matter how many boarding orders it files - a
+	 * 2-pod flight files one per pod and a claw ship one per Grappling Claw mount, while
+	 * hasAttached is keyed on the unit and getAttachFootprint already covers the whole unit.
+	 */
+	public static function getPendingAttachments($target, $gamedata, $skipId, $counted = array()){
+		$pending = array();
+
+		foreach ($gamedata->ships as $ship){
+			if ($ship->id == $skipId) continue;
+			if ($ship->id == $target->id) continue;
+			if (isset($counted[$ship->id])) continue;   //already attached, counted from hasAttached
+			if ($ship->isDestroyed()) continue;        //its order will never resolve
+			//No hasSpecialAbility("Attaches") pre-filter here on purpose. That flag is built at
+			//onConstructed and drops out when the attach system is destroyed or offline, so it
+			//answers "can this unit still attach" rather than "does it hold an approved order" -
+			//the per-order tests below answer the question we actually need.
+
+			foreach ($ship->getAllFireOrders($gamedata->turn) as $fire){
+				if ($fire->targetid != $target->id) continue;
+				if (!$fire->updated) continue;             //not processed yet in this pass
+				if ($fire->needed <= 0) continue;          //processed and refused
+				if ($fire->chosenLocation === null) continue;
+
+				//Marines and GrapplingClaw are the only weapons whose successful order
+				//writes hasAttached. Tested by class rather than by the isBoardingAction
+				//flag, which is a front-end display hint - the Trek Transporter delivers
+				//marines under it without ever attaching.
+				$weapon = $ship->getSystemById($fire->weaponid);
+				if (!($weapon instanceof Marines) && !($weapon instanceof GrapplingClaw)) continue;
+
+				$pending[$ship->id] = array('unit' => $ship, 'location' => $fire->chosenLocation);
+				break;   //one reservation per unit
 			}
 		}
 
-		//Different amount of Breaching Pods missions possible depending on size of ships.
-		if(	($target->shipSizeClass > 3 && $noOfPods >= 12) ||
-			($target->shipSizeClass == 3 && $noOfPods >= 8) ||
-		   	($target->shipSizeClass == 2 && $noOfPods >= 4) || 
-		   	($target->shipSizeClass == 1 && $noOfPods >= 2) ||
-		   	(($target->hangarRequired == 'LCVs' || $target instanceof OSAT) && $noOfPods > 1)) {
-		 									
-			$tooMany = true; //There are too many
-		}	
+		return $pending;
+	}
 
-		return $tooMany;	
-		
+	//Empty occupancy record, so callers never have to isset() a section that nothing holds.
+	public static function getSectionSlot($occ, $section){
+		if (isset($occ['sections'][$section])) return $occ['sections'][$section];
+		return array('pods' => 0, 'claws' => 0, 'units' => 0);
+	}
+
+	/* The one gate both Marines and GrapplingClaw call. Returns true to REFUSE the
+	 * attachment, filling $reason with the text to show in pubnotes.
+	 *
+	 * $location is the raw chosenLocation - resolution to a section key happens here and
+	 * ONLY here. hasAttached keeps storing the raw location, because the client positions
+	 * the pod model from it and ShipInfo labels it ("Port-Forward" etc.), so there is no
+	 * note-format change and no migration for games in flight.
+	 */
+	public static function isAttachBlocked($target, $gamedata, $shooter, $location, &$reason){
+		$reason  = '';
+		$section = Marines::resolveAttachSection($target, $location);
+		$occ     = Marines::getSectionOccupancy($target, $gamedata, $shooter->id);
+		$here    = Marines::getSectionSlot($occ, $section);
+		$isClaw  = !($shooter instanceof FighterFlight);
+
+		//A. LCV / OSAT - one attached craft on the whole hull, pod flight or claw.
+		//A whole 2-pod flight still fits: the data model cannot record a partial
+		//attachment, so the rule is capped as one UNIT here and one MISSION in
+		//checkMissionAmount, which nets out to the one-pod-boards intent.
+		if (Marines::isSingleAttachHull($target)){
+			if ($occ['unitTotal'] >= 1){
+				$reason = "This unit can only support a single attached craft.";
+				return true;
+			}
+			return false;
+		}
+
+		//B. A claw ship holds its section exclusively - pods may never join it.
+		//Deliberately asymmetric: nothing stops a claw attaching to a section that
+		//already holds pods, which is today's behaviour.
+		if ($here['claws'] >= 1){
+			$reason = "A Grappling Claw already holds this section.";
+			return true;
+		}
+
+		if ($isClaw){
+			//C. Whole-hull claw caps. Bases and Enormous units have NO hull-wide cap -
+			//one claw per section (rule B) is their only limit. That also retires the
+			//opposite-ends test on hulls whose locations could never satisfy it.
+			if (!$target->base && !$target->Enormous){
+				if ($target->shipSizeClass <= 2){ //medium ship or HCV
+					if ($occ['clawTotal'] >= 1){
+						$reason = "Only one vessel may grapple a medium ship or HCV.";
+						return true;
+					}
+				}else{ //capital
+					if ($occ['clawTotal'] >= 2){
+						$reason = "A capital ship can be grappled by two vessels only.";
+						return true;
+					}
+					if ($occ['clawTotal'] == 1
+						&& !Marines::isOppositeSection($occ['clawSections'][0], $section)){
+						$reason = "Grappling vessels must attach to opposite ends.";
+						return true;
+					}
+				}
+			}
+			//D. One claw per section is already covered by rule B above.
+			return false;
+		}
+
+		$footprint = Marines::getAttachFootprint($shooter);
+
+		//E. Pods: two per section, counting live pods across every attached flight.
+		//Strict counting means a 1-pod flight blocks a full 2-pod flight from joining
+		//its section even though a slot looks free - partial attachment cannot be
+		//recorded, and never exceeding 2 pods on a section is the rules-correct outcome.
+		//Primary is the exception: its capacity is two per BREACHED exterior section, so a
+		//capital that has lost both sides takes four there. See getPrimaryPodCap.
+		$sectionCap = ($section === 0)
+			? Marines::getPrimaryPodCap($target, $gamedata->turn)
+			: 2;
+
+		if ($here['pods'] + $footprint > $sectionCap){
+			$reason = ($sectionCap == 0)
+				? "Breaching Pods can only reach the Primary section through a destroyed structure section."
+				: "No room for more Breaching Pods on this section.";
+			return true;
+		}
+
+		//F. Hull-wide ceiling by size class, on top of the per-section rule - a hull with
+		//many sections must still never hold more pods than its class allows.
+		if ($occ['podTotal'] + $footprint > Marines::getHullPodCap($target)){
+			$reason = "This ship cannot support any more Breaching Pods.";
+			return true;
+		}
+
+		return false;
+	}
+
+	//Marine missions this hull can absorb in one turn. Two per section, so a Stormfalcon
+	//cannot allow 8 missions when only 6 pods can physically attach - then clamped to the
+	//same hull-wide class cap, so it cannot exceed what can attach in the other direction
+	//either. LCV/OSAT take one.
+	public static function getMissionCap($target){
+		if (Marines::isSingleAttachHull($target)) return 1;
+
+		return min(2 * Marines::countAttachSections($target), Marines::getHullPodCap($target));
+	}
+
+
+	//Per-section limits now live in Marines::isAttachBlocked, which both this and
+	//GrapplingClaw::checkAttachmentLimits call. Writes the specific refusal into pubnotes
+	//so the player is told WHICH rule stopped the attachment rather than a generic string.
+	private function checkAttachedAmount($target, $gamedata, $fireOrder){
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		if (!$shooter) return false;
+
+		$reason = '';
+		if (!Marines::isAttachBlocked($target, $gamedata, $shooter, $fireOrder->chosenLocation, $reason)){
+			return false;
+		}
+
+		$fireOrder->pubnotes .= "<br>" . $reason;
+		return true;
 	}//endof checkAttachedAmount()
 
 	public static function getAttachedPodCount($target, $gamedata, $skipId = -1){
@@ -7904,22 +8265,13 @@ class Marines extends Weapon implements SpecialAbility{
 	}
 
 	//Checks during Delivery whether too many pods are trying to deliver marines to target.
-	private function checkMissionAmount($target, $gamedata, $fireOrder){	
-		$tooMany = false;//Initialise
+	//Derived from the hull's section count (2 per section) rather than a size-class table,
+	//so it can never allow more missions than pods can physically attach - a Stormfalcon
+	//has 3 exterior sections, so 8 was always wrong for it.
+	private function checkMissionAmount($target, $gamedata, $fireOrder){
 		$noOfMissions = Marines::getNewMissionsThisTurn($target);
-		
-		//Different amount of marine missions possible depending on size of ships.
-		if(	($target->shipSizeClass > 3 && $noOfMissions >= 12) ||
-			($target->shipSizeClass == 3 && $noOfMissions >= 8) ||
-		   	($target->shipSizeClass == 2 && $noOfMissions >= 4) || 
-		   	($target->shipSizeClass == 1 && $noOfMissions >= 2) ||
-		   	(($target->hangarRequired == 'LCVs' || $target instanceof OSAT) && $noOfMissions > 1)) {
-		 									
-			$tooMany = true; //There are too many
-		}	
 
-		return $tooMany;	
-		
+		return ($noOfMissions >= Marines::getMissionCap($target));
 	}//endof checkMissionAmount()
 
 
@@ -7933,7 +8285,9 @@ class Marines extends Weapon implements SpecialAbility{
         if (isset($target->hasAttached[$shooter->id])) {
             $hitLoc = $target->hasAttached[$shooter->id];
         } else {
-            $hitLoc = $target->getHitSection($shooter, $fireOrder->turn);
+			//getAttachSection, not getHitSection - a boarder takes the section its entry hex
+			//edge points at, deterministically. See BaseShip::getAttachSection.
+            $hitLoc = $target->getAttachSection($shooter, $fireOrder->turn);
         }
         $fireOrder->chosenLocation = $hitLoc;
 		
@@ -7951,18 +8305,20 @@ class Marines extends Weapon implements SpecialAbility{
 			return; 
 		}
 
-		//check if there are too many apods attached already on target ship.
-		if($this->checkAttachedAmount($target, $gamedata, $fireOrder)){//If it returns true, there are too many attaching pods to attach even one pod.  Cancel attempt early..							
-			$fireOrder->needed = 0;
-			$fireOrder->updated = true;	
-			$fireOrder->pubnotes .= "<br>Too many Breaching Pods/Grappling Claws attached on target, attachment attempt cancelled.";		
-			return;
-		}
-
+		//An already-attached flight stays attached - resolve the auto-hit BEFORE the section
+		//checks, or a claw that later grabbed the same section would refuse the pods that
+		//were there first and silently detach them.
         if (isset($target->hasAttached[$shooter->id])) {
 			$fireOrder->needed = 100;
 			$fireOrder->updated = true;
 			//$fireOrder->pubnotes .= "<br> Pod already attached, automatic hit."; //Remove to declutter Combat Log
+			return;
+		}
+
+		//check if this section can still take these pods.
+		if($this->checkAttachedAmount($target, $gamedata, $fireOrder)){//If it returns true, the section is full.  Cancel attempt early..
+			$fireOrder->needed = 0;
+			$fireOrder->updated = true;
 			return;
 		}
 
@@ -8023,8 +8379,27 @@ class Marines extends Weapon implements SpecialAbility{
 
 	public static function recordBoarding($targetId) {
 	    Marines::$boardedThisTurn[] = $targetId;
-	}	
-	
+	}
+
+	/* A Grappling Claw's marine delivery. Tracked SEPARATELY from $boardedThisTurn, so it does
+	 * not eat the target's breaching-pod mission allowance.
+	 *
+	 * Ruling (2026-08-13): grappling vessels do not count against the pod cap. They used to
+	 * share it, and since a Claweagle mounts TWO claws a single grappling frigate consumed half
+	 * of an HCV's entire per-turn allowance (getMissionCap = 4 on a Demos) - so pods that had
+	 * legitimately attached to the still-free aft section were refused delivery with "Too many
+	 * Breaching Pods trying to deliver marines". Seen in game 4300 turn 1, orders 497280/497281,
+	 * where one claw on the bow plus one pod flight used up all four missions.
+	 *
+	 * Nothing caps this tally: how many claw missions can land is already bounded by the
+	 * attachment limits (one grappling vessel on a medium ship or HCV, two on a capital, one per
+	 * section on a base) and by each claw's own ammunition.
+	 */
+	public static function recordClawBoarding($targetId) {
+	    Marines::$clawBoardedThisTurn[] = $targetId;
+	}
+
+
 
 	private function getDeliveryRollMod($shooter, $target, $gamedata, $fireOrder){
 		$rollMod = 0;
@@ -8291,16 +8666,23 @@ class GrapplingClaw extends Weapon implements SpecialAbility{
 	public function calculateHitBase($gamedata, $fireOrder)
 	{
 		//Needs it's own custom routine for hit chance.
-		$shooter = $gamedata->getShipById($fireOrder->shooterid);	
-		$target = $gamedata->getShipById($fireOrder->targetid);			
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		$target = $gamedata->getShipById($fireOrder->targetid);
+
+        if($target instanceof Mine || $target instanceof Terrain){
+			$fireOrder->pubnotes .= "<br> Grappling Claws cannot attach to this kind of target.";
+			$fireOrder->needed = 0;
+			$fireOrder->updated = true;
+            return;
+		}
 
 		if($target->factionAge > 2) {//Cannot attach to Ancients.  Might be impossible if Front End chance is also made 0%
 			$fireOrder->pubnotes .= "<br> Grappling Claws cannot attach to Ancient ships.";
 			$fireOrder->needed = 0;
-			$fireOrder->updated = true;	
-			return; 
+			$fireOrder->updated = true;
+			return;
 		}
-		
+
         if($target->iniative > $shooter->iniative){//Should not happen, Front End will prevent.  But just in case.
 			$fireOrder->pubnotes .= "<br> Grappling Claws cannot attach when you have lower Initiative than target.";
 			$fireOrder->needed = 0;
@@ -8318,13 +8700,23 @@ class GrapplingClaw extends Weapon implements SpecialAbility{
 			
 		$finalSpeedDifference = max(0, $speedDifference);
 
-        $hitLoc = $target->getHitSection($shooter, $fireOrder->turn);
-        $fireOrder->chosenLocation = $hitLoc;
+		//An attached claw keeps the section it already holds and stays attached automatically,
+		//exactly as Marines does. Without this it re-rolled its attach chance every turn and
+		//could "miss" while still being attached, and the section was re-rolled with it.
+		//Guarded BEFORE the limit check so a claw is never blocked by its own occupancy.
+        if (isset($target->hasAttached[$shooter->id])) {
+			$fireOrder->chosenLocation = $target->hasAttached[$shooter->id];
+			$fireOrder->needed = 100;
+			$fireOrder->updated = true;
+			return;
+		}
+
+		//getAttachSection, not getHitSection - see BaseShip::getAttachSection.
+        $fireOrder->chosenLocation = $target->getAttachSection($shooter, $fireOrder->turn);
 
         if($this->checkAttachmentLimits($target, $gamedata, $fireOrder)){
 			$fireOrder->needed = 0;
-			$fireOrder->updated = true;	
-			$fireOrder->pubnotes .= "<br>Too many Grappling Claws already attached on target, attachment attempt cancelled.";		
+			$fireOrder->updated = true;
 			return;
 		}
 
@@ -8366,54 +8758,23 @@ class GrapplingClaw extends Weapon implements SpecialAbility{
 			
 	}
 
-	private function checkAttachmentLimits($target, $gamedata, $fireOrder){	
-		$tooMany = false;//Initialise
-		$clawCount = 0;
-		$sectionClaws = array();
-		
-		$shooterId = $fireOrder->shooterid;
-		$fireLoc = $fireOrder->chosenLocation;
+	//Shares Marines::isAttachBlocked with the breaching pods - the size-class caps and the
+	//opposite-ends test moved into its branch C rather than being deleted. Two behaviour
+	//changes fall out of that: claw sections are resolved through the hull's Structures
+	//(so an MCV's locations 1 and 2 are correctly the same section), and bases/Enormous
+	//units now get one claw per section instead of an opposite-ends test that could never
+	//match their locations and therefore accepted any two sections.
+	private function checkAttachmentLimits($target, $gamedata, $fireOrder){
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		if (!$shooter) return false;
 
-		foreach ($target->hasAttached as $attachedShooterId => $location){
-			if ($attachedShooterId == $shooterId) continue; // Don't count existing claws from the same ship against the limit
-
-			$attachedShip = $gamedata->getShipById($attachedShooterId);
-			if(!($attachedShip instanceof FighterFlight)){
-				$clawCount++;
-				if(!isset($sectionClaws[$location])) $sectionClaws[$location] = 0;
-				$sectionClaws[$location]++;
-				
-				// Check if a Grappling Claw is already attached to this section (user snippet)
-				if ($location == $fireLoc) {
-					return true; // Already a claw on this section
-				}
-			}
-		}	
-		
-		if( ($target->shipSizeClass == 1 || $target->shipSizeClass == 2) && $clawCount >= 1 ){
-			$tooMany = true;
-		}
-		else if($target->shipSizeClass == 3) {
-			if ($clawCount >= 2) {
-				$tooMany = true;
-			} else if ($clawCount == 1) {
-				$attachedLoc = array_keys($sectionClaws)[0];
-				if ( ($attachedLoc == 1 && $fireLoc != 2) ||
-				     ($attachedLoc == 2 && $fireLoc != 1) ||
-				     ($attachedLoc == 3 && $fireLoc != 4) ||
-				     ($attachedLoc == 4 && $fireLoc != 3) ) {
-					$tooMany = true; // Not opposite
-				}
-				if ($attachedLoc == 0 || $fireLoc == 0) $tooMany = true;
-			}
-		}
-		else if($target->shipSizeClass > 3) {
-			if(isset($sectionClaws[$fireLoc]) && $sectionClaws[$fireLoc] >= 1) {
-				$tooMany = true;
-			}
+		$reason = '';
+		if (!Marines::isAttachBlocked($target, $gamedata, $shooter, $fireOrder->chosenLocation, $reason)){
+			return false;
 		}
 
-		return $tooMany;	
+		$fireOrder->pubnotes .= "<br>" . $reason;
+		return true;
 	}//endof checkAttachmentLimits()
 
 
@@ -8449,13 +8810,14 @@ class GrapplingClaw extends Weapon implements SpecialAbility{
 			return; 	
 		}
 		
-		//check if there are too many claws already on target ship.
-		if($this->checkAttachmentLimits($target, $gamedata, $fireOrder)){//If it returns true, there are too many attaching claws.							
+		//check the section can still take this claw. checkAttachmentLimits has already
+		//written the specific reason into pubnotes.
+		if($this->checkAttachmentLimits($target, $gamedata, $fireOrder)){
 			$this->ammunition++;//Marines weren't eliminated.  Give ammunition back to weapon.
-			Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);	
-			$fireOrder->pubnotes .= "<br>Too many Grappling Claws already attached at this location, boarding attempt cancelled.";		
+			Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+			$fireOrder->pubnotes .= "<br>Boarding attempt cancelled.";
 			return;
-		}	
+		}
 			
 		//Can proceed with boarding actions, roll to see if Marines are delivered.		
 		$rollMod = $this->getDeliveryRollMod($shooter, $target, $gamedata, $fireOrder);		
@@ -8496,13 +8858,13 @@ class GrapplingClaw extends Weapon implements SpecialAbility{
 									$crit->param = array('id' => $shooter->id, 'userid' => $shooter->userid, 'team' => $shooter->team);
 									$crit->updated = true;
 									$cnc->criticals[] =  $crit;
-									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.
+									Marines::recordClawBoarding($fireOrder->targetid);//Claw missions do NOT count against the pod cap.
 								}else{//Not Elite Marines
 									$crit = new CaptureShip(-1, $ship->id, $cnc->id, 'CaptureShip', $gamedata->turn+1);  //Takes effect next turn.
 									$crit->param = array('id' => $shooter->id, 'userid' => $shooter->userid, 'team' => $shooter->team);
 									$crit->updated = true;
 									$cnc->criticals[] =  $crit;
-									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.
+									Marines::recordClawBoarding($fireOrder->targetid);//Claw missions do NOT count against the pod cap.
 								}
 			            }
 
@@ -8517,13 +8879,13 @@ class GrapplingClaw extends Weapon implements SpecialAbility{
 							$crit->param = array('id' => $shooter->id, 'userid' => $shooter->userid, 'team' => $shooter->team);
 							$crit->updated = true;
 							$system->criticals[] =  $crit;
-							Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.
+							Marines::recordClawBoarding($fireOrder->targetid);//Claw missions do NOT count against the pod cap.
 						}else{//Not Elite Marines
 							$crit = new Sabotage(-1, $ship->id, $system->id, 'Sabotage', $gamedata->turn+1); //Takes effect next turn.
 							$crit->param = array('id' => $shooter->id, 'userid' => $shooter->userid, 'team' => $shooter->team);
 							$crit->updated = true;
 							$system->criticals[] =  $crit;
-							Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.
+							Marines::recordClawBoarding($fireOrder->targetid);//Claw missions do NOT count against the pod cap.
 						}
 					}else{ //Has targeted ship generally, not a specific system.  Apply crit to CnC.
 						$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit will attempt sabotage operations on enemy ship next turn.";
@@ -8533,13 +8895,13 @@ class GrapplingClaw extends Weapon implements SpecialAbility{
 										$crit->param = array('id' => $shooter->id, 'userid' => $shooter->userid, 'team' => $shooter->team);
 										$crit->updated = true;
 										$cnc->criticals[] =  $crit;
-										Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.
+										Marines::recordClawBoarding($fireOrder->targetid);//Claw missions do NOT count against the pod cap.
 									}else{//Not Elite Marines
 										$crit = new Sabotage(-1, $ship->id, $cnc->id, 'Sabotage', $gamedata->turn+1);  //Takes effect next turn.
 										$crit->param = array('id' => $shooter->id, 'userid' => $shooter->userid, 'team' => $shooter->team);
 										$crit->updated = true;
 										$cnc->criticals[] =  $crit;
-										Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.
+										Marines::recordClawBoarding($fireOrder->targetid);//Claw missions do NOT count against the pod cap.
 									}
 				            }
 					}
@@ -8555,13 +8917,13 @@ class GrapplingClaw extends Weapon implements SpecialAbility{
 									$crit->param = array('id' => $shooter->id, 'userid' => $shooter->userid, 'team' => $shooter->team);
 									$crit->updated = true;
 									$cnc->criticals[] =  $crit;
-									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note marines have boarded this turn
+									Marines::recordClawBoarding($fireOrder->targetid);//Claw missions do NOT count against the pod cap.
 								}else{//Not Elite Marines
 									$crit = new RescueMission(-1, $ship->id, $cnc->id, 'RescueMission', $gamedata->turn+1);  //Takes effect next turn.
 									$crit->param = array('id' => $shooter->id, 'userid' => $shooter->userid, 'team' => $shooter->team);
 									$crit->updated = true;
 									$cnc->criticals[] =  $crit;
-									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.
+									Marines::recordClawBoarding($fireOrder->targetid);//Claw missions do NOT count against the pod cap.
 								}
 			            }
 				
@@ -8572,11 +8934,11 @@ class GrapplingClaw extends Weapon implements SpecialAbility{
 			$this->ammunition++;//Marines weren't eliminated, they just weren't delivered.  Give ammunition back to weapon.
 			Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
 			$fireOrder->pubnotes .= "<br>Rolled: $deliveryRoll - A marine unit was beaten back by defenders but managed to return safely to their pod.";
-			Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.							
+			Marines::recordClawBoarding($fireOrder->targetid);//Claw missions do NOT count against the pod cap.							
 			return;	
 		}else{//Roll result is 9 or over
 			$fireOrder->pubnotes .= "<br>Rolled: $deliveryRoll - A marine unit was eliminated by defenders whilst trying to board the enemy ship.";
-			Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.								
+			Marines::recordClawBoarding($fireOrder->targetid);//Claw missions do NOT count against the pod cap.								
 			return;
 		}			
 	}//endof onDamagedSystem() 		

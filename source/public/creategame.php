@@ -409,13 +409,23 @@
         </section>
       </form>
 
-        <div id="globalchat" class="panel large create" style="height:200px; margin-top: 15px;">
-        <?php 
+        <?php
+        // The chat is now a PANEL WRAPPER around #globalchat rather than the same element,
+        // matching games.php: the head bar has to sit outside the scrolling body, or it
+        // would scroll away with the message log. .fv-chat-panel (chat.css) takes over the
+        // padding and the flow; .panel.large.create keeps the page's own border and fill.
+        ?>
+        <section class="panel large create fv-chat-panel" style="height:230px; margin-top: 15px;">
+        <div id="globalchat">
+        <?php
             $chatgameid = 0;
             $chatelement = "#globalchat";
+            $chattitle = "Global Chat";
+            $chatmeta = "All players";
             include("chat.php")
         ?>
         </div>
+        </section>
 
   </main>
 

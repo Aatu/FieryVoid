@@ -69,8 +69,8 @@ class Tyllz extends StarBaseSixSections
 
 		for ($i = 0; $i < sizeof($this->locations); $i++){
 
-			$min = 0 + ($i*60);
-			$max = 120 + ($i*60);
+			$min = (0 + ($i*60)) % 360;
+			$max = (120 + ($i*60)) % 360;
 
 
 			$struct = new Structure( 4, 100, true);

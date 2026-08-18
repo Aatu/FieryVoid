@@ -181,7 +181,24 @@ class Weapon extends ShipSystem
     public $ballisticIntercept = false; //can intercept, but only ballistics
     public $hextarget = false; //this weapon is targeted on hex, not unit
    	public $hextargetArray = array(); //For AntimatterShredder
-   	protected $noTargetHexIcon = false;		
+   	protected $noTargetHexIcon = false;
+
+	/* A shot at an ATTACHED breaching pod normally also lands an automatic hit on the host
+	   it is riding (Firing::fire). Set true on weapons that must never damage a ship, so
+	   they damage the pod only.
+
+	   Stays PROTECTED, like $survivesStructureDestruction in ShipSystem and for the same
+	   reason: a launcher's missileArray entries are json_encoded WHOLE rather than through
+	   stripForJson, so a public property here puts `skipsAttachedHostHit:false` on every
+	   ammo entry of every gamedata poll. Read it through doesSkipAttachedHostHit(). */
+	protected $skipsAttachedHostHit = false;
+
+	/* Should a shot at an attached pod skip the automatic hit on its host? $hextarget is an
+	   implicit opt-out on top of the explicit flag: the shooter aimed at a HEX and never at
+	   the pod, so spilling onto the host is conceptually wrong for every such weapon. */
+	public function doesSkipAttachedHostHit(){
+		return ($this->skipsAttachedHostHit || $this->hextarget);
+	}
 		
     public $noPrimaryHits = false; //PRIMARY removed from outer charts if true
 	

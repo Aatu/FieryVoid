@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import styled from 'styled-components';
 import theme from '../styled/theme';
 import CriticalEffectsSection, { critRowsFromMap } from '../system/CriticalEffectsSection';
+import { MenuHeader, MENU_CHROME } from '../system/menuControls';
 import nonPassiveWheel from '../helpers/nonPassiveWheel';
 
 /* Pre-battle damage editor for a bought FLIGHT. Design: PREBATTLE_DAMAGE_PLAN.md §5.2.
@@ -53,28 +54,24 @@ const Tooltip = styled.div`
       Container. A max-width is what clamps the max-content contribution.*/
     max-width: 300px;
     box-sizing: border-box;
-    opacity: 0.97;
-    background-color: rgba(16, 26, 38, 0.95);
-    border: 1px solid ${theme.colors.line};
+    /*Fill and frame shared with the ship and mine editors - see ../system/menuControls. No
+      element opacity beside the fill's alpha: the two compound, and it faded the text.*/
+    background-color: ${MENU_CHROME.bg};
+    border: 1px solid ${MENU_CHROME.line};
 `;
 
-const Header = styled.div`
-    padding: 3px;
-    background-color: #215a7a;
-    border-bottom: 1px solid ${theme.colors.line};
-    color: ${theme.colors.chromeText};
-    text-align: center;
-    font-size: 12px;
-    font-weight: bold;
-    position: sticky;
-    top: 0;
-`;
+/* Header is MenuHeader from ../system/menuControls now, $sticky because this body scrolls.
+
+   ⚠️ Every colour below is MENU_CHROME, not a literal (2026-08-16). This menu shares its
+   frame and fill with ApplyDamageMenu, so when that chassis was drained to near-neutral these
+   local copies of the old blue would have left the window a deep-hull frame wrapped around
+   blue innards. If the chassis moves again it moves here for free. */
 
 const Caption = styled.div`
     text-align: center;
     font-size: 10px;
     padding: 2px 4px;
-    color: ${theme.colors.textDim};
+    color: ${MENU_CHROME.dim};
     user-select: none;
 `;
 
@@ -84,10 +81,10 @@ const Row = styled.div`
     gap: 5px;
     padding: 3px 6px;
     font-size: 11px;
-    color: ${theme.colors.chromeText};
+    color: ${MENU_CHROME.text};
 
     &:hover {
-        background-color: rgba(73, 103, 145, 0.35);
+        background-color: rgba(51, 65, 79, 0.45);
     }
 `;
 
@@ -99,7 +96,7 @@ const RowLabel = styled.div`
 
 const MaxText = styled.span`
     flex: 0 0 auto;
-    color: ${theme.colors.textDim};
+    color: ${MENU_CHROME.dim};
     font-size: 10px;
     user-select: none;
 `;
@@ -108,9 +105,9 @@ const ActionButton = styled.div`
     width: 24px;
     height: 18px;
     flex: 0 0 24px;
-    background: #203348;
-    border: 1px solid #496791;
-    color: #deebff;
+    background: ${MENU_CHROME.btnBg};
+    border: 1px solid ${MENU_CHROME.line};
+    color: ${MENU_CHROME.btnText};
     cursor: pointer;
     display: flex;
     justify-content: center;
@@ -120,7 +117,7 @@ const ActionButton = styled.div`
     user-select: none;
 
     &:hover {
-        background: #496791;
+        background: ${MENU_CHROME.line};
         color: #ffffff;
         opacity: 1;
     }
@@ -128,7 +125,7 @@ const ActionButton = styled.div`
     ${props => props.disabled && `
         opacity: 0.3;
         cursor: not-allowed;
-        &:hover { background: #203348; color: #deebff; }
+        &:hover { background: ${MENU_CHROME.btnBg}; color: ${MENU_CHROME.btnText}; }
     `}
 `;
 
@@ -142,19 +139,19 @@ const ValueInput = styled.input`
     font-family: ${theme.fonts.mono};
     font-size: 12px;
     color: #ffffff;
-    background-color: #101a26;
-    border: 1px solid #496791;
+    background-color: ${MENU_CHROME.well};
+    border: 1px solid ${MENU_CHROME.line};
     outline: none;
 
-    &:focus { border-color: #6089c1; }
+    &:focus { border-color: ${MENU_CHROME.focus}; }
 `;
 
 const PropagateButton = styled.div`
     margin: 4px 6px 6px 6px;
     height: 20px;
-    background: #203348;
-    border: 1px solid #496791;
-    color: #deebff;
+    background: ${MENU_CHROME.btnBg};
+    border: 1px solid ${MENU_CHROME.line};
+    color: ${MENU_CHROME.btnText};
     cursor: pointer;
     display: flex;
     justify-content: center;
@@ -162,7 +159,7 @@ const PropagateButton = styled.div`
     font-size: 11px;
     user-select: none;
 
-    &:hover { background: #496791; color: #ffffff; }
+    &:hover { background: ${MENU_CHROME.line}; color: #ffffff; }
 `;
 
 const getPosition = boundingBox => {
@@ -247,9 +244,10 @@ class FighterDamageMenu extends Component {
         const { ship } = this.props;
         battleDamage.applyToShip(ship);
         if (window.shipWindowManagerReact) window.shipWindowManagerReact.update();
-        //Lobby only: keep the fleet-list row's broken-heart badge in step as we edit.
-        if (window.gamedata && typeof gamedata.refreshDamagedBadge === 'function') {
-            gamedata.refreshDamagedBadge(ship);
+        //Lobby only: keep the fleet-list row (badge, cost, enhancement lines) in step as
+        //we edit.
+        if (window.gamedata && typeof gamedata.refreshFleetRow === 'function') {
+            gamedata.refreshFleetRow(ship);
         }
         this.forceUpdate();
     }
@@ -301,7 +299,7 @@ class FighterDamageMenu extends Component {
 
         return (
             <Tooltip $position={getPosition(boundingBox)} onClick={e => e.stopPropagation()}>
-                <Header>Fighter Damage</Header>
+                <MenuHeader $sticky>Fighter Damage</MenuHeader>
 
                 {rows}
                 {size > 1 && <PropagateButton

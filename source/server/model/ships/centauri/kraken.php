@@ -64,8 +64,8 @@ class Kraken extends StarBaseSixSections{
 
 		for ($i = 0; $i < sizeof($this->locations); $i++){
 
-			$min = 0 + ($i*60);
-			$max = 120 + ($i*60);
+			$min = (0 + ($i*60)) % 360;
+			$max = (120 + ($i*60)) % 360;
 			
 /*some systems need pre-definition to have arcs set for TAGs!*/
 			/* replaced by shorter version...

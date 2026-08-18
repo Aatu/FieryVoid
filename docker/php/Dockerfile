@@ -8,6 +8,15 @@ RUN apt update && apt install -y coreutils findutils sed bash rsync inotify-tool
 RUN docker-php-ext-install mysqli && docker-php-ext-enable mysqli
 RUN docker-php-ext-install zip && docker-php-ext-enable zip
 
+# APCu. The live server (LiteSpeed/lsphp) has it, and a good deal of the app is built
+# on that: Manager's per-game gamedata cache, gamedata.php's and chatdata.php's fast
+# polls, and server_load_guard.php's request limiter all begin with
+# function_exists('apcu_fetch') and quietly do nothing when it is false. Without this
+# the container silently exercises only the slow path — every poll reaching the
+# database — so local testing cannot see the behaviour live actually has.
+# php.ini settings live in docker/php/php.ini (bind-mounted, no rebuild needed).
+RUN pecl install apcu && docker-php-ext-enable apcu
+
 # Configure bash history persistence
 ENV HISTFILE=/root/.bash_history_volume/.bash_history
 ENV HISTSIZE=10000

@@ -31,6 +31,56 @@ class ChatManager{
             self::$dbManager = new DBManager($database_host ?? "localhost", 3306, $database_name, $database_user, $database_password);
     }
     
+    /**
+     * Rewrites every character above U+FFFF as an HTML numeric reference, so that
+     * "🙂" is stored as "&#128578;".
+     *
+     * WHY THIS EXISTS
+     * ---------------
+     * DBManager opens its connection with mysqli_set_charset($c, 'utf8'), which is
+     * MySQL's THREE-byte utf8 — it cannot represent anything outside the BMP, and
+     * most emoji live outside it. Sent raw, an emoji either raises "Incorrect string
+     * value" or (on a non-strict server) truncates the message at the emoji, so what
+     * the player gets back is the first half of what they typed.
+     *
+     * The alternative is migrating the connection AND the chat.message column to
+     * utf8mb4. That is the better long-term answer, but it is a schema change on a
+     * live database and the connection is shared by every table in the game; this is
+     * scoped to chat and needs no migration. It also stays correct AFTER such a
+     * migration — the entities keep rendering, since the client already builds each
+     * message as HTML.
+     *
+     * Runs AFTER htmlspecialchars, so a player who literally types "&#128578;" has
+     * already had their ampersand escaped and sees their own text back, not a face.
+     *
+     * BMP characters are three bytes and pass through untouched — which covers the
+     * older emoji (❤ U+2764, ✌ U+270C) and, importantly, the two joiners that hold a
+     * compound emoji together: the variation selector U+FE0F and the ZWJ U+200D. The
+     * astral halves either side of them are encoded, so 👨‍👩‍👧 and 👍🏽 both survive
+     * intact rather than being flattened.
+     */
+    private static function encodeAstralCharacters($message)
+    {
+        // Every code point >= U+10000 is a four-byte sequence in UTF-8, so the bytes
+        // can be recombined directly rather than reaching for mb_ord().
+        $encoded = preg_replace_callback(
+            '/[\x{10000}-\x{10FFFF}]/u',
+            function ($match) {
+                $bytes = $match[0];
+                $codepoint = ((ord($bytes[0]) & 0x07) << 18)
+                           | ((ord($bytes[1]) & 0x3F) << 12)
+                           | ((ord($bytes[2]) & 0x3F) << 6)
+                           |  (ord($bytes[3]) & 0x3F);
+                return '&#' . $codepoint . ';';
+            },
+            $message
+        );
+
+        // preg_replace_callback returns null on malformed UTF-8 (the /u flag). Keep
+        // the original in that case: a mangled message beats a silently empty one.
+        return $encoded === null ? $message : $encoded;
+    }
+
     public static function submitChatMessage($userid, $message, $gameid = 0)
     {
         try
@@ -40,7 +90,8 @@ class ChatManager{
                 return "{}";
             
             $message = htmlspecialchars($message);
-            
+            $message = self::encodeAstralCharacters($message);
+
             self::initDBManager();
             $msgId = self::$dbManager->submitChatMessage($userid, $message, $gameid);
             

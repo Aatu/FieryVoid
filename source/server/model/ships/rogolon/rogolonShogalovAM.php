@@ -99,7 +99,7 @@ class RogolonShogalovAM extends SmallStarBaseFourSections
 			0=> array(
 				10 => "Structure",
 				11 => "Catapult",
-				13 => "Cargo",
+				13 => "Cargo Bay",
 				15 => "Scanner",
 				18 => "Hangar",
 				19 => "Reactor",
