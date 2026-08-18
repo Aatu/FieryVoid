@@ -16,6 +16,15 @@ $discord_webhook_url = '';                        // optional fallback: #turn-pi
 $game_base_url = 'https://fieryvoid.eu/game/';    // used to build game links in pings
 $discord_notify_idle_secs = 300;                  // don't ping players seen polling within this window
 
+// Maintenance-tool key (MaintenanceGate.php). Guards the web-runnable generators and the
+// image optimiser, which are plain URLs that anyone could otherwise trigger. EMPTY here on
+// purpose — like $discord_bot_token above, the real value is set only in the varconfig that
+// lives on each server and is never committed to the public repo. Empty means the tools
+// refuse to run over HTTP (CLI is always allowed, so fvbuild.ps1 and docker exec are
+// unaffected); the refusal page tells you what to add. Use a long random string and append
+// it as ?key=... when you open the tool.
+$maintenance_key = '';
+
 // APCu debug logging toggle. When true, the gamedata cache paths error_log()
 // their hits/misses/fast-poll exits/touches so you can watch APCu working
 // (see Manager::apcuLog()). Leave FALSE normally — at true it logs on EVERY poll

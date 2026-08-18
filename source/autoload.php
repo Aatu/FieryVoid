@@ -1810,6 +1810,7 @@ spl_autoload_register(
                 'maggravreactor' => '/server/model/systems/baseSystems.php',
                 'maggravreactortechnical' => '/server/model/systems/baseSystems.php',
                 'maggun' => '/server/model/weapons/plasma.php',
+                'maintenancegate' => '/server/lib/MaintenanceGate.php',
                 'maishan' => '/server/model/ships/yolu/maishan.php',
                 'maitau' => '/server/model/ships/yolu/maitau.php',
                 'makar' => '/server/model/ships/markab/makar.php',

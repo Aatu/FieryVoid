@@ -329,11 +329,38 @@ The harness works for everyone, but **the baseline is per-developer and is never
 - Because baselines aren't shared, a FAIL is always meaningful *to the dev who sees it*: it means the current code changed engine behaviour relative to the games in their own DB. It never reflects someone else's data.
 - The `EXCLUDED_GAMES` list is shared (it's in the committed code). It's keyed by game id, so an entry that names a game another dev doesn't have simply does nothing for them — harmless. Only add ids there for games that are genuinely unmodellable, with a note saying why.
 
+# Maintenance tools need a key (08.2026)
+
+The three web-runnable maintenance tools -- `generateStaticShipFileWeb.php`, `generateStaticShipFile.php`
+and `source/public/mass_optimizer.php` -- are plain URLs with no login behind them. Until 08.2026 that
+meant anyone, or any crawler, could start a job that instantiates every ship in the game or re-encodes
+every image. They are now behind `MaintenanceGate` (`source/server/lib/MaintenanceGate.php`).
+
+**One-time setup per server.** Add a line to that server's own `source/server/varconfig.php`:
+
+    $maintenance_key = 'some-long-random-string';
+
+Pick your own value. It is deliberately left EMPTY in the committed varconfig, exactly like
+$discord_bot_token, so the secret never reaches the public repo. Then open the tool with the key
+appended, e.g.
+
+    https://fieryvoid.eu/game/generateStaticShipFileWeb.php?key=some-long-random-string
+
+The key only has to be supplied once per browser session -- it is remembered in the session, so the
+optimiser's own AJAX calls do not need it. Without a valid key the tools answer **404** (not 403, so
+they stay distinguishable from a host-level block). **CLI is always exempt**, so `fvbuild.ps1` and
+`docker exec ... php generateStaticShipFile.php` are unaffected and need no key.
+
 # Image Optimiser:
 
-Images are optimised on Web Server by navigating to https://fieryvoid.eu/game/source/public/mass_optimizer.php or https://fieryvoid.eu/testInstance/source/public/mass_optimizer.php
+Images are optimised on Web Server by navigating to https://fieryvoid.eu/game/source/public/mass_optimizer.php or https://fieryvoid.eu/testInstance/source/public/mass_optimizer.php (plus `?key=`, see above)
 
 As a result, users can work with full png images, and then this script can be run on game and testInstance server whenever required.
+
+Since 08.2026 it runs **incrementally**: only images whose `.webp` is missing or older than the source
+are re-encoded, so a routine run after uploading a few new ship pictures converts a handful of files
+rather than all ~2500. Use the "force a full rebuild" link (or `?force=1`) only when you actually need
+everything re-encoded, e.g. after changing the quality setting -- it is much heavier on the server.
 
 On local server, images are simply not optimised, although in theory you could run the mass_optimser script to do so.
 
