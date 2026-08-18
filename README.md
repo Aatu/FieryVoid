@@ -345,6 +345,7 @@ The harness works for everyone, but **the baseline is per-developer and is never
 (from 18.8.2026) A companion to the replay harness that checks the *blueprints* rather than the play. It builds every ship class under `source/server/model/ships/` and asserts the invariants that nothing else in the toolchain checks. It needs no database and takes about 30 seconds for ~2,560 ships.
 
     docker exec -w /usr/src/current fieryvoid-php-1 php checkShipData.php
+    or record baseline with:     docker exec -w /usr/src/current fieryvoid-php-1 php checkShipData.php --record
 
 The reason it exists is that bad ship data fails **silently**. The clearest case is the hit chart: `getHitSystemByTable()` resolves a chart entry by calling `getSystemsByNameLoc($name, $location, ...)`, and a name that matches no system in that section returns an empty array, at which point the damage is quietly rerouted to that section's Structure. No error, no log — just a system that can never be hit directly, for the whole life of the ship. That is how `AlacanAtica` spent an unknown length of time with `"Light S-Missile Rackk"` on its starboard chart: every 5–6 against that section landed on Structure instead of the missile rack.
 
