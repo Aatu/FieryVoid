@@ -334,10 +334,11 @@ window.BallisticIconContainer = function () {
 		const centreHex = this.coordinateConverter.fromGameToHex(position);
 		const hexes = [{ q: centreHex.q, r: centreHex.r }].concat(mathlib.getNeighbouringHexes(centreHex, size));
 
-//		syncSceneObject.call(this, 'splash:' + id, `${centreHex.q},${centreHex.r}|${size}|${type}`, () => {
-		// GTS_Triad
+		syncSceneObject.call(this, 'splash:' + id, `${centreHex.q},${centreHex.r}|${size}|${type}`, () => {
+			const overlay = buildHexRegionOverlay.call(this, centreHex, hexes, type, SPLASH_REGION_DIM);			
+		/*// GTS_Triad
 		syncSceneObject.call(this, 'splash:' + id, `${centreHex.q},${centreHex.r}|${size}|${type}|${gamedata.gamephase}`, () => {			const overlay = buildHexRegionOverlay.call(this, centreHex, hexes, type, SPLASH_REGION_DIM);
-
+		*/ //Restoring old version above for now, which you'd accidentally deleted part of btw - DK
 			return overlay && { object: overlay, release: window.HexRegion.dispose };
 		});
 	}
