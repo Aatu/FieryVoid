@@ -1999,7 +1999,168 @@ class AmmoMissileRackG extends AmmoMissileRackS{
 } //endof class AmmoMissileRackG
 
 
+// GTS_Triad
 
+/*Class-Triad Missile Rack - weapon that looks at central magazine to determine available firing modes (and number of actual rounds available)
+	all functionality prepared in standard class-S rack
+	holds 5 missiles
+	doubles launch Range
+	can expend 6 power to generate a new basic missile to fire immediately
+	Ancient-class weapon
+*/
+/*
+class AmmoMissileRackTriad extends AmmoMissileRackS {
+    public $name = "AmmoMissileRackTriad";
+    public $displayName = "Triad Missile Rack";
+    public $iconPath = "missile1.png";
+
+    public $priority = 6;
+    public $loadingtime = 1;
+
+    protected $basicFC = array(3, 5, 5);
+    protected $rackExplosionDamage = 0;
+    protected $rackExplosionThreshold = 30;
+
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base = false) {
+        if ($maxhealth == 0) $maxhealth = 6;
+        if ($powerReq == 0) $powerReq = 0;
+        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base);
+    }
+
+    public function recompileFiringModes() {
+        parent::recompileFiringModes();
+        // Double launch range, then set distance range to doubled launch range x 3
+        foreach ($this->rangeArray as $mode => $range) {
+            $this->rangeArray[$mode] = $range * 2;
+            $this->distanceRangeArray[$mode] = $range * 2 * 3;
+        }
+    }
+}
+*/
+
+
+
+
+class AmmoMissileRackTriad extends AmmoMissileRackS {
+    public $name = "AmmoMissileRackTriad";
+    public $displayName = "Triad Missile Rack";
+    public $iconPath = "missile1.png";
+
+    public $priority = 6;
+    public $loadingtime = 1;
+    public $powerReq = 6;
+
+    protected $basicFC = array(3, 5, 5);
+    protected $rackExplosionDamage = 0;
+    protected $rackExplosionThreshold = 30;
+
+    public $boostable = false;
+    public $boostEfficiency = 6;
+    public $maxBoostLevel = 1;
+    public $powerReqArray = array();
+    public $boostModeIndex = null;
+
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base = false) {
+        if ($maxhealth == 0) $maxhealth = 6;
+        parent::__construct($armour, $maxhealth, 6, $startArc, $endArc, $magazine, $base);
+    }
+
+    public function recompileFiringModes() {
+        parent::recompileFiringModes();
+
+        foreach ($this->rangeArray as $mode => $range) {
+            $this->rangeArray[$mode] = $range * 2;
+            $this->distanceRangeArray[$mode] = $range * 2 * 3;
+            $this->powerReqArray[$mode] = 0;
+        }
+
+        $nextMode = count($this->firingModes) + 1;
+        $this->boostModeIndex = $nextMode;
+
+        $this->firingModes[$nextMode] = "Power Boost (Basic Missile)";
+        $this->damageTypeArray[$nextMode] = "Standard";
+        $this->weaponClassArray[$nextMode] = "Ballistic";
+        $this->fireControlArray[$nextMode] = array(6, 8, 8);
+        $this->rangeArray[$nextMode] = 40;
+        $this->distanceRangeArray[$nextMode] = 120;
+        $this->priorityArray[$nextMode] = 6;
+        $this->priorityAFArray[$nextMode] = 6;
+        $this->noOverkillArray[$nextMode] = false;
+        $this->minDamageArray[$nextMode] = 20;
+        $this->maxDamageArray[$nextMode] = 20;
+        $this->hidetargetArray[$nextMode] = false;
+        $this->maxpulsesArray[$nextMode] = 0;
+        $this->rofArray[$nextMode] = 0;
+        $this->useDieArray[$nextMode] = 0;
+        $this->fixedBonusPulsesArray[$nextMode] = 0;
+        $this->calledShotModArray[$nextMode] = -8;
+        $this->specialRangeCalculationArray[$nextMode] = false;
+        $this->rangePenaltyArray[$nextMode] = 0;
+        $this->noLockPenaltyArray[$nextMode] = false;
+        $this->specialHitChanceCalculationArray[$nextMode] = false;
+        $this->interceptArray[$nextMode] = 0;
+        $this->ballisticInterceptArray[$nextMode] = false;
+        $this->hextargetArray[$nextMode] = false;
+        $this->animationArray[$nextMode] = "trail";
+        $this->animationExplosionScaleArray[$nextMode] = 0;
+        $this->uninterceptableArray[$nextMode] = false;
+        $this->doNotInterceptArray[$nextMode] = false;
+        $this->mineRangeArray[$nextMode] = 0;
+        $this->powerReqArray[$nextMode] = 6;
+    }
+
+    public function changeFiringMode($newMode) {
+        parent::changeFiringMode($newMode);
+        if ($this->boostModeIndex !== null && $newMode == $this->boostModeIndex) {
+            $this->powerReq = 6;
+            $this->boostable = true;
+        } else {
+            $this->powerReq = 0;
+            $this->boostable = false;
+        }
+    }
+
+    public function getDamage($fireOrder) {
+        if ($this->boostModeIndex !== null && $fireOrder->firingMode == $this->boostModeIndex) {
+            return 20;
+        }
+        return parent::getDamage($fireOrder);
+    }
+
+    public function setSystemDataWindow($turn) {
+        parent::setSystemDataWindow($turn);
+        $this->data["Special"] .= "<br>Power Boost mode: spend 6 power to create and fire a basic missile without consuming rack ammunition.";
+        $this->data["Special"] .= "<br>All other modes fire from the magazine at no power cost.";
+    }
+
+    public function calculateHitBase($gamedata, $fireOrder) {
+        if ($this->boostModeIndex !== null && $fireOrder->firingMode == $this->boostModeIndex) {
+            Weapon::calculateHitBase($gamedata, $fireOrder);
+            return;
+        }
+        parent::calculateHitBase($gamedata, $fireOrder);
+    }
+
+    public function fire($gamedata, $fireOrder) {
+        if ($this->boostModeIndex !== null && $fireOrder->firingMode == $this->boostModeIndex) {
+            Weapon::fire($gamedata, $fireOrder);
+            return;
+        }
+        parent::fire($gamedata, $fireOrder);
+    }
+
+    public function stripForJson() {
+        $stripped = parent::stripForJson();
+        if (!empty($this->powerReqArray)) {
+            $stripped->powerReqArray = $this->powerReqArray;
+        }
+        $stripped->boostModeIndex = $this->boostModeIndex;
+        $stripped->boostable = $this->boostable;
+        $stripped->boostEfficiency = $this->boostEfficiency;
+        $stripped->maxBoostLevel = $this->maxBoostLevel;
+        return $stripped;
+    }
+}
 
 
 

@@ -1847,5 +1847,274 @@ class UnreliableBattleLaser extends BattleLaser{
 	
 } //endof class UnreliableBattleLaser
 
+// GTS_Triad
+
+class PhotonicPrismBeam extends Weapon {
+	public $name = "PhotonicPrismBeam";
+	public $displayName = "Photonic Prism Beam";
+	public $iconPath = "PhotonicPrismBeam.png";
+
+	public $factionAge = 4; //Primordial weapon, which sometimes has consequences!
+
+	public $animation = "laser";
+	public $animationColor = array(160, 10, 30); //placeholder colour
+//	public $animationArray = array(1=>'laser', 2=>'laser', 3=>'laser', 4=>'laser', 5=>'laser');
+    public $animationColorArray = array(1=>array(160, 10, 30), 2=>array(210, 80, 10), 3=>array(160, 220, 0), 4=>array(0, 200, 180), 5=>array(0, 100, 255));
+
+	public $loadingtime = 2; //always 2 turns, all modes
+
+	public $firingMode = 1;
+	public $firingModes = array(
+		1 => "Split",    //1 PPB, 3 independent shots
+		2 => "1 PPB",   //1 PPB, 1 combined shot
+		3 => "2 PPB",    //2 PPBs combined, 1 shot
+		4 => "3 PPB",    //3 PPBs combined, 1 shot
+		5 => "4 PPB",    //4 PPBs combined, 1 shot
+	);
+
+	//Mode 1 uses split shots (Twin Array pattern); Modes 2-5 are single shots.
+	//canSplitShots routes Mode 1 through doMultipleFireOrders in JS.
+	public $canSplitShots = false;
+	public $canSplitShotsArray = array(1 => true, 2 => false, 3 => false, 4 => false, 5 => false);
+
+	//guns drives how many split shots are available in Mode 1.
+	//Modes 2-5 always fire 1 shot so guns=1 for those.
+	public $guns = 3;
+	public $gunsArray = array(1 => 3, 2 => 1, 3 => 1, 4 => 1, 5 => 1);
+
+	//No intercept capability in any mode.
+	public $intercept = 0;
+
+	public $damageType = "Raking";
+	public $weaponClass = "Laser";
+
+	public $raking = 20;
+	public $rakingArray = array(1 => 20, 2 => 20, 3 => 15, 4 => 15, 5 => 10);
+
+	public $rangePenalty = 2;
+	public $rangePenaltyArray = array(1 => 2, 2 => 1, 3 => 0.5, 4 => 0.33, 5 => 0.2);
+
+	public $fireControl = array(8, 3, 0);
+	public $fireControlArray = array(
+		1 => array(8, 3, 0),
+		2 => array(6, 4, 1),
+		3 => array(3, 4, 4),
+		4 => array(4, 5, 6),
+		5 => array(3, 6, 8),
+	);
+
+	//Number of PPBs required to fire in each mode.
+	public $ppbRequiredArray = array(1 => 1, 2 => 1, 3 => 2, 4 => 3, 5 => 4);
+
+	//NeutronBlaster-style combine flags for Modes 3-5.
+	public $isCombined = false;
+	public $alreadyConsidered = false;
+
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
+		if ($maxhealth == 0) $maxhealth = 24;
+		if ($powerReq == 0) $powerReq = 8;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}
+
+	public function setSystemDataWindow($turn) {
+		parent::setSystemDataWindow($turn);
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		} else {
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= "Primordial weapon. Requires 2 turns to charge. No intercept capability.";
+		$this->data["Special"] .= "<br>Mode 1 (Split): 3 independent shots, each 4d10+15 Raking(20), -2/hex. Targets may differ.";
+		$this->data["Special"] .= "<br>Mode 2 (1 PPB): 1 combined shot, 8d10+15 Raking(20), -1/hex.";
+		$this->data["Special"] .= "<br>Mode 3 (2 PPB): 2 PPBs combined, 14d10+20 Raking(15), -1 / 2 hexes. All PPBs must have target in arc.";
+		$this->data["Special"] .= "<br>Mode 4 (3 PPB): 3 PPBs combined, 20d10+30 Raking(15), -1 / 3 hexes. All PPBs must have target in arc.";
+		$this->data["Special"] .= "<br>Mode 5 (4 PPB): 4 PPBs combined, 24d10+35 Raking(10), -1 / 5 hexes. All PPBs must have target in arc.";
+	}
+
+	public function getDamage($fireOrder) {
+		switch ($this->firingMode) {
+			case 1: return Dice::d(10, 4) + 15;
+			case 2: return Dice::d(10, 8) + 15;
+			case 3: return Dice::d(10, 14) + 20;
+			case 4: return Dice::d(10, 20) + 30;
+			case 5: return Dice::d(10, 24) + 35;
+			default: return Dice::d(10, 4) + 15;
+		}
+	}
+
+	public function setMinDamage() {
+		switch ($this->firingMode) {
+			case 1: $this->minDamage = 16; break;
+			case 2: $this->minDamage = 16; break;
+			case 3: $this->minDamage = 21; break;
+			case 4: $this->minDamage = 31; break;
+			case 5: $this->minDamage = 36; break;
+			default: $this->minDamage = 16;
+		}
+	}
+
+	public function setMaxDamage() {
+		switch ($this->firingMode) {
+			case 1: $this->maxDamage = 55; break;
+			case 2: $this->maxDamage = 95; break;
+			case 3: $this->maxDamage = 160; break;
+			case 4: $this->maxDamage = 230; break;
+			case 5: $this->maxDamage = 275; break;
+			default: $this->maxDamage = 55;
+		}
+	}
+
+	public function calculateHitBase($gamedata, $fireOrder) {
+		$this->changeFiringMode($fireOrder->firingMode);
+		$this->alreadyConsidered = true;
+
+		//This PPB was marked as a subordinate combiner by another PPB's primary order.
+		//Nullify and return - the primary carries the real shot.
+		if ($this->isCombined) {
+			$fireOrder->chosenLocation = 0;
+			$fireOrder->needed = 0;
+			$fireOrder->shots = 0;
+			$fireOrder->notes = "technical fire order - PPB combined into primary shot";
+			$fireOrder->updated = true;
+			$this->doNotIntercept = true;
+			return;
+		}
+
+		$ppbNeeded = $this->ppbRequiredArray[$fireOrder->firingMode];
+
+		if ($ppbNeeded <= 1) {
+			//Modes 1 and 2: single PPB, no combining needed.
+			parent::calculateHitBase($gamedata, $fireOrder);
+			return;
+		}
+
+		//Modes 3-5: find sibling PPBs on the same ship targeting the same target in the same mode.
+		//All PPBs must have the target in arc - if not, the shot is a mis-declared misfire.
+		$firingShip = $gamedata->getShipById($fireOrder->shooterid);
+		$subordinateOrders = array();
+		$allOrders = $firingShip->getAllFireOrders($gamedata->turn);
+
+		foreach ($allOrders as $subOrder) {
+			if ($subOrder->type != 'normal') continue;
+			if ($subOrder->targetid != $fireOrder->targetid) continue;
+			if ($subOrder->firingMode != $fireOrder->firingMode) continue;
+			$subWeapon = $firingShip->getSystemById($subOrder->weaponid);
+			if (!($subWeapon instanceof PhotonicPrismBeam)) continue;
+			if ($subWeapon->alreadyConsidered) continue;
+			$subordinateOrders[] = $subOrder;
+			if (count($subordinateOrders) >= ($ppbNeeded - 1)) break;
+		}
+
+		if (count($subordinateOrders) < ($ppbNeeded - 1)) {
+			//Not enough PPBs found for this mode - mis-declared.
+			$fireOrder->chosenLocation = 0;
+			$fireOrder->needed = 0;
+			$fireOrder->shots = 0;
+			$fireOrder->notes = "technical fire order - not enough PPBs combined for this mode";
+			$fireOrder->updated = true;
+			$this->doNotIntercept = true;
+			return;
+		}
+
+		//Enough PPBs found. Mark subordinates as combined and fire as primary.
+		foreach ($subordinateOrders as $subOrder) {
+			$subWeapon = $firingShip->getSystemById($subOrder->weaponid);
+			$subWeapon->isCombined = true;
+			$subWeapon->alreadyConsidered = true;
+			$subWeapon->doNotIntercept = true;
+		}
+
+		parent::calculateHitBase($gamedata, $fireOrder);
+	}
+}//endof class PhotonicPrismBeam
+
+
+
+    class LtPrismBeam extends Laser{
+        public $name = "LtPrismBeam";
+        public $displayName = "Light Prism Beam";
+	    public $iconPath = "PhotonicPrismBeam.png";
+	    
+        public $animation = "laser";
+		public $animationColor = array(255, 255, 255);
+
+        public $intercept = 1; //not very good ant intercepting things... I am going with default as nothing is marged on control card (except default allows merging multiple shots for interception purposes, too)
+        public $loadingtime = 1;
+        public $shots = 1;
+	    public $guns = 3;
+        public $defaultShots = 1;
+        public $rangePenalty = 2; // -2/hex... for single fire
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+	    public $priority = 4;
+	    public $priorityArray = array(1=>4, 2=>6); //alternate mode is stronger
+        
+        public $damageType = "Standard"; 
+        public $weaponClass = "Laser"; 
+		
+		public $firingModes = array(1=>'Single', 2=>'Combined');
+		public $damageTypeArray = array(1=>'Standard', 2=>'Standard'); 
+        public $weaponClassArray = array(1=>'Laser', 2=>'Laser');
+		public $gunsArray = array(1=>3, 2=>1);
+        public $rangePenaltyArray = array(1=>2, 2=>1); //-2/hex and -1 / hex
+		
+		public $factionAge = 4; //Primordial
+        
+        function __construct($startArc, $endArc,$dual = false){
+			$this->isLinked = false; //shots are separate, not linked! 
+//			if($dual){ //dual weapon is extending base weapon by adding third firing mode - combining ALL FOUR shots into one massive blast!
+//				$this->firingModes[3] = 'Quad';
+//				$this->damageTypeArray[3] = 'Standard'; 
+//				$this->gunsArray = array(1=>4, 2=>2, 3=>1); //lower modes get double allowance
+//				$this->rangePenaltyArray[3] = 1.5; // -3/2 hexes
+//				$this->iconPath = "VorlonLtDischargeGun2.png"; //alternate graphics showing off more powerful mount
+//			}
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+	
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Special"] = "This weapon is capable of combining 3 basic shots into smaller number of more powerful ones:";
+            $this->data["Special"] .= "<br> Single shot: 1d10+4 damage, -10/hex";
+            $this->data["Special"] .= "<br> Combined shot: 3d10+4 damage, -1/hex";
+        }
+	    
+        public function getDamage($fireOrder){
+			switch($this->firingMode){
+				case 1:
+					return Dice::d(10, 1)+4; 
+					break;
+				case 2:
+					return Dice::d(10, 3)+4; 
+					break;
+			}
+		}
+        public function setMinDamage(){ 
+			switch($this->firingMode){
+				case 1:
+					$this->minDamage = 5; 
+					break;
+				case 2:
+					$this->minDamage = 7; 
+					break;
+			}
+			$this->minDamageArray[$this->firingMode] = $this->minDamage;
+		}
+        public function setMaxDamage(){
+			switch($this->firingMode){
+				case 1:
+					$this->maxDamage = 14; 
+					break;
+				case 2:
+					$this->maxDamage = 34; 
+					break;	
+			}
+			$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+		}
+		
+    } //endof class LtPrismBeam
+
+
+
+
 
 ?>

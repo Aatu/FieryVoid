@@ -1753,4 +1753,463 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 } //end of class PakmaraPlasmaWeb
 
 	
+	
+// GTS_Triad
+class HyperplasmaCutter extends Weapon{
+	public $name = "HyperplasmaCutter";
+	public $displayName = "Hyperplasma Cutter";
+	public $iconPath = "HyperplasmaCutter.png";
+
+	public $factionAge = 3;
+
+	public $animation = "laser";
+	public $animationColor = array(200, 60, 220);
+
+	public $loadingtime = 1;
+	public $normalload = 2; //makes loadingTimeActual=2 so weaponManager allows manual intercept assignment
+	public $raking = 15;
+	public $rangeDamagePenalty = 0.33;
+	public $rangePenalty = 0.33;
+	public $fireControl = array(6, 6, 6);
+
+	public $firingMode = 1;
+	public $firingModes = array(
+		1 => "Normal",
+		2 => "Sustained",
+	);
+
+	//canSplitShots routes ALL modes through doMultipleFireOrders in the JS.
+	//Normal mode uses the Lightning Cannon combine pattern (server-side isCombined).
+	//Sustained mode uses the Heavy Laser overload pattern.
+	public $canSplitShots = true;
+	public $canSplitShotsArray = array(1=>true, 2=>true);
+
+	public $damageType = "Raking";
+	public $weaponClass = "Plasma";
+
+	//Custom critical chart: roll is d20 + damaged boxes (standard engine roll).
+	//24+ loses 1d10, 30+ loses 2d10. No standard weapon criticals apply.
+	protected $possibleCriticals = array(24 => "DiceLost", 30 => array("DiceLost", "DiceLost"));
+
+	//Track original max dice so we can calculate losses from accumulated DiceLost crits.
+	protected $originalMaxDice = 10;
+	public $maxDice = 10; //current max dice pool, reduced by DiceLost crits
+
+	//Apply DiceLost crits: count accumulated crits and reduce maxDice accordingly.
+	//Mirrors Twin Array's effectCriticals pattern for GunLost.
+	public function effectCriticals(){
+		parent::effectCriticals();
+		$diceLost = $this->hasCritical("DiceLost", false);
+		$this->maxDice = max(0, $this->originalMaxDice - $diceLost);
+	}
+
+	//If all dice are lost the weapon is effectively useless but not destroyed.
+	//Each DiceLost crit is individually repairable (engine handles this automatically
+	//since each crit is stored as a separate entry).
+	public function criticalPhaseEffects($ship, $gamedata){
+		parent::criticalPhaseEffects($ship, $gamedata);
+		$diceLost = $this->hasCritical("DiceLost", false);
+		$this->maxDice = max(0, $this->originalMaxDice - $diceLost);
+	}
+	//$overloadable=true enables the pipeline. $extraoverloadshots=2 means 3 turns total
+	//(1 initial + 2 continuation). No power doubling needed - HyperplasmaCutter is exempt.
+	//$loadingtime=1 so Normal mode fires every turn without any arming delay.
+	public $intercept = 1; //1 intercept point per d10 allocated = 5% reduction per die
+	public $overloadturns = 0;
+	public $overloadshots = 0;
+	public $extraoverloadshots = 0; //set to 2 only in beforeFiringOrderResolution when sustained is actually fired
+
+	public $damageDice = array();
+	private $sustainedTarget = array();
+	private $sustainedSystemsHit = array();
+	private $uniqueIntercepts = array();
+
+	//Each cutter represents one intercept group applied to exactly ONE incoming shot.
+	//Uses a simple flag rather than checking intercept orders, because intercept orders
+	//are only created AFTER getInterceptionMod returns - so they are never present
+	//when the next call comes in, allowing the same cutter to incorrectly intercept
+	//multiple shots.
+	public function getInterceptionMod($gamedata, $intercepted){
+		$selfInterceptCount = 0;
+		$existingInterceptOrders = 0;
+		foreach ($this->fireOrders as $order){
+			if ($order->type == "selfIntercept" && $order->shots > 0){
+				$selfInterceptCount++;
+			}
+			if ($order->type == "intercept"){
+				$existingInterceptOrders++;
+			}
+		}
+
+		if ($selfInterceptCount == 0) return 0;
+
+		//If this cutter already has an intercept order, it has already resolved one shot.
+		//intercept orders are created by addToInterceptionTotal AFTER getInterceptionMod
+		//returns, so they are present on the NEXT call - use them as the "already fired" signal.
+		if ($existingInterceptOrders > 0) return 0;
+
+		return $selfInterceptCount * $this->intercept * 5;
+	}
+
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+	{
+		if ( $maxhealth == 0 ) $maxhealth = 16;
+		if ( $powerReq == 0 ) $powerReq = 9;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}
+
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		} else {
+			$this->data["Special"] .= '<br>';
+		}
+		$ship = $this->getUnit();
+		$count = $ship ? $this->countShipHyperplasmaCutters($ship) : 1;
+		$this->data["Special"] .= "Base pool: " . $this->maxDice . "d10 per cutter, freely allocated across any number of targets with no accuracy penalty. May hold dice back as defensive intercept.";
+		$this->data["Special"] .= "<br>This ship has {$count} cutter(s), giving a maximum pool of " . (10*$count) . "d10.";
+		$this->data["Special"] .= "<br>Sustained mode (Mode 2) requires ALL cutters to commit ALL dice to one target. Sustains for up to 3 turns (auto-hit turns 2-3). Cooldown of 1 turn applies after a 2 or 3 turn sustain.";
+		$this->data["Special"] .= "<br>If any cutter fires in Normal mode, Sustained mode cannot be initiated that turn.";
+		if (!empty($this->sustainedTarget)){
+			$targetId = key($this->sustainedTarget);
+			$this->data["Current Target"] = "Sustaining vs ship #" . $targetId;
+		} else {
+			unset($this->data["Current Target"]);
+		}
+	}
+
+	public function countShipHyperplasmaCutters($ship){
+		$count = 0;
+		foreach ($ship->systems as $sys){
+			if ($sys instanceof HyperplasmaCutter && !$sys->isDestroyed()) $count++;
+		}
+		return $count;
+	}
+
+	//Only return true when actually in an active sustain sequence (overloadshots > 0).
+	//Without this override, $overloadable=true would cause the engine to show an S2
+	//arming cycle during the initial phase even when no sustain is in progress.
+	public function isOverloadingOnTurn($turn = null){
+		return ($this->overloadshots > 0);
+	}
+
+	//Override calculateLoading so that when the turn advances after a sustained shot,
+	//the engine saves overloadshots=2 rather than 0. Without this, calculateLoadingFromLastTurn
+	//reads $this->overloadshots which was loaded from the database BEFORE our
+	//beforeFiringOrderResolution write - so it always sees 0 and never continues the sequence.
+	public function calculateLoading(TacGamedata $gamedata){
+		//Bootstrap the sustain sequence on the first turn advance after a sustained shot.
+		//We check: fired last turn AND overloadshots==0 AND has a normal fire order with
+		//the HPC-Sustained note. The note check is critical - without it, an intercept-only
+		//turn also satisfies firedOnTurn==true and would incorrectly bootstrap the sequence.
+		if ($gamedata->phase == -1
+			&& $this->overloadshots == 0){
+			$hasSustainedOrder = false;
+			foreach ($this->fireOrders as $order){
+				if ($order->type == 'normal'
+					&& $order->turn == $gamedata->turn - 1
+					&& strpos($order->notes ?? '', 'HPC-Sustained') !== false){
+					$hasSustainedOrder = true;
+					break;
+				}
+			}
+			if ($hasSustainedOrder){
+				return new WeaponLoading(
+					$this->getTurnsloaded(),
+					2, //extrashots=2: bootstrap the 2-continuation-turn sequence
+					0,
+					$this->overloadturns,
+					$this->getLoadingTime(),
+					$this->firingMode
+				);
+			}
+		}
+		return parent::calculateLoading($gamedata);
+	}
+
+	//Capture dice count from each fire order before the engine resets shots to 1.
+	//For Sustained mode (Mode 2), arm the overload sequence exactly once.
+	public function beforeFiringOrderResolution($gamedata){
+		//Detect a sustained fire order via the HPC-Sustained note and arm the overload
+		//sequence. We also set $this->firingMode = 2 here because firingMode IS one of
+		//the six fields WeaponLoading persists to the database (as field 6). This gives
+		//us a reliable cross-turn signal that a sustain is in progress - next turn,
+		//isOverloadingOnTurn() checks $overloadshots > 0 which the engine maintains via
+		//the extrashots field (field 2 of WeaponLoading).
+		foreach ($this->fireOrders as $order){
+			if ($order->type == 'normal' && strpos($order->notes, 'HPC-Sustained') !== false && $this->overloadshots == 0){
+				$this->extraoverloadshots = 2;
+				$this->overloadshots = 2;
+				$this->firingMode = 2;
+				//Persist the overload state immediately. calculateLoading skips phase 4,
+				//so without this the overloadshots value is lost when the turn advances.
+				$ship = $this->getUnit();
+				if ($ship){
+					$loading = new WeaponLoading(
+						$this->getTurnsloaded(),
+						$this->overloadshots,  //extrashots=2: 2 continuation turns
+						0,
+						$this->overloadturns,
+						$this->getLoadingTime(),
+						$this->firingMode
+					);
+					SystemData::addDataForSystem($this->id, 0, $ship->id, $loading->toJSON());
+				}
+				break;
+			}
+		}
+
+		//PASS 1: Capture dice counts from fire orders before the engine resets shots to 1.
+		//This must happen for ALL cutters before combining can occur.
+		$this->guns = 0;
+		foreach ($this->fireOrders as $order){
+			//Skip 0-shot auto-assigned selfIntercept orders from setSelfIntercept -
+			//they exist to satisfy the engine but carry no dice and should not count as guns.
+			if ($order->type == 'selfIntercept' && $order->shots == 0) continue;
+			$this->guns++;
+			if ($order->type == "normal"){
+				$this->damageDice[$order->id] = $order->shots;
+				$order->shots = 1;
+			}
+			//selfIntercept orders each represent one die = one intercept shot allowed.
+			//guns is incremented above for each order so the engine allows all intercepts.
+		}
+
+		//PASS 2: Combining. Only run on the HIGHEST-ID cutter, which is called last by the
+		//engine's beforeFiringOrderResolution loop. By the time the highest-ID cutter runs,
+		//ALL other cutters have already populated their $damageDice in Pass 1 above.
+		//This means we can safely read sibling damageDice values and combine them.
+		$firingShip = $gamedata->getShipById($this->unit->id);
+		if (!$firingShip) return;
+
+		//Check if this is the highest-ID cutter on the ship.
+		$isHighestId = true;
+		foreach ($firingShip->systems as $sys){
+			if ($sys instanceof HyperplasmaCutter && !$sys->isDestroyed() && (int)$sys->id > (int)$this->id){
+				$isHighestId = false;
+				break;
+			}
+		}
+		if (!$isHighestId) return; //let the highest-ID cutter do the combining
+
+		//We are the highest-ID cutter. Iterate all cutters and combine orders sharing
+		//the same targetid+calledid into the lowest-ID cutter's damageDice entry.
+		$allCutters = array();
+		foreach ($firingShip->systems as $sys){
+			if ($sys instanceof HyperplasmaCutter && !$sys->isDestroyed()) $allCutters[] = $sys;
+		}
+		//Sort by ID ascending so lowest-ID is first (primary)
+		usort($allCutters, function($a, $b){ return (int)$a->id - (int)$b->id; });
+
+		//Build a map of targetid+calledid -> primary order (lowest-ID cutter's order)
+		$primaryOrders = array(); // key => ['weapon' => $weapon, 'order' => $order]
+		foreach ($allCutters as $cutter){
+			foreach ($cutter->fireOrders as $order){
+				if ($order->type != 'normal') continue;
+				//For fighter flights, each shot targets independently - don't combine.
+				//For ships, combine all shots against the same target into one pooled shot.
+				$orderTarget = $gamedata->getShipById($order->targetid);
+				if ($orderTarget instanceof FighterFlight) continue;
+				$key = $order->targetid . '_' . $order->calledid;
+				if (!isset($primaryOrders[$key])){
+					//First (lowest-ID) cutter with this target+calledid becomes primary
+					$primaryOrders[$key] = array('weapon' => $cutter, 'order' => $order);
+				} else {
+					//Higher-ID cutter: add its dice to primary and stamp as subordinate
+					$primary = $primaryOrders[$key];
+					$myDice = isset($cutter->damageDice[$order->id]) ? $cutter->damageDice[$order->id] : 0;
+					$primary['weapon']->damageDice[$primary['order']->id] += $myDice;
+					$order->notes .= 'combined-subordinate';
+					$cutter->guns--;
+				}
+			}
+		}
+	}
+
+	public function getDamage($fireOrder){
+		$dice = isset($this->damageDice[$fireOrder->id]) ? $this->damageDice[$fireOrder->id] : 1;
+		return Dice::d(10, $dice);
+	}
+
+	public function setMinDamage(){ $this->minDamage = 1; }
+
+	public function setMaxDamage(){
+		$ship = $this->getUnit();
+		$count = $ship ? $this->countShipHyperplasmaCutters($ship) : 1;
+		$this->maxDamage = 10 * (10 * $count);
+	}
+
+	public function calculateHitBase($gamedata, $fireOrder){
+		$this->changeFiringMode($fireOrder->firingMode);
+
+		//This order was stamped as subordinate in beforeFiringOrderResolution because a
+		//lower-ID cutter has an order against the same target+calledid. Its dice were
+		//already added to that cutter's damageDice total. Nullify and return.
+		if (strpos($fireOrder->notes, 'combined-subordinate') !== false){
+			$fireOrder->chosenLocation = 0;
+			$fireOrder->needed = 0;
+			$fireOrder->shots = 0;
+			$fireOrder->notes = "technical fire order - dice combined into primary cutter shot";
+			$fireOrder->updated = true;
+			$this->doNotIntercept = true;
+			return;
+		}
+
+		//SUSTAINED MODE: auto-hit on continuation turns (Improved Neutron Laser pattern).
+		//isOverloadingOnTurn() + loadingtime <= overloadturns confirms we're in an active
+		//sustain sequence, not just in the overload pipeline for another reason.
+		if ($this->isOverloadingOnTurn($gamedata->turn) &&
+			$this->loadingtime <= $this->overloadturns &&
+			isset($this->sustainedTarget[$fireOrder->targetid]) &&
+			$this->sustainedTarget[$fireOrder->targetid] == 1){
+			$fireOrder->needed = 100;
+			$fireOrder->updated = true;
+			$this->uninterceptable = true;
+			$this->doNotIntercept = true;
+			$fireOrder->pubnotes .= " Sustained shot automatically hits.";
+			return;
+		}
+
+		parent::calculateHitBase($gamedata, $fireOrder);
+
+		//Stamp the mode label into pubnotes since firingMode=1 in the fire order
+		//causes the combat log to show "Normal" instead of "Sustained".
+		if ($this->isOverloadingOnTurn($gamedata->turn)){
+			$fireOrder->pubnotes .= " [Sustained]";
+		}
+	}
+
+	//Improved Neutron Laser pattern: save target and hit result for auto-hit next turn.
+	//Also forces sibling cutters offline when the sustain sequence ends, so all three
+	//cutters cool down together via the engine's standard forced-offline mechanic.
+	public function generateIndividualNotes($gameData, $dbManager){
+		switch($gameData->phase){
+			case 4:
+				$ship = $this->getUnit();
+				if ($this->isDestroyed() || $ship->isDestroyed()) break;
+
+				$firingOrders = $this->getFireOrders($gameData->turn);
+
+				//If this cutter is in an active sustain but did NOT fire this turn,
+				//the player chose to end the sustain early. Force all cutters offline
+				//for the cooldown turn.
+				if ($this->isOverloadingOnTurn($gameData->turn) && !$firingOrders){
+					foreach ($ship->systems as $sys){
+						if ($sys instanceof HyperplasmaCutter && !$sys->isDestroyed()){
+							$crit = new ForcedOfflineOneTurn(-1, $ship->id, $sys->id, "ForcedOfflineOneTurn", $gameData->turn);
+							$crit->updated = true;
+							$crit->newCrit = true;
+							$sys->criticals[] = $crit;
+						}
+					}
+					break;
+				}
+
+				if (!$firingOrders) break;
+
+				if ($this->isOverloadingOnTurn($gameData->turn) && ($this->overloadshots - 1) > 0){
+					foreach ($firingOrders as $firingOrder){
+						$didShotHit = $firingOrder->shotshit;
+						$targetid = $firingOrder->targetid;
+
+						$this->individualNotes[] = new IndividualNote(
+							-1, TacGamedata::$currentGameID, $gameData->turn, $gameData->phase,
+							$ship->id, $this->id, 'targetinfo', 'ID of Target fired at',
+							$targetid . ';' . $didShotHit
+						);
+
+						if ($didShotHit == 0) continue;
+
+						$target = $gameData->getShipById($targetid);
+						if (!$target) continue;
+						foreach ($target->systems as $system){
+							$dmgThisTurn = 0;
+							foreach ($system->damage as $damage){
+								if ($damage->turn == $gameData->turn
+									&& $damage->shooterid == $ship->id
+									&& $damage->weaponid == $this->id){
+									$dmgThisTurn += $damage->damage;
+								}
+							}
+							if ($dmgThisTurn > 0){
+								$notes = min($dmgThisTurn, $system->armour);
+								while ($notes > 0){
+									$this->individualNotes[] = new IndividualNote(
+										-1, TacGamedata::$currentGameID, $gameData->turn, $gameData->phase,
+										$ship->id, $this->id, 'systeminfo', 'ID of System fired at', $system->id
+									);
+									$notes--;
+								}
+							}
+						}
+					}
+				}
+
+				//When the sustain sequence ends (last overloadshot), force siblings offline.
+				if ($this->isOverloadingOnTurn($gameData->turn) && $this->overloadshots <= 1){
+					foreach ($ship->systems as $sys){
+						if ($sys instanceof HyperplasmaCutter && !$sys->isDestroyed() && $sys->id != $this->id){
+							$crit = new ForcedOfflineOneTurn(-1, $ship->id, $sys->id, "ForcedOfflineOneTurn", $gameData->turn);
+							$crit->updated = true;
+							$crit->newCrit = true;
+							$sys->criticals[] = $crit;
+						}
+					}
+				}
+				break;
+		}
+	}
+
+	//Improved Neutron Laser pattern: restore target and armor data.
+	//Looks back 2 turns for systeminfo notes since sustain can last 3 turns.
+	public function onIndividualNotesLoaded($gamedata){
+		foreach ($this->individualNotes as $currNote){
+			if ($currNote->turn == $gamedata->turn - 1){
+				if ($currNote->notekey == 'targetinfo'){
+					if (strpos($currNote->notevalue, ';') === false) continue;
+					$parts = explode(';', $currNote->notevalue);
+					if (count($parts) === 2){
+						$this->sustainedTarget[$parts[0]] = $parts[1];
+					}
+				}
+				if ($currNote->notekey == 'systeminfo'){
+					$this->sustainedSystemsHit[] = $currNote->notevalue;
+				}
+			}
+			//Look back 2 turns for armor bypass - sustain can last 3 turns total
+			if ($currNote->turn == $gamedata->turn - 2){
+				if ($currNote->notekey == 'systeminfo'){
+					$this->sustainedSystemsHit[] = $currNote->notevalue;
+				}
+			}
+		}
+		$this->individualNotes = array();
+	}
+
+	public function getsustainedSystemsHit(){
+		if (!empty($this->sustainedSystemsHit)) return $this->sustainedSystemsHit;
+		return null;
+	}
+
+	public function shieldInteractionDamage($target, $shooter, $pos, $turn, $shield, $mod){
+		$toReturn = max(0, $mod);
+		if (!empty($this->sustainedTarget) && array_key_exists($target->id, $this->sustainedTarget)){
+			$toReturn = 0;
+		}
+		return $toReturn;
+	}
+
+	public function stripForJson(){
+		$strippedSystem = parent::stripForJson();
+		if (!empty($this->sustainedTarget)){
+			$strippedSystem->sustainedTarget = $this->sustainedTarget;
+		}
+		$strippedSystem->maxDice = $this->maxDice;
+		return $strippedSystem;
+	}
+
+}//endof class HyperplasmaCutter
+	
+	
 ?>

@@ -1779,4 +1779,268 @@ class GraviticAugmenter extends Weapon  implements SpecialAbility{
 }//endof GraviticAugmenter
 
 
+// GTS_Triad
+class FlareGenerator extends Weapon implements DefensiveSystem {
+    public $name = "FlareGenerator";
+    public $displayName = "Flare Generator";
+    public $iconPath = "FlareGenerator.png";
+
+    public $factionAge = 3;
+
+    public $animation = "laser";
+    public $animationArray = array(1 => "laser", 2 => "ball");
+    public $animationColor = array(255, 255, 255);
+    public $animationExplosionScale = 2;
+    public $animationExplosionScaleArray = array(1 => 0.4, 2 => 2);
+    public $animationExplosionType = "AoE";
+    public $explosionColor = array(255, 255, 255);
+    public $noProjectile = false;
+    public $noProjectileArray = array(1 => false, 2 => true);
+
+    public $loadingtime = 2;
+
+    //360 degree arc - set at construction
+    public $startArc = 0;
+    public $endArc = 0;
+
+    public $firingMode = 1;
+    public $firingModes = array(
+        1 => "Offensive",
+        2 => "Flare",
+    );
+
+    //Mode 1: standard offensive EM weapon
+    public $damageType = "Raking";
+    public $damageTypeArray = array(1 => "Raking", 2 => "Flash");
+    public $weaponClass = "Electromagnetic";
+    public $raking = 20;
+    public $rangePenalty = 0.25;
+    public $fireControl = array(4, 6, 7);
+    public $intercept = 6;
+
+    //Mode 1: non-ballistic EM weapon, fires in Firing phase (phase 3)
+    //Mode 2: ballistic flare weapon, fires in Initial Orders (phase 1)
+    //this.ballistic is set dynamically in JS initializationUpdate per phase:
+    //  phase 1 defaults to Mode 2 (ballistic=true)
+    //  phase 3 defaults to Mode 1 (ballistic=false)
+    public $ballistic = false;
+    public $preFires = false;
+
+    public $autoFireOnly = false;
+    public $autoFireOnlyArray = array(1 => false, 2 => true);
+
+    public $hextarget = false;
+    public $hextargetArray = array(1 => false, 2 => true);
+    public $hidetarget = false;
+
+    //Passive EM shield strength (always-on when powered, not in Mode 2 flare turn)
+    private $passiveShieldStrength = 4;
+
+    //Tracks whether Mode 2 fired this turn - set from individualNotes
+    private $mode2FiredThisTurn = false;
+
+    //Defensive system flag
+    public $defensiveSystem = true;
+
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
+        if ($maxhealth == 0) $maxhealth = 12;
+        if ($powerReq == 0) $powerReq = 6;
+        //360 degree arc
+        $this->startArc = 0;
+        $this->endArc = 360;
+        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+    }
+
+    public function calculateHitBase($gamedata, $fireOrder) {
+        //Ensure $ballistic is set correctly on the PHP object before the engine
+        //checks it. The engine reads $weapon->ballistic directly during firing
+        //resolution - without this, Mode 2 fires as a non-ballistic weapon.
+        $this->changeFiringMode($fireOrder->firingMode);
+        $this->ballistic = ($fireOrder->firingMode == 2);
+        parent::calculateHitBase($gamedata, $fireOrder);
+    }
+
+    public function setSystemDataWindow($turn) {
+        parent::setSystemDataWindow($turn);
+        if (!isset($this->data["Special"])) {
+            $this->data["Special"] = '';
+        } else {
+            $this->data["Special"] .= '<br>';
+        }
+        $this->data["Special"] .= "Passive: While powered, generates a 360° EM shield at strength 4.";
+        $this->data["Special"] .= "<br>Mode 1 (Offensive): 6d10+50 Raking(20) EM, -0.25/hex, FC 4/6/7. Intercept 6.";
+        $this->data["Special"] .= "<br>Mode 2 (Flare): Ballistic. Targets own ship. Flash damage: range 0 = 60, range 1 = 20, range 2 = 10. Triad:Order faction immune. Overrides passive shield with range brackets: range 0 = no shield, range 1 = 4, range 2 = 6, range 3+ = 7.";
+        $this->data["Special"] .= "<br>Both modes share the 2-turn loading cycle.";
+    }
+
+    public function getDamage($fireOrder) {
+        //Mode 1 only - Mode 2 damage is handled in fire()
+        return Dice::d(10, 6) + 50;
+    }
+
+    public function setMinDamage() { $this->minDamage = 56; }
+    public function setMaxDamage() { $this->maxDamage = 110; }
+
+    //Mode 2: override fire() to apply AoE flash damage to nearby units.
+    //Targets the generating ship's own hex. No scatter/dissipation.
+    //Triad:Order faction ships (including the generating ship) are immune.
+    public function fire($gamedata, $fireOrder) {
+        if ($fireOrder->firingMode != 2) {
+            parent::fire($gamedata, $fireOrder);
+            return;
+        }
+
+        //Mode 2 (Flare): AoE flash damage centred on the generating ship.
+        //The fire order targets the generating ship itself (targetid = shooterid).
+        $this->changeFiringMode(2);
+        $shooter = $gamedata->getShipById($fireOrder->shooterid);
+        $movement = $shooter->getLastMovement();
+        $sourceHex = $movement->position;
+
+        //Always hits - no scatter or dissipation for Mode 2
+        $fireOrder->rolled = 1;
+        $fireOrder->needed = 100;
+        $fireOrder->shotshit = 1;
+
+        //Damage brackets: range 0 = 60, range 1 = 20, range 2 = 10
+        $damageByRange = array(0 => 60, 1 => 20, 2 => 10);
+
+        $ships0 = $gamedata->getShipsInDistance($sourceHex, 0);
+        $ships1 = $gamedata->getShipsInDistance($sourceHex, 1);
+        $ships2 = $gamedata->getShipsInDistance($sourceHex, 2);
+
+        foreach ($ships2 as $targetShip) {
+            //Triad:Order ships are immune - flagged via $triadOrder property on the ship class
+            if (!empty($targetShip->triadOrder)) continue;
+            if ($targetShip->isDestroyed()) continue;
+            if ($targetShip->mine) continue;
+
+            if (isset($ships0[$targetShip->id])) {
+                $damage = $damageByRange[0];
+            } else if (isset($ships1[$targetShip->id])) {
+                $damage = $damageByRange[1];
+            } else {
+                $damage = $damageByRange[2];
+            }
+
+            $this->aoeFlashDamage($targetShip, $shooter, $fireOrder, $sourceHex, $damage, $gamedata);
+        }
+
+        $fireOrder->rolled = max(1, $fireOrder->rolled);
+    }
+
+    //Apply flash damage to a single target ship or fighter flight.
+    //Damage is applied directly without EW/defensive modifiers - Mode 2 auto-hits
+    //the generating ship's hex regardless of EW state.
+    private function aoeFlashDamage($target, $shooter, $fireOrder, $sourceHex, $damage, $gamedata) {
+        if ($target instanceof FighterFlight) {
+            foreach ($target->systems as $fighter) {
+                if ($fighter == null || $fighter->isDestroyed()) continue;
+                $this->doDamage($target, $shooter, $fighter, $damage, $fireOrder, $sourceHex, $gamedata, false);
+            }
+        } else {
+            $tmpLocation = $target->getHitSectionPos(Mathlib::hexCoToPixel($sourceHex), $fireOrder->turn);
+            $system = $target->getHitSystem($shooter, $fireOrder, $this, $gamedata, $tmpLocation);
+            $this->doDamage($target, $shooter, $system, $damage, $fireOrder, null, $gamedata, false, $tmpLocation);
+        }
+    }
+
+    //Save Mode 2 firing state so getDefensiveHitChangeMod knows to apply range brackets
+    //during firing resolution (which happens after Initial Orders phase).
+    public function generateIndividualNotes($gameData, $dbManager) {
+        switch ($gameData->phase) {
+            case 1: //Initial Orders phase - save if Mode 2 was fired
+                $ship = $this->getUnit();
+                if ($this->isDestroyed() || $ship->isDestroyed()) break;
+                foreach ($this->fireOrders as $order) {
+                    if ($order->type == 'ballistic' && $order->firingMode == 2 && $order->turn == $gameData->turn) {
+                        $this->individualNotes[] = new IndividualNote(
+                            -1, TacGamedata::$currentGameID, $gameData->turn, $gameData->phase,
+                            $ship->id, $this->id, 'mode2fired', 'Flare mode fired this turn', '1'
+                        );
+                        break;
+                    }
+                }
+                break;
+        }
+    }
+
+    public function onIndividualNotesLoaded($gamedata) {
+        if (!$this->mode2FiredThisTurn) {
+            foreach ($this->individualNotes as $note) {
+                if ($note->turn == $gamedata->turn && $note->notekey == 'mode2fired') {
+                    $this->mode2FiredThisTurn = true;
+                    break;
+                }
+            }
+        }
+        $this->individualNotes = array();
+    }
+
+    //--- DefensiveSystem interface ---
+
+    public function getDefensiveType() {
+        return "Shield";
+    }
+
+    //Returns the EM shield hit change modifier based on current state.
+    //Passive: strength 4 always (when powered and not destroyed).
+    //Mode 2 turn: range-bracketed values based on shooter distance.
+    public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon) {
+        if ($this->isDestroyed($turn - 1) || $this->isOfflineOnTurn($turn)) return 0;
+
+        $mode2Active = $this->mode2FiredThisTurn;
+        if (!$mode2Active) {
+            foreach ($this->fireOrders as $order) {
+                if ($order->firingMode == 2 && $order->turn == $turn) {
+                    $mode2Active = true;
+                    break;
+                }
+            }
+        }
+
+        $orderCount = count($this->fireOrders);
+        $orderInfo = '';
+        foreach ($this->fireOrders as $o) {
+            $orderInfo .= "[mode={$o->firingMode} turn={$o->turn} type={$o->type}]";
+        }
+
+        if ($mode2Active) {
+            $distance = Mathlib::getDistanceHex($target, $shooter);
+            if ($distance <= 0) return 0;
+            if ($distance <= 1) return 4;
+            if ($distance <= 2) return 6;
+            return 7;
+        }
+
+        return $this->passiveShieldStrength;
+    }
+
+    //Damage reduction mirrors hit change mod.
+    public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon) {
+        if ($this->isDestroyed($turn - 1) || $this->isOfflineOnTurn($turn)) return 0;
+
+        $mode2Active = $this->mode2FiredThisTurn;
+        if (!$mode2Active) {
+            foreach ($this->fireOrders as $order) {
+                if ($order->firingMode == 2 && $order->turn == $turn) {
+                    $mode2Active = true;
+                    break;
+                }
+            }
+        }
+
+        if ($mode2Active) {
+            $distance = Mathlib::getDistanceHex($target, $shooter);
+            if ($distance <= 0) return 0;
+            if ($distance <= 1) return 4;
+            if ($distance <= 2) return 6;
+            return 7;
+        }
+
+        return $this->passiveShieldStrength;
+    }
+
+} //endof class FlareGenerator
+
 ?>
