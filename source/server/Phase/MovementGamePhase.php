@@ -403,10 +403,7 @@ class MovementGamePhase implements Phase
 		foreach ($ships as $ship){ //generate system-specific information if necessary    
 			$ship->generateIndividualNotes($gameData, $dbManager);
 		}		
-// GTS_Triad added for Asteroid Salvo movement damage
-//		foreach ($ships as $ship){ //save system-specific information if necessary (separate loop - generate for all, THEN save for all!         
-//			$ship->saveIndividualNotes($dbManager);
-//		} 
+
 		foreach ($ships as $ship){ //save system-specific information if necessary (separate loop - generate for all, THEN save for all!         
 			$ship->saveIndividualNotes($dbManager);
 		} 
