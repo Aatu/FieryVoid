@@ -3957,3 +3957,60 @@ MineControllerDEW.prototype.ensureMultiAllocatedShape = function () {
 	}
 	this.allocatedRanges = nested;
 };
+
+// GTS_Triad
+var StructureSelfRepair = function StructureSelfRepair(json, ship) {
+    ShipSystem.call(this, json, ship);
+    this.data = Object.assign({}, this.data);
+    // repairOrder: array of structure system IDs in player-specified priority order.
+    // Empty array = use server default (destroyed first, then highest damage).
+    // Not persisted across turns — resets to [] each Initial Orders phase.
+    this.repairOrder = (json && Array.isArray(json.repairOrder)) ? json.repairOrder.slice() : [];
+};
+StructureSelfRepair.prototype = Object.create(ShipSystem.prototype);
+StructureSelfRepair.prototype.constructor = StructureSelfRepair;
+
+StructureSelfRepair.prototype.initializationUpdate = function () {
+    if (this.outputDoubled) this.outputDisplay = this.output * 2;
+    return this;
+};
+
+/* getCurrentMaxRepairPoints: remaining health * 10, mirrors PHP side */
+StructureSelfRepair.prototype.getCurrentMaxRepairPoints = function () {
+    return this.getRemainingHealth() * 10;
+};
+
+/* Set a new repair order (array of structure system IDs, highest priority first).
+   Pass an empty array to restore the server default. */
+StructureSelfRepair.prototype.setRepairOrder = function (orderedIds) {
+    this.repairOrder = orderedIds ? orderedIds.slice() : [];
+};
+
+/* Serialize repairOrder for transfer to PHP in Initial Orders phase.
+   Each entry: "order;<systemId>" — one entry per block in priority order. */
+StructureSelfRepair.prototype.doIndividualNotesTransfer = function () {
+    this.individualNotesTransfer = Array();
+    for (var i = 0; i < this.repairOrder.length; i++) {
+        this.individualNotesTransfer.push('order;' + this.repairOrder[i]);
+    }
+    return true;
+};
+
+StructureSelfRepair.prototype.hasMaxBoost = function () {
+    return (this.maxBoostLevel > 0);
+};
+
+var CoopStructureSelfRepair = function CoopStructureSelfRepair(json, ship) {
+    StructureSelfRepair.call(this, json, ship);
+};
+CoopStructureSelfRepair.prototype = Object.create(StructureSelfRepair.prototype);
+CoopStructureSelfRepair.prototype.constructor = CoopStructureSelfRepair;
+
+/* Inherits everything from StructureSelfRepair:
+   - repairOrder / setRepairOrder / doIndividualNotesTransfer
+   - initializationUpdate
+   - getCurrentMaxRepairPoints
+   - hasMaxBoost
+   No client-side additions needed — cooperative repair logic runs entirely server-side
+   in criticalPhaseEffects. The UI (StructureSelfRepairList) works unchanged since
+   SystemInfoButtons checks for both names. */

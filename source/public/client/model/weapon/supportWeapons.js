@@ -583,3 +583,127 @@ GraviticAugmenter.prototype.onFireOrderCreated = function (fire) {
 	return fire;
 };
 
+// GTS_Triad
+
+
+// GTS_Triad
+var FlareGenerator = function FlareGenerator(json, ship) {
+    Weapon.call(this, json, ship);
+    this.mode2FiredThisTurn = -1;
+};
+FlareGenerator.prototype = Object.create(Weapon.prototype);
+FlareGenerator.prototype.constructor = FlareGenerator;
+
+FlareGenerator.prototype.defensiveType = "Shield";
+FlareGenerator.prototype.defensiveSystem = true;
+
+FlareGenerator.prototype.getDefensiveHitChangeMod = function(target, shooter, weapon) {
+    if (this.ballistic && this.firingMode == 2) {
+        var distance = mathlib.getDistanceBetweenShipsInHex(target, shooter);
+        if (distance <= 0) return 0;
+        if (distance <= 1) return 4;
+        if (distance <= 2) return 6;
+        return 7;
+    }
+    return 4;
+};
+
+FlareGenerator.prototype.getDefensiveDamageMod = function(target, shooter, weapon) {
+    if (this.ballistic && this.firingMode == 2) {
+        var distance = mathlib.getDistanceBetweenShipsInHex(target, shooter);
+        if (distance <= 0) return 0;
+        if (distance <= 1) return 4;
+        if (distance <= 2) return 6;
+        return 7;
+    }
+    return 4;
+};
+
+FlareGenerator.prototype.initializationUpdate = function () {
+    var committed = this.getOrderThisTurn();
+
+    if (gamedata.gamephase == 1) {
+        if (!committed) {
+            this.firingMode = 2;
+        } else {
+            this.firingMode = committed.firingMode;
+        }
+    } else if (gamedata.gamephase == 3) {
+        if (this.mode2FiredThisTurn === gamedata.turn) {
+            this.firingMode = 2;
+        } else if (!committed) {
+            this.firingMode = 1;
+        } else {
+            this.firingMode = committed.firingMode;
+        }
+    }
+
+    this.updateFiringModeData();
+    this.ballistic = (this.firingMode == 2);
+    this.preFires = false;
+
+    return this;
+};
+
+FlareGenerator.prototype.getOrderThisTurn = function () {
+    for (var i in this.fireOrders) {
+        var fo = this.fireOrders[i];
+        if (fo.weaponid == this.id && fo.turn == gamedata.turn && !fo.rolled) return fo;
+    }
+    return null;
+};
+
+FlareGenerator.prototype.isSpentLocked = function () {
+    var order = this.getOrderThisTurn();
+    if (!order) return false;
+    var declarationPhase = (order.type === 'ballistic') ? 1 : 3;
+    return gamedata.gamephase != declarationPhase;
+};
+
+FlareGenerator.prototype.canActivate = function () {
+    return (gamedata.gamephase == 1 && this.firingMode == 2 && !this.getOrderThisTurn());
+};
+
+FlareGenerator.prototype.canDeactivate = function () {
+    return (gamedata.gamephase == 1 && this.firingMode == 2 && !!this.getOrderThisTurn());
+};
+
+FlareGenerator.prototype.doActivate = function () {
+    if (this.firingMode != 2) return;
+    if (this.getOrderThisTurn()) return;
+
+    var ship = this.ship;
+    var position = shipManager.getShipPosition(ship);
+    var fireid = ship.id + "_" + this.id + "_1";
+
+    var fire = {
+        id: fireid,
+        type: 'ballistic',
+        shooterid: ship.id,
+        targetid: ship.id,
+        weaponid: this.id,
+        calledid: -1,
+        turn: gamedata.turn,
+        firingMode: 2,
+        shots: 1,
+        x: position.q,
+        y: position.r,
+        damageclass: 'electromagnetic',
+        chance: 100,
+        hitmod: 0,
+        notes: ""
+    };
+
+    this.fireOrders.push(fire);
+    this.mode2FiredThisTurn = gamedata.turn;
+
+    if (weaponManager.isSelectedWeapon(this)) {
+        weaponManager.unSelectWeapon(this.ship, this);
+    }
+};
+
+FlareGenerator.prototype.doDeactivate = function () {
+    if (this.firingMode != 2) return;
+    this.mode2FiredThisTurn = -1;
+    weaponManager.removeFiringOrder(this.ship, this);
+};

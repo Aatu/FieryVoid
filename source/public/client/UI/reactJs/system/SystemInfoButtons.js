@@ -4,6 +4,7 @@ import { Clickable } from "../styled";
 
 import FiringModeSelector from "./FiringModeSelector";
 import SelfRepairList from "./SelfRepairList";
+import StructureSelfRepairList from "./StructureSelfRepairList";  // GTS_Triad
 import AdaptiveArmorList from "./AdaptiveArmorList";
 import HyachComputerList from "./HyachComputerList";
 import HyachSpecialistsList from "./HyachSpecialistsList";
@@ -657,6 +658,8 @@ class SystemInfoButtons extends React.Component {
 
 				{canSelfRepairList(ship, system) && <SelfRepairList ship={ship} system={system} readOnly={!canEditSelfRepairList(ship, system)} />}
 
+				{canStructureSelfRepairList(ship, system) && <StructureSelfRepairList ship={ship} system={system} readOnly={!canEditStructureSelfRepairList(ship, system)} />}   {/* GTS_Triad */}
+
 				{canPowerCapacitor(ship, system) && <PowerCapacitor ship={ship} system={system} />}
 
 			</Container>
@@ -766,6 +769,9 @@ const canThoughtShieldGenSelect = (ship, system) => canThoughtShieldGen(ship, sy
 const canSelfRepairList = (ship, system) => gamedata.isMyShip(ship) && (system.name == 'SelfRepair');
 //Editable only in Initial Orders; elsewhere the menu is view-only.
 const canEditSelfRepairList = (ship, system) => canSelfRepairList(ship, system) && gamedata.gamephase === 1;
+
+const canStructureSelfRepairList = (ship, system) => gamedata.isMyShip(ship) && (system.name == 'StructureSelfRepair' || system.name == 'CoopStructureSelfRepair');   // GTS_Triad
+const canEditStructureSelfRepairList = (ship, system) => canStructureSelfRepairList(ship, system) && gamedata.gamephase === 1;    // GTS_Triad
 
 /* Pre-battle damage (PREBATTLE_DAMAGE_PLAN.md §5.2): allocate damage/destruction to a
    BOUGHT ship in the gamelobby. gamephase -2 is the lobby and nothing else, and in the
@@ -958,6 +964,7 @@ export const hasStyledMenu = (ship, system) => {
 		(canTSShield(ship, system) || canTSShieldGen(ship, system)) ||
 		(canThoughtShield(ship, system) || canThoughtShieldGen(ship, system)) ||
 		canSelfRepairList(ship, system) ||
+		canStructureSelfRepairList(ship, system) ||    // GTS_Triad
 		canPowerCapacitor(ship, system) ||
 		canSystemPowerSettings(ship, system) ||
 		canSystemActivation(ship, system) ||
