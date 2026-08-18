@@ -1124,6 +1124,114 @@ public function setMaxDamage() {
 	}// endof WarriorRam
 
 
+// GTS_Triad
+
+class MatterBolt extends Weapon {
+
+    public $name = "MatterBolt";
+    public $displayName = "Matter Bolt";
+    public $iconPath = "GatlingGun.png";
+
+    public $damageType = "Standard";
+    public $weaponClass = "Matter";
+    public $shots = 1;
+    public $loadingtime = 1;
+	public $normalload = 2; // Done to trigger the manual defensive fire mode
+    public $noOverkill = true;	    
+		
+    public $range = 0; // unlimited
+    public $rangePenalty = 1.0; // -1 per hex
+    public $fireControl = array(0, 0, 0);
+    public $intercept = 2;
+
+    public $firingModes = array(1 => "Matter Bolt");
+
+    function __construct($startArc, $endArc, $powerReq = 0) {
+        parent::__construct(0, 0, $powerReq, $startArc, $endArc);
+    }
+
+    public function setSystemDataWindow($turn) {
+        parent::setSystemDataWindow($turn);
+        if (!isset($this->data["Special"])) {
+            $this->data["Special"] = '';
+        } else {
+            $this->data["Special"] .= '<br>';
+        }
+        $this->data["Special"] .= 'Matter Bolt: firing (offensive or defensive) causes 1 damage to this fighter, bypassing armor.';
+        $this->data["Special"] .= '<br>If not fired this turn, fighter auto-repairs 2 structure points. Unlimited ability.';
+        $this->data["Special"] .= '<br>Offensive bonus equals number of alive fighters in the flight.';
+    }
+
+    public function getDamage($fireOrder) {
+        return Dice::d(6, 3) + 2;
+    }
+
+    public function setMinDamage() { $this->minDamage = 5; }
+    public function setMaxDamage() { $this->maxDamage = 20; }
+
+    public function criticalPhaseEffects($ship, $gamedata) {
+        parent::criticalPhaseEffects($ship, $gamedata);
+
+        if (!($ship instanceof FighterFlight)) return;
+
+        $shuttle = $ship->getFighterBySystem($this->id);
+        if (!$shuttle) return;
+        if ($shuttle->isDestroyed($gamedata->turn)) return;
+
+        $firedThisTurn = count($this->getFireOrders($gamedata->turn)) > 0;
+
+        if ($firedThisTurn) {
+            // Self-damage: 1 point bypassing armor
+            // Replay guard
+            foreach ($shuttle->damage as $existing) {
+                if ($existing->turn == $gamedata->turn && $existing->damageclass === "MatterBoltSelfDamage") {
+                    return;
+                }
+            }
+
+            $remaining = (int)$shuttle->getRemainingHealth();
+            $damageCaused = min(1, max(1, $remaining));
+            $isDestroyed = (1 >= $remaining);
+
+            $dmg = new DamageEntry(
+                -1, $ship->id, -1, $gamedata->turn, $shuttle->id,
+                $damageCaused, 0, 0, -1, $isDestroyed, false,
+                "Matter Bolt self-damage", "MatterBoltSelfDamage"
+            );
+            $dmg->updated = true;
+            $dmg->shooterid = $ship->id;
+            $dmg->weaponid = $this->id;
+            $shuttle->damage[] = $dmg;
+
+        } else {
+            // Auto-repair 2 structure points if not fired
+            // Replay guard
+            foreach ($shuttle->damage as $existing) {
+                if ($existing->turn == $gamedata->turn && $existing->damageclass === "MatterBoltSelfRepair") {
+                    return;
+                }
+            }
+
+            $maxHealth = $shuttle->maxhealth;
+            $remaining = (int)$shuttle->getRemainingHealth();
+            $repairAmount = min(2, $maxHealth - $remaining);
+
+            if ($repairAmount <= 0) return;
+
+            $repair = new DamageEntry(
+                -1, $ship->id, -1, $gamedata->turn, $shuttle->id,
+                -$repairAmount, 0, 0, -1, false, false,
+                "Matter Bolt self-repair", "MatterBoltSelfRepair"
+            );
+            $repair->updated = true;
+            $repair->shooterid = $ship->id;
+            $repair->weaponid = $this->id;
+            $shuttle->damage[] = $repair;
+        }
+    }
+}
+
+
 
 
 

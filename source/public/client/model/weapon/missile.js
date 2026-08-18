@@ -326,6 +326,52 @@ var AmmoMissileRackG = function AmmoMissileRackG(json, ship) {
 AmmoMissileRackG.prototype = Object.create(AmmoMissileRackS.prototype);
 AmmoMissileRackG.prototype.constructor = AmmoMissileRackG;
 
+// GTS_Triad
+
+
+var AmmoMissileRackTriad = function AmmoMissileRackTriad(json, ship) {
+    AmmoMissileRackS.call(this, json, ship);
+};
+AmmoMissileRackTriad.prototype = Object.create(AmmoMissileRackS.prototype);
+AmmoMissileRackTriad.prototype.constructor = AmmoMissileRackTriad;
+AmmoMissileRackTriad.prototype.changeFiringMode = function(mode) {
+    AmmoMissileRackS.prototype.changeFiringMode.call(this, mode);
+    if (this.powerReqArray && this.powerReqArray[mode] !== undefined) {
+        this.powerReq = this.powerReqArray[mode];
+    }
+    if (this.boostModeIndex !== null && mode == this.boostModeIndex) {
+        this.boostable = true;
+        this.boostEfficiency = 6;
+        this.maxBoostLevel = 1;
+    } else {
+        this.boostable = false;
+    }
+};
+AmmoMissileRackTriad.prototype.clearBoost = function () {
+    for (var i in this.power) {
+        var power = this.power[i];
+        if (power.turn != gamedata.turn) continue;
+        if (power.type == 2) {
+            this.power.splice(i, 1);
+            return;
+        }
+    }
+};
+AmmoMissileRackTriad.prototype.hasMaxBoost = function () {
+    return true;
+};
+AmmoMissileRackTriad.prototype.getMaxBoost = function () {
+    return this.maxBoostLevel;
+};
+AmmoMissileRackTriad.prototype.initBoostableInfo = function () {
+    var boost = shipManager.power.getBoost(this);
+    if (boost > 0) {
+        this.data["Damage"] = '20 (Power Boosted Basic Missile)';
+        this.data["Range"] = '40 / 120';
+    }
+    return this;
+};
+
 var AmmoBombRack = function AmmoBombRack(json, ship) {
     Ballistic.call(this, json, ship);//I don't think Bomb Rack ever needs any AmmoMissileRackS function?
 };

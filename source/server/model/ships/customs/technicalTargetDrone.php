@@ -35,7 +35,7 @@ class technicalTargetDrone extends VreeCapital
 
 		$this->VreeHitLocations = false;
 
-
+		$this->triadOrder = true;	//Important to ensure immunity from Flare Generator!	
 
 
 		$this->addPrimarySystem(new Reactor(6, 18, 0, 0));
@@ -49,6 +49,11 @@ class technicalTargetDrone extends VreeCapital
         $this->addPrimarySystem(new GraviticThruster(5, 16, 0, 9, 1)); 
         $this->addPrimarySystem(new GraviticThruster(5, 16, 0, 9, 2));  
 		$this->addPrimarySystem(new GraviticThruster(5, 16, 0, 9, 4));	
+
+//        $this->addPrimarySystem(new FlareGenerator(8, 16, 8, 0, 360));	
+//        $this->addPrimarySystem(new FlareShielding(8, 9, 6, 4, 0, 360));
+
+        $this->addPrimarySystem(new CoopStructureSelfRepair(8, 24, 24)); //armor, structure, output
 		
 		$testHangar = new Hangar(5, 24, 18);
 		$testHangar->directions = array(0, 1, 5); //port + starboard launch bays — player picks per launch
@@ -84,10 +89,21 @@ class technicalTargetDrone extends VreeCapital
         $this->addFrontSystem(new TrekKlingonLauncher(3, 10, 5, 270, 90));	
         $this->addFrontSystem(new TrekKlingonLauncher(3, 10, 5, 270, 90));	
 */
-        $this->addFrontSystem(new CombatTransporter(3, 4, 1, 270, 90, 5, false));	
-        $this->addFrontSystem(new CombatTransporter(3, 4, 1, 270, 90, 5, false));	
+//        $this->addFrontSystem(new CombatTransporter(3, 4, 1, 270, 90, 5, false));	
+//        $this->addFrontSystem(new CombatTransporter(3, 4, 1, 270, 90, 5, false));	
 
+//        $this->addFrontSystem(new PhotonicPrismBeam(3, 24, 8, 270, 90));	
+ //       $this->addFrontSystem(new PhotonicPrismBeam(3, 24, 8, 270, 90));	
+//        $this->addFrontSystem(new PhotonicPrismBeam(3, 24, 8, 270, 90));	
+//        $this->addFrontSystem(new PhotonicPrismBeam(3, 24, 8, 270, 90));	
 
+//        $this->addFrontSystem(new AsteroidSalvo(8, 30, 10, 270, 90));	
+//        $this->addFrontSystem(new AsteroidSalvo(8, 30, 10, 270, 90));	
+
+//        $this->addFrontSystem(new SpatialCutter(7, 22, 8, 270, 90));	
+//        $this->addFrontSystem(new SpatialCutter(7, 22, 8, 270, 90));	
+//        $this->addFrontSystem(new AmmoMissileRackTriad(7, 0, 0, 270, 90, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+//        $this->addFrontSystem(new AmmoMissileRackTriad(7, 0, 0, 270, 90, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 
 
 /*

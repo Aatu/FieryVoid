@@ -81,6 +81,14 @@ EMShield.prototype.initializationUpdate = function () {
 	return this;
 };
 
+// GTS_Triad
+var FlareShielding = function FlareShielding(json, ship) {
+	Shield.call(this, json, ship);
+	this.defensiveType = "Shield";
+};
+FlareShielding.prototype = Object.create(Shield.prototype);
+FlareShielding.prototype.constructor = FlareShielding;
+
 var AlphaShadingField = function AlphaShadingField(json, ship) {
 	EMShield.call(this, json, ship);
 	this.defensiveType = "Shield";

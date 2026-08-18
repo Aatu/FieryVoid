@@ -334,8 +334,9 @@ window.BallisticIconContainer = function () {
 		const centreHex = this.coordinateConverter.fromGameToHex(position);
 		const hexes = [{ q: centreHex.q, r: centreHex.r }].concat(mathlib.getNeighbouringHexes(centreHex, size));
 
-		syncSceneObject.call(this, 'splash:' + id, `${centreHex.q},${centreHex.r}|${size}|${type}`, () => {
-			const overlay = buildHexRegionOverlay.call(this, centreHex, hexes, type, SPLASH_REGION_DIM);
+//		syncSceneObject.call(this, 'splash:' + id, `${centreHex.q},${centreHex.r}|${size}|${type}`, () => {
+		// GTS_Triad
+		syncSceneObject.call(this, 'splash:' + id, `${centreHex.q},${centreHex.r}|${size}|${type}|${gamedata.gamephase}`, () => {			const overlay = buildHexRegionOverlay.call(this, centreHex, hexes, type, SPLASH_REGION_DIM);
 
 			return overlay && { object: overlay, release: window.HexRegion.dispose };
 		});
@@ -449,6 +450,11 @@ window.BallisticIconContainer = function () {
 			//targetPosition = { x: 0, y: 0 }; // placeholder — the mesh will handle it
 		}
 
+		//GTS Need this to get the hex grid to appear on the Flare generating ship and follow its movement
+		if (modeName === 'Flare' && targetIcon) {
+			targetPosition = this.coordinateConverter.fromHexToGame(targetIcon.getLastMovement().position);
+		}
+		
 		if (weapon?.noTargetHexIcon) {
 			targetPosition = launchPosition;
 		}
@@ -460,11 +466,13 @@ window.BallisticIconContainer = function () {
 				'3-Blanket Shade': { type: 'hexYellow', text: 'Shade Modulator', color: '#787800' },
 				'Anti-Fighter Plasma Web': { type: 'hexGreen', text: 'Plasma', color: '#787800' },
 				'Anti-Fighter Sand Caster': { type: 'hexYellow', text: 'Sand', color: '#787800' },
+				'Asteroid Salvo': { type: 'hexWhite', text: 'Asteroid Salvo', color: '#ffffff' },  // GTS for Asteroid Salvo
 				'Basic Mine': { type: 'hexRed', text: 'Basic', color: '#e6140a' },				
 				'Defensive Plasma Web': { type: 'hexGreen', color: '', color: '#787800' },								
 				'Defensive Sand Caster': { type: 'hexYellow', color: '', color: '#787800' },
 				'Energy Mine': { type: 'hexRed', text: 'Energy Mine', color: '#e6140a' },					
 				'Fighter Bomb': { type: 'hexBlue', text: 'Fighter Bomb', color: '#00b8e6' },
+				'Flare': { type: 'hexWhite', text: 'Flare', color: '#ffffff' },  // GTS for Flare Generator
 				'Gravitic Mine': { type: 'hexGreen', text: 'Gravitic Mine', color: '#008000' },											
 				'Ion Storm': { type: 'hexPurple', text: 'Ion Field', color: '#7f00ff' },
 				'Jammer': { type: 'hexPurple', text: 'Jammer', color: '#7f00ff' },
@@ -495,7 +503,7 @@ window.BallisticIconContainer = function () {
 				// Call splash hex generation for cases where weapon affects more than one hex.
 				// Guard with targetPosition: mine-targeting fire orders (targetid !== -1) have a targetIcon
 				// but no targetPosition, which would make generateSplashHexes place hexes at 0,0 in Replay.
-				if (['Z - Antimine', 'Shredder', 'Energy Mine', 'Ion Storm', 'Jammer', '1-Blanket Shield', '3-Blanket Shade'].includes(modeName)) {
+				if (['Z - Antimine', 'Shredder', 'Energy Mine', 'Ion Storm', 'Jammer', '1-Blanket Shield', '3-Blanket Shade', 'Flare', 'Asteroid Salvo'].includes(modeName)) {  //GTS Added Flare and Asteroid Salvo
 					if ((gamedata.isMyOrTeamOneShip(shooter) || replay) && targetPosition) {
 						//A single RADIUS now, not a list of ring sizes: generateSplashHexes fills the whole
 						//disc in one region, so Ion Storm's old [1, 2] - ring 1 plus ring 2, the only way
@@ -518,6 +526,9 @@ window.BallisticIconContainer = function () {
 							case '3-Blanket Shade':
 								size = 5;
 								break;
+							case 'Asteroid Salvo':  //GTS for Triad Asteroid Salvo
+								sizes = [1, 2];
+								break;
 						}
 
 						generateSplashHexes.call(
@@ -532,6 +543,22 @@ window.BallisticIconContainer = function () {
 
 						splash = true;
 					}
+					
+					if (modeName === 'Flare' && targetPosition) { 
+						[1, 2].forEach(size => {
+							generateSplashHexes.call(
+								this,
+								ballistic.id,
+								targetPosition,
+								ballistic.shooterid,
+								ballistic.targetid,
+								size,
+								'hexWhite'
+							);
+						});
+						splash = true;
+					}					
+					
 				}
 			}
 			
@@ -580,9 +607,17 @@ window.BallisticIconContainer = function () {
 		let targetSprite = null;
 		if (!getByTargetIdOrTargetPosition(targetPosition, ballistic.targetid, this.ballisticIcons)) {
 			if (targetPosition || targetIcon) {
+
 				targetSprite = new BallisticSprite(targetPosition || { x: 0, y: 0 }, targetType, text, textColour, iconImage);
-				if (targetIcon) {
+				if (targetIcon && modeName !== 'Flare') {
 					targetIcon.mesh.add(targetSprite.mesh);
+				} else if (targetIcon && modeName === 'Flare') {
+					targetIcon.mesh.add(targetSprite.mesh);
+				targetSprite.mesh.position.set(0, 0, -100);
+
+//				targetSprite = new BallisticSprite(targetPosition || { x: 0, y: 0 }, targetType, text, textColour, iconImage);
+//				if (targetIcon) {
+//					targetIcon.mesh.add(targetSprite.mesh);
 				} else {
 					scene.add(targetSprite.mesh);
 				}
