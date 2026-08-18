@@ -155,8 +155,8 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
         <li><span class="update-title">THE KIRISHIAC LORDS</span>A brand-new Ancient faction has been added to Fiery Void!</li>
         <li><span class="update-title">Pre-Battle Damage & Saved Fleets</span>You now add battle damage to fleets before a game, and save damaged fleets from live games.</li>                  
         <li><span class="update-title">System Enhancements</span>New system-level enhancements such as Gunsights now available to choose in Fleet Selection.</li>   
-        <li><span class="update-title">Select Ships Menu</span>Improved menu / icons for when selecting on a hex contianing multiple units.<li>
-        <li><span class="update-title">Player Chat</span>Chat panels refreshed and some emoji options added.<li>                             
+        <li><span class="update-title">Select Ships Menu</span>Improved menu / icons for when selecting on a hex contianing multiple units.</li>
+        <li><span class="update-title">Player Chat</span>Chat panels refreshed and some emoji options added.</li>                             
         <li><span class="update-title">Discord Notifications</span>You can now add your Discord account details in 'Set-Up Discord Notifications' to get a message when it's your turn. See Fiery Void FAQ for details!</li>
         <!--<li><span class="update-title">General Fixes</span>Many other small bug fixes/updates. Thanks for the reports!</li>-->
       </ul>
