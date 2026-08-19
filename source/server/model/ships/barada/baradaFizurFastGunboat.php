@@ -47,7 +47,7 @@ class baradaFizurFastGunboat extends LCV{
         		0=> array( //should never happen (...but actually sometimes does!)
         				10 => "Structure",
 						12 => "1:Standard Particle Beam",
-        				15 => "1:Twin Particle Gun",
+        				15 => "1:Twin Array",
         				17 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
@@ -55,7 +55,7 @@ class baradaFizurFastGunboat extends LCV{
         		1=> array( //PRIMARY hit table, effectively
         				10 => "Structure",
 						12 => "1:Standard Particle Beam",
-        				15 => "1:Twin Particle Gun",
+        				15 => "1:Twin Array",
         				17 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
@@ -63,7 +63,7 @@ class baradaFizurFastGunboat extends LCV{
         		2=> array( //same as Fwd
         				10 => "Structure",
 						12 => "1:Standard Particle Beam",
-        				15 => "1:Twin Particle Gun",
+        				15 => "1:Twin Array",
         				17 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",

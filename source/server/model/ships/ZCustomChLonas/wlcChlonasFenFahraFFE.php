@@ -68,7 +68,7 @@ class wlcChlonasFenFahraFFE extends MediumShipLeftRight{
 		3=> array(
 			5 => "Thruster",
 			7 => "Light Gatling Mattergun",
-			9 => "Assault Laser",
+			9 => "Light Matter Cannon",
 			17 => "Structure",
 			20 => "Primary",
 		),
@@ -76,7 +76,7 @@ class wlcChlonasFenFahraFFE extends MediumShipLeftRight{
 		4=> array(
 			5 => "Thruster",
 			7 => "Light Gatling Mattergun",
-			9 => "Assault Laser",
+			9 => "Light Matter Cannon",
 			17 => "Structure",
 			20 => "Primary",
 		),

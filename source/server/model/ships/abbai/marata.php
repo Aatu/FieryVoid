@@ -33,9 +33,11 @@ class Marata extends BaseShip{
         $this->addPrimarySystem(new Engine(5, 18, 0, 9, 3));
         $this->addPrimarySystem(new ShieldGenerator(5, 16, 4, 5));
 		$cA = new CargoBay(5, 12);
-		$cB = new CargoBay(5, 12);
 		$cA->displayName = "Quarters";
-		$cB->displayName = "Quarters";
+        $this->addPrimarySystem($cA); 
+		$cB = new CargoBay(5, 12); 
+		$cB->displayName = "Quarters";                 
+        $this->addPrimarySystem($cB);              
  
         $this->addFrontSystem(new QuadArray(3, 0, 0, 240, 60));
         $this->addFrontSystem(new QuadArray(3, 0, 0, 300, 120));

@@ -66,24 +66,6 @@ class LeonidasGammaAM extends OSAT{
 				19 => "Reactor",
 				20 => "2:Interceptor Prototype",
 			),
-			1=> array(
-				9 => "Structure",
-				11 => "2:Thruster",
-				14 => "1:Class-SO Missile Rack",
-				16 => "1:Light Particle Beam",
-				18 => "0:Scanner",
-				19 => "0:Reactor",
-				20 => "2:Interceptor Prototype",
-			),
-			2=> array(
-				9 => "Structure",
-				11 => "2:Thruster",
-				14 => "1:Class-SO Missile Rack",
-				16 => "1:Light Particle Beam",
-				18 => "0:Scanner",
-				19 => "0:Reactor",
-				20 => "2:Interceptor Prototype",
-			),
         );
     }
 }

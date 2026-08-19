@@ -93,13 +93,13 @@ class gaimVRaxas extends BaseShip{
                 1=> array(
                         4 => "Thruster",
                         7 => "Improved Neutron Laser",
-                        10 => "Heavy Bolt Accelerator",      
+                        10 => "Bolt Accelerator",      
                         18 => "Structure",
                         20 => "Primary",
                 ),
                 2=> array(
                         6 => "Thruster",
-                        9 => "Heavy Bolt Accelerator",
+                        9 => "Bolt Accelerator",
 						11 => "EM Shield",                          
                         18 => "Structure",
                         20 => "Primary",

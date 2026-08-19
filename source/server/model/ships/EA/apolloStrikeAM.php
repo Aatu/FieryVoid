@@ -105,7 +105,7 @@ class apolloStrikeAM extends BaseShip{
             ),
             1=> array(
                     6 => "Thruster",
-                    8 => "Rail Gun",
+                    8 => "Railgun",
                     11 => "Interceptor II",
                     18 => "Structure",
                     20 => "Primary",

@@ -64,7 +64,7 @@ class Brigand extends HeavyCombatVesselLeftRight{
         				6 => "Thruster",
         				7 => "Light Particle Beam",
         				9 => "Light Particle Cannon",
-        				10 => "Medium Plasma",
+        				10 => "Medium Plasma Cannon",
         				18 => "Structure",
         				20 => "Primary"
         		),
@@ -73,7 +73,7 @@ class Brigand extends HeavyCombatVesselLeftRight{
         				7 => "Light Particle Beam",
         				8 => "Light Particle Cannon",
         				9 => "Light Particle Cannon",
-        				1 => "Medium Plasma",
+        				10 => "Medium Plasma Cannon",
         				18 => "Structure",
         				20 => "Primary"
         		),

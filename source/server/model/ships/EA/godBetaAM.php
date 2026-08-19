@@ -75,12 +75,6 @@ class GODBetaAM extends OSAT{
 				19 => "Reactor",
 				20 => "2:Interceptor II",
 			),
-			1=> array(
-				20 => "Primary",
-			),
-			2=> array(
-				20 => "Primary",
-			),
         );
     }
 }

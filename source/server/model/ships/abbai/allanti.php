@@ -87,15 +87,15 @@ class Allanti extends BaseShip{
         		2=> array(
         				4 => "Thruster",
         				5 => "Gravitic Shield",
-						7 => "Particle Impeder",
-						12=> "Particle Impeder",
+						7 => "TAG:Particle Impeder",
+						12=> "TAG:Particle Impeder",
         				17 => "Structure",
         				20 => "Primary",
         		),
         		3=> array(
         				6 => "Thruster",
         				8 => "Gravitic Shield",
-						10 => "Quad Array",
+						10 => "TAG:Quad Array",
         				17 => "Structure",
         				20 => "Primary",
         		),

@@ -89,13 +89,6 @@ class Urshtalu extends StarBaseSixSections
 				new PlasmaAccelerator(5, 10, 5, $min, $max),
 				new PakmaraPlasmaWeb(5, 0, 0, $min, $max),
 				new PakmaraPlasmaWeb(5, 0, 0, $min, $max),
-				/* replaced with arced systems - for TAG
-				new CargoBay(5, 35),
-				new PlasmaBattery(5, 6, 0, 6),	
-				new Hangar(5, 6),								
-				new SubReactorUniversal(5, 23),
-				new Structure(5, 100)
-				*/
 				$battery,
 				$cargoBay,
 				$subReactor,
@@ -114,7 +107,7 @@ class Urshtalu extends StarBaseSixSections
                     7 => "TAG:Hangar",                    
                     11 => "TAG:Cargo Bay",
                     12 => "TAG:Sub Reactor",
-                    18 => "Outer Structure",
+                    18 => "Structure",
                     20 => "Primary",
 			);
 

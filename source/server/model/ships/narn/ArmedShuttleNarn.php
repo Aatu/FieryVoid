@@ -38,7 +38,7 @@ class ArmedShuttleNarn extends FighterFlight{
             $fighter = new Fighter("ArmedShuttleNarn", $armour, 8, $this->id);
             $fighter->displayName = "Armed Shuttle";
             $fighter->imagePath = "img/ships/ShuttleNarn.png";
-            $fighter->iconPath = "img/ships/ShuttleNarn_large.png";
+            $fighter->iconPath = "img/ships/shuttleNarn_large.png";
 
             $frontGun = new PairedParticleGun(330, 30, 5, 1); //1 gun d6+5
             $frontGun->displayName = "Particle Gun";

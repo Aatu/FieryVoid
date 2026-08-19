@@ -96,7 +96,7 @@ class SoskaAM extends BaseShip{
 			),
 			1=> array(
 					4 => "Thruster",
-					7 => "Class-S Missile Rack",
+					7 => "Class-L Missile Rack",
 					8 => "Class-D Missile Rack",
 					9 => "Standard Particle Beam",
 					18 => "Structure",

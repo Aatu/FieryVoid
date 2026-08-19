@@ -30,7 +30,7 @@ class baradaTrukDestroyer extends MediumShip{
         $this->addPrimarySystem(new CnC(6, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 16, 4, 5));
 		$this->addPrimarySystem(new Hangar(5, 8, 6));
-		$this->addAftSystem(new Engine(5, 16, 0, 5, 2));
+		$this->addPrimarySystem(new Engine(5, 16, 0, 5, 2));
 
 		$this->addPrimarySystem(new Thruster(3, 6, 0, 3, 3));
 		$this->addPrimarySystem(new Thruster(3, 6, 0, 3, 3));

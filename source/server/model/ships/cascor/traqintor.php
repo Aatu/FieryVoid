@@ -55,7 +55,7 @@ class Traqintor extends SmallStarBaseFourSections{
 				8 => "TAG:Cargo Bay",
 			    9 => "TAG:Sub Reactor",
 			    10 => "TAG:Hangar",
-				18 => "Outer Structure",
+				18 => "Structure",
 				20 => "Primary",
 			),
 			2=> array(
@@ -65,7 +65,7 @@ class Traqintor extends SmallStarBaseFourSections{
 				8 => "TAG:Cargo Bay",
 			    9 => "TAG:Sub Reactor",
 			    10 => "TAG:Hangar",
-				18 => "Outer Structure",
+				18 => "Structure",
 				20 => "Primary",
 			),	
 			3=> array(
@@ -75,7 +75,7 @@ class Traqintor extends SmallStarBaseFourSections{
 				8 => "TAG:Cargo Bay",
 			    9 => "TAG:Sub Reactor",
 			    10 => "TAG:Hangar",
-				18 => "Outer Structure",
+				18 => "Structure",
 				20 => "Primary",
 			),
 			4=> array(
@@ -85,7 +85,7 @@ class Traqintor extends SmallStarBaseFourSections{
 				8 => "TAG:Cargo Bay",
 			    9 => "TAG:Sub Reactor",
 			    10 => "TAG:Hangar",
-				18 => "Outer Structure",
+				18 => "Structure",
 				20 => "Primary",
 			),
 		);

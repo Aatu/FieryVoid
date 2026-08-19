@@ -57,7 +57,7 @@ class HurrmissileOSAT2240AM extends OSAT
                 0=> array(
                         9 => "Structure",
                         11 => "2:Thruster",
-						15 => "Class-S Missile Rack",
+						15 => "1:Class-S Missile Rack",
 						17 => "Scanner",
                         19 => "Reactor",
                         20 => "Standard Particle Beam",

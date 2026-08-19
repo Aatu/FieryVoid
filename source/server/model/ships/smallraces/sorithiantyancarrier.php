@@ -90,14 +90,14 @@ class SorithianTyanCarrier extends BaseShip{
                 3=> array(
                         4 => "Thruster",
                         9 => "Cargo Bay",
-			10 => "Class-SO Missile Rack",
+			10 => "Light SO-Missile Rack",
                         17 => "Structure",
                         20 => "Primary",
                 ),
                 4=> array(
                         4 => "Thruster",
                         9 => "Cargo Bay",
-			10 => "Class-SO Missile Rack",
+			10 => "Light SO-Missile Rack",
                         17 => "Structure",
                         20 => "Primary",
                 ),

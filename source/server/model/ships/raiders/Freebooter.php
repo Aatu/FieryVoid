@@ -61,7 +61,7 @@ class Freebooter extends HeavyCombatVesselLeftRight{
 		$this->hitChart = array(
 			0=> array(
 					7 => "Structure",
-					11 => "Thruster",
+					11 => "TAG:Thruster",
 					15 => "Scanner",
 					16 => "Engine",
 					17 => "Hangar",
@@ -71,7 +71,7 @@ class Freebooter extends HeavyCombatVesselLeftRight{
 			3=> array(
 					4 => "Thruster",
 					6 => "Standard Particle Beam",
-					8 => "Medium Laser Cannon",
+					8 => "Medium Laser",
 					10 => "Light Particle Beam",
 					11 => "Hangar",
 					12 => "Cargo Bay",
@@ -81,7 +81,7 @@ class Freebooter extends HeavyCombatVesselLeftRight{
 			4=> array(
 					4 => "Thruster",
 					6 => "Standard Particle Beam",
-					8 => "Medium Laser Cannon",
+					8 => "Medium Laser",
 					10 => "Light Particle Beam",
 					11 => "Hangar",
 					12 => "Cargo Bay",

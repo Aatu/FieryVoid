@@ -58,7 +58,7 @@ class SorithianFylonFrigate extends MediumShip{
                 1=> array(
                         3 => "Thruster",
                         7 => "Light Laser",
-			10 => "Class-SO Missile Rack",
+			10 => "Light SO-Missile Rack",
                         12 => "Light Particle Beam",
                         17 => "Structure",
                         20 => "Primary",

@@ -110,7 +110,7 @@ class gaimKorvex extends BaseShip{
                         6 => "Thruster",
 						8 => "Twin Array",
                         10 => "Hangar",
-						12 => "Jumpe Engine",
+						12 => "Jump Engine",
                         18 => "Structure",
                         20 => "Primary",
                 ),

@@ -93,7 +93,7 @@ class CottenAlpha extends BaseShip{
         		18 => "Structure",
         		20 => "Primary",           			
         	),			
-        	3=> array(
+        	4=> array(
         		6 => "Thruster",
 				12 => "Cargo Bay",
         		18 => "Structure",

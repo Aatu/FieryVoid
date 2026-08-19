@@ -321,7 +321,26 @@ class Firing
         //update intercepion totals!
         $shotsStillComing = $allIncomingShots;
         foreach ($allIncomingShots as $fireOrder) {
-            if (($fireOrder->type != "selfIntercept") && ($fireOrder->type != "intercept")) continue; //manually assigned interception - no others exist at this point
+            /* 'intercept' ONLY - deliberately NOT 'selfIntercept' (fixed 2026-08-18).
+            The two types live in different id spaces: an 'intercept' order's targetid is the id of
+            the FIRE ORDER being intercepted, but a 'selfIntercept' order's targetid is the SHIP's
+            own id (every one of the five client creation sites sets `targetid: ship.id` - see
+            weaponManager.setSelfIntercept / onDeclareSelfInterceptSingle and the doMultipleSelfIntercept
+            overrides in molecular.js, pulse.js, special.js). Matching one against the other below
+            was only ever a coincidence test, and when a tac_fireorder.id happened to equal a
+            tac_ship.id in the same game it fired twice over: the marker was credited as a real
+            interceptor against an unrelated shot (bumping totalIntercept/numInterceptors AND
+            running fireDefensively, so backlash triggered and an interceptor missile was drawn),
+            and the same weapon was then ALSO given a genuine intercept order by the automation
+            below - a double count.
+
+            A selfIntercept order is a PERMISSION MARKER, not an assignment: it says "this
+            long-recharge weapon consents to be auto-assigned". Its real consumer is
+            isValidInterceptor(), which requires it for loadingTimeActual > 1, plus the
+            split-weapon gun refund at the head of the assignment loop. Both are untouched by this
+            guard, so the weapon still enters the pool and still gets a real order - it just no
+            longer credits a shot nobody assigned it to. */
+            if ($fireOrder->type != "intercept") continue; //manually assigned interception - no others exist at this point
             //let's find WHAT is being intercepted and update interception totals!
             foreach ($shotsStillComing as $intercepted) {
                 if ($fireOrder->targetid == $intercepted->id) {

@@ -119,9 +119,9 @@ class PariahAM extends BaseShip{
 		3=> array(
 			4 => "Thruster",
 			6 => "Class-S Missile Rack",
-			8 => "Rapid Gatling Railgun",
-			10 => "Hangar",			
-			12 => "Cargo Bay",
+			8 => "Heavy Gauss Cannon",
+			10 => "Rapid Gatling Railgun",
+			12 => "Hangar",	
 			18 => "Structure",
 			20 => "Primary",
 		),

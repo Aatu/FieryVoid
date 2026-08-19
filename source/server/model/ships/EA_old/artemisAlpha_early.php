@@ -77,7 +77,7 @@ class ArtemisAlpha_early extends HeavyCombatVessel{
             ),
             2=> array(
                     5 => "Thruster",
-                    8 => "Light Standard Particle Beam",
+                    8 => "Light Particle Beam",
                     10 => "Medium Plasma Cannon",
                     12 => "Interceptor Prototype",
                     18 => "Structure",

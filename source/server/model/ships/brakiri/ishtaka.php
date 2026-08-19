@@ -89,7 +89,7 @@ class Ishtaka extends StarBaseSixSections
                     8 => "TAG:Gravitic Shifter",                                                              
                     11 => "TAG:Cargo Bay",
                     12 => "TAG:Sub Reactor",
-                    18 => "Outer Structure",
+                    18 => "Structure",
                     20 => "Primary",
 			);
 

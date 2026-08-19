@@ -77,13 +77,7 @@ class skywatch2003AM extends OSAT
 					18 => "Scanner",
                     19 => "Reactor",
 					20 => "HK Control Node",
-                ),
-				1=> array(
-					20 => "Primary",
-				),
-				2=> array(
-					20 => "Primary",
-				),								
+                ),							
         );
 
 	}

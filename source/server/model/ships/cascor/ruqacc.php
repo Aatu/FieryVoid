@@ -48,12 +48,6 @@ class Ruqacc extends OSAT{
                         19 => "Reactor",
                         20 => "1:Dual Ion Bolter",
                 ),
-                1=> array(
-                        20 => "Primary",
-                ),
-                2=> array(
-                        20 => "Primary",
-                ),
         );
     }
 }

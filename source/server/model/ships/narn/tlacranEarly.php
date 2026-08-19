@@ -55,8 +55,7 @@ class TlacranEarly extends MediumShip{
         		),
         		1=> array(
         				4 => "Thruster",
-        				6 => "Medium Plasma Cannon",
-        				8 => "Light Particle Beam",
+        				7 => "Light Particle Beam",
         	        	9 => "C&C",	
         	        	10 => "Hangar",		
         				17 => "Structure",
@@ -64,7 +63,7 @@ class TlacranEarly extends MediumShip{
         		),
         		2=> array(
         				6 => "Thruster",
-        				10 => "Hangar",	
+        				12 => "Cargo Bay",	
         				17 => "Structure",
         				20 => "Primary",
         		),

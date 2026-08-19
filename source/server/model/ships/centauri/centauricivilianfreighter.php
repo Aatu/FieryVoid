@@ -35,16 +35,27 @@ class CentauriCivilianFreighter extends MediumShip{
 		$this->addPrimarySystem(new Thruster(3, 10, 0, 2, 3));
 		$this->addPrimarySystem(new Thruster(3, 10, 0, 2, 4));
 		        		
+		/* The hit chart addresses the holds individually ("Cargo Bay A".."Cargo Bay F"),
+		   so they need the matching displayNames - a bare "Cargo Bay" matches none of
+		   those entries and every cargo roll was landing on Structure instead. Same
+		   pattern as TrekFederationJClass's lettered containers. Front carries A and B,
+		   aft C through F, in chart order. */
         $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
-        $this->addFrontSystem(new CargoBay(2, 20));
-        $this->addFrontSystem(new CargoBay(2, 20));
+        $cargoA = new CargoBay(2, 20); $cargoA->displayName = "Cargo Bay A";
+        $cargoB = new CargoBay(2, 20); $cargoB->displayName = "Cargo Bay B";
+        $this->addFrontSystem($cargoA);
+        $this->addFrontSystem($cargoB);
 
-		
+
         $this->addAftSystem(new Thruster(3, 12, 0, 4, 2));
-        $this->addAftSystem(new CargoBay(2, 20));
-        $this->addAftSystem(new CargoBay(2, 20));
-        $this->addAftSystem(new CargoBay(2, 20));
-        $this->addAftSystem(new CargoBay(2, 20));
+        $cargoC = new CargoBay(2, 20); $cargoC->displayName = "Cargo Bay C";
+        $cargoD = new CargoBay(2, 20); $cargoD->displayName = "Cargo Bay D";
+        $cargoE = new CargoBay(2, 20); $cargoE->displayName = "Cargo Bay E";
+        $cargoF = new CargoBay(2, 20); $cargoF->displayName = "Cargo Bay F";
+        $this->addAftSystem($cargoC);
+        $this->addAftSystem($cargoD);
+        $this->addAftSystem($cargoE);
+        $this->addAftSystem($cargoF);
      
                
         $this->addPrimarySystem(new Structure(4, 52));
@@ -71,7 +82,7 @@ class CentauriCivilianFreighter extends MediumShip{
         				5=>"Cargo Bay C",
         				7=>"Cargo Bay D",
         				9=>"Cargo Bay E",
-        				11=>"Cargo BayF",
+        				11=>"Cargo Bay F",
         				17=>"Structure",
         				20=>"Primary",
         		),

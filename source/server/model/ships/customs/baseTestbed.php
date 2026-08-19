@@ -87,6 +87,8 @@ class baseTestbed extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new Reactor(4, 20, 0, 0));
 		$this->addPrimarySystem(new CnC(4, 15, 0, 0)); 
 		$this->addPrimarySystem(new Scanner(4, 14, 3, 4));
+		$this->addPrimarySystem(new CargoBay(4, 20));			
+		$this->addPrimarySystem(new Hangar(4, 2));		
 		$this->addPrimarySystem(new AMissileRack(5, 6, 0, 0, 360, true));
 		$this->addPrimarySystem(new BMissileRack(6, 9, 0, 0, 360, true));
         $this->addPrimarySystem(new MultiMissileLauncher(3, 'B', 0, 360, true));
