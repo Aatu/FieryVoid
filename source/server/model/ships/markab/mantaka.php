@@ -28,7 +28,7 @@ class Mantaka extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 6, 7));
         $this->addPrimarySystem(new Engine(4, 14, 0, 8, 3));
-        $this->addPrimarySystem(new Hangar(4, 8, 12));
+        $this->addPrimarySystem(new Hangar(4, 12, 12));
         
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));

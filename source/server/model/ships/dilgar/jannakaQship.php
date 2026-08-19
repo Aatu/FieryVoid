@@ -34,7 +34,7 @@ class JannakaQship extends MediumShip{
 
         $this->addFrontSystem(new Thruster(2, 6, 0, 2, 1));
         $this->addFrontSystem(new Thruster(2, 6, 0, 2, 1));
-        $this->addFrontSystem(new Hangar(2, 1, 1));
+        $this->addFrontSystem(new Hangar(2, 2, 1));
         $this->addFrontSystem(new MediumPlasma(2, 5, 3, 240, 360));
         $this->addFrontSystem(new MediumPlasma(2, 5, 3, 0, 120));
 

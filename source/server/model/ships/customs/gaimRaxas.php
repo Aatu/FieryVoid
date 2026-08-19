@@ -118,7 +118,7 @@ class gaimRaxas extends BaseShip{
                         11 => "Light Multiphased Cutter",
                         13 => "Scanner",
                         15 => "Engine",
-                        17 => "Hangar",
+                        17 => "Jump Engine",
                         19 => "Reactor",
                         20 => "C&C",
                 ),

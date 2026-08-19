@@ -79,14 +79,14 @@ class CottenGamma extends BaseShip{
         	1=> array(
         		5 => "Thruster",
 				7 => "Medium Pulse Cannon",
-        		8 => "Interceptor Prototype",
+        		8 => "Interceptor I",
 				12 => "Cargo Bay",
         		18 => "Structure",
         		20 => "Primary",        			
         	),
         	2=> array(
         		6 => "Thruster",
-        		7 => "Interceptor Prototype",
+        		7 => "Interceptor I",
 				9 => "Jump Engine",
 				12 => "Cargo Bay",
         		18 => "Structure",
@@ -104,7 +104,8 @@ class CottenGamma extends BaseShip{
 				6 => "Medium Pulse Cannon",
 				12 => "Cargo Bay",
         		18 => "Structure",
-        		20 => "Primary",           		 	),			
+        		20 => "Primary",           		 	
+            ),			
 		);		
 		
     }

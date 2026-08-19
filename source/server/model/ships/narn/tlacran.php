@@ -28,7 +28,6 @@ class Tlacran extends MediumShip{
         $this->rollcost = 2;
         $this->pivotcost = 3;
     	$this->iniativebonus = -4 * 5;
-    	$this->fighters = array("medium"=>12);
          
         $this->addPrimarySystem(new Reactor(3, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 8, 2, 2));

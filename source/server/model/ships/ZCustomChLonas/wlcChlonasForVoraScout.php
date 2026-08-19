@@ -18,11 +18,11 @@ class wlcChlonasForVoraScout extends BaseShipNoAft{
         $this->rollcost = 3;
         $this->pivotcost = 3;
 	    
-	$this->faction = "Ch'Lonas Cooperative";
-        $this->variantOf = "Tra'Vora Light Cruiser";
-	$this->occurence = "uncommon";
-	$this->isd = 2215;
-	$this->unofficial = true;
+		$this->faction = "Ch'Lonas Cooperative";
+			$this->variantOf = "Tra'Vora Light Cruiser";
+		$this->occurence = "uncommon";
+		$this->isd = 2215;
+		$this->unofficial = true;
         
         $this->iniativebonus = 15;
         $this->addPrimarySystem(new Reactor(5, 17, 0, 0));
