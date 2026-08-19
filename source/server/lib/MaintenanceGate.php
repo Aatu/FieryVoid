@@ -31,6 +31,23 @@ class MaintenanceGate
     const SESSION_FLAG = 'fv_maintenance_ok';
 
     /**
+     * The session flag is namespaced PER INSTALL, not shared.
+     *
+     * /game/ and /testInstance/ are two separate deployments on ONE domain, so they share a
+     * session cookie (session.cookie_path defaults to '/') and, on this host, very likely the
+     * same session store. With a single flat flag, unlocking one would silently unlock the
+     * other — and setting a different key on each server, which is the whole point of having
+     * two, would buy nothing. Same path-based isolation idiom server_load_guard.php uses for
+     * its APCu keys.
+     *
+     * __DIR__ is <root>/source/server/lib, so three levels up is the install root.
+     */
+    private static function sessionFlag(): string
+    {
+        return self::SESSION_FLAG . '_' . substr(md5(dirname(__DIR__, 3)), 0, 8);
+    }
+
+    /**
      * Allow the request through, or emit a refusal page and exit.
      *
      * CLI is always allowed: these tools are run from the console by fvbuild.ps1 and by
@@ -62,13 +79,13 @@ class MaintenanceGate
             @session_start();
         }
 
-        if (!empty($_SESSION[self::SESSION_FLAG])) {
+        if (!empty($_SESSION[self::sessionFlag()])) {
             return;
         }
 
         $supplied = isset($_GET['key']) ? (string)$_GET['key'] : '';
         if ($supplied !== '' && hash_equals($configured, $supplied)) {
-            $_SESSION[self::SESSION_FLAG] = true;
+            $_SESSION[self::sessionFlag()] = true;
             return;
         }
 
