@@ -420,7 +420,8 @@ class DiceLost extends Critical{
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
         parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend);
     }
-}    
+}        
+
 /*Turret jam: the mount is locked to a restricted firing arc (Vree saucer turrets jam to the
 forward 330..30). Scored by a SEPARATE d20 whenever an arc-restrictable mount is damaged - it is
 NOT an entry on the weapon critical chart, so it can land alongside a normal crit from the same
