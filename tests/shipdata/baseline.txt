@@ -213,16 +213,7 @@ hitchart	VelraxVersissRefit	location 3, roll 7	no system named "Laser Spear" on 
 hitchart	VelraxVersissRefit	location 4, roll 7	no system named "Laser Spear" on location 4 - every hit here is silently rerouted to Structure
 hitchart	VulcanLander	location 0, roll 15	no system named "Light Phase Cannon" on location 0 - every hit here is silently rerouted to Structure
 hitchart	VulcanLander	location 0, roll 17	no system named "Nacelle" on location 0 - every hit here is silently rerouted to Structure
-hitchart	baradaFizurFastGunboat	location 0, roll 15	no system named "1:Twin Particle Gun" on location 0 - every hit here is silently rerouted to Structure
-hitchart	baradaFizurFastGunboat	location 1, roll 15	no system named "1:Twin Particle Gun" on location 1 - every hit here is silently rerouted to Structure
-hitchart	baradaFizurFastGunboat	location 2, roll 15	no system named "1:Twin Particle Gun" on location 2 - every hit here is silently rerouted to Structure
-hitchart	baradaGilazFleetCarrier	location 1, roll 7	no system named "Heavy Particle Beam" on location 1 - every hit here is silently rerouted to Structure
 hitchart	baradaGomtuCruiser	location 2, roll 10	no system named "Light Particle Beam" on location 2 - every hit here is silently rerouted to Structure
-hitchart	baradaTomguScoutCruiser	location 2, roll 10	no system named "Light Particle Beam" on location 2 - every hit here is silently rerouted to Structure
-hitchart	baradaTomzurAttackGunboat	location 0, roll 15	no system named "1:Twin Particle Gun" on location 0 - every hit here is silently rerouted to Structure
-hitchart	baradaTomzurAttackGunboat	location 1, roll 15	no system named "1:Twin Particle Gun" on location 1 - every hit here is silently rerouted to Structure
-hitchart	baradaTomzurAttackGunboat	location 2, roll 15	no system named "1:Twin Particle Gun" on location 2 - every hit here is silently rerouted to Structure
-hitchart	baradaTrukDestroyer	location 0, roll 14	no system named "Engine" on location 0 - every hit here is silently rerouted to Structure
 hitchart	overseerGC	location 1, roll 8	no system named "Class-S Missile Rack" on location 1 - every hit here is silently rerouted to Structure
 hitchart	overseerGC	location 3, roll 11	no system named "Cargo Bay" on location 3 - every hit here is silently rerouted to Structure
 hitchart	overseerGC	location 4, roll 11	no system named "Cargo Bay" on location 4 - every hit here is silently rerouted to Structure
