@@ -511,6 +511,13 @@ var HypergravitonBlaster = function HypergravitonBlaster(json, ship) {
 };
 HypergravitonBlaster.prototype = Object.create(Gravitic.prototype);
 HypergravitonBlaster.prototype.constructor = HypergravitonBlaster;
+/* Replay: play this weapon's whole volley as one event rather than one victim at a time -
+ * see animateWeaponVolleys in ReplayAnimationStrategy. A transferring beam mints a synthetic
+ * fire order per hop (buildTransferFireOrder), which the default per-target pass would replay
+ * as a separate camera pan per hop. The volley pass overlaps them on a short stagger, which
+ * reads as the cascade this actually is - each hop costs 20 damage and needs the previous
+ * victim dead, so it is genuinely sequential and must not collapse to a single instant. */
+HypergravitonBlaster.prototype.volleyAnimation = true;
 
 /* STAGE 4 - HBlasterList transfer-target ordering window.
  * Declares ONE plain normal/raking fire order against the chosen target (so it behaves

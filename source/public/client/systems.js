@@ -440,6 +440,34 @@ shipManager.systems = {
         return armour;
     },
 
+    //How many fighters of a flight are still flying — the "(N)" every surface prints
+    //beside a flight's name. Lives here because it has two consumers now: the hex picker
+    //(SelectFromShips) and the hover ShipTooltip's stack grid.
+    //
+    //REPLAY-AWARE, and that is the whole subtlety. Inside replay, gamedata.turn is the
+    //turn being VIEWED, so count each fighter by its state as of that turn: one
+    //docked or destroyed during turn N was still flying while turn N's combat happened.
+    //Counting it out would show a flight that partial-docked 3 of 6 on turn N as "(3)"
+    //on turn N itself, when "(6)" is what was on the board. Outside replay there is no
+    //past to reconstruct, so the plain destroyed check is the answer.
+    getActiveFighterCount: function getActiveFighterCount(ship) {
+        if (!ship || !ship.systems) return 0;
+
+        var count = 0;
+        ship.systems.forEach(function (ftr) {
+            var counted;
+            if (gamedata.replay) {
+                var turnDestroyed = damageManager.getTurnDestroyed(ship, ftr);
+                counted = (turnDestroyed === null || turnDestroyed >= gamedata.turn);
+            } else {
+                counted = !shipManager.systems.isDestroyed(ship, ftr);
+            }
+            if (counted) count++;
+        });
+
+        return count;
+    },
+
     //Total declared hangar slots on a ship (sum of maxhealth across Hangar systems).
     //Includes Hangars but not other system types.
     getTotalHangarCapacity: function getTotalHangarCapacity(ship) {
@@ -1059,8 +1087,10 @@ shipManager.systems = {
     },
 
     //Looks for ships with Hyach Computer and lists any where the balance of BFCP is negative for error message.
+    //Returns ship OBJECTS, not names: the commit-error dialogs render these through
+    //gamedata.shipNameSpan, which needs ship.id to make the name clickable (scroll-to-ship).
     getNegativeBFCP: function getNegativeBFCP() {
-        var shipNames = new Array();
+        var ships = new Array();
         var counter = 0;
         for (var i in gamedata.ships) {
             var ship = gamedata.ships[i];
@@ -1075,43 +1105,48 @@ shipManager.systems = {
             var computer = (shipManager.systems.getSystemByName(ship, "hyachComputer"));
             if (shipManager.systems.isDestroyed(ship, computer)) continue;
             if (computer.BFCPtotal_used > computer.output) { //Is the total BFCP used greater than output and Computer NOT destroyed, usually due to damage to Computer.
-                shipNames[counter] = ship.name;
+                ships[counter] = ship;
                 counter++;
             }
         }
-        return shipNames;
+        return ships;
     },	//endof getNegativeBFCP
 
     //Looks for ships with Hyach Specialists and lists any where these have not been selected in Deployment Phase.
+    //Returns ship OBJECTS, not names - see getNegativeBFCP above.
     getUnusedSpecialists: function getUnusedSpecialists() {
-        var shipNames = new Array();
+        var ships = new Array();
         var counter = 0;
 
         for (var i in gamedata.ships) {
             var ship = gamedata.ships[i];
             if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
-            var deployTurn = shipManager.getTurnDeployed(ship);
-            if (deployTurn !== gamedata.turn) continue;   //Don't bother checking for ships that haven't deployed yet.
+            //PLACEMENT turn, not arrival turn - Specialists are chosen in the Deployment phase
+            //the ship is PLACED in, which for a reinforcement is the turn before it arrives
+            //(and its only Deployment phase). The `unavailable` guard below has to go with it:
+            //a reinforcement being placed is unavailable BY DEFINITION until it arrives, so
+            //keeping it would silently skip exactly the ships this warning exists for.
+            if (shipManager.getTurnPlaced(ship) !== gamedata.turn) continue;
 
             if (shipManager.isDestroyed(ship)) continue;
-            if (ship.unavailable) continue;
             if (ship.flight) continue;
             if (ship.userid != gamedata.thisplayer) continue;
             if (!(shipManager.systems.getSystemByName(ship, "hyachSpecialists"))) continue; //Does it Specialists?
 
             var specialists = (shipManager.systems.getSystemByName(ship, "hyachSpecialists"));
             if (specialists.canSelectAnything()) { //Can anymore Specialists be selected?
-                shipNames[counter] = ship.name;
+                ships[counter] = ship;
                 counter++;
             }
         }
 
-        return shipNames;
+        return ships;
     },	//endof getUnusedSpecialists
 
     // Looks for ships with Thirdspace Shield Generators or ThoughtShieldGenerators and compiles a list of any with negative capacity.
+    //Returns ship OBJECTS, not names - see getNegativeBFCP above.
     checkShieldGenValue: function checkShieldGenValue() {
-        var shipNames = [];
+        var ships = [];
         var counter = 0;
         for (var i in gamedata.ships) {
             var ship = gamedata.ships[i];
@@ -1132,11 +1167,11 @@ shipManager.systems = {
             if (shipManager.systems.isDestroyed(ship, generator)) continue;
 
             if (generator.storedCapacity != 0) { // Generator is not zero, either too much or too little shield allocation.
-                shipNames[counter] = ship.name;
+                ships[counter] = ship;
                 counter++;
             }
         }
-        return shipNames;
+        return ships;
     }, // end of checkShieldGenValue
 
     getSystemListThrustBoosted: function getSystemListThrustBoosted(ship) { //For Nexus PLasma Charge, but coulod be used for other Thrust-boosted system - DK 25.3.24

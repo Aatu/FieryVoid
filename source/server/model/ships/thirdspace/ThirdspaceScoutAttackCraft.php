@@ -67,7 +67,7 @@ class ThirdspaceScoutAttackCraft extends LCV{ //Actually an LCV.
         				14 => "Jump Engine",
         				16 => "Engine",
         				18 => "Reactor",
-        				20 => "Scanner",
+        				20 => "ELINT Scanner",
         		),
         		1=> array( //PRIMARY hit table, effectively
         				9 => "Structure",

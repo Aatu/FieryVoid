@@ -937,8 +937,11 @@
     text-align: center;
 }
 
+/* 230, not the old 200: the panel now spends a head bar and a composer bar with real
+   padding of its own on its height, so at 200 the message list itself was down to
+   about four lines. Matches games.php's chat panel. */
 .global-chat-wrapper {
-    height: 200px;
+    height: 230px;
 }
 
 .hidden-template-container {

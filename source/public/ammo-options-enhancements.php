@@ -56,9 +56,16 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li><a href="#mindriders">The Mindriders</a></li>                  
                 <li><a href="#shadows">Shadow Association</a></li>
                 <li><a href="#thirdspace">Thirdspace</a></li>                    
-                <li><a href="#vorlons">Vorlon Empire</a></li>                  
-            </ul>     
-      </li>                                                                 
+                <li><a href="#vorlons">Vorlon Empire</a></li>
+            </ul>
+      </li>
+        <li><a href="#systemenhancements">System Enhancements</a>
+           <ul class="sub-list">
+                <li><a href="#usingsystemenhancements">Buying &amp; Using Them</a></li>
+                <li><a href="#systemrefits">Available Refits</a></li>
+                <li><a href="#systemenhancementnotes">Points, Damage &amp; Saved Fleets</a></li>
+            </ul>
+      </li>
         <!-- Add more sections here -->
     </ul>
 
@@ -510,7 +517,105 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li>Limit: 6</li>
             </ul>      
           </li>
-      </ul>            
+      </ul>
+    <a class="back-to-top" href="#top">↩ Back to Top</a>
+
+
+    <h3 id="systemenhancements" style="margin-top: 20px;">System Enhancements:</h3>
+
+    <p>Everything above is bought for a whole unit. <strong>System enhancements</strong> (or "refits") are different - each one is bought for a
+      <strong>single system</strong> on a single ship, so you can put Gunsights on one Twin Array and leave the other three alone, or harden the armour
+      on just the reactor. They are bought from the ship window during Fleet Selection rather than from the ship purchase dialog, and like the other
+      enhancements they are entirely optional - worth agreeing with your opponent before using them in a pickup battle.</p>
+
+    <p>Refits represent field modifications made by a younger race with the tools it actually has, so they are only available to
+      <strong>Young and Middleborn ships</strong>. Ancient and Primordial vessels cannot buy them, and neither can an Ancient-technology weapon that
+      has been bolted onto a younger hull. They are also for <strong>ships only</strong> - fighter flights, mines and terrain cannot be refitted.</p>
+
+    <h4 id="usingsystemenhancements" style="margin-top: 20px; margin-bottom: 15px;">Buying &amp; Using Them:</h4>
+    <ul class="circle-list">
+      <li>Buy the ship in Fleet Selection as normal, then open its ship window from your fleet (your own bought ships, not the store list on the right).</li>
+      <li>Hover over (or long-press, on a touch screen) the system you want to refit. The same pop-up menu used for pre-battle damage appears, now titled
+        <strong>"Add Enhancements &amp; Damage"</strong>.</li>
+      <li>The gold <strong>Enhancements</strong> section sits at the top of that menu and lists every refit that system can take, each with
+        <strong>[-] [ n ] [+]</strong> controls. The price shown on a row is the cost of the <strong>next</strong> level, so it goes up as you buy;
+        the running total spent on that system appears underneath as "Refits: n pts", and your fleet points update as you click.</li>
+      <li>If a system has no gold section at all, it simply has nothing to offer - that is the normal case for most systems on most ships.</li>
+      <li>A refitted system gets a gold <strong>✦</strong> star on its icon, and the ship's Enhancements box gains a
+        <strong>"System Enhancements (n)"</strong> line, where n is the number of systems refitted (a gun carrying two different refits still counts once).
+        Both markers are shown to your own side only.</li>
+      <li>The details of what a system is actually carrying appear in that system's own information tooltip, alongside its normal stats.</li>
+      <li>Refits are a Fleet Selection purchase only. They cannot be bought, changed or removed once the battle has begun, and anything clicked after you
+        press Ready is not submitted.</li>
+    </ul>
+    <a class="back-to-top" href="#top">↩ Back to Top</a>
+
+    <h4 id="systemrefits" style="margin-top: 20px; margin-bottom: 15px;">Available Refits:</h4>
+    <ul>
+      <li><strong>Advanced Defensive Targeting</strong>
+        <ul class="circle-list">
+            <li>Effect: +1 Interception rating on that weapon, for every level bought (each point of Interception applies -5% to the hit chance of
+              incoming ballistic attacks). The bonus applies in every firing mode the weapon has.</li>
+            <li>Points Cost: 8 per gun on the mount, multiplied by the rating you are upgrading from - so a single-gun weapon starting at rating 1 pays
+              8, then 16, then 24. A Twin Array at rating 2 pays 32, then 48.</li>
+            <li>Limit: The resulting rating cannot exceed 4, so a weapon already at 4 is not offered it at all.</li>
+            <li>Notes: Only weapons that already have an intercept rating can be improved.</li>
+        </ul>
+      </li>
+      <li><strong>Gunsights</strong>
+        <ul class="circle-list">
+            <li>Effect: +1 Fire Control against every target class the weapon can already shoot at, in every firing mode. A weapon that cannot target a
+              size class at all (a Piercing missile against fighters, for instance) does not gain the ability to do so.</li>
+            <li>Points Cost: 25% of the weapon's maximum damage (rounded up, minimum 4), multiplied by the number of guns on the mount.</li>
+            <li>Limit: 1</li>
+            <li>Notes: Weapons only. A handful of utility mounts that roll no meaningful attack - the Abbai Shield Projector, Aegis Sensor Pod, Combat
+              Transporter, Grappling Claw, Gravitic Shifter, Grome Targeting Array - are excluded, as the refit would do nothing for them.</li>
+        </ul>
+      </li>
+      <li><strong>Hardened Shields</strong>
+        <ul class="circle-list">
+            <li>Effect: +1 rating on that shield emitter. Both the damage it absorbs and the to-hit penalty it confers improve.</li>
+            <li>Points Cost: 10 * the emitter's rating * the number of 60 degree arcs it covers (an all-round emitter counts as 6).</li>
+            <li>Limit: 1 per emitter - but each emitter on the ship is bought separately.</li>
+            <li>Notes: EM Shields and Gravitic Shields only. The Abbai Shield Projector is a support weapon rather than a shield and cannot take it.</li>
+        </ul>
+      </li>
+      <li><strong>Hardened Armour</strong>
+        <ul class="circle-list">
+            <li>Effect: +1 Armour on that system.</li>
+            <li>Points Cost: The system's total structure boxes multiplied by its current armour, halved and rounded up (armour counts as at least 2 for
+              this calculation).</li>
+            <li>Limit: 1</li>
+            <li>Notes: Any system that already has armour, including Structure blocks.</li>
+        </ul>
+      </li>
+      <li><strong>Improved Thrust Rating</strong>
+        <ul class="circle-list">
+            <li>Effect: +1 thrust rating on that thruster, for every level bought.</li>
+            <li>Points Cost: Twice the combined thrust rating of every thruster on the ship facing the same direction, then +2 for each further level.</li>
+            <li>Limit: Up to double the thruster's original rating.</li>
+            <li>Notes: Thrusters only. Priced from the ship as designed, so buying Elite Crew for example does not change what a thruster refit costs.</li>
+        </ul>
+      </li>
+    </ul>
+    <a class="back-to-top" href="#top">↩ Back to Top</a>
+
+    <h4 id="systemenhancementnotes" style="margin-top: 20px; margin-bottom: 15px;">Points, Damage &amp; Saved Fleets:</h4>
+    <ul class="circle-list">
+      <li>Refits are charged against your fleet budget like anything else. If a refit would take you over, the purchase is refused and put back as it was.</li>
+      <li>Pre-battle damage and refits share the same menu, so it is quite possible to wreck something you have just paid to improve. <strong>Damage
+        wins</strong> - destroying a system removes its refits and refunds the points immediately, with a message naming what went. Destroying a
+        Structure block takes every system in that location with it. This is one-way: un-ticking Destroy does not bring the refit back, you simply buy
+        it again.</li>
+      <li>Editing a ship keeps its refits; changing the ship to a different class clears them and refunds the points. Copying a ship copies its refits
+        as well.</li>
+      <li>Refits are saved with a fleet list. When that fleet is loaded again every refit is re-checked against the ship as it is designed
+        <em>now</em> and re-priced accordingly, since ships are revised from time to time. If a refit has become more expensive, cheaper, or is no
+        longer possible at all, you will be told what changed rather than it happening silently.</li>
+      <li>Finally, be aware that the ✦ star and the "System Enhancements (n)" line are hidden from your opponent, but several of the improved values
+        themselves are not - shield ratings, armour and thrust all have to reach the other player for their own damage and movement displays to be
+        correct. A careful opponent comparing a ship against the published control sheet can still work out that something has been refitted.</li>
+    </ul>
     <a class="back-to-top" href="#top">↩ Back to Top</a>
 
 

@@ -107,7 +107,7 @@ class ThirdspaceBattleScout extends BaseShip{
 				10 => "Shield Generator",				
 				11 => "Psychic Field",
 				12 => "Self Repair",
-				14 => "Scanner",
+				14 => "ELINT Scanner",
 				16 => "Engine",
 				17 => "Jump Engine",
 				19 => "Reactor",

@@ -1170,6 +1170,14 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
     public $ballistic = false;
     public $hextarget = true;
     public $hidetarget = false;
+
+	/* The cloud damages every flight that moved through its hex, and an attached pod
+	   mirrors its host's movement so it is in the hex whenever the host is. Without this
+	   the automatic "hit the host too" spill turned a hex-targeted anti-fighter weapon
+	   into a full-damage automatic hit on a capital ship. Protected, not public - see the
+	   declaration in Weapon for why. */
+	protected $skipsAttachedHostHit = true;
+
     public $priority = 1; //to show effect quickly
  	public $priorityArray = array(1=>1, 2=>2);        
                 
@@ -1349,15 +1357,36 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 	}
 
 
+	/* Movement rows to test a flight's hex transits against.
+
+	   An attached breaching pod is carried through every hex its host enters, but the rows
+	   MovementGamePhase writes for it are ALL type 'attached' (it copies the host's plot
+	   wholesale under that one type), so the "entered a NEW hex" test below - which only
+	   accepts move/slipleft/slipright - can never match one. Reading the HOST's own rows
+	   instead gives the same hexes with the real move types intact, so a pod riding a ship
+	   through a plasma cloud is caught exactly when the ship itself would have been.
+
+	   Firing::fire's attached-pod host spill is what keeps this from also damaging the host:
+	   this weapon opts out via $skipsAttachedHostHit, so the cloud burns the pod only. */
+	private function getHexTransitMovement($flight, $gamedata) {
+	    if (empty($flight->attached)) return $flight->movement;
+
+	    $hostIds = array_keys($flight->attached);
+	    $host = $gamedata->getShipById(reset($hostIds));
+
+	    return ($host === null) ? $flight->movement : $host->movement;
+	}
+
+
 	private function checkForValidTargets($relevantShips, $cloudFireOrder, $gamedata) {
-	    $targetFighters = array(); // Initialize array for fighters to be fired at.		
+	    $targetFighters = array(); // Initialize array for fighters to be fired at.
 	    $plasmaPosition = array((string)$cloudFireOrder->x, (string)$cloudFireOrder->y); // Convert plasma cloud position to a string array.
-	
-	    foreach ($relevantShips as $flight) { // Look through relevant ships and take appropriate action.					
+
+	    foreach ($relevantShips as $flight) { // Look through relevant ships and take appropriate action.
 	        // Check starting position first.
 
 	        // Now check other movements in the turn.
-	        foreach ($flight->movement as $fighterMove) {
+	        foreach ($this->getHexTransitMovement($flight, $gamedata) as $fighterMove) {
 	            if ($fighterMove->turn == $gamedata->turn) {
 
 	                // Only interested in moves where flight enters a NEW hex!
@@ -1388,8 +1417,11 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 			// Check if the target has been engaged by a Plasma Cloud at these coordinates
 			if (isset(PakmaraPlasmaWeb::$alreadyEngagedClouded[$target->id][$coordinatesKey])) {
 				if (PakmaraPlasmaWeb::$alreadyEngagedClouded[$target->id][$coordinatesKey]['engaged'] === true) {
-				    // Target was already engaged at these coordinates
-				    return; // unit already engaged by a Plasma Web at these coordinates, don't create new fireOrder
+				    // Target was already engaged at these coordinates.
+				    // CONTINUE, not return - the guard is per TARGET, and returning abandoned every
+				    // remaining flight in the list. A second Web clouding the same hex, or a flight
+				    // that enters the hex twice in one plot, silently spared everything after it.
+				    continue; // unit already engaged by a Plasma Web at these coordinates, don't create new fireOrder
 				}
 			}
 	

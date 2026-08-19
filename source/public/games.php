@@ -72,10 +72,6 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       gamedata.thisplayer = <?php echo $_SESSION["user"]; ?>;
       gamedata.defaultGameName = "<?php echo $defaultGameName; ?>";
       gamedata.defaultBackground = "21.PurpleNebula.jpg";
-
-      // Set here rather than in chat.php's markup: that file is also included by
-      // game.php, gamelobby.php and creategame.php, where "all players" would be wrong.
-      $("#globalchat .chatinput").attr("placeholder", "Message all players");
     });
     // BFCache restore freshness (games list page).
     // games.php bakes its game list into the page at server-render time and
@@ -157,10 +153,10 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       <ul class="updates-list">
         <!--<li style="--update-colour: #e05b52;"><span class="update-title">Merry Christmas from Fiery Void!</span></li>-->
         <li><span class="update-title">THE KIRISHIAC LORDS</span>A brand-new Ancient faction has been added to Fiery Void!</li>
-        <li><span class="update-title">Pre-Battle Damage & Saved Fleets</span>You now add battle damage to fleets before a game, and save damaged fleets from live games.</li>          
-        <li><span class="update-title">Vorlon Planet Killer</span>Now might not be the best time to visit Centauri Prime...</li>          
-        <li><span class="update-title">Chameleon Sensor Suite</span>The Centauri Dargan Strike Cruiser can now choose to disguise itself as another ship in Fleet Selection.</li> 
-        <li><span class="update-title">Ship Windows & Arcs</span>Ship windows (SCS) and Weapon Arc icons have been updated to improve appearance and functionality.</li>               
+        <li><span class="update-title">Pre-Battle Damage & Saved Fleets</span>You now add battle damage to fleets before a game, and save damaged fleets from live games.</li>                  
+        <li><span class="update-title">System Enhancements</span>New system-level enhancements such as Gunsights now available to choose in Fleet Selection.</li>   
+        <li><span class="update-title">Select Ships Menu</span>Improved menu / icons for when selecting on a hex contianing multiple units.<li>
+        <li><span class="update-title">Player Chat</span>Chat panels refreshed and some emoji options added.<li>                             
         <li><span class="update-title">Discord Notifications</span>You can now add your Discord account details in 'Set-Up Discord Notifications' to get a message when it's your turn. See Fiery Void FAQ for details!</li>
         <!--<li><span class="update-title">General Fixes</span>Many other small bug fixes/updates. Thanks for the reports!</li>-->
       </ul>
@@ -209,13 +205,17 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
   </section>
 
 <?php
-// .chat-panel is now a WRAPPER around #globalchat rather than the same element. It has
-// to be, because the head bar must sit outside the scrolling body — #globalchat scrolls,
+// .chat-panel is a WRAPPER around #globalchat rather than the same element. It has to
+// be, because the head bar must sit outside the scrolling body — #globalchat scrolls,
 // so a header inside it would scroll away with the chat log.
 //
 // $chatelement stays "#globalchat": chat.php's JS selects the scrolling body, which is
-// still that id. Nothing in chat.php changes, which matters — game.php, gamelobby.php
-// and creategame.php include it too.
+// still that id.
+//
+// This page keeps its own .fv-panel-head (so the chat matches the news and games panels
+// beside it) and therefore does NOT set $chattitle — creategame.php and gamelobby.php do,
+// and get chat.php's own head bar instead. Everything else about how the chat looks now
+// lives in styles/chat.css and is shared by all four pages.
 //
 // The height moved off #globalchat's own inline style and onto the body below; it is a
 // little taller than the old 200px because the composer bar now has real padding of its

@@ -302,24 +302,86 @@ window.BallisticIconContainer = function () {
 	}
 	*/
 
-	/* Still one sprite per marker - a reinforcement hex is a single hex, so there is no region to
-	   build - but keyed like the regions so it survives a poll untouched. It was being rebuilt on
-	   every consumeGamedata, and a lettered BallisticSprite used to mint its own 512x512 canvas
-	   texture each time (now cached in BallisticSprite). */
+	/* ONE marker per HEX, not per ship. A whole reinforcement wave shares a deployment box and
+	   several units routinely land on the same hex (fighters and mines stack freely), which
+	   previously minted one sprite per ship all at the same coordinates - a stack of identical
+	   overlapping labels that read as a single smeared, over-bright hex.
+
+	   Jump Points are drawn FIRST so that when a pending arrival and an arriving unit claim the
+	   same hex, the Jump Point wins: the arriving unit is already visible as itself, while the
+	   pending one has nothing else on the map to represent it. */
 	function generateReinforcementHexes(gamedata) {
 		if (gamedata.gamephase == -1) return;
 
+		const claimed = new Set();
+
+		generateJumpPointHexes.call(this, gamedata, claimed);
+
+		/* The ARRIVAL marker: the hex a unit that deploys THIS turn came in at. Also covers
+		   spawned units (mid-game mines), which have no deploy move of their own - hence the
+		   position coming from getPositionAtStartOfTurn rather than the movement row. */
 		gamedata.ships
 			.filter(ship => shipManager.getTurnDeployed(ship) == gamedata.turn && gamedata.turn > 1 && !shipManager.shouldBeHidden(ship))
 			.forEach(ship => {
 				const pos = shipManager.movement.getPositionAtStartOfTurn(ship, gamedata.turn);
 
-				syncSceneObject.call(this, 'reinforcement:' + ship.id, `${pos.q},${pos.r}`, () => {
-					const sprite = new BallisticSprite(this.coordinateConverter.fromHexToGame(pos), "hexBlue", `Reinforcement`);
-
-					return { object: sprite.mesh, release: () => releaseSprite(sprite) };
-				});
+				markReinforcementHex.call(this, pos, 'Reinforcement', claimed);
 			});
+	}
+
+	/* The WARNING half of the reinforcement marker: a late slot now picks its entry hexes during
+	   the Deployment phase of the turn BEFORE it arrives (shipManager.getTurnPlaced), so from that
+	   turn's Initial Orders onward everyone can see where the jump points will open. Previously the
+	   entry hex, the marker and the ships themselves all appeared together on the arrival turn and
+	   an opponent got no warning at all.
+
+	   Deliberately NOT filtered by shouldBeHidden - it returns true for every one of these ships
+	   (they are not on the board yet), which would suppress the whole feature. Stealth units get a
+	   marker too, by design ruling: the jump point is public even though the ship that comes
+	   through it arrives cloaked.
+
+	   No committed deploy move means no marker, which is exactly what keeps unplaced units and
+	   flights queued for a hangar deploy-start dock (they go into a bay, not onto the board) off
+	   the map. */
+	function generateJumpPointHexes(gamedata, claimed) {
+		gamedata.ships
+			.filter(ship => shipManager.getTurnDeployed(ship) == gamedata.turn + 1)
+			.filter(ship => !shipManager.isDestroyed(ship) && !ship.removed)
+			.filter(ship => !ship.pendingDeployDock && !ship.pendingLcvDeployDock)
+			.filter(ship => ship.spawned === undefined || ship.spawned === -1) //spawns never pre-place
+			.forEach(ship => {
+				const move = getCommittedDeployMove(ship);
+				if (!move) return;
+
+				markReinforcementHex.call(this, new hexagon.Offset(move.position), 'Jump Point', claimed);
+			});
+	}
+
+	function getCommittedDeployMove(ship) {
+		for (const key in ship.movement) {
+			const move = ship.movement[key];
+			if (move && move.type === 'deploy' && move.commit) return move;
+		}
+		return null;
+	}
+
+	/* One sprite per hex, keyed BY HEX so it survives a poll untouched. Keying by ship id (as this
+	   did) is what allowed a stack: N ships on one hex meant N distinct keys resolving to N sprites
+	   at identical coordinates. $claimed is the per-pass guard - first caller wins the hex, later
+	   ones are dropped.
+
+	   The LABEL is part of the signature so a hex that flips from "Jump Point" to "Reinforcement"
+	   when the wave arrives rebuilds its sprite rather than keeping the stale text. */
+	function markReinforcementHex(pos, label, claimed) {
+		const hexKey = `${pos.q},${pos.r}`;
+		if (claimed.has(hexKey)) return;
+		claimed.add(hexKey);
+
+		syncSceneObject.call(this, 'reinforcement:' + hexKey, label, () => {
+			const sprite = new BallisticSprite(this.coordinateConverter.fromHexToGame(pos), "hexBlue", label);
+
+			return { object: sprite.mesh, release: () => releaseSprite(sprite) };
+		});
 	}
 
 
@@ -334,10 +396,11 @@ window.BallisticIconContainer = function () {
 		const centreHex = this.coordinateConverter.fromGameToHex(position);
 		const hexes = [{ q: centreHex.q, r: centreHex.r }].concat(mathlib.getNeighbouringHexes(centreHex, size));
 
-//		syncSceneObject.call(this, 'splash:' + id, `${centreHex.q},${centreHex.r}|${size}|${type}`, () => {
-		// GTS_Triad
+		syncSceneObject.call(this, 'splash:' + id, `${centreHex.q},${centreHex.r}|${size}|${type}`, () => {
+			const overlay = buildHexRegionOverlay.call(this, centreHex, hexes, type, SPLASH_REGION_DIM);			
+		/*// GTS_Triad
 		syncSceneObject.call(this, 'splash:' + id, `${centreHex.q},${centreHex.r}|${size}|${type}|${gamedata.gamephase}`, () => {			const overlay = buildHexRegionOverlay.call(this, centreHex, hexes, type, SPLASH_REGION_DIM);
-
+		*/ //Restoring old version above for now, which you'd accidentally deleted part of btw - DK
 			return overlay && { object: overlay, release: window.HexRegion.dispose };
 		});
 	}

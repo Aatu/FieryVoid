@@ -59,8 +59,8 @@ class CarranaAM extends SmallStarBaseThreeSections{
 
 		for ($i = 0; $i < sizeof($this->locations); $i++){
 
-			$min = 300 + ($i*120);
-			$max = 60 + ($i*120);
+			$min = (300 + ($i*120)) % 360;
+			$max = (60 + ($i*120)) % 360;
 
 			$struct = Structure::createAsOuter(4, 56,$min,$max);
 			$hangar = new Hangar(4, 6);

@@ -211,7 +211,9 @@ window.MineDeployment = (function () {
                 !shipManager.isDestroyed(ship) &&
                 gamedata.turn == 1 &&
                 ship.spawned == -1 &&
-                shipManager.getTurnDeployed(ship) <= gamedata.turn;
+                //PLACEMENT turn: a turn-2 mine slot picks its hexes during Turn 1's Deployment
+                //phase, so it belongs in the bulk placement tool alongside the turn-1 mines.
+                shipManager.getTurnPlaced(ship) <= gamedata.turn;
         }).sort(function (a, b) {
             // Prefer mines without a deploy move (not yet placed)
             var aHasDeploy = !!a.deploymove ? 1 : 0;

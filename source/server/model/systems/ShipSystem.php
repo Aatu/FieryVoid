@@ -366,6 +366,18 @@ public function setParentFighter($fighter) {
 		return false;
 	}
 
+	/*isRevealedToCurrentViewer() widened by the post-mortem. Gate for the masks that hide standing
+	LOGISTICS state - AmmoMagazine's ordnance load, Hangar contents and queued launch/dock orders -
+	as opposed to a single turn's orders. The distinction matters because an ammo count never becomes
+	public with age the way a resolved fire order does, so those masks deliberately also run on the
+	replay path; without a FINISHED exemption they would never let go, and the post-mortem of a
+	completed game is exactly where players want to see what the other side was actually carrying.
+	Same "no viewer context = reveal" contract as its parent: only ever mask OUTGOING JSON with it.*/
+	protected function isDisclosedToCurrentViewer(){
+		if (TacGamedata::$currentGameFinished) return true; //game over - nothing left to hide
+		return $this->isRevealedToCurrentViewer();
+	}
+
 	/*hit allocation sub-roll hook: a system chosen by hit allocation (chart, dice or called shot)
 	may redirect the hit elsewhere - roll its own sub-chart (Kirishiac Orbital) or divert to
 	Structure while stowed. Default: the hit stays where it landed.

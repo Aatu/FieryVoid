@@ -207,7 +207,12 @@ class DeploymentGamePhase implements Phase
                 continue;
 
 
-            $depTurn = $ship->getTurnDeployed($gamedata);
+            //PLACEMENT turn, not arrival turn: a reinforcement commits its entry hex during the
+            //Deployment phase of the turn BEFORE it arrives, so that is the turn it must supply
+            //a "deploy" move on. The unit itself stays off-board until getTurnDeployed - see
+            //BaseShip::getTurnPlaced.
+            //Safe on a POST-side ship: getTurnPlaced only reads $gamedata->getSlotById().
+            $placeTurn = $ship->getTurnPlaced($gamedata);
 
             //Stage 7: a flight queued for hangar deploy-start dock has no
             //movement of its own — it goes straight into the carrier's hangar.
@@ -220,7 +225,7 @@ class DeploymentGamePhase implements Phase
             $moves = array();
             $found = false;
 
-            if($depTurn == $gamedata->turn){ //Is ship deploying this turn?
+            if($placeTurn == $gamedata->turn){ //Is ship picking its entry hex this turn?
                 foreach ($ship->movement as $move)
                 {
                     if ($found)
@@ -241,7 +246,7 @@ class DeploymentGamePhase implements Phase
                 }
             }
 
-            if (!$found && $depTurn == $gamedata->turn) //Throw if not found and slot has deployed.
+            if (!$found && $placeTurn == $gamedata->turn) //Throw if not found and slot is placing this turn.
                 throw new Exception("Deployment validation failed: Entry not found for ship $ship->name.");
 
             $shipIdMoves[$ship->id] = $moves;

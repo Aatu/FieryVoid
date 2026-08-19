@@ -40,8 +40,8 @@ class tfsfreedombase extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new CargoBay(5, 36));
 		$this->addPrimarySystem(new Structure( 5, 80));
 		for ($i = 0; $i < sizeof($this->locations); $i++){
-			$min = 270 + ($i*90);
-			$max = 90 + ($i*90);
+			$min = (270 + ($i*90)) % 360;
+			$max = (90 + ($i*90)) % 360;
 
 			$struct = Structure::createAsOuter(5, 80,$min,$max);
 			$hangar = new Hangar(5, 7, 6);

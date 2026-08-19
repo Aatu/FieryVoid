@@ -91,7 +91,9 @@ const ActionIcon = styled.div`
 
 // Helper to check for Deployment Phase
 const isDeployment = (ship) => {
-    return (window.gamedata.turn === window.shipManager.getTurnDeployed(ship) && window.gamedata.gamephase === -1);
+    //Placement turn, not arrival turn: a reinforcement's only Deployment phase is the turn
+    //before it arrives, so that is where its Specialists must be chosen.
+    return (window.gamedata.turn === window.shipManager.getTurnPlaced(ship) && window.gamedata.gamephase === -1);
 };
 
 class HyachSpecialistsList extends Component {

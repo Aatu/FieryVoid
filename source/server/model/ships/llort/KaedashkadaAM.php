@@ -16,6 +16,7 @@ class KaedashkadaAM extends UnevenBaseFourSections
 		$this->canvasSize = 300;
 		$this->fighters = array("normal"=>36);
 		$this->isd = 2228;
+		$this->variantOf = 'OBSOLETE';
 
 		$this->shipSizeClass = 3;
 		$this->Enormous = true;

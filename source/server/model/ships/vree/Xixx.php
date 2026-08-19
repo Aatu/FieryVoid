@@ -112,8 +112,7 @@ class Xixx extends VreeHCV{
 	//d20 hit chart
         $this->hitChart = array(
             0=> array(
-                    10 => "Structure",
-                    12 => "Jump Engine",
+                    12 => "Structure",
                     14 => "Scanner",
                     16 => "Engine",
                     17 => "Hangar",
@@ -133,37 +132,6 @@ class Xixx extends VreeHCV{
                     20 => "Primary",
            		 ),
            	);
-	
-	
-		/*remade for Tags!
-        $this->hitChart = array(
-            0=> array(
-                    10 => "Structure",
-                    12 => "Jump Engine",
-                    14 => "Scanner",
-                    16 => "Engine",
-                    17 => "Hangar",
-                    19 => "Reactor",
-                    20 => "C&C",
-           		 ),
-            1=> array(
-                    4 => "0:Thruster",   
-                    6 => "Antiproton Torpedo",
-                    7 => "0:Antiproton Gun",
-                    8 => "0: Antiproton Defender",
-                    17 => "Structure",
-                    20 => "Primary",
-           		 ),
-            2=> array(
-                    4 => "0:Thruster",   
-                    6 => "Antiproton Torpedo",
-                    7 => "0:Antiproton Gun",
-                    8 => "0: Antiproton Defender",
-                    17 => "Structure",
-                    20 => "Primary",
-           		 ),
-           	);
-			*/
        		
 		}
 	}

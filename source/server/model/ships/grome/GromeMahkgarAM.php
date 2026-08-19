@@ -77,8 +77,8 @@ class GromeMahkgarAM extends StarBaseSixSections{
 
 		for ($i = 0; $i < sizeof($this->locations); $i++){
 
-			$min = 0 + ($i*60);
-			$max = 120 + ($i*60);
+			$min = (0 + ($i*60)) % 360;
+			$max = (120 + ($i*60)) % 360;
 
 			$struct = Structure::createAsOuter(4, 180,$min,$max);
 			$hangar = new Hangar(4, 7, 6);

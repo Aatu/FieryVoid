@@ -132,11 +132,25 @@ class ShipCompactor
            JSON ARRAY [], and an array that later gets `sys`/`ftr` hung off it in the browser
            STRINGIFIES BACK AS [] - which is exactly how every authored point of pre-battle
            damage was lost on submit (fixed on the client side too, in battleDamage.get). */
+        /* systemEnhancements is the same shape of thing for per-system refits
+           (WEAPON_ENHANCEMENTS_PLAN.md §3.1): it only ever holds rows on a ship the player has
+           BOUGHT, so on a blueprint it is always array(). systemEnhancementOffers - what MAY be
+           bought - is NOT dropped: it is blueprint data and the lobby menu is built from it (D3).
+           Dropping the purchased array also guarantees systemEnhancements.js creates a FRESH array
+           per ship rather than inheriting one through a clone. */
         $serverOnlyShipKeys = ['chameleonDisguiseClass','chameleonBlueprint','chameleonDisguisedForViewer',
                                'chameleonPhantom','chameleonIsPhantom','chameleonWeaponMap',
-                               'preBattleDamage','preBattleAvailable'];
+                               'preBattleDamage','preBattleAvailable','systemEnhancements'];
         foreach ($serverOnlyShipKeys as $key) {
             unset($ship[$key]);
+        }
+
+        /* An Ancient/Primordial hull, a flight and a mine all offer no per-system refits, which is
+           640 of the 2,557 classes carrying a bare `[]` for nothing. Same rule the empty-array pass
+           in compactSystem applies; systemEnhancements.js treats absent and empty identically. */
+        if (isset($ship['systemEnhancementOffers']) && is_array($ship['systemEnhancementOffers'])
+            && empty($ship['systemEnhancementOffers'])) {
+            unset($ship['systemEnhancementOffers']);
         }
 
         if (!empty($ship['systems'])) {

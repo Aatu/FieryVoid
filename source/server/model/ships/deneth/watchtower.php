@@ -43,8 +43,8 @@ class Watchtower extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new Structure( 5, 60));
 		
 		for ($i = 0; $i < sizeof($this->locations); $i++){
-			$min = 300 + ($i*90); 
-			$max = 60 + ($i*90);
+			$min = (300 + ($i*90)) % 360; 
+			$max = (60 + ($i*90)) % 360;
 
 			$struct = Structure::createAsOuter(4, 60,$min,$max);			
 			$hangar = new Hangar(4, 6, 6);
@@ -71,7 +71,7 @@ class Watchtower extends SmallStarBaseFourSections{
 				4 => "TAG:Twin Array",
 				8 => "TAG:Assault Laser",
 				9 => "TAG:Hangar",
-				10 => "TAG:Catapult",
+				10 => "TAG:LCV Rail",
 				18 => "Structure",
 				20 => "Primary",
 			);

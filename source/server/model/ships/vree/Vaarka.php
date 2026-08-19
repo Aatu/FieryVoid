@@ -93,7 +93,7 @@ class Vaarka extends VreeHCV{
             0=> array(
                     10 => "Structure",
                     12 => "Jump Engine",
-                    14 => "Scanner",
+                    14 => "ELINT Scanner",
                     16 => "Engine",
                     17 => "Hangar",
                     19 => "Reactor",

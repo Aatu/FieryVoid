@@ -87,7 +87,7 @@ class Simtorka extends BaseShip{
                         5 => "Structure",
                         8 => "Cargo Bay",
                         10 => "Jump Engine",                       
-                        12 => "Scanner",
+                        12 => "ELINT Scanner",
                         15 => "Engine",
                         16 => "Hangar",
                         19 => "Reactor",

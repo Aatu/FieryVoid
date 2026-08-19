@@ -89,8 +89,11 @@ window.DeploymentPhaseStrategy = function () {
         PhaseStrategy.prototype.onHexClicked.call(this, payload);
         var hex = payload.hex;
 
-        if (!this.selectedShip || (shipManager.getTurnDeployed(this.selectedShip) < gamedata.turn)) {
-            //No selected ship or ship has ALREADY deployed so don't allow re-deployment!
+        if (!this.selectedShip || (shipManager.getTurnPlaced(this.selectedShip) < gamedata.turn)) {
+            //No selected ship or ship was ALREADY placed on an earlier turn so don't allow
+            //re-placement. Note this is the PLACEMENT turn, not the arrival turn: a reinforcement
+            //commits its entry hex the turn before it arrives, and from the arrival turn on it is
+            //locked in like any other deployed unit.
             return false;
         }
 
@@ -135,7 +138,7 @@ window.DeploymentPhaseStrategy = function () {
         //   - selected unit is a fighter/mine (drops onto stacked ships/mines/fighters), OR
         //   - selected unit is a regular ship and every stacked unit in the hex is a mine/fighter.
         if (payload && payload.shiftKey && this.selectedShip
-            && shipManager.getTurnDeployed(this.selectedShip) >= gamedata.turn
+            && shipManager.getTurnPlaced(this.selectedShip) >= gamedata.turn
             && validateDeploymentPosition(this.selectedShip, payload.hex, this.deploymentSprites)) {
             var selIsFighterMine = this.selectedShip.mine || this.selectedShip.flight;
             var allStackedFighterMine = ships.every(function (s) {
@@ -167,8 +170,8 @@ window.DeploymentPhaseStrategy = function () {
         this._lastShipClickTime = now;
 
         if (isDoubleClick && this.gamedata.isMyShip(ship)) {
-            var depTurn = shipManager.getTurnDeployed(ship);
-            if (depTurn === gamedata.turn || (depTurn < gamedata.turn && ship.canPreOrder)) {
+            var placeTurn = shipManager.getTurnPlaced(ship);
+            if (placeTurn === gamedata.turn || (placeTurn < gamedata.turn && ship.canPreOrder)) {
                 if (this.selectedShip && this.selectedShip.id !== ship.id) {
                     this.deselectShip(this.selectedShip);
                 }
@@ -240,8 +243,8 @@ window.DeploymentPhaseStrategy = function () {
             }
         }
 
-        if (this.gamedata.isMyShip(ship) && ((shipManager.getTurnDeployed(ship) == gamedata.turn)
-            || (shipManager.getTurnDeployed(ship) < gamedata.turn) && ship.canPreOrder)) { //Own ship and deploys this turn, just select it. Means that late-deployers can't deploy on ships with canPreOrder (unless they click very edge of hex), but that's rare.
+        if (this.gamedata.isMyShip(ship) && ((shipManager.getTurnPlaced(ship) == gamedata.turn)
+            || (shipManager.getTurnPlaced(ship) < gamedata.turn) && ship.canPreOrder)) { //Own ship and places this turn, just select it. Means that late-deployers can't deploy on ships with canPreOrder (unless they click very edge of hex), but that's rare.
             this.selectShip(ship, payload);
             return;
         }
@@ -264,8 +267,8 @@ window.DeploymentPhaseStrategy = function () {
 
     DeploymentPhaseStrategy.prototype.setSelectedShip = function (ship) {
         PhaseStrategy.prototype.setSelectedShip.call(this, ship);
-        var depTurn = shipManager.getTurnDeployed(ship);
-        if (depTurn < gamedata.turn) return;
+        var placeTurn = shipManager.getTurnPlaced(ship);
+        if (placeTurn < gamedata.turn) return;
 
         showDeploymentArea(ship, this.deploymentSprites, this.gamedata);
 
@@ -567,7 +570,7 @@ window.DeploymentPhaseStrategy = function () {
                 continue;
             }
 
-            if (shipManager.getTurnDeployed(ship) != gamedata.turn) continue; //We're only validating ships that deploy this turn!
+            if (shipManager.getTurnPlaced(ship) != gamedata.turn) continue; //We're only validating ships that pick their entry hex this turn!
 
             //Stage 7: flights queued for hangar deploy-start dock don't need a
             //hex position — they go straight into the carrier's hangar.

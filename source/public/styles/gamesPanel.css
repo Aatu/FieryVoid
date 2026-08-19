@@ -978,13 +978,16 @@
 }
 
 /* ══ Chat panel ═══════════════════════════════════════════════════════════════
-   Scoped to .chat-panel throughout, because chat.php is also included by game.php,
-   gamelobby.php and creategame.php and none of them should change. On games.php only,
-   .chat-panel is now a wrapper AROUND #globalchat rather than the same element.
+   ⚠️ WHAT THE CHAT PANEL LOOKS LIKE NO LONGER LIVES HERE. The log typography, the
+   composer bar, the emoji picker and the scrollbars all moved to styles/chat.css —
+   chat.php links that file itself, so creategame.php, gamelobby.php and game.php get
+   the same panel rather than the four different ones they used to have. Retune it
+   there and all four move together.
 
-   The panel is a flex column its rows fill edge to edge — head bar, scrolling log,
-   docked composer. Its own side padding is dropped and each row carries its own gutter,
-   so nothing floats in an inset box inside the panel.
+   What is left is games.php page layout only: .chat-panel is a wrapper AROUND
+   #globalchat rather than the same element (the head bar has to sit outside the
+   scrolling body, or it scrolls away with the log), and this page runs a wider gutter
+   than the shared default because its panel is 1000px across.
    ═══════════════════════════════════════════════════════════════════════════ */
 .chat-panel {
   display: flex;
@@ -1010,119 +1013,11 @@
   box-shadow: none;
 }
 
-.chat-panel .chatcontainer {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: visible;
-}
-
-/* chat.php's JS sets an inline pixel height here (container height - 20), which predates
-   the flex column and now fights it. !important is what it takes to beat an inline style;
-   the alternative is editing shared JS that three other pages depend on. */
-.chat-panel .chatMessages {
-  height: auto !important;
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;                 /* was `scroll`: a permanently empty scrollbar gutter */
-  padding: 10px 18px 10px;
-}
-
-.chat-panel .chatMessages::-webkit-scrollbar {
-  width: 8px;
-}
-
-.chat-panel .chatMessages::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.chat-panel .chatMessages::-webkit-scrollbar-thumb {
-  background: #2a4a66;
-  border-radius: 4px;
-}
-
-.chat-panel .chatMessages::-webkit-scrollbar-thumb:hover {
-  background: #3a6a96;
-}
-
-.chat-panel .chatmessage {
-  margin: 0 0 4px;
-  font-size: 12px;
-  line-height: 1.45;
-}
-
-/* Monospace + tabular-nums makes every timestamp the same width, so every username
-   starts at the same x and the log reads as a readout rather than as ragged prose. */
-.chat-panel .chattime {
-  font-family: var(--fv-mono);
-  font-size: 10px;
-  letter-spacing: 0;
-  color: #89a2b8;
-  font-variant-numeric: tabular-nums;
-}
-
-.chat-panel .chatuser {
-  font-family: var(--fv-display);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.7px;
-  text-transform: uppercase;
-  color: #8bcaf2;
-}
-
-.chat-panel .chatuser.mine {
-  color: #7ed576;
-}
-
-.chat-panel .chattext {
-  font-size: 13.5px;
-  color: #c8dced;
-}
-
-/* A composer bar docked to the foot of the panel, full width, rather than an input
-   floating inside a gutter. The input itself was the last raw browser control on the
-   page: `border: 0` on a white default, at the bottom of a dark panel. */
-.chat-panel .chatinputTd {
-  position: relative;
-  flex: none;
-  margin: 0;
-  padding: 9px 18px 10px;
-  background: rgba(4, 22, 28, 0.55);
-  border-top: 1px solid rgba(33, 90, 122, 0.55);
-}
-
-.chat-panel .chatinputTd::before {
-  content: "\203A";
-  position: absolute;
-  left: 27px;                       /* the bar's 18px gutter + the input's 9px */
-  top: 50%;
-  transform: translateY(-50%);
-  font-family: var(--fv-mono);
-  font-size: 15px;
-  line-height: 1;
-  color: var(--fv-accent);
-  pointer-events: none;
-}
-
-.chat-panel .chatinput {
-  box-sizing: border-box;
-  height: 30px;
-  padding: 0 10px 0 23px;
-  background: #04161c;
-  color: var(--fv-text);
-  border: 1px solid var(--fv-line-scs);
-  border-radius: 2px;
-  font-size: 13px;
-}
-
-.chat-panel .chatinput::placeholder {
-  color: #5f7688;
-}
-
-.chat-panel .chatinput:focus {
-  outline: none;
-  border-color: var(--fv-accent);
-  box-shadow: 0 0 0 1px rgba(139, 202, 242, 0.35);
+/* The one inset the head bar, the log and the composer all share, so the three line
+   up on a single left edge. Set on the .fv-chat element; chat.css reads it from
+   there for every row (and for the ">" prompt's offset). */
+.chat-panel .fv-chat {
+  --fv-chat-gutter: 18px;
 }
 
 /* ── Header: Logout ───────────────────────────────────────────────────────────
@@ -1223,15 +1118,16 @@
     padding: 7px 15px 6px;
   }
 
-  .chat-panel .fv-panel-head,
-  .chat-panel .chatMessages,
-  .chat-panel .chatinputTd {
-    padding-left: 15px;
-    padding-right: 15px;
+  /* One value, and the log, the composer and the ">" prompt all follow it — the head
+     bar is the only row still on its own padding, because it is .fv-panel-head (this
+     page's furniture) rather than one of chat.css's rows. */
+  .chat-panel .fv-chat {
+    --fv-chat-gutter: 15px;
   }
 
-  .chat-panel .chatinputTd::before {
-    left: 24px;
+  .chat-panel .fv-panel-head {
+    padding-left: 15px;
+    padding-right: 15px;
   }
 
   /* ── Header: account row ────────────────────────────────────────────────────

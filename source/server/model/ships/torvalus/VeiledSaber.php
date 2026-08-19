@@ -72,7 +72,7 @@ class VeiledSaber extends MediumShip{
 				9 => "Shading Field",
 				10 => "Transverse Drive",
 				11 => "Self Repair",
-				13 => "Scanner",                
+				13 => "ELINT Scanner",                
 				16 => "Engine",
 				19 => "Reactor",
 				20 => "C&C",
