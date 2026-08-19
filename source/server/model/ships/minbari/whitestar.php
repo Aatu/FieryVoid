@@ -64,7 +64,7 @@ class WhiteStar extends MediumShip{
 			8 => "Thruster",
 			10 => "Jammer",
 			12 => "Tractor Beam",
-			14 => "Sensors",
+			14 => "Scanner",
 			16 => "Engine",
 			17 => "Hangar",
 			19 => "Reactor",

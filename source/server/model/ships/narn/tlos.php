@@ -77,7 +77,7 @@ class Tlos extends BaseShip{
 			1=> array(
 				5 => "Thruster",
 				7 => "Light Pulse Cannon",
-				10 => "Cargo Bay A-D",
+				10 => "Cargo Bay",
 				18 => "Structure",
 				20 => "Primary",
 			),
@@ -89,13 +89,13 @@ class Tlos extends BaseShip{
 			),
 			3=> array(
 				4 => "Thruster",
-				9 => "Cargo Bay A-C",
+				9 => "Cargo Bay",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			4=> array(
 				4 => "Thruster",
-				9 => "Cargo Bay D-F",
+				9 => "Cargo Bay",
 				18 => "Structure",
 				20 => "Primary",
 			),

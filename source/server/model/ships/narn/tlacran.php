@@ -58,8 +58,7 @@ class Tlacran extends MediumShip{
         		),
         		1=> array(
         				4 => "Thruster",
-        				6 => "Medium Plasma Cannon",
-        				8 => "Light Particle Beam",
+        				7 => "Light Pulse Cannon",
         	        	9 => "C&C",	
         	        	10 => "Hangar",		
         				17 => "Structure",
