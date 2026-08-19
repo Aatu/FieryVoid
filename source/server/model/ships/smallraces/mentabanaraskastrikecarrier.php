@@ -94,14 +94,14 @@ class mentabanAraskaStrikeCarrier extends BaseShip{
                 ),
                 3=> array(
                         4 => "Thruster",
-                        6 => "Medium Railgun",
+                        6 => "Railgun",
                         8 => "Standard Particle Beam",
                         18 => "Structure",
                         20 => "Primary",
                 ),
                 4=> array(
                         4 => "Thruster",
-                        6 => "Medium Railgun",
+                        6 => "Railgun",
                         8 => "Standard Particle Beam",
                         18 => "Structure",
                         20 => "Primary",

@@ -92,7 +92,7 @@ class GromeGrothAM extends BaseShip{
 		$this->hitChart = array(
 			0=> array(
 					6 => "Structure",
-					20 => "Targeting Array",
+					8 => "Targeting Array",
 					10 => "Jump Engine",
 					13 => "Engine",
 					16 => "Scanner",

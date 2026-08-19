@@ -55,7 +55,7 @@ class Transbird extends HeavyCombatVesselLeftRight{
 			0=> array(
 				8 => "Structure",
 				11 => "2:Thruster",
-				12 => "Cargo Bay",
+				12 => "TAG:Cargo Bay",
 				14 => "Scanner",
 				16 => "Engine",
 				17 => "Hangar",

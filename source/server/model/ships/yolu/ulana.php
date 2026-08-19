@@ -82,7 +82,7 @@ class Ulana extends BaseShip{
         		),
         		2=> array(
         				6 => "Thruster",
-        				9 => "Heavy Fusion Cannon",
+        				9 => "Molecular Disruptor",
         				18 => "Structure",
         				20 => "Primary",
         		),

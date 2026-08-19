@@ -45,7 +45,7 @@ class Hemsar extends OSAT
                 0=> array(
                         8 => "Structure",
                         10 => "2:Thruster",
-						12 => "1:DualPlasmaCannon",
+						12 => "1:Dual Plasma Cannon",
 						14 => "1:Light Plasma Cannon",
 						16 => "1:Light Particle Beam",
 						18 => "Scanner",

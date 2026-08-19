@@ -82,7 +82,7 @@ class HyperionRail extends BaseShip{
                 ),
                 1=> array(
                         4 => "Thruster",
-                        7 => "Medium Plasma Cannon",
+                        7 => "Railgun",
                         12 => "Interceptor I",
                         18 => "Structure",
                         20 => "Primary",

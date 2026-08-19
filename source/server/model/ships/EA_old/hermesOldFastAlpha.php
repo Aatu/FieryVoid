@@ -83,14 +83,14 @@ class HermesOldFastAlpha extends HeavyCombatVessel{
                 1=> array(
                         4 => "Thruster",
                         6 => "Light Particle Beam",
-                        8 => "Interceptor I",
+                        8 => "Interceptor Prototype",
                         18 => "Structure",
                         20 => "Primary",
                 ),
                 2=> array(
                         6 => "Thruster",
                         8 => "Light Particle Beam",
-                        10 => "Interceptor I",
+                        10 => "Interceptor Prototype",
                         12 => "Cargo Bay",
                         18 => "Structure",
                         20 => "Primary",

@@ -83,7 +83,8 @@ class HyachSenchlatKirNew extends HeavyCombatVessel{
 			$this->addAftSystem($LauncherE);
 		$TargeterE->addTag("Aft Proximity Laser");	
         */	
-		$this->addAftSystem(new ProximityLaserNew(3, 0, 0, 120, 300));         		
+		$this->addAftSystem(new ProximityLaserNew(3, 0, 0, 120, 300));
+        $this->addAftSystem(new Maser(2, 6, 3, 90, 270));                 		
         $this->addAftSystem(new GraviticThruster(4, 32, 0, 10, 2));
         $this->addAftSystem(new Interdictor(2, 4, 1, 90, 270));
 		$this->addAftSystem(new ProximityLaserNew(3, 0, 0, 60, 240));         

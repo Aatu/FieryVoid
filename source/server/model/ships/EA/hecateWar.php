@@ -82,7 +82,7 @@ class HecateWar extends BaseShip{
                 ),
                 1=> array(
                         4 => "Thruster",
-                        8 => "Medium Bolter-Pulse Array",
+                        8 => "Medium Bolt-Pulse Array",
                         12 => "Interceptor II",
                         18 => "Structure",
                         20 => "Primary",
@@ -96,15 +96,15 @@ class HecateWar extends BaseShip{
                 ),
                 3=> array(
                         4 => "Thruster",
-                        9 => "Heavy Bolter-Pulse Array",
-                        11 => "Light Bolter-Pulse Array",
+                        9 => "Heavy Bolt-Pulse Array",
+                        11 => "Light Bolt-Pulse Array",
                         18 => "Structure",
                         20 => "Primary",
                 ),
                 4=> array(
                         4 => "Thruster",
-                        9 => "Heavy Bolter-Pulse Array",
-                        11 => "Light Bolter-Pulse Array",
+                        9 => "Heavy Bolt-Pulse Array",
+                        11 => "Light Bolt-Pulse Array",
                         18 => "Structure",
                         20 => "Primary",
                 ),

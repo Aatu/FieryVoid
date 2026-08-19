@@ -82,7 +82,7 @@ class ShipCarrierCubeHvy extends BaseShip{
 	//$this->addRightSystem(new Hangar(4, 18));
 		$hangar2 = new Hangar(4, 18);
 		$hangar2->directions = array(0, 3); 
-		$this->addLeftSystem($hangar2);		 	
+		$this->addRightSystem($hangar2);		 	
 	    
 		
 		

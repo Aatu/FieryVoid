@@ -108,7 +108,7 @@ class baradaTomguScoutCruiser extends BaseShip{
 			),
 			2=> array(
 				8 => "Thruster",
-				10 => "Light Particle Beam",
+				10 => "Standard Particle Beam",
 				18 => "Structure",
 				20 => "Primary",
 			),

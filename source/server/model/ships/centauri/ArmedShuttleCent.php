@@ -8,7 +8,7 @@ class ArmedShuttleCent extends FighterFlight{
         $this->faction = "Centauri Republic";
         $this->phpclass = "ArmedShuttleCent";
         $this->shipClass = "Armed Shuttles";
-        $this->imagePath = "img/ships/ShuttleCent.png";
+        $this->imagePath = "img/ships/shuttleCent.png";
         $this->isd = 2200;
         
 		Enhancements::nonstandardEnhancementSet($this, 'Shuttles');
@@ -37,7 +37,7 @@ class ArmedShuttleCent extends FighterFlight{
             $armour = array(0, 0, 0, 0);
             $fighter = new Fighter("ArmedShuttleCent", $armour, 10, $this->id);
             $fighter->displayName = "Armed Shuttle";
-            $fighter->imagePath = "img/ships/ShuttleCent.png";
+            $fighter->imagePath = "img/ships/shuttleCent.png";
             $fighter->iconPath = "img/ships/ShuttleCent_large.png";
 
             $frontGun = new PairedParticleGun(330, 30, 2, 1); //1 gun d6+2

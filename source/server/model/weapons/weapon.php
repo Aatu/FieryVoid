@@ -1977,6 +1977,19 @@ public function getStartLoading()
     }
     */
 
+    /* DEAD CODE, commented out 2026-08-18. A parallel, never-called reimplementation of
+    interception accounting. The authoritative number is $fireOrder->totalIntercept, summed by
+    Firing::addToInterceptionTotal (which uses getInterceptionMod above) and applied in
+    fireOrderResolution below. Verified dead: `getIntercept(` appears nowhere in the repo except
+    this declaration - no overrides, no call_user_func, no variable-method dispatch.
+
+    Kept rather than deleted because it records the ORIGINAL intent for two things this plan
+    relies on: interception is counted against a FIRE ORDER id (`$fire->targetid == $fireOrder->id`
+    with `type == "intercept"` only - never selfIntercept, whose targetid is a SHIP id), and
+    degradation is skipped for ballistic / noInterceptDegradation targets. Note it never grew the
+    $doInterceptDegradation clause that getInterceptionMod has, which is one reason it must not be
+    revived as-is. See MANUAL_INTERCEPTION_PLAN.md.
+
     public function getIntercept($gamedata, $fireOrder)
     {
         $count = 0;
@@ -2019,6 +2032,7 @@ public function getStartLoading()
 
         return $intercept;
     }
+    */
 
 
     public function getInterceptRating($turn)

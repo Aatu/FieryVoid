@@ -3934,6 +3934,19 @@ window.weaponManager = {
         return fires;
     },
 
+    /* Every intercept order committed against ONE fire order, by its DB id. Feeds the combat log's
+       per-shot "intercepted by" list (getIncomingFireAgainst).
+
+       `id` is a FIRE ORDER id, so only type 'intercept' can match it: an 'intercept' order's
+       targetid is the id of the shot it is stopping, whereas a 'selfIntercept' order's targetid is
+       the interceptor's OWN SHIP id (see weaponManager.setSelfIntercept and the
+       doMultipleSelfIntercept overrides - all five set `targetid: ship.id`). The old condition also
+       tested for selfIntercept here; that clause could never legitimately match and fired only when
+       a tac_ship.id happened to collide with a tac_fireorder.id, listing an unrelated weapon as an
+       interceptor of this shot. Same id-space confusion as the one fixed in
+       Firing::automateIntercept's totals loop, and the server's own counters have always tested
+       'intercept' alone. Nothing is lost: a selfIntercept marker that actually intercepted is given
+       a REAL intercept order by Firing::automateIntercept, and that order is what belongs here. */
     getInterceptingFiringOrders: function getInterceptingFiringOrders(id) {
         var intercepts = Array();
 
@@ -3942,7 +3955,7 @@ window.weaponManager = {
             var fires = weaponManager.getAllFireOrders(ship);
             for (var i in fires) {
                 var fire = fires[i];
-                if (fire.targetid == id && fire.turn == gamedata.turn && fire.type == "intercept" || fire.type == "selfIntercept" && fire.targetid == id && fire.turn == gamedata.turn) {
+                if (fire.type == "intercept" && fire.targetid == id && fire.turn == gamedata.turn) {
                     intercepts.push(fire);
                 }
             }

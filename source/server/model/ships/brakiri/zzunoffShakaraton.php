@@ -88,7 +88,7 @@ class zzunoffShakaraton extends BaseShip{
 					4 => "Thruster",
 					5 => "Gravitic Shield",
 					7 => "Graviton Pulsar",
-					10 => "Gravitic Cannon",
+					10 => "TAG:Gravitic Cannon",
 					18 => "Structure",
 					20 => "Primary",
 			),

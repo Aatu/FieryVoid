@@ -9,7 +9,7 @@ class wlcChlonasForVoraScout extends BaseShipNoAft{
         $this->imagePath = "img/ships/ChlonasForVora.png";
         $this->canvasSize = 200;
         $this->shipClass = "For'Vora Scout";
-        $this->fighters = array("heavy" => 12);
+        //$this->fighters = array("heavy" => 12);
         $this->forwardDefense = 14;
         $this->sideDefense = 16;
         $this->turncost = 0.66;
@@ -17,12 +17,13 @@ class wlcChlonasForVoraScout extends BaseShipNoAft{
         $this->accelcost = 3;
         $this->rollcost = 3;
         $this->pivotcost = 3;
+		$this->variantOf = "OBSOLETE";
 	    
-	$this->faction = "Ch'Lonas Cooperative";
-        $this->variantOf = "Tra'Vora Light Cruiser";
-	$this->occurence = "uncommon";
-	$this->isd = 2215;
-	$this->unofficial = true;
+		$this->faction = "Ch'Lonas Cooperative";
+			//$this->variantOf = "Tra'Vora Light Cruiser";
+		$this->occurence = "uncommon";
+		$this->isd = 2215;
+		$this->unofficial = true;
         
         $this->iniativebonus = 15;
         $this->addPrimarySystem(new Reactor(5, 17, 0, 0));

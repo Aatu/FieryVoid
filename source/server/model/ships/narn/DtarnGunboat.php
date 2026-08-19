@@ -46,7 +46,7 @@ class DtarnGunboat extends LCV{
         		0=> array( //should never happen (...but actually sometimes does!)
         				10 => "Structure",
         				12 => "1:Medium Plasma Cannon",
-        				15 => "1:Light Particle Beam",
+        				15 => "1:Light Plasma Cannon",
         				17 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
@@ -54,7 +54,7 @@ class DtarnGunboat extends LCV{
         		1=> array( //PRIMARY hit table, effectively
         				10 => "Structure",
         				12 => "1:Medium Plasma Cannon",
-        				15 => "1:Light Particle Beam",
+        				15 => "1:Light Plasma Cannon",
         				17 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
@@ -62,7 +62,7 @@ class DtarnGunboat extends LCV{
         		2=> array( //same as Fwd
         				10 => "Structure",
         				12 => "1:Medium Plasma Cannon",
-        				15 => "1:Light Particle Beam",
+        				15 => "1:Light Plasma Cannon",
         				17 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",

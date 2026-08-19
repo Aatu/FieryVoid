@@ -10,11 +10,22 @@ declare(strict_types=1);
  */
 
 //// ─── Output Compression ─────────────────────────────────────────────
-if (!headers_sent() && !ini_get('zlib.output_compression')) {
-    ob_start('ob_gzhandler');
-} else {
-    ob_start();
-}
+// Compression is left ENTIRELY to global.php, which starts its own buffer and registers
+// fv_compress_output() as a shutdown function.
+//
+// This file used to open an ob_gzhandler buffer HERE, i.e. BEFORE global.php, which made it
+// the OUTER buffer — the opposite nesting to every other script that uses ob_gzhandler
+// (gamedata.php, chatdata.php, playerChatInfo.php all open theirs AFTER global.php, so the
+// gz buffer is the inner one and fv_compress_output correctly sees Content-Encoding already
+// set and passes the body straight through).
+//
+// With the nesting inverted the response was compressed TWICE: at shutdown
+// fv_compress_output() popped global.php's inner buffer, brotli-compressed it, sent
+// 'Content-Encoding: br' plus an explicit Content-Length, and echoed the brotli bytes into
+// the still-open ob_gzhandler buffer — which then gzipped those brotli bytes, overwrote the
+// header with 'Content-Encoding: gzip', and left the now-wrong Content-Length in place. The
+// client was told "gzip" for a body that gunzips to brotli, with a length that matches
+// neither. Deleting the outer buffer restores the single, correct compression pass.
 
 // ----------------------
 // High Resource Limits for Generator
@@ -94,6 +105,14 @@ $genLog('boot (before includes)');
 //// ─── Includes ──────────────────────────────────────────────────────
 define('IN_STATIC_GENERATION', true);
 require_once __DIR__ . '/source/public/global.php';
+
+// Access gate. This URL is publicly reachable and starts a multi-minute job that
+// instantiates every ship in the game and rewrites ~180 files, so it must not be runnable
+// by anyone who stumbles onto it. CLI is exempt inside requireAccess(), and the check runs
+// straight after global.php because that is what loads varconfig.php (where the key lives).
+// See MaintenanceGate for why it must not load varconfig itself.
+require_once __DIR__ . '/source/server/lib/MaintenanceGate.php';
+MaintenanceGate::requireAccess('Static ship file generator');
 
 // Compaction + brotli pre-compression now live in ONE shared place (ShipCompactor) so
 // this generator and generateStaticShipFile.php can no longer drift apart. They already

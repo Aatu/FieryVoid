@@ -78,7 +78,7 @@ class BALCVCarrier extends BaseShip{
                 0=> array(
                         7 => "Structure",
                         9 => "Jump Engine",
-                        12 => "ELINT Scanner",
+                        12 => "Scanner",
                         15 => "Engine",
                         18 => "Reactor",
                         20 => "C&C",

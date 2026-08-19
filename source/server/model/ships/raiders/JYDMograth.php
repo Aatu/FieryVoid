@@ -54,7 +54,7 @@ class JYDMograth extends MediumShip{
 		$this->hitChart = array(
                 0=> array(
                         7 => "Thruster",
-                        9 => "Standard Parmticle Beam",
+                        9 => "Standard Particle Beam",
                         12 => "Scanner",
 						15 => "Engine",
                         16 => "Hangar",

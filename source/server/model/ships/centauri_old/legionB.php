@@ -47,7 +47,7 @@ class LegionB extends OSAT{
 			14 => "1:Imperial Laser",
 			16 => "1:Light Particle Beam",
 			18 => "Scanner",
-			30 => "Reactor",
+			20 => "Reactor",
 		),
 	);	    
 	    

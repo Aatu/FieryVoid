@@ -66,12 +66,6 @@ class vorlonAsteroidDefenseGrid extends OSAT{
 				19 => "0:Power Capacitor",
 				20 => "0:Self Repair",
 			),
-			1=> array(
-				20 => "Primary",
-			),
-			2=> array(
-				20 => "Primary",
-			),
         );
     }
 }

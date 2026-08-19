@@ -3344,7 +3344,7 @@ class SecondaryCnC extends ShipSystem{
 
 class FlagBridge extends CnC implements SpecialAbility {
     public $name = "cnC";
-    public $displayName = "CnC";
+    public $displayName = "C&C";
     
     public $initiativeBonus = 1;
     public $bonusType = 'Generic';

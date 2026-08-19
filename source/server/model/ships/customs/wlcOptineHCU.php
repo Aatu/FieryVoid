@@ -31,7 +31,7 @@ class wlcOptineHCU extends BaseShip{
     
 		$this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
 		$this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
-		$this->addFrontSystem(new Hangar(4, 6));
+		$this->addFrontSystem(new Hangar(4, 12));
 		$this->addFrontSystem(new AssaultLaser(3, 6, 4, 300, 60));
 		$this->addFrontSystem(new BattleLaser(3, 6, 6, 300, 60));
 		$this->addFrontSystem(new BattleLaser(3, 6, 6, 300, 60));

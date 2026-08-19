@@ -46,14 +46,32 @@ class TlosEarly extends BaseShip{
         $this->addAftSystem(new Thruster(4, 9, 0, 2, 2));
 		
         $this->addLeftSystem(new Thruster(4, 15, 0, 4, 3));
-        $this->addLeftSystem(new CargoBay(2, 45));        
-        $this->addLeftSystem(new CargoBay(2, 45));        
-        $this->addLeftSystem(new CargoBay(2, 45));        
+        $cargo1 = new CargoBay(2, 45);
+		$cargo1->startArc = 180;
+		$cargo1->endArc = 360;
+		$this->addLeftSystem($cargo1);        
+        $cargo2 = new CargoBay(2, 45);
+		$cargo2->startArc = 180;
+		$cargo2->endArc = 360;
+		$this->addLeftSystem($cargo2);        
+        $cargo3 = new CargoBay(2, 45);
+		$cargo3->startArc = 180;
+		$cargo3->endArc = 360;
+		$this->addLeftSystem($cargo3);         
              			  
 		$this->addRightSystem(new Thruster(4, 15, 0, 4, 4));
-        $this->addRightSystem(new CargoBay(2, 45));        
-        $this->addRightSystem(new CargoBay(2, 45));        
-        $this->addRightSystem(new CargoBay(2, 45));        
+        $cargo1 = new CargoBay(2, 45);
+		$cargo1->startArc = 0;
+		$cargo1->endArc = 180;
+		$this->addRightSystem($cargo1);        
+        $cargo2 = new CargoBay(2, 45);
+		$cargo2->startArc = 0;
+		$cargo2->endArc = 180;
+		$this->addRightSystem($cargo2);        
+        $cargo3 = new CargoBay(2, 45);
+		$cargo3->startArc = 0;
+		$cargo3->endArc = 180;
+		$this->addRightSystem($cargo3);        
 
 		//structures
         $this->addFrontSystem(new Structure(4, 44));
@@ -75,7 +93,7 @@ class TlosEarly extends BaseShip{
 			1=> array(
 				5 => "Thruster",
 				7 => "Light Particle Beam",
-				10 => "Cargo Bay A-D",
+				10 => "TAG:Cargo Bay",
 				18 => "Structure",
 				20 => "Primary",
 			),
@@ -87,13 +105,13 @@ class TlosEarly extends BaseShip{
 			),
 			3=> array(
 				4 => "Thruster",
-				9 => "Cargo Bay A-C",
+				9 => "Cargo Bay",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			4=> array(
 				4 => "Thruster",
-				9 => "Cargo Bay D-F",
+				9 => "Cargo Bay",
 				18 => "Structure",
 				20 => "Primary",
 			),

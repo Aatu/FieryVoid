@@ -86,7 +86,7 @@ class Torsha extends BaseShip{
 			),
 			2=> array(
 					6 => "Thruster",
-					8 => "Graviton Pulsar",
+					8 => "TAG:Graviton Pulsar",
 					18 => "Structure",
 					20 => "Primary",
 			),

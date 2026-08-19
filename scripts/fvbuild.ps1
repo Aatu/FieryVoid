@@ -15,7 +15,8 @@
 
   -Check is the pre-deploy gate and writes nothing: it regenerates the
   autoload map to a temp file and byte-compares it against the committed one,
-  then runs the replay harness over the local game corpus.
+  runs the ship-data validator over every ship blueprint, then runs the replay
+  harness over the local game corpus.
 
   Every docker exec passes -w /usr/src/current. Without it, commands run in
   the container-local throwaway copy (/usr/src/fieryvoid) and their output
@@ -131,7 +132,7 @@ if ($doClient) {
 
 # ---- pre-deploy gate (writes nothing)
 if ($Check) {
-    Write-Host "`n=== check 1/2: committed autoload map up to date? ===" -ForegroundColor Cyan
+    Write-Host "`n=== check 1/3: committed autoload map up to date? ===" -ForegroundColor Cyan
     # Generate beside the real map (phpab writes paths relative to the output
     # file, so the temp copy must live in source/ to be byte-comparable),
     # compare, then delete the temp file whatever the outcome.
@@ -139,7 +140,16 @@ if ($Check) {
     if ($LASTEXITCODE -ne 0) { Fail 'source/autoload.php is STALE (or generation failed) - run fvbuild.ps1 -Autoload and commit the result' }
     Write-Host 'autoload map is up to date.'
 
-    Write-Host "`n=== check 2/2: replay harness ===" -ForegroundColor Cyan
+    # Ship blueprints. Cheap (~25s, no database) and it runs BEFORE the replay
+    # harness because a broken hit-chart entry or a duplicate roll key would
+    # otherwise surface as a puzzling damage diff there rather than as itself.
+    # It compares against tests/shipdata/baseline.txt and only fails on findings
+    # that are NOT already accepted there.
+    Write-Host "`n=== check 2/3: ship-data validator ===" -ForegroundColor Cyan
+    docker exec -w /usr/src/current $Container php checkShipData.php
+    if ($LASTEXITCODE -ne 0) { Fail 'ship-data validator found NEW violations - fix them, or run "php checkShipData.php --record" to accept them into tests/shipdata/baseline.txt (and commit that)' }
+
+    Write-Host "`n=== check 3/3: replay harness ===" -ForegroundColor Cyan
     docker exec -w /usr/src/current $Container php tests/replay/replayHarness.php check
     if ($LASTEXITCODE -ne 0) { Fail 'replay harness found differences - do not deploy' }
 
