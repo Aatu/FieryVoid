@@ -35,7 +35,7 @@ class JonkurFreighter extends MediumShip{
 
         $this->addFrontSystem(new Thruster(2, 6, 0, 2, 1));
         $this->addFrontSystem(new Thruster(2, 6, 0, 2, 1));
-        $this->addFrontSystem(new Hangar(2, 1, 1));
+        $this->addFrontSystem(new Hangar(2, 2, 1));
         $this->addFrontSystem(new CargoBay(1, 25));
         $this->addFrontSystem(new CargoBay(1, 25));
 
