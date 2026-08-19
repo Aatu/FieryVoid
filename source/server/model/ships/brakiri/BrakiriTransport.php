@@ -84,13 +84,13 @@ class BrakiriTransport extends BaseShip{
         		),
         		2=> array(
         				4 => "Gravitic Bolt",
-        				8 => "Cargo",
+        				8 => "Cargo Bay",
         				18 => "Structure",
         				20 => "Primary",
         		),
         		3=> array(
         				3 => "1:Thruster",
-        				6 => "Port Thruster",
+        				6 => "Thruster",
         				8 => "2:Thruster",
         				13 => "Cargo Bay",
         				18 => "Structure",
@@ -98,7 +98,7 @@ class BrakiriTransport extends BaseShip{
         		),
         		4=> array(
         				3 => "1:Thruster",
-        				6 => "Port Thruster",
+        				6 => "Thruster",
         				8 => "2:Thruster",
         				13 => "Cargo Bay",
         				18 => "Structure",

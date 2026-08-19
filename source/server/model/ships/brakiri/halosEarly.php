@@ -86,14 +86,14 @@ class HalosEarly extends BaseShip{
 			3=> array(
 					4 => "Thruster",
 					6 => "Gravitic Bolt",
-					8 => "Graviton Pulsar",
+					8 => "Gravitic Cannon",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			4=> array(
 					4 => "Thruster",
 					6 => "Gravitic Bolt",
-					8 => "Graviton Pulsar",
+					8 => "Gravitic Cannon",
 					18 => "Structure",
 					20 => "Primary",
 			),

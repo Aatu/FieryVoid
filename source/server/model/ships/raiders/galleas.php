@@ -93,7 +93,7 @@ class Galleas extends BaseShip{
         		),
         		3=> array(
         				3 => "1:Thruster",
-        				6 => "Port Thruster",
+        				6 => "Thruster",
         				8 => "2:Thruster",
         				11 => "Twin Array",
         				13 => "Hangar",
@@ -102,7 +102,7 @@ class Galleas extends BaseShip{
         		),
         		4=> array(
         				3 => "1:Thruster",
-        				6 => "Port Thruster",
+        				6 => "Thruster",
         				8 => "2:Thruster",
         				11 => "Twin Array",
         				13 => "Hangar",

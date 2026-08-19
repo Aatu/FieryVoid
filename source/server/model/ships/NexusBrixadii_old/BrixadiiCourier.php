@@ -50,7 +50,7 @@ class BrixadiiCourier extends LCV{
         		0=> array( 
         				11 => "Structure",
 						12 => "1:Light Particle Projector",
-        				15 => "1:Cargo",
+        				15 => "1:Cargo Bay",
         				18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
@@ -58,7 +58,7 @@ class BrixadiiCourier extends LCV{
         		1=> array( //redirect to PRIMARY
         				11 => "Structure",
 						12 => "1:Light Particle Projector",
-        				15 => "1:Cargo",
+        				15 => "1:Cargo Bay",
         				18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",
@@ -66,7 +66,7 @@ class BrixadiiCourier extends LCV{
         		2=> array( //redirect to PRIMARY
         				11 => "Structure",
 						12 => "1:Light Particle Projector",
-        				15 => "1:Cargo",
+        				15 => "1:Cargo Bay",
         				18 => "0:Engine",
         				19 => "0:Reactor",
         				20 => "0:Scanner",

@@ -51,7 +51,7 @@ class JonkurRefit extends MediumShip{
 	$this->hitChart = array(
 		0=> array(
 			9 => "Thruster",
-			12 => "Scatter Pulsar",
+			12 => "Light Laser",
 			14 => "Scanner",
 			16 => "Engine",
 			19 => "Reactor",

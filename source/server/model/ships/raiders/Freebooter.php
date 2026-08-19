@@ -71,7 +71,7 @@ class Freebooter extends HeavyCombatVesselLeftRight{
 			3=> array(
 					4 => "Thruster",
 					6 => "Standard Particle Beam",
-					8 => "Medium Laser Cannon",
+					8 => "Medium Laser",
 					10 => "Light Particle Beam",
 					11 => "Hangar",
 					12 => "Cargo Bay",
@@ -81,7 +81,7 @@ class Freebooter extends HeavyCombatVesselLeftRight{
 			4=> array(
 					4 => "Thruster",
 					6 => "Standard Particle Beam",
-					8 => "Medium Laser Cannon",
+					8 => "Medium Laser",
 					10 => "Light Particle Beam",
 					11 => "Hangar",
 					12 => "Cargo Bay",

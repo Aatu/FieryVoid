@@ -67,7 +67,7 @@ class AdvancedSeffensa extends BaseShip{
             ),
             1=> array(
                     3 => "Thruster",
-                    5 => "Adv. Assault Laser",
+                    5 => "Advanced Assault Laser",
 					9 => "Advanced Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
@@ -80,7 +80,7 @@ class AdvancedSeffensa extends BaseShip{
             ),
             3=> array(
                     3 => "Thruster",
-					6 => "Advanced Assault Laser",
+                    5 => "Advanced Assault Laser",
 					9 => "Improved Ion Cannon",
                     18 => "Structure",
                     20 => "Primary",

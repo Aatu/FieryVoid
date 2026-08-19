@@ -50,7 +50,7 @@ class JonkurFreighter extends MediumShip{
 	$this->hitChart = array(
 		0=> array(
 			9 => "Thruster",
-			12 => "Light Laser",
+			12 => "Scatter Pulsar",
 			14 => "Scanner",
 			16 => "Engine",
 			19 => "Reactor",

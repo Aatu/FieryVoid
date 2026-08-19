@@ -79,7 +79,7 @@ class MishakurB extends BaseShip{
                     12 => "Jump Engine",
                     14 => "Scanner",
                     16 => "Engine",
-                    17 => "Primary Hangar",
+                    17 => "Hangar",
                     19 => "Reactor",
                     20 => "C&C",
                 ),
@@ -93,7 +93,7 @@ class MishakurB extends BaseShip{
                 ),
                 2=> array(
                     6 => "Thruster",
-                    8 => "Aft Hangar",
+                    8 => "Hangar",
                     10 => "Scatter Pulsar",
                     12 => "Engine",
                     18 => "Structure",
@@ -102,7 +102,7 @@ class MishakurB extends BaseShip{
                 3=> array(
                     4 => "Thruster",
                     6 => "Heavy Bolter",
-                    8 => "Port/Stb Hangar",
+                    8 => "Hangar",
                     10 => "Scatter Pulsar",
                     18 => "Structure",
                     20 => "Primary",
@@ -110,7 +110,7 @@ class MishakurB extends BaseShip{
                 4=> array(
                     4 => "Thruster",
                     6 => "Heavy Bolter",
-                    8 => "Port/Stb Hangar",
+                    8 => "Hangar",
                     10 => "Scatter Pulsar",
                     18 => "Structure",
                     20 => "Primary",

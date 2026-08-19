@@ -96,7 +96,7 @@ class KellyTrekConstitution extends HeavyCombatVessel{
             1=> array(
 				2 => "Shield Projector",
 				4 => "Photon Torpedo",
-				7 => "Phaser",
+				7 => "Type 6 Phaser",
 				8 => "Tractor Beam",
 				18 => "Structure",
 				20 => "Primary",
@@ -104,7 +104,7 @@ class KellyTrekConstitution extends HeavyCombatVessel{
             2=> array(
 				2 => "Shield Projector",
 				7 => "Nacelle",
-				9 => "Phaser",
+				9 => "Type 6 Phaser",
 				18 => "Structure",
 				20 => "Primary",
             ),
