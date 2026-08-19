@@ -1530,6 +1530,11 @@ class HangarOps {
 			if (self::lcvDockedOn($rail) !== null) break;   //rail already occupied
 			$lcv = $gamedata->getShipById($shipId);
 			if (!$lcv || !self::isLCVUnit($lcv)) continue;
+			/* A deploy-docked LCV starts aboard, so it has to join the board on the same turn as
+			   its carrier. Both being PLACED this turn is not enough - turn-1 and turn-2 units are
+			   both placed on turn 1 (see validateDeployBayOrders for the same guard on the fighter
+			   path). The client gate is the only other check on this route, so mirror it here. */
+			if ($lcv->getTurnDeployed($gamedata) != $carrier->getTurnDeployed($gamedata)) continue;
 
 			$lcv->removed = true;
 			$lcv->removedTurn = $gamedata->turn;
@@ -5941,8 +5946,17 @@ class HangarOps {
 		if ($carrier->isDestroyed() || $carrier->removed) { $reason = 'carrier not in play'; return false; }
 		if ((int)$flight->slot   !== (int)$carrier->slot)   { $reason = 'slot mismatch';  return false; }
 		if ((int)$flight->userid !== (int)$carrier->userid) { $reason = 'owner mismatch'; return false; }
-		if ($flight->getTurnDeployed($gamedata) != $gamedata->turn) { $reason = 'flight not deploying this turn'; return false; }
-		if ($carrier->getTurnDeployed($gamedata) != $gamedata->turn) { $reason = 'carrier not deploying this turn'; return false; }
+		//PLACEMENT turn, not arrival turn: a late slot picks its entry hexes (and queues its
+		//deploy-start docks) the turn BEFORE it arrives - see BaseShip::getTurnPlaced.
+		if ($flight->getTurnPlaced($gamedata) != $gamedata->turn) { $reason = 'flight not placing this turn'; return false; }
+		if ($carrier->getTurnPlaced($gamedata) != $gamedata->turn) { $reason = 'carrier not placing this turn'; return false; }
+		/* ...and they must ARRIVE together, which the two placement tests above do NOT imply.
+		   Turn-1 and turn-2 units are both PLACED on turn 1, so without this a turn-1 fighter
+		   could be docked into a turn-2 carrier (and vice versa) - it would have to be aboard a
+		   ship that does not exist yet. The old code tested getTurnDeployed on both sides and got
+		   this for free. Same-slot is not a substitute: a base/OSAT arrives on turn 1 even in a
+		   late slot, so one slot can hold two arrival turns. */
+		if ($flight->getTurnDeployed($gamedata) != $carrier->getTurnDeployed($gamedata)) { $reason = 'flight and carrier arrive on different turns'; return false; }
 
 		$activeCount = $flight->countActiveCraft($gamedata->turn);
 		if ($activeCount <= 0) { $reason = 'flight has no craft'; return false; }

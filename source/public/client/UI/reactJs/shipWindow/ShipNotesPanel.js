@@ -62,7 +62,7 @@ const Block = styled.div`
     background-color: ${theme.colors.panelBgGlass};
     /*$gold: the Enhancements block matches its bronze header border (user request
       2026-07-18) so the whole panel reads as the gold-accented one*/
-    border: 1px dotted ${props => props.$gold ? '#8a6d3b' : theme.colors.line};
+    border: 1px dotted ${props => props.$gold ? theme.colors.enhLine : theme.colors.line};
     padding: 0 8px 3px;
 `;
 
@@ -79,13 +79,13 @@ const BlockTitle = styled.div`
     text-transform: uppercase;
     white-space: nowrap;
     overflow: hidden;
-    color: ${props => props.$gold ? '#e8cf93' : theme.colors.text};
+    color: ${props => props.$gold ? theme.colors.enhTitle : theme.colors.text};
     /*shaded header-bar blue (same as the hit chart section names) so the block
       headers stand out against the glass panels (feedback 2026-07-17).
       $gold: muted bronze variant for the Enhancements blocks (user request
       2026-07-18) - stands out from the blue chrome without going garish.*/
-    background-color: ${props => props.$gold ? 'rgba(169, 128, 56, 0.30)' : 'rgba(73, 103, 145, 0.25)'};
-    border-bottom: 1px solid ${props => props.$gold ? '#8a6d3b' : theme.colors.line};
+    background-color: ${props => props.$gold ? theme.colors.enhBg : 'rgba(73, 103, 145, 0.25)'};
+    border-bottom: 1px solid ${props => props.$gold ? theme.colors.enhLine : theme.colors.line};
     margin: 0 -8px 3px;
     padding: 0 6px 0 4px;
 `;
@@ -215,9 +215,9 @@ const EnhTitle = styled.div`
     text-transform: uppercase;
     white-space: nowrap;
     overflow: hidden;
-    color: #e8cf93;
-    background-color: rgba(169, 128, 56, 0.30);
-    border-bottom: 1px solid #8a6d3b;
+    color: ${theme.colors.enhTitle};
+    background-color: ${theme.colors.enhBg};
+    border-bottom: 1px solid ${theme.colors.enhLine};
     margin: 0 -8px 3px;
     padding: 0 6px 0 4px;
 `;

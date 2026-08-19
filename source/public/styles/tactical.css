@@ -395,10 +395,16 @@ body {
 
    Its twin is the styled-components Tooltip in client/UI/reactJs/common/Tooltip.js,
    which covers systems, weapons and thrusters. The two are the SAME design declared
-   twice in two stacks - same black fill, same 0.65 opacity, same 7px radius, same
-   arial 12px, same z-index 7001 - and until roadmap item 6 Stage 3 they agreed only
-   by luck. Both now read the same tokens, so retuning one retunes both. If you change
-   anything here, change it there.
+   twice in two stacks - same 65%-black fill, same 7px radius, same arial 12px, same
+   z-index 7001 - and until roadmap item 6 Stage 3 they agreed only by luck. Both now
+   read the same tokens, so retuning one retunes both. If you change anything here,
+   change it there.
+
+   ⚠️ The translucency lives in the FILL (--fv-overlay-soft), not in element `opacity`.
+   Element opacity fades the TEXT too, which is why the ship names here rendered visibly
+   duller than the identical allegiance tokens in the hex picker beside them. The panel
+   is exactly as see-through as it was; only the text came back to full strength. Do not
+   reintroduce an `opacity` here - it would compound with the fill's alpha.
 
    The 7px radius is kept ROUNDED on purpose while the rest of the screen goes square
    at Stage 4: tooltips are transient and float over the map rather than docking to
@@ -408,14 +414,13 @@ body {
 .shipNameContainer {
 
     z-index: 7001;
-    opacity: 0.65;
     position: absolute;
     display: none;
     text-align: center;
     font-family: arial;
     font-size: 12px;
-    color: var(--fv-text-bright);
-    background-color: var(--fv-overlay);
+    color: var(--fv-text);
+    background-color: var(--fv-overlay-soft);
     border-radius: var(--fv-radius-tooltip);
     -moz-border-radius: var(--fv-radius-tooltip);
     -webkit-border-radius: var(--fv-radius-tooltip);
@@ -428,6 +433,7 @@ body {
     word-wrap: break-word;
     white-space: normal;
     box-sizing: border-box;
+    opacity: 0.9;
 }
 
 .shipNameContainer .fire {
@@ -446,28 +452,34 @@ body {
 
 }
 
-.not-deployed {
-    color: #b34119;
-    font-size: 16px;
-}
+/* .not-deployed was removed with the hex-picker rewrite (SELECT_FROM_SHIPS_PLAN.md):
+   SelectFromShips was its only consumer, and its "(Deploys Turn N)" text is now a neutral
+   .fv-hexpicker__chip in hexPicker.css. */
 
+/* The hover ShipTooltip's ship names. ShipTooltip.js is the ONLY emitter of these
+   class pairs (.shipSelectList uses .shiplistentry, not .name), so this block is that
+   one surface.
 
+   Converted to the shared allegiance palette (SELECT_FROM_SHIPS_PLAN.md Stage 6, item 4
+   — deferred there, done on request 2026-08-14). These held literal `red` / `limegreen`
+   while the hex picker beneath them ran the muted tints, and the two surfaces now appear
+   SIDE BY SIDE — the picker places this tooltip beside itself — so the mismatch had gone
+   from theoretical to visible. They take the tone-mapped values, not the -signal twins:
+   this is text, and the full-chroma versions belong only on small marks. */
 .enemy.name {
-    /*color:#b34119;*/
-    color: red;
+    color: var(--fv-enemy);
 }
 
 .mine.name {
-    /*color:#2f5123; I'm making this color much lighter! this dark it's poorly readable*/
-    color: limegreen;
+    color: var(--fv-own);
 }
 
 .terrain.name {
-    color: #dedede;
+    color: var(--fv-neutral);
 }
 
 .ally.name {
-    color: #33adff;
+    color: var(--fv-ally);
 }
 
 .name-value-button-ally {
@@ -483,17 +495,9 @@ body {
     padding: 2px 4px;
 }
 
-.name-value-button-dock {
-    border: solid cyan 1px;
-    background: rgba(20, 79, 128, 0.212);
-    font-weight: normal;
-    margin-bottom: 4px;
-    color: cyan;
-    cursor: pointer;
-    font-size: 14px;
-    padding: 2px 4px;
-}
-
+/* .name-value-button-dock was removed with the hex-picker rewrite: SelectFromShips was its
+   only consumer, and its DOCK button is now .fv-hexpicker__action--dock on --fv-accent.
+   .name-value-button-ally above STAYS — confirm.js still uses it for the carrier picker. */
 
 .escorting {
     color: orange;

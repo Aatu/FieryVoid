@@ -599,7 +599,10 @@ window.fleetListManager = {
     },
 
 
-    doScrollToShip: function doScrollToShip(e) {
+    //`options.select` additionally makes the ship the selected ship once the camera
+    //arrives (see PhaseStrategy.onScrollToShip). Off by default, so a fleet list row
+    //keeps behaving as it always has - scroll only.
+    doScrollToShip: function doScrollToShip(e, options) {
         e.stopPropagation();
         var shipNameEntry = e.currentTarget;
 
@@ -609,6 +612,13 @@ window.fleetListManager = {
 
         var shipId = shipNameEntry.dataset["shipid"];
         var ship = gamedata.getShip(shipId);
+
+        //getShip returns null for an id no longer in gamedata.ships. A fleet list row is
+        //rebuilt from gamedata.ships so it can't go stale, but a confirm dialog holds its
+        //rendered ship names across polls - so this can be clicked after the fact.
+        if (!ship) {
+            return;
+        }
 
         //Hangar Ops Stage 9.1: a docked flight isn't on the board, so a
         //scroll-to-ship event has nothing to find. Open its status window
@@ -631,7 +641,10 @@ window.fleetListManager = {
             return; //Do not scroll to Stealthed ships
         }
 
-        window.webglScene.customEvent('ScrollToShip', { shipId: shipId });
+        window.webglScene.customEvent('ScrollToShip', {
+            shipId: shipId,
+            select: !!(options && options.select)
+        });
     },
 
     //Hangar Ops: ids of docked flights whose carrier jumped to hyperspace. A
@@ -712,3 +725,48 @@ window.fleetListManager = {
     },
 
 };
+
+//Clickable ship names inside confirm/error dialogs (gamedata.onCommitClicked and
+//gamedata.doCommit list ships by name; gamedata.shipNameSpan marks each one with
+//.clickable + data-shipid, exactly like a fleet list row).
+//
+//Delegated from `document` rather than bound per dialog: confirm.js builds a fresh
+//<div class="confirm"> for every prompt and wipes it with $(".confirm").remove(), so a
+//direct binding would have to be re-applied on each dialog and in each of the ~40 places
+//that build one. One delegated handler covers every dialog, present and future, and costs
+//nothing when no dialog is open. doScrollToShip is reused unmodified - it reads only
+//e.currentTarget's .clickable class and data-shipid (jQuery points currentTarget at the
+//delegated match), so the confirm dialogs inherit its shouldBeHidden guard and its
+//docked-flight branch for free.
+$(document).on("click", ".confirm .ship-name.clickable", function (e) {
+    var dialog = $(e.currentTarget).closest(".confirm");
+
+    //Close the dialog BEFORE scrolling, not after: PhaseStrategy.setSelectedShip bails out
+    //while $(".confirm") is on screen (it stops map clicks leaking through a modal), so the
+    //select half of the jump would silently do nothing in the other order. Closing first
+    //satisfies that guard rather than working around it.
+    //
+    //moveCameraTo centres the ship in the viewport, which is exactly where the dialog sits
+    //(position:fixed, left/top 50%), so it had to go anyway.
+    //
+    //Dismiss through the dialog's OWN cancel control rather than removing the node: the
+    //movement and firing commit prompts pass a cancelCallback that re-shows the pivot UI
+    //(UI.shipMovement.show()), and a bare .remove() would strand that UI hidden.
+    //Order matters here too - .confirmok on a commit prompt IS the commit.
+    var closer = dialog.find(".confirmcancel, .confirmcanceloption").first();
+    if (!closer.length) {
+        //error/warning dialogs are acknowledge-only: they carry no cancel, and their ok
+        //button is the dismiss (every commit-error callback in gamedata.js is a no-op).
+        closer = dialog.find(".confirmok, .confirmokoption").first();
+    }
+
+    if (closer.length) {
+        closer.trigger("click");
+    } else {
+        dialog.remove();
+    }
+
+    //Safe to read e.currentTarget after the dialog is gone - the span is detached, but its
+    //dataset and classList are what doScrollToShip reads, and those survive detachment.
+    fleetListManager.doScrollToShip(e, { select: true });
+});

@@ -50,7 +50,7 @@ class Vorchar extends HeavyCombatVessel{
 			0=> array(
 				7 => "Structure",
 				10 => "Thruster",
-				12 => "Scanner",
+				12 => "ELINT Scanner",
 				15 => "Engine",
 				17 => "Hangar",
 				19 => "Reactor",

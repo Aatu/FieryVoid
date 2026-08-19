@@ -3,7 +3,21 @@
  * APCu Load Guard (Robust & Quiet Edition)
  */
 
-if (!function_exists('apcu_fetch')) {
+// Two separate reasons to sit this one out, and both matter:
+//
+//  - APCu absent OR present-but-disabled. function_exists() alone is not enough. Once
+//    the extension is installed, every apcu_* call still EXISTS while apc.enabled (or,
+//    under CLI, apc.enable_cli) is off — it just returns false. The global limiter below
+//    reads that false as "could not acquire a slot", spins its full second, and 503s.
+//    A disabled cache must mean "no limiting", never "limit everything".
+//  - CLI. This is a concurrency limiter for web requests; a console script is not one.
+//    Checked independently of APCu so that flipping apc.enable_cli=1 to poke at the cache
+//    cannot start rate-limiting the generators and one-off scripts.
+//
+// Both were live between 2026-08-16 and 2026-08-17: installing APCu in the container
+// silently turned `php generateStaticShipFile.php` into a 1-second no-op that printed
+// nothing and exited 0, so fvbuild.ps1 reported success while regenerating no statics.
+if (PHP_SAPI === 'cli' || !function_exists('apcu_enabled') || !apcu_enabled()) {
     return;
 }
 

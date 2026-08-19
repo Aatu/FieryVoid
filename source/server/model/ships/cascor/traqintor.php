@@ -14,6 +14,7 @@ class Traqintor extends SmallStarBaseFourSections{
 		$this->canvasSize = 200; 
 		$this->fighters = array("normal"=>48); 
 		$this->isd = 2219;
+		$this->variantOf = "OBSOLETE";
 
 		$this->shipSizeClass = 3; 
 		$this->Enormous = true;

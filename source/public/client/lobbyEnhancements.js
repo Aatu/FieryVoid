@@ -29,6 +29,17 @@ window.lobbyEnhancements = {
 			var line = this.describeTaken(entry);
 			if (line !== null) tooltipParts.push(line);
 		}
+		/* ONE line for the per-system refits, last, after the ship-level ones
+		   (WEAPON_ENHANCEMENTS_PLAN.md §6.4). A line per refit would push the `enh` grid
+		   panel past the section cluster it is meant to sit beside - a dozen refits is an
+		   ordinary purchase. The detail lives in each system's own SystemInfo tooltip, which
+		   is where the player is already looking when they care.
+		   ⚠️ MIRROR PAIR with the same line in Enhancements::setEnhancementsShip (PHP), so
+		   the lobby and the in-game tooltip agree. */
+		if (window.systemEnhancements) {
+			var sysEnhLine = systemEnhancements.summaryLine(ship);
+			if (sysEnhLine) tooltipParts.push(sysEnhLine);
+		}
 		ship.enhancementTooltip = tooltipParts.join("<br>");
 
 		if (ship.flight) {

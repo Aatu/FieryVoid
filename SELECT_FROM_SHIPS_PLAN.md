@@ -1,9 +1,364 @@
 # SelectFromShips redesign — the Hex Stack Picker
 
-**Status:** proposed, not started
+**Status:** **COMPLETE — Stages 0–6 built (2026-08-14), plus two rounds of play feedback.**
 **Scope:** client-only. One JS file rewritten, one new stylesheet, one `<link>` added to `game.php`.
 No PHP, no serialisation, no gamedata shape change.
-**Owner file:** `source/public/client/UI/SelectFromShips.js` (379 lines, self-contained IIFE)
+**Owner file:** `source/public/client/UI/SelectFromShips.js` (self-contained IIFE)
+
+### What shipped
+
+| File | Change |
+|---|---|
+| `client/UI/SelectFromShips.js` | rewritten — `.fv-hexpicker` card/sheet, grouping, run-collapsing, dense tier, touch parity, keyboard/a11y |
+| `styles/hexPicker.css` | **new** — tuning-knob block, component-scoped `--hp-*` allegiance palette |
+| `client/lib/coordinateConverter.js` | **new** `getHexWidthViewport()` — the missing half of `getHexHeightViewport()`, needed once the card started clearing its hex sideways (round 8) |
+| `client/gamedata.js` | **new** `getMutedTeamColorRGB` + `MUTED_TEAM_SAT` / `MUTED_TEAM_LIGHT` (§2.5); `getFleetHeaderColorRGB` converted (Stage 6) |
+| `styles/tokens.css` | **new** `── Allegiance ──` group: the eight `--fv-own/-ally/-enemy/-neutral` values and their `-signal` twins (Stage 6) |
+| `client/renderer/phaseStrategy/PhaseStrategy.js` | `requestRender()` in `onMouseOverShip` / `onMouseOutShips` — see feedback round 1, item 6 |
+| `game.php` | one `<link>` through `AssetLoader::getAssetUrl()` |
+| `styles/tactical.css` | deleted `.not-deployed` and `.name-value-button-dock` — the picker was their only consumer. `.name-value-button-ally` **stays** (confirm.js) |
+
+`renderClassic()` / `USE_CARD_UI` / `window.FV_LEGACY_SHIP_PICKER` were never built: Stages 0–5
+landed in one pass (user decision 2026-08-14), so the escape hatch would have been written only
+to be deleted in the same change. **There is therefore no fallback to the old menu.**
+
+### Three deviations from the text below, all deliberate
+
+1. **The dense threshold keys on UNIT count, not rendered-row count.** §2.3 says "above 8 rows"
+   but its own worked cases require units (a 20-unit hex collapses to 8 rows and is still
+   described as dense; verification case 15 makes a 9-unit stack dense). The constant is
+   `DENSE_AT_UNITS` in the JS; `--hp-dense-at` in the CSS remains documentation-only.
+2. **Rows bind `mouseenter`/`mouseleave`, not `mouseover`/`mouseout`.** Rows now have children,
+   and the bubbling pair re-fires on every internal boundary — the map highlight flickered as
+   the cursor crossed from the thumbnail to the name. Same behaviour, no flicker.
+3. **A folded group emits no rows at all** rather than hiding them with `display:none`. The list
+   is rebuilt from the model on every fold anyway, so nothing is preserved by rendering them —
+   and it keeps "what can be focused" a question about the DOM rather than about layout, which
+   is what a `:visible` filter would have made it.
+
+### Feedback round 1 (2026-08-14) — all applied
+
+| # | Change |
+|---|---|
+| 1 | Details icon 20→**24px** in a 32px box; sheet 24→**28px** in a 40px box |
+| 2 | **The header is a drag handle.** Position is per-instance and never remembered — every opening re-anchors on its hex. A dragged card opts out of `positionSelf()` (otherwise the next zoom/scroll would snap it back) and hides its caret. Card mode only; the sheet is docked |
+| 3 | **Hover tooltip no longer lands on the card.** `showShipTooltip` anchors it on the hovered ship's ICON — the hex the picker is anchored to, i.e. underneath the picker. Now placed beside the card (flipping side when there is no room), or above it in sheet mode. A `hoveredShipId` guard also makes re-entering the row you are already on a no-op, since `showShipTooltip` destroys and rebuilds on every call |
+| 4 | **Long press no longer opens the ship window.** It PINS the preview tooltip — stays up after the finger lifts — and suppresses the click that would otherwise select. The details button is the only touch route to the ship window |
+| 5 | **Sheet gets `--hp-sheet-max-w: 400px`** and auto inline margins. `left:8px..right:8px` was fine on a 390px phone and absurd on a landscape phone or a finger-driven tablet. Landscape short screens also get a tighter list cap |
+| 6 | **Pre-existing bug fixed at source.** `PhaseStrategy.onMouseOverShip` / `onMouseOutShips` mutate the scene (`setHighlighted` raises the icon out of the pile and shows its prow/movement sprites) without calling `requestRender()`. Canvas-driven hovers were masked — `webglScene.mouseMove` requests a frame for the same event — but a DOM-driven hover produces no canvas event, so the icon never redrew. Straight instance of the render-loop invariant |
+| 7 | **Count leads the name and shares its font:** `2 x Scion Breaching Pod`, not `Scion Breaching Pod ×2`. Collapsed runs follow (`13 x Mine`); the separate `.fv-hexpicker__count` span is gone |
+
+⚠️ Item 3 was fixed **structurally**, not by identifying the exact trigger: the overlap that put the
+tooltip under the cursor is what made an enter/rebuild/leave cycle possible, and the tooltip can no
+longer land there. Worth re-confirming in play.
+
+### Feedback round 2 (2026-08-14) — all applied
+
+**1. Folding a group no longer moves the card.** `positionSelf()` was being called after every
+re-render, which re-runs the above/below decision from scratch: a card that had flipped BELOW the
+hex because it was too tall to fit above flipped back ABOVE the moment a fold made it short enough.
+Fold one group and the whole menu leapt across the hex.
+
+Fold and expand now call `reflow(captureBox())` instead, which re-places the card **without
+re-anchoring** and never flips it. It holds one edge steady: anchored **above** the hex it holds the
+**bottom**, so the caret stays on the hex and the card grows and shrinks upward away from it;
+anchored **below**, or dragged, it holds the **top**, which is how every collapsible panel behaves.
+Then it clamps. `positionSelf()` still runs on zoom and scroll, where re-anchoring is correct
+because the hex itself moved.
+
+**2. Stage 6 shipped**, exactly as specified in §4 below, plus a colour retune:
+
+* the eight values moved into a `── Allegiance ──` group in the single `:root` in `tokens.css`;
+  `.fv-hexpicker`'s `--hp-*` colour block is gone and the row rules read `--fv-*` directly.
+  Appearance-neutral — a rename.
+* `getFleetHeaderColorRGB`'s three literals became the tone-mapped tints, and its observer /
+  3+-team branch moved from `getTeamColorRGB` to `getMutedTeamColorRGB`. Re-audited first: still
+  exactly one live consumer ([fleetList.js:282](source/public/client/UI/fleetList.js#L282)); the
+  ShipWindow reference remains inside a `/* … */` block.
+* `getShipLogColorCss` deliberately NOT converted. Both functions now carry a comment pointing at
+  the other and saying which one was converted, so the divergence reads as intent.
+* **`--fv-enemy` retuned `#d1867e` → `#e0736a`** (user: the pastel red was too soft). Chroma up
+  from ~0.47 to ~0.65 at essentially the same lightness (~0.65) — anti-pastel is more chroma, not
+  more brightness — so it still sits in the same band as own and ally. The full-chroma
+  `--fv-enemy-signal` on the 3px bar is unchanged.
+
+No `theme.js` twins were added: nothing in the React stack paints allegiance yet.
+
+### Feedback round 3 (2026-08-14) — all applied
+
+**1. `--fv-enemy` again, `#e0736a` → `#ea6a5e`** (chroma ~0.65 → ~0.77, lightness held at ~0.64),
+**and the four hover-tooltip rules converted.** `.enemy.name` / `.mine.name` / `.ally.name` /
+`.terrain.name` at [tactical.css:455](source/public/styles/tactical.css#L455) now read
+`--fv-enemy` / `--fv-own` / `--fv-ally` / `--fv-neutral` instead of literal `red` / `limegreen` /
+`#33adff` / `#dedede`. Re-audited first: **ShipTooltip.js is the only emitter** of those class
+pairs (`.shipSelectList` uses `.shiplistentry`), so this is exactly one surface. Closes the last
+item deferred from Stage 6 — the two surfaces sit side by side now, so the mismatch had become
+visible rather than theoretical.
+
+**2. The ship window opening on a touch long-press — real cause found.** It was never the
+long-press timer (round 2 already stopped that). **A long press on a touchscreen fires a
+`contextmenu` event of its own**, and the row's `contextmenu` handler routed straight to
+`onShipRightClicked`. That handler now returns early for touch, via a new `isTouchInteraction()`
+that reads the `pointerType` recorded by the last row `pointerdown` and falls back to
+`(pointer: coarse)`. It still `preventDefault`s unconditionally, so no native menu appears over
+the card. The details button's `pointerdown` guard was dropped at the same time — it existed only
+to stop the old double-open, and removing it keeps the recorded pointer type accurate.
+
+**3. Header height, and the sheet is now draggable.**
+* New knobs `--hp-header-h` / `--hp-close` / `--hp-grab-h`. The sheet header was **32px against
+  the card's 27px**, on top of a 12px grab bar — the one piece of chrome that grew on the screens
+  with the least room. Now 26px header + 9px grab, with the ✕ growing to 24px instead, since that
+  is the part that is actually a tap target.
+* `bindHeaderDrag` no longer refuses sheet mode. On the first real movement the sheet **unpins**:
+  its width is frozen, `right`/`bottom`/margins are dropped, and it runs on `left`/`top` like a
+  card. The grab bar joins the header as a drag handle, and the CSS rule that set
+  `touch-action: auto` on the sheet header — which was letting the browser claim the gesture as a
+  scroll before `pointermove` ever fired — is gone. `captureBox`/`reflow` treat a dragged sheet as
+  a card.
+
+### Feedback round 4 (2026-08-14) — all applied
+
+**1. Tooltip names looked duller than the picker's — the cause was `opacity: 0.65`.**
+`.shipNameContainer` faded its TEXT along with its panel, so the *same* allegiance token rendered
+at 65% strength in the tooltip and at full strength in the opaque picker beside it. New token
+`--fv-overlay-soft: rgba(0, 0, 0, 0.65)` moves the translucency into the FILL: the panel is exactly
+as see-through as before, the text comes back to full strength, and the two surfaces now match.
+
+The React twin `common/Tooltip.js` was changed with it (`theme.colors.overlayBgSoft`), because the
+two files carry an explicit "if you change anything here, change it there" contract and diverging
+them would have reintroduced the split-skin problem item 6 existed to remove. Both comments now
+warn against reintroducing element `opacity` — it would compound with the fill's alpha.
+
+Untouched: `#weaponTargetingContainer` and `.shipSelectList` keep their own `opacity: 0.65`. Neither
+uses the allegiance classes and neither was in question.
+
+**2. The touch preview now ends when the press ends.** `onMouseOutShips` resets highlights and EW
+but deliberately does NOT hide the tooltip — on the map that is the canvas mouse-out path's job, and
+no canvas event fires when a finger lifts off a DOM row, so the tooltip sat there until the next map
+tap. New `endTouchPreview()` calls `hideShipTooltip` explicitly.
+
+> ⚠️ **Touch path only.** The same hide on desktop `mouseleave` would also kill the PERSISTENT
+> targeting tooltip a click puts up (`showShipTooltip` with `hide=false`) the moment the cursor left
+> the row. Touch is safe because `pointerup` runs BEFORE the click that creates such a tooltip —
+> which the harness asserts by ordering, not just by outcome.
+
+`longPressFired` still suppresses the click after a long press, so inspecting never commits a
+selection.
+
+### Feedback round 5 (2026-08-14) — the touch teardown, properly this time
+
+Round 4's `endTouchPreview()` **was firing correctly** — and the tooltip still came back, because
+something re-created it immediately afterwards.
+
+⚠️⚠️ **After a tap or a long press the browser REPLAYS the gesture as simulated "compatibility"
+mouse events** — `mouseover` / `mouseenter` on the row the finger landed on. Those re-ran the
+DESKTOP hover handler after the touch teardown had already finished, which rebuilt the tooltip on
+the spot. The same echo explains the second symptom: a row the finger had already left could be
+re-highlighted by its own delayed echo while the next row lit up from a real `pointerdown`, so two
+units showed heading/facing arrows at once — and it was intermittent, because whether the echo
+arrives (and in what order) depends on the browser and on whether a long press suppressed it.
+
+Fix, in the row handlers:
+* `pointerenter` records `pointerType`. It fires BEFORE the compatibility events and carries the
+  type they lack, so `mouseenter` / `mouseleave` can now tell a real hover from a finger's echo —
+  and a hybrid device switching from screen to trackpad recovers on the next row entered.
+* `mouseenter` / `mouseleave` return early when `isTouchInteraction()`. On touch, `pointerdown` is
+  the only preview path and `pointerup` the only teardown, which makes the sequence deterministic.
+* `endTouchPreview()` ignores a **stale** end: dragging from one row to the next can deliver row A's
+  `pointerleave` after row B's `pointerdown` has started B's preview, and tearing down then would
+  either cancel the new preview or, with the highlight reset landing between B's two calls, leave
+  both rows lit.
+
+> **Still by design, and a candidate if the doubling is ever seen again:**
+> `showAppropriateHighlight()` re-applies `setSelected(true, true)` to the SELECTED ship, and on a
+> coarse pointer `setSelected` shows its prow/movement sprites ("no hover on mobile"). So a selected
+> ship legitimately keeps its arrows while another row is pressed. That is deterministic, not
+> intermittent, and lives in `ShipIcon`, outside this picker.
+
+### Feedback round 6 (2026-08-14) — all applied
+
+**1. `ShipTooltip`'s inline styles moved into `shipTooltip.css`, and the rule under the name
+now takes the name's own colour.** The tooltip's HTML string carried three `style="…"`
+attributes — `.namecontainer`'s bottom rule and the two `TARGETING` / `INCOMING` section
+headings. They are now four CSS rules; values came across unchanged, except
+`text-decoration: bold`, which was dropped because `bold` is not a text-decoration value and
+never did anything.
+
+The section headings needed a class of their own: **`.fire` and `.ballistics` are each
+carried by TWO divs** — the heading and the content beneath it — so a bare `.fire` rule
+would have put a white rule and red text on the targeting readout as well. Hence
+`tt-head`. The existing `.fire` / `.ballistics` / `.targeting` / `.incoming` classes are
+untouched; they are what the show/hide code and `weaponManager.targetingShipTooltip` select on.
+
+The rule under the name reads `border-bottom-color: var(--tt-name, var(--fv-neutral))`, and
+`createForSingleShip` writes `--tt-name` on the root element from a new **`getNameColor()`**.
+That function and `getNameStyle()` now share one gate, `usesTeamColor()`, so the line and the
+text cannot drift: terrain and 2-team participants resolve to the allegiance token the CSS
+class applies, observers and 3+-team games to the raw per-team `rgb()`. A **multi**-ship stack
+has several allegiances and no single answer, so it keeps the neutral fallback.
+
+> The static `#shipNameContainer` div at [game.php:570](source/public/game.php#L570) is a
+> separate element with the same inline styles and **no JS consumer at all** — the new rules
+> key on the CLASS, so it is untouched. Left alone deliberately; deleting dead markup is its
+> own change.
+
+**2. The picker's above/below choice is now STICKY** (`positionSelf`). `positionSelf()` runs
+on every zoom step and every scroll, and it re-decided the side from scratch each time. Zoom
+moves the hex in the viewport *and* changes `yOffset` (half the hex height, clamped 20–100),
+so a card that had flipped below because it did not fit above would find it fitted again a
+step later, jump up, and jump back on the next step — one continuous gesture, two different
+layouts.
+
+The first placement is unchanged (prefer above; the `!fitsAbove` test is algebraically the
+old `top < EDGE_MARGIN`). After that the card keeps its side for as long as that side still
+holds it, and needs `FLIP_SLACK` (24px) of **spare** room on the far side before moving, so a
+hex parked on the boundary cannot oscillate between two marginal answers. Neither side
+fitting keeps the current one and lets the clamp deal with it. Round 2 fixed the same class of
+jump for fold/expand via `reflow()`; this is the zoom/scroll half.
+
+**3. `createForMultipleShips` is a grid of silhouettes.** The hover tooltip for a stacked hex
+was a run-on comma-separated list of names — the least useful shape the information has, since
+the map has just shown the player those same silhouettes. It is now a wrapping grid of
+`tt-stack__cell`s: the picker's **3px allegiance rail**, the ship's art at 34px (`--hp-art`,
+so a unit does not change size between the two surfaces that appear side by side), and, for a
+flight, its **active fighter count printed over the art**. The `Zoom closer, or click to
+interact` line stays.
+
+* **The masked-mine rule applies here too.** An unrevealed mine's `imagePath` still identifies
+  the type that masking the name exists to hide, so it gets the generic ring-and-dot glyph —
+  the same trap, and the same fix, as the picker's thumbnails. A thumbnail that fails to load
+  falls back to the glyph rather than hiding, because in a grid with no names beside it an
+  empty cell says nothing.
+* Observers and 3+-team games get `--row-bar` / `--row-name` inline per cell, from a
+  `getTeamColorVars()` that mirrors the picker's.
+* Touch is unaffected — there is no hover on a touchscreen, so this surface only ever appears
+  for a mouse.
+
+**4. The replay-aware fighter count is now one function with two callers.**
+`shipManager.systems.getActiveFighterCount` in `systems.js`; `SelectFromShips`' private
+`countActiveFighters` is gone and both surfaces call it. It was about to be copied a third
+time, and the replay arm is the subtle part: inside replay a fighter destroyed **on** the
+viewed turn was still flying while that turn's combat happened and must still be counted.
+
+`tokens.css`'s allegiance note said the hover tooltip was "not yet converted" — stale since
+round 3, and now doubly so. Corrected.
+
+### Feedback round 7 (2026-08-14) — applied
+
+**1. The picker's flight count moved out of the name and onto the silhouette**, matching the
+badge round 6 gave the hover tooltip's stack grid. The name line reads `Nial Flight`, not
+`6 x Nial Flight`, and the `6` sits over the bottom-right of the art. The two surfaces appear
+together — the picker places the tooltip beside itself — so they now say the same thing the
+same way, and the row's most valuable line is spent on the name instead of on a number that
+was pushing long names into an ellipsis.
+
+* **This partially supersedes round 1, item 7.** That convention — count leads the name,
+  sharing its font — still holds for a **collapsed run**: `13 x Mine` counts *units*, and the
+  badge counts *fighters inside one unit*. They are different statements and both can appear
+  on one row, so three identical 6-fighter flights read `3 x Nial Flight` with a `6` on the
+  silhouette. `buildText` therefore keeps its `count` argument; real rows now pass `null`.
+* **New element `.fv-hexpicker__thumb`** wraps the art, because an `<img>` cannot hold
+  children and the badge needs something positioned to sit in. The reserved box moved to the
+  wrapper; the art fills it at 100%.
+  > ⚠️ `.fv-hexpicker__art` needed an explicit `display: block`. As a **direct flex item** its
+  > `<span>` form (the generic mine glyph) was blockified for free, so `width`/`height`
+  > applied; inside the wrapper it is an ordinary inline child, where they would not.
+* The badge shrinks in the dense tier — at a 26px silhouette the comfortable size would cover
+  over half of it.
+* Gated on `count > 0`, which is the old truthiness test: a flight with no fighters left
+  should not be on the map, and a bare `0` over the art would read as an alarm.
+
+**2. The header and the group heads wear the rail too**, in `--fv-line-scs` — the card's own
+border colour, not an allegiance signal, because neither belongs to a unit. The card now
+reads as one column of stacked strips rather than as chrome sitting on top of a list.
+
+A plain `border-left: 3px` rather than a pseudo-element: the header, the list, the groups and
+the rows all start at the card's content edge with no left padding between them, so the rails
+line up with no arithmetic. Each element's `padding-left` drops by 3px in exchange (header
+10→7, group head 6→3), so the border adds to the rail rather than to the indent and **the
+title and the fold caret do not move**.
+
+> The DEPLOY / DOCK actions deliberately keep their 6px inset and no rail. They are buttons,
+> not rows, and the inset is part of what says so.
+
+### Feedback round 8 (2026-08-15) — the card moved to the SIDE of its hex
+
+**The symptom:** the hover/select ShipTooltip jumped around after a zoom in or out that
+followed using the picker.
+
+**The cause, and why it could not be fixed where it showed.** `placeTooltipClear()` moved
+the tooltip beside the card on hover, because the card was anchored ABOVE its hex and the
+tooltip anchors BELOW it — two surfaces competing for one strip of screen, with a tall
+clamped card reaching down over the tooltip's spot. But `ShipTooltip.reposition()` re-runs
+its own `positionElement` on every zoom and scroll step, and PhaseStrategy's callback list
+is `[repositionTooltip, positionMovementUI, repositionSelectFromShips]` — so the first zoom
+step snapped the tooltip back onto its hex, under the card, and nothing put it back. The
+picker was writing a position that another owner overwrote one frame later.
+
+**The fix (user proposal, 2026-08-15): vacate the strip.** The card is now anchored
+**beside** the hex — prefer the **right**, flip **left**, vertically centred on the hex —
+so the space below the hex stays the tooltip's, and the tooltip is simply left alone.
+A position nothing overrides cannot jump.
+
+```
+                        ┌───────────────────────────────┐
+                        │  5 UNITS IN HEX …         ✕   │
+                        ├───────────────────────────────┤
+                   ◀    │▏ ▨  Sharlin            2   ▣ │   caret on the LEFT edge,
+               (hex)    │▏ ▨  Nial Flight        —   ▣ │   level with the hex
+                        │▏ ▨  Mine               —   ▣ │
+                        └───────────────────────────────┘
+                ┌────────────────┐
+                │  ShipTooltip   │  ← its usual place, below the hex, untouched
+                └────────────────┘
+```
+
+| # | Change |
+|---|---|
+| 1 | **`positionSelf()` is horizontal.** `xOffset` = half the hex's **width** (clamped 20–100, exactly as `yOffset` was), `roomRight`/`roomLeft`, and the STICKY + `FLIP_SLACK` rule carried across unchanged with above→right and below→left. `top = point.y - height/2`. |
+| 2 | **`--above` / `--below` became `--right` / `--left`**, and the caret runs down a vertical edge: `border-top`/`border-bottom` transparent, `left:-8px` + `border-right` when the card is right of the hex, `right:-8px` + `border-left` when it is left. JS writes its `top` (was `left`) after the clamp. |
+| 3 | **New `placeCaret()`, shared by `positionSelf()` and `reflow()`.** `positionSelf` records `this.anchorPoint`; `reflow` re-derives the caret from it. |
+| 4 | **`reflow()` now always holds the TOP.** With no above/below there is no bottom edge to hold — and because the caret is re-derived from the anchor afterwards, holding the top is *also* what keeps the caret on the hex: the hex is fixed in screen space, so an unmoved card top still meets it at the same absolute height. `captureBox()` no longer needs `height`. |
+| 5 | **`placeTooltipClear()` is collision-only.** It rect-tests first and **returns without touching anything** in the normal case. That is the actual fix for the reported jump — the common path now writes no position at all, so there is nothing for the next `repositionTooltip` to undo. On a genuine overlap (a wide tooltip at low zoom, where the card clears the hex by only 20px) it applies the smallest correction that works: slide horizontally to the card's far side, keeping the tooltip's vertical relationship to the hex. Sheet mode lifts it above the sheet instead, since a sheet has no side. |
+| 6 | **`reposition()` re-applies it** after `positionSelf()`. In the collision case the nudge would otherwise last exactly one frame, for the same reason the old placement did. |
+| 7 | **`captureTooltipAnchor` / `restoreTooltipAnchor` are gone** (~45 lines). They existed only to hold the tooltip still across the rebuild a row click causes, which was needed because the picker owned the tooltip's position. It does not any more: the rebuilt tooltip lands in its own usual place, which is the right answer. `activateShip` just re-derives the collision nudge, and that is a no-op once the card has destroyed itself. |
+| 8 | **`coordinateConverter.getHexWidthViewport()`** — the missing half of the existing `getHexHeightViewport()` pair. A pointy-top hex is `2·HEX_SIZE` tall and `√3·HEX_SIZE` wide, so clearing one sideways is not the same number as clearing it vertically. |
+
+**Mobile is untouched.** `useSheet()` still catches every coarse pointer and every window
+≤765px, and `positionSelf()` still returns early in sheet mode, so a phone or tablet never
+takes the side placement at all — it keeps the bottom-docked sheet, its caret hidden, its
+drag-to-unpin intact. What sheet mode *does* gain is item 5: the press-preview tooltip is
+now left where it opens unless it actually runs into the sheet, instead of being flung to
+the top of the sheet every time.
+
+> ⚠️ **Known degradation, narrow desktop windows only.** A fine-pointer window between
+> ~766px (the sheet threshold) and ~850px, with the hex near the horizontal centre and the
+> map zoomed in (`xOffset` at its 100px cap), can fit the 320px card on neither side. As
+> before, the code keeps the current side and lets the clamp deal with it — the card then
+> overlaps the hex's edge by a few tens of pixels. It stays legible and the tooltip's
+> collision nudge still fires; it is the same class of degradation the old vertical
+> placement had for a card taller than the viewport.
+
+> The hover tooltip has **no viewport clamping of its own** (`ShipTooltip.positionElement`
+> writes `left`/`top` raw), so near a screen edge it can hang off. Pre-existing, and now
+> visible on the picker path too because the picker no longer clamps it as a side effect —
+> but it is exactly what a plain map hover does today, so it was left alone deliberately
+> rather than fixed only for this one caller.
+
+### Local edit, kept
+
+The header now reads `N units in hex - Click to Select` and the hint footer is commented out — the
+guidance moved into the header and the `q·r` coordinates were dropped. That supersedes the §2.2
+diagram below. The `.fv-hexpicker__hint` and `__coords` rules are left in `hexPicker.css`, inert,
+since the JS is commented rather than deleted.
+
+### Still outstanding
+
+* **`img/openShipDetails2x.png` does not exist.** The `image-set()` is wired and a plain
+  `url()` fallback precedes it, but until an 80×80 export of the same artwork lands, HiDPI
+  users depend on the browser falling back to the 1× candidate. New filename only — never
+  overwrite the 40×40 (see the comment on `.fv-hexpicker__details`).
+* Stage 6, unchanged from §4 below.
 
 ---
 
@@ -781,17 +1136,18 @@ Test at **1920×1080**, a **phone width (≤420px)**, and **landscape phone** (`
     a player-supplied name, and the INI value is part of the collapse key — so the mechanism
     can essentially only fire on rows that were already indistinguishable.
 
-### Flagged assumption
+### Flagged assumption — RESOLVED 2026-08-14
 
-The instruction that the orange DEPLOY "no longer needs to stand out" was read as applying to
-the **button**, leaving the `DEPLOYS T<N>` **chip** amber. If the chip was meant as well, say
-so — it is one line, but its fallback would be neutral rather than green, since green means
-"yours" and the chip can land on an enemy row.
+The instruction that the orange DEPLOY "no longer needs to stand out" was meant to cover the
+`DEPLOYS T<N>` **chip** as well. **All chips are neutral** (`--fv-text-dim` on
+`--fv-line-soft`); `--fv-warn` now appears nowhere in the card at all, and allegiance is the
+only colour in it that carries meaning. §2.2 and §2.5 above are superseded on this point.
 
 ### Still open
 
-* If `openShipDetails.png` reads soft at 20px on a HiDPI screen, the `@2x` re-export is a small
-  art task; check the 1× at 20px first, and it may not be needed at all.
-* The hover tooltip (`.enemy.name` / `.mine.name` / …) keeps its bright legacy colours after
-  Stage 6, so it and the picker will disagree where they appear together. Deliberate scope
-  call; four lines to change whenever you want it (§4, Stage 6, item 4).
+* `img/openShipDetails2x.png` — the `image-set()` is wired and waiting for the 80×80 export.
+  The only outstanding item.
+
+**The combat log** (`gamedata.getShipLogColorCss`) remains on its own bright literals by decision,
+not by omission — it is a dense scrolling wall of text where the stronger colours still earn their
+place. Both it and `getFleetHeaderColorRGB` carry a comment pointing at the other.

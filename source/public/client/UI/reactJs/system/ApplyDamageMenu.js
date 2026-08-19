@@ -1,19 +1,37 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
-import theme from '../styled/theme';
-import CriticalEffectsSection, { critRowsFromMap, CritSectionHeader, CheckBox, CheckText } from './CriticalEffectsSection';
+import CriticalEffectsSection, { critRowsFromMap, CheckBox, CheckText } from './CriticalEffectsSection';
+import SystemEnhancementsSection from './SystemEnhancementsSection';
 import nonPassiveWheel from '../helpers/nonPassiveWheel';
+import {
+    ActionButton, ValueInput, SectionDivider, DamageSectionHeader,
+    SectionBody, SECTION_INK, MENU_CHROME
+} from './menuControls';
 
-/* Pre-battle damage editor for ONE system of a bought lobby ship.
- * Design: PREBATTLE_DAMAGE_PLAN.md §5.2. State lives in window.battleDamage.
+/* Enhancement + pre-battle-damage editor for ONE system of a bought lobby ship.
+ * Design: PREBATTLE_DAMAGE_PLAN.md §5.2 and WEAPON_ENHANCEMENTS_PLAN.md §6.1.
+ * State lives in window.battleDamage and window.systemEnhancements.
  *
- *   ┌ Apply Damage & Critical Effects ─────────┐
- *   ├ Damage ──────────────────────────────────┤
- *   │ Twin Array #14  [-] [  8 ] [+] ☐ Destroy │
- *   ├ Critical Effects ────────────────────────┤
- *   │ Output altered by -1      [-] [ 2 ] [+]  │
- *   │ [ + Add effect…            ] ☐ All       │
+ *   ┌ ✦ ENHANCEMENTS ──────────────────────────┐  bronze
+ *   ┃ Gunsights            [-] [ 1 ] [+]   12p │
+ *   ┃                          Refits: 30 pts  │
+ *   ╞══════════════════════════════════════════╡  the hard visual break
+ *   ├ Damage ──────────────────────────────────┤  teal
+ *   ┃ Twin Array #14  [-] [  8 ] [+] ☐ Destroy │
+ *   ├ Critical Effects ────────────────────────┤  rust
+ *   ┃ Output altered by -1      [-] [ 2 ] [+]  │
+ *   ┃ [ + Add effect…                        ] │
  *   └──────────────────────────────────────────┘
+ *
+ * The ┃ is the RAIL - each section's ink carried down its own rows (menuControls.SectionBody),
+ * which is what lets the bars name the sections without having to shout. There is no title
+ * bar: it said "Apply Damage & Critical Effects" over a Damage bar and a Critical Effects
+ * bar, which is its own contents joined by an ampersand (user request 2026-08-16).
+ *
+ * The two halves are deliberately one menu with a hard break, not two: the player is
+ * dressing ONE system, and a refit and a wound are both things they are doing to it.
+ * ⚠️ That also means they can destroy a system they refitted thirty seconds ago - see
+ * refresh(), which is where D11's sweep lives.
  *
  * The damage row NAMES THE SYSTEM (user request 2026-08-08) rather than saying
  * "Structure / 8": with several menus open, or on a ship carrying six Twin Arrays, the
@@ -44,21 +62,16 @@ const Container = styled.div`
     min-width: 200px;
     max-width: 300px;
     box-sizing: border-box;
-    opacity: 0.95;
-    background-color: rgba(16, 26, 38, 0.9);
-    border: 1px solid ${theme.colors.line};
+    /*Fill and frame from ./menuControls, shared with the fighter and mine editors - see the
+      note there on why the title bar is no longer the old teal, and why none of the three
+      carries an element opacity any more.*/
+    background-color: ${MENU_CHROME.bg};
+    border: 1px solid ${MENU_CHROME.line};
 `;
 
-const Header = styled.div`
-    padding: 3px;
-    background-color: #215a7a;
-    border-bottom: 1px solid ${theme.colors.line};
-    color: ${theme.colors.chromeText};
-    text-align: center;
-    font-size: 12px;
-    opacity: 1 !important;
-    font-weight: bold;
-`;
+/* No header component here any more - see the sketch above. MenuHeader still lives in
+   ./menuControls for the fighter and mine menus, which have one section each and so need a
+   title to name the window. */
 
 const Row = styled.div`
     display: flex;
@@ -66,7 +79,7 @@ const Row = styled.div`
     gap: 5px;
     padding: 4px 6px;
     font-size: 11px;
-    color: ${theme.colors.chromeText};
+    color: ${MENU_CHROME.text};
 `;
 
 const RowLabel = styled.div`
@@ -78,57 +91,9 @@ const RowLabel = styled.div`
     gap: 4px;
 `;
 
-const ActionButton = styled.div`
-    width: 24px;
-    height: 18px;
-    flex: 0 0 24px;
-    background: #203348;
-    border: 1px solid #496791;
-    color: #deebff;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 10px;
-    opacity: 0.9;
-    user-select: none;
-
-    &:hover {
-        background: #496791;
-        color: #ffffff;
-        opacity: 1;
-    }
-
-    ${props => props.disabled && `
-        opacity: 0.3;
-        cursor: not-allowed;
-        &:hover { background: #203348; color: #deebff; }
-    `}
-`;
-
-const ValueInput = styled.input`
-    flex: 0 0 44px;
-    width: 44px;
-    height: 18px;
-    box-sizing: border-box;
-    padding: 0;
-    text-align: center;
-    font-family: ${theme.fonts.mono};
-    font-size: 12px;
-    color: ${props => props.$destroyed ? '#ff8a80' : '#ffffff'};
-    background-color: #101a26;
-    border: 1px solid #496791;
-    outline: none;
-
-    &:focus {
-        border-color: #6089c1;
-    }
-
-    &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-`;
+/* ActionButton and ValueInput now live in ./menuControls, shared with
+   SystemEnhancementsSection - a gold variant of the same ticker is one prop, and two
+   copies would be two places to fix the next time either is nudged. */
 
 const DestroyLabel = styled.label`
     display: flex;
@@ -138,12 +103,12 @@ const DestroyLabel = styled.label`
     cursor: ${props => props.$disabled ? 'not-allowed' : 'pointer'};
     user-select: none;
     opacity: ${props => props.$disabled ? 0.4 : 1};
-    color: ${props => props.$on ? '#ff8a80' : theme.colors.textDim};
+    color: ${props => props.$on ? '#ff8a80' : MENU_CHROME.dim};
 `;
 
 const MaxText = styled.span`
     flex: 0 0 auto;
-    color: ${theme.colors.textDim};
+    color: ${MENU_CHROME.dim};
     font-size: 10px;
 `;
 
@@ -260,16 +225,96 @@ class ApplyDamageMenu extends Component {
         this.refresh();
     }
 
+    /* ⭐ EVERY damage, critical and enhancement write funnels through here, which is why
+       D11's sweep lives here rather than in each writer. */
     refresh() {
         const { ship } = this.props;
         battleDamage.applyToShip(ship);
+
+        /* D11: a refit on a system that has just been destroyed is REMOVED and REFUNDED,
+           one way. Deliberately AFTER applyToShip, never before and never off the payload's
+           `k` flags: applyToShip is what writes the STRUCTURE CASCADE (destroying a
+           Structure block destroys every system in its location), so sweeping any earlier
+           catches only the box the player clicked.
+           The refund has to be visible in the same tick - a refund the player does not see
+           reads as a pricing bug - so calculateFleet re-runs and one warning names what
+           went. Un-ticking Destroy does NOT bring it back; the wording says "removed", not
+           "suspended", so that is not a surprise. */
+        let removed = [];
+        if (window.systemEnhancements) {
+            const bucketBefore = parseFloat(ship.pointCostSysEnh) || 0;
+            removed = systemEnhancements.dropDestroyed(ship);   //recomputes pointCostSysEnh
+            if (removed.length) this.settleRefitCost(ship, bucketBefore);
+        }
+
         //Repaints icons, health bars and section headers of every open ship window.
         if (window.shipWindowManagerReact) window.shipWindowManagerReact.update();
-        //Lobby only: keep the fleet-list row's broken-heart badge in step as we edit.
-        if (window.gamedata && typeof gamedata.refreshDamagedBadge === 'function') {
-            gamedata.refreshDamagedBadge(ship);
+        //Lobby only: keep the fleet-list row - badge, point cost and the "System
+        //Enhancements (n)" line - in step as we edit.
+        if (window.gamedata && typeof gamedata.refreshFleetRow === 'function') {
+            gamedata.refreshFleetRow(ship);
         }
         this.forceUpdate();
+
+        if (removed.length && window.confirm && typeof confirm.warning === 'function') {
+            confirm.warning(systemEnhancements.describeRemoved(removed));
+        }
+    }
+
+    /* ⭐ THE one place ship.pointCost is moved when the refit bucket changes.
+
+       The invariant every lobby path maintains is
+           pointCost = bare hull + pointCostEnh + pointCostEnh2 + pointCostSysEnh
+       so when the third bucket moves, pointCost moves by exactly the same amount. Applying
+       the DELTA rather than recomputing the total is what makes this safe from here: a
+       recompute would have to peel the buy dialog's arithmetic back apart (flight scaling,
+       bulk counts), which getPristinePointCost only manages because it has a blueprint to
+       fall back on. Pass the bucket value read BEFORE the write. */
+    settleRefitCost(ship, bucketBefore) {
+        const bucketAfter = parseFloat(ship.pointCostSysEnh) || 0;
+        ship.pointCost = (parseFloat(ship.pointCost) || 0) - (bucketBefore - bucketAfter);
+
+        //Panel and fleet-list row move in the SAME tick as the points - a refund the player
+        //does not see reads as a pricing bug.
+        if (window.gamedata && typeof gamedata.calculateFleet === 'function') {
+            gamedata.calculateFleet();
+        }
+    }
+
+    /* Buy / un-buy one refit on this system.
+       REFUSES and restores the previous count rather than letting the fleet go over budget
+       (§5.2), because there is no dialog here to cancel out of - the write has already
+       landed on the ship by the time we can ask. */
+    setEnhancement(enhID, count) {
+        const { ship, system } = this.props;
+        if (!window.systemEnhancements) return;
+
+        const bucketBefore = parseFloat(ship.pointCostSysEnh) || 0;
+        const previous = systemEnhancements.taken(ship, system.id, enhID);
+        if (count === previous) return;
+
+        systemEnhancements.set(ship, system.id, enhID, count);
+        this.settleRefitCost(ship, bucketBefore);
+
+        const affordable = !window.gamedata
+            || typeof gamedata.canAffordRefit !== 'function'
+            || gamedata.canAffordRefit(ship);
+
+        if (!affordable) {
+            //Put it back exactly as it was, points included, then say so.
+            const revertFrom = parseFloat(ship.pointCostSysEnh) || 0;
+            systemEnhancements.set(ship, system.id, enhID, previous);
+            this.settleRefitCost(ship, revertFrom);
+            systemEnhancements.apply(ship);
+            this.forceUpdate();
+            if (window.confirm && typeof confirm.error === 'function') {
+                confirm.error("You cannot afford that enhancement!", function () { });
+            }
+            return;
+        }
+
+        systemEnhancements.apply(ship);
+        this.refresh();
     }
 
     step(direction) {
@@ -292,18 +337,32 @@ class ApplyDamageMenu extends Component {
         const critRows = critRowsFromMap(
             entry.c, ship.preBattleCritDesc, ship.preBattleCritTransient, entry.p);
 
+        /* The gold half. Empty on most systems of most hulls, on every system of an
+           Ancient hull, and - by D11 - on a destroyed one, in which case
+           SystemEnhancementsSection renders nothing at all and the menu is the damage
+           editor it has always been. */
+        const enhRows = (window.systemEnhancements && !destroyed)
+            ? systemEnhancements.menuRowsFor(ship, system)
+            : [];
+
         return (
             <Container onClick={e => e.stopPropagation()}>
-                <Header>Apply Damage & Critical Effects</Header>
+                <SystemEnhancementsSection
+                    rows={enhRows}
+                    onChange={(enhID, count) => this.setEnhancement(enhID, count)}
+                />
+                {enhRows.length > 0 && <SectionDivider />}
 
-                <CritSectionHeader>Damage</CritSectionHeader>
+                <DamageSectionHeader>Damage</DamageSectionHeader>
 
+                <SectionBody $ink={SECTION_INK.damage}>
                 <Row>
                     <RowLabel title={`${system.displayName || system.name} (system id ${system.id})`}>
                         <SystemName>{system.displayName || system.name}</SystemName>
                         <MaxText>#{system.id}</MaxText>
                     </RowLabel>
                     <ActionButton
+                        $ink={SECTION_INK.damage}
                         title={indestructible && remaining <= 1
                             ? "A reactor cannot be destroyed before the battle"
                             : "More damage"}
@@ -314,6 +373,7 @@ class ApplyDamageMenu extends Component {
                        preventDefault there cannot stop the page scrolling behind the menu.*/}
                     <ValueInput
                         ref={this.wheelRef}
+                        $ink={SECTION_INK.damage}
                         type="text"
                         $destroyed={destroyed}
                         disabled={destroyed}
@@ -321,6 +381,7 @@ class ApplyDamageMenu extends Component {
                         onChange={e => this.onInput(e)}
                     />
                     <ActionButton
+                        $ink={SECTION_INK.damage}
                         title="Repair"
                         disabled={destroyed || remaining >= system.maxhealth}
                         onClick={() => this.step(1)}
@@ -344,6 +405,7 @@ class ApplyDamageMenu extends Component {
                         <CheckText>Destroy</CheckText>
                     </DestroyLabel>
                 </Row>
+                </SectionBody>
 
                 {/* Criticals can be added, amended or removed here. The picker's contents
                     come from the per-class catalogue (systemCriticals.php), which

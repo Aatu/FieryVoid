@@ -798,6 +798,25 @@ export const canApplyPreBattleDamage = (ship, system) =>
 	gamedata.gamephase === -2 && !fleetIsCommitted() && ship && ship.userid != 0
 	&& !ship.flight && !ship.mine && !isPseudoSystem(system);
 
+/* Per-system enhancements (WEAPON_ENHANCEMENTS_PLAN.md §6.1): the damage predicate PLUS a
+   live offer for this system. The offer list is generated server-side and already encodes
+   the hull-age gate, the Ancient-weapon gate and the pseudo-system filter (D3/D6), so there
+   is nothing to re-derive here - if the server offered nothing, there is nothing to show.
+
+   ⚠️ The two predicates are DELIBERATELY ASYMMETRIC on `destroyed`, and must stay that way:
+   canApplyPreBattleDamage has to keep passing for a destroyed system, because you must be
+   able to un-destroy what you just destroyed (SystemIcon's destroyed short-circuit still
+   opens this menu) - while this one must NOT, because you cannot refit a wreck (D11). Do
+   not "tidy" them into one predicate.
+
+   fleetIsCommitted() is inherited from the predicate above: a refit bought after Ready is
+   never submitted but WOULD be charged locally. */
+export const canApplySystemEnhancements = (ship, system) =>
+	canApplyPreBattleDamage(ship, system)
+	&& Boolean(window.systemEnhancements)
+	&& !shipManager.systems.isDestroyed(ship, system)
+	&& systemEnhancements.offersFor(ship, system).length > 0;
+
 /* A bought lobby mine: the section health bar opens the synthetic per-copy editor.
    Guarded on the mine having structure worth dialling - a 1-box proximity mine has
    nothing to edit, since any damage at all would destroy it and a destroyed mine is
@@ -822,7 +841,10 @@ const isPseudoSystem = (system) => !system
    the question directly instead of evaluating them. Same branch in hasStyledMenu and in
    render() below - all three walk the same list. */
 export const canDoAnything = (ship, system) => {
-	if (gamedata.gamephase === -2) return canApplyPreBattleDamage(ship, system);
+	//EITHER lobby editor opens the menu - see hasStyledMenu, which walks the same pair.
+	if (gamedata.gamephase === -2) {
+		return canApplyPreBattleDamage(ship, system) || canApplySystemEnhancements(ship, system);
+	}
 
 	return canOffline(ship, system) || canOnline(ship, system)
 		|| canOverload(ship, system) || canStopOverload(ship, system) || canBoost(ship, system)
@@ -925,8 +947,12 @@ export const canSystemActivation = (ship, system) => {
 };
 
 export const hasStyledMenu = (ship, system) => {
-	//see the note on canDoAnything: no weaponManager in the lobby
-	if (gamedata.gamephase === -2) return canApplyPreBattleDamage(ship, system);
+	//see the note on canDoAnything: no weaponManager in the lobby. The menu opens if EITHER
+	//lobby editor has something to offer - the enhancement half can pass where the damage
+	//half does not, and vice versa (they are asymmetric on `destroyed`).
+	if (gamedata.gamephase === -2) {
+		return canApplyPreBattleDamage(ship, system) || canApplySystemEnhancements(ship, system);
+	}
 
 	return canAA(ship, system) ||
 		canBFCP(ship, system) ||

@@ -143,7 +143,9 @@ window.gamedata = {
         for (var i in gamedata.ships) {
             var ship = gamedata.ships[i];
 
-            if (shipManager.getTurnDeployed(ship) > gamedata.turn) continue;
+            //PLACEMENT turn: a reinforcement is selectable in the Deployment phase of the turn
+            //before it arrives, which is when the player picks its entry hex.
+            if (shipManager.getTurnPlaced(ship) > gamedata.turn) continue;
             //Stage 7 (Hangar Ops): skip flights queued for deployment-phase dock —
             //they're going into a hangar, not onto the map, so auto-selecting them
             //in deployment would be misleading.
@@ -343,6 +345,66 @@ window.gamedata = {
         ];
     },
 
+    // TONE-MAPPED team colour, for TEXT that sits beside a full-chroma mark of the same
+    // team. The hex picker (SELECT_FROM_SHIPS_PLAN.md §2.5) puts the raw palette on a 3px
+    // allegiance bar — where a strong colour reads as a signal precisely because there is
+    // so little of it — and this on the ship NAME, so an arbitrary team colour lands in the
+    // same brightness band as the four fixed allegiance tints instead of red shouting and
+    // blue sinking.
+    //
+    // Same shape and same reasoning as getIniTeamColorRGB above, which darkens the palette
+    // for the Order of Battle: a per-SURFACE transform of one shared palette, declared once
+    // rather than inlined at each call site. Saturation is CLAMPED (a colour that is
+    // already muted stays where it is) but lightness is NORMALISED to a fixed value — the
+    // whole point is that every team ends up equally bright. Returns integer sRGB [r,g,b].
+    MUTED_TEAM_SAT: 0.40,
+    MUTED_TEAM_LIGHT: 0.68,
+    getMutedTeamColorRGB: function getMutedTeamColorRGB(team) {
+        var rgb = gamedata.getTeamColorRGB(team);
+        var r = rgb[0] / 255, g = rgb[1] / 255, b = rgb[2] / 255;
+        var max = Math.max(r, g, b), min = Math.min(r, g, b);
+        var h = 0, s = 0, l = (max + min) / 2;
+
+        if (max !== min) {
+            var d = max - min;
+            s = (l > 0.5) ? d / (2 - max - min) : d / (max + min);
+            if (max === r) {
+                h = (g - b) / d + (g < b ? 6 : 0);
+            } else if (max === g) {
+                h = (b - r) / d + 2;
+            } else {
+                h = (r - g) / d + 4;
+            }
+            h /= 6;
+        }
+
+        s = Math.min(s, gamedata.MUTED_TEAM_SAT);
+        l = gamedata.MUTED_TEAM_LIGHT;
+
+        if (s === 0) {
+            var grey = Math.round(l * 255);
+            return [grey, grey, grey];
+        }
+
+        var q = (l < 0.5) ? l * (1 + s) : l + s - l * s;
+        var p = 2 * l - q;
+
+        function hueToChannel(t) {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1 / 6) return p + (q - p) * 6 * t;
+            if (t < 1 / 2) return q;
+            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+            return p;
+        }
+
+        return [
+            Math.round(hueToChannel(h + 1 / 3) * 255),
+            Math.round(hueToChannel(h) * 255),
+            Math.round(hueToChannel(h - 1 / 3) * 255)
+        ];
+    },
+
     // Inline style for an "active mover" IniGUI box, derived from the ship's team
     // colour. Mirrors the .iniActive* CSS (border + translucent fill + glow) but
     // keyed on team instead of mine/ally/enemy.
@@ -421,19 +483,27 @@ window.gamedata = {
     //     is ambiguous, so each team gets its own colour instead.
     // Returns a raw "rgb(r,g,b)" string (no "color:" prefix) so callers can drop
     // it straight into a style attribute.
+    //
+    // CONVERTED to the shared allegiance palette (SELECT_FROM_SHIPS_PLAN.md Stage 6).
+    // The three literals below are --fv-own / --fv-ally / --fv-enemy from tokens.css,
+    // and the per-team branch runs the tone-mapped palette, so this label sits in the
+    // same brightness band as the hex picker's ship names rather than at full chroma.
+    // ⚠️ Its sibling getShipLogColorCss BELOW is deliberately NOT converted — the two
+    // functions have the same shape, so read the divergence as intent, not as a bug.
     getFleetHeaderColorRGB: function getFleetHeaderColorRGB(slot) {
         var rgb;
         if (gamedata.isPlayerInGame() && gamedata.getDistinctTeamCount() === 2) {
             if (parseInt(slot.playerid, 10) === parseInt(gamedata.thisplayer, 10)) {
-                rgb = [50, 205, 50];    // green (mine)
+                rgb = [125, 191, 136];  // --fv-own   #7dbf88 (mine)
             } else if (parseInt(slot.team, 10) === parseInt(gamedata.getPlayerTeam(), 10)) {
-                rgb = [51, 173, 255];   // blue (ally)
+                rgb = [121, 174, 212];  // --fv-ally  #79aed4 (ally)
             } else {
-                rgb = [255, 80, 80];    // red (enemy)
+                rgb = [234, 106, 94];   // --fv-enemy #ea6a5e (enemy)
             }
         } else {
-            // Observer, or 3+-team participant: absolute per-team palette.
-            rgb = gamedata.getTeamColorRGB(slot.team);
+            // Observer, or 3+-team participant: absolute per-team palette, tone-mapped
+            // into the same band as the three fixed tints above.
+            rgb = gamedata.getMutedTeamColorRGB(slot.team);
         }
         return "rgb(" + Math.round(rgb[0]) + "," + Math.round(rgb[1]) + "," + Math.round(rgb[2]) + ")";
     },
@@ -447,6 +517,13 @@ window.gamedata = {
     // (shooter) and the attacked ship's name (target) so one log line stays
     // self-consistent. NOTE: unlike getFleetHeaderColorRGB this returns a COMPLETE
     // declaration ("color:rgb(...);") ready to drop into a style attribute.
+    //
+    // ⚠️ NOT CONVERTED to the shared allegiance palette, on purpose (user decision
+    // 2026-08-14, SELECT_FROM_SHIPS_PLAN.md Stage 6 item 3). Its sibling
+    // getFleetHeaderColorRGB ABOVE now runs the muted --fv-own/-ally/-enemy tints; this
+    // one keeps its own bright literals because the combat log is a dense scrolling wall
+    // of text where the stronger colours still earn their place. The two functions have
+    // the same shape and now disagree — that is intent, not drift.
     getShipLogColorCss: function getShipLogColorCss(ship) {
         if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
             return "color:#ffffff;";
@@ -531,6 +608,57 @@ window.gamedata = {
         return false;
     },
 
+    //The systems a canPreOrder ship switches on and off during the Deployment/Pre-Turn phase
+    //(gamephase -1), mapped system name -> the label the commit warning shows. Currently the
+    //two stealth toggles; a future pre-order system only has to be added here to be covered.
+    preOrderToggleSystems: {
+        "ShadingField": "Shading Field",
+        "CloakingDevice": "Cloaking Device"
+    },
+
+    //Deployment commit warning: labels of the pre-order toggles this ship could still switch
+    //ON but hasn't. The systems' own canActivate() already encodes the whole rule (gamephase
+    //-1, not already active, not offline this turn), so this stays correct if those conditions
+    //change; destroyed is tested separately because canActivate() doesn't look at it.
+    //One system answers for the whole unit, flights included: a flight's fields are toggled
+    //collectively, so getSystemByName's first match is enough and it stops there rather than
+    //walking every fighter. It must be a LIVE fighter's copy though, which is what that call
+    //returns - doActivate/doDeactivate skip destroyed fighters, so a dead one's field keeps
+    //whatever it held when it died and would read as unshaded on a flight that IS shaded.
+    getInactivePreOrderSystems: function getInactivePreOrderSystems(ship) {
+        var labels = [];
+        if (!ship || !ship.systems) return labels;
+        for (var name in gamedata.preOrderToggleSystems) {
+            var sys = shipManager.systems.getSystemByName(ship, name);
+            if (!sys) continue;
+            if (shipManager.systems.isDestroyed(ship, sys)) continue;
+            if (typeof sys.canActivate !== 'function' || !sys.canActivate()) continue;
+            labels.push(gamedata.preOrderToggleSystems[name]);
+        }
+        return labels;
+    },
+
+    //Renders one ship name for a confirm/error dialog. `.ship-name` is the existing
+    //styling hook (confirm.css); adding `.clickable` + data-shipid on top of it opts the
+    //span into the delegated scroll-to-ship handler in UI/fleetList.js, exactly the way a
+    //fleet list row does. Marking is deliberately conditional: a span with no data-shipid
+    //stays inert, so a caller with only a name string (or a ship class, or a hidden ship)
+    //still renders normally instead of producing a click that leaks a position or throws.
+    //`label` overrides the default "Name (Class)" text for the "- Name" list style.
+    shipNameSpan: function shipNameSpan(ship, label) {
+        if (!ship || !ship.id) {
+            return '<span class="ship-name">' + (label || ship || '') + '</span>';
+        }
+        var text = (label !== undefined && label !== null) ? label : (ship.name + ' (' + ship.shipClass + ')');
+        //Same two gates doScrollToShip applies, in the same order, so a dialog name behaves
+        //exactly like a fleet list row: a docked flight has no board position but opens its
+        //ship window, and shouldBeHidden (enemy/stealthed/not-yet-deployed) is never jumped to.
+        if (!(ship.removed && ship.flight) && shipManager.shouldBeHidden(ship)) {
+            return '<span class="ship-name">' + text + '</span>';
+        }
+        return '<span class="ship-name clickable" data-shipid="' + ship.id + '">' + text + '</span>';
+    },
+
     onCommitClicked: function onCommitClicked(e) {
 
         if (gamedata.waiting == true) return;
@@ -564,21 +692,22 @@ window.gamedata = {
             var mines = [];
             var html = '';
 
-            // Mine ranges can only be set on the turn the mine first deploys; once deployed
-            // on an earlier turn the ranges are locked in. Only warn about mines deploying THIS
-            // turn - otherwise a later (delayed) deployment phase re-lists already-deployed mines
-            // whose transient mineSet flag was reset on page reload.
+            // Mine ranges can only be set on the turn the mine is PLACED (which for a late slot is
+            // the turn before it arrives); once placed on an earlier turn the ranges are locked
+            // in. Only warn about mines being placed THIS turn - otherwise a later (delayed)
+            // deployment phase re-lists already-placed mines whose transient mineSet flag was
+            // reset on page reload.
             var playerHasMines = gamedata.ships.some(function (ship) {
                 return ship.mine &&
                     ship.userid == gamedata.thisplayer &&
                     !shipManager.isDestroyed(ship) &&
-                    shipManager.getTurnDeployed(ship) == gamedata.turn;
+                    shipManager.getTurnPlaced(ship) == gamedata.turn;
             });
             if (playerHasMines) {
                 for (var i in gamedata.ships) {
                     var ship = gamedata.ships[i];
                     if (ship.userid == gamedata.thisplayer) {
-                        if (ship.mine && shipManager.getTurnDeployed(ship) == gamedata.turn) {
+                        if (ship.mine && shipManager.getTurnPlaced(ship) == gamedata.turn) {
                             mines.push(ship);
                         }
                     }
@@ -615,6 +744,47 @@ window.gamedata = {
                     }
                 }
             }
+
+            // CHECK for un-activated Pre-Turn systems (Shading Field / Cloaking Device)
+            // Deployment turn only. From the ship's second Pre-Turn phase onwards the player is
+            // looking at a unit already on the board, and leaving its field/cloak down is a real
+            // choice we shouldn't nag about every turn; the turn a ship ARRIVES it is easy to
+            // place it and commit without ever opening its ship window. Warning only, never a block.
+            var inactivePreOrder = {}; //label -> ships, so a mixed fleet gets one list per system
+            for (var i in gamedata.ships) {
+                var ship = gamedata.ships[i];
+                //canPreOrder first: a plain property read rejects the whole fleet bar a few units
+                //(Torvalus and Klingon hulls plus Stiletto flights), so nothing below runs for a
+                //normal ship. Mines carry the marker for their range settings, which the block
+                //above already warns about.
+                if (!ship.canPreOrder || ship.mine) continue;
+                if (ship.userid != gamedata.thisplayer) continue;
+                //ARRIVAL turn, not placement turn: a field/cloak is only meaningful once the unit
+                //is on the board, and a late slot gets its own Pre-Turn phase on the turn it
+                //arrives (FireGamePhase's $doDeployment branch) - that is where the nag belongs.
+                if (shipManager.getTurnDeployed(ship) != gamedata.turn) continue;
+                if (shipManager.isDestroyed(ship)) continue;
+
+                var labels = gamedata.getInactivePreOrderSystems(ship);
+                for (var l = 0; l < labels.length; l++) {
+                    if (!inactivePreOrder[labels[l]]) inactivePreOrder[labels[l]] = [];
+                    inactivePreOrder[labels[l]].push(ship);
+                }
+            }
+
+            var preOrderLabels = Object.keys(inactivePreOrder);
+            if (preOrderLabels.length > 0 && html !== '') html += "<br>"; //blank line off the mine warning above
+            for (var p = 0; p < preOrderLabels.length; p++) {
+                var preOrderShips = inactivePreOrder[preOrderLabels[p]];
+                html += "You have not activated the " + preOrderLabels[p] + " on: ";
+                html += "<br>";
+                for (var s = 0; s < preOrderShips.length; s++) {
+                    html += gamedata.shipNameSpan(preOrderShips[s]);
+                    html += "<br>";
+                }
+                html += "<br>";
+            }
+
             confirm.confirm(html + '<br><span class="commit-confirm-q">Are you sure you wish to commit your orders?</span>', gamedata.doCommit);
 
 
@@ -786,7 +956,7 @@ window.gamedata = {
                 html += "<br>";
                 for (var ship in selfDestructing) {
                     //html += selfDestructing[ship].name + " (" + selfDestructing[ship].shipClass + ")";
-                    html += '<span class="ship-name">' + selfDestructing[ship].name + ' (' + selfDestructing[ship].shipClass + ')</span>';
+                    html += gamedata.shipNameSpan(selfDestructing[ship]);
                     html += "<br>";
                 }
                 html += "<br>";
@@ -796,7 +966,7 @@ window.gamedata = {
                 html += "<br>";
                 for (var ship in jumping) {
                     //html += jumping[ship].name + " (" + jumping[ship].shipClass + ")";
-                    html += '<span class="ship-name">' + jumping[ship].name + ' (' + jumping[ship].shipClass + ')</span>';
+                    html += gamedata.shipNameSpan(jumping[ship]);
                     html += "<br>";
                 }
                 html += "<br>";
@@ -825,7 +995,7 @@ window.gamedata = {
                     html += "<br>";
                     for (var ship in hasNoEW) {
                         //html += hasNoEW[ship].name + " (" + hasNoEW[ship].shipClass + ")";
-                        html += '<span class="ship-name">' + hasNoEW[ship].name + ' (' + hasNoEW[ship].shipClass + ')</span>';
+                        html += gamedata.shipNameSpan(hasNoEW[ship]);
                         html += "<br>";
                     }
                     html += "<br>";
@@ -836,7 +1006,7 @@ window.gamedata = {
                 html += "<br>";
                 for (var ship in notLaunching) {
                     //html += notLaunching[ship].name + " (" + notLaunching[ship].shipClass + ")";
-                    html += '<span class="ship-name">' + notLaunching[ship].name + ' (' + notLaunching[ship].shipClass + ')</span>';
+                    html += gamedata.shipNameSpan(notLaunching[ship]);
                     html += "<br>";
                 }
                 html += "<br>";
@@ -846,7 +1016,7 @@ window.gamedata = {
                 html += "<br>";
                 for (var ship in notSetAA) {
                     //html += notSetAA[ship].name + " (" + notSetAA[ship].shipClass + ")";
-                    html += '<span class="ship-name">' + notSetAA[ship].name + ' (' + notSetAA[ship].shipClass + ')</span>';
+                    html += gamedata.shipNameSpan(notSetAA[ship]);
                     html += "<br>";
                 }
                 html += "<br>";
@@ -856,7 +1026,7 @@ window.gamedata = {
                 html += "<br>";
                 for (var ship in notSetFC) {
                     //html += notSetFC[ship].name + " (" + notSetFC[ship].shipClass + ")";
-                    html += '<span class="ship-name">' + notSetFC[ship].name + ' (' + notSetFC[ship].shipClass + ')</span>';
+                    html += gamedata.shipNameSpan(notSetFC[ship]);
                     html += "<br>";
                 }
                 html += "<br>";
@@ -868,7 +1038,7 @@ window.gamedata = {
                     //show actual surplus, too - like: Surplusser (PowerShip) - <10>
                     var surplusVal = shipManager.power.getReactorPower(powerSurplus[ship], shipManager.systems.getSystemByName(powerSurplus[ship], "reactor"));
                     //html += powerSurplus[ship].name + " (" + powerSurplus[ship].shipClass + "): <b>&#60;" + surplusVal + '&#62;</b>';
-                    html += '<span class="ship-name">' + powerSurplus[ship].name + ' (' + powerSurplus[ship].shipClass + '): <b>&#60;' + surplusVal + '&#62;</b></span>';
+                    html += gamedata.shipNameSpan(powerSurplus[ship], powerSurplus[ship].name + ' (' + powerSurplus[ship].shipClass + '): <b>&#60;' + surplusVal + '&#62;</b>');
                     html += "<br>";
                 }
                 html += "<br>";
@@ -896,7 +1066,7 @@ window.gamedata = {
 
                 for (var j in zeroSpeedShips) {
                     var movingShip = zeroSpeedShips[j];
-                    html += '<span class="ship-name">' + movingShip.name + '</span><br>';
+                    html += gamedata.shipNameSpan(movingShip, movingShip.name) + '<br>';
                 }
             }
 
@@ -996,7 +1166,7 @@ window.gamedata = {
                     html += "<br>";
                     for (var ship in hasNoFO) {
                         //html += hasNoFO[ship].name + " (" + hasNoFO[ship].shipClass + ")";
-                        html += '<span class="ship-name">' + hasNoFO[ship].name + ' (' + hasNoFO[ship].shipClass + ')</span>';
+                        html += gamedata.shipNameSpan(hasNoFO[ship]);
                         html += "<br>";
                     }
                 }
@@ -1006,7 +1176,7 @@ window.gamedata = {
                     html += "<br>";
                     for (var ship in hasSplitFO) {
                         //html += hasSplitFO[ship].name + " (" + hasSplitFO[ship].shipClass + ")";
-                        html += '<span class="ship-name">' + hasSplitFO[ship].name + ' (' + hasSplitFO[ship].shipClass + ')</span>';
+                        html += gamedata.shipNameSpan(hasSplitFO[ship]);
                         html += "<br>";
                     }
                 }
@@ -1106,7 +1276,7 @@ window.gamedata = {
                     html += "<br>";
                     for (var ship in hasNoFO) {
                         //html += hasNoFO[ship].name + " (" + hasNoFO[ship].shipClass + ")";
-                        html += '<span class="ship-name">' + hasNoFO[ship].name + ' (' + hasNoFO[ship].shipClass + ')</span>';
+                        html += gamedata.shipNameSpan(hasNoFO[ship]);
                         html += "<br>";
                     }
                 }
@@ -1116,7 +1286,7 @@ window.gamedata = {
                     html += "<br>";
                     for (var ship in hasSplitFO) {
                         //html += hasSplitFO[ship].name + " (" + hasSplitFO[ship].shipClass + ")";
-                        html += '<span class="ship-name">' + hasSplitFO[ship].name + ' (' + hasSplitFO[ship].shipClass + ')</span>';
+                        html += gamedata.shipNameSpan(hasSplitFO[ship]);
                         html += "<br>";
                     }
                 }
@@ -1128,7 +1298,7 @@ window.gamedata = {
                     html += "The following ships have not launched fighters:";
                     html += '</span><br>';
                     for (var ship in notLaunchedFighters) {
-                        html += '<span class="ship-name">' + notLaunchedFighters[ship].name + ' (' + notLaunchedFighters[ship].shipClass + ')</span>';
+                        html += gamedata.shipNameSpan(notLaunchedFighters[ship]);
                         html += "<br>";
                     }
                 }
@@ -1174,15 +1344,14 @@ window.gamedata = {
 
         //DEPLOYMENT PHASE
         if (gamedata.gamephase == -1) {
-            shipNames = shipManager.systems.getUnusedSpecialists();
+            var specialistShips = shipManager.systems.getUnusedSpecialists();
 
-            if (shipNames.length > 0) {
+            if (specialistShips.length > 0) {
                 var specialistsError = "The following ships have not selected Specialists:<br>";
 
-                for (var i in shipNames) {
-                    var shipName = shipNames[i];
-                    //specialistsError += "- " + shipName + "<br>";
-                    specialistsError += '<span class="ship-name">- ' + shipName + '</span><br>';
+                for (var i in specialistShips) {
+                    var specialistShip = specialistShips[i];
+                    specialistsError += gamedata.shipNameSpan(specialistShip, '- ' + specialistShip.name) + '<br>';
                 }
                 specialistsError += "<br>You need to choose Specialists for these ships.";
                 window.confirm.error(specialistsError, function () { });
@@ -1202,7 +1371,9 @@ window.gamedata = {
                 if (!flight.deploysInHangar) continue;
                 if (flight.pendingDeployDock) continue;
                 if (!gamedata.isMyShip(flight)) continue;
-                if (shipManager.getTurnDeployed(flight) != gamedata.turn) continue;
+                //Placement turn: a reinforcement flight is queued for its hangar during the
+                //Deployment phase of the turn before it arrives.
+                if (shipManager.getTurnPlaced(flight) != gamedata.turn) continue;
                 hangarDeployCandidates.push(flight);
             }
 
@@ -1215,25 +1386,29 @@ window.gamedata = {
                     var carrier = gamedata.ships[ck];
                     if (!carrier || !gamedata.isMyShip(carrier)) continue;
                     if (carrier.flight) continue;
-                    if (shipManager.getTurnDeployed(carrier) != gamedata.turn) continue;
+                    if (shipManager.getTurnPlaced(carrier) != gamedata.turn) continue;
                     myDeployingCarriers.push(carrier);
                 }
 
-                var mustDockNames = [];
+                var mustDockFlights = [];
                 for (var hi = 0; hi < hangarDeployCandidates.length; hi++) {
                     var hdFlight = hangarDeployCandidates[hi];
                     for (var ci = 0; ci < myDeployingCarriers.length; ci++) {
+                        //Only a carrier arriving on the SAME turn can hold it - being placed in the
+                        //same phase is not enough (turn-1 and turn-2 units are both placed on turn 1).
+                        //Otherwise this would block the commit over a berth the flight can't use.
+                        if (shipManager.getTurnDeployed(myDeployingCarriers[ci]) !== shipManager.getTurnDeployed(hdFlight)) continue;
                         if (window.DeploymentDock.eligibleHangarsForFlight(myDeployingCarriers[ci], hdFlight).length > 0) {
-                            mustDockNames.push(hdFlight.name);
+                            mustDockFlights.push(hdFlight);
                             break;
                         }
                     }
                 }
 
-                if (mustDockNames.length > 0) {
+                if (mustDockFlights.length > 0) {
                     var hangarDeployError = "The following flights must be deployed inside a Hangar:<br>";
-                    for (var mi = 0; mi < mustDockNames.length; mi++) {
-                        hangarDeployError += '<span class="ship-name">- ' + mustDockNames[mi] + '</span><br>';
+                    for (var mi = 0; mi < mustDockFlights.length; mi++) {
+                        hangarDeployError += gamedata.shipNameSpan(mustDockFlights[mi], '- ' + mustDockFlights[mi].name) + '<br>';
                     }
                     hangarDeployError += "<br>Dock them into a carrier's hangar before committing your orders.";
                     window.confirm.error(hangarDeployError, function () { });
@@ -1246,15 +1421,14 @@ window.gamedata = {
             //INITIAL ORDERS    
         } else if (gamedata.gamephase == 1) {
             //        	ajaxInterface.fastpolling=true;
-            var shipNames = shipManager.power.getShipsNegativePower();
+            var noPowerShips = shipManager.power.getShipsNegativePower();
 
-            if (shipNames.length > 0) {
+            if (noPowerShips.length > 0) {
                 var negPowerError = "The following ships have insufficient power:<br>";
 
-                for (var index in shipNames) {
-                    var name = shipNames[index];
-                    //negPowerError += "- " + name + "<br>";
-                    negPowerError += '<span class="ship-name">- ' + name + '</span><br>';
+                for (var index in noPowerShips) {
+                    var noPowerShip = noPowerShips[index];
+                    negPowerError += gamedata.shipNameSpan(noPowerShip, '- ' + noPowerShip.name) + '<br>';
                 }
                 negPowerError += "<br>You need to turn off systems before you can commit the turn.";
                 window.confirm.error(negPowerError, function () { });
@@ -1262,45 +1436,42 @@ window.gamedata = {
             }
 
             //We have one thrust-boosted weapon in Initial Orders Phase, let's put in a check for it and future - DK 26.11.24
-            shipNames = shipManager.movement.getShipsNegativeThrust();
+            var lowThrustShips = shipManager.movement.getShipsNegativeThrust();
 
-            if (shipNames.length > 0) {
+            if (lowThrustShips.length > 0) {
                 var negThrustError = "The following ships have insufficient Engine Thrust:<br>";
 
-                for (var index in shipNames) {
-                    var name = shipNames[index];
-                    //negThrustError += "- " + name + "<br>";
-                    negThrustError += '<span class="ship-name">- ' + name + '</span><br>';
+                for (var index in lowThrustShips) {
+                    var lowThrustShip = lowThrustShips[index];
+                    negThrustError += gamedata.shipNameSpan(lowThrustShip, '- ' + lowThrustShip.name) + '<br>';
                 }
                 negThrustError += "<br>You need to lower channelled thrust before you can commit the turn.";
                 window.confirm.error(negThrustError, function () { });
                 return false;
             }
 
-            shipNames = shipManager.power.getShipsGraviticShield();
+            var gravShieldShips = shipManager.power.getShipsGraviticShield();
 
-            if (shipNames.length > 0) {
+            if (gravShieldShips.length > 0) {
                 var tooManyShieldsError = "The following ships have too many active shields:<br>";
 
-                for (var i in shipNames) {
-                    var shipName = shipNames[i];
-                    //tooManyShieldsError += "- " + shipName + "<br>";
-                    tooManyShieldsError += '<span class="ship-name">- ' + shipName + '</span><br>';
+                for (var i in gravShieldShips) {
+                    var gravShieldShip = gravShieldShips[i];
+                    tooManyShieldsError += gamedata.shipNameSpan(gravShieldShip, '- ' + gravShieldShip.name) + '<br>';
                 }
                 tooManyShieldsError += "<br>You need to turn off shields or boost your shield generator before you can commit the turn.";
                 window.confirm.error(tooManyShieldsError, function () { });
                 return false;
             }
 
-            shipNames = shipManager.systems.getNegativeBFCP();
+            var negBFCPShips = shipManager.systems.getNegativeBFCP();
 
-            if (shipNames.length > 0) {
+            if (negBFCPShips.length > 0) {
                 var tooManyBFCPError = "The following ships have too many Bonus Fire Control Points (BFCP) set:<br>";
 
-                for (var i in shipNames) {
-                    var shipName = shipNames[i];
-                    //tooManyBFCPError += "- " + shipName + "<br>";
-                    tooManyBFCPError += '<span class="ship-name">- ' + shipName + '</span><br>';
+                for (var i in negBFCPShips) {
+                    var negBFCPShip = negBFCPShips[i];
+                    tooManyBFCPError += gamedata.shipNameSpan(negBFCPShip, '- ' + negBFCPShip.name) + '<br>';
                 }
                 tooManyBFCPError += "<br>You need to decrease the number of allocated BFCPs.";
                 window.confirm.error(tooManyBFCPError, function () { });
@@ -1322,15 +1493,14 @@ window.gamedata = {
                 return false;                
             }		
             */
-            shipNames = shipManager.systems.checkShieldGenValue();
+            var shieldGenShips = shipManager.systems.checkShieldGenValue();
 
-            if (shipNames.length > 0) {
+            if (shieldGenShips.length > 0) {
                 var shieldCapacityError = "The following ships have directed too much or too little power to their shields:<br>";
 
-                for (var i in shipNames) {
-                    var shipName = shipNames[i];
-                    //shieldCapacityError += "- " + shipName + "<br>";
-                    shieldCapacityError += '<span class="ship-name">- ' + shipName + '</span><br>';
+                for (var i in shieldGenShips) {
+                    var shieldGenShip = shieldGenShips[i];
+                    shieldCapacityError += gamedata.shipNameSpan(shieldGenShip, '- ' + shieldGenShip.name) + '<br>';
                 }
                 shieldCapacityError += "<br>You need to change their allocation of shield power.";
                 window.confirm.error(shieldCapacityError, function () { });
@@ -1405,7 +1575,7 @@ window.gamedata = {
                 errorText += "The following ships have too many EW points set:<br>";
                 for (var shipID in EWIncorrect) {
                     //errorText += EWIncorrect[shipID].name + " (" + EWIncorrect[shipID].shipClass + ")";
-                    errorText += '<span class="ship-name">' + EWIncorrect[shipID].name + ' (' + EWIncorrect[shipID].shipClass + ')</span>';
+                    errorText += gamedata.shipNameSpan(EWIncorrect[shipID]);
                     errorText += "<br>";
                 }
                 errorText += "<br>";
@@ -1414,7 +1584,7 @@ window.gamedata = {
                 errorText += "The following ships have too many EW points set:<br>";
                 for (var shipID in EWRestrictedIncorrect) {
                     //errorText += EWRestrictedIncorrect[shipID].name + " (" + EWRestrictedIncorrect[shipID].shipClass + ")";
-                    errorText += '<span class="ship-name">' + EWRestrictedIncorrect[shipID].name + ' (' + EWRestrictedIncorrect[shipID].shipClass + ')</span>';
+                    errorText += gamedata.shipNameSpan(EWRestrictedIncorrect[shipID]);
                     errorText += "<br>";
                 }
                 errorText += "<br>";
@@ -1423,7 +1593,7 @@ window.gamedata = {
                 errorText += "The following LCVs have too many EW points set on non-OEW:<br>";
                 for (var shipID in EWLCVIncorrect) {
                     //errorText += EWLCVIncorrect[shipID].name + " (" + EWLCVIncorrect[shipID].shipClass + ")";
-                    errorText += '<span class="ship-name">' + EWLCVIncorrect[shipID].name + ' (' + EWLCVIncorrect[shipID].shipClass + ')</span>';
+                    errorText += gamedata.shipNameSpan(EWLCVIncorrect[shipID]);
                     errorText += "<br>";
                 }
                 errorText += "<br>";
@@ -1434,7 +1604,7 @@ window.gamedata = {
                 errorText += "The following units are trying to launch more ordnance than available (see Ammunition Magazine):<br>";
                 for (var shipID in ammoMagazineError) {
                     //errorText += ammoMagazineError[shipID].name + " (" + ammoMagazineError[shipID].shipClass + ")";
-                    errorText += '<span class="ship-name">' + ammoMagazineError[shipID].name + ' (' + ammoMagazineError[shipID].shipClass + ')</span>';
+                    errorText += gamedata.shipNameSpan(ammoMagazineError[shipID]);
                     errorText += "<br>";
                 }
                 errorText += "<br>";
@@ -1444,7 +1614,7 @@ window.gamedata = {
                 errorText += "The following units are derelict and should be considered shut down - cancel all firing orders:<br>";
                 for (var shipID in derelictFiring) {
                     //errorText += derelictFiring[shipID].name + " (" + derelictFiring[shipID].shipClass + ")";
-                    errorText += '<span class="ship-name">' + derelictFiring[shipID].name + ' (' + derelictFiring[shipID].shipClass + ')</span>';
+                    errorText += gamedata.shipNameSpan(derelictFiring[shipID]);
                     errorText += "<br>";
                 }
                 errorText += "<br>";
@@ -1484,7 +1654,7 @@ window.gamedata = {
                     var pivoted = shipManager.movement.hasPivoted(pShip)
                     if (!pivoted.left && !pivoted.right) {
                         foundPShip = true;
-                        mustPivotError += '<span class="ship-name">- ' + pShip.name + '</span><br>';
+                        mustPivotError += gamedata.shipNameSpan(pShip, '- ' + pShip.name) + '<br>';
                     }
                 }
 
@@ -1493,7 +1663,7 @@ window.gamedata = {
                 //Limited thrust check to Hyach Specialist now for efficiency, but we can expand it as needed - DK
                 if (shipManager.hasSpecialAbility(tShip, "HyachSpecialists") && shipManager.movement.hasNegativeThrust(tShip)) {
                     foundTShip = true;
-                    negThrustError += '<span class="ship-name">- ' + tShip.name + '</span><br>';
+                    negThrustError += gamedata.shipNameSpan(tShip, '- ' + tShip.name) + '<br>';
                 }
 
             }
@@ -1571,7 +1741,7 @@ window.gamedata = {
                 var ammoMagError = "The following units are trying to fire more ordnance than available (see Ammunition Magazine):<br>";
                 for (var shipID in ammoMagazineError) {
                     //ammoMagError += ammoMagazineError[shipID].name + " (" + ammoMagazineError[shipID].shipClass + ")";
-                    ammoMagError += '<span class="ship-name">' + ammoMagazineError[shipID].name + ' (' + ammoMagazineError[shipID].shipClass + ')</span>';
+                    ammoMagError += gamedata.shipNameSpan(ammoMagazineError[shipID]);
                     ammoMagError += "<br>";
                 }
                 ammoMagError += "You need to reduce number of shots (or change mode) before you can commit the turn.";
@@ -1587,13 +1757,12 @@ window.gamedata = {
 
             //prevent Vorlons from borrowing future power for firing 
             //Capacitor-equipped ships cannot commit firing with negative power balance (they actively use power in this phase, AND they don't have any legal option of achieving negative balance by other means)
-            var shipNames = shipManager.power.getCapacitorShipsNegativePower();
-            if (shipNames.length > 0) {
+            var capacitorShips = shipManager.power.getCapacitorShipsNegativePower();
+            if (capacitorShips.length > 0) {
                 var negPowerError = "The following ships have insufficient power:<br>";
-                for (var index in shipNames) {
-                    var name = shipNames[index];
-                    //negPowerError += "- " + name + "<br>";
-                    negPowerError += '<span class="ship-name">- ' + name + '</span><br>';
+                for (var index in capacitorShips) {
+                    var capacitorShip = capacitorShips[index];
+                    negPowerError += gamedata.shipNameSpan(capacitorShip, '- ' + capacitorShip.name) + '<br>';
                 }
                 negPowerError += "You need to reduce your firing declarations before you can commit the turn.";
                 window.confirm.error(negPowerError, function () { });
@@ -1605,9 +1774,8 @@ window.gamedata = {
             if (batteryShips.length > 0) {
                 var negPowerError = "The following ships have insufficient plasma battery power:<br>";
                 for (var index in batteryShips) {
-                    var name = batteryShips[index];
-                    //negPowerError += "- " + name + "<br>";
-                    negPowerError += '<span class="ship-name">- ' + name + '</span><br>';
+                    var batteryShip = batteryShips[index];
+                    negPowerError += gamedata.shipNameSpan(batteryShip, '- ' + batteryShip.name) + '<br>';
                 }
                 negPowerError += "You need to reduce the number of unboosted Plasma Webs firing in Offensive Mode before you can commit the turn.";
                 window.confirm.error(negPowerError, function () { });
@@ -1642,7 +1810,7 @@ window.gamedata = {
                 var ammoMagError = "The following units are trying to fire more ordnance than available (see Ammunition Magazine):<br>";
                 for (var shipID in ammoMagazineError) {
                     //ammoMagError += ammoMagazineError[shipID].name + " (" + ammoMagazineError[shipID].shipClass + ")";
-                    ammoMagError += '<span class="ship-name">' + ammoMagazineError[shipID].name + ' (' + ammoMagazineError[shipID].shipClass + ')</span>';
+                    ammoMagError += gamedata.shipNameSpan(ammoMagazineError[shipID]);
                     ammoMagError += "<br>";
                 }
                 ammoMagError += "You need to reduce number of shots (or change mode) before you can commit the turn.";

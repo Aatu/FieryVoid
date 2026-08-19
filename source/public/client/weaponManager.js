@@ -594,6 +594,9 @@ window.weaponManager = {
                 lines.push('• ' + m.label + ': ' + fmtPct(m.value, m.key));
             }
         }
+        //Free-text footer that is not a percentage - boarding uses it to name the structure
+        //section the unit will attach to.
+        if (result.note) lines.push(result.note);
         return lines.join('\n');
     },
 
@@ -655,6 +658,32 @@ window.weaponManager = {
                 }
             }
             $('<div><span class="weapon">' + html + '</span></div>').appendTo(f);
+        }
+
+        /* Boarding attaches to the section its ENTRY HEX EDGE points at, not to whichever arc
+           the bearing happens to fall in, so name that one section. Without this the player was
+           left to guess from the incoming-fire arcs above - and on a six-section base those list
+           THREE candidates. Outside the calledid guard on purpose: a Sabotage boarding action is
+           a called shot, and where it attaches still matters. */
+        if (!ship.flight && !ship.mine && ship.shipSizeClass != 5) {
+            var hasBoarding = false;
+            for (var bw = 0; bw < gamedata.selectedSystems.length; bw++) {
+                if (gamedata.selectedSystems[bw].isBoardingAction) { hasBoarding = true; break; }
+            }
+            if (hasBoarding) {
+                var attach = weaponManager.getBoardingAttachInfo(selectedShip, ship);
+                var attachHtml;
+                if (attach.reason !== null) {
+                    attachHtml = attach.certain
+                        ? 'BOARDING ' + attach.label.toUpperCase() + ': ' + attach.reason
+                        : 'BOARDING: no free section on target';
+                } else if (attach.certain) {
+                    attachHtml = 'BOARDING: attaching to ' + attach.label.toUpperCase();
+                } else {
+                    attachHtml = 'BOARDING: section rolled by server (two sections tie)';
+                }
+                $('<div><span class="weapon">' + attachHtml + '</span></div>').appendTo(f);
+            }
         }
 
         //var blockedLosHex = weaponManager.getBlockedHexes(); //Are there any blocked hexes, no point checking if no.
@@ -1270,6 +1299,334 @@ window.weaponManager = {
     ------------------------------------------------------------ */
 
 
+    /* ------------------------------------------------------------------------
+       BOARDING ATTACHMENT - front-end mirror of Marines::isAttachBlocked
+       (source/server/model/weapons/specialWeapons.php).
+
+       Limits are per STRUCTURE SECTION: two breaching pods per section, one
+       grappling claw per section which it holds exclusively, and one attached
+       craft in total on an LCV or OSAT. Without this mirror the player saw a
+       healthy hit chance and the server silently cancelled the attachment.
+
+       The SERVER rolls which section is hit, so these helpers only ever answer
+       "is EVERY section this shooter could reach blocked". If some are free we
+       must not pretend to know which one the server will pick.
+       ------------------------------------------------------------------------ */
+
+    //Section key for an EXISTING attachment. Mirrors BaseShip::getStructureSystem,
+    //which falls back to Primary (0) for any location with no Structure of its own -
+    //so an MCV's locations 1 and 2 are correctly the same section. No destroyed rule
+    //here: the server resolves stored attachments the same way, breached or not.
+    resolveAttachSection: function resolveAttachSection(target, location) {
+        var loc = parseInt(location, 10);
+        if (isNaN(loc) || loc === 0) return 0;
+
+        var structure = shipManager.systems.getStructureSystem(target, loc);
+        if (!structure) return 0;
+
+        var structLoc = parseInt(structure.location, 10);
+        return isNaN(structLoc) ? 0 : structLoc;
+    },
+
+    //Section the server would roll for a hit at this outer location. Mirrors
+    //BaseShip::getHitSection, which redirects to Primary once the facing structure
+    //was destroyed as of turn-1 - which is exactly what the client's destroyed flag
+    //shows during order entry, since this turn's damage has not resolved yet.
+    resolveAttachCandidate: function resolveAttachCandidate(target, location) {
+        var loc = parseInt(location, 10);
+        if (isNaN(loc) || loc === 0) return 0;
+
+        var structure = shipManager.systems.getStructureSystem(target, loc);
+        if (!structure) return 0;                                          //no Structure of its own
+        if (shipManager.systems.isDestroyed(target, structure)) return 0;  //breached -> Primary
+
+        return loc;
+    },
+
+    /* How many pods the PRIMARY section (0) can hold. On a hull with exterior Structures,
+       pods reach Primary only through a breach - getHitSection redirects a hit to 0 exactly
+       when the facing structure is destroyed - so its capacity is two per BREACHED exterior
+       section, and zero while the hull is intact. A hull with no exterior structures (MCV,
+       LCV, OSAT) keeps the flat two, because for those Primary IS the only section.
+       Mirrors Marines::getPrimaryPodCap. */
+    getPrimaryPodCap: function getPrimaryPodCap(target) {
+        var exterior = 0;
+        var breached = 0;
+
+        for (var loc in target.structures) {
+            if (parseInt(loc, 10) === 0) continue; //Primary itself is not a way in
+
+            exterior++;
+            var structure = shipManager.systems.getSystem(target, target.structures[loc]);
+            if (structure && shipManager.systems.isDestroyed(target, structure)) breached++;
+        }
+
+        if (exterior === 0) return 2; //Primary is the hull's only section
+
+        return 2 * breached;
+    },
+
+    //Slots this unit takes on its section: live pods for a flight, the whole
+    //section for a claw ship.
+    getAttachFootprint: function getAttachFootprint(unit) {
+        if (!unit.flight) return 1;
+
+        var live = 0;
+        for (var i in unit.systems) {
+            if (!shipManager.systems.isDestroyed(unit, unit.systems[i])) live++;
+        }
+        return live;
+    },
+
+    //An LCV or OSAT supports a single attached craft, pod flight or claw ship.
+    isSingleAttachHull: function isSingleAttachHull(target) {
+        return (target.hangarRequired === 'LCVs' || !!target.osat);
+    },
+
+    /* Hull-wide ceiling on attached pods, applied on top of the two-per-section rule, so a
+       many-sectioned hull (a Vree saucer has six outer Structure blocks plus Primary) can
+       never hold more than its size class allows. Enormous units and bases are exempt from
+       the class table and take 12. Mirrors Marines::getHullPodCap. */
+    getHullPodCap: function getHullPodCap(target) {
+        if (target.base || target.Enormous) return 12;
+        if (target.shipSizeClass >= 3) return 8;   //capital
+        if (target.shipSizeClass == 2) return 4;   //HCV
+        return 2;                                  //medium ship and smaller
+    },
+
+    //Opposite-ends pairing for the capital claw rule. Only 1<->2 and 3<->4 exist on
+    //a non-base capital hull and Primary is never a valid partner; bases and Enormous
+    //units skip this test entirely, exactly as the server does.
+    isOppositeSection: function isOppositeSection(a, b) {
+        a = parseInt(a, 10);
+        b = parseInt(b, 10);
+        if (!a || !b) return false;
+        if (a === 1) return (b === 2);
+        if (a === 2) return (b === 1);
+        if (a === 3) return (b === 4);
+        if (a === 4) return (b === 3);
+        return false;
+    },
+
+    //Human-readable structure-section name, for telling the player where a boarder will land.
+    //Same labels ShipInfo.js uses for already-attached units, plus Primary.
+    getSectionLabel: function getSectionLabel(loc) {
+        var labels = {
+            0: "Primary", 1: "Forward", 2: "Aft",
+            3: "Port", 31: "Port-Forward", 32: "Port-Aft",
+            4: "Starboard", 41: "Starboard-Forward", 42: "Starboard-Aft"
+        };
+        var name = labels[parseInt(loc, 10)];
+        return name ? name : "section " + loc;
+    },
+
+    //Mirror of BaseShip::getBearingOnUnit - the boarder's bearing relative to the target's own
+    //facing, mirrored when the target is rolled exactly as the server does.
+    getAttachRelativeBearing: function getAttachRelativeBearing(target, unit) {
+        var bearing = mathlib.addToDirection(
+            mathlib.getCompassHeadingOfShip(target, unit),
+            -shipManager.getShipHeadingAngle(target));
+
+        if (shipManager.movement.isRolled(target) && bearing !== 0) bearing = 360 - bearing;
+
+        return Math.round(bearing);
+    },
+
+    /* Mirror of BaseShip::doGetAttachSectionBearing. A boarding unit attaches to the section
+       whose arc is CENTRED on the hex edge it crossed, not merely to one that contains its
+       bearing - so the player can see and plan the section rather than watch the server roll it.
+
+       Returns the raw location, or null when two sections are equally centred on that edge (the
+       server falls back to its profile-weighted roll there, and we must not claim to know which
+       it picks). outerSections carries the same {loc, min, max} arcs as the server's
+       getLocations(), minus Primary - which has no arc and is reached only via a breach. */
+    getAttachLocation: function getAttachLocation(shooter, target) {
+        if (!target.outerSections || target.outerSections.length === 0) return 0; //Primary-only hull
+
+        var bearing = weaponManager.getAttachRelativeBearing(target, shooter);
+        var best = null;
+        var bestDist = null;
+        var tied = false;
+
+        for (var i = 0; i < target.outerSections.length; i++) {
+            var arc = target.outerSections[i];
+            if (!mathlib.isInArc(bearing, arc.min, arc.max)) continue;
+
+            var dist = mathlib.getAngleDistance(bearing, mathlib.getArcCentre(arc.min, arc.max));
+
+            if (bestDist === null || dist < bestDist - 0.001) {
+                bestDist = dist;
+                best = parseInt(arc.loc, 10);
+                tied = false;
+            } else if (dist < bestDist + 0.001 && parseInt(arc.loc, 10) !== best) {
+                tied = true; //two distinct sections equally centred - the server rolls
+            }
+        }
+
+        if (best === null || tied) return null;
+        return best;
+    },
+
+    //The section a boarder actually lands on: the entry-edge location, then the breached-structure
+    //-> Primary redirect. null when getAttachLocation could not commit to one.
+    getAttachSection: function getAttachSection(shooter, target) {
+        var loc = weaponManager.getAttachLocation(shooter, target);
+        if (loc === null) return null;
+
+        return weaponManager.resolveAttachCandidate(target, loc);
+    },
+
+    //Mirror of Marines::getSectionOccupancy. skipId excludes the unit being tested.
+    //Destroyed attached units are skipped so a dead claw does not hold a section.
+    //
+    //NOTE: unlike the server this cannot see attachments DECLARED but not yet resolved this
+    //turn - the client never learns the opponent's declarations. So every answer here is
+    //occupancy as of the START of the turn; a section that fills up during resolution is
+    //reported by the server in the combat log instead. See Marines::getPendingAttachments.
+    getSectionOccupancy: function getSectionOccupancy(target, skipId) {
+        var occ = { sections: {}, podTotal: 0, clawTotal: 0, unitTotal: 0, clawSections: [] };
+        if (!target.hasAttached) return occ;
+
+        for (var attachedId in target.hasAttached) {
+            if (skipId !== undefined && attachedId == skipId) continue;
+
+            var unit = gamedata.getShip(attachedId);
+            if (!unit) continue;
+            if (shipManager.isDestroyed(unit)) continue;
+
+            var section = weaponManager.resolveAttachSection(target, target.hasAttached[attachedId]);
+            if (!occ.sections[section]) occ.sections[section] = { pods: 0, claws: 0, units: 0 };
+
+            occ.unitTotal++;
+            occ.sections[section].units++;
+
+            if (unit.flight) {
+                var pods = weaponManager.getAttachFootprint(unit);
+                occ.sections[section].pods += pods;
+                occ.podTotal += pods;
+            } else {
+                occ.sections[section].claws++;
+                occ.clawTotal++;
+                occ.clawSections.push(section);
+            }
+        }
+
+        return occ;
+    },
+
+    //Mirror of Marines::isAttachBlocked for ONE resolved section. Returns the reason
+    //string if the attachment is refused, or null if it is allowed.
+    getAttachBlockedReason: function getAttachBlockedReason(target, shooter, section, occ) {
+        var here = occ.sections[section] || { pods: 0, claws: 0, units: 0 };
+        var isClaw = !shooter.flight;
+
+        //A. LCV / OSAT - one attached craft on the whole hull.
+        if (weaponManager.isSingleAttachHull(target)) {
+            if (occ.unitTotal >= 1) return 'This unit can only support a single attached craft.';
+            return null;
+        }
+
+        //B. A claw ship holds its section exclusively - pods may never join it.
+        //Deliberately asymmetric: a claw may still take a section holding pods.
+        if (here.claws >= 1) return 'A Grappling Claw already holds this section.';
+
+        if (isClaw) {
+            //C. Whole-hull claw caps. Bases and Enormous units have no hull-wide cap -
+            //one claw per section (rule B) is their only limit.
+            if (!target.base && !target.Enormous) {
+                if (target.shipSizeClass <= 2) { //medium ship or HCV
+                    if (occ.clawTotal >= 1) return 'Only one vessel may grapple a medium ship or HCV.';
+                } else { //capital
+                    if (occ.clawTotal >= 2) return 'A capital ship can be grappled by two vessels only.';
+                    if (occ.clawTotal === 1 && !weaponManager.isOppositeSection(occ.clawSections[0], section)) {
+                        return 'Grappling vessels must attach to opposite ends.';
+                    }
+                }
+            }
+            return null;
+        }
+
+        var footprint = weaponManager.getAttachFootprint(shooter);
+
+        //E. Pods: two per section, counting live pods across every attached flight.
+        //Primary is the exception - two per BREACHED exterior section. See getPrimaryPodCap.
+        var sectionCap = (section === 0) ? weaponManager.getPrimaryPodCap(target) : 2;
+
+        if (here.pods + footprint > sectionCap) {
+            return (sectionCap === 0)
+                ? 'Breaching Pods can only reach the Primary section through a destroyed structure section.'
+                : 'No room for more Breaching Pods on this section.';
+        }
+
+        //F. Hull-wide ceiling by size class, on top of the per-section rule.
+        if (occ.podTotal + footprint > weaponManager.getHullPodCap(target)) {
+            return 'This ship cannot support any more Breaching Pods.';
+        }
+
+        return null;
+    },
+
+    /* Where this unit will attach and whether it can. Single source of truth for the boarding
+       hit chance, the targeting tooltip and the declaration-time warning.
+
+       Returns { section, label, reason, certain } where:
+         section  the resolved structure section, or null when the server will roll it
+         label    that section's name, or null
+         reason   why the attachment is refused, or null if it is allowed
+         certain  true when we know the exact section, false when the server rolls between ties
+
+       When the section is known we test only THAT section - the honest answer, and what lets
+       the UI name it. When it ties we fall back to the old conservative test: refuse only if
+       EVERY reachable section is blocked, because we must not pretend to know the server's roll. */
+    getBoardingAttachInfo: function getBoardingAttachInfo(shooter, target) {
+        var unknown = { section: null, label: null, reason: null, certain: false };
+
+        //Targets nothing can attach to anyway - the callers refuse these separately, and terrain
+        //has no outerSections to walk.
+        if (!target || target.flight || target.mine || target.shipSizeClass == 5) return unknown;
+
+        //An already-attached unit keeps the section it holds and is never refused.
+        if (target.hasAttached && target.hasAttached[shooter.id] !== undefined) {
+            var held = weaponManager.resolveAttachSection(target, target.hasAttached[shooter.id]);
+            return { section: held, label: weaponManager.getSectionLabel(held), reason: null, certain: true };
+        }
+
+        var occ = weaponManager.getSectionOccupancy(target, shooter.id);
+        var section = weaponManager.getAttachSection(shooter, target);
+
+        if (section !== null) {
+            return {
+                section: section,
+                label: weaponManager.getSectionLabel(section),
+                reason: weaponManager.getAttachBlockedReason(target, shooter, section, occ),
+                certain: true
+            };
+        }
+
+        //Tie: the server rolls. Only assert a refusal if nothing at all is reachable.
+        var candidates = target.outerSections ? weaponManager.getShipHittingSide(shooter, target) : null;
+        if (!candidates || candidates.length === 0) candidates = [0];
+
+        var seen = {};
+        var lastReason = null;
+        for (var i = 0; i < candidates.length; i++) {
+            var candidate = weaponManager.resolveAttachCandidate(target, candidates[i]);
+            if (seen[candidate]) continue; //two locations can collapse onto one section
+            seen[candidate] = true;
+
+            var reason = weaponManager.getAttachBlockedReason(target, shooter, candidate, occ);
+            if (reason === null) return unknown; //at least one section is still free
+            lastReason = reason;
+        }
+
+        return { section: null, label: null, reason: lastReason, certain: false };
+    },
+
+    //True when this unit cannot attach to the target at all. See getBoardingAttachInfo.
+    isBoardingFullyBlocked: function isBoardingFullyBlocked(shooter, target) {
+        return (weaponManager.getBoardingAttachInfo(shooter, target).reason !== null);
+    },
+
     //calculate hit chance for Boarding Action - different procedure
     /* Refactored DK 2026: returns same shape as calculateHitChange so the
        targeting tooltip can show a per-modifier breakdown. */
@@ -1282,6 +1639,7 @@ window.weaponManager = {
                 isOutOfRange: false,
                 breakdownReason: opts.breakdownReason || null,
                 modifiers: opts.modifiers || [],
+                note: opts.note || null,
                 _otherDetail: []
             };
         }
@@ -1289,12 +1647,31 @@ window.weaponManager = {
         if (target.flight)              return makeResult(0, { breakdownReason: 'Boarding: cannot board fighter' });
         if (target.shipSizeClass == 5)  return makeResult(0, { breakdownReason: 'Boarding: cannot board terrain' });
         if (target.mine)                return makeResult(0, { breakdownReason: 'Boarding: cannot board mine' });
-        if (target.attached[shooter.id] !== undefined) {
-            return makeResult(100, { autoHit: true, breakdownReason: 'Boarding: attached to target' });
+
+        var attach = weaponManager.getBoardingAttachInfo(shooter, target);
+
+        //hasAttached, not attached: target.attached is keyed by the TARGET's own host,
+        //so this branch never fired and an attached unit showed a rolled chance instead
+        //of the automatic hit the server has always given it.
+        if (target.hasAttached[shooter.id] !== undefined) {
+            return makeResult(100, { autoHit: true,
+                breakdownReason: 'Boarding: already attached at ' + attach.label });
         }
         if (shipManager.movement.getJinking(shooter) > 0) {
             return makeResult(0, { breakdownReason: 'Boarding: cannot jink and attach' });
         }
+        if (attach.reason !== null) {
+            //Name the section when we know it, so the player can see WHERE the problem is and
+            //re-route rather than just being told the attempt fails.
+            return makeResult(0, { breakdownReason: attach.certain
+                ? 'Boarding: ' + attach.label + ' - ' + attach.reason
+                : 'Boarding: no free section on target' });
+        }
+
+        //The section is fixed by the hex edge this unit crossed, so tell the player which one.
+        var attachNote = attach.certain
+            ? 'Will attach to: ' + attach.label
+            : 'Attach section rolled by server (two sections tie on this approach)';
 
         var modifiers = [];
         function pushIfNonZero(key, label, value) {
@@ -1331,7 +1708,7 @@ window.weaponManager = {
 
         var sum = modifiers.reduce(function (s, m) { return s + m.value; }, 0);
         var hitChance = Math.round(sum * 5); //d20 -> d100
-        return makeResult(hitChance, { modifiers: modifiers });
+        return makeResult(hitChance, { modifiers: modifiers, note: attachNote });
     }, //endof calculateBoardingAction
 
     /* ------------------------------------------------------------
@@ -2479,6 +2856,20 @@ window.weaponManager = {
                     return;
                 }
             }
+
+            //Boarding: refuse a target this unit cannot attach to, so the order is not burned on
+            //an attachment the server will cancel. Names the section when the entry hex edge
+            //fixes it, so the player knows to approach from a different side.
+            if (weapon.isBoardingAction) {
+                var attachInfo = weaponManager.getBoardingAttachInfo(selectedShip, ship);
+                if (attachInfo.reason !== null) {
+                    confirm.warning(attachInfo.certain
+                        ? "This unit would attach to the " + attachInfo.label + " section of "
+                          + ship.name + ". " + attachInfo.reason
+                        : "There is no free section on " + ship.name + " for this unit to attach to.");
+                    return;
+                }
+            }
             //Only need to check first weapon
             if (blockedLosHex && blockedLosHex.length > 0 && !loSBlocked) {
                 var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
@@ -3477,10 +3868,15 @@ window.weaponManager = {
         });
     },
 
-    getAllFireOrdersForDisplayingAgainst: function getAllFireOrdersForDisplayingAgainst(target) {
+    // damageIndex is optional, and follows the same convention as logFireOrders: a caller that
+    // asks about several targets in a row (the replay's fire pass, which now walks the fleet
+    // twice - once for multi-target volleys, once for everything else) builds ONE index and
+    // passes it in, so the fleet sweep happens once for the whole pass instead of once per
+    // target. Callers that pass nothing keep the original per-call sweep.
+    getAllFireOrdersForDisplayingAgainst: function getAllFireOrdersForDisplayingAgainst(target, damageIndex) {
         //one reverse map for every order resolved against this target, instead of one full
         //fleet sweep per order - see the note above getDamagesCausedBy
-        var damageIndex = weaponManager.buildDamageIndex(gamedata.ships);
+        if (!damageIndex) damageIndex = weaponManager.buildDamageIndex(gamedata.ships);
         return gamedata.ships.reduce(function (fires, shooter) {
             return fires.concat(weaponManager.getAllFireOrders(shooter).filter(function (fire) {
                 return fire.targetid === target.id && (fire.type === "normal" || fire.type === "ballistic");

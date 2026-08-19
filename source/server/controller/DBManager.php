@@ -161,7 +161,11 @@ class DBManager
 		/*07.01.2024: merge options point cost into enhancements point cost! 
         $sql = "INSERT INTO `B5CGM`.`tac_ship` VALUES(null, $userid, $gameid, '" . $this->DBEscape($ship->name) . "', '" . $ship->phpclass . "', 0, 0, 0, 0, 0, $ship->slot, $ship->pointCostEnh)";
 		*/
-		$enhCostTotal = $ship->pointCostEnh + $ship->pointCostEnh2;
+		/* pointCostSysEnh is the third bucket (WEAPON_ENHANCEMENTS_PLAN.md D5) - per-system refits.
+		   It belongs in tac_ship.enhvalue with the other two: that column is what the fleet list
+		   reads back as the ship's enhancement spend, and a refit is spend. BuyingGamePhase sets
+		   it from the SERVER-derived total before calling this, never from the client's claim. */
+		$enhCostTotal = $ship->pointCostEnh + $ship->pointCostEnh2 + $ship->pointCostSysEnh;
         $sql = "INSERT INTO `tac_ship` VALUES(null, $userid, $gameid, '" . $this->DBEscape($ship->name) . "', '" . $ship->phpclass . "', 0, 0, 0, 0, 0, $ship->slot, $enhCostTotal)";
 		
         //   Debug::log($sql);
@@ -181,7 +185,45 @@ class DBManager
 			throw $e;
 		}
 	} //endof function submitEnhancement
-	
+
+
+	/* PER-SYSTEM enhancement, written at buy time from BuyingGamePhase::process
+	   (WEAPON_ENHANCEMENTS_PLAN.md §4.5). Prepared, unlike its ship-level twin above: the
+	   two string columns both come from server-side tables (the registry's label and the
+	   system's ->name), but there is no reason to reintroduce string interpolation on a
+	   brand-new path.
+	   $enhvalue is the price the SERVER derived (D4) - the client's claim is discarded
+	   before this is ever called - and it is stored so a refund can be exact.
+	   $sysname is the D13 integrity check, verified against the rebuilt ship on load. */
+	public function submitSystemEnhancement($gameid, $shipid, $systemid, $sysname, $enhid, $numbertaken, $enhname, $enhvalue)
+	{
+		try{
+			$stmt = $this->connection->prepare(
+				"INSERT INTO `tac_sys_enhancements`
+					(gameid, shipid, systemid, sysname, enhid, numbertaken, enhname, enhvalue)
+				 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+				 ON DUPLICATE KEY UPDATE
+					numbertaken = VALUES(numbertaken), enhvalue = VALUES(enhvalue)"
+			);
+			if (!$stmt) throw new Exception("DB error in submitSystemEnhancement (prepare): " . $this->connection->error);
+			//'d' on enhvalue - DECIMAL column, and a price can be fractional.
+			$gameid      = (int)$gameid;
+			$shipid      = (int)$shipid;
+			$systemid    = (int)$systemid;
+			$sysname     = (string)$sysname;
+			$enhid       = (string)$enhid;
+			$numbertaken = (int)$numbertaken;
+			$enhname     = (string)$enhname;
+			$enhvalue    = (float)$enhvalue;
+			$stmt->bind_param('iiissisd', $gameid, $shipid, $systemid, $sysname, $enhid, $numbertaken, $enhname, $enhvalue);
+			$stmt->execute();
+			$stmt->close();
+		}catch(Exception $e) {
+			$this->endTransaction(true);
+			throw $e;
+		}
+	} //endof function submitSystemEnhancement
+
 
     public function submitFlightSize($gameid, $shipid, $flightSize)
     {
@@ -263,7 +305,9 @@ class DBManager
         //them. Before this column existed the count was silently dropped and a saved
         //fleet of 10 mines reloaded as 1.
         $bulkbuy = max(1, (int)($ship->bulkBuy ?? 1));
-		$enhCostTotal = $ship->pointCostEnh + $ship->pointCostEnh2;
+		//Third bucket, same reasoning as submitShip above: a saved fleet's enhvalue has to carry
+		//the per-system refits or reloading it prices the ship short (D5).
+		$enhCostTotal = $ship->pointCostEnh + $ship->pointCostEnh2 + $ship->pointCostSysEnh;
 
         $sql = "INSERT INTO tac_saved_ship
                 (userid, listid, name, phpclass, flightsize, bulkbuy, enhvalue)
@@ -308,6 +352,42 @@ class DBManager
 			throw $e;
 		}
 	} //endof function submitEnhancement
+
+	/* PER-SYSTEM enhancements for a saved fleet (WEAPON_ENHANCEMENTS_PLAN.md §4.7).
+	   Batched like submitSavedDamageRows rather than one call per row: a fleet of refitted
+	   ships is dozens of rows, and the chunking/binding rules are already solved there.
+	   @param array $rows [[shipid, systemid, sysname, enhid, numbertaken, enhname, enhvalue], …]
+	   Every value here is server-derived; the client's prices never reach this method (D4). */
+	public function submitSavedSystemEnhancementRows($listid, array $rows)
+	{
+		foreach (array_chunk($rows, self::SAVED_ROW_CHUNK) as $chunk) {
+			$types = '';
+			$values = array();
+			$placeholders = array();
+
+			foreach ($chunk as $row) {
+				$placeholders[] = '(?, ?, ?, ?, ?, ?, ?, ?)';
+				$types .= 'iiissisd';
+				$values[] = (int)$listid;
+				$values[] = (int)$row[0];
+				$values[] = (int)$row[1];
+				$values[] = (string)$row[2];
+				$values[] = (string)$row[3];
+				$values[] = (int)$row[4];
+				$values[] = (string)$row[5];
+				$values[] = (float)$row[6];
+			}
+
+			$this->executeBatchInsert(
+				"INSERT INTO tac_saved_sysenh
+					(listid, shipid, systemid, sysname, enhid, numbertaken, enhname, enhvalue)
+				 VALUES " . implode(', ', $placeholders) . "
+				 ON DUPLICATE KEY UPDATE
+					numbertaken = VALUES(numbertaken), enhvalue = VALUES(enhvalue), sysname = VALUES(sysname)",
+				$types, $values, 'submitSavedSystemEnhancementRows'
+			);
+		}
+	}
 
     public function submitSavedAmmo($listid, $shipid, $systemid, $firingMode, $ammoAmount)
     {
@@ -660,6 +740,39 @@ class DBManager
         return $byShip;
     }
 
+    /**
+     * Every PER-SYSTEM enhancement row in a fleet, as
+     * shipid => [[systemid, sysname, enhid, numbertaken, enhname, enhvalue], …].
+     * ONE query for the whole fleet, like getSavedDamageForList above.
+     * ⚠️ enhvalue is DECIMAL -> PHP string; cast at the point of use. Nothing here trusts
+     * the stored price anyway - loadSavedFleet re-derives it (D4, plan §4.7.1).
+     */
+    public function getSavedSystemEnhancementsForList($listid)
+    {
+        $byShip = array();
+        $stmt = $this->connection->prepare(
+            "SELECT
+                shipid, systemid, sysname, enhid, numbertaken, enhname, enhvalue
+            FROM
+                tac_saved_sysenh
+            WHERE
+                listid = ?
+            "
+        );
+        if ($stmt)
+        {
+            $stmt->bind_param('i', $listid);
+            $stmt->bind_result($shipid, $systemid, $sysname, $enhid, $numbertaken, $enhname, $enhvalue);
+            $stmt->execute();
+            while ($stmt->fetch())
+            {
+                $byShip[$shipid][] = array($systemid, $sysname, $enhid, $numbertaken, $enhname, $enhvalue);
+            }
+            $stmt->close();
+        }
+        return $byShip;
+    }
+
     public function changeAvailabilityFleet(int $id): int {
         try {
             // Toggle the value
@@ -743,6 +856,49 @@ class DBManager
                  foreach ($findRes as $row) {
                      $slotsToReset[] = $row->slot;
                  }
+            }
+
+            /* ⭐ The ship ids FIRST, then every table keyed by them, THEN the ships themselves.
+               tac_ship is the only one of these tables with a player/slot column - all the rest are
+               keyed by (gameid, shipid) with no foreign key - so deleting the ships alone leaves
+               ORPHAN rows behind. That is not merely untidy: MariaDB's InnoDB does not persist the
+               AUTO_INCREMENT counter, so after a server restart tac_ship.id resumes at MAX(id)+1 and
+               the NEXT fleet bought into this game can be handed the exact ids the cleared one had.
+               The orphans then re-attach to unrelated ships and resolve POSITIONALLY by systemid -
+               refits bought on a Primus turned up on an Omega's heavy lasers (game 4302, 2026-08-17),
+               and damage, criticals, ammo and flight sizes would come back the same way.
+               deleteGames() clears the same tables game-wide; this is its per-slot twin. */
+            $shipIds = array();
+            $findShips = "SELECT id FROM `tac_ship` WHERE tacgameid = $gameid AND playerid = $userid";
+            if ($slotid)
+                $findShips .= " AND slot = $slotid";
+
+            $shipRows = $this->query($findShips);
+            if ($shipRows) {
+                foreach ($shipRows as $row) {
+                    $shipIds[] = (int)$row->id;
+                }
+            }
+
+            if (count($shipIds) > 0) {
+                //Ints straight out of the DB, so the list is safe to interpolate.
+                $idList = implode(',', $shipIds);
+
+                //Rows that BELONG to a removed ship.
+                $shipKeyedTables = array(
+                    'tac_ammo', 'tac_critical', 'tac_damage', 'tac_enhancements', 'tac_ew',
+                    'tac_flightsize', 'tac_individual_notes', 'tac_iniative', 'tac_power',
+                    'tac_shipmovement', 'tac_systemdata', 'tac_sys_enhancements'
+                );
+                foreach ($shipKeyedTables as $table) {
+                    $this->update("DELETE FROM `$table` WHERE shipid IN ($idList)");
+                }
+
+                /* Rows that POINT AT a removed ship rather than belonging to it. A slot can only be
+                   left from the lobby, so in practice there are none - but the recycled-id problem
+                   above would mis-attribute them just as readily if that ever changes. */
+                $this->update("DELETE FROM `tac_ew` WHERE targetid IN ($idList)");
+                $this->update("DELETE FROM `tac_fireorder` WHERE shooterid IN ($idList) OR targetid IN ($idList)");
             }
 
             $sql = "DELETE FROM `tac_ship` WHERE tacgameid = $gameid AND playerid = $userid";
@@ -2750,6 +2906,11 @@ class DBManager
     private function getEnhancementsForShips($gamedata)
     {
         $allEnhancements = $this->getEnhancementsForGame($gamedata->id);
+        //Per-system enhancements (WEAPON_ENHANCEMENTS_PLAN.md §4.6). ONE query for the whole
+        //game, and read at the same EARLY point as the ship-level rows, for the same reason:
+        //everything downstream resolves systems through getSystemById and skips, silently, any
+        //row that does not resolve.
+        $allSystemEnhancements = $this->getSystemEnhancementsForGame($gamedata->id);
 
         foreach ($gamedata->ships as $ship){
             $shipEnhancements = isset($allEnhancements[$ship->id]) ? $allEnhancements[$ship->id] : array();
@@ -2762,6 +2923,43 @@ class DBManager
             }
 
             Enhancements::addEnhancementSystems($ship);
+
+            /* Rebuilt into the PURCHASE tuple shape (see BaseShip::$systemEnhancements):
+                 [enhID, label, count, limit, TOTAL PAID, priceStep, systemid, sysname]
+               limit and priceStep are 0 in game - nothing can be bought here, so there is
+               nothing for them to constrain, exactly as the ship-level rebuild above zeroes
+               its price columns. enhvalue is DECIMAL and mysqli hands it back as a STRING;
+               cast it, or pointCostSysEnh becomes a string and the fleet total concatenates.
+
+               ⭐ VALIDATED, not merely rebuilt - the D13 integrity check, the same rule
+               Enhancements::setSystemEnhancements applies before it changes a stat and
+               loadSavedFleet applies before it re-prices. A stored systemid is POSITIONAL, so a
+               row whose id no longer resolves, or resolves to a system of a different NAME, is
+               describing somebody else's ship and is dropped here rather than carried.
+
+               Without this the row still reached the client and still cost points even though the
+               server refused to apply it: phantom refit badges on an Omega's heavy lasers and +52
+               points on a fleet that had bought nothing (game 4302, 2026-08-17). The cause there
+               was orphaned rows plus a recycled tac_ship.id - fixed at source in leaveSlot() - but
+               a contributor revising a hull shifts every id after the system they insert, which is
+               the routine way for the same mismatch to appear.
+
+               AFTER addEnhancementSystems because an enhancement may MOUNT a system (Extra
+               Tendrils) and a refit may have been bought on one; validating first would drop it. */
+            if (isset($allSystemEnhancements[$ship->id])) {
+                foreach ($allSystemEnhancements[$ship->id] as $entry) {
+                    // entry: [systemid, sysname, enhid, numbertaken, enhname, enhvalue]
+                    $system = $ship->getSystemById((int)$entry[0]);
+                    if (!$system) continue;                              //stale id - drop, never guess
+                    //Older rows may carry no name; those fall through on the id alone.
+                    if ($entry[1] !== '' && (string)$system->name !== (string)$entry[1]) continue;
+
+                    $ship->systemEnhancements[] = array(
+                        $entry[2], $entry[4], (int)$entry[3], 0, (float)$entry[5], 0, (int)$entry[0], $entry[1]
+                    );
+                    $ship->pointCostSysEnh += (float)$entry[5];
+                }
+            }
         }
     } //endof function getEnhancementsForShips
 
@@ -3333,6 +3531,37 @@ class DBManager
             {
                 if (!isset($toReturn[$shipID])) $toReturn[$shipID] = array();
                 $toReturn[$shipID][] = array($enhID,$numbertaken,$description);
+            }
+            $stmt->close();
+        }
+        return $toReturn;
+    }
+
+    /* Every PER-SYSTEM enhancement row in the game, as shipid => [[systemid, sysname,
+       enhid, numbertaken, enhname, enhvalue], …]. ONE query for the whole game, exactly
+       like getEnhancementsForGame above - this runs on every game.php load.
+       ⚠️ enhvalue is DECIMAL and mysqli hands it back as a PHP STRING; cast at the point of
+       use (arch_fractional_enhancement_value). */
+    private function getSystemEnhancementsForGame($gameID){
+        $toReturn = array(); // Map shipid -> array of entries
+        $stmt = $this->connection->prepare(
+            "SELECT
+                shipid, systemid, sysname, enhid, numbertaken, enhname, enhvalue
+            FROM
+                tac_sys_enhancements
+            WHERE
+                gameid = ?
+            "
+        );
+        if ($stmt)
+        {
+            $stmt->bind_param('i', $gameID);
+            $stmt->bind_result($shipID, $systemid, $sysname, $enhID, $numbertaken, $enhname, $enhvalue);
+            $stmt->execute();
+            while ($stmt->fetch())
+            {
+                if (!isset($toReturn[$shipID])) $toReturn[$shipID] = array();
+                $toReturn[$shipID][] = array($systemid, $sysname, $enhID, $numbertaken, $enhname, $enhvalue);
             }
             $stmt->close();
         }
@@ -4276,13 +4505,23 @@ class DBManager
 		
 			//unit enhancements
             $stmt = $this->connection->prepare(
-                "DELETE FROM 
+                "DELETE FROM
                     tac_enhancements
                 WHERE
                     gameid = ?"
             );
             $this->executeGameDeleteStatement($stmt, $ids);
-			
+
+			//per-system enhancements (WEAPON_ENHANCEMENTS_PLAN.md §3.3). tac_sys_enhancements
+			//has no FK to tac_game, same as tac_enhancements, so it needs its own DELETE.
+            $stmt = $this->connection->prepare(
+                "DELETE FROM
+                    tac_sys_enhancements
+                WHERE
+                    gameid = ?"
+            );
+            $this->executeGameDeleteStatement($stmt, $ids);
+
 			//individual system notes
             $stmt = $this->connection->prepare(
                 "DELETE FROM 

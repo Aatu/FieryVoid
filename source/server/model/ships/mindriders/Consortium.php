@@ -105,7 +105,7 @@ class Consortium extends MindriderHCV{
 				10 => "Shield Reinforcement",
 				11 => "Telekinetic Cutter",
 				12 => "Thought Shield",
-				14 => "Scanner",			
+				14 => "ELINT Scanner",			
 				16 => "Engine",
 				17 => "Jump Engine",
 				19 => "Reactor",

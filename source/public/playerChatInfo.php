@@ -16,14 +16,30 @@ require_once dirname(__DIR__) . '/server/lib/Debug.php';
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+$playerid = (int)($_SESSION["user"] ?? 0);
+// Both branches below only touch the DB, never the session, so drop the per-session
+// file lock now. It was previously held across both queries, serialising this
+// endpoint against the chat and gamedata polls of the same tab.
+session_write_close();
 
-// Redirect if not logged in
-if (empty($_SESSION["user"])) {
-    header('Location: index.php');
+/*
+ * 401 JSON, not a redirect.
+ *
+ * This used to answer an expired session with header('Location: index.php'), which
+ * jQuery follows — so a dataType:'json' caller got index.php's HTML, failed to parse
+ * it, and fell into chat.js's error handler, which simply retried. Every one of those
+ * retries reached this file and ran two real queries: unlike chatdata.php there is no
+ * APCu fast path here, so a single logged-out tab left open was an open-ended stream
+ * of DB work. A 401 lets the client recognise the condition and stop.
+ */
+if (!$playerid) {
+    http_response_code(401);
+    if(ob_get_length()) ob_clean();
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(["error" => "Not logged in."]);
     exit;
 }
 
-$playerid = (int)$_SESSION["user"];
 $ret = null;
 
 // Handle POST request

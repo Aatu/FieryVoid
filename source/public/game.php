@@ -76,6 +76,9 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 	<link href="<?php echo AssetLoader::getAssetUrl('styles/confirm.css'); ?>" rel="stylesheet" type="text/css">
     <link href="<?php echo AssetLoader::getAssetUrl('styles/replay.css'); ?>" rel="stylesheet" type="text/css">
     <link href="<?php echo AssetLoader::getAssetUrl('styles/shipTooltip.css'); ?>" rel="stylesheet" type="text/css">
+    <!-- The hex stack picker (client/UI/SelectFromShips.js). Its own namespace and its own
+         file so it no longer shares .shipNameContainer with the hover tooltip above. -->
+    <link href="<?php echo AssetLoader::getAssetUrl('styles/hexPicker.css'); ?>" rel="stylesheet" type="text/css">
 <!--	styles/helper.css was deleted (roadmap item 6, Stage 5) - it was dead, see helper.php -->
     <!-- jQuery + jQuery-UI self-hosted (same-origin HTTP/2 + cache-control, no 3rd-party TLS).
          Both kept SYNCHRONOUS: jQuery for the inline $(window).on("load") bootstrap below, and
@@ -382,6 +385,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     <script defer src="client/criticals.js"></script>
     <script defer src="client/systems.js"></script>
     <script defer src="client/battleDamage.js"></script>
+    <script defer src="client/systemEnhancements.js"></script>
     <script defer src="client/savedFleets.js"></script>
 	<script defer src="client/power.js"></script>
     <script defer src="client/UI/shipMovement.js"></script>
@@ -799,18 +803,26 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
         </div>
     </div>
 
+    <?php
+    // No $chattitle on either of these: the chat already sits behind a labelled tab
+    // (GAME CHAT / CHAT), so chat.php's head bar would only repeat it and cost a line
+    // of the log panel. $chatcompact trims the composer for the same reason — see
+    // .fv-chat-compact in styles/chat.css.
+    ?>
     <div id="chat" class="logPanelEntry" style="display:none;">
-        <?php 
+        <?php
             $chatgameid = $gameid;
             $chatelement = "#chat";
+            $chatcompact = true;
             include("chat.php")
         ?>
     </div>
-    
+
     <div id="globalchat" class="logPanelEntry" style="display:none;">
-        <?php 
+        <?php
             $chatgameid = 0;
             $chatelement = "#globalchat";
+            $chatcompact = true;
             include("chat.php")
         ?>
     </div>

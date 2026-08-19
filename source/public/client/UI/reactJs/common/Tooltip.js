@@ -18,20 +18,25 @@ class Component extends React.Component {
 /* The hover tooltip for systems, weapons and thrusters.
 
    Its twin is .shipNameContainer in tactical.css - the jQuery map tooltip - which
-   declares the identical design a second time: same black fill, same 0.65 opacity, same
-   7px radius, same arial 12px, same z-index 7001. Two stacks, one look, and until
-   roadmap item 6 Stage 3 they agreed only by luck. Both now read the same tokens
-   (theme.radii.tooltip here, var(--fv-radius-tooltip) there), so a retune of one is a
-   retune of both. If you change anything here, change it there. */
+   declares the identical design a second time: same 65%-black fill, same 7px radius,
+   same arial 12px, same z-index 7001. Two stacks, one look, and until roadmap item 6
+   Stage 3 they agreed only by luck. Both now read the same tokens (theme.radii.tooltip
+   here, var(--fv-radius-tooltip) there), so a retune of one is a retune of both. If you
+   change anything here, change it there.
+
+   ⚠️ The translucency is in the FILL (overlayBgSoft), not in element `opacity`. Opacity
+   fades the TEXT along with the panel; the jQuery twin's ship names were coming out
+   visibly duller than the identical allegiance tokens in the hex picker beside them, and
+   this surface was changed with it to keep the two in step. The panel is exactly as
+   see-through as before. Do not reintroduce `opacity` - it compounds with the alpha. */
 const Tooltip = styled(Component)`
     z-index:7001;
-    opacity:0.65;
     position:absolute;
     text-align:center;
     font-family:${theme.fonts.body};
     font-size:12px;
     color:${theme.colors.text};
-    background-color:${theme.colors.overlayBg};
+    background-color:${theme.colors.overlayBgSoft};
     border-radius: ${theme.radii.tooltip};
     -moz-border-radius: ${theme.radii.tooltip};
     -webkit-border-radius: ${theme.radii.tooltip};

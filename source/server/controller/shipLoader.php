@@ -384,8 +384,14 @@
 			   pulls in getFactionDirMap() and constructs every ship class in the codebase. Switch
 			   them off for the duration; restore in finally so a broken ship class cannot leave the
 			   flag off for the lobby paths in the same request. */
+			/* Same reasoning for PER-SYSTEM enhancement offers (WEAPON_ENHANCEMENTS_PLAN.md D3):
+			   only the lobby needs "what MAY be bought". In game the bought rows come from
+			   tac_sys_enhancements, and generating an offer list for every system of every ship on
+			   every game.php load is pure waste. Restored in the same finally. */
 			$offerChoiceLists = Enhancements::$offerChoiceLists;
 			Enhancements::$offerChoiceLists = false;
+			$offerSystemEnhancements = Enhancements::$offerSystemEnhancements;
+			Enhancements::$offerSystemEnhancements = false;
 			try {
 				foreach ($classNames as $name){
 					if (class_exists($name)){
@@ -408,6 +414,7 @@
 				}
 			} finally {
 				Enhancements::$offerChoiceLists = $offerChoiceLists;
+				Enhancements::$offerSystemEnhancements = $offerSystemEnhancements;
 			}
 
 			return $ships;
