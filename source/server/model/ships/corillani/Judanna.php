@@ -70,7 +70,7 @@ class Judanna extends HeavyCombatVessel{
 			),
 			1=> array(
 				3 => "Thruster",
-				5 => "Plsama Accelerator",
+				5 => "Plasma Accelerator",
 				9 => "Twin Array",
 				18 => "Structure",
 				20 => "Primary",

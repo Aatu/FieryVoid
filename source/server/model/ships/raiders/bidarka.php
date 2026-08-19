@@ -66,8 +66,7 @@ class Bidarka extends BaseShip{
                     20 => "C&C",
             ),
             1=> array(
-                    3 => "Thruster",
-            		5 => "Cargo Bay",
+                    5 => "Thruster",
             		10 => "Medium Plasma Cannon",
 					11 => "Particle Cannon",
                     18 => "Structure",

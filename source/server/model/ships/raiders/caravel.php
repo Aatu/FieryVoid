@@ -62,7 +62,7 @@ class Caravel extends MediumShip{
         		),
         		1=> array(
         				6 => "Thruster",
-        				8 => "Heavy Plasma",
+        				8 => "Heavy Plasma Cannon",
         				10 => "Light Particle Beam",
         				17 => "Structure",
         				20 => "Primary",

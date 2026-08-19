@@ -89,7 +89,7 @@ class VostovaAMDOC extends BaseShip{
 			),
 			2=> array(
 				9 => "Thruster",
-				10 => "Twin Array",
+				10 => "TAG:Twin Array",
 				18 => "Structure",
 				20 => "Primary",
 			),

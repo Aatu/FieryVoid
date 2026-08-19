@@ -70,7 +70,7 @@ class Curragh extends HeavyCombatVesselLeftRight{
 			3=> array(
 					4 => "Thruster",
 					6 => "Standard Particle Beam",
-					8 => "Medium Laser Cannon",
+					8 => "Medium Laser",
 					11 => "Particle Cannon",
 					18 => "Structure",
 					20 => "Primary",
@@ -78,7 +78,7 @@ class Curragh extends HeavyCombatVesselLeftRight{
 			4=> array(
 					4 => "Thruster",
 					6 => "Standard Particle Beam",
-					8 => "Medium Laser Cannon",
+					8 => "Medium Laser",
 					11 => "Particle Cannon",
 					18 => "Structure",
 					20 => "Primary",

@@ -114,7 +114,7 @@ class baradaGilazFleetCarrier extends BaseShip{
 			),
 			1=> array(
 				4 => "Thruster",
-				7 => "Heavy Particle Beam",
+				7 => "Light Particle Beam",
 				10 => "Standard Particle Beam",
 				18 => "Structure",
 				20 => "Primary",

@@ -58,7 +58,7 @@ class QShipPlasma extends MediumShip{
         		0=> array(
         				6 => "Thruster",
         				7 => "Reload Rack",
-        				9 => "Standard Particle Beam",
+        				9 => "Light Plasma Cannon",
         				12 => "Scanner",
         				15 => "Engine",
         				17 => "Hangar",
@@ -67,15 +67,15 @@ class QShipPlasma extends MediumShip{
         		),
         		1=> array(
         				6 => "Thruster",
-        				8 => "Heavy Plasma Cannon",
-        				10 => "Class-S Missile Rack",
+        				8 => "Medium Plasma Cannon",
+        				10 => "Light Plasma Cannon",
         				17 => "Structure",
         				20 => "Primary",
         		),
         		2=> array(
         				6 => "Thruster",
-        				8 => "Heavy Plasma Cannon",
-        				10 => "Class-S Missile Rack",
+        				8 => "Medium Plasma Cannon",
+        				10 => "Light Plasma Cannon",
         				17 => "Structure",
         				20 => "Primary",
         		),

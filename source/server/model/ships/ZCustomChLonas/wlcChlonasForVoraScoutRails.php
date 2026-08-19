@@ -1,15 +1,15 @@
 <?php
-class wlcChlonasForVoraScout extends BaseShipNoAft{
+class wlcChlonasForVoraScoutRails extends BaseShipNoAft{
     /*Ch'Lonas For'Vora scout*/
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         $this->pointCost = 500;
-        $this->phpclass = "wlcChlonasForVoraScout";
+        $this->phpclass = "wlcChlonasForVoraScoutRails";
         $this->imagePath = "img/ships/ChlonasForVora.png";
         $this->canvasSize = 200;
         $this->shipClass = "For'Vora Scout";
-        //$this->fighters = array("heavy" => 12);
+        $this->fighters = array("normal" => 12);
         $this->forwardDefense = 14;
         $this->sideDefense = 16;
         $this->turncost = 0.66;
@@ -17,10 +17,9 @@ class wlcChlonasForVoraScout extends BaseShipNoAft{
         $this->accelcost = 3;
         $this->rollcost = 3;
         $this->pivotcost = 3;
-		$this->variantOf = "OBSOLETE";
 	    
 		$this->faction = "Ch'Lonas Cooperative";
-			//$this->variantOf = "Tra'Vora Light Cruiser";
+			$this->variantOf = "Tra'Vora Light Cruiser";
 		$this->occurence = "uncommon";
 		$this->isd = 2215;
 		$this->unofficial = true;
@@ -35,22 +34,25 @@ class wlcChlonasForVoraScout extends BaseShipNoAft{
 		$this->addAftSystem(new JumpEngine(5, 10, 6, 48));
 
         $this->addFrontSystem(new ElintScanner(4, 9, 6, 4));
-	$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
-	$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
-	$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
-	$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
+		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
+		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
+		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
+		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
 
         $this->addLeftSystem(new AssaultLaser(3, 6, 4, 240, 0));
-	$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 240, 0));
-	$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 300));
+		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 240, 0));
+		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 300));
         $this->addLeftSystem(new Thruster(4, 13, 0, 4, 3));
+		$this->addLeftSystem(new FighterRail(4, 6, 6, 0, 'normal'));
+	
 
         $this->addRightSystem(new AssaultLaser(3, 6, 4, 0, 120));
-	$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 120));
-	$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 60, 180));
+		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 120));
+		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 60, 180));
         $this->addRightSystem(new Thruster(4, 13, 0, 4, 4));
+		$this->addRightSystem(new FighterRail(4, 6, 6, 0, 'normal'));			
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 44));

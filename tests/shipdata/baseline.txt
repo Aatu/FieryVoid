@@ -62,7 +62,6 @@ chart	VelraxOSATRefit	location 1	no such section on this hull - the chart is dea
 chart	VelraxOSATRefit	location 2	no such section on this hull - the chart is dead data
 hangar	Acclamator	source/server/model/ships/StarWarsCloneWars/Acclamator.php	$fighters declares 12 boxes but the hangar bays hold 4 - populateInitialHangarUsage silently drops the excess
 hangar	CylonBasestar	source/server/model/ships/BSGCylons/CylonBasestar.php	$fighters declares 54 boxes but the hangar bays hold 36 - populateInitialHangarUsage silently drops the excess
-hangar	baseTestbed	source/server/model/ships/customs/baseTestbed.php	$fighters declares 6 boxes but the hangar bays hold 4 - populateInitialHangarUsage silently drops the excess
 hangar	drakhAttackShip	source/server/model/ships/drakh/drakhAttackShip.php	$fighters declares 6 boxes but the hangar bays hold 2 - populateInitialHangarUsage silently drops the excess
 hangar	drakhCommandShip	source/server/model/ships/drakh/drakhCommandShip.php	$fighters declares 10 boxes but the hangar bays hold 4 - populateInitialHangarUsage silently drops the excess
 hangar	drakhDreadnought	source/server/model/ships/drakh/drakhDreadnought.php	$fighters declares 16 boxes but the hangar bays hold 6 - populateInitialHangarUsage silently drops the excess
@@ -71,14 +70,10 @@ hangar	drakhHeavyTender	source/server/model/ships/drakh/drakhHeavyTender.php	$fi
 hangar	drakhMothership	source/server/model/ships/drakh/drakhMothership.php	$fighters declares 84 boxes but the hangar bays hold 24 - populateInitialHangarUsage silently drops the excess
 hangar	drakhSupportShip	source/server/model/ships/drakh/drakhSupportShip.php	$fighters declares 10 boxes but the hangar bays hold 6 - populateInitialHangarUsage silently drops the excess
 hangar	drakhTender	source/server/model/ships/drakh/drakhTender.php	$fighters declares 10 boxes but the hangar bays hold 6 - populateInitialHangarUsage silently drops the excess
-hangar	wlcChlonasForVoraScout	source/server/model/ships/ZCustomChLonas/wlcChlonasForVoraScout.php	$fighters declares 12 boxes but the hangar bays hold 2 - populateInitialHangarUsage silently drops the excess
-hangar	wlcChlonasTraVoraCL2169	source/server/model/ships/ZCustomChLonas/wlcChlonasTraVoraCL2169.php	$fighters declares 12 boxes but the hangar bays hold 2 - populateInitialHangarUsage silently drops the excess
-hangar	wlcChlonasTraVoraCL2240	source/server/model/ships/ZCustomChLonas/wlcChlonasTraVoraCL2240.php	$fighters declares 12 boxes but the hangar bays hold 2 - populateInitialHangarUsage silently drops the excess
 hitchart	AndorianKumari	location 3, roll 12	no system named "Hangar" on location 3 - every hit here is silently rerouted to Structure
 hitchart	AndorianKumari	location 4, roll 12	no system named "Hangar" on location 4 - every hit here is silently rerouted to Structure
 hitchart	AndorianKumariCommand	location 0, roll 13	no system named "Hangar" on location 0 - every hit here is silently rerouted to Structure
 hitchart	AndorianKumariGunship	location 0, roll 13	no system named "Hangar" on location 0 - every hit here is silently rerouted to Structure
-hitchart	BrakiriTransport	location 2, roll 8	no system named "Cargo Bay" on location 2 - every hit here is silently rerouted to Structure
 hitchart	BrixadiiLightEscortFrigate	location 2, roll 9	no system named "Chaff Launcer" on location 2 - every hit here is silently rerouted to Structure
 hitchart	BrixadiiLightEscortFrigate2057	location 2, roll 9	no system named "Chaff Launcer" on location 2 - every hit here is silently rerouted to Structure
 hitchart	ChoukaAcolyteFrigate	location 0, roll 13	no system named "Cargo" on location 0 - every hit here is silently rerouted to Structure
@@ -138,10 +133,7 @@ hitchart	CraytanSorena	location 4, roll 2	no system named "Connection Strut" on 
 hitchart	CraytanSorenb	location 3, roll 2	no system named "Connection Strut" on location 3 - every hit here is silently rerouted to Structure
 hitchart	CraytanSorenb	location 4, roll 2	no system named "Connection Strut" on location 4 - every hit here is silently rerouted to Structure
 hitchart	CraytanUlten	location 1, roll 8	no system named "ELINT Scatter" on location 1 - every hit here is silently rerouted to Structure
-hitchart	Curragh	location 3, roll 8	no system named "Medium Laser Cannon" on location 3 - every hit here is silently rerouted to Structure
-hitchart	Curragh	location 4, roll 8	no system named "Medium Laser Cannon" on location 4 - every hit here is silently rerouted to Structure
 hitchart	CylonPillager	location 2, roll 10	no system named "Jump Engine" on location 2 - every hit here is silently rerouted to Structure
-hitchart	Judanna	location 1, roll 5	no system named "Plsama Accelerator" on location 1 - every hit here is silently rerouted to Structure
 hitchart	KastanFlamebladeAM	location 4, roll 10	no system named "Royal Laser" on location 4 - every hit here is silently rerouted to Structure
 hitchart	KastanFlamebladeAM	location 4, roll 7	no system named "Imperial Laser" on location 4 - every hit here is silently rerouted to Structure
 hitchart	KastanSteelsabre	location 1, roll 6	no system named "Medium Plasma Cannoncher" on location 1 - every hit here is silently rerouted to Structure
@@ -154,7 +146,6 @@ hitchart	KlingonTransport	location 0, roll 12	no system named "0:Micro Jump Syst
 hitchart	KlingonTransport	location 1, roll 12	no system named "0:Micro Jump System" on location 1 - every hit here is silently rerouted to Structure
 hitchart	KlingonTransport	location 2, roll 12	no system named "0:Micro Jump System" on location 2 - every hit here is silently rerouted to Structure
 hitchart	KobolRanger	location 0, roll 18	no system named "FTL Drive" on location 0 - every hit here is silently rerouted to Structure
-hitchart	Lashassi	location 0, roll 15	no system named "1:Fusion Agitator" on location 0 - every hit here is silently rerouted to Structure
 hitchart	Lucrehulk	location 4, roll 11	no system named "Quad Turbolaser" on location 4 - every hit here is silently rerouted to Structure
 hitchart	MakarGethishan	location 2, roll 7	no system named "Docking Collar" on location 2 - every hit here is silently rerouted to Structure
 hitchart	MakarGethishanRefit	location 2, roll 7	no system named "Docking Collar" on location 2 - every hit here is silently rerouted to Structure
@@ -180,7 +171,6 @@ hitchart	PolarenWyrith	location 4, roll 8	no system named "Docking Collar" on lo
 hitchart	PolarenWyrithRefit	location 0, roll 12	no system named "1: Sand Caster" on location 0 - every hit here is silently rerouted to Structure
 hitchart	PolarenWyrithRefit	location 3, roll 8	no system named "Docking Collar" on location 3 - every hit here is silently rerouted to Structure
 hitchart	PolarenWyrithRefit	location 4, roll 8	no system named "Docking Collar" on location 4 - every hit here is silently rerouted to Structure
-hitchart	ProtectorateLeshath	location 4, roll 12	no system named "Neutron Laser" on location 4 - every hit here is silently rerouted to Structure
 hitchart	QomYominOoru	location 3, roll 6	no system named "RAM Launcher" on location 3 - every hit here is silently rerouted to Structure
 hitchart	QomYominOoru	location 4, roll 6	no system named "RAM Launcher" on location 4 - every hit here is silently rerouted to Structure
 hitchart	QomYominOoruRail	location 3, roll 6	no system named "RAM Launcher" on location 3 - every hit here is silently rerouted to Structure
@@ -221,15 +211,8 @@ hitchart	VelraxSivrinRefit2	location 3, roll 5	no system named "1: Medium Plasma
 hitchart	VelraxSivrinRefit2	location 4, roll 5	no system named "1: Medium Plasma Cannon" on location 4 - every hit here is silently rerouted to Structure
 hitchart	VelraxVersissRefit	location 3, roll 7	no system named "Laser Spear" on location 3 - every hit here is silently rerouted to Structure
 hitchart	VelraxVersissRefit	location 4, roll 7	no system named "Laser Spear" on location 4 - every hit here is silently rerouted to Structure
-hitchart	VostovaAMCPN	location 2, roll 10	no system named "Twin Array" on location 2 - every hit here is silently rerouted to Structure
-hitchart	VostovaAMDOC	location 2, roll 10	no system named "Twin Array" on location 2 - every hit here is silently rerouted to Structure
-hitchart	VostovaAMOSF	location 2, roll 10	no system named "Twin Array" on location 2 - every hit here is silently rerouted to Structure
 hitchart	VulcanLander	location 0, roll 15	no system named "Light Phase Cannon" on location 0 - every hit here is silently rerouted to Structure
 hitchart	VulcanLander	location 0, roll 17	no system named "Nacelle" on location 0 - every hit here is silently rerouted to Structure
-hitchart	aurillia2010	location 3, roll 10	no system named "Imperial Laser" on location 3 - every hit here is silently rerouted to Structure
-hitchart	aurillia2010	location 3, roll 8	no system named "Particle Projector" on location 3 - every hit here is silently rerouted to Structure
-hitchart	aurillia2010	location 4, roll 10	no system named "Imperial Laser" on location 4 - every hit here is silently rerouted to Structure
-hitchart	aurillia2010	location 4, roll 8	no system named "Particle Projector" on location 4 - every hit here is silently rerouted to Structure
 hitchart	baradaFizurFastGunboat	location 0, roll 15	no system named "1:Twin Particle Gun" on location 0 - every hit here is silently rerouted to Structure
 hitchart	baradaFizurFastGunboat	location 1, roll 15	no system named "1:Twin Particle Gun" on location 1 - every hit here is silently rerouted to Structure
 hitchart	baradaFizurFastGunboat	location 2, roll 15	no system named "1:Twin Particle Gun" on location 2 - every hit here is silently rerouted to Structure
@@ -240,38 +223,12 @@ hitchart	baradaTomzurAttackGunboat	location 0, roll 15	no system named "1:Twin P
 hitchart	baradaTomzurAttackGunboat	location 1, roll 15	no system named "1:Twin Particle Gun" on location 1 - every hit here is silently rerouted to Structure
 hitchart	baradaTomzurAttackGunboat	location 2, roll 15	no system named "1:Twin Particle Gun" on location 2 - every hit here is silently rerouted to Structure
 hitchart	baradaTrukDestroyer	location 0, roll 14	no system named "Engine" on location 0 - every hit here is silently rerouted to Structure
-hitchart	baseTestbed	location 0, roll 13	no system named "Cargo Bay" on location 0 - every hit here is silently rerouted to Structure
-hitchart	baseTestbed	location 0, roll 14	no system named "Hangar" on location 0 - every hit here is silently rerouted to Structure
-hitchart	bidarka	location 1, roll 5	no system named "Cargo Bay" on location 1 - every hit here is silently rerouted to Structure
-hitchart	brigand	location 3, roll 10	no system named "Medium Plasma" on location 3 - every hit here is silently rerouted to Structure
-hitchart	brigand	location 4, roll 1	no system named "Medium Plasma" on location 4 - every hit here is silently rerouted to Structure
-hitchart	caravel	location 1, roll 8	no system named "Heavy Plasma" on location 1 - every hit here is silently rerouted to Structure
-hitchart	hactrus	location 0, roll 15	entry is not a non-empty string (false)
-hitchart	hyperionRail	location 1, roll 7	no system named "Rail Gun" on location 1 - every hit here is silently rerouted to Structure
-hitchart	mentabanaraskastrikecarrier	location 3, roll 6	no system named "Medium Railgun" on location 3 - every hit here is silently rerouted to Structure
-hitchart	mentabanaraskastrikecarrier	location 4, roll 6	no system named "Medium Railgun" on location 4 - every hit here is silently rerouted to Structure
 hitchart	overseerGC	location 1, roll 8	no system named "Class-S Missile Rack" on location 1 - every hit here is silently rerouted to Structure
 hitchart	overseerGC	location 3, roll 11	no system named "Cargo Bay" on location 3 - every hit here is silently rerouted to Structure
 hitchart	overseerGC	location 4, roll 11	no system named "Cargo Bay" on location 4 - every hit here is silently rerouted to Structure
 hitchart	paragonGCAM	location 3, roll 8	no system named "Heavy Gauss Cannon" on location 3 - every hit here is silently rerouted to Structure
 hitchart	paragonGCAM	location 4, roll 8	no system named "Heavy Gauss Cannon" on location 4 - every hit here is silently rerouted to Structure
-hitchart	pariahAM	location 3, roll 12	no system named "Cargo Bay" on location 3 - every hit here is silently rerouted to Structure
-hitchart	privateerHactrus	location 0, roll 11	no system named "Cargo Bay" on location 0 - every hit here is silently rerouted to Structure
-hitchart	privateerHandus	location 1, roll 8	no system named "Medium Laser Cannon" on location 1 - every hit here is silently rerouted to Structure
-hitchart	qshipPlasma	location 0, roll 9	no system named "Standard Particle Beam" on location 0 - every hit here is silently rerouted to Structure
-hitchart	qshipPlasma	location 1, roll 10	no system named "Class-S Missile Rack" on location 1 - every hit here is silently rerouted to Structure
-hitchart	qshipPlasma	location 1, roll 8	no system named "Heavy Plasma Cannon" on location 1 - every hit here is silently rerouted to Structure
-hitchart	qshipPlasma	location 2, roll 10	no system named "Class-S Missile Rack" on location 2 - every hit here is silently rerouted to Structure
-hitchart	qshipPlasma	location 2, roll 8	no system named "Heavy Plasma Cannon" on location 2 - every hit here is silently rerouted to Structure
-hitchart	righteous1894AM	location 4, roll 6	no system named "Rapid Gatling Railgun" on location 4 - every hit here is silently rerouted to Structure
-hitchart	rogolonRostovAM	location 1, roll 10	no system named "Cargo" on location 1 - every hit here is silently rerouted to Structure
-hitchart	shadowDreadnoughtPrimordial	location 2, roll 12	no system named "1:Slicer Beam" on location 2 - every hit here is silently rerouted to Structure
-hitchart	shadowDreadnoughtPrimordialBomb	location 2, roll 12	no system named "1:Slicer Beam" on location 2 - every hit here is silently rerouted to Structure
-hitchart	shafab	location 2, roll 11	no system named "Jump Engine" on location 2 - every hit here is silently rerouted to Structure
 hitchart	shlassanvelmakescortcarrier	location 0, roll 13	no system named "Cargo Bay" on location 0 - every hit here is silently rerouted to Structure
-hitchart	sorithianfylonfrigate	location 1, roll 10	no system named "Class-SO Missile Rack" on location 1 - every hit here is silently rerouted to Structure
-hitchart	sorithiantyancarrier	location 3, roll 10	no system named "Class-SO Missile Rack" on location 3 - every hit here is silently rerouted to Structure
-hitchart	sorithiantyancarrier	location 4, roll 10	no system named "Class-SO Missile Rack" on location 4 - every hit here is silently rerouted to Structure
 hitchart	swCorellianGunship	location 0, roll 17	no system named "Hangar" on location 0 - every hit here is silently rerouted to Structure
 hitchart	swImperialSD2	location 1, roll 4	no system named "Medium Laser" on location 1 - every hit here is silently rerouted to Structure
 hitchart	swLancer	location 0, roll 17	no system named "Hangar" on location 0 - every hit here is silently rerouted to Structure
@@ -281,23 +238,6 @@ hitchart	technicalTargetDrone	location 31, roll 15	no system carries tag "Weapon
 hitchart	technicalTargetDrone	location 32, roll 15	no system carries tag "Weapon" - every hit here is rerouted to Structure
 hitchart	technicalTargetDrone	location 41, roll 15	no system carries tag "Weapon" - every hit here is rerouted to Structure
 hitchart	technicalTargetDrone	location 42, roll 15	no system carries tag "Weapon" - every hit here is rerouted to Structure
-hitchart	thira	location 0, roll 13	no system named "0:Cargo" on location 0 - every hit here is silently rerouted to Structure
-hitchart	thira	location 0, roll 15	no system named "1:Particle Projector" on location 0 - every hit here is silently rerouted to Structure
-hitchart	thira	location 1, roll 13	no system named "0:Cargo" on location 1 - every hit here is silently rerouted to Structure
-hitchart	thira	location 1, roll 15	no system named "1:Particle Projector" on location 1 - every hit here is silently rerouted to Structure
-hitchart	thira	location 2, roll 13	no system named "0:Cargo" on location 2 - every hit here is silently rerouted to Structure
-hitchart	thira	location 2, roll 15	no system named "1:Particle Projector" on location 2 - every hit here is silently rerouted to Structure
-hitchart	tlos	location 1, roll 10	no system named "Cargo Bay" on location 1 - every hit here is silently rerouted to Structure
-hitchart	tlosEarly	location 1, roll 10	no system named "Cargo Bay" on location 1 - every hit here is silently rerouted to Structure
-hitchart	torataFatharPC	location 2, roll 8	no system named "Pentagon Array" on location 2 - every hit here is silently rerouted to Structure
-hitchart	torataFatharPC	location 3, roll 8	no system named "Pentagon Array" on location 3 - every hit here is silently rerouted to Structure
-hitchart	torataFatharPC	location 4, roll 8	no system named "Pentagon Array" on location 4 - every hit here is silently rerouted to Structure
-hitchart	torataGoracFF	location 2, roll 9	no system named "Light Particle Beam" on location 2 - every hit here is silently rerouted to Structure
-hitchart	torataKalorBF	location 0, roll 17	no system named "Hangar" on location 0 - every hit here is silently rerouted to Structure
-hitchart	torataKalorBF	location 1, roll 12	no system named "0:Cargo Bay" on location 1 - every hit here is silently rerouted to Structure
-hitchart	torataKalorBF	location 2, roll 11	no system named "0:Cargo Bay" on location 2 - every hit here is silently rerouted to Structure
-hitchart	wlcChlonasFenFahraFFE	location 3, roll 9	no system named "Assault Laser" on location 3 - every hit here is silently rerouted to Structure
-hitchart	wlcChlonasFenFahraFFE	location 4, roll 9	no system named "Assault Laser" on location 4 - every hit here is silently rerouted to Structure
 ids	ChoukaPenanceBaseAM	CargoBay at systems[10]	id 11 != its array index 10 - persisted thrust/fire/power/crit rows are keyed by this id
 ids	ChoukaPenanceBaseAM	CargoBay at systems[17]	id 18 != its array index 17 - persisted thrust/fire/power/crit rows are keyed by this id
 ids	ChoukaPenanceBaseAM	CargoBay at systems[24]	id 25 != its array index 24 - persisted thrust/fire/power/crit rows are keyed by this id

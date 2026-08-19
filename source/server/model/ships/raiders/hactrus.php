@@ -55,9 +55,9 @@ class Hactrus extends MediumShip{
         $this->hitChart = array (
         		0=> array (
         				8=>"Thruster",
-        				12=>"Scanner",
+        				11=>"Scanner",
         				14=>"Engine",
-        				16>"Hangar",
+        				16=>"Hangar",
         				18=>"Reactor",
         				20=>"C&C",
         		),

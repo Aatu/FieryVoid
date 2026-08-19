@@ -125,7 +125,7 @@ class Righteous1894AM extends BaseShip{
 		//Starboard
 		4=> array(
 			4 => "Thruster",
-			6 => "Rapid Gatling Railgun",
+			6 => "Gatling Railgun",
 			11 => "Class-SO Missile Rack",
 			18 => "Structure",
 			20 => "Primary",

@@ -233,7 +233,7 @@ class ShadowDreadnoughtPrimordial extends MediumShip{
 				7 => "0:Energy Diffuser",
 				9 => "2:BioThruster",
 				10 => "0:Self Repair",
-				12 => "1:Slicer Beam",
+				12 => "1:Heavy Slicer Beam",
 				14 => "1:Vortex Disruptor",
 				15 => "0:Hangar",
 				16 => "0:Scanner",

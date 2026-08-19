@@ -1,15 +1,15 @@
 <?php
-class wlcChlonasTraVoraCL2240 extends BaseShipNoAft{
+class wlcChlonasTraVoraCL2240Rails extends BaseShipNoAft{
     /*Ch'Lonas Tra'Vora light cruiser, variant ISD 2240*/
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         $this->pointCost = 545;
-        $this->phpclass = "wlcChlonasTraVoraCL2240";
+        $this->phpclass = "wlcChlonasTraVoraCL2240Rails";
         $this->imagePath = "img/ships/ChlonasTraVora.png";
         $this->canvasSize = 200;
         $this->shipClass = "Tra'Vora Light Cruiser (2240)";
-        //$this->fighters = array("heavy" => 12);
+        $this->fighters = array("normal" => 12);
         $this->forwardDefense = 14;
         $this->sideDefense = 16;
         $this->turncost = 0.66;
@@ -17,10 +17,9 @@ class wlcChlonasTraVoraCL2240 extends BaseShipNoAft{
         $this->accelcost = 3;
         $this->rollcost = 3;
         $this->pivotcost = 3;
-        $this->variantOf = "OBSOLETE";
 	    
 	$this->faction = "Ch'Lonas Cooperative";
-        //$this->variantOf = "Tra'Vora Light Cruiser";
+        $this->variantOf = "Tra'Vora Light Cruiser";
 	$this->isd = 2240;
 	$this->unofficial = true;
         
@@ -42,11 +41,13 @@ class wlcChlonasTraVoraCL2240 extends BaseShipNoAft{
 	$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
 	$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
         $this->addLeftSystem(new Thruster(4, 13, 0, 4, 3));
+	$this->addLeftSystem(new FighterRail(4, 6, 6, 0, 'normal'));        
 
         $this->addRightSystem(new CustomPulsarLaser(4, 0,0, 300, 120)); //Power and Structure are defined in weapon
 	$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
 	$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
         $this->addRightSystem(new Thruster(4, 13, 0, 4, 4));
+	$this->addRightSystem(new FighterRail(4, 6, 6, 0, 'normal'));		        
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 44));
