@@ -50,7 +50,7 @@ class technicalTargetDrone extends VreeCapital
         $this->addPrimarySystem(new GraviticThruster(5, 16, 0, 9, 2));  
 		$this->addPrimarySystem(new GraviticThruster(5, 16, 0, 9, 4));	
 
-//        $this->addPrimarySystem(new FlareGenerator(8, 16, 8, 0, 360));	
+        $this->addPrimarySystem(new FlareGenerator(8, 16, 8, 0, 360));	
 //        $this->addPrimarySystem(new FlareShielding(8, 9, 6, 4, 0, 360));
 
         $this->addPrimarySystem(new CoopStructureSelfRepair(8, 24, 24)); //armor, structure, output
@@ -93,7 +93,7 @@ class technicalTargetDrone extends VreeCapital
 //        $this->addFrontSystem(new CombatTransporter(3, 4, 1, 270, 90, 5, false));	
 
 //        $this->addFrontSystem(new PhotonicPrismBeam(3, 24, 8, 270, 90));	
- //       $this->addFrontSystem(new PhotonicPrismBeam(3, 24, 8, 270, 90));	
+//        $this->addFrontSystem(new PhotonicPrismBeam(3, 24, 8, 270, 90));	
 //        $this->addFrontSystem(new PhotonicPrismBeam(3, 24, 8, 270, 90));	
 //        $this->addFrontSystem(new PhotonicPrismBeam(3, 24, 8, 270, 90));	
 

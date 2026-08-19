@@ -583,7 +583,7 @@ GraviticAugmenter.prototype.onFireOrderCreated = function (fire) {
 	return fire;
 };
 
-// GTS_Triad
+
 
 
 // GTS_Triad
@@ -661,7 +661,7 @@ FlareGenerator.prototype.isSpentLocked = function () {
 };
 
 FlareGenerator.prototype.canActivate = function () {
-    return (gamedata.gamephase == 1 && this.firingMode == 2 && !this.getOrderThisTurn());
+    return (gamedata.gamephase == 1 && this.firingMode == 2 && !this.getOrderThisTurn() && weaponManager.isLoaded(this));
 };
 
 FlareGenerator.prototype.canDeactivate = function () {
@@ -671,7 +671,7 @@ FlareGenerator.prototype.canDeactivate = function () {
 FlareGenerator.prototype.doActivate = function () {
     if (this.firingMode != 2) return;
     if (this.getOrderThisTurn()) return;
-
+    if (!weaponManager.isLoaded(this)) return;
     var ship = this.ship;
     var position = shipManager.getShipPosition(ship);
     var fireid = ship.id + "_" + this.id + "_1";

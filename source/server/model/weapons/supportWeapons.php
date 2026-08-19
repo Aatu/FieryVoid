@@ -1883,7 +1883,7 @@ class FlareGenerator extends Weapon implements DefensiveSystem {
 
     //Mode 2: override fire() to apply AoE flash damage to nearby units.
     //Targets the generating ship's own hex. No scatter/dissipation.
-    //Triad:Order faction ships (including the generating ship) are immune.
+    //Triad:Order faction ships (including the generating ship) are immune.	
     public function fire($gamedata, $fireOrder) {
         if ($fireOrder->firingMode != 2) {
             parent::fire($gamedata, $fireOrder);
@@ -1922,7 +1922,8 @@ class FlareGenerator extends Weapon implements DefensiveSystem {
             } else {
                 $damage = $damageByRange[2];
             }
-
+$this->changeFiringMode(2);
+error_log("FlareGenerator DEBUG: damageType=" . $this->damageType . " firingMode=" . $this->firingMode);
             $this->aoeFlashDamage($targetShip, $shooter, $fireOrder, $sourceHex, $damage, $gamedata);
         }
 
@@ -1941,7 +1942,7 @@ class FlareGenerator extends Weapon implements DefensiveSystem {
         } else {
             $tmpLocation = $target->getHitSectionPos(Mathlib::hexCoToPixel($sourceHex), $fireOrder->turn);
             $system = $target->getHitSystem($shooter, $fireOrder, $this, $gamedata, $tmpLocation);
-            $this->doDamage($target, $shooter, $system, $damage, $fireOrder, null, $gamedata, false, $tmpLocation);
+            $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $sourceHex, $gamedata, false, $tmpLocation);
         }
     }
 
