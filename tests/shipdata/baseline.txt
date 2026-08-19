@@ -60,39 +60,8 @@ chart	VelraxOSATEarly	location 1	no such section on this hull - the chart is dea
 chart	VelraxOSATEarly	location 2	no such section on this hull - the chart is dead data
 chart	VelraxOSATRefit	location 1	no such section on this hull - the chart is dead data
 chart	VelraxOSATRefit	location 2	no such section on this hull - the chart is dead data
-chart	legionA	location 0	chart terminates at 30, not 20 - rolls 31..20 fall through to Structure
-chart	legionA	location 0	roll key 30 is outside 1..20
-chart	legionB	location 0	chart terminates at 30, not 20 - rolls 31..20 fall through to Structure
-chart	legionB	location 0	roll key 30 is outside 1..20
-chart	leonidasAlphaAM	location 1	no such section on this hull - the chart is dead data
-chart	leonidasAlphaAM	location 2	no such section on this hull - the chart is dead data
-chart	leonidasBetaAM	location 1	no such section on this hull - the chart is dead data
-chart	leonidasBetaAM	location 2	no such section on this hull - the chart is dead data
 chart	leonidasGammaAM	location 1	no such section on this hull - the chart is dead data
 chart	leonidasGammaAM	location 2	no such section on this hull - the chart is dead data
-chart	ruqacc	location 1	no such section on this hull - the chart is dead data
-chart	ruqacc	location 2	no such section on this hull - the chart is dead data
-chart	shadowDefenseOSAT	location 1	no such section on this hull - the chart is dead data
-chart	shadowDefenseOSAT	location 2	no such section on this hull - the chart is dead data
-chart	shadowHeavyOSAT	location 1	no such section on this hull - the chart is dead data
-chart	shadowHeavyOSAT	location 2	no such section on this hull - the chart is dead data
-chart	shadowOSAT	location 1	no such section on this hull - the chart is dead data
-chart	shadowOSAT	location 2	no such section on this hull - the chart is dead data
-chart	shadowRegenBase	location 1	no such section on this hull - the chart is dead data
-chart	shadowRegenBase	location 2	no such section on this hull - the chart is dead data
-chart	shadowRegenBaseBomb	location 1	no such section on this hull - the chart is dead data
-chart	shadowRegenBaseBomb	location 2	no such section on this hull - the chart is dead data
-chart	skywatch1810AM	location 1	no such section on this hull - the chart is dead data
-chart	skywatch1810AM	location 2	no such section on this hull - the chart is dead data
-chart	skywatch2003AM	location 1	no such section on this hull - the chart is dead data
-chart	skywatch2003AM	location 2	no such section on this hull - the chart is dead data
-chart	skywatchAM	location 1	no such section on this hull - the chart is dead data
-chart	skywatchAM	location 2	no such section on this hull - the chart is dead data
-chart	skywatchGCAM	location 1	no such section on this hull - the chart is dead data
-chart	skywatchGCAM	location 2	no such section on this hull - the chart is dead data
-dupkeys	GromeGrothAM	source/server/model/ships/grome/GromeGrothAM.php:101	roll key 20 is repeated (first written on line 95) - PHP keeps only the last, so the earlier entry is lost
-dupkeys	athenaAM	source/server/model/ships/EA/athenaAM.php:117	roll key 11 is repeated (first written on line 116) - PHP keeps only the last, so the earlier entry is lost
-dupkeys	athenaAM	source/server/model/ships/EA/athenaAM.php:153	roll key 6 is repeated (first written on line 152) - PHP keeps only the last, so the earlier entry is lost
 hangar	Acclamator	source/server/model/ships/StarWarsCloneWars/Acclamator.php	$fighters declares 12 boxes but the hangar bays hold 4 - populateInitialHangarUsage silently drops the excess
 hangar	CylonBasestar	source/server/model/ships/BSGCylons/CylonBasestar.php	$fighters declares 54 boxes but the hangar bays hold 36 - populateInitialHangarUsage silently drops the excess
 hangar	JYDLias	source/server/model/ships/raiders/JYDLias.php	$fighters declares 15 boxes but the hangar bays hold 3 - populateInitialHangarUsage silently drops the excess
@@ -113,22 +82,10 @@ hangar	drakhHeavyTender	source/server/model/ships/drakh/drakhHeavyTender.php	$fi
 hangar	drakhMothership	source/server/model/ships/drakh/drakhMothership.php	$fighters declares 84 boxes but the hangar bays hold 24 - populateInitialHangarUsage silently drops the excess
 hangar	drakhSupportShip	source/server/model/ships/drakh/drakhSupportShip.php	$fighters declares 10 boxes but the hangar bays hold 6 - populateInitialHangarUsage silently drops the excess
 hangar	drakhTender	source/server/model/ships/drakh/drakhTender.php	$fighters declares 10 boxes but the hangar bays hold 6 - populateInitialHangarUsage silently drops the excess
-hangar	faskurSpy	source/server/model/ships/dilgar/faskurSpy.php	$fighters declares 2 boxes but the hangar bays hold 1 - populateInitialHangarUsage silently drops the excess
-hangar	fessa	source/server/model/ships/balosian/fessa.php	$fighters declares 6 boxes but the hangar bays hold 4 - populateInitialHangarUsage silently drops the excess
-hangar	gaimOssari	source/server/model/ships/gaim/gaimOssari.php	$fighters declares 6 boxes but the hangar bays hold 4 - populateInitialHangarUsage silently drops the excess
-hangar	jannakaQship	source/server/model/ships/dilgar/jannakaQship.php	$fighters declares 2 boxes but the hangar bays hold 1 - populateInitialHangarUsage silently drops the excess
 hangar	jonkurFreighter	source/server/model/ships/dilgar/jonkurFreighter.php	$fighters declares 2 boxes but the hangar bays hold 1 - populateInitialHangarUsage silently drops the excess
-hangar	jonkurRefit	source/server/model/ships/dilgar/jonkurRefit.php	$fighters declares 2 boxes but the hangar bays hold 1 - populateInitialHangarUsage silently drops the excess
-hangar	mantaka	source/server/model/ships/markab/mantaka.php	$fighters declares 9 boxes but the hangar bays hold 8 - populateInitialHangarUsage silently drops the excess
-hangar	sanctuarybase	source/server/model/ships/raiders/sanctuarybase.php	$fighters declares 48 boxes but the hangar bays hold 18 - populateInitialHangarUsage silently drops the excess
-hangar	schooner	source/server/model/ships/raiders/schooner.php	$fighters declares 12 boxes but the hangar bays hold 4 - populateInitialHangarUsage silently drops the excess
-hangar	sloop	source/server/model/ships/raiders/sloop.php	$fighters declares 6 boxes but the hangar bays hold 2 - populateInitialHangarUsage silently drops the excess
-hangar	tlacran	source/server/model/ships/narn/tlacran.php	$fighters declares 12 boxes but the hangar bays hold 1 - populateInitialHangarUsage silently drops the excess
 hangar	wlcChlonasForVoraScout	source/server/model/ships/ZCustomChLonas/wlcChlonasForVoraScout.php	$fighters declares 12 boxes but the hangar bays hold 2 - populateInitialHangarUsage silently drops the excess
 hangar	wlcChlonasTraVoraCL2169	source/server/model/ships/ZCustomChLonas/wlcChlonasTraVoraCL2169.php	$fighters declares 12 boxes but the hangar bays hold 2 - populateInitialHangarUsage silently drops the excess
 hangar	wlcChlonasTraVoraCL2240	source/server/model/ships/ZCustomChLonas/wlcChlonasTraVoraCL2240.php	$fighters declares 12 boxes but the hangar bays hold 2 - populateInitialHangarUsage silently drops the excess
-hangar	wlcOptineHC	source/server/model/ships/customs/wlcOptineHC.php	$fighters declares 12 boxes but the hangar bays hold 8 - populateInitialHangarUsage silently drops the excess
-hangar	wlcOptineHCU	source/server/model/ships/customs/wlcOptineHCU.php	$fighters declares 12 boxes but the hangar bays hold 8 - populateInitialHangarUsage silently drops the excess
 hitchart	AndorianKumari	location 3, roll 12	no system named "Hangar" on location 3 - every hit here is silently rerouted to Structure
 hitchart	AndorianKumari	location 4, roll 12	no system named "Hangar" on location 4 - every hit here is silently rerouted to Structure
 hitchart	AndorianKumariCommand	location 0, roll 13	no system named "Hangar" on location 0 - every hit here is silently rerouted to Structure
@@ -346,12 +303,7 @@ hitchart	bidarka	location 1, roll 5	no system named "Cargo Bay" on location 1 - 
 hitchart	brigand	location 3, roll 10	no system named "Medium Plasma" on location 3 - every hit here is silently rerouted to Structure
 hitchart	brigand	location 4, roll 1	no system named "Medium Plasma" on location 4 - every hit here is silently rerouted to Structure
 hitchart	caravel	location 1, roll 8	no system named "Heavy Plasma" on location 1 - every hit here is silently rerouted to Structure
-hitchart	cottenGamma	location 1, roll 8	no system named "Interceptor Prototype" on location 1 - every hit here is silently rerouted to Structure
-hitchart	cottenGamma	location 2, roll 7	no system named "Interceptor Prototype" on location 2 - every hit here is silently rerouted to Structure
-hitchart	devaskar	location 2, roll 8	no system named "Graviton Beam" on location 2 - every hit here is silently rerouted to Structure
-hitchart	gaimRaxas	location 0, roll 17	no system named "Hangar" on location 0 - every hit here is silently rerouted to Structure
-hitchart	gaimVRaxas	location 1, roll 10	no system named "Heavy Bolt Accelerator" on location 1 - every hit here is silently rerouted to Structure
-hitchart	gaimVRaxas	location 2, roll 9	no system named "Heavy Bolt Accelerator" on location 2 - every hit here is silently rerouted to Structure
+hitchart	devaskar	location 2, roll 8	no system named "Graviton Bolt" on location 2 - every hit here is silently rerouted to Structure
 hitchart	galleas	location 3, roll 6	no system named "Port Thruster" on location 3 - every hit here is silently rerouted to Structure
 hitchart	galleas	location 4, roll 6	no system named "Port Thruster" on location 4 - every hit here is silently rerouted to Structure
 hitchart	hactrus	location 0, roll 11	no system named "Cargo Bay" on location 0 - every hit here is silently rerouted to Structure
@@ -399,7 +351,6 @@ hitchart	swCorellianGunship	location 0, roll 17	no system named "Hangar" on loca
 hitchart	swImperialSD2	location 1, roll 4	no system named "Medium Laser" on location 1 - every hit here is silently rerouted to Structure
 hitchart	swLancer	location 0, roll 17	no system named "Hangar" on location 0 - every hit here is silently rerouted to Structure
 hitchart	swRaiderCorvette	location 0, roll 17	no system named "Hangar" on location 0 - every hit here is silently rerouted to Structure
-hitchart	swift	location 1, roll 7	no system named "Particle Repeater" on location 1 - every hit here is silently rerouted to Structure
 hitchart	technicalTargetDrone	location 2, roll 15	no system carries tag "Weapon" - every hit here is rerouted to Structure
 hitchart	technicalTargetDrone	location 31, roll 15	no system carries tag "Weapon" - every hit here is rerouted to Structure
 hitchart	technicalTargetDrone	location 32, roll 15	no system carries tag "Weapon" - every hit here is rerouted to Structure
@@ -411,15 +362,8 @@ hitchart	thira	location 1, roll 13	no system named "0:Cargo" on location 1 - eve
 hitchart	thira	location 1, roll 15	no system named "1:Particle Projector" on location 1 - every hit here is silently rerouted to Structure
 hitchart	thira	location 2, roll 13	no system named "0:Cargo" on location 2 - every hit here is silently rerouted to Structure
 hitchart	thira	location 2, roll 15	no system named "1:Particle Projector" on location 2 - every hit here is silently rerouted to Structure
-hitchart	tlacran	location 1, roll 6	no system named "Medium Plasma Cannon" on location 1 - every hit here is silently rerouted to Structure
-hitchart	tlacran	location 1, roll 8	no system named "Light Particle Beam" on location 1 - every hit here is silently rerouted to Structure
-hitchart	tlacranEarly	location 1, roll 6	no system named "Medium Plasma Cannon" on location 1 - every hit here is silently rerouted to Structure
-hitchart	tlos	location 1, roll 10	no system named "Cargo Bay A-D" on location 1 - every hit here is silently rerouted to Structure
-hitchart	tlos	location 3, roll 9	no system named "Cargo Bay A-C" on location 3 - every hit here is silently rerouted to Structure
-hitchart	tlos	location 4, roll 9	no system named "Cargo Bay D-F" on location 4 - every hit here is silently rerouted to Structure
-hitchart	tlosEarly	location 1, roll 10	no system named "Cargo Bay A-D" on location 1 - every hit here is silently rerouted to Structure
-hitchart	tlosEarly	location 3, roll 9	no system named "Cargo Bay A-C" on location 3 - every hit here is silently rerouted to Structure
-hitchart	tlosEarly	location 4, roll 9	no system named "Cargo Bay D-F" on location 4 - every hit here is silently rerouted to Structure
+hitchart	tlos	location 1, roll 10	no system named "Cargo Bay" on location 1 - every hit here is silently rerouted to Structure
+hitchart	tlosEarly	location 1, roll 10	no system named "Cargo Bay" on location 1 - every hit here is silently rerouted to Structure
 hitchart	torataFatharPC	location 2, roll 8	no system named "Pentagon Array" on location 2 - every hit here is silently rerouted to Structure
 hitchart	torataFatharPC	location 3, roll 8	no system named "Pentagon Array" on location 3 - every hit here is silently rerouted to Structure
 hitchart	torataFatharPC	location 4, roll 8	no system named "Pentagon Array" on location 4 - every hit here is silently rerouted to Structure
@@ -427,11 +371,6 @@ hitchart	torataGoracFF	location 2, roll 9	no system named "Light Particle Beam" 
 hitchart	torataKalorBF	location 0, roll 17	no system named "Hangar" on location 0 - every hit here is silently rerouted to Structure
 hitchart	torataKalorBF	location 1, roll 12	no system named "0:Cargo Bay" on location 1 - every hit here is silently rerouted to Structure
 hitchart	torataKalorBF	location 2, roll 11	no system named "0:Cargo Bay" on location 2 - every hit here is silently rerouted to Structure
-hitchart	ulana	location 2, roll 9	no system named "Heavy Fusion Cannon" on location 2 - every hit here is silently rerouted to Structure
-hitchart	vulture	location 3, roll 9	no system named "Cargo" on location 3 - every hit here is silently rerouted to Structure
-hitchart	vulture	location 4, roll 9	no system named "Cargo" on location 4 - every hit here is silently rerouted to Structure
-hitchart	whitestar	location 0, roll 14	no system named "Sensors" on location 0 - every hit here is silently rerouted to Structure
-hitchart	whitestarCmd	location 0, roll 14	no system named "Sensors" on location 0 - every hit here is silently rerouted to Structure
 hitchart	wlcChlonasFenFahraFFE	location 3, roll 9	no system named "Assault Laser" on location 3 - every hit here is silently rerouted to Structure
 hitchart	wlcChlonasFenFahraFFE	location 4, roll 9	no system named "Assault Laser" on location 4 - every hit here is silently rerouted to Structure
 ids	ChoukaPenanceBaseAM	CargoBay at systems[10]	id 11 != its array index 10 - persisted thrust/fire/power/crit rows are keyed by this id
