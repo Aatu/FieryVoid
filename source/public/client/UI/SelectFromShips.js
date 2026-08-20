@@ -78,7 +78,7 @@ window.SelectFromShips = function () {
     function HexPicker(selectedShip, ships, payload, phaseStrategy) {
         this.element = jQuery(HTML);
         this.ships = [].concat(ships);
-        this.ships.sort(shipManager.hasWorseInitiveSort); //highest Ini on top
+        this.ships.sort(byInitiativeOrder); //ascending Initiative order, matching the INI column
         this.position = payload.hex;
         this.payload = payload;
         this.selectedShip = selectedShip;
@@ -408,6 +408,22 @@ window.SelectFromShips = function () {
 
         var order = shipManager.getIniativeOrder(ship);
         return (order > 0) ? order : null;
+    }
+
+    // List order matches the INI column: group 1 (the first to move) at the top, counting
+    // up. getIniativeOrder numbers the groups from the LOWEST raw initiative total, so
+    // ascending INI order means ascending raw initiative — the exact reverse of
+    // shipManager.hasWorseInitiveSort, which this list used to use. Units with no INI of
+    // their own (mines, terrain, not-yet-deployed) sort on their raw total like everything
+    // else; mines and terrain are in their own categories anyway.
+    function byInitiativeOrder(a, b) {
+        if (a.iniative < b.iniative) return -1;
+        if (a.iniative > b.iniative) return 1;
+        if (a.iniativebonus < b.iniativebonus) return -1;
+        if (a.iniativebonus > b.iniativebonus) return 1;
+        //Ids can arrive as strings (spawned units), so compare them numerically. Keeping
+        //a stable tail also keeps a bulk buy's "#1, #2, #3" in number order.
+        return parseInt(a.id, 10) - parseInt(b.id, 10);
     }
 
     function describe(ship) {
