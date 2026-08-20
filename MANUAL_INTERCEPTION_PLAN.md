@@ -1402,3 +1402,95 @@ in place, and points here.
 Trap 11 now has a real case to record: game 4306 carries the first manual intercept orders in the
 corpus. Re-record it once the turn count is stable so a future change to this arithmetic has
 something to fail against.
+
+---
+
+## 17. Fourth refinement round — 2026-08-20
+
+Two display fixes on the INCOMING row and the first player-facing documentation of the feature.
+
+### 17.1 A Slicer row now says what the shot is MADE OF
+
+Reported: *"Slicer hit chances are displaying 93-93% for a single shot."*
+
+Two separate things were wrong with that cell, and they had the same cause — the Shadow branch of
+`chanceText` was written before the rest of the column was, and never caught up:
+
+```js
+if (ball.weapon.data["Offensive Dice"]) {          // Molecular Slicer
+    chanceText = joinRange(displayMin, displayMax) + ' (' + (amount == 1 ? ball.fireOrder.shots : shots) + ' dice)';
+}
+```
+
+* **It always printed a range**, with no `displayMin !== displayMax` guard — the guard every other
+  branch has. A lone Slicer shot has one hit chance, so it read `93-93%`.
+* **`shots` was summed across GROUPS.** It came from the `hitchanceLists` loop, which adds
+  `b.fireOrder.shots` for every ballistic sharing this row's shooter and weapon *regardless of
+  which group it fell into*. A Slicer that put two shots on the same fighter flight (the only unit
+  that may be targeted more than once) therefore reported the whole volley's dice on both rows.
+* **It named dice only.** A Slicer shot is dice **and** set damage (§14.4); the set-damage half was
+  invisible, and the number sat after the percentage where it read as part of it.
+
+**The whole branch is gone.** A Slicer order is `type: 'normal'` with `damageclass: 'Sweeping'`
+(that is what `getAllBallisticsAgainst` filters on), so with the dice text removed it lands on the
+`type == "normal"` branch below and is formatted exactly like every other split weapon —
+single-shot rows print one number, groups print a range only when their ends differ.
+
+The allocation moved onto the weapon label, after the firing mode, as new `diceSuffix()`:
+
+    Sharlin War Cruiser
+        1x Molecular Slicer (Sweeping) (3d + 12)      93%
+
+    ▼ 2x Molecular Slicer (Sweeping) (4d + 18)        88%
+        Molecular Slicer (Sweeping) (3d + 12)         93%
+        Molecular Slicer (Sweeping) (1d + 6)          88%
+
+`diceSuffix` sums over the **row's own members** — the group for a collapsed row, the single member
+for a sub-row — which is what the row describes and what the old cross-group sum got wrong. Set
+damage comes from `MolecularSlicerBeamL.getOrderSetDamage`, so the "committed before the page was
+reloaded" case (only the encoded `MSB|d:x|s:y` token in `->notes` survives) is handled by the
+weapon, not re-implemented in the menu.
+
+`joinRange` also collapses equal ends now. Every caller guards on `lo !== hi` itself, so it is belt
+and braces — but a range of one is never the right thing to print, and the caller that printed one is
+how this was found.
+
+### 17.2 The feature is documented for players
+
+* **[faq.php](source/public/faq.php)** — new *Interception* section (`#interception`, listed in the
+  contents between Hangar Operations and Jump Drives). Covers the rating → −5%/point arithmetic,
+  degradation and the ballistic exemption (§2.1), what the automation does and the
+  loading-time-over-one-turn marker rule (§13.4), the four-step manual flow, the *"declared orders
+  only, not floored at zero"* caveat on the number (§4.5, §13.1), greedy fill and the caret (§4.2),
+  R2/R3/R4/R7, and the geometry of who may cover whom.
+* **[factions-tiers.php](source/public/factions-tiers.php)** — the Shadow Association *Molecular
+  Slicer Beam* entry gains the manual path (§14.4): what an engagement costs, that already-bought
+  capacity is re-used rather than paid for twice, that it counts as a shot for the −5%, and that
+  withdrawal hands the die back. Also records that the Light Slicer has no intercept rating at all,
+  and explains the new `(3d + 12)` label. Two typos in the adjacent self-intercept bullet fixed in
+  passing (*"1d10 dice of 6 set-damage"* → *or*; a stray `".`).
+
+### 17.3 Limitation found while writing the FAQ — recorded, not fixed
+
+**Third-party manual interception is only reachable in friendly-fire games.** The INCOMING list is
+built only by `FirePhaseStrategy.selectShip`, which `PhaseStrategy.onShipClicked` reaches only for
+`isMyShip(ship)` — and outside the `friendlyFire === 1` branch `selectShip` ends with
+`this.setSelectedShip(ship)`. So the interceptor passed to the menu is always the ship whose tooltip
+you are looking at, and there is no way to keep ship A selected while opening ship B's list.
+
+That makes two of §4/§10's cases hand-unassignable in an ordinary game: a `freeintercept` weapon
+covering a friendly, and a fighter flight covering the ship it escorts. Both still work — the
+automation places them exactly as before — and both are reachable when friendly fire is on, where
+`selectShip` deliberately keeps the current selection and offers a *Select ship* button instead.
+The FAQ says covering someone else is normally left to the automation rather than describing a flow
+that does not exist.
+
+### 17.4 Verification
+
+* `node --check` clean on `ShipTooltipBallisticsMenu.js`; both legacy bundles rebuilt.
+* 13 assertions over the extracted `joinRange` / `diceSuffix` / `getOrderSetDamage` helpers, all
+  passing: equal and negative ranges, a null low end, single shot, a two-member group, dice-only,
+  set-damage-only, the `MSB` notes fallback, and the three not-a-Slicer paths.
+* `php -l` clean on `faq.php` and `factions-tiers.php`, both still CRLF and BOM-free
+  ([arch_php_entry_bom_trap] — written through node, not PowerShell).
+* Not play-tested.

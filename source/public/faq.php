@@ -45,6 +45,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li><a href="#enormous">Enormous Units</a></li>
                 <li><a href="#escorts">Fighter Escorts</a></li>
                 <li><a href="#hangar">Hangar Operations</a></li>
+                <li><a href="#interception">Interception</a></li>
                 <li><a href="#jump">Jump Drives</a></li>
                 <li><a href="#ladder">Online Ladder</a></li> 
                 <li><a href="#mines">Mines</a></li>                               
@@ -694,6 +695,59 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 </ul>
             </li>
             <br>
+        </ul>
+        <a class="back-to-top" href="#top">↩ Back to Top</a>
+
+
+        <h3 id="interception" >Interception</h3>
+        <ul>
+            <li>Interception is defensive fire that makes an incoming shot harder to hit.  Every weapon capable of it has an <strong>Intercept Rating</strong>.</li>
+            <li>In general, when several weapons are put on the <em>same</em> shot, each one after the first is worth 5% less than its rating, cumulatively.  Three rating -20% weapons therefore give -20%, -15% and -10%, for -45% total intercept, rather than -60%.
+                This degradation <strong>does not apply against ballistic weapons</strong> (missiles, captor mines) — every weapon assigned to a missile is worth its full rating.</li>
+            <li>Automatic Interception:
+                <ul class="circle-list">
+                    <li>This is the default and needs no input from the player to happen.  When the Firing phase resolves, the game gathers every intercept-capable weapon that has <em>not</em> fired that turn and assigns it to the incoming shots itself.</li>
+                    <li>Firing a weapon offensively takes it out of the defensive pool for that turn.  Interception is always paid for with weapons you chose not to shoot with.</li>
+                    <li>Weapons that take <strong>more than one turn to load</strong> are only used automatically if you first place a self-intercept marker on them, using the green shield icon on the weapon in the ship window during Firing phase.
+                        That marker is your consent to use the weapon's to intercept — without this consent the game will not spend a slow-charging weapon on defence.</li>
+                    <li>Missile racks that reload in a single turn and carry Interceptor missiles are switched into their interceptor mode and used automatically, drawing rounds from the magazine as they go.
+                        Racks with a longer loading time fall under the marker rule above.</li>
+                    <li>Note - Automated interception is the only way to intercept non-Ballistic weapons, since you have no prior knowledge of these atacks until after Firing Phase.</li>    
+                    <li>Mines do not intercept at all unless they carry the Command Controller enhancement.</li>
+                </ul>
+            </li>
+            <li>Manual Interception — putting your own weapons on a specific shot.  This is declared in the <strong>Firing phase only</strong>:
+                <ul class="circle-list">
+                    <li>Click one of your own units to select it and open its ship tooltip.  The <strong>INCOMING</strong> list at the bottom of that tooltip is every ballistic shot currently aimed at it, grouped under the ship that fired,
+                        and written as "2x Heavy Missile (Class-H)".</li>
+                    <li>Select the weapon(s) you want to commit in the ship window, exactly as you would to fire them.</li>
+                    <li>The hit chance at the end of the row <em>is</em> the button.  When the current selection can legally commit to that row the number is underlined in blue and the cursor becomes a pointer — click it to declare.
+                        Hover it at any time to read the full to-hit breakdown and, when it is refusing, the reason (<em>No interceptor selected</em>, <em>Uninterceptable</em>, <em>No selected weapon can reach this shot</em>, and so on).</li>
+                    <li>The hit chance drops as you commit, and the hover breakdown gains a <em>Declared interception</em> line.  That number is <strong>your own declared orders only</strong>: automatic interception is worked out after the
+                        turn is committed and is deliberately not previewed, and your allies' uncommitted orders are not in your game data.  It is not floored at zero either — a shot reading -25% is one you have already spent more on than it was worth.</li>
+                    <li>Clicking a grouped row spends the selection greedily, best interceptor first: it stacks weapons onto one shot of the group until that shot is fully suppressed, then moves on to the next one.
+                        Use the ▶ caret to expand the group into one row per shot when you would rather place each weapon yourself.</li>
+                    <li>A weapon that has been selected to intercept manually cannot also fire offensively, and neither will be in the automatic interceptor pool. For this reason you cannot manually declare an intercept with a weapon, and use Self Intercept shield to place it in the automated pool.</li>
+                    <li>Weapons that can split their shots (Twin and Quad Arrays, Discharge Guns and so on) spend <strong>one gun</strong> per manual intercept, and the rest are still free to fire, to intercept something else, or to be
+                        left to the automation.  A weapon that cannot split commits all of its guns to the one shot you point it at.</li>
+                    <li>Missile racks and other weapons that declare in an earlier phase can be hand-assigned in the Firing phase too, so long as they have fired nothing at all that turn.  Ammunition is checked against the magazine
+                        before the order is offered.</li>
+                    <li>To withdraw, clear that weapon's fire orders from the ship window in the usual way.</li>
+                </ul>
+            </li>
+            <li>What can be intercepted, either way:
+                <ul class="circle-list">
+                    <li>Fire aimed at the intercepting unit itself, provided the shot comes from within the weapon's firing arc.  Arcs are measured from where the shot is coming <em>from</em> — for a ballistic that is the hex it was
+                        launched from, not wherever the shooter has since moved to.</li>
+                    <li>Fire aimed at a <em>friendly</em> unit, but only by weapons carrying the free-intercept trait, and only when the unit being protected lies between them and the incoming shot.  Covering someone else is normally
+                        left to the automation, since the INCOMING list is shown on your own units' tooltips.</li>
+                    <li>Fighter flights may protect the ship they are escorting from ballistic fire, provided they end their movement on its hex now and were in the same hex as the ship at the start of the current turn.  A flight cannot cover another flight.</li>
+                    <li>Some attacks cannot be intercepted at all: e.g. laser weapons tend to be uninterceptable, and proximity mines, rams and Molecular Slicers are other examples.  Those rows refuse with a reason rather than
+                        disappearing from the list.</li>
+                </ul>
+            </li>
+            <li>Note - The Molecular Slicer prices interception out of its damage pool rather than per gun and has its own declaration method — see the Shadow Association section of
+                <a style="font-size: 14px;" href="./factions-tiers.php" target="_blank" rel="noopener noreferrer">Factions &amp; Tiers</a>.</li>
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 

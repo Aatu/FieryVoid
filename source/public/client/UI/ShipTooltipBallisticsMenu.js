@@ -168,10 +168,12 @@ window.ShipTooltipBallisticsMenu = function () {
                 }
 
                 // Set display text. The shooter is named by the heading above, so the row carries only
-                // the shot: how many, of what, in which mode. The count is always written - including
-                // "1x" - so the weapon names line up down the column.
+                // the shot: how many, of what, in which mode, and - for a Shadow split weapon - what
+                // the shot is made of. The count is always written - including "1x" - so the weapon
+                // names line up down the column.
                 var textToDisplay = amount + 'x ' + ball.weapon.displayName
-                    + ' (' + ball.weapon.firingModes[ball.fireOrder.firingMode] + ')';
+                    + ' (' + ball.weapon.firingModes[ball.fireOrder.firingMode] + ')'
+                    + diceSuffix(ball.weapon, members);
                 jQuery(".weapon", ballElement).html(textToDisplay).attr('title', textToDisplay);
 
     			var hitchance = weaponManager.calculataBallisticHitChange(ballisticEntry);
@@ -193,7 +195,6 @@ window.ShipTooltipBallisticsMenu = function () {
                 }
                 */
                 let hitchanceLists = {};   // { firingMode: [hc, hc, ...] }
-                let shots = 0;
                 for (let i = 0; i < ballistics.length; i++) {
                     const b = ballistics[i];
 
@@ -207,7 +208,6 @@ window.ShipTooltipBallisticsMenu = function () {
                         if (!hitchanceLists[mode]) {
                             hitchanceLists[mode] = [];
                         }
-                        shots += b.fireOrder.shots;
                         // Push the hit chance into the array for this firing mode
                         hitchanceLists[mode].push(hc);
                     }
@@ -341,11 +341,14 @@ window.ShipTooltipBallisticsMenu = function () {
 
                 // "Approx:" and "Between:" are gone - every number in this column is a hit chance, and
                 // a range says "between" by being a range. The words cost a third of the row's width.
+                // The Shadow "(N dice)" suffix has gone too: the allocation now rides on the weapon
+                // label as "(3d + 12)", where it reads as part of the shot rather than as part of the
+                // percentage. With it went the branch that carried it - a Slicer order is
+                // type "normal" (Sweeping), so it lands on the branch below and is now formatted like
+                // every other split weapon. That branch does NOT print a range for a single-shot row,
+                // which is what stopped one Slicer shot reading "93-93%".
                 var chanceText;
-                if (ball.weapon.data["Offensive Dice"]) { //how many dice Shadow use for each split shot
-                    chanceText = joinRange(displayMin, displayMax) + ' ('
-                        + (amount == 1 ? ball.fireOrder.shots : shots) + ' dice)';
-                } else if (ball.fireOrder.type == "normal") {
+                if (ball.fireOrder.type == "normal") {
                     chanceText = (amount > 1 && displayMin !== displayMax)
                         ? joinRange(displayMin, displayMax)
                         : displayMax + '%';
@@ -393,7 +396,8 @@ window.ShipTooltipBallisticsMenu = function () {
                         subElement.addClass('ballsub');
 
                         var subText = ball.weapon.displayName
-                            + ' (' + ball.weapon.firingModes[ball.fireOrder.firingMode] + ')';
+                            + ' (' + ball.weapon.firingModes[ball.fireOrder.firingMode] + ')'
+                            + diceSuffix(ball.weapon, [member]);
                         jQuery(".weapon", subElement).html(subText).attr('title', subText);
 
                         var subHit = jQuery(".hitchange", subElement);
@@ -446,10 +450,48 @@ window.ShipTooltipBallisticsMenu = function () {
        "30-45%" normally - but declared interception is no longer floored at 0 (user direction,
        2026-08-20), so a low end can be negative and a bare hyphen would produce "-30--10%". A range
        that starts below zero repeats the % sign instead - "-30%--10%" - which separates the two
-       numbers without costing the width that spelling out "to" did. Equal ends are NOT collapsed
-       here: the Shadow dice branch has always printed both, and its callers decide. */
+       numbers without costing the width that spelling out "to" did.
+
+       Equal ends collapse to a single number rather than reading "93-93%". Every caller today also
+       guards on lo !== hi itself, so this is belt and braces - but a range of one is never the right
+       thing to print, and the caller that did print it is how this was found. */
     function joinRange(lo, hi) {
+        if (lo === null || lo === undefined || lo === hi) return hi + '%';
         return (lo < 0) ? lo + '%-' + hi + '%' : lo + '-' + hi + '%';
+    }
+
+    /* "(3d + 12)" - the dice and set damage a Shadow split weapon has committed to a row's shots.
+
+       Only Molecular Slicers reach this: "Offensive Dice" is written by
+       MolecularSlicerBeamL.initializationUpdate, in the Firing phase only. Everything else gets an
+       empty string, so ordinary ballistic rows are untouched.
+
+       Summed over the ROW's own shots, because that is what the row describes - a collapsed group
+       reads as the whole group's allocation, and each expanded sub-row as its own. (The "(N dice)"
+       this replaces summed every shot the weapon had made against this target regardless of which
+       group it fell into, so a Slicer whose shots landed in two groups over-counted in both. It
+       also never mentioned the set-damage half of the allocation at all.) */
+    function diceSuffix(weapon, members) {
+        if (!weapon || !weapon.data || !weapon.data["Offensive Dice"]) return '';
+
+        var dice = 0;
+        var setDam = 0;
+        members.forEach(function (member) {
+            dice += member.fireOrder.shots || 0;
+            setDam += getOrderSetDamage(weapon, member.fireOrder);
+        });
+
+        return ' (' + dice + 'd + ' + setDam + ')';
+    }
+
+    /* Set damage on one order. The weapon owns this: a freshly declared order carries ->setDam,
+       but one that has round-tripped through the server has only the encoded "MSB|d:x|s:y" token
+       left in ->notes, and MolecularSlicerBeamL.getOrderSetDamage reads both. The fallbacks are
+       for anything that reaches here without that prototype. */
+    function getOrderSetDamage(weapon, fireOrder) {
+        if (typeof weapon.getOrderSetDamage === 'function') return weapon.getOrderSetDamage(fireOrder) || 0;
+        if (typeof fireOrder.setDam === 'number') return fireOrder.setDam;
+        return 0;
     }
 
     /* Turn a hit-chance span into the row's intercept control.
