@@ -1418,8 +1418,8 @@ window.SelectFromShips = function () {
         if (gamedata.isPlayerInGame() && gamedata.getDistinctTeamCount() === 2) return '';
 
         var raw = gamedata.getTeamColorRGB(ship.team);
-        var toned = (typeof gamedata.getMutedTeamColorRGB === 'function')
-            ? gamedata.getMutedTeamColorRGB(ship.team)
+        var toned = (typeof gamedata.getMidTeamColorRGB === 'function')
+            ? gamedata.getMidTeamColorRGB(ship.team)
             : raw;
 
         return '--row-bar:rgb(' + Math.round(raw[0]) + ',' + Math.round(raw[1]) + ',' + Math.round(raw[2]) + ');'

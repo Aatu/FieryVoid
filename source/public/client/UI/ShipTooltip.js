@@ -594,13 +594,16 @@ window.ShipTooltip = function () {
         return gamedata.isTerrain(ship.shipSizeClass, ship.userid) ? 'terrain' : (gamedata.isMyShip(ship) ? 'mine' : (gamedata.isMyorMyTeamShip(ship) ? 'ally' : 'enemy'));
     }
 
-    // What the CSS allegiance classes below paint, as values rather than as classes. The
-    // shared --fv-* allegiance set in tokens.css; the tone-mapped tints, not the
-    // -signal twins, because these are for TEXT.
+    // What the CSS allegiance classes in tactical.css paint, as values rather than as
+    // classes, so the rule under the name can be drawn in the name's own colour. The
+    // BRIGHT tier (2026-08-20) — these must track .mine.name / .ally.name / .enemy.name
+    // exactly, because this map and those rules answer the same question on the same
+    // element and a drift shows up as a name whose underline is a different green.
+    // Terrain has no bright twin and stays neutral.
     var ALLEGIANCE_NAME = {
-        mine: 'var(--fv-own)',
-        ally: 'var(--fv-ally)',
-        enemy: 'var(--fv-enemy)',
+        mine: 'var(--fv-own-bright)',
+        ally: 'var(--fv-ally-bright)',
+        enemy: 'var(--fv-enemy-bright)',
         terrain: 'var(--fv-neutral)'
     };
 
@@ -619,6 +622,12 @@ window.ShipTooltip = function () {
 
     // Inline colour for the ship name. Empty string on the class path — the CSS class
     // from getAllyClass is already carrying it, and returning nothing is what lets it.
+    //
+    // The two arms now agree on BRIGHTNESS as well as on scheme (2026-08-20): this one
+    // has always returned the raw palette, and the .mine/.ally/.enemy .name rules in
+    // tactical.css moved onto --fv-*-bright, which is that same palette as tokens. Until
+    // then a 2-team participant saw pastel names and everyone else saw full chroma, on
+    // the same tooltip — the mismatch the user reported. Keep them level.
     function getNameStyle(ship) {
         if (!usesTeamColor(ship)) {
             return '';
@@ -649,8 +658,8 @@ window.ShipTooltip = function () {
         if (!usesTeamColor(ship)) return '';
 
         var raw = gamedata.getTeamColorRGB(ship.team);
-        var toned = (typeof gamedata.getMutedTeamColorRGB === 'function')
-            ? gamedata.getMutedTeamColorRGB(ship.team)
+        var toned = (typeof gamedata.getMidTeamColorRGB === 'function')
+            ? gamedata.getMidTeamColorRGB(ship.team)
             : raw;
 
         return '--row-bar:rgb(' + Math.round(raw[0]) + ',' + Math.round(raw[1]) + ',' + Math.round(raw[2]) + ');'

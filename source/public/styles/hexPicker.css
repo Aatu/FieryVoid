@@ -608,22 +608,30 @@
 /* ── Allegiance classes ──────────────────────────────────────────────────────
    One class carries BOTH renderings. getTeamColorVars() overrides the same two
    custom properties inline on the row for observers and 3+-team games — inline
-   wins over the class, and the name and the bar both follow. */
+   wins over the class, and the name and the bar both follow.
+
+   The name takes the --fv-*-mid tier (2026-08-20), NOT the plain tone-mapped tint it
+   used to and NOT the -bright tier the ShipTooltip's heading moved to on the same day.
+   This is the surface the tiers exist to separate: a stack of twenty rows at full
+   chroma stops reading as a list and starts reading as a warning, so the picker sits
+   one step down from the heading it opens beside. If you retune it, retune
+   gamedata.MID_TEAM_MIX to match — that is the observer / 3+-team arm of this same
+   rule, and it lands in the row right next to these. */
 .fv-hexpicker__row.mine,
 .fv-hexpicker__run.mine {
-    --row-name: var(--fv-own);
+    --row-name: var(--fv-own-mid);
     --row-bar: var(--fv-own-signal);
 }
 
 .fv-hexpicker__row.ally,
 .fv-hexpicker__run.ally {
-    --row-name: var(--fv-ally);
+    --row-name: var(--fv-ally-mid);
     --row-bar: var(--fv-ally-signal);
 }
 
 .fv-hexpicker__row.enemy,
 .fv-hexpicker__run.enemy {
-    --row-name: var(--fv-enemy);
+    --row-name: var(--fv-enemy-mid);
     --row-bar: var(--fv-enemy-signal);
 }
 

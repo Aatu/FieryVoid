@@ -140,19 +140,26 @@
     border: 1px solid var(--row-bar);
 }
 
-/* One class carries both channels, as in hexPicker.css. */
+/* One class carries both channels, as in hexPicker.css.
+
+   ⚠️ These are the STACK GRID cells, not the tooltip's ship name — the name lives in
+   tactical.css and took the -bright tier on 2026-08-20. This grid stayed a step below
+   it on --fv-*-mid, deliberately, because it tracks the hex PICKER rather than its own
+   heading: the picker opens this tooltip beside itself, the two grids of small cells
+   read as one surface, and the user confirmed they should move together. Change these
+   only alongside the matching block in hexPicker.css. */
 .shipNameContainer .tt-stack__cell.mine {
-    --row-name: var(--fv-own);
+    --row-name: var(--fv-own-mid);
     --row-bar: var(--fv-own-signal);
 }
 
 .shipNameContainer .tt-stack__cell.ally {
-    --row-name: var(--fv-ally);
+    --row-name: var(--fv-ally-mid);
     --row-bar: var(--fv-ally-signal);
 }
 
 .shipNameContainer .tt-stack__cell.enemy {
-    --row-name: var(--fv-enemy);
+    --row-name: var(--fv-enemy-mid);
     --row-bar: var(--fv-enemy-signal);
 }
 

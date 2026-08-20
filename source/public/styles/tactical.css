@@ -457,21 +457,32 @@ body {
    .fv-hexpicker__chip in hexPicker.css. */
 
 /* The hover ShipTooltip's ship names. ShipTooltip.js is the ONLY emitter of these
-   class pairs (.shipSelectList uses .shiplistentry, not .name), so this block is that
-   one surface.
+   class pairs, so this block is that one surface. (It used to share the qualifier with
+   .shipSelectList .shiplistentry; that block was deleted 2026-08-20 as dead — see the
+   note where it stood, further down.)
 
-   Converted to the shared allegiance palette (SELECT_FROM_SHIPS_PLAN.md Stage 6, item 4
-   — deferred there, done on request 2026-08-14). These held literal `red` / `limegreen`
-   while the hex picker beneath them ran the muted tints, and the two surfaces now appear
-   SIDE BY SIDE — the picker places this tooltip beside itself — so the mismatch had gone
-   from theoretical to visible. They take the tone-mapped values, not the -signal twins:
-   this is text, and the full-chroma versions belong only on small marks. */
+   Colour history, because this block has now moved twice. It held literal `red` /
+   `limegreen` until 2026-08-14, when SELECT_FROM_SHIPS_PLAN.md Stage 6 item 4 moved it
+   to the tone-mapped --fv-own/-ally/-enemy so it would sit level with the hex picker
+   beneath it. On 2026-08-20 the user judged the result too pastel and it moved again,
+   to the --fv-*-bright tier.
+
+   ⚠️ The Stage 6 reasoning was not wrong, it was INCOMPLETE, and that is the part worth
+   keeping: this block only ever painted 2-team participants. Observers and 3+-team
+   participants take an INLINE colour from ShipTooltip.getNameStyle, which has always run
+   the raw getTeamColorRGB palette. So muting the class arm did not make the tooltip
+   consistent with the picker — it made the tooltip inconsistent with ITSELF, bright in a
+   4-player game and pastel in a 2-player one. The bright tier is what closes that gap.
+   The picker keeps its own answer: --fv-*-mid, a step down from these, because twenty
+   dense rows and one large heading are not the same typographic problem.
+
+   The stack grid further down shipTooltip.css does still track the picker exactly. */
 .enemy.name {
-    color: var(--fv-enemy);
+    color: var(--fv-enemy-bright);
 }
 
 .mine.name {
-    color: var(--fv-own);
+    color: var(--fv-own-bright);
 }
 
 .terrain.name {
@@ -479,7 +490,7 @@ body {
 }
 
 .ally.name {
-    color: var(--fv-ally);
+    color: var(--fv-ally-bright);
 }
 
 .name-value-button-ally {
@@ -1188,68 +1199,18 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     right: 150px;
 }
 
+/* REMOVED 2026-08-20: the .shipSelectList block (the panel, .shiplistentry and its
+   action/remark/name variants). Its JS was window.shipSelectList in
+   source/public/client/UI/shipSelect.js, deleted in commit 7ea324de3, and the five
+   shipManager functions that still called it were removed from ships.js in this same
+   change — see the note there. Nothing emits this markup any more; the hex picker
+   (hexPicker.css, .fv-hexpicker__*) is what replaced it.
 
-.shipSelectList {
-    position: absolute;
-    display: none;
-    top: 200px;
-    left: 200px;
-    /*border: 1px solid #496791;*/
-    background-color: black;
-    z-index: 20000;
-    padding: 5px 0px;
-    margin: 0px;
-    color: white;
-    font-family: arial;
-    font-size: 9px;
-    line-height: 12px;
-    opacity: 0.65;
-    border-radius: 5px 5px 5px 5px;
-    -moz-border-radius: 5px 5px 5px 5px;
-    -webkit-border-radius: 5px;
+   Worth recording because of HOW it was found: its .enemy.name #b34119 and .ally.name
+   #2f5123 were the last allegiance colours in the codebase sitting on no brightness
+   tier, and chasing that anomaly is what turned up the dead JS behind it. An unexplained
+   colour is a reasonable thing to pull on. See [[arch_team_colour_logic]]. */
 
-}
-
-.shipSelectList .shiplistentry {
-    margin: 3px 20px;
-    cursor: pointer;
-}
-
-.shipSelectList .shiplistentry.action {
-    margin: 3px 40px;
-    cursor: pointer;
-}
-
-.shipSelectList .shiplistentry.remark {
-    margin: 3px 45px;
-    color: #496791;
-}
-
-.shipSelectList .shiplistentry span {
-    font-size: 14px;
-    padding-right: 5px;
-}
-
-.shipSelectList .shiplistentry.action span {
-    font-size: 12px;
-}
-
-.shipSelectList .shiplistentry.remark span {
-    font-size: 11px;
-}
-
-.shipSelectList .shiplistentry .name {
-    font-style: italic;
-}
-
-
-.shipSelectList .shiplistentry .enemy.name {
-    color: #b34119;
-}
-
-.shipSelectList .shiplistentry .ally.name {
-    color: #2f5123;
-}
 
 /* The initiative drawer. Colours converged with the rest of the chrome (roadmap item 6,
    Stage 4); the ROUNDING is a standing exception - see the border-radius note below. The
@@ -1351,16 +1312,30 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     padding-left: 12px;
 }
 
+/* The initiative NUMBER in the Order of Battle drawer. These paint the 2-team
+   participant arm only; observers and 3+-team participants get an inline colour from
+   the `teamColorCss` local in gamedata.js's ini-table render.
+
+   Moved to --fv-*-bright 2026-08-20 (user request) from the CSS keywords `green`
+   (#008000), #6091d2 and `red` (#ff0000), which sat on no tier at all. The inline arm
+   moved to the full-strength palette in the same change — before that a 2-team
+   participant saw pure #ff0000 where an observer saw the ×0.65 #a63434, which is the
+   same one-arm drift that had made the ship tooltip pastel for participants only.
+
+   ⚠️ NOT the same thing as the .iniActive* rules further down. Those are the
+   active-mover BOX (border + fill + glow) and deliberately stay dark so they do not
+   overpower the drawer panel; the number is a two-character glyph, which is the
+   small-mark case where full chroma reads as a signal. Two surfaces, two answers. */
 .iniMyShip {
-    color: green;
+    color: var(--fv-own-bright);
 }
 
 .iniAllyShip {
-    color: #6091d2;
+    color: var(--fv-ally-bright);
 }
 
 .iniEnemyShip {
-    color: red;
+    color: var(--fv-enemy-bright);
 }
 
 #iniTopic {
