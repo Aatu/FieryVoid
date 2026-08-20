@@ -500,6 +500,103 @@ function openSlicerSelfInterceptDialog() {
 	});
 }
 
+/* The Slicer does not spend GUNS on interception: it spends dice and set damage out of a shared
+   pool, and each defensive order costs the offensive shots 5% through recalculateForIntercept. A
+   generic "one order per gun" allocation would misprice all three sizes and corrupt the pool
+   arithmetic, so it stays out of weaponManager's per-gun path. It is NOT out of manual
+   interception - it declares through the two hooks below (Stage 7). The Hyperplasma Cutter sets
+   the same flag and implements neither, which is what keeps it out entirely (§11.5). */
+MolecularSlicerBeamL.prototype.usesCustomInterceptAllocation = true;
+
+/* ── Manual interception (MANUAL_INTERCEPTION_PLAN.md Stage 7) ─────────────────────────────────
+   THE SERVER'S ARITHMETIC IS WHAT DICTATES THE SHAPE. MolecularSlicerBeamL::getInterceptionMod
+   (molecular.php) counts selfIntercept orders as how many shots the Slicer is ALLOWED to engage
+   and distinct 'intercept' targetids as how many it HAS engaged, and pays out the full rating only
+   while engaged <= allowed. A bare 'intercept' order with no marker behind it is therefore worth
+   EXACTLY NOTHING - which is why the Slicer could not simply be let onto the generic path.
+
+   So one manual intercept is TWO orders:
+     - a selfIntercept order, which spends one die or one whole block of set damage and buys one
+       engagement (identical to what the self-interception dialog produces), and
+     - the targeted intercept order, which names the shot to spend it on.
+
+   Capacity the player already bought through the dialog is REUSED rather than paid for twice: an
+   unmatched marker is spare capacity. That is D4's conversion expressed in this weapon's own
+   currency - the generic path deletes the marker it finds, this one spends it.
+
+   Capacity is counted per intercept ORDER, not per distinct target: one order is one engagement and
+   costs one die, whether or not it lands on a shot this weapon is already engaging.
+
+   ⚠ THE SERVER HAD TO BE TAUGHT THE SAME (bug found in game 4306, 2026-08-20). Its own
+   getInterceptionMod compares DISTINCT targetids against the marker count, so 22 engagements
+   stacked on 2 shots read as "2 of 22 spent" - and the automation cheerfully spent the other 20
+   markers all over again, 44 defensive shots against 4 missiles. The correction is in
+   MolecularSlicerBeamL::beforeFiringOrderResolution, which no longer pads $guns for an 'intercept'
+   order, so automateIntercept's budget comes out as (markers - manual intercepts + spare). Do NOT
+   "fix" it at this end by counting distinct targets here - that would undercharge the pool instead,
+   letting one die buy any number of engagements against the same shot.
+   See MANUAL_INTERCEPTION_PLAN.md §16. */
+MolecularSlicerBeamL.prototype.getSpareInterceptCapacity = function () {
+	var markers = 0;
+	var engagements = 0;
+	for (var i = 0; i < this.fireOrders.length; i++) {
+		var fire = this.fireOrders[i];
+		if (fire.turn != gamedata.turn) continue;
+		if (fire.type === 'selfIntercept') markers++;
+		else if (fire.type === 'intercept') engagements++;
+	}
+	return markers - engagements;
+};
+
+MolecularSlicerBeamL.prototype.canDeclareManualIntercept = function (ship) {
+	//The Light Slicer has no interception rating and can never be committed to defensive fire.
+	if (this.intercept < 1) return false;
+	//An engagement the player has already paid for through the dialog.
+	if (this.getSpareInterceptCapacity() > 0) return true;
+	//Otherwise there has to be a die, or a WHOLE block of set damage, left to spend. Same test
+	//checkSelfInterceptSystem makes - a part-block buys nothing.
+	return (this.getRemainingDice() > 0 || this.getRemainingSetDamage() >= SLICER_SET_DAMAGE_BLOCK);
+};
+
+MolecularSlicerBeamL.prototype.declareManualIntercept = function (ship, ball, mode) {
+	if (!this.canDeclareManualIntercept(ship)) return 0;
+
+	//Buy the engagement unless one is already paid for. addSelfInterceptOrders is the SAME call
+	//the dialog makes: it unshifts the marker to the front of the array (index order drives the
+	//cumulative -5%, so defensive orders must lead) and runs recalculateForIntercept(true) to
+	//charge the offensive shots for it. Dice first, exactly as the dialog spends them.
+	if (this.getSpareInterceptCapacity() <= 0) {
+		if (this.getRemainingDice() > 0) {
+			this.addSelfInterceptOrders(ship, 1, 0);
+		} else {
+			this.addSelfInterceptOrders(ship, 0, 1);
+		}
+	}
+
+	this.fireOrders.push({
+		id: ship.id + "_" + this.id + "_" + (this.fireOrders.length + 1),
+		type: 'intercept',
+		shooterid: ship.id,
+		//An intercept order's targetid is the id of the FIRE ORDER it is stopping.
+		targetid: ball.fireOrder.id,
+		weaponid: this.id,
+		calledid: -1,
+		turn: gamedata.turn,
+		firingMode: mode,
+		//ZERO of both pools. The die (or block) was spent by the marker above, and getShotsUsed /
+		//getSetDamageUsed sum EVERY order in the array - carrying a 1 here would charge the pool
+		//twice and silently eat a die out of the offensive volley.
+		shots: 0,
+		setDam: 0,
+		x: "null",
+		y: "null",
+		damageclass: this.data["Weapon type"].toLowerCase()
+	});
+
+	webglScene.customEvent('SystemDataChanged', { ship: ship, system: this });
+	return 1;
+};
+
 MolecularSlicerBeamL.prototype.doMultipleSelfIntercept = function (ship) {
 	for (var q = 0; q < slicerSelfInterceptQueue.length; q++) {
 		if (slicerSelfInterceptQueue[q].weapon === this) return; //already queued this tick
@@ -581,10 +678,18 @@ MolecularSlicerBeamL.prototype.recalculateFireOrders = function (shooter, fireOr
 
 };
 
+/* Re-prices the OFFENSIVE shots when a defensive order is added or withdrawn: each one costs them
+   a further cumulative 5%.
+
+   Both defensive kinds are skipped. selfIntercept always was; 'intercept' was added with the manual
+   path (Stage 7) because a manual intercept order carries neither ->chance nor ->hitmod, so the
+   arithmetic below would write NaN into it - harmless in itself (nothing reads an intercept order's
+   chance, and Manager.php drops the field on POST) but it would surface as "NaN%" the moment
+   anything did. */
 MolecularSlicerBeamL.prototype.recalculateForIntercept = function (add) {
 	for (let i = 0; i < this.fireOrders.length; i++) {
 		const fireOrder = this.fireOrders[i];
-		if (fireOrder.type !== "selfIntercept") {
+		if (fireOrder.type !== "selfIntercept" && fireOrder.type !== "intercept") {
 			if (add) {
 				fireOrder.chance -= fireOrder.hitmod;
 			} else {

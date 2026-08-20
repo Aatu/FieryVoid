@@ -384,6 +384,15 @@ VorlonDischargeGun.prototype.checkSelfInterceptSystem = function() {
     return true;
 };
 
+/* A defensive shot is always declared in mode 1, whatever mode the weapon is set to.
+   VorlonDischargeCannon.initializationUpdate bills `powerReq += 5 * fireOrder.firingMode` for EVERY
+   order it finds, which is exactly why doMultipleSelfIntercept below stamps firingMode 1 - a
+   defensive shot costs 5, not 5 x mode. Without this a manual intercept declared in mode 3 would be
+   billed 15 power and could block an otherwise legal commit.
+   Safe because the rating is a flat ->intercept with no interceptArray.
+   MANUAL_INTERCEPTION_PLAN.md Stage 7. */
+VorlonDischargeGun.prototype.getInterceptOrderMode = function () { return 1; };
+
 VorlonDischargeGun.prototype.doMultipleSelfIntercept = function(ship) {
 
     for (var s = 0; s < 1; s++) {    

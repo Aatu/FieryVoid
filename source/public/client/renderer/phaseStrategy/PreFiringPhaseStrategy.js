@@ -99,8 +99,8 @@ window.PreFiringPhaseStrategy = function () {
 
     };
 
-    PreFiringPhaseStrategy.prototype.deselectShip = function (ship) {
-        PhaseStrategy.prototype.deselectShip.call(this, ship);
+    PreFiringPhaseStrategy.prototype.deselectShip = function (ship, keepWeapons) {
+        PhaseStrategy.prototype.deselectShip.call(this, ship, keepWeapons);
         this.hideMovementUI();
     };
 

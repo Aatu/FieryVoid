@@ -894,9 +894,26 @@ const canDeBoost = (ship, system) =>
 	shipManager.power.canDeboost(ship, system) && 
 	Boolean(shipManager.power.getBoost(system));
 */
-const canAddShots = (ship, system) => system.weapon && system.canChangeShots && weaponManager.hasFiringOrder(ship, system) && weaponManager.getFiringOrder(ship, system).shots < system.maxVariableShots;
+//getFiringOrder returns whichever current-turn order it finds first, INTERCEPT orders included, so
+//without this guard the +/- shots buttons would offer to edit a manual interception's shot count.
+//Interception resolution ignores ->shots entirely, so it was only ever cosmetic - but the buttons
+//should not appear for an order they cannot change.
+const isShotEditableOrder = (ship, system) => {
+	const fire = weaponManager.getFiringOrder(ship, system);
+	return fire && fire.type !== 'intercept' && fire.type !== 'selfIntercept' ? fire : null;
+};
 
-const canReduceShots = (ship, system) => system.weapon && system.canChangeShots && weaponManager.hasFiringOrder(ship, system) && weaponManager.getFiringOrder(ship, system).shots > 1;
+const canAddShots = (ship, system) => {
+	if (!system.weapon || !system.canChangeShots || !weaponManager.hasFiringOrder(ship, system)) return false;
+	const fire = isShotEditableOrder(ship, system);
+	return Boolean(fire) && fire.shots < system.maxVariableShots;
+};
+
+const canReduceShots = (ship, system) => {
+	if (!system.weapon || !system.canChangeShots || !weaponManager.hasFiringOrder(ship, system)) return false;
+	const fire = isShotEditableOrder(ship, system);
+	return Boolean(fire) && fire.shots > 1;
+};
 
 const canRemoveFireOrderMulti = (ship, system) => system.weapon && weaponManager.hasOrderForMode(system) && system.canSplitShots;
 //A "spent & locked" Gravitic Augmenter (order committed, outside its declaration phase) must not

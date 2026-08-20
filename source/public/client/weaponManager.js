@@ -1076,23 +1076,12 @@ window.weaponManager = {
         return weaponManager.calculateHitChange(shooter, target, weapon, calledid).hitChance;
     },//endof calculataBallisticHitChange
 
+    /* Kept only as the legacy entry point: it was always called as getInterception(ball) where
+       ball carried .fireOrderId, and it never applied degradation or read the ORDER's firing mode.
+       getDeclaredInterception does both. Returns d20 points - multiply by 5 for a percentage. */
     getInterception: function getInterception(ball) {
-
-        var intercept = 0;
-
-        for (var i in gamedata.ships) {
-            var ship = gamedata.ships[i];
-            var fires = weaponManager.getAllFireOrders(ship);
-            for (var a in fires) {
-                var fire = fires[a];
-                if (fire.type == "intercept" && fire.targetid == ball.fireOrderId) {
-                    var weapon = shipManager.systems.getSystem(ship, fire.weaponid);
-                    intercept += weapon.getInterceptRating();
-                }
-            }
-        }
-
-        return intercept;
+        if (!ball) return 0;
+        return weaponManager.getDeclaredInterception(ball.fireOrderId, ball.weapon);
     },
 
     calculateBaseHitChange: function calculateBaseHitChange(target, base, shooter, weapon) {
@@ -2551,70 +2540,607 @@ window.weaponManager = {
         return target.sideDefense;
     },
 
-    targetBallistic: function targetBallistic(ship, ball) {
-        console.log("target Ballistics", ship, ball);
+    /* ==== MANUAL INTERCEPTION =================================================================
+       Player-directed intercept assignment: select intercept-capable weapons in the Firing phase
+       and click an incoming shot in the ship tooltip's INCOMING list to commit them to that shot.
+       Automated interception (Firing::automateIntercept) still handles everything left unassigned.
 
-        if (gamedata.gamephase !== 3) return;
+       Every predicate here mirrors a server-side test in Firing::isLegalIntercept /
+       Firing::validateManualIntercept. The server drops an illegal order silently - by design, so
+       nothing leaks about hidden state - which means the client predicate has to be strict enough
+       that a drop means a stale blueprint, not a legitimate click.
 
-        var selectedShip = ship;
-        if (shipManager.isDestroyed(selectedShip)) return;
+       Throughout, a "shot" is one entry from getAllBallisticsAgainst - {fireOrder, shooter, weapon}
+       - optionally carrying .position, the launch hex the tooltip already resolved from the
+       shooter's icon. ========================================================================= */
 
-        if (!ball.targetid) return;
+    /* Read a per-mode weapon flag WITHOUT changing the weapon's mode. The display path in
+       ShipTooltipBallisticsMenu cycles changeFiringMode() to match an order, and weapon objects are
+       shared between same-phpclass systems, so mutating one here would corrupt another's display.
+       Falls back to the live field for weapons that have no array for that flag. */
+    getModeFlag: function getModeFlag(weapon, flagName, mode) {
+        if (!weapon) return undefined;
+        var array = weapon[flagName + 'Array'];
+        if (array && array[mode] !== undefined) return array[mode];
+        return weapon[flagName];
+    },
 
-        var target = gamedata.getShip(ball.targetid);
+    /* Where an incoming shot is bearing FROM, in hex coordinates.
+       Ballistic: the launch hex - what the server's getFiringHex resolves to, and what the tooltip
+       already recorded as ball.position. Non-ballistic (a Sweeping shot): the server bears on the
+       shooter's CURRENT hex, so a start-of-turn position would be the wrong answer. Moot while
+       every Sweeping weapon in the game is uninterceptable, but it must not be inherited wrong. */
+    getIncomingSourcePos: function getIncomingSourcePos(ball) {
+        var shooter = ball.shooter || gamedata.getShip(ball.fireOrder.shooterid);
+        if (!ball.weapon || !ball.weapon.ballistic) {
+            return shooter ? shipManager.getShipPosition(shooter) : null;
+        }
+        if (ball.position) return new hexagon.Offset(ball.position);
+        return shooter ? shipManager.movement.getPositionAtStartOfTurn(shooter) : null;
+    },
 
-        var toUnselect = Array();
+    /* Which firing mode would this weapon intercept in? Mirrors MissileLauncher::switchModeForIntercept.
+       The current mode wins when it already has a rating; otherwise ONLY a canModesIntercept weapon
+       (an Interceptor-missile rack) is allowed to look at its other modes - that flag is exactly the
+       gate Firing::getUnassignedInterceptors uses before calling switchModeForIntercept, and without
+       it an ordinary multi-mode weapon would silently intercept in a mode it is not set to.
+       Returns null when the weapon cannot intercept in any mode. */
+    getInterceptModeFor: function getInterceptModeFor(weapon) {
+        if (!weapon || !weapon.weapon) return null;
+        if (weapon.intercept > 0) return weapon.firingMode;
+        if (!weapon.canModesIntercept) return null;
+        if (mathlib.arrayIsEmpty(weapon.interceptArray)) return null;
 
-        for (var i in gamedata.selectedSystems) {
+        var bestMode = null;
+        var bestValue = 0;
+        for (var mode in weapon.interceptArray) {
+            var value = weapon.interceptArray[mode];
+            if (value > bestValue) {
+                bestValue = value;
+                bestMode = parseInt(mode, 10);
+            }
+        }
+        return bestValue > 0 ? bestMode : null;
+    },
+
+    /* Intercept rating (d20 points) this weapon carries in a given mode - read from interceptArray
+       rather than by switching the weapon, for the shared-object reason above. */
+    getInterceptRatingInMode: function getInterceptRatingInMode(weapon, mode) {
+        if (!weapon) return 0;
+        if (weapon.interceptArray && weapon.interceptArray[mode] !== undefined) return weapon.interceptArray[mode];
+        return weapon.intercept || 0;
+    },
+
+    /* This turn's orders on one weapon, split by kind. selfIntercept is counted separately because
+       it is a PERMISSION MARKER ("the automation may use me"), not a shot - the server's own gun
+       arithmetic makes the same distinction. */
+    countCurrentTurnOrders: function countCurrentTurnOrders(weapon) {
+        var counts = { offensive: 0, intercept: 0, selfIntercept: 0 };
+        if (!weapon || !weapon.fireOrders) return counts;
+        for (var i = 0; i < weapon.fireOrders.length; i++) {
+            var fire = weapon.fireOrders[i];
+            if (fire.turn != gamedata.turn) continue;
+            if (fire.type === 'selfIntercept') counts.selfIntercept++;
+            else if (fire.type === 'intercept') counts.intercept++;
+            else counts.offensive++;
+        }
+        return counts;
+    },
+
+    /* Does this shot admit interception AT ALL, independent of who might shoot at it?
+       Returns null when it does, or a short reason for the disabled button's title.
+       'uninterceptable' is deliberately NOT tested here: canInterceptUninterceptable is a property
+       of the INTERCEPTOR, so an uninterceptable shot is a per-weapon question, answered in
+       canInterceptBallistic. The row still reports it, from getInterceptDisabledReason. */
+    getShotInterceptRefusal: function getShotInterceptRefusal(ball) {
+        if (!ball || !ball.weapon || !ball.fireOrder) return 'Unknown shot';
+        var mode = ball.fireOrder.firingMode;
+        if (weaponManager.getModeFlag(ball.weapon, 'doNotIntercept', mode)) return 'Cannot be intercepted';
+        if (weaponManager.getModeFlag(ball.weapon, 'hextarget', mode)) return 'Hex-targeted';
+        if (!gamedata.getShip(ball.fireOrder.targetid)) return 'No target';
+        return null;
+    },
+
+    /* Client mirror of AmmoMagazine::canDrawInterceptor. The server tracks rounds already committed
+       to interception in a private per-request counter the client never sees, so count our own
+       declared intercept orders for that mode instead. Non-magazine weapons pass trivially. */
+    ammoAvailableForIntercept: function ammoAvailableForIntercept(ship, weapon, mode) {
+        if (!weapon || !weapon.checkAmmoMagazine) return true; //not magazine-fed - nothing to check
+
+        //The magazine sits on the unit that carries the weapon: the ship itself, or the individual
+        //fighter of a flight. Same lookup by name that getMagazineFireableAmmo uses.
+        var unit = ship;
+        if (ship.flight) unit = shipManager.systems.getFighterBySystem(ship, weapon.id);
+        if (!unit || !unit.systems) return false;
+
+        var magazine = null;
+        for (var i in unit.systems) {
+            if (unit.systems[i].name == "ammoMagazine") { magazine = unit.systems[i]; break; }
+        }
+        //Magazine-fed weapon on a unit with no magazine: the server's getAmmoMagazine returns null
+        //and canInterceptAtAll refuses, so refuse here too.
+        if (!magazine || !magazine.ammoCountArray) return false;
+        if (!(magazine.remainingAmmo > 0)) return false;
+
+        var modeName = weapon.firingModes ? weapon.firingModes[mode] : null;
+        if (!modeName) return false;
+
+        //canDrawInterceptor compares the mode's round count against rounds already committed to
+        //interception THIS request. That counter is private and server-side, so mirror it by
+        //counting the intercept orders this unit has already declared for the same round.
+        var held = magazine.ammoCountArray[modeName] || 0;
+        var declared = 0;
+        for (var s in unit.systems) {
+            var other = unit.systems[s];
+            if (!other.fireOrders || !other.checkAmmoMagazine || !other.firingModes) continue;
+            for (var f = 0; f < other.fireOrders.length; f++) {
+                var fire = other.fireOrders[f];
+                if (fire.type !== 'intercept') continue;
+                if (fire.turn != gamedata.turn) continue;
+                if (other.firingModes[fire.firingMode] !== modeName) continue;
+                declared++;
+            }
+        }
+
+        return (held - declared) >= 1;
+    },
+
+    /* Same hex NOW and at the end of the previous turn - the fighter-escort rule the server applies
+       in isLegalIntercept. shipManager.isEscorting tests the start-of-turn position ONLY, which is
+       why it cannot be reused here: it would offer orders the server then drops. */
+    sharesHexNowAndAtStartOfTurn: function sharesHexNowAndAtStartOfTurn(ship, other) {
+        var nowSelf = shipManager.getShipPosition(ship);
+        var nowOther = shipManager.getShipPosition(other);
+        if (!nowSelf || !nowOther || !nowSelf.equals(nowOther)) return false;
+
+        var wasSelf = shipManager.movement.getPositionAtStartOfTurn(ship);
+        var wasOther = shipManager.movement.getPositionAtStartOfTurn(other);
+        if (!wasSelf || !wasOther) return false;
+        return wasSelf.equals(wasOther);
+    },
+
+    /* Standard $freeintercept geometry: the protected unit must lie roughly opposite the incoming
+       shot - within 60 degrees either side of the bearing away from it. Mirrors the arc built in
+       isLegalIntercept. Both bearings are taken as absolute compass headings rather than relative
+       ones: the server's relative transform (facing offset plus the rolled-ship mirror) is applied
+       identically to both, and the window is symmetric about the opposite bearing, so it cancels. */
+    isBetweenShooterAndTarget: function isBetweenShooterAndTarget(ship, target, ball) {
+        var sourcePos = weaponManager.getIncomingSourcePos(ball);
+        if (!sourcePos) return false;
+
+        var incomingHeading = mathlib.getCompassHeadingOfPoint(shipManager.getShipPosition(ship), sourcePos);
+        var from = mathlib.addToDirection(incomingHeading, 120);
+        var to = mathlib.addToDirection(from, 120);
+        var targetHeading = mathlib.getCompassHeadingOfShip(ship, target);
+
+        return mathlib.isInArc(targetHeading, from, to);
+    },
+
+    /* THE predicate. One weapon, one shot: may this weapon be hand-assigned to intercept it?
+       Used by the button-enable test AND by the declaration loop, so the UI can never offer
+       something the declaration would silently skip. */
+    canInterceptBallistic: function canInterceptBallistic(ship, weapon, ball) {
+        if (gamedata.gamephase !== 3) return false; //R1 - Firing phase only
+        if (!ship || !weapon || !weapon.weapon || !ball || !ball.fireOrder) return false;
+        if (!gamedata.isMyShip(ship)) return false;
+        if (shipManager.isDestroyed(ship)) return false;
+        if (!ship.flight && shipManager.isDisabled(ship)) return false;
+
+        if (shipManager.systems.isDestroyed(ship, weapon)) return false;
+        if (shipManager.power.isOffline(ship, weapon)) return false;
+        if (weapon.stowed) return false; //docked Kirishiac Orbital - non-operational
+        if (weapon.autoFireOnly) return false; //server drives these; the player never assigns them
+        if (!weaponManager.isLoaded(weapon)) return false;
+
+        if (weaponManager.getShotInterceptRefusal(ball) !== null) return false;
+
+        var incoming = ball.weapon;
+        var mode = ball.fireOrder.firingMode;
+        if (weaponManager.getModeFlag(incoming, 'uninterceptable', mode) && !weapon.canInterceptUninterceptable) return false;
+        if (weapon.ballisticIntercept && !incoming.ballistic) return false; //may only stop ballistics
+
+        //Rating, in the mode the order will actually carry (R6).
+        var interceptMode = weaponManager.getInterceptModeFor(weapon);
+        if (interceptMode === null) return false;
+        if (weaponManager.getInterceptRatingInMode(weapon, interceptMode) <= 0) return false;
+
+        //Weapons that price interception per DIE out of a shared pool rather than per gun. The
+        //generic gun accounting below is meaningless for them, so they answer for themselves:
+        //  - Molecular Slicer  - implements the pair of hooks and spends a die or a block of set
+        //                        damage per engagement (Stage 7).
+        //  - Hyperplasma Cutter - permanently out of scope (§11.5); no hook, so still refused.
+        if (weapon.usesCustomInterceptAllocation) {
+            if (typeof weapon.canDeclareManualIntercept !== 'function') return false;
+            if (!weapon.canDeclareManualIntercept(ship)) return false;
+        }
+
+        //Gun accounting. Skipped entirely for the custom-allocation weapons above - guns are not
+        //the currency they spend, and ->guns is 1 on a Slicer, which would cap it at one order.
+        var counts = weaponManager.countCurrentTurnOrders(weapon);
+        if (weapon.usesCustomInterceptAllocation) {
+            //answered above, by the weapon itself
+        } else if (weapon.ballistic || weapon.preFires) {
+            //R7 - these declare in an EARLIER phase, so their orders are already committed and
+            //nothing may be wiped to make room: they qualify only if they have fired nothing.
+            if (counts.offensive > 0) return false;
+            if (counts.intercept >= weapon.guns) return false;
+            if (!weaponManager.ammoAvailableForIntercept(ship, weapon, interceptMode)) return false;
+        } else if (weapon.canSplitShots) {
+            //R3 - one gun per manual intercept; the rest stay available to fire or be auto-assigned.
+            if (counts.offensive + counts.intercept >= weapon.guns) return false;
+        }
+        //A non-split direct-fire weapon needs no cap here: the click wipes its own uncommitted
+        //orders and re-declares (R4), exactly as targetShip does in the opposite direction.
+
+        //Arc, measured from where the shot is coming from.
+        var sourcePos = weaponManager.getIncomingSourcePos(ball);
+        if (!sourcePos) return false;
+        if (!weaponManager.isPosOnWeaponArc(ship, sourcePos, weapon)) return false;
+
+        //Who is being shot at?
+        var target = gamedata.getShip(ball.fireOrder.targetid);
+        if (!target) return false;
+
+        if (target.id !== ship.id) { //fire directed at a third party - only some weapons may step in
+            if (ball.fireOrder.shooterid === ship.id) return false; //never intercept your own shot
+            if (target.team !== ship.team) return false;
+
+            if (ship.flight) {
+                //Fighter escort: ballistics only, never fire aimed at another flight, and the two
+                //must share a hex now AND have shared one at the end of last turn.
+                if (!incoming.ballistic) return false;
+                if (target.flight) return false;
+                if (!weaponManager.sharesHexNowAndAtStartOfTurn(ship, target)) return false;
+            } else {
+                if (!weapon.freeintercept) return false;
+                //freeinterceptspecial weapons decide third-party legality in their own server-side
+                //canFreeInterceptShot, which has no client mirror. Rather than offer an order the
+                //server may drop, leave those to the automation - they keep working, and every one
+                //of them can still be hand-assigned to fire aimed at its OWN ship.
+                if (weapon.freeinterceptspecial) return false;
+                if (!weaponManager.isBetweenShooterAndTarget(ship, target, ball)) return false;
+            }
+        }
+
+        return true;
+    },
+
+    /* The eligible part of the current selection, ordered the way the server ranks interceptors in
+       compareInterceptAbility: best rating first, faster-recharging first on a tie. Client and
+       server therefore agree on what "strongest" means when the greedy fill spends them. */
+    getSelectedInterceptorsFor: function getSelectedInterceptorsFor(ship, ball) {
+        var eligible = [];
+        for (var i = 0; i < gamedata.selectedSystems.length; i++) {
             var weapon = gamedata.selectedSystems[i];
+            if (weaponManager.canInterceptBallistic(ship, weapon, ball)) eligible.push(weapon);
+        }
 
-            if (ball.targetid !== selectedShip.id && !weapon.freeintercept && !shipManager.isEscorting(selectedShip, target)) continue;
+        eligible.sort(function (a, b) {
+            var ra = weaponManager.getInterceptRatingInMode(a, weaponManager.getInterceptModeFor(a));
+            var rb = weaponManager.getInterceptRatingInMode(b, weaponManager.getInterceptModeFor(b));
+            if (ra !== rb) return rb - ra;
+            var la = Math.max(a.loadingtime || 0, a.normalload || 0);
+            var lb = Math.max(b.loadingtime || 0, b.normalload || 0);
+            if (la !== lb) return la - lb;
+            return a.id - b.id;
+        });
 
-            if (ball.targetid !== selectedShip.id && weapon.freeintercept) {
+        return eligible;
+    },
 
-                var ballPosHex = new hexagon.Offset(ball.position);
-                var targetPosHex = shipManager.getShipPosition(target);
-                var selectedPosHex = shipManager.getShipPosition(selectedShip);
+    /* Why is the INTERCEPT button on this row disabled? Null when it is not. */
+    getInterceptDisabledReason: function getInterceptDisabledReason(ship, ball) {
+        var shotRefusal = weaponManager.getShotInterceptRefusal(ball);
+        if (shotRefusal) return shotRefusal;
 
-                if (ballPosHex.distanceTo(targetPosHex) <= ballPosHex.distanceTo(selectedPosHex) || targetPosHex.distanceTo(selectedPosHex) > 3) continue;
+        if (weaponManager.getSelectedInterceptorsFor(ship, ball).length > 0) return null;
+
+        //Nothing eligible - say which of the two reasons it is, since they call for opposite actions.
+        //A custom-allocation weapon counts as an interceptor only if it implements the manual hooks
+        //(the Slicer does; the Hyperplasma Cutter deliberately does not - §11.5).
+        var anyInterceptorSelected = gamedata.selectedSystems.some(function (weapon) {
+            if (weapon.usesCustomInterceptAllocation
+                && typeof weapon.canDeclareManualIntercept !== 'function') return false;
+            return weaponManager.getInterceptModeFor(weapon) !== null;
+        });
+        if (!anyInterceptorSelected) {
+            var anyCustom = gamedata.selectedSystems.some(function (weapon) {
+                return weapon.usesCustomInterceptAllocation
+                    && typeof weapon.canDeclareManualIntercept !== 'function';
+            });
+            return anyCustom
+                ? 'Use this weapon\'s own intercept declaration'
+                : 'No interceptor selected';
+        }
+
+        var mode = ball.fireOrder.firingMode;
+        if (weaponManager.getModeFlag(ball.weapon, 'uninterceptable', mode)) return 'Uninterceptable';
+        return 'No selected weapon can reach this shot';
+    },
+
+    /* Interception this side has DECLARED against one shot, in d20 points (x5 for a percentage).
+       Mirrors Weapon::getInterceptionMod, degradation included: each interceptor after the first is
+       worth one point less, but only where degradation applies at all - it is switched off against
+       ballistics and against noInterceptDegradation weapons, unless the weapon sets
+       doInterceptDegradation (the Nexus Laser Missiles).
+
+       This is DECLARED interception only. Automated assignment happens server-side after commit and
+       is deliberately not previewed, and a teammate's uncommitted orders are not in this payload -
+       hence the "Committed" wording on the row rather than "Interception". */
+    getDeclaredInterception: function getDeclaredInterception(fireOrderId, interceptedWeapon) {
+        var degrades = interceptedWeapon
+            ? (interceptedWeapon.doInterceptDegradation
+                || !(interceptedWeapon.ballistic || interceptedWeapon.noInterceptDegradation))
+            : true;
+
+        var total = 0;
+        var prior = 0;
+
+        for (var s in gamedata.ships) {
+            var ship = gamedata.ships[s];
+            var fires = weaponManager.getAllFireOrders(ship);
+            for (var f in fires) {
+                var fire = fires[f];
+                if (fire.type !== 'intercept') continue;
+                if (fire.turn != gamedata.turn) continue;
+                if (fire.targetid != fireOrderId) continue;
+
+                var weapon = shipManager.systems.getSystem(ship, fire.weaponid);
+                if (!weapon) continue;
+
+                var rating = weaponManager.getInterceptRatingInMode(weapon, fire.firingMode);
+                if (degrades) rating -= prior;
+                total += Math.max(0, rating);
+                prior++;
             }
-            if (shipManager.systems.isDestroyed(selectedShip, weapon) || !weaponManager.isLoaded(weapon)) continue;
-            if (weapon.getInterceptRating() === 0) continue;
+        }
 
-            var type = 'intercept';
+        return total;
+    },
 
-            if (weaponManager.isPosOnWeaponArc(selectedShip, ball.position, weapon)) {
-                weaponManager.removeFiringOrder(selectedShip, weapon);
+    /* Base hit chance of an incoming shot, BEFORE interception.
 
-                var damageClass = weapon.data["Weapon type"].toLowerCase();
-                var chance = weaponManager.calculataBallisticHitChange(ball, -1);
+       A BALLISTIC in flight has no stored hit chance at all: tac_fireorder has no `chance` column
+       (the client-side field of that name never leaves the browser), and the row's `needed` stays 0
+       until the shot resolves. So the obvious `chance ?? needed` reads 0% for every missile on the
+       board - which made every ballistic look already-suppressed and stopped the greedy fill dead
+       before it declared anything. The INCOMING row has always shown a LIVE recompute for these, so
+       anything that subtracts interception has to start from the same number.
 
-                for (var s = 0; s < weapon.guns; s++) {
-                    weapon.fireOrders.push({
-                        id: null,
-                        type: type,
-                        shooterid: selectedShip.id,
-                        targetid: ball.fireOrderId,
-                        weaponid: weapon.id,
-                        calledid: -1,
-                        turn: gamedata.turn,
-                        firingMode: weapon.firingMode,
-                        shots: weapon.defaultShots,
-                        x: "null",
-                        y: "null",
-                        damageclass: weapon.data["Weapon type"].toLowerCase(),
-                        chance: chance
-                    });
+       A direct-fire (Sweeping) order does carry its declared chance, so that is preferred where it
+       exists - it is what the row's own "normal" branches print. */
+    getIncomingShotHitChance: function getIncomingShotHitChance(ball) {
+        if (!ball || !ball.fireOrder) return 0;
+
+        if (ball.fireOrder.type === 'normal') {
+            var stored = ball.fireOrder.chance ?? ball.fireOrder.needed;
+            if (stored > 0) return stored;
+        }
+
+        var shooter = ball.shooter || gamedata.getShip(ball.fireOrder.shooterid);
+        if (!shooter || !ball.weapon) return 0;
+
+        //Same call - and therefore the same number - the row's headline and the grouping key use.
+        return weaponManager.calculataBallisticHitChange({
+            weaponid: ball.weapon.id,
+            targetid: ball.fireOrder.targetid,
+            shooterid: shooter.id
+        });
+    },
+
+    /* Hit chance left on a shot once this side's declared interception is subtracted. NOT floored
+       at 0 (user direction, 2026-08-20): the server does not floor 'needed - totalIntercept' for
+       the roll either, and the overshoot is information the player is spending weapons to buy -
+       "-25%" says "this shot is dead twice over, stop feeding it" where a floored 0% cannot.
+       Every consumer must therefore cope with a negative. The greedy fill's `<= 0` test still
+       advances correctly; the row formats a negative range with "to" so a leading minus cannot
+       read as a second hyphen.
+
+       The server behaves the same way: automateIntercept drops any shot whose
+       'needed - totalIntercept' is <= 0, so an over-intercepted shot is simply gone. */
+    getRemainingHitChance: function getRemainingHitChance(ball) {
+        var base = weaponManager.getIncomingShotHitChance(ball);
+        var committed = weaponManager.getDeclaredInterception(ball.fireOrder.id, ball.weapon) * 5;
+        return base - committed;
+    },
+
+    /* Commit ONE weapon to ONE shot. Returns the number of orders created. */
+    declareInterceptWith: function declareInterceptWith(ship, weapon, ball) {
+        var mode = weaponManager.getInterceptModeFor(weapon);
+        if (mode === null) return 0;
+
+        //Some weapons price a DEFENSIVE shot in a fixed firing mode regardless of the mode they
+        //are set to - their doMultipleSelfIntercept overrides stamp firingMode 1 for exactly this
+        //reason (VorlonDischargeCannon bills 5 x firingMode of power PER ORDER, so a mode-3
+        //intercept would be charged 15 instead of 5). A manual intercept is the same kind of shot
+        //and has to be stamped the same way. Only ever narrows the mode, never the rating: every
+        //weapon that overrides this carries a flat ->intercept with no interceptArray.
+        if (typeof weapon.getInterceptOrderMode === 'function') mode = weapon.getInterceptOrderMode(mode);
+
+        //Weapons with their own interception currency declare through their own hook - the
+        //Molecular Slicer spends a damage die or a block of set damage, not a gun (Stage 7). It
+        //owns everything below, INCLUDING whether a selfIntercept marker is spent or reused, so
+        //this returns straight out rather than falling through to the generic path.
+        if (typeof weapon.declareManualIntercept === 'function') {
+            return weapon.declareManualIntercept(ship, ball, mode);
+        }
+
+        //A selfIntercept marker offers the weapon to the automation; a targeted order supersedes
+        //that offer, so trade one for the other (same consent, a strictly more specific
+        //commitment). removeSelfInterceptSingle re-prices split weapons via recalculateForIntercept.
+        if (weaponManager.canRemInterceptSingle(ship, weapon)) {
+            weaponManager.removeSelfInterceptSingle(ship, weapon);
+        }
+
+        var orders = 1;
+        if (!weapon.canSplitShots) {
+            //R4 - a non-split weapon commits every gun to the shot it was pointed at. Its own
+            //uncommitted orders are cleared first so a second click retargets rather than stacks.
+            //NOT for split weapons: removeFiringOrder would wipe their offensive shots too, and on
+            //a multiModeSplit weapon it detours through removeAllMultiModeSplit.
+            if (!weapon.ballistic && !weapon.preFires && !weapon.multiModeSplit) {
+                weaponManager.removeFiringOrder(ship, weapon);
+            }
+            orders = weapon.guns;
+        }
+
+        var damageClass = (weapon.data && weapon.data["Weapon type"])
+            ? weapon.data["Weapon type"].toLowerCase() : '';
+
+        for (var s = 0; s < orders; s++) {
+            weapon.fireOrders.push({
+                id: ship.id + "_" + weapon.id + "_" + (weapon.fireOrders.length + 1),
+                type: 'intercept',
+                shooterid: ship.id,
+                //An intercept order's targetid is the id of the FIRE ORDER it is stopping - a
+                //different id space from every other order type, where it is a unit id.
+                targetid: ball.fireOrder.id,
+                weaponid: weapon.id,
+                calledid: -1,
+                turn: gamedata.turn,
+                firingMode: mode,
+                shots: weapon.defaultShots,
+                x: "null",
+                y: "null",
+                damageclass: damageClass
+            });
+        }
+
+        webglScene.customEvent('SystemDataChanged', { ship: ship, system: weapon });
+        return orders;
+    },
+
+    /* Commit the whole eligible selection to ONE named shot - the expanded sub-row's INTERCEPT,
+       where the player has been explicit about which shot they mean. */
+    targetBallistic: function targetBallistic(ship, ball) {
+        if (gamedata.gamephase !== 3) return 0;
+        if (!ship || !ball) return 0;
+
+        var declared = 0;
+        var eligible = weaponManager.getSelectedInterceptorsFor(ship, ball);
+
+        for (var i = 0; i < eligible.length; i++) {
+            var weapon = eligible[i];
+            //Re-test: an earlier weapon in this pass may have drawn the last interceptor round.
+            if (!weaponManager.canInterceptBallistic(ship, weapon, ball)) continue;
+            if (weaponManager.declareInterceptWith(ship, weapon, ball) > 0) {
+                declared++;
+                if (weaponManager.isWeaponSpentForIntercept(ship, weapon)) {
+                    weaponManager.unSelectWeapon(ship, weapon);
                 }
-                toUnselect.push(weapon);
             }
         }
 
-        for (var i in toUnselect) {
-            weaponManager.unSelectWeapon(selectedShip, toUnselect[i]);
+        if (declared > 0) gamedata.shipStatusChanged(ship);
+        return declared;
+    },
+
+    /* A weapon with shots left stays selected so the player can keep spending it; one that is out
+       is unselected, matching what targetShip does through checkFinished. */
+    isWeaponSpentForIntercept: function isWeaponSpentForIntercept(ship, weapon) {
+        //A custom-allocation weapon knows exactly when its pool is empty, and neither ->guns nor
+        //the generic order count means anything to it (a Slicer's ->guns is 1, which would retire
+        //it after a single engagement with most of its dice still in hand).
+        if (typeof weapon.canDeclareManualIntercept === 'function') {
+            return !weapon.canDeclareManualIntercept(ship);
+        }
+        if (!weapon.canSplitShots) return true; //committed every gun
+        if (typeof weapon.checkFinished === 'function' && weapon.checkFinished()) return true;
+        var counts = weaponManager.countCurrentTurnOrders(weapon);
+        return (counts.offensive + counts.intercept) >= weapon.guns;
+    },
+
+    /* Greedy fill across the members of a grouped row (3x Missile). One click walks the eligible
+       selection strongest-first and puts each weapon on the FOCUS shot - the first member still
+       above 0% once declared interception is subtracted. When a member reaches 0% the focus moves
+       on, so nothing is wasted on a shot that is already suppressed, and the click stops early if
+       every member is suppressed. Allocation is at WEAPON granularity: a non-split weapon's guns
+       all follow it onto the same shot (R4). */
+    allocateIntercept: function allocateIntercept(ship, members) {
+        if (gamedata.gamephase !== 3) return 0;
+        if (!ship || !members || members.length === 0) return 0;
+
+        var ordered = members.slice().sort(function (a, b) {
+            return String(a.fireOrder.id).localeCompare(String(b.fireOrder.id), undefined, { numeric: true });
+        });
+
+        //One eligibility pass, against the first member: every member of a group shares shooter,
+        //weapon, firing mode and geometry, so eligibility cannot differ between them.
+        var eligible = weaponManager.getSelectedInterceptorsFor(ship, ordered[0]);
+        var declared = 0;
+        var focus = 0;
+
+        for (var i = 0; i < eligible.length; i++) {
+            while (focus < ordered.length && weaponManager.getRemainingHitChance(ordered[focus]) <= 0) {
+                focus++;
+            }
+            if (focus >= ordered.length) break; //whole group suppressed - spend nothing more
+
+            var weapon = eligible[i];
+            var ball = ordered[focus];
+            if (!weaponManager.canInterceptBallistic(ship, weapon, ball)) continue;
+
+            if (weaponManager.declareInterceptWith(ship, weapon, ball) > 0) {
+                declared++;
+                if (weaponManager.isWeaponSpentForIntercept(ship, weapon)) {
+                    weaponManager.unSelectWeapon(ship, weapon);
+                }
+            }
         }
 
-        gamedata.shipStatusChanged(selectedShip);
+        if (declared > 0) gamedata.shipStatusChanged(ship);
+        return declared;
+    },
+
+    /* Does this weapon's whole contribution this turn consist of interception? True when it carries
+       at least one manual 'intercept' order or 'selfIntercept' marker and nothing aimed at anyone.
+       Drives the GREEN system-icon highlight that tells a defensive commitment apart from the
+       orange "this weapon is shooting at something".
+
+       Withdrawing a manual intercept is deliberately NOT offered in the ballistics tooltip: it is an
+       ordinary fire order, so the ship window's existing remove button clears it like any other. */
+    isInterceptOnly: function isInterceptOnly(ship, weapon) {
+        if (!weapon || !weapon.weapon) return false;
+        var counts = weaponManager.countCurrentTurnOrders(weapon);
+        return counts.offensive === 0 && (counts.intercept + counts.selfIntercept) > 0;
+    },
+
+    /* May this weapon be SELECTED in the Firing phase purely so it can be hand-assigned to
+       interception? The normal selection gate in SystemIcon allows a phase-3 click only on a
+       direct-fire weapon; a missile rack loaded with Interceptor missiles is intercept-capable but
+       ballistic, so without this it cannot be picked up at all (D3).
+
+       Note this asks only "is it selectable"; whether it may take a PARTICULAR shot is
+       canInterceptBallistic's question, and the two agree on every test they share. */
+    canManuallyInterceptWith: function canManuallyInterceptWith(ship, weapon) {
+        if (gamedata.gamephase !== 3) return false;
+        if (!ship || !weapon || !weapon.weapon) return false;
+        if (!gamedata.isMyShip(ship)) return false;
+        if (shipManager.isAdrift(ship)) return false;
+        if (shipManager.isDestroyed(ship)) return false;
+
+        if (weapon.stowed) return false;
+        if (weapon.autoFireOnly) return false;
+        if (shipManager.systems.isDestroyed(ship, weapon)) return false;
+        if (shipManager.power.isOffline(ship, weapon)) return false;
+        if (!weaponManager.isLoaded(weapon)) return false;
+        if (weapon.usesCustomInterceptAllocation) return false; //allocates per die, via its own dialog
+
+        var mode = weaponManager.getInterceptModeFor(weapon);
+        if (mode === null) return false;
+
+        //R7 - a rack that launched in Initial Orders has fired; a rack that manually intercepts
+        //cannot then launch. Its orders are already committed server-side, so nothing may be wiped
+        //to make room.
+        var counts = weaponManager.countCurrentTurnOrders(weapon);
+        if (counts.offensive > 0) return false;
+        if (weapon.canSplitShots) {
+            if (counts.intercept >= weapon.guns) return false;
+        } else if (counts.intercept > 0) {
+            return false;
+        }
+
+        return weaponManager.ammoAvailableForIntercept(ship, weapon, mode);
     },
 
     canSelfIntercept: function canSelfIntercept(ship) {
@@ -2751,6 +3277,21 @@ window.weaponManager = {
                 break; //we are only remove one order
             }
         }
+
+        //On a weapon whose manual intercepts are PAID FOR by its markers (the Molecular Slicer -
+        //MANUAL_INTERCEPTION_PLAN.md Stage 7), removing the last spare marker would strand an
+        //engagement with nothing behind it. MolecularSlicerBeamL::getInterceptionMod pays out only
+        //while engagements <= markers, so a stranded intercept order is worth exactly 0 - it would
+        //still sit in the ship window looking committed. Withdraw it with the marker that bought it.
+        if (typeof weapon.getSpareInterceptCapacity === 'function' && weapon.getSpareInterceptCapacity() < 0) {
+            for (var j = weapon.fireOrders.length - 1; j >= 0; j--) {
+                if (weapon.fireOrders[j].type == "intercept") {
+                    weapon.fireOrders.splice(j, 1);
+                    break; //one marker bought one engagement - withdraw one
+                }
+            }
+        }
+
         weapon.recalculateForIntercept(false); //Slicers need this to adjust hit chance for other shots, perhaps other will in future too. 
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: weapon });
     },

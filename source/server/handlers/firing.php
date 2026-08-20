@@ -25,9 +25,13 @@ class Firing
         //rather than failing the whole ship's submission (some callers throw on
         //false, which would abort turn processing over one bad shot).
         foreach ($fireOrders as $fire) {
-            //Intercept/self-intercept orders legitimately reference another fire
-            //order id (or carry no weapon), so don't weapon-validate them here.
-            if ($fire->type === 'intercept' || $fire->type === 'selfIntercept')
+            //A selfIntercept order is a permission marker with no targeting of its own - leave it
+            //alone. An 'intercept' order DOES carry an ordinary positional weaponid (the
+            //interceptor), so it runs the same stale-blueprint weapon check as every other order
+            //below; only the reading of ->targetid differs, and nothing here reads it. Before manual
+            //interception was reintroduced no client emitted these, so skipping them cost nothing;
+            //now it would leave the new path unguarded.
+            if ($fire->type === 'selfIntercept')
                 continue;
 
             $shooter = $gamedata->getShipById($fire->shooterid);
@@ -167,6 +171,32 @@ class Firing
             if (!(($ship->unavailable === true) || $ship->isDisabled())) { //ship itself can fight this turn
                 foreach ($ship->systems as $weapon) {               	
                     if ((!($weapon instanceof Weapon))) continue; //not a weapon, or a ballistic weapon         
+                    /* ===== AUTO-INTERCEPTOR-MISSILES (1 of 3) - THE SWITCH ITSELF =============
+                       THIS is where the server decides, on the player's behalf, that a missile
+                       launcher will spend an Interceptor round this turn. Nothing else opts it in.
+
+                       $canModesIntercept is true for the generic MissileLauncher (missile.php),
+                       false for A-Racks, Bomb Racks and Fighter Racks. switchModeForIntercept()
+                       walks $interceptArray, picks the firing mode with the highest intercept
+                       rating - i.e. Interceptor - CHANGES THE WEAPON INTO THAT MODE and sets
+                       $weapon->intercept, which is what puts the launcher into $toReturn below and
+                       so into the automation pool. A launcher that has already fired this turn is
+                       skipped, but an idle loaded one is enrolled without being asked.
+
+                       The player is never consulted because the consent gate lives in
+                       isValidInterceptor (site 2 of 3) and only bites when the weapon's effective
+                       loading time is > 1. A rack declared with $loadingtime = 1 - which is what
+                       the Class-D Missile Rack, the Interceptor carrier, is - therefore never has
+                       the selfIntercept marker demanded of it. That is exactly the behaviour
+                       reported on 2026-08-20.
+
+                       TO MAKE IT OPT-IN: this single line is the kill switch. Guarding it with the
+                       same selfIntercept test isValidInterceptor uses (or with a new per-weapon
+                       flag) leaves the launcher in its offensive mode, $weapon->intercept stays 0,
+                       and it never reaches the pool. Manual interception is unaffected: the manual
+                       path sets the order's firing mode itself, in automateIntercept, and never
+                       comes through here.
+                       Ammo is NOT consulted here - that is site 3 of 3. ==================== */
 					if ($weapon->canModesIntercept && (!($weapon->firedOnTurn($currTurn)))) $weapon->switchModeForIntercept(); //To check for intercept values in non-default modes if weapon has appropriate marker and hasn't fired e.g. Intercept Missile etc                    
                     
                     /* //Old method before the additiona of split shot weapons, keep for now
@@ -319,7 +349,16 @@ class Firing
         }
 
         //update intercepion totals!
-        $shotsStillComing = $allIncomingShots;
+        //Index this turn's orders by id so a manual intercept order can resolve the shot it names
+        //directly. Resolving BY ID rather than scanning for a match is what lets validation tell
+        //"no such order" apart from "found it", which the old scan silently conflated.
+        $ordersById = array();
+        foreach ($allIncomingShots as $anyOrder) {
+            $ordersById[$anyOrder->id] = $anyOrder;
+        }
+        //Per-weapon tally of manual intercept orders ACCEPTED so far, keyed shipid_weaponid, so the
+        //gun cap is enforced against survivors rather than against everything that was submitted.
+        $manualInterceptsAccepted = array();
         foreach ($allIncomingShots as $fireOrder) {
             /* 'intercept' ONLY - deliberately NOT 'selfIntercept' (fixed 2026-08-18).
             The two types live in different id spaces: an 'intercept' order's targetid is the id of
@@ -341,15 +380,49 @@ class Firing
             guard, so the weapon still enters the pool and still gets a real order - it just no
             longer credits a shot nobody assigned it to. */
             if ($fireOrder->type != "intercept") continue; //manually assigned interception - no others exist at this point
-            //let's find WHAT is being intercepted and update interception totals!
-            foreach ($shotsStillComing as $intercepted) {
-                if ($fireOrder->targetid == $intercepted->id) {
-                    $shooter = $gamedata->getShipById($fireOrder->shooterid);
-                    $firingWeapon = $shooter->getSystemById($fireOrder->weaponid);
-                    self::addToInterceptionTotal($gamedata, $intercepted, $firingWeapon);
-                    break; //loop
-                }
+
+            /* Player-declared intercept orders are validated HERE, per order, immediately before
+            they are credited. Until manual interception was reintroduced nothing emitted such an
+            order, so this path had no legality checking at all: isLegalIntercept is otherwise only
+            reached from getBestInterception, i.e. the AUTOMATED side. A hand-crafted or stale-client
+            order used to be honoured with no arc, uninterceptable, skindancing, ammo, readiness or
+            ownership test whatsoever.
+
+            Per order rather than as a pre-pass, because an interceptor missile's magazine is read by
+            canInterceptAtAll and DEBITED by fireDefensively inside addToInterceptionTotal: N orders
+            from one rack must each be checked against the RUNNING ammo state, exactly as the
+            automation's per-gun loop does. A pre-pass would approve all N against an undrawn
+            magazine and the surplus would then draw rounds that are not there. */
+            $shooter = $gamedata->getShipById($fireOrder->shooterid);
+            $interceptor = $shooter ? $shooter->getSystemById($fireOrder->weaponid) : null;
+
+            /* The intercept rating that counts is the one for the ORDER's firing mode, not whatever
+            mode this weapon object happens to be in when the loop reaches it - several weapons carry
+            a per-mode interceptArray. The mode also selects which round MissileLauncher checks in
+            canInterceptAtAll and draws in fireDefensively, so it has to stay set across
+            addToInterceptionTotal and be put back afterwards: these objects are read again later in
+            the same request, and changeFiringMode rewrites arcs, guns and damage along with it. */
+            $originalMode = null;
+            if (($interceptor instanceof Weapon)
+                && isset($interceptor->firingModes[$fireOrder->firingMode])
+                && $interceptor->firingMode != $fireOrder->firingMode
+            ) {
+                $originalMode = $interceptor->firingMode;
+                $interceptor->changeFiringMode($fireOrder->firingMode);
             }
+
+            $intercepted = self::validateManualIntercept(
+                $gamedata, $fireOrder, $shooter, $interceptor, $ordersById, $manualInterceptsAccepted
+            );
+
+            if ($intercepted !== null) {
+                $tallyKey = $fireOrder->shooterid . '_' . $fireOrder->weaponid;
+                $manualInterceptsAccepted[$tallyKey] = (isset($manualInterceptsAccepted[$tallyKey])
+                    ? $manualInterceptsAccepted[$tallyKey] : 0) + 1;
+                self::addToInterceptionTotal($gamedata, $intercepted, $interceptor);
+            }
+
+            if ($originalMode !== null) $interceptor->changeFiringMode($originalMode);
         }
 
 
@@ -396,6 +469,125 @@ class Firing
     } //endof function automateIntercept
 
 
+    /* Is this player-declared 'intercept' order legal? Returns the FireOrder it intercepts, or null -
+    in which case the order has already been rejected, detached and logged.
+
+    $weapon must ALREADY be in $fire->firingMode when this is called: several weapons carry a per-mode
+    interceptArray, and MissileLauncher::canInterceptAtAll reads the magazine for the CURRENT mode's
+    round. The caller owns setting and restoring the mode.
+
+    Deliberately NOT isValidInterceptor(): that helper's loadingTimeActual > 1 branch demands a
+    selfIntercept marker on the weapon, and for a hand-picked interceptor the declaration itself IS
+    that consent - a selfIntercept marker only ever meant "I permit the automation to use me". Every
+    other test it makes is repeated below.
+
+    Drops are logged and never surfaced to the player: the client-side predicate is meant to be strict
+    enough that reaching a drop means a stale client blueprint or a hand-edited payload, not a
+    legitimate order the player expected to work. */
+    private static function validateManualIntercept($gamedata, $fire, $shooter, $weapon, $ordersById, $acceptedPerWeapon)
+    {
+        $reason = null;
+        $intercepted = null;
+
+        //1. the interceptor itself must exist, be a weapon, and be able to shoot right now.
+        if (!$shooter) {
+            $reason = "shooterid does not resolve to a unit";
+        } else if (!($weapon instanceof Weapon)) {
+            $reason = "weaponid resolves to " . ($weapon ? get_class($weapon) : "nothing") . ", not a Weapon";
+        } else if (!$weapon->getWeaponForIntercept()) {
+            $reason = "weapon class cannot act as an interceptor";
+        } else if (!isset($weapon->firingModes[$fire->firingMode])) {
+            $reason = "unknown firing mode " . $fire->firingMode;
+        } else if ($weapon->isDestroyed()) {
+            $reason = "weapon is destroyed";
+        } else if ($weapon->isOfflineOnTurn($gamedata->turn)) {
+            $reason = "weapon is offline this turn";
+        } else if ($weapon->stowed) {
+            $reason = "weapon is stowed"; //e.g. Antigravity Beam on a docked Kirishiac Orbital
+        } else if ($weapon->getTurnsloaded() < $weapon->getLoadingTime()) {
+            $reason = "weapon is not loaded (" . $weapon->getTurnsloaded() . "/" . $weapon->getLoadingTime() . ")";
+        } else if ($weapon->intercept <= 0) {
+            $reason = "weapon has no intercept rating in mode " . $fire->firingMode;
+        }
+
+        //2. the shot being intercepted must exist, this turn, and be a real shot.
+        if ($reason === null) {
+            $intercepted = isset($ordersById[$fire->targetid]) ? $ordersById[$fire->targetid] : null;
+            if (!$intercepted) {
+                $reason = "targetid " . $fire->targetid . " matches no fire order this turn";
+            } else if ($intercepted->type == "intercept" || $intercepted->type == "selfIntercept") {
+                $reason = "targetid " . $fire->targetid . " is itself an " . $intercepted->type . " order";
+            } else {
+                //isLegalIntercept dereferences both of these unguarded, as does the automated path.
+                //Here we are already validating, so resolve them first rather than fatal on a
+                //stale-blueprint order that slipped past submit-time validation.
+                $victimShooter = $gamedata->getShipById($intercepted->shooterid);
+                $victimWeapon = $victimShooter ? $victimShooter->getSystemById($intercepted->weaponid) : null;
+                if (!($victimWeapon instanceof Weapon)) {
+                    $reason = "intercepted order " . $intercepted->id . " has no resolvable weapon";
+                } else if (!$gamedata->getShipById($intercepted->targetid)) {
+                    $reason = "intercepted order " . $intercepted->id . " has no resolvable target unit";
+                } else {
+                    //Same call the assignment loop below makes, and idempotent: it only ever clears
+                    //hextarget on an order that does name a unit (BM Launcher and friends start
+                    //hex-targeted and become normal). Without it a shot that is about to stop being
+                    //hex-targeted would be refused here.
+                    $victimWeapon->notActuallyHexTargeted($intercepted);
+                    if ($victimWeapon->hextarget) {
+                        //getInterceptionMod returns 0 for these, so crediting one would buy nothing
+                        //while still bumping numInterceptors and drawing an interceptor missile.
+                        $reason = "intercepted order " . $intercepted->id . " is hex-targeted";
+                    }
+                }
+            }
+        }
+
+        //3. gun accounting (R2/R3/R7). A weapon that fired offensively cannot also intercept, and one
+        //that manually intercepted cannot also fire. A canSplitShots weapon spends ONE gun per order
+        //and may legitimately mix the two; a non-split weapon may not. Both are capped at ->guns,
+        //counted against orders ACCEPTED so far so a surplus drops the extras, not the whole set.
+        if ($reason === null) {
+            $offensiveOrders = 0;
+            foreach ($weapon->fireOrders as $order) {
+                if ($order->turn != $gamedata->turn) continue;
+                if ($order->type == "selfIntercept") continue; //a permission marker, not a shot
+                if ($order->type == "intercept") continue; //counted via $acceptedPerWeapon instead
+                $offensiveOrders++;
+            }
+            $tallyKey = $fire->shooterid . '_' . $fire->weaponid;
+            $alreadyAccepted = isset($acceptedPerWeapon[$tallyKey]) ? $acceptedPerWeapon[$tallyKey] : 0;
+
+            if (!$weapon->canSplitShots && $offensiveOrders > 0) {
+                $reason = "non-split weapon already has " . $offensiveOrders . " offensive order(s) this turn";
+            } else if (($offensiveOrders + $alreadyAccepted) >= $weapon->guns) {
+                $reason = "all " . $weapon->guns . " gun(s) already spent ("
+                    . $offensiveOrders . " offensive + " . $alreadyAccepted . " intercept)";
+            }
+        }
+
+        //4. the same legality test the automation applies - arc (including split arcs and turret
+        //jam), uninterceptable, doNotIntercept, ballisticIntercept, mines, skindancing, freeintercept
+        //and fighter-escort geometry, and canInterceptAtAll (where a missile rack checks its magazine).
+        if ($reason === null && !self::isLegalIntercept($gamedata, $weapon, $intercepted)) {
+            $reason = "isLegalIntercept refused it";
+        }
+
+        if ($reason === null) return $intercepted;
+
+        //Same rejected + detach convention as validateFireOrders. The DB row was written at commit
+        //time and is left alone: detaching removes the order from resolution and from the totals,
+        //and validation is deterministic given the same gamedata, so a re-read reaches this verdict
+        //again. Deleting the row would buy nothing and cost a write.
+        $fire->rejected = true;
+        Debug::log("automateIntercept: dropping manual intercept order (game " . $gamedata->id
+            . ", ship " . $fire->shooterid . ", weaponid " . $fire->weaponid
+            . ", order " . $fire->id . ", targetid " . $fire->targetid . ") - " . $reason . ".");
+        if ($shooter) self::detachFireOrder($shooter, $fire);
+
+        return null;
+    } //endof function validateManualIntercept
+
+
     private static function isValidInterceptor($gd, $weapon)
     {
         if (!($weapon instanceof Weapon)) return false;
@@ -425,6 +617,24 @@ class Firing
         }
 	
 	$loadingTimeActual = max($weapon->getLoadingTime(),$weapon->normalload);//Accelerator (or multi-mode) weapons may have loading time of 1, yet reach full potential only after longer charging 
+
+        /* ===== AUTO-INTERCEPTOR-MISSILES (2 of 3) - WHY NOBODY IS ASKED ======================
+           The block below is the ONLY consent gate in the automated path: a weapon whose effective
+           loading time is > 1 must carry a player-placed 'selfIntercept' marker or it is refused.
+           That is the "don't waste my slow gun on interception without being told" rule.
+
+           Loading time is the RACK's own $loadingtime (there is no per-firing-mode loading time -
+           MissileLauncher's constructor copies range, damage, intercept and the rest out of the
+           ammo class, but not loadingtime), and $normalload is 0 on every rack. So a rack declared
+           with $loadingtime = 1 - the Class-D Missile Rack at AmmoMissileRackD is exactly that, and
+           it carries Interceptor as its DEFAULT round - gives $loadingTimeActual == 1, this gate
+           NEVER RUNS FOR IT, and the launcher is used automatically. That is the reported
+           behaviour, and this is why: the rule keys on loading time, not on whether the weapon
+           consumes ammo. A rack with $loadingtime = 2 does fall in here and does demand the marker.
+
+           Note this is a DESCRIPTION of the current behaviour, not the place to change it: raising
+           the threshold here would also start demanding markers from every ordinary 1-turn gun.
+           The narrow lever is site 1 of 3. ================================================= */
         /*  //Old method  
 	    if ($loadingTimeActual > 1) { 
             if (isset($weapon->fireOrders[0])) {

@@ -109,8 +109,8 @@ window.FirePhaseStrategy = function () {
     };
 
 
-    FirePhaseStrategy.prototype.deselectShip = function (ship) {
-        PhaseStrategy.prototype.deselectShip.call(this, ship);
+    FirePhaseStrategy.prototype.deselectShip = function (ship, keepWeapons) {
+        PhaseStrategy.prototype.deselectShip.call(this, ship, keepWeapons);
         this.hideMovementUI();
     };
 

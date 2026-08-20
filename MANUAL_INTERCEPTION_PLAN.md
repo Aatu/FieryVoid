@@ -5,7 +5,9 @@ click an incoming shot in the ship tooltip's INCOMING list** to commit those wea
 specific shot. Automated interception stays as the default for everything the player does not
 hand-assign.
 
-Status: **PLAN ONLY — nothing built.**
+Status: **BUILT — Stages 0-7 all landed (Stage 7 on 2026-08-20); revised three times after
+play-testing.** See §10 for what is in and what is not, §11 for the first play-test's changes, §12
+for the second's, §13 for the third round of refinements and §14 for the Stage 7 sweep.
 
 Decisions taken (2026-08-18, user):
 
@@ -422,7 +424,7 @@ Both paths must call `recalculateForIntercept(false)` on split weapons, exactly 
 
 Each stage is independently shippable and independently testable.
 
-### Stage 0 — Server validation (ship this first, on its own)
+### Stage 0 — Server validation (ship this first, on its own)  ✅ BUILT
 
 **Nothing user-visible. Hardens a path that is currently unguarded.**
 
@@ -464,7 +466,7 @@ genuinely do not apply.
 Slicer, and three from a two-round magazine — and confirm each is logged and dropped and that
 `totalIntercept` reflects only the survivors.
 
-### Stage 1 — Client declaration plumbing (no UI)
+### Stage 1 — Client declaration plumbing (no UI)  ✅ BUILT
 
 * Rewrite `weaponManager.targetBallistic` against T1–T9, taking a **single member** (not a group).
 * `weaponManager.canInterceptBallistic(selectedShip, weapon, ball)` — the **single** per-weapon
@@ -478,7 +480,7 @@ Slicer, and three from a two-round magazine — and confirm each is logged and d
 *Test:* drive these from the console against a live ballistic entry; inspect `weapon.fireOrders`;
 commit; check the DB rows and the resulting `totalIntercept` in the turn log.
 
-### Stage 2 — The row UI
+### Stage 2 — The row UI  ✅ BUILT
 
 * Restore the template children; honour the ctor's `allowIntercept` (delete the `//obsolete`
   override) and add the `gamephase === 3` gate.
@@ -491,38 +493,33 @@ commit; check the DB rows and the resulting `totalIntercept` in the turn log.
 * Re-attach `attachHitChanceTooltipDelegation` on the rebuilt container (it `.off('.hitchance')`
   first, so re-attaching is safe).
 
-### Stage 3 — Hit-chance integration
+### Stage 3 — Hit-chance integration  ✅ BUILT
 
 Fold committed interception into the row and sub-row percentages and add the breakdown line (§4.6).
 Keep the existing Shadow "dice" and split-penalty branches intact — they are load-bearing and fiddly.
 
-### Stage 4 — Ballistic and pre-firing interceptors (D3)
+### Stage 4 — Ballistic and pre-firing interceptors (D3)  ✅ BUILT
 
 The three edits in §4.7: the `SystemIcon` selection gate, `getInterceptModeFor` wired into order
 creation, and the two `AmmoMagazine` changes. Ship after Stage 3 so the common case is already
 proven.
 
-### Stage 5 — Self-intercept conversion (D4)
+### Stage 5 — Self-intercept conversion (D4)  ✅ BUILT
 
 One-click marker → targeted order, via `removeSelfInterceptSingle` + normal declaration (§4.4).
 
-### Stage 6 — CSS
+### Stage 6 — CSS  ✅ BUILT
 
 New rules in [styles/shipTooltip.css](source/public/styles/shipTooltip.css) for `.incoming .intercept`,
 `.incoming .interception`, `.incoming .ballexpand` and the sub-row indent. Tokens only, no new
 `:root` block, no new `<link>` — see [project_visual_unification]. Real disabled state, not
 `display: none`. Touch targets ≥ 32px on coarse pointers; the disclosure toggle must be tappable.
 
-### Stage 7 — Per-weapon-class sweep
+### Stage 7 — Per-weapon-class sweep  ✅ BUILT 2026-08-20
 
-Verify against the classes that override the split/self-intercept hooks, since each has its own
-`checkFinished` arithmetic: TwinArray / QuadArray / HeavyArray / QuadParticleBeam / ParticleRepeater
-/ TelekineticCutter ([particle.js](source/public/client/model/weapon/particle.js)),
-MolecularSlicerBeam L/M/H ([molecular.js:503,584,599](source/public/client/model/weapon/molecular.js#L503)),
-PointPulsar ([pulse.js:149](source/public/client/model/weapon/pulse.js#L149)),
-VorlonDischargeGun/Cannon ([special.js:382](source/public/client/model/weapon/special.js#L382)),
-NeutronBlaster, GravityNet, GraviticLance, Med/AntigravityBeam, ProximityLaserNew, MultiphasedCutter,
-PsionicConcentrator, EWGraviticTractingRod, BallisticTorpedo, and the AmmoMissileRack family.
+Verified against the classes that override the split/self-intercept hooks, since each has its own
+`checkFinished` arithmetic. Three defects found and fixed, the Molecular Slicer given its bespoke
+manual path. Full results in **§14**.
 
 ---
 
@@ -575,6 +572,14 @@ PsionicConcentrator, EWGraviticTractingRod, BallisticTorpedo, and the AmmoMissil
     ([howto_minify_legacy_bundles], [howto_verify_react_bundle]).
 11. **Replay corpus.** No serialized property changes here, but fire-order *flow* changes. Record a
     fresh case with manual interception and run the harness `check` ([project_replay_harness]).
+12. **The lobby has its own hand-written `weaponManager`.** ⚠ **Cost a live crash, 2026-08-20 — see
+    §15.** `gamelobby.php` does not bundle `weaponManager.js`; it defines a small stub object inline
+    with just the predicates the React ship window calls. The ship window renders on BOTH pages
+    ([project_shipwindow_redesign]), so **every new `weaponManager.x()` call added to
+    `reactJs/system/*` must be added to that stub too**, unless it sits behind a
+    `gamedata.gamephase === -2` early return. `SystemInfoButtons` is safe by construction —
+    `canDoAnything`, `hasStyledMenu` and `render` all return at -2 before touching any of it.
+    **`SystemIcon` is not**: it calls straight through on every render.
 
 ---
 
@@ -676,6 +681,9 @@ Docker containers up at the time. Lint both PHP files once the dev env is runnin
 - [source/public/client/weaponManager.js](source/public/client/weaponManager.js) — `targetBallistic`, `canInterceptBallistic`, `getDeclaredInterception`, `getInterceptModeFor`, `allocateIntercept`, `removeManualIntercept`, `canManuallyInterceptWith`, hit-chance breakdown line
 - [source/public/client/UI/ShipTooltipBallisticsMenu.js](source/public/client/UI/ShipTooltipBallisticsMenu.js) — template, `allowIntercept`, group members, disclosure + sub-rows, in-place refresh
 - [source/public/client/model/weapon/missile.js](source/public/client/model/weapon/missile.js) — `AmmoMagazine.doVerifyAmmoUsage` / `…Fighter` count phase-3 intercept orders on ballistics; share `getInterceptModeFor` with `canWeaponInterceptAtAll`
+- [source/public/client/model/weapon/molecular.js](source/public/client/model/weapon/molecular.js) — Slicer `canDeclareManualIntercept` / `declareManualIntercept` / `getSpareInterceptCapacity`; `recalculateForIntercept` skips `intercept` orders (Stage 7, §14.4)
+- [source/public/client/model/weapon/pulse.js](source/public/client/model/weapon/pulse.js) — `PointPulsar.getInterceptOrderMode` (Stage 7, §14.3)
+- [source/public/client/model/weapon/special.js](source/public/client/model/weapon/special.js) — `VorlonDischargeGun.getInterceptOrderMode` (Stage 7, §14.3)
 
 **Client — React bundle**
 - [source/public/client/UI/reactJs/system/SystemIcon.js](source/public/client/UI/reactJs/system/SystemIcon.js) — selection gate for ballistic/preFires interceptors (Stage 4)
@@ -686,3 +694,711 @@ Docker containers up at the time. Lint both PHP files once the dev env is runnin
 
 No blueprint, no schema, no serialized-property changes. `autoload.php` untouched (no new PHP class —
 the validation is a static on `Firing`).
+
+
+---
+
+## 10. Build record — 2026-08-19
+
+### What landed
+
+**Stage 0 — server validation.** [firing.php](source/server/handlers/firing.php)
+
+* `validateFireOrders` no longer skips `intercept` orders. They carry an ordinary positional
+  weaponid, so they now run the same stale-blueprint weapon check as everything else.
+  `selfIntercept` is still skipped: it is a permission marker with no targeting of its own.
+* `automateIntercept`'s totals loop indexes this turn's orders by id (`$ordersById`) and keeps a
+  per-weapon tally of orders it has ACCEPTED (`$manualInterceptsAccepted`), so a surplus drops the
+  extras rather than the whole set.
+* New `Firing::validateManualIntercept` runs per order, immediately before `addToInterceptionTotal`,
+  with the weapon already switched into the ORDER's firing mode (restored afterwards). It checks:
+  interceptor resolves / is a `Weapon` / `getWeaponForIntercept()` / known mode / not destroyed /
+  not offline / not stowed / loaded / `intercept > 0` in that mode; the intercepted order resolves
+  by id, is not itself an intercept, has a resolvable weapon and target unit, and is not
+  hex-targeted (after `notActuallyHexTargeted`); the gun cap and the R2/R7 offensive-vs-intercept
+  rule; then `isLegalIntercept`. Failures take the established `->rejected = true` +
+  `detachFireOrder` route with a `Debug::log` naming the reason (D5 — log only).
+
+**Stages 1-5 — client.** [weaponManager.js](source/public/client/weaponManager.js) gained
+`getModeFlag`, `getIncomingSourcePos`, `getInterceptModeFor`, `getInterceptRatingInMode`,
+`countCurrentTurnOrders`, `getShotInterceptRefusal`, `ammoAvailableForIntercept`,
+`sharesHexNowAndAtStartOfTurn`, `isBetweenShooterAndTarget`, `canInterceptBallistic`,
+`getSelectedInterceptorsFor`, `getInterceptDisabledReason`, `getDeclaredInterception`,
+`getRemainingHitChance`, `declareInterceptWith`, `isWeaponSpentForIntercept`,
+`allocateIntercept`, `removeManualIntercept`, `getOwnInterceptOrdersAgainst` and
+`canManuallyInterceptWith`; `targetBallistic` was rewritten against T1-T9 and `getInterception`
+is now a thin wrapper over `getDeclaredInterception` (T10).
+[ShipTooltipBallisticsMenu.js](source/public/client/UI/ShipTooltipBallisticsMenu.js) restored the
+row controls, honours `allowIntercept`, keeps group members, renders the disclosure toggle and
+sub-rows, and refreshes `.incoming` in place.
+[SystemIcon.js](source/public/client/UI/reactJs/system/SystemIcon.js) ORs `canManuallyInterceptWith`
+into the selection gate; [missile.js](source/public/client/model/weapon/missile.js) counts phase-3
+intercept orders on ballistics in both `doVerifyAmmoUsage` variants; trap 7's type guard went into
+[SystemInfoButtons.js](source/public/client/UI/reactJs/system/SystemInfoButtons.js).
+
+**Stage 6 — CSS.** New `.ballrow` / `.ballexpand` / `.interception` / `.intercept` / `.ballsub`
+rules at the foot of [shipTooltip.css](source/public/styles/shipTooltip.css). Tokens only, no new
+`:root`, no new `<link>` (game.php already links the file). Real `:disabled` state; 32px targets
+under `@media (pointer: coarse)`.
+
+### Deviations from the plan, and why
+
+**D-1. `usesCustomInterceptAllocation` — Molecular Slicer and Hyperplasma Cutter are excluded.**
+Both price interception PER DIE out of a pool the player splits in a dialog, not per gun:
+`MolecularSlicerBeamL.recalculateForIntercept` charges every offensive shot 5% for each defensive
+order, and `HyperplasmaCutter` reads `getRemainingDice()`. The generic "one order per gun"
+allocation in §4.3 would misprice all three Slicer sizes and the Cutter, and a generic intercept
+order would corrupt their pool arithmetic. They carry a new `usesCustomInterceptAllocation = true`
+prototype flag, which `canInterceptBallistic` and `canManuallyInterceptWith` refuse on; the row's
+disabled title reads *"Use this weapon's own intercept declaration"*. Self-intercept and the
+automation are untouched for them. Wiring these two into the manual path properly is Stage 7 work.
+
+**D-2. `freeinterceptspecial` weapons cannot be hand-assigned to THIRD-PARTY shots.**
+Their legality lives in a server-side `canFreeInterceptShot` with no client mirror, and D5 asks for
+a predicate strict enough that drops are near-impossible. They still intercept fire aimed at their
+own ship by hand, and the automation is unchanged. (The most visible one, the Interdictor, is
+`autoFireOnly` and was never hand-assignable anyway.)
+
+**D-3. The button prefers INTERCEPT over CANCEL.** §4.8 describes a CANCEL state whenever this ship
+has orders against the row. As written that would make a shot un-stackable once committed. The
+button now shows INTERCEPT whenever a legal declaration is available with the current selection and
+CANCEL otherwise. Because declaring unselects a spent weapon, the button flips to CANCEL on its own
+right after a click, and re-selecting weapons offers INTERCEPT again.
+
+**D-4. A non-split DIRECT-FIRE weapon has no intercept cap in the client predicate**, because the
+click wipes its own uncommitted phase-3 orders and re-declares (T6 retarget semantics), exactly as
+`targetShip` does in the opposite direction. Ballistic and `preFires` weapons DO get the cap: their
+orders were committed in an earlier phase and nothing may be wiped to make room (R7).
+
+**D-5. The collapsed group row's "Committed" label reads `Committed on X/Y`**, not a percentage.
+Summing a percentage across several different shots would not mean anything; single-shot rows and
+sub-rows show `Committed −N%` as §4.5 specifies.
+
+**D-6. `getIncomingSourcePos` bears on the shooter's CURRENT hex for a non-ballistic shot**, which
+is what the server does — trap 5 notes `ball.position` is the wrong answer there. Moot while every
+Sweeping weapon is uninterceptable, but it is no longer wrong to inherit.
+
+### Verification
+
+* `php -l` clean on firing.php; `node --check` clean on every touched legacy source; esbuild
+  (jsx loader) parses both React sources.
+* A sandbox smoke test drove the pure client helpers — 34 assertions covering
+  `getInterceptModeFor` (including the `canModesIntercept` gate), per-mode flag reads, order
+  counting, degradation (off vs ballistic, on vs direct fire, forced on by
+  `doInterceptDegradation`), the row-level refusals, and `canInterceptBallistic` across
+  uninterceptable / `canInterceptUninterceptable` / `ballisticIntercept` / stowed / autoFireOnly /
+  custom-allocation / split-gun caps / ballistic-rack R7 / third-party geometry. All pass.
+* `fvbuild.ps1 -Check`: autoload map up to date; ship-data validator PASS (248 findings, all in
+  baseline, 0 new); replay harness **160 passed, 4 failed**. The four (games 4126, 4140, 4143, 4148)
+  fail identically on a stashed, clean tree — pre-existing corpus drift (a positional system-id
+  shift and a missing `gaimOssari` class), not this work.
+* Bundles rebuilt with `fvbuild.ps1 -Client`.
+
+### Still to do
+
+1. ~~**Stage 7 — the per-weapon-class sweep.**~~ DONE 2026-08-20 — §14. Nothing in the class list has
+   been exercised in a live game yet, though: the Twin/Quad Array `checkFinished` arithmetic is the
+   one to try first (R3), then the Slicer's paired marker/engagement flow.
+2. ~~**Slicer / Cutter** — decide whether they get a bespoke manual path or stay on self-intercept
+   (D-1).~~ DECIDED and BUILT — Slicer has its own path (§14.4), Cutter stays out (§11.5).
+3. **Replay corpus** — record a fresh case with a manual intercept order and re-run `check`
+   (trap 11). No serialized property changed, but the fire-order flow did.
+4. **Live test matrix** — §8 has not been walked through in a running game.
+
+
+---
+
+## 11. First live test — game 4305, 2026-08-19
+
+Five findings, all addressed. Two were real bugs with one root cause; three were design changes.
+
+### 11.1 The root cause: a ballistic in flight has NO stored hit chance
+
+`tac_fireorder` **has no `chance` column**. `chance` is a client-side field that
+`weaponManager.targetShip` stamps on an order at declaration and that never leaves the browser —
+`Manager.php`'s rebuild drops it (trap 6), and it is not persisted. A ballistic order's `needed`
+stays **0** until the shot actually resolves. Confirmed directly against the game:
+
+    id      turn  type       shooterid  targetid  weaponid  needed  rolled
+    497312  1     ballistic  876551     876550    28        0       0
+    497313  1     ballistic  876550     876551    21        0       0
+    497314  1     ballistic  876550     876551    28        0       0
+
+So `fireOrder.chance ?? fireOrder.needed` — which §4.6 specified and which the row's own *"normal"*
+branches use quite correctly for direct fire — evaluates to **0 for every missile on the board**.
+The INCOMING row never hit this because a ballistic falls through to its `else` branch and prints
+`calculataBallisticHitChange`, a LIVE recompute. Everything I added on top read the stored value.
+
+Two symptoms, both reported:
+
+* **Expanded sub-rows showed 0%** (finding 4). They printed the stored base directly.
+* **A grouped row could not be intercepted at all** (findings 3 and 4). `allocateIntercept`'s greedy
+  fill advances past any member whose remaining hit chance is `<= 0` — with every member reading 0
+  it walked off the end of the group and `break`ed before declaring anything. A single-shot row and
+  an expanded sub-row both route through `targetBallistic`, which has no such check, which is
+  exactly why those worked and the collapsed multi-shot row did not.
+
+**Fix:** new `weaponManager.getIncomingShotHitChance(ball)` — the stored chance for a direct-fire
+order, the live `calculataBallisticHitChange` for anything else (the same call the row headline and
+the grouping key already make, so the numbers agree by construction). `getRemainingHitChance` and
+every display path now go through it. Covered by four regression assertions in the smoke test.
+
+### 11.2 The button is gone — the hit chance IS the control (findings 1 and 2)
+
+An INTERCEPT/CANCEL button on every row squashed the layout. Replaced per user direction:
+
+* **Declare** by clicking the hit chance itself, which is already the number the player is reading.
+  It carries a dotted underline and a pointer cursor when a legal declaration is available with the
+  current selection, and turns green once this side has committed interception against it.
+* **The number drops** as interception is committed, and the hover tooltip gains its
+  `Declared interception` line (as §4.6 always intended).
+* **The refusal reason moved into that tooltip's footer** (`result.note`, the existing free-text
+  hook) — *"Cannot intercept: Out of arc"* — rather than a disabled button's `title`. Nothing about
+  the row moves as the selection changes, which was the point of the disabled state in §4.1.
+* **No CANCEL.** A manual intercept is an ordinary fire order, so the ship window's existing remove
+  button clears it. `removeManualIntercept` and `getOwnInterceptOrdersAgainst` were deleted.
+* The row went back to plain block flow — no flex, no reserved columns. The only structural addition
+  is the 12px disclosure caret.
+
+This supersedes §4.1's control list, §4.8's tooltip half, and D-3 in §10.
+
+### 11.3 Green system icon for a defensive commitment (finding 2)
+
+A weapon whose entire contribution this turn is interception — one or more `intercept` orders, or a
+`selfIntercept` marker, and nothing aimed at anyone — now paints its
+[SystemIcon](source/public/client/UI/reactJs/system/SystemIcon.js) **green** (`#52b352` border and
+glow, `#2f7a3a` fill) instead of the offensive orange. New predicate
+`weaponManager.isInterceptOnly(ship, weapon)`; the icon still reads as `$firing`, so nothing else
+about its behaviour changes. A split-shot mount spending one gun offensively and one on interception
+stays orange — it *is* shooting at someone.
+
+### 11.4 Expanded sub-rows match the row above them (finding 4)
+
+Sub-rows print `- Approx: N%` in the same wording as the collapsed row, N being the hit chance after
+declared interception. The per-shot detail (base chance, interception applied, what a click will do)
+moved into their own hover tooltip.
+
+### 11.5 Slicer stays in scope, Cutter does not (finding 5)
+
+`usesCustomInterceptAllocation` still excludes both from the generic per-gun path, but they now mean
+different things and say so in their comments:
+
+* **Molecular Slicer** — *deferred to Stage 7, and BUILT there on 2026-08-20 (§14.4)*. It needed a
+  bespoke manual path that spends dice and set damage out of its pool rather than guns; it now has
+  one, and `usesCustomInterceptAllocation` has become "not the generic per-gun path" rather than a
+  blanket refusal.
+* **Hyperplasma Cutter** — *out of scope for this project*, permanently. Its 1-point-per-d10
+  allocation is a different mechanic and is already well served by its own self-intercept dialog.
+
+### 11.6 Still to verify in play
+
+The revised UI has not been through a game yet. If a row still refuses when it should not, **hover
+the hit chance** — the tooltip footer now names the reason, which is the diagnostic the first test
+lacked.
+
+
+---
+
+## 12. Second live test — game 4305, 2026-08-19
+
+### 12.1 Selecting a ship threw away its weapon selection
+
+`PhaseStrategy.setSelectedShip` opened with:
+
+    if (this.selectedShip) { this.deselectShip(this.selectedShip); }
+
+with no check that the ship being selected was a DIFFERENT ship — so re-clicking the ship you already
+had selected tore it down and rebuilt it, and `deselectShip` unselects every weapon on the way
+through. Clicking your own ship is how you open its tooltip, so the INCOMING list could only ever be
+opened with an empty selection.
+
+**Fix:** `setSelectedShip` passes `keepWeapons = (this.selectedShip === ship)` to `deselectShip`,
+which skips **only** the weapon-unselect loop. The icon, weapon list, movement UI, EW and LoS sprite
+all still tear down and rebuild exactly as before.
+
+**Blast radius.** The new behaviour is reachable in one situation only: selecting the ship that is
+already selected.
+
+* Every direct `deselectShip` caller — [PhaseStrategy:171](source/public/client/renderer/phaseStrategy/PhaseStrategy.js#L171),
+  DeploymentPhaseStrategy (x2), MineDeployment (x2), SelectFromShips — omits the new argument and
+  keeps the original clear-everything behaviour.
+* The four `deselectShip` overrides (Fire, Initial, PreFiring, Deployment) now forward the flag;
+  Movement has no override and inherits the base.
+* `FirePhaseStrategy.onWeaponSelected` is already guarded by `if (this.selectedShip !== ship)`, so it
+  can never pass `keepWeapons`.
+* Of the remaining `setSelectedShip` callers, the affected ones are the per-phase `selectShip`
+  handlers plus `onShipRightClicked`, `onScrollToShip`, the Deployment dock and the mine-deployment
+  helper. In all of them the weapon selection was being dropped incidentally, never deliberately —
+  nothing reads `gamedata.selectedSystems` expecting it to have been emptied by a re-select.
+
+### 12.2 The INCOMING list answered with a stale weapon selection
+
+Every clickable hit chance is computed against `gamedata.selectedSystems` **at render time**, and
+nothing re-rendered the list when that selection changed. So the sequence *open tooltip → select an
+interceptor → click the hit chance* asked a row that had been built before the weapon existed, and it
+answered *"Cannot intercept: No interceptor selected"*. Toggling a group's disclosure caret called
+`refresh()`, which is why that — and only that — unstuck it, and why a shot with no group to expand
+could not be intercepted at all.
+
+This is also what the first play-test reported as a *"greyed out"* button (§11): the button's state
+was computed at the same moment, for the same reason.
+
+**Fix, in two halves:**
+
+1. `PhaseStrategy.onSystemDataChanged` re-renders the ballistics menu. Both selection paths land
+   there — `selectWeapon` fires `WeaponSelected`, which `FirePhaseStrategy.onWeaponSelected`
+   forwards, and `unSelectWeapon` fires `SystemDataChanged` directly. Kept as narrow as the stealth
+   forecast beside it: Firing phase only, and it calls the menu's own `refresh()` rather than
+   `ShipTooltip.update()`, so only `.incoming` is rebuilt and the rest of the tooltip never moves
+   under a click (Stage 2's warning stands).
+2. `makeInterceptable` now re-asks `getInterceptDisabledReason` **at click time** and declares on
+   that answer. The render-time answer only drives the affordance. A row that has gone stale for any
+   other reason therefore still does the right thing instead of firing on a stale verdict.
+
+### 12.3 The list is grouped by shooter (user choice, from three options)
+
+The run-on row — *"Sharlin War Cruiser, 3x Heavy Missile (Normal) - Approx: 45%"* — wrapped onto a
+second line as soon as a name got long. The list is now:
+
+    Apollo Bombardment Cru…
+      ▶ 2x Missile Rack (Class-B)     45%
+        1x Heavy Missile (Class-H)    30%
+
+    Sharlin War Cruiser
+        1x Molecular Slicer           55%
+
+* **The ship name is a heading, written once per shooter**, not repeated on every row.
+* **Rows are three fixed parts** — caret, what is incoming, hit chance. Both text cells ellipsise
+  instead of wrapping and carry the full string as a `title`; the number column is fixed-width and
+  right-aligned so the percentages form a column. `.incoming` is capped at 340px, which is what
+  gives `text-overflow` something to work against.
+* **"Approx:" and "Between:" are gone.** Every number in that column is a hit chance, and a range
+  says "between" by being a range. They were costing about a third of the row's width.
+* **Expanded shots name the weapon** rather than "Shot 1 / Shot 2" — which shot it is only matters
+  inside its own tooltip, which still says *"Shot 2 of 3"*.
+* The count is always written, "1x" included, so weapon names line up down the column.
+
+This supersedes the row description in §4.1 and §4.2's mock.
+
+
+---
+
+## 13. Third refinement round — 2026-08-20
+
+Four items, none of which changed a rule. Three are display, one is documentation only.
+
+### 13.1 Interception is no longer floored at 0%
+
+`getRemainingHitChance` and the row's per-member `remaining` both did `Math.max(0, base - committed)`.
+The floor is gone (user direction): an over-intercepted shot now reads **`-25%`**, which is the only
+way that column can say *"you have already spent more than this shot was worth — stop feeding it."*
+A floored `0%` is indistinguishable from *"exactly suppressed"*.
+
+The server has always behaved this way — `automateIntercept` drops any shot whose
+`needed - totalIntercept` is `<= 0`, so an over-intercepted shot is simply gone — so nothing about
+the outcome changed, only what the player is told.
+
+Consumers that had to cope:
+
+* **The greedy fill.** `allocateIntercept` advances its focus while `getRemainingHitChance(...) <= 0`.
+  A negative still satisfies `<= 0`, so it walks past an over-killed member exactly as before. No
+  change needed, but it is the one caller that reads the number as a *decision* rather than as text.
+* **Range formatting.** `"30-45%"` with a negative low end would render `"-30--10%"` — two hyphens,
+  one of them a minus. New `joinRange(lo, hi)` in the menu repeats the `%` sign when `lo < 0`,
+  giving `"-30%--10%"`, and keeps the compact `"30-45%"` otherwise. (It first spelled the negative
+  case out as `"-30% to -10%"`; the user asked for the shorter form on 2026-08-20 — the words cost
+  the width the row spent §12.3 recovering.) It deliberately does **not** collapse equal ends: the
+  Shadow "Offensive Dice" branch has always printed both and its callers decide.
+* **The hover tooltip.** `hitChance` and the `Declared interception` line already carried signed
+  values through `buildHitChanceTooltipText`; nothing there needed touching.
+
+### 13.2 The shooter heading is `--fv-accent`
+
+The three tiers of the INCOMING list are told apart by colour alone, so they have to read as a
+ladder. They did not:
+
+| Tier | Was | Now |
+|---|---|---|
+| Shooter heading (`.shipname`) | `--fv-text-accent` **#C6E2FF** | `--fv-accent` **#8bcaf2** |
+| Shot row (`.ballrow .weapon`) | `--fv-text` #deebff (inherited) | unchanged |
+| Expanded sub-row (`.ballsub`) | `--fv-text-dim` #8ca5c0 | unchanged |
+
+#C6E2FF against #deebff is two near-identical bluish whites — the ship name did not read as a
+heading at all. `--fv-accent` is the same token the active disclosure caret already uses, so the
+row's structural chrome stays on one colour, and it is a token, not a new value
+(see `project_visual_unification`).
+
+### 13.3 The dotted underline sits under the number, not under the column
+
+**The underline was never a `text-decoration`.** It is
+`.hit-chance-tooltip { border-bottom: 1px dotted green }` in
+[tactical.css:2106](source/public/styles/tactical.css#L2106) — the site-wide *"there is a breakdown
+behind this number"* cue that `weaponManager` attaches to whatever element carries a hit chance. In
+the TARGETING list that element is an inline `<span>`, so the border is exactly as wide as the text.
+In the INCOMING list it is `.hitchange`, a **blockified, fixed-width, right-aligned flex item**
+(`min-width: 44px`, wider on a range) — so the same declaration drew a rule the full width of the
+column, in front of the number.
+
+The first attempt at this moved `text-decoration: underline dotted` off `.hitchange`, which was
+correct in itself and changed nothing visible, because it was not the property doing the drawing.
+Recorded because it is an easy trap to fall into twice: **before moving an underline, check whether
+it is a border.**
+
+Fix: the number goes into its own inline `<span class="hitvalue">` (new `setChanceText()` helper),
+`.incoming .hitchange.hit-chance-tooltip` explicitly gives the border up, and `.hitvalue` takes it.
+`.hitchange` keeps the classes, the `data-tooltip`, the hover colour and the click handler, so the
+whole column stays clickable and the delegated tooltip still fires — `.hitvalue` is a descendant.
+
+One line, with colour carrying the state (a second dotted rule under a 12px `45%` would only read as
+a thicker one):
+
+| State | Underline | Cursor |
+|---|---|---|
+| Has a breakdown | `green` — tactical.css's own value | `help` |
+| …and interception can be declared | `--fv-accent` | `pointer` |
+
+### 13.4 Where the server auto-uses Interceptor missiles (documentation only — no behaviour change)
+
+Reported: *"the server is using Interceptor missiles automatically for launchers with 1-turn loading
+time."* Correct, and the chain is now annotated in place under one greppable marker —
+`grep -rn "AUTO-INTERCEPTOR-MISSILES" source/server`.
+
+| Site | Where | What it does |
+|---|---|---|
+| **1 of 3 — the switch itself** | `Firing::getUnassignedInterceptors`, [firing.php](source/server/handlers/firing.php) — the `canModesIntercept && !firedOnTurn` line | **The kill switch.** `switchModeForIntercept()` walks `$interceptArray`, picks the highest-rated mode (i.e. Interceptor), *changes the weapon into it* and sets `$weapon->intercept` — which is what puts the launcher in the automation pool. Nothing else opts it in. |
+| **2 of 3 — why nobody is asked** | `Firing::isValidInterceptor`, the `$loadingTimeActual > 1` block | The only consent gate in the automated path: a weapon that loads in more than one turn must carry a player-placed `selfIntercept` marker. It keys on **loading time**, not on ammo use. |
+| **3 of 3 — the ammo check** | `MissileLauncher::canInterceptAtAll` → `AmmoMagazine::canDrawInterceptor`, debited by `fireDefensively` → `doDrawAmmo` | Yes, ammo **is** verified before each intercept is allowed, and `interceptorUsed` is bumped per draw so the Nth intercept this turn sees the N−1 rounds already spent. |
+
+Why site 2 never fires for these racks: there is **no per-firing-mode loading time**.
+`MissileLauncher`'s constructor copies range, damage, intercept and the rest out of the ammo class
+but not `loadingtime`, and `$normalload` is 0 on every rack. So the rack's own `$loadingtime` decides
+— and `AmmoMissileRackD`, the Class-D rack that carries Interceptor as its *default* round, declares
+`$loadingtime = 1`. `$loadingTimeActual == 1`, the gate is skipped, the launcher is enrolled. A rack
+with `$loadingtime = 2` does fall into the gate and does demand the marker.
+
+**If it is to become opt-in**, site 1 is the narrow lever: guard that one line (with the same
+`selfIntercept` test, or a new per-weapon flag) and the launcher stays in its offensive mode,
+`$weapon->intercept` stays 0, and it never reaches the pool. Site 2 is the wrong place — raising the
+threshold there would start demanding markers from every ordinary 1-turn gun on the board. **Manual**
+interception is unaffected either way: the manual path sets the order's firing mode itself, inside
+`automateIntercept`, and never passes through `getUnassignedInterceptors`.
+
+### 13.5 Verification
+
+* `node --check` clean on `ShipTooltipBallisticsMenu.js` and `weaponManager.js`; `php -l` clean on
+  `firing.php` and `missile.php`.
+* No build needed — legacy JS (the `yarn watch:legacy` watcher covers it) and a plain stylesheet.
+  No React source, no server property reaching the client through a static blueprint.
+* Not yet play-tested. §11.6's diagnostic still applies: if a row refuses when it should not, hover
+  the hit chance and read the tooltip footer.
+
+
+---
+
+## 14. Stage 7 — the per-weapon-class sweep (2026-08-20)
+
+The Hyperplasma Cutter stays permanently out of scope (§11.5). The Molecular Slicer is **in**, and
+this is what it took.
+
+### 14.1 What the sweep actually checks
+
+A weapon reaches the manual path only if `getInterceptRatingInMode` is above 0, so the first pass was
+to throw out everything with `$intercept = 0`: **GraviticLance, PhotonicPrismBeam, MolecularSlicerBeamL**
+(the Light Slicer cannot intercept at all), plus **GravityNet, EWGraviticTractingRod, BallisticTorpedo,
+MultiphasedCutter, ProximityLaserNew**, which declare no rating. **ShadeModulator** is `autoFireOnly`
+and `canInterceptBallistic` refuses it a line earlier.
+
+For everything left, three questions:
+
+1. **Does `declareInterceptWith` emit the right number of orders?** A non-split weapon commits every
+   gun (R4), so `->guns` has to be the count for the mode it is actually in.
+2. **Does `checkFinished()` agree?** It counts `fireOrders.length` — which now includes intercept
+   orders — so its cap has to be the same number.
+3. **Does anything else on the class read a fire order per-order?** This is where the real bug was.
+
+`->guns` is mode-correct for every one of them: the multi-mode classes all carry a `$gunsArray`
+(`QuadArray` 4/3/2/1/4, `PsionicConcentrator` 4/2/1/4/2, `NeutronBlaster` 1/1/1, `MedAntigravityBeam`
+1/2, `AntigravityBeam` 1/3) and `changeFiringMode` re-derives `$guns` from it. `TwinArray`,
+`HeavyArray`, `TelekineticCutter` (2), `QuadParticleBeam`, `VorlonDischargeGun`/`Cannon` (4) and
+`PointPulsar` (3) are flat.
+
+| Class | guns (per mode) | Split in | `checkFinished` cap | Verdict |
+|---|---|---|---|---|
+| TwinArray | 2 | 2 | `>= guns` in mode 2 | ok |
+| QuadArray | 4/3/2/1/4 | 5 | `>= guns` in mode 5 | ok |
+| HeavyArray | 2 | 2 | `> 1` in mode 2 | ok |
+| QuadParticleBeam | 4 | 2 | `> 3` in mode 2 | ok |
+| TelekineticCutter | 2 | 2 | `> 1` in mode 2 | ok |
+| ParticleRepeater | 1-2 (`$baseGuns`) | with Gunsights | `getShotsFired() == "Number of shots"` | ok — see 14.2 |
+| PointPulsar | 3 | 2 | `> 2` | **fixed** — 14.3 |
+| VorlonDischargeGun/Cannon | 4 | always | `> 3` | **fixed** — 14.3 |
+| PsionicConcentrator | 4/2/1/4/2 | 4, 5 | `> 3` / `> 1`, none in 4-5 | ok — see 14.2 |
+| NeutronBlaster | 1 | 2, 3 | `>= guns` | ok |
+| MedAntigravityBeam | 1/2 | 2 | `>= guns` in mode 2 | ok |
+| AntigravityBeam | 1/3 | 2 | `>= guns` in mode 2 | ok |
+| MolecularSlicerBeam M/H | n/a | always | pools empty | **built** — 14.4 |
+| AmmoMissileRack family | per rack | — | — | ok (Stage 4, R7) |
+
+### 14.2 Two things that look wrong and are not
+
+**ParticleRepeater** counts `order.shots` across *every* fire order in `getShotsFired()`, so a manual
+intercept eats one of its "Number of shots". That is correct — the Repeater trades shots against
+intercept rating (`this.intercept = 1 + boost`) by design, and `->guns` (1, or 2 on the Mine version)
+is the cap on both sides: `automateIntercept`'s per-weapon loop runs `for i < $currInterceptor->guns`.
+
+**PsionicConcentrator** has no `checkFinished` branch for modes 4 and 5, its two split modes, so it
+never reports finished there. `isWeaponSpentForIntercept`'s `(offensive + intercept) >= guns` fallback
+is what catches it — that fallback exists for exactly this shape. (Its `$canSplitShotsArray` also has
+a duplicate `1 =>` key and no entry for mode 3; PHP keeps the last write, so mode 3 reads as
+non-split, which is what mode 3 — `$gunsArray[3] = 1` — wants anyway. Noted, not touched.)
+
+### 14.3 Defect: a manual intercept was billed at the wrong firing mode
+
+`VorlonDischargeCannon.initializationUpdate` bills the ship's power budget
+`powerReq += 5 * fireOrder.firingMode` **per order**, and `hasFiringOrder` returns `true` for an
+`intercept` order (it only special-cases `selfIntercept`). So a manual intercept declared while the
+Cannon sat in mode 3 was charged **15 power instead of 5** — enough to fail an end-of-turn power
+check on an otherwise legal declaration.
+
+The weapons already knew the answer and nothing was asking them: both `PointPulsar` and
+`VorlonDischargeGun` stamp `firingMode: 1` in their `doMultipleSelfIntercept`, with the comment *"So
+that powerReqd display accurately always"*. A defensive shot is priced in mode 1 whatever mode the
+weapon is set to.
+
+**Fix:** new optional hook `getInterceptOrderMode()`, asked by `declareInterceptWith` right after
+`getInterceptModeFor`. `PointPulsar` and `VorlonDischargeGun` (the Cannon inherits) return 1. Safe
+because both carry a flat `->intercept` with no `interceptArray`, so narrowing the mode cannot change
+the rating — and the server re-reads the rating in the order's mode anyway
+([firing.php](source/server/handlers/firing.php), the `changeFiringMode` sandwich around
+`validateManualIntercept`).
+
+### 14.4 The Molecular Slicer's manual path
+
+**The server's arithmetic is what dictates the shape.**
+`MolecularSlicerBeamL::getInterceptionMod` ([molecular.php](source/server/model/weapons/molecular.php))
+counts `selfIntercept` orders as how many shots the Slicer is *allowed* to engage and distinct
+`intercept` targetids as how many it *has*, and pays the full rating only while engaged <= allowed. **A
+bare intercept order with no marker behind it is worth exactly nothing** — which is why the Slicer
+could not simply be let onto the generic per-gun path, and why Stage 7 was the right place for it.
+
+So one manual Slicer intercept is **two orders**:
+
+* a **selfIntercept marker**, which spends one damage die (or one whole `SLICER_SET_DAMAGE_BLOCK` of
+  set damage) and buys one engagement — written by `addSelfInterceptOrders`, the *same* call the
+  self-interception dialog makes, so it is unshifted to the front of the array (index order drives
+  the cumulative -5%) and runs `recalculateForIntercept(true)` to charge the offensive shots for it;
+* the **targeted intercept order**, naming the shot, carrying `shots: 0` and `setDam: 0`.
+
+Those two zeroes matter: `getShotsUsed` / `getSetDamageUsed` sum **every** order in the array, so a
+`1` there would charge the pool twice and silently eat a die out of the offensive volley.
+
+**Capacity already bought is reused.** An unmatched marker is spare capacity, so a manual intercept
+consumes it rather than paying again — D4's conversion in this weapon's own currency: the generic
+path *deletes* the marker it finds, this one *spends* it. The client counts capacity per intercept
+**order** rather than per distinct target — one order is one engagement and costs one die.
+
+> ⚠ This paragraph originally went on to say that, since the server counts distinct targets, stacking
+> two engagements on one shot leaves it "a marker to spare rather than short", and that erring in that
+> direction was deliberate. **A marker to spare is not the safe side** — a spare marker is budget the
+> automation spends, and that is exactly the game-4306 double-interception in §16.
+
+~~**Zero server changes.**~~ **WRONG — see §16.** The claim was that `getInterceptionMod` returning 0
+would stop the automation on its own. It does not: that function compares **distinct** targetids
+against the marker count, so engagements stacked on one shot read as barely any used. One server
+line was needed after all — `beforeFiringOrderResolution` must not pad `$guns` for an `intercept`
+order, or the automation re-spends every marker the player already hand-assigned. Found in game 4306.
+
+**Withdrawal is paired.** `removeSelfInterceptSingle` takes one `intercept` order with the marker when
+there is no spare capacity — otherwise removing the last marker would strand an engagement that is
+worth 0 server-side while still looking committed in the ship window.
+
+**`recalculateForIntercept` now skips `intercept` orders as well as `selfIntercept`.** A manual
+intercept order carries neither `->chance` nor `->hitmod`, so the re-price loop would have written
+`NaN` into it — harmless in itself (nothing reads it, and `Manager.php` drops the field on POST) but
+it would surface the moment anything did.
+
+### 14.5 How the hooks are wired
+
+`usesCustomInterceptAllocation` keeps its meaning — *"not the generic per-gun path"* — and is still
+set on both the Slicer and the Cutter. What changed is that it is no longer a blanket refusal: a
+weapon carrying it now has to implement the pair of hooks to be offered at all.
+
+| Hook | On | Asked by |
+|---|---|---|
+| `canDeclareManualIntercept(ship)` | MolecularSlicerBeamL | `canInterceptBallistic` (in place of gun accounting), `isWeaponSpentForIntercept`, `getInterceptDisabledReason` |
+| `declareManualIntercept(ship, ball, mode)` | MolecularSlicerBeamL | `declareInterceptWith` — returns straight out, owning marker reuse |
+| `getSpareInterceptCapacity()` | MolecularSlicerBeamL | itself, and `removeSelfInterceptSingle`'s pairing guard |
+| `getInterceptOrderMode(mode)` | PointPulsar, VorlonDischargeGun | `declareInterceptWith` |
+
+The Hyperplasma Cutter implements none of them, so every one of those sites refuses it and it still
+answers *"Use this weapon's own intercept declaration"*.
+
+### 14.6 Known limitation, recorded not fixed
+
+`getDeclaredInterception` (the row's preview) applies interception **degradation** generically, but
+the Slicer's server-side `getInterceptionMod` override does not degrade — *"Slicers can freely
+combine their self-intercepts into a single strong intercept or multiple small ones."* The two would
+disagree only when a Slicer is stacked with other interceptors on a **direct-fire** shot, because
+degradation is switched off against ballistics (§2.1) and every Sweeping weapon is currently
+`uninterceptable`. It is unreachable today; expressing a per-*interceptor* degradation exemption
+client-side would need a new serialized flag, which is not worth it until something can reach it.
+
+### 14.7 Verification
+
+* `node --check` clean on `weaponManager.js`, `molecular.js`, `pulse.js`, `special.js`,
+  `ShipTooltipBallisticsMenu.js`.
+* Three sandbox smoke tests, **49 assertions, all passing**, driving the real sources in a `vm`
+  context rather than a reimplementation:
+  * **Slicer pool arithmetic (28)** — marker written first, one die charged *once*, `shots`/`setDam`
+    zero on the intercept order, set-damage fallback when the dice run out, offensive orders
+    re-priced by 5%, refusal when both pools are empty, Light Slicer refused, no `NaN` out of
+    `recalculateForIntercept`.
+  * **Hook wiring (10)** — delegation to `declareManualIntercept` with the generic path writing
+    nothing, `getInterceptOrderMode` narrowing mode 3 to 1 (and a weapon without it keeping 3),
+    `isWeaponSpentForIntercept` deferring to the weapon, and the Cutter still refused by name.
+  * **Withdrawal pairing (11)** — marker and engagement withdrawn together when there is no spare, a
+    *spare* marker removed on its own leaving the paid engagement standing, a generic weapon
+    untouched by the new branch, and the offensive 5% refunded correctly either way.
+* **No server file changed** in this stage (the only PHP edits this session are the
+  `AUTO-INTERCEPTOR-MISSILES` comments of §13.4), so the replay harness cannot be affected and was
+  not re-run. Trap 11's "record a fresh case with a manual intercept" is still worth doing once the
+  Slicer path has been through a live game.
+
+
+---
+
+## 15. Regression: the lobby ship window died on `isInterceptOnly` (2026-08-20)
+
+    Ship window render failed for Ochlavita Destroyer
+    TypeError: weaponManager.isInterceptOnly is not a function
+
+**Not a Stage 7 bug.** It had been live since §11.3 (2026-08-19) and would fire for *every* ship in
+the lobby, not just one with a Point Pulsar — that was simply the ship being looked at.
+
+**Cause.** `gamelobby.php` does not bundle `weaponManager.js`. It defines a small stub object inline,
+listing only the predicates the React ship window needs, because the lobby is read-only and
+everything should read as idle. §11.3 added `isInterceptOnly` to `SystemIcon`'s render — as an
+unconditional prop, `$intercepting={isIntercepting(ship, system)}` — and the stub was never given it.
+
+`SystemInfoButtons` escaped because it is guarded by construction: `canDoAnything`, `hasStyledMenu`
+and `render` all return at `gamedata.gamephase === -2` before reading anything off `weaponManager`,
+and the comment above `canDoAnything` says exactly why. **`SystemIcon` has no such guard** — every
+predicate in its prop list runs on every render, in every phase, on both pages.
+
+**A second, latent one from Stage 4.** `SystemIcon`'s weapon-select gate ends
+`… || weaponManager.canManuallyInterceptWith(ship, system)` (§4.7a). `&&` binds tighter than `||`, so
+once the three phase clauses ahead of it are false — which at gamephase −2 they always are — the
+`||` chain reaches that call. Clicking any system in the lobby ship window threw the same way. Fixed
+in the same edit, before it was ever reported.
+
+**Fix.** Both added to the stub, returning `false` (nothing is declared pre-game), with a warning
+above the object stating the invariant: *any new `weaponManager.x()` call in `reactJs/system/*` that
+is not behind a −2 early return has to be added here too.* Now trap 12 in §6.
+
+`selectWeapon` / `unSelectWeapon` are deliberately left **out**. They sit inside the gate that is now
+provably false at −2, and if someone later widens that gate a crash is a better outcome than a
+silent no-op that quietly does nothing.
+
+**Verified** by extracting the stub out of `gamelobby.php`, evaluating it, and diffing its keys
+against every `weaponManager.*` call in `SystemIcon.js`: ten of twelve stubbed, the two omissions
+being the deliberate ones above. `php -l` clean; no BOM introduced ([arch_php_entry_bom_trap] — this
+is a PHP entry file).
+
+**Why the sweep did not catch it:** Stage 7 swept *weapon classes*, and this is a page-level plumbing
+gap. Nothing about the Slicer, the Point Pulsar or any other class was involved.
+
+
+---
+
+## 16. The Slicer intercepted twice — game 4306, 2026-08-20
+
+*"I set 22 defensive shots with one slicer, and when the server resolved the firing there was 44
+defensive shots against the 4 incoming missiles."*
+
+### 16.1 What the database said
+
+    type           shots  damageclass   n   distinct targets
+    selfIntercept    1    molecular     16        1
+    selfIntercept    0    molecular      6        1
+    intercept        0    molecular     22        2      <- client, manual
+    intercept        1    (empty)       22        3      <- SERVER, automated
+
+The client was **correct**. 22 markers — 16 dice plus 6 whole blocks out of a Medium Slicer's
+16-dice / 36-set pool, exactly the whole volley — and 22 manual intercept orders, one per marker,
+carrying `shots: 0` and `damageclass: molecular` as §14.4 specifies.
+
+The other 22 are the server's own shape: `defaultShots` and no damageclass, which is what
+`Firing::addToInterceptionTotal` writes. **The automation spent all 22 markers a second time.**
+
+### 16.2 Why: `getInterceptionMod` counts distinct targets, `$guns` counted orders
+
+`MolecularSlicerBeamL::getInterceptionMod` gates payout on
+*distinct `intercept` targetids* ≤ *`selfIntercept` count*. Those 22 engagements were stacked on
+**two** shots, so the server read them as "2 of 22 used" and never refused.
+
+That alone would not have created orders — `getBestInterception` skips any shot whose mod is `<= 0`.
+What created them was the **gun budget**. `automateIntercept` derives a split weapon's remaining
+budget as:
+
+    currGuns = guns - count(fireOrders);   then +1 per selfIntercept order
+
+and `MolecularSlicerBeamL::beforeFiringOrderResolution` synthesises `$guns` by adding 1 for *every*
+fire order (a deliberate hack, so that expression collapses to `markers + spare` — the Slicer's real
+allowance). A manual intercept order landed in **both terms** and cancelled itself out:
+
+    guns = 44 (22 markers + 22 intercepts) + 0 spare
+    currGuns = 44 - 44 = 0,  then +22 for the markers  =  22
+
+Twenty-two guns, twenty-two more intercepts. Each one passed `getInterceptionMod`'s
+distinct-target test, so each paid out its full −10%.
+
+### 16.3 The fix — one line, server side
+
+`beforeFiringOrderResolution` no longer pads `$guns` for an `intercept` order:
+
+    if ($order->type != "intercept") $this->guns++;
+
+Now `guns = markers + normals + spare`, and the budget collapses to what is actually left:
+
+    currGuns = (markers + normals + spare) - (markers + normals + manual) + markers
+             =  markers - manual intercepts + spare
+
+Game 4306's case gives **0**. A Slicer with no manual orders gets exactly the number it always did.
+
+**Why the fix is on the server and not the client.** Counting distinct targets client-side instead
+would "agree" with `getInterceptionMod`, but it would undercharge the pool — one die would buy any
+number of engagements against the same shot. One order is one engagement and costs one die; the
+server had to be taught to subtract them.
+
+### 16.4 Where §14.4's reasoning was wrong
+
+§14.4 said, of counting capacity per order rather than per distinct target:
+
+> the server counts distinct targets, which can only ever be fewer, so stacking two engagements on
+> the same shot leaves the server's test satisfied with a marker to spare rather than short. Erring
+> in that direction is deliberate.
+
+The premise was right and the conclusion was backwards. **A marker to spare is not the safe side** —
+a spare marker is budget the automation will spend. The comment in `molecular.js` has been corrected
+in place, and points here.
+
+### 16.5 Verification
+
+* Scratch PHP against the real classes inside the container, asserting the invariant
+  `budget == markers - manual + spare` across seven shapes: game 4306's exact set (budget **0**),
+  markers-only (**22**, unchanged from before the fix), partly hand-assigned, mixed offence and
+  defence with pool left over, purely offensive, minimum charge, and a two-turn charge. All pass,
+  and four manual orders reduce the budget by exactly four.
+* `php -l` clean; legacy bundles rebuilt un-minified.
+* **Replay harness `check`: 159 passed, 1 failed (46.0s).** The single failure, game 4297
+  (`/ships/1/systems/2/output: 6 -> 8`), is **pre-existing blueprint drift** — verified by
+  `git stash push -- source/server source/public/gamelobby.php`, re-running, and getting the byte-identical
+  diff on a clean tree. Expected: the harness never calls `prepareFiring`, and both the `tohit` and
+  `damage` checks skip `intercept`/`selfIntercept` orders outright, so `beforeFiringOrderResolution`
+  is not on any path it exercises.
+
+### 16.6 Still worth doing
+
+Trap 11 now has a real case to record: game 4306 carries the first manual intercept orders in the
+corpus. Re-record it once the turn count is stable so a future change to this arithmetic has
+something to fail against.

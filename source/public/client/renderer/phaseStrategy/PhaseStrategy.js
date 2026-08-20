@@ -413,7 +413,13 @@ window.PhaseStrategy = function () {
         if ($(".confirm").length > 0) return;
 
         if (this.selectedShip) {
-            this.deselectShip(this.selectedShip);
+            //RE-selecting the ship that is already selected keeps its weapon selection. Clicking
+            //your own ship is how you open its tooltip, and the tear-down/rebuild below would
+            //otherwise unselect every weapon on the way through - so the INCOMING list opened with
+            //nothing selected and manual interception could not be declared without picking the
+            //weapons again (user report 2026-08-19). Only the weapon-unselect is skipped; the icon,
+            //weapon list, movement UI and EW all still tear down and rebuild exactly as before.
+            this.deselectShip(this.selectedShip, this.selectedShip === ship);
         }
 
         this.selectedShip = ship;
@@ -427,12 +433,17 @@ window.PhaseStrategy = function () {
         this.uiManager.showWeaponList({ ship: ship, gamePhase: gamedata.gamephase });
     };
 
-    PhaseStrategy.prototype.deselectShip = function (ship) {
+    /* keepWeapons: leave gamedata.selectedSystems alone. Passed ONLY by setSelectedShip when the
+       ship being selected is the one already selected - see the note there. Every other caller
+       omits it and gets the original clear-everything behaviour. */
+    PhaseStrategy.prototype.deselectShip = function (ship, keepWeapons) {
         this.shipIconContainer.getById(ship.id).setSelected(false);
 
-        gamedata.selectedSystems.slice(0).forEach(function (selected) {
-            weaponManager.unSelectWeapon(this.selectedShip, selected);
-        }, this);
+        if (!keepWeapons) {
+            gamedata.selectedSystems.slice(0).forEach(function (selected) {
+                weaponManager.unSelectWeapon(this.selectedShip, selected);
+            }, this);
+        }
 
         this.selectedShip = null;
         this.uiManager.hideWeaponList();
@@ -1070,6 +1081,23 @@ window.PhaseStrategy = function () {
             && this.shipTooltip.ships.length === 1 && this.shipTooltip.ships.includes(ship)
             && shipManager.getStealthToggleForecast(ship) !== null) {
             this.shipTooltip.update(ship, this.selectedShip);
+        }
+
+        //Manual interception: every clickable hit chance in the INCOMING list is computed against
+        //the CURRENT weapon selection, so selecting or unselecting an interceptor has to re-render
+        //them - otherwise the row goes on answering with the selection it was BUILT with, and
+        //reports "No interceptor selected" at a weapon the player can plainly see is selected
+        //(user report 2026-08-19). Both paths land here: selectWeapon fires WeaponSelected, which
+        //FirePhaseStrategy.onWeaponSelected forwards to this handler, and unSelectWeapon fires
+        //SystemDataChanged directly.
+        //
+        //Deliberately as narrow as the stealth forecast above, and narrower in what it touches:
+        //Firing phase only, and it rebuilds ONLY the .incoming list through the menu's own
+        //refresh() - ShipTooltip.update() is not called, so the name, TARGETING half and button
+        //row are never rebuilt under whatever the player is clicking.
+        if (gamedata.gamephase === 3 && this.shipTooltip && this.shipTooltip.ballisticsMenu
+            && typeof this.shipTooltip.ballisticsMenu.refresh === 'function') {
+            this.shipTooltip.ballisticsMenu.refresh();
         }
 
         if (system

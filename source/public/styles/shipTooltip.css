@@ -314,3 +314,173 @@
 .openSCS {
     background-image: url("../img/openShipDetails.png");
 }
+
+/* == The INCOMING list (MANUAL_INTERCEPTION_PLAN.md §6) ======================================
+   Rows used to be one run-on line - "Sharlin War Cruiser, 3x Heavy Missile (Normal) - Approx: 45%" -
+   which wrapped onto a second line as soon as a ship or weapon had a long name, and read as a wall.
+
+   It is now grouped by SHOOTER: the ship name is a heading written once, and its shots are listed
+   beneath it in a fixed three-part row - caret, what is incoming, hit chance. Both text cells
+   ellipsise rather than wrap and carry the full string as a title. The words "Approx:" and
+   "Between:" are gone; every number in that column is a hit chance, and a range says "between" by
+   being a range.
+
+   Interception is declared by clicking a hit chance - there is no button. An INTERCEPT/CANCEL
+   button on every row was tried first and is what made the rows too tight to begin with.
+
+   Tokens only, no new :root block, no new <link> - see project_visual_unification. */
+
+/* The list is the widest thing in the tooltip, so this cap is effectively the tooltip's width.
+   Without a bounded width there is nothing for text-overflow to ellipsise against. */
+.shipNameContainer .incoming {
+    max-width: 340px;
+    text-align: left;
+}
+
+/* Shooter heading. One per ship, above its shots. */
+.shipNameContainer .incoming .ballship {
+    margin-top: 4px;
+    overflow: hidden;
+}
+
+.shipNameContainer .incoming .ballship:first-child {
+    margin-top: 0;
+}
+
+/* The three tiers of this list are told apart by colour alone, so they have to read as a ladder:
+
+     shooter heading   --fv-accent     #8bcaf2  saturated cyan
+     shot row          --fv-text       #deebff  the tooltip's own body text (inherited)
+     expanded sub-row  --fv-text-dim   #8ca5c0  dim
+
+   The heading was --fv-text-accent (#C6E2FF), which is a hair off the #deebff body text it sits
+   above - two near-identical bluish whites, so the ship name did not read as a heading at all
+   (user report 2026-08-20). --fv-accent is the same token the active disclosure caret uses, which
+   keeps the row's structural chrome on one colour. */
+.shipNameContainer .incoming .shipname {
+    display: block;
+    color: var(--fv-accent);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* One shot row: caret | what is incoming | hit chance. */
+.shipNameContainer .incoming .ballrow {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    padding-left: 6px;
+}
+
+/* Disclosure caret. Emptied (not hidden) on a single-shot row so its weapon name still lines up
+   with the rows around it. */
+.shipNameContainer .incoming .ballexpand {
+    flex: 0 0 12px;
+    color: var(--fv-text-dim);
+    cursor: default;
+    user-select: none;
+}
+
+.shipNameContainer .incoming .ballexpand-active {
+    color: var(--fv-accent);
+    cursor: pointer;
+}
+
+.shipNameContainer .incoming .ballexpand-active:hover {
+    color: var(--fv-text-bright);
+}
+
+/* min-width:0 is what actually lets a flex child shrink below its content and ellipsise. */
+.shipNameContainer .incoming .ballrow .weapon {
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Fixed and right-aligned so the numbers form a column the eye can run down. */
+.shipNameContainer .incoming .ballrow .hitchange {
+    flex: 0 0 auto;
+    min-width: 44px;
+    text-align: right;
+    white-space: nowrap;
+}
+
+/* One sub-row per shot inside an expanded group: same columns, weapon name indented under the
+   group it belongs to. */
+.shipNameContainer .incoming .ballsub {
+    color: var(--fv-text-dim);
+}
+
+.shipNameContainer .incoming .ballsub .weapon {
+    padding-left: 14px;
+}
+
+/* ── The dotted underline under a hit chance ─────────────────────────────────────────────────
+   ONE dotted line, and it is a border-bottom on .hitvalue.
+
+   Where it comes from: `.hit-chance-tooltip { border-bottom: 1px dotted green }` in tactical.css
+   is the site-wide "there is a breakdown behind this number" cue, and weaponManager adds that
+   class to whatever element carries the number. In the TARGETING list that element is an inline
+   <span>, so the border is exactly as wide as the text. In THIS list it is .hitchange - a
+   blockified, fixed-width, right-aligned FLEX ITEM - so the same border ran the whole width of the
+   column, in front of the number (user report 2026-08-20, twice: the first attempt moved a
+   text-decoration that was never the thing being drawn).
+
+   So the column explicitly gives the border up and the inline .hitvalue takes it. An inline box is
+   exactly as wide as its text, which is the whole point.
+
+   Colour carries the state, because a second dotted line under a 12px "45%" would just read as a
+   thicker one:
+     - green (tactical.css's own value)  - hover me, there is a breakdown
+     - --fv-accent + pointer cursor      - AND clicking me declares interception with the current
+                                           selection. When it is not on offer the number is plain
+                                           green and the reason why is in the tooltip's footer, so
+                                           nothing about the row moves as the selection changes. */
+.shipNameContainer .incoming .hitchange.hit-chance-tooltip {
+    border-bottom: none;
+}
+
+.shipNameContainer .incoming .hitchange.hit-chance-tooltip .hitvalue {
+    border-bottom: 1px dotted green;
+}
+
+.shipNameContainer .incoming .hitchange.intercept-ready {
+    cursor: pointer;
+}
+
+.shipNameContainer .incoming .hitchange.intercept-ready .hitvalue {
+    border-bottom: 1px dotted var(--fv-accent);
+}
+
+.shipNameContainer .incoming .hitchange.intercept-ready:hover {
+    color: var(--fv-text-bright);
+}
+
+/* A shot this side has already committed interception against. The number itself has dropped - and
+   it is no longer floored at 0, so an over-intercepted shot reads as a negative; this just says the
+   drop was yours. */
+.shipNameContainer .incoming .hitchange.intercepted {
+    color: var(--fv-own);
+}
+
+/* Coarse pointers need a real target on both controls. */
+@media (pointer: coarse) {
+    .shipNameContainer .incoming .ballrow {
+        gap: 6px;
+    }
+
+    .shipNameContainer .incoming .ballexpand {
+        flex: 0 0 32px;
+        min-height: 32px;
+        line-height: 32px;
+        text-align: center;
+    }
+
+    .shipNameContainer .incoming .hitchange.intercept-ready {
+        min-height: 32px;
+        line-height: 32px;
+    }
+}

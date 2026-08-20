@@ -131,8 +131,8 @@ window.InitialPhaseStrategy = function () {
     };
 
 
-    InitialPhaseStrategy.prototype.deselectShip = function (ship) {
-        PhaseStrategy.prototype.deselectShip.call(this, ship);
+    InitialPhaseStrategy.prototype.deselectShip = function (ship, keepWeapons) {
+        PhaseStrategy.prototype.deselectShip.call(this, ship, keepWeapons);
         this.hideShipEW(ship);
     };
 

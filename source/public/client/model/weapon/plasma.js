@@ -473,6 +473,14 @@ HyperplasmaCutter.prototype.checkSelfInterceptSystem = function () {
     return this.getRemainingDice() > 0;
 };
 
+/* OUT OF SCOPE for manual interception (user decision, 2026-08-19) - permanently, not deferred.
+   This cutter's intercept rating is 1 point PER d10 allocated out of a dice pool the player splits
+   in its own dialog, which is a different mechanic from "commit these guns to that shot" and is
+   already well served by the self-intercept flow. It keeps that flow and the automation; the
+   ballistics tooltip will not offer it. Unlike the Molecular Slicer, this is not a Stage 7 item. 
+   Disabled for now - DK */
+//HyperplasmaCutter.prototype.usesCustomInterceptAllocation = true;
+
 HyperplasmaCutter.prototype.doMultipleSelfIntercept = function (ship) {
     //Each cutter handles its own intercept group independently.
     //The player selects whichever cutter(s) they want and clicks intercept -
