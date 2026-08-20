@@ -392,7 +392,10 @@ window.shipManager = {
         lastpos.y = Math.floor(lastpos.y + movement.yOffset * gamedata.zoom);
         return lastpos;
     },
-
+    /*
+    onShipContextMenu: function onShipContextMenu(e) {
+        var id = $(e).data("id");
+        var ship = gamedata.getShip(id);
     // REMOVED 2026-08-20: onShipContextMenu, doShipContextMenu, onShipDblClick,
     // onShipClick and doShipClick. All five called window.shipSelectList, which was
     // deleted along with source/public/client/UI/shipSelect.js in commit 7ea324de3
@@ -409,6 +412,83 @@ window.shipManager = {
     // Found via a colour audit: the .shipSelectList rules in tactical.css (removed in
     // the same change) held the last two allegiance literals in the codebase sitting on
     // no brightness tier, which is what led back here. See [[arch_team_colour_logic]].
+
+        if (shipSelectList.haveToShowList(ship, e)) {
+            shipSelectList.showList(ship);
+        } else {
+            shipManager.doShipContextMenu(ship);
+        }
+    },
+
+    doShipContextMenu: function doShipContextMenu(ship) {
+
+        shipSelectList.remove();
+
+        if (shipManager.isDestroyed(ship)) return;
+
+        if (ship.userid == gamedata.thisplayer && (gamedata.gamephase == 1 || gamedata.gamephase > 2)) {
+            gamedata.selectShip(ship, false);
+            gamedata.shipStatusChanged(ship);
+            drawEntities();
+        } else {
+        }
+        return false;
+    },
+
+    onShipDblClick: function onShipDblClick(e) { },
+
+    onShipClick: function onShipClick(e) {
+        //console.log("click on ship");
+
+        if (!e || e.which !== 1) return;
+
+        e.stopPropagation();
+        var id = $(this).data("id");
+        var ship = gamedata.getShip(id);
+
+        if (shipSelectList.haveToShowList(ship, e)) {
+            shipSelectList.showList(ship);
+        } else {
+            shipManager.doShipClick(ship);
+        }
+    },
+
+    doShipClick: function doShipClick(ship) {
+
+        shipSelectList.remove();
+
+        if (ship == null) {
+            return;
+        }
+
+        if (gamedata.thisplayer == -1) return;
+
+        if (shipManager.isDestroyed(ship)) return;
+
+        if (gamedata.gamephase == 2) return;
+
+        if (gamedata.waiting) return;
+
+        if (ship.userid == gamedata.thisplayer) {
+            gamedata.selectShip(ship, false);
+        }
+
+        if (ship.userid != gamedata.thisplayer && gamedata.gamephase == 3) {
+            weaponManager.targetShip(ship, false);
+        }
+
+        if (gamedata.gamephase == 1 && ship.userid != gamedata.thisplayer) {
+            if (gamedata.selectedSystems.length > 0) {
+                weaponManager.targetShip(ship, false);
+            } else if (!ship.flight) {
+                ew.AssignOEW(ship);
+            }
+        }
+        gamedata.shipStatusChanged(ship);
+        drawEntities();
+        //scrolling.scrollToShip(ship);
+    },
+    */
 
 
     getPrimaryCnC: function getPrimaryCnC(ship) {
