@@ -8,7 +8,7 @@ class triadPhantom extends FighterFlight {
         $this->faction = "Custom Ships"; 
         $this->phpclass = "triadPhantom";
         $this->shipClass = "Neutrality: Phantom Medium Fighter";
-        $this->imagePath = "img/ships/novaSF.png";
+        $this->imagePath = "img/ships/triadPhantom.png";
         $this->isd = 'Primordial';
 		$this->factionAge = 4; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
 
@@ -19,6 +19,10 @@ class triadPhantom extends FighterFlight {
         $this->jinkinglimit = 8;
         $this->turncost = 0.33;
         $this->iniativebonus = 100;
+
+		$this->notes = "Max flight size of 6. Reduce offensive bonus by 5 for every fighter less than 6 in the flight.";
+
+        $this->maxFlightSize = 6;//limit flight size to 6 by design
 
         $this->populate();
     }
@@ -32,8 +36,8 @@ class triadPhantom extends FighterFlight {
             $armour = array(3, 4, 4, 4); // no armor sections
             $fighter = new Fighter("Phantom", $armour, 9, $this->id);
             $fighter->displayName = "Phantom";
-            $fighter->imagePath = "img/ships/novaSF.png";
-            $fighter->iconPath = "img/ships/NovaSF_Large.png";
+            $fighter->imagePath = "img/ships/triadPhantom.png";
+            $fighter->iconPath = "img/ships/triadPhantom_large.png";
 
             $gun = new MatterBolt(330, 30, 0);
             $gun->displayName = "Matter Bolt";

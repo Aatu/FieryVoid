@@ -33,6 +33,8 @@ window.BallisticIconContainer = function () {
 		this.ballisticLineIcons.forEach(icon => icon.used = false);
 		this.sceneObjects.forEach(entry => entry.used = false);
 
+//		const ballistics = replayData ?? weaponManager.getAllFireOrdersForAllShipsForTurn(gamedata.turn, 'ballistic');
+// GTS Change
 		const ballistics = replayData ?? weaponManager.getAllFireOrdersForAllShipsForTurn(gamedata.turn, 'ballistic');
 
 		ballistics.forEach(ballistic => {
@@ -79,6 +81,37 @@ window.BallisticIconContainer = function () {
 			}
 			return true;
 		});
+
+		// Phase 3: rebuild Flare hex grid from mode2FiredThisTurn since ballistic order is gone GTS_Change
+		if (gamedata.gamephase === 3 && !replayData) {
+			gamedata.ships.forEach(ship => {
+				ship.systems.forEach(system => {
+					if (system.name !== 'FlareGenerator') return;
+					if (system.mode2FiredThisTurn !== gamedata.turn) return;
+
+					const shooterIcon = iconContainer.getById(ship.id);
+					if (!shooterIcon) return;
+
+					const targetPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement().position);
+					if (!targetPosition) return;
+
+					const fakeBallistic = {
+						id: 'flare_' + ship.id + '_' + system.id,
+						shooterid: ship.id,
+						targetid: ship.id,
+						weaponid: system.id,
+						firingMode: 2,
+						turn: gamedata.turn,
+						type: 'ballistic',
+						damageclass: 'electromagnetic'
+					};
+
+					createOrUpdateBallistic.call(this, fakeBallistic, iconContainer, gamedata.turn, false);
+				});
+			});
+		}
+
+		generateBallisticLines.call(this);
 
 		generateBallisticLines.call(this);
 		generateTerrainHexes.call(this, gamedata);

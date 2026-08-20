@@ -1922,8 +1922,6 @@ class FlareGenerator extends Weapon implements DefensiveSystem {
             } else {
                 $damage = $damageByRange[2];
             }
-$this->changeFiringMode(2);
-error_log("FlareGenerator DEBUG: damageType=" . $this->damageType . " firingMode=" . $this->firingMode);
             $this->aoeFlashDamage($targetShip, $shooter, $fireOrder, $sourceHex, $damage, $gamedata);
         }
 
@@ -2000,12 +1998,6 @@ error_log("FlareGenerator DEBUG: damageType=" . $this->damageType . " firingMode
             }
         }
 
-        $orderCount = count($this->fireOrders);
-        $orderInfo = '';
-        foreach ($this->fireOrders as $o) {
-            $orderInfo .= "[mode={$o->firingMode} turn={$o->turn} type={$o->type}]";
-        }
-
         if ($mode2Active) {
             $distance = Mathlib::getDistanceHex($target, $shooter);
             if ($distance <= 0) return 0;
@@ -2041,6 +2033,16 @@ error_log("FlareGenerator DEBUG: damageType=" . $this->damageType . " firingMode
 
         return $this->passiveShieldStrength;
     }
+
+
+public function stripForJson() {
+    $strippedSystem = parent::stripForJson();
+    $strippedSystem->data = $this->data;
+    if ($this->mode2FiredThisTurn) {
+        $strippedSystem->mode2FiredThisTurn = true;
+    }
+    return $strippedSystem;
+}
 
 } //endof class FlareGenerator
 

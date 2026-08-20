@@ -589,7 +589,7 @@ GraviticAugmenter.prototype.onFireOrderCreated = function (fire) {
 // GTS_Triad
 var FlareGenerator = function FlareGenerator(json, ship) {
     Weapon.call(this, json, ship);
-    this.mode2FiredThisTurn = -1;
+    this.mode2FiredThisTurn = json.mode2FiredThisTurn ? gamedata.turn : -1;
 };
 FlareGenerator.prototype = Object.create(Weapon.prototype);
 FlareGenerator.prototype.constructor = FlareGenerator;
@@ -598,7 +598,7 @@ FlareGenerator.prototype.defensiveType = "Shield";
 FlareGenerator.prototype.defensiveSystem = true;
 
 FlareGenerator.prototype.getDefensiveHitChangeMod = function(target, shooter, weapon) {
-    if (this.ballistic && this.firingMode == 2) {
+    if (this.mode2FiredThisTurn === gamedata.turn) {
         var distance = mathlib.getDistanceBetweenShipsInHex(target, shooter);
         if (distance <= 0) return 0;
         if (distance <= 1) return 4;
@@ -609,7 +609,7 @@ FlareGenerator.prototype.getDefensiveHitChangeMod = function(target, shooter, we
 };
 
 FlareGenerator.prototype.getDefensiveDamageMod = function(target, shooter, weapon) {
-    if (this.ballistic && this.firingMode == 2) {
+    if (this.mode2FiredThisTurn === gamedata.turn) {
         var distance = mathlib.getDistanceBetweenShipsInHex(target, shooter);
         if (distance <= 0) return 0;
         if (distance <= 1) return 4;
