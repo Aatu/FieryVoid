@@ -196,3 +196,9 @@ var SpatialCutter = function SpatialCutter(json, ship) {
 };
 SpatialCutter.prototype = Object.create(Weapon.prototype);
 SpatialCutter.prototype.constructor = SpatialCutter;
+
+var AsteroidSalvo = function AsteroidSalvo(json, ship) {
+    Aoe.call(this, json, ship);
+};
+AsteroidSalvo.prototype = Object.create(Aoe.prototype);
+AsteroidSalvo.prototype.constructor = AsteroidSalvo;

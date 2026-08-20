@@ -34,7 +34,7 @@ window.BallisticIconContainer = function () {
 		this.sceneObjects.forEach(entry => entry.used = false);
 
 //		const ballistics = replayData ?? weaponManager.getAllFireOrdersForAllShipsForTurn(gamedata.turn, 'ballistic');
-// GTS Change
+// GTS_Change
 		const ballistics = replayData ?? weaponManager.getAllFireOrdersForAllShipsForTurn(gamedata.turn, 'ballistic');
 
 		ballistics.forEach(ballistic => {
@@ -622,8 +622,9 @@ window.BallisticIconContainer = function () {
 							case '3-Blanket Shade':
 								size = 5;
 								break;
-							case 'Asteroid Salvo':  //GTS for Triad Asteroid Salvo
-								sizes = [1, 2];
+							// GTS_Triad
+							case 'Asteroid Salvo':
+								size = 2;
 								break;
 						}
 

@@ -2055,7 +2055,7 @@ class spawnDustField extends Terrain {
         $this->faction = "Terrain";
         $this->factionAge = 1;
         $this->phpclass = "spawnDustField";
-        $this->imagePath = "img/ships/dust2.png";
+        $this->imagePath = "img/ships/dust.png";
         $this->canvasSize = 200;
         $this->shipClass = "Dust Field";
         $this->Enormous = true;

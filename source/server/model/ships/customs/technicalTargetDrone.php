@@ -9,7 +9,7 @@ class technicalTargetDrone extends VreeCapital
 		$this->pointCost = 5;
 		$this->faction = "Custom Ships";
 		$this->phpclass = "technicalTargetDrone";
-		$this->imagePath = "img/ships/triadDemon.png";
+		$this->imagePath = "img/ships/triadWraith.png";
 		$this->canvasSize = 200;
 		$this->shipClass = "Target Drone - DO NOT USE";
 		$this->shipSizeClass = 3;
@@ -50,7 +50,7 @@ class technicalTargetDrone extends VreeCapital
         $this->addPrimarySystem(new GraviticThruster(5, 16, 0, 9, 2));  
 		$this->addPrimarySystem(new GraviticThruster(5, 16, 0, 9, 4));	
 
-        $this->addPrimarySystem(new FlareGenerator(8, 16, 8, 0, 360));	
+//        $this->addPrimarySystem(new FlareGenerator(8, 16, 8, 0, 360));	
 //        $this->addPrimarySystem(new FlareShielding(8, 9, 6, 4, 0, 360));
 
         $this->addPrimarySystem(new CoopStructureSelfRepair(8, 24, 24)); //armor, structure, output
@@ -97,8 +97,8 @@ class technicalTargetDrone extends VreeCapital
 //        $this->addFrontSystem(new PhotonicPrismBeam(3, 24, 8, 270, 90));	
 //        $this->addFrontSystem(new PhotonicPrismBeam(3, 24, 8, 270, 90));	
 
-//        $this->addFrontSystem(new AsteroidSalvo(8, 30, 10, 270, 90));	
-//        $this->addFrontSystem(new AsteroidSalvo(8, 30, 10, 270, 90));	
+        $this->addFrontSystem(new AsteroidSalvo(8, 30, 10, 270, 90));	
+        $this->addFrontSystem(new AsteroidSalvo(8, 30, 10, 270, 90));	
 
 //        $this->addFrontSystem(new SpatialCutter(7, 22, 8, 270, 90));	
 //        $this->addFrontSystem(new SpatialCutter(7, 22, 8, 270, 90));	
