@@ -17,15 +17,15 @@
 
    This is a SIBLING of UI.shipMovement, not an extension of it. drawShipMovementUI is ~400 lines
    keyed to a ship (ship.movement, canTurn(ship), ...); threading vortex-ness through it would be
-   the wrong shape. What is reused is the technique: UI.shipMovement.drawUIElement is fully generic.
-   The art is the control's own (img/vortexleft.png, img/vortexright.png) and Ok is the WORD, in
-   --fv-warn yellow.
+   the wrong shape. What is reused is the technique, not the code: placeElement is drawUIElement's
+   geometry without its bitmap step. NOTHING here is an image - the two turn arrows are drawn as
+   arcs (drawCurvedArrow) and Ok is the WORD, both in --fv-warn yellow straight from tokens.css.
 
    LAYOUT: the whole control is RIGID and swings with the FACING - Ok directly in front of the
    facing arrow, the two turn buttons flanking it at +/-60 degrees on the side each one turns
-   towards, and both arrow bitmaps rotated by the facing so they keep pointing the way they point
-   at facing 0. So the arrow always points at the button that accepts it. The one exception is the
-   Ok label, which stays UPRIGHT at every facing. Their radius follows the zoom (see
+   towards, and both turn arrows DRAWN at the facing angle so the whole thing looks at every facing
+   exactly as it does at facing 0, just turned. So the arrow always points at the button that
+   accepts it. The one exception is the Ok label, which stays UPRIGHT. Their radius follows the zoom (see
    buttonDistance) because they are placed around the hex, which scales; #shipMovementUI's fixed
    pixels would put Ok inside the hex when zoomed in.
 
@@ -229,7 +229,7 @@ window.UI.vortexFacing = {
             //the vortex faces - which is the doorway the entry rule is about. It also matches the
             //visual weight of a ship's own heading arrow (canvasSize 200 / 1.5 on a capital).
             var size = window.HexagonMath.getHexHeight() * 1.15;
-            UI.vortexFacing.arrowSprite = new window.webglSprite('./img/directionOfMovement.png',
+            UI.vortexFacing.arrowSprite = new window.webglSprite('./img/directionOfVortex.png',
                 { width: size, height: size }, -99);
             UI.vortexFacing.arrowSprite.setPosition(UI.vortexFacing.gamePosition);
             scene.add(UI.vortexFacing.arrowSprite.mesh);
@@ -281,13 +281,11 @@ window.UI.vortexFacing = {
        conversion. x/y are 0 because only the delta from them is used; the container itself is
        anchored to the hex by reposition().
 
-       The two ICONS are also ROTATED by the facing (drawUIElement's 9th argument, which
-       drawAndRotate applies to the bitmap inside its own canvas, in the same clockwise-from-east
-       degrees as the position angle). Rotating by facingAngle - not by each button's own position
-       angle - keeps the whole control RIGID: it looks at every facing exactly as it does at facing
-       0, just turned. That is the same thing #shipMovementUI achieves by CSS-rotating its entire
-       container to the ship's heading, and it is what keeps each curved arrow's tangent aligned
-       with the circle the vortex mouth actually swings around. */
+       The two ICONS are also rotated by the facing, but they are DRAWN at that angle rather than
+       rotated as bitmaps (see drawCurvedArrow) - which is the whole reason they are not images.
+       Rotating by facingAngle, not by each button's own position angle, keeps the control RIGID:
+       it looks at every facing exactly as it does at facing 0, just turned. That is the same thing
+       #shipMovementUI achieves by CSS-rotating its entire container to the ship's heading. */
     drawButtons: function drawButtons() {
         var pending = UI.vortexFacing.pending;
         if (!pending) return;
@@ -298,18 +296,154 @@ window.UI.vortexFacing = {
 
         UI.vortexFacing.currentDistance = dis;
 
-        UI.shipMovement.drawUIElement(UI.vortexFacing.turnLeftElement, 0, 0, s, dis, facingAngle - 60,
-            "img/vortexleft.png", "vortexTurnLeftCanvas", facingAngle);
-        UI.shipMovement.drawUIElement(UI.vortexFacing.turnRightElement, 0, 0, s, dis, facingAngle + 60,
-            "img/vortexright.png", "vortexTurnRightCanvas", facingAngle);
+        UI.vortexFacing.placeElement(UI.vortexFacing.turnLeftElement, dis-15, facingAngle - 60, s);
+        UI.vortexFacing.drawCurvedArrow("vortexTurnLeftCanvas", s, facingAngle, false);
 
-        //Ok is the WORD, not a bitmap, so it is placed but not drawn - and unlike the two arrows it
-        //stays UPRIGHT at every facing, because nothing here ever rotates the container.
+        UI.vortexFacing.placeElement(UI.vortexFacing.turnRightElement, dis-15, facingAngle + 60, s);
+        UI.vortexFacing.drawCurvedArrow("vortexTurnRightCanvas", s, facingAngle, true);
+
+        //Ok is the WORD, so it is placed but not drawn - and unlike the two arrows it stays
+        //UPRIGHT at every facing, because nothing here ever rotates the container.
         UI.vortexFacing.placeElement(UI.vortexFacing.confirmElement, dis, facingAngle, s);
     },
 
-    /* drawUIElement minus its canvas step. The Ok button holds text, so there is no canvas for
-       graphics.getCanvas to find and drawUIimage would throw on the null context it returns. */
+    /* THE TURN ARROWS ARE DRAWN, NOT ROTATED.
+
+       They used to be img/vortexleft.png / img/vortexright.png fed through
+       UI.shipMovement.drawUIElement, whose drawAndRotate spins the bitmap inside its canvas. That
+       works, but you can SEE it: rotating a 40px raster resamples it, so every facing except 0
+       came out soft and the curve's edges crawled as it stepped round. An arc re-drawn at the
+       target angle is rasterised fresh each time and is crisp at all six, costs no asset, retunes
+       from one colour token, and scales to whatever box size it is handed.
+
+       $base is the facing angle; $clockwise picks which way the arrow curls (right = clockwise =
+       facing + 1). The glyph is a $SWEEP-degree arc centred on $base with a solid head at the
+       leading end, so the pair are mirror images about the facing axis - exactly what the two
+       bitmaps were.
+
+       ANGLES are graphics.js's convention throughout: degrees clockwise from east, screen y down.
+       That is also what canvas arc() measures, so they pass through with no conversion, and
+       getPointInDirection takes the NEGATED angle (compare drawCircleSegment / drawArrow). */
+    /* ---------------- TURN-ARROW GLYPH: THE KNOBS ----------------
+       All of these are meant to be retuned by eye - nothing else reads them, and nothing about the
+       vortex RULES depends on any of them. Fractions are of BUTTON_SIZE, so the glyph keeps its
+       proportions if that changes. What each one does:
+
+         ARROW_SWEEP      how much arc the shaft covers, in degrees, head included. THIS IS THE
+                          "make the shaft longer/shorter" knob. ~135 is a comma, ~215 is a
+                          three-quarter loop. Does not affect how much room the glyph needs.
+         ARROW_TILT       extra rotation of each glyph AWAY from the Ok arrow between them - the
+                          left one anticlockwise, the right one clockwise. 0 points both straight
+                          along the facing. Purely cosmetic; the buttons themselves do not move
+                          (that is the +/-60 in drawButtons).
+         ARROW_RADIUS     how far the shaft sits from the middle of its button.
+         ARROW_THICKNESS  shaft line width.
+         ARROW_HEAD_LEN   arrowhead length. Also sets how much arc the head eats: the stroke stops
+                          half a head-length short so the head does not sit on a round line cap.
+         ARROW_HEAD_HALF  arrowhead half-width, i.e. how chunky the point is.
+
+       ⚠️ THE ONE REAL CONSTRAINT: the head tip is the outermost part of the glyph, and the canvas
+       clips at half the box. Tip radius works out at roughly
+       ARROW_RADIUS + ARROW_HEAD_LEN * 0.7, which must stay under 0.5 with a little left over for
+       the 2px glow. At the values below that is 0.28 + 0.17 = 0.45, so there is room; push
+       ARROW_RADIUS or ARROW_HEAD_LEN much past that and the point gets shaved off. Growing
+       BUTTON_SIZE is the way to make the whole glyph bigger - the canvas is resized from here, so
+       the width/height in game.php's markup do not need to match. */
+    ARROW_SWEEP: 200,
+    ARROW_TILT: 18,
+    ARROW_RADIUS: 0.28,
+    ARROW_THICKNESS: 0.11,
+    ARROW_HEAD_LEN: 0.24,
+    ARROW_HEAD_HALF: 0.14,
+
+    drawCurvedArrow: function drawCurvedArrow(canvasId, box, base, clockwise) {
+        var ctx = window.graphics.getCanvas(canvasId);
+        if (!ctx) return;
+
+        /* HiDPI backing store. This is the point of drawing rather than rotating a bitmap, so do
+           not drop it and leave the arc soft again; min(dpr, 2) is the same cap webglScene's
+           renderer uses. Assigning width RESETS the context, hence the setTransform every pass. */
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        var el = ctx.canvas;
+        if (el.width !== box * dpr) {
+            el.width = box * dpr;
+            el.height = box * dpr;
+            el.style.width = box + "px";
+            el.style.height = box + "px";
+        }
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, box, box);
+
+        var cx = box / 2;
+        var cy = box / 2;
+        var r = box * UI.vortexFacing.ARROW_RADIUS;
+        var headLen = box * UI.vortexFacing.ARROW_HEAD_LEN;
+        var headHalf = box * UI.vortexFacing.ARROW_HEAD_HALF;
+        var half = UI.vortexFacing.ARROW_SWEEP / 2;
+
+        //Splay the pair apart: the left glyph leans anticlockwise, the right one clockwise, away
+        //from the Ok arrow sitting between them. Cosmetic - it does not move either button.
+        base += clockwise ? UI.vortexFacing.ARROW_TILT : -UI.vortexFacing.ARROW_TILT;
+
+        var start = clockwise ? base - half : base + half;
+        var end = clockwise ? base + half : base - half;
+        var headDir = end + (clockwise ? 90 : -90); //tangent at the leading end
+
+        //Stop the stroke where the head begins, or the head sits on top of a line cap.
+        var backoff = mathlib.radianToDegree((headLen * 0.5) / r);
+        var strokeEnd = clockwise ? end - backoff : end + backoff;
+
+        var colour = UI.vortexFacing.arrowColour();
+
+        ctx.strokeStyle = colour;
+        ctx.fillStyle = colour;
+        ctx.lineWidth = Math.max(3, box * UI.vortexFacing.ARROW_THICKNESS);
+        ctx.lineCap = "round";
+        //Same job the Ok label's text-shadow does: lift the glyph off whatever map is behind it.
+        ctx.shadowColor = "rgba(0,0,0,0.9)";
+        ctx.shadowBlur = 2;
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, mathlib.degreeToRadian(start), mathlib.degreeToRadian(strokeEnd), !clockwise);
+        ctx.stroke();
+
+        var tip = mathlib.getPointInDirection(r, -end, cx, cy, true);
+        tip = mathlib.getPointInDirection(headLen * 0.5, -headDir, tip.x, tip.y, true);
+        var back = mathlib.getPointInDirection(headLen, -(headDir + 180), tip.x, tip.y, true);
+        var b1 = mathlib.getPointInDirection(headHalf, -(headDir + 90), back.x, back.y, true);
+        var b2 = mathlib.getPointInDirection(headHalf, -(headDir - 90), back.x, back.y, true);
+
+        ctx.beginPath();
+        ctx.moveTo(tip.x, tip.y);
+        ctx.lineTo(b1.x, b1.y);
+        ctx.lineTo(b2.x, b2.y);
+        ctx.closePath();
+        ctx.fill();
+    },
+
+    /* Read from tokens.css rather than hard-coded, so the control's yellow cannot drift from the
+       one the vortex marker and its hex use - styles/tokens.css is the single :root block and the
+       only place a colour is defined. Cached: the value cannot change without a reload. */
+    arrowColour: function arrowColour() {
+        if (!UI.vortexFacing._arrowColour) {
+            var token = "";
+            try {
+                token = getComputedStyle(document.documentElement).getPropertyValue("--fv-warn");
+            } catch (e) {
+                token = "";
+            }
+            UI.vortexFacing._arrowColour = (token && token.trim()) || "#e1b000";
+        }
+        return UI.vortexFacing._arrowColour;
+    },
+
+    _arrowColour: null,
+
+    /* drawUIElement's geometry without its bitmap step - all three buttons are placed with this
+       and then painted (or not) separately, because none of them is an image any more. Same angle
+       convention: degrees clockwise from east, screen y down, negated into getPointInDirection.
+       x/y are implicitly 0 because only the delta from them was ever used; the container itself is
+       anchored to the hex by reposition(). */
     placeElement: function placeElement(e, dis, angle, box) {
         var pos = mathlib.getPointInDirection(dis, -angle, 0, 0);
         e.css("top", pos.y - box * 0.5 + "px").css("left", pos.x - box * 0.5 + "px");

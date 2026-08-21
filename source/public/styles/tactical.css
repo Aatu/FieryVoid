@@ -174,7 +174,7 @@ body {
     text-align: center;
     color: var(--fv-warn);
     font-weight: bold;
-    font-size: 17px;
+    font-size: 15px;
     letter-spacing: 0.5px;
     text-shadow: 0 0 4px #000, 0 0 2px #000;
     user-select: none;

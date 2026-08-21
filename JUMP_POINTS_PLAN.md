@@ -324,11 +324,28 @@ select Jump Engine (ballistic weapon)
 **The whole control is rigid and swings with the facing.** Ok sits directly in front of the facing
 arrow and the two turn buttons flank it at ±60°, each on the side it turns toward — so the arrow
 always points at the button that accepts it, and the left button is always the anticlockwise one.
-The two arrow bitmaps are **rotated by the facing as well** (`drawUIElement`'s 9th argument, in the
-same clockwise-from-east degrees as the position angle), so the control looks at every facing
-exactly as it does at facing 0, just turned — the same effect `#shipMovementUI` gets by CSS-rotating
-its whole container to the ship's heading. **The one exception is Ok**, which is the word in
-`--fv-warn` yellow and stays upright at every facing.
+The two turn arrows are angled to the facing as well, so the control looks at every facing exactly
+as it does at facing 0, just turned — the same effect `#shipMovementUI` gets by CSS-rotating its
+whole container to the ship's heading. **The one exception is Ok**, which is the word in `--fv-warn`
+yellow and stays upright at every facing.
+
+⭐ **Nothing in this control is an image.** The turn arrows started as `img/vortex{left,right}.png`
+spun by `drawUIElement`'s `drawAndRotate`, and you could *see* it: rotating a 40 px raster resamples
+it, so every facing except 0 came out soft and the curve's edges crawled as it stepped round.
+`UI.vortexFacing.drawCurvedArrow` draws each one as an arc plus a filled head straight into the
+button's canvas at the target angle — rasterised fresh, so crisp at all six facings, HiDPI-backed
+(`min(devicePixelRatio, 2)`, the cap `webglScene`'s renderer uses), no asset to ship, and the yellow
+read once from `--fv-warn` so it cannot drift from the marker's. Angles are `graphics.js`'s
+convention throughout (degrees clockwise from east, screen y down), which is also what canvas
+`arc()` measures, so they pass through unconverted. The two PNGs are now unused.
+
+**Retuning the glyph** is a block of six named constants on `UI.vortexFacing` (`ARROW_SWEEP`,
+`ARROW_TILT`, `ARROW_RADIUS`, `ARROW_THICKNESS`, `ARROW_HEAD_LEN`, `ARROW_HEAD_HALF`), each
+documented where it is declared. Nothing else reads them and no vortex *rule* depends on any of
+them, so they are safe to change by eye. The one constraint: the head tip is the outermost part of
+the glyph and the canvas clips at half the box, so `ARROW_RADIUS + ARROW_HEAD_LEN * 0.7` has to stay
+under ~0.47. `BUTTON_SIZE` is the knob for making the whole thing bigger — `drawCurvedArrow` resizes
+the canvas itself, so game.php's `width`/`height` attributes do not need to track it.
 
 Their radius follows the zoom (`UI.vortexFacing.buttonDistance`, clamped 58–130 px) because they are
 placed around the hex, which scales: `#shipMovementUI`'s fixed pixels would bury Ok inside the hex
@@ -608,22 +625,31 @@ first in the same submission anyway.
 
 **Second pass, same day (user feedback):** the control opens on **facing 0 every time** rather than
 on the ship's heading (§3.1); the whole control **swings rigidly with the facing** instead of sitting
-above the hex — buttons orbiting at a **zoom-relative** radius and both arrow bitmaps rotated to
-match; Ok is the **word in `--fv-warn` yellow**, not a tick, and is the one part that stays
-**upright**; and **deselecting the Jump Engine discards the transaction**. The user also recoloured the
-whole vortex livery from blue to `--fv-warn` yellow (`BallisticIconContainer`'s `case 'jumppoint'`,
-the preview hex, and new `img/vortex{left,right}.png` art).
+above the hex — buttons orbiting at a **zoom-relative** radius and the arrows angled to match; Ok is
+the **word in `--fv-warn` yellow**, not a tick, and is the one part that stays **upright**; and
+**deselecting the Jump Engine discards the transaction**. The user also recoloured the whole vortex
+livery from blue to `--fv-warn` yellow (`BallisticIconContainer`'s `case 'jumppoint'` and the
+preview hex). Finally the turn arrows stopped being images at all — rotating a bitmap was visibly
+resampling it, so they are **drawn** as arcs now (§3.5), and `img/vortex{left,right}.png`, added and
+superseded the same afternoon, are unused.
 
-Two notes from that pass worth keeping:
+Three notes from that pass worth keeping:
 - **The deselect hook goes in `weaponManager.unSelectWeapon`, not in `SystemIcon`.** That is the
   choke point every deselect route funnels through — the weapon-list icon toggle, `deselectShip`'s
   sweep when another ship is selected, and the phase teardown — so one three-line guard covers all
   of them. Ordering is safe: `confirm()` closes the control *before* calling `onConfirm`, so the
   `unSelectWeapon` at the end of `createJumpPointOrder` finds nothing pending.
-- **OK cannot go through `drawUIElement`.** That function ends in `graphics.getCanvas(canvasid)` →
+- **Ok cannot go through `drawUIElement`.** That function ends in `graphics.getCanvas(canvasid)` →
   `drawUIimage`, and a text button has no canvas: `getCanvas` returns null and `clearSmallCanvas`
-  throws on it. `UI.vortexFacing.placeElement` is `drawUIElement` minus the canvas step; the two
-  turn buttons still use the real thing.
+  throws on it. `UI.vortexFacing.placeElement` is `drawUIElement` minus the bitmap step — and once
+  the turn arrows became drawn arcs too, all three buttons went through it and the control stopped
+  calling `drawUIElement` at all.
+- **⭐ Rotating a small bitmap is visible; drawing at the angle is not.** The general lesson, not a
+  vortex one: any FV chrome that has to appear at an arbitrary angle should be stroked into its
+  canvas at that angle rather than fed to `drawAndRotate`. `graphics.js` already has the vocabulary
+  (`drawCircleSegment`, `drawArrow`) and the same angle convention as `drawUIElement`, so the swap
+  is local. Add a HiDPI backing store while you are there — `min(devicePixelRatio, 2)`, matching
+  `webglScene`'s renderer — or the result is still soft and the exercise was pointless.
 
 ### Stage 3 — the vortex unit
 `SpawnJumpPoint` + spawn sweep at the end of `InitialOrdersGamePhase::advance` + the note +
