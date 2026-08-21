@@ -65,8 +65,8 @@ class JaStat extends StarBaseFiveSections{
 
 		for ($i = 0; $i < sizeof($this->locations); $i++){
 
-			$min = 270 + ($i*72);
-			$max = 90 + ($i*72);
+			$min = (270 + ($i*72)) % 360;
+			$max = (90 + ($i*72)) % 360;
 			
 			/*some systems need pre-definition to have arcs set for TAGs!*/
 			$struct = Structure::createAsOuter(5, 90,$min,$max);
@@ -89,12 +89,6 @@ class JaStat extends StarBaseFiveSections{
 				new TwinArray(5, 6, 2, $min, $max),
 				new LightPulse(5, 4, 2, $min, $max),
 				new LightPulse(5, 4, 2, $min, $max),
-				/* replaced with arced systems - for TAG
-				new CargoBay(5, 36),
-				new SubReactorUniversal(5, 35, 0, 0),
-				new Hangar(5, 7, 6),
-				new Structure(5, 90)
-				*/
 				$cargoBay,
 				$subReactor,
 				$hangar,
@@ -113,7 +107,7 @@ class JaStat extends StarBaseFiveSections{
 				8 => "TAG:Cargo Bay",
 				9 => "TAG:Sub Reactor",
 				10 => "TAG:Hangar",
-				18 => "Outer Structure",
+				18 => "Structure",
 				20 => "Primary",
 			);
 

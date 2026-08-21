@@ -141,18 +141,6 @@ class VorlonStrikeCruiser extends VorlonCapitalShip{
 				18 => "Structure",
 				20 => "Primary",
 			),
-			31=> array( //Fwd
-				6 => "32:Thruster",
-				10 => "TAG:Lightning Gun",
-				18 => "32:Structure",
-				20 => "Primary",
-			),
-			41=> array( //Fwd
-				6 => "42:Thruster",
-				10 => "TAG:Lightning Gun",
-				18 => "42:Structure",
-				20 => "Primary",
-			),
 		);
 		
     }

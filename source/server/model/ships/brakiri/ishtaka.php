@@ -55,8 +55,8 @@ class Ishtaka extends StarBaseSixSections
 
 		for ($i = 0; $i < sizeof($this->locations); $i++){
 
-			$min = 0 + ($i*60);
-			$max = 120 + ($i*60);
+			$min = (0 + ($i*60)) % 360;
+			$max = (120 + ($i*60)) % 360;
 
             /*some systems need pre-definition to have arcs set for TAGs!*/
 			$struct = Structure::createAsOuter(5, 120,$min,$max);
@@ -89,7 +89,7 @@ class Ishtaka extends StarBaseSixSections
                     8 => "TAG:Gravitic Shifter",                                                              
                     11 => "TAG:Cargo Bay",
                     12 => "TAG:Sub Reactor",
-                    18 => "Outer Structure",
+                    18 => "Structure",
                     20 => "Primary",
 			);
 

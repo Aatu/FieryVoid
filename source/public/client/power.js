@@ -225,8 +225,10 @@ shipManager.power = {
 		return highestId;
 	},
 
+	//Returns ship OBJECTS, not names: the commit-error dialogs render these through
+	//gamedata.shipNameSpan, which needs ship.id to make the name clickable (scroll-to-ship).
 	getShipsGraviticShield: function getShipsGraviticShield() {
-		var shipNames = new Array();
+		var ships = new Array();
 		var counter = 0;
 
 		for (var i in gamedata.ships) {
@@ -244,16 +246,17 @@ shipManager.power = {
 			if (deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.
 
 			if (!ship.checkShieldGenerator()) {
-				shipNames[counter] = ship.name;
+				ships[counter] = ship;
 				counter++;
 			}
 		}
 
-		return shipNames;
+		return ships;
 	},
 
+	//Returns ship OBJECTS, not names - see getShipsGraviticShield above.
 	getShipsNegativePower: function getShipsNegativePower() {
-		var shipNames = new Array();
+		var ships = new Array();
 		var counter = 0;
 
 		for (var i in gamedata.ships) {
@@ -283,12 +286,12 @@ shipManager.power = {
 			var reactorPower = shipManager.power.getReactorPower(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 
 			if (reactorPower < 0 && shipManager.power.getRemainingFreeablePower(ship) > 0) {
-				shipNames[counter] = ship.name;
+				ships[counter] = ship;
 				counter++;
 			}
 		}
 
-		return shipNames;
+		return ships;
 	},
 
 	//Total reactor power the player could still free by voluntarily powering systems down
@@ -315,8 +318,9 @@ shipManager.power = {
 	},
 
 	//like getShipsNegativePower BUT only looks for PowerCapacitor-equipped ships
+	//Returns ship OBJECTS, not names - see getShipsGraviticShield above.
 	getCapacitorShipsNegativePower: function getCapacitorShipsNegativePower() {
-		var shipNames = new Array();
+		var ships = new Array();
 		var counter = 0;
 		for (var i in gamedata.ships) {
 			var ship = gamedata.ships[i];
@@ -330,15 +334,16 @@ shipManager.power = {
 			if (!(shipManager.systems.getSystemByName(ship, "powerCapacitor"))) continue;
 			if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship)) continue;
 			if (shipManager.power.getReactorPower(ship, shipManager.systems.getSystemByName(ship, "reactor")) < 0) {
-				shipNames[counter] = ship.name;
+				ships[counter] = ship;
 				counter++;
 			}
 		}
-		return shipNames;
+		return ships;
 	},	//endof getCapacitorShipsNegativePower
 
 
 	//like getShipsNegativePower BUT only looks for PlasmaBattery-equipped ships
+	//Returns ship OBJECTS, not names - see getShipsGraviticShield above.
 	getPlasmaBatteryShipsNegativePower: function getPlasmaBatteryShipsNegativePower() {
 		var batteryShips = new Array();
 		var counter = 0;
@@ -377,7 +382,7 @@ shipManager.power = {
 			}
 
 			if (batteryPowerAvailable < batteryPowerRequired) {
-				batteryShips[counter] = ship.name;
+				batteryShips[counter] = ship;
 				counter++;
 			}
 		}

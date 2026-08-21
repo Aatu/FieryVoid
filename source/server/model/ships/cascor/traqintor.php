@@ -14,6 +14,7 @@ class Traqintor extends SmallStarBaseFourSections{
 		$this->canvasSize = 200; 
 		$this->fighters = array("normal"=>48); 
 		$this->isd = 2219;
+		$this->variantOf = "OBSOLETE";
 
 		$this->shipSizeClass = 3; 
 		$this->Enormous = true;
@@ -54,7 +55,7 @@ class Traqintor extends SmallStarBaseFourSections{
 				8 => "TAG:Cargo Bay",
 			    9 => "TAG:Sub Reactor",
 			    10 => "TAG:Hangar",
-				18 => "Outer Structure",
+				18 => "Structure",
 				20 => "Primary",
 			),
 			2=> array(
@@ -64,7 +65,7 @@ class Traqintor extends SmallStarBaseFourSections{
 				8 => "TAG:Cargo Bay",
 			    9 => "TAG:Sub Reactor",
 			    10 => "TAG:Hangar",
-				18 => "Outer Structure",
+				18 => "Structure",
 				20 => "Primary",
 			),	
 			3=> array(
@@ -74,7 +75,7 @@ class Traqintor extends SmallStarBaseFourSections{
 				8 => "TAG:Cargo Bay",
 			    9 => "TAG:Sub Reactor",
 			    10 => "TAG:Hangar",
-				18 => "Outer Structure",
+				18 => "Structure",
 				20 => "Primary",
 			),
 			4=> array(
@@ -84,7 +85,7 @@ class Traqintor extends SmallStarBaseFourSections{
 				8 => "TAG:Cargo Bay",
 			    9 => "TAG:Sub Reactor",
 			    10 => "TAG:Hangar",
-				18 => "Outer Structure",
+				18 => "Structure",
 				20 => "Primary",
 			),
 		);

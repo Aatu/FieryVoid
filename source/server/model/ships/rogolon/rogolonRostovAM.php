@@ -72,7 +72,7 @@ class RogolonRostovAM extends HeavyCombatVessel{
         	1=> array(
         		6 => "Thruster",
         		8 => "Medium Plasma Cannon",
-        		10 => "Cargo",
+        		10 => "Cargo Bay",
         		18 => "Structure",
         		20 => "Primary",        			
         	),

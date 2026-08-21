@@ -85,7 +85,7 @@ class PrivateerHandus extends BaseShip{
 			),
 			1=> array(
 				6 => "Thruster",
-				8 => "Medium Laser Cannon",
+				8 => "Plasma Accelerator",
 				11 => "Light Particle Beam",
 				18 => "Structure",
 				20 => "Primary",

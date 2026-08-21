@@ -65,22 +65,6 @@ class LeonidasBetaAM extends OSAT{
 				19 => "Scanner",
 				20 => "Reactor",
 			),
-			1=> array(
-				9 => "Structure",
-				11 => "2:Thruster",
-				14 => "1:Class-SO Missile Rack",
-				17 => "1:Light Particle Beam",
-				19 => "0:Scanner",
-				20 => "0:Reactor",
-			),
-			2=> array(
-				9 => "Structure",
-				11 => "2:Thruster",
-				14 => "1:Class-SO Missile Rack",
-				17 => "1:Light Particle Beam",
-				19 => "0:Scanner",
-				20 => "0:Reactor",
-			),
         );
     }
 }

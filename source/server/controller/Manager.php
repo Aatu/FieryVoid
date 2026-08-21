@@ -779,10 +779,28 @@ class Manager{
                them inside one request. */
             $damageRows = array();
             $critRows   = array();
+            //Per-system enhancements, batched the same way and for the same reason
+            //(WEAPON_ENHANCEMENTS_PLAN.md §4.7).
+            $sysEnhRows = array();
 
             // ✅ Now you can associate ships, enhancements, ammo with $listId
             foreach ($ships as $ship) {
+                /* Re-sanitise BEFORE submitSavedShip, not after: that writer reads
+                   $ship->pointCostSysEnh into tac_saved_ship.enhvalue, so the authoritative
+                   total has to be on the ship by the time it runs. Re-derived rather than
+                   trusted (D4) - and re-derived AGAIN on load (§4.7.1), because a saved fleet
+                   outlives the blueprint it was priced against. */
+                $cleanSysEnh = Enhancements::sanitiseSystemEnhancements(
+                    $ship, $ship->systemEnhancements ?? array(),
+                    PreBattleDamage::sanitise($ship, $ship->preBattleDamage ?? array()));
+                $ship->pointCostSysEnh = $cleanSysEnh['total'];
+
                 $shipId = self::$dbManager->submitSavedShip($listId, $userid, $ship);
+
+                foreach ($cleanSysEnh['rows'] as $row) {
+                    //[shipid, systemid, sysname, enhid, count, enhname, enhvalue]
+                    $sysEnhRows[] = array($shipId, $row[6], $row[7], $row[0], $row[2], $row[1], $row[4]);
+                }
 
                 foreach($ship->enhancementOptions as $enhancementEntry){ //ID,readableName,numberTaken,limit,price,priceStep
                     $enhID = $enhancementEntry[0];
@@ -867,6 +885,7 @@ class Manager{
                 //Two statements for the whole fleet, however many wounds it carries.
                 if ($damageRows) self::$dbManager->submitSavedDamageRows($listId, $damageRows);
                 if ($critRows)   self::$dbManager->submitSavedCritRows($listId, $critRows);
+                if ($sysEnhRows) self::$dbManager->submitSavedSystemEnhancementRows($listId, $sysEnhRows);
 
                 self::$dbManager->endTransaction(false);
 
@@ -924,6 +943,8 @@ class Manager{
         $critsByShip = [];
         $critDesc = [];
         $critTransient = [];   //{critClass => true} for the one-turn ones, for the lobby's label
+        //Per-system refits that were dropped, clamped or re-priced on the way in (§4.7).
+        $sysEnhNotices = [];
         //$fleetPoints = 0;
 
         try {
@@ -939,6 +960,9 @@ class Manager{
             //carry listid with an index on it (db/prebattleDamage.sql).
             $damageByShip = self::$dbManager->getSavedDamageForList($listid);
             $critsByShip  = self::$dbManager->getSavedCritsForList($listid);
+
+            //Per-system enhancements: ONE query for the whole fleet, like the damage above.
+            $sysEnhByShip = self::$dbManager->getSavedSystemEnhancementsForList($listid);
 
             // Load enhancements and ammo for all ships
             foreach ($ships as $ship) {
@@ -979,6 +1003,47 @@ class Manager{
                         }
                     }
                     unset($option);
+                }
+
+                /* Per-system enhancements (WEAPON_ENHANCEMENTS_PLAN.md §4.7.1). AFTER
+                   setEnhancementOptions above, which is what builds the offer list the
+                   re-validation prices against.
+
+                   ⭐ Re-validated and RE-PRICED, never trusted. A saved fleet has no expiry and
+                   the blueprint it was priced against is PHP source that changes under it - a
+                   contributor revising a hull is the ROUTINE case, not an edge case. Resolution
+                   order, per row: no such systemid -> drop; name mismatch -> drop (D13); no
+                   longer eligible -> drop; over the current limit -> clamp; then re-price.
+                   Dropping is always the safe direction - the player loses points they get
+                   straight back and can re-buy in two clicks, whereas silently relocating a
+                   refit to whatever now sits at id 14 is not recoverable, because nobody
+                   notices. Stored rows arrive as
+                   [systemid, sysname, enhid, numbertaken, enhname, enhvalue]. */
+                $storedSysEnh = array();
+                $storedSysEnhTotal = 0;
+                foreach (($sysEnhByShip[$ship->id] ?? array()) as $entry) {
+                    $storedSysEnh[] = array(
+                        $entry[2], $entry[4], (int)$entry[3], 0, (float)$entry[5], 0, (int)$entry[0], $entry[1]
+                    );
+                    $storedSysEnhTotal += (float)$entry[5];
+                }
+                if ($storedSysEnh) {
+                    $cleanSysEnh = Enhancements::sanitiseSystemEnhancements($ship, $storedSysEnh);
+                    $ship->systemEnhancements = $cleanSysEnh['rows'];
+                    $ship->pointCostSysEnh    = $cleanSysEnh['total'];
+                    /* ⚠️ SPLIT THE BUCKETS APART AGAIN. tac_saved_ship.enhvalue stores all THREE
+                       added together (submitSavedShip), and getSavedShips hands the lot back as
+                       pointCostEnh - so leaving it would double-count every refit the moment
+                       doLoadFleet adds pointCostSysEnh on as well. Subtract what the refits
+                       contributed WHEN SAVED, then let the freshly re-derived total stand beside
+                       it: the difference between the two is exactly the re-pricing, and it lands
+                       in the right bucket. */
+                    $ship->pointCostEnh = max(0, (float)$ship->pointCostEnh - $storedSysEnhTotal);
+                    //Report every drop / clamp / re-price ONCE, fleet-wide. Silent point changes
+                    //on a loaded fleet are the kind of thing that gets noticed three battles later.
+                    foreach ($cleanSysEnh['notices'] as $notice) {
+                        $sysEnhNotices[] = $ship->name . ': ' . $notice;
+                    }
                 }
 
                 // Add Ammo
@@ -1037,7 +1102,10 @@ class Manager{
             'critDesc' => $critDesc,
             //which of those classes are one-turn effects, so the lobby's editable critical
             //list can say so rather than showing them as permanent
-            'critTransient' => $critTransient
+            'critTransient' => $critTransient,
+            //One string per per-system refit that was dropped, clamped or re-priced against the
+            //CURRENT blueprint (§4.7.1). Empty on the ordinary case; the lobby says it once.
+            'systemEnhancementNotice' => $sysEnhNotices
         ];
     }
 
@@ -1226,6 +1294,10 @@ class Manager{
             $ship->preBattleDamage = $value["preBattleDamage"] ?? array();
 
             $ship->enhancementOptions = $value["enhancementOptions"] ?? [];
+
+            //Per-system enhancements (§4.7). Raw here, re-validated and RE-PRICED by
+            //submitSavedFleet - a saved fleet outlives the blueprint it was priced against.
+            $ship->systemEnhancements = $value["systemEnhancements"] ?? array();
 
             // Map Mine deployment properties from frontend payload
             $ship->bulkBuy = $value["bulkBuy"] ?? 1;
@@ -1721,18 +1793,22 @@ class Manager{
     }
   
 
-    //New function called in Manager::getTacGamedata() to search for slots that skip Deployment on Turn 1 - DK July 2025 
+    //New function called in Manager::getTacGamedata() to search for slots that skip Deployment on Turn 1 - DK July 2025
     public static function updateLateDeployments($gamedata){
-        foreach($gamedata->slots as $slot){    
+        foreach($gamedata->slots as $slot){
             if($slot->depavailable > 1){
-                $depTurn = $gamedata->getMinTurnDeployedSlot($slot->slot, $slot->depavailable);
-                if($depTurn > 1){ //Bases and Terrain will need to deploy on Turn 1 still
-                    //Set lastphase, and lastTurn for slot to intial phase on next turn.                
+                //PLACEMENT turn, not arrival turn: reinforcements pick their entry hexes a turn
+                //early (BaseShip::getTurnPlaced). So a slot arriving on turn 2 places during
+                //Turn 1's Deployment phase alongside the main fleets and must NOT be skipped
+                //here; only turn-3-and-later arrivals still sit Turn 1 out.
+                $placeTurn = $gamedata->getMinTurnPlacedSlot($slot->slot, $slot->depavailable);
+                if($placeTurn > 1){ //Bases and Terrain will need to deploy on Turn 1 still
+                    //Set lastphase, and lastTurn for slot to intial phase on next turn.
                     self::$dbManager->updatePlayerSlotPhase($gamedata->id, $slot->playerid, $slot->slot, -1, 1);
-                }        
-            }    
-        }           
-    }    
+                }
+            }
+        }
+    }
 
 
     private static function changeTurn($gamedata){
@@ -1912,6 +1988,13 @@ class Manager{
 
             $ship->enhancementOptions = $value["enhancementOptions"] ?? [];
 
+            /* Per-system enhancements (WEAPON_ENHANCEMENTS_PLAN.md §4.5). Carried RAW here and
+               validated by Enhancements::sanitiseSystemEnhancements at the one place it is
+               consumed - BuyingGamePhase::process - which re-resolves every systemid, re-checks
+               eligibility and REPLACES the client's prices with the server's own (D4). Every
+               other phase ignores the field, so a client cannot inject a refit mid-game. */
+            $ship->systemEnhancements = $value["systemEnhancements"] ?? array();
+
             $systems = $value["systems"] ?? [];
             foreach ($systems as $i => $system) {
                 $sys = $ship->getSystemById($i);
@@ -2050,6 +2133,7 @@ class Manager{
                 }
     
                 if (isset($system["individualNotesTransfer"])) {
+
                     if ($sys) {
                         $sys->individualNotesTransfer = $system["individualNotesTransfer"];
                         $sys->doIndividualNotesTransfer();

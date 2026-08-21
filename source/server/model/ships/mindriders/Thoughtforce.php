@@ -114,7 +114,7 @@ class Thoughtforce extends MindriderCapital{
 				10 => "Ultra Pulse Cannon",
 				12 => "Thought Shield",
 				13 => "Second Sight",
-				14 => "Scanner",
+				14 => "ELINT Scanner",
 				15 => "Hangar",				
 				16 => "Engine",
 				17 => "Jump Engine",

@@ -78,7 +78,7 @@ class Adjudicator extends BaseShip{
                 3 => "Thruster",
                 7 => "Improved Blast Laser",
                 9 => "Medium Burst Beam",
-                10 => "EM-Wave Disruptor",
+                10 => "TAG:EM-Wave Disruptor",
                 18 => "Structure",
                 20 => "Primary",
             ),

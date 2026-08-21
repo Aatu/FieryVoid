@@ -143,6 +143,39 @@ CREATE TABLE `tac_enhancements` (
 
 
 --
+-- Table structure for table `tac_sys_enhancements`
+--
+-- PER-SYSTEM enhancements (WEAPON_ENHANCEMENTS_PLAN.md §3.3, D1). Additive twin of
+-- tac_enhancements, NOT a PK migration of it: six Twin Arrays each with Gunsights is six
+-- rows, so `systemid` has to be in the key, and rebuilding the key of the table every
+-- existing game reads on every load buys nothing.
+-- `sysname` is deliberately NOT in the key - the id is the identity, the name is the
+-- INTEGRITY CHECK (D13). System ids are pure constructor order, so a system inserted
+-- mid-constructor shifts every id after it; a row whose name no longer matches is DROPPED
+-- on load, never re-homed by searching for the name (plan §4.7.1).
+-- `enhvalue` is the price PAID, stored so a refund is exact. ⚠️ mysqli returns DECIMAL as
+-- a PHP STRING - cast on read (db/fractionalEnhancementValue.sql).
+--
+
+DROP TABLE IF EXISTS `tac_sys_enhancements`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tac_sys_enhancements` (
+  `gameid`      INT(11)       NOT NULL,
+  `shipid`      INT(11)       NOT NULL,
+  `systemid`    INT(11)       NOT NULL,
+  `sysname`     VARCHAR(50)   NOT NULL,
+  `enhid`       VARCHAR(10)   NOT NULL,
+  `numbertaken` INT(11)       NOT NULL,
+  `enhname`     VARCHAR(50)   NOT NULL,
+  `enhvalue`    DECIMAL(10,2) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`gameid`,`shipid`,`systemid`,`enhid`),
+  KEY `idx_shipid` (`shipid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+
+--
 -- Table structure for table `tac_critical`
 --
 
@@ -518,6 +551,42 @@ CREATE TABLE `tac_saved_enh` (
     FOREIGN KEY (`shipid`) REFERENCES `tac_saved_ship` (`id`)
     ON DELETE CASCADE,
   CONSTRAINT `fk_enh_list`
+    FOREIGN KEY (`listid`) REFERENCES `tac_saved_list` (`id`)
+    ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+
+--
+-- Table structure for table `tac_saved_sysenh`
+--
+-- PER-SYSTEM enhancements a saved fleet carries (WEAPON_ENHANCEMENTS_PLAN.md §3.3, D1).
+-- Additive twin of tac_saved_enh with `systemid` in the key, and the same double FK, so
+-- deleteSavedFleet keeps working untouched - these cascade away with the list.
+-- `sysname` is the D13 integrity check, not part of the identity: a saved fleet outlives
+-- the blueprint it was priced against, and a stored id that now names a differently-named
+-- system is dropped rather than applied to whatever moved into its slot.
+-- `enhvalue` is the price PAID; it is re-derived on load anyway (D4), but storing it keeps
+-- a refund exact and makes a re-price visible.
+--
+
+DROP TABLE IF EXISTS `tac_saved_sysenh`;
+
+CREATE TABLE `tac_saved_sysenh` (
+  `listid`      INT(11)       NOT NULL,
+  `shipid`      INT(11)       NOT NULL,
+  `systemid`    INT(11)       NOT NULL,
+  `sysname`     VARCHAR(50)   NOT NULL,
+  `enhid`       VARCHAR(10)   NOT NULL,
+  `numbertaken` INT(11)       NOT NULL,
+  `enhname`     VARCHAR(255)  NOT NULL,
+  `enhvalue`    DECIMAL(10,2) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`listid`,`shipid`,`systemid`,`enhid`),
+  KEY `idx_shipid` (`shipid`),
+  KEY `idx_listid` (`listid`),
+  CONSTRAINT `fk_sysenh_ship`
+    FOREIGN KEY (`shipid`) REFERENCES `tac_saved_ship` (`id`)
+    ON DELETE CASCADE,
+  CONSTRAINT `fk_sysenh_list`
     FOREIGN KEY (`listid`) REFERENCES `tac_saved_list` (`id`)
     ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;

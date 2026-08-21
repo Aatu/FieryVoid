@@ -65,7 +65,7 @@ class torataGoracFF extends MediumShip
 					),
 					2=> array(
 						6 => "Thruster",
-						9 => "Light Particle Beam",
+						9 => "0:Light Particle Beam",
 						17 => "Structure",
 						20 => "Primary",
 					),

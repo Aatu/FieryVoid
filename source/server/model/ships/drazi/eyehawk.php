@@ -52,7 +52,7 @@ class Eyehawk extends HeavyCombatVesselLeftRight{
         				6 => "Structure",
         				9 => "2:Thruster",
 					11 => "2:Jump Engine",
-        				14 => "Scanner",
+        				14 => "ELINT Scanner",
         				16 => "Engine",
         				17 => "Hangar",
         				19 => "Reactor",

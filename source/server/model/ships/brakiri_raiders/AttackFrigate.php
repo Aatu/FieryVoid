@@ -65,7 +65,7 @@ class AttackFrigate extends MediumShip{
 			1=> array(
 					4 => "Thruster",
 					8 => "Medium Bolter",
-					10 => "Standard Particle Beam",
+					10 => "0:Standard Particle Beam",
 					17 => "Structure",
 					20 => "Primary",
 			),

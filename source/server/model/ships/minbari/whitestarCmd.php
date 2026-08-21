@@ -69,7 +69,7 @@ class WhiteStarCmd extends MediumShip{
 				8 => "Self Repair",
 				10 => "Jammer",
 				12 => "Tractor Beam",
-				14 => "Sensors",
+				14 => "Scanner",
 				16 => "Engine",
 				17 => "Hangar",
 				19 => "Reactor",

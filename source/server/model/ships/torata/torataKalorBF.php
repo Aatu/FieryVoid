@@ -30,8 +30,15 @@ class torataKalorBF extends HeavyCombatVessel{
         $this->addPrimarySystem(new Thruster(3, 13, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 3, 4));        
 
-        $this->addLeftSystem(new CargoBay(2, 100));        
-        $this->addRightSystem(new CargoBay(2, 100));        
+        $cargo1 = new CargoBay(2, 100);
+		$cargo1->startArc = 180;
+		$cargo1->endArc = 360;
+		$this->addLeftSystem($cargo1); 
+
+        $cargo1 = new CargoBay(2, 100);
+		$cargo1->startArc = 0;
+		$cargo1->endArc = 180;
+		$this->addRightSystem($cargo1);       
 
 		
         $this->addFrontSystem(new Thruster(3, 12, 0, 4, 1));
@@ -52,15 +59,14 @@ class torataKalorBF extends HeavyCombatVessel{
                     6 => "Structure",
                     12 => "Thruster",
                     14 => "Scanner",
-            		16 => "Engine",
-            		17 => "Hangar",
-                    18 => "Reactor",
+            		17 => "Engine",
+                    19 => "Reactor",
                     20 => "C&C",
             ),
             1=> array(
                     5 => "Thruster",
             		7 => "Light Particle Beam",
-            		12 => "0:Cargo Bay",
+            		12 => "TAG:Cargo Bay",
                     18 => "Structure",
                     20 => "Primary",
             ),
@@ -68,7 +74,7 @@ class torataKalorBF extends HeavyCombatVessel{
                     4 => "Thruster",
             		6 => "Light Particle Beam",
             		8 => "Hangar",
-            		11 => "0:Cargo Bay",
+            		11 => "TAG:Cargo Bay",
                     18 => "Structure",
                     20 => "Primary",
             ),

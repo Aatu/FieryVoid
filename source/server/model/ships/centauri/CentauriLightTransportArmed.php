@@ -44,7 +44,7 @@ class CentauriLightTransportArmed extends LCV{
         		),
         		1=> array( //PRIMARY hit table, effectively
         				7 => "Structure",
-        				9 => "0:Twin Array",
+        				9 => "1:Twin Array",
         				15 => "0:Cargo Bay",
         				17 => "0:Engine",
         				19 => "0:Reactor",
@@ -52,7 +52,7 @@ class CentauriLightTransportArmed extends LCV{
         		),
         		2=> array( //same as Fwd
         				7 => "Structure",
-        				9 => "0:Twin Array",
+        				9 => "1:Twin Array",
         				15 => "0:Cargo Bay",
         				17 => "0:Engine",
         				19 => "0:Reactor",

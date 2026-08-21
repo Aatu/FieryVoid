@@ -50,8 +50,8 @@ class wlcChlonasVaLothar extends SmallStarBaseThreeSections{
 
 		for ($i = 0; $i < sizeof($this->locations); $i++){
 
-			$min = 270 + ($i*120);
-			$max = 90 + ($i*120);
+			$min = (270 + ($i*120)) % 360;
+			$max = (90 + ($i*120)) % 360;
 
 			/*some systems need pre-definition to have arcs set for TAGs!*/
 			$struct = Structure::createAsOuter(4, 154,$min,$max);

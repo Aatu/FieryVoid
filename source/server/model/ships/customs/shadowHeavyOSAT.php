@@ -109,12 +109,6 @@ class shadowHeavyOSAT extends OSAT{
                         18 => "Scanner",
 						20 => "Reactor",
                 ),
-                1=> array(
-                        20 => "Primary",
-                ),
-                2=> array(
-                        20 => "Primary",
-                ),
         );
     }
 }

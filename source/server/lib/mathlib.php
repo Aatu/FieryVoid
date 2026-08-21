@@ -133,8 +133,28 @@ class Mathlib{
         return $ret;
     }
     
+    /* Bearing at the middle of an arc. $start == $end means a full circle, whose "centre" is
+       simply opposite the start - which is what makes a catch-all 360 arc lose to any narrower
+       one under getAngleDistance. Used by BaseShip::doGetAttachSectionBearing to pick the
+       section an arc is centred on rather than merely contains. */
+    public static function getArcCentre($start, $end){
+        $start = fmod($start, 360);
+        $end   = fmod($end, 360);
+        $width = fmod($end - $start + 360, 360);
+        if ($width == 0) $width = 360;
+
+        return fmod($start + $width / 2, 360);
+    }
+
+    //Shortest angular separation between two bearings, 0-180.
+    public static function getAngleDistance($a, $b){
+        $d = fmod(abs($a - $b), 360);
+
+        return ($d > 180) ? 360 - $d : $d;
+    }
+
     public static function isInArc($direction, $start, $end){
-    
+
         if ($start == $end)
             return true;
             

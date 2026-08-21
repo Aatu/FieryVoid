@@ -74,7 +74,6 @@ class Shafab extends BaseShip{
             2=> array(
                     6 => "Thruster",
             		9 => "Scattergun",
-            		11 => "Jump Engine",
                     18 => "Structure",
                     20 => "Primary",
             ),

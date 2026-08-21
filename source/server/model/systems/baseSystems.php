@@ -979,6 +979,14 @@ class EMShield extends Shield implements DefensiveSystem{
     }
 }
 
+// GTS_Triad
+class FlareShielding extends EMShield{
+	public $name = "FlareShielding";
+    public $displayName = "Flare Shielding";
+    public $iconPath = "FlareShielding.png";
+
+}
+
 class GraviticShield extends Shield implements DefensiveSystem{
     public $name = "graviticShield";
     public $displayName = "Gravitic Shield";
@@ -1429,19 +1437,47 @@ class SubReactorUniversal extends ShipSystem{
 			$newFireOrder=null;
 		}
 
-		//destroy primary structure
+		/*which block goes up? A sub reactor mounted on a PSEUDO-section (a "quarter" such as
+		31/32/41/42, whose systems are homed on TWO real blocks via setStructureHome) has no
+		structure block of its own - getStructureSystem() would silently fall back to PRIMARY
+		and take the entire base with it. Detected by the fallback: the block handed back sits
+		on a different location than we do.*/
 		$ownStruct = $ship->getStructureSystem($this->location);
-		if($ownStruct){			
+		$isPseudoSection = (!$ownStruct) || ($ownStruct->location != $this->location);
+
+		if($isPseudoSection){
+			/*immolate the quarter itself instead - everything displayed there dies, while both
+			real home blocks are left intact. Killing either of them would be out of proportion
+			(a quarter reactor is roughly half the size of a full section's) and killing both
+			would take out half the base.*/
+			foreach($ship->systems as $sys){
+				if($sys === $this) continue; //already destroyed - that is why we are here
+				if($sys->location != $this->location) continue; //not in this quarter
+				if($sys instanceof Structure) continue; //a quarter has none, but never take a block out this way
+				if($sys->isDestroyed()) continue;
+				$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $sys->id, $sys->getRemainingHealth(), 0, 0, -1, true, false, "", "Reactor");
+				$damageEntry->updated = true;
+				$sys->damage[] = $damageEntry;
+				if($rammingSystem){ //add extra data to damage entry - so firing order can be identified!
+						$damageEntry->shooterid = $ship->id; //additional field
+						$damageEntry->weaponid = $rammingSystem->id; //additional field
+				}
+			}
+			return;
+		}
+
+		//destroy own structure (systems on the section fall off with it)
+		if($ownStruct){
             $remaining = $ownStruct->getRemainingHealth();
             $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $ownStruct->id, $remaining, 0, 0, -1, true, false, "", "Reactor");
             $damageEntry->updated = true;
-            $ownStruct->damage[] = $damageEntry;			
+            $ownStruct->damage[] = $damageEntry;
 			if($rammingSystem){ //add extra data to damage entry - so firing order can be identified!
 					$damageEntry->shooterid = $ship->id; //additional field
 					$damageEntry->weaponid = $rammingSystem->id; //additional field
 			}
-        }	
-    } //endof function criticalPhaseEffects	
+        }
+    } //endof function criticalPhaseEffects
 	
 	
 	//critical - add to primary reactor instead!
@@ -2002,7 +2038,14 @@ class ElintScanner extends Scanner implements SpecialAbility{
     public $name = "elintScanner";
     public $displayName = "ELINT Scanner";
     public $specialAbilities = array("ELINT");
-    public $iconPath = "elintArray.png";   
+    public $iconPath = "elintArray.png";
+	//hit-chart alias (getSystemsByNameLoc matches displayName OR hitChartName): 26 hulls mount an
+	//ELINT array as their ONLY scanner and chart that band as plain "Scanner" - without the alias
+	//those rolls match nothing and silently drop through to Structure. Hulls that spell out
+	//"ELINT Scanner" keep working (displayName still matches); baradaTomguScoutCruiser charts both
+	//names but at different locations, so they still resolve to the intended array each.
+	//NOTE: TAG: lookups (getSystemsByTag) do NOT consult hitChartName - use a tag for those.
+	public $hitChartName = "Scanner";
 
     function __construct($armour, $maxhealth, $powerReq, $output ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );
@@ -3301,7 +3344,7 @@ class SecondaryCnC extends ShipSystem{
 
 class FlagBridge extends CnC implements SpecialAbility {
     public $name = "cnC";
-    public $displayName = "CnC";
+    public $displayName = "C&C";
     
     public $initiativeBonus = 1;
     public $bonusType = 'Generic';
@@ -4051,7 +4094,16 @@ class Hangar extends ShipSystem{
 	public function generateIndividualNotes($gamedata, $dbManager){
 		$ship = $this->getUnit();
 		if (!$ship) return;
-		if ($ship->getTurnDeployed($gamedata) > $gamedata->turn) return;
+		/* PLACEMENT turn, not arrival turn. The deploy-start dock block below is resolved RIGHT
+		   NOW rather than at end of turn, and for a reinforcement carrier "now" is the Deployment
+		   phase of the turn BEFORE it arrives - its only Deployment phase. Reading getTurnDeployed
+		   here returned before that block ever ran, so a queued dock was silently dropped: the
+		   carrier arrived correctly on turn N and its fighters appeared at their off-board 'start'
+		   markers instead of in the hangar (user report, game 4302).
+		   Safe to run a turn early: the launch/dock/LCV order blocks are all no-ops unless the
+		   client POSTed a matching transfer (impossible for a unit with no phases of its own), and
+		   every snapshot tail is change-detected, so nothing spurious is written. */
+		if ($ship->getTurnPlaced($gamedata) > $gamedata->turn) return;
 
 		//A destroyed carrier never processes launch/dock/pool orders, but it MUST
 		//still reach the hangarUsage snapshot tail below: Stage 18's carrier-
@@ -4578,7 +4630,41 @@ class Hangar extends ShipSystem{
 		$strippedSystem->excludeFromDefaultShuttles = !empty($this->excludeFromDefaultShuttles); //steers default shuttles away from this bay (boxes still count toward capacity)
 		$strippedSystem->inadequate = !empty($this->inadequate); //Inadequate Hangars (Unreliable): client renders the trait + launch-abort/landing-damage outcomes
 		$strippedSystem->allowedFighterClasses = is_array($this->allowedFighterClasses) ? array_values($this->allowedFighterClasses) : array(); //per-bay fighter-class allow-list (empty = unrestricted); client mirrors the dock/launch eligibility gate
-		$strippedSystem->hangarUsage = $this->hangarUsage;
+		/*Bay contents and any queued launch/dock orders are own-team-only.
+		  $hangarUsage names every stored craft, so it discloses the shuttle composition an
+		  opponent never watched load (a MinesweepingShuttle aboard is real intel) and the exact
+		  free-box count of a bay they might be planning to cripple. The pending*Order fields are
+		  the sharper leak of the two: they are COMMITTED-BUT-UNRESOLVED Firing-Phase orders, so
+		  an opponent who has not committed yet could read off which bay is about to launch, in
+		  which direction, or which flight is being recovered - the same bleed shape the
+		  deleteHiddenData rules exist to close, masked here instead because these ride the system
+		  payload rather than a fire order.
+		  EXTERNAL MOUNTS ARE EXEMPT FROM THE CONTENTS MASK, but NOT from the order mask: a
+		  catapult's superheavy, a fighter rail's fighters, a docking collar's LCV and a
+		  ShadowHangar's integrated fighters all ride OUTSIDE the hull, so whether the mount is
+		  occupied is plainly apparent to an opponent (user ruling, same reasoning that keeps a
+		  fighter's hardpoint ammo public in AmmoMagazine below). Only an ENCLOSED hangar bay
+		  conceals what is inside it. Their queued orders still mask - an intention to launch next
+		  turn is not something you can see by looking at the hull.
+		  ShadowHangar has a SECOND, independent reason to stay disclosed: fleetList's
+		  integratedFighterCarrierAdjust derives the held integrated-fighter count from these
+		  entries to net LAUNCHED fighters off the carrier's Order-of-Battle value, and blanking
+		  them would silently drop an enemy Shadow carrier's displayed value by its whole
+		  complement. It leaks nothing either way - integratedFighterCount and
+		  integratedFighterPerCraft already ship to every viewer, and every launched integrated
+		  fighter is a visible flight row, so held = purchased - visible regardless.
+		  $launchedThisTurn/$landedThisTurn stay public - they are incremented at turn resolution,
+		  by which point the opponent has watched the craft cross the map.*/
+		$disclosed = $this->isDisclosedToCurrentViewer();
+		$externalMount = !empty($this->isCatapult) || !empty($this->isRail)
+					  || !empty($this->isLCVRail) || !empty($this->isShadowHangar);
+		$disclosedUsage = $disclosed || $externalMount;
+		//A list, so the empty case is a JSON [] and every Array.isArray() consumer still matches.
+		$strippedSystem->hangarUsage = $disclosedUsage ? $this->hangarUsage : array();
+		//Tells the client the bay is UNKNOWN rather than EMPTY - without it refreshHangarTooltip
+		//would render a confident "0 / N slots" off the blanked list, which is a false statement
+		//rather than a withheld one.
+		if (!$disclosedUsage) $strippedSystem->hangarUsageHidden = true;
 		$strippedSystem->launchedThisTurn = $this->launchedThisTurn;
 		$strippedSystem->landedThisTurn = $this->landedThisTurn;
 		//Stage 15: only the primary hangar carries the carrier-level reload pool.
@@ -4612,15 +4698,25 @@ class Hangar extends ShipSystem{
 		}
 		//Send last-submitted pending orders so the client can pre-fill the
 		//launch/dock dialogs after a page reload (re-edit a queued order
-		//mid-Firing-Phase, or cancel a queued dock).
-		if ($this->pendingLaunchOrder !== null) $strippedSystem->pendingLaunchOrder = $this->pendingLaunchOrder;
-		if ($this->pendingDockOrder !== null)   $strippedSystem->pendingDockOrder   = $this->pendingDockOrder;
+		//mid-Firing-Phase, or cancel a queued dock). Own team only - see above.
+		//The client hydrates both into empty arrays when absent, so withholding
+		//them needs no client-side guard of its own.
+		if ($disclosed) {
+			if ($this->pendingLaunchOrder !== null) $strippedSystem->pendingLaunchOrder = $this->pendingLaunchOrder;
+			if ($this->pendingDockOrder !== null)   $strippedSystem->pendingDockOrder   = $this->pendingDockOrder;
+		}
 		//LCV Rails: ship the rail→LCV link + last-submitted LCV orders so the client
 		//tooltip/dialog renders the occupant and pre-fills/cancels a queued order.
+		//The link and the orders split across the two gates: $lcvDocked IS this mount's
+		//occupancy (a rail holds one whole LCV and carries no hangarUsage), so it follows
+		//$disclosedUsage - which an LCV rail always satisfies, being an external mount -
+		//while the queued orders follow $disclosed with every other pending order.
 		if (!empty($this->isLCVRail)) {
-			if (is_array($this->lcvDocked)) $strippedSystem->lcvDocked = $this->lcvDocked;
-			if ($this->pendingLcvDockOrder   !== null) $strippedSystem->pendingLcvDockOrder   = $this->pendingLcvDockOrder;
-			if ($this->pendingLcvLaunchOrder !== null) $strippedSystem->pendingLcvLaunchOrder = $this->pendingLcvLaunchOrder;
+			if ($disclosedUsage && is_array($this->lcvDocked)) $strippedSystem->lcvDocked = $this->lcvDocked;
+			if ($disclosed) {
+				if ($this->pendingLcvDockOrder   !== null) $strippedSystem->pendingLcvDockOrder   = $this->pendingLcvDockOrder;
+				if ($this->pendingLcvLaunchOrder !== null) $strippedSystem->pendingLcvLaunchOrder = $this->pendingLcvLaunchOrder;
+			}
 		}
 		return $strippedSystem;
 	}
@@ -10644,15 +10740,48 @@ class AmmoMagazine extends ShipSystem {
 	
  	public function stripForJson(){
 		$strippedSystem = parent::stripForJson();
-		$strippedSystem->data = $this->data; 
-		//$strippedSystem->data['Special'] = $this->data['Special']; 
-		$strippedSystem->remainingAmmo = $this->remainingAmmo;
+		$strippedSystem->data = $this->data;
+		//$strippedSystem->data['Special'] = $this->data['Special'];
+		$strippedSystem->output = $this->output;
+		$strippedSystem->capacity = $this->capacity;           //printed SCS value - public
+		$strippedSystem->remainingAmmo = $this->remainingAmmo; //round TOTAL - public, see below
+		/*The at-a-glance on-icon number. Sent EXPLICITLY because the base stripForJson does not
+		  transmit outputDisplay (it is a blueprint field) and the static blueprint is built from an
+		  EMPTY magazine - the rounds come from lobby enhancements - so the blueprint's copy is
+		  worthless here. SystemFactory.createSystemFromJson merges Object.assign(blueprint,
+		  liveJson), so this one wins. A STRING deliberately: SystemIcon's getText() lets a NUMERIC
+		  0 fall through to the generic display (`0 != ''` is false in JS) but returns a string "0",
+		  which is what makes an emptied magazine read 0 instead of going blank.*/
+		$strippedSystem->outputDisplay = (string)$this->remainingAmmo;
+
+		/*The ordnance TYPES are own-team-only; the round TOTAL is not. An opponent may see how much
+		  a magazine still holds - and its capacity, a printed SCS value - but not WHAT it holds:
+		  whether those rounds are Interceptors or Antifighter is what decides whether they commit
+		  missiles. So ammoCountArray/ammoSizeArray go (the sizes name the ordnance aboard even
+		  where a count has reached zero) while remainingAmmo/output/outputDisplay stay.
+		  EXEMPT - FIGHTERS: a fighter's missiles ride EXTERNAL HARDPOINTS, so the load is there to
+		  be seen and counted (B5W). A flight's magazine keeps reporting its types in full.
+		  Both client consumers of the type arrays are own-ship-scoped - the commit-time ammo check
+		  (gamedata.js, iterates myShips) through doVerifyAmmoUsage, and getMagazineFireableAmmo
+		  through checkOutOfAmmo - so an enemy viewer loses nothing it could act on.
+		  data['Special'] is REBUILT rather than dropped: AmmoMagazine is one of the few systems
+		  that transmits data[] live, and its prose repeats the same per-type breakdown. The two
+		  surviving lines mirror setSystemDataWindow's wording so the public half reads identically
+		  - keep them in step if that text changes. PHP arrays are value types, so writing to the
+		  stripped copy cannot reach $this->data.*/
+		$unit = $this->getUnit();
+		$isFighterMagazine = ($unit !== null && !empty($unit->flight));
+		if (!$isFighterMagazine && !$this->isDisclosedToCurrentViewer()){
+			$strippedSystem->data['Special'] = "Technical system, keeping track of consumable ammo."
+				. "<br>Total rounds: " . $this->remainingAmmo . "/" . $this->capacity
+				. "<br>Ordnance types are known only to its own fleet.";
+			return $strippedSystem;
+		}
+
 		$strippedSystem->ammoCountArray = $this->ammoCountArray;
 		$strippedSystem->ammoSizeArray = $this->ammoSizeArray;
-		$strippedSystem->output = $this->output;	
-		$strippedSystem->capacity = $this->capacity;
 		return $strippedSystem;
-	} 
+	}
 	
     //add new kind of ordnance: ammo to be used (CLASS INSTANCE!), number of rounds to add (number)
 	//to be called only AFTER AmmoMagazine itself is fitted to unit!
@@ -12376,6 +12505,520 @@ class AmmoVedasC extends AmmoMissileTemplate{
 } //endof class AmmoVedasA
 
 
+// GTS_Triad
+class StructureSelfRepair extends ShipSystem {
+    public $name = "StructureSelfRepair";
+    public $displayName = "Structure Self Repair";
+    public $iconPath = "StructureSelfRepair.png";
+    public $primary = true;
+
+    public $output = 0;
+    public $maxRepairPoints = 0;   // ceiling = maxhealth * 10 (undamaged)
+    public $usedRepairPoints = 0;  // accumulated across all turns
+    public $usedThisTurn = 0;
+
+    /* Player-specified repair order: array of structure system IDs, highest priority first.
+       Empty = use default (destroyed first, then highest damage). Not persisted across turns. */
+    public $repairOrder = array();
+
+    public $repairPriority = 10;
+
+    public $boostable = false;
+    public $maxBoostLevel = 0;
+    public $boostEfficiency = 0;
+
+    protected $possibleCriticals = array(
+        19 => "OutputHalved"
+    );
+
+    function __construct($armour, $maxhealth, $output)
+    {
+        if ($maxhealth < 1) $maxhealth = 1;
+        if ($output < 1)    $output = 1;
+        parent::__construct($armour, $maxhealth, 0, 0, 0);
+        $this->output = $output;
+        $this->maxRepairPoints = $maxhealth * 10;
+    }
+
+    /* Capacity ceiling, scales with remaining health */
+    public function getCurrentMaxRepairPoints()
+    {
+        return $this->getRemainingHealth() * 10;
+    }
+
+    public function setSystemDataWindow($turn)
+    {
+        parent::setSystemDataWindow($turn);
+        $this->data["Repair points (used/max)"] = $this->usedRepairPoints . "/" . $this->getCurrentMaxRepairPoints();
+        $this->data["Special"]  = "Repairs damaged and destroyed structure blocks each turn, including damage caused this turn.";
+        $this->data["Special"] .= "<br>Will not engage if the primary structure block is destroyed (unit is destroyed).";
+        $this->data["Special"] .= "<br>Restoring a destroyed structure block reattaches all systems on that block; "
+                                 . "those systems retain their individual damage and destroyed status.";
+        $this->data["Special"] .= "<br>Default priority: destroyed blocks first, then most-damaged blocks.";
+        $this->data["Special"] .= "<br>Player may set a custom repair order using the 'Manage Structure Repair' menu during Initial Orders.";
+    }
+
+    private function getBoostLevel($turn)
+    {
+        $boostLevel = 0;
+        foreach ($this->power as $i) {
+            if ($i->turn != $turn) continue;
+            if ($i->type == 2)     $boostLevel += $i->amount;
+        }
+        return $boostLevel;
+    }
+
+    public function getEffectiveOutput($ship)
+    {
+        $turn   = TacGamedata::$currentTurn;
+        $boost  = $this->getBoostLevel($turn);
+        $output = $this->getOutput();
+        return $output + $boost;
+    }
+
+    public function criticalPhaseEffects($ship, $gamedata)
+    {
+        parent::criticalPhaseEffects($ship, $gamedata);
+
+        // Guard: primary structure destroyed means unit is destroyed — do not engage
+        foreach ($ship->systems as $system) {
+            if (!($system instanceof Structure)) continue;
+            if ($system->location == 0) {
+                if ($system->isDestroyed($gamedata->turn)) return;
+                break;
+            }
+        }
+
+        // Available points this turn
+        $availableRepairPoints = $this->getCurrentMaxRepairPoints() - $this->usedRepairPoints;
+        $availableRepairPoints = min($availableRepairPoints, $this->getEffectiveOutput($ship));
+        if ($availableRepairPoints < 1) return;
+
+        // Build repair queue
+        $repairQueue = array();
+
+        if (!empty($this->repairOrder)) {
+            // Player-specified order: walk repairOrder, pick up damaged blocks in that sequence,
+            // then append any remaining damaged blocks not mentioned in the order (default sort).
+            $byId = array();
+            foreach ($ship->systems as $system) {
+                if (!($system instanceof Structure)) continue;
+                $currentDamage = $system->maxhealth - $system->getRemainingHealth();
+                if ($currentDamage < 1) continue;
+                $byId[$system->id] = array(
+                    'obj'          => $system,
+                    'currentDamage'=> $currentDamage,
+                    'destroyed'    => $system->isDestroyed($gamedata->turn) ? 1 : 0,
+                );
+            }
+
+            // First pass: player-ordered blocks
+            $seen = array();
+            foreach ($this->repairOrder as $id) {
+                if (isset($byId[$id])) {
+                    $repairQueue[] = $byId[$id];
+                    $seen[$id] = true;
+                }
+            }
+
+            // Second pass: any damaged blocks not in the player order, default sort
+            $remainder = array();
+            foreach ($byId as $id => $entry) {
+                if (!isset($seen[$id])) $remainder[] = $entry;
+            }
+            usort($remainder, function($a, $b) {
+                if ($a['destroyed'] !== $b['destroyed']) return $b['destroyed'] - $a['destroyed'];
+                return $b['currentDamage'] - $a['currentDamage'];
+            });
+            $repairQueue = array_merge($repairQueue, $remainder);
+
+        } else {
+            // Default: destroyed first, then highest damage
+            foreach ($ship->systems as $system) {
+                if (!($system instanceof Structure)) continue;
+                $currentDamage = $system->maxhealth - $system->getRemainingHealth();
+                if ($currentDamage < 1) continue;
+                $repairQueue[] = array(
+                    'obj'          => $system,
+                    'currentDamage'=> $currentDamage,
+                    'destroyed'    => $system->isDestroyed($gamedata->turn) ? 1 : 0,
+                );
+            }
+            usort($repairQueue, function($a, $b) {
+                if ($a['destroyed'] !== $b['destroyed']) return $b['destroyed'] - $a['destroyed'];
+                return $b['currentDamage'] - $a['currentDamage'];
+            });
+        }
+
+        if (empty($repairQueue)) return;
+
+        // Execute repairs
+        foreach ($repairQueue as $job) {
+            if ($availableRepairPoints < 1) break;
+
+            $structureBlock = $job['obj'];
+            $currentDamage  = $job['currentDamage'];
+
+            $toBeFixed = min($currentDamage, $availableRepairPoints);
+            $undestroy = ($toBeFixed >= $currentDamage);
+
+            $damageEntry = new DamageEntry(
+                -1,
+                $ship->id,
+                -1,
+                $gamedata->turn,
+                $structureBlock->id,
+                -$toBeFixed,
+                0,
+                0,
+                -1,
+                false,
+                $undestroy,
+                'StructureSelfRepair',
+                'StructureSelfRepair'
+            );
+            $damageEntry->updated = true;
+            $structureBlock->damage[] = $damageEntry;
+
+            $availableRepairPoints  -= $toBeFixed;
+            $this->usedRepairPoints += $toBeFixed;
+            $this->usedThisTurn     += $toBeFixed;
+        }
+    }
+
+    /* Receive repair order from client (Initial Orders phase).
+       Format: one entry per structure block ID, semicolon-separated, in priority order. */
+	public function doIndividualNotesTransfer()
+	{
+		if (is_array($this->individualNotesTransfer) && count($this->individualNotesTransfer) > 0) {
+			$this->repairOrder = array();
+			foreach ($this->individualNotesTransfer as $noteReceived) {
+				$parts = explode(';', $noteReceived);
+				if ($parts[0] === 'order' && isset($parts[1])) {
+					$id = intval($parts[1]);
+					if ($id > 0) $this->repairOrder[] = $id;
+				}
+			}
+		}
+    $this->individualNotesTransfer = array();
+	}
+
+    /* Save usedThisTurn to DB. repairOrder is not persisted (resets each turn). */
+	public function generateIndividualNotes($gameData, $dbManager)
+	{
+		$ship = $this->getUnit();
+		switch ($gameData->phase) {
+			case 1: // Initial phase — save repair order
+				if ($ship->userid == $gameData->forPlayer) {
+					foreach ($this->repairOrder as $position => $systemId) {
+						$this->individualNotes[] = new IndividualNote(
+							-1, TacGamedata::$currentGameID, $gameData->turn, $gameData->phase,
+							$ship->id, $this->id, 'order', 'Structure repair order', $position . ';' . $systemId
+						);
+					}
+				}
+			case 4: // Firing phase — save points used
+				if ($this->usedThisTurn > 0) {
+					$this->individualNotes[] = new IndividualNote(
+						-1, TacGamedata::$currentGameID, $gameData->turn, $gameData->phase,
+						$ship->id, $this->id, 'used', 'Structure self-repair used', $this->usedThisTurn
+					);
+				}
+				break;
+		}
+	}
+
+    /* Reconstruct usedRepairPoints from saved per-turn totals */
+	public function onIndividualNotesLoaded($gamedata)
+	{
+		$orderEntries = array();
+		foreach ($this->individualNotes as $currNote) {
+			switch ($currNote->notekey) {
+				case 'used':
+					$this->usedRepairPoints += $currNote->notevalue;
+					break;
+				case 'order':
+					$parts = explode(';', $currNote->notevalue);
+					if (count($parts) === 2) {
+						$orderEntries[(int)$parts[0]] = (int)$parts[1];
+					}
+					break;
+			}
+		}
+		if (!empty($orderEntries)) {
+			ksort($orderEntries);
+			$this->repairOrder = array_values($orderEntries);
+		}
+		$this->individualNotes = array();
+	}
+
+    public function stripForJson()
+    {
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->data = $this->data;
+
+        // Send the full structure block list so the client can populate the repair-order UI.
+        // Each entry: { id, displayName, location, section }
+        // section is a human-readable label derived from location for display in the popup.
+        $ship = $this->getUnit();
+        $structureBlocks = array();
+        $sectionLabels = array(
+            0  => 'Primary Structure',
+            1  => 'Forward Structure',
+            2  => 'Aft Structure',
+            3  => 'Port Structure',
+            4  => 'Starboard Structure',
+            5  => 'Upper Structure',
+            6  => 'Lower Structure',
+        );
+        foreach ($ship->systems as $system) {
+            if (!($system instanceof Structure)) continue;
+            $loc = $system->location;
+            $label = isset($sectionLabels[$loc]) ? $sectionLabels[$loc] : ($system->displayName . ' (section ' . $loc . ')');
+            $structureBlocks[] = array(
+                'id'          => $system->id,
+                'displayName' => $label,
+                'location'    => $loc,
+            );
+        }
+        $strippedSystem->structureBlocks = $structureBlocks;
+
+        // Also send the current repairOrder so the client reflects any order set earlier this turn
+        if (!empty($this->repairOrder)) {
+            $strippedSystem->repairOrder = array_values($this->repairOrder);
+        }
+
+        return $strippedSystem;
+    }
+
+    public function hasMaxBoost()
+    {
+        return ($this->maxBoostLevel > 0);
+    }
+
+} // endof class StructureSelfRepair
+
+
+
+
+
+
+
+class CoopStructureSelfRepair extends StructureSelfRepair {
+    public $name = "CoopStructureSelfRepair";
+    public $displayName = "Cooperative Structure Self Repair";
+    public $iconPath = "StructureSelfRepair.png";
+
+    /* Range within which friendly units are eligible for cooperative repair */
+    const COOP_RANGE = 5;
+
+    public function setSystemDataWindow($turn)
+    {
+        parent::setSystemDataWindow($turn);
+        $this->data["Special"] .= "<br>Cooperative: after repairing own structure, remaining points are used to repair "
+                                 . "damaged structure blocks on friendly units within " . self::COOP_RANGE . " hexes.";
+        $this->data["Special"] .= "<br>Prioritises friendly units without any structure repair capability, then those with repair capability.";
+        $this->data["Special"] .= "<br>Within each tier, destroyed blocks are repaired first, then most-damaged blocks.";
+        $this->data["Special"] .= "<br>Will not assist units whose primary structure is destroyed.";
+    }
+
+    /* Returns true if a system is a functioning structure repair system (StructureSelfRepair or CoopStructureSelfRepair) */
+    private function hasWorkingStructureRepair($targetShip)
+    {
+        foreach ($targetShip->systems as $sys) {
+            if (($sys instanceof StructureSelfRepair) && !$sys->isDestroyed()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /* Returns true if the target ship's primary structure is destroyed */
+	private function isPrimaryDestroyed($targetShip, $gamedata)
+	{
+		if ($targetShip instanceof FighterFlight) return false; // handled by isFlightViable
+		foreach ($targetShip->systems as $sys) {
+			if (!($sys instanceof Structure)) continue;
+			if ($sys->location == 0) {
+				return $sys->isDestroyed($gamedata->turn);
+			}
+		}
+		return false;
+	}
+
+
+
+
+
+
+
+    /* Returns true if a fighter flight is still viable (has surviving fighters after dropout) */
+    private function isFlightViable($targetShip, $gamedata)
+    {
+        if (!($targetShip instanceof FighterFlight)) return true; // Not a fighter — always viable
+        // Check if flight has any surviving fighters
+        foreach ($targetShip->systems as $fighter) {
+            if (!$fighter->isDestroyed($gamedata->turn)) return true;
+        }
+        return false;
+    }
+
+    /* Build a flat list of damaged structure blocks on a target ship, sorted destroyed first then highest damage */
+	private function getDamagedStructureBlocks($targetShip, $gamedata)
+	{
+		$blocks = array();
+
+		if ($targetShip instanceof FighterFlight) {
+			// For fighter flights, each Fighter system IS the structure
+			foreach ($targetShip->systems as $fighter) {
+				if ($fighter->isDestroyed($gamedata->turn)) continue; // destroyed fighters can't be repaired
+				$currentDamage = $fighter->maxhealth - $fighter->getRemainingHealth();
+				if ($currentDamage < 1) continue;
+				$blocks[] = array(
+					'obj'          => $fighter,
+					'currentDamage'=> $currentDamage,
+					'destroyed'    => 0, // surviving fighters are not destroyed by definition
+				);
+			}
+		} else {
+			// For ships, look for Structure instances
+			foreach ($targetShip->systems as $sys) {
+				if (!($sys instanceof Structure)) continue;
+				$currentDamage = $sys->maxhealth - $sys->getRemainingHealth();
+				if ($currentDamage < 1) continue;
+				$blocks[] = array(
+					'obj'          => $sys,
+					'currentDamage'=> $currentDamage,
+					'destroyed'    => $sys->isDestroyed($gamedata->turn) ? 1 : 0,
+				);
+			}
+		}
+
+		usort($blocks, function($a, $b) {
+			if ($a['destroyed'] !== $b['destroyed']) return $b['destroyed'] - $a['destroyed'];
+			return $b['currentDamage'] - $a['currentDamage'];
+		});
+		return $blocks;
+	}
+
+
+
+
+
+
+
+
+
+    /* Apply repair points to a list of structure blocks. Returns points remaining. */
+    private function repairBlocks($blocks, $availableRepairPoints, $ship, $gamedata)
+    {
+        foreach ($blocks as $job) {
+            if ($availableRepairPoints < 1) break;
+
+            $structureBlock = $job['obj'];
+            $currentDamage  = $structureBlock->maxhealth - $structureBlock->getRemainingHealth();
+            if ($currentDamage < 1) continue; // Already repaired (by this ship's own SR, etc.)
+
+            $toBeFixed = min($currentDamage, $availableRepairPoints);
+            $undestroy = ($toBeFixed >= $currentDamage);
+
+            $damageEntry = new DamageEntry(
+                -1,
+                $ship->id,
+                -1,
+                $gamedata->turn,
+                $structureBlock->id,
+                -$toBeFixed,
+                0,
+                0,
+                -1,
+                false,
+                $undestroy,
+                'CoopStructureSelfRepair',
+                'CoopStructureSelfRepair'
+            );
+            $damageEntry->updated = true;
+            $structureBlock->damage[] = $damageEntry;
+
+            $availableRepairPoints  -= $toBeFixed;
+            $this->usedRepairPoints += $toBeFixed;
+            $this->usedThisTurn     += $toBeFixed;
+        }
+        return $availableRepairPoints;
+    }
+
+    public function criticalPhaseEffects($ship, $gamedata)
+    {
+        // Step 1: Run inherited self-repair pass (repairs own structure, respects player order)
+        parent::criticalPhaseEffects($ship, $gamedata);
+
+        if ($this->isDestroyed()) return;
+
+        // Step 2: Check remaining points after self-repair
+        $availableRepairPoints = $this->getCurrentMaxRepairPoints() - $this->usedRepairPoints;
+        $availableRepairPoints = min($availableRepairPoints, $this->getEffectiveOutput($ship));
+        if ($availableRepairPoints < 1) return;
+
+        // Step 3: Build eligible friendly target list
+        $tier1 = array(); // Friendlies without working structure repair
+        $tier2 = array(); // Friendlies with working structure repair
+
+        foreach ($gamedata->ships as $targetShip) {
+            // Must be friendly (same userid), not self
+            if ($targetShip->id === $ship->id) continue;
+            if ($targetShip->userid !== $ship->userid) continue;
+
+            // Primary structure must not be destroyed
+            if ($this->isPrimaryDestroyed($targetShip, $gamedata)) continue;
+
+            // Fighter flights must still be viable
+            if (!$this->isFlightViable($targetShip, $gamedata)) continue;
+
+            // Must be within range
+            if (Mathlib::getDistanceHex($targetShip, $ship) > self::COOP_RANGE) continue;
+
+            // Must have at least one damaged structure block
+            $blocks = $this->getDamagedStructureBlocks($targetShip, $gamedata);
+            if (empty($blocks)) continue;
+
+            $entry = array(
+                'ship'   => $targetShip,
+                'blocks' => $blocks,
+                // Sort key: destroyed block count descending, then total damage descending
+                'hasDestroyed' => ($blocks[0]['destroyed'] ? 1 : 0),
+                'totalDamage'  => array_sum(array_column($blocks, 'currentDamage')),
+            );
+
+            if ($this->hasWorkingStructureRepair($targetShip)) {
+                $tier2[] = $entry;
+            } else {
+                $tier1[] = $entry;
+            }
+        }
+
+        // Sort each tier: destroyed blocks first, then most total damage
+        $sortFn = function($a, $b) {
+            if ($a['hasDestroyed'] !== $b['hasDestroyed']) return $b['hasDestroyed'] - $a['hasDestroyed'];
+            return $b['totalDamage'] - $a['totalDamage'];
+        };
+        usort($tier1, $sortFn);
+        usort($tier2, $sortFn);
+
+        $targets = array_merge($tier1, $tier2);
+
+        // Step 4: Distribute remaining points across targets, block by block
+        foreach ($targets as $target) {
+            if ($availableRepairPoints < 1) break;
+            $availableRepairPoints = $this->repairBlocks(
+                $target['blocks'],
+                $availableRepairPoints,
+                $target['ship'],
+                $gamedata
+            );
+        }
+    }
+
+} // endof class CoopStructureSelfRepair
 
 
 

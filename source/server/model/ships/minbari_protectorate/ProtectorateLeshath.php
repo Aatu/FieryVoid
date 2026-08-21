@@ -98,9 +98,9 @@ class ProtectorateLeshath extends BaseShip{
                     20 => "Primary",
             ),
             4=> array(
-                    3 => "Thruster",
+                    4 => "Thruster",
                     8 => "Fusion Cannon",
-                    12 => "Neutron Laser",
+                    10 => "Electro-Pulse Gun",
                     18 => "Structure",
                     20 => "Primary",
             ),

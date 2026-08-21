@@ -239,10 +239,30 @@ window.PhaseStrategy = function () {
 
     PhaseStrategy.prototype.onScrollToShip = function (payload) {
         var icon = this.shipIconContainer.getById(payload.shipId)
-        if (!shipManager.shouldBeHidden(icon.ship)) {
-            window.webglScene.moveCameraTo(icon.getPosition())
-        } else {
+        //A ship with no icon has no position to scroll to (docked flight, undeployed,
+        //stale id). Callers guard for this, but a stray id must be a no-op, not a throw.
+        if (!icon) {
             return;
+        }
+        if (shipManager.shouldBeHidden(icon.ship)) {
+            return;
+        }
+
+        window.webglScene.moveCameraTo(icon.getPosition())
+
+        //Opt-in via payload.select, for callers where clicking a ship's name means "take me
+        //to it so I can do something about it" - the commit-dialog ship links. setSelectedShip
+        //is the primitive every selection path funnels through (selectShip, onShipRightClicked,
+        //selectShipInDeploymentPhase), so the previous ship is deselected, the weapon list and
+        //EW display follow, and each phase strategy stays consistent.
+        //
+        //canSelectShip carries each phase's own rule (own ships; in movement, only ships
+        //active in the current step), so a link click can neither declare a fire order nor
+        //jump the movement sequence. Ships that shouldBeHidden already returned above, and a
+        //ship with no icon never gets here - setSelectedShip would throw on
+        //getByShip(...).setSelected for both.
+        if (payload.select && this.canSelectShip(icon.ship)) {
+            this.setSelectedShip(icon.ship);
         }
     }
 
@@ -380,6 +400,15 @@ window.PhaseStrategy = function () {
         }
     };
 
+    //Whether `ship` may become the selected ship right now. The base rule is the one
+    //onShipClicked applies to a map click: your own ships select, anything else routes to
+    //targetShip instead. Phases with a tighter rule override this (MovementPhaseStrategy).
+    //Exists so programmatic selection - onScrollToShip, which has no map click to push
+    //through onShipClicked - obeys the same rule the player would hit on the board.
+    PhaseStrategy.prototype.canSelectShip = function (ship) {
+        return this.gamedata.isMyShip(ship);
+    };
+
     PhaseStrategy.prototype.setSelectedShip = function (ship) {
         if ($(".confirm").length > 0) return;
 
@@ -507,6 +536,14 @@ window.PhaseStrategy = function () {
         this.showAppropriateEW();
 
         if (window.LosSprite) mathlib.clearLosSprite();
+
+        //Both of these mutate the scene (mesh z, facing sprites, EW lines) outside the
+        //animation list, so the render-loop invariant applies. A hover that ORIGINATES ON
+        //THE CANVAS is masked: webglScene.mouseMove already requested a render for the same
+        //event. A hover driven from the DOM — the hex picker's rows — produces no canvas
+        //event at all, so without this the icon never actually redraws and the raise and
+        //the heading/facing sprites simply never appear.
+        if (window.webglScene) window.webglScene.requestRender();
     };
 
     PhaseStrategy.prototype.onMouseOverShips = function (ships, payload) {
@@ -570,6 +607,12 @@ window.PhaseStrategy = function () {
         icon.showBDEW();
         icon.showMDEW();
         icon.setHighlighted(true);
+
+        //See the note in onMouseOutShips: setHighlighted raises the icon out of the pile
+        //and shows its prow/movement sprites, which is a scene mutation and therefore has
+        //to ask for a frame. Canvas-driven hovers get one for free from
+        //webglScene.mouseMove; DOM-driven ones (the hex picker) do not.
+        if (window.webglScene) window.webglScene.requestRender();
     };
 
     PhaseStrategy.prototype.showShipEW = function (ship) {

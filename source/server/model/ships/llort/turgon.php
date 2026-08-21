@@ -80,7 +80,7 @@ class Turgon extends BaseShip{
         		),
         		2=> array(
         				6 => "Thruster",
-        				8 => "Scattegun",
+        				8 => "Scattergun",
          				18 => "Structure",
         				20 => "Primary",
         		),

@@ -57,7 +57,7 @@ class MitocJomic extends MediumShip{
             ),
             1=> array(
 				5 => "Thruster",
-				7 => "Medium Plasma",
+				7 => "Medium Plasma Cannon",
 				9 => "Light Particle Cannon",
 				17 => "Structure",
 				20 => "Primary",

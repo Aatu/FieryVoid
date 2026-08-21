@@ -51,8 +51,8 @@ class JaDan extends SmallStarBaseThreeSections{
 
 		for ($i = 0; $i < sizeof($this->locations); $i++){
 
-			$min = 300 + ($i*120);
-			$max = 60 + ($i*120);
+			$min = (300 + ($i*120)) % 360;
+			$max = (60 + ($i*120)) % 360;
 
 
 			/*some systems need pre-definition to have arcs set for TAGs!*/
@@ -74,12 +74,6 @@ class JaDan extends SmallStarBaseThreeSections{
 				new TwinArray(3, 6, 2, $min, $max),
 				new TwinArray(3, 6, 2, $min, $max),
 				new TwinArray(3, 6, 2, $min, $max),												
-				/* replaced with arced systems - for TAG
-				new SubReactorUniversal(3, 20),
-				new CargoBay(3, 24),				
-				new Hangar(3, 7),
-				new Structure( 3, 130)
-				*/
 				$subReactor,
 				$cargoBay,
 				$hangar,
@@ -96,7 +90,7 @@ class JaDan extends SmallStarBaseThreeSections{
 				9 => "TAG:Cargo Bay",				
 				10 => "TAG:Sub Reactor",				
 				11 => "TAG:Hangar",
-				18 => "Outer Structure",
+				18 => "Structure",
 				20 => "Primary",
 			);
 

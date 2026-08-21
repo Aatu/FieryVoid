@@ -35,7 +35,7 @@ class Shadrak extends SmallStarBaseFourSections{
 			0=> array(
 				11 => "Structure",
 				13 => "Cargo Bay",
-				15 => "Scanner",
+				15 => "ELINT Scanner",
 				16 => "Hangar",
 				19 => "Reactor",
 				20 => "C&C",

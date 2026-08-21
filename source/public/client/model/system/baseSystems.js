@@ -434,6 +434,24 @@ Hangar.prototype.refreshHangarTooltip = function () {
 		if (allowedLabel) this.data["Type"] = allowedLabel;
 	}
 
+	// Enemy/observer view of an ENCLOSED bay: Hangar::stripForJson withheld its contents
+	// (and any queued launch/dock orders) as own-team-only, sending hangarUsageHidden in
+	// their place. External mounts — catapults, fighter rails, docking collars, ShadowHangar
+	// bays — are exempt there and never reach this branch: their occupants ride outside the
+	// hull, so an opponent can see them and the normal projection below is correct.
+	// Report the bay as UNKNOWN and stop — running the projection below over the
+	// blanked list would render a confident "0 / N slots" and an empty stored-craft
+	// line, which states something false rather than withholding something true. The
+	// "Type" line above is blueprint-derived (the bay's declared category, printed on
+	// the SCS) so it stays. Own team, spectators of a FINISHED game, and every
+	// server-side caller never see this flag and take the full path.
+	if (this.hangarUsageHidden) {
+    	var currentHealth = shipManager.systems.getRemainingHealth(this)		
+		this.data["Capacity"] = currentHealth;
+		this.data["Stored Craft"] = "<br>???";
+		return;
+	}
+
 	// Hangar boxes a single stored craft occupies. A unitSize<1 craft (Vorlon
 	// Assault Fighter et al.) needs more than one box each; a unitSize>1 ultralight
 	// (Zorth) packs several per box and costs a FRACTIONAL 1/unitSize boxes (0.5).
@@ -998,6 +1016,20 @@ DockingCollar.prototype.doIndividualNotesTransfer = function () {
 // "(Recovering)" / "(Launching)" projection for queued orders this turn.
 DockingCollar.prototype.refreshHangarTooltip = function () {
 	if (!this.data) this.data = {};
+
+	// Safety net, not a live path: an LCV rail is an EXTERNAL mount, so Hangar::stripForJson
+	// exempts it from the contents mask and never raises this flag today (its occupant is
+	// plainly visible on the hull; only its queued LCV orders are withheld, and those
+	// hydrate to empty arrays on their own). Kept because the flag is written by shared
+	// inherited code — if a collar is ever put back inside the mask, the projection below
+	// would render a confident "0 / 1 slots" off the blanked link, which states something
+	// false rather than withholding something true.
+	if (this.hangarUsageHidden) {
+		this.data["Type"] = "LCVs";
+		this.data["Capacity"] = "Unknown";
+		this.data["Stored Craft"] = "<br>Contents not disclosed.";
+		return;
+	}
 
 	var lcvName = function (id) {
 		if (!id) return 'LCV';
@@ -1928,7 +1960,7 @@ HyachSpecialists.prototype.constructor = HyachSpecialists;
 
 HyachSpecialists.prototype.getCurrClass = function () {
 	var ship = this.ship;
-	if ((gamedata.turn === shipManager.getTurnDeployed(ship)) && gamedata.gamephase == -1 && this.specCurrClass == '') {
+	if ((gamedata.turn === shipManager.getTurnPlaced(ship)) && gamedata.gamephase == -1 && this.specCurrClass == '') {
 		var classes = Object.keys(this.allSpec);
 		if (classes.length > 0) {
 			this.specCurrClass = classes[0];
@@ -1945,7 +1977,7 @@ HyachSpecialists.prototype.nextCurrClass = function () { //get next class for di
 	this.getCurrClass();
 	if (this.specCurrClass == '') return ''; //this would mean there are no classes whatsover!
 	var ship = this.ship;
-	if (gamedata.turn === shipManager.getTurnDeployed(ship) && gamedata.gamephase == -1) {
+	if (gamedata.turn === shipManager.getTurnPlaced(ship) && gamedata.gamephase == -1) {
 		var classes = Object.keys(this.allSpec);
 		var currId = -1;
 		for (var i = 0; i < classes.length; i++) {
@@ -1975,7 +2007,7 @@ HyachSpecialists.prototype.prevCurrClass = function () { //get previous class fo
 	this.getCurrClass();
 	if (this.specCurrClass == '') return ''; //this would mean there are no classes whatsover!
 	var ship = this.ship;
-	if (gamedata.turn === shipManager.getTurnDeployed(ship) && gamedata.gamephase == -1) {
+	if (gamedata.turn === shipManager.getTurnPlaced(ship) && gamedata.gamephase == -1) {
 		var classes = Object.keys(this.allSpec);
 		var currId = -1;
 		for (var i = 0; i < classes.length; i++) {
@@ -2006,7 +2038,7 @@ HyachSpecialists.prototype.canSelect = function () { //check if can increase rat
 	this.getCurrClass();
 	if (this.specCurrClass == '') return false; //this would mean there are no Specialist classes whatsover!
 	var ship = this.ship;
-	if ((gamedata.gamephase !== -1) || gamedata.turn != shipManager.getTurnDeployed(ship)) return false;//Can only be selected in deployment phase on turn the ship deploys.
+	if ((gamedata.gamephase !== -1) || gamedata.turn != shipManager.getTurnPlaced(ship)) return false;//Can only be selected in the Deployment phase the ship is PLACED in - for a reinforcement that is the turn BEFORE it arrives, and its only such phase.
 
 	var totalSpecSelected = Object.values(this.availableSpec).reduce((accumulator, currentValue) => accumulator + currentValue, 0);
 	if (totalSpecSelected >= this.specTotal) return false;
@@ -2022,7 +2054,7 @@ HyachSpecialists.prototype.canSelect = function () { //check if can increase rat
 HyachSpecialists.prototype.canUnselect = function () { //can unselect Specialists on turn the ship deploys.
 	this.getCurrClass();
 	var ship = this.ship;
-	if ((gamedata.gamephase !== -1) || gamedata.turn != shipManager.getTurnDeployed(ship)) return false;//Can only be selected in deployment phase on turn the ship deploys.
+	if ((gamedata.gamephase !== -1) || gamedata.turn != shipManager.getTurnPlaced(ship)) return false;//Can only be selected in the Deployment phase the ship is PLACED in - for a reinforcement that is the turn BEFORE it arrives, and its only such phase.
 	if (this.specCurrClass == '') return false; //this would mean there are no Specialists whatsover!
 
 	if (this.currSelectedSpec[this.specCurrClass]) return true;	//If it's filled, you can unselect.
@@ -2417,7 +2449,7 @@ HyachSpecialists.prototype.refreshData = function () {
 		if (!this.specAllocatedCount[currType]) this.specAllocatedCount[currType] = 0; //Will show 1 if selected but not used, 0 if selected and used.
 		this.data[entryName] = Math.max(0, this.availableSpec[currType] - this.specAllocatedCount[currType]);
 
-		if (this.availableSpec[currType] == 0 && (gamedata.turn == shipManager.getTurnDeployed(ship)) && gamedata.gamephase == -1) { //This way it's removed form list on Turn 1 whenever it's deselected.
+		if (this.availableSpec[currType] == 0 && (gamedata.turn == shipManager.getTurnPlaced(ship)) && gamedata.gamephase == -1) { //This way it's removed form list on Turn 1 whenever it's deselected.
 			delete this.data[entryName];
 		}
 
@@ -2427,7 +2459,7 @@ HyachSpecialists.prototype.refreshData = function () {
 	}
 
 	var totalSpecSelected = Object.values(this.availableSpec).reduce((accumulator, currentValue) => accumulator + currentValue, 0);
-	if ((gamedata.turn == shipManager.getTurnDeployed(ship)) && gamedata.gamephase == -1) { //Show Specialists selected in Turn 1 Initial Orders only, then change to showing Specilists used.
+	if ((gamedata.turn == shipManager.getTurnPlaced(ship)) && gamedata.gamephase == -1) { //Show Specialists selected in Turn 1 Initial Orders only, then change to showing Specilists used.
 		this.data["Specialists"] = totalSpecSelected + '/' + this.specTotal;
 	} else {
 		this.data["Specialists"] = this.specTotal - this.specTotal_used;
@@ -3925,3 +3957,60 @@ MineControllerDEW.prototype.ensureMultiAllocatedShape = function () {
 	}
 	this.allocatedRanges = nested;
 };
+
+// GTS_Triad
+var StructureSelfRepair = function StructureSelfRepair(json, ship) {
+    ShipSystem.call(this, json, ship);
+    this.data = Object.assign({}, this.data);
+    // repairOrder: array of structure system IDs in player-specified priority order.
+    // Empty array = use server default (destroyed first, then highest damage).
+    // Not persisted across turns — resets to [] each Initial Orders phase.
+    this.repairOrder = (json && Array.isArray(json.repairOrder)) ? json.repairOrder.slice() : [];
+};
+StructureSelfRepair.prototype = Object.create(ShipSystem.prototype);
+StructureSelfRepair.prototype.constructor = StructureSelfRepair;
+
+StructureSelfRepair.prototype.initializationUpdate = function () {
+    if (this.outputDoubled) this.outputDisplay = this.output * 2;
+    return this;
+};
+
+/* getCurrentMaxRepairPoints: remaining health * 10, mirrors PHP side */
+StructureSelfRepair.prototype.getCurrentMaxRepairPoints = function () {
+    return this.getRemainingHealth() * 10;
+};
+
+/* Set a new repair order (array of structure system IDs, highest priority first).
+   Pass an empty array to restore the server default. */
+StructureSelfRepair.prototype.setRepairOrder = function (orderedIds) {
+    this.repairOrder = orderedIds ? orderedIds.slice() : [];
+};
+
+/* Serialize repairOrder for transfer to PHP in Initial Orders phase.
+   Each entry: "order;<systemId>" — one entry per block in priority order. */
+StructureSelfRepair.prototype.doIndividualNotesTransfer = function () {
+    this.individualNotesTransfer = Array();
+    for (var i = 0; i < this.repairOrder.length; i++) {
+        this.individualNotesTransfer.push('order;' + this.repairOrder[i]);
+    }
+    return true;
+};
+
+StructureSelfRepair.prototype.hasMaxBoost = function () {
+    return (this.maxBoostLevel > 0);
+};
+
+var CoopStructureSelfRepair = function CoopStructureSelfRepair(json, ship) {
+    StructureSelfRepair.call(this, json, ship);
+};
+CoopStructureSelfRepair.prototype = Object.create(StructureSelfRepair.prototype);
+CoopStructureSelfRepair.prototype.constructor = CoopStructureSelfRepair;
+
+/* Inherits everything from StructureSelfRepair:
+   - repairOrder / setRepairOrder / doIndividualNotesTransfer
+   - initializationUpdate
+   - getCurrentMaxRepairPoints
+   - hasMaxBoost
+   No client-side additions needed — cooperative repair logic runs entirely server-side
+   in criticalPhaseEffects. The UI (StructureSelfRepairList) works unchanged since
+   SystemInfoButtons checks for both names. */

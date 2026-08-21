@@ -19,19 +19,23 @@
 window.DeploymentDock = (function () {
 
     // True if $ship is one of MY carriers (has at least one hangar) during
-    // Deployment Phase AND the carrier itself is deploying THIS turn —
+    // Deployment Phase AND the carrier itself is being PLACED THIS turn —
     // fighters arriving on turn N can only dock into ships also arriving on
-    // turn N, so a previously-deployed carrier can never accept deploy-start
-    // docks. (Stage 7 originally surfaced the dock button on every friendly
-    // carrier to support cancelling previously-queued flights, but under the
-    // new same-turn-only rule no legitimate queue can exist on a previously-
-    // deployed carrier — those carriers are excluded entirely.)
+    // turn N, and both pick their entry this turn. (Stage 7 originally surfaced
+    // the dock button on every friendly carrier to support cancelling
+    // previously-queued flights, but under the same-turn-only rule no legitimate
+    // queue can exist on an already-placed carrier — those are excluded entirely.)
+    //
+    // ⚠️ PLACEMENT turn, not arrival turn. A late slot picks its entry hexes the
+    // turn BEFORE it arrives, and that is the only phase in which it can queue a
+    // deploy-start dock — reading getTurnDeployed here silently withheld the
+    // "Deploy Flights in Hangar" button from every reinforcement carrier.
     function shipHasOpenableDockDialog(ship) {
         if (!ship || !Array.isArray(ship.systems)) return false;
         if (!gamedata.isMyShip(ship)) return false;
         if (ship.flight) return false;                                   //flights can't carry flights
         if (gamedata.isTerrain && gamedata.isTerrain(ship.shipSizeClass, ship.userid)) return false;
-        if (shipManager.getTurnDeployed(ship) !== gamedata.turn) return false;
+        if (shipManager.getTurnPlaced(ship) !== gamedata.turn) return false;
 
         var hangars = collectAllHangars(ship);
         if (hangars.length > 0) return true;
@@ -136,9 +140,25 @@ window.DeploymentDock = (function () {
         return Math.max(0, effective - Math.ceil(used));
     }
 
+    // True when two units join the board on the SAME turn. A deploy-start dock puts the flight
+    // inside the carrier's hangar from the moment the carrier appears, so the two have to arrive
+    // together — a flight that shows up a turn later cannot already be aboard, and one that
+    // arrived a turn earlier is on the board and must use the Firing-Phase dock instead.
+    //
+    // ⚠️ This used to be implied and is now explicit. Both sides were once tested against
+    // `getTurnDeployed === gamedata.turn`, which forced them to share an arrival turn as a side
+    // effect. The placement-turn rewrite tests `getTurnPlaced` instead, and turn-1 and turn-2
+    // units are BOTH placed on turn 1 — so the pairing constraint silently vanished and a turn-1
+    // fighter could dock into a turn-2 carrier (user report, game 4302). Slot identity is not a
+    // substitute: a base or OSAT always arrives on turn 1 (BaseShip::getTurnDeployed) even in a
+    // late slot, so one slot can legitimately hold two different arrival turns.
+    function arrivesOnSameTurn(a, b) {
+        return shipManager.getTurnDeployed(a) === shipManager.getTurnDeployed(b);
+    }
+
     // Pending flights belonging to the same slot/player as $carrier that:
     //   - are FighterFlights
-    //   - are deploying THIS turn (deployment is still in progress for them)
+    //   - are being PLACED this turn AND arrive on the same turn as the carrier
     //   - aren't already destroyed/removed
     //   - aren't already queued in a DIFFERENT hangar
     //   - are positioned in the same hex as the carrier (visual co-location is
@@ -159,11 +179,13 @@ window.DeploymentDock = (function () {
             if (parseInt(s.userid, 10) !== parseInt(carrier.userid, 10)) continue;
             if (shipManager.isDestroyed(s)) continue;
             if (s.removed) continue;
-            //Only flights whose deployment IS this turn. Future reinforcements
-            //(> turn) aren't yet available; past-deployed flights (< turn) are
-            //already locked in on the board and can't be docked from here —
-            //they go through the Firing-Phase dock path instead.
-            if (shipManager.getTurnDeployed(s) !== gamedata.turn) continue;
+            //Only flights being PLACED this turn — for a late slot that is the turn before it
+            //arrives, which is when the deploy-start docks are queued. Later reinforcements
+            //(> turn) aren't yet available; already-placed flights (< turn) are locked in on
+            //the board and can't be docked from here — they go through the Firing-Phase dock
+            //path instead. And they must arrive WITH this carrier, not merely alongside it.
+            if (shipManager.getTurnPlaced(s) !== gamedata.turn) continue;
+            if (!arrivesOnSameTurn(s, carrier)) continue;
 
             //If queued on a DIFFERENT carrier, don't show — player can re-edit there.
             if (s.pendingDeployDock && s.pendingDeployDock.carrierId !== carrier.id) continue;
@@ -537,15 +559,23 @@ window.DeploymentDock = (function () {
     }
 
     // True if $carrier can accept $lcv as a deploy-start dock: $carrier is one of
-    // my ships deploying THIS turn (LCVs deploy-dock onto same-turn carriers, like
-    // fighters) and has a free LCV rail. $lcv must be an LCV unit.
+    // my ships being PLACED THIS turn (LCVs deploy-dock onto same-turn carriers,
+    // like fighters) and has a free LCV rail. $lcv must be an LCV unit.
+    // Placement turn, not arrival turn — see shipHasOpenableDockDialog.
     function carrierAcceptsLcvDeployDock(carrier, lcv) {
         if (!carrier || !lcv) return false;
         if (!gamedata.isMyShip(carrier)) return false;
         if (carrier.flight) return false;
         if (String(lcv.hangarRequired || '').toLowerCase() !== 'lcvs') return false;
         if (gamedata.isTerrain && gamedata.isTerrain(carrier.shipSizeClass, carrier.userid)) return false;
-        if (shipManager.getTurnDeployed(carrier) !== gamedata.turn) return false;
+        if (shipManager.getTurnPlaced(carrier) !== gamedata.turn) return false;
+        if (!arrivesOnSameTurn(carrier, lcv)) return false;  //must join the board together
+        //Same slot/owner, as the fighter path has always required (findPendingFlightsForCarrier,
+        //HangarOps::validateDeployBayOrders). A player's slots are separate fleets with separate
+        //deployment boxes, so an LCV starting inside another fleet's carrier is nonsense - and the
+        //server's LCV route has no slot check of its own, so this gate is the only one.
+        if (parseInt(carrier.slot, 10) !== parseInt(lcv.slot, 10)) return false;
+        if (parseInt(carrier.userid, 10) !== parseInt(lcv.userid, 10)) return false;
         return freeLcvDeployRails(carrier, lcv.id).length > 0;
     }
 
@@ -628,6 +658,7 @@ window.DeploymentDock = (function () {
 
     return {
         shipHasOpenableDockDialog:    shipHasOpenableDockDialog,
+        arrivesOnSameTurn:            arrivesOnSameTurn,
         carrierAcceptsLcvDeployDock:  carrierAcceptsLcvDeployDock,
         freeLcvDeployRailCount:       freeLcvDeployRailCount,
         freeLcvDeployRails:           freeLcvDeployRails,

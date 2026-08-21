@@ -33,6 +33,14 @@ class TacGamedata {
       unconditional and must stay that way. With nothing marked disguised it is the only thing left
       for that pass to do.*/
     public static $chameleonDisclosed = false;
+    /*The post-mortem discloses everything: once a game has ENDED its replay shows the standing
+      logistics state that was own-team-only while it was being played (ordnance loads, hangar
+      contents, queued launch/dock orders). Read by ShipSystem::isDisclosedToCurrentViewer(), which
+      is the gate on those masks. Set from isGameOver(), so SURRENDERED counts as well as FINISHED -
+      most dead games never leave SURRENDERED. A static because a ShipSystem has no route back to
+      $gamedata; re-set on every load, since one request can build gamedata twice. Defaults false so
+      a load that never reached onConstructed() masks rather than discloses.*/
+    public static $currentGameFinished = false;
 
     public $id, $turn, $phase, $activeship, $name, $status, $points, $background, $creator, $gamespace, $description;
     public $ships = array();
@@ -137,6 +145,7 @@ class TacGamedata {
 
     public function onConstructed(){
         self::$currentForPlayerTeam = $this->getPlayerTeam(); //viewer context (slots are loaded by now) - teammates see each other's hidden orders
+        self::$currentGameFinished = $this->isGameOver(); //post-mortem discloses private logistics (ammo loads, hangar contents)
         $this->setChameleonTeamList();
         $this->setBlockedHexes();
         $this->waitingForThisPlayer = $this->getIsWaitingForThisPlayer();
@@ -240,6 +249,17 @@ class TacGamedata {
         }
     }
     
+    /*Has this game ENDED? Both terminal statuses count, and in practice SURRENDERED is the usual
+      one: a surrender that leaves one team standing writes SURRENDERED, and only a subsequent
+      Manager::changeTurn promotes it to FINISHED - which most dead games never reach, because the
+      turn stops rolling. (Local corpus at the time of writing: 118 SURRENDERED vs 1 FINISHED.)
+      Same pairing DiscordNotifier already uses to decide a game is over.
+      NOT to be confused with isFinished() below, which asks a different question entirely - whether
+      two hostile ships can still fight - and is a game-STATE test, not a status one.*/
+    public function isGameOver(){
+        return ($this->status === "FINISHED" || $this->status === "SURRENDERED");
+    }
+
     public function isFinished(){
         foreach ($this->slots as $slot)
         {
@@ -1609,6 +1629,37 @@ private function setWaiting() {
 
         // Return slot value if no valid ships were found; otherwise return the lowest turn.
         return $depavailable;
+    }
+
+
+    /*The turn this SLOT gets its Deployment phase - the placement-turn twin of
+      getMinTurnDeployedSlot above. A late slot picks its entry hexes on depavailable-1 so the
+      resulting Jump Point markers give opponents a turn of warning; see BaseShip::getTurnPlaced.
+      Bases/OSATs/Terrain in the slot still force a turn-1 deployment, exactly as above - they
+      have to be placed manually before anything else happens.*/
+    public function getMinTurnPlacedSlot($slotid, $depavailable) {
+        $minTurnDeploy = $this->getMinTurnDeployedSlot($slotid, $depavailable);
+        return ($minTurnDeploy > 1) ? ($minTurnDeploy - 1) : $minTurnDeploy;
+    }
+
+
+    /*Has ANY ship in this slot already committed a deploy entry? (Destroyed ones count - a wreck
+      still proves the slot was placed.) Used only by the legacy
+      safety valve in FireGamePhase: a game that rolled past a late slot's placement turn under
+      the OLD (arrival-turn) rule would otherwise never be granted a Deployment phase at all and
+      its ships would be stranded off-board forever.
+      Deliberately "any", not "all": a slot can legitimately hold units with no deploy move of
+      their own (a flight queued for a hangar deploy-start dock writes no movement), so requiring
+      every ship to be placed would keep re-granting the phase for ever.*/
+    public function slotHasPlacedShips($slotid) {
+        foreach ($this->ships as $ship) {
+            if ($ship->slot != $slotid) continue;
+            if ($ship->userid == -5) continue; //generated terrain is never player-placed
+            foreach ($ship->movement as $move) {
+                if ($move->type == "deploy") return true;
+            }
+        }
+        return false;
     }
 
 

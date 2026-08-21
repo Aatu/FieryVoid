@@ -35,7 +35,7 @@ class JonkurFreighter extends MediumShip{
 
         $this->addFrontSystem(new Thruster(2, 6, 0, 2, 1));
         $this->addFrontSystem(new Thruster(2, 6, 0, 2, 1));
-        $this->addFrontSystem(new Hangar(2, 1, 1));
+        $this->addFrontSystem(new Hangar(2, 2, 1));
         $this->addFrontSystem(new CargoBay(1, 25));
         $this->addFrontSystem(new CargoBay(1, 25));
 
@@ -50,7 +50,7 @@ class JonkurFreighter extends MediumShip{
 	$this->hitChart = array(
 		0=> array(
 			9 => "Thruster",
-			12 => "Light Laser",
+			12 => "Scatter Pulsar",
 			14 => "Scanner",
 			16 => "Engine",
 			19 => "Reactor",

@@ -79,8 +79,16 @@ window.MovementPhaseStrategy = function () {
         PhaseStrategy.prototype.onHexClicked.call(this, payload);
     };
 
+    //Movement runs a sequential active-ship loop, so only a ship active in the current step
+    //can be selected - tighter than the base "any ship of mine". Lives here rather than
+    //inline in selectShip so programmatic selection (a commit-dialog ship link routed
+    //through PhaseStrategy.onScrollToShip) is held to the same rule as a map click.
+    MovementPhaseStrategy.prototype.canSelectShip = function (ship) {
+        return gamedata.getMyActiveShips().includes(ship);
+    };
+
     MovementPhaseStrategy.prototype.selectShip = function (ship, payload) {
-        if (gamedata.getMyActiveShips().includes(ship)) {
+        if (this.canSelectShip(ship)) {
             this.setSelectedShip(ship);
         }
 

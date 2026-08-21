@@ -55,7 +55,7 @@ class Athasa extends HeavyCombatVessel{
             0=> array(
                     6 => "Structure",
 					9 => "Thruster",
-					12 => "Scanner",
+					12 => "ELINT Scanner",
                     15 => "Engine",
                     17 => "Hangar",
                     19 => "Reactor",

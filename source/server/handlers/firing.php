@@ -321,7 +321,26 @@ class Firing
         //update intercepion totals!
         $shotsStillComing = $allIncomingShots;
         foreach ($allIncomingShots as $fireOrder) {
-            if (($fireOrder->type != "selfIntercept") && ($fireOrder->type != "intercept")) continue; //manually assigned interception - no others exist at this point
+            /* 'intercept' ONLY - deliberately NOT 'selfIntercept' (fixed 2026-08-18).
+            The two types live in different id spaces: an 'intercept' order's targetid is the id of
+            the FIRE ORDER being intercepted, but a 'selfIntercept' order's targetid is the SHIP's
+            own id (every one of the five client creation sites sets `targetid: ship.id` - see
+            weaponManager.setSelfIntercept / onDeclareSelfInterceptSingle and the doMultipleSelfIntercept
+            overrides in molecular.js, pulse.js, special.js). Matching one against the other below
+            was only ever a coincidence test, and when a tac_fireorder.id happened to equal a
+            tac_ship.id in the same game it fired twice over: the marker was credited as a real
+            interceptor against an unrelated shot (bumping totalIntercept/numInterceptors AND
+            running fireDefensively, so backlash triggered and an interceptor missile was drawn),
+            and the same weapon was then ALSO given a genuine intercept order by the automation
+            below - a double count.
+
+            A selfIntercept order is a PERMISSION MARKER, not an assignment: it says "this
+            long-recharge weapon consents to be auto-assigned". Its real consumer is
+            isValidInterceptor(), which requires it for loadingTimeActual > 1, plus the
+            split-weapon gun refund at the head of the assignment loop. Both are untouched by this
+            guard, so the weapon still enters the pool and still gets a real order - it just no
+            longer credits a shot nobody assigned it to. */
+            if ($fireOrder->type != "intercept") continue; //manually assigned interception - no others exist at this point
             //let's find WHAT is being intercepted and update interception totals!
             foreach ($shotsStillComing as $intercepted) {
                 if ($fireOrder->targetid == $intercepted->id) {
@@ -1089,7 +1108,7 @@ public static function firePreFiringWeapons($gamedata){
 	/*actual firing of weapons in normal Firing Phase
 	Marcin Sawicki, October 2017: at this stage, assume all necessary calculations (hit chance, target section), and only raw rolling remains!
 	*/
-    public static function fireWeapons($gamedata){	
+    public static function fireWeapons($gamedata, $dbManager = null){
         $rammingOrders  = array();
 
         //Reactor explosions and Ramming Orders first    
@@ -1269,8 +1288,12 @@ public static function firePreFiringWeapons($gamedata){
             }
         }
 
+        //Attachment outcomes are only known now, so units that failed to attach to an
+        //Enormous unit ram it here - see createFailedAttachRamOrders.
+        self::createFailedAttachRamOrders($gamedata, $dbManager);
+
         //Check if any ships have activate jump engines and do this after all other fire (in case they or their jump engine got destroyed)
-        foreach ($gamedata->ships as $ship) {   
+        foreach ($gamedata->ships as $ship) {
             
             $jumpList = $ship->getSystemsByName('Jump Engine'); //Won't return if Jump engine destroyed.
             if ($ship->faction === 'Shadow Association') { //PhasingDrive extends JumpEngine but has a different display name; only Shadow Association ships have one.
@@ -1285,6 +1308,125 @@ public static function firePreFiringWeapons($gamedata){
         }    	
 
     } //endof method fireWeapons
+
+
+    /* AUTO-RAM ON FAILED ATTACHMENT.
+     *
+     * RammingAttack::beforePreFiringOrderResolution skips every unit with the "Attaches"
+     * ability, because Pre-Firing runs a whole phase BEFORE the attach roll and has to
+     * assume the attachment will succeed. This is the other half of that skip: by the end
+     * of fireWeapons the roll has happened, so anything still unattached and sharing an
+     * Enormous unit's hex rams it, exactly as any other ship would. The Pre-Firing skip
+     * stays exactly as it is - that is what keeps the two paths from double-ramming.
+     *
+     * It has to be here rather than anywhere earlier or later. The attach outcome is only
+     * written (onDamagedSystem -> $shooter->attached) inside fireWeapons, and ram orders
+     * were gathered and resolved at the TOP of fireWeapons, so a ram created after the
+     * boarding roll cannot join that batch. criticalPhaseEffects is too late: an order
+     * created there would be persisted but never resolved, and would surface next turn.
+     *
+     * Consequences worth knowing:
+     *  - Ram damage lands AFTER normal weapons fire rather than before, and a pod shot down
+     *    earlier in the phase never rams (the isDestroyed guard makes that explicit).
+     *  - Bases are speed 0, so the speed difference is 0, so the attach auto-succeeds and
+     *    $attached is set - only a BLOCKED attach (section full, advanced armour, Ancient)
+     *    ever rams one.
+     *  - This ships more rams than before, because a unit that never declared an attach
+     *    (out of marines, drifted in) now rams a co-located Enormous unit too. That is the
+     *    general auto-ram rule the blanket skip was hiding.
+     */
+    public static function createFailedAttachRamOrders($gamedata, $dbManager = null)
+    {
+        foreach ($gamedata->ships as $shooter){
+            if (!$shooter->hasSpecialAbility("Attaches")) continue;
+            if ($shooter instanceof Terrain) continue;   //terrain collisions have their own path
+            if ($shooter->isDestroyed()) continue;       //shot down earlier this phase - no ram
+            if ($shooter->getTurnDeployed($gamedata) > $gamedata->turn) continue;
+
+            $ram = self::getRammingAttackSystem($shooter);
+            if (!$ram) continue;
+            if ($ram->autoFireOnly) continue; //immobile units carry one for technical purposes only
+
+            //A flight files ONE order naming its last live fighter, matching the Pre-Firing
+            //skin-dance path exactly, so a failed attach and a failed skin dance produce
+            //identical output.
+            $calledid = -1;
+            if ($shooter instanceof FighterFlight){
+                foreach ($shooter->systems as $fighter){
+                    if (!$fighter->isDestroyed()) $calledid = $fighter->id;
+                }
+            }
+
+            $movementThisTurn = $shooter->getLastTurnMovement($gamedata->turn + 1);
+            if (!$movementThisTurn) continue;
+
+            foreach ($gamedata->getShipsInDistance($shooter, 0) as $targetID => $target){
+                if ($targetID == $shooter->id) continue;              //do not ram self
+                if (!$target->Enormous) continue;                     //only Enormous units auto-ram
+                if ($target instanceof Terrain) continue;             //handled as a collision
+                if ($target->isDestroyed()) continue;
+                if ($target->getTurnDeployed($gamedata) > $gamedata->turn) continue;
+                if (isset($shooter->attached[$targetID])) continue;   //attached units never ram their host
+                if (isset($shooter->skinDancing[$targetID])) continue;
+                if ($ram->checkAlreadyRammed($targetID)) continue;
+
+                //don't duplicate a ram already declared this turn, manual or from Pre-Firing
+                $alreadyDeclared = false;
+                foreach ($ram->getFireOrders($gamedata->turn) as $existing){
+                    if ($existing->targetid == $targetID) $alreadyDeclared = true;
+                }
+                if ($alreadyDeclared) continue;
+
+                $fire = new FireOrder(
+                    -1, "normal", $shooter->id, $targetID,
+                    $ram->id, $calledid, $gamedata->turn, 1,
+                    0, 0, 1, 0, 0,
+                    $movementThisTurn->position->q, $movementThisTurn->position->r, 'TerrainCrash', 10000
+                );
+                $fire->pubnotes = "<br>COLLISION! Unit failed to attach and collided with the target!";
+                $fire->addToDB = true;
+
+                //Persist NOW so the order carries a real DB id before it resolves. The ram's
+                //return damage lands on the FIRING unit and its DamageEntry captures
+                //$fire->id; without a real id that is -1 and the pod's destruction never links
+                //to a combat-log row. Clearing addToDB stops FireGamePhase's later
+                //submitFireorders inserting a duplicate. Cast to int - insert ids come back as
+                //strings (see the spawned-ship string-id trap).
+                if ($dbManager) {
+                    $fire->id = (int)$dbManager->submitSingleFireorder($gamedata->id, $fire);
+                    $fire->addToDB = false;
+                }
+
+                //File it on the SHOOTER's own RammingAttack - Transverse Drive files its
+                //collision under the jumping ship instead, which persists but is misfiled.
+                $ram->fireOrders[] = $fire;
+
+                //Resolve immediately: the ram batch at the top of fireWeapons is long gone.
+                //calculateHitBase makes a TerrainCrash an automatic hit without touching
+                //chosenLocation, which is what the Pre-Firing auto-ram relies on too.
+                $ram->calculateHitBase($gamedata, $fire);
+                self::fire($shooter, $fire, $gamedata);
+            }
+        }
+    } //endof method createFailedAttachRamOrders
+
+
+    /* The RammingAttack a unit would ram with. A flight mounts one per FIGHTER (they are
+       subsystems), so take the first live fighter's - the flight files a single order. */
+    private static function getRammingAttackSystem($shooter)
+    {
+        if ($shooter instanceof FighterFlight){
+            foreach ($shooter->systems as $fighter){
+                if ($fighter->isDestroyed()) continue;
+                foreach ($fighter->systems as $sub){
+                    if (!empty($sub->isRammingAttack)) return $sub;
+                }
+            }
+            return null;
+        }
+
+        return $shooter->getSystemByName("RammingAttack");
+    }
 
 
     private static function fire($ship, $fire, $gamedata)
@@ -1302,7 +1444,24 @@ public static function firePreFiringWeapons($gamedata){
         $target = $gamedata->getShipById($fire->targetid);
 
         // If the target is an attached pod, weapon fires against it normally, but we also spawn a duplicate automatic hit against the host ship
-        if ($target && !empty($target->attached) && $target instanceof FighterFlight) {
+        //
+        // Two exclusions:
+        // - doesSkipAttachedHostHit(): weapons that must never damage a ship, plus every
+        //   hex-targeted weapon. An attached pod mirrors its host's movement so it is in the
+        //   hex whenever the host is, which turned Plasma Web's cloud - a hex-targeted
+        //   anti-fighter weapon - into a full-damage automatic hit on a capital ship.
+        // - Terrain collisions: RammingAttack::beforePreFiringOrderResolution already creates
+        //   a SEPARATE collision order for the host itself, so spilling the pod's order onto
+        //   it as well made a host dragging a pod through an asteroid field take collision
+        //   damage twice.
+        $spillsToHost = $target
+            && !empty($target->attached)
+            && $target instanceof FighterFlight
+            && !$weapon->doesSkipAttachedHostHit()
+            && $fire->damageclass !== 'TerrainCollision'
+            && $fire->damageclass !== 'TerrainCrash';
+
+        if ($spillsToHost) {
             $hostShipId = key($target->attached);
             $hostShip = $gamedata->getShipById($hostShipId);
             if ($hostShip && !$hostShip->isDestroyed() && $hostShip->userid !== -5) {

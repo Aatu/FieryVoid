@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 if (! isset($chatgameid ))
     $chatgameid = 0;
@@ -6,13 +6,288 @@ if (! isset($chatgameid ))
 if (! isset($chatelement))
     throw new Exception("\$chatelement is missing!");
 
+/*
+ * OPTIONAL PANEL HEAD
+ * -------------------
+ * Set $chattitle before the include and this file renders its own head bar (see
+ * .fv-chat-head in chat.css); $chatmeta is the smaller readout on its right. Leave
+ * $chattitle unset and no bar is rendered at all — game.php wants that, because its
+ * chat already sits behind a labelled tab in a 150px panel with no room to spare, and
+ * games.php wants it because it supplies its own .fv-panel-head to match the news and
+ * games panels beside it.
+ *
+ * Both are consumed and unset at the end of this file: game.php includes chat.php
+ * TWICE, and a title left set by the first include would leak into the second.
+ */
+$chattitle = isset($chattitle) ? (string)$chattitle : null;
+$chatmeta  = isset($chatmeta)  ? (string)$chatmeta  : null;
+
+/*
+ * The composer's placeholder. Derived from $chatgameid rather than hard-coded in the
+ * markup, because "Message all players" is a lie in game.php's GAME CHAT tab — which
+ * is why games.php used to patch this attribute from its own ready handler. It does
+ * not need to any more; this file knows which chat it is.
+ */
+$chatplaceholder = isset($chatplaceholder)
+    ? (string)$chatplaceholder
+    : ((int)$chatgameid === 0 ? "Message all players" : "Message this game");
+
+/*
+ * Set $chatcompact for a chat that has to live somewhere tight — game.php's log panel
+ * is 150px until the player expands it, and there every pixel the composer takes is a
+ * line of message it takes away. See .fv-chat-compact in chat.css.
+ */
+$chatcompact = !empty($chatcompact);
 ?>
 <link href="<?php echo AssetLoader::getAssetUrl('styles/chat.css'); ?>" rel="stylesheet" type="text/css">
 <script>
 (function(){
 
-    const POLL_INTERVAL = 6000;
-    const REQUEST_TIMEOUT = 5000;    
+    /* ── Poll pacing ──────────────────────────────────────────────────────────
+       Chat used to poll on a flat 6s timer that never decayed. That is 600 requests
+       an hour per chat for as long as the tab is open, and game.php runs TWO of them
+       (global + this game), so an abandoned tab was 1200 requests an hour forever.
+
+       The server side of an unchanged chat is now free of the database — chatdata.php
+       answers it straight out of APCu (see ChatManager::submitChatMessage, which keeps
+       the last message id there) — but the request itself is not free. Every call made
+       through ajaxInterface.ajaxWithRetry is chained onto ONE global request queue, so
+       each chat poll is a slot the gamedata poll cannot have.
+
+       So spend the requests where they buy something: poll fast while a conversation
+       is actually happening, and stand down when it is not. HOT is entered when a
+       message arrives, when the player sends one, and when they focus the composer —
+       which between them cover every moment somebody is waiting on a reply. Otherwise
+       the interval walks up the ladder below, one rung per poll that came back empty.
+
+       Against the old flat 6s that is roughly 3x faster in conversation and roughly
+       3x fewer requests when nobody is talking. */
+    const POLL_HOT     = 2000;
+    const HOT_DURATION = 60000;   // stay hot this long after the last sign of life
+
+    /* Rungs are [consecutive empty polls, interval]. Read top-down, first match wins;
+       the last entry is the floor. Deliberately gentler than gamedata's decay (which
+       reaches 30 MINUTES) — gamedata has the whole game screen to tell a player that
+       something happened, whereas an unpolled chat is simply silent, so 15s is as far
+       as this is allowed to drift. */
+    const POLL_LADDER = [[3, 4000], [8, 6000], [20, 10000], [Infinity, 15000]];
+
+    /* Backgrounded tabs keep polling rather than stopping dead, so the CHAT tab can
+       still light up while the player is reading a rules PDF in another tab. Browsers
+       clamp background timers hard (and freeze them outright when the tab is fully
+       discarded), so this costs less than the arithmetic suggests. */
+    const POLL_HIDDEN = 60000;
+
+    const REQUEST_TIMEOUT = 5000;
+
+    /* Retry ceiling for playerChatInfo.php. That endpoint has no APCu fast path — every
+       call is two real queries — so its retries have to terminate. See getLastTimeChecked. */
+    const TIME_CHECK_MAX_FAILS = 3;
+
+    /* ── Emoji ────────────────────────────────────────────────────────────────
+       The picker's contents. Four short groups rather than one long grid: the
+       panel is scrollable, and a labelled group is findable in a way that row 6
+       of an undifferentiated wall of faces is not. Kept to what people actually
+       reach for in a game chat — this is a wargame's message bar, not a keyboard.
+
+       Anything in here is stored as an HTML numeric entity by the server (see
+       ChatManager::submitChatMessage), so it survives a 3-byte utf8 column. */
+    const EMOJI_GROUPS = [
+        { label: "Reactions", emoji: ["🙂","😀","😄","😆","🤣","😉","😍","😎","🤔","😐","🙄","😏","😴","😢","😭","😤","😡","🤯","😱","🥳"] },
+        { label: "Gestures",  emoji: ["👍","👎","👌","✌️","🤞","👏","🙏","💪","🫡","🖖","👀","🤷","🤦","👋","🤝"] },
+        { label: "Battle",    emoji: ["🚀","🛸","🛰️","🌌","⭐","💫","☄️","🔥","💥","⚡","🎯","🛡️","⚔️","💣","☠️","💀","🔧","⚙️","📡","🔋"] },
+        { label: "Signals",   emoji: ["✅","❌","❓","❗","⚠️","🎲","🏆","🥇","❤️","💔","🍺","🎉","⏳","🆘"] }
+    ];
+
+    /* Classic text smileys, swapped for the real thing as the message is sent (so
+       what is stored is what everyone sees, including anyone who never types them).
+       Longest token first — the alternation below is ordered, so ":-)" has to get a
+       look before ":)" or it would never match. */
+    const EMOTICONS = {
+        ":-)": "🙂",  ":)": "🙂",
+        ":-D": "😄",  ":D": "😄",
+        ";-)": "😉",  ";)": "😉",
+        ":-(": "🙁",  ":(": "🙁",
+        ":-P": "😛",  ":P": "😛",  ":p": "😛",
+        ":-O": "😮",  ":O": "😮",  ":o": "😮",
+        ":'(": "😢",
+        "xD": "😆",   "XD": "😆",
+        "<3": "❤️",
+        "\\o/": "🙌",
+        "o7": "🫡"
+    };
+
+    /* Only matched when the token stands alone between spaces, so "10:00" and a
+       smiley at the end of a URL are both left alone. The leading (^|\s) is a
+       capture rather than a lookbehind for Safari's sake — lookbehind is recent
+       there, and this file has to run on whatever the player brought. */
+    const EMOTICON_RE = new RegExp(
+        "(^|\\s)(" +
+        Object.keys(EMOTICONS)
+              .sort(function(a, b){ return b.length - a.length; })
+              .map(function(t){ return t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); })
+              .join("|") +
+        ")(?=\\s|$)", "g"
+    );
+
+    /* ── Shared poll coordinator ──────────────────────────────────────────────
+       game.php includes this file TWICE — global chat and this game's chat — and each
+       include is its own IIFE with its own `chat`. They used to poll independently:
+       two requests every interval, two slots in ajaxInterface's single global request
+       queue, asking two questions that fit comfortably in one. Both are answered out
+       of the same APCu segment by the same process, so the second request bought
+       nothing but a round trip.
+
+       The loop therefore lives on `window`, not in the closure. Whichever include
+       starts first builds it; the second joins. One timer, one request carrying every
+       member's (gameid, lastid), one response fanned back out by gameid.
+
+       games.php and gamelobby.php include this file once, so there the coordinator has
+       a single member and behaves exactly as the old per-chat loop did.
+
+       Pacing is shared because the request is: interval() takes the MINIMUM over the
+       members, so a hot chat pulls its quiet neighbour along with it. That neighbour
+       costs nothing extra — it is the same request either way — and it keeps its own
+       quietPolls ladder, so it returns to its own rhythm as soon as the hot one cools. */
+    var coordinator = window.fvChatPoll;
+    if (!coordinator) {
+        coordinator = window.fvChatPoll = {
+            members: [],
+            timer: null,
+            requesting: false,
+
+            add: function(c){
+                if (coordinator.members.indexOf(c) === -1) coordinator.members.push(c);
+            },
+
+            live: function(){
+                return coordinator.members.filter(function(c){ return c.polling; });
+            },
+
+            interval: function(){
+                var live = coordinator.live();
+                var best = null;
+                for (var i = 0; i < live.length; i++){
+                    var v = live[i].pollInterval();
+                    if (best === null || v < best) best = v;
+                }
+                return best === null ? POLL_HIDDEN : best;
+            },
+
+            /* THE ONLY PLACE A POLL IS SCHEDULED, and it clears the pending timer
+               before setting a new one. That is deliberate: it makes two concurrent
+               poll chains impossible by construction.
+
+               They used to be very possible, and the cost was not a one-off doubling.
+               The visibilitychange handler cleared chat.polling on hide and then set
+               it and called requestChatdata() directly on show, while the previous
+               timeout was still pending — so both went on to schedule their own
+               successors. The `requesting` guard collapsed them only when they fired
+               at the same instant; a switch partway through the interval leaves them
+               staggered, and both chains survive. Measured against the old file: three
+               staggered tab switches left FOUR live chains, i.e. one extra permanent
+               chain per switch, growing for as long as the tab stays open, with no
+               symptom but the request count. */
+            schedule: function(delay){
+                if (coordinator.timer){
+                    clearTimeout(coordinator.timer);
+                    coordinator.timer = null;
+                }
+                if (!coordinator.live().length) return;
+                coordinator.timer = setTimeout(function(){
+                    coordinator.timer = null;
+                    coordinator.poll();
+                }, delay === undefined ? coordinator.interval() : delay);
+            },
+
+            /* A freshness report that cost us no request of our own.
+               ─────────────────────────────────────────────────────────
+               game.php polls gamedata.php every 4-8s while a game is live, and that
+               file's APCu fast-poll reply now carries the same chat watermarks
+               chatdata.php would have returned (see gamedata.php). Called from
+               ajaxInterface.successRequest with that map.
+
+               Three outcomes:
+                 - a chat is BEHIND     -> real messages exist; fetch them right now
+                 - every chat CONFIRMED unchanged -> bank it as a quiet poll and push
+                   our own request out. This is what takes steady-state chat traffic on
+                   an active game to zero: as long as gamedata reports in more often
+                   than our own interval, our timer never reaches zero.
+                 - anything unknown     -> learn nothing, change nothing
+
+               Our own timer deliberately remains the floor. gamedata's interval decays
+               to 30s, then 30 minutes, then stops; chat must not inherit that, so when
+               the reports become rarer than our ladder, our timer simply fires first
+               and we are back to polling normally. */
+            observe: function(chatIds){
+                if (!chatIds) return;
+                var live = coordinator.live();
+                if (!live.length) return;
+
+                var behind = false, covered = 0;
+                live.forEach(function(c){
+                    var id = chatIds[c.gameid];
+                    if (id === undefined || id === null) return;   // nothing said about this chat
+                    covered++;
+                    if (c.lastid < id){
+                        behind = true;
+                        c.markHot();
+                    }
+                });
+
+                if (!covered) return;
+                if (behind){ coordinator.schedule(0); return; }
+
+                // Only a partial report — cannot conclude the page is up to date.
+                if (covered < live.length) return;
+
+                // Counted exactly as receive() counts an empty reply, so the ladder
+                // backs off the same way whether the news came free or was paid for.
+                live.forEach(function(c){ c.quietPolls++; });
+                coordinator.schedule();
+            },
+
+            poll: function(){
+                /* A request is already in flight — drop this tick rather than stack a
+                   second one. Note this returns WITHOUT rescheduling, which is correct
+                   but worth being explicit about: while a request is outstanding, the
+                   next poll is owned by that request's success/error handler, both of
+                   which call schedule(). ajaxWithRetry always ends in one or the other
+                   (and REQUEST_TIMEOUT bounds the wait), so the chain cannot be lost. */
+                if (coordinator.requesting) return;
+                var live = coordinator.live();
+                if (!live.length) return;       // everyone has unloaded; let the loop die
+                coordinator.requesting = true;
+
+                var spec = live.map(function(c){ return c.gameid + ":" + c.lastid; }).join(",");
+
+                ajaxInterface.ajaxWithRetry({
+                    type: 'GET',
+                    url: 'chatdata.php',
+                    dataType: 'json',
+                    timeout: REQUEST_TIMEOUT,
+                    data: { chats: spec },
+                    success: function(data){
+                        coordinator.requesting = false;
+                        live.forEach(function(c){
+                            // Numeric gameid indexes the string key fine — JS coerces.
+                            c.receive(data ? data[c.gameid] : null);
+                        });
+                        coordinator.schedule();
+                    },
+                    error: function(){
+                        coordinator.requesting = false;
+                        // Treat a failed poll as a quiet one AND double the wait, so a
+                        // server having a bad minute is not asked about it at the hot
+                        // interval by every chat on the page.
+                        live.forEach(function(c){ c.quietPolls++; });
+                        coordinator.schedule(coordinator.interval() * 2);
+                    }
+                }).fail(() => {});
+            }
+        };
+    }
+
     // Define chat first
     var chat = {
 
@@ -27,8 +302,19 @@ if (! isset($chatelement))
         playerid: <?php print(isset($_SESSION["user"]) ? (int)$_SESSION["user"] : 0); ?>,
         chatElement: <?php print("'$chatelement'") ?>,
 
-        // place to store current jqXhr so we can abort on unload
-        _currentXhr: null,
+        /* The timer and the in-flight request both belong to the coordinator now, not
+           to this chat. Nor is there a stored jqXHR to abort: what
+           ajaxInterface.ajaxWithRetry hands back is a plain $.Deferred().promise(),
+           which has neither .abort() nor .readyState, so the abort this file used to
+           attempt threw on every single poll and was swallowed by an empty catch. */
+
+        hotUntil: 0,      // Date.now() before which we poll at POLL_HOT
+        quietPolls: 0,    // consecutive polls that returned nothing; indexes POLL_LADDER
+
+        /* Bounded because the endpoint behind it, playerChatInfo.php, has no APCu fast
+           path — every call is two real queries. An unbounded retry there is a tab
+           quietly generating database load for as long as it stays open. */
+        timeCheckFails: 0,
 
         initInterface: function(){
             $(chat.chatElement + " .chatinput").on("keydown", function(e){
@@ -42,18 +328,120 @@ if (! isset($chatelement))
             });
             $(chat.chatElement).on('onshow', chat.resizeChat);
 
-            var h = $(chat.chatElement + " .chatcontainer").height();
-            $(chat.chatElement + " .chatMessages").css("height", (h-20)+"px");
-            var c = $(chat.chatElement + " .chatMessages");
-            c.scrollTop(c[0].scrollHeight);
+            chat.initEmoji();
+            chat.scrollToBottom();
 
-            // abort outstanding requests on navigation away
+            // Stand down on navigation away. In-flight requests cannot be aborted (see
+            // the note on the coordinator's timer), but dropping out of the members
+            // list is enough: the shared loop stops of its own accord once nothing is
+            // left polling, and re-times itself if the other chat on the page is.
             $(window).on('beforeunload.chat', function(){
-                if(chat._currentXhr && typeof chat._currentXhr.abort === "function"){
-                    try { chat._currentXhr.abort(); } catch(e){}
-                }
                 chat.polling = false;
-                chat.requesting = false;
+                coordinator.schedule();
+            });
+        },
+
+        /* The message list used to be sized from JS — `.chatMessages` got an inline
+           height of (container height - 20). chat.css lays the panel out as a flex
+           column now, so that measurement is both unnecessary and wrong (it fought
+           the flex row and needed an !important to beat). All that is left of it is
+           pinning the scroll to the newest message. */
+        scrollToBottom: function(){
+            var c = $(chat.chatElement + " .chatMessages");
+            if (c.length) c.scrollTop(c[0].scrollHeight);
+        },
+
+        /* ── Emoji picker ─────────────────────────────────────────────────────
+           Built here rather than printed as markup because chat.php is included
+           twice on game.php and this keeps the emitted HTML to one empty div. */
+        initEmoji: function(){
+            var panel  = $(chat.chatElement + " .chatEmojiPanel");
+            var button = $(chat.chatElement + " .chatEmojiButton");
+            if (!panel.length || !button.length) return;
+
+            EMOJI_GROUPS.forEach(function(group){
+                var g = $('<div class="chatEmojiGroup"></div>');
+                $('<div class="chatEmojiGroupLabel"></div>').text(group.label).appendTo(g);
+                var grid = $('<div class="chatEmojiGrid"></div>').appendTo(g);
+                group.emoji.forEach(function(glyph){
+                    $('<button type="button" class="chatEmojiKey" tabindex="-1"></button>')
+                        .attr("aria-label", "Insert " + glyph)
+                        .text(glyph)
+                        .appendTo(grid);
+                });
+                g.appendTo(panel);
+            });
+
+            // mousedown default = "move focus here", which would blur the input and,
+            // in game.php, hand the map's key handlers back the keyboard mid-message.
+            // Suppressing it on both the key and the panel keeps the caret where it is.
+            button.on("mousedown", function(e){ e.preventDefault(); });
+            panel.on("mousedown", function(e){ e.preventDefault(); });
+
+            button.on("click", function(e){
+                e.preventDefault();
+                e.stopPropagation();
+                chat.toggleEmojiPanel();
+            });
+
+            panel.on("click", ".chatEmojiKey", function(e){
+                e.preventDefault();
+                chat.insertAtCaret($(this).text());
+            });
+
+            // Anything outside this chat's own composer or picker closes its own panel.
+            // Each include registers its own handler; they do not fight, because each
+            // only ever looks at (and closes) its own element.
+            $(document).on("mousedown", function(e){
+                if (panel.prop("hidden")) return;
+                var target = $(e.target);
+                if (target.closest(chat.chatElement + " .chatinputTd").length) return;
+                if (target.closest(chat.chatElement + " .chatEmojiPanel").length) return;
+                chat.toggleEmojiPanel(false);
+            });
+        },
+
+        toggleEmojiPanel: function(show){
+            var panel  = $(chat.chatElement + " .chatEmojiPanel");
+            var button = $(chat.chatElement + " .chatEmojiButton");
+            if (!panel.length) return;
+
+            if (show === undefined) show = panel.prop("hidden");
+            if (show === !panel.prop("hidden")) return;      // already in that state
+
+            panel.prop("hidden", !show);
+            button.attr("aria-expanded", show ? "true" : "false");
+
+            // The picker takes its height out of the message list, so the list is a
+            // different size either side of this — without re-pinning it, opening the
+            // picker scrolls the newest messages out of sight.
+            chat.scrollToBottom();
+
+            if (show) $(chat.chatElement + " .chatinput").trigger("focus");
+        },
+
+        insertAtCaret: function(text){
+            var input = $(chat.chatElement + " .chatinput");
+            var el = input[0];
+            if (!el) return;
+
+            var start = el.selectionStart;
+            var end   = el.selectionEnd;
+
+            if (typeof start === "number" && typeof end === "number"){
+                el.value = el.value.slice(0, start) + text + el.value.slice(end);
+                var caret = start + text.length;
+                el.setSelectionRange(caret, caret);
+            }else{
+                el.value += text;
+            }
+            el.focus();
+        },
+
+        // ":)" -> "🙂", but only where the token stands on its own. See EMOTICON_RE.
+        applyEmoticons: function(text){
+            return text.replace(EMOTICON_RE, function(match, lead, token){
+                return lead + EMOTICONS[token];
             });
         },
 
@@ -66,15 +454,16 @@ if (! isset($chatelement))
         resizeChat: function(){
             chat.setLastTimeChecked();
             chat.removeNewMessageTag();
-            var h = $(chat.chatElement + " .chatcontainer").height();
-            $(chat.chatElement + " .chatMessages").css("height", (h-20)+"px");
-            var c = $(chat.chatElement + " .chatMessages");
-            c.scrollTop(c[0].scrollHeight);
+            chat.scrollToBottom();
             chat.getLastTimeChecked();
         },
 
         onFocus: function(){
             if (window.windowEvents) windowEvents.chatfocus = true;
+            // A player with the caret in the composer is in the conversation, whether
+            // or not they have sent anything yet — go hot before they hit Enter, so
+            // the reply they are about to provoke does not arrive on a 15s timer.
+            chat.markHot();
         },
 
         onBlur: function(){
@@ -83,12 +472,21 @@ if (! isset($chatelement))
 
         onKeyUp: function(e){
             e.stopPropagation();
+
+            // Escape closes the picker rather than the message, so a player who opened
+            // it by accident is not made to reach for the mouse to get out again.
+            if (e.keyCode == 27){
+                chat.toggleEmojiPanel(false);
+                return;
+            }
+
             if (e.keyCode == 13){
                 var input = $(this);
-                var value = input.val();
+                var value = chat.applyEmoticons(input.val());
                 if (value.length === 0) return;
 
                 input.val("");
+                chat.toggleEmojiPanel(false);
                 chat.submitChatMessage(value);
             }
         },
@@ -120,14 +518,22 @@ if (! isset($chatelement))
     }
 
             if(chat.checkTimesForLightup(chat.lastTimeStamp, chat.lastTimeChecked)){
-                var thisChat = chat.gameid == 0 ? "globalChatTab" : "chatTab";
-                if(document.getElementById(thisChat) && 
+                /* Only the in-game tab lights up. Global traffic is read in the lobby,
+                   where the player already sees it, so highlighting #globalChatTab in
+                   game.php just nagged about messages that were not about this game.
+                   var thisChat = chat.gameid == 0 ? "globalChatTab" : "chatTab"; */
+                var thisChat = chat.gameid == 0 ? null : "chatTab";
+                if(thisChat && document.getElementById(thisChat) &&
                    !document.getElementById(thisChat).classList.contains("selected")){
                     document.getElementById(thisChat).classList.add("newMessage");
                 }
             }
 
             if(scroll) c.scrollTop(c[0].scrollHeight);
+
+            // Reported so receive() can tell a live conversation from a quiet one and
+            // pace the next poll accordingly.
+            return scroll;
         },
 
         checkTimesForLightup: function(timeStamp, lastChecked){
@@ -157,7 +563,39 @@ if (! isset($chatelement))
         startPolling: function(){
             if(chat.polling) return;
             chat.polling = true;
-            setTimeout(chat.requestChatdata, 2000); //Set initial polling to 1 sec to load chat, then it'll go to 8secs.
+            coordinator.add(chat);
+            coordinator.schedule(0);   // first load: fill the panel immediately
+        },
+
+        // Something is happening in this chat — poll fast for the next HOT_DURATION.
+        markHot: function(){
+            chat.hotUntil = Date.now() + HOT_DURATION;
+            chat.quietPolls = 0;
+        },
+
+        // The delay to use for the next poll, given how the last few went.
+        pollInterval: function(){
+            if(document.hidden) return POLL_HIDDEN;
+            if(Date.now() < chat.hotUntil) return POLL_HOT;
+            for(var i = 0; i < POLL_LADDER.length; i++){
+                if(chat.quietPolls <= POLL_LADDER[i][0]) return POLL_LADDER[i][1];
+            }
+            return POLL_LADDER[POLL_LADDER.length - 1][1];
+        },
+
+        /* This chat's slice of a batched response — see coordinator.poll(). `slice` is
+           whatever chatdata.php returned under this gameid: [] for "nothing new" (which
+           is also what the APCu fast path returns without touching the database), a map
+           of messages keyed by id, or that one chat's own error. */
+        receive: function(slice){
+            if(!chat.polling) return;
+
+            var arrived = false;
+            if(slice && slice.error) window.confirm.exception(slice, function(){});
+            else if(slice) arrived = chat.parseChatData(slice);
+
+            if(arrived) chat.markHot();
+            else chat.quietPolls++;
         },
 
         removeNewMessageTag: function(){
@@ -165,21 +603,41 @@ if (! isset($chatelement))
             document.getElementById(el)?.classList.remove("newMessage");
         },
 
+        /* ── playerChatInfo.php ───────────────────────────────────────────────
+           The read/write mark for "when did this player last look at this chat",
+           which drives the CHAT tab highlight. NOT on the poll loop — these fire on
+           init, on tab switch and on send — but every call is two real queries, with
+           no APCu fast path in front of them, so their retries must terminate.
+
+           They did not. An expired session used to be answered with a redirect to
+           index.php; jQuery followed it, failed to parse the HTML as JSON, and landed
+           in the error handler, which retried on a fixed timer — forever, at two
+           queries a time, for as long as the tab stayed open. playerChatInfo.php
+           returns 401 JSON now, and the counter below caps every other failure mode
+           the same way. A chat that gives up here still polls messages normally; all
+           that is lost is the unread highlight. */
+        timeCheckFailed: function(xhr, retry){
+            // 401 is terminal, not transient — retrying cannot produce a session.
+            if(xhr && xhr.status === 401) return;
+            if(++chat.timeCheckFails > TIME_CHECK_MAX_FAILS) return;
+            setTimeout(retry, 6000 * chat.timeCheckFails);
+        },
+
         setLastTimeChecked: function(){
             if (!chat.polling) return;
-            chat._currentXhr = ajaxInterface.ajaxWithRetry({
+            ajaxInterface.ajaxWithRetry({
                 type: 'POST',
                 url: 'playerChatInfo.php',
                 dataType: 'json',
                 data: { gameid: chat.gameid },
                 success: chat.successSetLastTimeChecked,
-                error: function(){ setTimeout(chat.setLastTimeChecked, POLL_INTERVAL * 2); }
+                error: function(xhr){ chat.timeCheckFailed(xhr, chat.setLastTimeChecked); }
             }).fail(() => {});
         },
 
         getLastTimeChecked: function(){
             if (!chat.polling) return;
-            chat._currentXhr = ajaxInterface.ajaxWithRetry({
+            ajaxInterface.ajaxWithRetry({
                 type: 'GET',
                 url: 'playerChatInfo.php',
                 dataType: 'json',
@@ -187,46 +645,55 @@ if (! isset($chatelement))
                 success: function(data){
                     if(!data || data.error){
                         if(data?.error) window.confirm.exception(data, function(){});
-                        setTimeout(chat.getLastTimeChecked, 6000);
+                        chat.timeCheckFailed(null, chat.getLastTimeChecked);
                         return;
                     }
+                    chat.timeCheckFails = 0;
                     chat.lastTimeChecked = data.lastCheckGame;
                 },
-                error: function(){ setTimeout(chat.getLastTimeChecked, 6000); }
+                error: function(xhr){ chat.timeCheckFailed(xhr, chat.getLastTimeChecked); }
             }).fail(() => {});
         },
 
         successSetLastTimeChecked: function(data){
             if(data.error) window.confirm.exception(data, function(){});
+            else chat.timeCheckFails = 0;
         },
 
-        successGetLastTimeChecked: function(data){
-            if(data.error) window.confirm.exception(data, function(){});
-            else chat.lastTimeChecked = data.lastCheckGame;
-        },
+        // (successGetLastTimeChecked removed — getLastTimeChecked handles its own
+        //  response inline, and the orphan copy here was never wired to anything.)
 
         submitChatMessage: function(message){
             chat.message = message;
+
+            // Sending is the strongest possible signal that this chat is live.
+            chat.markHot();
 
             // small retry limit and exponential backoff
             var attempt = 0;
             var maxAttempts = 4;
 
-            function doSend(delay){
+            function doSend(){
                 if (!chat.polling) return; // avoid when shutting down
-                chat._currentXhr = ajaxInterface.ajaxWithRetry({
+                ajaxInterface.ajaxWithRetry({
                     type: 'POST',
                     url: 'chatdata.php',
                     dataType: 'json',
                     data: { gameid: chat.gameid, message: message },
                     success: function(data){
                         chat.successSubmit(data);
+                        /* Pull it straight back rather than waiting out the timer: the
+                           sender seeing their own message land is what makes the chat
+                           feel responsive, and this is the one poll guaranteed to miss
+                           the APCu fast path (submitChatMessage has just raised the
+                           cached id), so it is also the only one that costs a query. */
+                        coordinator.schedule(300);
                     },
                     error: function(jqXHR, textStatus){
                         attempt++;
                         if (attempt <= maxAttempts){
                             // backoff: 500ms, 1000ms, 2000ms, 4000ms ...
-                            setTimeout(function(){ doSend(); }, 500 * Math.pow(2, attempt-1));
+                            setTimeout(doSend, 500 * Math.pow(2, attempt-1));
                         } else {
                             console.error("Failed to submit chat message after " + maxAttempts + " attempts: " + textStatus);
                         }
@@ -239,61 +706,30 @@ if (! isset($chatelement))
         },
 
 
-requestChatdata: function(){
-  if(chat.requesting || !chat.polling) return;
-  chat.requesting = true;
-
-  if(chat._currentXhr && chat._currentXhr.readyState !== 4){
-    try { chat._currentXhr.abort(); } catch(e){}
-  }
-
-  chat._currentXhr = ajaxInterface.ajaxWithRetry({
-    type: 'GET',
-    url: 'chatdata.php',
-    dataType: 'json',
-    timeout: REQUEST_TIMEOUT,
-    data: { gameid: chat.gameid, lastid: chat.lastid },
-    success: function(data){
-      chat.requesting = false;
-      if(!chat.polling) return;
-      if(!data.error) chat.parseChatData(data);
-      setTimeout(chat.requestChatdata, POLL_INTERVAL);
-    },
-    error: function(){
-      chat.requesting = false;
-      if(chat.polling) setTimeout(chat.requestChatdata, POLL_INTERVAL * 2);
-    }
-  }).fail(() => {});
-},
-
-        successRequest: function(data){
-            chat.requesting = false;
-            if(data.error){
-                window.confirm.exception(data, function(){});
-                // don't block further polling; schedule next attempt
-                setTimeout(chat.requestChatdata, 6000);
-            }else{
-                chat.parseChatData(data);
-                setTimeout(chat.requestChatdata, 6000);
-            }
-        },
-
-
         successSubmit: function(data){
             if(data.error) window.confirm.exception(data, function(){});
         } // no comma here
 
     }//endof Chat
 
-// Pause/resume polling when the tab visibility changes
+/* Re-pace on tab visibility rather than stopping and restarting.
+
+   This handler is where the poll-chain leak lived — see coordinator.schedule for what
+   it cost. chat.polling now means "this chat is alive" and is cleared only on unload;
+   hiding and showing simply re-times the one shared chain through that method, which
+   clears the pending timer before setting the next and so cannot leave a second behind.
+
+   Both includes on game.php register a listener and both fire. That is harmless and
+   intended: each marks its OWN chat hot, and the two schedule() calls collapse onto
+   the single shared timer. */
 document.addEventListener("visibilitychange", function() {
+    if (!chat.polling) return;
     if (document.hidden) {
-        chat.polling = false; // stop polling while tab is hidden
+        coordinator.schedule(POLL_HIDDEN);
     } else {
-        if (!chat.polling) {
-            chat.polling = true; // resume polling
-            chat.requestChatdata();
-        }
+        // Coming back is a sign of life, and the player wants to see what they missed.
+        chat.markHot();
+        coordinator.schedule(0);
     }
 });
 
@@ -310,12 +746,56 @@ document.addEventListener("visibilitychange", function() {
 
 </script>
 
-<div class="chatcontainer">
+<?php // .fv-chat carries the panel styling; .chatcontainer is kept because combatLog.php
+      // and declarations.php share it and chat.css still holds their base rules. ?>
+<div class="chatcontainer fv-chat<?php echo $chatcompact ? ' fv-chat-compact' : ''; ?>">
+<?php if ($chattitle !== null): ?>
+    <div class="fv-chat-head">
+        <span><?php echo htmlspecialchars($chattitle, ENT_QUOTES, 'UTF-8'); ?></span>
+<?php   if ($chatmeta !== null): ?>
+        <span class="fv-chat-meta"><?php echo htmlspecialchars($chatmeta, ENT_QUOTES, 'UTF-8'); ?></span>
+<?php   endif; ?>
+    </div>
+<?php endif; ?>
     <div class="chatMessages"></div>
+    <?php // A row of the flex column, between the log and the composer — NOT a popup
+          // floating over them. Every one of the four hosts wraps the chat in a panel
+          // that clips (`.chat-panel` needs it for its rounded corners), so an absolutely
+          // positioned picker got its top cut off; in the flow it simply takes its space
+          // from the message list for as long as it is open, and cannot escape anything.
+          //
+          // Filled in by chat.initEmoji(). Empty in the markup so the two includes on
+          // game.php do not each ship the same ~70 glyphs down the wire. ?>
+    <div class="chatEmojiPanel" hidden></div>
     <div class="chatinputTd">
-        <input class="chatinput" value="" name="chatinput">
+        <div class="chatcomposer">
+            <input class="chatinput" value="" name="chatinput" autocomplete="off"
+                   placeholder="<?php echo htmlspecialchars($chatplaceholder, ENT_QUOTES, 'UTF-8'); ?>">
+            <?php // A line-art face in currentColor rather than a 🙂 glyph: the colour
+                  // emoji was the one saturated yellow object on an otherwise blue-grey
+                  // bar, and it read as a message someone had already sent rather than as
+                  // a control. Inline SVG so it inherits the accent and can brighten on
+                  // hover — an <img> could do neither. ?>
+            <button type="button" class="chatEmojiButton" aria-expanded="false" aria-label="Insert emoji">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" stroke-width="1.6"/>
+                    <circle cx="9" cy="9.8" r="1.2" fill="currentColor"/>
+                    <circle cx="15" cy="9.8" r="1.2" fill="currentColor"/>
+                    <?php // Quadratic with the control point BELOW both ends (y grows
+                          // downward), so the curve bulges into a smile. Its ends sit at
+                          // x 7.8/16.2 to line up under the outer edge of each eye. ?>
+                    <path d="M7.8 13.6 Q12 17.6 16.2 13.6" fill="none" stroke="currentColor"
+                          stroke-width="1.6" stroke-linecap="round"/>
+                </svg>
+            </button>
+        </div>
     </div>
 </div>
+<?php
+// Consumed — game.php includes this file twice and the first include's title must not
+// leak into the second.
+unset($chattitle, $chatmeta, $chatplaceholder, $chatcompact);
+?>
 
 
 

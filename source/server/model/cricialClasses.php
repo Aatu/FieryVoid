@@ -413,6 +413,15 @@ class GunLost extends Critical{
     }
 }
 
+//Reduce number of dice available to the Hyperplasma Cutter  GTS_Triad
+class DiceLost extends Critical{
+    public $description = "Dice Lost";
+    public $repairPriority = 5; //Can be repaired - each lost d10 is a separate repairable critical
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend);
+    }
+}        
+
 /*Turret jam: the mount is locked to a restricted firing arc (Vree saucer turrets jam to the
 forward 330..30). Scored by a SEPARATE d20 whenever an arc-restrictable mount is damaged - it is
 NOT an entry on the weapon critical chart, so it can land alongside a normal crit from the same

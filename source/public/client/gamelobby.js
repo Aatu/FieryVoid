@@ -430,6 +430,21 @@ window.gamedata = {
 		return gamedata.fleetCost(ship, ship.id) <= maxPoints;
 	},
 
+	/* Can this ALREADY-BOUGHT row still fit the budget after a change made outside the buy
+	   dialog? Used by the ship window's per-system enhancement menu
+	   (WEAPON_ENHANCEMENTS_PLAN.md §5.2), which writes straight onto the ship.
+
+	   Deliberately NOT canAffordEdit: that one reads ship.pointCost back off the confirm
+	   dialog's DOM, and there is no dialog open here. Same fleetCost() otherwise, with the
+	   ship's own row excluded and itself costed as the pending one, so the refusal and the
+	   pts-left figure the player is looking at can never disagree. */
+	canAffordRefit: function canAffordRefit(ship) {
+		var maxPoints = gamedata.getMaxPoints();
+		if (maxPoints == -1) return true; // Unlimited points
+
+		return gamedata.fleetCost(ship, ship.id) <= maxPoints;
+	},
+
 	/* ⭐ Has the selected slot's fleet been READIED? `lastphase >= "-2"` is the one test for
 	   that, and it is what every buy/edit/remove path already refuses on ("You have already
 	   confirmed your fleet"). Stated here so the React damage editors can ask the same
@@ -471,11 +486,56 @@ window.gamedata = {
 		return '<span class="shipDamagedBadge fa-solid fa-screwdriver-wrench" title="' + title + '"></span>';
 	},
 
-	/* Re-paint ONE fleet-list row's damage badge. Called by the React damage menus after
-	   every edit, so the badge appears/disappears as the player works rather than waiting
-	   for the next full fleet-list rebuild. Lobby-only: game.php's gamedata has no such
-	   method and the callers guard on typeof. */
-	refreshDamagedBadge: function refreshDamagedBadge(ship) {
+	/* The bought-enhancement list for a fleet-list row, as an HTML string. Empty when the
+	   unit has none.
+
+	   ONE helper for BOTH row builders (updateFleet and constructFleetList) for exactly the
+	   reason damagedShipBadge above is: the two used to carry identical copies of this loop,
+	   and the pre-battle-damage badge was written into only one of them and vanished on the
+	   next rebuild (PREBATTLE_DAMAGE_PLAN.md §6). Per-system refits are summarised as ONE
+	   line rather than a dozen - the detail is in each system's own tooltip
+	   (WEAPON_ENHANCEMENTS_PLAN.md §6.4). */
+	enhancementListHtml: function enhancementListHtml(ship) {
+		var listHtml = "";
+		var hasEnhancements = false;
+
+		for (var enhId in (ship.enhancementOptions || {})) {
+			var name = lobbyEnhancements.describeTaken(ship.enhancementOptions[enhId]); //null when not taken
+			if (name === null) continue;
+			name = name.replace(/^(\(AMMO\)|\(LIGHT AMMO\)|\(MEDIUM AMMO\)|\(HEAVY AMMO\)|\(Option\))\s*/, '');
+			hasEnhancements = true;
+			listHtml = '<div class="ship-enhancement-entry">- ' + name + '</div>' + listHtml; // Prepend to reverse order
+		}
+
+		if (window.systemEnhancements) {
+			var sysEnhLine = systemEnhancements.summaryLine(ship);
+			if (sysEnhLine) {
+				hasEnhancements = true;
+				//Appended, so it reads LAST after the prepend-reversed ship-level lines above.
+				listHtml = listHtml + '<div class="ship-enhancement-entry">- ' + sysEnhLine + '</div>';
+			}
+		}
+
+		return hasEnhancements ? '<div class="ship-enhancements">' + listHtml + '</div>' : '';
+	},
+
+	/* Re-derive ONE fleet-list row's mutable content from the ship. Called by the React
+	   damage/enhancement menus after every edit, so the row keeps up as the player works
+	   rather than waiting for the next full fleet-list rebuild. Lobby-only: game.php's
+	   gamedata has no such method and the callers guard on typeof.
+
+	   ⭐ EVERYTHING here is re-derived through the same helpers the two row BUILDERS use
+	   (rowDisplay / damagedShipBadge / enhancementListHtml), never patched field by field.
+	   That is what stops this drifting away from updateFleet and constructFleetList - the
+	   badge did exactly that once already (PREBATTLE_DAMAGE_PLAN.md §6).
+
+	   ⚠️ Three things move when a per-system refit is bought, and until 2026-08-16 only the
+	   first was repainted: the badge, the row's POINT COST (calculateFleet updates the
+	   points panel, never the row) and the "System Enhancements (n)" line. The cost and the
+	   line were both only ever written at row-BUILD time, so a refit read as free and
+	   invisible until the player edited the ship or reloaded the fleet - while the panel
+	   subheader had already charged for it (user report 2026-08-16). */
+	refreshFleetRow: function refreshFleetRow(ship) {
 		if (!ship) return;
 
 		var row = $(".ship.bought").filter(function () {
@@ -486,6 +546,21 @@ window.gamedata = {
 		row.find(".shipDamagedBadge").remove();
 		var badge = gamedata.damagedShipBadge(ship);
 		if (badge) row.prepend(badge);
+
+		var display = gamedata.rowDisplay(ship);
+		row.find(".shipname").first().text(display.name);
+		row.find(".boughtPointCost").first().text(display.cost + 'p');
+
+		/* Re-inserted BEFORE .ship-actions rather than appended: the row is a block stack
+		   and the action links are always its last child, so appending would put the
+		   enhancement lines underneath them. */
+		row.find(".ship-enhancements").remove();
+		var enhancementHtml = gamedata.enhancementListHtml(ship);
+		if (enhancementHtml) {
+			var actions = row.find(".ship-actions").first();
+			if (actions.length) $(enhancementHtml).insertBefore(actions);
+			else row.append(enhancementHtml);
+		}
 	},
 
 	/* The action links one fleet-list row offers, as an HTML string.
@@ -529,27 +604,8 @@ window.gamedata = {
 
 		ship.slot = gamedata.selectedSlot;
 		gamedata.ships[a] = ship;
-		var enhancementHtml = "";
-		if (ship.enhancementOptions) {
-			var hasEnhancements = false;
-			var listHtml = "";
-
-			for (var enhId in ship.enhancementOptions) {
-				var enhancement = ship.enhancementOptions[enhId];
-				// enhancement is an array: [id, readableName, numberTaken, limit, price, priceStep]
-				var name = lobbyEnhancements.describeTaken(enhancement); //null when not taken
-
-				if (name !== null) {
-					name = name.replace(/^(\(AMMO\)|\(LIGHT AMMO\)|\(MEDIUM AMMO\)|\(HEAVY AMMO\)|\(Option\))\s*/, '');
-					hasEnhancements = true;
-					listHtml = '<div class="ship-enhancement-entry">- ' + name + '</div>' + listHtml; // Prepend to reverse order
-				}
-			}
-
-			if (hasEnhancements) {
-				enhancementHtml = '<div class="ship-enhancements">' + listHtml + '</div>';
-			}
-		}
+		//ONE builder for both fleet-list row paths - see gamedata.enhancementListHtml.
+		var enhancementHtml = gamedata.enhancementListHtml(ship);
 
 		var displayType = ship.shipClass;
 		var display = gamedata.rowDisplay(ship);
@@ -1764,27 +1820,9 @@ window.gamedata = {
 
 			var ship = gamedata.ships[i];
 			if (ship.slot != slotid) continue;
-			var enhancementHtml = "";
-			if (ship.enhancementOptions) {
-				var hasEnhancements = false;
-				var listHtml = "";
-
-				for (var enhId in ship.enhancementOptions) {
-					var enhancement = ship.enhancementOptions[enhId];
-					// enhancement is an array: [id, readableName, numberTaken, limit, price, priceStep]
-					var name = lobbyEnhancements.describeTaken(enhancement); //null when not taken
-
-					if (name !== null) {
-						name = name.replace(/^(\(AMMO\)|\(LIGHT AMMO\)|\(MEDIUM AMMO\)|\(HEAVY AMMO\)|\(Option\))\s*/, '');
-						hasEnhancements = true;
-						listHtml = '<div class="ship-enhancement-entry">- ' + name + '</div>' + listHtml; // Prepend to reverse order
-					}
-				}
-
-				if (hasEnhancements) {
-					enhancementHtml = '<div class="ship-enhancements">' + listHtml + '</div>';
-				}
-			}
+			//ONE builder for both fleet-list row paths - see gamedata.enhancementListHtml.
+			//This rebuild is exactly where a row-only addition gets lost.
+			var enhancementHtml = gamedata.enhancementListHtml(ship);
 			var displayType = ship.shipClass;
 			var display = gamedata.rowDisplay(ship);
 
@@ -2779,7 +2817,12 @@ window.gamedata = {
 		//Fold the per-unit enhancement cost into pointCost, exactly as doBuyShip does with
 		//the dialog total. That single convention (see rowPointCost) is what lets a bulk
 		//row be priced, edited and saved by the same code as any other unit.
-		ship.pointCost = baseCost + ship.pointCostEnh + ship.pointCostEnh2;
+		//pointCostSysEnh is the THIRD bucket (WEAPON_ENHANCEMENTS_PLAN.md D5): per-system
+		//refits are bought from the ship window, never from this dialog, so the two loops
+		//above cannot rebuild them - it is added, never recomputed. Leaving it out here is
+		//exactly the bug D5 exists to prevent: an edit that silently refunds every refit
+		//while leaving it applied.
+		ship.pointCost = baseCost + ship.pointCostEnh + ship.pointCostEnh2 + (ship.pointCostSysEnh || 0);
 	},
 
 	doBuyBulk: function doBuyBulk(results, shipclass) {
@@ -2837,6 +2880,10 @@ window.gamedata = {
 			ship.enhancementOptions = originalShipData.enhancementOptions ? [...originalShipData.enhancementOptions] : [];
 			ship.pointCostEnh = originalShipData.pointCostEnh;
 			ship.pointCostEnh2 = originalShipData.pointCostEnh2;
+			ship.pointCostSysEnh = originalShipData.pointCostSysEnh;
+			if (window.systemEnhancements) {
+				ship.systemEnhancements = systemEnhancements.clone(originalShipData.systemEnhancements);
+			}
 			$(".confirm").remove();
 			window.confirm.error("You cannot afford those edits!", function () { });
 			return;
@@ -2951,6 +2998,13 @@ window.gamedata = {
 		//DEEP clone - sharing the payload object would make damaging either row damage both.
 		if (window.battleDamage) {
 			newShip.preBattleDamage = battleDamage.clone(copiedShip.preBattleDamage);
+		}
+		//Per-system refits: same story, same DEEP clone. Applied to the copy's own systems,
+		//which are a fresh blueprint clone - the copy must not share the original's rows.
+		if (window.systemEnhancements) {
+			newShip.pointCostSysEnh = copiedShip.pointCostSysEnh || 0;
+			newShip.systemEnhancements = systemEnhancements.clone(copiedShip.systemEnhancements);
+			systemEnhancements.apply(newShip);
 		}
 
 		$(".confirm").remove();
@@ -3151,6 +3205,15 @@ window.gamedata = {
 		if (window.battleDamage) {
 			newShip.preBattleDamage = battleDamage.clone(copiedShip.preBattleDamage);
 		}
+		//Per-system refits (WEAPON_ENHANCEMENTS_PLAN.md §5.2): a copy starts equally refitted,
+		//and DEEP-cloned for the same reason - every write replaces a row in place, so a shared
+		//array would make editing one copy's refits edit the other's. newShip's systems are a
+		//fresh blueprint clone, so apply() paints them onto objects the original does not share.
+		if (window.systemEnhancements) {
+			newShip.pointCostSysEnh = copiedShip.pointCostSysEnh || 0;
+			newShip.systemEnhancements = systemEnhancements.clone(copiedShip.systemEnhancements);
+			systemEnhancements.apply(newShip);
+		}
 
 		// Copy ammo counts
 		if (newShip.flight && copiedShip.flight) {
@@ -3340,7 +3403,12 @@ window.gamedata = {
 		var pristinePointCost = gamedata.getPristinePointCost(ship);
 
 		if ($(".confirm .totalUnitCostAmount").length > 0) {
-			ship.pointCost = $(".confirm .totalUnitCostAmount").data("value");
+			/* The dialog totals base + the SHIP-LEVEL enhancements it renders. Per-system refits
+			   are bought from the ship window and have no row in it, so they have to be added
+			   back on - otherwise this line silently REFUNDS every refit while leaving it applied,
+			   which is the whole reason D5 makes them a third bucket. Added before the
+			   affordability test below, so the check prices what the player will actually pay. */
+			ship.pointCost = $(".confirm .totalUnitCostAmount").data("value") + (ship.pointCostSysEnh || 0);
 		}
 		var newPointCost = ship.pointCost;
 
@@ -3352,6 +3420,10 @@ window.gamedata = {
 			ship.enhancementOptions = originalShipData.enhancementOptions ? [...originalShipData.enhancementOptions] : [],
 				ship.pointCostEnh = originalShipData.pointCostEnh;
 			ship.pointCostEnh2 = originalShipData.pointCostEnh2;
+			ship.pointCostSysEnh = originalShipData.pointCostSysEnh;
+			if (window.systemEnhancements) {
+				ship.systemEnhancements = systemEnhancements.clone(originalShipData.systemEnhancements);
+			}
 			$(".confirm").remove();
 			window.confirm.error("You cannot afford those edits!", function () { });
 			return;
@@ -3513,6 +3585,23 @@ window.gamedata = {
 		var damageDiscarded = window.battleDamage
 			&& battleDamage.onShipRebuilt(ship, previousSize);
 
+		/* Per-system refits (WEAPON_ENHANCEMENTS_PLAN.md §5.2). `ship.systems` was replaced
+		   wholesale from the blueprint above, so the refits have to be painted back onto the new
+		   objects - after lobbyEnhancements.apply, because a refit stacks ON TOP of ELITE_CREW's
+		   thruster bump (its PRICE is pinned to the blueprint independently, per D10).
+		   The phpclass cannot change in an edit, so the stored systemids stay valid and the rows
+		   are carried across; apply()'s own name check drops anything that does not line up.
+		   Then the D11 sweep, which has to run AFTER onShipRebuilt has repainted the damage
+		   preview - that is what performs the structure cascade. */
+		var refitsDropped = [];
+		if (window.systemEnhancements) {
+			systemEnhancements.apply(ship);
+			var sysEnhBefore = ship.pointCostSysEnh || 0;
+			refitsDropped = systemEnhancements.dropDestroyed(ship);
+			//pointCost had the OLD refit total folded in; take the refunded difference back off.
+			if (refitsDropped.length) ship.pointCost -= (sysEnhBefore - (ship.pointCostSysEnh || 0));
+		}
+
 		//The React window renders from this same mutated ship object, so no
 		//destroy/rebuild dance is needed - just re-render if it is open.
 		var wasVisible = window.shipWindowManagerReact
@@ -3527,6 +3616,9 @@ window.gamedata = {
 
 		if (damageDiscarded) {
 			confirm.warning("Size reduced - pre-battle damage on the units above the new size has been discarded.");
+		}
+		if (refitsDropped.length) {
+			confirm.warning(systemEnhancements.describeRemoved(refitsDropped));
 		}
 		//gamedata.populateFleetDropdown();
 	},
@@ -3552,7 +3644,10 @@ window.gamedata = {
 		var blueprint = gamedata.getShipByType(ship.phpclass);
 		if (blueprint) return blueprint.pointCost;
 
-		var base = ship.pointCost - (ship.pointCostEnh || 0) - (ship.pointCostEnh2 || 0);
+		//All THREE buckets are peeled: pointCostSysEnh is folded into pointCost by the same
+		//paths as the other two (WEAPON_ENHANCEMENTS_PLAN.md D5), so leaving it in would make
+		//"pristine" contain the refits and count them twice on the next edit.
+		var base = ship.pointCost - (ship.pointCostEnh || 0) - (ship.pointCostEnh2 || 0) - (ship.pointCostSysEnh || 0);
 		//a flight's pointCost is scaled to the size it was bought or loaded at (doBuyShip,
 		//doLoadFleet), while the blueprint cost this stands in for is always the six-craft one
 		if (ship.flight && ship.flightSize > 0) base = (base / ship.flightSize) * 6;
@@ -3891,7 +3986,7 @@ window.gamedata = {
 				//console.log("AJAX response:", ships); // debug raw response
 
 				if (response.ships && Array.isArray(response.ships) && response.ships.length > 0) {
-					gamedata.doLoadFleet(response.ships, response.critDesc, response.critTransient);
+					gamedata.doLoadFleet(response.ships, response.critDesc, response.critTransient, response.systemEnhancementNotice);
 					fleetDropdownButton.textContent = 'LOAD A FLEET';
 					//confirm.warning("Fleet loaded!");
 				} else {
@@ -3938,7 +4033,7 @@ window.gamedata = {
 			}
 
 			if (response.ships && Array.isArray(response.ships) && response.ships.length > 0) {
-				gamedata.doLoadFleet(response.ships, response.critDesc, response.critTransient);
+				gamedata.doLoadFleet(response.ships, response.critDesc, response.critTransient, response.systemEnhancementNotice);
 				fleetDropdownButton.textContent = 'LOAD A FLEET';
 				//confirm.warning("Fleet loaded!");
 			} else {
@@ -3948,7 +4043,11 @@ window.gamedata = {
 		});
 	},
 
-	doLoadFleet: function doLoadFleet(fleet, critDesc, critTransient) {
+	/* sysEnhNotice: strings the server produced while re-validating this fleet's per-system
+	   refits against the CURRENT blueprint (WEAPON_ENHANCEMENTS_PLAN.md §4.7.1). Usually
+	   empty; reported once, after the load, because a silent point change on a loaded fleet
+	   is the kind of thing that gets noticed three battles later. */
+	doLoadFleet: function doLoadFleet(fleet, critDesc, critTransient, sysEnhNotice) {
 		if (!Array.isArray(fleet)) {
 			console.error("doLoadFleet: expected array, got", fleet);
 			return;
@@ -4009,6 +4108,16 @@ window.gamedata = {
 			if (ship.pointCostEnh !== 0) {
 				ship.pointCost = ship.pointCost + ship.pointCostEnh;
 			}
+			/* The third bucket (WEAPON_ENHANCEMENTS_PLAN.md D5). Kept separate from
+			   pointCostEnh above rather than folded into the stored enhvalue, because
+			   loadSavedFleet has just RE-PRICED the refits against the current blueprint
+			   (§4.7.1) - the server splits the stored total back apart so these two do not
+			   double-count. Applied here too: the systems came off the blueprint. */
+			if (window.systemEnhancements) {
+				ship.pointCostSysEnh = parseFloat(ship.pointCostSysEnh) || 0;
+				ship.pointCost = ship.pointCost + ship.pointCostSysEnh;
+				systemEnhancements.apply(ship);
+			}
 
 			/* Pre-battle damage (§6). The payload the server returned is ALREADY filtered
 			   to the player's choices - do NOT re-filter here, one filter server-side or
@@ -4040,6 +4149,11 @@ window.gamedata = {
 			if (declinedDamage) skipped.push("battle damage");
 			if (declinedCriticals) skipped.push("critical effects");
 			confirm.fleetNotice("Fleet loaded. Saved " + skipped.join(" and ") + " were not applied.");
+		}
+
+		if (Array.isArray(sysEnhNotice) && sysEnhNotice.length > 0) {
+			confirm.fleetNotice("System enhancements changed since this fleet was saved: "
+				+ sysEnhNotice.join(" "));
 		}
 
 		//gamedata.populateFleetDropdown();

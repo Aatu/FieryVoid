@@ -3,12 +3,26 @@
 // 12.2025 - Refactored to generate single shipsCombined.js
 // 04.2026 - Added compactShipForStaticJson() to strip default/empty values (Optimisation #4)
 
-ob_start("ob_gzhandler"); 	
+// No output buffer is opened here on purpose. This script had ob_start("ob_gzhandler")
+// BEFORE global.php, which made the gz buffer the OUTER one — the inverted nesting that
+// double-compressed generateStaticShipFileWeb.php (see the long note at the top of that
+// file). It was harmless in this script's normal CLI use, where ob_gzhandler is a no-op and
+// global.php opens no buffer at all, but the two generators are supposed to stay in step and
+// a latent copy of a fixed bug is how they drift back apart. Compression, when there is any,
+// is global.php's job.
 define('IN_STATIC_GENERATION', true);
 // __DIR__-based so the script is CWD-independent: a docker exec without
 // -w /usr/src/current would otherwise silently write into the container-local
 // throwaway tree (see AUTOLOAD_GENERATOR_PLAN.md section 1c).
 include_once __DIR__ . '/source/public/global.php';
+
+// Access gate. This file sits in the web root under a plain .php name one letter away from
+// the Web generator, and unlike that one it still runs the OLD unbounded approach
+// (memory_limit -1 + getAllShipsStatic(null), ~385MB). Reaching it over HTTP is never
+// intended. CLI — the only way it is actually meant to be run — is exempt inside
+// requireAccess(), so fvbuild.ps1 and docker exec are unaffected.
+require_once __DIR__ . '/source/server/lib/MaintenanceGate.php';
+MaintenanceGate::requireAccess('Static ship file generator (CLI)');
 
 // Compaction now lives in ONE shared place (ShipCompactor) so this generator and
 // generateStaticShipFileWeb.php can no longer drift apart. They already HAD drifted:

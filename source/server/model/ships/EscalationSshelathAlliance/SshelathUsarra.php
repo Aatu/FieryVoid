@@ -60,8 +60,8 @@ class SshelathUsarra extends StarBaseSixSections{
 
 		for ($i = 0; $i < sizeof($this->locations); $i++){
 
-			$min = 0 + ($i*60);
-			$max = 120 + ($i*60);
+			$min = (0 + ($i*60)) % 360;
+			$max = (120 + ($i*60)) % 360;
 
 			$systems = array(
 				new LaserCutter(4, 6, 4, $min, $max),

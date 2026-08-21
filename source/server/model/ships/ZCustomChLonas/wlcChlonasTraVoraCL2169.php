@@ -10,7 +10,7 @@ class wlcChlonasTraVoraCL2169 extends BaseShipNoAft{
         $this->imagePath = "img/ships/ChlonasTraVora.png";
         $this->canvasSize = 200;
         $this->shipClass = "Tra'Vora Light Cruiser";
-        $this->fighters = array("heavy" => 12);
+        //$this->fighters = array("heavy" => 12);
         $this->forwardDefense = 14;
         $this->sideDefense = 16;
         $this->turncost = 0.66;
@@ -18,6 +18,7 @@ class wlcChlonasTraVoraCL2169 extends BaseShipNoAft{
         $this->accelcost = 3;
         $this->rollcost = 3;
         $this->pivotcost = 3;
+        $this->variantOf = "OBSOLETE";		
 	    
         //$this->variantOf = "Tra'Vora Light Cruiser";
 	$this->isd = 2169;

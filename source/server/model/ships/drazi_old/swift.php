@@ -55,7 +55,7 @@ class Swift extends MediumShip{
         		),
         		1=> array(
         				5=> "Thruster",
-        				7=> "Particle Repeater",
+        				7=> "Repeater Gun",
         				10=> "Standard Particle Beam",
         				17=> "Structure",
         				20=> "Primary",

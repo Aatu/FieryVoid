@@ -45,6 +45,12 @@ class Enhancements{
 	}
 	//sort enhancements - options first, then by name
 	usort($ship->enhancementOptions, [self::class, 'compareEnhancements']);
+
+	/* PER-SYSTEM enhancement offers (WEAPON_ENHANCEMENTS_PLAN.md §4.2). Deliberately called from
+	   HERE rather than from setEnhancementOptions' four call sites, so the two can never be called
+	   apart - a path that builds ship-level options but not per-system ones would show an empty
+	   gold section with no error anywhere. Self-gated on $offerSystemEnhancements and on hull age. */
+	Enhancements::setSystemEnhancementOptions($ship);
   } //endof function setEnhancementOptions
   
   /* block all available enhancements (those that are by default enabled) - ADD ANY NEW STANDARD ENHANCEMENTS HERE!
@@ -189,18 +195,6 @@ class Enhancements{
 	/* all ship enhancement options - availability and cost calculation
 	*/
   public static function setEnhancementOptionsShip($ship){
-
-	  //Add option to delay the deployment of a ship, set as Enhancement so selection is remembered in the game itself.	
-	  //DO NOT PLACE ANY OPTIONS (E.G. ENH[6] = TRUE) ALPHABETICALLY BEFORE THIS!
-	  /*$enhID = 'DEPLOY';
-	  if(!in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is not disabled
-		  $enhName = 'Choose a turn to deploy this unit:';
-		  $enhLimit = 100;	
-		  $enhPrice = 0; //no cost
-		  $enhPriceStep = 0; //no ocst
-		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
-		  //technical ID, human readable name, number taken, maximum number to take, price for one, price increase for each further, is an option (rather than enhancement)
-	  }	*/ 
 
 	  //Elite Crew: +5 Initiative, +2 Engine, +1 Sensors, +2 Reactor power, -1 Profile, -2 to critical results
 	  //cost: +40% of ship cost (second time: +60%)
@@ -1564,18 +1558,6 @@ class Enhancements{
 	/* all fighter enhancement options - availability and cost calculation
 	*/
   public static function setEnhancementOptionsFighter($flight){
-
-	  //Add option to delay the deployment of a ship, set as Enhancement so selection is remembered in the game itself.
-	  //DO NOT PLACE ANY OPTIONS (E.G. ENH[6] = TRUE) ALPHABETICALLY BEFORE THIS!	  	
-	  /*$enhID = 'DEPLOY';
-	  if(!in_array($enhID, $flight->enhancementOptionsEnabled)){ //option is enabled
-		  $enhName = 'Choose which turn to deploy this unit:';
-		  $enhLimit = 100;	
-		  $enhPrice = 0; //no cost
-		  $enhPriceStep = 0; //no cost
-		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
-		  //technical ID, human readable name, number taken, maximum number to take, price for one, price increase for each further, is an option (rather than enhancement)
-	  }	 */
 
 	  //Elite Marines for Breaching Pods, cost: 40% craft price (round up), limit: 1	  	
 	  $enhID = 'ELT_MAR';	  
@@ -3077,6 +3059,12 @@ class Enhancements{
 	     - for modifications that do require such additional modification (most do not!)
 	   */
 	   public static function addSystemEnhancementsForJSON($ship, $system, $strippedSystem ){
+		   	/* PER-SYSTEM enhancements first, and it early-exits on an empty array before doing
+		   	   anything else: this whole method runs for EVERY system of EVERY ship on EVERY load
+		   	   (ShipSystem::stripForJson), so the new track must cost one empty() on the hot path
+		   	   and nothing more (D3). */
+		   	$strippedSystem = Enhancements::addSystemEnhancementsOwnForJSON($ship, $system, $strippedSystem);
+
 		   	foreach($ship->enhancementOptions as $entry){ //ID,readableName,numberTaken,limit,price,priceStep
 				$enhID = $entry[0];
 				$enhCount = $entry[2];
@@ -3225,6 +3213,734 @@ class Enhancements{
 		    }			
 			return $strippedSystem;
 	   }//endof function addEnhancementsForJSON
-		  
+
+
+	/* ==========================================================================================
+	   PER-SYSTEM ENHANCEMENTS  -  WEAPON_ENHANCEMENTS_PLAN.md
+	   ==========================================================================================
+
+	   Five refits attached to ONE SYSTEM rather than to the whole ship, offered on young-tech
+	   hulls (factionAge <= 2). Everything below is a PARALLEL TRACK beside the ship-level
+	   machinery above, deliberately kept BESIDE it rather than folded INTO it:
+
+	     - a separate $ship->systemEnhancements array, NOT index 8 on enhancementOptions (D2):
+	       confirm.js renders one buy-dialog row per enhancementOptions INDEX and
+	       gamedata.readBulkPurchase walks .selectAmount.shpenh<N> by that same index UNTIL THE
+	       FIRST GAP, so filtering per-system entries out of the dialog would make the indices
+	       sparse and silently zero every enhancement after the gap;
+	     - separate tables (D1), so no existing query, replay or deploy path moves;
+	     - a separate cost bucket, $ship->pointCostSysEnh (D5).
+
+	   ⚠️ Do NOT refactor the ship-level switch blocks above onto this registry. They work, and
+	   the churn buys nothing (D12).
+	   ========================================================================================== */
+
+	/* D3 - mirrors $offerChoiceLists above, for the same reason. Only the LOBBY needs "what may
+	   be bought"; in game only the BOUGHT rows matter and they come from the DB. The in-game
+	   blueprint path (ShipLoader::getShipsByClass, run on every game.php load) switches this off.
+	   Default TRUE for the same reason as $offerChoiceLists: a caller that forgets to disable it
+	   pays measurable time, whereas a caller that wrongly got false shows an empty menu, which is
+	   silent. */
+	public static $offerSystemEnhancements = true;
+
+	/* ⭐ THE definition of every SYSTEM-level enhancement (D12). Adding one is a single literal;
+	   nothing else in this file grows a `case`.
+
+	   eligible / price / limit / apply  are the names of static methods below, dispatched through
+	                                     self::regCall(). Keeping them here rather than in four
+	                                     switch statements is what stops the "added it in three
+	                                     places out of four" bug.
+	   serialise                         the stripped-payload fields addSystemEnhancementsOwnForJSON
+	                                     must re-send. Naming them HERE rather than in a fourth
+	                                     switch is what stops the "applied but not sent" class of
+	                                     bug, which is invisible until someone reads a tooltip.
+	                                     ⚠️ §12 (per-viewer masking) splits this into serialise +
+	                                     serialiseOwnerOnly - one line per entry, BECAUSE it is a
+	                                     registry. */
+	private static $systemEnhancementRegistry = array(
+		/* ⚠️ `data` is on these two and on no others, and it is not decoration. The ship window's
+		   SystemInfo tooltip renders $system->data VERBATIM, and the two refits that change a
+		   WEAPON's numbers change fields the tooltip only ever quotes THROUGH data:
+		     "Intercept"                      <- ->intercept   (Weapon::setSystemDataWindow)
+		     "Fire control (fighter/med/cap)" <- ->fireControl
+		   The other three refits move ->output and ->armour, which the client displays from the
+		   live field, so they showed up correctly from day one and these two did not (user report,
+		   2026-08-15). data is rebuilt per load in beforeTurn() from the ALREADY-enhanced values,
+		   so re-sending it is the whole fix - but stripForJson does not send data for an ordinary
+		   system, which is why it has to be named here. The lobby has no server round trip and
+		   patches the same two entries client-side; ⚠️ MIRROR PAIR with
+		   systemEnhancements.syncInterceptData / syncFireControlData. */
+		'SYS_ADT' => array(
+			'label'     => 'Advanced Defensive Targeting',
+			'eligible'  => 'sysEnhEligibleADT',
+			'price'     => 'sysEnhPriceADT',
+			'limit'     => 'sysEnhLimitADT',
+			'apply'     => 'sysEnhApplyADT',
+			'serialise' => array('intercept','interceptArray','data'),
+		),
+		'SYS_GSGT' => array(
+			'label'     => 'Gunsights',
+			'eligible'  => 'sysEnhEligibleGSGT',
+			'price'     => 'sysEnhPriceGSGT',
+			'limit'     => 'sysEnhLimitOne',
+			'apply'     => 'sysEnhApplyGSGT',
+			//isModified is what makes weapon::stripForJson re-send fireControl at all - see §2.2.
+			'serialise' => array('fireControl','fireControlArray','isModified','data'),
+		),
+		'SYS_HSHLD' => array(
+			'label'     => 'Hardened Shields',
+			'eligible'  => 'sysEnhEligibleHSHLD',
+			'price'     => 'sysEnhPriceHSHLD',
+			'limit'     => 'sysEnhLimitOne',
+			'apply'     => 'sysEnhApplyOutput',
+			'serialise' => array('output'),
+		),
+		'SYS_HARM' => array(
+			'label'     => 'Hardened Armour',
+			'eligible'  => 'sysEnhEligibleHARM',
+			'price'     => 'sysEnhPriceHARM',
+			'limit'     => 'sysEnhLimitOne',
+			'apply'     => 'sysEnhApplyHARM',
+			'serialise' => array('armour'),
+		),
+		'SYS_THR' => array(
+			'label'     => 'Improved Thrust Rating',
+			'eligible'  => 'sysEnhEligibleTHR',
+			'price'     => 'sysEnhPriceTHR',
+			'limit'     => 'sysEnhLimitTHR',
+			'apply'     => 'sysEnhApplyOutput',
+			'serialise' => array('output'),
+		),
+	);
+
+	/* The registry, for anything that needs to read it (the JSON fixups, the client label map
+	   emitter, the tests). Returned by value - callers must not mutate it. */
+	public static function getSystemEnhancementRegistry(){
+		return self::$systemEnhancementRegistry;
+	}
+
+	/* ⭐ THE one line this feature adds to a ship's Enhancements box, and - below - the one
+	   function that takes it back out again. Both live here so the string exists ONCE: the line is
+	   written at construction time, when there is no viewer yet, and removed at serialisation time,
+	   when there is. A literal at each end would drift the first time the wording is nudged and the
+	   only symptom would be an enemy quietly seeing it again.
+	   ⚠️ MIRROR PAIR with systemEnhancements.summaryLine (JS), which writes the identical string in
+	   the lobby - so the lobby and the game agree. */
+	const SYS_ENH_SUMMARY_PREFIX = 'System Enhancements (';
+
+	public static function systemEnhancementSummaryLine($count){
+		return self::SYS_ENH_SUMMARY_PREFIX . $count . ')';
+	}
+
+	/* Remove the summary line from a tooltip, for a viewer who is not on the ship's team.
+	   D8 said the ✦ badge was own-team-only; the SUMMARY LINE was not, and "System Enhancements (4)"
+	   on an enemy hull is the same tell in words (user request, 2026-08-15). The ship-LEVEL lines
+	   above it stay public, exactly as they always were.
+	   ⚠️ This hides the LABEL, not the fact - §6.3 still applies. Several of the enhanced stat
+	   values must reach the enemy for their own hit-chance and damage previews to be right. */
+	public static function stripSystemEnhancementSummary($tooltip){
+		if($tooltip === '' || strpos($tooltip, self::SYS_ENH_SUMMARY_PREFIX) === false) return $tooltip;
+		$kept = array();
+		foreach(explode('<br>', $tooltip) as $line){
+			if($line === '') continue;
+			if(strpos($line, self::SYS_ENH_SUMMARY_PREFIX) === 0) continue;
+			$kept[] = $line;
+		}
+		return implode('<br>', $kept);
+	}
+
+	/* The server-side label table. enhname NEVER comes from the client tuple's index 1 - it is
+	   interpolated into SQL by the writers and shown in tooltips. */
+	public static function systemEnhancementLabel($enhID){
+		return isset(self::$systemEnhancementRegistry[$enhID]['label'])
+			? self::$systemEnhancementRegistry[$enhID]['label']
+			: '';
+	}
+
+	/* Dispatch one registry slot. call_user_func rather than `self::$fn()`: the latter parses as
+	   a variable static-method call and works, but it reads like a static PROPERTY access and one
+	   day somebody will "fix" it into one. */
+	private static function regCall($enhID, $slot, array $args){
+		if(!isset(self::$systemEnhancementRegistry[$enhID][$slot])) return null;
+		return call_user_func_array(array(__CLASS__, self::$systemEnhancementRegistry[$enhID][$slot]), $args);
+	}
+
+	/* ------------------------------------------------------------------ shared eligibility */
+
+	/* The gate every one of the five sits behind (§4.3). Deliberately mirrors the client's
+	   isPseudoSystem in SystemInfoButtons.js - ⚠️ MIRROR PAIR, change both. */
+	public static function systemMayBeEnhanced($ship, $system){
+		if(!is_object($ship) || !is_object($system)) return false;
+		if($ship->factionAge > 2) return false;                     //D6 - hull age is the primary gate
+		if($ship instanceof FighterFlight) return false;            //D7 - per-fighter system ids do not exist in the lobby
+		if(!empty($ship->mine)) return false;                       //D7 - a bulk mine's clone rebuilds systems 0-indexed
+		//Pseudo-system filter. This is what excludes InvulnerableThruster, whose
+		//getArmourInvulnerable returns 99 regardless - enhancing it would charge for nothing.
+		if(!($system->maxhealth > 0)) return false;
+		if($system->isTargetable === false) return false;
+		if(!empty($system->hideInShipWindow)) return false;
+		/* D6 - the one case the ship-level gate lets through by accident: an ANCIENT weapon bolted
+		   onto a young hull (customDevelopment.php sets factionAge = 3 on ~15 weapon classes).
+		   ⚠️ factionAge is NOT declared on ShipSystem, only on those weapon classes, so this must
+		   be an isset() test and never a bare read. */
+		if(($system instanceof Weapon) && isset($system->factionAge) && $system->factionAge >= 3) return false;
+		return true;
+	}
+
+	/* Every enhID this system may be OFFERED, or an empty array. Pure - no mutation, no DB. */
+	public static function systemEnhancementsFor($ship, $system){
+		$out = array();
+		if(!self::systemMayBeEnhanced($ship, $system)) return $out;
+		foreach(self::$systemEnhancementRegistry as $enhID => $def){
+			if(!self::regCall($enhID, 'eligible', array($ship, $system))) continue;
+			if(self::systemEnhancementLimit($ship, $system, $enhID) < 1) continue; //nothing left to buy
+			$out[] = $enhID;
+		}
+		return $out;
+	}
+
+	/* THE pricing question (D4). $level is 0-BASED: the cost of buying the (level+1)th point.
+	   Total for N levels is sum(price(0..N-1)).
+	   ⚠️ D10 - every formula reads BLUEPRINT values. ELITE_CREW raises every thruster's output and
+	   VOR_AZURS raises every EM Shield's; if the offer were priced after them, buying Elite Crew
+	   would retroactively change what a thruster refit costs and how many levels the cap allows.
+	   Offer generation runs on a freshly-constructed ship (setEnhancementOptions, before any
+	   applier), so "current" IS "blueprint" at every site that calls this. Keep it that way. */
+	public static function systemEnhancementPrice($ship, $system, $enhID, $level){
+		$p = self::regCall($enhID, 'price', array($ship, $system, (int)$level));
+		return $p === null ? 0 : (int)$p;
+	}
+
+	/* THE limit question. 0 means "not purchasable", which systemEnhancementsFor treats as
+	   not-offered (a weapon already at intercept 4 cannot buy SYS_ADT at all). */
+	public static function systemEnhancementLimit($ship, $system, $enhID){
+		$l = self::regCall($enhID, 'limit', array($ship, $system));
+		return $l === null ? 0 : max(0, (int)$l);
+	}
+
+	/* ------------------------------------------------------------------ offer generation (D3) */
+
+	/* Build $ship->systemEnhancementOffers: one tuple per (eligible system x eligible enhancement).
+	   Emitted in the static blueprint JSON; ABSENT in game (the $offerSystemEnhancements gate).
+
+	       OFFER tuple: [enhID, limit, price, priceStep, systemid]
+	                       0      1      2        3          4
+
+	   ⚠️ This is a LEANER shape than $ship->systemEnhancements' 8-slot purchase tuple, which the
+	   plan's §3.2 assumed it would share. Measured 2026-08-15 on the whole corpus: the full shape
+	   cost 1,921 bytes per ship (2,557 classes, 85,025 offers, +217KB on Earth Alliance.json) -
+	   roughly double the "under 1 KB per ship" budget §3.2 set as the condition for keeping the
+	   human name on the wire. Dropping the two STRING slots the client can reconstruct for itself
+	   is 62% of that back:
+	     - the label comes from systemEnhancements.LABELS, the JS mirror of the registry above;
+	     - sysname is D13's integrity check on a STORED PURCHASE, and is irrelevant on an offer -
+	       the client is rendering the menu for a system it already holds, so it fills the slot in
+	       when it turns an offer into a purchase.
+	   Nothing else shares this shape; offersFor() in systemEnhancements.js is the only reader, and
+	   it hands the menu an object, not a tuple. ⚠️ MIRROR PAIR - change both. */
+	public static function setSystemEnhancementOptions($ship){
+		$ship->systemEnhancementOffers = array();
+		if(!self::$offerSystemEnhancements) return;
+		if(!is_object($ship) || empty($ship->systems)) return;
+		if($ship->factionAge > 2) return;                //cheap whole-ship exit before the per-system loop
+		if($ship instanceof FighterFlight) return;
+		if(!empty($ship->mine)) return;
+
+		foreach($ship->systems as $system){
+			foreach(self::systemEnhancementsFor($ship, $system) as $enhID){
+				$ship->systemEnhancementOffers[] = array(
+					$enhID,
+					self::systemEnhancementLimit($ship, $system, $enhID),
+					self::systemEnhancementPrice($ship, $system, $enhID, 0),
+					self::systemEnhancementPriceStep($ship, $system, $enhID),
+					(int)$system->id,
+				);
+			}
+		}
+	}
+
+	/* The tuple's priceStep slot. The lobby totals N levels as sum(price + i*step), which is what
+	   confirm.js already does for ship-level enhancements - so the step has to be the CONSTANT
+	   difference between consecutive levels. Every one of the five is linear in level, so this is
+	   just price(1) - price(0). Deriving it rather than declaring it means a formula and its step
+	   can never disagree. */
+	public static function systemEnhancementPriceStep($ship, $system, $enhID){
+		if(self::systemEnhancementLimit($ship, $system, $enhID) < 2) return 0; //single-level refit: no step to take
+		return self::systemEnhancementPrice($ship, $system, $enhID, 1)
+			 - self::systemEnhancementPrice($ship, $system, $enhID, 0);
+	}
+
+	/* ------------------------------------------------------------------ blueprint value helpers */
+
+	/* $system->guns defaults to 1 but is MUTATED at runtime by several classes (defensive.php
+	   does `$this->guns = 2 + $this->getBoostLevel($turn)`; Trek weapons assign it from shot
+	   counts) and by changeFiringMode, which re-reads gunsArray[$mode] straight over it.
+	   Price off the largest value the mount can ever present, so a mode switch cannot make a
+	   purchase retroactively cheap (§2.1). */
+	private static function sysEnhGuns($system){
+		$guns = isset($system->guns) ? (int)$system->guns : 1;
+		if(!empty($system->gunsArray) && is_array($system->gunsArray)){
+			foreach($system->gunsArray as $g) $guns = max($guns, (int)$g);
+		}
+		return max(1, $guns);
+	}
+
+	/* Intercept rating, taken as the maximum across firing modes for the same reason as guns.
+	   ⚠️ interceptArray DOES exist - missile launchers derive a per-mode rating from the loaded
+	   ammo (missile.php: $this->interceptArray[$mode] = $currAmmo->intercept) and
+	   Weapon::changeFiringMode re-reads it over ->intercept exactly the way it re-reads
+	   fireControlArray. The plan's §2.1 says there is none; that was true when it was written and
+	   is not any more, so SYS_ADT carries the SAME mode-switch hazard §2.2 flags for Gunsights and
+	   sysEnhApplyADT bumps both. */
+	private static function sysEnhIntercept($system){
+		$intercept = isset($system->intercept) ? (int)$system->intercept : 0;
+		if(!empty($system->interceptArray) && is_array($system->interceptArray)){
+			foreach($system->interceptArray as $v) $intercept = max($intercept, (int)$v);
+		}
+		return $intercept;
+	}
+
+	/* maxDamage is 0 on many weapons - variable-damage ones carry maxDamageArray and support
+	   weapons genuinely deal none - so take the largest of both before applying the price floor. */
+	private static function sysEnhMaxDamage($system){
+		$dmg = isset($system->maxDamage) ? (int)$system->maxDamage : 0;
+		if(!empty($system->maxDamageArray) && is_array($system->maxDamageArray)){
+			foreach($system->maxDamageArray as $d) $dmg = max($dmg, (int)$d);
+		}
+		return $dmg;
+	}
+
+	/* Arcs a shield covers, in 60-degree steps.
+	   ⚠️ arcWidth 0 means a FULL CIRCLE, not "no arc". Getting this wrong makes an omni-shield
+	   free - it is the single easiest mistake in this file to make and the hardest to notice. */
+	private static function sysEnhArcCount($system){
+		$start = isset($system->startArc) ? (int)$system->startArc : 0;
+		$end   = isset($system->endArc)   ? (int)$system->endArc   : 0;
+		$width = (($end - $start) % 360 + 360) % 360;
+		if($width === 0) $width = 360;
+		return max(1, (int)round($width / 60));
+	}
+
+	/* ------------------------------------------------------------------ SYS_ADT */
+
+	private static function sysEnhEligibleADT($ship, $system){
+		return ($system instanceof Weapon) && self::sysEnhIntercept($system) > 0;
+	}
+
+	/* The resulting rating caps at 4. A weapon already at 4 gets limit 0, i.e. is not offered. */
+	private static function sysEnhLimitADT($ship, $system){
+		return max(0, 4 - self::sysEnhIntercept($system));
+	}
+
+	/* Cost is per RESULTING rating, multiplied by the mount's gun count (O2). Rating is a single
+	   per-weapon value - there is no per-gun rating - and reads as -5% per point to the incoming
+	   to-hit, so a Twin Array at 2 is -10%.
+	       price(level) = 8 * guns * (intercept + level)
+	   i.e. the current rating IS the tier index. Twin Array (intercept 2, guns 2):
+	       level 0 -> 8*2*2 = 32,  level 1 -> 8*2*3 = 48,  limit 4-2 = 2.   (§2.1 worked example)
+	   A single-gun weapon starting at 1 reproduces the requested 8 / 16 / 24. */
+	private static function sysEnhPriceADT($ship, $system, $level){
+		return 8 * self::sysEnhGuns($system) * (self::sysEnhIntercept($system) + (int)$level);
+	}
+
+	private static function sysEnhApplyADT($ship, $system, $count){
+		$system->intercept = (int)$system->intercept + (int)$count;
+		/* Mirror across firing modes, or the refit EVAPORATES on the first mode switch -
+		   changeFiringMode re-reads interceptArray[$mode] straight over ->intercept.
+		   Only NON-ZERO entries: a mode carrying non-interceptor missiles has rating 0 and must
+		   keep it, exactly as a null fireControl must stay null. */
+		if(!empty($system->interceptArray) && is_array($system->interceptArray)){
+			foreach($system->interceptArray as $mode => $value){
+				if((int)$value > 0) $system->interceptArray[$mode] = (int)$value + (int)$count;
+			}
+		}
+	}
+
+	/* ------------------------------------------------------------------ SYS_GSGT */
+
+	/* Weapon classes that carry a fire control but get NOTHING from +1 to it - utility mounts, not
+	   guns. Without this list they are all offered Gunsights at the price floor of 4, which is a
+	   trap purchase: the player pays and nothing changes.
+
+	   It is a DENY-LIST rather than a "must deal damage" rule on purpose. Of the 30 zero-damage
+	   classes that pass the fireControl test (498 mounts across the corpus, measured 2026-08-15),
+	   most DO roll to hit and genuinely want the refit - Burst Beam, Stun Beam, Electro Pulse Gun,
+	   Tractor Beam, Gravity Net. A blanket maxDamage > 0 test would take those out with the rest.
+
+	   ⚠️ Matched on CLASS NAME, so a subclass is NOT covered automatically - if a new variant of an
+	   excluded mount appears it needs its own entry here. That is deliberate: silently excluding
+	   everything under a base class is how a real weapon loses its refit without anyone noticing. */
+	private static $gunsightExcluded = array(
+		'AbbaiShieldProjector',
+		'AegisSensorPod',
+		'CombatTransporter',
+		'GrapplingClaw',
+		'GraviticShifter',
+		'GromeTargetingArray',
+		'MicroJumpSystem',
+		'NexusChaffLauncher',
+	);
+
+	private static function sysEnhEligibleGSGT($ship, $system){
+		if(!($system instanceof Weapon)) return false;
+		if(in_array(get_class($system), self::$gunsightExcluded, true)) return false;
+		if(empty($system->fireControl) || !is_array($system->fireControl)) return false;
+		foreach($system->fireControl as $fc){
+			if($fc !== null) return true;   //0 is a legal fire control - test against null, not truthiness
+		}
+		return false;
+	}
+
+	/* max(4, ceil(maxDamage * 0.25)) per gun. */
+	private static function sysEnhPriceGSGT($ship, $system, $level){
+		return (int)max(4, ceil(self::sysEnhMaxDamage($system) * 0.25)) * self::sysEnhGuns($system);
+	}
+
+	private static function sysEnhApplyGSGT($ship, $system, $count){
+		self::sysEnhBumpFireControl($system->fireControl, $count);
+		/* ⚠️ THE single most important trap in this feature (§2.2). Weapon::changeFiringMode
+		   re-reads fireControlArray[$mode] STRAIGHT OVER fireControl, so a refit that bumps only
+		   fireControl evaporates on the player's first mode switch - silently, mid-game. */
+		if(!empty($system->fireControlArray) && is_array($system->fireControlArray)){
+			foreach($system->fireControlArray as $mode => $fcSet){
+				if(!is_array($fcSet)) continue;
+				self::sysEnhBumpFireControl($fcSet, $count);
+				$system->fireControlArray[$mode] = $fcSet;
+			}
+		}
+		/* Reuse the EXISTING generic "this system was changed, force it to serialize" flag rather
+		   than inventing a second one - the Gravitic Augmenter established it, and
+		   weapon::stripForJson already re-sends fireControl AND fireControlArray off it. */
+		$system->isModified = true;
+	}
+
+	/* +1 per level to every NON-NULL entry, in place.
+	   ⚠️ null means "cannot target this size class" and MUST stay null: `null + 1` is 1 in PHP,
+	   which would silently give a Piercing missile (fireControl [null,3,3]) a fighter-targeting
+	   capability it does not have. Guard with !== null, never with truthiness. */
+	private static function sysEnhBumpFireControl(&$fireControl, $count){
+		if(!is_array($fireControl)) return;
+		foreach($fireControl as $i => $fc){
+			if($fc === null) continue;
+			$fireControl[$i] = (int)$fc + (int)$count;
+		}
+	}
+
+	/* ------------------------------------------------------------------ SYS_HSHLD */
+
+	/* AbbaiShieldProjector is excluded FOR FREE and deliberately: it `extends Weapon implements
+	   DefensiveSystem`, so it is not a Shield subclass and this instanceof already skips it.
+	   No special case needed - but there IS a test asserting it, so a future reparenting cannot
+	   quietly make it eligible. */
+	private static function sysEnhEligibleHSHLD($ship, $system){
+		return ($system instanceof EMShield) || ($system instanceof GraviticShield);
+	}
+
+	private static function sysEnhPriceHSHLD($ship, $system, $level){
+		return 10 * (int)$system->output * self::sysEnhArcCount($system);
+	}
+
+	/* ------------------------------------------------------------------ SYS_HARM */
+
+	private static function sysEnhEligibleHARM($ship, $system){
+		return isset($system->armour) && (int)$system->armour > 0;
+	}
+
+	private static function sysEnhPriceHARM($ship, $system, $level){
+		return (int)ceil((int)$system->maxhealth * max(2, (int)$system->armour) / 2);
+	}
+
+	/* ShipSystem::getArmourBase returns $this->armour verbatim, so a += 1 works generically for
+	   every system including Structure blocks (IPSH_ESSAN already does exactly this). */
+	private static function sysEnhApplyHARM($ship, $system, $count){
+		$system->armour = (int)$system->armour + (int)$count;
+	}
+
+	/* ------------------------------------------------------------------ SYS_THR */
+
+	private static function sysEnhEligibleTHR($ship, $system){
+		return ($system instanceof Thruster);
+	}
+
+	/* "Up to double the rating". */
+	private static function sysEnhLimitTHR($ship, $system){
+		return max(0, (int)$system->output);
+	}
+
+	/* 2 x the DIRECTION's total blueprint thrust, +2 per level - because each level bought raises
+	   that direction's total rating by 1, so the next level is 2 * (total + 1) (O4).
+	   ⚠️ ELITE_CREW adds its count to EVERY thruster's output, server-side here and client-side in
+	   lobbyEnhancements.js. D10 pins this price and sysEnhLimitTHR to the BLUEPRINT, so the two are
+	   independent by design - do not "fix" one to follow the other. */
+	private static function sysEnhPriceTHR($ship, $system, $level){
+		$directionTotal = 0;
+		foreach($ship->systems as $other){
+			if(!($other instanceof Thruster)) continue;
+			if((int)$other->direction !== (int)$system->direction) continue;
+			$directionTotal += (int)$other->output;
+		}
+		return 2 * ($directionTotal + (int)$level);
+	}
+
+	/* ------------------------------------------------------------------ shared appliers */
+
+	private static function sysEnhLimitOne($ship, $system){
+		return 1;
+	}
+
+	/* SYS_HSHLD and SYS_THR are both "output += level".
+	   ⚠️ ORDERING MATTERS for the shield and is already right: Shield::onConstructed derives
+	   tohitPenalty/damagePenalty from getOutput(), and setSystemEnhancements is called from
+	   BaseShip::onConstructed BEFORE the per-system onConstructed loop. If it ran later the shield
+	   would absorb the bonus damage but not confer the bonus to-hit penalty - a half-working
+	   shield, which is worse than a broken one because nobody notices. */
+	private static function sysEnhApplyOutput($ship, $system, $count){
+		$system->output = (int)$system->output + (int)$count;
+	}
+
+	/* ------------------------------------------------------------------ apply (in game) */
+
+	/* APPLY $ship->systemEnhancements to the ship's systems.
+	   Called from BaseShip::onConstructed immediately after setEnhancements(), i.e. BEFORE the
+	   per-system onConstructed loop - see the ordering note on sysEnhApplyOutput. Runs once per
+	   construction, so a plain += is correct here; the CLIENT mirror is the one that has to be
+	   idempotent from a remembered blueprint value, because the player buys and un-buys from an
+	   open menu (§5.1).
+	   ⚠️ MIRROR PAIR with systemEnhancements.apply() in systemEnhancements.js - change both. */
+	public static function setSystemEnhancements($ship){
+		if(empty($ship->systemEnhancements)) return;
+
+		/* ONE summary line in the ship's Enhancements box, last, after the ship-level ones
+		   (§6.4). A line per refit would push the `enh` grid panel past the section cluster it
+		   sits beside; the detail lives in each system's own SystemInfo tooltip.
+
+		   ⭐ The number is DISTINCT SYSTEMS, not rows (user request 2026-08-15). It is the count
+		   of ✦ badges the player will find on the ship window, which is the thing they can go and
+		   look at; a gun wearing both Gunsights and Advanced Defensive Targeting is still one
+		   enhanced gun. Counting rows made the summary disagree with the badges on exactly the
+		   ships that had the most going on. ⚠️ MIRROR PAIR with systemEnhancements.systemsEnhanced
+		   (JS), which counts the same way for the lobby - the two numbers must agree.
+
+		   Counted over rows that actually resolve below would be more honest still, but the count
+		   has to be stable across the two sides and the client cannot see a drop - so both count
+		   the STORED rows, and a dropped row is reported by the saved-fleet notice instead.
+
+		   ⚠️ Written unconditionally here, because at construction time there is no viewer to ask.
+		   BaseShip::stripForJson takes it back off again for anyone outside the ship's team -
+		   see stripSystemEnhancementSummary(). */
+		$enhancedSystems = array();
+		foreach($ship->systemEnhancements as $row){
+			if(isset($row[2]) && (int)$row[2] > 0 && isset($row[6])) $enhancedSystems[(int)$row[6]] = true;
+		}
+		if(count($enhancedSystems) > 0){
+			if($ship->enhancementTooltip != "") $ship->enhancementTooltip .= "<br>";
+			$ship->enhancementTooltip .= self::systemEnhancementSummaryLine(count($enhancedSystems));
+		}
+
+		foreach($ship->systemEnhancements as $row){
+			$enhID = isset($row[0]) ? (string)$row[0] : '';
+			$count = isset($row[2]) ? (int)$row[2] : 0;
+			$systemid = isset($row[6]) ? (int)$row[6] : -1;
+			if($count < 1) continue;
+			if(!isset(self::$systemEnhancementRegistry[$enhID])) continue;
+
+			$system = $ship->getSystemById($systemid);
+			if(!$system) continue;                                    //stale id - drop, never guess
+
+			/* D13 integrity check. A stored systemid is POSITIONAL - pure constructor order - so a
+			   system inserted mid-constructor shifts every id after it and id 14 now names a
+			   DIFFERENT system. Verifying the name turns a MIS-APPLIED refit into a DROPPED one.
+			   Older rows may carry no name; those fall through on the id alone. */
+			if(isset($row[7]) && $row[7] !== '' && (string)$system->name !== (string)$row[7]) continue;
+
+			/* Deliberately NO eligibility re-check here, unlike loadSavedFleet (§4.7.1). These rows
+			   were validated at buy time and the points are already spent and recorded in
+			   tac_ship.enhvalue; a mid-campaign rebalance must not silently strip a refit the
+			   player paid for in a game already under way. Saved FLEETS re-validate because they
+			   are re-priced and the player can re-buy. */
+			self::regCall($enhID, 'apply', array($ship, $system, $count));
+		}
+	}
+
+	/* ------------------------------------------------------------------ JSON fixups */
+
+	/* Per-system JSON fixups for the new track - GENERIC, driven entirely by the registry's
+	   `serialise` list (D12). No per-enhancement branch, so a new enhancement cannot ship with its
+	   client-side half forgotten, which is the bug class that is invisible until someone reads a
+	   tooltip.
+	   Called from the existing addSystemEnhancementsForJSON, which runs for EVERY system of EVERY
+	   ship on EVERY load - hence the early exit before anything else happens (D3). */
+	public static function addSystemEnhancementsOwnForJSON($ship, $system, $strippedSystem){
+		if(empty($ship->systemEnhancements)) return $strippedSystem;
+
+		$systemid = (int)$system->id;
+		foreach($ship->systemEnhancements as $row){
+			if(!isset($row[6]) || (int)$row[6] !== $systemid) continue;
+			if(!isset($row[2]) || (int)$row[2] < 1) continue;
+			$enhID = (string)$row[0];
+			if(empty(self::$systemEnhancementRegistry[$enhID]['serialise'])) continue;
+
+			foreach(self::$systemEnhancementRegistry[$enhID]['serialise'] as $field){
+				//interceptArray/fireControlArray exist only on some classes - never invent a field.
+				if(!property_exists($system, $field)) continue;
+				$value = $system->$field;
+				//An empty PHP array() encodes as the JSON ARRAY [], which on the client silently
+				//replaces a map-shaped blueprint value with nothing. Send nothing instead.
+				if(is_array($value) && empty($value)) continue;
+				$strippedSystem->$field = $value;
+			}
+		}
+		return $strippedSystem;
+	}
+
+	/* ------------------------------------------------------------------ buy-time validation (D4) */
+
+	/* Validate a CLIENT-SUBMITTED list against a freshly built ship. Never throws.
+	   Resolves each systemid, re-checks the name (D13), re-checks eligibility, drops anything on a
+	   system the pre-battle payload destroys (D11), clamps the count to the current limit, and
+	   REPLACES the price with the server's own - ship enhancements today trust the client's
+	   pointCostEnh wholesale, and that trust is inherited, not endorsed.
+
+	   $cleanPreBattle is PreBattleDamage::sanitise()'s output for the same ship, or null. The
+	   client runs its own sweep for immediate feedback; THIS is the guarantee.
+
+	   Returns array(
+	     'rows'    => the clean PURCHASE tuples,
+	     'total'   => the authoritative point total for pointCostSysEnh,
+	     'notices' => human-readable strings, one per row that was dropped / clamped / re-priced
+	   ). */
+	public static function sanitiseSystemEnhancements($ship, $raw, $cleanPreBattle = null){
+		$out = array('rows' => array(), 'total' => 0, 'notices' => array());
+		if(!is_array($raw) || !is_object($ship)) return $out;
+
+		$destroyed = self::sysEnhDestroyedSystemIds($ship, $cleanPreBattle);
+		$seen = array(); //one row per (systemid, enhID) - the table's PK
+
+		foreach($raw as $row){
+			if(!is_array($row) || count($row) < 3) continue;
+			$enhID = (string)$row[0];
+			$count = isset($row[2]) ? (int)$row[2] : 0;
+			$systemid = isset($row[6]) ? (int)$row[6] : -1;
+			if($count < 1) continue;                                   //nothing bought - not an error
+			if(!isset(self::$systemEnhancementRegistry[$enhID])) continue;   //bogus enhID
+
+			$key = $systemid . '|' . $enhID;
+			if(isset($seen[$key])) continue;                           //duplicate row
+			$seen[$key] = true;
+
+			$system = $ship->getSystemById($systemid);
+			if(!$system){
+				$out['notices'][] = self::systemEnhancementLabel($enhID) . ": system #$systemid no longer exists - removed.";
+				continue;
+			}
+			$sysname = (string)$system->name;
+			if(isset($row[7]) && $row[7] !== '' && (string)$row[7] !== $sysname){
+				$out['notices'][] = self::systemEnhancementLabel($enhID) . ": system #$systemid is now '$sysname', not '" . (string)$row[7] . "' - removed.";
+				continue;
+			}
+			if(isset($destroyed[$systemid])){
+				//D11 - you cannot refit a wreck, and the removal is one-way.
+				$out['notices'][] = self::systemEnhancementLabel($enhID) . " on $sysname #$systemid was removed: the system is destroyed.";
+				continue;
+			}
+			if(!self::systemMayBeEnhanced($ship, $system) || !self::regCall($enhID, 'eligible', array($ship, $system))){
+				$out['notices'][] = self::systemEnhancementLabel($enhID) . " is no longer available on $sysname #$systemid - removed.";
+				continue;
+			}
+
+			$limit = self::systemEnhancementLimit($ship, $system, $enhID);
+			if($limit < 1){
+				$out['notices'][] = self::systemEnhancementLabel($enhID) . " is no longer available on $sysname #$systemid - removed.";
+				continue;
+			}
+			if($count > $limit){
+				$out['notices'][] = self::systemEnhancementLabel($enhID) . " on $sysname #$systemid was reduced from $count to $limit.";
+				$count = $limit;
+			}
+
+			$total = self::systemEnhancementTotalPrice($ship, $system, $enhID, $count);
+			$claimed = isset($row[4]) ? (float)$row[4] : null;
+			if($claimed !== null && abs($claimed - $total) > 0.001){
+				$out['notices'][] = self::systemEnhancementLabel($enhID) . " on $sysname #$systemid was re-priced from $claimed to $total.";
+			}
+
+			$out['rows'][] = array(
+				$enhID,
+				self::systemEnhancementLabel($enhID),   //NEVER the client tuple's index 1
+				$count,
+				$limit,
+				$total,                                  //index 4 = TOTAL PAID, see the tuple note on BaseShip
+				self::systemEnhancementPriceStep($ship, $system, $enhID),
+				$systemid,
+				$sysname,
+			);
+			$out['total'] += $total;
+		}
+		return $out;
+	}
+
+	/* Points for buying $count levels: the sum of the per-level prices, NOT count x price. */
+	public static function systemEnhancementTotalPrice($ship, $system, $enhID, $count){
+		$total = 0;
+		for($i = 0; $i < (int)$count; $i++){
+			$total += self::systemEnhancementPrice($ship, $system, $enhID, $i);
+		}
+		return $total;
+	}
+
+	/* Which system ids the pre-battle payload leaves DESTROYED, INCLUDING the structure cascade
+	   (D11). Destroying a Structure block destroys every system in its location, so sweeping only
+	   the boxes the player ticked would leave refits alive on systems that are in fact wrecked.
+
+	   Derived from the sanitised payload plus each system's own structure LOCATION rather than
+	   from ShipSystem::isDestroyed(): isDestroyed() reads ->structureSystem, which is populated in
+	   onConstructed, and a POST-side reconstructed ship is exactly the kind of thing that may not
+	   have been through it ([[arch_post_side_ship_reconstruction]]). ->location and
+	   getStructureLocation() are set in the constructor and are always there. */
+	private static function sysEnhDestroyedSystemIds($ship, $cleanPreBattle){
+		$destroyed = array();
+		if(empty($cleanPreBattle['sys']) || !is_array($cleanPreBattle['sys'])) return $destroyed;
+
+		foreach($cleanPreBattle['sys'] as $ref => $entry){
+			if(!empty($entry['k'])) $destroyed[(int)$ref] = true;
+		}
+		if(empty($destroyed)) return $destroyed;
+
+		//Which LOCATIONS lost their Structure block?
+		$deadLocations = array();
+		$primaryDead = false;
+		foreach($ship->systems as $sys){
+			if(!($sys instanceof Structure)) continue;
+			if(empty($destroyed[(int)$sys->id])) continue;
+			$deadLocations[(int)$sys->location] = true;
+			if((int)$sys->location === 0) $primaryDead = true;
+		}
+		if(empty($deadLocations)) return $destroyed;
+
+		foreach($ship->systems as $sys){
+			$id = (int)$sys->id;
+			if(isset($destroyed[$id])) continue;
+			if($sys instanceof Structure){
+				//A non-PRIMARY Structure falls with PRIMARY - isDestroyed()'s own rule.
+				if($primaryDead && (int)$sys->location !== 0) $destroyed[$id] = true;
+				continue;
+			}
+			//Outer-structure-ring hulls (the Vree saucers): a breached block does NOT take its
+			//systems with it ([[arch_outer_structure_ring]]).
+			if($sys->getSurvivesStructureDestruction()) continue;
+
+			$loc = $sys->getStructureLocation();
+			if(is_array($loc)){
+				if(empty($loc)) continue;
+				$all = true;
+				foreach($loc as $l){ if(empty($deadLocations[(int)$l])){ $all = false; break; } }
+				if($all) $destroyed[$id] = true;
+			}else{
+				if(!empty($deadLocations[(int)$loc])) $destroyed[$id] = true;
+			}
+		}
+		return $destroyed;
+	}
+
 } //endof class Enhancements
 ?>

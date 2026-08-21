@@ -20,11 +20,27 @@ const theme = {
         textDim: "#7f9bb8",                     //secondary labels
         healthOk: "#427231",                    //structure bar fill, healthy
         healthCrit: "#ed6738",                  //structure bar fill when criticals present
-        warning: "#e1b000",                     //amber status (e.g. ROLLED banner)
+        warning: "#e1b000",
+        warningSoft: "#e6b400",                     //amber status (e.g. ROLLED banner)
         statusOk: "limegreen",                  //green status banners - matches the map tooltip (Undetected / Attached)
         statusAlert: "#e1b000",                  //orange alert banners - matches the map tooltip (boarding)
         statusBad: "red",                       //red status banners - matches the map tooltip (Detected)
-        enhText: "#d8be86",                     //Enhancements list body text - gold, matches the block's bronze border/title
+        /* Cyan "not here yet / changes next turn" status. Same #00b8e6 the fleet list already
+           uses for its "[Deploys on Turn N]" fleet header and FighterIcon uses for DOCKED, so a
+           pending arrival reads the same wherever it is shown. */
+        statusPending: "#00b8e6",
+        /* THE GOLD SET - "this was bought, it is not standard equipment".
+           enhText was already here; the other three were hex literals repeated in
+           ShipNotesPanel.js (Block $gold and EnhTitle). They were extracted when the
+           system-enhancement menu needed the same look (WEAPON_ENHANCEMENTS_PLAN.md §1), because
+           a second file copying the literals is exactly how two gold surfaces drift apart -
+           see [[project_visual_unification]]. Any new gold surface reads these four.
+           ⚠️ enhBg is a FILL with its own alpha, never element opacity: element opacity would
+           fade the text as well, and stacking the two compounds. */
+        enhText: "#d8be86",                     //Enhancements list body text
+        enhTitle: "#e8cf93",                    //Enhancements section-bar title - a shade brighter
+        enhBg: "rgba(169, 128, 56, 0.30)",      //Enhancements section-bar fill
+        enhLine: "#8a6d3b",                     //Enhancements border / divider - bronze
         custom: "#cccc00",
 
         //HISTORICAL - the 2011 map-overlay skin. Stage 4 converged every surface that wore
@@ -39,6 +55,10 @@ const theme = {
                                                 //the converted surfaces kept this text colour, so it
                                                 //is still the right value to reach for on chrome.
         overlayBg: "black",                     //--fv-overlay     - map tooltips + .confirm
+        overlayBgSoft: "rgba(0, 0, 0, 0.65)",   //--fv-overlay-soft - the same, see-through as a FILL.
+        //                                        Element opacity fades TEXT as well as panel; putting the
+        //                                        translucency here keeps tooltip text at full strength.
+        //                                        Never combine with element opacity (alpha compounding).
     },
     fonts: {
         body: "arial",

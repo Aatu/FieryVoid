@@ -215,29 +215,7 @@ class shadowRegenBase extends OSAT{
 				16 => "0:Hangar",
 				17 => "0:Scanner",
 				18 => "0:Reactor",
-				20 => "C&C", //the only difference between sections - outer 19-20 hits are rerolled on Primary table, which is the only chance to hit Pilot
-			),
-			1=> array(
-				6 => "Structure",
-				9 => "0:Energy Diffuser",
-				10 => "2:BioThruster",
-				12 => "0:Self Repair",
-				14 => "1:Slicer Beam",
-				16 => "0:Hangar",
-				17 => "0:Scanner",
-				18 => "0:Reactor",
-				20 => "Primary", 
-			),
-			2=> array(
-				6 => "Structure",
-				9 => "0:Energy Diffuser",
-				10 => "2:BioThruster",
-				12 => "0:Self Repair",
-				14 => "1:Slicer Beam",
-				16 => "0:Hangar",
-				17 => "0:Scanner",
-				18 => "0:Reactor",
-				20 => "Primary", 
+				20 => "C&C", 
 			),
         );
     }

@@ -78,7 +78,7 @@ class RulnataAM extends HeavyCombatVessel{
 				6 => "Structure",
 				10 => "Thruster",
 				12 => "Class-S Missile Rack",
-				14 => "Scanner",
+				14 => "ELINT Scanner",
 				16 => "Engine",
 				17 => "Hangar",
 				19 => "Reactor",
@@ -86,7 +86,7 @@ class RulnataAM extends HeavyCombatVessel{
 			),
 			1=> array(
 				4 => "Thruster",
-				8 => "Scanner",
+				8 => "ELINT Scanner",
 				10 => "Light Particle Beam",
 				18 => "Structure",
 				20 => "Primary",

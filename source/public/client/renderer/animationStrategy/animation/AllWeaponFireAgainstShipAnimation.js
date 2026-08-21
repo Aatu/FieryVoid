@@ -2,7 +2,19 @@
 
 window.AllWeaponFireAgainstShipAnimation = function () {
 
-    function AllWeaponFireAgainstShipAnimation(ship, shipIconContainer, particleEmitterContainer, gamedata, time, scene, movementAnimations, logAnimation, prefire = false) {
+    /* opts (all optional):
+     *   fireOrderFilter - predicate on a mapped incoming-fire entry. Lets a caller draw only
+     *                     PART of what is coming at this ship, so the same ship can appear in
+     *                     two passes without either pass drawing the other's shots twice. Used
+     *                     by the multi-target volley pass in ReplayAnimationStrategy.
+     *   skipCamera      - suppress this animation's own pan (and the 1.3s it adds to the
+     *                     duration). For a caller that is animating several ships at once and
+     *                     therefore has to own a single shared camera move itself: N live pans
+     *                     all call webglScene.moveCameraTo every frame, and the last one in the
+     *                     animation array simply wins.
+     *   damageIndex     - shared reverse damage map, see getAllFireOrdersForDisplayingAgainst.
+     */
+    function AllWeaponFireAgainstShipAnimation(ship, shipIconContainer, particleEmitterContainer, gamedata, time, scene, movementAnimations, logAnimation, prefire = false, opts = {}) {
         Animation.call(this);
 
         this.gamedata = gamedata;
@@ -17,11 +29,18 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         this.logAnimation = logAnimation;
         this.prefire = prefire;
 
+        var incomingFire;
         if (!prefire) {
-            this.incomingFire = groupByShipAndWeapon(weaponManager.getAllFireOrdersForDisplayingAgainst(ship));
+            incomingFire = weaponManager.getAllFireOrdersForDisplayingAgainst(ship, opts.damageIndex);
         } else {
-            this.incomingFire = groupByShipAndWeapon(weaponManager.getAllPreFireOrdersForDisplayingAgainst(ship));
+            incomingFire = weaponManager.getAllPreFireOrdersForDisplayingAgainst(ship);
         }
+
+        if (opts.fireOrderFilter) {
+            incomingFire = incomingFire.filter(opts.fireOrderFilter);
+        }
+
+        this.incomingFire = groupByShipAndWeapon(incomingFire);
         this.animations = [];
 
         if (this.incomingFire.length === 0) {
@@ -31,9 +50,11 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         this.systemDestroyedEffect = new SystemDestroyedEffect(scene)
         this.animations.push(this.systemDestroyedEffect)
 
-        var cameraAnimation = new CameraPositionAnimation(getShipPositionAtTime.call(this, this.shipIconContainer.getByShip(ship), this.time), this.time);
-        this.animations.push(cameraAnimation);
-        this.duration += cameraAnimation.getDuration();
+        if (!opts.skipCamera) {
+            var cameraAnimation = new CameraPositionAnimation(getShipPositionAtTime.call(this, this.shipIconContainer.getByShip(ship), this.time), this.time);
+            this.animations.push(cameraAnimation);
+            this.duration += cameraAnimation.getDuration();
+        }
 
         this.incomingFire.forEach(function (group) {
 

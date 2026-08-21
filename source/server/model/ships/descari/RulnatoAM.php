@@ -83,7 +83,7 @@ class RulnatoAM extends HeavyCombatVessel{
 				9 => "Thruster",
 				10 => "Jump Engine",
 				12 => "Class-S Missile Rack",
-				14 => "Scanner",
+				14 => "ELINT Scanner",
 				16 => "Engine",
 				17 => "Hangar",
 				19 => "Reactor",
@@ -91,7 +91,7 @@ class RulnatoAM extends HeavyCombatVessel{
 			),
 			1=> array(
 				4 => "Thruster",
-				8 => "Scanner",
+				8 => "ELINT Scanner",
 				10 => "Light Particle Beam",
 				18 => "Structure",
 				20 => "Primary",

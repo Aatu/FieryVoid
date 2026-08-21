@@ -67,8 +67,8 @@ class OrionBetaAM extends StarBaseSixSections{
 
 		for ($i = 0; $i < sizeof($this->locations); $i++){
 
-			$min = 0 + ($i*60);
-			$max = 120 + ($i*60);
+			$min = (0 + ($i*60)) % 360;
+			$max = (120 + ($i*60)) % 360;
 
 			$struct = Structure::createAsOuter(3, 100,$min,$max);
 			$hangar = new Hangar(3, 6, 6);
@@ -96,7 +96,7 @@ class OrionBetaAM extends StarBaseSixSections{
 			$loc = $this->locations[$i];
 
 			$this->hitChart[$loc] = array(
-				1 => "TAG:Class-S Missile Rack",
+				1 => "TAG:Class-SO Missile Rack",
 				2 => "TAG:Railgun",
 				3 => "TAG:Standard Particle Beam",
 				4 => "TAG:Interceptor I",

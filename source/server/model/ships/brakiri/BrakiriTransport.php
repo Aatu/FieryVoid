@@ -54,8 +54,8 @@ class BrakiriTransport extends BaseShip{
 
         $this->addAftSystem(new GraviticThruster(3, 10, 0, 3, 2));
         $this->addAftSystem(new GraviticThruster(3, 10, 0, 3, 2));
-        $this->addLeftSystem(new CargoBay(1, 30));
-        $this->addLeftSystem(new CargoBay(1, 30));
+        $this->addAftSystem(new CargoBay(1, 30));
+        $this->addAftSystem(new CargoBay(1, 30));
         $this->addAftSystem(new GraviticBolt(3, 5, 2, 120, 300));
         $this->addAftSystem(new GraviticBolt(3, 5, 2, 60, 240));
 		
@@ -84,22 +84,22 @@ class BrakiriTransport extends BaseShip{
         		),
         		2=> array(
         				4 => "Gravitic Bolt",
-        				8 => "Cargo",
+        				8 => "Cargo Bay",
         				18 => "Structure",
         				20 => "Primary",
         		),
         		3=> array(
-        				3 => "1: Thruster",
-        				6 => "Port Thruster",
-        				8 => "2: Thruster",
+        				3 => "1:Thruster",
+        				6 => "Thruster",
+        				8 => "2:Thruster",
         				13 => "Cargo Bay",
         				18 => "Structure",
         				20 => "Primary",
         		),
         		4=> array(
-        				3 => "1: Thruster",
-        				6 => "Port Thruster",
-        				8 => "2: Thruster",
+        				3 => "1:Thruster",
+        				6 => "Thruster",
+        				8 => "2:Thruster",
         				13 => "Cargo Bay",
         				18 => "Structure",
         				20 => "Primary",

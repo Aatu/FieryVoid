@@ -138,7 +138,7 @@ class FlameOfPurityGCAM extends BaseShip{
 		3=> array(
 			3 => "Thruster",
 			5 => "War Lance",
-			8 => "Heavy Gauss Cannon",
+			8 => "Heavy Gauss Rifle",
 			9 => "Class-R Missile Rack",
 			11 => "Flak Array",
 			18 => "Structure",
@@ -148,7 +148,7 @@ class FlameOfPurityGCAM extends BaseShip{
 		4=> array(
 			3 => "Thruster",
 			5 => "War Lance",
-			8 => "Heavy Gauss Cannon",
+			8 => "Heavy Gauss Rifle",
 			9 => "Class-R Missile Rack",
 			11 => "Flak Array",
 			18 => "Structure",

@@ -34,7 +34,7 @@ class wlcOptineHC extends BaseShip{
 
 		$this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
 		$this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
-		$this->addFrontSystem(new Hangar(4, 6));
+		$this->addFrontSystem(new Hangar(4, 12));
 		$this->addFrontSystem(new AssaultLaser(3, 6, 4, 300, 60));
 		$this->addFrontSystem(new ImperialLaser(3, 8, 5, 300, 60));
 		$this->addFrontSystem(new ImperialLaser(3, 8, 5, 300, 60));

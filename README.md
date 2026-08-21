@@ -281,6 +281,16 @@ What it verifies, per game:
 - **snapshot** — the full client gamedata JSON (stripForJson) from every player's perspective. Catches serialization/payload regressions: dropped or changed fields, notes handling, visibility masking, shared-reference mutations, autoload/constructor breakage.
 - **movement** — Movement::validateThrustPayment replayed over every recorded ship-turn (with enforcement switched on in-memory only). Every legal recorded maneuver must stay legal — catches regressions in thrust/maneuver math.
 - **tohit** — Weapon::calculateHitBase recomputed for every recorded direct-fire order against as-of-turn game state. Catches regressions in hit-chance math (arcs, range penalties, EW, jink, firing modes).
+- **damage** (from 18.8.2026) — damage AND critical resolution replayed, per turn. The turn's own damage entries and criticals are rewound off the loaded state (which puts the ships back exactly as the engine found them when it started resolving that turn's fire), then every recorded fire order that scored hits is re-resolved in its recorded resolution order through the real allocation path, and every system the replay damaged rolls its critical. The report lists, per shot, every damage entry produced — which ship, which system, how much damage, how much armour ate, whether it was destroyed — plus every critical rolled. Catches regressions in damage modifiers, armour (advanced/adaptive/pierced), hit-location charts, overkill routing, protective systems, and the critical tables.
+
+  Two things about it are worth understanding:
+  - It uses the **recorded number of hits** (`shotshit`) rather than re-rolling to hit. Whether a shot hits is the tohit check's job; this check is about what happens *after* it hits, so it takes the hits as given. An unrelated EW change therefore can't cascade into every damage line.
+  - Like tohit, the baseline stores **recomputed** values, not the historically recorded ones. The engine rolls fresh dice for damage amount, hit location and criticals, and those per-roll results were never stored in the database, so there is nothing to compare against. Pass/fail is "what this code produces now" vs "what the code produced when you recorded" — which is exactly the drift signal you want.
+- **masking** (from 18.8.2026) — per-viewer information hiding: everything `TacGamedata::prepareForPlayer()` does, which is where `deleteHiddenData()` and the Chameleon disguise passes live. This is the "can my opponent see that before I commit it?" check: hidden fire orders, enemy EW and power, the active ship's un-committed movement, combat pivots, undetected stealth ships' movement, deployment docks, and the Chameleon disguise. The report is a compact per-ship fingerprint of exactly the fields masking is able to touch, so a failure names the rule that changed instead of burying it in payload.
+
+  Two things about it are worth understanding:
+  - It sweeps **every live phase** (-1 Deployment, 1 Initial Orders, 2 Movement, 5 Pre-Firing, 3 Firing) for **every player**. Nearly every masking rule is phase-conditional and viewer-conditional, so anything less would leave most of them untested.
+  - It replays at **the turn with the most recorded fire orders**, not the game's current turn. Every fire-order mask is gated on the order belonging to the current turn, and a recorded game almost always sits on a fresh turn nobody has declared on yet (13 games in 15, across the sample corpus, have zero fire orders at their current turn). Loading there would test the biggest masking rule against an empty list.
 
 ### How to use it, step by step:
 
@@ -292,7 +302,7 @@ What it verifies, per game:
 
    docker exec fieryvoid-php-1 php /usr/src/current/tests/replay/replayHarness.php record
 
-   This replays every local game with recorded play (turn >= 1, not in lobby) and writes the results to `tests/replay/baseline/` (git-ignored). Takes ~20 seconds for ~160 games.
+   This replays every local game with recorded play (turn >= 1, not in lobby) and writes the results to `tests/replay/baseline/` (git-ignored). Takes ~33 seconds for ~160 games.
 
 3. Develop as normal.
 
@@ -310,13 +320,14 @@ What it verifies, per game:
 
 - `list` — show all replayable games and whether they're in the baseline.
 - `--games=3696,3671` — limit record/check to specific game ids (fast iteration while debugging a failure).
-- `--checks=tohit` — run a subset of `snapshot,movement,tohit`.
+- `--checks=tohit` — run a subset of `snapshot,movement,tohit,damage,masking`.
 - `--diff-limit=50` — show more differences per failed report (default 15).
 
 ### Good to know:
 
 - **Add coverage by playing**: any game you play on the local server (fresh test games included) becomes corpus material — just run `record` again to fold it into the baseline. The more varied the local games (factions, weapons, terrain, fighters), the wider the net.
-- **Deterministic dice**: live hit-chance calculation genuinely rolls dice (the hit LOCATION is rolled inside calculateHitBase and feeds the final chance). The harness replaces the Dice class in its own process with a seeded RNG so every run reproduces exactly. Game code is not touched.
+- **Deterministic dice**: live hit-chance, damage and critical resolution all genuinely roll dice (the hit LOCATION is rolled inside calculateHitBase and feeds the final chance; damage amount, hit location and every critical are rolled again during resolution). The harness replaces the Dice class in its own process with a seeded RNG, re-seeded at fixed points (per game, per turn, per fire order, per system), so every run reproduces exactly and an extra roll in one calculation can't shift the next one's results. Game code is not touched.
+- **Still read-only, even though the damage check runs real weapon code**: a few weapons write to the database from inside the damage path (the Gravitic Tracting Rod inserts a movement row when it drags a target). The harness hands `Manager` its own DBManager and wraps each turn's damage replay in a transaction that is *always* rolled back, so nothing the engine attempts can reach the corpus. Verified with table checksums across a full record.
 - A couple of ancient test games fail to load (corrupt data) — their error text is recorded as part of the baseline, which is fine: if they ever start loading differently, that's a change worth seeing too. Games that are broken for legacy reasons the harness can't model can be dropped entirely by adding their id to the `EXCLUDED_GAMES` constant at the top of `replayHarness.php`.
 
 ### Multiple developers / different Docker databases:
@@ -329,11 +340,81 @@ The harness works for everyone, but **the baseline is per-developer and is never
 - Because baselines aren't shared, a FAIL is always meaningful *to the dev who sees it*: it means the current code changed engine behaviour relative to the games in their own DB. It never reflects someone else's data.
 - The `EXCLUDED_GAMES` list is shared (it's in the committed code). It's keyed by game id, so an entry that names a game another dev doesn't have simply does nothing for them — harmless. Only add ids there for games that are genuinely unmodellable, with a note saying why.
 
+# Ship-data validator (checkShipData.php):
+
+(from 18.8.2026) A companion to the replay harness that checks the *blueprints* rather than the play. It builds every ship class under `source/server/model/ships/` and asserts the invariants that nothing else in the toolchain checks. It needs no database and takes about 30 seconds for ~2,560 ships.
+
+    docker exec -w /usr/src/current fieryvoid-php-1 php checkShipData.php
+    or record baseline with:     docker exec -w /usr/src/current fieryvoid-php-1 php checkShipData.php --record
+
+The reason it exists is that bad ship data fails **silently**. The clearest case is the hit chart: `getHitSystemByTable()` resolves a chart entry by calling `getSystemsByNameLoc($name, $location, ...)`, and a name that matches no system in that section returns an empty array, at which point the damage is quietly rerouted to that section's Structure. No error, no log — just a system that can never be hit directly, for the whole life of the ship. That is how `AlacanAtica` spent an unknown length of time with `"Light S-Missile Rackk"` on its starboard chart: every 5–6 against that section landed on Structure instead of the missile rack.
+
+It is deliberately a **runtime** validator, not a source parser. A static probe over the same data reports hundreds of false hits, because systems assigned to a local before `addLeftSystem($t1l)`, `displayName` overridden after construction, six-sided hulls whose location numbering differs, and the `"2:Thruster"` location-qualified name syntax all resolve perfectly well once the ship is actually built. Only an instantiated ship can answer "is this name reachable from this section".
+
+### What it checks
+
+- **construct** — the hull builds at all. This one always runs whatever the filters say: nothing else can be inspected on a ship that won't instantiate, and a hull that throws in its constructor takes the lobby's whole faction list down with it.
+- **hitchart** — every chart entry resolves to a real system in that section, via `displayName`, `hitChartName`, the `"LOC:Name"` redirect or the `"TAG:tag"` selector. Failures are classified, so the report says what to do: *probable typo for X*, *a system carries this as a TAG — write it "TAG:X"*, *that system exists but at location N — use the "LOC:Name" form*, *stray whitespace*, or nothing when there is no plausible intent. It also checks the `Primary` keyword's spelling: the main resolution path compares it case-sensitively, so `"PRIMARY"` is looked up as a system name, matches nothing and becomes a Structure hit — while the Flash and Piercing chart rebuilds uppercase first and therefore *do* match it. Same entry, different behaviour depending on which weapon fired, which is why that one is close to impossible to spot from play.
+- **chart** — chart shape: integer keys in 1..20, terminating at 20 (a chart ending at 17 lets rolls 18–20 fall through to Structure), no chart for a section the hull doesn't have, no hull section without a chart.
+- **dupkeys** — duplicate roll keys. This is the one check that *cannot* be done at runtime: PHP builds an array literal with the last value for a repeated key and says nothing, so by the time the ship exists the earlier entry is simply gone. It tokenises the file instead (`token_get_all`, not a regex — comments and nested arrays live inside these literals).
+- **image / sysimage** — `$imagePath` and per-system icons resolve to real files under `source/public/`, **case-exactly**. `file_exists()` is useless here: Windows dev is case-insensitive and live is not, so a case slip works on your machine and 404s only in production (see the `dockingCollar.webp` incident). Note the two icon conventions it honours — a ShipSystem's `$iconPath` is always resolved under `img/systemicons/` even when it contains slashes, while a Fighter's `$iconPath`/`$imagePath` are web-root relative.
+- **variantof** — `$variantOf` is empty, a known retirement sentinel (`NONE`/`OBSOLETE`/`OBSELETE`), or the `$shipClass` of a real ship. Anything else makes the ship invisible in the lobby: it is neither a base design nor nestable under one, which is exactly how a truncated sentinel silently retires a refit nobody meant to retire.
+- **hangar** — declared `$fighters[]` fit the hangar boxes, using `HangarOps::populateInitialHangarUsage`'s own arithmetic (capacity in BOXES, catapult/rail/LCV bays partitioned out on both sides, ultralights two to a box). An over-declaration is silently truncated at game start.
+- **arcs** — `startArc`/`endArc` numeric and within 0..360.
+- **ids** — system ids are positional and unique: `id == array index` for top-level systems. Persisted thrust, fire-order, power and critical rows are keyed by these ids, so a collision misroutes real saved data. It also walks the `1000+(id*10)+i` sub-weapon ids of duo/dual weapons and missile racks, which collide once a parent carries more than 10 sub-weapons — though as of 18.8.2026 no ship blueprint actually reaches that arm (the one `DualWeapon` subclass is commented out and `FighterMissileRack` lives inside flights), so treat it as a guard for the future rather than as live coverage.
+
+### The baseline
+
+The tree carries a large amount of pre-existing ship-data debt, so a plain "exit 1 on any violation" gate would be red forever and therefore ignored. The accepted state lives in **`tests/shipdata/baseline.txt`** and a normal run only fails on findings that are *not* in it. Fix something and it's reported as FIXED (never a failure); introduce something and the run fails naming it and only it.
+
+Unlike the replay harness's baseline, this one is derived purely from the repository — no database, no local games — so it is deterministic, portable and **committed**. Everyone gets the same gate on a fresh clone, and the baseline diff is itself reviewable: a PR that adds a line to `baseline.txt` is a PR that added a known-broken ship entry. Review it, don't rubber-stamp it.
+
+    php checkShipData.php --record        # accept the current state (ALL of it) as the new baseline
+    php checkShipData.php --no-baseline   # ignore the baseline; show the whole debt
+
+`--record` refuses to run alongside `--ship=` / `--faction=`, because a filtered record would write a baseline covering only the filtered ships and the next full run would report everything else as brand new — the same trap the replay harness has with `record --games=`.
+
+### Useful options
+
+- `--checks=hitchart,dupkeys` / `--skip=sysimage` — run a subset.
+- `--ship=Atica` / `--faction=Alacan` — narrow to one ship or faction while iterating.
+- `--max=0` — print every finding (default is 40 per check).
+- `--strict` — new warnings fail too, not just new errors.
+
+It runs as check 2 of 3 in `scripts\fvbuild.ps1 -Check`, before the replay harness — a broken hit-chart entry would otherwise surface there as a puzzling damage diff instead of as itself.
+
+# Maintenance tools need a key (08.2026)
+
+The three web-runnable maintenance tools -- `generateStaticShipFileWeb.php`, `generateStaticShipFile.php`
+and `source/public/mass_optimizer.php` -- are plain URLs with no login behind them. Until 08.2026 that
+meant anyone, or any crawler, could start a job that instantiates every ship in the game or re-encodes
+every image. They are now behind `MaintenanceGate` (`source/server/lib/MaintenanceGate.php`).
+
+**One-time setup per server.** Add a line to that server's own `source/server/varconfig.php`:
+
+    $maintenance_key = 'some-long-random-string';
+
+Pick your own value. It is deliberately left EMPTY in the committed varconfig, exactly like
+$discord_bot_token, so the secret never reaches the public repo. Then open the tool with the key
+appended, e.g.
+
+    https://fieryvoid.eu/game/generateStaticShipFileWeb.php?key=some-long-random-string
+
+The key only has to be supplied once per browser session -- it is remembered in the session, so the
+optimiser's own AJAX calls do not need it. Without a valid key the tools answer **404** (not 403, so
+they stay distinguishable from a host-level block). **CLI is always exempt**, so `fvbuild.ps1` and
+`docker exec ... php generateStaticShipFile.php` are unaffected and need no key.
+
 # Image Optimiser:
 
-Images are optimised on Web Server by navigating to https://fieryvoid.eu/game/source/public/mass_optimizer.php or https://fieryvoid.eu/testInstance/source/public/mass_optimizer.php
+Images are optimised on Web Server by navigating to https://fieryvoid.eu/game/source/public/mass_optimizer.php or https://fieryvoid.eu/testInstance/source/public/mass_optimizer.php (plus `?key=`, see above)
 
 As a result, users can work with full png images, and then this script can be run on game and testInstance server whenever required.
+
+Since 08.2026 it runs **incrementally**: only images whose `.webp` is missing or older than the source
+are re-encoded, so a routine run after uploading a few new ship pictures converts a handful of files
+rather than all ~2500. Use the "force a full rebuild" link (or `?force=1`) only when you actually need
+everything re-encoded, e.g. after changing the quality setting -- it is much heavier on the server.
 
 On local server, images are simply not optimised, although in theory you could run the mass_optimser script to do so.
 

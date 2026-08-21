@@ -69,12 +69,6 @@ class HectorAM extends OSAT{
 				19 => "Reactor",
 				20 => "2:Interceptor I",
 			),
-			1=> array(
-				20 => "PRIMARY",
-			),
-			2=> array(
-				20 => "PRIMARY",
-			),
         );
     }
 }

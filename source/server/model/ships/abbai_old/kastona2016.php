@@ -73,7 +73,7 @@ class Kastona2016 extends BaseShip{
 			),
 			1=> array(
 					4 => "Thruster",
-					5 => "Medium Laser",
+					5 => "Assault Laser",
 					7 => "Laser Cutter",
 					9 => "Light Particle Beam",
 					17 => "Structure",

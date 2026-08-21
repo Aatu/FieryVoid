@@ -14,7 +14,9 @@ class FireGamePhase implements Phase
         $servergamedata = $dbManager->getTacGamedata($gameData->forPlayer, $gameData->id);
         Firing::prepareFiring($servergamedata, $dbManager); //Marcin Sawicki, October 2017: new approach: calculate base hit chance first!
         Firing::automateIntercept($servergamedata);
-        Firing::fireWeapons($servergamedata);
+        //$dbManager is threaded through so createFailedAttachRamOrders can persist each
+        //auto-ram FireOrder immediately (real DB id) before it resolves - see that method.
+        Firing::fireWeapons($servergamedata, $dbManager);
         Criticals::setCriticals($servergamedata);
 
 
@@ -68,9 +70,29 @@ class FireGamePhase implements Phase
                 $playersSkipped[$slot->playerid] = true; // Assume skipped initially
             }
 
-            $doDeployment = $servergamedata->checkDeploymentPhaseForPlayer($slot->playerid);                
-            if ($slot->depavailable == $gameData->turn+1 || $doDeployment){
-                //Slot is deploying next turn, ensure that database know it completed this Firing Phase
+            $doDeployment = $servergamedata->checkDeploymentPhaseForPlayer($slot->playerid);
+
+            /* Reinforcements pick their ENTRY HEX the turn before they arrive, so the Deployment
+               phase is granted on the slot's placement turn (depavailable-1), not its arrival
+               turn. The committed hexes then show to everyone as blue "Jump Point" markers for
+               the whole of that turn - see BaseShip::getTurnPlaced.
+
+               Raw depavailable deliberately, NOT getMinTurnPlacedSlot: that clamps to turn 1 when
+               the slot also holds a base/OSAT/Terrain, which is right for forcing their manual
+               turn-1 placement but would swallow the SAME slot's late arrivals and strand them
+               off-board for good. The old code used raw depavailable here for the same reason. */
+            $placeTurn = ($slot->depavailable > 1) ? $slot->depavailable-1 : $slot->depavailable;
+            $needsPhase = ($placeTurn == $gameData->turn+1);
+
+            /* Legacy games mid-flight: a slot whose placement turn already rolled past under the
+               OLD arrival-turn rule would never be granted a Deployment phase again and its ships
+               would be stranded off-board for good. Fall back to the old arrival-turn phase when
+               nothing in the slot has been placed yet. */
+            if (!$needsPhase && $slot->depavailable == $gameData->turn+1
+                && !$servergamedata->slotHasPlacedShips($slot->slot)) $needsPhase = true;
+
+            if ($needsPhase || $doDeployment){
+                //Slot places (or pre-orders) next turn, ensure that database know it completed this Firing Phase
                 $dbManager->updatePlayerSlotPhase($gameData->id, $slot->playerid, $slot->slot, 3, $gameData->turn);   
                 $playersSkipped[$slot->playerid] = false; // Mark player as NOT skipped             
             } else {

@@ -405,6 +405,21 @@ public function addMoons($gameData, $dbManager, $smallCount, $mediumCount, $larg
                        out of the result. */
                     $cleanPreBattle = PreBattleDamage::sanitise($ship, $ship->preBattleDamage ?? array());
 
+                    /* Per-system enhancements (WEAPON_ENHANCEMENTS_PLAN.md §4.5). Validated ONCE
+                       per lobby unit for the same reason as the damage above, and AFTER it, so the
+                       destroyed set it needs is already resolved: a refit on a system the payload
+                       destroys - directly or through the structure cascade - is dropped (D11).
+                       ⚠️ Resolved against $ship, NEVER $savedShip. A bulk-bought mine's $savedShip
+                       is a clone whose ->systems array was rebuilt 0-INDEXED, so getSystemById
+                       resolves the wrong system on it. Mines are excluded from refits anyway (D7),
+                       but OSATs go through the same bulk path and are not.
+                       Every price here is the SERVER's (D4) - the client's claim is discarded. */
+                    $cleanSysEnh = Enhancements::sanitiseSystemEnhancements(
+                        $ship, $ship->systemEnhancements ?? array(), $cleanPreBattle);
+                    //Fold the authoritative total in BEFORE submitShip, which writes it into
+                    //tac_ship.enhvalue alongside the other two buckets.
+                    $ship->pointCostSysEnh = $cleanSysEnh['total'];
+
                     /* BaseShip::isBulkBought is the single definition of "bought through
                        the bulk dialog" (mines + OSATs), mirrored client-side by
                        gamedata.isBulkRow. Captured before the loop so the stem cannot pick
@@ -452,6 +467,17 @@ public function addMoons($gameData, $dbManager, $smallCount, $mediumCount, $larg
                             if ($enhNo > 0){ //actually taken
                                 $dbManager->submitEnhancement($gameData->id, $id, $enhID, $enhNo, $enhName);
                             }
+                        }
+
+                        /* Per-system enhancements. One row per (system, enhID), keyed by the
+                           freshly minted $id, so each copy of a bulk gets its own rows.
+                           $row is the SANITISED tuple built above:
+                             [enhID, label, count, limit, TOTAL, priceStep, systemid, sysname]
+                           enhname comes from index 1, which sanitiseSystemEnhancements filled from
+                           the server-side label table - never from the client tuple. */
+                        foreach ($cleanSysEnh['rows'] as $row) {
+                            $dbManager->submitSystemEnhancement(
+                                $gameData->id, $id, $row[6], $row[7], $row[0], $row[2], $row[1], $row[4]);
                         }
 
                         /* Pre-battle damage & criticals (PREBATTLE_DAMAGE_PLAN.md §4.4).
