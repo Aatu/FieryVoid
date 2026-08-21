@@ -389,6 +389,9 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     <script defer src="client/savedFleets.js"></script>
 	<script defer src="client/power.js"></script>
     <script defer src="client/UI/shipMovement.js"></script>
+    <!-- MUST stay after shipMovement.js: that file ASSIGNS window.UI, so loading this one first
+         would have its module wiped (JUMP_POINTS_PLAN.md Stage 2b). -->
+    <script defer src="client/UI/vortexFacing.js"></script>
     <script defer src="client/UI/infowindow.js"></script>
     <script defer src="client/UI/fleetList.js"></script>
 	<script defer src="client/UI/gameInfo.js"></script>
@@ -722,7 +725,28 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
         <div id="detach" class="movement-icon" data-movement-type="Detach" style="filter: hue-rotate(200deg) scaleX(-1);">
             <canvas id="detachcanvas" width="50" height="50"></canvas>
         </div>
-        
+
+    </div>
+
+    <!-- JUMP_POINTS_PLAN.md Stage 2b - the vortex facing control (UI.vortexFacing).
+         Same shape as #shipMovementUI above and a sibling of it, not a part of it: that one is
+         anchored to a ship and rotated to its heading, this one is anchored to the hex a jump
+         point is being declared on and stays upright. Reuses the movement UI's art and its
+         generic drawUIElement. -->
+    <div id="vortexFacingUI">
+        <div id="vortexTurnLeft" class="movement-icon" data-movement-type="Turn Vortex Left">
+            <canvas id="vortexTurnLeftCanvas" width="40" height="40"></canvas>
+        </div>
+
+        <!-- Ok is the word, not a tick: text rather than a canvas, so UI.vortexFacing places this
+             one with placeElement (drawUIElement minus the canvas step) and never draws it. -->
+        <div id="vortexConfirm" class="movement-icon" data-movement-type="Open Jump Point">
+            <span class="vortexOkLabel">Ok</span>
+        </div>
+
+        <div id="vortexTurnRight" class="movement-icon" data-movement-type="Turn Vortex Right">
+            <canvas id="vortexTurnRightCanvas" width="40" height="40"></canvas>
+        </div>
     </div>
 </div>
 <!--

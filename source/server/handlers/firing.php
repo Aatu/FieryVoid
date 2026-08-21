@@ -55,6 +55,15 @@ class Firing
 
             $weapon = $shooter ? $shooter->getSystemById($fire->weaponid) : null;
 
+            //A Jump Engine order is not a shot, it is a VORTEX DECLARATION, and it has legality
+            //rules of its own (JUMP_POINTS_PLAN.md section 2.1) that no other weapon has. It uses
+            //the same ->rejected convention as the corrupt-order path below (see there for why the
+            //flag alone is enough to keep an order out of the DB).
+            if ($weapon instanceof JumpEngine) {
+                self::validateVortexDeclaration($fire, $weapon, $shooter, $gamedata, $fireOrders);
+                continue;
+            }
+
             if ($weapon instanceof Weapon)
                 continue; //valid — leave it attached
 
@@ -77,6 +86,105 @@ class Firing
         }
 
         return true;
+    }
+
+    /* JUMP_POINTS_PLAN.md STAGE 2 - server-side legality for a vortex declaration.
+     *
+     * The client already refuses every one of these (weaponManager.targetHex will not build the
+     * order), so anything that reaches here is a stale blueprint or a tampered POST. Drop it the
+     * same way a corrupt order is dropped - reject + detach, submission continues - rather than
+     * returning false, which some callers turn into an exception that aborts the whole turn.
+     *
+     * ONLY Initial Orders declarations are judged. The persisted order is handed to
+     * validateFireOrders again in Pre-Firing and Fire, by which point the ship has MOVED and the
+     * 4-hex test would legitimately fail; re-judging a declaration that was legal when it was made
+     * would silently detach it.
+     *
+     * ⚠️ $shooter is the ship from the REAL gamedata load, while $fire (and $fireOrders) come from
+     * the POST-side rebuild - InitialOrdersGamePhase::process hands one of each. That is what makes
+     * $shooter->getHexPos() trustworthy, since a POST-side ship carries no movement history. It is
+     * also why the one-vortex test below reads $fireOrders and NOT $shooter->systems: the $gd
+     * ship's fireOrders are the DB's, and this turn's declarations are not in the DB yet.
+     *
+     * detachFireOrder is deliberately not called here for the same reason - it matches by object
+     * identity and the $gd ship holds different objects. ->rejected is what carries: submitFireorders
+     * skips any order flagged with it, which is exactly the caller that matters. */
+    private static function validateVortexDeclaration($fire, $weapon, $shooter, $gamedata, $fireOrders)
+    {
+        if (!$shooter) return;
+        if ($gamedata->phase != 1) return;      //see above - only judge fresh declarations
+        if ($fire->turn != $gamedata->turn) return;
+
+        $reason = self::getVortexDeclarationBlock($fire, $weapon, $shooter, $gamedata, $fireOrders);
+        if ($reason === null) return;           //legal - leave it alone
+
+        $fire->rejected = true;
+        Debug::log("validateFireOrders: rejecting vortex declaration "
+            . "(game {$gamedata->id}, shooter {$fire->shooterid}, weaponid {$fire->weaponid}, "
+            . "hex {$fire->x},{$fire->y}, facing mode {$fire->firingMode}) — $reason.");
+    }
+
+    /* The rules themselves (plan section 2.1). Returns null when the declaration is legal, or a
+     * short reason for the log when it is not. Split out from the caller so the rule list reads as
+     * a list. */
+    private static function getVortexDeclarationBlock($fire, $weapon, $shooter, $gamedata, $fireOrders)
+    {
+        if ($weapon->isDestroyed($gamedata->turn)) return "Jump Engine is destroyed";
+        if ($weapon->isOfflineOnTurn($gamedata->turn)) return "Jump Engine is offline";
+
+        //ONE VORTEX PER SHIP - covers a second order on this engine and a second engine on the same
+        //hull alike. Only orders BEFORE this one in the submission count, so the FIRST declaration
+        //is the one that survives and every later one is dropped (scanning the whole array instead
+        //would reject the first and keep the last, which is the wrong way round).
+        foreach ($fireOrders as $other) {
+            if ($other === $fire) break;
+            if ($other->shooterid != $fire->shooterid) continue;
+            if ($other->turn != $gamedata->turn) continue;
+            if (!empty($other->rejected)) continue;
+            if ($shooter->getSystemById($other->weaponid) instanceof JumpEngine)
+                return "ship already has a vortex declaration this turn";
+        }
+
+        if ($fire->x === null || $fire->y === null || $fire->x === "null" || $fire->y === "null")
+            return "no target hex";
+
+        /* STAGE 2b - THE FACING IS NOW PLAYER-SETTABLE, SO IT IS NOW WORTH VALIDATING.
+         * firingMode is the storage for the vortex facing (mode = facing + 1), written by the
+         * on-map arrow control. Modes 1-6 are the six facings; mode 7 is the Stage 5 Maintain
+         * declaration and is not a legal OPENING, so it is refused here until Stage 5 gives it a
+         * meaning. Only a tampered client can get here - the arrow cannot produce anything else -
+         * but an out-of-range mode would reach the Stage 3 spawn sweep as a nonsense facing. */
+        $mode = (int)$fire->firingMode;
+        if ($mode < 1 || $mode > 6)
+            return "illegal vortex facing (firing mode $mode)";
+
+        $target = new OffsetCoordinate($fire->x, $fire->y);
+        $distance = $shooter->getHexPos()->distanceTo($target);
+        if ($distance > $weapon->range)
+            return "target hex is $distance hexes away, limit is {$weapon->range}";
+
+        /* The hex must be EMPTY OF OBSTRUCTIONS - it may hold ships, friendly or enemy, but not any
+         * part of a Terrain unit (which is also what a jump gate and, from Stage 3, a vortex are)
+         * and not an Enormous unit. Terrain is tested across its WHOLE footprint, not just its
+         * centre hex: an asteroid field's irregular hexOffsets shape and a moon's Huge radius both
+         * count, which is what RammingAttack::getTerrainOccupiedHexes exists to answer. */
+        foreach ($gamedata->ships as $unit) {
+            if (!empty($unit->removed)) continue;
+            if ($unit->isDestroyed($gamedata->turn)) continue;
+
+            if ($unit->isTerrain()) {
+                foreach (RammingAttack::getTerrainOccupiedHexes($unit) as $hex) {
+                    if ($hex->q == $target->q && $hex->r == $target->r)
+                        return "target hex holds terrain (unit {$unit->id})";
+                }
+                continue; //Terrain is Enormous too - do not also run the test below on it
+            }
+
+            if ($unit->Enormous && $unit->getHexPos()->equals($target))
+                return "target hex holds an Enormous unit (unit {$unit->id})";
+        }
+
+        return null;
     }
 
     /* True when $shooter is a remote-controlled flight that is Uncontrolled THIS turn
@@ -1394,9 +1502,16 @@ public static function firePreFiringWeapons($gamedata){
                 }
 
                 $weapon = $ship->getSystemById($fire->weaponid);
-                if (!($weapon instanceof Weapon)) continue; //...just in case...               
-                if($weapon->isDestroyed($gamedata->turn) && !$weapon->ballistic) continue; //now individual weapons can be destroyed by Ramming before firing, but not ballistics.                
+                if (!($weapon instanceof Weapon)) continue; //...just in case...
+                if($weapon->isDestroyed($gamedata->turn) && !$weapon->ballistic) continue; //now individual weapons can be destroyed by Ramming before firing, but not ballistics.
                 if ($weapon->isRammingAttack) continue; //Ramming Attacks have already been resolved.
+                /*A Jump Engine order is a VORTEX DECLARATION, not a shot (JUMP_POINTS_PLAN.md).
+                  Note this loop, unlike the interception passes above, deliberately does NOT skip
+                  type 'ballistic' - launched ballistics are meant to reach fire(). Weapon::fire
+                  would early-return on the null target, but only AFTER rolling a d100 and stamping
+                  ->rolled and ->notes on a declaration that never rolls for anything. Skip it here
+                  so the declaration reaches Movement exactly as the player made it. */
+                if ($weapon instanceof JumpEngine) continue;
 
                 //$fire->priority = $weapon->priority; //fire order priority already set, and may differ from basic weapon priority!
                 $fireOrders[] = $fire;

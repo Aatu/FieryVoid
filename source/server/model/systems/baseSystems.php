@@ -5037,16 +5037,91 @@ class DockingCollar extends Hangar{
 }
 
 
-class JumpEngine extends ShipSystem{
+/* JUMP_POINTS_PLAN.md STAGES 1-2 - the Jump Engine is a Weapon that never fires.
+   It is not a gun: the conversion exists because opening a hyperspace vortex is a HEX-TARGETED
+   DECLARATION (plan section 3.1), and the ballistic/hextarget fire-order pipeline - client
+   targeting, tac_fireorder persistence, enemy-side masking during Initial Orders - is what carries
+   the target hex and the vortex facing. Nothing else in the codebase expresses that.
+
+   STAGE 1 (landed) made it a Weapon with no behaviour change. STAGE 2 (here) turns the declaration
+   on and retires the old boost-to-jump path. What a declaration currently DOES is: nothing. It
+   persists a hex and a facing and is skipped by Firing::fireWeapons. Stage 3 spawns the vortex unit
+   from it, Stage 4 lets units fly into it and Stage 5 gives it a lifecycle.
+
+   The four knock-on effects the conversion has are handled, not discovered - see plan section 3.1:
+   combat value (ShipClasses::calculateCombatValue keeps this system in the CORE bucket, NOT the
+   weapon bucket), the weapon list (the engine now shows as an icon in the bottom bar on every
+   capital ship - kept deliberately, it is the click target for the declaration), the critical chart
+   (below), and the static blueprints (regenerated). */
+class JumpEngine extends Weapon{
     public $name = "jumpEngine";
     public $displayName = "Jump Engine";
     public $delay = 0;
     public $primary = true;
     
-    //Make boostable to do 'Jumping Out' effect
-    public $boostable = true; //for reactor overload feature!
+    /* STAGE 2 - THE BOOST-TO-JUMP PATH IS RETIRED, AND THIS FLAG IS THE WHOLE OF IT.
+       $boostable = false stops the client offering a boost and stops shipManager.power.canBoost
+       from allowing one, so no NEW boost-jump can be ordered. Everything else about boosting is
+       deliberately LEFT ALONE - isOverloading(), doHyperspaceJump(), the end-of-Fire sweep in
+       Firing::fireWeapons, the isJumpEngine branch in SystemPowerSettings.js and the boost-driven
+       jumping[] commit checklist in gamedata.js - because a boost already committed on the live
+       server must still resolve after this deploys: submitPower validates nothing against this
+       flag and ShipSystem::setPower loads a type-2 row back unconditionally.
+       Do NOT tidy the boost code away in the same deploy that flips this flag; that is the
+       cleanup deploy, one cycle later (plan section 4 Stage 2 and section 5 trap 10). */
+    public $boostable = false;
     public $maxBoostLevel = 1;
-    public $boostEfficiency = 0;    
+    public $boostEfficiency = 0;
+
+    /* STAGE 2 - THE VORTEX DECLARATION. The Jump Engine is a hex-targeted ballistic weapon:
+       declared in Initial Orders ($ballistic), aimed at a HEX rather than a unit ($hextarget), and
+       able to project a vortex up to 4 hexes away. It still never rolls to hit and never deals
+       damage - Firing::fireWeapons skips every order of type 'ballistic', and this class has no
+       beforeFiringOrderResolution hook - so the declaration is completely inert until the Stage 3
+       spawn sweep consumes it. All it does today is persist the target hex and the facing. */
+    public $ballistic = true;
+    public $hextarget = true;
+    public $range = 4;
+
+    /* MODES 1-6 ARE THE VORTEX FACING (mode = facing + 1); mode 7 is the Stage 5 Maintain
+       declaration. firingMode is the STORAGE for the facing - it persists to
+       tac_fireorder.firingmode, so no schema change and no new column - but it is NOT the input
+       method: the mode selector is suppressed below and Stage 2b sets the facing with an on-map
+       arrow that writes the mode under the hood. The modes are functionally identical (no per-mode
+       arrays), so every changeFiringMode() call in the codebase is a no-op on this system. */
+    public $firingModes = array(
+        1 => "Vortex 0°",   2 => "Vortex 60°",  3 => "Vortex 120°",
+        4 => "Vortex 180°", 5 => "Vortex 240°", 6 => "Vortex 300°",
+        7 => "Maintain Vortex",
+    );
+    /* Declared on THIS class rather than on Weapon on purpose: a public property on the base class
+       would write "hideFiringModeSelector":false into every weapon of every static blueprint, and
+       plan section 8 measured what default values already cost that tree. Absent reads as
+       undefined - falsy - on every other weapon, which is exactly the wanted answer. */
+    public $hideFiringModeSelector = true;
+
+    /* A declaration, not a shot: there is nothing in flight to shoot down, and no projectile for
+       the front end to fly from the ship to the hex. */
+    public $doNotIntercept = true;
+    public $uninterceptable = true;
+    public $noProjectile = true;
+
+    /* Doubles as the discriminator. weaponManager.targetHex stamps the fire order's damageclass
+       from data["Weapon type"].toLowerCase(), so every vortex declaration carries damageclass
+       'jumppoint' - which is how the Stage 3 spawn sweep will find them, and how the ballistic
+       icon knows to draw a jump point rather than an anonymous red hex. */
+    public $weaponClass = "JumpPoint";
+
+    public $loadingtime = 1;
+    /* A jump engine is always "loaded". Ships bought BEFORE this class became a Weapon have no
+       tac_systemdata loading row for it, so $turnsloaded would arrive null and the client would
+       paint the icon as still charging until the next turn advance wrote one. */
+    public $turnsloaded = 1;
+
+    /* Weapon's chart (ReducedRange 14 / ReducedDamage 19) describes a gun, and neither penalty
+       means anything on a system with no range and no damage. Keep ShipSystem's empty chart -
+       that is what this system rolled on before the conversion. */
+    protected $possibleCriticals = array();
     
 	//JumpEngine tactically  is not important at all!
 	public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
@@ -5054,20 +5129,85 @@ class JumpEngine extends ShipSystem{
 	private $preJumpValue = 0; //Will be used to store ship's Combat Value at the moment it jumped.
     
     function __construct($armour, $maxhealth, $powerReq, $delay){
-        parent::__construct($armour, $maxhealth, $powerReq, 0);
+        /* Same 4-arg signature as before, so none of the 610 ship files change. 0/360 arcs are
+           passed internally: the engine has no firing arc, and Stage 2 projects its vortex onto a
+           hex in any direction. Weapon's 6th argument ($output) still defaults to 0, which is what
+           ShipSystem was handed before. */
+        parent::__construct($armour, $maxhealth, $powerReq, 0, 360);
     
         $this->delay = $delay;
+    }
+
+    /* Has $ship declared a vortex on $turn? Public static because the CONCEALMENT systems need to
+       ask it, not the engine itself: opening a jump point reveals a hidden ship (plan section 2.1),
+       and ShadingField and CloakingDevice each act on the answer in their own
+       generateIndividualNotes. Kept here so the "what counts as a declaration" rule lives with the
+       engine and cannot drift between the two callers.
+
+       ⚠️ Called from InitialOrdersGamePhase::process, which runs note generation BEFORE
+       Firing::validateFireOrders - so ->rejected is not set yet and an ILLEGAL declaration would
+       still reveal the ship. That is deliberate: Stealth::isDetectedInitial has always behaved the
+       same way (it reveals on firedOffensivelyOnTurn, also before validation), the client refuses
+       illegal hexes anyway, and the only way to reach it is a tampered POST. */
+    public static function hasVortexDeclaration($ship, $turn){
+        if (!$ship || !is_array($ship->systems)) return false;
+        foreach ($ship->systems as $system){
+            if (!($system instanceof JumpEngine)) continue;
+            foreach ($system->fireOrders as $fire){
+                if ($fire->turn == $turn && empty($fire->rejected)) return true;
+            }
+        }
+        return false;
+    }
+
+    /* The notes a CONCEALMENT system must write when its ship opens a jump point (plan section 2.1).
+       Returns an empty array when no vortex was declared, so the caller can merge unconditionally.
+
+       Two notes' worth of work, and both are required:
+         1. $offNoteKey ('Unshaded' / 'Decloaked') drops the concealment for this turn. Notes load
+            sorted by turn then PHASE, so this phase-1 note beats the phase -1 'Shaded'/'Cloaked'
+            note of the same turn and wins.
+         2. a 'detected' note per enemy team, which is the reveal itself - the same shape
+            Stealth::isDetectedInitial writes when a hidden ship fires or uses non-DEW EW.
+       Note 1 without note 2 leaves the ship concealed until the next detection sweep; note 2
+       without note 1 is UNDONE by that sweep, because checkStealthNextPhase re-runs at the end of
+       Movement and writes 'undetected' for every team out of range while $active is still true.
+
+       RETURNED rather than pushed because ShipSystem::$individualNotes is protected - each system
+       owns its own note list, and this only states the rule.
+
+       ⚠️ notekey_human is varchar(40); the string below is 17. Do not lengthen it carelessly. */
+    public static function vortexRevealNotes($ship, $systemId, $gamedata, $offNoteKey){
+        $notes = array();
+        if (!self::hasVortexDeclaration($ship, $gamedata->turn)) return $notes;
+
+        $human = 'Jump point opened';
+
+        $notes[] = new IndividualNote(-1, TacGamedata::$currentGameID, $gamedata->turn, $gamedata->phase,
+                                      $ship->id, $systemId, $offNoteKey, $human, 1);
+
+        $seenTeams = array();
+        foreach ($gamedata->slots as $slot){
+            $teamId = (int)$slot->team;
+            if ($teamId == $ship->team) continue;
+            if (in_array($teamId, $seenTeams)) continue; //several slots can share one team
+            $seenTeams[] = $teamId;
+            $notes[] = new IndividualNote(-1, TacGamedata::$currentGameID, $gamedata->turn, $gamedata->phase,
+                                          $ship->id, $systemId, 'detected', $human, "Team:" . $teamId);
+        }
+
+        return $notes;
     }
 
     public function isOverloading($turn){
         foreach ($this->power as $power){
             if ($power->turn == $turn && $power->type == 2){
-                return true;			
+                return true;
             }
         }
         return false;
     }
-    
+
 	public function doHyperspaceJump($ship, $gamedata)
 	{
 		$reactorList = $ship->getSystemsByName('Reactor', true);
@@ -5178,11 +5318,21 @@ class JumpEngine extends ShipSystem{
 	}   	
 
      public function setSystemDataWindow($turn){
-        $this->data["Special"] = "<br>Boost in Initial Orders to jump to hyperspace at end of turn.";	
-        $this->data["Special"] .= "<br>WARNING - Jumping to hyperspace REMOVES ship from rest of the battle.";
+        $this->data["Special"] = "<br>Select in Initial Orders and target a hex within " . $this->range . " hexes to project a jump vortex.";
+        $this->data["Special"] .= "<br>WARNING - Jumping to hyperspace REMOVES a unit from the rest of the battle.";
         $this->data["Special"] .= "<br>If Jump Engine is damaged, ship has a % chance of being destroyed opening jump point.";
-        $this->data["Special"] .= "SHOULD NOT be shut down for power (unless damaged >50% or if Desperate rules apply).";									
-		parent::setSystemDataWindow($turn);     
+        $this->data["Special"] .= "SHOULD NOT be shut down for power (unless damaged >50% or if Desperate rules apply).";
+		/* ShipSystem, not parent. Weapon::setSystemDataWindow appends a gun's tooltip block -
+		   Damage, Fire control, Resolution Priority - which would be meaningless (and mostly zero)
+		   on a jump engine. Same idiom LCVRail uses two classes up. Plan Stage 6 rewrites this
+		   whole Special text once the vortex lifecycle is complete.
+
+		   The two entries that ARE wanted are set by hand. "Weapon type" is not cosmetic:
+		   weaponManager.targetHex reads data["Weapon type"] to stamp the fire order's damageclass
+		   and would throw on undefined, so without this line the declaration cannot be made at all. */
+		ShipSystem::setSystemDataWindow($turn);
+		$this->data["Weapon type"] = $this->weaponClass;
+		$this->data["Range"] = $this->range;
     }
 }
 
@@ -9962,11 +10112,22 @@ class MindriderHangar extends ShipSystem{
 						$noteHuman = 'Not Shaded this turn';
 						$noteValue = 1;
 						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
-				}	
+				}
 			break;
-			
-		}	
-	}			
+
+			/* Opening a jump point BREAKS the shading and reveals the ship (JUMP_POINTS_PLAN.md
+			   section 2.1, user ruling 2026-08-21). Both halves are needed: the reveal alone would
+			   not survive, because checkStealthNextPhase re-runs at the end of Movement and, with
+			   $active still true, would write 'undetected' again for every team out of range. */
+			case 1:
+				$this->individualNotes = array_merge(
+					$this->individualNotes,
+					JumpEngine::vortexRevealNotes($ship, $this->id, $gameData, 'Unshaded')
+				);
+			break;
+
+		}
+	}
 
 		public function onIndividualNotesLoaded($gamedata){
 			//Sort notes by turn, and then phase so latest detection note is always last.

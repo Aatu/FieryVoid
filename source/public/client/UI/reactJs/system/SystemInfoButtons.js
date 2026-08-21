@@ -924,8 +924,10 @@ const canRemoveFireOrder = (ship, system) => system.weapon && weaponManager.hasF
 
 //The Gravitic Augmenter cycles its own modes inside its green menu, and the Minor Thought Pulsar
 //replaces firing modes entirely with its free thrust-allocation menu — both opt out of the generic
-//firing-mode selector grid.
-const canChangeFiringMode = (ship, system) => system.weapon && !ship.mine && !system.stowed && system.name !== 'GraviticAugmenter' && system.name !== 'MinorThoughtPulsar' && ((gamedata.gamephase === 1 && system.ballistic) || (gamedata.gamephase === 5 && system.preFires) || (gamedata.gamephase === 3 && !system.ballistic && !system.preFires)) && (!weaponManager.hasFiringOrder(ship, system) || system.multiModeSplit) && (Object.keys(system.firingModes).length > 1);
+//firing-mode selector grid. So does anything carrying hideFiringModeSelector: the Jump Engine's
+//seven "modes" are the vortex FACING (JUMP_POINTS_PLAN.md section 3.1), which is chosen on the map
+//as part of the declaration, not by picking a letter out of a grid.
+const canChangeFiringMode = (ship, system) => system.weapon && !ship.mine && !system.stowed && !system.hideFiringModeSelector && system.name !== 'GraviticAugmenter' && system.name !== 'MinorThoughtPulsar' && ((gamedata.gamephase === 1 && system.ballistic) || (gamedata.gamephase === 5 && system.preFires) || (gamedata.gamephase === 3 && !system.ballistic && !system.preFires)) && (!weaponManager.hasFiringOrder(ship, system) || system.multiModeSplit) && (Object.keys(system.firingModes).length > 1);
 
 //can declare eligibility for interception: charged, recharge time >1 turn, intercept rating >0, no firing order
 const canSelfIntercept = (ship, system) => system.weapon && weaponManager.canSelfInterceptSingle(ship, system);

@@ -1071,10 +1071,18 @@ var Magazine = function Magazine(json, ship) {
 Magazine.prototype = Object.create(ShipSystem.prototype);
 Magazine.prototype.constructor = Magazine;
 
+/* Mirrors the server: JumpEngine extends Weapon (JUMP_POINTS_PLAN.md section 3.1) so it can declare
+   a hex-targeted vortex through the existing ballistic pipeline. From Stage 2 the engine is a live
+   ballistic hex-target weapon with range 4, so it is selectable in Initial Orders like a mine
+   launcher, hovering it draws a 4-hex 360-degree reach overlay, and its seven firing modes carry
+   the vortex facing (the mode SELECTOR is suppressed - hideFiringModeSelector - because the facing
+   is set on the map, not by cycling a letter).
+   Defined AFTER shipSystem.js in game.php / gamelobby.php script order, which is what makes
+   Weapon.prototype available at eval time here. */
 var JumpEngine = function JumpEngine(json, ship) {
-	ShipSystem.call(this, json, ship);
+	Weapon.call(this, json, ship);
 };
-JumpEngine.prototype = Object.create(ShipSystem.prototype);
+JumpEngine.prototype = Object.create(Weapon.prototype);
 JumpEngine.prototype.constructor = JumpEngine;
 
 JumpEngine.prototype.initializationUpdate = function () {
@@ -2274,7 +2282,10 @@ HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 		case 'Weapon':
 			for (var i in ship.systems) {
 				var system = ship.systems[i];
-				if (system instanceof Weapon) {
+				//jumpEngine is a Weapon subclass with no damage at all (JUMP_POINTS_PLAN.md
+				//section 3.1); Hyach hulls carry one, and without this its tooltip gains a
+				//"Damage: undefined-undefined" line the moment Weapon specialists are allocated.
+				if (system instanceof Weapon && system.name !== "jumpEngine") {
 					var minDam = system.minDamage;
 					var maxDam = system.maxDamage;
 
@@ -2421,7 +2432,10 @@ HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allo
 		case 'Weapon':
 			for (var i in ship.systems) {
 				var system = ship.systems[i];
-				if (system instanceof Weapon) {
+				//jumpEngine is a Weapon subclass with no damage at all (JUMP_POINTS_PLAN.md
+				//section 3.1); Hyach hulls carry one, and without this its tooltip gains a
+				//"Damage: undefined-undefined" line the moment Weapon specialists are allocated.
+				if (system instanceof Weapon && system.name !== "jumpEngine") {
 					var minDam = system.minDamage;
 					var maxDam = system.maxDamage;
 
@@ -2807,7 +2821,10 @@ PowerCapacitor.prototype.doActivate = function () {
 		for (var i in ship.systems) {
 			var system = ship.systems[i]; //The fighter
 			if (shipManager.systems.isDestroyed(ship, system)) continue;
-			if (system.name == "eMShield" || system instanceof Weapon && system.name !== "RammingAttack") { //Is shading Field but not this one
+			//jumpEngine joins RammingAttack as a Weapon-by-inheritance that is not a gun
+			//(JUMP_POINTS_PLAN.md section 3.1): the Vorlon capacitor takes weapons and shields
+			//offline, never the jump engine.
+			if (system.name == "eMShield" || system instanceof Weapon && system.name !== "RammingAttack" && system.name !== "jumpEngine") { //Is shading Field but not this one
 				system.power.push({ id: null, shipid: ship.id, systemid: system.id, type: 1, turn: gamedata.turn, amount: 0 });
 				system.reactivated = true; //To prevent it from immediately being powered back on.
 			}
@@ -2826,7 +2843,10 @@ PowerCapacitor.prototype.doDeactivate = function () {
 		for (var i in ship.systems) {
 			var system = ship.systems[i]; //The fighter
 			if (shipManager.systems.isDestroyed(ship, system)) continue;
-			if (system.name == "eMShield" || system instanceof Weapon && system.name !== "RammingAttack") { //Is shading Field but not this one
+			//jumpEngine joins RammingAttack as a Weapon-by-inheritance that is not a gun
+			//(JUMP_POINTS_PLAN.md section 3.1): the Vorlon capacitor takes weapons and shields
+			//offline, never the jump engine.
+			if (system.name == "eMShield" || system instanceof Weapon && system.name !== "RammingAttack" && system.name !== "jumpEngine") { //Is shading Field but not this one
 				shipManager.power.setOnline(ship, system);
 			}
 		}

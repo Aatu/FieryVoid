@@ -497,7 +497,14 @@ class BaseShip {
 				if ($system instanceOf Structure) { //Structure block
 					$structCurr += $systemCurr + ($systemDmg * $structDmgMultiplier);
 					$structMax += $systemMax;
-				} else if (($system instanceOf Weapon) || ($system instanceOf ElintScanner)) { //weapon! (count ElInt Scanner as a weapn here)
+				/* JumpEngine is a Weapon subclass (JUMP_POINTS_PLAN.md section 3.1) purely so it can
+				   declare a hex-targeted vortex - it is not a gun and must not be valued as one. Two
+				   things break if it lands in this bucket: a 40-box engine would add 120 to both the
+				   current and total weapon pools on every jump-capable ship, and the "defanged" branch
+				   below (weaponCurr == 0 -> weaponMultiplierMax) could never fire while the engine
+				   lived. It is $primary, so falling through leaves it in the CORE bucket - exactly
+				   where it sat before the conversion. */
+				} else if ((($system instanceOf Weapon) && !($system instanceOf JumpEngine)) || ($system instanceOf ElintScanner)) { //weapon! (count ElInt Scanner as a weapn here)
 					$weaponCurr += $systemCurr + ($systemDmg * $weaponDmgMultiplier);
 					$weaponMax += $systemMax;
 				} else if ($system instanceOf Thruster) { //Thruster

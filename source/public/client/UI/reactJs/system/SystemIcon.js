@@ -815,7 +815,10 @@ if (shipManager.criticals.hasCriticals(system)) {
            systemwindow.removeClass("ballistic");
        }
 
-       if (!firing && (Object.keys(system.firingModes).length > 1 || system.dualWeapon)) {
+       //hideFiringModeSelector: the Jump Engine's seven "modes" are the vortex FACING, not
+       //alternative ammunition, and they are set by the on-map facing control rather than by
+       //cycling a letter here (JUMP_POINTS_PLAN.md section 3.5). Suppress the letter badge.
+       if (!firing && !system.hideFiringModeSelector && (Object.keys(system.firingModes).length > 1 || system.dualWeapon)) {
            if (system.parentId >= 0) {
                var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
 

@@ -604,7 +604,11 @@ shipManager.power = {
 	},
 
 	setOnline: function setOnline(ship, system, skipMessage = false) {
-		if (ship.faction === "Vorlon Empire" && !ship.flight && (system instanceof Weapon || system instanceof Shield)) {
+		//JumpEngine is a Weapon subclass only so it can declare a hex-targeted vortex
+		//(JUMP_POINTS_PLAN.md section 3.1) - the Vorlon Power Capacitor rule is about weapons and
+		//shields, and 11 Vorlon hulls carry a jump engine. Without this it could not be powered
+		//back up while the capacitor is doubling generation.
+		if (ship.faction === "Vorlon Empire" && !ship.flight && system.name !== "jumpEngine" && (system instanceof Weapon || system instanceof Shield)) {
 			var capacitor = shipManager.systems.getSystemByName(ship, "powerCapacitor");
 			if (capacitor && capacitor.active) {
 				if (!skipMessage) window.confirm.warning("You cannot activate " + system.displayName + " while Power Capacitor is doubling power generation.");

@@ -13,8 +13,8 @@ window.PhaseStrategy = function () {
         this.currentlyMouseOveredIds = null;
 
         this.onMouseOutCallbacks = [];
-        this.onZoomCallbacks = [this.repositionTooltip.bind(this), this.positionMovementUI.bind(this), this.repositionSelectFromShips.bind(this)];
-        this.onScrollCallbacks = [this.repositionTooltip.bind(this), this.positionMovementUI.bind(this), this.repositionSelectFromShips.bind(this)];
+        this.onZoomCallbacks = [this.repositionTooltip.bind(this), this.positionMovementUI.bind(this), this.repositionSelectFromShips.bind(this), this.positionVortexFacingUI.bind(this)];
+        this.onScrollCallbacks = [this.repositionTooltip.bind(this), this.positionMovementUI.bind(this), this.repositionSelectFromShips.bind(this), this.positionVortexFacingUI.bind(this)];
         this.onClickCallbacks = [this.hideSystemInfo.bind(this, true)];
 
         this.selectedShip = null;
@@ -174,6 +174,10 @@ window.PhaseStrategy = function () {
         if (this.selectFromShips) { //To clear selectFromShips correctly if player clicks Commit before clicking anywhere else - DK 10/24
             this.hideSelectFromShips(this.selectFromShips);
         }
+
+        //Same reason: a vortex declaration left mid-transaction when the phase ends is a discard,
+        //and its preview sprites must not outlive the phase that owns them.
+        UI.vortexFacing.close();
 
         this.currentlyMouseOveredIds = null;
 
@@ -730,6 +734,43 @@ window.PhaseStrategy = function () {
         var heading = mathlib.hexFacingToAngle(this.movementUI.icon.getLastMovement().heading);
 
         UI.shipMovement.reposition(pos, heading);
+
+        return true;
+    };
+
+    /* JUMP_POINTS_PLAN.md STAGE 2b - the vortex facing control.
+
+       Raised by weaponManager.queueJumpPointOrder when a Jump Engine is aimed at a hex. Nothing is
+       committed yet: this shows the control, anchors it to the target hex, and registers the
+       click-away discard. The OK button calls the payload's own onConfirm, which is what actually
+       builds the FireOrder.
+
+       The one-shot discard rides onClickCallbacks - the same list showShipTooltip and
+       showSelectFromShips use. Note the ORDER inside onClickEvent: the callback list is filtered
+       and run BEFORE the click is dispatched to onHexClicked, so a click that opens a NEW
+       declaration first discards the pending one, and the callback pushed here lands on the fresh
+       array and survives to the next click. */
+    PhaseStrategy.prototype.onVortexFacingRequested = function (payload) {
+        UI.vortexFacing.open(payload);
+        this.positionVortexFacingUI();
+        this.onClickCallbacks.push(this.hideVortexFacingUI.bind(this, payload));
+    };
+
+    //Token-matched (like hideShipTooltip): by the time this fires the transaction may already have
+    //been closed by OK, or replaced by a newer one that must not be torn down by the old click.
+    //Returns undefined so onClickCallbacks filters it out - it is a one-shot.
+    PhaseStrategy.prototype.hideVortexFacingUI = function (pending) {
+        if (UI.vortexFacing.isOpenFor(pending)) {
+            UI.vortexFacing.close();
+        }
+    };
+
+    PhaseStrategy.prototype.positionVortexFacingUI = function () {
+        if (!UI.vortexFacing.isOpen()) {
+            return true;
+        }
+
+        UI.vortexFacing.reposition(this.coordinateConverter.fromGameToViewPort(UI.vortexFacing.getPosition()));
 
         return true;
     };

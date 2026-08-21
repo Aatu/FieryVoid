@@ -650,6 +650,16 @@ window.BallisticIconContainer = function () {
 						targetType = 'hexGreen';
 						//iconImage = './img/allySupport.png';
 						break;
+					//A vortex declaration (JUMP_POINTS_PLAN.md) is not an attack, and the default
+					//red hex reads as incoming fire. Yellow, labelled with the firing mode - which
+					//on a Jump Engine IS the vortex facing - so both players can see which way the
+					//mouth will point once it forms. The same --fv-warn yellow the Stage 2b facing
+					//control uses, so the preview and the committed marker match.
+					case 'jumppoint':
+						targetType = 'hexYellow';
+						text = modeName;
+						textColour = '#e1b000';
+						break;
 				}
 			}
 		}

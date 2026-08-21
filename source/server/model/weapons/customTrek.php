@@ -2137,10 +2137,21 @@ class CloakingDevice extends ShipSystem implements SpecialAbility{
 					$noteHuman = 'Not cloaked this turn';
 					$noteValue = 1;
 					$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
-				}	
+				}
 			break;
-		}	
-	}			
+
+			/* Opening a jump point BREAKS the cloak and reveals the ship (JUMP_POINTS_PLAN.md
+			   section 2.1, user ruling 2026-08-21). The mirror of the ShadingField case; see
+			   JumpEngine::vortexRevealNotes for why BOTH notes are needed rather than just the
+			   reveal. */
+			case 1:
+				$this->individualNotes = array_merge(
+					$this->individualNotes,
+					JumpEngine::vortexRevealNotes($ship, $this->id, $gameData, 'Decloaked')
+				);
+			break;
+		}
+	}
 
 		public function onIndividualNotesLoaded($gamedata){
 			//Sort notes by turn, and then phase so latest detection note is always last.

@@ -119,6 +119,13 @@ window.weaponManager = {
             */
         }
 
+        //JUMP_POINTS_PLAN.md Stage 2b: a pending vortex declaration belongs to the engine that is
+        //SELECTED, so deselecting it abandons the transaction exactly as clicking away on the map
+        //does. Hooked here rather than at the weapon-list icon because this is the choke point
+        //every deselect route funnels through - the icon toggle, selecting another ship, and the
+        //phase teardown sweep alike. No-op for every other weapon and whenever nothing is pending.
+        if (window.UI && UI.vortexFacing) UI.vortexFacing.closeForWeapon(weapon);
+
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: weapon });
     },
 
@@ -3692,7 +3699,12 @@ window.weaponManager = {
                 }
             }
 
-            if (hidden && weapon.name !== 'TransverseDrive' && weapon.name !== 'MicroJumpSystem') {
+            //jumpEngine joins the exemptions: a concealed ship MAY open a jump point, and doing so
+            //breaks its concealment (JUMP_POINTS_PLAN.md section 2.1, user ruling 2026-08-21). The
+            //server writes the reveal at commit - ShadingField/CloakingDevice generateIndividualNotes
+            //via JumpEngine::vortexRevealNotes - so the warning below is the player's only notice
+            //before the fact.
+            if (hidden && weapon.name !== 'TransverseDrive' && weapon.name !== 'MicroJumpSystem' && weapon.name !== 'jumpEngine') {
                 var html = "You cannot fire weapons on a turn when you are stealthed.";
                 confirm.warning(html);
                 toUnselect.push(weapon);
@@ -3724,6 +3736,25 @@ window.weaponManager = {
 
             if (weaponManager.checkConflictingFireOrder(selectedShip, weapon)) {
                 continue;
+            }
+
+            //Vortex declaration legality (JUMP_POINTS_PLAN.md section 2.1). Reported rather than
+            //silently skipped: the player picked this hex deliberately, and the server would
+            //otherwise drop the order without telling anyone. The weapon stays SELECTED so the
+            //next right-click can try a different hex.
+            if (weapon.name === 'jumpEngine') {
+                var vortexBlock = weaponManager.getVortexHexBlock(selectedShip, weapon, hexpos);
+                if (vortexBlock) {
+                    confirm.error(vortexBlock);
+                    continue;
+                }
+                //Concealed ships are allowed through the isHidden guard above for this weapon only.
+                //Say so before the order is built - the reveal is written server-side at commit and
+                //there is no other signal until the next gamedata load.
+                if (hidden) {
+                    confirm.warning("Opening a jump point breaks your concealment: this ship will be "
+                        + "revealed to every enemy, and loses its cloak/shading bonuses for the rest of the turn.");
+                }
             }
 
             //Firing-link guard for HEX targeting — the mirror of the one in targetShip. A turret is
@@ -3780,6 +3811,18 @@ window.weaponManager = {
                             splitTargeted.push(weapon); //Not finished, to be added to toUnselect aray at correct time below. 	  
                         }
                         webglScene.customEvent('SystemDataChanged', { ship: selectedShip, system: weapon });
+                    } else if (weapon.name === 'jumpEngine') {
+                        //JUMP_POINTS_PLAN.md Stage 2b. The vortex FACING is part of the
+                        //declaration, so the order cannot be built here: open the on-map facing
+                        //control and let its OK button build it. Async (callback), so we DON'T
+                        //fall through to the synchronous order build below - the same shape as
+                        //ShadowFighterBomb beneath this.
+                        //The `continue` also skips the loop tail, so the OK callback owns
+                        //unSelectWeapon and the HexTargeted event itself (see
+                        //createJumpPointOrder). Clicking away instead simply never calls it,
+                        //which is what makes discarding cost nothing to clean up.
+                        weaponManager.queueJumpPointOrder(selectedShip, weapon, hexpos, type);
+                        continue;
                     } else if (weapon.name === 'ShadowFighterBomb') {
                         //Stage S (S-f): the Fighter Bomb launches a player-chosen
                         //number of held integrated fighters (1..remaining in the
@@ -3916,6 +3959,70 @@ window.weaponManager = {
         var p = parseInt(pool, 10);
         if (!isNaN(p) && p > 0 && p < chunk) return p;
         return chunk;
+    },
+
+    /* JUMP_POINTS_PLAN.md STAGE 2b - start a vortex declaration transaction.
+
+       Raises the facing control and returns; NOTHING is committed here. PhaseStrategy relays
+       VortexFacingRequested to UI.vortexFacing, anchors it to the hex, and registers the
+       click-away discard. createJumpPointOrder below is reached only from the OK button.
+
+       DEFAULT FACING IS ALWAYS 0 (east) - user ruling 2026-08-21. It was briefly derived from the
+       declaring ship's heading (heading + 3, so the mouth pointed back at the ship and a
+       straight-ahead projection was OK-and-done), but a fixed, predictable starting point that
+       never depends on how the ship happens to be pointing is easier to read and to teach, and the
+       turn buttons now flank the facing arrow so stepping round is cheap. */
+    queueJumpPointOrder: function queueJumpPointOrder(ship, weapon, hexpos, type) {
+        webglScene.customEvent('VortexFacingRequested', {
+            ship: ship,
+            weapon: weapon,
+            hexpos: hexpos,
+            type: type,
+            facing: 0,
+            onConfirm: function (facing) {
+                weaponManager.createJumpPointOrder(ship, weapon, hexpos, type, facing);
+            }
+        });
+    },
+
+    /* The OK half of the transaction: build the declaration and do the work targetHex's loop tail
+       would have done, since the `continue` up there skipped it.
+
+       firingMode carries the FACING (mode = facing + 1) - that is the whole reason JumpEngine has
+       seven functionally identical modes: it persists to tac_fireorder.firingmode, so the facing
+       needs no schema change and no new column.
+
+       Exactly ONE order, not one per weapon.guns: a ship may hold one vortex, and
+       Firing::getVortexDeclarationBlock rejects every declaration after the first anyway. */
+    createJumpPointOrder: function createJumpPointOrder(ship, weapon, hexpos, type, facing) {
+        //Re-checked at OK, not just at targeting: a server poll can land between the two and move
+        //a terrain unit's owner or reveal a unit that was not there when the hex was picked.
+        var vortexBlock = weaponManager.getVortexHexBlock(ship, weapon, hexpos);
+        if (vortexBlock) {
+            confirm.error(vortexBlock);
+            return;
+        }
+
+        weaponManager.removeFiringOrder(ship, weapon);
+
+        var fireid = ship.id + "_" + weapon.id + "_" + (weapon.fireOrders.length + 1);
+        weapon.fireOrders.push({
+            id: fireid,
+            type: type,
+            shooterid: ship.id,
+            targetid: -1,
+            weaponid: weapon.id,
+            calledid: -1,
+            turn: gamedata.turn,
+            firingMode: facing + 1,
+            shots: weapon.defaultShots,
+            x: hexpos.q,
+            y: hexpos.r,
+            damageclass: weapon.data["Weapon type"].toLowerCase()
+        });
+
+        weaponManager.unSelectWeapon(ship, weapon);
+        webglScene.customEvent('HexTargeted', { shooter: ship, hexagon: hexpos });
     },
 
     // Stage S (S-f): open the Fighter Bomb launch dialog (count + auto-split toggle /
@@ -4706,6 +4813,53 @@ window.weaponManager = {
         }
 
         return shortLogTypes.includes(fire.damageclass);
+    },
+
+    /* JUMP_POINTS_PLAN.md STAGE 2 - the client half of Firing::getVortexDeclarationBlock. Returns
+       null when hexpos is a legal site for a jump vortex, or the message to show the player when it
+       is not. A vortex may be projected onto SHIPS, friendly or enemy; what it may not share a hex
+       with is any part of a Terrain unit (which is also what a jump gate, and from Stage 3 another
+       vortex, is) or an Enormous unit.
+
+       Range is deliberately not tested here - targetHex's own weapon.range check already covers it
+       and refuses out-of-range hexes the same way it does for every other weapon.
+
+       The sweep reads gamedata.ships rather than the ready-made gamedata.blockedHexes because the
+       two are not the same set: blockedHexes holds ENORMOUS units only, and the Stage 3 vortex is
+       Terrain that is deliberately NOT Enormous (so it cannot ram units flying over it). */
+    getVortexHexBlock: function getVortexHexBlock(ship, weapon, hexpos) {
+        for (var i in gamedata.ships) {
+            var unit = gamedata.ships[i];
+            if (!unit || unit.removed) continue;
+            if (shipManager.isDestroyed(unit)) continue;
+
+            var isTerrain = gamedata.isTerrain(unit.shipSizeClass, unit.userid);
+            if (!isTerrain && !unit.Enormous) continue; //ordinary ships may sit in a vortex hex
+
+            //Whole footprint, not just the centre hex: an irregular terrain shape carries
+            //hexOffsets (rotated to its facing) and a moon carries a Huge radius. Same shape as
+            //getBlockedHexes below and as RammingAttack::getTerrainOccupiedHexes on the server.
+            var position = shipManager.getShipPosition(unit);
+            var occupied = [position];
+
+            if (unit.hexOffsets && unit.hexOffsets.length > 0) {
+                var lastMove = shipManager.movement.getLastCommitedMove(unit) || 0;
+                var facing = lastMove.facing || 0;
+                for (var j in unit.hexOffsets) {
+                    occupied.push(mathlib.getRotatedHex(position, unit.hexOffsets[j], facing));
+                }
+            } else if (unit.Huge > 0) {
+                occupied.push(...mathlib.getNeighbouringHexes(position, unit.Huge));
+            }
+
+            for (var k in occupied) {
+                if (occupied[k].q == hexpos.q && occupied[k].r == hexpos.r) {
+                    return "A jump vortex cannot be opened in a hex occupied by <b>" + unit.name + "</b>.";
+                }
+            }
+        }
+
+        return null;
     },
 
     //Should have been replaced by gamedata.blockedHexes, but leaving just in case I've missed a call somewhere - DK 10.2.26

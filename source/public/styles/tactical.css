@@ -134,6 +134,53 @@ body {
     position: relative;
 }
 
+/* JUMP_POINTS_PLAN.md Stage 2b - the vortex facing control. Structurally identical to
+   #shipMovementUI above (absolutely positioned container anchored to a map position, absolutely
+   positioned icon children, same stacking level) and kept as its own block rather than merged
+   into those selectors: the two are siblings, not one widget, and only one of them is ever
+   visible at a time. No transform - unlike the movement UI this one is never rotated. */
+#vortexFacingUI {
+    display: none;
+    position: absolute;
+    z-index: 7000;
+}
+
+#vortexFacingUI div {
+    position: absolute;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+#vortexFacingUI div canvas {
+    position: relative;
+}
+
+/* The Ok button is the WORD, in the same yellow (--fv-warn) the vortex marker and its hex use,
+   and it is ALWAYS upright - the one part of the control that does NOT swing with the facing
+   (the two turn arrows are rotated by it). Upright costs nothing because this container is never
+   rotated, but say so, because it is a deliberate exception.
+   Absolutely centred rather than flexed or line-height'd so it stays correct whatever box size
+   UI.vortexFacing.placeElement gives it, and overflow is reopened so the glow is not clipped. */
+#vortexFacingUI #vortexConfirm {
+    overflow: visible;
+}
+
+#vortexFacingUI .vortexOkLabel {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    transform: translateY(-50%);
+    text-align: center;
+    color: var(--fv-warn);
+    font-weight: bold;
+    font-size: 17px;
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 4px #000, 0 0 2px #000;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
 .centercontainer {
     position: absolute !important;
     left: 50% !important;
