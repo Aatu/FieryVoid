@@ -236,6 +236,8 @@ shipManager.movement = {
     },
 
     canJink: function canJink(ship, accel) {
+        //A unit that has ordered a jump-out has finished manoeuvring (JUMP_POINTS_PLAN.md section 2.5).
+        if (shipManager.movement.hasJumpedOut(ship)) return false;
         if (gamedata.gamephase != 2) return false;
         if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!
         if (!ship.flight && ship.jinkinglimit <= 0) return false;
@@ -327,6 +329,8 @@ shipManager.movement = {
     },
 
     canRoll: function canRoll(ship) {
+        //A unit that has ordered a jump-out has finished manoeuvring (JUMP_POINTS_PLAN.md section 2.5).
+        if (shipManager.movement.hasJumpedOut(ship)) return false;
         if (gamedata.gamephase != 2) return false;
         if (shipManager.movement.isManeuverBlockedByAttachment(ship)) return false;
         if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!         
@@ -352,6 +356,8 @@ shipManager.movement = {
 
 
     canEmergencyRoll: function canEmergencyRoll(ship) {
+        //A unit that has ordered a jump-out has finished manoeuvring (JUMP_POINTS_PLAN.md section 2.5).
+        if (shipManager.movement.hasJumpedOut(ship)) return false;
         if (gamedata.gamephase != 2) return false;
         if (shipManager.movement.isManeuverBlockedByAttachment(ship)) return false;
         if (ship.flight || ship.osat) return false;
@@ -566,6 +572,172 @@ shipManager.movement = {
         while (shipManager.movement.getRemainingMovement(ship) > 0) {
             if (shipManager.movement.doMove(ship) === false) break; // break only on explicit false (prevents infinite loop when canMove() returns false)
         }
+    },
+
+
+    /* ===== JUMPING OUT THROUGH A VORTEX (JUMP_POINTS_PLAN.md Stage 4, sections 2.2 and 2.5) ====
+       A unit whose plotted path enters an OPEN vortex hex through the hex side the vortex faces
+       may leave the battle there. Ordering it ends that unit's movement immediately - the hexes
+       it had left are forfeit - and the server removes it at the end of the Movement phase.
+
+       This is the CLIENT MIRROR of Movement::getJumpOutVortex (source/server/handlers/movement.php),
+       which is authoritative and re-runs the same test on the submitted path. The rule is stated
+       once in plan section 2.2 and implemented twice; keep the two in step. */
+
+    /* The open jump vortex standing in hex 'pos', or null.
+
+       A vortex is a SpawnJumpPoint terrain unit. It is OPEN from the turn AFTER it was declared
+       (JumpEngine::restoreVortexFromNote sets spawned = declaration turn + 1, so on the declaring
+       turn there is only the yellow "Jump Point Forming" marker) until the turn after it closes.
+       removedTurn is closeTurn + 1 - the first turn the vortex is gone - so a vortex stays usable
+       for the whole of the turn it closes on, which is why the closed test is >= and not >. */
+    /* Is this unit a jump vortex? One place holds the class name, because two other files ask:
+       getVortexInHex below, and getInterestingStuffInPosition in PhaseStrategy, which keeps the
+       vortex out of the click/hover sweep entirely. phpclass reaches the client on the STATIC
+       blueprint (model/ship.js merges by faction + phpclass), so it is always present. */
+    isJumpVortex: function isJumpVortex(unit) {
+        return !!unit && unit.phpclass === "SpawnJumpPoint";
+    },
+
+    getVortexInHex: function getVortexInHex(pos) {
+        for (var i in gamedata.ships) {
+            var unit = gamedata.ships[i];
+            if (!shipManager.movement.isJumpVortex(unit)) continue;
+            if (unit.spawned !== undefined && unit.spawned !== -1 && unit.spawned > gamedata.turn) continue; //still forming
+            if (unit.removed && unit.removedTurn != null && gamedata.turn >= unit.removedTurn) continue; //already closed
+            var vortexMove = shipManager.movement.getLastCommitedMove(unit);
+            if (!vortexMove) continue; //no deploy row yet - nothing to stand in
+            var vortexPos = new hexagon.Offset(vortexMove.position);
+            if (vortexPos.q == pos.q && vortexPos.r == pos.r) return unit;
+        }
+
+        return null;
+    },
+
+    /* The travel direction a unit must be moving in to enter 'vortex'.
+
+       The facing names the vortex's MOUTH - the doorway into hyperspace - and a unit uses it by
+       crossing that side INBOUND, so it has to be travelling in the opposite direction:
+       D = (F + 3) % 6. Direction 0 is EAST and increases clockwise on screen. */
+    getVortexEntryDirection: function getVortexEntryDirection(vortex) {
+        var move = shipManager.movement.getLastCommitedMove(vortex);
+        if (!move) return null;
+        return (parseInt(move.facing, 10) + 3) % 6;
+    },
+
+    /* The direction of the step that last carried 'ship' INTO the hex it is standing in, or null
+       if there is no such step.
+
+       Walks BACKWARDS through the whole movement array, earlier turns included, because plan
+       section 2.2 judges a unit already sitting in the hex on the last step that put it there. A
+       unit with no such step at all - deployed there, a base, something that has never moved -
+       returns null and cannot use a vortex. So does a unit that arrived by a relocation rather
+       than a step (MicroJumpSystem), because the hex it came from is not a neighbour.
+
+       Reading POSITIONS rather than move TYPES is what makes a sideslip work: a slip enters the
+       hex from the side it slipped toward, and that is the direction judged, not the heading. */
+    getEntryDirection: function getEntryDirection(ship) {
+        var moves = ship.movement;
+        if (!moves || moves.length < 2) return null;
+
+        var here = new hexagon.Offset(moves[moves.length - 1].position);
+
+        for (var i = moves.length - 1; i > 0; i--) {
+            var from = new hexagon.Offset(moves[i - 1].position);
+            if (from.equals(here)) continue; //same hex - keep walking back to the step that entered it
+
+            for (var direction = 0; direction < 6; direction++) {
+                if (from.getNeighbourAtDirection(direction).equals(here)) return direction;
+            }
+
+            return null; //not a neighbour: the unit was put here, it did not fly in
+        }
+
+        return null;
+    },
+
+    /* The vortex this unit may leave through right now, or null. Both halves of the rule: it has
+       to be standing in an open vortex's hex, and the step that put it there has to have been
+       travelling into that vortex's mouth. */
+    getUsableVortex: function getUsableVortex(ship) {
+        var vortex = shipManager.movement.getVortexInHex(shipManager.getShipPosition(ship));
+        if (!vortex) return null;
+
+        var entry = shipManager.movement.getEntryDirection(ship);
+        if (entry === null) return null;
+        if (entry !== shipManager.movement.getVortexEntryDirection(vortex)) return null;
+
+        return vortex;
+    },
+
+    /* Has this unit already ordered a jump-out this turn? Read by getRemainingMovement and by
+       every manoeuvre gate below, so ordering one really does end the unit's movement. Deleting
+       the order (the ordinary cancel-movement button) undoes all of it. */
+    hasJumpedOut: function hasJumpedOut(ship) {
+        for (var i in ship.movement) {
+            var movement = ship.movement[i];
+            if (movement.turn == gamedata.turn && movement.type == "jumpout") return true;
+        }
+
+        return false;
+    },
+
+    canJumpOut: function canJumpOut(ship) {
+        if (gamedata.gamephase != 2) return false;
+        if (!ship || shipManager.isDestroyed(ship)) return false;
+        if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) return false;
+        if (ship.mine) return false;
+        /* Fighter flights are not offered a jump-out in Stage 4. They have no primary Structure
+           to destroy, so the removal path every other unit uses does not exist for them - a
+           docked flight is taken off the board by a note on its CARRIER's hangar instead, and an
+           independent flight would need its own. A flight whose carrier jumps still goes with it.
+           Recorded as a Stage 4 gap in JUMP_POINTS_PLAN.md; Movement::resolveJumpOuts refuses
+           them server-side too, so the two agree. */
+        if (ship.flight) return false;
+        //An attached pod leaves with its host and never decides for itself (plan section 5 trap 7).
+        if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false;
+        if (shipManager.movement.hasJumpedOut(ship)) return false;
+        //An unpayable manoeuvre still dangling would be dropped by the server's thrust validation,
+        //taking the path that reached the vortex with it. Make the player resolve it first.
+        if (shipManager.movement.checkHasUncommitted(ship)) return false;
+        //getUsableVortex reads the last committed move; a unit with no movement rows at all has none.
+        if (!ship.movement || ship.movement.length === 0) return false;
+
+        return shipManager.movement.getUsableVortex(ship) !== null;
+    },
+
+    doJumpOut: function doJumpOut(ship) {
+        if (!shipManager.movement.canJumpOut(ship)) return false;
+
+        var vortex = shipManager.movement.getUsableVortex(ship);
+        var lm = ship.movement[ship.movement.length - 1];
+
+        //Position/facing/heading/speed all copy the move that entered the hex: this order marks
+        //the unit as leaving, it does not move it. 'value' carries the vortex id, which is what
+        //the server re-validates against (the same field 'detach' uses for its host id).
+        ship.movement[ship.movement.length] = {
+            id: -1,
+            type: "jumpout",
+            position: lm.position,
+            xOffset: 0,
+            yOffset: 0,
+            facing: lm.facing,
+            heading: lm.heading,
+            speed: lm.speed,
+            animating: false,
+            animated: false,
+            animationtics: 0,
+            requiredThrust: Array(null, null, null, null, null),
+            assignedThrust: Array(),
+            commit: true,
+            preturn: false,
+            at_initiative: shipManager.getIniativeOrder(ship),
+            turn: gamedata.turn,
+            forced: false,
+            value: vortex.id
+        };
+
+        return true;
     },
 
     canDetach: function canDetach(ship) {
@@ -783,6 +955,8 @@ shipManager.movement = {
 
 
     canPivot: function canPivot(ship, right) {
+        //A unit that has ordered a jump-out has finished manoeuvring (JUMP_POINTS_PLAN.md section 2.5).
+        if (shipManager.movement.hasJumpedOut(ship)) return false;
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
         if (shipManager.movement.isManeuverBlockedByAttachment(ship)) return false;
         if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!         
@@ -1032,6 +1206,8 @@ shipManager.movement = {
 
     //Shadow ships ability! here it will rely on halfPhaseThrust attribute non-zero value to recognize the ability.
     canHalfPhase: function canHalfPhase(ship) {
+        //A unit that has ordered a jump-out has finished manoeuvring (JUMP_POINTS_PLAN.md section 2.5).
+        if (shipManager.movement.hasJumpedOut(ship)) return false;
         if (ship.halfPhaseThrust == 0) return false; //ship is not capable of half phasing
         if (gamedata.gamephase != 2) return false;
         if (shipManager.movement.isHalfPhased(ship)) return false;
@@ -1111,6 +1287,8 @@ shipManager.movement = {
 
 
     canContract: function canContract(ship, value) {
+        //A unit that has ordered a jump-out has finished manoeuvring (JUMP_POINTS_PLAN.md section 2.5).
+        if (shipManager.movement.hasJumpedOut(ship)) return false;
         if (gamedata.gamephase != 2) return false;
         if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!         
 
@@ -1257,6 +1435,8 @@ shipManager.movement = {
 
 
     canTurnIntoPivot: function canTurnIntoPivot(ship, right) {
+        //A unit that has ordered a jump-out has finished manoeuvring (JUMP_POINTS_PLAN.md section 2.5).
+        if (shipManager.movement.hasJumpedOut(ship)) return false;
         if (gamedata.gamephase != 2) return false;
         //if (ship.agile) returnVal = false; //agile ship should be able to turn into pivot all right...
         if (ship.flight) return false; //Every turn is a turn into pivot for fighters/shuttles, no need for extra movement type.
@@ -1428,6 +1608,8 @@ shipManager.movement = {
     },
 
     canChangeSpeed: function canChangeSpeed(ship, accel) {
+        //A unit that has ordered a jump-out has finished manoeuvring (JUMP_POINTS_PLAN.md section 2.5).
+        if (shipManager.movement.hasJumpedOut(ship)) return false;
         if (ship.osat || ship.base || gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
             return false;
         }
@@ -1746,6 +1928,10 @@ shipManager.movement = {
     }, //endof function getFullEngineThrust    
 
     getRemainingMovement: function getRemainingMovement(ship) {
+        //JUMPING OUT ends the unit's movement immediately and the hexes it had left are FORFEIT
+        //(JUMP_POINTS_PLAN.md section 2.5). Returning 0 here is what does it: canMove and canSlip
+        //both read this, and isMovementReady reads it to arm the Commit button.
+        if (shipManager.movement.hasJumpedOut(ship)) return 0;
         return shipManager.movement.getSpeed(ship) - shipManager.movement.getUsedMovement(ship);
     },
 
@@ -2152,6 +2338,8 @@ shipManager.movement = {
     },
 
     canTurn: function canTurn(ship, right) {
+        //A unit that has ordered a jump-out has finished manoeuvring (JUMP_POINTS_PLAN.md section 2.5).
+        if (shipManager.movement.hasJumpedOut(ship)) return false;
         if (ship.mine) return false;
         if (shipManager.movement.isManeuverBlockedByAttachment(ship)) return false;
         if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!         
@@ -2292,6 +2480,8 @@ shipManager.movement = {
 
 
     canGraviticTurn: function canGraviticTurn(ship, right) {
+        //A unit that has ordered a jump-out has finished manoeuvring (JUMP_POINTS_PLAN.md section 2.5).
+        if (shipManager.movement.hasJumpedOut(ship)) return false;
         //if (gamedata.gamephase == -1 && ship.deploymove) return true;
         if (gamedata.gamephase != 2) return false;
         if (!ship.gravitic) return false;

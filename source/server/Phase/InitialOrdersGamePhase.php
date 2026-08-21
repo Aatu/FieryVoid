@@ -47,6 +47,22 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
         }
     }
 
+    // JUMP_POINTS_PLAN.md Stage 3: every vortex declared in the Initial Orders that just closed
+    // FORMS here - a SpawnJumpPoint terrain unit goes onto the board at the declared hex, facing
+    // the declared way, visible to everyone from Movement onward. Same reason as the Chameleon
+    // checkpoint above for living in advance() rather than process(): process() rebuilds ships from
+    // the POST without enhancements or loaded notes, so the engine's own vortex state is absent
+    // there and a ship would re-open a jump point it already holds.
+    //
+    // LAST, deliberately, and after the active-ship selection: the vortex joins $gameData->ships
+    // the instant it is inserted, and SimultaneousMovementRule::getNewActiveShip's ship filter -
+    // unlike hasShipsAtIniative next to it - does not exclude terrain. The early returns above
+    // cannot strand a declaration; a ship that just declared one is on the board, alive and not
+    // terrain, which is exactly what makes hasShipsAtIniative find it.
+    //
+    // Note $gameData->phase already reads 2 by now - never branch on it in the sweep.
+    JumpEngine::spawnDeclaredVortices($gameData);
+
     $dbManager->updateGamedata($gameData);
 }
 

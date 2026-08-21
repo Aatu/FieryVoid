@@ -11,6 +11,17 @@ class MovementGamePhase implements Phase
         // Load fresh gamedata (to include newly submitted moves)
         $latestgameData = $dbManager->getTacGamedata($gameData->forPlayer, $gameData->id);
 
+        /* JUMPING OUT (JUMP_POINTS_PLAN.md Stage 4, section 2.5). Every unit whose plotted path
+           ended in an open jump vortex, entered through the side the vortex faces, leaves the
+           battle here: primary structure destroyed with damageclass HyperspaceJump, combat value
+           snapshotted first, attached units carried out with their host.
+
+           FIRST, before the loop below, on purpose - a unit that has left then reads isDestroyed()
+           for the rest of advance(), so it gets no dummy "end" move, no post-move stealth check
+           and holds no Pre-Firing slot open. The entry rule is re-checked here against the STORED
+           movement; process() has already refused anything a tampered client tried to bank. */
+        Movement::resolveJumpOuts($latestgameData, $dbManager);
+
         foreach ($latestgameData->ships as $ship) {
             // Track slots that have pre-firing ships ready to shoot
             // Checked BEFORE skipping bases/mines to ensure mines with command control get a Pre-Firing Phase
@@ -191,6 +202,14 @@ class MovementGamePhase implements Phase
 					$activeShip->movement = $ship->movement;
 					$ship->movement = Movement::validateThrustPayment($activeShip, $gameData->turn);
 					$activeShip->movement = $activeShipMovementBackup;
+
+					// JUMP OUT (JUMP_POINTS_PLAN.md Stage 4): the entry rule is enforced here too,
+					// not only when the phase resolves, so a tampered client cannot bank an order
+					// the plotted path never earned. The AUTHORITATIVE ship's stored movement is
+					// passed alongside the submitted moves because the POST carries this turn only
+					// and a unit already sitting in the vortex hex is judged on the step that put
+					// it there, however many turns back.
+					$ship->movement = Movement::validateJumpOutSubmission($ship->movement, $activeShipMovementBackup, $gameData);
 
 					// Check for detachment move in the submitted orders
 					$detachedMove = false;

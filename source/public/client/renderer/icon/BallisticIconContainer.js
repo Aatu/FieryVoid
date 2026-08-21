@@ -35,6 +35,10 @@ window.BallisticIconContainer = function () {
 
 		const ballistics = replayData ?? weaponManager.getAllFireOrdersForAllShipsForTurn(gamedata.turn, 'ballistic');
 
+		//Collected in the same pass, and under exactly the same turn/phase/masking filter the
+		//markers themselves get, so the facing arrows can never outlive or precede their hex.
+		const jumpPointOrders = [];
+
 		ballistics.forEach(ballistic => {
 			if (ballistic.turn === gamedata.turn || !replayData) {
 				//Suppress Gravitic Mine icons/lines in live phase 3: the mine has already detonated in
@@ -49,6 +53,10 @@ window.BallisticIconContainer = function () {
 						if (modeName === 'Gravitic Mine' || modeName === 'Standard - GN' || modeName === 'Priority - GN') return;
 					}
 				}
+				if (ballistic.damageclass === 'jumppoint' && ballistic.x !== "null" && ballistic.y !== "null") {
+					jumpPointOrders.push(ballistic);
+				}
+
 				createOrUpdateBallistic.call(this, ballistic, iconContainer, gamedata.turn, !!replayData);
 				createOrUpdateBallisticLines.call(this, ballistic, iconContainer, gamedata.turn, !!replayData);
 			}
@@ -83,6 +91,7 @@ window.BallisticIconContainer = function () {
 		generateBallisticLines.call(this);
 		generateTerrainHexes.call(this, gamedata);
 		generateReinforcementHexes.call(this, gamedata);
+		generateJumpPointArrows.call(this, jumpPointOrders);
 		pruneSceneObjects.call(this);
 	};
 
@@ -385,6 +394,48 @@ window.BallisticIconContainer = function () {
 	}
 
 
+	/* THE FACING ARROW OVER A FORMING JUMP POINT (JUMP_POINTS_PLAN.md).
+
+	   A vortex is not on the board on the turn it is declared — the "Jump Point Forming" hex above
+	   IS the vortex for that turn — so the facing, which is the rule that decides who can use it,
+	   has to be shown on the marker. It is drawn as the SAME asset, at the same size and opacity,
+	   that UI.vortexFacing puts over the pending hex and that ShipIcon puts over the vortex unit
+	   once it opens, so the arrow never changes appearance across the three stages of its life.
+	   Keep the three constants in step (see ShipIcon.FACING_ARROW_SCALE).
+
+	   ONE ARROW PER HEX, keyed by hex and signed by facing, because syncSceneObject rebuilds only
+	   on a signature change: a poll that leaves the declaration alone costs nothing, a re-declared
+	   facing rebuilds, and a withdrawn order is released by pruneSceneObjects.
+
+	   ⚠️ It has to be its own sweep rather than a line inside createBallisticIcon: an existing
+	   ballistic icon is UPDATED, not rebuilt, on later polls (see createOrUpdateBallistic), so a
+	   syncSceneObject call in there would run once and then let prune reclaim the arrow on the very
+	   next poll.
+
+	   firingMode is the storage for the facing on a Jump Engine — mode = facing + 1. */
+	const VORTEX_ARROW_SCALE = 1.15;    //multiple of hex HEIGHT; arrowhead lands on the hex side
+	const VORTEX_ARROW_OPACITY = 0.85;
+	const VORTEX_ARROW_Z = -99;         //above the ballistic hexes (-100), below terrain (-50)
+
+	function generateJumpPointArrows(orders) {
+		orders.forEach(order => {
+			const facing = (((parseInt(order.firingMode, 10) || 1) - 1) % 6 + 6) % 6;
+			const hex = new hexagon.Offset(order.x, order.y);
+
+			syncSceneObject.call(this, `jumppointArrow:${hex.q},${hex.r}`, String(facing), () => {
+				const size = window.HexagonMath.getHexHeight() * VORTEX_ARROW_SCALE;
+				const sprite = new window.webglSprite('./img/directionOfVortex.png', { width: size, height: size }, VORTEX_ARROW_Z);
+
+				sprite.setPosition(this.coordinateConverter.fromHexToGame(hex));
+				sprite.setFacing(-mathlib.hexFacingToAngle(facing));
+				sprite.setOpacity(VORTEX_ARROW_OPACITY);
+
+				return { object: sprite.mesh, release: () => releaseSprite(sprite) };
+			});
+		});
+	}
+
+
 	/* The whole affected area as one blanket, centre hex included. `size` is the radius in hexes and
 	   the area is the DISC of that radius - which is what the rules mean (IonFieldGenerator, for one,
 	   is documented as "affects all units within 2 hexes" and resolves with getShipsInDistance($target,
@@ -650,14 +701,21 @@ window.BallisticIconContainer = function () {
 						targetType = 'hexGreen';
 						//iconImage = './img/allySupport.png';
 						break;
-					//A vortex declaration (JUMP_POINTS_PLAN.md) is not an attack, and the default
-					//red hex reads as incoming fire. Yellow, labelled with the firing mode - which
-					//on a Jump Engine IS the vortex facing - so both players can see which way the
-					//mouth will point once it forms. The same --fv-warn yellow the Stage 2b facing
-					//control uses, so the preview and the committed marker match.
+					/* A vortex declaration (JUMP_POINTS_PLAN.md) is not an attack, and the default
+					   red hex reads as incoming fire. Yellow, in the same --fv-warn the Stage 2b
+					   facing control and the vortex unit use.
+
+					   THIS MARKER IS THE VORTEX for the whole of the turn it was declared on: the
+					   unit itself is deliberately not on the board until the turn it OPENS (user
+					   ruling 2026-08-21, plan section 2.3 — the vortex spawns with
+					   spawned = declaration turn + 1, so shouldBeHidden keeps it off). So the label
+					   says what is actually true — Forming, not yet enterable — and the FACING,
+					   which the firing mode used to carry as text, is shown instead by the arrow
+					   generateJumpPointArrows draws over this hex. The marker retires by itself at
+					   turn advance: onConstructed only builds ballistics for the current turn. */
 					case 'jumppoint':
 						targetType = 'hexYellow';
-						text = modeName;
+						text = 'Jump Point Forming';
 						textColour = '#e1b000';
 						break;
 				}

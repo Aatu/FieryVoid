@@ -1042,6 +1042,7 @@ class Firing
                 if (!($weapon instanceof Weapon)){ //this isn't a weapon after all...
                     continue;
                 }		
+                if (self::isHyperspaceLogOrder($fire)) continue; //not a shot - see the method
                
 		        $weapon->changeFiringMode($fire->firingMode); //For Chaff Missile
 		
@@ -1088,6 +1089,7 @@ public static function firePreFiringWeapons($gamedata){
 
                 $weapon = $ship->getSystemById($fire->weaponid);
                 if (!$weapon->isRammingAttack) continue; //Only interested in Ramming Attacks!
+                if (self::isHyperspaceLogOrder($fire)) continue; //not a ram - see the method
 
                 $rammingOrders[] = $fire;
             }
@@ -1225,6 +1227,23 @@ public static function firePreFiringWeapons($gamedata){
 
 
     /*Marcin Sawicki: count hit chances for starting fire phase fire*/
+    /* A HYPERSPACE DEPARTURE IS NOT A SHOT (JUMP_POINTS_PLAN.md Stage 4).
+     *
+     * Leaving the battle writes a RammingAttack fire order at 100/100 against the departing unit
+     * itself, purely so the combat log has a line to render - the damage entry beside it has
+     * already destroyed the primary structure. The BOOST path never needed guarding because
+     * JumpEngine::doHyperspaceJump runs at the very END of fireWeapons, after every gather has
+     * happened. A vortex jump-out resolves a whole phase earlier, in Movement, so by the time
+     * Pre-Firing and Fire load their orders this one is sitting in tac_fireorder looking exactly
+     * like a ram - and would be re-resolved as one, ramming the departed unit into itself.
+     *
+     * Four gathers consult this: preparePreFiring / firePreFiringWeapons and prepareFiring /
+     * fireWeapons. Matching on damageclass rather than on type keeps it independent of how the
+     * order was submitted. */
+    public static function isHyperspaceLogOrder($fire){
+        return $fire->damageclass === 'HyperspaceJump' || $fire->damageclass === 'JumpFailure';
+    }
+
     public static function prepareFiring($gamedata, $dbManager = null){
 	//additional call for weapons needing extra preparation
         foreach ($gamedata->ships as $ship){
@@ -1264,6 +1283,7 @@ public static function firePreFiringWeapons($gamedata){
                 if (!($weapon instanceof Weapon)){ //this isn't a weapon after all...
                     continue;
                 }		
+                if (self::isHyperspaceLogOrder($fire)) continue; //not a shot - see the method
                
 		        $weapon->changeFiringMode($fire->firingMode); //For Chaff Missile
 		
@@ -1476,6 +1496,7 @@ public static function firePreFiringWeapons($gamedata){
 
                 $weapon = $ship->getSystemById($fire->weaponid);
                 if (!$weapon->isRammingAttack) continue; //Only interested in Ramming Attacks!
+                if (self::isHyperspaceLogOrder($fire)) continue; //not a ram - see the method
 
                 $rammingOrders[] = $fire;
             }

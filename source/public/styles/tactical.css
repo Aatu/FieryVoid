@@ -155,30 +155,14 @@ body {
     position: relative;
 }
 
-/* The Ok button is the WORD, in the same yellow (--fv-warn) the vortex marker and its hex use,
-   and it is ALWAYS upright - the one part of the control that does NOT swing with the facing
-   (the two turn arrows are rotated by it). Upright costs nothing because this container is never
-   rotated, but say so, because it is a deliberate exception.
-   Absolutely centred rather than flexed or line-height'd so it stays correct whatever box size
-   UI.vortexFacing.placeElement gives it, and overflow is reopened so the glow is not clipped. */
+/* The confirm button is a DRAWN glyph now (a yellow disc with a dark tick), not the word "Ok" it
+   replaced - see UI.vortexFacing.drawConfirmIcon, which also owns its colour and opacity. It is
+   the one part of the control that does NOT swing with the facing: the two turn arrows are drawn
+   rotated by it, this one is always upright, which costs nothing because the container itself is
+   never rotated - but say so, because it is a deliberate exception.
+   Overflow is reopened so the disc's drop shadow is not clipped by the 40px box. */
 #vortexFacingUI #vortexConfirm {
     overflow: visible;
-}
-
-#vortexFacingUI .vortexOkLabel {
-    position: absolute;
-    top: 50%;
-    left: 0;
-    width: 100%;
-    transform: translateY(-50%);
-    text-align: center;
-    color: var(--fv-warn);
-    font-weight: bold;
-    font-size: 15px;
-    letter-spacing: 0.5px;
-    text-shadow: 0 0 4px #000, 0 0 2px #000;
-    user-select: none;
-    -webkit-user-select: none;
 }
 
 .centercontainer {

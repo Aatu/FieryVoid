@@ -128,6 +128,16 @@
                 // Note: $move->commit is not carried through the POST (it defaults to
                 // true server-side), so every submitted maneuver is validated - which is
                 // exactly the strict behaviour we want.
+                /* A JUMP-OUT TERMINATES THE PATH (JUMP_POINTS_PLAN.md section 2.5): the unit
+                   leaves the battle here and the hexes it had left are forfeit. Accept it and
+                   stop scanning, so the "must still cover its full speed" rebuild below can
+                   never fire on a path that legitimately ends short. */
+                if ($move->type === 'jumpout'){
+                    $sanitised[] = $move;
+                    $lastLegal = $move;
+                    break;
+                }
+
                 $isManeuver = isset($maneuverTypes[$move->type]);
                 $needsCheck = $isManeuver
                     && is_array($move->requiredThrust)
@@ -218,6 +228,282 @@
                 if ($req > 0) return true;
             }
             return false;
+        }
+
+
+        /* ================ JUMPING OUT THROUGH A VORTEX ==================================
+         * JUMP_POINTS_PLAN.md Stage 4, sections 2.2 and 2.5.
+         *
+         * A unit whose plotted path ends in an OPEN vortex hex, entered through the hex side the
+         * vortex faces, may leave the battle there. The player declares it with the Jump Out
+         * button in the Movement tooltip, which appends a movement order of type 'jumpout' whose
+         * 'value' is the vortex's ship id. Everything below is the SERVER's half:
+         *
+         *   process()  -> validateJumpOutSubmission strips an order the path does not justify,
+         *                 so a tampered client cannot bank one.
+         *   advance()  -> resolveJumpOuts re-runs the same test against the persisted movement
+         *                 and removes the units that pass.
+         *
+         * shipManager.movement (source/public/client/movement.js) mirrors the same rule so the
+         * button only offers what the server will honour. THIS is the authority; keep the two in
+         * step, and change the rule in plan section 2.2 first.
+         *
+         * Deliberately NOT touched: the end-of-Fire boost sweep in Firing::fireWeapons. It is the
+         * transition path for boost-jumps already committed on the live server when this ships,
+         * and the two cannot collide - Movement resolves first, and doHyperspaceJump early-returns
+         * on an already-destroyed primary structure. It comes out in the cleanup deploy one cycle
+         * later (plan section 4, Stage 2).
+         */
+
+        /* This turn's jump-out order in $movement, or null. */
+        public static function getJumpOutOrder($movement, $turn){
+            if (!is_array($movement)) return null;
+
+            foreach ($movement as $move){
+                if ($move->type === 'jumpout' && $move->turn == $turn) return $move;
+            }
+
+            return null;
+        }
+
+        /* The OPEN vortex standing in $pos, or null.
+         *
+         * A vortex is a SpawnJumpPoint terrain unit. JumpEngine::restoreVortexFromNote gives it
+         * spawned = declaration turn + 1 (on the declaring turn it is only a "Jump Point Forming"
+         * marker, not yet enterable) and removedTurn = close turn + 1, the first turn it is gone -
+         * so it stays usable for the whole of the turn it closes on, which is why the closed test
+         * is >= and not >. */
+        public static function getOpenVortexInHex($gamedata, OffsetCoordinate $pos){
+            foreach ($gamedata->ships as $unit){
+                if (!($unit instanceof SpawnJumpPoint)) continue;
+                if ($unit->spawned > $gamedata->turn) continue; //still forming
+                if ($unit->removed && $unit->removedTurn !== null && $gamedata->turn >= $unit->removedTurn) continue; //closed
+                if ($unit->getHexPos()->equals($pos)) return $unit;
+            }
+
+            return null;
+        }
+
+        /* The travel direction a unit must be moving in to enter $vortex.
+         *
+         * The facing names the vortex's MOUTH - the doorway into hyperspace - and a unit uses it
+         * by crossing that side INBOUND, so it has to be travelling in the opposite direction:
+         * D = (F + 3) % 6. Direction 0 is EAST and increases clockwise (CubeCoordinate::NEIGHBOURS
+         * and the client's Offset.neighbours both agree). */
+        public static function getVortexEntryDirection($vortex){
+            $move = $vortex->getLastMovement();
+            if (!$move) return null;
+
+            return ((int)$move->facing + 3) % 6;
+        }
+
+        /* The direction of the step that last carried this path INTO the hex it ends in, or null.
+         *
+         * Walks BACKWARDS through the whole array - earlier turns included - because plan section
+         * 2.2 judges a unit that is already sitting in the hex on the last step that put it there.
+         * A unit with no such step at all (deployed there, a base, an OSAT, anything that has
+         * never moved) returns null and cannot use a vortex. So does one that arrived by
+         * relocation rather than by a step, because the hex it came from is not a neighbour.
+         *
+         * Reading POSITIONS rather than move TYPES is what makes a sideslip work: a slip enters
+         * the hex from the side it slipped toward, and that step is what is judged - not the
+         * unit's heading. It is also why an attached pod can never satisfy this on its own: its
+         * rows are all type 'attached' and mirror its host's positions, so they always change hex
+         * together and the pod is carried out by the host instead (see resolveJumpOuts). */
+        public static function getEntryDirection($movement){
+            if (!is_array($movement)) return null;
+
+            $moves = array_values($movement);
+            $count = count($moves);
+            if ($count < 2) return null;
+
+            $here = new OffsetCoordinate($moves[$count - 1]->position);
+
+            for ($i = $count - 1; $i > 0; $i--){
+                $from = new OffsetCoordinate($moves[$i - 1]->position);
+                if ($from->equals($here)) continue; //same hex - keep walking back to the step that entered it
+
+                for ($direction = 0; $direction < 6; $direction++){
+                    if ($from->moveToDirection($direction)->equals($here)) return $direction;
+                }
+
+                return null; //not a neighbour: the unit was put here, it did not fly in
+            }
+
+            return null;
+        }
+
+        /* The vortex $movement legally leaves through, or null. Four things have to hold: there
+         * is a jump-out order this turn, the id it names is a vortex, that vortex is open and
+         * standing in the hex the order was given in, and the step that entered the hex was
+         * travelling into the vortex's mouth.
+         *
+         * The path is truncated at the jump-out order before the entry test, because that order
+         * is where the unit's movement ENDS - anything a client appended after it is not part of
+         * how the unit got there. */
+        public static function getJumpOutVortex($movement, $gamedata){
+            $order = self::getJumpOutOrder($movement, $gamedata->turn);
+            if (!$order) return null;
+
+            $vortex = $gamedata->getShipById((int)$order->value);
+            if (!($vortex instanceof SpawnJumpPoint)) return null;
+
+            $open = self::getOpenVortexInHex($gamedata, new OffsetCoordinate($order->position));
+            if (!$open || (int)$open->id !== (int)$vortex->id) return null;
+
+            $path = array();
+            foreach ($movement as $move){
+                $path[] = $move;
+                if ($move === $order) break;
+            }
+
+            $entry = self::getEntryDirection($path);
+            if ($entry === null) return null;
+            if ($entry !== self::getVortexEntryDirection($vortex)) return null;
+
+            return $vortex;
+        }
+
+        /* Called from MovementGamePhase::process. Drops a jump-out order the submitted path does
+         * not justify, so it never reaches the database.
+         *
+         * $history is the AUTHORITATIVE ship's stored movement: the POST carries this turn's moves
+         * only, and a unit that was already sitting in the vortex hex is judged on the step that
+         * put it there, however many turns back that was. */
+        public static function validateJumpOutSubmission($submitted, $history, $gamedata){
+            if (!is_array($submitted)) return $submitted;
+            if (!self::getJumpOutOrder($submitted, $gamedata->turn)) return $submitted;
+
+            $path = array();
+            if (is_array($history)){
+                foreach ($history as $move){
+                    if ($move->turn < $gamedata->turn) $path[] = $move;
+                }
+            }
+            foreach ($submitted as $move) $path[] = $move;
+
+            if (self::getJumpOutVortex($path, $gamedata)) return $submitted;
+
+            error_log("validateJumpOutSubmission: rejected jump-out on turn " . $gamedata->turn
+                . " - the submitted path does not enter an open vortex through its mouth. Order dropped.");
+
+            $clean = array();
+            foreach ($submitted as $move){
+                if ($move->type === 'jumpout' && $move->turn == $gamedata->turn) continue;
+                $clean[] = $move;
+            }
+
+            return $clean;
+        }
+
+        /* Called from MovementGamePhase::advance, off a FRESH gamedata load, once every ship has
+         * submitted. Removes every unit whose stored movement holds a legal jump-out.
+         *
+         * Runs BEFORE the phase's own ship loop so a unit that has left reads isDestroyed() for
+         * the rest of advance(): no dummy 'end' move, no post-move stealth check, and no
+         * Pre-Firing slot held open for it. */
+        public static function resolveJumpOuts($gamedata, $dbManager){
+            $jumped = array();
+
+            foreach ($gamedata->ships as $ship){
+                if ($ship->isTerrain() || $ship->mine) continue;
+                if ($ship instanceof FighterFlight) continue; //see applyJumpOut - flights have no primary Structure
+                if ($ship->isDestroyed()) continue;
+                if (!self::getJumpOutOrder($ship->movement, $gamedata->turn)) continue;
+
+                if (!self::getJumpOutVortex($ship->movement, $gamedata)){
+                    error_log("resolveJumpOuts: REFUSED jump-out for ship " . $ship->id . " on turn "
+                        . $gamedata->turn . " - stored path does not enter an open vortex through its mouth.");
+                    continue;
+                }
+
+                self::applyJumpOut($ship, $gamedata, " jumps out of the battle through a jump vortex.");
+                $jumped[] = $ship;
+
+                /* An attached unit rides its host into hyperspace (plan section 5, trap 7). Its
+                 * movement rows are all type 'attached' and mirror the host's, so it can never
+                 * satisfy the entry test on its own - which is also exactly why it must be taken
+                 * here, or it would be left behind sitting on an empty hex. */
+                if (!empty($ship->hasAttached)){
+                    foreach (array_keys($ship->hasAttached) as $attachedId){
+                        $attached = $gamedata->getShipById((int)$attachedId);
+                        if (!$attached || $attached->isDestroyed()) continue;
+                        if ($attached instanceof FighterFlight) continue; //breaching pod: no primary Structure to destroy
+                        self::applyJumpOut($attached, $gamedata, " is carried into hyperspace by " . $ship->name . ".");
+                        $jumped[] = $attached;
+                    }
+                }
+            }
+
+            if (empty($jumped)) return;
+
+            /* Phase 2 explicitly. submitFireorders only reads the phase to filter ballistic and
+             * pre-firing orders, and these are neither - but passing 1 would silently drop them. */
+            $dbManager->submitFireorders($gamedata->id, $gamedata->getNewFireOrders(), $gamedata->turn, 2);
+            $dbManager->submitDamages($gamedata->id, $gamedata->turn, $gamedata->getNewDamages());
+
+            foreach ($jumped as $ship){
+                $ship->saveIndividualNotes($dbManager);
+            }
+        }
+
+        /* Take one unit out of the battle through hyperspace. This is
+         * JumpEngine::doHyperspaceJump MINUS THE FAILURE ROLL - the risk was taken when the
+         * vortex was opened, not when it is used (plan section 2.5) - and minus the assumption
+         * that the unit owns a jump engine at all: any unit may use any open vortex, including
+         * an enemy's. Keep the two in step; they write the same three records.
+         *
+         *   1. a RammingAttack fire order, purely so the combat log has a line to render. It is
+         *      never resolved: Firing::prepareFiring and the ramming sweep in fireWeapons both
+         *      skip HyperspaceJump/JumpFailure orders, which the boost path never needed because
+         *      it writes its order AFTER both have run.
+         *   2. the 'jumped' note carrying the combat value AS OF NOW - written BEFORE the
+         *      structure is destroyed, or the snapshot would already be zero. It hangs on the
+         *      JUMP ENGINE when the unit has one, which is where doHyperspaceJump has always put
+         *      it and where JumpEngine::onIndividualNotesLoaded reads it back; on the PRIMARY
+         *      STRUCTURE when it does not (Structure::onIndividualNotesLoaded is the mirror).
+         *   3. the primary structure destroyed with damageclass HyperspaceJump. That is what
+         *      takes the unit off the board, and what every "did it jump or was it killed?" test
+         *      in the codebase keys off.
+         */
+        private static function applyJumpOut($ship, $gamedata, $pubNotes){
+            $rammingSystem = $ship->getSystemByName("RammingAttack");
+
+            if ($rammingSystem){
+                $newFireOrder = new FireOrder(
+                    -1, "normal", $ship->id, $ship->id,
+                    $rammingSystem->id, -1, $gamedata->turn, 1,
+                    100, 100, 1, 1, 0,
+                    0, 0, 'HyperspaceJump', 10001
+                );
+                $newFireOrder->pubnotes = $pubNotes;
+                $newFireOrder->addToDB = true;
+                $rammingSystem->fireOrders[] = $newFireOrder;
+            }
+
+            $jumpEngine = $ship->getSystemByName("JumpEngine");
+            $noteHost = $jumpEngine ? $jumpEngine : $ship->getStructureSystem(0);
+            if ($noteHost){
+                $noteHost->addIndividualNote(new IndividualNote(
+                    -1, $gamedata->id, $gamedata->turn, $gamedata->phase,
+                    $ship->id, $noteHost->id, 'jumped', 'jumped', $ship->calculateCombatValue()
+                ));
+            }
+
+            $primaryStruct = $ship->getStructureSystem(0);
+            if ($primaryStruct){
+                $damageEntry = new DamageEntry(
+                    -1, $ship->id, -1, $gamedata->turn,
+                    $primaryStruct->id, $primaryStruct->getRemainingHealth(), 0, 0, -1, true, false,
+                    "", 'HyperspaceJump'
+                );
+                $damageEntry->updated = true;
+                if ($rammingSystem){ //so submitDamages can find the fire order this belongs to
+                    $damageEntry->shooterid = $ship->id;
+                    $damageEntry->weaponid = $rammingSystem->id;
+                }
+                $primaryStruct->damage[] = $damageEntry;
+            }
         }
 
 

@@ -4,7 +4,7 @@ Replaces the current one-click "boost the Jump Engine, vanish at end of turn" es
 tabletop rules: a ship **projects a vortex** into a nearby hex, the vortex **forms**, **persists**,
 can be **maintained**, and any unit that **flies into its mouth** leaves the battle.
 
-Status: **STAGES 1, 2 AND 2b BUILT (2026-08-21), stages 3-6 not started.**
+Status: **STAGES 1, 2, 2b, 3 AND 4 BUILT (2026-08-21), stages 5-6 not started.**
 ⚠️ Stage 2 retires the boost-to-jump path and Stage 4 adds the replacement, so **stages 2–5 must
 ship as ONE live deploy** — deploying Stage 2 alone leaves a game with no way to leave a battle.
 
@@ -128,13 +128,26 @@ base, an OSAT, a unit that has never moved) **cannot** use the vortex.
 
 ### 2.3 Forming, open, closing
 
-| Turn | State | Can units enter? |
-|---|---|---|
-| N — declared in Initial Orders | **Forming**. Unit spawns at the end of `InitialOrdersGamePhase::advance`, visible to everyone from Movement onward | No |
-| End of N | **Activation.** Damaged-engine failure roll happens here | — |
-| N+1 | **Open** | Yes |
-| N+2, N+3 | Open **only if maintained each turn** | Yes |
-| End of N+3 | **Hard cap.** Closes unconditionally (4 turns counting N) | — |
+| Turn | State | Can units enter? | What is on the board |
+|---|---|---|---|
+| N — declared in Initial Orders | **Forming**. Unit is created at the end of `InitialOrdersGamePhase::advance` but is deliberately NOT drawn | No | a yellow **"Jump Point Forming"** hex + a facing arrow |
+| End of N | **Activation.** Damaged-engine failure roll happens here | — | — |
+| N+1 | **Open** | Yes | the **vortex unit**, with the same facing arrow over it |
+| N+2, N+3 | Open **only if maintained each turn** | Yes | as above |
+| End of N+3 | **Hard cap.** Closes unconditionally (4 turns counting N) | — | — |
+
+⭐ **A forming vortex is a MARKER, not a unit** (user ruling 2026-08-21, revising the original
+"visible to everyone from Movement onward"). Showing the unit on turn N read as "there is a jump
+point here" when there is not yet one, so the unit stays off the board until the turn it OPENS and
+the ballistic marker carries the turn instead. Mechanically this is one line — the vortex is spawned
+with `spawned = N + 1`, and `shipManager.shouldBeHidden` already hides anything whose spawned turn
+is later than the turn being viewed. Everything server-side still sees the unit on turn N, which is
+what keeps a second declaration out of the same hex.
+
+**The facing arrow is the same asset at the same size in all three places** — the Stage 2b preview,
+the Forming marker, and the vortex unit — so it never changes appearance across a vortex's life.
+Three constants, kept in step by hand: `UI.vortexFacing.MARKER_ARROW_SCALE/_OPACITY`,
+`BallisticIconContainer.VORTEX_ARROW_SCALE/_OPACITY`, `ShipIcon.FACING_ARROW_SCALE/_OPACITY`.
 
 A vortex also closes at the end of the current turn if **any** of these becomes true:
 
@@ -163,7 +176,13 @@ hard block would be a support burden).
 - At the end of Movement the unit is removed from the game exactly as `HyperspaceJump` does today:
   primary structure destroyed with damageclass `HyperspaceJump`, `jumped` note written first so CV
   is preserved.
-- Any unit may use any open vortex, including an enemy's. This is RAW and is deliberate.
+- Any unit may use any open vortex, including an enemy's. This is RAW and is deliberate — including
+  units with no jump engine of their own, which is why CV preservation cannot live on the engine
+  (see Stage 4).
+- An **attached** pod or grapple is carried out with its host and can never use a vortex on its own:
+  its movement rows mirror the host's, so it has no entry step of its own to judge.
+- ⚠️ **Fighter flights are excluded** as of Stage 4 — they have no primary Structure to destroy, so
+  the removal path does not exist for them yet. See the two gaps listed under Stage 4.
 - No failure roll on entering. The risk was taken when the vortex was opened.
 
 ### 2.6 Jump failure
@@ -255,7 +274,13 @@ is correct — but check that the half-phase self-destruct in its `criticalPhase
 
 ### 3.2 The vortex unit
 
-New `source/server/model/ships/terrain/jumpPointSpawn.php`:
+New [`source/server/model/ships/terrain/SpawnJumpPoint.php`](source/server/model/ships/terrain/SpawnJumpPoint.php):
+
+⚠️ **The filename MUST match the class name** (bar case). `ShipLoader::getShipClassnamesStatic`
+enumerates ship classes by stripping `.php` off every file under `model/ships/` and calling
+`class_exists()` on the result — a mismatched name is skipped **silently** by the static generator
+and every lobby path built on it. This section originally said `jumpPointSpawn.php`; that produced
+a class the autoload map knew about and `Terrain.json` did not. See Stage 3 in §4.
 
 ```php
 class SpawnJumpPoint extends Terrain {
@@ -651,14 +676,123 @@ Three notes from that pass worth keeping:
   is local. Add a HiDPI backing store while you are there — `min(devicePixelRatio, 2)`, matching
   `webglScene`'s renderer — or the result is still soft and the exercise was pointless.
 
-### Stage 3 — the vortex unit
+### Stage 3 — the vortex unit — **BUILT 2026-08-21**
 `SpawnJumpPoint` + spawn sweep at the end of `InitialOrdersGamePhase::advance` + the note +
 `onIndividualNotesLoaded`. Icon (`img/ships/JumpPoint.png`) and facing rendering.
 ⚠️ Do **not** branch on `$gamedata->phase` inside `advance()` — it already reads 2 by then.
 **Gate:** a declared vortex exists as a `tac_ship` row with a `deploy` movement row carrying the
 chosen facing, is visible to both players from Movement onward, and survives a page reload.
 
-### Stage 4 — jumping out
+**Four files, all server-side plus one image — no JS, so no `yarn build`; autoload and statics
+only (`fvbuild.ps1 -Server`):**
+
+| File | What it got |
+|---|---|
+| `ships/terrain/SpawnJumpPoint.php` (new) | the vortex unit — Terrain, `Enormous = false`, `pointCost 0`, `variantOf 'NONE'`, one OSATCnC and one **indestructible** `Structure(0, 1, true)` |
+| `baseSystems.php` `JumpEngine` | `$spawnableClasses`, the three state properties, `spawnDeclaredVortices` / `getVortexDeclaration` / `hasOpenVortex` / `openVortex` / `restoreVortexFromNote`, and the `notekey_human` branch in `onIndividualNotesLoaded` |
+| `InitialOrdersGamePhase.php` | one call, **last** in `advance()` |
+| `img/ships/JumpPoint.png` (new) | see below |
+
+Plus, in the second pass below (five more files, all presentation): `ShipIcon.js`,
+`BallisticIconContainer.js`, `UI/vortexFacing.js`, `game.php`, `styles/tactical.css`.
+
+**What it actually took, beyond the sketch in §3.2–3.3:**
+
+| Site | Why |
+|---|---|
+| ⭐ **The FILENAME** | This section used to name the file `jumpPointSpawn.php`. That is **silently fatal**: `ShipLoader::getShipClassnamesStatic` derives class names by stripping `.php` off every file under `model/ships/` and calling `class_exists()` on the result, so a file whose name does not match its class (bar case) is skipped by the static generator and every lobby path built on it — no error, the ship just does not exist. Verified: with `jumpPointSpawn.php` the class was **absent from `Terrain.json`**; renamed to `SpawnJumpPoint.php` it appears. phpab does not care (the autoload map was correct either way), which is exactly what makes it quiet |
+| `$spawnableClasses = array('SpawnJumpPoint')` on `JumpEngine` | **Load-bearing, not a nicety.** `shipSizeClass` is NOT in `BaseShip::stripForJson` — it reaches the client through the STATIC blueprint, which `model/ship.js` merges by `faction` + `phpclass`. A vortex that appears on a *poll* (no page reload) with no blueprint would arrive with `shipSizeClass` undefined, so `gamedata.isTerrain` would return **false** and it would be a selectable, targetable ordinary ship that does not block a second vortex in its hex. game.php's `$spawnableClasses` sweep is what preloads it |
+| The sweep runs **last** in `advance()` | `Manager::insertSingleShip` adds the vortex to `$gamedata->ships` immediately, and `SimultaneousMovementRule::getNewActiveShip`'s `array_filter` — unlike `hasShipsAtIniative` right next to it — does **not** exclude terrain. Spawning before the active-ship selection could hand a vortex to the Movement phase as an active unit. The two early returns above it cannot strand a declaration: a ship that just declared one is on the board, alive, not terrain and not a mine, which is exactly what `hasShipsAtIniative` looks for |
+| No `SystemData` work in `openVortex` | `createLoiteringMine`'s weapon-loading block ends in `Manager::insertSystemData(SystemData::getAndPurgeAllSystemData())`, and **purging mid-advance would steal** the pending system data `advanceGameState` flushes after its `onAdvancingGamedata` sweep. A unit with no weapons needs none of it |
+| `onIndividualNotesLoaded` branches on `notekey_human` | Two KINDS of note now hang on a Jump Engine. The old body assigned *every* note's value to `preJumpValue`; `'Vortex'` notes are peeled off first and everything else falls through unchanged, so the `jumped` CV-preservation path is untouched |
+| `hasOpenVortex($turn)` | §2.1's "one vortex per ship **at a time**" across turns — `Firing::getVortexDeclarationBlock`'s test only covers a second declaration in the same submission. Consults the close turn, not just the id, so it is already the final Stage 5 rule |
+
+**The note shape, and the Stage 5 seam.** `notekey` = the vortex ship id, `notekey_human` = `"Vortex"`
+(6 of the column's 40), `notevalue` = `"<openTurn>,<closeTurn or -1>"`, stamped **turn 1 / phase 1**
+exactly as the mine's spawn note is — `getIndividualNotesForGame` fetches `turn <= the turn being
+viewed`, so a note stamped with the real open turn would be invisible to every earlier replay turn
+and the vortex would lose its `spawned` marker there. There is **no UPDATE path for notes**
+(`insertIndividualNote` refuses anything that already has an id), so Stage 5 records a closure by
+**appending** a second note at turn 1 / phase 2: notes load ordered by turn then phase and the
+restore is last-wins per vortex, so the later note simply overrides. Verified working.
+
+**The icon is procedurally generated placeholder art** — a Node script (no image library in the
+tree, so the PNG is encoded by hand) draws an amber ring with a dark throat, faint spiral arms and
+a bright flared **mouth pointing EAST**, the ring fading toward the west so the facing reads at a
+glance. East because facing 0 is east and `ShipIcon.setFacing` rotates the ship sprite to
+`movement.facing` — which is the whole of "facing rendering"; no client code was needed. Replace it
+with real art whenever you like: nothing depends on the drawing, only on the mouth being at +x.
+
+**One thing to watch in playtest, deliberately left alone:** on the *declaring* turn both the vortex
+unit AND the yellow `jumppoint` ballistic hex (labelled with the facing) are drawn on the same hex —
+`TacGamedata::onConstructed` only builds ballistics for `$fire->turn == $this->turn` and from phase 2
+on, so the marker vanishes at turn advance and the icon speaks alone from N+1. Reads as
+"forming, not usable yet", which is right, but it is two things on one hex.
+*Resolved in the same-day second pass below: the unit is no longer drawn on the forming turn at all,
+so there is only ever one thing on the hex.*
+
+#### Stage 3 second pass, same day (user feedback)
+
+Five changes, four of them presentation. **No new server logic** — the one server change is a
+constant and a `+ 1`.
+
+1. **The vortex unit now carries a permanent facing arrow.** `ShipIcon` builds no direction sprites
+   for Terrain (terrain does not move, so a heading arrow is meaningless), and reading the facing off
+   the icon art alone was too subtle. New blueprint property **`$facingArrow`** — a path — makes
+   `ShipIcon` lay that image over the unit, always visible (not hover-gated like a ship's
+   prow/heading arrows) and rotated with it in `setFacing`. Declared on `SpawnJumpPoint` **only**,
+   never on `BaseShip`: measured, it adds the key to exactly **1 entry across all 93 faction
+   blueprint files** (§8's reasoning, same as `hideFiringModeSelector`).
+2. **⭐ The unit is not drawn at all on the turn it forms** — see the revised §2.3. `spawned` becomes
+   `openTurn + 1`; the ballistic marker now reads **"Jump Point Forming"** instead of the firing-mode
+   name, and the facing it used to spell out is shown by an arrow over the hex instead.
+   Two consequences worth keeping:
+   - The arrow needed **its own sweep** (`generateJumpPointArrows`, next to `generateReinforcementHexes`),
+     NOT a line inside `createBallisticIcon`. An existing ballistic icon is *updated*, not rebuilt,
+     on later polls (`createOrUpdateBallistic`), so a `syncSceneObject` call inside the create path
+     would run once and then let `pruneSceneObjects` reclaim the arrow on the very next poll. The
+     orders are collected during the main `ballistics.forEach` so the arrows inherit its turn/phase
+     and masking filters exactly.
+   - **`removedTurn` is `closeTurn + 1`**, not `closeTurn`. Both `shouldBeHidden` and
+     `ReplayAnimationStrategy` hide a unit outright when `spawned >= removedTurn`; with
+     `spawned = openTurn + 1` that reduces to `openTurn >= closeTurn`, i.e. true only for a vortex
+     that closed on the very turn it was declared — a Stage 5 jump-failure, which never formed and
+     should indeed never be drawn. Using `closeTurn` itself would make an ordinary unmaintained
+     vortex (open exactly one turn — the common case) vanish from its own replay.
+3. **The turn arrows got `ARROW_OPACITY` and `ARROW_ROTATION` knobs.** Opacity is one `globalAlpha`
+   over shaft, head and drop shadow together — fading only the fill leaves a solid black outline
+   round a ghost, which reads as a rendering fault. `ARROW_ROTATION` rotates the pair **rigidly**
+   and is deliberately distinct from the existing `ARROW_TILT`, which is *mirrored* (it splays them
+   apart) and so cannot be used as a plain "turn them a bit" control.
+4. **⭐ The button ring's upper distance cap was the zoom bug.** `buttonDistance` was
+   `max(58, min(130, hexRadius + 30))`. Note **zoom is a DIVISOR** — `getHexHeightViewport()` is
+   `hexHeight / zoom`, so zoomed IN is a *small* zoom value and a *huge* hex — and at zoom 0.3 the
+   hex radius is 167px, so a ring capped at 130px sat entirely inside the hex. The cap is gone: the
+   ring now always clears the rim by `BUTTON_GAP + BUTTON_SIZE/2 + TURN_BUTTON_INSET`, measured to
+   the inner edge of the innermost button (a turn arrow, which tucks in behind Ok). The only cap
+   left is `VIEWPORT_LIMIT` — 0.42 of the smaller viewport dimension — past which the hex is bigger
+   than the screen and "outside the hex" would mean "off the screen"; on a 1000px-tall window that
+   only bites below zoom ~0.12.
+5. **Ok is now a drawn confirm glyph** — a filled `--fv-custom` disc with a dark tick punched out,
+   `drawConfirmIcon`, same drawn-not-rotated-not-imaged approach as the turn arrows. A *solid disc*
+   rather than a bare yellow tick on purpose: a thin stroked tick on a transparent ground is what
+   the word replaced in the first place (it vanishes over bright terrain and gives the finger nothing
+   to aim at), and the disc's silhouette is what distinguishes it from the two curved arrows when all
+   three are the same colour. `#vortexConfirm` swapped its `<span>` for a `<canvas>`; the
+   `.vortexOkLabel` CSS block is gone. Knobs: `CONFIRM_DISC / _RING / _TICK_LEN / _TICK_WIDTH /
+   _INK / _OPACITY`.
+
+Gate result 2026-08-21 (after the second pass): `fvbuild.ps1 -Check` **all green** — autoload
+current, ship-data validator 0 new findings, replay harness **159 passed / 0 failed**. (The earlier
+160/1 run's single failure was game 4302's usual baseline staleness, proved not ours by
+`git stash` + re-run giving byte-identical output; it passes again now.) End-to-end verified against
+a real local game inside a rolled-back transaction, **36 assertions**: the `tac_ship` row, the
+`tac_shipmovement` deploy row at the declared hex with `facing = mode - 1`, the note, the reload
+round-trip (`spawned = openTurn + 1`, `activeVortexId`, `vortexOpenTurn` restored; another ship's
+Jump Engine unaffected), the double-sweep no-op, and all three closure cases Stage 5 will lean on
+(ordinary unmaintained, never-formed, and still-open-on-its-closing-turn).
+
+### Stage 4 — jumping out — **BUILT 2026-08-21**
 `jumpout` movement type, `canJumpOut`/`doJumpOut` in `movement.js` with the §2.2 entry test,
 a new `ShipTooltipMovementMenu` wired into
 [MovementPhaseStrategy.js:95](source/public/client/renderer/phaseStrategy/MovementPhaseStrategy.js#L95),
@@ -674,6 +808,100 @@ It comes out in the cleanup deploy one cycle later, together with `isOverloading
 **Gate:** ship enters from the correct side → button appears, movement ends, ship gone before
 Pre-Firing, CV preserved in the fleet list. Wrong side → no button. Wrong side via client tampering
 → server refuses.
+
+
+**Nine files — five server, three client, one new client file, plus one new icon. No new PHP class,
+so autoload and the static blueprints are untouched; `fvbuild.ps1 -Client` only.**
+
+| File | What it got |
+|---|---|
+| `handlers/movement.php` | the whole rule: `getJumpOutOrder` / `getOpenVortexInHex` / `getVortexEntryDirection` / `getEntryDirection` / `getJumpOutVortex`, plus `validateJumpOutSubmission` (process-time) and `resolveJumpOuts` + `applyJumpOut` (advance-time). And the `jumpout` terminator inside `validateThrustPayment` |
+| `Phase/MovementGamePhase.php` | two calls: `validateJumpOutSubmission` in `process()`, `resolveJumpOuts` **first** in `advance()` |
+| `handlers/firing.php` | `Firing::isHyperspaceLogOrder` + **four** guards — see below |
+| `ships/ShipClasses.php` | `BaseShip::hasJumpedToHyperspace` / `getCVBeforeJump` / `hasHyperspaceJumpDamage`, and `calculateCombatValue` asks the SHIP instead of the engine |
+| `systems/baseSystems.php` | `Structure` learns the `jumped` note (private `$preJumpValue`, `onIndividualNotesLoaded`, `getCVBeforeJump`) |
+| `client/movement.js` | the client mirror + `hasJumpedOut` guards on eleven manoeuvre gates and `getRemainingMovement` |
+| `client/UI/shipTooltipMovementMenu.js` (new) | the Movement phase's own tooltip menu — one button |
+| `client/renderer/phaseStrategy/MovementPhaseStrategy.js` | `selectShip` builds that menu instead of the base one |
+| `client/ships.js` | `hasJumpedNotDestroyed` no longer requires a jump engine |
+| `game.php`, `styles/shipTooltip.css`, `img/jumpOut.png` (new) | the script tag, the `.jumpOut` rule, the 40×40 icon |
+
+**What it actually took, beyond the sketch above:**
+
+| Site | Why |
+|---|---|
+| ⭐ **`Firing::isHyperspaceLogOrder`, and FOUR guards for it** | Leaving writes a RammingAttack fire order at 100/100 against the departing unit itself, purely so the combat log has a line to render (the log is fire-order-driven — `combatLog.js:408` already suppresses the structure damage). The boost path never needed guarding because `doHyperspaceJump` runs at the very END of `fireWeapons`, after every gather. A vortex jump-out resolves **a whole phase earlier**, so by the time Pre-Firing loads its orders this one is sitting in `tac_fireorder` looking exactly like a ram — and `firePreFiringWeapons`, `preparePreFiring`, `prepareFiring` and `fireWeapons` would each pick it up and ram the departed unit into itself. Matching on `damageclass` rather than on type keeps the guard independent of how the order was submitted |
+| ⭐ **CV preservation could not stay on the jump engine** | §2.5's "any unit may use any open vortex" includes units that have no jump engine at all, and `calculateCombatValue` gated the whole jumped-not-destroyed branch on `getSystemByName("JumpEngine")`. So did `HangarOps::processCarrierDestructionEscapes`, which would have rolled a d20 escape for the hangar of an engineless carrier that left perfectly safely. Both now ask `BaseShip::hasJumpedToHyperspace()`, which **delegates to the engine when there is one** — the boost path's behaviour is bit-for-bit unchanged — and reads the primary structure's own `HyperspaceJump` entry when there is not. `Movement::applyJumpOut` picks the note's host to match |
+| The engineless test has to be **stricter** than `JumpEngine::hasJumped` | That method never checks a jump entry is actually PRESENT; the engine's existence was doing the filtering. Without either, any unit destroyed by something other than damage to its primary structure — a collision, a captured hull — reads as having jumped. `hasHyperspaceJumpDamage` requires the entry *and* keeps the original "non-jump damage is short of destroying it" half |
+| `getRemainingMovement` returns **0**, and eleven gates got a guard | "Ends that unit's movement immediately" is two separate things: the hexes are forfeit (the 0, which also arms Commit through `isMovementReady`) and no further manoeuvre may be plotted. `canMove`/`canSlip` fall out of the 0 and `canDetach` out of `hasDeletableMovements`, but turning, pivoting, rolling, jinking, speed changes, half-phasing and contraction all needed saying. The **cancel** button deliberately still works — deleting the order is the ordinary undo and puts everything back |
+| ⭐ **The movement history the server can see is bounded** | `DBManager::getMovesForShips` fetches `turn = 1 OR turn = N-1 OR turn = N OR type IN (deploy,start)`. §2.2's "walk back through prior turns" therefore reaches exactly one turn back — but the CLIENT is fed the same array, so the two agree, which is what matters. A unit that has sat in the vortex hex for three turns cannot use it; flying one hex out and back in is the workaround, and it is also the more sensible reading of "entered the hex" |
+| `validateJumpOutSubmission` needs BOTH movement arrays | The POST carries this turn's moves only ([ajaxInterface.js:950](source/public/client/ajaxInterface.js#L950)), so process-time validation is handed `$activeShipMovementBackup` — the authoritative ship's stored movement — for the earlier turns, exactly the same seam the thrust validator uses two lines above |
+| The path is **truncated at the jump-out order** before the entry test | That order is where movement ends; anything a client appended after it is not part of how the unit got there |
+| Attached units are taken **explicitly** | Plan §5 trap 7. A pod's rows are all type `attached` and mirror the host's positions, so it can never satisfy the entry test on its own — which is exactly why it would otherwise be left sitting on an empty hex. `resolveJumpOuts` walks `hasAttached` after the host |
+| `resolveJumpOuts` runs **first** in `advance()` | A unit that has left then reads `isDestroyed()` for the rest of the method: no dummy `end` move, no post-move stealth check, no Pre-Firing slot held open for it. It is also what makes a double `advance()` a no-op |
+
+**Two deliberate gaps, both reported rather than silently half-built:**
+
+1. **Fighter flights cannot jump out.** A flight has no primary Structure to destroy, so the removal
+   every other unit uses does not exist for it — a docked flight is taken off the board by a note on
+   its CARRIER's hangar, and an independent flight would need its own note-backed path plus a loader.
+   Blocked on both sides (`canJumpOut` and `resolveJumpOuts`) so the button never appears and a
+   tampered order is refused. A flight docked in a carrier that jumps still goes with it, unchanged.
+2. **No commit-time warning.** `gamedata.js`'s commit checklist still lists only boost-jumping ships;
+   a vortex jump-out commits without the "this ship will leave the battle" confirmation. Stage 6.
+
+**Gate result 2026-08-21:** `fvbuild.ps1 -Check` — autoload map current, ship-data validator 0 new
+findings, replay harness **158 passed / 1 failed**, the 1 being game 4302's usual baseline staleness
+(`overloadturns: added`, `EW/1: removed`, a shipid shifting by one and `masking.txt` going
+`turn=4` → `turn=current` / `waiting=0` → `waiting=1` — all things only *data* drift can produce).
+The direction convention and the entry walk are covered by two scratch harnesses run against the
+real classes, **19 assertions each, server and client, identical results**: all six facings on both
+row parities, wrong-side refusal, a sideslip judged on the STEP rather than the heading, a jump-out
+order appended, a turn plotted after arrival, sitting in the hex since last turn, a unit that has
+never moved, and a relocation whose source hex is not a neighbour.
+
+#### Stage 4 second pass, same day (user feedback)
+
+Two symptoms, **one cause**: the vortex unit was still in
+`PhaseStrategy.getInterestingStuffInPosition`, the sweep that answers "what did the pointer just
+click or hover?". A vortex is unselectable terrain with nothing to target and nothing to open, but
+while it sat in that sweep it shared a hex with whatever flew into it and broke both halves of that
+hex's interaction:
+
+1. **It appeared in the hex picker.** Clicking your own ship in a vortex hex returned TWO icons, so
+   `onShipsClicked` opened `SelectFromShips` with the Jump Point listed as a unit to choose between —
+   instead of just selecting the ship.
+2. **The Jump Out button flickered and was hard to hit.** Two paths, one at each end of the zoom
+   range. Zoomed in past ~0.33, `getIconsInProximity` returns only the CLOSEST icon within 10 game
+   units, so the pointer flipped between the ship and the vortex stacked in the same hex; every flip
+   back to the ship ran `ShipTooltip.update`, which empties `.buttons` and rebuilds the menu — the
+   button was being destroyed and recreated *under the cursor*. Zoomed out, a click that missed the
+   button and landed on the canvas tore the tooltip down and popped the hex picker again, because
+   the hex still read as a two-icon stack.
+
+One line fixes both — the vortex is dropped from that sweep, so the hex reads as holding exactly the
+units that are really in it. Consequences, all wanted: a hex holding only a vortex now falls through
+to `onHexClicked` (so hex-targeting over it still works), and the vortex is no longer clickable to
+open its SCS. Hovering it never showed a tooltip anyway — `onMouseOverShip` has always suppressed
+terrain tooltips. `shipManager.movement.isJumpVortex()` holds the class name so `getVortexInHex` and
+this sweep cannot drift apart.
+
+**Verified in the user's real game 4302** (Omega, vortex at (-16,-4) facing 3, ship entering
+eastbound along direction 0 — `(3+3)%6 = 0` ✔): `tac_shipmovement` holds the `jumpout` row with
+`value` = the vortex ship id, `tac_damage` one `HyperspaceJump` entry of 60 destroying the primary
+structure, `tac_fireorder` the single log order, and `tac_individual_notes` the `jumped` note at
+value 100 — full CV preserved. And **exactly one** damage entry on that ship for the turn, through a
+completed Pre-Firing *and* Fire phase, which is the four `isHyperspaceLogOrder` guards proving
+themselves: without them the stored ram-shaped order would have been re-resolved.
+
+**Gate after the second pass:** `fvbuild.ps1 -Check` **all green** — autoload current, ship-data
+validator PASS (no new findings), replay harness **158 passed / 0 failed**.
+
+**Left alone, reported not folded in:** `PhaseStrategy.onMouseOverShip` calls
+`this.shipTooltip.update(...)` unconditionally whenever the hovered icon set re-enters a ship the
+tooltip is already for, and `update()` always rebuilds the menu. That is the general mechanism
+behind this flicker and it affects any stacked units, not just vortices; guarding it (only update
+when `selectedShip` actually changed) is a separate change to a shared hover path.
 
 ### Stage 5 — lifecycle
 Maintain mode, the four closure conditions, the 4-turn cap, the all-systems-offline check, and the
@@ -706,9 +934,10 @@ and must be rewritten).
 6. **Terrain is invisible to a lot of code.** `MovementGamePhase` skips `isTerrain()` units in three
    places, `setNextActiveShip` skips them, mine detection skips them. That is all correct for a
    vortex — but check the **fleet list** and any points/CV totals, which may not filter terrain.
-7. **Attached units.** Pod/grapple movement rows are all type `attached` and mirror the host, so an
-   attached pod is invisible to any "entered a new hex" test. Decide explicitly whether an attached
-   pod jumps with its host (it should) and whether it can jump independently (it should not).
+7. **Attached units — RESOLVED 2026-08-21 (Stage 4).** Pod/grapple movement rows are all type
+   `attached` and mirror the host, so an attached pod is invisible to any "entered a new hex" test.
+   It therefore cannot jump independently for free — the entry test refuses it — and
+   `Movement::resolveJumpOuts` walks `hasAttached` after removing a host so the pod goes with it.
 8. **The replay harness does not cover masking or damage resolution.** The "enemy can't see my
    declared vortex hex during Initial Orders" rule and the failure roll are both unprotected by
    regression tests — hand-check from both seats.

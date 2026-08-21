@@ -64,6 +64,29 @@ window.UI.vortexFacing = {
     BUTTON_SIZE: 40,
     currentDistance: null,
 
+    /* ---------------- THE ON-MAP PREVIEW ARROW ----------------
+       Kept identical to the arrow BallisticIconContainer draws over a committed "Jump Point
+       Forming" hex and the one ShipIcon draws over the vortex unit once it opens, so the arrow
+       never changes appearance across the three stages of a vortex's life. If you retune these,
+       retune BallisticIconContainer's VORTEX_ARROW_SCALE / _OPACITY and
+       ShipIcon.FACING_ARROW_SCALE / _OPACITY to match. SCALE is a multiple of the HEX HEIGHT. */
+    MARKER_ARROW_SCALE: 1.15,
+    MARKER_ARROW_OPACITY: 0.85,
+
+    /* ---------------- THE BUTTON RING ----------------
+       BUTTON_GAP        clear space between the hex rim and the nearest button edge, in viewport
+                         pixels. Bigger = the whole control sits further out.
+       TURN_BUTTON_INSET how much closer to the hex the two turn arrows sit than Ok does. Ok is the
+                         one on the ring proper; the arrows tuck in behind it.
+       MIN_DISTANCE      floor for when the hex is tiny (zoomed right out) - without it the three
+                         buttons would overlap each other and the hex.
+       VIEWPORT_LIMIT    fraction of the smaller viewport dimension past which the ring stops
+                         following the hex. See buttonDistance for why. */
+    BUTTON_GAP: 14,
+    TURN_BUTTON_INSET: 15,
+    MIN_DISTANCE: 58,
+    VIEWPORT_LIMIT: 0.42,
+
     initVortexUI: function initVortexUI() {
         if (UI.vortexFacing.iniated === true) return;
 
@@ -224,14 +247,14 @@ window.UI.vortexFacing = {
 
         if (!UI.vortexFacing.arrowSprite) {
             //z -99: above the ballistic hexes (-100), below terrain (-50) and ships (0).
-            //directionOfMovement.png draws its arrow ~0.78 of the way out from the centre of a
-            //square canvas, so a sprite 1.15 hex-heights across lands the arrowhead on the hex SIDE
-            //the vortex faces - which is the doorway the entry rule is about. It also matches the
-            //visual weight of a ship's own heading arrow (canvasSize 200 / 1.5 on a capital).
-            var size = window.HexagonMath.getHexHeight() * 1.15;
+            //The arrow is drawn ~0.78 of the way out from the centre of a square canvas, so a
+            //sprite 1.15 hex-heights across lands the arrowhead on the hex SIDE the vortex faces -
+            //which is the doorway the entry rule is about.
+            var size = window.HexagonMath.getHexHeight() * UI.vortexFacing.MARKER_ARROW_SCALE;
             UI.vortexFacing.arrowSprite = new window.webglSprite('./img/directionOfVortex.png',
                 { width: size, height: size }, -99);
             UI.vortexFacing.arrowSprite.setPosition(UI.vortexFacing.gamePosition);
+            UI.vortexFacing.arrowSprite.setOpacity(UI.vortexFacing.MARKER_ARROW_OPACITY);
             scene.add(UI.vortexFacing.arrowSprite.mesh);
         }
         UI.vortexFacing.arrowSprite.setFacing(-mathlib.hexFacingToAngle(pending.facing));
@@ -265,11 +288,32 @@ window.UI.vortexFacing = {
        THE HEX and Ok has to land in front of the facing arrow - which is a map object and scales.
        Fixed pixels would bury Ok inside the hex when zoomed in and strand it in empty space when
        zoomed out; the zoom range is 0.1 to 7, so that is not a corner case.
-       getHexHeightViewport()/2 is the hex's centre-to-vertex radius on screen; +30 clears the rim
-       and the arrowhead. Clamped so the control stays usable and clickable at both extremes. */
+       getHexHeightViewport()/2 is the hex's centre-to-vertex radius on screen - height, not width,
+       because that is the LARGER of the two on a pointy-top hex and so clears the rim in every
+       direction.
+
+       ⚠️ THIS USED TO HAVE AN UPPER CAP OF 130px AND THAT WAS THE BUG (user report 2026-08-21).
+       Note that zoom is a DIVISOR - getHexHeightViewport() is hexHeight / zoom - so zoomed IN is a
+       SMALL zoom value and a HUGE hex. At zoom 0.3 the hex radius is 167px, so a ring capped at
+       130px sat entirely inside the hex. There is no upper cap on the clearance any more: the ring
+       always clears the rim by BUTTON_GAP plus half a button plus the turn buttons' inset.
+
+       The one thing that IS capped is how far the hex is allowed to push the ring - VIEWPORT_LIMIT
+       of the smaller viewport dimension. Past that the hex is bigger than the screen, so "outside
+       the hex" would mean "off the screen"; staying reachable wins, and there is nothing to overlap
+       because the hex IS the viewport at that point. On a 1000px-tall window that only starts to
+       bite below zoom ~0.12, the very end of the range. */
     buttonDistance: function buttonDistance() {
+        var self = UI.vortexFacing;
         var hexRadius = window.coordinateConverter.getHexHeightViewport() / 2;
-        return Math.max(58, Math.min(130, hexRadius + 30));
+
+        var viewportCap = Math.min(window.innerWidth, window.innerHeight) * self.VIEWPORT_LIMIT;
+        if (hexRadius > viewportCap) hexRadius = viewportCap;
+
+        //Clearance is measured to the INNER edge of the innermost button, which is a turn arrow.
+        var clearance = self.TURN_BUTTON_INSET + self.BUTTON_SIZE * 0.5 + self.BUTTON_GAP;
+
+        return Math.max(self.MIN_DISTANCE, hexRadius + clearance);
     },
 
     /* Laid out AROUND THE FACING: Ok sits directly in front of the facing arrow and the two turn
@@ -296,15 +340,19 @@ window.UI.vortexFacing = {
 
         UI.vortexFacing.currentDistance = dis;
 
-        UI.vortexFacing.placeElement(UI.vortexFacing.turnLeftElement, dis-15, facingAngle - 60, s);
+        var inset = dis - UI.vortexFacing.TURN_BUTTON_INSET;
+
+        UI.vortexFacing.placeElement(UI.vortexFacing.turnLeftElement, inset, facingAngle - 60, s);
         UI.vortexFacing.drawCurvedArrow("vortexTurnLeftCanvas", s, facingAngle, false);
 
-        UI.vortexFacing.placeElement(UI.vortexFacing.turnRightElement, dis-15, facingAngle + 60, s);
+        UI.vortexFacing.placeElement(UI.vortexFacing.turnRightElement, inset, facingAngle + 60, s);
         UI.vortexFacing.drawCurvedArrow("vortexTurnRightCanvas", s, facingAngle, true);
 
-        //Ok is the WORD, so it is placed but not drawn - and unlike the two arrows it stays
-        //UPRIGHT at every facing, because nothing here ever rotates the container.
+        //Confirm sits on the ring proper, dead ahead of the facing arrow. Its glyph is DRAWN like
+        //the other two, but unlike them it is not rotated - a confirm that leans over reads as
+        //broken, and it is the one part of the control that should look the same at every facing.
         UI.vortexFacing.placeElement(UI.vortexFacing.confirmElement, dis, facingAngle, s);
+        UI.vortexFacing.drawConfirmIcon("vortexConfirmCanvas", s);
     },
 
     /* THE TURN ARROWS ARE DRAWN, NOT ROTATED.
@@ -341,6 +389,15 @@ window.UI.vortexFacing = {
          ARROW_HEAD_LEN   arrowhead length. Also sets how much arc the head eats: the stroke stops
                           half a head-length short so the head does not sit on a round line cap.
          ARROW_HEAD_HALF  arrowhead half-width, i.e. how chunky the point is.
+         ARROW_OPACITY    0-1, how solid the pair are against the map. 1 is fully opaque. Applied
+                          as globalAlpha so it fades the shaft, the head AND the drop shadow
+                          together - which is what you want, a half-faded glyph with a solid
+                          outline looks like a rendering fault.
+         ARROW_ROTATION   degrees added to BOTH glyphs in the SAME screen direction, i.e. the
+                          "just turn them a bit" knob. Distinct from ARROW_TILT, which is MIRRORED
+                          (it splays the pair apart); this one rotates the pair rigidly and so
+                          survives being set to anything. Positive is clockwise on screen, the
+                          same sense as a facing step.
 
        ⚠️ THE ONE REAL CONSTRAINT: the head tip is the outermost part of the glyph, and the canvas
        clips at half the box. Tip radius works out at roughly
@@ -352,9 +409,11 @@ window.UI.vortexFacing = {
     ARROW_SWEEP: 200,
     ARROW_TILT: 18,
     ARROW_RADIUS: 0.28,
-    ARROW_THICKNESS: 0.11,
-    ARROW_HEAD_LEN: 0.24,
-    ARROW_HEAD_HALF: 0.14,
+    ARROW_THICKNESS: 0.13,
+    ARROW_HEAD_LEN: 0.3,
+    ARROW_HEAD_HALF: 0.22,
+    ARROW_OPACITY: 0.7,
+    ARROW_ROTATION: 0,
 
     drawCurvedArrow: function drawCurvedArrow(canvasId, box, base, clockwise) {
         var ctx = window.graphics.getCanvas(canvasId);
@@ -382,8 +441,11 @@ window.UI.vortexFacing = {
         var half = UI.vortexFacing.ARROW_SWEEP / 2;
 
         //Splay the pair apart: the left glyph leans anticlockwise, the right one clockwise, away
-        //from the Ok arrow sitting between them. Cosmetic - it does not move either button.
+        //from the confirm button sitting between them. Cosmetic - it does not move either button.
         base += clockwise ? UI.vortexFacing.ARROW_TILT : -UI.vortexFacing.ARROW_TILT;
+        //...and then turn the pair RIGIDLY, same direction for both. The manual "nudge the arrows
+        //round" knob; ARROW_TILT above cannot do this because it is mirrored.
+        base += UI.vortexFacing.ARROW_ROTATION;
 
         var start = clockwise ? base - half : base + half;
         var end = clockwise ? base + half : base - half;
@@ -399,7 +461,11 @@ window.UI.vortexFacing = {
         ctx.fillStyle = colour;
         ctx.lineWidth = Math.max(3, box * UI.vortexFacing.ARROW_THICKNESS);
         ctx.lineCap = "round";
-        //Same job the Ok label's text-shadow does: lift the glyph off whatever map is behind it.
+        //One globalAlpha for the whole glyph rather than an rgba() colour: it fades the shaft, the
+        //head and the drop shadow together. Fading only the fill leaves a solid black outline
+        //around a ghost, which reads as a rendering fault rather than a design.
+        ctx.globalAlpha = UI.vortexFacing.ARROW_OPACITY;
+        //Lifts the glyph off whatever map is behind it.
         ctx.shadowColor = "rgba(0,0,0,0.9)";
         ctx.shadowBlur = 2;
 
@@ -421,6 +487,90 @@ window.UI.vortexFacing = {
         ctx.fill();
     },
 
+    /* ---------------- THE CONFIRM BUTTON: THE KNOBS ----------------
+       Replaced the word "Ok" (user request 2026-08-21). Drawn, not an image and not text, for the
+       same three reasons the turn arrows are: it stays crisp at any size, it costs no asset, and
+       it takes its yellow from the same one token everything else in the vortex livery uses.
+
+       A SOLID DISC with a dark tick punched out of it, rather than a bare yellow tick. A thin
+       stroked tick on a transparent ground is what the word replaced in the first place - it
+       disappears over bright map terrain and gives the finger nothing to aim at. A filled disc
+       reads as a button at a glance, is a real 40px target on touch, and its silhouette is
+       distinct from the two curved arrows flanking it, which matters more than the glyph itself
+       when all three are the same colour.
+
+         CONFIRM_DISC       disc radius as a fraction of the button box. 0.5 would touch the edges;
+                            leave room for the ring and the glow.
+         CONFIRM_RING       outline width in px, drawn just inside the disc edge in the same dark
+                            ink as the tick. Set to 0 for a flat disc.
+         CONFIRM_TICK_LEN   overall tick width as a fraction of the box.
+         CONFIRM_TICK_WIDTH tick stroke width as a fraction of the box.
+         CONFIRM_INK        the dark colour of the tick and ring. Anything that reads on yellow.
+         CONFIRM_OPACITY    0-1, as ARROW_OPACITY - one globalAlpha over disc, tick and shadow. */
+    CONFIRM_DISC: 0.40,
+    CONFIRM_RING: 2,
+    CONFIRM_TICK_LEN: 0.42,
+    CONFIRM_TICK_WIDTH: 0.11,
+    CONFIRM_INK: "#1a1206",
+    CONFIRM_OPACITY: 0.8,
+
+    drawConfirmIcon: function drawConfirmIcon(canvasId, box) {
+        var ctx = window.graphics.getCanvas(canvasId);
+        if (!ctx) return;
+
+        //Same HiDPI backing store as drawCurvedArrow - assigning width RESETS the context, hence
+        //the setTransform on every pass.
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        var el = ctx.canvas;
+        if (el.width !== box * dpr) {
+            el.width = box * dpr;
+            el.height = box * dpr;
+            el.style.width = box + "px";
+            el.style.height = box + "px";
+        }
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, box, box);
+
+        var self = UI.vortexFacing;
+        var cx = box / 2;
+        var cy = box / 2;
+        var r = box * self.CONFIRM_DISC;
+
+        ctx.globalAlpha = self.CONFIRM_OPACITY;
+        ctx.shadowColor = "rgba(0,0,0,0.9)";
+        ctx.shadowBlur = 3;
+
+        ctx.fillStyle = self.arrowColour();
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fill();
+
+        //Everything from here is INSIDE the disc, so the shadow would only muddy it.
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = self.CONFIRM_INK;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+
+        if (self.CONFIRM_RING > 0) {
+            ctx.lineWidth = self.CONFIRM_RING;
+            ctx.beginPath();
+            ctx.arc(cx, cy, r - self.CONFIRM_RING / 2, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+
+        /* The tick, as three points across a box CONFIRM_TICK_LEN wide. Proportions are the
+           conventional ones - the short arm about 40% of the long one and the elbow sitting below
+           centre - which is what stops it reading as a lopsided V. */
+        var len = box * self.CONFIRM_TICK_LEN;
+        ctx.lineWidth = Math.max(2, box * self.CONFIRM_TICK_WIDTH);
+
+        ctx.beginPath();
+        ctx.moveTo(cx - len * 0.46, cy + len * 0.02);
+        ctx.lineTo(cx - len * 0.12, cy + len * 0.32);
+        ctx.lineTo(cx + len * 0.46, cy - len * 0.34);
+        ctx.stroke();
+    },
+
     /* Read from tokens.css rather than hard-coded, so the control's yellow cannot drift from the
        one the vortex marker and its hex use - styles/tokens.css is the single :root block and the
        only place a colour is defined. Cached: the value cannot change without a reload. */
@@ -428,11 +578,11 @@ window.UI.vortexFacing = {
         if (!UI.vortexFacing._arrowColour) {
             var token = "";
             try {
-                token = getComputedStyle(document.documentElement).getPropertyValue("--fv-warn");
+                token = getComputedStyle(document.documentElement).getPropertyValue("--fv-custom");
             } catch (e) {
                 token = "";
             }
-            UI.vortexFacing._arrowColour = (token && token.trim()) || "#e1b000";
+            UI.vortexFacing._arrowColour = (token && token.trim()) || "#cccc00";
         }
         return UI.vortexFacing._arrowColour;
     },

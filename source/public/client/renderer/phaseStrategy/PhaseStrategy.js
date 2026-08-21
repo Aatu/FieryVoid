@@ -948,6 +948,17 @@ window.PhaseStrategy = function () {
             if (icon.ship && icon.ship.pendingDeployDock) return false;
             //LCV Rails: same for an LCV queued to deploy-dock onto a rail.
             if (icon.ship && icon.ship.pendingLcvDeployDock) return false;
+            /* A JUMP VORTEX IS A MARKER, NOT A UNIT (JUMP_POINTS_PLAN.md Stage 4 feedback).
+               It is unselectable terrain with nothing to target and nothing to open, but while it
+               sat in this sweep it shared a hex with whatever flew into it and broke both halves
+               of that hex's interaction: a click became a two-icon stack, so selecting your own
+               ship in a vortex hex went through the hex picker with the vortex listed in it; and a
+               hover flipped between the two icons (getIconsInProximity returns only the CLOSEST
+               when zoomed past ~0.33), and every flip back to the ship ran ShipTooltip.update,
+               which empties .buttons and rebuilds the menu - so the Jump Out button was torn down
+               and recreated under the cursor. Dropping the vortex here fixes both at once: the
+               hex reads as holding exactly the units that are really in it. */
+            if (icon.ship && shipManager.movement.isJumpVortex(icon.ship)) return false;
             return true;
         });
     }

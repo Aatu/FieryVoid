@@ -356,6 +356,8 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     <script defer src="client/UI/shipTooltipMenu.js"></script>
     <script defer src="client/UI/shipTooltipInitialOrdersMenu.js"></script>
     <script defer src="client/UI/shipTooltipFireMenu.js"></script>
+    <!-- MUST stay after shipTooltipMenu.js - it extends it at definition time (JUMP_POINTS_PLAN.md Stage 4). -->
+    <script defer src="client/UI/shipTooltipMovementMenu.js"></script>
     <script defer src="client/UI/ShipTooltipBallisticsMenu.js"></script>
 	<script defer src="client/UI/moveTooltip.js"></script>
 
@@ -738,10 +740,11 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
             <canvas id="vortexTurnLeftCanvas" width="40" height="40"></canvas>
         </div>
 
-        <!-- Ok is the word, not a tick: text rather than a canvas, so UI.vortexFacing places this
-             one with placeElement (drawUIElement minus the canvas step) and never draws it. -->
+        <!-- Confirm is a DRAWN glyph like the two turn arrows either side of it (a yellow disc with
+             a dark tick, UI.vortexFacing.drawConfirmIcon), not the word "Ok" it replaced and not an
+             image: crisp at any size, no asset, and one colour token for the whole control. -->
         <div id="vortexConfirm" class="movement-icon" data-movement-type="Open Jump Point">
-            <span class="vortexOkLabel">Ok</span>
+            <canvas id="vortexConfirmCanvas" width="40" height="40"></canvas>
         </div>
 
         <div id="vortexTurnRight" class="movement-icon" data-movement-type="Turn Vortex Right">

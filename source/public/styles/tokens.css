@@ -155,6 +155,7 @@
   --fv-ok: #427231;                   /* theme.colors.healthOk                   */
   --fv-warn: #e1b000;                 /* theme.colors.warning                    */
   --fv-crit: #ed6738;                 /* theme.colors.healthCrit                 */
+  --fv-custom: #cccc00;  
 
   /* ── Allegiance ────────────────────────────────────────────────────────────
      Whose unit is this? Signals, not chrome — same category as Status above, and

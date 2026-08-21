@@ -534,14 +534,8 @@ window.shipManager = {
 
     //Used by RelayAnimationStrategy/fleetList to check if ship has jumped, if so different destroyed sprite/entry
     hasJumpedNotDestroyed: function (ship) {
-        var hasJumped = false;
         // Check if the ship has a jump engine
         const jumpEngine = shipManager.systems.getSystemByName(ship, "jumpEngine");
-
-        // If no jump engine, ship cannot jump
-        if (!jumpEngine) {
-            return false;
-        }
 
         // Check if the jump engine is boosted
         //var boostedJump = shipManager.power.isBoosted(ship, jumpEngine);
@@ -549,17 +543,30 @@ window.shipManager = {
 
         //Check damage entries, and remove Hyperspace jump entry, to see if ship was 'destroyed' by jumping not actual damage.	    
         var struct = shipManager.systems.getStructureSystem(ship, 0);
+        if (!struct) return false;
         var maxHealth = struct.maxhealth;
         var totalDamage = 0;
         var thisDamage = null;
+        var jumpEntry = false;
         for (var i in struct.damage) {
             thisDamage = struct.damage[i];
-            if (thisDamage.damageclass !== 'HyperspaceJump') totalDamage += Math.max(0, thisDamage.damage - thisDamage.armour); //Only count non-jump damage, as jumping destroys ship anyway.
+            if (thisDamage.damageclass === 'HyperspaceJump') {
+                jumpEntry = true;
+                continue; //Only count non-jump damage, as jumping destroys ship anyway.
+            }
+            totalDamage += Math.max(0, thisDamage.damage - thisDamage.armour);
         }
+
+        /* A unit with NO jump engine can still leave through somebody else's open jump vortex
+           (JUMP_POINTS_PLAN.md Stage 4, section 2.5), so the engine can no longer be the gate.
+           It is replaced by a stricter test rather than simply dropped: without either, any
+           destroyed unit whose primary structure was not what killed it - a collision, a captured
+           hull - would read as having jumped. Mirrors BaseShip::hasJumpedToHyperspace. */
+        if (!jumpEngine && !jumpEntry) return false;
 
         if (totalDamage < maxHealth) return true; //The other damage sustained has not destroyed this ship, jumping has.
 
-        return hasJumped;
+        return false;
     },
 
 

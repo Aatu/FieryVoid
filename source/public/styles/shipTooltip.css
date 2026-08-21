@@ -322,6 +322,13 @@
     background-image: url("../img/openShipDetails.png");
 }
 
+/* Movement phase: leave the battle through an open jump vortex (JUMP_POINTS_PLAN.md Stage 4).
+   Offered by ShipTooltipMovementMenu only when the unit is standing in a vortex hex it entered
+   through the side the vortex faces. */
+.jumpOut {
+    background-image: url("../img/jumpOut.png");
+}
+
 /* == The INCOMING list (MANUAL_INTERCEPTION_PLAN.md §6) ======================================
    Rows used to be one run-on line - "Sharlin War Cruiser, 3x Heavy Missile (Normal) - Approx: 45%" -
    which wrapped onto a second line as soon as a ship or weapon had a long name, and read as a wall.

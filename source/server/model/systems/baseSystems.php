@@ -5122,7 +5122,27 @@ class JumpEngine extends Weapon{
        means anything on a system with no range and no damage. Keep ShipSystem's empty chart -
        that is what this system rolled on before the conversion. */
     protected $possibleCriticals = array();
-    
+
+    /* STAGE 3 - the vortex unit this engine can put on the board mid-game. game.php reads
+       $spawnableClasses off every weapon of every blueprint in the game and preloads the listed
+       classes into window.staticShips, which is what lets a vortex that appears on a POLL (no page
+       reload) resolve to a blueprint and render. Same mechanism BallisticMineLauncher uses for its
+       loitering mines; without it the first vortex of a session draws as nothing until F5. */
+    public $spawnableClasses = array('SpawnJumpPoint');
+
+    /* STAGE 3 - LIVE VORTEX STATE, rebuilt on every load by onIndividualNotesLoaded from the one
+       IndividualNote this engine writes when it opens a vortex (see openVortex).
+
+       SERVER-SIDE ONLY, on purpose: none of the three is in stripForJson's allow-list, so nothing
+       here reaches the client. That sidesteps the shared-reference trap - client system objects
+       share fields across same-phpclass instances, so a naively mirrored activeVortexId would have
+       every Jump Engine in the game showing the same vortex.
+
+       $vortexCloseTurn is -1 while the vortex is open. Stage 5 is what ever sets a real turn. */
+    public $activeVortexId = null;
+    public $vortexOpenTurn = null;
+    public $vortexCloseTurn = -1;
+
 	//JumpEngine tactically  is not important at all!
 	public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
 
@@ -5197,6 +5217,204 @@ class JumpEngine extends Weapon{
         }
 
         return $notes;
+    }
+
+    /* ================= STAGE 3 - THE VORTEX UNIT ==================================
+     *
+     * THE SPAWN SWEEP. Every legal vortex declaration made this Initial Orders turns into a
+     * SpawnJumpPoint terrain unit on the board. Called once, from the END of
+     * InitialOrdersGamePhase::advance.
+     *
+     * ⚠️ Must run off a REAL getTacGamedata load, never from generateIndividualNotes: POST-side
+     * ships carry no enhancements and no loaded notes, so $activeVortexId would read null on every
+     * one of them and a ship would re-open a vortex it already holds (plan section 5 trap 2).
+     * advance() is handed exactly such a load, which is also why $ship->getHexPos() is trustworthy
+     * there.
+     *
+     * ⚠️ Do NOT branch on $gamedata->phase in here. advance() has already set the next phase, so it
+     * reads 2 by the time this runs (plan section 5 trap 1). The turn is what identifies "this
+     * declaration", and that is what getVortexDeclaration matches on.
+     *
+     * ⚠️ Position in advance() matters: this runs AFTER the active-ship selection. The freshly
+     * inserted vortex joins $gamedata->ships immediately (Manager::insertSingleShip), and while
+     * hasShipsAtIniative filters terrain out, the array_filter inside
+     * SimultaneousMovementRule::getNewActiveShip does NOT - so a vortex spawned before that call
+     * could be handed to the Movement phase as an active unit. The two early returns above it are
+     * unreachable for a ship that just declared a vortex: such a ship is on the board, undestroyed,
+     * not terrain and not a mine, which is precisely what hasShipsAtIniative requires. */
+    public static function spawnDeclaredVortices($gamedata)
+    {
+        foreach ($gamedata->ships as $ship){
+            if ($ship->isTerrain()) continue; //terrain never declares; Phase 2's fixed gates get their own path
+            if ($ship->isDestroyed($gamedata->turn)) continue;
+
+            foreach ($ship->systems as $system){
+                if (!($system instanceof JumpEngine)) continue;
+
+                $declaration = $system->getVortexDeclaration($gamedata->turn);
+                if (!$declaration) continue;
+
+                $system->openVortex($ship, $declaration, $gamedata);
+            }
+        }
+    }
+
+    /* This engine's OPENING declaration for $turn, or null. Deliberately a mirror of the rules
+     * Firing::getVortexDeclarationBlock enforces at submit time rather than a re-run of them: by
+     * the time this is asked, an illegal order has already been marked ->rejected and never
+     * reached the DB, so all that is left to do is recognise the shape.
+     *
+     * Modes 1-6 are the six facings (mode = facing + 1). Mode 7 is Stage 5's Maintain declaration
+     * and is NOT an opening - it must never spawn a second unit, which is why it is filtered here
+     * and not merely tolerated. */
+    public function getVortexDeclaration($turn)
+    {
+        foreach ($this->fireOrders as $fire){
+            if ($fire->turn != $turn) continue;
+            if (!empty($fire->rejected)) continue;
+
+            $mode = (int)$fire->firingMode;
+            if ($mode < 1 || $mode > 6) continue;
+
+            if ($fire->x === null || $fire->y === null || $fire->x === "null" || $fire->y === "null") continue;
+
+            return $fire;
+        }
+
+        return null;
+    }
+
+    /* Is this engine currently holding an OPEN vortex, as of $turn? One vortex per ship at a time
+     * (plan section 2.1), and this is the test that enforces it across turns - the one inside
+     * Firing::getVortexDeclarationBlock only covers a second declaration in the SAME submission.
+     *
+     * A closed vortex frees the engine to open another, which is why the close turn is consulted
+     * rather than just the id. Until Stage 5 nothing ever sets a close turn, so in practice this
+     * currently reads "has this ship ever opened a vortex" - that is the temporary state stages 2-5
+     * ship out of together, not a rule to work around. */
+    public function hasOpenVortex($turn)
+    {
+        if ($this->activeVortexId === null) return false;
+        if ($this->vortexCloseTurn !== null && $this->vortexCloseTurn > -1 && $turn > $this->vortexCloseTurn) return false;
+        return true;
+    }
+
+    /* Put the vortex on the board. Spawn path is BallisticMineLauncher::createLoiteringMine's,
+     * verbatim in shape - insertSingleShip, mark $spawned, write a deploy MovementOrder, write the
+     * IndividualNote - minus its weapon-loading block, which a unit with no weapons does not need.
+     * (Deliberately no SystemData work here at all: Manager::insertSystemData takes
+     * SystemData::getAndPurgeAllSystemData(), and PURGING mid-advance would steal the pending
+     * system data that advanceGameState flushes after its onAdvancingGamedata sweep.)
+     *
+     * ⚠️ Route the insert through Manager::insertSingleShip, never DBManager::submitShip: submitShip
+     * returns LAST_INSERT_ID() as a STRING and getShipById compares ids with a strict ===.
+     * insertSingleShip is where the cast to int lives.
+     *
+     * THE FACING lives in the deploy MovementOrder rather than on the unit - free persistence, free
+     * rendering (ShipIcon rotates the ship sprite to movement.facing) and free replay. heading is
+     * set to match so anything reading getLastMovement()->heading on an immobile unit agrees with
+     * what is drawn. */
+    protected function openVortex($ship, $fire, $gamedata)
+    {
+        if ($this->hasOpenVortex($gamedata->turn)) return;
+
+        $facing = ((int)$fire->firingMode - 1) % 6; //modes 1-6 -> facings 0-5; the range is already validated
+
+        $vortex = new SpawnJumpPoint($gamedata->id, $ship->userid, "Jump Point", $ship->slot);
+        //Ships get their team from their slot on load; set it by hand so the rest of THIS request
+        //agrees with what the next load will produce.
+        $vortex->team = $ship->team;
+
+        $vortexId = Manager::insertSingleShip($gamedata, $vortex, $ship->userid);
+        //$spawned is the turn the unit APPEARS ON THE BOARD, which for a vortex is the turn it
+        //OPENS - one after the turn it was declared. See restoreVortexFromNote for the whole rule.
+        $vortex->spawned = $gamedata->turn + 1;
+
+        $deploy = new MovementOrder(null, "deploy", new OffsetCoordinate($fire->x, $fire->y),
+                                    0, 0, 0, $facing, $facing, false, $gamedata->turn, 0, 0);
+        Manager::insertSingleMovement($gamedata->id, $vortexId, $deploy);
+        $vortex->movement[] = $deploy; //so getHexPos() works on the in-memory unit for the rest of this advance
+
+        /* THE STATE NOTE. Hung on the OPENING SHIP's Jump Engine, not on the vortex: that way it
+         * survives the opener's destruction and the replay can still render the vortex's full life.
+         *
+         * turn 1 / phase 1, copying the mine's spawn note, because getIndividualNotesForGame fetches
+         * "turn <= the turn being viewed" - a note stamped with the real open turn would be invisible
+         * to any earlier replay turn, and the vortex would lose its $spawned marker there. The open
+         * turn is carried in the VALUE instead, where every reader compares it against the turn on
+         * hand.
+         *
+         * notevalue is "<openTurn>,<closeTurn or -1>". Stage 5 records a closure by APPENDING a
+         * second note (there is no UPDATE path for notes, by design - insertIndividualNote refuses
+         * anything that already has an id); notes load ordered by turn then phase, and
+         * onIndividualNotesLoaded is last-wins per vortex id, so a phase-2 note at turn 1 overrides
+         * this one cleanly.
+         *
+         * ⚠️ notekey_human is varchar(40) - an overflow is a mysqli 1406 that aborts the whole
+         * player submission, not a truncation. "Vortex" is 6. */
+        $note = new IndividualNote(
+            -1,
+            $gamedata->id,
+            1, //see above - turn 1 so the note is loaded at every replay turn
+            1,
+            $ship->id,
+            $this->id,
+            $vortexId,          //notekey = the vortex's ship id
+            'Vortex',           //notekey_human
+            $gamedata->turn . ',-1'
+        );
+        Manager::insertIndividualNote($note);
+
+        $this->activeVortexId = $vortexId;
+        $this->vortexOpenTurn = $gamedata->turn;
+        $this->vortexCloseTurn = -1;
+    }
+
+    /* Rebuild this engine's vortex state from one 'Vortex' note, and put the vortex unit itself
+     * into the state that note describes. Called from onIndividualNotesLoaded, so it runs on every
+     * load, for the live game and for every replay turn alike.
+     *
+     * ⭐ $spawned IS THE TURN THE VORTEX OPENS, WHICH IS openTurn + 1 - NOT the declaration turn.
+     * shipManager.shouldBeHidden hides any unit whose spawned turn is later than the turn being
+     * viewed, and on the FORMING turn (the turn it was declared) the vortex is deliberately not on
+     * the board at all: the player sees the yellow "Jump Point Forming" ballistic hex and its
+     * facing arrow instead, and the unit itself appears the turn it can actually be entered (user
+     * ruling 2026-08-21, plan section 2.3). It has to be restored from the note because tac_ship
+     * has no column for it - exactly how a mid-game mine works.
+     *
+     * $removed / $removedTurn is the closure half (Stage 5 writes the close turns; nothing does
+     * yet). Removal, not destruction: the vortex vanishes from the board on the turns after it
+     * closed while staying correct in the replay of the turns it was open.
+     *
+     * ⚠️ removedTurn is closeTurn + 1, i.e. the first turn the vortex is GONE - a vortex stays
+     * usable for the whole of the turn it closes on (plan section 2.3). Keeping the two fields on
+     * the same "first turn this is true" footing is also what keeps the born-and-removed-same-turn
+     * rule honest: shouldBeHidden and ReplayAnimationStrategy both hide a unit outright when
+     * spawned >= removedTurn, which here reduces to openTurn >= closeTurn - true only for a vortex
+     * that closed on the very turn it was declared (a Stage 5 jump-failure), which never formed and
+     * should indeed never be drawn. Use closeTurn itself and an ordinary unmaintained vortex - the
+     * common case, open one turn - would vanish from its own replay. */
+    protected function restoreVortexFromNote($note, $gamedata)
+    {
+        $parts     = explode(',', (string)$note->notevalue);
+        $openTurn  = (int)$parts[0];
+        $closeTurn = isset($parts[1]) ? (int)$parts[1] : -1;
+
+        $this->activeVortexId  = (int)$note->notekey;
+        $this->vortexOpenTurn  = $openTurn;
+        $this->vortexCloseTurn = $closeTurn;
+
+        //(int): notekey is a varchar column, so mysqli hands it back as a STRING, and
+        //getShipById's fallback loop compares with a strict ===.
+        $vortex = $gamedata->getShipById((int)$note->notekey);
+        if (!$vortex) return; //deleted game data, or a note that outlived its unit - state above is still right
+
+        $vortex->spawned = $openTurn + 1;
+
+        if ($closeTurn > -1 && $gamedata->turn > $closeTurn){
+            $vortex->removed     = true;
+            $vortex->removedTurn = $closeTurn + 1;
+        }
     }
 
     public function isOverloading($turn){
@@ -5290,10 +5508,20 @@ class JumpEngine extends Weapon{
 	}
 
 	public function onIndividualNotesLoaded($gamedata){
-		foreach ($this->individualNotes as $currNote) {			    	
+		foreach ($this->individualNotes as $currNote) {
+			/* STAGE 3 - two KINDS of note now hang on a Jump Engine, so the type has to be read
+			   rather than assumed. 'Vortex' notes rebuild the jump-point state; everything else
+			   falls through to the pre-existing behaviour below, which is the 'jumped' note.
+			   Notes arrive ordered by turn then phase and this is last-wins per note kind, which is
+			   how Stage 5 will record a closure by simply appending a later note. */
+			if ($currNote->notekey_human === 'Vortex'){
+				$this->restoreVortexFromNote($currNote, $gamedata);
+				continue;
+			}
+
 			//Insert the noteValue (e.g. combatValue when ship jumped) in appropriate variable
 			$this->preJumpValue = $currNote->notevalue;
-		}				
+		}
 	}//endof onIndividualNotesLoaded
 
 
@@ -5412,7 +5640,32 @@ class Structure extends ShipSystem{
 			}
 		}
     } //endof function criticalPhaseEffects	
-	
+
+	/* JUMP_POINTS_PLAN.md Stage 4 - the combat value a unit had when it left through a vortex.
+	   Mirror of JumpEngine's preJumpValue/getCVBeforeJump pair, for units that have no jump
+	   engine to hang the note on: any unit may use any open jump point, including an enemy's
+	   (plan section 2.5), and CV preservation has to follow it there.
+	   Movement::applyJumpOut picks the host - jump engine when the unit has one, primary
+	   Structure when it does not - so exactly one of the two carries the note.
+
+	   Private: nothing here reaches the client (BaseShip already sends the finished combatValue)
+	   and a public property would be written into every Structure entry of every static
+	   blueprint - plan section 8's default-value cost. */
+	private $preJumpValue = 0;
+
+	public function onIndividualNotesLoaded($gamedata){
+		foreach ($this->individualNotes as $currNote){
+			if ($currNote->notekey === 'jumped') $this->preJumpValue = $currNote->notevalue;
+		}
+
+		//Clear as the base implementation does - once reacted to, notes serve no further purpose.
+		$this->individualNotes = array();
+	}
+
+	public function getCVBeforeJump(){
+		return $this->preJumpValue;
+	}
+
 } //endof Structure	
 
 /* Kirishiac Orbital - a weapon platform that floats above its section when DEPLOYED and

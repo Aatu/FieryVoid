@@ -34,6 +34,9 @@ window.ShipIcon = function () {
         this.ShipSideSprite = null;
         this.shipDirectionOfMovementSprite = null;
         this.shipDirectionOfProwSprite = null;
+        //Always-on facing arrow — see create(). Only units whose blueprint sets ship.facingArrow
+        //have one (currently the jump vortex); it is null on everything else.
+        this.facingArrowSprite = null;
         this.weaponArcs = [];
         this.structureArcs = []; //structure facing wedges (own array so they never fight the weapon arcs)
         this.hidden = false;
@@ -52,6 +55,16 @@ window.ShipIcon = function () {
         this.create(ship, scene);
         this.consumeShipdata(ship);
     }
+
+    /* THE ALWAYS-ON FACING ARROW — the two knobs, meant to be retuned by eye. Only units whose
+       blueprint sets `facingArrow` have one (currently the jump vortex, SpawnJumpPoint.php).
+       SCALE is a multiple of the HEX HEIGHT, not of the unit's canvasSize, so the arrowhead lands
+       on the hex side the unit faces regardless of how big its own art is — and so it matches the
+       identical arrow drawn by UI.vortexFacing and by the "Jump Point Forming" ballistic marker.
+       Keep all three in step: BallisticIconContainer.VORTEX_ARROW_SCALE / _OPACITY and
+       UI.vortexFacing.MARKER_ARROW_SCALE / _OPACITY are the other two. */
+    ShipIcon.FACING_ARROW_SCALE = 1.15;
+    ShipIcon.FACING_ARROW_OPACITY = 0.85;
 
     ShipIcon.prototype.consumeShipdata = function (ship) {
         this.ship = ship;
@@ -100,8 +113,10 @@ window.ShipIcon = function () {
     ShipIcon.prototype.setFacing = function (facing) {
 
         var facingActual = mathlib.degreeToRadian(facing);
-        if (!this.terrain) this.shipDirectionOfProwSprite.mesh.rotation.z = facingActual;  //No sprite for Terrain 
+        if (!this.terrain) this.shipDirectionOfProwSprite.mesh.rotation.z = facingActual;  //No sprite for Terrain
         this.shipSprite.mesh.rotation.z = facingActual;//mathlib.degreeToRadian(facing);
+        //The always-on facing arrow turns with the unit, terrain included (see create()).
+        if (this.facingArrowSprite) this.facingArrowSprite.mesh.rotation.z = facingActual;
 
     };
 
@@ -331,6 +346,24 @@ window.ShipIcon = function () {
             this.mesh.add(this.shipDirectionOfMovementSprite.mesh);
             this.shipDirectionOfMovementSprite.hide();
         }
+        /* THE ALWAYS-ON FACING ARROW. A blueprint that sets `facingArrow` (a path) gets that image
+           laid over its icon, permanently — not hover-gated the way the prow/heading arrows above
+           are, and NOT skipped for terrain, which is the whole point: the jump vortex is terrain
+           and its facing is a rule, not decoration.
+
+           Sized off the HEX rather than off canvasSize so it matches the identical arrow drawn by
+           the Stage 2b facing control and by the "Jump Point Forming" ballistic marker — the same
+           asset at the same size at all three points of a vortex's life. z 2 puts it just above the
+           unit's own art (z 1) and well under the UI layers.
+
+           Rotation is handled in setFacing alongside shipSprite, so it swings with the unit. */
+        if (ship.facingArrow) {
+            var arrowSize = window.HexagonMath.getHexHeight() * ShipIcon.FACING_ARROW_SCALE;
+            this.facingArrowSprite = new window.webglSprite(ship.facingArrow, { width: arrowSize, height: arrowSize }, 2);
+            this.facingArrowSprite.setOpacity(ShipIcon.FACING_ARROW_OPACITY);
+            this.mesh.add(this.facingArrowSprite.mesh);
+        }
+
         this.shipSprite = new window.webglSprite(imagePath, { width: this.size / 2, height: this.size / 2 }, 1);
 
         this.shipSprite.setOverlayColor(
