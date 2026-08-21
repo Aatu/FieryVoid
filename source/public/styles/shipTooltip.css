@@ -473,6 +473,27 @@
     color: var(--fv-own);
 }
 
+/* ...and it has to out-weigh the hover rule above, which it did not.
+
+   A row that has been committed to but can still take MORE carries BOTH classes, and
+   `.hitchange.intercept-ready:hover` is five class-level selectors against `.hitchange.intercepted`'s
+   four - so the number under the cursor that had just declared went WHITE, and fell back to green
+   only once the weapon lost .intercept-ready. That made the green read as "this weapon is finished"
+   rather than "this shot has interception on it".
+
+   Which weapons showed it is exactly which weapons survive their own first declaration:
+   isWeaponSpentForIntercept retires any non-split mount on the click (`if (!weapon.canSplitShots)
+   return true`), so those lose .intercept-ready immediately and always looked right. A SPLIT mount
+   keeps it until checkFinished - the Molecular Slicer M/H and the Discharge Gun/Cannon (split in
+   every mode), the Point Pulsar in Split, and the Twin/Quad/Heavy Arrays in theirs.
+
+   Hover still brightens; it now brightens WITHIN the committed green, so what the row is telling you
+   never depends on where the pointer happens to be. --fv-own-mid is the tier meant for allegiance
+   colour in a DENSE list, which is what this column is. User report 2026-08-21. */
+.shipNameContainer .incoming .hitchange.intercepted.intercept-ready:hover {
+    color: var(--fv-own-mid);
+}
+
 /* Coarse pointers need a real target on both controls. */
 @media (pointer: coarse) {
     .shipNameContainer .incoming .ballrow {

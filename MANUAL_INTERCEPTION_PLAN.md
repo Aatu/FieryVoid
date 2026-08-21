@@ -1494,3 +1494,100 @@ that does not exist.
 * `php -l` clean on `faq.php` and `factions-tiers.php`, both still CRLF and BOM-free
   ([arch_php_entry_bom_trap] — written through node, not PowerShell).
 * Not play-tested.
+
+---
+
+## 18. The committed green was being eaten by the hover rule (2026-08-21)
+
+Reported: *"Molecular Slicers, Point Pulsar, Discharge Cannon only turn hitvalue green when they
+trigger `checkFinished`, instead of as soon as they apply any intercept at all (like other
+weapons)."*
+
+**It is a CSS specificity collision, not an arithmetic one.** `.intercepted` is applied correctly on
+the very first declaration for all three — `getDeclaredInterception` reads a flat `->intercept` of 2
+off every one of them (`MolecularSlicerBeamM/H`, `PointPulsar`, `VorlonDischargeGun/Cannon`), and
+`makeInterceptable`'s handler calls `refresh()` on every click, so the class is on the element
+immediately. It just could not be seen:
+
+| Selector | Weight | Colour |
+|---|---|---|
+| `.shipNameContainer .incoming .hitchange.intercept-ready:hover` | **5** | `--fv-text-bright` #ffffff |
+| `.shipNameContainer .incoming .hitchange.intercepted` | 4 | `--fv-own` #7dbf88 |
+
+The pointer that just clicked the number is still on it, so the hover rule wins and the number reads
+white. It only turned green when `.intercept-ready` came off — which happens in
+`isWeaponSpentForIntercept`, and the wording of the report is exact about when that is.
+
+**Which weapons show it is a clean split on `canSplitShots`, not on these three.**
+`isWeaponSpentForIntercept` retires any non-split mount on the click (`if (!weapon.canSplitShots)
+return true`) → `unSelectWeapon` → the row re-renders with `offer` = *"No interceptor selected"*, no
+`.intercept-ready`, green visible. A split mount keeps the class until `checkFinished`: the
+**Molecular Slicer M/H** and the **Discharge Gun/Cannon** (split in every mode) and the **Point
+Pulsar** in Split — which is what was tested — but equally the **Twin / Quad / Heavy Arrays**,
+**QuadParticleBeam**, **TelekineticCutter**, **NeutronBlaster** and the **antigravity beams** in
+theirs. The fix covers all of them, and the expanded sub-rows too (`.ballsub` is weight 3, so
+`.intercepted` already out-weighed the dim colour there).
+
+**Fix:** one rule in [shipTooltip.css](source/public/styles/shipTooltip.css), weight 6, so hover
+brightens *within* the committed green instead of overriding it:
+
+```css
+.shipNameContainer .incoming .hitchange.intercepted.intercept-ready:hover { color: var(--fv-own-mid); }
+```
+
+`--fv-own-mid` (#54c759) is the tier `tokens.css` reserves for allegiance colour in a dense list,
+which is what this column is (see `project_visual_unification`). No JS changed.
+
+> The general trap: **a `:hover` refinement of a base state out-specifies an orthogonal state class
+> that was written later.** Any pair of classes where one says *what this is* and the other says
+> *what you can do to it* needs the combined selector spelled out, or the state disappears under the
+> cursor — which is precisely when the player is looking at it.
+
+### 18.1 Why only `PointPulsar` and `VorlonDischargeGun` carry `getInterceptOrderMode`
+
+Asked alongside the above: why do the Twin/Quad Arrays and the Psionic Concentrator not need the same
+line, given they also override `checkFinished`?
+
+**Because the hook has nothing to do with `checkFinished`.** The two are unrelated: `checkFinished`
+caps how many orders a weapon may hold, `getInterceptOrderMode` decides what `firingMode` gets
+stamped **on** one. The hook exists for exactly one condition — *the weapon's power cost is computed
+per fire order as a function of that order's `firingMode`* — and it is a mirror of what those weapons
+had already been doing for self-interception:
+
+| Weapon | `initializationUpdate` | `doMultipleSelfIntercept` stamps |
+|---|---|---|
+| `VorlonDischargeGun` | `powerReq += 2 * fireOrder.firingMode` **per order** | `firingMode: 1` |
+| `VorlonDischargeCannon` | `powerReq += 5 * fireOrder.firingMode` **per order** | inherits |
+| `PointPulsar` | (no per-order power) | `firingMode: 1` |
+| everything else | — | `weaponManager.setSelfIntercept` → `firingMode: weapon.firingMode` |
+
+Those two client classes are the **only** ones in the game whose `doMultipleSelfIntercept` hard-codes
+`firingMode: 1` — *"So that powerReqd display accurately always"*, a comment that predates this
+feature. `getInterceptOrderMode` says the same thing for a manual intercept, which is the same kind
+of shot. Everything else stamps the current mode, so an intercept order priced in the current mode
+is already consistent with the marker the player could have placed instead — nothing to correct.
+
+**The Twin/Quad Array and Psionic Concentrator modes change guns, damage and hit chance, not the
+per-order price.** Their `powerReq` is fixed at initialisation, so the mode on an intercept order
+costs nothing either way — and the stamp is *load-bearing* for anything with an `interceptArray`,
+because `getInterceptRatingInMode` reads the rating out of that array by mode.
+
+Which is the rule for adding the hook to a fourth weapon:
+
+* **Add it** only if power (or any other budget) is billed **per fire order** and scaled by
+  `fireOrder.firingMode` — grep `initializationUpdate` for `+=` against `firingMode`.
+* **Never add it** to a weapon with an `interceptArray`: `declareInterceptWith` narrows the mode, and
+  on such a weapon that would silently narrow the *rating* too. Both current users carry a flat
+  `->intercept` with no array, which is why it is safe there.
+
+Checked and deliberately **not** given the hook: `VorlonLightningCannon`, `VorlonLightningGun`,
+`VorlonLightningGun2` and `VorlonDischargePulsar` all have `intercept` ratings of 2-4 and price
+themselves off `firingMode` — but by **assignment** from `getFiringOrder` (the turn's first order),
+not accumulation, so a manual intercept costs no more than the self-intercept marker it replaces.
+
+### 18.2 Verification
+
+* CSS only — the added selector is weight 6 against the weight-5 hover rule it corrects, so it wins
+  on specificity rather than on source order.
+* No JS touched, so no bundle rebuild is required for this change.
+* Not play-tested.
