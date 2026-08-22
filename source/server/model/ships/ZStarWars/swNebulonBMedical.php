@@ -55,6 +55,7 @@ class swNebulonBMedical extends HeavyCombatVessel{
 	$this->addAftSystem(new Engine(3, 10, 0, 4, 3));
 	$hyperdrive = new JumpEngine(3, 16, 5, 15);
 	$hyperdrive->displayName = 'Hyperdrive';
+	$hyperdrive->markLegacy(); //JUMP_POINTS_PLAN.md section 9 - this setting jumps by boost, not by vortex
 	$this->addAftSystem($hyperdrive);
         $this->addAftSystem(new Thruster(2, 12, 0, 3, 2));
         $this->addAftSystem(new Thruster(2, 12, 0, 3, 2));

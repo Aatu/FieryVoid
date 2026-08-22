@@ -5058,7 +5058,10 @@ class JumpEngine extends Weapon{
     public $displayName = "Jump Engine";
     public $delay = 0;
     public $primary = true;
-	public $iconPath = "JumpEngine1.png";
+	//⚠️ lower-case "j": the file Stage 6 added is img/systemicons/jumpEngine1.png. This said
+	//"JumpEngine1.png" from Stage 6 until 2026-08-22 - which works on a Windows dev box and 404s on
+	//the live Linux server, the exact trap checkShipData's sysimage check exists to catch.
+	public $iconPath = "jumpEngine1.png";
     
     /* STAGE 2 - THE BOOST-TO-JUMP PATH IS RETIRED, AND THIS FLAG IS THE WHOLE OF IT.
        $boostable = false stops the client offering a boost and stops shipManager.power.canBoost
@@ -5171,6 +5174,36 @@ class JumpEngine extends Weapon{
     protected $vortexCloseReason = '';
     protected $vortexFailureApplied = false;
 
+    /* SECTION 9 - THE LEGACY ONE-CLICK JUMP, AND WHY IT IS A FLAG RATHER THAN A SUBCLASS.
+     *
+     * Not every setting in the fleet has a B5 jump vortex. A Trek Nacelle, a BSG FTL Drive and a
+     * Star Wars Hyperdrive all take their ship away by themselves at the end of the turn and leave
+     * nothing on the board, and 195 of the 776 jump engines in the tree are one of those three
+     * (user ruling 2026-08-22). markLegacy() is how a blueprint says so.
+     *
+     * ⭐ PROTECTED, so it is not serialised at all - json_encode takes public properties only, and
+     * the static generator encodes the constructed ship (plan section 8: a public default costs
+     * 776 blueprint entries for nothing). The client does not need it: every switch it would drive
+     * is already carried by a property markLegacy() sets - $boostable brings the Jump-to-Hyperspace
+     * row back in SystemPowerSettings, $hextarget / $autoFireOnly keep the engine out of
+     * weaponManager.targetHex, and JumpEngine.getVortexIconLoad returns null with no vortex.
+     *
+     * ⭐ A FLAG AND NOT A `LegacyJumpEngine extends JumpEngine`, which plan section 9 originally
+     * sketched. Both work; this one is cheaper and safer in four specific ways:
+     *   - no new class means no autoload regeneration, which on live needs the maintenance gate;
+     *   - `phpclass` in every reverted blueprint stays "JumpEngine", so a game in progress across
+     *     the deploy sees no class identity change at all;
+     *   - every `instanceof JumpEngine` site in the codebase keeps its current answer without an
+     *     audit, and no `get_class() ===` comparison anywhere can silently stop matching;
+     *   - it is per-INSTANCE, so one hull in a faction can be reverted without a class of its own.
+     * The cost is that there is no `instanceof LegacyJumpEngine` to test - ask isLegacyJump().
+     *
+     * ⚠️ WHAT IT DOES NOT TOUCH: the vortex LIFECYCLE. restoreVortexState, closeExpiredVortices,
+     * recordVortexClosure and the jump-failure roll all still run on a legacy engine, so a vortex
+     * that was opened BEFORE a hull was reverted still closes and still logs properly. Only the
+     * DECLARATION path is shut off, which is the half that can create new state. */
+    protected $legacyJump = false;
+
 	//JumpEngine tactically  is not important at all!
 	public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
 
@@ -5208,6 +5241,101 @@ class JumpEngine extends Weapon{
         $this->delay       = (int)$delay;
         $this->loadingtime = max(1, (int)$delay);
         $this->turnsloaded = $this->loadingtime;
+    }
+
+    /* SECTION 9 - PUT THIS ENGINE BACK ON THE PRE-2026 ONE-CLICK JUMP.
+     *
+     * Called from a ship file (or from a subclass constructor) immediately after the engine is
+     * built, and BEFORE anything reads it - setSystemDataWindow and the static generator both run
+     * long afterwards, so there is no ordering hazard in practice:
+     *
+     *     $hyperdrive = new JumpEngine(4, 12, 6, 20);
+     *     $hyperdrive->displayName = 'Hyperdrive';
+     *     $hyperdrive->markLegacy();
+     *     $this->addPrimarySystem($hyperdrive);
+     *
+     * Returns $this so the one-liner form works too: addPrimarySystem((new JumpEngine(...))->markLegacy()).
+     *
+     * It flips exactly two things, in opposite directions:
+     *
+     * 1. THE BOOST PATH, BACK ON. $boostable is the whole of it, in the same way $boostable = false
+     *    was the whole of retiring it at Stage 2 (see the flag's own comment above): submitPower
+     *    validates nothing against it, ShipSystem::setPower loads a type-2 row back regardless, and
+     *    every client boost helper ignores it. The only thing it drives is `showBoost` in
+     *    SystemPowerSettings.js, a truthiness test - so setting it true restores the
+     *    "Jump to Hyperspace: Yes/No" row and nothing else. The rest of the boost machinery
+     *    (isOverloading, doHyperspaceJump, the end-of-Fire sweep in Firing::fireWeapons, the
+     *    isJumpEngine branch in SystemPowerSettings, the jumping[] commit checklist in gamedata.js)
+     *    was deliberately never deleted and does not need re-writing.
+     *
+     *    ⚠️ THIS MAKES THAT MACHINERY PERMANENT. Plan section 4 Stage 2 and section 5 trap 10 both
+     *    promise a "cleanup deploy, one cycle later" that deletes all five. That promise is now
+     *    void: 195 hulls depend on the boost path. The two plans were always mutually exclusive.
+     *
+     * 2. THE VORTEX DECLARATION PATH, OFF. $autoFireOnly keeps the engine out of
+     *    weaponManager.selectWeapon and targetHex; $hextarget / $ballistic / $range 0 mean it
+     *    cannot produce a hex order even if one were forged; and getVortexDeclaration /
+     *    getMaintainDeclaration / hasVortexDeclaration each refuse a legacy engine outright, which
+     *    is what makes the CONCEALMENT rule come out right (see hasVortexDeclaration).
+     *
+     * ⭐ $name STAYS "jumpEngine". SystemFactory.createSystemFromJson picks the client class from
+     * systemJson.name - `new window[name](args, ship)` - not from phpclass, so the existing client
+     * JumpEngine is reused with no new JS at all, and its initializationUpdate (the "JUMP" output
+     * display while boosted) and hasMaxBoost are exactly what the boost path needs. The name is
+     * also how movement.js canHalfPhase finds the drive, and how three client `instanceof Weapon`
+     * guards exclude it (plan section 3.1). Nothing here touches it. */
+    public function markLegacy()
+    {
+        $this->legacyJump = true;
+
+        //1. the boost path, back on
+        $this->boostable       = true;
+        $this->maxBoostLevel   = 1;
+        $this->boostEfficiency = 0;
+
+        //2. the declaration path, off
+        $this->autoFireOnly = true;
+        $this->ballistic    = false;
+        $this->hextarget    = false;
+        $this->range        = 0;
+        $this->firingModes  = array(1 => "Standard");
+
+        /* ⚠️ THE PER-MODE ARRAYS ARE ALREADY BUILT BY THE TIME THIS RUNS. Weapon::__construct walks
+           $this->firingModes and fills four of them, so an engine reaching markLegacy() carries
+           seven entries in each - one per vortex facing plus Maintain - and shrinking $firingModes
+           alone would leave them behind: six dead entries per array in every reverted blueprint,
+           and a mode list that disagrees with the arrays keyed off it. Nothing reads modes 2-7 on a
+           system that cannot change mode, so this is tidiness rather than a bug fix, but a stale
+           array that only LOOKS live is exactly what the next reader would trust.
+           changeFiringMode(1) below re-reads the pruned arrays so the live values still match. */
+        foreach (array('minDamageArray', 'maxDamageArray', 'priorityAFArray',
+                       'animationExplosionScaleArray') as $modeArray){
+            if (!is_array($this->$modeArray) || empty($this->$modeArray)) continue;
+            $this->$modeArray = isset($this->{$modeArray}[1]) ? array(1 => $this->{$modeArray}[1]) : array();
+        }
+        $this->changeFiringMode(1);
+
+        /* THE RECHARGE MEANS NOTHING HERE, so it must not be shown. Stage 6 gave $loadingtime the
+           B5W jump delay so the icon could count a charge the engine spends opening a vortex; a
+           legacy engine never opens one, so the count would sit at N/N forever and read as a
+           broken timer. 1/1 is what SystemIcon draws as nothing at all, which is what this system
+           looked like before Stage 1.
+
+           ⭐ It also repairs a Stage 6 accident on the Trek hulls specifically: TrekWarpDrive's 4th
+           constructor argument is an IMPULSE RATING (it feeds TrekImpulseDrive), not a jump delay,
+           and Stage 6's constructor read it as one - so a Nacelle with output 6 was claiming a
+           6-turn jump recharge it never had. $delay keeps the raw value; nothing reads it on a
+           legacy engine because stripForJson short-circuits below. */
+        $this->loadingtime = 1;
+        $this->turnsloaded = 1;
+
+        return $this;
+    }
+
+    /* Is this engine on the old one-click jump rather than the vortex? See markLegacy(). */
+    public function isLegacyJump()
+    {
+        return $this->legacyJump;
     }
 
     /* THE ENGINE'S REAL LOADING STATE on $turn, derived from the vortex note rather than stored.
@@ -5274,6 +5402,17 @@ class JumpEngine extends Weapon{
         if (!$ship || !is_array($ship->systems)) return false;
         foreach ($ship->systems as $system){
             if (!($system instanceof JumpEngine)) continue;
+            /* ⭐ SECTION 9 - THIS SKIP IS THE CLOAK GUARANTEE, AND IT IS THE WHOLE OF IT.
+               This method is what CloakingDevice / ShadingField ask before revealing their ship,
+               and it asks only "does this engine hold ANY order this turn?" - no firing-mode test,
+               because a legal declaration is any of the seven modes. A legacy engine jumps by
+               BOOST, which writes a tac_power type-2 row and no fire order at all, so a cloaked
+               Trek hull boosting its Nacelle already fails this test and keeps its cloak. Skipping
+               legacy engines outright is what makes that true by construction rather than by
+               coincidence: it also covers a stale order left on a hull that was reverted to legacy
+               mid-campaign, and it cannot be undone by a future edit that relaxes the test above.
+               (User ruling 2026-08-22: boosting to jump must NOT break concealment.) */
+            if ($system->isLegacyJump()) continue;
             foreach ($system->fireOrders as $fire){
                 if ($fire->turn == $turn && empty($fire->rejected)) return true;
             }
@@ -5392,6 +5531,8 @@ class JumpEngine extends Weapon{
      * and not merely tolerated. */
     public function getVortexDeclaration($turn)
     {
+        if ($this->legacyJump) return null;   //section 9 - a legacy engine never opens a vortex
+
         foreach ($this->fireOrders as $fire){
             if ($fire->turn != $turn) continue;
             if (!empty($fire->rejected)) continue;
@@ -5419,6 +5560,8 @@ class JumpEngine extends Weapon{
      * a real getTacGamedata load, so this turn's ballistic orders are on the weapon by then. */
     public function getMaintainDeclaration($turn)
     {
+        if ($this->legacyJump) return null;   //section 9 - and so never maintains one either
+
         foreach ($this->fireOrders as $fire){
             if ($fire->turn != $turn) continue;
             if (!empty($fire->rejected)) continue;
@@ -6033,6 +6176,23 @@ class JumpEngine extends Weapon{
 	}   	
 
      public function setSystemDataWindow($turn){
+        /* SECTION 9 - a legacy engine gets the boost-era tooltip back, verbatim from before Stage 2
+           (git d50c41929^). Describing the vortex rules on a system that cannot open one is worse
+           than saying nothing: every sentence of the text below is an instruction the player cannot
+           carry out. ShipSystem rather than Weapon for the same reason the vortex branch uses it -
+           Weapon's block is a gun's Damage / Fire control / Priority rows, all zero here - and with
+           no "Weapon type" or "Range" row either, because this engine targets nothing. The client's
+           own Weapon constructor sets data["Weapon type"] from $weaponClass on load, so no caller
+           that reads it can find it undefined. */
+        if ($this->legacyJump){
+            $this->data["Special"]  = "<br>Boost in Initial Orders to jump to hyperspace at end of turn.";
+            $this->data["Special"] .= "<br>WARNING - Jumping to hyperspace REMOVES ship from rest of the battle.";
+            $this->data["Special"] .= "<br>If Jump Engine is damaged, ship has a % chance of being destroyed opening jump point.";
+            $this->data["Special"] .= "<br>SHOULD NOT be shut down for power (unless damaged >50% or if Desperate rules apply).";
+            ShipSystem::setSystemDataWindow($turn);
+            return;
+        }
+
         /* STAGE 6 - the tooltip describes the VORTEX rules end to end. It used to describe the
            retired boost-to-jump method, and then Stage 5's half-way version; this is the whole
            thing, in the order a player meets it. */
@@ -6092,6 +6252,13 @@ class JumpEngine extends Weapon{
      *    Emitted only when there is a vortex, so every other load is a byte-for-byte no-change. */
     public function stripForJson(){
         $strippedSystem = parent::stripForJson();
+
+        /* SECTION 9 - a legacy engine sends the ordinary Weapon payload and nothing else. Both
+           overrides below describe a vortex it cannot have: getVortexRechargeLoad would answer with
+           a charge derived from $delay (an IMPULSE RATING on the Trek hulls - see markLegacy), and
+           the counter block cannot fire anyway with no activeVortexId. markLegacy set
+           loadingtime/turnsloaded to 1/1, which SystemIcon draws as nothing. */
+        if ($this->legacyJump) return $strippedSystem;
 
         $turn = (int)TacGamedata::$currentTurn;   //(int): mysqli hands the turn back as a STRING
 

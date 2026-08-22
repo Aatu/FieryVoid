@@ -4,10 +4,12 @@ Replaces the current one-click "boost the Jump Engine, vanish at end of turn" es
 tabletop rules: a ship **projects a vortex** into a nearby hex, the vortex **forms**, **persists**,
 can be **maintained**, and any unit that **flies into its mouth** leaves the battle.
 
-Status: **ALL SIX STAGES BUILT (2026-08-21/22).**
+Status: **ALL SIX STAGES BUILT (2026-08-21/22), plus §9 the legacy opt-out (2026-08-22).**
 ⚠️ Stage 2 retires the boost-to-jump path and Stage 4 adds the replacement, so **stages 2–5 must
 ship as ONE live deploy** — deploying Stage 2 alone leaves a game with no way to leave a battle.
 That deploy is now complete: 2–5 are all in the tree.
+⚠️ **The "cleanup deploy one cycle later" promised at Stage 2 and §5 trap 11 is now VOID** — §9 put
+195 hulls back on the boost path, so the boost framework is permanent. See §9 trap 3.
 
 Decisions already taken (2026-08-17, user):
 
@@ -618,7 +620,7 @@ findings, replay harness **163/163 with no diffs at all**. Nothing Stage 2 chang
 **Retiring the boost path — `boostable = false` ONLY (user ruling 2026-08-21).** Set
 `$boostable = false` on `JumpEngine` and change *nothing else about boosting*: keep
 `isOverloading()`, `doHyperspaceJump()`, the sweep at
-[firing.php:1509](source/server/handlers/firing.php#L1509), the `isJumpEngine` branch in
+[firing.php:1720](source/server/handlers/firing.php#L1720), the `isJumpEngine` branch in
 [SystemPowerSettings.js:293](source/public/client/UI/reactJs/system/SystemPowerSettings.js#L293)
 and the boost-driven `jumping[]` checklist in
 [gamedata.js:868](source/public/client/gamedata.js#L868). That flag alone stops every NEW boost
@@ -645,6 +647,9 @@ Two consequences to carry:
 - Not server-enforced: a stale client could still POST a type-2 row and get an old-style jump. That
   is the behaviour being preserved, so it is a feature for one deploy cycle - but it means the
   cleanup deploy is what actually closes the door.
+  **⚠️ SUPERSEDED 2026-08-22: there is no cleanup deploy.** §9 puts 195 hulls back on the boost
+  path deliberately, so the door stays open by design and `$boostable` is now a per-hull setting
+  rather than a transition flag. See §9 trap 3.
 - `canOffline()` also requires `!weaponManager.hasFiringOrder(ship, system)`, so once a vortex is
   declared the engine can no longer be powered down that phase. Correct (it matches every other
   weapon) but new, and worth a line in the FAQ at §6.
@@ -870,12 +875,16 @@ a new `ShipTooltipMovementMenu` wired into
 the `validateThrustPayment` terminator, and removal in `MovementGamePhase::advance`
 (`doHyperspaceJump` minus the roll → `submitDamages($id, $turn, $gd->getNewDamages())`, mirroring
 [PreFiringGamePhase.php:25](source/server/Phase/PreFiringGamePhase.php#L25)).
-**Do NOT delete the old sweep** at [firing.php:1509](source/server/handlers/firing.php#L1509) —
+**Do NOT delete the old sweep** at [firing.php:1720](source/server/handlers/firing.php#L1720) —
 it is the transition path for boosts already committed on live when Stage 2 ships (see Stage 2).
 Both removal paths coexist safely: Movement resolves before Firing, so `doHyperspaceJump`'s
 `$primaryStruct->isDestroyed()` early return no-ops for a ship that already left through a vortex.
 It comes out in the cleanup deploy one cycle later, together with `isOverloading()`, the
 `isJumpEngine` branch in `SystemPowerSettings.js` and the boost-driven `jumping[]` checklist.
+**⚠️ SUPERSEDED 2026-08-22: none of those five come out.** §9 makes the boost path supported
+behaviour for 195 hulls. The sweep stayed, and was rewritten to select by `instanceof JumpEngine`
+instead of by `displayName` — which fixed a pre-existing bug that had hidden 195 engines from it.
+See §9 traps 2 and 3.
 **Gate:** ship enters from the correct side → button appears, movement ends, ship gone before
 Pre-Firing, CV preserved in the fleet list. Wrong side → no button. Wrong side via client tampering
 → server refuses.
@@ -1280,6 +1289,9 @@ turn it happens, and as the pre-commit warning that is item 1. That is the whole
     committed on the live server still resolves. Full reasoning and the four facts it rests on are
     in §4 Stage 2; the consequence for Stage 4 is recorded there. Do not "tidy up" the boost code
     in the same deploy that removes the flag - that is the cleanup deploy, one cycle later.
+    **⚠️ SUPERSEDED 2026-08-22 (§9): the cleanup deploy will never happen.** `$boostable` is no
+    longer a transition flag being wound down - `markLegacy()` sets it true permanently on 195
+    hulls, and the whole boost framework is now supported behaviour. Never delete it.
 
 ---
 
@@ -1396,45 +1408,97 @@ case is the argument for auditing each key rather than writing a rule.
 weapon that needs its targeting surface, so the only durable fix is the generic one above.
 ---
 
-## 9. `LegacyJumpEngine` — the opt-out for custom factions (DO LAST, after Stage 6)
+## 9. The legacy one-click jump — the opt-out for custom factions — **BUILT 2026-08-22**
 
 **User request 2026-08-21:** some custom factions play better with the old one-click escape, so they
-need a `JumpEngine` subclass that keeps `$boostable = true` and `$autoFireOnly = true` and is simply
-swapped into those ships' blueprints. Deliberately scheduled **after Stage 6** — it is a variant of
-the finished thing, and building it early would mean maintaining two engines through four more
-stages.
+need a way to keep `$boostable = true` and `$autoFireOnly = true` on chosen hulls. Deliberately
+scheduled **after Stage 6** — it is a variant of the finished thing, and building it early would
+have meant maintaining two engines through four more stages.
+
+**⭐ BUILT AS A FLAG, NOT AS THE `LegacyJumpEngine extends JumpEngine` SUBCLASS THIS SECTION
+ORIGINALLY SKETCHED.** `JumpEngine` carries a `protected $legacyJump`, set by `markLegacy()` and
+read by `isLegacyJump()`. Both designs work; the flag is cheaper and safer in four specific ways:
+
+- no new class means **no autoload regeneration**, which on live needs the maintenance gate;
+- `phpclass` in every reverted blueprint stays `"JumpEngine"`, so a game in progress across the
+  deploy sees no class identity change at all;
+- every `instanceof JumpEngine` site in the codebase keeps its current answer with no audit, and no
+  `get_class() ===` comparison anywhere can silently stop matching;
+- it is **per-instance**, so one hull in a faction can be reverted without a class of its own.
+
+The cost is that there is no `instanceof LegacyJumpEngine` to test — ask `isLegacyJump()`.
 
 ### The shape
 
 ```php
-class LegacyJumpEngine extends JumpEngine {
-    //$name STAYS "jumpEngine" — see the traps below. Only the phpclass changes.
-    public $boostable   = true;
-    public $autoFireOnly = true;    //server-driven; the player never selects it
-    public $ballistic   = false;
-    public $hextarget   = false;
-    public $range       = 0;
-    public $firingModes = array(1 => "Standard");
-    //setSystemDataWindow: restore the boost-era Special text (kept in git history at Stage 2).
-}
+$hyperdrive = new JumpEngine(4, 12, 6, 20);
+$hyperdrive->displayName = 'Hyperdrive';
+$hyperdrive->markLegacy();          //returns $this, so the one-liner form works too
+$this->addPrimarySystem($hyperdrive);
 ```
 
-### Four traps, all verified 2026-08-21
+[`markLegacy()`](source/server/model/systems/baseSystems.php#L5287) flips exactly two things, in
+opposite directions, and then repairs the recharge display:
 
-1. **⭐ `$name` must stay `"jumpEngine"`.** `SystemFactory.createSystemFromJson` picks the client
+1. **The boost path, back on** — `$boostable = true`, `$maxBoostLevel = 1`, `$boostEfficiency = 0`.
+   `$boostable` is the whole of it, in the same way `$boostable = false` was the whole of retiring
+   it at Stage 2: the only thing it drives is `showBoost` in `SystemPowerSettings.js`, a truthiness
+   test, so setting it true restores the "Jump to Hyperspace: Yes/No" row and nothing else.
+2. **The vortex declaration path, off** — `$autoFireOnly = true`, `$ballistic = false`,
+   `$hextarget = false`, `$range = 0`, `$firingModes = array(1 => "Standard")`. The four per-mode
+   arrays are pruned to mode 1 as well: `Weapon::__construct` has already filled seven entries in
+   each by the time `markLegacy()` runs, and shrinking `$firingModes` alone would leave six dead
+   entries per array in every reverted blueprint.
+3. **`$loadingtime` / `$turnsloaded` forced to 1/1.** Stage 6 gave `$loadingtime` the B5W jump
+   delay so the icon could count a charge the engine spends opening a vortex; a legacy engine never
+   opens one, so the count would sit at N/N forever and read as a broken timer. 1/1 is what
+   `SystemIcon` draws as nothing at all.
+
+`setSystemDataWindow` takes an early branch for a legacy engine and describes the **boost** rules,
+calling `ShipSystem::setSystemDataWindow` rather than `Weapon`'s — no Damage / Fire control /
+Priority / Range rows, because this engine targets nothing.
+
+**⭐ PROTECTED ON PURPOSE, so it is not serialised at all** — `json_encode` takes public properties
+only, and a public default would cost 776 blueprint entries for nothing (§8). The client does not
+need it: every switch it would drive is already carried by a property `markLegacy()` sets.
+Confirmed in the generated output — a reverted hull reads
+`boostable:true, autoFireOnly:true, hextarget:false, range:0, firingModes:{1:"Standard"}, 1/1`,
+with **no `legacyJump` key**.
+
+**⚠️ WHAT IT DOES NOT TOUCH: the vortex LIFECYCLE.** `restoreVortexState`, `closeExpiredVortices`,
+`recordVortexClosure` and the jump-failure roll all still run on a legacy engine, so a vortex opened
+**before** a hull was reverted still closes and still logs properly. Only the DECLARATION path is
+shut off, which is the half that can create new state.
+
+### What was reverted
+
+| Family | Hulls | How |
+|---|---|---|
+| Star Wars Hyperdrive | 31 | `markLegacy()` per ship file |
+| BSG FTL Drive (Colonials / Kobol / Cylons) | 31 | `markLegacy()` per ship file |
+| `customs/VariableHangarSize` | 1 | `markLegacy()` per ship file |
+| Trek Nacelle | ~60 | **class-level**, in `TrekWarpDrive::__construct` |
+
+63 ship files carry the call, and that set is **exactly** the set of files naming a
+Hyperdrive/FTL Drive/Nacelle — verified both directions, nothing missed and nothing over-reverted.
+Trek is marked on the class because every instance of `TrekWarpDrive` is a nacelle.
+
+### The four traps — all resolved
+
+1. **⭐ `$name` stays `"jumpEngine"`. HOLDS.** `SystemFactory.createSystemFromJson` picks the client
    class from `systemJson.name`, **not** from phpclass — `new window[name](args, ship)`. Keeping the
-   name means the existing client `JumpEngine` class is reused with no new JS at all, and its
+   name means the existing client `JumpEngine` class is reused with **no new JS at all**, and its
    `initializationUpdate` (the `JUMP` output display) and `hasMaxBoost` are exactly what the boost
-   path needs. Changing it would also break `getSystemByName(ship, "jumpEngine")` — which is how
-   `movement.js canHalfPhase` finds the drive — and would silently un-exclude the system from the
-   three client `instanceof Weapon` guards that key off `name !== "jumpEngine"` (§3.1).
-2. **⭐ The end-of-Fire sweep finds engines by `displayName`, and misses 195 of them.**
-   [firing.php:1613](source/server/handlers/firing.php#L1613) does
+   path needs. It is also how `movement.js canHalfPhase` finds the drive, and how three client
+   `instanceof Weapon` guards exclude it (§3.1). The flag design touches none of it. Confirmed in
+   the regenerated blueprints: `"name":"jumpEngine"` on every reverted hull.
+2. **⭐ The end-of-Fire sweep found engines by `displayName` and missed 195. FIXED 2026-08-22.**
+   [firing.php:1699](source/server/handlers/firing.php#L1699) used
    `$ship->getSystemsByName('Jump Engine')` plus a Shadow-Association special case for
    `'Phasing Drive'`, and `getSystemsByNameLoc` matches `displayName` (or `hitChartName`). Measured
    across all 776 jump engines in the static tree:
 
-   | displayName | count | found by the boost sweep? |
+   | displayName | count | found by the old sweep? |
    |---|---|---|
    | Jump Engine | 558 | yes |
    | Nacelle | 132 | **no** |
@@ -1442,32 +1506,62 @@ class LegacyJumpEngine extends JumpEngine {
    | Phasing Drive | 23 | yes (special-cased) |
    | FTL Drive | 13 | **no** |
 
-   All three missing families carry `hitChartName: null`, so nothing rescues them. **Boost-to-jump
-   has never worked on a Trek Nacelle, a Hyperdrive or a BSG FTL Drive** — a pre-existing bug, not
-   something this plan introduced. Since those renamed families are precisely the "custom factions"
-   this section exists for, the swap alone would give them a boost path that still does nothing.
-   Fix the sweep at the same time: select on `instanceof JumpEngine` (or `instanceof
-   LegacyJumpEngine`) rather than on a display-name allow-list, which also retires the Shadow
-   special case.
-3. **This makes the boost framework PERMANENT.** §4 Stage 2 and §5 trap 10 promise a "cleanup
-   deploy, one cycle later" that deletes `isOverloading()`, `doHyperspaceJump()`, the end-of-Fire
-   sweep, the `isJumpEngine` branch in `SystemPowerSettings.js` and the boost-driven `jumping[]`
-   checklist in `gamedata.js`. **If this section is built, none of that may be deleted** — it
-   becomes supported behaviour for the legacy factions. Decide which promise wins before doing
-   either; they are mutually exclusive.
-4. **Stages 3–5 need no guard against it.** A legacy engine is `autoFireOnly` with no `hextarget`,
-   so it can never produce a declaration; the spawn sweep, the jump-out test and the lifecycle all
-   key off a declaration or a live vortex, and simply never see one. `Firing::validateFireOrders`
-   tests `instanceof JumpEngine`, which the subclass matches, but with no order to judge it is a
-   no-op. Nothing to write.
+   All three missing families carry `hitChartName: null`, so nothing rescued them. **Boost-to-jump
+   had never worked on a Trek Nacelle, a Hyperdrive or a BSG FTL Drive** — a pre-existing bug, not
+   one this plan introduced — and those are precisely the families this section puts back on the
+   boost path, so the two had to be fixed together. The sweep now selects on `instanceof JumpEngine`
+   and skips `isDestroyed()`, which also retires the Shadow special case. **Any future "find the
+   jump engines" sweep should test `instanceof`, never a name.**
 
-**Side effect of Stage 2 worth stating plainly before choosing which ships to revert:** the new
-declaration path is class-based and name-agnostic, so **all 776 jump engines can now open a vortex**,
-including the 195 that could never boost-jump. Reverting one of those hulls to `LegacyJumpEngine`
-therefore *removes* a capability Stage 2 just gave it and restores one that has never functioned —
-unless trap 2 is fixed in the same change.
+   ⚠️ It was deliberately **not** narrowed to `isLegacyJump()`: a boost committed on a NON-legacy
+   engine before the Stage 2 deploy must still resolve. `isOverloading()` is the real gate, and a
+   non-legacy engine can no longer be given a new boost, so it never fires for one by accident.
+3. **This makes the boost framework PERMANENT. THE CLEANUP DEPLOY IS NOW VOID.** §4 Stage 2 and §5
+   trap 11 promised a "cleanup deploy, one cycle later" deleting `isOverloading()`,
+   `doHyperspaceJump()`, the end-of-Fire sweep, the `isJumpEngine` branch in
+   `SystemPowerSettings.js` and the boost-driven `jumping[]` checklist in `gamedata.js`. **None of
+   those five may be deleted** — 195 hulls now depend on the boost path, and it is supported
+   behaviour. The two plans were always mutually exclusive; this section is the one that won.
+4. **Stages 3–5 needed no guard. HOLDS, and it went further.** A legacy engine is `autoFireOnly`
+   with no `hextarget`, so it can never produce a declaration. Belt and braces were added anyway:
+   `getVortexDeclaration` and `getMaintainDeclaration` return `null` outright for a legacy engine,
+   `Firing::getVortexDeclarationBlock` refuses one with a reason string, and — the one that matters
+   — `hasVortexDeclaration` **skips legacy engines entirely**. That last is the **cloak guarantee**:
+   it is what `CloakingDevice` / `ShadingField` ask before revealing their ship, and a legacy hull
+   jumps by boost (a `tac_power` type-2 row, no fire order), so a cloaked Trek hull boosting its
+   Nacelle keeps its cloak by construction rather than by coincidence. *(User ruling 2026-08-22:
+   boosting to jump must NOT break concealment.)*
 
-**Also needs:** `fvbuild.ps1 -Autoload` (new class), `-Statics` (every reverted hull's blueprint
-changes shape), and a re-run of the replay harness. Swapping the class in a ship file does **not**
-shift system ids — ids are construction-order and the position is unchanged.
+### Two incidental fixes that rode along
 
+- **`TrekWarpDrive`'s 4th constructor argument is an IMPULSE RATING, not a jump delay** (it feeds
+  `TrekImpulseDrive`). Stage 6's constructor read it as a delay, so a Nacelle rated 6 was claiming a
+  6-turn jump recharge it never had. `markLegacy()` resets it to 1/1; `$delay` keeps the raw value
+  and nothing reads it on a legacy engine.
+- **A jump engine is not a gun.** Since Stage 1 made `JumpEngine` a `Weapon` subclass it passed
+  `sysEnhEligibleGSGT`'s `instanceof Weapon` gate with `fireControl [0,0,0]`, so every jump-capable
+  hull in the game was being offered a fire-control refit for a system that never rolls to hit.
+  [Enhancements.php:3586](source/server/model/ships/Enhancements.php#L3586) now denies it by
+  `instanceof JumpEngine` — not by a `$gunsightExcluded` class-name entry, because each subclass
+  would need its own line and a missed one puts the bogus offer straight back.
+
+### Side effect worth stating plainly
+
+The Stage 2 declaration path is class-based and name-agnostic, so **all 776 jump engines could open
+a vortex**, including the 195 that could never boost-jump. Reverting one of those hulls therefore
+*removed* a capability Stage 2 had just given it and restored one that had never functioned — which
+is exactly why trap 2 had to be fixed in the same change.
+
+### Build steps and verification (2026-08-22)
+
+- **`-Autoload`: NOT needed** — the flag design adds no class. (The subclass sketch would have
+  required it; this is one of the four reasons the flag won.)
+- **`-Statics`: run**, after the last source edit. Every reverted hull's blueprint changes shape.
+  Swapping to the flag does **not** shift system ids — ids are construction-order and the position
+  is unchanged.
+- **PHP lint**: 64 modified ship files + `baseSystems.php`, `firing.php`, `fighter.php`,
+  `customTrek.php`, `Enhancements.php` — all clean.
+- **`fvbuild.ps1 -Check`**: autoload up to date · ship-data validator 234 findings, all in baseline,
+  **0 new** · replay harness **161 passed, 0 failed** (33.4s).
+- **Control check**: an Earth Alliance engine still reads all 7 vortex modes, range 4, 24-turn
+  charge. The vortex path is untouched by any of this.

@@ -129,6 +129,12 @@ class Firing
      * a list. */
     private static function getVortexDeclarationBlock($fire, $weapon, $shooter, $gamedata, $fireOrders)
     {
+        //Plan section 9 - this hull is on the old one-click jump, so it has no vortex to declare.
+        //The client cannot build the order either ($autoFireOnly / $hextarget false), so anything
+        //arriving here is a stale blueprint from before the revert; drop it rather than let it
+        //reach a spawn sweep that would refuse it silently.
+        if ($weapon->isLegacyJump()) return "Jump Engine uses the legacy one-click jump";
+
         if ($weapon->isDestroyed($gamedata->turn)) return "Jump Engine is destroyed";
         if ($weapon->isOfflineOnTurn($gamedata->turn)) return "Jump Engine is offline";
 
@@ -1690,20 +1696,39 @@ public static function firePreFiringWeapons($gamedata){
         //Enormous unit ram it here - see createFailedAttachRamOrders.
         self::createFailedAttachRamOrders($gamedata, $dbManager);
 
-        //Check if any ships have activate jump engines and do this after all other fire (in case they or their jump engine got destroyed)
+        /* Check if any ships have activated jump engines, and do this after all other fire (in case
+           they or their jump engine got destroyed).
+
+           ⭐ SELECTED BY CLASS, NOT BY DISPLAY NAME (plan section 9 trap 2, fixed 2026-08-22).
+           This sweep used to ask getSystemsByName('Jump Engine') plus a Shadow-Association special
+           case for 'Phasing Drive', and getSystemsByNameLoc matches displayName (or hitChartName).
+           Measured across all 776 jump engines in the static tree, that found 558 + 23 and MISSED
+           195: Nacelle 132, Hyperdrive 50, FTL Drive 13 - all three with hitChartName null, so
+           nothing rescued them. Boost-to-jump had never worked on a Trek Nacelle, a BSG FTL Drive
+           or a Star Wars Hyperdrive. That was a pre-existing bug, and it is precisely those three
+           families that markLegacy() now puts back on the boost path, so the two had to be fixed
+           together. Any future "find the jump engines" sweep should test instanceof, never a name.
+
+           NOT narrowed to isLegacyJump(): a boost committed on a NON-legacy engine before the
+           Stage 2 deploy must still resolve (that is the whole reason Stage 2 left this code in
+           place - see JumpEngine::$boostable). isOverloading() is the real gate, and a non-legacy
+           engine can no longer be given a new boost, so it never fires for one by accident.
+
+           isDestroyed() restates the filter getSystemsByName applied for free. doHyperspaceJump
+           re-checks the engine's health and its host section itself, but a destroyed engine should
+           not reach it at all. */
         foreach ($gamedata->ships as $ship) {
-            
-            $jumpList = $ship->getSystemsByName('Jump Engine'); //Won't return if Jump engine destroyed.
-            if ($ship->faction === 'Shadow Association') { //PhasingDrive extends JumpEngine but has a different display name; only Shadow Association ships have one.
-                $jumpList = array_merge($jumpList, $ship->getSystemsByName('Phasing Drive'));
-            }
-            foreach($jumpList as $jumpEngine){
+
+            if (!is_array($ship->systems)) continue;
+            foreach($ship->systems as $jumpEngine){
+                if (!($jumpEngine instanceof JumpEngine)) continue;
+                if ($jumpEngine->isDestroyed()) continue;
                 //is it overloading?...
-                if( $jumpEngine->isOverloading($gamedata->turn) ){ //primed for entering hyperspace!				
+                if( $jumpEngine->isOverloading($gamedata->turn) ){ //primed for entering hyperspace!
                     $jumpEngine->doHyperspaceJump($ship, $gamedata); //Actually create damage entry to destroy ship.
                 }
             }
-        }    	
+        }
 
     } //endof method fireWeapons
 

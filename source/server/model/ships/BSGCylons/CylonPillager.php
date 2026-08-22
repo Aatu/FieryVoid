@@ -43,6 +43,7 @@ class CylonPillager extends HeavyCombatVessel{
         $this->addAftSystem(new Thruster(3, 14, 0, 6, 2));
 		$hyperdrive = new JumpEngine(3, 15, 4, 20);
 			$hyperdrive->displayName = 'Hyperdrive';
+			$hyperdrive->markLegacy(); //JUMP_POINTS_PLAN.md section 9 - this setting jumps by boost, not by vortex
 			$this->addAftSystem($hyperdrive);
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

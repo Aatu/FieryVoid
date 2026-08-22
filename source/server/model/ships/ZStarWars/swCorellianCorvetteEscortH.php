@@ -42,6 +42,7 @@ class swCorellianCorvetteEscortH extends MediumShip{
 	    
 	$hyperdrive = new JumpEngine(3, 8, 4, 10);
 	$hyperdrive->displayName = 'Hyperdrive';
+	$hyperdrive->markLegacy(); //JUMP_POINTS_PLAN.md section 9 - this setting jumps by boost, not by vortex
 	$this->addPrimarySystem($hyperdrive);
 	    
 	$this->addPrimarySystem(new SWMediumTLaser(2, 0, 360, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!

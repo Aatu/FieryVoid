@@ -18,13 +18,31 @@ class TrekWarpDrive extends JumpEngine{
 	);
 	
     function __construct($armour, $maxhealth, $powerReq, $output){
-        parent::__construct($armour, $maxhealth, $powerReq, $output);   
+        parent::__construct($armour, $maxhealth, $powerReq, $output);
 			$this->output = $output; //as JumpEngine doesn't show output really...
+
+		/* JUMP_POINTS_PLAN.md section 9 - a warp nacelle is NOT a B5 jump engine. Trek ships go to
+		   warp by themselves and leave nothing behind, so all 130-odd hulls in the Trek trees keep
+		   the pre-2026 one-click method: boost in Initial Orders, gone at the end of the turn.
+		   Marked on the CLASS rather than on each ship file because every instance of this class is
+		   a nacelle - see JumpEngine::markLegacy for what it flips and why it is a flag.
+
+		   ⚠️ MUST come after parent::__construct, which reads its 4th argument as a jump DELAY and
+		   sets loadingtime from it. Here that argument is the IMPULSE RATING (TrekImpulseDrive sums
+		   the nacelles' outputs for the ship's sublight thrust), so a nacelle rated 6 was claiming a
+		   6-turn recharge it does not have. markLegacy resets it to 1/1. */
+		$this->markLegacy();
     }
-	
+
      public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
-        $this->data["Special"] = "Nacelle is an FTL Drive, as well as element of sublight drive system. Provides thrust in amount equal to system rating."; 
+		/* Deliberately REPLACES the parent's text rather than appending to it - a nacelle is its own
+		   thing and the generic engine wording does not describe it. The jump instruction is
+		   restated here because of that replacement, not in addition to it. */
+        $this->data["Special"] = "Nacelle is an FTL Drive, as well as element of sublight drive system. Provides thrust in amount equal to system rating.";
+        $this->data["Special"] .= "<br>Boost in Initial Orders to go to warp at end of turn.";
+        $this->data["Special"] .= "<br>WARNING - Going to warp REMOVES ship from rest of the battle.";
+        $this->data["Special"] .= "<br>If the Nacelle is damaged, the ship has a % chance of being destroyed instead.";
     }
 }
 

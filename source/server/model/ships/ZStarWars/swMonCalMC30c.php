@@ -38,6 +38,7 @@ class swMonCalMC30c extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Engine(3, 8, 0, 5, 3));
 	$hyperdrive = new JumpEngine(3, 14, 5, 15);
 	$hyperdrive->displayName = 'Hyperdrive';
+	$hyperdrive->markLegacy(); //JUMP_POINTS_PLAN.md section 9 - this setting jumps by boost, not by vortex
 	$this->addAftSystem($hyperdrive);
 	$this->addFrontSystem(new SWRayShield(3,8,4,2,90,270)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addAftSystem(new Thruster(2, 8, 0, 4, 2));

@@ -69,6 +69,7 @@ class ColonialOdinClassAM extends BaseShip{
         $this->addAftSystem(new AmmoMissileRackS(4, 0, 0, 90, 270, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $hyperdrive = new JumpEngine(6, 30, 8, 20);
 			$hyperdrive->displayName = 'Hyperdrive';
+			$hyperdrive->markLegacy(); //JUMP_POINTS_PLAN.md section 9 - this setting jumps by boost, not by vortex
 			$this->addAftSystem($hyperdrive);
 
         $this->addLeftSystem(new Thruster(4, 20, 0, 4, 3));

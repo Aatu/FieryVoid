@@ -36,6 +36,7 @@ class swVindicator extends BaseShipNoFwd{
 	$this->addPrimarySystem(new Hangar(3, 24));   
 	$hyperdrive = new JumpEngine(4, 16, 5, 15);
 	$hyperdrive->displayName = 'Hyperdrive';
+	$hyperdrive->markLegacy(); //JUMP_POINTS_PLAN.md section 9 - this setting jumps by boost, not by vortex
 	$this->addPrimarySystem($hyperdrive);
 
         $this->addLeftSystem(new Thruster(3, 15, 0, 4, 1));

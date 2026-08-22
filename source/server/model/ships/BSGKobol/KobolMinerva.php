@@ -41,6 +41,7 @@ class KobolMinerva extends BaseShip{
         $this->addPrimarySystem(new EWNuclearTorpedo(4, 6, 3, 0, 360));
 		$hyperdrive = new JumpEngine(4, 16, 6, 20);
 			$hyperdrive->displayName = 'FTL Drive';
+			$hyperdrive->markLegacy(); //JUMP_POINTS_PLAN.md section 9 - this setting jumps by boost, not by vortex
 			$this->addPrimarySystem($hyperdrive);
 		
         $this->addFrontSystem(new Thruster(4, 9, 0, 3, 1));
