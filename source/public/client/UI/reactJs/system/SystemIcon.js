@@ -642,6 +642,21 @@ const getText = (ship, system) => {
             return "✓"; // ✓
         }
 
+        /* JUMP_POINTS_PLAN.md Stage 6 - a Jump Engine holding a jump point open counts the JUMP
+           POINT (turns open, out of four) instead of its own charge, which is the number that
+           matters while one stands. JumpEngine.getVortexIconLoad returns null the rest of the
+           time, so the engine falls through to the ordinary "charge / recharge time" display -
+           16/16 at the start of a scenario, 0/16 the turn it opens one, climbing again from the
+           turn after it closes.
+
+           BEFORE the firing branch on purpose: a maintaining engine holds a mode-7 order all turn,
+           and that branch has nothing to return for a weapon that cannot change shots and was not
+           a called shot, so the icon came out blank.*/
+        if (typeof system.getVortexIconLoad === 'function') {
+            const vortexLoad = system.getVortexIconLoad();
+            if (vortexLoad !== null && vortexLoad !== undefined) return vortexLoad;
+        }
+
         const firing = weaponManager.hasFiringOrder(ship, system);
 
         if (firing && system.canChangeShots) {

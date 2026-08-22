@@ -203,6 +203,16 @@ class Firing
         if ($weapon->hasOpenVortex($gamedata->turn))
             return "ship already holds an open vortex";
 
+        /* STAGE 6 - THE DRIVE HAS TO BE CHARGED. Opening a jump point spends the Jump Engine's
+         * whole charge, and it recharges one per turn from the turn AFTER that jump point closed
+         * (JumpEngine::getVortexRechargeLoad, and the ship file's 4th constructor argument is how
+         * long that takes). The client keeps a recharging engine out of the weapon sweep by the
+         * ordinary weaponManager.isLoaded test, so only a tampered POST reaches this. */
+        $charge   = $weapon->getVortexRechargeLoad($gamedata->turn);
+        $recharge = $weapon->getLoadingTime();
+        if ($charge < $recharge)
+            return "Jump Engine is still recharging ($charge/$recharge)";
+
         /* The hex must be EMPTY OF OBSTRUCTIONS - it may hold ships, friendly or enemy, but not any
          * part of a Terrain unit (which is also what a jump gate and, from Stage 3, a vortex are)
          * and not an Enormous unit. Terrain is tested across its WHOLE footprint, not just its
@@ -1281,7 +1291,9 @@ public static function firePreFiringWeapons($gamedata){
      * fireWeapons. Matching on damageclass rather than on type keeps it independent of how the
      * order was submitted. */
     public static function isHyperspaceLogOrder($fire){
-        return $fire->damageclass === 'HyperspaceJump' || $fire->damageclass === 'JumpFailure';
+        return $fire->damageclass === 'HyperspaceJump'
+            || $fire->damageclass === 'JumpFailure'
+            || $fire->damageclass === 'JumpVortex';   //STAGE 6 - a jump point opening or closing
     }
 
     public static function prepareFiring($gamedata, $dbManager = null){

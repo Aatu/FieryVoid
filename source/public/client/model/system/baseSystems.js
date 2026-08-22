@@ -1121,6 +1121,39 @@ JumpEngine.prototype.getHeldVortex = function () {
 	return shipManager.movement.getVortexHeldBy(this.ship);
 };
 
+/* STAGE 6 - WHAT THE SYSTEM ICON SHOWS, when it should show something other than the ordinary
+   load counter. Returns "N/4" - turns this jump point has been OPEN, out of the four it can ever
+   have - while one stands, and null the rest of the time so SystemIcon.getText falls through to
+   the normal "charge/recharge time" display.
+
+   The two are genuinely different things and Stage 5 conflated them: it sent the vortex age in
+   turnsloaded, which made the engine's real loading state unreadable. turnsloaded now means what
+   it means on every other weapon (JumpEngine::getVortexRechargeLoad), and this is the counter.
+
+   vortexTurnsOpen / vortexMaxTurns are sent by JumpEngine::stripForJson only while a jump point
+   stands, so their mere presence is the test. The fallback derives the same number from the vortex
+   UNIT - spawned == openTurn + 1, so age == turn - spawned + 1 - which covers a payload written
+   before this change (an in-flight game mid-deploy) and a lobby object with no live state at all.
+
+   ⚠️ It must come BEFORE getText's "has a firing order" branch. A maintaining engine holds a
+   mode-7 order all turn, and that branch has nothing to say about a weapon that cannot change
+   shots and was not a called shot - so the icon drew EMPTY. */
+JumpEngine.prototype.getVortexIconLoad = function () {
+	var max = this.vortexMaxTurns || 4;   //JumpEngine::MAX_VORTEX_TURNS
+
+	if (this.vortexTurnsOpen !== undefined && this.vortexTurnsOpen !== null) {
+		return this.vortexTurnsOpen + "/" + max;
+	}
+
+	var vortex = this.getHeldVortex();
+	if (!vortex || vortex.spawned === undefined || vortex.spawned === -1) return null;
+
+	var age = gamedata.turn - vortex.spawned + 1;
+	if (age < 0) return null;
+
+	return Math.min(age, max) + "/" + max;
+};
+
 //Does a Maintain declaration for THIS turn stand on this engine?
 JumpEngine.prototype.isMaintainingVortex = function () {
 	for (var i in this.fireOrders) {

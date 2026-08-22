@@ -297,6 +297,13 @@ window.ShipTooltip = function () {
             }
         }
 
+        /* JUMP_POINTS_PLAN.md Stage 6 - this unit has declared a jump point, or has plotted a
+           jump-out it has not committed yet. Yellow, the jump-point colour used everywhere else in
+           the feature. See shipManager.isJumpingToHyperspace for what counts and why. */
+        if (shipManager.isJumpingToHyperspace(ship)) {
+            toDisplay += '<span style="color:#e1b000;">Jumping to Hyperspace</span>; ';
+        }
+
         if (ship.attached && Object.keys(ship.attached).length > 0 && !ship.detached) {
             var targetId = Object.keys(ship.attached)[0];
             var location = Object.values(ship.attached)[0];

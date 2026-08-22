@@ -991,6 +991,14 @@ export const canSystemPowerSettings = (ship, system) => {
 export const canSystemActivation = (ship, system) => {
 	if (canPowerCapacitor(ship, system)) return false;//power capacitor is handled by its own component
 	if (system.name === 'GraviticAugmenter') return false;//handled by its own green menu, not the generic activation box
+	/* JUMP_POINTS_PLAN.md Stage 6 - and neither is the Jump Engine, for the same reason. Its
+	   canActivate/canDeactivate pair IS the Maintain toggle, which JumpEngineMenu draws as a
+	   labelled blue "Jump Point" panel; the generic box would draw the same switch a second time
+	   as a RED "Fire / Don't Fire" weapon menu, because a jump engine is a Weapon subclass.
+	   ⚠️ The canActivate/canDeactivate helpers further up already carry this exclusion - this is
+	   the one that was missed, and it is the one the <SystemActivation> component reads
+	   (user report 2026-08-22). */
+	if (system.name === 'jumpEngine') return false;
 
 	if (system.canActivate && typeof system.canActivate === 'function' && system.canActivate()) return true;
 	if (system.canDeactivate && typeof system.canDeactivate === 'function' && system.canDeactivate()) return true;

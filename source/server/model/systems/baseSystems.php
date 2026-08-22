@@ -5058,6 +5058,7 @@ class JumpEngine extends Weapon{
     public $displayName = "Jump Engine";
     public $delay = 0;
     public $primary = true;
+	public $iconPath = "JumpEngine1.png";
     
     /* STAGE 2 - THE BOOST-TO-JUMP PATH IS RETIRED, AND THIS FLAG IS THE WHOLE OF IT.
        $boostable = false stops the client offering a boost and stops shipManager.power.canBoost
@@ -5126,10 +5127,13 @@ class JumpEngine extends Weapon{
        icon knows to draw a jump point rather than an anonymous red hex. */
     public $weaponClass = "JumpPoint";
 
+    /* STAGE 6 - THE RECHARGE IS REAL, AND $loadingtime / $turnsloaded ARE WHERE IT LIVES.
+       Both are overwritten in the constructor from $delay (the B5W jump delay, 8-36 across the
+       fleet) - these declarations only give the properties a value for anything that reads the
+       class before an instance exists. A jump engine STARTS a scenario fully loaded, spends its
+       whole charge opening a jump point, and recharges from the turn AFTER that jump point
+       closes: see getVortexRechargeLoad, which is what actually answers the question. */
     public $loadingtime = 1;
-    /* A jump engine is always "loaded". Ships bought BEFORE this class became a Weapon have no
-       tac_systemdata loading row for it, so $turnsloaded would arrive null and the client would
-       paint the icon as still charging until the next turn advance wrote one. */
     public $turnsloaded = 1;
 
     /* Weapon's chart (ReducedRange 14 / ReducedDamage 19) describes a gun, and neither penalty
@@ -5179,18 +5183,80 @@ class JumpEngine extends Weapon{
            ShipSystem was handed before. */
         parent::__construct($armour, $maxhealth, $powerReq, 0, 360);
 
-        /* STAGE 5 - $delay IS NOW WHERE THE REAL LOADED STATE LIVES.
+        /* STAGE 6 - THE 4th ARGUMENT IS THE RECHARGE TIME, AND IT IS THE LOADING TIME.
 
-           The 4th argument is the B5W JUMP DELAY (8 to 36 across the fleet) - how long the drive
-           took to charge under the boost-to-jump rules. Nothing has read it since those rules were
-           retired in Stage 2, and as a Weapon subclass $delay would now be taken for an INITIATIVE
-           delay if anything ever did, which is worse than useless.
+           It is the B5W JUMP DELAY (0 to 65 across the fleet, 16 on a Primus): how long the drive
+           needs to charge before it can open a jump point. Stage 5 parked it in $delay and drove
+           the icon off $turnsloaded instead; that made $turnsloaded a vortex counter rather than a
+           loading state, which is the wrong meaning for the one property every other weapon in
+           the game uses for exactly one thing (user ruling 2026-08-22). It now says what it means:
 
-           stripForJson hands the client $turnsloaded as the VORTEX'S AGE rather than the engine's
-           loading state (see there), so the field that genuinely answers 'is this engine ready?'
-           has to be somewhere else. This is it. The value is always 1: a jump engine is always
-           loaded - it never fires and never reloads. */
-        $this->delay = $this->turnsloaded;
+             - The engine STARTS the scenario fully loaded ($turnsloaded == $loadingtime), because
+               a fleet arrives with charged drives. A Primus reads 16/16 on turn 1.
+             - Opening a jump point spends the charge: 0/16 for the rest of that turn.
+             - While the vortex stands the icon shows the VORTEX counter instead (N/4, see
+               getVortexAge) and the charge does not move.
+             - From the turn AFTER the vortex closes it climbs one per turn, back to 16/16.
+
+           getVortexRechargeLoad derives all four states from the vortex note, so none of it
+           depends on a stored tac_systemdata loading row (see stripForJson).
+
+           $delay keeps the raw value because that is the name the rulebook uses, and one ship file
+           in the fleet passes 0 - the max(1, ...) below is what stops that meaning "never loaded".
+           ⚠️ Nothing else in the codebase reads $delay; as a Weapon subclass it would be taken
+           for an INITIATIVE delay if anything ever did, so do not start. */
+        $this->delay       = (int)$delay;
+        $this->loadingtime = max(1, (int)$delay);
+        $this->turnsloaded = $this->loadingtime;
+    }
+
+    /* THE ENGINE'S REAL LOADING STATE on $turn, derived from the vortex note rather than stored.
+
+       Four states, in the order they occur (see the constructor):
+         no vortex ever opened                  -> fully charged
+         a vortex is open, or closes THIS turn   -> 0; the charge was spent opening it and does not
+                                                   come back while the jump point stands
+         the turn after it closed                -> 1, climbing one per turn to the cap
+         a later vortex seen from an earlier replay turn -> fully charged, which is what was true then
+
+       DERIVED, NOT STORED, on purpose. The ordinary Weapon loading machinery would ALMOST do this
+       - a ballistic order zeroes the count at the phase-2 advance and phase -1 adds one per turn -
+       but it comes out a turn early whenever the vortex closes without a Maintain declaration on
+       its last turn (unmaintained, out of range, the four-turn cap), because the recharge starts
+       from the turn after the CLOSURE, not from the turn after the last order. The note already
+       carries both turns, so asking it is both shorter and exact.
+
+       ⚠️ (int) on both sides: $gamedata->turn / TacGamedata::$currentTurn are STRINGS out of
+       mysqli (plan section 5 trap 10) while the note's turns are int-cast. */
+    public function getVortexRechargeLoad($turn)
+    {
+        $turn   = (int)$turn;
+        $charge = max(1, (int)$this->delay);
+
+        if ($this->vortexOpenTurn === null) return $charge;      //never opened one
+        if ((int)$this->vortexOpenTurn > $turn) return $charge;   //a later vortex, from an earlier replay turn
+
+        $closeTurn = (int)$this->vortexCloseTurn;
+        if ($closeTurn < 0 || $turn <= $closeTurn) return 0;      //open, or closing at the end of this turn
+
+        return min($charge, $turn - $closeTurn);                  //recharging, from the turn AFTER it closed
+    }
+
+    /* How many turns the vortex this engine holds has been OPEN as of $turn, or null when it holds
+       none. 0 on the turn it was DECLARED (it has formed; it is not open yet), 1 on the first turn
+       a unit can fly into it, up to MAX_VORTEX_TURNS.
+
+       This is the counter Stage 5 used to smuggle out through $turnsloaded. It now travels as a
+       field of its own (see stripForJson) so that the loading state can mean loading. */
+    public function getVortexAge($turn)
+    {
+        $turn = (int)$turn;
+
+        if ($this->activeVortexId === null || $this->vortexOpenTurn === null) return null;
+        if ((int)$this->vortexOpenTurn > $turn) return null;      //a later vortex, from an earlier replay turn
+        if (!$this->hasOpenVortex($turn)) return null;            //closed - the engine is free again
+
+        return min($turn - (int)$this->vortexOpenTurn, self::MAX_VORTEX_TURNS);
     }
 
     /* Has $ship declared a vortex on $turn? Public static because the CONCEALMENT systems need to
@@ -5277,7 +5343,7 @@ class JumpEngine extends Weapon{
      * could be handed to the Movement phase as an active unit. The two early returns above it are
      * unreachable for a ship that just declared a vortex: such a ship is on the board, undestroyed,
      * not terrain and not a mine, which is precisely what hasShipsAtIniative requires. */
-    public static function spawnDeclaredVortices($gamedata)
+    public static function spawnDeclaredVortices($gamedata, $dbManager = null)
     {
         foreach ($gamedata->ships as $ship){
             if ($ship->isTerrain()) continue; //terrain never declares; Phase 2's fixed gates get their own path
@@ -5292,6 +5358,28 @@ class JumpEngine extends Weapon{
                 $system->openVortex($ship, $declaration, $gamedata);
             }
         }
+
+        /* STAGE 6 - openVortex writes a COMBAT-LOG ORDER, and InitialOrdersGamePhase::advance has
+         * no submit of its own, so this sweep has to persist its own. Same shape
+         * Movement::resolveJumpOuts uses at the other end of the turn.
+         *
+         * Phase 2 explicitly: submitFireorders reads the phase only to filter ballistic and
+         * pre-firing orders, and these are neither - passing 1 would silently drop every one.
+         *
+         * ⚠️ Narrowed to the orders THIS sweep wrote rather than to everything getNewFireOrders
+         * returns. Nothing else in advance() creates fire orders today, but a submit that hoovers
+         * up whatever happens to be marked addToDB is a trap for whatever gets added next: the
+         * ships' own declarations went in during process(), and re-submitting one would duplicate
+         * a row rather than fail loudly. */
+        if ($dbManager === null) return;
+
+        $logOrders = array();
+        foreach ($gamedata->getNewFireOrders() as $fire){
+            if ($fire->damageclass === 'JumpVortex') $logOrders[] = $fire;
+        }
+        if (empty($logOrders)) return;
+
+        $dbManager->submitFireorders($gamedata->id, $logOrders, $gamedata->turn, 2);
     }
 
     /* This engine's OPENING declaration for $turn, or null. Deliberately a mirror of the rules
@@ -5459,6 +5547,45 @@ class JumpEngine extends Weapon{
         $this->activeVortexId = $vortexId;
         $this->vortexOpenTurn = $gamedata->turn;
         $this->vortexCloseTurn = -1;
+
+        $distance = $ship->getHexPos()->distanceTo($vortex->getHexPos());
+        self::writeVortexLogOrder($ship, $gamedata,
+            " opens a jump point " . $distance . ($distance == 1 ? " hex" : " hexes")
+            . " away. It forms at the end of this turn and can be entered from next turn.");
+    }
+
+    /* STAGE 6 - THE COMBAT-LOG LINE FOR A JUMP POINT OPENING OR CLOSING.
+     *
+     * The combat log is fire-order driven, so an event that is not a shot needs an order to hang
+     * itself on. That is exactly what JumpEngine::doHyperspaceJump, Movement::applyJumpOut and
+     * PhasingDrive's half-phase self-destruct all already do, and this is the same three lines:
+     * a RammingAttack order at 100/100 against the ship itself, carrying the sentence to print.
+     *
+     * ⭐ RammingAttack, not the Jump Engine, and it matters. An order sitting on the engine's own
+     * fireOrders would be indistinguishable from a DECLARATION on the next load -
+     * getVortexDeclaration matches on turn plus firing mode - and firing mode 1 is a real facing.
+     *
+     * ⭐ damageclass 'JumpVortex' does two jobs. Firing::isHyperspaceLogOrder matches on it, so
+     * the four fire-order gathers skip it instead of re-resolving it as a ram on a later turn
+     * (see the note there - this is the trap Stage 4 hit). And weaponManager.doShortLogText lists
+     * it, so the log prints the sentence alone rather than "firing 1x Ramming Attack ... 1/1 shots
+     * hit" at a ship that was never shot at.
+     *
+     * No damage entry, deliberately: nothing is being hurt. */
+    protected static function writeVortexLogOrder($ship, $gamedata, $pubNotes)
+    {
+        $rammingSystem = $ship->getSystemByName("RammingAttack");
+        if (!$rammingSystem) return;   //every ship has one, but a jump gate (Phase 2) may not
+
+        $newFireOrder = new FireOrder(
+            -1, "normal", $ship->id, $ship->id,
+            $rammingSystem->id, -1, $gamedata->turn, 1,
+            100, 100, 1, 1, 0,
+            0, 0, 'JumpVortex', 10001
+        );
+        $newFireOrder->pubnotes = $pubNotes;
+        $newFireOrder->addToDB = true;
+        $rammingSystem->fireOrders[] = $newFireOrder;
     }
 
     /* ================= STAGE 5 - THE VORTEX LIFECYCLE =============================
@@ -5582,6 +5709,13 @@ class JumpEngine extends Weapon{
 
         $this->vortexCloseTurn   = $gamedata->turn;
         $this->vortexCloseReason = $reason;
+
+        /* STAGE 6 - the reason reaches the PLAYER, not just fieryvoid.log. It is the only part of
+         * this feature a player can act on ("systems left online: Heavy Laser; ...") and it was
+         * Stage 5's first reported gap. FireGamePhase::advance submits new fire orders after this
+         * sweep, so the order needs no submit of its own - unlike the opening one. */
+        self::writeVortexLogOrder($ship, $gamedata,
+            " loses its jump point at the end of this turn - " . $reason . ".");
 
         Debug::log("Jump vortex " . $this->activeVortexId . " (opened turn " . $this->vortexOpenTurn
             . " by ship " . $ship->id . ", game " . $gamedata->id . ") closes at the end of turn "
@@ -5899,14 +6033,29 @@ class JumpEngine extends Weapon{
 	}   	
 
      public function setSystemDataWindow($turn){
-        $this->data["Special"] = "<br>Select in Initial Orders and target a hex within " . $this->range . " hexes to project a jump vortex.";
-        $this->data["Special"] .= "<br>To MAINTAIN an open vortex, target its own hex in Initial Orders - and shut down every";
-        $this->data["Special"] .= " system except the Scanner and this one, or it collapses at the end of the turn.";
-        $this->data["Special"] .= "<br>A vortex lasts at most 4 turns, and closes if its holder is destroyed or ends the turn more";
-        $this->data["Special"] .= " than " . $this->range . " hexes away.";
-        $this->data["Special"] .= "<br>WARNING - Jumping to hyperspace REMOVES a unit from the rest of the battle.";
-        $this->data["Special"] .= "<br>If Jump Engine is damaged, ship has a % chance of being destroyed opening jump point.";
-        $this->data["Special"] .= "SHOULD NOT be shut down for power (unless damaged >50% or if Desperate rules apply).";
+        /* STAGE 6 - the tooltip describes the VORTEX rules end to end. It used to describe the
+           retired boost-to-jump method, and then Stage 5's half-way version; this is the whole
+           thing, in the order a player meets it. */
+        $recharge = max(1, (int)$this->delay);
+
+        $this->data["Special"]  = "<br><b>OPENING A JUMP POINT.</b> Select this system in Initial Orders and target a hex";
+        $this->data["Special"] .= " within " . $this->range . " hexes (line of sight required; the hex must be clear of terrain,";
+        $this->data["Special"] .= " other jump points and Enormous units). Set the vortex FACING with the on-map arrow, then";
+        $this->data["Special"] .= " confirm. The jump point forms at the end of that turn and can be entered from the NEXT turn.";
+        $this->data["Special"] .= "<br><b>USING IT.</b> In Movement, fly any unit into the jump point hex through the side the";
+        $this->data["Special"] .= " arrow points at, then press Jump to Hyperspace. Movement ends there and the unit leaves the";
+        $this->data["Special"] .= " battle keeping its full combat value. Any unit may use any open jump point, including an enemy's.";
+        $this->data["Special"] .= "<br><b>MAINTAINING IT.</b> Use the Jump Point ON/OFF switch in this system's menu each Initial";
+        $this->data["Special"] .= " Orders. It shuts the ship down for the turn - everything except the Scanner and this system -";
+        $this->data["Special"] .= " which is the price of holding the jump point open. A jump point lasts " . self::MAX_VORTEX_TURNS;
+        $this->data["Special"] .= " turns at most, and closes at the end of any turn it is not maintained, its holder ends more than";
+        $this->data["Special"] .= " " . $this->range . " hexes away, or its holder is destroyed or leaves the battle.";
+        $this->data["Special"] .= "<br><b>RECHARGE.</b> Opening a jump point spends the drive's whole charge. It recharges from the";
+        $this->data["Special"] .= " turn after that jump point closes, 1 per turn, and cannot open another until it reads " . $recharge . "/" . $recharge . ".";
+        $this->data["Special"] .= "<br><b>WARNING</b> - jumping to hyperspace REMOVES a unit from the rest of the battle.";
+        $this->data["Special"] .= "<br>A DAMAGED Jump Engine may fail: at the end of every turn it opens or maintains a jump point,";
+        $this->data["Special"] .= " the ship is destroyed on a d100 roll at or under the percentage of Jump Engine boxes lost.";
+        $this->data["Special"] .= "<br>SHOULD NOT be shut down for power (unless damaged >50% or if Desperate rules apply).";
 		/* ShipSystem, not parent. Weapon::setSystemDataWindow appends a gun's tooltip block -
 		   Damage, Fire control, Resolution Priority - which would be meaningless (and mostly zero)
 		   on a jump engine. Same idiom LCVRail uses two classes up. Plan Stage 6 rewrites this
@@ -5920,37 +6069,40 @@ class JumpEngine extends Weapon{
 		$this->data["Range"] = $this->range;
     }
 
-    /* STAGE 5 - THE ICON READS N/4 WHILE A JUMP POINT STANDS (user request 2026-08-22).
+    /* STAGE 6 - THE PAYLOAD CARRIES TWO SEPARATE THINGS, BECAUSE THEY ARE TWO SEPARATE THINGS.
      *
-     * A jump engine never reloads, so the "1/1" every other weapon's icon uses for its loading
-     * state told the player nothing. While this engine holds a vortex the same two numbers carry
-     * something worth knowing instead: how many turns the jump point has been OPEN, out of the four
-     * it can ever have. The turn it was declared reads 0/4 - it has formed, it is not open yet.
+     * 1. THE LOADING STATE, in $turnsloaded / $loadingtime, which every other weapon in the game
+     *    uses for exactly one purpose and which now means the same here: how charged the drive is,
+     *    out of the recharge time the ship file passed as $delay (see the constructor). Sent from
+     *    getVortexRechargeLoad rather than from the stored value so it cannot drift out of step
+     *    with the vortex note - and $loadingtime is sent explicitly because Weapon::stripForJson
+     *    does not send it, so it would otherwise come off a STATIC BLUEPRINT that may predate this
+     *    change.
      *
-     * ⭐ THIS IS A PAYLOAD OVERRIDE ONLY. The engine's own $turnsloaded / $loadingtime are
-     * left alone, so nothing on the server changes; $delay carries the real loaded state for
-     * anything that needs to ask (see the constructor).
+     *    ⭐ It also does the job Stage 5's counter was doing by accident: weaponManager.isLoaded
+     *    is `loadingtime <= turnsloaded`, so a recharging engine reads as NOT LOADED and drops out
+     *    of weaponManager.targetHex's weapon sweep and off the fire-order buttons. While a vortex
+     *    stands the charge is 0, which is the one-vortex-per-ship rule; after it closes the count
+     *    climbs, which is the recharge rule. Neither has to be restated in the UI.
      *
-     * ⭐ AND IT DOES A SECOND, WANTED JOB. weaponManager.isLoaded is
-     * `loadingtime <= turnsloaded`, so an age below the cap reads as NOT LOADED on the client -
-     * which takes the engine out of weaponManager.targetHex's weapon sweep and off the fire-order
-     * buttons for exactly as long as it is holding a jump point open. That is the rule (one vortex
-     * per ship at a time) expressing itself in the UI rather than being restated there.
-     *
-     * No vortex - the ordinary 1/1 - means ready to declare one, which is exactly what it says. */
+     * 2. THE VORTEX COUNTER, in $vortexTurnsOpen / $vortexMaxTurns, sent only while a jump point
+     *    actually stands. The system icon shows this INSTEAD of the loading pair for as long as it
+     *    is present (SystemIcon.getText via JumpEngine.getVortexIconLoad), so the player sees
+     *    "2/4 turns open" while it matters and "7/16 charged" the rest of the time.
+     *    Emitted only when there is a vortex, so every other load is a byte-for-byte no-change. */
     public function stripForJson(){
         $strippedSystem = parent::stripForJson();
 
-        if ($this->activeVortexId === null || $this->vortexOpenTurn === null) return $strippedSystem;
-
         $turn = (int)TacGamedata::$currentTurn;   //(int): mysqli hands the turn back as a STRING
-        $age  = $turn - (int)$this->vortexOpenTurn;
 
-        if ($age < 0) return $strippedSystem;                       //a later vortex, seen from an earlier replay turn
-        if (!$this->hasOpenVortex($turn)) return $strippedSystem;   //closed - the engine is free again
+        $strippedSystem->turnsloaded = $this->getVortexRechargeLoad($turn);
+        $strippedSystem->loadingtime = max(1, (int)$this->delay);
 
-        $strippedSystem->turnsloaded = min($age, self::MAX_VORTEX_TURNS);
-        $strippedSystem->loadingtime = self::MAX_VORTEX_TURNS;
+        $age = $this->getVortexAge($turn);
+        if ($age !== null){
+            $strippedSystem->vortexTurnsOpen = $age;
+            $strippedSystem->vortexMaxTurns  = self::MAX_VORTEX_TURNS;
+        }
 
         return $strippedSystem;
     }

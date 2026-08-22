@@ -2203,6 +2203,17 @@ const getStatusBanners = (ship) => {
         }
     }
 
+    /*JUMP_POINTS_PLAN.md Stage 6: a declared jump point, or an uncommitted jump-out. Same
+      --fv-warn yellow the jump-point hex marker, the facing arrow and the Jump Engine's map arc
+      all use, so the whole feature reads as one thing. shipManager.isJumpingToHyperspace holds
+      what counts - the fire order IS the marker, so cancelling it clears this.*/
+    if (shipManager.isJumpingToHyperspace(ship)) {
+        banners.push({
+            key: 'jumping', color: theme.colors.warning, bg: 'rgba(225, 176, 0, 0.10)',
+            text: 'Jumping to Hyperspace'
+        });
+    }
+
     //this ship rides a host (e.g. breaching pod attached to its target)
     if (ship.attached && Object.keys(ship.attached).length > 0 && !ship.detached) {
         const hostShip = window.gamedata.getShip(Object.keys(ship.attached)[0]);

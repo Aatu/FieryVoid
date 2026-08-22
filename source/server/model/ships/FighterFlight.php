@@ -94,6 +94,13 @@ class FighterFlight extends BaseShip
 	current algorithm: active fighters are worth their full value (except when damaged over 50%, then they get 3/4), inactive are worth nothing
 	*/
 	public function calculateCombatValue() {
+		/* JUMP_POINTS_PLAN.md Stage 6 - a flight that LEFT through a jump point keeps the value it
+		   had when it went, exactly as a hull does (BaseShip::calculateCombatValue has the same
+		   branch; this class overrides the whole method, so it needs its own). Without it the
+		   craft-by-craft count below reads every craft as destroyed - which is how a flight is
+		   taken off the board - and the flight would be scored as a kill for the enemy. */
+		if ($this->isDestroyed() && $this->hasJumpedToHyperspace()) return $this->getCVBeforeJump();
+
 		$effectiveValue = 100;
 		//combat value of flight: combat value of craft remaining in flight. Destroyed or dropped out craft have no value, still fighting craft have full value even if damaged
 		$craftActive = 0;
@@ -227,6 +234,50 @@ class FighterFlight extends BaseShip
     public function getSampleFighter()
     {
         return $this->systems[1];
+    }
+
+    /* ================ JUMP_POINTS_PLAN.md Stage 6 - A FLIGHT CAN LEAVE THROUGH A JUMP POINT =====
+     *
+     * BaseShip answers both of these off the ship's PRIMARY STRUCTURE, and a flight has none
+     * (getStructureSystem returns null). Movement::applyJumpOut therefore takes a flight out by
+     * destroying every craft in it with a HyperspaceJump damage entry - which is what "the flight
+     * is gone" means for a flight - and hangs the CV note on the sample fighter. These two read
+     * that back.
+     *
+     * hasJumpedToHyperspace is the same shape as BaseShip::hasHyperspaceJumpDamage, asked of the
+     * craft instead of the hull: SOME craft carries a jump entry, and the damage that is NOT jump
+     * damage left at least one craft alive - i.e. the flight was still flying when it jumped. A
+     * flight shot to pieces and then handed a jump entry (which cannot happen, but the test should
+     * not depend on that) reads as destroyed, exactly as a hull would. */
+    public function hasJumpedToHyperspace(){
+        $jumped   = false;
+        $survivor = false;
+
+        foreach ($this->systems as $craft){
+            if (!is_array($craft->damage)) continue;
+
+            $craftJumped = false;
+            $nonJump     = 0;
+            foreach ($craft->damage as $entry){
+                if ($entry->damageclass === 'HyperspaceJump'){
+                    $craftJumped = true;
+                    continue;
+                }
+                $nonJump += max(0, $entry->damage - $entry->armour);
+            }
+
+            if ($craftJumped){
+                $jumped = true;
+                if ($nonJump < $craft->maxhealth) $survivor = true;
+            }
+        }
+
+        return $jumped && $survivor;
+    }
+
+    public function getCVBeforeJump(){
+        $sample = $this->getSampleFighter();
+        return $sample ? $sample->getCVBeforeJump() : 0;
     }
 
 

@@ -61,7 +61,9 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
     // terrain, which is exactly what makes hasShipsAtIniative find it.
     //
     // Note $gameData->phase already reads 2 by now - never branch on it in the sweep.
-    JumpEngine::spawnDeclaredVortices($gameData);
+    // $dbManager is threaded through so the sweep can persist the "a jump point opens" combat-log
+    // order it writes (Stage 6): advance() has no submitFireorders of its own.
+    JumpEngine::spawnDeclaredVortices($gameData, $dbManager);
 
     $dbManager->updateGamedata($gameData);
 }

@@ -4,7 +4,7 @@ Replaces the current one-click "boost the Jump Engine, vanish at end of turn" es
 tabletop rules: a ship **projects a vortex** into a nearby hex, the vortex **forms**, **persists**,
 can be **maintained**, and any unit that **flies into its mouth** leaves the battle.
 
-Status: **STAGES 1, 2, 2b, 3, 4 AND 5 BUILT (2026-08-21/22), stage 6 not started.**
+Status: **ALL SIX STAGES BUILT (2026-08-21/22).**
 ⚠️ Stage 2 retires the boost-to-jump path and Stage 4 adds the replacement, so **stages 2–5 must
 ship as ONE live deploy** — deploying Stage 2 alone leaves a game with no way to leave a battle.
 That deploy is now complete: 2–5 are all in the tree.
@@ -213,16 +213,29 @@ Other consequences, all deliberate:
   by throwing the toggle to OFF — a generic "remove fire order" would strip the declaration and
   leave the ship's systems shut down with nothing holding them that way. On the turn a vortex is
   *declared* there is no unit yet, so the ordinary remove-and-redeclare idiom still re-aims it.
-- ⭐ **The engine's icon counts the vortex instead of its loading.** A jump engine never reloads, so
-  the `1/1` every other weapon shows said nothing; while a vortex stands the same two numbers read
-  **N/4** — turns open, out of the four it can have — with the declaring turn reading `0/4`. It is a
-  `stripForJson` override only, so no server state moves. It also does a second, wanted job:
-  `weaponManager.isLoaded` is `loadingtime <= turnsloaded`, so an age below the cap reads as NOT
-  LOADED and the engine drops out of `targetHex`'s weapon sweep for exactly as long as it is holding
-  a jump point open — the one-vortex-per-ship rule expressing itself in the UI rather than being
-  restated there. The engine's real loaded state moved to **`$delay`**, the constructor's 4th
-  argument: that is the retired B5W jump delay (8–36 across the fleet), read by nothing since Stage
-  2, and as a `Weapon` it would be taken for an initiative delay if anything ever did.
+- ⭐ **The engine's icon counts the vortex while one stands, and its CHARGE the rest of the time**
+  (revised in Stage 6, user ruling 2026-08-22). While a jump point is open the two numbers read
+  **N/4** — turns open, out of the four it can have — with the declaring turn reading `0/4`. That
+  counter travels in its own payload field (`vortexTurnsOpen` / `vortexMaxTurns`), because
+  `$turnsloaded` now means on a Jump Engine exactly what it means on every other weapon:
+
+  > **A jump engine STARTS a scenario fully charged, spends the whole charge opening a jump point,
+  > and recharges at 1 per turn from the turn AFTER that jump point closes.** The recharge time is
+  > the ship file's 4th constructor argument — the B5W jump delay, 0–65 across the fleet, 16 on a
+  > Primus — and it is `$loadingtime`. So a Primus reads 16/16 on turn 1, 0/16 for the rest of the
+  > turn it opens one, N/4 while that jump point stands, and 1/16, 2/16 … from the turn after it
+  > closes. It cannot open another until it is full again.
+
+  It is a **derived** value (`JumpEngine::getVortexRechargeLoad`, off the vortex note's open and
+  close turns), not a stored one — see Stage 6 for why the ordinary Weapon loading machinery is out
+  by a turn. And it does a second, wanted job for free: `weaponManager.isLoaded` is
+  `loadingtime <= turnsloaded`, so a discharged or recharging engine reads NOT LOADED and drops out
+  of `targetHex`'s weapon sweep — the one-vortex-per-ship rule and the recharge rule both
+  expressing themselves in the UI rather than being restated there.
+  (⚠️ Stage 5 put the vortex age in `$turnsloaded` and parked the loaded state in `$delay`. Stage 6
+  undid that. `$delay` still holds the raw constructor value because that is the rulebook's name for
+  it, but nothing reads it except the constructor — as a `Weapon` subclass it would be taken for an
+  INITIATIVE delay if anything ever did.)
 
 ### 2.5 Jumping out
 
@@ -237,8 +250,10 @@ Other consequences, all deliberate:
   (see Stage 4).
 - An **attached** pod or grapple is carried out with its host and can never use a vortex on its own:
   its movement rows mirror the host's, so it has no entry step of its own to judge.
-- ⚠️ **Fighter flights are excluded** as of Stage 4 — they have no primary Structure to destroy, so
-  the removal path does not exist for them yet. See the two gaps listed under Stage 4.
+- **Fighter flights may use one too, from Stage 6.** A flight has no primary Structure, so
+  `Movement::applyJumpOut` takes it off the board by destroying every CRAFT in it with a
+  `HyperspaceJump` entry instead, and hangs the CV note on the sample fighter. (Stage 4 blocked
+  them on both sides because that path did not exist yet.)
 - No failure roll on entering. The risk was taken when the vortex was opened.
 
 ### 2.6 Jump failure
@@ -896,15 +911,15 @@ so autoload and the static blueprints are untouched; `fvbuild.ps1 -Client` only.
 | Attached units are taken **explicitly** | Plan §5 trap 7. A pod's rows are all type `attached` and mirror the host's positions, so it can never satisfy the entry test on its own — which is exactly why it would otherwise be left sitting on an empty hex. `resolveJumpOuts` walks `hasAttached` after the host |
 | `resolveJumpOuts` runs **first** in `advance()` | A unit that has left then reads `isDestroyed()` for the rest of the method: no dummy `end` move, no post-move stealth check, no Pre-Firing slot held open for it. It is also what makes a double `advance()` a no-op |
 
-**Two deliberate gaps, both reported rather than silently half-built:**
+**Two deliberate gaps, both reported rather than silently half-built — BOTH CLOSED IN STAGE 6:**
 
-1. **Fighter flights cannot jump out.** A flight has no primary Structure to destroy, so the removal
-   every other unit uses does not exist for it — a docked flight is taken off the board by a note on
-   its CARRIER's hangar, and an independent flight would need its own note-backed path plus a loader.
-   Blocked on both sides (`canJumpOut` and `resolveJumpOuts`) so the button never appears and a
-   tampered order is refused. A flight docked in a carrier that jumps still goes with it, unchanged.
-2. **No commit-time warning.** `gamedata.js`'s commit checklist still lists only boost-jumping ships;
-   a vortex jump-out commits without the "this ship will leave the battle" confirmation. Stage 6.
+1. ~~**Fighter flights cannot jump out.**~~ A flight has no primary Structure, so the removal every
+   other unit uses did not exist for it. **Stage 6 built it**: every craft takes a `HyperspaceJump`
+   entry and the CV note goes on the sample fighter. A flight docked in a carrier that jumps still
+   goes with it, unchanged, and that is still a different question with a different answer
+   (`jumpedWithCarrier`) because nothing on that flight is damaged at all.
+2. ~~**No commit-time warning.**~~ **Stage 6** added *"The following units will LEAVE THE BATTLE
+   through a jump point"* to the Movement-phase commit dialogue.
 
 **Gate result 2026-08-21:** `fvbuild.ps1 -Check` — autoload map current, ship-data validator 0 new
 findings, replay harness **158 passed / 1 failed**, the 1 being game 4302's usual baseline staleness
@@ -1035,12 +1050,13 @@ are reconstructed in memory and pushed through the real `stripForJson`, then thr
 
 Replay harness 158 passed / 0 failed.
 
-⚠️ **Known, pre-existing, NOT fixed:** from **two turns after** the jump the carrier's own row reads
-"Destroyed" (red) rather than "Jumped" (orange). `ShipSystem::stripForJson` aggregates damage older
-than `currentTurn - 1` into one synthetic `Historical` entry, which drops the `HyperspaceJump`
-damageclass that `shipManager.hasJumpedNotDestroyed` keys off; the summed damage then reads as a kill.
-The FLIGHTS stay orange (server-side `hasJumpedToHyperspace` asks the jump engine's own note, which
-survives aggregation). Predates Stage 4 — it applies to Firing-phase boost jumps too.
+⚠️ **Known, pre-existing — FIXED IN STAGE 6.** From **two turns after** the jump the carrier's own row
+read "Destroyed" (red) rather than "Jumped" (orange). `ShipSystem::stripForJson` aggregates damage
+older than `currentTurn - 1` into one synthetic `Historical` entry, which dropped the
+`HyperspaceJump` damageclass that `shipManager.hasJumpedNotDestroyed` keys off; the summed damage
+then read as a kill. It predated Stage 4 and applied to Firing-phase boost jumps too. `HyperspaceJump`
+entries are now passed through the aggregation whole. The tell was that the FLIGHTS stayed orange —
+the server answers for them off the jump engine's own note, which no aggregation touches.
 
 ⭐ **Fifth pass — the jumped ship's own row could not be painted at all, for a reason older than
 this feature.** `gamedata.drawIniGUI` gives every Order of Battle `<tr>` the ship's **raw id**
@@ -1144,23 +1160,84 @@ released boost; `setOnline` and `onlineAll` both refusing while it stands; the r
 last turn's declaration does not count. And `JumpEngineMenu` is bundled with esbuild — which
 RESOLVES imports, unlike a parse-check — and `renderToString`d in both states, **8 assertions**.
 
-**Two deliberate gaps, reported rather than silently half-built:**
+**Two deliberate gaps, reported rather than silently half-built — BOTH CLOSED IN STAGE 6:**
 
-1. **The closure reason is not in the combat log yet.** It is persisted in the note and written to
-   `source/logs/fieryvoid.log`; the player-facing line is Stage 6, which owns combat-log work. What
-   the player *does* get today is the client warning at declaration time, which is the only one of
-   the reasons they can still do something about.
-2. **No commit-time warning for maintaining**, matching Stage 4's gap: `gamedata.js`'s commit
-   checklist still lists only boost-jumping ships. Much less of a hole than it was — the toggle
-   powers the ship down itself, so the commonest way to lose a vortex by accident no longer exists —
-   but a holder that drifts out of range during Movement still gets no warning at commit.
+1. ~~**The closure reason is not in the combat log yet.**~~ **Stage 6** writes it as a
+   `JumpVortex` log order in `recordVortexClosure`, so the turn's combat log reads *"<ship> loses
+   its jump point at the end of this turn — systems left online: Heavy Laser; …"*.
+2. ~~**No commit-time warning for maintaining.**~~ **Stage 6** added *"The JUMP POINTS held by the
+   following ships will CLOSE at the end of this turn"* to the Initial-Orders commit dialogue. It
+   is asked of the VORTEX rather than of the toggle, so it also covers the cases where maintaining
+   was never on offer — the holder is out of range, or the four-turn cap has been reached — which
+   are exactly the ones a player had no other way of seeing coming.
 
-### Stage 6 — polish
-Replay (`ShipJumpAnimation` / the existing `ShipJumpPoint` particle effect for formation and
-closure), combat-log lines, `faq.php` section, tooltip text on the Jump Engine
-(`setSystemDataWindow` — the current text at
-[baseSystems.php:5172](source/server/model/systems/baseSystems.php#L5172) describes the boost method
-and must be rewritten).
+### Stage 6 — polish — **BUILT 2026-08-22**
+The plan's four polish items (replay effect, combat-log lines, `faq.php`, the Jump Engine tooltip)
+plus an eleven-point list from the user. **Twenty files — eight server, twelve client, one doc — and
+one new scratch harness. No new PHP class, so the autoload map is untouched; `JumpEngine`'s
+`$loadingtime` / `$turnsloaded` / `$delay` are public, so the STATICS want regenerating, and two
+React files changed, so this is a full `fvbuild.ps1` (autoload + statics + yarn build).**
+
+| # | What the user asked for | Where it landed |
+|---|---|---|
+| 1 | Warn when a jump point is about to close unmaintained | `gamedata.js` Initial-Orders commit checklist |
+| 2 | A jumped ship must stay "Jumped", not turn "Destroyed" two turns later | `ShipSystem::stripForJson` |
+| 3 | A yellow *Jumping to Hyperspace* marker while the departure is only planned | `ships.js` + `ShipTooltip.js` + `ShipWindow.js` |
+| 4 | The Jump Drive's map arc is yellow, not cobalt | `ShipIcon.js` |
+| 5 | …and stays on screen while the system is SELECTED — also for Transverse Drive and Warp Drive | `PhaseStrategy.js` + `systems.js` |
+| 6 | A jump point closes if its holder leaves the battle | **already true** — Stage 5's closure sweep; now covered by tests |
+| 7 | The jump point's zoomed-out overlay is yellow, not terrain white | `gamedata.js` `getShipOverlayColor` |
+| 8 | `$turnsloaded` means LOADING again; the vortex counter moves to its own field; `$delay` is a real recharge | `JumpEngine` ctor + `getVortexRechargeLoad` / `getVortexAge` / `stripForJson`, `firing.php`, `SystemIcon.js`, client `JumpEngine` |
+| 9 | No red *Fire / Don't Fire* box on an engine holding a jump point | `SystemInfoButtons.canSystemActivation` |
+| 10 | Fighter flights can use a jump point | `movement.php`, `FighterFlight.php`, `fighter.php`, `movement.js`, `ships.js` |
+| 11 | Rewrite the FAQ's *Jump Drives* section | `faq.php` |
+| — | Combat-log lines for a jump point opening and closing | `JumpEngine::writeVortexLogOrder`, `firing.php`, `weaponManager.js` |
+| — | Replay: the jump point forming and collapsing | `ReplayAnimationStrategy.animateVortexLifecycle` |
+| — | The Jump Engine's own tooltip | `JumpEngine::setSystemDataWindow` |
+
+**What it actually took, beyond the sketch above:**
+
+| Site | Why |
+|---|---|
+| ⭐ **The recharge is DERIVED, not stored** | Item 8 needs four states — full at scenario start, 0 the turn a jump point opens, flat while it stands, +1 per turn from the turn AFTER it closes. The ordinary Weapon loading machinery *almost* does it (a ballistic order zeroes the count at the phase-2 advance, phase -1 adds one per turn) and is out by a turn in every case where the vortex closes without a Maintain declaration on its last turn — unmaintained, out of range, the four-turn cap — because the recharge starts from the turn after the CLOSURE, not from the turn after the last order. `getVortexRechargeLoad` reads the two turns the vortex note already carries, which is both shorter and exact |
+| `$loadingtime` is now the ship file's 4th argument | The B5W jump delay, 0–65 across the fleet, 16 on a Primus. It rides the STATIC blueprint like every other weapon's loading time — and `stripForJson` sends it as well, because `Weapon::stripForJson` does not, so a browser holding a pre-Stage-6 blueprint would otherwise read 1. One ship (the Drazi Jumphawk) passes 0, hence `max(1, …)` |
+| ⭐ **It re-earns the one-vortex rule for free** | `weaponManager.isLoaded` is `loadingtime <= turnsloaded`, so an engine reads NOT LOADED while its jump point stands (charge 0) and until it is fully recharged. That is what keeps it out of `targetHex`'s weapon sweep — the same job Stage 5's N/4 counter was doing by accident, now done by the number that actually means it. `Firing::getVortexDeclarationBlock` gained the matching server-side refusal |
+| The N/4 counter needed the icon branch it never had | Moving it out of `turnsloaded` meant `SystemIcon.getText` had to ask for it — and that exposed an existing bug: a MAINTAINING engine holds a mode-7 order all turn, so `getText`'s "has a firing order" branch caught it, found a weapon that cannot change shots and was not a called shot, and returned **undefined**. The icon was drawing blank. The vortex counter is checked before that branch |
+| ⭐ **Item 2 was one `continue` in the damage aggregator** | `ShipSystem::stripForJson` folds damage older than `currentTurn - 1` into one synthetic `Historical` entry, summing it and dropping the damageclass. Both jumped-out tests (client `hasJumpedNotDestroyed`, server `hasHyperspaceJumpDamage`) work by SUBTRACTING the `HyperspaceJump` entry from the total and asking whether the rest would have killed the unit — so once it is folded in there is nothing left to subtract and the sum reads as a kill. `HyperspaceJump` entries now pass through whole. The tell was that docked FLIGHTS stayed orange: the server answers for them off the jump engine's own note, which no aggregation touches |
+| ⭐ **Item 10 moved all three of `applyJumpOut`'s records one level down** | A flight has no primary Structure (so what takes it off the board is every CRAFT destroyed — one `HyperspaceJump` entry each, which is also what makes the test answerable) and no jump engine (so the CV note goes on the SAMPLE fighter). `Fighter` gained the third `preJumpValue`/`getCVBeforeJump` pair after `JumpEngine` and `Structure`; `FighterFlight` gained `hasJumpedToHyperspace`, `getCVBeforeJump` **and a jumped branch in `calculateCombatValue`** — it overrides the whole method, so `BaseShip`'s branch never applied to it and a jumped flight would have been scored as a kill |
+| Breaching pods now ride their host out too | The attached sweep in `resolveJumpOuts` skipped `FighterFlight` for the same "no primary Structure" reason. With flights removable it does not have to |
+| ⭐ **Item 9 was a THIRD gate nobody had found** | `SystemInfoButtons` carries `canActivate`/`canDeactivate` helpers that already excluded `jumpEngine` — but the `<SystemActivation>` component is gated on `canSystemActivation`, a *different* function that asks the system directly. So the engine's Maintain pair drew a second, unlabelled copy of the same switch, in the RED weapon chrome (a jump engine is a `Weapon` subclass). One line, in the gate that was missed |
+| Item 5 turned three arc-clearing sites into one `refreshSystemArcs` | Arcs were a pure hover display: three call sites each cleared every icon's arcs and `onSystemMouseOver` drew the one under the pointer. Keeping a SELECTED system's arc up needs the hovered system to be remembered rather than passed, because the sweep also has to run from `onSystemDataChanged` — selecting and unselecting both land there — and must not tear down an arc the pointer is still sitting on. `shipManager.systems.ARC_VISIBLE_WHEN_SELECTED` is the short list, and it is short on purpose: every gun's arc left standing would paint the map solid on a selected broadside |
+| Item 7 is on the ZOOMED-OUT overlay, and the direction is counter-intuitive | `ShipIconContainer.applyZoomToIcon` fades the overlay colour in at `zoom > 2`, and a LARGER `zoom` is a wider orthographic frustum — i.e. **zoomed out**. So `getShipOverlayColor` is exactly the right hook, and terrain's off-white is what a jump point was collapsing to at map scale |
+| The combat-log lines are RammingAttack orders, not Jump Engine ones | The log is fire-order driven, so a non-shot event needs an order to hang a sentence on — the idiom `doHyperspaceJump`, `applyJumpOut` and the half-phase self-destruct all use. It has to sit on **RammingAttack**: an order on the engine's own `fireOrders` would be indistinguishable from a DECLARATION on the next load, because `getVortexDeclaration` matches on turn plus firing mode and mode 1 is a real facing. `damageclass 'JumpVortex'` then does two jobs — `Firing::isHyperspaceLogOrder` matches it so the four fire-order gathers skip it (the Stage 4 trap), and `weaponManager.doShortLogText` lists it so the log prints the sentence alone |
+| …and the OPENING one needed its own submit | `InitialOrdersGamePhase::advance` has no `submitFireorders` at all, so `spawnDeclaredVortices` persists its own, narrowed to the `JumpVortex` orders it just wrote rather than to everything `getNewFireOrders` returns. The CLOSING one rides the submit `FireGamePhase::advance` already does after the closure sweep |
+| The replay effect is off by one at both ends, deliberately | `spawned == openTurn + 1` and `removedTurn == closeTurn + 1` are each the FIRST turn their state is true, not the turn the event happened — so the forming animation belongs to turn `spawned - 1` and the closing one to turn `removedTurn - 1`. A vortex that never formed (a Stage 5 failure roll on the declaring turn) is born and removed on the same turn and is skipped outright |
+| The Jump Engine dropped out of the "no ballistic launch declared" nag | It is a ballistic hex-target weapon, so every jump-capable hull in the game was carrying that line every turn its drive was charged. Pre-existing since Stage 2; its own warning is the jump-point one |
+
+**Gate result 2026-08-22:** `fvbuild.ps1 -Check` **all green** — autoload map current, ship-data
+validator PASS, replay harness **160 passed / 0 failed**. The harness baseline was re-recorded
+first: every one of the 148 pre-record differences was `turnsloaded` or `loadingtime` on a jump
+engine and nothing else — no movement, tohit, damage or masking drift anywhere in the corpus,
+which is the whole of item 8 showing up and nothing else showing up with it.
+
+Two scratch harnesses, both against the real classes:
+- **`tests/replay/stage6harness.php`, 68 assertions** (in-memory, no DB): the recharge curve across
+  a whole vortex lifecycle including a string turn and the delay-0 hull, `PhasingDrive` inheriting
+  it, both `stripForJson` shapes off a real Primus, the preserved `HyperspaceJump` entry and the
+  verdict the client reaches from it, all seven closure reasons including *holder left through a
+  vortex*, a real Kotha flight through `Movement::applyJumpOut` (every craft, the CV note on the
+  sample fighter, the read-back, and a shot-down flight that must NOT read as jumped), and the log
+  order's damageclass, its `addToDB`, its invisibility to `getVortexDeclaration` and its being
+  skipped by `isHyperspaceLogOrder`.
+- **A `vm`-sandbox client harness, 26 assertions**, over the real `ships.js` / `systems.js` /
+  `movement.js` / `model/system/baseSystems.js`: the icon counter in all four states plus the
+  `spawned`-derived fallback, `isLoaded` agreeing at each, the marker's five accept/reject cases,
+  `hasJumpedNotDestroyed` for a hull and a flight (and the aggregated payload that used to read
+  Destroyed), and the arc-when-selected list.
+
+**One thing NOT built, reported rather than half-done:** nothing renders the vortex's closure
+REASON on the map or in a tooltip — it reaches the player as a combat-log line at the end of the
+turn it happens, and as the pre-commit warning that is item 1. That is the whole of it.
 
 ---
 

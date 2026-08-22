@@ -1201,6 +1201,29 @@ shipManager.systems = {
         return toReturn;
     },
 
+    /* JUMP_POINTS_PLAN.md Stage 6 - SYSTEMS WHOSE ARC STAYS ON SCREEN WHILE THEY ARE SELECTED.
+       Every weapon draws its arc on HOVER (PhaseStrategy.onSystemMouseOver); the moment the player
+       clicks to select it the pointer leaves the icon, mouse-out fires and the arc goes - which is
+       exactly the moment they want to see it, because the next thing they do is pick a hex on the
+       map (user request 2026-08-22).
+
+       Deliberately a SHORT LIST rather than every weapon. What these three have in common is that
+       the arc is a REACH the player has to aim inside, not a bearing check they have already made:
+         jumpEngine       - where a jump point may be projected (4 hexes, all round)
+         TransverseDrive  - the straight-line lanes an Ancient ship may jump along
+         MicroJumpSystem  - the same, for a Warp Drive
+       All three are hex-targeted, so the selection is followed by a right-click on the map with
+       nothing else to guide it. Leaving every gun's arc up instead would paint the map solid the
+       moment a player selected a broadside.
+
+       Matched by name because the client has no class information on a system object, and stated
+       ONCE here so the arc sweep in PhaseStrategy and any future caller cannot drift apart. */
+    ARC_VISIBLE_WHEN_SELECTED: ['jumpEngine', 'TransverseDrive', 'MicroJumpSystem'],
+
+    showsArcWhenSelected: function showsArcWhenSelected(system) {
+        return !!system && shipManager.systems.ARC_VISIBLE_WHEN_SELECTED.indexOf(system.name) !== -1;
+    },
+
     hasBorderHighlight: function hasBorderHighlight(ship, system) {
         // Try to prioritise effects and optimise performance. Can only return ONE border highlight colour.
 

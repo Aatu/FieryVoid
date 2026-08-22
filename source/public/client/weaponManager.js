@@ -4814,7 +4814,11 @@ window.weaponManager = {
     //entry has already resolved from fire.shooterid.
     doShortLogText: function doShortLogText(fire, shooter) {
         const shortLogTypes = [
-            "HyperspaceJump", "JumpFailure", "SelfDestruct", "ContainmentBreach",
+            //JumpVortex (JUMP_POINTS_PLAN.md Stage 6): a jump point opening or closing. Like every
+            //other entry here it is a log line wearing a fire order's clothes - there is no shot,
+            //no target and no damage - so the log prints its sentence alone rather than "firing 1x
+            //Ramming Attack ... 1/1 shots hit" at a ship nobody shot at.
+            "HyperspaceJump", "JumpFailure", "JumpVortex", "SelfDestruct", "ContainmentBreach",
             "Reactor", "Sabotage", "WreakHavoc", "Capture", "Rescue", "LimpetBore",
             "MagazineExplosion", "NoHangar", "TerrainCollision", "HalfPhase", "TranverseCrit", "Boarding",
             "InadequateHangar", "HkJamming"

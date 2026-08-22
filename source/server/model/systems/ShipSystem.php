@@ -214,6 +214,30 @@ public function setParentFighter($fighter) {
             $lastTurnDestroyed = 0;
 
             foreach ($this->damage as $entry) {
+                /* JUMP_POINTS_PLAN.md Stage 6 - A HYPERSPACE JUMP IS NEVER AGGREGATED.
+                 *
+                 * The synthetic entry below sums damage and DROPS the damageclass (it becomes
+                 * "Historical"), which is right for ordinary damage and silently wrong for this
+                 * one: shipManager.hasJumpedNotDestroyed and BaseShip::hasHyperspaceJumpDamage
+                 * both work by SUBTRACTING the HyperspaceJump entry from the total and asking
+                 * whether what is left would have killed the unit. Fold it into the sum and there
+                 * is nothing left to subtract, so a unit that left through a jump point read
+                 * "Destroyed" (red) instead of "Jumped" (orange) from two turns after it jumped -
+                 * on its own fleet-list row, in the replay, everywhere that asks.
+                 *
+                 * (The FLIGHTS docked inside a jumping carrier stayed orange throughout, because
+                 * the server answers for them off the jump engine's own note, which no aggregation
+                 * touches. That asymmetry was the tell.)
+                 *
+                 * Costs one extra damage entry per jumped unit for the rest of the game, which is
+                 * as cheap as this gets: the unit is off the board and takes no further damage.
+                 * JumpFailure is deliberately NOT exempted - that unit really was destroyed, and
+                 * it is meant to count toward the total. */
+                if ($entry->damageclass === 'HyperspaceJump') {
+                    $newDamageArray[] = clone $entry;
+                    continue;
+                }
+
                 // Aggregate any damage older than the required animation threshold
                 if ($entry->turn < $thresholdTurn) {
                     $sumDamage += $entry->damage;

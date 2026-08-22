@@ -715,8 +715,16 @@ window.ShipIcon = function () {
 
         } else { //Normal weapons with circular weapon arcs
             var arcs = shipManager.systems.getArcs(ship, weapon);
-            var arcColour = "rgb(20,80,128)";
-            var arcFillOpacity = ARC_FILL_OPACITY;
+            /* JUMP_POINTS_PLAN.md Stage 6 - THE JUMP ENGINE'S REACH IS YELLOW, not the cobalt every
+               gun uses (user request 2026-08-22). It is not a firing arc: it is where this ship can
+               project a jump point, and it reads in the same --fv-warn yellow as everything else in
+               that feature - the Stage 2b facing control, the "Jump Point Forming" hex marker, and
+               the vortex unit's own zoomed-out overlay. A player who has seen one has seen them all.
+               Opacity comes down with it for the same reason REDUCED_ARC_COLOUR's does: yellow over
+               the dark map reads a good deal hotter than cobalt at the same alpha. */
+            var isVortexReach = weapon.name === 'jumpEngine';
+            var arcColour = isVortexReach ? VORTEX_ARC_COLOUR : "rgb(20,80,128)";
+            var arcFillOpacity = isVortexReach ? VORTEX_ARC_FILL_OPACITY : ARC_FILL_OPACITY;
 
             //Firing-link reduced arc (e.g. Vree turret): if this weapon shares an angular-spread
             //group and any member has declared fire this turn (a sibling, OR this weapon itself once
@@ -797,6 +805,12 @@ window.ShipIcon = function () {
     var ARC_BORDER_OPACITY = 0.9;                   //outline of every hex-edged arc, in the arc's own colour
     var REDUCED_ARC_COLOUR = "rgb(170,95,25)";      //amber: this weapon's arc is restricted this turn
     var REDUCED_ARC_FILL_OPACITY = 0.25;             //fainter than ARC_FILL_OPACITY - see above
+    /* --fv-warn (#e1b000), the jump-point yellow. Written as an rgb() literal like every other arc
+       colour here rather than read from the CSS token, because these are consumed by THREE.Color
+       inside a WebGL scene that has no computed style to read. Keep it in step with
+       BallisticIconContainer's 'Jump Point Forming' text colour and UI.vortexFacing's arrow. */
+    var VORTEX_ARC_COLOUR = "rgb(225,176,0)";
+    var VORTEX_ARC_FILL_OPACITY = 0.22;              //see REDUCED_ARC_FILL_OPACITY - yellow runs hot
 
     /* A ranged weapon's arc, as the grid hexes it covers. arcsList is one or more ship-frame arcs -
        a split-arc mount hands both over at once, so its two regions share a single overlay and any

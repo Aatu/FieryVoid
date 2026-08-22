@@ -754,11 +754,53 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
         <h3 id="jump" >Jump Drives</h3>
         <ul>
-            <li>The Jump Drive system usually cannot be turned off unless seriously damaged, but some scenarios allow it.</li>
-            <li>The game warns the player when attempting to deactivate this system improperly (e.g., without Desperate rules or 50%+ damage).</li>
-            <li>Ships equipped with Jump Drives can boost this system during Initial Orders to 'jump out' of the scenario at the end of the turn.  
-                Doing will remove then from the rest of the scenario, and ships with damaged jump drives may be destroyed as they jump (the chance of this is the % of the Jump Drive's health lost).  
-                The latter situation will be reflected in the Combat Log for that turn.</li>            
+            <li>A ship equipped with a Jump Drive can use it to <b>open a jump point</b> &mdash; a vortex into hyperspace
+                that appears in a nearby hex for up to four turns &mdash; allowing units to leave the battle by <b>flying into it</b>. Any unit may use any
+                <i>open</i> jump point, including an enemy's, and including units with no Jump Drive of their own.</li>
+            <li><b>Opening a jump point:</b>
+                <ul class="circle-list">
+                    <li>In <b>Initial Orders</b>, select the Jump Engine in the ship window (it behaves like any other hex-targeted weapon &mdash;
+                        hovering it shows its reach as a <span style="color:#e1b000;">yellow</span> overlay on the map, and the overlay stays up while it is selected).</li>
+                    <li>Right-click a target hex within <b>4 hexes</b> and choose 'Target selected weapons on hexagon'. You need line of sight to the hex,
+                        and it must be clear of terrain, of another jump point and of Enormous units. Ships in the hex, friendly or enemy, do not block it.</li>
+                    <li>A control appears on that hex with a <b>facing arrow</b> and two turn buttons. <b>The facing is the doorway</b> &mdash; it is the hex
+                        side a unit has to come <i>through</i> to use the jump point. Step it round, then press OK. Clicking away, or deselecting the Jump
+                        Engine, abandons the whole thing and no order is made. The facing cannot be changed afterwards; to re-aim, remove the fire order
+                        and declare again.</li>
+                    <li>The declaration is private until all player commit their Initial Orders. It then shows to everyone as a <span style="color:#e1b000;">yellow</span>
+                        <b>'Jump Point Forming'</b> hex with the facing arrow over it, and the ship reads <b>'Jumping to Hyperspace'</b> in its own tooltip
+                        and ship window.</li>
+                    <li>A jump point <b>cannot be entered on the turn it is declared</b>. It forms at the end of that turn and is open from the next one.</li>
+                    <li>Opening a jump point <b>reveals a stealthed or cloaked ship</b>, exactly as using non-DEW EW does &mdash; a Shading Field or Cloaking
+                        Device drops for that turn.</li>
+                </ul>
+            </li>
+            <li><b>Using a jump point:</b> during the <b>Movement</b> phase, plot the unit's path so it <i>enters</i> the jump point hex through the side the
+                arrow points at, then press the <b>Jump to Hyperspace</b> button on the unit's tooltip. Movement ends there &mdash; any remaining thrust is
+                forfeit &mdash; and the unit is removed at the end of the phase. It is judged on the actual step that carried it into the hex, so a
+                <b>sideslip</b> through the correct side works, and a unit that has been sitting in the hex since an earlier turn is judged on the step that
+                first put it there. Fighter flights may use a jump point too. Attached pods and docked craft are carried out with their host.</li>
+            <li>A unit that leaves through a jump point <b>keeps its full combat value</b> &mdash; it escaped, it was not destroyed &mdash; and its fleet-list
+                row reads <span style="color:#cc8500;">Jumped</span> rather than Destroyed. Craft docked aboard a carrier that jumps go with it and are not
+                subject to the carrier-destruction escape roll.</li>
+            <li><b>Maintaining a jump point:</b> a jump point closes at the end of <i>every</i> turn unless its holder declares Maintain. Use the blue
+                <b>Jump Point</b> ON/OFF switch in the Jump Engine's own system menu during Initial Orders. Switching it ON makes the declaration <i>and</i>
+                shuts the ship down for the turn &mdash; everything with a power cost except the Scanner and the Jump Engine itself &mdash; which is the price
+                of holding it open. Those systems cannot be switched back on until you switch Maintain OFF again.</li>
+            <li>A jump point also closes at the end of the turn if its holder <b>ends the turn more than 4 hexes away</b>, is <b>destroyed</b>, or
+                <b>leaves the battle</b> (through this jump point or any other). It closes unconditionally after <b>four turns open</b>. Whatever the reason,
+                it stays usable for the whole of the turn it closes on, and the reason is printed in that turn's Combat Log. The Initial Orders commit
+                dialogue warns you before you lose one you could still have kept.</li>
+            <li><b>Recharging:</b> opening a jump point spends the drive's entire charge. The Jump Engine's icon shows <b>N/4</b> &mdash; turns the jump point
+                has been open, out of four &mdash; while one stands, and its ordinary charge counter the rest of the time. It starts a scenario fully charged,
+                drops to zero when it opens a jump point, and recharges at 1 per turn from the turn <i>after</i> that jump point closes. It cannot open
+                another until it is full again, and the time that takes varies by hull (a Centauri Primus, for example, needs 16 turns).</li>
+            <li><b>Damaged Jump Drives are dangerous.</b> At the end of every turn a ship opens or maintains a jump point, it rolls d100 against the
+                percentage of its Jump Engine boxes lost. Roll at or under, and the ship is destroyed outright &mdash; docked craft are lost with it, with no
+                escape roll. The Combat Log records it. The risk is taken by the ship <i>opening</i> the jump point; there is no roll for units flying
+                through one.</li>
+            <li>The Jump Drive system usually cannot be turned off unless seriously damaged, but some scenarios allow it.
+                The game warns the player when attempting to deactivate this system improperly (e.g. without Desperate rules or 50%+ damage).</li>
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 

@@ -273,8 +273,11 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         } else { //Everything else
             weaponOrigin = getShipPositionAtTime.call(this, this.shipIconContainer.getByShip(incomingFire.shooter), startLocationTime);
         }
-        //We don't want any explosions when this fireOrder type gets animated.  Separate animation at end of turn will show jump.				
-        if (incomingFire.fireOrder.damageclass == "HyperspaceJump") {
+        //We don't want any explosions when this fireOrder type gets animated.  Separate animation at end of turn will show jump.
+        //JumpVortex (JUMP_POINTS_PLAN.md Stage 6) is the same shape: a log line wearing a fire
+        //order's clothes, with the jump point's own swirl played separately by
+        //ReplayAnimationStrategy.animateVortexLifecycle.
+        if (incomingFire.fireOrder.damageclass == "HyperspaceJump" || incomingFire.fireOrder.damageclass == "JumpVortex") {
             damage = 0;
             hit = false;
         }
@@ -502,7 +505,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         }
     */
     function getSystemNamesDestroyed(incomingFire) {
-        if (incomingFire.fireOrder.damageclass === "HyperspaceJump") {
+        if (incomingFire.fireOrder.damageclass === "HyperspaceJump" || incomingFire.fireOrder.damageclass === "JumpVortex") {
             return; // Return nothing if "HyperspaceJump", we don't want the text showing Primary Structure to show.
         }
 

@@ -60,12 +60,55 @@ window.PhaseStrategy = function () {
             this.systemInfoState = null;
         }
 
+        this.hoveredArcSystem = null;
+        this.refreshSystemArcs();
+
+        return true;
+    }
+
+    /* ⭐ JUMP_POINTS_PLAN.md Stage 6 - WHOSE ARC IS ON SCREEN, decided in one place.
+     *
+     * Arcs used to be a pure hover display: three call sites each cleared every icon's arcs, and
+     * onSystemMouseOver drew the one under the pointer. That lost the arc at the exact moment a
+     * HEX-TARGETED system needs it - the player clicks the icon to SELECT the system, the pointer
+     * leaves, mouse-out fires, and the overlay showing where they may aim disappears just as they
+     * turn to the map to aim (user request 2026-08-22).
+     *
+     * So the answer is now "the hovered system, plus anything selected that asks to stay up", and
+     * every site that used to clear arcs calls this instead. The hovered system is remembered
+     * (this.hoveredArcSystem) rather than passed, because the sweep also has to run from
+     * onSystemDataChanged - selecting and unselecting both land there - and that must not tear
+     * down an arc the pointer is still sitting on.
+     *
+     * Deliberately narrow: shipManager.systems.showsArcWhenSelected holds the short list and says
+     * why. Every gun's arc left standing would paint the map solid on a selected broadside. */
+    PhaseStrategy.prototype.refreshSystemArcs = function () {
+        if (!this.shipIconContainer) return;
+
         this.shipIconContainer.getArray().forEach(function (icon) {
             icon.hideWeaponArcs();
         });
 
-        return true;
-    }
+        var drawn = [];
+        var container = this.shipIconContainer;
+
+        var draw = function (ship, system) {
+            if (!ship || !system) return;
+            if (drawn.indexOf(system) !== -1) return;  //never twice - two fills would alpha-compound
+            var icon = container.getByShip(ship);
+            if (!icon) return;
+            icon.showWeaponArc(ship, system);
+            drawn.push(system);
+        };
+
+        if (this.hoveredArcSystem) draw(this.hoveredArcSystem.ship, this.hoveredArcSystem.system);
+
+        if (!gamedata.selectedSystems) return;
+        gamedata.selectedSystems.forEach(function (system) {
+            if (!shipManager.systems.showsArcWhenSelected(system)) return;
+            draw(system.ship, system);
+        });
+    };
 
     PhaseStrategy.prototype.showSystemInfo = function (ship, system, element, menu) {
         if (this.systemInfoState && this.systemInfoState.menu && !menu) {
@@ -845,22 +888,15 @@ window.PhaseStrategy = function () {
             this.hideSystemInfo();
         }
 
-        this.shipIconContainer.getArray().forEach(function (icon) {
-            icon.hideWeaponArcs();
-        });
-
-        if (system instanceof Ship) {
-            return;
-        }
-
-        var icon = this.shipIconContainer.getByShip(ship);
-        icon.showWeaponArc(ship, system);
+        //Ship (the hex-stack hover pseudo-system) has no arc of its own, but it still ENDS the
+        //previous hover - so record the miss and let refreshSystemArcs redraw whatever is selected.
+        this.hoveredArcSystem = (system instanceof Ship) ? null : { ship: ship, system: system };
+        this.refreshSystemArcs();
     };
 
     PhaseStrategy.prototype.onSystemMouseOut = function () {
-        this.shipIconContainer.getArray().forEach(function (icon) {
-            icon.hideWeaponArcs();
-        });
+        this.hoveredArcSystem = null;
+        this.refreshSystemArcs();
 
         this.hideSystemInfo();
     };
@@ -1160,6 +1196,13 @@ window.PhaseStrategy = function () {
         ) {
             this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
         }
+
+        //Selecting AND unselecting a weapon both land here - selectWeapon fires WeaponSelected,
+        //which the phase strategies forward to this handler, and unSelectWeapon fires
+        //SystemDataChanged directly - so this is the seam that puts a selected system's arc up and
+        //takes it down again. See refreshSystemArcs; it keeps the hovered arc, so running here
+        //while the pointer is still on the icon that was just clicked changes nothing.
+        this.refreshSystemArcs();
 
         this.shipWindowManager.update();
     }

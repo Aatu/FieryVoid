@@ -407,7 +407,6 @@
 
             foreach ($gamedata->ships as $ship){
                 if ($ship->isTerrain() || $ship->mine) continue;
-                if ($ship instanceof FighterFlight) continue; //see applyJumpOut - flights have no primary Structure
                 if ($ship->isDestroyed()) continue;
                 if (!self::getJumpOutOrder($ship->movement, $gamedata->turn)) continue;
 
@@ -428,7 +427,6 @@
                     foreach (array_keys($ship->hasAttached) as $attachedId){
                         $attached = $gamedata->getShipById((int)$attachedId);
                         if (!$attached || $attached->isDestroyed()) continue;
-                        if ($attached instanceof FighterFlight) continue; //breaching pod: no primary Structure to destroy
                         self::applyJumpOut($attached, $gamedata, " is carried into hyperspace by " . $ship->name . ".");
                         $jumped[] = $attached;
                     }
@@ -465,6 +463,18 @@
          *   3. the primary structure destroyed with damageclass HyperspaceJump. That is what
          *      takes the unit off the board, and what every "did it jump or was it killed?" test
          *      in the codebase keys off.
+         *
+         * ⭐ STAGE 6 - A FIGHTER FLIGHT HAS NONE OF THE THREE ANCHORS a hull has, so all three
+         * records move one level down. A flight has no primary Structure, so what takes it off the
+         * board is EVERY CRAFT destroyed (FighterFlight::isDestroyed is "every fighter destroyed
+         * or disengaged") - one HyperspaceJump entry per craft, which is also what makes
+         * FighterFlight::hasJumpedToHyperspace answerable. And it has no jump engine either, so
+         * the CV note goes on the SAMPLE fighter, where Fighter::onIndividualNotesLoaded reads it
+         * back and FighterFlight::getCVBeforeJump asks for it. The RammingAttack log order is the
+         * one thing that is the same - a flight carries one.
+         *
+         * That closes the Stage 4 gap: flights were blocked from jumping out on both sides
+         * because this removal path did not exist for them.
          */
         private static function applyJumpOut($ship, $gamedata, $pubNotes){
             $rammingSystem = $ship->getSystemByName("RammingAttack");
@@ -481,13 +491,34 @@
                 $rammingSystem->fireOrders[] = $newFireOrder;
             }
 
+            //THE NOTE, ALWAYS BEFORE THE DAMAGE: calculateCombatValue reads the craft/structure
+            //this is about to destroy, so a note written afterwards would snapshot a zero.
             $jumpEngine = $ship->getSystemByName("JumpEngine");
             $noteHost = $jumpEngine ? $jumpEngine : $ship->getStructureSystem(0);
+            if (!$noteHost && $ship instanceof FighterFlight) $noteHost = $ship->getSampleFighter();
             if ($noteHost){
                 $noteHost->addIndividualNote(new IndividualNote(
                     -1, $gamedata->id, $gamedata->turn, $gamedata->phase,
                     $ship->id, $noteHost->id, 'jumped', 'jumped', $ship->calculateCombatValue()
                 ));
+            }
+
+            if ($ship instanceof FighterFlight){
+                foreach ($ship->systems as $craft){
+                    if ($craft->isDestroyed($gamedata->turn)) continue; //already lost - nothing left to take
+                    $damageEntry = new DamageEntry(
+                        -1, $ship->id, -1, $gamedata->turn,
+                        $craft->id, $craft->getRemainingHealth(), 0, 0, -1, true, false,
+                        "", 'HyperspaceJump'
+                    );
+                    $damageEntry->updated = true;
+                    if ($rammingSystem){ //so submitDamages can find the fire order this belongs to
+                        $damageEntry->shooterid = $ship->id;
+                        $damageEntry->weaponid = $rammingSystem->id;
+                    }
+                    $craft->damage[] = $damageEntry;
+                }
+                return;
             }
 
             $primaryStruct = $ship->getStructureSystem(0);

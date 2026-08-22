@@ -485,6 +485,17 @@ window.gamedata = {
     // (a single "ally" colour is ambiguous once there are several teams).
     getShipOverlayColor: function getShipOverlayColor(ship, mine, ally, terrain) {
         if (terrain) {
+            /* JUMP_POINTS_PLAN.md Stage 6 - a jump point is terrain, but it is not scenery. Zoomed
+               out, every icon collapses to its overlay colour, and an off-white blob in the middle
+               of a battle reads as an asteroid - which is the one thing a player must not mistake
+               it for, because flying into it is how you leave the game. Yellow, the same --fv-warn
+               the "Jump Point Forming" hex marker, the facing arrow and the Jump Engine's map arc
+               all use (user request 2026-08-22).
+               isJumpVortex holds the class name once, so this and the two movement sweeps that ask
+               the same question cannot drift apart. */
+            if (shipManager.movement && shipManager.movement.isJumpVortex(ship)) {
+                return new THREE.Color(0xE1 / 255, 0xB0 / 255, 0x00 / 255).convertSRGBToLinear(); // --fv-warn
+            }
             return new THREE.Color(0xBE / 255, 0xBE / 255, 0xBE / 255).convertSRGBToLinear(); // Off-white
         }
 
@@ -848,6 +859,7 @@ window.gamedata = {
             var hasNoEW = [];
             var selfDestructing = [];
             var jumping = [];
+            var vortexClosing = [];  //JUMP_POINTS_PLAN.md Stage 6 - see the block that fills it
             var notLaunching = [];
             var notSetAA = [];//available Adaptive Armor points remaining!
             var notSetFC = [];//available BFCP points remaining for Hyach!
@@ -883,6 +895,26 @@ window.gamedata = {
                         }
                     }
 
+                    /* ⭐ JUMP_POINTS_PLAN.md Stage 6 - THE JUMP POINT IS ABOUT TO CLOSE.
+                       A vortex closes at the end of every turn its holder does not declare
+                       Maintain (plan section 2.3), and until now nothing said so: the player
+                       committed Initial Orders and found out a phase later, by which time the
+                       decision could not be taken back. This is the last moment it can be.
+
+                       Asked of the VORTEX, not of the toggle, so it also covers the cases where
+                       maintaining was never on offer - the holder is out of range, or the vortex
+                       has reached its four-turn cap - which are precisely the ones a player has
+                       no other way of seeing coming. getVortexHeldBy returns null on the turn a
+                       vortex was declared (it has not formed yet), so a fresh declaration never
+                       warns about itself. */
+                    var heldVortex = shipManager.movement.getVortexHeldBy(myShips[ship]);
+                    if (heldVortex) {
+                        var jumpEngine = shipManager.systems.getSystemByName(myShips[ship], "jumpEngine");
+                        var maintaining = jumpEngine && typeof jumpEngine.isMaintainingVortex === 'function'
+                            && jumpEngine.isMaintainingVortex();
+                        if (!maintaining) vortexClosing.push(myShips[ship]);
+                    }
+
                     if (shipManager.isDisabled(myShips[ship])) {
                         continue;
                     }
@@ -915,6 +947,12 @@ window.gamedata = {
                     var hasReadyLaunchers = false;
                     for (var i = 0; i < myShips[ship].systems.length; i++) {
                         var currWeapon = myShips[ship].systems[i];
+                        /* The Jump Engine is a BALLISTIC hex-target weapon (JUMP_POINTS_PLAN.md
+                           section 3.1) but it is not a launcher, and "you have not assigned any
+                           ballistic launch" is not advice about it - every jump-capable hull in
+                           the game would carry that line every turn it was charged. Its own
+                           warning is the jump-point one further down. */
+                        if (currWeapon.name === 'jumpEngine') continue;
                         if (currWeapon.ballistic) { //only ballistic weapons are of interest now
                             if (currWeapon.fireOrders.length > 0) {
                                 fired = 1;
@@ -1010,6 +1048,15 @@ window.gamedata = {
                 }
                 html += "<br>";
             }
+            if (vortexClosing.length > 0) {
+                html += "The JUMP POINTS held by the following ships will CLOSE at the end of this turn: ";
+                html += "<br>";
+                for (var ship in vortexClosing) {
+                    html += gamedata.shipNameSpan(vortexClosing[ship]);
+                    html += "<br>";
+                }
+                html += "<br>";
+            }
             if (hasNoEW.length > 0) {
                 // New check to see if Scanner exists / has positive output before giving warning - DK 01/25
                 for (var i = hasNoEW.length - 1; i >= 0; i--) {
@@ -1087,6 +1134,7 @@ window.gamedata = {
 
         else if (gamedata.gamephase == 2) {
             var zeroSpeedShips = [];
+            var leavingBattle = [];
             var activeShips = gamedata.getActiveShips();
             var html = '';
 
@@ -1096,6 +1144,22 @@ window.gamedata = {
                     if (shipManager.movement.canChangeSpeed(ship, true) && ship.userid == gamedata.thisplayer) {
                         zeroSpeedShips.push(ship);
                     }
+                    /* JUMP_POINTS_PLAN.md Stage 6 - "this ship will leave the battle" was Stage 4's
+                       second reported gap: a jump-out committed with no confirmation at all, and it
+                       is the most irreversible order in the game. Committed is committed - the
+                       server removes the unit at the end of this phase. */
+                    if (ship.userid == gamedata.thisplayer && shipManager.movement.hasJumpedOut(ship)) {
+                        leavingBattle.push(ship);
+                    }
+                }
+            }
+
+            if (leavingBattle.length > 0) {
+                html += "<br>";
+                html += "The following units will LEAVE THE BATTLE through a jump point: <br>";
+
+                for (var k in leavingBattle) {
+                    html += gamedata.shipNameSpan(leavingBattle[k], leavingBattle[k].name) + '<br>';
                 }
             }
 

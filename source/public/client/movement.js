@@ -742,13 +742,12 @@ shipManager.movement = {
         if (!ship || shipManager.isDestroyed(ship)) return false;
         if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) return false;
         if (ship.mine) return false;
-        /* Fighter flights are not offered a jump-out in Stage 4. They have no primary Structure
-           to destroy, so the removal path every other unit uses does not exist for them - a
-           docked flight is taken off the board by a note on its CARRIER's hangar instead, and an
-           independent flight would need its own. A flight whose carrier jumps still goes with it.
-           Recorded as a Stage 4 gap in JUMP_POINTS_PLAN.md; Movement::resolveJumpOuts refuses
-           them server-side too, so the two agree. */
-        if (ship.flight) return false;
+        /* STAGE 6 - FIGHTER FLIGHTS ARE NOW OFFERED IT TOO, closing the Stage 4 gap. They have no
+           primary Structure, so Movement::applyJumpOut takes a flight off the board by destroying
+           every CRAFT in it with a HyperspaceJump entry instead - see the note there for the three
+           records that move one level down. Nothing is needed here beyond removing the block: a
+           flight plots movement like anything else, and a DOCKED flight is already refused by the
+           isDestroyed test above (a docked flight is removed=true). */
         //An attached pod leaves with its host and never decides for itself (plan section 5 trap 7).
         if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false;
         if (shipManager.movement.hasJumpedOut(ship)) return false;
