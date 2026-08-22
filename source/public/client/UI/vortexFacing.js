@@ -407,7 +407,7 @@ window.UI.vortexFacing = {
        BUTTON_SIZE is the way to make the whole glyph bigger - the canvas is resized from here, so
        the width/height in game.php's markup do not need to match. */
     ARROW_SWEEP: 200,
-    ARROW_TILT: 18,
+    ARROW_TILT: 15,
     ARROW_RADIUS: 0.28,
     ARROW_THICKNESS: 0.13,
     ARROW_HEAD_LEN: 0.3,
