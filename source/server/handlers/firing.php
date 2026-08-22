@@ -150,18 +150,58 @@ class Firing
 
         /* STAGE 2b - THE FACING IS NOW PLAYER-SETTABLE, SO IT IS NOW WORTH VALIDATING.
          * firingMode is the storage for the vortex facing (mode = facing + 1), written by the
-         * on-map arrow control. Modes 1-6 are the six facings; mode 7 is the Stage 5 Maintain
-         * declaration and is not a legal OPENING, so it is refused here until Stage 5 gives it a
-         * meaning. Only a tampered client can get here - the arrow cannot produce anything else -
-         * but an out-of-range mode would reach the Stage 3 spawn sweep as a nonsense facing. */
+         * on-map arrow control. Modes 1-6 are the six facings; mode 7 (STAGE 5) is the MAINTAIN
+         * declaration, which is a different gesture judged by a different list - see below. Only a
+         * tampered client can produce anything else - the arrow cannot - but an out-of-range mode
+         * would reach the Stage 3 spawn sweep as a nonsense facing. */
         $mode = (int)$fire->firingMode;
-        if ($mode < 1 || $mode > 6)
+        if ($mode < 1 || $mode > JumpEngine::MAINTAIN_MODE)
             return "illegal vortex facing (firing mode $mode)";
 
         $target = new OffsetCoordinate($fire->x, $fire->y);
         $distance = $shooter->getHexPos()->distanceTo($target);
         if ($distance > $weapon->range)
             return "target hex is $distance hexes away, limit is {$weapon->range}";
+
+        /* STAGE 5 - MAINTAINING (plan section 2.4). The player keeps a vortex open by targeting its
+         * OWN hex with the Jump Engine; that is the only thing that distinguishes the gesture, and
+         * it is why the terrain test below has to be skipped here - the vortex IS terrain.
+         *
+         * The all-systems-offline requirement is deliberately NOT enforced at submit time. A hard
+         * block in the submit path is a support burden ("why won't my turn commit?"), and the rule
+         * has a natural consequence instead: JumpEngine::closeExpiredVortices sees the violation at
+         * the end of the turn and closes the vortex with a reason in the log. The client warns
+         * before the commit, which is where the player can still act on it.
+         *
+         * $weapon is the engine from the REAL gamedata load (see the caller), so its vortex state
+         * has been rebuilt from the notes and these two questions can actually be answered. */
+        if ($mode === JumpEngine::MAINTAIN_MODE){
+            if (!$weapon->hasOpenVortex($gamedata->turn))
+                return "no open vortex to maintain";
+
+            //Not on the turn it was declared: it has not formed yet, and the opening declaration
+            //is this turn's declaration.
+            if ($weapon->vortexOpenTurn >= $gamedata->turn)
+                return "vortex is still forming - it cannot be maintained until the turn after it was declared";
+
+            $vortex = $gamedata->getShipById((int)$weapon->activeVortexId);
+            if (!($vortex instanceof SpawnJumpPoint))
+                return "this ship's vortex unit is gone";
+
+            if (!$vortex->getHexPos()->equals($target))
+                return "maintain must target this ship's own vortex hex";
+
+            return null; //legal - and the obstruction sweep below must NOT run on a vortex hex
+        }
+
+        /* STAGE 5 - ONE VORTEX PER SHIP, ACROSS TURNS. The duplicate test above only sees a second
+         * declaration inside the SAME submission; this is the one that stops a ship opening a
+         * second jump point while it still holds one. It is deliberately after the maintain branch:
+         * holding a vortex is precisely what makes a MAINTAIN legal and a second OPENING illegal.
+         * (On the declaring turn itself this reads false - the unit is not spawned until
+         * InitialOrdersGamePhase::advance - so a fresh declaration is never caught by it.) */
+        if ($weapon->hasOpenVortex($gamedata->turn))
+            return "ship already holds an open vortex";
 
         /* The hex must be EMPTY OF OBSTRUCTIONS - it may hold ships, friendly or enemy, but not any
          * part of a Terrain unit (which is also what a jump gate and, from Stage 3, a vortex are)

@@ -3743,6 +3743,19 @@ window.weaponManager = {
             //otherwise drop the order without telling anyone. The weapon stays SELECTED so the
             //next right-click can try a different hex.
             if (weapon.name === 'jumpEngine') {
+                //STAGE 5 - one vortex per ship, across turns. Told rather than silently dropped:
+                //the server refuses a second opening (Firing::getVortexDeclarationBlock) and the
+                //player would otherwise watch the order vanish at commit with no explanation.
+                //MAINTAINING an open vortex is NOT done from the map - it is the Maintain toggle in
+                //the Jump Engine's own menu (JumpEngineMenu), because it also has to take the ship
+                //dark, which a hex-target gesture cannot do. Hence the pointer rather than a second
+                //map path to the same order.
+                if (shipManager.movement.getVortexHeldBy(selectedShip)) {
+                    confirm.error("This ship is already holding a jump point open. Use <b>Maintain Vortex</b> "
+                        + "on the Jump Engine to keep it open, or let it close before opening another.");
+                    continue;
+                }
+
                 var vortexBlock = weaponManager.getVortexHexBlock(selectedShip, weapon, hexpos);
                 if (vortexBlock) {
                     confirm.error(vortexBlock);
@@ -4024,6 +4037,13 @@ window.weaponManager = {
         weaponManager.unSelectWeapon(ship, weapon);
         webglScene.customEvent('HexTargeted', { shooter: ship, hexagon: hexpos });
     },
+
+    /* JUMP_POINTS_PLAN.md STAGE 5 - MAINTAINING is NOT here. It is a toggle in the Jump Engine's
+       own system menu (JumpEngineMenu / JumpEngine.doActivate in model/system/baseSystems.js),
+       because the declaration is only half of it: the ship also has to shut everything down, which
+       is not something a right-click on a hex can do, and the two halves have to happen together or
+       the vortex closes at the end of the turn anyway. The ORDER the toggle produces is identical -
+       firing mode 7 at the vortex's own hex - so the server side is the same either way. */
 
     // Stage S (S-f): open the Fighter Bomb launch dialog (count + auto-split toggle /
     // manual per-flight sizes), then emit the fire order(s) at the target hex. A launch

@@ -253,7 +253,9 @@ class SystemPowerSettings extends Component {
         const { ship, system } = this.props;
         // A system forced offline by a cooldown / forced-shutdown crit cannot be
         // powered back on by the player (it auto-recovers when the crit expires).
-        return gamedata.gamephase === 1 && shipManager.power.isOffline(ship, system) && !shipManager.power.isForcedOffline(ship, system);
+        // JUMP_POINTS_PLAN.md Stage 5: nor can one shut down to hold a jump point open, until
+        // Maintain is switched off again on the Jump Engine.
+        return gamedata.gamephase === 1 && shipManager.power.isOffline(ship, system) && !shipManager.power.isForcedOffline(ship, system) && !shipManager.power.isVortexLockedOffline(ship, system);
     }
 
     canBoost() {

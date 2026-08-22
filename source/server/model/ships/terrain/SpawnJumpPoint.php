@@ -57,6 +57,30 @@ class SpawnJumpPoint extends Terrain{
        identical at all three points of a vortex's life: previewing, forming, open. */
     public $facingArrow = "img/directionOfVortex.png";
 
+    /* JUMP_POINTS_PLAN.md STAGE 5 - the id of the SHIP whose Jump Engine holds this vortex open.
+
+       Not persisted in tac_ship and not set by the constructor: JumpEngine::restoreVortexState
+       stamps it from the 'Vortex' note's shipid on every load, which is the same note the open and
+       close turns come from, so the link cannot drift from the state it describes.
+
+       WHY THE CLIENT NEEDS IT. Maintaining is declared by targeting the vortex's OWN hex with the
+       Jump Engine, so weaponManager.targetHex has to tell 'this is my jump point, keep it open'
+       from 'this hex is blocked by terrain' - and userid alone will not do it: a player may have
+       several ships with jump engines and only the holder may maintain.
+
+       No masking question: the declaration's launch line is drawn from the shooter to the hex from
+       phase 2 onward, so who opened a vortex has been public knowledge since Stage 2. */
+    public $vortexHolderId = null;
+
+    /* Emitted only when set, so a vortex that has somehow lost its note is byte-identical to
+       before. The static blueprint carries vortexHolderId: null (the generator serialises public
+       properties) and model/ship.js applies the blueprint FIRST, so the live value always wins. */
+    public function stripForJson(){
+        $strippedShip = parent::stripForJson();
+        if ($this->vortexHolderId !== null) $strippedShip->vortexHolderId = (int)$this->vortexHolderId;
+        return $strippedShip;
+    }
+
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 

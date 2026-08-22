@@ -10,6 +10,7 @@ import HyachComputerList from "./HyachComputerList";
 import HyachSpecialistsList from "./HyachSpecialistsList";
 import ShieldGeneratorList from "./ShieldGeneratorList";
 import PowerCapacitor from "./PowerCapacitor";
+import JumpEngineMenu from "./JumpEngineMenu";
 import SystemActivation from "./SystemActivation";
 import SystemPowerSettings from "./SystemPowerSettings";
 import MineSettingsList from "./MineSettingsList";
@@ -662,6 +663,8 @@ class SystemInfoButtons extends React.Component {
 
 				{canPowerCapacitor(ship, system) && <PowerCapacitor ship={ship} system={system} />}
 
+				{canJumpEngineMenu(ship, system) && <JumpEngineMenu ship={ship} system={system} />}
+
 			</Container>
 		)
 	}
@@ -671,6 +674,7 @@ class SystemInfoButtons extends React.Component {
 const canSelectAllWeapons = (ship, system) => {
 	if (!window.matchMedia("(pointer: coarse)").matches) return false;
 	if (!system.weapon) return false;
+	if (isHoldingVortex(ship, system)) return false; //JUMP_POINTS_PLAN.md Stage 5 - see isHoldingVortex
 
 	if (gamedata.gamephase != 3 && !system.ballistic && !system.preFires) return false;
 	if (gamedata.gamephase != 1 && system.ballistic) return false;
@@ -852,7 +856,7 @@ export const canDoAnything = (ship, system) => {
 		|| canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system)
 		|| canSelfIntercept(ship, system) || canRemIntercept(ship, system) || canAA(ship, system) || canBFCP(ship, system) || canSpec(ship, system) || canTSShield(ship, system)
 		|| canThoughtShield(ship, system) || canTSShieldGen(ship, system) || canThoughtShieldGen(ship, system)
-		|| canSelfRepairList(ship, system) || canActivate(ship, system) || canDeactivate(ship, system) || canPowerCapacitor(ship, system) || canSystemActivation(ship, system) || canSelectAllWeapons(ship, system)
+		|| canSelfRepairList(ship, system) || canActivate(ship, system) || canDeactivate(ship, system) || canPowerCapacitor(ship, system) || canJumpEngineMenu(ship, system) || canSystemActivation(ship, system) || canSelectAllWeapons(ship, system)
 		|| canMineSettings(ship, system) || canProxMineSettings(ship, system) || canGraviticAugmenter(ship, system) || canMinorThoughtPulsar(ship, system);
 };
 
@@ -862,7 +866,10 @@ const canOffline = (ship, system) => gamedata.gamephase === 1 && (system.canOffL
 // A system forced offline by a cooldown / forced-shutdown crit cannot be powered back
 // on by the player (it auto-recovers when the crit expires); onOnlineClicked/onlineAll
 // also reject it at the source.
-const canOnline = (ship, system) => gamedata.gamephase === 1 && shipManager.power.isOffline(ship, system) && !shipManager.power.isForcedOffline(ship, system);
+// JUMP_POINTS_PLAN.md Stage 5: a ship maintaining a jump point stays dark for the WHOLE turn, so a
+// system it shut down cannot be powered back on until Maintain is switched off. setOnline refuses
+// it at the source too; this is what makes the button read as unavailable rather than warn on click.
+const canOnline = (ship, system) => gamedata.gamephase === 1 && shipManager.power.isOffline(ship, system) && !shipManager.power.isForcedOffline(ship, system) && !shipManager.power.isVortexLockedOffline(ship, system);
 
 //change December 2021: can start overloading even if no Power is available, to be balanced at end of turn
 const canOverload = (ship, system) => gamedata.gamephase === 1 && !shipManager.power.isOffline(ship, system) && system.weapon && system.overloadable && !shipManager.power.isOverloading(ship, system) /*&& shipManager.power.canOverload(ship, system)*/;
@@ -904,23 +911,38 @@ const isShotEditableOrder = (ship, system) => {
 };
 
 const canAddShots = (ship, system) => {
+	if (isHoldingVortex(ship, system)) return false;
 	if (!system.weapon || !system.canChangeShots || !weaponManager.hasFiringOrder(ship, system)) return false;
 	const fire = isShotEditableOrder(ship, system);
 	return Boolean(fire) && fire.shots < system.maxVariableShots;
 };
 
 const canReduceShots = (ship, system) => {
+	if (isHoldingVortex(ship, system)) return false;
 	if (!system.weapon || !system.canChangeShots || !weaponManager.hasFiringOrder(ship, system)) return false;
 	const fire = isShotEditableOrder(ship, system);
 	return Boolean(fire) && fire.shots > 1;
 };
 
-const canRemoveFireOrderMulti = (ship, system) => system.weapon && weaponManager.hasOrderForMode(system) && system.canSplitShots;
+/* JUMP_POINTS_PLAN.md Stage 5 - a Jump Engine that is HOLDING a vortex open shows none of the
+   fire-order controls. It cannot declare anything (one vortex per ship at a time, enforced in
+   Firing::getVortexDeclarationBlock), and the order it does hold is the Maintain declaration -
+   which is cancelled by throwing the Maintain toggle to OFF, not by a generic "remove fire order"
+   button that would leave the ship's systems shut down with nothing holding them that way.
+
+   Deliberately gated on HOLDING A VORTEX, not on being a jump engine: on the turn a vortex is
+   DECLARED there is no unit yet, and the ordinary remove-and-redeclare idiom is still how the
+   player re-aims it (plan section 3.5). */
+const isHoldingVortex = (ship, system) => system.name === 'jumpEngine'
+	&& typeof system.getHeldVortex === 'function' && Boolean(system.getHeldVortex());
+
+const canRemoveFireOrderMulti = (ship, system) => system.weapon && weaponManager.hasOrderForMode(system) && system.canSplitShots && !isHoldingVortex(ship, system);
 //A "spent & locked" Gravitic Augmenter (order committed, outside its declaration phase) must not
 //offer a remove button — e.g. its ballistic Mode 1/2 order reads as active in the Firing phase via
 //hasFiringOrder's phase-3 branch, but Initial-Orders support cannot be un-fired mid-turn.
 const canRemoveFireOrder = (ship, system) => system.weapon && weaponManager.hasFiringOrder(ship, system)
-	&& !(typeof system.isSpentLocked === 'function' && system.isSpentLocked());
+	&& !(typeof system.isSpentLocked === 'function' && system.isSpentLocked())
+	&& !isHoldingVortex(ship, system);
 
 //The Gravitic Augmenter cycles its own modes inside its green menu, and the Minor Thought Pulsar
 //replaces firing modes entirely with its free thrust-allocation menu — both opt out of the generic
@@ -937,8 +959,19 @@ const canSelfIntercept = (ship, system) => system.weapon && weaponManager.canSel
 const canRemIntercept = (ship, system) => system.weapon && system.canSplitShots && weaponManager.canRemInterceptSingle(ship, system);
 
 //GraviticAugmenter excluded: its Activate/Deactivate lives in its own green menu, not the generic SystemActivation box.
-const canActivate = (ship, system) => system.canActivate && typeof system.canActivate === 'function' && system.canActivate() && system.name !== 'powerCapacitor' && system.name !== 'PowerCapacitor' && system.name !== 'GraviticAugmenter'; //Used to manually fire weapons/systems that don't need to target e.g. Second Sight/Thoughwave
-const canDeactivate = (ship, system) => system.canDeactivate && typeof system.canDeactivate === 'function' && system.canDeactivate() && system.name !== 'powerCapacitor' && system.name !== 'PowerCapacitor' && system.name !== 'GraviticAugmenter';
+//jumpEngine joins the exclusions: its activation pair is the Maintain toggle, which JumpEngineMenu
+//renders as a labelled row of its own (JUMP_POINTS_PLAN.md Stage 5). A bare Activate button beside
+//it would be the same switch twice, unlabelled.
+const canActivate = (ship, system) => system.canActivate && typeof system.canActivate === 'function' && system.canActivate() && system.name !== 'powerCapacitor' && system.name !== 'PowerCapacitor' && system.name !== 'GraviticAugmenter' && system.name !== 'jumpEngine'; //Used to manually fire weapons/systems that don't need to target e.g. Second Sight/Thoughwave
+const canDeactivate = (ship, system) => system.canDeactivate && typeof system.canDeactivate === 'function' && system.canDeactivate() && system.name !== 'powerCapacitor' && system.name !== 'PowerCapacitor' && system.name !== 'GraviticAugmenter' && system.name !== 'jumpEngine';
+
+//JUMP_POINTS_PLAN.md Stage 5 - the Maintain panel. Shown while the engine COULD be told to maintain
+//(canMaintainVortex: phase 1, my ship, engine alive and powered, a vortex of ours open and in range,
+//and not on the turn the four-turn cap closes it) and while it already IS, so the player can change
+//their mind before committing.
+const canJumpEngineMenu = (ship, system) => system.name === 'jumpEngine'
+	&& typeof system.canMaintainVortex === 'function'
+	&& (system.canMaintainVortex() || system.canDeactivate());
 
 const canPowerCapacitor = (ship, system) => {
 	if (system.name === 'powerCapacitor' || system.name === 'PowerCapacitor') {

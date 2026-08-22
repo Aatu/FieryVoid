@@ -419,6 +419,12 @@ window.BallisticIconContainer = function () {
 
 	function generateJumpPointArrows(orders) {
 		orders.forEach(order => {
+			//Stage 5: mode 7 is MAINTAIN, not a facing. The vortex is already on the board by then
+			//and carries its own permanent facing arrow (ShipIcon.$facingArrow), so drawing a second
+			//one over it - at facing (7-1)%6 = 0, which would usually be the WRONG way round - would
+			//be both redundant and a lie.
+			if (parseInt(order.firingMode, 10) === 7) return;
+
 			const facing = (((parseInt(order.firingMode, 10) || 1) - 1) % 6 + 6) % 6;
 			const hex = new hexagon.Offset(order.x, order.y);
 
@@ -715,7 +721,14 @@ window.BallisticIconContainer = function () {
 					   turn advance: onConstructed only builds ballistics for the current turn. */
 					case 'jumppoint':
 						targetType = 'hexYellow';
-						text = 'Jump Point Forming';
+						/* Stage 5: firing mode 7 is not a facing, it is the MAINTAIN declaration -
+						   the same gesture aimed at a vortex that already exists. Its hex already
+						   holds the vortex unit and the vortex unit's own arrow, so this marker
+						   only has to say that the player has spent this turn's declaration on
+						   keeping it open. */
+						text = (parseInt(ballistic.firingMode, 10) === 7)
+							? 'Maintaining Jump Point'
+							: 'Jump Point Forming';
 						textColour = '#e1b000';
 						break;
 				}

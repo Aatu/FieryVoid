@@ -614,6 +614,31 @@ shipManager.movement = {
         return null;
     },
 
+    /* JUMP_POINTS_PLAN.md Stage 5 - the OPEN vortex this ship is holding open, or null.
+
+       vortexHolderId is stamped on the vortex unit by JumpEngine::restoreVortexState from the
+       'Vortex' note's shipid, so it names the ship whose Jump Engine owns the jump point - not
+       merely a ship belonging to the same player, which is what a userid comparison would give.
+       A player may have several ships with jump engines and only the holder may maintain.
+
+       Returns null on the turn the vortex was DECLARED: getVortexInHex skips a unit that is still
+       forming, and a forming vortex cannot be maintained anyway (the opening declaration is that
+       turn's declaration). Mirrors JumpEngine::hasOpenVortex on the server. */
+    getVortexHeldBy: function getVortexHeldBy(ship) {
+        if (!ship) return null;
+
+        for (var i in gamedata.ships) {
+            var unit = gamedata.ships[i];
+            if (!shipManager.movement.isJumpVortex(unit)) continue;
+            if (unit.vortexHolderId != ship.id) continue;
+
+            //Same open/closed window getVortexInHex applies, asked of the unit we already have.
+            if (shipManager.movement.getVortexInHex(shipManager.getShipPosition(unit)) === unit) return unit;
+        }
+
+        return null;
+    },
+
     /* The travel direction a unit must be moving in to enter 'vortex'.
 
        The facing names the vortex's MOUTH - the doorway into hyperspace - and a unit uses it by

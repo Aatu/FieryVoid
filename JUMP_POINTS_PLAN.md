@@ -4,9 +4,10 @@ Replaces the current one-click "boost the Jump Engine, vanish at end of turn" es
 tabletop rules: a ship **projects a vortex** into a nearby hex, the vortex **forms**, **persists**,
 can be **maintained**, and any unit that **flies into its mouth** leaves the battle.
 
-Status: **STAGES 1, 2, 2b, 3 AND 4 BUILT (2026-08-21), stages 5-6 not started.**
+Status: **STAGES 1, 2, 2b, 3, 4 AND 5 BUILT (2026-08-21/22), stage 6 not started.**
 ⚠️ Stage 2 retires the boost-to-jump path and Stage 4 adds the replacement, so **stages 2–5 must
 ship as ONE live deploy** — deploying Stage 2 alone leaves a game with no way to leave a battle.
+That deploy is now complete: 2–5 are all in the tree.
 
 Decisions already taken (2026-08-17, user):
 
@@ -133,8 +134,16 @@ base, an OSAT, a unit that has never moved) **cannot** use the vortex.
 | N — declared in Initial Orders | **Forming**. Unit is created at the end of `InitialOrdersGamePhase::advance` but is deliberately NOT drawn | No | a yellow **"Jump Point Forming"** hex + a facing arrow |
 | End of N | **Activation.** Damaged-engine failure roll happens here | — | — |
 | N+1 | **Open** | Yes | the **vortex unit**, with the same facing arrow over it |
-| N+2, N+3 | Open **only if maintained each turn** | Yes | as above |
-| End of N+3 | **Hard cap.** Closes unconditionally (4 turns counting N) | — | — |
+| N+2, N+3, N+4 | Open **only if maintained each turn** | Yes | as above |
+| End of N+4 | **Hard cap.** Closes unconditionally | — | — |
+
+⭐ **FOUR TURNS OPEN, AND THE TURN IT WAS DECLARED IS NOT ONE OF THEM** (user ruling 2026-08-22,
+correcting an earlier "4 turns counting N"). Declared on N, open on N+1 … N+4, gone on N+5. So the
+last turn on which declaring Maintain can change anything is **N+3** — a Maintain on N+4 is
+overtaken by the cap, which is why the control is not offered there. `JumpEngine::MAX_VORTEX_TURNS`
+is the one place the 4 is written down; the closure sweep, the client's decision to offer the
+toggle and the engine's N/4 icon counter all read it (the client derives it from `spawned`, which
+is `openTurn + 1`, so its cap turn is `spawned + 3`).
 
 ⭐ **A forming vortex is a MARKER, not a unit** (user ruling 2026-08-21, revising the original
 "visible to everyone from Movement onward"). Showing the unit on turn N read as "there is a jump
@@ -167,6 +176,53 @@ Declared each Initial Orders after the opening turn. Requires every power-absorb
 Scanner and the Jump Engine to be **offline**. Violation does not block the commit; the vortex
 simply closes at end of turn with a log note (this keeps the rule out of the submit path, where a
 hard block would be a support burden).
+
+⭐ **THE CONTROL (Stage 5, revised at build): a Maintain ON/OFF toggle in the Jump Engine's own
+system menu**, alongside the ship's other per-system switches. Switching it ON does BOTH halves of
+the rule in one click — it makes the declaration *and* powers down everything that has to be off.
+While it stands, none of those systems can be powered back up.
+
+⚠️ **The first cut had the player re-target the vortex's own hex with the Jump Engine each turn.**
+It produced the right order and the server was happy, but it was the wrong shape: it asked for a
+targeting ritual to express what is really a switch, and — decisively — a right-click on a hex
+cannot take the ship dark, so the player was left to shut down thirty systems by hand and lose the
+vortex at end of turn if they missed one. Replaced (user, 2026-08-22). The map path is gone;
+targeting your own vortex hex now says so and points at the toggle.
+
+**What did NOT change is the order it produces**: an ordinary ballistic declaration carrying
+**firing mode 7** (`JumpEngine::MAINTAIN_MODE`) aimed at the vortex's own hex. It persists, masks
+and replays exactly like the opening declaration, `Firing::getVortexDeclarationBlock` validates it
+unchanged, and the yellow hex marker reads *Maintaining Jump Point* instead of *Jump Point Forming*.
+⭐ **The order is also the STATE** — there is no `active` flag anywhere — which is what makes "am I
+maintaining?" survive a poll, a page reload and the commit with nothing to keep in sync.
+
+Other consequences, all deliberate:
+- The 4-hex range test the declaration already runs **is** "the holder must be near its vortex",
+  measured at Initial Orders. The end-of-turn closure test measures it again after Movement.
+- The client needs to know **which ship** holds a given vortex, not merely which player. Hence
+  `SpawnJumpPoint::$vortexHolderId`, stamped on every load from the state note's `shipid`.
+- Maintaining reveals a stealthed/cloaked ship exactly as opening does (`hasVortexDeclaration`
+  counts any un-rejected Jump Engine order). Not a special case: a ship maintaining a vortex has
+  had to shut its Shading Field or Cloaking Device down anyway, since both draw power.
+- ⭐ **The toggle is not offered on the vortex's LAST turn.** The cap closes it at the end of
+  `openTurn + MAX_VORTEX_TURNS` whatever the player does, so a Maintain declaration there could not
+  change the outcome. A control that cannot matter should not be shown. (`openTurn` is not sent to
+  the client, but `spawned` is, and `spawned == openTurn + 1`, so the cap turn is `spawned + 3`.)
+- ⭐ **Nor are the fire-order buttons**, on any turn the engine is holding a vortex: it cannot
+  declare a second one, and the order it does hold is the Maintain declaration, which is cancelled
+  by throwing the toggle to OFF — a generic "remove fire order" would strip the declaration and
+  leave the ship's systems shut down with nothing holding them that way. On the turn a vortex is
+  *declared* there is no unit yet, so the ordinary remove-and-redeclare idiom still re-aims it.
+- ⭐ **The engine's icon counts the vortex instead of its loading.** A jump engine never reloads, so
+  the `1/1` every other weapon shows said nothing; while a vortex stands the same two numbers read
+  **N/4** — turns open, out of the four it can have — with the declaring turn reading `0/4`. It is a
+  `stripForJson` override only, so no server state moves. It also does a second, wanted job:
+  `weaponManager.isLoaded` is `loadingtime <= turnsloaded`, so an age below the cap reads as NOT
+  LOADED and the engine drops out of `targetHex`'s weapon sweep for exactly as long as it is holding
+  a jump point open — the one-vortex-per-ship rule expressing itself in the UI rather than being
+  restated there. The engine's real loaded state moved to **`$delay`**, the constructor's 4th
+  argument: that is the retired B5W jump delay (8–36 across the fleet), read by nothing since Stage
+  2, and as a `Weapon` it would be taken for an initiative delay if anything ever did.
 
 ### 2.5 Jumping out
 
@@ -1017,11 +1073,87 @@ activation or the phase boundary, so the plotted order keeps `id = -1` until the
 the fleet list changing at the end of the Movement phase is fine, and not worth that machinery.
 The same fact is why `shouldBeHidden` cannot drop the jumping player's OWN sprite any sooner.
 
-### Stage 5 — lifecycle
-Maintain mode, the four closure conditions, the 4-turn cap, the all-systems-offline check, and the
+### Stage 5 — lifecycle — **BUILT 2026-08-22**
+Maintain mode, the closure conditions, the 4-turn cap, the all-systems-offline check, and the
 end-of-turn failure roll in `JumpEngine::criticalPhaseEffects`.
 **Gate:** a vortex left unmaintained closes at end of its first full turn; a maintained one survives
-to the cap; a holder that strays to 5 hexes closes it; a damaged engine rolls each turn.
+to the cap; a holder that strays to 5 hexes closes it; a damaged engine rolls each turn. ✔ all four.
+
+**Twelve files — four server, eight client (two of them new). No new PHP class, so the autoload map
+is untouched; `SpawnJumpPoint` gains one public property, so the local statics want regenerating
+(`fvbuild.ps1 -Statics`) — but `source/public/static` is gitignored, so nothing lands in the diff.
+Two new React files, so this is a `yarn build` (or `fvbuild.ps1 -Client`), not a legacy-only one.**
+
+| File | What it got |
+|---|---|
+| `systems/baseSystems.php` `JumpEngine` | `MAINTAIN_MODE`, `MAX_VORTEX_TURNS`, `getMaintainDeclaration`, `getVortexPowerViolations`, the closure sweep (`closeExpiredVortices` / `closeVortexIfDue` / `getVortexClosureReason` / `recordVortexClosure`), `criticalPhaseEffects` + `rollVortexJumpFailure`, `stripForJson` (the N/4 counter), `$delay` repurposed, and `restoreVortexFromNote` rewritten as `restoreVortexState` |
+| `systems/baseSystems.php` `PhasingDrive` | one line: skip the half-phase self-destruct when the parent's failure roll has just destroyed the same ship in the same Critical phase |
+| `handlers/firing.php` | `getVortexDeclarationBlock` learns mode 7 (its own rule list, and it must **not** run the obstruction sweep), plus the across-turns "one vortex per ship" test |
+| `Phase/FireGamePhase.php` | one call, immediately after `Criticals::setCriticals` |
+| `ships/terrain/SpawnJumpPoint.php` | `$vortexHolderId` and a `stripForJson` override to emit it |
+| `client/movement.js` | `getVortexHeldBy` |
+| `client/power.js` | `vortexMaintainExemptNames`, `isVortexExemptSystem`, `isMaintainingVortex`, `getVortexMaintainBlockers`, `isVortexLockedOffline` — and the lock itself, one guard inside `setOnline` |
+| `client/model/system/baseSystems.js` `JumpEngine` | `getHeldVortex`, `isMaintainingVortex`, `removeVortexMaintainOrder`, `canMaintainVortex`, and the activation four (`canActivate` / `canDeactivate` / `doActivate` / `doDeactivate`) |
+| `client/UI/reactJs/system/JumpEngineMenu.js` (new) | the toggle, one labelled row plus a note saying what switching it on will shut down |
+| `client/UI/reactJs/system/activationMenu.js` (new) | the shared panel chrome, lifted out of `PowerCapacitor.js` so the two menus cannot drift apart |
+| `client/UI/reactJs/system/PowerCapacitor.js` | imports that chrome instead of declaring it (and loses one unused `Value` styled-div) |
+| `client/UI/reactJs/system/SystemInfoButtons.js` | renders the menu, excludes `jumpEngine` from the generic Activate/Deactivate buttons, adds the lock to `canOnline`, and hides the whole fire-order row behind `isHoldingVortex` |
+| `client/UI/reactJs/system/SystemPowerSettings.js` | the same lock on its own `canOnline` |
+| `client/weaponManager.js` | the map path for maintaining is GONE; targeting your own vortex hex now points at the toggle |
+| `client/renderer/icon/BallisticIconContainer.js` | the *Maintaining Jump Point* label, and mode 7 skips the facing-arrow sweep |
+
+**What it actually took, beyond the sketch above:**
+
+| Site | Why |
+|---|---|
+| ⭐ **`onIndividualNotesLoaded` had to stop being last-note-wins** | Stage 3 recorded a closure by APPENDING a phase-2 note and relying on "notes load ordered by turn then phase, last wins". That is correct for ONE vortex and silently wrong for two. A closed vortex frees its engine to open another, so an engine accumulates several vortices' notes — all stamped turn 1 — and the load order becomes `A open (p1)`, `B open (p1)`, `A closed (p2)`: the engine would end up believing its current vortex is the long-dead A, and `hasOpenVortex` would say it holds nothing. Vortex notes are now collected into a map **keyed by vortex id** (last-wins *per vortex*, which is what the phase-2 override was always meant to be) and the engine then adopts the **latest-opened** one. The unit half — `spawned`, `removed`, `vortexHolderId` — is applied for *every* vortex in the map, not just the current one, so a replay turn still renders each of them |
+| ⭐ **`$gamedata->turn` is a STRING** | `TacGamedata::setTurn` stores what mysqli handed it, with no cast, while `$vortexOpenTurn` is `(int)`-cast out of the note. The failure roll's `$this->vortexOpenTurn !== $turn` was therefore **true for the same turn**, which silently skipped the roll on the very turn a vortex is opened — the commonest case there is. Caught by the scratch harness, not by review. Everything else in the stage compares turns loosely; this was the only strict one |
+| The closure sweep is its own pass, **not** `criticalPhaseEffects` | "Its holder is destroyed" is a closure condition, and `Criticals::setCriticals` iterates only the ships that were **alive when it started** — so a holder killed by fire this turn, or one that flew out through its own vortex during Movement, never reaches its own systems' hooks. The sweep walks `$gamedata->ships` unfiltered instead |
+| …and it runs **after** `setCriticals`, not before | The failure roll is inside `criticalPhaseEffects` (plan §2.6), and a ship it has just destroyed has to read as destroyed when the sweep asks. On the OPENING turn that gives `closeTurn == openTurn`, i.e. a vortex that never forms — which falls out of the general rule rather than needing one of its own |
+| The closure REASON goes in the note, and it can contain commas | `notevalue` is now `"<openTurn>,<closeTurn>,<reason>"`, parsed back with an `explode` **limit of 3**. The reason is free text ("systems left online: Heavy Laser; Interceptor II; …") because it is the only thing a player can act on. It reaches `source/logs/fieryvoid.log` via `Debug::log` today; rendering it in the combat log is Stage 6 |
+| `getVortexPowerViolations` is **public static on `JumpEngine`** | The rule is about the SHIP, not about one engine, and three callers need it (the closure test, a future Stage 6 tooltip, Phase 2's fixed gates). It exempts `Scanner` **by `instanceof`**, which catches `ElintScanner` / `SWScanner` / `AntiquatedScanner` — the client, which has no class information on a system, has to list the four names instead, and says so |
+| A `powerLocked` system is deliberately **not** exempt | A deployed Kirishiac orbital's beam draws power and cannot be switched off, so such a ship simply cannot hold a vortex open until it docks. That is a real rule interaction, not an oversight |
+| `PhasingDrive` needed one line | Its `criticalPhaseEffects` calls `parent::` **first**, which is now also the failure roll, and would then write a second destruction entry and a second log line on the same hull. It asks about *this turn's roll specifically* (`hasAppliedVortexFailure`) rather than about the ship being destroyed at all, so no pre-existing behaviour changes |
+| The new state fields are `protected` | `json_encode` serialises public properties only, so `$vortexCloseReason` and `$vortexFailureApplied` cost the static blueprints nothing. (`$activeVortexId` and friends are public and *do* appear in every blueprint with a jump engine — Stage 3's choice, left alone) |
+| Warn on the client, close on the server | §2.4 says a violation must not block the commit. The server says nothing at submit time and closes the vortex at end of turn; the client makes the violation impossible in the first place by shutting the systems down itself. Neither side blocks the commit |
+| ⭐ **The toggle does the shutdown, and the lock is in `setOnline`** | Two halves that have to happen together, so they happen in one click: `JumpEngine.doActivate` makes the declaration and then powers down every non-exempt system, withdrawing any fire order it holds first (the ordinary Off button refuses a weapon that has one, for the same reason). Keeping them on is enforced in **`shipManager.power.setOnline`** rather than only in the button gates, because that is the choke point every route funnels through — the Off/On toggle, `onlineAll`, and the forced-shutdown recovery. Exactly where the Vorlon Power Capacitor's own lock sits, three lines above it. The two `canOnline` gates get it as well, so the button reads unavailable instead of warning on click |
+| `doDeactivate` removes the declaration BEFORE restoring anything | Otherwise `setOnline`'s lock — which reads that very declaration — refuses every restore, and turning Maintain off would leave the ship dark |
+| The restore is deliberately broad | Everything non-exempt that is offline comes back on, so a system the player had *already* powered down by hand before switching Maintain on comes back too. Same broad brush the Power Capacitor's Double Recharge uses, and for the same reason: remembering exactly which systems the toggle switched off would not survive the gamedata poll that rebuilds a ship's systems. Visible on screen, one click to undo |
+| `jumpEngine` joins the generic-activation exclusion list | `SystemInfoButtons`' bare Activate/Deactivate buttons fire off any system that defines `canActivate`. With the toggle defined that way, the engine would show the same switch twice — once labelled, once not. `powerCapacitor` and `GraviticAugmenter` were already excluded for the same reason |
+| The panel chrome became a shared module | `PowerCapacitor.js`'s styled-components were this menu's private styling; two menus that are meant to read as the same control had no business owning two copies. Moved verbatim to `activationMenu.js`. ⚠️ It is **not** the same chassis as `menuControls.js`'s `MENU_CHROME` — that is the drained neutral frame the lobby damage editors use, this is the older saturated `#215a7a` header the activation menus have always had. Different families on purpose |
+
+**Gate result 2026-08-22:** `fvbuild.ps1 -Check` **all green** — autoload map current, ship-data
+validator PASS, replay harness **158 passed / 0 failed**. Two scratch harnesses against the real
+classes and real local game 4302, inside rolled-back transactions, **54 + 19 assertions**:
+the open/reload round trip including `vortexHolderId` through `stripForJson`; maintain accepted on
+its own hex and refused everywhere else, on the forming turn, and for a ship holding no vortex; a
+second opening refused; all six closure reasons (unmaintained, systems online, the cap, one turn
+short of the cap, range, holder destroyed, holder left through a vortex); the closing turn still
+usable and `Movement::getOpenVortexInHex` agreeing; a double sweep as a no-op; a comma-bearing
+reason surviving the note round trip; the two-vortex note ordering; and the failure roll at both
+deterministic ends of the d100, including the `isHyperspaceLogOrder` and `HangarOps` hand-offs.
+
+**The client half is covered by two more harnesses, both against the real files.** A `vm` sandbox
+loads the actual `power.js`, `movement.js` and `model/system/baseSystems.js` (its global is a Proxy
+that hands out a stub constructor for anything those files reference but do not define, so the
+whole dependency graph does not have to be present) and drives the toggle against a fake Omega —
+**49 assertions**: every case where the control is and is not offered (forming turn, cap turn, one
+turn short of the cap, out of range, somebody else's vortex, engine powered down, wrong phase); the
+order it builds; which systems go dark and which four do not; the withdrawn fire order and the
+released boost; `setOnline` and `onlineAll` both refusing while it stands; the restore; and that
+last turn's declaration does not count. And `JumpEngineMenu` is bundled with esbuild — which
+RESOLVES imports, unlike a parse-check — and `renderToString`d in both states, **8 assertions**.
+
+**Two deliberate gaps, reported rather than silently half-built:**
+
+1. **The closure reason is not in the combat log yet.** It is persisted in the note and written to
+   `source/logs/fieryvoid.log`; the player-facing line is Stage 6, which owns combat-log work. What
+   the player *does* get today is the client warning at declaration time, which is the only one of
+   the reasons they can still do something about.
+2. **No commit-time warning for maintaining**, matching Stage 4's gap: `gamedata.js`'s commit
+   checklist still lists only boost-jumping ships. Much less of a hole than it was — the toggle
+   powers the ship down itself, so the commonest way to lose a vortex by accident no longer exists —
+   but a holder that drifts out of range during Movement still gets no warning at commit.
 
 ### Stage 6 — polish
 Replay (`ShipJumpAnimation` / the existing `ShipJumpPoint` particle effect for formation and
@@ -1061,7 +1193,12 @@ and must be rewritten).
    damage this turn"), but re-read that comment block before changing the timing, and confirm a
    fighter that ordered a dock in Initial Orders onto a carrier that jumps at end of Movement still
    ends up in the hangar.
-10. **In-flight games — RESOLVED 2026-08-21.** Retire the boost path with `$boostable = false` and
+10. **`$gamedata->turn` IS A STRING — never compare it strictly. RESOLVED 2026-08-22 (Stage 5).**
+    `TacGamedata::setTurn` stores mysqli's value with no cast, while every turn parsed out of an
+    IndividualNote is `(int)`-cast. `$note-derived === $gamedata->turn` is therefore **false for the
+    same turn**. It silently disabled the Stage 5 jump-failure roll on the opening turn until a
+    scratch harness caught it. Compare loosely, or cast both sides.
+11. **In-flight games — RESOLVED 2026-08-21.** Retire the boost path with `$boostable = false` and
     nothing else; the whole boost framework stays live for one deploy cycle so a boost already
     committed on the live server still resolves. Full reasoning and the four facts it rests on are
     in §4 Stage 2; the consequence for Stage 4 is recorded there. Do not "tidy up" the boost code

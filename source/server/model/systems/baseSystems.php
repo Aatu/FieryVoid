@@ -5083,6 +5083,20 @@ class JumpEngine extends Weapon{
     public $hextarget = true;
     public $range = 4;
 
+    /* STAGE 5 - the MAINTAIN declaration's firing mode. Named once because three places have to
+       agree on where the six facings stop and Maintain begins: getVortexDeclaration (openings
+       only), getMaintainDeclaration (this mode only) and Firing::getVortexDeclarationBlock, which
+       judges the two by different rule lists. */
+    const MAINTAIN_MODE = 7;
+
+    /* STAGE 5 - HOW MANY TURNS A VORTEX CAN STAY OPEN (plan section 2.3, user ruling 2026-08-22).
+       ⚠️ The turn it is DECLARED does not count. Declared on N, it forms at the end of N, is
+       open on N+1 through N+4, and closes unconditionally at the end of N+4 - so the last turn on
+       which declaring Maintain can change anything is N+3. Named once because three things count
+       in it: the closure sweep, the client's decision to offer the toggle, and the N/4 counter on
+       the engine's icon. */
+    const MAX_VORTEX_TURNS = 4;
+
     /* MODES 1-6 ARE THE VORTEX FACING (mode = facing + 1); mode 7 is the Stage 5 Maintain
        declaration. firingMode is the STORAGE for the facing - it persists to
        tac_fireorder.firingmode, so no schema change and no new column - but it is NOT the input
@@ -5143,6 +5157,16 @@ class JumpEngine extends Weapon{
     public $vortexOpenTurn = null;
     public $vortexCloseTurn = -1;
 
+    /* STAGE 5. PROTECTED, not public, on purpose: json_encode serialises public properties only,
+       so a protected field costs the static blueprints nothing (plan section 8) - and nothing
+       outside this class hierarchy needs either of them.
+         $vortexCloseReason  - why the vortex closed, for the log and the closure note's 3rd field.
+         $vortexFailureApplied - set by rollVortexJumpFailure when it has just destroyed the ship,
+           read by PhasingDrive::criticalPhaseEffects so a Shadow hull cannot be killed twice in
+           one Critical phase (parent rolls first, the half-phase self-destruct runs after it). */
+    protected $vortexCloseReason = '';
+    protected $vortexFailureApplied = false;
+
 	//JumpEngine tactically  is not important at all!
 	public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
 
@@ -5154,8 +5178,19 @@ class JumpEngine extends Weapon{
            hex in any direction. Weapon's 6th argument ($output) still defaults to 0, which is what
            ShipSystem was handed before. */
         parent::__construct($armour, $maxhealth, $powerReq, 0, 360);
-    
-        $this->delay = $delay;
+
+        /* STAGE 5 - $delay IS NOW WHERE THE REAL LOADED STATE LIVES.
+
+           The 4th argument is the B5W JUMP DELAY (8 to 36 across the fleet) - how long the drive
+           took to charge under the boost-to-jump rules. Nothing has read it since those rules were
+           retired in Stage 2, and as a Weapon subclass $delay would now be taken for an INITIATIVE
+           delay if anything ever did, which is worse than useless.
+
+           stripForJson hands the client $turnsloaded as the VORTEX'S AGE rather than the engine's
+           loading state (see there), so the field that genuinely answers 'is this engine ready?'
+           has to be somewhere else. This is it. The value is always 1: a jump engine is always
+           loaded - it never fires and never reloads. */
+        $this->delay = $this->turnsloaded;
     }
 
     /* Has $ship declared a vortex on $turn? Public static because the CONCEALMENT systems need to
@@ -5284,14 +5319,70 @@ class JumpEngine extends Weapon{
         return null;
     }
 
+    /* STAGE 5 - this engine's MAINTAIN declaration for $turn (firing mode 7), or null.
+     *
+     * Maintaining is declared exactly like opening - the Jump Engine is selected in Initial Orders
+     * and the player targets a hex - except that the hex is the vortex's OWN hex, which is how the
+     * client and Firing::getVortexDeclarationBlock both tell the two gestures apart. No facing is
+     * involved (RAW: a vortex's facing can never be altered once it forms), so there is no facing
+     * control and the mode is a flat 7.
+     *
+     * Read at the END of the turn, by closeVortexIfDue and by the jump-failure roll. Both run off
+     * a real getTacGamedata load, so this turn's ballistic orders are on the weapon by then. */
+    public function getMaintainDeclaration($turn)
+    {
+        foreach ($this->fireOrders as $fire){
+            if ($fire->turn != $turn) continue;
+            if (!empty($fire->rejected)) continue;
+            if ((int)$fire->firingMode !== self::MAINTAIN_MODE) continue;
+
+            return $fire;
+        }
+
+        return null;
+    }
+
+    /* STAGE 5 - every power-absorbing system that is still ONLINE on a ship trying to MAINTAIN a
+     * jump point, and so is not allowed to be (plan section 2.4). Returns display names, so the
+     * caller can say which ones; an empty array means the ship is legal.
+     *
+     * Exempt by rule: the Scanner - and its ELINT / SW / Antiquated subclasses, which is why this
+     * asks instanceof rather than matching a name - and the Jump Engine itself. The Reactor is
+     * exempt because it PRODUCES power rather than drawing it.
+     *
+     * A powerLocked system (a deployed Kirishiac orbital's beam, say) draws power and CANNOT be
+     * switched off, so it is deliberately NOT exempted: such a ship simply cannot hold a vortex
+     * open until it docks the thing. The client warns about exactly this list before the commit.
+     *
+     * PUBLIC STATIC because the rule is about the SHIP, not about one engine: nothing here reads
+     * $this, and stating it once is what keeps the end-of-turn test and any future caller (a
+     * Stage 6 tooltip, Phase 2's fixed gates) from drifting apart. */
+    public static function getVortexPowerViolations($ship, $turn)
+    {
+        $violations = array();
+
+        foreach ($ship->systems as $system){
+            if ($system instanceof JumpEngine) continue;
+            if ($system instanceof Scanner) continue;
+            if ($system instanceof Reactor) continue;
+            if ((int)$system->powerReq <= 0) continue;      //nothing to switch off
+            if ($system->isDestroyed($turn)) continue;      //draws nothing
+            if ($system->isOfflineOnTurn($turn)) continue;  //already off
+
+            $violations[] = $system->displayName;
+        }
+
+        return $violations;
+    }
+
     /* Is this engine currently holding an OPEN vortex, as of $turn? One vortex per ship at a time
      * (plan section 2.1), and this is the test that enforces it across turns - the one inside
      * Firing::getVortexDeclarationBlock only covers a second declaration in the SAME submission.
      *
      * A closed vortex frees the engine to open another, which is why the close turn is consulted
-     * rather than just the id. Until Stage 5 nothing ever sets a close turn, so in practice this
-     * currently reads "has this ship ever opened a vortex" - that is the temporary state stages 2-5
-     * ship out of together, not a rule to work around. */
+     * rather than just the id. Stage 5's closeExpiredVortices is what sets one, and it sets it to
+     * the turn the vortex closes ON - a vortex is usable for the whole of that turn, hence the
+     * strictly-greater test rather than >=. */
     public function hasOpenVortex($turn)
     {
         if ($this->activeVortexId === null) return false;
@@ -5370,9 +5461,136 @@ class JumpEngine extends Weapon{
         $this->vortexCloseTurn = -1;
     }
 
-    /* Rebuild this engine's vortex state from one 'Vortex' note, and put the vortex unit itself
-     * into the state that note describes. Called from onIndividualNotesLoaded, so it runs on every
-     * load, for the live game and for every replay turn alike.
+    /* ================= STAGE 5 - THE VORTEX LIFECYCLE =============================
+     *
+     * THE CLOSURE SWEEP. Every open vortex whose holder has stopped meeting the conditions for
+     * holding it closes at the END OF THE TURN, after Firing (plan section 2.3) - which is what
+     * makes a vortex declared closed still usable for the whole of that turn. Called once, from
+     * FireGamePhase::advance, immediately after Criticals::setCriticals.
+     *
+     * ⚠️ Destroyed ships are NOT skipped. "Its holder is destroyed" is itself a closure
+     * condition, and so is "its holder flew into its own vortex", which arrives here as the same
+     * thing. Terrain IS skipped, because terrain never holds a vortex - Phase 2's fixed jump gates
+     * will need their own path, which is exactly why this one refuses to guess.
+     *
+     * ⚠️ Runs AFTER setCriticals, not before, so the jump-failure roll (criticalPhaseEffects)
+     * has already had its say. A ship the roll has just destroyed closes its vortex on the same
+     * turn, and on the OPENING turn that gives closeTurn == openTurn, which is how "it never
+     * forms" is expressed - restoreVortexState then keeps the unit off the board for good. */
+    public static function closeExpiredVortices($gamedata)
+    {
+        foreach ($gamedata->ships as $ship){
+            if ($ship->isTerrain()) continue;
+
+            foreach ($ship->systems as $system){
+                if (!($system instanceof JumpEngine)) continue;
+
+                $system->closeVortexIfDue($ship, $gamedata);
+            }
+        }
+    }
+
+    /* Close this engine's vortex if any closure condition has become true, and record it.
+     *
+     * Idempotent three ways over: a closed vortex fails hasOpenVortex, an already-recorded closure
+     * has a real $vortexCloseTurn, and a load of an earlier turn cannot reach a vortex that had
+     * not been opened yet. So a double advance is a no-op - the same guarantee
+     * Movement::resolveJumpOuts gives on the other side of the turn. */
+    protected function closeVortexIfDue($ship, $gamedata)
+    {
+        if (!$this->hasOpenVortex($gamedata->turn)) return;
+        if ($this->vortexCloseTurn > -1) return;
+        if ($this->vortexOpenTurn === null || $this->vortexOpenTurn > $gamedata->turn) return;
+
+        $vortex = $gamedata->getShipById((int)$this->activeVortexId);
+        $reason = $this->getVortexClosureReason($ship, $vortex, $gamedata);
+        if ($reason === null) return; //still held
+
+        $this->recordVortexClosure($ship, $gamedata, $reason);
+    }
+
+    /* WHY the vortex closes this turn, or null if it survives into the next one. The list is plan
+     * section 2.3's, ordered so the reason worth reporting wins: a destroyed holder is the story
+     * even when it was also out of range.
+     *
+     * The OPENING turn is exempt from the Maintain test and from the all-systems-offline test:
+     * opening a jump point costs nothing and does not stop the ship fighting (plan section 2.4).
+     * It is NOT exempt from range or from destruction - a ship that opens a vortex and then runs
+     * eight hexes away never gets one.
+     *
+     * THE FOUR-TURN CAP is FOUR TURNS OPEN, and the declaring turn is not one of them: declared on
+     * N, open on N+1 through N+4, gone at the end of N+4. openTurn + MAX_VORTEX_TURNS is that last
+     * turn. (Corrected 2026-08-22 - it read openTurn + 3, which cost the vortex a turn.) */
+    protected function getVortexClosureReason($ship, $vortex, $gamedata)
+    {
+        $turn = $gamedata->turn;
+
+        //Defensive: the note outlived its unit (deleted game data, a recycled ship id). There is
+        //nothing left to hold open, so stop asking about it every turn.
+        if (!($vortex instanceof SpawnJumpPoint)) return 'vortex unit is gone';
+
+        if ($ship->isDestroyed($turn)){
+            return $ship->hasJumpedToHyperspace() ? 'holder left through a vortex' : 'holder destroyed';
+        }
+
+        if ($turn >= $this->vortexOpenTurn + self::MAX_VORTEX_TURNS) return 'four-turn limit reached';
+
+        $distance = $ship->getHexPos()->distanceTo($vortex->getHexPos());
+        if ($distance > $this->range) return 'holder is ' . $distance . ' hexes away';
+
+        if ($turn == $this->vortexOpenTurn) return null; //the turn it was declared - nothing more to ask
+
+        if (!$this->getMaintainDeclaration($turn)) return 'not maintained';
+
+        $violations = self::getVortexPowerViolations($ship, $turn);
+        if (!empty($violations)){
+            //Capped: notevalue is varchar(4096), but a log line naming forty weapons helps nobody.
+            $named = array_slice($violations, 0, 6);
+            if (count($violations) > count($named)) $named[] = '+' . (count($violations) - count($named)) . ' more';
+            return 'systems left online: ' . implode('; ', $named);
+        }
+
+        return null;
+    }
+
+    /* Write the closure down. There is NO UPDATE PATH for individual notes, by design
+     * (insertIndividualNote refuses anything that already has an id), so a closure is recorded by
+     * APPENDING a second note for the same vortex id at turn 1 / phase 2 - notes load ordered by
+     * turn then phase, and restoreVortexState is last-wins PER VORTEX ID, so the phase-2 note
+     * overrides its own phase-1 opening note and nobody else's.
+     *
+     * ⚠️ The reason is free text and can contain commas, so notevalue is parsed with an
+     * explode LIMIT of 3 on the way back in. Do not tidy that limit away.
+     *
+     * ⚠️ notekey_human is varchar(40) - an overflow is a mysqli 1406 that aborts the whole
+     * player submission, not a truncation. 'Vortex' is 6, and it MUST stay the same string the
+     * opening note uses or onIndividualNotesLoaded will not recognise this as a vortex note. */
+    protected function recordVortexClosure($ship, $gamedata, $reason)
+    {
+        $note = new IndividualNote(
+            -1,
+            $gamedata->id,
+            1, //turn 1 / phase 2 - see above, and see openVortex for why turn 1
+            2,
+            $ship->id,
+            $this->id,
+            $this->activeVortexId,
+            'Vortex',
+            $this->vortexOpenTurn . ',' . $gamedata->turn . ',' . $reason
+        );
+        Manager::insertIndividualNote($note);
+
+        $this->vortexCloseTurn   = $gamedata->turn;
+        $this->vortexCloseReason = $reason;
+
+        Debug::log("Jump vortex " . $this->activeVortexId . " (opened turn " . $this->vortexOpenTurn
+            . " by ship " . $ship->id . ", game " . $gamedata->id . ") closes at the end of turn "
+            . $gamedata->turn . " - " . $reason . ".");
+    }
+
+    /* Rebuild this engine's vortex state from the 'Vortex' notes it has written, and put each
+     * vortex unit itself into the state its note describes. Called from onIndividualNotesLoaded,
+     * so it runs on every load, for the live game and for every replay turn alike.
      *
      * ⭐ $spawned IS THE TURN THE VORTEX OPENS, WHICH IS openTurn + 1 - NOT the declaration turn.
      * shipManager.shouldBeHidden hides any unit whose spawned turn is later than the turn being
@@ -5393,27 +5611,59 @@ class JumpEngine extends Weapon{
      * spawned >= removedTurn, which here reduces to openTurn >= closeTurn - true only for a vortex
      * that closed on the very turn it was declared (a Stage 5 jump-failure), which never formed and
      * should indeed never be drawn. Use closeTurn itself and an ordinary unmaintained vortex - the
-     * common case, open one turn - would vanish from its own replay. */
-    protected function restoreVortexFromNote($note, $gamedata)
+     * common case, open one turn - would vanish from its own replay.
+     *
+     * ⭐ STAGE 5 - ONE NOTE PER VORTEX, NOT ONE PER ENGINE. A closed vortex frees its engine to
+     * open another (hasOpenVortex), so over a long game one engine accumulates several vortices'
+     * worth of notes, plus a second phase-2 note for each one that closed. Notes arrive ordered by
+     * turn then PHASE and every vortex note is stamped turn 1, so a naive last-note-wins loop
+     * would read A open (p1), B open (p1), A closed (p2) - and leave the engine believing its
+     * CURRENT vortex is the long-dead A. Keying by vortex id and then picking the LATEST-OPENED
+     * one is what makes the two orderings independent.
+     *
+     * $vortexNotes is keyed by vortex ship id, last-wins per key - which is how a phase-2 closure
+     * note overrides its own opening note. */
+    protected function restoreVortexState($vortexNotes, $gamedata)
     {
-        $parts     = explode(',', (string)$note->notevalue);
-        $openTurn  = (int)$parts[0];
-        $closeTurn = isset($parts[1]) ? (int)$parts[1] : -1;
+        $this->activeVortexId    = null;
+        $this->vortexOpenTurn    = null;
+        $this->vortexCloseTurn   = -1;
+        $this->vortexCloseReason = '';
 
-        $this->activeVortexId  = (int)$note->notekey;
-        $this->vortexOpenTurn  = $openTurn;
-        $this->vortexCloseTurn = $closeTurn;
+        foreach ($vortexNotes as $note){
+            //LIMIT 3: the closure reason is free text and can contain commas.
+            $parts     = explode(',', (string)$note->notevalue, 3);
+            $openTurn  = (int)$parts[0];
+            $closeTurn = isset($parts[1]) ? (int)$parts[1] : -1;
+            $reason    = isset($parts[2]) ? (string)$parts[2] : '';
 
-        //(int): notekey is a varchar column, so mysqli hands it back as a STRING, and
-        //getShipById's fallback loop compares with a strict ===.
-        $vortex = $gamedata->getShipById((int)$note->notekey);
-        if (!$vortex) return; //deleted game data, or a note that outlived its unit - state above is still right
+            /* THE UNIT half, applied for EVERY vortex this engine has ever opened - not just the
+             * current one - so a replay turn renders each of them in the state it was in then.
+             * (int): notekey is a varchar column, so mysqli hands it back as a STRING, and
+             * getShipById's fallback loop compares with a strict ===. */
+            $vortex = $gamedata->getShipById((int)$note->notekey);
+            if ($vortex instanceof SpawnJumpPoint){ //instanceof, not a null test: ship ids get recycled
+                $vortex->spawned        = $openTurn + 1;
+                $vortex->vortexHolderId = (int)$note->shipid; //who may MAINTAIN it - read by the client
 
-        $vortex->spawned = $openTurn + 1;
+                if ($closeTurn > -1 && $gamedata->turn > $closeTurn){
+                    $vortex->removed     = true;
+                    $vortex->removedTurn = $closeTurn + 1;
+                }
+            }
 
-        if ($closeTurn > -1 && $gamedata->turn > $closeTurn){
-            $vortex->removed     = true;
-            $vortex->removedTurn = $closeTurn + 1;
+            /* THE ENGINE half. Only ONE vortex can be this engine's current one, and because a ship
+             * may hold only one at a time that is always the latest-opened of the notes. A vortex
+             * opened on a LATER turn than the one being viewed does not exist yet as far as this
+             * load is concerned - which matters in replay, where every vortex note, whatever turn
+             * its vortex belongs to, is visible from turn 1 onwards. */
+            if ($openTurn > $gamedata->turn) continue;
+            if ($this->vortexOpenTurn !== null && $openTurn < $this->vortexOpenTurn) continue;
+
+            $this->activeVortexId    = (int)$note->notekey;
+            $this->vortexOpenTurn    = $openTurn;
+            $this->vortexCloseTurn   = $closeTurn;
+            $this->vortexCloseReason = $reason;
         }
     }
 
@@ -5508,22 +5758,125 @@ class JumpEngine extends Weapon{
 	}
 
 	public function onIndividualNotesLoaded($gamedata){
+		/* STAGE 3 - two KINDS of note hang on a Jump Engine, so the type has to be read rather than
+		   assumed. 'Vortex' notes rebuild the jump-point state; everything else falls through to
+		   the pre-existing behaviour below, which is the 'jumped' note.
+
+		   STAGE 5 - vortex notes are COLLECTED here and applied in one pass afterwards, keyed by
+		   the vortex's ship id. Notes arrive ordered by turn then phase, so this map is last-wins
+		   PER VORTEX, which is how a phase-2 closure note overrides its own phase-1 opening note
+		   without a later vortex's opening note getting in between. restoreVortexState explains
+		   why that distinction is load-bearing. */
+		$vortexNotes = array();
+
 		foreach ($this->individualNotes as $currNote) {
-			/* STAGE 3 - two KINDS of note now hang on a Jump Engine, so the type has to be read
-			   rather than assumed. 'Vortex' notes rebuild the jump-point state; everything else
-			   falls through to the pre-existing behaviour below, which is the 'jumped' note.
-			   Notes arrive ordered by turn then phase and this is last-wins per note kind, which is
-			   how Stage 5 will record a closure by simply appending a later note. */
 			if ($currNote->notekey_human === 'Vortex'){
-				$this->restoreVortexFromNote($currNote, $gamedata);
+				$vortexNotes[(string)$currNote->notekey] = $currNote;
 				continue;
 			}
 
 			//Insert the noteValue (e.g. combatValue when ship jumped) in appropriate variable
 			$this->preJumpValue = $currNote->notevalue;
 		}
+
+		$this->restoreVortexState($vortexNotes, $gamedata);
 	}//endof onIndividualNotesLoaded
 
+
+	/* ================= STAGE 5 - THE END-OF-TURN JUMP-FAILURE ROLL ================
+	 *
+	 * A DAMAGED Jump Drive may not survive holding a vortex open (plan section 2.6). The ship rolls
+	 * at the end of every turn on which it opened a vortex or maintained one; d100 <= the
+	 * percentage of engine boxes lost destroys it outright, down the existing JumpFailure path -
+	 * same damageclass, same log-order shape, so HangarOps' JumpFailure handling (no d20 escape
+	 * roll, every docked craft dies with the ship) picks it up unchanged.
+	 *
+	 * WHY HERE. criticalPhaseEffects is Pass 2 of Criticals::setCriticals, which runs inside
+	 * FireGamePhase::advance after all fire has resolved - so the roll sees the damage the engine
+	 * took THIS turn - and before Pass 3's processCarrierDestructionEscapes, which is what reads
+	 * the JumpFailure entry this may write. Pass 2 iterates the ships that were alive when
+	 * setCriticals started, which is also exactly the population that should be rolling: a ship
+	 * already destroyed by fire, or one that flew out through its own vortex during Movement, has
+	 * no jump left to fail.
+	 *
+	 * The vortex itself is closed by closeExpiredVortices, which runs after setCriticals and reads
+	 * the destruction this may have caused as its 'holder destroyed' condition. On the OPENING turn
+	 * that gives closeTurn == openTurn, i.e. a vortex that never forms - which is the rule. */
+	public function criticalPhaseEffects($ship, $gamedata)
+	{
+		parent::criticalPhaseEffects($ship, $gamedata);
+
+		$this->rollVortexJumpFailure($ship, $gamedata);
+	}
+
+	protected function rollVortexJumpFailure($ship, $gamedata)
+	{
+		//(int) THROUGHOUT, and it is load-bearing: TacGamedata::setTurn stores what mysqli handed
+		//it, which is a STRING, while $vortexOpenTurn is cast to int when the note is parsed. A
+		//strict comparison between the two is false for the same turn, which silently skips the
+		//roll on the very turn a vortex is opened - the commonest case there is.
+		$turn = (int)$gamedata->turn;
+
+		//Only a ship that OPENED a vortex this turn, or is MAINTAINING one this turn, is asking
+		//anything of its jump drive. A vortex simply left to expire costs no roll.
+		if (!$this->hasOpenVortex($turn)) return;
+		if ((int)$this->vortexOpenTurn !== $turn && !$this->getMaintainDeclaration($turn)) return;
+
+		//An undamaged drive never fails. Same measure doHyperspaceJump uses for the boost path.
+		$healthDiff = $this->maxhealth - $this->getRemainingHealth();
+		if ($healthDiff <= 0) return;
+
+		//Already gone this turn - by fire, by ramming, by its own half-phase - so there is nothing
+		//left to destroy and no second log line worth writing.
+		$primaryStruct = $ship->getStructureSystem(0);
+		if (!$primaryStruct || $primaryStruct->isDestroyed($turn)) return;
+
+		$missingHealthPercentage = round(($healthDiff / $this->maxhealth) * 100);
+		if (Dice::d(100) > $missingHealthPercentage) return; //held
+
+		//try to make an actual attack to show in the log - use the Ramming Attack system, exactly
+		//as doHyperspaceJump and PhasingDrive do. damageclass 'JumpFailure' is what
+		//Firing::isHyperspaceLogOrder matches on, so the four fire-order gathers skip it instead of
+		//re-resolving it as a ram on later turns.
+		$rammingSystem = $ship->getSystemByName("RammingAttack");
+		if ($rammingSystem){
+			$newFireOrder = new FireOrder(
+				-1, "normal", $ship->id, $ship->id,
+				$rammingSystem->id, -1, $turn, 1,
+				100, 100, 1, 1, 0,
+				0, 0, 'JumpFailure', 10001
+			);
+			$newFireOrder->pubnotes = " loses control of its jump vortex - damage to the Jump Drive destroys the ship ("
+				. $missingHealthPercentage . "% chance of failure).";
+			$newFireOrder->addToDB = true;
+			$rammingSystem->fireOrders[] = $newFireOrder;
+		}
+
+		$remaining = $primaryStruct->getRemainingHealth();
+		$damageEntry = new DamageEntry(
+			-1, $ship->id, -1, $turn,
+			$primaryStruct->id, $remaining, 0, 0, -1, true, false,
+			"", 'JumpFailure'
+		);
+		$damageEntry->updated = true;
+		if ($rammingSystem){ //extra data, so the damage entry can be tied back to the log order
+			$damageEntry->shooterid = $ship->id;
+			$damageEntry->weaponid  = $rammingSystem->id;
+		}
+		$primaryStruct->damage[] = $damageEntry;
+
+		//Read by PhasingDrive::criticalPhaseEffects, which runs its half-phase self-destruct AFTER
+		//this and would otherwise destroy the same ship a second time in the same phase.
+		$this->vortexFailureApplied = true;
+
+		Debug::log("Jump vortex failure: ship " . $ship->id . " (game " . $gamedata->id . ") destroyed"
+			. " at the end of turn " . $turn . " - " . $missingHealthPercentage . "% chance of failure.");
+	}
+
+	//True when the roll above has just destroyed this ship. Protected read for PhasingDrive.
+	protected function hasAppliedVortexFailure(){
+		return $this->vortexFailureApplied;
+	}
 
 	public function hasJumped() {		
 		$ship = $this->getUnit();
@@ -5547,6 +5900,10 @@ class JumpEngine extends Weapon{
 
      public function setSystemDataWindow($turn){
         $this->data["Special"] = "<br>Select in Initial Orders and target a hex within " . $this->range . " hexes to project a jump vortex.";
+        $this->data["Special"] .= "<br>To MAINTAIN an open vortex, target its own hex in Initial Orders - and shut down every";
+        $this->data["Special"] .= " system except the Scanner and this one, or it collapses at the end of the turn.";
+        $this->data["Special"] .= "<br>A vortex lasts at most 4 turns, and closes if its holder is destroyed or ends the turn more";
+        $this->data["Special"] .= " than " . $this->range . " hexes away.";
         $this->data["Special"] .= "<br>WARNING - Jumping to hyperspace REMOVES a unit from the rest of the battle.";
         $this->data["Special"] .= "<br>If Jump Engine is damaged, ship has a % chance of being destroyed opening jump point.";
         $this->data["Special"] .= "SHOULD NOT be shut down for power (unless damaged >50% or if Desperate rules apply).";
@@ -5561,6 +5918,41 @@ class JumpEngine extends Weapon{
 		ShipSystem::setSystemDataWindow($turn);
 		$this->data["Weapon type"] = $this->weaponClass;
 		$this->data["Range"] = $this->range;
+    }
+
+    /* STAGE 5 - THE ICON READS N/4 WHILE A JUMP POINT STANDS (user request 2026-08-22).
+     *
+     * A jump engine never reloads, so the "1/1" every other weapon's icon uses for its loading
+     * state told the player nothing. While this engine holds a vortex the same two numbers carry
+     * something worth knowing instead: how many turns the jump point has been OPEN, out of the four
+     * it can ever have. The turn it was declared reads 0/4 - it has formed, it is not open yet.
+     *
+     * ⭐ THIS IS A PAYLOAD OVERRIDE ONLY. The engine's own $turnsloaded / $loadingtime are
+     * left alone, so nothing on the server changes; $delay carries the real loaded state for
+     * anything that needs to ask (see the constructor).
+     *
+     * ⭐ AND IT DOES A SECOND, WANTED JOB. weaponManager.isLoaded is
+     * `loadingtime <= turnsloaded`, so an age below the cap reads as NOT LOADED on the client -
+     * which takes the engine out of weaponManager.targetHex's weapon sweep and off the fire-order
+     * buttons for exactly as long as it is holding a jump point open. That is the rule (one vortex
+     * per ship at a time) expressing itself in the UI rather than being restated there.
+     *
+     * No vortex - the ordinary 1/1 - means ready to declare one, which is exactly what it says. */
+    public function stripForJson(){
+        $strippedSystem = parent::stripForJson();
+
+        if ($this->activeVortexId === null || $this->vortexOpenTurn === null) return $strippedSystem;
+
+        $turn = (int)TacGamedata::$currentTurn;   //(int): mysqli hands the turn back as a STRING
+        $age  = $turn - (int)$this->vortexOpenTurn;
+
+        if ($age < 0) return $strippedSystem;                       //a later vortex, seen from an earlier replay turn
+        if (!$this->hasOpenVortex($turn)) return $strippedSystem;   //closed - the engine is free again
+
+        $strippedSystem->turnsloaded = min($age, self::MAX_VORTEX_TURNS);
+        $strippedSystem->loadingtime = self::MAX_VORTEX_TURNS;
+
+        return $strippedSystem;
     }
 }
 
@@ -9006,6 +9398,12 @@ class PhasingDrive extends JumpEngine{
     
 		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.	    
     
+		//JUMP_POINTS_PLAN.md Stage 5: the parent call above is now also the vortex jump-failure
+		//roll, which can destroy this very ship. Do not write a second destruction entry and a
+		//second log line on top of it. Deliberately asks about THIS turn's roll only, rather than
+		//about the ship being destroyed at all, so no pre-existing behaviour changes.
+		if ($this->hasAppliedVortexFailure()) return;
+
 		if (!Movement::isHalfPhased($ship, $gamedata->turn)) return;
 		if (!$this->isDamagedOnTurn($gamedata->turn)) return; 
 		
