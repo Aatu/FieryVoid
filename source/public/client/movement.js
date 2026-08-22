@@ -682,6 +682,36 @@ shipManager.movement = {
         return false;
     },
 
+    /* Has this unit COMMITTED a jump-out - i.e. is the order on the board rather than merely
+       plotted? The distinction is the movement row's id: a locally plotted order carries -1
+       until it is submitted, and after the commit the reloaded gamedata carries its real
+       database id.
+
+       That is the moment the unit stops being part of the battle for display purposes. The
+       server does not actually remove it until the END of the Movement phase (Movement::
+       resolveJumpOuts), but movement is sequential, so without this the hex keeps a ghost in it
+       while everyone else takes their turn. Read by shipManager.shouldBeHidden (the sprite) and
+       by fleetListManager (the ship's row and its docked flights' rows).
+
+       ⚠️ It only becomes true on a client that has been sent fresh ships, which is NOT the
+       moment of the commit: submitTacGamedata answers the POST with a bare {}, and a WAITING
+       player's poll is answered with the last_update timestamp alone, so the committing player
+       keeps their own order at id -1 until they are activated again or the phase ends. Their own
+       sprite therefore lingers a while; every other viewer sees it go as soon as they are served
+       the order, which is also when TacGamedata::hideActiveShipMovement stops masking it (once
+       that initiative bracket has passed).
+
+       Purely presentational, and self-correcting: the server re-checks the entry rule when the
+       phase resolves, so a tampered order that it refuses simply comes back on the next load. */
+    hasCommittedJumpOut: function hasCommittedJumpOut(ship) {
+        for (var i in ship.movement) {
+            var movement = ship.movement[i];
+            if (movement.turn == gamedata.turn && movement.type == "jumpout" && movement.id > 0) return true;
+        }
+
+        return false;
+    },
+
     canJumpOut: function canJumpOut(ship) {
         if (gamedata.gamephase != 2) return false;
         if (!ship || shipManager.isDestroyed(ship)) return false;

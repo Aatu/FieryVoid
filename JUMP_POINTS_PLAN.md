@@ -903,6 +903,120 @@ tooltip is already for, and `update()` always rebuilds the menu. That is the gen
 behind this flicker and it affects any stacked units, not just vortices; guarding it (only update
 when `selectedShip` actually changed) is a separate change to a shared hover path.
 
+#### Stage 4 third pass, same day (user feedback)
+
+**A departure should read as a departure the moment it is COMMITTED**, not when the phase resolves.
+The server still removes the unit at the end of Movement — nothing about the rules moved — but
+movement is sequential, so between one player's commit and the phase advancing there is a long
+window in which the unit sits in the vortex as a ghost and everyone plotting after it has no way to
+know it has already gone.
+
+New `shipManager.movement.hasCommittedJumpOut()` is the whole of it. The distinction it draws is the
+movement row's **id**: a locally plotted order carries `-1` until it is submitted, and the reloaded
+gamedata brings back its real database id. So nothing changes while the player is still deciding —
+they can still delete the order — and everything changes at once when they commit. Three readers:
+
+| Reader | Effect |
+|---|---|
+| `shipManager.shouldBeHidden` | the SPRITE goes. `IdleAnimationStrategy` hides any icon that answers true, so the hex empties for every player as soon as they can see the order — which is exactly when `TacGamedata::hideActiveShipMovement` stops masking it, i.e. once that ship's initiative bracket has passed |
+| `fleetListManager.updateFleetList` | the ship's own row reads **Jumped** |
+| `fleetListManager.getJumpedDockedFlightIds` | and so do the rows of every flight docked in it |
+
+⚠️ **Live play only** — `!gamedata.replay`. In replay the unit has to be seen flying INTO the
+vortex before it vanishes, which the ordinary destroyed path already handles. It is also
+self-correcting rather than authoritative: the server re-checks the entry rule when the phase
+resolves, so an order it refuses simply brings the unit back on the next load.
+
+⭐ **And a genuine long-standing bug underneath the second half of it.** `updateFleetList` only ever
+ADDED its state class, and the fleet list rows are rebuilt only at the start of a turn
+(`displayFleetLists` rebuilds when `fleetListManager.reset()` has cleared `initialized`, which only
+`initPhase` does, in phase 1). So a row that changed state mid-turn kept the class it was given
+earlier as well. `.destroyed`, `.jumped` and `.docked` are the same specificity and `.docked` is
+written **after** `.jumped` in `tactical.css` — so a docked flight whose carrier jumped had its text
+changed to "Jumped" while the cascade kept painting it **docked blue**, and it only turned orange at
+the next turn's rebuild. That is what "doesn't show as Jumped until the end of the turn" actually
+was. All three states now go through one `fleetListManager.setRowState(ship, state, label)` that
+clears the other two.
+
+**Three files, all client:** `movement.js`, `ships.js`, `UI/fleetList.js`. Verified by a Node
+harness over the REAL `ships.js` / `movement.js` / `fleetList.js` with a fake jQuery that records
+classes per row — **16 assertions**: nothing moves while the order is only plotted; sprite, ship row
+and both docked flights all flip together on commit; `.docked` is actually removed; replay still
+shows the unit; and last turn's order does not count. `fvbuild.ps1 -Check` all green — autoload
+current, validator PASS, harness **158 passed / 0 failed**.
+
+#### Stage 4 fourth pass — the opponent could never see a docked flight jump out
+
+Reported on game 4302: an opponent never saw the docked flights turn orange at all. **Cause:**
+`getJumpedDockedFlightIds` walks each carrier's `hangarUsage` for `dockedFlightId` links, and
+`Hangar::stripForJson` masks bay contents out of an opponent's payload (composition and free-box
+count are intel — the ruling is in that method). Proven on 4302: player 210 receives all three
+entries, player 211 receives `[]`. So the walk works for the fleet's OWNER and for nobody else, and
+the opponent's row stayed **Docked blue** for the rest of the game — for a unit that is in hyperspace.
+
+**Fixed on the server, without unmasking the bay.** `TacGamedata::markJumpedDockedFlights` sets one
+boolean on the FLIGHT — `BaseShip::jumpedWithCarrier`, emitted only when true, so every other unit's
+payload is unchanged — and `updateFleetList` ORs it with the local walk. It says "this unit is in
+hyperspace" and nothing about what else the bay holds, and the flight already has its own row on that
+screen, so no unit is disclosed either.
+
+It runs **after** `deleteHiddenData`, deliberately: a jump-out the viewer is not entitled to see yet
+(`hideActiveShipMovement`, while that ship's initiative bracket is still moving) is already gone from
+the masked movement by then, so the flag inherits that masking instead of restating it.
+`hasLeftThroughVortex` covers both halves of the departure — the committed-but-unresolved order, then
+`isDestroyed() && hasJumpedToHyperspace()` once Movement has resolved it.
+
+**Verified end to end** (game 4302 was rewound before this was written, so the two post-jump states
+are reconstructed in memory and pushed through the real `stripForJson`, then through the real
+`ships.js` / `movement.js` / `fleetList.js` with the real `staticShips` blueprints and a fake jQuery):
+
+| state | owner | opponent |
+|---|---|---|
+| committed, jumping ship still the active mover | ship + both flights **Jumped**, sprite gone | unchanged — correct, `hideActiveShipMovement` is still masking the order |
+| committed, activation moved on | Jumped | **Jumped** |
+| end of Movement (Firing phase) | Jumped | **Jumped** |
+| next turn | Jumped | Jumped |
+
+Replay harness 158 passed / 0 failed.
+
+⚠️ **Known, pre-existing, NOT fixed:** from **two turns after** the jump the carrier's own row reads
+"Destroyed" (red) rather than "Jumped" (orange). `ShipSystem::stripForJson` aggregates damage older
+than `currentTurn - 1` into one synthetic `Historical` entry, which drops the `HyperspaceJump`
+damageclass that `shipManager.hasJumpedNotDestroyed` keys off; the summed damage then reads as a kill.
+The FLIGHTS stay orange (server-side `hasJumpedToHyperspace` asks the jump engine's own note, which
+survives aggregation). Predates Stage 4 — it applies to Firing-phase boost jumps too.
+
+⭐ **Fifth pass — the jumped ship's own row could not be painted at all, for a reason older than
+this feature.** `gamedata.drawIniGUI` gives every Order of Battle `<tr>` the ship's **raw id**
+(`tr.id = ships[i].id`), which is the same id the fleet list row span carries — and `#iniGui` is
+written before `#gameinfo` in game.php. So `$("#" + ship.id)` (jQuery's `#id` fast path is
+`getElementById`) returned the **Order of Battle** row, `addClass("jumped")` coloured a row nobody
+styles, and `$("#id .initiative")` matched nothing at all, an OoB row holding `.iniOrder` /
+`.iniInfo` instead.
+
+It stayed invisible because `drawIniGUI` filters out anything `isDestroyed`, and the only two states
+the fleet list ever painted before were docked flights and destroyed hulls — both already out of the
+OoB, so their ids really were unique. **A jumped-out ship is the first unit that changes row state
+while still listed in the Order of Battle**, because the server does not remove it until the end of
+the Movement phase. Its docked flights' rows changed correctly around it the whole time, which is
+exactly what the report described.
+
+`fleetListManager.fleetRow(ship)` now scopes every row lookup to `$("#gameinfo")` with an attribute
+selector (which also sidesteps `#123` not being a valid CSS identifier). Ids are left alone — the
+OoB's own click handler reads `this.id`. Proved both ways with a Node harness that models the
+duplicate id: with the old bare lookup the ship row reads `(unchanged)` mid-Movement while its
+flights read `Jumped`; with the scoped lookup all three read `Jumped`.
+
+**Investigated and deliberately NOT adopted:** making the row change at the instant of the commit.
+It works, but it needs `hasCommittedJumpOut` to accept `gamedata.waiting` as a second proof and
+`goToWaiting` to repaint the list, because **a committing player is served no ship data at all** —
+`Manager::submitTacGamedata` answers the POST with a bare `{}`, and `Manager::getTacGamedataJSON`
+answers a waiting player with the `last_update` timestamp alone (`$gdS->changed` is never set true
+anywhere, so that branch reduces to "waiting → no ships"). Fresh ships arrive only at the next
+activation or the phase boundary, so the plotted order keeps `id = -1` until then. User's call:
+the fleet list changing at the end of the Movement phase is fine, and not worth that machinery.
+The same fact is why `shouldBeHidden` cannot drop the jumping player's OWN sprite any sooner.
+
 ### Stage 5 — lifecycle
 Maintain mode, the four closure conditions, the 4-turn cap, the all-systems-offline check, and the
 end-of-turn failure roll in `JumpEngine::criticalPhaseEffects`.

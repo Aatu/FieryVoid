@@ -765,6 +765,7 @@ class TacGamedata {
         if (!$all) {
             $this->deleteHiddenData();
         }
+        $this->markJumpedDockedFlights(); //after deleteHiddenData: it reads the MASKED movement (see the method)
         $this->setPreTurnTasks();
         $this->applyChameleonDisguise(); //after setPreTurnTasks: it reads live system state
         $this->maskChameleonFireOrders(); //after applyChameleonDisguise: it reads the flag it sets
@@ -1060,6 +1061,66 @@ class TacGamedata {
             $unit->removed = false;
             $unit->removedTurn = null;
         }
+    }
+
+    /* Hangar Ops x JUMP_POINTS_PLAN.md Stage 4 - flag every flight that is sitting in a hangar of a
+       carrier which has left through a jump vortex, so the fleet list can paint its row "Jumped"
+       (orange) rather than "Docked" (blue).
+
+       The client cannot answer this for itself except on its OWN fleet. It walks each carrier's
+       hangarUsage for dockedFlightId links (fleetList.js getJumpedDockedFlightIds), and bay contents
+       are own-team-only - Hangar::stripForJson masks $hangarUsage out of an opponent's payload, see
+       the ruling there - so an opponent gets an empty list and their copy of the row stays blue for
+       the rest of the game. Answered here instead, as one boolean on the FLIGHT. It says "this unit
+       is in hyperspace" and nothing whatever about what else the bay holds, so the contents mask is
+       untouched - and the flight already has its own row on that screen, so no unit is disclosed
+       either.
+
+       Runs AFTER deleteHiddenData, deliberately: a jump-out this viewer is not entitled to see yet -
+       hideActiveShipMovement strips the order while its initiative bracket is still moving - is
+       already gone from $carrier->movement by the time we look, so the flag inherits that masking
+       for free rather than restating it. */
+    private function markJumpedDockedFlights(){
+        foreach ($this->ships as $carrier){
+            if ($carrier instanceof FighterFlight) continue;   //flights carry nothing themselves
+
+            //Collect the stored flights FIRST: it is a pair of instanceof tests on a hull with no
+            //hangar, which is most of them, and it keeps the departure test off every unit in every
+            //ordinary game that has no vortex in it.
+            $docked = array();
+            foreach ($carrier->systems as $system){
+                if (!($system instanceof Hangar)) continue;
+                if (!is_array($system->hangarUsage)) continue;
+
+                foreach ($system->hangarUsage as $entry){
+                    if (!empty($entry['dockedFlightId'])) $docked[] = (int)$entry['dockedFlightId'];
+                }
+            }
+
+            if (empty($docked)) continue;                      //nothing aboard to take with it
+            if (!$this->hasLeftThroughVortex($carrier)) continue;
+
+            foreach ($docked as $flightId){
+                $flight = $this->getShipById($flightId);
+                if ($flight) $flight->jumpedWithCarrier = true;
+            }
+        }
+    }
+
+    /* Has this unit left the battle through a vortex, as far as THIS viewer can tell?
+
+       Two states, because the departure spans a phase. A COMMITTED jump-out is on the board but not
+       yet resolved - Movement::resolveJumpOuts removes the unit at the END of the Movement phase - and
+       is read straight off the (already masked) movement. Afterwards the order is history and the
+       removal is the record, which is what hasJumpedToHyperspace answers.
+
+       hasJumpedToHyperspace MUST be paired with isDestroyed: JumpEngine::hasJumped only distinguishes
+       "jumped" from "damage-killed" among units already out of play, so on a healthy hull with a jump
+       engine it returns true on its own. The client twin of this pairing is in fleetList.js. */
+    private function hasLeftThroughVortex($ship){
+        if (Movement::getJumpOutOrder($ship->movement, $this->turn) !== null) return true;
+
+        return $ship->isDestroyed() && $ship->hasJumpedToHyperspace();
     }
 
     private function deleteHiddenData(){

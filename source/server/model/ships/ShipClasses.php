@@ -44,6 +44,12 @@ class BaseShip {
     public $spawned = -1; //To denote if a unit was spawned by DURING the game, e.g. doesn't count for CPV etc, show in Replay prior to it spawning
     public $removed = false; //Hangar Ops (B5W §10.1): set when a flight has docked. Hides from board/target lists without triggering destruction; record stays in DB for replay history.
     public $removedTurn = null; //Turn the ship docked into a hangar. Lets replay show the flight up to and including this turn.
+    /* JUMP_POINTS_PLAN.md Stage 4 x Hangar Ops: this unit was sitting in a carrier's hangar when
+       that carrier left through a jump vortex, so it is in hyperspace too. Set per LOAD by
+       TacGamedata::markJumpedDockedFlights (never persisted - it is derived from the carrier), and
+       only for the viewers allowed to know. Exists because the carrier->flight link lives in the
+       hangar's own-team-only $hangarUsage, which an opponent's client never receives. */
+    public $jumpedWithCarrier = false;
     public $dockCoalesceDone = false; //Hangar Ops Stage 21: transient once-per-carrier guard for the whole-flight dock coalescer (no-split docking). Not persisted/serialized — fresh false each load; first non-catapult hangar's criticalPhaseEffects runs the coalescer, the rest skip it.
     public $launchCoalesceDone = false; //Hangar Ops Stage 21: transient once-per-carrier guard for the whole-flight launch coalescer. Same lifetime as dockCoalesceDone.
     public $dockRegenSweepDone = false; //Kirishiac Warrior regeneration: transient once-per-carrier guard for HangarOps::applyDockedRegeneration. Same lifetime as dockCoalesceDone.
@@ -746,6 +752,9 @@ class BaseShip {
             $strippedShip->removed = true;
             if ($this->removedTurn !== null) $strippedShip->removedTurn = $this->removedTurn;
         }
+        //Emitted only when true, so every other unit's payload is byte-identical to before (the
+        //fleet list reads a plain falsy on anything that did not leave inside a carrier).
+        if ($this->jumpedWithCarrier) $strippedShip->jumpedWithCarrier = true;
 
         $strippedShip->systems = array_map( function($system) {return $system->stripForJson();}, $this->systems);
 

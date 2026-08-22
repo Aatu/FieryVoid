@@ -1028,6 +1028,13 @@ window.shipManager = {
     //Generic function called from various front end functions.  Checks if ships should be shown/interactable or not.
     shouldBeHidden: function (ship) {
         if (!gamedata.replay && shipManager.isDestroyed(ship)) return true; //Prevents lots of things from happening when a ship collides and dies to Terrain.
+        /* A unit that has COMMITTED a jump-out has left the battle (JUMP_POINTS_PLAN.md section 2.5).
+           The server does not remove it until the end of the Movement phase, but movement is
+           sequential - so without this it sits in the vortex as a ghost while everyone else takes
+           their turn, and the players plotting after it cannot tell it has already gone.
+           Live play only: in REPLAY the unit has to be seen flying INTO the vortex before it
+           vanishes, and the destroyed check above takes over there. */
+        if (!gamedata.replay && shipManager.movement.hasCommittedJumpOut(ship)) return true;
         if (shipManager.getTurnDeployed(ship) > gamedata.turn) {
             /* Not deployed yet - with ONE exception. Reinforcements pick their entry hex during
                the Deployment phase of the turn BEFORE they arrive (shipManager.getTurnPlaced), so
