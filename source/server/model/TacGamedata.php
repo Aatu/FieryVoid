@@ -1242,7 +1242,40 @@ class TacGamedata {
                     unset($system->fireOrders[$i]);
                 }
                
-				$weapon->changeFiringMode($fire->firingMode); //Select the current mode so the correct variables are considered, important for Stealth missile.                
+				$weapon->changeFiringMode($fire->firingMode); //Select the current mode so the correct variables are considered, important for Stealth missile.
+
+                /* ⭐⭐ JUMP GATES (PHASE 2) - THE ONLY FIELD THAT NAMES A GATE'S SIGNALLER, AND THE
+                   ONE REAL COST OF THE CONCEALMENT RULING (JUMP_GATES_PLAN.md sections 2.1 and 3.3,
+                   trap 4).
+
+                   Signalling a fixed jump gate NEVER reveals a hidden unit - a stealthed, shaded or
+                   cloaked ship may signal and keeps its concealment, which is the opposite of the
+                   rule for a ship opening its own vortex. On the server that ruling holds for free
+                   (JumpEngine::hasVortexDeclaration walks a ship's OWN engines, and a gate claim
+                   sits on the GATE's), and every combat-log line names the PLAYER rather than a
+                   unit. This is the exception: a gate claim has no player column to live in, so
+                   targetid carries the claiming player as their nearest qualifying unit - and fire
+                   orders become public from phase 2 onward. Left alone, the enemy could read "the
+                   ship at X signalled the gate" straight out of the payload and pick a cloaked hull
+                   out of it.
+
+                   ⚠️ EVERY TURN, not just the current one. The signaller is never named, ever -
+                   including in a replay of the turn it happened, which is the one place a
+                   turn-scoped mask would quietly leak it.
+
+                   ⚠️ NOT $isAlly - that is computed from the GATE, which belongs to whoever bought
+                   it and usually to nobody the claimant is allied with. The question here is who
+                   owns the TARGETED unit, and the test is the same one the hidetarget branch below
+                   uses on the viewer: their own ship, or their team's.
+
+                   The HEX is deliberately left alone: it is the gate's own, it is public, and the
+                   marker has to be drawn on it. */
+                if ($weapon instanceof JumpEngine && $weapon->isGateJump() && (int)$fire->targetid > 0){
+                    $signaller = $this->getShipById((int)$fire->targetid);
+                    $ownSignaller = $signaller
+                        && ($signaller->userid == $this->forPlayer || $signaller->team == $playerTeam);
+                    if (!$ownSignaller) $fire->targetid = -1;
+                }
 
                 $hideTargetPhase = $weapon->revealAfterPreFire
                     ? ($this->phase == 1 || $this->phase == 2 || $this->phase == 5) //Reveal in phases 3/4 after PreFire resolution.

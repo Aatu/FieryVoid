@@ -1139,7 +1139,12 @@ JumpEngine.prototype.getHeldVortex = function () {
    mode-7 order all turn, and that branch has nothing to say about a weapon that cannot change
    shots and was not a called shot - so the icon drew EMPTY. */
 JumpEngine.prototype.getVortexIconLoad = function () {
-	var max = this.vortexMaxTurns || 4;   //JumpEngine::MAX_VORTEX_TURNS
+	/* JumpEngine::MAX_VORTEX_TURNS is the fallback, not the rule: stripForJson sends the real
+	   denominator, which on a FIXED JUMP GATE is the PROGRAMMED HOLD (1-4 turns, chosen when the
+	   gate was signalled) rather than the four turns a ship's vortex may be maintained to
+	   (JUMP_GATES_PLAN.md Stage 4). So a gate signalled for two turns reads 1/2 then 2/2 and closes,
+	   which is what the player asked for. */
+	var max = this.vortexMaxTurns || 4;
 
 	if (this.vortexTurnsOpen !== undefined && this.vortexTurnsOpen !== null) {
 		return this.vortexTurnsOpen + "/" + max;
@@ -1190,6 +1195,14 @@ JumpEngine.prototype.removeVortexMaintainOrder = function () {
    is still ahead of the turn being viewed. */
 JumpEngine.prototype.canMaintainVortex = function () {
 	if (gamedata.gamephase !== 1) return false;
+	/* ⭐ AND THIS IS ALSO WHAT KEEPS MAINTAIN OFF A FIXED JUMP GATE (JUMP_GATES_PLAN.md section 2.3).
+	   A gate has NO Maintain: the open duration is programmed once, when the gate is signalled, and
+	   cannot be changed afterwards. gamedata.isMyShip is false for terrain in every live phase and a
+	   gate IS terrain (JumpgateCapital sets shipSizeClass 5), so the menu is never offered on one -
+	   the rule holding by construction rather than by a branch. Recorded because the temptation on
+	   reading the gate feature is to "let the owner keep their gate open", which is the opposite of
+	   the ruling. The server refuses it independently: JumpEngine::getMaintainDeclaration returns
+	   null outright for a gate engine, so a tampered mode-7 order cannot get there either. */
 	if (!gamedata.isMyShip(this.ship)) return false;
 	if (shipManager.isDestroyed(this.ship)) return false;
 	if (shipManager.systems.isDestroyed(this.ship, this)) return false;

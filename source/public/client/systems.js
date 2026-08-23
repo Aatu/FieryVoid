@@ -1302,6 +1302,33 @@ shipManager.systems = {
         }
 
         return rem;
+    },
+
+    /* ⭐ JUMP_GATES_PLAN.md section 2.5 - THE LONGEST OPEN DURATION A FIXED JUMP GATE CAN BE
+       PROGRAMMED FOR, 1 to 4 turns. The client mirror of JumpEngine::getGateMaxHold; keep the two
+       in step.
+
+       A GATE'S WHOLE DAMAGE MODEL IS THE NUMBER OF POINTS ON ITS REACTOR. It rolls no criticals at
+       all (JumpgateCapital silences its Reactor's chart and the gate engine's has been empty since
+       Phase 1), so its condition is one number, D, and three rules read off it: the recharge
+       lengthens by D/3 turns, the maximum hold shortens by D/15 turns with a floor of 1, and total
+       reactor loss destroys the gate.
+
+       ⭐ DERIVED FROM THE UNIT, NOT MIRRORED ONTO THE SYSTEM, and that is deliberate: client system
+       objects built from the same static blueprint SHARE field references across every instance of
+       a phpclass, so a cap stashed on the Jump Engine would leak between two gates in one game
+       (JUMP_GATES_PLAN.md trap 9). Reactor damage is sent fresh per ship, so computing it here is
+       both correct per instance and free. */
+    getGateMaxHold: function getGateMaxHold(gate) {
+        var MAX_VORTEX_TURNS = 4;      //JumpEngine::MAX_VORTEX_TURNS
+        var HOLD_PER_DAMAGE = 15;      //JumpEngine::GATE_HOLD_PER_DAMAGE
+
+        var reactor = shipManager.systems.getSystemByName(gate, "reactor");
+        if (!reactor) return MAX_VORTEX_TURNS;
+
+        var damage = Math.max(0, reactor.maxhealth - shipManager.systems.getRemainingHealth(reactor));
+
+        return Math.max(1, MAX_VORTEX_TURNS - Math.floor(damage / HOLD_PER_DAMAGE));
     }
 
 };

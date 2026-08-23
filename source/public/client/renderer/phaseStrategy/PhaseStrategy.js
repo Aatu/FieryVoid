@@ -13,8 +13,8 @@ window.PhaseStrategy = function () {
         this.currentlyMouseOveredIds = null;
 
         this.onMouseOutCallbacks = [];
-        this.onZoomCallbacks = [this.repositionTooltip.bind(this), this.positionMovementUI.bind(this), this.repositionSelectFromShips.bind(this), this.positionVortexFacingUI.bind(this)];
-        this.onScrollCallbacks = [this.repositionTooltip.bind(this), this.positionMovementUI.bind(this), this.repositionSelectFromShips.bind(this), this.positionVortexFacingUI.bind(this)];
+        this.onZoomCallbacks = [this.repositionTooltip.bind(this), this.positionMovementUI.bind(this), this.repositionSelectFromShips.bind(this), this.positionVortexFacingUI.bind(this), this.positionGateSignalUI.bind(this)];
+        this.onScrollCallbacks = [this.repositionTooltip.bind(this), this.positionMovementUI.bind(this), this.repositionSelectFromShips.bind(this), this.positionVortexFacingUI.bind(this), this.positionGateSignalUI.bind(this)];
         this.onClickCallbacks = [this.hideSystemInfo.bind(this, true)];
 
         this.selectedShip = null;
@@ -221,6 +221,11 @@ window.PhaseStrategy = function () {
         //Same reason: a vortex declaration left mid-transaction when the phase ends is a discard,
         //and its preview sprites must not outlive the phase that owns them.
         UI.vortexFacing.close();
+
+        //And the same again for a fixed jump gate's duration panel (JUMP_GATES_PLAN.md Stage 3).
+        //Nothing is declared until SIGNAL is pressed, so an open panel at phase end is simply
+        //abandoned - but the div is outside the WebGL canvas and would otherwise stay on screen.
+        UI.gateSignal.close();
 
         this.currentlyMouseOveredIds = null;
 
@@ -814,6 +819,43 @@ window.PhaseStrategy = function () {
         }
 
         UI.vortexFacing.reposition(this.coordinateConverter.fromGameToViewPort(UI.vortexFacing.getPosition()));
+
+        return true;
+    };
+
+    /* JUMP_GATES_PLAN.md STAGE 3 - the fixed jump gate signal panel.
+
+       The same three-part wiring the facing control above uses, and for the same reasons: show the
+       panel, anchor it to the gate's hex, and register a ONE-SHOT click-away discard on
+       onClickCallbacks (filtered and run BEFORE the click reaches onHexClicked, so a click that
+       opens a new panel first discards the pending one).
+
+       The tooltip that launched it is closed here rather than left standing: the button lives in
+       the gate's own Initial Orders menu, which is drawn on the very hex this panel anchors to, so
+       leaving it up would put two overlapping controls on one spot. */
+    PhaseStrategy.prototype.onGateSignalRequested = function (payload) {
+        this.hideShipTooltip(this.shipTooltip);
+
+        UI.gateSignal.open(payload);
+        this.positionGateSignalUI();
+        this.onClickCallbacks.push(this.hideGateSignalUI.bind(this, payload));
+    };
+
+    //Token-matched, exactly as hideVortexFacingUI is: by the time this fires the transaction may
+    //have been closed by SIGNAL or replaced by a newer one that must not be torn down by the old
+    //click. Returns undefined so onClickCallbacks filters it out - it is a one-shot.
+    PhaseStrategy.prototype.hideGateSignalUI = function (pending) {
+        if (UI.gateSignal.isOpenFor(pending)) {
+            UI.gateSignal.close();
+        }
+    };
+
+    PhaseStrategy.prototype.positionGateSignalUI = function () {
+        if (!UI.gateSignal.isOpen()) {
+            return true;
+        }
+
+        UI.gateSignal.reposition(this.coordinateConverter.fromGameToViewPort(UI.gateSignal.getPosition()));
 
         return true;
     };

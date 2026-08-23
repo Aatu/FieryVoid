@@ -146,7 +146,15 @@ window.InitialPhaseStrategy = function () {
     InitialPhaseStrategy.prototype.targetShip = function (ship, payload) {
         //TODO: Targeting ship with ballistic weapons
         //TODO: Targeting ship with support EW (defensive or offensive)
-        if (shipManager.getTurnDeployed(this.selectedShip) > gamedata.turn) { //Selected ships is not deployed yet - DK May 2025
+
+        /* ⚠️ THE GUARD ON this.selectedShip IS LOAD-BEARING (JUMP_GATES_PLAN.md trap 11).
+           shipManager.getTurnDeployed opens with ship.osat and throws outright on null - and since
+           Stage 3 "click the gate with NOTHING selected" is the PRIMARY gesture for signalling a
+           fixed jump gate, not an edge case: no ship needs to be selected, because which of the
+           player's units is within the gate's signal range is never chosen (plan section 2.1).
+           With no selection there is no undeployed ship to refuse for, so the menu is built as
+           normal - which is what carries the Signal Jump Gate button. */
+        if (this.selectedShip && shipManager.getTurnDeployed(this.selectedShip) > gamedata.turn) { //Selected ships is not deployed yet - DK May 2025
             this.showShipTooltip(ship, payload, menu, false);
             return;
         }

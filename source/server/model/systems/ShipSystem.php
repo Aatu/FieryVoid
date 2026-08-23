@@ -112,6 +112,26 @@ class ShipSystem {
         return array_keys($out);
     }
 
+    /* SILENCE THIS SYSTEM'S CRITICAL CHART FROM OUTSIDE THE CLASS HIERARCHY
+       (JUMP_GATES_PLAN.md section 2.5). A jump gate's Reactor rolls no criticals at all: the
+       gate's whole damage model is the AMOUNT of damage on that Reactor - recharge time, hold
+       cap, destruction - and not a table of named wounds. JumpgateCapital is a ship file and so
+       cannot reach a protected property, hence a setter rather than making $possibleCriticals
+       public - for exactly the reason its own comment gives, that these tables must never ride a
+       payload or a static blueprint.
+
+       Costs the static tree nothing: $possibleCriticals is protected and is not serialised, so a
+       blueprint whose Reactor has been silenced encodes byte-for-byte as it did before.
+
+       ⚠️ It does NOT touch $preBattleCriticals - what a battle can ROLL and what the lobby may
+       AUTHOR are the two different questions getPreBattleCriticalTypes exists to keep apart.
+
+       Returns $this so the one-liner form works: addPrimarySystem((new Reactor(...))->clear...()). */
+    public function clearPossibleCriticals(){
+        $this->possibleCriticals = array();
+        return $this;
+    }
+
     /* What the lobby's pre-battle editor may OFFER on this system: the hit chart above
        PLUS $preBattleCriticals. Kept separate from getPossibleCriticalTypes(), which keeps
        meaning exactly "what this system's hit chart can roll" - the two questions are

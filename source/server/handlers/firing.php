@@ -119,9 +119,12 @@ class Firing
         if ($reason === null) return;           //legal - leave it alone
 
         $fire->rejected = true;
+        //"mode" rather than "facing mode": on a FIXED GATE the firing mode is the programmed open
+        //duration in turns, not a facing (JUMP_GATES_PLAN.md section 3.3), and both kinds of
+        //declaration are rejected from here.
         Debug::log("validateFireOrders: rejecting vortex declaration "
             . "(game {$gamedata->id}, shooter {$fire->shooterid}, weaponid {$fire->weaponid}, "
-            . "hex {$fire->x},{$fire->y}, facing mode {$fire->firingMode}) — $reason.");
+            . "hex {$fire->x},{$fire->y}, mode {$fire->firingMode}) — $reason.");
     }
 
     /* The rules themselves (plan section 2.1). Returns null when the declaration is legal, or a
@@ -134,6 +137,27 @@ class Firing
         //arriving here is a stale blueprint from before the revert; drop it rather than let it
         //reach a spawn sweep that would refuse it silently.
         if ($weapon->isLegacyJump()) return "Jump Engine uses the legacy one-click jump";
+
+        /* ⭐⭐ JUMP GATES (PHASE 2) - THE GATE BRANCH, AND IT IS TAKEN FIRST AND RETURNS.
+           (JUMP_GATES_PLAN.md Stage 3, traps 1-4.)
+
+           A fixed gate's claim is a DIFFERENT DECLARATION that happens to travel in the same
+           fire-order shape, and almost none of the ship rules below apply to it:
+
+             - THE RANGE TEST IS THE WRONG QUESTION. A ship projects a vortex up to 4 hexes away
+               and the distance measured is the SHOOTER's; a gate opens one on its own hex, and the
+               10 hexes markGate() puts in $range is how far away the CLAIMING PLAYER's nearest unit
+               may be. Sharing one test would silently answer the other question.
+             - THE OBSTRUCTION SWEEP ALONE WOULD REJECT EVERY CLAIM EVER MADE (plan trap 3). It
+               refuses a hex holding any part of a Terrain unit - and the gate's own hex holds
+               terrain: the gate. Same reason the Maintain branch below returns before it.
+             - ONE-VORTEX-PER-SHIP is one-claim-per-PLAYER here, because a gate belongs to nobody in
+               particular and several players may signal the same gate in the same turn (plan
+               section 2.4 - that is the whole point of the contested-claim rule).
+
+           So it is its own list, and it returns rather than falling through. */
+        if ($weapon->isGateJump())
+            return self::getGateSignalBlock($fire, $weapon, $shooter, $gamedata, $fireOrders);
 
         if ($weapon->isDestroyed($gamedata->turn)) return "Jump Engine is destroyed";
         if ($weapon->isOfflineOnTurn($gamedata->turn)) return "Jump Engine is offline";
@@ -239,6 +263,117 @@ class Firing
             if ($unit->Enormous && $unit->getHexPos()->equals($target))
                 return "target hex holds an Enormous unit (unit {$unit->id})";
         }
+
+        return null;
+    }
+
+    /* ⭐⭐ THE FIXED-GATE CLAIM RULES (JUMP_GATES_PLAN.md Stage 3 and section 2.1). Returns null
+     * when the claim is legal, or a short reason for the log when it is not - same contract as
+     * getVortexDeclarationBlock above, and reached only from its gate branch.
+     *
+     * $shooter is THE GATE, from the real gamedata load, and $gamedata->forPlayer is the CLAIMING
+     * PLAYER - who is not the gate's owner and usually is not on its team. That asymmetry is the
+     * whole feature: a gate is contested terrain with no owner priority (plan section 2.4).
+     *
+     * ⭐ IT HAS ONE SIDE EFFECT, AND IT IS DELIBERATE: on a legal claim it OVERWRITES $fire->targetid
+     * with the server's own re-derived nearest qualifying unit (plan section 3.3, trap 4).
+     * tac_fireorder has no player column and the gate belongs to nobody in particular, so targetid
+     * is the only field that can record WHO claimed - and the client's value is a hint, never an
+     * authority. A tampered POST cannot claim on someone else's behalf or fake a distance, because
+     * both are recomputed here and again at resolution time.
+     *
+     * ⚠️ NO LINE-OF-SIGHT TEST APPEARS ANYWHERE IN THIS LIST, and that is the ruling, not an
+     * omission (user ruling 2026-08-23). Signalling is a transmission; a ship projecting its own
+     * vortex is an aimed effect and keeps its LoS rules.
+     *
+     * ⚠️ NOTHING HERE REVEALS THE SIGNALLER. See JumpEngine::hasVortexDeclaration - a gate claim
+     * sits on the GATE's engine, so a hidden unit that signals stays hidden. */
+    private static function getGateSignalBlock($fire, $weapon, $gate, $gamedata, $fireOrders)
+    {
+        if ($gate->isDestroyed($gamedata->turn)) return "the jump gate is destroyed";
+        if ($weapon->isDestroyed($gamedata->turn)) return "the gate's Jump Engine is destroyed";
+        if ($weapon->isOfflineOnTurn($gamedata->turn)) return "the gate's Jump Engine is offline";
+
+        if ($fire->x === null || $fire->y === null || $fire->x === "null" || $fire->y === "null")
+            return "no target hex";
+
+        /* THE HEX IS ALWAYS THE GATE'S OWN, and there is nothing for the player to aim (plan
+         * section 2.2): the vortex forms in the gate's mouth, facing the way the gate was placed.
+         * The client never sends anything else, so a mismatch is a tampered POST trying to
+         * relocate a jump point it does not own. */
+        $target = new OffsetCoordinate($fire->x, $fire->y);
+        if (!$gate->getHexPos()->equals($target))
+            return "a gate opens its vortex on its OWN hex only";
+
+        /* THE FIRING MODE IS THE PROGRAMMED OPEN DURATION, 1-4 turns (markGate). Modes 5-7 have no
+         * meaning on a gate at all - and mode 7 is MAINTAIN, which a gate does not have, so a
+         * forged one must never survive to reach getMaintainDeclaration (which refuses a gate
+         * engine outright for exactly this reason). */
+        $mode = (int)$fire->firingMode;
+        if ($mode < 1 || $mode > JumpEngine::MAX_VORTEX_TURNS)
+            return "illegal programmed duration (firing mode $mode)";
+
+        /* ⭐ A WOUNDED GATE'S CAP IS A CLAMP, NOT A REFUSAL (plan section 2.5 and test 18). The
+         * client's stepper already caps at this, so the only way to exceed it is a stale blueprint
+         * or a tampered POST - and in both cases losing the player's whole turn over one number
+         * they cannot see is the wrong answer, while a shorter jump point is exactly the rule.
+         * Rewriting the mode HERE rather than only clamping at resolution keeps the invariant
+         * "every persisted claim is within the gate's cap" true in the DB as well as in memory;
+         * the min() in the resolution sweep stays as belt and braces. */
+        $maxHold = JumpEngine::getGateMaxHold($gate);
+        if ($mode > $maxHold){
+            Debug::log("Jump gate signal: clamping claim on gate {$gate->id} (game {$gamedata->id}, "
+                . "player {$gamedata->forPlayer}) from $mode turns to $maxHold - reactor damage.");
+            $fire->firingMode = $maxHold;
+        }
+
+        //A gate holds ONE jump point at a time, exactly as a ship does. (On the claiming turn this
+        //reads false - the vortex is not spawned until InitialOrdersGamePhase::advance.)
+        if ($weapon->hasOpenVortex($gamedata->turn))
+            return "the gate already holds an open vortex";
+
+        /* THE 20-TURN RECHARGE (plan section 2.5). It is the engine's 4th constructor argument and
+         * getVortexRechargeLoad derives the whole state off the vortex note, so this is the same
+         * test a ship engine takes a few lines up - the gate-specific part is that reactor damage
+         * lengthens the target, which is what getVortexRechargeTime() adds.
+         *
+         * ⚠️ getVortexRechargeTime(), NOT getLoadingTime(): the latter reads $loadingtime, which
+         * Weapon::setLoading overwrites from the stored tac_systemdata row, and in a game recorded
+         * before Phase 1 Stage 6 that row still says 1. See the method for the whole note. (The ship
+         * branch above still asks getLoadingTime and so is lenient on such a game; that is
+         * pre-existing Phase 1 behaviour and is deliberately left alone here.) */
+        $charge   = $weapon->getVortexRechargeLoad($gamedata->turn);
+        $recharge = $weapon->getVortexRechargeTime();
+        if ($charge < $recharge)
+            return "the gate's Jump Engine is still recharging ($charge/$recharge)";
+
+        /* ⭐ THE ONE RULE THAT IS ENTIRELY NEW: the CLAIMING PLAYER must have a live, deployed,
+         * non-terrain unit within the gate's signal range. WHICH unit is never chosen and never
+         * matters (plan section 2.1) - only that one exists, and how far away the nearest is,
+         * because that is what settles a contested claim. */
+        $signaller = $weapon->getNearestGateSignaller($gate, $gamedata, $gamedata->forPlayer);
+        if (!$signaller)
+            return "player {$gamedata->forPlayer} has no live unit within {$weapon->range} hexes of the gate";
+
+        /* ONE CLAIM PER PLAYER PER GATE PER TURN, and the FIRST is the one that survives - the same
+         * rule and the same reason as the ship one-vortex test (scanning the whole array instead
+         * would reject the first and keep the last, which is the wrong way round).
+         *
+         * Only orders BEFORE this one in the submission count. A player commits Initial Orders once
+         * per turn, and InitialOrdersGamePhase hands this branch only that gate engine's orders, so
+         * the submission IS the population. Other players' claims are separate submissions and are
+         * settled at resolution time, not here. */
+        foreach ($fireOrders as $other) {
+            if ($other === $fire) break;
+            if ($other->shooterid != $fire->shooterid) continue;
+            if ($other->turn != $gamedata->turn) continue;
+            if (!empty($other->rejected)) continue;
+            if ($gate->getSystemById($other->weaponid) instanceof JumpEngine)
+                return "this player already has a signal on this gate this turn";
+        }
+
+        //Legal. Record WHO claimed, from the server's own reckoning - see the header note.
+        $fire->targetid = $signaller->id;
 
         return null;
     }

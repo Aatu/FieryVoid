@@ -394,6 +394,11 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     <!-- MUST stay after shipMovement.js: that file ASSIGNS window.UI, so loading this one first
          would have its module wiped (JUMP_POINTS_PLAN.md Stage 2b). -->
     <script defer src="client/UI/vortexFacing.js"></script>
+    <!-- Same rule, same reason (JUMP_GATES_PLAN.md Stage 3): shipMovement.js ASSIGNS window.UI, so
+         this module must load after it. Its sibling vortexFacing.js sets a vortex FACING; this one
+         sets a fixed gate's programmed open DURATION, which is the only thing a gate lets a player
+         choose - a gate's facing is set when it is placed and can never be aimed. -->
+    <script defer src="client/UI/gateSignal.js"></script>
     <script defer src="client/UI/infowindow.js"></script>
     <script defer src="client/UI/fleetList.js"></script>
 	<script defer src="client/UI/gameInfo.js"></script>
@@ -749,6 +754,51 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
         <div id="vortexTurnRight" class="movement-icon" data-movement-type="Turn Vortex Right">
             <canvas id="vortexTurnRightCanvas" width="40" height="40"></canvas>
+        </div>
+    </div>
+
+    <!-- JUMP_GATES_PLAN.md Stage 3 - the fixed jump gate signal panel (UI.gateSignal).
+
+         Plain anchored HTML, not a canvas ring: a gate's vortex facing is fixed when the gate is
+         placed and can never be chosen, so the ONLY thing to set is the programmed open duration -
+         and a number needs no glyph that swings with it. The container is anchored to the gate's
+         hex centre; the panel inside is lifted clear of the hex by CSS.
+
+         ⭐ IT IS THE REACT POWER SETTINGS MENU'S BOOST ROW, IN PLAIN HTML (user request
+         2026-08-23). Structure and palette both: Label / Controls / Value, the same gold chrome,
+         and the Signal button in that menu's own "warning" yellow. reactJs/system/
+         SystemPowerSettings.js is the source of truth for every value - see tactical.css.
+
+         Two earlier revisions are worth not repeating. It was a bespoke box (fine but foreign), and
+         then it wore the ship TOOLTIP's menu markup, which read far worse: a 40x40 icon row needs
+         more width than this panel has, so it wrapped into a column. The X is gone throughout:
+         clicking anywhere off the panel discards it (a one-shot on PhaseStrategy.onClickCallbacks,
+         registered when the panel opens), which is how every other floating control here is
+         dismissed.
+
+         ⭐ THE DURATION IS A REAL <input>, NOT A READOUT - which is the ONE place this goes further
+         than the Boost row, whose Value is display-only. It takes typing, the mousewheel and the
+         two ticker buttons beside it; all three feed the one clamp in UI.gateSignal.setHold, and
+         `max` is rewritten per gate on open because a damaged gate cannot hold the door open as
+         long. type=number for the mobile keypad and the free min/max semantics; its native spinner
+         is suppressed in CSS because the buttons here are ours (the UA draws its own in white -
+         same reasoning as confirm.css's .stepper-input). -->
+    <div id="gateSignalUI">
+        <div id="gateSignalPanel">
+            <div class="gateSignalRow">
+                <span class="gateSignalLabel">Open for</span>
+                <span class="gateSignalControls">
+                    <span class="gateSignalButton" id="gateSignalDown">&#8722;</span>
+                    <input type="number" id="gateSignalValue" min="1" step="1" value="1" inputmode="numeric" autocomplete="off">
+                    <span class="gateSignalButton" id="gateSignalUp">+</span>
+                </span>
+                <!-- "turn" / "turns" is rewritten by UI.gateSignal.draw(); the word here is a
+                     placeholder and is never read. -->
+                <span class="gateSignalLabel gateSignalUnit">turn</span>
+            </div>
+            <div class="gateSignalRow">
+                <button type="button" id="gateSignalConfirm" class="gateSignalButton">Signal Jump Gate</button>
+            </div>
         </div>
     </div>
 </div>

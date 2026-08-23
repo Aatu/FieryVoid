@@ -5174,6 +5174,27 @@ class JumpEngine extends Weapon{
     protected $vortexCloseReason = '';
     protected $vortexFailureApplied = false;
 
+    /* ⭐ JUMP GATES (PHASE 2) - THE PROGRAMMED HOLD, rebuilt from the 'VortexHold' note the same
+       pass restores the 'Vortex' one (JUMP_GATES_PLAN.md section 3.4).
+
+       A gate's jump point is open for a number of turns PROGRAMMED WHEN IT WAS SIGNALLED, 1 to 4,
+       and there is no Maintain declaration to re-state it turn by turn - so the duration has to
+       survive a load, and the existing note cannot carry it (its notevalue's third field is free
+       text containing commas; see writeVortexHoldNote, and plan trap 8).
+
+       ⭐ NULL IS THE WHOLE OF WHAT MAKES PHASE 2 INVISIBLE TO PHASE 1: a vortex with no hold note
+       is a SHIP-opened vortex, and every gate branch keyed off these two reads exactly as it did
+       before Phase 2 existed.
+
+       $vortexClaimantId is the player who WON the claim. It is recorded because the roll-off must
+       never be re-derived on load (plan section 2.4) - not because it grants anybody anything: an
+       open gate vortex may be used by any unit of any side (plan section 2.6).
+
+       Protected for the same reason as the two above - json_encode takes public properties only, so
+       neither reaches a payload or a static blueprint. */
+    protected $vortexHoldTurns = null;
+    protected $vortexClaimantId = null;
+
     /* SECTION 9 - THE LEGACY ONE-CLICK JUMP, AND WHY IT IS A FLAG RATHER THAN A SUBCLASS.
      *
      * Not every setting in the fleet has a B5 jump vortex. A Trek Nacelle, a BSG FTL Drive and a
@@ -5338,6 +5359,290 @@ class JumpEngine extends Weapon{
         return $this->legacyJump;
     }
 
+    /* ================= JUMP GATES (PHASE 2) - THE FIXED-GATE ENGINE ===============
+     *
+     * JUMP_GATES_PLAN.md section 3.2. A FLAG, not a subclass, for exactly the four reasons
+     * markLegacy() gives above and with equal force: no new class means no autoload regeneration
+     * (which on live needs the maintenance gate), `phpclass` stays "JumpEngine" so a game in
+     * progress across the deploy sees no identity change, every `instanceof JumpEngine` site keeps
+     * its answer without an audit, and it is per-INSTANCE.
+     *
+     * ⚠️ PROTECTED, so it is not serialised - json_encode takes public properties only, and the
+     * static generator encodes the constructed ship. The client does not need it: it tells a gate
+     * engine from a ship engine by the SHIP it is mounted on (gamedata.isJumpGate), never by the
+     * system. Ask isGateJump() server-side.
+     *
+     * ⚠️ THE GATE UNIT IS JumpgateCapital, AND IT IS THE ONLY ONE. JumpgateNew (terrain) and the
+     * civilian Jumpgate also mount a JumpEngine and will turn up in any grep; both are obsolete and
+     * explicitly out of scope (user ruling 2026-08-23, plan trap 12). Neither gets markGate(), and
+     * anything that keys off gate behaviour must key off isGateJump() rather than off a hull name.
+     */
+    protected $gateJump = false;
+
+    /* PUT THIS ENGINE ON THE FIXED-GATE RULES. Called from a ship file immediately after the engine
+     * is built, in the one-liner form markLegacy() established:
+     *
+     *     $this->addPrimarySystem((new JumpEngine(8, 10, 20, 20))->markGate());
+     *
+     * What it changes, and what it deliberately does not:
+     *
+     * 1. $range BECOMES A SIGNAL RANGE, NOT A PROJECTION RANGE. A gate opens its vortex on its OWN
+     *    hex and never projects one, so the 4 hexes a ship engine may throw a vortex is the wrong
+     *    number and the wrong question. 10 is how far away the claiming player's nearest live,
+     *    deployed, non-terrain unit may be (plan section 2.1). ⚠️ NO LINE OF SIGHT is required for
+     *    that reach - signalling is a transmission, not an aimed effect (user ruling 2026-08-23).
+     *
+     * 2. THE FIRING MODES BECOME THE PROGRAMMED OPEN DURATION, 1-4 TURNS. A gate's facing is fixed
+     *    when the gate is placed and can never be chosen (plan section 2.2), so the six facing modes
+     *    have nothing left to say; the one number a player DOES choose is how long to hold the door
+     *    open, and firingMode is where it persists (tac_fireorder.firingmode - no schema change).
+     *    Mode 7 (MAINTAIN) is gone with them: a gate has no Maintain, the duration is programmed
+     *    once and cannot be changed afterwards.
+     *
+     * 3. $loadingtime / $turnsloaded ARE LEFT ALONE, on purpose. The constructor already set both
+     *    from the 4th argument - 20 on JumpgateCapital - and Stage 6 of Phase 1 gave that argument
+     *    the meaning "turns to charge", which is precisely the 20-turn gate recharge plan section
+     *    2.5 asks for. getVortexRechargeLoad derives the whole state off the vortex note, so the
+     *    recharge rule needs no new code at all.
+     *
+     * 4. $hideFiringModeSelector STAYS TRUE. The duration is picked in the signal panel that opens
+     *    off the gate's tooltip, not by cycling a letter in the gate's ship window.
+     *
+     * ⭐ $name STAYS "jumpEngine", for the same reason markLegacy() keeps it:
+     * SystemFactory.createSystemFromJson picks the client class from systemJson.name, so the
+     * existing client JumpEngine is reused with no new JS.
+     *
+     * Returns $this so the one-liner form works. */
+    public function markGate()
+    {
+        $this->gateJump = true;
+
+        $this->range = 10;                  //SIGNAL range (section 2.1), never a projection range
+
+        $this->firingModes = array(
+            1 => "Open 1 turn",
+            2 => "Open 2 turns",
+            3 => "Open 3 turns",
+            4 => "Open 4 turns",
+        );
+
+        /* ⚠️ THE PER-MODE ARRAYS ARE ALREADY BUILT BY THE TIME THIS RUNS - identical hazard to the
+           one markLegacy() documents. Weapon::__construct has already walked the SEVEN vortex modes
+           and filled four arrays from them, so shrinking $firingModes alone would leave three dead
+           entries in each. Keep keys 1-4 and drop the rest, then changeFiringMode(1) so the live
+           values are re-read off the pruned arrays. */
+        foreach (array('minDamageArray', 'maxDamageArray', 'priorityAFArray',
+                       'animationExplosionScaleArray') as $modeArray){
+            if (!is_array($this->$modeArray) || empty($this->$modeArray)) continue;
+            $kept = array();
+            for ($mode = 1; $mode <= 4; $mode++){
+                if (isset($this->{$modeArray}[$mode])) $kept[$mode] = $this->{$modeArray}[$mode];
+            }
+            $this->$modeArray = $kept;
+        }
+        $this->changeFiringMode(1);
+
+        return $this;
+    }
+
+    /* Is this engine a FIXED GATE's rather than a ship's? See markGate(). */
+    public function isGateJump()
+    {
+        return $this->gateJump;
+    }
+
+    /* ================= THE GATE DAMAGE MODEL (JUMP_GATES_PLAN.md section 2.5) =====
+     *
+     * ⭐ THE REACTOR IS THE WHOLE OF IT. A fixed gate has no criticals - JumpgateCapital calls
+     * clearPossibleCriticals() on its Reactor and this engine's own chart has been empty since
+     * Phase 1 - so the gate's condition is expressed as ONE NUMBER, D, the points of damage on its
+     * Reactor, and three rules read off it:
+     *
+     *     recharge time      20 + floor(D / 3) turns   (Stage 4 - getLoadingTime)
+     *     maximum hold       max(1, 4 - floor(D / 15)) turns
+     *     total reactor loss (D >= maxhealth)          the gate is destroyed (Stage 4)
+     *
+     * Same measure rollVortexJumpFailure uses on the engine: maxhealth - getRemainingHealth(),
+     * which is the DAMAGE TAKEN, clamped at maxhealth by getRemainingHealth's own floor of 0.
+     *
+     * ⚠️ STATIC AND SHIP-KEYED, not an instance method on the engine, because the number lives on
+     * a DIFFERENT system. Both the submit path (Firing) and the resolution sweep have the gate in
+     * hand and need the same answer, and threading it through the engine would only invite an
+     * engine-damage reading somewhere. A ship with no Reactor answers 0 rather than throwing -
+     * every hull has one, but a POST-side object may not have been fully rebuilt. */
+    public static function getGateReactorDamage($gate)
+    {
+        if (!$gate) return 0;
+        $reactor = $gate->getSystemByName("Reactor");
+        if (!$reactor) return 0;
+
+        return max(0, $reactor->maxhealth - $reactor->getRemainingHealth());
+    }
+
+    /* THE LONGEST OPEN DURATION THIS GATE CAN BE PROGRAMMED FOR, 1 to MAX_VORTEX_TURNS.
+     *
+     * A wounded gate cannot hold the door open as long: every 15 points on the Reactor costs one
+     * turn, and it never drops below 1 - a gate that can still signal at all can always manage a
+     * single turn. The client's signal panel caps its stepper at this, and the submit path CLAMPS
+     * to it rather than rejecting (see Firing::getGateSignalBlock for why). */
+    const GATE_HOLD_PER_DAMAGE = 15;
+
+    public static function getGateMaxHold($gate)
+    {
+        $damage = self::getGateReactorDamage($gate);
+
+        return max(1, self::MAX_VORTEX_TURNS - (int)floor($damage / self::GATE_HOLD_PER_DAMAGE));
+    }
+
+    /* ⭐ HOW MANY TURNS THIS ENGINE TAKES TO CHARGE A VORTEX - the one authority, for a ship and a
+     * gate alike, and the number every vortex charge test compares against.
+     *
+     * ⚠️ IT IS DERIVED FROM $delay, NOT FROM $loadingtime, AND THAT IS LOAD-BEARING. Phase 1
+     * Stage 6 gave the 4th constructor argument the meaning "turns to charge" and set $loadingtime
+     * from it - but Weapon::setLoading OVERWRITES $loadingtime from the stored tac_systemdata row
+     * on every load, and in a game recorded before Stage 6 that row still holds the pre-Stage-6
+     * value of 1. $delay is set by the constructor and nothing writes it afterwards, so it is the
+     * only field that says what the ship file actually asked for. (This is exactly why Stage 6's
+     * stripForJson sent max(1, (int)$this->delay) rather than $this->loadingtime; reading the
+     * stored value here instead silently gave every jump engine in the replay corpus a 1-turn
+     * recharge, which the harness caught.)
+     *
+     * ⚠️ NOT AN OVERRIDE OF getLoadingTime(). That is asked by the whole generic weapon-loading
+     * machinery, on every weapon, in every phase; this question is "how long does a VORTEX take to
+     * charge", which is only ever asked at the four vortex sites. Keeping them apart is what stops
+     * a gate rule leaking into weapon loading.
+     *
+     * ⭐ A SHIP ENGINE'S ANSWER IS EXACTLY THE EXPRESSION IT ALWAYS WAS. The gate term is the third
+     * rule of the gate damage model (plan section 2.5): 20 + floor(D / 3) turns, where D is points
+     * of damage on the gate's Reactor. getUnit() is set in BaseShip::addSystem, so it is available
+     * from construction onwards - a gate that somehow has none falls back to the undamaged
+     * recharge rather than throwing. */
+    const GATE_RECHARGE_PER_DAMAGE = 3;
+
+    public function getVortexRechargeTime()
+    {
+        $recharge = max(1, (int)$this->delay);
+
+        if (!$this->gateJump) return $recharge;
+
+        $gate = $this->getUnit();
+        if (!$gate) return $recharge;
+
+        return $recharge + (int)floor(self::getGateReactorDamage($gate) / self::GATE_RECHARGE_PER_DAMAGE);
+    }
+
+    /* ⭐ TOTAL REACTOR LOSS DESTROYS THE GATE (plan section 2.5) - the last rule of the damage
+     * model, and the only one that is an EVENT rather than a number read off the Reactor.
+     *
+     * A gate is a BaseShip, so nothing else would ever destroy it: its four side Structures and its
+     * primary can be shot away one by one, but "the reactor is gone, therefore the installation is
+     * gone" is a gate rule with no general equivalent. Expressed the way every other
+     * destroy-this-ship path in the game is - a damage entry that takes the primary Structure's
+     * remaining health - so the fleet list, the combat log, the replay and the vortex closure all
+     * see an ordinary destruction and need no gate branch of their own.
+     *
+     * ⚠️ TIMING. This runs in Pass 2 of Criticals::setCriticals inside FireGamePhase::advance, so
+     * it sees the damage the Reactor took THIS turn - and closeExpiredVortices runs after
+     * setCriticals, which is what makes the gate's own jump point close on the same turn (its gate
+     * closure branch reads isDestroyed). Idempotent: once the primary Structure is destroyed the
+     * guard below refuses a second entry.
+     *
+     * damageclass 'JumpFailure' is reused rather than invented: Firing::isHyperspaceLogOrder skips
+     * it in the fire-order gathers, weaponManager.doShortLogText prints the sentence alone, and
+     * HangarOps treats it as "everything aboard dies with it" - all three of which are what should
+     * happen here, and none of which a new damage class would get for free. */
+    protected function destroyGateOnReactorLoss($gate, $gamedata)
+    {
+        $turn = (int)$gamedata->turn;
+
+        $reactor = $gate->getSystemByName("Reactor");
+        if (!$reactor) return;
+        if ($reactor->getRemainingHealth() > 0) return;      //still has boxes - nothing to do
+
+        $primaryStruct = $gate->getStructureSystem(0);
+        if (!$primaryStruct || $primaryStruct->isDestroyed($turn)) return;   //already gone
+
+        $rammingSystem = $gate->getSystemByName("RammingAttack");
+        if ($rammingSystem){
+            $newFireOrder = new FireOrder(
+                -1, "normal", $gate->id, $gate->id,
+                $rammingSystem->id, -1, $turn, 1,
+                100, 100, 1, 1, 0,
+                0, 0, 'JumpFailure', 10001
+            );
+            $newFireOrder->pubnotes = " loses its reactor entirely - the jump gate collapses.";
+            $newFireOrder->addToDB = true;
+            $rammingSystem->fireOrders[] = $newFireOrder;
+        }
+
+        $damageEntry = new DamageEntry(
+            -1, $gate->id, -1, $turn,
+            $primaryStruct->id, $primaryStruct->getRemainingHealth(), 0, 0, -1, true, false,
+            "", 'JumpFailure'
+        );
+        $damageEntry->updated = true;
+        if ($rammingSystem){
+            $damageEntry->shooterid = $gate->id;
+            $damageEntry->weaponid  = $rammingSystem->id;
+        }
+        $primaryStruct->damage[] = $damageEntry;
+
+        Debug::log("Jump gate " . $gate->id . " (game " . $gamedata->id . ") destroyed on turn " . $turn
+            . " - total reactor loss.");
+    }
+
+    /* THE CLAIMING PLAYER'S NEAREST QUALIFYING UNIT, or null when they have none in range.
+     *
+     * ⭐ WHICH UNIT IS NEVER CHOSEN BY THE PLAYER (user ruling 2026-08-23, plan section 2.1). The
+     * requirement is "you have a unit within signal range of the gate", not "this ship signals" -
+     * so this answers two questions at once and they are the same question: whether the claim is
+     * legal at all, and the DISTANCE a contested claim is settled on, which is why it returns the
+     * NEAREST rather than the first it finds.
+     *
+     * ⭐ NO LINE-OF-SIGHT TEST, ANYWHERE, ON EITHER SIDE (user ruling 2026-08-23). Signalling a
+     * gate is a transmission, not an aimed effect - unlike a ship projecting its own vortex, which
+     * runs mathlib.isLoSBlocked / $gamedata->blockedHexes. Its absence here is the RULE, not an
+     * omission; do not "fix" it.
+     *
+     * ⭐ AND IT NEVER REVEALS THE UNIT IT FINDS. A stealthed, shaded or cloaked ship may be the
+     * signaller and keeps its concealment - see hasVortexDeclaration, where that ruling holds by
+     * construction. The one place the unit can leak is the claim order's targetid, which
+     * TacGamedata::hideSystemFireOrders masks for every viewer it does not belong to.
+     *
+     * QUALIFYING = live, deployed, non-terrain, owned by $playerId, within $this->range hexes
+     * (10 on a gate engine - markGate makes $range a SIGNAL range). Note that a mine or an OSAT
+     * qualifies: the plan's test is ownership and presence, not what the unit is.
+     *
+     * ⚠️ Called with a REAL gamedata load on both paths (Firing gets $gd, the resolution sweep
+     * runs in advance()), which is what makes getHexPos() and getTurnDeployed() trustworthy - a
+     * POST-side ship carries no movement history (plan trap 2). */
+    public function getNearestGateSignaller($gate, $gamedata, $playerId)
+    {
+        if (!$gate || !$gamedata) return null;
+
+        $gateHex  = $gate->getHexPos();
+        $best     = null;
+        $bestDist = null;
+
+        foreach ($gamedata->ships as $unit){
+            if ($unit->userid != $playerId) continue;
+            if (!empty($unit->removed)) continue;
+            if ($unit->isDestroyed($gamedata->turn)) continue;
+            if ($unit->isTerrain()) continue;                              //a gate cannot signal itself
+            if ($unit->getTurnDeployed($gamedata) > $gamedata->turn) continue; //not on the board yet
+
+            $distance = $gateHex->distanceTo($unit->getHexPos());
+            if ($distance > $this->range) continue;
+
+            if ($bestDist === null || $distance < $bestDist){
+                $bestDist = $distance;
+                $best     = $unit;
+            }
+        }
+
+        return $best;
+    }
+
     /* THE ENGINE'S REAL LOADING STATE on $turn, derived from the vortex note rather than stored.
 
        Four states, in the order they occur (see the constructor):
@@ -5358,8 +5663,15 @@ class JumpEngine extends Weapon{
        mysqli (plan section 5 trap 10) while the note's turns are int-cast. */
     public function getVortexRechargeLoad($turn)
     {
-        $turn   = (int)$turn;
-        $charge = max(1, (int)$this->delay);
+        $turn = (int)$turn;
+
+        /* ⚠️ THE CAP IS THE RECHARGE TIME, AND ON A FIXED GATE THAT IS NOT $delay ALONE (plan
+           section 2.5). A gate's recharge lengthens with reactor damage - 20 + floor(D/3) - so a cap
+           of $delay would leave a damaged gate climbing to 20 and stopping there, one short of a
+           target it can never reach: the gate would simply never recharge again.
+           getVortexRechargeTime() returns max(1, (int)$this->delay) unchanged for a ship engine,
+           which is the expression this line has always carried. */
+        $charge = $this->getVortexRechargeTime();
 
         if ($this->vortexOpenTurn === null) return $charge;      //never opened one
         if ((int)$this->vortexOpenTurn > $turn) return $charge;   //a later vortex, from an earlier replay turn
@@ -5402,6 +5714,24 @@ class JumpEngine extends Weapon{
         if (!$ship || !is_array($ship->systems)) return false;
         foreach ($ship->systems as $system){
             if (!($system instanceof JumpEngine)) continue;
+            /* ⭐⭐ JUMP GATES (PHASE 2) - DO NOT "FIX" THIS METHOD TO COVER GATES. IT IS A RULING.
+               (JUMP_GATES_PLAN.md sections 2.1 and 3.3, trap 5; user ruling 2026-08-23.)
+
+               SIGNALLING A FIXED JUMP GATE NEVER REVEALS A HIDDEN UNIT. A stealthed, shaded or
+               cloaked ship may signal a gate and keeps its concealment - which is the OPPOSITE of
+               the rule for a ship opening its own vortex, and it is deliberate: a gate signal is a
+               transmission that points at nothing, and nothing about the declaration says which of
+               the player's units sent it.
+
+               This loop walks the SHIP'S OWN engines, and a gate claim is a fire order on the
+               GATE'S engine, so a signaller already fails this test and keeps its cloak. That is
+               the rule holding by construction, not an oversight - the mirror image of the LoS
+               note in section 2.1 of the Phase 1 plan. Widening this to "does any gate in the game
+               hold an order naming one of my units?" would silently reverse a ruling.
+
+               (The one place the signaller CAN leak is the claim order's targetid, which names a
+               real unit and becomes public from phase 2 onward. That is masked in
+               TacGamedata::hideSystemFireOrders, not here.) */
             /* ⭐ SECTION 9 - THIS SKIP IS THE CLOAK GUARANTEE, AND IT IS THE WHOLE OF IT.
                This method is what CloakingDevice / ShadingField ask before revealing their ship,
                and it asks only "does this engine hold ANY order this turn?" - no firing-mode test,
@@ -5521,6 +5851,203 @@ class JumpEngine extends Weapon{
         $dbManager->submitFireorders($gamedata->id, $logOrders, $gamedata->turn, 2);
     }
 
+    /* ================= JUMP GATES (PHASE 2) - THE CLAIM RESOLUTION SWEEP ==========
+     *
+     * Every FIXED GATE that was signalled in the Initial Orders that just closed opens its jump
+     * point here. The sibling of spawnDeclaredVortices above, run immediately after it from
+     * InitialOrdersGamePhase::advance, and it exists precisely BECAUSE that sweep skips terrain
+     * (JUMP_GATES_PLAN.md trap 2: that skip is CORRECT - the two resolve different rules and must
+     * not be unified).
+     *
+     * WHAT IS DIFFERENT FROM A SHIP'S DECLARATION, and why it needs a sweep of its own:
+     *
+     *   A SHIP'S declaration is uncontested by construction - a ship may hold one vortex and only
+     *   its owner can order it, so "the declaration" is a single order and opening it is one call.
+     *
+     *   A GATE belongs to nobody in particular and ANY player may signal it, so several claims from
+     *   several players can arrive on the same gate in the same turn and exactly one of them can
+     *   win. Resolution is NEAREST-FIRST WITH NO OWNER PRIORITY (plan section 2.4, user ruling
+     *   2026-08-23): each claiming player's distance is to THEIR nearest qualifying unit, smallest
+     *   wins, and a tie is settled by a bounded roll-off.
+     *
+     * ⚠️ RUNS OFF A REAL getTacGamedata LOAD, never off POST-side ships - the same requirement
+     * spawnDeclaredVortices documents. The engine's vortex state comes from its notes and the
+     * units' positions from their movement, and a POST-side object has neither (plan trap 2).
+     *
+     * ⚠️ DO NOT BRANCH ON $gamedata->phase IN HERE. advance() has already set the next phase, so it
+     * reads 2 by the time this runs. The TURN is what identifies "this turn's claim".
+     *
+     * ⚠️ THE ROLL-OFF IS PERSISTED, NOT RE-DERIVED (plan section 2.4). It happens once, here, and
+     * its outcome is what the 'Vortex' and 'VortexHold' notes record - so a reload, a replay and a
+     * second advance all read the same winner. Nothing re-rolls on load. */
+    public static function openSignalledGates($gamedata, $dbManager = null)
+    {
+        $logOrders = array();
+
+        foreach ($gamedata->ships as $gate){
+            if (!$gate->isTerrain()) continue;              //only terrain can be a gate...
+            if ($gate->isDestroyed($gamedata->turn)) continue;
+
+            foreach ($gate->systems as $system){
+                if (!($system instanceof JumpEngine)) continue;
+                if (!$system->isGateJump()) continue;       //...and only a MARKED engine is a gate's
+
+                $system->resolveGateClaims($gate, $gamedata, $logOrders);
+            }
+        }
+
+        /* THE LOG ORDERS THIS SWEEP WROTE, AND ONLY THOSE. spawnDeclaredVortices submits by
+         * re-scanning $gamedata->getNewFireOrders() for damageclass 'JumpVortex', which is correct
+         * while it is the only sweep writing them - but it runs FIRST, so a second scan here would
+         * pick its orders up again and insert every one of them twice. writeVortexLogOrder returns
+         * what it created for exactly this reason.
+         *
+         * Phase 2 explicitly, for the same reason spawnDeclaredVortices passes 2: submitFireorders
+         * reads the phase only to filter ballistic and pre-firing orders, and these are neither -
+         * passing 1 would silently drop all of them. */
+        if ($dbManager === null || empty($logOrders)) return;
+
+        $dbManager->submitFireorders($gamedata->id, $logOrders, $gamedata->turn, 2);
+    }
+
+    /* ONE GATE'S CONTESTED CLAIM, RESOLVED AND OPENED. See openSignalledGates for the rules.
+     *
+     * The gate conditions are re-tested here rather than trusted from submit time: a gate can have
+     * been destroyed since the claim was made, and - more to the point - this must be IDEMPOTENT,
+     * because advance() can run twice. hasOpenVortex is what makes it so, exactly as it is for a
+     * ship's declaration. */
+    protected function resolveGateClaims($gate, $gamedata, &$logOrders)
+    {
+        $turn = (int)$gamedata->turn;
+
+        if ($this->hasOpenVortex($turn)) return;            //a gate holds ONE jump point at a time
+        if ($this->isDestroyed($turn)) return;
+        if ($this->isOfflineOnTurn($turn)) return;
+        if ($this->getVortexRechargeLoad($turn) < $this->getVortexRechargeTime()) return;
+
+        /* ONE CLAIM PER PLAYER, AND THE FIRST IS THE ONE THAT COUNTS - the same rule and the same
+         * reason as the ship one-vortex-per-submission test in Firing (scanning for the last would
+         * reject the first and keep the last, which is the wrong way round). Firing already refuses
+         * a player's second claim at submit time; this is what makes the rule hold whatever else
+         * reached the DB.
+         *
+         * THE CLAIMING PLAYER IS READ OFF targetid, which Firing::getGateSignalBlock re-derived
+         * from $gamedata->forPlayer and OVERWROTE before the row was written - so it is the
+         * SERVER's reckoning of who claimed, never the client's (plan section 3.3, trap 4). The
+         * unit it names is used for nothing but finding its owner; the distance below is recomputed
+         * from scratch. */
+        $claims = array();   //userid => firingMode (the programmed hold, 1-4)
+        foreach ($this->fireOrders as $fire){
+            if ((int)$fire->turn !== $turn) continue;
+            if (!empty($fire->rejected)) continue;
+
+            $mode = (int)$fire->firingMode;
+            if ($mode < 1 || $mode > self::MAX_VORTEX_TURNS) continue;
+
+            $claimant = $gamedata->getShipById((int)$fire->targetid);
+            if (!$claimant) continue;                       //an order naming nothing claims nothing
+
+            $userId = (int)$claimant->userid;
+            if (isset($claims[$userId])) continue;          //first claim wins
+
+            $claims[$userId] = $mode;
+        }
+
+        if (empty($claims)) return;
+
+        /* EACH CLAIMANT'S DISTANCE, RECOMPUTED FROM THE DB. Nothing has moved since the claims were
+         * made - Initial Orders is the first phase of the turn - so recomputing changes no outcome;
+         * what it does is make a tampered POST pointless, because the number that settles the
+         * contest is never one the client sent. */
+        $distances = array();
+        foreach ($claims as $userId => $mode){
+            $signaller = $this->getNearestGateSignaller($gate, $gamedata, $userId);
+            if (!$signaller) continue;                      //nothing in range any more - the claim lapses
+
+            //(int) so the strict === in pickGateClaimWinner is comparing like with like. The hex
+            //maths is integral, but its inputs come off mysqli as strings and PHP's / can hand back
+            //a float - and a tie that fails to be recognised as one would silently skip the roll-off.
+            $distances[$userId] = (int)$gate->getHexPos()->distanceTo($signaller->getHexPos());
+        }
+
+        if (empty($distances)) return;
+
+        $winner  = self::pickGateClaimWinner($distances, $gate, $gamedata);
+        $maxHold = self::getGateMaxHold($gate);
+        $hold    = min((int)$claims[$winner], $maxHold);
+
+        if (!$this->openVortexAtGate($gate, $hold, $winner, $gamedata, $logOrders)) return;
+
+        /* THE LOSERS ARE TOLD, BY PLAYER AND BY DISTANCE (plan section 2.4). A beaten claim costs
+         * nothing - no charge is spent and nothing goes on cooldown - so there is no state to
+         * unwind, but silence would read as a bug. */
+        foreach ($distances as $userId => $distance){
+            if ($userId === $winner) continue;
+
+            $log = self::writeVortexLogOrder($gate, $gamedata,
+                " refuses the signal from " . self::playerLabel($userId, $gamedata) . ": their nearest unit is "
+                . $distance . ($distance == 1 ? " hex" : " hexes") . " away, against "
+                . $distances[$winner] . " for " . self::playerLabel($winner, $gamedata) . ".");
+            if ($log) $logOrders[] = $log;
+        }
+
+        //A clamped claim is worth a line too - the player asked for longer, and the gate's reactor
+        //damage is why they did not get it (plan section 2.5, test 18).
+        if ($hold < (int)$claims[$winner]){
+            $log = self::writeVortexLogOrder($gate, $gamedata,
+                " cannot hold its jump point for " . (int)$claims[$winner] . " turns - reactor damage caps it at "
+                . $hold . ($hold == 1 ? " turn" : " turns") . ".");
+            if ($log) $logOrders[] = $log;
+        }
+
+        Debug::log("Jump gate " . $gate->id . " (game " . $gamedata->id . ") opens for player " . $winner
+            . " on turn " . $turn . " - hold " . $hold . " turn(s), " . count($distances) . " claim(s).");
+    }
+
+    /* NEAREST WINS; A TIE IS ROLLED OFF (plan section 2.4). Returns the winning userid.
+     *
+     * ⭐ NO OWNER PRIORITY, deliberately (user ruling 2026-08-23, superseding the earlier sketch in
+     * JUMP_POINTS_PLAN.md section 7). A gate is contested ground, not a home-team asset: whoever
+     * bought it has no claim on it that somebody else's unit standing closer does not beat.
+     *
+     * THE ROLL-OFF IS BOUNDED so it can never hang: at most 10 rounds of d100, and if the dice are
+     * somehow still tied after that the lowest player id takes it. That last line will effectively
+     * never run - it is there so this function has no path that does not return. */
+    protected static function pickGateClaimWinner($distances, $gate, $gamedata)
+    {
+        $best = min($distances);
+
+        $tied = array();
+        foreach ($distances as $userId => $distance){
+            if ($distance === $best) $tied[] = $userId;
+        }
+
+        if (count($tied) === 1) return $tied[0];
+
+        for ($round = 0; $round < 10 && count($tied) > 1; $round++){
+            $rolls = array();
+            $high  = -1;
+            foreach ($tied as $userId){
+                $roll = Dice::d(100);
+                $rolls[$userId] = $roll;
+                if ($roll > $high) $high = $roll;
+
+                Debug::log("Jump gate " . $gate->id . " (game " . $gamedata->id . ") claim roll-off: player "
+                    . $userId . " rolls " . $roll . " at " . $best . " hexes.");
+            }
+
+            $next = array();
+            foreach ($tied as $userId){
+                if ($rolls[$userId] === $high) $next[] = $userId;
+            }
+            $tied = $next;
+        }
+
+        sort($tied);
+
+        return $tied[0];
+    }
+
     /* This engine's OPENING declaration for $turn, or null. Deliberately a mirror of the rules
      * Firing::getVortexDeclarationBlock enforces at submit time rather than a re-run of them: by
      * the time this is asked, an illegal order has already been marked ->rejected and never
@@ -5528,17 +6055,26 @@ class JumpEngine extends Weapon{
      *
      * Modes 1-6 are the six facings (mode = facing + 1). Mode 7 is Stage 5's Maintain declaration
      * and is NOT an opening - it must never spawn a second unit, which is why it is filtered here
-     * and not merely tolerated. */
+     * and not merely tolerated.
+     *
+     * ⭐ JUMP GATES (PHASE 2) - ON A GATE ENGINE THE MODE MEANS SOMETHING ELSE ENTIRELY, so the two
+     * are asked as two questions and share no range test (plan section 4 Stage 1). A gate's modes
+     * are the programmed OPEN DURATION, 1-4 turns; 5, 6 and 7 are not facings it happens not to use
+     * but values that have no meaning at all on a gate, and mode 7 in particular must be refused
+     * outright - a tampered MAINTAIN order on a gate would otherwise walk into the ship closure
+     * path and take the range and power tests with it (plan section 3.3). */
     public function getVortexDeclaration($turn)
     {
         if ($this->legacyJump) return null;   //section 9 - a legacy engine never opens a vortex
+
+        $maxMode = $this->gateJump ? 4 : 6;   //duration 1-4 on a gate; facing 1-6 on a ship
 
         foreach ($this->fireOrders as $fire){
             if ($fire->turn != $turn) continue;
             if (!empty($fire->rejected)) continue;
 
             $mode = (int)$fire->firingMode;
-            if ($mode < 1 || $mode > 6) continue;
+            if ($mode < 1 || $mode > $maxMode) continue;
 
             if ($fire->x === null || $fire->y === null || $fire->x === "null" || $fire->y === "null") continue;
 
@@ -5561,6 +6097,17 @@ class JumpEngine extends Weapon{
     public function getMaintainDeclaration($turn)
     {
         if ($this->legacyJump) return null;   //section 9 - and so never maintains one either
+
+        /* ⭐ JUMP GATES (PHASE 2) - A GATE HAS NO MAINTAIN, AND THIS IS WHERE THAT IS ENFORCED
+           (JUMP_GATES_PLAN.md sections 2.3 and 3.3). The open duration is PROGRAMMED once, in the
+           signal order's firing mode, and cannot be changed afterwards; there is no second
+           declaration and nothing to maintain. Refusing here rather than merely leaving mode 7 off
+           $firingModes is what makes that true against a TAMPERED POST as well as against the UI:
+           getVortexClosureReason, rollVortexJumpFailure and the client's Maintain toggle all ask
+           this method, so a mode-7 order forged onto a gate engine would otherwise put the gate on
+           the ship closure path - taking its range test and its all-systems-offline test with it,
+           neither of which is a gate rule. */
+        if ($this->gateJump) return null;
 
         foreach ($this->fireOrders as $fire){
             if ($fire->turn != $turn) continue;
@@ -5638,9 +6185,40 @@ class JumpEngine extends Weapon{
      * what is drawn. */
     protected function openVortex($ship, $fire, $gamedata)
     {
-        if ($this->hasOpenVortex($gamedata->turn)) return;
-
         $facing = ((int)$fire->firingMode - 1) % 6; //modes 1-6 -> facings 0-5; the range is already validated
+        $hex    = new OffsetCoordinate($fire->x, $fire->y);
+
+        $vortex = $this->spawnVortexUnit($ship, $hex, $facing, $gamedata);
+        if (!$vortex) return;
+
+        $distance = $ship->getHexPos()->distanceTo($vortex->getHexPos());
+        self::writeVortexLogOrder($ship, $gamedata,
+            " opens a jump point " . $distance . ($distance == 1 ? " hex" : " hexes")
+            . " away. It forms at the end of this turn and can be entered from next turn.");
+    }
+
+    /* ⭐⭐ JUMP GATES (PHASE 2) - A FIXED GATE OPENS ONE OF THESE TOO, AND THE BODY IS SHARED.
+     *
+     * The spawn path is exactly the same three things - insert the unit, mark $spawned as
+     * openTurn + 1, write the deploy MovementOrder and the 'Vortex' state note - and only the
+     * INPUTS differ: a gate's hex is its own and its facing is its own (set when it was placed and
+     * never chosen), so there is no projection to measure and no facing in the order.
+     *
+     * ⚠️ IT IS SHARED RATHER THAN COPIED FOR ONE SPECIFIC REASON (JUMP_GATES_PLAN.md section 3.4):
+     * `$spawned = openTurn + 1` is the rule the whole forming/open/closing lifecycle turns on, and
+     * a second copy of the spawn path is exactly how that rule drifts out of step between the two
+     * kinds of vortex. Returns the vortex UNIT so each caller can write its own log sentence.
+     *
+     * $holder is whatever owns the jump point - the declaring ship, or the gate. Its userid, slot
+     * and team are what the vortex is created with, which for a gate means the vortex belongs to
+     * the gate rather than to the player who claimed it. That is deliberate: WHO won the claim is
+     * recorded in the 'VortexHold' note, and it governs nothing about using the vortex - any unit
+     * of any side may fly into an open one (plan section 2.6). */
+    protected function spawnVortexUnit($holder, OffsetCoordinate $hex, $facing, $gamedata)
+    {
+        if ($this->hasOpenVortex($gamedata->turn)) return null;
+
+        $ship = $holder;
 
         $vortex = new SpawnJumpPoint($gamedata->id, $ship->userid, "Jump Point", $ship->slot);
         //Ships get their team from their slot on load; set it by hand so the rest of THIS request
@@ -5652,7 +6230,7 @@ class JumpEngine extends Weapon{
         //OPENS - one after the turn it was declared. See restoreVortexFromNote for the whole rule.
         $vortex->spawned = $gamedata->turn + 1;
 
-        $deploy = new MovementOrder(null, "deploy", new OffsetCoordinate($fire->x, $fire->y),
+        $deploy = new MovementOrder(null, "deploy", $hex,
                                     0, 0, 0, $facing, $facing, false, $gamedata->turn, 0, 0);
         Manager::insertSingleMovement($gamedata->id, $vortexId, $deploy);
         $vortex->movement[] = $deploy; //so getHexPos() works on the in-memory unit for the rest of this advance
@@ -5691,10 +6269,99 @@ class JumpEngine extends Weapon{
         $this->vortexOpenTurn = $gamedata->turn;
         $this->vortexCloseTurn = -1;
 
-        $distance = $ship->getHexPos()->distanceTo($vortex->getHexPos());
-        self::writeVortexLogOrder($ship, $gamedata,
-            " opens a jump point " . $distance . ($distance == 1 ? " hex" : " hexes")
-            . " away. It forms at the end of this turn and can be entered from next turn.");
+        return $vortex;
+    }
+
+    /* ⭐⭐ JUMP GATES (PHASE 2) - OPEN THIS GATE'S JUMP POINT (JUMP_GATES_PLAN.md section 3.4).
+     *
+     * The sibling of openVortex above, over the same shared spawn body. THREE INPUTS DIFFER, and
+     * every one of them is a rule rather than a choice:
+     *
+     *   THE HEX is the gate's own. A gate does not project a vortex anywhere - the doorway is the
+     *   gate's mouth, which is where the gate is standing.
+     *
+     *   THE FACING is the gate's own, off its deploy MovementOrder, and cannot be aimed or re-aimed
+     *   (plan section 2.2, user ruling 2026-08-23). It was fixed when the gate was placed, which is
+     *   why the gate carries $facingArrow: the player cannot choose the mouth, so they must be able
+     *   to read it. A unit still enters travelling in direction (facing + 3) % 6, exactly as it does
+     *   into a ship's vortex - getUsableVortex and Movement::applyJumpOut need no gate branch at all.
+     *
+     *   THERE IS NO PROJECTION RANGE to measure, so the log line says what a gate line should say.
+     *
+     * ⭐ AND IT WRITES A SECOND NOTE, which is the whole of what a gate vortex needs that a ship's
+     * does not: the PROGRAMMED HOLD. See writeVortexHoldNote for why it is its own note and not a
+     * fourth field on the existing one.
+     *
+     * ⚠️ EVERY LOG LINE NAMES THE PLAYER, NEVER THE SIGNALLING UNIT (plan section 2.4 and 2.1).
+     * Signalling a gate never reveals a hidden unit, and a combat-log line saying which ship sent
+     * the signal would undo that on the very turn it mattered. */
+    protected function openVortexAtGate($gate, $hold, $winnerUserId, $gamedata, &$logOrders)
+    {
+        $move   = $gate->getLastMovement();
+        $facing = $move ? ((int)$move->facing % 6 + 6) % 6 : 0;
+
+        $vortex = $this->spawnVortexUnit($gate, $gate->getHexPos(), $facing, $gamedata);
+        if (!$vortex) return false;
+
+        $this->writeVortexHoldNote($gate, $vortex->id, $hold, $winnerUserId, $gamedata);
+
+        $log = self::writeVortexLogOrder($gate, $gamedata,
+            " is signalled by " . self::playerLabel($winnerUserId, $gamedata) . " and opens its jump point for "
+            . $hold . ($hold == 1 ? " turn" : " turns")
+            . ". It forms at the end of this turn and can be entered from next turn.");
+        if ($log) $logOrders[] = $log;
+
+        return true;
+    }
+
+    /* HOW A PLAYER IS NAMED IN A GATE LOG LINE - and it is a PLAYER, never a unit.
+     *
+     * ⚠️ THE WHOLE POINT (JUMP_GATES_PLAN.md sections 2.1 and 2.4). Signalling a gate never reveals
+     * a hidden unit, and "the Shadow Scout signalled the gate" would undo that on the very turn it
+     * mattered. Every sentence openSignalledGates writes says who CLAIMED, and nothing about which
+     * of their ships was in range. Falls back to the raw id rather than to nothing, so a log line is
+     * never mysteriously anonymous if a slot lookup fails. */
+    protected static function playerLabel($userId, $gamedata)
+    {
+        foreach ($gamedata->slots as $slot){
+            if ($slot->playerid == $userId && !empty($slot->playername)) return $slot->playername;
+        }
+
+        return "player " . (int)$userId;
+    }
+
+    /* ⭐ THE HOLD NOTE - a SECOND, ADDITIVE note on the same engine, keyed by the same vortex id.
+     *
+     * ⚠️ THE 'Vortex' NOTE'S FORMAT MUST NOT BE TOUCHED. Its notevalue is
+     * "<openTurn>,<closeTurn>[,<reason>]" and the closure reason is FREE TEXT THAT CONTAINS COMMAS,
+     * which is why restoreVortexState parses it with explode(',', $v, 3). Adding a fourth field
+     * would silently swallow the reason on every existing note in every live game
+     * (JUMP_GATES_PLAN.md trap 8). So the hold gets a note of its own, and a vortex with no such
+     * note is a SHIP-opened vortex behaving exactly as it does today - which is what makes the
+     * whole of Phase 2 invisible to Phase 1.
+     *
+     * Turn 1 / phase 1, for the same reason the opening note is: getIndividualNotesForGame fetches
+     * "turn <= the turn being viewed", so a note stamped with the real open turn would be invisible
+     * to every earlier replay turn.
+     *
+     * notevalue is "<hold>,<winning userid>". Two ints, no free text, so it needs no explode limit.
+     *
+     * ⚠️ notekey_human is varchar(40) and an overflow is a mysqli 1406 that aborts the whole player
+     * submission, not a truncation (plan trap 7). "VortexHold" is 10. */
+    protected function writeVortexHoldNote($gate, $vortexId, $hold, $winnerUserId, $gamedata)
+    {
+        $note = new IndividualNote(
+            -1,
+            $gamedata->id,
+            1, //turn 1 / phase 1 - see above, and see spawnVortexUnit for why turn 1
+            1,
+            $gate->id,
+            $this->id,
+            $vortexId,              //notekey = the vortex's ship id, the same key the 'Vortex' note uses
+            'VortexHold',           //notekey_human
+            (int)$hold . ',' . (int)$winnerUserId
+        );
+        Manager::insertIndividualNote($note);
     }
 
     /* STAGE 6 - THE COMBAT-LOG LINE FOR A JUMP POINT OPENING OR CLOSING.
@@ -5718,7 +6385,7 @@ class JumpEngine extends Weapon{
     protected static function writeVortexLogOrder($ship, $gamedata, $pubNotes)
     {
         $rammingSystem = $ship->getSystemByName("RammingAttack");
-        if (!$rammingSystem) return;   //every ship has one, but a jump gate (Phase 2) may not
+        if (!$rammingSystem) return null;   //every ship has one, and BaseShip gives a jump gate one too
 
         $newFireOrder = new FireOrder(
             -1, "normal", $ship->id, $ship->id,
@@ -5729,6 +6396,13 @@ class JumpEngine extends Weapon{
         $newFireOrder->pubnotes = $pubNotes;
         $newFireOrder->addToDB = true;
         $rammingSystem->fireOrders[] = $newFireOrder;
+
+        /* RETURNED (Phase 2) so a caller can submit exactly the orders IT wrote. spawnDeclaredVortices
+         * submits by re-scanning getNewFireOrders(), which is fine as the only sweep in advance()
+         * that writes any - but openSignalledGates runs immediately after it, and re-scanning there
+         * would pick the ship sweep's orders up a second time and duplicate every one of them.
+         * spawnDeclaredVortices ignores this return; nothing about it changed. */
+        return $newFireOrder;
     }
 
     /* ================= STAGE 5 - THE VORTEX LIFECYCLE =============================
@@ -5740,8 +6414,19 @@ class JumpEngine extends Weapon{
      *
      * ⚠️ Destroyed ships are NOT skipped. "Its holder is destroyed" is itself a closure
      * condition, and so is "its holder flew into its own vortex", which arrives here as the same
-     * thing. Terrain IS skipped, because terrain never holds a vortex - Phase 2's fixed jump gates
-     * will need their own path, which is exactly why this one refuses to guess.
+     * thing.
+     *
+     * ⚠️⚠️ TERRAIN IS SKIPPED - EXCEPT A FIXED JUMP GATE, AND THAT EXCEPTION IS THE SINGLE
+     * HIGHEST-CONSEQUENCE LINE IN PHASE 2 (JUMP_GATES_PLAN.md trap 1, confirmed by the user
+     * 2026-08-23). This sweep is the ONLY thing that can end a jump point. A gate is terrain
+     * (JumpgateCapital sets shipSizeClass 5 by hand), so the bare skip this used to carry made a
+     * gate's vortex invisible to it: spawned by openSignalledGates and then open FOREVER.
+     *
+     * ⚠️ AND THE EXCEPTION IS NARROWED ON THE ENGINE, NEVER ON A HULL NAME (plan trap 12).
+     * jumgateNew (terrain) and the civilian Jumpgate also mount a JumpEngine, are obsolete and are
+     * explicitly out of scope; neither is marked with markGate(), so isGateJump() is false on both
+     * and they keep the Phase 1 behaviour they have today. Ordinary terrain - asteroids, moons,
+     * mines - has no JumpEngine at all and falls straight through the inner loop.
      *
      * ⚠️ Runs AFTER setCriticals, not before, so the jump-failure roll (criticalPhaseEffects)
      * has already had its say. A ship the roll has just destroyed closes its vortex on the same
@@ -5750,7 +6435,7 @@ class JumpEngine extends Weapon{
     public static function closeExpiredVortices($gamedata)
     {
         foreach ($gamedata->ships as $ship){
-            if ($ship->isTerrain()) continue;
+            if ($ship->isTerrain() && !self::holdsGateEngine($ship)) continue;
 
             foreach ($ship->systems as $system){
                 if (!($system instanceof JumpEngine)) continue;
@@ -5758,6 +6443,19 @@ class JumpEngine extends Weapon{
                 $system->closeVortexIfDue($ship, $gamedata);
             }
         }
+    }
+
+    /* Does this unit carry a FIXED GATE's Jump Engine? The narrow test the terrain skip above uses,
+     * kept as its own named thing so nothing is ever tempted to ask it by hull name instead. */
+    protected static function holdsGateEngine($ship)
+    {
+        if (!$ship || !is_array($ship->systems)) return false;
+
+        foreach ($ship->systems as $system){
+            if ($system instanceof JumpEngine && $system->isGateJump()) return true;
+        }
+
+        return false;
     }
 
     /* Close this engine's vortex if any closure condition has become true, and record it.
@@ -5799,6 +6497,24 @@ class JumpEngine extends Weapon{
         //nothing left to hold open, so stop asking about it every turn.
         if (!($vortex instanceof SpawnJumpPoint)) return 'vortex unit is gone';
 
+        /* ⭐⭐ JUMP GATES (PHASE 2) - THE GATE BRANCH, TAKEN FIRST AND RETURNING, because a gate's
+           list is SHORTER than a ship's and the difference is entirely things that do NOT close a
+           gate's jump point (JUMP_GATES_PLAN.md section 2.3, user rulings 2026-08-23):
+
+             NOT "not maintained" - a gate has no Maintain. The duration is programmed once, when
+               the gate is signalled, and cannot be changed afterwards.
+             NOT "systems left online" - a gate does not have to go dark to hold its OWN jump point
+               open. getVortexPowerViolations is never consulted for one.
+             NOT "holder is N hexes away" - the gate IS the hex. And the SIGNALLER may fly away, be
+               destroyed, or leave through the vortex itself; once signalled, the gate holds it.
+               There is no end-of-turn range recheck of any kind.
+             NOT the four-turn cap - the programmed hold replaces it, and it may be shorter.
+
+           What is left is: the unit is gone (above), the gate is destroyed, or the programmed hold
+           has run out. Closure is still END OF TURN, after Firing, so a vortex closing this turn is
+           usable for the whole of it. */
+        if ($this->isGateJump()) return $this->getGateVortexClosureReason($ship, $gamedata);
+
         if ($ship->isDestroyed($turn)){
             return $ship->hasJumpedToHyperspace() ? 'holder left through a vortex' : 'holder destroyed';
         }
@@ -5818,6 +6534,36 @@ class JumpEngine extends Weapon{
             $named = array_slice($violations, 0, 6);
             if (count($violations) > count($named)) $named[] = '+' . (count($violations) - count($named)) . ' more';
             return 'systems left online: ' . implode('; ', $named);
+        }
+
+        return null;
+    }
+
+    /* ⭐ WHY A FIXED GATE'S JUMP POINT CLOSES THIS TURN, or null if it stands into the next one.
+     * The whole of the gate list - see the branch in getVortexClosureReason for what is deliberately
+     * NOT on it, which is most of the ship rules.
+     *
+     * ⚠️ (int) ON EVERY TURN COMPARISON. $gamedata->turn is a STRING out of mysqli (Phase 1
+     * trap 10) while $vortexOpenTurn is int-cast when the note is parsed, and the expiry test below
+     * is exactly the kind of comparison that silently comes out a turn wrong.
+     *
+     * THE OFF-BY-ONE, stated once so it is not re-derived: the turn a gate is signalled is NOT one
+     * of the open turns. Signalled on N, open on N+1 through N+hold, gone at the end of N+hold - the
+     * same shape as a ship's four-turn cap, with the programmed hold in place of the constant. */
+    protected function getGateVortexClosureReason($gate, $gamedata)
+    {
+        $turn = (int)$gamedata->turn;
+
+        //Total reactor loss destroys the gate outright (plan section 2.5), so this covers that too -
+        //isDestroyed is what the reactor rule ends in.
+        if ($gate->isDestroyed($turn)) return 'jump gate destroyed';
+
+        //A hold note that never arrived: defensive only. Fall back to the ship cap rather than
+        //holding the door open forever, which is the failure mode trap 1 exists to prevent.
+        $hold = ($this->vortexHoldTurns !== null) ? (int)$this->vortexHoldTurns : self::MAX_VORTEX_TURNS;
+
+        if ($turn >= (int)$this->vortexOpenTurn + $hold){
+            return 'programmed ' . $hold . '-turn hold expired';
         }
 
         return null;
@@ -5900,12 +6646,14 @@ class JumpEngine extends Weapon{
      *
      * $vortexNotes is keyed by vortex ship id, last-wins per key - which is how a phase-2 closure
      * note overrides its own opening note. */
-    protected function restoreVortexState($vortexNotes, $gamedata)
+    protected function restoreVortexState($vortexNotes, $gamedata, $holdNotes = array())
     {
         $this->activeVortexId    = null;
         $this->vortexOpenTurn    = null;
         $this->vortexCloseTurn   = -1;
         $this->vortexCloseReason = '';
+        $this->vortexHoldTurns   = null;
+        $this->vortexClaimantId  = null;
 
         foreach ($vortexNotes as $note){
             //LIMIT 3: the closure reason is free text and can contain commas.
@@ -5942,6 +6690,31 @@ class JumpEngine extends Weapon{
             $this->vortexCloseTurn   = $closeTurn;
             $this->vortexCloseReason = $reason;
         }
+
+        /* ⭐ JUMP GATES (PHASE 2) - THE HOLD, keyed by the SAME vortex id, applied AFTER the loop
+         * above has settled which vortex is the current one (plan section 3.4).
+         *
+         * A vortex with no hold note is a SHIP-opened vortex and these two stay null, which is what
+         * makes every gate branch downstream invisible to Phase 1. Ordering matters: the current
+         * vortex is only known once the latest-opened note has won, so the lookup cannot ride
+         * inside the loop.
+         *
+         * notevalue is "<hold>,<winning userid>" - two ints, no free text, so no explode limit is
+         * needed here (unlike the 'Vortex' note, whose third field is a reason full of commas). */
+        if ($this->activeVortexId !== null && isset($holdNotes[(string)$this->activeVortexId])){
+            $parts = explode(',', (string)$holdNotes[(string)$this->activeVortexId]->notevalue);
+
+            $this->vortexHoldTurns  = max(1, (int)$parts[0]);
+            $this->vortexClaimantId = isset($parts[1]) ? (int)$parts[1] : null;
+        }
+    }
+
+    /* The programmed open duration of the jump point this engine is holding, or null when it holds
+     * none - or when the one it holds is a SHIP'S, which runs on the four-turn cap and the Maintain
+     * declaration instead. See $vortexHoldTurns. */
+    public function getVortexHoldTurns()
+    {
+        return $this->vortexHoldTurns;
     }
 
     public function isOverloading($turn){
@@ -6046,9 +6819,23 @@ class JumpEngine extends Weapon{
 		   why that distinction is load-bearing. */
 		$vortexNotes = array();
 
+		/* ⭐ JUMP GATES (PHASE 2) - a THIRD kind, collected in the same pass and keyed the same way.
+		   A 'VortexHold' note carries a FIXED GATE's programmed open duration and the player who
+		   won the claim; a vortex with none is a ship's and behaves exactly as it did before Phase 2
+		   (JUMP_GATES_PLAN.md section 3.4). It is a separate note rather than a fourth field on the
+		   'Vortex' one because that note's third field is a free-text closure reason CONTAINING
+		   COMMAS, and widening its format would silently swallow the reason on every existing note
+		   in every live game (plan trap 8). */
+		$holdNotes = array();
+
 		foreach ($this->individualNotes as $currNote) {
 			if ($currNote->notekey_human === 'Vortex'){
 				$vortexNotes[(string)$currNote->notekey] = $currNote;
+				continue;
+			}
+
+			if ($currNote->notekey_human === 'VortexHold'){
+				$holdNotes[(string)$currNote->notekey] = $currNote;
 				continue;
 			}
 
@@ -6056,7 +6843,7 @@ class JumpEngine extends Weapon{
 			$this->preJumpValue = $currNote->notevalue;
 		}
 
-		$this->restoreVortexState($vortexNotes, $gamedata);
+		$this->restoreVortexState($vortexNotes, $gamedata, $holdNotes);
 	}//endof onIndividualNotesLoaded
 
 
@@ -6083,6 +6870,18 @@ class JumpEngine extends Weapon{
 	{
 		parent::criticalPhaseEffects($ship, $gamedata);
 
+		/* ⭐ JUMP GATES (PHASE 2): total reactor loss destroys the gate (plan section 2.5). FIRST,
+		   before the roll below: a gate already dead of reactor loss has nothing left to lose to a
+		   failed jump, and the failure path's own guard (primary Structure already destroyed) then
+		   makes the pair mutually exclusive without either needing to know about the other. */
+		if ($this->gateJump) $this->destroyGateOnReactorLoss($ship, $gamedata);
+
+		/* ⭐ AND THE JUMP-FAILURE ROLL IS KEPT FOR GATES (user ruling 2026-08-23 - it was offered as
+		   an exemption and deliberately not taken). A gate with a damaged Jump Engine rolls on the
+		   turn it opens a vortex, exactly as a ship does; with no Maintain declaration to make, the
+		   guard inside already gives precisely one roll per opening and needs no gate branch.
+		   ⚠️ JumpgateCapital's engine has TEN boxes, so each point of damage on it is a flat 10%
+		   chance of destroying the whole gate the next time it is signalled. */
 		$this->rollVortexJumpFailure($ship, $gamedata);
 	}
 
@@ -6193,6 +6992,18 @@ class JumpEngine extends Weapon{
             return;
         }
 
+        /* ⭐ JUMP GATES (PHASE 2) STAGE 5 - A FIXED GATE GETS ITS OWN TEXT, AND IT MUST.
+           Almost every sentence of the ship version below is WRONG on a gate and would read as an
+           instruction the player cannot carry out - which is exactly the argument the legacy branch
+           above makes. A gate is not selected and does not target: it is CLICKED, from the Initial
+           Orders tooltip, with no ship selected. Its vortex opens on its own hex with its own fixed
+           facing, so there is nothing to aim, no 10-hex projection (the 10 is a SIGNAL range) and no
+           line of sight. And it has no Maintain at all. */
+        if ($this->gateJump){
+            $this->setGateSystemDataWindow($turn);
+            return;
+        }
+
         /* STAGE 6 - the tooltip describes the VORTEX rules end to end. It used to describe the
            retired boost-to-jump method, and then Stage 5's half-way version; this is the whole
            thing, in the order a player meets it. */
@@ -6229,6 +7040,68 @@ class JumpEngine extends Weapon{
 		$this->data["Range"] = $this->range;
     }
 
+    /* ⭐ THE FIXED GATE TOOLTIP (JUMP_GATES_PLAN.md Stage 5). Its own text, not a variant of the
+     * ship one, because on a gate almost every sentence of that text is an instruction the player
+     * cannot carry out - the same argument the legacy branch makes, and the reason section 0 of the
+     * plan carried this as a known gap from Stage 1.
+     *
+     * WHAT IT SAYS THAT THE SHIP TEXT DOES NOT:
+     *   - the gesture is CLICK THE GATE, with no ship selected and none needed;
+     *   - the 10 hexes are a SIGNAL range - how far away YOUR nearest unit may be - not a
+     *     projection range, and no line of sight is required for it;
+     *   - the facing cannot be chosen: it is the gate's own, fixed when the gate was placed, and
+     *     the arrow on the map is how you read it;
+     *   - the duration is PROGRAMMED once, 1-4 turns, and there is no Maintain;
+     *   - a contested gate goes to the NEAREST claimant, with a roll-off for a tie;
+     *   - the damage model is the Reactor, and it is three numbers.
+     *
+     * ⚠️ NO LIVE NUMBERS IN HERE, AND THAT IS NOT AN OVERSIGHT. ShipSystem::stripForJson does not
+     * send $data at all, so this text reaches the client on the STATIC BLUEPRINT - generated once
+     * at build time, on an undamaged hull, on turn 1. A "charge: now 7/20" line would therefore be
+     * frozen at whatever the generator saw and would read as a lie for the rest of the game. The
+     * LIVE charge is on the system icon (turnsloaded/loadingtime, which stripForJson does send);
+     * this text states the RULES, and the damage paragraph says how damage moves them. */
+    protected function setGateSystemDataWindow($turn)
+    {
+        //Undamaged values on purpose - see above. $delay is the ship file's own argument, so this
+        //is the gate's base recharge whatever hull it is mounted on.
+        $recharge = max(1, (int)$this->delay);
+        $maxHold  = self::MAX_VORTEX_TURNS;
+
+        $this->data["Special"]  = "<br><b>SIGNALLING THE GATE.</b> In Initial Orders, CLICK THE GATE - no ship needs to be";
+        $this->data["Special"] .= " selected. The button is offered if you have any live unit within " . $this->range . " hexes of it;";
+        $this->data["Special"] .= " which unit does not matter, and NO line of sight is needed. Signalling never reveals a";
+        $this->data["Special"] .= " stealthed, shaded or cloaked unit. ANY player may signal ANY gate, including one the enemy bought.";
+        $this->data["Special"] .= "<br><b>THE DURATION.</b> Set how many turns to hold the jump point open - 1 to " . $maxHold;
+        $this->data["Special"] .= " on an undamaged gate - and press SIGNAL. It cannot be changed afterwards: there is no Maintain. The jump point";
+        $this->data["Special"] .= " forms at the end of that turn and can be entered from the NEXT turn.";
+        $this->data["Special"] .= "<br><b>THE FACING CANNOT BE CHOSEN.</b> The vortex always takes the GATE'S OWN facing, set when";
+        $this->data["Special"] .= " the gate was placed. The arrow drawn over the gate is its mouth: a unit must be TRAVELLING";
+        $this->data["Special"] .= " INTO that side on the step that carries it into the hex, then press Jump to Hyperspace.";
+        $this->data["Special"] .= " Movement ends there and the unit leaves the battle keeping its full combat value.";
+        $this->data["Special"] .= "<br><b>CONTESTED GATES.</b> If several players signal the same gate in one turn, the one whose";
+        $this->data["Special"] .= " nearest unit is CLOSEST wins - the owner has no priority - and an exact tie is rolled off.";
+        $this->data["Special"] .= " The winner's duration is used; the losers lose nothing but the turn's claim.";
+        $this->data["Special"] .= "<br><b>RECHARGE.</b> Opening a jump point spends the gate's whole charge. It recharges from the";
+        $this->data["Special"] .= " turn after that jump point closes, 1 per turn, and cannot be signalled again until it reads";
+        $this->data["Special"] .= " " . $recharge . "/" . $recharge . " on this system's icon.";
+        $this->data["Special"] .= "<br><b>DAMAGE.</b> The gate's condition is its REACTOR. Every 3 points of damage on it adds a";
+        $this->data["Special"] .= " turn to the recharge, every 15 points costs a turn off the longest hold, and losing the";
+        $this->data["Special"] .= " reactor entirely destroys the gate.";
+        $this->data["Special"] .= "<br>A DAMAGED Jump Engine may fail: at the end of a turn the gate opens a jump point, the gate";
+        $this->data["Special"] .= " is destroyed on a d100 roll at or under the percentage of Jump Engine boxes lost.";
+
+        /* ShipSystem, not parent - same reason as the ship branch: Weapon's block is a gun's
+           Damage / Fire control / Priority rows, all meaningless here.
+
+           "Weapon type" is not cosmetic: the client stamps a fire order's damageclass from it.
+           "Range" is relabelled, because on a gate the number means something else entirely - it is
+           how far away the SIGNALLER may be, not how far the vortex can be thrown. */
+        ShipSystem::setSystemDataWindow($turn);
+        $this->data["Weapon type"]  = $this->weaponClass;
+        $this->data["Signal range"] = $this->range;
+    }
+
     /* STAGE 6 - THE PAYLOAD CARRIES TWO SEPARATE THINGS, BECAUSE THEY ARE TWO SEPARATE THINGS.
      *
      * 1. THE LOADING STATE, in $turnsloaded / $loadingtime, which every other weapon in the game
@@ -6263,12 +7136,26 @@ class JumpEngine extends Weapon{
         $turn = (int)TacGamedata::$currentTurn;   //(int): mysqli hands the turn back as a STRING
 
         $strippedSystem->turnsloaded = $this->getVortexRechargeLoad($turn);
-        $strippedSystem->loadingtime = max(1, (int)$this->delay);
+        /* getVortexRechargeTime() rather than the raw max(1, (int)$this->delay) this used to send:
+           the method IS that expression on a ship engine, so a ship's payload is byte-identical, and
+           on a FIXED GATE it adds the reactor-damage term. Sending the undamaged number instead
+           would leave the client's weaponManager.isLoaded test disagreeing with the server's own
+           charge test in Firing::getGateSignalBlock - the Signal button would be offered and the
+           claim then rejected, which is the worst of both. */
+        $strippedSystem->loadingtime = $this->getVortexRechargeTime();
 
         $age = $this->getVortexAge($turn);
         if ($age !== null){
             $strippedSystem->vortexTurnsOpen = $age;
-            $strippedSystem->vortexMaxTurns  = self::MAX_VORTEX_TURNS;
+            /* ⭐ JUMP GATES (PHASE 2): a gate's jump point runs for the duration PROGRAMMED when it
+               was signalled, not for the four turns a ship's may be maintained to - so the counter
+               the system icon draws has to be out of the HOLD. $vortexHoldTurns is null on a
+               ship-opened vortex, which is what keeps this byte-identical for Phase 1.
+               ⚠️ Sent per instance from live state, never mirrored onto the system as a flag - two
+               gates in one game must not read each other's hold (plan trap 9). */
+            $strippedSystem->vortexMaxTurns  = ($this->vortexHoldTurns !== null)
+                ? (int)$this->vortexHoldTurns
+                : self::MAX_VORTEX_TURNS;
         }
 
         return $strippedSystem;

@@ -4045,6 +4045,143 @@ window.weaponManager = {
        the vortex closes at the end of the turn anyway. The ORDER the toggle produces is identical -
        firing mode 7 at the vortex's own hex - so the server side is the same either way. */
 
+    /* =============== JUMP_GATES_PLAN.md STAGE 3 - SIGNALLING A FIXED JUMP GATE ================
+
+       ⭐ THIS IS NOT A TARGETING GESTURE, AND IT DELIBERATELY DOES NOT GO THROUGH targetHex.
+
+       Everything above starts from "I have a ship selected and some of its weapons selected, and I
+       have right-clicked a hex". A gate signal starts from clicking THE GATE, with no ship selected
+       and none needed - which unit of mine is in range is never chosen and never matters (plan
+       section 2.1) - and the weapon it declares on belongs to a unit the player does not own. Every
+       gate in targetHex's loop (weapon selection, arc, range from the shooter, line of sight, the
+       firing-link test) is either the wrong question or an outright wrong answer here, which is why
+       this is its own short path from the Initial Orders tooltip.
+
+       THIS TURN'S SIGNAL ORDER ON $gate, or null - "does a claim of mine stand on this gate?".
+
+       ⚠️ SCOPED TO THIS TURN AND TO MODES 1-4, never a bare fireOrders check. A gate's engine
+       accumulates every claim ever made on it across the game, and the ones from earlier turns are
+       history that must not be mistaken for a live one - the same reason
+       JumpEngine.removeVortexMaintainOrder is turn-scoped rather than going through
+       removeFiringOrder. While Initial Orders are open the only current-turn order that can be here
+       is one THIS client just made: TacGamedata::hideSystemFireOrders strips every phase-1 ballistic
+       order from every payload, its author's included. */
+    getGateSignalOrder: function getGateSignalOrder(gate) {
+        var engine = gamedata.getGateJumpEngine(gate);
+        if (!engine || !Array.isArray(engine.fireOrders)) return null;
+
+        for (var i = 0; i < engine.fireOrders.length; i++) {
+            var fire = engine.fireOrders[i];
+            if (!fire || fire.turn != gamedata.turn) continue;
+            var mode = parseInt(fire.firingMode, 10);
+            if (isNaN(mode) || mode < 1 || mode > 4) continue;
+            return fire;
+        }
+
+        return null;
+    },
+
+    /* Withdraw it again. Turn-scoped for the reason above - removeFiringOrder would take every
+       claim this gate has ever carried with it. */
+    removeGateSignalOrder: function removeGateSignalOrder(gate) {
+        var engine = gamedata.getGateJumpEngine(gate);
+        if (!engine || !Array.isArray(engine.fireOrders)) return;
+
+        for (var i = engine.fireOrders.length - 1; i >= 0; i--) {
+            var fire = engine.fireOrders[i];
+            if (!fire || fire.turn != gamedata.turn) continue;
+            var mode = parseInt(fire.firingMode, 10);
+            if (isNaN(mode) || mode < 1 || mode > 4) continue;
+            engine.fireOrders.splice(i, 1);
+        }
+
+        webglScene.customEvent('SystemDataChanged', { ship: gate, system: engine });
+        webglScene.customEvent('HexTargeted', { shooter: gate, hexagon: shipManager.getShipPosition(gate) });
+    },
+
+    /* START A SIGNAL TRANSACTION. Raises the duration panel and returns; NOTHING is declared here.
+       PhaseStrategy relays GateSignalRequested to UI.gateSignal, anchors it to the gate's hex and
+       registers the click-away discard. createGateSignalOrder below is reached only from SIGNAL.
+
+       DEFAULT DURATION IS 1 TURN, clamped to the gate's cap. The shortest opening is the cheapest
+       mistake - a jump point standing open for four turns is a door the enemy may also use (plan
+       section 2.6: ANY unit may fly into a gate vortex), so the safe number is the default and
+       longer is a deliberate choice. */
+    queueGateSignalOrder: function queueGateSignalOrder(gate) {
+        if (!gamedata.canSignalJumpGate(gate)) return;
+
+        var engine = gamedata.getGateJumpEngine(gate);
+        var maxHold = shipManager.systems.getGateMaxHold(gate);
+
+        webglScene.customEvent('GateSignalRequested', {
+            gate: gate,
+            engine: engine,
+            hexpos: shipManager.getShipPosition(gate),
+            hold: 1,                 //maxHold is never below 1, so the default never needs clamping
+            maxHold: maxHold,
+            onConfirm: function (hold) {
+                weaponManager.createGateSignalOrder(gate, hold);
+            }
+        });
+    },
+
+    /* THE SIGNAL HALF OF THE TRANSACTION: build the claim.
+
+       The order is an ordinary ballistic hex-target FireOrder on the GATE's own Jump Engine, aimed
+       at the GATE's own hex - and that single choice buys the whole pipeline for free: secrecy
+       until Initial Orders close (hideSystemFireOrders strips every phase-1 ballistic order), the
+       map marker, the replay, the combat-log line and the server-side legality check (plan
+       section 3.3).
+
+       firingMode CARRIES THE PROGRAMMED OPEN DURATION IN TURNS, 1-4 - not a facing. That is what
+       markGate() re-purposes the modes for, and it persists to tac_fireorder.firingmode with no
+       schema change. A gate's facing is fixed when the gate is placed and is never in the order.
+
+       targetid CARRIES THE CLAIMING PLAYER, as their nearest qualifying unit, because tac_fireorder
+       has no player column and the gate belongs to nobody in particular. ⚠️ IT IS A HINT, NEVER AN
+       AUTHORITY: Firing::getGateSignalBlock re-derives the nearest unit from $gamedata->forPlayer
+       and OVERWRITES this before the row is written, and TacGamedata::hideSystemFireOrders masks it
+       for every viewer it does not belong to - because it is the only field that could name a
+       signaller, and a signaller is never named (plan section 2.1, trap 4).
+
+       Re-checked at SIGNAL rather than only at the tooltip: a server poll can land between opening
+       the panel and pressing the button, and it can move the ships the range test reads. */
+    createGateSignalOrder: function createGateSignalOrder(gate, hold) {
+        if (!gamedata.canSignalJumpGate(gate)) {
+            confirm.error("This jump gate can no longer be signalled.");
+            return;
+        }
+
+        var engine = gamedata.getGateJumpEngine(gate);
+        var source = gamedata.getGateSignalSource(gate);
+        if (!engine || !source) return;
+
+        var maxHold = shipManager.systems.getGateMaxHold(gate);
+        hold = Math.max(1, Math.min(parseInt(hold, 10) || 1, maxHold));
+
+        var hex = shipManager.getShipPosition(gate);
+
+        weaponManager.removeGateSignalOrder(gate);   //one claim per player per gate per turn
+
+        engine.fireOrders.push({
+            id: gate.id + "_" + engine.id + "_" + (engine.fireOrders.length + 1),
+            type: 'ballistic',
+            shooterid: gate.id,
+            targetid: source.id,
+            weaponid: engine.id,
+            calledid: -1,
+            turn: gamedata.turn,
+            firingMode: hold,
+            shots: engine.defaultShots,
+            x: hex.q,
+            y: hex.r,
+            damageclass: engine.data["Weapon type"].toLowerCase()
+        });
+
+        webglScene.customEvent('SystemDataChanged', { ship: gate, system: engine });
+        webglScene.customEvent('HexTargeted', { shooter: gate, hexagon: hex });
+    },
+
     // Stage S (S-f): open the Fighter Bomb launch dialog (count + auto-split toggle /
     // manual per-flight sizes), then emit the fire order(s) at the target hex. A launch
     // bigger than the flight-size cap must spawn multiple flights:

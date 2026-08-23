@@ -50,7 +50,17 @@ window.ShipIcon = function () {
         this.NotMovedSprite = null;
 
         this.selected = false;
-        this.baseZ = this.terrain ? -50 : 0;
+        /* A JUMP VORTEX SITS A PLANE BELOW EVEN THE OTHER TERRAIN (user request 2026-08-23).
+           -50 is enough separation to keep a ship readable over an asteroid field, but a vortex is
+           200px of bright art that is routinely COPLANAR with the unit that opened it: a fixed
+           gate's vortex forms in the GATE'S OWN HEX (JumpEngine::openVortexAtGate spawns it at
+           $gate->getHexPos()), so at the shared terrain depth the two fight for the same pixels and
+           the vortex wins on draw order, hiding the gate. Dropping it further puts it under
+           everything - gate, ships, mines - which is also the honest reading: a vortex is a hole in
+           space that things stand in front of.
+           The gap is bigger than the +10 setHighlighted lifts terrain by, so hovering a vortex
+           cannot float it back over the gate. */
+        this.baseZ = this.terrain ? (ShipIcon.isVortex(ship) ? -150 : -50) : 0;
 
         this.create(ship, scene);
         this.consumeShipdata(ship);
@@ -65,6 +75,14 @@ window.ShipIcon = function () {
        UI.vortexFacing.MARKER_ARROW_SCALE / _OPACITY are the other two. */
     ShipIcon.FACING_ARROW_SCALE = 1.15;
     ShipIcon.FACING_ARROW_OPACITY = 0.85;
+
+    /* Is this unit a jump vortex? Delegates to the ONE place that holds the class name
+       (shipManager.movement.isJumpVortex) rather than repeating "SpawnJumpPoint" here - the same
+       discipline gamedata.isJumpGate follows. Guarded because this runs from the icon constructor:
+       a missing shipManager should cost a vortex its z-plane, not throw. */
+    ShipIcon.isVortex = function isVortex(ship) {
+        return !!(window.shipManager && shipManager.movement && shipManager.movement.isJumpVortex(ship));
+    };
 
     ShipIcon.prototype.consumeShipdata = function (ship) {
         this.ship = ship;

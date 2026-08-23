@@ -165,6 +165,203 @@ body {
     overflow: visible;
 }
 
+/* JUMP_GATES_PLAN.md Stage 3 - the fixed jump gate signal panel (UI.gateSignal).
+
+   ⭐ THIS IS THE REACT POWER SETTINGS MENU'S BOOST ROW, REDRAWN IN PLAIN CSS (user request
+   2026-08-23). client/UI/reactJs/system/SystemPowerSettings.js IS THE SOURCE OF TRUTH for every
+   colour and size below - Container, Row, Label, Controls, Value and ActionButton, plus the
+   $variant="warning" gold that the Signal button wears. If that file is ever retuned, retune this
+   with it; there is no shared stylesheet between them, because that menu is styled-components
+   inside the ship window and this is anchored HTML over the WebGL canvas.
+
+   WHY MIRROR IT RATHER THAN INVENT. Two earlier revisions of this panel are the argument. It began
+   as its own box - self-consistent but foreign to everything around it - and was then dressed in
+   the ship TOOLTIP's menu markup, which read much worse again: a row of 40x40 icon buttons needs
+   more width than a panel this narrow has, so it wrapped into a column and the heading broke in
+   half. The Boost row is the right thing to copy because it already solves this exact problem: a
+   label, a small stepper and a number, sized for a panel a few inches wide.
+
+   ONE DEVIATION, AND IT IS DELIBERATE: the Boost row's Value is a display-only div; here it is a
+   real <input>, because a duration can be typed and wheeled as well as ticked (see gateSignal.js).
+   It takes the ActionButton chrome so it still reads as part of that row.
+
+   The anchoring is unchanged and is all this shares with #vortexFacingUI above: the container is
+   positioned on the hex CENTRE by UI.gateSignal.reposition and the panel is lifted clear of it by
+   the translate below, so no part of this has to know the hex's on-screen size and a zoom costs
+   nothing but a move. */
+#gateSignalUI {
+    /* Every value here is lifted from SystemPowerSettings.js, named for the styled-component it
+       came from so the two can be diffed by eye. */
+    --gs-bg: rgba(24, 20, 6, 0.9);      /* Container background          */
+    --gs-line: #8d7e40;                 /* Container border              */
+    --gs-line-row: #917940;             /* Row border-bottom, and hover  */
+    --gs-text: #fff8d6;                 /* Row colour                    */
+    --gs-btn-bg: #3d2e107c;             /* ActionButton background       */
+    --gs-btn-line: #8d7e40be;           /* ActionButton border           */
+    --gs-btn-text: #e0e7ef;             /* ActionButton colour           */
+    --gs-warn-bg: #806c00;              /* $variant="warning", active    */
+    --gs-warn-line: #e6c300;
+    --gs-warn-hover-bg: #998100;
+    --gs-warn-hover-line: #ffda00;
+
+    display: none;
+    position: absolute;
+    z-index: 7000;
+}
+
+/* Container. Square, like every styled-components panel in the ship window - no radius token here
+   on purpose. */
+#gateSignalPanel {
+    position: absolute;
+    /* Centred on the hex horizontally and lifted its own height plus a gap ABOVE it, so the panel
+       never covers the gate the player is signalling. */
+    transform: translate(-50%, calc(-100% - 34px));
+    min-width: 160px;
+    background-color: var(--gs-bg);
+    border: 1px solid var(--gs-line);
+    border-radius: 3px;    
+    color: var(--gs-text);
+    font-size: 12px;
+    /* Arial, inherited from body - which is exactly what the React menu gets. Stated as a
+       reminder, not as a change: do NOT reach for --fv-mono here, the Boost row is not mono. */
+    font-family: inherit;
+    /* The row is one sentence and must never wrap - that is what broke the previous design. */
+    white-space: nowrap;
+    cursor: default;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Row. The React Row pads 1px and lets its Label supply the horizontal breathing; the second row
+   here is a lone button with no Label, so the padding lives on the row instead. */
+#gateSignalUI .gateSignalRow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px 8px;
+    border-bottom: 1px solid var(--gs-line-row);
+}
+
+#gateSignalUI .gateSignalRow:last-child {
+    border-bottom: none;
+}
+
+#gateSignalUI .gateSignalRow:hover {
+    background-color: rgba(145, 121, 64, 0.08);
+}
+
+/* Label. The React Label is flex:1 with 8px either side, which pushes its Controls to the far end
+   of a two-part row. This row is a three-part SENTENCE - "Open for [-][3][+] turns" - so the words
+   sit against the controls instead and the whole thing is centred by the row. */
+#gateSignalUI .gateSignalLabel {
+    padding: 0 6px;
+}
+
+/* Controls */
+#gateSignalUI .gateSignalControls {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px;
+}
+
+/* ActionButton, in its $narrow width (18px) for the two steppers. The Signal button below widens
+   itself; everything else here is that component. */
+#gateSignalUI .gateSignalButton {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 30px;
+    height: 20px;
+    padding: 0;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1;
+    background: var(--gs-btn-bg);
+    border: 1px solid var(--gs-btn-line);
+    border-radius: 3px;
+    color: var(--gs-btn-text);
+    opacity: 0.9;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+#gateSignalUI .gateSignalButton:hover {
+    background: var(--gs-line-row);
+    border-color: var(--gs-line);
+    color: #ffffff;
+    opacity: 1;
+}
+
+/* A gate whose Reactor damage has capped the hold at 1 turn leaves a stepper dead at one end or
+   the other. Saying so beats letting the player press a button that does nothing.
+   pointer-events, not the React component's cursor:not-allowed - the clamp in setHold already
+   makes a stray press harmless, and killing the press is one less thing to reason about. */
+#gateSignalUI .gateSignalButton.disabled {
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+/* Value, as a field. The React Value is a display-only div (min-width 20px, centred, 11px bold);
+   this keeps that type and takes the ActionButton chrome around it so it still belongs to the row.
+   The panel's blanket user-select:none has to be lifted or the text cannot be selected, and the
+   native spinner is suppressed because the steppers beside it are ours - the UA draws its own in
+   white, and there is no reliable hook to recolour them (same two rules as confirm.css's
+   .stepper-input). */
+#gateSignalUI #gateSignalValue {
+    /* border-box, and 20px tall on purpose: the buttons either side are content-box 18px inside a
+       1px border (which is what the React ActionButton is too), so they occupy 20px. Matching the
+       OUTER height is what keeps the three boxes level. */
+    box-sizing: border-box;
+    width: 32px;
+    height: 22px;
+    padding: 0;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: bold;
+    line-height: 1;
+    text-align: center;
+    background: var(--gs-btn-bg);
+    border: 1px solid var(--gs-btn-line);
+    border-radius: 2px;
+    color: var(--gs-text);
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+#gateSignalUI #gateSignalValue::-webkit-outer-spin-button,
+#gateSignalUI #gateSignalValue::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+}
+
+#gateSignalUI #gateSignalValue:focus {
+    outline: none;
+    border-color: var(--gs-warn-line);
+}
+
+/* The commit, in the Boost row's own $variant="warning" gold - the yellow that menu uses for "this
+   is the consequential one". Width is auto because "Signal Jump Gate" does not fit ActionButton's
+   30px; every other dimension is that component's. */
+#gateSignalUI #gateSignalConfirm {
+    width: auto;
+    padding: 0 12px;
+    background: var(--gs-warn-bg);
+    border-color: var(--gs-warn-line);
+    color: #ffffff;
+    opacity: 1;
+}
+
+#gateSignalUI #gateSignalConfirm:hover {
+    background: var(--gs-warn-hover-bg);
+    border-color: var(--gs-warn-hover-line);
+    color: #ffffff;
+}
+
 .centercontainer {
     position: absolute !important;
     left: 50% !important;

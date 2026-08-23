@@ -1137,6 +1137,43 @@ window.ajaxInterface = {
                 }
 
                 tidyships.push(newShip);
+            } else {
+                /* ⭐ JUMP_GATES_PLAN.md section 3.1 fact 2 - THE ONE UNIT A PLAYER MAY ORDER
+                   WITHOUT OWNING IT, and this `else` is half of what makes that possible.
+
+                   Everything above is gated on `ship.userid === gamedata.thisplayer`, so a unit
+                   you do not own is not in the POST AT ALL - not its systems, not an empty shell.
+                   That, and not isMyShip, was the real structural blocker on fixed jump gates: a
+                   gate belongs to whoever bought it (often the enemy) and ANY player may signal it.
+
+                   ⚠️ SEND THE GATE AND ITS SIGNAL ORDER AND NOTHING ELSE. No movement, no EW, no
+                   power, no ammo, no enhancements, no pre-battle damage - the arrays built above
+                   stay empty. The server ignores all of those for a gate anyway (its power and EW
+                   loops keep their own userid guard), and sending them would be an invitation to
+                   trust them later. The systems array carries exactly one entry: the Jump Engine,
+                   with this turn's signal order on it.
+
+                   The server half is InitialOrdersGamePhase::process, which lets a POSTed gate
+                   through its fire-order loop and passes only that engine's orders to
+                   Firing::validateFireOrders. Neither half is any use without the other. */
+                var gateOrders = ajaxInterface.getGateSignalOrders(ship);
+                if (gateOrders) {
+                    /* AN OBJECT, not the Array() the owner path builds, and the key matters:
+                       Manager::getShipsFromJSON resolves each entry with
+                       $ship->getSystemById($i) where $i is the KEY - and getSystemById indexes
+                       straight into $ship->systems, so a system's "id" IS its position in the
+                       construction order. Writing systems[4] into an Array would stringify as
+                       [null,null,null,null,{...}] and post four dead entries; an object posts
+                       exactly the one system. (PHP coerces the numeric string key back to an int
+                       on array access, so getSystemById("4") finds system 4.) */
+                    newShip.systems = {};
+                    newShip.systems[gateOrders.systemId] = {
+                        'id': gateOrders.systemId,
+                        'power': Array(),
+                        'fireOrders': gateOrders.fireOrders
+                    };
+                    tidyships.push(newShip);
+                }
             }
         }
 
@@ -1152,6 +1189,55 @@ window.ajaxInterface = {
         };
 
         return gd;
+    },
+
+    /* JUMP_GATES_PLAN.md Stage 2 - THIS TURN'S GATE SIGNAL ORDERS ON $ship, or null.
+       Returns { systemId, fireOrders }; null means this unit contributes nothing to the POST and
+       the caller must not add it, so an unowned unit with no claim on it is dropped exactly as it
+       is today.
+
+       FOUR CONDITIONS, all of them narrow on purpose:
+         1. Initial Orders (phase 1). A signal is declared there and nowhere else.
+         2. The unit is a JumpgateCapital. Nothing else in the game gets this exemption.
+         3. It carries a Jump Engine. (Keyed on system NAME - markGate() deliberately leaves
+            $name 'jumpEngine' so the client class is reused, and the client tells a gate engine
+            from a ship engine by the SHIP, never by the system.)
+         4. That engine holds at least one order for THIS turn in firing mode 1-4 (the programmed
+            open duration). Modes 5-7 have no meaning on a gate and are refused server-side too.
+
+       ⭐ EVERY SUCH ORDER IS ONE THIS CLIENT JUST CREATED, and that is a property of the payload
+       rather than an assumption: TacGamedata::hideSystemFireOrders strips EVERY current-turn
+       ballistic order from EVERY phase-1 payload, its author's included, so a committed signal
+       never comes back down the wire while Initial Orders are open. There is therefore no
+       already-submitted order here to re-send and duplicate.
+
+       The order's targetid is the claiming player's nearest qualifying unit - a HINT.
+       Firing::validateVortexDeclaration re-derives it from $gamedata->forPlayer and overwrites it,
+       so nothing here is trusted (plan section 3.3 and trap 4). */
+    getGateSignalOrders: function getGateSignalOrders(ship) {
+        if (gamedata.gamephase !== 1) return null;
+        if (!gamedata.isJumpGate(ship)) return null;
+        if (!ship.systems) return null;
+
+        for (var i in ship.systems) {
+            var system = ship.systems[i];
+            if (!system || system.name !== 'jumpEngine') continue;
+            if (!Array.isArray(system.fireOrders)) continue;
+
+            var orders = Array();
+            for (var b = 0; b < system.fireOrders.length; b++) {
+                var fire = system.fireOrders[b];
+                if (!fire || fire.turn != gamedata.turn) continue;
+                var mode = parseInt(fire.firingMode, 10);
+                if (isNaN(mode) || mode < 1 || mode > 4) continue;
+                orders.push(fire);
+            }
+
+            if (orders.length === 0) return null;
+            return { systemId: system.id, fireOrders: orders };
+        }
+
+        return null;
     },
 
 

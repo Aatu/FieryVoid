@@ -241,6 +241,125 @@ window.gamedata = {
 
     },
 
+    /* JUMP_GATES_PLAN.md - IS THIS UNIT A FIXED JUMP GATE?
+
+       ONE PLACE holds the class name, mirroring shipManager.movement.isJumpVortex, because three
+       different sweeps ask: the submit path in ajaxInterface (a gate is the one unit a player may
+       order without owning it), the Initial Orders tooltip, and the signal panel.
+
+       phpclass reaches the client on the STATIC blueprint (model/ship.js merges by faction +
+       phpclass), so it is always present.
+
+       ⚠️ JumpgateCapital ONLY. jumpgateNew (terrain) and the civilian Jumpgate also mount a Jump
+       Engine and are obsolete and out of scope (user ruling 2026-08-23, plan trap 12) - they keep
+       their Phase 1 behaviour and must never match here.
+
+       ⚠️ This does NOT loosen isMyShip, and must not be made to. A gate stays terrain for the fleet
+       list, the active-ship sweep, the movement UI and the commit checks; the ONE thing that
+       changes is that a signal order on its Jump Engine rides the POST. */
+    isJumpGate: function isJumpGate(unit) {
+        return !!unit && unit.phpclass === "JumpgateCapital";
+    },
+
+    /* JUMP_GATES_PLAN.md Stage 3 - THIS GATE'S JUMP ENGINE, or null.
+
+       Keyed on the system NAME, because markGate() deliberately leaves $name 'jumpEngine' so the
+       existing client JumpEngine class is reused with no new JS (plan section 3.2). The client
+       tells a gate engine from a ship engine by the SHIP - isJumpGate above - never by the system,
+       which is why this asks isJumpGate first rather than looking for a flag on the system. */
+    getGateJumpEngine: function getGateJumpEngine(gate) {
+        if (!gamedata.isJumpGate(gate) || !gate.systems) return null;
+
+        for (var i in gate.systems) {
+            var system = gate.systems[i];
+            if (system && system.name === 'jumpEngine') return system;
+        }
+
+        return null;
+    },
+
+    /* ⭐ MY NEAREST UNIT THAT LETS ME SIGNAL THIS GATE, or null when I have none.
+
+       ⭐ WHICH UNIT IS NEVER CHOSEN BY THE PLAYER, and never matters (user ruling 2026-08-23, plan
+       section 2.1). The rule is "you have a live unit within the gate's signal range", not "this
+       ship signals" - so no ship needs to be selected to signal, and the gate is clicked directly.
+       The NEAREST is returned rather than the first found because the distance is what settles a
+       contested claim, and it is what the order's targetid records.
+
+       ⭐ NO LINE-OF-SIGHT TEST, DELIBERATELY (user ruling 2026-08-23). Signalling is a transmission,
+       not an aimed effect - unlike a ship projecting its own vortex, which runs mathlib.isLoSBlocked
+       against gamedata.blockedHexes in weaponManager.targetHex. Its absence is the RULE; do not add
+       one here to "match" the ship path.
+
+       ⭐ AND IT NEVER REVEALS THE UNIT IT PICKS. A stealthed, shaded or cloaked ship may be the
+       signaller and keeps its concealment - the opposite of the rule for a ship opening its own
+       vortex - so there is no isHidden guard here either.
+
+       The server re-derives all of this from the DB in Firing::getGateSignalBlock and overwrites
+       the order's targetid with its own answer, so this is a UX predicate and a hint, never an
+       authority (plan section 3.3 and trap 4).
+
+       Mirrors JumpEngine::getNearestGateSignaller. Keep the two lists in step. */
+    getGateSignalSource: function getGateSignalSource(gate) {
+        var engine = gamedata.getGateJumpEngine(gate);
+        if (!engine) return null;
+
+        var gateHex = shipManager.getShipPosition(gate);
+        var best = null;
+        var bestDistance = null;
+
+        for (var i in gamedata.ships) {
+            var unit = gamedata.ships[i];
+            if (!unit || unit.userid !== gamedata.thisplayer) continue;
+            if (unit.removed) continue;
+            if (shipManager.isDestroyed(unit)) continue;
+            if (gamedata.isTerrain(unit.shipSizeClass, unit.userid)) continue;   //a gate cannot signal itself
+            if (shipManager.getTurnDeployed(unit) > gamedata.turn) continue;     //not on the board yet
+
+            var distance = gateHex.distanceTo(shipManager.getShipPosition(unit));
+            if (distance > engine.range) continue;
+
+            if (bestDistance === null || distance < bestDistance) {
+                bestDistance = distance;
+                best = unit;
+            }
+        }
+
+        return best;
+    },
+
+    /* MAY I SIGNAL THIS GATE RIGHT NOW? The condition on the Initial Orders tooltip button, and the
+       client mirror of Firing::getGateSignalBlock's list - minus the two rules only the server can
+       judge (the one-claim-per-player test, which is a property of the submission, and the targetid
+       re-derivation).
+
+       Deliberately NOT a test of ownership: ANY player may signal ANY gate, including one the enemy
+       bought. That is the whole point of the contested-claim rule (plan section 2.4), and it is why
+       the gate had to be let through the POST at all (plan section 3.1). */
+    canSignalJumpGate: function canSignalJumpGate(gate) {
+        if (gamedata.gamephase !== 1) return false;      //declared in Initial Orders and nowhere else
+        if (gamedata.waiting) return false;
+
+        var engine = gamedata.getGateJumpEngine(gate);
+        if (!engine) return false;
+
+        if (shipManager.isDestroyed(gate)) return false;
+        if (shipManager.systems.isDestroyed(gate, engine)) return false;
+        if (shipManager.power.isOffline(gate, engine)) return false;
+
+        //A gate holds ONE jump point at a time. While one stands the engine's charge reads 0, so
+        //the load test below covers it too - but say it, because the two are different rules and
+        //the reasons the player is shown differ.
+        if (shipManager.movement.getVortexHeldBy(gate)) return false;
+
+        //THE 20-TURN RECHARGE. turnsloaded / loadingtime are sent per instance by
+        //JumpEngine::stripForJson off getVortexRechargeLoad, so this is the ordinary weapon load
+        //test and needs no gate-specific arithmetic.
+        if (!weaponManager.isLoaded(engine)) return false;
+
+        return !!gamedata.getGateSignalSource(gate);
+    },
+
     isMyOrTeamOneShip: function isMyOrTeamOneShip(ship) {
         if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
             return false; // Ensure terrain units are never considered friendly

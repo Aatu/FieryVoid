@@ -54,7 +54,17 @@ window.BallisticIconContainer = function () {
 					}
 				}
 				if (ballistic.damageclass === 'jumppoint' && ballistic.x !== "null" && ballistic.y !== "null") {
-					jumpPointOrders.push(ballistic);
+					/* ⚠️ NOT FOR A FIXED JUMP GATE (JUMP_GATES_PLAN.md Stage 3). generateJumpPointArrows
+					   draws an arrow at facing (firingMode - 1), and on a gate the firing mode is the
+					   programmed OPEN DURATION in turns - so "Open 3 turns" would be rendered as
+					   facing 2, i.e. the duration drawn as a direction, and usually the wrong one.
+					   A gate needs no arrow from here in any case: it carries $facingArrow itself, so
+					   ShipIcon already draws the permanent mouth arrow on this very hex, which is the
+					   facing the vortex will take (plan section 2.2). */
+					const gateIcon = iconContainer.getById(ballistic.shooterid);
+					if (!gateIcon || !gamedata.isJumpGate(gateIcon.ship)) {
+						jumpPointOrders.push(ballistic);
+					}
 				}
 
 				createOrUpdateBallistic.call(this, ballistic, iconContainer, gamedata.turn, !!replayData);
@@ -563,10 +573,35 @@ window.BallisticIconContainer = function () {
 		let targetIcon = null;
 		let splash = false;
 
-		if (ballistic.targetid === -1 && ballistic.x !== "null" && ballistic.y !== "null" && !hideTargetAlways) {
+		/* ⭐⭐ A VORTEX DECLARATION IS ALWAYS DRAWN ON ITS HEX, WHATEVER ITS targetid SAYS
+		   (JUMP_GATES_PLAN.md sections 2.1 and 3.3).
+
+		   Every other ballistic order means "targetid names a unit, so hang the marker on that
+		   unit's icon". A FIXED JUMP GATE's signal order breaks that rule: its targetid carries the
+		   claiming PLAYER, recorded as their nearest qualifying unit, because tac_fireorder has no
+		   player column and the gate belongs to nobody in particular. The hex is, and always is,
+		   the gate's own.
+
+		   Left alone the branch below would do two wrong things at once: draw the "Jump Gate
+		   Signalled" marker over the SIGNALLING SHIP instead of over the gate, and - because the
+		   line drawer takes the same branch - run a bright line from the gate to it. The second is
+		   an information leak on the map of the very fact section 2.1 says is never revealed, and
+		   it would fire on the claimant's own screen the moment the order is created, before the
+		   server has masked anything.
+
+		   So a 'jumppoint' order is treated as targetid -1 THROUGHOUT this function - here, in the
+		   duplicate-icon lookup, and in the record pushed at the end - which is exactly what a
+		   ship's own vortex declaration already sends. */
+		const isVortexDeclaration = ballistic.damageclass === 'jumppoint';
+		const iconTargetId = isVortexDeclaration ? -1 : ballistic.targetid;
+		//A FIXED GATE signals ITSELF: launch hex and target hex are the same hex, which is what the
+		//label and the launch-sprite suppression below both key off.
+		const isGateSignal = isVortexDeclaration && gamedata.isJumpGate(shooter);
+
+		if (iconTargetId === -1 && ballistic.x !== "null" && ballistic.y !== "null" && !hideTargetAlways) {
 			targetPosition = this.coordinateConverter.fromHexToGame(new hexagon.Offset(ballistic.x, ballistic.y));
-		} else if (ballistic.targetid && ballistic.targetid !== -1 && !hideTargetAlways) {
-			targetIcon = iconContainer.getById(ballistic.targetid);
+		} else if (iconTargetId && iconTargetId !== -1 && !hideTargetAlways) {
+			targetIcon = iconContainer.getById(iconTargetId);
 			//targetPosition = { x: 0, y: 0 }; // placeholder — the mesh will handle it
 		}
 
@@ -725,10 +760,19 @@ window.BallisticIconContainer = function () {
 						   the same gesture aimed at a vortex that already exists. Its hex already
 						   holds the vortex unit and the vortex unit's own arrow, so this marker
 						   only has to say that the player has spent this turn's declaration on
-						   keeping it open. */
-						text = (parseInt(ballistic.firingMode, 10) === 7)
-							? 'Maintaining Jump Point'
-							: 'Jump Point Forming';
+						   keeping it open.
+
+						   JUMP GATES (PHASE 2): on a FIXED GATE the mode is neither a facing nor
+						   Maintain - it is the programmed open duration in turns, and the gate is
+						   already sitting on this hex with its own permanent facing arrow. The
+						   marker says the gate has been SIGNALLED and nothing else; who signalled
+						   it is never shown (plan section 2.1), and how long for is not public
+						   either, so the duration stays off the label. */
+						text = isGateSignal
+							? 'Jump Gate Signalled'
+							: ((parseInt(ballistic.firingMode, 10) === 7)
+								? 'Maintaining Jump Point'
+								: 'Jump Point Forming');
 						textColour = '#e1b000';
 						break;
 				}
@@ -740,7 +784,12 @@ window.BallisticIconContainer = function () {
 			!getByLaunchPosition(launchPosition, this.ballisticIcons) &&
 			ballistic.damageclass !== 'PersistentEffectPlasma' &&
 			ballistic.type !== 'normal' &&
-			ballistic.damageclass !== 'support'
+			ballistic.damageclass !== 'support' &&
+			//A FIXED GATE signals itself, so its launch hex IS its target hex: the blank launch
+			//sprite would sit exactly under the "Jump Gate Signalled" marker and read as a doubled,
+			//mis-drawn outline. A SHIP declaring a vortex still gets one - there the launch hex says
+			//which ship declared it, and the two hexes are genuinely different places.
+			!isGateSignal
 		) {
 			const launchType = gamedata.isMyOrTeamOneShip(shooter) ? 'hexYellow' : 'hexOrange';
 			launchSprite = new BallisticSprite(launchPosition, launchType);
@@ -749,7 +798,10 @@ window.BallisticIconContainer = function () {
 
 		// TARGET SPRITE
 		let targetSprite = null;
-		if (!getByTargetIdOrTargetPosition(targetPosition, ballistic.targetid, this.ballisticIcons)) {
+		//iconTargetId, not ballistic.targetid - see the note above: a gate signal's targetid names
+		//the claiming player's unit, and matching on it would let an unrelated order aimed at that
+		//same unit suppress the gate's own marker.
+		if (!getByTargetIdOrTargetPosition(targetPosition, iconTargetId, this.ballisticIcons)) {
 			if (targetPosition || targetIcon) {
 
 				targetSprite = new BallisticSprite(targetPosition || { x: 0, y: 0 }, targetType, text, textColour, iconImage);
@@ -771,7 +823,7 @@ window.BallisticIconContainer = function () {
 		this.ballisticIcons.push({
 			id: ballistic.id,
 			shooterId: ballistic.shooterid,
-			targetId: ballistic.targetid,
+			targetId: iconTargetId,   //see the note above - a vortex declaration is hex-keyed, never unit-keyed
 			launchPosition,
 			position: new hexagon.Offset(ballistic.x, ballistic.y),
 			launchSprite,
@@ -877,6 +929,16 @@ window.BallisticIconContainer = function () {
 
 		// Determine target position
 		if (ballistic.damageclass === 'PersistentEffectPlasma') {
+			targetPosition = this.coordinateConverter.fromHexToGame(new hexagon.Offset(ballistic.x, ballistic.y));
+		} else if (ballistic.damageclass === 'jumppoint') {
+			/* ⭐ A VORTEX DECLARATION IS HEX-KEYED, NEVER UNIT-KEYED - see the long note in
+			   createBallisticIcon. A FIXED JUMP GATE's signal order carries the claiming player's
+			   nearest unit in targetid, so the targetIcon branch below would draw a bright line
+			   from the gate to the SIGNALLER: wrong, and the map half of an information leak the
+			   whole feature is built to avoid (JUMP_GATES_PLAN.md section 2.1).
+			   Forced to the hex, launch and target are the gate's own position, and the
+			   same-position guard further down skips the line entirely - which is right: a gate
+			   signals itself and there is nothing to draw a line to. */
 			targetPosition = this.coordinateConverter.fromHexToGame(new hexagon.Offset(ballistic.x, ballistic.y));
 		} else if (replay && targetIcon) {
 			targetPosition = this.coordinateConverter.fromHexToGame(targetIcon.getLastMovementOnTurn(turn)?.position);

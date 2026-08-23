@@ -23,6 +23,104 @@ already contains one it keeps whatever Phase 1 behaviour it has today.
 
 ---
 
+## 0. Build status
+
+| Stage | State |
+|---|---|
+| 1 — `markGate()` and the gate blueprint | ✅ **BUILT** 2026-08-23 |
+| 2 — the two submit widenings | ✅ **BUILT** 2026-08-23 |
+| 3 — declaration: the button, the panel, the validation | ✅ **BUILT** 2026-08-23 |
+| 4 — resolution, the hold, the lifecycle | ✅ **BUILT** 2026-08-23 |
+| 5 — polish | ✅ **BUILT** 2026-08-23 (the gate tooltip; the `convoyRaid` playthrough is §6's job) |
+
+`fvbuild.ps1 -Check` green after each: autoload map current (no new classes — `markGate()` and the
+gate branches are all flags and methods on existing ones), ship-data validator **0 new errors**,
+replay harness **160 passed / 1 failed** where the 1 is game 4309, **confirmed pre-existing on a
+clean tree** by `git stash push -- source/server` + re-run (byte-identical diff: a movement/phase
+drift, nothing to do with gates). Statics regenerated after Stages 1 and 5 — Stage 5 because the
+tooltip text rides the STATIC BLUEPRINT, see below. Legacy bundles rebuilt (`node
+scripts/bundle-legacy.js`, minified as `yarn build` leaves them).
+
+**Deliberate departures from the stage list, recorded here so the plan and the tree agree:**
+
+1. **`gamedata.isJumpGate(unit)` landed in Stage 2, not Stage 3.** Stage 2's client widening has to
+   answer "is this unit a jump gate?" before it can decide to POST it, so the predicate is a Stage 2
+   dependency. `gamedata.canSignalJumpGate(gate)` is Stage 3's, as planned.
+2. **`RammingAttack` belongs on Stage 2's `generateIndividualNotes` audit list.** The stage names
+   Reactor, CnC, Scanner, Hangar, JumpEngine and Structure; `BaseShip` also auto-adds a
+   `RammingAttack`, and it is one of only TWO systems on the hull that override
+   `generateIndividualNotes` at all (the other is `Hangar`). Both were audited and both are safe on
+   a POST-side gate — `RammingAttack` is guarded on `!empty($ship->skinDancing)` (a base never
+   skindances), and every one of `Hangar`'s note writers is behind either a null `pending*Transfer`
+   or a first-time-empty guard that exists for precisely this POST-side-reconstruction case. The
+   other nine systems inherit `ShipSystem`'s empty stub and write nothing.
+3. ⭐ **Stage 3 CLAMPS an over-long claim rather than rejecting it.** The stage list says the gate
+   branch validates "mode 1–4 **and ≤ maxHold**", while §2.4/§3.4 put the clamp at resolution and
+   test 18 expects "a 4-turn claim is **clamped**, with a log line". Rejecting at submit would
+   throw the player's whole claim away over a number the UI never offered them, which is not what
+   test 18 describes. So `Firing::getGateSignalBlock` rewrites `firingMode` down to the cap (with a
+   `Debug::log` line) and lets it through; the `min()` in `resolveGateClaims` stays as belt and
+   braces, and the combat log gets its own "reactor damage caps it at N turns" line. The invariant
+   the stage list asked for — every persisted claim is within the gate's cap — holds in the DB as
+   well as in memory.
+4. ⭐ **`getVortexRechargeTime()` exists instead of a `getLoadingTime()` override**, and this one
+   was forced by the harness. Stage 4 says "`getLoadingTime()` … read[s] reactor damage". Overriding
+   it broke **two replay-corpus games** (`loadingtime: 20 → 1` and `16 → 1`): `Weapon::setLoading`
+   overwrites `$loadingtime` from the stored `tac_systemdata` row on every load, and in a game
+   recorded before Phase 1 Stage 6 that row still holds the pre-Stage-6 value of `1`. `$delay` is
+   the only field that says what the ship file asked for — which is exactly why Stage 6's
+   `stripForJson` sent `max(1, (int)$this->delay)` rather than `$this->loadingtime`. The new method
+   is that expression plus the gate's damage term, it is used at the four vortex charge sites, and
+   `getLoadingTime()` — asked by the whole generic weapon-loading machinery, on every weapon, in
+   every phase — is left completely alone.
+5. **`BallisticIconContainer` needed more than the label.** The stage list names the
+   `'Jump Gate Signalled'` label and the `jumppointArrow` suppression. A gate claim also carries a
+   REAL `targetid` (the claimant's nearest unit), and every ballistic icon path reads that as "hang
+   the marker on that unit": left alone it drew the marker over the **signalling ship** and ran a
+   bright line from the gate to it — the map half of the very leak §2.1 forbids, on the claimant's
+   own screen, before the server has masked anything. A `'jumppoint'` order is now treated as
+   `targetid = -1` throughout `createBallisticIcon` and `createBallisticLineIcon`, and a gate signal
+   draws no launch sprite (its launch hex *is* its target hex).
+
+**Verified at Stage 2** with a forged POST through `Manager::getShipsFromJSON`: the client's
+object-keyed `systems` payload resolves to the gate's Jump Engine and carries the order; the
+server-side filter returns the claim for a gate and `null` for a forged mode-7 (MAINTAIN), a stale
+turn, any phase but Initial Orders, and for `jumpgateNew` (which is not a gate — trap 12 holds). The
+client half was exercised the same way: `isJumpGate` matches `JumpgateCapital` alone, and
+`getGateSignalOrders` accepts modes 1–4 in phase 1 only.
+
+**Verified at Stages 3–5** with a no-DB scratch harness over a constructed `JumpgateCapital`
+(25 assertions, all green): the blueprint (gate engine, signal range 10, modes 1–4, pruned per-mode
+arrays, silenced Reactor crit chart, facing arrow); the damage model — undamaged 4-turn hold and
+20-turn recharge, **D=9 → recharge 23, hold still 4** (test 17), **D=30 → recharge 30, hold 2**
+(test 18), and a full charge that tracks the *damaged* target rather than stalling one short of it;
+modes — 5 and 7 refused, 3 accepted, `getMaintainDeclaration` null; and a **ship** Jump Engine
+untouched on every one of those (not a gate, range 4, 7 modes, recharge unchanged).
+
+**The Stage 5 tooltip is a STATIC BLUEPRINT artefact, and that shaped what it may say.**
+`ShipSystem::stripForJson` does not send `$data` at all, so `setGateSystemDataWindow`'s text reaches
+the client on the static blueprint — generated once, at build time, on an undamaged hull, on turn 1.
+It therefore states the RULES and carries **no live numbers**: a "charge: now 7/20" line would be
+frozen at whatever the generator saw and would read as a lie for the rest of the game. The live
+charge is on the system icon (`turnsloaded`/`loadingtime`, which `stripForJson` does send), and the
+open counter reads `N/hold` rather than `N/4` while a gate vortex stands. ⚠️ **Statics must be
+regenerated whenever this text changes** — that is what the Stage-1 gap ("the gate printed the SHIP
+vortex rules") actually was.
+
+**What is left is play, not code.** §6's twenty-two scenarios want a real game — the two-seat
+lifecycle, the contested claim from two seats, the concealment cases (15/16) from the enemy seat,
+and the `convoyRaid` scenario end to end with a `JumpgateCapital` bought into its 1000-point gate
+slot. §2.5's ten-box Jump Engine (each point of engine damage = a flat 10% chance of losing the
+whole gate) is still the one thing that wants judgement rather than a ruling.
+
+**One adjacent Phase 1 defect found and deliberately NOT fixed** (it predates this plan and is a
+ship rule): `Firing::getVortexDeclarationBlock`'s *ship* charge test asks `getLoadingTime()`, which
+in a game whose `tac_systemdata` row predates Phase 1 Stage 6 reads `1` — so a ship declaration is
+lenient there where the gate branch is not. Departure 4 above explains the mechanism. Left alone
+under scope discipline; worth its own line if it ever matters.
+
+---
+
 ## 1. What exists today
 
 | Piece | Where | Behaviour |
