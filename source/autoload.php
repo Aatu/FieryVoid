@@ -47,6 +47,7 @@ spl_autoload_register(
                 'altarus' => '/server/model/ships/HouseValheru/Altarus.php',
                 'aluin' => '/server/model/ships/yolu/aluin.php',
                 'alykent' => '/server/model/ships/brakiri/Alykent.php',
+                'alykentnew' => '/server/model/ships/brakiri/AlykentNew.php',
                 'alzara' => '/server/model/ships/centauri_raiders/alzara.php',
                 'amar' => '/server/model/ships/centauri/amar.php',
                 'amissilerack' => '/server/model/weapons/missile.php',
