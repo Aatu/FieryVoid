@@ -486,7 +486,8 @@ window.BallisticIconContainer = function () {
 	//To create coloured hexes signifying ballistic launches and other effects.
 	function createBallisticIcon(ballistic, iconContainer, turn, scene, replay = false) {
 
-		if (ballistic.damageclass === 'Sweeping') return;
+//		if (ballistic.damageclass === 'Sweeping') return;
+if (ballistic.damageclass === 'Sweeping' || ballistic.damageclass === 'HPC-subordinate') return;
 
 		const shooterIcon = iconContainer.getById(ballistic.shooterid);
 		if (!shooterIcon) return;
