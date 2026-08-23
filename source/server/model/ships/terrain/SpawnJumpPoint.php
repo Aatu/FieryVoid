@@ -87,7 +87,7 @@ class SpawnJumpPoint extends Terrain{
         $this->pointCost = 0; //never bought, and must not disturb any fleet value it slips past
         $this->faction = "Terrain";
         $this->phpclass = "SpawnJumpPoint";
-        $this->imagePath = "img/ships/JumpPointExit.png";
+        $this->imagePath = "img/ships/JumpPointEntrance.png";
         $this->canvasSize = 200;
         $this->shipClass = "Jump Vortex";
         $this->variantOf = 'NONE'; //hidden from the lobby - see the class comment
