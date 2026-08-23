@@ -380,6 +380,57 @@
     border-color: #2a6b8f;
 }
 
+/* ── The key tooltip ──────────────────────────────────────────────────────────
+   Deliberately NOT scoped to .fv-chat: chat.php appends one of these to <body>,
+   because .chatEmojiPanel is `overflow-y: auto` and a box that clips one axis
+   clips both — inside the panel, the top row's tooltip lost its head.
+
+   The fill, radius and z-index are the house hover-tooltip values (see the map
+   tooltip in tactical.css and its twin in reactJs/common/Tooltip.js). They are
+   restated here rather than shared because three of chat.css's four hosts never
+   load tactical.css.
+
+   ⚠️ The translucency is in the FILL, as it is there. Do not add an `opacity`:
+   it would compound with the fill's alpha and dull the text with it. */
+.fvChatEmojiTip {
+    position: fixed;
+    z-index: 100000;
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+    padding: 4px 9px;
+    background: var(--fv-overlay-soft);
+    border-radius: var(--fv-radius-tooltip);
+    color: var(--fv-text);
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    line-height: 1.3;
+    white-space: nowrap;
+    pointer-events: none;      /* never eats the click that inserts the glyph */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.55);
+}
+
+/* `display: flex` above beats the browser's own [hidden] rule, so say it again. */
+.fvChatEmojiTip[hidden] {
+    display: none;
+}
+
+/* The typeable token, in the mono face and the accent so ":)" reads as something
+   to TYPE rather than as more prose. Absent on most keys — only the dozen or so
+   glyphs in the EMOTICONS table have one. */
+.fvChatEmojiTip .fvChatEmojiTipCode {
+    padding: 1px 4px;
+    background: rgba(139, 202, 242, 0.12);
+    border-radius: 2px;
+    font-family: var(--fv-mono);
+    font-size: 11.5px;
+    color: var(--fv-accent);
+}
+
+.fvChatEmojiTip .fvChatEmojiTipCode[hidden] {
+    display: none;
+}
+
 /* ── Compact ──────────────────────────────────────────────────────────────────
    For a chat with no room to spend: game.php's log panel is 150px tall until the
    player expands it, so the ~49px the composer costs at the default padding is a
