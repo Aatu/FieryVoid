@@ -422,8 +422,14 @@ window.ajaxInterface = {
     /* Is this unit eligible to be written into a saved fleet?
        Lobby: everything the player owns. game.php ("Save Current Fleet", PREBATTLE_DAMAGE_PLAN
        §7.2): the SURVIVORS only, minus the mid-battle artefacts that make no sense in a fleet
-       list - destroyed/docked units, launched-fighter "Split" rows, spent mines and Chameleon
-       phantom sheets (which use NEGATIVE ids). */
+       list - destroyed units, spent mines and Chameleon phantom sheets (which use NEGATIVE ids).
+
+       ⭐ A unit sitting in a HANGAR counts as a survivor (user report 2026-08-23). A docked
+       fighter flight and a rail-parked LCV are both `removed` ship rows - off the board, but
+       alive, undamaged by being stowed and part of the fleet in every other accounting
+       (fleetList.js renders them as "Docked", combat value included). Leaving them out saved a
+       carrier without its air wing. isDestroyedByDamage is what makes that possible: plain
+       isDestroyed folds `removed` in, so it cannot tell a stowed unit from a dead one. */
     isSaveableFleetShip: function isSaveableFleetShip(ship) {
         if (!ship) return false;
         if (ship.userid !== gamedata.thisplayer) return false;
@@ -439,11 +445,69 @@ window.ajaxInterface = {
         if (gamedata.gamephase === -2) return true;
 
         if (ship.id < 0) return false;                                  //Chameleon phantom sheet
-        if (ship.removed) return false;                                 //docked into a hangar
-        if (shipManager.isDestroyed(ship)) return false;                //dead, or a flight with no survivors
+        if (shipManager.isDestroyedByDamage(ship)) return false;        //dead, or a flight with no survivors
         if (ship.mine && ship.spawned !== -1) return false;             //mine laid during the battle
+        if (ship.removed && !ajaxInterface.isSaveableDockedShip(ship)) return false;
 
         return true;
+    },
+
+    /* The two docked units a fleet list must NOT re-buy. Reached only for a `removed`
+       (in-a-hangar) unit that is otherwise alive - see isSaveableFleetShip.
+
+       1. An auto-filled faction DEFAULT SHUTTLE was never bought: populateInitialHangarUsage
+          issues it free on turn 1 of every battle and will do so again in the next one, so
+          saving one mints a phantom unit that then arrives twice. (Only the ones that LAUNCHED
+          and re-docked are ship rows at all - a shuttle that never left its bay is an anonymous
+          hangarUsage entry with no ship row, so it was never a candidate. Armed shuttles are
+          real purchases and are NOT in isDefaultShuttleEntry's class list, so they still save.)
+       2. A unit whose CARRIER LEFT through a jump vortex went with it. Save Fleet already
+          excludes the carrier itself as departed, so its cargo has to go the same way.
+       A carrier that was DESTROYED needs no test here: the server either ejects the contents
+       (which un-removes them) or kills them with the ship, so they fail the damage test above. */
+    isSaveableDockedShip: function isSaveableDockedShip(ship) {
+        if (gamedata.isDefaultShuttleEntry(ship)) return false;
+        if (ajaxInterface.isDepartedWithCarrier(ship)) return false;
+        return true;
+    },
+
+    /* Did this docked unit leave the battle inside its carrier?
+       For a fighter FLIGHT the server answers it on every payload - jumpedWithCarrier, set by
+       TacGamedata::markJumpedDockedFlights, which is also what paints the fleet list row
+       "Jumped" rather than "Docked".
+       An LCV parked on a DockingCollar has no such flag (that walk only follows hangarUsage
+       dockedFlightId links, and an LCV rail stores its occupant in `lcvDocked` instead), so its
+       rail has to be found. Docking is the ONLY thing that ever sets `removed`, so past the
+       flight early-out the caller can only be holding a rail-parked LCV - and a fleet has at
+       most a handful, so the walk costs nothing until the viewer actually stows one.
+       Own units only, so the own-team hangar-contents mask is never in the way. */
+    isDepartedWithCarrier: function isDepartedWithCarrier(ship) {
+        if (ship.jumpedWithCarrier) return true;
+        if (ship.flight) return false;   //a docked flight is fully answered by the flag above
+
+        //Ship ids are STRINGS on anything spawned mid-battle (LAST_INSERT_ID), so compare
+        //the parsed numbers, never the raw values.
+        var lcvId = parseInt(ship.id, 10);
+
+        for (var i in gamedata.ships) {
+            var carrier = gamedata.ships[i];
+            if (!carrier || !Array.isArray(carrier.systems)) continue;
+
+            for (var s = 0; s < carrier.systems.length; s++) {
+                var rail = carrier.systems[s];
+                if (!rail || !rail.lcvDocked) continue;
+                if (parseInt(rail.lcvDocked.shipId, 10) !== lcvId) continue;
+
+                /* The same "has it left through a vortex?" pairing fleetList.js uses: a
+                   COMMITTED jump-out counts from the moment it is plotted (the server does not
+                   resolve it until the end of the Movement phase), and after that the removal
+                   itself is the record. */
+                if (shipManager.movement.hasCommittedJumpOut(carrier)) return true;
+                return Boolean(shipManager.isDestroyed(carrier));
+            }
+        }
+
+        return false;
     },
 
     /* Collapse the saveable units into the ROWS a fleet list holds.

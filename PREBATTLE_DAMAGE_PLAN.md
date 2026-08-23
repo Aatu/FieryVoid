@@ -1840,3 +1840,101 @@ the more useful behaviour.
 * **Replay harness: 154 pass / 1 fail** — the known stale game 4234. The new
   `$preBattleCriticals` is `protected`, so nothing reached a payload.
 * `node --check` on every edited legacy JS file.
+
+## 18. Refinement round, 2026-08-23 — units in hangars are part of the fleet
+
+### 18.1 ⭐ Save Fleet skipped every docked fighter flight and rail-parked LCV
+
+**Symptom (user report).** "The saved fleet option in game.php does not take into account
+fighters and/or LCVs currently in hangars. I think that it should, since they are present in
+game, albeit not visible." Save a carrier at the end of a battle with its air wing recovered
+and the reloaded fleet was the hull alone.
+
+**Cause.** `ajaxInterface.isSaveableFleetShip` carried a flat `if (ship.removed) return false;`.
+`$removed` is set by exactly one thing in the whole codebase — **docking** (`HangarOps`
+`performWholeFlightDock` / `performLand` / `performDeployStartDock` / `spawnFragmentFlight`, and
+the LCV-rail branch of `Hangar::onIndividualNotesLoaded`) — so that line was reading "in a
+hangar" as "gone". The `shipManager.isDestroyed(ship)` line underneath it says the same thing
+twice: `isDestroyed` folds `$removed` in (Hangar Ops Stage 5) so that ~300 call sites can skip
+docked units with one test, which means it cannot tell a **stowed** unit from a **dead** one.
+
+**Fix — three parts.**
+
+1. **A destruction predicate that answers the damage question alone**
+   ([ships.js](source/public/client/ships.js)). `shipManager.isDestroyed` keeps its Stage 5
+   shortcut and its exact old result; its body moved to a new
+   `shipManager.isDestroyedByDamage`, which is the same test minus the `removed` line — the
+   mirror of `BaseShip::isDestroyed` minus its own. Only code that has to tell "gone" from
+   "stowed" apart uses it.
+2. **The filter** ([ajaxInterface.js](source/public/client/ajaxInterface.js)). `removed` is no
+   longer a bare rejection; it routes through `isSaveableDockedShip`, and the destruction test
+   is now `isDestroyedByDamage`. Everything else in the funnel is untouched, so — as in §14.1 —
+   the units written, the `points` total and `savedFleets.js`'s summary line all move together.
+3. **The panel says so** ([savedFleets.js](source/public/client/savedFleets.js)). `saveSummary`
+   also returns `docked`, and the line reads *"7 units will be saved (including 2 in hangars)"*.
+   A docked unit is nowhere to be seen on the board, so without this the raised count reads as
+   a bug rather than the fix. Counted in the same single pass the panel already made, and
+   folded into `panelState` so an unchanged poll still costs nothing.
+
+**What a docked unit brings with it, for free.** The flight/LCV is an ordinary fully-serialised
+ship row (it is what the fleet list renders as "Docked" and what the ship window opens), so
+`constructSavedShips` needed no change at all: systems, ammo, `pointCostEnh`, enhancements and
+`battleDamage.summariseShip`'s damage/critical payload were already being built the same way for
+it as for a unit in space. A partial dock's `"- Split"` fragment is a real `removed` ship row
+holding the docked craft's copied damage — it saves as its own row, and its source flight's
+`survivingFlightSize` already excludes the departed craft (`DockedFighter`), so the two sum back
+to the original with no double count. **The `"- Split"` suffix rides along into the saved fleet
+name** — deliberately left, since it records where the unit came from.
+
+### 18.2 The two docked units a fleet list must NOT re-buy
+
+`ajaxInterface.isSaveableDockedShip` is reached only for a `removed` unit that is otherwise
+alive, and rejects two:
+
+* **An auto-filled faction default shuttle.** `populateInitialHangarUsage` issues these free on
+  turn 1 of every battle and will do so again in the next one, so saving one mints a phantom
+  unit that then arrives twice. Detected with `gamedata.isDefaultShuttleEntry`, which matches on
+  `phpclass` and therefore works on a ship as well as on the hangarUsage entry it was written
+  for (a ship carries no `hangarType`, so its second test is inert). Only shuttles that
+  **launched and re-docked** are ship rows at all — one that never left its bay is an anonymous
+  hangarUsage entry with no ship row and was never a candidate. **Armed shuttles are real
+  purchases** (`MerkulAM`, `genericArmedShuttle`) and are not in that class list, so they save.
+  ⚠️ Docked only: an auto-filled shuttle still *in space* keeps saving, exactly as before. That
+  is a pre-existing question this change deliberately does not reopen.
+* **A unit whose carrier left through a jump vortex.** Save Fleet already excludes the carrier
+  itself as departed, so its cargo has to go the same way. For a fighter FLIGHT the server has
+  answered this on every payload since JUMP_POINTS Stage 4 — `jumpedWithCarrier`, set by
+  `TacGamedata::markJumpedDockedFlights`, which is also what paints the fleet-list row "Jumped"
+  rather than "Docked". **An LCV has no such flag**: that walk follows `hangarUsage`
+  `dockedFlightId` links and an LCV rail stores its occupant in `lcvDocked` instead. So
+  `isDepartedWithCarrier` early-outs on `ship.flight` (the flag has already answered it) and
+  otherwise finds the rail — docking is the only thing that sets `removed`, so past that
+  early-out the argument can only be a rail-parked LCV, and a fleet holds at most a handful.
+  The carrier test is the same pairing [fleetList.js](source/public/client/UI/fleetList.js)
+  uses: a COMMITTED jump-out counts from the moment it is plotted, and after that the removal
+  is the record.
+
+**A carrier that was DESTROYED needs no test here.** The server either ejects the contents
+(`processCarrierDestructionEscapes` / `processLCVCarrierDestruction` un-remove the escapees) or
+kills them with the ship, so they fail the damage test one line earlier. The rail walk covers it
+anyway, for the in-request window before that resolves.
+
+Reabsorbed Shadow integrated fighters fall out for free and must keep doing so: `dockAllFighters`
+stamps `DockedFighter` on **every** craft, which folds into `Fighter::isDestroyed`, so the flight
+reads as destroyed-by-damage. They are paid for by the carrier's `SHAD_FTRL` enhancement and
+saving them as units would double-buy the complement. **Do not "fix" that by teaching the
+destruction test about `DockedFighter`.**
+
+### 18.3 Verification
+
+* `node --check` on all three edited legacy files and on both rebuilt legacy bundles.
+* **Node harness, 20 assertions** driving the REAL `ships.js` + `ajaxInterface.js` in a stub
+  window: every pre-existing verdict unchanged (in-space hull/flight save; destroyed hull, a
+  flight with no survivors, an enemy ship, a Chameleon phantom sheet and a mine laid in battle
+  do not; the lobby still ignores `removed` entirely); a docked flight, a docked `"- Split"`
+  fragment and a docked LCV now save; a reabsorbed Shadow flight, a re-docked default shuttle
+  and a flight whose carrier jumped do not; a docked LCV saves on a healthy carrier and is
+  refused on one that is jumping out or destroyed, matched by rail id; and `shipManager.isDestroyed`
+  still returns true for a docked flight and false for a healthy hull.
+* Legacy bundles rebuilt (`node scripts/bundle-legacy.js`) — minified, matching the state they
+  were already in. No React/PHP change, so no `yarn build` or static regeneration.

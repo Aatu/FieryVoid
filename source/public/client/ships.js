@@ -661,14 +661,29 @@ window.shipManager = {
             return;
         }
 
-        if (ship.destroyed) return true; // Early exit if server-side status is already set - DK 04/26
-
         // Hangar Ops Stage 5: a docked flight has $removed=true; treat as
         // destroyed for filtering purposes (icon hide, target list exclusion,
         // hex-occupancy). The destruction explosion is keyed off
         // damageManager.getTurnDestroyed (turn-of-damage record), which we
         // never write for docked flights — so no explosion fires.
         if (ship.removed) return true;
+
+        return shipManager.isDestroyedByDamage(ship);
+    },
+
+    /* The same question asked of the DAMAGE ALONE, without the docked-in-a-hangar
+       shortcut above. A docked flight or a rail-parked LCV is not a wreck — it is a
+       live unit parked out of sight — so the handful of callers that have to tell
+       "gone" from "stowed" apart (Save Fleet, ajaxInterface.isSaveableFleetShip) ask
+       this instead. Everything else wants isDestroyed and its Stage 5 shortcut.
+       Mirrors BaseShip::isDestroyed minus its own $removed line. */
+    isDestroyedByDamage: function isDestroyedByDamage(ship) {
+
+        if (ship == null) {
+            return;
+        }
+
+        if (ship.destroyed) return true; // Early exit if server-side status is already set - DK 04/26
 
         if (ship.flight) {
             for (var i in ship.systems) {
