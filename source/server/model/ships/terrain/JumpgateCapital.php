@@ -55,15 +55,19 @@ class JumpgateCapital  extends BaseShip{
                 		20 => "C&C",
                 ),
                 1=> array(
+                        18 => "Structure",                        
                         20 => "Primary",
                 ),
                 2=> array(
+                        18 => "Structure",                        
                         20 => "Primary",
                 ),
                 3=> array(
+                        18 => "Structure",                        
                         20 => "Primary",
                 ),
                 4=> array(
+                        18 => "Structure",                        
                         20 => "Primary",
                 ),                
         );
