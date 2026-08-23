@@ -1330,7 +1330,20 @@ Plus `scripts/fvbuild.ps1 -Check` (map staleness + replay harness) green at the 
 
 ---
 
-## 7. Phase 2 — Fixed Jump Gates (not in this plan's scope)
+## 7. Phase 2 — Fixed Jump Gates — **PLANNED 2026-08-23, see [JUMP_GATES_PLAN.md](JUMP_GATES_PLAN.md)**
+
+⭐ **This section is now HISTORY.** Phase 2 has a plan of its own; that file supersedes everything
+below and carries the user rulings of 2026-08-23 (no owner priority; the vortex facing is always the
+gate's own and cannot be changed; no Maintain, no power shutdown and no signaller-range recheck for
+a gate vortex; the jump-failure roll is KEPT). Two things below are wrong and are corrected there:
+
+- **The "one structural blocker" is not the one named.** `isMyShip` needs no exception at all —
+  clicking a terrain gate in Initial Orders already builds a `ShipTooltipInitialOrdersMenu`, and
+  right-clicking one already opens its ship window. The real blocker is the **submit path**, on
+  both sides: `ajaxInterface.construcGamedata` only pushes a ship into the POST when
+  `ship.userid === gamedata.thisplayer`, and `InitialOrdersGamePhase::process` drops fire orders
+  for any POST ship where `$ship->userid != $gameData->forPlayer`.
+- **"Owner first"** was replaced by a flat nearest-then-roll-off.
 
 Recorded here so the Phase 1 design does not paint it into a corner:
 
@@ -1342,10 +1355,10 @@ Recorded here so the Phase 1 design does not paint it into a corner:
 - Ownership / contested-claim resolution (owner first, then nearest, then roll off — **not**
   initiative).
 
-**The one structural blocker to solve first:** `isMyShip` / `isMyorMyTeamShip` return false for
+~~**The one structural blocker to solve first:** `isMyShip` / `isMyorMyTeamShip` return false for
 terrain outside Deployment ([gamedata.js:212](source/public/client/gamedata.js#L212)), so a neutral
 gate is unclickable. Phase 2 needs a deliberate, narrow exception — not a general loosening of the
-terrain gate.
+terrain gate.~~ **Wrong — see the note at the head of this section, and JUMP_GATES_PLAN.md §3.1.**
 
 Phase 1's vortex unit is designed to be exactly what a gate opens, so nothing here is wasted.
 
