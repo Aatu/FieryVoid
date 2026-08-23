@@ -1987,6 +1987,7 @@ spl_autoload_register(
                 'mitocjomic' => '/server/model/ships/smallraces/MitocJomic.php',
                 'mlpa' => '/server/model/weapons/customs.php',
                 'moesarbase' => '/server/model/ships/balosian/moesarBase.php',
+                'moesarbasenew' => '/server/model/ships/balosian/moesarBaseNew.php',
                 'mogortha' => '/server/model/ships/centauri_raiders/mogortha.php',
                 'mograte' => '/server/model/ships/HouseValheru/Mograte.php',
                 'mograth' => '/server/model/ships/centauri/mograth.php',
