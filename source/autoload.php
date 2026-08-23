@@ -1547,6 +1547,7 @@ spl_autoload_register(
                 'judanna' => '/server/model/ships/corillani/Judanna.php',
                 'jumpengine' => '/server/model/systems/baseSystems.php',
                 'jumpgate' => '/server/model/ships/civilians/jumpgate.php',
+                'jumpgatecapital' => '/server/model/ships/terrain/JumpgateCapital.php',
                 'jumpgatenew' => '/server/model/ships/terrain/jumpgateNew.php',
                 'jumphawk' => '/server/model/ships/drazi/jumphawk.php',
                 'jydkutai' => '/server/model/ships/raiders/JYDKutai.php',
