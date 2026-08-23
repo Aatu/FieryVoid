@@ -1,19 +1,19 @@
 <?php
-class JumpgateNew  extends Terrain{
-    
+class JumpgateCapital  extends BaseShip{
+    //This si the official Jump Gate unit from AoG
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 10;//well, it IS a very important and costly structure, even if with zero actual combat value!
+		$this->pointCost = 10;
 		$this->faction = "Terrain";  
-        $this->phpclass = "jumpgateNew";
+        $this->phpclass = "JumpgateCapital";
         $this->imagePath = "img/ships/JumpGate.png";
         $this->canvasSize = 200;
         $this->shipClass = "Fixed Jump Gate";
-        $this->Enormous = false; //classify it as a Capital just so it doesn't auto-ram passing units!
+        $this->Enormous = false; //classify it as a Capital just so it doesn't auto-ram passing units / block LoS!
 		$this->iniativebonus = -200; //no voluntary movement anyway
         $this->isd = '2000';
-        $this->variantOf = 'OBSOLETE';
+        $this->shipSizeClass = 5; //5 is used to identify Terrain is certain Front End functions.      
 	            
 		$this->base = true;
 		$this->smallBase = true;
@@ -35,29 +35,15 @@ class JumpgateNew  extends Terrain{
         $this->addPrimarySystem(new CnC(6, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 6, 2, 2));
         $this->addPrimarySystem(new Hangar(3, 1, 1));
-        $this->addPrimarySystem(new JumpEngine(6, 50, 20, 20));
-		
-		//Structures are not displayed properly if there are no systems - so I add generic "Support System" :)
-		/*$supportSystem = new CargoBay(2,10);
-		$supportSystem->displayName = 'Support System';
-        $this->addFrontSystem($supportSystem);
-		$supportSystem = new CargoBay(2,10);
-		$supportSystem->displayName = 'Support System';
-        $this->addAftSystem($supportSystem);
-		$supportSystem = new CargoBay(2,10);
-		$supportSystem->displayName = 'Support System';
-        $this->addLeftSystem($supportSystem);
-		$supportSystem = new CargoBay(2,10);
-		$supportSystem->displayName = 'Support System';
-        $this->addRightSystem($supportSystem);
-        */
+        $this->addPrimarySystem(new JumpEngine(8, 10, 20, 20));
+	
 				
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        //$this->addFrontSystem(new Structure(2, 220));
-        //$this->addAftSystem(new Structure(2, 220));
-        //$this->addLeftSystem(new Structure(2, 220));
-        //$this->addRightSystem(new Structure(2, 220));
-        $this->addPrimarySystem(new Structure(3,800));
+        $this->addFrontSystem(new Structure(2, 200));
+        $this->addAftSystem(new Structure(2, 200));
+        $this->addLeftSystem(new Structure(2, 240));
+        $this->addRightSystem(new Structure(2, 240));
+        $this->addPrimarySystem(new Structure(3, 160));
 
         $this->hitChart = array(
                 0=> array(
@@ -74,6 +60,12 @@ class JumpgateNew  extends Terrain{
                 2=> array(
                         20 => "Primary",
                 ),
+                3=> array(
+                        20 => "Primary",
+                ),
+                4=> array(
+                        20 => "Primary",
+                ),                
         );
     }
 }
