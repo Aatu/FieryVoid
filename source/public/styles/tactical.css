@@ -272,8 +272,8 @@ body {
     justify-content: center;
     align-items: center;
     width: 30px;
-    height: 20px;
-    padding: 0;
+    height: 18px;
+    padding: 3px;
     font-family: inherit;
     font-size: 14px;
     line-height: 1;
@@ -349,7 +349,7 @@ body {
    30px; every other dimension is that component's. */
 #gateSignalUI #gateSignalConfirm {
     width: auto;
-    padding: 0 12px;
+    padding: 5px 18px;
     background: var(--gs-warn-bg);
     border-color: var(--gs-warn-line);
     color: #ffffff;
