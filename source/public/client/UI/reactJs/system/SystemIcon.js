@@ -267,9 +267,38 @@ class SystemIcon extends React.Component {
                         && weaponManager.hasFiringOrder(ship, system)) {
                         if (system.reopenSpecialTargeting(ship)) return;
                     }
+                    //A weapon that has already committed its shot is not selectable again -
+                    //cancel the order first. selectAllWeapons has always applied this rule
+                    //(the right-click "all similar weapons" route skips such a weapon); the
+                    //single icon click never did, so the weapon joined gamedata.selectedSystems
+                    //and reappeared in the tooltip's TARGETING list as though it were still
+                    //available (user report 2026-08-24). Worse than cosmetic: targetShip does
+                    //not screen its selection for existing orders, so the next click on a
+                    //target would have declared a SECOND order for it.
+                    //
+                    //Three deliberate exemptions, matching selectAllWeapons plus one:
+                    //  canSplitShots      - shots are declared one at a time, so an existing
+                    //                       order says nothing about the remaining guns.
+                    //  hasSpecialTargeting - a Hypergraviton Blaster re-click EDITS its order
+                    //                       (see the reopen divert just above, and
+                    //                       gravitic.js's own select-to-edit call).
+                    //  a "self" order      - a selfIntercept marker is an OFFER to the
+                    //                       automation, not a committed shot. It has to stay
+                    //                       selectable or the manual-interception conversion
+                    //                       (MANUAL_INTERCEPTION_PLAN.md §4.4) loses its input:
+                    //                       declareManualIntercept trades the marker for a
+                    //                       targeted order off gamedata.selectedSystems.
+                    //                       hasFiringOrder returns the STRING "self" for these,
+                    //                       which is truthy - test the value, not its truthiness.
+                    var existingOrder = weaponManager.hasFiringOrder(ship, system);
+                    var committed = existingOrder && existingOrder !== "self"
+                        && !system.canSplitShots && !system.hasSpecialTargeting;
+
                     if (weaponManager.isSelectedWeapon(system)) {
+                        //Unselect is never blocked: whatever put it in the selection, the
+                        //player must be able to take it out again.
                         weaponManager.unSelectWeapon(ship, system);
-                    } else {
+                    } else if (!committed) {
                         weaponManager.selectWeapon(ship, system);
                     }
                 }

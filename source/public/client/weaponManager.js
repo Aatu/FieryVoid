@@ -476,10 +476,23 @@ window.weaponManager = {
                 }
             }
         }
+        //⚠️ ORDER MATTERS, TWICE OVER.
+        //
+        //`WeaponSelected` goes FIRST because the phase strategies answer it by switching the
+        //selected ship, and setSelectedShip -> deselectShip clears gamedata.selectedSystems on the
+        //way out of the old one. Push before the event and the weapon the player just clicked is
+        //swept away again whenever they click a weapon on a ship that was not already selected -
+        //DK 6.25, "friendly fighter flight is selected unit". So the push stays after it.
+        //
+        //Which leaves every listener reading a selection that does NOT yet contain this weapon,
+        //and that is what SystemDataChanged below is for. unSelectWeapon has always fired it AFTER
+        //splicing, so the deselect path notified with correct state while the select path notified
+        //with stale state - deselecting a weapon updated the tooltip's TARGETING list and
+        //reselecting it did nothing until some other click came along (user report 2026-08-24).
+        //Firing it here makes the two paths symmetric: state first, notification second.
         webglScene.customEvent('WeaponSelected', { ship: ship, weapon: weapon });
-        //Moved to AFTER onWeaponSelected() in Fire phase strategy, to prevent prevent error when selecting a weapon and friendly fighter flight is selected unit - DK 6.25        
         gamedata.selectedSystems.push(weapon);
-
+        webglScene.customEvent('SystemDataChanged', { ship: ship, system: weapon });
     },
 
     isSelectedWeapon: function isSelectedWeapon(weapon) {

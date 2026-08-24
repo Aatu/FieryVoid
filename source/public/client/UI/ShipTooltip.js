@@ -77,7 +77,6 @@ window.ShipTooltip = function () {
     ShipTooltip.prototype.update = function (ship, selectedShip) {
         if (selectedShip) {
             this.selectedShip = selectedShip;
-            //this.showTargeting = shipManager.systems.selectedShipHasSelectedWeapons(this.selectedShip);
         }
 
         if (selectedShip && this.menu) {
@@ -100,6 +99,49 @@ window.ShipTooltip = function () {
             createForMultipleShips.call(this, this.ships);
         } else {
             createForSingleShip.call(this, this.ships[0]);
+        }
+    };
+
+    /* Re-render ONLY the TARGETING half — the heading and the rows under it — against the
+       CURRENT weapon selection. Split out of createForSingleShip so a weapon going on or off
+       can refresh this in place: a full update() would rebuild the name, the button row and the
+       INCOMING list as well, and PhaseStrategy.onSystemDataChanged deliberately will not do that
+       under whatever the player is clicking.
+
+       ⚠️ `showTargeting` is a SNAPSHOT — PhaseStrategy builds the tooltip with
+       selectedShipHasSelectedWeapons and it goes stale the moment the selection changes, which it
+       does constantly: targeting a ship CONSUMES the selection, and the player can click a weapon
+       off at any time. So re-ask rather than trust it. Without this a stale `true` leaves the
+       TARGETING heading standing over an empty section, because weaponManager.targetingShipTooltip
+       returns immediately once nothing is selected — it only ever LOOKED right because the old
+       bare `.fire` wipe in update() took the heading's own <span> with it as collateral damage.
+       (selectedShip may be null here; selectedShipHasSelectedWeapons reads gamedata.selectedSystems
+       and ignores the ship it is handed.) */
+    ShipTooltip.prototype.refreshTargeting = function () {
+        //The stack tooltip has no targeting half: createForMultipleShips never shows `.fire`, and
+        //there is no single ship to work out a bearing and a hit chance against.
+        if (this.ships.length !== 1) return;
+
+        var ship = this.ships[0];
+        this.showTargeting = shipManager.systems.selectedShipHasSelectedWeapons(this.selectedShip);
+
+        if (gamedata.rules && gamedata.rules.friendlyFire === 1) {
+            if (this.selectedShip && this.showTargeting && this.selectedShip.id != ship.id) {
+                weaponManager.targetingShipTooltip(this.selectedShip, ship, this.element, null);
+                this.element.find(".fire").css({ "display": "block", "visibility": "visible" });
+            } else {
+                this.element.find(".fire").css("display", "none");
+            }
+        } else {
+            if (this.selectedShip && gamedata.isEnemy(ship, this.selectedShip) && this.showTargeting) { //Old version before allied targeting
+                weaponManager.targetingShipTooltip(this.selectedShip, ship, this.element, null);
+                this.element.find(".fire").css({ "display": "block", "visibility": "visible" });
+            } else if (this.selectedShip && gamedata.canTargetAlly(ship) && this.showTargeting) {//30 June 2024 - DK - Added for Ally targeting.
+                weaponManager.targetingShipTooltip(this.selectedShip, ship, this.element, null);
+                this.element.find(".fire").css({ "display": "block", "visibility": "visible" });
+            } else {
+                this.element.find(".fire").css("display", "none");
+            }
         }
     };
 
@@ -477,24 +519,7 @@ window.ShipTooltip = function () {
             this.addEntryElement('DISTANCE: ' + dis + ' hexes');
         }
 
-        if (gamedata.rules && gamedata.rules.friendlyFire === 1) {
-            if (this.selectedShip && this.showTargeting && this.selectedShip.id != ship.id) {
-                weaponManager.targetingShipTooltip(this.selectedShip, ship, this.element, null);
-                this.element.find(".fire").css({ "display": "block", "visibility": "visible" });
-            } else {
-                this.element.find(".fire").css("display", "none");
-            }
-        } else {
-            if (this.selectedShip && gamedata.isEnemy(ship, this.selectedShip) && this.showTargeting) { //Old version before allied targeting
-                weaponManager.targetingShipTooltip(this.selectedShip, ship, this.element, null);
-                this.element.find(".fire").css({ "display": "block", "visibility": "visible" });
-            } else if (this.selectedShip && gamedata.canTargetAlly(ship) && this.showTargeting) {//30 June 2024 - DK - Added for Ally targeting.
-                weaponManager.targetingShipTooltip(this.selectedShip, ship, this.element, null);
-                this.element.find(".fire").css({ "display": "block", "visibility": "visible" });
-            } else {
-                this.element.find(".fire").css("display", "none");
-            }
-        }
+        this.refreshTargeting();
 
         this.ballisticsMenu.renderTo(ship, this.element);
 

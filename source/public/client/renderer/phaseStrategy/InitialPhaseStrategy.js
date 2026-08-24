@@ -180,7 +180,12 @@ window.InitialPhaseStrategy = function () {
             this.setSelectedShip(ship);
         }
 
-        PhaseStrategy.prototype.onSystemDataChanged.call(this, { ship: ship });
+        //Deliberately does NOT forward to onSystemDataChanged any more. This event is raised
+        //BEFORE the weapon is pushed into gamedata.selectedSystems - weaponManager.selectWeapon
+        //has to order it that way, see the note there - so anything rendered from here reads a
+        //selection that is one weapon short. selectWeapon now fires SystemDataChanged itself
+        //immediately after the push, and that arrives at this strategy's inherited handler with
+        //the selection complete. Switching the selected ship above is all this handler still owns.
     };
 
     InitialPhaseStrategy.prototype.onSystemTargeted = function (payload) { //25.11.23 - Added onSystemTargeted here to allow Called Shots in Initial Orders phase e.g. Limpet Bore.

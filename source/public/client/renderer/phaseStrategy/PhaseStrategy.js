@@ -1225,14 +1225,25 @@ window.PhaseStrategy = function () {
         //the CURRENT weapon selection, so selecting or unselecting an interceptor has to re-render
         //them - otherwise the row goes on answering with the selection it was BUILT with, and
         //reports "No interceptor selected" at a weapon the player can plainly see is selected
-        //(user report 2026-08-19). Both paths land here: selectWeapon fires WeaponSelected, which
-        //FirePhaseStrategy.onWeaponSelected forwards to this handler, and unSelectWeapon fires
-        //SystemDataChanged directly.
+        //(user report 2026-08-19). Both paths land here, and both now arrive AFTER
+        //gamedata.selectedSystems has actually changed: selectWeapon and unSelectWeapon each fire
+        //SystemDataChanged once their push/splice is done. (They did not always - see the ordering
+        //note in weaponManager.selectWeapon for why the WeaponSelected event cannot carry this.)
         //
-        //Deliberately as narrow as the stealth forecast above, and narrower in what it touches:
-        //Firing phase only, and it rebuilds ONLY the .incoming list through the menu's own
-        //refresh() - ShipTooltip.update() is not called, so the name, TARGETING half and button
-        //row are never rebuilt under whatever the player is clicking.
+        //The TARGETING half above it has exactly the same dependency - its arcs and hit chances
+        //are the current selection's - so it is refreshed alongside (user report 2026-08-24).
+        //Neither call goes through ShipTooltip.update(): that would rebuild the name and the
+        //button row too, and this handler must not redraw a button under a player who is
+        //mid-click. Weapon selection is driven from the weapon list and the ship window, never
+        //from inside the tooltip, so nothing here moves under the pointer that put it there.
+        //
+        //refreshTargeting is unphased on purpose - it renders whatever createForSingleShip would
+        //render right now, and hides itself when nothing is selected - whereas the INCOMING
+        //rebuild stays pinned to the Firing phase, where interception may be declared.
+        if (this.shipTooltip && typeof this.shipTooltip.refreshTargeting === 'function') {
+            this.shipTooltip.refreshTargeting();
+        }
+
         if (gamedata.gamephase === 3 && this.shipTooltip && this.shipTooltip.ballisticsMenu
             && typeof this.shipTooltip.ballisticsMenu.refresh === 'function') {
             this.shipTooltip.ballisticsMenu.refresh();
@@ -1247,11 +1258,11 @@ window.PhaseStrategy = function () {
             this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
         }
 
-        //Selecting AND unselecting a weapon both land here - selectWeapon fires WeaponSelected,
-        //which the phase strategies forward to this handler, and unSelectWeapon fires
-        //SystemDataChanged directly - so this is the seam that puts a selected system's arc up and
-        //takes it down again. See refreshSystemArcs; it keeps the hovered arc, so running here
-        //while the pointer is still on the icon that was just clicked changes nothing.
+        //Selecting AND unselecting a weapon both land here - selectWeapon and unSelectWeapon each
+        //fire SystemDataChanged once the selection array has changed - so this is the seam that
+        //puts a selected system's arc up and takes it down again. See refreshSystemArcs; it
+        //keeps the hovered arc, so running here while the pointer is still on the icon that was
+        //just clicked changes nothing.
         this.refreshSystemArcs();
 
         this.shipWindowManager.update();
