@@ -1364,7 +1364,49 @@ Phase 1's vortex unit is designed to be exactly what a gate opens, so nothing he
 
 ---
 
-## 8. Follow-up — shrinking the static blueprints (separate task, not this plan)
+## 8. Follow-up — shrinking the static blueprints — **DONE 2026-08-24**
+
+> **Outcome: 97.77 MB → 58.87 MB, a 38.90 MB / 39.8% cut, in
+> [lib/ShipCompactor.php](source/server/lib/ShipCompactor.php) alone.** gzipped (the wire cost the
+> section below was careful to distinguish) 7.43 MB → 4.53 MB, −39.0%; the biggest faction, Earth
+> Alliance, goes 4.64 MB → 2.67 MB raw and 344 KB → 243 KB gzipped. A, B and C were all done; **D
+> was deliberately not**, because every large `null`/`0` candidate failed its audit — the reasons
+> are recorded key by key in ShipCompactor's comment so nobody re-derives them.
+>
+> **What shipped:** a new `$deadSystemKeys` map (115 keys nothing reads, dropped whatever their
+> value, 9.48 MB), 35 more entries on `$falseKeys` (17.9 MB) and 24 more on `$emptyArrayKeys`
+> (11.8 MB). Both generators inherit it — that is what the shared file is for.
+>
+> **Two corrections to the analysis below, worth carrying forward.** (i) The naive grep in "A" is
+> not quite the test it claims: it needs `-w` (a substring search for `useOEW` matches
+> `useOEWArray`, and `rof` matches `profile`), and even then it cannot tell a READ from a WRITE —
+> `grouping` and `rangeDamagePenalty` have hits, but every one is the guarded assignment
+> `arrayIsEmpty(this.groupingArray) || (this.grouping = …)` and nothing reads the result. Both are
+> dead, 0.80 MB. (ii) The "frame it correctly" paragraph is too pessimistic about compression: the
+> defaults are repetitive, but there are so many of them that removing them cuts the *gzipped*
+> tree by essentially the same 39%.
+>
+> **Verified three ways, none of them a file diff** (the section below asks for byte-identity of
+> the client's *behaviour*): a structural diff over all 2,573 ships / 56,687 systems confirming
+> that 1,755,438 key removals are the only change and that no surviving value moved by a byte; all
+> 55,671 systems constructed through the real client classes in the real `game.php` load order,
+> with `updateFiringModeData()` run on every weapon — zero errors; and the resulting live objects
+> compared property-by-property between the two trees — every difference is a key that is now
+> `undefined` instead of holding its default, and nothing else.
+>
+> ⚠️ **Four audited exclusions** that look strippable and are not: `isTargetable`
+> (`=== false` in SystemInfoButtons), `pressignedReset` (`== false`), `animationArray` /
+> `animationColorArray` (a bare index in AllWeaponFireAgainstShipAnimation), and `startArcArray` /
+> `endArcArray` (a bare `.length` in molecular.js and particle.js constructors). See ShipCompactor.
+>
+> **Sequel, done separately the same day: game.php.** Measuring the above turned up that the GAME
+> screen never went through ShipCompactor at all — the compactor only ever ran in the file
+> generator, so the lobby got compacted blueprints and `window.staticShips` did not. Fixing that
+> is [lib/BlueprintCache.php](source/server/lib/BlueprintCache.php), which also caches the result
+> per ship class in APCu: **233 ms → 4 ms** of server CPU per game page load, payload 3,776 KB →
+> 1,629 KB. ⚠️ On a **brotli** server the wire saving is only 39 KB → 35 KB — brotli's 4 MB window
+> swallows the repetition that gzip's 32 KB window cannot, so the gzip figure overstates this
+> particular change ~30x. The win is server CPU and client parse, not bytes on the wire.
 
 Stage 1 grew `source/public/static/json/**` because a jump-engine entry now serialises as a weapon:
 **536 B → 2,899 B** each (an average real weapon is 3,026 B, so it is now simply normal-sized),
