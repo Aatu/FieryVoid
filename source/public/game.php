@@ -104,7 +104,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 	<!-- replaced by php include below
     <script src="static/ships.js"></script>
 	-->
-    <?php		
+    <?php
         //include 'static/ships.php'; //Changed how staticships are loaded to help with HTTP Protocol errors - DK Dec 2025
         $shipClasses = [];
         if(isset($serverdata) && isset($serverdata->ships)){
@@ -112,74 +112,36 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
                 $shipClasses[] = $ship->phpclass;
             }
         }
+
+        /* window.staticShips — the blueprint half of every ship on the board; the client merges
+           it with the live gamedata in SystemFactory.createSystemFromJson.
+
+           This used to be ~75 lines inline here: getShipsByClass() (which INSTANTIATES every
+           class — 220ms for a 60-class game), then a walk of the resulting objects to discover
+           dynamically spawnable classes, then a raw json_encode of the lot (3.7MB inlined into
+           this page, on every single load, for every player).
+
+           None of it depends on the game, so all of it now lives in BlueprintCache, keyed per
+           ship class in APCu under the same deploy-versioned prefix the gamedata cache uses. A
+           warm request is ~60 apcu_fetch()es and a string concat. It also runs each blueprint
+           through ShipCompactor — which this page never did, so the game screen was shipping
+           uncompacted blueprints while the lobby got compacted ones from the generator.
+
+           The spawnable-discovery walk moved WITH it (BlueprintCache::build records what each
+           blueprint contributes at fill time, because a cache hit has no object to walk). If you
+           need to change that logic, it is in BlueprintCache::build and getStaticShipsJson, not
+           here — and the two must stay in step or a mid-game spawn shows a raw phpclass.
+
+           Explicit require_once: source/autoload.php is a generated classmap and will not know
+           about a new file until the generator next runs. Same pattern as ShipCompactor. */
+        require_once __DIR__ . '/../server/lib/BlueprintCache.php';
+        require_once __DIR__ . '/../server/lib/ShipCompactor.php';
+
         $t2 = microtime(true);
-        $staticShips = ShipLoader::getShipsByClass($shipClasses);
+        $staticShipsJson = BlueprintCache::getStaticShipsJson($shipClasses);
         $time_getShipsByClass = microtime(true) - $t2;
 
-        // Auto-discover dynamically spawnable ship blueprints from weapon system properties.
-        // Any weapon with a $spawnableClasses array will have its listed classes preloaded here,
-        // so the frontend has their full blueprint when a mine/unit is spawned mid-game.
-        //
-        // Hangar Ops: faction-specific default shuttles (e.g. Flyer for Minbari) live on
-        // HangarOps::$factionShuttleMap rather than on every Hangar's $spawnableClasses,
-        // so each game only preloads the shuttle classes of factions actually present
-        // (and carrying a Hangar) — not all ~80 factions in the codebase.
-        $spawnableClasses = [];
-        $factionsWithHangars = [];
-        foreach ($staticShips as $faction => $shipBlueprints) {
-            foreach ($shipBlueprints as $blueprint) {
-                foreach ($blueprint->systems as $system) {
-                    if (!empty($system->spawnableClasses)) {
-                        foreach ($system->spawnableClasses as $cls) {
-                            $spawnableClasses[] = $cls;
-                        }
-                    }
-                    if ($system instanceof Hangar) {
-                        $factionsWithHangars[$faction] = true;
-                        //Per-bay fighter-class allow-list (arch_hangar_class_allowlist):
-                        //preload the carrier's reserved fighter blueprint(s) so the client
-                        //can resolve the phpclass to a display name (Hangar SystemInfo
-                        //"Type:" line + lobby ship window) even when no such flight is
-                        //deployed yet. Without this the class is absent from staticShips
-                        //and the resolver falls back to showing the raw phpclass.
-                        if (!empty($system->allowedFighterClasses)) {
-                            foreach ($system->allowedFighterClasses as $cls) {
-                                $spawnableClasses[] = $cls;
-                            }
-                        }
-                    }
-                }
-                //Category-declared default shuttles (yacht / lifeboats / medical /
-                //presidential — see HangarOps::shuttlePhpclassForCategory): these
-                //auto-populate into the carrier's hangar but are NOT in the faction
-                //shuttle map, so the faction-shuttle preload below misses them.
-                //Without preloading them, launching one leaves the client unable to
-                //resolve its phpclass -> blueprint (shows "undefined" in the ini GUI).
-                if (!empty($blueprint->fighters) && is_array($blueprint->fighters)) {
-                    foreach ($blueprint->fighters as $category => $count) {
-                        $shuttleClass = HangarOps::shuttlePhpclassForCategory($category, $blueprint);
-                        if ($shuttleClass !== null) $spawnableClasses[] = $shuttleClass;
-                    }
-                }
-            }
-        }
-		foreach (array_keys($factionsWithHangars) as $faction) {
-			$factionShuttle = HangarOps::shuttleClassForFactionName($faction);
-			if ($factionShuttle !== null) $spawnableClasses[] = $factionShuttle;
-			$factionMsw = HangarOps::minesweepingShuttleClassForFactionName($faction);
-			if ($factionMsw !== null) $spawnableClasses[] = $factionMsw;
-		}            
-        if (!empty($spawnableClasses)) {
-            $spawnableStaticShips = ShipLoader::getShipsByClass(array_unique($spawnableClasses));
-            foreach ($spawnableStaticShips as $faction => $classes) {
-                if (!isset($staticShips[$faction])) $staticShips[$faction] = [];
-                foreach ($classes as $classKey => $blueprint) {
-                    $staticShips[$faction][$classKey] = $blueprint;
-                }
-            }
-        }
-
-        echo '<script>window.staticShips = ' . json_encode($staticShips) . ';</script>';
+        echo '<script>window.staticShips = ' . $staticShipsJson . ';</script>';
     ?>
     <script>
         window.Config = {
@@ -957,6 +919,8 @@ Manager::getTacGamedataJSON Time: <?php echo isset($time_getTacGamedataJSON) ? r
        |- onConstructed: <?php echo isset($GLOBALS['dbg_onConstructed']) ? round($GLOBALS['dbg_onConstructed']*1000, 2) : 0; ?> ms
   |- stripForJson: <?php echo isset($GLOBALS['dbg_stripForJson']) ? round($GLOBALS['dbg_stripForJson']*1000, 2) : 0; ?> ms
   |- json_encode: <?php echo isset($GLOBALS['dbg_json_encode']) ? round($GLOBALS['dbg_json_encode']*1000, 2) : 0; ?> ms
-ShipLoader::getShipsByClass Time: <?php echo isset($time_getShipsByClass) ? round($time_getShipsByClass*1000, 2) : 0; ?> ms
+BlueprintCache::getStaticShipsJson Time: <?php echo isset($time_getShipsByClass) ? round($time_getShipsByClass*1000, 2) : 0; ?> ms (<?php echo isset($staticShipsJson) ? round(strlen($staticShipsJson)/1024) : 0; ?> KB inlined)
+     A warm APCu cache reads ~1ms here; a figure in the tens or hundreds of ms means the cache
+     was cold (first load after a deploy) or is unavailable — see source/server/lib/BlueprintCache.php.
 -->
 

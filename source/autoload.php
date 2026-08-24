@@ -311,6 +311,7 @@ spl_autoload_register(
                 'bloodswordrazor' => '/server/model/ships/EscalationBloodSword/BloodSwordRazor.php',
                 'bloodswordscythe' => '/server/model/ships/EscalationBloodSword/BloodSwordScythe.php',
                 'bloodswordyacht' => '/server/model/ships/EscalationBloodSword/BloodSwordYacht.php',
+                'blueprintcache' => '/server/lib/BlueprintCache.php',
                 'bmissilerack' => '/server/model/weapons/missile.php',
                 'bochi' => '/server/model/ships/abbai_old/bochi.php',
                 'bochi1825' => '/server/model/ships/abbai_old/bochi1825.php',
