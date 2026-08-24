@@ -58,9 +58,11 @@ window.BallisticIconContainer = function () {
 					   draws an arrow at facing (firingMode - 1), and on a gate the firing mode is the
 					   programmed OPEN DURATION in turns - so "Open 3 turns" would be rendered as
 					   facing 2, i.e. the duration drawn as a direction, and usually the wrong one.
-					   A gate needs no arrow from here in any case: it carries $facingArrow itself, so
-					   ShipIcon already draws the permanent mouth arrow on this very hex, which is the
-					   facing the vortex will take (plan section 2.2). */
+					   A GATE SHOWS NO MOUTH ARROW AT ALL until the vortex actually opens - the gate
+					   blueprint dropped $facingArrow (user ruling 2026-08-24, see JumpgateCapital.php),
+					   so the arrow now belongs to the SpawnJumpPoint alone. Suppressing it here is
+					   therefore not just "redundant", it is the only thing keeping a duration off the
+					   map as a direction. */
 					const gateIcon = iconContainer.getById(ballistic.shooterid);
 					if (!gateIcon || !gamedata.isJumpGate(gateIcon.ship)) {
 						jumpPointOrders.push(ballistic);

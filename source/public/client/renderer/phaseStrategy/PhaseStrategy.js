@@ -799,6 +799,14 @@ window.PhaseStrategy = function () {
        declaration first discards the pending one, and the callback pushed here lands on the fresh
        array and survives to the next click. */
     PhaseStrategy.prototype.onVortexFacingRequested = function (payload) {
+        /* CLOSE THE TOOLTIP THAT LAUNCHED THIS, exactly as onGateSignalRequested does below and for
+           the same reason (user request 2026-08-24). The declaration can be started from the "Target
+           selected weapons on hexagon" button in a ship tooltip, and that tooltip is anchored to a
+           unit standing on or beside the very hex the facing ring lays itself out around - so it sits
+           on top of the turn arrows and the OK button and the ring cannot be worked. The tooltip
+           swallows its own mousedown/mouseup, so the click-away discard never fires for it here. */
+        this.hideShipTooltip(this.shipTooltip);
+
         UI.vortexFacing.open(payload);
         this.positionVortexFacingUI();
         this.onClickCallbacks.push(this.hideVortexFacingUI.bind(this, payload));

@@ -334,15 +334,16 @@
    contested ground and any player with a unit within 10 hexes may claim it.
 
    Both reuse existing art rather than adding two more icons to a menu that already has twenty:
-   the vortex sprite itself for the signal, and the standard withdraw-an-order icon for the cancel,
-   which is exactly what it does.
+   the vortex sprite itself for the signal, and the shared cancel.png for the withdrawal - the same
+   red cross every other "call this off" control in the game uses (user request 2026-08-24).
 
    ⚠️ EVERY OTHER ICON IN THIS MENU IS EXACTLY 40x40 AND RELIES ON THAT. The button is 40x40 and
    sets no background-size, -repeat or -position, so an off-size image does NOT scale - it TILES
    from the top-left. This icon was the Jump Engine's 16x16 system icon and rendered as a grid of
    repeated blue diamonds for exactly that reason (user report 2026-08-23). The art is now the
    vortex sprite, which is 200x200, so the three properties the other icons get for free have to be
-   written out here. Any future icon that is not 40x40 needs the same three lines. */
+   written out here - and cancel.png is 30x30, so it needs them too. Any future icon that is not
+   40x40 needs the same three lines. */
 .signalJumpGate {
     background-image: url("../img/ships/JumpPoint.png");
     background-size: contain;
@@ -351,7 +352,10 @@
 }
 
 .cancelJumpGateSignal {
-    background-image: url("../img/unfiring.png");
+    background-image: url("../img/cancel.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 /* == The INCOMING list (MANUAL_INTERCEPTION_PLAN.md §6) ======================================

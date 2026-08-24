@@ -348,12 +348,13 @@ body {
    is the consequential one". Width is auto because "Signal Jump Gate" does not fit ActionButton's
    30px; every other dimension is that component's. */
 #gateSignalUI #gateSignalConfirm {
-    width: auto;
-    padding: 5px 18px;
+    width: 90%;
+    padding: 3px 18px;
     background: var(--gs-warn-bg);
     border-color: var(--gs-warn-line);
     color: #ffffff;
     opacity: 1;
+    margin: 3px;
 }
 
 #gateSignalUI #gateSignalConfirm:hover {

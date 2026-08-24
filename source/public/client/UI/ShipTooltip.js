@@ -87,7 +87,12 @@ window.ShipTooltip = function () {
 
         jQuery(".buttons", this.element).html("");
         jQuery(".namecontainer", this.element).html("");
-        jQuery(".fire", this.element).html("");
+        //⚠️ `.fire.targeting`, NOT `.fire`. The TARGETING heading and the rows beneath it are two
+        //sibling divs that SHARE the `fire` class (see HTML above), so a bare `.fire` wipe deletes
+        //the heading's <span> as well - and nothing ever puts it back, because
+        //weaponManager.targetingShipTooltip fills only `.targeting`. The INCOMING pair below was
+        //always cleared by its content class alone; this is the same rule applied to its twin.
+        jQuery(".fire.targeting", this.element).html("");
         jQuery(".entry", this.element).remove();
         jQuery(".incoming", this.element).html("");
 

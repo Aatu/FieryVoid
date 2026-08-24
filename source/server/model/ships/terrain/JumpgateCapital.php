@@ -11,20 +11,25 @@
  */
 class JumpgateCapital  extends BaseShip{
 
-    /* ALWAYS-ON FACING ARROW, and on a gate it is not decoration (JUMP_GATES_PLAN.md section 2.2).
-       The vortex a gate opens ALWAYS takes the gate's own facing, that facing is fixed when the
-       gate is placed, and a unit may only enter travelling in direction (facing + 3) % 6. The
-       player never chooses any of that - so the mouth MUST be readable straight off the map, or the
-       one rule that governs using the gate is invisible.
-
-       Same asset SpawnJumpPoint uses, so the arrow looks identical at all three points of a gate
-       vortex's life: the gate itself, the "Jump Gate Signalled" marker, and the open vortex.
-
-       DECLARED as a property, not assigned in the constructor: PHP 8.2 deprecates dynamic
-       properties and Manager's error handler rethrows every diagnostic, E_DEPRECATED included.
-       Declared HERE and never on BaseShip - a base-class default would write "facingArrow":null
-       into every entry of every static blueprint, and absent already reads as falsy on the client. */
-    public $facingArrow = "img/directionOfVortex.png";
+    /* ⚠️ NO $facingArrow - DELIBERATELY, AND DO NOT PUT IT BACK (user ruling 2026-08-24).
+     *
+     * The gate used to carry "img/directionOfVortex.png", on the reasoning that the mouth is a rule
+     * the player never chooses (the vortex always takes the gate's own fixed facing, and a unit may
+     * only enter travelling in direction (facing + 3) % 6, plan section 2.2) and so had to be
+     * readable off the map. In play it read as clutter: the gate art is 200px and already points,
+     * and the yellow arrow sat over it permanently, on every gate, for every player, all game.
+     *
+     * THE ARROW NOW BELONGS TO THE JUMP POINT ALONE - SpawnJumpPoint.php still declares it, so the
+     * mouth is drawn exactly when there is a vortex to fly into and never before.
+     *
+     * A gate gets no ordinary facing/heading arrows either, and needs no code for that: it is
+     * Terrain (shipSizeClass 5), and ShipIcon.create builds shipDirectionOfProwSprite and
+     * shipDirectionOfMovementSprite only for non-terrain. With the property gone a gate now draws
+     * no arrow of any kind.
+     *
+     * ⚠️ Terrain.json is GENERATED. Removing this property does not change the static blueprint
+     * until the static ship generator is re-run, so a stale Terrain.json will keep serving
+     * "facingArrow" to the lobby. */
 
     //This si the official Jump Gate unit from AoG
     function __construct($id, $userid, $name,  $slot){

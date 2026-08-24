@@ -6281,10 +6281,12 @@ class JumpEngine extends Weapon{
      *   gate's mouth, which is where the gate is standing.
      *
      *   THE FACING is the gate's own, off its deploy MovementOrder, and cannot be aimed or re-aimed
-     *   (plan section 2.2, user ruling 2026-08-23). It was fixed when the gate was placed, which is
-     *   why the gate carries $facingArrow: the player cannot choose the mouth, so they must be able
-     *   to read it. A unit still enters travelling in direction (facing + 3) % 6, exactly as it does
-     *   into a ship's vortex - getUsableVortex and Movement::applyJumpOut need no gate branch at all.
+     *   (plan section 2.2, user ruling 2026-08-23). It was fixed when the gate was placed. The gate
+     *   itself draws NO mouth arrow - that was tried and dropped as clutter (user ruling 2026-08-24,
+     *   see JumpgateCapital.php); the arrow appears on the vortex this call spawns, which carries
+     *   $facingArrow, so the mouth becomes readable exactly when there is one to fly into. A unit
+     *   still enters travelling in direction (facing + 3) % 6, exactly as it does into a ship's
+     *   vortex - getUsableVortex and Movement::applyJumpOut need no gate branch at all.
      *
      *   THERE IS NO PROJECTION RANGE to measure, so the log line says what a gate line should say.
      *

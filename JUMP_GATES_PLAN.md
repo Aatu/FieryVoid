@@ -196,8 +196,13 @@ face 0 (east), right-side teams face 3 (west)**, and `nonRotating` means it stay
 withdrawing through a jump gate should feel like — and an attacker escaping through the defender's
 gate has to break off and run the same way. The facing is not arbitrary; it just is not chosen.
 
-The gate carries `$facingArrow` (§3.2) so the mouth is permanently visible on the map. That is
-**more** important now, not less: the player cannot pick it, so they must be able to read it.
+⚠️ **The gate itself draws NO mouth arrow** (user ruling 2026-08-24). It was built carrying
+`$facingArrow` on the reasoning that a facing the player cannot pick must be readable off the map —
+but a permanent yellow arrow over every gate, all game, read as clutter, and the 200px gate art
+already points. **The arrow belongs to the jump point alone**: `SpawnJumpPoint` still declares
+`$facingArrow`, so the mouth is drawn exactly when there is a vortex to fly into. The gate is
+Terrain, so it gets no ordinary prow/heading arrows either — `ShipIcon.create` builds those only for
+non-terrain — which means a gate now draws no arrow of any kind.
 
 ### 2.3 Forming, open, closing
 
@@ -376,14 +381,16 @@ its **ship** (`gamedata.isJumpGate(unit)`), never by the system.
 
 ```php
 $this->addPrimarySystem((new JumpEngine(8, 10, 20, 20))->markGate());
-$this->facingArrow = "img/directionOfVortex.png";   //the mouth is a RULE the player cannot choose,
-                                                   //so it MUST be readable off the map (§2.2)
 ```
 
-`$facingArrow` is the property `SpawnJumpPoint` already declares; `ShipIcon` draws it permanently
-over any unit that carries one, rotated to the unit's facing. Declaring it on `JumpgateCapital`
-gives the gate the same arrow as the vortex it opens — the same asset at all three points of a gate
-vortex's life (gate art, signalled marker, open vortex).
+⚠️ **`$facingArrow` was declared here and has been REMOVED** (user ruling 2026-08-24, §2.2). It is
+still the property `SpawnJumpPoint` declares — `ShipIcon` draws it permanently over any unit that
+carries one, rotated to the unit's facing — but only the vortex carries it now, so the arrow appears
+at one point of a gate vortex's life instead of three. Do not put it back on the gate.
+
+⚠️ `Terrain.json` is **generated**: dropping the property does not change the static blueprint until
+the static ship generator is re-run, so a stale `Terrain.json` keeps serving `facingArrow` to the
+lobby.
 
 ### 3.3 The signal order — and why concealment is free
 
@@ -497,8 +504,26 @@ click the gate  (no ship selected, none needed)
                      [ SIGNAL ]  [ x ]
           -> SIGNAL ..... creates the FireOrder on the gate and closes the panel
           -> x / click away  discards; no order, nothing to clean up
-      -> while a claim stands, the button reads "Cancel Gate Signal"
+      -> while a claim stands, the button reads "Cancel Gate Signal"  (cancel.png)
+          -> clicking it withdraws the claim AND redraws the tooltip in place,
+             so the button toggles straight back to "Signal Jump Gate"
 ```
+
+⭐ **The Cancel button toggles back without a re-click** (user request 2026-08-24). The two buttons
+are already mutually exclusive on `hasGateSignal` / `noGateSignalYet`, but nothing re-evaluates a
+menu's conditions on its own, and the tooltip *survives* its own button clicks — it swallows
+`mousedown`/`mouseup`, so the click-away discard never fires for them. `cancelJumpGateSignal`
+therefore calls `ShipTooltip.update()` (no arguments — a gate signal routinely has no selected
+ship), which re-runs every condition and rebuilds the button row. `ShipTooltipMenu.renderTo` now
+keeps the tooltip handle on `this.shipTooltip` for exactly this. It also sets `currentInfo` by hand,
+because the pointer does not *move* across the swap, so no `mouseover` fires on the replacement
+button and the info line would otherwise read "Cancel Gate Signal" beneath a Signal button.
+
+⚠️ **`onVortexFacingRequested` closes the ship tooltip**, the way `onGateSignalRequested` already
+did (user request 2026-08-24). A *ship's* vortex declaration can be started from the tooltip's
+"Target selected weapons on hexagon" button, and that tooltip is anchored to a unit on or beside the
+very hex `UI.vortexFacing`'s ring lays itself out around — so it covered the turn arrows and the OK
+button and the ring could not be worked. Same one-line fix, same reason.
 
 **Plain anchored HTML, not a canvas ring.** `UI.vortexFacing`'s ring exists because a *facing* has
 to swing with the thing it sets and had to stay legible at six angles; a duration is a number and
@@ -529,15 +554,16 @@ serialised property set on a blueprint and the harness covers exactly that.
 - `getVortexDeclaration()` accepts modes 1–4 on a gate engine and refuses 5–7; unchanged (1–6) on a
   ship engine. The two are different questions and must not share a range test.
 - The concealment comment in `hasVortexDeclaration` (§3.3) — a comment, but a load-bearing one.
-- `JumpgateCapital` calls `markGate()` and declares `$facingArrow`.
+- `JumpgateCapital` calls `markGate()`. (It also declared `$facingArrow` as built; that was removed
+  on 2026-08-24 — see §2.2/§3.2.)
 - `ShipSystem::clearPossibleCriticals()` — three lines, public, so `JumpgateCapital` can silence its
   Reactor's crit chart from outside. (`$possibleCriticals` is `protected` and never serialised, so
   this costs the static blueprints nothing.) `JumpgateCapital` calls it on its Reactor.
 - Run `checkShipData.php` — `JumpgateCapital` is brand new and has never been through it.
 - Regenerate statics (`fvbuild.ps1 -Statics`). Expect a small, mechanical diff.
 
-**Verify:** the gate's Jump Engine reads **20/20** on its system icon on turn 1, the gate draws its
-facing arrow, and it can be bought and placed. Nothing else changes; the engine is inert because no
+**Verify:** the gate's Jump Engine reads **20/20** on its system icon on turn 1, the gate draws **no**
+arrow of any kind (2026-08-24), and it can be bought and placed. Nothing else changes; the engine is inert because no
 client can target it yet.
 
 ### Stage 2 — the two submit widenings (§3.1 fact 2)

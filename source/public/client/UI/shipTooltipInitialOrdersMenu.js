@@ -208,8 +208,27 @@ window.ShipTooltipInitialOrdersMenu = function () {
         weaponManager.queueGateSignalOrder(this.targetedShip);
     }
 
+    /* Withdraw the claim - and TOGGLE THE BUTTON BACK, which is the point of the redraw.
+
+       The two gate buttons are mutually exclusive on hasGateSignal/noGateSignalYet, so the moment
+       the order is gone the OTHER one is the correct button - but nothing re-evaluates a menu's
+       conditions on its own. The tooltip SURVIVES this click (it swallows mousedown/mouseup, which
+       is why the click-away discard never fires on its own buttons), so without this the player is
+       left looking at a Cancel button for an order that no longer exists until they click the gate
+       again. ShipTooltip.update() with no arguments re-runs every condition and rebuilds the row;
+       passing no selectedShip is deliberate, since a gate signal routinely has none (section 2.1).
+
+       currentInfo is set by hand because the pointer does not MOVE across the swap, so no mouseover
+       fires on the replacement button and the info line would otherwise still read "Cancel Gate
+       Signal" underneath a Signal button. It is only claimed when the signal button is actually
+       going to be there - canSignalGate can have gone false in the meantime. */
     function cancelJumpGateSignal() {
         weaponManager.removeGateSignalOrder(this.targetedShip);
+
+        if (this.shipTooltip) {
+            this.currentInfo = canSignalGate.call(this) ? "Signal Jump Gate" : "";
+            this.shipTooltip.update();
+        }
     }
 
     function isSelf() {
