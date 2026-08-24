@@ -1403,10 +1403,20 @@ Phase 1's vortex unit is designed to be exactly what a gate opens, so nothing he
 > screen never went through ShipCompactor at all — the compactor only ever ran in the file
 > generator, so the lobby got compacted blueprints and `window.staticShips` did not. Fixing that
 > is [lib/BlueprintCache.php](source/server/lib/BlueprintCache.php), which also caches the result
-> per ship class in APCu: **233 ms → 4 ms** of server CPU per game page load, payload 3,776 KB →
-> 1,629 KB. ⚠️ On a **brotli** server the wire saving is only 39 KB → 35 KB — brotli's 4 MB window
-> swallows the repetition that gzip's 32 KB window cannot, so the gzip figure overstates this
-> particular change ~30x. The win is server CPU and client parse, not bytes on the wire.
+> per ship class in APCu. **Payload −57%** (a 35-entry game: 1.6 MB → 689 KB inlined).
+>
+> ⚠️ **Two measurement traps, both of which flattered the change and both of which were caught
+> only by measuring on the real server:**
+> 1. **The dev box lies about CPU.** Docker Desktop on Windows put `getShipsByClass` at 220 ms for
+>    60 classes; that is bind-mount file I/O, not work. On the live test instance the same block
+>    is **15.6 ms from source vs 1.7 ms cached** — a real saving, but single-digit-to-mid-teens ms
+>    per page load, not the hundreds the dev box implied.
+> 2. **gzip lies about the wire.** On a **brotli** server the payload saving is 39 KB → 35 KB;
+>    brotli's 4 MB window swallows the repetition gzip's 32 KB window cannot, so a gzip figure
+>    overstates this particular change ~30x.
+>
+> Net: the honest wins are a modest but real server-CPU cut, a −57% inline payload, and the client
+> parse time that goes with it. Not bytes on the wire.
 
 Stage 1 grew `source/public/static/json/**` because a jump-engine entry now serialises as a weapon:
 **536 B → 2,899 B** each (an average real weapon is 3,026 B, so it is now simply normal-sized),
