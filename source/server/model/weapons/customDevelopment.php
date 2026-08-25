@@ -1504,6 +1504,172 @@ class NeutronBlasterFtr extends Weapon{
 } //endof class NeutronBlasterFtr
 
 
+class NeutronBeam extends Laser{
+		public $name = "NeutronBeam";
+        public $displayName = "Neutron Beam";
+        public $iconPath = "NeutronBlaster.png";
+        public $animation = "laser";
+        public $animationColor = array(98, 127, 82); 
+        
+        public $loadingtime = 2;
+		public $normalload = 3;
+		public $raking = 15;
+		public $priority = 8; //heavy Raking	
+
+		public $factionAge = 3; //Ancient
+		
+        public $rangePenalty = 0.33; //-1 per 3 hexes
+        public $fireControl = array(0, 3, 6);
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){ //maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ) $maxhealth = 14;
+			if ( $powerReq == 0 ) $powerReq = 8;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+	    public $weaponClass = "Electromagnetic"; 
+	    
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn); 
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}	    		  
+			$this->data["Special"] .= "Can fire at accelerated RoF for less damage:";  
+			$this->data["Special"] .= "<br> - 1 per 2 turns: 5d10+5"; 
+			$this->data["Special"] .= "<br> - 1 per 3 turns: 6d10+10"; 
+		}
+	
+		public function getDamage($fireOrder){
+        	switch($this->turnsloaded){
+            	case 0:
+            	case 1: 
+            	case 2:
+                	return Dice::d(10,5)+5;
+					break;
+			    default:
+			    	return Dice::d(10,6)+10;
+					break;			
+        	}
+		}
+
+        public function setMinDamage(){
+            switch($this->turnsloaded){
+            	case 1:
+            	case 2:
+                    $this->minDamage = 10 ;
+                    break;
+                default:
+                    $this->minDamage = 16 ;  
+                    break;
+            }
+		}
+             
+        public function setMaxDamage(){
+            switch($this->turnsloaded){
+                case 1:
+                case 2:
+                    $this->maxDamage = 55 ;
+                    break;
+                default:
+                    $this->maxDamage = 70 ;  
+                    break;
+            }
+		}
+
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->data = $this->data;
+			$strippedSystem->minDamage = $this->minDamage;
+			$strippedSystem->minDamageArray = $this->minDamageArray;
+			$strippedSystem->maxDamage = $this->maxDamage;
+			$strippedSystem->maxDamageArray = $this->maxDamageArray;				
+			return $strippedSystem;
+		}
+
+} // End of class NeutronBeam
+
+
+class NeutronCannon extends Laser{
+    	public $name = "NeutronCannon";
+        public $displayName = "Neutron Cannon";
+		public $iconPath = "NeutronCannon.png";
+        public $animation = "laser";
+        public $animationColor = array(98, 127, 82);
+		public $raking = 15;
+        public $priority = 8;		
+
+		public $factionAge = 3; //Ancient
+
+        public $loadingtime = 3;
+			
+        public $rangePenalty = 0.33;
+        public $fireControl = array(-4, 2, 4); // fighters, <=mediums, <=capitals 
+
+	    public $weaponClass = "Electromagnetic"; 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 12;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 6;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+		
+    	public function getDamage($fireOrder){        return Dice::d(10, 7)+20;   }
+        public function setMinDamage(){     $this->minDamage = 27 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 90 ;      }
+
+}  // endof NeutronCannon
+
+
+
+class PlasmaArray extends Plasma{
+    	public $name = "PlasmaArray";
+        public $displayName = "Plasma Array";
+		public $iconPath = "EWHeavyPointPlasmaGun.png";
+        public $animation = "trail";
+        public $animationColor = array(75, 250, 90);
+    	public $trailColor = array(75, 250, 90);
+    	public $projectilespeed = 15;
+        public $animationWidth = 5;
+    	public $animationExplosionScale = 0.30;
+    	public $trailLength = 20;
+        public $priority = 5;		
+    	public $rangeDamagePenalty = 0.5;
+        public $guns = 2;
+
+		public $factionAge = 3; //Ancient
+
+        public $intercept = 1;
+    		        
+        public $loadingtime = 1;
+			
+        public $rangePenalty = 0.5;
+        public $fireControl = array(6, 4, 3); // fighters, <=mediums, <=capitals 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 8;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 4;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+		
+    	public function getDamage($fireOrder){        return Dice::d(10, 1)+10;   }
+        public function setMinDamage(){     $this->minDamage = 11 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 20 ;      }
+
+}  // endof PlasmaArray
+
+
 
     class FusionBomb extends Torpedo{
         public $name = "FusionBomb";
@@ -2336,7 +2502,7 @@ class spawnHyperspaceWaveform extends Terrain {
         $this->faction = "Terrain";
         $this->factionAge = 1;
         $this->phpclass = "spawnHyperspaceWaveform";
-        $this->imagePath = "img/ships/hyperspaceWaveform3.png";
+        $this->imagePath = "img/ships/hyperspaceWaveform.png";
         $this->canvasSize = 200;
         $this->shipClass = "Hyperspace Waveform";
         $this->Enormous = true;

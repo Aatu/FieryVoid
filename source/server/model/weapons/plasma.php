@@ -1171,6 +1171,8 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
     public $hextarget = true;
     public $hidetarget = false;
 
+	public $factionAge = 4; //Primordial
+
 	/* The cloud damages every flight that moved through its hex, and an attached pod
 	   mirrors its host's movement so it is in the hex whenever the host is. Without this
 	   the automatic "hit the host too" spill turned a hex-targeted anti-fighter weapon

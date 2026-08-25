@@ -172,6 +172,24 @@ var NeutronBlasterFtr = function NeutronBlasterFtr(json, ship) {
 NeutronBlasterFtr.prototype = Object.create(Weapon.prototype);
 NeutronBlasterFtr.prototype.constructor = NeutronBlasterFtr;
 
+var NeutronBeam = function NeutronBeam(json, ship) {
+    Laser.call(this, json, ship);
+};
+NeutronBeam.prototype = Object.create(Laser.prototype);
+NeutronBeam.prototype.constructor = NeutronBeam;
+
+var NeutronCannon = function NeutronCannon(json, ship) {
+    Laser.call(this, json, ship);
+};
+NeutronCannon.prototype = Object.create(Laser.prototype);
+NeutronCannon.prototype.constructor = NeutronCannon;
+
+var PlasmaArray = function PlasmaArray(json, ship) {
+    Plasma.call(this, json, ship);
+};
+PlasmaArray.prototype = Object.create(Laser.prototype);
+PlasmaArray.prototype.constructor = PlasmaArray;
+
 var FusionBomb = function  FusionBomb(json, ship) {
     Torpedo.call(this, json, ship);
 };

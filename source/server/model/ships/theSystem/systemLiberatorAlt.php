@@ -1,14 +1,14 @@
 <?php
-class systemLiberator extends BaseShip{
+class systemLiberatorAlt extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 4700;
 		$this->faction = "The System";
-		$this->phpclass = "systemLiberator";
+		$this->phpclass = "systemLiberatorAlt";
 		$this->imagePath = "img/ships/systemLiberator.png";
-		$this->shipClass = "Liberator";
+		$this->shipClass = "Liberator (Alternate)";
 		$this->shipSizeClass = 3;
 //		$this->fighters = array("normal"=>12);
 		$this->unofficial = true;
@@ -50,29 +50,29 @@ class systemLiberator extends BaseShip{
 		$this->addFrontSystem(new GraviticThruster(5, 12, 0, 3, 1));
 		$this->addFrontSystem(new GraviticThruster(5, 15, 0, 5, 1));
 		$this->addFrontSystem(new GraviticThruster(5, 12, 0, 3, 1));
-        $this->addFrontSystem(new NeutronBlaster(5, 15, 8, 300, 60));
+        $this->addFrontSystem(new NeutronBeam(5, 14, 8, 300, 60));
         $this->addFrontSystem(new SeekerTorp(5, 6, 5, 270, 90));
-        $this->addFrontSystem(new PlasmaDriver(5, 6, 6, 300, 60));
+        $this->addFrontSystem(new PlasmaArray(5, 8, 4, 270, 90));
 		$this->addFrontSystem(new ThirdspaceShield(0, 200, 100, 330, 30, 'F'));	
 
 		$this->addAftSystem(new GraviticThruster(5, 15, 0, 4, 2));
 		$this->addAftSystem(new GraviticThruster(5, 20, 0, 6, 2));
 		$this->addAftSystem(new GraviticThruster(5, 15, 0, 4, 2));
-        $this->addAftSystem(new PlasmaDriver(5, 6, 6, 120, 240));
+        $this->addAftSystem(new PlasmaArray(5, 8, 4, 90, 270));
         $this->addAftSystem(new SeekerTorp(5, 6, 5, 90, 270));
 		$this->addAftSystem(new ThirdspaceShield(0, 160, 80, 150, 210, 'A'));		
 		$this->addAftSystem(new JumpEngine(6, 25, 6, 8));        
 		
 		$this->addLeftSystem(new GraviticThruster(5, 15, 0, 4, 3));
 		$this->addLeftSystem(new GraviticThruster(5, 15, 0, 4, 3));
-        $this->addLeftSystem(new NeutronBlaster(5, 15, 8, 300, 60));
-        $this->addLeftSystem(new PlasmaDriver(5, 6, 6, 240, 360));
+        $this->addLeftSystem(new NeutronBeam(5, 14, 8, 300, 60));
+        $this->addLeftSystem(new PlasmaArray(5, 8, 4, 180, 360));
 		$this->addLeftSystem(new ThirdspaceShield(0, 300, 150, 210, 330, 'L'));			
 
 		$this->addRightSystem(new GraviticThruster(5, 15, 0, 4, 4));
 		$this->addRightSystem(new GraviticThruster(5, 15, 0, 4, 4));
-        $this->addRightSystem(new NeutronBlaster(5, 15, 8, 300, 60));
-        $this->addRightSystem(new PlasmaDriver(5, 6, 6, 0, 120));
+        $this->addRightSystem(new NeutronBeam(5, 14, 8, 300, 60));
+        $this->addRightSystem(new PlasmaArray(5, 8, 4, 0, 180));
  		$this->addRightSystem(new ThirdspaceShield(0, 300, 150, 30, 150, 'R'));
        
         $this->addFrontSystem(new Structure( 6, 80));
@@ -95,8 +95,8 @@ class systemLiberator extends BaseShip{
                 ),
                 1=> array(
                         5 => "Thruster",
-                        8 => "Neutron Blaster",
-						10 => "Plasma Driver",
+                        8 => "Neutron Beam",
+						10 => "Plasma Array",
 						12 => "Seeker Torpedo",
                         18 => "Structure",
                         20 => "Primary",
@@ -104,22 +104,22 @@ class systemLiberator extends BaseShip{
                 2=> array(
                         6 => "Thruster",
 						8 => "Jump Engine",
-                        10 => "Plasma Driver",
+                        10 => "Plasma Array",
 						12 => "Seeker Torpedo",
                         18 => "Structure",
                         20 => "Primary",
                 ),
                 3=> array(
                         5 => "Thruster",
-                        8 => "Neutron Blaster",
-						10 => "Plasma Driver",
+                        8 => "Neutron Beam",
+						10 => "Plasma Array",
                         18 => "Structure",
                         20 => "Primary",
                 ),
                 4=> array(
                         5 => "Thruster",
-                        8 => "Neutron Blaster",
-						10 => "Plasma Driver",
+                        8 => "Neutron Beam",
+						10 => "Plasma Array",
                         18 => "Structure",
                         20 => "Primary",
                 ),
