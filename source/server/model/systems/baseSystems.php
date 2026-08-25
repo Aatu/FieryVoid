@@ -6220,10 +6220,17 @@ class JumpEngine extends Weapon{
         $vortex = $this->spawnVortexUnit($ship, $hex, $facing, $gamedata);
         if (!$vortex) return;
 
+		//An undamaged drive never fails. Same measure doHyperspaceJump uses for the boost path.
+		$healthDiff = $this->maxhealth - $this->getRemainingHealth();
+
+		$missingHealthPercentage = round(($healthDiff / $this->maxhealth) * 100);
+		//Ancients have half the normal chance of Jump Engine failure. 
+		if($ship->factionAge >= 3) $missingHealthPercentage = round($missingHealthPercentage / 2);		
+
         $distance = $ship->getHexPos()->distanceTo($vortex->getHexPos());
         self::writeVortexLogOrder($ship, $gamedata,
             " opens a jump point " . $distance . ($distance == 1 ? " hex" : " hexes")
-            . " away. It forms at the end of this turn and can be entered from next turn.");
+            . " away. It forms at the end of this turn and can be entered from next turn. Chance of failure (" . $missingHealthPercentage . ").");
     }
 
     /* ⭐⭐ JUMP GATES (PHASE 2) - A FIXED GATE OPENS ONE OF THESE TOO, AND THE BODY IS SHARED.
@@ -6637,9 +6644,9 @@ class JumpEngine extends Weapon{
         self::writeVortexLogOrder($ship, $gamedata,
             " loses its jump point at the end of this turn - " . $reason . ".");
 
-        Debug::log("Jump vortex " . $this->activeVortexId . " (opened turn " . $this->vortexOpenTurn
+        /*Debug::log("Jump vortex " . $this->activeVortexId . " (opened turn " . $this->vortexOpenTurn
             . " by ship " . $ship->id . ", game " . $gamedata->id . ") closes at the end of turn "
-            . $gamedata->turn . " - " . $reason . ".");
+            . $gamedata->turn . " - " . $reason . ".");*/
     }
 
     /* Rebuild this engine's vortex state from the 'Vortex' notes it has written, and put each
@@ -6979,8 +6986,8 @@ class JumpEngine extends Weapon{
 		//this and would otherwise destroy the same ship a second time in the same phase.
 		$this->vortexFailureApplied = true;
 
-		Debug::log("Jump vortex failure: ship " . $ship->id . " (game " . $gamedata->id . ") destroyed"
-			. " at the end of turn " . $turn . " - " . $missingHealthPercentage . "% chance of failure.");
+		//Debug::log("Jump vortex failure: ship " . $ship->id . " (game " . $gamedata->id . ") destroyed"
+		//	. " at the end of turn " . $turn . " - " . $missingHealthPercentage . "% chance of failure.");
 	}
 
 	//True when the roll above has just destroyed this ship. Protected read for PhasingDrive.
@@ -7043,23 +7050,10 @@ class JumpEngine extends Weapon{
            thing, in the order a player meets it. */
         $recharge = max(1, (int)$this->delay);
 
-        $this->data["Special"]  = "<br><b>OPENING A JUMP POINT.</b> Select this system in Initial Orders and target a hex";
-        $this->data["Special"] .= " within " . $this->range . " hexes (line of sight required; the hex must be clear of terrain,";
-        $this->data["Special"] .= " other jump points and Enormous units). Set the vortex FACING with the on-map arrow, then";
-        $this->data["Special"] .= " confirm. The jump point forms at the end of that turn and can be entered from the NEXT turn.";
-        $this->data["Special"] .= "<br><b>USING IT.</b> In Movement, fly any unit into the jump point hex through the side the";
-        $this->data["Special"] .= " arrow points at, then press Jump to Hyperspace. Movement ends there and the unit leaves the";
-        $this->data["Special"] .= " battle keeping its full combat value. Any unit may use any open jump point, including an enemy's.";
-        $this->data["Special"] .= "<br><b>MAINTAINING IT.</b> Use the Jump Point ON/OFF switch in this system's menu each Initial";
-        $this->data["Special"] .= " Orders. It shuts the ship down for the turn - everything except the Scanner and this system -";
-        $this->data["Special"] .= " which is the price of holding the jump point open. A jump point lasts " . self::MAX_VORTEX_TURNS;
-        $this->data["Special"] .= " turns at most, and closes at the end of any turn it is not maintained, its holder ends more than";
-        $this->data["Special"] .= " " . $this->range . " hexes away, or its holder is destroyed or leaves the battle.";
-        $this->data["Special"] .= "<br><b>RECHARGE.</b> Opening a jump point spends the drive's whole charge. It recharges from the";
-        $this->data["Special"] .= " turn after that jump point closes, 1 per turn, and cannot open another until it reads " . $recharge . "/" . $recharge . ".";
-        $this->data["Special"] .= "<br><b>WARNING</b> - jumping to hyperspace REMOVES a unit from the rest of the battle.";
-        $this->data["Special"] .= "<br>A DAMAGED Jump Engine may fail: at the end of every turn it opens or maintains a jump point,";
-        $this->data["Special"] .= " the ship is destroyed on a d100 roll at or under the percentage of Jump Engine boxes lost.";
+        $this->data["Special"]  = "<br>Select this system in Initial Orders and target a hex within " . $this->range . " hexes.";
+        $this->data["Special"] .= "Set the vortex FACING with the on-map arrow, then confirm. The jump point forms at the end of that turn and can be entered from the NEXT turn.";
+        $this->data["Special"] .= "<br>A damaged Jump Engine may fail: at the end of every turn it opens or maintains a jump point, the ship is destroyed on a d100 roll at or under the percentage of Jump Engine boxes lost.";
+        $this->data["Special"] .= "<br>See FAQ for full rules for Jump Drives.";
         $this->data["Special"] .= "<br>SHOULD NOT be shut down for power (unless damaged >50% or if Desperate rules apply).";
 		/* ShipSystem, not parent. Weapon::setSystemDataWindow appends a gun's tooltip block -
 		   Damage, Fire control, Resolution Priority - which would be meaningless (and mostly zero)
@@ -7102,7 +7096,7 @@ class JumpEngine extends Weapon{
         $recharge = max(1, (int)$this->delay);
         $maxHold  = self::MAX_VORTEX_TURNS;
 
-        $this->data["Special"]  = "<br><b>SIGNALLING THE GATE.</b> In Initial Orders, CLICK THE GATE - no ship needs to be";
+        /*$this->data["Special"]  = "<br><b>SIGNALLING THE GATE.</b> In Initial Orders, CLICK THE GATE - no ship needs to be";
         $this->data["Special"] .= " selected. The button is offered if you have any live unit within " . $this->range . " hexes of it;";
         $this->data["Special"] .= " which unit does not matter, and NO line of sight is needed. Signalling never reveals a";
         $this->data["Special"] .= " stealthed, shaded or cloaked unit. ANY player may signal ANY gate, including one the enemy bought.";
@@ -7123,7 +7117,13 @@ class JumpEngine extends Weapon{
         $this->data["Special"] .= " turn to the recharge, every 15 points costs a turn off the longest hold, and losing the";
         $this->data["Special"] .= " reactor entirely destroys the gate.";
         $this->data["Special"] .= "<br>A DAMAGED Jump Engine may fail: at the end of a turn the gate opens a jump point, the gate";
-        $this->data["Special"] .= " is destroyed on a d100 roll at or under the percentage of Jump Engine boxes lost.";
+        $this->data["Special"] .= " is destroyed on a d100 roll at or under the percentage of Jump Engine boxes lost.";*/
+
+		$this->data["Special"]  = "<br>Gate can be signalled to open by any unit within " . $this->range . " hexes";
+        $this->data["Special"] .= "<br>Set how many turns to hold the jump point open - 1 to " . $maxHold . ". It cannot be changed afterwards and the jump point forms at the end of that turn and can be entered from the NEXT turn.";
+        $this->data["Special"] .= "<br>The vortex always takes the gate's OWN facing.";
+        $this->data["Special"] .= "<br>The gate's condition is its REACTOR. Every 3 points of damage on it adds a turn to the recharge, every 15 points costs a turn off the longest hold.";
+        $this->data["Special"] .= "<br>A Jump Engine may fail: at the end of a turn the gate opens a jump point, the gate is destroyed on a d100 roll at or under the percentage of Jump Engine boxes lost";
 
         /* ShipSystem, not parent - same reason as the ship branch: Weapon's block is a gun's
            Damage / Fire control / Priority rows, all meaningless here.
@@ -7135,6 +7135,17 @@ class JumpEngine extends Weapon{
         $this->data["Weapon type"]  = $this->weaponClass;
         $this->data["Signal range"] = $this->range;
     }
+
+	public function calculateHitBase($gamedata, $fireOrder)
+		{
+			$fireOrder->needed = 100; //always true
+			$fireOrder->updated = true;			
+		}              
+
+    public function fire($gamedata, $fireOrder)
+    {
+	        $fireOrder->rolled = 0; //To prevent animationa nd dispaly in Comabt Log 
+	}	
 
     /* STAGE 6 - THE PAYLOAD CARRIES TWO SEPARATE THINGS, BECAUSE THEY ARE TWO SEPARATE THINGS.
      *
