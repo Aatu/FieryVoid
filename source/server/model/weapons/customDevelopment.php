@@ -2255,6 +2255,7 @@ class spawnDustField extends Terrain {
 
 
 
+
 class SpatialCutter extends Weapon {
 
     public $name = "SpatialCutter";
@@ -2280,8 +2281,6 @@ class SpatialCutter extends Weapon {
     public $animationExplosionScale = 0.4;
 
     public $firingModes = array(1 => "Spatial Cutter");
-
-    public $pendingWaveformHexes = array();
 
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
@@ -2321,58 +2320,33 @@ class SpatialCutter extends Weapon {
 
         if ($fireOrder->shotshit > 0) {
             $shooter = $gamedata->getShipById($fireOrder->shooterid);
-            $target = $gamedata->getShipById($fireOrder->targetid);
+            $target  = $gamedata->getShipById($fireOrder->targetid);
 
             if ($shooter && $target) {
+                // Spawn waveform immediately along the line of fire.
+                // spawnTurn is set to the current turn so:
+                // - No collision damage on turn N (units already placed before firing)
+                // - Collision damage fires on turn N+1 when units move through the hex
+                // - beforePreFiringOrderResolution removes it on turn N+2
                 $lineHexes = self::getHexLine($shooter->getHexPos(), $target->getHexPos());
                 foreach ($lineHexes as $hex) {
-                    $this->individualNotes[] = new IndividualNote(
-                        -1, $gamedata->id,
-                        $gamedata->turn, $gamedata->phase,
-                        $fireOrder->shooterid, $this->id,
-                        'waveformHex_' . $gamedata->turn,
-                        'Waveform Hex Turn ' . $gamedata->turn,
-                        $hex->q . ',' . $hex->r
-                    );
-                }
-            }
-        }
-    }
-
-    public function onIndividualNotesLoaded($gamedata) {
-        foreach ($this->individualNotes as $note) {
-            if ($note->turn == $gamedata->turn - 1 && strpos($note->notekey, 'waveformHex_') === 0) {
-                $parts = explode(',', $note->notevalue);
-                if (count($parts) == 2) {
-                    $this->pendingWaveformHexes[] = new OffsetCoordinate((int)$parts[0], (int)$parts[1]);
-                }
-            }
-        }
-        $this->individualNotes = array();
-    }
-
-    public function beforePreFiringOrderResolution($gamedata) {
-        // Spawn waveform hexes saved from previous turn
-        if (!empty($this->pendingWaveformHexes)) {
-            $hexesToSpawn = $this->pendingWaveformHexes;
-            $this->pendingWaveformHexes = array();
-            $shooter = $this->getUnit();
-            if ($shooter) {
-                foreach ($hexesToSpawn as $hex) {
                     $this->spawnWaveformAtHex($gamedata, $shooter, $hex);
                 }
             }
         }
+    }
 
-        // Remove expired waveforms (spawned turn N, active turn N+1, gone turn N+2)
-        foreach ($gamedata->ships as $ship) {
-            if ($ship instanceof spawnHyperspaceWaveform) {
-                $ship->loadSpawnTurn();
-                if ($ship->spawnTurn > 0 && $gamedata->turn > $ship->spawnTurn + 1) {
-                    $structure = $ship->getSystemByName("Structure");
+    // Remove expired waveforms at the start of pre-firing on turn N+2.
+    // Waveform spawns on turn N, is active on turn N+1, removed on turn N+2.
+    public function beforePreFiringOrderResolution($gamedata) {
+        foreach ($gamedata->ships as $waveShip) {
+            if ($waveShip instanceof spawnHyperspaceWaveform) {
+                $waveShip->loadSpawnTurn();
+                if ($waveShip->spawnTurn > 0 && $gamedata->turn > $waveShip->spawnTurn + 1) {
+                    $structure = $waveShip->getSystemByName("Structure");
                     if ($structure && !$structure->isDestroyed()) {
                         $damageEntry = new DamageEntry(
-                            -1, $ship->id, $gamedata->id, $gamedata->turn, $structure->id,
+                            -1, $waveShip->id, $gamedata->id, $gamedata->turn, $structure->id,
                             $structure->maxhealth, 0, 0, -1, true, false,
                             "Waveform dissipated", "Standard"
                         );
@@ -2487,14 +2461,11 @@ class SpatialCutter extends Weapon {
     }
 }
 
-
-
-
-
 class spawnHyperspaceWaveform extends Terrain {
 
     public $terrainCollisionType = 'WaveformCollision';
     public $Enormous = true;
+	public $spawnTurn = 0; 
 
     function __construct($id, $userid, $name, $slot) {
         parent::__construct($id, $userid, $name, $slot);
@@ -2541,7 +2512,6 @@ class spawnHyperspaceWaveform extends Terrain {
         }
     }
 }
-
 
 
 

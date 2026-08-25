@@ -5,7 +5,7 @@ class triadPhantom extends FighterFlight {
         parent::__construct($id, $userid, $name, $slot);
 
         $this->pointCost = 390; 
-        $this->faction = "Custom Ships"; 
+        $this->faction = ""; 
         $this->phpclass = "triadPhantom";
         $this->shipClass = "Neutrality: Phantom Medium Fighter";
         $this->imagePath = "img/ships/triadPhantom.png";

@@ -1,12 +1,12 @@
 <?php
-class Triumviron extends BaseShip{
+class triadTriumviron extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 5175;
 		$this->faction = "";
-        $this->phpclass = "Triumviron";
+        $this->phpclass = "triadTriumviron";
         $this->shipClass = "The Triumviron";
         $this->imagePath = "img/ships/Triumviron2.png";
         $this->canvasSize = 200;
