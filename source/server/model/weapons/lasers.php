@@ -2073,8 +2073,8 @@ class PhotonicPrismBeam extends Weapon {
 	
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
-            $this->data["Special"] = "This weapon is capable of combining 3 basic shots into smaller number of more powerful ones:";
-            $this->data["Special"] .= "<br> Single shot: 1d10+4 damage, -10/hex";
+            $this->data["Special"] = "May fire 3 basic shots or combined into one more powerful shot:";
+            $this->data["Special"] .= "<br> Individual shots: 1d10+4 damage, -10/hex";
             $this->data["Special"] .= "<br> Combined shot: 3d10+4 damage, -1/hex";
         }
 	    

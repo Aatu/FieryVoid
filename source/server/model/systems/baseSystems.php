@@ -14837,9 +14837,9 @@ class CoopStructureSelfRepair extends StructureSelfRepair {
         parent::setSystemDataWindow($turn);
         $this->data["Special"] .= "<br>Cooperative: after repairing own structure, remaining points are used to repair "
                                  . "damaged structure blocks on friendly units within " . self::COOP_RANGE . " hexes.";
-        $this->data["Special"] .= "<br>Prioritises friendly units without any structure repair capability, then those with repair capability.";
+        $this->data["Special"] .= "<br>Prioritizes friendly units without any structure repair capability, then those with repair capability.";
         $this->data["Special"] .= "<br>Within each tier, destroyed blocks are repaired first, then most-damaged blocks.";
-        $this->data["Special"] .= "<br>Will not assist units whose primary structure is destroyed.";
+        $this->data["Special"] .= "<br>Cannot not assist units whose primary structure is destroyed.";
     }
 
     /* Returns true if a system is a functioning structure repair system (StructureSelfRepair or CoopStructureSelfRepair) */
@@ -14865,12 +14865,6 @@ class CoopStructureSelfRepair extends StructureSelfRepair {
 		}
 		return false;
 	}
-
-
-
-
-
-
 
     /* Returns true if a fighter flight is still viable (has surviving fighters after dropout) */
     private function isFlightViable($targetShip, $gamedata)
@@ -14921,14 +14915,6 @@ class CoopStructureSelfRepair extends StructureSelfRepair {
 		return $blocks;
 	}
 
-
-
-
-
-
-
-
-
     /* Apply repair points to a list of structure blocks. Returns points remaining. */
     private function repairBlocks($blocks, $availableRepairPoints, $ship, $gamedata)
     {
@@ -14973,10 +14959,13 @@ class CoopStructureSelfRepair extends StructureSelfRepair {
         parent::criticalPhaseEffects($ship, $gamedata);
 
         if ($this->isDestroyed()) return;
-
+error_log("CoopRepair DEBUG: getCurrentMaxRepairPoints=" . $this->getCurrentMaxRepairPoints() 
+    . " usedRepairPoints=" . $this->usedRepairPoints 
+    . " getEffectiveOutput=" . $this->getEffectiveOutput($ship));
         // Step 2: Check remaining points after self-repair
-        $availableRepairPoints = $this->getCurrentMaxRepairPoints() - $this->usedRepairPoints;
-        $availableRepairPoints = min($availableRepairPoints, $this->getEffectiveOutput($ship));
+//        $availableRepairPoints = $this->getCurrentMaxRepairPoints() - $this->usedRepairPoints;
+//        $availableRepairPoints = min($availableRepairPoints, $this->getEffectiveOutput($ship));
+		$availableRepairPoints = $this->getEffectiveOutput($ship) - $this->usedThisTurn;
         if ($availableRepairPoints < 1) return;
 
         // Step 3: Build eligible friendly target list

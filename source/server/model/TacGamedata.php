@@ -1623,7 +1623,8 @@ private function setWaiting() {
         foreach ($this->ships as $ship) {
             if($ship->isDestroyed()) continue;
 
-            if ($ship->Enormous) { // Only enormous units block LoS
+//            if ($ship->Enormous) { // Only enormous units block LoS
+			if ($ship->Enormous && !($ship instanceof spawnMeteoroid) && !($ship instanceof spawnDustField) && !($ship instanceof spawnHyperspaceWaveform)) { // Only enormous units block LoS, but not these terrain GTS_Change
                 $position = $ship->getHexPos();
                 $blockedHexes[] = $position;
 
@@ -1657,7 +1658,8 @@ private function setWaiting() {
             foreach ($this->ships as $ship) {
                 if($ship->isDestroyed()) continue;
 
-                if ($ship->Enormous) { // Only enormous units block LoS
+//                if ($ship->Enormous) { // Only enormous units block LoS
+if ($ship->Enormous && !($ship instanceof spawnMeteoroid) && !($ship instanceof spawnDustField) && !($ship instanceof spawnHyperspaceWaveform)) {
                     $position = $ship->getHexPos();
                     if (!$position) continue; // Skip if no position (e.g. in lobby/initialization)
 
