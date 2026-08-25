@@ -392,10 +392,26 @@ window.shipManager = {
         lastpos.y = Math.floor(lastpos.y + movement.yOffset * gamedata.zoom);
         return lastpos;
     },
-
+    /*
     onShipContextMenu: function onShipContextMenu(e) {
         var id = $(e).data("id");
         var ship = gamedata.getShip(id);
+    // REMOVED 2026-08-20: onShipContextMenu, doShipContextMenu, onShipDblClick,
+    // onShipClick and doShipClick. All five called window.shipSelectList, which was
+    // deleted along with source/public/client/UI/shipSelect.js in commit 7ea324de3
+    // ("delete unused files") — so every one of them would have thrown a
+    // ReferenceError on its first line.
+    //
+    // They never fired. Their ONLY binding site was createHexShipDiv (the oncontextmenu
+    // attribute and the .on("click") / .on("dblclick") handlers on .shipclickable), and
+    // that whole function sits inside the big commented-out block at the top of this
+    // file, which is why it is absent from the built bundle entirely. The WebGL
+    // renderer's map clicks go to PhaseStrategy.onShipClicked instead — a different
+    // function with a confusingly similar name, and the live path.
+    //
+    // Found via a colour audit: the .shipSelectList rules in tactical.css (removed in
+    // the same change) held the last two allegiance literals in the codebase sitting on
+    // no brightness tier, which is what led back here. See [[arch_team_colour_logic]].
 
         if (shipSelectList.haveToShowList(ship, e)) {
             shipSelectList.showList(ship);
@@ -472,6 +488,8 @@ window.shipManager = {
         drawEntities();
         //scrolling.scrollToShip(ship);
     },
+    */
+
 
     getPrimaryCnC: function getPrimaryCnC(ship) {
         var cncs = [];
@@ -514,16 +532,95 @@ window.shipManager = {
         return false;
     },
 
+    /* ⭐ JUMP_POINTS_PLAN.md Stage 6 - "THIS UNIT IS ON ITS WAY OUT", as a client-only marker.
+     *
+     * A PLANNED departure had nothing to show for itself. Under the retired boost-to-jump rules
+     * the ship window lit up the moment the Jump Engine was boosted; the vortex rules replaced
+     * that with two separate gestures a turn or more apart, and neither said anything about the
+     * unit making them (user request 2026-08-22). Both are answered here:
+     *
+     *   1. THE DECLARATION - this turn's Jump Engine order at a hex (firing modes 1-6, the vortex
+     *      facings; mode 7 is Maintain, which is about keeping a jump point open rather than
+     *      going through one). Removing the fire order removes the marker, because the order IS
+     *      the marker - there is no flag anywhere to keep in step.
+     *   2. THE PLOTTED JUMP-OUT - a 'jumpout' movement order this unit has drawn but not yet
+     *      committed. Once it IS committed the fleet list, the map sprite and the ship row all
+     *      change together (hasCommittedJumpOut), so the banner has done its job and stands down.
+     *
+     * Purely presentational, and deliberately NOT own-ship-only: a declaration is public from the
+     * moment Initial Orders close (TacGamedata::hideSystemFireOrders masks it during phase 1 only)
+     * and the yellow "Jump Point Forming" hex is on everyone's map, so this discloses nothing that
+     * is not already drawn.
+     *
+     * Guarded on weaponManager because ships.js is loaded by the LOBBY as well, where it does not
+     * exist and no ship has orders of any kind.
+     */
+    isJumpingToHyperspace: function isJumpingToHyperspace(ship) {
+        if (!ship || typeof gamedata === 'undefined') return false;
+        if (gamedata.gamephase === -2) return false;   //lobby
+
+        if (shipManager.movement.hasJumpedOut(ship) && !shipManager.movement.hasCommittedJumpOut(ship)) return true;
+        /*
+        if (typeof weaponManager === 'undefined') return false;
+
+        for (var i in ship.systems) {
+            var system = ship.systems[i];
+            if (!system || system.name !== 'jumpEngine') continue;
+
+            for (var f in system.fireOrders) {
+                var fire = system.fireOrders[f];
+                if (fire.turn != gamedata.turn) continue;
+                var mode = parseInt(fire.firingMode, 10);
+                if (mode >= 1 && mode <= 6) return true;   //an OPENING declaration, not Maintain (7)
+            }
+        }
+        */
+        return false;
+    },
+
     //Used by RelayAnimationStrategy/fleetList to check if ship has jumped, if so different destroyed sprite/entry
     hasJumpedNotDestroyed: function (ship) {
-        var hasJumped = false;
+        /* JUMP_POINTS_PLAN.md Stage 6 - A FLIGHT HAS NO PRIMARY STRUCTURE, so the hull test below
+           cannot answer for one. Movement::applyJumpOut takes a flight off the board by destroying
+           every CRAFT with a HyperspaceJump entry instead, so that is what is asked here: some
+           craft carries a jump entry, and the damage that is NOT jump damage left at least one
+           craft alive - i.e. the flight was still flying when it went. Mirror of
+           FighterFlight::hasJumpedToHyperspace, which is authoritative.
+
+           This is the flight jumping under its OWN power. A DOCKED flight carried out inside a
+           jumping carrier is a different question with a different answer - jumpedWithCarrier, or
+           fleetListManager.getJumpedDockedFlightIds - because nothing on that flight is damaged
+           at all. */
+        if (ship.flight) {
+            var anyJumped = false;
+            var anySurvivor = false;
+
+            for (var f in ship.systems) {
+                var craft = ship.systems[f];
+                if (!craft || !craft.damage) continue;
+
+                var craftJumped = false;
+                var craftNonJump = 0;
+                for (var d in craft.damage) {
+                    var craftDamage = craft.damage[d];
+                    if (craftDamage.damageclass === 'HyperspaceJump') {
+                        craftJumped = true;
+                        continue;
+                    }
+                    craftNonJump += Math.max(0, craftDamage.damage - craftDamage.armour);
+                }
+
+                if (craftJumped) {
+                    anyJumped = true;
+                    if (craftNonJump < craft.maxhealth) anySurvivor = true;
+                }
+            }
+
+            return anyJumped && anySurvivor;
+        }
+
         // Check if the ship has a jump engine
         const jumpEngine = shipManager.systems.getSystemByName(ship, "jumpEngine");
-
-        // If no jump engine, ship cannot jump
-        if (!jumpEngine) {
-            return false;
-        }
 
         // Check if the jump engine is boosted
         //var boostedJump = shipManager.power.isBoosted(ship, jumpEngine);
@@ -531,17 +628,30 @@ window.shipManager = {
 
         //Check damage entries, and remove Hyperspace jump entry, to see if ship was 'destroyed' by jumping not actual damage.	    
         var struct = shipManager.systems.getStructureSystem(ship, 0);
+        if (!struct) return false;
         var maxHealth = struct.maxhealth;
         var totalDamage = 0;
         var thisDamage = null;
+        var jumpEntry = false;
         for (var i in struct.damage) {
             thisDamage = struct.damage[i];
-            if (thisDamage.damageclass !== 'HyperspaceJump') totalDamage += Math.max(0, thisDamage.damage - thisDamage.armour); //Only count non-jump damage, as jumping destroys ship anyway.
+            if (thisDamage.damageclass === 'HyperspaceJump') {
+                jumpEntry = true;
+                continue; //Only count non-jump damage, as jumping destroys ship anyway.
+            }
+            totalDamage += Math.max(0, thisDamage.damage - thisDamage.armour);
         }
+
+        /* A unit with NO jump engine can still leave through somebody else's open jump vortex
+           (JUMP_POINTS_PLAN.md Stage 4, section 2.5), so the engine can no longer be the gate.
+           It is replaced by a stricter test rather than simply dropped: without either, any
+           destroyed unit whose primary structure was not what killed it - a collision, a captured
+           hull - would read as having jumped. Mirrors BaseShip::hasJumpedToHyperspace. */
+        if (!jumpEngine && !jumpEntry) return false;
 
         if (totalDamage < maxHealth) return true; //The other damage sustained has not destroyed this ship, jumping has.
 
-        return hasJumped;
+        return false;
     },
 
 
@@ -551,14 +661,29 @@ window.shipManager = {
             return;
         }
 
-        if (ship.destroyed) return true; // Early exit if server-side status is already set - DK 04/26
-
         // Hangar Ops Stage 5: a docked flight has $removed=true; treat as
         // destroyed for filtering purposes (icon hide, target list exclusion,
         // hex-occupancy). The destruction explosion is keyed off
         // damageManager.getTurnDestroyed (turn-of-damage record), which we
         // never write for docked flights — so no explosion fires.
         if (ship.removed) return true;
+
+        return shipManager.isDestroyedByDamage(ship);
+    },
+
+    /* The same question asked of the DAMAGE ALONE, without the docked-in-a-hangar
+       shortcut above. A docked flight or a rail-parked LCV is not a wreck — it is a
+       live unit parked out of sight — so the handful of callers that have to tell
+       "gone" from "stowed" apart (Save Fleet, ajaxInterface.isSaveableFleetShip) ask
+       this instead. Everything else wants isDestroyed and its Stage 5 shortcut.
+       Mirrors BaseShip::isDestroyed minus its own $removed line. */
+    isDestroyedByDamage: function isDestroyedByDamage(ship) {
+
+        if (ship == null) {
+            return;
+        }
+
+        if (ship.destroyed) return true; // Early exit if server-side status is already set - DK 04/26
 
         if (ship.flight) {
             for (var i in ship.systems) {
@@ -1003,6 +1128,13 @@ window.shipManager = {
     //Generic function called from various front end functions.  Checks if ships should be shown/interactable or not.
     shouldBeHidden: function (ship) {
         if (!gamedata.replay && shipManager.isDestroyed(ship)) return true; //Prevents lots of things from happening when a ship collides and dies to Terrain.
+        /* A unit that has COMMITTED a jump-out has left the battle (JUMP_POINTS_PLAN.md section 2.5).
+           The server does not remove it until the end of the Movement phase, but movement is
+           sequential - so without this it sits in the vortex as a ghost while everyone else takes
+           their turn, and the players plotting after it cannot tell it has already gone.
+           Live play only: in REPLAY the unit has to be seen flying INTO the vortex before it
+           vanishes, and the destroyed check above takes over there. */
+        if (!gamedata.replay && shipManager.movement.hasCommittedJumpOut(ship)) return true;
         if (shipManager.getTurnDeployed(ship) > gamedata.turn) {
             /* Not deployed yet - with ONE exception. Reinforcements pick their entry hex during
                the Deployment phase of the turn BEFORE they arrive (shipManager.getTurnPlaced), so

@@ -39,6 +39,7 @@ class KobolOrion extends MediumShip{
 		$this->addPrimarySystem(new Thruster(3, 9, 0, 3, 4));        
 		$hyperdrive = new JumpEngine(3, 12, 6, 20);
 			$hyperdrive->displayName = 'FTL Drive';
+			$hyperdrive->markLegacy(); //JUMP_POINTS_PLAN.md section 9 - this setting jumps by boost, not by vortex
 			$this->addPrimarySystem($hyperdrive);
 
 		$this->addFrontSystem(new Hangar(3, 9));

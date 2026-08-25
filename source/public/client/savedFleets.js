@@ -14,9 +14,10 @@
 
 window.savedFleets = {
 
-	/* Units the current save would write: the viewer's own SURVIVING ships, minus the
-	   mid-battle artefacts a fleet list has no use for. Mirrors the filter
-	   constructSavedShips itself applies, so the summary line cannot drift from it. */
+	/* Units the current save would write: the viewer's own SURVIVING ships - those on the
+	   board AND those stowed in a hangar - minus the mid-battle artefacts a fleet list has no
+	   use for. Mirrors the filter constructSavedShips itself applies, so the summary line
+	   cannot drift from it. */
 	saveableShips: function saveableShips() {
 		var ships = [];
 		for (var i in gamedata.ships) {
@@ -25,15 +26,18 @@ window.savedFleets = {
 		return ships;
 	},
 
-	/* {saveable, excluded, present} — how many of the viewer's units will and will not be
-	   written, and whether they have any units here at all.
+	/* {saveable, excluded, docked, present} — how many of the viewer's units will and will
+	   not be written, how many of the written ones are sitting in a hangar, and whether they
+	   have any units here at all.
 	   `present` answers canSaveCurrentFleet's question in the SAME walk, because this runs
 	   on every gamedata poll (see refreshSavePanel) and two passes over the ship list for
 	   two closely-related counts is one pass too many. It counts phantom sheets, exactly as
-	   canSaveCurrentFleet does; `saveable`/`excluded` do not. */
+	   canSaveCurrentFleet does; `saveable`/`excluded` do not.
+	   `docked` is called out separately because those units are INVISIBLE on the board - the
+	   whole reason they used to be missed - so the panel has to say they are in the count. */
 	saveSummary: function saveSummary() {
-		var saveable = 0, owned = 0, present = 0;
-		if (!window.gamedata || !gamedata.ships) return { saveable: 0, excluded: 0, present: false };
+		var saveable = 0, owned = 0, present = 0, docked = 0;
+		if (!window.gamedata || !gamedata.ships) return { saveable: 0, excluded: 0, docked: 0, present: false };
 
 		for (var i in gamedata.ships) {
 			var ship = gamedata.ships[i];
@@ -41,9 +45,11 @@ window.savedFleets = {
 			present++;
 			if (ship.id < 0) continue;   //Chameleon phantom sheet - not a unit the player owns
 			owned++;
-			if (ajaxInterface.isSaveableFleetShip(ship)) saveable++;
+			if (!ajaxInterface.isSaveableFleetShip(ship)) continue;
+			saveable++;
+			if (ship.removed) docked++;
 		}
-		return { saveable: saveable, excluded: owned - saveable, present: present > 0 };
+		return { saveable: saveable, excluded: owned - saveable, docked: docked, present: present > 0 };
 	},
 
 	/* The viewer has units in this game at all? That, not the phase, is what gates the
@@ -119,7 +125,7 @@ window.savedFleets = {
 		var summary = savedFleets.saveSummary();
 		var hasFleet = summary.present;
 
-		var state = hasFleet + "/" + summary.saveable + "/" + summary.excluded;
+		var state = hasFleet + "/" + summary.saveable + "/" + summary.excluded + "/" + summary.docked;
 		if (state === savedFleets.panelState) return;
 		savedFleets.panelState = state;
 
@@ -135,10 +141,16 @@ window.savedFleets = {
 			text = "You have no units in this game.";
 		} else {
 			text = summary.saveable + (summary.saveable === 1 ? " unit" : " units") + " will be saved";
-			if (summary.excluded > 0) {
+			//Spelled out because a docked unit is nowhere to be seen on the board - without
+			//this the count reads as too high and looks like a bug rather than the fix.
+			if (summary.docked > 0) {
+				text += " (including " + summary.docked
+					+ (summary.docked === 1 ? " in a hangar" : " in hangars") + ")";
+			}
+			/*if (summary.excluded > 0) {
 				text += "; " + summary.excluded + " destroyed or departed "
 					+ (summary.excluded === 1 ? "unit is" : "units are") + " excluded";
-			}
+			}*/
 			text += ".";
 		}
 		$("#fleetSaveSummary").text(text);

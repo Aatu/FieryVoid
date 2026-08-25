@@ -45,6 +45,7 @@ class ColonialTigerClassAM extends HeavyCombatVessel{
         $this->addPrimarySystem(new BSGFlakBattery(4, 6, 2, 0, 360));
         $hyperdrive = new JumpEngine(3, 12, 6, 20);
 			$hyperdrive->displayName = 'Hyperdrive';
+			$hyperdrive->markLegacy(); //JUMP_POINTS_PLAN.md section 9 - this setting jumps by boost, not by vortex
 			$this->addPrimarySystem($hyperdrive);
         
         $this->addFrontSystem(new Thruster(5, 8, 0, 3, 1));

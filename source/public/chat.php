@@ -90,13 +90,52 @@ $chatcompact = !empty($chatcompact);
        of an undifferentiated wall of faces is not. Kept to what people actually
        reach for in a game chat — this is a wargame's message bar, not a keyboard.
 
+       Each entry is [glyph, name]. The name is the hover tooltip and the key's
+       aria-label; a PAIR rather than a parallel glyph->name map so that adding a
+       glyph cannot leave it nameless, and so nothing depends on two copies of a
+       variation-selector sequence ("⚔️" is two code points) matching by eye.
+
+       ⚠️ Nothing newer than Emoji 12 (2019). Windows 10's Segoe UI Emoji stops
+       there, so an Emoji 14 glyph — the U+1FAxx faces and hands — renders as a
+       tofu box for a large share of the players. A saluting face (U+1FAE1) sat
+       in Gestures until Aug 2026 doing exactly that; "o7" resolves to 🖖 now.
+
        Anything in here is stored as an HTML numeric entity by the server (see
        ChatManager::submitChatMessage), so it survives a 3-byte utf8 column. */
     const EMOJI_GROUPS = [
-        { label: "Reactions", emoji: ["🙂","😀","😄","😆","🤣","😉","😍","😎","🤔","😐","🙄","😏","😴","😢","😭","😤","😡","🤯","😱","🥳"] },
-        { label: "Gestures",  emoji: ["👍","👎","👌","✌️","🤞","👏","🙏","💪","🫡","🖖","👀","🤷","🤦","👋","🤝"] },
-        { label: "Battle",    emoji: ["🚀","🛸","🛰️","🌌","⭐","💫","☄️","🔥","💥","⚡","🎯","🛡️","⚔️","💣","☠️","💀","🔧","⚙️","📡","🔋"] },
-        { label: "Signals",   emoji: ["✅","❌","❓","❗","⚠️","🎲","🏆","🥇","❤️","💔","🍺","🎉","⏳","🆘"] }
+        { label: "Reactions", emoji: [
+            ["🙂", "Slight smile"],    ["😀", "Grinning"],         ["😄", "Grinning, big eyes"],
+            ["😆", "Squinting laugh"], ["🤣", "Rolling on floor"], ["😉", "Wink"],
+            ["😍", "Heart eyes"],      ["😎", "Sunglasses"],       ["😛", "Tongue out"],
+            ["🤔", "Thinking"],        ["😮", "Surprised"],        ["😐", "Neutral"],
+            ["🙄", "Rolling eyes"],    ["😏", "Smirk"],            ["😴", "Sleeping"],
+            ["🙁", "Slight frown"],    ["😢", "Crying"],           ["😭", "Sobbing"],
+            ["😤", "Steam from nose"], ["😡", "Enraged"],          ["🤯", "Mind blown"],
+            ["😱", "Screaming"],       ["🥳", "Partying"]
+        ] },
+        { label: "Gestures", emoji: [
+            ["👍", "Thumbs up"],       ["👎", "Thumbs down"],      ["👌", "OK hand"],
+            ["✌️", "Victory"],          ["🤞", "Fingers crossed"],  ["👏", "Clapping"],
+            ["🙏", "Folded hands"],    ["💪", "Flexed biceps"],    ["🙌", "Raising hands"],
+            ["🖖", "Vulcan salute"],   ["👀", "Eyes"],             ["🤷", "Shrug"],
+            ["🤦", "Facepalm"],        ["👋", "Waving"],           ["🤝", "Handshake"]
+        ] },
+        { label: "Battle", emoji: [
+            ["🚀", "Rocket"],          ["🛸", "Flying saucer"],    ["🛰️", "Satellite"],
+            ["🌌", "Milky Way"],       ["⭐", "Star"],              ["💫", "Dizzy"],
+            ["☄️", "Comet"],            ["🔥", "Fire"],             ["💥", "Explosion"],
+            ["⚡", "High voltage"],     ["🎯", "Direct hit"],       ["🛡️", "Shield"],
+            ["⚔️", "Crossed swords"],   ["💣", "Bomb"],             ["☠️", "Skull and bones"],
+            ["💀", "Skull"],           ["🔧", "Wrench"],           ["⚙️", "Gear"],
+            ["📡", "Dish antenna"],    ["🔋", "Battery"]
+        ] },
+        { label: "Signals", emoji: [
+            ["✅", "Check mark"],       ["❌", "Cross mark"],        ["❓", "Question"],
+            ["❗", "Exclamation"],      ["⚠️", "Warning"],           ["🎲", "Die"],
+            ["🏆", "Trophy"],          ["🥇", "Gold medal"],       ["❤️", "Red heart"],
+            ["💔", "Broken heart"],    ["🍺", "Beer"],             ["🎉", "Party popper"],
+            ["⏳", "Hourglass"],        ["🆘", "SOS"]
+        ] }
     ];
 
     /* Classic text smileys, swapped for the real thing as the message is sent (so
@@ -114,7 +153,7 @@ $chatcompact = !empty($chatcompact);
         "xD": "😆",   "XD": "😆",
         "<3": "❤️",
         "\\o/": "🙌",
-        "o7": "🫡"
+        "o7": "🖖"
     };
 
     /* Only matched when the token stands alone between spaces, so "10:00" and a
@@ -129,6 +168,73 @@ $chatcompact = !empty($chatcompact);
               .join("|") +
         ")(?=\\s|$)", "g"
     );
+
+    /* The same table read backwards: glyph -> the token a player would type for it.
+       The picker's tooltips are the only place the emoticons are advertised, so this
+       is how anyone finds out ":)" works at all.
+
+       Several tokens share a glyph (":-)" and ":)" are both 🙂). The SHORTEST wins,
+       and ties keep the one declared first — which is what makes 😛 show ":P" rather
+       than ":p". Derived rather than written out so the two can never disagree. */
+    const EMOTICON_FOR = (function(){
+        var out = {};
+        Object.keys(EMOTICONS).forEach(function(token){
+            var glyph = EMOTICONS[token];
+            if (!out[glyph] || token.length < out[glyph].length) out[glyph] = token;
+        });
+        return out;
+    })();
+
+    /* ── The key tooltip ──────────────────────────────────────────────────────
+       Hovering a key names the glyph and, where one exists, shows the text token
+       that produces it — the picker is the only place the emoticon table is ever
+       advertised, so without this nobody finds out ":)" works.
+
+       ONE element, on <body>, shared by both of game.php's includes and positioned
+       `fixed` from the hovered key's own rect. It cannot live inside the picker:
+       .chatEmojiPanel is overflow-y: auto, and a box that clips one axis clips
+       both, so a tooltip drawn over the top row of keys lost its head — the same
+       clipping that put the picker in the flex flow rather than in a popup. */
+    var CAN_HOVER = !window.matchMedia || window.matchMedia("(hover: hover)").matches;
+
+    function emojiTipEl(){
+        if (!window.fvChatEmojiTip){
+            window.fvChatEmojiTip = $(
+                '<div class="fvChatEmojiTip" hidden>' +
+                    '<span class="fvChatEmojiTipName"></span>' +
+                    '<span class="fvChatEmojiTipCode" hidden></span>' +
+                '</div>'
+            ).appendTo(document.body);
+        }
+        return window.fvChatEmojiTip;
+    }
+
+    function showEmojiTip(key){
+        var code = key.attr("data-emoji-code") || "";
+        var tip  = emojiTipEl();
+
+        tip.find(".fvChatEmojiTipName").text(key.attr("data-emoji-name") || "");
+        tip.find(".fvChatEmojiTipCode").text(code).prop("hidden", !code);
+        tip.prop("hidden", false);
+
+        /* Measured only once it is displayable, then clamped to the window. Every
+           host docks the chat to an edge: the top row of a picker at the foot of
+           the page has room above it, but the first key of a narrow in-game panel
+           is close enough to the left edge that a centred tooltip would hang off. */
+        var r = key[0].getBoundingClientRect();
+        var w = tip.outerWidth();
+        var h = tip.outerHeight();
+
+        var left = Math.min(r.left + r.width / 2 - w / 2, window.innerWidth - w - 4);
+        var top  = r.top - h - 6;
+        if (top < 4) top = r.bottom + 6;            // no room above: sit under the key
+
+        tip.css({ left: Math.round(Math.max(4, left)) + "px", top: Math.round(top) + "px" });
+    }
+
+    function hideEmojiTip(){
+        if (window.fvChatEmojiTip) window.fvChatEmojiTip.prop("hidden", true);
+    }
 
     /* ── Shared poll coordinator ──────────────────────────────────────────────
        game.php includes this file TWICE — global chat and this game's chat — and each
@@ -363,9 +469,23 @@ $chatcompact = !empty($chatcompact);
                 var g = $('<div class="chatEmojiGroup"></div>');
                 $('<div class="chatEmojiGroupLabel"></div>').text(group.label).appendTo(g);
                 var grid = $('<div class="chatEmojiGrid"></div>').appendTo(g);
-                group.emoji.forEach(function(glyph){
+                group.emoji.forEach(function(entry){
+                    var glyph = entry[0];
+                    var name  = entry[1];
+                    var code  = EMOTICON_FOR[glyph] || "";
+
+                    /* Name and token ride on the button as data attributes. The hover
+                       handler below is delegated, so the alternative is finding the
+                       entry again by glyph on every mouseenter — the variation-selector
+                       string comparison that the [glyph, name] pairs exist to avoid.
+
+                       The aria-label carries the same two facts for a screen reader,
+                       which gets nothing from a tooltip and nothing useful from the
+                       glyph it used to be given. */
                     $('<button type="button" class="chatEmojiKey" tabindex="-1"></button>')
-                        .attr("aria-label", "Insert " + glyph)
+                        .attr("aria-label", "Insert " + name + (code ? ", typed as " + code : ""))
+                        .attr("data-emoji-name", name)
+                        .attr("data-emoji-code", code)
                         .text(glyph)
                         .appendTo(grid);
                 });
@@ -389,6 +509,18 @@ $chatcompact = !empty($chatcompact);
                 chat.insertAtCaret($(this).text());
             });
 
+            /* Mouse only. A tap fires mouseenter with nothing to fire the matching
+               mouseleave, so on a touch screen the tooltip would just stick over the
+               keys; those players get the label through the aria-label instead. */
+            if (CAN_HOVER){
+                panel.on("mouseenter", ".chatEmojiKey", function(){ showEmojiTip($(this)); });
+                panel.on("mouseleave", ".chatEmojiKey", hideEmojiTip);
+
+                // The tooltip is placed from the key's VIEWPORT rect, so scrolling the
+                // picker slides the key out from under a tooltip that stays put.
+                panel.on("scroll", hideEmojiTip);
+            }
+
             // Anything outside this chat's own composer or picker closes its own panel.
             // Each include registers its own handler; they do not fight, because each
             // only ever looks at (and closes) its own element.
@@ -411,6 +543,9 @@ $chatcompact = !empty($chatcompact);
 
             panel.prop("hidden", !show);
             button.attr("aria-expanded", show ? "true" : "false");
+
+            // Closing the picker leaves no key to mouseleave off.
+            hideEmojiTip();
 
             // The picker takes its height out of the message list, so the list is a
             // different size either side of this — without re-pinning it, opening the

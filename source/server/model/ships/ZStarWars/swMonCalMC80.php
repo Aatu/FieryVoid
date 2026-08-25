@@ -40,6 +40,7 @@ class swMonCalMC80 extends BaseShip{
 	$this->addPrimarySystem(new SWRayShield(3,10,5,2,0,180)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$hyperdrive = new JumpEngine(5, 24, 8, 20);
 	$hyperdrive->displayName = 'Hyperdrive';
+	$hyperdrive->markLegacy(); //JUMP_POINTS_PLAN.md section 9 - this setting jumps by boost, not by vortex
 	$this->addPrimarySystem($hyperdrive);
 	$this->addPrimarySystem(new Hangar(3, 36, 12));
          

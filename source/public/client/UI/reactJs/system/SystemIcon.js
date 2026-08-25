@@ -73,6 +73,8 @@ const System = styled.div`
    border: ${props => {
         if (props.$firing && props.$calledShot) {
             return '2px solid #ff3366'; // Called shot - magenta border
+        } else if (props.$firing && props.$intercepting) {
+            return '1px solid #52b352'; // Interception only - green, not the offensive orange
         } else if (props.$firing) {
             return '1px solid #eb5c15';
         } else if (props.$orderPending) {
@@ -90,6 +92,8 @@ const System = styled.div`
      background-color:  ${props => {
         if (props.$selected) {
             return '#4e6c91';
+        } else if (props.$firing && props.$intercepting) {
+            return '#2f7a3a'; //green - this weapon has committed to interception only
         } else if (props.$firing) {
             return '#e06f01'; //orange
         } else if (props.$off) {
@@ -109,6 +113,8 @@ const System = styled.div`
             return '0px 0px 15px #0099ff';
         } else if (props.$firing && props.$calledShot) {
             return '0px 0px 12px #ff3366'; // Called shot glow
+        } else if (props.$firing && props.$intercepting) {
+            return '0px 0px 15px #52b352'; // Interception-only glow
         } else if (props.$firing) {
             return 'box-shadow: 0px 0px 15px #eb5c15';
         } else if (props.$orderPending) {
@@ -239,8 +245,15 @@ class SystemIcon extends React.Component {
         var spentLockedAugmenter = system.weapon
             && typeof system.isSpentLocked === 'function' && system.isSpentLocked();
 
+        //The trailing clause is manual interception (MANUAL_INTERCEPTION_PLAN.md §4.7a): a missile
+        //rack carrying Interceptor missiles is intercept-capable but BALLISTIC, so the phase-3
+        //clause above refuses it and the player could never select it to hand-assign. The predicate
+        //is narrow - Firing phase, own undamaged powered loaded weapon with an intercept rating in
+        //some mode, nothing fired this turn, and a round in the magazine - so it can only ever ADD
+        //the weapons this feature exists for.
         if (!spentLockedAugmenter
-            && (system.weapon && (gamedata.gamephase === 3 && !system.ballistic && !system.preFires) || (gamedata.gamephase === 1 && system.ballistic) || (gamedata.gamephase === 5 && system.preFires))) {
+            && (system.weapon && (gamedata.gamephase === 3 && !system.ballistic && !system.preFires) || (gamedata.gamephase === 1 && system.ballistic) || (gamedata.gamephase === 5 && system.preFires)
+                || weaponManager.canManuallyInterceptWith(ship, system))) {
             //cannoct SELECT weapon when unit is adrift though!
             if (!shipManager.isAdrift(ship)) {
                 if (gamedata.isMyShip(ship)) {
@@ -254,9 +267,38 @@ class SystemIcon extends React.Component {
                         && weaponManager.hasFiringOrder(ship, system)) {
                         if (system.reopenSpecialTargeting(ship)) return;
                     }
+                    //A weapon that has already committed its shot is not selectable again -
+                    //cancel the order first. selectAllWeapons has always applied this rule
+                    //(the right-click "all similar weapons" route skips such a weapon); the
+                    //single icon click never did, so the weapon joined gamedata.selectedSystems
+                    //and reappeared in the tooltip's TARGETING list as though it were still
+                    //available (user report 2026-08-24). Worse than cosmetic: targetShip does
+                    //not screen its selection for existing orders, so the next click on a
+                    //target would have declared a SECOND order for it.
+                    //
+                    //Three deliberate exemptions, matching selectAllWeapons plus one:
+                    //  canSplitShots      - shots are declared one at a time, so an existing
+                    //                       order says nothing about the remaining guns.
+                    //  hasSpecialTargeting - a Hypergraviton Blaster re-click EDITS its order
+                    //                       (see the reopen divert just above, and
+                    //                       gravitic.js's own select-to-edit call).
+                    //  a "self" order      - a selfIntercept marker is an OFFER to the
+                    //                       automation, not a committed shot. It has to stay
+                    //                       selectable or the manual-interception conversion
+                    //                       (MANUAL_INTERCEPTION_PLAN.md §4.4) loses its input:
+                    //                       declareManualIntercept trades the marker for a
+                    //                       targeted order off gamedata.selectedSystems.
+                    //                       hasFiringOrder returns the STRING "self" for these,
+                    //                       which is truthy - test the value, not its truthiness.
+                    var existingOrder = weaponManager.hasFiringOrder(ship, system);
+                    var committed = existingOrder && existingOrder !== "self"
+                        && !system.canSplitShots && !system.hasSpecialTargeting;
+
                     if (weaponManager.isSelectedWeapon(system)) {
+                        //Unselect is never blocked: whatever put it in the selection, the
+                        //player must be able to take it out again.
                         weaponManager.unSelectWeapon(ship, system);
-                    } else {
+                    } else if (!committed) {
                         weaponManager.selectWeapon(ship, system);
                     }
                 }
@@ -487,6 +529,7 @@ class SystemIcon extends React.Component {
                 $loadedAlternate={isLoadedAlternate(system)} //alternate mode ready while primary is not
                 $selected={isSelected(system)}
                 $firing={isFiring(ship, system)}
+                $intercepting={isIntercepting(ship, system)}
                 $calledShot={isCalledShot(ship, system)}
                 $boosted={isBoosted(ship, system)}
                 $off={isOff(system)}
@@ -523,6 +566,15 @@ const renderBadges = (ship, system) => {
 //border — its committed order is not being fired/edited in the current phase (see isSpentLocked).
 const isFiring = (ship, system) => weaponManager.hasFiringOrder(ship, system)
     && !(typeof system.isSpentLocked === 'function' && system.isSpentLocked());
+
+/* A weapon whose entire contribution this turn is DEFENSIVE - one or more manual 'intercept'
+   orders, or a 'selfIntercept' permission marker, and nothing aimed at anyone - reads GREEN rather
+   than the offensive orange. It has committed itself either way, so it still counts as $firing;
+   only the colour differs, which is the whole point: at a glance the player can see which weapons
+   they have held back for interception. A weapon that mixes an offensive shot with a manual
+   intercept (a split-shot mount spending one gun each way) stays orange - it IS shooting at
+   someone. */
+const isIntercepting = (ship, system) => weaponManager.isInterceptOnly(ship, system);
 
 const isCalledShot = (ship, system) => {
     if (!system.weapon || !weaponManager.hasFiringOrder(ship, system)) return false;
@@ -617,6 +669,21 @@ const getText = (ship, system) => {
         //tick rather than a misleading load counter or crosshair (the icon is dimmed via isLoading).
         if (typeof system.isSpentLocked === 'function' && system.isSpentLocked()) {
             return "✓"; // ✓
+        }
+
+        /* JUMP_POINTS_PLAN.md Stage 6 - a Jump Engine holding a jump point open counts the JUMP
+           POINT (turns open, out of four) instead of its own charge, which is the number that
+           matters while one stands. JumpEngine.getVortexIconLoad returns null the rest of the
+           time, so the engine falls through to the ordinary "charge / recharge time" display -
+           16/16 at the start of a scenario, 0/16 the turn it opens one, climbing again from the
+           turn after it closes.
+
+           BEFORE the firing branch on purpose: a maintaining engine holds a mode-7 order all turn,
+           and that branch has nothing to return for a weapon that cannot change shots and was not
+           a called shot, so the icon came out blank.*/
+        if (typeof system.getVortexIconLoad === 'function') {
+            const vortexLoad = system.getVortexIconLoad();
+            if (vortexLoad !== null && vortexLoad !== undefined) return vortexLoad;
         }
 
         const firing = weaponManager.hasFiringOrder(ship, system);
@@ -792,7 +859,10 @@ if (shipManager.criticals.hasCriticals(system)) {
            systemwindow.removeClass("ballistic");
        }
 
-       if (!firing && (Object.keys(system.firingModes).length > 1 || system.dualWeapon)) {
+       //hideFiringModeSelector: the Jump Engine's seven "modes" are the vortex FACING, not
+       //alternative ammunition, and they are set by the on-map facing control rather than by
+       //cycling a letter here (JUMP_POINTS_PLAN.md section 3.5). Suppress the letter badge.
+       if (!firing && !system.hideFiringModeSelector && (Object.keys(system.firingModes).length > 1 || system.dualWeapon)) {
            if (system.parentId >= 0) {
                var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
 

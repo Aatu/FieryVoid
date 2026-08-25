@@ -155,34 +155,53 @@
   --fv-ok: #427231;                   /* theme.colors.healthOk                   */
   --fv-warn: #e1b000;                 /* theme.colors.warning                    */
   --fv-crit: #ed6738;                 /* theme.colors.healthCrit                 */
+  --fv-custom: #cccc00;  
 
   /* ── Allegiance ────────────────────────────────────────────────────────────
      Whose unit is this? Signals, not chrome — same category as Status above, and
      they must survive any reskin intact.
 
-     TWO renderings per allegiance, which is the whole point of the pair. The
+     SEVERAL renderings per allegiance, which is the whole point of the set. The
      -signal twin is the full-chroma value and belongs ONLY on small marks: a 3px
      bar, a rule, a dot. A strong colour reads as a signal precisely because there
      is so little of it. The plain value is tone-mapped — same hue, lower chroma,
-     lightness normalised to roughly 0.65 — and is what TEXT uses, so all four sit
-     at the same perceived brightness instead of red shouting and blue sinking.
+     lightness normalised to roughly 0.65 — so all four allegiances sit at the same
+     perceived brightness instead of red shouting and blue sinking. See the tier
+     table below for which one a given surface should take.
 
      Introduced by the hex picker (SELECT_FROM_SHIPS_PLAN.md §2.5, Stage 6), which
      is where the reasoning is written up. gamedata.getMutedTeamColorRGB() is the
      runtime equivalent for arbitrary per-team colours in 3+-team games and observer
      views — it lands them in this same brightness band.
 
+     FOUR TIERS as of 2026-08-20, not two. Pick by how much of the colour there is and
+     how dense its surroundings, NOT by what kind of element it is:
+       -bright   raw palette      one large heading standing alone — the ShipTooltip
+                                  ship name, the fleetList TEAM label, the combat log
+       -mid      55% toward raw   allegiance text inside a DENSE list — the hex
+                                  picker's rows, the ShipTooltip stack grid
+       (plain)   tone-mapped      supporting/secondary text, and any surface where
+                                  allegiance is context rather than the point
+       -signal   full chroma      small marks ONLY: a 3px bar, a rule, a dot
+     Every tier has a runtime twin for arbitrary team numbers, so the observer and
+     3+-team arms can follow the same tier the CSS classes do: getTeamColorRGB (bright),
+     getMidTeamColorRGB (mid), getMutedTeamColorRGB (plain).
+
      NO theme.js TWINS: nothing in the React stack paints allegiance yet. If that
      changes, add them there and re-declare the sync contract above.
 
-     NOT YET CONVERTED, deliberately: gamedata.getShipLogColorCss (the combat log)
-     still holds its own bright literals — it is a dense scrolling wall of text where
-     the stronger colours still earn their place. Noted at its definition.
+     ⚠️ THE TRAP THIS SET KEEPS SPRINGING — a rule here paints ONE ARM of a two-arm
+     gate. Every allegiance surface splits: 2-team participants take these CSS classes,
+     while observers and 3+-team participants take an inline colour from JS. Retuning a
+     token therefore changes what a 2-player game looks like and leaves a 4-player game
+     exactly as it was. That is precisely how the ShipTooltip ended up bright for
+     observers and pastel for participants between 2026-08-14 and 2026-08-20. Before
+     changing any value below, find the JS twin (gamedata.js and the getTeamColorVars /
+     getNameStyle pair) and move it to the matching tier in the same commit.
 
-     The hover ShipTooltip HAS since been converted: the .enemy.name / .mine.name /
-     .ally.name / .terrain.name rules in tactical.css, and the stack grid and the rule
-     under the name in shipTooltip.css. It sits SIDE BY SIDE with the picker — the
-     picker places it beside itself — so the mismatch had stopped being theoretical. */
+     gamedata.getShipLogColorCss (the combat log) holds its own bright literals rather
+     than referencing --fv-*-bright, because it builds a canvas/inline colour string and
+     cannot read a custom property. Same values, different delivery — keep in step. */
   /* Text tints — equal perceived lightness, for NAMES and labels on a dark ground. */
   --fv-own: #7dbf88;
   --fv-ally: #79aed4;
@@ -193,6 +212,33 @@
   --fv-ally-signal: #33adff;
   --fv-enemy-signal: #e0483f;
   --fv-neutral-signal: #8ca5c0;
+
+  /* BRIGHT tier — the raw team palette (gamedata.teamBaseColors 1-3) as tokens, for the
+     surfaces that carry allegiance as their PRIMARY signal on a large, uncrowded piece of
+     text: the hover ShipTooltip's ship name and the fleetList's TEAM header. Added
+     2026-08-20 on user request — those two read as washed out beside the combat log, which
+     had kept the full-strength values all along, and the ShipTooltip in particular
+     CONTRADICTED ITSELF: 2-team participants got the muted tints while observers and
+     3+-team participants got the raw palette inline off getTeamColorRGB. These tokens are
+     that raw palette, so both arms of the gate now land on the same brightness.
+     ⚠️ MUST stay byte-equal to gamedata.teamBaseColors[0..2] — the JS side hands the same
+     colours in as inline rgb() on the observer / 3+-team arm, and a drift shows up as a
+     2-team game and a 4-team game disagreeing about what "green" is. */
+  --fv-own-bright: #32cd32;
+  --fv-ally-bright: #33adff;
+  --fv-enemy-bright: #ff5050;
+
+  /* MID tier — deliberately between the two above, for allegiance text that sits in a
+     DENSE list rather than alone: the SelectFromShips picker's row names and the
+     ShipTooltip stack-grid cells (the picker opens that tooltip beside itself, so those
+     two must move together — see shipTooltip.css). At full chroma a column of twenty rows
+     stops reading as a list and starts reading as a warning; muted, it disappeared. Each
+     value is a 55% sRGB blend from the tone-mapped tint toward its -bright twin, which is
+     exactly what gamedata.getMidTeamColorRGB does at runtime for arbitrary team colours.
+     Terrain has no bright counterpart and stays on --fv-neutral in this tier. */
+  --fv-own-mid: #54c759;
+  --fv-ally-mid: #53adec;
+  --fv-enemy-mid: #f65c56;
 
   /* Landing-page game states. --fv-mine is --fv-lobby's green under a second name:
      "you are in this one" is a different statement from "this is a lobby", and

@@ -34,6 +34,9 @@ window.ShipIcon = function () {
         this.ShipSideSprite = null;
         this.shipDirectionOfMovementSprite = null;
         this.shipDirectionOfProwSprite = null;
+        //Always-on facing arrow — see create(). Only units whose blueprint sets ship.facingArrow
+        //have one (currently the jump vortex); it is null on everything else.
+        this.facingArrowSprite = null;
         this.weaponArcs = [];
         this.structureArcs = []; //structure facing wedges (own array so they never fight the weapon arcs)
         this.hidden = false;
@@ -47,11 +50,39 @@ window.ShipIcon = function () {
         this.NotMovedSprite = null;
 
         this.selected = false;
-        this.baseZ = this.terrain ? -50 : 0;
+        /* A JUMP VORTEX SITS A PLANE BELOW EVEN THE OTHER TERRAIN (user request 2026-08-23).
+           -50 is enough separation to keep a ship readable over an asteroid field, but a vortex is
+           200px of bright art that is routinely COPLANAR with the unit that opened it: a fixed
+           gate's vortex forms in the GATE'S OWN HEX (JumpEngine::openVortexAtGate spawns it at
+           $gate->getHexPos()), so at the shared terrain depth the two fight for the same pixels and
+           the vortex wins on draw order, hiding the gate. Dropping it further puts it under
+           everything - gate, ships, mines - which is also the honest reading: a vortex is a hole in
+           space that things stand in front of.
+           The gap is bigger than the +10 setHighlighted lifts terrain by, so hovering a vortex
+           cannot float it back over the gate. */
+        this.baseZ = this.terrain ? (ShipIcon.isVortex(ship) ? -150 : -50) : 0;
 
         this.create(ship, scene);
         this.consumeShipdata(ship);
     }
+
+    /* THE ALWAYS-ON FACING ARROW — the two knobs, meant to be retuned by eye. Only units whose
+       blueprint sets `facingArrow` have one (currently the jump vortex, SpawnJumpPoint.php).
+       SCALE is a multiple of the HEX HEIGHT, not of the unit's canvasSize, so the arrowhead lands
+       on the hex side the unit faces regardless of how big its own art is — and so it matches the
+       identical arrow drawn by UI.vortexFacing and by the "Jump Point Forming" ballistic marker.
+       Keep all three in step: BallisticIconContainer.VORTEX_ARROW_SCALE / _OPACITY and
+       UI.vortexFacing.MARKER_ARROW_SCALE / _OPACITY are the other two. */
+    ShipIcon.FACING_ARROW_SCALE = 1.15;
+    ShipIcon.FACING_ARROW_OPACITY = 0.85;
+
+    /* Is this unit a jump vortex? Delegates to the ONE place that holds the class name
+       (shipManager.movement.isJumpVortex) rather than repeating "SpawnJumpPoint" here - the same
+       discipline gamedata.isJumpGate follows. Guarded because this runs from the icon constructor:
+       a missing shipManager should cost a vortex its z-plane, not throw. */
+    ShipIcon.isVortex = function isVortex(ship) {
+        return !!(window.shipManager && shipManager.movement && shipManager.movement.isJumpVortex(ship));
+    };
 
     ShipIcon.prototype.consumeShipdata = function (ship) {
         this.ship = ship;
@@ -100,8 +131,10 @@ window.ShipIcon = function () {
     ShipIcon.prototype.setFacing = function (facing) {
 
         var facingActual = mathlib.degreeToRadian(facing);
-        if (!this.terrain) this.shipDirectionOfProwSprite.mesh.rotation.z = facingActual;  //No sprite for Terrain 
+        if (!this.terrain) this.shipDirectionOfProwSprite.mesh.rotation.z = facingActual;  //No sprite for Terrain
         this.shipSprite.mesh.rotation.z = facingActual;//mathlib.degreeToRadian(facing);
+        //The always-on facing arrow turns with the unit, terrain included (see create()).
+        if (this.facingArrowSprite) this.facingArrowSprite.mesh.rotation.z = facingActual;
 
     };
 
@@ -331,6 +364,24 @@ window.ShipIcon = function () {
             this.mesh.add(this.shipDirectionOfMovementSprite.mesh);
             this.shipDirectionOfMovementSprite.hide();
         }
+        /* THE ALWAYS-ON FACING ARROW. A blueprint that sets `facingArrow` (a path) gets that image
+           laid over its icon, permanently — not hover-gated the way the prow/heading arrows above
+           are, and NOT skipped for terrain, which is the whole point: the jump vortex is terrain
+           and its facing is a rule, not decoration.
+
+           Sized off the HEX rather than off canvasSize so it matches the identical arrow drawn by
+           the Stage 2b facing control and by the "Jump Point Forming" ballistic marker — the same
+           asset at the same size at all three points of a vortex's life. z 2 puts it just above the
+           unit's own art (z 1) and well under the UI layers.
+
+           Rotation is handled in setFacing alongside shipSprite, so it swings with the unit. */
+        if (ship.facingArrow) {
+            var arrowSize = window.HexagonMath.getHexHeight() * ShipIcon.FACING_ARROW_SCALE;
+            this.facingArrowSprite = new window.webglSprite(ship.facingArrow, { width: arrowSize, height: arrowSize }, 2);
+            this.facingArrowSprite.setOpacity(ShipIcon.FACING_ARROW_OPACITY);
+            this.mesh.add(this.facingArrowSprite.mesh);
+        }
+
         this.shipSprite = new window.webglSprite(imagePath, { width: this.size / 2, height: this.size / 2 }, 1);
 
         this.shipSprite.setOverlayColor(
@@ -682,8 +733,16 @@ window.ShipIcon = function () {
 
         } else { //Normal weapons with circular weapon arcs
             var arcs = shipManager.systems.getArcs(ship, weapon);
-            var arcColour = "rgb(20,80,128)";
-            var arcFillOpacity = ARC_FILL_OPACITY;
+            /* JUMP_POINTS_PLAN.md Stage 6 - THE JUMP ENGINE'S REACH IS YELLOW, not the cobalt every
+               gun uses (user request 2026-08-22). It is not a firing arc: it is where this ship can
+               project a jump point, and it reads in the same --fv-warn yellow as everything else in
+               that feature - the Stage 2b facing control, the "Jump Point Forming" hex marker, and
+               the vortex unit's own zoomed-out overlay. A player who has seen one has seen them all.
+               Opacity comes down with it for the same reason REDUCED_ARC_COLOUR's does: yellow over
+               the dark map reads a good deal hotter than cobalt at the same alpha. */
+            var isVortexReach = weapon.name === 'jumpEngine';
+            var arcColour = isVortexReach ? VORTEX_ARC_COLOUR : "rgb(20,80,128)";
+            var arcFillOpacity = isVortexReach ? VORTEX_ARC_FILL_OPACITY : ARC_FILL_OPACITY;
 
             //Firing-link reduced arc (e.g. Vree turret): if this weapon shares an angular-spread
             //group and any member has declared fire this turn (a sibling, OR this weapon itself once
@@ -764,6 +823,12 @@ window.ShipIcon = function () {
     var ARC_BORDER_OPACITY = 0.9;                   //outline of every hex-edged arc, in the arc's own colour
     var REDUCED_ARC_COLOUR = "rgb(170,95,25)";      //amber: this weapon's arc is restricted this turn
     var REDUCED_ARC_FILL_OPACITY = 0.25;             //fainter than ARC_FILL_OPACITY - see above
+    /* --fv-warn (#e1b000), the jump-point yellow. Written as an rgb() literal like every other arc
+       colour here rather than read from the CSS token, because these are consumed by THREE.Color
+       inside a WebGL scene that has no computed style to read. Keep it in step with
+       BallisticIconContainer's 'Jump Point Forming' text colour and UI.vortexFacing's arrow. */
+    var VORTEX_ARC_COLOUR = "rgb(225,176,0)";
+    var VORTEX_ARC_FILL_OPACITY = 0.22;              //see REDUCED_ARC_FILL_OPACITY - yellow runs hot
 
     /* A ranged weapon's arc, as the grid hexes it covers. arcsList is one or more ship-frame arcs -
        a split-arc mount hands both over at once, so its two regions share a single overlay and any
@@ -778,22 +843,24 @@ window.ShipIcon = function () {
         if (!maxHexes || !arcsList.length) return; //no reach, or nothing to bear with
 
         var loops = buildHexRegion(Math.min(maxHexes, MAX_ARC_HEXES), hexDistance, function (x, y) {
-            /* The ship's own hex is left OUT of the fill - deliberately, and NOT because it is out of
-               arc. By the rules it is in arc for every weapon on the ship: a target sharing your hex
-               is at range 0, inside every weapon's reach, and its bearing is genuinely undefined (the
-               game falls back to the previous turn's positions to get an arc out of it -
-               mathlib.getCompassHeadingOfShip - and ballistics ignore arc at range 0 outright).
+            /* The ship's own hex is not a member in its own right: the centreSectors argument below
+               splits it into its six corner-to-corner triangles, each filled exactly when the range-1
+               hex it faces is. So the wedge runs unbroken from the ship's centre out to its far edge,
+               and where the arc turns you get a clean radial line from the centre to the hex corner
+               between the two directions - leaving the part of its own hex the weapon does not bear
+               on visibly empty. A 0-360 mount has no such turn and fills the hex outright.
 
-               That is exactly what made it worth dropping. Filling identically for every system
-               hovered, it told the player nothing, and it did so right on top of the icons - and a
-               hex holding two or three stacked ships is precisely where you are trying to read which
-               way the arcs point. Where the arc wraps round the centre it now reads as an unfilled
-               hex outlined in the arc's own colour (HexRegion.buildFill punches the hole, the outline
-               traces it), so it is still legibly part of the region.
+               It used to be left wholly empty, on the grounds that a fill identical for every system
+               hovered told the player nothing while sitting right on top of the stacked icons. That
+               holds for a FLAT fill; a sectored one is the opposite, and is in fact the only place
+               the arc's real bounds are drawn as lines rather than approximated by a hex staircase.
 
-               The declared-area overlay keeps ITS centre hex - see DECLARED_AREA_SHAPES. */
-            if (x === 0 && y === 0) return false;
-
+               None of this is a claim about what may be SHOT AT at range 0. By the rules a target
+               sharing your hex is in arc for every weapon on the ship - its bearing is genuinely
+               undefined, the game falls back to the previous turn's positions to get an arc out of it
+               (mathlib.getCompassHeadingOfShip) and ballistics ignore arc at range 0 outright. The
+               declared-area overlay, which IS such a claim, keeps its whole centre hex - see
+               DECLARED_AREA_SHAPES. */
             var bearing = bearingFromOrigin(x, y);
 
             for (var i = 0; i < arcsList.length; i++) {
@@ -801,7 +868,7 @@ window.ShipIcon = function () {
             }
 
             return false;
-        });
+        }, true);
 
         if (!loops.length) return;
 
@@ -1134,8 +1201,8 @@ window.ShipIcon = function () {
        These wrappers keep every call site below unchanged, and they bind LATE - reading
        window.HexRegion when called rather than when this IIFE runs - so this file stays independent
        of script order. */
-    function buildHexRegion(range, hexDistance, accept) {
-        return window.HexRegion.buildRegion(range, hexDistance, accept);
+    function buildHexRegion(range, hexDistance, accept, centreSectors) {
+        return window.HexRegion.buildRegion(range, hexDistance, accept, centreSectors);
     }
 
     function buildRegionOverlay(loops, colour, fillOpacity, borderColour, borderOpacity) {
@@ -1710,12 +1777,12 @@ window.ShipIcon = function () {
                 //The ship's own hex counts, whatever the arc says - a unit sharing your hex is at
                 //range 0, inside every reach, and its bearing is genuinely undefined.
                 //
-                //The hovered arcs (showRangeArc) deliberately do the OPPOSITE and leave their centre
-                //hex clear, so don't "fix" one to match the other: they answer different questions. A
-                //hover arc is a transient legibility aid, and a centre that fills the same way for
-                //every system on the ship earns nothing while covering the stacked icons underneath.
-                //A declared area names a shot that has actually been committed, and a unit in the
-                //firing ship's own hex is a legal target of it - so it stays in the region.
+                //The hovered arcs (showRangeArc) fill their centre hex only in the SECTORS the arc
+                //bears on, so don't "fix" one to match the other: they answer different questions. A
+                //hover arc is a transient legibility aid and its centre is drawn to show which way it
+                //points, not what it may hit. A declared area names a shot that has actually been
+                //committed, and a unit in the firing ship's own hex is a legal target of it - so the
+                //whole hex stays in the region however the arc runs.
                 return function (x, y, a, b) {
                     if (a === 0 && b === 0) return true;
 

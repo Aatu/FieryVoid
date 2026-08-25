@@ -44,6 +44,12 @@ class BaseShip {
     public $spawned = -1; //To denote if a unit was spawned by DURING the game, e.g. doesn't count for CPV etc, show in Replay prior to it spawning
     public $removed = false; //Hangar Ops (B5W §10.1): set when a flight has docked. Hides from board/target lists without triggering destruction; record stays in DB for replay history.
     public $removedTurn = null; //Turn the ship docked into a hangar. Lets replay show the flight up to and including this turn.
+    /* JUMP_POINTS_PLAN.md Stage 4 x Hangar Ops: this unit was sitting in a carrier's hangar when
+       that carrier left through a jump vortex, so it is in hyperspace too. Set per LOAD by
+       TacGamedata::markJumpedDockedFlights (never persisted - it is derived from the carrier), and
+       only for the viewers allowed to know. Exists because the carrier->flight link lives in the
+       hangar's own-team-only $hangarUsage, which an opponent's client never receives. */
+    public $jumpedWithCarrier = false;
     public $dockCoalesceDone = false; //Hangar Ops Stage 21: transient once-per-carrier guard for the whole-flight dock coalescer (no-split docking). Not persisted/serialized — fresh false each load; first non-catapult hangar's criticalPhaseEffects runs the coalescer, the rest skip it.
     public $launchCoalesceDone = false; //Hangar Ops Stage 21: transient once-per-carrier guard for the whole-flight launch coalescer. Same lifetime as dockCoalesceDone.
     public $dockRegenSweepDone = false; //Kirishiac Warrior regeneration: transient once-per-carrier guard for HangarOps::applyDockedRegeneration. Same lifetime as dockCoalesceDone.
@@ -398,18 +404,19 @@ class BaseShip {
 		//destroyed ship gets no value UNLESS it successfully jumped to Hyperspace
 		if($this->isDestroyed() && !$dockedLCV){
             if(!$this instanceof FighterFlight && !$this->base && !$this->osat){
-                $jumpEngine = $this->getSystemByName("JumpEngine");
-                // Check if the ship has a jump engine
-                if ($jumpEngine) {
-                    //Check if it's jumped, instead of being destroyed.
-                    if($jumpEngine->hasJumped()){
-                        //Do NOT zero $effectiveValue if ship has jumped.
-                        $effectiveValue = $jumpEngine->getCVBeforeJump();
-                        return $effectiveValue;
-                    }
+                /* A unit that LEFT through hyperspace keeps the value it had when it went.
+                   hasJumpedToHyperspace asks the jump engine when the unit has one - the
+                   boost path's behaviour, unchanged - and reads the primary structure's own
+                   HyperspaceJump entry when it does not, because any unit may use an open jump
+                   vortex, including one with no jump engine of its own
+                   (JUMP_POINTS_PLAN.md Stage 4, section 2.5). */
+                if($this->hasJumpedToHyperspace()){
+                    //Do NOT zero $effectiveValue if ship has jumped.
+                    $effectiveValue = $this->getCVBeforeJump();
+                    return $effectiveValue;
                 }
             }
-            //No jump engine, or hasn't jumped, set value to 0 as normal.
+            //Hasn't jumped, set value to 0 as normal.
             $effectiveValue = 0;
         }
         
@@ -497,7 +504,14 @@ class BaseShip {
 				if ($system instanceOf Structure) { //Structure block
 					$structCurr += $systemCurr + ($systemDmg * $structDmgMultiplier);
 					$structMax += $systemMax;
-				} else if (($system instanceOf Weapon) || ($system instanceOf ElintScanner)) { //weapon! (count ElInt Scanner as a weapn here)
+				/* JumpEngine is a Weapon subclass (JUMP_POINTS_PLAN.md section 3.1) purely so it can
+				   declare a hex-targeted vortex - it is not a gun and must not be valued as one. Two
+				   things break if it lands in this bucket: a 40-box engine would add 120 to both the
+				   current and total weapon pools on every jump-capable ship, and the "defanged" branch
+				   below (weaponCurr == 0 -> weaponMultiplierMax) could never fire while the engine
+				   lived. It is $primary, so falling through leaves it in the CORE bucket - exactly
+				   where it sat before the conversion. */
+				} else if ((($system instanceOf Weapon) && !($system instanceOf JumpEngine)) || ($system instanceOf ElintScanner)) { //weapon! (count ElInt Scanner as a weapn here)
 					$weaponCurr += $systemCurr + ($systemDmg * $weaponDmgMultiplier);
 					$weaponMax += $systemMax;
 				} else if ($system instanceOf Thruster) { //Thruster
@@ -738,6 +752,9 @@ class BaseShip {
             $strippedShip->removed = true;
             if ($this->removedTurn !== null) $strippedShip->removedTurn = $this->removedTurn;
         }
+        //Emitted only when true, so every other unit's payload is byte-identical to before (the
+        //fleet list reads a plain falsy on anything that did not leave inside a carrier).
+        if ($this->jumpedWithCarrier) $strippedShip->jumpedWithCarrier = true;
 
         $strippedShip->systems = array_map( function($system) {return $system->stripForJson();}, $this->systems);
 
@@ -3015,6 +3032,58 @@ public function getAllEWExceptDEW($turn){
         return $movement->getFacingAngle();
     }
 
+
+    /* ===== LEAVING THE BATTLE THROUGH HYPERSPACE (JUMP_POINTS_PLAN.md Stage 4) ==============
+     *
+     * "Did this unit LEAVE, rather than die?" Asked wherever a destroyed unit has to be told
+     * apart from one that jumped out - the combat value (below) and the hangar escape roll
+     * (HangarOps::processCarrierDestructionEscapes).
+     *
+     * Two storage sites, one question. A unit WITH a jump engine keeps its record on the engine,
+     * exactly where JumpEngine::doHyperspaceJump has always written it - that path is untouched.
+     * A unit WITHOUT one can still use somebody else's open vortex (plan section 2.5), so the
+     * fallback reads the primary structure directly: Movement::applyJumpOut hangs the combat-value
+     * note there instead, and the HyperspaceJump damage entry is on it either way.
+     */
+    public function hasJumpedToHyperspace(){
+        $jumpEngine = $this->getSystemByName("JumpEngine");
+        if ($jumpEngine) return $jumpEngine->hasJumped();
+
+        return $this->hasHyperspaceJumpDamage();
+    }
+
+    /* The combat value this unit had at the moment it jumped. Meaningless unless
+       hasJumpedToHyperspace() is true. */
+    public function getCVBeforeJump(){
+        $jumpEngine = $this->getSystemByName("JumpEngine");
+        if ($jumpEngine) return $jumpEngine->getCVBeforeJump();
+
+        $primaryStruct = $this->getStructureSystem(0);
+        return $primaryStruct ? $primaryStruct->getCVBeforeJump() : 0;
+    }
+
+    /* Stricter than JumpEngine::hasJumped, deliberately: with no jump engine to act as a first
+       filter, an actual HyperspaceJump damage entry has to be present. Without that test any
+       unit destroyed by something OTHER than damage to its primary structure - a collision, a
+       captured hull - would read as having jumped. The second half is the engine version's test
+       verbatim: the damage that is NOT jump damage must be short of destroying the ship, or the
+       unit was already dead when the vortex took it. */
+    private function hasHyperspaceJumpDamage(){
+        $primaryStruct = $this->getStructureSystem(0);
+        if (!$primaryStruct || !is_array($primaryStruct->damage)) return false;
+
+        $jumped = false;
+        $totalDamage = 0;
+        foreach ($primaryStruct->damage as $entry){
+            if ($entry->damageclass === 'HyperspaceJump'){
+                $jumped = true;
+                continue;
+            }
+            $totalDamage += max(0, $entry->damage - $entry->armour);
+        }
+
+        return $jumped && ($totalDamage < $primaryStruct->maxhealth);
+    }
 
     public function getStructureSystem($location){
         foreach ($this->systems as $system){

@@ -14,6 +14,7 @@ class MoesarBase extends SmallStarBaseFourSections{
 		$this->canvasSize = 200; 
 		$this->fighters = array("heavy"=>18); 
 		$this->isd = 2253;
+		$this->variantOf = "OBSOLETE";
 
 		$this->shipSizeClass = 3; 
 		$this->Enormous = false;

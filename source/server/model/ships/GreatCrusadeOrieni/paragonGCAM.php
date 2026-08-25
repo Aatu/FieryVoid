@@ -142,7 +142,7 @@ class paragonGCAM extends BaseShip{
 		3=> array(
 			3 => "Thruster",
 			5 => "War Lance",
-			8 => "Heavy Gauss Cannon",
+			8 => "Heavy Gauss Rifle",
 			9 => "Class-L Missile Rack",
 			11 => "Improved Gatling Railgun",
 			18 => "Structure",
@@ -152,7 +152,7 @@ class paragonGCAM extends BaseShip{
 		4=> array(
 			3 => "Thruster",
 			5 => "War Lance",
-			8 => "Heavy Gauss Cannon",
+			8 => "Heavy Gauss Rifle",
 			9 => "Class-L Missile Rack",
 			11 => "Improved Gatling Railgun",
 			18 => "Structure",

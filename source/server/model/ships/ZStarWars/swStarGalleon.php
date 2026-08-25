@@ -35,6 +35,7 @@ class swStarGalleon extends HeavyCombatVessel{
 	$this->addPrimarySystem(new Thruster(3, 12, 0, 4, 4));
 	$hyperdrive = new JumpEngine(4, 14, 5, 15);
 	$hyperdrive->displayName = 'Hyperdrive';
+	$hyperdrive->markLegacy(); //JUMP_POINTS_PLAN.md section 9 - this setting jumps by boost, not by vortex
 	$this->addPrimarySystem($hyperdrive);
 	$this->addPrimarySystem(new CargoBay(2, 80));
 	$this->addPrimarySystem(new CargoBay(2, 80));

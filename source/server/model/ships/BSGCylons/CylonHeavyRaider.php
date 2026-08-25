@@ -41,7 +41,7 @@ class CylonHeavyRaider extends FighterFlight{
 			$armour = array(3, 1, 2, 2);
 			$fighter = new Fighter("CylonHeavyRaider ", $armour, 24, $this->id);
 			$fighter->displayName = "Heavy Raider";
-			$fighter->imagePath = "img/ships/BSG/CylonHeavyRaider.png.png";
+			$fighter->imagePath = "img/ships/BSG/CylonHeavyRaider.png";
 			$fighter->iconPath = "img/ships/BSG/CylonHeavyRaider_Large.png";
 
 			$leftgun = new NexusShatterGunFtr(180, 360, 1);

@@ -1071,10 +1071,18 @@ var Magazine = function Magazine(json, ship) {
 Magazine.prototype = Object.create(ShipSystem.prototype);
 Magazine.prototype.constructor = Magazine;
 
+/* Mirrors the server: JumpEngine extends Weapon (JUMP_POINTS_PLAN.md section 3.1) so it can declare
+   a hex-targeted vortex through the existing ballistic pipeline. From Stage 2 the engine is a live
+   ballistic hex-target weapon with range 4, so it is selectable in Initial Orders like a mine
+   launcher, hovering it draws a 4-hex 360-degree reach overlay, and its seven firing modes carry
+   the vortex facing (the mode SELECTOR is suppressed - hideFiringModeSelector - because the facing
+   is set on the map, not by cycling a letter).
+   Defined AFTER shipSystem.js in game.php / gamelobby.php script order, which is what makes
+   Weapon.prototype available at eval time here. */
 var JumpEngine = function JumpEngine(json, ship) {
-	ShipSystem.call(this, json, ship);
+	Weapon.call(this, json, ship);
 };
-JumpEngine.prototype = Object.create(ShipSystem.prototype);
+JumpEngine.prototype = Object.create(Weapon.prototype);
 JumpEngine.prototype.constructor = JumpEngine;
 
 JumpEngine.prototype.initializationUpdate = function () {
@@ -1088,6 +1096,217 @@ JumpEngine.prototype.initializationUpdate = function () {
 
 JumpEngine.prototype.hasMaxBoost = function () {
 	return true;
+};
+
+/* ===== JUMP_POINTS_PLAN.md STAGE 5 - MAINTAINING A JUMP POINT =================================
+
+   A vortex closes at the end of every turn unless its holder declares Maintain in that turn's
+   Initial Orders, and maintaining requires the ship to shut down everything except its Scanner and
+   this engine (plan section 2.4).
+
+   ⭐ THE DECLARATION IS STILL A FIRING-MODE-7 BALLISTIC ORDER AT THE VORTEX'S OWN HEX - exactly
+   what Firing::getVortexDeclarationBlock validates and JumpEngine::getMaintainDeclaration reads.
+   Nothing on the server changed when this moved into a menu; only the way the player produces the
+   order did. Keeping the order as the single source of truth is also what makes 'am I maintaining?'
+   survive a poll, a page reload and the commit without a flag of its own to synchronise.
+
+   The control is the ordinary system-menu activation pair (canActivate / doActivate ...), which is
+   how the Vorlon Power Capacitor's Double Recharge - the closest existing thing to this - is
+   built. The generic Activate/Deactivate buttons in SystemInfoButtons are suppressed for this
+   system so only JumpEngineMenu's labelled row appears, the same exclusion powerCapacitor and
+   GraviticAugmenter already carry. */
+
+//The open vortex this ship is holding, or null. Also the source of the target hex.
+JumpEngine.prototype.getHeldVortex = function () {
+	return shipManager.movement.getVortexHeldBy(this.ship);
+};
+
+/* STAGE 6 - WHAT THE SYSTEM ICON SHOWS, when it should show something other than the ordinary
+   load counter. Returns "N/4" - turns this jump point has been OPEN, out of the four it can ever
+   have - while one stands, and null the rest of the time so SystemIcon.getText falls through to
+   the normal "charge/recharge time" display.
+
+   The two are genuinely different things and Stage 5 conflated them: it sent the vortex age in
+   turnsloaded, which made the engine's real loading state unreadable. turnsloaded now means what
+   it means on every other weapon (JumpEngine::getVortexRechargeLoad), and this is the counter.
+
+   vortexTurnsOpen / vortexMaxTurns are sent by JumpEngine::stripForJson only while a jump point
+   stands, so their mere presence is the test. The fallback derives the same number from the vortex
+   UNIT - spawned == openTurn + 1, so age == turn - spawned + 1 - which covers a payload written
+   before this change (an in-flight game mid-deploy) and a lobby object with no live state at all.
+
+   ⚠️ It must come BEFORE getText's "has a firing order" branch. A maintaining engine holds a
+   mode-7 order all turn, and that branch has nothing to say about a weapon that cannot change
+   shots and was not a called shot - so the icon drew EMPTY. */
+JumpEngine.prototype.getVortexIconLoad = function () {
+	/* JumpEngine::MAX_VORTEX_TURNS is the fallback, not the rule: stripForJson sends the real
+	   denominator, which on a FIXED JUMP GATE is the PROGRAMMED HOLD (1-4 turns, chosen when the
+	   gate was signalled) rather than the four turns a ship's vortex may be maintained to
+	   (JUMP_GATES_PLAN.md Stage 4). So a gate signalled for two turns reads 1/2 then 2/2 and closes,
+	   which is what the player asked for. */
+	var max = this.vortexMaxTurns || 4;
+
+	if (this.vortexTurnsOpen !== undefined && this.vortexTurnsOpen !== null) {
+		return this.vortexTurnsOpen + "/" + max;
+	}
+
+	var vortex = this.getHeldVortex();
+	if (!vortex || vortex.spawned === undefined || vortex.spawned === -1) return null;
+
+	var age = gamedata.turn - vortex.spawned + 1;
+	if (age < 0) return null;
+
+	return Math.min(age, max) + "/" + max;
+};
+
+//Does a Maintain declaration for THIS turn stand on this engine?
+JumpEngine.prototype.isMaintainingVortex = function () {
+	for (var i in this.fireOrders) {
+		var fire = this.fireOrders[i];
+		if (fire.turn != gamedata.turn) continue;
+		if (parseInt(fire.firingMode, 10) !== 7) continue;   //JumpEngine::MAINTAIN_MODE
+		return true;
+	}
+
+	return false;
+};
+
+//Drop it again. Scoped to THIS turn's mode-7 order rather than going through
+//weaponManager.removeFiringOrder, which clears every order the weapon holds - on a jump engine
+//that would also take the opening declaration made earlier in the game.
+JumpEngine.prototype.removeVortexMaintainOrder = function () {
+	for (var i = this.fireOrders.length - 1; i >= 0; i--) {
+		var fire = this.fireOrders[i];
+		if (fire.turn != gamedata.turn) continue;
+		if (parseInt(fire.firingMode, 10) !== 7) continue;
+		this.fireOrders.splice(i, 1);
+	}
+};
+
+/* Is Maintain a choice this ship can make at all this turn? Mirrors the server's own list in
+   Firing::getVortexDeclarationBlock, plus one thing the server has no reason to test:
+
+   ⭐ THE LAST TURN IS NOT OFFERED. A vortex is open for FOUR TURNS - the turn it was declared does
+   not count - so it closes unconditionally at the end of openTurn + 4 (plan section 2.3,
+   JumpEngine::MAX_VORTEX_TURNS). On that final turn declaring Maintain changes nothing at all, and
+   a control that cannot do anything should not be shown. openTurn is not sent to the client, but
+   `spawned` is, and spawned == openTurn + 1, so the cap turn is spawned + 3. A forming vortex is
+   not offered either, and that falls out for free: getVortexInHex skips a unit whose spawned turn
+   is still ahead of the turn being viewed. */
+JumpEngine.prototype.canMaintainVortex = function () {
+	if (gamedata.gamephase !== 1) return false;
+	/* ⭐ AND THIS IS ALSO WHAT KEEPS MAINTAIN OFF A FIXED JUMP GATE (JUMP_GATES_PLAN.md section 2.3).
+	   A gate has NO Maintain: the open duration is programmed once, when the gate is signalled, and
+	   cannot be changed afterwards. gamedata.isMyShip is false for terrain in every live phase and a
+	   gate IS terrain (JumpgateCapital sets shipSizeClass 5), so the menu is never offered on one -
+	   the rule holding by construction rather than by a branch. Recorded because the temptation on
+	   reading the gate feature is to "let the owner keep their gate open", which is the opposite of
+	   the ruling. The server refuses it independently: JumpEngine::getMaintainDeclaration returns
+	   null outright for a gate engine, so a tampered mode-7 order cannot get there either. */
+	if (!gamedata.isMyShip(this.ship)) return false;
+	if (shipManager.isDestroyed(this.ship)) return false;
+	if (shipManager.systems.isDestroyed(this.ship, this)) return false;
+	if (shipManager.power.isOffline(this.ship, this)) return false;
+
+	var vortex = this.getHeldVortex();
+	if (!vortex) return false;
+
+	if (gamedata.turn >= vortex.spawned + 3) return false;   //its last turn - see above
+
+	//Out of range NOW is refused by the server's declaration test too. (Straying out of range
+	//LATER, during Movement, closes the vortex at end of turn - that one is not preventable here.)
+	var distance = shipManager.getShipPosition(this.ship).distanceTo(shipManager.getShipPosition(vortex));
+	if (distance > this.range) return false;
+
+	return true;
+};
+
+JumpEngine.prototype.canActivate = function () {
+	return this.canMaintainVortex() && !this.isMaintainingVortex();
+};
+
+JumpEngine.prototype.canDeactivate = function () {
+	return gamedata.gamephase === 1 && gamedata.isMyShip(this.ship) && this.isMaintainingVortex();
+};
+
+/* Turn Maintain ON: make the declaration, and take the ship dark in the same click.
+
+   Shutting the systems down here rather than leaving it to the player is the point of the control -
+   the rule is all-or-nothing and the penalty for missing one system is losing the jump point at the
+   end of the turn, which is a long way from the mistake. shipManager.power.setOnline then refuses
+   to bring any of them back while the declaration stands. */
+JumpEngine.prototype.doActivate = function () {
+	if (!this.canActivate()) return;
+
+	var ship = this.ship;
+	var vortex = this.getHeldVortex();
+	if (!vortex) return;
+
+	var hex = shipManager.getShipPosition(vortex);
+
+	this.removeVortexMaintainOrder();
+	this.fireOrders.push({
+		id: ship.id + "_" + this.id + "_" + (this.fireOrders.length + 1),
+		type: 'ballistic',
+		shooterid: ship.id,
+		targetid: -1,
+		weaponid: this.id,
+		calledid: -1,
+		turn: gamedata.turn,
+		firingMode: 7,                                  //JumpEngine::MAINTAIN_MODE
+		shots: this.defaultShots,
+		x: hex.q,
+		y: hex.r,
+		damageclass: this.data["Weapon type"].toLowerCase()
+	});
+
+	var blockers = shipManager.power.getVortexMaintainBlockers(ship);
+	for (var i in blockers) {
+		var system = blockers[i];
+
+		//A declared shot and a powered-down mount are incompatible, which is exactly why the
+		//ordinary Off button refuses a weapon that has one (canOffline tests hasFiringOrder). The
+		//player cannot fire this turn anyway, so withdraw the order rather than refuse the toggle.
+		weaponManager.removeFiringOrder(ship, system);
+		shipManager.power.stopOverloading(ship, system);
+		if (shipManager.power.getBoost(system)) shipManager.power.unsetBoost(ship, system);
+
+		system.power.push({ id: null, shipid: ship.id, systemid: system.id, type: 1, turn: gamedata.turn, amount: 0 });
+	}
+
+	webglScene.customEvent('SystemDataChanged', { ship: ship, system: this });
+	webglScene.customEvent('HexTargeted', { shooter: ship, hexagon: hex });   //draw the marker on the vortex hex
+};
+
+/* Turn Maintain OFF: withdraw the declaration, then give the ship its power back.
+
+   ⚠️ ORDER MATTERS - the declaration goes first, because setOnline's own lock reads it and would
+   otherwise refuse every restore below.
+
+   The restore is broad: everything non-exempt that is currently offline comes back on, so a system
+   the player had ALREADY powered down by hand before turning Maintain on comes back too. Same
+   broad-brush the Power Capacitor's Double Recharge uses, and for the same reason - remembering
+   exactly which systems this toggle switched off would not survive the gamedata poll that rebuilds
+   a ship's systems. It is visible on screen and one click to undo. */
+JumpEngine.prototype.doDeactivate = function () {
+	if (!this.canDeactivate()) return;
+
+	var ship = this.ship;
+	this.removeVortexMaintainOrder();
+
+	for (var i in ship.systems) {
+		var system = ship.systems[i];
+		if (!system) continue;
+		if (shipManager.power.isVortexExemptSystem(system)) continue;
+		if (!(system.powerReq > 0)) continue;
+		if (shipManager.systems.isDestroyed(ship, system)) continue;
+		if (shipManager.power.isForcedOffline(ship, system)) continue;   //cooldown crit - not ours to lift
+		if (!shipManager.power.isOffline(ship, system)) continue;
+
+		shipManager.power.setOnline(ship, system, true); //skip the message: a bulk restore must not nag per system
+	}
+
+	webglScene.customEvent('SystemDataChanged', { ship: ship, system: this });
 };
 
 var Structure = function Structure(json, ship) {
@@ -2274,7 +2493,10 @@ HyachSpecialists.prototype.doUse = function () { //Mark Specialist as used.
 		case 'Weapon':
 			for (var i in ship.systems) {
 				var system = ship.systems[i];
-				if (system instanceof Weapon) {
+				//jumpEngine is a Weapon subclass with no damage at all (JUMP_POINTS_PLAN.md
+				//section 3.1); Hyach hulls carry one, and without this its tooltip gains a
+				//"Damage: undefined-undefined" line the moment Weapon specialists are allocated.
+				if (system instanceof Weapon && system.name !== "jumpEngine") {
 					var minDam = system.minDamage;
 					var maxDam = system.maxDamage;
 
@@ -2421,7 +2643,10 @@ HyachSpecialists.prototype.doDecrease = function () { //decrease Specialist allo
 		case 'Weapon':
 			for (var i in ship.systems) {
 				var system = ship.systems[i];
-				if (system instanceof Weapon) {
+				//jumpEngine is a Weapon subclass with no damage at all (JUMP_POINTS_PLAN.md
+				//section 3.1); Hyach hulls carry one, and without this its tooltip gains a
+				//"Damage: undefined-undefined" line the moment Weapon specialists are allocated.
+				if (system instanceof Weapon && system.name !== "jumpEngine") {
 					var minDam = system.minDamage;
 					var maxDam = system.maxDamage;
 
@@ -2807,7 +3032,10 @@ PowerCapacitor.prototype.doActivate = function () {
 		for (var i in ship.systems) {
 			var system = ship.systems[i]; //The fighter
 			if (shipManager.systems.isDestroyed(ship, system)) continue;
-			if (system.name == "eMShield" || system instanceof Weapon && system.name !== "RammingAttack") { //Is shading Field but not this one
+			//jumpEngine joins RammingAttack as a Weapon-by-inheritance that is not a gun
+			//(JUMP_POINTS_PLAN.md section 3.1): the Vorlon capacitor takes weapons and shields
+			//offline, never the jump engine.
+			if (system.name == "eMShield" || system instanceof Weapon && system.name !== "RammingAttack" && system.name !== "jumpEngine") { //Is shading Field but not this one
 				system.power.push({ id: null, shipid: ship.id, systemid: system.id, type: 1, turn: gamedata.turn, amount: 0 });
 				system.reactivated = true; //To prevent it from immediately being powered back on.
 			}
@@ -2826,7 +3054,10 @@ PowerCapacitor.prototype.doDeactivate = function () {
 		for (var i in ship.systems) {
 			var system = ship.systems[i]; //The fighter
 			if (shipManager.systems.isDestroyed(ship, system)) continue;
-			if (system.name == "eMShield" || system instanceof Weapon && system.name !== "RammingAttack") { //Is shading Field but not this one
+			//jumpEngine joins RammingAttack as a Weapon-by-inheritance that is not a gun
+			//(JUMP_POINTS_PLAN.md section 3.1): the Vorlon capacitor takes weapons and shields
+			//offline, never the jump engine.
+			if (system.name == "eMShield" || system instanceof Weapon && system.name !== "RammingAttack" && system.name !== "jumpEngine") { //Is shading Field but not this one
 				shipManager.power.setOnline(ship, system);
 			}
 		}

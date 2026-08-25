@@ -88,6 +88,7 @@ window.ReplayAnimationStrategy = function () {
         this.firingPhaseStartTime = time;
         time = animateWeaponPreFire.call(this, time, logAnimation);
         time = animateWeaponFire.call(this, time, logAnimation);
+        time = animateVortexLifecycle.call(this, time);
         time = animateShipDestruction.call(this, time, logAnimation);
         time += 100;
 
@@ -811,6 +812,57 @@ window.ReplayAnimationStrategy = function () {
         }
 
         return FireAnimationHelper.getShipPositionAtTime(icon, time, this.movementAnimations);
+    }
+
+    /* ⭐ JUMP_POINTS_PLAN.md Stage 6 - A JUMP POINT FORMING, AND A JUMP POINT COLLAPSING.
+     *
+     * The ship that GOES through one has had its own animation since the boost-to-jump days
+     * (ShipJumpAnimation, below). The jump point itself simply blinked into existence between one
+     * turn's replay and the next, which is the least readable moment of the whole feature: the
+     * hex is empty for the entire turn it was declared on - deliberately, a forming vortex is a
+     * marker, not a unit - and then a vortex is just there.
+     *
+     * Both ends use the SAME effect the departing ship uses (ShipJumpPoint: a cyan swirl opening
+     * out, then a burst), because they are the same event seen from two sides. It plays after the
+     * turn's fire and before the destructions, which is where a vortex actually forms and closes -
+     * end of turn, after Firing.
+     *
+     * ⚠️ THE TURNS ARE OFF BY ONE IN BOTH DIRECTIONS, and that is the point:
+     *   spawned      == openTurn + 1  -> the FORMING animation belongs to turn spawned - 1
+     *   removedTurn  == closeTurn + 1 -> the CLOSING animation belongs to turn removedTurn - 1
+     * (JumpEngine::restoreVortexState sets both; see the note there for why each is the FIRST
+     * turn its state is true rather than the turn the event happened.)
+     *
+     * ShipJumpPoint is not an Animation - it has no render() - it just seeds Explosions into the
+     * emitterContainer at absolute times, and the container IS in this.animations. So it is
+     * constructed and left alone; only the camera pan is pushed. */
+    function animateVortexLifecycle(time) {
+        this.gamedata.ships.forEach(function (vortex) {
+            if (!shipManager.movement.isJumpVortex(vortex)) return;
+
+            var forming = vortex.spawned !== undefined && vortex.spawned !== -1
+                && vortex.spawned === this.turn + 1;
+            var closing = Boolean(vortex.removed) && vortex.removedTurn != null
+                && vortex.removedTurn === this.turn + 1;
+            if (!forming && !closing) return;
+
+            //A vortex that never formed at all - the holder's damaged drive failed on the turn it
+            //was declared - is born and removed on the same turn. Nothing was ever there to see.
+            if (forming && closing) return;
+
+            var move = shipManager.movement.getLastCommitedMove(vortex);
+            if (!move) return;
+
+            var position = window.coordinateConverter.fromHexToGame(new hexagon.Offset(move.position));
+            if (!position || isNaN(position.x) || isNaN(position.y)) return;
+
+            this.animations.push(new CameraPositionAnimation(position, time));
+
+            var effect = new ShipJumpPoint(this.emitterContainer, { time: time, position: position });
+            time += effect.getDuration();
+        }, this);
+
+        return time;
     }
 
     function animateShipDestruction(time, logAnimation) {

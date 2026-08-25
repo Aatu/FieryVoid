@@ -14,6 +14,8 @@ window.ShipTooltipMenu = function () {
         this.leadingButtons = [];
         this.extraButtons = [];
         this.currentInfo = "";
+        //Set by renderTo; the tooltip currently displaying this menu, so an action can redraw it.
+        this.shipTooltip = null;
     }
 
     ShipTooltipMenu.template = '<div class="menu"><div class="action-buttons"></div><div class="info"></div></div>';
@@ -23,6 +25,13 @@ window.ShipTooltipMenu = function () {
     ShipTooltipMenu.buttons = [{ className: "openSCS", condition: null, action: openSCS, info: "Open ship details" }];
 
     ShipTooltipMenu.prototype.renderTo = function (parent, shipTooltip) {
+
+        //Keep a handle on the tooltip that drew this menu so an ACTION can ask for a redraw.
+        //ShipTooltip.update() re-runs every button's condition list, which is the only way a
+        //button can turn into its opposite without the player having to re-click the unit - see
+        //cancelJumpGateSignal in shipTooltipInitialOrdersMenu.js. renderTo is called again by
+        //update() itself, so this stays pointed at the live tooltip.
+        this.shipTooltip = shipTooltip;
 
         var menu = jQuery(ShipTooltipMenu.template);
         var allButtons = this.getAllButtons();

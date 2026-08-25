@@ -654,18 +654,32 @@ window.fleetListManager = {
     //to show those flights as "Jumped" (orange) rather than "Docked" (blue) —
     //a docked flight has no jump engine of its own, so hasJumpedNotDestroyed
     //can't detect this on the flight directly.
+    //
+    //OWN TEAM ONLY, unavoidably: bay contents are masked out of an opponent's
+    //payload (Hangar::stripForJson), so their hangarUsage arrives as an empty list
+    //and this walk finds nothing. The server answers it for them instead, with the
+    //flight's own jumpedWithCarrier flag (TacGamedata::markJumpedDockedFlights),
+    //which updateFleetList ORs in below. Both are kept: the flag needs a round trip,
+    //while this walk flips the owner's own rows the instant they commit the jump.
     getJumpedDockedFlightIds: function getJumpedDockedFlightIds() {
         var ids = {};
         for (var i in gamedata.ships) {
             var carrier = gamedata.ships[i];
-            //hasJumpedNotDestroyed only distinguishes "jumped" from
-            //"damage-killed" among ships already out of play: on a healthy,
-            //in-play carrier it returns true purely because it has a jump
-            //engine and little non-jump damage. Gate on isDestroyed first —
-            //the same pairing updateFleetList uses for a ship's own row — so
-            //we only flag flights whose carrier actually left via hyperspace.
-            if (!shipManager.isDestroyed(carrier)) continue;
-            if (!shipManager.hasJumpedNotDestroyed(carrier)) continue;
+            /* A carrier that has COMMITTED a jump-out is on its way out but the server has not
+               removed it yet (that happens at the end of the Movement phase), so isDestroyed is
+               still false. Take the order as proof on its own; the destroyed pairing below stays
+               for every other route out and for the phases after this one, so the flights flip
+               to "Jumped" at the same instant as the carrier's own row and its map sprite. */
+            if (!shipManager.movement.hasCommittedJumpOut(carrier)) {
+                //hasJumpedNotDestroyed only distinguishes "jumped" from
+                //"damage-killed" among ships already out of play: on a healthy,
+                //in-play carrier it returns true purely because it has a jump
+                //engine and little non-jump damage. Gate on isDestroyed first —
+                //the same pairing updateFleetList uses for a ship's own row — so
+                //we only flag flights whose carrier actually left via hyperspace.
+                if (!shipManager.isDestroyed(carrier)) continue;
+                if (!shipManager.hasJumpedNotDestroyed(carrier)) continue;
+            }
             if (!Array.isArray(carrier.systems)) continue;
             for (var s = 0; s < carrier.systems.length; s++) {
                 var sys = carrier.systems[s];
@@ -679,6 +693,47 @@ window.fleetListManager = {
         return ids;
     },
 
+    /* THE fleet list's row for a ship - never $("#" + ship.id) on its own.
+
+       gamedata.drawIniGUI gives every Order of Battle <tr> the ship's RAW id too, and #iniGui is
+       written before #gameinfo in game.php - so getElementById (which is what jQuery's #id fast
+       path uses) hands back the Order of Battle row for any unit still listed there, and the paint
+       silently lands on the wrong element: addClass colours an OoB row nobody styles, and the
+       .initiative lookup inside it matches nothing at all, because an OoB row holds .iniOrder and
+       .iniInfo instead.
+
+       It only bites a unit that is still IN the Order of Battle when its row changes state, which
+       is why it went unnoticed: drawIniGUI filters out anything isDestroyed, so docked flights and
+       destroyed hulls - the only two states this ever painted before - had already dropped out and
+       their ids really were unique. A jumped-out ship has NOT: the server does not remove it until
+       the end of the Movement phase, so for that whole phase its own row was the one row that could
+       not be painted, while its docked flights' rows changed correctly around it.
+
+       Scoped to the fleet list container rather than renaming the ids: the OoB's own click handler
+       reads this.id, and an attribute selector sidesteps the "#123" invalid-CSS-identifier
+       question entirely. */
+    fleetRow: function fleetRow(ship) {
+        return $("#gameinfo").find("[id='" + ship.id + "']");
+    },
+
+    /* Paint one row's out-of-play state. The three states are MUTUALLY EXCLUSIVE and the rows are
+       only rebuilt at the start of a turn (displayFleetLists rebuilds when fleetListManager.reset()
+       has cleared `initialized`, which only initPhase does, in phase 1) - so a row that changes
+       state mid-turn keeps whatever class it was given earlier unless the others are taken off it.
+       They are the same specificity, so the CASCADE decided which colour won, and .docked is
+       written after .jumped in tactical.css: a docked flight whose carrier jumped read "Jumped"
+       in blue and only turned orange at the next turn's rebuild. Set the class, clear the
+       other two. */
+    setRowState: function setRowState(ship, state, label) {
+        var STATES = ["jumped", "docked", "destroyed"];
+        var row = fleetListManager.fleetRow(ship);
+        for (var s = 0; s < STATES.length; s++) {
+            if (STATES[s] !== state) row.removeClass(STATES[s]);
+        }
+        row.addClass(state);
+        row.find(".initiative").html(label);
+    },
+
     updateFleetList: function updateFleetList() {
         //Hangar Ops: collect the docked flights whose carrier jumped to
         //hyperspace once, before the row loop, so we can flag them below.
@@ -687,34 +742,39 @@ window.fleetListManager = {
         for (var i in gamedata.ships) {
             var ship = gamedata.ships[i];
             var name = ship.name;
-            if (shipManager.isDestroyed(ship)) {
+            /* A COMMITTED jump-out is a departure the server has not resolved yet - it removes the
+               unit at the end of the Movement phase - but the order is on the board and the map
+               already shows the hex empty. Read it as Jumped from that moment, so the ship, its
+               docked flights and its sprite all change together instead of the list lagging
+               behind the rest of the turn (JUMP_POINTS_PLAN.md Stage 4). */
+            var jumpingOut = shipManager.movement.hasCommittedJumpOut(ship);
+            if (shipManager.isDestroyed(ship) || jumpingOut) {
                 if (ship.removed) {
                     //Docked flight: same isDestroyed=true filtering, but not
                     //actually destroyed. Keep .clickable so the player can
                     //open the flight window (doScrollToShip opens the React
                     //ship window via OpenShipWindowFor for removed flights
                     //since they're not on the board).
-                    if (jumpedDockedFlightIds[ship.id]) {
+                    //Two sources by design - see getJumpedDockedFlightIds: the local walk
+                    //covers this flight's owner immediately, the server's jumpedWithCarrier
+                    //covers every OTHER viewer, whose copy of the bay is masked empty.
+                    if (jumpedDockedFlightIds[ship.id] || ship.jumpedWithCarrier) {
                         //Carrier jumped to hyperspace and took the flight with
                         //it: it kept its combat value but is no longer in play,
                         //so render it like a jumped ship (orange) not docked.
-                        $("#" + ship.id).addClass("jumped");
-                        $("#" + ship.id + " .initiative").html("Jumped");
+                        fleetListManager.setRowState(ship, "jumped", "Jumped");
                     } else {
-                        $("#" + ship.id).addClass("docked");
-                        $("#" + ship.id + " .initiative").html("Docked");
+                        fleetListManager.setRowState(ship, "docked", "Docked");
                     }
                     continue;
                 }
                 // Remove action listener and make everything italic to indicate the
                 // ship was destroyed.
-                $("#" + ship.id + " .shipname").removeClass("clickable");
-                if (shipManager.hasJumpedNotDestroyed(ship)) {
-                    $("#" + ship.id).addClass("jumped");
-                    $("#" + ship.id + " .initiative").html("Jumped");
+                fleetListManager.fleetRow(ship).find(".shipname").removeClass("clickable");
+                if (jumpingOut || shipManager.hasJumpedNotDestroyed(ship)) {
+                    fleetListManager.setRowState(ship, "jumped", "Jumped");
                 } else {
-                    $("#" + ship.id).addClass("destroyed");
-                    $("#" + ship.id + " .initiative").html("Destroyed");
+                    fleetListManager.setRowState(ship, "destroyed", "Destroyed");
                 }
             }
         }

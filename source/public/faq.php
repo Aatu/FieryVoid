@@ -45,6 +45,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li><a href="#enormous">Enormous Units</a></li>
                 <li><a href="#escorts">Fighter Escorts</a></li>
                 <li><a href="#hangar">Hangar Operations</a></li>
+                <li><a href="#interception">Interception</a></li>
                 <li><a href="#jump">Jump Drives</a></li>
                 <li><a href="#ladder">Online Ladder</a></li> 
                 <li><a href="#mines">Mines</a></li>                               
@@ -698,13 +699,108 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
 
+        <h3 id="interception" >Interception</h3>
+        <ul>
+            <li>Interception is defensive fire that makes an incoming shot harder to hit.  Every weapon capable of it has an <strong>Intercept Rating</strong>.</li>
+            <li>In general, when several weapons are put on the <em>same</em> shot, each one after the first is worth 5% less than its rating, cumulatively.  Three rating -20% weapons therefore give -20%, -15% and -10%, for -45% total intercept, rather than -60%.
+                This degradation <strong>does not apply against ballistic weapons</strong> (missiles, captor mines) — every weapon assigned to a missile is worth its full rating.</li>
+            <li>Automatic Interception:
+                <ul class="circle-list">
+                    <li>This is the default and needs no input from the player to happen.  When the Firing phase resolves, the game gathers every intercept-capable weapon that has <em>not</em> fired that turn and assigns it to the incoming shots itself.</li>
+                    <li>Firing a weapon offensively takes it out of the defensive pool for that turn.  Interception is always paid for with weapons you chose not to shoot with.</li>
+                    <li>Weapons that take <strong>more than one turn to load</strong> are only used automatically if you first place a self-intercept marker on them, using the green shield icon on the weapon in the ship window during Firing phase.
+                        That marker is your consent to use the weapon's to intercept — without this consent the game will not spend a slow-charging weapon on defence.</li>
+                    <li>Missile racks that reload in a single turn and carry Interceptor missiles are switched into their interceptor mode and used automatically, drawing rounds from the magazine as they go.
+                        Racks with a longer loading time fall under the marker rule above.</li>
+                    <li>Note - Automated interception is the only way to intercept non-Ballistic weapons, since you have no prior knowledge of these atacks until after Firing Phase.</li>    
+                    <li>Mines do not intercept at all unless they carry the Command Controller enhancement.</li>
+                </ul>
+            </li>
+            <li>Manual Interception — putting your own weapons on a specific shot.  This is declared in the <strong>Firing phase only</strong>:
+                <ul class="circle-list">
+                    <li>Click one of your own units to select it and open its ship tooltip.  The <strong>INCOMING</strong> list at the bottom of that tooltip is every ballistic shot currently aimed at it, grouped under the ship that fired,
+                        and written as "2x Heavy Missile (Class-H)".</li>
+                    <li>Select the weapon(s) you want to commit in the ship window, exactly as you would to fire them.</li>
+                    <li>The hit chance at the end of the row <em>is</em> the button.  When the current selection can legally commit to that row the number is underlined in blue and the cursor becomes a pointer — click it to declare.
+                        Hover it at any time to read the full to-hit breakdown and, when it is refusing, the reason (<em>No interceptor selected</em>, <em>Uninterceptable</em>, <em>No selected weapon can reach this shot</em>, and so on).</li>
+                    <li>The hit chance drops as you commit, and the hover breakdown gains a <em>Declared interception</em> line.  That number is <strong>your own declared orders only</strong>: automatic interception is worked out after the
+                        turn is committed and is deliberately not previewed, and your allies' uncommitted orders are not in your game data.  It is not floored at zero either — a shot reading -25% is one you have already spent more on than it was worth.</li>
+                    <li>Clicking a grouped row spends the selection greedily, best interceptor first: it stacks weapons onto one shot of the group until that shot is fully suppressed, then moves on to the next one.
+                        Use the ▶ caret to expand the group into one row per shot when you would rather place each weapon yourself.</li>
+                    <li>A weapon that has been selected to intercept manually cannot also fire offensively, and neither will be in the automatic interceptor pool. For this reason you cannot manually declare an intercept with a weapon, and use Self Intercept shield to place it in the automated pool.</li>
+                    <li>Weapons that can split their shots (Twin and Quad Arrays, Discharge Guns and so on) spend <strong>one gun</strong> per manual intercept, and the rest are still free to fire, to intercept something else, or to be
+                        left to the automation.  A weapon that cannot split commits all of its guns to the one shot you point it at.</li>
+                    <li>Missile racks and other weapons that declare in an earlier phase can be hand-assigned in the Firing phase too, so long as they have fired nothing at all that turn.  Ammunition is checked against the magazine
+                        before the order is offered.</li>
+                    <li>To withdraw, clear that weapon's fire orders from the ship window in the usual way.</li>
+                </ul>
+            </li>
+            <li>What can be intercepted, either way:
+                <ul class="circle-list">
+                    <li>Fire aimed at the intercepting unit itself, provided the shot comes from within the weapon's firing arc.  Arcs are measured from where the shot is coming <em>from</em> — for a ballistic that is the hex it was
+                        launched from, not wherever the shooter has since moved to.</li>
+                    <li>Fire aimed at a <em>friendly</em> unit, but only by weapons carrying the free-intercept trait, and only when the unit being protected lies between them and the incoming shot.  Covering someone else is normally
+                        left to the automation, since the INCOMING list is shown on your own units' tooltips.</li>
+                    <li>Fighter flights may protect the ship they are escorting from ballistic fire, provided they end their movement on its hex now and were in the same hex as the ship at the start of the current turn.  A flight cannot cover another flight.</li>
+                    <li>Some attacks cannot be intercepted at all: e.g. laser weapons tend to be uninterceptable, and proximity mines, rams and Molecular Slicers are other examples.  Those rows refuse with a reason rather than
+                        disappearing from the list.</li>
+                </ul>
+            </li>
+            <li>Note - The Molecular Slicer prices interception out of its damage pool rather than per gun and has its own declaration method — see the Shadow Association section of
+                <a style="font-size: 14px;" href="./factions-tiers.php" target="_blank" rel="noopener noreferrer">Factions &amp; Tiers</a>.</li>
+        </ul>
+        <a class="back-to-top" href="#top">↩ Back to Top</a>
+
+
         <h3 id="jump" >Jump Drives</h3>
         <ul>
-            <li>The Jump Drive system usually cannot be turned off unless seriously damaged, but some scenarios allow it.</li>
-            <li>The game warns the player when attempting to deactivate this system improperly (e.g., without Desperate rules or 50%+ damage).</li>
-            <li>Ships equipped with Jump Drives can boost this system during Initial Orders to 'jump out' of the scenario at the end of the turn.  
-                Doing will remove then from the rest of the scenario, and ships with damaged jump drives may be destroyed as they jump (the chance of this is the % of the Jump Drive's health lost).  
-                The latter situation will be reflected in the Combat Log for that turn.</li>            
+            <li>A ship equipped with a Jump Drive can use it to <b>open a jump point</b> &mdash; a vortex into hyperspace
+                that appears in a nearby hex for up to four turns &mdash; allowing units to leave the battle by <b>flying into it</b>. Any unit may use any
+                <i>open</i> jump point, including an enemy's, and including units with no Jump Drive of their own.</li>
+            <li><b>Opening a jump point:</b>
+                <ul class="circle-list">
+                    <li>In <b>Initial Orders</b>, select the Jump Engine in the ship window (it behaves like any other hex-targeted weapon &mdash;
+                        hovering it shows its reach as a <span style="color:#e1b000;">yellow</span> overlay on the map, and the overlay stays up while it is selected).</li>
+                    <li>Right-click a target hex within <b>4 hexes</b> and choose 'Target selected weapons on hexagon'. You need line of sight to the hex,
+                        and it must be clear of terrain, of another jump point and of Enormous units. Ships in the hex, friendly or enemy, do not block it.</li>
+                    <li>A control appears on that hex with a <b>facing arrow</b> and two turn buttons. <b>The facing is the doorway</b> &mdash; it is the hex
+                        side a unit has to come <i>through</i> to use the jump point. Step it round, then press OK. Clicking away, or deselecting the Jump
+                        Engine, abandons the whole thing and no order is made. The facing cannot be changed afterwards; to re-aim, remove the fire order
+                        and declare again.</li>
+                    <li>The declaration is private until all player commit their Initial Orders. It then shows to everyone as a <span style="color:#e1b000;">yellow</span>
+                        <b>'Jump Point Forming'</b> hex with the facing arrow over it, and the ship reads <b>'Jumping to Hyperspace'</b> in its own tooltip
+                        and ship window.</li>
+                    <li>A jump point <b>cannot be entered on the turn it is declared</b>. It forms at the end of that turn and is open from the next one.</li>
+                    <li>Opening a jump point <b>reveals a stealthed or cloaked ship</b>, exactly as using non-DEW EW does &mdash; a Shading Field or Cloaking
+                        Device drops for that turn.</li>
+                </ul>
+            </li>
+            <li><b>Using a jump point:</b> during the <b>Movement</b> phase, plot the unit's path so it <i>enters</i> the jump point hex through the side the
+                arrow points at, then press the <b>Jump to Hyperspace</b> button on the unit's tooltip. Movement ends there &mdash; any remaining thrust is
+                forfeit &mdash; and the unit is removed at the end of the phase. It is judged on the actual step that carried it into the hex, so a
+                <b>sideslip</b> through the correct side works, and a unit that has been sitting in the hex since an earlier turn is judged on the step that
+                first put it there. Fighter flights may use a jump point too. Attached pods and docked craft are carried out with their host.</li>
+            <li>A unit that leaves through a jump point <b>keeps its full combat value</b> &mdash; it escaped, it was not destroyed &mdash; and its fleet-list
+                row reads <span style="color:#cc8500;">Jumped</span> rather than Destroyed. Craft docked aboard a carrier that jumps go with it and are not
+                subject to the carrier-destruction escape roll.</li>
+            <li><b>Maintaining a jump point:</b> a jump point closes at the end of <i>every</i> turn unless its holder declares Maintain. Use the blue
+                <b>Jump Point</b> ON/OFF switch in the Jump Engine's own system menu during Initial Orders. Switching it ON makes the declaration <i>and</i>
+                shuts the ship down for the turn &mdash; everything with a power cost except the Scanner and the Jump Engine itself &mdash; which is the price
+                of holding it open. Those systems cannot be switched back on until you switch Maintain OFF again.</li>
+            <li>A jump point also closes at the end of the turn if its holder <b>ends the turn more than 4 hexes away</b>, is <b>destroyed</b>, or
+                <b>leaves the battle</b> (through this jump point or any other). It closes unconditionally after <b>four turns open</b>. Whatever the reason,
+                it stays usable for the whole of the turn it closes on, and the reason is printed in that turn's Combat Log. The Initial Orders commit
+                dialogue warns you before you lose one you could still have kept.</li>
+            <li><b>Recharging:</b> opening a jump point spends the drive's entire charge. The Jump Engine's icon shows <b>N/4</b> &mdash; turns the jump point
+                has been open, out of four &mdash; while one stands, and its ordinary charge counter the rest of the time. It starts a scenario fully charged,
+                drops to zero when it opens a jump point, and recharges at 1 per turn from the turn <i>after</i> that jump point closes. It cannot open
+                another until it is full again, and the time that takes varies by hull (a Centauri Primus, for example, needs 16 turns).</li>
+            <li><b>Damaged Jump Drives are dangerous.</b> At the end of every turn a ship opens or maintains a jump point, it rolls d100 against the
+                percentage of its Jump Engine boxes lost. Roll at or under, and the ship is destroyed outright &mdash; docked craft are lost with it, with no
+                escape roll. The Combat Log records it. The risk is taken by the ship <i>opening</i> the jump point; there is no roll for units flying
+                through one.</li>
+            <li>The Jump Drive system usually cannot be turned off unless seriously damaged, but some scenarios allow it.
+                The game warns the player when attempting to deactivate this system improperly (e.g. without Desperate rules or 50%+ damage).</li>
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
