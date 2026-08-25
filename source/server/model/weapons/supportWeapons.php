@@ -1883,7 +1883,7 @@ class FlareGenerator extends Weapon implements DefensiveSystem {
 
     //Mode 2: override fire() to apply AoE flash damage to nearby units.
     //Targets the generating ship's own hex. No scatter/dissipation.
-    //Triad:Order faction ships (including the generating ship) are immune.
+    //Triad:Order faction ships (including the generating ship) are immune.	
     public function fire($gamedata, $fireOrder) {
         if ($fireOrder->firingMode != 2) {
             parent::fire($gamedata, $fireOrder);
@@ -1922,7 +1922,6 @@ class FlareGenerator extends Weapon implements DefensiveSystem {
             } else {
                 $damage = $damageByRange[2];
             }
-
             $this->aoeFlashDamage($targetShip, $shooter, $fireOrder, $sourceHex, $damage, $gamedata);
         }
 
@@ -1941,7 +1940,7 @@ class FlareGenerator extends Weapon implements DefensiveSystem {
         } else {
             $tmpLocation = $target->getHitSectionPos(Mathlib::hexCoToPixel($sourceHex), $fireOrder->turn);
             $system = $target->getHitSystem($shooter, $fireOrder, $this, $gamedata, $tmpLocation);
-            $this->doDamage($target, $shooter, $system, $damage, $fireOrder, null, $gamedata, false, $tmpLocation);
+            $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $sourceHex, $gamedata, false, $tmpLocation);
         }
     }
 
@@ -1999,12 +1998,6 @@ class FlareGenerator extends Weapon implements DefensiveSystem {
             }
         }
 
-        $orderCount = count($this->fireOrders);
-        $orderInfo = '';
-        foreach ($this->fireOrders as $o) {
-            $orderInfo .= "[mode={$o->firingMode} turn={$o->turn} type={$o->type}]";
-        }
-
         if ($mode2Active) {
             $distance = Mathlib::getDistanceHex($target, $shooter);
             if ($distance <= 0) return 0;
@@ -2040,6 +2033,16 @@ class FlareGenerator extends Weapon implements DefensiveSystem {
 
         return $this->passiveShieldStrength;
     }
+
+
+public function stripForJson() {
+    $strippedSystem = parent::stripForJson();
+    $strippedSystem->data = $this->data;
+    if ($this->mode2FiredThisTurn) {
+        $strippedSystem->mode2FiredThisTurn = true;
+    }
+    return $strippedSystem;
+}
 
 } //endof class FlareGenerator
 

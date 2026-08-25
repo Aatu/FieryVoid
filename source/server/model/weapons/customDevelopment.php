@@ -1504,6 +1504,172 @@ class NeutronBlasterFtr extends Weapon{
 } //endof class NeutronBlasterFtr
 
 
+class NeutronBeam extends Laser{
+		public $name = "NeutronBeam";
+        public $displayName = "Neutron Beam";
+        public $iconPath = "NeutronBlaster.png";
+        public $animation = "laser";
+        public $animationColor = array(98, 127, 82); 
+        
+        public $loadingtime = 2;
+		public $normalload = 3;
+		public $raking = 15;
+		public $priority = 8; //heavy Raking	
+
+		public $factionAge = 3; //Ancient
+		
+        public $rangePenalty = 0.33; //-1 per 3 hexes
+        public $fireControl = array(0, 3, 6);
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){ //maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ) $maxhealth = 14;
+			if ( $powerReq == 0 ) $powerReq = 8;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+	    public $weaponClass = "Electromagnetic"; 
+	    
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn); 
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}	    		  
+			$this->data["Special"] .= "Can fire at accelerated RoF for less damage:";  
+			$this->data["Special"] .= "<br> - 1 per 2 turns: 5d10+5"; 
+			$this->data["Special"] .= "<br> - 1 per 3 turns: 6d10+10"; 
+		}
+	
+		public function getDamage($fireOrder){
+        	switch($this->turnsloaded){
+            	case 0:
+            	case 1: 
+            	case 2:
+                	return Dice::d(10,5)+5;
+					break;
+			    default:
+			    	return Dice::d(10,6)+10;
+					break;			
+        	}
+		}
+
+        public function setMinDamage(){
+            switch($this->turnsloaded){
+            	case 1:
+            	case 2:
+                    $this->minDamage = 10 ;
+                    break;
+                default:
+                    $this->minDamage = 16 ;  
+                    break;
+            }
+		}
+             
+        public function setMaxDamage(){
+            switch($this->turnsloaded){
+                case 1:
+                case 2:
+                    $this->maxDamage = 55 ;
+                    break;
+                default:
+                    $this->maxDamage = 70 ;  
+                    break;
+            }
+		}
+
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->data = $this->data;
+			$strippedSystem->minDamage = $this->minDamage;
+			$strippedSystem->minDamageArray = $this->minDamageArray;
+			$strippedSystem->maxDamage = $this->maxDamage;
+			$strippedSystem->maxDamageArray = $this->maxDamageArray;				
+			return $strippedSystem;
+		}
+
+} // End of class NeutronBeam
+
+
+class NeutronCannon extends Laser{
+    	public $name = "NeutronCannon";
+        public $displayName = "Neutron Cannon";
+		public $iconPath = "NeutronCannon.png";
+        public $animation = "laser";
+        public $animationColor = array(98, 127, 82);
+		public $raking = 15;
+        public $priority = 8;		
+
+		public $factionAge = 3; //Ancient
+
+        public $loadingtime = 3;
+			
+        public $rangePenalty = 0.33;
+        public $fireControl = array(-4, 2, 4); // fighters, <=mediums, <=capitals 
+
+	    public $weaponClass = "Electromagnetic"; 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 12;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 6;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+		
+    	public function getDamage($fireOrder){        return Dice::d(10, 7)+20;   }
+        public function setMinDamage(){     $this->minDamage = 27 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 90 ;      }
+
+}  // endof NeutronCannon
+
+
+
+class PlasmaArray extends Plasma{
+    	public $name = "PlasmaArray";
+        public $displayName = "Plasma Array";
+		public $iconPath = "EWHeavyPointPlasmaGun.png";
+        public $animation = "trail";
+        public $animationColor = array(75, 250, 90);
+    	public $trailColor = array(75, 250, 90);
+    	public $projectilespeed = 15;
+        public $animationWidth = 5;
+    	public $animationExplosionScale = 0.30;
+    	public $trailLength = 20;
+        public $priority = 5;		
+    	public $rangeDamagePenalty = 0.5;
+        public $guns = 2;
+
+		public $factionAge = 3; //Ancient
+
+        public $intercept = 1;
+    		        
+        public $loadingtime = 1;
+			
+        public $rangePenalty = 0.5;
+        public $fireControl = array(6, 4, 3); // fighters, <=mediums, <=capitals 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 8;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 4;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+		
+    	public function getDamage($fireOrder){        return Dice::d(10, 1)+10;   }
+        public function setMinDamage(){     $this->minDamage = 11 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 20 ;      }
+
+}  // endof PlasmaArray
+
+
 
     class FusionBomb extends Torpedo{
         public $name = "FusionBomb";
@@ -2055,7 +2221,7 @@ class spawnDustField extends Terrain {
         $this->faction = "Terrain";
         $this->factionAge = 1;
         $this->phpclass = "spawnDustField";
-        $this->imagePath = "img/ships/dust2.png";
+        $this->imagePath = "img/ships/dust.png";
         $this->canvasSize = 200;
         $this->shipClass = "Dust Field";
         $this->Enormous = true;
@@ -2089,6 +2255,7 @@ class spawnDustField extends Terrain {
 
 
 
+
 class SpatialCutter extends Weapon {
 
     public $name = "SpatialCutter";
@@ -2114,8 +2281,6 @@ class SpatialCutter extends Weapon {
     public $animationExplosionScale = 0.4;
 
     public $firingModes = array(1 => "Spatial Cutter");
-
-    public $pendingWaveformHexes = array();
 
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
@@ -2155,58 +2320,33 @@ class SpatialCutter extends Weapon {
 
         if ($fireOrder->shotshit > 0) {
             $shooter = $gamedata->getShipById($fireOrder->shooterid);
-            $target = $gamedata->getShipById($fireOrder->targetid);
+            $target  = $gamedata->getShipById($fireOrder->targetid);
 
             if ($shooter && $target) {
+                // Spawn waveform immediately along the line of fire.
+                // spawnTurn is set to the current turn so:
+                // - No collision damage on turn N (units already placed before firing)
+                // - Collision damage fires on turn N+1 when units move through the hex
+                // - beforePreFiringOrderResolution removes it on turn N+2
                 $lineHexes = self::getHexLine($shooter->getHexPos(), $target->getHexPos());
                 foreach ($lineHexes as $hex) {
-                    $this->individualNotes[] = new IndividualNote(
-                        -1, $gamedata->id,
-                        $gamedata->turn, $gamedata->phase,
-                        $fireOrder->shooterid, $this->id,
-                        'waveformHex_' . $gamedata->turn,
-                        'Waveform Hex Turn ' . $gamedata->turn,
-                        $hex->q . ',' . $hex->r
-                    );
-                }
-            }
-        }
-    }
-
-    public function onIndividualNotesLoaded($gamedata) {
-        foreach ($this->individualNotes as $note) {
-            if ($note->turn == $gamedata->turn - 1 && strpos($note->notekey, 'waveformHex_') === 0) {
-                $parts = explode(',', $note->notevalue);
-                if (count($parts) == 2) {
-                    $this->pendingWaveformHexes[] = new OffsetCoordinate((int)$parts[0], (int)$parts[1]);
-                }
-            }
-        }
-        $this->individualNotes = array();
-    }
-
-    public function beforePreFiringOrderResolution($gamedata) {
-        // Spawn waveform hexes saved from previous turn
-        if (!empty($this->pendingWaveformHexes)) {
-            $hexesToSpawn = $this->pendingWaveformHexes;
-            $this->pendingWaveformHexes = array();
-            $shooter = $this->getUnit();
-            if ($shooter) {
-                foreach ($hexesToSpawn as $hex) {
                     $this->spawnWaveformAtHex($gamedata, $shooter, $hex);
                 }
             }
         }
+    }
 
-        // Remove expired waveforms (spawned turn N, active turn N+1, gone turn N+2)
-        foreach ($gamedata->ships as $ship) {
-            if ($ship instanceof spawnHyperspaceWaveform) {
-                $ship->loadSpawnTurn();
-                if ($ship->spawnTurn > 0 && $gamedata->turn > $ship->spawnTurn + 1) {
-                    $structure = $ship->getSystemByName("Structure");
+    // Remove expired waveforms at the start of pre-firing on turn N+2.
+    // Waveform spawns on turn N, is active on turn N+1, removed on turn N+2.
+    public function beforePreFiringOrderResolution($gamedata) {
+        foreach ($gamedata->ships as $waveShip) {
+            if ($waveShip instanceof spawnHyperspaceWaveform) {
+                $waveShip->loadSpawnTurn();
+                if ($waveShip->spawnTurn > 0 && $gamedata->turn > $waveShip->spawnTurn + 1) {
+                    $structure = $waveShip->getSystemByName("Structure");
                     if ($structure && !$structure->isDestroyed()) {
                         $damageEntry = new DamageEntry(
-                            -1, $ship->id, $gamedata->id, $gamedata->turn, $structure->id,
+                            -1, $waveShip->id, $gamedata->id, $gamedata->turn, $structure->id,
                             $structure->maxhealth, 0, 0, -1, true, false,
                             "Waveform dissipated", "Standard"
                         );
@@ -2321,14 +2461,11 @@ class SpatialCutter extends Weapon {
     }
 }
 
-
-
-
-
 class spawnHyperspaceWaveform extends Terrain {
 
     public $terrainCollisionType = 'WaveformCollision';
     public $Enormous = true;
+	public $spawnTurn = 0; 
 
     function __construct($id, $userid, $name, $slot) {
         parent::__construct($id, $userid, $name, $slot);
@@ -2336,7 +2473,7 @@ class spawnHyperspaceWaveform extends Terrain {
         $this->faction = "Terrain";
         $this->factionAge = 1;
         $this->phpclass = "spawnHyperspaceWaveform";
-        $this->imagePath = "img/ships/hyperspaceWaveform3.png";
+        $this->imagePath = "img/ships/hyperspaceWaveform.png";
         $this->canvasSize = 200;
         $this->shipClass = "Hyperspace Waveform";
         $this->Enormous = true;
@@ -2375,7 +2512,6 @@ class spawnHyperspaceWaveform extends Terrain {
         }
     }
 }
-
 
 
 

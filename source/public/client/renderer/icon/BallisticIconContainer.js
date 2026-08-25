@@ -33,6 +33,8 @@ window.BallisticIconContainer = function () {
 		this.ballisticLineIcons.forEach(icon => icon.used = false);
 		this.sceneObjects.forEach(entry => entry.used = false);
 
+//		const ballistics = replayData ?? weaponManager.getAllFireOrdersForAllShipsForTurn(gamedata.turn, 'ballistic');
+// GTS_Change
 		const ballistics = replayData ?? weaponManager.getAllFireOrdersForAllShipsForTurn(gamedata.turn, 'ballistic');
 
 		//Collected in the same pass, and under exactly the same turn/phase/masking filter the
@@ -99,6 +101,37 @@ window.BallisticIconContainer = function () {
 			}
 			return true;
 		});
+
+		// Phase 3: rebuild Flare hex grid from mode2FiredThisTurn since ballistic order is gone GTS_Change
+		if (gamedata.gamephase === 3 && !replayData) {
+			gamedata.ships.forEach(ship => {
+				ship.systems.forEach(system => {
+					if (system.name !== 'FlareGenerator') return;
+					if (system.mode2FiredThisTurn !== gamedata.turn) return;
+
+					const shooterIcon = iconContainer.getById(ship.id);
+					if (!shooterIcon) return;
+
+					const targetPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement().position);
+					if (!targetPosition) return;
+
+					const fakeBallistic = {
+						id: 'flare_' + ship.id + '_' + system.id,
+						shooterid: ship.id,
+						targetid: ship.id,
+						weaponid: system.id,
+						firingMode: 2,
+						turn: gamedata.turn,
+						type: 'ballistic',
+						damageclass: 'electromagnetic'
+					};
+
+					createOrUpdateBallistic.call(this, fakeBallistic, iconContainer, gamedata.turn, false);
+				});
+			});
+		}
+
+		generateBallisticLines.call(this);
 
 		generateBallisticLines.call(this);
 		generateTerrainHexes.call(this, gamedata);
@@ -522,7 +555,8 @@ window.BallisticIconContainer = function () {
 	//To create coloured hexes signifying ballistic launches and other effects.
 	function createBallisticIcon(ballistic, iconContainer, turn, scene, replay = false) {
 
-		if (ballistic.damageclass === 'Sweeping') return;
+//		if (ballistic.damageclass === 'Sweeping') return;
+if (ballistic.damageclass === 'Sweeping' || ballistic.damageclass === 'HPC-subordinate') return;
 
 		const shooterIcon = iconContainer.getById(ballistic.shooterid);
 		if (!shooterIcon) return;
@@ -683,8 +717,9 @@ window.BallisticIconContainer = function () {
 							case '3-Blanket Shade':
 								size = 5;
 								break;
-							case 'Asteroid Salvo':  //GTS for Triad Asteroid Salvo
-								sizes = [1, 2];
+							// GTS_Triad
+							case 'Asteroid Salvo':
+								size = 2;
 								break;
 						}
 

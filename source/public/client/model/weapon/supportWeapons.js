@@ -583,13 +583,13 @@ GraviticAugmenter.prototype.onFireOrderCreated = function (fire) {
 	return fire;
 };
 
-// GTS_Triad
+
 
 
 // GTS_Triad
 var FlareGenerator = function FlareGenerator(json, ship) {
     Weapon.call(this, json, ship);
-    this.mode2FiredThisTurn = -1;
+    this.mode2FiredThisTurn = json.mode2FiredThisTurn ? gamedata.turn : -1;
 };
 FlareGenerator.prototype = Object.create(Weapon.prototype);
 FlareGenerator.prototype.constructor = FlareGenerator;
@@ -598,7 +598,7 @@ FlareGenerator.prototype.defensiveType = "Shield";
 FlareGenerator.prototype.defensiveSystem = true;
 
 FlareGenerator.prototype.getDefensiveHitChangeMod = function(target, shooter, weapon) {
-    if (this.ballistic && this.firingMode == 2) {
+    if (this.mode2FiredThisTurn === gamedata.turn) {
         var distance = mathlib.getDistanceBetweenShipsInHex(target, shooter);
         if (distance <= 0) return 0;
         if (distance <= 1) return 4;
@@ -609,7 +609,7 @@ FlareGenerator.prototype.getDefensiveHitChangeMod = function(target, shooter, we
 };
 
 FlareGenerator.prototype.getDefensiveDamageMod = function(target, shooter, weapon) {
-    if (this.ballistic && this.firingMode == 2) {
+    if (this.mode2FiredThisTurn === gamedata.turn) {
         var distance = mathlib.getDistanceBetweenShipsInHex(target, shooter);
         if (distance <= 0) return 0;
         if (distance <= 1) return 4;
@@ -661,7 +661,7 @@ FlareGenerator.prototype.isSpentLocked = function () {
 };
 
 FlareGenerator.prototype.canActivate = function () {
-    return (gamedata.gamephase == 1 && this.firingMode == 2 && !this.getOrderThisTurn());
+    return (gamedata.gamephase == 1 && this.firingMode == 2 && !this.getOrderThisTurn() && weaponManager.isLoaded(this));
 };
 
 FlareGenerator.prototype.canDeactivate = function () {
@@ -671,7 +671,7 @@ FlareGenerator.prototype.canDeactivate = function () {
 FlareGenerator.prototype.doActivate = function () {
     if (this.firingMode != 2) return;
     if (this.getOrderThisTurn()) return;
-
+    if (!weaponManager.isLoaded(this)) return;
     var ship = this.ship;
     var position = shipManager.getShipPosition(ship);
     var fireid = ship.id + "_" + this.id + "_1";
