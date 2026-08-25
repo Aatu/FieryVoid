@@ -9,7 +9,7 @@ class technicalTargetDrone extends VreeCapital
 		$this->pointCost = 5;
 		$this->faction = "Custom Ships";
 		$this->phpclass = "technicalTargetDrone";
-		$this->imagePath = "img/ships/kirishiacLordship.png";
+		$this->imagePath = "img/ships/triadTriumviron.png";
 		$this->canvasSize = 200;
 		$this->shipClass = "Target Drone - DO NOT USE";
 		$this->shipSizeClass = 3;
@@ -24,7 +24,7 @@ class technicalTargetDrone extends VreeCapital
 		$this->rollcost = 1;
 		$this->pivotcost = 1;
 
-    	$this->iniativebonus = 50 * 5;
+    	$this->iniativebonus = 0 * 5;
 		
         $this->gravitic = true;  
 
@@ -54,6 +54,7 @@ class technicalTargetDrone extends VreeCapital
 //        $this->addPrimarySystem(new FlareShielding(8, 9, 6, 4, 0, 360));
 
         $this->addPrimarySystem(new CoopStructureSelfRepair(8, 24, 24)); //armor, structure, output
+        $this->addPrimarySystem(new SelfRepair(5, 6, 2)); //armor, structure, output
 		
 		$testHangar = new Hangar(5, 24, 18);
 		$testHangar->directions = array(0, 1, 5); //port + starboard launch bays — player picks per launch
@@ -93,9 +94,14 @@ class technicalTargetDrone extends VreeCapital
 //        $this->addFrontSystem(new CombatTransporter(3, 4, 1, 270, 90, 5, false));	
 
 //        $this->addFrontSystem(new PhotonicPrismBeam(3, 24, 8, 270, 90));	
- //       $this->addFrontSystem(new PhotonicPrismBeam(3, 24, 8, 270, 90));	
 //        $this->addFrontSystem(new PhotonicPrismBeam(3, 24, 8, 270, 90));	
 //        $this->addFrontSystem(new PhotonicPrismBeam(3, 24, 8, 270, 90));	
+//        $this->addFrontSystem(new PhotonicPrismBeam(3, 24, 8, 270, 90));	
+
+        $this->addFrontSystem(new HyperplasmaCutter(0, 16, 9, 270, 360));	
+//        $this->addFrontSystem(new HyperplasmaCutter(8, 16, 9, 300, 60));	
+        $this->addFrontSystem(new HyperplasmaCutter(0, 16, 9, 0, 90));	
+
 
 //        $this->addFrontSystem(new AsteroidSalvo(8, 30, 10, 270, 90));	
 //        $this->addFrontSystem(new AsteroidSalvo(8, 30, 10, 270, 90));	
