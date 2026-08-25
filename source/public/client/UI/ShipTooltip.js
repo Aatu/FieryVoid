@@ -145,6 +145,27 @@ window.ShipTooltip = function () {
         }
     };
 
+    /* Re-run the button row's condition lists. Every button that can act on a weapon asks
+       gamedata.selectedSystems whether it has one - hasWeaponsSelected, hasHexWeaponsSelected,
+       FFWeaponSelected, hasSplitWeaponFiringOrder - so "Target Weapons" and "Remove a Firing
+       Order" would otherwise sit there inert after the player emptied the selection, and stay
+       missing after they refilled it (user report 2026-08-24). The conditions were always right;
+       nothing was asking them again.
+
+       renderTo APPENDS, so the row has to be emptied first - that is why this is not simply a
+       call to renderTo. Safe to run from inside a button's own click handler: onClick calls the
+       action and returns without touching the element (shipTooltipMenu.js), and ShipTooltip's
+       own update() already destroys these buttons the same way on every retarget. */
+    ShipTooltip.prototype.refreshButtons = function () {
+        //Same two guards the render site had: no menu on a plain hover tooltip, and
+        //createForMultipleShips never draws a button row for a stack.
+        if (!this.menu || this.ships.length !== 1) return;
+
+        var buttons = jQuery(".buttons", this.element);
+        buttons.html("");
+        this.menu.renderTo(buttons, this);
+    };
+
     ShipTooltip.prototype.isForAnyOf = function (ships) {
         ships = [].concat(ships)
 
@@ -523,9 +544,7 @@ window.ShipTooltip = function () {
 
         this.ballisticsMenu.renderTo(ship, this.element);
 
-        if (this.menu) {
-            this.menu.renderTo(jQuery(".buttons", this.element), this);
-        }
+        this.refreshButtons();
     }
 
     // The hover tooltip for a STACKED hex — several units under one cursor, none of them
