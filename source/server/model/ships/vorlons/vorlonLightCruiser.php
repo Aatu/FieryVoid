@@ -52,7 +52,7 @@ class VorlonLightCruiser extends VorlonCapitalShip{
 
         $this->addAftSystem(new EMShield(4, 6, 0, 4, 120, 300));
         $this->addAftSystem(new EMShield(4, 6, 0, 4, 60, 240));
-		$this->addAftSystem(new JumpEngine(5, 16, 0, 10));//Vorlon Jump Engines normally do use power (the only system onboard that does so), but still are counted as base running costs - in FV I simplify to 0 power requirement
+		$this->addAftSystem(new JumpEngine(5, 16, 0, 10, 12));//Vorlon Jump Engines normally do use power (the only system onboard that does so), but still are counted as base running costs - in FV I simplify to 0 power requirement. 5th argument = jump point projection range: Vorlon Empire hulls reach 12 hexes, not the standard 4 (JUMP_POINTS_PLAN.md section 2.1)
 		$this->addAftSystem(new GraviticThruster(5, 13, 0, 3, 2));
 		$this->addAftSystem(new GraviticThruster(5, 13, 0, 3, 2));
 		$this->addAftSystem(new GraviticThruster(5, 13, 0, 3, 2));

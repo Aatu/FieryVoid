@@ -5079,12 +5079,27 @@ class JumpEngine extends Weapon{
 
     /* STAGE 2 - THE VORTEX DECLARATION. The Jump Engine is a hex-targeted ballistic weapon:
        declared in Initial Orders ($ballistic), aimed at a HEX rather than a unit ($hextarget), and
-       able to project a vortex up to 4 hexes away. It still never rolls to hit and never deals
+       able to project a vortex up to $range hexes away. It still never rolls to hit and never deals
        damage - Firing::fireWeapons skips every order of type 'ballistic', and this class has no
        beforeFiringOrderResolution hook - so the declaration is completely inert until the Stage 3
        spawn sweep consumes it. All it does today is persist the target hex and the facing. */
     public $ballistic = true;
     public $hextarget = true;
+
+    /* HOW FAR THIS ENGINE CAN PROJECT ITS VORTEX, in hexes. 4 is the B5W standard and stays the
+       default; the constructor's 5th argument is how a faction says otherwise (Vorlon Empire
+       hulls pass 12 - user ruling 2026-08-25). Read it, never assume 4: every reader already
+       does, and there is deliberately no second copy of the number anywhere.
+
+         - declaration legality, server side .. Firing::getVortexDeclarationBlock
+         - declaration legality, client side .. weaponManager.targetHex ($range rides the static
+                                                blueprint - ShipCompactor does not strip it)
+         - the "holder drifted too far" closure rule .. getVortexCloseReason
+         - the tooltip .. setSystemDataWindow, which interpolates it twice
+
+       ⚠️ markLegacy() zeroes it and markGate() overwrites it with a SIGNAL range of 10; both run
+       after the constructor, so a 5th argument passed alongside either is silently discarded.
+       That is correct in both cases - neither kind of engine projects a vortex at all. */
     public $range = 4;
 
     /* STAGE 5 - the MAINTAIN declaration's firing mode. Named once because three places have to
@@ -5230,11 +5245,12 @@ class JumpEngine extends Weapon{
 
 	private $preJumpValue = 0; //Will be used to store ship's Combat Value at the moment it jumped.
     
-    function __construct($armour, $maxhealth, $powerReq, $delay){
-        /* Same 4-arg signature as before, so none of the 610 ship files change. 0/360 arcs are
-           passed internally: the engine has no firing arc, and Stage 2 projects its vortex onto a
-           hex in any direction. Weapon's 6th argument ($output) still defaults to 0, which is what
-           ShipSystem was handed before. */
+    function __construct($armour, $maxhealth, $powerReq, $delay, $range = 4){
+        /* The first four arguments are the signature every one of the 610 ship files already
+           passes, so a 5th with a default changes none of them. 0/360 arcs are passed internally:
+           the engine has no firing arc, and Stage 2 projects its vortex onto a hex in any
+           direction. Weapon's 6th argument ($output) still defaults to 0, which is what ShipSystem
+           was handed before. */
         parent::__construct($armour, $maxhealth, $powerReq, 0, 360);
 
         /* STAGE 6 - THE 4th ARGUMENT IS THE RECHARGE TIME, AND IT IS THE LOADING TIME.
@@ -5262,6 +5278,19 @@ class JumpEngine extends Weapon{
         $this->delay       = (int)$delay;
         $this->loadingtime = max(1, (int)$delay);
         $this->turnsloaded = $this->loadingtime;
+
+        /* THE 5th ARGUMENT IS THE PROJECTION RANGE, and it defaults to the B5W standard 4 - see
+           $range above for the four things that read it. Faction rule, not a hull rule: it is
+           passed per ship file because that is where a faction's hulls are, but every hull of a
+           faction is expected to carry the same number (Vorlon Empire: 12, user ruling
+           2026-08-25).
+
+           ⚠️ FLOORED AT 1, and that floor is not decoration. The two ends disagree about what a
+           range of 0 means - weaponManager.targetHex reads it as UNLIMITED (`weapon.range === 0
+           ||`), Firing::getVortexDeclarationBlock reads it as "no hex is legal" - so 0 is a state
+           no ship file should be able to reach by accident. markLegacy() sets it deliberately and
+           is safe there precisely because it also turns the whole declaration path off. */
+        $this->range = max(1, (int)$range);
     }
 
     /* SECTION 9 - PUT THIS ENGINE BACK ON THE PRE-2026 ONE-CLICK JUMP.
@@ -6910,6 +6939,9 @@ class JumpEngine extends Weapon{
 		if (!$primaryStruct || $primaryStruct->isDestroyed($turn)) return;
 
 		$missingHealthPercentage = round(($healthDiff / $this->maxhealth) * 100);
+		//Ancieents have half the normal chance of Jump Engine failure. 
+		if($ship->factionAge >= 3) $missingHealthPercentage = round($missingHealthPercentage / 2);
+
 		if (Dice::d(100) > $missingHealthPercentage) return; //held
 
 		//try to make an actual attack to show in the log - use the Ramming Attack system, exactly
@@ -10586,10 +10618,55 @@ class ShadowPilot extends CnC{
 /*Phasing Drive - essentially a jump engine that destroys ship if damaged while half-phasing*/
 class PhasingDrive extends JumpEngine{
     public $displayName = "Phasing Drive";
-    
+
 	//JumpEngine enables half phasing, so I'm torn about priority... I'll increase to 2 over Jump Engine's 1
 	public $repairPriority = 2;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
-    	
+
+    /* A SHADOW SHIP DOES NOT OPEN A B5 VORTEX - IT SIMPLY FADES OUT, and the replay has to say so
+     * (user ruling 2026-08-25). The only client-side effect of this flag is that
+     * ReplayAnimationStrategy hands ShipJumpAnimation a fade with no ShipJumpPoint attached; the
+     * ship still pans into view, still fades and still gets its log entry. It makes no SOUND
+     * either: ShipJumpAudio is a vortex tearing open, so a ship that never opens one stays quiet
+     * (user ruling 2026-08-25) - the animation builds no Audio object at all in that case.
+     *
+     * ⭐ PUBLIC, and declared HERE rather than on JumpEngine, which is the whole reason it is cheap.
+     * json_encode takes public properties only and the static generator encodes the constructed
+     * ship, so this key rides the blueprint of the 23 hulls that mount a Phasing Drive and does not
+     * exist on the other 753 jump engines in the tree (plan section 8: a public default on the base
+     * class would cost all 776 for nothing). ShipCompactor needs no entry for it either - it is
+     * never false, so there is no default to strip - and the client's ShipSystem constructor copies
+     * every key it is given, so it arrives without any per-class plumbing.
+     *
+     * ⚠️ NOT keyed off isLegacyJump() on the client side, deliberately. The Trek Nacelle, the BSG
+     * FTL Drive and the Star Wars Hyperdrive are legacy too and keep the existing jump-point
+     * animation; this is a SHADOW rule, not a legacy-jump rule, and the two are only aligned by
+     * coincidence today. */
+    public $noJumpPointAnimation = true;
+
+    /* SHADOW ASSOCIATION HULLS JUMP THE OLD WAY (user ruling 2026-08-25) - boost the drive in
+     * Initial Orders, vanish at the end of the turn, leave nothing behind. See
+     * JumpEngine::markLegacy() for exactly what that flips and why it is a flag rather than a
+     * subclass; the "or from a subclass constructor" case that comment describes is this one.
+     *
+     * Done here rather than in the 23 ship files because EVERY Phasing Drive in the tree is a
+     * Shadow hull's and always will be - the drive is the faction's defining system, and the four
+     * Shadow hulls filed under "Custom Ships" want the identical rule. A per-file call would be 23
+     * chances to forget one on the next hull somebody adds.
+     *
+     * ⚠️ AFTER parent::__construct, never before: markLegacy() prunes the per-firing-mode arrays
+     * that Weapon::__construct builds, so running it first would leave the seven vortex modes in
+     * place. Same ordering the ship-file form relies on.
+     *
+     * ⚠️ FOUR ARGUMENTS, NOT FIVE. JumpEngine's 5th is the vortex PROJECTION range, and a drive
+     * that cannot project one has no use for it - markLegacy() zeroes the range either way. Left
+     * off rather than forwarded so the signature does not advertise a range this class can honour;
+     * PHP ignores a surplus argument silently, so a ship file that passes one gets no error and no
+     * effect, which is the same answer forwarding it would have given. */
+    function __construct($armour, $maxhealth, $powerReq, $delay){
+        parent::__construct($armour, $maxhealth, $powerReq, $delay);
+        $this->markLegacy();
+    }
+
     public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
 		if (!isset($this->data["Special"])) {

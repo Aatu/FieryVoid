@@ -858,7 +858,15 @@ window.ReplayAnimationStrategy = function () {
 
             this.animations.push(new CameraPositionAnimation(position, time));
 
-            var effect = new ShipJumpPoint(this.emitterContainer, { time: time, position: position });
+            /* ⭐ PUSHED INTO this.animations, unlike every other use of this effect, and that is
+               what gives it a SOUND (user report 2026-08-25: a jump point forming was silent).
+               The particles never needed it - the constructor seeds them into the emitterContainer,
+               which is already in the list - but render() is where the audio fires, and nothing
+               calls render() on an object the strategy is not holding. ShipJumpPoint now inherits
+               Animation so it survives the update/cleanUp sweeps that come with membership. */
+            var effect = new ShipJumpPoint(this.emitterContainer,
+                { time: time, position: position, playSound: true });
+            this.animations.push(effect);
             time += effect.getDuration();
         }, this);
 
@@ -871,7 +879,15 @@ window.ReplayAnimationStrategy = function () {
         }, this).forEach(function (ship) {
             var jumped = shipManager.hasJumpedNotDestroyed(ship);
             if (jumped) {
-                var animation = new ShipJumpAnimation(time, this.shipIconContainer.getByShip(ship), this.emitterContainer, this.movementAnimations);
+                /* A SHADOW HULL JUST FADES OUT - no cyan vortex (user ruling 2026-08-25). The flag
+                   is a blueprint property of the Phasing Drive itself (PhasingDrive in
+                   baseSystems.php), not a faction-string test, so the four Shadow hulls filed under
+                   "Custom Ships" get the same treatment as the 19 under Shadow Association.
+                   Absent on every other jump engine in the tree, which reads as the falsy default. */
+                var drive = shipManager.systems.getSystemByName(ship, "jumpEngine");
+                var noJumpPoint = Boolean(drive && drive.noJumpPointAnimation);
+
+                var animation = new ShipJumpAnimation(time, this.shipIconContainer.getByShip(ship), this.emitterContainer, this.movementAnimations, noJumpPoint);
                 logAnimation.addLogEntryDestroyed(ship, time, true);
             } else {
                 var animation = new ShipDestroyedAnimation(time, this.shipIconContainer.getByShip(ship), this.emitterContainer, this.movementAnimations);
