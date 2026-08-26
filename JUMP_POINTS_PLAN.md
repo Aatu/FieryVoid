@@ -4,7 +4,8 @@ Replaces the current one-click "boost the Jump Engine, vanish at end of turn" es
 tabletop rules: a ship **projects a vortex** into a nearby hex, the vortex **forms**, **persists**,
 can be **maintained**, and any unit that **flies into its mouth** leaves the battle.
 
-Status: **ALL SIX STAGES BUILT (2026-08-21/22), plus §9 the legacy opt-out (2026-08-22).**
+Status: **ALL SIX STAGES BUILT (2026-08-21/22), plus §9 the legacy opt-out (2026-08-22) and §10 the
+Vorlon 12-hex range + Shadow revert (2026-08-25).**
 ⚠️ Stage 2 retires the boost-to-jump path and Stage 4 adds the replacement, so **stages 2–5 must
 ship as ONE live deploy** — deploying Stage 2 alone leaves a game with no way to leave a battle.
 That deploy is now complete: 2–5 are all in the tree.
@@ -1543,10 +1544,15 @@ shut off, which is the half that can create new state.
 | BSG FTL Drive (Colonials / Kobol / Cylons) | 31 | `markLegacy()` per ship file |
 | `customs/VariableHangarSize` | 1 | `markLegacy()` per ship file |
 | Trek Nacelle | ~60 | **class-level**, in `TrekWarpDrive::__construct` |
+| **Shadow Phasing Drive** | **23** | **class-level, in `PhasingDrive::__construct` — added 2026-08-25, see §10.2** |
 
 63 ship files carry the call, and that set is **exactly** the set of files naming a
 Hyperdrive/FTL Drive/Nacelle — verified both directions, nothing missed and nothing over-reverted.
 Trek is marked on the class because every instance of `TrekWarpDrive` is a nacelle.
+
+⚠️ **The counts above are the 2026-08-22 state.** §10.2 added the Shadows on the same class-level
+pattern, so the boost path now carries **218** hulls, not 195, and the Shadows are the one family
+that also suppresses the replay's jump-point effect (§10.3).
 
 ### The four traps — all resolved
 
@@ -1630,3 +1636,148 @@ is exactly why trap 2 had to be fixed in the same change.
   **0 new** · replay harness **161 passed, 0 failed** (33.4s).
 - **Control check**: an Earth Alliance engine still reads all 7 vortex modes, range 4, 24-turn
   charge. The vortex path is untouched by any of this.
+
+---
+
+## 10. Faction rules — projection range and the Shadow revert — **BUILT 2026-08-25**
+
+Two per-faction clarifications, ruled by the user on 2026-08-25. Neither changes the vortex
+mechanic; both change *who plays by it*.
+
+| Ruling | Effect |
+|---|---|
+| A Vorlon Empire hull projects its jump point **up to 12 hexes**, not 4 | All 11 Vorlon hulls with a Jump Engine |
+| A Shadow Association hull **jumps the old way** and **fades out** rather than tearing a vortex open | All 23 hulls mounting a `PhasingDrive` |
+
+### 10.1 The range is a constructor argument
+
+`JumpEngine::__construct` gained a **5th argument, `$range`, defaulting to 4** — the B5W standard,
+so none of the other 610 ship files change. It is assigned to `$this->range`, which was already the
+single number every reader consults, so nothing else needed touching:
+
+| Reader | Where |
+|---|---|
+| declaration legality, server | `Firing::getVortexDeclarationBlock` — `if ($distance > $weapon->range)` |
+| declaration legality, client | `weaponManager.targetHex` — `weapon.range === 0 \|\| distanceTo(hexpos) <= weapon.range` |
+| the "holder drifted too far" closure rule | `JumpEngine::getVortexCloseReason` |
+| the tooltip | `setSystemDataWindow`, which interpolates it **twice** (opening, and the closure rule) |
+
+⚠️ **`$range` is NOT stripped by `ShipCompactor`** — it is not in `$deadSystemKeys`, `$falseKeys`
+or `$zeroKeys` — so the client learns the Vorlon 12 from the static blueprint with no payload
+change and no new plumbing. Verified in `source/public/static/json/Vorlon Empire.json`:
+`"range":12` × 11, and no other faction's file moved.
+
+⚠️ **Floored at 1, deliberately.** The two ends disagree about what a range of 0 means — the client
+reads it as *unlimited*, the server as *no hex is legal*. `markLegacy()` sets 0 on purpose and is
+safe there only because it also turns the whole declaration path off; a ship file must not be able
+to reach that state by passing a bad number.
+
+⚠️ **`markLegacy()` and `markGate()` both run AFTER the constructor** and overwrite `$range` (0 and
+a 10-hex *signal* range respectively), so a 5th argument passed alongside either is silently
+discarded. Correct in both cases — neither kind of engine projects a vortex at all.
+
+### 10.2 Shadows go back on the boost path — `markLegacy()` from the subclass constructor
+
+`PhasingDrive::__construct` now calls `parent::__construct(...)` then `$this->markLegacy()`. §9's
+own comment sanctions the subclass-constructor form; this is the second user of it after
+`TrekWarpDrive`, and for the same reason: **every** `PhasingDrive` in the tree is a Shadow hull's
+and always will be. A per-file call would have been 23 chances to forget one on the next hull
+somebody adds — and it would have missed the four Shadow hulls filed under faction
+`"Custom Ships"` (`shadowAttackDreadnought`, `shadowCruiserAdvanced`, `shadowDestroyerHunter`,
+`shadowStrikeCruiser`), which want the identical rule.
+
+⚠️ **After `parent::__construct`, never before** — `markLegacy()` prunes the per-firing-mode arrays
+that `Weapon::__construct` builds, so running it first would leave the seven vortex modes behind.
+
+⚠️ **FOUR constructor arguments, not five.** A drive that cannot project a vortex has no use for a
+projection range. The argument is left off rather than forwarded so the signature does not
+advertise a range this class can honour.
+
+What this makes true of a Shadow hull, confirmed by instantiating one: `legacy=true`,
+`boostable=true`, `hextarget=false`, `ballistic=false`, `autoFireOnly=true`, `range=0`,
+`firingModes={1:"Standard"}`, load `1/1`, and the boost-era tooltip with the Phasing Drive's own
+half-phase warning appended. The end-of-Fire sweep already finds it — §9 trap 2 made that sweep
+`instanceof JumpEngine`, which `PhasingDrive` satisfies.
+
+### 10.3 The replay: a Shadow ship just fades out
+
+`ReplayAnimationStrategy.animateShipDestruction` passes a 5th argument to `ShipJumpAnimation`,
+which skips **both the `ShipJumpPoint` particle effect and `ShipJumpAudio.mp3`** — the sound is the
+noise of a vortex tearing open, so a hull that never opens one stays quiet. The camera pan, the
+opacity fade and the log entry are kept. With no jump point to ask, the animation states its own
+duration: `2600ms` (fade start 2100 + fade 500) rather than `ShipJumpPoint`'s 4000, so the replay
+does not sit on an empty hex.
+
+⚠️ **The silent case builds no `Audio` object at all** (`this.sound = null`), so nothing is fetched
+for it either. `render()` now tests `this.sound` rather than the flag — the same null check
+`cleanUp()` already made, so both paths agree and neither needs the flag stored on the instance.
+
+### 10.3a A jump point FORMING now has a sound too — a separate, pre-existing gap
+
+Suppressing the Shadow sound made an older silence obvious: **the vortex forming/collapsing
+animation never had one**, from Stage 6 until 2026-08-25. It is a different code path —
+`animateVortexLifecycle` builds a bare `ShipJumpPoint` and pushes only the camera pan; the audio
+lived one level up, in `ShipJumpAnimation`, which is the **departing ship**, not the vortex.
+
+⭐ **The fix is one line of wiring plus an opt-in, and the wiring is the interesting half.**
+`ShipJumpPoint` had no `render()` at all — the constructor seeds Explosions into the
+`emitterContainer` at absolute times and that container renders itself, which is exactly why the
+effect was never in `this.animations`. But `render()` is where audio fires, and **nothing calls
+`render()` on an object the strategy is not holding**. So `animateVortexLifecycle` now pushes the
+effect as well as the pan. Membership brings obligations: the list is swept for `update(gameData)`
+and — from `deactivate()` — `cleanUp(scene)`, neither of which this effect defined, so it now
+inherits `Animation` for the no-ops. ⚠️ The prototype swap is assigned **before** `getDuration`, or
+it would discard it.
+
+⚠️ **The sound is OPT-IN (`args.playSound`), and must stay so.** `ShipJumpPoint` has two callers
+with opposite needs: `ShipJumpAnimation` owns its own `Audio` and plays it from its own `render()`,
+so asking here would double the clip; `animateVortexLifecycle` has nothing above it to make a
+noise. Its instance is also bare of `playSound` **and** absent from the animation list, so it is
+silent twice over — but the flag is what states the intent.
+
+Registered in `ReplayPhaseStrategy.resetAudio` next to the `ShipDestroyedAnimation` /
+`ShipJumpAnimation` branch (its own flag, `playedSound`, because it is the bare effect in the list
+rather than an animation wrapping one) so seeking to a phase replays it instead of firing once
+per page load. Both **forming and collapsing** play it — the same effect, and §7's note that the
+two ends are "the same event seen from two sides" is the reason.
+
+Verified by evaluating the file in node against the real `Animation` base: inherits correctly,
+`getDuration()` still 4000, `update`/`cleanUp` present, fires exactly once and only after its own
+start time, never while paused or scrubbing backwards, never with `gamedata.playAudio` off,
+replays after a `resetAudio`, and the bare `ShipJumpAnimation`-owned instance stays silent even
+when rendered.
+
+⭐ **The signal is a blueprint property, `PhasingDrive::$noJumpPointAnimation = true`, not a faction
+string.** Declared on `PhasingDrive` rather than on `JumpEngine`, which is the whole reason it is
+cheap: `json_encode` takes public properties only, so the key rides the blueprint of the 23 hulls
+that mount a Phasing Drive and does not exist on the other 753 jump engines (§8 measured what a
+public default on the base class costs). `ShipCompactor` needs no entry — it is never `false`, so
+there is no default to strip — and the client's `ShipSystem` constructor copies every key it is
+given, so it arrives with no per-class JS. Verified: 19 occurrences in
+`static/json/Shadow Association.json`, 4 in `Custom Ships.json`, **zero** in every other faction.
+
+⚠️ **NOT keyed off `isLegacyJump()`.** The Trek Nacelle, the BSG FTL Drive and the Star Wars
+Hyperdrive are legacy too and keep the existing jump-point animation. This is a **Shadow** rule,
+not a legacy-jump rule; the two are aligned only by coincidence today.
+
+### 10.4 Verification (2026-08-25)
+
+- **PHP lint**: `baseSystems.php` + all 11 Vorlon ship files — clean.
+- **`node --check`**: both edited client files, and the rebuilt `game.legacy.bundle.js`.
+- **Ship-data validator**: 236 findings, 234 in baseline, **2 new** — `triadArchangel` and
+  `triadDevil` hit-chart entries, **identical on a clean tree** (stashed and re-run to prove it).
+  Pre-existing, unrelated to this change, and still outstanding.
+- **`-Statics`: run.** Required — both changes are blueprint-shaped.
+- **`-Autoload`: not needed** — no new class.
+- **Replay harness**: 14 games diffed, every one of them the same single intended change on a
+  Shadow hull (`turnsloaded: 8 -> 1`, `loadingtime` dropped as now-default — the legacy engine
+  shows no recharge counter). Re-recorded; the corpus is back to the clean-tree result of
+  155 passed / 1 failed (4303, a stale recording that fails on `master` too) / 5 SKIP.
+  **No Vorlon diff at all**, because `range` never rides the gamedata payload.
+
+⚠️ **`replayHarness.php record --games=…` REWRITES THE WHOLE MANIFEST**, keeping only the filtered
+games — `cmdRecord` builds `$manifest` from scratch and `file_put_contents`es it. `--games=` is
+safe on `check` and **destructive on `record`**. The per-game report directories survive, so the
+repair is to rebuild `baseline/manifest.json` from the directories on disk plus the DB's
+turn/status; but the recorded turn/status of anything that has since advanced is unrecoverable
+from disk (the snapshots do not carry it), so pin those by hand from the previous `check` output.

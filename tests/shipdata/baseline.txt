@@ -218,6 +218,8 @@ hitchart	technicalTargetDrone	location 31, roll 15	no system carries tag "Weapon
 hitchart	technicalTargetDrone	location 32, roll 15	no system carries tag "Weapon" - every hit here is rerouted to Structure
 hitchart	technicalTargetDrone	location 41, roll 15	no system carries tag "Weapon" - every hit here is rerouted to Structure
 hitchart	technicalTargetDrone	location 42, roll 15	no system carries tag "Weapon" - every hit here is rerouted to Structure
+hitchart	triadArchangel	location 1, roll 9	no system named "Neutron Burst" on location 1 - every hit here is silently rerouted to Structure
+hitchart	triadDevil	location 1, roll 7	no system named "Antimatter Wave" on location 1 - every hit here is silently rerouted to Structure
 ids	ChoukaPenanceBaseAM	CargoBay at systems[10]	id 11 != its array index 10 - persisted thrust/fire/power/crit rows are keyed by this id
 ids	ChoukaPenanceBaseAM	CargoBay at systems[17]	id 18 != its array index 17 - persisted thrust/fire/power/crit rows are keyed by this id
 ids	ChoukaPenanceBaseAM	CargoBay at systems[24]	id 25 != its array index 24 - persisted thrust/fire/power/crit rows are keyed by this id

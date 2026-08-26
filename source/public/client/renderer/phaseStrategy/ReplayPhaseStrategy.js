@@ -230,6 +230,14 @@ window.ReplayPhaseStrategy = function () {
                 continue;
             }
 
+            // A jump point forming or collapsing (animateVortexLifecycle pushes the effect itself,
+            // which is what lets it make a sound at all). Its own flag, because it is the bare
+            // effect in the list rather than an animation wrapping one.
+            if (animContainer instanceof ShipJumpPoint) {
+                animContainer.playedSound = value;
+                continue;
+            }
+
             // --- 2. Handle AllWeaponFireAgainstShipAnimation containers ---
             const isAllWeaponFire =
                 animContainer?.movementAnimations &&

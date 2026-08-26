@@ -2,7 +2,14 @@
 
 window.ShipJumpAnimation = function () {
     
-    function ShipJumpAnimation(time, shipIcon, emitterContainer, movementAnimations) {
+    /* noJumpPoint - draw the fade WITHOUT the cyan vortex swirl. Shadow Association hulls do not
+       tear a B5 jump point open, they simply fade out (user ruling 2026-08-25), and the flag rides
+       their Phasing Drive's blueprint as noJumpPointAnimation - see PhasingDrive in
+       baseSystems.php, and the caller in ReplayAnimationStrategy.animateShipDestruction.
+       The camera pan, the fade and the log entry are kept; the particle effect AND the jump
+       sound both go, because ShipJumpAudio is the sound of a vortex tearing open and a ship
+       that never opens one should not make it (user ruling 2026-08-25). */
+    function ShipJumpAnimation(time, shipIcon, emitterContainer, movementAnimations, noJumpPoint) {
         Animation.call(this);
         this.time = time;
         this.shipIcon = shipIcon;
@@ -18,17 +25,31 @@ window.ShipJumpAnimation = function () {
         );
         this.animations.push(cameraAnimation);
 
-        this.explosion = new ShipJumpPoint(emitterContainer, {
-            time: this.time,
-            position: FireAnimationHelper.getShipPositionAtTime(shipIcon, time, movementAnimations)
-        });
+        if (noJumpPoint) {
+            this.explosion = null;
+            /* The fade is the whole animation now, so it has to state its own length - without the
+               jump point there is nothing left to ask. It ends when the fade does, which is 400ms
+               shorter than ShipJumpPoint's 4000 and keeps the replay from sitting on an empty hex. */
+            this.duration = (this.fadeoutTime - this.time) + this.fadeoutDuration;
+        } else {
+            this.explosion = new ShipJumpPoint(emitterContainer, {
+                time: this.time,
+                position: FireAnimationHelper.getShipPositionAtTime(shipIcon, time, movementAnimations)
+            });
 
-        this.duration = this.explosion.getDuration();
+            this.duration = this.explosion.getDuration();
+        }
 
         // --- 🔊 Add sound support ---
+        // A silent fade has no Audio object at all, so nothing is fetched for it either. render()
+        // and cleanUp() both test this.sound rather than the flag, which is the same null check
+        // cleanUp already made.
         this.explosionTriggered = false;
-        this.sound = new Audio("client/renderer/animationStrategy/animation/sound/ShipJumpAudio.mp3");
-        this.sound.volume = 0.7;
+        this.sound = null;
+        if (!noJumpPoint) {
+            this.sound = new Audio("client/renderer/animationStrategy/animation/sound/ShipJumpAudio.mp3");
+            this.sound.volume = 0.7;
+        }
     }
 
     ShipJumpAnimation.prototype = Object.create(Animation.prototype);
@@ -36,7 +57,7 @@ window.ShipJumpAnimation = function () {
     ShipJumpAnimation.prototype.render = function (now, total, last, delta, zoom, back, paused) {
 
         // --- 🔊 Play sound once when jump starts ---
-        if (!this.explosionTriggered && total >= this.time && gamedata.playAudio && !paused && !back) {
+        if (this.sound && !this.explosionTriggered && total >= this.time && gamedata.playAudio && !paused && !back) {
             this.sound.currentTime = 0;
             window.applyReplayPlaybackRate(this.sound);
             this.sound.play().catch(() => {});

@@ -1230,18 +1230,29 @@ window.PhaseStrategy = function () {
         //SystemDataChanged once their push/splice is done. (They did not always - see the ordering
         //note in weaponManager.selectWeapon for why the WeaponSelected event cannot carry this.)
         //
-        //The TARGETING half above it has exactly the same dependency - its arcs and hit chances
-        //are the current selection's - so it is refreshed alongside (user report 2026-08-24).
-        //Neither call goes through ShipTooltip.update(): that would rebuild the name and the
-        //button row too, and this handler must not redraw a button under a player who is
-        //mid-click. Weapon selection is driven from the weapon list and the ship window, never
-        //from inside the tooltip, so nothing here moves under the pointer that put it there.
+        //The tooltip's other two selection-dependent halves are refreshed the same way (user
+        //report 2026-08-24). The TARGETING list is the selection's own arcs and hit chances, and
+        //the button row's conditions (hasWeaponsSelected, hasHexWeaponsSelected, FFWeaponSelected,
+        //hasSplitWeaponFiringOrder) each ask what is selected - so emptying the selection has to
+        //take "Target Weapons" and "Remove a Firing Order" away with it, and refilling it has to
+        //bring them back, rather than leaving buttons that do nothing when clicked.
         //
-        //refreshTargeting is unphased on purpose - it renders whatever createForSingleShip would
-        //render right now, and hides itself when nothing is selected - whereas the INCOMING
-        //rebuild stays pinned to the Firing phase, where interception may be declared.
+        //None of this goes through ShipTooltip.update(), which would rebuild the name and re-run
+        //the whole single-ship body; these three redraw only what actually depends on the
+        //selection. Weapon selection is driven from the weapon list and the ship window, never
+        //from inside the tooltip, so nothing here moves under the pointer that put it there - and
+        //a button that redraws itself from its OWN click is already the norm (see the note on
+        //ShipTooltip.refreshButtons).
+        //
+        //Both are unphased on purpose - they render whatever createForSingleShip would render
+        //right now, and hide themselves when nothing is selected - whereas the INCOMING rebuild
+        //below stays pinned to the Firing phase, where interception may be declared.
         if (this.shipTooltip && typeof this.shipTooltip.refreshTargeting === 'function') {
             this.shipTooltip.refreshTargeting();
+        }
+
+        if (this.shipTooltip && typeof this.shipTooltip.refreshButtons === 'function') {
+            this.shipTooltip.refreshButtons();
         }
 
         if (gamedata.gamephase === 3 && this.shipTooltip && this.shipTooltip.ballisticsMenu
