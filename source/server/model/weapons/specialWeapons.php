@@ -3157,12 +3157,11 @@ error_log("RammingAttack fire DEBUG: damageclass=" . $fireOrder->damageclass . "
             $targetSpeed = $targetMove ? $targetMove->speed : 0; // GTS
             $damage = spawnDustField::getDustDamage($targetSpeed); // GTS
             if(empty($target->advancedArmor)) $damage *= 2; // GTS - double damage for non-advanced armor
-error_log("DustCollision DEBUG: targetSpeed=" . $targetSpeed . " damage=" . $damage . " advancedArmor=" . var_export($target->advancedArmor ?? null, true));
             return $damage; // GTS
 
 
 
-		}else if($fireOrder->damageclass == 'WaveformCollision'){ // GTS
+		}else if($fireOrder->damageclass == 'WaveformCollision'){ // GTS_Triad
         $targetMove = $target->getLastMovement(); // GTS
         $targetSpeed = $targetMove ? $targetMove->speed : 0; // GTS
         if($targetSpeed <= 0) return 0; // GTS
