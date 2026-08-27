@@ -412,6 +412,12 @@ CREATE TABLE `tac_ship` (
   `campaigngameid` int(11) DEFAULT NULL,
   `slot` int(11) NOT NULL DEFAULT '0',
   `enhvalue` decimal(10,2) NOT NULL DEFAULT '0.00',
+  -- Reinforcements (db/reinforcements.sql, REINFORCEMENTS_PLAN.md 3.1): bought as a
+  -- reinforcement / the turn it arrives (NULL = still in hyperspace) / the id of the
+  -- opener unit whose jump point entrance it is riding through (NULL = unassigned).
+  `reinforcement` tinyint(1) NOT NULL DEFAULT '0',
+  `arrivalturn` int(11) DEFAULT NULL,
+  `arrivalvia` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `gameid` (`tacgameid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=28910 DEFAULT CHARSET=utf8;

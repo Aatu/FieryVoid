@@ -39,6 +39,7 @@ spl_autoload_register(
                 'allanti' => '/server/model/ships/abbai/allanti.php',
                 'allovan' => '/server/model/ships/llort/allovan.php',
                 'allowminesrule' => '/server/model/AllowMinesRule.php',
+                'allowreinforcementsrule' => '/server/model/AllowReinforcementsRule.php',
                 'alphashadingfield' => '/server/model/systems/baseSystems.php',
                 'altareus' => '/server/model/ships/HouseValheru/Altareus.php',
                 'altarian' => '/server/model/ships/centauri/altarian.php',

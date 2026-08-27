@@ -176,8 +176,15 @@
 
                 <div class="settings-group movementspacecontainer">
                      <input id="allowMinesCheck" type="checkbox" name="allowMinesCheck"> <label for="allowMinesCheck" class="clickable">Allow Mines</label>
-                </div>                 
-                
+                </div>
+
+                <!-- REINFORCEMENTS_PLAN.md 2.1: off means the whole feature does not exist -
+                     the lobby sells no reinforcements, so nothing is ever flagged and no jump
+                     point entrance can be declared. -->
+                <div class="settings-group movementspacecontainer">
+                     <input id="allowReinforcementsCheck" type="checkbox" name="allowReinforcementsCheck"> <label for="allowReinforcementsCheck" class="clickable">Allow Reinforcements</label>
+                </div>
+
                 <div class="settings-group movementspacecontainer">
                      <input id="friendlyFireCheck" type="checkbox" name="friendlyFireCheck"> <label for="friendlyFireCheck" class="clickable">Friendly Fire</label>
                 </div>

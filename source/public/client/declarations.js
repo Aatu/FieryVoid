@@ -454,6 +454,9 @@ window.declarations = {
     if (gamedata.rules && 'allowMines' in gamedata.rules) {
 		newText += '<br>Mines enabled.'; 
     }
+    if (gamedata.rules && 'allowReinforcements' in gamedata.rules) {
+		newText += '<br>Reinforcements enabled.';
+    }
     if (gamedata.rules && 'desperate' in gamedata.rules) {
         var desperateValue = gamedata.rules.desperate;
         switch (desperateValue) {

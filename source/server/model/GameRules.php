@@ -25,6 +25,11 @@ class GameRules implements JsonSerializable{
             array_push($this->rules, $allowMinesRules);
         }
 
+        $allowReinforcementsRules = $this->getAllowReinforcementsRules($rules);
+        if ($allowReinforcementsRules !== null) {
+            array_push($this->rules, $allowReinforcementsRules);
+        }
+
         $asteroidsRules = $this->getAsteroidsRules($rules);
         if ($asteroidsRules !== null) {
             array_push($this->rules, $asteroidsRules);
@@ -70,6 +75,13 @@ class GameRules implements JsonSerializable{
     private function getAllowMinesRules($rules) {
         if (isset($rules['allowMines'])) {
             return new AllowMinesRule();
+        }
+        return null;
+    }
+
+    private function getAllowReinforcementsRules($rules) {
+        if (isset($rules['allowReinforcements'])) {
+            return new AllowReinforcementsRule();
         }
         return null;
     }

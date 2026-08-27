@@ -716,16 +716,16 @@ window.fleetListManager = {
         return $("#gameinfo").find("[id='" + ship.id + "']");
     },
 
-    /* Paint one row's out-of-play state. The three states are MUTUALLY EXCLUSIVE and the rows are
+    /* Paint one row's out-of-play state. The four states are MUTUALLY EXCLUSIVE and the rows are
        only rebuilt at the start of a turn (displayFleetLists rebuilds when fleetListManager.reset()
        has cleared `initialized`, which only initPhase does, in phase 1) - so a row that changes
        state mid-turn keeps whatever class it was given earlier unless the others are taken off it.
        They are the same specificity, so the CASCADE decided which colour won, and .docked is
        written after .jumped in tactical.css: a docked flight whose carrier jumped read "Jumped"
        in blue and only turned orange at the next turn's rebuild. Set the class, clear the
-       other two. */
+       others. */
     setRowState: function setRowState(ship, state, label) {
-        var STATES = ["jumped", "docked", "destroyed"];
+        var STATES = ["jumped", "docked", "destroyed", "hyperspace"];
         var row = fleetListManager.fleetRow(ship);
         for (var s = 0; s < STATES.length; s++) {
             if (STATES[s] !== state) row.removeClass(STATES[s]);
@@ -776,6 +776,22 @@ window.fleetListManager = {
                 } else {
                     fleetListManager.setRowState(ship, "destroyed", "Destroyed");
                 }
+            } else if (ship.reinforcement && (ship.arrivalTurn === null || ship.arrivalTurn === undefined)) {
+                /* REINFORCEMENTS_PLAN.md - a reinforcement still WAITING IN HYPERSPACE. Every other
+                   list in the game drops it for free off getTurnDeployed's 999, but the fleet list
+                   is deliberately the one that shows a fleet in FULL - that is how a late slot's
+                   ships appear under a "[Deploys on Turn N]" header from turn 1 - so it needs
+                   telling explicitly.
+                   The row STAYS: this is the owner's own list, they paid for these units and need
+                   to see what is still waiting (and its points are already in the fleet totals
+                   above). It is an ENEMY's copy that must not show them at all, and that is done
+                   a whole layer down by dropping the ship from the payload - so by the time a row
+                   could be built there is nothing to build it from.
+                   Not clickable, like a destroyed row: shouldBeHidden already refuses to scroll to
+                   a unit that is not on the board, so the pointer was promising something that
+                   silently did nothing. */
+                fleetListManager.fleetRow(ship).find(".shipname").removeClass("clickable");
+                fleetListManager.setRowState(ship, "hyperspace", "Hyperspace");
             }
         }
     },

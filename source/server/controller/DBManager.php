@@ -158,16 +158,29 @@ class DBManager
 		if($ship->name == ''){
 				$ship->name = 'NAMELESS UNIT' ;
 		}
-		/*07.01.2024: merge options point cost into enhancements point cost! 
-        $sql = "INSERT INTO `B5CGM`.`tac_ship` VALUES(null, $userid, $gameid, '" . $this->DBEscape($ship->name) . "', '" . $ship->phpclass . "', 0, 0, 0, 0, 0, $ship->slot, $ship->pointCostEnh)";
+		/*07.01.2024: merge options point cost into enhancements point cost!
+        $sql = "INSERT INTO `B5CGM`.`tac_ship` (playerid, tacgameid, name, phpclass, slot, enhvalue) VALUES($userid, $gameid, '" . $this->DBEscape($ship->name) . "', '" . $ship->phpclass . "', $ship->slot, $ship->pointCostEnh)";
 		*/
 		/* pointCostSysEnh is the third bucket (WEAPON_ENHANCEMENTS_PLAN.md D5) - per-system refits.
 		   It belongs in tac_ship.enhvalue with the other two: that column is what the fleet list
 		   reads back as the ship's enhancement spend, and a refit is spend. BuyingGamePhase sets
 		   it from the SERVER-derived total before calling this, never from the client's claim. */
 		$enhCostTotal = $ship->pointCostEnh + $ship->pointCostEnh2 + $ship->pointCostSysEnh;
-        $sql = "INSERT INTO `tac_ship` VALUES(null, $userid, $gameid, '" . $this->DBEscape($ship->name) . "', '" . $ship->phpclass . "', 0, 0, 0, 0, 0, $ship->slot, $enhCostTotal)";
-		
+		/* ⚠️ NAMED COLUMNS, not the positional `VALUES(null, …)` this used to be
+		   (REINFORCEMENTS_PLAN.md trap 1). The positional form silently depended on tac_ship
+		   never gaining a column, and broke every ship insert in the game with a column-count
+		   error the moment db/reinforcements.sql added three. rolling, rolled and the three
+		   campaign* columns are still written with the same literal 0s the positional form gave
+		   them - named rather than dropped in favour of the table defaults, so the row this
+		   writes stays byte-identical to the one it wrote before.
+		   `reinforcement` is written here because this is the ONE insert path for every ship in
+		   the game (Manager::insertSingleShip routes through it), so a mid-game spawn gets a
+		   correct 0 for free. arrivalturn/arrivalvia are deliberately left NULL: a reinforcement
+		   is born in hyperspace and unassigned, and both are written later by the server alone. */
+		$isReinforcement = !empty($ship->reinforcement) ? 1 : 0;
+        $sql = "INSERT INTO `tac_ship` (playerid, tacgameid, name, phpclass, rolling, rolled, campaignX, campaignY, campaigngameid, slot, enhvalue, reinforcement) "
+             . "VALUES($userid, $gameid, '" . $this->DBEscape($ship->name) . "', '" . $ship->phpclass . "', 0, 0, 0, 0, 0, $ship->slot, $enhCostTotal, $isReinforcement)";
+
         //   Debug::log($sql);
         $id = $this->insert($sql);
         return $id;
@@ -2281,6 +2294,7 @@ class DBManager
         if ($asteroids > 0 || $moonCount > 0) $chips[] = 'TERRAIN';
 
         if (!empty($r['allowMines']))   $chips[] = 'MINES';
+        if (!empty($r['allowReinforcements'])) $chips[] = 'REINF';
         if (!empty($r['desperate']))    $chips[] = 'DESPERATE';
         if (!empty($r['friendlyFire'])) $chips[] = 'FRIENDLY FIRE';
 
@@ -2654,9 +2668,9 @@ class DBManager
 
         $stmt = $this->connection->prepare(
             "SELECT
-                id, playerid, name, phpclass, slot, enhvalue
+                id, playerid, name, phpclass, slot, enhvalue, reinforcement, arrivalturn, arrivalvia
             FROM
-                tac_ship 
+                tac_ship
             WHERE
                 id = ?
             "
@@ -2664,7 +2678,7 @@ class DBManager
 
         if ($stmt) {
             $stmt->bind_param('i', $id);
-            $stmt->bind_result($id, $playerid, $name, $phpclass, $slot, $enhvalue);
+            $stmt->bind_result($id, $playerid, $name, $phpclass, $slot, $enhvalue, $reinforcement, $arrivalturn, $arrivalvia);
             $stmt->execute();
             while ($stmt->fetch()) {
                 $ship = new $phpclass($id, $playerid, $name, $slot);
@@ -2672,12 +2686,24 @@ class DBManager
 				//json_encoded to the client, where `pointCost + pointCostEnh` would then
 				//CONCATENATE instead of adding. See db/fractionalEnhancementValue.sql.
 				$ship->pointCostEnh = (float)$enhvalue;
+				$this->applyReinforcementFields($ship, $reinforcement, $arrivalturn, $arrivalvia);
             }
             $stmt->close();
         }
 
         return $ship;
     }
+
+	/* REINFORCEMENTS_PLAN.md §3.1 — the three tac_ship reinforcement columns, cast once for both
+	   ship readers. Casting matters on all three: mysqli hands back STRINGS, and getTurnDeployed
+	   tests `$this->arrivalTurn === null` with a STRICT ===, so a "0"/"" would read as an arrival
+	   on turn 0 rather than as "still in hyperspace". NULL must survive as null and nothing else. */
+	private function applyReinforcementFields($ship, $reinforcement, $arrivalturn, $arrivalvia)
+	{
+		$ship->reinforcement = (bool)$reinforcement;
+		$ship->arrivalTurn   = ($arrivalturn === null) ? null : (int)$arrivalturn;
+		$ship->arrivalVia    = ($arrivalvia  === null) ? null : (int)$arrivalvia;
+	}
 
     public function getTacShips($gamedata, $turn, $allData = true)
     {
@@ -2687,9 +2713,9 @@ class DBManager
 
         $stmt = $this->connection->prepare(
             "SELECT
-                id, playerid, name, phpclass, slot, enhvalue
+                id, playerid, name, phpclass, slot, enhvalue, reinforcement, arrivalturn, arrivalvia
             FROM
-                tac_ship 
+                tac_ship
             WHERE
                 tacgameid = ?
             "
@@ -2697,7 +2723,7 @@ class DBManager
 
         if ($stmt) {
             $stmt->bind_param('i', $gamedata->id);
-            $stmt->bind_result($id, $playerid, $name, $phpclass, $slot, $enhvalue);
+            $stmt->bind_result($id, $playerid, $name, $phpclass, $slot, $enhvalue, $reinforcement, $arrivalturn, $arrivalvia);
             $stmt->execute();
             while ($stmt->fetch()) {
                 $ship = new $phpclass($id, $playerid, $name, $slot);
@@ -2705,6 +2731,7 @@ class DBManager
 				//json_encoded to the client, where `pointCost + pointCostEnh` would then
 				//CONCATENATE instead of adding. See db/fractionalEnhancementValue.sql.
 				$ship->pointCostEnh = (float)$enhvalue;
+				$this->applyReinforcementFields($ship, $reinforcement, $arrivalturn, $arrivalvia);
                 /*    if ($ship instanceof FighterFlight && $ship->superheavy === false){
                         debug::log("backwards adjust");
                         $ship->flightSize = 6;

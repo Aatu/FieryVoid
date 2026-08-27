@@ -1179,6 +1179,19 @@ window.shipManager = {
             var slot = playerManager.getSlotById(ship.slot);
             var depTurn = slot.depavailable;
 
+            /* REINFORCEMENTS_PLAN.md §3.2 — mirror of BaseShip::getTurnDeployed. A reinforcement's
+               arrival turn is decided IN PLAY by the jump point entrance it rides through, not by
+               its slot, so depavailable says nothing about it. A null/undefined arrivalTurn means
+               it is still in HYPERSPACE, which reads here as 999 = "not on the board" — the same
+               sentinel a surrendered fleet gets, because it means exactly the same thing. That one
+               line is what keeps a hyperspace unit out of shouldBeHidden, the fleet list, the
+               Deployment phase and every firing/EW gate without touching any of them.
+               BEFORE the surrender check, exactly as on the server: a surrendered slot still wins
+               and takes its reinforcements with it. */
+            if (ship.reinforcement) {
+                depTurn = (ship.arrivalTurn === null || ship.arrivalTurn === undefined) ? 999 : ship.arrivalTurn;
+            }
+
             if (slot.surrendered !== null) {
                 /* 999 is the "not on the board" sentinel — shouldBeHidden() and every
                    deployed-yet check key off it, so a surrendered fleet vanishes from the game. - DK
@@ -1206,7 +1219,7 @@ window.shipManager = {
     /*The turn this unit picks its ENTRY HEX, as opposed to the turn it is physically on the
       board (getTurnDeployed above). Mirrors BaseShip::getTurnPlaced on the server.
 
-      Reinforcements place a turn EARLY: the player commits entry hexes during the Deployment
+      LATE-SLOT arrivals place a turn EARLY: the player commits entry hexes during the Deployment
       phase of turn depTurn-1, and those hexes show to everyone as blue "Jump Point" markers for
       the whole of that turn, so an arriving fleet no longer materialises without warning.
 
@@ -1220,6 +1233,12 @@ window.shipManager = {
     getTurnPlaced: function getTurnPlaced(ship) {
         if (ship.osat || ship.base || gamedata.isTerrain(ship.shipSizeClass, ship.userid)) return 1;
         if (ship.spawned !== undefined && ship.spawned !== -1) return ship.spawned;
+
+        /* REINFORCEMENTS_PLAN.md §3.2 / trap 2 — a REINFORCEMENT (the jump point entrance kind,
+           not a late slot) places and arrives on the SAME turn: its early warning is the blue jump
+           point that formed last turn, not an early placement. Subtracting one here would give it
+           a Deployment phase a turn before its vortex exists, with nowhere legal to stand. */
+        if (ship.reinforcement) return shipManager.getTurnDeployed(ship);
 
         var depTurn = shipManager.getTurnDeployed(ship); //carries the 999 surrender sentinel
         return (depTurn > 1) ? depTurn - 1 : depTurn;

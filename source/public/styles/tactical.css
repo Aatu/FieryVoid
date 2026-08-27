@@ -1243,6 +1243,15 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     color: #00b8e6;
 }
 
+/* A reinforcement still waiting in hyperspace (REINFORCEMENTS_PLAN.md). Same #00b8e6 as
+   .docked on purpose - it is FV's established "not here yet" cyan, shared with the fleet
+   header's [Deploys on Turn N] and the blue Jump Point marker - and the LABEL is what
+   separates the two states. Do not introduce a second blue for this. */
+.fleetlistentry .hyperspace {
+    font-style: normal;
+    color: #00b8e6;
+}
+
 .fleetheader .headername {
     font-weight: bold;
     color: #deebff;

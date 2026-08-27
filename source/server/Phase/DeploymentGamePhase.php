@@ -207,12 +207,18 @@ class DeploymentGamePhase implements Phase
                 continue;
 
 
-            //PLACEMENT turn, not arrival turn: a reinforcement commits its entry hex during the
+            //PLACEMENT turn, not arrival turn: a late-slot unit commits its entry hex during the
             //Deployment phase of the turn BEFORE it arrives, so that is the turn it must supply
             //a "deploy" move on. The unit itself stays off-board until getTurnDeployed - see
             //BaseShip::getTurnPlaced.
-            //Safe on a POST-side ship: getTurnPlaced only reads $gamedata->getSlotById().
-            $placeTurn = $ship->getTurnPlaced($gamedata);
+            //⚠️ ASKED OF THE SERVER-SIDE SHIP, NOT THE POSTED ONE (REINFORCEMENTS_PLAN.md trap 3).
+            //getTurnPlaced used to read nothing but $gamedata->getSlotById(), which made a POST-side
+            //clone safe; it now also reads $reinforcement/$arrivalTurn, and a POST-side ship carries
+            //neither. Left on $ship, a unit sitting in hyperspace would answer with its slot's
+            //placement turn, be required to supply a deploy move it cannot have, and take the whole
+            //submission down with "Entry not found".
+            $servership = $gamedata->getShipById($ship->id);
+            $placeTurn = ($servership !== null) ? $servership->getTurnPlaced($gamedata) : $ship->getTurnPlaced($gamedata);
 
             //Stage 7: a flight queued for hangar deploy-start dock has no
             //movement of its own — it goes straight into the carrier's hangar.
@@ -234,7 +240,7 @@ class DeploymentGamePhase implements Phase
                     if ($move->type == "deploy")
                     {
                         $found = true;
-                        $servership = $gamedata->getShipById($ship->id);
+                        //$servership was resolved above, for the placement-turn question
                         if (self::validateDeploymentArea($gamedata, $servership, $move))
                         {
                             $moves[] = $move;
