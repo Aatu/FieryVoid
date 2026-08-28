@@ -140,6 +140,25 @@ window.gamedata = {
     },
 
     getFirstFriendlyShipDeployment: function getFirstFriendlyShipDeployment() {
+        /* ⭐ SOMETHING THAT STILL NEEDS PLACING, IN PREFERENCE TO ANYTHING ELSE
+           (REINFORCEMENTS_PLAN.md Stage 7). On turn 1 every unit places, so this pass returns
+           exactly what the loop below would have; on any LATER Deployment phase the two differ
+           sharply. A player whose only business this turn is a reinforcement arriving through a
+           jump point would otherwise be handed the first ship of their turn-1 fleet - already on
+           the board, nothing to do with it - and would have to hunt the arrival's icon down at the
+           off-map 'start' marker its slot gave it before they could place anything at all.
+           Falls through to the original loop when nothing is placing, so a Pre-Turn phase with no
+           placements still selects a ship to work with. */
+        for (var p in gamedata.ships) {
+            var placing = gamedata.ships[p];
+            if (shipManager.getTurnPlaced(placing) != gamedata.turn) continue;
+            if (placing.pendingDeployDock || placing.pendingLcvDeployDock) continue;
+            if (!gamedata.isMyShip(placing) || placing.mine) continue;
+            if (shipManager.isDestroyed(placing)) continue;
+
+            return placing;
+        }
+
         for (var i in gamedata.ships) {
             var ship = gamedata.ships[i];
 
@@ -961,6 +980,43 @@ window.gamedata = {
                     html += "<br>";
                 }
                 html += "<br>";
+            }
+
+            /* ⭐ REINFORCEMENTS_PLAN.md STAGE 7 - REINFORCEMENTS LEFT IN HYPERSPACE.
+
+               Since arrivals place themselves (DeploymentPhaseStrategy.autoPlaceArrivingReinforcements,
+               user request 2026-08-28) this is no longer the ordinary "you chose to hold one back"
+               case - it is the FAILURE case, and that makes it more worth saying, not less: the
+               only way to reach it now is a unit whose doorway could not be resolved, which is
+               something the player has no other way of noticing before their jump point closes at
+               the end of this turn and the berth goes with it.
+
+               Silent unless something is actually being left behind, and it names the units rather
+               than counting them. Never a block - the phase still has to be committable. */
+            var leftInHyperspace = [];
+            for (var i in gamedata.ships) {
+                var arrival = gamedata.ships[i];
+                if (arrival.userid != gamedata.thisplayer) continue;
+                if (!shipManager.isArrivingReinforcement(arrival)) continue;
+                if (shipManager.isDestroyed(arrival)) continue;
+                //The two hangar routes are arrivals too, into a hold rather than onto a hex.
+                if (arrival.pendingDeployDock || arrival.pendingLcvDeployDock) continue;
+                if (arrival.deploymove) continue;
+
+                leftInHyperspace.push(arrival);
+            }
+
+            if (leftInHyperspace.length > 0) {
+                if (html !== '') html += "<br>";
+                html += "These reinforcements could not be brought out of hyperspace &mdash; no open "
+                    + "jump point was found for them: ";
+                html += "<br>";
+                for (var h = 0; h < leftInHyperspace.length; h++) {
+                    html += gamedata.shipNameSpan(leftInHyperspace[h]);
+                    html += "<br>";
+                }
+                html += "They stay where they are with nothing spent, and will need another "
+                    + "entrance opened for them.<br>";
             }
 
             confirm.confirm(html + '<br><span class="commit-confirm-q">Are you sure you wish to commit your orders?</span>', gamedata.doCommit);
@@ -2529,6 +2585,12 @@ getActiveShipName: function getActiveShipName() {
         //change identity and a reload would throw the viewer out of the replay.
         if (!gamedata.replay && gamedata.hasShipIdentityChanged(serverdata.ships)) return;
 
+        /* REINFORCEMENTS_PLAN.md Stage 7 - a hull arriving mid-session that this page has no
+           blueprint for. Same failure as the Chameleon reveal above and a much commoner one; it
+           fetches the missing faction instead of reloading. Returns true when it has deferred this
+           update - nothing below has run yet, so re-entering with the same payload is clean. */
+        if (gamedata.ensureBlueprintsFor(serverdata)) return;
+
         gamedata.turn = serverdata.turn;
         gamedata.gamephase = serverdata.phase;
         gamedata.activeship = serverdata.activeship;
@@ -2619,6 +2681,118 @@ getActiveShipName: function getActiveShipName() {
         }
 
         return false;
+    },
+
+    /* ⭐⭐ REINFORCEMENTS_PLAN.md STAGE 7 - A HULL THIS PAGE HAS NO BLUEPRINT FOR
+       (user report 2026-08-28, game 4318).
+
+       window.staticShips is built ONCE, by game.php, from the ships in THIS VIEWER'S payload at the
+       moment the page loaded - and a reinforcement waiting in hyperspace is not in an opponent's
+       payload at all (§3.6 removes it outright). So when the wave arrives, the opponent's client is
+       handed ship JSON for classes it holds no blueprint for: Ship() builds them from the live JSON
+       alone, with no armour, no arcs, no maxhealth and no systems - "no ship information", exactly
+       as reported. The one class that DID render was the Primus, because a front-line Primus was
+       already on the board and had brought its blueprint with it.
+
+       ⭐ THIS IS THE SAME BUG AS hasShipIdentityChanged ABOVE, AND IT IS ANSWERED DIFFERENTLY.
+       That one reloads the page, which is right for it: a Chameleon reveal changes the identity of
+       a ship the page has ALREADY built - its icon, its ship window and every cached reference are
+       made of the old hull, so nothing short of a rebuild is honest. Here the ships do not exist
+       yet. Only the blueprint is missing, so fetching it is enough, and a mid-turn reload is a
+       cost the player should not have to pay for their opponent's reinforcements arriving.
+
+       ⚠️ IT DEFERS THE WHOLE UPDATE RATHER THAN PATCHING AFTERWARDS. Returning true from here
+       leaves parseServerData having touched NOTHING, so the re-entry on completion is an ordinary
+       first pass over the same payload - no half-applied turn, no ships built from a blueprint that
+       had not landed yet. The payload is a moment staler by then, which is the same staleness the
+       reload path accepts.
+
+       ⚠️ EVERY FACTION IS ASKED FOR AT MOST ONCE. A class that is missing even after the fetch (a
+       spawnable that never made it into the static generator, say) must not put the client into a
+       fetch-defer-fetch loop, or worse freeze it out of a turn change - the poll stops once it is
+       this player's move, so a permanently deferred update is a dead screen, not a slow one. After
+       one attempt the payload is applied whatever happened, which is exactly today's behaviour.
+
+       gamelobbyloader.php rather than a new endpoint: it already serves per-faction blueprints with
+       gzip and ETag revalidation, and its output is the SAME static/json/<faction>.json the
+       generator writes. Diffed against BlueprintCache's own output for Primus and Sentri: identical
+       but for the blueprint's ship-level `id`/`flightid` (overwritten from the live JSON by Ship()
+       anyway), one tooltip `data` value that is a string on one side and a number on the other, and
+       the lobby-only `systemEnhancementOffers`. Nothing the game screen reads. */
+    blueprintFetchAttempted: {},
+    blueprintFetchPending: false,
+
+    ensureBlueprintsFor: function ensureBlueprintsFor(serverdata) {
+        //A fetch is already in flight for an earlier payload - defer this one too, and let that
+        //fetch's own re-entry apply what it captured.
+        if (gamedata.blueprintFetchPending) return true;
+        if (!serverdata || !serverdata.ships || !window.staticShips) return false;
+
+        var wanted = {};
+        for (var i in serverdata.ships) {
+            var json = serverdata.ships[i];
+            if (!json || !json.faction || !json.phpclass) continue;
+            if (gamedata.blueprintFetchAttempted[json.faction]) continue;
+
+            var faction = window.staticShips[json.faction];
+            if (faction && faction[json.phpclass]) continue;
+
+            wanted[json.faction] = true;
+        }
+
+        var factions = Object.keys(wanted);
+        if (factions.length === 0) return false;
+
+        factions.forEach(function (faction) { gamedata.blueprintFetchAttempted[faction] = true; });
+        gamedata.blueprintFetchPending = true;
+
+        //Settle on the LAST response, success or failure alike - .always, so a 401/timeout on one
+        //faction cannot strand the update behind it.
+        var remaining = factions.length;
+        var settle = function () {
+            remaining--;
+            if (remaining > 0) return;
+            gamedata.blueprintFetchPending = false;
+            gamedata.parseServerData(serverdata);
+        };
+
+        factions.forEach(function (faction) {
+            $.ajax({
+                type: 'POST',
+                url: 'gamelobbyloader.php',
+                dataType: 'json',
+                contentType: 'application/json',
+                data: JSON.stringify({ faction: String(faction) }),
+                timeout: 30000
+            }).done(function (data) {
+                gamedata.mergeStaticShips(data);
+            }).always(settle);
+        });
+
+        return true;
+    },
+
+    /* Fold a faction blueprint file into window.staticShips. Shape is
+       { "<faction>": { "<phpclass>": {...} } }, which is what staticShips already is.
+
+       ⚠️ ADDS ONLY, NEVER OVERWRITES. The classes already present came from BlueprintCache and are
+       what every Ship on the page was built from; the loader's copies are the lobby's, equivalent
+       but not byte-identical (see ensureBlueprintsFor). Replacing them would swap the blueprint out
+       from under units that are already on the board, to fix a problem those units do not have. */
+    mergeStaticShips: function mergeStaticShips(data) {
+        if (!data || typeof data !== 'object' || data.error) return;
+        if (!window.staticShips) window.staticShips = {};
+
+        for (var faction in data) {
+            var incoming = data[faction];
+            if (!incoming || typeof incoming !== 'object') continue;
+            if (!window.staticShips[faction]) window.staticShips[faction] = {};
+
+            for (var phpclass in incoming) {
+                if (window.staticShips[faction][phpclass]) continue;
+                window.staticShips[faction][phpclass] = incoming[phpclass];
+            }
+        }
     },
 
     setShipsFromJson: function setShipsFromJson(jsonShips) {

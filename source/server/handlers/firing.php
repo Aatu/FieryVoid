@@ -368,38 +368,15 @@ class Firing
 
         $target = new OffsetCoordinate($fire->x, $fire->y);
 
-        /* 6a. ON THE MAP. The client tests the same bounds before it will even raise the facing
-               control; this is the half that a tampered POST meets. gamespace is a "WIDTHxHEIGHT"
-               string in which -1x-1 means "unlimited" - and unlimited is not unbounded, it is the
-               60x40 default BuyingGamePhase::getGamespace substitutes, which is what every fleet is
-               actually deployed into. */
-        $width = 60; $height = 40;
-        sscanf((string)$gamedata->gamespace, "%dx%d", $w, $h);
-        if ((int)$w > 0) $width = (int)$w;
-        if ((int)$h > 0) $height = (int)$h;
-
-        if (abs($target->q) > intdiv($width, 2) || abs($target->r) > intdiv($height, 2))
-            return "target hex ({$target->q},{$target->r}) is off the map";
-
-        /* 6b. FREE OF OBSTRUCTIONS. Identical to the exit rule and deliberately so: the hex may
-               hold ships, friendly or enemy - arriving units stack on it by design (§2.4) - but not
-               any part of a Terrain unit, which is what a jump gate and a vortex of either kind
-               also are, and not an Enormous unit. Terrain is tested across its WHOLE footprint. */
-        foreach ($gamedata->ships as $unit) {
-            if (!empty($unit->removed)) continue;
-            if ($unit->isDestroyed($gamedata->turn)) continue;
-
-            if ($unit->isTerrain()) {
-                foreach (RammingAttack::getTerrainOccupiedHexes($unit) as $hex) {
-                    if ($hex->q == $target->q && $hex->r == $target->r)
-                        return "target hex holds terrain (unit {$unit->id})";
-                }
-                continue; //Terrain is Enormous too - do not also run the test below on it
-            }
-
-            if ($unit->Enormous && $unit->getHexPos()->equals($target))
-                return "target hex holds an Enormous unit (unit {$unit->id})";
-        }
+        /* 6. ON THE MAP AND FREE OF OBSTRUCTIONS - one shared test, and the sharing is the point.
+              JumpEngine::getEntranceHexBlock is asked the identical question by the END-OF-TURN
+              DEVIATION CLAMP (§2.5), which walks outward from the scattered hex looking for the
+              nearest legal one. If the two ever disagreed, either a declaration would be accepted
+              onto a hex the clamp then refuses to place a doorway on, or the clamp would put one
+              somewhere the declaration rules say cannot hold it. The reasons it returns are this
+              method's own log strings; see there for what each test is and why. */
+        $hexBlock = JumpEngine::getEntranceHexBlock($gamedata, $target);
+        if ($hexBlock !== null) return $hexBlock;
 
         return null;
     }

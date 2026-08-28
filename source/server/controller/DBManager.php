@@ -285,6 +285,38 @@ class DBManager
         $stmt->close();
     }
 
+    /* REINFORCEMENTS_PLAN.md section 3.1 / Stage 6 - THE TURN THIS UNIT COMES OUT OF HYPERSPACE.
+     *
+     * ⚠️⚠️ WRITTEN FROM EXACTLY ONE PLACE - JumpEngine::spawnEntranceVortices, at the end of the
+     * turn its entrance formed - AND NO POST CAN REACH IT. Manager::getShipsFromJSON whitelists
+     * arrivalVia and deliberately not this (see the note there): a player who could name their own
+     * arrival turn would be placing units on a board with no vortex on it, in a Deployment phase
+     * nothing granted them.
+     *
+     * Setting it is what ENDS the unit's hyperspace life: BaseShip::isReinforcement() is
+     * `reinforcement AND arrivalturn IS NULL`, so from this write on the unit is an ordinary one
+     * with a late deploy turn, visible to the enemy from the turn it arrives.
+     *
+     * ⭐ AND IT TAKES NULL, which Stage 7 is what added (an earlier draft of this comment said the
+     * write was one-way). §2.6's one-way rule is about the DOORWAY - an entrance cannot be jumped
+     * out of - and says nothing about a unit that never walked through one. Placement is optional
+     * (§2.4), so DeploymentGamePhase::releaseUnplacedReinforcements clears BOTH arrival fields on
+     * anything the player left behind and the unit goes back to being an ordinary reinforcement
+     * waiting in hyperspace, concealed again, with nothing spent. Clearing arrivalvia alone would
+     * leave it reading as a ship that deployed on a turn now past.
+     *
+     * mysqli binds a PHP null as SQL NULL whatever the type character says, which is the same thing
+     * setShipArrivalVia above relies on - do not "fix" the 'i' to something else. */
+    public function setShipArrivalTurn($shipid, $turn)
+    {
+        $stmt = $this->connection->prepare("UPDATE `tac_ship` SET arrivalturn = ? WHERE id = ?");
+        $arrival = ($turn === null) ? null : (int)$turn;
+        $id = (int)$shipid;
+        $stmt->bind_param('ii', $arrival, $id);
+        $stmt->execute();
+        $stmt->close();
+    }
+
     public function submitAmmo($shipid, $systemid, $gameid, $firingMode, $ammoAmount, $turn)
     {
         $stmt = $this->connection->prepare("

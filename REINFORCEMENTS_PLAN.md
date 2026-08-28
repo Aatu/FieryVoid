@@ -6,13 +6,31 @@ Jump Points Phase 3. Phases 1 and 2 gave a ship, and then a fixed gate, a way to
 their fleet as **reinforcements**, those units wait in hyperspace, and during the battle the player
 opens an **entrance** vortex and brings them onto the map through it.
 
-Status: **STAGES 0–5 BUILT 2026-08-27, all awaiting the by-hand verification below. Stages 6-9 not
-started.** A player can now buy reinforcements, they are concealed from the enemy, and they can
-**declare** a jump point entrance and name its manifest — the declaration reaches `tac_fireorder`
-with `damageclass='jumpentry'` and the manifest reaches `tac_ship.arrivalvia`. What is still
-missing is Stage 6: **nothing yet turns a declaration into a vortex**, so no unit has ever actually
-arrived. Until Stage 6 lands, a declared entrance is a blue marker and a database row and nothing
-else.
+Status: **STAGES 0–7 COMPLETE AND SIGNED OFF 2026-08-28 — Stage 6 verified in play in game 4317,
+Stage 7 in game 4318. Stages 8-9 not started.**
+
+**The whole loop closes.** A player buys reinforcements; they are concealed from the enemy down to a
+count and a point total; they **declare** a jump point entrance in Initial Orders and name its
+manifest; at the end of that turn the entrance **forms** — the deviation is rolled, a blue
+`SpawnJumpPointEntrance` goes onto the board at the hex it lands on, and every unit riding it is
+stamped with `tac_ship.arrivalturn = turn + 1`; and on that turn the owner gets a **Deployment
+phase** in which the wave **places itself** in the doorway on the vortex's facing, stacking freely,
+leaving the player only its speed to set (Stage 7a). Reinforcements have arrived under fire in a real
+game, with three units through one doorway and three different speeds among them.
+
+⚠️ **THREE OF STAGE 7'S FIXES ARE HARNESS-PROVEN BUT NOT YET SEEN IN PLAY** — the two Stage 7a
+fallout fixes (the deploy-start dock dialog that explained nothing, and the opponent's missing
+blueprints) and the lobby header restyle. Everything else in Stages 0–7 has been exercised in
+4317/4318.
+
+⭐ **THE ONE PIECE OF HOUSEKEEPING LEFT IS THE REPLAY BASELINE.** It has needed its single
+re-record since Stage 2 and now costs more than it saves: `check` reports **149 failures**, every
+one of them the same three Stage 2/5 payload additions (`reinforcementCount`,
+`reinforcementPoints`, `formingEntrances`), which is enough noise to hide a real regression
+completely. Re-record on this tree before Stage 8 starts.
+
+Stage 8 (gates as entrances) and Stage 9 (the scatter initiative penalty) are what remain, and
+neither is on the critical path.
 
 Three things Stage 0 needed that §3 did not anticipate, all recorded here because they are the shape
 of the next surprise too:
@@ -75,14 +93,18 @@ And five more from Stages 1–3, same reason:
 that delivers them strands a player's points in hyperspace for the whole game. Local testing is
 stage by stage; the deploy is not.
 
-⭐ **THE REPLAY HARNESS BASELINE NEEDS RE-RECORDING ONCE, for Stage 2.** `PlayerSlot` gained two
-public fields, so every `snapshot_*` report in the corpus now differs by exactly
-`/slots/N/reinforcementCount: added (0)` and `/slots/N/reinforcementPoints: added (0)` — 1238 diff
-lines across 152 games, and **nothing else whatsoever**. The four behavioural checks are unaffected:
+⭐ **THE REPLAY HARNESS BASELINE NEEDS RE-RECORDING ONCE, for Stage 2 — AND STAGE 7 IS THE MOMENT
+TO DO IT.** `PlayerSlot` gained two public fields and Stage 5 a third, so every `snapshot_*` report
+in the corpus now differs by exactly `/slots/N/reinforcementCount: added (0)`,
+`/slots/N/reinforcementPoints: added (0)` and `/slots/N/formingEntrances: added (<0 item array>)` —
+and **nothing else whatsoever**, re-confirmed after Stage 7 (which adds no payload difference of any
+kind). As of Stage 7 that is **149 of 152 games failing**, which is more than enough noise to hide a
+real regression: the harness has stopped being a regression detector until it is re-recorded.
+
+The four behavioural checks are unaffected and remain usable in the meantime:
 `--checks=movement,tohit,damage,masking` gives **155 passed, 0 failed** (game 4309 included, since
 its [[arch_replay_corpus_known_failures]] failure is a snapshot one). Accept with
-`replayHarness.php record`; until then use the `--checks=` form, or every future check in this
-feature drowns in the additive field.
+`replayHarness.php record` on a tree with Stages 0–7 in it; until then use the `--checks=` form.
 
 ---
 
@@ -566,6 +588,25 @@ Three refinements the user asked for after playing Stage 1, all in the lobby.
 groups correct, points identical), then load the same fleet into a game without the rule (everything
 in the main fleet, no headers, no links).
 
+#### Stage 1b refinement — the headers read as BANDS ✅ 2026-08-28, untested in play
+
+MAIN FLEET "blends too well into the wider container" (user report). `#fleet` is one flat
+`--fv-well` slab and the header was a 13px caption over a hairline — near the visual weight of the
+ship rows it was supposed to be heading. Three changes, and **no new colour**: a gradient washing
+the group's own colour in behind the title and fading out to the left (`#fleet` is right-aligned, so
+the substance belongs where the eye is), a solid 3px right border flush against the text, and more
+size, letter-spacing and separation.
+
+⚠️ **The band is a `background-IMAGE`, and that is what keeps the buy-target state machine working.**
+Hover and selected paint `background-COLOR`; the gradient composites over it, so the two layers add
+up instead of overwriting each other. Painting the band as a colour would have meant restating it in
+all four state rules. Both state tints were raised (0.10/0.16 → 0.14/0.22) because against a header
+carrying 0.20 of its own colour the old ones stopped reading as a change of state, and `selected`
+gained a fatter accent bar so it still answers "where does the next purchase land?" three ways over.
+
+⚠️ **No `text-transform`.** The titles are already uppercase in the markup, and
+`.fleet-group-note` is a sentence living INSIDE the element — it would be shouted at.
+
 ### Stage 2 — concealment ✅ BUILT 2026-08-27
 `hideHyperspaceReinforcements` + the slot aggregate + the fleet-list placeholder row.
 
@@ -730,6 +771,53 @@ opens **one menu listing every jump-capable unit still in hyperspace**, declared
 | No declaration | its ship class | **Choose Hex** → arms the map |
 | Already holding one | `OPENING` tag, cyan row tint, `hex q,r — N units` | **Withdraw Jump Point** |
 | Already riding someone else's | `RIDING` tag, greyed, `riding <name>`, radio **disabled** | *not selectable* |
+| No jump drive at all (a passenger) | listed in a second group below the drives, greyed, radio in its OWN group | *not selectable* |
+
+**Both tags share a left edge** (user request 2026-08-28), and it is a CSS-only pair in
+`tactical.css`: `order: 1` anchors the tag past `.reinforcementRowClass` to the row's right edge,
+and a common `min-width` makes the two badges the same width. Neither works alone, and neither is
+tidying — the row packs `[radio][name grows][tag][detail]`, so a tag left to sit before the detail
+measures its position from free text (`hex q,r — N units` on one row, `riding <name>` on the next)
+and no two rows agree. The full reasoning is on the rule itself.
+
+**THE MENU LISTS THE WHOLE WAVE, IN TWO GROUPS** (user request 2026-08-28). The jump-capable units
+above, everything else — a reinforcement with **no drive of its own** — underneath, greyed, under a
+`No jump drive — they arrive as passengers` heading. They were invisible here before, which made the
+menu quietly misreport the fleet: a player looking at two hulls had no way to see the four fighters
+waiting behind them, and the **stranding warning at commit time was the first mention they ever
+got**. They are listed for awareness, never for choice, and each says which state it is in in the
+same words the group above uses (`RIDING` + `riding <name>`, or its class).
+
+- ⭐ **A DIFFERENT RADIO GROUP, not merely `disabled`.** The OK handler reads
+  `input[name='reinforcementOpener']:checked`, and a passenger must never be able to answer that
+  question whatever a browser does with a disabled control — so `passengerRowsHtml` names them
+  `reinforcementPassenger` and they are not in that group at all. They keep a radio rather than
+  dropping it because the row is a flex line that measures from the control; without one every name
+  in the second group would hang a control-width left of the names above it.
+- The heading appears only when both groups exist, and `pickIndex` is decided over the
+  jump-capable rows **before** the passenger block is appended, so it can never shift the selection.
+
+**AND SELECTING A DECLARED ROW HIGHLIGHTS ITS OWN JUMP POINT ON THE MAP** (user request
+2026-08-28). Three drives put three identical blue "Jump Point Forming" markers out there, and a row
+reading `hex 4,-2 — 3 units` could not tell you which of them belonged to the unit you were about to
+withdraw. The selected opener's marker now draws with **its name in the hex, in white, arrow at full
+opacity**; every other marker keeps the generic blue.
+
+- `ReinforcementEntry.highlight()` holds an **opener id** (never a ship object — every poll replaces
+  every entry of `gamedata.ships`) and `BallisticIconContainer.generateEntranceHexes` asks
+  `getHighlightedOpener()` as it draws, matching on the ORDER's `shooterid`. The republished enemy
+  entries carry no shooter and so can never be highlighted, which is right: their menu is not open
+  and the units are hidden from them anyway.
+- The label goes into the sprite's **`syncSceneObject` signature**, so exactly the two hexes whose
+  state changed are rebuilt and every other marker's texture is left alone.
+- ⚠️ **THE REDRAW EVENT CARRIES NO SHOOTER.** Firing `HexTargeted` is how this asks for the ballistic
+  icons to be rebuilt (the same event `withdraw()` uses), but `PhaseStrategy.onHexTargeted` then
+  compares `payload.shooter` with the **selected** ship — and `selectedShip` is `null` when nothing
+  is selected, so a `shooter: null` would rebuild the weapon list for a ship that does not exist. An
+  absent property matches neither a null nor a ship.
+- It clears itself on every exit: `deactivate()` (above its early return, so the Choose Hex path is
+  covered), the Cancel button, and a selection moving to a row with no declaration. `syncLabel` owns
+  the whole decision, so a withdrawal drops the highlight in the same breath as the `OPENING` tag.
 
 **The greyed state** (`ridingWith`, user request 2026-08-28). A jump-capable unit that is on
 another ship's manifest is spoken for: opening a second doorway with it would have its drive
@@ -813,7 +901,7 @@ map; an obstructed hex refused; right-click cancels; **and the mode still works 
 poll has replaced every ship object.** The order it builds carries `damageclass='jumpentry'`,
 `type='ballistic'`, `firingMode = facing+1`, the chosen x/y, and **`targetid = -1`**.
 
-### Stage 5 — server-side declaration validation ✅ BUILT 2026-08-27
+### Stage 5 — server-side declaration validation ✅ COMPLETE 2026-08-28 (built 2026-08-27)
 `getEntranceDeclarationBlock`; the `arrivalVia` whitelist + validation + `setShipArrivalVia`.
 
 ✅ **THE STAGE-3 HAZARD IS NOW FIXED, BOTH HALVES.** `JumpEngine::getVortexDeclaration` did not
@@ -868,7 +956,8 @@ the happy path FAILED on one with moons. Terrain occupies a whole **footprint**
 (`RammingAttack::getTerrainOccupiedHexes`), so a hex with no centre in it can still be solid rock. A
 test that cannot tell "correctly refused" from "wrongly refused" is testing nothing.
 
-### Stage 6 — the entrance forms, and it deviates
+### Stage 6 — the entrance forms, and it deviates ✅ COMPLETE 2026-08-28
+
 `JumpEngine::spawnEntranceVortices($servergamedata, $dbManager)` in `FireGamePhase::advance`, after
 `closeExpiredVortices` and **before** the slot loop. Per declaration: roll the deviation, clamp to
 a legal hex, `spawnVortexUnit(..., 'SpawnJumpPointEntrance')`, stamp `arrivalturn = turn + 1` on
@@ -876,28 +965,356 @@ every ship whose `arrivalvia` matches, clear `arrivalvia` on any manifest whose 
 open, write the log order and the additive `'VortexScatter'` note (`"<hexes>,<facingSteps>"`).
 
 ⚠️ Runs off a real `getTacGamedata` load, never off POST-side ships. ⚠️ Do not branch on
-`$gamedata->phase` — `advance()` has already set the next one. Both traps are documented on the two
+`$gamedata->phase` — `advance()` has already set the next phase. Both traps are documented on the two
 sibling sweeps.
+
+**As built**, with six things §2.5 and §4 did not anticipate:
+
+- ⭐⭐ **A NEW NOTE KIND IS A SILENT BUG UNLESS `onIndividualNotesLoaded` CLAIMS IT.** The
+  JumpEngine's loader ends in a fall-through that treats **any** note it does not recognise as the
+  legacy `jumped` note and assigns its value to `$preJumpValue` — so an unclaimed `'VortexScatter'`
+  would have quietly overwritten the pre-jump combat value of the very ship that opened the
+  entrance. `'Vortex'` and `'VortexHold'` are each `continue`d for exactly this reason and it does
+  not read as a hazard until you add a fourth. The scatter now has its own branch, its own map, and
+  its own restore (`restoreVortexScatter`, run **after** `restoreVortexState` because which vortex
+  is the current one is settled in there — the same ordering the hold note needs).
+- ⚠️⚠️ **`OffsetCoordinate::distanceTo` RETURNS A FLOAT.** `CubeCoordinate::__construct` runs every
+  ordinate through `round(..., 4)` and `round()` returns a float in PHP, so `distanceTo` answers
+  `3.0` and **`$d === 3` is false**. Nothing in this stage's shipped code compares one strictly (the
+  clamp returns its own int), but two assertions written the obvious way failed on it, and any
+  Stage 7/9 rule of the shape "arrived in the vortex's hex" is one `===` away from the same bug.
+  Compare with `==`, or cast.
+- **The deviation table had to be split from the roll to be testable.** `rollEntranceDeviation`
+  reads the sensor rating and the modifiers and then calls `rollEntranceScatter($roll, $sensors)`,
+  which is the whole table and nothing else. Everything that can be *wrong* is in the second half,
+  and a band that is one comparison out looks exactly like bad luck in play — so the test drives
+  every boundary pair directly rather than rolling d20s and hoping.
+- **The hex-legality test is now SHARED with the submit path** (`JumpEngine::getEntranceHexBlock`,
+  called by `Firing::getEntranceDeclarationBlock`), and it has to be: the clamp asks the identical
+  question of every hex the scatter could land on. If the two ever disagreed, either a declaration
+  would be accepted onto a hex the clamp then refuses to use, or the clamp would put a doorway
+  somewhere the declaration rules forbid.
+- **An entrance never rolls for jump failure, and that falls out for free** —
+  `rollVortexJumpFailure` runs in `criticalPhaseEffects` (inside `setCriticals`, i.e. *before* this
+  sweep) and needs `hasOpenVortex` plus either `vortexOpenTurn == turn` or a Maintain declaration.
+  On turn N the entrance does not exist yet; on N+1 it was opened on N and has no Maintain. So a
+  damaged drive costs a reinforcement nothing. Deliberate — do not "fix" it into existence.
+- **The freshly spawned entrance blocks its own hex immediately.** It is Terrain and
+  `Manager::insertSingleShip` puts it in `$gamedata->ships` at once, so a *second* entrance formed
+  later in the same sweep clamps around the first for free. ⚠️ The one hole is the **distance-0 last
+  resort, which is unconditional** (§2.5): two openers that declared the same hex and both rolled a
+  precise arrival get two doorways in one hex. Accepted — the alternative is refusing to open, which
+  strands a paid-for wave in hyperspace for the rest of the game, and units arriving through either
+  vortex stack there by design anyway.
+
+⚠️ **IDEMPOTENCY IS TWO RULES, NOT ONE.** `hasOpenVortex` stops the second `advance()` re-spawning,
+but the manifest half needed its own: a second pass must record an **already-open** entrance as
+*opened*, or the "berth that never formed" branch would clear the whole wave's `arrivalvia` on the
+very units it had just admitted. A stamped unit stops answering `isReinforcement()`, which is what
+makes the stamping half idempotent by itself.
 
 **Verify:** the sensor rating is non-zero for a hyperspace unit (§2.5); each band scatters the
 right distance and the log line **names the band it landed in**; the clamp never lands on terrain,
 a gate, another vortex or off-map; and — the concealment test — the enemy's turn-N payload contains
 **no** entrance unit at all.
 
-### Stage 7 — arriving
+**Proven headless against three real local games** (4277 with its 59 terrain rows, 4311, 4307),
+driving the sweep with `Manager::$dbManager` swapped for a stub through reflection, so the whole
+spawn path — `insertSingleShip`, the deploy `MovementOrder`, all three notes — runs with **zero
+database writes**. 177 assertions, all passing:
+
+- **The sensor rating in hyperspace is 14 / 8 / 10 on the three openers**, never 0 — §2.5's headline
+  worry, and the one failure mode that would have looked like bad luck rather than a bug.
+- Every band boundary: `roll < 1`, 1–3, 4..S, S<roll<2S, roll>=2S, the empty `4..S` on a low-sensor
+  ship falling through to the 1d10 band, and the S=0 degenerate case landing everything in the worst
+  band. Each band's distance stays inside its own dice range over 400 iterations, the direction is
+  always 0–5, and the 1d10 band produces −60°, 0 and +60° shifts.
+- The clamp returns a legal hex over 72 direction/distance pairs; **a scatter aimed straight at a
+  terrain footprint hex rotates off it at the same distance in all 14–18 cases per game**; a 5-hex
+  scatter off the east edge rotates rather than shortening; the reported distance is always the real
+  one; distance 0 stays on the declared hex.
+- The unit created is a `SpawnJumpPointEntrance` whose **`phpclass` is the subclass**, `spawned` is
+  `turn + 1` (so it is hidden on the forming turn), its id is an `int` and it carries the opener's
+  team; the deploy movement row is written; the `'Vortex'` and `'VortexScatter'` notes are written,
+  keyed by the vortex id, stamped turn 1 / phase 1, and the scatter note's two fields agree with the
+  hex and facing the vortex actually got.
+- The opener **and** its manifest are stamped `turn + 1` in the database *and* in memory (so the slot
+  loop that follows sees it), the opener stops answering `isReinforcement()`, and `getTurnDeployed`
+  switches from 999 to the arrival turn; **a berth on an entrance that never formed is cleared, not
+  stamped**, and that unit keeps its reinforcement status with nothing spent.
+- A **second** `advance()` spawns nothing, writes no second note, and does not clear the berths it
+  has already honoured; with the rule **off** the sweep does nothing at all.
+- `getEntranceDeclaration` finds this turn's order and refuses a mode-7, a rejected and a stale one,
+  while `getVortexDeclaration` (the exit reader) still ignores it entirely.
+- The modifier table: Minbari −1, Ancient −5 on top (the Vorlon opener in 4277 reads −5 with no
+  friendly base on the board).
+
+**Replay harness:** `check` shows **only** the three known Stage 2/5 baseline additions
+(`reinforcementCount`, `reinforcementPoints`, `formingEntrances`) across all 611 diffs — Stage 6
+adds no payload difference of any kind, which is what protected fields and a rule-gated sweep should
+look like. The baseline still needs its one re-record.
+
+**VERIFIED IN PLAY — game 4317, turn 1 (2026-08-28).** Two entrances declared in one turn, by a
+Primus and an Octurion, and both formed:
+
+- `tac_ship` holds two `SpawnJumpPointEntrance` rows with deploy movement at `-2,-1` facing 1 and
+  `-3,4` facing 5.
+- `arrivalturn = 2` on both openers and on all three of the Primus's riders (Sentri, Vorchan,
+  Razik); the Centurion, bought front-line, is untouched.
+- Two `'Vortex'` notes (`1,-1`) and two `'VortexScatter'` notes (`6,0` and `1,0`), keyed by their
+  own vortex ids.
+- The two log lines name their bands: *"sensors 10, roll 15 (1d10 band). It forms 6 hexes from the
+  declared hex"* and *"sensors 10, roll 1 (1d3 band). It forms 1 hex…"* — and the 1d10 band's
+  facing roll came up 3–4, which is why that one scattered six hexes with its facing intact.
+
+The one thing turn 1 of 4317 does not exercise is Stage 7: those five units now have an arrival turn
+and still have no Deployment phase to use it in.
+
+### Stage 7 — arriving ✅ COMPLETE 2026-08-28 — VERIFIED IN PLAY (game 4318), then refined by 7a
 The `hasReinforcementsArriving($playerid, $turn)` clause in the slot loop; the reinforcement branch
 in `validateDeploymentArea` (hex == the assigned vortex's hex, facing == the vortex facing); the
 partial-commit exemption in `validateDeployment`; the unplaced-unit reset. Client:
 `DeploymentPhaseStrategy` valid-area override, the stacking bypass in `onHexClicked`, the forced
 facing, and `validateAllDeployment` not demanding placement.
 
-⚠️ **Check `Hangar::generateIndividualNotes`' `getTurnDeployed > turn` guard** before assuming a
-reinforcement carrier's deploy-start dock works. It was trap 3 of
-[[arch_placement_turn_vs_deploy_turn]] and it is the same shape of bug here.
+**As built**, with nine things §4 did not anticipate — three of them silent bugs:
+
+- ⭐⭐ **THE JOIN NEEDED NO NEW STATE OF ANY KIND.** "Which doorway does this unit arrive through?"
+  is `arrivalVia` → `vortexHolderId`, and **both halves already existed and already reached the
+  client**: `arrivalVia` names the OPENER (§3.1) and `JumpEngine::restoreVortexState` has stamped
+  every vortex unit with its holder's ship id since Jump Points Stage 5, which is what the client's
+  `getVortexHeldBy` reads. No column, no note, no payload field, and `JumpEngine::getArrivalVortex`
+  / `shipManager.movement.getArrivalVortex` are the two sides of the same three-line lookup.
+- ⚠️ **`vortexHolderId` IS STAMPED ON LOAD, NOT AT SPAWN.** `spawnVortexUnit` sets the engine's
+  `activeVortexId` and writes the note; the reverse link is only made when the note is read back.
+  So `getArrivalVortex` answers **null inside the request that created the doorway** — harmless,
+  because arrivals happen a turn later in a different request, but it is the one thing the Stage 7
+  harness has to simulate, and any future rule that wants to reach the vortex from the opener *in
+  the forming request* must go through `$system->activeVortexId` instead.
+- ⚠️ **`DBManager::setShipArrivalTurn` HAD TO LEARN NULL, and its own comment said it never
+  would.** §2.6's one-way rule is about the DOORWAY (an entrance cannot be jumped out of) and says
+  nothing about a unit that declined to walk through one. Clearing `arrivalvia` alone would leave
+  an unplaced unit reading as an ordinary ship that deployed on a turn now past — on the board,
+  shootable, EW-relevant, and standing at its off-map `start` marker for the rest of the game.
+  Both fields are cleared, which puts it back to exactly `isReinforcement()`.
+- ⚠️⚠️ **THE DEPLOY-START-DOCK LANDMINE IS NOT THE ONE §4 FLAGGED.**
+  `Hangar::generateIndividualNotes`' guard turns out to be safe *by accident*: a POST-side ship has
+  `reinforcement === false` (`getShipsFromJSON` writes `$reinforcementClaim`), so it answers with
+  its slot's placement turn and the guard passes. The two that **did** break are
+  `HangarOps::validateDeployBayOrders` and `HangarOps::processLcvDeployStartTransfer`, which compare
+  a **POST-side carrier's** `getTurnPlaced`/`getTurnDeployed` against a **server-side** flight's or
+  LCV's. An arriving carrier answered 1 while its flight answered 3, so *every* deploy-start dock
+  onto a reinforcement carrier was refused — silently, with the fighters left at their off-board
+  `start` markers. Both now resolve the carrier through the `$dbCarrier` / `$dbShip` they already
+  had in hand. ⭐ Grep for any other site comparing a POST-side ship's turn accessor against a
+  DB-side one; this is the shape.
+- ⚠️ **THE STACKING BYPASS IN `onHexClicked` IS NOT WHERE THE WAVE GETS STUCK.** From the SECOND
+  unit onward every click on the doorway lands on a *shipmate already standing in it*, and
+  `onShipClicked` routes that to plain ship-selection several branches before `onHexClicked` is
+  ever reached — so units 2..n could not be placed at all. The exemption has to go on the
+  `SelectFromShips` popup gate too, **and on that file's own copy of the `isBlocked` test**, which
+  is a duplicate of the strategy's and must be kept in step with it.
+- ⚠️ **THE COMMIT BUTTON HAD EXACTLY ONE ARMING SITE AND IT WAS A DEAD END.** It is shown only
+  after a successful placement, which is correct while every unit in the phase must be placed and
+  unfinishable the moment one need not be: a player who brings **none** of a wave through had no
+  way out of the Deployment phase. `onlyOptionalPlacementsRemain` arms it at activate instead —
+  and deliberately **not** `validateAllDeployment`, which on turn 1 validates every ship at its
+  slot's box centre and so would arm the button before anybody had placed anything.
+- **`showDeploymentArea` had to be silenced for an arrival.** Its slot box is wherever the fleet
+  started, usually the far side of the map from the only hex it may stand in, so lighting it up
+  points the player at the one place they definitely cannot go. The blue entrance vortex with its
+  outward arrow is the cue.
+- **`getFirstFriendlyShipDeployment` selected the wrong ship.** It returns the first own unit with
+  `getTurnPlaced <= turn`, which on any Deployment phase after the first is the first ship of the
+  turn-1 fleet — already on the board, nothing to do. A player would have had to hunt the arrival's
+  icon down at its off-map `start` marker before they could place anything. A new first pass
+  prefers something that actually places *this* turn; on turn 1 the two passes are identical.
+- **A commit warning names what is being left behind**, in the phase -1 `onCommitClicked` block
+  beside the mine-range and pre-order nags. Placement being optional is a decision with an
+  invisible cost: a ship's entrance closes at the end of the turn it opened for, so the berth is
+  not waiting next turn.
+
+⚠️ **KNOWN AND ACCEPTED: an unplaced arrival is visible at its `start` marker for the length of the
+Deployment phase**, and stays disclosed even if the player then releases it back to hyperspace.
+`hideHyperspaceReinforcements` keys on `arrivalTurn === null`, which is set for the whole of the
+arrival turn, and §3.6 says that disclosure is the intent. The residue is that an opponent who also
+has a Deployment phase that turn can see a unit that ends up not coming. Same shape as turn-1
+deployment, where every unplaced ship sits in its box in plain sight; not worth machinery.
 
 **Verify:** three units through one entrance stack correctly and separate on their first movement;
 leaving one behind works and it is still there next turn; a forced facing cannot be overridden;
 speed is free.
+
+**Proven headless** by `tests/replay/reinforcementsStage7Harness.php`, which builds its board by
+running the **real Stage 6 sweep** on real local games (4277, 4307; 4311 has too few units and
+skips) so the entrance it validates against is one the deviation table actually produced. **80
+assertions, all passing, zero database writes** — `Manager::$dbManager` is stubbed by reflection and
+the three private statics are reached the same way. The POST-side ships are deliberately
+`stdClass` stand-ins carrying only what `validateDeployment` reads off a posted object, so any rule
+that reaches for a reinforcement field on `$ship` instead of `$servership` fatals rather than
+quietly passing:
+
+- the predicate (`isArrivingReinforcement`): true on the arrival turn for the opener and for its
+  manifest, **false on the turn after** (or the unit would be re-placed every turn for the rest of
+  the game), false for a front-line ship;
+- the lookup (`getArrivalVortex`): the opener resolves through a **NULL `arrivalVia`** to its own
+  doorway; riders resolve through the holder id; a berth naming a unit that opened nothing, a vortex
+  that lost its note, one that has not formed, and one already closed all resolve to **null rather
+  than to the wrong doorway**; an **EXIT** vortex held by the same ship is ignored (§2.6);
+- the vortex is still usable for the whole of the turn it **closes** on, which is the rule Stage 7
+  leans on hardest;
+- `hasReinforcementsArriving`: true for the owner on N+1 only, and never for another player;
+- one hex and one facing: the entrance hex on the entrance facing passes; the next hex, a chosen
+  facing, and a **mismatched heading** each fail; a unit with no doorway has no legal hex anywhere
+  and does **not** fall back to its slot box;
+- the whole submission: a **partial commit** (three of a four-unit wave) is accepted, **three units
+  stack in one hex with none blocking another**, and a placement off the doorway still throws
+  `Illegal placement`;
+- the release: both fields cleared in DB and in memory, `isReinforcement()` true again,
+  `getTurnDeployed` back to 999, the units that DID arrive untouched, a second pass writing nothing,
+  and a unit queued for a deploy-start hangar dock **exempted** (with the exemption removed, the
+  same unit is released — so the guard is proven to be doing the work).
+
+**Replay harness:** `check` shows **only** the three known Stage 2/5 baseline additions
+(`reinforcementCount`, `reinforcementPoints`, `formingEntrances`). Stage 7 adds no payload
+difference of any kind — every new field is derived, and the two hangar fixes are no-ops for a
+non-reinforcement carrier (a POST-side and a DB-side ship agree on slot, osat and base). The
+baseline still needs its one re-record.
+
+**VERIFIED IN PLAY — game 4318, turn 2 (2026-08-28).** Two entrances formed at the end of turn 1
+and both waves came through them. `tac_shipmovement` holds the proof: the Primus opener, the Demos
+and the Rutarian all deployed at `-7,4` facing 1; the Centurion, the Sentri and the Razik all at
+`1,-5` facing 5 — three units stacked in each doorway, every one on its vortex's own facing, and
+**three different speeds among them (0 and 5)**, so the "speed is free" half is exercised too.
+
+#### Stage 7a — the wave places itself ✅ COMPLETE 2026-08-28, verified in play (user request)
+
+Two things came out of that game, and the second made the first moot:
+
+- **"You cannot deploy on terrain." fired on every unit of every wave.** `shipManager.getShipsInSameHex`
+  is a query with a UI side effect: it pops that toast whenever the hex holds Terrain, and an
+  entrance vortex *is* Terrain. Placement went through regardless (the arrival bypasses the block),
+  so the message was pure noise — but it was noise on every single click. It is now suppressed for
+  an arriving reinforcement, in both of that function's two error sites. ⚠️ Only the TOAST is
+  suppressed; the vortex still goes into the returned list, which callers use for their own
+  occupancy decisions.
+- ⭐ **AND THEN THE CLICK ITSELF WENT.** There was never a choice to make: the deviation roll fixed
+  the hex and the facing a turn earlier, so "click the one legal hex" was ceremony.
+  `DeploymentPhaseStrategy.autoPlaceArrivingReinforcements` runs on phase activate, before
+  `selectFirstOwnShipOrActiveShip`, and puts every arrival in its doorway. The player keeps the one
+  decision that was ever real — **speed, 0–10, on the ordinary Deployment accel arrows** — and the
+  header says `DEPLOYMENT: REINFORCEMENTS ARRIVED` when that is the whole of the phase.
+
+⚠️ **THE DUPLICATE-DEPLOY-ROW TRAP.** The deploy move is not persisted until commit, so
+auto-placement runs against a ship carrying only its off-board `start` row — but `activate` can run
+again (a re-activate in the same page load, or a reload after the phase was committed, where the row
+*is* persisted and `ship.deploymove` is not). Two guards, and both are needed:
+`ship.deploymove` for the first case and a scan of `ship.movement` for `type == "deploy" && turn ==
+gamedata.turn` for the second. A second deploy row makes `validateDeployment` throw *"Found more
+than one deployment entry"* and takes the whole submission down.
+
+⚠️ **NOTHING SERVER-SIDE CHANGED, and that is the point** — auto-placement produces exactly the
+POST the manual click produced, so `validateReinforcementArrival` still checks the hex, the facing
+and the heading. The client is a convenience, never the authority.
+
+**The optional-placement path is deliberately still open**, and is now the FAILURE path rather than
+a player choice: a unit whose doorway cannot be resolved is left alone by auto-placement,
+`validateAllDeployment` skips it so the commit button still arms, the phase -1 commit warning names
+it ("no open jump point was found for them"), and `releaseUnplacedReinforcements` sends it back to
+hyperspace with nothing spent. ⭐ **§2.4's "a player may bring some units through and leave the rest"
+is therefore no longer reachable through the UI** — auto-placement supersedes it. If it is ever
+wanted back it is a per-unit control in the Deployment phase, not a change to any of this
+machinery, which already handles the unplaced case end to end.
+
+**Proven** by a node harness driving the *shipped* `ships.js` / `movement.js` over game 4318's real
+rows (17 assertions): all six reinforcements join to the doorway the database says they arrived
+through, each takes that doorway's facing (1 and 5) rather than its reverse, `movement.deploy`
+stamps facing **and** heading while leaving speed alone, a unit reloaded after commit is not given a
+second deploy row, the closed / not-yet-formed windows both refuse, and an EXIT vortex held by the
+same ship is still ignored.
+
+#### Stage 7a fallout — the deploy-start hangar dock ✅ FIXED 2026-08-28, untested in play (user report, game 4318)
+
+"Deploy Flights in Hangar" on a reinforcement carrier appeared to do nothing. Two separate causes,
+both found by driving the real `DeploymentDock.js` over 4318's own payload:
+
+- ⭐⭐ **`confirm.hangarDeployDock` BUILT THE DIALOG AND THEN THREW IT AWAY.** It has TWO empty
+  states and only one of them was visible. The first (`pending.length === 0`) renders *"No Hangar
+  Operations available."*; the second — flights ARE pending but every row was skipped for want of
+  space — was a bare `e.remove(); return;`. A click into that path produced no dialog, no message
+  and no error. 4318's **Centurion Attack Cruiser is exactly it**: `new Hangar(7, 2, 1)` is a
+  **2-box shuttle bay**, both boxes taken by its default shuttles, and the Sentri and Razik flights
+  riding its jump point need six boxes each. It now renders the reason, names the flights that are
+  stuck, and prints each bay's free-box count — because "0 free" IS the explanation and is
+  otherwise a tooltip away. ⚠️ This is a **pre-existing Hangar Ops bug**, not a Stage 7 one; the
+  reinforcement wave is simply the first fleet likely to meet a bay with no room in it.
+  (The same game's **Primus**, `new Hangar(7, 14)` with 12 boxes free, took its Rutarian flight
+  through the identical code path without complaint — so the button was never broken, only mute.)
+- ⚠️ **AUTO-PLACEMENT BROKE THE OTHER ROUTE IN.** "Select the flight, click the carrier" reaches
+  the DOCK button through `onShipClicked`'s SelectFromShips branch — which is only entered when the
+  two are in **different hexes**. Before Stage 7a an arriving flight sat at its own off-map `start`
+  marker, so it always was; now the whole wave is auto-placed in one doorway, every click on the
+  carrier lands on the hex the flight is already standing in, and the `else` branch swallowed it
+  into a plain selection swap. Fixed by taking the picker in that branch too — scoped to an
+  arriving reinforcement FLIGHT, since two units that merely happen to share a hex on turn 1 should
+  keep the selection swap nobody asked to change.
+
+#### Stage 7a fallout — the opponent had no blueprints for the wave ✅ FIXED 2026-08-28, untested in play (user report)
+
+On the opponent's screen, every arriving reinforcement rendered with **no ship information at all —
+except the Primus**, and a page reload fixed it. The user's own diagnosis was right: the Primus was
+the one class already on the board front-line, so its blueprint had come along at page load.
+
+⭐⭐ **`window.staticShips` IS BUILT ONCE, FROM THIS VIEWER'S PAYLOAD, AT PAGE LOAD** —
+`game.php` collects `$serverdata->ships[]->phpclass` and hands it to `BlueprintCache`. §3.6 removes
+a hyperspace reinforcement from an opponent's payload **outright**, so its class is not in that
+list, and when the wave arrives mid-session the client is handed ship JSON for hulls it has no
+blueprint for. `Ship()` then builds them from the live JSON alone: no armour, no arcs, no
+maxhealth, no systems.
+
+⚠️ **THIS IS THE PRICE OF §3.6 AND IT CANNOT BE PAID BY PRELOADING.** Putting the concealed
+classes into the opponent's `staticShips` would hand the whole composition of the hidden wave to
+anyone who opens devtools — which is the exact disclosure §3.6 exists to prevent, and a step
+*worse* than the `[Deploys on Turn N]` late slots it was written to improve on. The blueprint must
+arrive when the ships do, not before.
+
+⭐ **THE SAME BUG ALREADY HAD AN ANSWER, AND STAGE 7 NEEDED A DIFFERENT ONE.**
+`gamedata.hasShipIdentityChanged` (the Chameleon reveal, D14) hits this and **reloads the page**.
+That is right for it: a broken disguise changes the identity of a ship the page has already built,
+so its icon, ship window and every cached reference are made of the old hull and nothing short of a
+rebuild is honest. Here the ships do not exist yet — only the blueprint is missing — so
+`gamedata.ensureBlueprintsFor` **fetches the faction and re-enters**, and the player keeps their
+camera, their selection and their turn.
+
+- It **defers the whole update** rather than patching afterwards: returning true leaves
+  `parseServerData` having touched nothing, so the re-entry is an ordinary first pass over the same
+  payload. No half-applied turn, no ship built from a blueprint that had not landed yet.
+- ⚠️ **Every faction is asked for at most once.** A class still missing after the fetch must not
+  loop — and *must not freeze*: polling stops once it is this player's move, so a permanently
+  deferred update is a dead screen, not a slow one. After one attempt the payload is applied
+  whatever happened, which is exactly the old behaviour.
+- ⚠️ **The merge ADDS ONLY, never overwrites.** `gamelobbyloader.php` serves the lobby's copies;
+  diffed against `BlueprintCache`'s own output for Primus and Sentri they are identical bar the
+  blueprint's ship-level `id`/`flightid` (overwritten from the live JSON by `Ship()` anyway), one
+  tooltip `data` value that is a string on one side and a number on the other, and the lobby-only
+  `systemEnhancementOffers`. Close enough to add, not close enough to swap out from under units
+  already on the board.
+- `gamelobbyloader.php` rather than a new endpoint: it already serves per-faction blueprints with
+  gzip and ETag revalidation, from the same `static/json/<faction>.json` the generator writes.
+
+**Proven** by a node harness driving the shipped `gamedata.js` over 4318's turn-2 payload from
+player 211's starting position (19 assertions): it reproduces the report exactly — *"classes with no
+blueprint at load: Centurion, Demos, Rutarian, Sentri, Razik"*, the Primus conspicuously absent —
+then defers the update, fires **one** request for the **one** faction that is short, ignores a poll
+that lands mid-fetch without firing a second, re-enters with the very payload it deferred, leaves
+the Primus blueprint and the Narn faction untouched, and afterwards applies normally. A failed fetch
+still re-enters and the retry applies the payload instead of deferring again.
+
+⭐ **AND THE RULE ANSWER, WHICH IS NOT A BUG:** a 2-box shuttle bay cannot hold a 6-fighter flight,
+with or without its shuttles, so 4318's Sentri and Razik genuinely cannot start aboard the
+Centurion. `findPendingFlightsForCarrier` requires the flight to share the carrier's **hex**, so
+they cannot reach the Primus's spare 12 boxes either — it is at the other doorway. A wave that wants
+its fighters stowed has to ride the jump point of a carrier with the boxes for them.
 
 ### Stage 8 — gates
 The blue `UI.gateSignal` variant; the entrance flavour on the claim; the refund when an enemy exit
@@ -998,6 +1415,26 @@ through that vortex, on their arrival turn only) read from the `'VortexScatter'`
     only server-side consumer is the `hidetarget` mask — which an entrance is not subject to,
     `hideHyperspaceReinforcements` having deleted the whole unit first.
 
+20. ⚠️⚠️ **A NEW `IndividualNote` KIND ON THE JUMP ENGINE MUST BE CLAIMED IN
+    `onIndividualNotesLoaded`, OR IT CORRUPTS `$preJumpValue`.** That loop ends in a fall-through
+    which treats every note it does not recognise as the legacy `jumped` note and assigns its value
+    to `$preJumpValue` — the ship's pre-jump combat value. `'Vortex'` and `'VortexHold'` each
+    `continue` for exactly this reason, and Stage 6's `'VortexScatter'` had to as well. It fails
+    silently, on the ship that opened the doorway, and only for games that use the feature.
+
+21. ⚠️ **`OffsetCoordinate::distanceTo` RETURNS A FLOAT, so `=== <int>` IS ALWAYS FALSE.**
+    `CubeCoordinate::__construct` rounds every ordinate with `round(..., 4)` and PHP's `round()`
+    returns a float. Stage 6 caught it in test assertions only; **Stage 7 is where it can reach
+    shipped code** — "the unit was placed in the vortex's hex" is exactly the shape of comparison
+    that will be written with a `===`. Use `==`, or cast. (`equals()` on the coordinate objects is
+    safe: it compares `q`/`r`, which are `(int)` cast in the constructor.)
+
+22. **A vortex spawned mid-sweep is Terrain and is on the board IMMEDIATELY.**
+    `Manager::insertSingleShip` appends to `$gamedata->ships`, so anything asking a hex question
+    later in the same request sees it — which is what makes a second entrance in one sweep clamp
+    around the first, and what makes any "is this hex free" test written for Stage 7 need to think
+    about whether it means *before* or *after* this turn's doorways exist.
+
 ---
 
 ## 6. Test plan
@@ -1035,6 +1472,11 @@ Local, two seats, in a game with the rule on:
 | 26 | Put a second jump-capable unit on the first one's manifest | It is greyed and `RIDING` in the menu, and cannot be selected |
 | 27 | Withdraw that first jump point | The menu stays open, the row reverts to Choose Hex, and the greyed unit is selectable again |
 | 28 | Lobby: tick Show Custom | The customs dropdown appears immediately right of the checkbox, before Buy as Reinforcement |
+| 29 | Declare an entrance and play the turn out (Stage 6) | At the end of Firing a blue Jump Point Entrance appears — usually NOT on the declared hex — and the combat log names the band and the distance |
+| 30 | Check `tac_ship` for the riders | `arrivalturn` = the next turn on the opener AND on every unit on its manifest; `arrivalvia` untouched |
+| 31 | An Ancient (Vorlon/Shadow) opener vs a Young one | The Ancient is precise far more often; the log line's roll differs by 5 |
+| 32 | Declare next to a moon or an asteroid field | The doorway never forms inside terrain, however the dice fall |
+| 33 | Declare with two openers in one turn, then withdraw one | Only the standing declaration forms; the withdrawn one's manifest has its `arrivalvia` cleared and nothing else changes |
 
 ---
 

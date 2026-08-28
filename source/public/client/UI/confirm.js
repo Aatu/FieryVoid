@@ -4719,8 +4719,57 @@ window.confirm = {
         //deploy-docked LCV was a page refresh). Unchecking + OK releases it.
         var lcvDeploySection = window.confirm.appendLcvDeployDockSection(container, carrier);
 
+        /* ⭐ NOTHING DOCKABLE IS AN ANSWER, NOT A REASON TO VANISH (user report 2026-08-28, game
+           4318). This used to `e.remove(); return;` — the dialog was built and then thrown away
+           without ever being shown, so the "Deploy Flights in Hangar" button looked broken: click,
+           nothing, no message, no way to tell whether the bay was full or the feature was dead.
+
+           It is reachable whenever flights are PENDING (so the "No Hangar Operations available."
+           branch further up did not fire) but every row was skipped for want of space — each row
+           is dropped when no single bay fits the flight AND distributeFlightAcrossHangars cannot
+           spread it across bays either. Game 4318's Centurion is the case in point: a 2-box bay
+           already holding its two default shuttles, and a 6-fighter Sentri flight that needs six.
+
+           So say that, and say it with numbers. The flights are named because a carrier can have
+           several pending and the player needs to know which ones are stuck, and the per-bay free
+           count is shown because "0 free" is the whole explanation and is otherwise invisible
+           (hangarUsage is a tooltip away). No OK button - there is nothing to commit. */
         if (rowData.length === 0 && lcvDeploySection.count === 0) {
-            e.remove();
+            container.empty();
+
+            var $why = $('<div class="multi-value-row"></div>');
+            $('<span class="multi-value-label" style="font-style:normal;"></span>')
+                .text('No hangar bay on ' + carrier.name + ' can hold:')
+                .appendTo($why);
+            container.append($why);
+
+            pending.forEach(function (flight) {
+                var size = parseInt(flight.flightSize || 1, 10);
+                var $row = $('<div class="multi-value-row"></div>');
+                var $label = $('<span class="multi-value-label"><span class="hangar-craft-name"></span></span>');
+                $label.find('.hangar-craft-name')
+                    .text(flight.name + ' (' + size + ' x ' + flight.shipClass + ')');
+                $row.append($label);
+                container.append($row);
+            });
+
+            /*var $freeRow = $('<div class="multi-value-row hangarCapacityHeader" style="font-style:normal;"></div>');
+            $freeRow.append('<span class="hangar-capacity-label">Free hangar capacity:</span>');
+            var $freePills = $('<span class="hangar-capacity-pills"></span>').appendTo($freeRow);
+            carrier.systems.forEach(function (sys) {
+                if (!sys || !isDockHangar(sys)) return;
+                if (!baseFreeByHangar.has(sys.id)) return;
+                $('<span class="hangar-capacity-pill"></span>')
+                    .text(hangarLabelFor(carrier, sys) + ': ' + baseFreeByHangar.get(sys.id) + ' free')
+                    .appendTo($freePills);
+            });
+            if ($freePills.children().length === 0) $freePills.append('<span>none</span>');
+            container.append($freeRow);
+            */
+
+            $('.confirmok', e).hide();
+            $(".confirmcancel", e).on("click", function () { e.remove(); });
+            e.appendTo("body").fadeIn(250);
             return;
         }
 

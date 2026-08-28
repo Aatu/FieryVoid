@@ -87,6 +87,25 @@ shipManager.movement = {
         if (ship.deploymove && ship.osat || ship.deploymove && ship.base) {
             ship.deploymove.speed = 0;
         }
+
+        /* REINFORCEMENTS_PLAN.md STAGE 7 - AN ARRIVAL'S FACING IS THE DOORWAY'S (plan §2.4). A unit
+           comes out of a jump point travelling the way the vortex points; it does not get to pick.
+           Heading as well as facing, and the two are set together here so nothing downstream has to
+           know that this ship was placed differently from any other.
+
+           HERE rather than in DeploymentPhaseStrategy.onHexClicked because there is more than one
+           way to place a unit - the hex click, the SelectFromShips "DEPLOY HERE" button, a
+           re-placement onto the same hex - and every one of them ends in this function. Speed is
+           deliberately untouched: it is the player's to choose (§2.4) and canChangeSpeed already
+           allows it during Deployment.
+
+           Set on BOTH branches above, so re-placing keeps the facing rather than only the first
+           placement getting it. */
+        var arrivalFacing = shipManager.movement.getArrivalFacing(ship);
+        if (arrivalFacing !== null && ship.deploymove) {
+            ship.deploymove.facing = arrivalFacing;
+            ship.deploymove.heading = arrivalFacing;
+        }
     },
 
     doDeploymentTurn: function doDeploymentTurn(ship, right) {
@@ -659,6 +678,64 @@ shipManager.movement = {
         }
 
         return null;
+    },
+
+    /* REINFORCEMENTS_PLAN.md STAGE 7 - THE ENTRANCE THIS UNIT ARRIVES THROUGH, or null. The mirror
+       of JumpEngine::getArrivalVortex, and the client's whole answer to "where may I put this?".
+
+       ⭐ THE JOIN IS arrivalVia -> vortexHolderId AND BOTH HALVES ALREADY REACH THE CLIENT.
+       arrivalVia names the OPENER (the vortex did not exist when the manifest was named), and
+       SpawnJumpPoint::stripForJson has sent vortexHolderId since Jump Points Stage 5 - it is what
+       getVortexHeldBy above reads. So no new payload field was needed for any of Stage 7.
+
+       ⚠️ A NULL arrivalVia MEANS "ITS OWN DOORWAY", not "unassigned": an opener always comes
+       through the entrance it opened, and the Stage 6 sweep stamps it from the list of entrances
+       that formed rather than from a berth. Read as unassigned, the one unit guaranteed a doorway
+       would be the one unable to use it.
+
+       ⚠️ isJumpVortexEntrance, NOT isJumpVortex - the two are deliberately separate predicates and
+       an EXIT is never a legal arrival hex (§2.6). The open/closed window is getVortexInHex's,
+       repeated here rather than delegated because that helper is exit-only by design. */
+    getArrivalVortex: function getArrivalVortex(ship) {
+        if (!shipManager.isArrivingReinforcement(ship)) return null;
+
+        var openerId = (ship.arrivalVia === null || ship.arrivalVia === undefined)
+            ? ship.id : ship.arrivalVia;
+
+        for (var i in gamedata.ships) {
+            var unit = gamedata.ships[i];
+            if (!shipManager.movement.isJumpVortexEntrance(unit)) continue;
+            if (unit.vortexHolderId == null) continue;              //no 'Vortex' note - nothing to join on
+            if (unit.vortexHolderId != openerId) continue;
+            if (unit.spawned !== undefined && unit.spawned !== -1 && unit.spawned > gamedata.turn) continue; //still forming
+            if (unit.removed && unit.removedTurn != null && gamedata.turn >= unit.removedTurn) continue;     //closed
+            if (!shipManager.movement.getLastCommitedMove(unit)) continue; //no deploy row: no hex, no facing
+
+            return unit;
+        }
+
+        return null;
+    },
+
+    /* The facing an arriving reinforcement is FORCED onto, or null if it has no doorway.
+
+       ⚠️ NOT getVortexEntryDirection. On an EXIT the facing names the mouth a unit crosses inbound,
+       so a ship using one travels in the OPPOSITE direction (F+3). On an ENTRANCE the arrow points
+       outward - it is the doorway out - and an arriving unit is placed facing the way it points
+       (plan §0 / §2.4). Reusing the exit helper here would drop every wave onto the board facing
+       backwards, and would still look plausible on screen. */
+    getArrivalFacing: function getArrivalFacing(ship) {
+        var vortex = shipManager.movement.getArrivalVortex(ship);
+        if (!vortex) return null;
+
+        var move = shipManager.movement.getLastCommitedMove(vortex);
+        if (!move) return null;
+
+        //isNaN rather than a bare parse: the caller writes this straight onto a MovementOrder, and
+        //a NaN facing is not null - it would sail past the "is there a forced facing?" test in
+        //deploy() and be submitted, where the server's === would refuse the whole placement.
+        var facing = parseInt(move.facing, 10);
+        return isNaN(facing) ? null : (((facing % 6) + 6) % 6);
     },
 
     /* The travel direction a unit must be moving in to enter 'vortex'.
@@ -2419,6 +2496,12 @@ shipManager.movement = {
         if (ship.mine) return false;
         if (shipManager.movement.isManeuverBlockedByAttachment(ship)) return false;
         if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!         
+        /* REINFORCEMENTS_PLAN.md STAGE 7 - A UNIT ARRIVING THROUGH A JUMP POINT CANNOT BE TURNED.
+           Its facing is the vortex's (§2.4) and shipManager.movement.deploy sets it; the arrows are
+           refused here so the player cannot immediately turn back off it. The server checks the
+           submitted facing as well (DeploymentGamePhase::validateReinforcementArrival) - this is
+           the courtesy half, not the enforcement. */
+        if (gamedata.gamephase == -1 && shipManager.isArrivingReinforcement(ship)) return false;
         if (gamedata.gamephase == -1 && ship.deploymove) return true;
         if (gamedata.gamephase != 2) return false;
         if (ship.osat && (!ship.flight)) { //OSAT but not MicroSAT

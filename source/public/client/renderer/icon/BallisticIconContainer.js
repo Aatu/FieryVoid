@@ -523,43 +523,69 @@ window.BallisticIconContainer = function () {
 	   hex and the facing on the PlayerSlot, and they are folded in here so both viewers get the
 	   identical marker from the identical code (section 3.6).
 
+	   ⭐ ONE OF THEM CAN BE HIGHLIGHTED (user request 2026-08-28). Three drives put three identical
+	   blue hexes on the map and the Manage Reinforcements menu could not say which row owned which
+	   one; selecting a declared row there names its marker here - the opener's NAME in the hex
+	   instead of the generic label, in white, with the arrow at full opacity.
+	     - It rides the ORDER's shooterid, so it can only ever apply to the owner's own half. The
+	       republished enemy entries carry no shooter and are never highlighted, which is correct:
+	       an opponent's menu is not open and the units are hidden from them anyway.
+	     - The label goes into the sprite's SIGNATURE, so syncSceneObject rebuilds exactly the two
+	       hexes whose state changed and leaves every other marker's texture alone.
+	     - ⚠️ The name is read from gamedata at draw time rather than passed in: the highlight is an
+	       ID for the reason ReinforcementEntry documents (every poll replaces every ship object).
+
 	   ⚠️ Its own sweep rather than a line inside createBallisticIcon, for the reason
 	   generateJumpPointArrows gives: an existing ballistic icon is UPDATED, not rebuilt, on later
 	   polls, so a syncSceneObject call in there would run once and then let prune reclaim it. */
 	function generateEntranceHexes(gamedata, orders) {
 		const claimed = new Set();
 
-		const draw = (q, r, facing) => {
+		const draw = (q, r, facing, label) => {
 			const hex = new hexagon.Offset(q, r);
 			const hexKey = `${hex.q},${hex.r}`;
 			if (claimed.has(hexKey)) return;
 			claimed.add(hexKey);
 
-			syncSceneObject.call(this, 'jumpentry:' + hexKey, String(facing), () => {
+			const signature = `${facing}|${label || ''}`;
+
+			syncSceneObject.call(this, 'jumpentry:' + hexKey, signature, () => {
 				const sprite = new BallisticSprite(this.coordinateConverter.fromHexToGame(hex),
-					'hexBlue', 'Jump Point Forming', '#00b8e6');
+					'hexBlue', label || 'Jump Point Forming', label ? '#ffffff' : '#00b8e6');
 
 				return { object: sprite.mesh, release: () => releaseSprite(sprite) };
 			});
 
-			syncSceneObject.call(this, 'jumpentryArrow:' + hexKey, String(facing), () => {
+			syncSceneObject.call(this, 'jumpentryArrow:' + hexKey, signature, () => {
 				const size = window.HexagonMath.getHexHeight() * VORTEX_ARROW_SCALE;
 				const sprite = new window.webglSprite('./img/directionOfVortexEntry.png',
 					{ width: size, height: size }, VORTEX_ARROW_Z);
 
 				sprite.setPosition(this.coordinateConverter.fromHexToGame(hex));
 				sprite.setFacing(-mathlib.hexFacingToAngle(facing));
-				sprite.setOpacity(VORTEX_ARROW_OPACITY);
+				sprite.setOpacity(label ? 1 : VORTEX_ARROW_OPACITY);
 
 				return { object: sprite.mesh, release: () => releaseSprite(sprite) };
 			});
 		};
 
+		//Which opener the Manage Reinforcements menu is pointing at, if it is open at all. Guarded
+		//because this container is also driven by the replay, where the module may not be loaded.
+		const highlightId = (window.ReinforcementEntry && ReinforcementEntry.getHighlightedOpener)
+			? ReinforcementEntry.getHighlightedOpener() : null;
+
 		//The owner's own orders. firingMode is the storage for the facing - mode = facing + 1 - the
 		//same convention an exit uses, so the arrow maths is shared verbatim.
 		orders.forEach(order => {
 			const facing = (((parseInt(order.firingMode, 10) || 1) - 1) % 6 + 6) % 6;
-			draw(order.x, order.y, facing);
+
+			let label = null;
+			if (highlightId !== null && order.shooterid == highlightId) {
+				const opener = gamedata.getShip(order.shooterid);
+				if (opener) label = opener.name;
+			}
+
+			draw(order.x, order.y, facing, label);
 		});
 
 		//The republished half, for a viewer whose payload has no opening ship to carry an order.
@@ -569,7 +595,7 @@ window.BallisticIconContainer = function () {
 			const entries = gamedata.slots[key] && gamedata.slots[key].formingEntrances;
 			if (!Array.isArray(entries)) continue;
 
-			entries.forEach(entry => draw(entry.x, entry.y, (((parseInt(entry.facing, 10) || 0) % 6) + 6) % 6));
+			entries.forEach(entry => draw(entry.x, entry.y, (((parseInt(entry.facing, 10) || 0) % 6) + 6) % 6, null));
 		}
 	}
 

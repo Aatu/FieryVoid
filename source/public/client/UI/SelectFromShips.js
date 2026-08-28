@@ -557,7 +557,14 @@ window.SelectFromShips = function () {
             var selIsLcvUnit = !this.phaseStrategy.selectedShip.flight && !this.phaseStrategy.selectedShip.mine
                 && String(this.phaseStrategy.selectedShip.hangarRequired || '').toLowerCase() === 'lcvs';
 
-            if (hasTerrain) {
+            /* REINFORCEMENTS_PLAN.md STAGE 7 - an arrival bypasses BOTH blocks, exactly as it does
+               in DeploymentPhaseStrategy.onHexClicked (which this whole check is a copy of - keep
+               the two in step). The vortex it must stand in is terrain, so `hasTerrain` alone would
+               hide this button on the only hex the unit is allowed to occupy; and a wave stacks in
+               that one hex by rule (§2.4), so the one-ship-per-hex block has to go too. */
+            if (shipManager.isArrivingReinforcement(this.phaseStrategy.selectedShip)) {
+                isBlocked = false;
+            } else if (hasTerrain) {
                 isBlocked = true;
             } else if (!(this.phaseStrategy.selectedShip.mine || this.phaseStrategy.selectedShip.flight || selIsLcvUnit)) {
                 isBlocked = shipsInHex.some(function (s) { return !(s.mine || s.flight); });

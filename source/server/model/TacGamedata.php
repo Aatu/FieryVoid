@@ -1948,6 +1948,38 @@ if ($ship->Enormous && !($ship instanceof spawnMeteoroid) && !($ship instanceof 
         return false;
     }
 
+    /* REINFORCEMENTS_PLAN.md STAGE 7 - does this player have anything coming out of hyperspace on
+       $turn? The clause that GRANTS the Deployment phase in FireGamePhase::advance's slot loop
+       (plan §4 Stage 7), and the only thing that does: a reinforcement's arrival turn is decided in
+       play by the entrance it rides, so no slot value - depavailable, getMinTurnPlacedSlot or
+       otherwise - can predict it.
+
+       ⚠️ ASK IT OF THE GAMEDATA THE SWEEP STAMPED. JumpEngine::spawnEntranceVortices writes
+       arrivalTurn to the DB and to its own in-memory ships; the outer $gameData FireGamePhase was
+       handed was loaded BEFORE any of that happened, so asking it would answer "nobody is arriving"
+       every time and the wave would never get a phase to walk through the door in.
+
+       PER PLAYER and not per slot, matching checkDeploymentPhaseForPlayer beside it: the loop grants
+       or skips a slot at a time, but a player with two slots is only marked "skipped" when EVERY one
+       of their slots was, so a spare Deployment phase on a slot with nothing to place costs nothing -
+       validateDeployment asks for a move only from units whose placement turn is this turn.
+
+       isDestroyed() is asked because pre-battle damage can in principle kill a unit before it ever
+       leaves hyperspace, and a phase granted for a wreck is a phase the player cannot finish. */
+    public function hasReinforcementsArriving($playerid, $turn) {
+        foreach ($this->ships as $ship) {
+            if ($ship->userid != $playerid) continue;
+            if (!$ship->reinforcement) continue;
+            if ($ship->arrivalTurn === null) continue;
+            if ((int)$ship->arrivalTurn !== (int)$turn) continue;
+            if ($ship->isDestroyed()) continue;
+
+            return true;
+        }
+
+        return false;
+    }
+
 
     //A check for Manager in case there are no ships deployed at all, in which case just proceed to next phase. 
     public function areDeployedShips() {

@@ -928,6 +928,17 @@ window.shipManager = {
 
         if (!pos1) var pos1 = shipManager.getShipPosition(ship);
 
+        /* REINFORCEMENTS_PLAN.md Stage 7 - DO NOT SHOUT AT A UNIT WHOSE DESTINATION *IS* TERRAIN
+           (user report 2026-08-28, game 4318). A reinforcement arrives inside its jump point
+           entrance, which is a Terrain unit, so both error calls below fired on every single unit
+           of every wave - and said nothing true: the arrival bypasses the terrain block entirely
+           (DeploymentPhaseStrategy.onHexClicked), so the placement went through and the message was
+           pure noise. Only the TOAST is suppressed; the vortex still goes into the returned list,
+           because callers use that list for their own occupancy decisions.
+           A null ship is legal here - window.validateMineDeploymentHex passes one - and
+           isArrivingReinforcement answers false for it. */
+        var arrivingReinforcement = shipManager.isArrivingReinforcement(ship);
+
         var shipsInHex = Array();
         for (var i in gamedata.ships) {
             var ship2 = gamedata.ships[i];
@@ -978,7 +989,7 @@ window.shipManager = {
 
             if (collides) {
                 shipsInHex.push(ship2);
-                confirm.error("You cannot deploy on terrain.");
+                if (!arrivingReinforcement) confirm.error("You cannot deploy on terrain.");
                 continue; // Collision found, skip center check for this ship
             }
 
@@ -988,7 +999,7 @@ window.shipManager = {
             if (pos1.equals(pos2)) {
                 if (gamedata.isTerrain(ship2.shipSizeClass, ship2.userid)) {
                     shipsInHex.push(ship2);
-                    confirm.error("You cannot deploy on terrain.");
+                    if (!arrivingReinforcement) confirm.error("You cannot deploy on terrain.");
                 } else {
                     shipsInHex.push(ship2);
                 }
@@ -1242,6 +1253,22 @@ window.shipManager = {
 
         var depTurn = shipManager.getTurnDeployed(ship); //carries the 999 surrender sentinel
         return (depTurn > 1) ? depTurn - 1 : depTurn;
+    },
+
+
+    /* REINFORCEMENTS_PLAN.md STAGE 7 - is this unit coming out of hyperspace THIS turn? The mirror
+       of JumpEngine::isArrivingReinforcement, and the predicate every Stage 7 branch on this side
+       keys off: the one legal hex, the stacking bypass, the forced facing, the optional placement.
+
+       Note what it is NOT the complement of. `reinforcement && arrivalTurn == null` is HYPERSPACE
+       (the server's isReinforcement); this is the single turn between that and being an ordinary
+       deployed ship. A unit that arrived on an earlier turn must answer false, or it would be
+       offered for re-placement every Deployment phase for the rest of the game. */
+    isArrivingReinforcement: function isArrivingReinforcement(ship) {
+        if (!ship || ship.reinforcement !== true) return false;
+        if (ship.arrivalTurn === null || ship.arrivalTurn === undefined) return false;
+
+        return (parseInt(ship.arrivalTurn, 10) === gamedata.turn);
     },
 
 

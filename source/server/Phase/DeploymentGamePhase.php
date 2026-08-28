@@ -104,12 +104,87 @@ class DeploymentGamePhase implements Phase
             $dbManager->insertMovement($gameData->id, $shipid, $move);
         }
 
+        //REINFORCEMENTS_PLAN.md Stage 7: whatever the player chose NOT to bring through goes back
+        //to hyperspace. AFTER the movement writes and after the note loops above - see the method.
+        self::releaseUnplacedReinforcements($gameData, $dbManager, $dockedFlightIds);
+
         $dbManager->updatePlayerStatus($gameData->id, $gameData->forPlayer, $gameData->phase, $gameData->turn);
         $dbManager->setPlayerWaitingStatus($gameData->forPlayer, $gameData->id, true);
     }
 
+    /* REINFORCEMENTS_PLAN.md STAGE 7 - WHAT THE PLAYER DID NOT BRING THROUGH GOES BACK (plan §2.4).
+     *
+     * Placement is optional, so a wave of four can arrive as a wave of two. The two left behind are
+     * not stranded and nothing about them is spent: both arrival fields are cleared, which puts them
+     * straight back where they were before the entrance formed - `reinforcement` with a NULL
+     * arrivalturn, which is exactly what BaseShip::isReinforcement() means by "in hyperspace". They
+     * are concealed from the enemy again by hideHyperspaceReinforcements, they answer 999 to both
+     * turn accessors, and they can be named on the manifest of the next entrance anybody opens.
+     *
+     * ⚠️ arrivalTurn MUST BE CLEARED, not just arrivalVia. Left set, the unit reads as an ordinary
+     * ship that deployed on a turn now in the past - on the board, shootable, EW-relevant, and
+     * standing at the off-map 'start' marker its slot gave it, for the rest of the game. §2.4 says
+     * "goes back to unassigned"; this is the whole of what that has to mean.
+     *
+     * ⚠️ RUN AFTER generateIndividualNotes, NOT BEFORE. A reinforcement carrier's fighters dock at
+     * deploy start rather than being placed, and that block resolves during the note loops above by
+     * asking the SERVER-side flight for its turns (HangarOps::validateDeployBayOrders). Released
+     * first, the flight would answer 999 and its own dock would refuse it. The $dockedFlightIds
+     * exemption below covers the same case from the other side - a docked unit is aboard, which is
+     * an arrival, and it deliberately writes no movement of its own.
+     *
+     * Ship-entrance only, which is all Stage 7 has: a ship's doorway closes at the end of the turn
+     * it is used on, so there is never a berth worth keeping. §2.4's "keeps its berth if the
+     * entrance will still be open next turn" is a GATE rule and belongs to Stage 8 - the test to
+     * add there is on the vortex's remaining hold, not on this unit.
+     *
+     * $dbManager is deliberately UNTYPED, matching JumpEngine::spawnEntranceVortices - it is what
+     * lets the Stage 7 harness drive this with a write-capturing stub and prove the release against
+     * real recorded games with zero database writes. */
+    private static function releaseUnplacedReinforcements(TacGamedata $gamedata, $dbManager,
+                                                          array $dockedFlightIds = array())
+    {
+        foreach ($gamedata->ships as $unit)
+        {
+            if ($unit->userid != $gamedata->forPlayer) continue;
+            if (!JumpEngine::isArrivingReinforcement($unit, $gamedata)) continue;
+            if (isset($dockedFlightIds[(int)$unit->id])) continue;   //arrived into a hangar - see above
+            if ($unit->removed) continue;                            //already docked/absorbed this pass
+            if ($unit->isDestroyed()) continue;                      //a wreck has nowhere to go back to
+
+            //validateDeployment pushes each accepted move onto the SERVER-side ship, so this reads
+            //what was actually committed a moment ago rather than what the client claimed.
+            $placed = false;
+            foreach ($unit->movement as $move){
+                if ($move->type == "deploy" && $move->turn == $gamedata->turn) { $placed = true; break; }
+            }
+            if ($placed) continue;
+
+            $unit->arrivalTurn = null;
+            $unit->arrivalVia  = null;
+            $dbManager->setShipArrivalTurn($unit->id, null);
+            $dbManager->setShipArrivalVia($unit->id, null);
+
+            Debug::log("Jump point entrance: ship {$unit->id} was not placed and returns to hyperspace "
+                . "(game {$gamedata->id}, turn {$gamedata->turn}).");
+        }
+    }
+
     private static function validateDeploymentArea($gamedata, $ship, $move){
         if($ship->isTerrain()) return true; //When manually placing Terrain, they can go anywhere.
+
+        /* REINFORCEMENTS_PLAN.md STAGE 7 - a unit coming out of hyperspace ignores its slot's
+           deployment box entirely and may stand in exactly one hex: the jump point entrance it is
+           riding (plan §2.4). Taken BEFORE the box/distance branches and returning outright, because
+           the box would say yes to a hex nowhere near the doorway - a reinforcement's slot is an
+           ordinary slot and its box is wherever the fleet started.
+           ⚠️ $ship here is already the SERVER-side ship: validateDeployment resolves it through
+           getShipById before calling this, which is what makes the arrival test answerable at all
+           (a POST-side unit carries neither $reinforcement nor $arrivalTurn - plan trap 3). */
+        if (JumpEngine::isArrivingReinforcement($ship, $gamedata)) {
+            return self::validateReinforcementArrival($gamedata, $ship, $move);
+        }
+
         $slot = $gamedata->slots[$ship->slot];
         $hexpos = Mathlib::hexCoToPixel($move->position);
 
@@ -162,6 +237,46 @@ class DeploymentGamePhase implements Phase
 
         return false;
 
+    }
+
+    /* REINFORCEMENTS_PLAN.md STAGE 7 - ONE HEX AND ONE FACING (plan §2.4).
+     *
+     * A reinforcement arrives THROUGH a doorway, so the doorway is the whole of its legal placement:
+     * the entrance's hex, on the entrance's facing, or nowhere. There is no box, no distance and no
+     * enemy-proximity rule to apply - the deviation roll already decided where the hex is, and a
+     * player who dislikes where it landed may leave the unit in hyperspace instead (which is what
+     * the partial-commit exemption in validateDeployment is for).
+     *
+     * ⭐ THE FACING IS CHECKED AND NOT MERELY FORCED. The client sets it when the unit is placed
+     * (shipManager.movement.deploy) and refuses to turn it (canTurn), but the client is not the
+     * authority: a submitted move carries whatever facing it carries, and arriving on a heading of
+     * one's choosing is a real advantage. HEADING as well as facing, because they are set together
+     * on arrival and the Movement phase reads heading to decide which way the unit is travelling.
+     *
+     * ⚠️ NO STACKING TEST HERE, deliberately. A whole wave comes through one hex (§2.4) and the
+     * server has never had a one-ship-per-hex deployment rule anyway - that block lives entirely in
+     * the client's onHexClicked, which Stage 7 exempts. Do not "restore" it here.
+     *
+     * ⚠️ COMPARE THE ORDINATES, never a distance. OffsetCoordinate::distanceTo returns a FLOAT
+     * (CubeCoordinate rounds, and round() returns float in PHP), so `$d === 0` is false for a unit
+     * standing exactly on the spot - the trap Stage 6 recorded and the shape of rule this is. */
+    private static function validateReinforcementArrival($gamedata, $ship, $move) {
+        $vortex = JumpEngine::getArrivalVortex($ship, $gamedata);
+
+        //No doorway: the entrance closed, was never formed, or the berth names something that is
+        //not one. Nothing on the board is a legal hex for this unit, so refuse rather than fall
+        //through to a slot box it has no business standing in.
+        if ($vortex === null) return false;
+
+        $hex = $vortex->getHexPos();
+        if ((int)$move->position->q !== (int)$hex->q) return false;
+        if ((int)$move->position->r !== (int)$hex->r) return false;
+
+        $facing = (int)$vortex->getLastMovement()->facing;
+        if ((int)$move->facing !== $facing) return false;
+        if ((int)$move->heading !== $facing) return false;
+
+        return true;
     }
 
     private static function validateMineDeploymentArea($gamedata, $ship, $move, $hexpos, $hexWidth, $hexHeight) {
@@ -252,7 +367,18 @@ class DeploymentGamePhase implements Phase
                 }
             }
 
-            if (!$found && $placeTurn == $gamedata->turn) //Throw if not found and slot is placing this turn.
+            /* REINFORCEMENTS_PLAN.md STAGE 7 - PLACEMENT IS OPTIONAL FOR AN ARRIVAL (plan §2.4).
+               A player may bring some of a wave through and leave the rest in hyperspace - the
+               deviation may have put the doorway somewhere they would rather not stand, or they may
+               simply want to hold a unit back - so a missing deploy entry is a legal answer here,
+               where for every other unit it is a broken submission. What the unit loses by staying
+               is its berth, and releaseUnplacedReinforcements is what takes it.
+               ⚠️ ASKED OF $servership. The POST-side $ship carries no $arrivalTurn (trap 3), so the
+               exemption would never fire and the first player to leave a unit behind would have
+               their whole submission rejected. */
+            $arriving = ($servership !== null && JumpEngine::isArrivingReinforcement($servership, $gamedata));
+
+            if (!$found && $placeTurn == $gamedata->turn && !$arriving) //Throw if not found and slot is placing this turn.
                 throw new Exception("Deployment validation failed: Entry not found for ship $ship->name.");
 
             $shipIdMoves[$ship->id] = $moves;

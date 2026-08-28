@@ -29,12 +29,23 @@ window.DeploymentPhaseStrategy = function () {
 
         combatLog.onTurnStart();
         infowindow.informPhase(5000, null);
+
+        /* REINFORCEMENTS_PLAN.md Stage 7 - THE WAVE PLACES ITSELF (user request 2026-08-28).
+           BEFORE selectFirstOwnShipOrActiveShip, so the selection lands on a unit that is already
+           standing in its doorway and its movement UI (the speed arrows) draws straight away. */
+        var arrived = this.autoPlaceArrivingReinforcements();
+
         this.selectFirstOwnShipOrActiveShip();
 
         showEnemyDeploymentAreas(this.deploymentSprites, gamedata);
         showAlliedDeploymentAreas(this.deploymentSprites, gamedata);
 
-        this.setPhaseHeader("DEPLOYMENT");
+        //Say WHY there is nothing to place when the whole phase was a wave arriving. Only when
+        //there is genuinely nothing else outstanding - a late slot placing on the same turn still
+        //has real deployment to do and the header must not claim otherwise.
+        this.setPhaseHeader(arrived.length > 0 && onlyOptionalPlacementsRemain(gamedata)
+            ? "DEPLOYMENT: REINFORCEMENTS"
+            : "DEPLOYMENT");
 
         //Show commit button Deployment Phase if player has no ships to deploy this turn, should never actually happen as server will skip Deployment Phases for these slots.
         if (!shipManager.hasShipsToDeployThisTurn(gamedata.thisplayer)) {
@@ -49,10 +60,42 @@ window.DeploymentPhaseStrategy = function () {
                 $(".confirmok").trigger("click");
             }, 50); // Adjust delay if needed */
 
+        } else if (onlyOptionalPlacementsRemain(gamedata)) {
+            /* ⭐ REINFORCEMENTS_PLAN.md STAGE 7 - A PHASE WITH NO CLICK LEFT IN IT STILL HAS TO BE
+               COMMITTABLE. The commit button is otherwise armed in exactly one place - onHexClicked,
+               after a successful placement - which is right while every unit in the phase has to be
+               placed by hand, and a dead end the moment none of them does. Both Stage 7 cases land
+               here: a wave that autoPlaceArrivingReinforcements has just put on the board (nothing
+               left to click), and the failure case of one whose doorway could not be resolved, which
+               stays in hyperspace and must not hold the phase hostage.
+               Deliberately not just `validateAllDeployment`: on turn 1 every ship sits at its
+               slot's box centre, which validates, so that alone would arm the button before
+               anybody had placed anything. */
+            gamedata.showCommitButton();
         }
 
         return this;
     };
+
+    /* Is every placement still outstanding an OPTIONAL one? Used only to arm the commit button
+       above. Anything with a placement turn of THIS turn that has not been placed and is not one
+       of the three optional kinds - a reinforcement arriving through a jump point, a flight queued
+       for a deploy-start hangar dock, an LCV queued for a rail - is mandatory, and the phase is not
+       finishable until it is on the board. */
+    function onlyOptionalPlacementsRemain(gamedata) {
+        for (var i in gamedata.ships) {
+            var ship = gamedata.ships[i];
+            if (!gamedata.isMyShip(ship)) continue;
+            if (shipManager.getTurnPlaced(ship) != gamedata.turn) continue;
+            if (ship.deploymove) continue;                                   //already placed this phase
+            if (ship.pendingDeployDock || ship.pendingLcvDeployDock) continue;
+            if (shipManager.isArrivingReinforcement(ship)) continue;
+
+            return false;
+        }
+
+        return true;
+    }
 
     DeploymentPhaseStrategy.prototype.deactivate = function () {
         PhaseStrategy.prototype.deactivate.call(this);
@@ -72,6 +115,79 @@ window.DeploymentPhaseStrategy = function () {
         //You can refresh screen if player has no ships, but not sure it's really necessary.        
         //if(!shipManager.playerHasDeployedShips(gamedata.thisplayer)) window.location.reload(); 
     };
+
+    /* ⭐ REINFORCEMENTS_PLAN.md STAGE 7 - AN ARRIVAL PLACES ITSELF (user request 2026-08-28).
+     *
+     * There was never a choice to make. A reinforcement may stand in exactly one hex on exactly one
+     * facing - the jump point it is riding decided both, a turn ago and by dice - so asking the
+     * player to click that hex was ceremony, and ceremony that misbehaved: the doorway is Terrain,
+     * so every click on it fired "You cannot deploy on terrain." (harmless, since the arrival
+     * bypasses the block, but it popped up on every single unit of every wave). Placing them here
+     * removes the click, the message and the "find the icon at the off-map start marker" hunt in
+     * one go. Returns the units it placed.
+     *
+     * ⭐ SPEED IS STILL THE PLAYER'S. shipManager.movement.deploy carries the unit's existing speed
+     * onto the deploy move and canChangeSpeed already allows the 0-10 accel arrows during
+     * Deployment, so the phase keeps the one decision that was ever real (§2.4).
+     *
+     * ⚠️ THE `deploy` MOVE IS NOT PERSISTED UNTIL COMMIT, so this runs against a ship that has only
+     * its off-board `start` row. The two guards are what stop a SECOND deploy row being added to a
+     * unit that already has one - `deploymove` for a re-activate inside this page load, and the
+     * movement scan for a reload after the phase was committed. validateDeployment throws
+     * "Found more than one deployment entry" on a duplicate, which would take the whole submission
+     * down.
+     *
+     * ⚠️ A UNIT WITH NO DOORWAY IS LEFT ALONE, deliberately, and every downstream path already
+     * handles it: validateAllDeployment skips it so the commit button still arms, the phase -1
+     * commit warning names it, and DeploymentGamePhase::releaseUnplacedReinforcements sends it back
+     * to hyperspace with nothing spent. That is the only route by which a reinforcement can now
+     * fail to arrive, so it must stay open. */
+    DeploymentPhaseStrategy.prototype.autoPlaceArrivingReinforcements = function () {
+        var placed = [];
+
+        for (var i in gamedata.ships) {
+            var ship = gamedata.ships[i];
+
+            if (!gamedata.isMyShip(ship)) continue;
+            if (!shipManager.isArrivingReinforcement(ship)) continue;
+            if (shipManager.isDestroyed(ship)) continue;
+            //Both hangar routes arrive INTO a hold and take no hex of their own.
+            if (ship.pendingDeployDock || ship.pendingLcvDeployDock) continue;
+            if (ship.deploymove) continue;                //already placed in this page load
+            if (hasDeployMoveThisTurn(ship)) continue;    //...or on a load after the commit
+
+            var vortex = shipManager.movement.getArrivalVortex(ship);
+            if (!vortex) continue;
+
+            //deploy() reads the facing off the same vortex, so the hex and the heading cannot
+            //disagree - see shipManager.movement.deploy.
+            shipManager.movement.deploy(ship, new hexagon.Offset(shipManager.getShipPosition(vortex)));
+            placed.push(ship);
+
+            //onShipMovementChanged goes straight to getByShip(...).consumeMovement, which throws on
+            //a unit with no icon. One should always exist here (shouldBeHidden is false for an
+            //arrival on its own turn), but the placement itself is the part that must not be lost
+            //to a rendering accident - so the move is made first and the repaint is guarded.
+            if (this.shipIconContainer && this.shipIconContainer.getByShip(ship)) {
+                this.onShipMovementChanged({ ship: ship });
+            }
+        }
+
+        return placed;
+    };
+
+    //A deploy row already committed for THIS turn, as the server counts them
+    //(DeploymentGamePhase::releaseUnplacedReinforcements asks the same question of the same rows).
+    function hasDeployMoveThisTurn(ship) {
+        if (!ship.movement) return false;
+
+        for (var i = 0; i < ship.movement.length; i++) {
+            var move = ship.movement[i];
+            if (move.type === "deploy" && move.turn == gamedata.turn) return true;
+        }
+
+        return false;
+    }
 
     DeploymentPhaseStrategy.prototype.selectFirstOwnShipOrActiveShip = function () {
         var ship = gamedata.getFirstFriendlyShipDeployment();
@@ -111,7 +227,20 @@ window.DeploymentPhaseStrategy = function () {
             var selIsLcvUnit = !this.selectedShip.flight && !this.selectedShip.mine
                 && String(this.selectedShip.hangarRequired || '').toLowerCase() === 'lcvs';
 
-            if (hasTerrain) {
+            /* REINFORCEMENTS_PLAN.md STAGE 7 - AN ARRIVAL BYPASSES BOTH BLOCKS, and it is not an
+               optional nicety either way (plan §2.4).
+
+               The terrain block would refuse it outright: the vortex IS terrain, and it is standing
+               in the only hex this unit is allowed to occupy - so without this exemption a
+               reinforcement could never be placed anywhere at all.
+
+               The one-ship-per-hex block has to go too, because a whole wave comes through one
+               doorway and they stack there freely until they separate on their first movement. The
+               server has no such rule to relax (validateReinforcementArrival tests the hex and the
+               facing and nothing else), so this is the only place it lives. */
+            if (shipManager.isArrivingReinforcement(this.selectedShip)) {
+                isBlocked = false;
+            } else if (hasTerrain) {
                 isBlocked = true;
             } else if (!(this.selectedShip.mine || this.selectedShip.flight || selIsLcvUnit)) {
                 isBlocked = shipsInHex.some(function (s) { return !(s.mine || s.flight); });
@@ -140,7 +269,10 @@ window.DeploymentPhaseStrategy = function () {
         if (payload && payload.shiftKey && this.selectedShip
             && shipManager.getTurnPlaced(this.selectedShip) >= gamedata.turn
             && validateDeploymentPosition(this.selectedShip, payload.hex, this.deploymentSprites)) {
-            var selIsFighterMine = this.selectedShip.mine || this.selectedShip.flight;
+            //REINFORCEMENTS_PLAN.md Stage 7: a whole wave stacks in one hex by rule, so shift-click
+            //straight past the picker for an arrival too - the same convenience a fighter gets.
+            var selIsFighterMine = this.selectedShip.mine || this.selectedShip.flight
+                || shipManager.isArrivingReinforcement(this.selectedShip);
             var allStackedFighterMine = ships.every(function (s) {
                 return s.id === this.selectedShip.id || s.mine || s.flight;
             }, this);
@@ -212,8 +344,15 @@ window.DeploymentPhaseStrategy = function () {
             var selIsLcvUnit = !this.selectedShip.flight && !this.selectedShip.mine
                 && String(this.selectedShip.hangarRequired || '').toLowerCase() === 'lcvs';
 
+            /* REINFORCEMENTS_PLAN.md STAGE 7 - AND AN ARRIVAL, for the reason the LCV is here.
+               A wave shares one hex, so from the SECOND unit onward every click on the doorway
+               lands on a shipmate already standing in it. Without this the click falls through to
+               the plain "select that ship" branch further down and the rest of the wave can never
+               be placed at all - the stacking bypass in onHexClicked is never even reached. */
+            var selIsArrival = shipManager.isArrivingReinforcement(this.selectedShip);
+
             var isTerrain = gamedata.isTerrain(ship.shipSizeClass, ship.userid) || (ship.Huge > 0 && ship.Huge <= 3);
-            if (!isTerrain && isPlacedOnMap && (this.selectedShip.mine || this.selectedShip.flight || ship.mine || ship.flight || selIsLcvUnit)) {
+            if (!isTerrain && isPlacedOnMap && (this.selectedShip.mine || this.selectedShip.flight || ship.mine || ship.flight || selIsLcvUnit || selIsArrival)) {
                 // Ensure we only ever show the deployment stacking pop-up if the clicked location is actually 
                 // a valid, legal deployment drop for our CURRENTLY selected piece.
                 // This implicitly strips the pop-up out of the "deployment bay" clicking interaction.
@@ -227,13 +366,42 @@ window.DeploymentPhaseStrategy = function () {
                         // Shift+Click: skip the "Deploy here" popup and place directly on this hex.
                         // Allowed when the selected unit is a fighter/mine, or when the only thing in
                         // the hex (other than terrain, already excluded above) is a fighter/mine.
-                        if (payload.shiftKey && (this.selectedShip.mine || this.selectedShip.flight || ship.mine || ship.flight)) {
+                        if (payload.shiftKey && (this.selectedShip.mine || this.selectedShip.flight || ship.mine || ship.flight || selIsArrival)) {
                             this.onHexClicked(payload);
                             return;
                         }
                         this.showSelectFromShips([ship], payload);
                         return;
                     } else {
+                        /* ⭐ REINFORCEMENTS_PLAN.md STAGE 7a - AUTO-PLACEMENT PUT THE FLIGHT IN THE
+                           CARRIER'S HEX, AND THAT BROKE THE DOCK GESTURE (user report 2026-08-28,
+                           game 4318). "Select the flight, click the carrier" is how a fighter is
+                           deploy-docked, and it works by falling into the SelectFromShips branch
+                           above - which is reached only when the two are in DIFFERENT hexes. Before
+                           Stage 7a an arriving flight sat at its own off-map start marker, so it
+                           always was; now the whole wave is auto-placed in one doorway, every click
+                           on the carrier lands on the hex the flight is already standing in, and
+                           this branch swallowed it into a plain selection swap. The DOCK button
+                           became unreachable, which left the carrier's tooltip button as the only
+                           route in - the user's report.
+
+                           Scoped to an arriving reinforcement FLIGHT deliberately: that is the only
+                           case Stage 7a created. Two units that merely happen to share a hex on
+                           turn 1 keep the old selection-swap, which is what a player expects when
+                           nothing put them there automatically.
+
+                           The picker decides for itself whether a DOCK is actually on offer (it
+                           re-runs eligibleHangarsForFlight), so a carrier with no room simply shows
+                           the ship list - it never claims a dock that would be refused. */
+                        if (selIsArrival && this.selectedShip.flight
+                            && window.DeploymentDock
+                            && typeof window.DeploymentDock.shipHasOpenableDockDialog === 'function'
+                            && window.DeploymentDock.shipHasOpenableDockDialog(ship)
+                            && window.DeploymentDock.arrivesOnSameTurn(ship, this.selectedShip)) {
+                            this.showSelectFromShips([ship], payload);
+                            return;
+                        }
+
                         // The selected ship is indeed legally placed, but it's ALREADY in the hex we clicked on.
                         // We shouldn't show a deploy menu or fall through to auto-deploy. We simply swap the selection.
                         this.selectShip(ship, payload);
@@ -344,6 +512,13 @@ window.DeploymentPhaseStrategy = function () {
     }
 
     function showDeploymentArea(ship, deploymentSprites, gamedata) {
+        /* REINFORCEMENTS_PLAN.md STAGE 7 - an arrival's slot box is a LIE and must not be drawn.
+           Its legal area is one hex on the far side of the map (the jump point entrance), and
+           lighting up the fleet's original deployment rectangle would point the player at the one
+           place they definitely cannot go. The blue entrance vortex is already on the board with
+           its outward-pointing arrow, so the cue this replaces is there without drawing anything. */
+        if (shipManager.isArrivingReinforcement(ship)) return;
+
         var icon = getSlotById(ship.slot, deploymentSprites);
         if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
             icon.terrainSprite.show();
@@ -579,6 +754,18 @@ window.DeploymentPhaseStrategy = function () {
             //hex position — it starts docked on the carrier.
             if (ship.pendingLcvDeployDock) continue;
 
+            /* REINFORCEMENTS_PLAN.md STAGE 7 - PLACEMENT IS OPTIONAL FOR AN ARRIVAL (plan §2.4), so
+               an unplaced one must not hold the commit button hostage. It is the player's right to
+               leave part of a wave in hyperspace - the deviation may have put the doorway somewhere
+               they would rather not stand - and what they give up by doing so is the berth, which
+               DeploymentGamePhase::releaseUnplacedReinforcements takes on commit.
+               ⚠️ THE `deploymove` TEST IS LOAD-BEARING, not a shortcut. Without it the call below
+               would validate the unit's 'start' position - the off-map deployment-box centre every
+               ship is given - against the entrance hex, fail, and the commit button would never
+               arm for anybody who chose to leave a unit behind. A PLACED arrival still falls
+               through and is validated normally. */
+            if (shipManager.isArrivingReinforcement(ship) && !ship.deploymove) continue;
+
             if (!validateDeploymentPosition(ship, null, deploymentSprites)) {
                 return false;
             }
@@ -591,6 +778,20 @@ window.DeploymentPhaseStrategy = function () {
         if (!hex) {
             hex = new hexagon.Offset(shipManager.getShipPosition(ship));
         }
+        /* REINFORCEMENTS_PLAN.md STAGE 7 - a unit arriving out of hyperspace has exactly ONE legal
+           hex: the jump point entrance it is riding (plan §2.4). Its slot's deployment box is
+           irrelevant and would say yes to a hex nowhere near the doorway, so this is taken first
+           and returns outright. Mirrors DeploymentGamePhase::validateReinforcementArrival, minus
+           the facing half - the facing is not a choice on this side (movement.deploy sets it and
+           canTurn refuses to change it), so there is nothing here to validate. */
+        if (shipManager.isArrivingReinforcement(ship)) {
+            var entrance = shipManager.movement.getArrivalVortex(ship);
+            if (!entrance) return false;
+
+            var entranceHex = new hexagon.Offset(shipManager.getShipPosition(entrance));
+            return (entranceHex.q == hex.q && entranceHex.r == hex.r);
+        }
+
         if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {//return true;
             return validateTerrainDeployment(hex);
         } else if (ship.mine) {

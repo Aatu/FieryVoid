@@ -282,10 +282,63 @@ window.ReinforcementEntry = (function () {
     }
 
     function deactivate() {
+        //Every teardown path goes through here - the menu's Choose Hex, the button's Cancel, the
+        //phase strategy dropping the mode - so this is where the map stops pointing at a row
+        //nobody is looking at any more. ABOVE the early return, which guards only the banner half.
+        highlight(null);
+
         if (_openerId === null) return;
         _openerId = null;
         hideBanner();
         gamedata.drawIniGUI();
+    }
+
+    /* ⭐ THE DECLARED ENTRANCE THE MENU IS CURRENTLY POINTING AT, BY OPENER ID (user request
+       2026-08-28). Null - the value at every moment the menu is not open - means "point at
+       nothing", and every marker draws in its ordinary blue.
+
+       WHY IT EXISTS: a fleet with three drives puts three identical blue "Jump Point Forming"
+       markers on the map, and a row reading `hex 4,-2 — 3 units` cannot tell you WHICH of them
+       belongs to the unit you are about to withdraw. Selecting a declared row now names its own
+       marker on the map - white, with the opener's name written into the hex - so the answer is
+       a glance rather than an arithmetic.
+
+       ⚠️ AN ID AND NEVER A SHIP OBJECT, for the reason _openerId carries at the top of this file:
+       every poll replaces every entry of gamedata.ships.
+
+       ⚠️ AN INT. The value arrives from `$(...).val()`, which is a STRING, and it is compared with
+       `===` here (to skip a pointless rebuild) and against `order.shooterid` in the renderer. One
+       normalisation, at the door. */
+    var _highlightId = null;
+
+    function getHighlightedOpener() {
+        return _highlightId;
+    }
+
+    /* Point the map at one unit's declared entrance, or - for null, an unknown id, or a unit with
+       no declaration of its own - at nothing. The marker itself is drawn by
+       BallisticIconContainer.generateEntranceHexes, which asks getHighlightedOpener() as it goes.
+
+       ⚠️ THE EVENT CARRIES NO SHOOTER, deliberately. Firing 'HexTargeted' is how this asks for the
+       ballistic icons to be rebuilt (PhaseStrategy.onHexTargeted, the same event withdraw() uses),
+       but that handler then compares `payload.shooter` with the SELECTED ship - and selectedShip
+       is null when nothing is selected, so a `shooter: null` would rebuild the weapon list for a
+       ship that does not exist. An absent property matches neither a null nor a ship.
+       webglScene.customEvent calls requestRender() itself, so the idle-gated render loop wakes
+       without a second call ([[arch_render_loop_idle_gating]]). */
+    function highlight(shipId) {
+        var id = null;
+
+        if (shipId !== null && shipId !== undefined) {
+            var parsed = parseInt(shipId, 10);
+            var ship = isNaN(parsed) ? null : gamedata.getShip(parsed);
+            if (ship && declarationOn(ship)) id = parsed;
+        }
+
+        if (_highlightId === id) return;   //the change handler fires on every click on a row
+
+        _highlightId = id;
+        webglScene.customEvent('HexTargeted', { hexagon: null });
     }
 
     /* The one instruction the mode needs, as a plain anchored strip rather than anything on the
@@ -511,6 +564,9 @@ window.ReinforcementEntry = (function () {
             + "marked; one already booked to ride somebody else's is greyed out.",
             "", "Choose Hex");
 
+        //Wider than the rest of the .fleetDialog family - see .reinforcementDialog in tactical.css.
+        e.addClass("reinforcementDialog");
+
         /* THE LIST IS RE-RENDERED IN PLACE, NEVER REBUILT. Withdrawing used to close the whole
            window (user request 2026-08-28), which made "move my jump point" three gestures -
            withdraw, reopen the menu, find the unit again - and hid the one thing the withdrawal
@@ -529,6 +585,13 @@ window.ReinforcementEntry = (function () {
             var checked = $("input[name='reinforcementOpener']:checked", e);
             var declared = checked.length > 0 && checked.attr("data-declared") === '1';
             $(".confirmok", e).attr("data-label", declared ? "Withdraw Jump Point" : "Choose Hex");
+
+            /* AND THE MAP FOLLOWS THE SELECTION (user request 2026-08-28). The same `declared`
+               answer that picks the button's label picks whether there is anything to point at:
+               a row with no declaration owns no marker, so the highlight clears rather than
+               pointing somewhere arbitrary. Every re-render calls this, so a withdrawal drops the
+               highlight in the same breath as it drops the OPENING tag. */
+            highlight(declared ? checked.val() : null);
         }
 
         //DELEGATED on the dialog root and bound ONCE: render() replaces every row, so a handler
@@ -543,7 +606,7 @@ window.ReinforcementEntry = (function () {
             //re-read off the live object: both can have been replaced by a poll while the dialog
             //was open, and acting on a discarded copy would silently do nothing at all.
             var live = gamedata.getShip(id);
-            if (!live || !isMine(live)) { e.remove(); return; }
+            if (!live || !isMine(live)) { highlight(null); e.remove(); return; }
 
             if (declarationOn(live)) {
                 withdraw(live);
@@ -555,20 +618,35 @@ window.ReinforcementEntry = (function () {
             activate(live);
         });
 
-        $(".confirmcancel", e).on("click", function () { e.remove(); });
+        //highlight(null) here and not only in deactivate(): closing the menu with Cancel arms
+        //nothing, so deactivate() is never reached on this path.
+        $(".confirmcancel", e).on("click", function () { highlight(null); e.remove(); });
 
         render(null);
         e.appendTo("body").fadeIn(250);
     }
 
-    /* One row per jump-capable unit in hyperspace, in whatever state it is in RIGHT NOW - which
-       is why this re-reads gamedata on every call rather than closing over a list.
+    /* THE WHOLE WAVE, IN TWO GROUPS (user request 2026-08-28). Every unit of mine still in
+       hyperspace appears, in whatever state it is in RIGHT NOW - which is why this re-reads
+       gamedata on every call rather than closing over a list.
+
+         JUMP-CAPABLE units come first and are the only selectable rows: they are what the dialog
+         is FOR, since only a drive can open a doorway.
+
+         PASSENGERS - a reinforcement with no jump engine of its own - follow underneath, greyed
+         and unselectable. They used to be invisible here, which made the menu quietly misreport
+         the fleet: a player looking at two jump-capable hulls had no way to see the four fighters
+         waiting behind them, and the stranding warning at commit time was the first mention they
+         ever got. They are listed for AWARENESS, not for choice - a passenger cannot open
+         anything, so it can never be the answer to "whose drive do you want to work with?".
 
        $selectedId is the unit to leave checked if it is still selectable; null means "the first
        one that is".
 
        ⚠️ A GREYED ROW IS NEVER PRE-CHECKED. Its radio is disabled, so a player who wanted a
-       different unit could not move the selection off it - the dialog would be stuck. */
+       different unit could not move the selection off it - the dialog would be stuck. And
+       pickIndex indexes the JUMP-CAPABLE rows alone: the passenger group is appended after the
+       selection has already been decided, so it cannot shift it. */
     function openerRowsHtml(selectedId) {
         var rows = openerCandidates().map(function (ship) {
             return { ship: ship, order: declarationOn(ship), host: ridingWith(ship) };
@@ -584,7 +662,7 @@ window.ReinforcementEntry = (function () {
             }
         }
 
-        return rows.map(function (row, i) {
+        var html = rows.map(function (row, i) {
             var ship = row.ship;
             var riders = row.order ? manifestOf(ship.id).length : 0;
 
@@ -600,12 +678,52 @@ window.ReinforcementEntry = (function () {
                 + ' data-declared="' + (row.order ? '1' : '0') + '"'
                 + (row.host ? ' disabled' : '')
                 + (i === pickIndex ? ' checked' : '') + '>'
+                + '<span class="reinforcementRowMain">'
                 + '<span class="reinforcementRowName">' + ship.name + '</span>'
                 + (row.order ? '<span class="reinforcementRowTag">OPENING</span>' : '')
                 + (row.host ? '<span class="reinforcementRowTag reinforcementRowTagRiding">RIDING</span>' : '')
+                + '</span>'
                 + '<span class="reinforcementRowClass">' + detail + '</span>'
                 + '</label>';
         }).join('');
+
+        return html + passengerRowsHtml();
+    }
+
+    /* THE SECOND GROUP: everything of mine in hyperspace with no drive of its own, under a heading
+       that divides the two - the dialog never opens with an empty first group
+       (manageReinforcements refuses outright), so the heading can never end up labelling the whole
+       list. No passengers, no heading and no change to the list this menu has always shown.
+
+       ⭐ A DIFFERENT RADIO NAME, not merely `disabled`. The OK handler reads
+       `input[name='reinforcementOpener']:checked`, and a passenger must never be able to answer
+       that question whatever a browser does with a disabled control - so these rows are not in
+       that group at all. They keep a radio rather than dropping it because the row is a flex line
+       that measures from the control: without one, every name here would hang a control-width to
+       the left of the names above them.
+
+       Each says which state it is in, in the same words the group above uses: riding somebody's
+       doorway, or nothing yet. */
+    function passengerRowsHtml() {
+        var passengers = myHyperspaceUnits().filter(function (ship) { return !canOpen(ship); });
+        if (passengers.length === 0) return '';
+
+        var rows = passengers.map(function (ship) {
+            var host = ridingWith(ship);
+
+            return '<label class="reinforcementRow reinforcementRowPassenger">'
+                + '<input type="radio" name="reinforcementPassenger" value="' + ship.id + '" disabled>'
+                + '<span class="reinforcementRowMain">'
+                + '<span class="reinforcementRowName">' + ship.name + '</span>'
+                + (host ? '<span class="reinforcementRowTag reinforcementRowTagRiding">RIDING</span>' : '')
+                + '</span>'
+                + '<span class="reinforcementRowClass">'
+                + (host ? 'riding ' + host.name : ship.shipClass) + '</span>'
+                + '</label>';
+        }).join('');
+
+        return '<div class="reinforcementRowHeading">No jump drive &mdash; they arrive as passengers</div>'
+            + rows;
     }
 
     /* WHO RIDES THROUGH. Any number, including none but the opener, and including units with no
@@ -630,7 +748,9 @@ window.ReinforcementEntry = (function () {
             return '<label class="reinforcementRow">'
                 + '<input type="checkbox" class="reinforcementRider" value="' + ship.id + '"'
                 + (ship.arrivalVia == opener.id ? ' checked' : '') + '>'
+                + '<span class="reinforcementRowMain">'
                 + '<span class="reinforcementRowName">' + ship.name + '</span>'
+                + '</span>'
                 + '<span class="reinforcementRowClass">' + ship.shipClass + '</span>'
                 + '</label>';
         }).join('');
@@ -639,6 +759,9 @@ window.ReinforcementEntry = (function () {
             "Jump Point Manifest",
             opener.name + " arrives through this jump point. Which others ride with it?",
             rows, "Confirm");
+
+        //Same width as the menu it was opened from - see .reinforcementDialog in tactical.css.
+        e.addClass("reinforcementDialog");
 
         //No cancel: the ORDER is already made by this point and the manifest is a separate choice.
         //Closing with nothing ticked is a legal answer (the opener comes through alone), so an
@@ -700,6 +823,7 @@ window.ReinforcementEntry = (function () {
         declarations: declarations,
         manifestOf: manifestOf,
         canOpen: canOpen,
+        getHighlightedOpener: getHighlightedOpener,
         jumpEngineOf: jumpEngineOf,
         myHyperspaceUnits: myHyperspaceUnits,
         strandedByCommit: strandedByCommit
