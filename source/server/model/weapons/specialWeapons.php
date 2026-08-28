@@ -9715,4 +9715,214 @@ class PlanetCrackerBeam extends Weapon{
 } //endof class PlanetCrackerBeam
 
 
+
+class NeutronBurst extends Weapon {
+    public $name        = "NeutronBurst";
+    public $displayName = "Neutron Burst";
+    public $iconPath    = "NeutronBlaster.png";
+    public $animation      = "laser";
+    public $animationColor = array(180, 255, 180);
+    public $damageType  = "Raking";
+    public $weaponClass = "Electromagnetic";
+    public $firingModes = array(1 => "Raking");
+    public $rangePenalty = 0.5;   // -5% per 2 hexes
+    public $loadingtime  = 1;
+    public $fireControl  = array(2, 5, 5);
+    public $uninterceptable = true;
+
+    // Tracks system+order pairs already processed for Shadow vessels
+    public $shadowEffectsApplied = array();
+    // Tracks turns on which structure power loss has already been applied
+    public $structurePowerLossApplied = array();
+
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
+        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        $this->animationExplosionScale = $this->dynamicScale(0, 2);
+    }
+
+    public function setSystemDataWindow($turn) {
+        parent::setSystemDataWindow($turn);
+        $this->data["Special"]  = "Electromagnetic class, Raking mode. Primordial technology — unaffected by advanced armor or EM resistance.";
+        $this->data["Special"] .= "<br>Structure hits: -2 power output for one turn (once per firing).";
+        $this->data["Special"] .= "<br>Capacitor hits: drains 2 stored power (no critical roll).";
+        $this->data["Special"] .= "<br>Weapon hits: system deactivated for one turn, requires manual reactivation. Power from deactivated system is lost for one turn.";
+        $this->data["Special"] .= "<br>Capacitor-using vessels: hitting a weapon also drains the capacitor by that weapon's minimum firing cost.";
+        $this->data["Special"] .= "<br>Non-weapon, non-powered system hits: +5 to critical roll (forced).";
+        $this->data["Special"] .= "<br>Fighter hits: forced dropout. Superheavy fighters: standard dropout roll.";
+        $this->data["Special"] .= "<br>All effects require at least 1 point of damage to trigger.";
+        $this->data["Special"] .= "<br>Shadow Association vessels: all effects apply even if damage is fully absorbed.";
+    }
+
+    public function getDamage($fireOrder)  { return Dice::d(10, 4) + 8; }
+    public function setMinDamage()         { $this->minDamage = 12; }
+    public function setMaxDamage()         { $this->maxDamage = 48; }
+
+    private function isShadow($ship) {
+        return isset($ship->faction) && $ship->faction === "Shadow Association";
+    }
+
+    // -------------------------------------------------------------------------
+    // Helper: get minimum capacitor firing cost for a given weapon system
+    // -------------------------------------------------------------------------
+    private function getMinCapacitorCost($system) {
+        // Weapons with powerRequiredArray: minimum is mode 1, power element
+        if (isset($system->powerRequiredArray[1][1])) {
+            return $system->powerRequiredArray[1][1];
+        }
+        // Discharge weapons: minimum cost from their single-shot drain
+        if ($system instanceof VorlonDischargeCannon) return 5;
+        if ($system instanceof VorlonDischargePulsar)  return 4;
+        if ($system instanceof VorlonDischargeGun)     return 2;
+        // Standard weapon with explicit powerReq
+        if ($system->powerReq > 0) return $system->powerReq;
+        return 0;
+    }
+
+    // -------------------------------------------------------------------------
+    // Core effects — applied per damaged system
+    // -------------------------------------------------------------------------
+    private function applyNeutronEffects($ship, $system, $damage, $gamedata, $fireOrder) {
+
+        // Effects require at least 1 point of damage
+        if ($damage < 1) return;
+
+        // --- Fighter hit ---
+        if ($system instanceof Fighter) {
+            if (!$ship->superheavy) {
+                $crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+                $crit->updated = true;
+                $crit->inEffect = true;
+                $system->setCritical($crit);
+                $fireOrder->pubnotes .= " DROPOUT! ";
+            } else {
+                $crits = array();
+                $crits = $system->testCritical($ship, $gamedata, $crits);
+                foreach ($crits as $crit) {
+                    $crit->updated = true;
+                }
+            }
+            return;
+        }
+
+        // --- Structure hit: -2 power for one turn (once per firing) ---
+        if ($system instanceof Structure) {
+            if (!in_array($gamedata->turn, $this->structurePowerLossApplied)) {
+                $this->structurePowerLossApplied[] = $gamedata->turn;
+                $capacitor = $ship->getSystemByName("PowerCapacitor");
+                if ($capacitor) {
+                    // Capacitor vessel: drain 2 from stored charge
+                    $capacitor->doDrawPower(2);
+                    $fireOrder->pubnotes .= " [Neutron Burst: -2 capacitor charge (structure)] ";
+                } else {
+                    // Reactor vessel: apply two one-turn OutputReduced1 criticals
+                    $reactor = $ship->getSystemByName("Reactor");
+                    if ($reactor) {
+                        $crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn, $gamedata->turn + 1);
+                        $crit->updated = true;
+                        $reactor->setCritical($crit);
+                        $crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn, $gamedata->turn + 1);
+                        $crit->updated = true;
+                        $reactor->setCritical($crit);
+                        $fireOrder->pubnotes .= " [Neutron Burst: -2 power output next turn] ";
+                    }
+                }
+            }
+            $system->forceCriticalRoll = true;
+            $system->critRollMod += 5;
+            return;
+        }
+
+        // --- Capacitor hit: drain 2 stored power, no critical roll ---
+        if ($system instanceof PowerCapacitor) {
+            $system->doDrawPower(2);
+            $fireOrder->pubnotes .= " [Neutron Burst: -2 capacitor charge] ";
+            return;
+        }
+
+        // --- Weapon hit: deactivate for one turn, power is lost ---
+        if ($system instanceof Weapon) {
+            $system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
+            $fireOrder->pubnotes .= " [Neutron Burst: weapon deactivated] ";
+
+            $capacitor = $ship->getSystemByName("PowerCapacitor");
+            if ($capacitor) {
+                // Capacitor vessel: drain powerReq (power loss) + minimum firing cost
+                $powerLoss = $system->powerReq; // 0 for Vorlon weapons, non-zero for others
+                $minCost   = $this->getMinCapacitorCost($system);
+                $totalDrain = $powerLoss + $minCost;
+                if ($totalDrain > 0) {
+                    $capacitor->doDrawPower($totalDrain);
+                    $fireOrder->pubnotes .= " [Neutron Burst: -{$totalDrain} capacitor charge] ";
+                }
+            } else {
+                // Reactor vessel: apply OutputReduced1 per point of powerReq
+                if ($system->powerReq > 0) {
+                    $reactor = $ship->getSystemByName("Reactor");
+                    if ($reactor) {
+                        for ($i = 0; $i < $system->powerReq; $i++) {
+                            $crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn, $gamedata->turn + 1);
+                            $crit->updated = true;
+                            $reactor->setCritical($crit);
+                        }
+                    }
+                }
+            }
+            // No forced critical roll — weapons roll normally
+            return;
+        }
+
+        // --- Non-weapon, non-powered system hit: forced +5 critical roll ---
+        // Covers engines, thrusters, sensors, C&C, etc.
+        if ($system->powerReq > 0 || (!empty($system->canOffLine))) {
+            $system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
+            $fireOrder->pubnotes .= " [Neutron Burst: system deactivated] ";
+            if ($system->powerReq > 0) {
+                $reactor = $ship->getSystemByName("Reactor");
+                if ($reactor) {
+                    for ($i = 0; $i < $system->powerReq; $i++) {
+                        $crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn, $gamedata->turn + 1);
+                        $crit->updated = true;
+                        $reactor->setCritical($crit);
+                    }
+                }
+            }
+            return;
+        }
+
+        // Truly non-powered system (structure excluded above): +5 forced crit
+        $system->forceCriticalRoll = true;
+        $system->critRollMod += 5;
+
+    } // end applyNeutronEffects
+
+    // -------------------------------------------------------------------------
+    // Shadow exception: apply effects before absorption so they always fire.
+    // -------------------------------------------------------------------------
+    public function beforeDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder) {
+        if ($this->isShadow($ship)) {
+            $key = $system->id . '_' . $fireOrder->id;
+            if (!in_array($key, $this->shadowEffectsApplied)) {
+                $this->shadowEffectsApplied[] = $key;
+                $this->applyNeutronEffects($ship, $system, $damage, $gamedata, $fireOrder);
+            }
+        }
+        return parent::beforeDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+    }
+
+    // -------------------------------------------------------------------------
+    // Normal hits: apply effects when damage lands.
+    // Shadow vessels: already handled in beforeDamagedSystem, skip here.
+    // -------------------------------------------------------------------------
+    public function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder) {
+        if (!$this->isShadow($ship)) {
+            $this->applyNeutronEffects($ship, $system, $damage, $gamedata, $fireOrder);
+        }
+        parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+    }
+
+} // end class NeutronBurst
+
+
+
+
 ?>

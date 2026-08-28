@@ -2234,5 +2234,177 @@ class HyperplasmaCutter extends Weapon{
 }//endof class HyperplasmaCutter
 
 
+
+class HyperplasmaMatrix extends Weapon {
+
+    public $name = "HyperplasmaMatrix";
+    public $displayName = "Hyperplasma Matrix";
+    public $iconPath = "HyperplasmaCutter.png";
+
+    public $damageType  = "Flash";
+    public $weaponClass = "Plasma";
+    public $firingModes = array(1 => "Flash");
+
+    public $raking       = 0;
+    public $rangePenalty = 1; // -5% per hex
+    public $loadingtime  = 1;
+    public $intercept    = 2; // -10% per fighter defensive intercept
+
+    public $animation      = "laser";
+    public $animationColor = array(200, 60, 220);
+
+    public $damageDice = array();
+
+	public $fireControl = array(0, 0, 0);
+
+    function __construct($startArc, $endArc, $dualMount = false) {
+        parent::__construct(array(0), 1, 0, $startArc, $endArc);
+    }
+
+    public function setSystemDataWindow($turn) {
+        parent::setSystemDataWindow($turn);
+        $this->data["Special"]  = "Plasma class, Flash mode. Fighter flight fires as a single combined weapon.";
+        $this->data["Special"] .= "<br>Damage: 2d6+12 base + 2d6 per additional surviving fighter in the flight.";
+        $this->data["Special"] .= "<br>Range penalty: -5% per hex.";
+        $this->data["Special"] .= "<br>The flight is immune to its own Flash splash damage when in the same hex as the target.";
+        $this->data["Special"] .= "<br>Defensive: each fighter generates an independent -10% intercept.";
+    }
+
+    // getUnit() returns the FighterFlight directly.
+    // FighterFlight->systems contains the individual Fighter objects.
+    private function getAliveFighterCount() {
+        $flight = $this->getUnit();
+        if (!$flight || !($flight instanceof FighterFlight)) return 1;
+        $count = 0;
+        foreach ($flight->systems as $fighter) {
+            if (!$fighter->isDestroyed()) $count++;
+        }
+        return max(1, $count);
+    }
+
+    // Damage = N * 2d6 + 12 where N = surviving fighters.
+    // Uses damageDice captured in beforeFiringOrderResolution when available,
+    // falls back to live count otherwise.
+    public function getDamage($fireOrder) {
+        if (isset($this->damageDice[$fireOrder->id])) {
+            return Dice::d(6, $this->damageDice[$fireOrder->id]) + 12;
+        }
+        $n = $this->getAliveFighterCount();
+        return Dice::d(6, $n * 2) + 12;
+    }
+
+    public function setMinDamage() { $this->minDamage = 14; } // 1 fighter: 2+12
+    public function setMaxDamage() { $this->maxDamage = 84; } // 6 fighters: 12+12
+
+    // Combine all fire orders from the flight into one primary shot.
+    // The lowest-ID HyperplasmaMatrix weapon with a fire order this turn
+    // becomes the primary. All others are nullified so they do not appear
+    // in the fire resolution log or trigger animations.
+    public function beforeFiringOrderResolution($gamedata) {
+        $flight = $this->getUnit();
+        if (!$flight || !($flight instanceof FighterFlight)) return;
+
+        // Find the lowest-ID HyperplasmaMatrix weapon across all alive fighters
+        // in the flight that has a normal fire order this turn.
+        $primaryWeapon  = null;
+        $primaryOrderId = null;
+
+        foreach ($flight->systems as $fighter) {
+            if ($fighter->isDestroyed()) continue;
+            foreach ($fighter->systems as $sys) {
+                if (!($sys instanceof HyperplasmaMatrix)) continue;
+                foreach ($sys->fireOrders as $order) {
+                    if ($order->type == 'normal' && $order->turn == $gamedata->turn) {
+                        if ($primaryWeapon === null || $sys->id < $primaryWeapon->id) {
+                            $primaryWeapon  = $sys;
+                            $primaryOrderId = $order->id;
+                        }
+                    }
+                }
+            }
+        }
+
+        if ($primaryWeapon === null) return;
+
+        // Process this weapon's orders
+        foreach ($this->fireOrders as $order) {
+            if ($order->type != 'normal' || $order->turn != $gamedata->turn) continue;
+
+            if ($this->id == $primaryWeapon->id && $order->id == $primaryOrderId) {
+                // Primary shot — capture alive fighter count for getDamage
+                $this->damageDice[$order->id] = $this->getAliveFighterCount() * 2;
+                $order->shots = 1;
+                $this->guns   = 1;
+            } else {
+                // Subordinate — fully nullify so no log entry, no animation,
+                // no missed shot display.
+                $order->shots    = 0;
+                $order->shotshit = 0;
+                $order->needed   = 0;
+                $order->rolled   = 100;
+                $order->pubnotes = "";
+                $order->updated  = true;
+            }
+        }
+    }
+
+    // Suppress subordinate orders before parent runs so they generate
+    // no log entry and no animation.
+    public function calculateHitBase($gamedata, $fireOrder) {
+        if ($fireOrder->shots == 0 && $fireOrder->shotshit == 0 &&
+            $fireOrder->needed == 0 && $fireOrder->rolled == 100) {
+            $fireOrder->pubnotes  = "";
+            $fireOrder->updated   = true;
+            $this->doNotIntercept = true;
+            return;
+        }
+
+        parent::calculateHitBase($gamedata, $fireOrder);
+
+        // Add alive fighter count to log
+        $n = isset($this->damageDice[$fireOrder->id])
+            ? $this->damageDice[$fireOrder->id] / 2
+            : $this->getAliveFighterCount();
+        $fireOrder->pubnotes .= " [" . (int)$n . " fighters, " . ((int)$n * 2) . "d6+12]";
+    }
+
+    // Skip fully nullified subordinate orders and handle self-immunity.
+    public function fire($gamedata, $fireOrder) {
+        if ($fireOrder->shots == 0 && $fireOrder->shotshit == 0 &&
+            $fireOrder->needed == 0 && $fireOrder->rolled == 100) {
+            return;
+        }
+
+        $shooter = $gamedata->getShipById($fireOrder->shooterid);
+        $target  = $gamedata->getShipById($fireOrder->targetid);
+
+        // Self-immunity: flight immune to own flash splash in same hex
+        if ($shooter && $target) {
+            $shooterHex = $shooter->getHexPos();
+            $targetHex  = $target->getHexPos();
+            if ($shooterHex->q == $targetHex->q && $shooterHex->r == $targetHex->r) {
+                $shooter->hyperplasmaMatrixImmune = true;
+            }
+        }
+
+        parent::fire($gamedata, $fireOrder);
+
+        if ($shooter) {
+            $shooter->hyperplasmaMatrixImmune = false;
+        }
+    }
+
+    // Skip damage to the shooting flight when it is immune to own flash.
+    public function doDamage($target, $shooter, $system, $damage, $fireOrder,
+                              $pos, $gamedata, $noOverkill = false, $location = null) {
+        if (!empty($shooter->hyperplasmaMatrixImmune) && $target->id == $shooter->id) {
+            return;
+        }
+        parent::doDamage($target, $shooter, $system, $damage, $fireOrder,
+                         $pos, $gamedata, $noOverkill, $location);
+    }
+}
+
+
 	
 ?>

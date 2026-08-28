@@ -1,5 +1,7 @@
 <?php
 class triadImp extends FighterFlight{
+
+	public $hyperplasmaMatrixImmune = false;
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
@@ -35,7 +37,7 @@ class triadImp extends FighterFlight{
         $toAdd = $new - $current;
 
         for ($i = 0; $i < $toAdd; $i++){			
-			$armour = array(4, 4, 4, );
+			$armour = array(4, 4, 4, 4);
 			$fighter = new Fighter("triadImp", $armour, 15, $this->id);
 			$fighter->displayName = "Imp";
 			$fighter->imagePath = "img/ships/triadImp.png";

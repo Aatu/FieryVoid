@@ -1233,3 +1233,4 @@ ShadowFighterBomb.prototype.constructor = ShadowFighterBomb;
 ShadowFighterBomb.prototype.getModeNameForEnemy = function (fireOrder) {
     return "Fighter Bomb";
 };
+

@@ -9,7 +9,7 @@ class technicalTargetDrone extends VreeCapital
 		$this->pointCost = 5;
 		$this->faction = "Custom Ships";
 		$this->phpclass = "technicalTargetDrone";
-		$this->imagePath = "img/ships/triadTriumviron.png";
+		$this->imagePath = "img/ships/triadWraith.png";
 		$this->canvasSize = 200;
 		$this->shipClass = "Target Drone - DO NOT USE";
 		$this->shipSizeClass = 3;
@@ -98,9 +98,13 @@ class technicalTargetDrone extends VreeCapital
 //        $this->addFrontSystem(new PhotonicPrismBeam(3, 24, 8, 270, 90));	
 //        $this->addFrontSystem(new PhotonicPrismBeam(3, 24, 8, 270, 90));	
 
-        $this->addFrontSystem(new HyperplasmaCutter(0, 16, 9, 270, 360));	
+//        $this->addFrontSystem(new HyperplasmaCutter(0, 16, 9, 270, 360));	
 //        $this->addFrontSystem(new HyperplasmaCutter(8, 16, 9, 300, 60));	
-        $this->addFrontSystem(new HyperplasmaCutter(0, 16, 9, 0, 90));	
+//        $this->addFrontSystem(new HyperplasmaCutter(0, 16, 9, 0, 90));	
+
+        $this->addFrontSystem(new NeutronBurst(0, 12, 4, 270, 90));	
+        $this->addFrontSystem(new NeutronBurst(0, 12, 4, 270, 90));	
+
 
 
 //        $this->addFrontSystem(new AsteroidSalvo(8, 30, 10, 270, 90));	
