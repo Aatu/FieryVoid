@@ -599,6 +599,28 @@ shipManager.movement = {
         return !!unit && unit.phpclass === "SpawnJumpPoint";
     },
 
+    /* REINFORCEMENTS_PLAN.md §2.6 - IS THIS THE OTHER KIND OF VORTEX, the blue one units come OUT
+       of? A SpawnJumpPointEntrance. phpclass is set by that class's own constructor and reaches the
+       client both on the live payload and on the preloaded blueprint, so this is always answerable.
+
+       ⭐ isJumpVortex ABOVE IS DELIBERATELY LEFT EXIT-ONLY, and must not be widened into a two-value
+       test. Its callers do not agree on the verdict: getVortexInHex, getVortexHeldBy and everything
+       downstream of them (canJumpOut, the Maintain control, the "already holding a jump point open"
+       refusal, the closing-vortex commit warning) are all rules an entrance must FAIL, while the
+       icon's z-plane, the map overlay colour, the hex-stack sweep and the replay lifecycle animation
+       are all things it must MATCH. Widening the one predicate would silently flip the first group.
+       Sites that want either kind ask isAnyJumpVortex instead. */
+    isJumpVortexEntrance: function isJumpVortexEntrance(unit) {
+        return !!unit && unit.phpclass === "SpawnJumpPointEntrance";
+    },
+
+    /* Either kind of vortex - for the sites that care that this is a hole in space, not which way
+       it points: how deep to draw it, what colour it collapses to when zoomed out, that it must
+       stay out of the click/hover sweep, and that it forms and closes on screen. */
+    isAnyJumpVortex: function isAnyJumpVortex(unit) {
+        return shipManager.movement.isJumpVortex(unit) || shipManager.movement.isJumpVortexEntrance(unit);
+    },
+
     getVortexInHex: function getVortexInHex(pos) {
         for (var i in gamedata.ships) {
             var unit = gamedata.ships[i];

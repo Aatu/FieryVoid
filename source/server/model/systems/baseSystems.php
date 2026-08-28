@@ -5163,8 +5163,12 @@ class JumpEngine extends Weapon{
        $spawnableClasses off every weapon of every blueprint in the game and preloads the listed
        classes into window.staticShips, which is what lets a vortex that appears on a POLL (no page
        reload) resolve to a blueprint and render. Same mechanism BallisticMineLauncher uses for its
-       loitering mines; without it the first vortex of a session draws as nothing until F5. */
-    public $spawnableClasses = array('SpawnJumpPoint');
+       loitering mines; without it the first vortex of a session draws as nothing until F5.
+       ⚠️ SpawnJumpPointEntrance is on the list for exactly the same reason and NOT because this
+       engine can open one today - an entrance is spawned by the Stage 6 sweep, not by openVortex -
+       but a preloaded blueprint is what stops the first one to form rendering as an empty hex
+       (REINFORCEMENTS_PLAN.md §4 Stage 3). BlueprintCache::build reads this list verbatim. */
+    public $spawnableClasses = array('SpawnJumpPoint', 'SpawnJumpPointEntrance');
 
     /* STAGE 3 - LIVE VORTEX STATE, rebuilt on every load by onIndividualNotesLoaded from the one
        IndividualNote this engine writes when it opens a vortex (see openVortex).
@@ -5846,6 +5850,15 @@ class JumpEngine extends Weapon{
         foreach ($gamedata->ships as $ship){
             if ($ship->isTerrain()) continue; //terrain never declares; Phase 2's fixed gates get their own path
             if ($ship->isDestroyed($gamedata->turn)) continue;
+            /* REINFORCEMENTS_PLAN.md §3.4 - NOTHING IN HYPERSPACE OPENS AN EXIT. This sweep makes
+               yellow SpawnJumpPoints, which units fly into to LEAVE the battle; a unit that is not
+               on the board has nothing to leave from and its only legal declaration is an entrance,
+               which the Stage 6 sweep owns.
+               Belt and braces with getVortexDeclaration's damageclass skip: that one stops a
+               well-formed entrance order being read here, this one stops ANY order on a hyperspace
+               unit reaching the exit path at all. Either alone would do; both together mean a
+               future order shape cannot reintroduce the bug by accident. */
+            if ($ship->isReinforcement()) continue;
 
             foreach ($ship->systems as $system){
                 if (!($system instanceof JumpEngine)) continue;
@@ -6102,6 +6115,18 @@ class JumpEngine extends Weapon{
             if ($fire->turn != $turn) continue;
             if (!empty($fire->rejected)) continue;
 
+            /* ⚠️⚠️ REINFORCEMENTS_PLAN.md §3.4 - AN ENTRANCE DECLARATION IS NOT AN EXIT DECLARATION,
+               and without this line it would be opened as one. A 'jumpentry' order satisfies every
+               other condition in this loop by construction: it is ballistic, it is this turn's, it
+               carries an x/y and its firing mode is facing+1, i.e. 1-6. So spawnDeclaredVortices -
+               which runs at the end of Initial Orders and skips only terrain and destroyed ships,
+               neither of which a hyperspace reinforcement is - would put a YELLOW EXIT VORTEX at
+               the entrance hex; and hasOpenVortex would then make the Stage 6 entrance sweep return
+               null at spawnVortexUnit's first line, so the entrance never forms at all.
+               The class of vortex is decided by the SWEEP that opens it, and this method belongs to
+               the exit sweep. damageclass is the discriminator, mirroring the client. */
+            if ($fire->damageclass === 'jumpentry') continue;
+
             $mode = (int)$fire->firingMode;
             if ($mode < 1 || $mode > $maxMode) continue;
 
@@ -6250,13 +6275,22 @@ class JumpEngine extends Weapon{
      * the gate rather than to the player who claimed it. That is deliberate: WHO won the claim is
      * recorded in the 'VortexHold' note, and it governs nothing about using the vortex - any unit
      * of any side may fly into an open one (plan section 2.6). */
-    protected function spawnVortexUnit($holder, OffsetCoordinate $hex, $facing, $gamedata)
+    protected function spawnVortexUnit($holder, OffsetCoordinate $hex, $facing, $gamedata,
+                                       $class = 'SpawnJumpPoint')
     {
         if ($this->hasOpenVortex($gamedata->turn)) return null;
 
         $ship = $holder;
 
-        $vortex = new SpawnJumpPoint($gamedata->id, $ship->userid, "Jump Point", $ship->slot);
+        /* REINFORCEMENTS_PLAN.md §3.3 - THE CLASS IS A PARAMETER, and the default is what keeps both
+           existing callers (openVortex and openVortexAtGate) byte-identical. The reasoning that made
+           this method shared between a ship's vortex and a gate's holds for a third kind with equal
+           force: `$spawned = openTurn + 1`, the deploy MovementOrder that carries the facing, and the
+           'Vortex' note that restoreVortexState reads back are the same three records whichever
+           direction the door faces, and they must not drift.
+           The name is a LABEL and the subclass overwrites it in its own constructor, so it stays
+           "Jump Point" here rather than becoming a second thing to keep in step. */
+        $vortex = new $class($gamedata->id, $ship->userid, "Jump Point", $ship->slot);
         //Ships get their team from their slot on load; set it by hand so the rest of THIS request
         //agrees with what the next load will produce.
         $vortex->team = $ship->team;
@@ -6534,6 +6568,25 @@ class JumpEngine extends Weapon{
         //Defensive: the note outlived its unit (deleted game data, a recycled ship id). There is
         //nothing left to hold open, so stop asking about it every turn.
         if (!($vortex instanceof SpawnJumpPoint)) return 'vortex unit is gone';
+
+        /* ⭐ REINFORCEMENTS_PLAN.md §2.3 - AN ENTRANCE IS ONE-SHOT, and this is the whole of that
+           rule. Forms at the end of the turn it was declared (N), the manifest arrives through it in
+           the Deployment phase of N+1, and it closes at the end of N+1. Nothing on a ship's closure
+           list below applies: there is no Maintain to declare, no range to keep (the opener is in
+           hyperspace and has no hex to measure from), and the four-turn cap is longer than its whole
+           life.
+
+           ⚠️ TRAP 5 - IT MUST REACH THIS METHOD AND IT MUST CLOSE. spawnVortexUnit opens with
+           `if ($this->hasOpenVortex(...)) return null;`, so an entrance that never closes locks the
+           unit that opened it out of ever opening anything - including an exit to leave the battle
+           by - for the rest of the game.
+
+           BEFORE the gate branch below, deliberately: from Stage 8 a fixed GATE can open an
+           entrance, and entrance-ness is a property of the VORTEX while gate-ness is a property of
+           the ENGINE. The one-shot rule is the vortex's, so it wins. */
+        if ($vortex instanceof SpawnJumpPointEntrance){
+            return ($turn > (int)$this->vortexOpenTurn) ? 'reinforcements have arrived' : null;
+        }
 
         /* ⭐⭐ JUMP GATES (PHASE 2) - THE GATE BRANCH, TAKEN FIRST AND RETURNING, because a gate's
            list is SHORTER than a ship's and the difference is entirely things that do NOT close a

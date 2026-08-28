@@ -359,6 +359,13 @@ public function addMoons($gameData, $dbManager, $smallCount, $mediumCount, $larg
             throw new Exception("Invalid slotid");
         }
 
+        /* REINFORCEMENTS_PLAN.md §2.1 - THE RULE IS THE AUTHORITY, the client's flag only a claim.
+           Hoisted out of both loops because hasRuleName is a linear scan over the rule list, and
+           read ONCE for the whole submission because a rule cannot change mid-POST.
+           Rule off means the flag is simply dropped and the unit buys front-line - never an
+           exception, which would take the whole submission down over a stale browser tab. */
+        $allowReinforcements = $gameData->rules->hasRuleName('allowReinforcements');
+
         $seenSlots = array();
         foreach($gameData->slots as $slot)
         {
@@ -419,6 +426,16 @@ public function addMoons($gameData, $dbManager, $smallCount, $mediumCount, $larg
                     //Fold the authoritative total in BEFORE submitShip, which writes it into
                     //tac_ship.enhvalue alongside the other two buckets.
                     $ship->pointCostSysEnh = $cleanSysEnh['total'];
+
+                    /* REINFORCEMENTS_PLAN.md §4 Stage 1 - THE ONE PLACE THE CLIENT'S CLAIM BECOMES
+                       THE REAL FLAG. Set once per lobby unit and BEFORE the bulk loop below: that
+                       loop's mine branch does `clone $ship`, a shallow copy, so a scalar set here
+                       rides onto every copy of a bulk for free - exactly as pointCostSysEnh above
+                       does. submitShip reads $ship->reinforcement and writes the tac_ship column.
+                       A reinforcement is an ORDINARY purchase with a flag on it: same shared point
+                       pool, same $points tally above, same fleet-composition checks. Nothing else
+                       in this method branches on it. */
+                    $ship->reinforcement = $allowReinforcements && !empty($ship->reinforcementClaim);
 
                     /* BaseShip::isBulkBought is the single definition of "bought through
                        the bulk dialog" (mines + OSATs), mirrored client-side by

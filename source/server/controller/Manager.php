@@ -1301,6 +1301,20 @@ class Manager{
 
             // Map Mine deployment properties from frontend payload
             $ship->bulkBuy = $value["bulkBuy"] ?? 1;
+
+            /* REINFORCEMENTS_PLAN.md §0 - a saved fleet REMEMBERS which units were bought as
+               reinforcements (user request 2026-08-28). constructSavedShips emits the key only
+               when true, so an ordinary fleet's payload is unchanged and an older client that
+               sends nothing simply saves everything front-line.
+
+               ⚠️ THE REAL PROPERTY, not $reinforcementClaim, and that is safe HERE and only
+               here. The claim exists because a POST-side ship built by getShipsFromJSON is put
+               into a live TacGamedata, where a bare $reinforcement makes getTurnDeployed and
+               getTurnPlaced answer 999 in every phase (plan §4 trap 14). These ships never see
+               a TacGamedata at all: they are built, sanitised, written to tac_saved_ship and
+               thrown away, and both turn accessors require a $gamedata argument nothing on this
+               path can supply. */
+            $ship->reinforcement = !empty($value["reinforcement"]);
     
             $systems = $value["systems"] ?? [];
             foreach ($systems as $i => $system) {
@@ -1985,6 +1999,40 @@ class Manager{
             //⚠️ Must stay AFTER the populate() above: flight ordinals resolve by position
             //in $ship->systems, so the fighters have to exist first.
             $ship->preBattleDamage = $value["preBattleDamage"] ?? array();
+
+            /* Reinforcements (REINFORCEMENTS_PLAN.md §4 Stage 1). Carried RAW here and consumed by
+               BuyingGamePhase::process alone, which checks the game rule and only then writes the
+               real $ship->reinforcement. Every other phase ignores the field, so a client cannot
+               flag a unit into hyperspace mid-game.
+               ⚠️ DELIBERATELY NOT $ship->reinforcement. That property is read by getTurnDeployed
+               and getTurnPlaced, and a POST-side ship carries no $arrivalTurn - so writing it here
+               would make every POSTed reinforcement answer 999 to both accessors in every phase,
+               silently early-returning Hangar::generateIndividualNotes and
+               HangarOps::validateDeployBayOrders, neither of which resolves through
+               $gamedata->getShipById() the way DeploymentGamePhase::validateDeployment now does.
+               See BaseShip::$reinforcementClaim and plan trap 3.
+               ⚠️ The saved-fleet parser above (getSavedShipsFromJSON) writes the REAL property from
+               the same wire key, and the difference is the point: those ships are built, sanitised,
+               written to tac_saved_ship and thrown away without ever entering a TacGamedata, so
+               neither turn accessor can be reached. These ships do enter one. */
+            $ship->reinforcementClaim = !empty($value["reinforcement"]);
+
+            /* THE MANIFEST (REINFORCEMENTS_PLAN.md §3.5, Stage 5) - the ONE reinforcement field a
+               client is trusted to send in a live game, and even then only as a claim.
+               InitialOrdersGamePhase::process re-validates it against the SERVER-side ships and
+               writes NULL for anything it does not believe.
+
+               ⚠️ $arrivalTurn IS DELIBERATELY NOT WHITELISTED and must never be. It is written only
+               by the end-of-formation-turn deviation sweep; a client that could set it could bring
+               its own fleet out of hyperspace a turn early, at a hex of its choosing, with no
+               entrance in between. $reinforcement is not whitelisted here either - see the claim
+               property above.
+
+               (int) rather than a raw carry: mysqli and JSON disagree about number types, and the
+               validation downstream compares it against real ship ids. 0 is normalised to null so
+               "unassigned" has exactly one representation. */
+            $arrivalVia = isset($value["arrivalVia"]) ? (int)$value["arrivalVia"] : 0;
+            $ship->arrivalVia = ($arrivalVia > 0) ? $arrivalVia : null;
 
             $ship->enhancementOptions = $value["enhancementOptions"] ?? [];
 

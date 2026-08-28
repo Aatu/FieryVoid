@@ -300,6 +300,14 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     <script defer src="client/renderer/phaseStrategy/PhaseStrategy.js"></script>
     <script defer src="client/renderer/phaseStrategy/DeploymentPhaseStrategy.js"></script>
     <script defer src="client/renderer/phaseStrategy/MineDeployment.js"></script>
+    <!-- REINFORCEMENTS_PLAN.md Stage 4 - the "Call Reinforcements" flow. A sibling of
+         MineDeployment.js: a bespoke map click mode driven from an #iniGui button, because the
+         opener has no hex and so cannot go through weaponManager.targetHex (plan section 3.4).
+         It CALLS UI.vortexFacing but does not touch window.UI itself, so it has no ordering
+         constraint against shipMovement.js the way vortexFacing.js and gateSignal.js do - every
+         call site is guarded, and all of these are `defer`, so the whole set is in place before
+         anything runs. -->
+    <script defer src="client/renderer/phaseStrategy/ReinforcementEntry.js"></script>
     <script defer src="client/renderer/phaseStrategy/DeploymentDock.js"></script>
     <script defer src="client/renderer/phaseStrategy/WaitingPhaseStrategy.js"></script>
     <script defer src="client/renderer/phaseStrategy/InitialPhaseStrategy.js"></script>

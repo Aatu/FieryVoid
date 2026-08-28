@@ -158,6 +158,30 @@ class TacGamedata {
                 $weapon = $ship->getSystemById($fire->weaponid);
                 if (($this->phase >= 2) && $weapon->ballistic && $fire->turn == $this->turn){
                     $movement = $ship->getLastTurnMovement($fire->turn);
+
+                    /* REINFORCEMENTS_PLAN.md - A BALLISTIC WHOSE SHOOTER IS NOT ON THE MAP.
+                       getLastTurnMovement() skips every 'start' row, so a unit that has never
+                       actually moved answers null - and a reinforcement declaring its jump point
+                       ENTRANCE from hyperspace is exactly that unit. Reading ->position off the
+                       null was a fatal ErrorException on EVERY gamedata load from phase 2 of the
+                       turn the entrance was declared (both players, every poll); phase-1 secrecy
+                       - hideSystemFireOrders strips every current-turn ballistic order from every
+                       phase-1 payload, including its author's - is what hid it until Initial
+                       Orders were committed.
+
+                       Nothing wants a Ballistic record for one either: $this->ballistics is absent
+                       from stripForJson so it never reaches the client at all, the entrance marker
+                       is drawn from the fire order itself (BallisticIconContainer's entranceOrders,
+                       or the slot's formingEntrances for an enemy viewer), and the only
+                       server-side consumer is the hidetarget mask in hideSystemFireOrders - which
+                       an entrance is not subject to, being masked wholesale by
+                       hideHyperspaceReinforcements instead.
+
+                       The null test is the general rule and is deliberately NOT written as
+                       "damageclass === 'jumpentry'": any ballistic order from a shooter with no
+                       movement row lands here, and inventing a position for one is never right. */
+                    if ($movement === null) continue;
+
                     $target = $fire->targetid;
                     if ($fire->x != "null" && $fire->y != "null")
                         $targetpos = array("x"=>$fire->x, "y"=>$fire->y);
@@ -231,7 +255,12 @@ class TacGamedata {
             }
 
             //Just a convenient place to set Stealth/Mine variable since we're already going through ships in the game.
-            if($ship->userid !== $this->forPlayer){
+            //REINFORCEMENTS_PLAN.md §3.6 - but NOT for a unit still in hyperspace. Both of these are
+            //one-bit broadcasts to every viewer ("somebody has a cloak", "enemy mines are out
+            //there"), and a unit nobody can see must not set either: hideHyperspaceReinforcements
+            //deletes the ship from the payload a moment later, and a flag it had already flipped
+            //would survive it and say the ship was there.
+            if($ship->userid !== $this->forPlayer && !$ship->isReinforcement()){
                 if($ship->trueStealth && !$ship instanceof Mine && !$ship->isDestroyed() && $ship->factionAge <= 2) $this->isStealthPresent = true; //Hyach and Trek cloaks atm.
                 if($ship instanceof Mine && !$ship->isDestroyed()) $this->areMinesPresent = true; //Marks that ENEMY mines are present.
             }
@@ -1123,7 +1152,156 @@ class TacGamedata {
         return $ship->isDestroyed() && $ship->hasJumpedToHyperspace();
     }
 
+    /* REINFORCEMENTS_PLAN.md §3.6 - WHAT AN ENEMY IS TOLD ABOUT A FLEET STILL IN HYPERSPACE:
+     * a count and a point total, on the slot. Never classes, never names.
+     *
+     * Every OTHER list in the game already drops these units for free, because getTurnDeployed
+     * answers 999 for them (§3.2). This sweep exists because that is not enough: a hyperspace
+     * unit's full sheet - its class, its enhancements, its damage - is still in the payload for
+     * anyone who opens the console. So the ship is removed from the list outright.
+     *
+     * ⭐ A UNIT STOPS BEING CONCEALED THE MOMENT IT IS ASSIGNED an arrival turn, which is the same
+     * turn its jump point becomes a public blue marker. The disclosure is therefore: turn N -
+     * "three units are coming, 1250 points, somewhere near here"; turn N+1 - the ships themselves.
+     * That is deliberately a step MORE concealed than today's late-deploy slots, which show their
+     * full composition from turn 1.
+     *
+     * RUNS FIRST inside deleteHiddenData, so every later mask (hideDeploymentDocks,
+     * hideActiveShipMovement, hideEnemyCombatPivots, the fire-order sweep, hideStealthShipMovement)
+     * walks the already-shortened list and cannot write to a ship that is about to vanish. Living
+     * inside deleteHiddenData also inherits the $all skip for free - a PAST turn served to the
+     * replay is not masked, which is the same rule applyChameleonDisguise follows.
+     */
+    private function hideHyperspaceReinforcements(){
+
+        //Post-mortem discloses everything, exactly as ShipSystem's private-logistics masks do.
+        //⚠️ NOT self::$chameleonDisclosed, which is FINISHED only and misses SURRENDERED - the
+        //overwhelmingly common terminal status.
+        if (self::$currentGameFinished) return;
+
+        /* Zeroed unconditionally and up front, mirroring setChameleonFleetValueAdjust. A PlayerSlot
+           is rebuilt per load so in practice both already hold their declared 0, but nothing else
+           in the request zeroes them and a per-viewer field that can only ever be added to is one
+           refactor away from leaking. */
+        foreach ($this->slots as $slot){
+            $slot->reinforcementCount = 0;
+            $slot->reinforcementPoints = 0;
+            $slot->formingEntrances = array();
+        }
+
+        $playerTeam = $this->getPlayerTeam(); //null for an observer, who owns no slot
+        $kept = array();
+        $removedAny = false;
+
+        foreach ($this->ships as $ship){
+
+            /* ⚠️ BOTH TESTS, not isReinforcement() alone. getTurnDeployed returns 1 for an OSAT,
+               a base or terrain BEFORE it ever looks at the reinforcement branch, so such a row
+               carrying the flag is on the board on turn 1 while isReinforcement() still answers
+               true - and deleting a visible unit here would also change what
+               getMinTurnDeployedSlot tells Manager::updateLateDeployments, which WRITES to the
+               database. 999 is the "not on the board" sentinel §3.2 sets. */
+            if (!$ship->isReinforcement() || $ship->getTurnDeployed($this) <= $this->turn){
+                $kept[] = $ship;
+                continue;
+            }
+
+            //The owner and their team see the real rows and no aggregate. Same shape as
+            //hideEnemyCombatPivots and hideStealthShipMovement, deliberately.
+            if ($ship->userid == $this->forPlayer || $ship->team == $playerTeam){
+                $kept[] = $ship;
+                continue;
+            }
+
+            $removedAny = true;
+
+            if (!isset($this->slots[$ship->slot])) continue; //no slot to report it on
+
+            /* THE SAME ARITHMETIC fleetList.js prices every other row with (a flight is costed per
+               craft off a six-craft blueprint price), so the enemy's header still sums.
+               ⚠️ pointCostSysEnh is NOT added: getTacShips reads tac_ship.enhvalue - which
+               submitShip wrote as all THREE buckets added together - straight into pointCostEnh,
+               and getEnhancementsForShips then re-derives pointCostSysEnh from its own table.
+               Adding it would double-count. pointCostEnh2 is 0 once a game is running and is
+               summed only so this cannot rot if that ever changes. */
+            $pts = (float)$ship->pointCost;
+            if ($ship instanceof FighterFlight) $pts = $pts * ($ship->flightSize / 6);
+            $pts += (float)$ship->pointCostEnh + (float)$ship->pointCostEnh2;
+
+            $this->slots[$ship->slot]->reinforcementCount++;
+            $this->slots[$ship->slot]->reinforcementPoints += (int)round($pts);
+
+            $this->republishFormingEntrances($ship);
+        }
+
+        if (!$removedAny) return;
+
+        /* ⚠️ RE-INDEX. stripForJson maps over $this->ships with array_map, which PRESERVES KEYS
+           when passed a single array - so a gap would make json_encode emit a JSON OBJECT where
+           the client requires a real array (gamedata.ships is .filter()ed, .some()d and .length'd
+           all over the client). $kept is built by append, so it is already 0-indexed; the array is
+           replaced wholesale rather than unset() from, for exactly that reason.
+           ⚠️ AND DROP THE ID CACHE. $shipsById is populated for EVERY ship in the game long before
+           this runs - getMovesForShips resolves every id during the DB load - so without this,
+           markJumpedDockedFlights, hideDeploymentDocks and hideSystemFireOrders could all still
+           resolve an id to a unit that is no longer in the payload. */
+        $this->ships = $kept;
+        $this->shipsById = array();
+    }
+
+    /* REINFORCEMENTS_PLAN.md §2.3 - REPUBLISH THIS UNIT'S JUMP POINT ENTRANCE AS A BARE HEX.
+     *
+     * Called from the sweep above, for a ship that is about to be deleted from this viewer's
+     * payload. The BLUE "Jump Point Forming" marker is public for the whole of the turn a jump
+     * point forms in - it is the warning an opponent gets in exchange for reinforcements arriving
+     * able to act - but the ORDER that carries it lives on a ship this viewer must not see. So the
+     * hex and the facing are lifted onto the slot, and the client draws the identical marker from
+     * either source (BallisticIconContainer::generateEntranceHexes).
+     *
+     * ⭐ THE HEX AND THE FACING, AND NOTHING ELSE. Not the opener, not the manifest, not how many
+     * units ride it. Those are exactly the things §3.6 says are never disclosed, and the slot
+     * already carries the only aggregate that is (a count and a point total).
+     *
+     * ⚠️ NEVER IN PHASE 1. A declaration is secret while Initial Orders are open - that is the rule
+     * hideSystemFireOrders enforces on the order itself, stripping every current-turn ballistic
+     * order from every phase-1 payload INCLUDING ITS AUTHOR'S - and republishing a summary of one
+     * here would leak in phase 1 exactly what that sweep spends its time hiding. From phase 2 the
+     * declaration is public and so is this.
+     *
+     * ⚠️ THE DECLARED HEX, which is the whole point of §2.3's timing rule: the deviation has not
+     * been rolled yet (that happens at the end of this turn, in FireGamePhase::advance), so there
+     * is no true hex in existence to leak. What is published here is where the player AIMED.
+     */
+    private function republishFormingEntrances($ship)
+    {
+        if ((int)$this->phase === 1) return;   //secret while Initial Orders are open
+        if (!isset($this->slots[$ship->slot])) return;
+        if (!is_array($ship->systems)) return;
+
+        foreach ($ship->systems as $system){
+            if (!($system instanceof JumpEngine)) continue;
+
+            foreach ($system->fireOrders as $fire){
+                if ($fire->damageclass !== 'jumpentry') continue;
+                if ((int)$fire->turn !== (int)$this->turn) continue;
+                if (!empty($fire->rejected)) continue;
+                if ($fire->x === null || $fire->y === null || $fire->x === "null" || $fire->y === "null") continue;
+
+                //firingMode is the storage for the facing - mode = facing + 1 - the same convention
+                //an exit uses, so the client's arrow maths is shared verbatim.
+                $this->slots[$ship->slot]->formingEntrances[] = array(
+                    'x'      => (int)$fire->x,
+                    'y'      => (int)$fire->y,
+                    'facing' => ((((int)$fire->firingMode - 1) % 6) + 6) % 6,
+                );
+            }
+        }
+    }
+
     private function deleteHiddenData(){
+
+        //REINFORCEMENTS_PLAN.md §3.6 - FIRST, so every mask below walks the shortened list.
+        $this->hideHyperspaceReinforcements();
 
         if ($this->phase == -1){
             foreach ($this->ships as $ship){
@@ -1657,6 +1835,18 @@ private function setWaiting() {
         try {
             foreach ($this->ships as $ship) {
                 if($ship->isDestroyed()) continue;
+                /* REINFORCEMENTS_PLAN.md §3.6 - a unit still in HYPERSPACE blocks nothing. Its
+                   only movement row is the 'start' one every ship is given at its slot's
+                   deployment-box centre, so an Enormous reinforcement would otherwise plant a
+                   phantom line-of-sight blocker there for EVERY player, itself included - and,
+                   since blockedHexes is computed once in onConstructed and is not per-viewer,
+                   it would survive hideHyperspaceReinforcements and tell an enemy that something
+                   big is coming and roughly where from.
+                   ⚠️ isReinforcement() specifically, NOT a general getTurnDeployed test: a
+                   late-SLOT Enormous unit has blocked its deployment-box hex from turn 1 since
+                   long before this feature, and changing that is a line-of-sight rule change for
+                   existing games rather than a concealment fix. */
+                if($ship->isReinforcement()) continue;
 
 //                if ($ship->Enormous) { // Only enormous units block LoS
 if ($ship->Enormous && !($ship instanceof spawnMeteoroid) && !($ship instanceof spawnDustField) && !($ship instanceof spawnHyperspaceWaveform)) {

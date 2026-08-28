@@ -32,9 +32,33 @@ window.InitialPhaseStrategy = function () {
     };
 
     InitialPhaseStrategy.prototype.deactivate = function () {
+        //REINFORCEMENTS_PLAN.md Stage 4: an armed hex-pick mode belongs to THIS phase and nothing
+        //else. Leaving it on would arm the map in Movement, where the first click would be
+        //swallowed by a declaration the player can no longer make. Mirrors the way
+        //DeploymentPhaseStrategy tears MineDeployment down.
+        if (window.ReinforcementEntry) ReinforcementEntry.deactivate();
+
         PhaseStrategy.prototype.deactivate.call(this, true);
 
         return this;
+    };
+
+    /* REINFORCEMENTS_PLAN.md Stage 4 - THE ENTRANCE HEX-PICK MODE GETS THE CLICK FIRST.
+
+       ⚠️ INTERCEPTED HERE AND NOT IN onHexClicked. onHexClicked is only reached when the click
+       landed on NO icon (see PhaseStrategy.onClickEvent's icons.length branch) - but a hex holding
+       a ship is a perfectly legal place to open an entrance, and a wave arriving on top of somebody
+       is the ordinary case. Hooking the later method would silently refuse every occupied hex.
+
+       Consuming the click also means the ordinary select/target dispatch never runs, so arming the
+       mode cannot select a ship by accident on the way to picking a hex. */
+    InitialPhaseStrategy.prototype.onClickEvent = function (payload) {
+        if (window.ReinforcementEntry && ReinforcementEntry.isActive()
+            && ReinforcementEntry.onMapClick(payload)) {
+            return;
+        }
+
+        PhaseStrategy.prototype.onClickEvent.call(this, payload);
     };
 
     InitialPhaseStrategy.prototype.onHexClicked = function (payload) {

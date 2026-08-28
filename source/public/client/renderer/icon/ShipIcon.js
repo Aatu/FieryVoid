@@ -76,12 +76,17 @@ window.ShipIcon = function () {
     ShipIcon.FACING_ARROW_SCALE = 1.15;
     ShipIcon.FACING_ARROW_OPACITY = 0.85;
 
-    /* Is this unit a jump vortex? Delegates to the ONE place that holds the class name
-       (shipManager.movement.isJumpVortex) rather than repeating "SpawnJumpPoint" here - the same
-       discipline gamedata.isJumpGate follows. Guarded because this runs from the icon constructor:
-       a missing shipManager should cost a vortex its z-plane, not throw. */
+    /* Is this unit a jump vortex? Delegates to the ONE place that holds the class names
+       (shipManager.movement) rather than repeating them here - the same discipline
+       gamedata.isJumpGate follows. Guarded because this runs from the icon constructor:
+       a missing shipManager should cost a vortex its z-plane, not throw.
+
+       EITHER KIND (isAnyJumpVortex). The only thing this drives is the −150 z-plane, and an
+       ENTRANCE needs it more than an exit does: arriving reinforcements deliberately stack in its
+       hex, so the art has to sit behind them rather than over them
+       (REINFORCEMENTS_PLAN.md §4 Stage 3). */
     ShipIcon.isVortex = function isVortex(ship) {
-        return !!(window.shipManager && shipManager.movement && shipManager.movement.isJumpVortex(ship));
+        return !!(window.shipManager && shipManager.movement && shipManager.movement.isAnyJumpVortex(ship));
     };
 
     ShipIcon.prototype.consumeShipdata = function (ship) {

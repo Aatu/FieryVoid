@@ -6,7 +6,13 @@ Jump Points Phase 3. Phases 1 and 2 gave a ship, and then a fixed gate, a way to
 their fleet as **reinforcements**, those units wait in hyperspace, and during the battle the player
 opens an **entrance** vortex and brings them onto the map through it.
 
-Status: **STAGE 0 BUILT 2026-08-27, awaiting the by-hand verification below. Stages 1-9 not started.**
+Status: **STAGES 0–5 BUILT 2026-08-27, all awaiting the by-hand verification below. Stages 6-9 not
+started.** A player can now buy reinforcements, they are concealed from the enemy, and they can
+**declare** a jump point entrance and name its manifest — the declaration reaches `tac_fireorder`
+with `damageclass='jumpentry'` and the manifest reaches `tac_ship.arrivalvia`. What is still
+missing is Stage 6: **nothing yet turns a declaration into a vortex**, so no unit has ever actually
+arrived. Until Stage 6 lands, a declared entrance is a blue marker and a database row and nothing
+else.
 
 Three things Stage 0 needed that §3 did not anticipate, all recorded here because they are the shape
 of the next surprise too:
@@ -23,9 +29,60 @@ of the next surprise too:
   unit would have been asked for a deploy move it cannot have - killing the whole submission with
   "Entry not found". It now resolves through `$gamedata->getShipById()`.
 
+And five more from Stages 1–3, same reason:
+
+- **`$reinforcement` is NOT an inert POST field, so the lobby's claim needed its own property.**
+  §3.5 whitelists only `arrivalVia`, and trap 3 says every server rule must resolve through
+  `getShipById` — but `submitShip` reads `$ship->reinforcement` off the POSTed object at buy time,
+  so *something* has to travel. Writing it straight onto `$ship->reinforcement` would make **every
+  POST-side reinforcement answer 999 to both turn accessors in every phase**, because a POST-side
+  ship never carries `arrivalTurn`. Two live call sites would have broken silently:
+  `Hangar::generateIndividualNotes` (`if ($ship->getTurnPlaced($gamedata) > $gamedata->turn) return;`
+  — reached from Deployment, Initial Orders **and** Movement with the POSTed ships) and
+  `HangarOps::validateDeployBayOrders`' POST-side `$carrier`. Neither resolves through
+  `$gamedata->getShipById()` the way `DeploymentGamePhase` now does. The fix is a separate
+  `BaseShip::$reinforcementClaim`, carried raw by `getShipsFromJSON` and promoted to the real flag
+  by `BuyingGamePhase::process` alone — the `preBattleDamage` / `systemEnhancements` idiom.
+  ⭐ **Those two POST-side `getTurnPlaced` sites are still landmines for Stage 7**, which is where a
+  reinforcement carrier's deploy-start dock actually runs.
+- **Four `standIn` sites poison the lobby's blueprint cache.** `doEditShip`, `doEditBulk`,
+  `copyShip` and `copyBulk` each register a `jQuery.extend` copy of the edited unit as the class
+  blueprint when a loaded fleet has no faction registered, and `new Ship(json)` copies **every** key
+  — so an ad-hoc `reinforcement:true` would have been minted onto every future purchase of that
+  class, silently, and only ever on a **loaded** fleet, which is exactly the case §0 says must be
+  re-flagged by hand. All four now `delete standIn.reinforcement`, beside the existing
+  `standIn.pointCost` line that exists for the identical reason. `doCopyShip` additionally rebuilds
+  the ship a *second* time and needed the capture-and-re-apply the pre-battle damage uses.
+- **An empty `SpawnJumpPointEntrance` subclass is a silent bug**, and §3.3 sketched exactly that.
+  The parent's constructor sets `$this->phpclass = "SpawnJumpPoint"`, and **phpclass is the
+  persisted identity**: `submitShip` writes the property (not `get_class()`), the reload does
+  `new $phpclass(...)`, and it is the only route by which the client learns the class. Inherit it
+  and the entrance is an entrance for one request, then reloads as an ordinary exit anything can
+  jump out through. The subclass constructor must set it.
+- **`JumpEngine::$spawnableClasses` is a third channel §3.3 did not mention.** `BlueprintCache::build`
+  reads it to preload `window.staticShips`, so without `'SpawnJumpPointEntrance'` on that list the
+  first entrance to appear on a **poll** (no page reload) renders as an empty hex until F5.
+  Regenerating `Terrain.json` does not help — that file is the *lobby* catalogue; `game.php` builds
+  its blueprints from `BlueprintCache`.
+- **`isJumpVortex` must stay EXIT-ONLY on the client.** Its callers disagree: `getVortexInHex`,
+  `getVortexHeldBy` and everything downstream (the Jump Out button, Maintain, the "already holding a
+  jump point open" refusal, the closing-vortex commit warning) are rules an entrance must **fail**,
+  while the icon z-plane, the map overlay colour, the hex-stack sweep and the replay lifecycle
+  animation must **match**. Widening the one predicate silently flips the first group. Two siblings
+  were added instead — `isJumpVortexEntrance` and `isAnyJumpVortex`.
+
 ⚠️ **STAGES 0–8 ARE ONE LIVE DEPLOY.** A lobby that can sell reinforcements without the runtime
 that delivers them strands a player's points in hyperspace for the whole game. Local testing is
 stage by stage; the deploy is not.
+
+⭐ **THE REPLAY HARNESS BASELINE NEEDS RE-RECORDING ONCE, for Stage 2.** `PlayerSlot` gained two
+public fields, so every `snapshot_*` report in the corpus now differs by exactly
+`/slots/N/reinforcementCount: added (0)` and `/slots/N/reinforcementPoints: added (0)` — 1238 diff
+lines across 152 games, and **nothing else whatsoever**. The four behavioural checks are unaffected:
+`--checks=movement,tohit,damage,masking` gives **155 passed, 0 failed** (game 4309 included, since
+its [[arch_replay_corpus_known_failures]] failure is a snapshot one). Accept with
+`replayHarness.php record`; until then use the `--checks=` form, or every future check in this
+feature drowns in the additive field.
 
 ---
 
@@ -42,7 +99,7 @@ stage by stage; the deploy is not.
 | One-way | A blue entrance can never be jumped out of; a yellow exit can never be arrived through |
 | Arriving units on their arrival turn | **Act normally.** They deploy in that turn's Deployment phase and then move and fire like anything else |
 | Ancient (`factionAge >= 3`) deviation modifier | **−5** |
-| Saved fleets | **Do not remember reinforcement status.** `tac_savedships` gets no new column; a reloaded fleet buys everything front-line and the player re-flags |
+| Saved fleets | **Remember reinforcement status** (user request 2026-08-28, reversing the original ruling). One `reinforcement` tinyint on `tac_saved_ship`, carrying the **purchase-time flag only** — `arrivalturn` / `arrivalvia` are in-play state and are never saved, so a reloaded reinforcement is back in hyperspace exactly as a freshly bought one is. Loading into a game *without* the rule still lands everything in the main fleet |
 
 Notes on two of those:
 
@@ -84,7 +141,14 @@ can be added at any later date without re-working anything before it.
 
 ### 2.1 Buying reinforcements
 
-- Game rule **Allow Reinforcements** (`allowReinforcements`), set at Create Game. Off ⇒ nothing in
+- Game rule **Allow Reinforcements** (`allowReinforcements`), set at Create Game — **and always on in
+  a Fleet Builder (`fleetTest`) lobby** (user request 2026-08-28). A Builder exists to compose and
+  save fleets, and a saved fleet now remembers the flag (§0), so it has to be able to author one and
+  load one back. Derived in `GameRules::getAllowReinforcementsRules` rather than written into
+  `games.js`'s rules object: a game's rules JSON is stored once at creation and never rewritten, so
+  adding the key there would leave every Fleet Builder lobby that already exists without it — and
+  deriving it serves client and server from one decision, since the client reads
+  `gamedata.rules.allowReinforcements`, which is that object's `jsonSerialize`. Off ⇒ nothing in
   this document exists.
 - In the lobby a unit is bought either as **front-line** or as a **reinforcement**. Same shared
   point pool, same cap, same fleet-composition checks — a reinforcement is an ordinary purchase
@@ -422,7 +486,7 @@ the map, the Order of Battle, the fleet list's deployable set and the turn-1 Dep
 the game must play on normally. Then run `replayHarness.php check` — a change to a serialized
 property's visibility is exactly what that harness exists for ([[project_replay_harness]]).
 
-### Stage 1 — the lobby
+### Stage 1 — the lobby ✅ BUILT 2026-08-27
 A **Reinforcements** toggle in the buy panel; bought units carry the flag; the fleet list groups
 them under a sub-header; `submitShip` writes the column; the no-jump-drive warning at Ready; the
 "rule is off" strip that mirrors [gamelobby.js:4064](source/public/client/gamelobby.js#L4064).
@@ -430,26 +494,189 @@ them under a sub-header; `submitShip` writes the column; the no-jump-drive warni
 ⚠️ Lobby ship objects are `jQuery.extend` clones, so **every `instanceof` fails** and there is no
 `window.staticShips` ([[arch_lobby_ship_objects]]). The flag must be a plain property.
 
-**Verify:** buy a mixed fleet, reload the lobby, confirm the flag survives and the points cap counts
-reinforcements against the same pool.
+**As built**, with three deviations worth stating:
 
-### Stage 2 — concealment
+- **A BUY MODE plus a per-row re-flag link, not a control in the buy dialog.** `#reinforcementModeToggle`
+  in the store's filter strip flags everything bought while it is ticked (and lights the label cyan
+  so it cannot be left on unnoticed); each fleet row then carries its own **Reinforce / Main Fleet**
+  link, which changes one row's mind afterwards. Keeping the control out of the buy/edit dialogs keeps
+  it out of `confirm.snapshotShip`, whose fixed field list would otherwise have to learn about it or
+  silently restore the old value on a cancelled edit.
+- **`gamedata.applyFleetGrouping()` writes and REMOVES both group headers**, and is called at the end
+  of *both* row-writing paths. `constructFleetList` clears the list with `$(".ship.bought").remove()`
+  — there is no `$("#fleet").empty()` anywhere — so a header it did not remove itself would survive
+  every rebuild and accumulate once per poll, forever. The headers deliberately carry no `ship` class
+  and no action-link class, because `#fleet`'s handlers are delegated by those and resolve their row
+  with `closest(".ship")`.
+- **The Ready warning can only see the player's own purchases, and says so.** A lobby client is served
+  **no ships at all** — `prepareForPlayer` empties the list for a LOBBY game and `gamelobby.js`
+  discards `serverdata.ships` anyway — so an ally's gate is invisible. Hence a warning the player
+  confirms, never a refusal. The "does this hull mount a usable jump drive" test is
+  `gamedata.hasVortexJumpEngine`: `name === 'jumpEngine' && ballistic && hextarget && range > 0`.
+  ⚠️ **All three**, because `markLegacy()` clears `ballistic`/`hextarget` (and ShipCompactor strips a
+  `false` key outright, so both read `undefined`) *and* zeroes `range`. `range > 0` alone lets through
+  the nine engines in the stale uncompacted `Earth Alliance (Custom).json`, which carry none of the
+  three keys; `ballistic && hextarget` alone lets through `JumpgateCapital`, whose `isGateJump()` is
+  invisible to the client. Gates are excluded by the caller instead — a gate is exactly what makes a
+  jump-drive-less group legal.
+
+**Verify:** buy a mixed fleet, reload the lobby, confirm the flag survives and the points cap counts
+reinforcements against the same pool. Then: **copy** a reinforcement (the copy must be one too),
+**edit** one (it must stay one), **load a saved fleet** (the flags must come back — see Stage 1b —
+and buying that class again afterwards must NOT be pre-flagged, which is the `standIn` trap), and turn
+the rule off in a second game (no toggle, no link, no headers).
+
+### Stage 1b — the header selector, MAIN FLEET, and saved-fleet memory ✅ BUILT 2026-08-28
+
+Three refinements the user asked for after playing Stage 1, all in the lobby.
+
+- **"FRONT LINE" is now "MAIN FLEET"**, in the group header and in the row link (`Front-line` →
+  `Main Fleet`). Text only; no class, selector or stored value changed, so nothing had to migrate.
+- **Both headers are written whenever the game carries the rule** — empty group or not, and on an
+  empty fleet. They used to appear only once something was flagged, which is no longer possible: an
+  EMPTY group's header is the click target that fills it, so hiding it would hide the control.
+- **The two headers ARE the buy-target selector.** `gamedata.setBuyTarget` writes
+  `#reinforcementModeToggle` and `applyFleetGrouping` reads it back to decide which header lights up,
+  so the checkbox stays the single source of truth and `buyingReinforcement()` is unchanged. The
+  header click is **delegated on `#fleet`** for the same reason the re-flag link is, only more so:
+  `applyFleetGrouping` destroys and rewrites both headers on every poll, every purchase and every
+  re-flag. A `change` handler on the checkbox itself repaints the highlight when the player uses the
+  filter-strip control instead.
+- **Saved fleets remember the flag** (§0, reversed). `tac_saved_ship.reinforcement`;
+  `constructSavedShips` emits the key **only when true** (so an ordinary fleet's payload is
+  byte-identical to before, and an older client simply saves everything front-line);
+  `getSavedShipsFromJSON` reads it, `submitSavedShip` writes it, `getSavedShips` reads it back onto
+  the ship — where it rides `loadSavedFleet.php`'s `json_encode` for free, `$reinforcement` being an
+  ordinary public `BaseShip` property.
+
+  ⚠️ **`$reinforcement`, not `$reinforcementClaim`, and that is safe on this path only.** The claim
+  exists because a POST-side ship from `getShipsFromJSON` is put into a live `TacGamedata`, where a
+  bare flag makes both turn accessors answer 999 in every phase (trap 14). Saved-fleet ships never
+  see a `TacGamedata`: they are built, sanitised, written and thrown away, and both accessors need a
+  `$gamedata` argument nothing on that path can supply.
+
+  ⚠️ `groupSaveableShips` now keys its mine merge on **class + flag**. The group takes the first
+  member's flag, so merging hyperspace and front-line mines of one class would silently re-flag half
+  of them on reload.
+
+  ⚠️ The lobby restore is **gated on the rule** (`gamedata.reinforcementsAllowed()`), so a fleet
+  saved from a game that had it loads entirely into the main fleet in one that does not.
+
+**Verify:** save a mixed fleet, load it into another Allow-Reinforcements game (flags come back,
+groups correct, points identical), then load the same fleet into a game without the rule (everything
+in the main fleet, no headers, no links).
+
+### Stage 2 — concealment ✅ BUILT 2026-08-27
 `hideHyperspaceReinforcements` + the slot aggregate + the fleet-list placeholder row.
 
-**Verify from BOTH seats, by hand.** The harness does not cover masking
-([[arch_placement_turn_vs_deploy_turn]]), so this stage has no regression net. Check the raw JSON,
-not just the rendered list.
+**As built.** The sweep is the FIRST statement of `deleteHiddenData`, so every later mask
+(`hideDeploymentDocks`, `hideActiveShipMovement`, `hideEnemyCombatPivots`, the fire-order sweep,
+`hideStealthShipMovement`) walks the shortened list and cannot write to a ship about to vanish —
+and living inside `deleteHiddenData` inherits the `$all` skip for free. Three things §3.6 did not
+spell out:
 
-### Stage 3 — the entrance vortex unit
+- **The predicate is `isReinforcement()` AND `getTurnDeployed() > turn`, not the first alone.**
+  `getTurnDeployed` returns **1** for an OSAT, a base or terrain *before* it reaches the
+  reinforcement branch, so such a row carrying the flag is on the board on turn 1 while
+  `isReinforcement()` still answers true. Masking it would delete a visible unit — and change what
+  `getMinTurnDeployedSlot` tells `Manager::updateLateDeployments`, which **writes to the database**.
+- **`$this->ships` is replaced wholesale with an appended list, not `unset()` from.** `stripForJson`
+  maps it with `array_map`, which **preserves keys** given a single array, so a gap makes
+  `json_encode` emit a JSON *object* where the client requires a real array. `$shipsById` is then
+  dropped entirely: it is populated for **every** ship in the game long before this runs, because
+  `getMovesForShips` resolves every id during the DB load.
+- **The points go into the header total.** The owner's own copy already counts these units (the
+  `shipArray` loop has no deploy-turn filter, by design), so leaving them out of the enemy's copy
+  would make the two players' headers disagree about the same fleet — a louder tell than the number.
+  Same arithmetic as every other row: `pointCost` (×`flightSize/6` for a flight) `+ pointCostEnh
+  + pointCostEnh2`. ⚠️ **Never `pointCostSysEnh`** — `tac_ship.enhvalue` already holds all three
+  buckets and `getTacShips` reads it into `pointCostEnh`, so adding it double-counts.
+  ⚠️ A reinforcement **MINE** would be under-counted: `fleetList.js` prices mines with a fleet-wide
+  100pt premium and 10% per extra class, which this deliberately does not reproduce. Buying a mine
+  as a reinforcement is a nonsense purchase (it cannot arrive through a vortex it has no drive to
+  reach) but nothing forbids it yet.
+
+**Two residual leaks §3.6 did not list, both closed here, both outside `deleteHiddenData` because
+they are computed ONCE in `onConstructed` and are not per-viewer:**
+
+- **`setBlockedHexes`** would plant a phantom line-of-sight blocker for an **Enormous** reinforcement
+  at its slot's deployment-box centre — its only movement row is the `'start'` one every ship is
+  given — for *every* player including its owner, and it would survive the masking sweep. Now skips
+  `isReinforcement()`. ⚠️ Keyed on that specifically, **not** on a general `getTurnDeployed` test: a
+  late-SLOT Enormous unit has blocked its box's hex since long before this feature, and changing
+  that is a LoS rule change for existing games rather than a concealment fix.
+- **`isStealthPresent` / `areMinesPresent`** are one-bit broadcasts to every viewer ("somebody has a
+  cloak", "enemy mines are out there"). A hyperspace unit must not set either — the flag would
+  outlive the ship the sweep deletes a moment later. Now gated on `!isReinforcement()`.
+
+**Checked and clean, recorded so nobody re-derives it:** `Manager::updateLateDeployments` runs
+*after* `prepareForPlayer` and **writes to the database** off the per-viewer masked list — the first
+time in FV that a masked ship list drives a persistent write. It is unaffected, because
+`getMinTurnDeployedSlot` only reads the list to look for terrain/OSATs/bases, and the predicate keeps
+every one of those. Every `getShipById` that runs after the sweep (`hideDeploymentDocks`,
+`markJumpedDockedFlights`, `hideSystemFireOrders`, the gate-signal mask, the attached-mirror mask) is
+already null-safe, which matters because clearing `$shipsById` turns a formerly-cached hit into a
+`null`.
+
+⚠️ **KNOWN GAP, deferred to Stage 4:** the React ship window shows **no banner** for a unit in
+hyperspace. `ShipWindow.js`'s "Deploying on Turn N" banner is gated `deployTurn < 999`, a guard
+written for the surrender sentinel that now also swallows this case — so an owner opening a
+hyperspace unit's window sees an ordinary-looking sheet. The fleet list does label it (Stage 0), so
+this is a second-order gap; fixing it means a React source edit and a `UI.bundle.js` rebuild
+([[howto_verify_react_bundle]]), which is Stage 4's territory.
+
+**Verify from BOTH seats, by hand.** The harness's `masking` check does not cover this rule
+([[arch_placement_turn_vs_deploy_turn]]), so this stage has no regression net. Check the raw JSON,
+not just the rendered list — the whole point is that the ship object is *absent*, not hidden.
+
+**Already proven against real local games (in memory, no DB writes — flag a ship on the object
+returned by `DBManager::getTacGamedata`, then call `prepareForPlayer()` yourself, the way the replay
+harness does).** On game 3671 (a 850pt Vorlon Battle Destroyer) and game 4311 (a Gorith flight), for
+owner / enemy / observer / replay: owner's list unchanged and both slot fields 0; enemy's list
+exactly one ship shorter with the id **absent from the encoded JSON**, `"ships":[` still an array,
+and the slot reporting 1 unit at the right cost; observer (team `null`) masked like an enemy; the
+`$all` replay path unmasked. ⚠️ **The flight test needed forcing** — every flight in the corpus is
+six craft, so the `flightSize / 6` branch multiplies by exactly 1 and proves nothing left alone
+(the [[arch_blueprint_cache]] self-test trap). Forced to 3 it gives 120 and to 1 it gives 40, with
+enhancements added on top, so the branch really divides.
+
+### Stage 3 — the entrance vortex unit ✅ BUILT 2026-08-27
 `SpawnJumpPointEntrance`; autoload + statics; the one-way `instanceof` guards in
 `Movement::applyJumpOut` and the movement-phase tooltip; the blue outward `$facingArrow` on
 `ShipIcon`.
 
-**Verify:** spawn one by hand (or temporarily point an exit declaration at the new class). It must
-render blue with an outward arrow and refuse a Jump Out.
+**As built.** Four one-way guards rather than the two §2.6 counted, and they are cheap:
+`Movement::getOpenVortexInHex` (what the client's `getVortexInHex` mirrors — the Jump Out button
+never appears), `Movement::getJumpOutVortex` (every jump-out path funnels through it, so a forged
+order naming an entrance by id is refused), `Firing::getVortexDeclarationBlock`'s maintain branch
+(an entrance is one-shot and has no Maintain), and `JumpEngine::getVortexClosureReason` — which is
+**trap 5**, and goes *before* the gate branch because entrance-ness belongs to the vortex while
+gate-ness belongs to the engine, and the one-shot rule must win.
 
-### Stage 4 — the Call Reinforcements client flow
-The `#iniGui` button; the opener picker; the bespoke hex click mode with the legal-hex test; blue
+`spawnVortexUnit` took the `$class = 'SpawnJumpPoint'` parameter as designed; the name stays the
+literal `"Jump Point"` there and the subclass constructor overwrites it, so there is no second
+string to keep in step.
+
+⚠️ **The two vortex ART assets are named the other way round from what you expect**, and both
+predate this feature: `img/ships/JumpPointEntrance.png` is YELLOW and is worn by the **exit**;
+`img/ships/JumpPointExit.png` is BLUE and is worn by the **entrance**. The colour carries the
+meaning; do not rename the files ([[arch_image_cache_busting]]).
+
+**Deviation from §3.7 — no blue twins of the three arrow constants.** `img/directionOfVortexEntry.png`
+is the yellow asset mirrored **within its own alpha bounding box** (411,197)–(511,314) and recoloured
+`#ffd12b→#00b8e6` / `#7b6415→#005870`. It therefore occupies exactly the same 101×118 pixels of the
+same 512×512 canvas, so it shares `ShipIcon.FACING_ARROW_SCALE` with the yellow one and Stage 4 can
+share the other two. Three more numbers kept in step by eye is precisely trap 7; identical geometry
+makes them unnecessary. (Mirroring the *whole canvas* would be wrong — it puts the arrow on the
+opposite side of the hex.)
+
+**Verify:** spawn one by hand (or temporarily point an exit declaration at the new class). It must
+render blue with an outward arrow, sit *behind* units standing in its hex, stay out of the hex-stack
+picker, refuse a Jump Out, and — the trap-5 test — **close at the end of the turn after it opened**,
+freeing its opener's engine.
+
+### Stage 4 — the Manage Reinforcements client flow ✅ BUILT 2026-08-27, reworked 2026-08-28
+The `#iniGui` button; the opener menu; the bespoke hex click mode with the legal-hex test; blue
 `UI.vortexFacing`; the manifest dialog; the blue "Jump Point Forming" marker and reversed arrow in
 `BallisticIconContainer`.
 
@@ -457,15 +684,189 @@ The `#iniGui` button; the opener picker; the bespoke hex click mode with the leg
 `game.php` or the assignment wipes it — the hazard both `vortexFacing.js` and `gateSignal.js`
 document at the top of themselves.
 
+**As built** — `client/renderer/phaseStrategy/ReinforcementEntry.js`, a sibling of
+`MineDeployment.js`. It only *calls* `UI.vortexFacing` and never assigns `window.UI`, so it has no
+ordering constraint of its own. Four things worth recording:
+
+- ⚠️⚠️ **THE MODE HOLDS A SHIP ID, NEVER A SHIP OBJECT, and this is not a style preference.**
+  `gamedata.setShipsFromJson` REPLACES every entry of `gamedata.ships` with a fresh `new Ship(...)`
+  on each poll that carries ship data — and the mode is armed across exactly the window in which a
+  poll lands (the player is looking at the map choosing a hex; the facing control is open while they
+  turn the doorway). Pushing the order onto a captured `engine` would push it onto a discarded copy:
+  **the declaration would silently not happen**, with no error anywhere. The `onConfirm` closure
+  re-resolves through `gamedata.getShip(id)` at the moment of the tick for the same reason.
+- **The click is intercepted at `onClickEvent`, not `onHexClicked`.** `onHexClicked` is only reached
+  when the click landed on *no* icon — but a hex holding a ship is a perfectly legal entrance hex
+  (§2.2 forbids terrain, gates, vortices and Enormous units and nothing else) and a wave arriving on
+  top of somebody is the ordinary case. Hooking the later method would have silently refused every
+  occupied hex.
+- ⚠️ **An entrance order takes NO part in the ballistic icon or line pipeline.** It is collected into
+  its own list and drawn by `generateEntranceHexes`. `createBallisticIcon` opens with
+  `if (!shooterIcon) return;` and the shooter is in hyperspace, so it would drop the marker outright
+  — and if the opener ever *did* have an icon, the launch sprite and the ballistic line would be
+  drawn from its `'start'` row at the deployment-box centre: a bright line, on the map, from a ship
+  that is not there. Trap 10 turns out to be bigger than `targetid`.
+- **The legal-hex test reuses `weaponManager.getVortexHexBlock`** — the same sweep an exit uses, so
+  terrain footprints, gates and existing vortices are all caught for free — plus a map-bounds test
+  the exit path never needed. There is **no range and no LoS test**, by rule.
+
 **Verify:** the order reaches `tac_fireorder` with `damageclass='jumpentry'`, the right `x`/`y` and
 `firingmode`, and the manifest reaches `tac_ship.arrivalvia`. Discarding the control leaves nothing
 behind.
 
-### Stage 5 — server-side declaration validation
+#### Stage 4b — one menu, and the stranding warning ✅ BUILT 2026-08-28
+
+⭐ **THE BUTTON'S "HAS AN ORDER" STATE WAS A DEAD END, and that is the whole of this rework.**
+`buttonLabel()` flipped the `#iniGui` button to **Withdraw Jump Point** the instant any declaration
+stood, and `onButtonClicked` routed to `chooseWithdraw()` — so a fleet with three jump-capable
+hulls could open **exactly one doorway per turn**, and the only way to reach the second was to take
+the first one back. Reported 2026-08-28.
+
+The button now reads **Manage Reinforcements** (or **Cancel Jump Point** while the map is armed) and
+opens **one menu listing every jump-capable unit still in hyperspace**, declared or not:
+
+| Row state | Marked with | Primary button becomes |
+|---|---|---|
+| No declaration | its ship class | **Choose Hex** → arms the map |
+| Already holding one | `OPENING` tag, cyan row tint, `hex q,r — N units` | **Withdraw Jump Point** |
+| Already riding someone else's | `RIDING` tag, greyed, `riding <name>`, radio **disabled** | *not selectable* |
+
+**The greyed state** (`ridingWith`, user request 2026-08-28). A jump-capable unit that is on
+another ship's manifest is spoken for: opening a second doorway with it would have its drive
+holding one entrance open while it arrives through a different one, and the declaration and the
+manifest would disagree. The menu refuses the choice rather than letting it be made and then
+unpicked.
+
+- ⚠️ **`arrivalVia == its OWN id` is not riding with anybody** — that is what `createEntranceOrder`
+  stamps on an opener, because a drive always comes through its own doorway. Without that line
+  every opener would grey *itself* out the instant it declared and **Withdraw would be
+  unreachable**.
+- Nothing has to un-grey a row by hand: `withdraw()` clears the whole manifest it carried, so the
+  next render simply finds no standing declaration to ride.
+- ⚠️ **A greyed row is never pre-checked.** Its radio is `disabled`, so a player who wanted a
+  different unit could not move the selection off it — the dialog would be stuck. `openerRowsHtml`
+  picks the first *selectable* row, or the one it was asked to keep if that is still selectable.
+
+**Withdrawing keeps the window open** (user request 2026-08-28). It used to close the whole
+dialog, which made "move my jump point" three gestures — withdraw, reopen the menu, find the unit
+again — and hid the one thing the withdrawal had just changed: the passengers it freed. The list is
+now **re-rendered in place** (`render(keepSelectedId)`): the row loses its `OPENING` mark, the
+button reverts to **Choose Hex**, anything the withdrawal un-booked stops being grey, and the same
+unit stays selected, so re-placing it is the very next click. Declaring still closes the dialog —
+the map has to be visible for the hex click.
+
+- ⚠️ **The `change` handler is DELEGATED on the dialog root and bound once.** `render()` replaces
+  every row, so a handler bound to the inputs themselves would die with the markup it was attached
+  to — and the label would stop following the selection after the first withdrawal.
+- `syncLabel` tolerates nothing being checked (`.attr()` on an empty set is `undefined`, not a
+  throw) and the OK handler returns early on it, because in principle every row can be greyed.
+
+- **The primary button's label follows the radio selection**, re-synced on `change` *and* once up
+  front (the first row is pre-checked and may already be a declared unit). `fleetDialogShell` renders
+  that label from `data-label` through `content: attr(data-label)`, so setting the attribute is all
+  it takes; the button's own width is `auto` with a `min-width`, so the longer label fits.
+- ⚠️ **`data-declared` on the row is for the LABEL ONLY.** The click re-resolves the ship through
+  `gamedata.getShip` and re-reads `declarationOn` from the live object, because a poll can land while
+  the dialog is open — the same hazard the mode's ship-id rule exists for.
+- **The single-candidate shortcut survives, but only one way round.** One candidate with nothing
+  declared still goes straight to the map. One candidate that *is* declared always shows the menu:
+  the only thing it could do is withdraw, and withdrawing a jump point on an unconfirmed button click
+  is not something a player should be able to trip over.
+- `availableOpeners()` (which filtered declared units out) became `openerCandidates()` (which does
+  not); `chooseOpener` and `chooseWithdraw` are gone, replaced by `manageReinforcements`.
+
+⚠️ **Still deliberately not offered: re-editing a STANDING entrance's manifest.** A unit already
+assigned to entrance A is not listed in entrance B's manifest dialog, and the menu does not reopen
+A's — moving it means withdrawing A. That refusal predates this rework and is documented on
+`showManifestDialog` ("silently moving it would undo a choice the player has already made"), but
+multi-entrance turns make it far easier to reach, so it is a candidate if it starts to bite.
+
+**The stranding warning** (also user-reported 2026-08-28). A reinforcement with no jump drive of its
+own only ever arrives as a passenger. If the unit that opened this turn's doorway leaves it off the
+manifest and jumps in alone, **nobody able to open the next one is left in hyperspace** — those units
+are paid for and unusable for the rest of the battle, and nothing said so until the phase after the
+commit, by which time the order could not be taken back.
+
+`ReinforcementEntry.strandedByCommit()` owns the whole test and
+`gamedata.onCommitClicked`'s phase-1 block only renders it, beside the `vortexClosing` warning it is
+the exact sibling of. It is narrow on purpose and never cries wolf:
+
+| Situation | Says |
+|---|---|
+| Nothing departing this turn | *nothing* — the player can still call everybody in later |
+| Somebody able to open the next doorway stays behind | *nothing* — keeping a drive in reserve is a plan, not a mistake |
+| Otherwise | names the units that can never be called in |
+
+- ⚠️ **`ridingOut` tests the ORDER, not `arrivalVia`.** Being on a manifest is not enough — the
+  entrance it names has to still exist, and a declaration can be replaced as well as withdrawn.
+- ⚠️ **It reads the module, never `myShips`.** That list drops everything whose `getTurnDeployed` is
+  later than this turn, and a unit in hyperspace answers 999.
+- ⚠️ **It does not know about jump gates, and does not need to yet** — `canOpen()` excludes them
+  because gate ENTRANCE signalling is Stage 8 and is not built. When that lands, a gate this player
+  could signal **must** count as a remaining opener here or this will warn about fleets that are fine.
+
+**Already proven headless** (`vm`-evaluated against a stubbed client world, which is the
+[[howto_verify_react_bundle]] "bundle and evaluate" discipline — a parse check would not catch a
+missing global or a wrong predicate): eligibility across seven cases; the legacy / stale-blueprint /
+fixed-gate drive tests all refuse; the off-map bound accepted at q=21 and refused at q=22 of a 42x30
+map; an obstructed hex refused; right-click cancels; **and the mode still works after a simulated
+poll has replaced every ship object.** The order it builds carries `damageclass='jumpentry'`,
+`type='ballistic'`, `firingMode = facing+1`, the chosen x/y, and **`targetid = -1`**.
+
+### Stage 5 — server-side declaration validation ✅ BUILT 2026-08-27
 `getEntranceDeclarationBlock`; the `arrivalVia` whitelist + validation + `setShipArrivalVia`.
+
+✅ **THE STAGE-3 HAZARD IS NOW FIXED, BOTH HALVES.** `JumpEngine::getVortexDeclaration` did not
+filter `damageclass` and would have accepted an entrance order as an exit declaration — so
+`spawnDeclaredVortices` would have put a **yellow exit vortex at the entrance hex** at the end of
+Initial Orders, and `hasOpenVortex` would then have made Stage 6's own sweep return `null` at
+`spawnVortexUnit`'s first line. Both guards are in, deliberately redundant: the declaration reader
+skips a `'jumpentry'` order, and the sweep skips `isReinforcement()` units outright. Either alone
+would do; both together mean a future order shape cannot reintroduce it by accident.
+
+⚠️ Still unfixed and deliberately so: **`getMaintainDeclaration` cannot see the vortex class** (it
+takes only `$turn` and has no gamedata to resolve `activeVortexId` with), so the entrance's
+no-Maintain rule is enforced at `Firing::getVortexDeclarationBlock` and again in
+`getVortexClosureReason`, which returns before the maintain test is ever reached. That is two gates;
+a third would need a signature change for no new coverage.
+
+**As built**, with three things §3.5 did not anticipate:
+
+- ⭐⭐ **THE ENEMY'S BLUE MARKER NEEDED A CHANNEL OF ITS OWN, and §2.3 and §3.6 did not reconcile.**
+  §2.3 says the forming marker is what an opponent sees on turn N, and §3.6's ⭐ says the disclosure
+  is *"three units are coming, 1250 points, **somewhere near here**"* — but §3.6 also **deletes the
+  declaring ship from the enemy's payload, orders and all**, so there is nothing left to draw the
+  marker from. `PlayerSlot` therefore gained `formingEntrances` — a list of `{x, y, facing}` and
+  **nothing else**, never the opener, never the manifest — filled by the same sweep that removes the
+  ship. The owner draws the identical marker from its own fire order; `generateEntranceHexes` folds
+  both sources into one drawing. ⚠️ **Never published in phase 1**: a declaration is secret while
+  Initial Orders are open, which is the rule `hideSystemFireOrders` already enforces on the order.
+- **The rule check in `persistManifest` is an efficiency guard, not only a correctness one.** The
+  sweep needs a fresh gamedata load to answer anything, and that would be a **third** full load on
+  every Initial Orders commit of every game in the system. `hasRuleName('allowReinforcements')`
+  first means every game without the rule pays nothing at all.
+- **The map-bounds test is new** — the exit path never needed one, because a 4-hex projection range
+  from a ship on the board cannot reach off-map. `-1x-1` ("unlimited") is **not** unbounded: it is
+  the 60x40 default `BuyingGamePhase::getGamespace` substitutes, and both ends use that.
 
 **Verify:** a tampered POST (an opener that is not yours, one that is already on the board, an
 illegal hex) is rejected and logged, and never reaches the DB.
+
+**Already proven against three real local games** (3671, 4277 with 59 terrain rows, 4256), driving
+`Firing::validateFireOrders` directly with hand-built orders and in-memory reinforcement flags, no
+DB writes: the happy path and all six facings accepted; **refused** for a non-reinforcement, a
+reinforcement that already has an arrival turn, a submission by a player who does not own the unit,
+facing modes 0 and 7, an off-map hex, a missing hex, and a destroyed jump engine; a hex holding a
+moon and one holding an asteroid field both refused; **a hex far beyond the engine's projection
+range accepted**, which is the rule §2.2 states as an absence; the map bound accepted at q=21 and
+refused at q=22; a second declaration in one submission dropped while the first survives; and
+`getVortexDeclaration` ignoring a `'jumpentry'` order.
+
+⚠️ **One harness lesson worth keeping:** the first version of that test picked its "free hex" by
+looking for a hex with no ship *centre* in it, and every case passed on a game with no terrain while
+the happy path FAILED on one with moons. Terrain occupies a whole **footprint**
+(`RammingAttack::getTerrainOccupiedHexes`), so a hex with no centre in it can still be solid rock. A
+test that cannot tell "correctly refused" from "wrongly refused" is testing nothing.
 
 ### Stage 6 — the entrance forms, and it deviates
 `JumpEngine::spawnEntranceVortices($servergamedata, $dbManager)` in `FireGamePhase::advance`, after
@@ -551,6 +952,51 @@ through that vortex, on their arrival turn only) read from the `'VortexScatter'`
 13. **Leaving a slot recycles `tac_ship` ids.** No new shipid-keyed table is added here, so
     `deleteGames()` / `leaveSlot()` need nothing — but the three new columns live on `tac_ship`
     itself and go with the row ([[arch_orphan_shipid_rows_recycled_ids]]).
+14. **`$reinforcement` on a POST-side ship is a landmine, and only `$reinforcementClaim` may cross
+    the wire.** Stage 1's entry above has the reasoning; the two live sites are
+    `Hangar::generateIndividualNotes` and `HangarOps::validateDeployBayOrders`, and **Stage 7 runs
+    straight through both**. Fix them there by resolving through `$gamedata->getShipById($ship->id)`,
+    the way `DeploymentGamePhase::validateDeployment` already does.
+15. **`phpclass` is the persisted class identity, not `get_class()`.** Any future vortex subclass
+    must set it in its own constructor or it reloads as its parent. §3.3 and Stage 3.
+16. **A new spawnable class needs THREE registrations, not one:** the autoload map (or
+    `class_exists()` is false and the static generator skips the file *silently*),
+    `static/json/<faction>.json` for the lobby, and `JumpEngine::$spawnableClasses` for
+    `BlueprintCache` — which is what `game.php` actually reads, and the only one that matters for a
+    unit that appears mid-game on a poll.
+17. ⚠️⚠️ **A HELD SHIP OBJECT GOES STALE ON EVERY POLL.** `gamedata.setShipsFromJson` replaces every
+    entry of `gamedata.ships` with a fresh `new Ship(...)`, so any client state that outlives a
+    single event — a bespoke map mode, a dialog, a pending transaction — must hold an **id** and
+    re-resolve through `gamedata.getShip()`. The failure is silent: an order pushed onto a discarded
+    object's `fireOrders` never reaches the POST. Stage 4.
+18. **`Manager::updateLateDeployments` runs AFTER `prepareForPlayer` and writes to the database off
+    a per-viewer masked ship list** — the only such write in the game. It is safe today only because
+    `getMinTurnDeployedSlot` reads that list solely to look for terrain/OSATs/bases, every one of
+    which §3.6's predicate keeps. Any future masking rule that removes one of *those* breaks another
+    slot's Deployment scheduling, per viewer, in the database.
+
+19. **A REINFORCEMENT'S BALLISTIC ORDER HAS NO SHOOTER POSITION, and `TacGamedata::onConstructed`
+    assumed every ballistic shooter had one.** (Fixed 2026-08-28, user report.) The Jump Engine is
+    `$ballistic`, so an entrance declaration is an ordinary ballistic fire order — but its author is
+    in hyperspace, and `getLastTurnMovement()` skips every `'start'` row, so it answers **null**.
+    `array("x" => $movement->position->q, …)` was then a fatal `ErrorException` on **every gamedata
+    load from phase 2 of the turn the entrance was declared**, for both players, on every poll:
+
+    ```
+    Attempt to read property "position" on null … TacGamedata.php (171)
+    ```
+
+    ⚠️ **Phase-1 secrecy hid it.** `hideSystemFireOrders` strips every current-turn ballistic order
+    from every phase-1 payload *including its author's*, so the declaration is invisible to this loop
+    until Initial Orders are committed — which is exactly when the error appeared, and why it read as
+    "committing orders breaks the game" rather than "declaring an entrance does".
+
+    The guard is `if ($movement === null) continue;` — the general rule, deliberately not a
+    `damageclass === 'jumpentry'` test. Nothing wants the record either: `$this->ballistics` is
+    absent from `stripForJson` so it never reaches the client, the marker is drawn from the fire
+    order itself (`entranceOrders`, or the slot's `formingEntrances` for an enemy viewer), and the
+    only server-side consumer is the `hidetarget` mask — which an entrance is not subject to,
+    `hideHyperspaceReinforcements` having deleted the whole unit first.
 
 ---
 
@@ -577,6 +1023,18 @@ Local, two seats, in a game with the rule on:
 | 14 | A reinforcement group with no jump drive, no gate on the map | Warned at Ready |
 | 15 | Surrender a slot holding reinforcements | They vanish with the rest of the fleet |
 | 16 | `replayHarness.php check` | Green, or failing only on [[arch_replay_corpus_known_failures]] |
+| 17 | Commit Initial Orders on the turn an entrance is declared | No `ErrorException` in the PHP log for either player (trap 19) |
+| 18 | Save a mixed fleet, load it into another Allow-Reinforcements game | Flags come back; the groups and the points total match what was saved |
+| 19 | Load that same fleet into a game *without* the rule | Everything in the main fleet; no headers, no toggle, no Reinforce links |
+| 20 | Click MAIN FLEET / REINFORCEMENTS, then buy | The unit lands in the clicked group with no re-flag; the filter-strip tick agrees |
+| 21 | A Fleet Builder lobby | Headers, toggle and Reinforce links all present; save a mixed fleet and load it back into the Builder with the flags intact |
+| 22 | Two jump-capable reinforcements, declare with one | Manage Reinforcements still lists BOTH; the declared one is marked `OPENING` and offers Withdraw, the other offers Choose Hex |
+| 23 | Withdraw from the menu, then declare again | The order and the manifest both clear, and the second declaration is accepted |
+| 24 | Declare with your only opener, tick nobody onto the manifest, commit | Initial Orders confirm names the units that can never be called in |
+| 25 | Same, but a second jump-capable unit stays behind | No stranding warning |
+| 26 | Put a second jump-capable unit on the first one's manifest | It is greyed and `RIDING` in the menu, and cannot be selected |
+| 27 | Withdraw that first jump point | The menu stays open, the row reverts to Choose Hex, and the greyed unit is selectable again |
+| 28 | Lobby: tick Show Custom | The customs dropdown appears immediately right of the checkbox, before Buy as Reinforcement |
 
 ---
 

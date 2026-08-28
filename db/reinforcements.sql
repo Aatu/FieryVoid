@@ -29,3 +29,25 @@ ALTER TABLE `tac_ship`
   ADD COLUMN IF NOT EXISTS `reinforcement` tinyint(1) NOT NULL DEFAULT 0 AFTER `enhvalue`,
   ADD COLUMN IF NOT EXISTS `arrivalturn`   int(11)             DEFAULT NULL AFTER `reinforcement`,
   ADD COLUMN IF NOT EXISTS `arrivalvia`    int(11)             DEFAULT NULL AFTER `arrivalturn`;
+
+--
+-- SAVED FLEETS REMEMBER REINFORCEMENT STATUS (user request 2026-08-28).
+--
+-- This REVERSES the original §0 ruling ("saved fleets do not remember reinforcement
+-- status; a reloaded fleet buys everything front-line and the player re-flags").
+-- Re-flagging a dozen rows by hand after every load was the whole of the cost, and
+-- one tinyint is the whole of the fix.
+--
+-- ONE column, and only the PURCHASE-TIME flag. `arrivalturn` / `arrivalvia` are
+-- in-play state written by the server during a battle and mean nothing in a fleet
+-- list, so they get no column here: a reloaded reinforcement is always back in
+-- hyperspace, exactly as if it had just been bought.
+--
+-- Rows written before this column existed read 0, which is the old behaviour
+-- unchanged. Loading such a fleet into a game WITHOUT the Allow Reinforcements rule
+-- still lands everything front-line, because gamedata.isReinforcementRow gates on
+-- the rule as well as on the flag.
+--
+
+ALTER TABLE `tac_saved_ship`
+  ADD COLUMN IF NOT EXISTS `reinforcement` tinyint(1) NOT NULL DEFAULT 0 AFTER `enhvalue`;

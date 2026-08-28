@@ -611,7 +611,16 @@ window.gamedata = {
                the "Jump Point Forming" hex marker, the facing arrow and the Jump Engine's map arc
                all use (user request 2026-08-22).
                isJumpVortex holds the class name once, so this and the two movement sweeps that ask
-               the same question cannot drift apart. */
+               the same question cannot drift apart.
+
+               REINFORCEMENTS_PLAN.md §3.7 - AN ENTRANCE TAKES THE SAME TREATMENT IN THE OTHER
+               COLOUR: #00b8e6, FV's "not here yet" cyan, the same value as the blue Jump Point
+               marker and the fleet list's hyperspace rows. Leaving it unmatched would be worse than
+               either colour - it would fall through to the off-white below and read as an asteroid,
+               which is the exact confusion the yellow was introduced to prevent. */
+            if (shipManager.movement && shipManager.movement.isJumpVortexEntrance(ship)) {
+                return new THREE.Color(0x00 / 255, 0xB8 / 255, 0xE6 / 255).convertSRGBToLinear(); // hexBlue
+            }
             if (shipManager.movement && shipManager.movement.isJumpVortex(ship)) {
                 return new THREE.Color(0xE1 / 255, 0xB0 / 255, 0x00 / 255).convertSRGBToLinear(); // --fv-warn
             }
@@ -1172,6 +1181,35 @@ window.gamedata = {
                 html += "<br>";
                 for (var ship in vortexClosing) {
                     html += gamedata.shipNameSpan(vortexClosing[ship]);
+                    html += "<br>";
+                }
+                html += "<br>";
+            }
+
+            /* ⭐ REINFORCEMENTS_PLAN.md - REINFORCEMENTS ABOUT TO BE STRANDED FOR GOOD (user
+               report 2026-08-28). The exact sibling of the vortexClosing warning above, and it
+               exists for the same reason: the decision is irreversible one phase later, and
+               nothing said so.
+
+               A reinforcement with no jump drive of its own only ever arrives as a passenger. If
+               the unit that opened this turn's doorway leaves it off the manifest and jumps in
+               alone, nobody able to open the next one is left in hyperspace and those units are
+               unusable for the rest of the battle. ReinforcementEntry.strandedByCommit owns the
+               whole test (and stays silent unless it is really true - see the note on it there);
+               this only renders it.
+
+               ⚠️ Read from the module, NOT from myShips: that list drops everything whose
+               getTurnDeployed is later than this turn, and a unit in hyperspace answers 999.
+               Guarded on the module existing at all, exactly as drawIniGUI's button is. */
+            var strandedReinforcements = window.ReinforcementEntry
+                ? ReinforcementEntry.strandedByCommit() : [];
+            if (strandedReinforcements.length > 0) {
+                html += "These REINFORCEMENTS are not riding any jump point, and no unit able to "
+                    + "open another one will be left in hyperspace &mdash; they can NEVER be "
+                    + "called in: ";
+                html += "<br>";
+                for (var s = 0; s < strandedReinforcements.length; s++) {
+                    html += gamedata.shipNameSpan(strandedReinforcements[s]);
                     html += "<br>";
                 }
                 html += "<br>";
@@ -2389,6 +2427,38 @@ getActiveShipName: function getActiveShipName() {
                 // Append inside #iniGui so it sits naturally at the bottom of the panel
                 ini_gui.appendChild(mineBtn);
             }
+        }
+
+        /* REINFORCEMENTS_PLAN.md Stage 4 - MANAGE REINFORCEMENTS. Same shape as the mine button
+           above and for the same reason: a bespoke map mode needs somewhere to be switched on, and
+           #iniGui is where this game puts that.
+
+           The whole state machine lives in the module (ReinforcementEntry.buttonLabel /
+           onButtonClicked), so the label and the click cannot disagree - the button opens the
+           menu, or cancels the armed hex mode, and this loop only draws it. drawIniGUI is re-run
+           by the module after every state change, which is what repaints the label.
+           ⚠️ It no longer flips to "Withdraw Jump Point" when a declaration stands (user request
+           2026-08-28) - that state locked the player out of declaring a SECOND entrance with a
+           second jump-capable hull. Withdrawing is a row in the menu now.
+
+           Guarded on the module existing at all: game.php loads it `defer` alongside every other
+           phase-strategy file, but this method is also reached from the lobby's shared code paths
+           in some flows, where it is not loaded. */
+        var existingReinfBtn = document.getElementById('reinforcementEntryBtn');
+        if (existingReinfBtn) existingReinfBtn.parentNode.removeChild(existingReinfBtn);
+
+        if (window.ReinforcementEntry && ReinforcementEntry.isOffered()) {
+            var reinfBtn = document.createElement('button');
+            reinfBtn.id = 'reinforcementEntryBtn';
+            reinfBtn.textContent = ReinforcementEntry.buttonLabel();
+            if (ReinforcementEntry.isActive()) reinfBtn.classList.add('active');
+
+            reinfBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                ReinforcementEntry.onButtonClicked();
+            });
+
+            ini_gui.appendChild(reinfBtn);
         }
     },
 

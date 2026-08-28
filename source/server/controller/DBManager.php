@@ -261,6 +261,30 @@ class DBManager
     }
 
 
+    /* REINFORCEMENTS_PLAN.md §3.1 / Stage 5 - which opener's jump point entrance this unit is
+     * riding through. NULL clears the berth (a withdrawn declaration, a manifest the player
+     * un-ticked, or a claim the server did not believe).
+     *
+     * The opener and NOT the vortex, deliberately: the vortex does not exist when the manifest is
+     * named - it is created two phases later, and for a gate it may never be created at all if the
+     * claim is lost - so keying on the opener makes the refund automatic. A manifest that never
+     * gets a vortex is simply never stamped with an arrival turn.
+     *
+     * ⚠️ arrivalturn is NOT settable from here or from anywhere a POST can reach. It is written by
+     * the end-of-formation-turn deviation sweep alone; see db/reinforcements.sql.
+     *
+     * 'i' with an explicit null: bind_param sends a PHP null as SQL NULL for an integer parameter,
+     * which is what clears the column - do not "fix" it to 0, which is a real ship id. */
+    public function setShipArrivalVia($shipid, $openerid)
+    {
+        $stmt = $this->connection->prepare("UPDATE `tac_ship` SET arrivalvia = ? WHERE id = ?");
+        $via = ($openerid === null) ? null : (int)$openerid;
+        $id = (int)$shipid;
+        $stmt->bind_param('ii', $via, $id);
+        $stmt->execute();
+        $stmt->close();
+    }
+
     public function submitAmmo($shipid, $systemid, $gameid, $firingMode, $ammoAmount, $turn)
     {
         $stmt = $this->connection->prepare("
@@ -321,10 +345,23 @@ class DBManager
 		//Third bucket, same reasoning as submitShip above: a saved fleet's enhvalue has to carry
 		//the per-system refits or reloading it prices the ship short (D5).
 		$enhCostTotal = $ship->pointCostEnh + $ship->pointCostEnh2 + $ship->pointCostSysEnh;
+		/* REINFORCEMENTS_PLAN.md §0 - A SAVED FLEET DOES REMEMBER WHICH UNITS WERE REINFORCEMENTS
+		   (user request 2026-08-28; this reverses the original ruling, which was that it would
+		   not). Re-flagging a dozen rows by hand after every load was the whole of the cost.
+
+		   Only the PURCHASE-TIME flag travels. `arrivalturn` and `arrivalvia` are in-play state
+		   written by the server during a battle and mean nothing in a fleet list, so they get no
+		   column here - a reloaded reinforcement is always back in hyperspace, exactly as if it
+		   had just been bought.
+
+		   Reading as 0 on every row written before the column existed is the old behaviour
+		   unchanged, and loading into a game WITHOUT the rule still lands everything front-line
+		   because gamedata.isReinforcementRow gates on the rule as well as the flag. */
+		$reinforcement = !empty($ship->reinforcement) ? 1 : 0;
 
         $sql = "INSERT INTO tac_saved_ship
-                (userid, listid, name, phpclass, flightsize, bulkbuy, enhvalue)
-                VALUES (?, ?, ?, ?, ?, ?, ?)";
+                (userid, listid, name, phpclass, flightsize, bulkbuy, enhvalue, reinforcement)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $this->connection->prepare($sql);
         if (!$stmt) {
@@ -335,14 +372,15 @@ class DBManager
         //(MINE_DMG is 0.5/level), and truncating it here made a fleet reload dearer than it
         //was bought. See db/fractionalEnhancementValue.sql.
         $stmt->bind_param(
-            "iissiid",
+            "iissiidi",
             $userid,
             $listId,
             $shipName,
             $ship->phpclass,
             $flightsize,
             $bulkbuy,
-            $enhCostTotal
+            $enhCostTotal,
+            $reinforcement
         );
 
         if (!$stmt->execute()) {
@@ -495,7 +533,7 @@ class DBManager
 
         $stmt = $this->connection->prepare(
             "SELECT
-                id, userid, name, phpclass, flightsize, bulkbuy, enhvalue
+                id, userid, name, phpclass, flightsize, bulkbuy, enhvalue, reinforcement
             FROM
                 tac_saved_ship
             WHERE
@@ -505,7 +543,7 @@ class DBManager
 
         if ($stmt) {
             $stmt->bind_param('i', $listid);
-            $stmt->bind_result($shipid, $userid, $name, $phpclass, $flightsize, $bulkbuy, $enhvalue);
+            $stmt->bind_result($shipid, $userid, $name, $phpclass, $flightsize, $bulkbuy, $enhvalue, $reinforcement);
             $stmt->execute();
             while ($stmt->fetch()) {
                 $ship = new $phpclass($shipid, $userid, $name, 1);
@@ -521,6 +559,15 @@ class DBManager
 				//json_encoded to the client, where `pointCost + pointCostEnh` would then
 				//CONCATENATE instead of adding. See db/fractionalEnhancementValue.sql.
 				$ship->pointCostEnh = (float)$enhvalue;
+				/* REINFORCEMENTS_PLAN.md §0 - which units this fleet was saved with in hyperspace
+				   (user request 2026-08-28). $reinforcement is a public BaseShip property, so it
+				   rides the loadSavedFleet.php payload through json_encode with no extra plumbing;
+				   the lobby re-applies it in gamedata.loadSavedFleet, still gated on the game
+				   actually carrying the rule.
+				   $arrivalTurn stays null - a reloaded reinforcement is back in hyperspace, never
+				   mid-arrival - so isReinforcement() answers true, which is what a fresh purchase
+				   would do too. */
+				$ship->reinforcement = (bool)$reinforcement;
                 $ships[] = $ship;
             }
             $stmt->close();

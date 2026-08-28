@@ -247,8 +247,100 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
         }
 				
 
+        /* REINFORCEMENTS_PLAN.md §3.5 / Stage 5 - THE MANIFEST. Which of this player's hyperspace
+           units ride through which jump point entrance.
+
+           LAST, and after the fire orders have been validated and written, because that is what
+           decides which entrances actually exist: a declaration Firing rejected never reached the
+           DB, so a manifest naming its opener must not be believed either. $gd is re-read for the
+           same reason - it now holds this turn's surviving declarations. */
+        self::persistManifest($gameData, $dbManager, $ships);
+
         $dbManager->updatePlayerStatus($gameData->id, $gameData->forPlayer, $gameData->phase, $gameData->turn);
         $dbManager->setPlayerWaitingStatus($gameData->forPlayer, $gameData->id, true);
+    }
+
+    /* REINFORCEMENTS_PLAN.md §3.5 - VALIDATE AND PERSIST tac_ship.arrivalvia.
+     *
+     * The client sets ship.arrivalVia locally on each unit it wants to bring through; this is where
+     * that claim is checked and written. THE RULES, all three of them:
+     *
+     *   1. the unit must be the submitting player's own, and still in hyperspace
+     *   2. arrivalVia must name a unit of theirs that is ALSO still in hyperspace
+     *   3. that named unit must hold a legal 'jumpentry' declaration for THIS turn
+     *
+     * Anything else is written as NULL. Not rejected, not thrown on - NULL is the correct answer
+     * for "no berth", and a manifest is a preference rather than an order: the units simply stay in
+     * hyperspace and wait for another entrance.
+     *
+     * ⚠️ EVERY QUESTION IS ASKED OF THE SERVER-SIDE SHIP (plan trap 3). A POST-side ship carries no
+     * $reinforcement and no $arrivalTurn, so isReinforcement() on the posted object would answer
+     * false for everything and the whole manifest would be discarded; and the posted object's
+     * fireOrders are the ones just submitted, which is not the same thing as the ones that
+     * survived validation.
+     *
+     * ⚠️ WRITTEN EVERY SUBMISSION, INCLUDING THE UN-SETTING. A player who un-ticks a unit sends no
+     * arrivalVia for it, and that has to clear the column - so the sweep walks every hyperspace
+     * unit the player owns rather than only the ones the POST mentioned. Skipping the write when
+     * nothing changed keeps an ordinary turn's DB traffic at zero.
+     */
+    private static function persistManifest(TacGamedata $gameData, DBManager $dbManager, Array $ships)
+    {
+        /* ⚠️ THE RULE GATE IS AN EFFICIENCY GUARD AS WELL AS A CORRECTNESS ONE, and it must stay
+           first. This method needs a fresh gamedata load to answer anything, and that would be a
+           THIRD full load on every Initial Orders commit of every game in the system - including
+           the overwhelming majority that will never have a reinforcement in them. Off ⇒ there are
+           no reinforcements to have a manifest, so there is nothing to write and nothing to read. */
+        if (!$gameData->rules->hasRuleName('allowReinforcements')) return;
+
+        $gd = $dbManager->getTacGamedata($gameData->forPlayer, $gameData->id);
+
+        //What each unit CLAIMED, keyed by ship id. Absent means "no berth".
+        $claims = array();
+        foreach ($ships as $ship){
+            if ($ship->userid != $gameData->forPlayer) continue;
+            if ($ship->arrivalVia === null) continue;
+            $claims[(int)$ship->id] = (int)$ship->arrivalVia;
+        }
+
+        //Which of this player's hyperspace units hold a live entrance declaration this turn. Read
+        //off the freshly reloaded gamedata, so a rejected declaration is simply not here.
+        $openers = array();
+        foreach ($gd->ships as $unit){
+            if ($unit->userid != $gameData->forPlayer) continue;
+            if (!$unit->isReinforcement()) continue;
+
+            foreach ($unit->systems as $system){
+                if (!($system instanceof JumpEngine)) continue;
+
+                foreach ($system->fireOrders as $fire){
+                    if ($fire->damageclass !== 'jumpentry') continue;
+                    if ((int)$fire->turn !== (int)$gameData->turn) continue;
+                    if (!empty($fire->rejected)) continue;
+
+                    $openers[(int)$unit->id] = true;
+                    break 2;
+                }
+            }
+        }
+
+        foreach ($gd->ships as $unit){
+            if ($unit->userid != $gameData->forPlayer) continue;
+            if (!$unit->isReinforcement()) continue;
+
+            $wanted = isset($claims[(int)$unit->id]) ? $claims[(int)$unit->id] : null;
+            if ($wanted !== null && !isset($openers[$wanted])) $wanted = null; //no such entrance
+
+            $current = ($unit->arrivalVia === null) ? null : (int)$unit->arrivalVia;
+            if ($current === $wanted) continue; //nothing to write
+
+            $dbManager->setShipArrivalVia($unit->id, $wanted);
+
+            Debug::log("Jump point manifest: ship {$unit->id} arrivalvia "
+                . ($current === null ? 'NULL' : $current) . " -> "
+                . ($wanted === null ? 'NULL' : $wanted)
+                . " (game {$gameData->id}, turn {$gameData->turn}, player {$gameData->forPlayer}).");
+        }
     }
 
     /* JUMP_GATES_PLAN.md Stage 2 - THIS TURN'S GATE SIGNAL ORDERS ON A POSTED UNIT THE PLAYER DOES

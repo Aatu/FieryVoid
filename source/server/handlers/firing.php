@@ -138,6 +138,26 @@ class Firing
         //reach a spawn sweep that would refuse it silently.
         if ($weapon->isLegacyJump()) return "Jump Engine uses the legacy one-click jump";
 
+        /* ⭐⭐ REINFORCEMENTS_PLAN.md §3.4 - THE ENTRANCE BRANCH, TAKEN FIRST AND RETURNING, for
+           the same reason the gate branch below is: an entrance is a DIFFERENT DECLARATION that
+           happens to travel in the same fire-order shape, and almost none of the ship rules apply.
+
+             - THERE IS NO RANGE TEST AND NO LINE-OF-SIGHT TEST, and their absence is the rule and
+               not an omission (§2.2). The opener is in HYPERSPACE: it has no hex to measure either
+               from. getHexPos() would answer with its slot's deployment-box centre - the 'start'
+               movement row every ship is given - which is not a place it is, so a range test would
+               be a real number computed from a fiction.
+             - THERE IS NO OFFLINE TEST. A unit in hyperspace has no power allocation to be offline
+               in; the engine's power rows do not exist.
+             - THE CHARGE TEST DOES NOT APPLY either. A reinforcement has never been on the board,
+               so it has never spent its drive.
+
+           The discriminator is damageclass, mirroring 'jumppoint', and it is checked BEFORE the
+           gate branch so a forged 'jumpentry' on a gate engine takes the entrance list (which
+           refuses it, because a gate is not a hyperspace reinforcement) rather than the gate one. */
+        if ($fire->damageclass === 'jumpentry')
+            return self::getEntranceDeclarationBlock($fire, $weapon, $shooter, $gamedata, $fireOrders);
+
         /* ⭐⭐ JUMP GATES (PHASE 2) - THE GATE BRANCH, AND IT IS TAKEN FIRST AND RETURNS.
            (JUMP_GATES_PLAN.md Stage 3, traps 1-4.)
 
@@ -218,6 +238,17 @@ class Firing
             if (!($vortex instanceof SpawnJumpPoint))
                 return "this ship's vortex unit is gone";
 
+            /* REINFORCEMENTS_PLAN.md §2.6 / §2.3 - AN ENTRANCE HAS NO MAINTAIN. It is one-shot:
+               it forms at the end of the turn it was declared, delivers its manifest on the next,
+               and closes at the end of that one whatever anybody declares. The client never offers
+               the control (isJumpVortex stays exit-only, so JumpEngine.canMaintainVortex cannot see
+               an entrance), so only a tampered POST arrives here - but without this line a forged
+               mode-7 order would hold an entrance open indefinitely, and the ship that opened it
+               could never open anything else (trap 5).
+               Same shape and same reasoning as getMaintainDeclaration's gate refusal. */
+            if ($vortex instanceof SpawnJumpPointEntrance)
+                return "a jump point entrance is one-shot and cannot be maintained";
+
             if (!$vortex->getHexPos()->equals($target))
                 return "maintain must target this ship's own vortex hex";
 
@@ -248,6 +279,112 @@ class Firing
          * and not an Enormous unit. Terrain is tested across its WHOLE footprint, not just its
          * centre hex: an asteroid field's irregular hexOffsets shape and a moon's Huge radius both
          * count, which is what RammingAttack::getTerrainOccupiedHexes exists to answer. */
+        foreach ($gamedata->ships as $unit) {
+            if (!empty($unit->removed)) continue;
+            if ($unit->isDestroyed($gamedata->turn)) continue;
+
+            if ($unit->isTerrain()) {
+                foreach (RammingAttack::getTerrainOccupiedHexes($unit) as $hex) {
+                    if ($hex->q == $target->q && $hex->r == $target->r)
+                        return "target hex holds terrain (unit {$unit->id})";
+                }
+                continue; //Terrain is Enormous too - do not also run the test below on it
+            }
+
+            if ($unit->Enormous && $unit->getHexPos()->equals($target))
+                return "target hex holds an Enormous unit (unit {$unit->id})";
+        }
+
+        return null;
+    }
+
+    /* ⭐⭐ THE JUMP POINT ENTRANCE RULES (REINFORCEMENTS_PLAN.md §2.2 and §3.4). Returns null when
+     * the declaration is legal, or a short reason for the log when it is not - the same contract
+     * getVortexDeclarationBlock above has, and reached only from its entrance branch.
+     *
+     * The list is SHORT and almost none of it overlaps the ship list, which is the whole reason it
+     * is separate. What is here:
+     *
+     *   1. the opener is the submitting player's own unit
+     *   2. it is a reinforcement STILL IN HYPERSPACE
+     *   3. its engine is undestroyed and non-legacy (the caller has already refused a legacy one)
+     *   4. it has not already declared an entrance this turn
+     *   5. the facing is one of the six
+     *   6. the hex is on the map and free of obstructions
+     *
+     * ⚠️ $shooter IS THE SHIP FROM THE REAL GAMEDATA LOAD, not the POSTed one - the caller hands
+     * one of each, which is exactly what makes test 2 answerable. A POST-side ship carries no
+     * $reinforcement and no $arrivalTurn at all (plan trap 3), so asking the posted object would
+     * read every unit in the game as front-line and let anyone declare an entrance.
+     *
+     * ⚠️ NO RANGE, NO LINE OF SIGHT, NO OFFLINE TEST, NO CHARGE TEST. See the branch that calls
+     * this for why each one is the wrong question rather than a missing rule.
+     */
+    private static function getEntranceDeclarationBlock($fire, $weapon, $shooter, $gamedata, $fireOrders)
+    {
+        //1. YOUR OWN UNIT. A gate is the one thing in this game a player may order without owning
+        //   it, and an entrance is not that - the opener's own drive holds the doorway open.
+        if ($shooter->userid != $gamedata->forPlayer)
+            return "jump point entrance declared on a unit the player does not own";
+
+        //2. STILL IN HYPERSPACE. isReinforcement() is `bought as a reinforcement AND no arrival
+        //   turn yet`, which is precisely "has not been assigned an entrance". A unit that already
+        //   has one, or that was bought front-line, opens an EXIT like anything else on the board.
+        if (!$shooter->isReinforcement())
+            return "only a reinforcement still in hyperspace may open a jump point entrance";
+
+        //3. A WORKING DRIVE. isLegacyJump is already refused by the caller; a gate engine cannot
+        //   reach here either, because a gate is not a reinforcement and test 2 has just failed it.
+        //   isDestroyed is asked anyway: pre-battle damage can destroy a system before turn 1.
+        if ($weapon->isDestroyed($gamedata->turn))
+            return "Jump Engine is destroyed";
+
+        /* 4. ONE ENTRANCE PER UNIT. Only orders BEFORE this one in the submission count, so the
+              FIRST declaration survives and every later one is dropped - the same way round as the
+              ship rule, and for the same reason (scanning the whole array would reject the first
+              and keep the last).
+              ⚠️ Any JumpEngine order counts, not only another 'jumpentry': a unit in hyperspace has
+              no business declaring an exit either, and letting the two coexist would hand the Stage
+              6 sweep two declarations on one engine. */
+        foreach ($fireOrders as $other) {
+            if ($other === $fire) break;
+            if ($other->shooterid != $fire->shooterid) continue;
+            if ($other->turn != $gamedata->turn) continue;
+            if (!empty($other->rejected)) continue;
+            if ($shooter->getSystemById($other->weaponid) instanceof JumpEngine)
+                return "unit already has a jump point declaration this turn";
+        }
+
+        if ($fire->x === null || $fire->y === null || $fire->x === "null" || $fire->y === "null")
+            return "no target hex";
+
+        /* 5. THE FACING, stored as firingMode = facing + 1, exactly as an exit's is. Modes 1-6 only:
+              7 is MAINTAIN, which an entrance does not have (§2.3 - it is one-shot), so a mode-7
+              'jumpentry' is refused here rather than falling through to the maintain branch it can
+              never legally reach. */
+        $mode = (int)$fire->firingMode;
+        if ($mode < 1 || $mode > 6)
+            return "illegal entrance facing (firing mode $mode)";
+
+        $target = new OffsetCoordinate($fire->x, $fire->y);
+
+        /* 6a. ON THE MAP. The client tests the same bounds before it will even raise the facing
+               control; this is the half that a tampered POST meets. gamespace is a "WIDTHxHEIGHT"
+               string in which -1x-1 means "unlimited" - and unlimited is not unbounded, it is the
+               60x40 default BuyingGamePhase::getGamespace substitutes, which is what every fleet is
+               actually deployed into. */
+        $width = 60; $height = 40;
+        sscanf((string)$gamedata->gamespace, "%dx%d", $w, $h);
+        if ((int)$w > 0) $width = (int)$w;
+        if ((int)$h > 0) $height = (int)$h;
+
+        if (abs($target->q) > intdiv($width, 2) || abs($target->r) > intdiv($height, 2))
+            return "target hex ({$target->q},{$target->r}) is off the map";
+
+        /* 6b. FREE OF OBSTRUCTIONS. Identical to the exit rule and deliberately so: the hex may
+               hold ships, friendly or enemy - arriving units stack on it by design (§2.4) - but not
+               any part of a Terrain unit, which is what a jump gate and a vortex of either kind
+               also are, and not an Enormous unit. Terrain is tested across its WHOLE footprint. */
         foreach ($gamedata->ships as $unit) {
             if (!empty($unit->removed)) continue;
             if ($unit->isDestroyed($gamedata->turn)) continue;

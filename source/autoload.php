@@ -2965,6 +2965,7 @@ spl_autoload_register(
                 'spawndustfield' => '/server/model/weapons/customDevelopment.php',
                 'spawnhyperspacewaveform' => '/server/model/weapons/customDevelopment.php',
                 'spawnjumppoint' => '/server/model/ships/terrain/SpawnJumpPoint.php',
+                'spawnjumppointentrance' => '/server/model/ships/terrain/SpawnJumpPointEntrance.php',
                 'spawnmeteoroid' => '/server/model/weapons/customDevelopment.php',
                 'specialability' => '/server/model/systems/baseSystems.php',
                 'spinallaser' => '/server/model/weapons/lasers.php',

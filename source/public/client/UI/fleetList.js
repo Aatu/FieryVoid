@@ -487,6 +487,43 @@ window.fleetListManager = {
             fleetlistline.appendTo(fleetlisttable);
         }
 
+        /* REINFORCEMENTS_PLAN.md §3.6 - THE ENEMY'S VIEW OF A FLEET STILL IN HYPERSPACE: one row
+           carrying a count and a point total, and nothing else. Never classes, never names.
+
+           These two numbers are non-zero ONLY in a masked payload: the sweep that fills them
+           (TacGamedata::hideHyperspaceReinforcements) is the same one that deletes those units from
+           $this->ships, so the owner and their team never reach this branch - they got the real
+           rows, which the shipArray loop above has already listed and priced (it has no deploy-turn
+           filter, by design).
+
+           ⭐ THE POINTS GO INTO THE HEADER TOTAL, and that is the point of having them. The owner's
+           own copy already counts these units, so leaving them out here would make the two players'
+           headers disagree about the same fleet - which is itself a tell, and a louder one than the
+           number. Added BEFORE the Chameleon adjustment below so the curr/base ratio it computes
+           stays coherent.
+
+           Current == base: a unit that has never been on the board has taken no damage. */
+        var reinfCount = parseInt(slot.reinforcementCount, 10) || 0;
+        var reinfPoints = parseInt(slot.reinforcementPoints, 10) || 0;
+        if (reinfCount > 0) {
+            fleetlistline = template.clone(true);
+            //No .clickable and no id: there is no unit here to scroll to, and shouldBeHidden would
+            //refuse one anyway. Same reasoning as the mine group's un-clickable name above.
+            fleetlistline.html(
+                "<span>" +
+                "<span class='shipname hyperspace' style='cursor:default;' title='Bought as reinforcements and still in hyperspace'>Reinforcements</span>" +
+                "<span class='shipclass hyperspace'>" + reinfCount + (reinfCount === 1 ? " unit" : " units") + "</span>" +
+                "<span class='shiptype hyperspace'>Unknown</span>" +
+                "<span class='initiative hyperspace'>&mdash;</span>" +
+                "<span class='value hyperspace'>" + reinfPoints + "CP</span>" +
+                "<span class='shipstatus'></span></span>"
+            );
+            fleetlistline.appendTo(fleetlisttable);
+
+            totalBaseValue += reinfPoints;
+            totalCurrValue += reinfPoints;
+        }
+
         //Chameleon Sensor Suite: a disguised ship is valued off the simulacrum blueprint this viewer
         //was served, so a simulacrum dearer than the real hull inflates the total above what the slot
         //could legally spend — a fleet costing more than its budget is impossible, not just odd, and

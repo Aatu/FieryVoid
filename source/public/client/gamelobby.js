@@ -465,6 +465,227 @@ window.gamedata = {
 		return Boolean(slot) && slot.lastphase >= "-2";
 	},
 
+	/* ── REINFORCEMENTS (REINFORCEMENTS_PLAN.md §4 Stage 1) ─────────────────────────────
+	   A reinforcement is an ORDINARY purchase with one boolean on it. It costs the same, it
+	   comes out of the same point pool (fleetCost walks every row of the slot and does not
+	   ask), and it passes the same fleet-composition checks. All this section does is let
+	   the player set that boolean, show which rows carry it, and warn at Ready if nothing
+	   they own could ever bring them in.
+
+	   ⚠️ A PLAIN PROPERTY, never a class or a marker object. Lobby ship objects are
+	   jQuery.extend clones of the static blueprint, so every instanceof fails and there is no
+	   window.staticShips here ([[arch_lobby_ship_objects]]).                              */
+
+	/* Was this game created with Allow Reinforcements? Off ⇒ the whole feature is invisible:
+	   no toggle, no group header, no row link, and the server drops the flag anyway
+	   (BuyingGamePhase::process reads the rule, never the claim alone). */
+	reinforcementsAllowed: function reinforcementsAllowed() {
+		return Boolean(gamedata.rules && gamedata.rules.allowReinforcements);
+	},
+
+	/* Show or hide the buy-mode toggle, and force it off when the rule is not in play.
+	   Called from parseServerData, i.e. on every poll, because gamedata.rules only exists
+	   once the first payload has landed - the checkbox ships hidden in the markup. Cheap and
+	   idempotent: .toggle() and .prop() are no-ops when nothing has changed. */
+	applyReinforcementRule: function applyReinforcementRule() {
+		var allowed = gamedata.reinforcementsAllowed();
+		$(".reinforcement-mode-label").toggle(allowed);
+		if (!allowed) $("#reinforcementModeToggle").prop("checked", false);
+	},
+
+	/* Is the buy panel currently minting reinforcements? Read at PURCHASE time only - never
+	   stored anywhere but on the bought unit - so flipping it later cannot rewrite history. */
+	buyingReinforcement: function buyingReinforcement() {
+		if (!gamedata.reinforcementsAllowed()) return false;
+		return $("#reinforcementModeToggle").is(":checked");
+	},
+
+	/* Is this row a reinforcement? ONE place holds the test, because four sites ask: both row
+	   builders, the grouping sweep and the Ready warning. The rule gate is folded in so that
+	   a fleet carrying the flag from a game that HAD the rule reads as ordinary in one that
+	   does not - which is also what the server will do with it. */
+	isReinforcementRow: function isReinforcementRow(ship) {
+		return Boolean(ship && ship.reinforcement) && gamedata.reinforcementsAllowed();
+	},
+
+	/* Does this lobby unit mount a Jump Engine that could OPEN a jump point?
+
+	   Mirrors JumpEngine::getVortexDeclaration and Firing::getVortexDeclarationBlock's legacy
+	   test. $legacyJump is PROTECTED server-side and never reaches a blueprint, so the test is
+	   the three public properties markLegacy() flips: it clears ballistic and hextarget (and
+	   ShipCompactor strips a false key outright, so both read undefined on a legacy engine)
+	   and zeroes range. A live engine carries ballistic:true, hextarget:true, range>=1.
+
+	   ⚠️ ALL THREE, not one of them. range>0 alone lets through the nine engines in the stale
+	   uncompacted "Earth Alliance (Custom)" blueprint, which carry no ballistic/hextarget/range
+	   keys at all; ballistic && hextarget alone lets through the fixed jump gates, whose
+	   isGateJump() is invisible to the client. The gates are excluded by the caller instead -
+	   see readyReinforcementWarning - because a gate is exactly what makes a jump-drive-less
+	   reinforcement group legal.
+	   ⚠️ `s.range > 0`, not `s.range !== 0`: an absent key is undefined, and undefined !== 0. */
+	hasVortexJumpEngine: function hasVortexJumpEngine(ship) {
+		if (!ship || !ship.systems) return false;
+
+		for (var a in ship.systems) {
+			var s = ship.systems[a];
+			if (!s || s.name !== 'jumpEngine') continue;
+			if (!s.ballistic || !s.hextarget) continue; //markLegacy() cleared both
+			if (!(s.range > 0)) continue;               //markLegacy() zeroed it
+			return true;
+		}
+
+		return false;
+	},
+
+	/* Is this unit a fixed jump gate? Mirrors gamedata.isJumpGate in game.php's gamedata.js -
+	   JumpgateCapital ONLY. jumpgateNew and the civilian Jumpgate are obsolete, hidden from the
+	   store by variantOf, and must never match (JUMP_GATES_PLAN.md trap 12). */
+	isJumpGateRow: function isJumpGateRow(ship) {
+		return Boolean(ship) && ship.phpclass === 'JumpgateCapital';
+	},
+
+	/* Flip one bought row between the main fleet and hyperspace.
+
+	   ⭐ THE PER-ROW CORRECTION, not the primary control. Where a purchase LANDS is chosen
+	   before it is bought - by clicking one of the two group headers (setBuyTarget) or the
+	   store's "Buy as Reinforcement" tick - and a loaded fleet now comes back with the flags it
+	   was saved with (plan §0, reversed 2026-08-28). This link is what changes one row's mind
+	   afterwards. Keeping it out of the buy/edit dialogs also keeps it out of
+	   confirm.snapshotShip, whose fixed field list would otherwise have to learn about it or
+	   silently restore the old value on a cancelled edit. */
+	toggleReinforcement: function toggleReinforcement(id) {
+		if (!gamedata.reinforcementsAllowed()) return;
+
+		//Same refusal every other row action makes - the fleet has been POSTed by now, so
+		//anything authored afterwards is never submitted.
+		if (gamedata.fleetIsCommitted()) {
+			window.confirm.error("You have already readied your fleet!", function () { });
+			return;
+		}
+
+		for (var i in gamedata.ships) {
+			if (gamedata.ships[i].id != id) continue;
+			gamedata.ships[i].reinforcement = !gamedata.ships[i].reinforcement;
+			break;
+		}
+
+		//A full rebuild rather than a patch: the row's class, its action link and its position
+		//in the two groups all change together, and constructFleetList is the one place that
+		//knows how to write all three.
+		gamedata.constructFleetList();
+	},
+
+	/* Sort the fleet list into MAIN FLEET and REINFORCEMENTS, under one header each - and let
+	   those two headers double as the BUY TARGET selector (user request 2026-08-28).
+
+	   Called at the end of BOTH row-writing paths, for the same reason damagedShipBadge and
+	   enhancementListHtml are shared: constructFleetList throws every row away and rewrites it
+	   on every poll, while updateFleet appends one row at the end. Running here means a
+	   freshly bought unit lands in its group immediately instead of sitting at the bottom
+	   until the next poll.
+
+	   ⚠️ BOTH HEADERS ARE ALWAYS WRITTEN once the game carries the rule - empty group or not,
+	   and even on an empty fleet (user request 2026-08-28). They used to be conditional on there
+	   BEING a reinforcement, which is no longer possible: an EMPTY group's header is the click
+	   target that says "put the next purchase in here", so suppressing it would hide the only
+	   control that could ever fill it.
+
+	   ⚠️ IT REMOVES ITS OWN HEADERS FIRST, and that is load-bearing. constructFleetList clears
+	   the list with $(".ship.bought").remove() - there is no $("#fleet").empty() anywhere - so
+	   a header written by a previous pass would survive every rebuild and accumulate, once per
+	   poll, forever.
+
+	   ⚠️ The header must not carry the class `ship`, and must contain no .remove / .showship /
+	   .editship / .copyship / .reinforcetoggle element: #fleet's click handlers are delegated
+	   by those classes and resolve the row with closest(".ship"), which would come back empty.
+	   Its OWN handler is delegated on .fleet-group-header and reads data-buytarget off the
+	   header itself, so it never looks for a row either.
+
+	   .appendTo on an existing element MOVES it, preserving document order within the set, so
+	   the two groups keep the order the builder wrote them in. */
+	applyFleetGrouping: function applyFleetGrouping() {
+		$("#fleet .fleet-group-header").remove();
+		if (!gamedata.reinforcementsAllowed()) return;
+
+		//Which header is lit is exactly what #reinforcementModeToggle says - ONE source of truth
+		//for the buy mode, so the tick in the store's filter strip and the two headers can never
+		//disagree about where the next purchase is going to land.
+		var toHyperspace = gamedata.buyingReinforcement();
+		var marker = '<span class="fleet-group-target">buying here &#9656;</span>';
+
+		var reinforcements = $("#fleet .ship.bought.reinforcement");
+		var frontLine = $("#fleet .ship.bought").not(".reinforcement");
+
+		$('<div class="fleet-group-header buy-target' + (toHyperspace ? '' : ' selected') + '"'
+			+ ' data-buytarget="main" title="Buy the next unit into the main fleet">'
+			+ marker + 'MAIN FLEET</div>').appendTo("#fleet");
+		frontLine.appendTo("#fleet");
+
+		$('<div class="fleet-group-header reinforcement buy-target' + (toHyperspace ? ' selected' : '') + '"'
+			+ ' data-buytarget="reinforcement" title="Buy the next unit as a reinforcement">'
+			+ marker + 'REINFORCEMENTS'
+			+ '<span class="fleet-group-note">wait in hyperspace, arrive through a jump point</span>'
+			+ '</div>').appendTo("#fleet");
+		reinforcements.appendTo("#fleet");
+	},
+
+	/* Point the buy panel at one of the two groups, so a purchase lands where the player asked
+	   instead of arriving front-line and needing its Reinforce link clicked afterwards (user
+	   request 2026-08-28).
+
+	   ⭐ THE HEADERS ARE THE CONTROL, #reinforcementModeToggle IS THE STATE. No second flag is
+	   introduced: buyingReinforcement() already reads that checkbox at purchase time, and
+	   applyReinforcementRule already forces it off when the game does not carry the rule - so
+	   writing it from here is what keeps the header highlight, the lit-up filter-strip label and
+	   the flag actually stamped on the bought unit all saying the same thing.
+
+	   .prop() deliberately does not fire `change`, so the repaint is called explicitly. */
+	setBuyTarget: function setBuyTarget(target) {
+		if (!gamedata.reinforcementsAllowed()) return;
+		$("#reinforcementModeToggle").prop("checked", target === 'reinforcement');
+		gamedata.applyFleetGrouping();
+	},
+
+	/* The Ready-time warning for a reinforcement group that can never reach the battle, as an
+	   HTML string, or "" when there is nothing to say (plan §2.1).
+
+	   ⚠️ IT CAN ONLY SEE THIS PLAYER'S OWN PURCHASES, and says so. A lobby client is served NO
+	   ships at all - TacGamedata::prepareForPlayer empties the list for a LOBBY game and
+	   gamelobby.js discards serverdata.ships anyway - so gamedata.ships holds exactly what this
+	   browser has bought. An ally's gate is invisible here, which is why this is a warning the
+	   player confirms rather than a refusal. */
+	readyReinforcementWarning: function readyReinforcementWarning() {
+		if (!gamedata.reinforcementsAllowed()) return "";
+
+		var slotid = gamedata.selectedSlot;
+		var reinforcements = 0;
+		var opener = false;
+		var gate = false;
+
+		for (var i in gamedata.ships) {
+			var lship = gamedata.ships[i];
+			if (lship.slot != slotid) continue;
+
+			//A gate anywhere in the fleet will do - it does not have to be a reinforcement.
+			if (gamedata.isJumpGateRow(lship)) gate = true;
+			if (!gamedata.isReinforcementRow(lship)) continue;
+
+			reinforcements++;
+			//Only a unit that is ITSELF waiting in hyperspace can open its group's entrance.
+			if (gamedata.hasVortexJumpEngine(lship)) opener = true;
+		}
+
+		if (reinforcements === 0 || opener || gate) return "";
+
+		return '<span class="prebattle-note">'
+			+ '<span class="prebattle-note-label">WARNING:</span> '
+			+ 'None of your ' + reinforcements + ' reinforcement' + (reinforcements === 1 ? '' : 's')
+			+ ' mounts a usable jump drive, and you have bought no jump gate. Unless an ally '
+			+ 'provides one, they will stay in hyperspace for the whole battle and their points '
+			+ 'will be wasted.'
+			+ '</span>';
+	},
+
 	/* Broken-heart badge for a bought unit carrying pre-battle damage or criticals, as an
 	   HTML string ready to prepend to a fleet-list row. Empty string when it carries
 	   neither.
@@ -576,10 +797,22 @@ window.gamedata = {
 	   ONE builder for both row-writing paths (updateFleet and constructFleetList), which
 	   previously carried two near-identical copies of this markup. */
 	rowActionsHtml: function rowActionsHtml(ship) {
+		/* REINFORCEMENTS_PLAN.md §4 Stage 1 - the re-flag link, offered only when the game
+		   carries the rule so every other lobby's row is byte-identical to before. It reads as
+		   the ACTION, not the state (the state is the group the row sits in and the colour of
+		   its name), which is the convention the other four links follow. */
+		var reinforce = '';
+		if (gamedata.reinforcementsAllowed()) {
+			reinforce = gamedata.isReinforcementRow(ship)
+				? ' -<span class="reinforcetoggle clickable" title="Move this unit into the main fleet instead">Main Fleet</span> '
+				: ' -<span class="reinforcetoggle clickable" title="Hold this unit in hyperspace and bring it in through a jump point">Reinforcement</span> ';
+		}
+
 		return '<div class="ship-actions">' +
 			' <span class="showship clickable">Details</span> ' +
 			' -<span class="editship clickable">Edit</span> ' +
 			' -<span class="copyship clickable">Copy</span> ' +
+			reinforce +
 			' -<span class="remove clickable">Remove</span> </div>';
 	},
 
@@ -616,7 +849,11 @@ window.gamedata = {
 		//written HERE ONLY and vanished at the next fleet-list rebuild.
 		var damageBadge = gamedata.damagedShipBadge(ship);
 
-		var h = $('<div class="ship bought slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '">' +
+		//REINFORCEMENTS_PLAN.md §4 Stage 1: the row carries its own state as a class, so the
+		//grouping sweep and the CSS can both read it off the DOM without walking gamedata.ships.
+		var reinforcementClass = gamedata.isReinforcementRow(ship) ? ' reinforcement' : '';
+
+		var h = $('<div class="ship bought' + reinforcementClass + ' slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '">' +
 			damageBadge +
 			'<span class="shipname name">' + display.name + '</span>' +
 			'<span class="boughtShiptype">' + displayType + '</span>' +
@@ -628,6 +865,11 @@ window.gamedata = {
 		$(".remove", h).bind("click", function () {
 			delete gamedata.ships[a];
 			h.remove();
+			//REINFORCEMENTS_PLAN.md §4 Stage 1: the removed row leaves a gap in whichever group it
+			//sat in, and the two headers have to be re-drawn around what is left. This handler is a
+			//direct bind on a row updateFleet built, so - unlike the delegated twin in
+			//constructFleetList - it is the only one that runs and it does not rebuild the list.
+			gamedata.applyFleetGrouping();
 			gamedata.calculateFleet();
 			gamedata.populateFleetDropdown();
 		});
@@ -647,6 +889,11 @@ window.gamedata = {
 		});
 
 		h.appendTo("#fleet");
+		//REINFORCEMENTS_PLAN.md §4 Stage 1: this row was appended at the END of the list, so a
+		//freshly bought reinforcement would sit outside its own group until the next poll
+		//rebuilt the list. Re-sorting here costs nothing in a game without the rule -
+		//applyFleetGrouping returns on its second line.
+		gamedata.applyFleetGrouping();
 		gamedata.calculateFleet();
 	},
 	/*
@@ -1830,7 +2077,11 @@ window.gamedata = {
 			//this rebuild is exactly where the previous ' (damaged)' suffix was lost.
 			var damageBadge = gamedata.damagedShipBadge(ship);
 
-			var h = $('<div class="ship bought slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '">' +
+			//Re-derived from the ship, exactly like the badge above - this rebuild is where a
+			//row-only addition gets lost (REINFORCEMENTS_PLAN.md §4 Stage 1).
+			var reinforcementClass = gamedata.isReinforcementRow(ship) ? ' reinforcement' : '';
+
+			var h = $('<div class="ship bought' + reinforcementClass + ' slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '">' +
 				damageBadge +
 				'<span class="shipname name">' + display.name + '</span>' +
 				'<span class="boughtShiptype">' + displayType + '</span>' +
@@ -1888,7 +2139,36 @@ window.gamedata = {
 				}
 			}
 		});
+
+		/* REINFORCEMENTS_PLAN.md §4 Stage 1 - the re-flag link. DELEGATED ONLY, unlike the four
+		   closure bindings updateFleet also makes: this method runs from the inline
+		   parseServerData at page load, long before anything can be bought, so the handler is
+		   always in place by the time a row exists - and binding it only here means a row added
+		   by updateFleet cannot end up with two handlers and toggle twice. */
+		$("#fleet").off("click", ".reinforcetoggle").on("click", ".reinforcetoggle", function (e) {
+			gamedata.toggleReinforcement($(this).closest(".ship").data("shipindex"));
+		});
+
+		/* The two group headers AS the buy-target selector (user request 2026-08-28). Delegated for
+		   the same reason the re-flag link above is, only more so: applyFleetGrouping destroys and
+		   rewrites both headers on every poll, after every purchase and on every re-flag, so a
+		   closure binding would be thrown away and re-made constantly.
+		   The `change` binding is what keeps the highlight honest when the player uses the OTHER
+		   control - the "Buy as Reinforcement" tick in the store's filter strip - because that
+		   writes the same checkbox without going through setBuyTarget. Bound on document rather
+		   than on #fleet: the checkbox lives in the store panel, nowhere near the fleet list. */
+		$("#fleet").off("click", ".fleet-group-header").on("click", ".fleet-group-header", function (e) {
+			gamedata.setBuyTarget($(this).data("buytarget"));
+		});
+
+		$(document).off("change.buytarget", "#reinforcementModeToggle")
+			.on("change.buytarget", "#reinforcementModeToggle", function (e) {
+				gamedata.applyFleetGrouping();
+			});
 		//}
+
+		//After every row is written, never before: it sorts the rows it finds in the DOM.
+		gamedata.applyFleetGrouping();
 
 		gamedata.calculateFleet();
 	},
@@ -2560,6 +2840,11 @@ window.gamedata = {
 		gamedata.gamespace = serverdata.gamespace;
 		gamedata.rules = serverdata.rules;
 
+		//REINFORCEMENTS_PLAN.md §4 Stage 1 - the buy-mode toggle ships hidden in the markup and
+		//is revealed here, because this is the first point at which gamedata.rules exists. Runs
+		//on every poll; both calls inside are no-ops when nothing has changed.
+		gamedata.applyReinforcementRule();
+
 		if (gamedata.status == "ACTIVE") {
 			window.location = "game.php?gameid=" + gamedata.gameid;
 		}
@@ -2834,6 +3119,10 @@ window.gamedata = {
 		//OSATs as for mines - a bulk purchase is interchangeable units, so neither offers
 		//a name box.
 		ship.name = ship.shipClass;
+		//REINFORCEMENTS_PLAN.md §4 Stage 1 - same read as doBuyShip. A bulk row is ONE object
+		//standing for N units and BuyingGamePhase mints the copies with `clone $ship`, a shallow
+		//copy, so this one boolean reaches every unit in the row.
+		ship.reinforcement = gamedata.buyingReinforcement();
 
 		//A store blueprint's pointCost is pristine by definition.
 		gamedata.readBulkPurchase(ship, results.quantity, ship.pointCost);
@@ -2910,6 +3199,14 @@ window.gamedata = {
 			//same row, which would then take an inflated cost as its baseline.
 			var standIn = jQuery.extend({}, ship);
 			standIn.pointCost = pristinePointCost;
+			/* REINFORCEMENTS_PLAN.md §4 Stage 1 - and STRIP THE REINFORCEMENT FLAG off the
+			   stand-in. setShipsFromFaction runs every entry through new Ship(json), whose ctor
+			   copies EVERY key onto the instance, so whatever is registered here becomes the
+			   blueprint that every later getShipByType of this class returns - and an ad-hoc
+			   reinforcement:true would then be minted onto every FUTURE purchase of the class,
+			   silently. Exactly the hazard the pointCost line above exists for, and this branch
+			   fires only on a LOADED fleet, which is precisely the reinforcement-heavy case. */
+			delete standIn.reinforcement;
 			gamedata.setShipsFromFaction(ship.faction, [standIn]);
 			baseShip = gamedata.getShipByType(ship.phpclass);
 		}
@@ -2983,6 +3280,14 @@ window.gamedata = {
 			//the BARE hull's cost, same reasoning as in doEditBulk.
 			var standIn = jQuery.extend({}, copiedShip);
 			standIn.pointCost = gamedata.getPristinePointCost(copiedShip);
+			/* REINFORCEMENTS_PLAN.md §4 Stage 1 - and STRIP THE REINFORCEMENT FLAG off the
+			   stand-in. setShipsFromFaction runs every entry through new Ship(json), whose ctor
+			   copies EVERY key onto the instance, so whatever is registered here becomes the
+			   blueprint that every later getShipByType of this class returns - and an ad-hoc
+			   reinforcement:true would then be minted onto every FUTURE purchase of the class,
+			   silently. Exactly the hazard the pointCost line above exists for, and this branch
+			   fires only on a LOADED fleet, which is precisely the reinforcement-heavy case. */
+			delete standIn.reinforcement;
 			gamedata.setShipsFromFaction(copiedShip.faction, [standIn]);
 			newShip = gamedata.getShipByType(copiedShip.phpclass);
 		}
@@ -2994,6 +3299,9 @@ window.gamedata = {
 		newShip.pointCostEnh = copiedShip.pointCostEnh;
 		newShip.pointCostEnh2 = copiedShip.pointCostEnh2;
 		newShip.bulkBuy = copiedShip.bulkBuy;
+		//REINFORCEMENTS_PLAN.md §4 Stage 1 - same as copyShip: the copy starts where the
+		//original is. doCopyBulk receives this object unchanged, so nothing more is needed.
+		newShip.reinforcement = Boolean(copiedShip.reinforcement);
 		newShip.enhancementOptions = gamedata.cloneEnhancementOptions(copiedShip);
 		//DEEP clone - sharing the payload object would make damaging either row damage both.
 		if (window.battleDamage) {
@@ -3069,6 +3377,11 @@ window.gamedata = {
 		var name = $(".confirm input").val();
 		ship.name = name;
 		ship.userid = gamedata.thisplayer;
+		//REINFORCEMENTS_PLAN.md §4 Stage 1. Read off the buy panel, NOT off `ship` - this is a
+		//pristine blueprint clone (getShipByType deep-copies gamedata.allShips) and never
+		//carries the flag. A reinforcement costs the same and comes out of the same pool, so
+		//nothing below has to know about it.
+		ship.reinforcement = gamedata.buyingReinforcement();
 
 		if ($(".confirm .totalUnitCostAmount").length > 0) {
 			ship.pointCost = $(".confirm .totalUnitCostAmount").data("value");
@@ -3190,6 +3503,14 @@ window.gamedata = {
 			//later lookup of this class finds.
 			var standIn = jQuery.extend({}, copiedShip);
 			standIn.pointCost = gamedata.getPristinePointCost(copiedShip);
+			/* REINFORCEMENTS_PLAN.md §4 Stage 1 - and STRIP THE REINFORCEMENT FLAG off the
+			   stand-in. setShipsFromFaction runs every entry through new Ship(json), whose ctor
+			   copies EVERY key onto the instance, so whatever is registered here becomes the
+			   blueprint that every later getShipByType of this class returns - and an ad-hoc
+			   reinforcement:true would then be minted onto every FUTURE purchase of the class,
+			   silently. Exactly the hazard the pointCost line above exists for, and this branch
+			   fires only on a LOADED fleet, which is precisely the reinforcement-heavy case. */
+			delete standIn.reinforcement;
 			gamedata.setShipsFromFaction(copiedShip.faction, [standIn]);
 			newShip = gamedata.getShipByType(copiedShip.phpclass);
 		}
@@ -3197,6 +3518,9 @@ window.gamedata = {
 		newShip.name = copiedShip.name;
 		newShip.pointCost = copiedShip.pointCost;
 		newShip.flightSize = copiedShip.flightSize;
+		//REINFORCEMENTS_PLAN.md §4 Stage 1: a copy starts in the same place as its original,
+		//front-line or hyperspace. newShip is a fresh blueprint clone and carries nothing.
+		newShip.reinforcement = Boolean(copiedShip.reinforcement);
 		//Rows copied, not just the outer array - see cloneEnhancementOptions. Copying a ship
 		//and then changing the copy's enhancements used to rewrite the original's counts too.
 		newShip.enhancementOptions = gamedata.cloneEnhancementOptions(copiedShip);
@@ -3266,6 +3590,10 @@ window.gamedata = {
 		//different fields for a unit that is both (the flight-shaped MineClass customs).
 		var copiedFlightSize = window.battleDamage ? battleDamage.ordinalCount(ship) : null;
 		var copiedDamage = window.battleDamage ? battleDamage.clone(ship.preBattleDamage) : null;
+		//REINFORCEMENTS_PLAN.md §4 Stage 1 - captured for exactly the reason the damage above is:
+		//the next line REBUILDS the ship from its blueprint, which carries no ad-hoc property, so
+		//the flag copyShip set on this object is about to be thrown away.
+		var copiedReinforcement = Boolean(ship.reinforcement);
 
 		ship = gamedata.getShipByType(ship.phpclass); //Faction already set if not already when we called copyShip()
 
@@ -3273,6 +3601,7 @@ window.gamedata = {
 		ship.name = name;
 		ship.pointCost = newPointCost;
 		ship.userid = gamedata.thisplayer;
+		ship.reinforcement = copiedReinforcement;
 		if (copiedDamage) ship.preBattleDamage = copiedDamage;
 
 		if (ship.flight) {
@@ -3448,6 +3777,14 @@ window.gamedata = {
 			//which would then take an inflated cost as its baseline and double-count all over again.
 			var standIn = jQuery.extend({}, ship);
 			standIn.pointCost = pristinePointCost;
+			/* REINFORCEMENTS_PLAN.md §4 Stage 1 - and STRIP THE REINFORCEMENT FLAG off the
+			   stand-in. setShipsFromFaction runs every entry through new Ship(json), whose ctor
+			   copies EVERY key onto the instance, so whatever is registered here becomes the
+			   blueprint that every later getShipByType of this class returns - and an ad-hoc
+			   reinforcement:true would then be minted onto every FUTURE purchase of the class,
+			   silently. Exactly the hazard the pointCost line above exists for, and this branch
+			   fires only on a LOADED fleet, which is precisely the reinforcement-heavy case. */
+			delete standIn.reinforcement;
 			gamedata.setShipsFromFaction(ship.faction, [standIn]);
 			baseShip = gamedata.getShipByType(ship.phpclass);
 		}
@@ -3726,6 +4063,12 @@ window.gamedata = {
 				+ 'This fleet includes units with pre-battle damage and/or critical effects.'
 				+ '</span>';
 		}
+
+		//REINFORCEMENTS_PLAN.md §2.1 - a reinforcement group with no way in. Same note styling
+		//as the pre-battle warning above, and deliberately a WARNING the player confirms rather
+		//than a refusal: an ally's jump gate would make the fleet perfectly legal, and a lobby
+		//client cannot see one (it is served no ships at all).
+		readyMessage += gamedata.readyReinforcementWarning();
 
 		// Pass the submission function as a callback, not invoke it immediately
 		confirm.confirm(readyMessage, function () {
@@ -4085,6 +4428,25 @@ window.gamedata = {
 			ship.userid = parseInt(gamedata.thisplayer, 10);
 			ship.slot = parseInt(gamedata.selectedSlot, 10);
 			ship.loaded = true;
+			/* REINFORCEMENTS_PLAN.md §0 - A SAVED FLEET *DOES* REMEMBER REINFORCEMENT STATUS
+			   (user request 2026-08-28), and this is where it comes back. tac_saved_ship carries
+			   the flag, DBManager::getSavedShips reads it onto the ship and it rides the
+			   loadSavedFleet.php payload as an ordinary public property.
+
+			   ⚠️ GATED ON THE RULE, so a fleet saved from a game that HAD Allow Reinforcements
+			   still loads entirely front-line into one that does not. Without this the flag would
+			   sit on rows that no group header, no Reinforce link and no server-side reader would
+			   ever act on - invisible in the lobby, and dropped at buy time by
+			   BuyingGamePhase::process, which checks the rule before believing the claim.
+
+			   Written explicitly rather than left to the `new Ship(listShip)` copy so the property
+			   exists (as a real boolean) on every lobby ship object and isReinforcementRow never
+			   has to test for its absence.
+
+			   Only the purchase-time flag is restored: arrivalTurn/arrivalVia are in-play state
+			   and are never saved, so a reloaded reinforcement is back in hyperspace exactly as a
+			   freshly bought one is. */
+			ship.reinforcement = gamedata.reinforcementsAllowed() && Boolean(listShip.reinforcement);
 
 			if (ship.flight) {
 				// preserve original indexing for fighters

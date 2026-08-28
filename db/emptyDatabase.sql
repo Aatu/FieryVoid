@@ -530,6 +530,10 @@ CREATE TABLE `tac_saved_ship` (
   -- DECIMAL, not INT: MINE_DMG is priced at 0.5/level, so a per-unit enhancement cost is
   -- not always a whole number. See db/fractionalEnhancementValue.sql.
   `enhvalue` DECIMAL(10,2) NOT NULL DEFAULT 0,
+  -- Bought as a reinforcement, i.e. this unit waits in hyperspace (db/reinforcements.sql).
+  -- The PURCHASE-TIME flag only: arrivalturn/arrivalvia are in-play state and live on
+  -- tac_ship, never here.
+  `reinforcement` TINYINT(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `listid_key` (`listid`),
   CONSTRAINT `fk_ship_list`

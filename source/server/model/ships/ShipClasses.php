@@ -70,6 +70,17 @@ class BaseShip {
     public $reinforcement = false;
     public $arrivalTurn   = null;
     public $arrivalVia    = null;
+    /* REINFORCEMENTS_PLAN.md §4 Stage 1 — THE LOBBY'S CLAIM, AND DELIBERATELY NOT $reinforcement.
+       Carried RAW by Manager::getShipsFromJSON and consumed at exactly one place,
+       BuyingGamePhase::process, which checks the game rule and promotes it. Same idiom as
+       $preBattleDamage and $systemEnhancements below, and for a stronger reason than either:
+       $reinforcement is NOT inert. getTurnDeployed/getTurnPlaced read it, a POST-side ship never
+       carries $arrivalTurn, and so a POSTed ship with $reinforcement = true would answer 999 to
+       both accessors in every phase - which Hangar::generateIndividualNotes and
+       HangarOps::validateDeployBayOrders both ask of POST-side ships (plan trap 3). Keeping the
+       client's claim in its own field means $reinforcement always means "the DB said so", which is
+       what all ~80 getTurnDeployed call sites assume. NOT a tac_ship column. */
+    public $reinforcementClaim = false;
     public $unavailable = false;
     public $minesweeperbonus = 0;
     public $base = false;

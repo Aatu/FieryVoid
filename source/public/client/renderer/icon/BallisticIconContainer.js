@@ -40,6 +40,15 @@ window.BallisticIconContainer = function () {
 		//Collected in the same pass, and under exactly the same turn/phase/masking filter the
 		//markers themselves get, so the facing arrows can never outlive or precede their hex.
 		const jumpPointOrders = [];
+		/* REINFORCEMENTS_PLAN.md Stage 4 - ENTRANCE declarations, collected separately because
+		   almost nothing about them shares the exit path: they are drawn BLUE, their arrow uses the
+		   outward asset, and - the reason they cannot go through createBallisticIcon at all - their
+		   SHOOTER IS IN HYPERSPACE. That unit has no icon (shouldBeHidden keeps it off the board), so
+		   createBallisticIcon's `if (!shooterIcon) return;` would drop the marker outright; and if it
+		   ever DID have one, the launch sprite and the ballistic line would both be drawn from its
+		   'start' movement row at its slot's deployment-box centre - a bright line, on the map, from
+		   a ship that is not there, to the hex it is about to arrive in. */
+		const entranceOrders = [];
 
 		ballistics.forEach(ballistic => {
 			if (ballistic.turn === gamedata.turn || !replayData) {
@@ -69,6 +78,14 @@ window.BallisticIconContainer = function () {
 					if (!gateIcon || !gamedata.isJumpGate(gateIcon.ship)) {
 						jumpPointOrders.push(ballistic);
 					}
+				}
+
+				/* An entrance draws itself, below, and takes NO part in the icon or line pipeline - see
+				   the note on entranceOrders above. Returned from the forEach rather than filtered inside
+				   createBallisticIcon, so no half-built icon record is ever created for one. */
+				if (ballistic.damageclass === 'jumpentry') {
+					if (ballistic.x !== "null" && ballistic.y !== "null") entranceOrders.push(ballistic);
+					return;
 				}
 
 				createOrUpdateBallistic.call(this, ballistic, iconContainer, gamedata.turn, !!replayData);
@@ -137,6 +154,7 @@ window.BallisticIconContainer = function () {
 		generateTerrainHexes.call(this, gamedata);
 		generateReinforcementHexes.call(this, gamedata);
 		generateJumpPointArrows.call(this, jumpPointOrders);
+		generateEntranceHexes.call(this, gamedata, entranceOrders);
 		pruneSceneObjects.call(this);
 	};
 
@@ -484,6 +502,75 @@ window.BallisticIconContainer = function () {
 				return { object: sprite.mesh, release: () => releaseSprite(sprite) };
 			});
 		});
+	}
+
+
+	/* REINFORCEMENTS_PLAN.md Stage 4 / section 2.3 - A JUMP POINT ENTRANCE FORMING.
+
+	   On the turn it is declared THIS MARKER IS THE ENTRANCE: the vortex unit is not created until
+	   the end of that turn, and deliberately so - the deviation is rolled then, so until it has
+	   been rolled there is no true hex for anyone's payload to leak (section 2.3's concealment
+	   rule). What everyone sees for the whole of turn N is a blue hex at the DECLARED hex and an
+	   arrow showing which way units will come out of it.
+
+	   BLUE, not yellow: #00b8e6 is FV's 'not here yet' cyan and it is what tells an entrance from
+	   an exit at a glance. The arrow is the mirrored asset, pointing OUTWARD, because an
+	   entrance's facing is the doorway out rather than the mouth an exit is entered through.
+
+	   TWO SOURCES, ONE DRAWING. The OWNER sees their own declaration as a fire order and it
+	   arrives here. An ENEMY never does - TacGamedata::hideHyperspaceReinforcements deletes the
+	   whole opening ship from their payload, orders and all - so the server republishes just the
+	   hex and the facing on the PlayerSlot, and they are folded in here so both viewers get the
+	   identical marker from the identical code (section 3.6).
+
+	   ⚠️ Its own sweep rather than a line inside createBallisticIcon, for the reason
+	   generateJumpPointArrows gives: an existing ballistic icon is UPDATED, not rebuilt, on later
+	   polls, so a syncSceneObject call in there would run once and then let prune reclaim it. */
+	function generateEntranceHexes(gamedata, orders) {
+		const claimed = new Set();
+
+		const draw = (q, r, facing) => {
+			const hex = new hexagon.Offset(q, r);
+			const hexKey = `${hex.q},${hex.r}`;
+			if (claimed.has(hexKey)) return;
+			claimed.add(hexKey);
+
+			syncSceneObject.call(this, 'jumpentry:' + hexKey, String(facing), () => {
+				const sprite = new BallisticSprite(this.coordinateConverter.fromHexToGame(hex),
+					'hexBlue', 'Jump Point Forming', '#00b8e6');
+
+				return { object: sprite.mesh, release: () => releaseSprite(sprite) };
+			});
+
+			syncSceneObject.call(this, 'jumpentryArrow:' + hexKey, String(facing), () => {
+				const size = window.HexagonMath.getHexHeight() * VORTEX_ARROW_SCALE;
+				const sprite = new window.webglSprite('./img/directionOfVortexEntry.png',
+					{ width: size, height: size }, VORTEX_ARROW_Z);
+
+				sprite.setPosition(this.coordinateConverter.fromHexToGame(hex));
+				sprite.setFacing(-mathlib.hexFacingToAngle(facing));
+				sprite.setOpacity(VORTEX_ARROW_OPACITY);
+
+				return { object: sprite.mesh, release: () => releaseSprite(sprite) };
+			});
+		};
+
+		//The owner's own orders. firingMode is the storage for the facing - mode = facing + 1 - the
+		//same convention an exit uses, so the arrow maths is shared verbatim.
+		orders.forEach(order => {
+			const facing = (((parseInt(order.firingMode, 10) || 1) - 1) % 6 + 6) % 6;
+			draw(order.x, order.y, facing);
+		});
+
+		//The republished half, for a viewer whose payload has no opening ship to carry an order.
+		//Empty on the owner's own copy and on their team's, so the two can never double-draw - and
+		//`claimed` would drop the second one anyway if they ever did.
+		for (const key in gamedata.slots) {
+			const entries = gamedata.slots[key] && gamedata.slots[key].formingEntrances;
+			if (!Array.isArray(entries)) continue;
+
+			entries.forEach(entry => draw(entry.x, entry.y, (((parseInt(entry.facing, 10) || 0) % 6) + 6) % 6));
+		}
 	}
 
 

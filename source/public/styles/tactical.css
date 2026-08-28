@@ -2355,3 +2355,168 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     color: #bdd9eb;
     padding-left: 4px;
 }
+/* ── Reinforcements: calling a jump point entrance (REINFORCEMENTS_PLAN.md Stage 4) ──────
+   #00b8e6 throughout - FV's established "not here yet" cyan, the same value as the blue
+   Jump Point marker, the fleet list's .docked / .hyperspace rows and the fleet header's
+   [Deploys on Turn N]. Do NOT introduce a second blue for this. */
+
+/* The #iniGui button. Deliberately the same shape as #mineDeployBtn beside it - it is the
+   same kind of thing, a switch that arms a bespoke map mode - and differs only in the
+   ACTIVE colour, which is the feature's cyan rather than the minefield's green. */
+#reinforcementEntryBtn {
+    display: block;
+    width: 90%;
+    box-sizing: border-box;
+    margin: 10px auto 0px;
+    padding: 6px 10px;
+    background: #3793c82a;
+    border: 1px solid var(--fv-line-scs);
+    border-radius: 5px;
+    color: var(--fv-text);
+    font-family: arial, sans-serif;
+    font-size: 13px;
+    text-align: center;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
+    opacity: 0.9;
+}
+
+#reinforcementEntryBtn:hover {
+    background: #133e56;
+    border-color: #5a9abf;
+    color: #deebff;
+}
+
+#reinforcementEntryBtn.active {
+    background: rgba(0, 184, 230, 0.30);
+    border-color: #00b8e6;
+    color: white;
+    box-shadow: 0 0 8px rgba(0, 184, 230, 0.35);
+}
+
+/* The armed-mode instruction strip. Top-centre rather than anchored to anything on the
+   map, because the whole point of the mode is that the hex has not been chosen yet, so
+   there is nowhere on the map to anchor to. pointer-events on the strip itself would
+   swallow map clicks in the band it covers, so only the Cancel word takes them. */
+#reinforcementEntryBanner {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 8000;
+    pointer-events: none;
+    padding: 7px 14px;
+    background: rgba(4, 22, 28, 0.92);
+    border: 1px solid #00b8e6;
+    border-radius: 5px;
+    color: var(--fv-text);
+    font-family: arial, sans-serif;
+    font-size: 13px;
+    box-shadow: 0 0 10px rgba(0, 184, 230, 0.35);
+    white-space: nowrap;
+}
+
+#reinforcementEntryBanner b {
+    color: #00b8e6;
+}
+
+#reinforcementEntryBanner .reinforcementEntryCancel {
+    pointer-events: auto;
+    margin-left: 14px;
+    padding-left: 12px;
+    border-left: 1px solid rgba(0, 184, 230, 0.4);
+    color: #8ca5c0;
+    cursor: pointer;
+}
+
+#reinforcementEntryBanner .reinforcementEntryCancel:hover {
+    color: #deebff;
+}
+
+/* One row of the Manage Reinforcements / manifest dialogs. These ride confirm.fleetDialogShell,
+   so the surrounding window skin, the buttons and the click plumbing are all inherited;
+   only the rows themselves are new. The whole row is a <label>, so the class name is as
+   much of a hit target as the box. */
+.confirm.fleetDialog .reinforcementRow {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 4px 2px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(33, 90, 122, 0.35);
+}
+
+.confirm.fleetDialog .reinforcementRow:last-child {
+    border-bottom: none;
+}
+
+.confirm.fleetDialog .reinforcementRow:hover {
+    background: rgba(0, 184, 230, 0.08);
+}
+
+.confirm.fleetDialog .reinforcementRowName {
+    flex: 1 1 auto;
+    color: #00b8e6;
+    font-weight: bold;
+}
+
+.confirm.fleetDialog .reinforcementRowClass {
+    flex: 0 0 auto;
+    color: #8ca5c0;
+    font-size: 12px;
+}
+
+/* A unit that is ALREADY holding a jump point open, in the Manage Reinforcements menu (user
+   request 2026-08-28). The row has to say so at a glance, because picking it arms the opposite
+   action from every other row - the dialog's primary button reads "Withdraw Jump Point" instead
+   of "Choose Hex" (ReinforcementEntry.manageReinforcements). The tint alone would be too quiet
+   for that, hence the word as well as the colour.
+   #00b8e6 is the same "not here yet" cyan the rest of this feature uses; do not add a second. */
+.confirm.fleetDialog .reinforcementRow.reinforcementRowOpen {
+    background: rgba(0, 184, 230, 0.10);
+}
+
+/* Its own hover, because the plain .reinforcementRow:hover above carries the SAME specificity
+   and loses on source order - so without this an already-opening row would be the one row in
+   the list that did not light up under the cursor. */
+.confirm.fleetDialog .reinforcementRow.reinforcementRowOpen:hover {
+    background: rgba(0, 184, 230, 0.20);
+}
+
+/* A unit already booked to RIDE somebody else's jump point (user request 2026-08-28). Its radio
+   is `disabled`, so this is only the read-out of a refusal the markup already makes: opening a
+   second doorway with a unit that is arriving through a first one would have its drive in two
+   places at once.
+   ⚠️ The hover rule is a real override, not tidiness - .reinforcementRow:hover carries the same
+   specificity and only loses on source order, so a greyed row would otherwise light up under the
+   cursor exactly like a row that CAN be picked. It is listed after both hover rules above for
+   that reason; keep it there. */
+.confirm.fleetDialog .reinforcementRow.reinforcementRowRiding {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.confirm.fleetDialog .reinforcementRow.reinforcementRowRiding:hover,
+.confirm.fleetDialog .reinforcementRow.reinforcementRowOpen.reinforcementRowRiding:hover {
+    background: none;
+}
+
+/* Grey rather than cyan: the cyan tag means "this unit is HOLDING a doorway open", which is the
+   opposite state, and two cyan badges in one list would read as the same thing. */
+.confirm.fleetDialog .reinforcementRowTag.reinforcementRowTagRiding {
+    border-color: rgba(140, 165, 192, 0.55);
+    color: #8ca5c0;
+}
+
+.confirm.fleetDialog .reinforcementRowTag {
+    flex: 0 0 auto;
+    padding: 1px 5px;
+    border: 1px solid rgba(0, 184, 230, 0.55);
+    border-radius: 3px;
+    color: #00b8e6;
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
