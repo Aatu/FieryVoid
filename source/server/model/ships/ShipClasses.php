@@ -65,7 +65,7 @@ class BaseShip {
          $arrivalTurn    null = still in hyperspace; N = arrives and places on turn N. Written
                          ONLY by the server's end-of-formation-turn deviation sweep, never from
                          a POST.
-         $arrivalVia     the OPENER unit's id (a reinforcement ship, or a gate) whose entrance
+         $arrivalVia     the OPENER unit's id (a reinforcement ship, or a gate) whose exit
                          this unit is riding through. null = unassigned. */
     public $reinforcement = false;
     public $arrivalTurn   = null;
@@ -352,9 +352,63 @@ class BaseShip {
 					$mod += -15* $firstFighter->hasCritical("Uncontrolled", $gamedata->turn);
 			    }
 		    }
-            if (!empty($this->attached)) $mod += -10;//Attached Pods get -10 to Iniative as if just launched.            
+            if (!empty($this->attached)) $mod += -10;//Attached Pods get -10 to Iniative as if just launched.
 	    }
+
+	    //REINFORCEMENTS_PLAN.md STAGE 9 - a unit that has just come out of hyperspace off course
+	    //is disordered for the turn it arrives on. Outside the OSAT guard above: it applies to
+	    //everything that can ride a doorway, and an OSAT cannot be a reinforcement at all
+	    //(alwaysDeploysTurnOne refuses the flag at the buy), so the answer is 0 there anyway.
+	    $mod += $this->getReinforcementArrivalIniModifier($gamedata);
+
 	    return $mod;
+    }
+
+    /* ⭐⭐ REINFORCEMENTS_PLAN.md STAGE 9 - THE ARRIVAL INITIATIVE PENALTY.
+     *
+     * "Scatter hexes + 2 per 60 degrees of facing shift, applied to units arriving through that
+     * vortex, on their arrival turn only." A wave that comes out of hyperspace four hexes off
+     * course and turned sideways spends the turn sorting itself out.
+     *
+     *     -5 per hex of scatter          (1 tabletop initiative point)
+     *     -10 per 60 degrees of facing   (2 tabletop initiative points)
+     *
+     * ⚠️ FV INITIATIVE IS d100 AND EVERY MODIFIER IN THIS FILE IS FIVE TIMES ITS TABLETOP VALUE -
+     * the crit lines above are the reference (-5 is written "-1 Ini per crit", -20 is "-4 Ini per
+     * hit"), as is the -10 per point of speed below 5. Written x1 this rule would be worth a
+     * fifth of a point and would do nothing at all, while still looking implemented.
+     *
+     * abs() ON THE FACING STEPS. openExitVortex stores them signed and shortest-way-round (-2..3)
+     * because the log line reads better for it; turning left is exactly as disordering as turning
+     * right.
+     *
+     * ⭐ THE ORDER OF THE FIRST TWO TESTS IS THE EFFICIENCY GATE (Stage 9, refinement 4), and it is
+     * the cheap one first ON PURPOSE. getCommonIniModifiers runs for every ship at every turn
+     * advance, so this method is on the hottest path reinforcements touch. $reinforcement is a
+     * plain property read and is false for every unit of every ordinary game - so a game without
+     * the feature pays one boolean per ship per turn, and only a genuinely flagged unit ever
+     * reaches the rule lookup or the vortex walk.
+     *
+     * ⚠️ THE RULE TEST STILL HAS TO BE THERE, after it: the column survives in games whose rule was
+     * removed, and in the pre-fix fleets §5 trap 25 describes.
+     *
+     * ⚠️ ARRIVAL TURN ONLY, which isArrivingReinforcement is (arrivalTurn === this turn). It is not
+     * "has arrived": a unit that came through a badly-scattered doorway three turns ago is an
+     * ordinary ship and must roll like one.
+     *
+     * ⚠️ ASKED OF A REAL gamedata LOAD. The scatter is rebuilt from an IndividualNote on the
+     * opener's engine, which a POST-side object does not carry (plan trap 3). Both callers -
+     * Manager::generateIniative and SimultaneousMovementRule - roll on a full server load, which is
+     * also the only moment initiative is generated. */
+    public function getReinforcementArrivalIniModifier($gamedata)
+    {
+        if (empty($this->reinforcement)) return 0;
+        if (!$gamedata || !$gamedata->rules || !$gamedata->rules->hasRuleName('allowReinforcements')) return 0;
+
+        $scatter = JumpEngine::getArrivalScatter($this, $gamedata);
+        if ($scatter === null) return 0;
+
+        return -5 * (int)$scatter['hexes'] - 10 * abs((int)$scatter['facingSteps']);
     }
     
 
@@ -3250,7 +3304,7 @@ public function getAllEWExceptDEW($turn){
 	}
 
 	/* REINFORCEMENTS_PLAN.md §3.1 — "this unit was bought as a reinforcement and is STILL in
-	   hyperspace". Once the entrance it is riding forms, $arrivalTurn is stamped and it stops
+	   hyperspace". Once the exit it is riding forms, $arrivalTurn is stamped and it stops
 	   answering true: from then on it is an ordinary unit with a late deploy turn. */
 	public function isReinforcement(){
 		return $this->reinforcement && $this->arrivalTurn === null;
@@ -3284,7 +3338,7 @@ public function getAllEWExceptDEW($turn){
         $depTurn = $slot->depavailable;
 
         /* REINFORCEMENTS_PLAN.md §3.2 — THE ONE LOAD-BEARING CHANGE. A reinforcement's arrival
-           turn is decided IN PLAY (by the jump point entrance it comes through), not by its
+           turn is decided IN PLAY (by the jump point exit it comes through), not by its
            slot, so the slot's depavailable says nothing about it. null means it is still in
            hyperspace, which reads here as "not on the board" - and that single sentence is what
            makes it inert to firing, movement, EW, power, masking, the fleet list's deployable
@@ -3317,7 +3371,7 @@ public function getAllEWExceptDEW($turn){
       Bases/OSATs/Terrain place and arrive together on turn 1, so they fall out of getTurnDeployed
       already. The 999 surrender sentinel becomes 998, still far beyond any real turn.*/
     public function getTurnPlaced($gamedata){
-        /* REINFORCEMENTS_PLAN.md §3.2 / trap 2 — a REINFORCEMENT (the jump point entrance kind,
+        /* REINFORCEMENTS_PLAN.md §3.2 / trap 2 — a REINFORCEMENT (the jump point exit kind,
            not a late slot) places and arrives on the SAME turn. Its early warning is the blue
            jump point that formed LAST turn, not an early placement. Subtracting one here would
            grant it a Deployment phase a turn before its vortex exists, with nowhere legal for it

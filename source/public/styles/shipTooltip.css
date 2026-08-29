@@ -352,12 +352,12 @@
 }
 
 /* ⭐ REINFORCEMENTS_PLAN.md STAGE 8 - the ARRIVAL claim, and the icon is the BLUE vortex sprite
-   the entrance vortex itself wears (SpawnJumpPointEntrance::$imagePath). Yellow = leaving, blue =
+   the exit vortex itself wears (SpawnJumpPointExit::$imagePath). Yellow = leaving, blue =
    arriving is the pairing this whole feature is built on (plan section 3.7), so the two gate
    buttons differ by exactly the thing the two claims differ by, and by nothing else.
-   ⚠️ THE TWO ASSET NAMES ARE THE OTHER WAY ROUND FROM WHAT YOU EXPECT - JumpPointExit.png is the
-   BLUE art and is worn by the ENTRANCE. Both files predate this feature; see the ⚠️ on
-   SpawnJumpPointEntrance's constructor before "fixing" either name. */
+   ⚠️ THE TWO ASSET NAMES ARE THE OTHER WAY ROUND FROM WHAT YOU EXPECT - JumpPointEntrance.png is the
+   BLUE art and is worn by the EXIT. Both files predate this feature; see the ⚠️ on
+   SpawnJumpPointExit's constructor before "fixing" either name. */
 .signalJumpGateArrival {
     background-image: url("../img/JumpPointExitIcon.png");
     background-size: contain;

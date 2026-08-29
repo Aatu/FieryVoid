@@ -1045,8 +1045,8 @@ window.PhaseStrategy = function () {
                and recreated under the cursor. Dropping the vortex here fixes both at once: the
                hex reads as holding exactly the units that are really in it. */
             /* EITHER KIND (REINFORCEMENTS_PLAN.md §4 Stage 3). This is the strongest case on the
-               list for matching an entrance too: arriving reinforcements deliberately STACK in
-               the entrance hex, so if it stayed in this sweep every arrival-hex click would go
+               list for matching an exit too: arriving reinforcements deliberately STACK in
+               the exit hex, so if it stayed in this sweep every arrival-hex click would go
                through the stack picker with the vortex listed in it, and every hover would tear
                down and rebuild the tooltip - exactly the two symptoms described above, on the
                one hex where several units are guaranteed to be sharing space. */

@@ -232,12 +232,12 @@ window.UI.vortexFacing = {
         if (!pending || !window.webglScene || !window.webglScene.scene) return;
 
         var scene = window.webglScene.scene;
-        /* Stage 4: an ENTRANCE does not borrow the engine's mode names. They read "Vortex 0°" -
-           correct for an exit, where the mode IS the facing and the word is the thing being made,
-           but on an entrance the facing means the doorway OUT and "Vortex" is the wrong noun for a
+        /* Stage 4: an EXIT does not borrow the engine's mode names. They read "Vortex 0°" -
+           correct for an entrance, where the mode IS the facing and the word is the thing being made,
+           but on an exit the facing means the doorway OUT and "Vortex" is the wrong noun for a
            doorway units arrive through. The degrees are still shown, because the facing is exactly
            what this control exists to set. */
-        var label = UI.vortexFacing.isEntrance()
+        var label = UI.vortexFacing.isExit()
             ? ("Entry " + (pending.facing * 60) + "°")
             : ((pending.weapon.firingModes && pending.weapon.firingModes[pending.facing + 1]) || "Jump Point");
 
@@ -250,10 +250,10 @@ window.UI.vortexFacing = {
             UI.vortexFacing.hexSprite.destroy();
         }
         //Stage 4: the preview wears the same livery the COMMITTED marker will - a blue hex for
-        //an entrance, a yellow one for an exit - so confirming is visually a no-op either way.
-        var entrance = UI.vortexFacing.isEntrance();
+        //an exit, a yellow one for an entrance - so confirming is visually a no-op either way.
+        var exit = UI.vortexFacing.isExit();
         UI.vortexFacing.hexSprite = new BallisticSprite(UI.vortexFacing.gamePosition,
-            entrance ? "hexBlue" : "hexYellow", label, UI.vortexFacing.arrowColour());
+            exit ? "hexBlue" : "hexYellow", label, UI.vortexFacing.arrowColour());
         scene.add(UI.vortexFacing.hexSprite.mesh);
 
         if (!UI.vortexFacing.arrowSprite) {
@@ -262,8 +262,8 @@ window.UI.vortexFacing = {
             //sprite 1.15 hex-heights across lands the arrowhead on the hex SIDE the vortex faces -
             //which is the doorway the entry rule is about.
             var size = window.HexagonMath.getHexHeight() * UI.vortexFacing.MARKER_ARROW_SCALE;
-            //The ENTRANCE asset is the same glyph mirrored in place, so the size is unchanged.
-            var asset = entrance ? UI.vortexFacing.ENTRANCE_ARROW : UI.vortexFacing.EXIT_ARROW;
+            //The EXIT asset is the same glyph mirrored in place, so the size is unchanged.
+            var asset = exit ? UI.vortexFacing.EXIT_ARROW : UI.vortexFacing.ENTRANCE_ARROW;
             UI.vortexFacing.arrowSprite = new window.webglSprite(asset,
                 { width: size, height: size }, -99);
             UI.vortexFacing.arrowSprite.setPosition(UI.vortexFacing.gamePosition);
@@ -588,10 +588,10 @@ window.UI.vortexFacing = {
        one the vortex marker and its hex use - styles/tokens.css is the single :root block and the
        only place a colour is defined. Cached: the value cannot change without a reload. */
     arrowColour: function arrowColour() {
-        //The entrance livery is a flat literal rather than a token: --fv-custom IS the exit's
+        //The exit livery is a flat literal rather than a token: --fv-custom IS the entrance's
         //yellow, and tokens.css carries no cyan matching #00b8e6 (the same reason lobby.css
         //writes it as a literal beside its two siblings in tactical.css).
-        if (UI.vortexFacing.isEntrance()) return UI.vortexFacing.ENTRANCE_COLOUR;
+        if (UI.vortexFacing.isExit()) return UI.vortexFacing.EXIT_COLOUR;
 
         if (!UI.vortexFacing._arrowColour) {
             var token = "";
@@ -607,31 +607,31 @@ window.UI.vortexFacing = {
 
     _arrowColour: null,
 
-    /* ---------------- THE ENTRANCE LIVERY (REINFORCEMENTS_PLAN.md Stage 4) ----------------
-       The same control, in the other direction. An ENTRANCE is declared by a reinforcement that
+    /* ---------------- THE EXIT LIVERY (REINFORCEMENTS_PLAN.md Stage 4) ----------------
+       The same control, in the other direction. An EXIT is declared by a reinforcement that
        is still in hyperspace, and its facing is the doorway OUT rather than the mouth units
        cross inbound - so everything that says 'this is a vortex' swaps colour, and the arrow
        swaps asset:
 
-         yellow --fv-warn + directionOfVortex.png       an EXIT     - the mouth crossed inbound
-         cyan   #00b8e6   + directionOfVortexEntry.png  an ENTRANCE - the way units come out
+         yellow --fv-warn + directionOfVortex.png       an ENTRANCE     - the mouth crossed inbound
+         cyan   #00b8e6   + directionOfVortexEntry.png  an EXIT - the way units come out
 
        #00b8e6 is FV's established 'not here yet' cyan, shared with the blue Jump Point marker,
        the fleet list's hyperspace rows and the [Deploys on Turn N] header. Do not introduce a
        second blue.
 
        The two arrow assets are the SAME glyph mirrored inside its own bounding box, so they
-       share MARKER_ARROW_SCALE and need no second constant - see SpawnJumpPointEntrance.php. */
-    ENTRANCE_COLOUR: '#00b8e6',
-    ENTRANCE_ARROW: './img/directionOfVortexEntry.png',
-    EXIT_ARROW: './img/directionOfVortex.png',
+       share MARKER_ARROW_SCALE and need no second constant - see SpawnJumpPointExit.php. */
+    EXIT_COLOUR: '#00b8e6',
+    EXIT_ARROW: './img/directionOfVortexEntry.png',
+    ENTRANCE_ARROW: './img/directionOfVortex.png',
 
-    /* Is the transaction in progress an ENTRANCE? ONE place holds the test, because the preview
+    /* Is the transaction in progress an EXIT? ONE place holds the test, because the preview
        hex, the arrow asset and all three button glyphs ask it. Read off the pending payload
-       rather than any stored state, so a closed control answers false and the exit livery is
+       rather than any stored state, so a closed control answers false and the entrance livery is
        always the default. */
-    isEntrance: function isEntrance() {
-        return Boolean(UI.vortexFacing.pending && UI.vortexFacing.pending.entrance);
+    isExit: function isExit() {
+        return Boolean(UI.vortexFacing.pending && UI.vortexFacing.pending.exit);
     },
 
     /* drawUIElement's geometry without its bitmap step - all three buttons are placed with this

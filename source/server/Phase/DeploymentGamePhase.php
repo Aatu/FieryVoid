@@ -116,10 +116,10 @@ class DeploymentGamePhase implements Phase
      *
      * Placement is optional, so a wave of four can arrive as a wave of two. The two left behind are
      * not stranded and nothing about them is spent: both arrival fields are cleared, which puts them
-     * straight back where they were before the entrance formed - `reinforcement` with a NULL
+     * straight back where they were before the exit formed - `reinforcement` with a NULL
      * arrivalturn, which is exactly what BaseShip::isReinforcement() means by "in hyperspace". They
      * are concealed from the enemy again by hideHyperspaceReinforcements, they answer 999 to both
-     * turn accessors, and they can be named on the manifest of the next entrance anybody opens.
+     * turn accessors, and they can be named on the manifest of the next exit anybody opens.
      *
      * ⚠️ arrivalTurn MUST BE CLEARED, not just arrivalVia. Left set, the unit reads as an ordinary
      * ship that deployed on a turn now in the past - on the board, shootable, EW-relevant, and
@@ -134,7 +134,7 @@ class DeploymentGamePhase implements Phase
      * an arrival, and it deliberately writes no movement of its own.
      *
      * ⭐⭐ STAGE 8 - A GATE BERTH IS KEPT, A SHIP BERTH IS NOT, and §2.4 says exactly that: "an
-     * unplaced unit keeps its berth if the entrance will still be open next turn (a gate), and
+     * unplaced unit keeps its berth if the exit will still be open next turn (a gate), and
      * otherwise goes back to unassigned". A ship's doorway closes at the end of the turn it is used
      * on, so there is never anything to keep; a gate's may have three turns left on its programmed
      * hold, and making the player re-name the same manifest every turn would be busywork with a
@@ -142,7 +142,7 @@ class DeploymentGamePhase implements Phase
      *
      * ⭐ AND THE TEST IS "IS THE OPENER A GATE?", NOT "HOW MUCH HOLD IS LEFT?" - deliberately, and
      * this is the one design decision in the method. There are two moments that could decide this:
-     * here, in the Deployment phase, and the end-of-turn sweep (JumpEngine::collectGateEntrances /
+     * here, in the Deployment phase, and the end-of-turn sweep (JumpEngine::collectGateExits /
      * stampArrivingReinforcements) which already has to answer the identical question for every
      * berth in the game. Two answers means two chances to disagree, and a disagreement here is
      * invisible - a unit either quietly loses a berth it should have kept, or keeps a dead one. So
@@ -153,7 +153,7 @@ class DeploymentGamePhase implements Phase
      * arrival: the unit has to go back to isReinforcement() (concealed, 999 to both turn accessors,
      * re-stampable) or the ⚠️ above comes true.
      *
-     * $dbManager is deliberately UNTYPED, matching JumpEngine::spawnEntranceVortices - it is what
+     * $dbManager is deliberately UNTYPED, matching JumpEngine::spawnExitVortices - it is what
      * lets the Stage 7 harness drive this with a write-capturing stub and prove the release against
      * real recorded games with zero database writes. */
     private static function releaseUnplacedReinforcements(TacGamedata $gamedata, $dbManager,
@@ -189,7 +189,7 @@ class DeploymentGamePhase implements Phase
                 $dbManager->setShipArrivalVia($unit->id, null);
             }
 
-            Debug::log("Jump point entrance: ship {$unit->id} was not placed and returns to hyperspace"
+            Debug::log("Jump point exit: ship {$unit->id} was not placed and returns to hyperspace"
                 . ($keepsBerth ? ", keeping its berth on gate {$unit->arrivalVia}" : "")
                 . " (game {$gamedata->id}, turn {$gamedata->turn}).");
         }
@@ -199,7 +199,7 @@ class DeploymentGamePhase implements Phase
         if($ship->isTerrain()) return true; //When manually placing Terrain, they can go anywhere.
 
         /* REINFORCEMENTS_PLAN.md STAGE 7 - a unit coming out of hyperspace ignores its slot's
-           deployment box entirely and may stand in exactly one hex: the jump point entrance it is
+           deployment box entirely and may stand in exactly one hex: the jump point exit it is
            riding (plan §2.4). Taken BEFORE the box/distance branches and returning outright, because
            the box would say yes to a hex nowhere near the doorway - a reinforcement's slot is an
            ordinary slot and its box is wherever the fleet started.
@@ -267,7 +267,7 @@ class DeploymentGamePhase implements Phase
     /* REINFORCEMENTS_PLAN.md STAGE 7 - ONE HEX AND ONE FACING (plan §2.4).
      *
      * A reinforcement arrives THROUGH a doorway, so the doorway is the whole of its legal placement:
-     * the entrance's hex, on the entrance's facing, or nowhere. There is no box, no distance and no
+     * the exit's hex, on the exit's facing, or nowhere. There is no box, no distance and no
      * enemy-proximity rule to apply - the deviation roll already decided where the hex is, and a
      * player who dislikes where it landed may leave the unit in hyperspace instead (which is what
      * the partial-commit exemption in validateDeployment is for).
@@ -288,7 +288,7 @@ class DeploymentGamePhase implements Phase
     private static function validateReinforcementArrival($gamedata, $ship, $move) {
         $vortex = JumpEngine::getArrivalVortex($ship, $gamedata);
 
-        //No doorway: the entrance closed, was never formed, or the berth names something that is
+        //No doorway: the exit closed, was never formed, or the berth names something that is
         //not one. Nothing on the board is a legal hex for this unit, so refuse rather than fall
         //through to a slot box it has no business standing in.
         if ($vortex === null) return false;

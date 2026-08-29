@@ -526,30 +526,30 @@ window.gamedata = {
 		return !gamedata.isTerrain(ship.shipSizeClass, ship.userid);
 	},
 
-	/* Does this lobby unit mount a Jump Engine that could OPEN a jump point?
+	/* Does this lobby unit mount a Jump Engine that could bring its group OUT of hyperspace?
 
-	   Mirrors JumpEngine::getVortexDeclaration and Firing::getVortexDeclarationBlock's legacy
-	   test. $legacyJump is PROTECTED server-side and never reaches a blueprint, so the test is
-	   the three public properties markLegacy() flips: it clears ballistic and hextarget (and
-	   ShipCompactor strips a false key outright, so both read undefined on a legacy engine)
-	   and zeroes range. A live engine carries ballistic:true, hextarget:true, range>=1.
+	   ⭐⭐ ANY JUMP ENGINE, INCLUDING A LEGACY ONE (Stage 9, user ruling 2026-08-29). This used to
+	   be the three-property legacy test - markLegacy() clears ballistic and hextarget and zeroes
+	   range, and $legacyJump itself is PROTECTED server-side and never reaches a blueprint - which
+	   was right while only a B5 vortex could bring a wave in. It is wrong now: a Shadow hull
+	   PHASES in, and the server's arrival rules (Firing::getExitDeclarationBlock) contain no range,
+	   line-of-sight, offline or charge test for a legacy engine to fail. Narrowing this again would
+	   put the WARNING BELOW on a Shadow reinforcement group that is perfectly able to arrive - a
+	   scary, wrong message on a legal fleet, which is worse than no message at all.
 
-	   ⚠️ ALL THREE, not one of them. range>0 alone lets through the nine engines in the stale
-	   uncompacted "Earth Alliance (Custom)" blueprint, which carry no ballistic/hextarget/range
-	   keys at all; ballistic && hextarget alone lets through the fixed jump gates, whose
-	   isGateJump() is invisible to the client. The gates are excluded by the caller instead -
-	   see readyReinforcementWarning - because a gate is exactly what makes a jump-drive-less
-	   reinforcement group legal.
-	   ⚠️ `s.range > 0`, not `s.range !== 0`: an absent key is undefined, and undefined !== 0. */
-	hasVortexJumpEngine: function hasVortexJumpEngine(ship) {
+	   ⚠️ THE NAME IS THE WHOLE TEST, and it can be, because markLegacy() deliberately keeps $name
+	   'jumpEngine' (so SystemFactory reuses the client class) and PhasingDrive inherits it. This
+	   also now counts the nine key-less engines in the stale uncompacted "Earth Alliance (Custom)"
+	   blueprint, which is correct rather than tolerated: they are jump engines.
+	   ⚠️ It also counts a FIXED GATE's engine, whose isGateJump() is invisible to the client. That
+	   was true of the old test too and is handled by the caller - see readyReinforcementWarning,
+	   where a gate is exactly what makes a jump-drive-less reinforcement group legal anyway. */
+	hasArrivalJumpEngine: function hasArrivalJumpEngine(ship) {
 		if (!ship || !ship.systems) return false;
 
 		for (var a in ship.systems) {
 			var s = ship.systems[a];
-			if (!s || s.name !== 'jumpEngine') continue;
-			if (!s.ballistic || !s.hextarget) continue; //markLegacy() cleared both
-			if (!(s.range > 0)) continue;               //markLegacy() zeroed it
-			return true;
+			if (s && s.name === 'jumpEngine') return true;
 		}
 
 		return false;
@@ -694,8 +694,8 @@ window.gamedata = {
 			if (!gamedata.isReinforcementRow(lship)) continue;
 
 			reinforcements++;
-			//Only a unit that is ITSELF waiting in hyperspace can open its group's entrance.
-			if (gamedata.hasVortexJumpEngine(lship)) opener = true;
+			//Only a unit that is ITSELF waiting in hyperspace can open its group's exit.
+			if (gamedata.hasArrivalJumpEngine(lship)) opener = true;
 		}
 
 		if (reinforcements === 0 || opener || gate) return "";

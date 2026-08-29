@@ -2025,7 +2025,7 @@ class Manager{
                ⚠️ $arrivalTurn IS DELIBERATELY NOT WHITELISTED and must never be. It is written only
                by the end-of-formation-turn deviation sweep; a client that could set it could bring
                its own fleet out of hyperspace a turn early, at a hex of its choosing, with no
-               entrance in between. $reinforcement is not whitelisted here either - see the claim
+               exit in between. $reinforcement is not whitelisted here either - see the claim
                property above.
 
                (int) rather than a raw carry: mysqli and JSON disagree about number types, and the

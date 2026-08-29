@@ -82,7 +82,7 @@ window.ShipIcon = function () {
        a missing shipManager should cost a vortex its z-plane, not throw.
 
        EITHER KIND (isAnyJumpVortex). The only thing this drives is the −150 z-plane, and an
-       ENTRANCE needs it more than an exit does: arriving reinforcements deliberately stack in its
+       EXIT needs it more than an entrance does: arriving reinforcements deliberately stack in its
        hex, so the art has to sit behind them rather than over them
        (REINFORCEMENTS_PLAN.md §4 Stage 3). */
     ShipIcon.isVortex = function isVortex(ship) {

@@ -1,5 +1,5 @@
 --
--- Reinforcements — Jump Point ENTRANCES (REINFORCEMENTS_PLAN.md §3.1)
+-- Reinforcements — Jump Point EXITS (REINFORCEMENTS_PLAN.md §3.1)
 --
 -- Three columns on `tac_ship`, because each of them is written ONCE and never
 -- revised: there is no history to reconstruct, `getTurnDeployed` sits on ~80 hot

@@ -39,7 +39,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li><a href="#savedfleets">Battle Damage &amp; Saving Fleets</a></li>
                 <li><a href="#boarding">Boarding Actions</a></li>
                 <li><a href="#called">Called Shots</a></li>
-                <li><a href="#delayed">Delayed Deployment</a></li>
+                <li><a href="#delayed">Delayed Deployment Slot</a></li>
                 <li><a href="#notifications">Discord Turn Notifications</a></li>
                 <li><a href="#elint">ELINT &amp; Electronic Warfare (EW)</a></li>
                 <li><a href="#enormous">Enormous Units</a></li>
@@ -359,8 +359,13 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
-        <h3  id="delayed">Delayed Deployment</h3>
+        <h3  id="delayed">Delayed Deployment Slot</h3>
         <ul>
+            <li><b>This is not the same thing as <a style="font-size: 14px;" href="#reinforcements">Reinforcements</a>.</b> A Delayed Deployment Slot is a <i>scenario</i> setting: the game is
+            created knowing that a whole player slot turns up on a fixed turn, whatever happens in the battle, and it arrives wherever its Deployment Zone allows.
+            <b>Reinforcements</b> are bought by a player out of their own points, wait in hyperspace with no arrival turn at all, and only appear when one of their own jump-capable
+            ships (or a jump gate) opens a jump point for them — which can be any turn, or never. Delayed Deployment is decided before the game starts; Reinforcements are played.
+            See <a style="font-size: 14px;" href="#jump">Jump Drives</a> for how the latter work.</li>
             <li>You can select this option in the Create Game screen, by setting the <b>'Deploys on Turn'</b> field in a Player Slot to the Turn you wish that slot to deploy, or ‘jump in’.
             Ships cannot jump into hexes occupied by terrain or Enormous units, so make sure you make the Deployment Zone large enough!</li>
             <li><b>You choose your entry hexes a turn early.</b> A slot set to deploy on Turn 5 gets its Deployment Phase on <b>Turn 4</b>, where you position every arriving unit
@@ -754,6 +759,14 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
         <h3 id="jump" >Jump Drives</h3>
         <ul>
+            <li><b>There are two kinds of jump point, and the colour tells you which.</b> They are named from hyperspace's point of view, not the battle's:
+                <ul class="circle-list">
+                    <li>A <span style="color:#e1b000;"><b>yellow Jump Point Entrance</b></span> is a doorway <i>into</i> hyperspace. Units fly into it to <b>leave</b> the battle.
+                        This is the one a ship opens with its own Jump Drive, and everything in this section up to Reinforcements is about it.</li>
+                    <li>A <span style="color:#00b8e6;"><b>blue Jump Point Exit</b></span> is a doorway <i>out of</i> hyperspace. Reinforcements <b>arrive</b> through it.
+                        Nothing can go the other way &mdash; there is no Jump to Hyperspace button on a blue vortex, whoever opened it.</li>
+                </ul>
+            </li>
             <li>A ship equipped with a Jump Drive can use it to <b>open a jump point</b> &mdash; a vortex into hyperspace
                 that appears in a nearby hex for up to four turns &mdash; allowing units to leave the battle by <b>flying into it</b>. Any unit may use any
                 <i>open</i> jump point, including an enemy's, and including units with no Jump Drive of their own.</li>
@@ -801,6 +814,60 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 through one.</li>
             <li>The Jump Drive system usually cannot be turned off unless seriously damaged, but some scenarios allow it.
                 The game warns the player when attempting to deactivate this system improperly (e.g. without Desperate rules or 50%+ damage).</li>
+
+            <li id="reinforcements" style="margin-top:10px;"><b>REINFORCEMENTS &mdash; arriving through a jump point.</b> When the host ticks
+                <b>'Allow Reinforcements'</b> in the Create Game screen, a player may buy part of their fleet as reinforcements: units that start the battle
+                in <b>hyperspace</b> and come out of a <span style="color:#00b8e6;"><b>Jump Point Exit</b></span> one of their own ships opens during the game.
+                They come out of the same points pool as the rest of the fleet &mdash; a reinforcement is not free, it is a ship you have chosen not to bring
+                to the party yet. This is <i>not</i> the same as a
+                <a style="font-size: 14px;" href="#delayed">Delayed Deployment Slot</a>, which arrives on a fixed turn set before the game began.
+                <ul class="circle-list">
+                    <li><b>Buying them.</b> In Fleet Selection the store has two groups, <b>MAIN FLEET</b> and <b>REINFORCEMENTS</b>; pick the group before you
+                        buy, or use the <i>Reinforce</i> link on a bought row to move a unit between them. Saved fleets remember which group each unit was in.
+                        Terrain, Bases and OSATs cannot be reinforcements &mdash; they always deploy on Turn 1 &mdash; and the lobby will not let you put them
+                        in the group.</li>
+                    <li><b>Bring a way in.</b> At least one reinforcement needs a <b>Jump Drive</b> of its own, or your side needs a <b>Jump Gate</b> on the map.
+                        Without either, your reinforcements sit in hyperspace for the whole battle and their points are wasted &mdash; the lobby warns you
+                        before you click Ready.</li>
+                    <li><b>What the enemy sees.</b> Nothing but a line in your fleet list reading <i>Reinforcements &mdash; N units, X pts</i>. Not which hulls,
+                        not what they carry, not who can open a jump point. You see your own in full.</li>
+                    <li><b>Calling them in.</b> During <b>Initial Orders</b>, press <b>Manage Reinforcements</b>. Every jump-capable unit you have in hyperspace is
+                        listed; choose one, press <b>Choose Hex</b>, click the hex you want the jump point to open in, set the <b>facing</b> with the arrow
+                        control, and then tick the units that will ride through it &mdash; the <b>Jump Point Manifest</b>. The opening ship always rides its own
+                        jump point. A unit already riding somebody else's is greyed out; you can withdraw a declaration from the same menu and start again.</li>
+                    <li><b>The declaration is public once orders are committed</b> &mdash; everyone sees a <span style="color:#00b8e6;"><b>blue hex</b></span> with a
+                        facing arrow at the hex you named, for the rest of that turn. That warning is the price of arriving somewhere useful, and it is the same
+                        deal a Delayed Deployment Slot gets.</li>
+                    <li><b>You will probably miss.</b> At the end of the turn the jump point forms, and where it forms is a <b>deviation roll</b> against the
+                        opening ship's <b>sensor rating</b>: d20, modified by <b>&minus;1</b> for the Minbari Federation, <b>&minus;5</b> for an Ancient race
+                        (Vorlon, Shadow), <b>&minus;3</b> for a friendly base or OSAT on the map and <b>&minus;1</b> for a friendly ELINT vessel. A low roll
+                        arrives exactly where you aimed; a high one scatters 1d3, 1d6, 1d10 or 2d10+2 hexes in a random direction, and the worst two bands turn
+                        the facing as well. An Ancient fleet with a base on the map arrives precisely about 40% of the time; a young race with a sensor rating of
+                        10 is precise only on a natural 1. The Combat Log names the band, the roll and the distance, so you can see which happened. The jump
+                        point never forms inside terrain or an Enormous unit &mdash; if the dice put it there it is nudged to the nearest legal hex.</li>
+                    <li><b>Arriving.</b> On the <i>next</i> turn the owner gets a <b>Deployment Phase</b>. The wave places itself in the jump point's hex on the
+                        jump point's facing, stacked, and all you set is each unit's <b>speed</b>. Anything you leave unplaced goes back to hyperspace with
+                        nothing spent, and can be called in again later. A ship's jump point is <b>one-shot</b>: it closes at the end of the arrival turn, and the
+                        drive can then be used normally (including to open a way out).</li>
+                    <li><b>Arriving is disorderly.</b> A wave that comes out of hyperspace off course spends the turn sorting itself out: on its <b>arrival turn
+                        only</b>, every unit that rode that jump point takes an <b>initiative penalty of 1 per hex it scattered, plus 2 for every 60&deg; the
+                        facing was turned</b>. A precise arrival costs nothing at all, which is one more reason the modifiers above are worth having.</li>
+                    <li><b>Jump Gates.</b> A fixed Jump Gate can be signalled to open a jump point <i>inward</i> instead of outward: click the gate in Initial
+                        Orders and choose <b>Signal Gate for Arrival</b>, which opens the same Manifest window. A gate's jump point does not deviate &mdash; it
+                        opens in the gate's own mouth, on the gate's own facing, with no initiative penalty &mdash; and it stays open for its programmed hold, so
+                        it can bring a fresh wave through on <i>every</i> turn it stands. Pick the gate up again from Manage Reinforcements on later turns. A gate
+                        belongs to nobody: if two players signal the same gate in the same turn, the one whose nearest unit is closest wins it, and the loser's
+                        manifest is refunded to hyperspace with nothing spent. While the contest is live only the nearest side's marker is shown on the gate, so
+                        you can see whether you are going to get it.</li>
+                    <li><b>Shadows and other phasing hulls.</b> A Shadow ship does not tear a vortex open &mdash; it fades out, and from now on it fades back
+                        <b>in</b> the same way. It declares a hex exactly as anything else does and its arrival marker reads <b>REINFORCEMENTS</b>, but no jump
+                        point terrain ever appears: the ships simply <i>are</i> there on the arrival turn. Everything else &mdash; the deviation roll, the manifest,
+                        the Deployment Phase, the initiative penalty &mdash; is identical. Such a drive still cannot open a way <i>out</i>; it uses the old
+                        one-click Jump to Hyperspace for that.</li>
+                    <li><b>You cannot go back out the way you came.</b> A blue Jump Point Exit is one-way. To leave the battle you need a yellow Jump Point
+                        Entrance, which means opening one with a drive that has recharged.</li>
+                </ul>
+            </li>
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 

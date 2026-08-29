@@ -43,11 +43,11 @@ window.InitialPhaseStrategy = function () {
         return this;
     };
 
-    /* REINFORCEMENTS_PLAN.md Stage 4 - THE ENTRANCE HEX-PICK MODE GETS THE CLICK FIRST.
+    /* REINFORCEMENTS_PLAN.md Stage 4 - THE EXIT HEX-PICK MODE GETS THE CLICK FIRST.
 
        ⚠️ INTERCEPTED HERE AND NOT IN onHexClicked. onHexClicked is only reached when the click
        landed on NO icon (see PhaseStrategy.onClickEvent's icons.length branch) - but a hex holding
-       a ship is a perfectly legal place to open an entrance, and a wave arriving on top of somebody
+       a ship is a perfectly legal place to open an exit, and a wave arriving on top of somebody
        is the ordinary case. Hooking the later method would silently refuse every occupied hex.
 
        Consuming the click also means the ordinary select/target dispatch never runs, so arming the

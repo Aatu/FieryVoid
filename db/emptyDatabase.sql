@@ -414,7 +414,7 @@ CREATE TABLE `tac_ship` (
   `enhvalue` decimal(10,2) NOT NULL DEFAULT '0.00',
   -- Reinforcements (db/reinforcements.sql, REINFORCEMENTS_PLAN.md 3.1): bought as a
   -- reinforcement / the turn it arrives (NULL = still in hyperspace) / the id of the
-  -- opener unit whose jump point entrance it is riding through (NULL = unassigned).
+  -- opener unit whose jump point exit it is riding through (NULL = unassigned).
   `reinforcement` tinyint(1) NOT NULL DEFAULT '0',
   `arrivalturn` int(11) DEFAULT NULL,
   `arrivalvia` int(11) DEFAULT NULL,

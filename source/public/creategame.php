@@ -180,7 +180,7 @@
 
                 <!-- REINFORCEMENTS_PLAN.md 2.1: off means the whole feature does not exist -
                      the lobby sells no reinforcements, so nothing is ever flagged and no jump
-                     point entrance can be declared. -->
+                     point exit can be declared. -->
                 <div class="settings-group movementspacecontainer">
                      <input id="allowReinforcementsCheck" type="checkbox" name="allowReinforcementsCheck"> <label for="allowReinforcementsCheck" class="clickable">Allow Reinforcements</label>
                 </div>

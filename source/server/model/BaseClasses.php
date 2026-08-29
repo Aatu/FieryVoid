@@ -92,7 +92,7 @@ class PlayerSlot {
       Populated only in a MASKED payload, and only from phase 2 onward: a declaration is secret
       while Initial Orders are open, which is the same rule hideSystemFireOrders enforces on the
       order itself.*/
-    public $formingEntrances = array();
+    public $formingExits = array();
 
     function __construct(
         $playerid, $slot, $team, $lastturn, $lastphase, $name, $points,

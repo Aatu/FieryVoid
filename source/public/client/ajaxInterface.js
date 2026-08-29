@@ -1153,7 +1153,7 @@ window.ajaxInterface = {
                 }
 
                 /* THE MANIFEST (REINFORCEMENTS_PLAN.md §3.5, Stage 4). arrivalVia names the OPENER
-                   unit whose jump point entrance this unit is riding through - never the vortex,
+                   unit whose jump point exit this unit is riding through - never the vortex,
                    which does not exist yet and for a gate may never exist at all.
 
                    ⚠️ THIS IS THE ONLY ONE OF THE THREE REINFORCEMENT FIELDS THE CLIENT MAY SEND.

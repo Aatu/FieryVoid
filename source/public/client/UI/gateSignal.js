@@ -15,13 +15,13 @@
 
    ⭐ REINFORCEMENTS_PLAN.md STAGE 8 - THE SAME PANEL SIGNALS FOR ARRIVAL, and the difference is a
    class and a word. A second tooltip button, "Signal Gate for Arrival", raises the identical
-   transaction with pending.entrance set; open() then puts .gateSignalEntrance on the container -
+   transaction with pending.exit set; open() then puts .gateSignalExit on the container -
    which re-liveries the whole panel in FV's "not here yet" cyan through the --gs-* tokens
    tactical.css defines it with - and relabels the commit "Signal for Arrival". THE DURATION IS
-   STILL THE ONLY THING THE PLAYER CHOOSES: an entrance has no facing to aim any more than an exit
+   STILL THE ONLY THING THE PLAYER CHOOSES: an exit has no facing to aim any more than an entrance
    does, because a gate's facing was fixed when the gate was placed.
 
-   Pressing it builds a claim with damageclass 'gateentry' and then opens the Jump Point Manifest
+   Pressing it builds a claim with damageclass 'gateexit' and then opens the Jump Point Manifest
    dialog (user request 2026-08-28) - see weaponManager.createGateSignalOrder, which owns both.
 
    ⭐ IT IS THE REACT POWER SETTINGS MENU'S BOOST ROW (user request 2026-08-23), redrawn in plain
@@ -227,7 +227,7 @@ window.UI.gateSignal = {
         return UI.gateSignal.pending !== null && UI.gateSignal.pending === pending;
     },
 
-    /* pending = { gate, engine, hexpos, hold, maxHold, entrance, onConfirm } - raised by
+    /* pending = { gate, engine, hexpos, hold, maxHold, exit, onConfirm } - raised by
        weaponManager.queueGateSignalOrder and relayed here by PhaseStrategy.onGateSignalRequested. */
     open: function open(pending) {
         UI.gateSignal.initGateSignalUI();
@@ -235,17 +235,17 @@ window.UI.gateSignal = {
 
         /* ⭐ REINFORCEMENTS_PLAN.md STAGE 8 - THE BLUE LIVERY, AND IT IS ONE CLASS AND ONE LABEL.
            An ARRIVAL claim asks the gate for a doorway IN, and #00b8e6 is FV's established "not
-           here yet" cyan - the colour of the Forming marker, the entrance vortex and the fleet
+           here yet" cyan - the colour of the Forming marker, the exit vortex and the fleet
            list's hyperspace row (plan section 3.7). The panel is otherwise the identical control:
-           the one thing a gate lets a player choose is still the duration, and an entrance has no
-           facing to aim any more than an exit does.
+           the one thing a gate lets a player choose is still the duration, and an exit has no
+           facing to aim any more than an entrance does.
 
            ⚠️ SET ON EVERY OPEN, BOTH WAYS. The panel is a singleton reused across transactions, so
-           an entrance claim followed by an ordinary one would leave the blue behind - toggleClass
+           an exit claim followed by an ordinary one would leave the blue behind - toggleClass
            with an explicit second argument, never a bare add. Same for the label: it is written
            here rather than in game.php because the markup has one button and two meanings. */
-        UI.gateSignal.uiElement.toggleClass("gateSignalEntrance", !!pending.entrance);
-        UI.gateSignal.confirmElement.text(pending.entrance ? "Signal for Arrival" : "Signal Jump Gate");
+        UI.gateSignal.uiElement.toggleClass("gateSignalExit", !!pending.exit);
+        UI.gateSignal.confirmElement.text(pending.exit ? "Signal for Arrival" : "Signal Jump Gate");
 
         UI.gateSignal.pending = pending;
         UI.gateSignal.gamePosition = window.coordinateConverter.fromHexToGame(pending.hexpos);

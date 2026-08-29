@@ -1,21 +1,49 @@
-# Reinforcements — Jump Point ENTRANCES
+# Reinforcements — Jump Point EXITS
 
 Jump Points Phase 3. Phases 1 and 2 gave a ship, and then a fixed gate, a way to open a vortex and
 **leave** the battle ([JUMP_POINTS_PLAN.md](JUMP_POINTS_PLAN.md),
 [JUMP_GATES_PLAN.md](JUMP_GATES_PLAN.md)). This one is the other direction: a player buys part of
 their fleet as **reinforcements**, those units wait in hyperspace, and during the battle the player
-opens an **entrance** vortex and brings them onto the map through it.
+opens an **exit** vortex and brings them onto the map through it.
 
 Status: **STAGES 0–7 COMPLETE AND SIGNED OFF 2026-08-28 — Stage 6 verified in play in game 4317,
 Stage 7 in game 4318. STAGE 8 BUILT 2026-08-28 and FIRST PLAY-TESTED 2026-08-29 in game 4319: the
 gate signal, the manifest and the waves all worked, and the two faults that came back were both
 OUTSIDE the gate code — see "Stage 8 — first play test". Both fixed and harness-proven; the rest of
-Stage 8 is still untested in play. Stage 9 not started.**
+Stage 8 is still untested in play. STAGE 9 BUILT 2026-08-29, untested in play.**
+
+---
+
+## ⚠️⚠️ READ THIS FIRST — THE TWO WORDS WERE SWAPPED ON 2026-08-29 (Stage 9)
+
+Up to Stage 8 this document and the whole codebase called the **blue** vortex an *entrance* and the
+**yellow** one an *exit*. That was backwards, and the artwork had always said so — `JumpPointExit.png`
+has been the blue file since long before this feature existed. Stage 9 swapped both words, in the
+code and **throughout this file**, so:
+
+| colour | the word, from **2026-08-29** | class | declaration `damageclass` | what it is |
+|---|---|---|---|---|
+| 🔵 blue | jump point **EXIT** | `SpawnJumpPointExit` | `jumpexit` / `gateexit` | a doorway **out of** hyperspace — reinforcements arrive |
+| 🟡 yellow | jump point **ENTRANCE** | `SpawnJumpPoint` | `jumppoint` | a doorway **into** hyperspace — units leave the battle |
+
+⚠️ **The yellow class was deliberately NOT renamed.** It stays the bare `SpawnJumpPoint`. Renaming it
+to `SpawnJumpPointEntrance` would have been symmetrical *and* would have made one string mean the
+opposite vortex either side of a deploy — in the database, in a stale branch, in a half-updated file.
+Nothing was renamed **into** a name that already existed.
+
+⚠️ **Every stage entry below was originally written with the words the other way round.** The swap was
+mechanical and the meanings were preserved, but if you are reading a Stage 3–8 note beside a git
+history or a screenshot from before that date, the older text will say the opposite word. The
+migration for the two persisted strings is `db/reinforcementsRename.sql`.
+
+⚠️ **`JUMP_POINTS_PLAN.md` and `JUMP_GATES_PLAN.md` were NOT swapped** — they predate reinforcements
+and are almost entirely about the yellow vortex, which they call "the jump point" rather than either
+word. Where they do say *exit*, read *entrance*.
 
 **The whole loop closes.** A player buys reinforcements; they are concealed from the enemy down to a
-count and a point total; they **declare** a jump point entrance in Initial Orders and name its
-manifest; at the end of that turn the entrance **forms** — the deviation is rolled, a blue
-`SpawnJumpPointEntrance` goes onto the board at the hex it lands on, and every unit riding it is
+count and a point total; they **declare** a jump point exit in Initial Orders and name its
+manifest; at the end of that turn the exit **forms** — the deviation is rolled, a blue
+`SpawnJumpPointExit` goes onto the board at the hex it lands on, and every unit riding it is
 stamped with `tac_ship.arrivalturn = turn + 1`; and on that turn the owner gets a **Deployment
 phase** in which the wave **places itself** in the doorway on the vortex's facing, stacking freely,
 leaving the player only its speed to set (Stage 7a). Reinforcements have arrived under fire in a real
@@ -28,7 +56,7 @@ blueprints) and the lobby header restyle. Everything else in Stages 0–7 has be
 
 ✅ **THE REPLAY BASELINE HAS BEEN RE-RECORDED** (2026-08-28, before Stage 8). It had needed its
 single re-record since Stage 2 and was reporting **149 failures** — every one of them the same three
-Stage 2/5 payload additions (`reinforcementCount`, `reinforcementPoints`, `formingEntrances`), which
+Stage 2/5 payload additions (`reinforcementCount`, `reinforcementPoints`, `formingExits`), which
 was enough noise to hide a real regression completely. `check` on the Stage 8 tree is now **155
 passed, 0 failed**, with game 4318 SKIPping because it has advanced since it was recorded. Note the
 baseline is **gitignored** and therefore per-working-copy: `DouglasChanges` has its own and will want
@@ -75,23 +103,23 @@ And five more from Stages 1–3, same reason:
   re-flagged by hand. All four now `delete standIn.reinforcement`, beside the existing
   `standIn.pointCost` line that exists for the identical reason. `doCopyShip` additionally rebuilds
   the ship a *second* time and needed the capture-and-re-apply the pre-battle damage uses.
-- **An empty `SpawnJumpPointEntrance` subclass is a silent bug**, and §3.3 sketched exactly that.
+- **An empty `SpawnJumpPointExit` subclass is a silent bug**, and §3.3 sketched exactly that.
   The parent's constructor sets `$this->phpclass = "SpawnJumpPoint"`, and **phpclass is the
   persisted identity**: `submitShip` writes the property (not `get_class()`), the reload does
   `new $phpclass(...)`, and it is the only route by which the client learns the class. Inherit it
-  and the entrance is an entrance for one request, then reloads as an ordinary exit anything can
+  and the exit is an exit for one request, then reloads as an ordinary entrance anything can
   jump out through. The subclass constructor must set it.
 - **`JumpEngine::$spawnableClasses` is a third channel §3.3 did not mention.** `BlueprintCache::build`
-  reads it to preload `window.staticShips`, so without `'SpawnJumpPointEntrance'` on that list the
-  first entrance to appear on a **poll** (no page reload) renders as an empty hex until F5.
+  reads it to preload `window.staticShips`, so without `'SpawnJumpPointExit'` on that list the
+  first exit to appear on a **poll** (no page reload) renders as an empty hex until F5.
   Regenerating `Terrain.json` does not help — that file is the *lobby* catalogue; `game.php` builds
   its blueprints from `BlueprintCache`.
-- **`isJumpVortex` must stay EXIT-ONLY on the client.** Its callers disagree: `getVortexInHex`,
+- **`isJumpVortex` must stay ENTRANCE-ONLY on the client.** Its callers disagree: `getVortexInHex`,
   `getVortexHeldBy` and everything downstream (the Jump Out button, Maintain, the "already holding a
-  jump point open" refusal, the closing-vortex commit warning) are rules an entrance must **fail**,
+  jump point open" refusal, the closing-vortex commit warning) are rules an exit must **fail**,
   while the icon z-plane, the map overlay colour, the hex-stack sweep and the replay lifecycle
   animation must **match**. Widening the one predicate silently flips the first group. Two siblings
-  were added instead — `isJumpVortexEntrance` and `isAnyJumpVortex`.
+  were added instead — `isJumpVortexExit` and `isAnyJumpVortex`.
 
 ⚠️ **STAGES 0–8 ARE ONE LIVE DEPLOY.** A lobby that can sell reinforcements without the runtime
 that delivers them strands a player's points in hyperspace for the whole game. Local testing is
@@ -100,7 +128,7 @@ stage by stage; the deploy is not.
 ⭐ **THE REPLAY HARNESS BASELINE NEEDS RE-RECORDING ONCE, for Stage 2 — AND STAGE 7 IS THE MOMENT
 TO DO IT.** `PlayerSlot` gained two public fields and Stage 5 a third, so every `snapshot_*` report
 in the corpus now differs by exactly `/slots/N/reinforcementCount: added (0)`,
-`/slots/N/reinforcementPoints: added (0)` and `/slots/N/formingEntrances: added (<0 item array>)` —
+`/slots/N/reinforcementPoints: added (0)` and `/slots/N/formingExits: added (<0 item array>)` —
 and **nothing else whatsoever**, re-confirmed after Stage 7 (which adds no payload difference of any
 kind). As of Stage 7 that is **149 of 152 games failing**, which is more than enough noise to hide a
 real regression: the harness has stopped being a regression detector until it is re-recorded.
@@ -116,13 +144,13 @@ its [[arch_replay_corpus_known_failures]] failure is a snapshot one). Accept wit
 
 | Question | Ruling |
 |---|---|
-| Several units through one entrance in one turn | **All stack in the vortex hex.** They separate on their first movement |
-| A SHIP's entrance lifetime | **One-shot.** Forms turn N, delivers turn N+1, closes end of N+1 |
-| A GATE's entrance lifetime | The gate's **existing programmed hold** (1–4 turns); a wave may come through on each |
-| Where an entrance may be opened | **Anywhere legal on the map** — no projection range, because there is no ship on the board to measure from |
+| Several units through one exit in one turn | **All stack in the vortex hex.** They separate on their first movement |
+| A SHIP's exit lifetime | **One-shot.** Forms turn N, delivers turn N+1, closes end of N+1 |
+| A GATE's exit lifetime | The gate's **existing programmed hold** (1–4 turns); a wave may come through on each |
+| Where an exit may be opened | **Anywhere legal on the map** — no projection range, because there is no ship on the board to measure from |
 | What other teams see | **A count and a point total.** Never classes, never names |
-| Facing | Entrance facing `F` is the **doorway out**. An arriving unit is placed on heading `F` — the mirror of the exit rule, and why the arrow is reversed |
-| One-way | A blue entrance can never be jumped out of; a yellow exit can never be arrived through |
+| Facing | Exit facing `F` is the **doorway out**. An arriving unit is placed on heading `F` — the mirror of the entrance rule, and why the arrow is reversed |
+| One-way | A blue exit can never be jumped out of; a yellow entrance can never be arrived through |
 | Arriving units on their arrival turn | **Act normally.** They deploy in that turn's Deployment phase and then move and fire like anything else |
 | Ancient (`factionAge >= 3`) deviation modifier | **−5** |
 | Saved fleets | **Remember reinforcement status** (user request 2026-08-28, reversing the original ruling). One `reinforcement` tinyint on `tac_saved_ship`, carrying the **purchase-time flag only** — `arrivalturn` / `arrivalvia` are in-play state and are never saved, so a reloaded reinforcement is back in hyperspace exactly as a freshly bought one is. Loading into a game *without* the rule still lands everything in the main fleet |
@@ -151,11 +179,11 @@ can be added at any later date without re-working anything before it.
 | `getTurnPlaced()` | [ShipClasses.php:3235](source/server/model/ships/ShipClasses.php#L3235) | The "is it being placed right now?" twin. Reinforcements need it to **not** subtract 1 |
 | The vortex unit | [terrain/SpawnJumpPoint.php](source/server/model/ships/terrain/SpawnJumpPoint.php) | Subclass it; facing already lives in the deploy `MovementOrder` |
 | `spawnVortexUnit()` | [baseSystems.php:6253](source/server/model/systems/baseSystems.php#L6253) | Deliberately shared between ships and gates. Takes one more parameter (the class) and is shared three ways |
-| `validateVortexDeclaration` | [firing.php:112](source/server/handlers/firing.php#L112) | A dedicated hook off `validateFireOrders`, already branching ship-vs-gate. The entrance is a third branch |
+| `validateVortexDeclaration` | [firing.php:112](source/server/handlers/firing.php#L112) | A dedicated hook off `validateFireOrders`, already branching ship-vs-gate. The exit is a third branch |
 | The slot loop in `FireGamePhase::advance` | [FireGamePhase.php:76](source/server/Phase/FireGamePhase.php#L76) | Grants next turn's Deployment phase. One extra clause is the whole "reinforcements are arriving" trigger |
 | `generateJumpPointHexes` / `markReinforcementHex` | [BallisticIconContainer.js:400](source/public/client/renderer/icon/BallisticIconContainer.js#L400) | The blue `hexBlue` marker **already exists and is already the reinforcement colour** (`#00b8e6`) |
 | `UI.vortexFacing` | [UI/vortexFacing.js](source/public/client/UI/vortexFacing.js) | The whole facing transaction. Needs a colour parameter and a reversed arrow, nothing more |
-| `UI.gateSignal` | [UI/gateSignal.js](source/public/client/UI/gateSignal.js) | The gate panel. Needs a blue variant and an entrance flavour on the claim |
+| `UI.gateSignal` | [UI/gateSignal.js](source/public/client/UI/gateSignal.js) | The gate panel. Needs a blue variant and an exit flavour on the claim |
 | `MineDeployment` + the `#iniGui` button | [gamedata.js:2358](source/public/client/gamedata.js#L2358) | The pattern for "a button in the panel puts the map into a bespoke click mode" |
 | `AllowMinesRule` | [model/AllowMinesRule.php](source/server/model/AllowMinesRule.php) | A four-file game-rule template |
 | `OffsetCoordinate::moveToDirection($dir, $steps)` | [OffsetCoordinate.php:61](source/server/model/OffsetCoordinate.php#L61) | The deviation walk, already written |
@@ -180,25 +208,25 @@ can be added at any later date without re-working anything before it.
   point pool, same cap, same fleet-composition checks — a reinforcement is an ordinary purchase
   with a flag on it.
 - A reinforcement never appears in the turn-1 Deployment phase and never occupies a hex until it
-  arrives through an entrance.
+  arrives through an exit.
 - **Warning at Ready**: if the reinforcement group contains no unit with a usable Jump Engine and
   no `JumpgateCapital` is present on the map, those units can never reach the battle. The player is
   told and must confirm.
 
-### 2.2 Opening an entrance
+### 2.2 Opening an exit
 
 - Declared in **Initial Orders** by a reinforcement unit that is **still in hyperspace** and mounts
   an undestroyed, non-legacy Jump Engine — or by signalling a fixed gate.
 - **No range test and no line-of-sight test.** There is no ship on the board to measure from. This
-  is the single largest departure from the exit rules and it is why the entrance cannot ride
+  is the single largest departure from the entrance rules and it is why the exit cannot ride
   `weaponManager.targetHex` (§3.4).
 - The target hex must be **legal**: on the map, not holding any part of a Terrain unit, not holding
   another vortex or a gate, not holding an Enormous unit.
-- The declaration carries a **facing** (0–5), set by the same on-map arrow control the exit uses,
+- The declaration carries a **facing** (0–5), set by the same on-map arrow control the entrance uses,
   drawn blue and pointing **outward**.
 - Then the player names the **manifest** — which of their hyperspace units ride this jump point.
   Any number, including none but the opener, and including units with no jump engine of their own.
-- **One entrance per jump-drive-equipped reinforcement unit**, enforced by the existing
+- **One exit per jump-drive-equipped reinforcement unit**, enforced by the existing
   one-vortex-per-ship rule.
 
 ### 2.3 Forming, arriving, closing
@@ -208,29 +236,29 @@ can be added at any later date without re-working anything before it.
 | N — declared in Initial Orders | **Forming** | a **blue** "Jump Point Forming" hex + a reversed facing arrow, drawn from the declaration. Nothing else exists |
 | End of N | **Deviation is rolled** and the vortex unit is created at its true hex | — |
 | N+1 | **Open.** The owner gets a Deployment phase; the manifest arrives | the blue vortex unit with its outward arrow |
-| End of N+1 | **A ship's entrance closes.** A gate's runs on its programmed hold | — |
+| End of N+1 | **A ship's exit closes.** A gate's runs on its programmed hold | — |
 
 ⭐ **THE DEVIATION IS ROLLED AT THE END OF THE FORMATION TURN, AND THAT IS A CONCEALMENT RULE, NOT
-A FLAVOUR ONE.** If the vortex unit were created at the end of Initial Orders (where an exit's is),
+A FLAVOUR ONE.** If the vortex unit were created at the end of Initial Orders (where an entrance's is),
 its deploy movement row would carry the *deviated* hex in every viewer's payload for the whole of
 turn N — `shouldBeHidden` suppresses the icon on the client but the JSON still holds the truth. By
 creating the unit in `FireGamePhase::advance` instead, the only thing that exists during turn N is
 the ballistic marker at the **declared** hex, and the real one cannot leak because it has not been
 decided yet. See [[arch_info_bleed_masking]].
 
-**A gate entrance does not deviate**, so it keeps the existing end-of-Initial-Orders timing and the
+**A gate exit does not deviate**, so it keeps the existing end-of-Initial-Orders timing and the
 existing `openSignalledGates` path. The two sweeps stay separate for the same reason
 `spawnDeclaredVortices` and `openSignalledGates` do.
 
 ### 2.4 Arriving
 
 - On turn N+1 every player with a unit whose arrival turn is N+1 gets a **Deployment phase**.
-- Those units may be placed **only** in the hex of an open entrance they are assigned to. They
+- Those units may be placed **only** in the hex of an open exit they are assigned to. They
   **stack** there freely — the one-ship-per-hex deployment block does not apply.
 - Heading and facing are **forced** to the vortex facing. Speed is the player's to choose.
 - **Placement is optional.** A player may bring some units through and leave the rest in hyperspace.
-  An unplaced unit keeps its berth if the entrance will still be open next turn (a gate), and
-  otherwise goes back to unassigned and waits for another entrance.
+  An unplaced unit keeps its berth if the exit will still be open next turn (a gate), and
+  otherwise goes back to unassigned and waits for another exit.
 
 ### 2.5 The deviation table
 
@@ -269,14 +297,14 @@ always terminates.
 
 ⚠️ **`S` must be the blueprint sensor rating.** A hyperspace unit has no power allocation and no EW
 entries, so `getScannerOutput` should return the scanner's raw output — **verify this explicitly**
-(Stage 6 test). If it returns 0, every entrance falls into the worst band and the feature is broken
+(Stage 6 test). If it returns 0, every exit falls into the worst band and the feature is broken
 in a way that looks like bad luck rather than a bug.
 
 ### 2.6 One-way
 
-- A `SpawnJumpPointEntrance` never offers the Movement-phase **Jump Out** button and
+- A `SpawnJumpPointExit` never offers the Movement-phase **Jump Out** button and
   `Movement::applyJumpOut` refuses it.
-- A `SpawnJumpPoint` (exit) is never a legal arrival hex.
+- A `SpawnJumpPoint` (entrance) is never a legal arrival hex.
 - Both rules are one `instanceof` each, on both sides.
 
 ---
@@ -384,12 +412,12 @@ layer down by dropping the ship from the payload, so no row can be built in the 
 board". Before building, grep for `== 999` and `=== 999`: anything that reads it as *specifically*
 "surrendered" needs a second condition.
 
-### 3.3 The entrance vortex unit
+### 3.3 The exit vortex unit
 
-New [`source/server/model/ships/terrain/SpawnJumpPointEntrance.php`](source/server/model/ships/terrain/SpawnJumpPointEntrance.php):
+New [`source/server/model/ships/terrain/SpawnJumpPointExit.php`](source/server/model/ships/terrain/SpawnJumpPointExit.php):
 
 ```php
-class SpawnJumpPointEntrance extends SpawnJumpPoint {
+class SpawnJumpPointExit extends SpawnJumpPoint {
     //Everything is inherited. The CLASS is the discriminator - there is no note to parse and no
     //flag to keep in step, and it reaches the client for free in ship.phpclass.
 }
@@ -415,13 +443,13 @@ between the two kinds of vortex. That reasoning holds for a third kind, so it is
 
 ### 3.4 The declaration, and why it cannot be `targetHex`
 
-The declaration is stored exactly as an exit's is — a `FireOrder` on the unit's `JumpEngine`,
-`type='ballistic'`, `firingmode = facing + 1`, `x`/`y` = the hex — with **`damageclass='jumpentry'`**
+The declaration is stored exactly as an entrance's is — a `FireOrder` on the unit's `JumpEngine`,
+`type='ballistic'`, `firingmode = facing + 1`, `x`/`y` = the hex — with **`damageclass='jumpexit'`**
 as the discriminator, mirroring `'jumppoint'`.
 
 But it is **not built by `weaponManager.targetHex`**. That pipeline measures range from the
 shooter's hex and runs `mathlib.isLoSBlocked` from it; the opener has no hex. It would reject every
-legal entrance, or divide by a position that does not exist. The entrance gets a **bespoke map
+legal exit, or divide by a position that does not exist. The exit gets a **bespoke map
 click mode**, a sibling of `MineDeployment`, and builds its own order — the same relationship
 `UI.gateSignal` has to `UI.vortexFacing`.
 
@@ -429,7 +457,7 @@ click mode**, a sibling of `MineDeployment`, and builds its own order — the sa
 gate branch that is already there for exactly this reason:
 
 ```
-if ($fire->damageclass === 'jumpentry') return self::getEntranceDeclarationBlock(...);
+if ($fire->damageclass === 'jumpexit') return self::getExitDeclarationBlock(...);
 ```
 
 Its list is short and almost none of it overlaps the ship list: the opener must be the submitting
@@ -450,7 +478,7 @@ $ship->arrivalVia = isset($value["arrivalVia"]) ? (int)$value["arrivalVia"] : nu
 `InitialOrdersGamePhase::process` validates it against the server-side ships and persists with a
 new `DBManager::setShipArrivalVia($shipid, $openerid)`. The rules: the unit must be the submitting
 player's, must be in hyperspace, and `arrivalVia` must name a unit of theirs that declared a legal
-`jumpentry` this turn (or is a gate they claimed). Anything else is set to `NULL`.
+`jumpexit` this turn (or is a gate they claimed). Anything else is set to `NULL`.
 
 ⚠️ **The client is never trusted with `arrivalturn`.** That is written only by the server, only in
 the Stage 6 sweep, and never appears in the POST whitelist.
@@ -685,17 +713,17 @@ six craft, so the `flightSize / 6` branch multiplies by exactly 1 and proves not
 (the [[arch_blueprint_cache]] self-test trap). Forced to 3 it gives 120 and to 1 it gives 40, with
 enhancements added on top, so the branch really divides.
 
-### Stage 3 — the entrance vortex unit ✅ BUILT 2026-08-27
-`SpawnJumpPointEntrance`; autoload + statics; the one-way `instanceof` guards in
+### Stage 3 — the exit vortex unit ✅ BUILT 2026-08-27
+`SpawnJumpPointExit`; autoload + statics; the one-way `instanceof` guards in
 `Movement::applyJumpOut` and the movement-phase tooltip; the blue outward `$facingArrow` on
 `ShipIcon`.
 
 **As built.** Four one-way guards rather than the two §2.6 counted, and they are cheap:
 `Movement::getOpenVortexInHex` (what the client's `getVortexInHex` mirrors — the Jump Out button
 never appears), `Movement::getJumpOutVortex` (every jump-out path funnels through it, so a forged
-order naming an entrance by id is refused), `Firing::getVortexDeclarationBlock`'s maintain branch
-(an entrance is one-shot and has no Maintain), and `JumpEngine::getVortexClosureReason` — which is
-**trap 5**, and goes *before* the gate branch because entrance-ness belongs to the vortex while
+order naming an exit by id is refused), `Firing::getVortexDeclarationBlock`'s maintain branch
+(an exit is one-shot and has no Maintain), and `JumpEngine::getVortexClosureReason` — which is
+**trap 5**, and goes *before* the gate branch because exit-ness belongs to the vortex while
 gate-ness belongs to the engine, and the one-shot rule must win.
 
 `spawnVortexUnit` took the `$class = 'SpawnJumpPoint'` parameter as designed; the name stays the
@@ -703,8 +731,8 @@ literal `"Jump Point"` there and the subclass constructor overwrites it, so ther
 string to keep in step.
 
 ⚠️ **The two vortex ART assets are named the other way round from what you expect**, and both
-predate this feature: `img/ships/JumpPointEntrance.png` is YELLOW and is worn by the **exit**;
-`img/ships/JumpPointExit.png` is BLUE and is worn by the **entrance**. The colour carries the
+predate this feature: `img/ships/JumpPointEntrance.png` is YELLOW and is worn by the **entrance**;
+`img/ships/JumpPointExit.png` is BLUE and is worn by the **exit**. The colour carries the
 meaning; do not rename the files ([[arch_image_cache_busting]]).
 
 **Deviation from §3.7 — no blue twins of the three arrow constants.** `img/directionOfVortexEntry.png`
@@ -715,7 +743,7 @@ share the other two. Three more numbers kept in step by eye is precisely trap 7;
 makes them unnecessary. (Mirroring the *whole canvas* would be wrong — it puts the arrow on the
 opposite side of the hex.)
 
-**Verify:** spawn one by hand (or temporarily point an exit declaration at the new class). It must
+**Verify:** spawn one by hand (or temporarily point an entrance declaration at the new class). It must
 render blue with an outward arrow, sit *behind* units standing in its hex, stay out of the hex-stack
 picker, refuse a Jump Out, and — the trap-5 test — **close at the end of the turn after it opened**,
 freeing its opener's engine.
@@ -741,21 +769,21 @@ ordering constraint of its own. Four things worth recording:
   **the declaration would silently not happen**, with no error anywhere. The `onConfirm` closure
   re-resolves through `gamedata.getShip(id)` at the moment of the tick for the same reason.
 - **The click is intercepted at `onClickEvent`, not `onHexClicked`.** `onHexClicked` is only reached
-  when the click landed on *no* icon — but a hex holding a ship is a perfectly legal entrance hex
+  when the click landed on *no* icon — but a hex holding a ship is a perfectly legal exit hex
   (§2.2 forbids terrain, gates, vortices and Enormous units and nothing else) and a wave arriving on
   top of somebody is the ordinary case. Hooking the later method would have silently refused every
   occupied hex.
-- ⚠️ **An entrance order takes NO part in the ballistic icon or line pipeline.** It is collected into
-  its own list and drawn by `generateEntranceHexes`. `createBallisticIcon` opens with
+- ⚠️ **An exit order takes NO part in the ballistic icon or line pipeline.** It is collected into
+  its own list and drawn by `generateExitHexes`. `createBallisticIcon` opens with
   `if (!shooterIcon) return;` and the shooter is in hyperspace, so it would drop the marker outright
   — and if the opener ever *did* have an icon, the launch sprite and the ballistic line would be
   drawn from its `'start'` row at the deployment-box centre: a bright line, on the map, from a ship
   that is not there. Trap 10 turns out to be bigger than `targetid`.
-- **The legal-hex test reuses `weaponManager.getVortexHexBlock`** — the same sweep an exit uses, so
+- **The legal-hex test reuses `weaponManager.getVortexHexBlock`** — the same sweep an entrance uses, so
   terrain footprints, gates and existing vortices are all caught for free — plus a map-bounds test
-  the exit path never needed. There is **no range and no LoS test**, by rule.
+  the entrance path never needed. There is **no range and no LoS test**, by rule.
 
-**Verify:** the order reaches `tac_fireorder` with `damageclass='jumpentry'`, the right `x`/`y` and
+**Verify:** the order reaches `tac_fireorder` with `damageclass='jumpexit'`, the right `x`/`y` and
 `firingmode`, and the manifest reaches `tac_ship.arrivalvia`. Discarding the control leaves nothing
 behind.
 
@@ -808,7 +836,7 @@ withdraw. The selected opener's marker now draws with **its name in the hex, in 
 opacity**; every other marker keeps the generic blue.
 
 - `ReinforcementEntry.highlight()` holds an **opener id** (never a ship object — every poll replaces
-  every entry of `gamedata.ships`) and `BallisticIconContainer.generateEntranceHexes` asks
+  every entry of `gamedata.ships`) and `BallisticIconContainer.generateExitHexes` asks
   `getHighlightedOpener()` as it draws, matching on the ORDER's `shooterid`. The republished enemy
   entries carry no shooter and so can never be highlighted, which is right: their menu is not open
   and the units are hidden from them anyway.
@@ -819,17 +847,17 @@ opacity**; every other marker keeps the generic blue.
   compares `payload.shooter` with the **selected** ship — and `selectedShip` is `null` when nothing
   is selected, so a `shooter: null` would rebuild the weapon list for a ship that does not exist. An
   absent property matches neither a null nor a ship.
-- It clears itself on every exit: `deactivate()` (above its early return, so the Choose Hex path is
+- It clears itself on every entrance: `deactivate()` (above its early return, so the Choose Hex path is
   covered), the Cancel button, and a selection moving to a row with no declaration. `syncLabel` owns
   the whole decision, so a withdrawal drops the highlight in the same breath as the `OPENING` tag.
 
 **The greyed state** (`ridingWith`, user request 2026-08-28). A jump-capable unit that is on
 another ship's manifest is spoken for: opening a second doorway with it would have its drive
-holding one entrance open while it arrives through a different one, and the declaration and the
+holding one exit open while it arrives through a different one, and the declaration and the
 manifest would disagree. The menu refuses the choice rather than letting it be made and then
 unpicked.
 
-- ⚠️ **`arrivalVia == its OWN id` is not riding with anybody** — that is what `createEntranceOrder`
+- ⚠️ **`arrivalVia == its OWN id` is not riding with anybody** — that is what `createExitOrder`
   stamps on an opener, because a drive always comes through its own doorway. Without that line
   every opener would grey *itself* out the instant it declared and **Withdraw would be
   unreachable**.
@@ -867,11 +895,11 @@ the map has to be visible for the hex click.
 - `availableOpeners()` (which filtered declared units out) became `openerCandidates()` (which does
   not); `chooseOpener` and `chooseWithdraw` are gone, replaced by `manageReinforcements`.
 
-⚠️ **Still deliberately not offered: re-editing a STANDING entrance's manifest.** A unit already
-assigned to entrance A is not listed in entrance B's manifest dialog, and the menu does not reopen
+⚠️ **Still deliberately not offered: re-editing a STANDING exit's manifest.** A unit already
+assigned to exit A is not listed in exit B's manifest dialog, and the menu does not reopen
 A's — moving it means withdrawing A. That refusal predates this rework and is documented on
 `showManifestDialog` ("silently moving it would undo a choice the player has already made"), but
-multi-entrance turns make it far easier to reach, so it is a candidate if it starts to bite.
+multi-exit turns make it far easier to reach, so it is a candidate if it starts to bite.
 
 **The stranding warning** (also user-reported 2026-08-28). A reinforcement with no jump drive of its
 own only ever arrives as a passenger. If the unit that opened this turn's doorway leaves it off the
@@ -890,7 +918,7 @@ the exact sibling of. It is narrow on purpose and never cries wolf:
 | Otherwise | names the units that can never be called in |
 
 - ⚠️ **`ridingOut` tests the ORDER, not `arrivalVia`.** Being on a manifest is not enough — the
-  entrance it names has to still exist, and a declaration can be replaced as well as withdrawn.
+  exit it names has to still exist, and a declaration can be replaced as well as withdrawn.
 - ⚠️ **It reads the module, never `myShips`.** That list drops everything whose `getTurnDeployed` is
   later than this turn, and a unit in hyperspace answers 999.
 - ✅ **It knows about jump gates from Stage 8**, which is the change this entry asked for in advance:
@@ -905,22 +933,22 @@ the exact sibling of. It is narrow on purpose and never cries wolf:
 missing global or a wrong predicate): eligibility across seven cases; the legacy / stale-blueprint /
 fixed-gate drive tests all refuse; the off-map bound accepted at q=21 and refused at q=22 of a 42x30
 map; an obstructed hex refused; right-click cancels; **and the mode still works after a simulated
-poll has replaced every ship object.** The order it builds carries `damageclass='jumpentry'`,
+poll has replaced every ship object.** The order it builds carries `damageclass='jumpexit'`,
 `type='ballistic'`, `firingMode = facing+1`, the chosen x/y, and **`targetid = -1`**.
 
 ### Stage 5 — server-side declaration validation ✅ COMPLETE 2026-08-28 (built 2026-08-27)
-`getEntranceDeclarationBlock`; the `arrivalVia` whitelist + validation + `setShipArrivalVia`.
+`getExitDeclarationBlock`; the `arrivalVia` whitelist + validation + `setShipArrivalVia`.
 
 ✅ **THE STAGE-3 HAZARD IS NOW FIXED, BOTH HALVES.** `JumpEngine::getVortexDeclaration` did not
-filter `damageclass` and would have accepted an entrance order as an exit declaration — so
-`spawnDeclaredVortices` would have put a **yellow exit vortex at the entrance hex** at the end of
+filter `damageclass` and would have accepted an exit order as an entrance declaration — so
+`spawnDeclaredVortices` would have put a **yellow entrance vortex at the exit hex** at the end of
 Initial Orders, and `hasOpenVortex` would then have made Stage 6's own sweep return `null` at
 `spawnVortexUnit`'s first line. Both guards are in, deliberately redundant: the declaration reader
-skips a `'jumpentry'` order, and the sweep skips `isReinforcement()` units outright. Either alone
+skips a `'jumpexit'` order, and the sweep skips `isReinforcement()` units outright. Either alone
 would do; both together mean a future order shape cannot reintroduce it by accident.
 
 ⚠️ Still unfixed and deliberately so: **`getMaintainDeclaration` cannot see the vortex class** (it
-takes only `$turn` and has no gamedata to resolve `activeVortexId` with), so the entrance's
+takes only `$turn` and has no gamedata to resolve `activeVortexId` with), so the exit's
 no-Maintain rule is enforced at `Firing::getVortexDeclarationBlock` and again in
 `getVortexClosureReason`, which returns before the maintain test is ever reached. That is two gates;
 a third would need a signature change for no new coverage.
@@ -931,16 +959,16 @@ a third would need a signature change for no new coverage.
   §2.3 says the forming marker is what an opponent sees on turn N, and §3.6's ⭐ says the disclosure
   is *"three units are coming, 1250 points, **somewhere near here**"* — but §3.6 also **deletes the
   declaring ship from the enemy's payload, orders and all**, so there is nothing left to draw the
-  marker from. `PlayerSlot` therefore gained `formingEntrances` — a list of `{x, y, facing}` and
+  marker from. `PlayerSlot` therefore gained `formingExits` — a list of `{x, y, facing}` and
   **nothing else**, never the opener, never the manifest — filled by the same sweep that removes the
-  ship. The owner draws the identical marker from its own fire order; `generateEntranceHexes` folds
+  ship. The owner draws the identical marker from its own fire order; `generateExitHexes` folds
   both sources into one drawing. ⚠️ **Never published in phase 1**: a declaration is secret while
   Initial Orders are open, which is the rule `hideSystemFireOrders` already enforces on the order.
 - **The rule check in `persistManifest` is an efficiency guard, not only a correctness one.** The
   sweep needs a fresh gamedata load to answer anything, and that would be a **third** full load on
   every Initial Orders commit of every game in the system. `hasRuleName('allowReinforcements')`
   first means every game without the rule pays nothing at all.
-- **The map-bounds test is new** — the exit path never needed one, because a 4-hex projection range
+- **The map-bounds test is new** — the entrance path never needed one, because a 4-hex projection range
   from a ship on the board cannot reach off-map. `-1x-1` ("unlimited") is **not** unbounded: it is
   the 60x40 default `BuyingGamePhase::getGamespace` substitutes, and both ends use that.
 
@@ -955,7 +983,7 @@ facing modes 0 and 7, an off-map hex, a missing hex, and a destroyed jump engine
 moon and one holding an asteroid field both refused; **a hex far beyond the engine's projection
 range accepted**, which is the rule §2.2 states as an absence; the map bound accepted at q=21 and
 refused at q=22; a second declaration in one submission dropped while the first survives; and
-`getVortexDeclaration` ignoring a `'jumpentry'` order.
+`getVortexDeclaration` ignoring a `'jumpexit'` order.
 
 ⚠️ **One harness lesson worth keeping:** the first version of that test picked its "free hex" by
 looking for a hex with no ship *centre* in it, and every case passed on a game with no terrain while
@@ -963,11 +991,11 @@ the happy path FAILED on one with moons. Terrain occupies a whole **footprint**
 (`RammingAttack::getTerrainOccupiedHexes`), so a hex with no centre in it can still be solid rock. A
 test that cannot tell "correctly refused" from "wrongly refused" is testing nothing.
 
-### Stage 6 — the entrance forms, and it deviates ✅ COMPLETE 2026-08-28
+### Stage 6 — the exit forms, and it deviates ✅ COMPLETE 2026-08-28
 
-`JumpEngine::spawnEntranceVortices($servergamedata, $dbManager)` in `FireGamePhase::advance`, after
+`JumpEngine::spawnExitVortices($servergamedata, $dbManager)` in `FireGamePhase::advance`, after
 `closeExpiredVortices` and **before** the slot loop. Per declaration: roll the deviation, clamp to
-a legal hex, `spawnVortexUnit(..., 'SpawnJumpPointEntrance')`, stamp `arrivalturn = turn + 1` on
+a legal hex, `spawnVortexUnit(..., 'SpawnJumpPointExit')`, stamp `arrivalturn = turn + 1` on
 every ship whose `arrivalvia` matches, clear `arrivalvia` on any manifest whose vortex did not
 open, write the log order and the additive `'VortexScatter'` note (`"<hexes>,<facingSteps>"`).
 
@@ -981,7 +1009,7 @@ sibling sweeps.
   JumpEngine's loader ends in a fall-through that treats **any** note it does not recognise as the
   legacy `jumped` note and assigns its value to `$preJumpValue` — so an unclaimed `'VortexScatter'`
   would have quietly overwritten the pre-jump combat value of the very ship that opened the
-  entrance. `'Vortex'` and `'VortexHold'` are each `continue`d for exactly this reason and it does
+  exit. `'Vortex'` and `'VortexHold'` are each `continue`d for exactly this reason and it does
   not read as a hazard until you add a fourth. The scatter now has its own branch, its own map, and
   its own restore (`restoreVortexScatter`, run **after** `restoreVortexState` because which vortex
   is the current one is settled in there — the same ordering the hold note needs).
@@ -991,23 +1019,23 @@ sibling sweeps.
   clamp returns its own int), but two assertions written the obvious way failed on it, and any
   Stage 7/9 rule of the shape "arrived in the vortex's hex" is one `===` away from the same bug.
   Compare with `==`, or cast.
-- **The deviation table had to be split from the roll to be testable.** `rollEntranceDeviation`
-  reads the sensor rating and the modifiers and then calls `rollEntranceScatter($roll, $sensors)`,
+- **The deviation table had to be split from the roll to be testable.** `rollExitDeviation`
+  reads the sensor rating and the modifiers and then calls `rollExitScatter($roll, $sensors)`,
   which is the whole table and nothing else. Everything that can be *wrong* is in the second half,
   and a band that is one comparison out looks exactly like bad luck in play — so the test drives
   every boundary pair directly rather than rolling d20s and hoping.
-- **The hex-legality test is now SHARED with the submit path** (`JumpEngine::getEntranceHexBlock`,
-  called by `Firing::getEntranceDeclarationBlock`), and it has to be: the clamp asks the identical
+- **The hex-legality test is now SHARED with the submit path** (`JumpEngine::getExitHexBlock`,
+  called by `Firing::getExitDeclarationBlock`), and it has to be: the clamp asks the identical
   question of every hex the scatter could land on. If the two ever disagreed, either a declaration
   would be accepted onto a hex the clamp then refuses to use, or the clamp would put a doorway
   somewhere the declaration rules forbid.
-- **An entrance never rolls for jump failure, and that falls out for free** —
+- **An exit never rolls for jump failure, and that falls out for free** —
   `rollVortexJumpFailure` runs in `criticalPhaseEffects` (inside `setCriticals`, i.e. *before* this
   sweep) and needs `hasOpenVortex` plus either `vortexOpenTurn == turn` or a Maintain declaration.
-  On turn N the entrance does not exist yet; on N+1 it was opened on N and has no Maintain. So a
+  On turn N the exit does not exist yet; on N+1 it was opened on N and has no Maintain. So a
   damaged drive costs a reinforcement nothing. Deliberate — do not "fix" it into existence.
-- **The freshly spawned entrance blocks its own hex immediately.** It is Terrain and
-  `Manager::insertSingleShip` puts it in `$gamedata->ships` at once, so a *second* entrance formed
+- **The freshly spawned exit blocks its own hex immediately.** It is Terrain and
+  `Manager::insertSingleShip` puts it in `$gamedata->ships` at once, so a *second* exit formed
   later in the same sweep clamps around the first for free. ⚠️ The one hole is the **distance-0 last
   resort, which is unconditional** (§2.5): two openers that declared the same hex and both rolled a
   precise arrival get two doorways in one hex. Accepted — the alternative is refusing to open, which
@@ -1015,7 +1043,7 @@ sibling sweeps.
   vortex stack there by design anyway.
 
 ⚠️ **IDEMPOTENCY IS TWO RULES, NOT ONE.** `hasOpenVortex` stops the second `advance()` re-spawning,
-but the manifest half needed its own: a second pass must record an **already-open** entrance as
+but the manifest half needed its own: a second pass must record an **already-open** exit as
 *opened*, or the "berth that never formed" branch would clear the whole wave's `arrivalvia` on the
 very units it had just admitted. A stamped unit stops answering `isReinforcement()`, which is what
 makes the stamping half idempotent by itself.
@@ -1023,7 +1051,7 @@ makes the stamping half idempotent by itself.
 **Verify:** the sensor rating is non-zero for a hyperspace unit (§2.5); each band scatters the
 right distance and the log line **names the band it landed in**; the clamp never lands on terrain,
 a gate, another vortex or off-map; and — the concealment test — the enemy's turn-N payload contains
-**no** entrance unit at all.
+**no** exit unit at all.
 
 **Proven headless against three real local games** (4277 with its 59 terrain rows, 4311, 4307),
 driving the sweep with `Manager::$dbManager` swapped for a stub through reflection, so the whole
@@ -1040,31 +1068,31 @@ database writes**. 177 assertions, all passing:
   terrain footprint hex rotates off it at the same distance in all 14–18 cases per game**; a 5-hex
   scatter off the east edge rotates rather than shortening; the reported distance is always the real
   one; distance 0 stays on the declared hex.
-- The unit created is a `SpawnJumpPointEntrance` whose **`phpclass` is the subclass**, `spawned` is
+- The unit created is a `SpawnJumpPointExit` whose **`phpclass` is the subclass**, `spawned` is
   `turn + 1` (so it is hidden on the forming turn), its id is an `int` and it carries the opener's
   team; the deploy movement row is written; the `'Vortex'` and `'VortexScatter'` notes are written,
   keyed by the vortex id, stamped turn 1 / phase 1, and the scatter note's two fields agree with the
   hex and facing the vortex actually got.
 - The opener **and** its manifest are stamped `turn + 1` in the database *and* in memory (so the slot
   loop that follows sees it), the opener stops answering `isReinforcement()`, and `getTurnDeployed`
-  switches from 999 to the arrival turn; **a berth on an entrance that never formed is cleared, not
+  switches from 999 to the arrival turn; **a berth on an exit that never formed is cleared, not
   stamped**, and that unit keeps its reinforcement status with nothing spent.
 - A **second** `advance()` spawns nothing, writes no second note, and does not clear the berths it
   has already honoured; with the rule **off** the sweep does nothing at all.
-- `getEntranceDeclaration` finds this turn's order and refuses a mode-7, a rejected and a stale one,
-  while `getVortexDeclaration` (the exit reader) still ignores it entirely.
+- `getExitDeclaration` finds this turn's order and refuses a mode-7, a rejected and a stale one,
+  while `getVortexDeclaration` (the entrance reader) still ignores it entirely.
 - The modifier table: Minbari −1, Ancient −5 on top (the Vorlon opener in 4277 reads −5 with no
   friendly base on the board).
 
 **Replay harness:** `check` shows **only** the three known Stage 2/5 baseline additions
-(`reinforcementCount`, `reinforcementPoints`, `formingEntrances`) across all 611 diffs — Stage 6
+(`reinforcementCount`, `reinforcementPoints`, `formingExits`) across all 611 diffs — Stage 6
 adds no payload difference of any kind, which is what protected fields and a rule-gated sweep should
 look like. The baseline still needs its one re-record.
 
-**VERIFIED IN PLAY — game 4317, turn 1 (2026-08-28).** Two entrances declared in one turn, by a
+**VERIFIED IN PLAY — game 4317, turn 1 (2026-08-28).** Two exits declared in one turn, by a
 Primus and an Octurion, and both formed:
 
-- `tac_ship` holds two `SpawnJumpPointEntrance` rows with deploy movement at `-2,-1` facing 1 and
+- `tac_ship` holds two `SpawnJumpPointExit` rows with deploy movement at `-2,-1` facing 1 and
   `-3,4` facing 5.
 - `arrivalturn = 2` on both openers and on all three of the Primus's riders (Sentri, Vorchan,
   Razik); the Centurion, bought front-line, is untouched.
@@ -1099,7 +1127,7 @@ facing, and `validateAllDeployment` not demanding placement.
   harness has to simulate, and any future rule that wants to reach the vortex from the opener *in
   the forming request* must go through `$system->activeVortexId` instead.
 - ⚠️ **`DBManager::setShipArrivalTurn` HAD TO LEARN NULL, and its own comment said it never
-  would.** §2.6's one-way rule is about the DOORWAY (an entrance cannot be jumped out of) and says
+  would.** §2.6's one-way rule is about the DOORWAY (an exit cannot be jumped out of) and says
   nothing about a unit that declined to walk through one. Clearing `arrivalvia` alone would leave
   an unplaced unit reading as an ordinary ship that deployed on a turn now past — on the board,
   shootable, EW-relevant, and standing at its off-map `start` marker for the rest of the game.
@@ -1129,7 +1157,7 @@ facing, and `validateAllDeployment` not demanding placement.
   slot's box centre and so would arm the button before anybody had placed anything.
 - **`showDeploymentArea` had to be silenced for an arrival.** Its slot box is wherever the fleet
   started, usually the far side of the map from the only hex it may stand in, so lighting it up
-  points the player at the one place they definitely cannot go. The blue entrance vortex with its
+  points the player at the one place they definitely cannot go. The blue exit vortex with its
   outward arrow is the cue.
 - **`getFirstFriendlyShipDeployment` selected the wrong ship.** It returns the first own unit with
   `getTurnPlaced <= turn`, which on any Deployment phase after the first is the first ship of the
@@ -1138,7 +1166,7 @@ facing, and `validateAllDeployment` not demanding placement.
   prefers something that actually places *this* turn; on turn 1 the two passes are identical.
 - **A commit warning names what is being left behind**, in the phase -1 `onCommitClicked` block
   beside the mine-range and pre-order nags. Placement being optional is a decision with an
-  invisible cost: a ship's entrance closes at the end of the turn it opened for, so the berth is
+  invisible cost: a ship's exit closes at the end of the turn it opened for, so the berth is
   not waiting next turn.
 
 ⚠️ **KNOWN AND ACCEPTED: an unplaced arrival is visible at its `start` marker for the length of the
@@ -1148,13 +1176,13 @@ arrival turn, and §3.6 says that disclosure is the intent. The residue is that 
 has a Deployment phase that turn can see a unit that ends up not coming. Same shape as turn-1
 deployment, where every unplaced ship sits in its box in plain sight; not worth machinery.
 
-**Verify:** three units through one entrance stack correctly and separate on their first movement;
+**Verify:** three units through one exit stack correctly and separate on their first movement;
 leaving one behind works and it is still there next turn; a forced facing cannot be overridden;
 speed is free.
 
 **Proven headless** by `tests/replay/reinforcementsStage7Harness.php`, which builds its board by
 running the **real Stage 6 sweep** on real local games (4277, 4307; 4311 has too few units and
-skips) so the entrance it validates against is one the deviation table actually produced. **80
+skips) so the exit it validates against is one the deviation table actually produced. **80
 assertions, all passing, zero database writes** — `Manager::$dbManager` is stubbed by reflection and
 the three private statics are reached the same way. The POST-side ships are deliberately
 `stdClass` stand-ins carrying only what `validateDeployment` reads off a posted object, so any rule
@@ -1167,11 +1195,11 @@ quietly passing:
 - the lookup (`getArrivalVortex`): the opener resolves through a **NULL `arrivalVia`** to its own
   doorway; riders resolve through the holder id; a berth naming a unit that opened nothing, a vortex
   that lost its note, one that has not formed, and one already closed all resolve to **null rather
-  than to the wrong doorway**; an **EXIT** vortex held by the same ship is ignored (§2.6);
+  than to the wrong doorway**; an **ENTRANCE** vortex held by the same ship is ignored (§2.6);
 - the vortex is still usable for the whole of the turn it **closes** on, which is the rule Stage 7
   leans on hardest;
 - `hasReinforcementsArriving`: true for the owner on N+1 only, and never for another player;
-- one hex and one facing: the entrance hex on the entrance facing passes; the next hex, a chosen
+- one hex and one facing: the exit hex on the exit facing passes; the next hex, a chosen
   facing, and a **mismatched heading** each fail; a unit with no doorway has no legal hex anywhere
   and does **not** fall back to its slot box;
 - the whole submission: a **partial commit** (three of a four-unit wave) is accepted, **three units
@@ -1183,12 +1211,12 @@ quietly passing:
   same unit is released — so the guard is proven to be doing the work).
 
 **Replay harness:** `check` shows **only** the three known Stage 2/5 baseline additions
-(`reinforcementCount`, `reinforcementPoints`, `formingEntrances`). Stage 7 adds no payload
+(`reinforcementCount`, `reinforcementPoints`, `formingExits`). Stage 7 adds no payload
 difference of any kind — every new field is derived, and the two hangar fixes are no-ops for a
 non-reinforcement carrier (a POST-side and a DB-side ship agree on slot, osat and base). The
 baseline still needs its one re-record.
 
-**VERIFIED IN PLAY — game 4318, turn 2 (2026-08-28).** Two entrances formed at the end of turn 1
+**VERIFIED IN PLAY — game 4318, turn 2 (2026-08-28).** Two exits formed at the end of turn 1
 and both waves came through them. `tac_shipmovement` holds the proof: the Primus opener, the Demos
 and the Rutarian all deployed at `-7,4` facing 1; the Centurion, the Sentri and the Razik all at
 `1,-5` facing 5 — three units stacked in each doorway, every one on its vortex's own facing, and
@@ -1200,7 +1228,7 @@ Two things came out of that game, and the second made the first moot:
 
 - **"You cannot deploy on terrain." fired on every unit of every wave.** `shipManager.getShipsInSameHex`
   is a query with a UI side effect: it pops that toast whenever the hex holds Terrain, and an
-  entrance vortex *is* Terrain. Placement went through regardless (the arrival bypasses the block),
+  exit vortex *is* Terrain. Placement went through regardless (the arrival bypasses the block),
   so the message was pure noise — but it was noise on every single click. It is now suppressed for
   an arriving reinforcement, in both of that function's two error sites. ⚠️ Only the TOAST is
   suppressed; the vortex still goes into the returned list, which callers use for their own
@@ -1237,7 +1265,7 @@ machinery, which already handles the unplaced case end to end.
 rows (17 assertions): all six reinforcements join to the doorway the database says they arrived
 through, each takes that doorway's facing (1 and 5) rather than its reverse, `movement.deploy`
 stamps facing **and** heading while leaving speed alone, a unit reloaded after commit is not given a
-second deploy row, the closed / not-yet-formed windows both refuse, and an EXIT vortex held by the
+second deploy row, the closed / not-yet-formed windows both refuse, and an ENTRANCE vortex held by the
 same ship is still ignored.
 
 #### Stage 7a fallout — the deploy-start hangar dock ✅ FIXED 2026-08-28, untested in play (user report, game 4318)
@@ -1324,7 +1352,7 @@ they cannot reach the Primus's spare 12 boxes either — it is at the other door
 its fighters stowed has to ride the jump point of a carrier with the boxes for them.
 
 ### Stage 8 — gates ✅ BUILT 2026-08-28, untested in play
-The blue `UI.gateSignal` variant; the entrance flavour on the claim; the refund when an enemy exit
+The blue `UI.gateSignal` variant; the exit flavour on the claim; the refund when an enemy entrance
 claim wins the contest (the manifest is simply never stamped, so this is mostly a matter of
 clearing `arrivalvia`); waves on each turn of a gate's programmed hold.
 
@@ -1332,10 +1360,10 @@ clearing `arrivalvia`); waves on each turn of a gate's programmed hold.
 harness proved this on Phase 2 ([[project_jump_gates]]).
 
 **Verify:** both `convoyRaid`-style scenarios — a gate claimed for entry uncontested, and a gate
-claimed for entry and lost to a nearer enemy exit claim.
+claimed for entry and lost to a nearer enemy entrance claim.
 
-**As built.** The whole stage is one new `damageclass`, `'gateentry'`, and everything else follows
-from it — the same shape `'jumpentry'` gave a ship's entrance in §3.4, one step along. Two user
+**As built.** The whole stage is one new `damageclass`, `'gateexit'`, and everything else follows
+from it — the same shape `'jumpexit'` gave a ship's exit in §3.4, one step along. Two user
 requests set the gestures:
 
 > "When a player signals the jump gate to open an entrance from Hyperspace and clicks Signal Gate,
@@ -1349,7 +1377,7 @@ requests set the gestures:
 **The gesture, end to end.** Click the gate in Initial Orders → a **second** tooltip button,
 **Signal Gate for Arrival** (blue vortex icon), offered only when this player has something in
 hyperspace → `UI.gateSignal` in its cyan livery, commit reading **Signal for Arrival** → the claim
-is built with `damageclass='gateentry'` → **the Jump Point Manifest opens immediately**. On any
+is built with `damageclass='gateexit'` → **the Jump Point Manifest opens immediately**. On any
 later turn of the hold the doorway is picked up again from **Manage Reinforcements**, where the gate
 is a row like any drive but its button reads **Select Reinforcements**.
 
@@ -1360,25 +1388,25 @@ is a row like any drive but its button reads **Select Reinforcements**.
   feature is invisible until it applies, which is the shape the two existing mutually-exclusive gate
   buttons already have.
 - ⭐ **THE LIVERY IS A TOKEN OVERRIDE AND NOTHING ELSE.** Every `#gateSignalUI` rule is written
-  against the `--gs-*` custom properties, so `.gateSignalEntrance` redefines six of them and
+  against the `--gs-*` custom properties, so `.gateSignalExit` redefines six of them and
   re-liveries chrome, steppers, field, focus ring and commit button with no duplicated selector.
   Add a hard-coded colour to the gold rules and this silently stops working. The class is set with
   an explicit second argument to `toggleClass` on **every** open, both ways — the panel is a
   singleton reused across transactions, so a bare `add` would leave the blue behind on the next
   ordinary signal.
 - ⭐⭐ **§0's GATE RULING FORCED A REVERSAL IN `getVortexClosureReason`.** Stage 7 put the
-  `SpawnJumpPointEntrance` branch *before* the gate branch, reasoning that entrance-ness belongs to
+  `SpawnJumpPointExit` branch *before* the gate branch, reasoning that exit-ness belongs to
   the vortex while gate-ness belongs to the engine, so the one-shot rule wins. §0 says a gate's
-  entrance runs for its **programmed hold**. Left alone, a gate signalled for four turns of arrivals
+  exit runs for its **programmed hold**. Left alone, a gate signalled for four turns of arrivals
   would have slammed shut after one — silently, and looking exactly like a working feature. The
   branch is now `&& !$this->isGateJump()`; trap 5 is unaffected, because a gate's engine is released
-  by the hold expiring and a gate that never closed its jump point would be broken for Phase 2 exits
+  by the hold expiring and a gate that never closed its jump point would be broken for Phase 2 entrances
   too.
 - ⭐ **THE WAVES ARE ONE LINE ADDED TO `$opened`, NOT A SWEEP OF THEIR OWN.**
-  `JumpEngine::collectGateEntrances` walks the gates at the end of `spawnEntranceVortices` and adds
+  `JumpEngine::collectGateExits` walks the gates at the end of `spawnExitVortices` and adds
   every one holding a doorway-in that survives into next turn. Everything downstream is then already
   right: `stampArrivingReinforcements` stamps a berth naming an id **in** that list and **clears**
-  one naming an id that is not — which *is* the refund, for both of its causes (an enemy exit claim
+  one naming an id that is not — which *is* the refund, for both of its causes (an enemy entrance claim
   won the contest; the hold ran out). A second sweep would have meant writing that refund twice. The
   terrain skip that used to sit in `stampArrivingReinforcements` is gone; it existed precisely so
   Stage 8 could remove it.
@@ -1397,7 +1425,7 @@ is a row like any drive but its button reads **Select Reinforcements**.
 - ⭐ **ONE AUTHORITY FOR "IS THIS BERTH STILL GOOD?", AND IT IS THE END-OF-TURN SWEEP.** Two other
   places could have decided it and both are deliberately lenient instead:
   `DeploymentGamePhase::releaseUnplacedReinforcements` **keeps** a gate berth on the flat test "is the
-  opener terrain?" (§2.4's "keeps its berth if the entrance will still be open next turn"), and
+  opener terrain?" (§2.4's "keeps its berth if the exit will still be open next turn"), and
   `InitialOrdersGamePhase::collectGateOpeners` accepts a doorway that expires tonight, because during
   Initial Orders `$vortexCloseTurn` has not been written yet. Both defer to the sweep. A berth written
   and cleared four phases later costs the player nothing; a strict test in either place that got the
@@ -1406,25 +1434,25 @@ is a row like any drive but its button reads **Select Reinforcements**.
   berth is not the same as staying an arrival: the unit has to go back to `isReinforcement()` —
   concealed, 999 to both turn accessors, re-stampable — or Stage 7's ⚠️ comes true and it reads as a
   ship that deployed on a turn now past.
-- ⚠️ **`'gateentry'` HAD TO BE ADDED TO `isVortexDeclaration` IN `BallisticIconContainer`, and that
+- ⚠️ **`'gateexit'` HAD TO BE ADDED TO `isVortexDeclaration` IN `BallisticIconContainer`, and that
   is the information leak, not a cosmetic miss.** An arrival claim carries the same `targetid` as an
-  exit claim — the claiming player's nearest qualifying unit — so without it the marker is hung on
+  entrance claim — the claiming player's nearest qualifying unit — so without it the marker is hung on
   **that ship** and a bright line drawn to it from the gate, on the claimant's own screen, the
   instant the order is built and before the server has masked anything. Which unit signalled is never
   revealed ([[project_jump_gates]] §2.1). It also gets a `case` of its own in the label switch, in
   `hexBlue`, or it falls through to the default **red** hex and reads as incoming fire at a gate
   nobody is shooting.
-- ⚠️ **`gamedata.canSignalJumpGate` WAS BLIND TO A GATE HOLDING AN ENTRANCE.** `getVortexHeldBy` is
-  exit-only by design, so on its own it answers "free to signal" for a gate that demonstrably is not.
+- ⚠️ **`gamedata.canSignalJumpGate` WAS BLIND TO A GATE HOLDING AN EXIT.** `getVortexHeldBy` is
+  entrance-only by design, so on its own it answers "free to signal" for a gate that demonstrably is not.
   The server refuses such a claim (`hasOpenVortex` knows nothing of flavour), so the blindness would
   have shown up as a button offered and then silently rejected at commit — the exact "worst of both"
-  that function's charge note exists to avoid. `getEntranceHeldBy` is now asked beside it.
+  that function's charge note exists to avoid. `getExitHeldBy` is now asked beside it.
 - **`data-declared` became `data-action`**, and it is not a rename: there were two states and two
   labels, and there are now four (Choose Hex, Withdraw Jump Point, Select Reinforcements, Withdraw
   Gate Signal). A boolean cannot carry four. The row that knows its own state writes the label it
   wants and `syncLabel` only moves it onto the button.
 - **A gate row never highlights the map**, deliberately. `highlight()` drives the blue Forming
-  markers of `'jumpentry'` declarations; a gate's claim is not one, and the gate is a permanent,
+  markers of `'jumpexit'` declarations; a gate's claim is not one, and the gate is a permanent,
   named, plainly visible unit on its own hex. The highlight exists to tell three *identical* markers
   apart — a gate has no twin to be confused with.
 - **`SIGNALLED`, not `OPENING`.** A drive is *holding* a doorway of its own open; a gate has been
@@ -1440,18 +1468,18 @@ is a row like any drive but its button reads **Select Reinforcements**.
 
 1. **A gate's log line says "opens an ARRIVAL jump point", one turn before the blue vortex appears.**
    The claim itself stays secret (`hideSystemFireOrders`), so this brings forward exactly one turn of
-   "somebody is coming through here" — the same trade §2.3 already made for a ship's entrance, whose
+   "somebody is coming through here" — the same trade §2.3 already made for a ship's exit, whose
    blue Forming marker is public for the whole of its declaration turn. It still names only the
    **player**, never a unit and never a count.
-2. **Anyone may ride an open gate entrance, including one an opponent paid to open.** A gate is
+2. **Anyone may ride an open gate exit, including one an opponent paid to open.** A gate is
    contested ground with no owner priority and *any* unit of *any* side may use an open gate vortex
    ([[project_jump_gates]] §2.6); this is that rule read in the other direction. Both
-   `collectGateOpeners` (server) and `gateCandidates` (client) list an open entrance whoever claimed
+   `collectGateOpeners` (server) and `gateCandidates` (client) list an open exit whoever claimed
    it. Narrowing it to the claimant is a one-line change in each if the user would rather.
 
 **Still not offered:** re-aiming or re-timing a standing gate claim (cancel and re-signal, exactly as
-Phase 2 has always worked), and a gate entrance is **not** a way out — `Movement::getOpenVortexInHex`
-and its client mirror are entrance-blind by design (§2.6), so a gate signalled for arrival offers no
+Phase 2 has always worked), and a gate exit is **not** a way out — `Movement::getOpenVortexInHex`
+and its client mirror are exit-blind by design (§2.6), so a gate signalled for arrival offers no
 Jump Out button for the turns it stands.
 
 **Proven headless.** `tests/replay/reinforcementsStage8Harness.php` — **103 assertions across games
@@ -1462,14 +1490,14 @@ unit in a real recorded game, so the signal-range and distance rules are the liv
 - the claim rules: an arrival claim is legal with the rule on and a wave waiting; refused with the
   rule off, refused with nothing in hyperspace, refused outright on a **ship's** Jump Engine — and a
   **departure** claim is unaffected by all three, so the rule gate is on the flavour and not the gate;
-- the class: an arrival claim opens a `SpawnJumpPointEntrance` (`phpclass` included, which is the
+- the class: an arrival claim opens a `SpawnJumpPointExit` (`phpclass` included, which is the
   identity that survives the reload); a departure claim still opens a plain `SpawnJumpPoint`;
-- the contest: my arrival claim against an enemy exit claim **0 hexes** from the gate opens **yellow**,
+- the contest: my arrival claim against an enemy entrance claim **0 hexes** from the gate opens **yellow**,
   and my whole manifest is refunded — still in hyperspace, still unassigned, nothing spent;
-- closure: hold 3 stands on turns N…N+2 and expires on N+3, while a **ship's** entrance on the same
+- closure: hold 3 stands on turns N…N+2 and expires on N+3, while a **ship's** exit on the same
   vortex class is still one-shot (trap 5);
-- the waves: `collectGateEntrances` puts the gate in `$opened` and leaves out a gate holding an exit
-  (proven with the exit vortex **actually on the board**, so the assertion is about the class and not
+- the waves: `collectGateExits` puts the gate in `$opened` and leaves out a gate holding an entrance
+  (proven with the entrance vortex **actually on the board**, so the assertion is about the class and not
   about a lookup returning null); every manifest unit is stamped for next turn in memory *and* in the
   database; on the last turn of the hold the gate is not in `$opened` and every berth is refunded;
 - the release: an unplaced arrival clears `arrivalTurn` and **keeps** a gate berth with no
@@ -1480,7 +1508,7 @@ unit in a real recorded game, so the signal-range and distance rules are the liv
 catch a missing global or a wrong predicate ([[howto_verify_react_bundle]]). It injects one export
 line before the module's `return {` to reach the private row builders and changes nothing else.
 **34 assertions**. The module evaluates clean; a gate
-holding an entrance is listed and one holding an exit is not; a destroyed gate is not; `age < hold`
+holding an exit is listed and one holding an entrance is not; a destroyed gate is not; `age < hold`
 across all three states including the no-vortex NaN case; the row offers **Select Reinforcements**
 badged **OPEN** and sorts **before** the hyperspace drives; on the last turn it says
 `jump point closes this turn`, its radio is `disabled`, and the pre-checked row is the **drive**, so
@@ -1561,7 +1589,7 @@ passed on the broken code by never reaching the throw. Removing the null guard t
 ⭐⭐ **A GATE IS IN `$opened` AS THE DOORWAY'S HOLDER, NOT AS A UNIT RIDING IT — AND IT STAMPED
 ITSELF.** `stampArrivingReinforcements` has three populations and the first is "the OPENER itself,
 which always arrives through its own doorway", keyed on `isset($opened[$unit->id])`. That sentence is
-true of a **ship** and false of a **gate**: `collectGateEntrances` files the gate under its own id
+true of a **ship** and false of a **gate**: `collectGateExits` files the gate under its own id
 precisely so the *manifest* test below it works. So a gate that also carried `reinforcement` matched
 the opener test **on itself** and was given `arrivalturn = turn + 1` on every turn its jump point
 stood. `TacGamedata::hasReinforcementsArriving` reads exactly that column, so `FireGamePhase::advance`
@@ -1618,9 +1646,204 @@ the same two columns cleared; nothing else about such a unit is wrong.
 **Replay harness: `check` is 155 passed, 0 failed**, unchanged — none of this touches a serialised
 field. Stage 6 (177), Stage 7 (80) and the Stage 8 client harness (34) all still pass.
 
-### Stage 9 — optional, after playtest
+### Stage 9 ✅ BUILT 2026-08-29, untested in play
 The scatter initiative penalty (scatter hexes + 2 per 60° of facing shift, applied to units arriving
-through that vortex, on their arrival turn only) read from the `'VortexScatter'` note.
+through that vortex, on their arrival turn only) read from the `'VortexScatter'` note — **plus four
+refinements the user asked for at the same time** (2026-08-29), which turned out to be the larger
+half of the stage.
+
+#### 9a — the terminology swap
+See the banner at the top of this file for the mapping and for why the yellow class kept its bare
+name. Mechanics of the change:
+
+- **~200 identifiers and their prose**, swapped in both directions in one pass over a 35-file
+  whitelist. ⚠️ It had to be a **simultaneous swap, not two renames**: the codebase used *exit* for
+  yellow, so `entrance → exit` on its own would have collided with 60-odd existing correct uses of
+  *exit*. A handful of unrelated idioms (`early exit`, `exit loop`, `exitSourceOverride`,
+  `exitFullscreen`) were sentinel-protected first, as were the four artwork filenames — which were
+  already named the NEW way and must not move ([[arch_image_cache_busting]]).
+- **`db/reinforcementsRename.sql`** migrates the two persisted strings: `tac_ship.phpclass`
+  `SpawnJumpPointEntrance → SpawnJumpPointExit` (3 rows locally, game 4318) and
+  `tac_fireorder.damageclass` `jumpentry → jumpexit`, `gateentry → gateexit` (5 rows). ⚠️ **Run it
+  with the deploy, not after** — `phpclass` is what `new $phpclass(...)` is called with on reload, so
+  a stale row is a fatal on every load of that game.
+- **`source/autoload.php` and the static ship JSONs regenerate** (`fvbuild.ps1 -Server`). The class
+  file was renamed too, because a filename that does not match its class is **silently** skipped by
+  the static generator (trap 9).
+- **The one player-facing label that had to be rewritten rather than swapped** is the gate's
+  departure button: "Signal Jump Gate for Exit" would have become "…for Entrance", which is correct
+  under the new convention and reads like a trap to a player. It is **"Signal Jump Gate for
+  Departure"**, paired with the existing "Signal Gate for Arrival". Departure/Arrival is the verb
+  pair for a player; Entrance/Exit is the noun pair for the vortex.
+
+#### 9b — Shadows and other legacy drives phase IN
+> "Shadows and other legacy jump drive factions should phase in in the same manner they phase out
+> e.g. no visible jump point terrain is created. But we can still have blue ballisticSprite in hex
+> just with 'Reinforcements' as a general message."
+
+⭐⭐ **THE WHOLE FEATURE WAS ONE LINE MOVED PAST ANOTHER.** `Firing::getVortexDeclarationBlock` opened
+with `if ($weapon->isLegacyJump()) return …`, and the arrival branch sat *below* it. The arrival rule
+list has **no range, line-of-sight, offline or charge test** (§3.4 — the opener is in hyperspace and
+has no hex to measure from), which is exactly the list `markLegacy()` makes unanswerable — so there
+was nothing left for the flag to protect. The branch moved above the refusal; the refusal stayed.
+
+- ⚠️ **THE ASYMMETRY IS THE RULE.** `getVortexDeclaration` (the departure reader) still refuses a
+  legacy engine outright, and `getExitDeclaration` (the arrival reader) no longer does. A Shadow hull
+  may come back and may still never open a way out. A test that only asserted "the arrival is
+  accepted" would pass on a build that had simply deleted the legacy rule, which is why the harness
+  asserts both directions on the same engine.
+- ⭐⭐ **THE DOORWAY IS STILL A UNIT — `SpawnJumpPointPhaseIn extends SpawnJumpPointExit`.** Every
+  Stage 6/7/8 rule is anchored on the vortex object (where the wave stands, which way it faces, when
+  it closes, whether an unplaced unit keeps its berth, whether a second doorway may clamp onto the
+  same hex). Deleting the object for one faction would have forked all of that in two. The client
+  draws nothing for it instead.
+- ⚠️ **A SUBCLASS AND NOT A FLAG, because of persistence.** A public property set at spawn does not
+  survive the round trip — `DBManager` writes the columns and the reload is `new $phpclass(...)` — so
+  a boolean would be true for exactly one request and false for the rest of the game, silently.
+- ⭐ **ONE LINE OF SUPPRESSION: `shipManager.shouldBeHidden`.** It is what the icon, the facing arrow,
+  the click/hover sweep, the hex ship-list and the replay lifecycle animation all consult, so hiding
+  the unit there hides it everywhere at once. A second `if (isPhaseInVortex)` anywhere else is a sign
+  the suppression is in the wrong place.
+- ⚠️⚠️ **`isJumpVortexExit` HAD TO LEARN THE SECOND CLASS NAME** — trap 23's shape exactly. On the
+  server one `instanceof` catches the subclass for free; on the client the test is a phpclass
+  **string**, so the phase-in doorway would have stopped being a doorway on that side only: no
+  arrival hex, and a Jump Out button offered on a blue vortex.
+- ⚠️ **AND IT NEEDS ITS BLUEPRINT ANYWAY.** `SpawnJumpPointPhaseIn` is in
+  `JumpEngine::$spawnableClasses` despite never being drawn: `model/ship.js` merges the live payload
+  against the blueprint by faction + phpclass, and a unit with no blueprint is a unit with no
+  phpclass — which is the very thing `isJumpVortexExit` tests. "Invisible" is a rendering rule, not
+  an excuse to skip trap 16.
+- **`canOpen` / `jumpEngineOf` / the lobby's `hasVortexJumpEngine` are now "any Jump Engine"**, and
+  the last is renamed `hasArrivalJumpEngine` so the next reader cannot mistake it for the departure
+  test. The three-property legacy sniff was right while only a B5 vortex could bring a wave in; kept,
+  it would have put the lobby's "none of your reinforcements can arrive" WARNING on a legal Shadow
+  fleet — a scary wrong message, which is worse than none.
+- **The marker says `Reinforcements`** rather than "Jump Point Forming", because for a phasing hull
+  nothing is forming. Two sources, as always: the owner's own order can ask the drive directly
+  (`shipManager.movement.isLegacyJumpEngine`, the client-readable trace of `markLegacy()`), and the
+  republished slot entry gained a third field, `phase`, because that viewer has no opening ship left
+  to ask. It discloses nothing the next turn does not — either terrain appears there or it does not.
+- **The deviation still applies**, and the log line's verb changes to "phases in from hyperspace".
+  Navigating out of hyperspace is the same job however the hull does it, and an Ancient's −5 already
+  makes a Shadow arrival precise most of the time (§2.5).
+
+#### 9c — on a contested gate, only the nearest team's signal is drawn
+> "When two or more teams signal a Jump Gate to open, we should only show the ballistic hex icon for
+> the closest team at the moment of signalling (to show who will win). If it's tied we can show both
+> as it's still unclear."
+
+A gate claim is a fire order on the **gate's** engine, and fire orders become public from phase 2 —
+so two teams signalling one gate put two markers on one hex, in whatever colours they happened to be,
+one of them already dead. `JumpEngine::maskLosingGateClaims` now thins them, called from
+`TacGamedata::deleteHiddenData`.
+
+- ⭐ **IT IS A MASK, NOT A RENDERING RULE, AND IT COULD NOT HAVE BEEN ANYTHING ELSE.** The distance
+  that settles the contest is measured to the claimant's nearest qualifying unit, which the claim
+  records in `targetid` — and `targetid` is masked to −1 for every viewer it does not belong to
+  ([[project_jump_gates]] §2.1: which unit signalled is never revealed). A client cannot measure a
+  distance from a unit it has been told nothing about.
+- ⚠️ **IT MUST RUN BEFORE `hideSystemFireOrders`**, which is what makes `targetid` readable at all.
+  Run it after and every enemy claim looks like a claim naming nothing — which the mask reads as
+  "cannot win" — so a player would see only their own marker on every contested gate, always,
+  whoever was nearer.
+- ⭐ **IT LEAKS STRICTLY LESS THAN BEFORE.** Every claim it drops was already public; nothing it keeps
+  was not. A viewer learns exactly one new thing — that somebody nearer has claimed the same gate —
+  which is the thing the user asked to be told.
+- ⚠️ **BY TEAM, NOT BY PLAYER.** Two allies may both signal one gate; between them they hold one
+  position on the map. The RESOLUTION is still per player (`resolveGateClaims` takes one claim per
+  userid and rolls off ties between userids); this is a drawing rule and it deliberately does not try
+  to predict the roll-off, which is why a distance tie shows both.
+- ⚠️ **COUNTED IN CLAIMS, NOT IN TEAMS.** The first cut was `count($bestByTeam) < 2`, and a lapsed or
+  unresolvable claim has no team — so a contest between one live claim and one lapsed one looked
+  *uncontested* and both markers stood, the far one included. The harness caught it.
+- **Replay is unaffected**, deliberately: `deleteHiddenData` does not run for a past turn
+  (`$all = true`), so a post-mortem still shows every claim that was made.
+- **Not gated on the reinforcements rule**, deliberately: a contested gate is a Phase 2 situation that
+  predates reinforcements, and both flavours of claim are masked by the same rule. The efficiency
+  gate is the terrain test — a game with no jump gate pays one pass over its terrain and stops.
+
+#### 9d — the arrival initiative penalty (the stage as originally scoped)
+`BaseShip::getReinforcementArrivalIniModifier`, added to `getCommonIniModifiers` so it reaches both
+initiative generators (`Manager::generateIniative` and `SimultaneousMovementRule`).
+
+**−5 per hex of scatter, −10 per 60° of facing shift, on the arrival turn only.**
+
+- ⚠️⚠️ **THE ×5 IS NOT DECORATION.** FV initiative is d100 and **every** modifier in `ShipClasses` is
+  five times its tabletop value — the crit lines say so in their own comments (`-5` is written "−1 Ini
+  per crit", `-20` is "−4 Ini per hit"), as does `-10` per point of speed below 5. Written ×1 this
+  rule would be worth a fifth of a point and would still **look** implemented.
+- ⭐ **THE SCATTER BELONGS TO THE DOORWAY, NOT TO THE UNIT.** `JumpEngine::getArrivalScatter` resolves
+  `arrivalVia` to the opener and reads `getVortexScatter()` off its engine, so every unit riding one
+  doorway takes the same disorder. That is the rule: a wave that comes out four hexes off course and
+  turned sideways is disordered *as a wave*, and the rider's own sensors had nothing to do with it.
+- **A GATE'S DOORWAY COSTS NOTHING**, and that is a rule rather than a gap: a gate's jump point does
+  not deviate (§2.4), so `getVortexScatter()` is null on it and null is the whole of "no penalty".
+- ⚠️ **ARRIVAL TURN ONLY** (`isArrivingReinforcement`, i.e. `arrivalTurn === this turn`). Not "has
+  arrived": a unit that came through a badly-scattered doorway three turns ago is an ordinary ship.
+- **`abs()` on the facing steps.** `openExitVortex` stores them signed and shortest-way-round (−2..3)
+  because the log line reads better for it; turning left is exactly as disordering as turning right.
+- **Stage 6 recorded the roll for exactly this**, in the `'VortexScatter'` note, because a d20 and two
+  dice cannot be re-derived afterwards. Stage 9 is the reader that note was written for.
+- ⚠️ **KNOWN AND NOT FIXED:** an arriving reinforcement is *also* still paying the ordinary
+  `speed < 5` penalty (−50 at speed 0), because initiative for turn N+1 is rolled at the end of turn N
+  and the wave does not set its speed until the Deployment phase of N+1. That is pre-existing
+  behaviour shared with every Delayed Deployment Slot, it is arguably right (they arrive slow), and it
+  is out of Stage 9's scope — but it means the scatter penalty **stacks on top of** a −50 that is
+  already there. Worth a look after the play test if arrivals feel over-punished.
+
+#### 9e — the efficiency gates ("blast radius")
+> "Ensure we've gated any intensive checks in the code with a check for the Reinforcement rule being
+> in place, as best we can."
+
+Audited every sweep the feature added. Most were already cheap — `hasReinforcementsArriving`,
+`releaseUnplacedReinforcements` and `stampArrivingReinforcements` all open on the plain
+`$ship->reinforcement` property read, and `spawnExitVortices` and `persistManifest` already carried
+the rule gate. Three did not:
+
+- **`TacGamedata::hideHyperspaceReinforcements`** — the per-viewer load path, the hottest sweep the
+  feature touches. Gated **after** the defensive slot zeroing so that still runs in every game.
+  ⚠️ **It fails OPEN**: the test is "rules exist AND say no", never "rules do not say yes". A load
+  that somehow arrives without a `GameRules` object still does the masking — a missing object must
+  never become a concealment failure ([[arch_info_bleed_masking]]).
+- **`ReinforcementEntry.myHyperspaceUnits`** — every dialog, `isOffered`, `canSignalJumpGateForArrival`
+  and `strandedByCommit` reach hyperspace through it, so one test switches the module off wholesale
+  instead of filtering every ship on every UI refresh for the whole battle.
+- **`BallisticIconContainer.generateExitHexes`** — runs on every ballistic redraw and walks
+  `gamedata.slots`.
+- **`BaseShip::getReinforcementArrivalIniModifier`** puts the cheap flag test *first* and the rule
+  test second, on purpose: `getCommonIniModifiers` runs for every ship at every turn advance, so an
+  ordinary game pays one boolean per ship per turn and nothing else.
+
+`gamedata.reinforcementsAllowed()` is the new game.php twin of the lobby's helper. ⚠️ **It is an
+efficiency gate and never a security one** — every rule behind it is also enforced server-side.
+
+**Proven headless.**
+- `tests/replay/reinforcementsStage9Harness.php` — **108 assertions across games 4277/4307/4312, all
+  passing, zero database writes** (`Manager::$dbManager` stubbed by reflection; the two private
+  methods reached the same way). It builds a real `PhasingDrive` and a real `JumpgateCapital` on top
+  of real units in real recorded games, and fabricates the contested geometry by giving two of the
+  player's hulls userids and teams that exist nowhere else in the game plus a deploy row at a hex the
+  file chooses — which is the only way the **tie** case is reachable at all. ⚠️ Two traps the harness
+  itself hit and now documents: a unit left with `reinforcement = true, arrivalTurn = null` answers
+  **999** to `getTurnDeployed`, so its claim lapses and the whole contested section goes quietly
+  vacuous; and a `FighterFlight`'s `->systems` are FIGHTERS, so hanging a synthetic Jump Engine on one
+  fatals in `getSystemByName`.
+- `tests/replay/reinforcementsStage9ClientHarness.js` — plain `node`, **26 assertions**, evaluated
+  against the **real** `movement.js` and `ships.js` rather than stubs of them (the Stage 8 client
+  harness stubs `shipManager.movement` on purpose — it is testing ReinforcementEntry's questions; this
+  one is testing movement's answers). It proves the two class names, that `shouldBeHidden` hides the
+  phase-in doorway and **not** the ordinary one, that `canOpen` accepts a legacy drive and still
+  refuses a wreck and a gate, and that the rule gate empties the module without touching
+  `gamedata.ships`.
+- **Replay harness: 157 passed, 0 failed** after re-recording. The only difference the swap produced
+  anywhere in the corpus was the payload key `formingEntrances → formingExits`, on 619 **empty**
+  arrays — no value changed anywhere. (The re-record also picked up game 4318, which had advanced
+  since it was last recorded, and game 4319.)
+- Stage 6 (177), Stage 7 (80), Stage 8 (130) and the Stage 8 client harness (34) all still pass.
+
+⚠️ **The legacy bundles need regenerating** (`scripts/fvbuild.ps1 -Client`) before this is exercised in
+production mode — nine client files changed and `game.php` serves them from `game.legacy.bundle.js`
+outside dev mode.
 
 ---
 
@@ -1635,16 +1858,16 @@ through that vortex, on their arrival turn only) read from the `'VortexScatter'`
    `arrivalVia` is. Every server rule must resolve through `$gamedata->getShipById($ship->id)`
    ([[arch_post_side_ship_reconstruction]]).
 4. **The `'Vortex'` note format is untouchable** — its third field is free text full of commas,
-   parsed with `explode(',', $v, 3)`. Entrance-ness rides the **class**; scatter rides a new
+   parsed with `explode(',', $v, 3)`. Exit-ness rides the **class**; scatter rides a new
    additive `'VortexScatter'` note. ⚠️ `notekey_human` is `varchar(40)` and an overflow is a mysqli
    1406 that aborts the whole submission, not a truncation.
-5. **A one-shot entrance must release its engine — and ONE-SHOT IS A SHIP'S RULE, NOT THE VORTEX'S.**
+5. **A one-shot exit must release its engine — and ONE-SHOT IS A SHIP'S RULE, NOT THE VORTEX'S.**
    `spawnVortexUnit` opens with `if ($this->hasOpenVortex($gamedata->turn)) return null;`. If the
-   entrance does not close at the end of the arrival turn, the ship that opened it can never open an
-   exit for the rest of the game. `closeExpiredVortices` needs an entrance clause that disturbs
+   exit does not close at the end of the arrival turn, the ship that opened it can never open an
+   entrance for the rest of the game. `closeExpiredVortices` needs an exit clause that disturbs
    neither the ship branch nor the `holdsGateEngine` narrowing.
    ⚠️ **Stage 7 wrote that clause ahead of the gate branch and Stage 8 had to reverse it**
-   (`&& !$this->isGateJump()`): §0 gives a GATE'S entrance the gate's **programmed hold**, not one
+   (`&& !$this->isGateJump()`): §0 gives a GATE'S exit the gate's **programmed hold**, not one
    turn. Both orderings are defensible from first principles and only the user ruling settles it —
    which is why the reversal is a rule, not a tidy-up. Getting it wrong slams a 4-turn doorway shut
    after one turn, silently, while looking exactly like a working feature.
@@ -1656,9 +1879,9 @@ through that vortex, on their arrival turn only) read from the `'VortexScatter'`
 9. **The static generator skips a class whose filename does not match, silently.** §3.3.
 10. **A ballistic order's `targetid` is read as "hang the marker on that unit"** by every
     ballistic-icon path — `'jumppoint'` orders are already forced to `targetid = -1` throughout
-    `createBallisticIcon`. `'jumpentry'` must be too, or the blue marker will be drawn over the
+    `createBallisticIcon`. `'jumpexit'` must be too, or the blue marker will be drawn over the
     opener, which is in hyperspace ([[project_jump_gates]], trap 2).
-    ⚠️ **And `'gateentry'` (Stage 8) is the sharper case, because there the leak is real rather than
+    ⚠️ **And `'gateexit'` (Stage 8) is the sharper case, because there the leak is real rather than
     merely wrong.** A gate claim's `targetid` carries the CLAIMING PLAYER, recorded as their nearest
     qualifying unit — so a flavour left out of `isVortexDeclaration` hangs the marker on **that ship**
     and runs a bright line to it from the gate, on the claimant's own screen, before the server has
@@ -1697,10 +1920,10 @@ through that vortex, on their arrival turn only) read from the `'VortexScatter'`
 
 19. **A REINFORCEMENT'S BALLISTIC ORDER HAS NO SHOOTER POSITION, and `TacGamedata::onConstructed`
     assumed every ballistic shooter had one.** (Fixed 2026-08-28, user report.) The Jump Engine is
-    `$ballistic`, so an entrance declaration is an ordinary ballistic fire order — but its author is
+    `$ballistic`, so an exit declaration is an ordinary ballistic fire order — but its author is
     in hyperspace, and `getLastTurnMovement()` skips every `'start'` row, so it answers **null**.
     `array("x" => $movement->position->q, …)` was then a fatal `ErrorException` on **every gamedata
-    load from phase 2 of the turn the entrance was declared**, for both players, on every poll:
+    load from phase 2 of the turn the exit was declared**, for both players, on every poll:
 
     ```
     Attempt to read property "position" on null … TacGamedata.php (171)
@@ -1709,13 +1932,13 @@ through that vortex, on their arrival turn only) read from the `'VortexScatter'`
     ⚠️ **Phase-1 secrecy hid it.** `hideSystemFireOrders` strips every current-turn ballistic order
     from every phase-1 payload *including its author's*, so the declaration is invisible to this loop
     until Initial Orders are committed — which is exactly when the error appeared, and why it read as
-    "committing orders breaks the game" rather than "declaring an entrance does".
+    "committing orders breaks the game" rather than "declaring an exit does".
 
     The guard is `if ($movement === null) continue;` — the general rule, deliberately not a
-    `damageclass === 'jumpentry'` test. Nothing wants the record either: `$this->ballistics` is
+    `damageclass === 'jumpexit'` test. Nothing wants the record either: `$this->ballistics` is
     absent from `stripForJson` so it never reaches the client, the marker is drawn from the fire
-    order itself (`entranceOrders`, or the slot's `formingEntrances` for an enemy viewer), and the
-    only server-side consumer is the `hidetarget` mask — which an entrance is not subject to,
+    order itself (`exitOrders`, or the slot's `formingExits` for an enemy viewer), and the
+    only server-side consumer is the `hidetarget` mask — which an exit is not subject to,
     `hideHyperspaceReinforcements` having deleted the whole unit first.
 
 20. ⚠️⚠️ **A NEW `IndividualNote` KIND ON THE JUMP ENGINE MUST BE CLAIMED IN
@@ -1734,24 +1957,24 @@ through that vortex, on their arrival turn only) read from the `'VortexScatter'`
 
 22. **A vortex spawned mid-sweep is Terrain and is on the board IMMEDIATELY.**
     `Manager::insertSingleShip` appends to `$gamedata->ships`, so anything asking a hex question
-    later in the same request sees it — which is what makes a second entrance in one sweep clamp
+    later in the same request sees it — which is what makes a second exit in one sweep clamp
     around the first, and what makes any "is this hex free" test written for Stage 7 need to think
     about whether it means *before* or *after* this turn's doorways exist.
 
-23. ⚠️ **`getVortexHeldBy` / `isJumpVortex` ARE EXIT-ONLY BY DESIGN, so any rule that means "is this
-    unit holding a jump point at all" must ask `getEntranceHeldBy` beside them.** (Stage 8, client.)
+23. ⚠️ **`getVortexHeldBy` / `isJumpVortex` ARE ENTRANCE-ONLY BY DESIGN, so any rule that means "is this
+    unit holding a jump point at all" must ask `getExitHeldBy` beside them.** (Stage 8, client.)
     The two predicates were deliberately kept separate because their callers do not agree on the
     verdict — `canJumpOut`, the Maintain control and the closing-vortex warning are all rules an
-    entrance must FAIL, while the icon's z-plane and the hex-stack sweep are things it must MATCH —
+    exit must FAIL, while the icon's z-plane and the hex-stack sweep are things it must MATCH —
     so the temptation is to widen `isJumpVortex` and the correct move is never to. The bite:
-    `gamedata.canSignalJumpGate` asked only `getVortexHeldBy` and so read a gate holding an ENTRANCE
+    `gamedata.canSignalJumpGate` asked only `getVortexHeldBy` and so read a gate holding an EXIT
     as free to signal, while the server's `hasOpenVortex` knows nothing of flavour and refuses. That
     shape — **client predicate narrower than its server twin** — always surfaces as a button offered
     and then silently rejected at commit, which is worse than either answer alone.
 
 24. ⭐ **WHEN TWO PLACES COULD DECIDE THE SAME THING, PICK ONE AND MAKE THE OTHER LENIENT.** (Stage 8.)
     "Is this berth still good?" is asked in the Deployment phase (`releaseUnplacedReinforcements`),
-    in Initial Orders (`collectGateOpeners`) and at end of turn (`collectGateEntrances`). Only the
+    in Initial Orders (`collectGateOpeners`) and at end of turn (`collectGateExits`). Only the
     last one runs at a moment when the answer is settled — closure is not written until the end of
     Firing — so the other two keep the berth optimistically and defer. A berth written and cleared
     four phases later costs the player nothing; a strict test at either earlier point that got the
@@ -1781,6 +2004,37 @@ through that vortex, on their arrival turn only) read from the `'VortexScatter'`
     beside it claims** — and a button whose ACTION needs a shooter needs one as a condition, or it
     is offered with nothing to fire it from.
 
+27. ⭐⭐ **SWAPPING TWO WORDS IS NOT TWO RENAMES.** (Stage 9.) The codebase used *entrance* for blue
+    and *exit* for yellow, and the user wanted them the other way round. `entrance → exit` run on its
+    own would have collided with every existing correct use of *exit* and produced a file where both
+    words meant blue. It has to be **one simultaneous pass** with a lookup table, with the unrelated
+    idioms (`early exit`, `exit loop`, `exitSourceOverride`, `exitFullscreen`) and the artwork
+    filenames sentinel-protected first. **And never rename a class INTO a name that already exists**:
+    `SpawnJumpPoint` kept its bare name precisely so no string ever means the opposite vortex either
+    side of a deploy — in the database, in a stale branch, in a half-updated file.
+
+28. ⭐⭐ **THE ORDER OF TWO GUARD LINES CAN BE A WHOLE FEATURE.** (Stage 9.) "Shadows phase in" is
+    `Firing::getVortexDeclarationBlock`'s arrival branch moved **above** its legacy refusal, and
+    nothing else. The refusal stays where it is and still means what it meant. If you are tempted to
+    widen `isLegacyJump()` — or to delete it — the rule you actually want is one line further up or
+    down. ⚠️ **The asymmetry it produces is the ruling**: such a hull may come back and may still
+    never open a way out, so a test must assert BOTH directions on the same engine or it will pass on
+    a build that simply deleted the rule.
+
+29. ⚠️ **A UNIT LEFT `reinforcement = true, arrivalTurn = null` ANSWERS 999 TO `getTurnDeployed`, AND
+    EVERY "IS IT ON THE BOARD?" SWEEP THEN SKIPS IT.** (Stage 9, caught by its own harness.)
+    `getNearestGateSignaller` reads it as "not on the board yet", so a gate claim naming such a unit
+    LAPSES — which made the whole contested-gate section of the harness pass vacuously, because a
+    contest with only one live claimant is correctly left alone. Any test that flags a unit as a
+    reinforcement must un-flag it before reusing that unit for anything positional, and any *rule*
+    that means "somewhere on the map" must expect 999 rather than a real turn.
+
+30. ⭐ **"COUNT THE THINGS YOU MIGHT DROP, NOT THE GROUPS YOU RESOLVED THEM INTO."** (Stage 9.)
+    `maskLosingGateClaims` first tested `count($bestByTeam) < 2` for "is this contested?" — and a
+    lapsed or unresolvable claim has no team, so it never reached that map. One live claim against one
+    lapsed one therefore looked uncontested and **both** markers stood. The test has to be over the
+    claims themselves, with the unusable ones recorded as losers rather than skipped.
+
 ---
 
 ## 6. Test plan
@@ -1791,22 +2045,22 @@ Local, two seats, in a game with the rule on:
 |---|---|---|
 | 1 | Buy 3 front-line + 2 reinforcements | Same point pool; turn-1 Deployment offers only the 3 |
 | 2 | Enemy view, turn 1 | "Reinforcements — 2 units, N pts" and nothing else. Check the raw JSON |
-| 3 | Declare an entrance with an undamaged high-sensor ship | Roll lands in the 0–1d6 bands most of the time |
+| 3 | Declare an exit with an undamaged high-sensor ship | Roll lands in the 0–1d6 bands most of the time |
 | 4 | Declare with a low-sensor ship | Reaches the 1d10 and 2d10+2 bands; facing shifts |
 | 4b | Declare with a Vorlon/Shadow hull (`factionAge >= 3`) | Precise roughly a quarter of the time; never worse than 1d6 on a roll under 13 |
 | 5 | Declare next to the map edge / a moon | Clamp finds a legal hex, direction before distance |
-| 6 | Enemy view, turn N (formation) | Blue marker at the **declared** hex; no entrance unit in the payload |
+| 6 | Enemy view, turn N (formation) | Blue marker at the **declared** hex; no exit unit in the payload |
 | 7 | Turn N+1 | Deployment phase granted; 2 units stack in the vortex hex on the vortex facing |
 | 8 | Place one, leave one | Commit succeeds; the unplaced unit is still in hyperspace next turn |
-| 9 | Try to Jump Out through a blue entrance | No button, and a hand-built order is refused |
-| 10 | Arrive, then declare an **exit** with the same ship | Allowed once the entrance has closed |
-| 11 | Gate entrance, uncontested | Opens at end of Initial Orders, no deviation, waves on each held turn |
-| 12 | Gate entrance, lost to a nearer enemy exit claim | Manifest refunded; units still in hyperspace, still unassigned |
+| 9 | Try to Jump Out through a blue exit | No button, and a hand-built order is refused |
+| 10 | Arrive, then declare an **entrance** with the same ship | Allowed once the exit has closed |
+| 11 | Gate exit, uncontested | Opens at end of Initial Orders, no deviation, waves on each held turn |
+| 12 | Gate exit, lost to a nearer enemy entrance claim | Manifest refunded; units still in hyperspace, still unassigned |
 | 13 | Reinforcement carrier with a queued deploy-start dock | Fighters end up in the bay, not at `x = ±30` |
 | 14 | A reinforcement group with no jump drive, no gate on the map | Warned at Ready |
 | 15 | Surrender a slot holding reinforcements | They vanish with the rest of the fleet |
 | 16 | `replayHarness.php check` | Green, or failing only on [[arch_replay_corpus_known_failures]] |
-| 17 | Commit Initial Orders on the turn an entrance is declared | No `ErrorException` in the PHP log for either player (trap 19) |
+| 17 | Commit Initial Orders on the turn an exit is declared | No `ErrorException` in the PHP log for either player (trap 19) |
 | 18 | Save a mixed fleet, load it into another Allow-Reinforcements game | Flags come back; the groups and the points total match what was saved |
 | 19 | Load that same fleet into a game *without* the rule | Everything in the main fleet; no headers, no toggle, no Reinforce links |
 | 20 | Click MAIN FLEET / REINFORCEMENTS, then buy | The unit lands in the clicked group with no re-flag; the filter-strip tick agrees |
@@ -1818,7 +2072,7 @@ Local, two seats, in a game with the rule on:
 | 26 | Put a second jump-capable unit on the first one's manifest | It is greyed and `RIDING` in the menu, and cannot be selected |
 | 27 | Withdraw that first jump point | The menu stays open, the row reverts to Choose Hex, and the greyed unit is selectable again |
 | 28 | Lobby: tick Show Custom | The customs dropdown appears immediately right of the checkbox, before Buy as Reinforcement |
-| 29 | Declare an entrance and play the turn out (Stage 6) | At the end of Firing a blue Jump Point Entrance appears — usually NOT on the declared hex — and the combat log names the band and the distance |
+| 29 | Declare an exit and play the turn out (Stage 6) | At the end of Firing a blue Jump Point Exit appears — usually NOT on the declared hex — and the combat log names the band and the distance |
 | 30 | Check `tac_ship` for the riders | `arrivalturn` = the next turn on the opener AND on every unit on its manifest; `arrivalvia` untouched |
 | 31 | An Ancient (Vorlon/Shadow) opener vs a Young one | The Ancient is precise far more often; the log line's roll differs by 5 |
 | 32 | Declare next to a moon or an asteroid field | The doorway never forms inside terrain, however the dice fall |
@@ -1837,15 +2091,15 @@ are the gestures the build added:
 | 39 | Manage Reinforcements on that turn | The gate is a row, badged **SIGNALLED**, offering **Withdraw Gate Signal**, listed above the drives |
 | 40 | Withdraw it there | The row goes, the berths clear, the menu stays open |
 | 41 | Cancel Gate Signal from the tooltip instead | Same: claim and berths both gone |
-| 42 | Commit, play the turn, look at turn N+1 | A **blue** entrance vortex on the gate's hex; the wave deploys into it on the gate's own facing |
+| 42 | Commit, play the turn, look at turn N+1 | A **blue** exit vortex on the gate's hex; the wave deploys into it on the gate's own facing |
 | 43 | Turn N+1, Manage Reinforcements | The gate is a row badged **OPEN**, offering **Select Reinforcements**; it opens the manifest |
 | 44 | Name a second wave and commit | It arrives on N+2 — a wave per turn of the hold (§0) |
 | 45 | Do the same on the **last** turn of the hold | The row is greyed and says `jump point closes this turn`; the drives are still selectable |
 | 46 | Signal a gate for 1 turn, bring nobody through | The berth is refunded at end of turn; the units are unassigned and concealed again next turn |
 | 47 | Arrive through a gate, leave one unit unplaced | It goes back to hyperspace but **keeps** its berth, and rides the next wave without being re-named |
-| 48 | Try to Jump Out through a gate's blue entrance | No button; the gate is a way in only while it is signalled that way |
-| 49 | Try to signal a gate that is already holding an entrance | The button is not offered (the charge reads 0 and `getEntranceHeldBy` also refuses) |
-| 50 | A game **without** the reinforcements rule | The arrival button never appears, and a hand-built `gateentry` claim is refused server-side |
+| 48 | Try to Jump Out through a gate's blue exit | No button; the gate is a way in only while it is signalled that way |
+| 49 | Try to signal a gate that is already holding an exit | The button is not offered (the charge reads 0 and `getExitHeldBy` also refuses) |
+| 50 | A game **without** the reinforcements rule | The arrival button never appears, and a hand-built `gateexit` claim is refused server-side |
 
 **From the first play test (2026-08-29, game 4319)** — the two fixes above:
 
@@ -1857,6 +2111,25 @@ are the gestures the build added:
 | 54 | Lobby: select REINFORCEMENTS, buy a jump gate / a base / an OSAT | It lands in **MAIN FLEET**, with no Reinforcement link on its row |
 | 55 | Signal a gate for arrival and play three turns out | No Deployment phase appears on any turn for the gate itself; only a real wave brings one |
 | 56 | Click a gate during a Deployment or Pre-Turn phase | No "You cannot deploy on terrain" toast unless a unit that actually places this turn is selected |
+
+**Stage 9, all still to be done in play:**
+
+| # | Scenario | Expect |
+|---|---|---|
+| 57 | Open game 4318 (it holds a live blue vortex from Stage 7) after the deploy | It loads. If `db/reinforcementsRename.sql` was not run, it is a fatal on every load — that is the migration's whole point |
+| 58 | Declare an arrival and let it scatter 3+ hexes, then look at the arrival turn's initiative | Every unit that rode it is that much lower — 5 per hex, 10 per 60° — and only on that turn |
+| 59 | Arrive precisely (an Ancient with a friendly base on the map) | No penalty at all |
+| 60 | Arrive through a **gate** | No penalty at all, however far away the gate is |
+| 61 | Check the same units on the turn AFTER they arrived | The penalty is gone; they roll like anything else |
+| 62 | Buy a Shadow fleet as reinforcements and open a doorway with a Phasing Drive | It is offered in Manage Reinforcements, the hex picker works, and the marker reads **Reinforcements** rather than "Jump Point Forming" |
+| 63 | Play that turn out | **No terrain appears** on the arrival hex — for either player — and the wave is still placed there on the doorway's facing next turn |
+| 64 | Try to Jump Out with that same Shadow ship once it has arrived | The old one-click Jump to Hyperspace, and no vortex declaration offered |
+| 65 | Look at the enemy's screen on the declaration turn of a Shadow arrival | The same blue **Reinforcements** hex, from the republished slot entry — no ship, no count, no manifest |
+| 66 | Two teams signal one gate, one clearly nearer | Both players see ONE marker, the nearer team's, in that team's flavour |
+| 67 | Two teams signal one gate from the same distance | Both markers, both flavours — it is genuinely unclear |
+| 68 | Replay that turn | Every claim that was made is shown again; the mask is live-play only |
+| 69 | A game with the rule OFF | No Manage Reinforcements button, no arrival gate button, no reinforcement markers, and nothing in the payload |
+| 70 | The FAQ | Delayed Deployment Slot and Jump Drives → Reinforcements each point at the other, and the two vortex colours are named |
 
 ---
 

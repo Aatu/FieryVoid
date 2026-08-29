@@ -364,14 +364,14 @@ body {
 }
 
 /* ⭐⭐ REINFORCEMENTS_PLAN.md STAGE 8 - THE ARRIVAL LIVERY, AND IT IS A TOKEN OVERRIDE AND NOTHING
-   ELSE. UI.gateSignal.open() puts .gateSignalEntrance on the container when the claim asks for a
+   ELSE. UI.gateSignal.open() puts .gateSignalExit on the container when the claim asks for a
    doorway IN, and every rule above is written against the --gs-* custom properties, so redefining
    six of them here re-liveries the whole panel - chrome, steppers, field, focus ring and commit
    button - without a single duplicated selector. Change a dimension above and this follows it for
    free; add a hard-coded colour up there and this stops working, which is the point.
 
    #00b8e6 IS FV'S ESTABLISHED "NOT HERE YET" CYAN (plan section 3.7) - the Forming marker, the
-   entrance vortex, the fleet list's hyperspace row and theme.js's statusPending are all this one
+   exit vortex, the fleet list's hyperspace row and theme.js's statusPending are all this one
    value. Do not introduce a second blue. Everything below is that colour put through the same
    transformations the gold values above already are: a near-black wash for the container, a mid
    tone for the row lines, and a full-strength pair for the commit button.
@@ -379,7 +379,7 @@ body {
    ⚠️ THE LABEL SWAP IS IN JS, NOT HERE. The button's text is written by UI.gateSignal.open()
    because the markup has one button and two meanings, and content: attr() would fight the plain
    text node game.php ships. This file owns the colour only. */
-#gateSignalUI.gateSignalEntrance {
+#gateSignalUI.gateSignalExit {
     --gs-bg: rgba(4, 20, 26, 0.9);
     --gs-line: #3f7d92;
     --gs-line-row: #40808f;
@@ -394,7 +394,7 @@ body {
 
 /* The row hover is the one rule above that hard-codes its rgba (it is a wash of --gs-line-row,
    which cannot be expressed as a var() alpha without a colour-mix), so it needs its own twin. */
-#gateSignalUI.gateSignalEntrance .gateSignalRow:hover {
+#gateSignalUI.gateSignalExit .gateSignalRow:hover {
     background-color: rgba(64, 128, 143, 0.10);
 }
 
@@ -2390,7 +2390,7 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     color: #bdd9eb;
     padding-left: 4px;
 }
-/* ── Reinforcements: calling a jump point entrance (REINFORCEMENTS_PLAN.md Stage 4) ──────
+/* ── Reinforcements: calling a jump point exit (REINFORCEMENTS_PLAN.md Stage 4) ──────
    #00b8e6 throughout - FV's established "not here yet" cyan, the same value as the blue
    Jump Point marker, the fleet list's .docked / .hyperspace rows and the fleet header's
    [Deploys on Turn N]. Do NOT introduce a second blue for this. */

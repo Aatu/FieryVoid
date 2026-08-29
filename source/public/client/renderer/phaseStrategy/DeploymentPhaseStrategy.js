@@ -519,9 +519,9 @@ window.DeploymentPhaseStrategy = function () {
 
     function showDeploymentArea(ship, deploymentSprites, gamedata) {
         /* REINFORCEMENTS_PLAN.md STAGE 7 - an arrival's slot box is a LIE and must not be drawn.
-           Its legal area is one hex on the far side of the map (the jump point entrance), and
+           Its legal area is one hex on the far side of the map (the jump point exit), and
            lighting up the fleet's original deployment rectangle would point the player at the one
-           place they definitely cannot go. The blue entrance vortex is already on the board with
+           place they definitely cannot go. The blue exit vortex is already on the board with
            its outward-pointing arrow, so the cue this replaces is there without drawing anything. */
         if (shipManager.isArrivingReinforcement(ship)) return;
 
@@ -767,7 +767,7 @@ window.DeploymentPhaseStrategy = function () {
                DeploymentGamePhase::releaseUnplacedReinforcements takes on commit.
                ⚠️ THE `deploymove` TEST IS LOAD-BEARING, not a shortcut. Without it the call below
                would validate the unit's 'start' position - the off-map deployment-box centre every
-               ship is given - against the entrance hex, fail, and the commit button would never
+               ship is given - against the exit hex, fail, and the commit button would never
                arm for anybody who chose to leave a unit behind. A PLACED arrival still falls
                through and is validated normally. */
             if (shipManager.isArrivingReinforcement(ship) && !ship.deploymove) continue;
@@ -785,17 +785,17 @@ window.DeploymentPhaseStrategy = function () {
             hex = new hexagon.Offset(shipManager.getShipPosition(ship));
         }
         /* REINFORCEMENTS_PLAN.md STAGE 7 - a unit arriving out of hyperspace has exactly ONE legal
-           hex: the jump point entrance it is riding (plan §2.4). Its slot's deployment box is
+           hex: the jump point exit it is riding (plan §2.4). Its slot's deployment box is
            irrelevant and would say yes to a hex nowhere near the doorway, so this is taken first
            and returns outright. Mirrors DeploymentGamePhase::validateReinforcementArrival, minus
            the facing half - the facing is not a choice on this side (movement.deploy sets it and
            canTurn refuses to change it), so there is nothing here to validate. */
         if (shipManager.isArrivingReinforcement(ship)) {
-            var entrance = shipManager.movement.getArrivalVortex(ship);
-            if (!entrance) return false;
+            var exit = shipManager.movement.getArrivalVortex(ship);
+            if (!exit) return false;
 
-            var entranceHex = new hexagon.Offset(shipManager.getShipPosition(entrance));
-            return (entranceHex.q == hex.q && entranceHex.r == hex.r);
+            var exitHex = new hexagon.Offset(shipManager.getShipPosition(exit));
+            return (exitHex.q == hex.q && exitHex.r == hex.r);
         }
 
         if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {//return true;

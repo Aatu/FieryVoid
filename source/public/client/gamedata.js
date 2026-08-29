@@ -370,15 +370,15 @@ window.gamedata = {
            the load test below covers it too - but say it, because the two are different rules and
            the reasons the player is shown differ.
 
-           ⚠️ BOTH KINDS OF VORTEX (Stage 8). getVortexHeldBy is EXIT-ONLY by design - see
+           ⚠️ BOTH KINDS OF VORTEX (Stage 8). getVortexHeldBy is ENTRANCE-ONLY by design - see
            isJumpVortex, whose callers do not agree on the verdict - so on its own it is blind to a
-           gate holding an ENTRANCE, and this test would answer "free to signal" for a gate that
+           gate holding an EXIT, and this test would answer "free to signal" for a gate that
            demonstrably is not. The server refuses such a claim outright
            (Firing::getGateSignalBlock asks hasOpenVortex, which knows nothing of flavour), so the
            blindness would show up as a button that is offered and then silently rejected at commit
            - the exact "worst of both" the charge note above exists to avoid. */
         if (shipManager.movement.getVortexHeldBy(gate)) return false;
-        if (shipManager.movement.getEntranceHeldBy(gate.id)) return false;
+        if (shipManager.movement.getExitHeldBy(gate.id)) return false;
 
         //THE 20-TURN RECHARGE. turnsloaded / loadingtime are sent per instance by
         //JumpEngine::stripForJson off getVortexRechargeLoad, so this is the ordinary weapon load
@@ -390,7 +390,7 @@ window.gamedata = {
 
     /* ⭐ REINFORCEMENTS_PLAN.md STAGE 8 - MAY I SIGNAL THIS GATE FOR AN ARRIVAL? The condition on
        the second Initial Orders tooltip button, and the client mirror of the two extra rules
-       Firing::getGateSignalBlock applies to a 'gateentry' claim.
+       Firing::getGateSignalBlock applies to a 'gateexit' claim.
 
        Everything a departure claim needs, PLUS something in hyperspace to bring in. A gate holds one
        jump point and it is one-way (plan section 2.6), so an arrival claim spends the gate's whole
@@ -406,6 +406,25 @@ window.gamedata = {
         if (!window.ReinforcementEntry) return false;
 
         return ReinforcementEntry.myHyperspaceUnits().length > 0;
+    },
+
+    /* ⭐ REINFORCEMENTS_PLAN.md STAGE 9 - IS THE REINFORCEMENTS RULE ON IN THIS GAME?
+     *
+     * The efficiency gate for every reinforcements sweep on this side (user request 2026-08-29).
+     * Nothing in the feature can be true in a game without the rule - BuyingGamePhase never sets
+     * the flag - so a game that does not use it should pay one property read rather than a pass
+     * over every ship, on every UI refresh, for the whole battle. The lobby has had the identical
+     * helper since Stage 1b (gamelobby.js reinforcementsAllowed); this is its game.php twin.
+     *
+     * ⚠️ IT IS AN EFFICIENCY GATE AND NEVER A SECURITY ONE. Every rule it guards is also enforced
+     * server-side, where the same test is asked again against the real GameRules object; a client
+     * that lied about it would gain nothing but a button that fails at commit. Do not move a rule
+     * BEHIND this that is not also checked on the server.
+     *
+     * `in` rather than truthiness, matching declarations.js: the rule is stored as the KEY
+     * gamedata.rules.allowReinforcements and its value is not part of the contract. */
+    reinforcementsAllowed: function reinforcementsAllowed() {
+        return !!(gamedata.rules && ('allowReinforcements' in gamedata.rules));
     },
 
     isMyOrTeamOneShip: function isMyOrTeamOneShip(ship) {
@@ -661,12 +680,12 @@ window.gamedata = {
                isJumpVortex holds the class name once, so this and the two movement sweeps that ask
                the same question cannot drift apart.
 
-               REINFORCEMENTS_PLAN.md §3.7 - AN ENTRANCE TAKES THE SAME TREATMENT IN THE OTHER
+               REINFORCEMENTS_PLAN.md §3.7 - AN EXIT TAKES THE SAME TREATMENT IN THE OTHER
                COLOUR: #00b8e6, FV's "not here yet" cyan, the same value as the blue Jump Point
                marker and the fleet list's hyperspace rows. Leaving it unmatched would be worse than
                either colour - it would fall through to the off-white below and read as an asteroid,
                which is the exact confusion the yellow was introduced to prevent. */
-            if (shipManager.movement && shipManager.movement.isJumpVortexEntrance(ship)) {
+            if (shipManager.movement && shipManager.movement.isJumpVortexExit(ship)) {
                 return new THREE.Color(0x00 / 255, 0xB8 / 255, 0xE6 / 255).convertSRGBToLinear(); // hexBlue
             }
             if (shipManager.movement && shipManager.movement.isJumpVortex(ship)) {
@@ -1045,7 +1064,7 @@ window.gamedata = {
                     html += "<br>";
                 }
                 html += "They stay where they are with nothing spent, and will need another "
-                    + "entrance opened for them.<br>";
+                    + "exit opened for them.<br>";
             }
 
             confirm.confirm(html + '<br><span class="commit-confirm-q">Are you sure you wish to commit your orders?</span>', gamedata.doCommit);
@@ -2523,7 +2542,7 @@ getActiveShipName: function getActiveShipName() {
            menu, or cancels the armed hex mode, and this loop only draws it. drawIniGUI is re-run
            by the module after every state change, which is what repaints the label.
            ⚠️ It no longer flips to "Withdraw Jump Point" when a declaration stands (user request
-           2026-08-28) - that state locked the player out of declaring a SECOND entrance with a
+           2026-08-28) - that state locked the player out of declaring a SECOND exit with a
            second jump-capable hull. Withdrawing is a row in the menu now.
 
            Guarded on the module existing at all: game.php loads it `defer` alongside every other

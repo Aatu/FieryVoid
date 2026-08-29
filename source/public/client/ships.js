@@ -930,7 +930,7 @@ window.shipManager = {
 
         /* REINFORCEMENTS_PLAN.md Stage 7 - DO NOT SHOUT AT A UNIT WHOSE DESTINATION *IS* TERRAIN
            (user report 2026-08-28, game 4318). A reinforcement arrives inside its jump point
-           entrance, which is a Terrain unit, so both error calls below fired on every single unit
+           exit, which is a Terrain unit, so both error calls below fired on every single unit
            of every wave - and said nothing true: the arrival bypasses the terrain block entirely
            (DeploymentPhaseStrategy.onHexClicked), so the placement went through and the message was
            pure noise. Only the TOAST is suppressed; the vortex still goes into the returned list,
@@ -1160,6 +1160,15 @@ window.shipManager = {
             if (!placingNow) return true;
         }
         if (ship.spawned !== -1 && ship.spawned > gamedata.turn) return true; //Not spawned yet.
+        /* REINFORCEMENTS_PLAN.md STAGE 9 - A PHASING HULL'S ARRIVAL POINT IS NEVER DRAWN. Shadow
+           and other legacy-drive factions leave nothing behind when they go and put nothing on the
+           board when they come back (user ruling 2026-08-29), so the doorway exists server-side -
+           where every arrival, closure and berth rule is anchored on it - and is invisible here.
+           ⭐ THIS ONE LINE IS THE WHOLE SUPPRESSION. shouldBeHidden is what the icon, the facing
+           arrow, the click/hover sweep, the hex ship-list and the replay animation all consult, so
+           there is no second place to remember. What the players see instead is the blue ballistic
+           hex the declaration already draws, labelled REINFORCEMENTS. */
+        if (shipManager.movement.isPhaseInVortex(ship)) return true;
         //Hangar Ops: a partial-dock fragment ("- Split") is born removed=true with
         //spawned == removedTurn == the dock turn — it never existed on the board as
         //its own flight (its craft are shown firing as part of the SOURCE flight).
@@ -1192,7 +1201,7 @@ window.shipManager = {
             var depTurn = slot.depavailable;
 
             /* REINFORCEMENTS_PLAN.md §3.2 — mirror of BaseShip::getTurnDeployed. A reinforcement's
-               arrival turn is decided IN PLAY by the jump point entrance it rides through, not by
+               arrival turn is decided IN PLAY by the jump point exit it rides through, not by
                its slot, so depavailable says nothing about it. A null/undefined arrivalTurn means
                it is still in HYPERSPACE, which reads here as 999 = "not on the board" — the same
                sentinel a surrendered fleet gets, because it means exactly the same thing. That one
@@ -1246,7 +1255,7 @@ window.shipManager = {
         if (ship.osat || ship.base || gamedata.isTerrain(ship.shipSizeClass, ship.userid)) return 1;
         if (ship.spawned !== undefined && ship.spawned !== -1) return ship.spawned;
 
-        /* REINFORCEMENTS_PLAN.md §3.2 / trap 2 — a REINFORCEMENT (the jump point entrance kind,
+        /* REINFORCEMENTS_PLAN.md §3.2 / trap 2 — a REINFORCEMENT (the jump point exit kind,
            not a late slot) places and arrives on the SAME turn: its early warning is the blue jump
            point that formed last turn, not an early placement. Subtracting one here would give it
            a Deployment phase a turn before its vortex exists, with nowhere legal to stand. */

@@ -50,7 +50,7 @@ window.ShipTooltipInitialOrdersMenu = function () {
            NO SHIP NEEDS TO BE SELECTED. Which of my units is within range is never chosen and never
            matters, so every condition below reads the TARGETED ship (the gate) and none of them
            touches this.selectedShip - which is routinely null here. */
-        { className: "signalJumpGate", condition: [isJumpGate, canSignalGate, noGateSignalYet], action: signalJumpGate, info: "Signal Jump Gate for Exit" },
+        { className: "signalJumpGate", condition: [isJumpGate, canSignalGate, noGateSignalYet], action: signalJumpGate, info: "Signal Jump Gate for Departure" },
         /* ⭐⭐ REINFORCEMENTS_PLAN.md STAGE 8 - THE OTHER DIRECTION, AND IT IS A SECOND BUTTON
            RATHER THAN A TOGGLE INSIDE THE PANEL. A gate holds ONE jump point and it is one-way
            (plan section 2.6), so signalling for departure and signalling for arrival are two
@@ -232,7 +232,7 @@ window.ShipTooltipInitialOrdersMenu = function () {
 
     /* REINFORCEMENTS_PLAN.md STAGE 8 - everything canSignalGate needs, plus something waiting in
        hyperspace to bring in. The client mirror of the two extra rules Firing::getGateSignalBlock
-       applies to a 'gateentry' claim; gamedata owns the predicate so the two buttons cannot drift. */
+       applies to a 'gateexit' claim; gamedata owns the predicate so the two buttons cannot drift. */
     function canSignalGateForArrival() {
         return gamedata.canSignalJumpGateForArrival(this.targetedShip);
     }

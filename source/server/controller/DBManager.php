@@ -261,7 +261,7 @@ class DBManager
     }
 
 
-    /* REINFORCEMENTS_PLAN.md §3.1 / Stage 5 - which opener's jump point entrance this unit is
+    /* REINFORCEMENTS_PLAN.md §3.1 / Stage 5 - which opener's jump point exit this unit is
      * riding through. NULL clears the berth (a withdrawn declaration, a manifest the player
      * un-ticked, or a claim the server did not believe).
      *
@@ -287,8 +287,8 @@ class DBManager
 
     /* REINFORCEMENTS_PLAN.md section 3.1 / Stage 6 - THE TURN THIS UNIT COMES OUT OF HYPERSPACE.
      *
-     * ⚠️⚠️ WRITTEN FROM EXACTLY ONE PLACE - JumpEngine::spawnEntranceVortices, at the end of the
-     * turn its entrance formed - AND NO POST CAN REACH IT. Manager::getShipsFromJSON whitelists
+     * ⚠️⚠️ WRITTEN FROM EXACTLY ONE PLACE - JumpEngine::spawnExitVortices, at the end of the
+     * turn its exit formed - AND NO POST CAN REACH IT. Manager::getShipsFromJSON whitelists
      * arrivalVia and deliberately not this (see the note there): a player who could name their own
      * arrival turn would be placing units on a board with no vortex on it, in a Deployment phase
      * nothing granted them.
@@ -298,7 +298,7 @@ class DBManager
      * with a late deploy turn, visible to the enemy from the turn it arrives.
      *
      * ⭐ AND IT TAKES NULL, which Stage 7 is what added (an earlier draft of this comment said the
-     * write was one-way). §2.6's one-way rule is about the DOORWAY - an entrance cannot be jumped
+     * write was one-way). §2.6's one-way rule is about the DOORWAY - an exit cannot be jumped
      * out of - and says nothing about a unit that never walked through one. Placement is optional
      * (§2.4), so DeploymentGamePhase::releaseUnplacedReinforcements clears BOTH arrival fields on
      * anything the player left behind and the unit goes back to being an ordinary reinforcement

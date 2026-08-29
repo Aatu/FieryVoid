@@ -2,7 +2,7 @@
 
 /* REINFORCEMENTS_PLAN.md STAGE 4 - CALLING REINFORCEMENTS IN.
  *
- * The client half of a jump point ENTRANCE. A player with units waiting in hyperspace opens a
+ * The client half of a jump point EXIT. A player with units waiting in hyperspace opens a
  * doorway for them: pick which of those units opens it, pick a hex, pick the facing, then say which
  * of the rest ride through it.
  *
@@ -15,7 +15,7 @@
  *             |-> "Select Reinforcements" . a GATE whose jump point is already open (Stage 8)
  *             |       \-> manifest dialog ..... who rides through, this turn
  *             |-> "Withdraw Gate Signal" .. a gate this client claimed for arrival this turn
- *             \-> "Choose Hex" ............ the map is armed; the next click is the entrance hex
+ *             \-> "Choose Hex" ............ the map is armed; the next click is the exit hex
  *                     -> UI.vortexFacing (BLUE) ... turn the doorway, confirm
  *                         -> manifest dialog ..... who rides through
  *                             -> the FireOrder exists, and ship.arrivalVia is stamped locally
@@ -66,7 +66,7 @@ window.ReinforcementEntry = (function () {
     /* Is this MY unit, bought as a reinforcement and still waiting in hyperspace?
 
        arrivalTurn is the whole test, and it is the same one BaseShip::isReinforcement makes on the
-       server: null means "no entrance has been assigned to it yet". Once the Stage 6 sweep stamps
+       server: null means "no exit has been assigned to it yet". Once the Stage 6 sweep stamps
        an arrival turn the unit stops being a reinforcement in this sense - it becomes an ordinary
        unit with a late deploy turn, and it must not be offered for a second ride. */
     function isMine(ship) {
@@ -76,51 +76,69 @@ window.ReinforcementEntry = (function () {
             && !shipManager.isDestroyed(ship);
     }
 
+    /* ⭐ STAGE 9 - THE RULE GATE IS HERE, at the head of the one list the whole module is built on
+       (user request 2026-08-29). isOffered, canSignalJumpGateForArrival, strandedByCommit and every
+       dialog reach hyperspace through this function, so one test switches the feature off wholesale
+       for a game that does not have it - instead of a filter over every ship on every UI refresh
+       for the whole battle. Nothing can be in hyperspace without the rule anyway: BuyingGamePhase
+       refuses the flag outright. */
     function myHyperspaceUnits() {
+        if (!gamedata.reinforcementsAllowed()) return [];
+
         return gamedata.ships.filter(isMine);
     }
 
-    /* Does this unit mount a Jump Engine that could OPEN a jump point?
+    /* Does this unit mount a Jump Engine that could bring its group OUT of hyperspace?
 
-       ⚠️ THE CLIENT MIRROR OF JumpEngine::getVortexDeclaration's legacy test, and it has to be the
-       same three properties the lobby's gamedata.hasVortexJumpEngine reads, for the same reason:
-       $legacyJump is PROTECTED server-side and never reaches a blueprint, so what markLegacy()
-       actually flips is ballistic/hextarget (cleared, and ShipCompactor strips a false key outright
-       so both read undefined) and range (zeroed). A live engine carries all three.
+       ⭐⭐ ANY JUMP ENGINE, LEGACY INCLUDED (Stage 9, user ruling 2026-08-29). Up to Stage 8 this
+       was the three-property legacy test - $legacyJump is PROTECTED server-side and never reaches a
+       blueprint, so the readable trace of markLegacy() is ballistic/hextarget cleared (ShipCompactor
+       strips a false key outright, so both read undefined) and range zeroed. That test is now wrong
+       in this direction: a Shadow hull phases IN, and the server's arrival list
+       (Firing::getExitDeclarationBlock) has no range, line-of-sight, offline or charge rule for a
+       legacy engine to fail. Its whole difference lives at spawn time, where the doorway becomes a
+       SpawnJumpPointPhaseIn and is never drawn.
 
-       ⚠️ isJumpGate IS EXCLUDED HERE AND MUST STAY EXCLUDED, even though a gate's engine passes
-       those three. A gate is a doorway too from Stage 8, but it is not an OPENER in this sense:
-       nobody's drive is holding it, it is not in hyperspace, it is signalled rather than aimed, and
-       it belongs to nobody. gateCandidates() below is its list; this one is "whose drive can I
-       spend?". Merging them would put a gate in front of the hex picker. */
+       ⚠️ THE EXIT READER STILL REFUSES A LEGACY DRIVE, and that asymmetry is the feature, not an
+       inconsistency: such a hull may come back, and may still never open a way OUT. If you are
+       here because "a legacy drive should not open a jump point", the rule you want is
+       JumpEngine::getVortexDeclaration's, and it is intact.
+
+       ⚠️ isJumpGate IS EXCLUDED HERE AND MUST STAY EXCLUDED. A gate is a doorway too from Stage 8,
+       but it is not an OPENER in this sense: nobody's drive is holding it, it is not in hyperspace,
+       it is signalled rather than aimed, and it belongs to nobody. gateCandidates() below is its
+       list; this one is "whose drive can I spend?". Merging them would put a gate in front of the
+       hex picker. */
     function canOpen(ship) {
         if (!ship || !ship.systems) return false;
         if (gamedata.isJumpGate(ship)) return false;
 
-        for (var i in ship.systems) {
-            var s = ship.systems[i];
-            if (!s || s.name !== 'jumpEngine') continue;
-            if (shipManager.systems.isDestroyed(ship, s)) continue;
-            if (!s.ballistic || !s.hextarget) continue;   //markLegacy() cleared both
-            if (!(s.range > 0)) continue;                 //markLegacy() zeroed it
-            return true;
-        }
-
-        return false;
+        return !!arrivalEngineOf(ship, true);
     }
 
-    function jumpEngineOf(ship) {
+    /* THE ENGINE canOpen FOUND, so the two can never disagree about which system it was.
+       $checkDestroyed is what separates them: canOpen is offering a gesture and must not offer one
+       through a wrecked drive, while every later resolution re-reads the engine off a fresh ship
+       object and only wants the same system back. (Pre-battle damage can destroy a Jump Engine
+       before turn 1, so "destroyed" is reachable on a unit that has never been shot at.) */
+    function arrivalEngineOf(ship, checkDestroyed) {
         if (!ship || !ship.systems) return null;
 
         for (var i in ship.systems) {
             var s = ship.systems[i];
-            if (s && s.name === 'jumpEngine' && s.ballistic && s.hextarget && s.range > 0) return s;
+            if (!s || s.name !== 'jumpEngine') continue;
+            if (checkDestroyed && shipManager.systems.isDestroyed(ship, s)) continue;
+            return s;
         }
 
         return null;
     }
 
-    /* EVERY unit of mine in hyperspace that could open an entrance - INCLUDING the ones already
+    function jumpEngineOf(ship) {
+        return arrivalEngineOf(ship, false);
+    }
+
+    /* EVERY unit of mine in hyperspace that could open an exit - INCLUDING the ones already
        holding a declaration this turn.
 
        ⭐ INCLUDING THEM IS THE WHOLE OF THE SINGLE MENU (user request 2026-08-28). This used to
@@ -129,7 +147,7 @@ window.ReinforcementEntry = (function () {
        could never be reached, and a fleet with three jump-capable hulls could open exactly one
        doorway per turn. The list is the menu now, and the row says which state each unit is in.
 
-       One entrance per unit is still the rule (the server's one-vortex-per-ship test); it is
+       One exit per unit is still the rule (the server's one-vortex-per-ship test); it is
        expressed by what the row OFFERS - withdraw rather than declare - instead of by hiding the
        unit, so nothing here can produce an order the server would reject. */
     function openerCandidates() {
@@ -138,7 +156,7 @@ window.ReinforcementEntry = (function () {
 
     /* ---------------------------------------------------------------- the declaration */
 
-    /* THIS TURN'S entrance declaration on $ship, or null.
+    /* THIS TURN'S exit declaration on $ship, or null.
 
        ⚠️ SCOPED TO THIS TURN, never a bare fireOrders check, for the same reason
        weaponManager.getGateSignalOrder is: an engine accumulates every order it has ever made and
@@ -152,14 +170,14 @@ window.ReinforcementEntry = (function () {
         for (var i = 0; i < engine.fireOrders.length; i++) {
             var fire = engine.fireOrders[i];
             if (!fire || fire.turn != gamedata.turn) continue;
-            if (fire.damageclass !== 'jumpentry') continue;
+            if (fire.damageclass !== 'jumpexit') continue;
             return fire;
         }
 
         return null;
     }
 
-    /* Every entrance this player has declared this turn, as {ship, order} pairs. */
+    /* Every exit this player has declared this turn, as {ship, order} pairs. */
     function declarations() {
         var out = [];
         myHyperspaceUnits().forEach(function (ship) {
@@ -171,7 +189,7 @@ window.ReinforcementEntry = (function () {
 
     /* Withdraw one. Turn-scoped, exactly as removeGateSignalOrder is - removeFiringOrder would take
        every order the engine has ever carried with it. The manifest goes back to unassigned in the
-       same breath: an entrance that no longer exists cannot be ridden through, and leaving
+       same breath: an exit that no longer exists cannot be ridden through, and leaving
        arrivalVia pointing at a withdrawn opener would post a manifest for nothing. */
     function withdraw(ship) {
         var engine = jumpEngineOf(ship);
@@ -180,7 +198,7 @@ window.ReinforcementEntry = (function () {
         for (var i = engine.fireOrders.length - 1; i >= 0; i--) {
             var fire = engine.fireOrders[i];
             if (!fire || fire.turn != gamedata.turn) continue;
-            if (fire.damageclass !== 'jumpentry') continue;
+            if (fire.damageclass !== 'jumpexit') continue;
             engine.fireOrders.splice(i, 1);
         }
 
@@ -212,8 +230,8 @@ window.ReinforcementEntry = (function () {
     /* ---------------------------------------------------------------- the stranding check */
 
     /* Is this unit actually leaving hyperspace this turn? Being ON a manifest is not enough: the
-       entrance it names has to still exist. withdraw() clears the manifest it opened, but a
-       declaration can also be replaced (createEntranceOrder withdraws first), so the order is
+       exit it names has to still exist. withdraw() clears the manifest it opened, but a
+       declaration can also be replaced (createExitOrder withdraws first), so the order is
        the authority and arrivalVia is only the pointer to it. */
     function ridingOut(ship) {
         if (ship.arrivalVia === null || ship.arrivalVia === undefined) return false;
@@ -239,12 +257,12 @@ window.ReinforcementEntry = (function () {
        opener, and the two would disagree - so the menu refuses the choice rather than letting it
        be made and then unpicked.
 
-       ⚠️ arrivalVia == its OWN id is not riding with anybody - that is what createEntranceOrder
+       ⚠️ arrivalVia == its OWN id is not riding with anybody - that is what createExitOrder
        stamps on an opener, because a drive always comes through its own doorway. Without this
        line every opener would grey itself out the moment it declared, and Withdraw would be
        unreachable.
 
-       Riding is undone by withdrawing the entrance that carries it (withdraw() clears its whole
+       Riding is undone by withdrawing the exit that carries it (withdraw() clears its whole
        manifest), which is why nothing has to un-grey a row by hand: the next render simply finds
        no standing declaration to ride. */
     function ridingWith(ship) {
@@ -259,7 +277,7 @@ window.ReinforcementEntry = (function () {
        in the phase-1 confirm; empty means there is nothing to say.
 
        THE TRAP THIS EXISTS FOR: a reinforcement with no jump drive of its own can only ever
-       arrive as a passenger on somebody else's entrance. If the one unit that COULD open a
+       arrive as a passenger on somebody else's exit. If the one unit that COULD open a
        doorway declares one, leaves the passengers off its manifest and jumps in alone, then from
        next turn there is nobody left in hyperspace able to open anything - and those units sit
        there for the rest of the battle, paid for and unusable. Nothing said so, and by the time
@@ -300,7 +318,7 @@ window.ReinforcementEntry = (function () {
 
     /* ⭐⭐ A FIXED GATE IS THE OTHER KIND OF DOORWAY, AND ALMOST NOTHING ABOVE APPLIES TO IT.
      *
-     * A reinforcement's entrance is opened by its own drive, from hyperspace, at a hex it aims, and
+     * A reinforcement's exit is opened by its own drive, from hyperspace, at a hex it aims, and
      * it is one-shot. A gate's is opened by SIGNALLING a unit nobody owns; it forms on the gate's own
      * hex on the gate's own fixed facing, which cannot be aimed; and it stands for the programmed
      * hold - one to four turns - with a fresh wave allowed on each of them (plan section 0).
@@ -326,19 +344,19 @@ window.ReinforcementEntry = (function () {
         return false;
     }
 
-    /* THE OPEN ENTRANCE VORTEX THIS GATE IS HOLDING, or null.
+    /* THE OPEN EXIT VORTEX THIS GATE IS HOLDING, or null.
 
-       ⚠️ isJumpVortexEntrance, NEVER isJumpVortex. A gate holding an ordinary yellow EXIT is not a
-       doorway in - the two are one-way in opposite directions (section 2.6) - and an exit is exactly
+       ⚠️ isJumpVortexExit, NEVER isJumpVortex. A gate holding an ordinary yellow ENTRANCE is not a
+       doorway in - the two are one-way in opposite directions (section 2.6) - and an entrance is exactly
        what an ENEMY winning the claim contest looks like. Widening this would offer the player a
        manifest for a jump point their units can never come out of. */
-    function gateEntranceOn(gate) {
+    function gateExitOn(gate) {
         if (!gate || !gamedata.isJumpGate(gate)) return null;
-        return shipManager.movement.getEntranceHeldBy(gate.id);
+        return shipManager.movement.getExitHeldBy(gate.id);
     }
 
     /* THIS TURN'S ARRIVAL CLAIM ON THIS GATE, or null. The claim is a ballistic order on the GATE's
-       Jump Engine with damageclass 'gateentry'; weaponManager owns the turn-scoping and the
+       Jump Engine with damageclass 'gateexit'; weaponManager owns the turn-scoping and the
        firing-mode range, so this only has to add the flavour test.
 
        ⚠️ IT CANNOT TELL WHOSE CLAIM IT IS, AND IT DOES NOT HAVE TO. TacGamedata::hideSystemFireOrders
@@ -348,7 +366,7 @@ window.ReinforcementEntry = (function () {
        belong to - trusting it would be trusting a field that is deliberately a lie.) */
     function gateClaimOn(gate) {
         var fire = weaponManager.getGateSignalOrder(gate);
-        return (fire && fire.damageclass === 'gateentry') ? fire : null;
+        return (fire && fire.damageclass === 'gateexit') ? fire : null;
     }
 
     /* ⭐ WILL A MANIFEST NAMED NOW ACTUALLY COME THROUGH THIS GATE? The one piece of arithmetic in
@@ -381,7 +399,7 @@ window.ReinforcementEntry = (function () {
        signal with) but both are asked, because the rule is "there will be a doorway", not "how". */
     function gateDoorway(gate) {
         if (gateClaimOn(gate)) return true;
-        return !!gateEntranceOn(gate) && gateTakesAWave(gate);
+        return !!gateExitOn(gate) && gateTakesAWave(gate);
     }
 
     /* EVERY GATE WORTH SHOWING IN THE MENU. A gate is listed when it is holding a doorway in, or
@@ -392,7 +410,7 @@ window.ReinforcementEntry = (function () {
             if (!gamedata.isJumpGate(unit)) return false;
             if (shipManager.isDestroyed(unit)) return false;
 
-            return !!gateEntranceOn(unit) || !!gateClaimOn(unit);
+            return !!gateExitOn(unit) || !!gateClaimOn(unit);
         });
     }
 
@@ -423,7 +441,7 @@ window.ReinforcementEntry = (function () {
         gamedata.drawIniGUI();
     }
 
-    /* ⭐ THE DECLARED ENTRANCE THE MENU IS CURRENTLY POINTING AT, BY OPENER ID (user request
+    /* ⭐ THE DECLARED EXIT THE MENU IS CURRENTLY POINTING AT, BY OPENER ID (user request
        2026-08-28). Null - the value at every moment the menu is not open - means "point at
        nothing", and every marker draws in its ordinary blue.
 
@@ -445,9 +463,9 @@ window.ReinforcementEntry = (function () {
         return _highlightId;
     }
 
-    /* Point the map at one unit's declared entrance, or - for null, an unknown id, or a unit with
+    /* Point the map at one unit's declared exit, or - for null, an unknown id, or a unit with
        no declaration of its own - at nothing. The marker itself is drawn by
-       BallisticIconContainer.generateEntranceHexes, which asks getHighlightedOpener() as it goes.
+       BallisticIconContainer.generateExitHexes, which asks getHighlightedOpener() as it goes.
 
        ⚠️ THE EVENT CARRIES NO SHOOTER, deliberately. Firing 'HexTargeted' is how this asks for the
        ballistic icons to be rebuilt (PhaseStrategy.onHexTargeted, the same event withdraw() uses),
@@ -499,13 +517,13 @@ window.ReinforcementEntry = (function () {
         _banner = null;
     }
 
-    /* Is this hex a legal place to open an entrance? Returns null when it is, or the reason when it
+    /* Is this hex a legal place to open an exit? Returns null when it is, or the reason when it
        is not (plan §2.2).
 
        ⭐ NO RANGE AND NO LINE OF SIGHT, and their absence is the rule rather than an omission:
        there is no ship on the board to measure either from.
 
-       The obstruction test is weaponManager.getVortexHexBlock, the very same sweep an EXIT
+       The obstruction test is weaponManager.getVortexHexBlock, the very same sweep an ENTRANCE
        declaration uses - it reads whole terrain footprints (hexOffsets and Huge radii alike) and
        catches gates and existing vortices for free, because both are Terrain. It takes ship and
        weapon arguments it does not read, so the opener and its engine are passed through honestly
@@ -543,7 +561,7 @@ window.ReinforcementEntry = (function () {
 
        ⚠️ INTERCEPTED AT onClickEvent, NOT AT onHexClicked. onHexClicked is only reached when the
        click landed on no icon at all - but a hex holding a SHIP is a perfectly legal place to open
-       an entrance (§2.2 forbids terrain, gates, vortices and Enormous units, and nothing else), and
+       an exit (§2.2 forbids terrain, gates, vortices and Enormous units, and nothing else), and
        an arriving wave standing on top of somebody is the normal case. Waiting for onHexClicked
        would silently refuse every hex with a unit in it. */
     function onMapClick(payload) {
@@ -572,10 +590,10 @@ window.ReinforcementEntry = (function () {
 
     /* ---------------------------------------------------------------- the facing, then the order */
 
-    /* Hand the hex to the shared facing control, in its ENTRANCE livery. The control is the same
-       transaction UI.vortexFacing runs for an exit - nothing is committed until the tick - and the
-       `entrance` flag is the whole of the difference: cyan instead of yellow, and the arrow drawn
-       with the outward asset, because an entrance's facing is the doorway OUT rather than the mouth
+    /* Hand the hex to the shared facing control, in its EXIT livery. The control is the same
+       transaction UI.vortexFacing runs for an entrance - nothing is committed until the tick - and the
+       `exit` flag is the whole of the difference: cyan instead of yellow, and the arrow drawn
+       with the outward asset, because an exit's facing is the doorway OUT rather than the mouth
        units cross inbound (§0). */
     function openFacingControl(opener, hex) {
         var engine = jumpEngineOf(opener);
@@ -586,7 +604,7 @@ window.ReinforcementEntry = (function () {
             weapon: engine,
             hexpos: hex,
             type: 'ballistic',
-            entrance: true,
+            exit: true,
             facing: 0,
             /* ⚠️ RE-RESOLVED AT THE TICK, not captured. The facing control is open for as long as
                the player takes to turn the doorway, and a poll in that window replaces every ship
@@ -598,32 +616,32 @@ window.ReinforcementEntry = (function () {
                 var liveEngine = jumpEngineOf(live);
                 if (!live || !liveEngine) return;
 
-                createEntranceOrder(live, liveEngine, hex, facing);
+                createExitOrder(live, liveEngine, hex, facing);
             }
         });
     }
 
-    /* BUILD THE DECLARATION. Stored exactly as an exit's is - a ballistic FireOrder on the unit's
-       Jump Engine, x/y the hex, firingMode = facing + 1 - with damageclass 'jumpentry' as the
+    /* BUILD THE DECLARATION. Stored exactly as an entrance's is - a ballistic FireOrder on the unit's
+       Jump Engine, x/y the hex, firingMode = facing + 1 - with damageclass 'jumpexit' as the
        discriminator, mirroring 'jumppoint' (§3.4). That one string is what routes it to
-       Firing::getEntranceDeclarationBlock instead of the ship rules, and what keeps it out of
-       JumpEngine::getVortexDeclaration's exit sweep.
+       Firing::getExitDeclarationBlock instead of the ship rules, and what keeps it out of
+       JumpEngine::getVortexDeclaration's entrance sweep.
 
        ⚠️ targetid IS -1 AND MUST STAY -1 (trap 10). Every ballistic-icon path reads targetid as
        "hang the marker on that unit", and the unit here is in hyperspace: the marker would be drawn
-       at its slot's deployment-box centre, with a bright line running to the entrance hex from a
+       at its slot's deployment-box centre, with a bright line running to the exit hex from a
        ship that is not on the board.
 
        Re-checked at the tick rather than only at the click, exactly as createJumpPointOrder is: a
        server poll can land between the two and put something in the hex. */
-    function createEntranceOrder(opener, engine, hex, facing) {
+    function createExitOrder(opener, engine, hex, facing) {
         var block = weaponManager.getVortexHexBlock(opener, engine, hex);
         if (block) {
             confirm.error(block);
             return;
         }
 
-        withdraw(opener);   //one entrance per unit per turn; re-declaring replaces
+        withdraw(opener);   //one exit per unit per turn; re-declaring replaces
 
         engine.fireOrders.push({
             id: opener.id + "_" + engine.id + "_" + (engine.fireOrders.length + 1),
@@ -637,10 +655,10 @@ window.ReinforcementEntry = (function () {
             shots: engine.defaultShots,
             x: hex.q,
             y: hex.r,
-            damageclass: 'jumpentry'
+            damageclass: 'jumpexit'
         });
 
-        //The opener always rides its own entrance - it is the unit whose drive is holding the
+        //The opener always rides its own exit - it is the unit whose drive is holding the
         //doorway open, and leaving it behind would strand the drive on the far side.
         opener.arrivalVia = opener.id;
 
@@ -656,7 +674,7 @@ window.ReinforcementEntry = (function () {
 
        Replaces the old pair of dialogs - "Call Reinforcements" (openers with no declaration) and
        "Withdraw Jump Point" (openers with one) - which between them made it impossible to open a
-       SECOND entrance: the #iniGui button flipped to withdraw mode the moment any declaration
+       SECOND exit: the #iniGui button flipped to withdraw mode the moment any declaration
        stood, and the declare path could not be reached again until it was taken back. One list,
        both states, and the row the player picks decides which action is on offer.
 
@@ -735,11 +753,11 @@ window.ReinforcementEntry = (function () {
                drops the highlight in the same breath as it drops the OPENING tag.
 
                ⚠️ A GATE ROW NEVER HIGHLIGHTS, and that is not an omission. highlight() drives
-               BallisticIconContainer.generateEntranceHexes, which draws the blue Forming markers of
-               'jumpentry' declarations - a gate's claim is not one of those, and the gate itself is
+               BallisticIconContainer.generateExitHexes, which draws the blue Forming markers of
+               'jumpexit' declarations - a gate's claim is not one of those, and the gate itself is
                a permanent, named, plainly visible unit sitting on its own hex. The highlight exists
                to tell three IDENTICAL blue markers apart; a gate has no twin to be confused with.
-               highlight() ignores an id with no entrance declaration on it, so passing the gate's
+               highlight() ignores an id with no exit declaration on it, so passing the gate's
                would be harmless - it is skipped explicitly so the reason is on the record. */
             var isGateRow = checked.length > 0 && checked.attr("data-gate") === '1';
             highlight((!isGateRow && action === "Withdraw Jump Point") ? checked.val() : null);
@@ -769,7 +787,7 @@ window.ReinforcementEntry = (function () {
                branch re-reads its declaration - a poll can land while the dialog is open, and the
                gate's vortex can open, close or be lost to a rival claim between render and click. */
             if (gamedata.isJumpGate(live)) {
-                if (gateEntranceOn(live) && gateTakesAWave(live)) {
+                if (gateExitOn(live) && gateTakesAWave(live)) {
                     highlight(null);
                     e.remove();
                     showManifestDialog(live);
@@ -984,7 +1002,7 @@ window.ReinforcementEntry = (function () {
     /* WHO RIDES THROUGH. Any number, including none but the opener, and including units with no
        jump engine of their own (§2.2) - which is the whole point: one drive brings a wave.
 
-       Offered only for units that are NOT already assigned to a DIFFERENT entrance this turn. A
+       Offered only for units that are NOT already assigned to a DIFFERENT exit this turn. A
        unit can only ride one doorway, and silently moving it would undo a choice the player has
        already made on another opener. */
     function showManifestDialog(opener) {
@@ -1055,12 +1073,12 @@ window.ReinforcementEntry = (function () {
     }
 
     /* ⭐⭐ THE MANIFEST, STRAIGHT OFF THE SIGNAL BUTTON (user request 2026-08-28): "when a player
-       signals the jump gate to open an entrance from Hyperspace and clicks Signal Gate, this should
+       signals the jump gate to open an exit from Hyperspace and clicks Signal Gate, this should
        open the same Jump Point Manifest window."
 
        Signalling a gate for arrival is only half a gesture. The claim opens the doorway and the
        manifest says who walks through it, and everywhere else in this feature the two are named in
-       one breath - createEntranceOrder ends with exactly this call. Without it a player would signal
+       one breath - createExitOrder ends with exactly this call. Without it a player would signal
        the gate, close the panel, then have to find Manage Reinforcements and pick the gate out of
        the list to finish what they started; and a gate signalled with nobody on its manifest brings
        nothing through, silently.
@@ -1080,7 +1098,7 @@ window.ReinforcementEntry = (function () {
     }
 
     /* Drop every berth booked on this gate. The gate twin of what withdraw() does for a ship
-       entrance, called by weaponManager.removeGateSignalOrder when a claim is taken back - a
+       exit, called by weaponManager.removeGateSignalOrder when a claim is taken back - a
        booking for a doorway that will now never form would be posted for nothing, and the server
        would silently refuse it (persistManifest would not find the gate among the openers).
 
@@ -1112,7 +1130,7 @@ window.ReinforcementEntry = (function () {
 
        ⚠️ THE "HAS AN ORDER" STATE IS GONE ON PURPOSE (user request 2026-08-28). The button used
        to become "Withdraw Jump Point" as soon as any declaration stood, which locked the player
-       out of declaring a second entrance with a second jump-capable hull - the one action a
+       out of declaring a second exit with a second jump-capable hull - the one action a
        multi-drive reinforcement group most wants. Withdrawing is now a row in the menu. */
     function buttonLabel() {
         if (isActive()) return 'Cancel Jump Point';

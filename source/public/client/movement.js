@@ -619,25 +619,70 @@ shipManager.movement = {
     },
 
     /* REINFORCEMENTS_PLAN.md §2.6 - IS THIS THE OTHER KIND OF VORTEX, the blue one units come OUT
-       of? A SpawnJumpPointEntrance. phpclass is set by that class's own constructor and reaches the
+       of? A SpawnJumpPointExit. phpclass is set by that class's own constructor and reaches the
        client both on the live payload and on the preloaded blueprint, so this is always answerable.
 
-       ⭐ isJumpVortex ABOVE IS DELIBERATELY LEFT EXIT-ONLY, and must not be widened into a two-value
+       ⭐ isJumpVortex ABOVE IS DELIBERATELY LEFT ENTRANCE-ONLY, and must not be widened into a two-value
        test. Its callers do not agree on the verdict: getVortexInHex, getVortexHeldBy and everything
        downstream of them (canJumpOut, the Maintain control, the "already holding a jump point open"
-       refusal, the closing-vortex commit warning) are all rules an entrance must FAIL, while the
+       refusal, the closing-vortex commit warning) are all rules an exit must FAIL, while the
        icon's z-plane, the map overlay colour, the hex-stack sweep and the replay lifecycle animation
        are all things it must MATCH. Widening the one predicate would silently flip the first group.
-       Sites that want either kind ask isAnyJumpVortex instead. */
-    isJumpVortexEntrance: function isJumpVortexEntrance(unit) {
-        return !!unit && unit.phpclass === "SpawnJumpPointEntrance";
+       Sites that want either kind ask isAnyJumpVortex instead.
+
+       ⚠️⚠️ TWO CLASS NAMES, NOT ONE (Stage 9), and this is the client half of plan trap 23. On the
+       server SpawnJumpPointPhaseIn IS a SpawnJumpPointExit - one `instanceof` catches both, for
+       free, everywhere. Here the test is a phpclass STRING, so a subclass matches nothing unless it
+       is named; leave it out and the phasing doorway stops being a doorway on this side only, which
+       surfaces as arrivals with nowhere to stand and a Jump Out button offered on a blue vortex. */
+    isJumpVortexExit: function isJumpVortexExit(unit) {
+        return !!unit
+            && (unit.phpclass === "SpawnJumpPointExit" || unit.phpclass === "SpawnJumpPointPhaseIn");
+    },
+
+    /* REINFORCEMENTS_PLAN.md STAGE 9 - IS THIS THE DOORWAY THAT IS NEVER DRAWN?
+
+       A Shadow hull (any legacy/PhasingDrive engine) fades in rather than tearing a vortex open, so
+       its arrival point is a SpawnJumpPointPhaseIn: the same unit in every rule that matters, with
+       no terrain on the map to show for it (user ruling 2026-08-29).
+
+       ⭐ ONE READER THAT MATTERS - shipManager.shouldBeHidden. Everything visual keys off that one
+       predicate (the icon, the facing arrow, the hover/click sweep, the hex ship-list, the replay
+       lifecycle animation), so suppressing the unit there suppresses it everywhere at once. Adding
+       a second `if (isPhaseInVortex)` anywhere else is a sign the suppression is in the wrong place.
+       The other reader is the ballistic marker's LABEL, which says REINFORCEMENTS rather than
+       "Jump Point Forming" because for a phasing hull nothing is forming. */
+    isPhaseInVortex: function isPhaseInVortex(unit) {
+        return !!unit && unit.phpclass === "SpawnJumpPointPhaseIn";
+    },
+
+    /* IS THIS JUMP ENGINE ON THE OLD ONE-CLICK JUMP? (Stage 9.)
+
+       ⚠️ THERE IS NO FLAG TO READ. JumpEngine::$legacyJump is PROTECTED, so json_encode never emits
+       it and it reaches neither the payload nor a static blueprint - deliberately, because a public
+       default would cost all 776 jump engines in the tree a key each. What markLegacy() leaves
+       behind that IS readable is the three properties it flips: ballistic and hextarget cleared
+       (and ShipCompactor strips a false key outright, so both read undefined) and range zeroed.
+
+       ⚠️ ALL THREE, and `s.range > 0` rather than `s.range !== 0`: an absent key is undefined, and
+       undefined !== 0. The nine engines in the stale uncompacted "Earth Alliance (Custom)"
+       blueprint carry none of the three keys, so they read as legacy here - which is the safe way
+       round, since the only thing this drives is a marker LABEL.
+
+       Used for exactly one thing: whether the blue declaration marker says REINFORCEMENTS (a hull
+       that will fade in, leaving no vortex) or "Jump Point Forming" (a hull that will tear one
+       open). It is NOT the gate test - a gate's engine passes all three - and it must never be used
+       to decide whether an arrival is legal, which is a server rule with no legacy test in it. */
+    isLegacyJumpEngine: function isLegacyJumpEngine(system) {
+        if (!system || system.name !== 'jumpEngine') return false;
+        return !system.ballistic || !system.hextarget || !(system.range > 0);
     },
 
     /* Either kind of vortex - for the sites that care that this is a hole in space, not which way
        it points: how deep to draw it, what colour it collapses to when zoomed out, that it must
        stay out of the click/hover sweep, and that it forms and closes on screen. */
     isAnyJumpVortex: function isAnyJumpVortex(unit) {
-        return shipManager.movement.isJumpVortex(unit) || shipManager.movement.isJumpVortexEntrance(unit);
+        return shipManager.movement.isJumpVortex(unit) || shipManager.movement.isJumpVortexExit(unit);
     },
 
     getVortexInHex: function getVortexInHex(pos) {
@@ -680,7 +725,7 @@ shipManager.movement = {
         return null;
     },
 
-    /* REINFORCEMENTS_PLAN.md STAGE 7 - THE ENTRANCE THIS UNIT ARRIVES THROUGH, or null. The mirror
+    /* REINFORCEMENTS_PLAN.md STAGE 7 - THE EXIT THIS UNIT ARRIVES THROUGH, or null. The mirror
        of JumpEngine::getArrivalVortex, and the client's whole answer to "where may I put this?".
 
        ⭐ THE JOIN IS arrivalVia -> vortexHolderId AND BOTH HALVES ALREADY REACH THE CLIENT.
@@ -689,24 +734,24 @@ shipManager.movement = {
        getVortexHeldBy above reads. So no new payload field was needed for any of Stage 7.
 
        ⚠️ A NULL arrivalVia MEANS "ITS OWN DOORWAY", not "unassigned": an opener always comes
-       through the entrance it opened, and the Stage 6 sweep stamps it from the list of entrances
+       through the exit it opened, and the Stage 6 sweep stamps it from the list of exits
        that formed rather than from a berth. Read as unassigned, the one unit guaranteed a doorway
        would be the one unable to use it.
 
-       ⚠️ isJumpVortexEntrance, NOT isJumpVortex - the two are deliberately separate predicates and
-       an EXIT is never a legal arrival hex (§2.6). The open/closed window is getVortexInHex's,
-       repeated here rather than delegated because that helper is exit-only by design. */
+       ⚠️ isJumpVortexExit, NOT isJumpVortex - the two are deliberately separate predicates and
+       an ENTRANCE is never a legal arrival hex (§2.6). The open/closed window is getVortexInHex's,
+       repeated here rather than delegated because that helper is entrance-only by design. */
     getArrivalVortex: function getArrivalVortex(ship) {
         if (!shipManager.isArrivingReinforcement(ship)) return null;
 
         var openerId = (ship.arrivalVia === null || ship.arrivalVia === undefined)
             ? ship.id : ship.arrivalVia;
 
-        return shipManager.movement.getEntranceHeldBy(openerId);
+        return shipManager.movement.getExitHeldBy(openerId);
     },
 
-    /* REINFORCEMENTS_PLAN.md STAGE 8 - THE OPEN ENTRANCE $holderId's JUMP ENGINE IS HOLDING, or
-       null. The entrance twin of getVortexHeldBy above, and the body getArrivalVortex was written
+    /* REINFORCEMENTS_PLAN.md STAGE 8 - THE OPEN EXIT $holderId's JUMP ENGINE IS HOLDING, or
+       null. The exit twin of getVortexHeldBy above, and the body getArrivalVortex was written
        as before a GATE could hold one of these.
 
        ⭐ IT TAKES AN ID, NOT A SHIP, and that is not a convenience. The two callers ask it of
@@ -716,19 +761,19 @@ shipManager.movement = {
        stable form of the question ([[REINFORCEMENTS_PLAN.md]] trap 17).
 
        ⚠️ NOT getVortexHeldBy WITH A WIDER PREDICATE. That one runs its open/closed test by asking
-       getVortexInHex, which is EXIT-ONLY by design (see isJumpVortex) and would answer null for
-       every entrance. The window is therefore repeated here rather than delegated - it is the same
+       getVortexInHex, which is ENTRANCE-ONLY by design (see isJumpVortex) and would answer null for
+       every exit. The window is therefore repeated here rather than delegated - it is the same
        three lines the server's JumpEngine::getArrivalVortex carries for the same reason.
 
        ⚠️ vortexHolderId NAMES THE OPENER - a reinforcement's own hull, or the GATE. It is stamped by
        JumpEngine::restoreVortexState from the 'Vortex' note's shipid, so a gate's doorway names the
        gate and a berth on it names the gate too: the join needs nothing new. */
-    getEntranceHeldBy: function getEntranceHeldBy(holderId) {
+    getExitHeldBy: function getExitHeldBy(holderId) {
         if (holderId === null || holderId === undefined) return null;
 
         for (var i in gamedata.ships) {
             var unit = gamedata.ships[i];
-            if (!shipManager.movement.isJumpVortexEntrance(unit)) continue;
+            if (!shipManager.movement.isJumpVortexExit(unit)) continue;
             if (unit.vortexHolderId == null) continue;              //no 'Vortex' note - nothing to join on
             if (unit.vortexHolderId != holderId) continue;
             if (unit.spawned !== undefined && unit.spawned !== -1 && unit.spawned > gamedata.turn) continue; //still forming
@@ -743,10 +788,10 @@ shipManager.movement = {
 
     /* The facing an arriving reinforcement is FORCED onto, or null if it has no doorway.
 
-       ⚠️ NOT getVortexEntryDirection. On an EXIT the facing names the mouth a unit crosses inbound,
-       so a ship using one travels in the OPPOSITE direction (F+3). On an ENTRANCE the arrow points
+       ⚠️ NOT getVortexEntryDirection. On an ENTRANCE the facing names the mouth a unit crosses inbound,
+       so a ship using one travels in the OPPOSITE direction (F+3). On an EXIT the arrow points
        outward - it is the doorway out - and an arriving unit is placed facing the way it points
-       (plan §0 / §2.4). Reusing the exit helper here would drop every wave onto the board facing
+       (plan §0 / §2.4). Reusing the entrance helper here would drop every wave onto the board facing
        backwards, and would still look plausible on screen. */
     getArrivalFacing: function getArrivalFacing(ship) {
         var vortex = shipManager.movement.getArrivalVortex(ship);

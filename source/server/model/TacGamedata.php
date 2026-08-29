@@ -162,23 +162,23 @@ class TacGamedata {
                     /* REINFORCEMENTS_PLAN.md - A BALLISTIC WHOSE SHOOTER IS NOT ON THE MAP.
                        getLastTurnMovement() skips every 'start' row, so a unit that has never
                        actually moved answers null - and a reinforcement declaring its jump point
-                       ENTRANCE from hyperspace is exactly that unit. Reading ->position off the
+                       EXIT from hyperspace is exactly that unit. Reading ->position off the
                        null was a fatal ErrorException on EVERY gamedata load from phase 2 of the
-                       turn the entrance was declared (both players, every poll); phase-1 secrecy
+                       turn the exit was declared (both players, every poll); phase-1 secrecy
                        - hideSystemFireOrders strips every current-turn ballistic order from every
                        phase-1 payload, including its author's - is what hid it until Initial
                        Orders were committed.
 
                        Nothing wants a Ballistic record for one either: $this->ballistics is absent
-                       from stripForJson so it never reaches the client at all, the entrance marker
-                       is drawn from the fire order itself (BallisticIconContainer's entranceOrders,
-                       or the slot's formingEntrances for an enemy viewer), and the only
+                       from stripForJson so it never reaches the client at all, the exit marker
+                       is drawn from the fire order itself (BallisticIconContainer's exitOrders,
+                       or the slot's formingExits for an enemy viewer), and the only
                        server-side consumer is the hidetarget mask in hideSystemFireOrders - which
-                       an entrance is not subject to, being masked wholesale by
+                       an exit is not subject to, being masked wholesale by
                        hideHyperspaceReinforcements instead.
 
                        The null test is the general rule and is deliberately NOT written as
-                       "damageclass === 'jumpentry'": any ballistic order from a shooter with no
+                       "damageclass === 'jumpexit'": any ballistic order from a shooter with no
                        movement row lands here, and inventing a position for one is never right. */
                     if ($movement === null) continue;
 
@@ -1186,8 +1186,20 @@ class TacGamedata {
         foreach ($this->slots as $slot){
             $slot->reinforcementCount = 0;
             $slot->reinforcementPoints = 0;
-            $slot->formingEntrances = array();
+            $slot->formingExits = array();
         }
+
+        /* ⭐ STAGE 9 EFFICIENCY GATE (user request 2026-08-29), and it goes AFTER the zeroing above
+           so the defensive reset still happens in every game. Nothing below can be true without the
+           rule - BuyingGamePhase::process writes `$ship->reinforcement = $allowReinforcements && …`,
+           so the column is 0 for every unit of every game that does not have it - and this method
+           is on the per-viewer load path, which is the single hottest sweep the feature touches.
+
+           ⚠️ IT FAILS OPEN. The test is "rules exist AND say no", never "rules do not say yes": a
+           load that somehow arrives without a GameRules object still does the masking. Getting that
+           backwards would turn a missing object into a concealment failure, which is the one
+           direction a mask must never fail ([[arch_info_bleed_masking]]). */
+        if ($this->rules && !$this->rules->hasRuleName('allowReinforcements')) return;
 
         $playerTeam = $this->getPlayerTeam(); //null for an observer, who owns no slot
         $kept = array();
@@ -1231,7 +1243,7 @@ class TacGamedata {
             $this->slots[$ship->slot]->reinforcementCount++;
             $this->slots[$ship->slot]->reinforcementPoints += (int)round($pts);
 
-            $this->republishFormingEntrances($ship);
+            $this->republishFormingExits($ship);
         }
 
         if (!$removedAny) return;
@@ -1249,14 +1261,14 @@ class TacGamedata {
         $this->shipsById = array();
     }
 
-    /* REINFORCEMENTS_PLAN.md §2.3 - REPUBLISH THIS UNIT'S JUMP POINT ENTRANCE AS A BARE HEX.
+    /* REINFORCEMENTS_PLAN.md §2.3 - REPUBLISH THIS UNIT'S JUMP POINT EXIT AS A BARE HEX.
      *
      * Called from the sweep above, for a ship that is about to be deleted from this viewer's
      * payload. The BLUE "Jump Point Forming" marker is public for the whole of the turn a jump
      * point forms in - it is the warning an opponent gets in exchange for reinforcements arriving
      * able to act - but the ORDER that carries it lives on a ship this viewer must not see. So the
      * hex and the facing are lifted onto the slot, and the client draws the identical marker from
-     * either source (BallisticIconContainer::generateEntranceHexes).
+     * either source (BallisticIconContainer::generateExitHexes).
      *
      * ⭐ THE HEX AND THE FACING, AND NOTHING ELSE. Not the opener, not the manifest, not how many
      * units ride it. Those are exactly the things §3.6 says are never disclosed, and the slot
@@ -1272,7 +1284,7 @@ class TacGamedata {
      * been rolled yet (that happens at the end of this turn, in FireGamePhase::advance), so there
      * is no true hex in existence to leak. What is published here is where the player AIMED.
      */
-    private function republishFormingEntrances($ship)
+    private function republishFormingExits($ship)
     {
         if ((int)$this->phase === 1) return;   //secret while Initial Orders are open
         if (!isset($this->slots[$ship->slot])) return;
@@ -1282,17 +1294,25 @@ class TacGamedata {
             if (!($system instanceof JumpEngine)) continue;
 
             foreach ($system->fireOrders as $fire){
-                if ($fire->damageclass !== 'jumpentry') continue;
+                if ($fire->damageclass !== 'jumpexit') continue;
                 if ((int)$fire->turn !== (int)$this->turn) continue;
                 if (!empty($fire->rejected)) continue;
                 if ($fire->x === null || $fire->y === null || $fire->x === "null" || $fire->y === "null") continue;
 
-                //firingMode is the storage for the facing - mode = facing + 1 - the same convention
-                //an exit uses, so the client's arrow maths is shared verbatim.
-                $this->slots[$ship->slot]->formingEntrances[] = array(
+                /* firingMode is the storage for the facing - mode = facing + 1 - the same convention
+                   an entrance uses, so the client's arrow maths is shared verbatim.
+
+                   ⭐ STAGE 9 - 'phase' IS THE THIRD FIELD, and it is the only thing this viewer
+                   cannot work out for themselves. The opening ship is gone from their payload
+                   (hideHyperspaceReinforcements deleted it, engine and all), so they have nothing
+                   to ask "is that a legacy drive?" of, and the marker would say "Jump Point
+                   Forming" over a hex where no jump point will ever form. It discloses nothing the
+                   next turn does not: either terrain appears there or it does not. */
+                $this->slots[$ship->slot]->formingExits[] = array(
                     'x'      => (int)$fire->x,
                     'y'      => (int)$fire->y,
                     'facing' => ((((int)$fire->firingMode - 1) % 6) + 6) % 6,
+                    'phase'  => $system->isLegacyJump() ? 1 : 0,
                 );
             }
         }
@@ -1354,12 +1374,21 @@ class TacGamedata {
             $this->hideEnemyCombatPivots();
         }
 
+        /* REINFORCEMENTS_PLAN.md STAGE 9 - ON A CONTESTED JUMP GATE, ONLY THE NEAREST TEAM'S SIGNAL
+           IS DRAWN (user request 2026-08-29). See JumpEngine::maskLosingGateClaims for the rule.
+           ⚠️ BEFORE the sweep below, and that ordering is load-bearing: the distance is measured to
+           the unit named in the claim's targetid, and hideSystemFireOrders is what masks targetid to
+           -1 for every viewer the claim does not belong to. Run it after and every enemy claim looks
+           like a claim naming nothing, which the mask reads as "cannot win" - so a player would see
+           only their own marker on every contested gate, always, whoever was nearer. */
+        JumpEngine::maskLosingGateClaims($this);
+
         foreach ($this->ships as $ship){
             if ($ship instanceof FighterFlight) {
                 foreach ($ship->systems as $fighter){
                     $this->hideSystemFireOrders($fighter);
-                } 
-            } else {                 
+                }
+            } else {
                 $this->hideSystemFireOrders($ship);
             }
         }
@@ -1951,10 +1980,10 @@ if ($ship->Enormous && !($ship instanceof spawnMeteoroid) && !($ship instanceof 
     /* REINFORCEMENTS_PLAN.md STAGE 7 - does this player have anything coming out of hyperspace on
        $turn? The clause that GRANTS the Deployment phase in FireGamePhase::advance's slot loop
        (plan §4 Stage 7), and the only thing that does: a reinforcement's arrival turn is decided in
-       play by the entrance it rides, so no slot value - depavailable, getMinTurnPlacedSlot or
+       play by the exit it rides, so no slot value - depavailable, getMinTurnPlacedSlot or
        otherwise - can predict it.
 
-       ⚠️ ASK IT OF THE GAMEDATA THE SWEEP STAMPED. JumpEngine::spawnEntranceVortices writes
+       ⚠️ ASK IT OF THE GAMEDATA THE SWEEP STAMPED. JumpEngine::spawnExitVortices writes
        arrivalTurn to the DB and to its own in-memory ships; the outer $gameData FireGamePhase was
        handed was loaded BEFORE any of that happened, so asking it would answer "nobody is arriving"
        every time and the wave would never get a phase to walk through the door in.
