@@ -412,6 +412,15 @@ window.ShipTooltip = function () {
         if (shipManager.criticals.hasCriticalInAnySystem(ship, "HangarOperations")) {
             toDisplay += '<span style="color:cyan;">Hangar Operations</span>; ';
         }
+        /* REINFORCEMENTS_PLAN.md STAGE 9 - this unit came out of hyperspace off course and is
+           disordered for the turn it arrives on (user request 2026-08-29). Deliberately the same
+           cyan span as Hangar Operations and Just Launched above it: all three are benign
+           initiative penalties from something the unit just DID, not damage, and the colour is what
+           says so. The figure is the server's own (shipManager.getArrivalIniPenalty). */
+        var arrivalIni = shipManager.getArrivalIniPenalty(ship);
+        if (arrivalIni !== 0) {
+            toDisplay += '<span style="color:cyan;">Arrival Scatter (' + arrivalIni + ' Ini)</span>; ';
+        }
         if (ship.flight === true) {
             if (shipManager.movement.hasCombatPivoted(ship) && (!ship.ignoreManoeuvreMods)) rollPivotModifier -= 5;
         } else if (ship.osat) {

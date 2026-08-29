@@ -5262,6 +5262,25 @@ class JumpEngine extends Weapon{
      * DECLARATION path is shut off, which is the half that can create new state. */
     protected $legacyJump = false;
 
+    /* ⭐ DOES THIS ENGINE'S 4th CONSTRUCTOR ARGUMENT MEAN A JUMP DELAY? (user report 2026-08-29.)
+     *
+     * True on all 776 of them but the Star Trek Nacelle, which passes an IMPULSE RATING there
+     * instead (TrekWarpDrive feeds TrekImpulseDrive's sublight thrust off it). Only markLegacy(false)
+     * clears it, and only customTrek.php calls that.
+     *
+     * ⭐ IT IS NOT "is this a legacy drive". It used to be, by accident: markLegacy() zeroed the
+     * recharge for every legacy drive on the reasoning that a legacy drive never opens a jump point
+     * and so never spends a charge. Stage 9 made that false - a Shadow, Star Wars or BSG hull now
+     * PHASES IN through a doorway of its own and spends the charge doing it - so the Trek-specific
+     * reason had to be separated from the legacy flag it was hiding behind, or every one of those
+     * hulls would go on drawing a flat 1/1 for a drive that really is recharging.
+     *
+     * ⚠️ PROTECTED, for the same reason $legacyJump is: json_encode takes public properties only
+     * and the static generator encodes the CONSTRUCTED ship, so a public default would cost 776
+     * blueprint entries for a flag the client never asks about (it reads the loading pair
+     * stripForJson sends). */
+    protected $hasJumpRecharge = true;
+
 	//JumpEngine tactically  is not important at all!
 	public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
 
@@ -5356,7 +5375,7 @@ class JumpEngine extends Weapon{
      * display while boosted) and hasMaxBoost are exactly what the boost path needs. The name is
      * also how movement.js canHalfPhase finds the drive, and how three client `instanceof Weapon`
      * guards exclude it (plan section 3.1). Nothing here touches it. */
-    public function markLegacy()
+    public function markLegacy($keepsRecharge = true)
     {
         $this->legacyJump = true;
 
@@ -5387,19 +5406,28 @@ class JumpEngine extends Weapon{
         }
         $this->changeFiringMode(1);
 
-        /* THE RECHARGE MEANS NOTHING HERE, so it must not be shown. Stage 6 gave $loadingtime the
-           B5W jump delay so the icon could count a charge the engine spends opening a vortex; a
-           legacy engine never opens one, so the count would sit at N/N forever and read as a
-           broken timer. 1/1 is what SystemIcon draws as nothing at all, which is what this system
-           looked like before Stage 1.
+        /* ⭐⭐ THE RECHARGE IS REAL AGAIN ON EVERY LEGACY DRIVE BUT THE TREK NACELLE (user report
+           2026-08-29). Stage 9 gave legacy drives a way to PHASE IN (Firing::getVortexDeclarationBlock
+           takes the arrival branch above the legacy refusal), so a Phasing Drive, a Hyperdrive and a
+           BSG FTL Drive all spend and recover a charge exactly as a B5 Jump Engine does - and every
+           one of them was still drawing the flat 1/1 this used to force, which reads as a system
+           with no state at all.
 
-           ⭐ It also repairs a Stage 6 accident on the Trek hulls specifically: TrekWarpDrive's 4th
-           constructor argument is an IMPULSE RATING (it feeds TrekImpulseDrive), not a jump delay,
-           and Stage 6's constructor read it as one - so a Nacelle with output 6 was claiming a
-           6-turn jump recharge it never had. $delay keeps the raw value; nothing reads it on a
-           legacy engine because stripForJson short-circuits below. */
-        $this->loadingtime = 1;
-        $this->turnsloaded = 1;
+           So the reset is now OPT-IN, and the ONE caller that opts in is TrekWarpDrive
+           (out of scope by the same user ruling, and for a concrete reason): its 4th constructor
+           argument is an IMPULSE RATING - it feeds TrekImpulseDrive's sublight thrust - not a jump
+           delay, so a Nacelle rated 6 would claim a 6-turn jump recharge it does not have. $delay
+           keeps the raw value either way; $hasJumpRecharge is what stripForJson reads to decide
+           whether the number means anything.
+
+           ⚠️ THE DEFAULT IS true, so every existing one-argument markLegacy() call in the 88 ship
+           files keeps its OWN $delay - which is what those files always passed and what the
+           rulebook calls the jump delay. Only customTrek.php passes false. */
+        if (!$keepsRecharge){
+            $this->hasJumpRecharge = false;
+            $this->loadingtime     = 1;
+            $this->turnsloaded     = 1;
+        }
 
         return $this;
     }
@@ -6115,18 +6143,31 @@ class JumpEngine extends Weapon{
      *
      * THE THIRD SWEEP. Every legal jump point EXIT declared in the Initial Orders of this turn
      * turns into a SpawnJumpPointExit on the board here - at a hex the DEVIATION ROLL decides,
-     * which is usually not the hex the player named. Called once, from FireGamePhase::advance,
-     * immediately after closeExpiredVortices and BEFORE the slot loop that hands out next turn's
-     * Deployment phases (REINFORCEMENTS_PLAN.md section 2.3 and Stage 6).
+     * which is usually not the hex the player named. Called once, from
+     * InitialOrdersGamePhase::advance, immediately after openSignalledGates.
      *
-     * ⭐⭐ WHY THE END OF THE FIRING PHASE AND NOT THE END OF INITIAL ORDERS, where an ENTRANCE's
-     * vortex forms. It is a CONCEALMENT rule, not a flavour one (section 2.3). The vortex unit
-     * carries a deploy MovementOrder, and a movement row is in every viewer's payload whether or
-     * not the icon is drawn - shouldBeHidden hides the picture, not the JSON. So a unit created at
-     * the end of Initial Orders would publish its DEVIATED hex for the whole of turn N, while the
-     * only thing an opponent is meant to have is the blue marker at the DECLARED hex. Rolling here
-     * means the true hex does not exist yet during turn N and therefore cannot leak
-     * ([[arch_info_bleed_masking]]).
+     * ⭐⭐ THE END OF INITIAL ORDERS, NOT THE END OF THE FIRING PHASE (user ruling 2026-08-29,
+     * REINFORCEMENTS_PLAN.md section 2.3). Both players have committed their orders by the time
+     * this runs, so rolling here lets BOTH OF THEM SEE WHERE THE DOORWAY ACTUALLY LANDED for the
+     * whole of the turn it forms on, and move and shoot accordingly - instead of finding out at the
+     * start of the arrival turn, with nothing left to do about it.
+     *
+     * ⭐ AND THE DECLARATION IS REWRITTEN TO THE ROLLED HEX (rewriteDeclaration below), which is
+     * what makes that visible without one line of client code. The blue "Jump Point Forming" marker
+     * is drawn from the fire order - by its owner directly, and for an opponent through the
+     * republished PlayerSlot entry TacGamedata::republishFormingExits lifts off the same order - so
+     * moving the order moves both markers at once, to the same hex, from phase 2 onward.
+     *
+     * ⚠️ THIS DELIBERATELY REVERSES SECTION 2.3'S ORIGINAL CONCEALMENT ARGUMENT, which was that a
+     * vortex created before the Firing phase would publish its DEVIATED hex in every viewer's
+     * payload for the whole of turn N. It does, and that is now the POINT. Nothing else about the
+     * lifecycle moved: $spawned is still openTurn + 1, so the vortex UNIT still appears on the board
+     * on the arrival turn and not before ([[arch_info_bleed_masking]]).
+     *
+     * ⚠️ THE MANIFEST HALF DID NOT MOVE WITH IT - see stampExitManifests, which still runs at the
+     * end of the Firing phase and MUST. Splitting them is not tidiness: collectGateExits asks
+     * whether a gate's doorway will still be open NEXT turn, and that answer is only correct after
+     * closeExpiredVortices has run.
      *
      * ⚠️ RUNS OFF A REAL getTacGamedata LOAD, never off POST-side ships - the requirement both
      * sibling sweeps carry, and the one this sweep depends on most: isReinforcement(), arrivalVia
@@ -6135,9 +6176,9 @@ class JumpEngine extends Weapon{
      * ⚠️ DO NOT BRANCH ON $gamedata->phase. advance() has already set the next phase (trap 1). The
      * TURN is what identifies "this turn's declaration".
      *
-     * ⚠️ IDEMPOTENT, because advance() can run twice. hasOpenVortex is what makes the spawn half so
-     * (it is spawnVortexUnit's first line); the manifest half is idempotent because a stamped unit
-     * stops answering isReinforcement() and is skipped on the second pass.
+     * ⚠️ IDEMPOTENT, because advance() can run twice. hasOpenVortex is what makes it so (it is
+     * spawnVortexUnit's first line), and it is also what stops the rewritten declaration being put
+     * through the deviation table a second time.
      *
      * THE RULE GATE IS AN EFFICIENCY GUARD AS WELL - the same one persistManifest opens with. A
      * game without the rule cannot contain a reinforcement, so there is nothing here to find. */
@@ -6147,18 +6188,19 @@ class JumpEngine extends Weapon{
 
         $turn = (int)$gamedata->turn;
 
-        /* WHICH OPENERS ACTUALLY GOT A DOORWAY, keyed by opener ship id. The manifest pass below
-           turns this into arrival turns - and its absence into a cleared berth - so it must record
-           an exit that was ALREADY open (a second advance()) exactly as it records one opened
-           on this pass. Getting that wrong strands a whole wave in hyperspace. */
-        $opened = array();
+        /* THE LOG LINES AND THE MOVED DECLARATIONS THIS SWEEP WROTE, AND ONLY THOSE.
+           InitialOrdersGamePhase::advance has no submit of its own, and re-scanning
+           getNewFireOrders() the way spawnDeclaredVortices does would pick up that sweep's orders a
+           second time and insert every one of them twice - the same trap openSignalledGates
+           documents, and this sweep runs after both of them. */
+        $logOrders = array();
+        $moved     = array();
 
         foreach ($gamedata->ships as $ship){
-            /* TERRAIN IS SKIPPED HERE AND PICKED UP BY THE GATE PASS BELOW (Stage 8). A gate's
-               doorway is contested, owner-less and does not deviate, so it is opened by
-               openSignalledGates at the end of INITIAL ORDERS - the same reason openSignalledGates
-               is not spawnDeclaredVortices. What it still needs from this sweep is the manifest
-               half, which is why the pass below adds gates to $opened rather than opening anything. */
+            /* TERRAIN IS SKIPPED. A gate's doorway is contested, owner-less and does not deviate,
+               so it is opened by openSignalledGates a few lines earlier in the same advance() -
+               the same reason openSignalledGates is not spawnDeclaredVortices. What a gate still
+               needs is the MANIFEST half, which is collectGateExits' job in the Firing phase. */
             if ($ship->isTerrain()) continue;
             //Only a unit still IN HYPERSPACE opens an exit (section 2.2). Anything on the board
             //that carries such an order is a tampered POST, and getExitDeclarationBlock refused it.
@@ -6172,24 +6214,90 @@ class JumpEngine extends Weapon{
                 $declaration = $system->getExitDeclaration($turn);
                 if (!$declaration) continue;
 
-                /* ALREADY FORMED - a second advance() over the same turn. Count it as opened: the
-                   manifest still has to be stamped, and clearing it here would be the strand.
+                /* ALREADY FORMED - a second advance() over the same turn. Nothing to do: the
+                   doorway is on the board, the declaration has already been rewritten to its hex,
+                   and the manifest is stamped by the Firing-phase sweep from the board state rather
+                   than from anything this pass remembers.
                    break, not continue, for the same one-doorway-per-unit reason as below - and this
                    branch is only ever reached on the engine that holds THIS turn's exit, since
                    getExitDeclaration has just answered on it. */
-                if ($system->hasOpenVortex($turn)){
-                    $opened[(int)$ship->id] = true;
-                    break;
-                }
+                if ($system->hasOpenVortex($turn)) break;
 
                 /* ONE DOORWAY PER UNIT, and the break is what enforces it HERE. hasOpenVortex is
                    asked of each ENGINE, so a hull carrying two of them would open two exits -
                    the submit path already refuses a second JumpEngine order in one submission
                    (Firing::getExitDeclarationBlock rule 4), and this makes that true of the
                    resolution as well, for a row that reached the table another way. */
-                if ($system->openExitVortex($ship, $declaration, $gamedata)){
+                if ($system->openExitVortex($ship, $declaration, $gamedata, $logOrders, $moved)) break;
+            }
+        }
+
+        if ($dbManager === null) return;
+
+        /* THE MOVED DECLARATIONS FIRST, so a load that races the log insert still finds the hex the
+           doorway is really at. Both are writes to rows this sweep owns outright.
+           ⚠️ updateFireOrders writes x, y and firingmode among its columns - which is exactly the
+           three fields rewriteDeclaration changed - and matches on the order's real DB id, which
+           every declaration has by now: it was persisted in InitialOrdersGamePhase::process, one
+           commit before this advance(). */
+        if (!empty($moved)) $dbManager->updateFireOrders($moved);
+
+        /* Phase 2 explicitly, for the same reason spawnDeclaredVortices and openSignalledGates pass
+           2: submitFireorders reads the phase only to filter ballistic and pre-firing orders, and a
+           'JumpVortex' log line is neither - passing 1 would silently drop every one. */
+        if (!empty($logOrders)) $dbManager->submitFireorders($gamedata->id, $logOrders, $gamedata->turn, 2);
+    }
+
+    /* ⭐⭐ REINFORCEMENTS_PLAN.md STAGE 6/8 - THE MANIFEST HALF, AND IT STAYS AT THE END OF THE
+     * FIRING PHASE. Every unit riding a doorway that will be open next turn is stamped with an
+     * arrival turn; every unit riding one that will not gets its berth refunded.
+     *
+     * Called once, from FireGamePhase::advance, AFTER closeExpiredVortices and BEFORE the slot loop
+     * that hands out next turn's Deployment phases.
+     *
+     * ⚠️⚠️ IT CANNOT MOVE UP TO INITIAL ORDERS WITH THE SPAWN HALF, AND THAT IS THE WHOLE REASON
+     * THE TWO ARE SPLIT (2026-08-29). The question $opened answers is "will this doorway still be
+     * there NEXT turn", and closeExpiredVortices is what decides it:
+     *
+     *   - A GATE on the LAST turn of its programmed hold closes at the end of THIS turn. Asked
+     *     before that sweep has run, $vortexCloseTurn is still -1 and holdsExitOpenOn answers YES -
+     *     so a whole wave would be stamped for a turn on which its doorway no longer exists, get a
+     *     Deployment phase with no legal hex in it, and be stuck there.
+     *   - A SHIP'S exit is one-shot and closes at the end of the arrival turn. Asked before the
+     *     closure, a rider that stayed behind would have its berth renewed for another turn instead
+     *     of refunded.
+     *
+     * ⭐ AND $opened IS REBUILT FROM THE BOARD, not carried over from the spawn half. The two sweeps
+     * now run in different phases off different gamedata loads, so there is nothing to carry; the
+     * doorway itself is the record, which is what holdsExitOpenOn reads. That also makes the whole
+     * thing idempotent for free - a second advance() re-derives the same list.
+     *
+     * THE RULE GATE IS AN EFFICIENCY GUARD: a game without the rule cannot contain a reinforcement. */
+    public static function stampExitManifests($gamedata, $dbManager = null)
+    {
+        if (!$gamedata->rules || !$gamedata->rules->hasRuleName('allowReinforcements')) return;
+
+        $turn = (int)$gamedata->turn;
+
+        /* WHICH OPENERS HOLD A DOORWAY THAT SURVIVES INTO NEXT TURN, keyed by opener ship id. The
+           manifest pass turns this into arrival turns - and its ABSENCE into a cleared berth - so
+           an opener missing from it strands its whole wave. */
+        $opened = array();
+
+        foreach ($gamedata->ships as $ship){
+            if ($ship->isTerrain()) continue;            //gates are collectGateExits' half, below
+            if (!$ship->isReinforcement()) continue;     //an opener rides its own doorway, so it is still in hyperspace
+
+            foreach ($ship->systems as $system){
+                if (!($system instanceof JumpEngine)) continue;
+
+                /* THE SAME QUESTION THE GATE PASS ASKS, deliberately: is the jump point this engine
+                   holds an EXIT, and will it still be open on the arrival turn. Stronger than the
+                   bare hasOpenVortex the old combined sweep used - it also rejects an ENTRANCE,
+                   which is not a doorway in (section 2.6). */
+                if ($system->holdsExitOpenOn($gamedata, $turn + 1)){
                     $opened[(int)$ship->id] = true;
-                    break;
+                    break;   //one doorway per unit
                 }
             }
         }
@@ -6503,8 +6611,14 @@ class JumpEngine extends Weapon{
      *
      * WHAT IS DIFFERENT is entirely the two lines in the middle: the hex and the facing are the
      * DECLARED ones put through the deviation table, and a note of its own records how far it
-     * missed by. Returns true when a doorway now exists. */
-    protected function openExitVortex($opener, $fire, $gamedata)
+     * missed by. Returns true when a doorway now exists.
+     *
+     * ⭐ $logOrders AND $moved ARE OUT-PARAMETERS, and both are the same idea: this method now runs
+     * at the end of INITIAL ORDERS, where advance() has no submit of its own, so each caller has to
+     * persist exactly the rows IT created. Collecting them here rather than re-scanning
+     * getNewFireOrders() is what stops spawnDeclaredVortices' log lines - written a few lines
+     * earlier in the same advance() and already inserted - being inserted a second time. */
+    protected function openExitVortex($opener, $fire, $gamedata, &$logOrders = null, &$moved = null)
     {
         $declaredFacing = ((int)$fire->firingMode - 1) % 6; //modes 1-6 -> facings 0-5; range validated
         $declaredHex    = new OffsetCoordinate($fire->x, $fire->y);
@@ -6539,13 +6653,13 @@ class JumpEngine extends Weapon{
         if (!$vortex) return false;
 
         $this->writeVortexScatterNote($opener, $vortex->id, $distance, $facingSteps, $gamedata);
+        $this->rewriteDeclaration($fire, $hex, $facing, $moved);
 
         /* THE LOG LINE NAMES THE BAND (section 2.5). A player who lands nine hexes away should be
            able to see that it was the 2d10+2 band rather than bad luck inside a good one - the
            modifiers are large and the bands are what they act on.
-           No submit of its own: FireGamePhase::advance submits every new fire order after this
-           sweep, which is what recordVortexClosure relies on too. (spawnDeclaredVortices needs one
-           only because InitialOrdersGamePhase::advance has none.) */
+           The order goes back to spawnExitVortices to be submitted - see the ⭐ on this method's
+           signature for why it is collected rather than re-scanned for. */
         $where = ($distance === 0)
             ? "exactly where it was aimed"
             : ($distance . ($distance == 1 ? " hex" : " hexes") . " from the declared hex");
@@ -6558,11 +6672,12 @@ class JumpEngine extends Weapon{
             ? " phases in from hyperspace"
             : " opens a jump point exit";
 
-        self::writeVortexLogOrder($opener, $gamedata,
+        $log = self::writeVortexLogOrder($opener, $gamedata,
             //$opens . " - sensors " . $scatter['sensors'] . ", roll " . $scatter['roll']
 			$opens . "- rolled " . $scatter['roll']
             . " (" . $scatter['band'] . "). It forms " . $where . $turned
             . ", and the units riding it arrive through it next turn.");
+        if ($log && is_array($logOrders)) $logOrders[] = $log;
 
         Debug::log("Jump point exit: ship {$opener->id} opens vortex {$vortex->id} at "
             . $hex->q . "," . $hex->r . " facing " . $facing . " (declared " . $declaredHex->q . ","
@@ -6571,6 +6686,49 @@ class JumpEngine extends Weapon{
             . ", facing steps " . $facingSteps . ") in game {$gamedata->id}, turn {$gamedata->turn}.");
 
         return true;
+    }
+
+    /* ⭐⭐ THE DECLARATION IS MOVED TO WHERE THE DOORWAY ACTUALLY FORMED (user ruling 2026-08-29,
+     * REINFORCEMENTS_PLAN.md §2.3). This is the whole of "both players can see where the actual
+     * exit will be on the formation turn", and it is deliberately done by moving the ORDER rather
+     * than by teaching the client a second source:
+     *
+     *   - THE OWNER draws their blue marker straight off this order
+     *     (BallisticIconContainer::generateExitHexes), and gets it back from the database from
+     *     phase 2 onward - hideSystemFireOrders strips a current-turn ballistic order in phase 1
+     *     only.
+     *   - AN OPPONENT has no opening ship in their payload at all, so the hex and the facing are
+     *     republished onto the PlayerSlot by TacGamedata::republishFormingExits - which reads the
+     *     SAME three fields off the SAME order.
+     *
+     * So one write moves both markers, to the same hex, with no client change and no second
+     * concealment rule to keep in step.
+     *
+     * ⚠️ x/y ARE STRINGS in tac_fireorder (varchar columns, and mysqli hands them back as strings),
+     * which is why the ballistic pipeline compares them against the literal "null". Written as ints
+     * here and cast on the way in by the DB layer; every reader either casts or builds an
+     * OffsetCoordinate out of them.
+     *
+     * ⚠️ firingMode IS THE FACING, mode = facing + 1, the same convention the entrance uses. It is
+     * rewritten because the marker's ARROW is drawn from it, and a doorway that came out of the
+     * 1d10 band with its facing shifted 60 degrees would otherwise advertise the wrong mouth.
+     * Modes 1-6 only: MAINTAIN (7) is not a thing an exit has, and getExitDeclaration refuses it.
+     *
+     * ⚠️ AND IT IS ONLY EVER DONE ONCE. spawnExitVortices breaks out on hasOpenVortex before
+     * reaching openExitVortex on a second advance(), so the rolled hex can never be put through the
+     * deviation table again as though it were the declared one.
+     *
+     * $moved is an out-parameter and may be null - the harnesses call openExitVortex directly. The
+     * in-memory order is updated either way, so the rest of THIS request agrees with the database. */
+    protected function rewriteDeclaration($fire, OffsetCoordinate $hex, $facing, &$moved = null)
+    {
+        $fire->x          = (int)$hex->q;
+        $fire->y          = (int)$hex->r;
+        $fire->firingMode = ((((int)$facing % 6) + 6) % 6) + 1;
+
+        //A row that has never been inserted has nothing to update - and cannot be reached from the
+        //sweep, where every declaration was persisted by the preceding process() commit.
+        if (is_array($moved) && (int)$fire->id > 0) $moved[] = $fire;
     }
 
     /* ⭐ THE DEVIATION TABLE (section 2.5), rolled once per exit. Returns everything the caller
@@ -7945,6 +8103,27 @@ class JumpEngine extends Weapon{
 		if (!$this->hasOpenVortex($turn)) return;
 		if ((int)$this->vortexOpenTurn !== $turn && !$this->getMaintainDeclaration($turn)) return;
 
+		/* ⚠️⚠️ REINFORCEMENTS - A SHIP'S JUMP POINT EXIT NEVER ROLLS, AND THAT IS A RULE
+		   (REINFORCEMENTS_PLAN.md Stage 6: "an exit never rolls for jump failure ... Deliberate -
+		   do not 'fix' it into existence"). A damaged drive costs a reinforcement nothing.
+
+		   ⚠️ IT USED TO FALL OUT FOR FREE AND NO LONGER DOES. Until 2026-08-29 the exit was spawned
+		   at the END OF THE FIRING PHASE, i.e. after this roll, so on the opening turn there was
+		   simply no vortex here to ask about. Moving the spawn up to the end of Initial Orders (so
+		   both players can see where the doorway landed) put one in front of it - and its opener is
+		   a unit sitting in HYPERSPACE, which pre-battle damage can perfectly well have damaged.
+		   Without this line such a wave would start being destroyed before it ever reached the map.
+
+		   ⭐ THE GATE IS EXEMPTED FROM THE EXEMPTION, exactly as it is in getVortexClosureReason: a
+		   fixed gate rolls on the turn it opens a jump point of EITHER flavour (user ruling
+		   2026-08-23, offered as an exemption and deliberately not taken).
+
+		   After the two cheap tests above, so the ship lookup is only paid when a roll is pending. */
+		if (!$this->gateJump){
+			$openVortex = $gamedata->getShipById((int)$this->activeVortexId);
+			if ($openVortex instanceof SpawnJumpPointExit) return;
+		}
+
 		//An undamaged drive never fails. Same measure doHyperspaceJump uses for the boost path.
 		$healthDiff = $this->maxhealth - $this->getRemainingHealth();
 		if ($healthDiff <= 0) return;
@@ -8180,12 +8359,19 @@ class JumpEngine extends Weapon{
     public function stripForJson(){
         $strippedSystem = parent::stripForJson();
 
-        /* SECTION 9 - a legacy engine sends the ordinary Weapon payload and nothing else. Both
-           overrides below describe a vortex it cannot have: getVortexRechargeLoad would answer with
-           a charge derived from $delay (an IMPULSE RATING on the Trek hulls - see markLegacy), and
-           the counter block cannot fire anyway with no activeVortexId. markLegacy set
-           loadingtime/turnsloaded to 1/1, which SystemIcon draws as nothing. */
-        if ($this->legacyJump) return $strippedSystem;
+        /* ⭐ THE ONE ENGINE THAT SENDS THE ORDINARY WEAPON PAYLOAD AND NOTHING ELSE IS THE TREK
+           NACELLE (user ruling 2026-08-29 - see $hasJumpRecharge). Its 4th constructor argument is
+           an IMPULSE RATING, not a jump delay, so getVortexRechargeLoad would answer with a charge
+           derived from a number that is not a recharge time at all; markLegacy(false) set
+           loadingtime/turnsloaded to 1/1 and this keeps them there.
+
+           ⚠️ THIS USED TO TEST $legacyJump, AND THAT WAS THE BUG. Stage 9 gave every legacy drive a
+           way to phase IN, so a Phasing Drive / Hyperdrive / FTL Drive spends and recovers its
+           charge exactly as a B5 Jump Engine does - and short-circuiting here left all of them
+           drawing a flat 1/1 while the real state moved underneath. The vortex counter block below
+           is right for them too: a phase-in doorway is a vortex, invisible or not, and its holder's
+           icon should count it. */
+        if (!$this->hasJumpRecharge) return $strippedSystem;
 
         $turn = (int)TacGamedata::$currentTurn;   //(int): mysqli hands the turn back as a STRING
 

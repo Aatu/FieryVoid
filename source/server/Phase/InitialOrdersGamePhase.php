@@ -13,11 +13,26 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
 
         // Check if there are any active ships to assign
         if (empty($activeShipIds)) {
+            /* ⚠️⚠️ THE EXIT SWEEP MUST RUN ON THIS PATH TOO, and it is the ONLY one of the three
+               vortex sweeps that must. The note on the trio at the foot of this method says the
+               early returns cannot strand a declaration, because a ship that just declared one is
+               on the board, alive and not terrain - which is precisely what makes it an active
+               ship. THAT ARGUMENT DOES NOT HOLD FOR AN EXIT: its opener is in HYPERSPACE and is on
+               nobody's initiative list, so a turn with nothing to activate would leave the
+               declaration unresolved and the whole wave stranded, silently and for good.
+
+               SAFE HERE AND NOT A LINE EARLIER: the selection above has already concluded there is
+               nothing to activate, so the vortex this inserts cannot be handed to the Movement
+               phase as an active unit - which is the hazard the ⚠️ on the trio below describes.
+
+               A no-op in every ordinary game: the sweep opens on the reinforcements rule gate. */
+            JumpEngine::spawnExitVortices($gameData, $dbManager);
+
             // No ships available to activate in Movement Phase, move to Firing Phase
             $gameData->setPhase(3);
             $gameData->setActiveship(-1);
             $dbManager->updateGamedata($gameData);
-            $dbManager->setPlayersWaitingStatusInGame($gameData->id, false);  
+            $dbManager->setPlayersWaitingStatusInGame($gameData->id, false);
             return;
         }
 
@@ -26,6 +41,10 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
     } else {
         $ship = $gameData->getFirstShip();
         if ($ship === null) {
+            //THE SAME STRANDING GUARD as the getNewActiveShip branch above - see the ⚠️⚠️ there
+            //for why the exit sweep alone needs it and why this is the safe place for it.
+            JumpEngine::spawnExitVortices($gameData, $dbManager);
+
             // No ships found in getFirstShip move to Firing Phase
             $gameData->setPhase(3);
             $gameData->setActiveship(-1);
@@ -80,6 +99,31 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
     // $dbManager is threaded through so the sweep can persist its own combat-log orders - the
     // winner's line and each loser's - which advance() has no submitFireorders of its own for.
     JumpEngine::openSignalledGates($gameData, $dbManager);
+
+    // REINFORCEMENTS_PLAN.md Stage 6: the third vortex sweep, and the one that ROLLS. Every jump
+    // point EXIT declared in the Initial Orders that just closed forms here - a SpawnJumpPointExit
+    // goes onto the board at the hex the DEVIATION ROLL decides, and the declaration itself is
+    // moved to that hex so the blue marker both players see is the real one.
+    //
+    // ⭐ HERE AND NOT AT THE END OF THE FIRING PHASE (user ruling 2026-08-29, plan section 2.3).
+    // Both players have committed by now, so rolling here is what lets them SEE where the doorway
+    // actually landed for the whole of the turn it forms on, and react to it - instead of finding
+    // out at the start of the arrival turn with nothing left to do about it. The vortex UNIT still
+    // appears on the board on the arrival turn and not before ($spawned is openTurn + 1).
+    //
+    // ⚠️ ONLY THE SPAWN HALF MOVED. JumpEngine::stampExitManifests - which turns a manifest into
+    // arrival turns - still runs at the end of FireGamePhase::advance and must: it asks whether a
+    // doorway will still be open NEXT turn, and closeExpiredVortices is what decides that.
+    //
+    // LAST of the three, for the reasons the two above give: advance() has already set the next
+    // phase (never branch on it), the sweep needs a real getTacGamedata load, and a freshly
+    // inserted vortex must not be visible to the active-ship selection higher up. Running third
+    // also means the clamp that keeps the rolled hex legal already sees this turn's entrances and
+    // gate vortices, so an exit cannot land on top of one.
+    //
+    // $dbManager is threaded through so the sweep can persist its own combat-log order and its own
+    // moved declaration: advance() has no submitFireorders and no updateFireOrders of its own.
+    JumpEngine::spawnExitVortices($gameData, $dbManager);
 
     $dbManager->updateGamedata($gameData);
 }

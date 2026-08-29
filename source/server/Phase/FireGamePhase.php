@@ -28,24 +28,25 @@ class FireGamePhase implements Phase
         // because it is recording something that has happened, not generating per-ship state.
         JumpEngine::closeExpiredVortices($servergamedata);
 
-        // REINFORCEMENTS_PLAN.md Stage 6: every jump point EXIT declared in this turn's Initial
-        // Orders forms here - a SpawnJumpPointExit goes onto the board at the hex the DEVIATION
-        // ROLL decides, and every unit riding it is stamped with an arrival turn of turn+1.
+        // REINFORCEMENTS_PLAN.md Stage 6/8: every unit riding a jump point EXIT that will still be
+        // open next turn is stamped with an arrival turn of turn+1 here, and every unit riding one
+        // that will not gets its berth refunded.
         //
-        // THE FIRING PHASE AND NOT THE END OF INITIAL ORDERS, where an ENTRANCE's vortex forms, and
-        // that is a concealment rule (plan section 2.3): a vortex unit created a phase earlier
-        // would publish its DEVIATED hex in every viewer's payload for the whole of the turn, while
-        // the only thing an opponent is meant to have is the blue marker at the DECLARED hex.
-        // Rolling here means the true hex does not exist during the turn it is secret in.
+        // THE DOORWAY ITSELF NO LONGER FORMS HERE - it forms at the end of INITIAL ORDERS, where
+        // the deviation is rolled and the declaration is moved to the hex it landed on, so both
+        // players can see where the exit will actually be for the whole of the turn it forms on
+        // (user ruling 2026-08-29, plan section 2.3). Only the manifest half stayed behind.
         //
-        // AFTER closeExpiredVortices, so this turn's arrivals cannot be closed by the same pass
-        // that ends last turn's exit; and BEFORE the slot loop at the bottom, which asks
-        // getTurnDeployed to decide who gets a Deployment phase next turn - the arrival turns
-        // stamped here are exactly what that question needs to see (Stage 7).
+        // ⚠️ AND IT HAD TO STAY BEHIND. This sweep asks "will this doorway still be there NEXT
+        // turn", and closeExpiredVortices above is what decides it: a gate on the last turn of its
+        // programmed hold, and a ship's one-shot exit on its arrival turn, both close there. Asked
+        // an instant earlier the answer is yes in both cases, which would stamp a wave for a turn
+        // its doorway does not exist on. See JumpEngine::stampExitManifests.
         //
-        // Its combat-log orders need no submit of their own: submitFireorders below picks up every
-        // new fire order, which is what the closure sweep above relies on too.
-        JumpEngine::spawnExitVortices($servergamedata, $dbManager);
+        // AND BEFORE the slot loop at the bottom, which asks getTurnDeployed to decide who gets a
+        // Deployment phase next turn - the arrival turns stamped here are exactly what that
+        // question needs to see (Stage 7).
+        JumpEngine::stampExitManifests($servergamedata, $dbManager);
 
 
 		foreach ($servergamedata->ships as $currShip){ //generate system-specific information if necessary
@@ -124,7 +125,7 @@ class FireGamePhase implements Phase
                reinforcement's arrival turn is decided in play by the exit it rides, and
                depavailable (which is what every clause above is built on) knows nothing about it.
 
-               ⚠️ ASKED OF $servergamedata, NEVER $gameData. spawnExitVortices ran a few lines
+               ⚠️ ASKED OF $servergamedata, NEVER $gameData. stampExitManifests ran a few lines
                above this loop and stamped its arrival turns onto that object and the database; the
                outer $gameData was loaded before the Firing phase resolved and still believes every
                reinforcement is in hyperspace. Ask the wrong one and the whole wave silently misses

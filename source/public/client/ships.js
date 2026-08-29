@@ -1281,6 +1281,29 @@ window.shipManager = {
         return (parseInt(ship.arrivalTurn, 10) === gamedata.turn);
     },
 
+    /* ⭐ REINFORCEMENTS_PLAN.md STAGE 9 - HOW MUCH INITIATIVE THIS UNIT IS LOSING FOR COMING OUT
+       OF HYPERSPACE OFF COURSE, as a negative number, or 0.
+
+       -5 per hex of scatter and -10 per 60 degrees of facing shift, on the ARRIVAL TURN ONLY. The
+       number is not computed here: the server sends the figure its own initiative generators
+       applied (BaseShip::getReinforcementArrivalIniModifier, attached in
+       TacGamedata::stripForJson), so the two can never quote different penalties for the same
+       ship - which on a d100 roll is exactly the kind of disagreement nobody would ever notice
+       and everybody would argue about.
+
+       ⚠️ THE KEY'S PRESENCE IS THE WHOLE TEST. It is emitted only when the penalty is non-zero,
+       which already means "a reinforcement, arriving this turn, through a doorway that scattered" -
+       so there is no arrivalTurn or rule test to repeat here. A gate's doorway never deviates and
+       therefore never sends one.
+
+       The single reader for the tooltip line and the ship-window banner both, so the two cannot
+       drift apart. */
+    getArrivalIniPenalty: function getArrivalIniPenalty(ship) {
+        if (!ship || ship.arrivalIniPenalty === undefined || ship.arrivalIniPenalty === null) return 0;
+
+        return parseInt(ship.arrivalIniPenalty, 10) || 0;
+    },
+
 
     //True if the player still has at least one ship to PLACE this turn — which for a late slot
     //is the turn before it arrives. Anything placing later is excluded; those don't keep the

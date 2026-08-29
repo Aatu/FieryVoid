@@ -10,7 +10,12 @@ Status: **STAGES 0–7 COMPLETE AND SIGNED OFF 2026-08-28 — Stage 6 verified i
 Stage 7 in game 4318. STAGE 8 BUILT 2026-08-28 and FIRST PLAY-TESTED 2026-08-29 in game 4319: the
 gate signal, the manifest and the waves all worked, and the two faults that came back were both
 OUTSIDE the gate code — see "Stage 8 — first play test". Both fixed and harness-proven; the rest of
-Stage 8 is still untested in play. STAGE 9 BUILT 2026-08-29, untested in play.**
+Stage 8 is still untested in play. STAGES 9 AND 10 BUILT 2026-08-29, untested in play.**
+
+⚠️⚠️ **STAGE 10a MOVED THE DEVIATION ROLL AND REWROTE §2.3.** From 2026-08-29 the roll happens at the
+**end of Initial Orders** on the formation turn, not at the end of the Firing phase, and the blue
+marker both players see is moved to the hex the doorway actually formed at. Every Stage 3–9 note that
+mentions the timing, and the concealment argument behind it, is superseded by §2.3.
 
 ---
 
@@ -62,7 +67,8 @@ passed, 0 failed**, with game 4318 SKIPping because it has advanced since it was
 baseline is **gitignored** and therefore per-working-copy: `DouglasChanges` has its own and will want
 its own `record` ([[reference_fv_repo]]).
 
-Stage 9 (the scatter initiative penalty) is what remains, and it is not on the critical path.
+Stages 9 (the scatter initiative penalty) and 10 (the roll's timing, the penalty's UI, the legacy
+drives' recharge, and the blast-radius pass) are both built. **What remains is play-testing.**
 
 Three things Stage 0 needed that §3 did not anticipate, all recorded here because they are the shape
 of the next surprise too:
@@ -231,20 +237,73 @@ can be added at any later date without re-working anything before it.
 
 ### 2.3 Forming, arriving, closing
 
+⚠️ **THE TIMING BELOW CHANGED ON 2026-08-29 (Stage 10a).** Anything written before that date says
+the deviation is rolled at the **end of the formation turn**, and gives a concealment argument for
+it. It is now rolled at the **end of Initial Orders** on the formation turn, and the declaration is
+moved onto the hex it landed on, so both players can see where the doorway really is and play the
+rest of turn N against it. The old argument, and why it was traded away, is kept below.
+
 | Turn | State | What is on the board |
 |---|---|---|
-| N — declared in Initial Orders | **Forming** | a **blue** "Jump Point Forming" hex + a reversed facing arrow, drawn from the declaration. Nothing else exists |
-| End of N | **Deviation is rolled** and the vortex unit is created at its true hex | — |
+| N — declared in Initial Orders | **Declared** | nothing yet — the declaration is secret while Initial Orders are open |
+| End of Initial Orders, N | **Deviation is rolled**, the vortex unit is created at its true hex, and the declaration is MOVED there | a **blue** "Jump Point Forming" hex + a reversed facing arrow **at the true hex**, public to both sides for the rest of turn N |
 | N+1 | **Open.** The owner gets a Deployment phase; the manifest arrives | the blue vortex unit with its outward arrow |
 | End of N+1 | **A ship's exit closes.** A gate's runs on its programmed hold | — |
 
-⭐ **THE DEVIATION IS ROLLED AT THE END OF THE FORMATION TURN, AND THAT IS A CONCEALMENT RULE, NOT
-A FLAVOUR ONE.** If the vortex unit were created at the end of Initial Orders (where an entrance's is),
-its deploy movement row would carry the *deviated* hex in every viewer's payload for the whole of
-turn N — `shouldBeHidden` suppresses the icon on the client but the JSON still holds the truth. By
-creating the unit in `FireGamePhase::advance` instead, the only thing that exists during turn N is
-the ballistic marker at the **declared** hex, and the real one cannot leak because it has not been
-decided yet. See [[arch_info_bleed_masking]].
+⭐ **THE DEVIATION IS ROLLED AFTER INITIAL ORDERS CLOSE ON THE FORMATION TURN** (user ruling
+2026-08-29, from the tabletop rules). Both players have committed their orders by then, so nobody
+can aim a jump point at what they have just seen the enemy do; and from the Movement phase of turn N
+onward **both sides can see where the exit will actually be, and react to it** — instead of finding
+out at the start of the arrival turn with nothing left to do about it.
+
+⭐ **THE DOORWAY IS SHOWN BY MOVING THE DECLARATION, NOT BY REVEALING THE UNIT.** `openExitVortex`
+rewrites its own fire order's `x`, `y` and `firingMode` to the hex and facing the vortex actually
+got, and persists that with `updateFireOrders`. Both viewers already draw the blue marker from that
+one order — the owner reads it directly, and an opponent gets it republished onto their `PlayerSlot`
+by `TacGamedata::republishFormingExits`, which lifts the same three fields — so one write moves both
+markers to the same hex with **no client change at all**. The vortex UNIT still carries
+`spawned = openTurn + 1` and still appears on the board on the arrival turn and not before, so
+nothing in the lifecycle moved with it.
+
+⚠️ **THIS REVERSES THE ORIGINAL CONCEALMENT ARGUMENT DELIBERATELY.** It used to read: *a vortex unit
+created at the end of Initial Orders would publish its deviated hex in every viewer's payload for
+the whole of turn N — `shouldBeHidden` suppresses the icon on the client but the JSON still holds
+the truth — so create it in `FireGamePhase::advance` instead and the real hex cannot leak, because
+it has not been decided yet.* All of that is still true; it is simply no longer wanted. The hex is
+now **published on purpose**, and nothing new leaks with it: the vortex row carries the same slot
+and facing the republished `formingExits` entry already did. See [[arch_info_bleed_masking]].
+
+⚠️⚠️ **ONLY THE SPAWN HALF MOVED — THE MANIFEST HALF STAYED AT THE END OF THE FIRING PHASE**, and
+that split is load-bearing rather than tidy. `JumpEngine::stampExitManifests` asks *will this doorway
+still be open next turn*, and `closeExpiredVortices` is what decides it:
+
+- a **gate** on the last turn of its programmed hold closes at the end of this turn. Asked before
+  that sweep, `$vortexCloseTurn` is still −1 and `holdsExitOpenOn` says yes — so a whole wave would
+  be stamped for a turn its doorway does not exist on, get a Deployment phase with no legal hex, and
+  stick there;
+- a **ship's** one-shot exit closes at the end of the arrival turn. Asked before the closure, a rider
+  that stayed behind would have its berth renewed instead of refunded.
+
+`$opened` is therefore **rebuilt from the board** in the Firing phase rather than carried across
+from the spawn — the doorway itself is the record, which is what `holdsExitOpenOn` reads, and which
+makes the whole thing idempotent for free.
+
+⚠️⚠️ **AND THE EXIT SWEEP RUNS ON `InitialOrdersGamePhase::advance`'s TWO EARLY RETURNS TOO.** The
+existing note on `spawnDeclaredVortices` argues those returns cannot strand a declaration, because a
+ship that just declared one is on the board, alive and not terrain — which is exactly what makes it
+an active ship. **That argument does not hold for an exit**: its opener is in hyperspace and is on
+nobody's initiative list, so a turn with nothing to activate would leave the declaration unresolved
+and the wave stranded permanently. The call sits just inside each early return, *after* the
+active-ship selection has already concluded there is nothing to activate — which is what keeps the
+freshly inserted vortex out of `SimultaneousMovementRule::getNewActiveShip`.
+
+⚠️⚠️ **AN EXIT MUST NOT ROLL FOR JUMP FAILURE, AND THAT USED TO FALL OUT FOR FREE.** Stage 6 recorded
+that a damaged drive costs a reinforcement nothing, because `rollVortexJumpFailure` runs inside
+`Criticals::setCriticals` — which used to be *before* the exit existed. Moving the spawn up put a
+vortex in front of that roll, and a hyperspace opener can perfectly well carry pre-battle damage on
+its Jump Engine, so the wave would have started being destroyed before it ever reached the map.
+`rollVortexJumpFailure` now returns on a `SpawnJumpPointExit` held by a **ship**; a gate still rolls
+on the turn it opens a jump point of either flavour, exactly as `getVortexClosureReason` splits them.
 
 **A gate exit does not deviate**, so it keeps the existing end-of-Initial-Orders timing and the
 existing `openSignalledGates` path. The two sweeps stay separate for the same reason
@@ -1844,6 +1903,173 @@ efficiency gate and never a security one** — every rule behind it is also enfo
 ⚠️ **The legacy bundles need regenerating** (`scripts/fvbuild.ps1 -Client`) before this is exercised in
 production mode — nine client files changed and `game.php` serves them from `game.legacy.bundle.js`
 outside dev mode.
+
+### Stage 10 ✅ BUILT 2026-08-29, untested in play
+Four refinements asked for immediately after Stage 9, all of them small in code and two of them
+load-bearing in rules. Read §2.3 first — 10a rewrote it.
+
+#### 10a — the deviation is rolled after Initial Orders, and the marker moves to the real hex
+> "I've re-read the tabletop rules and realised that the vortex deviation roll (and any movement of
+> the jump exit) should be after Initial Orders on its formation turn, instead of the very end of
+> the formation turn. This way, the player has already committed the ships and both players can see
+> where the actual exit will be on formation turn to react to it, instead of having to wait until
+> the start of the arrival turn."
+
+§2.3 carries the whole ruling, the reversed concealment argument and the three traps. In code:
+
+- **`JumpEngine::spawnExitVortices` moved to `InitialOrdersGamePhase::advance`**, third of the three
+  vortex sweeps — after `spawnDeclaredVortices` and `openSignalledGates`, which means the clamp that
+  keeps the rolled hex legal already sees this turn's entrances and gate vortices for free.
+- **It was SPLIT.** `JumpEngine::stampExitManifests` is the manifest half and stays at the end of
+  `FireGamePhase::advance`, where `closeExpiredVortices` has already run. §2.3's ⚠️⚠️ says why that
+  is a rule and not a tidy-up, and why `$opened` is now rebuilt from the board with
+  `holdsExitOpenOn` rather than carried across.
+- **`openExitVortex` gained two out-parameters** (`$logOrders`, `$moved`) and a
+  `rewriteDeclaration` call. Initial Orders' `advance()` has no submit of its own, so the sweep
+  persists exactly the rows it wrote — the log line through `submitFireorders(..., 2)` and the moved
+  declaration through `updateFireOrders`. ⚠️ Collected, never re-scanned out of `getNewFireOrders()`:
+  `spawnDeclaredVortices` runs first in the same `advance()` and has already submitted its own, and
+  a second scan would insert every one of them twice. This is the trap `openSignalledGates`
+  documents, now with a third sweep behind it.
+- ⚠️⚠️ **The two early returns in `InitialOrdersGamePhase::advance` had to call the sweep too**, and
+  the exit sweep is the only one of the three that needs it — see §2.3.
+- ⚠️⚠️ **`rollVortexJumpFailure` needed an explicit exit refusal**, because the "it falls out for
+  free" that Stage 6 recorded was a statement about *ordering* and the ordering just changed — see
+  §2.3.
+- **Nothing on the client changed.** That is the design, not luck: both viewers draw the marker from
+  the one fire order the sweep rewrites.
+
+⚠️ **The DECLARED hex is no longer recoverable** once the roll has happened — the `'VortexScatter'`
+note records the distance and the facing steps, not the origin. Nothing needs it (the log line
+quotes the distance, Stage 9's penalty reads the note), but a future "show me where they aimed"
+feature would have to widen the note.
+
+**Idempotency is unchanged and now covers one more thing.** A second `advance()` breaks out on
+`hasOpenVortex` before reaching `openExitVortex`, which is what stops the ALREADY-MOVED hex being
+put through the deviation table a second time — a compounding scatter, every time an advance ran
+twice. The Stage 6 harness asserts it directly.
+
+#### 10b — the arrival initiative penalty is visible
+> "For the Stage 9 Initiative Penalty, can we have a shipTooltip message and a shipstatus banner in
+> shipWindow, both using the same styles as Hangar initiative penalty notification and using the
+> same cyan colour styles."
+
+A cyan `Arrival Scatter (-25 Ini)` line in `ShipTooltip.js`, beside Hangar Operations and Just
+Launched, and a cyan `ARRIVAL SCATTER -25 INI` banner in `ShipWindow`'s `getStatusBanners`, straight
+after Deploying. Both read one function, `shipManager.getArrivalIniPenalty`.
+
+- ⭐ **THE NUMBER IS THE SERVER'S, NOT A CLIENT RE-DERIVATION.** `TacGamedata::stripForJson` attaches
+  `arrivalIniPenalty` from `BaseShip::getReinforcementArrivalIniModifier` — the same method both
+  initiative generators call — so the UI cannot quote a figure the roll did not apply. On a d100
+  roll that is exactly the disagreement nobody would notice and everybody would argue about.
+- ⚠️ **IT IS ATTACHED IN `TacGamedata::stripForJson`, NOT IN `BaseShip::stripForJson`** where every
+  other reinforcement field lives, and that is forced: the answer needs a **gamedata** (the scatter
+  is rebuilt from an `IndividualNote` on the OPENER's engine, so it takes a walk to another ship),
+  and a ship's `stripForJson` is handed none. The obvious alternative — a public
+  `$arrivalIniPenalty` on `BaseShip` — would ride the static blueprint of every hull in the tree,
+  because `ShipCompactor` walks the RAW object rather than that method
+  ([[arch_shipcompactor_key_stripping]]).
+- **Emitted only when non-zero**, so an ordinary payload is byte-identical and the key's presence is
+  the client's whole test. A precise arrival and a gate's doorway both produce 0, and both are the
+  good outcome — neither should carry a banner.
+- **It discloses nothing new.** `iniative` / `iniativeadded` already go out real to every viewer
+  (the Chameleon sheet says so in as many words), the arriving unit is on the board, and its
+  doorway's hex has been public since it formed.
+- The `array_map` over `$this->ships` became a `foreach`, which now re-indexes unconditionally.
+  ⚠️ That does **not** make `hideHyperspaceReinforcements`' rebuild redundant — it also drops the
+  `$shipsById` cache.
+
+#### 10c — legacy jump drives show their real recharge
+> "Shadow PhasingDrives and other markLegacy Jump Drives, such as Hyperdrives and FTL Drives on Star
+> Wars and BSG factions respectively, are not correctly showing their recharge time like normal
+> JumpEngines, they just show 1/1. Star Trek Nacelles are out of scope of this fix."
+
+⭐⭐ **ONE DISTINCTION, SEPARATED.** `markLegacy()` forced `loadingtime`/`turnsloaded` to 1/1 and
+`JumpEngine::stripForJson` short-circuited on `$legacyJump`, on the reasoning that a legacy drive
+never opens a jump point and so never spends a charge. **Stage 9 made that false** — a Shadow, Star
+Wars or BSG hull now phases IN through a doorway of its own and spends the charge doing it — so the
+flag was hiding a rule that only ever applied to one family.
+
+- **`JumpEngine::$hasJumpRecharge`** now means "my 4th constructor argument is a jump delay". True on
+  every engine in the tree except the Trek Nacelle, whose 4th argument is an **impulse rating**
+  (`TrekImpulseDrive` sums the nacelles' outputs for sublight thrust) — a Nacelle rated 6 would
+  otherwise claim a 6-turn jump recharge it does not have.
+- **`markLegacy($keepsRecharge = true)`**, and the ONE caller that passes `false` is
+  `TrekWarpDrive::__construct`. The default keeps all 88 ship-file calls byte-identical in intent:
+  they always passed a real B5W jump delay.
+- **`stripForJson` now tests `!$hasJumpRecharge`** instead of `$legacyJump`, so a phasing hull sends
+  the real loading pair — and the vortex counter block below it, which is right for it too: a
+  phase-in doorway is a vortex, invisible or not, and its holder's icon should count it.
+- ⚠️ **NOTHING ELSE ABOUT `markLegacy` MOVED.** The boost path back on and the declaration path off
+  are what the flag is for; the harness asserts both are identical either way.
+- ⚠️ **THE STATIC BLUEPRINTS CHANGE** for the ~195 hulls that mount one — `loadingtime`/`turnsloaded`
+  are public `Weapon` properties and `ShipCompactor` strips neither. `fvbuild.ps1 -Server` is
+  required, and the lobby reads the blueprint alone.
+- **`weaponManager.isLoaded` now answers false on a recharging legacy drive.** Audited: the engine is
+  already out of `weaponManager.targetHex` (`autoFireOnly` / `hextarget` false), the ballistic
+  "unfired launchers" checklist skips `name === 'jumpEngine'` outright, `canBoost` never consults
+  loading, and the server's only charge test lives in the ENTRANCE branch that refuses a legacy drive
+  above it. The one visible effect is the intended one: `SystemIcon` dims a recharging drive.
+- **The boost jump is deliberately NOT gated on the charge.** A phased-in hull can still boost out
+  the same turn if it wants to; that is pre-existing legacy behaviour and this was a display fix.
+
+#### 10d — the blast-radius pass
+> "Can you do a Blast radius check for all REINFORCEMENTS changes for safety and efficiency e.g.
+> Ensure we've gated any intensive checks in the code with a check for the Reinforcement rule being
+> in place, as best we can. Plus, make extra sure we're not breaking any existing game mechanics
+> with these expansive changes."
+
+Stage 9e did the sweep audit; this one re-ran it over the Stage 10 additions and then went looking
+for **mechanics** rather than for cost.
+
+**Gating.** Every sweep Stage 10 adds opens on the rule: `spawnExitVortices` and
+`stampExitManifests` both, and the payload half in `TacGamedata::stripForJson` resolves the rule
+**once outside the loop** and then tests the plain `$reinforcement` property per ship — so an
+ordinary game pays one boolean per ship per payload. The `rollVortexJumpFailure` refusal sits
+*after* that method's two cheap tests, so the ship lookup is only paid on a turn a vortex was
+actually opened or maintained. `shipManager.getArrivalIniPenalty` is a property read.
+
+**Mechanics.** The window that changed is turn N's Movement, Pre-Firing and Firing phases, which now
+contain an exit vortex unit that did not exist there before. Everything that could see it was walked:
+
+| asked | answer |
+|---|---|
+| Can a ship collide with it? | No. `SpawnJumpPoint` sets `Enormous = false` deliberately, which is also what keeps it out of `blockedHexes` — the note in that class says so. |
+| Can a ship jump OUT through it? | No. `Movement::getOpenVortexInHex` and `applyJumpOut` both `instanceof SpawnJumpPointExit` → refuse (§2.6), on both sides. |
+| Can it be MAINTAINED? | No. `Firing::getVortexDeclarationBlock`'s mode-7 branch refuses an exit explicitly. |
+| Does it close early? | No. `getVortexClosureReason`'s one-shot branch is `turn > openTurn`, and `openTurn` is still N. |
+| Does it change the JUMP-FAILURE roll? | It would have. Fixed — see §2.3. |
+| Does it block LoS / firing? | No — not `Enormous`, so it never reaches `blockedHexes`. |
+| Does a second exit clamp around it? | Yes, and better than before: it is inserted a phase earlier, so a same-turn second exit and next turn's declaration test both see it. |
+| Is it new information? | No. The vortex row carries the slot and facing the republished `formingExits` entry already published from phase 2. |
+
+**All of it is the entrance vortex's existing situation**, which has spawned at the end of Initial
+Orders since Jump Points Stage 3 — which is the reassuring half of the answer: Stage 10a did not
+invent a state, it put the exit into one the codebase has been living with for months.
+
+**Proven headless.**
+- `tests/replay/reinforcementsStage6Harness.php` — **192 assertions** (was 177). The new ones: the
+  declaration is moved onto the hex the doorway formed at, its firing mode carries the facing the
+  doorway actually got, the sweep submits its own log order, a declaration with no DB id is not
+  queued for an UPDATE that would match nothing, and a second `advance()` does **not** re-roll the
+  moved hex.
+- `tests/replay/reinforcementsStage9Harness.php` — **123** (was 108), the new ones on the payload
+  field: it is emitted for the opener and every rider, for **no** other unit in the game, not at all
+  on a precise arrival, and not at all without the rule. ⚠️ Two synthetic engines the file hangs on
+  real hulls now need `setUnit()`: `ShipSystem::stripForJson` reaches back through `$this->unit`, so
+  any payload built from that gamedata fatals without it.
+- `tests/replay/legacyRechargeHarness.php` — **NEW**, 33 assertions over a real Shadow, Star Wars,
+  BSG and Trek hull plus the flag itself.
+- `tests/replay/reinforcementsStage9ClientHarness.js` — **32** (was 26), the new ones on
+  `getArrivalIniPenalty`, including that 0 reads as "no banner".
+- Stage 7 (80), Stage 8 (130) and the Stage 8 client harness (34) unchanged and still passing.
+- `checkShipData.php`: **236 findings, all in baseline, 0 new.**
+- **Replay harness: every diff in the corpus is one of the three expected payload keys** —
+  `loadingtime` (52), `turnsloaded` (48) and `arrivalIniPenalty` (4). No movement, to-hit, damage,
+  critical or masking difference anywhere. Baseline re-recorded to accept them.
+
+⚠️ **`fvbuild.ps1 -Server` IS REQUIRED** for 10c (the static blueprints carry the legacy drives'
+loading pair), and the legacy + React bundles need rebuilding for 10b.
 
 ---
 

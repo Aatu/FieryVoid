@@ -117,9 +117,51 @@ class TacGamedata {
         });
     }
    
-    public function stripForJson() {        
+    public function stripForJson() {
         $strippedGamedata = new stdClass();
-        $strippedGamedata->ships = array_map( function($ship) {return $ship->stripForJson();}, $this->ships);
+
+        /* ⭐⭐ REINFORCEMENTS STAGE 9 - THE ARRIVAL INITIATIVE PENALTY, ATTACHED HERE AND NOWHERE
+           ELSE (user request 2026-08-29: a ship tooltip line and a ship-window banner for it).
+           The number itself is BaseShip::getReinforcementArrivalIniModifier's, which is the same
+           method both initiative generators use - so the UI can never quote a figure the roll did
+           not actually apply.
+
+           ⚠️ WHY IT IS BOLTED ON HERE RATHER THAN INSIDE BaseShip::stripForJson, where every other
+           reinforcement field lives: the answer needs a GAMEDATA (the scatter is rebuilt from an
+           IndividualNote on the OPENER's engine, so it takes a walk to another ship), and a ship's
+           stripForJson is handed none. The alternative - a public $arrivalIniPenalty on BaseShip -
+           would ride the STATIC BLUEPRINT of all 6000-odd hulls: ShipCompactor walks the RAW
+           BaseShip object, not this method ([[arch_shipcompactor_key_stripping]]).
+
+           ⚠️ THE RULE GATE IS RESOLVED ONCE, OUTSIDE THE LOOP, and the per-ship test after it is
+           the plain $reinforcement property read - so an ordinary game pays one boolean per ship
+           per payload and nothing else. Same ordering, and the same reason, as
+           getReinforcementArrivalIniModifier's own two tests.
+
+           ⚠️ EMITTED ONLY WHEN NON-ZERO, so every other unit's payload is byte-identical to before
+           and the client can treat the key's presence as the whole question. Zero is also the right
+           answer for a doorway that did not scatter (a gate's never does) and for every turn after
+           the arrival one - neither should carry a banner.
+
+           ⚠️ THE array_map THIS REPLACED PRESERVED KEYS (it was passed a single array), which is why
+           hideHyperspaceReinforcements rebuilds $this->ships by append rather than unset()-ing from
+           it - a gap would have made json_encode emit a JSON OBJECT where the client requires an
+           array. The append below re-indexes unconditionally, so that hazard is now covered twice;
+           do not read this as licence to remove the rebuild there, which also drops the id cache. */
+        $reinforcementsRule = ($this->rules && $this->rules->hasRuleName('allowReinforcements'));
+
+        $strippedGamedata->ships = array();
+        foreach ($this->ships as $ship){
+            $strippedShip = $ship->stripForJson();
+
+            if ($reinforcementsRule && !empty($ship->reinforcement)){
+                $penalty = (int)$ship->getReinforcementArrivalIniModifier($this);
+                if ($penalty !== 0) $strippedShip->arrivalIniPenalty = $penalty;
+            }
+
+            $strippedGamedata->ships[] = $strippedShip;
+        }
+
         $strippedGamedata->id = $this->id;
         $strippedGamedata->turn = $this->turn;
         $strippedGamedata->phase = $this->phase;
@@ -1280,9 +1322,12 @@ class TacGamedata {
      * here would leak in phase 1 exactly what that sweep spends its time hiding. From phase 2 the
      * declaration is public and so is this.
      *
-     * ⚠️ THE DECLARED HEX, which is the whole point of §2.3's timing rule: the deviation has not
-     * been rolled yet (that happens at the end of this turn, in FireGamePhase::advance), so there
-     * is no true hex in existence to leak. What is published here is where the player AIMED.
+     * ⚠️ THE TRUE HEX, AS OF 2026-08-29, AND THAT IS THE RULE RATHER THAN A LEAK. The deviation is
+     * now rolled at the END OF INITIAL ORDERS (§2.3, user ruling), and JumpEngine::openExitVortex
+     * moves the declaration onto the hex the doorway actually formed at - so this sweep, which
+     * copies the order's own x/y/firingMode, republishes where the exit really is rather than where
+     * the player aimed. That is the point: both sides get to see it and react to it for the whole
+     * of the formation turn. Nothing here had to change for it; the timing did.
      */
     private function republishFormingExits($ship)
     {
@@ -1983,7 +2028,7 @@ if ($ship->Enormous && !($ship instanceof spawnMeteoroid) && !($ship instanceof 
        play by the exit it rides, so no slot value - depavailable, getMinTurnPlacedSlot or
        otherwise - can predict it.
 
-       ⚠️ ASK IT OF THE GAMEDATA THE SWEEP STAMPED. JumpEngine::spawnExitVortices writes
+       ⚠️ ASK IT OF THE GAMEDATA THE SWEEP STAMPED. JumpEngine::stampExitManifests writes
        arrivalTurn to the DB and to its own in-memory ships; the outer $gameData FireGamePhase was
        handed was loaded BEFORE any of that happened, so asking it would answer "nobody is arriving"
        every time and the wave would never get a phase to walk through the door in.

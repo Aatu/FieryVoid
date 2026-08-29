@@ -287,7 +287,7 @@ class DBManager
 
     /* REINFORCEMENTS_PLAN.md section 3.1 / Stage 6 - THE TURN THIS UNIT COMES OUT OF HYPERSPACE.
      *
-     * ⚠️⚠️ WRITTEN FROM EXACTLY ONE PLACE - JumpEngine::spawnExitVortices, at the end of the
+     * ⚠️⚠️ WRITTEN FROM EXACTLY ONE PLACE - JumpEngine::stampExitManifests, at the end of the
      * turn its exit formed - AND NO POST CAN REACH IT. Manager::getShipsFromJSON whitelists
      * arrivalVia and deliberately not this (see the note there): a player who could name their own
      * arrival turn would be placing units on a board with no vortex on it, in a Deployment phase
