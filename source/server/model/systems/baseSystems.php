@@ -6559,7 +6559,8 @@ class JumpEngine extends Weapon{
             : " opens a jump point exit";
 
         self::writeVortexLogOrder($opener, $gamedata,
-            $opens . " - sensors " . $scatter['sensors'] . ", roll " . $scatter['roll']
+            //$opens . " - sensors " . $scatter['sensors'] . ", roll " . $scatter['roll']
+			$opens . "- rolled " . $scatter['roll']
             . " (" . $scatter['band'] . "). It forms " . $where . $turned
             . ", and the units riding it arrive through it next turn.");
 
