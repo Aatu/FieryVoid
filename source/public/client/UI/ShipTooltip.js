@@ -77,7 +77,6 @@ window.ShipTooltip = function () {
     ShipTooltip.prototype.update = function (ship, selectedShip) {
         if (selectedShip) {
             this.selectedShip = selectedShip;
-            //this.showTargeting = shipManager.systems.selectedShipHasSelectedWeapons(this.selectedShip);
         }
 
         if (selectedShip && this.menu) {
@@ -87,7 +86,12 @@ window.ShipTooltip = function () {
 
         jQuery(".buttons", this.element).html("");
         jQuery(".namecontainer", this.element).html("");
-        jQuery(".fire", this.element).html("");
+        //⚠️ `.fire.targeting`, NOT `.fire`. The TARGETING heading and the rows beneath it are two
+        //sibling divs that SHARE the `fire` class (see HTML above), so a bare `.fire` wipe deletes
+        //the heading's <span> as well - and nothing ever puts it back, because
+        //weaponManager.targetingShipTooltip fills only `.targeting`. The INCOMING pair below was
+        //always cleared by its content class alone; this is the same rule applied to its twin.
+        jQuery(".fire.targeting", this.element).html("");
         jQuery(".entry", this.element).remove();
         jQuery(".incoming", this.element).html("");
 
@@ -96,6 +100,70 @@ window.ShipTooltip = function () {
         } else {
             createForSingleShip.call(this, this.ships[0]);
         }
+    };
+
+    /* Re-render ONLY the TARGETING half — the heading and the rows under it — against the
+       CURRENT weapon selection. Split out of createForSingleShip so a weapon going on or off
+       can refresh this in place: a full update() would rebuild the name, the button row and the
+       INCOMING list as well, and PhaseStrategy.onSystemDataChanged deliberately will not do that
+       under whatever the player is clicking.
+
+       ⚠️ `showTargeting` is a SNAPSHOT — PhaseStrategy builds the tooltip with
+       selectedShipHasSelectedWeapons and it goes stale the moment the selection changes, which it
+       does constantly: targeting a ship CONSUMES the selection, and the player can click a weapon
+       off at any time. So re-ask rather than trust it. Without this a stale `true` leaves the
+       TARGETING heading standing over an empty section, because weaponManager.targetingShipTooltip
+       returns immediately once nothing is selected — it only ever LOOKED right because the old
+       bare `.fire` wipe in update() took the heading's own <span> with it as collateral damage.
+       (selectedShip may be null here; selectedShipHasSelectedWeapons reads gamedata.selectedSystems
+       and ignores the ship it is handed.) */
+    ShipTooltip.prototype.refreshTargeting = function () {
+        //The stack tooltip has no targeting half: createForMultipleShips never shows `.fire`, and
+        //there is no single ship to work out a bearing and a hit chance against.
+        if (this.ships.length !== 1) return;
+
+        var ship = this.ships[0];
+        this.showTargeting = shipManager.systems.selectedShipHasSelectedWeapons(this.selectedShip);
+
+        if (gamedata.rules && gamedata.rules.friendlyFire === 1) {
+            if (this.selectedShip && this.showTargeting && this.selectedShip.id != ship.id) {
+                weaponManager.targetingShipTooltip(this.selectedShip, ship, this.element, null);
+                this.element.find(".fire").css({ "display": "block", "visibility": "visible" });
+            } else {
+                this.element.find(".fire").css("display", "none");
+            }
+        } else {
+            if (this.selectedShip && gamedata.isEnemy(ship, this.selectedShip) && this.showTargeting) { //Old version before allied targeting
+                weaponManager.targetingShipTooltip(this.selectedShip, ship, this.element, null);
+                this.element.find(".fire").css({ "display": "block", "visibility": "visible" });
+            } else if (this.selectedShip && gamedata.canTargetAlly(ship) && this.showTargeting) {//30 June 2024 - DK - Added for Ally targeting.
+                weaponManager.targetingShipTooltip(this.selectedShip, ship, this.element, null);
+                this.element.find(".fire").css({ "display": "block", "visibility": "visible" });
+            } else {
+                this.element.find(".fire").css("display", "none");
+            }
+        }
+    };
+
+    /* Re-run the button row's condition lists. Every button that can act on a weapon asks
+       gamedata.selectedSystems whether it has one - hasWeaponsSelected, hasHexWeaponsSelected,
+       FFWeaponSelected, hasSplitWeaponFiringOrder - so "Target Weapons" and "Remove a Firing
+       Order" would otherwise sit there inert after the player emptied the selection, and stay
+       missing after they refilled it (user report 2026-08-24). The conditions were always right;
+       nothing was asking them again.
+
+       renderTo APPENDS, so the row has to be emptied first - that is why this is not simply a
+       call to renderTo. Safe to run from inside a button's own click handler: onClick calls the
+       action and returns without touching the element (shipTooltipMenu.js), and ShipTooltip's
+       own update() already destroys these buttons the same way on every retarget. */
+    ShipTooltip.prototype.refreshButtons = function () {
+        //Same two guards the render site had: no menu on a plain hover tooltip, and
+        //createForMultipleShips never draws a button row for a stack.
+        if (!this.menu || this.ships.length !== 1) return;
+
+        var buttons = jQuery(".buttons", this.element);
+        buttons.html("");
+        this.menu.renderTo(buttons, this);
     };
 
     ShipTooltip.prototype.isForAnyOf = function (ships) {
@@ -297,6 +365,13 @@ window.ShipTooltip = function () {
             }
         }
 
+        /* JUMP_POINTS_PLAN.md Stage 6 - this unit has declared a jump point, or has plotted a
+           jump-out it has not committed yet. Yellow, the jump-point colour used everywhere else in
+           the feature. See shipManager.isJumpingToHyperspace for what counts and why. */
+        if (shipManager.isJumpingToHyperspace(ship)) {
+            toDisplay += '<span style="color:#e1b000;">Jumping to Hyperspace</span>; ';
+        }
+
         if (ship.attached && Object.keys(ship.attached).length > 0 && !ship.detached) {
             var targetId = Object.keys(ship.attached)[0];
             var location = Object.values(ship.attached)[0];
@@ -465,30 +540,11 @@ window.ShipTooltip = function () {
             this.addEntryElement('DISTANCE: ' + dis + ' hexes');
         }
 
-        if (gamedata.rules && gamedata.rules.friendlyFire === 1) {
-            if (this.selectedShip && this.showTargeting && this.selectedShip.id != ship.id) {
-                weaponManager.targetingShipTooltip(this.selectedShip, ship, this.element, null);
-                this.element.find(".fire").css({ "display": "block", "visibility": "visible" });
-            } else {
-                this.element.find(".fire").css("display", "none");
-            }
-        } else {
-            if (this.selectedShip && gamedata.isEnemy(ship, this.selectedShip) && this.showTargeting) { //Old version before allied targeting
-                weaponManager.targetingShipTooltip(this.selectedShip, ship, this.element, null);
-                this.element.find(".fire").css({ "display": "block", "visibility": "visible" });
-            } else if (this.selectedShip && gamedata.canTargetAlly(ship) && this.showTargeting) {//30 June 2024 - DK - Added for Ally targeting.
-                weaponManager.targetingShipTooltip(this.selectedShip, ship, this.element, null);
-                this.element.find(".fire").css({ "display": "block", "visibility": "visible" });
-            } else {
-                this.element.find(".fire").css("display", "none");
-            }
-        }
+        this.refreshTargeting();
 
         this.ballisticsMenu.renderTo(ship, this.element);
 
-        if (this.menu) {
-            this.menu.renderTo(jQuery(".buttons", this.element), this);
-        }
+        this.refreshButtons();
     }
 
     // The hover tooltip for a STACKED hex — several units under one cursor, none of them
@@ -594,13 +650,16 @@ window.ShipTooltip = function () {
         return gamedata.isTerrain(ship.shipSizeClass, ship.userid) ? 'terrain' : (gamedata.isMyShip(ship) ? 'mine' : (gamedata.isMyorMyTeamShip(ship) ? 'ally' : 'enemy'));
     }
 
-    // What the CSS allegiance classes below paint, as values rather than as classes. The
-    // shared --fv-* allegiance set in tokens.css; the tone-mapped tints, not the
-    // -signal twins, because these are for TEXT.
+    // What the CSS allegiance classes in tactical.css paint, as values rather than as
+    // classes, so the rule under the name can be drawn in the name's own colour. The
+    // BRIGHT tier (2026-08-20) — these must track .mine.name / .ally.name / .enemy.name
+    // exactly, because this map and those rules answer the same question on the same
+    // element and a drift shows up as a name whose underline is a different green.
+    // Terrain has no bright twin and stays neutral.
     var ALLEGIANCE_NAME = {
-        mine: 'var(--fv-own)',
-        ally: 'var(--fv-ally)',
-        enemy: 'var(--fv-enemy)',
+        mine: 'var(--fv-own-bright)',
+        ally: 'var(--fv-ally-bright)',
+        enemy: 'var(--fv-enemy-bright)',
         terrain: 'var(--fv-neutral)'
     };
 
@@ -619,6 +678,12 @@ window.ShipTooltip = function () {
 
     // Inline colour for the ship name. Empty string on the class path — the CSS class
     // from getAllyClass is already carrying it, and returning nothing is what lets it.
+    //
+    // The two arms now agree on BRIGHTNESS as well as on scheme (2026-08-20): this one
+    // has always returned the raw palette, and the .mine/.ally/.enemy .name rules in
+    // tactical.css moved onto --fv-*-bright, which is that same palette as tokens. Until
+    // then a 2-team participant saw pastel names and everyone else saw full chroma, on
+    // the same tooltip — the mismatch the user reported. Keep them level.
     function getNameStyle(ship) {
         if (!usesTeamColor(ship)) {
             return '';
@@ -649,8 +714,8 @@ window.ShipTooltip = function () {
         if (!usesTeamColor(ship)) return '';
 
         var raw = gamedata.getTeamColorRGB(ship.team);
-        var toned = (typeof gamedata.getMutedTeamColorRGB === 'function')
-            ? gamedata.getMutedTeamColorRGB(ship.team)
+        var toned = (typeof gamedata.getMidTeamColorRGB === 'function')
+            ? gamedata.getMidTeamColorRGB(ship.team)
             : raw;
 
         return '--row-bar:rgb(' + Math.round(raw[0]) + ',' + Math.round(raw[1]) + ',' + Math.round(raw[2]) + ');'

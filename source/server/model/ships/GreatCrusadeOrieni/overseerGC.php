@@ -88,7 +88,7 @@ class overseerGC extends BaseShip{
 		//Forward
 		1=> array(
 			4 => "Thruster",
-			8 => "Class-S Missile Rack",
+			8 => "Heavy Gauss Rifle",
 			11 => "Improved Gatling Railgun",
 			18 => "Structure",
 			20 => "Primary",
@@ -106,7 +106,7 @@ class overseerGC extends BaseShip{
 		3=> array(
 			4 => "Thruster",
 			6 => "Improved Gatling Railgun",
-			11 => "Cargo Bay",
+			11 => "Hangar",
 			18 => "Structure",
 			20 => "Primary",
 		),
@@ -115,7 +115,7 @@ class overseerGC extends BaseShip{
 		4=> array(
 			4 => "Thruster",
 			6 => "Improved Gatling Railgun",
-			11 => "Cargo Bay",
+			11 => "Hangar",
 			18 => "Structure",
 			20 => "Primary",
 		),

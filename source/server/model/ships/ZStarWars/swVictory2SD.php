@@ -45,6 +45,7 @@ class swVictory2SD extends BaseShip{
         $this->addPrimarySystem(new Engine(4, 20, 0, 6, 5)); //split to Aft, too
 	$hyperdrive = new JumpEngine(4, 24, 8, 20);
 	$hyperdrive->displayName = 'Hyperdrive';
+	$hyperdrive->markLegacy(); //JUMP_POINTS_PLAN.md section 9 - this setting jumps by boost, not by vortex
 	$this->addPrimarySystem($hyperdrive);
 	$this->addPrimarySystem(new Hangar(3, 30, 12));
          

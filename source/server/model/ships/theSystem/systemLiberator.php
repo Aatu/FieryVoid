@@ -20,6 +20,7 @@ class systemLiberator extends BaseShip{
 	    $this->isd = 'Ancient';
 
 		$this->notes = "Can control 12 drones";		
+		$this->notes .= "<br>Resistant to criticals";		
 
 		$this->critRollMod -= 2;
 		$this->enhancementOptionsDisabled[] = 'VULN_CRIT';

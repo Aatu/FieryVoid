@@ -98,6 +98,72 @@ shipManager.power = {
 			|| shipManager.criticals.hasCritical(system, "ForcedOfflineForTurns"));
 	},
 
+	/* ===== JUMP_POINTS_PLAN.md STAGE 5 - HOLDING A JUMP POINT OPEN ==========================
+
+	   Maintaining a vortex costs the ship everything it has: every power-absorbing system except
+	   the Scanner and the Jump Engine itself must be OFF for the whole turn (plan section 2.4).
+	   The Maintain toggle in the Jump Engine's menu switches them off in one go, and these four
+	   helpers are what keeps them off until the player turns Maintain back off.
+
+	   MIRROR of JumpEngine::getVortexPowerViolations on the server, which is authoritative: it
+	   re-tests the rule at the end of the turn and closes the vortex if it was broken. The server
+	   asks `instanceof Scanner`, which catches the ELINT / SW / Antiquated subclasses; a client
+	   system carries no class information, so the four names are listed here instead. A fifth
+	   scanner class would need adding to this list - and until then the only cost of drift is a
+	   system needlessly shut down, never a rule that differs. */
+	vortexMaintainExemptNames: ['jumpEngine', 'reactor', 'scanner', 'elintScanner', 'SWScanner', 'AntiquatedScanner'],
+
+	isVortexExemptSystem: function isVortexExemptSystem(system) {
+		return Boolean(system) && shipManager.power.vortexMaintainExemptNames.indexOf(system.name) !== -1;
+	},
+
+	//Is this ship's Jump Engine declaring Maintain this turn? The firing-mode-7 ballistic order IS
+	//the declaration - there is no separate flag anywhere - so this answer survives a poll, a page
+	//reload and the commit for free, and it is the same thing the server reads.
+	isMaintainingVortex: function isMaintainingVortex(ship) {
+		if (!ship || !ship.systems) return false;
+
+		for (var i in ship.systems) {
+			var system = ship.systems[i];
+			if (!system || system.name !== 'jumpEngine') continue;
+			if (typeof system.isMaintainingVortex !== 'function') continue;
+			if (system.isMaintainingVortex()) return true;
+		}
+
+		return false;
+	},
+
+	//Every power-absorbing system that is still ONLINE and so would break the rule. SYSTEMS, not
+	//names, because the caller both names them (the menu) and switches them off (the toggle).
+	getVortexMaintainBlockers: function getVortexMaintainBlockers(ship) {
+		var blockers = [];
+		if (!ship || !ship.systems) return blockers;
+
+		for (var i in ship.systems) {
+			var system = ship.systems[i];
+			if (!system) continue;
+			if (shipManager.power.isVortexExemptSystem(system)) continue;
+			if (!(system.powerReq > 0)) continue;                                //nothing to switch off
+			if (shipManager.systems.isDestroyed(ship, system)) continue;         //draws nothing
+			if (shipManager.power.isOfflineOnTurn(ship, system, gamedata.turn)) continue; //already off
+
+			blockers.push(system);
+		}
+
+		return blockers;
+	},
+
+	//THE LOCK. While the Maintain declaration stands, a system it shut down may not be powered back
+	//on - the rule is 'everything off for the whole turn', not 'everything off at the moment you
+	//click'. Enforced in setOnline (so every route is covered) and again in the two canOnline gates
+	//(so the button reads as unavailable rather than warning on click).
+	isVortexLockedOffline: function isVortexLockedOffline(ship, system) {
+		if (!system || shipManager.power.isVortexExemptSystem(system)) return false;
+		if (!(system.powerReq > 0)) return false;
+
+		return shipManager.power.isMaintainingVortex(ship);
+	},
+
 	//Window-independent forced-offline enforcement, extracted from setPowerClasses so it
 	//runs for every owned ship at turn start (repeatLastTurnPower) regardless of whether
 	//the legacy status window was ever opened. Adds the type:1 offline entry for the
@@ -604,12 +670,29 @@ shipManager.power = {
 	},
 
 	setOnline: function setOnline(ship, system, skipMessage = false) {
-		if (ship.faction === "Vorlon Empire" && !ship.flight && (system instanceof Weapon || system instanceof Shield)) {
+		//JumpEngine is a Weapon subclass only so it can declare a hex-targeted vortex
+		//(JUMP_POINTS_PLAN.md section 3.1) - the Vorlon Power Capacitor rule is about weapons and
+		//shields, and 11 Vorlon hulls carry a jump engine. Without this it could not be powered
+		//back up while the capacitor is doubling generation.
+		if (ship.faction === "Vorlon Empire" && !ship.flight && system.name !== "jumpEngine" && (system instanceof Weapon || system instanceof Shield)) {
 			var capacitor = shipManager.systems.getSystemByName(ship, "powerCapacitor");
 			if (capacitor && capacitor.active) {
 				if (!skipMessage) window.confirm.warning("You cannot activate " + system.displayName + " while Power Capacitor is doubling power generation.");
 				return;
 			}
+		}
+
+		//JUMP_POINTS_PLAN.md Stage 5: a ship maintaining a jump point has to stay dark for the WHOLE
+		//turn, so nothing it shut down may be powered back up while the declaration stands. Guarded
+		//here rather than only in the button gates because setOnline is the choke point every route
+		//funnels through - the Off/On toggle, onlineAll, and the forced-shutdown recovery above.
+		//Same shape as the Vorlon Power Capacitor guard immediately above it.
+		//(JumpEngine::doDeactivate removes the declaration BEFORE it restores anything, so turning
+		//Maintain off is not blocked by its own lock.)
+		if (shipManager.power.isVortexLockedOffline(ship, system)) {
+			if (!skipMessage) window.confirm.warning("You cannot power up " + system.displayName
+				+ " while the Jump Engine is maintaining a jump point. Turn Maintain off first.");
+			return;
 		}
 
 		if (system.name == "graviticShield") {

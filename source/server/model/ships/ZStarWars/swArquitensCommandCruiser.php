@@ -50,6 +50,7 @@ class swArquitensCommandCruiser extends HeavyCombatVessel{
 	    
 	$hyperdrive = new JumpEngine(3, 16, 5, 15);
 	$hyperdrive->displayName = 'Hyperdrive';
+	$hyperdrive->markLegacy(); //JUMP_POINTS_PLAN.md section 9 - this setting jumps by boost, not by vortex
 	$this->addAftSystem($hyperdrive);
 	$this->addAftSystem(new Hangar(2, 4));  
         $this->addAftSystem(new Thruster(3, 12, 0, 3, 2));

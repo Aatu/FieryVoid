@@ -1201,6 +1201,29 @@ shipManager.systems = {
         return toReturn;
     },
 
+    /* JUMP_POINTS_PLAN.md Stage 6 - SYSTEMS WHOSE ARC STAYS ON SCREEN WHILE THEY ARE SELECTED.
+       Every weapon draws its arc on HOVER (PhaseStrategy.onSystemMouseOver); the moment the player
+       clicks to select it the pointer leaves the icon, mouse-out fires and the arc goes - which is
+       exactly the moment they want to see it, because the next thing they do is pick a hex on the
+       map (user request 2026-08-22).
+
+       Deliberately a SHORT LIST rather than every weapon. What these three have in common is that
+       the arc is a REACH the player has to aim inside, not a bearing check they have already made:
+         jumpEngine       - where a jump point may be projected (4 hexes, all round)
+         TransverseDrive  - the straight-line lanes an Ancient ship may jump along
+         MicroJumpSystem  - the same, for a Warp Drive
+       All three are hex-targeted, so the selection is followed by a right-click on the map with
+       nothing else to guide it. Leaving every gun's arc up instead would paint the map solid the
+       moment a player selected a broadside.
+
+       Matched by name because the client has no class information on a system object, and stated
+       ONCE here so the arc sweep in PhaseStrategy and any future caller cannot drift apart. */
+    ARC_VISIBLE_WHEN_SELECTED: ['jumpEngine', 'TransverseDrive', 'MicroJumpSystem'],
+
+    showsArcWhenSelected: function showsArcWhenSelected(system) {
+        return !!system && shipManager.systems.ARC_VISIBLE_WHEN_SELECTED.indexOf(system.name) !== -1;
+    },
+
     hasBorderHighlight: function hasBorderHighlight(ship, system) {
         // Try to prioritise effects and optimise performance. Can only return ONE border highlight colour.
 
@@ -1279,6 +1302,33 @@ shipManager.systems = {
         }
 
         return rem;
+    },
+
+    /* ⭐ JUMP_GATES_PLAN.md section 2.5 - THE LONGEST OPEN DURATION A FIXED JUMP GATE CAN BE
+       PROGRAMMED FOR, 1 to 4 turns. The client mirror of JumpEngine::getGateMaxHold; keep the two
+       in step.
+
+       A GATE'S WHOLE DAMAGE MODEL IS THE NUMBER OF POINTS ON ITS REACTOR. It rolls no criticals at
+       all (JumpgateCapital silences its Reactor's chart and the gate engine's has been empty since
+       Phase 1), so its condition is one number, D, and three rules read off it: the recharge
+       lengthens by D/3 turns, the maximum hold shortens by D/15 turns with a floor of 1, and total
+       reactor loss destroys the gate.
+
+       ⭐ DERIVED FROM THE UNIT, NOT MIRRORED ONTO THE SYSTEM, and that is deliberate: client system
+       objects built from the same static blueprint SHARE field references across every instance of
+       a phpclass, so a cap stashed on the Jump Engine would leak between two gates in one game
+       (JUMP_GATES_PLAN.md trap 9). Reactor damage is sent fresh per ship, so computing it here is
+       both correct per instance and free. */
+    getGateMaxHold: function getGateMaxHold(gate) {
+        var MAX_VORTEX_TURNS = 4;      //JumpEngine::MAX_VORTEX_TURNS
+        var HOLD_PER_DAMAGE = 15;      //JumpEngine::GATE_HOLD_PER_DAMAGE
+
+        var reactor = shipManager.systems.getSystemByName(gate, "reactor");
+        if (!reactor) return MAX_VORTEX_TURNS;
+
+        var damage = Math.max(0, reactor.maxhealth - shipManager.systems.getRemainingHealth(reactor));
+
+        return Math.max(1, MAX_VORTEX_TURNS - Math.floor(damage / HOLD_PER_DAMAGE));
     }
 
 };

@@ -104,7 +104,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 	<!-- replaced by php include below
     <script src="static/ships.js"></script>
 	-->
-    <?php		
+    <?php
         //include 'static/ships.php'; //Changed how staticships are loaded to help with HTTP Protocol errors - DK Dec 2025
         $shipClasses = [];
         if(isset($serverdata) && isset($serverdata->ships)){
@@ -112,74 +112,36 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
                 $shipClasses[] = $ship->phpclass;
             }
         }
+
+        /* window.staticShips — the blueprint half of every ship on the board; the client merges
+           it with the live gamedata in SystemFactory.createSystemFromJson.
+
+           This used to be ~75 lines inline here: getShipsByClass() (which INSTANTIATES every
+           class — 220ms for a 60-class game), then a walk of the resulting objects to discover
+           dynamically spawnable classes, then a raw json_encode of the lot (3.7MB inlined into
+           this page, on every single load, for every player).
+
+           None of it depends on the game, so all of it now lives in BlueprintCache, keyed per
+           ship class in APCu under the same deploy-versioned prefix the gamedata cache uses. A
+           warm request is ~60 apcu_fetch()es and a string concat. It also runs each blueprint
+           through ShipCompactor — which this page never did, so the game screen was shipping
+           uncompacted blueprints while the lobby got compacted ones from the generator.
+
+           The spawnable-discovery walk moved WITH it (BlueprintCache::build records what each
+           blueprint contributes at fill time, because a cache hit has no object to walk). If you
+           need to change that logic, it is in BlueprintCache::build and getStaticShipsJson, not
+           here — and the two must stay in step or a mid-game spawn shows a raw phpclass.
+
+           Explicit require_once: source/autoload.php is a generated classmap and will not know
+           about a new file until the generator next runs. Same pattern as ShipCompactor. */
+        require_once __DIR__ . '/../server/lib/BlueprintCache.php';
+        require_once __DIR__ . '/../server/lib/ShipCompactor.php';
+
         $t2 = microtime(true);
-        $staticShips = ShipLoader::getShipsByClass($shipClasses);
+        $staticShipsJson = BlueprintCache::getStaticShipsJson($shipClasses);
         $time_getShipsByClass = microtime(true) - $t2;
 
-        // Auto-discover dynamically spawnable ship blueprints from weapon system properties.
-        // Any weapon with a $spawnableClasses array will have its listed classes preloaded here,
-        // so the frontend has their full blueprint when a mine/unit is spawned mid-game.
-        //
-        // Hangar Ops: faction-specific default shuttles (e.g. Flyer for Minbari) live on
-        // HangarOps::$factionShuttleMap rather than on every Hangar's $spawnableClasses,
-        // so each game only preloads the shuttle classes of factions actually present
-        // (and carrying a Hangar) — not all ~80 factions in the codebase.
-        $spawnableClasses = [];
-        $factionsWithHangars = [];
-        foreach ($staticShips as $faction => $shipBlueprints) {
-            foreach ($shipBlueprints as $blueprint) {
-                foreach ($blueprint->systems as $system) {
-                    if (!empty($system->spawnableClasses)) {
-                        foreach ($system->spawnableClasses as $cls) {
-                            $spawnableClasses[] = $cls;
-                        }
-                    }
-                    if ($system instanceof Hangar) {
-                        $factionsWithHangars[$faction] = true;
-                        //Per-bay fighter-class allow-list (arch_hangar_class_allowlist):
-                        //preload the carrier's reserved fighter blueprint(s) so the client
-                        //can resolve the phpclass to a display name (Hangar SystemInfo
-                        //"Type:" line + lobby ship window) even when no such flight is
-                        //deployed yet. Without this the class is absent from staticShips
-                        //and the resolver falls back to showing the raw phpclass.
-                        if (!empty($system->allowedFighterClasses)) {
-                            foreach ($system->allowedFighterClasses as $cls) {
-                                $spawnableClasses[] = $cls;
-                            }
-                        }
-                    }
-                }
-                //Category-declared default shuttles (yacht / lifeboats / medical /
-                //presidential — see HangarOps::shuttlePhpclassForCategory): these
-                //auto-populate into the carrier's hangar but are NOT in the faction
-                //shuttle map, so the faction-shuttle preload below misses them.
-                //Without preloading them, launching one leaves the client unable to
-                //resolve its phpclass -> blueprint (shows "undefined" in the ini GUI).
-                if (!empty($blueprint->fighters) && is_array($blueprint->fighters)) {
-                    foreach ($blueprint->fighters as $category => $count) {
-                        $shuttleClass = HangarOps::shuttlePhpclassForCategory($category, $blueprint);
-                        if ($shuttleClass !== null) $spawnableClasses[] = $shuttleClass;
-                    }
-                }
-            }
-        }
-		foreach (array_keys($factionsWithHangars) as $faction) {
-			$factionShuttle = HangarOps::shuttleClassForFactionName($faction);
-			if ($factionShuttle !== null) $spawnableClasses[] = $factionShuttle;
-			$factionMsw = HangarOps::minesweepingShuttleClassForFactionName($faction);
-			if ($factionMsw !== null) $spawnableClasses[] = $factionMsw;
-		}            
-        if (!empty($spawnableClasses)) {
-            $spawnableStaticShips = ShipLoader::getShipsByClass(array_unique($spawnableClasses));
-            foreach ($spawnableStaticShips as $faction => $classes) {
-                if (!isset($staticShips[$faction])) $staticShips[$faction] = [];
-                foreach ($classes as $classKey => $blueprint) {
-                    $staticShips[$faction][$classKey] = $blueprint;
-                }
-            }
-        }
-
-        echo '<script>window.staticShips = ' . json_encode($staticShips) . ';</script>';
+        echo '<script>window.staticShips = ' . $staticShipsJson . ';</script>';
     ?>
     <script>
         window.Config = {
@@ -356,6 +318,8 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     <script defer src="client/UI/shipTooltipMenu.js"></script>
     <script defer src="client/UI/shipTooltipInitialOrdersMenu.js"></script>
     <script defer src="client/UI/shipTooltipFireMenu.js"></script>
+    <!-- MUST stay after shipTooltipMenu.js - it extends it at definition time (JUMP_POINTS_PLAN.md Stage 4). -->
+    <script defer src="client/UI/shipTooltipMovementMenu.js"></script>
     <script defer src="client/UI/ShipTooltipBallisticsMenu.js"></script>
 	<script defer src="client/UI/moveTooltip.js"></script>
 
@@ -389,6 +353,14 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     <script defer src="client/savedFleets.js"></script>
 	<script defer src="client/power.js"></script>
     <script defer src="client/UI/shipMovement.js"></script>
+    <!-- MUST stay after shipMovement.js: that file ASSIGNS window.UI, so loading this one first
+         would have its module wiped (JUMP_POINTS_PLAN.md Stage 2b). -->
+    <script defer src="client/UI/vortexFacing.js"></script>
+    <!-- Same rule, same reason (JUMP_GATES_PLAN.md Stage 3): shipMovement.js ASSIGNS window.UI, so
+         this module must load after it. Its sibling vortexFacing.js sets a vortex FACING; this one
+         sets a fixed gate's programmed open DURATION, which is the only thing a gate lets a player
+         choose - a gate's facing is set when it is placed and can never be aimed. -->
+    <script defer src="client/UI/gateSignal.js"></script>
     <script defer src="client/UI/infowindow.js"></script>
     <script defer src="client/UI/fleetList.js"></script>
 	<script defer src="client/UI/gameInfo.js"></script>
@@ -722,7 +694,74 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
         <div id="detach" class="movement-icon" data-movement-type="Detach" style="filter: hue-rotate(200deg) scaleX(-1);">
             <canvas id="detachcanvas" width="50" height="50"></canvas>
         </div>
-        
+
+    </div>
+
+    <!-- JUMP_POINTS_PLAN.md Stage 2b - the vortex facing control (UI.vortexFacing).
+         Same shape as #shipMovementUI above and a sibling of it, not a part of it: that one is
+         anchored to a ship and rotated to its heading, this one is anchored to the hex a jump
+         point is being declared on and stays upright. Reuses the movement UI's art and its
+         generic drawUIElement. -->
+    <div id="vortexFacingUI">
+        <div id="vortexTurnLeft" class="movement-icon" data-movement-type="Turn Vortex Left">
+            <canvas id="vortexTurnLeftCanvas" width="40" height="40"></canvas>
+        </div>
+
+        <!-- Confirm is a DRAWN glyph like the two turn arrows either side of it (a yellow disc with
+             a dark tick, UI.vortexFacing.drawConfirmIcon), not the word "Ok" it replaced and not an
+             image: crisp at any size, no asset, and one colour token for the whole control. -->
+        <div id="vortexConfirm" class="movement-icon" data-movement-type="Open Jump Point">
+            <canvas id="vortexConfirmCanvas" width="40" height="40"></canvas>
+        </div>
+
+        <div id="vortexTurnRight" class="movement-icon" data-movement-type="Turn Vortex Right">
+            <canvas id="vortexTurnRightCanvas" width="40" height="40"></canvas>
+        </div>
+    </div>
+
+    <!-- JUMP_GATES_PLAN.md Stage 3 - the fixed jump gate signal panel (UI.gateSignal).
+
+         Plain anchored HTML, not a canvas ring: a gate's vortex facing is fixed when the gate is
+         placed and can never be chosen, so the ONLY thing to set is the programmed open duration -
+         and a number needs no glyph that swings with it. The container is anchored to the gate's
+         hex centre; the panel inside is lifted clear of the hex by CSS.
+
+         ⭐ IT IS THE REACT POWER SETTINGS MENU'S BOOST ROW, IN PLAIN HTML (user request
+         2026-08-23). Structure and palette both: Label / Controls / Value, the same gold chrome,
+         and the Signal button in that menu's own "warning" yellow. reactJs/system/
+         SystemPowerSettings.js is the source of truth for every value - see tactical.css.
+
+         Two earlier revisions are worth not repeating. It was a bespoke box (fine but foreign), and
+         then it wore the ship TOOLTIP's menu markup, which read far worse: a 40x40 icon row needs
+         more width than this panel has, so it wrapped into a column. The X is gone throughout:
+         clicking anywhere off the panel discards it (a one-shot on PhaseStrategy.onClickCallbacks,
+         registered when the panel opens), which is how every other floating control here is
+         dismissed.
+
+         ⭐ THE DURATION IS A REAL <input>, NOT A READOUT - which is the ONE place this goes further
+         than the Boost row, whose Value is display-only. It takes typing, the mousewheel and the
+         two ticker buttons beside it; all three feed the one clamp in UI.gateSignal.setHold, and
+         `max` is rewritten per gate on open because a damaged gate cannot hold the door open as
+         long. type=number for the mobile keypad and the free min/max semantics; its native spinner
+         is suppressed in CSS because the buttons here are ours (the UA draws its own in white -
+         same reasoning as confirm.css's .stepper-input). -->
+    <div id="gateSignalUI">
+        <div id="gateSignalPanel">
+            <div class="gateSignalRow">
+                <span class="gateSignalLabel">Open for</span>
+                <span class="gateSignalControls">
+                    <span class="gateSignalButton" id="gateSignalDown">&#8722;</span>
+                    <input type="number" id="gateSignalValue" min="1" step="1" value="1" inputmode="numeric" autocomplete="off">
+                    <span class="gateSignalButton" id="gateSignalUp">+</span>
+                </span>
+                <!-- "turn" / "turns" is rewritten by UI.gateSignal.draw(); the word here is a
+                     placeholder and is never read. -->
+                <span class="gateSignalLabel gateSignalUnit">turn</span>
+            </div>
+            <div class="gateSignalRow">
+                <button type="button" id="gateSignalConfirm" class="gateSignalButton">Signal Jump Gate</button>
+            </div>
+        </div>
     </div>
 </div>
 <!--
@@ -880,6 +919,8 @@ Manager::getTacGamedataJSON Time: <?php echo isset($time_getTacGamedataJSON) ? r
        |- onConstructed: <?php echo isset($GLOBALS['dbg_onConstructed']) ? round($GLOBALS['dbg_onConstructed']*1000, 2) : 0; ?> ms
   |- stripForJson: <?php echo isset($GLOBALS['dbg_stripForJson']) ? round($GLOBALS['dbg_stripForJson']*1000, 2) : 0; ?> ms
   |- json_encode: <?php echo isset($GLOBALS['dbg_json_encode']) ? round($GLOBALS['dbg_json_encode']*1000, 2) : 0; ?> ms
-ShipLoader::getShipsByClass Time: <?php echo isset($time_getShipsByClass) ? round($time_getShipsByClass*1000, 2) : 0; ?> ms
+BlueprintCache::getStaticShipsJson Time: <?php echo isset($time_getShipsByClass) ? round($time_getShipsByClass*1000, 2) : 0; ?> ms (<?php echo isset($staticShipsJson) ? round(strlen($staticShipsJson)/1024) : 0; ?> KB inlined)
+     A warm APCu cache reads ~1ms here; a figure in the tens or hundreds of ms means the cache
+     was cold (first load after a deploy) or is unavailable — see source/server/lib/BlueprintCache.php.
 -->
 

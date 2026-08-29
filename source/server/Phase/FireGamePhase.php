@@ -19,6 +19,15 @@ class FireGamePhase implements Phase
         Firing::fireWeapons($servergamedata, $dbManager);
         Criticals::setCriticals($servergamedata);
 
+        // JUMP_POINTS_PLAN.md Stage 5: end of turn, after Firing, is when a jump vortex closes -
+        // which is what makes one declared closed still usable for the whole of the turn it closes
+        // on (plan section 2.3). AFTER setCriticals, deliberately: the jump-failure roll lives in
+        // JumpEngine::criticalPhaseEffects and a ship it has just destroyed must read as destroyed
+        // here, so its vortex closes with it. The sweep writes its closure notes straight to the
+        // DB (Manager::insertIndividualNote) rather than through the generate/save loops below,
+        // because it is recording something that has happened, not generating per-ship state.
+        JumpEngine::closeExpiredVortices($servergamedata);
+
 
 		foreach ($servergamedata->ships as $currShip){ //generate system-specific information if necessary
 			$currShip->generateIndividualNotes($servergamedata, $dbManager);

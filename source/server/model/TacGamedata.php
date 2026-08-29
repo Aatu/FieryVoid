@@ -765,6 +765,7 @@ class TacGamedata {
         if (!$all) {
             $this->deleteHiddenData();
         }
+        $this->markJumpedDockedFlights(); //after deleteHiddenData: it reads the MASKED movement (see the method)
         $this->setPreTurnTasks();
         $this->applyChameleonDisguise(); //after setPreTurnTasks: it reads live system state
         $this->maskChameleonFireOrders(); //after applyChameleonDisguise: it reads the flag it sets
@@ -1062,6 +1063,66 @@ class TacGamedata {
         }
     }
 
+    /* Hangar Ops x JUMP_POINTS_PLAN.md Stage 4 - flag every flight that is sitting in a hangar of a
+       carrier which has left through a jump vortex, so the fleet list can paint its row "Jumped"
+       (orange) rather than "Docked" (blue).
+
+       The client cannot answer this for itself except on its OWN fleet. It walks each carrier's
+       hangarUsage for dockedFlightId links (fleetList.js getJumpedDockedFlightIds), and bay contents
+       are own-team-only - Hangar::stripForJson masks $hangarUsage out of an opponent's payload, see
+       the ruling there - so an opponent gets an empty list and their copy of the row stays blue for
+       the rest of the game. Answered here instead, as one boolean on the FLIGHT. It says "this unit
+       is in hyperspace" and nothing whatever about what else the bay holds, so the contents mask is
+       untouched - and the flight already has its own row on that screen, so no unit is disclosed
+       either.
+
+       Runs AFTER deleteHiddenData, deliberately: a jump-out this viewer is not entitled to see yet -
+       hideActiveShipMovement strips the order while its initiative bracket is still moving - is
+       already gone from $carrier->movement by the time we look, so the flag inherits that masking
+       for free rather than restating it. */
+    private function markJumpedDockedFlights(){
+        foreach ($this->ships as $carrier){
+            if ($carrier instanceof FighterFlight) continue;   //flights carry nothing themselves
+
+            //Collect the stored flights FIRST: it is a pair of instanceof tests on a hull with no
+            //hangar, which is most of them, and it keeps the departure test off every unit in every
+            //ordinary game that has no vortex in it.
+            $docked = array();
+            foreach ($carrier->systems as $system){
+                if (!($system instanceof Hangar)) continue;
+                if (!is_array($system->hangarUsage)) continue;
+
+                foreach ($system->hangarUsage as $entry){
+                    if (!empty($entry['dockedFlightId'])) $docked[] = (int)$entry['dockedFlightId'];
+                }
+            }
+
+            if (empty($docked)) continue;                      //nothing aboard to take with it
+            if (!$this->hasLeftThroughVortex($carrier)) continue;
+
+            foreach ($docked as $flightId){
+                $flight = $this->getShipById($flightId);
+                if ($flight) $flight->jumpedWithCarrier = true;
+            }
+        }
+    }
+
+    /* Has this unit left the battle through a vortex, as far as THIS viewer can tell?
+
+       Two states, because the departure spans a phase. A COMMITTED jump-out is on the board but not
+       yet resolved - Movement::resolveJumpOuts removes the unit at the END of the Movement phase - and
+       is read straight off the (already masked) movement. Afterwards the order is history and the
+       removal is the record, which is what hasJumpedToHyperspace answers.
+
+       hasJumpedToHyperspace MUST be paired with isDestroyed: JumpEngine::hasJumped only distinguishes
+       "jumped" from "damage-killed" among units already out of play, so on a healthy hull with a jump
+       engine it returns true on its own. The client twin of this pairing is in fleetList.js. */
+    private function hasLeftThroughVortex($ship){
+        if (Movement::getJumpOutOrder($ship->movement, $this->turn) !== null) return true;
+
+        return $ship->isDestroyed() && $ship->hasJumpedToHyperspace();
+    }
+
     private function deleteHiddenData(){
 
         if ($this->phase == -1){
@@ -1181,7 +1242,40 @@ class TacGamedata {
                     unset($system->fireOrders[$i]);
                 }
                
-				$weapon->changeFiringMode($fire->firingMode); //Select the current mode so the correct variables are considered, important for Stealth missile.                
+				$weapon->changeFiringMode($fire->firingMode); //Select the current mode so the correct variables are considered, important for Stealth missile.
+
+                /* ⭐⭐ JUMP GATES (PHASE 2) - THE ONLY FIELD THAT NAMES A GATE'S SIGNALLER, AND THE
+                   ONE REAL COST OF THE CONCEALMENT RULING (JUMP_GATES_PLAN.md sections 2.1 and 3.3,
+                   trap 4).
+
+                   Signalling a fixed jump gate NEVER reveals a hidden unit - a stealthed, shaded or
+                   cloaked ship may signal and keeps its concealment, which is the opposite of the
+                   rule for a ship opening its own vortex. On the server that ruling holds for free
+                   (JumpEngine::hasVortexDeclaration walks a ship's OWN engines, and a gate claim
+                   sits on the GATE's), and every combat-log line names the PLAYER rather than a
+                   unit. This is the exception: a gate claim has no player column to live in, so
+                   targetid carries the claiming player as their nearest qualifying unit - and fire
+                   orders become public from phase 2 onward. Left alone, the enemy could read "the
+                   ship at X signalled the gate" straight out of the payload and pick a cloaked hull
+                   out of it.
+
+                   ⚠️ EVERY TURN, not just the current one. The signaller is never named, ever -
+                   including in a replay of the turn it happened, which is the one place a
+                   turn-scoped mask would quietly leak it.
+
+                   ⚠️ NOT $isAlly - that is computed from the GATE, which belongs to whoever bought
+                   it and usually to nobody the claimant is allied with. The question here is who
+                   owns the TARGETED unit, and the test is the same one the hidetarget branch below
+                   uses on the viewer: their own ship, or their team's.
+
+                   The HEX is deliberately left alone: it is the gate's own, it is public, and the
+                   marker has to be drawn on it. */
+                if ($weapon instanceof JumpEngine && $weapon->isGateJump() && (int)$fire->targetid > 0){
+                    $signaller = $this->getShipById((int)$fire->targetid);
+                    $ownSignaller = $signaller
+                        && ($signaller->userid == $this->forPlayer || $signaller->team == $playerTeam);
+                    if (!$ownSignaller) $fire->targetid = -1;
+                }
 
                 $hideTargetPhase = $weapon->revealAfterPreFire
                     ? ($this->phase == 1 || $this->phase == 2 || $this->phase == 5) //Reveal in phases 3/4 after PreFire resolution.
@@ -1529,7 +1623,8 @@ private function setWaiting() {
         foreach ($this->ships as $ship) {
             if($ship->isDestroyed()) continue;
 
-            if ($ship->Enormous) { // Only enormous units block LoS
+//            if ($ship->Enormous) { // Only enormous units block LoS
+			if ($ship->Enormous && !($ship instanceof spawnMeteoroid) && !($ship instanceof spawnDustField) && !($ship instanceof spawnHyperspaceWaveform)) { // Only enormous units block LoS, but not these terrain GTS_Change
                 $position = $ship->getHexPos();
                 $blockedHexes[] = $position;
 
@@ -1563,7 +1658,8 @@ private function setWaiting() {
             foreach ($this->ships as $ship) {
                 if($ship->isDestroyed()) continue;
 
-                if ($ship->Enormous) { // Only enormous units block LoS
+//                if ($ship->Enormous) { // Only enormous units block LoS
+if ($ship->Enormous && !($ship instanceof spawnMeteoroid) && !($ship instanceof spawnDustField) && !($ship instanceof spawnHyperspaceWaveform)) {
                     $position = $ship->getHexPos();
                     if (!$position) continue; // Skip if no position (e.g. in lobby/initialization)
 

@@ -312,8 +312,8 @@ window.DeploymentPhaseStrategy = function () {
         this.showShipTooltip(ship, payload, menu, false);
     };
 
-    DeploymentPhaseStrategy.prototype.deselectShip = function (ship) {
-        PhaseStrategy.prototype.deselectShip.call(this, ship);
+    DeploymentPhaseStrategy.prototype.deselectShip = function (ship, keepWeapons) {
+        PhaseStrategy.prototype.deselectShip.call(this, ship, keepWeapons);
         hideDeploymentArea(ship, this.deploymentSprites, this.gamedata);
         this.hideMovementUI();
     };

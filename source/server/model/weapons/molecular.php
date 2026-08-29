@@ -985,8 +985,22 @@ class SuperHeavyMolecularDisruptor extends Raking
             $anythingDeclared = false;
 
             foreach ($this->fireOrders as $order) {
-                //Add +1 gun for each order like this so that intercept algorithms allow it any selfIntercepts
-                $this->guns++;
+                /* Add +1 gun for each order like this so that intercept algorithms allow it any
+                   selfIntercepts. Firing::automateIntercept re-derives a split weapon's remaining
+                   budget as `guns - count(fireOrders)` and then adds one back per selfIntercept, so
+                   padding $guns by the order count makes that expression collapse to
+                   (markers + spare) - which IS the Slicer's allowance.
+
+                   ⚠ A MANUAL 'intercept' order must NOT be padded in (bug found in game 4306,
+                   2026-08-20). It appears in BOTH terms of that expression, so it cancelled itself
+                   out and left the marker it had already spent looking untouched: 22 markers + 22
+                   hand-assigned intercepts still handed the automation a budget of 22, and it
+                   assigned all 22 over again - 44 defensive shots against 4 missiles. Skipping it
+                   here makes the expression collapse to (markers - manual intercepts + spare),
+                   which is the allowance actually left. Nothing else changes: a Slicer with no
+                   manual orders gets exactly the same number it always did.
+                   See MANUAL_INTERCEPTION_PLAN.md §16. */
+                if ($order->type != "intercept") $this->guns++;
 
                 if ($order->type != "normal" && $order->type != "selfIntercept") continue;
 

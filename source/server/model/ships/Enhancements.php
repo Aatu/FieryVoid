@@ -3583,6 +3583,17 @@ class Enhancements{
 
 	private static function sysEnhEligibleGSGT($ship, $system){
 		if(!($system instanceof Weapon)) return false;
+		/* ⭐ A JUMP ENGINE IS NOT A GUN, and since JUMP_POINTS_PLAN.md Stage 1 made JumpEngine a
+		   Weapon subclass it passes the instanceof gate above with fireControl [0,0,0] - so every
+		   jump-capable hull in the game was being offered a fire-control refit for a system that
+		   never rolls to hit (found 2026-08-22 in the plan's blast-radius sweep; the offer existed
+		   from Stage 1 and was never intended). instanceof rather than a $gunsightExcluded entry
+		   BECAUSE of the deny-list's class-name rule above: the three real subclasses
+		   (TrekWarpDrive, PhasingDrive, and any future one) would each need their own line, and a
+		   missed one puts the bogus offer straight back. The deny-list's reasoning - "do not
+		   silently exclude a whole base class" - is about mounts that DO roll to hit; nothing
+		   under JumpEngine ever does. */
+		if($system instanceof JumpEngine) return false;
 		if(in_array(get_class($system), self::$gunsightExcluded, true)) return false;
 		if(empty($system->fireControl) || !is_array($system->fireControl)) return false;
 		foreach($system->fireControl as $fc){

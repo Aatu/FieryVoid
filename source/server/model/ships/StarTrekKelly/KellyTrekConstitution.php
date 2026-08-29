@@ -4,14 +4,14 @@ class KellyTrekConstitution extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 500;
+	$this->pointCost = 700;
 	$this->faction = "Star Trek (Kelly)";
     $this->phpclass = "KellyTrekConstitution";
     $this->imagePath = "img/ships/StarTrek/Constitution.png";
     $this->shipClass = "Constitution Light Cruiser";
 
 	$this->unofficial = true;
-    $this->isd = 'please fill!';
+    $this->isd = 2235;
 
 
 	$this->fighters = array("Shuttlecraft"=>6);
@@ -30,7 +30,7 @@ class KellyTrekConstitution extends HeavyCombatVessel{
 		
 	$this->addPrimarySystem(new CnC(4, 10, 0, 0));
     $this->addPrimarySystem(new Reactor(4, 20, 0, 0));
-    $this->addPrimarySystem(new Scanner(4, 12, 6, 6));
+    $this->addPrimarySystem(new Scanner(4, 12, 6, 8));
 	$this->addPrimarySystem(new Hangar(3, 6, 6));
 
 	$impulseDrive = new TrekImpulseDrive(4,24,0,0,3); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency

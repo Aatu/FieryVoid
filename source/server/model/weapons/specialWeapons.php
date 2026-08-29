@@ -2490,7 +2490,9 @@ class RammingAttack extends Weapon{
 							0, 0, 1, 0, 0,
 							$targetMovement->position->q, $targetMovement->position->r, $type, -1
 						);
-						$newFireOrder->chosenLocation = $location;                
+//						$newFireOrder->chosenLocation = $location;                
+$newFireOrder->chosenLocation = $location ?: 1;
+$newFireOrder->notes = "loc:" . ($location ?: 1);
 				
 						if ($first) {
 							$newFireOrder->pubnotes = "<br>COLLISION! A fighter unit collided with terrain during its movement!";
@@ -2507,7 +2509,9 @@ class RammingAttack extends Weapon{
 						0, 0, 1, 0, 0,
 						$targetMovement->position->q, $targetMovement->position->r, $type, -1
 					);
-					$newFireOrder->chosenLocation = $location;									
+//					$newFireOrder->chosenLocation = $location;									
+$newFireOrder->chosenLocation = $location ?: 1;
+$newFireOrder->notes = "loc:" . ($location ?: 1);
 					$newFireOrder->pubnotes = "<br>COLLISION! Ship collided with terrain during its movement!";
 					$newFireOrder->addToDB = true;
 					$this->fireOrders[] = $newFireOrder;			
@@ -2990,9 +2994,19 @@ class RammingAttack extends Weapon{
 	}//endof getTerrainReturnHitLocation()
 
 
-	public function fire($gamedata, $fireOrder){
+//	public function fire($gamedata, $fireOrder){
 		// If hit, firing unit itself suffers damage, too (based on ramming factor of target)!
-		$this->gamedata = $gamedata;			
+//		$this->gamedata = $gamedata;			
+	public function fire($gamedata, $fireOrder){
+		// Restore chosenLocation from notes if lost between requests
+		if (empty($fireOrder->chosenLocation) && !empty($fireOrder->notes)) {
+			if (preg_match('/loc:(\d+)/', $fireOrder->notes, $m)) {
+				$fireOrder->chosenLocation = (int)$m[1];
+			}
+		}
+error_log("RammingAttack fire() entry: damageclass=" . $fireOrder->damageclass . " chosenLocation=" . $fireOrder->chosenLocation . " notes=" . $fireOrder->notes);		
+		// If hit, firing unit itself suffers damage, too (based on ramming factor of target)!
+		$this->gamedata = $gamedata;
 		//preventing double hit on the same target!
 		if($this->checkAlreadyRammed($fireOrder->targetid)){
 			$target = $gamedata->getShipById($fireOrder->targetid);		
@@ -3005,9 +3019,18 @@ class RammingAttack extends Weapon{
 			}	
 		}
 
-                if(($fireOrder->damageclass == 'MeteoroidCollision' || $fireOrder->damageclass == 'DustCollision' || $fireOrder->damageclass == 'WaveformCollision') && $this->getDamage($fireOrder) <= 0) return; // GTS
-		
+if($fireOrder->damageclass == 'WaveformCollision' && $this->getDamage($fireOrder) <= 0) return; // GTS
+error_log("RammingAttack pre-fire DEBUG: damageclass=" . $fireOrder->damageclass . " chosenLocation=" . $fireOrder->chosenLocation . " targetid=" . $fireOrder->targetid);		
+// Skip duplicate dust fire orders silently - only first hex counts
+if ($fireOrder->damageclass == 'DustCollision') {
+    if (isset(spawnDustField::$dustDamagedThisTurn[$fireOrder->targetid]) && 
+        spawnDustField::$dustDamagedThisTurn[$fireOrder->targetid] == $gamedata->turn) {
+        $fireOrder->shotshit = 0;
+        return;
+    }
+}
 		parent::fire($gamedata, $fireOrder);
+error_log("RammingAttack fire DEBUG: damageclass=" . $fireOrder->damageclass . " shotshit=" . $fireOrder->shotshit . " rolled=" . $fireOrder->rolled . " needed=" . $fireOrder->needed);
 
 		if($fireOrder->shotshit > 0){
 			$pos = null;
@@ -3134,6 +3157,7 @@ class RammingAttack extends Weapon{
             $targetSpeed = $targetMove ? $targetMove->speed : 0; // GTS
             $damage = spawnDustField::getDustDamage($targetSpeed); // GTS
             if(empty($target->advancedArmor)) $damage *= 2; // GTS - double damage for non-advanced armor
+error_log("DustCollision DEBUG: targetSpeed=" . $targetSpeed . " damage=" . $damage . " advancedArmor=" . var_export($target->advancedArmor ?? null, true));
             return $damage; // GTS
 
 

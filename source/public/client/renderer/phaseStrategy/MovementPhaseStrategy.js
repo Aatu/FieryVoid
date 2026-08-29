@@ -92,7 +92,9 @@ window.MovementPhaseStrategy = function () {
             this.setSelectedShip(ship);
         }
 
-        var menu = new ShipTooltipMenu(this.selectedShip, ship, this.gamedata.turn);
+        //ShipTooltipMovementMenu, not the plain base menu: it adds the Jump Out button when this
+        //unit is standing in an open vortex it may leave through (JUMP_POINTS_PLAN.md Stage 4).
+        var menu = new ShipTooltipMovementMenu(this.selectedShip, ship, this.gamedata.turn);
         if (!gamedata.showLoS) this.showShipTooltip(ship, payload, menu, false);
     };
 

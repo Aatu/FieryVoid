@@ -82,6 +82,25 @@
 		 * replay scrub reproduces the table result exactly — setCriticals re-runs and
 		 * Dice::d is non-deterministic. Mirrors HangarOps' railCritRoll/inadequateRoll
 		 * read-back. Then defer to the base hook (which clears individualNotes). */
+		/* JUMP_POINTS_PLAN.md Stage 6 - the combat value this FLIGHT had when it left through a
+		   jump point. Third member of the preJumpValue/getCVBeforeJump family, after JumpEngine
+		   (ships that have a drive) and Structure (ships that do not): a flight has neither, so
+		   Movement::applyJumpOut hangs the note on the SAMPLE fighter instead and the flight
+		   delegates to it (FighterFlight::getCVBeforeJump).
+
+		   Private, like the other two: nothing here reaches the client (BaseShip already sends the
+		   finished combatValue) and a public property would be written into every fighter of every
+		   static blueprint. */
+		private $preJumpValue = 0;
+
+		public function getCVBeforeJump(){
+			return $this->preJumpValue;
+		}
+
+		/* HK Jamming: read back this turn's persisted disruption roll (if any) so a
+		 * replay scrub reproduces the table result exactly — setCriticals re-runs and
+		 * Dice::d is non-deterministic. Mirrors HangarOps' railCritRoll/inadequateRoll
+		 * read-back. Then defer to the base hook (which clears individualNotes). */
 		public function onIndividualNotesLoaded($gamedata){
 			foreach ($this->individualNotes as $note){
 				if ($note->notekey === 'hkJammingRoll' && $note->turn == $gamedata->turn){
@@ -91,6 +110,7 @@
 						$this->jammingLoadedValue = (int)$decoded['roll'];
 					}
 				}
+				if ($note->notekey === 'jumped') $this->preJumpValue = $note->notevalue;
 			}
 			parent::onIndividualNotesLoaded($gamedata);
 		}

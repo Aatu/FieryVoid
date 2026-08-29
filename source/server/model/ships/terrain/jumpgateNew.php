@@ -13,6 +13,7 @@ class JumpgateNew  extends Terrain{
         $this->Enormous = false; //classify it as a Capital just so it doesn't auto-ram passing units!
 		$this->iniativebonus = -200; //no voluntary movement anyway
         $this->isd = '2000';
+        $this->variantOf = 'OBSOLETE';
 	            
 		$this->base = true;
 		$this->smallBase = true;

@@ -35,6 +35,7 @@ class KobolBerserk extends BaseShip{
 		$this->addPrimarySystem(new Hangar(4, 15));
 		$hyperdrive = new JumpEngine(4, 12, 4, 20);
 			$hyperdrive->displayName = 'FTL Drive';
+			$hyperdrive->markLegacy(); //JUMP_POINTS_PLAN.md section 9 - this setting jumps by boost, not by vortex
 			$this->addPrimarySystem($hyperdrive);
 
         $this->addFrontSystem(new Thruster(4, 9, 0, 3, 1));

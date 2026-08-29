@@ -56,8 +56,18 @@ window.HexRegion = function () {
        member, which is a direct test - no counting every edge and keeping the singletons. Emitted
        from corner (5-d) to corner (6-d) for direction d, which walks the region counter-clockwise
        with the inside on the left, so outer boundaries come out counter-clockwise and any hole comes
-       out clockwise. buildFill leans on that to tell one from the other. */
-    function buildRegion(range, hexDistance, accept) {
+       out clockwise. buildFill leans on that to tell one from the other.
+
+       `centreSectors` splits the CENTRE hex into its six corner-to-corner triangles rather than
+       treating it as one cell - what a weapon arc wants, because a wedge that stops dead at the
+       ship's own hex boundary says nothing about which way it points once you are inside that hex.
+       Each triangle is in exactly when the range-1 hex it faces is, so no centre-to-neighbour seam
+       is ever a boundary and the wedge runs unbroken from the ship's centre out to its far edge;
+       what IS drawn, wherever the arc turns, is a radial line from the centre to the hex corner
+       between the two directions. A full-circle region emits no centre edge at all and so simply
+       fills its centre hex outright. With this on, the caller's `accept` no longer decides the
+       centre hex - the six triangles answer for it. */
+    function buildRegion(range, hexDistance, accept, centreSectors) {
         var stride = 2 * range + 1;
         var members = new Uint8Array(stride * stride);
         //bearings are clockwise, game space is counter-clockwise, so direction 1 sits at math angle -60
@@ -74,6 +84,21 @@ window.HexRegion = function () {
 
             for (b = Math.max(-range, -a - range); b <= last; b++) {
                 if (accept(a * hexDistance + b * stepX, b * stepY, a, b)) members[(a + range) * stride + (b + range)] = 1;
+            }
+        }
+
+        /* The six centre triangles, indexed by hex direction. Triangle d is in exactly when the
+           range-1 hex in direction d is - which is what makes every seam between the centre and its
+           neighbours an interior one below - and the centre's own membership is dropped, because
+           with sectors on it is the triangles that answer for it. */
+        var sectors = null;
+
+        if (centreSectors && range >= 1) {
+            members[range * stride + range] = 0;
+            sectors = new Uint8Array(6);
+
+            for (var direction = 0; direction < 6; direction++) {
+                sectors[direction] = members[(AXIAL_NEIGHBOURS[direction][0] + range) * stride + AXIAL_NEIGHBOURS[direction][1] + range];
             }
         }
 
@@ -94,6 +119,10 @@ window.HexRegion = function () {
                     if (na >= -range && na <= range && nb >= -range && nb <= range
                         && members[(na + range) * stride + (nb + range)]) continue; //interior seam
 
+                    //With sectors on, the triangle facing this hex is in whenever this hex is (that
+                    //is how sectors was built), so this seam is interior too.
+                    if (sectors && na === 0 && nb === 0) continue;
+
                     var from = HEX_CORNERS[(5 - d) % 6];
                     var to = HEX_CORNERS[(6 - d) % 6];
 
@@ -102,6 +131,24 @@ window.HexRegion = function () {
                         x2: centreX + to.x * radius, y2: centreY + to.y * radius
                     });
                 }
+            }
+        }
+
+        /* The centre triangles' own boundary, in the same counter-clockwise-with-the-inside-on-the-
+           left convention as the hexes: triangle d runs centre -> corner(5-d) -> corner(6-d) ->
+           centre, so its first radial is shared with triangle d+1 and its last with triangle d-1,
+           while its outer side is the hex edge in direction d, already settled above. Only a radial
+           with an empty triangle across it is a boundary - that is the arc-edge line, running from
+           the ship's centre out to the corner where the arc turns. */
+        if (sectors) {
+            for (var sector = 0; sector < 6; sector++) {
+                if (!sectors[sector]) continue;
+
+                var first = HEX_CORNERS[(5 - sector) % 6];
+                var last = HEX_CORNERS[(6 - sector) % 6];
+
+                if (!sectors[(sector + 1) % 6]) edges.push({ x1: 0, y1: 0, x2: first.x * radius, y2: first.y * radius });
+                if (!sectors[(sector + 5) % 6]) edges.push({ x1: last.x * radius, y1: last.y * radius, x2: 0, y2: 0 });
             }
         }
 

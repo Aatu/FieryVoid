@@ -41,6 +41,7 @@ class swGallofreeComm extends LCV{
 	$this->addPrimarySystem(new CargoBay(1, 40));
 	$hyperdrive = new JumpEngine(2, 6, 3, 12);
 	$hyperdrive->displayName = 'Hyperdrive';
+	$hyperdrive->markLegacy(); //JUMP_POINTS_PLAN.md section 9 - this setting jumps by boost, not by vortex
 	$this->addPrimarySystem($hyperdrive);
 	$this->addPrimarySystem(new SWRayShield(2,6,1,1,0,360)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addPrimarySystem(new SWMediumLaser(1, 240, 60, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!

@@ -38,6 +38,7 @@ class CylonBasestar extends SixSidedShip{
         $this->addPrimarySystem(new Engine(6, 25, 0, 16, 3));			
 		$hyperdrive = new JumpEngine(6, 25, 3, 16);
 			$hyperdrive->displayName = 'Hyperdrive';
+			$hyperdrive->markLegacy(); //JUMP_POINTS_PLAN.md section 9 - this setting jumps by boost, not by vortex
 			$this->addPrimarySystem($hyperdrive);
 		$this->addPrimarySystem(new SelfRepair(3, 3, 2)); //armor, structure, output
 		$this->addPrimarySystem(new SelfRepair(3, 3, 2)); //armor, structure, output

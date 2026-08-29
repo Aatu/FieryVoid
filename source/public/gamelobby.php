@@ -191,7 +191,18 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
                SystemIcon + SystemInfo render paths call. The lobby is read-only,
                so everything reads as idle/unloaded-order and the action functions
                are no-ops (SystemIcon's action branches are additionally gated off
-               by gamephase -2 / gamedata.waiting). */
+               by gamephase -2 / gamedata.waiting).
+
+               ⚠ THIS LIST DRIFTS. gamelobby.php does NOT bundle weaponManager.js -
+               this object is the whole of `weaponManager` on this page. Any NEW
+               `weaponManager.x()` call added to reactJs/system/* that is not behind
+               a `gamedata.gamephase === -2` early return has to be added here too,
+               or the lobby ship window dies with "x is not a function" and React
+               reports "Ship window render failed for <ship>".
+
+               SystemInfoButtons is safe by construction: canDoAnything, hasStyledMenu
+               and render all return at gamephase -2 before reading any of this.
+               SystemIcon is NOT - it calls straight through on every render. */
             window.weaponManager =
             {
                 hasFiringOrder: function(){return false},
@@ -201,6 +212,17 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
                 getFiringOrder: function(){return null},
                 getCalledShotInfo: function(){return null},
                 selectAllWeapons: function(){}, //right-click select-all: nothing to select pre-game
+                //Manual interception (MANUAL_INTERCEPTION_PLAN.md). Both are read by
+                //SystemIcon with NO phase guard in front of them:
+                //  isInterceptOnly       - the green "committed to defence" icon state,
+                //                          evaluated for every system on every render (§11.3).
+                //  canManuallyInterceptWith - the last clause of the weapon-select gate, and
+                //                          `||` reaches it once the three phase clauses ahead
+                //                          of it are false, which at gamephase -2 they always
+                //                          are (Stage 4, §4.7a).
+                //Nothing is declared pre-game, so both are flatly false.
+                isInterceptOnly: function(){return false},
+                canManuallyInterceptWith: function(){return false},
                 getWeaponCurrentLoading: function(weapon)
                 {
                     /* Weapons enter the game fully loaded, so the icon load counter

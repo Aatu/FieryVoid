@@ -45,7 +45,7 @@ class VorlonPlanetKiller extends BaseShip{
         $this->addPrimarySystem(new SelfRepair(7, 20, 12)); //armor, structure, output
 		$AAC = $this->createAdaptiveArmorController(6, 3, 4); //$AAtotal, $AApertype, $AApreallocated
 		$this->addPrimarySystem( $AAC );
-		$this->addPrimarySystem(new JumpEngine(8, 25, 0, 8));//Vorlon Jump Engines normally do use power (the only system onboard that does so), but still are counted as base running costs - in FV I simplify to 0 power requirement		
+		$this->addPrimarySystem(new JumpEngine(8, 25, 0, 8, 12));//Vorlon Jump Engines normally do use power (the only system onboard that does so), but still are counted as base running costs - in FV I simplify to 0 power requirement. 5th argument = jump point projection range: Vorlon Empire hulls reach 12 hexes, not the standard 4 (JUMP_POINTS_PLAN.md section 2.1)		
 		
 		
         $this->addFrontSystem(new PlanetCrackerBeam(8, 110, 0, 0, 0));

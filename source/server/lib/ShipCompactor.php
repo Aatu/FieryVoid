@@ -17,6 +17,101 @@
 class ShipCompactor
 {
     /**
+     * SYSTEM keys NO CLIENT CODE READS — dropped whatever their value, not just at their default.
+     *
+     * WHY THIS EXISTS (JUMP_POINTS_PLAN.md section 8, "A"). Both generators json_encode the RAW
+     * system objects rather than going through ShipSystem::stripForJson(), so every public
+     * property a system declares lands in the static blueprint whether the browser has any use
+     * for it or not. Measured 2026-08-24 over all 93 faction files / 56,687 system objects, these
+     * 115 keys are 9.48MB of a 97.8MB tree — the single largest block of pure waste in it, and
+     * the lowest-risk to remove: a key nothing reads cannot break anything.
+     *
+     * ⭐ THE GREP IS THE WHOLE TEST — re-run it before adding to this list, and before trusting it.
+     *   grep -rlw --exclude-dir=static -- '<key>' source/public
+     * The tree searched is source/public in full: the client JS, the React sources under
+     * client/UI/reactJs, the three BUILT bundles (game.legacy, gamelobby.legacy, UI.bundle — a
+     * bundle can only contain what its sources contain, but they are cheap insurance against a
+     * source file that is no longer wired up) and every .php page that emits inline JS. A hit
+     * anywhere means the key stays.
+     *
+     * TWO TRAPS THE NAIVE GREP FALLS INTO, both hit while compiling this list:
+     *  1. WORD BOUNDARIES MATTER (-w). A plain substring grep for `useOEW` matches
+     *     `useOEWArray`, and for `rof` matches `profile`, so 'has hits' is not the same question
+     *     as 'is read'. Conversely -w alone flagged `inadequate`, `squadrons` and `rakes` as read
+     *     — those hits are English prose in factions-tiers.php, and `rof` matched bytes inside
+     *     notali.png. Read the hits; do not just count them.
+     *  2. A KEY CAN BE WRITE-ONLY. `grouping` and `rangeDamagePenalty` DO appear in the client,
+     *     but their only appearance — source and bundles alike — is the guarded assignment
+     *     `arrayIsEmpty(this.groupingArray) || (this.grouping = this.groupingArray[mode])`.
+     *     Nothing ever reads the result back, so both are dead despite matching. 0.80MB.
+     *
+     * AND THE ONE DYNAMIC READ IN THE CLIENT: weaponManager.getModeFlag() does
+     * `weapon[flagName + 'Array']`. Its call sites pass three string literals only —
+     * 'doNotIntercept', 'hextarget', 'uninterceptable' — all three of which the grep already
+     * finds spelled out in shipSystem.js. Nothing else composes a system property name, so the
+     * name-by-name grep is sound. If a second dynamic reader is ever added, this list needs
+     * re-auditing (that is why it is called out here rather than left to be rediscovered).
+     *
+     * Biggest entries: overkillArcStructures 1.55MB, addedByEnhancement 1.45MB, hitChartName
+     * 1.07MB, revealAfterPreFire 0.59MB, rangeDamagePenalty 0.51MB, noPrimaryHits 0.48MB,
+     * doOverkill / noOverkill 0.42MB each, isLinked / useOEWArray 0.37MB each, grouping 0.29MB.
+     * Most of the rest are server-side working state (escape pods, Shadow attachment, jamming
+     * and rail cooldown counters, vortex bookkeeping, pending-transfer slots) that has no reason
+     * to be on a blueprint at all.
+     *
+     * ⚠️ Stored as a KEY=>true map, not a list: compactSystem does one array_diff_key() rather
+     * than 115 isset() probes per system, which over 56,687 systems is the difference between a
+     * free rule and a measurable slice of the deploy generator's runtime (see
+     * arch_static_generator_streaming — this runs inside a LiteSpeed request).
+     *
+     * A handful of these (jsClass, advancedArmor, hardAdvancedArmor, forceCriticalRoll,
+     * specialAbilityValue, stowedArcEnd, linkedOrbital) also still appear in the value-based
+     * lists below, where they were added earlier for their default value alone. That is
+     * deliberate, not an oversight: this pass has already removed them by the time those loops
+     * run, so the duplicates are no-ops — but each carries the rationale for why it was safe at
+     * its default, and deleting the entry would delete the reasoning with it.
+     */
+    private static $deadSystemKeys = null;
+
+    private static function deadSystemKeys(): array
+    {
+        if (self::$deadSystemKeys !== null) return self::$deadSystemKeys;
+
+        $keys = ['overkillArcStructures','addedByEnhancement','hitChartName','revealAfterPreFire',
+                 'rangeDamagePenalty','noPrimaryHits','doOverkill','noOverkill',
+                 'isLinked','useOEWArray','grouping','thrustused',
+                 'rof','orbitalBump','pendingLcvDeployStartTransfer','pendingDeployStartTransfer',
+                 'linkedOrbital','maxpulsesArray','inadequateLoadedRolls','specialAbilityValue',
+                 'inadequateLoadedTurn','usagePopulated','escapeRolled','shadowStructLost',
+                 'shadowLaunched','shadowAttached','inadequate','maxpulses',
+                 'escapeNames','shadowCutOff','escapeTotal','squadrons',
+                 'escapeRoll','escapeMax','fixedBonusPulsesArray','firstCriticalIgnored',
+                 'mineRangeArray','useDieArray','fixedBonusPulses','rofArray',
+                 'activeVortexId','vortexOpenTurn','vortexCloseTurn','mineRange',
+                 'normaload','missileRackReloadedTurn','useDie','doCountForCombatValue',
+                 'marinesReloadedTurn','jammingLoadedValue','jammingLoadedTurn','alreadyConsidered',
+                 'forceCriticalRoll','hardAdvancedArmor','onMine','advancedArmor',
+                 'startingAmmo','jsClass','animationWidth2','rangeDamagePenaltyPBolter',
+                 'maxRepairPoints','usedRepairPoints','railCritLoadedValue','setRanges',
+                 'isCloaked','railCritLoadedTurn','systemHitChart','ballisticWeapon',
+                 'usedThisTurn','curDamage','powerReceivedFromFrontEnd','fireControlMod',
+                 'powerReceivedFromBackEnd','mineWeapons','subChartWhileDocked','setShipTypes',
+                 'hasSystemHitChart','addedDice','blueprintRating','canRegenerate',
+                 'powerDrawnAtFiring','haphazardTargeting','changeThisTurn','testRun',
+                 'worksOnAllFactions','basicDistanceRange','bonusType','escortArray',
+                 'flashDamage','worksOnlyOnBaseHull','rakes','basicRange',
+                 'presetSubordinates','worksOnFighters','damageBonus','showHexagonArc',
+                 'worksOnAllies','blueprintMaxhealth','initiativeBonus','worksOnShips',
+                 'specTotalSelected','currchangedSpec','capacityBonus','totalBaseRating',
+                 'firstShotMissed','transferQueue','blastersRequiredArray','postArmorTotal',
+                 'reduceFacing','stowedArcEnd','exlusive','lastCalculatedDamage',
+                 'bonusDamageShots','reduceStructure','reduceSystem'];
+
+        self::$deadSystemKeys = array_fill_keys($keys, true);
+        return self::$deadSystemKeys;
+    }
+
+    /**
      * Strip default/empty values from ONE system's decoded JSON representation. Mirrors the
      * Optimisation #2 applied to the live gamedata payload in ShipSystem::stripForJson() —
      * the client's ShipSystem constructor re-applies these exact defaults on load, so
@@ -53,14 +148,81 @@ class ShipCompactor
      * ship->fighters is deliberately NOT walked. Those entries are constructed by the Fighter
      * constructor in shipSystem.js, which copies staticFighter and the JSON verbatim and
      * applies NO defaults of its own — stripping a key there would leave it undefined.
+     *
+     * ── THE SAFETY ARGUMENT, AND WHY IT IS NOT "the constructor re-defaults everything" ──────
+     * Worth being precise, because the obvious reading of the paragraph above is wrong. The
+     * client's ShipSystem/Weapon constructors copy the JSON verbatim (`for (var i in json)
+     * this[i] = json[i]`) and then re-default exactly the twenty-one named properties listed at
+     * the top of this comment — and nothing else. Every weapon subclass below Weapon is a bare
+     * three-liner that adds no defaults at all. So for any key beyond that list the test is not
+     * "does something restore it" but:
+     *
+     *      does EVERY read site behave identically when the value is `undefined`?
+     *
+     * For a `false` that means every read must be a truthy test. `undefined` is falsy, so
+     * `if (sys.foo)`, `!sys.foo`, `Boolean(sys.foo)` and `sys.foo === true` are all identical —
+     * but `sys.foo === false` and `sys.foo == false` are NOT (`undefined == false` is false).
+     * For an empty array it means every read must be `mathlib.arrayIsEmpty()` (a for..in, which
+     * is a no-op on undefined), optional chaining, or an `x && x[i]` guard — never a bare
+     * `.length`, index or `.forEach`.
+     *
+     * FOUR AUDITED EXCLUSIONS. These look exactly like the keys around them and are NOT
+     * strippable; they are written down because the next person will measure the same tempting
+     * numbers and needs to know they were already checked:
+     *   - isTargetable (0.13MB of `false`) — SystemInfoButtons.js isPseudoSystem does
+     *     `system.isTargetable === false`. Absent would turn every ability system into a real
+     *     SCS box. (weaponManager.js's `!= true` is fine; the `=== false` is what kills it.)
+     *   - pressignedReset — baseSystems.js:1760 `this.pressignedReset == false`.
+     *   - animationArray / animationColorArray (0.97MB of `[]`) — the guarded copies in
+     *     updateFiringModeData are not the only readers.
+     *     AllWeaponFireAgainstShipAnimation.js does a BARE
+     *     `weapon.animationArray[incomingFire.firingMode] || weapon.animation`, which becomes
+     *     `undefined[...]` — a TypeError in the middle of the firing animation — the moment the
+     *     key is absent rather than empty.
+     *   - startArcArray / endArcArray (0.79MB of `[]`) — molecular.js:756 and particle.js:22 do
+     *     a bare `this.startArcArray.length > 0` in the constructor and special.js:878 indexes
+     *     [0] directly. (systems.js uses `?.length`, which would have been fine; one unguarded
+     *     reader is enough.)
+     *
+     * ── AND WHY THERE IS NO GENERIC null / 0 PASS (JUMP_POINTS_PLAN.md section 8 "D") ────────
+     * 5.7MB of `null` and 5.1MB of `0` sit in the tree and every large candidate failed its
+     * audit, which is precisely the argument for auditing each key rather than writing a rule:
+     *   boostEfficiency (1.06MB) has `.toString()` called on it in power.js · maxBoostLevel
+     *   (1.05MB) is returned into arithmetic, where null coerces to 0 and undefined to NaN ·
+     *   turnsloaded (0.40MB) is concatenated unconditionally into data["Loading"] and reaches
+     *   Math.max · distanceRange (0.37MB) and normalload (0.32MB) both reach a bare
+     *   Math.max(a, b) · maxVariableShots (0.46MB) is `++`-ed · thrustwasted (0.17MB) is
+     *   `-=`-ed · rangePenalty (0.11MB) is multiplied · and powerReq / output / location /
+     *   armour all MEAN zero (movement.js:1477 keys off `system.armour === undefined`).
+     * The zeros and nulls that WERE safe to drop are the ones nothing reads, and those have
+     * already gone via $deadSystemKeys.
      */
     public static function compactSystem(array $system): array
     {
+        // Keys no client code reads at all — see $deadSystemKeys. One array_diff_key rather
+        // than 115 isset() probes per system, and done FIRST so the value-based passes below
+        // walk a smaller array.
+        $system = array_diff_key($system, self::deadSystemKeys());
+
         // Empty arrays
         $emptyArrayKeys = ['damage','criticals','fireOrders','power','specialAbilities','critData',
                            'revealedTeams',
                            'turnsloadedArray','extraoverloadshotsArray','fireControlArray',
-                           'rangeArray','rangePenaltyArray','sustainedTarget'];
+                           'rangeArray','rangePenaltyArray','sustainedTarget',
+                           /* Per-firing-mode arrays. Every reader is an
+                              `if (!mathlib.arrayIsEmpty(x)) ...` in updateFiringModeData, or one
+                              of the `x && x[mode]` / `for..in` variants in FiringModeSelector and
+                              weaponManager's shortest-load scan, and arrayIsEmpty is a for..in,
+                              which is a no-op on undefined. 11.8MB. See the four exclusions
+                              above before adding animation/arc arrays to this list. */
+                           'specialHitChanceCalculationArray','specialRangeCalculationArray',
+                           'rangeDamagePenaltyArray','uninterceptableArray','ignoreJinkingArray',
+                           'doNotInterceptArray','calledShotModArray','noLockPenaltyArray',
+                           'distanceRangeArray','canSplitShotsArray','autoFireOnlyArray',
+                           'defaultShotsArray','ignoreAllEWArray','modeLettersArray',
+                           'loadingtimeArray','weaponClassArray','hidetargetArray',
+                           'hextargetArray','damageTypeArray','groupingArray','rakingArray',
+                           'priorityArray','shotsArray','gunsArray'];
         foreach ($emptyArrayKeys as $key) {
             if (isset($system[$key]) && is_array($system[$key]) && empty($system[$key])) {
                 unset($system[$key]);
@@ -70,7 +232,22 @@ class ShipCompactor
         $falseKeys = ['destroyed','jsClass','boostable','canOffLine','fighter','preFires',
                       'primary','isPrimaryTargetable','forceCriticalRoll',
                       'advancedArmor','hardAdvancedArmor','fixedPower',
-                      'stowed','outputDoubled','splitArcs'];
+                      'stowed','outputDoubled','splitArcs',
+                      /* Weapon/system capability flags. Every read site in the client is a
+                         truthy test — verified one key at a time, the audit being a grep for
+                         `=== false`, `!== false`, `== false` and `!= false` across the whole of
+                         source/public. 17.9MB, the biggest single win here. isTargetable and
+                         pressignedReset are the two that failed that grep; see above. */
+                      'privateRepairOnly','hideInShipWindow','specialHitChanceCalculation',
+                      'canInterceptUninterceptable','specialRangeCalculation',
+                      'noInterceptDegradation','doInterceptDegradation','freeinterceptspecial',
+                      'doubleRangeIfNoLock','alwaysoverloading','ballisticIntercept',
+                      'canModesIntercept','checkAmmoMagazine','canChangeShots','ignoreJinking',
+                      'canSplitShots','freeintercept','isRammingAttack','overloadable',
+                      'canTargetAll','autoFireOnly','ignoreAllEW','uninterceptable',
+                      'doNotIntercept','ignoresLoS','isModified','hidetarget','exclusive',
+                      'noProjectile','hextarget','ballistic','excludeFromDefaultShuttles',
+                      'designedToRam','noLockPenalty','useOEW'];
         foreach ($falseKeys as $key) {
             if (isset($system[$key]) && $system[$key] === false) {
                 unset($system[$key]);

@@ -63,6 +63,7 @@ class ColonialBerserkClassCarrierAM extends BaseShip{
         $this->addAftSystem(new RapidGatling(5, 4, 1, 120, 240));
         $hyperdrive = new JumpEngine(6, 30, 8, 20);
 			$hyperdrive->displayName = 'Hyperdrive';
+			$hyperdrive->markLegacy(); //JUMP_POINTS_PLAN.md section 9 - this setting jumps by boost, not by vortex
 			$this->addAftSystem($hyperdrive);
 
         $this->addLeftSystem(new Thruster(3, 20, 0, 3, 3));

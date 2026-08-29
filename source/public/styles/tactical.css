@@ -134,6 +134,235 @@ body {
     position: relative;
 }
 
+/* JUMP_POINTS_PLAN.md Stage 2b - the vortex facing control. Structurally identical to
+   #shipMovementUI above (absolutely positioned container anchored to a map position, absolutely
+   positioned icon children, same stacking level) and kept as its own block rather than merged
+   into those selectors: the two are siblings, not one widget, and only one of them is ever
+   visible at a time. No transform - unlike the movement UI this one is never rotated. */
+#vortexFacingUI {
+    display: none;
+    position: absolute;
+    z-index: 7000;
+}
+
+#vortexFacingUI div {
+    position: absolute;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+#vortexFacingUI div canvas {
+    position: relative;
+}
+
+/* The confirm button is a DRAWN glyph now (a yellow disc with a dark tick), not the word "Ok" it
+   replaced - see UI.vortexFacing.drawConfirmIcon, which also owns its colour and opacity. It is
+   the one part of the control that does NOT swing with the facing: the two turn arrows are drawn
+   rotated by it, this one is always upright, which costs nothing because the container itself is
+   never rotated - but say so, because it is a deliberate exception.
+   Overflow is reopened so the disc's drop shadow is not clipped by the 40px box. */
+#vortexFacingUI #vortexConfirm {
+    overflow: visible;
+}
+
+/* JUMP_GATES_PLAN.md Stage 3 - the fixed jump gate signal panel (UI.gateSignal).
+
+   ⭐ THIS IS THE REACT POWER SETTINGS MENU'S BOOST ROW, REDRAWN IN PLAIN CSS (user request
+   2026-08-23). client/UI/reactJs/system/SystemPowerSettings.js IS THE SOURCE OF TRUTH for every
+   colour and size below - Container, Row, Label, Controls, Value and ActionButton, plus the
+   $variant="warning" gold that the Signal button wears. If that file is ever retuned, retune this
+   with it; there is no shared stylesheet between them, because that menu is styled-components
+   inside the ship window and this is anchored HTML over the WebGL canvas.
+
+   WHY MIRROR IT RATHER THAN INVENT. Two earlier revisions of this panel are the argument. It began
+   as its own box - self-consistent but foreign to everything around it - and was then dressed in
+   the ship TOOLTIP's menu markup, which read much worse again: a row of 40x40 icon buttons needs
+   more width than a panel this narrow has, so it wrapped into a column and the heading broke in
+   half. The Boost row is the right thing to copy because it already solves this exact problem: a
+   label, a small stepper and a number, sized for a panel a few inches wide.
+
+   ONE DEVIATION, AND IT IS DELIBERATE: the Boost row's Value is a display-only div; here it is a
+   real <input>, because a duration can be typed and wheeled as well as ticked (see gateSignal.js).
+   It takes the ActionButton chrome so it still reads as part of that row.
+
+   The anchoring is unchanged and is all this shares with #vortexFacingUI above: the container is
+   positioned on the hex CENTRE by UI.gateSignal.reposition and the panel is lifted clear of it by
+   the translate below, so no part of this has to know the hex's on-screen size and a zoom costs
+   nothing but a move. */
+#gateSignalUI {
+    /* Every value here is lifted from SystemPowerSettings.js, named for the styled-component it
+       came from so the two can be diffed by eye. */
+    --gs-bg: rgba(24, 20, 6, 0.9);      /* Container background          */
+    --gs-line: #8d7e40;                 /* Container border              */
+    --gs-line-row: #917940;             /* Row border-bottom, and hover  */
+    --gs-text: #fff8d6;                 /* Row colour                    */
+    --gs-btn-bg: #3d2e107c;             /* ActionButton background       */
+    --gs-btn-line: #8d7e40be;           /* ActionButton border           */
+    --gs-btn-text: #e0e7ef;             /* ActionButton colour           */
+    --gs-warn-bg: #806c00;              /* $variant="warning", active    */
+    --gs-warn-line: #e6c300;
+    --gs-warn-hover-bg: #998100;
+    --gs-warn-hover-line: #ffda00;
+
+    display: none;
+    position: absolute;
+    z-index: 7000;
+}
+
+/* Container. Square, like every styled-components panel in the ship window - no radius token here
+   on purpose. */
+#gateSignalPanel {
+    position: absolute;
+    /* Centred on the hex horizontally and lifted its own height plus a gap ABOVE it, so the panel
+       never covers the gate the player is signalling. */
+    transform: translate(-50%, calc(-100% - 34px));
+    min-width: 160px;
+    background-color: var(--gs-bg);
+    border: 1px solid var(--gs-line);
+    border-radius: 3px;    
+    color: var(--gs-text);
+    font-size: 12px;
+    /* Arial, inherited from body - which is exactly what the React menu gets. Stated as a
+       reminder, not as a change: do NOT reach for --fv-mono here, the Boost row is not mono. */
+    font-family: inherit;
+    /* The row is one sentence and must never wrap - that is what broke the previous design. */
+    white-space: nowrap;
+    cursor: default;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Row. The React Row pads 1px and lets its Label supply the horizontal breathing; the second row
+   here is a lone button with no Label, so the padding lives on the row instead. */
+#gateSignalUI .gateSignalRow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px 8px;
+    border-bottom: 1px solid var(--gs-line-row);
+}
+
+#gateSignalUI .gateSignalRow:last-child {
+    border-bottom: none;
+}
+
+#gateSignalUI .gateSignalRow:hover {
+    background-color: rgba(145, 121, 64, 0.08);
+}
+
+/* Label. The React Label is flex:1 with 8px either side, which pushes its Controls to the far end
+   of a two-part row. This row is a three-part SENTENCE - "Open for [-][3][+] turns" - so the words
+   sit against the controls instead and the whole thing is centred by the row. */
+#gateSignalUI .gateSignalLabel {
+    padding: 0 6px;
+}
+
+/* Controls */
+#gateSignalUI .gateSignalControls {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px;
+}
+
+/* ActionButton, in its $narrow width (18px) for the two steppers. The Signal button below widens
+   itself; everything else here is that component. */
+#gateSignalUI .gateSignalButton {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 30px;
+    height: 18px;
+    padding: 3px;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1;
+    background: var(--gs-btn-bg);
+    border: 1px solid var(--gs-btn-line);
+    border-radius: 3px;
+    color: var(--gs-btn-text);
+    opacity: 0.9;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+#gateSignalUI .gateSignalButton:hover {
+    background: var(--gs-line-row);
+    border-color: var(--gs-line);
+    color: #ffffff;
+    opacity: 1;
+}
+
+/* A gate whose Reactor damage has capped the hold at 1 turn leaves a stepper dead at one end or
+   the other. Saying so beats letting the player press a button that does nothing.
+   pointer-events, not the React component's cursor:not-allowed - the clamp in setHold already
+   makes a stray press harmless, and killing the press is one less thing to reason about. */
+#gateSignalUI .gateSignalButton.disabled {
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+/* Value, as a field. The React Value is a display-only div (min-width 20px, centred, 11px bold);
+   this keeps that type and takes the ActionButton chrome around it so it still belongs to the row.
+   The panel's blanket user-select:none has to be lifted or the text cannot be selected, and the
+   native spinner is suppressed because the steppers beside it are ours - the UA draws its own in
+   white, and there is no reliable hook to recolour them (same two rules as confirm.css's
+   .stepper-input). */
+#gateSignalUI #gateSignalValue {
+    /* border-box, and 20px tall on purpose: the buttons either side are content-box 18px inside a
+       1px border (which is what the React ActionButton is too), so they occupy 20px. Matching the
+       OUTER height is what keeps the three boxes level. */
+    box-sizing: border-box;
+    width: 32px;
+    height: 22px;
+    padding: 0;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: bold;
+    line-height: 1;
+    text-align: center;
+    background: var(--gs-btn-bg);
+    border: 1px solid var(--gs-btn-line);
+    border-radius: 2px;
+    color: var(--gs-text);
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+#gateSignalUI #gateSignalValue::-webkit-outer-spin-button,
+#gateSignalUI #gateSignalValue::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+}
+
+#gateSignalUI #gateSignalValue:focus {
+    outline: none;
+    border-color: var(--gs-warn-line);
+}
+
+/* The commit, in the Boost row's own $variant="warning" gold - the yellow that menu uses for "this
+   is the consequential one". Width is auto because "Signal Jump Gate" does not fit ActionButton's
+   30px; every other dimension is that component's. */
+#gateSignalUI #gateSignalConfirm {
+    width: 90%;
+    padding: 3px 18px;
+    background: var(--gs-warn-bg);
+    border-color: var(--gs-warn-line);
+    color: #ffffff;
+    opacity: 1;
+    margin: 3px;
+}
+
+#gateSignalUI #gateSignalConfirm:hover {
+    background: var(--gs-warn-hover-bg);
+    border-color: var(--gs-warn-hover-line);
+    color: #ffffff;
+}
+
 .centercontainer {
     position: absolute !important;
     left: 50% !important;
@@ -457,21 +686,32 @@ body {
    .fv-hexpicker__chip in hexPicker.css. */
 
 /* The hover ShipTooltip's ship names. ShipTooltip.js is the ONLY emitter of these
-   class pairs (.shipSelectList uses .shiplistentry, not .name), so this block is that
-   one surface.
+   class pairs, so this block is that one surface. (It used to share the qualifier with
+   .shipSelectList .shiplistentry; that block was deleted 2026-08-20 as dead — see the
+   note where it stood, further down.)
 
-   Converted to the shared allegiance palette (SELECT_FROM_SHIPS_PLAN.md Stage 6, item 4
-   — deferred there, done on request 2026-08-14). These held literal `red` / `limegreen`
-   while the hex picker beneath them ran the muted tints, and the two surfaces now appear
-   SIDE BY SIDE — the picker places this tooltip beside itself — so the mismatch had gone
-   from theoretical to visible. They take the tone-mapped values, not the -signal twins:
-   this is text, and the full-chroma versions belong only on small marks. */
+   Colour history, because this block has now moved twice. It held literal `red` /
+   `limegreen` until 2026-08-14, when SELECT_FROM_SHIPS_PLAN.md Stage 6 item 4 moved it
+   to the tone-mapped --fv-own/-ally/-enemy so it would sit level with the hex picker
+   beneath it. On 2026-08-20 the user judged the result too pastel and it moved again,
+   to the --fv-*-bright tier.
+
+   ⚠️ The Stage 6 reasoning was not wrong, it was INCOMPLETE, and that is the part worth
+   keeping: this block only ever painted 2-team participants. Observers and 3+-team
+   participants take an INLINE colour from ShipTooltip.getNameStyle, which has always run
+   the raw getTeamColorRGB palette. So muting the class arm did not make the tooltip
+   consistent with the picker — it made the tooltip inconsistent with ITSELF, bright in a
+   4-player game and pastel in a 2-player one. The bright tier is what closes that gap.
+   The picker keeps its own answer: --fv-*-mid, a step down from these, because twenty
+   dense rows and one large heading are not the same typographic problem.
+
+   The stack grid further down shipTooltip.css does still track the picker exactly. */
 .enemy.name {
-    color: var(--fv-enemy);
+    color: var(--fv-enemy-bright);
 }
 
 .mine.name {
-    color: var(--fv-own);
+    color: var(--fv-own-bright);
 }
 
 .terrain.name {
@@ -479,7 +719,7 @@ body {
 }
 
 .ally.name {
-    color: var(--fv-ally);
+    color: var(--fv-ally-bright);
 }
 
 .name-value-button-ally {
@@ -1188,68 +1428,18 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     right: 150px;
 }
 
+/* REMOVED 2026-08-20: the .shipSelectList block (the panel, .shiplistentry and its
+   action/remark/name variants). Its JS was window.shipSelectList in
+   source/public/client/UI/shipSelect.js, deleted in commit 7ea324de3, and the five
+   shipManager functions that still called it were removed from ships.js in this same
+   change — see the note there. Nothing emits this markup any more; the hex picker
+   (hexPicker.css, .fv-hexpicker__*) is what replaced it.
 
-.shipSelectList {
-    position: absolute;
-    display: none;
-    top: 200px;
-    left: 200px;
-    /*border: 1px solid #496791;*/
-    background-color: black;
-    z-index: 20000;
-    padding: 5px 0px;
-    margin: 0px;
-    color: white;
-    font-family: arial;
-    font-size: 9px;
-    line-height: 12px;
-    opacity: 0.65;
-    border-radius: 5px 5px 5px 5px;
-    -moz-border-radius: 5px 5px 5px 5px;
-    -webkit-border-radius: 5px;
+   Worth recording because of HOW it was found: its .enemy.name #b34119 and .ally.name
+   #2f5123 were the last allegiance colours in the codebase sitting on no brightness
+   tier, and chasing that anomaly is what turned up the dead JS behind it. An unexplained
+   colour is a reasonable thing to pull on. See [[arch_team_colour_logic]]. */
 
-}
-
-.shipSelectList .shiplistentry {
-    margin: 3px 20px;
-    cursor: pointer;
-}
-
-.shipSelectList .shiplistentry.action {
-    margin: 3px 40px;
-    cursor: pointer;
-}
-
-.shipSelectList .shiplistentry.remark {
-    margin: 3px 45px;
-    color: #496791;
-}
-
-.shipSelectList .shiplistentry span {
-    font-size: 14px;
-    padding-right: 5px;
-}
-
-.shipSelectList .shiplistentry.action span {
-    font-size: 12px;
-}
-
-.shipSelectList .shiplistentry.remark span {
-    font-size: 11px;
-}
-
-.shipSelectList .shiplistentry .name {
-    font-style: italic;
-}
-
-
-.shipSelectList .shiplistentry .enemy.name {
-    color: #b34119;
-}
-
-.shipSelectList .shiplistentry .ally.name {
-    color: #2f5123;
-}
 
 /* The initiative drawer. Colours converged with the rest of the chrome (roadmap item 6,
    Stage 4); the ROUNDING is a standing exception - see the border-radius note below. The
@@ -1351,16 +1541,30 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     padding-left: 12px;
 }
 
+/* The initiative NUMBER in the Order of Battle drawer. These paint the 2-team
+   participant arm only; observers and 3+-team participants get an inline colour from
+   the `teamColorCss` local in gamedata.js's ini-table render.
+
+   Moved to --fv-*-bright 2026-08-20 (user request) from the CSS keywords `green`
+   (#008000), #6091d2 and `red` (#ff0000), which sat on no tier at all. The inline arm
+   moved to the full-strength palette in the same change — before that a 2-team
+   participant saw pure #ff0000 where an observer saw the ×0.65 #a63434, which is the
+   same one-arm drift that had made the ship tooltip pastel for participants only.
+
+   ⚠️ NOT the same thing as the .iniActive* rules further down. Those are the
+   active-mover BOX (border + fill + glow) and deliberately stay dark so they do not
+   overpower the drawer panel; the number is a two-character glyph, which is the
+   small-mark case where full chroma reads as a signal. Two surfaces, two answers. */
 .iniMyShip {
-    color: green;
+    color: var(--fv-own-bright);
 }
 
 .iniAllyShip {
-    color: #6091d2;
+    color: var(--fv-ally-bright);
 }
 
 .iniEnemyShip {
-    color: red;
+    color: var(--fv-enemy-bright);
 }
 
 #iniTopic {

@@ -130,7 +130,19 @@ class MaintenanceGate
                . "<p>Then load this page as "
                . "<code>?key=some-long-random-string</code>.</p>";
         } else {
-            echo "<p>Not found.</p>";
+            // Deliberately informative rather than opaque. This project's repo is PUBLIC, so
+            // the endpoint names and the ?key= scheme are already in the README for anyone to
+            // read — hiding the URL's existence buys nothing, while the opacity cost real
+            // debugging time when /game/ and /testInstance/ disagreed. The KEY is the control,
+            // not the secrecy. Naming the install is the bit that actually disambiguates:
+            // the two deployments sit on one domain and each has its own varconfig and key.
+            echo "<p>This tool needs a maintenance key.</p>"
+               . "<p>Append <code>?key=&lt;value&gt;</code>, using the "
+               . '<strong>$maintenance_key</strong> set in '
+               . "<code>source/server/varconfig.php</code> for <strong>this</strong> install "
+               . "(<code>" . htmlspecialchars(basename(dirname(__DIR__, 3))) . "</code>).</p>"
+               . "<p>Each install has its own varconfig and its own key — a key that works on "
+               . "one will not work on another.</p>";
         }
 
         echo "</body></html>";
