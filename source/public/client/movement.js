@@ -702,11 +702,35 @@ shipManager.movement = {
         var openerId = (ship.arrivalVia === null || ship.arrivalVia === undefined)
             ? ship.id : ship.arrivalVia;
 
+        return shipManager.movement.getEntranceHeldBy(openerId);
+    },
+
+    /* REINFORCEMENTS_PLAN.md STAGE 8 - THE OPEN ENTRANCE $holderId's JUMP ENGINE IS HOLDING, or
+       null. The entrance twin of getVortexHeldBy above, and the body getArrivalVortex was written
+       as before a GATE could hold one of these.
+
+       ⭐ IT TAKES AN ID, NOT A SHIP, and that is not a convenience. The two callers ask it of
+       different things - an arriving unit's arrivalVia (which is a number off the payload) and a
+       gate the Manage Reinforcements menu is deciding whether to list - and every ship object on
+       this client is replaced wholesale on each poll that carries ship data, so an id is the only
+       stable form of the question ([[REINFORCEMENTS_PLAN.md]] trap 17).
+
+       ⚠️ NOT getVortexHeldBy WITH A WIDER PREDICATE. That one runs its open/closed test by asking
+       getVortexInHex, which is EXIT-ONLY by design (see isJumpVortex) and would answer null for
+       every entrance. The window is therefore repeated here rather than delegated - it is the same
+       three lines the server's JumpEngine::getArrivalVortex carries for the same reason.
+
+       ⚠️ vortexHolderId NAMES THE OPENER - a reinforcement's own hull, or the GATE. It is stamped by
+       JumpEngine::restoreVortexState from the 'Vortex' note's shipid, so a gate's doorway names the
+       gate and a berth on it names the gate too: the join needs nothing new. */
+    getEntranceHeldBy: function getEntranceHeldBy(holderId) {
+        if (holderId === null || holderId === undefined) return null;
+
         for (var i in gamedata.ships) {
             var unit = gamedata.ships[i];
             if (!shipManager.movement.isJumpVortexEntrance(unit)) continue;
             if (unit.vortexHolderId == null) continue;              //no 'Vortex' note - nothing to join on
-            if (unit.vortexHolderId != openerId) continue;
+            if (unit.vortexHolderId != holderId) continue;
             if (unit.spawned !== undefined && unit.spawned !== -1 && unit.spawned > gamedata.turn) continue; //still forming
             if (unit.removed && unit.removedTurn != null && gamedata.turn >= unit.removedTurn) continue;     //closed
             if (!shipManager.movement.getLastCommitedMove(unit)) continue; //no deploy row: no hex, no facing
@@ -2641,13 +2665,12 @@ shipManager.movement = {
     canGraviticTurn: function canGraviticTurn(ship, right) {
         //A unit that has ordered a jump-out has finished manoeuvring (JUMP_POINTS_PLAN.md section 2.5).
         if (shipManager.movement.hasJumpedOut(ship)) return false;
-        //if (gamedata.gamephase == -1 && ship.deploymove) return true;
         if (gamedata.gamephase != 2) return false;
         if (!ship.gravitic) return false;
         if (!ship.flight) return false; //Fighters only for now.
+        if (shipManager.movement.isManeuverBlockedByAttachment(ship)) return false;          
 
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
-        //if (shipManager.systems.isEngineDestroyed(ship)) return false;
 
         if (shipManager.movement.checkHasUncommitted(ship)) return false;
         var turndelay = shipManager.movement.calculateCurrentTurndelay(ship);
@@ -2660,7 +2683,6 @@ shipManager.movement = {
 
         var speed = shipManager.movement.getSpeed(ship);
         var baseTurnCost = shipManager.movement.getTurnCost(ship);
-        //if (ship.submarine && shipManager.movement.isGoingBackwards(ship)) baseTurnCost = baseTurnCost * 1.33; //Subs have a weird rule about turning backwards.
         var turncost = Math.ceil(speed * baseTurnCost);
         turncost = Math.max(1, turncost);//turn cost may never be less than 1!
         turncost += shipManager.movement.getDockedLcvTurnSurcharge(ship);//LCV Rails: +1 thrust/turn per docked LCV

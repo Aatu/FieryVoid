@@ -12,8 +12,8 @@ window.ShipTooltipFireMenu = function () {
 
     ShipTooltipFireMenu.buttons = [
 		{ className: "targetWeapons", condition: [isEnemy, hasWeaponsSelected], action: targetWeapons, info: "Target Weapons" },
-        { className: "targetWeaponsHex", condition: [hasHexWeaponsSelected], action: targetHexagon, info: "Target Hex" },
-        { className: "targetSuppWeapons", condition: [isFriendly, hasWeaponsSelected, FFWeaponSelected, notSelf], action: targetWeapons, info: "Target Support Weapons" },//30 June 2024 - DK - Added for Ally targeting.
+        { className: "targetWeaponsHex", condition: [hasOrderSource, hasHexWeaponsSelected], action: targetHexagon, info: "Target Hex" },
+        { className: "targetSuppWeapons", condition: [hasOrderSource, isFriendly, hasWeaponsSelected, FFWeaponSelected, notSelf], action: targetWeapons, info: "Target Support Weapons" },//30 June 2024 - DK - Added for Ally targeting.
         { className: "removeMultiOrder", condition: [isEnemy, hasWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firing Order" },
         { className: "launchFighters", condition: [isMine, isFiringPhase, hasLaunchableHangar, isLaunchEnabledGame, carrierNotPivotingOrRolling], action: openHangarLaunch, info: "Launch Fighters" },
         { className: "recoverFlights", condition: [isMine, isFiringPhase, hasReceivableFlights, isLaunchEnabledGame, carrierNotPivotingOrRolling], action: openHangarRecover, info: "Recover Flights" },
@@ -135,6 +135,16 @@ window.ShipTooltipFireMenu = function () {
 	    }, this); // Make sure to bind `this` so that `this.selectedShip` is correct
 	}
 	
+    /* IS THERE A UNIT TO FIRE *FROM*? this.selectedShip is null whenever nothing is selected, and
+       since 2026-08-29 also when the selected unit is not on the board yet (Fire/PreFiring
+       PhaseStrategy.targetShip pass null rather than dropping the whole menu). isEnemy carries its
+       own null test; these two asked only about the weapon SELECTION, so without this they would
+       offer a button whose action calls weaponManager with a null shooter. The hangar buttons
+       below need no such guard - every one of them is about the TARGETED unit. */
+    function hasOrderSource() {
+        return !!this.selectedShip;
+    }
+
     function isEnemy() {
         //return this.selectedShip && !gamedata.isMyShip(this.targetedShip);
 		//actually enemy is anyone not on players' TEAM, not every other player:

@@ -435,7 +435,19 @@ public function addMoons($gameData, $dbManager, $smallCount, $mediumCount, $larg
                        A reinforcement is an ORDINARY purchase with a flag on it: same shared point
                        pool, same $points tally above, same fleet-composition checks. Nothing else
                        in this method branches on it. */
-                    $ship->reinforcement = $allowReinforcements && !empty($ship->reinforcementClaim);
+                    /* ⚠️ AND NEVER ON A UNIT THAT IS ON THE BOARD ON TURN 1 ANYWAY (user report
+                       2026-08-29, game 4319). A base, an OSAT and Terrain all answer 1 to
+                       getTurnDeployed before it looks at the reinforcement branch at all, so the
+                       flag can never come true for them - but isReinforcement() still answers true
+                       while arrivalTurn is null, and every sweep that trusts that predicate then
+                       treats a unit standing on the map as something waiting in hyperspace. That is
+                       how two Fixed Jump Gates bought with the lobby's REINFORCEMENTS group selected
+                       ended up stamping THEMSELVES with an arrival turn.
+                       BaseShip::alwaysDeploysTurnOne is the one definition, and the lobby refuses the
+                       same purchases up front (gamedata.canBeReinforcement) so the group the player
+                       sees and the flag the server writes cannot disagree. */
+                    $ship->reinforcement = $allowReinforcements && !empty($ship->reinforcementClaim)
+                        && !$ship->alwaysDeploysTurnOne();
 
                     /* BaseShip::isBulkBought is the single definition of "bought through
                        the bulk dialog" (mines + OSATs), mirrored client-side by

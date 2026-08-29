@@ -741,7 +741,15 @@ if (ballistic.damageclass === 'Sweeping' || ballistic.damageclass === 'HPC-subor
 		   So a 'jumppoint' order is treated as targetid -1 THROUGHOUT this function - here, in the
 		   duplicate-icon lookup, and in the record pushed at the end - which is exactly what a
 		   ship's own vortex declaration already sends. */
-		const isVortexDeclaration = ballistic.damageclass === 'jumppoint';
+		/* ⚠️⚠️ 'gateentry' MUST BE IN THIS TEST (REINFORCEMENTS_PLAN.md Stage 8), and leaving it out
+		   is the information leak the whole paragraph above describes, not a cosmetic miss. An
+		   ARRIVAL claim is the same order shape with the same targetid - the claiming player's
+		   nearest qualifying unit - so without this line the marker would be hung on that SHIP and a
+		   bright line drawn to it from the gate, on the claimant's own screen, the instant the order
+		   is built and before the server has masked anything. Which unit signalled is never revealed
+		   (JUMP_GATES_PLAN.md section 2.1); this is what keeps that true for the second flavour. */
+		const isVortexDeclaration = ballistic.damageclass === 'jumppoint'
+			|| ballistic.damageclass === 'gateentry';
 		const iconTargetId = isVortexDeclaration ? -1 : ballistic.targetid;
 		//A FIXED GATE signals ITSELF: launch hex and target hex are the same hex, which is what the
 		//label and the launch-sprite suppression below both key off.
@@ -924,6 +932,29 @@ if (ballistic.damageclass === 'Sweeping' || ballistic.damageclass === 'HPC-subor
 								? 'Maintaining Jump Point'
 								: 'Jump Point Forming');
 						textColour = '#e1b000';
+						break;
+
+					/* ⭐ REINFORCEMENTS_PLAN.md STAGE 8 - THE ARRIVAL CLAIM, IN BLUE. Yellow =
+					   leaving, blue = arriving is the pairing the whole reinforcements feature is
+					   built on (plan section 3.7), and #00b8e6 is FV's one "not here yet" cyan -
+					   the same value the Forming marker, the entrance vortex and the fleet list's
+					   hyperspace row use. Without a case of its own this order would fall to the
+					   default RED hex, which reads as incoming fire at a gate nobody is shooting.
+
+					   NO DURATION AND NO CLAIMANT ON THE LABEL, exactly as the yellow twin above:
+					   who signalled is never shown and how long for is not public either. And no
+					   facing, because a gate's is fixed when it is placed and the arrow that says so
+					   belongs to the vortex this claim will spawn.
+
+					   ⚠️ IN PRACTICE ONLY ITS AUTHOR EVER SEES THIS. TacGamedata::hideSystemFireOrders
+					   strips every phase-1 ballistic order from every payload, its author's included,
+					   so the marker exists for the length of one client's Initial Orders and then the
+					   blue vortex unit takes over. It is local feedback, not a public announcement -
+					   which is why saying "Arrival" here leaks nothing. */
+					case 'gateentry':
+						targetType = 'hexBlue';
+						text = 'Arrival Gate Signalled';
+						textColour = '#00b8e6';
 						break;
 				}
 			}

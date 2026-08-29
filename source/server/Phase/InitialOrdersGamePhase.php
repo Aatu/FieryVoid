@@ -269,6 +269,11 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
      *   2. arrivalVia must name a unit of theirs that is ALSO still in hyperspace
      *   3. that named unit must hold a legal 'jumpentry' declaration for THIS turn
      *
+     * ⭐ OR (STAGE 8) arrivalVia names a FIXED GATE that is a doorway in - see collectGateOpeners.
+     * A gate is the one opener a player does not own, does not have in hyperspace and may not even
+     * have signalled themselves, so it cannot be found by the ship sweep below and is collected
+     * separately. Everything downstream is identical: the id goes in the same $openers map.
+     *
      * Anything else is written as NULL. Not rejected, not thrown on - NULL is the correct answer
      * for "no berth", and a manifest is a preference rather than an order: the units simply stay in
      * hyperspace and wait for another entrance.
@@ -324,6 +329,8 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
             }
         }
 
+        self::collectGateOpeners($gd, $gameData, $openers);
+
         foreach ($gd->ships as $unit){
             if ($unit->userid != $gameData->forPlayer) continue;
             if (!$unit->isReinforcement()) continue;
@@ -340,6 +347,76 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
                 . ($current === null ? 'NULL' : $current) . " -> "
                 . ($wanted === null ? 'NULL' : $wanted)
                 . " (game {$gameData->id}, turn {$gameData->turn}, player {$gameData->forPlayer}).");
+        }
+    }
+
+    /* ⭐⭐ REINFORCEMENTS_PLAN.md STAGE 8 - EVERY FIXED GATE THAT COULD BE THIS PLAYER'S DOORWAY IN,
+     * added to the $openers map persistManifest validates against. TWO WAYS A GATE QUALIFIES, and
+     * they are the two halves of a gate's life:
+     *
+     *   1. IT ALREADY HOLDS ONE. A SpawnJumpPointEntrance stands on the gate. This is the "wave on
+     *      each turn of the hold" case (§0) and the one the client's Manage Reinforcements menu
+     *      offers as "Select Reinforcements".
+     *
+     *      ⚠️ AND IT IS DELIBERATELY LENIENT ABOUT THE LAST TURN OF THE HOLD. holdsEntranceOpenOn
+     *      asks hasOpenVortex, which reads $vortexCloseTurn - and closure is not recorded until the
+     *      END of the Firing phase, so during Initial Orders a doorway that expires tonight still
+     *      answers "open next turn" here. The client knows better (it has the age/hold pair off the
+     *      system icon payload and greys the row with "jump point closes this turn"), and the
+     *      END-OF-TURN SWEEP IS THE SINGLE AUTHORITY: JumpEngine::collectGateEntrances asks the same
+     *      question at the moment the answer is settled, and refunds a berth that did not make it.
+     *      A berth written here and cleared four phases later costs the player nothing - a strict
+     *      test here that got the arithmetic wrong would silently drop a legitimate wave, which is
+     *      the failure mode worth avoiding.
+     *
+     *   2. THIS PLAYER HAS JUST CLAIMED IT for arrival, with a live 'gateentry' order for this turn.
+     *      The vortex does not exist yet - openSignalledGates spawns it at the end of THIS phase -
+     *      so there is nothing to look at but the claim, which is exactly why arrivalVia names the
+     *      OPENER and never the vortex (§3.1). The claim may still LOSE the contest to a nearer
+     *      enemy exit claim; that is fine and is why nothing is stamped here. The berth is written,
+     *      no entrance forms, and JumpEngine::stampArrivingReinforcements refunds it at the end of
+     *      the turn.
+     *
+     * ⚠️ THE CLAIM IS READ THROUGH targetid, WHICH IS THE SERVER'S OWN ANSWER, not the client's.
+     * tac_fireorder has no player column and a gate belongs to nobody, so Firing::getGateSignalBlock
+     * re-derives the claiming player's nearest unit and OVERWRITES targetid before the row is
+     * written (JUMP_GATES_PLAN.md §3.3, trap 4). Matching on it here is therefore asking "did the
+     * SERVER record a claim by me?", which is the only trustworthy form of the question.
+     *
+     * ⚠️ ANOTHER PLAYER'S standing entrance on a gate qualifies too, and that is correct rather than
+     * a leak: a gate is contested ground with no owner priority, ANY unit of ANY side may use an
+     * open vortex (JUMP_GATES_PLAN.md §2.6), and the vortex is a public blue unit on the board by
+     * the time this can matter. What stays concealed is who rides it, which is §3.6's job. */
+    private static function collectGateOpeners(TacGamedata $gd, TacGamedata $gameData, Array &$openers)
+    {
+        $turn = (int)$gameData->turn;
+
+        foreach ($gd->ships as $gate){
+            if (!$gate->isTerrain()) continue;
+
+            foreach ($gate->systems as $system){
+                if (!($system instanceof JumpEngine)) continue;
+                if (!$system->isGateJump()) continue;
+
+                //1. a doorway that is already standing and still covers next turn.
+                if ($system->holdsEntranceOpenOn($gd, $turn + 1)){
+                    $openers[(int)$gate->id] = true;
+                    break;
+                }
+
+                //2. this player's own arrival claim, made a moment ago in this same submission.
+                foreach ($system->fireOrders as $fire){
+                    if ($fire->damageclass !== 'gateentry') continue;
+                    if ((int)$fire->turn !== $turn) continue;
+                    if (!empty($fire->rejected)) continue;
+
+                    $claimant = $gd->getShipById((int)$fire->targetid);
+                    if (!$claimant || $claimant->userid != $gameData->forPlayer) continue;
+
+                    $openers[(int)$gate->id] = true;
+                    break 2;
+                }
+            }
         }
     }
 

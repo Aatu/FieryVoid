@@ -6007,9 +6007,11 @@ class JumpEngine extends Weapon{
         $opened = array();
 
         foreach ($gamedata->ships as $ship){
-            /* Terrain never declares one of these yet. A fixed GATE entrance is Stage 8 and will
-               need a sweep of its own for the reason openSignalledGates is not spawnDeclaredVortices:
-               a gate's doorway is contested, owner-less, and does not deviate. */
+            /* TERRAIN IS SKIPPED HERE AND PICKED UP BY THE GATE PASS BELOW (Stage 8). A gate's
+               doorway is contested, owner-less and does not deviate, so it is opened by
+               openSignalledGates at the end of INITIAL ORDERS - the same reason openSignalledGates
+               is not spawnDeclaredVortices. What it still needs from this sweep is the manifest
+               half, which is why the pass below adds gates to $opened rather than opening anything. */
             if ($ship->isTerrain()) continue;
             //Only a unit still IN HYPERSPACE opens an entrance (section 2.2). Anything on the board
             //that carries such an order is a tampered POST, and getEntranceDeclarationBlock refused it.
@@ -6045,9 +6047,70 @@ class JumpEngine extends Weapon{
             }
         }
 
+        self::collectGateEntrances($gamedata, $opened);
+
         if (empty($opened) && !self::hasEntranceBerths($gamedata)) return;
 
         self::stampArrivingReinforcements($gamedata, $dbManager, $opened);
+    }
+
+    /* ⭐⭐ REINFORCEMENTS_PLAN.md STAGE 8 - EVERY FIXED GATE HOLDING A DOORWAY IN THAT WILL STILL BE
+     * OPEN NEXT TURN, added to $opened so the manifest pass treats it exactly as it treats a ship
+     * that opened one. That is the whole of "a wave on each turn of a gate's programmed hold"
+     * (section 0): the gate is not re-opened - it opened once, at the end of the turn it was
+     * signalled - it is simply counted again, every turn, for as long as it will still be there.
+     *
+     * ⭐ WHY $opened AND NOT A SWEEP OF ITS OWN. Everything the manifest pass does is already right
+     * for a gate: it stamps arrivalturn on anything whose arrivalVia names an id in this list, and
+     * it CLEARS the berth of anything whose arrivalVia names an id that is not - which is precisely
+     * the Stage 8 refund (an enemy exit claim won the contest, or the hold has run out). Writing a
+     * second sweep would mean writing that refund twice.
+     *
+     * ⚠️ THE TEST IS hasOpenVortex($turn + 1), NOT ($turn). A manifest named this turn arrives in
+     * the DEPLOYMENT PHASE OF NEXT TURN, so the question is whether the doorway is there THEN - and
+     * on the last turn of a gate's hold it is not. closeExpiredVortices has already run by the time
+     * this sweep does (FireGamePhase::advance calls them in that order) and has written
+     * $vortexCloseTurn in memory as well as to the notes, so the answer is correct on the very turn
+     * the hold expires rather than a turn late.
+     *
+     * ⚠️ AND IT MUST BE AN ENTRANCE. A gate holding an ordinary yellow EXIT is not a doorway in
+     * (section 2.6), and a berth naming it is a claim that lost - which the manifest pass refunds.
+     * The class is the discriminator, as everywhere else in this feature. */
+    protected static function collectGateEntrances($gamedata, &$opened)
+    {
+        foreach ($gamedata->ships as $gate){
+            if (!$gate->isTerrain()) continue;
+
+            foreach ($gate->systems as $system){
+                if (!($system instanceof JumpEngine)) continue;
+                if (!$system->isGateJump()) continue;
+
+                if ($system->holdsEntranceOpenOn($gamedata, (int)$gamedata->turn + 1)){
+                    $opened[(int)$gate->id] = true;
+                    break;   //one doorway per gate, exactly as one per unit above
+                }
+            }
+        }
+    }
+
+    /* Is the jump point this engine holds an ENTRANCE, and will it still be open on $turn?
+     *
+     * Both halves in one place because they are always asked together and the second is the one
+     * that is easy to get wrong: hasOpenVortex is "not closed BEFORE $turn", so a vortex closing at
+     * the end of turn T answers true for T and false for T+1 - which is exactly the window a
+     * manifest needs (a vortex is usable for the whole of the turn it closes on, section 2.3).
+     *
+     * ⚠️ $spawned IS openTurn + 1, so a doorway signalled this turn already answers true for next
+     * turn - which is right, and is what lets the FIRST wave ride a gate on the turn it was
+     * signalled. */
+    public function holdsEntranceOpenOn($gamedata, $turn)
+    {
+        if (!$this->hasOpenVortex($turn)) return false;
+
+        $vortex = $gamedata->getShipById((int)$this->activeVortexId);
+        if (!($vortex instanceof SpawnJumpPointEntrance)) return false;
+
+        return ((int)$vortex->spawned <= (int)$turn);
     }
 
     /* Does anybody in this game hold a berth that might need clearing? Asked only when NO entrance
@@ -6087,16 +6150,37 @@ class JumpEngine extends Weapon{
      *                       so it is cleared and the unit waits in hyperspace for another doorway.
      *                       That is a REFUND, not a punishment: nothing about the unit is spent.
      *
-     * ⚠️ A BERTH NAMING TERRAIN IS LEFT ALONE. From Stage 8 a fixed GATE can be an opener, and a
-     * gate's vortex is opened by openSignalledGates at the end of INITIAL ORDERS - so it is not in
-     * $opened and never will be. Clearing it here would silently cancel every gate arrival the
-     * moment Stage 8 lands. */
+     * ⭐ A BERTH NAMING A GATE IS SETTLED HERE TOO, from Stage 8 (this used to skip terrain
+     * outright, precisely so that it could be). collectGateEntrances has just put every gate
+     * holding a doorway-in that survives into next turn into $opened, so a gate berth takes the
+     * ordinary stamp above - and a gate berth that is NOT in that list falls to the clear below,
+     * which is the whole of the Stage 8 refund:
+     *   - an enemy EXIT claim won the contest, so the gate opened yellow and there is no doorway in;
+     *   - or the programmed hold ran out at the end of this turn.
+     * Either way nothing about the unit is spent and it waits in hyperspace for another doorway. */
     protected static function stampArrivingReinforcements($gamedata, $dbManager, $opened)
     {
         $arrival = (int)$gamedata->turn + 1;
 
         foreach ($gamedata->ships as $unit){
             if (!$unit->isReinforcement()) continue;
+
+            /* ⚠️⚠️ A GATE IS IN $opened AS THE DOORWAY'S HOLDER, NOT AS A UNIT RIDING IT (user
+               report 2026-08-29, game 4319). The three populations above are all things that ARRIVE;
+               collectGateEntrances adds a gate to the same list because that is what makes its
+               MANIFEST arrive, and the id it adds is the gate's own. So a gate that also happens to
+               carry the reinforcement flag matched the opener test on itself and was stamped with an
+               arrival turn every single turn its jump point stood - which won its owner a phantom
+               Deployment phase (TacGamedata::hasReinforcementsArriving reads exactly this field), one
+               with nothing in it to place, announcing itself as PRE-TURN ACTIONS.
+
+               The unit cannot be an arrival because it is already on the board: alwaysDeploysTurnOne
+               is the same ⚠️ hideHyperspaceReinforcements carries a few hundred lines away, and the
+               reason both need it is that isReinforcement() asks where a unit is, not what it is.
+               BuyingGamePhase now refuses the flag on such a hull outright, so this can only be
+               reached by a game bought before that fix - but it stays, because a stamp written here
+               is what every later phase believes. */
+            if ($unit->alwaysDeploysTurnOne()) continue;
 
             $via = ($unit->arrivalVia === null) ? null : (int)$unit->arrivalVia;
 
@@ -6110,9 +6194,6 @@ class JumpEngine extends Weapon{
             }
 
             if ($via === null) continue;
-
-            $opener = $gamedata->getShipById($via);
-            if ($opener && $opener->isTerrain()) continue; //a Stage 8 gate berth - not this sweep's to clear
 
             $unit->arrivalVia = null;
             if ($dbManager !== null) $dbManager->setShipArrivalVia($unit->id, null);
@@ -6549,7 +6630,17 @@ class JumpEngine extends Weapon{
          * SERVER's reckoning of who claimed, never the client's (plan section 3.3, trap 4). The
          * unit it names is used for nothing but finding its owner; the distance below is recomputed
          * from scratch. */
-        $claims = array();   //userid => firingMode (the programmed hold, 1-4)
+        /* ⭐ REINFORCEMENTS_PLAN.md STAGE 8 - EACH CLAIM CARRIES A DIRECTION AS WELL AS A
+         * DURATION. damageclass 'gateentry' asks for a doorway IN (a SpawnJumpPointEntrance that
+         * reinforcements ride out of); anything else is the Phase 2 exit. The two travel in the
+         * identical fire-order shape and are settled by the identical contest - only the WINNER's
+         * flavour is ever read, because a gate holds one jump point and it points one way.
+         *
+         * ⚠️ A LOSING ARRIVAL CLAIM IS THE REFUND CASE (plan Stage 8). Nothing is unwound here: the
+         * manifest names the GATE, the gate opens an exit, no entrance vortex ever exists for those
+         * units to join on, and JumpEngine::stampArrivingReinforcements clears their berths at the
+         * end of the turn. The refund is the absence of a stamp, exactly as section 3.1 designed. */
+        $claims = array();   //userid => array('hold' => 1-4, 'entrance' => bool)
         foreach ($this->fireOrders as $fire){
             if ((int)$fire->turn !== $turn) continue;
             if (!empty($fire->rejected)) continue;
@@ -6563,7 +6654,10 @@ class JumpEngine extends Weapon{
             $userId = (int)$claimant->userid;
             if (isset($claims[$userId])) continue;          //first claim wins
 
-            $claims[$userId] = $mode;
+            $claims[$userId] = array(
+                'hold'     => $mode,
+                'entrance' => ($fire->damageclass === 'gateentry'),
+            );
         }
 
         if (empty($claims)) return;
@@ -6573,7 +6667,7 @@ class JumpEngine extends Weapon{
          * what it does is make a tampered POST pointless, because the number that settles the
          * contest is never one the client sent. */
         $distances = array();
-        foreach ($claims as $userId => $mode){
+        foreach ($claims as $userId => $claim){
             $signaller = $this->getNearestGateSignaller($gate, $gamedata, $userId);
             if (!$signaller) continue;                      //nothing in range any more - the claim lapses
 
@@ -6585,11 +6679,12 @@ class JumpEngine extends Weapon{
 
         if (empty($distances)) return;
 
-        $winner  = self::pickGateClaimWinner($distances, $gate, $gamedata);
-        $maxHold = self::getGateMaxHold($gate);
-        $hold    = min((int)$claims[$winner], $maxHold);
+        $winner   = self::pickGateClaimWinner($distances, $gate, $gamedata);
+        $maxHold  = self::getGateMaxHold($gate);
+        $hold     = min((int)$claims[$winner]['hold'], $maxHold);
+        $entrance = !empty($claims[$winner]['entrance']);
 
-        if (!$this->openVortexAtGate($gate, $hold, $winner, $gamedata, $logOrders)) return;
+        if (!$this->openVortexAtGate($gate, $hold, $winner, $gamedata, $logOrders, $entrance)) return;
 
         /* THE LOSERS ARE TOLD, BY PLAYER AND BY DISTANCE (plan section 2.4). A beaten claim costs
          * nothing - no charge is spent and nothing goes on cooldown - so there is no state to
@@ -6606,9 +6701,9 @@ class JumpEngine extends Weapon{
 
         //A clamped claim is worth a line too - the player asked for longer, and the gate's reactor
         //damage is why they did not get it (plan section 2.5, test 18).
-        if ($hold < (int)$claims[$winner]){
+        if ($hold < (int)$claims[$winner]['hold']){
             $log = self::writeVortexLogOrder($gate, $gamedata,
-                " cannot hold its jump point for " . (int)$claims[$winner] . " turns - reactor damage caps it at "
+                " cannot hold its jump point for " . (int)$claims[$winner]['hold'] . " turns - reactor damage caps it at "
                 . $hold . ($hold == 1 ? " turn" : " turns") . ".");
             if ($log) $logOrders[] = $log;
         }
@@ -6938,20 +7033,43 @@ class JumpEngine extends Weapon{
      * ⚠️ EVERY LOG LINE NAMES THE PLAYER, NEVER THE SIGNALLING UNIT (plan section 2.4 and 2.1).
      * Signalling a gate never reveals a hidden unit, and a combat-log line saying which ship sent
      * the signal would undo that on the very turn it mattered. */
-    protected function openVortexAtGate($gate, $hold, $winnerUserId, $gamedata, &$logOrders)
+    protected function openVortexAtGate($gate, $hold, $winnerUserId, $gamedata, &$logOrders,
+                                        $entrance = false)
     {
         $move   = $gate->getLastMovement();
         $facing = $move ? ((int)$move->facing % 6 + 6) % 6 : 0;
 
-        $vortex = $this->spawnVortexUnit($gate, $gate->getHexPos(), $facing, $gamedata);
+        /* ⭐ REINFORCEMENTS_PLAN.md STAGE 8 - THE WINNING CLAIM'S FLAVOUR PICKS THE CLASS, and that
+           is the whole of the difference between a gate exit and a gate entrance on this side. Both
+           are the same unit at the same hex on the same facing with the same hold note; the class is
+           what makes one blue, one-way inbound and joinable by a manifest (plan section 3.3 - the
+           class is the discriminator, there is no flag to keep in step).
+
+           The DEFAULT is false so every Phase 2 caller and every existing recorded game is
+           byte-identical, exactly as spawnVortexUnit's own $class default is. */
+        $class = $entrance ? 'SpawnJumpPointEntrance' : 'SpawnJumpPoint';
+
+        $vortex = $this->spawnVortexUnit($gate, $gate->getHexPos(), $facing, $gamedata, $class);
         if (!$vortex) return false;
 
         $this->writeVortexHoldNote($gate, $vortex->id, $hold, $winnerUserId, $gamedata);
 
+        /* ⚠️ THE ARRIVAL LINE SAYS "ARRIVAL", AND THAT IS A DISCLOSURE ONE TURN EARLY - deliberately.
+           The gate CLAIM is secret until Initial Orders close (TacGamedata::hideSystemFireOrders
+           strips every phase-1 ballistic order from every payload), but the vortex it opens is a
+           public blue unit from the next turn, so the only thing this sentence brings forward is one
+           turn of "somebody is coming through here". That is the identical trade section 2.3 already
+           made for a ship's entrance, whose blue Forming marker is public for the whole of the turn
+           it was declared on - and it is what makes the log readable rather than reporting an exit
+           and then producing an entrance.
+           ⚠️ IT STILL NAMES ONLY THE PLAYER, never a unit and never a count. Who is coming through
+           and how many stay concealed by hideHyperspaceReinforcements (section 3.6). */
         $log = self::writeVortexLogOrder($gate, $gamedata,
-            " is signalled by " . self::playerLabel($winnerUserId, $gamedata) . " and opens its jump point for "
+            " is signalled by " . self::playerLabel($winnerUserId, $gamedata) . " and opens "
+            . ($entrance ? "an ARRIVAL jump point" : "its jump point") . " for "
             . $hold . ($hold == 1 ? " turn" : " turns")
-            . ". It forms at the end of this turn and can be entered from next turn.");
+            . ". It forms at the end of this turn and can be "
+            . ($entrance ? "arrived through" : "entered") . " from next turn.");
         if ($log) $logOrders[] = $log;
 
         return true;
@@ -7152,10 +7270,19 @@ class JumpEngine extends Weapon{
            unit that opened it out of ever opening anything - including an exit to leave the battle
            by - for the rest of the game.
 
-           BEFORE the gate branch below, deliberately: from Stage 8 a fixed GATE can open an
-           entrance, and entrance-ness is a property of the VORTEX while gate-ness is a property of
-           the ENGINE. The one-shot rule is the vortex's, so it wins. */
-        if ($vortex instanceof SpawnJumpPointEntrance){
+           ⭐⭐ STAGE 8 REVERSED THE ORDERING THIS BRANCH WAS WRITTEN WITH, and the reversal is a
+           RULE, not a tidy-up. Stage 7 put this before the gate branch on the reasoning that
+           entrance-ness belongs to the VORTEX while gate-ness belongs to the ENGINE, so the one-shot
+           rule should win. Section 0 says otherwise, and it is the user ruling that governs: A
+           GATE'S ENTRANCE RUNS FOR THE GATE'S PROGRAMMED HOLD (1-4 turns), with a fresh wave allowed
+           on each of them. Left as it was, a gate signalled for a 4-turn arrival would have slammed
+           shut after one - silently, and looking exactly like a working feature.
+
+           So ONE-SHOT IS A SHIP'S RULE. A gate falls through to getGateVortexClosureReason below,
+           which is where the hold lives, and which already closes a gate vortex of either flavour.
+           Trap 5 is unaffected: a gate's engine is released by the hold expiring, and a gate that
+           never closed its jump point would be broken for Phase 2 exits too. */
+        if ($vortex instanceof SpawnJumpPointEntrance && !$this->isGateJump()){
             return ($turn > (int)$this->vortexOpenTurn) ? 'reinforcements have arrived' : null;
         }
 

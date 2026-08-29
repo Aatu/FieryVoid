@@ -1097,6 +1097,7 @@ window.shipManager = {
             if (shipManager.isDestroyed(othership)) continue; //no need to list ships already destroyed
             if (othership.flight === true) continue; //can escort only ships
             if (othership.id == ship.id) continue;
+            if (gamedata.isTerrain(othership.shipSizeClass, othership.userid)) continue;            
 
             if (gamedata.isEnemy(ship, othership)) continue;
 

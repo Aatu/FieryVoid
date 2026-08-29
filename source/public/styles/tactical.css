@@ -363,6 +363,41 @@ body {
     color: #ffffff;
 }
 
+/* ⭐⭐ REINFORCEMENTS_PLAN.md STAGE 8 - THE ARRIVAL LIVERY, AND IT IS A TOKEN OVERRIDE AND NOTHING
+   ELSE. UI.gateSignal.open() puts .gateSignalEntrance on the container when the claim asks for a
+   doorway IN, and every rule above is written against the --gs-* custom properties, so redefining
+   six of them here re-liveries the whole panel - chrome, steppers, field, focus ring and commit
+   button - without a single duplicated selector. Change a dimension above and this follows it for
+   free; add a hard-coded colour up there and this stops working, which is the point.
+
+   #00b8e6 IS FV'S ESTABLISHED "NOT HERE YET" CYAN (plan section 3.7) - the Forming marker, the
+   entrance vortex, the fleet list's hyperspace row and theme.js's statusPending are all this one
+   value. Do not introduce a second blue. Everything below is that colour put through the same
+   transformations the gold values above already are: a near-black wash for the container, a mid
+   tone for the row lines, and a full-strength pair for the commit button.
+
+   ⚠️ THE LABEL SWAP IS IN JS, NOT HERE. The button's text is written by UI.gateSignal.open()
+   because the markup has one button and two meanings, and content: attr() would fight the plain
+   text node game.php ships. This file owns the colour only. */
+#gateSignalUI.gateSignalEntrance {
+    --gs-bg: rgba(4, 20, 26, 0.9);
+    --gs-line: #3f7d92;
+    --gs-line-row: #40808f;
+    --gs-text: #d6f4ff;
+    --gs-btn-bg: #10394a7c;
+    --gs-btn-line: #3f7d92be;
+    --gs-warn-bg: #00728f;
+    --gs-warn-line: #00b8e6;
+    --gs-warn-hover-bg: #0090b4;
+    --gs-warn-hover-line: #4ad4ff;
+}
+
+/* The row hover is the one rule above that hard-codes its rgba (it is a wash of --gs-line-row,
+   which cannot be expressed as a var() alpha without a colour-mix), so it needs its own twin. */
+#gateSignalUI.gateSignalEntrance .gateSignalRow:hover {
+    background-color: rgba(64, 128, 143, 0.10);
+}
+
 .centercontainer {
     position: absolute !important;
     left: 50% !important;
@@ -2583,7 +2618,13 @@ only screen and (max-height: 500px) and (orientation: landscape) {
    min-width stays, for a different reason than it was added for: the badges are the label the eye
    scans down, and OPENING is a glyph longer than RIDING. A floor rather than a `width`
    deliberately - should a font ever render OPENING wider than this the tag grows rather than
-   spilling centred text out of the box on both sides. */
+   spilling centred text out of the box on both sides.
+
+   ⚠️ STAGE 8 ADDED TWO MORE, OPEN AND SIGNALLED, and SIGNALLED is wider than this floor. It grows,
+   which is exactly what the floor-not-width choice above was for. The rule the user asked for is a
+   shared LEFT edge, and every badge still starts at the left edge of .reinforcementRowMain whatever
+   its width - so do not reach for a wider min-width to make the right edges agree; that would only
+   pad the short badges out for no gain. */
 .confirm.fleetDialog .reinforcementRowTag {
     display: inline-block;
     margin-top: 3px;

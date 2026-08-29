@@ -3256,9 +3256,29 @@ public function getAllEWExceptDEW($turn){
 		return $this->reinforcement && $this->arrivalTurn === null;
 	}
 
+	/* ⭐ IS THIS UNIT ON THE BOARD FROM TURN 1 NO MATTER WHAT THE SLOT OR THE FLAG SAYS?
+	   Bases, OSATs and Terrain never 'jump in' - getTurnDeployed has always answered 1 for them
+	   before it looks at anything else, and hideHyperspaceReinforcements already carries the ⚠️
+	   that says so. This NAMES that rule so the other two places that need it can ask instead of
+	   re-listing the three properties (user report 2026-08-29, game 4319):
+
+	     - BuyingGamePhase::process refuses the reinforcement flag on such a unit outright. A gate
+	       bought while the lobby's REINFORCEMENTS group was selected took the flag, and the flag
+	       can never come true for it - the gate is on the board on turn 1 regardless.
+	     - JumpEngine::stampArrivingReinforcements refuses to give it an arrival turn. That was the
+	       live bug: a signalled gate is in $opened as the doorway's HOLDER, not as a unit riding
+	       it, so a gate carrying the flag stamped ITSELF as arriving and won its owner a phantom
+	       Deployment phase on every turn its jump point stood.
+
+	   ⚠️ NOT the same question as isReinforcement(). This is a property of the HULL; that one is a
+	   property of where the unit currently is. */
+	public function alwaysDeploysTurnOne(){
+		return $this->osat || $this->base || $this->isTerrain();
+	}
+
     public function getTurnDeployed($gamedata){
 
-        if ($this->osat || $this->base || $this->isTerrain()) return 1; //Bases, Terrain and OSATs never 'jump in'.
+        if ($this->alwaysDeploysTurnOne()) return 1; //Bases, Terrain and OSATs never 'jump in'.
 
         $slot = $gamedata->getSlotById($this->slot);
         $depTurn = $slot->depavailable;

@@ -133,10 +133,25 @@ class DeploymentGamePhase implements Phase
      * exemption below covers the same case from the other side - a docked unit is aboard, which is
      * an arrival, and it deliberately writes no movement of its own.
      *
-     * Ship-entrance only, which is all Stage 7 has: a ship's doorway closes at the end of the turn
-     * it is used on, so there is never a berth worth keeping. §2.4's "keeps its berth if the
-     * entrance will still be open next turn" is a GATE rule and belongs to Stage 8 - the test to
-     * add there is on the vortex's remaining hold, not on this unit.
+     * ⭐⭐ STAGE 8 - A GATE BERTH IS KEPT, A SHIP BERTH IS NOT, and §2.4 says exactly that: "an
+     * unplaced unit keeps its berth if the entrance will still be open next turn (a gate), and
+     * otherwise goes back to unassigned". A ship's doorway closes at the end of the turn it is used
+     * on, so there is never anything to keep; a gate's may have three turns left on its programmed
+     * hold, and making the player re-name the same manifest every turn would be busywork with a
+     * silent failure mode attached.
+     *
+     * ⭐ AND THE TEST IS "IS THE OPENER A GATE?", NOT "HOW MUCH HOLD IS LEFT?" - deliberately, and
+     * this is the one design decision in the method. There are two moments that could decide this:
+     * here, in the Deployment phase, and the end-of-turn sweep (JumpEngine::collectGateEntrances /
+     * stampArrivingReinforcements) which already has to answer the identical question for every
+     * berth in the game. Two answers means two chances to disagree, and a disagreement here is
+     * invisible - a unit either quietly loses a berth it should have kept, or keeps a dead one. So
+     * this keeps the berth OPTIMISTICALLY and the end-of-turn sweep is the single authority: it
+     * re-stamps a doorway that is still open next turn and refunds one that is not.
+     *
+     * ⚠️ arrivalTurn IS STILL CLEARED IN BOTH CASES. Keeping a berth is not the same as staying an
+     * arrival: the unit has to go back to isReinforcement() (concealed, 999 to both turn accessors,
+     * re-stampable) or the ⚠️ above comes true.
      *
      * $dbManager is deliberately UNTYPED, matching JumpEngine::spawnEntranceVortices - it is what
      * lets the Stage 7 harness drive this with a write-capturing stub and prove the release against
@@ -161,12 +176,22 @@ class DeploymentGamePhase implements Phase
             if ($placed) continue;
 
             $unit->arrivalTurn = null;
-            $unit->arrivalVia  = null;
             $dbManager->setShipArrivalTurn($unit->id, null);
-            $dbManager->setShipArrivalVia($unit->id, null);
 
-            Debug::log("Jump point entrance: ship {$unit->id} was not placed and returns to hyperspace "
-                . "(game {$gamedata->id}, turn {$gamedata->turn}).");
+            //A gate keeps its berth - see the ⭐⭐ above. getShipById, never the posted object:
+            //isTerrain() is a blueprint property and a POST-side unit is not what this list holds
+            //anyway ($gamedata->ships is the real load).
+            $opener = ($unit->arrivalVia === null) ? null : $gamedata->getShipById((int)$unit->arrivalVia);
+            $keepsBerth = ($opener !== null && $opener->isTerrain());
+
+            if (!$keepsBerth){
+                $unit->arrivalVia = null;
+                $dbManager->setShipArrivalVia($unit->id, null);
+            }
+
+            Debug::log("Jump point entrance: ship {$unit->id} was not placed and returns to hyperspace"
+                . ($keepsBerth ? ", keeping its berth on gate {$unit->arrivalVia}" : "")
+                . " (game {$gamedata->id}, turn {$gamedata->turn}).");
         }
     }
 

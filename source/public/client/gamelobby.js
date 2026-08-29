@@ -505,7 +505,25 @@ window.gamedata = {
 	   a fleet carrying the flag from a game that HAD the rule reads as ordinary in one that
 	   does not - which is also what the server will do with it. */
 	isReinforcementRow: function isReinforcementRow(ship) {
-		return Boolean(ship && ship.reinforcement) && gamedata.reinforcementsAllowed();
+		return Boolean(ship && ship.reinforcement) && gamedata.reinforcementsAllowed()
+			&& gamedata.canBeReinforcement(ship);
+	},
+
+	/* ⭐ COULD THIS UNIT EVER WAIT IN HYPERSPACE? Bases, OSATs and Terrain are on the board on
+	   turn 1 whatever the slot or the flag says - the mirror of BaseShip::alwaysDeploysTurnOne,
+	   which is the first line of getTurnDeployed on BOTH sides.
+
+	   ⚠️ THE FLAG IS NOT MERELY USELESS ON THEM, IT IS HARMFUL (user report 2026-08-29, game
+	   4319). isReinforcement() means "flagged AND no arrival turn yet", so a Fixed Jump Gate
+	   bought with the REINFORCEMENTS group selected answered TRUE to it while standing in plain
+	   sight on the map - and the end-of-turn sweep then stamped the gate itself as arriving,
+	   handing its owner an empty PRE-TURN ACTIONS phase every turn its jump point stood.
+	   BuyingGamePhase::process refuses the same purchases server-side; this is here so the
+	   player never sees a row in a group it cannot belong to. */
+	canBeReinforcement: function canBeReinforcement(ship) {
+		if (!ship) return false;
+		if (ship.base || ship.osat) return false;
+		return !gamedata.isTerrain(ship.shipSizeClass, ship.userid);
 	},
 
 	/* Does this lobby unit mount a Jump Engine that could OPEN a jump point?
@@ -565,7 +583,12 @@ window.gamedata = {
 
 		for (var i in gamedata.ships) {
 			if (gamedata.ships[i].id != id) continue;
-			gamedata.ships[i].reinforcement = !gamedata.ships[i].reinforcement;
+			//A hull that is on the board on turn 1 regardless can never wait in hyperspace -
+			//see canBeReinforcement. The link is not offered on such a row, but the row could
+			//still be carrying the flag from a fleet saved before that rule existed, in which
+			//case clearing it is the only useful direction this toggle has.
+			gamedata.ships[i].reinforcement = !gamedata.ships[i].reinforcement
+				&& gamedata.canBeReinforcement(gamedata.ships[i]);
 			break;
 		}
 
@@ -802,7 +825,9 @@ window.gamedata = {
 		   the ACTION, not the state (the state is the group the row sits in and the colour of
 		   its name), which is the convention the other four links follow. */
 		var reinforce = '';
-		if (gamedata.reinforcementsAllowed()) {
+		//canBeReinforcement: no link at all on a hull that is on the board on turn 1 regardless
+		//(base, OSAT, Terrain) - offering it would be offering a state it can never hold.
+		if (gamedata.reinforcementsAllowed() && gamedata.canBeReinforcement(ship)) {
 			reinforce = gamedata.isReinforcementRow(ship)
 				? ' -<span class="reinforcetoggle clickable" title="Move this unit into the main fleet instead">Main Fleet</span> '
 				: ' -<span class="reinforcetoggle clickable" title="Hold this unit in hyperspace and bring it in through a jump point">Reinforcement</span> ';
@@ -3122,7 +3147,9 @@ window.gamedata = {
 		//REINFORCEMENTS_PLAN.md §4 Stage 1 - same read as doBuyShip. A bulk row is ONE object
 		//standing for N units and BuyingGamePhase mints the copies with `clone $ship`, a shallow
 		//copy, so this one boolean reaches every unit in the row.
-		ship.reinforcement = gamedata.buyingReinforcement();
+		//canBeReinforcement: a base/OSAT/Terrain bulk row is on the board on turn 1 whatever the
+		//buy panel says, and the flag on it is actively harmful - see the note there.
+		ship.reinforcement = gamedata.buyingReinforcement() && gamedata.canBeReinforcement(ship);
 
 		//A store blueprint's pointCost is pristine by definition.
 		gamedata.readBulkPurchase(ship, results.quantity, ship.pointCost);
@@ -3381,7 +3408,9 @@ window.gamedata = {
 		//pristine blueprint clone (getShipByType deep-copies gamedata.allShips) and never
 		//carries the flag. A reinforcement costs the same and comes out of the same pool, so
 		//nothing below has to know about it.
-		ship.reinforcement = gamedata.buyingReinforcement();
+		//canBeReinforcement: a base, an OSAT and Terrain deploy on turn 1 whatever the buy panel
+		//says, so the flag can never come true for them and does real damage - see the note there.
+		ship.reinforcement = gamedata.buyingReinforcement() && gamedata.canBeReinforcement(ship);
 
 		if ($(".confirm .totalUnitCostAmount").length > 0) {
 			ship.pointCost = $(".confirm .totalUnitCostAmount").data("value");

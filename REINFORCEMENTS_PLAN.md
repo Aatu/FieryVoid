@@ -7,7 +7,10 @@ their fleet as **reinforcements**, those units wait in hyperspace, and during th
 opens an **entrance** vortex and brings them onto the map through it.
 
 Status: **STAGES 0–7 COMPLETE AND SIGNED OFF 2026-08-28 — Stage 6 verified in play in game 4317,
-Stage 7 in game 4318. Stages 8-9 not started.**
+Stage 7 in game 4318. STAGE 8 BUILT 2026-08-28 and FIRST PLAY-TESTED 2026-08-29 in game 4319: the
+gate signal, the manifest and the waves all worked, and the two faults that came back were both
+OUTSIDE the gate code — see "Stage 8 — first play test". Both fixed and harness-proven; the rest of
+Stage 8 is still untested in play. Stage 9 not started.**
 
 **The whole loop closes.** A player buys reinforcements; they are concealed from the enemy down to a
 count and a point total; they **declare** a jump point entrance in Initial Orders and name its
@@ -23,14 +26,15 @@ fallout fixes (the deploy-start dock dialog that explained nothing, and the oppo
 blueprints) and the lobby header restyle. Everything else in Stages 0–7 has been exercised in
 4317/4318.
 
-⭐ **THE ONE PIECE OF HOUSEKEEPING LEFT IS THE REPLAY BASELINE.** It has needed its single
-re-record since Stage 2 and now costs more than it saves: `check` reports **149 failures**, every
-one of them the same three Stage 2/5 payload additions (`reinforcementCount`,
-`reinforcementPoints`, `formingEntrances`), which is enough noise to hide a real regression
-completely. Re-record on this tree before Stage 8 starts.
+✅ **THE REPLAY BASELINE HAS BEEN RE-RECORDED** (2026-08-28, before Stage 8). It had needed its
+single re-record since Stage 2 and was reporting **149 failures** — every one of them the same three
+Stage 2/5 payload additions (`reinforcementCount`, `reinforcementPoints`, `formingEntrances`), which
+was enough noise to hide a real regression completely. `check` on the Stage 8 tree is now **155
+passed, 0 failed**, with game 4318 SKIPping because it has advanced since it was recorded. Note the
+baseline is **gitignored** and therefore per-working-copy: `DouglasChanges` has its own and will want
+its own `record` ([[reference_fv_repo]]).
 
-Stage 8 (gates as entrances) and Stage 9 (the scatter initiative penalty) are what remain, and
-neither is on the critical path.
+Stage 9 (the scatter initiative penalty) is what remains, and it is not on the critical path.
 
 Three things Stage 0 needed that §3 did not anticipate, all recorded here because they are the shape
 of the next surprise too:
@@ -889,9 +893,12 @@ the exact sibling of. It is narrow on purpose and never cries wolf:
   entrance it names has to still exist, and a declaration can be replaced as well as withdrawn.
 - ⚠️ **It reads the module, never `myShips`.** That list drops everything whose `getTurnDeployed` is
   later than this turn, and a unit in hyperspace answers 999.
-- ⚠️ **It does not know about jump gates, and does not need to yet** — `canOpen()` excludes them
-  because gate ENTRANCE signalling is Stage 8 and is not built. When that lands, a gate this player
-  could signal **must** count as a remaining opener here or this will warn about fleets that are fine.
+- ✅ **It knows about jump gates from Stage 8**, which is the change this entry asked for in advance:
+  `anyLiveGate()` silences the whole warning while any undestroyed `JumpgateCapital` is on the map,
+  because a gate can be signalled by anybody on any later turn and so nothing is stranded *for good*.
+  The gate test is deliberately **loose** — "a live gate exists", not "I could signal it right now" —
+  since charge, signal range and a rival claim all move between turns and the question here is about
+  the whole rest of the battle. Loose errs towards silence, which is the right direction for a nag.
 
 **Already proven headless** (`vm`-evaluated against a stubbed client world, which is the
 [[howto_verify_react_bundle]] "bundle and evaluate" discipline — a parse check would not catch a
@@ -1316,7 +1323,7 @@ Centurion. `findPendingFlightsForCarrier` requires the flight to share the carri
 they cannot reach the Primus's spare 12 boxes either — it is at the other doorway. A wave that wants
 its fighters stowed has to ride the jump point of a carrier with the boxes for them.
 
-### Stage 8 — gates
+### Stage 8 — gates ✅ BUILT 2026-08-28, untested in play
 The blue `UI.gateSignal` variant; the entrance flavour on the claim; the refund when an enemy exit
 claim wins the contest (the manifest is simply never stamped, so this is mostly a matter of
 clearing `arrivalvia`); waves on each turn of a gate's programmed hold.
@@ -1326,6 +1333,290 @@ harness proved this on Phase 2 ([[project_jump_gates]]).
 
 **Verify:** both `convoyRaid`-style scenarios — a gate claimed for entry uncontested, and a gate
 claimed for entry and lost to a nearer enemy exit claim.
+
+**As built.** The whole stage is one new `damageclass`, `'gateentry'`, and everything else follows
+from it — the same shape `'jumpentry'` gave a ship's entrance in §3.4, one step along. Two user
+requests set the gestures:
+
+> "When a player signals the jump gate to open an entrance from Hyperspace and clicks Signal Gate,
+> this should open the same Jump Point Manifest window."
+>
+> "In cases where a jump gate is already open with a jump point allowing units to enter from
+> Hyperspace, then it should be listed as a Jump Drive ship in Manage Reinforcements, but instead of
+> 'Choose Hex' the same button should say 'Select Reinforcements' and likewise bring up the 'Jump
+> Point Manifest' window."
+
+**The gesture, end to end.** Click the gate in Initial Orders → a **second** tooltip button,
+**Signal Gate for Arrival** (blue vortex icon), offered only when this player has something in
+hyperspace → `UI.gateSignal` in its cyan livery, commit reading **Signal for Arrival** → the claim
+is built with `damageclass='gateentry'` → **the Jump Point Manifest opens immediately**. On any
+later turn of the hold the doorway is picked up again from **Manage Reinforcements**, where the gate
+is a row like any drive but its button reads **Select Reinforcements**.
+
+- ⭐ **A SECOND TOOLTIP BUTTON, NOT A TOGGLE IN THE PANEL.** A gate holds one jump point and it is
+  one-way, so departure and arrival are two answers to one question — and the arrival one is
+  meaningless unless something is waiting behind it, which is a condition a *button* can simply not
+  meet. A toggle would sit greyed out on every gate in every game without the rule; this way the
+  feature is invisible until it applies, which is the shape the two existing mutually-exclusive gate
+  buttons already have.
+- ⭐ **THE LIVERY IS A TOKEN OVERRIDE AND NOTHING ELSE.** Every `#gateSignalUI` rule is written
+  against the `--gs-*` custom properties, so `.gateSignalEntrance` redefines six of them and
+  re-liveries chrome, steppers, field, focus ring and commit button with no duplicated selector.
+  Add a hard-coded colour to the gold rules and this silently stops working. The class is set with
+  an explicit second argument to `toggleClass` on **every** open, both ways — the panel is a
+  singleton reused across transactions, so a bare `add` would leave the blue behind on the next
+  ordinary signal.
+- ⭐⭐ **§0's GATE RULING FORCED A REVERSAL IN `getVortexClosureReason`.** Stage 7 put the
+  `SpawnJumpPointEntrance` branch *before* the gate branch, reasoning that entrance-ness belongs to
+  the vortex while gate-ness belongs to the engine, so the one-shot rule wins. §0 says a gate's
+  entrance runs for its **programmed hold**. Left alone, a gate signalled for four turns of arrivals
+  would have slammed shut after one — silently, and looking exactly like a working feature. The
+  branch is now `&& !$this->isGateJump()`; trap 5 is unaffected, because a gate's engine is released
+  by the hold expiring and a gate that never closed its jump point would be broken for Phase 2 exits
+  too.
+- ⭐ **THE WAVES ARE ONE LINE ADDED TO `$opened`, NOT A SWEEP OF THEIR OWN.**
+  `JumpEngine::collectGateEntrances` walks the gates at the end of `spawnEntranceVortices` and adds
+  every one holding a doorway-in that survives into next turn. Everything downstream is then already
+  right: `stampArrivingReinforcements` stamps a berth naming an id **in** that list and **clears**
+  one naming an id that is not — which *is* the refund, for both of its causes (an enemy exit claim
+  won the contest; the hold ran out). A second sweep would have meant writing that refund twice. The
+  terrain skip that used to sit in `stampArrivingReinforcements` is gone; it existed precisely so
+  Stage 8 could remove it.
+- ⚠️ **THE WINDOW IS `hasOpenVortex($turn + 1)`, NOT `($turn)`.** A manifest named this turn arrives
+  in the **Deployment phase of next turn**, so the question is whether the doorway is there *then*.
+  `closeExpiredVortices` runs before this sweep in `FireGamePhase::advance` and writes
+  `$vortexCloseTurn` in memory as well as to the notes, so the answer is right on the very turn the
+  hold expires rather than a turn late.
+- ⭐ **THE CLIENT KNOWS WHICH TURN IS THE LAST ONE, AND NEEDED NO NEW PAYLOAD.**
+  `JumpEngine::stripForJson` has sent `vortexTurnsOpen` / `vortexMaxTurns` since Phase 2 to draw the
+  system icon's "2/4 turns open" counter, and **on a gate `vortexMaxTurns` *is* the programmed hold**
+  (`MAX_VORTEX_TURNS` only on a ship's). So `age < hold` is exactly "one more wave to give", and the
+  menu greys the row with **`jump point closes this turn`** instead of quietly taking a manifest that
+  can never be honoured. Listing it greyed rather than hiding it is the point — the player can see
+  *why*.
+- ⭐ **ONE AUTHORITY FOR "IS THIS BERTH STILL GOOD?", AND IT IS THE END-OF-TURN SWEEP.** Two other
+  places could have decided it and both are deliberately lenient instead:
+  `DeploymentGamePhase::releaseUnplacedReinforcements` **keeps** a gate berth on the flat test "is the
+  opener terrain?" (§2.4's "keeps its berth if the entrance will still be open next turn"), and
+  `InitialOrdersGamePhase::collectGateOpeners` accepts a doorway that expires tonight, because during
+  Initial Orders `$vortexCloseTurn` has not been written yet. Both defer to the sweep. A berth written
+  and cleared four phases later costs the player nothing; a strict test in either place that got the
+  arithmetic wrong would silently drop a legitimate wave.
+- ⚠️ **`arrivalTurn` IS STILL CLEARED FOR AN UNPLACED UNIT EVEN WHEN THE BERTH IS KEPT.** Keeping a
+  berth is not the same as staying an arrival: the unit has to go back to `isReinforcement()` —
+  concealed, 999 to both turn accessors, re-stampable — or Stage 7's ⚠️ comes true and it reads as a
+  ship that deployed on a turn now past.
+- ⚠️ **`'gateentry'` HAD TO BE ADDED TO `isVortexDeclaration` IN `BallisticIconContainer`, and that
+  is the information leak, not a cosmetic miss.** An arrival claim carries the same `targetid` as an
+  exit claim — the claiming player's nearest qualifying unit — so without it the marker is hung on
+  **that ship** and a bright line drawn to it from the gate, on the claimant's own screen, the
+  instant the order is built and before the server has masked anything. Which unit signalled is never
+  revealed ([[project_jump_gates]] §2.1). It also gets a `case` of its own in the label switch, in
+  `hexBlue`, or it falls through to the default **red** hex and reads as incoming fire at a gate
+  nobody is shooting.
+- ⚠️ **`gamedata.canSignalJumpGate` WAS BLIND TO A GATE HOLDING AN ENTRANCE.** `getVortexHeldBy` is
+  exit-only by design, so on its own it answers "free to signal" for a gate that demonstrably is not.
+  The server refuses such a claim (`hasOpenVortex` knows nothing of flavour), so the blindness would
+  have shown up as a button offered and then silently rejected at commit — the exact "worst of both"
+  that function's charge note exists to avoid. `getEntranceHeldBy` is now asked beside it.
+- **`data-declared` became `data-action`**, and it is not a rename: there were two states and two
+  labels, and there are now four (Choose Hex, Withdraw Jump Point, Select Reinforcements, Withdraw
+  Gate Signal). A boolean cannot carry four. The row that knows its own state writes the label it
+  wants and `syncLabel` only moves it onto the button.
+- **A gate row never highlights the map**, deliberately. `highlight()` drives the blue Forming
+  markers of `'jumpentry'` declarations; a gate's claim is not one, and the gate is a permanent,
+  named, plainly visible unit on its own hex. The highlight exists to tell three *identical* markers
+  apart — a gate has no twin to be confused with.
+- **`SIGNALLED`, not `OPENING`.** A drive is *holding* a doorway of its own open; a gate has been
+  *asked* to open one and may still lose the contest to a nearer enemy claim. Both share the cyan
+  row tint, which is right — each is a doorway this player is counting on. `SIGNALLED` is wider than
+  the tag's `min-width` and grows, which is what that floor-not-`width` choice was for; the shared
+  **left** edge is what the user asked for and it is unaffected.
+- **`removeGateSignalOrder` now drops the berths with the claim**, guarded on the gate not already
+  holding a doorway from an earlier turn — cancelling this turn's claim on a gate that is already
+  open takes nothing away, and clearing there would cancel a wave nobody asked to cancel.
+
+**Two rulings made here, both open to reversal:**
+
+1. **A gate's log line says "opens an ARRIVAL jump point", one turn before the blue vortex appears.**
+   The claim itself stays secret (`hideSystemFireOrders`), so this brings forward exactly one turn of
+   "somebody is coming through here" — the same trade §2.3 already made for a ship's entrance, whose
+   blue Forming marker is public for the whole of its declaration turn. It still names only the
+   **player**, never a unit and never a count.
+2. **Anyone may ride an open gate entrance, including one an opponent paid to open.** A gate is
+   contested ground with no owner priority and *any* unit of *any* side may use an open gate vortex
+   ([[project_jump_gates]] §2.6); this is that rule read in the other direction. Both
+   `collectGateOpeners` (server) and `gateCandidates` (client) list an open entrance whoever claimed
+   it. Narrowing it to the claimant is a one-line change in each if the user would rather.
+
+**Still not offered:** re-aiming or re-timing a standing gate claim (cancel and re-signal, exactly as
+Phase 2 has always worked), and a gate entrance is **not** a way out — `Movement::getOpenVortexInHex`
+and its client mirror are entrance-blind by design (§2.6), so a gate signalled for arrival offers no
+Jump Out button for the turns it stands.
+
+**Proven headless.** `tests/replay/reinforcementsStage8Harness.php` — **103 assertions across games
+4277/4307/4311, all passing, zero database writes** (`Manager::$dbManager` stubbed by reflection; the
+six private methods reached the same way). It builds a `JumpgateCapital` on top of a real player's
+unit in a real recorded game, so the signal-range and distance rules are the live ones:
+
+- the claim rules: an arrival claim is legal with the rule on and a wave waiting; refused with the
+  rule off, refused with nothing in hyperspace, refused outright on a **ship's** Jump Engine — and a
+  **departure** claim is unaffected by all three, so the rule gate is on the flavour and not the gate;
+- the class: an arrival claim opens a `SpawnJumpPointEntrance` (`phpclass` included, which is the
+  identity that survives the reload); a departure claim still opens a plain `SpawnJumpPoint`;
+- the contest: my arrival claim against an enemy exit claim **0 hexes** from the gate opens **yellow**,
+  and my whole manifest is refunded — still in hyperspace, still unassigned, nothing spent;
+- closure: hold 3 stands on turns N…N+2 and expires on N+3, while a **ship's** entrance on the same
+  vortex class is still one-shot (trap 5);
+- the waves: `collectGateEntrances` puts the gate in `$opened` and leaves out a gate holding an exit
+  (proven with the exit vortex **actually on the board**, so the assertion is about the class and not
+  about a lookup returning null); every manifest unit is stamped for next turn in memory *and* in the
+  database; on the last turn of the hold the gate is not in `$opened` and every berth is refunded;
+- the release: an unplaced arrival clears `arrivalTurn` and **keeps** a gate berth with no
+  `arrivalvia` write at all, while a **ship** berth is dropped exactly as Stage 7 left it.
+
+**And headless on the client** — `tests/replay/reinforcementsStage8ClientHarness.js`, run with plain
+`node` from anywhere, `vm`-evaluated against a stubbed client world because a parse check cannot
+catch a missing global or a wrong predicate ([[howto_verify_react_bundle]]). It injects one export
+line before the module's `return {` to reach the private row builders and changes nothing else.
+**34 assertions**. The module evaluates clean; a gate
+holding an entrance is listed and one holding an exit is not; a destroyed gate is not; `age < hold`
+across all three states including the no-vortex NaN case; the row offers **Select Reinforcements**
+badged **OPEN** and sorts **before** the hyperspace drives; on the last turn it says
+`jump point closes this turn`, its radio is `disabled`, and the pre-checked row is the **drive**, so
+the dialog can never open stuck on a row nobody can move off; a claimed gate offers **Withdraw Gate
+Signal** badged **SIGNALLED** *before its vortex exists*; a `'jumppoint'` claim on a gate is **not** an
+arrival doorway; a drive booked on the gate is greyed as `riding <gate>` and freed again the moment
+the doorway stops taking waves; `clearGateManifest` drops every berth; and `strandedByCommit` is
+**silent while any live gate is on the map** and names the stranded fighter again the moment there is
+none — which is the change §4 Stage 4b wrote down in advance as the one Stage 8 would have to make.
+
+**Replay harness: `check` is 155 passed, 0 failed on the full local corpus.** Stage 8 adds **no
+payload difference of any kind** — no new column, no new note, no new serialised field; the flavour
+rides an existing `damageclass` and the client's last-turn test reads a pair of fields Phase 2 has
+sent since 2026-08-23. (Game 4318 SKIPs: it advanced since it was recorded and wants its own
+re-record.) Stage 6 (177) and Stage 7 (80) both still pass unchanged.
+
+⚠️ **The legacy bundles need regenerating** (`scripts/fvbuild.ps1`) before this is exercised in
+production mode — six client files changed and `game.php` serves them from `game.legacy.bundle.js`
+outside dev mode. *(Done 2026-08-29, together with the fixes below.)*
+
+### Stage 8 — first play test (game 4319, 2026-08-29): two bugs, neither of them in the gate code
+
+Both reports came from one session and neither was a mistake in what Stage 8 built. One was a claim
+the menu file made about itself that had never been true; the other was a purchase the lobby should
+never have allowed. They are recorded at length because they are the same *shape* — **a state that
+was theoretically reachable all along and that reinforcements made ordinary**.
+
+> "You can't click on a Jump Gate or Open Ship Details buttons unless you have a ship selected in
+> Initial Orders."
+
+⭐⭐ **THE MENU'S OWN COMMENT SAYS `this.selectedShip` IS "ROUTINELY NULL HERE", AND ONE CONDITION IN
+THE ARRAY IT SITS IN COULD NOT SURVIVE THAT.** `isEnemyEW` reaches
+`shipManager.hasSpecialAbility(this.selectedShip, 'alliedEW')` whenever the game has friendly fire
+OFF, and `getSpecialAbilitySystem` opens with `for (var i in ship.systems)` — which on `null`
+**throws**. It is the third entry in `ShipTooltipInitialOrdersMenu.buttons` (`addOEW`), reached as
+soon as `notSelf` is true, which it always is when nothing is selected.
+
+⚠️ **AND A THROW THERE COSTS THE WHOLE PANEL, NOT ONE BUTTON.** The conditions run inside
+`ShipTooltipMenu.renderTo`'s `.filter()`, which runs inside `ShipTooltip.createForSingleShip`, which
+runs inside the **constructor, before `show()`**. So a TypeError in a condition that was never going
+to add a button took the name, the stats, the ballistics list, both gate signal buttons and **Open
+Ship Details** down with it. Nothing appeared at all, which is exactly what the report describes.
+
+It stayed hidden for the whole of Jump Gates Phase 2 because `InitialPhaseStrategy.activate` calls
+`selectFirstOwnShipOrActiveShip`, so something is essentially always selected — Stage 3's "click the
+gate with nothing selected" gesture was only ever exercised with a ship still selected from the
+auto-select. **Reinforcements are what made an empty selection ordinary**: a fleet held entirely in
+hyperspace has nothing for `getFirstFriendlyShip` to return.
+
+- **`isEnemyEW` now answers a plain `false` with no source, BEFORE the friendly-fire shortcut** —
+  which would otherwise say "yes, EW is legal" with no unit to assign it from.
+- **Two entries gained a `hasOrderSource` condition**: `targetWeaponsHex` and `removeMultiOrder`
+  asked only about the *weapon selection*, never about the shooter, so they could be offered with a
+  null source and hand `weaponManager` a null. Same fix on the Firing menu's `targetWeaponsHex` and
+  `targetSuppWeapons`. Every other entry already failed closed through `isSelf` / `isEnemy` /
+  `isElint` / `isFriendly`.
+- ⭐ **AND A SECOND, INDEPENDENT WAY TO LOSE THE SAME PANEL.** `InitialPhaseStrategy.targetShip` (and
+  its twins in `FirePhaseStrategy` / `PreFiringPhaseStrategy`) refused a selected unit that is not on
+  the board yet by calling `showShipTooltip(ship, payload, menu, false)` — with `menu` still
+  **undefined**, because the `var` is hoisted and assigned two lines below. That is not "a menu with
+  no orders in it": `ShipTooltip` renders no button row without a menu and tears itself down on the
+  first mouse event. All three now compute an `orderSource` — the selected ship, or `null` when it is
+  not deployed yet — and build the menu from that. The refusal is real and unchanged; what it costs
+  is the ORDER SOURCE, not the panel. (`FirePhaseStrategy` / `PreFiringPhaseStrategy` also had no
+  null guard at all on `getTurnDeployed(this.selectedShip)`, so an empty selection threw there too —
+  the same crash, one phase along.)
+
+**Proven headless**: `tests/replay/initialOrdersTooltipHarness.js`, plain `node`, **14 assertions**.
+It re-runs `renderTo`'s *own* condition filter — same `[].concat(condition)`, same
+`.every(c => c.call(menu))` — because the bug was never in a button's verdict but in a condition
+throwing on the way to one, and a test that only asked "is the gate button offered?" would have
+passed on the broken code by never reaching the throw. Removing the null guard turns 14 passed into
+7 passed / 7 failed, the first of them naming the real message
+(`Cannot read properties of null (reading 'systems')`).
+
+> "Turn 3 triggered Pre-Turn Actions gamephase, and I'm not sure why."
+
+⭐⭐ **A GATE IS IN `$opened` AS THE DOORWAY'S HOLDER, NOT AS A UNIT RIDING IT — AND IT STAMPED
+ITSELF.** `stampArrivingReinforcements` has three populations and the first is "the OPENER itself,
+which always arrives through its own doorway", keyed on `isset($opened[$unit->id])`. That sentence is
+true of a **ship** and false of a **gate**: `collectGateEntrances` files the gate under its own id
+precisely so the *manifest* test below it works. So a gate that also carried `reinforcement` matched
+the opener test **on itself** and was given `arrivalturn = turn + 1` on every turn its jump point
+stood. `TacGamedata::hasReinforcementsArriving` reads exactly that column, so `FireGamePhase::advance`
+granted the owner a Deployment phase for a unit already on the board — and the client, correctly, had
+nothing to place, so it announced itself as **PRE-TURN ACTIONS**. It then repeated: that phase's
+`releaseUnplacedReinforcements` cleared `arrivalturn` again, which made the gate `isReinforcement()`
+once more, and the end-of-turn sweep re-stamped it.
+
+⚠️ **THE FLAG SHOULD NEVER HAVE BEEN ON THE GATE.** Both gates in 4319 were bought with the lobby's
+**REINFORCEMENTS** group selected, and nothing on either side refused it. A base, an OSAT and Terrain
+all answer **1** to `getTurnDeployed` before it ever looks at the reinforcement branch, so the flag
+can never come true for them — but `isReinforcement()` means "flagged **and** no arrival turn yet",
+which such a unit answers **true** while standing in plain sight on the map.
+`hideHyperspaceReinforcements` already carried a ⚠️ about exactly this ("BOTH TESTS, not
+`isReinforcement()` alone"), which is what kept the gate visible to the enemy; the stamp had no such
+guard.
+
+- ⭐ **ONE NAME FOR THE RULE, THREE READERS.** `BaseShip::alwaysDeploysTurnOne()` is the first line of
+  `getTurnDeployed` lifted into a method, and it is now also asked by `BuyingGamePhase::process` (the
+  flag is refused outright on such a hull) and by `stampArrivingReinforcements` (no arrival turn,
+  ever). Trap 24's rule applied to a predicate rather than to a decision: three sites re-listing
+  `osat || base || isTerrain()` is three chances to disagree.
+- **The lobby refuses the same purchase up front** — `gamedata.canBeReinforcement`, asked by
+  `doBuyShip`, `doBuyBulk`, `isReinforcementRow`, `toggleReinforcement` and the row's Reinforce link,
+  so the group a player sees and the flag the server writes cannot disagree. The toggle can still
+  clear a stale flag on a loaded fleet, which is the only useful direction it has there.
+- **Kept at the stamp as well as at the buy**, deliberately: a fleet bought before the fix carries the
+  flag in the database, and the stamp is what every later phase believes.
+
+**Proven headless**: six new assertions in `tests/replay/reinforcementsStage8Harness.php` (**130
+passed, 0 failed**, was 103). The gate is given the flag by hand, the way an already-bought fleet
+carries it, and the harness asserts it is still in `$opened` (it *is* holding the doorway), is not
+stamped, produces no database write, grants **no** Deployment phase — and that its manifest is stamped
+exactly as before, because the refusal is about the gate alone. ⚠️ The gate is re-owned by the real
+player for that block: the harness's default gate is `userid -5`, against which the phantom-phase
+assertion is **vacuous**. Disabling the guard turns those six into four failures.
+
+**And the toast that came with it.** The rest of the same report — *"whenever I click on a Jump Gate
+I get the 'You cannot deploy on Terrain' warning as if I have a ship selected for deployment, but
+there's no ship"* — is `DeploymentPhaseStrategy.onHexClicked`'s entry guard, which read
+`getTurnPlaced(this.selectedShip) < gamedata.turn`. That is right as "already placed on an earlier
+turn, so no re-placement" and wrong as the rule it stands in for: a unit that places **later** passes
+it, and a unit still in hyperspace answers **999**. The click then ran the whole placement path —
+`validateDeploymentPosition`, then `getShipsInSameHex`, whose terrain branch is where that toast comes
+from — for a unit with no business being placed at all. It is now `!=`: this turn or nothing. (With
+the gate no longer an "arriving reinforcement" the phase that made this reachable is gone as well, so
+both ends are closed.)
+
+**Data repair for 4319**: `UPDATE tac_ship SET reinforcement=0, arrivalturn=NULL, arrivalvia=NULL WHERE
+tacgameid=4319 AND phpclass='JumpgateCapital'` — `hasReinforcementsArriving(210, 3)` goes from `true`
+to `false`. Any other game whose lobby put a base, an OSAT or a gate in the reinforcements group wants
+the same two columns cleared; nothing else about such a unit is wrong.
+
+**Replay harness: `check` is 155 passed, 0 failed**, unchanged — none of this touches a serialised
+field. Stage 6 (177), Stage 7 (80) and the Stage 8 client harness (34) all still pass.
 
 ### Stage 9 — optional, after playtest
 The scatter initiative penalty (scatter hexes + 2 per 60° of facing shift, applied to units arriving
@@ -1347,11 +1638,16 @@ through that vortex, on their arrival turn only) read from the `'VortexScatter'`
    parsed with `explode(',', $v, 3)`. Entrance-ness rides the **class**; scatter rides a new
    additive `'VortexScatter'` note. ⚠️ `notekey_human` is `varchar(40)` and an overflow is a mysqli
    1406 that aborts the whole submission, not a truncation.
-5. **A one-shot entrance must release its engine.** `spawnVortexUnit` opens with
-   `if ($this->hasOpenVortex($gamedata->turn)) return null;`. If the entrance does not close at the
-   end of the arrival turn, the ship that opened it can never open an exit for the rest of the
-   game. `closeExpiredVortices` needs an entrance clause that disturbs neither the ship branch nor
-   the `holdsGateEngine` narrowing.
+5. **A one-shot entrance must release its engine — and ONE-SHOT IS A SHIP'S RULE, NOT THE VORTEX'S.**
+   `spawnVortexUnit` opens with `if ($this->hasOpenVortex($gamedata->turn)) return null;`. If the
+   entrance does not close at the end of the arrival turn, the ship that opened it can never open an
+   exit for the rest of the game. `closeExpiredVortices` needs an entrance clause that disturbs
+   neither the ship branch nor the `holdsGateEngine` narrowing.
+   ⚠️ **Stage 7 wrote that clause ahead of the gate branch and Stage 8 had to reverse it**
+   (`&& !$this->isGateJump()`): §0 gives a GATE'S entrance the gate's **programmed hold**, not one
+   turn. Both orderings are defensible from first principles and only the user ruling settles it —
+   which is why the reversal is a rule, not a tidy-up. Getting it wrong slams a 4-turn doorway shut
+   after one turn, silently, while looking exactly like a working feature.
 6. **Removing ships from the payload** must re-index `$this->ships` and rebuild `$shipsById`. §3.6.
 7. **The three facing-arrow constants are kept in step by hand** and now there are six. §3.7.
 8. **`generateIndividualNotes` deploy guards.** Only three exist
@@ -1362,6 +1658,13 @@ through that vortex, on their arrival turn only) read from the `'VortexScatter'`
     ballistic-icon path — `'jumppoint'` orders are already forced to `targetid = -1` throughout
     `createBallisticIcon`. `'jumpentry'` must be too, or the blue marker will be drawn over the
     opener, which is in hyperspace ([[project_jump_gates]], trap 2).
+    ⚠️ **And `'gateentry'` (Stage 8) is the sharper case, because there the leak is real rather than
+    merely wrong.** A gate claim's `targetid` carries the CLAIMING PLAYER, recorded as their nearest
+    qualifying unit — so a flavour left out of `isVortexDeclaration` hangs the marker on **that ship**
+    and runs a bright line to it from the gate, on the claimant's own screen, before the server has
+    masked anything. Which unit signalled is never revealed ([[project_jump_gates]] §2.1). **Every
+    new vortex-ish `damageclass` must be added to that test and given a `case` in the label switch**;
+    without the second it falls through to the default **red** hex and reads as incoming fire.
 11. **Hex direction 0 is EAST and increases CLOCKWISE.** Both libraries agree. Do not re-derive it
     ([JUMP_POINTS_PLAN.md §2.2](JUMP_POINTS_PLAN.md)).
 12. **`Manager::insertSingleShip` casts the id to int** — do not bypass it
@@ -1435,6 +1738,49 @@ through that vortex, on their arrival turn only) read from the `'VortexScatter'`
     around the first, and what makes any "is this hex free" test written for Stage 7 need to think
     about whether it means *before* or *after* this turn's doorways exist.
 
+23. ⚠️ **`getVortexHeldBy` / `isJumpVortex` ARE EXIT-ONLY BY DESIGN, so any rule that means "is this
+    unit holding a jump point at all" must ask `getEntranceHeldBy` beside them.** (Stage 8, client.)
+    The two predicates were deliberately kept separate because their callers do not agree on the
+    verdict — `canJumpOut`, the Maintain control and the closing-vortex warning are all rules an
+    entrance must FAIL, while the icon's z-plane and the hex-stack sweep are things it must MATCH —
+    so the temptation is to widen `isJumpVortex` and the correct move is never to. The bite:
+    `gamedata.canSignalJumpGate` asked only `getVortexHeldBy` and so read a gate holding an ENTRANCE
+    as free to signal, while the server's `hasOpenVortex` knows nothing of flavour and refuses. That
+    shape — **client predicate narrower than its server twin** — always surfaces as a button offered
+    and then silently rejected at commit, which is worse than either answer alone.
+
+24. ⭐ **WHEN TWO PLACES COULD DECIDE THE SAME THING, PICK ONE AND MAKE THE OTHER LENIENT.** (Stage 8.)
+    "Is this berth still good?" is asked in the Deployment phase (`releaseUnplacedReinforcements`),
+    in Initial Orders (`collectGateOpeners`) and at end of turn (`collectGateEntrances`). Only the
+    last one runs at a moment when the answer is settled — closure is not written until the end of
+    Firing — so the other two keep the berth optimistically and defer. A berth written and cleared
+    four phases later costs the player nothing; a strict test at either earlier point that got the
+    arithmetic wrong would silently drop a legitimate wave. Say which one is the authority **in the
+    comment at every site**, or the next change will "fix" a leniency that is load-bearing.
+
+25. ⭐⭐ **A PREDICATE THAT SAYS "NOT ON THE BOARD" IS NOT THE SAME AS ONE THAT SAYS "CANNOT BE ON
+    THE BOARD".** (Stage 8 play test.) `isReinforcement()` is *flagged and no arrival turn yet* — a
+    statement about **where a unit is**. A base, an OSAT and Terrain answer `1` to `getTurnDeployed`
+    before it looks at the flag at all, so such a hull can carry the flag, stand in plain sight on
+    the map, and answer `true` to `isReinforcement()` forever. `hideHyperspaceReinforcements` knew
+    this and tested both; `stampArrivingReinforcements` did not, and stamped a signalled jump gate
+    as arriving through its own doorway — which bought its owner an empty Deployment phase on every
+    turn the doorway stood. **Anything keying off `isReinforcement()` must decide whether it also
+    needs `alwaysDeploysTurnOne()`**, which is now the one name for the hull half of the question.
+    And the flag has no business being on such a hull at all: refuse it at the buy, on **both**
+    sides.
+
+26. ⚠️ **A CONDITION THAT THROWS TAKES THE WHOLE TOOLTIP, NOT ITS OWN BUTTON.** (Stage 8 play test,
+    client.) `ShipTooltipMenu.renderTo` evaluates every button's conditions in one `.filter()`, and
+    that runs inside the `ShipTooltip` **constructor**, before `show()`. So one TypeError in an EW
+    predicate that was going to answer `false` anyway deletes the name, the stats, the ballistics
+    list and **Open Ship Details** along with it — and it looks exactly like "clicking that unit
+    does nothing". The trigger here was `this.selectedShip === null`, which the gate buttons were
+    explicitly designed for and which the array around them had never survived. **Any predicate in
+    a tooltip menu that dereferences `this.selectedShip` needs a null guard, whatever the button
+    beside it claims** — and a button whose ACTION needs a shooter needs one as a condition, or it
+    is offered with nothing to fire it from.
+
 ---
 
 ## 6. Test plan
@@ -1477,6 +1823,40 @@ Local, two seats, in a game with the rule on:
 | 31 | An Ancient (Vorlon/Shadow) opener vs a Young one | The Ancient is precise far more often; the log line's roll differs by 5 |
 | 32 | Declare next to a moon or an asteroid field | The doorway never forms inside terrain, however the dice fall |
 | 33 | Declare with two openers in one turn, then withdraw one | Only the standing declaration forms; the withdrawn one's manifest has its `arrivalvia` cleared and nothing else changes |
+
+**Stage 8 (gates), all still to be done in play** — 11 and 12 above are the two the plan named; these
+are the gestures the build added:
+
+| # | Scenario | Expect |
+|---|---|---|
+| 34 | Click a gate in Initial Orders with nothing in hyperspace | Only **Signal Jump Gate**. No arrival button at all |
+| 35 | Same with a wave waiting | **Signal Gate for Arrival** too, blue vortex icon |
+| 36 | Press it | The panel is **cyan**, the commit reads **Signal for Arrival**, and the Jump Point Manifest opens the moment it is pressed |
+| 37 | Close the panel by clicking away instead | No claim, no berths, nothing to clean up |
+| 38 | Look at the gate's hex after signalling | A **blue** "Arrival Gate Signalled" marker, not the yellow one and not a red hex |
+| 39 | Manage Reinforcements on that turn | The gate is a row, badged **SIGNALLED**, offering **Withdraw Gate Signal**, listed above the drives |
+| 40 | Withdraw it there | The row goes, the berths clear, the menu stays open |
+| 41 | Cancel Gate Signal from the tooltip instead | Same: claim and berths both gone |
+| 42 | Commit, play the turn, look at turn N+1 | A **blue** entrance vortex on the gate's hex; the wave deploys into it on the gate's own facing |
+| 43 | Turn N+1, Manage Reinforcements | The gate is a row badged **OPEN**, offering **Select Reinforcements**; it opens the manifest |
+| 44 | Name a second wave and commit | It arrives on N+2 — a wave per turn of the hold (§0) |
+| 45 | Do the same on the **last** turn of the hold | The row is greyed and says `jump point closes this turn`; the drives are still selectable |
+| 46 | Signal a gate for 1 turn, bring nobody through | The berth is refunded at end of turn; the units are unassigned and concealed again next turn |
+| 47 | Arrive through a gate, leave one unit unplaced | It goes back to hyperspace but **keeps** its berth, and rides the next wave without being re-named |
+| 48 | Try to Jump Out through a gate's blue entrance | No button; the gate is a way in only while it is signalled that way |
+| 49 | Try to signal a gate that is already holding an entrance | The button is not offered (the charge reads 0 and `getEntranceHeldBy` also refuses) |
+| 50 | A game **without** the reinforcements rule | The arrival button never appears, and a hand-built `gateentry` claim is refused server-side |
+
+**From the first play test (2026-08-29, game 4319)** — the two fixes above:
+
+| # | Scenario | Expect |
+|---|---|---|
+| 51 | Initial Orders with **nothing** selected, click a gate | Full tooltip: Open Ship Details and both gate signal buttons, all clickable |
+| 52 | Same, click an ordinary enemy ship | Full tooltip, Open Ship Details only — no EW or targeting buttons offered with no source |
+| 53 | Select a ship, select some weapons, then deselect | The hex/split buttons drop out rather than being offered with nothing to fire |
+| 54 | Lobby: select REINFORCEMENTS, buy a jump gate / a base / an OSAT | It lands in **MAIN FLEET**, with no Reinforcement link on its row |
+| 55 | Signal a gate for arrival and play three turns out | No Deployment phase appears on any turn for the gate itself; only a real wave brings one |
+| 56 | Click a gate during a Deployment or Pre-Turn phase | No "You cannot deploy on terrain" toast unless a unit that actually places this turn is selected |
 
 ---
 

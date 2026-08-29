@@ -205,11 +205,17 @@ window.DeploymentPhaseStrategy = function () {
         PhaseStrategy.prototype.onHexClicked.call(this, payload);
         var hex = payload.hex;
 
-        if (!this.selectedShip || (shipManager.getTurnPlaced(this.selectedShip) < gamedata.turn)) {
-            //No selected ship or ship was ALREADY placed on an earlier turn so don't allow
-            //re-placement. Note this is the PLACEMENT turn, not the arrival turn: a reinforcement
-            //commits its entry hex the turn before it arrives, and from the arrival turn on it is
-            //locked in like any other deployed unit.
+        if (!this.selectedShip || (shipManager.getTurnPlaced(this.selectedShip) != gamedata.turn)) {
+            //No selected ship, or the ship does not place on THIS turn. Note this is the PLACEMENT
+            //turn, not the arrival turn: a reinforcement commits its entry hex the turn before it
+            //arrives, and from the arrival turn on it is locked in like any other deployed unit.
+            //
+            //⚠️ `!=`, NOT `<` (user report 2026-08-29). `<` reads as "already placed on an earlier
+            //turn, so no re-placement", which is right, but it also lets a unit that places LATER
+            //through - and a unit still in hyperspace answers 999, the "not on the board" sentinel.
+            //Such a click then ran the whole placement path against a unit that has no business
+            //being placed at all, whose most visible symptom was getShipsInSameHex shouting "You
+            //cannot deploy on terrain." at a click on a jump gate. This turn or nothing.
             return false;
         }
 

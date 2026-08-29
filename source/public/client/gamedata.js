@@ -366,10 +366,19 @@ window.gamedata = {
         if (shipManager.systems.isDestroyed(gate, engine)) return false;
         if (shipManager.power.isOffline(gate, engine)) return false;
 
-        //A gate holds ONE jump point at a time. While one stands the engine's charge reads 0, so
-        //the load test below covers it too - but say it, because the two are different rules and
-        //the reasons the player is shown differ.
+        /* A gate holds ONE jump point at a time. While one stands the engine's charge reads 0, so
+           the load test below covers it too - but say it, because the two are different rules and
+           the reasons the player is shown differ.
+
+           ⚠️ BOTH KINDS OF VORTEX (Stage 8). getVortexHeldBy is EXIT-ONLY by design - see
+           isJumpVortex, whose callers do not agree on the verdict - so on its own it is blind to a
+           gate holding an ENTRANCE, and this test would answer "free to signal" for a gate that
+           demonstrably is not. The server refuses such a claim outright
+           (Firing::getGateSignalBlock asks hasOpenVortex, which knows nothing of flavour), so the
+           blindness would show up as a button that is offered and then silently rejected at commit
+           - the exact "worst of both" the charge note above exists to avoid. */
         if (shipManager.movement.getVortexHeldBy(gate)) return false;
+        if (shipManager.movement.getEntranceHeldBy(gate.id)) return false;
 
         //THE 20-TURN RECHARGE. turnsloaded / loadingtime are sent per instance by
         //JumpEngine::stripForJson off getVortexRechargeLoad, so this is the ordinary weapon load
@@ -377,6 +386,26 @@ window.gamedata = {
         if (!weaponManager.isLoaded(engine)) return false;
 
         return !!gamedata.getGateSignalSource(gate);
+    },
+
+    /* ⭐ REINFORCEMENTS_PLAN.md STAGE 8 - MAY I SIGNAL THIS GATE FOR AN ARRIVAL? The condition on
+       the second Initial Orders tooltip button, and the client mirror of the two extra rules
+       Firing::getGateSignalBlock applies to a 'gateentry' claim.
+
+       Everything a departure claim needs, PLUS something in hyperspace to bring in. A gate holds one
+       jump point and it is one-way (plan section 2.6), so an arrival claim spends the gate's whole
+       charge on a doorway nobody can use if there is nothing waiting behind it - the server refuses
+       it for that reason, and this is why the button is simply not offered.
+
+       ⚠️ ReinforcementEntry OWNS "what is still in hyperspace", and this asks it rather than
+       re-deriving: the predicate is "reinforcement, no arrival turn yet, mine, alive", and a second
+       copy of it here would be a fifth place for the arrivalTurn half to be forgotten. The module is
+       guarded because gamedata.js loads before it. */
+    canSignalJumpGateForArrival: function canSignalJumpGateForArrival(gate) {
+        if (!gamedata.canSignalJumpGate(gate)) return false;
+        if (!window.ReinforcementEntry) return false;
+
+        return ReinforcementEntry.myHyperspaceUnits().length > 0;
     },
 
     isMyOrTeamOneShip: function isMyOrTeamOneShip(ship) {
