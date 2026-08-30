@@ -185,10 +185,6 @@
                      <input id="allowReinforcementsCheck" type="checkbox" name="allowReinforcementsCheck"> <label for="allowReinforcementsCheck" class="clickable">Allow Reinforcements</label>
                 </div>
 
-                <div class="settings-group movementspacecontainer">
-                     <input id="friendlyFireCheck" type="checkbox" name="friendlyFireCheck"> <label for="friendlyFireCheck" class="clickable">Friendly Fire</label>
-                </div>
-
                 <div id="desperate" class="settings-group movementspacecontainer">
                     <div>
                         <input id="desperatecheck" type="checkbox" name="desperatecheck"> <label for="desperatecheck" class="clickable">Desperate Scenario</label>
@@ -202,6 +198,10 @@
                             <option value="2">Team 2</option>
                         </select>
                     </div>
+                </div>
+
+                <div class="settings-group movementspacecontainer">
+                     <input id="friendlyFireCheck" type="checkbox" name="friendlyFireCheck"> <label for="friendlyFireCheck" class="clickable">Allow Friendly Fire</label>
                 </div>
 
                 <div class="settings-group movementspacecontainer">
