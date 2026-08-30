@@ -53,6 +53,7 @@ class KobolMinotaur extends BaseShip{
 		$this->addAftSystem(new GromeFlakCannon(3, 4, 2, 30, 180));
 		$hyperdrive = new JumpEngine(5, 32, 6, 20);
 			$hyperdrive->displayName = 'FTL Drive';
+			$hyperdrive->markLegacy(); //JUMP_POINTS_PLAN.md section 9 - this setting jumps by boost, not by vortex
 			$this->addAftSystem($hyperdrive);
 
         $this->addLeftSystem(new Thruster(6, 9, 0, 3, 3));

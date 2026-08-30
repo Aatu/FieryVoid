@@ -241,6 +241,125 @@ window.gamedata = {
 
     },
 
+    /* JUMP_GATES_PLAN.md - IS THIS UNIT A FIXED JUMP GATE?
+
+       ONE PLACE holds the class name, mirroring shipManager.movement.isJumpVortex, because three
+       different sweeps ask: the submit path in ajaxInterface (a gate is the one unit a player may
+       order without owning it), the Initial Orders tooltip, and the signal panel.
+
+       phpclass reaches the client on the STATIC blueprint (model/ship.js merges by faction +
+       phpclass), so it is always present.
+
+       ⚠️ JumpgateCapital ONLY. jumpgateNew (terrain) and the civilian Jumpgate also mount a Jump
+       Engine and are obsolete and out of scope (user ruling 2026-08-23, plan trap 12) - they keep
+       their Phase 1 behaviour and must never match here.
+
+       ⚠️ This does NOT loosen isMyShip, and must not be made to. A gate stays terrain for the fleet
+       list, the active-ship sweep, the movement UI and the commit checks; the ONE thing that
+       changes is that a signal order on its Jump Engine rides the POST. */
+    isJumpGate: function isJumpGate(unit) {
+        return !!unit && unit.phpclass === "JumpgateCapital";
+    },
+
+    /* JUMP_GATES_PLAN.md Stage 3 - THIS GATE'S JUMP ENGINE, or null.
+
+       Keyed on the system NAME, because markGate() deliberately leaves $name 'jumpEngine' so the
+       existing client JumpEngine class is reused with no new JS (plan section 3.2). The client
+       tells a gate engine from a ship engine by the SHIP - isJumpGate above - never by the system,
+       which is why this asks isJumpGate first rather than looking for a flag on the system. */
+    getGateJumpEngine: function getGateJumpEngine(gate) {
+        if (!gamedata.isJumpGate(gate) || !gate.systems) return null;
+
+        for (var i in gate.systems) {
+            var system = gate.systems[i];
+            if (system && system.name === 'jumpEngine') return system;
+        }
+
+        return null;
+    },
+
+    /* ⭐ MY NEAREST UNIT THAT LETS ME SIGNAL THIS GATE, or null when I have none.
+
+       ⭐ WHICH UNIT IS NEVER CHOSEN BY THE PLAYER, and never matters (user ruling 2026-08-23, plan
+       section 2.1). The rule is "you have a live unit within the gate's signal range", not "this
+       ship signals" - so no ship needs to be selected to signal, and the gate is clicked directly.
+       The NEAREST is returned rather than the first found because the distance is what settles a
+       contested claim, and it is what the order's targetid records.
+
+       ⭐ NO LINE-OF-SIGHT TEST, DELIBERATELY (user ruling 2026-08-23). Signalling is a transmission,
+       not an aimed effect - unlike a ship projecting its own vortex, which runs mathlib.isLoSBlocked
+       against gamedata.blockedHexes in weaponManager.targetHex. Its absence is the RULE; do not add
+       one here to "match" the ship path.
+
+       ⭐ AND IT NEVER REVEALS THE UNIT IT PICKS. A stealthed, shaded or cloaked ship may be the
+       signaller and keeps its concealment - the opposite of the rule for a ship opening its own
+       vortex - so there is no isHidden guard here either.
+
+       The server re-derives all of this from the DB in Firing::getGateSignalBlock and overwrites
+       the order's targetid with its own answer, so this is a UX predicate and a hint, never an
+       authority (plan section 3.3 and trap 4).
+
+       Mirrors JumpEngine::getNearestGateSignaller. Keep the two lists in step. */
+    getGateSignalSource: function getGateSignalSource(gate) {
+        var engine = gamedata.getGateJumpEngine(gate);
+        if (!engine) return null;
+
+        var gateHex = shipManager.getShipPosition(gate);
+        var best = null;
+        var bestDistance = null;
+
+        for (var i in gamedata.ships) {
+            var unit = gamedata.ships[i];
+            if (!unit || unit.userid !== gamedata.thisplayer) continue;
+            if (unit.removed) continue;
+            if (shipManager.isDestroyed(unit)) continue;
+            if (gamedata.isTerrain(unit.shipSizeClass, unit.userid)) continue;   //a gate cannot signal itself
+            if (shipManager.getTurnDeployed(unit) > gamedata.turn) continue;     //not on the board yet
+
+            var distance = gateHex.distanceTo(shipManager.getShipPosition(unit));
+            if (distance > engine.range) continue;
+
+            if (bestDistance === null || distance < bestDistance) {
+                bestDistance = distance;
+                best = unit;
+            }
+        }
+
+        return best;
+    },
+
+    /* MAY I SIGNAL THIS GATE RIGHT NOW? The condition on the Initial Orders tooltip button, and the
+       client mirror of Firing::getGateSignalBlock's list - minus the two rules only the server can
+       judge (the one-claim-per-player test, which is a property of the submission, and the targetid
+       re-derivation).
+
+       Deliberately NOT a test of ownership: ANY player may signal ANY gate, including one the enemy
+       bought. That is the whole point of the contested-claim rule (plan section 2.4), and it is why
+       the gate had to be let through the POST at all (plan section 3.1). */
+    canSignalJumpGate: function canSignalJumpGate(gate) {
+        if (gamedata.gamephase !== 1) return false;      //declared in Initial Orders and nowhere else
+        if (gamedata.waiting) return false;
+
+        var engine = gamedata.getGateJumpEngine(gate);
+        if (!engine) return false;
+
+        if (shipManager.isDestroyed(gate)) return false;
+        if (shipManager.systems.isDestroyed(gate, engine)) return false;
+        if (shipManager.power.isOffline(gate, engine)) return false;
+
+        //A gate holds ONE jump point at a time. While one stands the engine's charge reads 0, so
+        //the load test below covers it too - but say it, because the two are different rules and
+        //the reasons the player is shown differ.
+        if (shipManager.movement.getVortexHeldBy(gate)) return false;
+
+        //THE 20-TURN RECHARGE. turnsloaded / loadingtime are sent per instance by
+        //JumpEngine::stripForJson off getVortexRechargeLoad, so this is the ordinary weapon load
+        //test and needs no gate-specific arithmetic.
+        if (!weaponManager.isLoaded(engine)) return false;
+
+        return !!gamedata.getGateSignalSource(gate);
+    },
+
     isMyOrTeamOneShip: function isMyOrTeamOneShip(ship) {
         if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
             return false; // Ensure terrain units are never considered friendly
@@ -405,6 +524,36 @@ window.gamedata = {
         ];
     },
 
+    // MID-TONE team colour — the runtime twin of the --fv-*-mid tokens in tokens.css,
+    // for allegiance text that sits in a DENSE list: the SelectFromShips picker's row
+    // names and the ShipTooltip stack-grid cells. Sits deliberately between
+    // getMutedTeamColorRGB (too faint to read as a signal at all) and the raw palette
+    // (a column of twenty full-chroma rows stops being a list and starts being a
+    // warning). Added 2026-08-20 alongside the ShipTooltip/fleetList brightening.
+    //
+    // A straight sRGB blend from the tone-mapped value toward the raw one, rather than
+    // a third set of HSL constants, and for a specific reason: the tone-map NORMALISES
+    // lightness to a fixed value, so re-deriving a "brighter" tier from HSL pushes an
+    // already-light hue (green) PAST the raw palette instead of toward it. Interpolating
+    // between the two endpoints cannot overshoot either of them, whatever the hue.
+    //
+    // ⚠️ MID_TEAM_MIX must stay in step with the --fv-*-mid literals: the CSS classes
+    // paint the fixed mine/ally/enemy tints for 2-team participants while THIS paints
+    // arbitrary teams for observers and 3+-team games, and the two arms sit in the same
+    // list. Change one, recompute the other (blend --fv-own/-ally/-enemy toward
+    // --fv-own-bright/-ally-bright/-enemy-bright by the same factor).
+    MID_TEAM_MIX: 0.55,
+    getMidTeamColorRGB: function getMidTeamColorRGB(team) {
+        var toned = gamedata.getMutedTeamColorRGB(team);
+        var raw = gamedata.getTeamColorRGB(team);
+        var m = gamedata.MID_TEAM_MIX;
+        return [
+            Math.round(toned[0] + (raw[0] - toned[0]) * m),
+            Math.round(toned[1] + (raw[1] - toned[1]) * m),
+            Math.round(toned[2] + (raw[2] - toned[2]) * m)
+        ];
+    },
+
     // Inline style for an "active mover" IniGUI box, derived from the ship's team
     // colour. Mirrors the .iniActive* CSS (border + translucent fill + glow) but
     // keyed on team instead of mine/ally/enemy.
@@ -455,6 +604,17 @@ window.gamedata = {
     // (a single "ally" colour is ambiguous once there are several teams).
     getShipOverlayColor: function getShipOverlayColor(ship, mine, ally, terrain) {
         if (terrain) {
+            /* JUMP_POINTS_PLAN.md Stage 6 - a jump point is terrain, but it is not scenery. Zoomed
+               out, every icon collapses to its overlay colour, and an off-white blob in the middle
+               of a battle reads as an asteroid - which is the one thing a player must not mistake
+               it for, because flying into it is how you leave the game. Yellow, the same --fv-warn
+               the "Jump Point Forming" hex marker, the facing arrow and the Jump Engine's map arc
+               all use (user request 2026-08-22).
+               isJumpVortex holds the class name once, so this and the two movement sweeps that ask
+               the same question cannot drift apart. */
+            if (shipManager.movement && shipManager.movement.isJumpVortex(ship)) {
+                return new THREE.Color(0xE1 / 255, 0xB0 / 255, 0x00 / 255).convertSRGBToLinear(); // --fv-warn
+            }
             return new THREE.Color(0xBE / 255, 0xBE / 255, 0xBE / 255).convertSRGBToLinear(); // Off-white
         }
 
@@ -484,26 +644,29 @@ window.gamedata = {
     // Returns a raw "rgb(r,g,b)" string (no "color:" prefix) so callers can drop
     // it straight into a style attribute.
     //
-    // CONVERTED to the shared allegiance palette (SELECT_FROM_SHIPS_PLAN.md Stage 6).
-    // The three literals below are --fv-own / --fv-ally / --fv-enemy from tokens.css,
-    // and the per-team branch runs the tone-mapped palette, so this label sits in the
-    // same brightness band as the hex picker's ship names rather than at full chroma.
-    // ⚠️ Its sibling getShipLogColorCss BELOW is deliberately NOT converted — the two
-    // functions have the same shape, so read the divergence as intent, not as a bug.
+    // REVERTED to full chroma 2026-08-20, both arms, on user request. The Stage 6 pass
+    // above had put this label in the muted band to sit level with the hex picker; in
+    // practice the picker is a dense twenty-row list and this is ONE header per fleet,
+    // and at that size the tone-mapped tints read as washed out. It now runs the raw
+    // palette on BOTH arms — the --fv-*-bright tokens as literals for the 2-team
+    // relative case, getTeamColorRGB for observers and 3+-team games — so a 2-team
+    // game and a 4-team game agree about how bright a fleet header is, which brightening
+    // only the relative arm would have broken. Now matches getShipLogColorCss exactly;
+    // the two are no longer allowed to diverge.
     getFleetHeaderColorRGB: function getFleetHeaderColorRGB(slot) {
         var rgb;
         if (gamedata.isPlayerInGame() && gamedata.getDistinctTeamCount() === 2) {
             if (parseInt(slot.playerid, 10) === parseInt(gamedata.thisplayer, 10)) {
-                rgb = [125, 191, 136];  // --fv-own   #7dbf88 (mine)
+                rgb = [50, 205, 50];    // --fv-own-bright   #32cd32 (mine)
             } else if (parseInt(slot.team, 10) === parseInt(gamedata.getPlayerTeam(), 10)) {
-                rgb = [121, 174, 212];  // --fv-ally  #79aed4 (ally)
+                rgb = [51, 173, 255];   // --fv-ally-bright  #33adff (ally)
             } else {
-                rgb = [234, 106, 94];   // --fv-enemy #ea6a5e (enemy)
+                rgb = [255, 80, 80];    // --fv-enemy-bright #ff5050 (enemy)
             }
         } else {
-            // Observer, or 3+-team participant: absolute per-team palette, tone-mapped
-            // into the same band as the three fixed tints above.
-            rgb = gamedata.getMutedTeamColorRGB(slot.team);
+            // Observer, or 3+-team participant: absolute per-team palette at full
+            // strength, the same values the 2-team arm hard-codes for teams 1-3.
+            rgb = gamedata.getTeamColorRGB(slot.team);
         }
         return "rgb(" + Math.round(rgb[0]) + "," + Math.round(rgb[1]) + "," + Math.round(rgb[2]) + ")";
     },
@@ -518,14 +681,20 @@ window.gamedata = {
     // self-consistent. NOTE: unlike getFleetHeaderColorRGB this returns a COMPLETE
     // declaration ("color:rgb(...);") ready to drop into a style attribute.
     //
-    // ⚠️ NOT CONVERTED to the shared allegiance palette, on purpose (user decision
-    // 2026-08-14, SELECT_FROM_SHIPS_PLAN.md Stage 6 item 3). Its sibling
-    // getFleetHeaderColorRGB ABOVE now runs the muted --fv-own/-ally/-enemy tints; this
-    // one keeps its own bright literals because the combat log is a dense scrolling wall
-    // of text where the stronger colours still earn their place. The two functions have
-    // the same shape and now disagree — that is intent, not drift.
+    // Kept its bright literals through the Stage 6 muting pass (user decision
+    // 2026-08-14) because the combat log is a dense scrolling wall of text where the
+    // stronger colours still earn their place. As of 2026-08-20 its sibling
+    // getFleetHeaderColorRGB ABOVE has been brought BACK to those same values on both
+    // arms, so the two functions no longer disagree: they are now the same scheme in
+    // two output shapes. Keep them in step.
     getShipLogColorCss: function getShipLogColorCss(ship) {
         if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
+            // ⚠️ DELIBERATELY pure white, NOT --fv-neutral (#b4c2cf) as the ship tooltip
+            // and the hex picker use for terrain. Ruled intentional by the user
+            // 2026-08-20 when the audit flagged it: the log is a scrolling wall of ship
+            // names, and terrain needs to stand out AGAINST the firing ship's name
+            // rather than sit level with it. Elsewhere terrain is a quiet default; here
+            // it is a distinction. Do not "unify" this.
             return "color:#ffffff;";
         }
         if (!gamedata.isPlayerInGame() || gamedata.getDistinctTeamCount() !== 2) {
@@ -809,6 +978,7 @@ window.gamedata = {
             var hasNoEW = [];
             var selfDestructing = [];
             var jumping = [];
+            var vortexClosing = [];  //JUMP_POINTS_PLAN.md Stage 6 - see the block that fills it
             var notLaunching = [];
             var notSetAA = [];//available Adaptive Armor points remaining!
             var notSetFC = [];//available BFCP points remaining for Hyach!
@@ -844,6 +1014,26 @@ window.gamedata = {
                         }
                     }
 
+                    /* ⭐ JUMP_POINTS_PLAN.md Stage 6 - THE JUMP POINT IS ABOUT TO CLOSE.
+                       A vortex closes at the end of every turn its holder does not declare
+                       Maintain (plan section 2.3), and until now nothing said so: the player
+                       committed Initial Orders and found out a phase later, by which time the
+                       decision could not be taken back. This is the last moment it can be.
+
+                       Asked of the VORTEX, not of the toggle, so it also covers the cases where
+                       maintaining was never on offer - the holder is out of range, or the vortex
+                       has reached its four-turn cap - which are precisely the ones a player has
+                       no other way of seeing coming. getVortexHeldBy returns null on the turn a
+                       vortex was declared (it has not formed yet), so a fresh declaration never
+                       warns about itself. */
+                    var heldVortex = shipManager.movement.getVortexHeldBy(myShips[ship]);
+                    if (heldVortex) {
+                        var jumpEngine = shipManager.systems.getSystemByName(myShips[ship], "jumpEngine");
+                        var maintaining = jumpEngine && typeof jumpEngine.isMaintainingVortex === 'function'
+                            && jumpEngine.isMaintainingVortex();
+                        if (!maintaining) vortexClosing.push(myShips[ship]);
+                    }
+
                     if (shipManager.isDisabled(myShips[ship])) {
                         continue;
                     }
@@ -876,6 +1066,12 @@ window.gamedata = {
                     var hasReadyLaunchers = false;
                     for (var i = 0; i < myShips[ship].systems.length; i++) {
                         var currWeapon = myShips[ship].systems[i];
+                        /* The Jump Engine is a BALLISTIC hex-target weapon (JUMP_POINTS_PLAN.md
+                           section 3.1) but it is not a launcher, and "you have not assigned any
+                           ballistic launch" is not advice about it - every jump-capable hull in
+                           the game would carry that line every turn it was charged. Its own
+                           warning is the jump-point one further down. */
+                        if (currWeapon.name === 'jumpEngine') continue;
                         if (currWeapon.ballistic) { //only ballistic weapons are of interest now
                             if (currWeapon.fireOrders.length > 0) {
                                 fired = 1;
@@ -971,6 +1167,15 @@ window.gamedata = {
                 }
                 html += "<br>";
             }
+            if (vortexClosing.length > 0) {
+                html += "The JUMP POINTS held by the following ships will CLOSE at the end of this turn: ";
+                html += "<br>";
+                for (var ship in vortexClosing) {
+                    html += gamedata.shipNameSpan(vortexClosing[ship]);
+                    html += "<br>";
+                }
+                html += "<br>";
+            }
             if (hasNoEW.length > 0) {
                 // New check to see if Scanner exists / has positive output before giving warning - DK 01/25
                 for (var i = hasNoEW.length - 1; i >= 0; i--) {
@@ -1048,6 +1253,7 @@ window.gamedata = {
 
         else if (gamedata.gamephase == 2) {
             var zeroSpeedShips = [];
+            var leavingBattle = [];
             var activeShips = gamedata.getActiveShips();
             var html = '';
 
@@ -1057,6 +1263,22 @@ window.gamedata = {
                     if (shipManager.movement.canChangeSpeed(ship, true) && ship.userid == gamedata.thisplayer) {
                         zeroSpeedShips.push(ship);
                     }
+                    /* JUMP_POINTS_PLAN.md Stage 6 - "this ship will leave the battle" was Stage 4's
+                       second reported gap: a jump-out committed with no confirmation at all, and it
+                       is the most irreversible order in the game. Committed is committed - the
+                       server removes the unit at the end of this phase. */
+                    if (ship.userid == gamedata.thisplayer && shipManager.movement.hasJumpedOut(ship)) {
+                        leavingBattle.push(ship);
+                    }
+                }
+            }
+
+            if (leavingBattle.length > 0) {
+                html += "<br>";
+                html += "The following units will LEAVE THE BATTLE through a jump point: <br>";
+
+                for (var k in leavingBattle) {
+                    html += gamedata.shipNameSpan(leavingBattle[k], leavingBattle[k].name) + '<br>';
                 }
             }
 
@@ -2001,14 +2223,27 @@ getActiveShipName: function getActiveShipName() {
             // the relative mine/ally/enemy scheme for observers AND 3+-team
             // participants, matching the fleetList / combat-log / ship-icon rule
             // (a single "ally" colour is ambiguous once there are several teams).
-            // Use the IniGUI-darkened palette so it isn't brighter than the muted
-            // CSS participant colours. When teamColorCss is set, the active-mover
-            // box below also switches to the per-team style, so the whole row
-            // follows one scheme.
+            // When teamColorCss is set, the active-mover box below also switches to
+            // the per-team style, so the whole row follows one scheme.
+            //
+            // FULL-STRENGTH palette since 2026-08-20 (user request), not the ×0.65
+            // getIniTeamColorRGB this used to call. Two reasons that is not a
+            // regression of the original "don't out-shout the muted panel" rule:
+            // the NUMBER is a two-character glyph, which is the small-mark case
+            // where chroma reads as a signal, and the CSS arm beside it
+            // (.iniMyShip / .iniAllyShip / .iniEnemyShip) moved to --fv-*-bright in
+            // the same change, so both arms of the gate agree. Darkening only the
+            // inline arm was the actual bug: a 2-team participant saw pure #ff0000
+            // where an observer saw #a63434.
+            //
+            // ⚠️ getIniTeamColorRGB still exists and is still correct — it is the
+            // ACTIVE-MOVER BOX's colour (via getIniActiveTeamStyle), where the
+            // colour becomes a border, a fill and a glow all at once and genuinely
+            // does need holding back. Do not "tidy" the two back together.
             var teamColorCss = "";
             if (!gamedata.isPlayerInGame() || gamedata.getDistinctTeamCount() !== 2) {
-                var iniRgb = gamedata.getIniTeamColorRGB(ships[i].team);
-                teamColorCss = "color:rgb(" + iniRgb[0] + "," + iniRgb[1] + "," + iniRgb[2] + ");";
+                var iniRgb = gamedata.getTeamColorRGB(ships[i].team);
+                teamColorCss = "color:rgb(" + Math.round(iniRgb[0]) + "," + Math.round(iniRgb[1]) + "," + Math.round(iniRgb[2]) + ");";
             }
 
             var td = document.createElement("td");

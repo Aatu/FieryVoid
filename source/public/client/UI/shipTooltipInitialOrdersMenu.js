@@ -37,7 +37,21 @@ window.ShipTooltipInitialOrdersMenu = function () {
         { className: "targetWeapons", condition: [isEnemy, hasShipWeaponsSelected], action: targetWeapons, info: "Target selected weapons on ship" },
         { className: "targetWeaponsHex", condition: [hasHexWeaponsSelected], action: targetHexagon, info: "Target selected weapons on hexagon" },
         { className: "targetSuppWeapons", condition: [isFriendly, hasShipWeaponsSelected, FFWeaponSelected, notSelf], action: targetWeapons, info: "Target support weapons" },//30 June 2024 - DK - Added for Ally targeting.
-        { className: "removeMultiOrder", condition: [hasShipWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firing Order" }				        
+        { className: "removeMultiOrder", condition: [hasShipWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firing Order" },
+        /* ⭐ JUMP_GATES_PLAN.md Stage 3 - SIGNALLING A FIXED JUMP GATE, and these two are the ONLY
+           entries in this array whose subject is a unit the player does not own.
+
+           A gate is contested terrain: ANY player may signal ANY gate, including one the enemy
+           bought (plan section 2.4 - there is no owner priority). Clicking a terrain gate in Initial
+           Orders already lands on InitialPhaseStrategy.targetShip and builds this menu, so the
+           button is an entry in an existing array and gamedata.isMyShip needs no exception at all -
+           the real structural work was the SUBMIT PATH, on both sides (plan section 3.1).
+
+           NO SHIP NEEDS TO BE SELECTED. Which of my units is within range is never chosen and never
+           matters, so every condition below reads the TARGETED ship (the gate) and none of them
+           touches this.selectedShip - which is routinely null here. */
+        { className: "signalJumpGate", condition: [isJumpGate, canSignalGate, noGateSignalYet], action: signalJumpGate, info: "Signal Jump Gate" },
+        { className: "cancelJumpGateSignal", condition: [isJumpGate, hasGateSignal], action: cancelJumpGateSignal, info: "Cancel Gate Signal" }
     ];
 
 
@@ -166,6 +180,55 @@ window.ShipTooltipInitialOrdersMenu = function () {
             if (!entry) return;
             ew.deassignEW(this.selectedShip, entry);
         } while (isMaxClick);
+    }
+
+    /* ---- JUMP_GATES_PLAN.md Stage 3: the fixed jump gate signal. See the button entries above.
+       All four read this.targetedShip - the gate - and never this.selectedShip. */
+    function isJumpGate() {
+        return gamedata.isJumpGate(this.targetedShip);
+    }
+
+    //Phase, charge, open vortex, engine health AND "I have a unit within the gate's signal range"
+    //- the client mirror of Firing::getGateSignalBlock. No line-of-sight test, deliberately.
+    function canSignalGate() {
+        return gamedata.canSignalJumpGate(this.targetedShip);
+    }
+
+    function hasGateSignal() {
+        return !!weaponManager.getGateSignalOrder(this.targetedShip);
+    }
+
+    //A standing claim does not stop the gate being signallable, so the two buttons need this to be
+    //mutually exclusive - otherwise both show and the player can declare twice.
+    function noGateSignalYet() {
+        return !weaponManager.getGateSignalOrder(this.targetedShip);
+    }
+
+    function signalJumpGate() {
+        weaponManager.queueGateSignalOrder(this.targetedShip);
+    }
+
+    /* Withdraw the claim - and TOGGLE THE BUTTON BACK, which is the point of the redraw.
+
+       The two gate buttons are mutually exclusive on hasGateSignal/noGateSignalYet, so the moment
+       the order is gone the OTHER one is the correct button - but nothing re-evaluates a menu's
+       conditions on its own. The tooltip SURVIVES this click (it swallows mousedown/mouseup, which
+       is why the click-away discard never fires on its own buttons), so without this the player is
+       left looking at a Cancel button for an order that no longer exists until they click the gate
+       again. ShipTooltip.update() with no arguments re-runs every condition and rebuilds the row;
+       passing no selectedShip is deliberate, since a gate signal routinely has none (section 2.1).
+
+       currentInfo is set by hand because the pointer does not MOVE across the swap, so no mouseover
+       fires on the replacement button and the info line would otherwise still read "Cancel Gate
+       Signal" underneath a Signal button. It is only claimed when the signal button is actually
+       going to be there - canSignalGate can have gone false in the meantime. */
+    function cancelJumpGateSignal() {
+        weaponManager.removeGateSignalOrder(this.targetedShip);
+
+        if (this.shipTooltip) {
+            this.currentInfo = canSignalGate.call(this) ? "Signal Jump Gate" : "";
+            this.shipTooltip.update();
+        }
     }
 
     function isSelf() {

@@ -37,6 +37,7 @@ class KobolAdamant extends HeavyCombatVessel{
         $this->addPrimarySystem(new SMissileRack(4, 6, 0, 0, 360));
         $hyperdrive = new JumpEngine(4, 12, 6, 20);
 			$hyperdrive->displayName = 'FTL Drive';
+			$hyperdrive->markLegacy(); //JUMP_POINTS_PLAN.md section 9 - this setting jumps by boost, not by vortex
 			$this->addPrimarySystem($hyperdrive);
         
         $this->addFrontSystem(new Thruster(3, 9, 0, 3, 1));

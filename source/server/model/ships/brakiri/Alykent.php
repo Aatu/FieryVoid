@@ -13,6 +13,7 @@ class Alykent extends SmallStarBaseFourSections{
 		$this->imagePath = "img/ships/Alykent.png";
 		$this->canvasSize = 200; 
 		$this->isd = 2198;
+		$this->variantOf = "OBSOLETE";
 
 		$this->shipSizeClass = 3; 
 		$this->Enormous = false;

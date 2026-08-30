@@ -13,8 +13,8 @@ window.PhaseStrategy = function () {
         this.currentlyMouseOveredIds = null;
 
         this.onMouseOutCallbacks = [];
-        this.onZoomCallbacks = [this.repositionTooltip.bind(this), this.positionMovementUI.bind(this), this.repositionSelectFromShips.bind(this)];
-        this.onScrollCallbacks = [this.repositionTooltip.bind(this), this.positionMovementUI.bind(this), this.repositionSelectFromShips.bind(this)];
+        this.onZoomCallbacks = [this.repositionTooltip.bind(this), this.positionMovementUI.bind(this), this.repositionSelectFromShips.bind(this), this.positionVortexFacingUI.bind(this), this.positionGateSignalUI.bind(this)];
+        this.onScrollCallbacks = [this.repositionTooltip.bind(this), this.positionMovementUI.bind(this), this.repositionSelectFromShips.bind(this), this.positionVortexFacingUI.bind(this), this.positionGateSignalUI.bind(this)];
         this.onClickCallbacks = [this.hideSystemInfo.bind(this, true)];
 
         this.selectedShip = null;
@@ -60,12 +60,55 @@ window.PhaseStrategy = function () {
             this.systemInfoState = null;
         }
 
+        this.hoveredArcSystem = null;
+        this.refreshSystemArcs();
+
+        return true;
+    }
+
+    /* ⭐ JUMP_POINTS_PLAN.md Stage 6 - WHOSE ARC IS ON SCREEN, decided in one place.
+     *
+     * Arcs used to be a pure hover display: three call sites each cleared every icon's arcs, and
+     * onSystemMouseOver drew the one under the pointer. That lost the arc at the exact moment a
+     * HEX-TARGETED system needs it - the player clicks the icon to SELECT the system, the pointer
+     * leaves, mouse-out fires, and the overlay showing where they may aim disappears just as they
+     * turn to the map to aim (user request 2026-08-22).
+     *
+     * So the answer is now "the hovered system, plus anything selected that asks to stay up", and
+     * every site that used to clear arcs calls this instead. The hovered system is remembered
+     * (this.hoveredArcSystem) rather than passed, because the sweep also has to run from
+     * onSystemDataChanged - selecting and unselecting both land there - and that must not tear
+     * down an arc the pointer is still sitting on.
+     *
+     * Deliberately narrow: shipManager.systems.showsArcWhenSelected holds the short list and says
+     * why. Every gun's arc left standing would paint the map solid on a selected broadside. */
+    PhaseStrategy.prototype.refreshSystemArcs = function () {
+        if (!this.shipIconContainer) return;
+
         this.shipIconContainer.getArray().forEach(function (icon) {
             icon.hideWeaponArcs();
         });
 
-        return true;
-    }
+        var drawn = [];
+        var container = this.shipIconContainer;
+
+        var draw = function (ship, system) {
+            if (!ship || !system) return;
+            if (drawn.indexOf(system) !== -1) return;  //never twice - two fills would alpha-compound
+            var icon = container.getByShip(ship);
+            if (!icon) return;
+            icon.showWeaponArc(ship, system);
+            drawn.push(system);
+        };
+
+        if (this.hoveredArcSystem) draw(this.hoveredArcSystem.ship, this.hoveredArcSystem.system);
+
+        if (!gamedata.selectedSystems) return;
+        gamedata.selectedSystems.forEach(function (system) {
+            if (!shipManager.systems.showsArcWhenSelected(system)) return;
+            draw(system.ship, system);
+        });
+    };
 
     PhaseStrategy.prototype.showSystemInfo = function (ship, system, element, menu) {
         if (this.systemInfoState && this.systemInfoState.menu && !menu) {
@@ -174,6 +217,15 @@ window.PhaseStrategy = function () {
         if (this.selectFromShips) { //To clear selectFromShips correctly if player clicks Commit before clicking anywhere else - DK 10/24
             this.hideSelectFromShips(this.selectFromShips);
         }
+
+        //Same reason: a vortex declaration left mid-transaction when the phase ends is a discard,
+        //and its preview sprites must not outlive the phase that owns them.
+        UI.vortexFacing.close();
+
+        //And the same again for a fixed jump gate's duration panel (JUMP_GATES_PLAN.md Stage 3).
+        //Nothing is declared until SIGNAL is pressed, so an open panel at phase end is simply
+        //abandoned - but the div is outside the WebGL canvas and would otherwise stay on screen.
+        UI.gateSignal.close();
 
         this.currentlyMouseOveredIds = null;
 
@@ -413,7 +465,13 @@ window.PhaseStrategy = function () {
         if ($(".confirm").length > 0) return;
 
         if (this.selectedShip) {
-            this.deselectShip(this.selectedShip);
+            //RE-selecting the ship that is already selected keeps its weapon selection. Clicking
+            //your own ship is how you open its tooltip, and the tear-down/rebuild below would
+            //otherwise unselect every weapon on the way through - so the INCOMING list opened with
+            //nothing selected and manual interception could not be declared without picking the
+            //weapons again (user report 2026-08-19). Only the weapon-unselect is skipped; the icon,
+            //weapon list, movement UI and EW all still tear down and rebuild exactly as before.
+            this.deselectShip(this.selectedShip, this.selectedShip === ship);
         }
 
         this.selectedShip = ship;
@@ -427,12 +485,17 @@ window.PhaseStrategy = function () {
         this.uiManager.showWeaponList({ ship: ship, gamePhase: gamedata.gamephase });
     };
 
-    PhaseStrategy.prototype.deselectShip = function (ship) {
+    /* keepWeapons: leave gamedata.selectedSystems alone. Passed ONLY by setSelectedShip when the
+       ship being selected is the one already selected - see the note there. Every other caller
+       omits it and gets the original clear-everything behaviour. */
+    PhaseStrategy.prototype.deselectShip = function (ship, keepWeapons) {
         this.shipIconContainer.getById(ship.id).setSelected(false);
 
-        gamedata.selectedSystems.slice(0).forEach(function (selected) {
-            weaponManager.unSelectWeapon(this.selectedShip, selected);
-        }, this);
+        if (!keepWeapons) {
+            gamedata.selectedSystems.slice(0).forEach(function (selected) {
+                weaponManager.unSelectWeapon(this.selectedShip, selected);
+            }, this);
+        }
 
         this.selectedShip = null;
         this.uiManager.hideWeaponList();
@@ -723,6 +786,88 @@ window.PhaseStrategy = function () {
         return true;
     };
 
+    /* JUMP_POINTS_PLAN.md STAGE 2b - the vortex facing control.
+
+       Raised by weaponManager.queueJumpPointOrder when a Jump Engine is aimed at a hex. Nothing is
+       committed yet: this shows the control, anchors it to the target hex, and registers the
+       click-away discard. The OK button calls the payload's own onConfirm, which is what actually
+       builds the FireOrder.
+
+       The one-shot discard rides onClickCallbacks - the same list showShipTooltip and
+       showSelectFromShips use. Note the ORDER inside onClickEvent: the callback list is filtered
+       and run BEFORE the click is dispatched to onHexClicked, so a click that opens a NEW
+       declaration first discards the pending one, and the callback pushed here lands on the fresh
+       array and survives to the next click. */
+    PhaseStrategy.prototype.onVortexFacingRequested = function (payload) {
+        /* CLOSE THE TOOLTIP THAT LAUNCHED THIS, exactly as onGateSignalRequested does below and for
+           the same reason (user request 2026-08-24). The declaration can be started from the "Target
+           selected weapons on hexagon" button in a ship tooltip, and that tooltip is anchored to a
+           unit standing on or beside the very hex the facing ring lays itself out around - so it sits
+           on top of the turn arrows and the OK button and the ring cannot be worked. The tooltip
+           swallows its own mousedown/mouseup, so the click-away discard never fires for it here. */
+        this.hideShipTooltip(this.shipTooltip);
+
+        UI.vortexFacing.open(payload);
+        this.positionVortexFacingUI();
+        this.onClickCallbacks.push(this.hideVortexFacingUI.bind(this, payload));
+    };
+
+    //Token-matched (like hideShipTooltip): by the time this fires the transaction may already have
+    //been closed by OK, or replaced by a newer one that must not be torn down by the old click.
+    //Returns undefined so onClickCallbacks filters it out - it is a one-shot.
+    PhaseStrategy.prototype.hideVortexFacingUI = function (pending) {
+        if (UI.vortexFacing.isOpenFor(pending)) {
+            UI.vortexFacing.close();
+        }
+    };
+
+    PhaseStrategy.prototype.positionVortexFacingUI = function () {
+        if (!UI.vortexFacing.isOpen()) {
+            return true;
+        }
+
+        UI.vortexFacing.reposition(this.coordinateConverter.fromGameToViewPort(UI.vortexFacing.getPosition()));
+
+        return true;
+    };
+
+    /* JUMP_GATES_PLAN.md STAGE 3 - the fixed jump gate signal panel.
+
+       The same three-part wiring the facing control above uses, and for the same reasons: show the
+       panel, anchor it to the gate's hex, and register a ONE-SHOT click-away discard on
+       onClickCallbacks (filtered and run BEFORE the click reaches onHexClicked, so a click that
+       opens a new panel first discards the pending one).
+
+       The tooltip that launched it is closed here rather than left standing: the button lives in
+       the gate's own Initial Orders menu, which is drawn on the very hex this panel anchors to, so
+       leaving it up would put two overlapping controls on one spot. */
+    PhaseStrategy.prototype.onGateSignalRequested = function (payload) {
+        this.hideShipTooltip(this.shipTooltip);
+
+        UI.gateSignal.open(payload);
+        this.positionGateSignalUI();
+        this.onClickCallbacks.push(this.hideGateSignalUI.bind(this, payload));
+    };
+
+    //Token-matched, exactly as hideVortexFacingUI is: by the time this fires the transaction may
+    //have been closed by SIGNAL or replaced by a newer one that must not be torn down by the old
+    //click. Returns undefined so onClickCallbacks filters it out - it is a one-shot.
+    PhaseStrategy.prototype.hideGateSignalUI = function (pending) {
+        if (UI.gateSignal.isOpenFor(pending)) {
+            UI.gateSignal.close();
+        }
+    };
+
+    PhaseStrategy.prototype.positionGateSignalUI = function () {
+        if (!UI.gateSignal.isOpen()) {
+            return true;
+        }
+
+        UI.gateSignal.reposition(this.coordinateConverter.fromGameToViewPort(UI.gateSignal.getPosition()));
+
+        return true;
+    };
+
     PhaseStrategy.prototype.redrawMovementUI = function () {
 
         if (gamedata.waiting) return;
@@ -793,22 +938,15 @@ window.PhaseStrategy = function () {
             this.hideSystemInfo();
         }
 
-        this.shipIconContainer.getArray().forEach(function (icon) {
-            icon.hideWeaponArcs();
-        });
-
-        if (system instanceof Ship) {
-            return;
-        }
-
-        var icon = this.shipIconContainer.getByShip(ship);
-        icon.showWeaponArc(ship, system);
+        //Ship (the hex-stack hover pseudo-system) has no arc of its own, but it still ENDS the
+        //previous hover - so record the miss and let refreshSystemArcs redraw whatever is selected.
+        this.hoveredArcSystem = (system instanceof Ship) ? null : { ship: ship, system: system };
+        this.refreshSystemArcs();
     };
 
     PhaseStrategy.prototype.onSystemMouseOut = function () {
-        this.shipIconContainer.getArray().forEach(function (icon) {
-            icon.hideWeaponArcs();
-        });
+        this.hoveredArcSystem = null;
+        this.refreshSystemArcs();
 
         this.hideSystemInfo();
     };
@@ -896,6 +1034,17 @@ window.PhaseStrategy = function () {
             if (icon.ship && icon.ship.pendingDeployDock) return false;
             //LCV Rails: same for an LCV queued to deploy-dock onto a rail.
             if (icon.ship && icon.ship.pendingLcvDeployDock) return false;
+            /* A JUMP VORTEX IS A MARKER, NOT A UNIT (JUMP_POINTS_PLAN.md Stage 4 feedback).
+               It is unselectable terrain with nothing to target and nothing to open, but while it
+               sat in this sweep it shared a hex with whatever flew into it and broke both halves
+               of that hex's interaction: a click became a two-icon stack, so selecting your own
+               ship in a vortex hex went through the hex picker with the vortex listed in it; and a
+               hover flipped between the two icons (getIconsInProximity returns only the CLOSEST
+               when zoomed past ~0.33), and every flip back to the ship ran ShipTooltip.update,
+               which empties .buttons and rebuilds the menu - so the Jump Out button was torn down
+               and recreated under the cursor. Dropping the vortex here fixes both at once: the
+               hex reads as holding exactly the units that are really in it. */
+            if (icon.ship && shipManager.movement.isJumpVortex(icon.ship)) return false;
             return true;
         });
     }
@@ -1072,6 +1221,45 @@ window.PhaseStrategy = function () {
             this.shipTooltip.update(ship, this.selectedShip);
         }
 
+        //Manual interception: every clickable hit chance in the INCOMING list is computed against
+        //the CURRENT weapon selection, so selecting or unselecting an interceptor has to re-render
+        //them - otherwise the row goes on answering with the selection it was BUILT with, and
+        //reports "No interceptor selected" at a weapon the player can plainly see is selected
+        //(user report 2026-08-19). Both paths land here, and both now arrive AFTER
+        //gamedata.selectedSystems has actually changed: selectWeapon and unSelectWeapon each fire
+        //SystemDataChanged once their push/splice is done. (They did not always - see the ordering
+        //note in weaponManager.selectWeapon for why the WeaponSelected event cannot carry this.)
+        //
+        //The tooltip's other two selection-dependent halves are refreshed the same way (user
+        //report 2026-08-24). The TARGETING list is the selection's own arcs and hit chances, and
+        //the button row's conditions (hasWeaponsSelected, hasHexWeaponsSelected, FFWeaponSelected,
+        //hasSplitWeaponFiringOrder) each ask what is selected - so emptying the selection has to
+        //take "Target Weapons" and "Remove a Firing Order" away with it, and refilling it has to
+        //bring them back, rather than leaving buttons that do nothing when clicked.
+        //
+        //None of this goes through ShipTooltip.update(), which would rebuild the name and re-run
+        //the whole single-ship body; these three redraw only what actually depends on the
+        //selection. Weapon selection is driven from the weapon list and the ship window, never
+        //from inside the tooltip, so nothing here moves under the pointer that put it there - and
+        //a button that redraws itself from its OWN click is already the norm (see the note on
+        //ShipTooltip.refreshButtons).
+        //
+        //Both are unphased on purpose - they render whatever createForSingleShip would render
+        //right now, and hide themselves when nothing is selected - whereas the INCOMING rebuild
+        //below stays pinned to the Firing phase, where interception may be declared.
+        if (this.shipTooltip && typeof this.shipTooltip.refreshTargeting === 'function') {
+            this.shipTooltip.refreshTargeting();
+        }
+
+        if (this.shipTooltip && typeof this.shipTooltip.refreshButtons === 'function') {
+            this.shipTooltip.refreshButtons();
+        }
+
+        if (gamedata.gamephase === 3 && this.shipTooltip && this.shipTooltip.ballisticsMenu
+            && typeof this.shipTooltip.ballisticsMenu.refresh === 'function') {
+            this.shipTooltip.ballisticsMenu.refresh();
+        }
+
         if (system
             && (system.ballistic
                 || system.hextarget //same for direct fire hextarget weapons - they use ballistic highlight...
@@ -1080,6 +1268,13 @@ window.PhaseStrategy = function () {
         ) {
             this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
         }
+
+        //Selecting AND unselecting a weapon both land here - selectWeapon and unSelectWeapon each
+        //fire SystemDataChanged once the selection array has changed - so this is the seam that
+        //puts a selected system's arc up and takes it down again. See refreshSystemArcs; it
+        //keeps the hovered arc, so running here while the pointer is still on the icon that was
+        //just clicked changes nothing.
+        this.refreshSystemArcs();
 
         this.shipWindowManager.update();
     }

@@ -1292,9 +1292,17 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             The Raking damage mode is capped at 2-turns charge level.</li>
         <li>All other Slicers use Sweeping Mode as their default, which allows them to target as many different enemies as it has dice/damage to allocate, assigning a number of d10 target dice and/or set-damage to each shot up to their maximum amount. Simply select the weapon and choose who you want to target in this mode, although each ship can only be targeted once (whilst fighter flights can be targeted multiple times). 
             When splitting shots, the weapon will attract a cumulative -5% penalty for every additional shot after the first, as well as any modifier for defensive shots (see below).</li>
-        <li>Slicers may commit a 1d10 dice of 6 set-damage to gain -10 intercept by clicking the 'Self-Intercept' green shield icon and using the menu provided.  Each self-intercept dice committed in this way increases the number of different shots Slicer may intercept, as well as the total interception amount. 
-            If you choose to fire offensively, or select any amount self-intercept dice, but do not use all your available dice/damage, then any unspent dice will be added to intercept so long as you committed as least ONE self-intercept dice.  You can use ship tooltip to track defensive fire.  
-            NOTE - Each self intercept dice commited counts as a 'shot' for the purposes of the -5% penalty detailed above.".</li>
+        <li>Slicers may commit a 1d10 dice or 6 set-damage to gain -10 intercept by clicking the 'Self-Intercept' green shield icon and using the menu provided.  Each self-intercept dice committed in this way increases the number of different shots Slicer may intercept, as well as the total interception amount.
+            If you choose to fire offensively, or select any amount self-intercept dice, but do not use all your available dice/damage, then any unspent dice will be added to intercept so long as you committed as least ONE self-intercept dice.  You can use ship tooltip to track defensive fire.
+            NOTE - Each self intercept dice commited counts as a 'shot' for the purposes of the -5% penalty detailed above.  The Light Slicer has no intercept rating and cannot intercept at all.</li>
+        <li>A Slicer can also be pointed at one <strong>specific</strong> incoming shot, rather than leaving the game to place its defensive fire for it.  In the Firing phase, select the Slicer, click the unit being shot at to bring up its ship tooltip,
+            and click the hit chance of the shot you want to engage in the INCOMING list (manual interception is described in full in the
+            <a style="font-size: 14px;" href="./faq.php#interception" target="_blank" rel="noopener noreferrer">FAQ</a>).</li>
+        <li>A shot named that way costs exactly what a self-intercept costs - one damage die, or one whole 6-point block of set damage - out of the same pool, and counts as a 'shot' for the -5% penalty in the same way.
+            Capacity you have already bought is re-used rather than paid for twice: if you hold self-intercept dice that are not yet pointed at anything, naming a shot spends one of those instead of charging the pool again.
+            Withdrawing works from the ship window as usual, and hands the die or damage block back.</li>
+        <li>When you look at a target's ship tooltip, each Slicer shot in its INCOMING list is written with the allocation you gave it - for example
+            <em>1x Molecular Slicer (Sweeping) (3d + 12)</em> for three damage dice plus twelve points of set damage.</li>
             <li>Slicer can make Called Shots against fighters without any penalty.</li>                                                                 
     </ul>
 <h5>Phasing Pulse Cannon</h5>

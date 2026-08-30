@@ -6858,8 +6858,11 @@ class HangarOps {
 			if ($carrier instanceof FighterFlight) continue;
 			if (!$carrier->isDestroyed()) continue;
 
-			$jumpEngine = $carrier->getSystemByName('JumpEngine');
-			if ($jumpEngine && $jumpEngine->hasJumped()) continue;
+			//A carrier that LEFT through hyperspace is excluded, however it left: by the boost
+			//path, or through a jump vortex - which a carrier with no jump engine of its own can
+			//also use (JUMP_POINTS_PLAN.md Stage 4, section 2.5). Asking the ship rather than the
+			//engine is what covers the second case; the first is unchanged.
+			if ($carrier->hasJumpedToHyperspace()) continue;
 
 			$hangars = self::collectHangars($carrier);
 			if (empty($hangars)) continue;

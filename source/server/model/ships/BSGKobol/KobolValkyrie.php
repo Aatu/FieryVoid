@@ -36,6 +36,7 @@ class KobolValkyrie extends BaseShip{
         $this->addPrimarySystem(new SMissileRack(5, 6, 0, 0, 360));
 		$hyperdrive = new JumpEngine(4, 16, 6, 20);
 			$hyperdrive->displayName = 'FTL Drive';
+			$hyperdrive->markLegacy(); //JUMP_POINTS_PLAN.md section 9 - this setting jumps by boost, not by vortex
 			$this->addPrimarySystem($hyperdrive);
 
         $this->addFrontSystem(new Railgun(4, 9, 6, 330, 30));

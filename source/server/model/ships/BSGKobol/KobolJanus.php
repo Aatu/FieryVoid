@@ -60,6 +60,7 @@ class KobolJanus extends HeavyCombatVessel{
 		$this->addAftSystem(new GromeFlakCannon(3, 4, 2, 120, 240)); 
         $hyperdrive = new JumpEngine(4, 12, 6, 20);
 			$hyperdrive->displayName = 'FTL Drive';
+			$hyperdrive->markLegacy(); //JUMP_POINTS_PLAN.md section 9 - this setting jumps by boost, not by vortex
 			$this->addAftSystem($hyperdrive);
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

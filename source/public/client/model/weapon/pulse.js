@@ -151,6 +151,14 @@ PointPulsar.prototype.checkSelfInterceptSystem = function() {
     return true;
 };
 
+/* A defensive shot is always declared in mode 1, whatever mode the weapon is set to -
+   doMultipleSelfIntercept below stamps firingMode 1 for the same reason (the power-requirement
+   display is derived per order from the mode). A MANUAL intercept is the same kind of shot, so
+   weaponManager.declareInterceptWith asks here rather than using the current mode.
+   Safe because the rating is a flat ->intercept with no interceptArray - mode does not change it.
+   MANUAL_INTERCEPTION_PLAN.md Stage 7. */
+PointPulsar.prototype.getInterceptOrderMode = function () { return 1; };
+
 PointPulsar.prototype.doMultipleSelfIntercept = function(ship) {
 
     for (var s = 0; s < 1; s++) {    

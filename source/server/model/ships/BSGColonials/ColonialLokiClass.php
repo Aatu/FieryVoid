@@ -35,6 +35,7 @@ class ColonialLokiClass extends MediumShip{
         $this->addPrimarySystem(new RapidGatling(5, 4, 1, 0, 360));
 		$hyperdrive = new JumpEngine(4, 10, 6, 20);
 			$hyperdrive->displayName = 'Hyperdrive';
+			$hyperdrive->markLegacy(); //JUMP_POINTS_PLAN.md section 9 - this setting jumps by boost, not by vortex
 			$this->addPrimarySystem($hyperdrive);
 
 		$this->addFrontSystem(new BSGMedBattery(4, 7, 4, 180, 360));

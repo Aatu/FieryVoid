@@ -182,10 +182,6 @@ hitchart	SalbezTarskRefit	location 2, roll 8	no system named "Medium Laser" on l
 hitchart	SalbezUshkrit	location 1, roll 7	no system named "Heavy Laser Cutter" on location 1 - every hit here is silently rerouted to Structure
 hitchart	SalbezVasken	location 2, roll 11	no system named "Light Particle Beam" on location 2 - every hit here is silently rerouted to Structure
 hitchart	SalbezVaskenRefit	location 2, roll 9	no system named "Light Laser" on location 2 - every hit here is silently rerouted to Structure
-hitchart	SatyraMCVTest	location 0, roll 15	no system named "1: Laser Array" on location 0 - every hit here is silently rerouted to Structure
-hitchart	SatyraMCVTest	location 0, roll 17	no system named "0:Sensors" on location 0 - every hit here is silently rerouted to Structure
-hitchart	SatyraMCVTest	location 1, roll 17	no system named "0:Sensors" on location 1 - every hit here is silently rerouted to Structure
-hitchart	SatyraMCVTest	location 2, roll 17	no system named "0:Sensors" on location 2 - every hit here is silently rerouted to Structure
 hitchart	SshelathKosluka	location 0, roll 12	no system named "1:Light Class-O Missile Rack" on location 0 - every hit here is silently rerouted to Structure
 hitchart	SshelathKosluka	location 1, roll 12	no system named "1:Light Class-O Missile Rack" on location 1 - every hit here is silently rerouted to Structure
 hitchart	SshelathKosluka	location 2, roll 12	no system named "1:Light Class-O Missile Rack" on location 2 - every hit here is silently rerouted to Structure
@@ -213,13 +209,6 @@ hitchart	VelraxVersissRefit	location 3, roll 7	no system named "Laser Spear" on 
 hitchart	VelraxVersissRefit	location 4, roll 7	no system named "Laser Spear" on location 4 - every hit here is silently rerouted to Structure
 hitchart	VulcanLander	location 0, roll 15	no system named "Light Phase Cannon" on location 0 - every hit here is silently rerouted to Structure
 hitchart	VulcanLander	location 0, roll 17	no system named "Nacelle" on location 0 - every hit here is silently rerouted to Structure
-hitchart	baradaGomtuCruiser	location 2, roll 10	no system named "Light Particle Beam" on location 2 - every hit here is silently rerouted to Structure
-hitchart	overseerGC	location 1, roll 8	no system named "Class-S Missile Rack" on location 1 - every hit here is silently rerouted to Structure
-hitchart	overseerGC	location 3, roll 11	no system named "Cargo Bay" on location 3 - every hit here is silently rerouted to Structure
-hitchart	overseerGC	location 4, roll 11	no system named "Cargo Bay" on location 4 - every hit here is silently rerouted to Structure
-hitchart	paragonGCAM	location 3, roll 8	no system named "Heavy Gauss Cannon" on location 3 - every hit here is silently rerouted to Structure
-hitchart	paragonGCAM	location 4, roll 8	no system named "Heavy Gauss Cannon" on location 4 - every hit here is silently rerouted to Structure
-hitchart	shlassanvelmakescortcarrier	location 0, roll 13	no system named "Cargo Bay" on location 0 - every hit here is silently rerouted to Structure
 hitchart	swCorellianGunship	location 0, roll 17	no system named "Hangar" on location 0 - every hit here is silently rerouted to Structure
 hitchart	swImperialSD2	location 1, roll 4	no system named "Medium Laser" on location 1 - every hit here is silently rerouted to Structure
 hitchart	swLancer	location 0, roll 17	no system named "Hangar" on location 0 - every hit here is silently rerouted to Structure
@@ -229,6 +218,8 @@ hitchart	technicalTargetDrone	location 31, roll 15	no system carries tag "Weapon
 hitchart	technicalTargetDrone	location 32, roll 15	no system carries tag "Weapon" - every hit here is rerouted to Structure
 hitchart	technicalTargetDrone	location 41, roll 15	no system carries tag "Weapon" - every hit here is rerouted to Structure
 hitchart	technicalTargetDrone	location 42, roll 15	no system carries tag "Weapon" - every hit here is rerouted to Structure
+hitchart	triadArchangel	location 1, roll 9	no system named "Neutron Burst" on location 1 - every hit here is silently rerouted to Structure
+hitchart	triadDevil	location 1, roll 7	no system named "Antimatter Wave" on location 1 - every hit here is silently rerouted to Structure
 ids	ChoukaPenanceBaseAM	CargoBay at systems[10]	id 11 != its array index 10 - persisted thrust/fire/power/crit rows are keyed by this id
 ids	ChoukaPenanceBaseAM	CargoBay at systems[17]	id 18 != its array index 17 - persisted thrust/fire/power/crit rows are keyed by this id
 ids	ChoukaPenanceBaseAM	CargoBay at systems[24]	id 25 != its array index 24 - persisted thrust/fire/power/crit rows are keyed by this id
@@ -244,11 +235,8 @@ image	DalithornPrototypeJumpcruiser	source/server/model/ships/NexusDalithorn_old
 image	MakarTolmor	source/server/model/ships/NexusMakar_old/MakarTolmor.php	"img/ships/Nexus/makar_tolmor.png" - no such file
 image	QomYominAuxDestroyerAlt	source/server/model/ships/NexusMakar/QomYominAuxDestroyerAlt.php	"img/ships/Nexus/makarSreaTormal.png" - no such file
 image	VelraxNareshGuard	source/server/model/ships/NexusVelrax/VelraxNareshGuard.php	"img/ships/Nexus/VelraxNareshGuard.png" - no such file
-sysimage	(assets)	img/ships/BSG/CylonHeavyRaider.png.png	no such file
 sysimage	(assets)	img/ships/Nexus/Dalithorn_Cutter2.png.png	no such file
 sysimage	(assets)	img/ships/Nexus/makar_tolmor.png	no such file
 sysimage	(assets)	img/ships/Nexus/makar_tolmor_large.png	no such file
 sysimage	(assets)	img/ships/Nexus/velraxTassrv.png	no such file
-sysimage	(assets)	img/ships/mentabanDeltaV_Large.png	case mismatch: on disk as "img/ships/mentabanDeltaV_large.png" (works on Windows, 404s on live)
-sysimage	(assets)	img/ships/shlassanDeltaV_Large.png	case mismatch: on disk as "img/ships/shlassanDeltaV_large.png" (works on Windows, 404s on live)
 variantof	SalbezAvrtzRefit2	source/server/model/ships/NexusSalbez/SalbezAvrtzRefit2.php	$variantOf = "Av'rtz Explorer (2122)" matches no ship's $shipClass - the lobby shows it neither as a base design nor as a variant, so players never see it

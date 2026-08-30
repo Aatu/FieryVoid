@@ -38,6 +38,7 @@ class KobolArtemis extends BaseShip{
         $this->addPrimarySystem(new SMissileRack(5, 6, 0, 0, 360));
 		$hyperdrive = new JumpEngine(5, 16, 6, 20);
 			$hyperdrive->displayName = 'FTL Drive';
+			$hyperdrive->markLegacy(); //JUMP_POINTS_PLAN.md section 9 - this setting jumps by boost, not by vortex
 			$this->addPrimarySystem($hyperdrive);
 		
         $this->addFrontSystem(new Thruster(4, 9, 0, 3, 1));

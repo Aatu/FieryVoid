@@ -478,7 +478,7 @@ window.webglScene = function () {
         payload.shiftKey = !!(modifierOverride && modifierOverride.shiftKey) || !!event.shiftKey;
         payload.metaKey = !!(modifierOverride && modifierOverride.metaKey) || !!event.metaKey;
 
-        //console.log(payload);        
+        //console.log(payload);
         if (this.lastPositionClicked) {
             //console.log("direction", mathlib.getCompassHeadingOfPoint(hexPos, this.lastPositionClicked));
         }

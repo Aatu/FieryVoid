@@ -422,8 +422,14 @@ window.ajaxInterface = {
     /* Is this unit eligible to be written into a saved fleet?
        Lobby: everything the player owns. game.php ("Save Current Fleet", PREBATTLE_DAMAGE_PLAN
        §7.2): the SURVIVORS only, minus the mid-battle artefacts that make no sense in a fleet
-       list - destroyed/docked units, launched-fighter "Split" rows, spent mines and Chameleon
-       phantom sheets (which use NEGATIVE ids). */
+       list - destroyed units, spent mines and Chameleon phantom sheets (which use NEGATIVE ids).
+
+       ⭐ A unit sitting in a HANGAR counts as a survivor (user report 2026-08-23). A docked
+       fighter flight and a rail-parked LCV are both `removed` ship rows - off the board, but
+       alive, undamaged by being stowed and part of the fleet in every other accounting
+       (fleetList.js renders them as "Docked", combat value included). Leaving them out saved a
+       carrier without its air wing. isDestroyedByDamage is what makes that possible: plain
+       isDestroyed folds `removed` in, so it cannot tell a stowed unit from a dead one. */
     isSaveableFleetShip: function isSaveableFleetShip(ship) {
         if (!ship) return false;
         if (ship.userid !== gamedata.thisplayer) return false;
@@ -439,11 +445,69 @@ window.ajaxInterface = {
         if (gamedata.gamephase === -2) return true;
 
         if (ship.id < 0) return false;                                  //Chameleon phantom sheet
-        if (ship.removed) return false;                                 //docked into a hangar
-        if (shipManager.isDestroyed(ship)) return false;                //dead, or a flight with no survivors
+        if (shipManager.isDestroyedByDamage(ship)) return false;        //dead, or a flight with no survivors
         if (ship.mine && ship.spawned !== -1) return false;             //mine laid during the battle
+        if (ship.removed && !ajaxInterface.isSaveableDockedShip(ship)) return false;
 
         return true;
+    },
+
+    /* The two docked units a fleet list must NOT re-buy. Reached only for a `removed`
+       (in-a-hangar) unit that is otherwise alive - see isSaveableFleetShip.
+
+       1. An auto-filled faction DEFAULT SHUTTLE was never bought: populateInitialHangarUsage
+          issues it free on turn 1 of every battle and will do so again in the next one, so
+          saving one mints a phantom unit that then arrives twice. (Only the ones that LAUNCHED
+          and re-docked are ship rows at all - a shuttle that never left its bay is an anonymous
+          hangarUsage entry with no ship row, so it was never a candidate. Armed shuttles are
+          real purchases and are NOT in isDefaultShuttleEntry's class list, so they still save.)
+       2. A unit whose CARRIER LEFT through a jump vortex went with it. Save Fleet already
+          excludes the carrier itself as departed, so its cargo has to go the same way.
+       A carrier that was DESTROYED needs no test here: the server either ejects the contents
+       (which un-removes them) or kills them with the ship, so they fail the damage test above. */
+    isSaveableDockedShip: function isSaveableDockedShip(ship) {
+        if (gamedata.isDefaultShuttleEntry(ship)) return false;
+        if (ajaxInterface.isDepartedWithCarrier(ship)) return false;
+        return true;
+    },
+
+    /* Did this docked unit leave the battle inside its carrier?
+       For a fighter FLIGHT the server answers it on every payload - jumpedWithCarrier, set by
+       TacGamedata::markJumpedDockedFlights, which is also what paints the fleet list row
+       "Jumped" rather than "Docked".
+       An LCV parked on a DockingCollar has no such flag (that walk only follows hangarUsage
+       dockedFlightId links, and an LCV rail stores its occupant in `lcvDocked` instead), so its
+       rail has to be found. Docking is the ONLY thing that ever sets `removed`, so past the
+       flight early-out the caller can only be holding a rail-parked LCV - and a fleet has at
+       most a handful, so the walk costs nothing until the viewer actually stows one.
+       Own units only, so the own-team hangar-contents mask is never in the way. */
+    isDepartedWithCarrier: function isDepartedWithCarrier(ship) {
+        if (ship.jumpedWithCarrier) return true;
+        if (ship.flight) return false;   //a docked flight is fully answered by the flag above
+
+        //Ship ids are STRINGS on anything spawned mid-battle (LAST_INSERT_ID), so compare
+        //the parsed numbers, never the raw values.
+        var lcvId = parseInt(ship.id, 10);
+
+        for (var i in gamedata.ships) {
+            var carrier = gamedata.ships[i];
+            if (!carrier || !Array.isArray(carrier.systems)) continue;
+
+            for (var s = 0; s < carrier.systems.length; s++) {
+                var rail = carrier.systems[s];
+                if (!rail || !rail.lcvDocked) continue;
+                if (parseInt(rail.lcvDocked.shipId, 10) !== lcvId) continue;
+
+                /* The same "has it left through a vortex?" pairing fleetList.js uses: a
+                   COMMITTED jump-out counts from the moment it is plotted (the server does not
+                   resolve it until the end of the Movement phase), and after that the removal
+                   itself is the record. */
+                if (shipManager.movement.hasCommittedJumpOut(carrier)) return true;
+                return Boolean(shipManager.isDestroyed(carrier));
+            }
+        }
+
+        return false;
     },
 
     /* Collapse the saveable units into the ROWS a fleet list holds.
@@ -1073,6 +1137,43 @@ window.ajaxInterface = {
                 }
 
                 tidyships.push(newShip);
+            } else {
+                /* ⭐ JUMP_GATES_PLAN.md section 3.1 fact 2 - THE ONE UNIT A PLAYER MAY ORDER
+                   WITHOUT OWNING IT, and this `else` is half of what makes that possible.
+
+                   Everything above is gated on `ship.userid === gamedata.thisplayer`, so a unit
+                   you do not own is not in the POST AT ALL - not its systems, not an empty shell.
+                   That, and not isMyShip, was the real structural blocker on fixed jump gates: a
+                   gate belongs to whoever bought it (often the enemy) and ANY player may signal it.
+
+                   ⚠️ SEND THE GATE AND ITS SIGNAL ORDER AND NOTHING ELSE. No movement, no EW, no
+                   power, no ammo, no enhancements, no pre-battle damage - the arrays built above
+                   stay empty. The server ignores all of those for a gate anyway (its power and EW
+                   loops keep their own userid guard), and sending them would be an invitation to
+                   trust them later. The systems array carries exactly one entry: the Jump Engine,
+                   with this turn's signal order on it.
+
+                   The server half is InitialOrdersGamePhase::process, which lets a POSTed gate
+                   through its fire-order loop and passes only that engine's orders to
+                   Firing::validateFireOrders. Neither half is any use without the other. */
+                var gateOrders = ajaxInterface.getGateSignalOrders(ship);
+                if (gateOrders) {
+                    /* AN OBJECT, not the Array() the owner path builds, and the key matters:
+                       Manager::getShipsFromJSON resolves each entry with
+                       $ship->getSystemById($i) where $i is the KEY - and getSystemById indexes
+                       straight into $ship->systems, so a system's "id" IS its position in the
+                       construction order. Writing systems[4] into an Array would stringify as
+                       [null,null,null,null,{...}] and post four dead entries; an object posts
+                       exactly the one system. (PHP coerces the numeric string key back to an int
+                       on array access, so getSystemById("4") finds system 4.) */
+                    newShip.systems = {};
+                    newShip.systems[gateOrders.systemId] = {
+                        'id': gateOrders.systemId,
+                        'power': Array(),
+                        'fireOrders': gateOrders.fireOrders
+                    };
+                    tidyships.push(newShip);
+                }
             }
         }
 
@@ -1088,6 +1189,55 @@ window.ajaxInterface = {
         };
 
         return gd;
+    },
+
+    /* JUMP_GATES_PLAN.md Stage 2 - THIS TURN'S GATE SIGNAL ORDERS ON $ship, or null.
+       Returns { systemId, fireOrders }; null means this unit contributes nothing to the POST and
+       the caller must not add it, so an unowned unit with no claim on it is dropped exactly as it
+       is today.
+
+       FOUR CONDITIONS, all of them narrow on purpose:
+         1. Initial Orders (phase 1). A signal is declared there and nowhere else.
+         2. The unit is a JumpgateCapital. Nothing else in the game gets this exemption.
+         3. It carries a Jump Engine. (Keyed on system NAME - markGate() deliberately leaves
+            $name 'jumpEngine' so the client class is reused, and the client tells a gate engine
+            from a ship engine by the SHIP, never by the system.)
+         4. That engine holds at least one order for THIS turn in firing mode 1-4 (the programmed
+            open duration). Modes 5-7 have no meaning on a gate and are refused server-side too.
+
+       ⭐ EVERY SUCH ORDER IS ONE THIS CLIENT JUST CREATED, and that is a property of the payload
+       rather than an assumption: TacGamedata::hideSystemFireOrders strips EVERY current-turn
+       ballistic order from EVERY phase-1 payload, its author's included, so a committed signal
+       never comes back down the wire while Initial Orders are open. There is therefore no
+       already-submitted order here to re-send and duplicate.
+
+       The order's targetid is the claiming player's nearest qualifying unit - a HINT.
+       Firing::validateVortexDeclaration re-derives it from $gamedata->forPlayer and overwrites it,
+       so nothing here is trusted (plan section 3.3 and trap 4). */
+    getGateSignalOrders: function getGateSignalOrders(ship) {
+        if (gamedata.gamephase !== 1) return null;
+        if (!gamedata.isJumpGate(ship)) return null;
+        if (!ship.systems) return null;
+
+        for (var i in ship.systems) {
+            var system = ship.systems[i];
+            if (!system || system.name !== 'jumpEngine') continue;
+            if (!Array.isArray(system.fireOrders)) continue;
+
+            var orders = Array();
+            for (var b = 0; b < system.fireOrders.length; b++) {
+                var fire = system.fireOrders[b];
+                if (!fire || fire.turn != gamedata.turn) continue;
+                var mode = parseInt(fire.firingMode, 10);
+                if (isNaN(mode) || mode < 1 || mode > 4) continue;
+                orders.push(fire);
+            }
+
+            if (orders.length === 0) return null;
+            return { systemId: system.id, fireOrders: orders };
+        }
+
+        return null;
     },
 
 

@@ -1575,6 +1575,19 @@ class AmmoMissileRackS extends Weapon{
   		  }
 	}
 
+	/* ===== AUTO-INTERCEPTOR-MISSILES (3 of 3) - THE AMMO CHECK ================================
+	   Yes: ammo IS verified before an intercept is allowed, per shot, in sequence.
+
+	   Firing::isLegalIntercept calls this for every candidate intercept (firing.php, the
+	   canInterceptAtAll line), and it answers from AmmoMagazine::canDrawInterceptor, which tests
+	   remainingAmmo AND (ammoCountArray['Interceptor'] - interceptorUsed) >= 1. interceptorUsed is
+	   bumped by doDrawAmmo from fireDefensively just below, so the Nth intercept this turn sees the
+	   N-1 rounds already spent and the magazine cannot be overdrawn.
+
+	   What this does NOT do is ask whether the player WANTED to spend the round - that decision is
+	   made upstream, at site 1 of 3 in Firing::getUnassignedInterceptors. Ammo availability is the
+	   only thing standing between a loaded launcher and an automatic intercept.
+	   ====================================================================================== */
 	//can intercept only if Magazine holds enough ammo of correct type...
 	public function canInterceptAtAll($gd, $fire, $shooter, $target, $interceptingShip, $firingweapon)
 	{

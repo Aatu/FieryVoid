@@ -54,6 +54,7 @@ class ColonialMercuryClassAM extends BaseShip{
 		$this->addPrimarySystem(new BSGMedBattery(5, 7, 4, 0, 360));
 		$hyperdrive = new JumpEngine(6, 30, 8, 20);
 			$hyperdrive->displayName = 'Hyperdrive';
+			$hyperdrive->markLegacy(); //JUMP_POINTS_PLAN.md section 9 - this setting jumps by boost, not by vortex
 			$this->addPrimarySystem($hyperdrive);
 
         $this->addFrontSystem(new Thruster(6, 30, 0, 3, 1));

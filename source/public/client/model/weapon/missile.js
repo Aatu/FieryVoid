@@ -165,12 +165,22 @@ AmmoMagazine.prototype.doVerifyAmmoUsage = function (currShip) { //verify whethe
     //loop through all weapons for current ship (appropriate to phase) - and check for ammo usage
     for (var i in currShip.systems) {
         var currWeapon = currShip.systems[i];
+        //Manual interception (MANUAL_INTERCEPTION_PLAN.md §4.7c): a BALLISTIC rack may be
+        //hand-assigned to intercept in the Firing phase, and every such order draws a round
+        //(MissileLauncher::fireDefensively). Those orders sit outside the phase test below - which
+        //only ever looked at ballistics in Initial Orders - so without counting them here the
+        //client would happily commit six interceptors from a magazine holding two, and the server
+        //would silently drop four.
+        var interceptOnly = (gamedata.gamephase == 3) && (currWeapon.ballistic);
         if ( (currWeapon.checkAmmoMagazine) //this confirms both that it is a weapon and that it requires ammo
-            && ( ((gamedata.gamephase == 1) && (currWeapon.ballistic)) || ((gamedata.gamephase == 3) && (!currWeapon.ballistic)) ) //appropriate phase - Initial for ballistics, Firing Declaration for direct fire
+            && ( ((gamedata.gamephase == 1) && (currWeapon.ballistic)) || ((gamedata.gamephase == 3) && (!currWeapon.ballistic)) || interceptOnly ) //appropriate phase - Initial for ballistics, Firing Declaration for direct fire, plus phase-3 interception by a ballistic
         ) {
             //loop through firing orders
             for (var fo = 0; fo < currWeapon.fireOrders.length; fo++) {
                 var currFireOrder = currWeapon.fireOrders[fo];
+                //On the intercept-only pass this weapon's launch orders are NOT ours to count -
+                //they belong to Initial Orders and were charged there.
+                if (interceptOnly && !(currFireOrder.type == 'intercept' && currFireOrder.turn == gamedata.turn)) continue;
 				if (currFireOrder.skipAmmoCheck) continue; // GTS_Triad
                 var modeName = currWeapon.firingModes[currFireOrder.firingMode];
                 //mark ammo drawn (particular ammo)
@@ -204,12 +214,22 @@ AmmoMagazine.prototype.doVerifyAmmoUsageFighter = function (currFighter) { //ver
     //loop through all weapons for current ship (appropriate to phase) - and check for ammo usage
     for (var i in currFighter.systems) {
         var currWeapon = currFighter.systems[i];
+        //Manual interception (MANUAL_INTERCEPTION_PLAN.md §4.7c): a BALLISTIC rack may be
+        //hand-assigned to intercept in the Firing phase, and every such order draws a round
+        //(MissileLauncher::fireDefensively). Those orders sit outside the phase test below - which
+        //only ever looked at ballistics in Initial Orders - so without counting them here the
+        //client would happily commit six interceptors from a magazine holding two, and the server
+        //would silently drop four.
+        var interceptOnly = (gamedata.gamephase == 3) && (currWeapon.ballistic);
         if ( (currWeapon.checkAmmoMagazine) //this confirms both that it is a weapon and that it requires ammo
-            && ( ((gamedata.gamephase == 1) && (currWeapon.ballistic)) || ((gamedata.gamephase == 3) && (!currWeapon.ballistic)) ) //appropriate phase - Initial for ballistics, Firing Declaration for direct fire
+            && ( ((gamedata.gamephase == 1) && (currWeapon.ballistic)) || ((gamedata.gamephase == 3) && (!currWeapon.ballistic)) || interceptOnly ) //appropriate phase - Initial for ballistics, Firing Declaration for direct fire, plus phase-3 interception by a ballistic
         ) {
             //loop through firing orders
             for (var fo = 0; fo < currWeapon.fireOrders.length; fo++) {
                 var currFireOrder = currWeapon.fireOrders[fo];
+                //On the intercept-only pass this weapon's launch orders are NOT ours to count -
+                //they belong to Initial Orders and were charged there.
+                if (interceptOnly && !(currFireOrder.type == 'intercept' && currFireOrder.turn == gamedata.turn)) continue;
                 var modeName = currWeapon.firingModes[currFireOrder.firingMode];
                 //mark ammo drawn (particular ammo)
                 if(this.ammoUseArray[modeName]){

@@ -38,6 +38,7 @@ class swCorellianGunship extends MediumShip{
 	    
 	$hyperdrive = new JumpEngine(3, 6, 4, 10);
 	$hyperdrive->displayName = 'Hyperdrive';
+	$hyperdrive->markLegacy(); //JUMP_POINTS_PLAN.md section 9 - this setting jumps by boost, not by vortex
 	$this->addPrimarySystem($hyperdrive);
 	    
 	    

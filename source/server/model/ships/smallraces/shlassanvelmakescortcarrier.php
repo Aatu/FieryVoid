@@ -57,16 +57,14 @@ class ShlassanVelmakEscortCarrier extends MediumShip{
 
         $this->hitChart = array(
             0=> array(
-					10 => "Structure",
-                    11 => "Thruster",
-					13 => "Cargo Bay",
-                    14 => "Scanner",
+                    10 => "Thruster",
+                    12 => "Scanner",
 					16 => "Hangar",
                     19 => "Reactor",
                     20 => "C&C",
             ),
             1=> array(
-                    5 => "Thruster",
+                    6 => "Thruster",
                     10 => "Light Particle Beam",
 					17 => "Structure",
                     20 => "Primary",
