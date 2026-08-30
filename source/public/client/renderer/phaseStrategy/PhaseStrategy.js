@@ -747,6 +747,12 @@ window.PhaseStrategy = function () {
         var shipTooltip = new window.ShipTooltip(this.selectedShip, ships, position, shipManager.systems.selectedShipHasSelectedWeapons(this.selectedShip), menu, payload.hex, ballisticsMenu);
 
         this.shipTooltip = shipTooltip;
+        //What the tooltip's own X presses. It has to route back through hideShipTooltip rather
+        //than the tooltip's destroy(), or this.shipTooltip would keep pointing at a tooltip that
+        //is no longer in the DOM and onMouseOverShip's `!this.shipTooltip.menu` guard would then
+        //block every later tooltip. Same bound call the click / mouse-out callbacks below use, so
+        //dismissing by X and dismissing by clicking the map are literally the same code path.
+        shipTooltip.onClose = this.hideShipTooltip.bind(this, shipTooltip);
         this.onClickCallbacks.push(this.hideShipTooltip.bind(this, shipTooltip));
 
         if (hide) {
