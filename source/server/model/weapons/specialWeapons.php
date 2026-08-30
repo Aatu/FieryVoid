@@ -3620,15 +3620,52 @@ class IonFieldGenerator extends Weapon{
 
 
 
+/* ============================ THE VORTEX DISRUPTOR ==========================================
+ *
+ * A Shadow weapon built for one job: to fire into a jump point and tear it apart, killing whatever
+ * is passing through it at that moment. Until 2026-08-29 there were no jump points in FV, so the
+ * class rolled to hit an arbitrary hex and printed a sentence; Jump Points Phase 1-3 gave the game
+ * real ones, and this is the weapon connected to them (user ruling 2026-08-29).
+ *
+ * WHAT IT DOES, in the order it happens (all of it inside FireGamePhase::advance):
+ *
+ *   1. fire() rolls to hit the HEX. Base 24, less 1 per hex of range, converted to d100. EW is
+ *      irrelevant and there is no target ship - a player may perfectly well shoot at an empty hex,
+ *      and the rules say so explicitly. A MISS has no effect whatsoever.
+ *   2. On a hit, the hex is searched for a jump point - either colour, and FORMING counts as well
+ *      as open (see getDisruptableVortexInHex). Nothing there: no effect, and the log says so.
+ *   3. The doorway is marked collapsing (JumpEngine::disruptVortex). It then closes at the end of
+ *      THIS turn whatever else was keeping it open - a Maintain declaration, a gate's programmed
+ *      multi-turn hold - because JumpEngine::getVortexClosureReason answers for the disruption
+ *      ahead of every other branch.
+ *   4. Whatever was in transit through it is destroyed outright. No damage roll, no allocation:
+ *        - a YELLOW ENTRANCE killed the units that flew into it during THIS turn's Movement phase
+ *          (they are already off the board with a HyperspaceJump damage entry - see
+ *          getDeparturesThrough for how "left the battle" is turned back into "died");
+ *        - a BLUE EXIT killed the reinforcements riding it, who are still in hyperspace waiting to
+ *          come through on a later turn.
+ *   5. An ANCIENT hull (factionAge 3+, whose drives were redesigned in answer to this weapon) rolls
+ *      to slip through the collapsing rift first - see rollAncientEscape.
+ *
+ * ⚠️ ALL OF THIS LIVES IN fire(), NOT IN beforeFiringOrderResolution(). The hook runs from
+ * Firing::prepareFiring, which calls it BEFORE calculateHitBase - so at that point the order has
+ * neither a to-hit number nor a roll, and both are needed here: the shot has to hit before anything
+ * happens, and the MARGIN by which it hit is an input to the ancient-drive escape roll. fire() is
+ * also where the effect is idempotent for free (Firing::fire returns early on
+ * `$fire->rolled > 0`), which is the same self-persisting-effect pattern ShadowFighterBomb uses
+ * below. The one ordering this DOES depend on is that Firing::fireWeapons runs before
+ * JumpEngine::closeExpiredVortices in FireGamePhase::advance, which it does, a few lines apart.
+ *
+ * ⚠️ HALF-PHASING STILL SWITCHES THE WEAPON OFF (hit chance 0 in calculateHitBase). Since
+ * 2026-08-29 the client refuses the targeting gesture outright rather than letting the player spend
+ * a shot on a certain miss - weaponManager.targetHex.
+ * ===========================================================================================
+ */
 class VortexDisruptor extends Weapon{
-	/*Shadow weapon - destabilizes target vortex (it will collapse, destroying any ships that are trying to use it).
-		In FV there are no actual vortexes to be destabilized, but such action may happen in a scenario, being narrated. 
-		Hence the weapon is rendered as hex-targeted - players will get information of hit or miss.
-	*/
 	public $name = "VortexDisruptor";
 	public $displayName = "Vortex Disruptor";
 	public $iconPath = "VortexDisruptor.png";
-	
+
 	public $damageType = "Standard"; //irrelevant, really
 	public $weaponClass = "Ion";
 	public $hextarget = true;
@@ -3638,11 +3675,11 @@ class VortexDisruptor extends Weapon{
 	public $doNotIntercept = true; //although I don't think a weapon exists that could intercept it...
 	public $priority = 1;
 	public $factionAge = 3;//Ancient weapon, which sometimes has consequences!
-	
+
 	public $range = 23;//no point firing at further target with base 24 to hit!
 	public $loadingtime = 3;
     public $rangePenalty = 1;//-1/hex
-	
+
 	public $animation = "ball";
 	public $animationColor = array(245, 90, 90);
 	public $animationExplosionScale = 0.5; //single hex explosion
@@ -3654,24 +3691,42 @@ class VortexDisruptor extends Weapon{
 	public $animationWidth = 14;
 	public $trailLength = 10;
 	    */
-	
+
 	public $firingModes = array(
 		1 => "Disruption"
 	);
-		
-			
+
+	/* THE DAMAGECLASS THE COLLAPSE KILLS WITH, and it is load-bearing rather than a label.
+	   A unit that flew into a jump point this turn is ALREADY off the board carrying a
+	   'HyperspaceJump' damage entry, and both "did it leave or did it die?" tests -
+	   JumpEngine::hasJumped and BaseShip::hasHyperspaceJumpDamage - work by SUBTRACTING the
+	   HyperspaceJump entries and asking whether what remains is enough to have killed it. So the
+	   one thing this string must not be is 'HyperspaceJump': anything else flips both tests, the
+	   client mirror (shipManager.hasJumpedNotDestroyed) and the combat value with them.
+	   ⚠️ it must also stay OUT of Firing::isHyperspaceLogOrder - that is a FIRE ORDER filter,
+	   and the disruptor's order is a real shot that must keep being gathered and resolved. */
+	const COLLAPSE_DAMAGECLASS = 'VortexCollapse';
+
+	/* THE AGE AT WHICH A DRIVE CAN OUTRUN THE COLLAPSE. "factionAge 3+ ships use a slightly
+	   advanced form of jump engine, developed in response to the vortex disruptor" - the same
+	   threshold JumpEngine::openVortex already uses to halve an Ancient's jump-failure chance. */
+	const ANCIENT_FACTION_AGE = 3;
+
+
 	//in pickup play it's essentially a power source - and Shadows don't have all that much use for extra power. Very low repair priority,although maybe above Hangars ;)
 	public $repairPriority = 2;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
-    		
-		
+
+
 	public function setSystemDataWindow($turn){
-		parent::setSystemDataWindow($turn);  
-		$this->data["Special"] = "Weapon that destabilizes hyperspace vortexes, therefore preventing escape (any ships entering destabilized vortex is destroyed).";      
-		$this->data["Special"] .= "<br>There are no actual vortexes in game, but such action might be useful for a scenario - in such case, target weapon on a hex where (by scenario narration) vortex appears."; //originally just charging cycle resets - but I opted for simpler (if stronger) effect. 
-		$this->data["Special"] .= "<br>Game will calculate whether disruption was successful (base chance is 120%, -5%/hex - EW is irrelevant) - but will NOT show it during targeting.";  
-		$this->data["Special"] .= "<br>Being half-phased renders weapon ineffective (hit chance = 0)."; 
-	}	
-	
+		parent::setSystemDataWindow($turn);
+		$this->data["Special"] = "Fired into a jump point - either an open ENTRANCE (yellow, units leaving) or an EXIT (blue, reinforcements arriving), including one that is still forming.";
+		$this->data["Special"] .= "<br>On a hit the jump point begins to collapse: it closes at the end of this turn no matter what was holding it open - a maintained vortex, or a jump gate programmed to stay open longer.";
+		$this->data["Special"] .= "<br>Anything in the jump point at the time is destroyed outright - no damage roll. Ships that flew into an entrance this turn die instead of escaping, and reinforcements waiting behind an exit die in hyperspace.";
+		$this->data["Special"] .= "<br>Ancient hulls (faction age 3+) may slip through first: roll 1d20 against the shot's to-hit margin plus the distance the ship travelled this turn, and escape on equal or higher.";
+		$this->data["Special"] .= "<br>Game will calculate whether disruption was successful (base chance is 120%, -5%/hex - EW is irrelevant) - but will NOT show it during targeting. A miss has no effect at all, and neither does a hit on a hex with no jump point in it.";
+		$this->data["Special"] .= "<br>Being half-phased renders weapon ineffective (hit chance = 0).";
+	}
+
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
 	{
 		//maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -3679,7 +3734,7 @@ class VortexDisruptor extends Weapon{
 		if ( $powerReq == 0 ) $powerReq = 8;
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 	}
-	
+
 	public function calculateHitBase($gamedata, $fireOrder)
 	{
 		//reduce by distance...
@@ -3697,7 +3752,7 @@ class VortexDisruptor extends Weapon{
 		$targetPos = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
 		$dis = mathlib::getDistanceHex($firingPos, $targetPos);
 		$rangePenalty = $this->rangePenalty * $dis;
-		if($shooterHalfphased){ //this prevents Disruptor from working 
+		if($shooterHalfphased){ //this prevents Disruptor from working
 			$fireOrder->needed = 0;
 		}else{//calculate hit chance: 24 minus range penalty
 			$fireOrder->needed = 24 - $rangePenalty;
@@ -3706,23 +3761,371 @@ class VortexDisruptor extends Weapon{
 		$fireOrder->notes .=  "shooter: " . $firingPos->q . "," . $firingPos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis, rangePenalty: $rangePenalty ";
 		$fireOrder->updated = true;
 	}
-	
+
     public function fire($gamedata, $fireOrder)
     { //sadly here it really has to be completely redefined... or at least I see no option to avoid this
         $this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
-        $shooter = $gamedata->getShipById($fireOrder->shooterid);        
+        $shooter = $gamedata->getShipById($fireOrder->shooterid);
         $rolled = Dice::d(100);
-        $fireOrder->rolled = $rolled; 
+        $fireOrder->rolled = $rolled;
 		$fireOrder->pubnotes .= " chance " . $fireOrder->needed . "%,";
 		if($rolled <= $fireOrder->needed){//HIT!
-			$fireOrder->pubnotes .= " HIT - target vortex is disrupted, ships entering it are destroyed! ";
 			$fireOrder->shotshit++;
+			$this->disruptJumpPoint($gamedata, $fireOrder, $shooter);
 		}else{ //MISS!
 			$fireOrder->pubnotes .= " MISSED! ";
 		}
-	} //endof function fire	
-	
-	
+	} //endof function fire
+
+
+	/* ⭐ THE WHOLE EFFECT, ONCE THE SHOT HAS HIT. Everything here is written into
+	 * $fireOrder->pubnotes rather than into a log order of its own: the disruptor's order is an
+	 * ordinary fire order the combat log already renders, and calculateHitBase has already set
+	 * ->updated, so the notes ride back to tac_fireorder on FireGamePhase::advance's
+	 * updateFireOrders call. */
+	protected function disruptJumpPoint($gamedata, $fireOrder, $shooter)
+	{
+		$vortex = self::getDisruptableVortexInHex($gamedata, new OffsetCoordinate($fireOrder->x, $fireOrder->y));
+
+		if (!$vortex){
+			//An expected outcome, not an error: the shot is aimed at a HEX and the shooter may have
+			//guessed wrong, or the jump point may have closed before the Firing phase came round.
+			$fireOrder->pubnotes .= " HIT - but there was no jump point in the target hex, so nothing happened. ";
+			return;
+		}
+
+		$isExit = ($vortex instanceof SpawnJumpPointExit);
+		$engine = JumpEngine::getHoldingEngine($vortex, $gamedata);
+
+		//A SECOND SHOT INTO THE SAME COLLAPSING DOORWAY disrupts nothing further, and more
+		//importantly must not kill the same units twice - so it reports and stops. Same-turn only:
+		//once the closure is recorded the jump point fails getDisruptableVortexInHex's window on
+		//every later turn.
+		if ($engine && $engine->isVortexDisrupted()){
+			$fireOrder->pubnotes .= " HIT - the jump point was already collapsing. ";
+			return;
+		}
+
+		if ($engine){
+			$engine->disruptVortex($vortex->id);
+			$fireOrder->pubnotes .= " HIT - the jump point " . ($isExit ? "exit" : "entrance")
+				. " collapses and will be gone at the end of this turn.";
+		}else{
+			/* AN ORPHANED DOORWAY - its 'Vortex' note never arrived, or its holder's row has gone,
+			   so no engine owns its lifecycle and closeExpiredVortices will never reach it. The
+			   rift is still real and whatever is inside still dies, but do not PROMISE a closure
+			   that no sweep is going to carry out: a log line the game then contradicts is worse
+			   than one that says less. (getVortexClosureReason's 'vortex unit is gone' branch is
+			   the same situation seen from the other end.) */
+			$fireOrder->pubnotes .= " HIT - the jump point " . ($isExit ? "exit" : "entrance")
+				. " is torn open.";
+		}
+
+		$victims = $isExit
+			? self::getArrivalsThrough($vortex, $gamedata)
+			: self::getDeparturesThrough($vortex, $gamedata);
+
+		if (empty($victims)){
+			$fireOrder->pubnotes .= " Nothing was passing through it. ";
+			return;
+		}
+
+		$killed  = array();
+		$escaped = array();
+
+		foreach ($victims as $group){
+			//THE GROUP'S FATE IS THE HOST'S. An attached pod mirrors its host's movement and was
+			//carried into hyperspace by it (Movement::resolveJumpOuts), so it cannot roll for
+			//itself - it goes wherever the hull it is bolted to goes, whatever its own faction age.
+			$host = $group[0];
+
+			$distance = $isExit
+				? 0   //still in hyperspace - it moved no distance to reach the doorway
+				: self::getApproachDistance($host, $vortex->getHexPos(), $gamedata);
+
+			if (self::rollAncientEscape($host, $fireOrder, $distance)){
+				$escaped[] = $host->name;
+				continue;
+			}
+
+			foreach ($group as $unit){
+				$this->destroyInCollapse($unit, $gamedata, $shooter);
+				$killed[] = $unit->name;
+			}
+		}
+
+		if ($isExit){
+			/* ⚠️ COUNTS, NEVER NAMES, ON THE EXIT SIDE. pubnotes is PUBLIC - it is the combat-log
+			   sentence every player reads - and a wave that is still in hyperspace is concealed
+			   down to a count and a point total by TacGamedata::hideHyperspaceReinforcements
+			   (REINFORCEMENTS_PLAN.md §3.6: never classes, never names). These units never get an
+			   arrival turn, so they are never declassified; printing what the disruptor killed
+			   would hand the shooter the enemy's whole reserve order of battle as a reward for one
+			   lucky shot. The count is already public per slot, so it discloses nothing new.
+			   ⭐ The DAMAGE ROWS take care of themselves: combatLog walks gamedata.ships matching
+			   fireorderid, and a masked unit is not in the payload at all, so an enemy sees the
+			   shot with no victims under it while the owner sees exactly which of their ships died.
+			   A DEPARTURE is the opposite case and is named below - those hulls were on the board
+			   in front of everybody. */
+			if (!empty($killed)){
+				$fireOrder->pubnotes .= " " . count($killed)
+					. (count($killed) == 1 ? " reinforcement was" : " reinforcements were")
+					. " destroyed in hyperspace as it tore apart.";
+			}
+			if (!empty($escaped)){
+				$fireOrder->pubnotes .= " " . count($escaped) . " slipped clear before it closed.";
+			}
+		}else{
+			if (!empty($killed))  $fireOrder->pubnotes .= " Destroyed in the rift: " . implode(", ", $killed) . ".";
+			if (!empty($escaped)) $fireOrder->pubnotes .= " Slipped through before it closed: " . implode(", ", $escaped) . ".";
+		}
+		$fireOrder->pubnotes .= " ";
+	}
+
+
+	/* ⭐ THE JUMP POINT THIS SHOT CAN DISRUPT AT $pos, or null.
+	 *
+	 * ⚠️ DELIBERATELY WIDER THAN Movement::getOpenVortexInHex, IN BOTH DIRECTIONS, and the
+	 * two must not be merged:
+	 *
+	 *   BOTH COLOURS. That reader is entrance-only because an exit is not a doorway OUT
+	 *   (REINFORCEMENTS_PLAN.md section 2.6). This weapon shoots at whatever is there.
+	 *
+	 *   FORMING COUNTS. That reader refuses a vortex that has not formed yet because nothing can
+	 *   fly into one. Here it is the opposite: "a jump point that is forming" is an explicit target
+	 *   in the rule, and for a BLUE exit the forming turn is the ONLY turn on which the
+	 *   reinforcements behind it are still in hyperspace to be killed. $spawned is openTurn + 1, so
+	 *   `spawned <= turn + 1` is "open, or forming right now" and nothing beyond that - a doorway
+	 *   declared for a later turn does not exist yet.
+	 *
+	 * The CLOSED half of the window is that reader's verbatim: removedTurn is the first turn the
+	 * jump point is gone, so a vortex stays shootable for the whole of the turn it closes on. */
+	public static function getDisruptableVortexInHex($gamedata, OffsetCoordinate $pos)
+	{
+		foreach ($gamedata->ships as $unit){
+			if (!($unit instanceof SpawnJumpPoint)) continue;              //both colours - Exit extends this
+			if ((int)$unit->spawned > (int)$gamedata->turn + 1) continue;  //not even forming yet
+			if ($unit->removed && $unit->removedTurn !== null
+				&& $gamedata->turn >= $unit->removedTurn) continue;        //already gone
+			if (!$unit->getLastMovement()) continue;                       //no deploy row: no hex to compare
+			if ($unit->getHexPos()->equals($pos)) return $unit;
+		}
+
+		return null;
+	}
+
+
+	/* ⭐ THE UNITS THAT FLEW INTO THIS YELLOW ENTRANCE DURING THIS TURN'S MOVEMENT PHASE, as groups of
+	 * [host, ...units carried out with it].
+	 *
+	 * They are ALREADY GONE by the time the Firing phase runs - Movement::resolveJumpOuts removed
+	 * them at the end of Movement - so this searches wreckage rather than the board: the unit has a
+	 * 'jumpout' movement row naming this vortex, and it actually left (isDestroyed +
+	 * hasJumpedToHyperspace, which is what tells a successful departure from one the server
+	 * REFUSED, whose ship is still sitting on the map).
+	 *
+	 * ⚠️ AN ATTACHED POD HAS NO JUMP-OUT ORDER OF ITS OWN. Its movement rows are all type
+	 * 'attached' and mirror the host's, so resolveJumpOuts takes it out under the host's order and
+	 * it can only be found through $hasAttached - the same reasoning, and the same loop, as there. */
+	protected static function getDeparturesThrough($vortex, $gamedata)
+	{
+		$groups = array();
+
+		foreach ($gamedata->ships as $unit){
+			if ($unit->isTerrain() || $unit->mine) continue;
+			if (!self::hasLeftThroughVortex($unit, $vortex, $gamedata)) continue;
+
+			$group = array($unit);
+
+			if (!empty($unit->hasAttached)){
+				foreach (array_keys($unit->hasAttached) as $attachedId){
+					$attached = $gamedata->getShipById((int)$attachedId);
+					if (!$attached) continue;
+					if (!$attached->isDestroyed($gamedata->turn) || !$attached->hasJumpedToHyperspace()) continue;
+					$group[] = $attached;
+				}
+			}
+
+			$groups[] = $group;
+		}
+
+		return $groups;
+	}
+
+	/* Did $unit leave the battle through THIS jump point on THIS turn? */
+	protected static function hasLeftThroughVortex($unit, $vortex, $gamedata)
+	{
+		$order = Movement::getJumpOutOrder($unit->movement, $gamedata->turn);
+		if (!$order) return false;
+		if ((int)$order->value !== (int)$vortex->id) return false;
+
+		//The order alone is not proof: resolveJumpOuts re-validates the stored path and refuses one
+		//that does not enter the vortex through its mouth. A refused unit never left.
+		//An explicit turn, not the bare isDestroyed(): the no-argument form falls back to
+		//TacGamedata::$currentTurn, and the two are only the same thing when the static happens to
+		//have been set. We have the turn right here.
+		return ($unit->isDestroyed($gamedata->turn) && $unit->hasJumpedToHyperspace());
+	}
+
+
+	/* ⭐ THE REINFORCEMENTS RIDING THIS BLUE EXIT, as one-unit groups.
+	 *
+	 * These have never been on the board: they are waiting in hyperspace with a berth naming the
+	 * unit (or the gate) that opened the doorway, and they would have come out of it in the
+	 * Deployment phase of a later turn. Collapsing it kills them there.
+	 *
+	 * ⚠️ THE JOIN IS arrivalVia -> vortexHolderId, and a NULL arrivalVia MEANS "ITS OWN
+	 * DOORWAY" rather than "unassigned" - JumpEngine::getArrivalVortex documents why, and the opener
+	 * always comes through the exit it opened (section 2.2). Reading null as unassigned here would
+	 * spare the one unit that is unquestionably inside the jump point.
+	 *
+	 * ⚠️ TIMING - THIS RUNS BEFORE JumpEngine::stampExitManifests, so the wave is still
+	 * isReinforcement() (arrivalTurn null) and has not been given its arrival turn yet. That is the
+	 * right side of the boundary in both directions: a unit that ALREADY came through on an earlier
+	 * turn has an arrivalTurn, fails isReinforcement(), and is correctly left alone - it is standing
+	 * on the board, not inside the jump point. A gate's second and later waves are caught here on
+	 * each turn of its hold, which is what the rule wants.
+	 *
+	 * ⚠️ alwaysDeploysTurnOne() - a gate or base that wrongly carries the reinforcement flag
+	 * (a game bought before BuyingGamePhase refused it) is on the board and is not riding anything.
+	 * Same guard, same reason, as stampArrivingReinforcements. */
+	protected static function getArrivalsThrough($vortex, $gamedata)
+	{
+		if ($vortex->vortexHolderId === null) return array();
+
+		$openerId = (int)$vortex->vortexHolderId;
+		$groups   = array();
+
+		foreach ($gamedata->ships as $unit){
+			if (!$unit->isReinforcement()) continue;
+			if ($unit->alwaysDeploysTurnOne()) continue;
+			if ($unit->isDestroyed($gamedata->turn)) continue;
+
+			$via = ($unit->arrivalVia === null) ? (int)$unit->id : (int)$unit->arrivalVia;
+			if ($via !== $openerId) continue;
+
+			$groups[] = array($unit);
+		}
+
+		return $groups;
+	}
+
+
+	/* ⭐⭐ THE ANCIENT-DRIVE ESCAPE ROLL (user ruling 2026-08-29). True when $unit slips through before
+	 * the rift closes and is spared.
+	 *
+	 * "factionAge 3+ ships, which use a slightly advanced form of jump engine developed in response
+	 * to the vortex disruptor, have a chance to slip through the jump point before it collapses.
+	 * Determine the difference between the attack die roll to hit the jump point and the required
+	 * to-hit value, and add to this the distance the advanced race ship moved to reach the jump
+	 * point on this turn. Now roll 1d20: equal to or greater than that total and the ship escapes."
+	 *
+	 * So a CLEANER hit is harder to survive, and so is a longer run-up: both terms make the total
+	 * bigger and the d20 harder to make. A total of 1 or less is a certain escape, 21 or more is
+	 * certain death.
+	 *
+	 * ⚠️ THE MARGIN IS MEASURED IN d20s, NOT IN THE d100 THE WEAPON ACTUALLY ROLLS. FV
+	 * converts the B5W to-hit number to percent (needed = (24 - range) * 5) and rolls d100, so both
+	 * sides are divided back down before they are subtracted - ceil() on the roll and round() on the
+	 * target, which is the exact inverse of that conversion (a d100 of 1-5 IS a d20 of 1).
+	 * Subtracting raw d100 values would produce margins around 60 and make every escape impossible.
+	 *
+	 * ⚠️ DISTANCE IS ZERO FOR AN ARRIVING REINFORCEMENT, and that is a real answer rather than
+	 * a missing one: it is in hyperspace, it has no hex, and it moved no distance to reach the
+	 * doorway. Its escape rides on the shot's margin alone. */
+	protected static function rollAncientEscape($unit, $fireOrder, $distance)
+	{
+		if (!$unit || (int)$unit->factionAge < self::ANCIENT_FACTION_AGE) return false;
+
+		$neededD20 = (int)round(((int)$fireOrder->needed) / 5);
+		$rolledD20 = (int)ceil(((int)$fireOrder->rolled) / 5);
+		$total     = ($neededD20 - $rolledD20) + (int)$distance;
+
+		return (Dice::d(20) >= $total);
+	}
+
+	/* HOW FAR $unit TRAVELLED THIS TURN TO REACH $vortexPos - "between start point and jump point,
+	 * not just speed value", so it is measured from where the unit stood when the turn began, in
+	 * hexes, ignoring the shape of the path.
+	 *
+	 * ⚠️ DBManager::getMovesForShips fetches turn 1, turn N-1, turn N and the deploy/start
+	 * rows and nothing else, so the last row BEFORE this turn is always present for a unit that has
+	 * been on the board - and the fallback (this turn's first row) covers one that arrived during
+	 * it. */
+	protected static function getApproachDistance($unit, OffsetCoordinate $vortexPos, $gamedata)
+	{
+		if (!$unit || !is_array($unit->movement) || empty($unit->movement)) return 0;
+
+		$turn  = (int)$gamedata->turn;
+		$start = null;
+
+		foreach ($unit->movement as $move){
+			if ((int)$move->turn < $turn){ $start = $move; continue; }
+			if ((int)$move->turn > $turn) continue;
+			if ($start === null) $start = $move;   //nothing earlier: the unit arrived this turn
+		}
+
+		if (!$start || !$start->position) return 0;
+
+		//(int) because CubeCoordinate::distanceTo returns a FLOAT (its cube conversion divides), and
+		//this number is about to be added to a d20 target. An int is what the rule means.
+		return (int)(new OffsetCoordinate($start->position))->distanceTo($vortexPos);
+	}
+
+
+	/* ⭐ KILL ONE UNIT IN THE COLLAPSE. Movement::applyJumpOut's damage half, with two differences
+	 * that are the entire point of the method:
+	 *
+	 *   1. THE DAMAGECLASS IS NOT 'HyperspaceJump' (see COLLAPSE_DAMAGECLASS). That is what turns a
+	 *      unit the game has already recorded as having LEFT into one it records as DEAD - both
+	 *      tests subtract the jump entries and ask whether the rest was fatal.
+	 *   2. THE DAMAGE IS maxhealth, NOT getRemainingHealth(). It LOOKS wrong on a structure that is
+	 *      already at zero, and it is the load-bearing half of point 1: a departing unit's
+	 *      HyperspaceJump entry has already taken its remaining health, so a second entry sized on
+	 *      what is left would be worth nothing at all and the ship would still read as having
+	 *      escaped. maxhealth is the smallest value that is certainly fatal whatever else has
+	 *      happened to the hull, including nothing at all (an untouched reinforcement).
+	 *
+	 * A FLIGHT HAS NO PRIMARY STRUCTURE - the same three-anchor problem applyJumpOut documents - so
+	 * it is killed craft by craft, which is what FighterFlight::isDestroyed reads.
+	 *
+	 * No allocation, no criticals, no overkill: this is not a hit, it is the fabric of space coming
+	 * apart. shooterid/weaponid are stamped so DBManager::submitDamages can find the disruptor's own
+	 * fire order and hang the rows off it in the combat log (fireorderid is not known yet here).
+	 * ⚠️ damage pubnotes are interpolated into SQL unescaped by submitDamages - keep the text
+	 * free of apostrophes. */
+	protected function destroyInCollapse($unit, $gamedata, $shooter)
+	{
+		if ($unit instanceof FighterFlight){
+			foreach ($unit->systems as $craft){
+				if ($craft->isDestroyed($gamedata->turn)) continue;
+				$this->addCollapseDamage($unit, $craft, $gamedata, $shooter);
+			}
+			return;
+		}
+
+		$primaryStruct = $unit->getStructureSystem(0);
+		if (!$primaryStruct) return;
+
+		$this->addCollapseDamage($unit, $primaryStruct, $gamedata, $shooter);
+	}
+
+	protected function addCollapseDamage($unit, $system, $gamedata, $shooter)
+	{
+		$damageEntry = new DamageEntry(
+			-1, $unit->id, -1, $gamedata->turn,
+			$system->id, (int)$system->maxhealth, 0, 0, -1, true, false,
+			"Destroyed by a collapsing jump point.", self::COLLAPSE_DAMAGECLASS
+		);
+		$damageEntry->updated = true;
+		if ($shooter){ //so submitDamages can find the fire order this belongs to
+			$damageEntry->shooterid = $shooter->id;
+			$damageEntry->weaponid  = $this->id;
+		}
+		$system->damage[] = $damageEntry;
+	}
+
+
 	public function getDamage($fireOrder){       return 0; /*no actual damage, just disruption of vortex which is narrative only*/  }
 	public function setMinDamage(){     $this->minDamage = 0 ;      }
 	public function setMaxDamage(){     $this->maxDamage = 0 ;      }

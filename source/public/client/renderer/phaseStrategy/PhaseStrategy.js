@@ -384,6 +384,37 @@ window.PhaseStrategy = function () {
             mathlib.clearLosSprite();
         }
 
+        /* ⭐⭐ NOTHING VISIBLE LEFT IN THE HEX MEANS THE CLICK BELONGS TO THE HEX (bug report
+           2026-08-29, game 4321). Every unit here filtered out as hidden, so as far as the player
+           can see they clicked empty space - and until this branch existed the click was simply
+           swallowed and NOTHING happened, with no message.
+
+           ⚠️ THE RULE IS onShipClicked's, VERBATIM, and the bug was that only IT had it. A hex with
+           exactly ONE hidden unit in it routes through onShipClicked, whose first branch already
+           says "hidden + a hex weapon selected -> target the hex". A hex with TWO or more arrived
+           here instead, where filteredShips.length === 0 fell into the else below and was refused
+           by its own `length > 0` guard. One hidden ship: works. Two: silently does nothing.
+
+           A JUMP POINT IS WHERE THAT RELIABLY BITES, which is how it surfaced: units that fly into
+           a vortex are removed at the END of the Movement phase but stay in the icon container at
+           the vortex hex for the rest of the turn (destroyed, and hidden by shouldBeHidden), so by
+           the Firing phase a used jump point is a stack of two, three or four invisible wrecks -
+           and a Vortex Disruptor shot at that hex could never be declared. Arriving reinforcements
+           stack on a blue exit for the same reason. It is NOT a vortex-specific fix: any hex weapon
+           aimed at any hex holding several undetected stealth ships had the same hole.
+
+           Left-click only, and no fall-through to onHexClicked: a RIGHT click on a hidden stack
+           still does nothing (it opens a ship window, and there is no ship to open), and routing
+           the whole click to onHexClicked would hand the Deployment and Movement phases a hex the
+           player cannot see the contents of. Mirroring the one-ship rule changes nothing except the
+           case that was broken. */
+        if (filteredShips.length === 0) {
+            if (payload.button !== 2 && this.selectedShip && weaponManager.hasHexWeaponsSelected()) {
+                weaponManager.targetHex(this.selectedShip, payload.hex);
+            }
+            return;
+        }
+
         if (filteredShips.length === 1) { //only one ship, we have to pretend the stealth ship(s) aren't on same hex!
             var ship = filteredShips[0];
             if (payload.button === 2) {

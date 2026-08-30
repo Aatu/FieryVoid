@@ -1189,9 +1189,18 @@ class TacGamedata {
        "jumped" from "damage-killed" among units already out of play, so on a healthy hull with a jump
        engine it returns true on its own. The client twin of this pairing is in fleetList.js. */
     private function hasLeftThroughVortex($ship){
-        if (Movement::getJumpOutOrder($ship->movement, $this->turn) !== null) return true;
+        /* ⚠️ ORDER MATTERS, AND THE REMOVAL IS THE AUTHORITY ONCE THERE IS ONE. The jump-out ORDER
+           was the first test here until the Vortex Disruptor shipped (2026-08-29), and it has to
+           give way to it: a unit killed by a collapsing jump point still carries the order it flew
+           in on, so asking the order first said "it left" about a ship that is a wreck, and the
+           docked flights inside it were painted Jumped for the rest of the game. A destroyed unit's
+           damage entries are the record - hasJumpedToHyperspace subtracts the HyperspaceJump ones
+           and asks whether the rest was fatal, which the disruptor's VortexCollapse entry makes it.
+           The client twin of this fix is fleetListManager.getJumpedDockedFlightIds. */
+        if ($ship->isDestroyed()) return $ship->hasJumpedToHyperspace();
 
-        return $ship->isDestroyed() && $ship->hasJumpedToHyperspace();
+        //Still on the board: a COMMITTED jump-out is a departure the phase has not resolved yet.
+        return (Movement::getJumpOutOrder($ship->movement, $this->turn) !== null);
     }
 
     /* REINFORCEMENTS_PLAN.md §3.6 - WHAT AN ENEMY IS TOLD ABOUT A FLEET STILL IN HYPERSPACE:

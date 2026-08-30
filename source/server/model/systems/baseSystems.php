@@ -5232,6 +5232,23 @@ class JumpEngine extends Weapon{
     protected $vortexScatterHexes = null;
     protected $vortexScatterFacingSteps = null;
 
+    /* ⭐ VORTEX DISRUPTOR - THIS ENGINE'S JUMP POINT HAS BEEN SHOT INTO AND IS COLLAPSING.
+       Set by VortexDisruptor::fire (model/weapons/specialWeapons.php) the instant its shot hits,
+       read by getVortexClosureReason, which answers for it BEFORE every other branch on the list -
+       so a collapsing jump point closes at the end of this turn however long it was otherwise going
+       to last: a Maintain declaration does not save it, and neither does a fixed gate's programmed
+       hold.
+
+       IN MEMORY ONLY, AND THAT IS SUFFICIENT rather than an oversight. Both halves run inside ONE
+       FireGamePhase::advance, off ONE gamedata load, in this order: Firing::fireWeapons -> the
+       disruptor's fire() -> this flag, then JumpEngine::closeExpiredVortices a few lines later.
+       What PERSISTS is the closure that comes out of it - the ordinary phase-2 'Vortex' note
+       recordVortexClosure writes - so a second advance() over the same turn re-reads a vortex that
+       is already closed and never consults this flag at all. (Firing::fire's
+       `if ($fire->rolled > 0) return;` is what makes the shot itself idempotent, so it is not
+       re-rolled either.) Protected, so it costs no payload and no static blueprint. */
+    protected $vortexDisrupted = false;
+
     /* SECTION 9 - THE LEGACY ONE-CLICK JUMP, AND WHY IT IS A FLAG RATHER THAN A SUBCLASS.
      *
      * Not every setting in the fleet has a B5 jump vortex. A Trek Nacelle, a BSG FTL Drive and a
@@ -7259,6 +7276,68 @@ class JumpEngine extends Weapon{
         return true;
     }
 
+    /* ⭐ VORTEX DISRUPTOR - START THE JUMP POINT $vortexId COLLAPSING. Returns true when this
+     * engine is the one holding it, so the caller can stop looking.
+     *
+     * THE ID IS CHECKED RATHER THAN TRUSTED. The disruptor finds its victim by HEX and then walks
+     * from the vortex unit to its holder through $vortex->vortexHolderId, and a hull may carry more
+     * than one Jump Engine (11 Vorlon classes do). Without this test the first engine on the ship
+     * would take the flag whether or not it was the one holding the door open - and would then be
+     * unable to open a jump point of its own for the rest of the game, while the real one closed
+     * nothing.
+     *
+     * ⚠️ NO TURN ARGUMENT ON PURPOSE. The window has already been judged by the caller, against
+     * the vortex UNIT (forming counts, which hasOpenVortex knows nothing about - a doorway that has
+     * been declared but has not formed yet is a legal target, plan §2.3 of REINFORCEMENTS_PLAN.md).
+     * Asking hasOpenVortex here as well would silently refuse exactly that case. */
+    public function disruptVortex($vortexId)
+    {
+        if ($this->activeVortexId === null) return false;
+        if ((int)$this->activeVortexId !== (int)$vortexId) return false;
+
+        $this->vortexDisrupted = true;
+        return true;
+    }
+
+    /* Is this engine's jump point collapsing? Read by the disruptor so a second shot into the same
+     * hex on the same turn can report "already collapsing" instead of claiming a fresh kill. */
+    public function isVortexDisrupted()
+    {
+        return $this->vortexDisrupted;
+    }
+
+    /* THE ENGINE HOLDING $vortex OPEN, or null. The walk is vortex -> vortexHolderId -> that ship's
+     * Jump Engine whose activeVortexId is this vortex - the same join getArrivalVortex makes in the
+     * other direction, and the same field the client's getVortexHeldBy has read since Stage 5.
+     *
+     * ⚠️ A GATE IS A SHIP HERE. restoreVortexState stamps vortexHolderId from the 'Vortex' note's
+     * shipid whoever wrote it, so a fixed gate's own id is what a gate vortex carries and
+     * getShipById finds the terrain unit exactly as it finds a hull. That is what lets one caller
+     * disrupt both kinds without a branch.
+     *
+     * ⚠️ NULL IS A REAL ANSWER, not a defensive shrug: a vortex whose 'Vortex' note never arrived,
+     * or whose holder's row has gone, has no engine to tell. The doorway then simply stays as it
+     * was - which is the same thing getVortexClosureReason's 'vortex unit is gone' branch does from
+     * the other side. */
+    public static function getHoldingEngine($vortex, $gamedata)
+    {
+        if (!($vortex instanceof SpawnJumpPoint)) return null;
+        if ($vortex->vortexHolderId === null) return null;
+
+        $holder = $gamedata->getShipById((int)$vortex->vortexHolderId);
+        if (!$holder || !is_array($holder->systems)) return null;
+
+        foreach ($holder->systems as $system){
+            if (!($system instanceof JumpEngine)) continue;
+            if ($system->activeVortexId === null) continue;
+            if ((int)$system->activeVortexId !== (int)$vortex->id) continue;
+
+            return $system;
+        }
+
+        return null;
+    }
+
     /* Put the vortex on the board. Spawn path is BallisticMineLauncher::createLoiteringMine's,
      * verbatim in shape - insertSingleShip, mark $spawned, write a deploy MovementOrder, write the
      * IndividualNote - minus its weapon-loading block, which a unit with no weapons does not need.
@@ -7629,6 +7708,25 @@ class JumpEngine extends Weapon{
         //nothing left to hold open, so stop asking about it every turn.
         if (!($vortex instanceof SpawnJumpPoint)) return 'vortex unit is gone';
 
+        /* ⭐⭐ VORTEX DISRUPTOR - FIRST ON THE LIST, AND THE POSITION IS THE RULE. A jump point that
+           has been shot into collapses at the end of THIS turn "regardless of whether it's being
+           maintained, or a jump gate that is scheduled to stay open longer" (user ruling
+           2026-08-29). Every branch below this line is something that could have kept it open:
+
+             - the EXIT branch answers null on the forming turn, which is precisely the turn a blue
+               doorway is most likely to be shot at (its manifest has not come through yet);
+             - the GATE branch runs on a programmed hold this rule is explicitly allowed to cut short;
+             - a ship's own list is exempt from Maintain on the opening turn and honours it after.
+
+           Put anywhere else, the disruptor would work on some jump points and silently not on
+           others. The vortex unit test above stays ahead of it only because there is nothing left
+           to collapse when the unit itself is gone.
+
+           The UNITS in the doorway are not killed here - VortexDisruptor::fire does that at the
+           moment of the hit, where the to-hit margin it needs for the ancient-drive escape roll
+           still exists. This branch is only the doorway's own fate. */
+        if ($this->vortexDisrupted) return 'disrupted by a Vortex Disruptor';
+
         /* ⭐ REINFORCEMENTS_PLAN.md §2.3 - AN EXIT IS ONE-SHOT, and this is the whole of that
            rule. Forms at the end of the turn it was declared (N), the manifest arrives through it in
            the Deployment phase of N+1, and it closes at the end of N+1. Nothing on a ship's closure
@@ -7814,6 +7912,10 @@ class JumpEngine extends Weapon{
         $this->vortexCloseReason = '';
         $this->vortexHoldTurns   = null;
         $this->vortexClaimantId  = null;
+        //A disruption describes the CURRENT vortex, and this method is what decides which one that
+        //is. Ordering makes it academic in practice (loads happen before firing, never after), but
+        //leaving one of the per-vortex fields out of the reset is how the next one drifts.
+        $this->vortexDisrupted   = false;
 
         foreach ($vortexNotes as $note){
             //LIMIT 3: the closure reason is free text and can contain commas.

@@ -3751,6 +3751,21 @@ window.weaponManager = {
                 continue;
             }
 
+            /* VORTEX DISRUPTOR - A HALF-PHASED SHADOW HULL CANNOT USE IT (user ruling
+               2026-08-29). The server has always said so, but only by setting the hit chance to
+               ZERO in VortexDisruptor::calculateHitBase - so the order was accepted, the weapon
+               discharged, and the player found out at the end of the turn that they had spent a
+               3-turn recharge on a shot that could not physically hit. Refused here instead, with a
+               reason, and REPORTED rather than silently skipped for the same reason the vortex
+               declaration below is: the hex was picked deliberately.
+               ⚠️ The server keeps its hit chance of 0 - this is the courtesy, not the rule. */
+            if (weapon.name === 'VortexDisruptor' && shipManager.movement.isHalfPhased(selectedShip)) {
+                confirm.error("A half-phased ship cannot fire its <b>Vortex Disruptor</b> - the beam has "
+                    + "nothing to bite on. Stay in phase to disrupt a jump point.");
+                toUnselect.push(weapon);
+                continue;
+            }
+
             //Vortex declaration legality (JUMP_POINTS_PLAN.md section 2.1). Reported rather than
             //silently skipped: the player picked this hex deliberately, and the server would
             //otherwise drop the order without telling anyone. The weapon stays SELECTED so the

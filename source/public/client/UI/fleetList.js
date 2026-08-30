@@ -702,20 +702,23 @@ window.fleetListManager = {
         var ids = {};
         for (var i in gamedata.ships) {
             var carrier = gamedata.ships[i];
-            /* A carrier that has COMMITTED a jump-out is on its way out but the server has not
-               removed it yet (that happens at the end of the Movement phase), so isDestroyed is
-               still false. Take the order as proof on its own; the destroyed pairing below stays
-               for every other route out and for the phases after this one, so the flights flip
-               to "Jumped" at the same instant as the carrier's own row and its map sprite. */
-            if (!shipManager.movement.hasCommittedJumpOut(carrier)) {
-                //hasJumpedNotDestroyed only distinguishes "jumped" from
-                //"damage-killed" among ships already out of play: on a healthy,
-                //in-play carrier it returns true purely because it has a jump
-                //engine and little non-jump damage. Gate on isDestroyed first —
-                //the same pairing updateFleetList uses for a ship's own row — so
-                //we only flag flights whose carrier actually left via hyperspace.
-                if (!shipManager.isDestroyed(carrier)) continue;
+            if (shipManager.isDestroyed(carrier)) {
+                //OUT OF PLAY: the damage entries are the record and the pending order is history.
+                //hasJumpedNotDestroyed only distinguishes "jumped" from "damage-killed" among ships
+                //already out of play — on a healthy, in-play carrier it returns true purely because
+                //it has a jump engine and little non-jump damage — which is why it is gated on
+                //isDestroyed, the same pairing updateFleetList uses for a ship's own row.
+                //⚠️ ASKED BEFORE THE ORDER, not after (Vortex Disruptor, 2026-08-29): a carrier
+                //killed by a collapsing jump point still carries the jumpout order it flew in on,
+                //so taking the order as proof first painted a wreck's flights Jumped for good. The
+                //server twin of this ordering is TacGamedata::hasLeftThroughVortex.
                 if (!shipManager.hasJumpedNotDestroyed(carrier)) continue;
+            } else {
+                /* STILL IN PLAY: a carrier that has COMMITTED a jump-out is on its way out but the
+                   server has not removed it yet (that happens at the end of the Movement phase).
+                   Take the order as proof on its own, so the flights flip to "Jumped" at the same
+                   instant as the carrier's own row and its map sprite. */
+                if (!shipManager.movement.hasCommittedJumpOut(carrier)) continue;
             }
             if (!Array.isArray(carrier.systems)) continue;
             for (var s = 0; s < carrier.systems.length; s++) {
@@ -808,7 +811,18 @@ window.fleetListManager = {
                 // Remove action listener and make everything italic to indicate the
                 // ship was destroyed.
                 fleetListManager.fleetRow(ship).find(".shipname").removeClass("clickable");
-                if (jumpingOut || shipManager.hasJumpedNotDestroyed(ship)) {
+                /* ⚠️ ONCE THE UNIT IS OUT OF PLAY, THE DAMAGE DECIDES — NOT THE PENDING ORDER
+                   (Vortex Disruptor, 2026-08-29). A ship killed by a collapsing jump point is
+                   destroyed AND still carries the jumpout order it flew in on, so ORing the two
+                   the way this used to would have labelled the wreck Jumped and, worse, kept its
+                   combat value out of the enemy's score (fleetListManager's value walk at the top
+                   of this file uses the same pairing). Before the removal resolves there is no
+                   damage to read yet, so the committed order is the only signal and stands.
+                   Same shape, same reason, as getJumpedDockedFlightIds above. */
+                var jumpedOut = shipManager.isDestroyed(ship)
+                    ? shipManager.hasJumpedNotDestroyed(ship)
+                    : jumpingOut;
+                if (jumpedOut) {
                     fleetListManager.setRowState(ship, "jumped", "Jumped");
                 } else {
                     fleetListManager.setRowState(ship, "destroyed", "Destroyed");
