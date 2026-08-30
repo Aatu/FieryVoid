@@ -2255,7 +2255,6 @@ class spawnDustField extends Terrain {
 
 
 
-
 class SpatialCutter extends Weapon {
 
     public $name = "SpatialCutter";
@@ -2276,11 +2275,13 @@ class SpatialCutter extends Weapon {
 
     public $loadingtime = 1;
 
-    public $animation = "gravitic";
+    public $animation = "laser";
     public $animationColor = array(100, 0, 200);
     public $animationExplosionScale = 0.4;
 
     public $firingModes = array(1 => "Spatial Cutter");
+
+	public $factionAge = 4; //Primordial
 
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
@@ -2291,7 +2292,7 @@ class SpatialCutter extends Weapon {
         $this->data["Special"] = "Gravitic class weapon. Raking 15. Requires lock-on to fire.";
         $this->data["Special"] .= "<br>Uninterceptable. Can intercept uninterceptable weapons.";
         $this->data["Special"] .= "<br>On hit: creates a hyperspace waveform along the line of fire.";
-        $this->data["Special"] .= "<br>Waveform appears at start of next turn. Units entering a waveform hex take speed x size factor damage.";
+        $this->data["Special"] .= "<br>Waveform is active for one turn. Units entering a waveform hex take speed x size factor damage per hex.";
         $this->data["Special"] .= "<br>Units without advanced armor take double waveform damage.";
     }
 
@@ -2304,11 +2305,13 @@ class SpatialCutter extends Weapon {
 
     public function calculateHitBase($gamedata, $fireOrder) {
         $firingShip = $gamedata->getShipById($fireOrder->shooterid);
-        $target = $gamedata->getShipById($fireOrder->targetid);
+        $target     = $gamedata->getShipById($fireOrder->targetid);
 
+        // Require lock-on — if no OEW on target, auto-miss with note
         if ($target && $firingShip->getOEW($target, $gamedata->turn) <= 0) {
-            $fireOrder->needed = 0;
-            $fireOrder->pubnotes .= "No lock-on - shot cannot be fired. ";
+            $fireOrder->needed   = 0;
+            $fireOrder->shotshit = 0;
+            $fireOrder->pubnotes .= "No lock-on — Spatial Cutter cannot fire. ";
             return;
         }
 
@@ -2324,10 +2327,10 @@ class SpatialCutter extends Weapon {
 
             if ($shooter && $target) {
                 // Spawn waveform immediately along the line of fire.
-                // spawnTurn is set to the current turn so:
-                // - No collision damage on turn N (units already placed before firing)
-                // - Collision damage fires on turn N+1 when units move through the hex
-                // - beforePreFiringOrderResolution removes it on turn N+2
+                // spawnTurn = current turn so:
+                // Turn N:   waveform exists but no collision damage (units already in position)
+                // Turn N+1: units moving through take WaveformCollision damage
+                // Turn N+1 end: generateIndividualNotes silently removes waveforms (no animation)
                 $lineHexes = self::getHexLine($shooter->getHexPos(), $target->getHexPos());
                 foreach ($lineHexes as $hex) {
                     $this->spawnWaveformAtHex($gamedata, $shooter, $hex);
@@ -2336,27 +2339,35 @@ class SpatialCutter extends Weapon {
         }
     }
 
-    // Remove expired waveforms at the start of pre-firing on turn N+2.
-    // Waveform spawns on turn N, is active on turn N+1, removed on turn N+2.
-    public function beforePreFiringOrderResolution($gamedata) {
-        foreach ($gamedata->ships as $waveShip) {
-            if ($waveShip instanceof spawnHyperspaceWaveform) {
-                $waveShip->loadSpawnTurn();
-                if ($waveShip->spawnTurn > 0 && $gamedata->turn > $waveShip->spawnTurn + 1) {
-                    $structure = $waveShip->getSystemByName("Structure");
-                    if ($structure && !$structure->isDestroyed()) {
-                        $damageEntry = new DamageEntry(
-                            -1, $waveShip->id, $gamedata->id, $gamedata->turn, $structure->id,
-                            $structure->maxhealth, 0, 0, -1, true, false,
-                            "Waveform dissipated", "Standard"
-                        );
-                        $damageEntry->updated = true;
-                        $structure->damage[] = $damageEntry;
-                    }
-                }
-            }
-        }
-    }
+    // Runs at the END of the fire phase (phase 4) on turn N+1 — after all
+    // firing, criticals, and animations are resolved. Removes expired waveforms
+    // silently (no DamageEntry = no explosion animation in the replay).
+    // This ensures waveforms are gone before movement on turn N+2.
+	public function generateIndividualNotes($gameData, $dbManager) {
+		switch ($gameData->phase) {
+			case 4:
+				$ship = $this->getUnit();
+				if ($this->isDestroyed() || !$ship || $ship->isDestroyed()) break;
+
+				foreach ($gameData->ships as $waveShip) {
+					if (!($waveShip instanceof spawnHyperspaceWaveform)) continue;
+					$waveShip->loadSpawnTurn();
+					if ($waveShip->spawnTurn > 0 && $gameData->turn >= $waveShip->spawnTurn + 1) {
+						$structure = $waveShip->getSystemByName("Structure");
+						if ($structure && !$structure->isDestroyed()) {
+							$damageEntry = new DamageEntry(
+								-1, $waveShip->id, $gameData->id, $gameData->turn, $structure->id,
+								$structure->maxhealth, 0, 0, -1, true, false,
+								"Waveform dissipated", "Standard"
+							);
+							$damageEntry->updated = true;
+							$structure->damage[] = $damageEntry;
+						}
+					}
+				}
+				break;
+		}
+	}
 
     private function spawnWaveformAtHex($gamedata, $shooter, $hex) {
         $waveform = new spawnHyperspaceWaveform($gamedata->id, -5, "HW" . $gamedata->turn, $shooter->slot);
@@ -2383,7 +2394,7 @@ class SpatialCutter extends Weapon {
 
     public static function getHexLine(OffsetCoordinate $start, OffsetCoordinate $end) {
         $startCube = self::offsetToCube($start);
-        $endCube = self::offsetToCube($end);
+        $endCube   = self::offsetToCube($end);
 
         $dx = $endCube[0] - $startCube[0];
         $dy = $endCube[1] - $startCube[1];
@@ -2394,22 +2405,22 @@ class SpatialCutter extends Weapon {
 
         $hexes = array();
         for ($i = 0; $i <= $steps; $i++) {
-            $t = $steps == 0 ? 0 : $i / $steps;
-            $cx = $startCube[0] + $dx * $t;
-            $cy = $startCube[1] + $dy * $t;
-            $cz = $startCube[2] + $dz * $t;
+            $t       = $steps == 0 ? 0 : $i / $steps;
+            $cx      = $startCube[0] + $dx * $t;
+            $cy      = $startCube[1] + $dy * $t;
+            $cz      = $startCube[2] + $dz * $t;
             $hexes[] = self::cubeToOffset(self::cubeRound($cx, $cy, $cz));
         }
 
         return $hexes;
     }
 
-    private static function offsetToCube(OffsetCoordinate $hex) {
-        $x = $hex->q - ($hex->r - ($hex->r & 1)) / 2;
-        $z = $hex->r;
-        $y = -$x - $z;
-        return array($x, $y, $z);
-    }
+	private static function offsetToCube(OffsetCoordinate $hex) {
+		$x = $hex->q - ($hex->r + ($hex->r & 1)) / 2;
+		$z = $hex->r;
+		$y = -$x - $z;
+		return array($x, $y, $z);
+	}
 
     private static function cubeRound($x, $y, $z) {
         $rx = round($x);
@@ -2428,14 +2439,14 @@ class SpatialCutter extends Weapon {
         return array($rx, $ry, $rz);
     }
 
-    private static function cubeToOffset($cube) {
-        $q = $cube[0] + ($cube[2] - ($cube[2] & 1)) / 2;
-        $r = $cube[2];
-        return new OffsetCoordinate($q, $r);
-    }
+	private static function cubeToOffset($cube) {
+		$q = $cube[0] + ($cube[2] + ($cube[2] & 1)) / 2;
+		$r = $cube[2];
+		return new OffsetCoordinate($q, $r);
+	}
 
     public static function getWaveformDamage($ship) {
-        $move = $ship->getLastMovement();
+        $move  = $ship->getLastMovement();
         $speed = $move ? $move->speed : 0;
         if ($speed <= 0) return 0;
 
@@ -2449,10 +2460,10 @@ class SpatialCutter extends Weapon {
             $factor = 10.0;
         } else {
             switch ($ship->shipSizeClass) {
-                case 0: $factor = 1.5; break;
-                case 1: $factor = 2.0; break;
-                case 2: $factor = 4.0; break;
-                case 3: $factor = 6.0; break;
+                case 0: $factor = 1.5; break; // LCV
+                case 1: $factor = 2.0; break; // Medium
+                case 2: $factor = 4.0; break; // Heavy Combat Vessel
+                case 3: $factor = 6.0; break; // Capital Ship
                 default: $factor = 10.0; break;
             }
         }
@@ -2464,41 +2475,50 @@ class SpatialCutter extends Weapon {
 class spawnHyperspaceWaveform extends Terrain {
 
     public $terrainCollisionType = 'WaveformCollision';
-    public $Enormous = true;
-	public $spawnTurn = 0; 
+    public $Enormous  = true;
+    public $spawnTurn = 0;
+	public $updated   = false;
+
+	public $weaponClass = "Gravitic";
 
     function __construct($id, $userid, $name, $slot) {
         parent::__construct($id, $userid, $name, $slot);
-        $this->pointCost = 0;
-        $this->faction = "Terrain";
+        $this->pointCost  = 0;
+        $this->faction    = "Terrain";
         $this->factionAge = 1;
-        $this->phpclass = "spawnHyperspaceWaveform";
-        $this->imagePath = "img/ships/hyperspaceWaveform.png";
+        $this->phpclass   = "spawnHyperspaceWaveform";
+        $this->imagePath  = "img/ships/hyperspaceWaveform.png";
         $this->canvasSize = 200;
-        $this->shipClass = "Hyperspace Waveform";
-        $this->Enormous = true;
+        $this->shipClass  = "Hyperspace Waveform";
+        $this->Enormous   = true;
         $this->iniativebonus = -200;
-        $this->isd = 0;
-        $this->notes = "Hyperspace waveform - lasts one turn only.";
-        $this->notes .= "<br>Units entering this hex take speed x size factor damage per hex.";
-        $this->notes .= "<br>Units without advanced armor take double damage.";
-        $this->occurence = "common";
+        $this->isd        = 0;
+        $this->notes      = "Hyperspace waveform — active for one turn only.";
+        $this->notes     .= "<br>Units entering this hex take speed x size factor damage per hex.";
+        $this->notes     .= "<br>Units without advanced armor take double damage.";
+        $this->occurence  = "common";
 
-        $this->base = true;
-        $this->smallBase = true;
+        $this->base        = true;
+        $this->smallBase   = true;
         $this->nonRotating = true;
         $this->forwardDefense = 20;
-        $this->sideDefense = 20;
+        $this->sideDefense    = 20;
 
-        $this->turncost = 0;
+        $this->turncost      = 0;
         $this->turndelaycost = 0;
-        $this->accelcost = 0;
-        $this->rollcost = 0;
-        $this->pivotcost = 0;
+        $this->accelcost     = 0;
+        $this->rollcost      = 0;
+        $this->pivotcost     = 0;
 
         Enhancements::nonstandardEnhancementSet($this, 'Terrain');
         $this->addPrimarySystem(new OSATCnC(10, 1, 0, 0));
         $this->addPrimarySystem(new Structure(8, 300));
+//To make this gravitic damage for adaptive armor
+foreach ($this->systems as $system) {
+    if ($system instanceof RammingAttack) {
+        $system->weaponClass = "Gravitic";
+    }
+}
 
         $this->hitChart = array(
             0 => array(20 => "Structure"),
@@ -2506,13 +2526,11 @@ class spawnHyperspaceWaveform extends Terrain {
     }
 
     public function loadSpawnTurn() {
-        // Name is stored as "HWN" where N is the turn
         if (strpos($this->name, 'HW') === 0) {
             $this->spawnTurn = (int)substr($this->name, 2);
         }
     }
 }
-
 
 
 

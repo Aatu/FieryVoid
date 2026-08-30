@@ -875,7 +875,9 @@ window.ReplayAnimationStrategy = function () {
 
     function animateShipDestruction(time, logAnimation) {
         this.gamedata.ships.filter(function (ship) {
-            return shipManager.getTurnDestroyed(ship) === this.turn && !ship.flight && !ship.mine;
+//GTS_Triad
+//            return shipManager.getTurnDestroyed(ship) === this.turn && !ship.flight && !ship.mine;
+			  return shipManager.getTurnDestroyed(ship) === this.turn && !ship.flight && !ship.mine && ship.phpclass !== 'spawnHyperspaceWaveform';
         }, this).forEach(function (ship) {
             var jumped = shipManager.hasJumpedNotDestroyed(ship);
             if (jumped) {

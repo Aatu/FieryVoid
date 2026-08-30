@@ -59,3 +59,26 @@ var VortexDisruptor = function VortexDisruptor(json, ship) {
 };
 VortexDisruptor.prototype = Object.create(Electromagnetic.prototype);
 VortexDisruptor.prototype.constructor = VortexDisruptor;
+
+/* =============================================================================
+ * NeutronBurst
+ *
+ * Primordial Electromagnetic raking weapon.
+ * Damage: 4d10+8. Range penalty: -5% per 2 hexes. Not interceptable.
+ * Fire control: +2/+5/+5.
+ *
+ * Special effects (handled PHP-side):
+ *   - Structure hit: -2 power output for one turn
+ *   - Capacitor hit: -2 stored power, no critical
+ *   - Powered system hit: ForcedOfflineOneTurn, manual reactivation required
+ *   - Non-powered system hit: +5 to critical roll
+ *   - Fighter hit: forced dropout; superheavy: dropout roll
+ *   - Shadow Association: all effects apply even if damage fully absorbed
+ *   - Unaffected by advanced armor and EM resistance (Primordial tier)
+ * =========================================================================== */
+
+var NeutronBurst = function NeutronBurst(json, ship) {
+    Electromagnetic.call(this, json, ship);
+};
+NeutronBurst.prototype = Object.create(Electromagnetic.prototype);
+NeutronBurst.prototype.constructor = NeutronBurst;

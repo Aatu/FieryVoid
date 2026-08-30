@@ -682,3 +682,77 @@ HyperplasmaCutter.prototype.checkFinished = function () {
     if (this.isSustainedThisTurn()) return true;
     return this.getRemainingDice() <= 0;
 };
+
+/* =============================================================================
+ * HyperplasmaMatrix
+ *
+ * Fighter flight weapon — each fighter IS a component of a single combined gun.
+ * The entire flight fires as one shot in Flash mode (Plasma class).
+ *
+ * Damage: N * 2d6 + 12, where N = surviving fighters in the flight.
+ * Range penalty: -5% per hex.
+ * Self-immunity: flight is immune to own Flash splash when in the same hex.
+ * Defensive: each surviving fighter generates an independent -10% intercept.
+ *
+ * When one fighter fires, PHP combines all flight orders into one primary shot.
+ * On the JS side, doMultipleFireOrders submits the fire order normally and then
+ * stows all sibling HyperplasmaMatrix weapons so they gray out in the UI.
+ * =========================================================================== */
+
+var HyperplasmaMatrix = function HyperplasmaMatrix(json, ship) {
+    Weapon.call(this, json, ship);
+};
+HyperplasmaMatrix.prototype = Object.create(Weapon.prototype);
+HyperplasmaMatrix.prototype.constructor = HyperplasmaMatrix;
+
+// One fire order from any fighter in the flight is sufficient — PHP combines them.
+HyperplasmaMatrix.prototype.checkFinished = function (fireOrders) {
+    return fireOrders.length >= 1;
+};
+
+/* --------------------------------------------------------------------------
+ * doMultipleFireOrders
+ *
+ * Called when the player clicks a target to fire. Submits the fire order via
+ * the standard weapon path, then stows all sibling HyperplasmaMatrix weapons
+ * (other fighters in the flight) and fires SystemDataChanged so the UI redraws
+ * them as grayed out — reflecting that the whole flight fires as one gun.
+ * -------------------------------------------------------------------------- */
+HyperplasmaMatrix.prototype.doMultipleFireOrders = function (shooter, target, system) {
+alert("HPM fired"); // ← add this line
+    // Build and submit the fire order via the standard weapon mechanism
+    var fireid = shooter.id + '_' + this.id + '_' + (this.fireOrders.length + 1);
+    var fire = {
+        id:         fireid,
+        type:       'normal',
+        shooterid:  shooter.id,
+        targetid:   target.id,
+        weaponid:   this.id,
+        turn:       gamedata.turn,
+        firingMode: this.firingMode,
+        shots:      1,
+        addToDB:    true
+    };
+    this.fireOrders.push(fire);
+
+    webglScene.customEvent('SystemDataChanged', { ship: shooter, system: this });
+    weaponManager.unSelectWeapon(shooter, this);
+    webglScene.customEvent('ShipTargeted', { shooter: shooter, target: target, weapons: [this] });
+
+    // Stow all sibling HyperplasmaMatrix weapons and redraw them
+    if (shooter.flight && shooter.systems) {
+        for (var i in shooter.systems) {
+            var fighter = shooter.systems[i];
+            if (!fighter || !fighter.systems) continue;
+            for (var j in fighter.systems) {
+                var sys = fighter.systems[j];
+                if (!(sys instanceof HyperplasmaMatrix)) continue;
+                if (sys.id === this.id) continue; // skip self
+                sys.stowed = true;
+                webglScene.customEvent('SystemDataChanged', { ship: shooter, system: sys });
+            }
+        }
+    }
+
+    return [fire];
+};
