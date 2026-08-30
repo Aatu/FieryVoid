@@ -51,7 +51,10 @@ window.DeploymentPhaseStrategy = function () {
         if (!shipManager.hasShipsToDeployThisTurn(gamedata.thisplayer)) {
             if (this.selectedShip) this.deselectShip(this.selectedShip);
             this.setPhaseHeader("PRE-TURN ACTIONS");
-            this.replayUI = new ReplayUI().activate();
+            //Only if createReplayUI has not already made one (turn > 1). Turn 1 still gets a
+            //Replay button here, exactly as it always has - a player with nothing to deploy is
+            //sitting on PRE-TURN ACTIONS, not on a deployment.
+            if (!this.replayUI) this.replayUI = new ReplayUI().activate();
             gamedata.showCommitButton();
             /*//Can auto-click it if we want.
 
@@ -492,7 +495,22 @@ window.DeploymentPhaseStrategy = function () {
         this.hideMovementUI();
     };
 
-    DeploymentPhaseStrategy.prototype.createReplayUI = function (gamedata) { };
+    /* THE REPLAY BUTTON BELONGS IN ANY DEPLOYMENT PHASE THAT IS NOT TURN 1 (user request
+       2026-08-30). This override used to suppress it outright, which was right while Deployment
+       was a turn-1-only phase with no history behind it to replay. REINFORCEMENTS made Deployment
+       recur mid-battle - a DEPLOYMENT: REINFORCEMENTS phase on turn 5 sits on four turns the
+       player had no way to review without committing the phase first - so the gate is now the same
+       one InitialPhaseStrategy uses, for the same reason.
+
+       ⚠️ ALSO THE ONLY CREATION POINT WORTH HAVING. PhaseStrategy.activate calls this BEFORE
+       activate()'s "no ships to deploy" branch below, which creates its own ReplayUI for the
+       PRE-TURN ACTIONS case; that branch is now guarded on this.replayUI so the two cannot both
+       append #replayUI to #topcontainer. */
+    DeploymentPhaseStrategy.prototype.createReplayUI = function (gamedata) {
+        if (gamedata.turn === 1) return;
+
+        this.replayUI = new ReplayUI().activate();
+    };
 
     function showEnemyDeploymentAreas(deploymentSprites, gamedata) {
         var team = gamedata.getPlayerTeam();

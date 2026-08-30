@@ -415,13 +415,19 @@ window.ReplayPhaseStrategy = function () {
         }
     }
 
+    /* Which turn does the replay open on? The live turn, unless the live turn has not been played
+       yet - which is the case for every phase that runs BEFORE movement: Initial Orders (1) and,
+       ⭐ since REINFORCEMENTS made it a phase that recurs mid-battle, the DEPLOYMENT phase (-1).
+       Both sit at the top of turn N with nothing in turn N to show, so they replay N-1.
+
+       ⚠️ `<= 1`, NOT `=== 1`. Deployment's phase id is -1, so an equality test sent it down the
+       "replay the live turn" path and asked replay.php for a turn that had not happened - an empty
+       replay in the one phase (DEPLOYMENT: REINFORCEMENTS) that most needs a full one. The turn-1
+       floor is the same expression: turn 1 Deployment and turn 1 Initial Orders both land on 0,
+       which is the "nothing has been played at all" value turnBack() guards against below. */
     function getInitialReplayTurn() {
 
-        if (this.currentTurn === 1 && this.currentPhase <= 1) {
-            return 0;
-        }
-
-        if (this.currentPhase === 1) {
+        if (this.currentPhase <= 1) {
             return this.currentTurn - 1;
         }
 
