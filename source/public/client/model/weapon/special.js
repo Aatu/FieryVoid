@@ -1234,3 +1234,41 @@ ShadowFighterBomb.prototype.getModeNameForEnemy = function (fireOrder) {
     return "Fighter Bomb";
 };
 
+/* =============================================================================
+ * SingularityMine — JS stubs
+ * All logic is PHP-side. These stubs allow the JS engine to construct
+ * the system objects from JSON without errors.
+ * =========================================================================== */
+
+var SingularityMine = function SingularityMine(json, ship) {
+    Weapon.call(this, json, ship);
+};
+SingularityMine.prototype = Object.create(Weapon.prototype);
+SingularityMine.prototype.constructor = SingularityMine;
+
+SingularityMine.prototype.initializationUpdate = function () {
+    if (this.selected) {
+        this.showHexagonArc = 10;
+    } else {
+        this.showHexagonArc = 0;
+    }
+    return this;
+};
+
+var SingularityRammingAttack = function SingularityRammingAttack(json, ship) {
+    RammingAttack.call(this, json, ship);
+};
+SingularityRammingAttack.prototype = Object.create(RammingAttack.prototype);
+SingularityRammingAttack.prototype.constructor = SingularityRammingAttack;
+
+var SingularityCore = function SingularityCore(json, ship) {
+    ShipSystem.call(this, json, ship);
+};
+SingularityCore.prototype = Object.create(ShipSystem.prototype);
+SingularityCore.prototype.constructor = SingularityCore;
+
+var spawnSingularity = function spawnSingularity(json) {
+    Ship.call(this, json);
+};
+spawnSingularity.prototype = Object.create(Ship.prototype);
+spawnSingularity.prototype.constructor = spawnSingularity;

@@ -12939,9 +12939,9 @@ class CoopStructureSelfRepair extends StructureSelfRepair {
         parent::criticalPhaseEffects($ship, $gamedata);
 
         if ($this->isDestroyed()) return;
-error_log("CoopRepair DEBUG: getCurrentMaxRepairPoints=" . $this->getCurrentMaxRepairPoints() 
-    . " usedRepairPoints=" . $this->usedRepairPoints 
-    . " getEffectiveOutput=" . $this->getEffectiveOutput($ship));
+//error_log("CoopRepair DEBUG: getCurrentMaxRepairPoints=" . $this->getCurrentMaxRepairPoints() 
+//    . " usedRepairPoints=" . $this->usedRepairPoints 
+//    . " getEffectiveOutput=" . $this->getEffectiveOutput($ship));
         // Step 2: Check remaining points after self-repair
 //        $availableRepairPoints = $this->getCurrentMaxRepairPoints() - $this->usedRepairPoints;
 //        $availableRepairPoints = min($availableRepairPoints, $this->getEffectiveOutput($ship));

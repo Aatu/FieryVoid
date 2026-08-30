@@ -9,7 +9,7 @@ class technicalTargetDrone extends VreeCapital
 		$this->pointCost = 5;
 		$this->faction = "Custom Ships";
 		$this->phpclass = "technicalTargetDrone";
-		$this->imagePath = "img/ships/triadWraith.png";
+		$this->imagePath = "img/ships/triadDemon.png";
 		$this->canvasSize = 200;
 		$this->shipClass = "Target Drone - DO NOT USE";
 		$this->shipSizeClass = 3;
@@ -35,9 +35,28 @@ class technicalTargetDrone extends VreeCapital
 
 		$this->VreeHitLocations = false;
 
-		$this->triadOrder = true;	//Important to ensure immunity from Flare Generator!	
+//		$this->triadOrder = true;	//Important to ensure immunity from Flare Generator!	
 
+/*
+        //ammo magazine itself (AND its missile options)
+        $ammoMagazine = new AmmoMagazine(10); //pass magazine capacity - 20 rounds per launcher, plus reload rack 80
+        $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 10); //add full load of basic missiles
+        
+	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
+	    $this->enhancementOptionsEnabled[] = 'AMMO_C';//add enhancement options for other missiles - Class-C
+	    $this->enhancementOptionsEnabled[] = 'AMMO_F';//add enhancement options for other missiles - Class-F
+	    $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H    
+	    $this->enhancementOptionsEnabled[] = 'AMMO_I';//add enhancement options for other missiles - Class-I
+	    $this->enhancementOptionsEnabled[] = 'AMMO_J';//add enhancement options for other missiles - Class-J	     
+	    $this->enhancementOptionsEnabled[] = 'AMMO_K';//add enhancement options for other missiles - Class-K   
+	    $this->enhancementOptionsEnabled[] = 'AMMO_L';//add enhancement options for other missiles - Class-L
+	    $this->enhancementOptionsEnabled[] = 'AMMO_M';//add enhancement options for other missiles - Class-M	    
+		$this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P    	    	    	    
+	    $this->enhancementOptionsEnabled[] = 'AMMO_X';//add enhancement options for other missiles - Class-X		    	    	    	    
+	    $this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-S
 
+*/
 		$this->addPrimarySystem(new Reactor(6, 18, 0, 0));
 		$this->addPrimarySystem(new Hangar(6, 1));
 		$this->addPrimarySystem(new CnC(6, 12, 0, 0));
@@ -102,9 +121,12 @@ class technicalTargetDrone extends VreeCapital
 //        $this->addFrontSystem(new HyperplasmaCutter(8, 16, 9, 300, 60));	
 //        $this->addFrontSystem(new HyperplasmaCutter(0, 16, 9, 0, 90));	
 
-        $this->addFrontSystem(new NeutronBurst(0, 12, 4, 270, 90));	
-        $this->addFrontSystem(new NeutronBurst(0, 12, 4, 270, 90));	
+//        $this->addFrontSystem(new NeutronBurst(0, 12, 4, 270, 90));	
+//        $this->addFrontSystem(new NeutronBurst(0, 12, 4, 270, 90));	
 
+        $this->addFrontSystem(new SingularityMine(4, 28, 16, 300, 60));	
+        $this->addFrontSystem(new SingularityMine(4, 28, 16, 300, 60));	
+        $this->addFrontSystem(new SingularityMine(4, 28, 16, 300, 60));	
 
 
 //        $this->addFrontSystem(new AsteroidSalvo(8, 30, 10, 270, 90));	
