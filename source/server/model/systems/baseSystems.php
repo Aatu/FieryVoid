@@ -8017,16 +8017,28 @@ class JumpEngine extends Weapon{
 
 		// Roll a D100
 		$d100Roll = Dice::d(100);
-	
+
+		/* ⭐ SOME DRIVES DO NOT GET A ROLL AT ALL. getCertainJumpFailureNote returns the log line
+		   to write when this turn's jump is doomed outright and null when the percentage above is
+		   what decides it; only the Shadow Phasing Drive overrides it (see that class). Asked
+		   BEFORE the roll rather than instead of it so the d100 is still consumed either way -
+		   Dice draws are part of the game's random sequence and a rule that silently skipped one
+		   would make otherwise-identical games diverge. */
+		$certainFailureNote = $this->getCertainJumpFailureNote($ship, $gamedata);
+
 		// Determine if the jump fails
-		$jumpFailure = $missingHealthPercentage > 0 && $d100Roll <= $missingHealthPercentage;
+		$jumpFailure = ($certainFailureNote !== null) || ($missingHealthPercentage > 0 && $d100Roll <= $missingHealthPercentage);
 
 		// Try to create the fire order for logs
 		$rammingSystem = $ship->getSystemByName("RammingAttack");
 		$fireOrderType = $jumpFailure ? 'JumpFailure' : 'HyperspaceJump';
-		$pubNotes = $jumpFailure
-			? " attempts to jump to hyperspace, but damage to the Jump Drive causes the ship to be destroyed (" . $missingHealthPercentage . "% chance of failure)."
-			: " successfully jumps to hyperspace (" . $missingHealthPercentage . "% chance of failure).";
+		if ($certainFailureNote !== null){
+			$pubNotes = $certainFailureNote;
+		}else{
+			$pubNotes = $jumpFailure
+				? " attempts to jump to hyperspace, but damage to the Jump Drive causes the ship to be destroyed (" . $missingHealthPercentage . "% chance of failure)."
+				: " successfully jumps to hyperspace (" . $missingHealthPercentage . "% chance of failure).";
+		}
 	
 		if ($rammingSystem) {
 			$newFireOrder = new FireOrder(
@@ -8067,6 +8079,20 @@ class JumpEngine extends Weapon{
 			}
 		}
 
+	}
+
+	/* HOOK - IS THIS TURN'S BOOST-TO-HYPERSPACE JUMP DOOMED REGARDLESS OF THE DICE?
+	 *
+	 * Returns the public combat-log line to write when it is, or null to let doHyperspaceJump's
+	 * ordinary missing-health percentage roll decide - which is the answer for every drive in the
+	 * tree except the Shadow Phasing Drive, whose override is the only reason this exists.
+	 *
+	 * Deliberately returns the NOTE rather than a bool: a rule that overrides the roll also has to
+	 * override the "(N% chance of failure)" sentence, which would otherwise report a percentage
+	 * that had nothing to do with the outcome. One return value carries both halves and there is
+	 * no way to supply one without the other. */
+	protected function getCertainJumpFailureNote($ship, $gamedata){
+		return null;
 	}
 
 	public function onIndividualNotesLoaded($gamedata){
@@ -11982,35 +12008,95 @@ class PhasingDrive extends JumpEngine{
 		}else{
 			$this->data["Special"] .= '<br>';
 		}
-		$this->data["Special"] .= 'If damaged while half-phasing - entire ship is destroyed.';
+		$this->data["Special"] .= 'If damaged while half-phasing, or on the turn it jumps to hyperspace - entire ship is destroyed.';
     }
-	
-	//destroy ship if damaged while half-phaseing
+
+	/* ⭐ A SHADOW HULL PHASES OUT - AND ONE HIT WHILE IT IS DOING SO TEARS IT APART (user ruling
+	 * 2026-08-30). The drive that carries the ship into hyperspace is the same drive that
+	 * half-phases it, and the half-phase rule has always been absolute: a single point of damage
+	 * taken while the hull is between states destroys it outright (criticalPhaseEffects below).
+	 * Jumping out at the end of the turn is that same manoeuvre taken all the way, so it carries
+	 * the same absolute penalty in place of JumpEngine's missing-health percentage roll.
+	 *
+	 * ⚠️ THIS TURN'S DAMAGE ONLY, which is the whole point. A Phasing Drive damaged on an EARLIER
+	 * turn and left unrepaired still jumps on the ordinary percentage roll - what kills the ship is
+	 * being hit DURING the phase-out, exactly as with half-phasing. isDamagedOnTurn is deliberately
+	 * the same measure the half-phase self-destruct uses two methods down, so the two halves of one
+	 * rule cannot drift apart.
+	 *
+	 * ⚠️ TIMING IS WHY THIS WORKS AT ALL. The boost-to-jump sweep runs at the very END of
+	 * Firing::fireWeapons (firing.php), so every damage entry from this turn's fire is already on
+	 * the drive when the question is asked. It also runs BEFORE Criticals::setCriticals, whose
+	 * $activeShips snapshot then excludes the ship this has just destroyed - which is what stops
+	 * criticalPhaseEffects below from writing a SECOND destruction for a hull that both half-phased
+	 * and jumped in the same turn. */
+	protected function getCertainJumpFailureNote($ship, $gamedata){
+		if (!$this->isDamagedOnTurn($gamedata->turn)) return null;
+
+		return " is torn apart as it phases out - damage to the Phasing Drive destroys the ship.";
+	}
+
+	//destroy ship if damaged while half-phaseing, or while jumping out on a wrecked drive
 	public function criticalPhaseEffects($ship, $gamedata)
-    { 
-    
-		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.	    
-    
+    {
+
+		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.
+
 		//JUMP_POINTS_PLAN.md Stage 5: the parent call above is now also the vortex jump-failure
 		//roll, which can destroy this very ship. Do not write a second destruction entry and a
 		//second log line on top of it. Deliberately asks about THIS turn's roll only, rather than
 		//about the ship being destroyed at all, so no pre-existing behaviour changes.
 		if ($this->hasAppliedVortexFailure()) return;
 
-		if (!Movement::isHalfPhased($ship, $gamedata->turn)) return;
-		if (!$this->isDamagedOnTurn($gamedata->turn)) return; 
-		
-	
-		//try to make actual attack to show in log - use Ramming Attack system!				
+		/* ⭐ THE OTHER HALF OF getCertainJumpFailureNote, AND THE ONLY WAY TO REACH THE CASE IT
+		 * CANNOT (user ruling 2026-08-30). A Phasing Drive DESTROYED by this turn's fire never
+		 * reaches doHyperspaceJump at all: the boost-to-jump sweep at the end of
+		 * Firing::fireWeapons skips every destroyed engine, and doHyperspaceJump re-checks
+		 * getRemainingHealth() <= 0 on top of that. So without this clause the gradient ran
+		 * backwards - one point of damage on the drive destroyed the ship, while enough damage to
+		 * wreck the drive outright left it sitting on the board, alive, its jump silently
+		 * discarded.
+		 *
+		 * ⭐ WHY HERE RATHER THAN IN THE SWEEP. criticalPhaseEffects is called on EVERY system in
+		 * Criticals::setCriticals Pass 2, destroyed or not - which is exactly why the half-phase
+		 * rule below has always covered a wrecked drive and the jump rule did not. Widening the
+		 * gate to "half-phased OR jumping out" makes one drive answer one way, instead of teaching
+		 * a generic jump-engine sweep about a Shadow special case.
+		 *
+		 * ⚠️ IT CANNOT DOUBLE-FIRE with getCertainJumpFailureNote. A drive that was merely DAMAGED
+		 * and boosted has already had the ship destroyed by doHyperspaceJump, which runs before
+		 * setCriticals - so that ship is absent from the $activeShips snapshot and Pass 2 never
+		 * reaches it. This clause only ever catches the jump that was skipped.
+		 *
+		 * isOverloading() reads power type 2, which despite the name is the BOOST record - that is
+		 * what the client's "Jump to Hyperspace" control writes, and what the sweep tests. */
+		$halfPhased = Movement::isHalfPhased($ship, $gamedata->turn);
+		$jumpingOut = $this->isOverloading($gamedata->turn);
+
+		if (!$halfPhased && !$jumpingOut) return;
+		if (!$this->isDamagedOnTurn($gamedata->turn)) return;
+
+		/* 'JumpFailure' for the jump case so it reads and queries identically to the damaged-drive
+		   failure doHyperspaceJump writes - one damageclass covers both ways a Shadow jump can kill
+		   its own ship. Both classes are already short-log types (weaponManager.doShortLogText).
+		   ⚠️ The leading space is not decoration: combatLog.js prints the ship name and then the
+		   pubnotes with nothing between them, which is why the half-phase line below has always
+		   rendered as "SHIPNAMEPhasing drive damaged...". Fixed in passing. */
+		$damageClass = $halfPhased ? 'HalfPhase' : 'JumpFailure';
+		$pubNotes = $halfPhased
+			? " - phasing drive damaged during half-phasing, ship destroyed."
+			: " is torn apart as it phases out - the Phasing Drive was destroyed before the jump could complete.";
+
+		//try to make actual attack to show in log - use Ramming Attack system!
 		$rammingSystem = $ship->getSystemByName("RammingAttack");
-		if($rammingSystem){ //actually exists! - it should on every ship!				
+		if($rammingSystem){ //actually exists! - it should on every ship!
 			$newFireOrder = new FireOrder(
 				-1, "normal", $ship->id, $ship->id,
-				$rammingSystem->id, -1, $gamedata->turn, 1, 
+				$rammingSystem->id, -1, $gamedata->turn, 1,
 				100, 100, 1, 1, 0,
-				0,0,'HalfPhase',10000
+				0,0,$damageClass,10000
 			);
-			$newFireOrder->pubnotes = "Phasing drive damaged during half-phasing - ship destroyed.";
+			$newFireOrder->pubnotes = $pubNotes;
 			$newFireOrder->addToDB = true;
 			$rammingSystem->fireOrders[] = $newFireOrder;
 		}else{
@@ -12021,7 +12107,7 @@ class PhasingDrive extends JumpEngine{
 		$primaryStruct = $ship->getStructureSystem(0);
 		if($primaryStruct){			
             $remaining = $primaryStruct->getRemainingHealth();
-            $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $primaryStruct->id, $remaining, 0, 0, -1, true, false, "", "HalfPhase");
+            $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $primaryStruct->id, $remaining, 0, 0, -1, true, false, "", $damageClass);
             $damageEntry->updated = true;
             $primaryStruct->damage[] = $damageEntry;			
 			if($rammingSystem){ //add extra data to damage entry - so firing order can be identified!
