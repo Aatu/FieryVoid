@@ -39,6 +39,13 @@
         <button type="button" id="currentTurnButton" class="fv-log-chip" title="Back to the current turn"
                 onclick="window.combatLog.showCurrent();" style="display:none;">Live</button>
 
+        <!-- The bar reads as three runs now: WHICH TURN, HOW IT IS ORDERED, WHAT IS IN IT.
+             A 6px flex gap alone did not separate them - every control is the same chip,
+             so eight of them in a row read as one undifferentiated strip. A hairline costs
+             5px and does the grouping the gap could not. #currentTurnButton is display:none
+             on the live turn, so this simply falls in behind the stepper then. -->
+        <span class="fv-log-divider" aria-hidden="true"></span>
+
         <!-- TWO CONTROLS, ONE STATE (user, 2026-08-31). Chips read better than a select
              wherever there is room for them and match the rest of the bar; the select is
              kept for narrow viewports, where three more chips would push the bar into a
@@ -58,17 +65,27 @@
             <option value="target">Target</option>
         </select>
 
-        <span class="fv-log-seg" id="combatLogSide" role="group" aria-label="Whose fire">
-            <button type="button" class="fv-log-chip" data-side="all" aria-pressed="true">All</button>
-            <button type="button" class="fv-log-chip" data-side="mine" aria-pressed="false">Mine</button>
-            <button type="button" class="fv-log-chip" data-side="enemy" aria-pressed="false">Enemy</button>
-        </span>
+        <span class="fv-log-divider" aria-hidden="true"></span>
 
+        <!-- WHAT IS IN THE LOG: two peer toggles, in the same shape, doing the same kind of
+             job. Either one narrows the turn; neither reorders it.
+
+             MINE REPLACES THE OLD `All | Mine | Enemy` SEGMENT (user, 2026-08-31). The
+             three-way control cost ~118px of a bar that must not wrap, and two thirds of
+             it was answering a question nobody asks: ENEMY-ONLY was the third state, and a
+             player wanting to know what was shot at them reads the whole turn, not a
+             half of it with their own return fire cut out. As a plain toggle beside Hits
+             it is also the same shape as the control it sits next to, which the segment
+             never was. combatLog.sideFilter keeps its name and its two surviving values
+             (all / mine), so the filter and the saved preference are unchanged - only
+             `enemy` is gone, and loadPrefs drops a remembered one. -->
         <button type="button" id="combatLogHitsOnly" class="fv-log-chip" aria-pressed="false"
                 title="Only show fire that scored at least one hit">Hits</button>
+        <button type="button" id="combatLogMineOnly" class="fv-log-chip" aria-pressed="false"
+                title="Only show fire by my own side">Mine</button>
 
         <span class="fv-log-bar-spacer"></span>
-        <span class="fv-log-bar-meta" data-log-meta="log"></span>
+        <!--<span class="fv-log-bar-meta" data-log-meta="log"></span>-->
         <input type="search" id="combatLogFind" class="fv-log-find" placeholder="Find" autocomplete="off"
                title="Filter by ship or weapon name">
     </div>

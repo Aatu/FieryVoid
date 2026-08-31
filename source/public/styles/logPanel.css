@@ -1382,6 +1382,16 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     flex-wrap: wrap;
     gap: 5px;
     margin-bottom: 8px;
+    color: var(--fv-text-accent);    
+}
+
+.fv-decl-rules {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--fv-text-accent);
+    white-space: nowrap;   
 }
 
 /* The rules are STATUS, not chrome: --fv-warn is the same amber the fleet header uses for

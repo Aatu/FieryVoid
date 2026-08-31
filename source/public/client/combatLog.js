@@ -632,6 +632,11 @@ window.combatLog = {
         el = document.getElementById('currentTurnButton');
         if (el) el.style.display = live ? 'none' : '';
 
+        //The Mine chip is gated on gamedata, which is why it is refreshed from HERE:
+        //gamedata.initPhase calls updateTurnControls on every phase change, and that is the
+        //first moment the slot map can answer "is this viewer a player".
+        combatLog.syncSideControl();
+
         /* The readout used to open with "TURN n" as well. That made sense in the head bar,
            which stood alone; in the control bar it sits a few centimetres from a stepper
            that already says TURN n in mono, so it was a repeat costing ~55px of a row the
@@ -642,6 +647,37 @@ window.combatLog = {
             if (combatLog.hiddenCount > 0) meta += ' · ' + combatLog.hiddenCount + ' HIDDEN';
             botPanel.setMeta('log', meta);
         }
+    },
+
+    /* Whether the Mine chip can mean anything for this viewer. Split out of the control
+       bar's syncControls because it is the one control whose answer depends on GAMEDATA
+       rather than on view state - and gamedata is not populated when syncControls first
+       runs.
+
+       ⭐ IT SHOWS AS WELL AS HIDES, and it refuses to answer early. The old version only
+       ever called .hide(), from a syncControls that runs at DOM-ready - when gamedata.slots
+       is still empty, so isPlayerInGame() says "not a player" and the control went away for
+       everyone, permanently. That is the Mine chip flashing on load and vanishing; the
+       All | Mine | Enemy segment it replaced had exactly the same bug, which is why no
+       player ever saw that control either.
+
+       An empty slot map means the payload has not arrived, NOT that this viewer is an
+       observer, so answer nothing and let a later call decide. updateTurnControls calls
+       this and gamedata.initPhase calls updateTurnControls on every phase change including
+       the first, so there is always a later call. */
+    syncSideControl: function syncSideControl() {
+        if (!window.gamedata || !gamedata.slots) return;
+        if (!Object.keys(gamedata.slots).length) return;
+        if (typeof gamedata.isPlayerInGame !== 'function') return;
+
+        var isPlayer = gamedata.isPlayerInGame();
+        var el = document.getElementById('combatLogMineOnly');
+        if (el) el.style.display = isPlayer ? '' : 'none';
+
+        /* An OBSERVER is on nobody's side, so "mine" would filter EVERY group away - there
+           is no unit in the game isMyorMyTeamShip will say yes to. Same two-arm reasoning as
+           every other allegiance surface here (arch_team_colour_logic). */
+        if (!isPlayer) combatLog.sideFilter = 'all';
     },
 
     phaseLabel: function phaseLabel() {
@@ -847,8 +883,9 @@ window.combatLog = {
        through gamedata.getShip on both paths, so the object this tests is the same one
        the entry is drawn from.
 
-       Mine / Enemy is a partition of All - "mine" is MY SIDE, allies included - so the
-       three chips never leave a group with nowhere to go. */
+       "Mine" is MY SIDE, allies included - the same isMyorMyTeamShip the rest of this
+       panel gates on, not isMyShip. Two states survive, all and mine; the enemy-only third
+       went with the segment it was a chip of - see the note in combatLog.php. */
     filterGroups: function filterGroups(groups) {
         var side = combatLog.sideFilter;
         var find = (combatLog.findText || '').trim().toLowerCase();
@@ -864,9 +901,7 @@ window.combatLog = {
                 //unit and "mine" would empty the log. The control is hidden for observers
                 //(see the init block below), but guard the state anyway.
                 if (!shooter) return false;
-                var friendly = gamedata.isMyorMyTeamShip(shooter);
-                if (side === 'mine' && !friendly) return false;
-                if (side === 'enemy' && friendly) return false;
+                if (!gamedata.isMyorMyTeamShip(shooter)) return false;
             }
 
             if (hitsOnly) {
@@ -957,7 +992,10 @@ window.combatLog = {
             if (!raw) return;
             var p = JSON.parse(raw);
             if (p.sortMode) combatLog.sortMode = p.sortMode;
-            if (p.sideFilter) combatLog.sideFilter = p.sideFilter;
+            //Validated, not trusted: `enemy` was a real stored value until 2026-08-31, and
+            //nothing filters on it any more - a browser still holding one would have shown an
+            //empty log with no control up to explain why.
+            if (p.sideFilter === 'mine' || p.sideFilter === 'all') combatLog.sideFilter = p.sideFilter;
             combatLog.hitsOnly = !!p.hitsOnly;
         } catch (e) { /* defaults stand */ }
     },
@@ -990,18 +1028,9 @@ $(function () {
         $("#combatLogSortSeg .fv-log-chip").each(function () {
             $(this).attr("aria-pressed", $(this).data("sort") === combatLog.sortMode ? "true" : "false");
         });
-        $("#combatLogSide .fv-log-chip").each(function () {
-            $(this).attr("aria-pressed", $(this).data("side") === combatLog.sideFilter ? "true" : "false");
-        });
+        combatLog.syncSideControl();
+        $("#combatLogMineOnly").attr("aria-pressed", combatLog.sideFilter === 'mine' ? "true" : "false");
         $("#combatLogHitsOnly").attr("aria-pressed", combatLog.hitsOnly ? "true" : "false");
-
-        /* An OBSERVER is on nobody's side, so Mine / Enemy would filter everything away.
-           Same two-arm reasoning as every other allegiance surface here - see
-           arch_team_colour_logic. */
-        if (window.gamedata && gamedata.isPlayerInGame && !gamedata.isPlayerInGame()) {
-            $("#combatLogSide").hide();
-            combatLog.sideFilter = 'all';
-        }
 
         if (window.gamedata && gamedata.turn) combatLog.updateTurnControls();
     };
@@ -1018,10 +1047,10 @@ $(function () {
         applySort(String($(this).data("sort")));
     });
 
-    $("#combatLogSide").on("click", ".fv-log-chip", function () {
-        combatLog.sideFilter = String($(this).data("side"));
-        $("#combatLogSide .fv-log-chip").attr("aria-pressed", "false");
-        $(this).attr("aria-pressed", "true");
+    //A TOGGLE, not one chip of a segment: on = my side only, off = the whole turn.
+    $("#combatLogMineOnly").on("click", function () {
+        combatLog.sideFilter = (combatLog.sideFilter === 'mine') ? 'all' : 'mine';
+        $(this).attr("aria-pressed", combatLog.sideFilter === 'mine' ? "true" : "false");
         combatLog.savePrefs();
         combatLog.rerender();
     });

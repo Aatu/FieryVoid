@@ -328,12 +328,23 @@ window.fleetListManager = {
         var headerColor = gamedata.getFleetHeaderColorRGB(slot);
         var headerColorStyle = "color:" + headerColor + ";";
 
-        /* The header's 3px rail is the SECOND arm of the same two-arm allegiance gate as
-           the label: both take their colour from getFleetHeaderColorRGB, so a 4-team game
-           and a 2-team game agree about it. Never give this rail a CSS-class colour -
-           that arm only ever fires for 2-team participants (arch_team_colour_logic). */
+        /* The 3px rail is the SECOND arm of the same two-arm allegiance gate as the label:
+           both take their colour from getFleetHeaderColorRGB, so a 4-team game and a 2-team
+           game agree about it. Never give this rail a CSS-class colour - that arm only ever
+           fires for 2-team participants (arch_team_colour_logic).
+
+           ⭐ ONE WRITE PAINTS THE WHOLE SLOT (user, 2026-08-31). This used to set
+           border-left-color directly on .fleetheader, so the rail stopped at the header and
+           the rows below it looked unattached to the fleet they belong to. It now sets a
+           custom property on the BLOCK; logPanel.css hangs the header's rail, the column
+           head's and every row's off that one value, and inheritance carries it to all of
+           them - so rows built later in this function need no inline style of their own,
+           and a row rebuilt mid-turn cannot lose the colour.
+
+           setProperty, not .attr("style", ...): .attr would REPLACE the style attribute,
+           and this element is the one the row templates are cloned out of. */
+        fleetlistentry.get(0).style.setProperty("--fv-fleet-rail", headerColor);
         fleetlistentry.find(".fleetheader")
-            .attr("style", "border-left-color:" + headerColor + ";")
             .html(
                 "<span class='headername' style='" + headerColorStyle + "'>" + teamName + "</span><span class='playername'>" + slot.playername + "</span>"
             );

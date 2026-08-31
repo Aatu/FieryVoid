@@ -1233,7 +1233,7 @@ class Reactor extends ShipSystem implements SpecialAbility {
 				$newFireOrder->addToDB = true;
 				$rammingSystem->fireOrders[] = $newFireOrder;
 			}
-			$newFireOrder->pubnotes .= "Reactor destroyed - entire ship is immolated.";
+			$newFireOrder->pubnotes .= " Reactor destroyed - entire ship is immolated.";
 		}else{
 			$newFireOrder=null;
 		}
@@ -1430,7 +1430,7 @@ class SubReactorUniversal extends ShipSystem{
 				100, 100, 1, 1, 0,
 				0,0,'Reactor',10000
 			);
-			$newFireOrder->pubnotes = "Sub Reactor destroyed - section is immolated.";
+			$newFireOrder->pubnotes = " Sub Reactor destroyed - section is immolated.";
 			$newFireOrder->addToDB = true;
 			$rammingSystem->fireOrders[] = $newFireOrder;
 		}else{
