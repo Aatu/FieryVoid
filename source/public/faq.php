@@ -45,6 +45,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li><a href="#enormous">Enormous Units</a></li>
                 <li><a href="#escorts">Fighter Escorts</a></li>
                 <li><a href="#hangar">Hangar Operations</a></li>
+                <li><a href="#infopanel">Info Panel</a></li>
                 <li><a href="#interception">Interception</a></li>
                 <li><a href="#jump">Jump Drives</a></li>
                 <li><a href="#ladder">Online Ladder</a></li> 
@@ -702,6 +703,83 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <br>
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
+
+
+        <h3 id="infopanel" >Info Panel</h3>
+        <p>The <strong>Info Panel</strong> is the tabbed panel along the bottom-left of the battle screen.  Six tabs share a single body, so only one is ever on screen:
+            <strong>COMBAT LOG</strong>, <strong>FLEET INFO</strong>, <strong>GAME CHAT</strong>, <strong>CHAT</strong>, <strong>DECLARATIONS</strong> and <strong>SAVE FLEET</strong>.
+            Click a tab to switch to it.  A tab is only a view - switching between them never changes anything about your orders.</p>
+
+        <ul>
+            <li><b>Sizing the panel:</b>
+                <ul class="circle-list">
+                    <li><strong>Drag the panel's top edge</strong> up or down to set its height.  The edge lights up when you point at it (Note- drag it with your finger on touchscreen).</li>
+                    <li><strong>The chevron (&#9650; / &#9660;) at the right-hand end of the tab strip</strong>, or a <strong>double-click on the top edge</strong>, switches between the compact and the tall panel.  Opening the tall panel also tucks the initiative drawer out of the way.</li>
+                    <li>The compact and the tall heights are remembered <em>separately</em>, and are kept on your device for your next session - so you can set one working size for reading the log at a glance, and another for going through a whole turn.</li>
+                    <li>Expanding or collapsing the panel leaves you on the tab you were reading.</li>
+                    <li>On phones, and on a short landscape screen, the panel is shut down to its tab strip until you tap the chevron, and only the selected tab is drawn while it is closed - there is not room for six of them and a map.</li>
+                </ul>
+            </li>
+            <br>
+            <li><b>Right-clicking inside the panel</b> no longer opens your browser's own menu (Back / Reload / Save as...), so a right-click aimed at a unit that lands slightly low does not cover the game with it.
+                The game's own right-click actions are unaffected - a right-click on a fleet-list row still opens that unit's ship window.  The browser menu is still there in a text box, so you can paste into chat, and when you have selected some text, so you can copy a log line out to Discord.</li>
+            <br>
+
+            <li><b>COMBAT LOG</b> - what happened, this turn and in every turn before it.
+                <ul class="circle-list">
+                    <li>During a replay the log fills in <em>live</em> as the turn plays out.  The rest of the time it shows the printed log of whichever turn you have selected.</li>
+                    <li><strong>&#9664; TURN n &#9654;</strong> - step back and forth through the turns.  The arrows grey out at the ends of the range.  The <strong>Live</strong> button appears only while you are looking at an older turn, and takes you back to the current one.</li>
+                    <li><strong>Sort</strong> - <em>Resolution</em> is the order the game actually resolved the fire in, which is what you want while following a replay; <em>Attacker</em> and <em>Target</em> regroup the same entries by who was shooting, or by who was being shot at, which is usually easier to read after the fact.  On a narrow screen the three buttons become a dropdown.</li>
+                    <li><strong>All / Mine / Enemy</strong> - whose fire to show.</li>
+                    <li><strong>Hits</strong> - show only fire that scored at least one hit, for when a big turn is mostly misses.</li>
+                    <li><strong>Find</strong> - filter the turn down to a ship or a weapon by name.</li>
+                    <li>The readout to the left of the Find box names the current game phase and, when a filter is on, how many fire groups it is hiding - so a filtered log never looks like a quiet turn.</li>
+                    <li>Reading the colours: ship names are pale, and the <em>target</em> of each shot is drawn in its team colour, because who was shot at is what the eye is looking for.  Damage is red, criticals are amber, and shield absorption is blue.</li>
+                </ul>
+            </li>
+            <br>
+
+            <li><b>FLEET INFO</b> - every fleet in the battle, one block per player.
+                <ul class="circle-list">
+                    <li>The block header carries the <strong>team</strong> (coloured by allegiance), the <strong>player's name</strong>, the fleet's <strong>current / base points</strong>, and a chip saying where that player is up to: <em>Orders committed</em>, <em>Waiting for Movement orders</em>, <em>Surrendered T5</em>, or <em>Deploys T3</em> for a reinforcement slot that has not arrived yet.  <strong>Click the header to collapse or expand that fleet.</strong></li>
+                    <li><strong>Click a column head</strong> (Ship Name, Class, Type, Ini, Value) to sort by it; click it again to reverse; a third click drops back to initiative order.  Your choice is remembered.</li>
+                    <li><strong>Left-click a unit row</strong> - scroll the map to that unit.</li>
+                    <li><strong>Right-click a unit row</strong> - open its <strong>ship window</strong>, without selecting the unit and without moving the map (Note- long press on touchscreen).  You can also click the <strong>&#9432;</strong> that appears at the right-hand end of a row when you point at it, which is the easier target on a phone.</li>
+                    <li>Units that are off the board but still yours - <strong>docked flights</strong> and <strong>reinforcements waiting in hyperspace</strong> - open their ship window on <em>either</em> click, since there is nowhere to scroll to.  For a docked flight that window is the only way to see what is actually in the bay.</li>
+                    <li><strong>Destroyed and jumped units are inert</strong>: no highlight and no window.  They are gone from the battle, and there is nothing left to inspect.</li>
+                    <li><strong>On map only</strong> hides everything that is not currently on the board - destroyed, jumped, docked, and reinforcements still in hyperspace - and hides a whole fleet block if nothing in it is left to show.  Mines <em>are</em> on the map, so they stay.</li>
+                    <li>The <strong>team dropdown</strong> appears in games of three or more teams, and narrows the list to one team.</li>
+                    <li>The readout recounts fleets and units against whatever filters are on, so it always describes what is actually on screen.</li>
+                    <li>The <strong>FAQ</strong>, <strong>Ammo &amp; Options</strong> and <strong>Factions</strong> buttons open those reference pages in a new tab.</li>
+                </ul>
+            </li>
+            <br>
+
+            <li><b>GAME CHAT</b> and <b>CHAT</b> - two separate channels.
+                <ul class="circle-list">
+                    <li><strong>GAME CHAT</strong> is this battle only, and everyone in the game can read it.  It is the place to agree a house rule, warn an opponent you will be slow, or ask what a system does.</li>
+                    <li><strong>CHAT</strong> is the site-wide channel - the same one that appears in the game lobby.</li>
+                    <li>A tab turns <strong>amber</strong> when a message has arrived on it that you have not read, so you can leave both closed and still not miss anything.</li>
+                </ul>
+            </li>
+            <br>
+
+            <li><b>DECLARATIONS</b> - a read-out of the orders currently on the table.  This is the tab to check <em>before</em> you commit: an unspent EW point or a weapon aimed at the wrong ship is far easier to spot here than in a dozen separate ship windows.
+                <ul class="circle-list">
+                    <li><strong>Side: Own / Enemy</strong> - whose orders to list.</li>
+                    <li><strong>Show: EW / Fire</strong> - electronic warfare allocations, or firing orders.</li>
+                    <li><strong>By: Source / Target</strong> - group under the unit <em>doing</em> it, or under the unit it is being done <em>to</em>.  So <em>Own + Fire + By Source</em> is your ships and what each of them is shooting at, while <em>Enemy + Fire + By Target</em> is your ships and what is shooting at them.  The same pairing works for EW: what you are emitting, versus what is being pointed at you.</li>
+                    <li>In the <strong>EW</strong> view each unit is listed with every point it is emitting or receiving plus a <strong>per-unit total</strong>, so you can see at a glance whether a ship still has EW left to allocate.  The <strong>Fire</strong> view reads as "4x Heavy Laser &rarr; Vorchan  45-60%" - how many guns, at whom, and the to-hit range.</li>
+                    <li><strong>Briefing</strong> (far right) replaces the panel with the game's name, the rules of engagement in play (Friendly fire, Mines, Reinforcements, Desperate) and the scenario text.  Press it again to return to the view you were on.  The three filter groups dim while it is up, because none of them means anything for a briefing.</li>
+                    <li>This tab only ever shows what your own game data already contains, so it cannot reveal an opponent's orders to you any earlier than the rest of the interface does.</li>
+                </ul>
+            </li>
+            <br>
+
+            <li><b>SAVE FLEET</b> - saves your surviving ships, with their enhancements, remaining ammunition, current battle damage and critical effects, as a reusable fleet list.  Load it from the game lobby to carry a campaign on into the next battle.  See <a href="#savedfleets">Battle Damage &amp; Saving Fleets</a> for exactly what is and is not carried over.</li>
+            <br>
+        </ul>
+        <a class="back-to-top" href="#top">&#8617; Back to Top</a>
 
 
         <h3 id="interception" >Interception</h3>

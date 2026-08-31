@@ -514,6 +514,11 @@ window.PhaseStrategy = function () {
         }
 
         this.uiManager.showWeaponList({ ship: ship, gamePhase: gamedata.gamephase });
+
+        //Mark, flash and scroll to this ship's row in the INFO tab's fleet list
+        //(LOG_PANEL_REDESIGN_PLAN.md Stage 3). Guarded because the fleet list is a
+        //game.php-only surface and this file is shared; it no-ops when the tab is hidden.
+        if (window.fleetListManager) fleetListManager.revealShipRow(ship);
     };
 
     /* keepWeapons: leave gamedata.selectedSystems alone. Passed ONLY by setSelectedShip when the

@@ -2313,6 +2313,14 @@ getActiveShipName: function getActiveShipName() {
             fleetListManager.displayFleetLists();
         }
 
+        /* The combat log's turn stepper and its "TURN 7 · FIRING" readout
+           (LOG_PANEL_REDESIGN_PLAN.md Stage 2b). Here rather than in a $(window).on("load")
+           of its own because the page bootstrap calls parseServerData from INSIDE a
+           setTimeout, so a load handler registered by the bundle runs while gamedata.turn
+           is still unset. initPhase runs on every phase change and on the first one, which
+           is exactly when the readout has something new to say. */
+        if (window.combatLog) combatLog.updateTurnControls();
+
 
         gamedata.setPhaseClass();
         //		window.helper.doUpdateHelpContent(gamedata.gamephase,0);        
