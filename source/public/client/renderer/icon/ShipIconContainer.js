@@ -65,6 +65,11 @@ window.ShipIconContainer = function () {
             alpha = 1;
         }
         icon.setOverlayColorAlpha(alpha);
+
+        //The movement-group badge runs the OPPOSITE way to everything else here: it grows and
+        //strengthens as the board is zoomed out, over the same 2 -> 3 range the coloured ship
+        //overlays fade in above. See ShipIniOrderSprite.setZoom.
+        icon.setIniOrderZoom(zoom);
     }
 
     ShipIconContainer.prototype.getByShip = function (ship) {

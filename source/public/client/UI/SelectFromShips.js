@@ -395,19 +395,11 @@ window.SelectFromShips = function () {
 
     // The movement GROUP number the Order of Battle prints down its left edge, not the
     // raw initiative total — ships that move together share one, which is the thing
-    // actually worth knowing in a stacked hex.
-    //
-    // getIniativeOrder's validShips filter excludes terrain, mines and not-yet-deployed
-    // ships, so for those the loop never matches and the `return 0` tail fires. A literal
-    // 0 in the column would be wrong AND would look like a real movement group, so every
-    // one of those cases returns null here and renders as an em dash.
+    // actually worth knowing in a stacked hex. null (rendered as an em dash) for anything
+    // with no group of its own; see SimultaneousMovementRule.getMovementGroup, which is
+    // also what the movement-phase map badge numbers itself from.
     function iniOrderOf(ship) {
-        if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) return null;
-        if (ship.mine) return null;
-        if (shipManager.getTurnDeployed(ship) > gamedata.turn) return null;
-
-        var order = shipManager.getIniativeOrder(ship);
-        return (order > 0) ? order : null;
+        return window.SimultaneousMovementRule.getMovementGroup(ship);
     }
 
     // List order matches the INI column: group 1 (the first to move) at the top, counting

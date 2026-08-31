@@ -244,6 +244,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     <script defer src="client/renderer/sprite/HexagonSprite.js"></script>
     <script defer src="client/renderer/sprite/ShipEWSprite.js"></script>
     <script defer src="client/renderer/sprite/ShipSelectedSprite.js"></script>
+    <script defer src="client/renderer/sprite/ShipIniOrderSprite.js"></script>
     <script defer src="client/renderer/sprite/BoxSprite.js"></script>
     <script defer src="client/renderer/sprite/PlainSprite.js"></script>
     <script defer src="client/renderer/sprite/LineSprite.js"></script>
