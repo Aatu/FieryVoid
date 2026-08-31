@@ -868,7 +868,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
             <button type="button" id="fleetOnMapOnly" class="fv-log-chip" aria-pressed="false"
                     title="Hide destroyed, jumped, docked and hyperspace units">On map only</button>
             <span class="fv-log-bar-spacer"></span>
-            <span class="fv-log-bar-meta" data-log-meta="info"></span>
+            <!--<span class="fv-log-bar-meta" data-log-meta="info"></span>-->
             <span id="gameInfoButtons">
                 <button type="button" class="fv-log-chip" title="Fiery Void FAQ"
                         onclick="window.open('faq.php', '_blank');">FAQ</button>
