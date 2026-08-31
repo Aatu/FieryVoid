@@ -175,7 +175,7 @@
    tokens.css; the tabs read as tabs from position alone. */
 .logUiEntry {
     flex: 0 1 auto;
-    min-width: 0;
+    min-width: 100px;
     box-sizing: border-box;
     padding: 6px 10px 5px;
     /* 2px so the selected tab's accent rail can replace it without moving anything, but
@@ -185,6 +185,7 @@
     border-top: 1px solid var(--fv-line-scs);
     border-right: 1px solid var(--fv-line-scs);
     border-left: 1px solid var(--fv-line-scs);
+    border-bottom: 1px solid var(--fv-line-scs);    
     border-radius: var(--fv-radius-chrome) var(--fv-radius-chrome) 0px 0px;
     text-align: center;
     white-space: nowrap;
@@ -457,6 +458,22 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     outline-offset: 1px;
 }
 
+/* A run separator on a control bar. The bar is a flex row of identically shaped chips,
+   so its 6px gap alone could not say where one job ended and the next began - eight chips
+   in a row read as one strip. A hairline costs 5px of a bar that must not wrap and does
+   the grouping the gap could not (user, 2026-08-31).
+
+   align-self:stretch, not a fixed height: the bar sets align-items:center, so a height
+   would have to be re-guessed every time a control's padding changed. The 2px inset keeps
+   it clear of the bar's own top and bottom edges. */
+.fv-log-divider {
+    flex: 0 0 auto;
+    align-self: stretch;
+    width: 1px;
+    margin: 2px 1px;
+    background: var(--fv-line-scs);
+}
+
 /* A segmented group: shared borders, so three chips read as one control. */
 .fv-log-seg {
     display: inline-flex;
@@ -603,7 +620,7 @@ only screen and (max-height: 500px) and (orientation: landscape) {
 }
 
 .fv-tag--waiting {
-    color: var(--fv-warn);
+    color: var(--fv-warning);
 }
 
 .fv-tag--surrendered {
@@ -837,7 +854,24 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     overflow-x: hidden;
 }
 
+/* THE TEAM RAIL RUNS DOWN THE WHOLE SLOT (user, 2026-08-31), not just its header: the
+   header, the column head and every row below them all draw the same 3px left border, and
+   because they stack flush the three read as one continuous rail bounding the block. It
+   used to stop at the header, which left the rows looking unattached to the fleet they
+   belonged to - the more so once a list was long enough for the sticky header to be the
+   only thing still saying whose ships these were.
+
+   ⚠ THE COLOUR IS ONE CUSTOM PROPERTY, SET INLINE BY fleetList.js from
+   gamedata.getFleetHeaderColorRGB - never give this rail a CSS-class colour. Allegiance is
+   a TWO-ARM gate (arch_team_colour_logic): a CSS class only ever fires for 2-team
+   participants, while observers and 3+-team games take an inline colour from JS, so a
+   colour declared here would leave half the games unpainted. The property is what makes
+   ONE inline write paint all three surfaces - it is set on this element and inherited by
+   every row, so the rows need no per-row inline style of their own.
+
+   The value below is only the fallback for a block JS has not painted yet. */
 .fleetlistentry {
+    --fv-fleet-rail: var(--fv-neutral-signal);
     padding: 0 0 6px 0;
     width: 100%;
     box-sizing: border-box;
@@ -870,7 +904,7 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     margin: 0;
     padding: 6px 8px 6px 6px;
     background: var(--fv-card);
-    border-left: var(--fv-log-rail) solid var(--fv-neutral-signal);
+    border-left: var(--fv-log-rail) solid var(--fv-fleet-rail);
     border-bottom: 1px solid var(--fv-line-soft);
     cursor: pointer;
     user-select: none;
@@ -893,7 +927,7 @@ only screen and (max-height: 500px) and (orientation: landscape) {
 }
 
 .fleetheader .playername {
-    color: #deebff;
+    color: var(--fv-text-accent); 
     font-weight: bold;
     min-width: 0;
     overflow: hidden;
@@ -905,7 +939,7 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     font-family: var(--fv-mono);
     font-size: 11px;
     font-variant-numeric: tabular-nums;
-    color: var(--fv-text-dim);
+    color: var(--fv-text-accent); 
 }
 
 .fleetheader .turnTaken {
@@ -950,8 +984,11 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     padding: 4px 6px 4px 6px;
 }
 
+/* Same rail as the header above it - see the note on .fleetlistentry. This includes
+   .fleetlisthead, which is a .fleetlistline too, so the column head is part of the run
+   rather than a gap in it. */
 .fleetlist .fleetlistline {
-    border-left: var(--fv-log-rail) solid transparent;
+    border-left: var(--fv-log-rail) solid var(--fv-fleet-rail);
     border-bottom: 1px solid rgba(73, 103, 145, 0.16);
 }
 
@@ -1053,7 +1090,8 @@ only screen and (max-height: 500px) and (orientation: landscape) {
    is correct. The column head is excluded as well; it already resolves to this same token,
    so that exclusion is about keeping the head out of a row rule, not about the colour. */
 .fleetlist .fleetlistline:not(.fleetlisthead)>span:not(.destroyed):not(.jumped):not(.docked):not(.hyperspace)>.shipname:not(.hyperspace) {
-    color: var(--fv-text-accent);   
+    color: var(--fv-text-dim); 
+    /*color: #7ba2ea*/      
 }
 
 /* ── Row state ────────────────────────────────────────────────────────────────────
@@ -1095,9 +1133,12 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     /* stops iOS's own selection callout during the long press */
 }
 
+/* The border-left-color lift is GONE from hover. It existed to give hover a left marker
+   back when a row rail was transparent; now that every row carries the team colour, all it
+   did was grey the rail out under the cursor - the fill change is the hover. Selection
+   still overrides the rail, further down: that is one row at a time and worth the colour. */
 .fleetlist .fleetlistline.unitrow:hover {
     background: var(--fv-card-hover);
-    border-left-color: var(--fv-line-scs);
 }
 
 .fleetlist .shipname.clickable {
