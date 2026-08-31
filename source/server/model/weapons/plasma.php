@@ -2406,5 +2406,55 @@ class HyperplasmaMatrix extends Weapon {
 }
 
 
+class PlasmaDriver extends Pulse{
+        public $name = "PlasmaDriver";
+        public $displayName = "Plasma Driver";
+		public $iconPath = "PlasmaDriver.png";
+
+        public $animation = "bolt";
+        public $animationColor = array(75, 250, 90);
+
+        public $grouping = 15;
+        public $maxpulses = 5;
+        public $priority = 6;
+		protected $useDie = 3; //die used for base number of hits	
+        
+        public $loadingtime = 1;
+        public $intercept = 2;
+        
+        public $rangePenalty = 0.5;
+    	public $rangeDamagePenalty = 0.5;
+        public $fireControl = array(6, 4, 3); // fighters, <mediums, <capitals 
+
+	    public $damageType = "Pulse"; 
+	    public $weaponClass = "Plasma"; 
+        
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc )
+		{
+			//maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ){
+				$maxhealth = 6;
+			}
+			if ( $powerReq == 0 ){
+				$powerReq = 6;
+			}
+			parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+		}
+
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);   
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}	    		
+				$this->data["Special"] .= "Does less damage over distance (0.5 per hex).";   
+		$this->data["Special"] .= "<br>Ignores half of armor.";  
+		}
+
+        public function getDamage($fireOrder){        return 22;   }
+		
+    }  // end of class PlasmaDriver
+
 	
 ?>

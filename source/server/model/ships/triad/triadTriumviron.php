@@ -46,9 +46,9 @@ class triadTriumviron extends BaseShip{
 		
 		$this->addPrimarySystem(new Reactor(8, 30, 0, 0));//armor, structure, power req, output
         $this->addPrimarySystem(new CnC(8, 24, 0, 0));
-		$scanner = new Scanner(8, 24, 0, 15);
-			$scanner->markAdvanced();
-			$this->addPrimarySystem($scanner);			
+		$scanner = new ElintScanner(8, 24, 0, 15);
+		$scanner->markAdvanced();
+       		$this->addPrimarySystem($scanner);
 		$this->addPrimarySystem(new Engine(8, 23, 0, 14, 3));
 //        $this->addPrimarySystem(new StructureSelfRepair(8, 24, 24)); //armor, structure, output
         $this->addPrimarySystem(new CoopStructureSelfRepair(8, 24, 24)); //armor, structure, output
@@ -87,7 +87,7 @@ class triadTriumviron extends BaseShip{
 			0=> array( //PRIMARY
 				12 => "Structure",
 				13 => "Cooperative Structure Self Repair",
-				15 => "Scanner",                
+				15 => "ELINT Scanner",                
 				17 => "Engine",
 				19 => "Reactor",
 				20 => "C&C",

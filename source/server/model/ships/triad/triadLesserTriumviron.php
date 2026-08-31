@@ -30,13 +30,12 @@ class triadLesserTriumviron extends BaseShip{
 		$this->notes = "Can control 12 fighters";		
 		$this->notes .= '<br>Unified Triad'; 
 		$this->notes .= '<br>Triad Capital Ship'; 
-		$this->notes .= '<br>Atmospheric capable'; 
 
-		$t1l = new GraviticThruster(7, 13, 0, 5, 1);
-		$t3l = new GraviticThruster(7, 25, 0, 8, 3);
+		$t1l = new GraviticThruster(7, 10, 0, 4, 1);
+		$t3l = new GraviticThruster(7, 23, 0, 8, 3);
 
-		$t1r = new GraviticThruster(7, 13, 0, 5, 1);
-		$t4r = new GraviticThruster(7, 25, 0, 8, 4);
+		$t1r = new GraviticThruster(7, 10, 0, 4, 1);
+		$t4r = new GraviticThruster(7, 23, 0, 8, 4);
 
 		$this->addLeftSystem($t1l);
 		$this->addLeftSystem($t3l);
@@ -45,9 +44,12 @@ class triadLesserTriumviron extends BaseShip{
 		
 		$this->addPrimarySystem(new Reactor(8, 30, 0, 0));//armor, structure, power req, output
         $this->addPrimarySystem(new CnC(8, 16, 0, 0));
-		$scanner = new Scanner(8, 15, 0, 14);
-			$scanner->markAdvanced();
-			$this->addPrimarySystem($scanner);			
+//		$scanner = new Scanner(8, 24, 0, 15);
+//			$scanner->markAdvanced();
+//			$this->addPrimarySystem($scanner);			
+        $scanner = new ElintScanner(8, 20, 0, 14);
+			$scanner->markMindrider();
+			$this->addPrimarySystem($scanner);	        
 		$this->addPrimarySystem(new Engine(8, 20, 0, 12, 3));
 //        $this->addPrimarySystem(new StructureSelfRepair(8, 24, 24)); //armor, structure, output
         $this->addPrimarySystem(new CoopStructureSelfRepair(8, 16, 16)); //armor, structure, output
@@ -60,8 +62,8 @@ class triadLesserTriumviron extends BaseShip{
 		$this->addAftSystem(new GraviticThruster(7, 10, 0, 4, 2));
 		$this->addAftSystem(new GraviticThruster(7, 10, 0, 4, 2));
 		$this->addAftSystem(new GraviticThruster(7, 10, 0, 4, 2));
-        $this->addAftSystem(new SelfRepair(6, 12, 6)); //armor, structure, output
-		$this->addAftSystem(new JumpEngine(6, 25, 5, 8));        
+        $this->addAftSystem(new SelfRepair(8, 12, 6)); //armor, structure, output
+		$this->addAftSystem(new JumpEngine(8, 25, 5, 8));        
 
 		$hyperplasma = new HyperplasmaCutter(7, 16, 9, 270, 90);
 			$hyperplasma->displayName = 'Hyperplasma Cutter B';
@@ -86,7 +88,7 @@ class triadLesserTriumviron extends BaseShip{
 			0=> array( //PRIMARY
 				12 => "Structure",
 				13 => "Cooperative Structure Self Repair",
-				15 => "Scanner",                
+				15 => "ELINT Scanner",                
 				17 => "Engine",
 				19 => "Reactor",
 				20 => "C&C",

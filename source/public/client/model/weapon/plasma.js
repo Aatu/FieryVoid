@@ -756,3 +756,9 @@ alert("HPM fired"); // ← add this line
 
     return [fire];
 };
+
+var PlasmaDriver = function PlasmaDriver(json, ship) {
+    Weapon.call(this, json, ship);
+};
+PlasmaDriver.prototype = Object.create(Weapon.prototype);
+PlasmaDriver.prototype.constructor = PlasmaDriver;

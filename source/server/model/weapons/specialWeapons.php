@@ -10559,6 +10559,704 @@ class spawnSingularity extends Terrain {
 }
 
 
+class SpatialCutter extends Weapon {
+
+    public $name = "SpatialCutter";
+    public $displayName = "Spatial Cutter";
+    public $iconPath = "SpatialCutter.png";
+
+    public $damageType = "Raking";
+    public $weaponClass = "Gravitic";
+    public $raking = 15;
+
+    public $range = 12;
+    public $rangePenalty = 0.25;
+    public $fireControl = array(-2, 3, 7);
+    public $intercept = 8;
+
+    public $uninterceptable = true;
+    public $canInterceptUninterceptable = true;
+
+    public $loadingtime = 1;
+
+    public $animation = "laser";
+    public $animationColor = array(100, 0, 200);
+    public $animationExplosionScale = 0.4;
+
+    public $firingModes = array(1 => "Spatial Cutter");
+
+	public $factionAge = 4; //Primordial
+
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
+        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+    }
+
+    public function setSystemDataWindow($turn) {
+        parent::setSystemDataWindow($turn);
+        $this->data["Special"] = "Gravitic class weapon. Raking 15. Requires lock-on to fire.";
+        $this->data["Special"] .= "<br>Uninterceptable. Can intercept uninterceptable weapons.";
+        $this->data["Special"] .= "<br>On hit: creates a hyperspace waveform along the line of fire.";
+        $this->data["Special"] .= "<br>Waveform is active for one turn. Units entering a waveform hex take speed x size factor damage per hex.";
+        $this->data["Special"] .= "<br>Units without advanced armor take double waveform damage.";
+    }
+
+    public function getDamage($fireOrder) {
+        return Dice::d(10, 8) + 20;
+    }
+
+    public function setMinDamage() { $this->minDamage = 28; }
+    public function setMaxDamage() { $this->maxDamage = 100; }
+
+    public function calculateHitBase($gamedata, $fireOrder) {
+        $firingShip = $gamedata->getShipById($fireOrder->shooterid);
+        $target     = $gamedata->getShipById($fireOrder->targetid);
+
+        // Require lock-on — if no OEW on target, auto-miss with note
+        if ($target && $firingShip->getOEW($target, $gamedata->turn) <= 0) {
+            $fireOrder->needed   = 0;
+            $fireOrder->shotshit = 0;
+            $fireOrder->pubnotes .= "No lock-on — Spatial Cutter cannot fire. ";
+            return;
+        }
+
+        parent::calculateHitBase($gamedata, $fireOrder);
+    }
+
+    public function fire($gamedata, $fireOrder) {
+        parent::fire($gamedata, $fireOrder);
+
+        if ($fireOrder->shotshit > 0) {
+            $shooter = $gamedata->getShipById($fireOrder->shooterid);
+            $target  = $gamedata->getShipById($fireOrder->targetid);
+
+            if ($shooter && $target) {
+                // Spawn waveform immediately along the line of fire.
+                // spawnTurn = current turn so:
+                // Turn N:   waveform exists but no collision damage (units already in position)
+                // Turn N+1: units moving through take WaveformCollision damage
+                // Turn N+1 end: generateIndividualNotes silently removes waveforms (no animation)
+                $lineHexes = self::getHexLine($shooter->getHexPos(), $target->getHexPos());
+                foreach ($lineHexes as $hex) {
+                    $this->spawnWaveformAtHex($gamedata, $shooter, $hex);
+                }
+            }
+        }
+    }
+
+    // Runs at the END of the fire phase (phase 4) on turn N+1 — after all
+    // firing, criticals, and animations are resolved. Removes expired waveforms
+    // silently (no DamageEntry = no explosion animation in the replay).
+    // This ensures waveforms are gone before movement on turn N+2.
+	public function generateIndividualNotes($gameData, $dbManager) {
+		switch ($gameData->phase) {
+			case 4:
+				$ship = $this->getUnit();
+				if ($this->isDestroyed() || !$ship || $ship->isDestroyed()) break;
+
+				foreach ($gameData->ships as $waveShip) {
+					if (!($waveShip instanceof spawnHyperspaceWaveform)) continue;
+					$waveShip->loadSpawnTurn();
+					if ($waveShip->spawnTurn > 0 && $gameData->turn >= $waveShip->spawnTurn + 1) {
+						$structure = $waveShip->getSystemByName("Structure");
+						if ($structure && !$structure->isDestroyed()) {
+							$damageEntry = new DamageEntry(
+								-1, $waveShip->id, $gameData->id, $gameData->turn, $structure->id,
+								$structure->maxhealth, 0, 0, -1, true, false,
+								"Waveform dissipated", "Standard"
+							);
+							$damageEntry->updated = true;
+							$structure->damage[] = $damageEntry;
+						}
+					}
+				}
+				break;
+		}
+	}
+
+    private function spawnWaveformAtHex($gamedata, $shooter, $hex) {
+        $waveform = new spawnHyperspaceWaveform($gamedata->id, -5, "HW" . $gamedata->turn, $shooter->slot);
+        $waveform->spawnTurn = $gamedata->turn;
+
+        $shipid = Manager::insertSingleShip($gamedata, $waveform, -5);
+        $waveform->id = $shipid;
+
+        $deployMove = new MovementOrder(
+            null, "deploy",
+            new OffsetCoordinate($hex->q, $hex->r),
+            0, 0, 0, 0, 0, false, $gamedata->turn, 0, 0
+        );
+        Manager::insertSingleMovement($gamedata->id, $shipid, $deployMove);
+
+        SystemData::initSystemData($gamedata->turn, $gamedata->id);
+        foreach ($waveform->systems as $system) {
+            $system->setInitialSystemData($waveform);
+        }
+        Manager::insertSystemData(SystemData::getAndPurgeAllSystemData());
+
+        unset($gamedata->ships[$shipid]);
+    }
+
+    public static function getHexLine(OffsetCoordinate $start, OffsetCoordinate $end) {
+        $startCube = self::offsetToCube($start);
+        $endCube   = self::offsetToCube($end);
+
+        $dx = $endCube[0] - $startCube[0];
+        $dy = $endCube[1] - $startCube[1];
+        $dz = $endCube[2] - $startCube[2];
+
+        $steps = max(abs($dx), abs($dy), abs($dz));
+        if ($steps > 50) $steps = 50;
+
+        $hexes = array();
+        for ($i = 0; $i <= $steps; $i++) {
+            $t       = $steps == 0 ? 0 : $i / $steps;
+            $cx      = $startCube[0] + $dx * $t;
+            $cy      = $startCube[1] + $dy * $t;
+            $cz      = $startCube[2] + $dz * $t;
+            $hexes[] = self::cubeToOffset(self::cubeRound($cx, $cy, $cz));
+        }
+
+        return $hexes;
+    }
+
+	private static function offsetToCube(OffsetCoordinate $hex) {
+		$x = $hex->q - ($hex->r + ($hex->r & 1)) / 2;
+		$z = $hex->r;
+		$y = -$x - $z;
+		return array($x, $y, $z);
+	}
+
+    private static function cubeRound($x, $y, $z) {
+        $rx = round($x);
+        $ry = round($y);
+        $rz = round($z);
+        $dx = abs($rx - $x);
+        $dy = abs($ry - $y);
+        $dz = abs($rz - $z);
+        if ($dx > $dy && $dx > $dz) {
+            $rx = -$ry - $rz;
+        } else if ($dy > $dz) {
+            $ry = -$rx - $rz;
+        } else {
+            $rz = -$rx - $ry;
+        }
+        return array($rx, $ry, $rz);
+    }
+
+	private static function cubeToOffset($cube) {
+		$q = $cube[0] + ($cube[2] + ($cube[2] & 1)) / 2;
+		$r = $cube[2];
+		return new OffsetCoordinate($q, $r);
+	}
+
+    public static function getWaveformDamage($ship) {
+        $move  = $ship->getLastMovement();
+        $speed = $move ? $move->speed : 0;
+        if ($speed <= 0) return 0;
+
+        if ($ship instanceof FighterFlight) {
+            if (!empty($ship->shuttle) || !empty($ship->superheavy)) {
+                $factor = 1.0;
+            } else {
+                $factor = 0.75;
+            }
+        } else if (!empty($ship->Enormous)) {
+            $factor = 10.0;
+        } else {
+            switch ($ship->shipSizeClass) {
+                case 0: $factor = 1.5; break; // LCV
+                case 1: $factor = 2.0; break; // Medium
+                case 2: $factor = 4.0; break; // Heavy Combat Vessel
+                case 3: $factor = 6.0; break; // Capital Ship
+                default: $factor = 10.0; break;
+            }
+        }
+
+        return (int)ceil($speed * $factor);
+    }
+}
+
+class spawnHyperspaceWaveform extends Terrain {
+
+    public $terrainCollisionType = 'WaveformCollision';
+    public $Enormous  = true;
+    public $spawnTurn = 0;
+	public $updated   = false;
+
+	public $weaponClass = "Gravitic";
+
+    function __construct($id, $userid, $name, $slot) {
+        parent::__construct($id, $userid, $name, $slot);
+        $this->pointCost  = 0;
+        $this->faction    = "Terrain";
+        $this->factionAge = 1;
+        $this->phpclass   = "spawnHyperspaceWaveform";
+        $this->imagePath  = "img/ships/hyperspaceWaveform.png";
+        $this->canvasSize = 200;
+        $this->shipClass  = "Hyperspace Waveform";
+        $this->Enormous   = true;
+        $this->iniativebonus = -200;
+        $this->isd        = 0;
+        $this->notes      = "Hyperspace waveform — active for one turn only.";
+        $this->notes     .= "<br>Units entering this hex take speed x size factor damage per hex.";
+        $this->notes     .= "<br>Units without advanced armor take double damage.";
+        $this->occurence  = "common";
+
+        $this->base        = true;
+        $this->smallBase   = true;
+        $this->nonRotating = true;
+        $this->forwardDefense = 20;
+        $this->sideDefense    = 20;
+
+        $this->turncost      = 0;
+        $this->turndelaycost = 0;
+        $this->accelcost     = 0;
+        $this->rollcost      = 0;
+        $this->pivotcost     = 0;
+
+        Enhancements::nonstandardEnhancementSet($this, 'Terrain');
+        $this->addPrimarySystem(new OSATCnC(10, 1, 0, 0));
+        $this->addPrimarySystem(new Structure(8, 300));
+//To make this gravitic damage for adaptive armor
+foreach ($this->systems as $system) {
+    if ($system instanceof RammingAttack) {
+        $system->weaponClass = "Gravitic";
+    }
+}
+
+        $this->hitChart = array(
+            0 => array(20 => "Structure"),
+        );
+    }
+
+    public function loadSpawnTurn() {
+        if (strpos($this->name, 'HW') === 0) {
+            $this->spawnTurn = (int)substr($this->name, 2);
+        }
+    }
+}
+
+
+
+// GTS_Triad
+
+class AsteroidSalvo extends AoE {
+
+    public $name = "AsteroidSalvo";
+    public $displayName = "Asteroid Salvo";
+    public $iconPath = "AsteroidSalvo.png";
+
+//    public $damageType = "Standard";
+    public $weaponClass = "Matter";
+    public $flashDamage = true;
+
+    public $hextarget = true;
+    public $hidetarget = true;
+    public $ballistic = true;
+    public $uninterceptable = true;
+
+	public $factionAge = 4; //Primordial
+
+    public $range = 50;
+    public $loadingtime = 2;
+    public $priority = 1;
+
+    public $animation = "ball";
+    public $animationColor = array(150, 100, 50);
+    public $animationExplosionScale = 2;
+    public $animationExplosionType = "AoE";
+    public $explosionColor = array(150, 100, 50);
+
+    //Classes that will be spawned on successful hit.
+    public $spawnableClasses = array(
+        'spawnAsteroidSalvo',
+        'spawnMeteoroid',
+        'spawnDustField',
+    );
+
+    public $firingModes = array(1 => "Asteroid Salvo");
+
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
+        if ($maxhealth == 0) $maxhealth = 30;
+        if ($powerReq == 0) $powerReq = 10;
+        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+    }
+
+    public function setSystemDataWindow($turn) {
+        parent::setSystemDataWindow($turn);
+        if (!isset($this->data["Special"])) $this->data["Special"] = '';
+        else $this->data["Special"] .= '<br>';
+        $this->data["Special"] .= "Ballistic hex-targeted weapon. Matter damage: 50 at target hex, 20 at range 1, 10 at range 2.";
+        $this->data["Special"] .= "<br>25% chance to scatter up to d6 hexes. 40% chance of that scatter to dissipate.";
+        $this->data["Special"] .= "<br>On clean hit: spawns an asteroid at target hex, meteoroid fields at range 1, dust fields at range 2 (from next turn onwards).";
+        $this->data["Special"] .= "<br>Terrain stacking: asteroid > meteoroid > dust. Existing asteroid/meteoroid is not replaced.";
+    }
+
+    public function getDamage($fireOrder) { return 50; }
+    public function setMinDamage() { $this->minDamage = 10; }
+    public function setMaxDamage() { $this->maxDamage = 50; }
+
+    public function fire($gamedata, $fireOrder) {
+        $this->changeFiringMode($fireOrder->firingMode);
+        $shooter = $gamedata->getShipById($fireOrder->shooterid);
+        $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+        $posLaunch = $movement->position;
+
+        //Handle unit-targeted fire orders (correct to hex)
+        if ($fireOrder->targetid != -1) {
+            $targetship = $gamedata->getShipById($fireOrder->targetid);
+            $movement = $targetship->getLastTurnMovement($fireOrder->turn);
+            $fireOrder->x = $movement->position->q;
+            $fireOrder->y = $movement->position->r;
+            $fireOrder->targetid = -1;
+        }
+
+        $target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
+
+        $rolled = Dice::d(100);
+        $fireOrder->rolled = $rolled;
+
+        if ($rolled > $fireOrder->needed) {
+            $fireOrder->pubnotes .= "Charge dissipates. ";
+            return;
+        }
+
+        $fireOrder->shotshit++;
+        $scattered = false;
+
+        if ($rolled > 75) { //scatter
+            $maxdis = $posLaunch->distanceTo($target);
+            $dis = Dice::d(6);
+            $dis = min($dis, floor($maxdis));
+            $direction = Dice::d(6) - 1;
+            $target = $target->moveToDirection($direction, $dis);
+
+            $fireOrder->pubnotes .= " Deviation from " . $fireOrder->x . ' ' . $fireOrder->y;
+            $fireOrder->x = $target->q;
+            $fireOrder->y = $target->r;
+            $fireOrder->pubnotes .= " to " . $fireOrder->x . ' ' . $fireOrder->y . '. ';
+            $fireOrder->pubnotes .= "Shot deviates $dis hexes. ";
+            $scattered = true;
+        }
+
+        //Apply AoE matter damage: 50/20/10 at ranges 0/1/2
+        $damageByRange = array(0 => 50, 1 => 20, 2 => 10);
+
+        $ships0 = $gamedata->getShipsInDistance($target, 0);
+        $ships1 = $gamedata->getShipsInDistance($target, 1);
+        $ships2 = $gamedata->getShipsInDistance($target, 2);
+
+        foreach ($ships2 as $targetShip) {
+            if ($targetShip->isDestroyed()) continue;
+            if ($targetShip->mine) continue;
+            if ($targetShip->isTerrain()) continue;
+
+            if (isset($ships0[$targetShip->id])) {
+                $damage = $damageByRange[0];
+            } else if (isset($ships1[$targetShip->id])) {
+                $damage = $damageByRange[1];
+            } else {
+                $damage = $damageByRange[2];
+            }
+
+            $this->AOEdamage($targetShip, $shooter, $fireOrder, $target, $damage, $gamedata);
+        }
+
+        //Spawn terrain only on clean hit (no scatter)
+        if (!$scattered) {
+            $this->spawnAsteroidTerrain($gamedata, $fireOrder, $shooter, $target);
+        } else {
+            $fireOrder->pubnotes .= "Shot scattered - no asteroid formed. ";
+        }
+
+        $fireOrder->rolled = max(1, $fireOrder->rolled);
+    }
+
+    //Spawn asteroid at target hex, meteoroids at range 1, dust at range 2.
+    //Terrain stacking rules apply.
+    private function spawnAsteroidTerrain($gamedata, $fireOrder, $shooter, $targetHex) {
+        //Spawn asteroid at direct hit hex
+        $this->spawnTerrainAtHex($gamedata, $shooter, $targetHex, 'asteroid', $fireOrder);
+
+        //Spawn meteoroids at range 1
+        for ($dir = 0; $dir < 6; $dir++) {
+            $hex = $targetHex->moveToDirection($dir, 1);
+            $this->spawnTerrainAtHex($gamedata, $shooter, $hex, 'meteoroid', $fireOrder);
+        }
+
+        //Spawn dust at range 2
+        $range2Hexes = array();
+        for ($dir = 0; $dir < 6; $dir++) {
+            $ring1 = $targetHex->moveToDirection($dir, 1);
+            $range2Hexes[] = $ring1->moveToDirection($dir, 1);
+            $range2Hexes[] = $ring1->moveToDirection(($dir + 1) % 6, 1);
+        }
+        //Deduplicate
+        $seen = array();
+        foreach ($range2Hexes as $hex) {
+            $key = $hex->q . ',' . $hex->r;
+            if (!isset($seen[$key])) {
+                $seen[$key] = true;
+                $this->spawnTerrainAtHex($gamedata, $shooter, $hex, 'dust', $fireOrder);
+            }
+        }
+
+        $fireOrder->pubnotes .= "<br>Asteroid formed at " . $targetHex->q . ' ' . $targetHex->r . '. Meteoroid and dust fields spawned.';
+    }
+
+    //Spawn terrain at a specific hex, respecting stacking rules.
+    //asteroid > meteoroid > dust (higher tier never replaced by lower)
+    private function spawnTerrainAtHex($gamedata, $shooter, $hex, $type, $fireOrder) {
+        //Check existing terrain
+        $existingShips = $gamedata->getShipsInDistance($hex, 0);
+        $hasAsteroid = false;
+        $hasMeteoroid = false;
+        $hasDust = false;
+
+        foreach ($existingShips as $existing) {
+            if (!$existing->isTerrain()) continue;
+            if ($existing instanceof spawnAsteroidSalvo || $existing instanceof asteroidSNew ||
+                $existing instanceof asteroidMNew || $existing instanceof asteroidLNew) {
+                $hasAsteroid = true;
+            } else if ($existing instanceof spawnMeteoroid) {
+                $hasMeteoroid = true;
+            } else if ($existing instanceof spawnDustField) {
+                $hasDust = true;
+            }
+        }
+
+        //Apply stacking rules
+        if ($type == 'asteroid') {
+            if ($hasAsteroid) return; //already has asteroid
+            //Remove existing meteoroid/dust and replace with asteroid
+            $terrain = new spawnAsteroidSalvo($gamedata->id, -5, "Asteroid", $shooter->slot);
+        } else if ($type == 'meteoroid') {
+            if ($hasAsteroid || $hasMeteoroid) return; //asteroid/meteoroid already present
+            //Can replace dust with meteoroid
+            $terrain = new spawnMeteoroid($gamedata->id, -5, "Meteoroid Field", $shooter->slot);
+        } else if ($type == 'dust') {
+            if ($hasAsteroid || $hasMeteoroid || $hasDust) return; //higher or equal tier present
+            $terrain = new spawnDustField($gamedata->id, -5, "Dust Field", $shooter->slot);
+        } else {
+            return;
+        }
+
+        //Insert terrain into game using ballistic mine pattern
+        $shipid = Manager::insertSingleShip($gamedata, $terrain, -5);
+        $terrain->id = $shipid;
+
+        //Create deployment movement at target hex
+        $deployMove = new MovementOrder(
+            null, "deploy",
+            new OffsetCoordinate($hex->q, $hex->r),
+            0, 0, 0, 0, 0, false, $gamedata->turn, 0, 0
+        );
+        Manager::insertSingleMovement($gamedata->id, $shipid, $deployMove);
+
+        //Initialize system data
+        SystemData::initSystemData($gamedata->turn, $gamedata->id);
+        foreach ($terrain->systems as $system) {
+            $system->setInitialSystemData($terrain);
+        }
+        Manager::insertSystemData(SystemData::getAndPurgeAllSystemData());
+
+        //Save note so terrain is recognized in subsequent turns
+        $note = new IndividualNote(
+            -1, $gamedata->id,
+            1, 1,
+            $shooter->id, $this->id,
+            $shipid,
+            "Asteroid Salvo terrain spawned",
+            $gamedata->turn
+        );
+        Manager::insertIndividualNote($note);
+    }
+
+    //Override AOEdamage to use Matter damage class
+    public function AOEdamage($target, $shooter, $fireOrder, $sourceHex, $damage, $gamedata) {
+        if ($target->isDestroyed()) return;
+        if ($target->mine) return;
+        $damage = $this->getDamageMod($damage, $shooter, $target, $sourceHex, $gamedata);
+        $damage -= $target->getDamageMod($shooter, $sourceHex, $gamedata->turn, $this);
+        if ($target instanceof FighterFlight) {
+            foreach ($target->systems as $fighter) {
+                if ($fighter == null || $fighter->isDestroyed()) continue;
+                $this->doDamage($target, $shooter, $fighter, $damage, $fireOrder, $sourceHex, $gamedata, false);
+            }
+        } else {
+            $tmpLocation = $target->getHitSectionPos(Mathlib::hexCoToPixel($sourceHex), $fireOrder->turn);
+            $system = $target->getHitSystem($shooter, $fireOrder, $this, $gamedata, $tmpLocation);
+            $this->doDamage($target, $shooter, $system, $damage, $fireOrder, null, $gamedata, false, $tmpLocation);
+        }
+    }
+}
+
+
+class spawnAsteroidSalvo extends Terrain {
+
+    function __construct($id, $userid, $name, $slot) {
+        parent::__construct($id, $userid, $name, $slot);
+
+        $this->pointCost = 0;
+        $this->faction = "Terrain";
+        $this->factionAge = 1;
+        $this->phpclass = "spawnAsteroidSalvo";
+        $this->imagePath = "img/ships/AsteroidS1.png";
+        $this->canvasSize = 200;
+        $this->shipClass = "Asteroid (Salvo)";
+        $this->Enormous = true;
+        $this->iniativebonus = -200;
+        $this->isd = 0;
+        $this->notes = "Blocks line of sight";
+        $this->notes .= "<br>Units entering this hex take collision damage";
+        $this->occurence = "common";
+
+        $this->base = true;
+        $this->smallBase = true;
+        $this->nonRotating = true;
+
+        $this->forwardDefense = 20;
+        $this->sideDefense = 20;
+
+        $this->turncost = 0;
+        $this->turndelaycost = 0;
+        $this->accelcost = 0;
+        $this->rollcost = 0;
+        $this->pivotcost = 0;
+
+        Enhancements::nonstandardEnhancementSet($this, 'Terrain');
+
+        $this->addPrimarySystem(new OSATCnC(10, 1, 0, 0));
+        $this->addPrimarySystem(new Structure(8, 300));
+
+        $this->hitChart = array(
+            0 => array(20 => "Structure"),
+            1 => array(20 => "Primary"),
+            2 => array(20 => "Primary"),
+        );
+    }
+} // end of class spawnAsteroidSalvo
+
+
+
+
+class spawnMeteoroid extends Terrain {
+    public $isMeteoroid = true;
+    public $terrainCollisionType = 'MeteoroidCollision';
+
+    function __construct($id, $userid, $name, $slot) {
+        parent::__construct($id, $userid, $name, $slot);
+        $this->pointCost = 0;
+        $this->faction = "Terrain";
+        $this->factionAge = 1;
+        $this->phpclass = "spawnMeteoroid";
+        $this->imagePath = "img/ships/asteroidField3.png";
+        $this->canvasSize = 200;
+        $this->shipClass = "Meteoroid Field";
+        $this->Enormous = true;
+        $this->iniativebonus = -200;
+        $this->isd = 0;
+        $this->notes = "Units entering this hex roll d20 on the Meteoroid chart.";
+        $this->notes .= "<br>Meteoroid hit damage = 1d6 + (unit speed / 2). Standard damage. Armor applies.";
+        $this->occurence = "common";
+        $this->base = true;
+        $this->smallBase = true;
+        $this->nonRotating = true;
+        $this->forwardDefense = 20;
+        $this->sideDefense = 20;
+        $this->turncost = 0;
+        $this->turndelaycost = 0;
+        $this->accelcost = 0;
+        $this->rollcost = 0;
+        $this->pivotcost = 0;
+        Enhancements::nonstandardEnhancementSet($this, 'Terrain');
+        $this->addPrimarySystem(new OSATCnC(10, 1, 0, 0));
+        $this->addPrimarySystem(new Structure(8, 300));
+        $this->hitChart = array(
+            0 => array(20 => "Structure"),
+        );
+    }
+
+    public static function rollMeteorChart($shipSizeClass, $isFlight, $modifier = 0) {
+        $roll = Dice::d(20) + $modifier;
+        $roll = max(1, min(20, $roll));
+        $chart = array(
+            12 => array(0, 0, 0, 0, 0),
+            14 => array(0, 0, 0, 0, 1),
+            15 => array(0, 0, 0, 1, 1),
+            16 => array(0, 0, 1, 1, 1),
+            17 => array(0, 1, 1, 1, 2),
+            18 => array(0, 1, 1, 2, 2),
+            19 => array(1, 1, 2, 2, 2),
+            20 => array(1, 2, 2, 2, 3),
+        );
+        if ($isFlight) { $col = 0; }
+        else {
+            switch ($shipSizeClass) {
+                case 1: $col = 1; break;
+                case 2: $col = 2; break;
+                case 3: $col = 3; break;
+                default: $col = ($shipSizeClass >= 4) ? 4 : 1;
+            }
+        }
+        $hits = 0;
+        foreach ($chart as $threshold => $row) {
+            if ($roll <= $threshold) { $hits = $row[$col]; break; }
+        }
+        if ($roll >= 20) $hits = $chart[20][$col];
+        return $hits;
+    }
+
+    public static function getMeteorDamage($speed) {
+        return Dice::d(6) + floor($speed / 2);
+    }
+}
+
+
+
+class spawnDustField extends Terrain {
+    public $isDustField = true;
+    public $terrainCollisionType = 'DustCollision';
+    public static $dustDamagedThisTurn = array();
+
+    function __construct($id, $userid, $name, $slot) {
+        parent::__construct($id, $userid, $name, $slot);
+        $this->pointCost = 0;
+        $this->faction = "Terrain";
+        $this->factionAge = 1;
+        $this->phpclass = "spawnDustField";
+        $this->imagePath = "img/ships/dust.png";
+        $this->canvasSize = 200;
+        $this->shipClass = "Dust Field";
+        $this->Enormous = true;
+        $this->iniativebonus = -200;
+        $this->isd = 0;
+        $this->notes = "Units entering this hex take dust damage.";
+        $this->notes .= "<br>Single damage roll per turn: speed / 2 (drop fractions).";
+        $this->occurence = "common";
+        $this->base = true;
+        $this->smallBase = true;
+        $this->nonRotating = true;
+        $this->forwardDefense = 20;
+        $this->sideDefense = 20;
+        $this->turncost = 0;
+        $this->turndelaycost = 0;
+        $this->accelcost = 0;
+        $this->rollcost = 0;
+        $this->pivotcost = 0;
+        Enhancements::nonstandardEnhancementSet($this, 'Terrain');
+        $this->addPrimarySystem(new OSATCnC(10, 1, 0, 0));
+        $this->addPrimarySystem(new Structure(8, 300));
+        $this->hitChart = array(
+            0 => array(20 => "Structure"),
+        );
+    }
+
+    public static function getDustDamage($speed) {
+        return floor($speed / 2);
+    }
+}
+
 
 
 
