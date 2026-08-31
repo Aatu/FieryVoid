@@ -95,6 +95,7 @@
   --fv-text-accent: #C6E2FF;          /* theme.colors.textAccent — bluish-white values */
   --fv-text-dim: #8ca5c0;
   --fv-accent: #8bcaf2;
+  --fv-warning: #ffd84d;  
 
   /* ── Type ──────────────────────────────────────────────────────────────────
      Body text is Arial everywhere and is not tokenised — gamesNew.css enforces it
