@@ -54,7 +54,7 @@ window showing current declarations (fire/EW)
              The spacer moves below it, so Briefing stays pinned to the right-hand end. -->
         <span class="fv-log-bar-meta" data-log-meta="declarations"></span>
         <span class="fv-log-bar-spacer"></span>
-        <button type="button" id="declBriefing" class="fv-log-chip" aria-pressed="false"
+        <button type="button" id="declBriefing" class="fv-log-chip fv-log-chip--toggle" aria-pressed="false"
                 title="Game name, rules of engagement and the scenario briefing">Briefing</button>
     </div>
 

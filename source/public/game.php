@@ -865,16 +865,21 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
             <span class="fv-log-field" id="fleetTeamFilterWrap">
                 <select id="fleetTeamFilter" class="fv-log-select" title="Show one team only"></select>
             </span>
-            <button type="button" id="fleetOnMapOnly" class="fv-log-chip" aria-pressed="false"
+            <button type="button" id="fleetOnMapOnly" class="fv-log-chip fv-log-chip--toggle" aria-pressed="false"
                     title="Hide destroyed, jumped, docked and hyperspace units">On map only</button>
             <span class="fv-log-bar-spacer"></span>
             <!--<span class="fv-log-bar-meta" data-log-meta="info"></span>-->
             <span id="gameInfoButtons">
-                <button type="button" class="fv-log-chip" title="Fiery Void FAQ"
+                <!-- The three reference pages are NAVIGATION, not controls: they leave the
+                     game rather than change what the tab shows. The label says so before
+                     you click, and .fv-log-chip--link paints them in the accent so they do
+                     not read as three more filters sitting beside "On map only". -->
+                <span class="fv-log-bar-meta">USEFUL LINKS:</span>
+                <button type="button" class="fv-log-chip fv-log-chip--link" title="Fiery Void FAQ"
                         onclick="window.open('faq.php', '_blank');">FAQ</button>
-                <button type="button" class="fv-log-chip" title="Ammo, Options &amp; Enhancements"
+                <button type="button" class="fv-log-chip fv-log-chip--link" title="Ammo, Options &amp; Enhancements"
                         onclick="window.open('ammo-options-enhancements.php', '_blank');">Ammo &amp; Options</button>
-                <button type="button" class="fv-log-chip" title="Factions &amp; Tiers Info"
+                <button type="button" class="fv-log-chip fv-log-chip--link" title="Factions &amp; Tiers Info"
                         onclick="window.open('factions-tiers.php', '_blank');">Factions</button>
             </span>
         </div>
@@ -899,7 +904,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
                 lobby to continue a campaign.
             </p>
             <p id="fleetSaveSummary"></p>
-            <input type="button" id="fleetSaveButton" value="Save Current Fleet">
+            <input type="button" id="fleetSaveButton" class="fv-log-chip fv-log-chip--link" value="Save Current Fleet">
         </div>
     </div>
 

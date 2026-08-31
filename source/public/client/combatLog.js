@@ -632,6 +632,17 @@ window.combatLog = {
         el = document.getElementById('currentTurnButton');
         if (el) el.style.display = live ? 'none' : '';
 
+        /* The filter run comes off the bar while there is no print to filter - see the note
+           on #combatLogButtons.no-print in logPanel.css. #LogActual's inline display is the
+           whole test: showLog sets it to block and showCurrent to none, and they are its only
+           two writers, so there is no third state to account for. This is the right home for
+           it because every transition between the two views already ends here - showLog and
+           showCurrent both finish by calling this, and initPhase calls it on every phase
+           change. */
+        var bar = document.getElementById('combatLogButtons');
+        var print = document.getElementById('LogActual');
+        if (bar) bar.classList.toggle('no-print', !print || print.style.display === 'none');
+
         //The Mine chip is gated on gamedata, which is why it is refreshed from HERE:
         //gamedata.initPhase calls updateTurnControls on every phase change, and that is the
         //first moment the slot map can answer "is this viewer a player".

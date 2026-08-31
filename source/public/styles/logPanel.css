@@ -450,12 +450,76 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     color: var(--fv-text);
 }
 
+/* ⭐ A STANDALONE TOGGLE LIGHTS GREEN; A SEGMENT CHIP KEEPS THE ACCENT (user, 2026-08-31).
+   The same green as the MINE filter on games.php (.fv-chip[data-filter="mine"] in
+   gamesPanel.css), and for the same reason: an on/off switch that is ON has narrowed what
+   you are looking at, and should say so in a colour that means exactly that - while a
+   segmented group is only reporting which of its three positions is current, which is what
+   the neutral accent is for. Four controls qualify, and every one of them is a lone
+   switch: HITS and MINE on the combat log, ON MAP ONLY in the fleet list, BRIEFING in
+   declarations.
+
+   Class + class + attribute, so it outranks the generic pressed rule above wherever
+   either happens to sit in the file. The hover pair is needed because
+   .fv-log-chip:hover:not(:disabled) would otherwise pull the label back to --fv-text and
+   the green would drop out from under the cursor. */
+.fv-log-chip--toggle[aria-pressed="true"] {
+    background: rgba(82, 179, 82, 0.2);
+    border-color: var(--fv-mine);
+    color: var(--fv-mine-soft);
+}
+
+.fv-log-chip--toggle[aria-pressed="true"]:hover:not(:disabled) {
+    color: var(--fv-mine-soft);
+}
+
+/* THE BLUE IS "THIS ONE DOES SOMETHING" (user, 2026-08-31). It started as the three
+   reference links in FLEET INFO and now also carries SAVE CURRENT FLEET, so it is not a
+   navigation-only class: what its members have in common is that they ACT - open a page,
+   write a saved fleet - rather than sit there reporting a view state. None of them has a
+   pressed state, because none of them has an on position to be in.
+
+   That completes the bar's three tiers, and they are worth keeping straight:
+     grey  - idle control, or a segment reporting which position is current;
+     green - a lone toggle that IS on, and has therefore narrowed what you are looking at;
+     blue  - a button that does a thing when you press it.
+   A control that gains an on/off state should move to the green rule above, not gain a
+   second colour here. */
+.fv-log-chip--link {
+    background: rgba(139, 202, 242, 0.14);
+    border-color: rgba(139, 202, 242, 0.55);
+    color: var(--fv-accent);
+}
+
+.fv-log-chip--link:hover:not(:disabled) {
+    background: rgba(139, 202, 242, 0.26);
+    border-color: var(--fv-accent);
+    color: var(--fv-text-bright);
+}
+
 .fv-log-chip:focus-visible,
 .fv-log-select:focus-visible,
 .fv-log-find:focus-visible,
 .fv-log-step:focus-visible {
     outline: 1px solid var(--fv-accent);
     outline-offset: 1px;
+}
+
+/* ⭐ THE FILTERS ONLY EXIST WHILE THERE IS A PRINT TO FILTER (user, 2026-08-31).
+   Sort, Hits, Mine and Find all act on #LogActual - the printed turn log - and do nothing
+   whatever to the live replay stream in #logLive, which is what this panel shows the rest
+   of the time. Five idle controls and the two dividers that group them is most of the bar,
+   so they come off it until a print is actually on screen. The turn stepper stays: stepping
+   to a turn is how you GET a print, so it is the one control that has to work first.
+
+   combatLog.updateTurnControls adds and removes .no-print, reading #LogActual's own inline
+   display - showLog and showCurrent are its only two writers.
+
+   One id plus two classes, which is what makes this beat .fv-log-wide-only and
+   .fv-log-narrow-only inside both phone media queries; at a plain class it would lose and
+   the sort control would reappear at phone width. */
+#combatLogButtons.no-print .fv-log-filter {
+    display: none;
 }
 
 /* A run separator on a control bar. The bar is a flex row of identically shaped chips,
@@ -548,6 +612,7 @@ only screen and (max-height: 500px) and (orientation: landscape) {
    same family as the filters beside them, right-aligned after the flex spacer. */
 #gameInfoButtons {
     display: inline-flex;
+    align-items: center;
     gap: 4px;
     flex: 0 0 auto;
 }
@@ -1433,18 +1498,26 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     font-size: 12px;
 }
 
-#fleetSaveButton {
-    font-size: 13px;
-    cursor: pointer;
-    padding: 4px 12px;
-    border: 1px solid var(--fv-line-scs);
-    background: var(--fv-line);
-    border-radius: var(--fv-radius-chrome);
-    color: var(--fv-text);
-}
+/* THE PANEL'S ONE ACTION, IN THE BAR'S OWN GRAMMAR (user, 2026-08-31). This was a bespoke
+   13px button with its own fill, border, padding and radius - the only control anywhere in
+   the log panel that did not look like the rest of it. It carries .fv-log-chip now, so it
+   inherits the shared 20px height, 18px line-height, 10px micro-caps, border, fill and
+   2px radius, and this block keeps only what that grammar has no opinion about.
 
-#fleetSaveButton:hover {
-    background: var(--fv-card-hover);
+   ⚠️ THE OLD DECLARATIONS HAD TO BE DELETED, NOT LEFT TO BE OVERRIDDEN. #fleetSaveButton is
+   an id (1,0,0) and .fv-log-chip is a class (0,1,0), so any font-size, padding, background,
+   border or radius surviving here would silently beat the shared rule and the button would
+   have looked exactly as before. The hover is gone for the same reason - the chip has one.
+
+   It also carries .fv-log-chip--link, which is the bar's "this button does something"
+   blue - see the note on that class. Save Fleet is the panel's only action, so it is
+   exactly what that tier is for.
+
+   Disabled stays: savedFleets.js disables this whenever there is nothing saveable, and the
+   chip grammar dims nothing on its own (it only declines to repaint the label, via
+   .fv-log-chip:hover:not(:disabled)). */
+#fleetSaveButton {
+    margin-top: 2px;
 }
 
 #fleetSaveButton:disabled {
