@@ -1033,3 +1033,167 @@
 .factionsubgroup-header + .faction-group-container {
     margin-left: 20px;
 }
+/* ── Reinforcements (REINFORCEMENTS_PLAN.md §4 Stage 1) ─────────────────────────────────
+   #00b8e6 is FV's established "not here yet" cyan - the same value tactical.css gives the
+   fleet list's .docked and .hyperspace rows, the [Deploys on Turn N] header and the blue
+   Jump Point marker. Do NOT introduce a second blue for this.
+   ⚠️ No :root block here, and none anywhere but styles/tokens.css. The cyan is written as a
+   literal because its two siblings in tactical.css are literals too; if it ever earns a
+   token, all three move together ([[project_visual_unification]]).                        */
+
+/* The buy-mode checkbox in the store's filter strip. base.css gives .yellow-tick the store's
+   own accent; a reinforcement is not a filter, so it takes the cyan instead - and the label
+   itself lights up while the mode is on, because "everything I buy now goes to hyperspace"
+   is a state a player must not be able to forget they left switched on. */
+input[type="checkbox"].cyan-tick:checked {
+    accent-color: #00b8e6;
+}
+
+.tier-label-style.reinforcement-mode-label {
+    cursor: pointer;
+}
+
+/* :has() degrades gracefully - a browser without it simply drops this one rule and the
+   player still sees the cyan tick itself, which is the state they must not miss. */
+.tier-label-style.reinforcement-mode-label:has(#reinforcementModeToggle:checked) {
+    color: #00b8e6;
+    font-weight: bold;
+}
+
+/* The two group headers inside #fleet. Written and REMOVED by gamedata.applyFleetGrouping;
+   they carry no `ship` class and no action-link classes, because #fleet's click handlers are
+   delegated by those and resolve their row with closest(".ship").
+   #fleet is text-align:right (.fleet-panel-style), which these inherit deliberately so they
+   sit over the column of rows they head. */
+/* ⭐ THEY READ AS BANDS, NOT AS A LINE OF TEXT (user report 2026-08-28: MAIN FLEET "blends too
+   well into the wider container"). #fleet is one flat --fv-well slab and the old header was a
+   13px caption over a hairline, which put it at almost the same visual weight as the ship rows it
+   was supposed to be heading. Three things fix that and none of them is a new colour:
+
+     the GRADIENT washes the group's own colour in behind the title and fades out to the left, so
+     the band has substance where the eye is (#fleet is right-aligned) without becoming a flat slab
+     that fights the panel;
+
+     the RIGHT BORDER is a solid 3px in that colour, flush against the title - the accent bar sits
+     on the text side because the text is right-aligned, which is also what makes the selected
+     state's thicker bar readable;
+
+     size and letter-spacing carry the rest.
+
+   ⚠️ background-IMAGE, not background-color, and that is what keeps the buy-target state machine
+   working: hover and selected paint `background-color`, the gradient composites over it, and the
+   two layers add up instead of overwriting each other. Painting the band as a colour here would
+   have meant restating it in all four state rules.
+
+   ⚠️ NO text-transform. The titles are already uppercase in the markup, and .fleet-group-note is a
+   sentence living INSIDE this element - it would be shouted at.
+   ⚠️ Colours are unchanged (#90b1ee / #00b8e6): the cyan is FV's established "not here yet" and a
+   lightened twin of it would be a second blue ([[project_visual_unification]]). */
+.fleet-group-header {
+    margin: 16px 2px 4px 2px;
+    padding-bottom: 3px;
+    background-image: linear-gradient(to left, rgba(144, 177, 238, 0.20), rgba(144, 177, 238, 0) 65%);
+    border-right: 3px solid #90b1ee;
+    border-bottom: 1px solid rgba(144, 177, 238, 0.45);
+    font-family: "Bruno Ace SC", sans-serif;
+    font-size: 14px;
+    font-weight: bold;
+    letter-spacing: 1.1px;
+    color: #deebff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
+}
+
+/* MAIN FLEET is the first thing in the panel, so its 16px separator gap has nothing above it to
+   separate from and reads as a hole at the top instead. */
+.fleet-group-header:first-child {
+    margin-top: 3px;
+}
+
+.fleet-group-header.reinforcement {
+    background-image: linear-gradient(to left, rgba(0, 184, 230, 0.20), rgba(0, 184, 230, 0) 65%);
+    border-right-color: #00b8e6;
+    color: #00b8e6;
+    border-bottom-color: rgba(0, 184, 230, 0.45);
+}
+
+.fleet-group-header .fleet-group-note {
+    display: block;
+    font-family: arial;
+    font-size: 11px;
+    font-weight: normal;
+    letter-spacing: 0;
+    color: #8ca5c0;
+}
+
+/* THE HEADERS ARE ALSO THE BUY-TARGET SELECTOR (user request 2026-08-28): whichever one is
+   lit is where the next purchase lands. The state itself lives on #reinforcementModeToggle -
+   gamedata.setBuyTarget writes it and applyFleetGrouping reads it back - so this is purely
+   the read-out, and the tick in the store's filter strip stays in step for free.
+   The header is a block, so the tint is a full-width band across the panel rather than a
+   chip around the words: it is naming the section below it, not labelling itself. */
+.fleet-group-header.buy-target {
+    cursor: pointer;
+    padding: 4px 8px 3px 6px;
+    border-radius: 3px 3px 0 0;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* The state layer, composited UNDER the base gradient - see the ⚠️ on .fleet-group-header. Both
+   steps were raised when the band gained its own wash: against a header that already carries 0.20
+   of its own colour on the right, the old 0.10/0.16 tints no longer read as a change of state. */
+.fleet-group-header.buy-target:hover {
+    background-color: rgba(144, 177, 238, 0.14);
+}
+
+.fleet-group-header.reinforcement.buy-target:hover {
+    background-color: rgba(0, 184, 230, 0.14);
+}
+
+/* Selected carries THREE signals, because it is answering a question the player asked ("where does
+   the next purchase land?") and one tint is not an answer: the fill, a 2px bottom rule in the solid
+   colour, a fatter accent bar - and the "BUYING HERE ▸" text, which appears on the lit header only
+   (.fleet-group-target below). */
+.fleet-group-header.buy-target.selected {
+    background-color: rgba(144, 177, 238, 0.22);
+    border-right-width: 5px;
+    border-bottom-width: 2px;
+    border-bottom-color: #90b1ee;
+}
+
+.fleet-group-header.reinforcement.buy-target.selected {
+    background-color: rgba(0, 184, 230, 0.22);
+    border-bottom-color: #00b8e6;
+}
+
+/* "buying here ▸", written into BOTH headers and shown on the lit one only, so the selector
+   reads as a sentence rather than as two similar-looking bands. Inline, and first in the
+   header's markup: #fleet is right-aligned, so it sits to the LEFT of the title on the same
+   line, and the title itself never moves.
+   ⚠️ Hidden with display:none rather than visibility/opacity - it must not reserve width in
+   the unlit header, or the two titles would sit at different distances from the edge. */
+.fleet-group-header .fleet-group-target {
+    display: none;
+    margin-right: 6px;
+    font-family: arial;
+    font-size: 10px;
+    font-weight: normal;
+    letter-spacing: 0;
+    text-transform: uppercase;
+    opacity: 0.75;
+}
+
+.fleet-group-header.selected .fleet-group-target {
+    display: inline;
+}
+
+/* A bought row that is waiting in hyperspace. The tinted left edge is what makes the state
+   readable once a long fleet has scrolled its group header off the top. */
+.ship.bought.reinforcement {
+    border-color: rgba(0, 184, 230, 0.55);
+    border-left: 3px solid #00b8e6;
+}
+
+.ship.bought.reinforcement .shipname {
+    color: #00b8e6;
+}

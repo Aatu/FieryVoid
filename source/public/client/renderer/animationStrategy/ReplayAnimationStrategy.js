@@ -838,7 +838,11 @@ window.ReplayAnimationStrategy = function () {
      * constructed and left alone; only the camera pan is pushed. */
     function animateVortexLifecycle(time) {
         this.gamedata.ships.forEach(function (vortex) {
-            if (!shipManager.movement.isJumpVortex(vortex)) return;
+            //EITHER KIND: an exit forms and collapses exactly like an entrance, off the same
+            //spawned/removedTurn pair that restoreVortexState writes for both. A replay with no
+            //forming animation for the exit would be the least readable moment of the
+            //feature - the turn the reinforcements are announced (REINFORCEMENTS_PLAN.md §4).
+            if (!shipManager.movement.isAnyJumpVortex(vortex)) return;
 
             var forming = vortex.spawned !== undefined && vortex.spawned !== -1
                 && vortex.spawned === this.turn + 1;

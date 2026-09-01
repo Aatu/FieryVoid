@@ -359,6 +359,13 @@ public function addMoons($gameData, $dbManager, $smallCount, $mediumCount, $larg
             throw new Exception("Invalid slotid");
         }
 
+        /* REINFORCEMENTS_PLAN.md §2.1 - THE RULE IS THE AUTHORITY, the client's flag only a claim.
+           Hoisted out of both loops because hasRuleName is a linear scan over the rule list, and
+           read ONCE for the whole submission because a rule cannot change mid-POST.
+           Rule off means the flag is simply dropped and the unit buys front-line - never an
+           exception, which would take the whole submission down over a stale browser tab. */
+        $allowReinforcements = $gameData->rules->hasRuleName('allowReinforcements');
+
         $seenSlots = array();
         foreach($gameData->slots as $slot)
         {
@@ -419,6 +426,28 @@ public function addMoons($gameData, $dbManager, $smallCount, $mediumCount, $larg
                     //Fold the authoritative total in BEFORE submitShip, which writes it into
                     //tac_ship.enhvalue alongside the other two buckets.
                     $ship->pointCostSysEnh = $cleanSysEnh['total'];
+
+                    /* REINFORCEMENTS_PLAN.md §4 Stage 1 - THE ONE PLACE THE CLIENT'S CLAIM BECOMES
+                       THE REAL FLAG. Set once per lobby unit and BEFORE the bulk loop below: that
+                       loop's mine branch does `clone $ship`, a shallow copy, so a scalar set here
+                       rides onto every copy of a bulk for free - exactly as pointCostSysEnh above
+                       does. submitShip reads $ship->reinforcement and writes the tac_ship column.
+                       A reinforcement is an ORDINARY purchase with a flag on it: same shared point
+                       pool, same $points tally above, same fleet-composition checks. Nothing else
+                       in this method branches on it. */
+                    /* ⚠️ AND NEVER ON A UNIT THAT IS ON THE BOARD ON TURN 1 ANYWAY (user report
+                       2026-08-29, game 4319). A base, an OSAT and Terrain all answer 1 to
+                       getTurnDeployed before it looks at the reinforcement branch at all, so the
+                       flag can never come true for them - but isReinforcement() still answers true
+                       while arrivalTurn is null, and every sweep that trusts that predicate then
+                       treats a unit standing on the map as something waiting in hyperspace. That is
+                       how two Fixed Jump Gates bought with the lobby's REINFORCEMENTS group selected
+                       ended up stamping THEMSELVES with an arrival turn.
+                       BaseShip::alwaysDeploysTurnOne is the one definition, and the lobby refuses the
+                       same purchases up front (gamedata.canBeReinforcement) so the group the player
+                       sees and the flag the server writes cannot disagree. */
+                    $ship->reinforcement = $allowReinforcements && !empty($ship->reinforcementClaim)
+                        && !$ship->alwaysDeploysTurnOne();
 
                     /* BaseShip::isBulkBought is the single definition of "bought through
                        the bulk dialog" (mines + OSATs), mirrored client-side by

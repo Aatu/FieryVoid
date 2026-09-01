@@ -280,9 +280,25 @@ shipManager.systems = {
         return null;
     },
 
+    /* A ROLL mirrors every arc across the ship's centreline, which for an ordinary wedge is
+       [start, end] -> [-end, -start]. A 360 degree mount is its own mirror image, and the
+       arithmetic below cannot say so: it turns 0..360 into 360..0, which mathlib.isInArc reads as
+       the single bearing 0 and mathlib.getArcLength measures as a zero-degree wedge. That silently
+       emptied every full-circle overlay on a ROLLED ship - the Transverse Drive's six-armed star
+       collapsed to one arm, a 0..360 turret's hex arc to a single line of hexes, and a 360 degree
+       shield or intercept wedge vanished outright. Targeting mostly escaped it by luck:
+       weaponManager.isPosOnWeaponArc adds the ship's facing first, which turns start and end back
+       into the same number - isInArc's own spelling of a full circle - at every facing but 0.
+
+       So hand a full circle straight back, unmirrored. Both spellings are caught: start == end is
+       how the rest of the client writes it (isInArc's first line, showCircularArc's arcLength), and
+       0..360 is how the blueprints do. Genuine wedges are untouched - 300..60 and 240..120 already
+       mirror onto themselves correctly. */
     getArcs: function getArcs(ship, weapon) {
 
-        if (shipManager.movement.isRolled(ship)) {
+        var isFullCircle = weapon.startArc === weapon.endArc || mathlib.getArcLength(weapon.startArc, weapon.endArc) >= 360;
+
+        if (shipManager.movement.isRolled(ship) && !isFullCircle) {
             return { start: mathlib.addToDirection(weapon.endArc, weapon.endArc * -2), end: mathlib.addToDirection(weapon.startArc, weapon.startArc * -2) };
         } else {
             return { start: weapon.startArc, end: weapon.endArc };
@@ -307,7 +323,11 @@ shipManager.systems = {
             // Skip unmatched pairs
             if (end === undefined) continue;
 
-            if (isRolled) {
+            //A full circle mirrors to itself - see getArcs above. No split mount is one today (both
+            //entries of a pair are real wedges), but the mirror has to mean the same thing here.
+            const isFullCircle = start === end || mathlib.getArcLength(start, end) >= 360;
+
+            if (isRolled && !isFullCircle) {
                 arcs.push({
                     start: mathlib.addToDirection(end, end * -2),
                     end: mathlib.addToDirection(start, start * -2)

@@ -3751,6 +3751,21 @@ window.weaponManager = {
                 continue;
             }
 
+            /* VORTEX DISRUPTOR - A HALF-PHASED SHADOW HULL CANNOT USE IT (user ruling
+               2026-08-29). The server has always said so, but only by setting the hit chance to
+               ZERO in VortexDisruptor::calculateHitBase - so the order was accepted, the weapon
+               discharged, and the player found out at the end of the turn that they had spent a
+               3-turn recharge on a shot that could not physically hit. Refused here instead, with a
+               reason, and REPORTED rather than silently skipped for the same reason the vortex
+               declaration below is: the hex was picked deliberately.
+               ⚠️ The server keeps its hit chance of 0 - this is the courtesy, not the rule. */
+            if (weapon.name === 'VortexDisruptor' && shipManager.movement.isHalfPhased(selectedShip)) {
+                confirm.error("A half-phased ship cannot fire its <b>Vortex Disruptor</b> - the beam has "
+                    + "nothing to bite on. Stay in phase to disrupt a jump point.");
+                toUnselect.push(weapon);
+                continue;
+            }
+
             //Vortex declaration legality (JUMP_POINTS_PLAN.md section 2.1). Reported rather than
             //silently skipped: the player picked this hex deliberately, and the server would
             //otherwise drop the order without telling anyone. The weapon stays SELECTED so the
@@ -4108,6 +4123,25 @@ window.weaponManager = {
             engine.fireOrders.splice(i, 1);
         }
 
+        /* ⭐ REINFORCEMENTS_PLAN.md STAGE 8 - AND THE MANIFEST GOES WITH IT, exactly as
+           ReinforcementEntry.withdraw() drops a ship exit's. A berth naming a gate whose claim
+           has just been taken back is a booking for a doorway that will not exist, and leaving it
+           standing would post a manifest for nothing - the server would refuse it (the gate is no
+           longer in persistManifest's opener list) and the player would never be told.
+           ⚠️ ONLY WHEN THE GATE IS NOT ALREADY HOLDING A DOORWAY. Cancelling THIS turn's claim on a
+           gate whose exit is already open from an earlier turn takes nothing away - the berth
+           still has a doorway to ride, and clearing it would quietly cancel a wave the player never
+           asked to cancel.
+
+           ⚠️ createGateSignalOrder BELOW IS ALSO A CALLER - it withdraws before it re-declares, to
+           keep one claim per player per gate per turn. That path cannot lose a manifest silently:
+           the two tooltip buttons are gated on noGateSignalYet so a live claim cannot be replaced
+           without cancelling first, and the manifest dialog opens immediately afterwards, so an
+           empty list would be on screen rather than merely true. */
+        if (window.ReinforcementEntry && !shipManager.movement.getExitHeldBy(gate.id)) {
+            ReinforcementEntry.clearGateManifest(gate);
+        }
+
         webglScene.customEvent('SystemDataChanged', { ship: gate, system: engine });
         webglScene.customEvent('HexTargeted', { shooter: gate, hexagon: shipManager.getShipPosition(gate) });
     },
@@ -4120,8 +4154,13 @@ window.weaponManager = {
        mistake - a jump point standing open for four turns is a door the enemy may also use (plan
        section 2.6: ANY unit may fly into a gate vortex), so the safe number is the default and
        longer is a deliberate choice. */
-    queueGateSignalOrder: function queueGateSignalOrder(gate) {
+    queueGateSignalOrder: function queueGateSignalOrder(gate, exit) {
         if (!gamedata.canSignalJumpGate(gate)) return;
+        //REINFORCEMENTS_PLAN.md Stage 8: an ARRIVAL claim is only offered when there is something in
+        //hyperspace to bring in. Re-asked here as well as on the tooltip button because a poll can
+        //land in between - and the server refuses the claim outright (Firing::getGateSignalBlock),
+        //so an order built without it would be silently dropped at commit.
+        if (exit && !gamedata.canSignalJumpGateForArrival(gate)) return;
 
         var engine = gamedata.getGateJumpEngine(gate);
         var maxHold = shipManager.systems.getGateMaxHold(gate);
@@ -4132,8 +4171,13 @@ window.weaponManager = {
             hexpos: shipManager.getShipPosition(gate),
             hold: 1,                 //maxHold is never below 1, so the default never needs clamping
             maxHold: maxHold,
+            /* REINFORCEMENTS_PLAN.md STAGE 8 - WHICH WAY THE DOORWAY FACES. The panel wears its blue
+               livery and its own button label off this flag, and it rides the confirm through to the
+               order's damageclass. Everything else about the transaction is identical: a gate holds
+               ONE jump point, so entry and entrance are two answers to one question, never two claims. */
+            exit: !!exit,
             onConfirm: function (hold) {
-                weaponManager.createGateSignalOrder(gate, hold);
+                weaponManager.createGateSignalOrder(gate, hold, exit);
             }
         });
     },
@@ -4159,9 +4203,14 @@ window.weaponManager = {
 
        Re-checked at SIGNAL rather than only at the tooltip: a server poll can land between opening
        the panel and pressing the button, and it can move the ships the range test reads. */
-    createGateSignalOrder: function createGateSignalOrder(gate, hold) {
+    createGateSignalOrder: function createGateSignalOrder(gate, hold, exit) {
         if (!gamedata.canSignalJumpGate(gate)) {
             confirm.error("This jump gate can no longer be signalled.");
+            return;
+        }
+
+        if (exit && !gamedata.canSignalJumpGateForArrival(gate)) {
+            confirm.error("You have nothing left in hyperspace to bring through this gate.");
             return;
         }
 
@@ -4188,11 +4237,27 @@ window.weaponManager = {
             shots: engine.defaultShots,
             x: hex.q,
             y: hex.r,
-            damageclass: engine.data["Weapon type"].toLowerCase()
+            /* ⭐ REINFORCEMENTS_PLAN.md STAGE 8 - THE FLAVOUR IS THE damageclass, mirroring the way
+               'jumpexit' tells a ship's exit from its entrance (§3.4). 'gateexit' asks the gate for
+               a doorway IN: Firing::getGateSignalBlock judges it by the identical gate list plus two
+               rules, and JumpEngine::resolveGateClaims spawns a SpawnJumpPointExit for it if the
+               claim wins the contest. Anything else keeps the Phase 2 value ('jumppoint'), so an
+               ordinary entrance claim is byte-identical to before. */
+            damageclass: exit ? 'gateexit' : engine.data["Weapon type"].toLowerCase()
         });
 
         webglScene.customEvent('SystemDataChanged', { ship: gate, system: engine });
         webglScene.customEvent('HexTargeted', { shooter: gate, hexagon: hex });
+
+        /* ⭐⭐ AND THE MANIFEST FOLLOWS IMMEDIATELY (user request 2026-08-28). Signalling a gate for
+           arrival is only half a gesture: the claim opens the doorway and the manifest says who
+           walks through it, and they are named in the same breath everywhere else in this feature
+           (ReinforcementEntry.createExitOrder does exactly this). Without it the player would
+           have to signal the gate, close the panel, then find "Manage Reinforcements" and pick the
+           gate out of the list to do the other half - and a gate signalled with nobody on its
+           manifest brings nothing through, silently.
+           Guarded on the module: gateSignal.js has no load-order relationship with it. */
+        if (exit && window.ReinforcementEntry) ReinforcementEntry.showGateManifest(gate);
     },
 
     // Stage S (S-f): open the Fighter Bomb launch dialog (count + auto-split toggle /

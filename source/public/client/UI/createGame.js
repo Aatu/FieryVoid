@@ -182,6 +182,7 @@ jQuery(function ($) {
     $("#desperatecheck").on("click", createGame.doDesperateCheck);
     $("#terraincheck").on("click", createGame.doTerrainCheck);
     $("#allowMinesCheck").on("click", createGame.doAllowMinesCheck);
+    $("#allowReinforcementsCheck").on("click", createGame.doAllowReinforcementsCheck);
     $("#friendlyFireCheck").on("click", createGame.doFriendlyFireCheck);
     $("#laddercheck").on("click", createGame.doLadderCheck);
 
@@ -484,6 +485,16 @@ window.createGame = {
             createGame.rules.allowMines = 1;
         } else {
             delete createGame.rules.allowMines;
+        }
+    },
+
+    doAllowReinforcementsCheck: function doAllowReinforcementsCheck(data) {
+        var checkval = $("#allowReinforcementsCheck:checked").val();
+
+        if (checkval == "on") {
+            createGame.rules.allowReinforcements = 1;
+        } else {
+            delete createGame.rules.allowReinforcements;
         }
     },
 

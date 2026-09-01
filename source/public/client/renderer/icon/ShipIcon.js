@@ -43,6 +43,9 @@ window.ShipIcon = function () {
         this.BDEWSprite = null;
         this.MDEWSprite = null;
         this.shipHexagonSpritesMap = new Map();
+        //The movement-group number drawn over an un-moved unit during the movement phase.
+        //Null on terrain, which never carries one - see create().
+        this.iniOrderSprite = null;
         //Declared-area overlays (see showDeclaredArea), keyed by SYSTEM ID rather than by the system
         //object: a gamedata poll rebuilds every ship and its systems, so an object key would go stale
         //each poll and leak the old mesh while a duplicate was drawn over it.
@@ -76,12 +79,24 @@ window.ShipIcon = function () {
     ShipIcon.FACING_ARROW_SCALE = 1.15;
     ShipIcon.FACING_ARROW_OPACITY = 0.85;
 
-    /* Is this unit a jump vortex? Delegates to the ONE place that holds the class name
-       (shipManager.movement.isJumpVortex) rather than repeating "SpawnJumpPoint" here - the same
-       discipline gamedata.isJumpGate follows. Guarded because this runs from the icon constructor:
-       a missing shipManager should cost a vortex its z-plane, not throw. */
+    /* The movement-group badge's size, as a multiple of the HEX HEIGHT rather than of the unit's
+       own canvasSize - the same reasoning as the facing arrow above. Only ONE badge is drawn per
+       stacked hex (MovementPhaseStrategy.refreshNotMovedMarkers), so it has to be equally legible
+       standing over a 34px fighter flight and over a 330px Pirocia; sizing it off canvasSize would
+       make it vanish on exactly the small units that are hardest to pick out. */
+    ShipIcon.INI_BADGE_SCALE = 0.55;
+
+    /* Is this unit a jump vortex? Delegates to the ONE place that holds the class names
+       (shipManager.movement) rather than repeating them here - the same discipline
+       gamedata.isJumpGate follows. Guarded because this runs from the icon constructor:
+       a missing shipManager should cost a vortex its z-plane, not throw.
+
+       EITHER KIND (isAnyJumpVortex). The only thing this drives is the −150 z-plane, and an
+       EXIT needs it more than an entrance does: arriving reinforcements deliberately stack in its
+       hex, so the art has to sit behind them rather than over them
+       (REINFORCEMENTS_PLAN.md §4 Stage 3). */
     ShipIcon.isVortex = function isVortex(ship) {
-        return !!(window.shipManager && shipManager.movement && shipManager.movement.isJumpVortex(ship));
+        return !!(window.shipManager && shipManager.movement && shipManager.movement.isAnyJumpVortex(ship));
     };
 
     ShipIcon.prototype.consumeShipdata = function (ship) {
@@ -324,6 +339,23 @@ window.ShipIcon = function () {
         // an empty hex would reveal all their facing/heading arrows at once.
     };
 
+    /* Show the unit's movement-group number, or clear it with a falsy label. Driven ONLY from
+       MovementPhaseStrategy, which owns the "one badge per stacked hex, lowest group wins, '+' if
+       there are more" rule - an icon has no idea what else is standing in its hex. */
+    ShipIcon.prototype.setIniOrderLabel = function (label) {
+        if (this.iniOrderSprite) {
+            this.iniOrderSprite.setLabel(label);
+        }
+    };
+
+    //The badge is the one thing on an icon that gets BIGGER as the board is zoomed out; the
+    //reasoning lives in ShipIniOrderSprite.js. Fed from ShipIconContainer.applyZoomToIcon.
+    ShipIcon.prototype.setIniOrderZoom = function (zoom) {
+        if (this.iniOrderSprite) {
+            this.iniOrderSprite.setZoom(zoom);
+        }
+    };
+
     // Selection/side circle args, matching getShipOverlayColor. 2-team
     // participants get the friend/foe type; observers AND 3+-team participants
     // get a per-team key + colour so the filled side circle matches the
@@ -429,6 +461,16 @@ window.ShipIcon = function () {
 
         this.NotMovedSprite = new window.ShipSelectedSprite({ width: spriteWidth, height: spriteHeight }, -2, 'neutral', false).hide();
         this.mesh.add(this.NotMovedSprite.mesh);
+
+        /* The movement-group number that accompanies that dotted ring - see ShipIniOrderSprite.js.
+           z 3 puts it above the hull art (1) and above the always-on facing arrow (2), which is the
+           point: it is a label ON the unit. Terrain never gets one, exactly like the ring, so
+           asteroid fields don't each carry an unused mesh. */
+        if (!this.terrain) {
+            var badgeSize = window.HexagonMath.getHexHeight() * ShipIcon.INI_BADGE_SCALE;
+            this.iniOrderSprite = new window.ShipIniOrderSprite({ width: badgeSize, height: badgeSize }, 3);
+            this.mesh.add(this.iniOrderSprite.mesh);
+        }
 
         scene.add(this.mesh);
     };

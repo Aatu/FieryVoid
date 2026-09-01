@@ -373,9 +373,9 @@ jQuery(function ($) {
                 }
                 $("#ladderHistoryTable tbody").html(html);
                 if(count === 0) {
-                    ladder.setCount(count + " matches to review");
+                    ladder.setCount(count + " matches available to review");
                 }else{
-                    ladder.setCount(count + (count === 1 ? " match played" : " matches played"));                    
+                    ladder.setCount(count + (count === 1 ? " match available to review" : " matches available to review"));                    
                 }    
             });
         },

@@ -9,6 +9,7 @@ window.ShipTooltip = function () {
     // existing `.fire` / `.ballistics` / `.targeting` / `.incoming` classes are untouched;
     // they are the selectors the show/hide and fill code below (and weaponManager) use.
     var HTML = '<div class="shipNameContainer">'
+        + '<button type="button" class="tt-close" aria-label="Close" title="Close">\u2715</button>'
         + '<div class="namecontainer"></div>'
         + '<div class="fire tt-head"><span>TARGETING</span></div>'
         + '<div class="fire targeting"></div>'
@@ -39,6 +40,26 @@ window.ShipTooltip = function () {
             }.bind(this));
         }
 
+        /* The close button is for the PERSISTENT tooltip only - the one a click on a unit
+           leaves standing, which is the one that sits over the hex you are trying to target or
+           over the movement UI (user report 2026-08-30). A hover tooltip (menu === null) already
+           tears itself down on the handler directly above: the pointer cannot reach an X inside
+           it without destroying it first, so drawing one there would be a button that can never
+           be pressed. */
+        if (menu) {
+            //The modifier reserves room at both ends of the name row so a long ship name cannot
+            //run under the X - symmetric, because the row is centre-aligned and padding one side
+            //only would shove every name off-centre. See shipTooltip.css.
+            this.element.addClass('shipNameContainer--closable');
+            this.element.find('.tt-close').on('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.close();
+            }.bind(this));
+        } else {
+            this.element.find('.tt-close').remove();
+        }
+
         if (ships.length > 1) {
             createForMultipleShips.call(this, this.ships);
         } else {
@@ -66,6 +87,20 @@ window.ShipTooltip = function () {
 
     ShipTooltip.prototype.destroy = function () {
         this.element.remove();
+    };
+
+    /* Dismiss THE WAY THE OWNER WOULD. destroy() only takes the element out of the DOM -
+       PhaseStrategy.shipTooltip would go on pointing at the corpse, and onMouseOverShip's
+       `if (!this.shipTooltip || !this.shipTooltip.menu)` guard would then refuse to build any
+       further tooltip for the rest of the phase. onClose is set by PhaseStrategy.showShipTooltip
+       to its own hideShipTooltip, which clears that handle (and restores the coarse-pointer
+       highlights). The bare destroy() is the fallback for any other owner. */
+    ShipTooltip.prototype.close = function () {
+        if (typeof this.onClose === 'function') {
+            this.onClose();
+        } else {
+            this.destroy();
+        }
     };
 
     ShipTooltip.prototype.addEntryElement = function (value, condition) {
@@ -411,6 +446,15 @@ window.ShipTooltip = function () {
         }
         if (shipManager.criticals.hasCriticalInAnySystem(ship, "HangarOperations")) {
             toDisplay += '<span style="color:cyan;">Hangar Operations</span>; ';
+        }
+        /* REINFORCEMENTS_PLAN.md STAGE 9 - this unit came out of hyperspace off course and is
+           disordered for the turn it arrives on (user request 2026-08-29). Deliberately the same
+           cyan span as Hangar Operations and Just Launched above it: all three are benign
+           initiative penalties from something the unit just DID, not damage, and the colour is what
+           says so. The figure is the server's own (shipManager.getArrivalIniPenalty). */
+        var arrivalIni = shipManager.getArrivalIniPenalty(ship);
+        if (arrivalIni !== 0) {
+            toDisplay += '<span style="color:cyan;">Arrival Scatter (' + arrivalIni + ' Ini)</span>; ';
         }
         if (ship.flight === true) {
             if (shipManager.movement.hasCombatPivoted(ship) && (!ship.ignoreManoeuvreMods)) rollPivotModifier -= 5;

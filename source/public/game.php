@@ -73,6 +73,11 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     <!-- Shared fv design tokens (roadmap item 6): MUST load before every other stylesheet. -->
     <link href="<?php echo AssetLoader::getAssetUrl('styles/tokens.css'); ?>" rel="stylesheet" type="text/css">
     <link href="<?php echo AssetLoader::getAssetUrl('styles/tactical.css'); ?>" rel="stylesheet" type="text/css">
+    <!-- The bottom log panel and its six tabs (LOG_PANEL_REDESIGN_PLAN.md). Its own file
+         for the same reasons gamesPanel.css is: one surface, page-scoped, reviewable as a
+         unit - and it takes ~450 lines out of a 2,600-line tactical.css. AFTER tactical.css
+         because it replaces rules that used to live there; no rule is in both files. -->
+    <link href="<?php echo AssetLoader::getAssetUrl('styles/logPanel.css'); ?>" rel="stylesheet" type="text/css">
 	<link href="<?php echo AssetLoader::getAssetUrl('styles/confirm.css'); ?>" rel="stylesheet" type="text/css">
     <link href="<?php echo AssetLoader::getAssetUrl('styles/replay.css'); ?>" rel="stylesheet" type="text/css">
     <link href="<?php echo AssetLoader::getAssetUrl('styles/shipTooltip.css'); ?>" rel="stylesheet" type="text/css">
@@ -244,6 +249,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     <script defer src="client/renderer/sprite/HexagonSprite.js"></script>
     <script defer src="client/renderer/sprite/ShipEWSprite.js"></script>
     <script defer src="client/renderer/sprite/ShipSelectedSprite.js"></script>
+    <script defer src="client/renderer/sprite/ShipIniOrderSprite.js"></script>
     <script defer src="client/renderer/sprite/BoxSprite.js"></script>
     <script defer src="client/renderer/sprite/PlainSprite.js"></script>
     <script defer src="client/renderer/sprite/LineSprite.js"></script>
@@ -300,6 +306,14 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     <script defer src="client/renderer/phaseStrategy/PhaseStrategy.js"></script>
     <script defer src="client/renderer/phaseStrategy/DeploymentPhaseStrategy.js"></script>
     <script defer src="client/renderer/phaseStrategy/MineDeployment.js"></script>
+    <!-- REINFORCEMENTS_PLAN.md Stage 4 - the "Call Reinforcements" flow. A sibling of
+         MineDeployment.js: a bespoke map click mode driven from an #iniGui button, because the
+         opener has no hex and so cannot go through weaponManager.targetHex (plan section 3.4).
+         It CALLS UI.vortexFacing but does not touch window.UI itself, so it has no ordering
+         constraint against shipMovement.js the way vortexFacing.js and gateSignal.js do - every
+         call site is guarded, and all of these are `defer`, so the whole set is in place before
+         anything runs. -->
+    <script defer src="client/renderer/phaseStrategy/ReinforcementEntry.js"></script>
     <script defer src="client/renderer/phaseStrategy/DeploymentDock.js"></script>
     <script defer src="client/renderer/phaseStrategy/WaitingPhaseStrategy.js"></script>
     <script defer src="client/renderer/phaseStrategy/InitialPhaseStrategy.js"></script>
@@ -783,19 +797,30 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     <div class="ewentry deletable"><span class="valueheader"></span><span class="value"></span><div class="button1"></div><div class="button2" ></div></div>
 
 </div>
-<div id="logcontainer">    
+<!-- ══ THE LOG PANEL ═════════════════════════════════════════════════════════════
+     LOG_PANEL_REDESIGN_PLAN.md. Styles live in styles/logPanel.css, NOT tactical.css.
+
+     A FLEX COLUMN OF TWO ROWS: the tab strip, then #logBody, which every tab's panel
+     fills. The strip is a FLOW SIBLING, not an overlay (plan Stage 1). It used to be
+     position:absolute / top:-26px against a panel whose tabs render ~27px tall, so it
+     settled 1-2px INSIDE the panel and clipped whatever sat at the top of it; and every
+     tab needed a hand-tuned "left" restated in both mobile media queries, so a seventh
+     tab was a three-place edit. In the flex column the strip is pulled down with
+     margin-bottom:-1px instead - the selected tab merges with the body, and nothing
+     depends on the tab's rendered height or on its ordinal position.
+
+     DOM ORDER IS NOW VISUAL ORDER, so the tabs are listed here in the order the old
+     "left" rules painted them: LOG, INFO, GAME CHAT, CHAT, DECLARATIONS, SAVE FLEET.
+
+     The panel FILL and BORDERS live on #logBody rather than on #logcontainer, so the
+     gaps between the tabs stay transparent to the map exactly as they were. -->
+<div id="logcontainer">
     <div id="logUI">
         <div id="logTab" data-select="#log" class="logUiEntry selected">
-            <span>LOG</span>
+            <span>COMBAT LOG</span>
         </div>
         <div id="infoTab" data-select="#gameinfo" class="logUiEntry">
-            <span>INFO</span>
-        </div>
-        <div id="declarationsTab" data-select="#declarations" class="logUiEntry" style = "overflow-y: auto;"> <!-- fire and EW declarations review -->
-            <span>DECLARATIONS</span>
-        </div>
-        <div id="fleetSaveTab" data-select="#fleetsave" class="logUiEntry"> <!-- save this game's fleet for reuse -->
-            <span>SAVE FLEET</span>
+            <span>FLEET INFO</span>
         </div>
         <div id="chatTab" data-select="#chat" class="logUiEntry">
             <span>GAME CHAT</span>
@@ -803,24 +828,65 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
         <div id="globalChatTab" data-select="#globalchat" class="logUiEntry">
             <span>CHAT</span>
         </div>
-        <div id="expandBotPanel">
-            <span>Click!</span>
+        <div id="declarationsTab" data-select="#declarations" class="logUiEntry"> <!-- fire and EW declarations review -->
+            <span>DECLARATIONS</span>
+        </div>
+        <div id="fleetSaveTab" data-select="#fleetsave" class="logUiEntry"> <!-- save this game's fleet for reuse -->
+            <span>SAVE FLEET</span>
+        </div>
+        <!-- Was the literal string "Click!". A chevron plus a real title / aria-expanded
+             pair says the same thing without needing a word for it; botPanel.js flips
+             both when the panel opens. -->
+        <div id="expandBotPanel" role="button" tabindex="0" aria-expanded="false" title="Expand log panel">
+            <span class="chevron" aria-hidden="true">&#9650;</span>
         </div>
 <!--        <div id="settingsTab" data-select="#settings" class="logUiEntry">
             <span>SETTINGS</span>
         </div>-->
     </div>
 
+    <div id="logBody">
+        <!-- Drag the panel's top edge to resize; double-click toggles compact/tall.
+             botPanel.js persists the height to localStorage. The log panel is NOT a
+             scaled window, so unlike the ship window's grip nothing here divides by a
+             scale factor (arch_scaled_window_coordinate_spaces). -->
+        <div id="logResizeGrip" role="separator" aria-orientation="horizontal" tabindex="-1"
+             title="Drag to resize the log panel &#183; double-click to toggle height"></div>
+
     <div id="log" class="logPanelEntry">
     <?php include("combatLog.php"); ?>
     </div>
-    
+
     <div id="gameinfo" class="logPanelEntry" style="display:none;">
-        <div id="gameInfoButtons">
-            <input type="button" value="Fiery Void FAQ" onclick="window.open('faq.php', '_blank');">
-            <input type="button" value="Ammo, Options & Enhancements" onclick="window.open('ammo-options-enhancements.php', '_blank');">            
-            <input type="button" value="Factions & Tiers Info" onclick="window.open('factions-tiers.php', '_blank');">
+        <!-- ONE ROW, same budget as the combat log's bar (plan Stage 3). The three
+             reference links keep their old job but now read as chips in the same
+             family as the filters, right-aligned after the flex spacer. -->
+        <div class="fv-log-bar" id="fleetListControls">
+            <span class="fv-log-field" id="fleetTeamFilterWrap">
+                <select id="fleetTeamFilter" class="fv-log-select" title="Show one team only"></select>
+            </span>
+            <button type="button" id="fleetOnMapOnly" class="fv-log-chip fv-log-chip--toggle" aria-pressed="false"
+                    title="Hide destroyed, jumped, docked and hyperspace units">On map only</button>
+            <span class="fv-log-bar-spacer"></span>
+            <!--<span class="fv-log-bar-meta" data-log-meta="info"></span>-->
+            <span id="gameInfoButtons">
+                <!-- The three reference pages are NAVIGATION, not controls: they leave the
+                     game rather than change what the tab shows. The label says so before
+                     you click, and .fv-log-chip--link paints them in the accent so they do
+                     not read as three more filters sitting beside "On map only". -->
+                <span class="fv-log-bar-meta">USEFUL LINKS:</span>
+                <button type="button" class="fv-log-chip fv-log-chip--link" title="Fiery Void FAQ"
+                        onclick="window.open('faq.php', '_blank');">FAQ</button>
+                <button type="button" class="fv-log-chip fv-log-chip--link" title="Ammo, Options &amp; Enhancements"
+                        onclick="window.open('ammo-options-enhancements.php', '_blank');">Ammo &amp; Options</button>
+                <button type="button" class="fv-log-chip fv-log-chip--link" title="Factions &amp; Tiers Info"
+                        onclick="window.open('factions-tiers.php', '_blank');">Factions</button>
+            </span>
         </div>
+        <!-- fleetList.js appends one .fleetlistentry per slot here. It used to append
+             straight to #gameinfo, which put the fleets in the same box as the chrome
+             above; a dedicated body is what lets that chrome stay put while they scroll. -->
+        <div id="fleetListBody"></div>
     </div>
     <div id="declarations" class="logPanelEntry" style="display:none;"> <!-- fire and EW declarations review -->
 	<?php
@@ -838,7 +904,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
                 lobby to continue a campaign.
             </p>
             <p id="fleetSaveSummary"></p>
-            <input type="button" id="fleetSaveButton" value="Save Current Fleet">
+            <input type="button" id="fleetSaveButton" class="fv-log-chip fv-log-chip--link" value="Save Current Fleet">
         </div>
     </div>
 
@@ -865,31 +931,35 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
             include("chat.php")
         ?>
     </div>
- 
+
 <!--    <div id="settings" class="logPanelEntry" style="display:none;">
         <div id="helphide" class="helphide">
         <span title="Show or Hide Vir to help you">
-        <img id="helphideimg" src="img/greyvir.jpg" height="30" width="30">	
+        <img id="helphideimg" src="img/greyvir.jpg" height="30" width="30">
         HELP
         </span>
         </div>
         <span title="Disable or Enable the extra Commit check to end a turn">
         <div id="autocommit" class="autocommit">
-        <img id="autocommitimg" src="img/ok.png" height="30" width="30">	
+        <img id="autocommitimg" src="img/ok.png" height="30" width="30">
         <span id="autocommittext" class="autocommittext">COMMIT</span>
         </span>
         </div>
     </div>-->
-        
-    <div class="fleetlistentry">
-        <div class="fleetheader">
+    </div><!-- /#logBody -->
+
+    <!-- fleetList.js clones .fleetlistentry (and the .fleetlistline inside it) as its row
+         templates, so the originals have to stay in the document. They are parked in a
+         hidden wrapper rather than carrying display:none themselves - clone(true) copies
+         the style attribute, so a hidden template would clone into hidden rows. -->
+    <div id="logtemplates" style="display:none;">
+        <div class="fleetlistentry">
+            <div class="fleetheader"></div>
+            <div class="fleetlist">
+                <div class="fleetlistline"></div>
+            </div>
         </div>
-        <div class="fleetlist">
-                <div class="fleetlistline">
-                </div>
     </div>
-    
-        
 </div>
 
 <div id="global-blocking-overlay" class="blocking-overlay" style="display:none;">

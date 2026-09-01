@@ -34,8 +34,10 @@ CREATE TABLE `chat` (
   `gameid` int(11) DEFAULT '0',
   `time` datetime NOT NULL,
   `message` text NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=39191 DEFAULT CHARSET=utf8;
+  PRIMARY KEY (`id`),
+  KEY `gameid_id` (`gameid`,`id`),
+  KEY `time` (`time`)
+) ENGINE=InnoDB AUTO_INCREMENT=39191 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -412,6 +414,12 @@ CREATE TABLE `tac_ship` (
   `campaigngameid` int(11) DEFAULT NULL,
   `slot` int(11) NOT NULL DEFAULT '0',
   `enhvalue` decimal(10,2) NOT NULL DEFAULT '0.00',
+  -- Reinforcements (db/reinforcements.sql, REINFORCEMENTS_PLAN.md 3.1): bought as a
+  -- reinforcement / the turn it arrives (NULL = still in hyperspace) / the id of the
+  -- opener unit whose jump point exit it is riding through (NULL = unassigned).
+  `reinforcement` tinyint(1) NOT NULL DEFAULT '0',
+  `arrivalturn` int(11) DEFAULT NULL,
+  `arrivalvia` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `gameid` (`tacgameid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=28910 DEFAULT CHARSET=utf8;
@@ -524,6 +532,10 @@ CREATE TABLE `tac_saved_ship` (
   -- DECIMAL, not INT: MINE_DMG is priced at 0.5/level, so a per-unit enhancement cost is
   -- not always a whole number. See db/fractionalEnhancementValue.sql.
   `enhvalue` DECIMAL(10,2) NOT NULL DEFAULT 0,
+  -- Bought as a reinforcement, i.e. this unit waits in hyperspace (db/reinforcements.sql).
+  -- The PURCHASE-TIME flag only: arrivalturn/arrivalvia are in-play state and live on
+  -- tac_ship, never here.
+  `reinforcement` TINYINT(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `listid_key` (`listid`),
   CONSTRAINT `fk_ship_list`

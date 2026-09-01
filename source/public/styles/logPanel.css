@@ -1,0 +1,1647 @@
+/*
+ * logPanel.css — game.php's bottom log panel and its six tabs.
+ *
+ * LOG_PANEL_REDESIGN_PLAN.md. This is the second half of VISUAL_UNIFICATION_PLAN.md
+ * Stage 4 surface 3: that pass converged the panel's COLOURS onto the tokens and
+ * deliberately left its geometry, type and information design alone. This file is that
+ * geometry, plus the functional work asked for on 2026-08-31.
+ *
+ * WHY ITS OWN FILE
+ * ----------------
+ * Same reasons as gamesPanel.css: one surface, page-scoped, reviewable as a unit — and it
+ * takes ~450 lines out of a 2,600-line tactical.css. Every rule here MOVED out of that
+ * file in the same commit; no rule lives in both. tactical.css is linked by game.php only,
+ * so nothing else on the site can be affected. Linked AFTER tactical.css.
+ *
+ * WHAT STAYED IN tactical.css, and why
+ * ------------------------------------
+ *   - the ::-webkit-scrollbar block, which #gameinfo / #declarationsContainer /
+ *     #combatLogContainer share with #iniGui and .mine-deploy-group-list;
+ *   - #logcontainer .assignthrustcontainer, dead markup nothing emits any more;
+ *   - the two mobile media queries themselves, which still size the rest of the screen.
+ *
+ * ⚠️ NO ORBITRON HERE, and that is deliberate. --fv-display is @imported by gamesNew.css,
+ * which gamelobby.php links and GAME.PHP DOES NOT — so a micro-label set in --fv-display
+ * would silently fall back to sans-serif on this page while looking right in review. Same
+ * call, for the same reason, as the .fleetDialog block at the foot of confirm.css:
+ * uppercase + letter-spacing in the inherited Arial gives the same micro-label read with
+ * no third-party font fetch on the most load-sensitive page in the game.
+ * --fv-mono (Consolas) IS used — it is a system face and costs nothing.
+ *
+ * ⚠️ NO NEW :root BLOCK. Every colour comes from styles/tokens.css. The two custom
+ * properties declared below are on #logcontainer, not on :root, and they are geometry
+ * that botPanel.js writes at runtime.
+ */
+
+/* ══ 1. THE SHELL ═══════════════════════════════════════════════════════════════════ */
+
+/* A FLEX COLUMN: the tab strip, then the body. The panel used to be a single fixed box
+   with the tab strip overlaid on top of it at `top:-26px`, against tabs that render ~27px
+   tall — so the strip settled 1-2px INSIDE the panel and clipped whatever was at the top.
+
+   ⚠️ THE ELEMENT `opacity: 0.85` IS GONE. It faded the log TEXT along with the panel, so
+   every log line, fleet row and declaration rendered at 85% strength — the alpha-
+   compounding trap VISUAL_UNIFICATION_PLAN.md documents. The translucency moved into the
+   fill (--fv-well-soft on #logBody). Removing `opacity` normally destroys a stacking
+   context; here it does NOT, because #logcontainer is position:fixed with z-index:10 and
+   so creates one on its own. The 9999/10000/10001 z-indexes inside stay contained.
+
+   The FILL and BORDERS live on #logBody rather than here, so the gaps between the tabs
+   stay transparent to the map exactly as they were. */
+#logcontainer {
+    /* ⭐⭐ THE TWO PANEL HEIGHTS. These are the ONLY numbers to edit to change how tall
+       the log panel is on a DESKTOP - everything else in this file sizes itself off
+       them. Both are the height of #logBody, i.e. of the CONTENT box; the tab strip
+       above it is extra.
+
+         --fv-log-h        collapsed - the panel as it sits when the page loads.
+         --fv-log-h-large  expanded  - after the chevron, a double-click on the grip,
+                                      or botPanel.toggleExpanded().
+
+       They are custom properties rather than plain heights for two reasons: botPanel.js
+       rewrites whichever one is live as the resize grip is dragged, and the phone media
+       queries at the foot of this file take the height back with a plain `height:`,
+       which beats a var()-valued declaration at equal specificity whatever the variable
+       holds. So RAISING EITHER NUMBER HERE CANNOT MAKE A PHONE PANEL TALLER - the phone
+       sizes live in §8 and are deliberately separate.
+
+       ⚠️ A REMEMBERED HEIGHT BEATS BOTH OF THEM. botPanel.restoreHeights writes
+       localStorage `fv.logPanel.height` / `fv.logPanel.heightLarge` back onto the
+       element as an inline style, so once a player has dragged the grip even once, the
+       value below is no longer what they see. Clear those two keys to test a new
+       default.
+
+       240 / 620, raised from 180 / 500 (user, 2026-08-31): the control bar is ~30px of
+       the collapsed panel, so 180px left only about ten lines of log under it. The
+       ceilings on #logBody below (calc(100vh - 90px) collapsed, 75vh expanded) are what
+       stop either number from swallowing a short screen, so they can be generous. */
+    --fv-log-h: 240px;
+    --fv-log-h-large: 640px;
+
+    position: fixed;
+    bottom: 0px;
+    left: 0;
+    z-index: 10;
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+
+    color: #7ba2ea;
+    font-family: arial;
+    font-size: 12px;
+}
+
+/* The body: fill, borders, shadow, and THE height. */
+#logBody {
+    position: relative;
+    flex: 0 0 auto;
+    height: var(--fv-log-h);
+    max-height: calc(100vh - 90px);
+    overflow: hidden;
+    background: var(--fv-well-soft);
+    border-top: 1px solid var(--fv-line-scs);
+    border-right: 1px solid var(--fv-line-scs);
+    border-left: 1px solid var(--fv-line-scs);
+    box-shadow: 5px 5px 10px var(--fv-overlay);
+    transition: height 0.1s linear;
+}
+
+#logcontainer.large #logBody {
+    height: var(--fv-log-h-large);
+    max-height: 75vh;
+}
+
+/* A transition on the height fights a pointer drag — it lags one frame behind the finger
+   the whole way. Off while the grip is held; back on for the chevron. */
+#logcontainer.resizing #logBody {
+    transition: none;
+}
+
+#logcontainer.mouseover {
+    bottom: 0px;
+}
+
+/* The drag grip: the panel's own top edge, 5px of it, invisible until pointed at. It is
+   inside #logBody rather than above the tab strip so it does not put a second bar over
+   the map. Above the panels' z-indexes so a scroll pane cannot swallow the drag. */
+#logResizeGrip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    z-index: 10002;
+    cursor: ns-resize;
+    touch-action: none;
+    background: transparent;
+}
+
+#logResizeGrip:hover,
+#logcontainer.resizing #logResizeGrip {
+    background: linear-gradient(180deg, var(--fv-accent), transparent);
+    opacity: 0.55;
+}
+
+/* ── The tab strip ────────────────────────────────────────────────────────────────
+   A FLEX ROW. The six tabs used to be absolutely positioned at hard-coded
+   left: 0/104/208/312/416/520px, restated as percentages in BOTH mobile media queries —
+   so a seventh tab was a three-place edit, a tab with no `left` silently stacked on top
+   of #logTab, and #settingsTab and #declarationsTab both claimed 416px. DOM order is
+   visual order now and a new tab costs nothing.
+
+   margin-bottom:-1px pulls the strip down onto the body's top border so the selected tab
+   merges with it — the old `top:-25px` 1px-lift hack did the same job by hand and
+   depended on the tab's rendered height. */
+#logUI {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 2px;
+    margin-bottom: -1px;
+    position: relative;
+    /* Above the panels, not below them. #logBody is position:relative with z-index:auto,
+       so it is NOT a stacking context and the panels' 10000/10001 are hoisted into
+       #logcontainer's context alongside this strip - at a plain z-index:2 a panel's
+       control bar would paint over the selected tab's bottom edge, which is the 1px the
+       margin-bottom above exists to merge. */
+    z-index: 10003;
+    min-width: 0;
+}
+
+/* The unselected fill (#020E12) is a one-off shade darker than the panel it fronts, which
+   is what makes an unselected tab recede; the selected tab matches the panel exactly.
+   Squared with the rest of the legacy chrome (--fv-radius-chrome) — see the note in
+   tokens.css; the tabs read as tabs from position alone. */
+.logUiEntry {
+    flex: 0 1 auto;
+    min-width: 100px;
+    box-sizing: border-box;
+    padding: 6px 10px 5px;
+    /* 2px so the selected tab's accent rail can replace it without moving anything, but
+       the SAME COLOUR as the other three borders when it is not selected (user,
+       2026-08-31) - a transparent top edge left an unselected tab looking open at the
+       top, as if its box had not been closed. */
+    border-top: 1px solid var(--fv-line-scs);
+    border-right: 1px solid var(--fv-line-scs);
+    border-left: 1px solid var(--fv-line-scs);
+    border-bottom: 1px solid var(--fv-line-scs);    
+    border-radius: var(--fv-radius-chrome) var(--fv-radius-chrome) 0px 0px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    background-color: #020E12;
+    cursor: pointer;
+    color: #deebffb6;
+    user-select: none;
+}
+
+.logUiEntry span {
+    pointer-events: none;
+}
+
+/* The 2px accent rail replaces the old 1px lift: it says "this one" without moving the
+   tab, so the strip's baseline no longer depends on which tab is selected. */
+.logUiEntry.selected {
+    border-top: 2px solid var(--fv-accent);    
+    background-color: var(--fv-well-soft);
+
+    color: var(--fv-text);
+}
+
+.logUiEntry:hover:not(.selected) {
+    color: var(--fv-text);
+    background-color: #08202a;
+}
+
+/* Unread chat — KEPT AS IS (plan Stage 1). The old rule only lifted the text colour by
+   one shade (#deebffb6 -> #DEEBFF), which players kept missing; lighting the whole tab
+   was a deliberate fix and only its type scale is restated here. Never applies to the
+   selected tab (chat.php only tags unselected tabs anyway). */
+.logUiEntry.newMessage:not(.selected) {
+    color: #FFE9CB;
+    font-weight: bold;
+    background-color: #5A2B0D;
+    border-color: #E08A3C;
+    text-shadow: 0 0 6px rgba(255, 176, 92, 0.8);
+    box-shadow: 0 0 8px 1px rgba(224, 138, 60, 0.6);
+    /*animation: chatTabUnreadPulse 1.6s ease-in-out infinite;*/
+}
+
+@keyframes chatTabUnreadPulse {
+
+    0%,
+    100% {
+        background-color: #5A2B0D;
+        box-shadow: 0 0 6px 0 rgba(224, 138, 60, 0.45);
+    }
+
+    50% {
+        background-color: #97490F;
+        box-shadow: 0 0 15px 3px rgba(255, 176, 92, 0.95);
+    }
+}
+
+/* Keep the highlight loud but hold it still for motion-sensitive players. */
+@media (prefers-reduced-motion: reduce) {
+    .logUiEntry.newMessage:not(.selected) {
+        animation: none;
+        background-color: #8A4413;
+        box-shadow: 0 0 12px 2px rgba(255, 176, 92, 0.85);
+    }
+}
+
+/* The expand toggle. Same tab skin, pushed to the right-hand end by the auto margin
+   rather than by `right: 5px` on an absolutely-positioned box. Its label was the literal
+   string "Click!"; it is a chevron with a title and aria-expanded now, both flipped by
+   botPanel.toggleExpanded. */
+#expandBotPanel {
+    flex: 0 0 auto;
+    margin-left: auto;
+    box-sizing: border-box;
+    padding: 6px 10px 5px;
+    border-top: 2px solid var(--fv-line-scs);
+    border-right: 1px solid var(--fv-line-scs);
+    border-left: 1px solid var(--fv-line-scs);
+    border-radius: var(--fv-radius-chrome) var(--fv-radius-chrome) 0px 0px;
+    min-width: 34px;
+    text-align: center;
+    font-size: 9px;
+    line-height: 1.3;
+    background-color: #020E12;
+    cursor: pointer;
+    color: var(--fv-text);
+    user-select: none;
+}
+
+#expandBotPanel:hover {
+    background-color: #08202a;
+    border-top-color: var(--fv-accent);
+}
+
+/* On phones the tabs are display:none until the panel is expanded (see the media queries
+   at the foot of this file), so an unread chat tab would light up somewhere the player
+   cannot see. Carry the glow onto the expand chevron while the panel is collapsed — on
+   those viewports it is the only tab-strip element on screen. Desktop is excluded: there
+   the tab itself is always visible, so glowing both would just be noise. */
+@media only screen and (max-width: 765px),
+only screen and (max-height: 500px) and (orientation: landscape) {
+    #logcontainer:not(.large):has(.logUiEntry.newMessage) #expandBotPanel {
+        background-color: #5A2B0D;
+        border-color: #E08A3C;
+        color: #FFE9CB;
+        font-weight: bold;
+        box-shadow: 0 0 8px 1px rgba(224, 138, 60, 0.6);
+        /*animation: chatTabUnreadPulse 1.6s ease-in-out infinite;*/
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #logcontainer:not(.large):has(.logUiEntry.newMessage) #expandBotPanel {
+        animation: none;
+    }
+}
+
+/* ── The panels ───────────────────────────────────────────────────────────────────
+   One per tab, stacked in the same box; botPanel.onLogUIClicked shows one and hides the
+   rest. display:flex is safe against jQuery's .show(): it clears the inline display:none
+   and only assigns an explicit value when the element is still hidden afterwards. */
+.logPanelEntry {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    z-index: 10000;
+}
+
+#logcontainer #gameinfo,
+#logcontainer #chat,
+#logcontainer #globalchat,
+#logcontainer #fleetsave,
+#logcontainer #declarations {
+    z-index: 10001;
+}
+
+/* ══ 2. THE SHARED GRAMMAR ══════════════════════════════════════════════════════════
+   Four surfaces (combat log, fleet list, declarations, Save Fleet) with one head bar,
+   one control bar and one set of controls between them, so they read as one panel with
+   four tabs rather than four panels that happen to share a box. */
+
+/* THE PER-PANEL HEAD BARS ARE GONE (user, 2026-08-31). Each panel used to carry a 25px
+   .fv-log-head naming it, suppressed below a height threshold; both the bar and the
+   #logcontainer.tall machinery behind it are removed. The reasoning: the selected TAB
+   sits directly above the panel and already names it, so the head bar was a second label
+   for the same thing — and at the default height, 25px of head plus 30px of control bar
+   was a third of the body. The readout it carried ("TURN 7 · FIRING", "4 FLEETS · 12
+   UNITS") lives permanently at the right-hand end of each panel's control bar instead;
+   botPanel.setMeta still writes it, and now has only one place to write to. */
+.fv-log-bar-meta {
+    font-family: var(--fv-mono);
+    font-size: 10px;
+    letter-spacing: 0.7px;
+    color: var(--fv-text-dim);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+/* ⭐ ONE ROW IS A HARD CONSTRAINT (user, 2026-08-31). At the default 150px there are only
+   ~120px of body left under this bar, so a bar that wrapped to a second row would cost a
+   fifth of the log. Hence nowrap and an overflow-x of its own: on a narrow viewport the
+   controls scroll sideways rather than stealing a second row from the content. */
+.fv-log-bar {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    /* padding-top matches #logResizeGrip's height exactly: the grip is a full-width strip
+       across the top of the body, so any less and it would cover the top edge of the first
+       row of controls and make them feel dead to the click. */
+    padding: 5px 8px 4px;
+    background: var(--fv-well);
+    border-bottom: 1px solid var(--fv-line-soft);
+    position: relative;
+    z-index: 3;
+    scrollbar-width: none;
+}
+
+.fv-log-bar::-webkit-scrollbar {
+    height: 0;
+}
+
+.fv-log-bar-spacer {
+    flex: 1 1 auto;
+    min-width: 4px;
+}
+
+/* A group label (SIDE / SHOW / BY on the declarations bar). The combat log's bar has
+   none: its controls name themselves, and each label was ~40px of the row. */
+.fv-log-label {
+    font-size: 8.5px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--fv-text-dim);
+    white-space: nowrap;
+}
+
+.fv-log-group {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex: 0 0 auto;
+}
+
+.fv-log-group.is-disabled {
+    opacity: 0.35;
+    pointer-events: none;
+}
+
+/* ⭐ ONE SHARED line-height ACROSS EVERY CELL IN THE BAR. Chips and readouts sized only
+   by padding come out at different heights and read as overlapping — that was a real
+   defect in the first mockup. 18px is the single value; every control below inherits it
+   and differs only in padding. */
+.fv-log-chip,
+.fv-log-select,
+.fv-log-find,
+.fv-log-step,
+.fv-log-step-value {
+    /* <button>, <select> and <input> do not inherit the page face - without this the
+       micro-label scale lands on the UA's own system font instead of the Arial these
+       labels are tuned against. */
+    font-family: inherit;
+    box-sizing: border-box;
+    height: 20px;
+    line-height: 18px;
+    font-size: 10px;
+    border: 1px solid var(--fv-line-scs);
+    background: rgba(73, 103, 145, 0.25);
+    color: var(--fv-text-dim);
+    border-radius: 2px;
+    padding: 0 7px;
+    margin: 0;
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+.fv-log-chip {
+    font-weight: 700;
+    letter-spacing: 0.9px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 120ms ease, color 120ms ease;
+}
+
+.fv-log-chip:hover:not(:disabled) {
+    color: var(--fv-text);
+}
+
+.fv-log-chip[aria-pressed="true"] {
+    background: rgba(198, 226, 255, 0.14);
+    border-color: var(--fv-accent);
+    color: var(--fv-text);
+}
+
+/* ⭐ A STANDALONE TOGGLE LIGHTS GREEN; A SEGMENT CHIP KEEPS THE ACCENT (user, 2026-08-31).
+   The same green as the MINE filter on games.php (.fv-chip[data-filter="mine"] in
+   gamesPanel.css), and for the same reason: an on/off switch that is ON has narrowed what
+   you are looking at, and should say so in a colour that means exactly that - while a
+   segmented group is only reporting which of its three positions is current, which is what
+   the neutral accent is for. Four controls qualify, and every one of them is a lone
+   switch: HITS and MINE on the combat log, ON MAP ONLY in the fleet list, BRIEFING in
+   declarations.
+
+   Class + class + attribute, so it outranks the generic pressed rule above wherever
+   either happens to sit in the file. The hover pair is needed because
+   .fv-log-chip:hover:not(:disabled) would otherwise pull the label back to --fv-text and
+   the green would drop out from under the cursor. */
+.fv-log-chip--toggle[aria-pressed="true"] {
+    background: rgba(82, 179, 82, 0.2);
+    border-color: var(--fv-mine);
+    color: var(--fv-mine-soft);
+}
+
+.fv-log-chip--toggle[aria-pressed="true"]:hover:not(:disabled) {
+    color: var(--fv-mine-soft);
+}
+
+/* THE BLUE IS "THIS ONE DOES SOMETHING" (user, 2026-08-31). It started as the three
+   reference links in FLEET INFO and now also carries SAVE CURRENT FLEET, so it is not a
+   navigation-only class: what its members have in common is that they ACT - open a page,
+   write a saved fleet - rather than sit there reporting a view state. None of them has a
+   pressed state, because none of them has an on position to be in.
+
+   That completes the bar's three tiers, and they are worth keeping straight:
+     grey  - idle control, or a segment reporting which position is current;
+     green - a lone toggle that IS on, and has therefore narrowed what you are looking at;
+     blue  - a button that does a thing when you press it.
+   A control that gains an on/off state should move to the green rule above, not gain a
+   second colour here. */
+.fv-log-chip--link {
+    background: rgba(139, 202, 242, 0.14);
+    border-color: rgba(139, 202, 242, 0.55);
+    color: var(--fv-accent);
+}
+
+.fv-log-chip--link:hover:not(:disabled) {
+    background: rgba(139, 202, 242, 0.26);
+    border-color: var(--fv-accent);
+    color: var(--fv-text-bright);
+}
+
+.fv-log-chip:focus-visible,
+.fv-log-select:focus-visible,
+.fv-log-find:focus-visible,
+.fv-log-step:focus-visible {
+    outline: 1px solid var(--fv-accent);
+    outline-offset: 1px;
+}
+
+/* ⭐ THE FILTERS ONLY EXIST WHILE THERE IS A PRINT TO FILTER (user, 2026-08-31).
+   Sort, Hits, Mine and Find all act on #LogActual - the printed turn log - and do nothing
+   whatever to the live replay stream in #logLive, which is what this panel shows the rest
+   of the time. Five idle controls and the two dividers that group them is most of the bar,
+   so they come off it until a print is actually on screen. The turn stepper stays: stepping
+   to a turn is how you GET a print, so it is the one control that has to work first.
+
+   combatLog.updateTurnControls adds and removes .no-print, reading #LogActual's own inline
+   display - showLog and showCurrent are its only two writers.
+
+   One id plus two classes, which is what makes this beat .fv-log-wide-only and
+   .fv-log-narrow-only inside both phone media queries; at a plain class it would lose and
+   the sort control would reappear at phone width. */
+#combatLogButtons.no-print .fv-log-filter {
+    display: none;
+}
+
+/* A run separator on a control bar. The bar is a flex row of identically shaped chips,
+   so its 6px gap alone could not say where one job ended and the next began - eight chips
+   in a row read as one strip. A hairline costs 5px of a bar that must not wrap and does
+   the grouping the gap could not (user, 2026-08-31).
+
+   align-self:stretch, not a fixed height: the bar sets align-items:center, so a height
+   would have to be re-guessed every time a control's padding changed. The 2px inset keeps
+   it clear of the bar's own top and bottom edges. */
+.fv-log-divider {
+    flex: 0 0 auto;
+    align-self: stretch;
+    width: 1px;
+    margin: 2px 1px;
+    background: var(--fv-line-scs);
+}
+
+/* A segmented group: shared borders, so three chips read as one control. */
+.fv-log-seg {
+    display: inline-flex;
+    flex: 0 0 auto;
+}
+
+.fv-log-seg .fv-log-chip {
+    border-radius: 0;
+}
+
+.fv-log-seg .fv-log-chip+.fv-log-chip {
+    margin-left: -1px;
+}
+
+.fv-log-seg .fv-log-chip:first-child {
+    border-radius: 2px 0 0 2px;
+}
+
+.fv-log-seg .fv-log-chip:last-child {
+    border-radius: 0 2px 2px 0;
+}
+
+/* Pressed chips have to sit above their neighbours or the shared border swallows their
+   accent outline on one side. */
+.fv-log-seg .fv-log-chip[aria-pressed="true"] {
+    position: relative;
+    z-index: 1;
+}
+
+.fv-log-select {
+    font-family: Arial, Helvetica, sans-serif;
+    color: var(--fv-text);
+    background: #000;
+    padding: 0 4px;
+    cursor: pointer;
+}
+
+.fv-log-find {
+    font-family: Arial, Helvetica, sans-serif;
+    color: var(--fv-text);
+    background: #000;
+    width: 104px;
+    min-width: 70px;
+    flex: 0 1 104px;
+}
+
+.fv-log-find::placeholder {
+    color: #5f7688;
+}
+
+.fv-log-field {
+    display: inline-flex;
+    flex: 0 0 auto;
+}
+
+/* ONE STATE, TWO CONTROLS (user, 2026-08-31). The combat log's sort is a segmented chip
+   group wherever the bar has room for it - it matches the rest of the bar and takes one
+   click instead of two - and falls back to a <select> on a narrow viewport, where three
+   more chips would push the whole bar into a sideways scroll. combatLog.syncControls
+   paints both from combatLog.sortMode, so the one on screen is always current.
+   The swap happens at the same two breakpoints the tab strip uses, at the foot of this
+   file. */
+.fv-log-wide-only {
+    display: inline-flex;
+}
+
+.fv-log-narrow-only {
+    display: none;
+}
+
+/* The INFO tab's three reference links. They keep their old job but read as chips in the
+   same family as the filters beside them, right-aligned after the flex spacer. */
+#gameInfoButtons {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex: 0 0 auto;
+}
+
+/* The turn stepper. THREE CELLS, ONE CONTROL: collapsed borders and the shared
+   line-height above are what stop the arrows and the readout coming out at different
+   heights. The arrows are DISABLED at the ends of the range rather than hidden — taking
+   a middle cell out of the flow would break the control in half. */
+.fv-log-stepper {
+    display: inline-flex;
+    flex: 0 0 auto;
+}
+
+.fv-log-step {
+    cursor: pointer;
+    padding: 0 6px;
+    border-radius: 0;
+}
+
+.fv-log-stepper .fv-log-step:first-child {
+    border-radius: 2px 0 0 2px;
+}
+
+.fv-log-stepper .fv-log-step:last-child {
+    border-radius: 0 2px 2px 0;
+}
+
+.fv-log-stepper> :not(:first-child) {
+    margin-left: -1px;
+}
+
+.fv-log-step:hover:not(:disabled) {
+    color: var(--fv-text);
+    background: rgba(198, 226, 255, 0.14);
+}
+
+.fv-log-step:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+.fv-log-step-value {
+    font-family: var(--fv-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.8px;
+    color: var(--fv-text-bright);
+    background: rgba(4, 22, 28, 0.6);
+    border-radius: 0;
+    cursor: default;
+}
+
+/* Micro tags, the .fv-tag grammar from gamesPanel.css. Used by the fleet header for the
+   three commit states, which were three different inline `style="color:…"` spans. */
+.fv-tag {
+    flex: none;
+    display: inline-block;
+    font-size: 7.5px;
+    font-weight: 700;
+    letter-spacing: 0.9px;
+    text-transform: uppercase;
+    padding: 1px 4px 0;
+    border: 1px solid currentColor;
+    color: var(--fv-text-dim);
+    line-height: 1.6;
+    white-space: nowrap;
+}
+
+.fv-tag--committed {
+    color: var(--fv-mine-soft);
+}
+
+.fv-tag--waiting {
+    color: var(--fv-warning);
+}
+
+.fv-tag--surrendered {
+    color: var(--fv-ended);
+}
+
+/* --fv-*-signal is not right here: this is a word, not a 3px mark. #00b8e6 is FV's
+   established "not here yet" cyan, shared with the .docked / .hyperspace rows and the
+   blue Jump Point marker. Do not introduce a second blue for this. */
+.fv-tag--deploys {
+    color: #00b8e6;
+}
+
+/* The panels' scroll panes. tactical.css still styles #gameinfo / #combatLogContainer /
+   #declarationsContainer scrollbars, but none of those three is the scroller any more —
+   these four are. Same tokens, so they look identical. */
+#logLive::-webkit-scrollbar,
+#LogActual::-webkit-scrollbar,
+#fleetListBody::-webkit-scrollbar,
+#declarationsActual::-webkit-scrollbar {
+    width: 10px;
+}
+
+#logLive::-webkit-scrollbar-track,
+#LogActual::-webkit-scrollbar-track,
+#fleetListBody::-webkit-scrollbar-track,
+#declarationsActual::-webkit-scrollbar-track {
+    background: var(--fv-scroll-track);
+}
+
+#logLive::-webkit-scrollbar-thumb,
+#LogActual::-webkit-scrollbar-thumb,
+#fleetListBody::-webkit-scrollbar-thumb,
+#declarationsActual::-webkit-scrollbar-thumb {
+    background: var(--fv-scroll-thumb);
+}
+
+#logLive::-webkit-scrollbar-thumb:hover,
+#LogActual::-webkit-scrollbar-thumb:hover,
+#fleetListBody::-webkit-scrollbar-thumb:hover,
+#declarationsActual::-webkit-scrollbar-thumb:hover {
+    background: var(--fv-scroll-thumb-hover);
+}
+
+/* ══ 3. THE COMBAT LOG ══════════════════════════════════════════════════════════════ */
+
+/* #log used to be position:absolute with overflow-y:VISIBLE, holding the replay stream as
+   direct children, while #combatLogContainer was a second absolutely-positioned scrolling
+   layer sitting on top of it. That is what made $("#log").scrollTop() a no-op — a box that
+   does not clip cannot scroll — and what let live entries overflow the 150px panel instead
+   of scrolling inside it. It is a plain flex parent now and the two bodies below it are
+   what scroll. */
+#log {
+    padding: 0;
+}
+
+#logContainer.assignThrust #log {
+    display: none;
+}
+
+/* .chatcontainer (styles/chat.css) gives this height:100%, which would run it past the
+   control bar in a flex column. flex:1 + min-height:0 is the replacement. */
+#combatLogContainer,
+#declarationsContainer {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+}
+
+/* THE REPORTED BUG. #combatLogButtons was position:absolute; top:0; right:0 INSIDE the
+   scrolling container, so (a) the log flowed underneath it and (b) it scrolled out of
+   reach as soon as the turn was longer than the panel. As a flex row in a flex column it
+   can do neither. */
+#combatLogButtons {
+    font-style: normal;
+    color: #e0e7ef;
+}
+
+/* The two bodies. Only one has content at a time — onTurnStart empties the live stream
+   before a print is fetched, and showCurrent blanks the print — so :empty hands the whole
+   body to whichever one is in use.
+   ⚠️ combatLog.php writes #logLive with NO whitespace inside it; a stray newline would
+   stop :empty matching and leave a dead half-panel under the print. */
+#logLive,
+#LogActual {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 3px 4px 6px;
+    font-size: 12px;
+    font-style: normal;
+    color: var(--fv-text-dim);      
+}
+
+#logLive:empty {
+    display: none;
+}
+
+/* ── Log entries ──────────────────────────────────────────────────────────────────
+   ⭐⭐ THE LOG'S TEXT COLOURS DO NOT CHANGE (user, 2026-08-31). Everything the live log
+   painted before is kept verbatim: prose #7ba2ea (inherited from #logcontainer), every
+   ship name #deebff, the target its team colour (inline), the FIRE: header the shooter's
+   team colour (inline), damage #c54120, criticals amber, shield absorption #6fb7ff. The
+   refit adds a rail and takes away the element opacity, and that is all.
+
+   A PASTEL TINT ON THE SHOOTER'S NAME WAS TRIED AND PULLED: softened team tints on ship
+   names fight the full-chroma damage red and critical amber in the damage list directly
+   beneath, and those are the colours that have to win — they are the reason a player is
+   reading the entry. The one name that carries a colour is the TARGET, because who was
+   shot at is the fact the eye is looking for. Do not reintroduce muted name tints here;
+   the --fv-*-mid tier exists for dense lists like the hex picker, and the combat log is
+   deliberately not one of them. */
+#log .logentry {
+    margin: 2px 0 3px;
+    padding: 2px 6px 3px;
+    cursor: pointer;
+    border-left: var(--fv-log-rail) solid var(--fv-neutral-signal);
+    background: rgba(10, 28, 38, 0.35);
+}
+
+#log .logentry:hover {
+    background: var(--fv-card-hover);
+}
+
+/* FIRE: IS CONTENT, NOT A CHROME MICRO-LABEL. It is the first word of the sentence, so it
+   is sized against the 12px body it sits in — not against the 9.5px tab labels. The
+   micro-cap scale in this file applies to CHROME only: tabs, head bars, column heads,
+   control labels. */
+#log .logheader {
+    font-weight: bold;
+    color: #c54120;
+}
+
+#log .damage {
+    color: #c54120;
+}
+
+#log .critical {
+    color: rgba(255, 166, 0, 0.781);
+}
+
+/* Shield-projection absorption line. Unscoped so it colours both the live replay log
+   (#logLive) and the printed turn log (#LogActual). */
+.shieldabsorb {
+    color: #6fb7ff;
+}
+
+#log .shiplink {
+    color: #deebff;
+}
+
+#log .notes {
+    display: none;
+}
+
+#log .destroyed {
+    font-weight: bold;
+    color: #b34119;
+}
+
+#log ul {
+    margin: 4px 0 2px;
+    padding-left: 20px;
+}
+
+#log li {
+    margin: 1px 0;
+}
+
+/* A long damage list starts folded — one alpha strike against a big hull can be thirty
+   rows and push every other entry off a compact panel. The affordance carries the count,
+   so the fold is never silent. */
+#log .logentry.collapsible.collapsed>ul {
+    display: none;
+}
+
+#log .logexpand {
+    display: inline-block;
+    margin-left: 6px;
+    font-size: 10px;
+    letter-spacing: 0.6px;
+    color: var(--fv-accent);
+    cursor: pointer;
+    user-select: none;
+}
+
+#log .logentry.collapsible.collapsed>.logexpand::before {
+    content: "\25B8\00a0";
+}
+
+#log .logentry.collapsible:not(.collapsed)>.logexpand::before {
+    content: "\25BE\00a0";
+}
+
+/* .combatTurn was the printed log's "Turn N:" heading. showLog stopped emitting it
+   (user, 2026-08-31) - the turn stepper in the control bar directly above says the same
+   thing, and the heading plus its two <br>s cost three lines of a short panel. The rule
+   is gone with it; nothing else in the tree uses the class. */
+
+.noCombatLog {
+    font-size: 14px;
+    color: #e0e7ef;
+}
+
+/* Always shown while anything is filtered out, so a filter left on from a previous turn
+   can never be mistaken for a quiet turn. */
+.logfiltered {
+    margin: 6px 0 2px;
+    padding: 3px 6px;
+    font-size: 11px;
+    color: var(--fv-text-dim);
+    border-left: var(--fv-log-rail) solid var(--fv-line-soft);
+    background: rgba(10, 28, 38, 0.35);
+}
+
+/* ══ 4. THE FLEET LIST (INFO tab) ═══════════════════════════════════════════════════ */
+
+#gameinfo {
+    overflow: hidden;
+}
+
+#fleetListBody {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* THE TEAM RAIL RUNS DOWN THE WHOLE SLOT (user, 2026-08-31), not just its header: the
+   header, the column head and every row below them all draw the same 3px left border, and
+   because they stack flush the three read as one continuous rail bounding the block. It
+   used to stop at the header, which left the rows looking unattached to the fleet they
+   belonged to - the more so once a list was long enough for the sticky header to be the
+   only thing still saying whose ships these were.
+
+   ⚠ THE COLOUR IS ONE CUSTOM PROPERTY, SET INLINE BY fleetList.js from
+   gamedata.getFleetHeaderColorRGB - never give this rail a CSS-class colour. Allegiance is
+   a TWO-ARM gate (arch_team_colour_logic): a CSS class only ever fires for 2-team
+   participants, while observers and 3+-team games take an inline colour from JS, so a
+   colour declared here would leave half the games unpainted. The property is what makes
+   ONE inline write paint all three surfaces - it is set on this element and inherited by
+   every row, so the rows need no per-row inline style of their own.
+
+   The value below is only the fallback for a block JS has not painted yet. */
+.fleetlistentry {
+    --fv-fleet-rail: var(--fv-neutral-signal);
+    padding: 0 0 6px 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* An empty list never has to explain itself - fleetListManager.applyView writes the
+   reason. Three of them: a filter that hid everything, a game with no units, and a
+   WAITING player, who is served no ship data at all (arch_gamedata_polling_cache) and
+   would otherwise just see a blank tab. */
+.fleetListEmpty {
+    padding: 10px 8px;
+    color: var(--fv-text-dim);
+    font-style: italic;
+}
+
+/* A card head with a 3px team rail. ⚠️ THE RAIL COLOUR IS SET INLINE BY fleetList.js from
+   gamedata.getFleetHeaderColorRGB — never give it a CSS-class colour here. Allegiance is
+   a TWO-ARM gate (arch_team_colour_logic): a CSS class only ever fires for 2-team
+   participants, while observers and 3+-team games take an inline colour from JS, so a
+   colour declared here would leave half the games unpainted. Sticks while its own list
+   scrolls. */
+.fleetheader {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 0;
+    padding: 6px 8px 6px 6px;
+    background: var(--fv-card);
+    border-left: var(--fv-log-rail) solid var(--fv-fleet-rail);
+    border-bottom: 1px solid var(--fv-line-soft);
+    cursor: pointer;
+    user-select: none;
+}
+
+.fleetheader:hover {
+    background: var(--fv-card-hover);
+}
+
+/* NOT the 9.5px chrome micro-cap scale (user, 2026-08-31). "TEAM 1" is the header's
+   FIRST FIELD, read alongside the 12px player name and the 11px mono CP readout, not a
+   column label sat above a list - at 9.5px it read as a caption on the name rather than
+   a peer of it. 11px in caps is optically level with the 12px name beside it; the
+   tracking comes down with the size so the tighter cap height does not smear. */
+.fleetheader .headername {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.9px;
+    text-transform: uppercase;
+}
+
+.fleetheader .playername {
+    color: var(--fv-text-accent); 
+    font-weight: bold;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fleetheader .fleetcp {
+    font-family: var(--fv-mono);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    color: var(--fv-text-accent); 
+}
+
+.fleetheader .turnTaken {
+    display: inline-flex;
+}
+
+/* Collapsible fleets: the whole header is the affordance, so there is no separate twisty
+   to hit on a phone. */
+.fleetlistentry.collapsed .fleetlist {
+    display: none;
+}
+
+.fleetheader::after {
+    content: "\25BE";
+    margin-left: auto;
+    font-size: 9px;
+    color: var(--fv-text-dim);
+}
+
+.fleetlistentry.collapsed .fleetheader::after {
+    content: "\25B8";
+}
+
+.fleetlist {
+    display: block;
+    color: var(--fv-text-dim);      
+}
+
+/* ⭐ GRID, NOT FLOATS. The columns were floats at 30/30/10/10/15%, so a long ship name
+   wrapped and dragged the whole row out of alignment. minmax(0,…) on the two text columns
+   is what lets the ellipsis engage instead. The last track is the hover info affordance.
+
+   THE ROWS BREATHE (user, 2026-08-31). They were 1px of vertical padding on a 12px line -
+   a wall of names with nothing to separate one from the next. 4px top and bottom plus a
+   very faint hairline gives the eye a row to track along without turning the list into a
+   ruled table; at 25px a row it is still the densest list on the screen. */
+.fleetlist .fleetlistline>span {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.4fr) 62px 74px 96px 18px;
+    align-items: center;
+    gap: 0 8px;
+    padding: 4px 6px 4px 6px;
+}
+
+/* Same rail as the header above it - see the note on .fleetlistentry. This includes
+   .fleetlisthead, which is a .fleetlistline too, so the column head is part of the run
+   rather than a gap in it. */
+.fleetlist .fleetlistline {
+    border-left: var(--fv-log-rail) solid var(--fv-fleet-rail);
+    border-bottom: 1px solid rgba(73, 103, 145, 0.16);
+}
+
+.fleetlist .fleetlistline:last-child {
+    border-bottom: 0;
+}
+
+/* ⭐ ONE TYPE SCALE ACROSS EVERY COLUMN (user, 2026-08-31). Ini and Value used to be
+   --fv-mono at 11px while Name / Class / Type inherited 12px Arial, so half the row was
+   set in a different face at a different size and the columns read as two tables side by
+   side. They are all the inherited face at one size now; the numeric columns keep
+   font-variant-numeric: tabular-nums, which Arial honours, so the digits still line up
+   down the page - that alignment was the only thing the mono face was buying here. */
+.fleetlist .fleetlistline>span>span {
+    font-size: 11.5px;
+    line-height: 1.45;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fleetlist .shiptype {
+    text-align: center;
+}
+
+.fleetlist .initiative,
+.fleetlist .value {
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+
+.fleetlist .shipstatus:empty {
+    display: none;
+}
+
+.fleetlist .shipstatus {
+    grid-column: 1 / -1;
+}
+
+/* THE COLUMN HEAD IS A HEADER, not a smaller row (user, 2026-08-31). It was 8.5px against
+   12px data - so small it read as a caption under the fleet header rather than as the
+   thing naming the columns. It is now only a shade under the data size, but set apart by
+   weight, tracking, case, a brighter colour, its own band and a 2px rule: the row below it
+   can be scanned without re-reading it, which is what a column head is for. */
+.fleetlist .fleetlisthead .header {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.3px;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--fv-text-accent);
+}
+
+.fleetlist .fleetlisthead {
+    border-bottom: 0;
+}
+
+.fleetlist .fleetlisthead>span {
+    background: rgba(73, 103, 145, 0.16);
+    border-bottom: 2px solid var(--fv-line-scs);
+    padding-top: 4px;
+    padding-bottom: 3px;
+}
+
+.fleetlist .header[data-sort] {
+    cursor: pointer;
+    user-select: none;
+}
+
+.fleetlist .header[data-sort]:hover {
+    color: var(--fv-accent);
+}
+
+.fleetlist .header.sorted-asc::after {
+    content: "\00a0\25B4";
+}
+
+.fleetlist .header.sorted-desc::after {
+    content: "\00a0\25BE";
+}
+
+/* THE DEFAULT SHIP NAME IS --fv-text-accent (user, 2026-08-31). It used to inherit
+   #logcontainer's #7ba2ea prose blue along with every other cell, so the name - the one
+   field a fleet list is actually scanned BY - sat at exactly the same weight as its class,
+   its type and its point value. The accent lifts it out of the row without adding a colour
+   to the palette: it is the same token the column heads already use.
+
+   THE STATE COLOURS BELOW STILL WIN, and the :not() chain is the whole reason this works.
+   A plain `color:` on .shipname would beat the destroyed red / jumped orange / docked and
+   hyperspace cyan, because those reach the name by INHERITANCE and a direct declaration
+   always outranks an inherited one whatever the specificity. Two shapes have to be
+   excluded, because the state class lands in two different places:
+     - a real unit row: fleetList.setRowState puts it on the inner grid span, and .shipname
+       inherits the colour from there;
+     - the enemy's reinforcement SUMMARY row: fleetList.js writes .hyperspace onto every
+       cell individually, .shipname included.
+   Mine-group rows carry no state class and ARE on the map, so they read as default, which
+   is correct. The column head is excluded as well; it already resolves to this same token,
+   so that exclusion is about keeping the head out of a row rule, not about the colour. */
+.fleetlist .fleetlistline:not(.fleetlisthead)>span:not(.destroyed):not(.jumped):not(.docked):not(.hyperspace)>.shipname:not(.hyperspace) {
+    color: var(--fv-text-dim); 
+    /*color: #7ba2ea*/      
+}
+
+/* ── Row state ────────────────────────────────────────────────────────────────────
+   ⭐ NOT ITALIC (user, 2026-08-31). The red and the "Destroyed" label in the Ini column
+   already carry it; italicising a whole row of proper nouns only made them harder to
+   read. The colours are unchanged. */
+.fleetlistentry .destroyed {
+    font-style: normal;
+    color: #c54120;
+}
+
+.fleetlistentry .jumped {
+    font-style: normal;
+    /*color:#00d100;*/
+    color: #cc8500;
+}
+
+.fleetlistentry .docked {
+    font-style: normal;
+    color: #00b8e6;
+}
+
+/* A reinforcement still waiting in hyperspace (REINFORCEMENTS_PLAN.md). Same #00b8e6 as
+   .docked on purpose - it is FV's established "not here yet" cyan, shared with the fleet
+   header's [Deploys on Turn N] and the blue Jump Point marker - and the LABEL is what
+   separates the two states. Do not introduce a second blue for this. */
+.fleetlistentry .hyperspace {
+    font-style: normal;
+    color: #00b8e6;
+}
+
+/* ── Interaction ──────────────────────────────────────────────────────────────────
+   ⭐ `unitrow` means "there is something here worth opening". fleetList.setRowState takes
+   it back off DESTROYED and JUMPED rows only — the split is gone-from-the-battle vs
+   yours-and-still-coming-back, so docked flights and your own hyperspace reinforcements
+   keep it. A row without it gets no highlight, no pointer and no info affordance. */
+.fleetlist .fleetlistline.unitrow {
+    -webkit-touch-callout: none;
+    /* stops iOS's own selection callout during the long press */
+}
+
+/* The border-left-color lift is GONE from hover. It existed to give hover a left marker
+   back when a row rail was transparent; now that every row carries the team colour, all it
+   did was grey the rail out under the cursor - the fill change is the hover. Selection
+   still overrides the rail, further down: that is one row at a time and worth the colour. */
+.fleetlist .fleetlistline.unitrow:hover {
+    background: var(--fv-card-hover);
+}
+
+.fleetlist .shipname.clickable {
+    cursor: pointer;
+}
+
+/* Out-of-play rows no longer act, so they lose the pointer that promised they would. */
+.fleetlist .fleetlistline:not(.unitrow) .shipname {
+    cursor: default;
+}
+
+/* Discoverability for the right-click / long-press gesture, and on touch an explicit tap
+   target for it in its own right — the same reasoning as the hex picker's details button
+   (arch_hex_stack_picker). Hidden until the row is pointed at so a dense list stays quiet. */
+.fleetlist .rowinfo {
+    visibility: hidden;
+    text-align: center;
+    color: var(--fv-accent);
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+}
+
+.fleetlist .fleetlistline.unitrow:hover .rowinfo {
+    visibility: visible;
+}
+
+/* Touch has no hover, so the affordance is always there on a coarse pointer. */
+@media (pointer: coarse) {
+    .fleetlist .fleetlistline.unitrow .rowinfo {
+        visibility: visible;
+    }
+}
+
+.fleetlist .fleetlistline:not(.unitrow) .rowinfo {
+    display: none;
+}
+
+/* The currently selected ship's row, marked and flashed by
+   fleetListManager.revealShipRow. */
+.fleetlist .fleetlistline.is-selected {
+    background: rgba(139, 202, 242, 0.10);
+    border-left-color: var(--fv-accent);
+}
+
+@keyframes fvRowFlash {
+    0% {
+        background: rgba(139, 202, 242, 0.45);
+    }
+
+    100% {
+        background: rgba(139, 202, 242, 0.10);
+    }
+}
+
+.fleetlist .fleetlistline.rowflash {
+    animation: fvRowFlash 700ms ease-out 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fleetlist .fleetlistline.rowflash {
+        animation: none;
+    }
+}
+
+/* ══ 5. DECLARATIONS ════════════════════════════════════════════════════════════════ */
+
+#declarationsActual {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 4px 8px 10px;
+    color: #e0e7ef;
+}
+
+/* Per-unit cards, replacing a <big><b>/<br> dump. ⚠️ The rail colour is set INLINE by
+   declarations.js from gamedata.getShipLogColorCss — same two-arm reasoning as the fleet
+   header above; never declare it here. */
+.decl-card {
+    margin: 0 0 5px;
+    padding: 3px 7px 4px;
+    background: var(--fv-card);
+    border: 1px solid var(--fv-line-soft);
+    border-left: var(--fv-log-rail) solid var(--fv-neutral-signal);
+}
+
+.decl-card-top {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+}
+
+.decl-name {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.1px;
+    text-transform: uppercase;
+    color: var(--fv-text);
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.decl-class {
+    font-family: var(--fv-mono);
+    font-size: 10px;
+    color: var(--fv-text-dim);
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* The per-unit total that used to be a mental sum. */
+.decl-total {
+    margin-left: auto;
+    font-family: var(--fv-mono);
+    font-size: 10px;
+    letter-spacing: 0.6px;
+    font-variant-numeric: tabular-nums;
+    color: var(--fv-text-accent);
+    white-space: nowrap;
+}
+
+.decl-rows {
+    list-style: none;
+    margin: 2px 0 0;
+    padding: 0;
+}
+
+/* what | value | at whom, with the value right-aligned in mono so a column of EW compares
+   at a glance. */
+.decl-rows li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 58px auto minmax(0, 1.3fr);
+    align-items: baseline;
+    gap: 0 6px;
+    padding: 1px 0;
+}
+
+.decl-what {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.decl-val {
+    font-family: var(--fv-mono);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    color: var(--fv-text);
+}
+
+/* The relation word is its own dim span WITH A REAL GAP AFTER IT. Run together with the
+   name, "OEW 3 at Vorchan Talon" reads as one token rather than as three fields. */
+.decl-rel {
+    color: var(--fv-text-dim);
+    font-size: 11px;
+    padding-right: 2px;
+}
+
+.decl-who {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.decl-who i {
+    color: var(--fv-text-dim);
+}
+
+/* Fire mode: a per-target roll-up, so "everything shooting at my Vorchan" is one heading
+   rather than a scan down a flat list. */
+.decl-group {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    margin-top: 3px;
+    padding-top: 2px;
+    border-top: 1px solid var(--fv-line-soft);
+}
+
+.decl-group-count {
+    margin-left: auto;
+    font-family: var(--fv-mono);
+    font-size: 10px;
+    color: var(--fv-text-dim);
+    font-variant-numeric: tabular-nums;
+}
+
+/* The to-hit as a small meter, off the LOW end of the range — the number a player plans
+   against. */
+.decl-meter {
+    grid-column: 4;
+    display: block;
+    height: 4px;
+    background: rgba(73, 103, 145, 0.35);
+    border: 1px solid var(--fv-line-soft);
+    align-self: center;
+}
+
+.decl-meter>span {
+    display: block;
+    height: 100%;
+    background: var(--fv-accent);
+}
+
+.decl-empty {
+    padding: 6px 2px;
+    color: var(--fv-text-dim);
+    font-style: italic;
+}
+
+/* THE BRIEFING (user, 2026-08-31). Its own control on the far right of the bar, and its
+   own skin: a name in the panel's micro-cap scale, the rules of engagement as .fv-tag
+   chips, and the scenario text as ordinary prose with room to read. It used to be a run of
+   "<br>Mines enabled." lines under an underlined blue title borrowed from chat.css. */
+.decl-briefing {
+    line-height: 1.5;
+    padding: 2px 0 4px;
+}
+
+.decl-briefing-name {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.6px;
+    text-transform: uppercase;
+    color: var(--fv-text);
+    padding-bottom: 5px;
+    margin-bottom: 7px;
+    border-bottom: 1px solid var(--fv-line-scs);
+}
+
+.decl-briefing-rules {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 8px;
+    color: var(--fv-text-accent);    
+}
+
+.fv-decl-rules {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--fv-text-accent);
+    white-space: nowrap;   
+}
+
+/* The rules are STATUS, not chrome: --fv-warn is the same amber the fleet header uses for
+   "waiting", and an optional rule being switched on is the same kind of fact - something
+   about this game that is not the default. */
+.fv-tag--rule {
+    color: var(--fv-warn);
+}
+
+.decl-briefing-text {
+    color: var(--fv-text-dim);
+    max-width: 68ch;
+}
+
+/* ══ 6. SAVE FLEET ══════════════════════════════════════════════════════════════════ */
+
+#logcontainer #fleetsave {
+    overflow: hidden;
+}
+
+#fleetSavePanel {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-style: normal;
+    color: var(--fv-text);
+    max-width: 640px;
+}
+
+#fleetSavePanel p {
+    margin: 0 0 8px 0;
+    line-height: 1.4;
+}
+
+#fleetSaveSummary {
+    color: var(--fv-text-dim);
+    font-size: 12px;
+}
+
+/* THE PANEL'S ONE ACTION, IN THE BAR'S OWN GRAMMAR (user, 2026-08-31). This was a bespoke
+   13px button with its own fill, border, padding and radius - the only control anywhere in
+   the log panel that did not look like the rest of it. It carries .fv-log-chip now, so it
+   inherits the shared 20px height, 18px line-height, 10px micro-caps, border, fill and
+   2px radius, and this block keeps only what that grammar has no opinion about.
+
+   ⚠️ THE OLD DECLARATIONS HAD TO BE DELETED, NOT LEFT TO BE OVERRIDDEN. #fleetSaveButton is
+   an id (1,0,0) and .fv-log-chip is a class (0,1,0), so any font-size, padding, background,
+   border or radius surviving here would silently beat the shared rule and the button would
+   have looked exactly as before. The hover is gone for the same reason - the chip has one.
+
+   It also carries .fv-log-chip--link, which is the bar's "this button does something"
+   blue - see the note on that class. Save Fleet is the panel's only action, so it is
+   exactly what that tier is for.
+
+   Disabled stays: savedFleets.js disables this whenever there is nothing saveable, and the
+   chip grammar dims nothing on its own (it only declines to repaint the label, via
+   .fv-log-chip:hover:not(:disabled)). */
+#fleetSaveButton {
+    margin-top: 2px;
+}
+
+#fleetSaveButton:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* ══ 7. CHAT (layout only — the chat panel itself is styles/chat.css) ═══════════════ */
+
+#logcontainer #chat,
+#logcontainer #globalchat {
+    height: 100%;
+    width: 100%;
+}
+
+#logcontainer #chat>.fv-chat,
+#logcontainer #globalchat>.fv-chat {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+/* ══ 8. PHONES ══════════════════════════════════════════════════════════════════════
+   THE SIX `left:` RESTATEMENTS ARE GONE from both of these blocks — the strip is a flex
+   row, so it lays itself out at every width and a new tab costs nothing here either.
+
+   The heights are set on #logBody rather than on #logcontainer, and as a plain `height:`
+   rather than through the custom property, so a remembered desktop height cannot leak
+   onto a phone: a declaration beats a var()-valued one at equal specificity whatever the
+   variable holds. Selector specificity matches the base rules for the same reason.
+
+   ⭐ THESE ARE THE PHONE KNOBS, and they are deliberately NOT --fv-log-h /
+   --fv-log-h-large: raising those two (see §1) changes the desktop only, and this block
+   is where a phone size is changed. `height: 0` collapsed is not a mistake - a phone
+   panel is shut down to its tab strip until the chevron is tapped, because 800px of map
+   is all there is. The expanded 300px is a FLOOR, not the working size: the max-height
+   beside it (75vh portrait, 65vh landscape) is what actually decides on a short screen,
+   so raise the max-height, not the 300, to give a phone more log. */
+
+@media only screen and (max-width: 765px) {
+
+    #logcontainer {
+        width: 100%;
+        max-width: none;
+    }
+
+    /* Collapsed to the tab strip until the chevron is tapped. */
+    #logcontainer #logBody {
+        height: 0;
+        border-top-width: 0;
+    }
+
+    #logcontainer.large #logBody {
+        height: 300px;
+        max-height: 75vh;
+        border-top-width: 1px;
+    }
+
+    /* Only the selected tab is drawn while the panel is shut — six tabs plus the chevron
+       do not fit a phone, and there is nothing behind them to look at anyway. */
+    #logUI .logUiEntry {
+        display: none;
+        flex: 1 1 0;
+        padding: 6px 2px 5px;
+        font-size: 8px;
+        letter-spacing: 0.6px;
+    }
+
+    #logcontainer.large #logUI .logUiEntry {
+        display: block;
+    }
+
+    /* The sort control swaps to its <select>: three more chips would push this bar into a
+       sideways scroll at phone widths, which is exactly what the select exists to avoid. */
+    .fv-log-wide-only {
+        display: none;
+    }
+
+    .fv-log-narrow-only {
+        display: inline-block;
+    }
+
+    /* Two text columns are one too many at this width. */
+    .fleetlist .fleetlistline>span {
+        grid-template-columns: minmax(0, 1.7fr) minmax(0, 1.2fr) 52px 62px 76px 16px;
+    }
+}
+
+@media only screen and (max-height: 500px) and (orientation: landscape) {
+
+    #logcontainer {
+        width: 100%;
+        max-width: none;
+    }
+
+    #logcontainer #logBody {
+        height: 0;
+        border-top-width: 0;
+    }
+
+    #logcontainer.large #logBody {
+        height: 300px;
+        max-height: 65vh;
+        border-top-width: 1px;
+    }
+
+    #logUI .logUiEntry {
+        display: none;
+        flex: 1 1 0;
+        padding: 6px 2px 5px;
+        font-size: 8px;
+        letter-spacing: 0.6px;
+    }
+
+    #logcontainer.large #logUI .logUiEntry {
+        display: block;
+    }
+
+    /* The sort control swaps to its <select>: three more chips would push this bar into a
+       sideways scroll at phone widths, which is exactly what the select exists to avoid. */
+    .fv-log-wide-only {
+        display: none;
+    }
+
+    .fv-log-narrow-only {
+        display: inline-block;
+    }
+}

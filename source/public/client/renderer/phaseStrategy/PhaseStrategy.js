@@ -384,6 +384,37 @@ window.PhaseStrategy = function () {
             mathlib.clearLosSprite();
         }
 
+        /* ⭐⭐ NOTHING VISIBLE LEFT IN THE HEX MEANS THE CLICK BELONGS TO THE HEX (bug report
+           2026-08-29, game 4321). Every unit here filtered out as hidden, so as far as the player
+           can see they clicked empty space - and until this branch existed the click was simply
+           swallowed and NOTHING happened, with no message.
+
+           ⚠️ THE RULE IS onShipClicked's, VERBATIM, and the bug was that only IT had it. A hex with
+           exactly ONE hidden unit in it routes through onShipClicked, whose first branch already
+           says "hidden + a hex weapon selected -> target the hex". A hex with TWO or more arrived
+           here instead, where filteredShips.length === 0 fell into the else below and was refused
+           by its own `length > 0` guard. One hidden ship: works. Two: silently does nothing.
+
+           A JUMP POINT IS WHERE THAT RELIABLY BITES, which is how it surfaced: units that fly into
+           a vortex are removed at the END of the Movement phase but stay in the icon container at
+           the vortex hex for the rest of the turn (destroyed, and hidden by shouldBeHidden), so by
+           the Firing phase a used jump point is a stack of two, three or four invisible wrecks -
+           and a Vortex Disruptor shot at that hex could never be declared. Arriving reinforcements
+           stack on a blue exit for the same reason. It is NOT a vortex-specific fix: any hex weapon
+           aimed at any hex holding several undetected stealth ships had the same hole.
+
+           Left-click only, and no fall-through to onHexClicked: a RIGHT click on a hidden stack
+           still does nothing (it opens a ship window, and there is no ship to open), and routing
+           the whole click to onHexClicked would hand the Deployment and Movement phases a hex the
+           player cannot see the contents of. Mirroring the one-ship rule changes nothing except the
+           case that was broken. */
+        if (filteredShips.length === 0) {
+            if (payload.button !== 2 && this.selectedShip && weaponManager.hasHexWeaponsSelected()) {
+                weaponManager.targetHex(this.selectedShip, payload.hex);
+            }
+            return;
+        }
+
         if (filteredShips.length === 1) { //only one ship, we have to pretend the stealth ship(s) aren't on same hex!
             var ship = filteredShips[0];
             if (payload.button === 2) {
@@ -483,6 +514,11 @@ window.PhaseStrategy = function () {
         }
 
         this.uiManager.showWeaponList({ ship: ship, gamePhase: gamedata.gamephase });
+
+        //Mark, flash and scroll to this ship's row in the INFO tab's fleet list
+        //(LOG_PANEL_REDESIGN_PLAN.md Stage 3). Guarded because the fleet list is a
+        //game.php-only surface and this file is shared; it no-ops when the tab is hidden.
+        if (window.fleetListManager) fleetListManager.revealShipRow(ship);
     };
 
     /* keepWeapons: leave gamedata.selectedSystems alone. Passed ONLY by setSelectedShip when the
@@ -716,6 +752,12 @@ window.PhaseStrategy = function () {
         var shipTooltip = new window.ShipTooltip(this.selectedShip, ships, position, shipManager.systems.selectedShipHasSelectedWeapons(this.selectedShip), menu, payload.hex, ballisticsMenu);
 
         this.shipTooltip = shipTooltip;
+        //What the tooltip's own X presses. It has to route back through hideShipTooltip rather
+        //than the tooltip's destroy(), or this.shipTooltip would keep pointing at a tooltip that
+        //is no longer in the DOM and onMouseOverShip's `!this.shipTooltip.menu` guard would then
+        //block every later tooltip. Same bound call the click / mouse-out callbacks below use, so
+        //dismissing by X and dismissing by clicking the map are literally the same code path.
+        shipTooltip.onClose = this.hideShipTooltip.bind(this, shipTooltip);
         this.onClickCallbacks.push(this.hideShipTooltip.bind(this, shipTooltip));
 
         if (hide) {
@@ -1044,7 +1086,13 @@ window.PhaseStrategy = function () {
                which empties .buttons and rebuilds the menu - so the Jump Out button was torn down
                and recreated under the cursor. Dropping the vortex here fixes both at once: the
                hex reads as holding exactly the units that are really in it. */
-            if (icon.ship && shipManager.movement.isJumpVortex(icon.ship)) return false;
+            /* EITHER KIND (REINFORCEMENTS_PLAN.md §4 Stage 3). This is the strongest case on the
+               list for matching an exit too: arriving reinforcements deliberately STACK in
+               the exit hex, so if it stayed in this sweep every arrival-hex click would go
+               through the stack picker with the vortex listed in it, and every hover would tear
+               down and rebuild the tooltip - exactly the two symptoms described above, on the
+               one hex where several units are guaranteed to be sharing space. */
+            if (icon.ship && shipManager.movement.isAnyJumpVortex(icon.ship)) return false;
             return true;
         });
     }

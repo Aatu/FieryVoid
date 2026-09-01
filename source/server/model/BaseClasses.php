@@ -63,6 +63,37 @@ class PlayerSlot {
       the deceiving slot would be a louder tell than the arithmetic it exists to hide.*/
     public $fleetValueAdjust = 0;
 
+    /*REINFORCEMENTS_PLAN.md §3.6 - what this slot is still holding in hyperspace, as a COUNT and a
+      POINT TOTAL and nothing else. Never classes, never names.
+
+      Written per viewer by TacGamedata::hideHyperspaceReinforcements, which is the same sweep that
+      deletes those units from $this->ships - so the OWNER and their team see the real rows and both
+      of these stay 0, and everybody else sees these two numbers and no rows at all.
+
+      Declared with a 0 default rather than passed to the constructor for exactly the reason
+      $fleetValueAdjust above is: the fields then ship on EVERY slot of EVERY game, so their
+      presence says nothing. A field that appeared only on a slot holding reinforcements would be a
+      louder tell than the numbers it exists to blur.*/
+    public $reinforcementCount = 0;
+    public $reinforcementPoints = 0;
+
+    /*REINFORCEMENTS_PLAN.md §2.3 - THE JUMP POINTS THIS SLOT IS OPENING, as [{x, y, facing}, ...].
+
+      A list of HEXES AND FACINGS and nothing else - never which unit declared one, never how many
+      ride it. The blue "Jump Point Forming" marker is public for the whole of the turn a jump point
+      forms in (§2.3: "the only thing that exists during turn N is the ballistic marker at the
+      declared hex"), and that is deliberately the warning an opponent gets in exchange for
+      reinforcements arriving able to act.
+
+      ⭐ IT HAS TO BE REPUBLISHED HERE because the sweep that fills it is the same one that DELETES
+      the declaring ship from this viewer's payload - orders and all. The owner's own client draws
+      the identical marker straight from its own fire order; this is the channel for everybody else.
+
+      Populated only in a MASKED payload, and only from phase 2 onward: a declaration is secret
+      while Initial Orders are open, which is the same rule hideSystemFireOrders enforces on the
+      order itself.*/
+    public $formingExits = array();
+
     function __construct(
         $playerid, $slot, $team, $lastturn, $lastphase, $name, $points,
         $depx, $depy, $deptype, $depwidth, $depheight, $depavailable,

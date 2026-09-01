@@ -84,6 +84,18 @@ $chatcompact = !empty($chatcompact);
        call is two real queries — so its retries have to terminate. See getLastTimeChecked. */
     const TIME_CHECK_MAX_FAILS = 3;
 
+    /* Consecutive "database unreachable" replies (code 300) tolerated in silence before
+       the panel admits to it. Every one of these used to raise a MODAL dialog — one per
+       chat, per poll — so during the 2026-09-01 connection bursts players were buried in
+       dialogs they could not dismiss faster than they arrived, for as long as the outage
+       lasted.
+
+       Four is deliberately past the point where a blip would have cleared: at the hot
+       2s interval that is ~8 seconds, and further up the ladder longer still. Most
+       connection shortages are over inside one poll and the player should never learn
+       they happened. See CHAT_DB_RESILIENCE_PLAN.md item 7. */
+    const DB_DOWN_NOTICE_AFTER = 4;
+
     /* ── Emoji ────────────────────────────────────────────────────────────────
        The picker's contents. Four short groups rather than one long grid: the
        panel is scrollable, and a labelled group is findable in a way that row 6
@@ -422,6 +434,9 @@ $chatcompact = !empty($chatcompact);
            quietly generating database load for as long as it stays open. */
         timeCheckFails: 0,
 
+        dbDownPolls: 0,        // consecutive code-300 replies; see DB_DOWN_NOTICE_AFTER
+        dbNoticeShown: false,  // the one in-panel notice line is up (never more than one)
+
         initInterface: function(){
             $(chat.chatElement + " .chatinput").on("keydown", function(e){
                 chat.onKeyUp.call(this, e);
@@ -726,11 +741,65 @@ $chatcompact = !empty($chatcompact);
             if(!chat.polling) return;
 
             var arrived = false;
-            if(slice && slice.error) window.confirm.exception(slice, function(){});
-            else if(slice) arrived = chat.parseChatData(slice);
+            if(slice && slice.error){
+                /* A database that is briefly unreachable is NOT a fault to interrupt the
+                   player about — it is a condition to wait out, and the poll ladder is
+                   already backing off on its own. Anything else still raises the dialog,
+                   because anything else is a real fault the player should hear about. */
+                if(chat.isDbUnavailable(slice)) chat.dbUnavailable();
+                else {
+                    chat.dbRecovered();
+                    window.confirm.exception(slice, function(){});
+                }
+            }
+            else if(slice){
+                chat.dbRecovered();
+                arrived = chat.parseChatData(slice);
+            }
 
             if(arrived) chat.markHot();
             else chat.quietPolls++;
+        },
+
+        /* chatdata.php could not reach the database. Code 300 is the marker restored by
+           ChatManager::initDBManager — before that the failure arrived as code 2
+           (E_WARNING) from inside mysqli_connect and was indistinguishable from any other
+           error, which is why every one of them became a dialog.
+
+           Compared loosely: ChatManager stringifies the code into its hand-built JSON
+           while chatdata.php's outer catch emits it as a number. */
+        isDbUnavailable: function(slice){
+            return !!slice && !!slice.error && slice.code == 300;
+        },
+
+        /* Stay completely silent for the first few, then say it once — in the panel, not
+           in a dialog — and leave that single line alone until the chat recovers. The
+           player can carry on reading, and nothing steals focus. Modelled on
+           timeCheckFailed: bounded, non-modal, and it never interrupts. */
+        dbUnavailable: function(){
+            if(++chat.dbDownPolls < DB_DOWN_NOTICE_AFTER) return;
+            if(chat.dbNoticeShown) return;
+
+            chat.dbNoticeShown = true;
+            var c = $(chat.chatElement + " .chatMessages");
+            $('<div class="chatmessage chatSystemNotice">' +
+              '<span class="chattext">Chat cannot reach the server. Still trying — ' +
+              'messages will reappear on their own.</span></div>').appendTo(c);
+
+            /* Only scroll if the player is already at the bottom; yanking the panel down
+               while they are reading back is exactly the interruption this replaced. */
+            if(c.length && c[0].scrollHeight - c.scrollTop() - c.outerHeight() < 40){
+                c.scrollTop(c[0].scrollHeight);
+            }
+        },
+
+        /* Anything that comes back normally clears the condition — including an empty
+           "[]", which is a perfectly good sign the endpoint is answering again. */
+        dbRecovered: function(){
+            chat.dbDownPolls = 0;
+            if(!chat.dbNoticeShown) return;
+            chat.dbNoticeShown = false;
+            $(chat.chatElement + " .chatSystemNotice").remove();
         },
 
         removeNewMessageTag: function(){

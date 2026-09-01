@@ -859,12 +859,36 @@ $optionsUsed = '';
         <span class="tier-pipe-separator">|</span>
 
         <label class="tier-label-style">Show Custom<input type="checkbox" id="toggleCustom" class="yellow-tick"></label>
+
+        <!-- ⚠️ DIRECTLY AFTER ITS OWN CHECKBOX, and it has to stay there. This dropdown is shown
+             and hidden by #toggleCustom (it is the "which customs?" half of that one control), so
+             the two read as one thing only while they are adjacent. The reinforcement label below
+             was inserted between them when it was added, which pushed the dropdown to the far side
+             of an unrelated control the moment Show Custom was ticked (user report 2026-08-28). -->
         <span id="customDropdown" class="custom-dropdown-style">
             <select id="customSelect" name="customFilterMode">
                 <option value="showCustom">Show Customs</option>
                 <option value="showOnlyCustom">Show Only Customs</option>
             </select>
-        </span>  
+        </span>
+
+        <span class="tier-pipe-separator">|</span>
+
+        <!-- REINFORCEMENTS_PLAN.md 2.1 - a BUY MODE, not a per-unit control: everything added to
+             the fleet while it is ticked is bought as a reinforcement and waits in hyperspace.
+             Hidden entirely unless the game was created with Allow Reinforcements
+             (gamedata.applyReinforcementRule), so a game without the rule looks exactly as it
+             did. An already-bought row is re-flagged from its own Reinforce/Main Fleet link.
+
+             ⭐ THIS CHECKBOX IS THE STATE THE WHOLE FEATURE READS. The MAIN FLEET /
+             REINFORCEMENTS headers in the fleet list are a second, more obvious control for the
+             same thing (user request 2026-08-28) - gamedata.setBuyTarget writes this box and
+             gamedata.applyFleetGrouping reads it back to decide which header lights up - so the
+             two can never disagree, and buyingReinforcement() still has exactly one thing to
+             ask. -->
+        <label class="tier-label-style reinforcement-mode-label" style="display:none"
+               title="Units bought while this is ticked wait in hyperspace and arrive through a jump point">Buy
+            as Reinforcement<input type="checkbox" id="reinforcementModeToggle" class="cyan-tick"></label>
 
 
         <div class="fleet-loading-container">

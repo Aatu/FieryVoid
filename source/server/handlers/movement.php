@@ -276,6 +276,13 @@
         public static function getOpenVortexInHex($gamedata, OffsetCoordinate $pos){
             foreach ($gamedata->ships as $unit){
                 if (!($unit instanceof SpawnJumpPoint)) continue;
+                /* REINFORCEMENTS_PLAN.md §2.6 - ONE-WAY. A blue exit can never be jumped out
+                   of. The subclass passes the instanceof above, so without this line an exit
+                   would be a perfectly legal doorway into hyperspace - and it is the hex arriving
+                   reinforcements are standing in, so it would be the easiest way off the board there is.
+                   Here rather than only in getJumpOutVortex because this is what the client's
+                   getVortexInHex mirrors, and the two must give the same answer. */
+                if ($unit instanceof SpawnJumpPointExit) continue;
                 if ($unit->spawned > $gamedata->turn) continue; //still forming
                 if ($unit->removed && $unit->removedTurn !== null && $gamedata->turn >= $unit->removedTurn) continue; //closed
                 if ($unit->getHexPos()->equals($pos)) return $unit;
@@ -347,6 +354,11 @@
 
             $vortex = $gamedata->getShipById((int)$order->value);
             if (!($vortex instanceof SpawnJumpPoint)) return null;
+            //REINFORCEMENTS_PLAN.md §2.6 - the second half of the one-way rule, stated where every
+            //jump-out path funnels through (validateJumpOutSubmission and resolveJumpOuts both ask
+            //here). getOpenVortexInHex above already refuses to hand one back, so this only ever
+            //fires on a hand-forged order naming an exit by id.
+            if ($vortex instanceof SpawnJumpPointExit) return null;
 
             $open = self::getOpenVortexInHex($gamedata, new OffsetCoordinate($order->position));
             if (!$open || (int)$open->id !== (int)$vortex->id) return null;

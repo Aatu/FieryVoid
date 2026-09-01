@@ -4,25 +4,37 @@ window.combatLog = {
 
     displayedTurn: null,
     critsShown: {},
-    critAnimations: {}, //Just a convenient place to have this array for AllWeaponFireAgainstShipAnimation to use   
+    critAnimations: {}, //Just a convenient place to have this array for AllWeaponFireAgainstShipAnimation to use
     logCache: {}, // key: turn number, value: processed fire order data
 
-    // Clears the LIVE replay log only (#log). The printed log (#LogActual) owns its own
-    // lifecycle via showCurrent / showLog and must not be touched here.
+    /* ── PRINTED-LOG VIEW STATE (LOG_PANEL_REDESIGN_PLAN.md Stage 2b/2c) ──────────
+       Sort and filters are PURE PRESENTATION and are applied in showLog ONLY. They must
+       never reach groupByShipAndWeapon, which is the canonical RESOLUTION order shared
+       with the replay animation. Remembered across sessions, so a player who always
+       reads by attacker does not re-pick it every game. */
+    sortMode: 'resolution',
+    sideFilter: 'all',
+    hitsOnly: false,
+    findText: '',
+    hiddenCount: 0,
+
+    // Damage lists longer than this start collapsed - one alpha strike against a big hull
+    // can otherwise be thirty lines and push every other entry off a 150px panel.
+    COLLAPSE_ROWS_OVER: 4,
+
+    PREF_KEY: 'fv.combatLog.view',
+
+    // Clears the LIVE replay stream only (#logLive). The printed log (#LogActual) owns its
+    // own lifecycle via showCurrent / showLog and must not be touched here.
     onTurnStart: function onTurnStart() {
-        // Scoped to #log. An unscoped $('.logentry') also matched the PRINTED log's entry
-        // divs, and because the damage <ul> below is a SIBLING of its .logentry div rather
-        // than a child, that left #LogActual holding orphaned damage lists with their
-        // "FIRE:" headers stripped off - bare "<unit> damaged for N" lines. showPrevious /
-        // showNext call this and then fetch asynchronously, so those orphans stayed on
-        // screen until the response landed and showLog overwrote the container.
-        $('#log > .logentry').remove();
-        // logFireOrders emits the damage <ul> as a SIBLING of its .logentry div
-        // (the </div> closes before the <ul>), so it lands as a direct child of
-        // #log and survives the .logentry removal. Clear those orphaned damage
-        // lists too — but only the ones directly under #log, never the print's
-        // lists nested inside #combatLogContainer > #LogActual.
-        $('#log > ul').remove();
+        /* ONE selector, and not a class selector at that. This used to be a pair -
+           $('#log > .logentry') plus $('#log > ul') - because logFireOrders emitted its
+           damage <ul> as a SIBLING of the .logentry div, so removing the entries left
+           orphaned damage lists with their "FIRE:" headers stripped off. The <ul> is
+           nested inside its entry now (Stage 2e) and the live stream has a container of
+           its own, so emptying that container is the whole job. */
+        $('#logLive').empty();
+        combatLog.updateTurnControls();
     },
 
     logDestroyedShip: function logDestroyedShip(ship, jumped) {
@@ -46,11 +58,30 @@ window.combatLog = {
             }
         }
 
-        var element = $(html).appendTo("#log");  //Changed to append - DK
+        var element = $(html).appendTo("#logLive");  //Changed to append - DK
 
-        $("#log").scrollTop($("#log")[0].scrollHeight);
+        combatLog.scrollLiveToBottom();
         return element;
 
+    },
+
+    /* #logLive is the box that actually scrolls. This used to be
+       $("#log").scrollTop($("#log")[0].scrollHeight) and was a NO-OP: #log was
+       overflow-y:visible, and a box that does not clip cannot scroll, so the live stream
+       simply overflowed the panel instead of following the newest entry. */
+    scrollLiveToBottom: function scrollLiveToBottom() {
+        var live = document.getElementById("logLive");
+        if (live) live.scrollTop = live.scrollHeight;
+    },
+
+    /* The 3px allegiance rail on a log entry, from the SAME source as the "FIRE:" header's
+       colour - so the rail follows getShipLogColorCss through all three of its arms
+       (observer / 2-team participant / 3+-team participant) instead of being a second,
+       CSS-only gate that only 2-team games would ever see. See arch_team_colour_logic. */
+    logRailStyle: function logRailStyle(ship) {
+        if (!ship) return '';
+        var m = /color\s*:\s*([^;]+)/.exec(gamedata.getShipLogColorCss(ship));
+        return m ? 'border-left-color:' + m[1] + ';' : '';
     },
 
     // damageIndex is optional: showLog builds one for the whole printed log so each order is a
@@ -170,7 +201,11 @@ window.combatLog = {
         // for the observer / 2-team / 3+-team rule it follows.
         var fireColor = gamedata.getShipLogColorCss(ship);
 
-        var html = '<div class="logentry fire-' + orders[0].id + '"><span class="logheader fire" style="' + fireColor + '">FIRE: </span><span>';
+        /* The entry's OPENING TAG is assembled at the very bottom of this function, not
+           here: the collapse class depends on how many damage rows come out of the loop
+           below, and the rail colour is easier to read next to the header colour it comes
+           from. `html` is the entry's INNER markup from this point on. */
+        var html = '<span class="logheader fire" style="' + fireColor + '">FIRE: </span><span>';
         html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name + '</span>';
 
         var counttext = count > 1 ? count + "x " : "";
@@ -269,11 +304,18 @@ window.combatLog = {
 
         html += '<span class="notes"> ' + fire.notes + '</span>';
         //  html += damagehtml;
-        html += '</span></div>';
+        html += '</span>';
 
+        /* THE DAMAGE LIST IS A CHILD OF THE ENTRY, NOT A SIBLING (Stage 2e). It used to be
+           emitted after the entry's </div>, which is what forced onTurnStart to run two
+           selectors and made a per-entry collapse impossible - there was no element that
+           contained an entry AND its damage. Built into its own string so the row count is
+           known before the entry's opening tag is written. */
+        var damageList = "";
+        var damageRows = 0;
 
         if (damages.length > 0) {
-            html += "<ul>";
+            damageList += "<ul>";
 
             for (var i in damages) {
                 var victim = damages[i].ship;
@@ -407,45 +449,63 @@ window.combatLog = {
 
                 if (fire.damageclass == "HyperspaceJump") continue; //Do not show damage to Primary Structure when jumping to Hyperspace. 
 
-                html += '<li><span class="shiplink victim" data-id="' + ship.id + '" >' + victim.name + '</span> damaged for ' + totaldam + ' (total armour mitigation: ' + armour + ').</li>';
+                damageList += '<li><span class="shiplink victim" data-id="' + ship.id + '" >' + victim.name + '</span> damaged for ' + totaldam + ' (total armour mitigation: ' + armour + ').</li>';
+                damageRows++;
 
                 if (shieldAbsorbed > 0) {
-                    html += '<li><span class="shieldabsorb">Shields absorbed ' + shieldAbsorbed + ' damage.</span></li>';
+                    damageList += '<li><span class="shieldabsorb">Shields absorbed ' + shieldAbsorbed + ' damage.</span></li>';
+                    damageRows++;
                 }
 
                 if (tendrilAbsorbed > 0) {
-                    html += '<li><span class="shieldabsorb">Tendrils absorbed ' + tendrilAbsorbed + ' damage.</span></li>';
+                    damageList += '<li><span class="shieldabsorb">Tendrils absorbed ' + tendrilAbsorbed + ' damage.</span></li>';
+                    damageRows++;
                 }
 
                 if (criticalshtml.length > 1) {
-                    html += '<li>' + criticalshtml + '</li>';
+                    damageList += '<li>' + criticalshtml + '</li>';
+                    damageRows++;
                 }
 
                 // Disengaged (orange) first, then destroyed (red), in one row.
                 var fighterNames = disengagedFighters.concat(destroyedFighters);
                 if (fighterNames.length > 0) {
-                    html += '<li> Fighters disengaged / destroyed: ' + fighterNames.join(', ') + '</li>';
+                    damageList += '<li> Fighters disengaged / destroyed: ' + fighterNames.join(', ') + '</li>';
+                    damageRows++;
                 }
 
                 if (damagehtml.length > 1) {
-                    html += '<li>' + damagehtml + '</li>';
+                    damageList += '<li>' + damagehtml + '</li>';
+                    damageRows++;
                 }
                 //}
             }
 
-            html += "</ul>";
+            damageList += "</ul>";
         }
 
-
-        if (printedLog) { //Different method of listing depending on whether player is watching a Replay animation or just browsing the printed log :)
-            var targetDiv = document.getElementById("LogActual");
-            targetDiv.style.display = "block";
-            targetDiv.innerHTML += html;
-        } else {
-            var element = $(html).appendTo("#log");
-            $("#log").scrollTop($("#log")[0].scrollHeight);
-            return element;
+        var entryClass = 'logentry fire-' + orders[0].id;
+        if (damageRows > combatLog.COLLAPSE_ROWS_OVER) {
+            // One alpha strike can be thirty rows; start those folded and let the entry be
+            // clicked open. The count goes in the affordance so the fold is never silent.
+            entryClass += ' collapsible collapsed';
+            html += '<span class="logexpand" role="button" tabindex="0">'
+                + damageRows + ' damage lines</span>';
         }
+
+        html = '<div class="' + entryClass + '" style="' + combatLog.logRailStyle(ship) + '">'
+            + html + damageList + '</div>';
+
+        /* Stage 2d: the printed path RETURNS its markup and showLog joins the lot in one
+           assignment. It used to do `targetDiv.innerHTML += html` per fire group, which
+           reparses the entire container once per group - O(n^2) on a busy turn. */
+        if (printedLog) {
+            return html;
+        }
+
+        var element = $(html).appendTo("#logLive");
+        combatLog.scrollLiveToBottom();
+        return element;
     },
 
     removeFireOrders: function removeFireOrders(element) {
@@ -496,7 +556,7 @@ window.combatLog = {
 
         html += '</span></div></ul>';
 
-        $(html).prependTo("#log");
+        $(html).prependTo("#logLive");
     },
 
     logSubReactorExplosion: function logSubReactorExplosion(ship, system) {
@@ -505,7 +565,7 @@ window.combatLog = {
         html += ' lost parts of its outer structure due to a chain reaction after a reactor exploded.';
         html += '</span></div></ul>';
 
-        $(html).prependTo("#log");
+        $(html).prependTo("#logLive");
     },
 
     /*
@@ -516,7 +576,7 @@ window.combatLog = {
         html += string;
         html += '</span></div></ul>';
 
-        $(html).prependTo("#log");
+        $(html).prependTo("#logLive");
     },
     */
 
@@ -535,8 +595,8 @@ window.combatLog = {
         var log = $(html);
         //var details = $('<ul><li><span> From ('+start.x+','+start.y+') to ('+end.x+','+end.y+') </span></ul></li>')
 
-        //$(details).prependTo("#log");
-        $(log).prependTo("#log");
+        //$(details).prependTo("#logLive");
+        $(log).prependTo("#logLive");
     },
 
     getDisplayTurn: function getDisplayTurn() {
@@ -547,43 +607,132 @@ window.combatLog = {
         }
     },
 
+    /* The turn stepper's three cells are a single control with collapsed borders, so the
+       arrows are DISABLED at the ends of the range rather than hidden - taking a middle
+       cell out of the flow would break the control in half. "Live" is the only cell that
+       still comes and goes, because it is a separate control and has nothing to say while
+       the current turn is on screen.
+
+       Also writes the panel readout, which appears in the head bar when the panel is tall
+       enough for one and at the right-hand end of the control bar otherwise - see
+       botPanel.setMeta. */
+    updateTurnControls: function updateTurnControls() {
+        var turn = combatLog.getDisplayTurn();
+        var live = (combatLog.displayedTurn === null || combatLog.displayedTurn >= gamedata.turn);
+
+        var el = document.getElementById('combatLogTurnLabel');
+        if (el) el.textContent = 'TURN ' + turn;
+
+        el = document.getElementById('previousTurnButton');
+        if (el) el.disabled = (turn <= 1);
+
+        el = document.getElementById('nextTurnButton');
+        if (el) el.disabled = live;
+
+        el = document.getElementById('currentTurnButton');
+        if (el) el.style.display = live ? 'none' : '';
+
+        /* The filter run comes off the bar while there is no print to filter - see the note
+           on #combatLogButtons.no-print in logPanel.css. #LogActual's inline display is the
+           whole test: showLog sets it to block and showCurrent to none, and they are its only
+           two writers, so there is no third state to account for. This is the right home for
+           it because every transition between the two views already ends here - showLog and
+           showCurrent both finish by calling this, and initPhase calls it on every phase
+           change. */
+        var bar = document.getElementById('combatLogButtons');
+        var print = document.getElementById('LogActual');
+        if (bar) bar.classList.toggle('no-print', !print || print.style.display === 'none');
+
+        //The Mine chip is gated on gamedata, which is why it is refreshed from HERE:
+        //gamedata.initPhase calls updateTurnControls on every phase change, and that is the
+        //first moment the slot map can answer "is this viewer a player".
+        combatLog.syncSideControl();
+
+        /* The readout used to open with "TURN n" as well. That made sense in the head bar,
+           which stood alone; in the control bar it sits a few centimetres from a stepper
+           that already says TURN n in mono, so it was a repeat costing ~55px of a row the
+           panel cannot spare. The phase, and what the filters are hiding, are the two
+           things nothing else on the bar says. */
+        if (window.botPanel && botPanel.setMeta) {
+            var meta = combatLog.phaseLabel();
+            if (combatLog.hiddenCount > 0) meta += ' · ' + combatLog.hiddenCount + ' HIDDEN';
+            botPanel.setMeta('log', meta);
+        }
+    },
+
+    /* Whether the Mine chip can mean anything for this viewer. Split out of the control
+       bar's syncControls because it is the one control whose answer depends on GAMEDATA
+       rather than on view state - and gamedata is not populated when syncControls first
+       runs.
+
+       ⭐ IT SHOWS AS WELL AS HIDES, and it refuses to answer early. The old version only
+       ever called .hide(), from a syncControls that runs at DOM-ready - when gamedata.slots
+       is still empty, so isPlayerInGame() says "not a player" and the control went away for
+       everyone, permanently. That is the Mine chip flashing on load and vanishing; the
+       All | Mine | Enemy segment it replaced had exactly the same bug, which is why no
+       player ever saw that control either.
+
+       An empty slot map means the payload has not arrived, NOT that this viewer is an
+       observer, so answer nothing and let a later call decide. updateTurnControls calls
+       this and gamedata.initPhase calls updateTurnControls on every phase change including
+       the first, so there is always a later call. */
+    syncSideControl: function syncSideControl() {
+        if (!window.gamedata || !gamedata.slots) return;
+        if (!Object.keys(gamedata.slots).length) return;
+        if (typeof gamedata.isPlayerInGame !== 'function') return;
+
+        var isPlayer = gamedata.isPlayerInGame();
+        var el = document.getElementById('combatLogMineOnly');
+        if (el) el.style.display = isPlayer ? '' : 'none';
+
+        /* An OBSERVER is on nobody's side, so "mine" would filter EVERY group away - there
+           is no unit in the game isMyorMyTeamShip will say yes to. Same two-arm reasoning as
+           every other allegiance surface here (arch_team_colour_logic). */
+        if (!isPlayer) combatLog.sideFilter = 'all';
+    },
+
+    phaseLabel: function phaseLabel() {
+        switch (gamedata.gamephase) {
+            case -1: return 'DEPLOYMENT';
+            case 1: return 'INITIAL ORDERS';
+            case 2: return 'MOVEMENT';
+            case 3: return 'FIRING';
+            case 4: return 'FIRE RESOLUTION';
+            case 5: return 'PRE-FIRING';
+            default: return 'TURN ' + gamedata.turn;
+        }
+    },
+
     showPrevious: function showPrevious() {
         if (this.displayedTurn === null) this.displayedTurn = gamedata.turn;
         var turn = this.displayedTurn - 1;
         if (turn < 1) return;
         this.displayedTurn = turn;
 
-        if (this.displayedTurn < gamedata.turn) {
-            document.getElementById('nextTurnButton').style.display = 'inline-block'; // Display next button when relevant.
-            document.getElementById('currentTurnButton').style.display = 'inline-block'; // Display next button when relevant.
-        }
-
-        combatLog.onTurnStart(); // Clear leftover live replay messages (.logentry in #log) before showing the print.
+        combatLog.onTurnStart(); // Clear leftover live replay messages before showing the print.
         combatLog.fetchAndShowCombatLog();
     },
 
     showNext: function showNext() {
         if (this.displayedTurn === null) this.displayedTurn = gamedata.turn;
         var turn = this.displayedTurn + 1; //Get the turn we want.
-        this.displayedTurn = turn; //Set new displayedTurn for further requests.
 
-        if (this.displayedTurn >= gamedata.turn) {
-            document.getElementById('nextTurnButton').style.display = 'none'; // Hide next turn button
-            document.getElementById('currentTurnButton').style.display = 'none'; //Hide Turn number.
-            document.getElementById('LogActual').style.display = 'none'; //Hide Turn number.
-            return; //Can't go forward past current turn.
+        if (turn >= gamedata.turn) { //Can't go forward past the current turn.
+            combatLog.showCurrent();
+            return;
         }
-        combatLog.onTurnStart(); // Clear leftover live replay messages (.logentry in #log) before showing the print.
+        this.displayedTurn = turn; //Set new displayedTurn for further requests.
+        combatLog.onTurnStart(); // Clear leftover live replay messages before showing the print.
         combatLog.fetchAndShowCombatLog();
     },
 
     showCurrent: function showCurrent() {
         this.displayedTurn = gamedata.turn;
 
-        document.getElementById('nextTurnButton').style.display = 'none'; // Hide next turn button
-        document.getElementById('currentTurnButton').style.display = 'none'; //Hide Turn number.
-        document.getElementById('LogActual').style.display = 'none'; //Hide Turn number.        
-        document.getElementById('LogActual').innerHTML = '';  //Reset Combat Log text          
+        document.getElementById('LogActual').style.display = 'none';
+        document.getElementById('LogActual').innerHTML = '';  //Reset Combat Log text
+        combatLog.hiddenCount = 0;
+        combatLog.updateTurnControls();
         return;
     },
 
@@ -711,37 +860,252 @@ window.combatLog = {
         });
     },
 
+    /* ── SORT (Stage 2c) ─────────────────────────────────────────────────────────
+       A PURE function over the group array, applied in showLog only. groupByShipAndWeapon
+       above stays the canonical RESOLUTION order because the replay animation reads the
+       same grouping; nothing here may reach it.
+
+       With DAMAGE cut (user, 2026-08-31) this reads nothing but the two ship names, so it
+       needs no damage index and no second sweep of the fire orders. Ties fall back to the
+       group's original index, which keeps the sort STABLE - i.e. within one attacker the
+       resolution order survives. */
+    sortGroups: function sortGroups(groups, mode) {
+        if (mode !== 'attacker' && mode !== 'target') return groups;
+
+        var nameOf = function (group, which) {
+            var id = which === 'attacker' ? group[0].shooterid : group[0].targetid;
+            var s = gamedata.getShip(id);
+            return s && s.name ? String(s.name).toLowerCase() : '￿'; //no target sorts last
+        };
+
+        return groups
+            .map(function (g, i) { return { g: g, i: i, key: nameOf(g, mode) }; })
+            .sort(function (a, b) {
+                if (a.key !== b.key) return a.key < b.key ? -1 : 1;
+                return a.i - b.i;
+            })
+            .map(function (e) { return e.g; });
+    },
+
+    /* ── FILTERS (Stage 2c) ──────────────────────────────────────────────────────
+       A pre-render .filter() on the group array, and like the sort it lives only on the
+       printed path. gamedata.isMyorMyTeamShip is safe here even though the printed log
+       carries its OWN raw ships from replay.php: logFireOrders resolves the shooter
+       through gamedata.getShip on both paths, so the object this tests is the same one
+       the entry is drawn from.
+
+       "Mine" is MY SIDE, allies included - the same isMyorMyTeamShip the rest of this
+       panel gates on, not isMyShip. Two states survive, all and mine; the enemy-only third
+       went with the segment it was a chip of - see the note in combatLog.php. */
+    filterGroups: function filterGroups(groups) {
+        var side = combatLog.sideFilter;
+        var find = (combatLog.findText || '').trim().toLowerCase();
+        var hitsOnly = combatLog.hitsOnly;
+
+        if (side === 'all' && !find && !hitsOnly) return groups;
+
+        return groups.filter(function (group) {
+            var shooter = gamedata.getShip(group[0].shooterid);
+
+            if (side !== 'all') {
+                //An observer is on nobody's side, so isMyorMyTeamShip is false for every
+                //unit and "mine" would empty the log. The control is hidden for observers
+                //(see the init block below), but guard the state anyway.
+                if (!shooter) return false;
+                if (!gamedata.isMyorMyTeamShip(shooter)) return false;
+            }
+
+            if (hitsOnly) {
+                var hit = group.some(function (fire) { return fire.shotshit > 0; });
+                if (!hit) return false;
+            }
+
+            if (find) {
+                var target = gamedata.getShip(group[0].targetid);
+                var weapon = shooter ? shipManager.systems.getSystem(shooter, group[0].weaponid) : null;
+                var hay = [
+                    shooter && shooter.name,
+                    target && target.name,
+                    weapon && weapon.displayName
+                ].join(' ').toLowerCase();
+                if (hay.indexOf(find) === -1) return false;
+            }
+
+            return true;
+        });
+    },
+
     showLog: function showLog(allFireOrders, ships = null) {
-        // Get the current turn from the combat log system
-        var currentTurn = window.combatLog.getDisplayTurn();
-
-        // Start building the log HTML
-        var html = '<br><span class = "combatTurn";>Turn ' + currentTurn + ':</span><br>';
-
-        // Check if the allFireOrders array is empty
-        if (allFireOrders.length === 0) {
-            html += '<span class = "noCombatLog";><br>No fire orders were made this turn!</span>';
-        }
-
-        // Update the content of LogActual with the current turn and optional message
-        document.getElementById('LogActual').innerHTML = html;
+        var groups = combatLog.filterGroups(allFireOrders);
+        combatLog.hiddenCount = allFireOrders.length - groups.length;
+        groups = combatLog.sortGroups(groups, combatLog.sortMode);
 
         // One reverse map of damage entries by fire order id for the whole print, built from the
         // same ship set logFireOrders will be handed (the printed log carries its own raw ships
         // from replay.php, not gamedata.ships). Lives only for this call.
         var damageIndex = weaponManager.buildDamageIndex(ships);
 
-        // Process fire orders if any
-        allFireOrders.forEach(function (logEntry) { // allFireOrders is an array of other arrays
-            combatLog.logFireOrders(logEntry, true, ships, damageIndex);
+        /* Stage 2d: ONE assignment. logFireOrders returns its markup on the printed path
+           now, so this joins the lot instead of doing innerHTML += per fire group - which
+           reparsed the whole container once per group, O(n^2) on a busy turn. */
+        /* NO "Turn N:" HEADING (user, 2026-08-31). The turn stepper in the control bar
+           directly above says which turn this is, and the heading plus its two <br>s cost
+           three lines of a panel that only has about six. updateTurnControls at the foot
+           of this function is what keeps that stepper honest. */
+        var parts = [];
+
+        if (allFireOrders.length === 0) {
+            parts.push('<span class="noCombatLog">No fire orders were made this turn!</span>');
+        } else if (groups.length === 0) {
+            //Never let a filter read as an empty turn.
+            parts.push('<span class="noCombatLog">Every fire group this turn is hidden by the current filters.</span>');
+        }
+
+        groups.forEach(function (logEntry) { // allFireOrders is an array of other arrays
+            var entry = combatLog.logFireOrders(logEntry, true, ships, damageIndex);
+            if (entry) parts.push(entry);
         });
 
-        // Show the LogActual div
-        document.getElementById('LogActual').style.display = 'block'; // Set to 'block' or 'inline-block' depending on your layout
+        //The count is ALWAYS shown while anything is filtered out, so a filter left on
+        //from a previous turn can never be mistaken for a quiet turn.
+        if (combatLog.hiddenCount > 0) {
+            parts.push('<div class="logfiltered">' + combatLog.hiddenCount
+                + (combatLog.hiddenCount === 1 ? ' fire group' : ' fire groups')
+                + ' hidden by the current filters.</div>');
+        }
+
+        var target = document.getElementById('LogActual');
+        target.innerHTML = parts.join('');
+        target.style.display = 'block';
+
         combatLog.critsShown = {}; //Empty crti tracker for next print.
+        combatLog.updateTurnControls();
+    },
+
+    /* Re-draw the printed log from the cache after a sort or filter change. Deliberately
+       does NOTHING while the print is not on screen: a filter click must not turn the live
+       replay view into a turn print behind the player's back. */
+    rerender: function rerender() {
+        var target = document.getElementById('LogActual');
+        if (!target || target.style.display === 'none') {
+            combatLog.updateTurnControls();
+            return;
+        }
+        combatLog.fetchAndShowCombatLog();
+    },
+
+    /* View preferences survive a reload - a player who reads by attacker should not have
+       to re-pick it every game. The find box is deliberately NOT remembered: a stale text
+       filter looks exactly like an empty turn. */
+    loadPrefs: function loadPrefs() {
+        try {
+            var raw = window.localStorage.getItem(combatLog.PREF_KEY);
+            if (!raw) return;
+            var p = JSON.parse(raw);
+            if (p.sortMode) combatLog.sortMode = p.sortMode;
+            //Validated, not trusted: `enemy` was a real stored value until 2026-08-31, and
+            //nothing filters on it any more - a browser still holding one would have shown an
+            //empty log with no control up to explain why.
+            if (p.sideFilter === 'mine' || p.sideFilter === 'all') combatLog.sideFilter = p.sideFilter;
+            combatLog.hitsOnly = !!p.hitsOnly;
+        } catch (e) { /* defaults stand */ }
+    },
+
+    savePrefs: function savePrefs() {
+        try {
+            window.localStorage.setItem(combatLog.PREF_KEY, JSON.stringify({
+                sortMode: combatLog.sortMode,
+                sideFilter: combatLog.sideFilter,
+                hitsOnly: combatLog.hitsOnly
+            }));
+        } catch (e) { /* the choice still applies for this session */ }
     }
 
 };
+/* ── The combat log's control bar (LOG_PANEL_REDESIGN_PLAN.md Stage 2b/2f) ──────────
+   Everything here is view state. Not one line of it reaches groupByShipAndWeapon or the
+   replay animation - see the note on combatLog.sortGroups. */
+$(function () {
+
+    combatLog.loadPrefs();
+
+    /* Paint the controls from the (possibly remembered) state, and hide the ones that
+       cannot mean anything for this viewer. Called again on every tab show because
+       gamedata is not necessarily populated at DOM-ready. */
+    var syncControls = function syncControls() {
+        //Two controls, one state - see the note in combatLog.php. Only one of them is ever
+        //on screen, but both are painted so a viewport change never shows a stale one.
+        $("#combatLogSort").val(combatLog.sortMode);
+        $("#combatLogSortSeg .fv-log-chip").each(function () {
+            $(this).attr("aria-pressed", $(this).data("sort") === combatLog.sortMode ? "true" : "false");
+        });
+        combatLog.syncSideControl();
+        $("#combatLogMineOnly").attr("aria-pressed", combatLog.sideFilter === 'mine' ? "true" : "false");
+        $("#combatLogHitsOnly").attr("aria-pressed", combatLog.hitsOnly ? "true" : "false");
+
+        if (window.gamedata && gamedata.turn) combatLog.updateTurnControls();
+    };
+
+    var applySort = function applySort(mode) {
+        combatLog.sortMode = mode;
+        syncControls();
+        combatLog.savePrefs();
+        combatLog.rerender();
+    };
+
+    $("#combatLogSort").on("change", function () { applySort(this.value); });
+    $("#combatLogSortSeg").on("click", ".fv-log-chip", function () {
+        applySort(String($(this).data("sort")));
+    });
+
+    //A TOGGLE, not one chip of a segment: on = my side only, off = the whole turn.
+    $("#combatLogMineOnly").on("click", function () {
+        combatLog.sideFilter = (combatLog.sideFilter === 'mine') ? 'all' : 'mine';
+        $(this).attr("aria-pressed", combatLog.sideFilter === 'mine' ? "true" : "false");
+        combatLog.savePrefs();
+        combatLog.rerender();
+    });
+
+    $("#combatLogHitsOnly").on("click", function () {
+        combatLog.hitsOnly = !combatLog.hitsOnly;
+        $(this).attr("aria-pressed", combatLog.hitsOnly ? "true" : "false");
+        combatLog.savePrefs();
+        combatLog.rerender();
+    });
+
+    //Not debounced on purpose: the filter runs over the cached group array for one turn,
+    //which is tens of entries, and a keystroke delay on a find box reads as lag.
+    $("#combatLogFind").on("input search", function () {
+        combatLog.findText = this.value;
+        combatLog.rerender();
+    });
+
+    $("#log").on("onshow", syncControls);
+    syncControls();
+
+    /* A long damage list starts folded (Stage 2f). Clicking anywhere in the entry opens
+       it, except on a ship name - those are marked up as links and will one day behave
+       like ones. */
+    $("#combatLogContainer").on("click", ".logentry.collapsible", function (e) {
+        if ($(e.target).closest(".shiplink").length) return;
+        $(this).toggleClass("collapsed");
+    });
+
+    /* Left / right step turns WHILE THE PANEL HAS FOCUS - never globally, so the map keeps
+       its own arrow keys, and never while the player is typing in the find box. */
+    $(document).on("keydown", function (e) {
+        if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+        var panel = document.getElementById("logcontainer");
+        if (!panel || !document.activeElement || !panel.contains(document.activeElement)) return;
+        if (!$("#logTab").hasClass("selected")) return;
+        var tag = document.activeElement.tagName;
+        if (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA") return;
+        e.preventDefault();
+        if (e.key === "ArrowLeft") combatLog.showPrevious();
+        else combatLog.showNext();
+    });
+});
+
 $(function () {
     $(document).on('mouseenter touchstart', '.intercept-tooltip', function (e) {
         var tooltip = $('#custom-intercept-tooltip');

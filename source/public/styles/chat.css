@@ -198,6 +198,29 @@
     overflow-wrap: anywhere;        /* a pasted URL must not widen the panel */
 }
 
+/* The chat's own voice, for the one thing it needs to say for itself: it cannot reach
+   the server. This replaced a MODAL dialog that fired once per chat per poll for the
+   whole length of a database outage — see CHAT_DB_RESILIENCE_PLAN.md item 7.
+
+   Styled deliberately unlike a message: no timestamp column, no username, no accent,
+   italic and dimmed, so it reads as panel chrome rather than as something a player
+   said. The warning colour appears only as a 2px rule and a barely-there wash — enough
+   to find, not enough to alarm, since by design it is shown for a condition that is
+   expected to pass on its own. Exactly one is ever present (chat.dbNoticeShown), and
+   it is removed the moment any poll answers normally. */
+.fv-chat .chatmessage.chatSystemNotice {
+    margin: 6px 0;
+    padding: 5px 8px;
+    border-left: 2px solid var(--fv-warning);
+    background: rgba(255, 216, 77, 0.07);
+}
+
+.fv-chat .chatmessage.chatSystemNotice .chattext {
+    font-size: 12px;
+    font-style: italic;
+    color: var(--fv-text-dim);
+}
+
 /* ── The composer ─────────────────────────────────────────────────────────────
    Docked to the foot of the panel, full width, rather than an input floating in a
    gutter. The input itself used to be the last raw browser control on these pages:

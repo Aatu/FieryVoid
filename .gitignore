@@ -15,6 +15,7 @@ nano*
 *.log
 /node_modules
 /source/public/static
+/tests
 .claude
 
 # Local-only Discord secrets for the docker dev container (never commit)

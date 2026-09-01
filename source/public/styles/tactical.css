@@ -363,6 +363,41 @@ body {
     color: #ffffff;
 }
 
+/* ⭐⭐ REINFORCEMENTS_PLAN.md STAGE 8 - THE ARRIVAL LIVERY, AND IT IS A TOKEN OVERRIDE AND NOTHING
+   ELSE. UI.gateSignal.open() puts .gateSignalExit on the container when the claim asks for a
+   doorway IN, and every rule above is written against the --gs-* custom properties, so redefining
+   six of them here re-liveries the whole panel - chrome, steppers, field, focus ring and commit
+   button - without a single duplicated selector. Change a dimension above and this follows it for
+   free; add a hard-coded colour up there and this stops working, which is the point.
+
+   #00b8e6 IS FV'S ESTABLISHED "NOT HERE YET" CYAN (plan section 3.7) - the Forming marker, the
+   exit vortex, the fleet list's hyperspace row and theme.js's statusPending are all this one
+   value. Do not introduce a second blue. Everything below is that colour put through the same
+   transformations the gold values above already are: a near-black wash for the container, a mid
+   tone for the row lines, and a full-strength pair for the commit button.
+
+   ⚠️ THE LABEL SWAP IS IN JS, NOT HERE. The button's text is written by UI.gateSignal.open()
+   because the markup has one button and two meanings, and content: attr() would fight the plain
+   text node game.php ships. This file owns the colour only. */
+#gateSignalUI.gateSignalExit {
+    --gs-bg: rgba(4, 20, 26, 0.9);
+    --gs-line: #3f7d92;
+    --gs-line-row: #40808f;
+    --gs-text: #d6f4ff;
+    --gs-btn-bg: #10394a7c;
+    --gs-btn-line: #3f7d92be;
+    --gs-warn-bg: #00728f;
+    --gs-warn-line: #00b8e6;
+    --gs-warn-hover-bg: #0090b4;
+    --gs-warn-hover-line: #4ad4ff;
+}
+
+/* The row hover is the one rule above that hard-codes its rgba (it is a wash of --gs-line-row,
+   which cannot be expressed as a var() alpha without a colour-mix), so it needs its own twin. */
+#gateSignalUI.gateSignalExit .gateSignalRow:hover {
+    background-color: rgba(64, 128, 143, 0.10);
+}
+
 .centercontainer {
     position: absolute !important;
     left: 50% !important;
@@ -773,175 +808,21 @@ body {
     display: none;
 }
 
-/* The log / info / chat panel. Roadmap item 6, Stage 4 surface 3.
+/* ── THE LOG PANEL LIVES IN styles/logPanel.css ────────────────────────────────
+   Every rule for #logcontainer and its six tabs - the panel shell, the tab strip,
+   the combat log, the fleet list, the declarations panel and the Save Fleet panel,
+   plus both mobile media queries' restatements of them - moved out of this file in
+   one commit (LOG_PANEL_REDESIGN_PLAN.md §1). No rule lives in both files.
 
-   Its fill was ALREADY the SCS panel colour (#04161C = theme.colors.panelBg), so only the
-   borders actually moved here - this surface was half-converged before item 6 started.
-   The opacity is left at 0.85 because --fv-well, unlike --fv-chrome-scs, has no alpha of
-   its own to multiply with (see the note on #phaseheader).
+   THREE THINGS DELIBERATELY STAYED HERE, because they are shared with surfaces that
+   are not the log panel:
+     - the ::-webkit-scrollbar block below, which #gameinfo / #declarationsContainer /
+       #combatLogContainer share with #iniGui and .mine-deploy-group-list;
+     - #logcontainer .assignthrustcontainer, which is dead markup nothing emits any
+       more but is not part of this refit;
+     - the mobile media queries themselves, which still size the rest of the screen.
 
-   The body text colour is deliberately NOT touched: #7ba2ea is a considered choice, not
-   drift - the two commented-out alternatives below it are previous attempts that were
-   reverted. Changing it would restyle every log line, which is content, not chrome. */
-#logcontainer {
-    width: 100%;
-    max-width: 800px;
-    height: 150px;
-    opacity: 0.85;
-    color: #7ba2ea;
-    /*color: #e0e7ef;*/
-    /* #deebff; */
-    background-color: var(--fv-well);
-    border-top: 1px solid var(--fv-line-scs);
-    border-right: 1px solid var(--fv-line-scs);
-    border-left: 1px solid var(--fv-line-scs);
-    position: fixed;
-    bottom: 0px;
-    z-index: 10;
-    -moz-box-shadow: 5px 5px 10px var(--fv-overlay);
-    -webkit-box-shadow: 5px 5px 10px var(--fv-overlay);
-    box-shadow: 5px 5px 10px var(--fv-overlay);
-    font-family: arial;
-    font-size: 12px;
-    -webkit-transition: all 0.1s linear;
-    -moz-transition: all 0.1s linear;
-    -o-transition: all 0.1s linear;
-    transition: all 0.1s linear;
-}
-
-#logcontainer.large {
-    height: 500px;
-    max-height: 75vh;
-}
-
-#logcontainer.mouseover {
-    bottom: 0px;
-}
-
-/* The log / info / chat tabs.
-
-   ⚠️ The most arguable call in surface 3: these had 5px top corners, and rounded-top is a
-   strong "this is a tab" affordance. They follow --fv-radius-chrome (now 0) with the rest
-   of the legacy chrome rather than being carved out like the ini drawer, because unlike
-   the drawer the curve here is decoration rather than a cue about how the thing behaves -
-   the tabs sit in a row above a panel and read as tabs from position alone. Easy to
-   reverse if it looks wrong: give them their own token like --fv-radius-drawer.
-
-   The unselected fill (#020E12) is a one-off shade darker than the panel it fronts, which
-   is what makes an unselected tab recede; the selected tab matches the panel exactly. */
-.logUiEntry {
-    position: absolute;
-    top: -26px;
-    border-top: 1px solid var(--fv-line-scs);
-    border-right: 1px solid var(--fv-line-scs);
-    border-left: 1px solid var(--fv-line-scs);
-    border-radius: var(--fv-radius-chrome) var(--fv-radius-chrome) 0px 0px;
-    -moz-border-radius: var(--fv-radius-chrome) var(--fv-radius-chrome) 0px 0px;
-    -webkit-border-radius: var(--fv-radius-chrome) var(--fv-radius-chrome) 0px 0px;
-    width: 100px;
-    height: 18px;
-    text-align: center;
-    font-size: 10px;
-    padding-top: 6px;
-    z-index: 9999;
-    background-color: #020E12;
-    cursor: pointer;
-    color: #deebffb6;
-}
-
-.logUiEntry span {}
-
-.logUiEntry.selected {
-    top: -25px;
-    background-color: var(--fv-well);
-    color: var(--fv-text);
-    font-weight: bold;
-}
-
-/* Unread chat — the old rule only lifted the text colour by one shade
-   (#deebffb6 -> #DEEBFF), which players kept missing. Light the whole tab
-   instead: amber fill, glowing border and a slow pulse, so it registers from
-   the corner of the eye while the player is looking at the map. Never applies
-   to the selected tab (chat.php only tags unselected tabs anyway). */
-.logUiEntry.newMessage:not(.selected) {
-    color: #FFE9CB;
-    font-weight: bold;
-    background-color: #5A2B0D;
-    border-color: #E08A3C;
-    text-shadow: 0 0 6px rgba(255, 176, 92, 0.8);
-    box-shadow: 0 0 8px 1px rgba(224, 138, 60, 0.6);
-    /*animation: chatTabUnreadPulse 1.6s ease-in-out infinite;*/
-}
-
-@keyframes chatTabUnreadPulse {
-
-    0%,
-    100% {
-        background-color: #5A2B0D;
-        box-shadow: 0 0 6px 0 rgba(224, 138, 60, 0.45);
-    }
-
-    50% {
-        background-color: #97490F;
-        box-shadow: 0 0 15px 3px rgba(255, 176, 92, 0.95);
-    }
-}
-
-/* Keep the highlight loud but hold it still for motion-sensitive players. */
-@media (prefers-reduced-motion: reduce) {
-    .logUiEntry.newMessage:not(.selected) {
-        animation: none;
-        background-color: #8A4413;
-        box-shadow: 0 0 12px 2px rgba(255, 176, 92, 0.85);
-    }
-}
-
-#logTab.logUiEntry {
-    left: -1px;
-}
-
-#infoTab.logUiEntry {
-    left: 104px;
-}
-
-#chatTab.logUiEntry {
-    left: 208px;
-}
-
-#globalChatTab.logUiEntry {
-    left: 312px;
-}
-
-#settingsTab.logUiEntry {
-    left: 417px;
-}
-
-
-#declarationsTab.logUiEntry {
-    left: 416px;
-}
-
-/* Every tab in this row is absolutely positioned with an explicit `left`, so a new one
-   with none defaults to left:auto and lands ON TOP of #logTab. SAVE FLEET is the
-   right-most tab, one 104px step (100px wide + 4px gap) past DECLARATIONS.
-   Hidden by savedFleets.refreshSavePanel when the viewer has no units in the game. */
-#fleetSaveTab.logUiEntry {
-    left: 520px;
-}
-
-#declarationsContainer {
-    overflow-y: scroll;
-    position: absolute;
-    padding: 0 0px;
-}
-
-#combatLogContainer {
-    overflow-y: scroll;
-    position: absolute;
-    padding: 0px 0px 0px 0px;
-    /* Extra right padding for scrollbar visibility */
-}
-
+   logPanel.css is linked by game.php AFTER this file. */
 
 #iniGui::-webkit-scrollbar {
     width: 12px;
@@ -993,405 +874,6 @@ body {
 #combatLogContainer::-webkit-scrollbar-thumb:hover,
 .mine-deploy-group-list::-webkit-scrollbar-thumb:hover {
     background: var(--fv-scroll-thumb-hover);
-}
-
-#combatLogButtons {
-    position: absolute;
-    /* Absolute positioning */
-    font-size: 14px;
-    font-style: normal;
-    /*font-weight: bold;*/
-    /*color: #7ba2ea; /* #deebff; */
-    color: #e0e7ef;
-    top: 0;
-    /* Align to the top */
-    right: 0;
-    /* Align to the right */
-    padding-top: 3px;
-    padding-right: 3px;
-    /* Adjust for padding from the right side */
-    z-index: 11;
-    /* Make sure it's on top */
-    opacity: 0.95;
-}
-
-/* Only the BORDER converts here: it is chrome, and a teal outline inside a converted
-   panel reads as a miss. The #215a7a fill and 4px radius are left alone - that fill is
-   the button's own identity rather than panel chrome, and a small radius on a small
-   control is not what §5's squaring decision was about. Revisit by eye if the buttons
-   now look out of place against the squared panel. */
-#combatLogButtons input[type="button"] {
-    font-size: 13px;
-    cursor: pointer;
-    margin-top: 3px;
-    margin-right: 0px;
-    margin-left: 3px;
-    /* Add space between buttons */
-    border: 1px solid var(--fv-line-scs);
-    background: #215a7a;
-    border-radius: 4px;
-    color: #e0e7ef;
-}
-
-#gameinfo {
-    position: relative;
-}
-
-#gameInfoButtons {
-    position: relative;
-    /* Relative positioning to flow normally in the element */
-    text-align: right;
-    /* Align buttons to the right */
-    font-size: 14px;
-    font-style: normal;
-    color: #e0e7ef;
-    padding-top: 2px;
-    padding-right: 2px;
-    /* Adjust for padding from the right side */
-    z-index: 11;
-    /* Make sure it's on top */
-    opacity: 0.95;
-    margin-right: 0px;
-}
-
-#gameInfoButtons input[type="button"] {
-    font-size: 13px;
-    cursor: pointer;
-    padding: 3px 8px 3px 8px;
-    margin-top: 3px;
-    margin-right: 5px;
-    margin-left: 3px;
-    margin-bottom: 3px;
-    /* Add space between buttons */
-    border: 1px solid #e0e7ef3b;
-    background: #215a7a;
-    border-radius: 4px;
-    color: #e0e7ef;
-}
-
-
-#LogActual {
-    padding-top: 3px;
-    font-size: 12px;
-    font-style: normal;
-}
-
-#declarationsButtons {
-    margin-top: 4px;
-    margin-bottom: 4px;
-    padding-top: 5px;
-    font-size: 13px;
-    color: #e0e7ef;
-}
-
-/* Border only, same reasoning as #combatLogButtons above. */
-#declarationsButtons input[type="button"] {
-    font-size: 13px;
-    cursor: pointer;
-    margin-top: 3px;
-    margin-bottom: 3px;
-    margin-right: 1px;
-    margin-left: 2px;
-    /* Add space between buttons */
-    border: 1px solid var(--fv-line-scs);
-    background: #215a7a;
-    border-radius: 4px;
-    color: #e0e7ef;
-}
-
-#declarationsActual {
-    padding-bottom: 10px;
-    color: #e0e7ef;
-}
-
-/* The bot panel's tab. Byte-for-byte the same pattern as .logUiEntry above and it sits in
-   the same bar, so it converts with the tabs - see the note there. */
-#expandBotPanel {
-    position: absolute;
-    top: -26px;
-    border-top: 1px solid var(--fv-line-scs);
-    border-right: 1px solid var(--fv-line-scs);
-    border-left: 1px solid var(--fv-line-scs);
-    border-radius: var(--fv-radius-chrome) var(--fv-radius-chrome) 0px 0px;
-    -moz-border-radius: var(--fv-radius-chrome) var(--fv-radius-chrome) 0px 0px;
-    -webkit-border-radius: var(--fv-radius-chrome) var(--fv-radius-chrome) 0px 0px;
-    width: 100px;
-    height: 18px;
-    text-align: center;
-    font-size: 10px;
-    padding-top: 6px;
-    z-index: 9999;
-    background-color: #020E12;
-    cursor: pointer;
-    right: 5px;
-    width: 40px;
-    color: white;
-
-}
-
-/* On phones the tabs are display:none until the panel is expanded (see the two
-   mobile media queries below), so an unread chat tab would light up somewhere
-   the player cannot see. Carry the glow onto the "Click!" expand button while
-   the panel is collapsed — on those viewports it is the only tab-strip element
-   on screen. Desktop is excluded: there the tab itself is always visible, so
-   glowing both would just be noise. */
-@media only screen and (max-width: 765px),
-only screen and (max-height: 500px) and (orientation: landscape) {
-    #logcontainer:not(.large):has(.logUiEntry.newMessage) #expandBotPanel {
-        background-color: #5A2B0D;
-        border-color: #E08A3C;
-        color: #FFE9CB;
-        font-weight: bold;
-        box-shadow: 0 0 8px 1px rgba(224, 138, 60, 0.6);
-        /*animation: chatTabUnreadPulse 1.6s ease-in-out infinite;*/
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-
-    #logcontainer:not(.large):has(.logUiEntry.newMessage) #expandBotPanel {
-        animation: none;
-    }
-}
-
-#gameinfo.logPanelEntry {
-    overflow-x: hidden;
-    overflow-y: scroll;
-}
-
-/* Save Current Fleet panel (PREBATTLE_DAMAGE_PLAN.md §7.3). Tokens only - see
-   styles/tokens.css, which is the ONLY :root block on the page. */
-#logcontainer #fleetsave {
-    height: 100%;
-    width: 100%;
-    z-index: 10001;
-    overflow-x: hidden;
-    overflow-y: auto;
-}
-
-#fleetSavePanel {
-    padding: 8px 12px;
-    font-size: 13px;
-    font-style: normal;
-    color: var(--fv-text);
-    max-width: 640px;
-}
-
-#fleetSavePanel p {
-    margin: 0 0 8px 0;
-    line-height: 1.4;
-}
-
-#fleetSaveSummary {
-    color: var(--fv-text-dim);
-    font-size: 12px;
-}
-
-#fleetSaveButton {
-    font-size: 13px;
-    cursor: pointer;
-    padding: 4px 12px;
-    border: 1px solid var(--fv-line-scs);
-    background: var(--fv-line);
-    border-radius: var(--fv-radius-chrome);
-    color: var(--fv-text);
-}
-
-#fleetSaveButton:hover {
-    background: var(--fv-card-hover);
-}
-
-#fleetSaveButton:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
-
-.combatTurn {
-    font-size: 12px;
-    font-weight: bold;
-    text-decoration: underline;
-    top: 15px;
-    color: #e0e7ef;
-}
-
-.noCombatLog {
-    font-size: 14px;
-    color: #e0e7ef;
-}
-
-.fleetlistentry {
-    padding-top: 10px;
-    padding-left: 5px;
-    padding-bottom: 5px;
-    float: left;
-    width: 98%;
-}
-
-.fleetlistentry .destroyed {
-    font-style: normal;
-    color: #c54120;
-}
-
-.fleetlistentry .jumped {
-    font-style: normal;
-    /*color:#00d100;*/
-    color: #cc8500;
-}
-
-.fleetlistentry .docked {
-    font-style: normal;
-    color: #00b8e6;
-}
-
-.fleetheader .headername {
-    font-weight: bold;
-    color: #deebff;
-}
-
-.fleetheader .playername {
-    color: #deebff;
-}
-
-.fleetlist {
-    display: block;
-}
-
-.fleetlist .header {
-    font-weight: bold;
-    text-decoration: underline;
-    text-transform: uppercase;
-    color: #a7c1f1;
-}
-
-.fleetheader {
-    margin-bottom: 3px;
-    margin-left: 5px
-}
-
-.fleetlist .shipname {
-    margin-top: 3px;
-    float: left;
-    padding-left: 5px;
-    width: 30%;
-}
-
-.fleetlist .shipclass {
-    margin-top: 3px;
-    float: left;
-    width: 30%;
-}
-
-.fleetlist .shiptype {
-    margin-top: 3px;
-    float: left;
-    width: 10%;
-    text-align: center;
-}
-
-/* //Apparently not used anymore, and old element is pushing value out of alignment in Info Tab - DK
-.fleetlist .shipstatus{
-    margin-top: 3px;
-    float: left;
-    width: 10%;
-}
-*/
-
-.fleetlist .shipstatus:empty {
-    display: none;
-}
-
-.fleetlist .initiative {
-    margin-top: 3px;
-    float: left;
-    text-align: center;
-    width: 10%;
-}
-
-.fleetlist .value {
-    margin-top: 3px;
-    float: left;
-    width: 15%;
-    text-align: center;
-}
-
-#logcontainer #gameinfo {
-    height: 100%;
-    width: 100%;
-    z-index: 10001;
-
-}
-
-#logcontainer #chat {
-    height: 100%;
-    width: 100%;
-    z-index: 10001;
-
-}
-
-#logcontainer #globalchat {
-    height: 100%;
-    width: 100%;
-    z-index: 10001;
-
-}
-
-#log {
-    width: 100%;
-    height: 100%;
-    border-right: 1px solid #496791;
-    position: absolute;
-    left: 0px;
-    top: 0px;
-    z-index: 10000;
-    overflow-y: visible;
-    overflow-x: hidden;
-
-}
-
-
-#logContainer.assignThrust #log {
-    display: none;
-}
-
-#log .logentry {
-    margin: 3px 5px 3px 5px;
-    cursor: pointer;
-}
-
-#log .logheader {
-    font-weight: bold;
-    color: #c54120;
-}
-
-#log .damage {
-    color: #c54120;
-}
-
-#log .critical {
-    color: rgba(255, 166, 0, 0.781);
-}
-
-/* Shield-projection absorption line. Unscoped so it colours both the live replay
-   log (#log) and the printed turn log (#LogActual). */
-.shieldabsorb {
-    color: #6fb7ff;
-}
-
-#log .shiplink {
-    color: #deebff;
-}
-
-#log .notes {
-    display: none;
-}
-
-#log .destroyed {
-    font-weight: bold;
-    color: #b34119;
-}
-
-#log ul {
-    margin: 5px 0px;
 }
 
 
@@ -1768,61 +1250,6 @@ only screen and (max-height: 500px) and (orientation: landscape) {
         background-size: cover;
     }
 
-    #logUI {
-        display: flex;
-        flex-direction: row;
-    }
-
-    #logcontainer.large #logUI .logUiEntry {
-        width: 15%;
-        display: block;
-    }
-
-    #logUI .logUiEntry {
-        width: 15%;
-        display: none;
-    }
-
-    #logUI #infoTab {
-        left: 15%;
-    }
-
-    #logUI #chatTab {
-        left: 30%;
-        width: 15%;
-    }
-
-    #logUI #globalChatTab {
-        left: 45%;
-        width: 15%;
-    }
-
-    #logUI #declarationsTab {
-        left: 60%;
-        width: 15%;
-    }
-
-    #logUI #fleetSaveTab {
-        left: 75%;
-        width: 15%;
-    }
-
-    #logUI #expandBotPanel {
-        right: 0px;
-        left: auto;
-    }
-
-    #logcontainer {
-        height: 0;
-        width: 100%;
-        max-width: none;
-    }
-
-    #logcontainer.large {
-        height: 300px;
-        max-height: 75vh;
-    }
-
     #iniGui {
         max-height: calc(100vh - 250px);
         width: 200px;
@@ -1878,8 +1305,9 @@ only screen and (max-height: 500px) and (orientation: landscape) {
    A phone turned sideways reports a viewport WIDTH above the 765px mobile
    breakpoint, so the desktop log (always-visible, height:150px) would take over
    and eat ~40% of the short screen. Key off the short viewport HEIGHT instead so
-   the log stays collapsed to its tabs until the user taps "Click!" (#expandBotPanel,
-   which toggles .large), matching portrait behaviour. */
+   the log stays collapsed to its tabs until the user taps the chevron
+   (#expandBotPanel, which toggles .large), matching portrait behaviour. The log
+   panel's own half of this breakpoint now lives in styles/logPanel.css. */
 @media only screen and (max-height: 500px) and (orientation: landscape) {
     #topcontainer {
         max-width: calc(100% - var(--fv-hud-strip-small) - 10px);
@@ -1918,61 +1346,6 @@ only screen and (max-height: 500px) and (orientation: landscape) {
         width: 18px;
         height: 18px;
         background-size: cover;
-    }
-
-    #logUI {
-        display: flex;
-        flex-direction: row;
-    }
-
-    #logcontainer.large #logUI .logUiEntry {
-        width: 15%;
-        display: block;
-    }
-
-    #logUI .logUiEntry {
-        width: 15%;
-        display: none;
-    }
-
-    #logUI #infoTab {
-        left: 15%;
-    }
-
-    #logUI #chatTab {
-        left: 30%;
-        width: 15%;
-    }
-
-    #logUI #globalChatTab {
-        left: 45%;
-        width: 15%;
-    }
-
-    #logUI #declarationsTab {
-        left: 60%;
-        width: 15%;
-    }
-
-    #logUI #fleetSaveTab {
-        left: 75%;
-        width: 15%;
-    }
-
-    #logUI #expandBotPanel {
-        right: 0px;
-        left: auto;
-    }
-
-    #logcontainer {
-        height: 0;
-        width: 100%;
-        max-width: none;
-    }
-
-    #logcontainer.large {
-        height: 300px;
-        max-height: 65vh;
     }
 
     /* iniGui / initiative list — same shrink as portrait so it doesn't
@@ -2345,4 +1718,252 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     font-size: 12px;
     color: #bdd9eb;
     padding-left: 4px;
+}
+/* ── Reinforcements: calling a jump point exit (REINFORCEMENTS_PLAN.md Stage 4) ──────
+   #00b8e6 throughout - FV's established "not here yet" cyan, the same value as the blue
+   Jump Point marker, the fleet list's .docked / .hyperspace rows and the fleet header's
+   [Deploys on Turn N]. Do NOT introduce a second blue for this. */
+
+/* The #iniGui button. Deliberately the same shape as #mineDeployBtn beside it - it is the
+   same kind of thing, a switch that arms a bespoke map mode - and differs only in the
+   ACTIVE colour, which is the feature's cyan rather than the minefield's green. */
+#reinforcementEntryBtn {
+    display: block;
+    width: 90%;
+    box-sizing: border-box;
+    margin: 10px auto 0px;
+    padding: 6px 10px;
+    background: #3793c82a;
+    border: 1px solid var(--fv-line-scs);
+    border-radius: 5px;
+    color: var(--fv-text);
+    font-family: arial, sans-serif;
+    font-size: 13px;
+    text-align: center;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
+    opacity: 0.9;
+}
+
+#reinforcementEntryBtn:hover {
+    background: #133e56;
+    border-color: #5a9abf;
+    color: #deebff;
+}
+
+#reinforcementEntryBtn.active {
+    background: rgba(0, 184, 230, 0.30);
+    border-color: #00b8e6;
+    color: white;
+    box-shadow: 0 0 8px rgba(0, 184, 230, 0.35);
+}
+
+/* The armed-mode instruction strip. Top-centre rather than anchored to anything on the
+   map, because the whole point of the mode is that the hex has not been chosen yet, so
+   there is nowhere on the map to anchor to. pointer-events on the strip itself would
+   swallow map clicks in the band it covers, so only the Cancel word takes them. */
+#reinforcementEntryBanner {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 8000;
+    pointer-events: none;
+    padding: 7px 14px;
+    background: rgba(4, 22, 28, 0.92);
+    border: 1px solid #00b8e6;
+    border-radius: 5px;
+    color: var(--fv-text);
+    font-family: arial, sans-serif;
+    font-size: 13px;
+    box-shadow: 0 0 10px rgba(0, 184, 230, 0.35);
+    white-space: nowrap;
+}
+
+#reinforcementEntryBanner b {
+    color: #00b8e6;
+}
+
+#reinforcementEntryBanner .reinforcementEntryCancel {
+    pointer-events: auto;
+    margin-left: 14px;
+    padding-left: 12px;
+    border-left: 1px solid rgba(0, 184, 230, 0.4);
+    color: #8ca5c0;
+    cursor: pointer;
+}
+
+#reinforcementEntryBanner .reinforcementEntryCancel:hover {
+    color: #deebff;
+}
+
+/* THE TWO REINFORCEMENT DIALOGS ARE WIDER THAN THE REST OF THE .fleetDialog FAMILY (user request
+   2026-08-28). Save Fleet and Load Fleet ask a one-line question and 420px is right for them; these
+   two are LISTS, and every row carries a ship name, a state tag and a free-text detail, so at 420px
+   a name next to an OPENING or RIDING tag wrapped onto a second and third line.
+
+   ⚠️ AN EXTRA CLASS AND NOT AN EDIT TO .confirm.fleetDialog. That skin is shared with the saved-fleet
+   windows on BOTH pages (confirm.css) and widening it would resize dialogs this feature has nothing
+   to do with. Three classes also puts this above the phone rule at the foot of confirm.css, which is
+   why the media query below has to be restated here rather than inherited - and it must stay AFTER
+   the base rule, since the two carry equal specificity and only source order separates them.
+   The family's own `max-width: calc(100vw - 32px)` still clamps both, so neither can overhang. */
+.confirm.fleetDialog.reinforcementDialog {
+    width: 560px;
+}
+
+@media (max-width: 765px) {
+    .confirm.fleetDialog.reinforcementDialog {
+        width: 420px;
+    }
+}
+
+/* One row of the Manage Reinforcements / manifest dialogs. These ride confirm.fleetDialogShell,
+   so the surrounding window skin, the buttons and the click plumbing are all inherited;
+   only the rows themselves are new. The whole row is a <label>, so the class name is as
+   much of a hit target as the box. */
+.confirm.fleetDialog .reinforcementRow {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 4px 2px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(33, 90, 122, 0.35);
+}
+
+.confirm.fleetDialog .reinforcementRow:last-child {
+    border-bottom: none;
+}
+
+.confirm.fleetDialog .reinforcementRow:hover {
+    background: rgba(0, 184, 230, 0.08);
+}
+
+/* THE NAME COLUMN, WHICH IS A STACK AND NOT A LINE (user request 2026-08-28). The state tag sits
+   UNDERNEATH the ship name rather than beside it, so the name has the whole column to itself and a
+   long one no longer has to share the line with a badge. Rows with no tag are still one line tall -
+   the wrapper only grows when there is a second thing to put in it.
+
+   min-width: 0 is the usual flex escape hatch: a flex item's default min-width is `auto`, so
+   without it an over-long name would refuse to shrink and push .reinforcementRowClass off the
+   right-hand edge instead of being the thing that gives. */
+.confirm.fleetDialog .reinforcementRowMain {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.confirm.fleetDialog .reinforcementRowName {
+    display: block;
+    color: #00b8e6;
+    font-weight: bold;
+}
+
+.confirm.fleetDialog .reinforcementRowClass {
+    flex: 0 0 auto;
+    color: #8ca5c0;
+    font-size: 12px;
+}
+
+/* A unit that is ALREADY holding a jump point open, in the Manage Reinforcements menu (user
+   request 2026-08-28). The row has to say so at a glance, because picking it arms the opposite
+   action from every other row - the dialog's primary button reads "Withdraw Jump Point" instead
+   of "Choose Hex" (ReinforcementEntry.manageReinforcements). The tint alone would be too quiet
+   for that, hence the word as well as the colour.
+   #00b8e6 is the same "not here yet" cyan the rest of this feature uses; do not add a second. */
+.confirm.fleetDialog .reinforcementRow.reinforcementRowOpen {
+    background: rgba(0, 184, 230, 0.10);
+}
+
+/* Its own hover, because the plain .reinforcementRow:hover above carries the SAME specificity
+   and loses on source order - so without this an already-opening row would be the one row in
+   the list that did not light up under the cursor. */
+.confirm.fleetDialog .reinforcementRow.reinforcementRowOpen:hover {
+    background: rgba(0, 184, 230, 0.20);
+}
+
+/* THE TWO KINDS OF ROW THAT CANNOT BE PICKED, greyed by one shared rule.
+
+   .reinforcementRowRiding is a unit already booked to RIDE somebody else's jump point (user
+   request 2026-08-28). Its radio is `disabled`, so the grey is only the read-out of a refusal the
+   markup already makes: opening a second doorway with a unit that is arriving through a first one
+   would have its drive in two places at once.
+
+   .reinforcementRowPassenger is a reinforcement with NO JUMP DRIVE AT ALL, in the second group of
+   the menu (user request 2026-08-28). Listed so a player can see the whole wave; never selectable,
+   because only a drive can open a doorway and a passenger is not an answer to the question the
+   dialog asks.
+
+   ⚠️ THE HOVER RULE IS A REAL OVERRIDE, NOT TIDINESS - .reinforcementRow:hover carries the same
+   specificity and only loses on source order, so without it a row nobody can pick would light up
+   under the cursor exactly like one that can. Both selectors are listed after the two hover rules
+   above for that reason; keep them there. */
+.confirm.fleetDialog .reinforcementRow.reinforcementRowRiding,
+.confirm.fleetDialog .reinforcementRow.reinforcementRowPassenger {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.confirm.fleetDialog .reinforcementRow.reinforcementRowRiding:hover,
+.confirm.fleetDialog .reinforcementRow.reinforcementRowOpen.reinforcementRowRiding:hover,
+.confirm.fleetDialog .reinforcementRow.reinforcementRowPassenger:hover {
+    background: none;
+}
+
+/* The divider between the two groups. No border of its own: the last jump-capable row above it
+   still carries its own bottom border (it stopped being :last-child the moment this was appended),
+   so a border-top here would draw a second line one margin away from the first.
+   text-align is a real override - .confirm centres its content, and every other child of this
+   dialog body is a flex row that never noticed. */
+.confirm.fleetDialog .reinforcementRowHeading {
+    margin-top: 9px;
+    padding: 2px 2px 4px;
+    color: #8ca5c0;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-align: left;
+    text-transform: uppercase;
+}
+
+/* Grey rather than cyan: the cyan tag means "this unit is HOLDING a doorway open", which is the
+   opposite state, and two cyan badges in one list would read as the same thing. */
+.confirm.fleetDialog .reinforcementRowTag.reinforcementRowTagRiding {
+    border-color: rgba(140, 165, 192, 0.55);
+    color: #8ca5c0;
+}
+
+/* THE TWO TAGS MUST SHARE A LEFT EDGE DOWN THE LIST (user request 2026-08-28), and moving them
+   under the name is what now gives that for free: every tag starts at the left edge of
+   .reinforcementRowMain, which is the same x on every row.
+
+   ⚠️ IT USED TO NEED `order: 1` AND IT NO LONGER DOES - do not put it back. While the tag was a
+   child of the row's own flex line it was packed against the RIGHT alongside the free-text detail
+   ("hex 12,-3 - 2 units" on an OPENING row, "riding <shipname>" on a RIDING one), no two rows
+   agreed on that text's width, so the tags landed wherever it happened to end; anchoring them last
+   made them measure from the one shared right edge instead. Inside the name stack there is no such
+   competition, and `order` on a non-flex child does nothing at all.
+
+   min-width stays, for a different reason than it was added for: the badges are the label the eye
+   scans down, and OPENING is a glyph longer than RIDING. A floor rather than a `width`
+   deliberately - should a font ever render OPENING wider than this the tag grows rather than
+   spilling centred text out of the box on both sides.
+
+   ⚠️ STAGE 8 ADDED TWO MORE, OPEN AND SIGNALLED, and SIGNALLED is wider than this floor. It grows,
+   which is exactly what the floor-not-width choice above was for. The rule the user asked for is a
+   shared LEFT edge, and every badge still starts at the left edge of .reinforcementRowMain whatever
+   its width - so do not reach for a wider min-width to make the right edges agree; that would only
+   pad the short badges out for no gain. */
+.confirm.fleetDialog .reinforcementRowTag {
+    display: inline-block;
+    margin-top: 3px;
+    min-width: 56px;
+    padding: 1px 5px;
+    border: 1px solid rgba(0, 184, 230, 0.55);
+    border-radius: 3px;
+    color: #00b8e6;
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    text-align: center;
 }

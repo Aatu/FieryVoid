@@ -32,9 +32,33 @@ window.InitialPhaseStrategy = function () {
     };
 
     InitialPhaseStrategy.prototype.deactivate = function () {
+        //REINFORCEMENTS_PLAN.md Stage 4: an armed hex-pick mode belongs to THIS phase and nothing
+        //else. Leaving it on would arm the map in Movement, where the first click would be
+        //swallowed by a declaration the player can no longer make. Mirrors the way
+        //DeploymentPhaseStrategy tears MineDeployment down.
+        if (window.ReinforcementEntry) ReinforcementEntry.deactivate();
+
         PhaseStrategy.prototype.deactivate.call(this, true);
 
         return this;
+    };
+
+    /* REINFORCEMENTS_PLAN.md Stage 4 - THE EXIT HEX-PICK MODE GETS THE CLICK FIRST.
+
+       ⚠️ INTERCEPTED HERE AND NOT IN onHexClicked. onHexClicked is only reached when the click
+       landed on NO icon (see PhaseStrategy.onClickEvent's icons.length branch) - but a hex holding
+       a ship is a perfectly legal place to open an exit, and a wave arriving on top of somebody
+       is the ordinary case. Hooking the later method would silently refuse every occupied hex.
+
+       Consuming the click also means the ordinary select/target dispatch never runs, so arming the
+       mode cannot select a ship by accident on the way to picking a hex. */
+    InitialPhaseStrategy.prototype.onClickEvent = function (payload) {
+        if (window.ReinforcementEntry && ReinforcementEntry.isActive()
+            && ReinforcementEntry.onMapClick(payload)) {
+            return;
+        }
+
+        PhaseStrategy.prototype.onClickEvent.call(this, payload);
     };
 
     InitialPhaseStrategy.prototype.onHexClicked = function (payload) {
@@ -147,19 +171,27 @@ window.InitialPhaseStrategy = function () {
         //TODO: Targeting ship with ballistic weapons
         //TODO: Targeting ship with support EW (defensive or offensive)
 
-        /* ⚠️ THE GUARD ON this.selectedShip IS LOAD-BEARING (JUMP_GATES_PLAN.md trap 11).
+        /* ⚠️ THE NULL TEST ON this.selectedShip IS LOAD-BEARING (JUMP_GATES_PLAN.md trap 11).
            shipManager.getTurnDeployed opens with ship.osat and throws outright on null - and since
            Stage 3 "click the gate with NOTHING selected" is the PRIMARY gesture for signalling a
            fixed jump gate, not an edge case: no ship needs to be selected, because which of the
            player's units is within the gate's signal range is never chosen (plan section 2.1).
-           With no selection there is no undeployed ship to refuse for, so the menu is built as
-           normal - which is what carries the Signal Jump Gate button. */
-        if (this.selectedShip && shipManager.getTurnDeployed(this.selectedShip) > gamedata.turn) { //Selected ships is not deployed yet - DK May 2025
-            this.showShipTooltip(ship, payload, menu, false);
-            return;
-        }
+
+           ⭐ AN UNDEPLOYED SELECTION COSTS THE MENU ITS SOURCE, NOT THE PLAYER THE MENU (user
+           report 2026-08-29). This used to hand showShipTooltip a `menu` that was still undefined
+           - the var is hoisted, the assignment is below - which is not "a menu with no orders in
+           it" but NO MENU AT ALL: ShipTooltip renders no button row without one and tears itself
+           down on the first mouse event. So a unit that cannot issue an order took Open Ship
+           Details and both jump gate signal buttons down with it, even though not one of those
+           three reads the selected ship. Passing null instead says exactly what is true - there is
+           no unit to issue orders FROM - and every EW/targeting condition in the menu already
+           fails closed on that, while the target-only buttons stay. */
+        var orderSource = (this.selectedShip && shipManager.getTurnDeployed(this.selectedShip) > gamedata.turn)
+            ? null                      //selected, but not on the board yet - DK May 2025
+            : this.selectedShip;
+
         var position = this.coordinateConverter.fromGameToHex(this.shipIconContainer.getByShip(ship).getPosition());
-        var menu = new ShipTooltipInitialOrdersMenu(this.selectedShip, ship, this.gamedata.turn, position);
+        var menu = new ShipTooltipInitialOrdersMenu(orderSource, ship, this.gamedata.turn, position);
         if (!gamedata.showLoS) this.showShipTooltip(ship, payload, menu, false);
     };
 

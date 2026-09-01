@@ -25,6 +25,11 @@ class GameRules implements JsonSerializable{
             array_push($this->rules, $allowMinesRules);
         }
 
+        $allowReinforcementsRules = $this->getAllowReinforcementsRules($rules);
+        if ($allowReinforcementsRules !== null) {
+            array_push($this->rules, $allowReinforcementsRules);
+        }
+
         $asteroidsRules = $this->getAsteroidsRules($rules);
         if ($asteroidsRules !== null) {
             array_push($this->rules, $asteroidsRules);
@@ -70,6 +75,35 @@ class GameRules implements JsonSerializable{
     private function getAllowMinesRules($rules) {
         if (isset($rules['allowMines'])) {
             return new AllowMinesRule();
+        }
+        return null;
+    }
+
+    /* REINFORCEMENTS_PLAN.md §2.1 - the Create Game rule, PLUS every Fleet Builder lobby
+       (user request 2026-08-28).
+
+       ⭐ A FLEET BUILDER ALWAYS HAS REINFORCEMENTS. A fleetTest game exists to compose and SAVE
+       fleets, and a saved fleet now remembers which units were bought as reinforcements (§0) -
+       so the Builder has to be able to author one, and to load one back without silently
+       flattening it into the main fleet, which is what the rule gate in
+       gamedata.isReinforcementRow would otherwise do.
+
+       ⭐ DERIVED HERE, not written into games.js's rules object, and that is the whole reason it
+       is in this file: a game's rules JSON is stored once at creation and never rewritten, so
+       adding the key at creation would leave every Fleet Builder lobby that ALREADY EXISTS
+       without it. Deriving it means one decision serves both sides too - the client reads
+       gamedata.rules.allowReinforcements, which is this object's jsonSerialize.
+
+       Same exemption the lobby already grants mines in three places (gamelobby.js:
+       `!gamedata.rules.allowMines && !gamedata.rules.fleetTest`): a Fleet Builder is not a
+       scenario, and nothing in it is meant to be restricted.
+
+       ⚠️ !empty, not isset, on fleetTest alone - it mirrors the client's `fleetTest === 1` test
+       rather than getFleetTestRules' looser isset, so a hypothetical `fleetTest: 0` cannot turn
+       reinforcements on in an ordinary game. */
+    private function getAllowReinforcementsRules($rules) {
+        if (isset($rules['allowReinforcements']) || !empty($rules['fleetTest'])) {
+            return new AllowReinforcementsRule();
         }
         return null;
     }

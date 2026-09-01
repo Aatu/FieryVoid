@@ -59,6 +59,15 @@
      VISUAL_UNIFICATION_PLAN.md. theme.colors.overlayBgSoft is its twin. */
   --fv-overlay-soft: rgba(0, 0, 0, 0.65);
 
+  /* The LOG PANEL's fill (#logcontainer, LOG_PANEL_REDESIGN_PLAN.md section 1). Same job as
+     --fv-overlay-soft above and added for exactly the same reason: the panel carried
+     `opacity: 0.85` as an ELEMENT opacity, so every log line, fleet row and declaration
+     inside it rendered at 85% strength too. This is --fv-well (#04161c) with the
+     translucency moved into the FILL, so the panel stays as see-through as it was while the
+     text returns to full strength.
+     WARNING: never combine with element opacity - see the alpha-compounding note above. */
+  --fv-well-soft: rgba(4, 22, 28, 0.86);
+
   /* HISTORICAL — the 2011 chrome. Nothing paints with these any more; every surface that
      did was converged in Stage 4. They are kept, rather than deleted, because they are the
      documented revert path: putting the old look back means pointing the converted rules
@@ -86,6 +95,7 @@
   --fv-text-accent: #C6E2FF;          /* theme.colors.textAccent — bluish-white values */
   --fv-text-dim: #8ca5c0;
   --fv-accent: #8bcaf2;
+  --fv-warning: #ffd84d;  
 
   /* ── Type ──────────────────────────────────────────────────────────────────
      Body text is Arial everywhere and is not tokenised — gamesNew.css enforces it
@@ -108,6 +118,11 @@
   --fv-radius-chrome: 0px;            /* #phaseheader + log tabs — squared, was 8px/5px */
   --fv-radius-modal: 0px;             /* .confirm — squared, was 5px             */
   --fv-radius-tooltip: 7px;           /* both map tooltips — rounded ON PURPOSE   */
+
+  /* The state/allegiance rail down the left edge of a row - the .fv-card grammar's
+     signature mark, shared by the log panel's four row types (combat-log entry, fleet
+     row, fleet header, declaration card). One token so the four cannot drift apart. */
+  --fv-log-rail: 3px;
 
   /* ── Top-bar HUD geometry ──────────────────────────────────────────────────
      The strip along the top of game.php is FOUR boxes that have to read as one row:
