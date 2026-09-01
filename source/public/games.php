@@ -152,10 +152,10 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       <h3>Latest Updates</h3>
       <ul class="updates-list">
         <!--<li style="--update-colour: #e05b52;"><span class="update-title">Merry Christmas from Fiery Void!</span></li>-->
+        <li><span class="update-title">Reinforcements from Hyperspace</span>Select new 'Allow Reinforcements' option in Create Game to let part of your fleet start the battle in Hyperspace, details in FAQ.</li>        
         <li><span class="update-title">Jumping to Hyperspace</span>Ships can now open a jump point for themselves and others to exit the scenario into hyperspace, more details in FAQ.</li>
-        <li><span class="update-title">Manual Ballistic Intercept</span>Updates to ship tooltips now allow you to manually intercept incoming ballistic shots, see FAQ for details.</li>                  
-        <li><span class="update-title">System Enhancements</span>New system-level enhancements such as Gunsights, Improved Shield etc now available to choose in Fleet Selection.</li>   
-        <li><span class="update-title">UI Improvements</span>Improved UI in areas like: selecting multiple units in a hex, ship targeting tooltips and weapon arcs.</li>
+        <li><span class="update-title">Info Panel Redesign</span>Combat Log, Fleet Info and Declarations tabs are more user friendly, and offer new filter options.  Panel height can also be manually resized.</li>        
+        <li><span class="update-title">Manual Ballistic Intercept</span>Updates to ship tooltips now allow you to manually intercept incoming ballistic shots, see FAQ for details.</li>                    
         <li><span class="update-title">The System</span>PaulUK (Reman) provides his vision of the System faction from Blake's 7, thanks to Geoffrey for adding to Fiery Void!</li>                             
         <li><span class="update-title">Discord Notifications</span>You can now add your Discord account details in 'Set-Up Discord Notifications' to get a message when it's your turn. See Fiery Void FAQ for details!</li>
         <!--<li><span class="update-title">General Fixes</span>Many other small bug fixes/updates. Thanks for the reports!</li>-->
