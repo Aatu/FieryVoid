@@ -2231,7 +2231,7 @@ class HyperplasmaCutter extends Weapon{
 		return $strippedSystem;
 	}
 
-}//endof class HyperplasmaCutter
+} //endof class HyperplasmaCutter
 
 
 
@@ -2403,7 +2403,136 @@ class HyperplasmaMatrix extends Weapon {
         parent::doDamage($target, $shooter, $system, $damage, $fireOrder,
                          $pos, $gamedata, $noOverkill, $location);
     }
-}
+} //endof class HyperplasmaMatrix
+
+
+class PlasmaDriver extends Pulse{
+        public $name = "PlasmaDriver";
+        public $displayName = "Plasma Driver";
+		public $iconPath = "PlasmaDriver.png";
+
+        public $animation = "bolt";
+        public $animationColor = array(75, 250, 90);
+
+        public $grouping = 15;
+        public $maxpulses = 5;
+        public $priority = 6;
+		protected $useDie = 3; //die used for base number of hits	
+        
+        public $loadingtime = 1;
+        public $intercept = 2;
+        
+        public $rangePenalty = 0.5;
+    	public $rangeDamagePenalty = 0.5;
+        public $fireControl = array(6, 4, 3); // fighters, <mediums, <capitals 
+
+	    public $damageType = "Pulse"; 
+	    public $weaponClass = "Plasma"; 
+        
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc )
+		{
+			//maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ){
+				$maxhealth = 6;
+			}
+			if ( $powerReq == 0 ){
+				$powerReq = 6;
+			}
+			parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+		}
+
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);   
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}	    		
+				$this->data["Special"] .= "Does less damage over distance (0.5 per hex).";   
+		$this->data["Special"] .= "<br>Ignores half of armor.";  
+		}
+
+        public function getDamage($fireOrder){        return 22;   }
+		
+    }  // end of class PlasmaDriver
+
+
+class FuserArray extends Plasma{	
+	public $name = "FuserArray";
+    public $displayName = "Fuser Array";
+	public $iconPath = "FuserArray.png";    
+
+    public $priority = 2;
+    public $rangeDamagePenalty = 0.66;
+		        
+    public $loadingtime = 1;			
+    public $guns = 2;
+    protected $originalGuns = 2; //starting number of guns, before any GunLost crits; used to gate the "both guns lost = destroyed" check
+
+    public $rangePenalty = 0.33;
+    public $fireControl = array(0, 4, 5); // fighters, <=mediums, <=capitals 
+
+    //Twin Array uses the standard weapon crit chart PLUS a special 20+ result (GunLost):
+    //one of the two guns is destroyed. 25+ adds GunLost on top of ReducedRange+ReducedDamage.
+    protected $possibleCriticals = array(14 => "ReducedRange", 19 => "ReducedDamage", 20 => "GunLost", 25 => array("ReducedRange", "ReducedDamage", "GunLost"));
+
+	public $damageType = "Flash"; 
+	public $weaponClass = "Plasma"; 
+    public $firingModes = array( 1 => "Normal", 2=> "Split");
+    public $canSplitShots = false; //Allows Firing Mode 2 to split shots.
+    public $canSplitShotsArray = array(1=>false, 2=>true );
+
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+        if ( $maxhealth == 0 ) $maxhealth = 24;
+        if ( $powerReq == 0 ) $powerReq = 10;
+        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+    }
+		
+        public function setSystemDataWindow($turn){			
+            parent::setSystemDataWindow($turn);   
+            $this->data["Special"] = "Can use 'Split' Firing Mode to target different enemy units.";
+        }
+		
+	public function getDamage($fireOrder){        return Dice::d(10, 6)+26;   }
+    public function setMinDamage(){     $this->minDamage = 32;      }
+    public function setMaxDamage(){     $this->maxDamage = 86;      }
+
+        //Each GunLost critical destroys one of the two guns, so the Twin Array fires one
+        //less shot for each. Runs via onConstructed (and setSystemDataWindow), translating
+        //the GunLost crits into the actual reduced $guns count used when fire orders are built.
+        public function effectCriticals(){
+            parent::effectCriticals();//apply ReducedRange/ReducedDamage etc.
+            $gunsLost = $this->hasCritical("GunLost", false);//count GunLost crits in effect up to the current turn
+            $this->guns = max(0, $this->originalGuns - $gunsLost);
+        }
+
+        //If every gun has been destroyed by GunLost crits, the whole weapon is destroyed.
+        //Runs in Pass 2 of the crit phase (after Pass 1 has added all GunLost crits), so two
+        //GunLost crits scored the same turn are both seen here.
+        public function criticalPhaseEffects($ship, $gamedata){
+            parent::criticalPhaseEffects($ship, $gamedata);//Some critical effects like Limpet Bore might destroy weapon in this phase.
+
+            if($this->isDestroyed()) return;//already destroyed - also guards replay re-runs from adding a duplicate destroy entry.
+
+            $gunsLost = $this->hasCritical("GunLost", false);//count GunLost crits in effect up to the current turn
+            if($gunsLost >= $this->originalGuns){//all guns gone - destroy the weapon.
+                $damageCaused = $this->getRemainingHealth();
+                $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $damageCaused, 0, 0, -1, true, false, "", "GunLost");
+                $damageEntry->updated = true;
+                $this->damage[] = $damageEntry;
+            }
+        }
+
+    public function stripForJson() {
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->splitArcs = $this->splitArcs;
+        if ($this->guns != $this->originalGuns) $strippedSystem->guns = $this->guns;//send reduced gun count (GunLost crit) so the client shows the right Split shot count.
+        return $strippedSystem;
+	}
+
+}//end of class FuserArray
+
 
 
 	

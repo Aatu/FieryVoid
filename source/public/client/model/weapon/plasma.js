@@ -756,3 +756,88 @@ alert("HPM fired"); // ← add this line
 
     return [fire];
 };
+
+var PlasmaDriver = function PlasmaDriver(json, ship) {
+    Weapon.call(this, json, ship);
+};
+PlasmaDriver.prototype = Object.create(Weapon.prototype);
+PlasmaDriver.prototype.constructor = PlasmaDriver;
+
+var HyperplasmaStream = function HyperplasmaStream(json, ship) {
+    Plasma.call(this, json, ship);
+};
+HyperplasmaStream.prototype = Object.create(Plasma.prototype);
+HyperplasmaStream.prototype.constructor = HyperplasmaStream;
+
+var FuserArray = function FuserArray(json, ship) {
+    Plasma.call(this, json, ship);
+};
+FuserArray.prototype = Object.create(Weapon.prototype);
+FuserArray.prototype.constructor = FuserArray;
+
+FuserArray.prototype.initializationUpdate = function () {
+    if (this.firingMode == 2) {
+        this.data["Shots Remaining"] = this.guns - this.fireOrders.length;
+    } else {
+        delete this.data["Shots Remaining"];
+    }
+
+    return this;
+};
+
+FuserArray.prototype.doMultipleFireOrders = function (shooter, target, system) {
+
+    var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon.
+
+    if (this.firingMode == 2 && this.fireOrders.length >= this.guns) return; //one split shot per gun (guns is reduced by GunLost crits).
+
+    var fireOrdersArray = []; // Store multiple fire orders
+
+    for (var s = 0; s < shotsOnTarget; s++) {
+        var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+        var calledid = -1;
+
+        if (system) {
+            //check if weapon is eligible for called shot!
+            if (!weaponManager.canWeaponCall(weapon)) continue;
+
+            // When the system is a subsystem, make all damage go through
+            // the parent.
+            while (system.parentId > 0) {
+                system = shipManager.systems.getSystem(ship, system.parentId);
+            }
+
+            calledid = system.id;
+        }
+
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
+        if (chance < 1) continue;
+
+        var fire = {
+            id: fireid,
+            type: 'normal',
+            shooterid: shooter.id,
+            targetid: target.id,
+            weaponid: this.id,
+            calledid: calledid,
+            turn: gamedata.turn,
+            firingMode: this.firingMode,
+            shots: 1,
+            x: "null",
+            y: "null",
+            damageclass: 'Sweeping',
+            chance: chance,
+            hitmod: 0,
+            notes: "Split"
+        };
+
+        fireOrdersArray.push(fire); // Store each fire order
+    }
+
+    return fireOrdersArray; // Return all fire orders
+};
+
+FuserArray.prototype.checkFinished = function () {
+    if (this.firingMode == 2 && this.fireOrders.length >= this.guns) return true; //one split shot per gun (guns is reduced by GunLost crits).
+    return false;
+};

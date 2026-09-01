@@ -7,7 +7,7 @@ class triadImp extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 175*6;
-		$this->faction = "Custom Ships";
+		$this->faction = "";
 		$this->phpclass = "triadImp";
 		$this->shipClass = "Chaos: Imp Medium Fighters";
 		$this->imagePath = "img/ships/triadImp.png";

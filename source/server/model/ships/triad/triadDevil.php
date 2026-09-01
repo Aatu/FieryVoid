@@ -5,7 +5,7 @@ class triadDevil extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 1625;
-		$this->faction = "Custom Ships";
+		$this->faction = "";
 		$this->phpclass = "triadDevil";
 		$this->imagePath = "img/ships/triadDevil.png";
 		$this->shipClass = "Chaos: Devil";
@@ -18,6 +18,7 @@ class triadDevil extends MediumShip{
 
         $this->gravitic = true;
 		$this->advancedArmor = true;  
+		$this->skinDancer = true; 	
 
 		$this->forwardDefense = 10;
 		$this->sideDefense = 12;
@@ -46,7 +47,7 @@ class triadDevil extends MediumShip{
 		$this->addFrontSystem(new GraviticThruster(7, 10, 0, 3, 1));
         $this->addFrontSystem(new PlasmaDriver(7, 6, 6, 300, 60));	
         $this->addFrontSystem(new PlasmaDriver(7, 6, 6, 300, 60));	
-//        $this->addFrontSystem(new AntimatterWave(5, 20, 8, 270, 90));	
+        $this->addFrontSystem(new AntimatterWave(5, 20, 8, 270, 90));	
         $this->addFrontSystem(new SpatialCutter(7, 22, 8, 180, 360));	
         $this->addFrontSystem(new SpatialCutter(7, 22, 8, 0, 180));	
 

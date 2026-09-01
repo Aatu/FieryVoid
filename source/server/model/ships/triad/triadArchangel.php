@@ -27,16 +27,19 @@ class triadArchangel extends BaseShip{
         $this->accelcost = 2;
         $this->rollcost = 3;
         $this->pivotcost = 4;
-		$this->iniativebonus = 2 *5;
+		$this->iniativebonus = 3 *5;
 
 		$this->notes = "Can control 12 fighters";		
 		$this->notes .= '<br>Triad Capital Ship'; 
 
 		$this->addPrimarySystem(new Reactor(8, 25, 0, 0));//armor, structure, power req, output
         $this->addPrimarySystem(new CnC(8, 24, 0, 0));
-		$scanner = new Scanner(8, 24, 0, 15);
-			$scanner->markAdvanced();
-			$this->addPrimarySystem($scanner);			
+//		$scanner = new Scanner(8, 24, 0, 15);
+//			$scanner->markAdvanced();
+//			$this->addPrimarySystem($scanner);			
+        $scanner = new ElintScanner(8, 24, 0, 15);  // Using this for now as Jealous ELINT not implemented
+			$scanner->markMindrider();
+			$this->addPrimarySystem($scanner);	        
 		$this->addPrimarySystem(new Engine(8, 25, 0, 18, 3));
 //        $this->addPrimarySystem(new StructureSelfRepair(8, 24, 24)); //armor, structure, output
         $this->addPrimarySystem(new CoopStructureSelfRepair(8, 24, 24)); //armor, structure, output
@@ -48,8 +51,8 @@ class triadArchangel extends BaseShip{
         $this->addFrontSystem(new GraviticThruster(8, 13, 0, 5, 1));		
         $this->addFrontSystem(new PhotonicPrismBeam(8, 24, 8, 270, 90));	
         $this->addFrontSystem(new PhotonicPrismBeam(8, 24, 8, 270, 90));	
-//        $this->addFrontSystem(new NeutronBurst(6, 12, 4, 240, 360));	
-//        $this->addFrontSystem(new NeutronBurst(6, 12, 4, 0, 120));	
+        $this->addFrontSystem(new NeutronBurst(6, 12, 4, 240, 360));	
+        $this->addFrontSystem(new NeutronBurst(6, 12, 4, 0, 120));	
 
 		$this->addAftSystem(new GraviticThruster(8, 20, 0, 6, 2));
 		$this->addAftSystem(new GraviticThruster(8, 20, 0, 6, 2));
@@ -76,7 +79,7 @@ class triadArchangel extends BaseShip{
 				11 => "Flare Generator",
 				12 => "Self Repair",
 				13 => "Cooperative Structure Self Repair",
-				15 => "Scanner",                
+				15 => "ELINT Scanner",                
 				17 => "Engine",
 				19 => "Reactor",
 				20 => "C&C",

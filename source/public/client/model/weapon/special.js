@@ -1281,3 +1281,29 @@ var spawnSingularity = function spawnSingularity(json) {
 };
 spawnSingularity.prototype = Object.create(Ship.prototype);
 spawnSingularity.prototype.constructor = spawnSingularity;
+
+// GTS_Triad
+var SpatialCutter = function SpatialCutter(json, ship) {
+    Weapon.call(this, json, ship);
+};
+SpatialCutter.prototype = Object.create(Weapon.prototype);
+SpatialCutter.prototype.constructor = SpatialCutter;
+
+SpatialCutter.prototype.onFireOrderCreated = function (fire) {
+    var shooter = gamedata.getShip(fire.shooterid);
+    var target  = gamedata.getShip(fire.targetid);
+    if (!shooter || !target) return;
+    if (ew.getTargetingEW(shooter, target) <= 0) {
+        confirm.warning("Spatial Cutter requires a lock-on (OEW) to fire. The shot will not resolve without one.");
+        var weapon = this;
+        window.setTimeout(function () {
+            for (var i = weapon.fireOrders.length - 1; i >= 0; i--) {
+                if (weapon.fireOrders[i].id === fire.id) {
+                    weapon.fireOrders.splice(i, 1);
+                    break;
+                }
+            }
+            webglScene.customEvent('SystemDataChanged', { ship: shooter, system: weapon });
+        }, 0);
+    }
+};

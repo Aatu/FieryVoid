@@ -366,3 +366,8 @@ ProximityMine.prototype.doIndividualNotesTransfer = function () { //prepare indi
 	return true;
 };
 
+var AsteroidSalvo = function AsteroidSalvo(json, ship) {
+    Aoe.call(this, json, ship);
+};
+AsteroidSalvo.prototype = Object.create(Aoe.prototype);
+AsteroidSalvo.prototype.constructor = AsteroidSalvo;
