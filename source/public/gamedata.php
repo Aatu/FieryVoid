@@ -80,6 +80,21 @@ if (function_exists('apcu_fetch') && isset($_GET['gameid']) && isset($_GET['last
     Manager::apcuLog("FAST-POLL MISS game=$gameid serverTime=" . var_export($serverTime, true) . " last_time={$_GET['last_time']} → full request");
 }
 
+/* Everything past this point is the expensive path: Manager, a database connection, the
+   ship tree, stripForJson() and json_encode(). The fast-poll branch above exits before any
+   of it, so THIS is the population a concurrency cap should be sized against — see
+   CHAT_DB_RESILIENCE_PLAN item 6 and PollInstrument's header.
+
+   Deliberately OUTSIDE the fast-poll if-block: a POST, or a first load with no last_time,
+   never enters that block at all and is every bit as expensive. No-op if the instrument was
+   not started (wrong script, APCu off, kill switch present).
+
+   The `false` second argument matters: it stops class_exists() from invoking the autoloader.
+   PollInstrument is require_once'd by server_load_guard.php and is deliberately NOT in the
+   generated classmap, so with the kill switch on this would otherwise be a pointless
+   autoload miss on the app's hottest endpoint. */
+if (class_exists('PollInstrument', false)) PollInstrument::markHeavy();
+
 try {
     if (isset($_POST["gameid"])) {
         if (!$playerid) {
