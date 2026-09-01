@@ -4927,6 +4927,46 @@ public function setLastTimeChatChecked($userid, $gameid)
         return $messages;
     }
 
+    /**
+     * Highest chat id that actually exists for a game, or 0 if it has none.
+     *
+     * Exists so ChatManager never caches a fast-poll watermark taken from the
+     * client's `lastid`, which is a claim rather than a fact. See the long comment at
+     * ChatManager::getChatMessages' empty-result branch for why an inflated watermark
+     * is harmful (it switches the DB-sparing fast path OFF for a whole game chat).
+     *
+     * Cheap enough to be worth the round trip: it runs only on a fast-poll MISS, on
+     * which a query has already been paid for anyway, and it is a bounded index
+     * lookup -- MAX() on the leading column of the `gameid_id` index is resolved from
+     * the index alone, and 3-day retention keeps the table tiny regardless.
+     */
+    public function getMaxChatMessageId($gameid = 0)
+    {
+        $maxId = 0;
+
+        $stmt = $this->connection->prepare("
+            SELECT
+                MAX(id)
+            FROM
+                chat
+            WHERE
+                gameid = ?
+        ");
+
+        if ($stmt) {
+            $stmt->bind_param('i', $gameid);
+            // MAX() over no rows is NULL, not 0 — a game whose chat is empty (or whose
+            // messages retention has just purged) lands here, and (int)null is 0.
+            $stmt->bind_result($dbMax);
+            $stmt->execute();
+            $stmt->fetch();
+            $stmt->close();
+            $maxId = (int)$dbMax;
+        }
+
+        return $maxId;
+    }
+
     public function getHelpMessage($gamehelpmessagelocation)
     {
         $message = "";

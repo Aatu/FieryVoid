@@ -55,10 +55,44 @@ class Manager{
             try {
                 self::$dbManager = new DBManager($database_host ?? "mariadb", 3306, $database_name, $database_user, $database_password);
             } catch (Throwable $e) {
-                self::$dbUnavailable = $e;
-                throw $e;
+                self::$dbUnavailable = self::asUnavailable($e);
+                throw self::$dbUnavailable;
             }
         }
+    }
+
+    /**
+     * Give a failed connect the stable, machine-readable code 300 the client can act on.
+     *
+     * WHY THIS IS NEEDED
+     * ------------------
+     * DBManager deliberately throws code 300 for "cannot reach the database" -- but that
+     * line never ran. DBManager.php opens with mysqli_report(MYSQLI_REPORT_ERROR), and
+     * this file registers a global set_error_handler that turns warnings into
+     * ErrorException, so the failure is thrown from INSIDE mysqli_connect() before
+     * DBManager can test its own return value. What reached the client was code 2
+     * (E_WARNING), indistinguishable from any other error -- so the chat client had no
+     * way to tell "database at capacity, this will pass" from a real fault, and showed a
+     * modal dialog for every one. See CHAT_DB_RESILIENCE_PLAN.md item 7.
+     *
+     * Narrowing that set_error_handler was the alternative and was rejected: it is
+     * registered at include time and converts every PHP warning in the whole request, in
+     * any file, so changing it reaches far beyond this problem.
+     *
+     * The message is replaced with a fixed string rather than passed through. The catch
+     * sites in this class interpolate getMessage() straight into a hand-built JSON
+     * string, so a driver message containing a quote would produce a malformed body --
+     * and the client would get a parse error instead of the marker this exists to send.
+     * A fixed string is also one less piece of database detail on the wire. The original
+     * is kept as the previous exception, and Debug::error logs the whole chain.
+     */
+    private static function asUnavailable(Throwable $e)
+    {
+        if ($e instanceof Exception && $e->getCode() === 300) {
+            return $e;
+        }
+
+        return new Exception('Database unavailable', 300, $e);
     }
 
     // Lightweight APCu debug logger, gated on FV_APCU_DEBUG (defined local-only in

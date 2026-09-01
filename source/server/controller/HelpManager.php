@@ -32,10 +32,24 @@ class HelpManager{
 			try {
 				self::$dbManager = new DBManager($database_host ?? "localhost", 3306,  $database_name, $database_user, $database_password);
 			} catch (Throwable $e) {
-				self::$dbUnavailable = $e;
-				throw $e;
+				self::$dbUnavailable = self::asUnavailable($e);
+				throw self::$dbUnavailable;
 			}
 		}
+	}
+
+	/**
+	 * Stamp a failed connect with code 300 -- see Manager::asUnavailable for why the
+	 * marker DBManager throws never survives to the client. Kept in step with the other
+	 * two managers so all three report a database outage identically.
+	 */
+	private static function asUnavailable(Throwable $e)
+	{
+		if ($e instanceof Exception && $e->getCode() === 300) {
+			return $e;
+		}
+
+		return new Exception('Database unavailable', 300, $e);
 	}
 	
 	public static function getHelpMessage($gamehelpmessagelocation)

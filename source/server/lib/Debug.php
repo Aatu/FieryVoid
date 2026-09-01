@@ -46,17 +46,33 @@ class Debug
             self::$loggedExceptions = new SplObjectStorage();
         }
 
-        if (self::$loggedExceptions->contains($e)) {
-            return self::$loggedExceptions[$e];
+        // offsetExists/offsetGet rather than contains()/[] — contains() is deprecated as
+        // of PHP 8.5, and the array syntax on an object key trips static analysers.
+        if (self::$loggedExceptions->offsetExists($e)) {
+            return self::$loggedExceptions->offsetGet($e);
         }
 
         $msg = "\nEXCEPTION: " . get_class($e);
         $msg .= "\nMESSAGE: " .$e->getMessage();
+        $msg .= "\nCODE: " . $e->getCode();
         $msg .= "\nFILE: " . $e->getFile() . " (" . $e->getLine() . ")";
         $msg .= "\nTRACE: " . $e->getTraceAsString();
 
+        // Walk the cause chain. Without this, wrapping an exception to give it a stable
+        // code — as ChatManager/Manager/HelpManager do to restore DBManager's code 300
+        // "database unreachable" marker — would replace the only record of what actually
+        // went wrong with a generic label. The wrapper carries the code; the chain
+        // carries the diagnosis, e.g. the real "(HY000/1040): Too many connections".
+        // Bounded, because a cyclic or absurdly deep chain must not be able to fill a log.
+        $previous = $e->getPrevious();
+        for ($depth = 1; $previous !== null && $depth <= 5; $depth++) {
+            $msg .= "\nCAUSED BY [$depth]: " . get_class($previous) . ": " . $previous->getMessage()
+                 .  " @ " . $previous->getFile() . " (" . $previous->getLine() . ")";
+            $previous = $previous->getPrevious();
+        }
+
         $logid = self::doLog($msg);
-        self::$loggedExceptions[$e] = $logid;
+        self::$loggedExceptions->attach($e, $logid);
 
         return $logid;
     }

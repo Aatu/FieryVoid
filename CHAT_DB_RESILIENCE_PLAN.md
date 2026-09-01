@@ -4,8 +4,9 @@ Follow-up to the live `1040 Too many connections` bursts of **2026-09-01**.
 
 Status: **Item 0 has reported (2026-09-01) and the answer is: the shared instance is chronically
 saturated, and FieryVoid cannot be the primary cause.** See "Item 0 — RESULTS" below for the numbers
-and the arithmetic. **Item 4 is BUILT and verified.** The first diagnosis was wrong and is dissected
-below so it is not rebuilt.
+and the arithmetic. **Items 4, 5 and 7 are BUILT and verified; item 6 is the only one left, and item 8
+is now conditional on a measurement that has not been taken.** The first diagnosis was wrong and is
+dissected below so it is not rebuilt.
 
 ⚠️ **Read this before starting any item below.** Items 4–7 make the app degrade gracefully when the
 database is already in trouble, and close two ways it can make its own trouble worse. **Not one of
@@ -294,10 +295,14 @@ Point `docker/php/varconfig.php` at a dead port, load `chatdata.php?chats=0:0,71
 
 ---
 
-## Item 5 — stop trusting the client's `lastid`
+## Item 5 — stop trusting the client's `lastid` ✅ BUILT 2026-09-01
 
 **Priority: medium.** Low likelihood, but the failure mode is that the app switches off its own
 protection.
+
+> **Status: done and verified — but NOT by option (1), which turned out to be dead code.**
+> See "Why option (1) cannot work" below before touching this again. The fix asks the database for
+> `MAX(id)` on the empty-result path; `DBManager::getMaxChatMessageId()` is new.
 
 ### The fault
 
@@ -341,6 +346,55 @@ generous margin at the chatdata.php parse step, where the value is first seen.
 ⚠️ Whatever is chosen must be applied in **both** places the value is read —
 [chatdata.php:64](source/public/chatdata.php#L64) (batched) and the single-chat legacy form below it.
 The legacy form must stay: a browser holding game.php open across a deploy goes on sending it.
+
+### ⚠️ Why option (1) cannot work — it is dead code, and it looks like a fix
+
+**Option (1) can never fire, and (2) inherits the same flaw.** The fast-poll gate at the *top* of
+`getChatMessages` returns early for every request where `$lastid >= $lastMsgId`. So by the time
+execution reaches the empty-result branch at the bottom, one of exactly two things is true:
+
+- the cache was **cold** (`$lastMsgId === false`), so there is nothing to clamp against; or
+- the cache was **warm and higher than the claim**, so "if the cached value is lower than `$lastid`,
+  use it instead" tests a condition the gate above has already excluded.
+
+The poisoning happens on the **cold** path — precisely the one option (1) admits it does not cover.
+Written as specified it would have added code, read as a fix, changed the log, and protected nothing.
+This is worth remembering as a shape: *a guard placed downstream of a gate that already implies its
+condition.*
+
+### The fix, as built
+
+**Option (3), and its cost objection does not survive contact with the gate either.** The plan
+called a second round trip wasteful "on a path whose whole purpose is avoiding them" — but this branch
+is only reachable on a fast-poll **MISS**, where a query has already been paid for. The extra lookup
+therefore lands roughly once per TTL per active chat, not once per poll.
+
+- New [`DBManager::getMaxChatMessageId($gameid)`](source/server/controller/DBManager.php) —
+  `SELECT MAX(id) FROM chat WHERE gameid = ?`, resolved from the `gameid_id` index alone.
+- The empty-result branch stores `min($lastid, $trueMaxId)`, so the cached watermark can never exceed
+  an id that really exists, whatever the client claims.
+- The short 30s TTL is now chosen on `$trueMaxId > 0` rather than `$lastid > 0` — i.e. on whether the
+  chat genuinely has messages, which is what the original short TTL was actually trying to express.
+
+**The parse-step sanity ceiling was deliberately NOT added.** With the watermark now taken from the
+database, clamping the claim earlier protects nothing: an inflated `lastid` can only win itself a
+fast-poll exemption, which returns `[]` to the liar and affects no one else. Both entry points are
+covered by construction, because both funnel through `getChatMessages` — which is a better answer to
+the ⚠️ above than duplicating a check in two callers.
+
+### Verified
+
+Against the local DB with a probe row at a known id (39282), cold cache, client claiming `999999`:
+
+| | cached watermark |
+|---|---|
+| before | `999999` — **poisoned**, 1h TTL |
+| after | `39282` — the true max |
+
+Baseline again measured by `git checkout`-ing the two files and re-running, so the test discriminates.
+Both control cases were re-checked and unchanged: an honest client at `lastid=0` still receives the
+message and caches the true id, and a client already up to date is still fast-polled `[]` with no DB
+work.
 
 ---
 
@@ -389,9 +443,12 @@ pile-up. A cap set too low is indistinguishable to players from the outage it is
 
 ---
 
-## Item 7 — don't show players a dialog when the database is busy
+## Item 7 — don't show players a dialog when the database is busy ✅ BUILT 2026-09-01
 
 **Priority: lowest. Purely cosmetic, but it was the visible symptom.**
+
+> **Status: done and verified, both halves.** The server-side option chosen was catching in
+> `initDBManager` (the `set_error_handler` was left alone, for the reason the ⚠️ below gives).
 
 ### The fault
 
@@ -426,6 +483,51 @@ Two halves, both small:
 - **Client:** treat that marker as transient. Count it, stay silent, let the poll ladder back off
   naturally, and surface something quiet and non-modal only if it persists past several polls. The
   precedent to copy is `timeCheckFailed`, which already caps its own retries and gives up silently.
+
+### As built
+
+**Server** — `asUnavailable()` in all three managers, called from the same `catch` item 4 added:
+a failed connect is rethrown as `Exception('Database unavailable', 300, $previous)`. The
+`set_error_handler` was **left alone**; the ⚠️ above is the reason, and it stands.
+
+Two decisions worth keeping:
+
+- **The message is replaced, not passed through.** The ~25 catch sites in these classes interpolate
+  `getMessage()` straight into a hand-built JSON string. A driver message containing a `"` would
+  produce a malformed body, and the client would get a parse error *instead of* the marker this whole
+  item exists to deliver — the failure would be worst exactly when it mattered. A fixed string is also
+  one less piece of database detail on the wire.
+- **`Debug::error` now logs the `getPrevious()` chain** (bounded at 5). Without it, wrapping would
+  have traded the client-side marker for the loss of the only record of what actually went wrong.
+  The wrapper carries the code; the chain carries the diagnosis. Confirmed in the log:
+  `CAUSED BY [1]: ErrorException: mysqli_connect(): (HY000/2002) ...`. `CODE:` was added to the log
+  frame at the same time, since the code is now load-bearing and was not being recorded.
+
+**Client** — [chat.php](source/public/chat.php) `receive()` now routes a code-300 slice to
+`dbUnavailable()` instead of `window.confirm.exception`. It stays **completely silent** for
+`DB_DOWN_NOTICE_AFTER` (4) consecutive polls, then appends **one** `.chatSystemNotice` line inside the
+panel and leaves it alone; `dbRecovered()` removes it and resets the counter on any normal reply,
+including an empty `[]`. Anything that is *not* code 300 still raises the dialog, because anything
+else is a real fault. The comparison is `==` — `ChatManager` stringifies the code into its hand-built
+JSON while `chatdata.php`'s outer catch emits it as a number, and both were tested.
+
+The notice only auto-scrolls if the player is already within 40px of the bottom, so it cannot yank the
+panel down while they are reading back.
+
+### Verified
+
+Real functions extracted from `chat.php` and driven through a stubbed poll sequence:
+
+| polls of code 300 | before (HEAD) | after |
+|---|---|---|
+| 3 | 3 modal dialogs | silent |
+| 4 | 4 modal dialogs | 1 in-panel line |
+| 24 | **24 modal dialogs** | **1 in-panel line** |
+
+…then recovery clears it, a genuine (non-300) error still dialogs, and a numeric `300` is recognised
+as well as the string. The baseline column was measured by extracting `receive()` from
+`git show HEAD:source/public/chat.php`, not estimated. **Per chat** — game.php runs two, so the real
+before-figure during the 07:11 burst was double.
 
 ---
 
