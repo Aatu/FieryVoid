@@ -5,9 +5,9 @@ class triadSpecter extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 1700;
-		$this->faction = "Custom Ships";
+		$this->faction = "";
 		$this->phpclass = "triadSpecter";
-		$this->imagePath = "img/ships/triadDevil.png";
+		$this->imagePath = "img/ships/triadSpecter.png";
 		$this->shipClass = "Neutrality: Specter";
 		$this->canvasSize = 100;
 	    $this->isd = 'Primordial';

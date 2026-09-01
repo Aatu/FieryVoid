@@ -2014,48 +2014,10 @@ class AmmoMissileRackG extends AmmoMissileRackS{
 
 // GTS_Triad
 
-/*Class-Triad Missile Rack - weapon that looks at central magazine to determine available firing modes (and number of actual rounds available)
-	all functionality prepared in standard class-S rack
-	holds 5 missiles
-	doubles launch Range
-	can expend 6 power to generate a new basic missile to fire immediately
-	Ancient-class weapon
-*/
-/*
 class AmmoMissileRackTriad extends AmmoMissileRackS {
     public $name = "AmmoMissileRackTriad";
     public $displayName = "Triad Missile Rack";
-    public $iconPath = "missile1.png";
-
-    public $priority = 6;
-    public $loadingtime = 1;
-
-    protected $basicFC = array(3, 5, 5);
-    protected $rackExplosionDamage = 0;
-    protected $rackExplosionThreshold = 30;
-
-    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base = false) {
-        if ($maxhealth == 0) $maxhealth = 6;
-        if ($powerReq == 0) $powerReq = 0;
-        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base);
-    }
-
-    public function recompileFiringModes() {
-        parent::recompileFiringModes();
-        // Double launch range, then set distance range to doubled launch range x 3
-        foreach ($this->rangeArray as $mode => $range) {
-            $this->rangeArray[$mode] = $range * 2;
-            $this->distanceRangeArray[$mode] = $range * 2 * 3;
-        }
-    }
-}
-*/
-
-
-class AmmoMissileRackTriad extends AmmoMissileRackS {
-    public $name = "AmmoMissileRackTriad";
-    public $displayName = "Triad Missile Rack";
-    public $iconPath = "missile1.png";
+    public $iconPath = "TriadMissileRack.png";
 
     public $priority = 6;
     public $loadingtime = 1;

@@ -1307,9 +1307,3 @@ SpatialCutter.prototype.onFireOrderCreated = function (fire) {
         }, 0);
     }
 };
-
-var AsteroidSalvo = function AsteroidSalvo(json, ship) {
-    Aoe.call(this, json, ship);
-};
-AsteroidSalvo.prototype = Object.create(Aoe.prototype);
-AsteroidSalvo.prototype.constructor = AsteroidSalvo;

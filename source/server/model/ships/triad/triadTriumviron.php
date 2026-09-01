@@ -8,7 +8,7 @@ class triadTriumviron extends BaseShip{
 		$this->faction = "";
         $this->phpclass = "triadTriumviron";
         $this->shipClass = "The Triumviron";
-        $this->imagePath = "img/ships/Triumviron2.png";
+        $this->imagePath = "img/ships/triadTriumviron.png";
         $this->canvasSize = 200;
 	    $this->isd = 'Ancient';
         $this->shipSizeClass = 3; 

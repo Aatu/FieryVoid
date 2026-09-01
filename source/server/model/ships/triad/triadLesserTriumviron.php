@@ -8,7 +8,7 @@ class triadLesserTriumviron extends BaseShip{
 		$this->faction = "";
         $this->phpclass = "triadLesserTriumviron";
         $this->shipClass = "Unified: Lesser Triumviron";
-        $this->imagePath = "img/ships/Triumviron2.png";
+        $this->imagePath = "img/ships/triadTriumviron.png";
         $this->canvasSize = 200;
 	    $this->isd = 'Ancient';
         $this->shipSizeClass = 3; 
@@ -69,13 +69,13 @@ class triadLesserTriumviron extends BaseShip{
 			$hyperplasma->displayName = 'Hyperplasma Cutter B';
 			$this->addLeftSystem($hyperplasma);
 //        $this->addLeftSystem(new GraviticThruster(7, 13, 0, 5, 1));       
-        $this->addLeftSystem(new GraviticThruster(7, 23, 0, 8, 3)); 		
+//        $this->addLeftSystem(new GraviticThruster(7, 23, 0, 8, 3)); 		
 
 		$hyperplasma = new HyperplasmaCutter(7, 16, 9, 270, 90);
 			$hyperplasma->displayName = 'Hyperplasma Cutter C';
 			$this->addRightSystem($hyperplasma);
 //        $this->addRightSystem(new GraviticThruster(7, 13, 0, 5, 1));       
-        $this->addRightSystem(new GraviticThruster(7, 23, 0, 8, 4)); 				
+//        $this->addRightSystem(new GraviticThruster(7, 23, 0, 8, 4)); 				
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 7, 51));

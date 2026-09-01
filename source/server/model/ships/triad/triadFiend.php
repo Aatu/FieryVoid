@@ -49,7 +49,7 @@ class triadFiend extends HeavyCombatVessel{
         $this->addFrontSystem(new GraviticThruster(7, 10, 0, 3, 1));
         $this->addFrontSystem(new PlasmaDriver(5, 6, 6, 300, 60));	
         $this->addFrontSystem(new HyperplasmaCutter(7, 16, 9, 240, 360));	
-        $this->addFrontSystem(new SolarBlaster(6, 18, 10, 270, 90));	
+//        $this->addFrontSystem(new SolarBlaster(6, 18, 10, 270, 90));	
         $this->addFrontSystem(new HyperplasmaCutter(7, 16, 9, 0, 120));	
         $this->addFrontSystem(new PlasmaDriver(5, 6, 6, 300, 60));	
         

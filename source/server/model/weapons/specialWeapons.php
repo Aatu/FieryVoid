@@ -3048,7 +3048,8 @@ if ($fireOrder->damageclass == 'DustCollision') {
 				$fireOrder->chosenLocation = $this->getRamHitLocation($target, $gamedata, $targetPos);
 			}
 			//TerrainCollision (asteroids): return damage stays 0 via damageModRolled, so chosenLocation is not used meaningfully.
-	if($fireOrder->damageclass == 'MeteoroidCollision' || $fireOrder->damageclass == 'DustCollision' || $fireOrder->damageclass == 'WaveformCollision') return; // GTS_Triad
+//	if($fireOrder->damageclass == 'MeteoroidCollision' || $fireOrder->damageclass == 'DustCollision' || $fireOrder->damageclass == 'WaveformCollision') return; // GTS_Triad
+if($fireOrder->damageclass == 'MeteoroidCollision' || $fireOrder->damageclass == 'DustCollision' || $fireOrder->damageclass == 'WaveformCollision' || $fireOrder->damageclass == 'SingularityCollision') return; // GTS_Triad
 
 			$damage = $this->getReturnDamage($fireOrder);
         		$damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);
@@ -9951,7 +9952,7 @@ class SingularityMine extends AoE {
     public $hidetarget   = true;
     public $priority     = 1;
     public $factionAge   = 4;
-    public $preFires     = true;
+//    public $preFires     = true;
 
     public $range        = 120;
     public $loadingtime  = 3;
@@ -10256,7 +10257,7 @@ public function calculateHitBase($gamedata, $fireOrder) {
 
         } else if ($roll <= 15) {
             // Expelled — edge damage then destroy
-            $fireOrder->pubnotes .= "Expelled from hyperspace! $damage standard damage. Unit expelled from battle. ";
+            $fireOrder->pubnotes .= "Expelled into hyperspace! $damage standard damage. Unit expelled from battle. ";
             $fireOrder->chosenLocation = $fireOrder->chosenLocation ?? 1;
             $weapon->damage($target, $shooter, $fireOrder, $gamedata, $damage, false);
             $primaryStruct = $target->getStructureSystem(0);
@@ -11258,6 +11259,70 @@ class spawnDustField extends Terrain {
 }
 
 
+
+class HyperplasmaStream extends Plasma{
+	public $name = "HyperplasmaStream";
+	public $displayName = "Hyperplasma Stream";
+	public $iconPath = "HyperplasmaStream.png";
+	
+	public $animation = "laser";
+	public $priority = 2; //early, due to armor reduction effect
+
+	public $factionAge = 4;//Primordial
+		        
+	public $raking = 20;
+	public $loadingtime = 2;
+	public $rangeDamagePenalty = 0.5;	
+	public $rangePenalty = 0.33;
+	public $fireControl = array(0, 2, 5); // fighters, <=mediums, <=capitals 
+	
+	public $damageType = "Raking"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	public $weaponClass = "Plasma"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+
+		public $firingModes = array(
+			1 => "Raking"
+		);
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		if ( $maxhealth == 0 ) $maxhealth = 12;
+		if ( $powerReq == 0 ) $powerReq = 7;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}
+	
+	public function setSystemDataWindow($turn){		
+		parent::setSystemDataWindow($turn);
+		if (!isset($this->data["Special"])) { //Plasma class covers basic Plasma properties
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+	    $this->data["Special"] .= "Reduces armor of systems hit by 4.";	
+	    $this->data["Special"] .= "<br>Does not ignore already pierced armor (eg. every rake needs to pierce armor anew, even to the same location).";
+	}
+	
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+		if (($damage+$armour)>0){
+			for ($i = 0; $i < 4; $i++) {
+				$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
+				$crit->updated = true;
+				$crit->inEffect = true;
+				$system->setCritical($crit);
+			}
+		}
+	}
+	
+	protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null)
+    {
+		parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
+		$fireOrder->armorIgnored = array(); //clear armorIgnored array - next rake should be met with full armor value!
+	}
+	
+	public function getDamage($fireOrder){        return Dice::d(10,8)+16;   }
+	public function setMinDamage(){     $this->minDamage = 24 ;      }
+	public function setMaxDamage(){     $this->maxDamage = 96 ;      }
+
+}//endof class hyperplasmaStream
 
 
 
