@@ -1242,3 +1242,68 @@ ShadowFighterBomb.prototype.constructor = ShadowFighterBomb;
 ShadowFighterBomb.prototype.getModeNameForEnemy = function (fireOrder) {
     return "Fighter Bomb";
 };
+
+/* =============================================================================
+ * SingularityMine — JS stubs
+ * All logic is PHP-side. These stubs allow the JS engine to construct
+ * the system objects from JSON without errors.
+ * =========================================================================== */
+
+var SingularityMine = function SingularityMine(json, ship) {
+    Weapon.call(this, json, ship);
+};
+SingularityMine.prototype = Object.create(Weapon.prototype);
+SingularityMine.prototype.constructor = SingularityMine;
+
+SingularityMine.prototype.initializationUpdate = function () {
+    if (this.selected) {
+        this.showHexagonArc = 10;
+    } else {
+        this.showHexagonArc = 0;
+    }
+    return this;
+};
+
+var SingularityRammingAttack = function SingularityRammingAttack(json, ship) {
+    RammingAttack.call(this, json, ship);
+};
+SingularityRammingAttack.prototype = Object.create(RammingAttack.prototype);
+SingularityRammingAttack.prototype.constructor = SingularityRammingAttack;
+
+var SingularityCore = function SingularityCore(json, ship) {
+    ShipSystem.call(this, json, ship);
+};
+SingularityCore.prototype = Object.create(ShipSystem.prototype);
+SingularityCore.prototype.constructor = SingularityCore;
+
+var spawnSingularity = function spawnSingularity(json) {
+    Ship.call(this, json);
+};
+spawnSingularity.prototype = Object.create(Ship.prototype);
+spawnSingularity.prototype.constructor = spawnSingularity;
+
+// GTS_Triad
+var SpatialCutter = function SpatialCutter(json, ship) {
+    Weapon.call(this, json, ship);
+};
+SpatialCutter.prototype = Object.create(Weapon.prototype);
+SpatialCutter.prototype.constructor = SpatialCutter;
+
+SpatialCutter.prototype.onFireOrderCreated = function (fire) {
+    var shooter = gamedata.getShip(fire.shooterid);
+    var target  = gamedata.getShip(fire.targetid);
+    if (!shooter || !target) return;
+    if (ew.getTargetingEW(shooter, target) <= 0) {
+        confirm.warning("Spatial Cutter requires a lock-on (OEW) to fire. The shot will not resolve without one.");
+        var weapon = this;
+        window.setTimeout(function () {
+            for (var i = weapon.fireOrders.length - 1; i >= 0; i--) {
+                if (weapon.fireOrders[i].id === fire.id) {
+                    weapon.fireOrders.splice(i, 1);
+                    break;
+                }
+            }
+            webglScene.customEvent('SystemDataChanged', { ship: shooter, system: weapon });
+        }, 0);
+    }
+};

@@ -803,10 +803,12 @@ if (ballistic.damageclass === 'Sweeping' || ballistic.damageclass === 'HPC-subor
 			const modeMap = {
 				'1-Blanket Shield': { type: 'hexGreen', text: 'Shade Modulator', color: '#008000' },
 				'3-Blanket Shade': { type: 'hexYellow', text: 'Shade Modulator', color: '#787800' },
+				'Anti-Clockwise': { type: 'hexPurple', text: 'Singularity Mine', color: '#7f00ff' }, // GTS for Singularity Mine
 				'Anti-Fighter Plasma Web': { type: 'hexGreen', text: 'Plasma', color: '#787800' },
 				'Anti-Fighter Sand Caster': { type: 'hexYellow', text: 'Sand', color: '#787800' },
 				'Asteroid Salvo': { type: 'hexWhite', text: 'Asteroid Salvo', color: '#ffffff' },  // GTS for Asteroid Salvo
 				'Basic Mine': { type: 'hexRed', text: 'Basic', color: '#e6140a' },				
+				'Clockwise': { type: 'hexPurple', text: 'Singularity Mine', color: '#7f00ff' }, // GTS for Singularity Mine
 				'Defensive Plasma Web': { type: 'hexGreen', color: '', color: '#787800' },								
 				'Defensive Sand Caster': { type: 'hexYellow', color: '', color: '#787800' },
 				'Energy Mine': { type: 'hexRed', text: 'Energy Mine', color: '#e6140a' },					
@@ -842,7 +844,7 @@ if (ballistic.damageclass === 'Sweeping' || ballistic.damageclass === 'HPC-subor
 				// Call splash hex generation for cases where weapon affects more than one hex.
 				// Guard with targetPosition: mine-targeting fire orders (targetid !== -1) have a targetIcon
 				// but no targetPosition, which would make generateSplashHexes place hexes at 0,0 in Replay.
-				if (['Z - Antimine', 'Shredder', 'Energy Mine', 'Ion Storm', 'Jammer', '1-Blanket Shield', '3-Blanket Shade', 'Flare', 'Asteroid Salvo'].includes(modeName)) {  //GTS Added Flare and Asteroid Salvo
+				if (['Z - Antimine', 'Shredder', 'Energy Mine', 'Ion Storm', 'Jammer', '1-Blanket Shield', '3-Blanket Shade', 'Flare', 'Asteroid Salvo', 'Clockwise', 'Anti-Clockwise'].includes(modeName)) {  //GTS Added Flare, Asteroid Salvo, and spins for Singularity Mine
 					if ((gamedata.isMyOrTeamOneShip(shooter) || replay) && targetPosition) {
 						//A single RADIUS now, not a list of ring sizes: generateSplashHexes fills the whole
 						//disc in one region, so Ion Storm's old [1, 2] - ring 1 plus ring 2, the only way
@@ -868,6 +870,10 @@ if (ballistic.damageclass === 'Sweeping' || ballistic.damageclass === 'HPC-subor
 							// GTS_Triad
 							case 'Asteroid Salvo':
 								size = 2;
+								break;
+							case 'Clockwise':
+							case 'Anti-Clockwise':
+								size = 10;
 								break;
 						}
 
