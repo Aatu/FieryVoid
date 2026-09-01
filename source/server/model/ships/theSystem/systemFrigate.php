@@ -4,7 +4,7 @@ class systemFrigate extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 800;
+		$this->pointCost = 900;
 		$this->faction = "The System";
         $this->phpclass = "systemFrigate";
         $this->imagePath = "img/ships/systemPursuitShip2.png";
