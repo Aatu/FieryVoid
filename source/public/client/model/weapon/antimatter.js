@@ -119,3 +119,15 @@ AntimatterShredder.prototype.constructor = AntimatterShredder;
  * replay as a separate camera pan per victim. Purely presentational, so it lives on the
  * client prototype - nothing is added to the serialised payload. */
 AntimatterShredder.prototype.volleyAnimation = true;
+
+var AntimatterWave = function AntimatterWave(json, ship) {
+    AntimatterWeapon.call(this, json, ship);
+};
+AntimatterWave.prototype = Object.create(AntimatterWeapon.prototype);
+AntimatterWave.prototype.constructor = AntimatterWave;
+
+var AntimatterSlicer = function AntimatterSlicer(json, ship) {
+    AntimatterWeapon.call(this, json, ship);
+};
+AntimatterSlicer.prototype = Object.create(AntimatterWeapon.prototype);
+AntimatterSlicer.prototype.constructor = AntimatterSlicer;

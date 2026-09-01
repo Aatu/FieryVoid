@@ -18,6 +18,7 @@ class triadDevil extends MediumShip{
 
         $this->gravitic = true;
 		$this->advancedArmor = true;  
+		$this->skinDancer = true; 	
 
 		$this->forwardDefense = 10;
 		$this->sideDefense = 12;
@@ -43,10 +44,10 @@ class triadDevil extends MediumShip{
         $this->addPrimarySystem(new GraviticThruster(7, 15, 0, 4, 4)); 				
 
 		$this->addFrontSystem(new GraviticThruster(7, 10, 0, 3, 1));
-		$this->addFrontSystem(new GraviticThruster(7, 10, 0, 2, 1));
+		$this->addFrontSystem(new GraviticThruster(7, 10, 0, 3, 1));
         $this->addFrontSystem(new PlasmaDriver(7, 6, 6, 300, 60));	
         $this->addFrontSystem(new PlasmaDriver(7, 6, 6, 300, 60));	
-//        $this->addFrontSystem(new AntimatterWave(5, 20, 8, 270, 90));	
+        $this->addFrontSystem(new AntimatterWave(5, 20, 8, 270, 90));	
         $this->addFrontSystem(new SpatialCutter(7, 22, 8, 180, 360));	
         $this->addFrontSystem(new SpatialCutter(7, 22, 8, 0, 180));	
 

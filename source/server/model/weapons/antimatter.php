@@ -740,5 +740,100 @@ class AntiprotonGun extends AntimatterWeapon{
 		}
 	
 	} //end of class AntimatterShredder
+	
+	
+	class AntimatterWave extends AntimatterWeapon{        
+        public $name = "AntimatterWave";
+        public $displayName = "Antimatter Wave";
+		public $iconPath = "AntimatterWave.png";
+        public $animation = "ball";
+        public $animationExplosionScale = 0.9;
+ 		public $repairPriority = 6;//heavy AM weapons get a bit higher priority - this will be relevant for allocating hits by TAG, too
+		
+        public $priority = 2; 
+        public $loadingtime = 1;
+		public $rangePenalty = 0.33; //-1/hex base penalty
+        
+        public $firingModes = array(
+            1 => "Flash",
+        );
+        
+		public $damageType = "Flash"; 
+	
+		public $rngNoPenalty = 0; //maximum range at which weapon suffers no penalty
+		public $rngNormalPenalty = 0;//maximum range at which weapon suffers regular penalty
+		public $maxX = 25; //maximum value of X
+		public $dmgEquation = '5X+10'; //to be able to automatically incorporate this into weapon description
+
+        public $fireControl = array(5, 5, 5); // fighters, <mediums, <capitals 
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+			if ( $maxhealth == 0 ) $maxhealth = 20;
+            if ( $powerReq == 0 ) $powerReq = 8;            
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+       	public function getDamage($fireOrder){
+                $X = $this->getX($fireOrder);
+				$damage = (5* $X) + 10;
+				return $damage ;
+            }
+
+        public function setMinDamage(){     $this->minDamage = 10;      }
+        public function setMaxDamage(){     $this->maxDamage = 135;      }
+	
+	} //end of class AntimatterWave	
+	
+	
+	class AntimatterSlicer extends AntimatterWeapon{        
+        public $name = "AntimatterSlicer";
+        public $displayName = "Antimatter Slicer";
+		public $iconPath = "AntimatterSlicer.png";
+        public $animation = "laser";
+        public $animationExplosionScale = 0.5;
+		public $repairPriority = 6;//heavy AM weapons get a bit higher priority - this will be relevant for allocating hits by TAG, too
+		
+        public $priority = 8; //that's heavy Raking hit!
+		public $priorityArray = array(1=>8, 2=>2); //heavy Raking in primary mode, Piercing in alternate mode
+        public $raking = 20;
+        public $loadingtime = 2;
+		public $rangePenalty = 1; //-1/hex base penalty
+        public $intercept = 3;
+        
+        public $firingModes = array(
+            1 => "Raking",
+            2 => "Piercing"
+        );
+        
+        public $damageTypeArray = array(1=>'Raking', 2=>'Piercing');
+
+		public $rngNoPenalty = 15; //maximum range at which weapon suffers no penalty
+		public $rngNormalPenalty = 30;//maximum range at which weapon suffers regular penalty
+		public $maxX = 999; //maximum value of X
+		public $dmgEquation = '4X+20'; //to be able to automatically incorporate this into weapon description
+
+        public $fireControlArray = array( 1=>array(0, 4, 5), 2=>array(null,0, 1) ); // fighters, <mediums, <capitals 
+		
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+			if ( $maxhealth == 0 ) $maxhealth = 12;
+            if ( $powerReq == 0 ) $powerReq = 4;            
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+       	public function getDamage($fireOrder){
+                $X = $this->getX($fireOrder);
+				$damage = (4* $X) + 20;
+				return $damage ;
+            }
+
+        public function setMinDamage(){     $this->minDamage = 20;      }
+        public function setMaxDamage(){     $this->maxDamage = 100;      }
+	
+	} //end of class AntimatterSlicer	
+	
+	
+	
+	
 		
 ?>

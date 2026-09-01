@@ -181,6 +181,7 @@ AmmoMagazine.prototype.doVerifyAmmoUsage = function (currShip) { //verify whethe
                 //On the intercept-only pass this weapon's launch orders are NOT ours to count -
                 //they belong to Initial Orders and were charged there.
                 if (interceptOnly && !(currFireOrder.type == 'intercept' && currFireOrder.turn == gamedata.turn)) continue;
+				if (currFireOrder.skipAmmoCheck) continue; // GTS_Triad
                 var modeName = currWeapon.firingModes[currFireOrder.firingMode];
                 //mark ammo drawn (particular ammo)
                 if(this.ammoUseArray[modeName]){
@@ -349,24 +350,41 @@ AmmoMissileRackG.prototype.constructor = AmmoMissileRackG;
 // GTS_Triad
 
 
+// GTS_Triad
+
 var AmmoMissileRackTriad = function AmmoMissileRackTriad(json, ship) {
     AmmoMissileRackS.call(this, json, ship);
 };
 AmmoMissileRackTriad.prototype = Object.create(AmmoMissileRackS.prototype);
 AmmoMissileRackTriad.prototype.constructor = AmmoMissileRackTriad;
+
 AmmoMissileRackTriad.prototype.changeFiringMode = function(mode) {
     AmmoMissileRackS.prototype.changeFiringMode.call(this, mode);
     if (this.powerReqArray && this.powerReqArray[mode] !== undefined) {
         this.powerReq = this.powerReqArray[mode];
     }
     if (this.boostModeIndex !== null && mode == this.boostModeIndex) {
-        this.boostable = true;
+        this.boostable       = true;
         this.boostEfficiency = 6;
-        this.maxBoostLevel = 1;
+        this.maxBoostLevel   = 1;
     } else {
         this.boostable = false;
     }
 };
+
+// Called by weaponManager when a fire order is created.
+// Auto-allocate the 6-power boost when boost mode is fired.
+AmmoMissileRackTriad.prototype.onFireOrderCreated = function(fire) {
+    if (this.boostModeIndex !== null && fire.firingMode == this.boostModeIndex) {
+        fire.skipAmmoCheck = true;
+        var ship = gamedata.getShip(fire.shooterid);
+        if (ship) {
+            shipManager.power.setBoost(ship, this);
+            webglScene.customEvent('SystemDataChanged', { ship: ship, system: this });
+        }
+    }
+};
+
 AmmoMissileRackTriad.prototype.clearBoost = function () {
     for (var i in this.power) {
         var power = this.power[i];
@@ -377,20 +395,41 @@ AmmoMissileRackTriad.prototype.clearBoost = function () {
         }
     }
 };
+
 AmmoMissileRackTriad.prototype.hasMaxBoost = function () {
     return true;
 };
+
 AmmoMissileRackTriad.prototype.getMaxBoost = function () {
     return this.maxBoostLevel;
 };
-AmmoMissileRackTriad.prototype.initBoostableInfo = function () {
+
+// Runs at turn start via systemFactory initializationUpdate hook.
+// Clears any stale boost entry carried over from the previous turn
+// if there is no boost-mode fire order this turn.
+AmmoMissileRackTriad.prototype.initializationUpdate = function () {
     var boost = shipManager.power.getBoost(this);
     if (boost > 0) {
-        this.data["Damage"] = '20 (Power Boosted Basic Missile)';
-        this.data["Range"] = '40 / 120';
+        var hasBoostOrder = false;
+        for (var i = 0; i < this.fireOrders.length; i++) {
+            var fo = this.fireOrders[i];
+            if (fo.turn == gamedata.turn && fo.firingMode == this.boostModeIndex) {
+                hasBoostOrder = true;
+                break;
+            }
+        }
+        if (!hasBoostOrder) {
+            this.clearBoost();
+        } else {
+            this.data["Damage"] = '20 (Extra Power Basic Missile)';
+            this.data["Range"]  = '40 / 120';
+        }
     }
     return this;
 };
+
+
+
 
 var AmmoBombRack = function AmmoBombRack(json, ship) {
     Ballistic.call(this, json, ship);//I don't think Bomb Rack ever needs any AmmoMissileRackS function?
