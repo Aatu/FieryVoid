@@ -12,13 +12,30 @@ set_error_handler(
 class HelpManager{
 	private static $dbManager = null;
 
+	/**
+	 * Latched connect failure for THIS request -- see Manager::$dbUnavailable for the
+	 * reasoning. HelpManager is the least exposed of the three (one entry point, no
+	 * per-item loop), but it is the same static-stays-null-on-failure pattern and
+	 * leaving one of the three half-done is how this comes back.
+	 */
+	private static $dbUnavailable = null;
+
 	private static function initDBManager() {
 	    global $database_host;
 	  	global $database_name;
 		global $database_user;
 		global $database_password;
-		if (self::$dbManager == null)
-			self::$dbManager = new DBManager($database_host ?? "localhost", 3306,  $database_name, $database_user, $database_password);
+		if (self::$dbUnavailable !== null)
+			throw self::$dbUnavailable;
+
+		if (self::$dbManager == null) {
+			try {
+				self::$dbManager = new DBManager($database_host ?? "localhost", 3306,  $database_name, $database_user, $database_password);
+			} catch (Throwable $e) {
+				self::$dbUnavailable = $e;
+				throw $e;
+			}
+		}
 	}
 	
 	public static function getHelpMessage($gamehelpmessagelocation)

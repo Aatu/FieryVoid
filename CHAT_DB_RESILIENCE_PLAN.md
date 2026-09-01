@@ -2,9 +2,10 @@
 
 Follow-up to the live `1040 Too many connections` bursts of **2026-09-01**.
 
-Status: **THE CAUSE IS STILL UNKNOWN.** The first diagnosis was wrong and is dissected below so it is
-not rebuilt. Items 4–7 are hardening that stands on its own merits. **ITEM 0 — measurement — comes
-first and nothing else should be built until it reports.**
+Status: **Item 0 has reported (2026-09-01) and the answer is: the shared instance is chronically
+saturated, and FieryVoid cannot be the primary cause.** See "Item 0 — RESULTS" below for the numbers
+and the arithmetic. **Item 4 is BUILT and verified.** The first diagnosis was wrong and is dissected
+below so it is not rebuilt.
 
 ⚠️ **Read this before starting any item below.** Items 4–7 make the app degrade gracefully when the
 database is already in trouble, and close two ways it can make its own trouble worse. **Not one of
@@ -81,11 +82,93 @@ During a burst, `SHOW PROCESSLIST` (or `SHOW FULL PROCESSLIST`) is worth more th
 shows how many connections are FieryVoid's, and whether they are running a query or sitting idle. If
 they are **idle**, that confirms the hypothesis below and item 8 becomes the priority.
 
+---
+
+## Item 0 — RESULTS (collected 2026-09-01, at rest — no outage in progress)
+
+| Metric | Value |
+|---|---|
+| `max_connections` | **1000** |
+| `max_user_connections` | **100** |
+| `wait_timeout` | **28800** (8 hours) |
+| `Threads_connected` | **965** |
+| `Max_used_connections` | **1001** |
+| `Connections` | 340745 |
+
+### What these say
+
+**1. The instance is at 96.5% of capacity while nothing is wrong.** 965 of 1000 connections were held
+at a routine measurement moment, not during a burst. There is essentially no headroom in normal
+operation; the 2026-09-01 exhaustion was not an anomaly, it was the inevitable consequence of a
+standing condition.
+
+**2. `Max_used_connections` = 1001 means the ceiling has actually been hit.** The extra one over
+`max_connections` is the slot MariaDB reserves for a `SUPER` user, which is handed out precisely when
+the pool is full. This is direct evidence the instance has reached total exhaustion at least once.
+
+**3. FieryVoid can account for at most 10% of it.** `max_user_connections` = 100 caps the account
+instance-wide. FieryVoid could hold *every one* of its permitted connections and still leave 900 to
+be explained by other tenants of `sql-005`.
+
+**4. ⭐ The error code proves FieryVoid was under its own cap when it failed.** MariaDB raises
+**`1203 ER_TOO_MANY_USER_CONNECTIONS`** when the *per-account* limit is hit, and **`1040`** when the
+*instance-wide* `max_connections` is full. Live got **1040**. So at the moment of failure FieryVoid
+held fewer than its 100 permitted connections and was refused because the **instance** was full of
+somebody else's. This is the single most decisive fact collected, and it is free — it was in the
+error code all along.
+
+**5. `wait_timeout` = 28800 is why the instance stays full.** Eight hours before an idle connection is
+reaped. Any tenant using persistent or pooled connections accumulates them essentially permanently.
+FieryVoid is *not* such a tenant — `DBManager` uses plain `mysqli_connect` with no `p:` prefix and no
+`mysqli.allow_persistent` reliance, so its connections die at request end. Whoever is holding the
+other ~900 is doing something FieryVoid is not.
+
+### The verdict, stated carefully
+
+FieryVoid **cannot be the primary cause**: it is capped at 10% of the instance, and it was demonstrably
+below that cap when it was refused.
+
+But it is **not a pure bystander either**, and this distinction matters for what is worth building. If
+the instance idles at ~900 from other tenants, then FieryVoid's own peak — a turn-advance flurry where
+an APCu `last_update` bump invalidates every player's fast poll at once — is the marginal load that
+crosses 1000. FieryVoid does not fill the pool, but it can be the straw. **Reducing FieryVoid's peak
+concurrent connection count and its per-connection hold time therefore still has real value** (items 6
+and 8), even though neither can prevent a `1040` caused by the other 90%.
+
+⚠️ **Do not let item 8 be built on the old story.** Its premise — "FieryVoid holds connections idle
+across serialisation and that inflates concurrency" — is still true and still worth fixing, but the
+framing changed: it protects FieryVoid against hitting its **own** 100-connection cap (which would
+raise `1203`, an error live has never seen) and reduces its marginal contribution. It cannot fix
+`1040`. Build it as good citizenship, not as the cure.
+
+### Still unmeasured: how many of the 965 are FieryVoid's
+
+The one number that would complete the picture. On shared hosting the account almost certainly lacks
+the `PROCESS` privilege, which is *convenient* here: without it `SHOW PROCESSLIST` returns **only the
+account's own threads**, so a bare row count is exactly the wanted figure.
+
+```sql
+SHOW FULL PROCESSLIST;
+SELECT COUNT(*) FROM information_schema.PROCESSLIST;
+SELECT COMMAND, COUNT(*) FROM information_schema.PROCESSLIST GROUP BY COMMAND;
+```
+
+The third splits FieryVoid's own threads into `Sleep` (idle, holding a slot for nothing — item 8's
+target) versus `Query` (actually working). Worth running at a quiet moment *and* during a turn-change
+flurry; the difference between the two is the real peak.
+
 ### Ask the host
 
-Worth a support ticket regardless: *what is `max_connections` on sql-005, is it shared across tenants,
-and were there connection-exhaustion events on 2026-09-01 between 07:11 and 08:24 UTC?* They can see
-what the account cannot.
+Now the highest-value action available, and the numbers above make the ticket concrete rather than
+speculative: *`Threads_connected` on sql-005 sits at 965 of 1000 at rest and `Max_used_connections`
+has reached 1001, so the instance is running with no headroom. `wait_timeout` is 28800, so idle
+connections are held for eight hours. Our account is capped at 100 and received error 1040 (not 1203)
+on 2026-09-01 between 07:11 and 08:24 UTC, meaning we were refused while under our own limit. Can you
+confirm whether max_connections is shared across tenants on this instance, and whether a lower
+wait_timeout or a higher max_connections is possible?*
+
+That framing is hard to deflect: it does not ask them to investigate a vague slowness, it presents
+their own instance's saturation and asks a specific question about capacity.
 
 ---
 
@@ -120,9 +203,38 @@ so a later query can reconnect rather than use a closed handle.
 
 ---
 
-## Item 4 — one connect attempt per request, not N
+## Item 4 — one connect attempt per request, not N ✅ BUILT 2026-09-01
 
 **Priority: highest of the four.** This is the only item that actively *deepens* an outage.
+
+> **Status: done and verified.** A per-request `$dbUnavailable` latch was added to **all three**
+> managers — `Manager`, `ChatManager` and **`HelpManager`**, which has the identical
+> static-stays-null-on-failure pattern and was not named in the original write-up. The canonical
+> explanatory comment lives on `Manager::$dbUnavailable`; the other two point at it.
+>
+> The latch rethrows the **identical exception object**, not a copy, so its trace still points at the
+> real connect failure. To stop that producing one log frame per catch site (there are ~25 across the
+> three managers), `Debug::error` now dedupes on exception object identity via an `SplObjectStorage`
+> and returns the original log id — so every error response in a request cites one logged frame
+> instead of N redundant ones. That also removes real disk I/O amplification: each frame writes the
+> full REQUEST and SESSION context to `fieryvoid.log`, at exactly the moment the server is struggling.
+>
+> **Verified** with a throwaway CLI harness in the php container, pointing the connect at a refusing
+> port and calling `getChatMessages()` twice as `chatdata.php` does:
+>
+> | | EXCEPTION frames | distinct log ids | elapsed |
+> |---|---|---|---|
+> | before | 2 | 2 | 10.42 ms |
+> | after | **1** | **1** | **5.08 ms** |
+>
+> The baseline was measured by `git checkout`-ing the two files and re-running, so the test is known
+> to discriminate rather than merely passing. The halved elapsed time is the second `mysqli_connect`
+> no longer being attempted — 5 ms against a locally refusing port, but a full TCP round trip plus
+> queueing against a saturated remote host.
+>
+> Also done while in these files: `playerChatInfo.php` no longer ships `display_errors = 1` (see the
+> note at the foot of this file). Errors now log instead of rendering into a body the client parses
+> as JSON.
 
 ### The fault
 
@@ -319,10 +431,12 @@ Two halves, both small:
 
 ## Not part of any item above, but in the same files
 
-`playerChatInfo.php` ships with [`ini_set('display_errors', 1); error_reporting(E_ALL);`](source/public/playerChatInfo.php#L6-L7)
-and its own comment says *"remove or adjust for production"*. On live that leaks PHP errors into a
-response the client parses as JSON. It is a two-line change; do it whenever that file is next open for
-item 4 or 5.
+~~`playerChatInfo.php` ships with `ini_set('display_errors', 1); error_reporting(E_ALL);`~~
+**✅ Fixed 2026-09-01 alongside item 4.** Now `display_errors = 0`, `log_errors = 1`, with
+`error_reporting(E_ALL)` kept so nothing stops being *reported* — it just goes to the log rather than
+into a body the client parses as JSON. Note the file's two `ob_clean()` calls only protected the paths
+that pass through them; a warning raised after the JSON header was sent would still have landed inside
+the payload.
 
 Also noted while diagnosing, both deliberate, neither a bug — recording them so they are not
 "discovered" again:

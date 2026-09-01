@@ -2,12 +2,36 @@
 
 class Debug
 {
-    
+    /**
+     * Per-request memo of exceptions already logged, mapping the exception object to
+     * the log id it was given.
+     *
+     * WHY THIS EXISTS
+     * ---------------
+     * The *Manager classes latch a failed database connect and rethrow the identical
+     * exception object for every later call in the same request (see
+     * Manager::initDBManager). chatdata.php calls into ChatManager once per requested
+     * chat -- up to 8 -- so without this, one dead-database poll writes up to eight
+     * copies of the same trace, each with the full REQUEST and SESSION context, to
+     * fieryvoid.log. That is disk I/O amplification at exactly the moment the server
+     * is already in trouble.
+     *
+     * Deduping here rather than at the ~25 individual catch sites keeps the change in
+     * one place, and every caller still gets a usable log id back -- the same one, so
+     * the several error responses a client receives all point at the single logged
+     * frame instead of at seven redundant ones.
+     *
+     * Keyed on object identity, so two genuinely separate failures that happen to
+     * carry the same message are still logged separately. A PHP static, so it dies
+     * with the request, like the latch it serves.
+     */
+    private static $loggedExceptions = null;
+
     public static function log($msg)
     {
         return self::doLog($msg);
     }
-    
+
     /**
      * Log an exception or error
      * @param Throwable|Exception $e
@@ -18,12 +42,23 @@ class Debug
             return self::log("Debug::error called with non-exception: " . var_export($e, true));
         }
 
+        if (self::$loggedExceptions === null) {
+            self::$loggedExceptions = new SplObjectStorage();
+        }
+
+        if (self::$loggedExceptions->contains($e)) {
+            return self::$loggedExceptions[$e];
+        }
+
         $msg = "\nEXCEPTION: " . get_class($e);
         $msg .= "\nMESSAGE: " .$e->getMessage();
         $msg .= "\nFILE: " . $e->getFile() . " (" . $e->getLine() . ")";
         $msg .= "\nTRACE: " . $e->getTraceAsString();
-        
-        return self::doLog($msg);
+
+        $logid = self::doLog($msg);
+        self::$loggedExceptions[$e] = $logid;
+
+        return $logid;
     }
     
     private static function doLog($msg)

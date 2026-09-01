@@ -13,6 +13,16 @@ class ChatManager{
 
     private static $dbManager = null;
 
+    /**
+     * Latched connect failure for THIS request. See Manager::$dbUnavailable for the
+     * full reasoning; ChatManager is the most exposed of the three because
+     * chatdata.php calls getChatMessages() once per requested chat (capped at 8, and
+     * client-supplied), so an unlatched outage costs up to 8 connect attempts per
+     * poll instead of one. The live log of 2026-09-01 caught pid 509813 logging two
+     * identical "Too many connections" frames 1.1ms apart -- two chats, one request.
+     */
+    private static $dbUnavailable = null;
+
     private static function getCachePrefix() {
         global $database_name;
         // Use a safe fallback if for some reason db name is missing, though strictly it should be there.
@@ -27,8 +37,17 @@ class ChatManager{
     	global $database_name;
     	global $database_user;
     	global $database_password;
-        if (self::$dbManager == null)
-            self::$dbManager = new DBManager($database_host ?? "localhost", 3306, $database_name, $database_user, $database_password);
+        if (self::$dbUnavailable !== null)
+            throw self::$dbUnavailable;
+
+        if (self::$dbManager == null) {
+            try {
+                self::$dbManager = new DBManager($database_host ?? "localhost", 3306, $database_name, $database_user, $database_password);
+            } catch (Throwable $e) {
+                self::$dbUnavailable = $e;
+                throw $e;
+            }
+        }
     }
     
     /**

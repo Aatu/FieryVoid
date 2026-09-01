@@ -16,13 +16,49 @@ class Manager{
      */
     private static $dbManager = null;
 
+    /**
+     * Latched connect failure for THIS request.
+     *
+     * WHY THIS EXISTS
+     * ---------------
+     * initDBManager() used to assign $dbManager only on success, so a failed connect
+     * left the static null. Every entry point catches the exception and returns an
+     * error string rather than rethrowing, so the caller carries on and calls in
+     * again -- and each call re-entered mysqli_connect. During the 2026-09-01
+     * "Too many connections" bursts that meant the app hammered an already-exhausted
+     * connection pool once per call instead of once per request: the one behaviour
+     * here that actively deepened the outage rather than merely suffering it.
+     *
+     * With the latch, the first failure is remembered and every later call in the
+     * same request rethrows it immediately without touching the network.
+     *
+     * WARNING: this must stay a PHP static and must NEVER be cached in APCu. Its
+     * correct lifetime is exactly one request. A shared latch would let a single
+     * unlucky request lock every other process out of a database that had already
+     * recovered -- turning a blip into a self-inflicted outage.
+     *
+     * The identical exception OBJECT is rethrown, not a copy, so its trace still
+     * points at the real connect failure; Debug::error dedupes on object identity so
+     * this still produces one log frame per request, not one per call.
+     */
+    private static $dbUnavailable = null;
+
     private static function initDBManager() {
         global $database_host;
     	global $database_name;
     	global $database_user;
     	global $database_password;
-        if (self::$dbManager == null)
-            self::$dbManager = new DBManager($database_host ?? "mariadb", 3306, $database_name, $database_user, $database_password);
+        if (self::$dbUnavailable !== null)
+            throw self::$dbUnavailable;
+
+        if (self::$dbManager == null) {
+            try {
+                self::$dbManager = new DBManager($database_host ?? "mariadb", 3306, $database_name, $database_user, $database_password);
+            } catch (Throwable $e) {
+                self::$dbUnavailable = $e;
+                throw $e;
+            }
+        }
     }
 
     // Lightweight APCu debug logger, gated on FV_APCU_DEBUG (defined local-only in
