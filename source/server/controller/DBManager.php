@@ -4948,11 +4948,28 @@ public function setLastTimeChatChecked($userid, $gameid)
 
     public function deleteOldChatMessages()
     {
+        /* The cutoff is computed on the RIGHT of the comparison, never by wrapping the
+           column. This used to read `DATE_ADD(time, INTERVAL 3 DAY) < NOW()`, which
+           selects exactly the same rows but is not sargable: a column inside a function
+           cannot be matched against an index, so no index on `time` could ever be used
+           however the table was defined.
+
+           Honesty about scale, so this is not mistaken for a hot fix: on live the 3-day
+           retention actually works and `chat` holds only about a dozen rows, so today
+           this predicate costs nothing either way. It was rewritten while chasing the
+           2026-09-01 "Too many connections" bursts on a theory — MyISAM table locks —
+           that turned out not to apply, because live `chat` has been InnoDB all along.
+           See db/chatTableIndexes.sql for that write-up.
+
+           It stays rewritten because a non-sargable predicate is a latent defect
+           regardless of the current row count: it silently cannot use an index, so the
+           cost is invisible right up until retention is lengthened or the purge stops
+           running. */
         $stmt = $this->connection->prepare("
             DELETE FROM
                 chat
             WHERE
-                DATE_ADD(time, INTERVAL 3 DAY) < NOW()    
+                time < NOW() - INTERVAL 3 DAY
         ");
 
         if ($stmt) {

@@ -34,8 +34,10 @@ CREATE TABLE `chat` (
   `gameid` int(11) DEFAULT '0',
   `time` datetime NOT NULL,
   `message` text NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=39191 DEFAULT CHARSET=utf8;
+  PRIMARY KEY (`id`),
+  KEY `gameid_id` (`gameid`,`id`),
+  KEY `time` (`time`)
+) ENGINE=InnoDB AUTO_INCREMENT=39191 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
