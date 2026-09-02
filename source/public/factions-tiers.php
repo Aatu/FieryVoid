@@ -1314,7 +1314,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <ul>
 <li>A weapon that destabilizes hyperspace vortexes, preventing enemy escape. 
             It is fired at hexes where vortex are formed or forming. If it hits, any ships which are traversing the vortexe on that turn will be automatically destroyed unless they are Ancients.  
-            Ancients factions have a chance to survive the vortex collapse depending on their distance to the vortex and how well the vortex disruptor rolled to hit.</li>
+            Ancients factions have a chance to survive the vortex collapse depending on their distance to the vortex and how well the vortex disruptor rolled to hit.  
+            They roll 1d100 against the shot's to-hit margin plus the distance*5 ship travelled this turn, escaping on equal or higher.</li>
         <li>The game will resolve the shot (e.g. calculate hit chance and report result in firing log) and show the result in the Combat Log.  
             The Vortex Disruptor cannot be fired while a Shadow ship is half-phased.</li>          
     </ul>

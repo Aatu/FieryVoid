@@ -4,8 +4,9 @@ Follow-up to the live `1040 Too many connections` bursts of **2026-09-01**.
 
 Status: **Item 0 has reported (2026-09-01) and the answer is: the shared instance is chronically
 saturated, and FieryVoid cannot be the primary cause.** See "Item 0 — RESULTS" below for the numbers
-and the arithmetic. **Items 4, 5 and 7 are BUILT and verified; item 6 is the only one left, and item 8
-is now conditional on a measurement that has not been taken.** The first diagnosis was wrong and is
+and the arithmetic. **Items 4, 5 and 7 are BUILT and verified. Item 6 is not built — but its
+prerequisite measurement (item 6a) is, and is waiting to be deployed for a week. Item 8 is still
+conditional on a `SHOW PROCESSLIST` that has not been taken.** The first diagnosis was wrong and is
 dissected below so it is not rebuilt.
 
 ⚠️ **Read this before starting any item below.** Items 4–7 make the app degrade gracefully when the
@@ -402,6 +403,9 @@ work.
 
 **Priority: medium. Highest risk of the four — this one can take the game down if it is got wrong.**
 
+> **Status: NOT built. The measurement it demands is built and ready to deploy — see
+> "Item 6a — the instrument" immediately below.** Do not pick a cap until it has reported.
+
 ### The fault
 
 [server_load_guard.php:54](source/server/server_load_guard.php#L54):
@@ -440,6 +444,92 @@ blocking overlay, and how that interacts with a 5-attempt retry needs to be read
 ⚠️ **Pick the limit from a measurement, not a guess.** Instrument first: log the observed concurrent
 gamedata count for a week and set the cap above the normal peak, so it only bites during a genuine
 pile-up. A cap set too low is indistinguishable to players from the outage it is meant to prevent.
+
+---
+
+## Item 6a — the instrument ✅ BUILT 2026-09-01, ready to deploy
+
+Answers the ⚠️ above. **Measures only — it limits nothing, sheds nothing and changes no behaviour.**
+
+### Files
+
+| File | Role |
+|---|---|
+| `source/server/lib/PollInstrument.php` | the whole instrument (new) |
+| `source/server/server_load_guard.php` | +1 hook, above the limiter |
+| `source/public/gamedata.php` | +1 line: `PollInstrument::markHeavy()` |
+| `source/public/pollStats.php` | read-out, MaintenanceGate `?key=` (new) |
+| `source/logs/pollstats.csv` | written by the app, one line per hour |
+
+### ⭐ It measures two pools, and the difference is the finding
+
+- **ALL** — every gamedata request. What a cap in `server_load_guard.php` would see, since the guard
+  runs *before* the fast-poll check and cannot yet know which kind it is.
+- **HEAVY** — only those that fell through to the full build (Manager, DB connection, ship tree,
+  `stripForJson`, `json_encode`). What a cap placed *after* the fast-poll exit would see.
+
+Most polls exit on the APCu fast path and are nearly free. If HEAVY peaks well below ALL, that is the
+argument for moving the acquire point rather than capping at the guard — and it would mean the
+"separate, higher counter" sketched above is solving the wrong half of the problem.
+
+`markHeavy()` sits **outside** the fast-poll `if`, because a POST or a first load with no `last_time`
+never enters that block at all and is every bit as expensive.
+
+### ⚠️ The leak, and why the CSV has a `min_all` column
+
+The in-flight counter is incremented at the start and decremented by a shutdown function. PHP runs
+shutdown functions on a normal end, `exit()`, an uncaught exception and a fatal (including the memory
+limit) — but **not** if lsphp is hard-killed, which is exactly what the LVE memory limit does to this
+endpoint. Every missed decrement leaves the counter permanently one too high, which over a week would
+quietly turn the peak into fiction.
+
+So the hourly **minimum** is recorded next to the peak. An honest counter returns to 0 whenever the
+site is briefly idle; a leaked one has a floor it never drops below. **Read `min_all` first:**
+
+- `min_all = 0` → the peaks are real as they stand.
+- `min_all` climbing → that many slots are stuck; the peaks are overstated by roughly that much.
+
+At each hour boundary the floor is subtracted back off, so the error cannot compound across the week.
+
+### Deploying it
+
+1. Push the five files. Nothing else changes; there is no schema change and no client change.
+2. Confirm `source/logs/` is writable and **outside the document root** (it is, alongside
+   `fieryvoid.log`).
+3. Visit `pollStats.php?key=<maintenance_key>` — "Right now" should show non-zero requests within a
+   minute of any game being open.
+4. Leave it for a week, ideally spanning a busy evening of simultaneous turn advances, since that
+   thundering herd is the whole reason for the cap.
+
+**Kill switch:** upload an empty `source/logs/pollstats.off` and collection stops dead. A marker file
+rather than a varconfig flag on purpose — `global.php` requires the guard at line 36 and
+`varconfig.php` at line 37, so no varconfig setting exists yet when the hook runs; and on a live
+shared host stopping a diagnostic should be an FTP upload, not a deploy.
+
+### Reading it, when the week is up
+
+`pollStats.php` prints the percentiles directly. **Set the cap above the 99.9th percentile of HEAVY
+concurrency**, not above the median: at the 99.9th it sheds roughly one poll in a thousand under
+normal load, and `ajaxInterface.js` already retries a 503. Below the 99th it will bite on ordinary
+evenings, which is precisely the outcome the ⚠️ warns against.
+
+Also look at the duration histogram. Concurrency is arrival rate × duration, so if the tail is a few
+multi-second builds, **item 8 shortens them and lowers concurrency with no cap at all** — which would
+be the better fix, and the instrument is what would show it.
+
+### Verified
+
+Nine scenarios against real APCu in the php container, each in its own process: counter increment and
+observation at depth, the `MAX_BUCKET` collapse (peak stays exact, only the histogram bucket caps),
+the separate heavy pool, `markHeavy` idempotence, shutdown release, duration bucketing, the
+never-negative decrement, the CSV rollup field-by-field including the leak rebase (`5 - 3 + 1 = 3`),
+and the one-writer-per-hour election. Plus `APCUIterator` worker counting and the viewer's percentile
+maths. All pass.
+
+⚠️ **Still unverified, and only live can settle it:** whether the host runs this account in a single
+lsphp pool. APCu is per-instance shared memory, so if there is more than one pool each counts only
+itself and every figure is an undercount. The CSV's `workers` column is the check — a suspiciously
+small number there means the numbers are a floor, not a measurement.
 
 ---
 

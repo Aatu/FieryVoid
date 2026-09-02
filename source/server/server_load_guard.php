@@ -65,6 +65,33 @@ if (!$isKnownPoll && strpos($script, 'gamelobby.php') !== false) {
 }
 
 // ----------------------
+// 4b. Poll Instrumentation (DIAGNOSTIC — measures only, limits nothing)
+// ----------------------
+// Groundwork for CHAT_DB_RESILIENCE_PLAN item 6, whose own warning is that the cap must
+// come from a measurement rather than a guess. Placed HERE, above the limiter, so the
+// duration it records covers the whole request; placed inside this file because this is the
+// earliest code that runs on every web request and already knows the script name.
+//
+// Costs nothing on requests it does not care about — begin() returns immediately unless the
+// script is gamedata.php or gamelobbyloader.php.
+//
+// KILL SWITCH: create the file source/logs/pollstats.off and instrumentation stops dead.
+// A marker file rather than a varconfig flag on purpose — global.php requires THIS file at
+// line 36 and varconfig.php at line 37, so no varconfig setting exists yet when this runs.
+// It is also the better switch for a live shared host: stopping a week-long diagnostic
+// becomes an FTP upload rather than a code edit and a deploy.
+$_pi_dir = dirname(__DIR__) . '/logs';
+if (!is_file($_pi_dir . '/pollstats.off')) {
+    $_pi_file = __DIR__ . '/lib/PollInstrument.php';
+    if (is_file($_pi_file)) {
+        require_once $_pi_file;
+        PollInstrument::begin($script);
+    }
+    unset($_pi_file);
+}
+unset($_pi_dir);
+
+// ----------------------
 // 5. Limit Enforcement
 // ----------------------
 $ipAcquired = false;

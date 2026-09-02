@@ -2398,6 +2398,7 @@ spl_autoload_register(
                 'polarentyreebp' => '/server/model/ships/NexusPolaren_old/PolarenTyreeBP.php',
                 'polarenwyrith' => '/server/model/ships/NexusPolaren_old/PolarenWyrith.php',
                 'polarenwyrithrefit' => '/server/model/ships/NexusPolaren_old/PolarenWyrithRefit.php',
+                'pollinstrument' => '/server/lib/PollInstrument.php',
                 'porcupinealpha' => '/server/model/ships/EA_old/porcupineAlpha.php',
                 'porcupinebeta' => '/server/model/ships/EA/porcupineBeta.php',
                 'porfatis' => '/server/model/ships/pakmara/Porfatis.php',

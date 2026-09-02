@@ -912,7 +912,9 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                     <li><b>Calling them in.</b> During <b>Initial Orders</b>, press <b>Manage Reinforcements</b>. Every jump-capable unit you have in hyperspace is
                         listed; choose one, press <b>Choose Hex</b>, click the hex you want the jump point to open in, set the <b>facing</b> with the arrow
                         control, and then tick the units that will ride through it &mdash; the <b>Jump Point Manifest</b>. The opening ship always rides its own
-                        jump point. A unit already riding somebody else's is greyed out; you can withdraw a declaration from the same menu and start again.</li>
+                        jump point. A unit already riding somebody else's is greyed out; you can withdraw a declaration from the same menu and start again.
+                        To change your mind about <i>who rides</i> without giving up the jump point itself, select the row and press <b>Jump Manifest</b> &mdash;
+                        it reopens the same tick list.</li>
                     <li><b>The declaration is public once orders are committed</b> &mdash; everyone sees a <span style="color:#00b8e6;"><b>blue hex</b></span> with a
                         facing arrow at the hex you named, for the rest of that turn. That warning is the price of arriving somewhere useful, and it is the same
                         deal a Delayed Deployment Slot gets.</li>

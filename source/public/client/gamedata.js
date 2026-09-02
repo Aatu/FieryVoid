@@ -389,23 +389,29 @@ window.gamedata = {
     },
 
     /* ⭐ REINFORCEMENTS_PLAN.md STAGE 8 - MAY I SIGNAL THIS GATE FOR AN ARRIVAL? The condition on
-       the second Initial Orders tooltip button, and the client mirror of the two extra rules
+       the second Initial Orders tooltip button, and the client mirror of the one extra rule
        Firing::getGateSignalBlock applies to a 'gateexit' claim.
 
-       Everything a departure claim needs, PLUS something in hyperspace to bring in. A gate holds one
-       jump point and it is one-way (plan section 2.6), so an arrival claim spends the gate's whole
-       charge on a doorway nobody can use if there is nothing waiting behind it - the server refuses
-       it for that reason, and this is why the button is simply not offered.
+       Everything a departure claim needs, plus the reinforcements rule being on in this game.
 
-       ⚠️ ReinforcementEntry OWNS "what is still in hyperspace", and this asks it rather than
-       re-deriving: the predicate is "reinforcement, no arrival turn yet, mine, alive", and a second
-       copy of it here would be a fifth place for the arrivalTurn half to be forgotten. The module is
-       guarded because gamedata.js loads before it. */
+       ⭐⭐ AND NOTHING ABOUT WHAT IS IN HYPERSPACE (user ruling 2026-09-02). Until now this also
+       demanded a unit of the player's OWN still waiting, on the reasoning that an arrival doorway
+       with nobody behind it spends the gate's whole charge on a door nobody can use. That test was
+       too narrow in two directions at once: a gate exit stands for the whole of its programmed hold
+       and ANY unit of ANY side may ride it (JUMP_GATES_PLAN.md section 2.6), so it barred a player
+       from opening a doorway their TEAMMATE's reinforcements would come through, and barred opening
+       one this turn for a wave only ready to ride it on a later one. Whether a door is worth the
+       charge is the player's call to make, not this predicate's.
+
+       ⚠️ THE RULE GATE STAYS, AND IT IS NOT DECORATION. The server still refuses an arrival claim
+       in a game without allowReinforcements (Firing::getGateSignalBlock, "this game has no
+       reinforcements rule"), so without this line the button would be offered and the order would be
+       dropped at commit with nothing said. It used to be implicit - myHyperspaceUnits() returns []
+       when the rule is off - and it has to be stated now that the count is gone. */
     canSignalJumpGateForArrival: function canSignalJumpGateForArrival(gate) {
         if (!gamedata.canSignalJumpGate(gate)) return false;
-        if (!window.ReinforcementEntry) return false;
 
-        return ReinforcementEntry.myHyperspaceUnits().length > 0;
+        return gamedata.reinforcementsAllowed();
     },
 
     /* ⭐ REINFORCEMENTS_PLAN.md STAGE 9 - IS THE REINFORCEMENTS RULE ON IN THIS GAME?

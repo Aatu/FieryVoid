@@ -88,8 +88,9 @@ window.UI.gateSignal = {
 
     gamePosition: null,
     currentPosition: null,
-    lastActionTime: 0,
-    lastActionKey: null,
+    //When and on which control a TOUCH last landed - the only thing swallowSyntheticClick reads.
+    lastTouchTime: 0,
+    lastTouchKey: null,
 
     initGateSignalUI: function initGateSignalUI() {
         if (UI.gateSignal.iniated === true) return;
@@ -163,40 +164,61 @@ window.UI.gateSignal = {
         UI.gateSignal.iniated = true;
     },
 
-    /* Bound to "click touchstart" like the facing control's buttons, and for the same reason: a
-       touch fires touchstart and then a synthetic click ~300ms later, which would act twice per tap.
-       Swallow the second one inside 350ms.
+    /* ⭐⭐ THE GUARD IS FOR ONE GESTURE ARRIVING TWICE, NOT FOR TWO DELIBERATE PRESSES (user report
+       2026-09-02: "if I press twice in quick succession the 'Open for' value only changes once").
 
-       ⚠️ KEYED PER CONTROL. A single shared timestamp swallowed the NEXT control's first press too,
-       so ticking the duration up and immediately pressing SIGNAL did nothing - the guard exists to
-       de-duplicate one gesture on one element, never to rate-limit the panel. */
-    swallowDoubleEvent: function swallowDoubleEvent(key) {
+       The buttons are bound to "click touchstart" because a TOUCH fires touchstart and then a
+       synthetic click ~300ms behind it, which would step the duration twice per tap. The first
+       version of this refused any second event on the same control inside 350ms - which did
+       de-duplicate the tap, and also ate the second of two deliberate mouse clicks, because a real
+       double press and a ghost click are INDISTINGUISHABLE when all you look at is the clock. On a
+       stepper, where pressing repeatedly is the whole gesture, that is the wrong half to throw away.
+
+       SO LOOK AT THE EVENT TYPE INSTEAD, which separates them exactly:
+         - a touchstart always acts, and stamps the window;
+         - a click acts UNLESS it is the tail of a touch on this same control - which is precisely
+           what the synthetic one is, and what a real mouse click can never be.
+       Two rapid taps still behave: the second touchstart re-stamps the window, and it is that tap's
+       own ghost click the window then swallows. Two rapid mouse clicks are two clicks with no touch
+       behind them, so neither is ever refused, however fast they come.
+
+       ⚠️ STILL KEYED PER CONTROL, as it has been since the first version: a single shared stamp
+       swallowed the NEXT control's first press too, so ticking the duration up and immediately
+       pressing SIGNAL did nothing.
+
+       700ms rather than the ~300ms a ghost click actually takes: the window is only ever consulted
+       by a click, and a genuine tap's own touchstart re-stamps it first, so a generous window costs
+       a touch user nothing and covers a slow device. */
+    swallowSyntheticClick: function swallowSyntheticClick(key, e) {
         var now = new Date().getTime();
-        if (key === UI.gateSignal.lastActionKey && now - UI.gateSignal.lastActionTime < 350) return true;
 
-        UI.gateSignal.lastActionKey = key;
-        UI.gateSignal.lastActionTime = now;
-        return false;
+        if (e.type === "touchstart") {
+            UI.gateSignal.lastTouchKey = key;
+            UI.gateSignal.lastTouchTime = now;
+            return false;
+        }
+
+        return key === UI.gateSignal.lastTouchKey && now - UI.gateSignal.lastTouchTime < 700;
     },
 
     stepDownCallback: function stepDownCallback(e) {
         e.preventDefault();
         e.stopPropagation();
-        if (UI.gateSignal.swallowDoubleEvent("down")) return;
+        if (UI.gateSignal.swallowSyntheticClick("down", e)) return;
         UI.gateSignal.step(-1);
     },
 
     stepUpCallback: function stepUpCallback(e) {
         e.preventDefault();
         e.stopPropagation();
-        if (UI.gateSignal.swallowDoubleEvent("up")) return;
+        if (UI.gateSignal.swallowSyntheticClick("up", e)) return;
         UI.gateSignal.step(1);
     },
 
     confirmCallback: function confirmCallback(e) {
         e.preventDefault();
         e.stopPropagation();
-        if (UI.gateSignal.swallowDoubleEvent("confirm")) return;
+        if (UI.gateSignal.swallowSyntheticClick("confirm", e)) return;
         UI.gateSignal.confirm();
     },
 
@@ -250,8 +272,8 @@ window.UI.gateSignal = {
         UI.gateSignal.pending = pending;
         UI.gateSignal.gamePosition = window.coordinateConverter.fromHexToGame(pending.hexpos);
         UI.gateSignal.currentPosition = null;
-        UI.gateSignal.lastActionTime = 0;
-        UI.gateSignal.lastActionKey = null;
+        UI.gateSignal.lastTouchTime = 0;
+        UI.gateSignal.lastTouchKey = null;
 
         //`max` is per GATE, not a constant - see setHold - so it is stamped on the field each time
         //the panel opens rather than written into the markup.

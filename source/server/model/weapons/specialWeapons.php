@@ -3718,11 +3718,9 @@ class VortexDisruptor extends Weapon{
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
 		$this->data["Special"] = "Fired into a jump point - either an open ENTRANCE (yellow, units leaving) or an EXIT (blue, reinforcements arriving), including one that is still forming.";
-		$this->data["Special"] .= "<br>On a hit the jump point begins to collapse: it closes at the end of this turn no matter what was holding it open - a maintained vortex, or a jump gate programmed to stay open longer.";
-		$this->data["Special"] .= "<br>Anything in the jump point at the time is destroyed outright - no damage roll. Ships that flew into an entrance this turn die instead of escaping, and reinforcements waiting behind an exit die in hyperspace.";
-		$this->data["Special"] .= "<br>Ancient hulls (faction age 3+) may slip through first: roll 1d20 against the shot's to-hit margin plus the distance the ship travelled this turn, and escape on equal or higher.";
-		$this->data["Special"] .= "<br>Game will calculate whether disruption was successful (base chance is 120%, -5%/hex - EW is irrelevant) - but will NOT show it during targeting. A miss has no effect at all, and neither does a hit on a hex with no jump point in it.";
-		$this->data["Special"] .= "<br>Being half-phased renders weapon ineffective (hit chance = 0).";
+		$this->data["Special"] .= "<br>On a hit collapses the jump point at end of turn, destroying anything transitting the jump point at the time.";
+		$this->data["Special"] .= "<br>Ancient hulls may escape: roll 1d100 against the shot's to-hit margin plus the distance*5 ship travelled this turn, escaping on equal or higher.";
+		$this->data["Special"] .= "<br>A miss has no effect at all and cannot fired while half-phased.";
 	}
 
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
@@ -4035,11 +4033,11 @@ class VortexDisruptor extends Weapon{
 	{
 		if (!$unit || (int)$unit->factionAge < self::ANCIENT_FACTION_AGE) return false;
 
-		$neededD20 = (int)round(((int)$fireOrder->needed) / 5);
-		$rolledD20 = (int)ceil(((int)$fireOrder->rolled) / 5);
-		$total     = ($neededD20 - $rolledD20) + (int)$distance;
+		$neededD100 = (int)round(((int)$fireOrder->needed)); //50
+		$rolledD100 = (int)ceil(((int)$fireOrder->rolled)); //30
+		$total     = ($neededD100 - $rolledD100) + ((int)$distance*5);
 
-		return (Dice::d(20) >= $total);
+		return (Dice::d(100) >= $total);
 	}
 
 	/* HOW FAR $unit TRAVELLED THIS TURN TO REACH $vortexPos - "between start point and jump point,
