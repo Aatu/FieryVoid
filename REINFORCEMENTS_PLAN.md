@@ -1549,6 +1549,8 @@ unit in a real recorded game, so the signal-range and distance rules are the liv
 - the claim rules: an arrival claim is legal with the rule on and a wave waiting; refused with the
   rule off, refused with nothing in hyperspace, refused outright on a **ship's** Jump Engine — and a
   **departure** claim is unaffected by all three, so the rule gate is on the flavour and not the gate;
+  ⚠️ **the "nothing in hyperspace" refusal was dropped on 2026-09-02** and that assertion is now
+  inverted — see Stage 11b;
 - the class: an arrival claim opens a `SpawnJumpPointExit` (`phpclass` included, which is the
   identity that survives the reload); a departure claim still opens a plain `SpawnJumpPoint`;
 - the contest: my arrival claim against an enemy entrance claim **0 hexes** from the gate opens **yellow**,
@@ -2073,6 +2075,143 @@ loading pair), and the legacy + React bundles need rebuilding for 10b.
 
 ---
 
+### Stage 11 — four refinements ✅ BUILT 2026-09-02, untested in play
+> "1. Can you add a 'Jump Manifest' button in the Manage Reinforcement menu, between the current
+> action button and cancel buttons, and only show it when a selected unit already has a jump point
+> scheduled. 2. Clicking the new button opens the normal Jump Manifest menu and lets the player make
+> changes without having to cancel and re-do their jump point. Teams with no Reinforcements can still
+> signal a Jump Gate to open a Jump Exit."
+
+and, once 11a/11b were in play:
+
+> "That's working great, can we also add a 'Back to Manage Reinforcements' button to Jump Manifest
+> next to the Confirm button. Also, I've noticed the ticker buttons for Jump Gate signal menu are a
+> little sticky to press, i.e. if I press twice in quick succession the 'Open for' value only changes
+> once."
+
+**The theme of the first three is that the menu and the manifest are now a LOOP** rather than a
+one-way funnel: 11a is the way in, 11c is the way back out, and between them a wave can be re-named
+as many times as the player likes without a single declaration being withdrawn. 11d is unrelated — a
+bug in the gate Signal panel's stepper, reported alongside.
+
+#### 11a — the manifest gets a way back in
+
+Up to here a manifest was named **exactly once**, on the way out of the transaction that made the
+doorway: `createExitOrder` ends with `showManifestDialog`, and so does `createGateSignalOrder`
+(Stage 8). There was no second door. Changing one's mind about a single passenger therefore meant
+withdrawing the jump point, re-picking the hex, re-turning the facing and naming the whole list
+again — four gestures to undo one tick, and three of them re-decisions the player did not want to
+make.
+
+**A third button on the Manage Reinforcements menu**, between the row's own action and Cancel:
+
+| the selected row | primary | Jump Manifest |
+|---|---|---|
+| a drive with no declaration | Choose Hex | — no doorway yet |
+| a drive holding its own jump point | Withdraw Jump Point | **yes** |
+| a gate this client signalled this turn | Withdraw Gate Signal | **yes** |
+| a gate already holding a doorway | Select Reinforcements | — the primary button *is* the manifest |
+
+⭐ **And it hides when there is nobody left to offer.** `manifestRiders()` — split out of
+`showManifestDialog` so the button and the dialog ask one question rather than two — is the list of
+hyperspace units not already spoken for by a *different* doorway. Empty means the only outcome of
+pressing the button is a notice, so the button is not there: a lone drive that has declared its own
+exit has nothing to manage.
+
+Mechanically it is `data-manifest` on the row's radio, written by `openerRow`/`gateRow` beside
+`data-action` and `data-gate`, and `syncLabel` moves it onto the button on every selection change and
+every re-render — so a withdrawal takes the button away in the same breath as the OPENING tag. The
+click **re-derives the doorway from live gamedata** (a poll can land while the dialog stands, trap
+17) and closes the menu before opening the manifest, exactly as the gate's own Select Reinforcements
+has always done. The paint is a new generic `.confirmalt` in the `.fleetDialog` button row — neutral
+rather than accented, because the affirmative action is still the one on its left.
+
+#### 11b — an arrival claim no longer needs anything of your own in hyperspace
+
+Stage 8 gave a `'gateexit'` claim two extra rules: the game must have the reinforcements rule, **and**
+the claiming player must have something still waiting. The second is gone (user ruling).
+
+**Why it was wrong in two directions at once.** A gate exit stands for the whole of its programmed
+hold and *any* unit of *any* side may ride it (JUMP_GATES_PLAN.md §2.6). So the test barred a player
+from opening a doorway their **teammate's** wave would come through, and barred opening one this turn
+for a wave that would only be ready to ride it on a later one.
+`InitialOrdersGamePhase::collectGateOpeners` has always accepted **anybody's** standing gate exit as
+an opener a manifest may name — that half of the feature already worked — so this test was the only
+thing stopping the door being opened in the first place. Whether a door is worth the gate's charge is
+the player's call.
+
+**What did *not* change:** the rule gate. A game without `allowReinforcements` still refuses an
+arrival claim on both sides, and the client predicate had to state it explicitly
+(`gamedata.reinforcementsAllowed()`) now that it no longer gets it for free from an empty
+`myHyperspaceUnits()`. The **departure** claim is untouched, as it has been since Phase 2.
+
+Three sites: `gamedata.canSignalJumpGateForArrival`, `Firing::getGateSignalBlock` (and its now-unused
+`hasHyperspaceReinforcements` helper, deleted), and the wording of the `createGateSignalOrder` error,
+which is now about the rule rather than about the fleet. `showManifestDialog` grew a third empty-list
+message for the state this makes reachable — a gate doorway with nothing at all in hyperspace behind
+it, as against "they are all riding something else".
+
+#### 11c — and the manifest gets a way back OUT
+> "Can we also add a 'Back to Manage Reinforcements' button to Jump Manifest next to the Confirm
+> button."
+
+The other half of 11a: a fleet with two drives and a gate is three doorways to name, and every one of
+them used to end by dropping the player back onto the map to find the menu again. `.confirmalt` a
+second time, beside Confirm.
+
+⚠️ **It COMMITS the ticks; it does not discard them.** This dialog has no discarding half at all —
+its Cancel was deliberately removed, because "closing with nothing ticked" is a legal answer and a
+Cancel could not say whether it also undid the declaration. "Back" therefore means *"and now show me
+the menu"*, exactly as Confirm means *"and now let me get on"*; a Back that silently threw the ticks
+away would be that same ambiguity wearing a different word.
+
+Offered on **every** path that opens the manifest, the two that were not reached from the menu
+included (a fresh `createExitOrder` declaration, and the gate Signal panel). "Name the wave, then set
+up the next doorway" is the same workflow whichever door was just opened, and
+`manageReinforcements()` always has at least the row this manifest belongs to — so it can never land
+on its empty-handed error, and its single-candidate shortcut can never fire either (that candidate
+now holds a declaration).
+
+#### 11d — the signal panel's stepper was sticky
+> "the ticker buttons for Jump Gate signal menu are a little sticky to press, i.e. if I press twice
+> in quick succession the 'Open for' value only changes once."
+
+⭐⭐ **A de-duplication guard that only looks at the clock cannot tell a second press from a ghost.**
+The panel's buttons are bound to `"click touchstart"` because a touch fires touchstart and then a
+synthetic click ~300ms behind it, which would step the duration twice per tap. The guard refused any
+second event on the same control inside **350ms** — which did de-duplicate the tap, and also ate the
+second of two deliberate mouse clicks. On a stepper, where pressing repeatedly *is* the gesture, that
+is the wrong half to throw away.
+
+**The fix is to look at the event TYPE**, which separates them exactly: a `touchstart` always acts and
+stamps the window; a `click` acts unless it is the tail of a touch on this same control — which is
+precisely what the synthetic one is, and what a real mouse click can never be. Two rapid taps still
+behave, because the second touchstart re-stamps the window and it is that tap's own ghost click the
+window then swallows. `swallowDoubleEvent` → `swallowSyntheticClick`, and `lastActionTime/Key` →
+`lastTouchTime/Key`, since the stamp now means something narrower.
+
+⚠️ **`UI.vortexFacing` has the same defect and a worse version of it** — its guard is a single
+*unkeyed* 350ms stamp shared by all three buttons, so rotating twice quickly, or rotating and
+immediately confirming, is swallowed. Not touched here; it is the facing control, not the reported
+control.
+
+**Proven headless.** `tests/replay/reinforcementsStage8Harness.php` — **130 passed**, with the
+"refused with nothing in hyperspace" assertion **inverted rather than deleted**, so the absence of the
+rule is proven rather than assumed. `tests/replay/reinforcementsStage8ClientHarness.js` — **39** (was
+34), the five new ones on `data-manifest` across all four row states.
+`tests/replay/gateSignalTickerHarness.js` — **NEW**, 13 assertions, and ⭐ **it was run against the
+pre-fix file and fails exactly the three double-click assertions there**, so it is proving the change
+rather than passing vacuously. It works because `UI.gateSignal` is a plain object literal whose every
+jQuery reach is inside a method: the module loads in a `vm` with nothing but a `window`, and `Date` is
+replaced so a "rapid" press is 40ms rather than something the file has to sleep for. Stage 6 (192),
+7 (80), 9 (123), the Stage 9 client harness (32), the tooltip harness (14) and the Vortex Disruptor
+client harness (30) all unchanged and still passing.
+
+⚠️ **Legacy bundles need rebuilding** (`node scripts/bundle-legacy.js`, or `fvbuild.ps1 -Client`) —
+this is legacy JS and CSS only, so no autoload, no statics and no React build.
+
+---
+
 ## 5. Traps
 
 1. **The two positional `tac_ship` INSERTs.** §3.1. This one will bite on the first commit.
@@ -2309,7 +2448,7 @@ are the gestures the build added:
 
 | # | Scenario | Expect |
 |---|---|---|
-| 34 | Click a gate in Initial Orders with nothing in hyperspace | Only **Signal Jump Gate**. No arrival button at all |
+| 34 | Click a gate in Initial Orders with nothing in hyperspace | ~~Only **Signal Jump Gate**. No arrival button at all~~ — **superseded by Stage 11b:** both buttons, and the manifest that opens says there is nothing to bring through |
 | 35 | Same with a wave waiting | **Signal Gate for Arrival** too, blue vortex icon |
 | 36 | Press it | The panel is **cyan**, the commit reads **Signal for Arrival**, and the Jump Point Manifest opens the moment it is pressed |
 | 37 | Close the panel by clicking away instead | No claim, no berths, nothing to clean up |

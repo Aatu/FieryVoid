@@ -528,51 +528,36 @@ class Firing
          * EVERY RULE ABOVE APPLIES TO IT UNCHANGED, which is the whole reason this is one branch at
          * the bottom rather than a fourth list: the gate, the hex, the duration, the recharge, the
          * signal range and the one-claim-per-player test are all properties of SIGNALLING a gate and
-         * say nothing about which way the door then faces. These two are the only extra questions.
+         * say nothing about which way the door then faces. This is the only extra question.
          *
-         * ⚠️ THE RULE GATE IS FIRST, AND IT IS A CORRECTNESS TEST, NOT AN EFFICIENCY ONE. A game
-         * without allowReinforcements cannot contain a unit in hyperspace, so an arrival claim in
-         * one can only be a tampered POST - and letting it through would open a ONE-WAY doorway that
-         * nobody can arrive through and no ship can jump out of (plan section 2.6), which is
-         * strictly worse for the claimant than the entrance they would otherwise have had. Refuse it
-         * rather than granting a useless jump point.
+         * ⚠️ AND IT IS A CORRECTNESS TEST, NOT AN EFFICIENCY ONE. A game without allowReinforcements
+         * cannot contain a unit in hyperspace, so an arrival claim in one can only be a tampered POST
+         * - and letting it through would open a ONE-WAY doorway that nobody can arrive through and no
+         * ship can jump out of (plan section 2.6), which is strictly worse for the claimant than the
+         * entrance they would otherwise have had. Refuse it rather than granting a useless jump
+         * point.
          *
-         * ⚠️ ASKED OF THE REAL GAMEDATA LOAD. isReinforcement() reads two fields a POST-side ship
-         * does not carry at all (plan trap 3); $gamedata here is $gd, the load Firing was handed. */
+         * ⭐⭐ THE SECOND RULE IS GONE (user ruling 2026-09-02). Until now this also refused a claim
+         * from a player with nothing of their OWN left in hyperspace, on the reasoning above applied
+         * one step further - a door with nobody behind it is a door nobody uses. That was too narrow
+         * in two directions at once. A gate exit stands for the whole of its programmed hold and ANY
+         * unit of ANY side may ride it (JUMP_GATES_PLAN.md section 2.6), so the test barred a player
+         * from opening a doorway their TEAMMATE's reinforcements would come through, and barred
+         * opening one this turn for a wave only ready to ride it on a later one.
+         * InitialOrdersGamePhase::collectGateOpeners has always accepted ANYBODY's standing gate exit
+         * as an opener a manifest may name, so that half of the feature already worked; this test was
+         * the only thing stopping the door being opened in the first place. A claim with nobody
+         * behind it now costs exactly what it costs - the gate's charge, spent on a door - and that
+         * is the player's call to make. */
         if ($fire->damageclass === 'gateexit'){
             if (!$gamedata->rules || !$gamedata->rules->hasRuleName('allowReinforcements'))
                 return "this game has no reinforcements rule";
-
-            if (!self::hasHyperspaceReinforcements($gamedata, $gamedata->forPlayer))
-                return "player {$gamedata->forPlayer} has nothing waiting in hyperspace";
         }
 
         //Legal. Record WHO claimed, from the server's own reckoning - see the header note.
         $fire->targetid = $signaller->id;
 
         return null;
-    }
-
-    /* REINFORCEMENTS_PLAN.md STAGE 8 - has this player anything left in hyperspace to bring in?
-     *
-     * The server half of what the client's ReinforcementEntry.isOffered() asks before it offers the
-     * "Signal Gate for Arrival" button, and the one rule that stops a gate being turned into a
-     * doorway nobody can use. isReinforcement() is "bought as a reinforcement AND not yet assigned
-     * an arrival turn", so a unit that has already come through stops counting the moment it does.
-     *
-     * Destroyed units are skipped: pre-battle damage can in principle kill one before turn 1, and a
-     * wreck is not something to open a door for. */
-    private static function hasHyperspaceReinforcements($gamedata, $playerId)
-    {
-        foreach ($gamedata->ships as $unit){
-            if ($unit->userid != $playerId) continue;
-            if (!$unit->isReinforcement()) continue;
-            if ($unit->isDestroyed($gamedata->turn)) continue;
-
-            return true;
-        }
-
-        return false;
     }
 
     /* True when $shooter is a remote-controlled flight that is Uncontrolled THIS turn

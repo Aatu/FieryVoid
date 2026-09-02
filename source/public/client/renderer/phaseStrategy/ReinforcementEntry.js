@@ -12,6 +12,10 @@
  *             |                      is already holding
  *             |-> "Withdraw Jump Point" ... a unit that already holds one; the menu STAYS OPEN
  *             |                              and re-renders, so re-placing it is the next click
+ *             |-> "Jump Manifest" ........ the SECOND button, on any row that already holds a
+ *             |       \-> manifest dialog     doorway - re-open the passenger list without taking
+ *             |                              the jump point back first (2026-09-02). The manifest
+ *             |                              has its own way back HERE, so the two are a loop
  *             |-> "Select Reinforcements" . a GATE whose jump point is already open (Stage 8)
  *             |       \-> manifest dialog ..... who rides through, this turn
  *             |-> "Withdraw Gate Signal" .. a gate this client claimed for arrival this turn
@@ -224,6 +228,22 @@ window.ReinforcementEntry = (function () {
     function manifestOf(openerId) {
         return myHyperspaceUnits().filter(function (ship) {
             return ship.arrivalVia == openerId;
+        });
+    }
+
+    /* WHO COULD BE PUT ON THIS DOORWAY'S MANIFEST RIGHT NOW: everything of mine still in
+       hyperspace that is not already spoken for by a DIFFERENT doorway, plus the ones already
+       riding this one. A unit can only ride one jump point, and silently moving it would undo a
+       choice the player has already made on another opener.
+
+       Split out of showManifestDialog (user request 2026-09-02) because the Jump Manifest button
+       has to ask the same question BEFORE it offers itself: a doorway with nobody left to offer
+       would put a button on screen whose only possible outcome is a notice. One rule, two callers,
+       so the button and the dialog can never disagree about whether there is anything to choose. */
+    function manifestRiders(opener) {
+        return myHyperspaceUnits().filter(function (ship) {
+            if (ship.id == opener.id) return false;
+            return ship.arrivalVia === null || ship.arrivalVia === undefined || ship.arrivalVia == opener.id;
         });
     }
 
@@ -687,7 +707,11 @@ window.ReinforcementEntry = (function () {
        ⚠️ data-declared is written into the row and read back rather than re-derived at click
        time - but the CLICK still re-derives it from live gamedata. The attribute is for the
        label only; a poll can land while the dialog is open and a declaration cannot be trusted
-       to still be there (see _openerId's note at the top of this file). */
+       to still be there (see _openerId's note at the top of this file). data-manifest, which
+       decides whether the third button is offered, is read and re-derived exactly the same way.
+
+       ⭐ THE THIRD BUTTON, JUMP MANIFEST (user request 2026-09-02), is how a passenger list is
+       changed without withdrawing the doorway it belongs to. See the block that builds it. */
     function manageReinforcements() {
         var candidates = openerCandidates();
         var gates      = gateCandidates();
@@ -720,6 +744,27 @@ window.ReinforcementEntry = (function () {
 
         //Wider than the rest of the .fleetDialog family - see .reinforcementDialog in tactical.css.
         e.addClass("reinforcementDialog");
+
+        /* ⭐⭐ THE THIRD BUTTON (user request 2026-09-02): CHANGE A MANIFEST WITHOUT UNDOING THE
+           DOORWAY IT BELONGS TO.
+
+           Until now a manifest was named exactly once, on the way out of the transaction that made
+           the doorway - createExitOrder ends with showManifestDialog, and so does
+           createGateSignalOrder - and there was no way back to it. Changing one's mind about a
+           single passenger therefore meant withdrawing the jump point, re-picking the hex,
+           re-turning the facing and naming the whole list again: four gestures to undo one tick.
+           The manifest is a separate choice from the declaration - the dialog says so by having no
+           Cancel - so it gets its own way back in.
+
+           BETWEEN THE ACTION BUTTON AND CANCEL, which is where it belongs in both senses: it is
+           secondary to the row's own action, and it is not a way out of the dialog. It takes the
+           neutral .confirmalt paint rather than the accented .confirmok one for the same reason -
+           see the button-row block in confirm.css.
+
+           ⚠️ SHOWN ONLY WHEN THE SELECTED ROW ALREADY HOLDS A DOORWAY, and never on a row whose
+           primary action is the manifest already. openerRowsHtml decides that per row and writes
+           data-manifest; syncLabel below only moves the answer onto the button. */
+        $('<div class="confirmalt" data-label="Jump Manifest"></div>').insertAfter($(".confirmok", e));
 
         /* THE LIST IS RE-RENDERED IN PLACE, NEVER REBUILT. Withdrawing used to close the whole
            window (user request 2026-08-28), which made "move my jump point" three gestures -
@@ -761,6 +806,11 @@ window.ReinforcementEntry = (function () {
                would be harmless - it is skipped explicitly so the reason is on the record. */
             var isGateRow = checked.length > 0 && checked.attr("data-gate") === '1';
             highlight((!isGateRow && action === "Withdraw Jump Point") ? checked.val() : null);
+
+            /* AND THE THIRD BUTTON FOLLOWS THE SELECTION TOO. Every re-render calls this, so
+               withdrawing a jump point takes the Jump Manifest button away in the same breath as it
+               takes the OPENING tag - there is no doorway left to name a manifest for. */
+            $(".confirmalt", e).toggle(checked.length > 0 && checked.attr("data-manifest") === '1');
         }
 
         //DELEGATED on the dialog root and bound ONCE: render() replaces every row, so a handler
@@ -818,6 +868,37 @@ window.ReinforcementEntry = (function () {
 
             e.remove();
             activate(live);
+        });
+
+        /* ⭐ THE JUMP MANIFEST BUTTON. Straight to the same dialog every other path opens, on the
+           doorway the selected row is holding - a ship's own declaration or a gate's claim.
+
+           IT CLOSES THE MENU, exactly as the gate's own 'Select Reinforcements' does a few lines
+           up: the manifest is a full dialog of its own, and stacking the two would leave the player
+           looking at a list they cannot reach underneath the one on top of it.
+
+           ⚠️ THE DOORWAY IS RE-DERIVED FROM LIVE GAMEDATA, never trusted from data-manifest. The
+           attribute decided whether to OFFER the button; a poll can land between the render and the
+           click and take the declaration, the claim or the whole unit away (see _openerId at the top
+           of this file). If it has gone, re-render rather than opening a manifest for a doorway that
+           no longer exists - the row will then say what is true.
+
+           gateDoorway() rather than gateClaimOn() for a gate, deliberately looser than the test that
+           offered the button: if the claim has resolved into a standing exit while the dialog stood,
+           the manifest is still exactly the right thing to open. */
+        $(".confirmalt", e).on("click", function () {
+            var id = $("input[name='reinforcementOpener']:checked", e).val();
+            if (id === undefined) return;
+
+            var live = gamedata.getShip(id);
+            if (!live) { highlight(null); e.remove(); return; }
+
+            var doorway = gamedata.isJumpGate(live) ? !!gateDoorway(live) : !!declarationOn(live);
+            if (!doorway) { render(live.id); return; }
+
+            highlight(null);
+            e.remove();
+            showManifestDialog(live);
         });
 
         //highlight(null) here and not only in deactivate(): closing the menu with Cancel arms
@@ -883,6 +964,7 @@ window.ReinforcementEntry = (function () {
                 + '<input type="radio" name="reinforcementOpener" value="' + ship.id + '"'
                 + ' data-action="' + row.action + '"'
                 + ' data-gate="' + (row.gate ? '1' : '0') + '"'
+                + ' data-manifest="' + (row.manifest ? '1' : '0') + '"'
                 + (row.blocked ? ' disabled' : '')
                 + (i === pickIndex ? ' checked' : '') + '>'
                 + '<span class="reinforcementRowMain">'
@@ -910,6 +992,9 @@ window.ReinforcementEntry = (function () {
             gate:      false,
             open:      !!order,
             blocked:   !!host,
+            //A standing declaration is a manifest that can be re-opened - but only while there is
+            //somebody left to put on it. See manifestRiders and the Jump Manifest button.
+            manifest:  !!order && manifestRiders(ship).length > 0,
             action:    order ? 'Withdraw Jump Point' : 'Choose Hex',
             tag:       order ? 'OPENING' : (host ? 'RIDING' : null),
             tagRiding: !!host && !order,
@@ -947,6 +1032,9 @@ window.ReinforcementEntry = (function () {
         if (claim) {
             return {
                 ship: gate, gate: true, open: true, blocked: false,
+                //The claim is made and the manifest was named on the way out of the Signal panel;
+                //this is how it is re-opened without taking the claim back first.
+                manifest: manifestRiders(gate).length > 0,
                 action: 'Withdraw Gate Signal',
                 tag: 'SIGNALLED', tagRiding: false,
                 detail: 'signalled &mdash; ' + riderText
@@ -957,6 +1045,10 @@ window.ReinforcementEntry = (function () {
 
         return {
             ship: gate, gate: true, open: takesAWave, blocked: !takesAWave,
+            //⚠️ FALSE EVEN THOUGH THIS ROW HAS A DOORWAY, and deliberately: the PRIMARY button on
+            //this row already IS the manifest ('Select Reinforcements'), so a second button beside
+            //it saying the same thing in different words would only be noise.
+            manifest: false,
             action: 'Select Reinforcements',
             tag: takesAWave ? 'OPEN' : null, tagRiding: false,
             detail: takesAWave ? ('jump point open &mdash; ' + riderText) : 'jump point closes this turn'
@@ -1014,16 +1106,21 @@ window.ReinforcementEntry = (function () {
            why this is a wording branch and not a structural one. */
         var isGateDoor = gamedata.isJumpGate(opener);
 
-        var riders = myHyperspaceUnits().filter(function (ship) {
-            if (ship.id == opener.id) return false;
-            return ship.arrivalVia === null || ship.arrivalVia === undefined || ship.arrivalVia == opener.id;
-        });
+        var riders = manifestRiders(opener);
 
+        /* ⭐ THREE WAYS THE LIST COMES BACK EMPTY, and they are three different facts (the third is
+           new with the 2026-09-02 ruling below, which lets a gate be signalled for arrival by a
+           player with nothing of their own waiting - so "they are all riding something else" is no
+           longer the only reason a gate can have nobody to offer). A drive is never in this case in
+           the same sense: it always rides its own doorway, so the message is about IT. */
         if (riders.length === 0) {
-            confirm.warning(isGateDoor
-                ? "<b>" + opener.name + "</b> is holding a jump point open, but everything you have "
-                  + "in hyperspace is already riding another one."
-                : "<b>" + opener.name + "</b> will open a jump point and arrive through it next turn.");
+            confirm.warning(!isGateDoor
+                ? "<b>" + opener.name + "</b> will open a jump point and arrive through it next turn."
+                : (myHyperspaceUnits().length === 0
+                    ? "<b>" + opener.name + "</b> will open a jump point, but you have nothing in "
+                      + "hyperspace to bring through it."
+                    : "<b>" + opener.name + "</b> is holding a jump point open, but everything you "
+                      + "have in hyperspace is already riding another one."));
             gamedata.drawIniGUI();
             return;
         }
@@ -1056,7 +1153,9 @@ window.ReinforcementEntry = (function () {
         //explicit Cancel would only be ambiguous about whether it undid the declaration too.
         $(".confirmcancel", e).remove();
 
-        $(".confirmok", e).on("click", function () {
+        //THE TICK LIST, WRITTEN. Both buttons run it - see the Back button for why neither of them
+        //discards. Split out only so the two cannot drift apart.
+        function applyManifest() {
             var chosen = {};
             $(".reinforcementRider:checked", e).each(function () { chosen[$(this).val()] = true; });
             e.remove();
@@ -1067,7 +1166,32 @@ window.ReinforcementEntry = (function () {
             });
 
             gamedata.drawIniGUI();
-        });
+        }
+
+        $(".confirmok", e).on("click", applyManifest);
+
+        /* ⭐ BACK TO MANAGE REINFORCEMENTS (user request 2026-09-02), beside Confirm, and it closes
+           the loop the Jump Manifest button opened: a fleet with two drives and a gate is three
+           doorways to name, and every one of them used to end by dropping the player back onto the
+           map to find the menu again.
+
+           ⚠️ IT COMMITS THE TICKS, IT DOES NOT DISCARD THEM, and that is not a compromise - this
+           dialog has no discarding half at all (the note above says why its Cancel was removed).
+           "Back" here means "and now show me the menu", exactly as Confirm means "and now let me get
+           on"; a Back that silently threw the ticks away would be the ambiguity that Cancel was
+           deleted to avoid, wearing a different word.
+
+           OFFERED ON EVERY PATH, including the two that were not reached from the menu - a fresh
+           declaration (createExitOrder) and the gate Signal panel (createGateSignalOrder). "Name the
+           wave, then set up the next doorway" is the same workflow whichever door was just opened,
+           and manageReinforcements() always has at least the row this manifest belongs to, so it
+           can never land on the empty-handed error. */
+        $('<div class="confirmalt" data-label="Back to Manage Reinforcements"></div>')
+            .insertAfter($(".confirmok", e))
+            .on("click", function () {
+                applyManifest();
+                manageReinforcements();
+            });
 
         e.appendTo("body").fadeIn(250);
     }
@@ -1157,8 +1281,9 @@ window.ReinforcementEntry = (function () {
         myHyperspaceUnits: myHyperspaceUnits,
         strandedByCommit: strandedByCommit,
         //STAGE 8 - the two the gate half needs. showGateManifest is weaponManager's, straight off
-        //the Signal button; clearGateManifest is its withdrawal twin. gamedata.js reads
-        //myHyperspaceUnits above for canSignalJumpGateForArrival.
+        //the Signal button; clearGateManifest is its withdrawal twin. (myHyperspaceUnits above used
+        //to answer gamedata.canSignalJumpGateForArrival; that rule was dropped on 2026-09-02, so it
+        //is exported now only as the module's public "what is still waiting" reader.)
         showGateManifest: showGateManifest,
         clearGateManifest: clearGateManifest
     };

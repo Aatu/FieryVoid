@@ -4156,10 +4156,12 @@ window.weaponManager = {
        longer is a deliberate choice. */
     queueGateSignalOrder: function queueGateSignalOrder(gate, exit) {
         if (!gamedata.canSignalJumpGate(gate)) return;
-        //REINFORCEMENTS_PLAN.md Stage 8: an ARRIVAL claim is only offered when there is something in
-        //hyperspace to bring in. Re-asked here as well as on the tooltip button because a poll can
-        //land in between - and the server refuses the claim outright (Firing::getGateSignalBlock),
-        //so an order built without it would be silently dropped at commit.
+        //REINFORCEMENTS_PLAN.md Stage 8: an ARRIVAL claim needs the reinforcements rule to be on in
+        //this game (it no longer needs anything of this player's to be waiting - user ruling
+        //2026-09-02, see gamedata.canSignalJumpGateForArrival). Re-asked here as well as on the
+        //tooltip button because a poll can land in between - and the server refuses the claim
+        //outright (Firing::getGateSignalBlock), so an order built without it would be silently
+        //dropped at commit.
         if (exit && !gamedata.canSignalJumpGateForArrival(gate)) return;
 
         var engine = gamedata.getGateJumpEngine(gate);
@@ -4209,8 +4211,13 @@ window.weaponManager = {
             return;
         }
 
+        //The message is about the RULE, not about the fleet: since 2026-09-02 a player may open an
+        //arrival doorway with nothing of their own waiting behind it (a teammate's wave, or their
+        //own on a later turn, can ride it), so the only way to reach this is a game that does not
+        //have reinforcements at all.
         if (exit && !gamedata.canSignalJumpGateForArrival(gate)) {
-            confirm.error("You have nothing left in hyperspace to bring through this gate.");
+            confirm.error("This game has no reinforcements, so a jump gate cannot be signalled to "
+                + "open a way in from hyperspace.");
             return;
         }
 

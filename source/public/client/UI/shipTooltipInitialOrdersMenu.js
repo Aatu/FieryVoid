@@ -230,9 +230,13 @@ window.ShipTooltipInitialOrdersMenu = function () {
         weaponManager.queueGateSignalOrder(this.targetedShip);
     }
 
-    /* REINFORCEMENTS_PLAN.md STAGE 8 - everything canSignalGate needs, plus something waiting in
-       hyperspace to bring in. The client mirror of the two extra rules Firing::getGateSignalBlock
-       applies to a 'gateexit' claim; gamedata owns the predicate so the two buttons cannot drift. */
+    /* REINFORCEMENTS_PLAN.md STAGE 8 - everything canSignalGate needs, plus the reinforcements rule
+       being on in this game. The client mirror of the one extra rule Firing::getGateSignalBlock
+       applies to a 'gateexit' claim; gamedata owns the predicate so the two buttons cannot drift.
+
+       ⭐ IT NO LONGER ASKS WHAT IS IN HYPERSPACE (user ruling 2026-09-02): a gate exit stands for
+       its whole programmed hold and anybody may ride it, so this button is offered to a player with
+       nothing of their own waiting. See gamedata.canSignalJumpGateForArrival for the reasoning. */
     function canSignalGateForArrival() {
         return gamedata.canSignalJumpGateForArrival(this.targetedShip);
     }
