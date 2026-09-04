@@ -174,6 +174,15 @@ class Enhancements{
 			Enhancements::blockStandardEnhancements($unit);
 			$unit->enhancementOptionsEnabled[] = 'IMPR_SR';											
 			break;				
+
+		case 'TriadFighter':
+			Enhancements::blockStandardEnhancements($unit);
+			break;	
+
+		case 'TriadShip':
+			Enhancements::blockStandardEnhancements($unit);
+			$unit->enhancementOptionsEnabled[] = 'IMPR_SR';											
+			break;				
 			
 		case 'VorlonShip':
 			Enhancements::blockStandardEnhancements($unit);

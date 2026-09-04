@@ -33,6 +33,9 @@ class triadSpecter extends MediumShip{
 		$this->notes = "Cannot control fighters";		
 		$this->notes .= "<br>Atmospheric Capable";		
 
+		/*Triad use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'TriadShip');
+
 		$this->addPrimarySystem(new Reactor(7, 20, 0, 0));
 		$this->addPrimarySystem(new CnC(8, 12, 0, 0));
 		$scanner = new Scanner(8, 20, 0, 12);

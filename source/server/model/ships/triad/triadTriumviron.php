@@ -43,6 +43,9 @@ class triadTriumviron extends BaseShip{
 		$this->addLeftSystem($t3l);
 		$this->addRightSystem($t1r);
 		$this->addRightSystem($t4r);
+
+		/*Triad use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'TriadShip');
 		
 		$this->addPrimarySystem(new Reactor(8, 30, 0, 0));//armor, structure, power req, output
         $this->addPrimarySystem(new CnC(8, 24, 0, 0));

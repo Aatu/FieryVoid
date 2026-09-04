@@ -12,6 +12,9 @@ class triadCherub extends FighterFlight{
 		$this->isd = 'Primordial';
 		$this->factionAge = 4; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
 
+		/*Triad use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'TriadFighter');
+
 		$this->triadOrder = true;	//Important to ensure immunity from Flare Generator!	
 
         $this->gravitic = true;

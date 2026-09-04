@@ -12,6 +12,9 @@ class triadPhantom extends FighterFlight {
         $this->isd = 'Primordial';
 		$this->factionAge = 4; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
 
+		/*Triad use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'TriadFighter');
+
         $this->forwardDefense = 6;
         $this->sideDefense = 7;
         $this->freethrust = 15;

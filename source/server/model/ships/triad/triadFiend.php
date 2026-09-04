@@ -30,6 +30,9 @@ class triadFiend extends HeavyCombatVessel{
         $this->iniativebonus = 40;
 
 		$this->notes = "Can control 6 fighters";		
+
+		/*Triad use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'TriadShip');
          
         $this->addPrimarySystem(new Reactor(8, 30, 0, 0));
         $this->addPrimarySystem(new CnC(8, 16, 0, 0));

@@ -31,6 +31,9 @@ class triadSeraph extends MediumShip{
 
 		$this->notes = "Cannot control fighters";		
 
+		/*Triad use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'TriadShip');
+
 		$this->addPrimarySystem(new Reactor(8, 25, 0, 0));
 		$this->addPrimarySystem(new CnC(9, 12, 0, 0));
 		$scanner = new Scanner(8, 20, 0, 13);

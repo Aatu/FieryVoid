@@ -46,6 +46,10 @@ class triadBanshee extends HeavyCombatVessel{
 		$this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P    	    	    	    
 	    $this->enhancementOptionsEnabled[] = 'AMMO_X';//add enhancement options for other missiles - Class-X		    	    	    	    
 	    $this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-S
+//		$this->enhancementOptionsEnabled[] = 'AMMO_HM';//add enhancement options for other missiles - Class-HM
+
+		/*Triad use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'TriadShip');
          
         $this->addPrimarySystem(new Reactor(7, 24, 0, 0));
         $this->addPrimarySystem(new CnC(8, 16, 0, 0));

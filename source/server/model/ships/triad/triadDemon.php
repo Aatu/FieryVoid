@@ -44,6 +44,9 @@ class triadDemon extends BaseShip{
 		$this->addPrimarySystem(new Engine(8, 25, 0, 15, 3));
 //        $this->addPrimarySystem(new StructureSelfRepair(8, 24, 24)); //armor, structure, output
         $this->addPrimarySystem(new CoopStructureSelfRepair(8, 20, 21)); //armor, structure, output
+
+		/*Triad use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'TriadShip');
  		
         $this->addFrontSystem(new GraviticThruster(7, 13, 0, 5, 1));		
         $this->addFrontSystem(new GraviticThruster(7, 13, 0, 5, 1));		
