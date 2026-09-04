@@ -181,16 +181,8 @@ HeavyArray.prototype.initializationUpdate = function () {
 HeavyArray.prototype.doMultipleFireOrders = function (shooter, target, system) {
 
     var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon.
-    /*
-    if (this.fireOrders.length > 0) {
-        if (this.fireOrders.length >= this.guns) {
-            // All guns already fired → retarget one gun by removing oldest fireorder.
-            this.fireOrders.splice(0, 1);
-        }
-    } 
-    */
 
-    if (this.firingMode == 2 && this.fireOrders.length > 1) return;
+    if (this.firingMode == 2 && this.fireOrders.length >= this.guns) return;
 
     var fireOrdersArray = []; // Store multiple fire orders
 
@@ -239,7 +231,7 @@ HeavyArray.prototype.doMultipleFireOrders = function (shooter, target, system) {
 };
 
 HeavyArray.prototype.checkFinished = function () {
-    if (this.firingMode == 2 && this.fireOrders.length > 1) return true;
+    if (this.firingMode == 2 && this.fireOrders.length >= this.guns) return true;
     return false;
 };
 

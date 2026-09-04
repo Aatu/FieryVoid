@@ -269,24 +269,21 @@
     class HeavyArray extends Particle{
         public $name = "heavyArray";
         public $displayName = "Heavy Array";
-	   
         public $animation = "bolt";
-	    /*
-        public $animationColor = array(255, 163, 26);
-        public $trailColor = array(255, 163, 26);
-        public $animationExplosionScale = 0.25;
-        public $projectilespeed = 20;
-        public $animationWidth = 4;
-        public $trailLength = 15;
-*/
+
         public $intercept = 2;
 
         public $loadingtime = 1;
         public $guns = 2;
+        protected $originalGuns = 2; //starting number of guns, before any GunLost crits; used to gate the "both guns lost = destroyed" check
         public $priority = 6;
 
         public $rangePenalty = 1;
         public $fireControl = array(2, 3, 4); // fighters, <mediums, <capitals
+
+        //Heavy Array uses the standard weapon crit chart PLUS a special 20+ result (GunLost):
+        //one of the two guns is destroyed. 25+ adds GunLost on top of ReducedRange+ReducedDamage.
+        protected $possibleCriticals = array(14 => "ReducedRange", 19 => "ReducedDamage", 20 => "GunLost", 25 => array("ReducedRange", "ReducedDamage", "GunLost"));
 
         public $firingModes = array( 1 => "Normal", 2=> "Split");
         public $canSplitShots = false; //Allows Firing Mode 2 to split shots.
@@ -307,6 +304,38 @@
         public function getDamage($fireOrder){        return Dice::d(10, 2)+6;   }
         public function setMinDamage(){     $this->minDamage = 8 ;      }
         public function setMaxDamage(){     $this->maxDamage = 26 ;      }
+
+        //Each GunLost critical destroys one of the two guns, so the Heavy Array fires one
+        //less shot for each. Runs via onConstructed (and setSystemDataWindow), translating
+        //the GunLost crits into the actual reduced $guns count used when fire orders are built.
+        public function effectCriticals(){
+            parent::effectCriticals();//apply ReducedRange/ReducedDamage etc.
+            $gunsLost = $this->hasCritical("GunLost", false);//count GunLost crits in effect up to the current turn
+            $this->guns = max(0, $this->originalGuns - $gunsLost);
+        }
+
+        //If every gun has been destroyed by GunLost crits, the whole weapon is destroyed.
+        //Runs in Pass 2 of the crit phase (after Pass 1 has added all GunLost crits), so two
+        //GunLost crits scored the same turn are both seen here.
+        public function criticalPhaseEffects($ship, $gamedata){
+            parent::criticalPhaseEffects($ship, $gamedata);//Some critical effects like Limpet Bore might destroy weapon in this phase.
+
+            if($this->isDestroyed()) return;//already destroyed - also guards replay re-runs from adding a duplicate destroy entry.
+
+            $gunsLost = $this->hasCritical("GunLost", false);//count GunLost crits in effect up to the current turn
+            if($gunsLost >= $this->originalGuns){//all guns gone - destroy the weapon.
+                $damageCaused = $this->getRemainingHealth();
+                $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $damageCaused, 0, 0, -1, true, false, "", "GunLost");
+                $damageEntry->updated = true;
+                $this->damage[] = $damageEntry;
+            }
+        }
+
+		public function stripForJson() {
+			$strippedSystem = parent::stripForJson();
+			if ($this->guns != $this->originalGuns) $strippedSystem->guns = $this->guns;//send reduced gun count (GunLost crit) so the client shows the right Split shot count.
+			return $strippedSystem;
+		}
 
     }
 
@@ -2862,15 +2891,10 @@ class MinorThoughtPulsar extends LinkedWeapon{
 
         public $loadingtime = 1;
         public $guns = 2;
-        protected $originalGuns = 2; //starting number of guns, before any GunLost crits; used to gate the "both guns lost = destroyed" check
         public $priority = 6;
 
         public $rangePenalty = 0.33;
         public $fireControl = array(2, 3, 5); // fighters, <mediums, <capitals
-
-        //Twin Array uses the standard weapon crit chart PLUS a special 20+ result (GunLost):
-        //one of the two guns is destroyed. 25+ adds GunLost on top of ReducedRange+ReducedDamage.
-        protected $possibleCriticals = array(14 => "ReducedRange", 19 => "ReducedDamage", 20 => "GunLost", 25 => array("ReducedRange", "ReducedDamage", "GunLost"));
 
         public $firingModes = array( 1 => "Normal", 2=> "Split");
         public $canSplitShots = false; //Allows Firing Mode 2 to split shots.
@@ -2894,39 +2918,6 @@ class MinorThoughtPulsar extends LinkedWeapon{
         public function getDamage($fireOrder){        return Dice::d(10, 2)+15;   }
         public function setMinDamage(){     $this->minDamage = 17 ;      }
         public function setMaxDamage(){     $this->maxDamage = 35 ;      }
-
-        //Each GunLost critical destroys one of the two guns, so the Twin Array fires one
-        //less shot for each. Runs via onConstructed (and setSystemDataWindow), translating
-        //the GunLost crits into the actual reduced $guns count used when fire orders are built.
-        public function effectCriticals(){
-            parent::effectCriticals();//apply ReducedRange/ReducedDamage etc.
-            $gunsLost = $this->hasCritical("GunLost", false);//count GunLost crits in effect up to the current turn
-            $this->guns = max(0, $this->originalGuns - $gunsLost);
-        }
-
-        //If every gun has been destroyed by GunLost crits, the whole weapon is destroyed.
-        //Runs in Pass 2 of the crit phase (after Pass 1 has added all GunLost crits), so two
-        //GunLost crits scored the same turn are both seen here.
-        public function criticalPhaseEffects($ship, $gamedata){
-            parent::criticalPhaseEffects($ship, $gamedata);//Some critical effects like Limpet Bore might destroy weapon in this phase.
-
-            if($this->isDestroyed()) return;//already destroyed - also guards replay re-runs from adding a duplicate destroy entry.
-
-            $gunsLost = $this->hasCritical("GunLost", false);//count GunLost crits in effect up to the current turn
-            if($gunsLost >= $this->originalGuns){//all guns gone - destroy the weapon.
-                $damageCaused = $this->getRemainingHealth();
-                $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $damageCaused, 0, 0, -1, true, false, "", "GunLost");
-                $damageEntry->updated = true;
-                $this->damage[] = $damageEntry;
-            }
-        }
-
-		public function stripForJson() {
-			$strippedSystem = parent::stripForJson();
-			$strippedSystem->splitArcs = $this->splitArcs;
-			if ($this->guns != $this->originalGuns) $strippedSystem->guns = $this->guns;//send reduced gun count (GunLost crit) so the client shows the right Split shot count.
-			return $strippedSystem;
-		}
 
     }
 
