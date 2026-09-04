@@ -9729,6 +9729,8 @@ class NeutronBurst extends Weapon {
     public $fireControl  = array(2, 5, 5);
     public $uninterceptable = true;
 
+	public $factionAge = 4;//Ancient weapon, which sometimes has consequences!
+
     // Tracks system+order pairs already processed for Shadow vessels
     public $shadowEffectsApplied = array();
     // Tracks turns on which structure power loss has already been applied

@@ -1135,3 +1135,9 @@ AdvParticleBlastGun.prototype.checkFinished = function () {
     if (this.firingMode == 2 && this.fireOrders.length >= this.guns) return true; //one split shot per gun (guns is reduced by GunLost crits).
     return false;
 };
+
+var SolarBlaster = function SolarBlaster(json, ship) {
+    Particle.call(this, json, ship);
+};
+SolarBlaster.prototype = Object.create(Particle.prototype);
+SolarBlaster.prototype.constructor = SolarBlaster;

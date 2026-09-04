@@ -6,7 +6,7 @@ class triadBanshee extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 3000;
-        $this->faction = "";
+        $this->faction = "The Triad";
         $this->phpclass = "triadBanshee";
         $this->imagePath = "img/ships/triadBanshee.png";
         $this->shipClass = "Neutrality: Banshee";

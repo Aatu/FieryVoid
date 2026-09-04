@@ -5,7 +5,7 @@ class triadDevil extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 1625;
-		$this->faction = "";
+		$this->faction = "The Triad";
 		$this->phpclass = "triadDevil";
 		$this->imagePath = "img/ships/triadDevil.png";
 		$this->shipClass = "Chaos: Devil";

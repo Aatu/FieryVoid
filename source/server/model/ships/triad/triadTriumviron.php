@@ -5,7 +5,7 @@ class triadTriumviron extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 5175;
-		$this->faction = "";
+		$this->faction = "The Triad";
         $this->phpclass = "triadTriumviron";
         $this->shipClass = "The Triumviron";
         $this->imagePath = "img/ships/triadTriumviron.png";

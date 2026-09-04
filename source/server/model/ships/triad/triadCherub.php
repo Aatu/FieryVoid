@@ -5,7 +5,7 @@ class triadCherub extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 1860;
-        $this->faction = "";
+        $this->faction = "The Triad";
         $this->phpclass = "triadCherub";
         $this->shipClass = "Order: Cherub Super-heavy Fighters";
         $this->imagePath = "img/ships/triadCherub.png";

@@ -5,7 +5,7 @@ class triadWraith extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 4300;
-		$this->faction = "";
+		$this->faction = "The Triad";
         $this->phpclass = "triadWraith";
         $this->shipClass = "Netrality: Wraith";
         $this->imagePath = "img/ships/triadWraith.png";

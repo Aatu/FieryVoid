@@ -6,7 +6,7 @@ class triadAngel extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 2850;
-        $this->faction = "";
+        $this->faction = "The Triad";
         $this->phpclass = "triadAngel";
         $this->imagePath = "img/ships/triadAngel.png";
         $this->shipClass = "Order: Angel";
