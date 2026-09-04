@@ -29,10 +29,9 @@ class triadArchangel extends BaseShip{
         $this->pivotcost = 4;
 		$this->iniativebonus = 3 *5;
 
-		$this->notes = "Can control 12 fighters";		
-		$this->notes .= '<br>Triad Capital Ship'; 
+		$this->notes = 'Triad Capital Ship'; 
 
-		$this->fighters = array("TriadFighter"=>12);
+		$this->fighters = array("Triad Fighter"=>12);
 
 		/*Triad use their own enhancement set */		
 		Enhancements::nonstandardEnhancementSet($this, 'TriadShip');

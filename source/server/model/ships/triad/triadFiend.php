@@ -29,9 +29,7 @@ class triadFiend extends HeavyCombatVessel{
         $this->pivotcost = 4;
         $this->iniativebonus = 40;
 
-		$this->notes = "Can control 6 fighters";		
-
-		$this->fighters = array("TriadFighter"=>6);
+		$this->fighters = array("Triad Fighter"=>6);
 
 		/*Triad use their own enhancement set */		
 		Enhancements::nonstandardEnhancementSet($this, 'TriadShip');

@@ -28,12 +28,11 @@ class triadTriumviron extends BaseShip{
         $this->pivotcost = 4;
 		$this->iniativebonus = 2 *5;
 
-		$this->notes = "Can control 24 fighters";		
-		$this->notes .= '<br>Unified Triad'; 
+		$this->notes = 'Unified Triad'; 
 		$this->notes .= '<br>Triad Capital Ship'; 
 		$this->notes .= '<br>Atmospheric capable'; 
 
-		$this->fighters = array("TriadFighter"=>24);
+		$this->fighters = array("Triad Fighter"=>24);
 
 		$t1l = new GraviticThruster(7, 13, 0, 5, 1);
 		$t3l = new GraviticThruster(7, 25, 0, 8, 3);

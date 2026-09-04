@@ -27,9 +27,7 @@ class triadBanshee extends HeavyCombatVessel{
         $this->pivotcost = 2;
         $this->iniativebonus = 40;
 
-		$this->notes = "Can control 6 fighters";		
-
-		$this->fighters = array("TriadFighter"=>6);
+		$this->fighters = array("Triad Fighter"=>6);
 
         //ammo magazine itself (AND its missile options)
         $ammoMagazine = new AmmoMagazine(40); //pass magazine capacity - 20 rounds per launcher, plus reload rack 80

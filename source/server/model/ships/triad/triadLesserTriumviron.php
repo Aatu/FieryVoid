@@ -13,6 +13,7 @@ class triadLesserTriumviron extends BaseShip{
 	    $this->isd = 'Ancient';
         $this->shipSizeClass = 3; 
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
+		$this->occurence = "unique";
 
         $this->gravitic = true;
 		$this->advancedArmor = true;  
@@ -27,11 +28,10 @@ class triadLesserTriumviron extends BaseShip{
         $this->pivotcost = 4;
 		$this->iniativebonus = 2 *5;
 
-		$this->notes = "Can control 12 fighters";		
-		$this->notes .= '<br>Unified Triad'; 
+		$this->notes = 'Unified Triad'; 
 		$this->notes .= '<br>Triad Capital Ship'; 
 
-		$this->fighters = array("TriadFighter"=>12);
+		$this->fighters = array("Triad Fighter"=>12);
 
 		$t1l = new GraviticThruster(7, 10, 0, 4, 1);
 		$t3l = new GraviticThruster(7, 23, 0, 8, 3);
