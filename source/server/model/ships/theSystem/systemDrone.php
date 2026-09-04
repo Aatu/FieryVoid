@@ -32,6 +32,8 @@ class systemDrone extends FighterFlight{
         $this->gravitic = true;
 		$this->hangarRequired = '';
 		$this->critRollMod = 0; //Normal dropout rules.
+
+		$this->hangarRequired = "System Drone"; 
 		
 		$this->iniativebonus = 19 *5;
         $this->dropOutBonus = -2;

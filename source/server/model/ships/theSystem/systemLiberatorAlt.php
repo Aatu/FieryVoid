@@ -19,8 +19,7 @@ class systemLiberatorAlt extends BaseShip{
 
 	    $this->isd = 'Ancient';
 
-		$this->notes = "Can control 12 drones";		
-		$this->notes .= "<br>Resistant to criticals";		
+		$this->notes = "Resistant to criticals";		
 
 		$this->critRollMod -= 2;
 		$this->enhancementOptionsDisabled[] = 'VULN_CRIT';
@@ -34,6 +33,8 @@ class systemLiberatorAlt extends BaseShip{
         $this->rollcost = 3;
         $this->pivotcost = 3;
 		$this->iniativebonus = 4 *5;
+
+		$this->fighters = array("System Drone"=>12);
 
 		/*The System use their own enhancement set */		
 		Enhancements::nonstandardEnhancementSet($this, 'SystemShip');
