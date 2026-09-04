@@ -28,6 +28,8 @@ class triadImp extends FighterFlight{
 	    $this->advancedArmor = true; 
         $this->gravitic = true;
         $this->maxFlightSize = 6;//this is very powerful craft, let's not overdo on its durability, limit flight size to 6
+
+		$this->hangarRequired = "TriadFighter"; //Vorlon Assault Fighters are housed in regular hangars, as heavy fighters
 		
 		$this->iniativebonus = 20 *5;
 		$this->populate();

@@ -34,6 +34,9 @@ class systemFrigate extends MediumShip{
         $this->pivotcost = 2;
 		$this->iniativebonus = 75; 
 
+		/*The System use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'SystemShip');
+
 		$this->addPrimarySystem(new Reactor(5, 12, 0, 0));
 		$this->addPrimarySystem(new CnC(6, 10, 0, 0));
 		$scanner = new Scanner(6, 16, 0, 10);

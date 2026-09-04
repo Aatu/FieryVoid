@@ -32,6 +32,8 @@ class triadArchangel extends BaseShip{
 		$this->notes = "Can control 12 fighters";		
 		$this->notes .= '<br>Triad Capital Ship'; 
 
+		$this->fighters = array("TriadFighter"=>12);
+
 		/*Triad use their own enhancement set */		
 		Enhancements::nonstandardEnhancementSet($this, 'TriadShip');
 

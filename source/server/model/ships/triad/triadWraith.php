@@ -30,6 +30,8 @@ class triadWraith extends BaseShip{
 		$this->notes = "Can control 12 fighters";		
 		$this->notes .= '<br>Triad Capital Ship'; 
 
+		$this->fighters = array("TriadFighter"=>12);
+
         //ammo magazine itself (AND its missile options)
         $ammoMagazine = new AmmoMagazine(10); //pass magazine capacity - 20 rounds per launcher, plus reload rack 80
         $this->addPrimarySystem($ammoMagazine); //fit to ship immediately

@@ -32,6 +32,9 @@ class triadCherub extends FighterFlight{
         $this->iniativebonus = 85;
     	$this->superheavy = true;
         $this->maxFlightSize = 3;//this is a superheavy fighter originally intended as single unit, limit flight size to 3
+
+		$this->hangarRequired = "TriadFighter"; //Vorlon Assault Fighters are housed in regular hangars, as heavy fighters
+		$this->unitSize = 0.5; //one craft requires 2 hangar slots
 	
 		$this->populate();
 	

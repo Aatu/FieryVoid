@@ -35,6 +35,9 @@ class systemLightCruiser extends BaseShipNoAft{
         $this->pivotcost = 3;
         $this->iniativebonus = 15;
 
+		/*The System use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'SystemShip');
+
 		$this->addPrimarySystem(new Reactor(5, 18, 0, 0));
 		$this->addPrimarySystem(new CnC(6, 16, 0, 0));
 		$scanner = new Scanner(6, 22, 0, 11);

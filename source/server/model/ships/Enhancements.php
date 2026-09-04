@@ -153,6 +153,15 @@ class Enhancements{
 				$unit->enhancementOptionsEnabled[] = 'MAKE_MINE';			
 			break;		
 
+		case 'SystemFighter':
+			Enhancements::blockStandardEnhancements($unit);
+			break;	
+
+		case 'SystemShip':
+			Enhancements::blockStandardEnhancements($unit);
+			$unit->enhancementOptionsEnabled[] = 'IMPR_SR';											
+			break;				
+
 		case 'Terrain':
 			Enhancements::blockStandardEnhancements($unit);
 			break;	

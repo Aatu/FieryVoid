@@ -31,6 +31,8 @@ class triadLesserTriumviron extends BaseShip{
 		$this->notes .= '<br>Unified Triad'; 
 		$this->notes .= '<br>Triad Capital Ship'; 
 
+		$this->fighters = array("TriadFighter"=>12);
+
 		$t1l = new GraviticThruster(7, 10, 0, 4, 1);
 		$t3l = new GraviticThruster(7, 23, 0, 8, 3);
 

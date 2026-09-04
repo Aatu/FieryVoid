@@ -35,6 +35,9 @@ class systemLiberatorAlt extends BaseShip{
         $this->pivotcost = 3;
 		$this->iniativebonus = 4 *5;
 
+		/*The System use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'SystemShip');
+
 		$this->addPrimarySystem(new Reactor(5, 20, 0, 0));
 		$this->addPrimarySystem(new CnC(6, 16, 0, 0));
 		$scanner = new Scanner(6, 22, 0, 13);

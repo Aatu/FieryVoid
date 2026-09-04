@@ -31,6 +31,8 @@ class triadFiend extends HeavyCombatVessel{
 
 		$this->notes = "Can control 6 fighters";		
 
+		$this->fighters = array("TriadFighter"=>6);
+
 		/*Triad use their own enhancement set */		
 		Enhancements::nonstandardEnhancementSet($this, 'TriadShip');
          

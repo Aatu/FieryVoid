@@ -33,6 +33,8 @@ class triadDemon extends BaseShip{
 		$this->notes .= '<br>Triad Capital Ship'; 
 		$this->notes .= '<br>Atmospheric Capable'; 
 
+		$this->fighters = array("TriadFighter"=>12);
+
 		$this->addPrimarySystem(new Reactor(8, 30, 0, 0));//armor, structure, power req, output
         $this->addPrimarySystem(new CnC(8, 24, 0, 0));
 //		$scanner = new Scanner(8, 24, 0, 15);

@@ -27,6 +27,8 @@ class triadPhantom extends FighterFlight {
 
         $this->maxFlightSize = 6;//limit flight size to 6 by design
 
+		$this->hangarRequired = "TriadFighter"; //Vorlon Assault Fighters are housed in regular hangars, as heavy fighters
+
         $this->populate();
     }
 
