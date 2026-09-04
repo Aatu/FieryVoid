@@ -75,13 +75,13 @@ class triadBanshee extends HeavyCombatVessel{
         $this->addAftSystem(new GraviticThruster(6, 13, 0, 5, 2));
         $this->addAftSystem(new GraviticThruster(6, 15, 0, 6, 2));
         $this->addAftSystem(new GraviticThruster(6, 13, 0, 5, 2));
-        $this->addAftSystem(new AmmoMissileRackTriad(7, 6, 0, 60, 300, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addAftSystem(new AmmoMissileRackTriad(7, 6, 0, 150, 30, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+        $this->addAftSystem(new AmmoMissileRackTriad(7, 6, 0, 60, 300, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addAftSystem(new AdvParticleBlastGun(6, 16, 8, 120, 240));	
 		$this->addAftSystem(new JumpEngine(7, 20, 6, 8));        
         $this->addAftSystem(new SelfRepair(7, 6, 3)); //armor, structure, output
-        $this->addAftSystem(new AmmoMissileRackTriad(7, 6, 0, 330, 210, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addAftSystem(new AmmoMissileRackTriad(7, 6, 0, 60, 300, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+        $this->addAftSystem(new AmmoMissileRackTriad(7, 6, 0, 330, 210, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 7, 63));

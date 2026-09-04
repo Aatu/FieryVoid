@@ -3654,7 +3654,8 @@ window.weaponManager = {
 
         var stealthSystem = shipManager.systems.getSystemByName(target, "stealth");
 
-        if (stealthSystem && distance > 5 && weapon.ballistic && target.flight) {
+		//GTS_Triad - Allowing Ancients to ignore stealth with ballistics (Triad Missile Rack and Phased Gravitic Torpedo)
+        if (stealthSystem && distance > 5 && weapon.ballistic && target.flight && weapon.factionAge < 3) {
             return false;
         }
 

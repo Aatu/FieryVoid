@@ -2019,7 +2019,7 @@ class AmmoMissileRackTriad extends AmmoMissileRackS {
     public $displayName = "Triad Missile Rack";
     public $iconPath = "TriadMissileRack.png";
 
-	public $factionAge = 4;//Ancient weapon, which sometimes has consequences!
+	public $factionAge = 3;//Ancient weapon, which sometimes has consequences!
 
     public $priority = 6;
     public $loadingtime = 1;
