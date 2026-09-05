@@ -7,13 +7,16 @@ class triadImp extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 175*6;
-		$this->faction = "";
+		$this->faction = "The Triad";
 		$this->phpclass = "triadImp";
 		$this->shipClass = "Chaos: Imp Medium Fighters";
 		$this->imagePath = "img/ships/triadImp.png";
 	    
 		$this->isd = 'Primordial';
 		$this->factionAge = 4; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
+
+		/*Triad use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'TriadFighter');
         
 		$this->forwardDefense = 7;
 		$this->sideDefense = 7;
@@ -25,6 +28,8 @@ class triadImp extends FighterFlight{
 	    $this->advancedArmor = true; 
         $this->gravitic = true;
         $this->maxFlightSize = 6;//this is very powerful craft, let's not overdo on its durability, limit flight size to 6
+
+		$this->hangarRequired = "Triad Fighter"; 
 		
 		$this->iniativebonus = 20 *5;
 		$this->populate();

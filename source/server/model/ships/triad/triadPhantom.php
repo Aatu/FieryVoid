@@ -5,12 +5,15 @@ class triadPhantom extends FighterFlight {
         parent::__construct($id, $userid, $name, $slot);
 
         $this->pointCost = 390; 
-        $this->faction = ""; 
+        $this->faction = "The Triad"; 
         $this->phpclass = "triadPhantom";
         $this->shipClass = "Neutrality: Phantom Medium Fighter";
         $this->imagePath = "img/ships/triadPhantom.png";
         $this->isd = 'Primordial';
 		$this->factionAge = 4; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
+
+		/*Triad use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'TriadFighter');
 
         $this->forwardDefense = 6;
         $this->sideDefense = 7;
@@ -23,6 +26,8 @@ class triadPhantom extends FighterFlight {
 		$this->notes = "Max flight size of 6. Reduce offensive bonus by 5 for every fighter less than 6 in the flight.";
 
         $this->maxFlightSize = 6;//limit flight size to 6 by design
+
+		$this->hangarRequired = "Triad Fighter";
 
         $this->populate();
     }

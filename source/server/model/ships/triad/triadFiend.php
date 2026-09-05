@@ -6,7 +6,7 @@ class triadFiend extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 3200;
-        $this->faction = "";
+        $this->faction = "The Triad";
         $this->phpclass = "triadFiend";
         $this->imagePath = "img/ships/triadFiend.png";
         $this->shipClass = "Chaos: Fiend";
@@ -29,7 +29,10 @@ class triadFiend extends HeavyCombatVessel{
         $this->pivotcost = 4;
         $this->iniativebonus = 40;
 
-		$this->notes = "Can control 6 fighters";		
+		$this->fighters = array("Triad Fighter"=>6);
+
+		/*Triad use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'TriadShip');
          
         $this->addPrimarySystem(new Reactor(8, 30, 0, 0));
         $this->addPrimarySystem(new CnC(8, 16, 0, 0));
@@ -49,7 +52,7 @@ class triadFiend extends HeavyCombatVessel{
         $this->addFrontSystem(new GraviticThruster(7, 10, 0, 3, 1));
         $this->addFrontSystem(new PlasmaDriver(5, 6, 6, 300, 60));	
         $this->addFrontSystem(new HyperplasmaCutter(7, 16, 9, 240, 360));	
-//        $this->addFrontSystem(new SolarBlaster(6, 18, 10, 270, 90));	
+        $this->addFrontSystem(new SolarBlaster(6, 18, 10, 270, 90));	
         $this->addFrontSystem(new HyperplasmaCutter(7, 16, 9, 0, 120));	
         $this->addFrontSystem(new PlasmaDriver(5, 6, 6, 300, 60));	
         

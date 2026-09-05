@@ -269,24 +269,21 @@
     class HeavyArray extends Particle{
         public $name = "heavyArray";
         public $displayName = "Heavy Array";
-	   
         public $animation = "bolt";
-	    /*
-        public $animationColor = array(255, 163, 26);
-        public $trailColor = array(255, 163, 26);
-        public $animationExplosionScale = 0.25;
-        public $projectilespeed = 20;
-        public $animationWidth = 4;
-        public $trailLength = 15;
-*/
+
         public $intercept = 2;
 
         public $loadingtime = 1;
         public $guns = 2;
+        protected $originalGuns = 2; //starting number of guns, before any GunLost crits; used to gate the "both guns lost = destroyed" check
         public $priority = 6;
 
         public $rangePenalty = 1;
         public $fireControl = array(2, 3, 4); // fighters, <mediums, <capitals
+
+        //Heavy Array uses the standard weapon crit chart PLUS a special 20+ result (GunLost):
+        //one of the two guns is destroyed. 25+ adds GunLost on top of ReducedRange+ReducedDamage.
+        protected $possibleCriticals = array(14 => "ReducedRange", 19 => "ReducedDamage", 20 => "GunLost", 25 => array("ReducedRange", "ReducedDamage", "GunLost"));
 
         public $firingModes = array( 1 => "Normal", 2=> "Split");
         public $canSplitShots = false; //Allows Firing Mode 2 to split shots.
@@ -307,6 +304,38 @@
         public function getDamage($fireOrder){        return Dice::d(10, 2)+6;   }
         public function setMinDamage(){     $this->minDamage = 8 ;      }
         public function setMaxDamage(){     $this->maxDamage = 26 ;      }
+
+        //Each GunLost critical destroys one of the two guns, so the Heavy Array fires one
+        //less shot for each. Runs via onConstructed (and setSystemDataWindow), translating
+        //the GunLost crits into the actual reduced $guns count used when fire orders are built.
+        public function effectCriticals(){
+            parent::effectCriticals();//apply ReducedRange/ReducedDamage etc.
+            $gunsLost = $this->hasCritical("GunLost", false);//count GunLost crits in effect up to the current turn
+            $this->guns = max(0, $this->originalGuns - $gunsLost);
+        }
+
+        //If every gun has been destroyed by GunLost crits, the whole weapon is destroyed.
+        //Runs in Pass 2 of the crit phase (after Pass 1 has added all GunLost crits), so two
+        //GunLost crits scored the same turn are both seen here.
+        public function criticalPhaseEffects($ship, $gamedata){
+            parent::criticalPhaseEffects($ship, $gamedata);//Some critical effects like Limpet Bore might destroy weapon in this phase.
+
+            if($this->isDestroyed()) return;//already destroyed - also guards replay re-runs from adding a duplicate destroy entry.
+
+            $gunsLost = $this->hasCritical("GunLost", false);//count GunLost crits in effect up to the current turn
+            if($gunsLost >= $this->originalGuns){//all guns gone - destroy the weapon.
+                $damageCaused = $this->getRemainingHealth();
+                $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $damageCaused, 0, 0, -1, true, false, "", "GunLost");
+                $damageEntry->updated = true;
+                $this->damage[] = $damageEntry;
+            }
+        }
+
+		public function stripForJson() {
+			$strippedSystem = parent::stripForJson();
+			if ($this->guns != $this->originalGuns) $strippedSystem->guns = $this->guns;//send reduced gun count (GunLost crit) so the client shows the right Split shot count.
+			return $strippedSystem;
+		}
 
     }
 
@@ -1237,6 +1266,7 @@
         public function setMaxDamage(){     $this->maxDamage = 17 ;      }
 
     }//endof class SolarCannon
+
 
 
 
@@ -2861,15 +2891,10 @@ class MinorThoughtPulsar extends LinkedWeapon{
 
         public $loadingtime = 1;
         public $guns = 2;
-        protected $originalGuns = 2; //starting number of guns, before any GunLost crits; used to gate the "both guns lost = destroyed" check
         public $priority = 6;
 
         public $rangePenalty = 0.33;
         public $fireControl = array(2, 3, 5); // fighters, <mediums, <capitals
-
-        //Twin Array uses the standard weapon crit chart PLUS a special 20+ result (GunLost):
-        //one of the two guns is destroyed. 25+ adds GunLost on top of ReducedRange+ReducedDamage.
-        protected $possibleCriticals = array(14 => "ReducedRange", 19 => "ReducedDamage", 20 => "GunLost", 25 => array("ReducedRange", "ReducedDamage", "GunLost"));
 
         public $firingModes = array( 1 => "Normal", 2=> "Split");
         public $canSplitShots = false; //Allows Firing Mode 2 to split shots.
@@ -2894,40 +2919,125 @@ class MinorThoughtPulsar extends LinkedWeapon{
         public function setMinDamage(){     $this->minDamage = 17 ;      }
         public function setMaxDamage(){     $this->maxDamage = 35 ;      }
 
-        //Each GunLost critical destroys one of the two guns, so the Twin Array fires one
-        //less shot for each. Runs via onConstructed (and setSystemDataWindow), translating
-        //the GunLost crits into the actual reduced $guns count used when fire orders are built.
-        public function effectCriticals(){
-            parent::effectCriticals();//apply ReducedRange/ReducedDamage etc.
-            $gunsLost = $this->hasCritical("GunLost", false);//count GunLost crits in effect up to the current turn
-            $this->guns = max(0, $this->originalGuns - $gunsLost);
-        }
-
-        //If every gun has been destroyed by GunLost crits, the whole weapon is destroyed.
-        //Runs in Pass 2 of the crit phase (after Pass 1 has added all GunLost crits), so two
-        //GunLost crits scored the same turn are both seen here.
-        public function criticalPhaseEffects($ship, $gamedata){
-            parent::criticalPhaseEffects($ship, $gamedata);//Some critical effects like Limpet Bore might destroy weapon in this phase.
-
-            if($this->isDestroyed()) return;//already destroyed - also guards replay re-runs from adding a duplicate destroy entry.
-
-            $gunsLost = $this->hasCritical("GunLost", false);//count GunLost crits in effect up to the current turn
-            if($gunsLost >= $this->originalGuns){//all guns gone - destroy the weapon.
-                $damageCaused = $this->getRemainingHealth();
-                $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $damageCaused, 0, 0, -1, true, false, "", "GunLost");
-                $damageEntry->updated = true;
-                $this->damage[] = $damageEntry;
-            }
-        }
-
-    public function stripForJson() {
-        $strippedSystem = parent::stripForJson();
-        $strippedSystem->splitArcs = $this->splitArcs;
-        if ($this->guns != $this->originalGuns) $strippedSystem->guns = $this->guns;//send reduced gun count (GunLost crit) so the client shows the right Split shot count.
-        return $strippedSystem;
-	}
-
     }
-	
+
+
+
+
+    class SolarBlaster extends Particle{
+        public $name = "SolarBlaster";
+        public $displayName = "Solar Blaster";
+        public $iconPath = "SolarBlaster.png";
+
+		public $factionAge = 4;//Ancient weapon, which sometimes has consequences!
+	    
+        public $animation = "bolt";
+        public $animationColor = array(204, 204, 0);
+	    public $animationExplosionScale = 0.5;//re-scaled automatically in constructor!
+
+        public $priority = 6;
+
+        public $loadingtime = 1;
+
+        public $rangePenalty = 0.5;
+        public $fireControl = array(2, 5, 5); // fighters, <mediums, <capitals
+
+        public $damageType = "Standard"; 
+        public $weaponClass = "Particle"; 
+        public $noOverkill = true; // The damage of a solar cannon does not overkill.
+		public $firingModes = array( 1 => "Melt"); 
+        private $damageToRepeat = 0;
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);   	    
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= "Damage scored is repeated on appropriate Structure.";
+		
+		$this->animationExplosionScale = $this->dynamicScale(0,2);//scale weapon using double damage output - as base damage output is low-ish, but it's repeated on Structure for overall impressive total
+        }
+		
+		/*actually repeating damage scored on appropriate Structure*/
+		private function doRepeatDamageOnStructure($fireOrder,$target,$systemHit, $damage, $gamedata){
+            //Debug::log(json_encode($damageToRepeat));
+            $damageToRepeat = $this->damageToRepeat;
+
+			if(!$target instanceof FighterFlight){
+				$struct = null;
+				if($systemHit instanceof Structure){
+					$struct = $systemHit;
+				}else{
+					$struct = $target->getStructureSystem($systemHit->location);
+				}
+                if($struct && (!$struct->isDestroyed())){
+                    $shooter = $this->getUnit();
+                    
+                    //Determine if the shot successfully penetrated (dealt damage) to trigger internal effects
+                    $isUnderShield = ($damage > 0);
+
+                    //CALL SYSTEMS PROTECTING FROM DAMAGE HERE! 
+                    //Pass true for isUnderShield to indicate this is internal/under-shield damage
+                    $systemProtectingDmg = $target->getSystemProtectingFromDamage($shooter, null, $gamedata->turn, $this, $struct, $damageToRepeat, false, $isUnderShield);
+                    if($systemProtectingDmg){
+                        $effectOfProtection = $systemProtectingDmg->doProtect($gamedata, $fireOrder, $target, $shooter,$this,$struct,$damageToRepeat, 0);
+                        $damageToRepeat = $effectOfProtection['dmg'];
+                        //$effectiveArmor = $effectOfProtection['armor'];
+                    }
+                    //Debug::log(json_encode($damageToRepeat));
+
+					$destroyed = false;
+					$remHealth = $struct->getRemainingHealth();	
+					if($damageToRepeat >= $remHealth) $destroyed = true;
+					$damageToMark = min($damageToRepeat, $remHealth);
+					$damageEntry = new DamageEntry(-1, $target->id, -1, $fireOrder->turn, $struct->id, $damageToMark, 0, 0, $fireOrder->id, $destroyed, false, "", $this->weaponClass, $fireOrder->shooterid, $this->id);
+					$damageEntry->updated = true;
+					$struct->damage[] = $damageEntry;
+				}
+			}
+		}//endof function doRepeatDamageOnStructure
+		
+        protected function beforeDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+            //Debug::log(json_encode($damage));
+            $this->damageToRepeat = $damage-$armour; //Saved damage amount before any protection from Diffusers/shields etc.
+            return $damage;
+        }
+
+		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder)
+		{
+			$target = $ship;
+			if(!$target instanceof FighterFlight){
+				$this->doRepeatDamageOnStructure($fireOrder,$target,$system,$damage, $gamedata);
+			}
+			parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);            
+		}//endof onDamagedSystem
+		
+		//overkill should return damaged system itself, even if it is destroyed! - necessary for redefined doDamage to work properly
+		protected function getOverkillSystem($target, $shooter, $system, $fireOrder, $gamedata, $damageWasDealt, $location = null)
+		{
+			if($damageWasDealt){
+				return null;
+			}
+			return parent::getOverkillSystem($target, $shooter, $system, $fireOrder, $gamedata, $damageWasDealt, $location );
+		}//endof function getOverkillSystem
+		
+		//if damage was already dealt - proceed immediately to melting effect (of overkill) - else regular behavior
+		protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null)
+		{
+			if($damageWasDealt){
+				$this->doRepeatDamageOnStructure($fireOrder,$target,$system,$damage, $gamedata);
+			}else{
+				parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
+			}			
+		}//endof function doDamage
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 3)+20;   }
+        public function setMinDamage(){     $this->minDamage = 23 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 50 ;      }
+
+    }//endof class SolarBlaster
+
 	
 ?>

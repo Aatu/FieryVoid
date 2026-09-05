@@ -2019,6 +2019,8 @@ class AmmoMissileRackTriad extends AmmoMissileRackS {
     public $displayName = "Triad Missile Rack";
     public $iconPath = "TriadMissileRack.png";
 
+	public $factionAge = 3;//Ancient weapon, which sometimes has consequences!
+
     public $priority = 6;
     public $loadingtime = 1;
     public $powerReq = 0; // power is handled via boost mechanism (6 power per boost-mode shot)

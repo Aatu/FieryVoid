@@ -5,12 +5,15 @@ class triadCherub extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 1860;
-        $this->faction = "";
+        $this->faction = "The Triad";
         $this->phpclass = "triadCherub";
         $this->shipClass = "Order: Cherub Super-heavy Fighters";
         $this->imagePath = "img/ships/triadCherub.png";
 		$this->isd = 'Primordial';
 		$this->factionAge = 4; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
+
+		/*Triad use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'TriadFighter');
 
 		$this->triadOrder = true;	//Important to ensure immunity from Flare Generator!	
 
@@ -29,6 +32,9 @@ class triadCherub extends FighterFlight{
         $this->iniativebonus = 85;
     	$this->superheavy = true;
         $this->maxFlightSize = 3;//this is a superheavy fighter originally intended as single unit, limit flight size to 3
+
+		$this->hangarRequired = "Triad Fighter"; 
+		$this->unitSize = 0.5; //one craft requires 2 hangar slots
 	
 		$this->populate();
 	

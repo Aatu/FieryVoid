@@ -174,6 +174,9 @@ window.gamedata = {
 			case 'The System':
 				powerRating = 'Tier Ancients, Custom faction, Playtest';
 				break;
+			case 'The Triad':
+				powerRating = 'Tier Ancients';
+				break;
 			case 'Thirdspace':
 				powerRating = 'Tier Ancients, Custom faction';
 				break;

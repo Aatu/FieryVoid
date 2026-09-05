@@ -1785,7 +1785,7 @@ class FlareGenerator extends Weapon implements DefensiveSystem {
     public $displayName = "Flare Generator";
     public $iconPath = "FlareGenerator.png";
 
-    public $factionAge = 3;
+    public $factionAge = 4;
 
     public $animation = "laser";
     public $animationArray = array(1 => "laser", 2 => "ball");

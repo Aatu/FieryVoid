@@ -6,7 +6,7 @@ class triadBanshee extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 3000;
-        $this->faction = "";
+        $this->faction = "The Triad";
         $this->phpclass = "triadBanshee";
         $this->imagePath = "img/ships/triadBanshee.png";
         $this->shipClass = "Neutrality: Banshee";
@@ -27,7 +27,7 @@ class triadBanshee extends HeavyCombatVessel{
         $this->pivotcost = 2;
         $this->iniativebonus = 40;
 
-		$this->notes = "Can control 6 fighters";		
+		$this->fighters = array("Triad Fighter"=>6);
 
         //ammo magazine itself (AND its missile options)
         $ammoMagazine = new AmmoMagazine(40); //pass magazine capacity - 20 rounds per launcher, plus reload rack 80
@@ -46,6 +46,10 @@ class triadBanshee extends HeavyCombatVessel{
 		$this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P    	    	    	    
 	    $this->enhancementOptionsEnabled[] = 'AMMO_X';//add enhancement options for other missiles - Class-X		    	    	    	    
 	    $this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-S
+//		$this->enhancementOptionsEnabled[] = 'AMMO_HM';//add enhancement options for other missiles - Class-HM
+
+		/*Triad use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'TriadShip');
          
         $this->addPrimarySystem(new Reactor(7, 24, 0, 0));
         $this->addPrimarySystem(new CnC(8, 16, 0, 0));
@@ -71,13 +75,13 @@ class triadBanshee extends HeavyCombatVessel{
         $this->addAftSystem(new GraviticThruster(6, 13, 0, 5, 2));
         $this->addAftSystem(new GraviticThruster(6, 15, 0, 6, 2));
         $this->addAftSystem(new GraviticThruster(6, 13, 0, 5, 2));
-        $this->addAftSystem(new AmmoMissileRackTriad(7, 6, 0, 60, 300, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addAftSystem(new AmmoMissileRackTriad(7, 6, 0, 150, 30, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+        $this->addAftSystem(new AmmoMissileRackTriad(7, 6, 0, 60, 300, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addAftSystem(new AdvParticleBlastGun(6, 16, 8, 120, 240));	
 		$this->addAftSystem(new JumpEngine(7, 20, 6, 8));        
         $this->addAftSystem(new SelfRepair(7, 6, 3)); //armor, structure, output
-        $this->addAftSystem(new AmmoMissileRackTriad(7, 6, 0, 330, 210, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addAftSystem(new AmmoMissileRackTriad(7, 6, 0, 60, 300, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
+        $this->addAftSystem(new AmmoMissileRackTriad(7, 6, 0, 330, 210, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 7, 63));

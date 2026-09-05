@@ -5,7 +5,7 @@ class triadDemon extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 4550;
-		$this->faction = "";
+		$this->faction = "The Triad";
         $this->phpclass = "triadDemon";
         $this->shipClass = "Chaos: Demon";
         $this->imagePath = "img/ships/triadDemon.png";
@@ -29,9 +29,10 @@ class triadDemon extends BaseShip{
         $this->pivotcost = 4;
 		$this->iniativebonus = 3 *5;
 
-		$this->notes = "Can control 12 fighters";		
-		$this->notes .= '<br>Triad Capital Ship'; 
+		$this->notes = 'Triad Capital Ship'; 
 		$this->notes .= '<br>Atmospheric Capable'; 
+
+		$this->fighters = array("Triad Fighter"=>12);
 
 		$this->addPrimarySystem(new Reactor(8, 30, 0, 0));//armor, structure, power req, output
         $this->addPrimarySystem(new CnC(8, 24, 0, 0));
@@ -44,6 +45,9 @@ class triadDemon extends BaseShip{
 		$this->addPrimarySystem(new Engine(8, 25, 0, 15, 3));
 //        $this->addPrimarySystem(new StructureSelfRepair(8, 24, 24)); //armor, structure, output
         $this->addPrimarySystem(new CoopStructureSelfRepair(8, 20, 21)); //armor, structure, output
+
+		/*Triad use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'TriadShip');
  		
         $this->addFrontSystem(new GraviticThruster(7, 13, 0, 5, 1));		
         $this->addFrontSystem(new GraviticThruster(7, 13, 0, 5, 1));		

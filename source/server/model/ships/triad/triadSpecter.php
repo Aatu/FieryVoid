@@ -5,7 +5,7 @@ class triadSpecter extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 1700;
-		$this->faction = "";
+		$this->faction = "The Triad";
 		$this->phpclass = "triadSpecter";
 		$this->imagePath = "img/ships/triadSpecter.png";
 		$this->shipClass = "Neutrality: Specter";
@@ -32,6 +32,9 @@ class triadSpecter extends MediumShip{
 
 		$this->notes = "Cannot control fighters";		
 		$this->notes .= "<br>Atmospheric Capable";		
+
+		/*Triad use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'TriadShip');
 
 		$this->addPrimarySystem(new Reactor(7, 20, 0, 0));
 		$this->addPrimarySystem(new CnC(8, 12, 0, 0));

@@ -5,7 +5,7 @@ class triadWraith extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 4300;
-		$this->faction = "";
+		$this->faction = "The Triad";
         $this->phpclass = "triadWraith";
         $this->shipClass = "Netrality: Wraith";
         $this->imagePath = "img/ships/triadWraith.png";
@@ -27,8 +27,9 @@ class triadWraith extends BaseShip{
         $this->pivotcost = 4;
 		$this->iniativebonus = 3 *5;
 
-		$this->notes = "Can control 12 fighters";		
-		$this->notes .= '<br>Triad Capital Ship'; 
+		$this->notes .= 'Triad Capital Ship'; 
+
+		$this->fighters = array("Triad Fighter"=>12);
 
         //ammo magazine itself (AND its missile options)
         $ammoMagazine = new AmmoMagazine(10); //pass magazine capacity - 20 rounds per launcher, plus reload rack 80
@@ -47,6 +48,10 @@ class triadWraith extends BaseShip{
 		$this->enhancementOptionsEnabled[] = 'AMMO_P';//add enhancement options for other missiles - Class-P    	    	    	    
 	    $this->enhancementOptionsEnabled[] = 'AMMO_X';//add enhancement options for other missiles - Class-X		    	    	    	    
 	    $this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-S
+//		$this->enhancementOptionsEnabled[] = 'AMMO_HM';//add enhancement options for other missiles - Class-HM
+
+		/*Triad use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'TriadShip');
 
 		$this->addPrimarySystem(new Reactor(8, 30, 0, 0));//armor, structure, power req, output
         $this->addPrimarySystem(new CnC(8, 16, 0, 0));

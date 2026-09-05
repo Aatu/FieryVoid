@@ -16,6 +16,9 @@ class systemDrone extends FighterFlight{
 
 		$this->notes = "Has Jump Engine with 30 turn delay.";
 		$this->notes .= '<br>Does not require Hangar. System ships can control a certain number of Drones.';		
+
+		/*The System use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'SystemFighter');
 		
 		$this->forwardDefense = 8;
 		$this->sideDefense = 10;
@@ -29,6 +32,8 @@ class systemDrone extends FighterFlight{
         $this->gravitic = true;
 		$this->hangarRequired = '';
 		$this->critRollMod = 0; //Normal dropout rules.
+
+		$this->hangarRequired = "System Drone"; 
 		
 		$this->iniativebonus = 19 *5;
         $this->dropOutBonus = -2;

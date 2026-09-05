@@ -10130,6 +10130,8 @@ class NeutronBurst extends Weapon {
     public $fireControl  = array(2, 5, 5);
     public $uninterceptable = true;
 
+	public $factionAge = 4;//Ancient weapon, which sometimes has consequences!
+
     // Tracks system+order pairs already processed for Shadow vessels
     public $shadowEffectsApplied = array();
     // Tracks turns on which structure power loss has already been applied
@@ -10241,28 +10243,29 @@ class NeutronBurst extends Weapon {
 
         // --- Weapon hit: deactivate for one turn, power is lost ---
         if ($system instanceof Weapon) {
-            $system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
-            $fireOrder->pubnotes .= " [Neutron Burst: weapon deactivated] ";
-
-            $capacitor = $ship->getSystemByName("PowerCapacitor");
-            if ($capacitor) {
-                // Capacitor vessel: drain powerReq (power loss) + minimum firing cost
-                $powerLoss = $system->powerReq; // 0 for Vorlon weapons, non-zero for others
-                $minCost   = $this->getMinCapacitorCost($system);
-                $totalDrain = $powerLoss + $minCost;
-                if ($totalDrain > 0) {
-                    $capacitor->doDrawPower($totalDrain);
-                    $fireOrder->pubnotes .= " [Neutron Burst: -{$totalDrain} capacitor charge] ";
-                }
-            } else {
-                // Reactor vessel: apply OutputReduced1 per point of powerReq
-                if ($system->powerReq > 0) {
-                    $reactor = $ship->getSystemByName("Reactor");
-                    if ($reactor) {
-                        for ($i = 0; $i < $system->powerReq; $i++) {
-                            $crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn, $gamedata->turn + 1);
-                            $crit->updated = true;
-                            $reactor->setCritical($crit);
+            if (!$system->isDestroyed()) {
+                $system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
+                $fireOrder->pubnotes .= " [Neutron Burst: weapon deactivated] ";
+                $capacitor = $ship->getSystemByName("PowerCapacitor");
+                if ($capacitor) {
+                    // Capacitor vessel: drain powerReq (power loss) + minimum firing cost
+                    $powerLoss = $system->powerReq; // 0 for Vorlon weapons, non-zero for others
+                    $minCost   = $this->getMinCapacitorCost($system);
+                    $totalDrain = $powerLoss + $minCost;
+                    if ($totalDrain > 0) {
+                        $capacitor->doDrawPower($totalDrain);
+                        $fireOrder->pubnotes .= " [Neutron Burst: -{$totalDrain} capacitor charge] ";
+                    }
+                } else {
+                    // Reactor vessel: apply OutputReduced1 per point of powerReq
+                    if ($system->powerReq > 0) {
+                        $reactor = $ship->getSystemByName("Reactor");
+                        if ($reactor) {
+                            for ($i = 0; $i < $system->powerReq; $i++) {
+                                $crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn, $gamedata->turn + 1);
+                                $crit->updated = true;
+                                $reactor->setCritical($crit);
+                            }
                         }
                     }
                 }

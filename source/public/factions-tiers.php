@@ -92,6 +92,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li><a href="#mindriders">THE MINDRIDERS</a></li>             
                 <li><a href="#shadows">SHADOW ASSOCIATION</a></li>
                 <li><a href="#thirdspace">THIRDSPACE (Unofficial)</a></li> 
+                <li><a href="#triad">THE TRIAD</a></li>                                   
                 <li><a href="#torvalus">TORVALUS SPECULATORS</a></li>                                   
                 <li><a href="#vorlons">VORLON EMPIRE</a></li> 
             </ul>
@@ -1477,6 +1478,244 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         Gravitic Thrusters also ignore the first "Efficiency Reduced" reduced critical they receive, increasing their resistance to damage.</li>                           
     </ul>
 <a class="back-to-top" href="#top">↩ Back to Top</a>  
+
+
+    <h4 id="triad" >THE TRIAD</h4>
+    <p>The Triad represent the only Transcendental beings in Babylon 5 Wars. They are akin to Lorien, able to manipulate matter and energy at the subatomic level, travel through space and 
+	dimensions on their own, and can influence locations at unfathomable distances. The ships presented do not carry any Tri members. For all intents and purposes, these are like windup toys. If a Tri
+	needs to project its influence, they manipulate energy into forming the ships presented here. When the need is over, the Tri simply reabsorb the energy. Given their technology, for lack of a better
+	term, is based on the Tri's will, their capabilities are very impressive</p>
+
+    <h5>Tri Aspects</h5>
+        <ul>
+<li>For scenarios set in the Primordial era, the Triad player can only take one aspect in their force. This also means the Triumviron and Lesser Triumviron are unavailable to play. 
+In the Ancient era the Triumvirons are available and multiple aspects can be flown if at least a Triumvrion or Lessser Triumviron are taken.
+            <ul class="circle-list">
+                <li>Chaos: This asepct was flamboyant and aggressive.</li>
+                <li>Neutrality: This aspect favored ballistics and attempted to intimidate opponents with fearful formations.</li>
+                <li>Order: This aspect was fascinated with crystals and was the least likely aspect to fight an opponent.</li>
+            </ul>
+        </li>
+    </ul>
+<h5>Gravitic Drives</h5>
+        <ul>
+<li>Allows ships to undertake maneuvers even while pivoted/pivoting using thrusters appropriate for their current orientation. Gravitic Thrusters also ignore the first "Efficiency Reduced" 
+critical they receive, increasing their resistance to damage.</li>
+    </ul>
+
+    <h5>Structure Self Repair</h5>
+        <ul>
+<li>The Tri's ability to manipulate matter and energy meant that they had the ability to restore lost structure, even on the turn it was lost. As long as the primary section is not destroyed, the Tri
+may restore structure on itself up to the rating on the icon. The Tri can even restore a lost structure block. If the entire block is restored, any systems attached to it are returned in the state they 
+were in when the structure was lost.</li>
+    </ul>
+<h5>Triad Capital ships</h5>
+        <ul>
+<li>Triad capital ships were often created with enhanced abilities to support the other creations.
+            <ul class="circle-list">
+                <li>Command Node: Capital ships gain an extra +1 initiative. This is more basic than the table top ability.</li>
+                <li>Jealous ELINT: This could not be fully implemented. The Triad use the Mindrider Constrained ELINT.</li>
+                <li>Cooperative Structure Self Repair: Triad capital ships can use their structure self repair on friendly units (both ships and fighters). This is automatically handed. The 
+				cooperative structure self repair will attempt to fix itself first. After that, it will prioritize friendly units without structure self repair and then other units with 
+				structure self repair.</li>
+            </ul>
+</li>
+    </ul>
+<h5>Fighter Control</h5>
+        <ul>
+<li>Like their ships, the Triad create fighters as necessary. The Tri will instill some limited fighter controls in their ships to offload the burden from themselves. Ships can control a number of fighters as shown. 
+The Triad are not required to take fighters.
+            <ul class="circle-list">
+                <li>The Triumviron: 24 fighters (Note, this is not the Lesser Triumviron)</li>
+                <li>Capital Ships: 12 fighters</li>
+                <li>Heavy Combat Vessels: 6 fighters</li>
+                <li>Medium Ships: 0 fighters</li>
+            </ul>
+</li>
+    </ul>
+
+<h5>Triad Weapons</h5>
+        <ul>
+<li>Many Triad weapons have differnt abilities. These weapons will be listed below in alphabetical order.</li>
+    </ul>
+<h5>Asteroid Salvo</h5>
+        <ul>
+<li>The Tri creates an asteroid and other debris. It is fired like an energy mine and detonates like one too.
+            <ul class="circle-list">
+                <li>As long as the asteroid salvo does not dissipate, it will detonate as a matter+flash attack scoring 50, 20, and 10 damage at 0, 1, and 2 hexes, respectively.</li>
+                <li>As long as the asteroid salvo does not deviate or dissipate, it will create an asteroid in the detonation hex, meteoroids at one hex, and dust at two hexes. Units without advanced 
+				armor will take double damage from terrain.</li>
+                <li>Asteroid - This operates exactly as a standard asteroid.</li>
+                <li>Meteoroid - This could not implement the table top's interception ability. As such, the overall damage is reduced in Fiery Void. Each unit rolls to determine how many meteoroids 
+				may hit, based on the unit's size. Each meteoroid hit does 1d6 + (unit's speed / 2) damage. </li>
+                <li>Dust - A unit will take damage once from dust as long as it moves through any hex with dust. The side of the unit that is hit is based on the first dust hex the unit moves through. 
+				The dust scores damage equal to the unit's speed / 2 (dropping all fractions).</li>
+            </ul>
+        </li>
+    </ul>
+<h5>Flare Generator</h5>
+        <ul>
+<li>This is a powerful electromatic shield that creates a "flare" around the ship.
+            <ul class="circle-list">
+                <li>Passive mode: Unless used in flare mode, the flare generator always produces a 4-point EM shield.</li>
+                <li>Offensive mode: The generator can direct its output into a concentrated blast in raking (20).</li>
+                <li>Flare mode: This is fired in the initial orders step as a ballistic weapon. It automatically targets
+				the generating ship. When this is done, the shield is extended for the ship. At range 0 there is no shield. 
+				It is a 4-point sheild at range 1, 6-points at range 2, and 7-points at range 3+. Furthermore, the flare 
+				causes a burst of damage like an energy mine in the generating unit's hex. It will score 60 damage at range 
+				0, 20 at range 1, and 10 at range 2.</li>
+                <li>Immunity: All Triad Order units are immune to the damage generated by flare mode.</li>
+            </ul>
+        </li>
+    </ul>
+<h5>Hyperplasma Cutter</h5>
+        <ul>
+<li>This is the most versatile plasma weapon available. It is capable of engaging multiple targets as well as firing defensively. It is important to note that 
+all Hyperplasma Cutters on a ship are treated as a single weapon. Each cutter has 10d10 available. This means a Triad Fiend has 20d10 whlie the Triumvirons 
+have 30d10 available. In order to use the cutter follow the guide below.
+            <ul class="circle-list">
+                <li>In Normal mode, the player can select one or all cutters. The game engine will assemble all available dice. NOTE: The available 
+				dice will also check to make sure they are all in arc.</li>
+                <li>Players select a target and a menu will appear. The player may select the number of d10s to be fired at the target.</li>
+                <li>Select a different target to fire at a new target. NOTE: If you return to a target you already fired at, it will create 
+				a second shot.</li>
+                <li>Fighters can be targeted individually. Simply select the flight and assign dice. Target the flight again and you will assign dice to another fighter.</li>
+                <li>To fire defensively, select the shield icon and you may assign a number of d10s to defensive fire. Each provides a -1 (-5%) 
+				to hit. This is cumulative. NOTE: At the moment, the hyperplasma cutter can only generate one defensive shot. This will be investigated 
+				for improvement in a later update.</li>
+                <li>Sustained Mode: In this mode ALL available cutters must be set to sustained mode. Every available die will be used on the same target. 
+				The hyperplasma cutter is a sustained (3) weapon.</li>				
+                <li>Criticals: The hyperplasma cutter only suffers one critical type. It can lose a number of d10s. Each lost d10 is a single 
+				self repair point to remove. The engine will automatically modify the available dice for use.</li>
+            </ul>
+        </li>
+    </ul>
+<h5>Hyperplasma Matrix</h5>
+        <ul>
+<li>This is an unusual fighter weapon on the Chaos Imp. Each fighter is part of of a single weapon.</li>
+           <ul class="circle-list">
+                <li>To fire select any hyperplasma matrix in a flight. All fighters will automatically fire.</li>
+                <li>The damage increases for each fighter surviving to fire. One fighter does 2d6+12 damage. Each additional fighter adds 
+				2d6 damage to the total.</li>
+                <li>Select a different target to fire at a new target. NOTE: If you return to a target you already fired at, it will create 
+				a second shot.</li>
+                <li>The hyperplasma matrix scores damage in flash mode. However, the flight is immune to its own shot. It is NOT immune to 
+				hyperplasma matrixes from other flights.</li>
+            </ul>
+    </ul>
+<h5>Matter Bolt</h5>
+        <ul>
+<li>This is another fighter weapon found on the Neutrality Phantom. It works by firing a piece of the fighter at a target.
+            <ul class="circle-list">
+                <li>Whenever fired offensively or defensively, the matter bolt scores one damage against the Phantom.</li>
+                <li>If left unfired for a turn, the Phantom will restore two damage to itself. This is in addition to any 
+				structure self repair that a Triad capital ship may apply in support.</li>
+            </ul>
+        </li>
+    </ul>
+<h5>Neutron Burst</h5>
+        <ul>
+<li>The Neutrality and Order aspects used this this to disable an opponent. Functionally, it is like a Shock Cannon, but with greater impacts.
+            <ul class="circle-list">
+                <li>Power using systems are deactivated if they take at least a point of damage. Unlike a shock cannon, the power from the 
+				deactivated weapon is lost for the turn. For example, a twin array is struck and takes 2 damage. This is enough to trigger it 
+				to be deactivated. In addition, the 2 power it normally uses is not available for the ship to use.</li>
+                <li>Vorlon power using systems are deactivated and drain the minimum power to use the weapon from the capacitor.</li>
+                <li>Damage scored on structure will reduce a unit's power by 2 for the next turn.</li>
+                <li>Striking a Vorlon capacity will drain two power.</li>
+                <li>Non-power systems, if damaged, roll for a critical with a +4 penalty.</li>
+                <li>Any fighter damaged will automatically drop out. Fighters immune to drop outs, including Torvalus Stilettos, super-heavy 
+				fighters, etc., must make a drop out roll as if they were not immune.</li>
+                <li>The weapon is particularly painful to Shadow vessels. Even if the full power of the neutron burst is absorbed by a tendril 
+				the system hit suffers the critical effects listed above.</li>
+            </ul>
+        </li>
+    </ul>
+<h5>Photonic Prism Beam</h5>
+        <ul>
+<li>This is a flexible array of lasers focused by Triad Order's crystal hulls. It has the unusual feature of scoring larger rakes of damage 
+at short range versus long range.
+            <ul class="circle-list">
+                <li>Individual split beams: Each prism can fire three beams at -2 per hex but raking 20.</li>
+                <li>Combined prism: All three beams from one prism are combined for a -1 per hex penalty and raking 20.</li>
+                <li>Two prisms: All three beams from two prisms are combined for a -1 per 2 hex penalty and raking 15.</li>
+                <li>Three prisms: All three beams from three prisms are combined for a -1 per 3 hex penalty and raking 15.</li>
+                <li>Four prisms: All three beams from four prisms are combined for a -1 per 5 hex penalty and raking 10.</li>
+            </ul>
+        </li>
+    </ul>
+<h5>Light Prism Beam</h5>
+        <ul>
+<li>A fighter weapon found on the Order Cherub that operates as a much smaller photonic prism beam.
+            <ul class="circle-list">
+                <li>Individual split beams: Fires three individual shots at -2 per hex.</li>
+                <li>Combined prism: All three beams combine for a -1 per hex shot.</li>
+            </ul>
+        </li>
+    </ul>
+<h5>Singularity Mine</h5>
+        <ul>
+<li>Nothing demonstrates the true power of the Triad more than their ability to manifest a black hole singularity on the battlefield.
+            <ul class="circle-list">
+                <li>The singularity mine is fired exactly like an energy mine, but adds a spin of clockwise or counter-clockwise. 
+				As long as it does not dissipate, it will detonate and create a singularity in the targeted hex, which will create 
+				gravitic-class shear damage to all enemy units within 10 hexes. The Triad's influence protects friendly units.</li>
+                <li>The sudden gravitational shift affects all enemy units within 10 hexes. If there are multiple singularities, 
+				each one will affect all enemy targets in range. Each singularity scores damage equal to the unit's ramming factor 
+				divived by (5 times the range to the singularity). Units at range 0 are treated as being at range 1. </li>
+                <li>Any unit in the detonation hex immidiately rolls for the effects of collision with the singularity (below).</li>
+                <li>On the turn after firing, the singularity blocks line of sight.</li> 
+                <li>On the turn after firing, the singularity will now affect EVERY unit with 50 hexes. They will be moved 
+				one hex in the direction of the spin of the singularity and one hex closer to the singularity. If a unit is within 
+				10 hexes, it will be pulled 2 hexes closer. (This is a change from table top as the variable maneuvering costs could 
+				not be implemented at this time.)</li>
+                <li>On the second turn after firing, the singularity's range is reduced to 25 hexes and the region of being pulled 
+				in two hexes is reduced to 5 hexes. Afterwards, the singularity dissipates</li>
+                <li>Any unit that moves into or is pulled into a singularity suffers one of the following effects, which are modified 
+				by the unit's size. Additionally, units without advanced armor take DOUBLE the damage.
+					<ul class="circle-list">
+						<li>The crew manage to skim the edge of the singularity and suffer damage equal to their speed times a modifier. 
+						0.5: Fighters/Shuttles, 2: MCVs, 4: HCVs, 6: Capital, 10: Enormous.</li>
+						<li>The unit is flung wildly in a random direction 1d6+1 hexes and pivoted in a random facing. The unit takes 
+						damage as skimming the edge, but also takes an equal amount of damage to the primary section.</li>
+						<li>The singularity draws in the unit and expels it to hyperspace, removing it from the battle.</li> 
+						<li>The singularity destroys the unit with no possibility of survival.</li> 
+					</ul>
+				</li>
+                <li>Lastly, two singularities within range of each other with opposite spins will immediate dissipate both.</li>
+            </ul>
+        </li>
+    </ul>
+<h5>Spatial Cutter</h5>
+        <ul>
+<li>The Chaos aspect liked to flaunt its power, and the spatial cutter did just that by firing a hyperspace waveform at a target!
+            <ul class="circle-list">
+                <li>To fire the shooter MUST have a lock-on and be within 12 hexes of the target at firing.</li>
+                <li>If the spatial cutter strikes, in addition to damaging the target, it creates a hyperspace waveform from the 
+				shooter's hex to the target's hex.</li>
+                <li>The waveform will persist for one turn. Units will take damage for every waveform hex traversed.</li>
+                <li>The damage is equal to the unit's speed times a modifier. This occurs for EVERY hex the unit moves through. 
+				Units without advanced armor take DOUBLE damage.</li>
+                <li>The modifiers are as follows. 0.75: Fighters, 1: SHFs/Shuttles, 1.5: LCVs, 2: MCVs, 4: HCVs, 6: Capital, 10: Enormous</li>
+                <li>Used defensively, the spatial cutter provides a -8 (-40%) chance to hit against ANY weapon.</li>
+            </ul>
+        </li>
+    </ul>
+<h5>Triad Missile Rack</h5>
+        <ul>
+<li>This was a favorite of the Neutrality aspect. The rack holds 5 missiles and the can be of any type the Tri desires.
+            <ul class="circle-list">
+                <li>The rack provides two times the missile's launch range.</li>
+                <li>If the Tri chooses not to expend a missile in the magazine, the unit may expend 6 power to create a basic 
+				missile.</li>
+                <li>This missile must be used immidiately. It cannot be used to reload a rack, nor does it use any ammunition.</li>
+                <li>Any missiles fired are treated as being fired by a First One.</li>
+            </ul>
+        </li>
+    </ul>	
+
+
+<a class="back-to-top" href="#top">↩ Back to Top</a> 
 
 
     <h4 id="vorlons" >VORLON EMPIRE</h4>

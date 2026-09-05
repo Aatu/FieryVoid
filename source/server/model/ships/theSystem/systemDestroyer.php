@@ -4,7 +4,7 @@ class systemDestroyer extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 1000;
+        $this->pointCost = 900;
         $this->faction = "The System";
         $this->phpclass = "systemDestroyer";
         $this->imagePath = "img/ships/systemBallisticsShip.png";
@@ -32,6 +32,9 @@ class systemDestroyer extends HeavyCombatVessel{
         $this->rollcost = 2;
         $this->pivotcost = 2;
         $this->iniativebonus = 40;
+
+		/*The System use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'SystemShip');
          
 		$this->addPrimarySystem(new Reactor(5, 14, 0, 0));
 		$this->addPrimarySystem(new CnC(6, 12, 0, 0));

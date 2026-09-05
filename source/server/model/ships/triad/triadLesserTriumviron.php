@@ -5,14 +5,15 @@ class triadLesserTriumviron extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 4800;
-		$this->faction = "";
+		$this->faction = "The Triad";
         $this->phpclass = "triadLesserTriumviron";
         $this->shipClass = "Unified: Lesser Triumviron";
-        $this->imagePath = "img/ships/triadTriumviron.png";
+        $this->imagePath = "img/ships/triadLesserTriumviron.png";
         $this->canvasSize = 200;
 	    $this->isd = 'Ancient';
         $this->shipSizeClass = 3; 
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
+		$this->occurence = "unique";
 
         $this->gravitic = true;
 		$this->advancedArmor = true;  
@@ -27,9 +28,10 @@ class triadLesserTriumviron extends BaseShip{
         $this->pivotcost = 4;
 		$this->iniativebonus = 2 *5;
 
-		$this->notes = "Can control 12 fighters";		
-		$this->notes .= '<br>Unified Triad'; 
+		$this->notes = 'Unified Triad'; 
 		$this->notes .= '<br>Triad Capital Ship'; 
+
+		$this->fighters = array("Triad Fighter"=>12);
 
 		$t1l = new GraviticThruster(7, 10, 0, 4, 1);
 		$t3l = new GraviticThruster(7, 23, 0, 8, 3);
@@ -41,6 +43,9 @@ class triadLesserTriumviron extends BaseShip{
 		$this->addLeftSystem($t3l);
 		$this->addRightSystem($t1r);
 		$this->addRightSystem($t4r);
+
+		/*Triad use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'TriadShip');
 		
 		$this->addPrimarySystem(new Reactor(8, 30, 0, 0));//armor, structure, power req, output
         $this->addPrimarySystem(new CnC(8, 16, 0, 0));

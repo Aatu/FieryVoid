@@ -5,7 +5,7 @@ class triadSeraph extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 900;
-		$this->faction = "";
+		$this->faction = "The Triad";
 		$this->phpclass = "triadSeraph";
 		$this->imagePath = "img/ships/triadSeraph.png";
 		$this->shipClass = "Order: Seraph";
@@ -30,6 +30,9 @@ class triadSeraph extends MediumShip{
 		$this->iniativebonus = 70;
 
 		$this->notes = "Cannot control fighters";		
+
+		/*Triad use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'TriadShip');
 
 		$this->addPrimarySystem(new Reactor(8, 25, 0, 0));
 		$this->addPrimarySystem(new CnC(9, 12, 0, 0));
