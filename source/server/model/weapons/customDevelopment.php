@@ -1537,8 +1537,8 @@ class NeutronBeam extends Laser{
 				$this->data["Special"] .= '<br>';
 			}	    		  
 			$this->data["Special"] .= "Can fire at accelerated RoF for less damage:";  
-			$this->data["Special"] .= "<br> - 1 per 2 turns: 5d10+5"; 
-			$this->data["Special"] .= "<br> - 1 per 3 turns: 6d10+10"; 
+			$this->data["Special"] .= "<br> - 1 per 2 turns: 3d10+20"; 
+			$this->data["Special"] .= "<br> - 1 per 3 turns: 4d10+40"; 
 		}
 	
 		public function getDamage($fireOrder){
@@ -1546,10 +1546,10 @@ class NeutronBeam extends Laser{
             	case 0:
             	case 1: 
             	case 2:
-                	return Dice::d(10,5)+5;
+                	return Dice::d(10,3)+20;
 					break;
 			    default:
-			    	return Dice::d(10,6)+10;
+			    	return Dice::d(10,4)+40;
 					break;			
         	}
 		}
@@ -1558,10 +1558,10 @@ class NeutronBeam extends Laser{
             switch($this->turnsloaded){
             	case 1:
             	case 2:
-                    $this->minDamage = 10 ;
+                    $this->minDamage = 23 ;
                     break;
                 default:
-                    $this->minDamage = 16 ;  
+                    $this->minDamage = 44 ;  
                     break;
             }
 		}
@@ -1570,10 +1570,10 @@ class NeutronBeam extends Laser{
             switch($this->turnsloaded){
                 case 1:
                 case 2:
-                    $this->maxDamage = 55 ;
+                    $this->maxDamage = 50 ;
                     break;
                 default:
-                    $this->maxDamage = 70 ;  
+                    $this->maxDamage = 80 ;  
                     break;
             }
 		}
@@ -1663,8 +1663,8 @@ class PlasmaArray extends Plasma{
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 		
-    	public function getDamage($fireOrder){        return Dice::d(10, 1)+10;   }
-        public function setMinDamage(){     $this->minDamage = 11 ;      }
+    	public function getDamage($fireOrder){        return 20;   }
+        public function setMinDamage(){     $this->minDamage = 20 ;      }
         public function setMaxDamage(){     $this->maxDamage = 20 ;      }
 
 }  // endof PlasmaArray

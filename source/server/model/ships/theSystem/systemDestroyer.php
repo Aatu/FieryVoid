@@ -4,7 +4,7 @@ class systemDestroyer extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 1000;
+        $this->pointCost = 900;
         $this->faction = "The System";
         $this->phpclass = "systemDestroyer";
         $this->imagePath = "img/ships/systemBallisticsShip.png";
