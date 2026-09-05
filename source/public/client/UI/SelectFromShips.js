@@ -395,19 +395,11 @@ window.SelectFromShips = function () {
 
     // The movement GROUP number the Order of Battle prints down its left edge, not the
     // raw initiative total — ships that move together share one, which is the thing
-    // actually worth knowing in a stacked hex.
-    //
-    // getIniativeOrder's validShips filter excludes terrain, mines and not-yet-deployed
-    // ships, so for those the loop never matches and the `return 0` tail fires. A literal
-    // 0 in the column would be wrong AND would look like a real movement group, so every
-    // one of those cases returns null here and renders as an em dash.
+    // actually worth knowing in a stacked hex. null (rendered as an em dash) for anything
+    // with no group of its own; see SimultaneousMovementRule.getMovementGroup, which is
+    // also what the movement-phase map badge numbers itself from.
     function iniOrderOf(ship) {
-        if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) return null;
-        if (ship.mine) return null;
-        if (shipManager.getTurnDeployed(ship) > gamedata.turn) return null;
-
-        var order = shipManager.getIniativeOrder(ship);
-        return (order > 0) ? order : null;
+        return window.SimultaneousMovementRule.getMovementGroup(ship);
     }
 
     // List order matches the INI column: group 1 (the first to move) at the top, counting
@@ -557,7 +549,14 @@ window.SelectFromShips = function () {
             var selIsLcvUnit = !this.phaseStrategy.selectedShip.flight && !this.phaseStrategy.selectedShip.mine
                 && String(this.phaseStrategy.selectedShip.hangarRequired || '').toLowerCase() === 'lcvs';
 
-            if (hasTerrain) {
+            /* REINFORCEMENTS_PLAN.md STAGE 7 - an arrival bypasses BOTH blocks, exactly as it does
+               in DeploymentPhaseStrategy.onHexClicked (which this whole check is a copy of - keep
+               the two in step). The vortex it must stand in is terrain, so `hasTerrain` alone would
+               hide this button on the only hex the unit is allowed to occupy; and a wave stacks in
+               that one hex by rule (§2.4), so the one-ship-per-hex block has to go too. */
+            if (shipManager.isArrivingReinforcement(this.phaseStrategy.selectedShip)) {
+                isBlocked = false;
+            } else if (hasTerrain) {
                 isBlocked = true;
             } else if (!(this.phaseStrategy.selectedShip.mine || this.phaseStrategy.selectedShip.flight || selIsLcvUnit)) {
                 isBlocked = shipsInHex.some(function (s) { return !(s.mine || s.flight); });

@@ -30,8 +30,15 @@ class TrekWarpDrive extends JumpEngine{
 		   ⚠️ MUST come after parent::__construct, which reads its 4th argument as a jump DELAY and
 		   sets loadingtime from it. Here that argument is the IMPULSE RATING (TrekImpulseDrive sums
 		   the nacelles' outputs for the ship's sublight thrust), so a nacelle rated 6 was claiming a
-		   6-turn recharge it does not have. markLegacy resets it to 1/1. */
-		$this->markLegacy();
+		   6-turn recharge it does not have.
+
+		   ⭐⭐ false = "MY 4th ARGUMENT IS NOT A JUMP DELAY", and this is the ONLY caller in the tree
+		   that passes it (user ruling 2026-08-29: Nacelles are out of scope of the recharge fix).
+		   Up to that date markLegacy() reset the recharge to 1/1 for EVERY legacy drive, which was
+		   right only here - the Shadow Phasing Drive, the Star Wars Hyperdrive and the BSG FTL Drive
+		   all pass a real B5W jump delay and, since Stage 9, all really do spend it phasing in. See
+		   JumpEngine::$hasJumpRecharge. */
+		$this->markLegacy(false);
     }
 
      public function setSystemDataWindow($turn){

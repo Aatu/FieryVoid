@@ -2,8 +2,13 @@
 ob_start();
 
 
-// Debugging (remove or adjust for production)
-ini_set('display_errors', 1);
+// Errors are reported to the log but NEVER to the response body: this endpoint's
+// output is parsed as JSON by the client, and a single PHP warning rendered into it
+// turns a valid reply into a parse error. The ob_clean() calls below only protect the
+// two paths that pass through them -- anything warning after the JSON header is sent
+// would land inside the payload.
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
 error_reporting(E_ALL);
 
 // Load required classes

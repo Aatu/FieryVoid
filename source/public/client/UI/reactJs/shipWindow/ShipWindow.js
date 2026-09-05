@@ -2182,6 +2182,22 @@ const getStatusBanners = (ship) => {
         });
     }
 
+    /*REINFORCEMENTS_PLAN.md STAGE 9 - this unit came out of hyperspace off course and spends the
+      turn it arrived on sorting itself out (user request 2026-08-29). Same cyan as the Deploying
+      banner above and as the map tooltip's own "Arrival Scatter" line, and for the same reason
+      Hangar Operations is cyan on the system icon: it is a benign initiative penalty from something
+      the unit just did, not damage.
+      Straight after Deploying, deliberately - they are the two halves of one story, and a unit
+      never carries both (Deploying is "not on the board yet", this is "arrived this turn").
+      The figure is the server's own, so it can never disagree with the roll (shipManager.getArrivalIniPenalty).*/
+    const arrivalIni = shipManager.getArrivalIniPenalty(ship);
+    if (arrivalIni !== 0) {
+        banners.push({
+            key: 'arrivalScatter', color: theme.colors.statusPending, bg: 'rgba(0, 184, 230, 0.10)',
+            text: 'Arrival Scatter ' + arrivalIni + ' Ini'
+        });
+    }
+
     //Resolved once per render and threaded through: when a forecast is live it sweeps every enemy
     //unit, so it is not something to ask for three times over on the way to two banners.
     const stealthForecast = ship.trueStealth ? shipManager.getStealthToggleForecast(ship) : null;

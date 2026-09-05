@@ -114,6 +114,13 @@ window.FlightIcon = function () {
         this.NotMovedSprite = new window.ShipSelectedSprite({ width: this.size * 0.75, height: this.size * 0.75 }, -2, 'neutral', false).hide();
         this.mesh.add(this.NotMovedSprite.mesh);
 
+        //The movement-group badge, as in ShipIcon.create. Hex-sized rather than icon-sized, which
+        //matters most here: a flight's fighters are 17px each, so a badge scaled off them would be
+        //illegible at exactly the zoom where flights are hardest to find.
+        var badgeSize = window.HexagonMath.getHexHeight() * ShipIcon.INI_BADGE_SCALE;
+        this.iniOrderSprite = new window.ShipIniOrderSprite({ width: badgeSize, height: badgeSize }, 3);
+        this.mesh.add(this.iniOrderSprite.mesh);
+
         scene.add(this.mesh);
     };
 

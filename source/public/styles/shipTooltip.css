@@ -168,6 +168,73 @@
     --row-bar: var(--fv-neutral-signal);
 }
 
+/* ── Close button ────────────────────────────────────────────────────────────
+   ShipTooltip.js draws this ONLY on the persistent tooltip (the one a click on a unit
+   leaves standing) - a hover tooltip destroys itself the moment the pointer enters it,
+   so an X there could never be reached. It exists because the persistent tooltip sits
+   right under the unit it describes, which is exactly where the hex you want to target
+   and the speed controls you want to press tend to be (user report 2026-08-30).
+
+   Absolute, so it costs the layout nothing and stays out of the centred text flow. It
+   is a child of the SCROLL container (.shipNameContainer is overflow-y:auto), so on the
+   rare tooltip long enough to scroll it rides with the content rather than pinning -
+   acceptable, because it starts at the top where the reader already is.
+
+   Sizing and the transparent-until-hover treatment are the hex picker's close button
+   (.fv-hexpicker__close), one tier smaller: this sits inside a 12px tooltip, not a
+   card header. */
+.shipNameContainer .tt-close {
+    position: absolute;
+    /* Clear of the 7px --fv-radius-tooltip corner: the container clips to its own rounded
+       padding box (overflow-y:auto makes BOTH axes clip), and 1px/2px put the button's own
+       corner outside the curve, which nicked it on hover. */
+    top: 2px;
+    right: 4px;
+    z-index: 1;
+    width: 17px;
+    height: 17px;
+    padding: 0;
+    line-height: 15px;
+    text-align: center;
+    font-size: 11px;
+    font-family: arial;
+    color: var(--fv-text-dim);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--fv-radius-modal);
+    cursor: pointer;
+    /* No 300ms tap delay and no long-press callout on touch - the same four properties
+       shipTooltipMenu.js sets inline on every action button. */
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.shipNameContainer .tt-close:hover {
+    color: var(--fv-text);
+    border-color: var(--fv-line-soft);
+    background: var(--fv-card-hover);
+}
+
+.shipNameContainer .tt-close:focus {
+    outline: none;
+}
+
+.shipNameContainer .tt-close:focus-visible {
+    outline: 1px solid var(--fv-accent);
+    outline-offset: -1px;
+}
+
+/* Room for the X at both ends of the name row. Symmetric on purpose: the row is
+   centre-aligned, so padding only the right would shift every name left of centre.
+   Padding is inside the border box, so the rule under the name still spans the full
+   width - only the text is inset. */
+.shipNameContainer--closable .namecontainer {
+    padding-left: 18px;
+    padding-right: 18px;
+}
+
 .shipNameContainer .buttons .menu .action-buttons {
     display: flex;
     margin: 10px 0;
@@ -345,7 +412,21 @@
    written out here - and cancel.png is 30x30, so it needs them too. Any future icon that is not
    40x40 needs the same three lines. */
 .signalJumpGate {
-    background-image: url("../img/ships/JumpPoint.png");
+    background-image: url("../img/JumpPointEntranceIcon.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* ⭐ REINFORCEMENTS_PLAN.md STAGE 8 - the ARRIVAL claim, and the icon is the BLUE vortex sprite
+   the exit vortex itself wears (SpawnJumpPointExit::$imagePath). Yellow = leaving, blue =
+   arriving is the pairing this whole feature is built on (plan section 3.7), so the two gate
+   buttons differ by exactly the thing the two claims differ by, and by nothing else.
+   ⚠️ THE TWO ASSET NAMES ARE THE OTHER WAY ROUND FROM WHAT YOU EXPECT - JumpPointEntrance.png is the
+   BLUE art and is worn by the EXIT. Both files predate this feature; see the ⚠️ on
+   SpawnJumpPointExit's constructor before "fixing" either name. */
+.signalJumpGateArrival {
+    background-image: url("../img/JumpPointExitIcon.png");
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;

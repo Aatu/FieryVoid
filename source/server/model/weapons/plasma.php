@@ -2231,7 +2231,308 @@ class HyperplasmaCutter extends Weapon{
 		return $strippedSystem;
 	}
 
-}//endof class HyperplasmaCutter
+} //endof class HyperplasmaCutter
+
+
+
+class HyperplasmaMatrix extends Weapon {
+
+    public $name = "HyperplasmaMatrix";
+    public $displayName = "Hyperplasma Matrix";
+    public $iconPath = "HyperplasmaCutter.png";
+
+    public $damageType  = "Flash";
+    public $weaponClass = "Plasma";
+    public $firingModes = array(1 => "Flash");
+
+    public $raking       = 0;
+    public $rangePenalty = 1; // -5% per hex
+    public $loadingtime  = 1;
+    public $intercept    = 2; // -10% per fighter defensive intercept
+
+    public $animation      = "laser";
+    public $animationColor = array(200, 60, 220);
+
+    public $damageDice = array();
+
+	public $fireControl = array(0, 0, 0);
+
+    function __construct($startArc, $endArc, $dualMount = false) {
+        parent::__construct(array(0), 1, 0, $startArc, $endArc);
+    }
+
+    public function setSystemDataWindow($turn) {
+        parent::setSystemDataWindow($turn);
+        $this->data["Special"]  = "Plasma class, Flash mode. Fighter flight fires as a single combined weapon.";
+        $this->data["Special"] .= "<br>Damage: 2d6+12 base + 2d6 per additional surviving fighter in the flight.";
+        $this->data["Special"] .= "<br>Range penalty: -5% per hex.";
+        $this->data["Special"] .= "<br>The flight is immune to its own Flash splash damage when in the same hex as the target.";
+        $this->data["Special"] .= "<br>Defensive: each fighter generates an independent -10% intercept.";
+    }
+
+    // getUnit() returns the FighterFlight directly.
+    // FighterFlight->systems contains the individual Fighter objects.
+    private function getAliveFighterCount() {
+        $flight = $this->getUnit();
+        if (!$flight || !($flight instanceof FighterFlight)) return 1;
+        $count = 0;
+        foreach ($flight->systems as $fighter) {
+            if (!$fighter->isDestroyed()) $count++;
+        }
+        return max(1, $count);
+    }
+
+    // Damage = N * 2d6 + 12 where N = surviving fighters.
+    // Uses damageDice captured in beforeFiringOrderResolution when available,
+    // falls back to live count otherwise.
+    public function getDamage($fireOrder) {
+        if (isset($this->damageDice[$fireOrder->id])) {
+            return Dice::d(6, $this->damageDice[$fireOrder->id]) + 12;
+        }
+        $n = $this->getAliveFighterCount();
+        return Dice::d(6, $n * 2) + 12;
+    }
+
+    public function setMinDamage() { $this->minDamage = 14; } // 1 fighter: 2+12
+    public function setMaxDamage() { $this->maxDamage = 84; } // 6 fighters: 12+12
+
+    // Combine all fire orders from the flight into one primary shot.
+    // The lowest-ID HyperplasmaMatrix weapon with a fire order this turn
+    // becomes the primary. All others are nullified so they do not appear
+    // in the fire resolution log or trigger animations.
+    public function beforeFiringOrderResolution($gamedata) {
+        $flight = $this->getUnit();
+        if (!$flight || !($flight instanceof FighterFlight)) return;
+
+        // Find the lowest-ID HyperplasmaMatrix weapon across all alive fighters
+        // in the flight that has a normal fire order this turn.
+        $primaryWeapon  = null;
+        $primaryOrderId = null;
+
+        foreach ($flight->systems as $fighter) {
+            if ($fighter->isDestroyed()) continue;
+            foreach ($fighter->systems as $sys) {
+                if (!($sys instanceof HyperplasmaMatrix)) continue;
+                foreach ($sys->fireOrders as $order) {
+                    if ($order->type == 'normal' && $order->turn == $gamedata->turn) {
+                        if ($primaryWeapon === null || $sys->id < $primaryWeapon->id) {
+                            $primaryWeapon  = $sys;
+                            $primaryOrderId = $order->id;
+                        }
+                    }
+                }
+            }
+        }
+
+        if ($primaryWeapon === null) return;
+
+        // Process this weapon's orders
+        foreach ($this->fireOrders as $order) {
+            if ($order->type != 'normal' || $order->turn != $gamedata->turn) continue;
+
+            if ($this->id == $primaryWeapon->id && $order->id == $primaryOrderId) {
+                // Primary shot — capture alive fighter count for getDamage
+                $this->damageDice[$order->id] = $this->getAliveFighterCount() * 2;
+                $order->shots = 1;
+                $this->guns   = 1;
+            } else {
+                // Subordinate — fully nullify so no log entry, no animation,
+                // no missed shot display.
+                $order->shots    = 0;
+                $order->shotshit = 0;
+                $order->needed   = 0;
+                $order->rolled   = 100;
+                $order->pubnotes = "";
+                $order->updated  = true;
+            }
+        }
+    }
+
+    // Suppress subordinate orders before parent runs so they generate
+    // no log entry and no animation.
+    public function calculateHitBase($gamedata, $fireOrder) {
+        if ($fireOrder->shots == 0 && $fireOrder->shotshit == 0 &&
+            $fireOrder->needed == 0 && $fireOrder->rolled == 100) {
+            $fireOrder->pubnotes  = "";
+            $fireOrder->updated   = true;
+            $this->doNotIntercept = true;
+            return;
+        }
+
+        parent::calculateHitBase($gamedata, $fireOrder);
+
+        // Add alive fighter count to log
+        $n = isset($this->damageDice[$fireOrder->id])
+            ? $this->damageDice[$fireOrder->id] / 2
+            : $this->getAliveFighterCount();
+        $fireOrder->pubnotes .= " [" . (int)$n . " fighters, " . ((int)$n * 2) . "d6+12]";
+    }
+
+    // Skip fully nullified subordinate orders and handle self-immunity.
+    public function fire($gamedata, $fireOrder) {
+        if ($fireOrder->shots == 0 && $fireOrder->shotshit == 0 &&
+            $fireOrder->needed == 0 && $fireOrder->rolled == 100) {
+            return;
+        }
+
+        $shooter = $gamedata->getShipById($fireOrder->shooterid);
+        $target  = $gamedata->getShipById($fireOrder->targetid);
+
+        // Self-immunity: flight immune to own flash splash in same hex
+        if ($shooter && $target) {
+            $shooterHex = $shooter->getHexPos();
+            $targetHex  = $target->getHexPos();
+            if ($shooterHex->q == $targetHex->q && $shooterHex->r == $targetHex->r) {
+                $shooter->hyperplasmaMatrixImmune = true;
+            }
+        }
+
+        parent::fire($gamedata, $fireOrder);
+
+        if ($shooter) {
+            $shooter->hyperplasmaMatrixImmune = false;
+        }
+    }
+
+    // Skip damage to the shooting flight when it is immune to own flash.
+    public function doDamage($target, $shooter, $system, $damage, $fireOrder,
+                              $pos, $gamedata, $noOverkill = false, $location = null) {
+        if (!empty($shooter->hyperplasmaMatrixImmune) && $target->id == $shooter->id) {
+            return;
+        }
+        parent::doDamage($target, $shooter, $system, $damage, $fireOrder,
+                         $pos, $gamedata, $noOverkill, $location);
+    }
+} //endof class HyperplasmaMatrix
+
+
+class PlasmaDriver extends Pulse{
+        public $name = "PlasmaDriver";
+        public $displayName = "Plasma Driver";
+		public $iconPath = "PlasmaDriver.png";
+
+        public $animation = "bolt";
+        public $animationColor = array(75, 250, 90);
+
+        public $grouping = 15;
+        public $maxpulses = 5;
+        public $priority = 6;
+		protected $useDie = 3; //die used for base number of hits	
+        
+        public $loadingtime = 1;
+        public $intercept = 2;
+        
+        public $rangePenalty = 0.5;
+    	public $rangeDamagePenalty = 0.5;
+        public $fireControl = array(6, 4, 3); // fighters, <mediums, <capitals 
+
+	    public $damageType = "Pulse"; 
+	    public $weaponClass = "Plasma"; 
+        
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc )
+		{
+			//maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ){
+				$maxhealth = 6;
+			}
+			if ( $powerReq == 0 ){
+				$powerReq = 6;
+			}
+			parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+		}
+
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);   
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}	    		
+				$this->data["Special"] .= "Does less damage over distance (0.5 per hex).";   
+		$this->data["Special"] .= "<br>Ignores half of armor.";  
+		}
+
+        public function getDamage($fireOrder){        return 22;   }
+		
+    }  // end of class PlasmaDriver
+
+
+class FuserArray extends Plasma{	
+	public $name = "FuserArray";
+    public $displayName = "Fuser Array";
+	public $iconPath = "FuserArray.png";    
+
+    public $priority = 2;
+    public $rangeDamagePenalty = 0.66;
+		        
+    public $loadingtime = 1;			
+    public $guns = 2;
+    protected $originalGuns = 2; //starting number of guns, before any GunLost crits; used to gate the "both guns lost = destroyed" check
+
+    public $rangePenalty = 0.33;
+    public $fireControl = array(0, 4, 5); // fighters, <=mediums, <=capitals 
+
+    //Twin Array uses the standard weapon crit chart PLUS a special 20+ result (GunLost):
+    //one of the two guns is destroyed. 25+ adds GunLost on top of ReducedRange+ReducedDamage.
+    protected $possibleCriticals = array(14 => "ReducedRange", 19 => "ReducedDamage", 20 => "GunLost", 25 => array("ReducedRange", "ReducedDamage", "GunLost"));
+
+	public $damageType = "Flash"; 
+	public $weaponClass = "Plasma"; 
+    public $firingModes = array( 1 => "Normal", 2=> "Split");
+    public $canSplitShots = false; //Allows Firing Mode 2 to split shots.
+    public $canSplitShotsArray = array(1=>false, 2=>true );
+
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+        if ( $maxhealth == 0 ) $maxhealth = 24;
+        if ( $powerReq == 0 ) $powerReq = 10;
+        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+    }
+		
+        public function setSystemDataWindow($turn){			
+            parent::setSystemDataWindow($turn);   
+            $this->data["Special"] = "Can use 'Split' Firing Mode to target different enemy units.";
+        }
+		
+	public function getDamage($fireOrder){        return Dice::d(10, 6)+26;   }
+    public function setMinDamage(){     $this->minDamage = 32;      }
+    public function setMaxDamage(){     $this->maxDamage = 86;      }
+
+        //Each GunLost critical destroys one of the two guns, so the Twin Array fires one
+        //less shot for each. Runs via onConstructed (and setSystemDataWindow), translating
+        //the GunLost crits into the actual reduced $guns count used when fire orders are built.
+        public function effectCriticals(){
+            parent::effectCriticals();//apply ReducedRange/ReducedDamage etc.
+            $gunsLost = $this->hasCritical("GunLost", false);//count GunLost crits in effect up to the current turn
+            $this->guns = max(0, $this->originalGuns - $gunsLost);
+        }
+
+        //If every gun has been destroyed by GunLost crits, the whole weapon is destroyed.
+        //Runs in Pass 2 of the crit phase (after Pass 1 has added all GunLost crits), so two
+        //GunLost crits scored the same turn are both seen here.
+        public function criticalPhaseEffects($ship, $gamedata){
+            parent::criticalPhaseEffects($ship, $gamedata);//Some critical effects like Limpet Bore might destroy weapon in this phase.
+
+            if($this->isDestroyed()) return;//already destroyed - also guards replay re-runs from adding a duplicate destroy entry.
+
+            $gunsLost = $this->hasCritical("GunLost", false);//count GunLost crits in effect up to the current turn
+            if($gunsLost >= $this->originalGuns){//all guns gone - destroy the weapon.
+                $damageCaused = $this->getRemainingHealth();
+                $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $damageCaused, 0, 0, -1, true, false, "", "GunLost");
+                $damageEntry->updated = true;
+                $this->damage[] = $damageEntry;
+            }
+        }
+
+    public function stripForJson() {
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->splitArcs = $this->splitArcs;
+        if ($this->guns != $this->originalGuns) $strippedSystem->guns = $this->guns;//send reduced gun count (GunLost crit) so the client shows the right Split shot count.
+        return $strippedSystem;
+	}
+
+}//end of class FuserArray
+
 
 
 	

@@ -35,9 +35,9 @@ window.ShipTooltipInitialOrdersMenu = function () {
         { className: "removeDetectSEW", condition: [isSelf, isElint, notFlight, doesNotHaveBDEW, enemyStealth], action: removeDetectSEW, info: "Remove Detect Stealth (right-click: clear)", supportsMaxClick: true },
         { className: "removeAllEW", condition: [isSelf, notFlight, notMine], action: removeAllEW, info: "Remove All EW" },
         { className: "targetWeapons", condition: [isEnemy, hasShipWeaponsSelected], action: targetWeapons, info: "Target selected weapons on ship" },
-        { className: "targetWeaponsHex", condition: [hasHexWeaponsSelected], action: targetHexagon, info: "Target selected weapons on hexagon" },
+        { className: "targetWeaponsHex", condition: [hasOrderSource, hasHexWeaponsSelected], action: targetHexagon, info: "Target selected weapons on hexagon" },
         { className: "targetSuppWeapons", condition: [isFriendly, hasShipWeaponsSelected, FFWeaponSelected, notSelf], action: targetWeapons, info: "Target support weapons" },//30 June 2024 - DK - Added for Ally targeting.
-        { className: "removeMultiOrder", condition: [hasShipWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firing Order" },
+        { className: "removeMultiOrder", condition: [hasOrderSource, hasShipWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firing Order" },
         /* ⭐ JUMP_GATES_PLAN.md Stage 3 - SIGNALLING A FIXED JUMP GATE, and these two are the ONLY
            entries in this array whose subject is a unit the player does not own.
 
@@ -50,7 +50,16 @@ window.ShipTooltipInitialOrdersMenu = function () {
            NO SHIP NEEDS TO BE SELECTED. Which of my units is within range is never chosen and never
            matters, so every condition below reads the TARGETED ship (the gate) and none of them
            touches this.selectedShip - which is routinely null here. */
-        { className: "signalJumpGate", condition: [isJumpGate, canSignalGate, noGateSignalYet], action: signalJumpGate, info: "Signal Jump Gate" },
+        { className: "signalJumpGate", condition: [isJumpGate, canSignalGate, noGateSignalYet], action: signalJumpGate, info: "Signal Jump Gate for Departure" },
+        /* ⭐⭐ REINFORCEMENTS_PLAN.md STAGE 8 - THE OTHER DIRECTION, AND IT IS A SECOND BUTTON
+           RATHER THAN A TOGGLE INSIDE THE PANEL. A gate holds ONE jump point and it is one-way
+           (plan section 2.6), so signalling for departure and signalling for arrival are two
+           different orders for the same charge - and the arrival one is meaningless unless the
+           player has something in hyperspace, which is a condition a button can simply not meet.
+           A toggle would have to sit there greyed out on every gate in every game without the
+           reinforcements rule; this way the feature is invisible until it applies, which is the
+           same shape the two mutually-exclusive buttons above already have. */
+        { className: "signalJumpGateArrival", condition: [isJumpGate, canSignalGateForArrival, noGateSignalYet], action: signalJumpGateForArrival, info: "Signal Gate for Arrival" },
         { className: "cancelJumpGateSignal", condition: [isJumpGate, hasGateSignal], action: cancelJumpGateSignal, info: "Cancel Gate Signal" }
     ];
 
@@ -58,6 +67,19 @@ window.ShipTooltipInitialOrdersMenu = function () {
     ShipTooltipInitialOrdersMenu.prototype.getAllButtons = function () {
         return ShipTooltipInitialOrdersMenu.buttons.concat(ShipTooltipMenu.prototype.getAllButtons.call(this));
     };
+
+    /* ⭐ IS THERE A UNIT TO ISSUE THIS ORDER *FROM*? (user report 2026-08-29.)
+
+       this.selectedShip is ROUTINELY null in this phase - the two jump gate buttons below are
+       built on exactly that, and a player whose whole fleet is still in hyperspace has nothing
+       the auto-select could pick - and InitialPhaseStrategy.targetShip now deliberately passes
+       null for a selected unit that is not on the board yet. Every EW entry above already fails
+       closed on a null source through isSelf/isEnemyEW/isElint/isFriendly, but the two hex/split
+       entries asked only about the WEAPON SELECTION, so they would have offered a button whose
+       action calls weaponManager with a null shooter. */
+    function hasOrderSource() {
+        return !!this.selectedShip;
+    }
 
     function hasShipWeaponsSelected() {
         return gamedata.selectedSystems.some(function (system) {
@@ -208,6 +230,23 @@ window.ShipTooltipInitialOrdersMenu = function () {
         weaponManager.queueGateSignalOrder(this.targetedShip);
     }
 
+    /* REINFORCEMENTS_PLAN.md STAGE 8 - everything canSignalGate needs, plus the reinforcements rule
+       being on in this game. The client mirror of the one extra rule Firing::getGateSignalBlock
+       applies to a 'gateexit' claim; gamedata owns the predicate so the two buttons cannot drift.
+
+       ⭐ IT NO LONGER ASKS WHAT IS IN HYPERSPACE (user ruling 2026-09-02): a gate exit stands for
+       its whole programmed hold and anybody may ride it, so this button is offered to a player with
+       nothing of their own waiting. See gamedata.canSignalJumpGateForArrival for the reasoning. */
+    function canSignalGateForArrival() {
+        return gamedata.canSignalJumpGateForArrival(this.targetedShip);
+    }
+
+    //Same panel, blue livery, and the manifest dialog opens on Signal - see
+    //weaponManager.createGateSignalOrder.
+    function signalJumpGateForArrival() {
+        weaponManager.queueGateSignalOrder(this.targetedShip, true);
+    }
+
     /* Withdraw the claim - and TOGGLE THE BUTTON BACK, which is the point of the redraw.
 
        The two gate buttons are mutually exclusive on hasGateSignal/noGateSignalYet, so the moment
@@ -244,6 +283,17 @@ window.ShipTooltipInitialOrdersMenu = function () {
     }
 
     function isEnemyEW() {
+        /* ⚠️ THE NULL GUARD IS THE WHOLE OF USER REPORT 2026-08-29, AND IT COST THE PLAYER THE
+           ENTIRE TOOLTIP. With nothing selected, hasSpecialAbility(null) walks null.systems and
+           throws - and this runs inside ShipTooltipMenu.renderTo's condition filter, which runs
+           inside the ShipTooltip constructor BEFORE show(). So one TypeError in a condition that
+           was never going to add a button took down the whole panel: no Signal Gate buttons, no
+           Signal Gate for Arrival, and no Open Ship Details either, on every click on every unit.
+           It only ever stayed hidden because Initial Orders auto-selects a ship on activate - a
+           fleet held entirely in hyperspace has none to select, which is what reinforcements made
+           reachable. An EW order with no source is meaningless, so the answer is a plain false,
+           BEFORE the friendly-fire shortcut (which would otherwise say yes with no shooter). */
+        if (!this.selectedShip) return false;
         if (gamedata.rules && gamedata.rules.friendlyFire === 1) return true;
         if (shipManager.hasSpecialAbility(this.selectedShip, "alliedEW")) return true;
 

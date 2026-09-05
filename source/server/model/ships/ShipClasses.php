@@ -57,6 +57,30 @@ class BaseShip {
 	public $factionAge = 1; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
     public $isd = 0; 
     public $slot;
+    /* REINFORCEMENTS_PLAN.md §3.1 — the three tac_ship columns that say where a unit is in the
+       hyperspace-to-board journey. PUBLIC on purpose: the client needs all three, and they are
+       PER-INSTANCE rather than blueprint, so the static ship bundle and ShipCompactor never see
+       them.
+         $reinforcement  bought as a reinforcement. Fixed at purchase, never changes.
+         $arrivalTurn    null = still in hyperspace; N = arrives and places on turn N. Written
+                         ONLY by the server's end-of-formation-turn deviation sweep, never from
+                         a POST.
+         $arrivalVia     the OPENER unit's id (a reinforcement ship, or a gate) whose exit
+                         this unit is riding through. null = unassigned. */
+    public $reinforcement = false;
+    public $arrivalTurn   = null;
+    public $arrivalVia    = null;
+    /* REINFORCEMENTS_PLAN.md §4 Stage 1 — THE LOBBY'S CLAIM, AND DELIBERATELY NOT $reinforcement.
+       Carried RAW by Manager::getShipsFromJSON and consumed at exactly one place,
+       BuyingGamePhase::process, which checks the game rule and promotes it. Same idiom as
+       $preBattleDamage and $systemEnhancements below, and for a stronger reason than either:
+       $reinforcement is NOT inert. getTurnDeployed/getTurnPlaced read it, a POST-side ship never
+       carries $arrivalTurn, and so a POSTed ship with $reinforcement = true would answer 999 to
+       both accessors in every phase - which Hangar::generateIndividualNotes and
+       HangarOps::validateDeployBayOrders both ask of POST-side ships (plan trap 3). Keeping the
+       client's claim in its own field means $reinforcement always means "the DB said so", which is
+       what all ~80 getTurnDeployed call sites assume. NOT a tac_ship column. */
+    public $reinforcementClaim = false;
     public $unavailable = false;
     public $minesweeperbonus = 0;
     public $base = false;
@@ -328,9 +352,63 @@ class BaseShip {
 					$mod += -15* $firstFighter->hasCritical("Uncontrolled", $gamedata->turn);
 			    }
 		    }
-            if (!empty($this->attached)) $mod += -10;//Attached Pods get -10 to Iniative as if just launched.            
+            if (!empty($this->attached)) $mod += -10;//Attached Pods get -10 to Iniative as if just launched.
 	    }
+
+	    //REINFORCEMENTS_PLAN.md STAGE 9 - a unit that has just come out of hyperspace off course
+	    //is disordered for the turn it arrives on. Outside the OSAT guard above: it applies to
+	    //everything that can ride a doorway, and an OSAT cannot be a reinforcement at all
+	    //(alwaysDeploysTurnOne refuses the flag at the buy), so the answer is 0 there anyway.
+	    $mod += $this->getReinforcementArrivalIniModifier($gamedata);
+
 	    return $mod;
+    }
+
+    /* ⭐⭐ REINFORCEMENTS_PLAN.md STAGE 9 - THE ARRIVAL INITIATIVE PENALTY.
+     *
+     * "Scatter hexes + 2 per 60 degrees of facing shift, applied to units arriving through that
+     * vortex, on their arrival turn only." A wave that comes out of hyperspace four hexes off
+     * course and turned sideways spends the turn sorting itself out.
+     *
+     *     -5 per hex of scatter          (1 tabletop initiative point)
+     *     -10 per 60 degrees of facing   (2 tabletop initiative points)
+     *
+     * ⚠️ FV INITIATIVE IS d100 AND EVERY MODIFIER IN THIS FILE IS FIVE TIMES ITS TABLETOP VALUE -
+     * the crit lines above are the reference (-5 is written "-1 Ini per crit", -20 is "-4 Ini per
+     * hit"), as is the -10 per point of speed below 5. Written x1 this rule would be worth a
+     * fifth of a point and would do nothing at all, while still looking implemented.
+     *
+     * abs() ON THE FACING STEPS. openExitVortex stores them signed and shortest-way-round (-2..3)
+     * because the log line reads better for it; turning left is exactly as disordering as turning
+     * right.
+     *
+     * ⭐ THE ORDER OF THE FIRST TWO TESTS IS THE EFFICIENCY GATE (Stage 9, refinement 4), and it is
+     * the cheap one first ON PURPOSE. getCommonIniModifiers runs for every ship at every turn
+     * advance, so this method is on the hottest path reinforcements touch. $reinforcement is a
+     * plain property read and is false for every unit of every ordinary game - so a game without
+     * the feature pays one boolean per ship per turn, and only a genuinely flagged unit ever
+     * reaches the rule lookup or the vortex walk.
+     *
+     * ⚠️ THE RULE TEST STILL HAS TO BE THERE, after it: the column survives in games whose rule was
+     * removed, and in the pre-fix fleets §5 trap 25 describes.
+     *
+     * ⚠️ ARRIVAL TURN ONLY, which isArrivingReinforcement is (arrivalTurn === this turn). It is not
+     * "has arrived": a unit that came through a badly-scattered doorway three turns ago is an
+     * ordinary ship and must roll like one.
+     *
+     * ⚠️ ASKED OF A REAL gamedata LOAD. The scatter is rebuilt from an IndividualNote on the
+     * opener's engine, which a POST-side object does not carry (plan trap 3). Both callers -
+     * Manager::generateIniative and SimultaneousMovementRule - roll on a full server load, which is
+     * also the only moment initiative is generated. */
+    public function getReinforcementArrivalIniModifier($gamedata)
+    {
+        if (empty($this->reinforcement)) return 0;
+        if (!$gamedata || !$gamedata->rules || !$gamedata->rules->hasRuleName('allowReinforcements')) return 0;
+
+        $scatter = JumpEngine::getArrivalScatter($this, $gamedata);
+        if ($scatter === null) return 0;
+
+        return -5 * (int)$scatter['hexes'] - 10 * abs((int)$scatter['facingSteps']);
     }
     
 
@@ -756,6 +834,19 @@ class BaseShip {
         //fleet list reads a plain falsy on anything that did not leave inside a carrier).
         if ($this->jumpedWithCarrier) $strippedShip->jumpedWithCarrier = true;
 
+        /* REINFORCEMENTS_PLAN.md §3.1 — shipManager.getTurnDeployed/getTurnPlaced mirror the server
+           pair and read all three, so a reinforcement that did not carry them would answer with its
+           SLOT's deploy turn on the client and with its arrival turn on the server. Emitted only on
+           a reinforcement, so every other unit's payload is byte-identical to before.
+           arrivalTurn/arrivalVia go out even when null, because on the client "still in hyperspace"
+           is a value and not an absence. A hyperspace unit belonging to another team never reaches
+           this method at all - deleteHiddenData drops the whole ship first (§3.6). */
+        if ($this->reinforcement) {
+            $strippedShip->reinforcement = true;
+            $strippedShip->arrivalTurn   = $this->arrivalTurn;
+            $strippedShip->arrivalVia    = $this->arrivalVia;
+        }
+
         $strippedShip->systems = array_map( function($system) {return $system->stripForJson();}, $this->systems);
 
         //Chameleon Sensor Suite, D11 (Stage 8) - the other half of the arming mask. The DISGUISED
@@ -933,6 +1024,16 @@ class BaseShip {
 		if ($this->removed) {
 			$disguised->removed = true;
 			if ($this->removedTurn !== null) $disguised->removedTurn = $this->removedTurn;
+		}
+		//Reinforcement state travels REAL, for the same reason initiative below does: the sheet is
+		//a hull, not a history, and the client's getTurnDeployed reads these three. A unit still in
+		//hyperspace is not on the board to be disguised in the first place, so in practice this only
+		//ever carries an arrival that has already happened - which everyone watched happen.
+		unset($disguised->reinforcement, $disguised->arrivalTurn, $disguised->arrivalVia);
+		if ($this->reinforcement) {
+			$disguised->reinforcement = true;
+			$disguised->arrivalTurn   = $this->arrivalTurn;
+			$disguised->arrivalVia    = $this->arrivalVia;
 		}
 
 		//--- D13: initiative and turn delay go out REAL. Faking the number while the ship still
@@ -3202,12 +3303,49 @@ public function getAllEWExceptDEW($turn){
 		return $this->osat && !($this instanceof FighterFlight);
 	}
 
+	/* REINFORCEMENTS_PLAN.md §3.1 — "this unit was bought as a reinforcement and is STILL in
+	   hyperspace". Once the exit it is riding forms, $arrivalTurn is stamped and it stops
+	   answering true: from then on it is an ordinary unit with a late deploy turn. */
+	public function isReinforcement(){
+		return $this->reinforcement && $this->arrivalTurn === null;
+	}
+
+	/* ⭐ IS THIS UNIT ON THE BOARD FROM TURN 1 NO MATTER WHAT THE SLOT OR THE FLAG SAYS?
+	   Bases, OSATs and Terrain never 'jump in' - getTurnDeployed has always answered 1 for them
+	   before it looks at anything else, and hideHyperspaceReinforcements already carries the ⚠️
+	   that says so. This NAMES that rule so the other two places that need it can ask instead of
+	   re-listing the three properties (user report 2026-08-29, game 4319):
+
+	     - BuyingGamePhase::process refuses the reinforcement flag on such a unit outright. A gate
+	       bought while the lobby's REINFORCEMENTS group was selected took the flag, and the flag
+	       can never come true for it - the gate is on the board on turn 1 regardless.
+	     - JumpEngine::stampArrivingReinforcements refuses to give it an arrival turn. That was the
+	       live bug: a signalled gate is in $opened as the doorway's HOLDER, not as a unit riding
+	       it, so a gate carrying the flag stamped ITSELF as arriving and won its owner a phantom
+	       Deployment phase on every turn its jump point stood.
+
+	   ⚠️ NOT the same question as isReinforcement(). This is a property of the HULL; that one is a
+	   property of where the unit currently is. */
+	public function alwaysDeploysTurnOne(){
+		return $this->osat || $this->base || $this->isTerrain();
+	}
+
     public function getTurnDeployed($gamedata){
 
-        if ($this->osat || $this->base || $this->isTerrain()) return 1; //Bases, Terrain and OSATs never 'jump in'.
+        if ($this->alwaysDeploysTurnOne()) return 1; //Bases, Terrain and OSATs never 'jump in'.
 
         $slot = $gamedata->getSlotById($this->slot);
         $depTurn = $slot->depavailable;
+
+        /* REINFORCEMENTS_PLAN.md §3.2 — THE ONE LOAD-BEARING CHANGE. A reinforcement's arrival
+           turn is decided IN PLAY (by the jump point exit it comes through), not by its
+           slot, so the slot's depavailable says nothing about it. null means it is still in
+           hyperspace, which reads here as "not on the board" - and that single sentence is what
+           makes it inert to firing, movement, EW, power, masking, the fleet list's deployable
+           filter and the unavailable flag all at once, with no further change anywhere.
+           999 is the existing surrender sentinel, reused deliberately: both mean exactly
+           "not on the board". */
+        if ($this->reinforcement) $depTurn = ($this->arrivalTurn === null) ? 999 : $this->arrivalTurn;
 
         if($slot->surrendered !== null){
             if($slot->surrendered <= $gamedata->turn){ //Surrendered on this turn or before, no longer present in game.
@@ -3220,7 +3358,7 @@ public function getAllEWExceptDEW($turn){
 
 
     /*The turn this unit picks its ENTRY HEX, as opposed to the turn it is physically on the
-      board (getTurnDeployed above). Reinforcements place a turn EARLY: the player commits the
+      board (getTurnDeployed above). LATE-SLOT arrivals place a turn EARLY: the player commits the
       entry hexes during the Deployment phase of turn depTurn-1, those hexes show to everyone as
       a blue "Jump Point" ballistic marker for the whole of that turn, and only then do the ships
       arrive. Without the early placement an opponent got no warning whatsoever - a fresh fleet
@@ -3233,6 +3371,14 @@ public function getAllEWExceptDEW($turn){
       Bases/OSATs/Terrain place and arrive together on turn 1, so they fall out of getTurnDeployed
       already. The 999 surrender sentinel becomes 998, still far beyond any real turn.*/
     public function getTurnPlaced($gamedata){
+        /* REINFORCEMENTS_PLAN.md §3.2 / trap 2 — a REINFORCEMENT (the jump point exit kind,
+           not a late slot) places and arrives on the SAME turn. Its early warning is the blue
+           jump point that formed LAST turn, not an early placement. Subtracting one here would
+           grant it a Deployment phase a turn before its vortex exists, with nowhere legal for it
+           to stand - a silent break either way round, and the most expensive mistake available
+           in this feature. */
+        if ($this->reinforcement) return $this->getTurnDeployed($gamedata);
+
         $depTurn = $this->getTurnDeployed($gamedata);
         return ($depTurn > 1) ? ($depTurn - 1) : $depTurn;
     }

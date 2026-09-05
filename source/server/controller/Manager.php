@@ -16,13 +16,83 @@ class Manager{
      */
     private static $dbManager = null;
 
+    /**
+     * Latched connect failure for THIS request.
+     *
+     * WHY THIS EXISTS
+     * ---------------
+     * initDBManager() used to assign $dbManager only on success, so a failed connect
+     * left the static null. Every entry point catches the exception and returns an
+     * error string rather than rethrowing, so the caller carries on and calls in
+     * again -- and each call re-entered mysqli_connect. During the 2026-09-01
+     * "Too many connections" bursts that meant the app hammered an already-exhausted
+     * connection pool once per call instead of once per request: the one behaviour
+     * here that actively deepened the outage rather than merely suffering it.
+     *
+     * With the latch, the first failure is remembered and every later call in the
+     * same request rethrows it immediately without touching the network.
+     *
+     * WARNING: this must stay a PHP static and must NEVER be cached in APCu. Its
+     * correct lifetime is exactly one request. A shared latch would let a single
+     * unlucky request lock every other process out of a database that had already
+     * recovered -- turning a blip into a self-inflicted outage.
+     *
+     * The identical exception OBJECT is rethrown, not a copy, so its trace still
+     * points at the real connect failure; Debug::error dedupes on object identity so
+     * this still produces one log frame per request, not one per call.
+     */
+    private static $dbUnavailable = null;
+
     private static function initDBManager() {
         global $database_host;
     	global $database_name;
     	global $database_user;
     	global $database_password;
-        if (self::$dbManager == null)
-            self::$dbManager = new DBManager($database_host ?? "mariadb", 3306, $database_name, $database_user, $database_password);
+        if (self::$dbUnavailable !== null)
+            throw self::$dbUnavailable;
+
+        if (self::$dbManager == null) {
+            try {
+                self::$dbManager = new DBManager($database_host ?? "mariadb", 3306, $database_name, $database_user, $database_password);
+            } catch (Throwable $e) {
+                self::$dbUnavailable = self::asUnavailable($e);
+                throw self::$dbUnavailable;
+            }
+        }
+    }
+
+    /**
+     * Give a failed connect the stable, machine-readable code 300 the client can act on.
+     *
+     * WHY THIS IS NEEDED
+     * ------------------
+     * DBManager deliberately throws code 300 for "cannot reach the database" -- but that
+     * line never ran. DBManager.php opens with mysqli_report(MYSQLI_REPORT_ERROR), and
+     * this file registers a global set_error_handler that turns warnings into
+     * ErrorException, so the failure is thrown from INSIDE mysqli_connect() before
+     * DBManager can test its own return value. What reached the client was code 2
+     * (E_WARNING), indistinguishable from any other error -- so the chat client had no
+     * way to tell "database at capacity, this will pass" from a real fault, and showed a
+     * modal dialog for every one. See CHAT_DB_RESILIENCE_PLAN.md item 7.
+     *
+     * Narrowing that set_error_handler was the alternative and was rejected: it is
+     * registered at include time and converts every PHP warning in the whole request, in
+     * any file, so changing it reaches far beyond this problem.
+     *
+     * The message is replaced with a fixed string rather than passed through. The catch
+     * sites in this class interpolate getMessage() straight into a hand-built JSON
+     * string, so a driver message containing a quote would produce a malformed body --
+     * and the client would get a parse error instead of the marker this exists to send.
+     * A fixed string is also one less piece of database detail on the wire. The original
+     * is kept as the previous exception, and Debug::error logs the whole chain.
+     */
+    private static function asUnavailable(Throwable $e)
+    {
+        if ($e instanceof Exception && $e->getCode() === 300) {
+            return $e;
+        }
+
+        return new Exception('Database unavailable', 300, $e);
     }
 
     // Lightweight APCu debug logger, gated on FV_APCU_DEBUG (defined local-only in
@@ -1301,6 +1371,20 @@ class Manager{
 
             // Map Mine deployment properties from frontend payload
             $ship->bulkBuy = $value["bulkBuy"] ?? 1;
+
+            /* REINFORCEMENTS_PLAN.md §0 - a saved fleet REMEMBERS which units were bought as
+               reinforcements (user request 2026-08-28). constructSavedShips emits the key only
+               when true, so an ordinary fleet's payload is unchanged and an older client that
+               sends nothing simply saves everything front-line.
+
+               ⚠️ THE REAL PROPERTY, not $reinforcementClaim, and that is safe HERE and only
+               here. The claim exists because a POST-side ship built by getShipsFromJSON is put
+               into a live TacGamedata, where a bare $reinforcement makes getTurnDeployed and
+               getTurnPlaced answer 999 in every phase (plan §4 trap 14). These ships never see
+               a TacGamedata at all: they are built, sanitised, written to tac_saved_ship and
+               thrown away, and both turn accessors require a $gamedata argument nothing on this
+               path can supply. */
+            $ship->reinforcement = !empty($value["reinforcement"]);
     
             $systems = $value["systems"] ?? [];
             foreach ($systems as $i => $system) {
@@ -1985,6 +2069,40 @@ class Manager{
             //⚠️ Must stay AFTER the populate() above: flight ordinals resolve by position
             //in $ship->systems, so the fighters have to exist first.
             $ship->preBattleDamage = $value["preBattleDamage"] ?? array();
+
+            /* Reinforcements (REINFORCEMENTS_PLAN.md §4 Stage 1). Carried RAW here and consumed by
+               BuyingGamePhase::process alone, which checks the game rule and only then writes the
+               real $ship->reinforcement. Every other phase ignores the field, so a client cannot
+               flag a unit into hyperspace mid-game.
+               ⚠️ DELIBERATELY NOT $ship->reinforcement. That property is read by getTurnDeployed
+               and getTurnPlaced, and a POST-side ship carries no $arrivalTurn - so writing it here
+               would make every POSTed reinforcement answer 999 to both accessors in every phase,
+               silently early-returning Hangar::generateIndividualNotes and
+               HangarOps::validateDeployBayOrders, neither of which resolves through
+               $gamedata->getShipById() the way DeploymentGamePhase::validateDeployment now does.
+               See BaseShip::$reinforcementClaim and plan trap 3.
+               ⚠️ The saved-fleet parser above (getSavedShipsFromJSON) writes the REAL property from
+               the same wire key, and the difference is the point: those ships are built, sanitised,
+               written to tac_saved_ship and thrown away without ever entering a TacGamedata, so
+               neither turn accessor can be reached. These ships do enter one. */
+            $ship->reinforcementClaim = !empty($value["reinforcement"]);
+
+            /* THE MANIFEST (REINFORCEMENTS_PLAN.md §3.5, Stage 5) - the ONE reinforcement field a
+               client is trusted to send in a live game, and even then only as a claim.
+               InitialOrdersGamePhase::process re-validates it against the SERVER-side ships and
+               writes NULL for anything it does not believe.
+
+               ⚠️ $arrivalTurn IS DELIBERATELY NOT WHITELISTED and must never be. It is written only
+               by the end-of-formation-turn deviation sweep; a client that could set it could bring
+               its own fleet out of hyperspace a turn early, at a hex of its choosing, with no
+               exit in between. $reinforcement is not whitelisted here either - see the claim
+               property above.
+
+               (int) rather than a raw carry: mysqli and JSON disagree about number types, and the
+               validation downstream compares it against real ship ids. 0 is normalised to null so
+               "unassigned" has exactly one representation. */
+            $arrivalVia = isset($value["arrivalVia"]) ? (int)$value["arrivalVia"] : 0;
+            $ship->arrivalVia = ($arrivalVia > 0) ? $arrivalVia : null;
 
             $ship->enhancementOptions = $value["enhancementOptions"] ?? [];
 

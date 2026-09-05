@@ -39,12 +39,13 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li><a href="#savedfleets">Battle Damage &amp; Saving Fleets</a></li>
                 <li><a href="#boarding">Boarding Actions</a></li>
                 <li><a href="#called">Called Shots</a></li>
-                <li><a href="#delayed">Delayed Deployment</a></li>
+                <li><a href="#delayed">Delayed Deployment Slot</a></li>
                 <li><a href="#notifications">Discord Turn Notifications</a></li>
                 <li><a href="#elint">ELINT &amp; Electronic Warfare (EW)</a></li>
                 <li><a href="#enormous">Enormous Units</a></li>
                 <li><a href="#escorts">Fighter Escorts</a></li>
                 <li><a href="#hangar">Hangar Operations</a></li>
+                <li><a href="#infopanel">Info Panel</a></li>
                 <li><a href="#interception">Interception</a></li>
                 <li><a href="#jump">Jump Drives</a></li>
                 <li><a href="#ladder">Online Ladder</a></li> 
@@ -359,8 +360,13 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
-        <h3  id="delayed">Delayed Deployment</h3>
+        <h3  id="delayed">Delayed Deployment Slot</h3>
         <ul>
+            <li><b>This is not the same thing as <a style="font-size: 14px;" href="#reinforcements">Reinforcements</a>.</b> A Delayed Deployment Slot is a <i>scenario</i> setting: the game is
+            created knowing that a whole player slot turns up on a fixed turn, whatever happens in the battle, and it arrives wherever its Deployment Zone allows.
+            <b>Reinforcements</b> are bought by a player out of their own points, wait in hyperspace with no arrival turn at all, and only appear when one of their own jump-capable
+            ships (or a jump gate) opens a jump point for them — which can be any turn, or never. Delayed Deployment is decided before the game starts; Reinforcements are played.
+            See <a style="font-size: 14px;" href="#jump">Jump Drives</a> for how the latter work.</li>
             <li>You can select this option in the Create Game screen, by setting the <b>'Deploys on Turn'</b> field in a Player Slot to the Turn you wish that slot to deploy, or ‘jump in’.
             Ships cannot jump into hexes occupied by terrain or Enormous units, so make sure you make the Deployment Zone large enough!</li>
             <li><b>You choose your entry hexes a turn early.</b> A slot set to deploy on Turn 5 gets its Deployment Phase on <b>Turn 4</b>, where you position every arriving unit
@@ -699,6 +705,83 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
 
+        <h3 id="infopanel" >Info Panel</h3>
+        <p>The <strong>Info Panel</strong> is the tabbed panel along the bottom-left of the battle screen.  Six tabs share a single body, so only one is ever on screen:
+            <strong>COMBAT LOG</strong>, <strong>FLEET INFO</strong>, <strong>GAME CHAT</strong>, <strong>CHAT</strong>, <strong>DECLARATIONS</strong> and <strong>SAVE FLEET</strong>.
+            Click a tab to switch to it.  A tab is only a view - switching between them never changes anything about your orders.</p>
+
+        <ul>
+            <li><b>Sizing the panel:</b>
+                <ul class="circle-list">
+                    <li><strong>Drag the panel's top edge</strong> up or down to set its height.  The edge lights up when you point at it (Note- drag it with your finger on touchscreen).</li>
+                    <li><strong>The chevron (&#9650; / &#9660;) at the right-hand end of the tab strip</strong>, or a <strong>double-click on the top edge</strong>, switches between the compact and the tall panel.  Opening the tall panel also tucks the initiative drawer out of the way.</li>
+                    <li>The compact and the tall heights are remembered <em>separately</em>, and are kept on your device for your next session - so you can set one working size for reading the log at a glance, and another for going through a whole turn.</li>
+                    <li>Expanding or collapsing the panel leaves you on the tab you were reading.</li>
+                    <li>On phones, and on a short landscape screen, the panel is shut down to its tab strip until you tap the chevron, and only the selected tab is drawn while it is closed - there is not room for six of them and a map.</li>
+                </ul>
+            </li>
+            <br>
+            <li><b>Right-clicking inside the panel</b> no longer opens your browser's own menu (Back / Reload / Save as...), so a right-click aimed at a unit that lands slightly low does not cover the game with it.
+                The game's own right-click actions are unaffected - a right-click on a fleet-list row still opens that unit's ship window.  The browser menu is still there in a text box, so you can paste into chat, and when you have selected some text, so you can copy a log line out to Discord.</li>
+            <br>
+
+            <li><b>COMBAT LOG</b> - what happened, this turn and in every turn before it.
+                <ul class="circle-list">
+                    <li>During a replay the log fills in <em>live</em> as the turn plays out.  The rest of the time it shows the printed log of whichever turn you have selected.</li>
+                    <li><strong>&#9664; TURN n &#9654;</strong> - step back and forth through the turns.  The arrows grey out at the ends of the range.  The <strong>Live</strong> button appears only while you are looking at an older turn, and takes you back to the current one.</li>
+                    <li><strong>Sort</strong> - <em>Resolution</em> is the order the game actually resolved the fire in, which is what you want while following a replay; <em>Attacker</em> and <em>Target</em> regroup the same entries by who was shooting, or by who was being shot at, which is usually easier to read after the fact.  On a narrow screen the three buttons become a dropdown.</li>
+                    <li><strong>All / Mine / Enemy</strong> - whose fire to show.</li>
+                    <li><strong>Hits</strong> - show only fire that scored at least one hit, for when a big turn is mostly misses.</li>
+                    <li><strong>Find</strong> - filter the turn down to a ship or a weapon by name.</li>
+                    <li>The readout to the left of the Find box names the current game phase and, when a filter is on, how many fire groups it is hiding - so a filtered log never looks like a quiet turn.</li>
+                    <li>Reading the colours: ship names are pale, and the <em>target</em> of each shot is drawn in its team colour, because who was shot at is what the eye is looking for.  Damage is red, criticals are amber, and shield absorption is blue.</li>
+                </ul>
+            </li>
+            <br>
+
+            <li><b>FLEET INFO</b> - every fleet in the battle, one block per player.
+                <ul class="circle-list">
+                    <li>The block header carries the <strong>team</strong> (coloured by allegiance), the <strong>player's name</strong>, the fleet's <strong>current / base points</strong>, and a chip saying where that player is up to: <em>Orders committed</em>, <em>Waiting for Movement orders</em>, <em>Surrendered T5</em>, or <em>Deploys T3</em> for a reinforcement slot that has not arrived yet.  <strong>Click the header to collapse or expand that fleet.</strong></li>
+                    <li><strong>Click a column head</strong> (Ship Name, Class, Type, Ini, Value) to sort by it; click it again to reverse; a third click drops back to initiative order.  Your choice is remembered.</li>
+                    <li><strong>Left-click a unit row</strong> - scroll the map to that unit.</li>
+                    <li><strong>Right-click a unit row</strong> - open its <strong>ship window</strong>, without selecting the unit and without moving the map (Note- long press on touchscreen).  You can also click the <strong>&#9432;</strong> that appears at the right-hand end of a row when you point at it, which is the easier target on a phone.</li>
+                    <li>Units that are off the board but still yours - <strong>docked flights</strong> and <strong>reinforcements waiting in hyperspace</strong> - open their ship window on <em>either</em> click, since there is nowhere to scroll to.  For a docked flight that window is the only way to see what is actually in the bay.</li>
+                    <li><strong>Destroyed and jumped units are inert</strong>: no highlight and no window.  They are gone from the battle, and there is nothing left to inspect.</li>
+                    <li><strong>On map only</strong> hides everything that is not currently on the board - destroyed, jumped, docked, and reinforcements still in hyperspace - and hides a whole fleet block if nothing in it is left to show.  Mines <em>are</em> on the map, so they stay.</li>
+                    <li>The <strong>team dropdown</strong> appears in games of three or more teams, and narrows the list to one team.</li>
+                    <li>The readout recounts fleets and units against whatever filters are on, so it always describes what is actually on screen.</li>
+                    <li>The <strong>FAQ</strong>, <strong>Ammo &amp; Options</strong> and <strong>Factions</strong> buttons open those reference pages in a new tab.</li>
+                </ul>
+            </li>
+            <br>
+
+            <li><b>GAME CHAT</b> and <b>CHAT</b> - two separate channels.
+                <ul class="circle-list">
+                    <li><strong>GAME CHAT</strong> is this battle only, and everyone in the game can read it.  It is the place to agree a house rule, warn an opponent you will be slow, or ask what a system does.</li>
+                    <li><strong>CHAT</strong> is the site-wide channel - the same one that appears in the game lobby.</li>
+                    <li>A tab turns <strong>amber</strong> when a message has arrived on it that you have not read, so you can leave both closed and still not miss anything.</li>
+                </ul>
+            </li>
+            <br>
+
+            <li><b>DECLARATIONS</b> - a read-out of the orders currently on the table.  This is the tab to check <em>before</em> you commit: an unspent EW point or a weapon aimed at the wrong ship is far easier to spot here than in a dozen separate ship windows.
+                <ul class="circle-list">
+                    <li><strong>Side: Own / Enemy</strong> - whose orders to list.</li>
+                    <li><strong>Show: EW / Fire</strong> - electronic warfare allocations, or firing orders.</li>
+                    <li><strong>By: Source / Target</strong> - group under the unit <em>doing</em> it, or under the unit it is being done <em>to</em>.  So <em>Own + Fire + By Source</em> is your ships and what each of them is shooting at, while <em>Enemy + Fire + By Target</em> is your ships and what is shooting at them.  The same pairing works for EW: what you are emitting, versus what is being pointed at you.</li>
+                    <li>In the <strong>EW</strong> view each unit is listed with every point it is emitting or receiving plus a <strong>per-unit total</strong>, so you can see at a glance whether a ship still has EW left to allocate.  The <strong>Fire</strong> view reads as "4x Heavy Laser &rarr; Vorchan  45-60%" - how many guns, at whom, and the to-hit range.</li>
+                    <li><strong>Briefing</strong> (far right) replaces the panel with the game's name, the rules of engagement in play (Friendly fire, Mines, Reinforcements, Desperate) and the scenario text.  Press it again to return to the view you were on.  The three filter groups dim while it is up, because none of them means anything for a briefing.</li>
+                    <li>This tab only ever shows what your own game data already contains, so it cannot reveal an opponent's orders to you any earlier than the rest of the interface does.</li>
+                </ul>
+            </li>
+            <br>
+
+            <li><b>SAVE FLEET</b> - saves your surviving ships, with their enhancements, remaining ammunition, current battle damage and critical effects, as a reusable fleet list.  Load it from the game lobby to carry a campaign on into the next battle.  See <a href="#savedfleets">Battle Damage &amp; Saving Fleets</a> for exactly what is and is not carried over.</li>
+            <br>
+        </ul>
+        <a class="back-to-top" href="#top">&#8617; Back to Top</a>
+
+
         <h3 id="interception" >Interception</h3>
         <ul>
             <li>Interception is defensive fire that makes an incoming shot harder to hit.  Every weapon capable of it has an <strong>Intercept Rating</strong>.</li>
@@ -754,6 +837,14 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
         <h3 id="jump" >Jump Drives</h3>
         <ul>
+            <li><b>There are two kinds of jump point, and the colour tells you which.</b> They are named from hyperspace's point of view, not the battle's:
+                <ul class="circle-list">
+                    <li>A <span style="color:#e1b000;"><b>yellow Jump Point Entrance</b></span> is a doorway <i>into</i> hyperspace. Units fly into it to <b>leave</b> the battle.
+                        This is the one a ship opens with its own Jump Drive, and everything in this section up to Reinforcements is about it.</li>
+                    <li>A <span style="color:#00b8e6;"><b>blue Jump Point Exit</b></span> is a doorway <i>out of</i> hyperspace. Reinforcements <b>arrive</b> through it.
+                        Nothing can go the other way &mdash; there is no Jump to Hyperspace button on a blue vortex, whoever opened it.</li>
+                </ul>
+            </li>
             <li>A ship equipped with a Jump Drive can use it to <b>open a jump point</b> &mdash; a vortex into hyperspace
                 that appears in a nearby hex for up to four turns &mdash; allowing units to leave the battle by <b>flying into it</b>. Any unit may use any
                 <i>open</i> jump point, including an enemy's, and including units with no Jump Drive of their own.</li>
@@ -801,6 +892,62 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 through one.</li>
             <li>The Jump Drive system usually cannot be turned off unless seriously damaged, but some scenarios allow it.
                 The game warns the player when attempting to deactivate this system improperly (e.g. without Desperate rules or 50%+ damage).</li>
+
+            <li id="reinforcements" style="margin-top:10px;"><b>REINFORCEMENTS &mdash; arriving through a jump point.</b> When the host ticks
+                <b>'Allow Reinforcements'</b> in the Create Game screen, a player may buy part of their fleet as reinforcements: units that start the battle
+                in <b>hyperspace</b> and come out of a <span style="color:#00b8e6;"><b>Jump Point Exit</b></span> one of their own ships opens during the game.
+                They come out of the same points pool as the rest of the fleet &mdash; a reinforcement is not free, it is a ship you have chosen not to bring
+                to the party yet. This is <i>not</i> the same as a
+                <a style="font-size: 14px;" href="#delayed">Delayed Deployment Slot</a>, which arrives on a fixed turn set before the game began.
+                <ul class="circle-list">
+                    <li><b>Buying them.</b> In Fleet Selection the store has two groups, <b>MAIN FLEET</b> and <b>REINFORCEMENTS</b>; pick the group before you
+                        buy, or use the <i>Reinforce</i> link on a bought row to move a unit between them. Saved fleets remember which group each unit was in.
+                        Terrain, Bases and OSATs cannot be reinforcements &mdash; they always deploy on Turn 1 &mdash; and the lobby will not let you put them
+                        in the group.</li>
+                    <li><b>Bring a way in.</b> At least one reinforcement needs a <b>Jump Drive</b> of its own, or your side needs a <b>Jump Gate</b> on the map.
+                        Without either, your reinforcements sit in hyperspace for the whole battle and their points are wasted &mdash; the lobby warns you
+                        before you click Ready.</li>
+                    <li><b>What the enemy sees.</b> Nothing but a line in your fleet list reading <i>Reinforcements &mdash; N units, X pts</i>. Not which hulls,
+                        not what they carry, not who can open a jump point. You see your own in full.</li>
+                    <li><b>Calling them in.</b> During <b>Initial Orders</b>, press <b>Manage Reinforcements</b>. Every jump-capable unit you have in hyperspace is
+                        listed; choose one, press <b>Choose Hex</b>, click the hex you want the jump point to open in, set the <b>facing</b> with the arrow
+                        control, and then tick the units that will ride through it &mdash; the <b>Jump Point Manifest</b>. The opening ship always rides its own
+                        jump point. A unit already riding somebody else's is greyed out; you can withdraw a declaration from the same menu and start again.
+                        To change your mind about <i>who rides</i> without giving up the jump point itself, select the row and press <b>Jump Manifest</b> &mdash;
+                        it reopens the same tick list.</li>
+                    <li><b>The declaration is public once orders are committed</b> &mdash; everyone sees a <span style="color:#00b8e6;"><b>blue hex</b></span> with a
+                        facing arrow at the hex you named, for the rest of that turn. That warning is the price of arriving somewhere useful, and it is the same
+                        deal a Delayed Deployment Slot gets.</li>
+                    <li><b>You will probably miss.</b> At the end of the turn the jump point forms, and where it forms is a <b>deviation roll</b> against the
+                        opening ship's <b>sensor rating</b>: d20, modified by <b>&minus;1</b> for the Minbari Federation, <b>&minus;5</b> for an Ancient race
+                        (Vorlon, Shadow), <b>&minus;3</b> for a friendly base or OSAT on the map and <b>&minus;1</b> for a friendly ELINT vessel. A low roll
+                        arrives exactly where you aimed; a high one scatters 1d3, 1d6, 1d10 or 2d10+2 hexes in a random direction, and the worst two bands turn
+                        the facing as well. An Ancient fleet with a base on the map arrives precisely about 40% of the time; a young race with a sensor rating of
+                        10 is precise only on a natural 1. The Combat Log names the band, the roll and the distance, so you can see which happened. The jump
+                        point never forms inside terrain or an Enormous unit &mdash; if the dice put it there it is nudged to the nearest legal hex.</li>
+                    <li><b>Arriving.</b> On the <i>next</i> turn the owner gets a <b>Deployment Phase</b>. The wave places itself in the jump point's hex on the
+                        jump point's facing, stacked, and all you set is each unit's <b>speed</b>. Anything you leave unplaced goes back to hyperspace with
+                        nothing spent, and can be called in again later. A ship's jump point is <b>one-shot</b>: it closes at the end of the arrival turn, and the
+                        drive can then be used normally (including to open a way out).</li>
+                    <li><b>Arriving is disorderly.</b> A wave that comes out of hyperspace off course spends the turn sorting itself out: on its <b>arrival turn
+                        only</b>, every unit that rode that jump point takes an <b>initiative penalty of 1 per hex it scattered, plus 2 for every 60&deg; the
+                        facing was turned</b>. A precise arrival costs nothing at all, which is one more reason the modifiers above are worth having.</li>
+                    <li><b>Jump Gates.</b> A fixed Jump Gate can be signalled to open a jump point <i>inward</i> instead of outward: click the gate in Initial
+                        Orders and choose <b>Signal Gate for Arrival</b>, which opens the same Manifest window. A gate's jump point does not deviate &mdash; it
+                        opens in the gate's own mouth, on the gate's own facing, with no initiative penalty &mdash; and it stays open for its programmed hold, so
+                        it can bring a fresh wave through on <i>every</i> turn it stands. Pick the gate up again from Manage Reinforcements on later turns. A gate
+                        belongs to nobody: if two players signal the same gate in the same turn, the one whose nearest unit is closest wins it, and the loser's
+                        manifest is refunded to hyperspace with nothing spent. While the contest is live only the nearest side's marker is shown on the gate, so
+                        you can see whether you are going to get it.</li>
+                    <li><b>Shadows and other phasing hulls.</b> A Shadow ship does not tear a vortex open &mdash; it fades out, and from now on it fades back
+                        <b>in</b> the same way. It declares a hex exactly as anything else does and its arrival marker reads <b>REINFORCEMENTS</b>, but no jump
+                        point terrain ever appears: the ships simply <i>are</i> there on the arrival turn. Everything else &mdash; the deviation roll, the manifest,
+                        the Deployment Phase, the initiative penalty &mdash; is identical. Such a drive still cannot open a way <i>out</i>; it uses the old
+                        one-click Jump to Hyperspace for that.</li>
+                    <li><b>You cannot go back out the way you came.</b> A blue Jump Point Exit is one-way. To leave the battle you need a yellow Jump Point
+                        Entrance, which means opening one with a drive that has recharged.</li>
+                </ul>
+            </li>
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 

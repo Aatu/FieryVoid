@@ -28,6 +28,26 @@ class FireGamePhase implements Phase
         // because it is recording something that has happened, not generating per-ship state.
         JumpEngine::closeExpiredVortices($servergamedata);
 
+        // REINFORCEMENTS_PLAN.md Stage 6/8: every unit riding a jump point EXIT that will still be
+        // open next turn is stamped with an arrival turn of turn+1 here, and every unit riding one
+        // that will not gets its berth refunded.
+        //
+        // THE DOORWAY ITSELF NO LONGER FORMS HERE - it forms at the end of INITIAL ORDERS, where
+        // the deviation is rolled and the declaration is moved to the hex it landed on, so both
+        // players can see where the exit will actually be for the whole of the turn it forms on
+        // (user ruling 2026-08-29, plan section 2.3). Only the manifest half stayed behind.
+        //
+        // ⚠️ AND IT HAD TO STAY BEHIND. This sweep asks "will this doorway still be there NEXT
+        // turn", and closeExpiredVortices above is what decides it: a gate on the last turn of its
+        // programmed hold, and a ship's one-shot exit on its arrival turn, both close there. Asked
+        // an instant earlier the answer is yes in both cases, which would stamp a wave for a turn
+        // its doorway does not exist on. See JumpEngine::stampExitManifests.
+        //
+        // AND BEFORE the slot loop at the bottom, which asks getTurnDeployed to decide who gets a
+        // Deployment phase next turn - the arrival turns stamped here are exactly what that
+        // question needs to see (Stage 7).
+        JumpEngine::stampExitManifests($servergamedata, $dbManager);
+
 
 		foreach ($servergamedata->ships as $currShip){ //generate system-specific information if necessary
 			$currShip->generateIndividualNotes($servergamedata, $dbManager);
@@ -99,6 +119,21 @@ class FireGamePhase implements Phase
                nothing in the slot has been placed yet. */
             if (!$needsPhase && $slot->depavailable == $gameData->turn+1
                 && !$servergamedata->slotHasPlacedShips($slot->slot)) $needsPhase = true;
+
+            /* REINFORCEMENTS_PLAN.md STAGE 7 - the wave that just got an arrival turn needs a
+               Deployment phase to walk through its doorway in. Nothing above can produce it: a
+               reinforcement's arrival turn is decided in play by the exit it rides, and
+               depavailable (which is what every clause above is built on) knows nothing about it.
+
+               ⚠️ ASKED OF $servergamedata, NEVER $gameData. stampExitManifests ran a few lines
+               above this loop and stamped its arrival turns onto that object and the database; the
+               outer $gameData was loaded before the Firing phase resolved and still believes every
+               reinforcement is in hyperspace. Ask the wrong one and the whole wave silently misses
+               the only turn its exit is open on. */
+            if (!$needsPhase
+                && $servergamedata->hasReinforcementsArriving($slot->playerid, $gameData->turn+1)) {
+                $needsPhase = true;
+            }
 
             if ($needsPhase || $doDeployment){
                 //Slot places (or pre-orders) next turn, ensure that database know it completed this Firing Phase

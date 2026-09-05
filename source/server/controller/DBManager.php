@@ -158,16 +158,29 @@ class DBManager
 		if($ship->name == ''){
 				$ship->name = 'NAMELESS UNIT' ;
 		}
-		/*07.01.2024: merge options point cost into enhancements point cost! 
-        $sql = "INSERT INTO `B5CGM`.`tac_ship` VALUES(null, $userid, $gameid, '" . $this->DBEscape($ship->name) . "', '" . $ship->phpclass . "', 0, 0, 0, 0, 0, $ship->slot, $ship->pointCostEnh)";
+		/*07.01.2024: merge options point cost into enhancements point cost!
+        $sql = "INSERT INTO `B5CGM`.`tac_ship` (playerid, tacgameid, name, phpclass, slot, enhvalue) VALUES($userid, $gameid, '" . $this->DBEscape($ship->name) . "', '" . $ship->phpclass . "', $ship->slot, $ship->pointCostEnh)";
 		*/
 		/* pointCostSysEnh is the third bucket (WEAPON_ENHANCEMENTS_PLAN.md D5) - per-system refits.
 		   It belongs in tac_ship.enhvalue with the other two: that column is what the fleet list
 		   reads back as the ship's enhancement spend, and a refit is spend. BuyingGamePhase sets
 		   it from the SERVER-derived total before calling this, never from the client's claim. */
 		$enhCostTotal = $ship->pointCostEnh + $ship->pointCostEnh2 + $ship->pointCostSysEnh;
-        $sql = "INSERT INTO `tac_ship` VALUES(null, $userid, $gameid, '" . $this->DBEscape($ship->name) . "', '" . $ship->phpclass . "', 0, 0, 0, 0, 0, $ship->slot, $enhCostTotal)";
-		
+		/* ⚠️ NAMED COLUMNS, not the positional `VALUES(null, …)` this used to be
+		   (REINFORCEMENTS_PLAN.md trap 1). The positional form silently depended on tac_ship
+		   never gaining a column, and broke every ship insert in the game with a column-count
+		   error the moment db/reinforcements.sql added three. rolling, rolled and the three
+		   campaign* columns are still written with the same literal 0s the positional form gave
+		   them - named rather than dropped in favour of the table defaults, so the row this
+		   writes stays byte-identical to the one it wrote before.
+		   `reinforcement` is written here because this is the ONE insert path for every ship in
+		   the game (Manager::insertSingleShip routes through it), so a mid-game spawn gets a
+		   correct 0 for free. arrivalturn/arrivalvia are deliberately left NULL: a reinforcement
+		   is born in hyperspace and unassigned, and both are written later by the server alone. */
+		$isReinforcement = !empty($ship->reinforcement) ? 1 : 0;
+        $sql = "INSERT INTO `tac_ship` (playerid, tacgameid, name, phpclass, rolling, rolled, campaignX, campaignY, campaigngameid, slot, enhvalue, reinforcement) "
+             . "VALUES($userid, $gameid, '" . $this->DBEscape($ship->name) . "', '" . $ship->phpclass . "', 0, 0, 0, 0, 0, $ship->slot, $enhCostTotal, $isReinforcement)";
+
         //   Debug::log($sql);
         $id = $this->insert($sql);
         return $id;
@@ -248,6 +261,62 @@ class DBManager
     }
 
 
+    /* REINFORCEMENTS_PLAN.md §3.1 / Stage 5 - which opener's jump point exit this unit is
+     * riding through. NULL clears the berth (a withdrawn declaration, a manifest the player
+     * un-ticked, or a claim the server did not believe).
+     *
+     * The opener and NOT the vortex, deliberately: the vortex does not exist when the manifest is
+     * named - it is created two phases later, and for a gate it may never be created at all if the
+     * claim is lost - so keying on the opener makes the refund automatic. A manifest that never
+     * gets a vortex is simply never stamped with an arrival turn.
+     *
+     * ⚠️ arrivalturn is NOT settable from here or from anywhere a POST can reach. It is written by
+     * the end-of-formation-turn deviation sweep alone; see db/reinforcements.sql.
+     *
+     * 'i' with an explicit null: bind_param sends a PHP null as SQL NULL for an integer parameter,
+     * which is what clears the column - do not "fix" it to 0, which is a real ship id. */
+    public function setShipArrivalVia($shipid, $openerid)
+    {
+        $stmt = $this->connection->prepare("UPDATE `tac_ship` SET arrivalvia = ? WHERE id = ?");
+        $via = ($openerid === null) ? null : (int)$openerid;
+        $id = (int)$shipid;
+        $stmt->bind_param('ii', $via, $id);
+        $stmt->execute();
+        $stmt->close();
+    }
+
+    /* REINFORCEMENTS_PLAN.md section 3.1 / Stage 6 - THE TURN THIS UNIT COMES OUT OF HYPERSPACE.
+     *
+     * ⚠️⚠️ WRITTEN FROM EXACTLY ONE PLACE - JumpEngine::stampExitManifests, at the end of the
+     * turn its exit formed - AND NO POST CAN REACH IT. Manager::getShipsFromJSON whitelists
+     * arrivalVia and deliberately not this (see the note there): a player who could name their own
+     * arrival turn would be placing units on a board with no vortex on it, in a Deployment phase
+     * nothing granted them.
+     *
+     * Setting it is what ENDS the unit's hyperspace life: BaseShip::isReinforcement() is
+     * `reinforcement AND arrivalturn IS NULL`, so from this write on the unit is an ordinary one
+     * with a late deploy turn, visible to the enemy from the turn it arrives.
+     *
+     * ⭐ AND IT TAKES NULL, which Stage 7 is what added (an earlier draft of this comment said the
+     * write was one-way). §2.6's one-way rule is about the DOORWAY - an exit cannot be jumped
+     * out of - and says nothing about a unit that never walked through one. Placement is optional
+     * (§2.4), so DeploymentGamePhase::releaseUnplacedReinforcements clears BOTH arrival fields on
+     * anything the player left behind and the unit goes back to being an ordinary reinforcement
+     * waiting in hyperspace, concealed again, with nothing spent. Clearing arrivalvia alone would
+     * leave it reading as a ship that deployed on a turn now past.
+     *
+     * mysqli binds a PHP null as SQL NULL whatever the type character says, which is the same thing
+     * setShipArrivalVia above relies on - do not "fix" the 'i' to something else. */
+    public function setShipArrivalTurn($shipid, $turn)
+    {
+        $stmt = $this->connection->prepare("UPDATE `tac_ship` SET arrivalturn = ? WHERE id = ?");
+        $arrival = ($turn === null) ? null : (int)$turn;
+        $id = (int)$shipid;
+        $stmt->bind_param('ii', $arrival, $id);
+        $stmt->execute();
+        $stmt->close();
+    }
+
     public function submitAmmo($shipid, $systemid, $gameid, $firingMode, $ammoAmount, $turn)
     {
         $stmt = $this->connection->prepare("
@@ -308,10 +377,23 @@ class DBManager
 		//Third bucket, same reasoning as submitShip above: a saved fleet's enhvalue has to carry
 		//the per-system refits or reloading it prices the ship short (D5).
 		$enhCostTotal = $ship->pointCostEnh + $ship->pointCostEnh2 + $ship->pointCostSysEnh;
+		/* REINFORCEMENTS_PLAN.md §0 - A SAVED FLEET DOES REMEMBER WHICH UNITS WERE REINFORCEMENTS
+		   (user request 2026-08-28; this reverses the original ruling, which was that it would
+		   not). Re-flagging a dozen rows by hand after every load was the whole of the cost.
+
+		   Only the PURCHASE-TIME flag travels. `arrivalturn` and `arrivalvia` are in-play state
+		   written by the server during a battle and mean nothing in a fleet list, so they get no
+		   column here - a reloaded reinforcement is always back in hyperspace, exactly as if it
+		   had just been bought.
+
+		   Reading as 0 on every row written before the column existed is the old behaviour
+		   unchanged, and loading into a game WITHOUT the rule still lands everything front-line
+		   because gamedata.isReinforcementRow gates on the rule as well as the flag. */
+		$reinforcement = !empty($ship->reinforcement) ? 1 : 0;
 
         $sql = "INSERT INTO tac_saved_ship
-                (userid, listid, name, phpclass, flightsize, bulkbuy, enhvalue)
-                VALUES (?, ?, ?, ?, ?, ?, ?)";
+                (userid, listid, name, phpclass, flightsize, bulkbuy, enhvalue, reinforcement)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $this->connection->prepare($sql);
         if (!$stmt) {
@@ -322,14 +404,15 @@ class DBManager
         //(MINE_DMG is 0.5/level), and truncating it here made a fleet reload dearer than it
         //was bought. See db/fractionalEnhancementValue.sql.
         $stmt->bind_param(
-            "iissiid",
+            "iissiidi",
             $userid,
             $listId,
             $shipName,
             $ship->phpclass,
             $flightsize,
             $bulkbuy,
-            $enhCostTotal
+            $enhCostTotal,
+            $reinforcement
         );
 
         if (!$stmt->execute()) {
@@ -482,7 +565,7 @@ class DBManager
 
         $stmt = $this->connection->prepare(
             "SELECT
-                id, userid, name, phpclass, flightsize, bulkbuy, enhvalue
+                id, userid, name, phpclass, flightsize, bulkbuy, enhvalue, reinforcement
             FROM
                 tac_saved_ship
             WHERE
@@ -492,7 +575,7 @@ class DBManager
 
         if ($stmt) {
             $stmt->bind_param('i', $listid);
-            $stmt->bind_result($shipid, $userid, $name, $phpclass, $flightsize, $bulkbuy, $enhvalue);
+            $stmt->bind_result($shipid, $userid, $name, $phpclass, $flightsize, $bulkbuy, $enhvalue, $reinforcement);
             $stmt->execute();
             while ($stmt->fetch()) {
                 $ship = new $phpclass($shipid, $userid, $name, 1);
@@ -508,6 +591,15 @@ class DBManager
 				//json_encoded to the client, where `pointCost + pointCostEnh` would then
 				//CONCATENATE instead of adding. See db/fractionalEnhancementValue.sql.
 				$ship->pointCostEnh = (float)$enhvalue;
+				/* REINFORCEMENTS_PLAN.md §0 - which units this fleet was saved with in hyperspace
+				   (user request 2026-08-28). $reinforcement is a public BaseShip property, so it
+				   rides the loadSavedFleet.php payload through json_encode with no extra plumbing;
+				   the lobby re-applies it in gamedata.loadSavedFleet, still gated on the game
+				   actually carrying the rule.
+				   $arrivalTurn stays null - a reloaded reinforcement is back in hyperspace, never
+				   mid-arrival - so isReinforcement() answers true, which is what a fresh purchase
+				   would do too. */
+				$ship->reinforcement = (bool)$reinforcement;
                 $ships[] = $ship;
             }
             $stmt->close();
@@ -2281,6 +2373,7 @@ class DBManager
         if ($asteroids > 0 || $moonCount > 0) $chips[] = 'TERRAIN';
 
         if (!empty($r['allowMines']))   $chips[] = 'MINES';
+        if (!empty($r['allowReinforcements'])) $chips[] = 'REINF';
         if (!empty($r['desperate']))    $chips[] = 'DESPERATE';
         if (!empty($r['friendlyFire'])) $chips[] = 'FRIENDLY FIRE';
 
@@ -2654,9 +2747,9 @@ class DBManager
 
         $stmt = $this->connection->prepare(
             "SELECT
-                id, playerid, name, phpclass, slot, enhvalue
+                id, playerid, name, phpclass, slot, enhvalue, reinforcement, arrivalturn, arrivalvia
             FROM
-                tac_ship 
+                tac_ship
             WHERE
                 id = ?
             "
@@ -2664,7 +2757,7 @@ class DBManager
 
         if ($stmt) {
             $stmt->bind_param('i', $id);
-            $stmt->bind_result($id, $playerid, $name, $phpclass, $slot, $enhvalue);
+            $stmt->bind_result($id, $playerid, $name, $phpclass, $slot, $enhvalue, $reinforcement, $arrivalturn, $arrivalvia);
             $stmt->execute();
             while ($stmt->fetch()) {
                 $ship = new $phpclass($id, $playerid, $name, $slot);
@@ -2672,12 +2765,24 @@ class DBManager
 				//json_encoded to the client, where `pointCost + pointCostEnh` would then
 				//CONCATENATE instead of adding. See db/fractionalEnhancementValue.sql.
 				$ship->pointCostEnh = (float)$enhvalue;
+				$this->applyReinforcementFields($ship, $reinforcement, $arrivalturn, $arrivalvia);
             }
             $stmt->close();
         }
 
         return $ship;
     }
+
+	/* REINFORCEMENTS_PLAN.md §3.1 — the three tac_ship reinforcement columns, cast once for both
+	   ship readers. Casting matters on all three: mysqli hands back STRINGS, and getTurnDeployed
+	   tests `$this->arrivalTurn === null` with a STRICT ===, so a "0"/"" would read as an arrival
+	   on turn 0 rather than as "still in hyperspace". NULL must survive as null and nothing else. */
+	private function applyReinforcementFields($ship, $reinforcement, $arrivalturn, $arrivalvia)
+	{
+		$ship->reinforcement = (bool)$reinforcement;
+		$ship->arrivalTurn   = ($arrivalturn === null) ? null : (int)$arrivalturn;
+		$ship->arrivalVia    = ($arrivalvia  === null) ? null : (int)$arrivalvia;
+	}
 
     public function getTacShips($gamedata, $turn, $allData = true)
     {
@@ -2687,9 +2792,9 @@ class DBManager
 
         $stmt = $this->connection->prepare(
             "SELECT
-                id, playerid, name, phpclass, slot, enhvalue
+                id, playerid, name, phpclass, slot, enhvalue, reinforcement, arrivalturn, arrivalvia
             FROM
-                tac_ship 
+                tac_ship
             WHERE
                 tacgameid = ?
             "
@@ -2697,7 +2802,7 @@ class DBManager
 
         if ($stmt) {
             $stmt->bind_param('i', $gamedata->id);
-            $stmt->bind_result($id, $playerid, $name, $phpclass, $slot, $enhvalue);
+            $stmt->bind_result($id, $playerid, $name, $phpclass, $slot, $enhvalue, $reinforcement, $arrivalturn, $arrivalvia);
             $stmt->execute();
             while ($stmt->fetch()) {
                 $ship = new $phpclass($id, $playerid, $name, $slot);
@@ -2705,6 +2810,7 @@ class DBManager
 				//json_encoded to the client, where `pointCost + pointCostEnh` would then
 				//CONCATENATE instead of adding. See db/fractionalEnhancementValue.sql.
 				$ship->pointCostEnh = (float)$enhvalue;
+				$this->applyReinforcementFields($ship, $reinforcement, $arrivalturn, $arrivalvia);
                 /*    if ($ship instanceof FighterFlight && $ship->superheavy === false){
                         debug::log("backwards adjust");
                         $ship->flightSize = 6;
@@ -4821,6 +4927,46 @@ public function setLastTimeChatChecked($userid, $gameid)
         return $messages;
     }
 
+    /**
+     * Highest chat id that actually exists for a game, or 0 if it has none.
+     *
+     * Exists so ChatManager never caches a fast-poll watermark taken from the
+     * client's `lastid`, which is a claim rather than a fact. See the long comment at
+     * ChatManager::getChatMessages' empty-result branch for why an inflated watermark
+     * is harmful (it switches the DB-sparing fast path OFF for a whole game chat).
+     *
+     * Cheap enough to be worth the round trip: it runs only on a fast-poll MISS, on
+     * which a query has already been paid for anyway, and it is a bounded index
+     * lookup -- MAX() on the leading column of the `gameid_id` index is resolved from
+     * the index alone, and 3-day retention keeps the table tiny regardless.
+     */
+    public function getMaxChatMessageId($gameid = 0)
+    {
+        $maxId = 0;
+
+        $stmt = $this->connection->prepare("
+            SELECT
+                MAX(id)
+            FROM
+                chat
+            WHERE
+                gameid = ?
+        ");
+
+        if ($stmt) {
+            $stmt->bind_param('i', $gameid);
+            // MAX() over no rows is NULL, not 0 — a game whose chat is empty (or whose
+            // messages retention has just purged) lands here, and (int)null is 0.
+            $stmt->bind_result($dbMax);
+            $stmt->execute();
+            $stmt->fetch();
+            $stmt->close();
+            $maxId = (int)$dbMax;
+        }
+
+        return $maxId;
+    }
+
     public function getHelpMessage($gamehelpmessagelocation)
     {
         $message = "";
@@ -4842,11 +4988,28 @@ public function setLastTimeChatChecked($userid, $gameid)
 
     public function deleteOldChatMessages()
     {
+        /* The cutoff is computed on the RIGHT of the comparison, never by wrapping the
+           column. This used to read `DATE_ADD(time, INTERVAL 3 DAY) < NOW()`, which
+           selects exactly the same rows but is not sargable: a column inside a function
+           cannot be matched against an index, so no index on `time` could ever be used
+           however the table was defined.
+
+           Honesty about scale, so this is not mistaken for a hot fix: on live the 3-day
+           retention actually works and `chat` holds only about a dozen rows, so today
+           this predicate costs nothing either way. It was rewritten while chasing the
+           2026-09-01 "Too many connections" bursts on a theory — MyISAM table locks —
+           that turned out not to apply, because live `chat` has been InnoDB all along.
+           See db/chatTableIndexes.sql for that write-up.
+
+           It stays rewritten because a non-sargable predicate is a latent defect
+           regardless of the current row count: it silently cannot use an index, so the
+           cost is invisible right up until retention is lengthened or the purge stops
+           running. */
         $stmt = $this->connection->prepare("
             DELETE FROM
                 chat
             WHERE
-                DATE_ADD(time, INTERVAL 3 DAY) < NOW()    
+                time < NOW() - INTERVAL 3 DAY
         ");
 
         if ($stmt) {

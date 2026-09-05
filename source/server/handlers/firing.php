@@ -132,11 +132,59 @@ class Firing
      * a list. */
     private static function getVortexDeclarationBlock($fire, $weapon, $shooter, $gamedata, $fireOrders)
     {
+        /* ⭐⭐ REINFORCEMENTS_PLAN.md STAGE 9 - THE ARRIVAL BRANCH IS NOW ABOVE THE LEGACY REFUSAL,
+           AND THE ORDER OF THESE TWO LINES IS THE WHOLE OF "SHADOWS PHASE IN" (user ruling
+           2026-08-29).
+
+           A legacy drive has no vortex to OPEN - that is what markLegacy() turns off, and the
+           refusal below is still exactly right for a ship on the board declaring a way out. But
+           coming BACK is the other direction, and it was never a vortex gesture at all: an arrival
+           declaration takes no range test, no line-of-sight test, no offline test and no charge
+           test (see the entrance branch's own note below), which is precisely the list markLegacy()
+           makes unanswerable. There is nothing left for the legacy flag to protect.
+
+           ⚠️ SO THE REFUSAL MUST STAY, AND MUST STAY UNDERNEATH. A legacy hull that could declare
+           an EXIT would spawn a yellow vortex on the board for a faction whose whole rule is that
+           it leaves nothing behind. Widening isLegacyJump() rather than moving one line past it is
+           the mistake this comment exists to stop.
+
+           ⭐⭐ AND §3.4 - THE ARRIVAL BRANCH IS A DIFFERENT DECLARATION that happens to travel in
+           the same fire-order shape, taken first and RETURNING, for the same reason the gate branch
+           below is: almost none of the ship rules apply to it.
+
+             - THERE IS NO RANGE TEST AND NO LINE-OF-SIGHT TEST, and their absence is the rule and
+               not an omission (§2.2). The opener is in HYPERSPACE: it has no hex to measure either
+               from. getHexPos() would answer with its slot's deployment-box centre - the 'start'
+               movement row every ship is given - which is not a place it is, so a range test would
+               be a real number computed from a fiction.
+             - THERE IS NO OFFLINE TEST. A unit in hyperspace has no power allocation to be offline
+               in; the engine's power rows do not exist.
+             - THE CHARGE TEST DOES NOT APPLY either. A reinforcement has never been on the board,
+               so it has never spent its drive.
+
+           The discriminator is damageclass, mirroring 'jumppoint', and it is checked BEFORE the
+           gate branch so a forged 'jumpexit' on a gate engine takes the arrival list (which refuses
+           it, because a gate is not a hyperspace reinforcement) rather than the gate one. */
+        if ($fire->damageclass === 'jumpexit')
+            return self::getExitDeclarationBlock($fire, $weapon, $shooter, $gamedata, $fireOrders);
+
         //Plan section 9 - this hull is on the old one-click jump, so it has no vortex to declare.
         //The client cannot build the order either ($autoFireOnly / $hextarget false), so anything
         //arriving here is a stale blueprint from before the revert; drop it rather than let it
         //reach a spawn sweep that would refuse it silently.
         if ($weapon->isLegacyJump()) return "Jump Engine uses the legacy one-click jump";
+
+        /* ⭐ REINFORCEMENTS_PLAN.md STAGE 8 - 'gateexit' IS THE SAME IDEA ONE STEP ALONG: a fixed
+           GATE signal that asks for a doorway IN rather than out. It is judged by the GATE list
+           below, which is right - every gate rule applies to it unchanged - so all this line has to
+           do is refuse it on a SHIP's engine.
+
+           ⚠️ AND IT MUST, because nothing further down would. The ship rules never read damageclass,
+           so a forged 'gateexit' on a ship would be validated as an ordinary ENTRANCE declaration and
+           then opened as one by getVortexDeclaration, which skips 'jumpexit' alone. A ship that
+           wants a doorway in declares 'jumpexit' and is judged by the exit list above. */
+        if ($fire->damageclass === 'gateexit' && !$weapon->isGateJump())
+            return "gate arrival claim declared on a ship's Jump Engine";
 
         /* ⭐⭐ JUMP GATES (PHASE 2) - THE GATE BRANCH, AND IT IS TAKEN FIRST AND RETURNS.
            (JUMP_GATES_PLAN.md Stage 3, traps 1-4.)
@@ -218,6 +266,17 @@ class Firing
             if (!($vortex instanceof SpawnJumpPoint))
                 return "this ship's vortex unit is gone";
 
+            /* REINFORCEMENTS_PLAN.md §2.6 / §2.3 - AN EXIT HAS NO MAINTAIN. It is one-shot:
+               it forms at the end of the turn it was declared, delivers its manifest on the next,
+               and closes at the end of that one whatever anybody declares. The client never offers
+               the control (isJumpVortex stays entrance-only, so JumpEngine.canMaintainVortex cannot see
+               an exit), so only a tampered POST arrives here - but without this line a forged
+               mode-7 order would hold an exit open indefinitely, and the ship that opened it
+               could never open anything else (trap 5).
+               Same shape and same reasoning as getMaintainDeclaration's gate refusal. */
+            if ($vortex instanceof SpawnJumpPointExit)
+                return "a jump point exit is one-shot and cannot be maintained";
+
             if (!$vortex->getHexPos()->equals($target))
                 return "maintain must target this ship's own vortex hex";
 
@@ -263,6 +322,95 @@ class Firing
             if ($unit->Enormous && $unit->getHexPos()->equals($target))
                 return "target hex holds an Enormous unit (unit {$unit->id})";
         }
+
+        return null;
+    }
+
+    /* ⭐⭐ THE JUMP POINT EXIT RULES (REINFORCEMENTS_PLAN.md §2.2 and §3.4). Returns null when
+     * the declaration is legal, or a short reason for the log when it is not - the same contract
+     * getVortexDeclarationBlock above has, and reached only from its exit branch.
+     *
+     * The list is SHORT and almost none of it overlaps the ship list, which is the whole reason it
+     * is separate. What is here:
+     *
+     *   1. the opener is the submitting player's own unit
+     *   2. it is a reinforcement STILL IN HYPERSPACE
+     *   3. its engine is undestroyed and non-legacy (the caller has already refused a legacy one)
+     *   4. it has not already declared an exit this turn
+     *   5. the facing is one of the six
+     *   6. the hex is on the map and free of obstructions
+     *
+     * ⚠️ $shooter IS THE SHIP FROM THE REAL GAMEDATA LOAD, not the POSTed one - the caller hands
+     * one of each, which is exactly what makes test 2 answerable. A POST-side ship carries no
+     * $reinforcement and no $arrivalTurn at all (plan trap 3), so asking the posted object would
+     * read every unit in the game as front-line and let anyone declare an exit.
+     *
+     * ⚠️ NO RANGE, NO LINE OF SIGHT, NO OFFLINE TEST, NO CHARGE TEST. See the branch that calls
+     * this for why each one is the wrong question rather than a missing rule.
+     */
+    private static function getExitDeclarationBlock($fire, $weapon, $shooter, $gamedata, $fireOrders)
+    {
+        //1. YOUR OWN UNIT. A gate is the one thing in this game a player may order without owning
+        //   it, and an exit is not that - the opener's own drive holds the doorway open.
+        if ($shooter->userid != $gamedata->forPlayer)
+            return "jump point exit declared on a unit the player does not own";
+
+        //2. STILL IN HYPERSPACE. isReinforcement() is `bought as a reinforcement AND no arrival
+        //   turn yet`, which is precisely "has not been assigned an exit". A unit that already
+        //   has one, or that was bought front-line, opens an ENTRANCE like anything else on the board.
+        if (!$shooter->isReinforcement())
+            return "only a reinforcement still in hyperspace may open a jump point exit";
+
+        //3. A WORKING DRIVE. A gate engine cannot reach here - a gate is not a reinforcement and
+        //   test 2 has just failed it. isDestroyed is asked anyway: pre-battle damage can destroy a
+        //   system before turn 1.
+        //   ⚠️ A LEGACY DRIVE IS DELIBERATELY NOT REFUSED (Stage 9). Up to Stage 8 the caller
+        //   dropped one before this list was ever reached; a phasing hull now arrives here and is
+        //   judged by exactly these rules, because there is not one test in this method that a
+        //   legacy engine cannot answer. What it gets instead of a vortex is decided at SPAWN time
+        //   (JumpEngine::openExitVortex picks SpawnJumpPointPhaseIn), which is the only place the
+        //   difference lives.
+        if ($weapon->isDestroyed($gamedata->turn))
+            return "Jump Engine is destroyed";
+
+        /* 4. ONE EXIT PER UNIT. Only orders BEFORE this one in the submission count, so the
+              FIRST declaration survives and every later one is dropped - the same way round as the
+              ship rule, and for the same reason (scanning the whole array would reject the first
+              and keep the last).
+              ⚠️ Any JumpEngine order counts, not only another 'jumpexit': a unit in hyperspace has
+              no business declaring an entrance either, and letting the two coexist would hand the Stage
+              6 sweep two declarations on one engine. */
+        foreach ($fireOrders as $other) {
+            if ($other === $fire) break;
+            if ($other->shooterid != $fire->shooterid) continue;
+            if ($other->turn != $gamedata->turn) continue;
+            if (!empty($other->rejected)) continue;
+            if ($shooter->getSystemById($other->weaponid) instanceof JumpEngine)
+                return "unit already has a jump point declaration this turn";
+        }
+
+        if ($fire->x === null || $fire->y === null || $fire->x === "null" || $fire->y === "null")
+            return "no target hex";
+
+        /* 5. THE FACING, stored as firingMode = facing + 1, exactly as an entrance's is. Modes 1-6 only:
+              7 is MAINTAIN, which an exit does not have (§2.3 - it is one-shot), so a mode-7
+              'jumpexit' is refused here rather than falling through to the maintain branch it can
+              never legally reach. */
+        $mode = (int)$fire->firingMode;
+        if ($mode < 1 || $mode > 6)
+            return "illegal exit facing (firing mode $mode)";
+
+        $target = new OffsetCoordinate($fire->x, $fire->y);
+
+        /* 6. ON THE MAP AND FREE OF OBSTRUCTIONS - one shared test, and the sharing is the point.
+              JumpEngine::getExitHexBlock is asked the identical question by the END-OF-TURN
+              DEVIATION CLAMP (§2.5), which walks outward from the scattered hex looking for the
+              nearest legal one. If the two ever disagreed, either a declaration would be accepted
+              onto a hex the clamp then refuses to place a doorway on, or the clamp would put one
+              somewhere the declaration rules say cannot hold it. The reasons it returns are this
+              method's own log strings; see there for what each test is and why. */
+        $hexBlock = JumpEngine::getExitHexBlock($gamedata, $target);
+        if ($hexBlock !== null) return $hexBlock;
 
         return null;
     }
@@ -370,6 +518,40 @@ class Firing
             if (!empty($other->rejected)) continue;
             if ($gate->getSystemById($other->weaponid) instanceof JumpEngine)
                 return "this player already has a signal on this gate this turn";
+        }
+
+        /* ⭐⭐ REINFORCEMENTS_PLAN.md STAGE 8 - THE ARRIVAL FLAVOUR, AND IT IS THE LAST RULE ON
+         * PURPOSE. A claim carrying damageclass 'gateexit' asks the gate for a doorway IN: it
+         * spawns a SpawnJumpPointExit instead of a SpawnJumpPoint, and the units waiting in
+         * hyperspace ride it - a fresh wave on each turn of the programmed hold (plan section 0).
+         *
+         * EVERY RULE ABOVE APPLIES TO IT UNCHANGED, which is the whole reason this is one branch at
+         * the bottom rather than a fourth list: the gate, the hex, the duration, the recharge, the
+         * signal range and the one-claim-per-player test are all properties of SIGNALLING a gate and
+         * say nothing about which way the door then faces. This is the only extra question.
+         *
+         * ⚠️ AND IT IS A CORRECTNESS TEST, NOT AN EFFICIENCY ONE. A game without allowReinforcements
+         * cannot contain a unit in hyperspace, so an arrival claim in one can only be a tampered POST
+         * - and letting it through would open a ONE-WAY doorway that nobody can arrive through and no
+         * ship can jump out of (plan section 2.6), which is strictly worse for the claimant than the
+         * entrance they would otherwise have had. Refuse it rather than granting a useless jump
+         * point.
+         *
+         * ⭐⭐ THE SECOND RULE IS GONE (user ruling 2026-09-02). Until now this also refused a claim
+         * from a player with nothing of their OWN left in hyperspace, on the reasoning above applied
+         * one step further - a door with nobody behind it is a door nobody uses. That was too narrow
+         * in two directions at once. A gate exit stands for the whole of its programmed hold and ANY
+         * unit of ANY side may ride it (JUMP_GATES_PLAN.md section 2.6), so the test barred a player
+         * from opening a doorway their TEAMMATE's reinforcements would come through, and barred
+         * opening one this turn for a wave only ready to ride it on a later one.
+         * InitialOrdersGamePhase::collectGateOpeners has always accepted ANYBODY's standing gate exit
+         * as an opener a manifest may name, so that half of the feature already worked; this test was
+         * the only thing stopping the door being opened in the first place. A claim with nobody
+         * behind it now costs exactly what it costs - the gate's charge, spent on a door - and that
+         * is the player's call to make. */
+        if ($fire->damageclass === 'gateexit'){
+            if (!$gamedata->rules || !$gamedata->rules->hasRuleName('allowReinforcements'))
+                return "this game has no reinforcements rule";
         }
 
         //Legal. Record WHO claimed, from the server's own reckoning - see the header note.

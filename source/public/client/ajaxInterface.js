@@ -533,7 +533,13 @@ window.ajaxInterface = {
             var ship = ships[i];
 
             if (groupMines && ship.mine) {
-                var key = ship.phpclass;
+                /* Keyed on the reinforcement flag as well as the class (REINFORCEMENTS_PLAN.md
+                   §0): the group takes the FIRST member's flag, so merging hyperspace and
+                   front-line mines of one class would silently re-flag half of them on reload.
+                   A reinforcement mine is a nonsense purchase - it cannot arrive through a
+                   vortex it has no drive to open - but nothing forbids it, and "nobody would do
+                   that" is not a reason to write a merge that would be wrong if they did. */
+                var key = ship.phpclass + '|' + (ship.reinforcement ? 1 : 0);
                 if (!mineGroups[key]) {
                     mineGroups[key] = { ship: ship, members: [] };
                     groups.push(mineGroups[key]);
@@ -643,6 +649,16 @@ window.ajaxInterface = {
             if (ship.bulkBuy !== undefined) newShip.bulkBuy = ship.bulkBuy;
             //A regrouped set of live mines is bought back as one bulk of that many.
             if (members.length > 1) newShip.bulkBuy = members.length;
+
+            /* REINFORCEMENTS_PLAN.md §0 - A SAVED FLEET REMEMBERS WHICH UNITS WERE BOUGHT AS
+               REINFORCEMENTS (user request 2026-08-28, reversing the original ruling that it
+               would not). Only the purchase-time flag: arrivalTurn/arrivalVia are in-play state
+               and are not saved, so a reloaded reinforcement is back in hyperspace exactly as a
+               freshly bought one would be.
+               Emitted only when TRUE, the same convention the buy POST uses below, so an
+               ordinary fleet's saved payload is byte-identical to before - and an older client
+               that sends nothing simply saves everything front-line. */
+            if (ship.reinforcement) newShip.reinforcement = true;
 
             newShip.systems = Array();
 
@@ -1135,6 +1151,33 @@ window.ajaxInterface = {
                 if (window.systemEnhancements && systemEnhancements.count(ship) > 0) {
                     newShip.systemEnhancements = ship.systemEnhancements;
                 }
+
+                /* THE MANIFEST (REINFORCEMENTS_PLAN.md §3.5, Stage 4). arrivalVia names the OPENER
+                   unit whose jump point exit this unit is riding through - never the vortex,
+                   which does not exist yet and for a gate may never exist at all.
+
+                   ⚠️ THIS IS THE ONLY ONE OF THE THREE REINFORCEMENT FIELDS THE CLIENT MAY SEND.
+                   `reinforcement` rides the lobby POST alone (and lands in a separate claim
+                   property server-side); `arrivalTurn` is written by the server's end-of-turn
+                   deviation sweep and NEVER appears in a POST whitelist - a client that could set
+                   it could bring its own fleet in a turn early, wherever it liked.
+
+                   Sent only when set, so every other unit's payload is byte-identical to before;
+                   InitialOrdersGamePhase::process re-validates it against the server-side ships and
+                   writes NULL for anything it does not believe. */
+                if (ship.arrivalVia !== null && ship.arrivalVia !== undefined) {
+                    newShip.arrivalVia = ship.arrivalVia;
+                }
+
+                /* Reinforcements (REINFORCEMENTS_PLAN.md §4 Stage 1). Read ONLY by
+                   BuyingGamePhase::process, which checks the game rule before believing it, so
+                   this is inert in every other phase - the same contract the two fields above have.
+                   Emitted only when TRUE, so every non-reinforcement payload in the game stays
+                   byte-identical to before.
+                   Inside the ownership gate on purpose: that makes it structurally impossible to
+                   attach the flag to a unit you do not own, which is the same guarantee the jump
+                   gate branch below depends on. */
+                if (ship.reinforcement) newShip.reinforcement = true;
 
                 tidyships.push(newShip);
             } else {

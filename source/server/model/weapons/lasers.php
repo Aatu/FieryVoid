@@ -1847,6 +1847,7 @@ class UnreliableBattleLaser extends BattleLaser{
 	
 } //endof class UnreliableBattleLaser
 
+
 // GTS_Triad
 
 class PhotonicPrismBeam extends Weapon {
@@ -2061,13 +2062,6 @@ class PhotonicPrismBeam extends Weapon {
         
         function __construct($startArc, $endArc,$dual = false){
 			$this->isLinked = false; //shots are separate, not linked! 
-//			if($dual){ //dual weapon is extending base weapon by adding third firing mode - combining ALL FOUR shots into one massive blast!
-//				$this->firingModes[3] = 'Quad';
-//				$this->damageTypeArray[3] = 'Standard'; 
-//				$this->gunsArray = array(1=>4, 2=>2, 3=>1); //lower modes get double allowance
-//				$this->rangePenaltyArray[3] = 1.5; // -3/2 hexes
-//				$this->iconPath = "VorlonLtDischargeGun2.png"; //alternate graphics showing off more powerful mount
-//			}
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
 	

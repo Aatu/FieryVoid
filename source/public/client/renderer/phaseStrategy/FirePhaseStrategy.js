@@ -115,11 +115,15 @@ window.FirePhaseStrategy = function () {
     };
 
     FirePhaseStrategy.prototype.targetShip = function (ship, payload) {
-        if (shipManager.getTurnDeployed(this.selectedShip) > gamedata.turn) { //Selected ships is not deployed yet - DK May 2025
-            this.showShipTooltip(ship, payload, menu, false);
-            return;
-        }
-        var menu = new ShipTooltipFireMenu(this.selectedShip, ship, this.gamedata.turn);
+        /* Same shape as InitialPhaseStrategy.targetShip, and for the same two reasons (user report
+           2026-08-29): getTurnDeployed throws outright on null, and a selection that is not on the
+           board yet must cost the menu its SOURCE, not cost the player the menu - the undefined
+           `menu` this used to pass meant no button row at all, so Open Ship Details went with it. */
+        var orderSource = (this.selectedShip && shipManager.getTurnDeployed(this.selectedShip) > gamedata.turn)
+            ? null                      //selected, but not on the board yet - DK May 2025
+            : this.selectedShip;
+
+        var menu = new ShipTooltipFireMenu(orderSource, ship, this.gamedata.turn);
         if (!gamedata.showLoS) this.showShipTooltip(ship, payload, menu, false);
     };
 

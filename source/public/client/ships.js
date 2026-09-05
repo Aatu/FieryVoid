@@ -928,6 +928,17 @@ window.shipManager = {
 
         if (!pos1) var pos1 = shipManager.getShipPosition(ship);
 
+        /* REINFORCEMENTS_PLAN.md Stage 7 - DO NOT SHOUT AT A UNIT WHOSE DESTINATION *IS* TERRAIN
+           (user report 2026-08-28, game 4318). A reinforcement arrives inside its jump point
+           exit, which is a Terrain unit, so both error calls below fired on every single unit
+           of every wave - and said nothing true: the arrival bypasses the terrain block entirely
+           (DeploymentPhaseStrategy.onHexClicked), so the placement went through and the message was
+           pure noise. Only the TOAST is suppressed; the vortex still goes into the returned list,
+           because callers use that list for their own occupancy decisions.
+           A null ship is legal here - window.validateMineDeploymentHex passes one - and
+           isArrivingReinforcement answers false for it. */
+        var arrivingReinforcement = shipManager.isArrivingReinforcement(ship);
+
         var shipsInHex = Array();
         for (var i in gamedata.ships) {
             var ship2 = gamedata.ships[i];
@@ -978,7 +989,7 @@ window.shipManager = {
 
             if (collides) {
                 shipsInHex.push(ship2);
-                confirm.error("You cannot deploy on terrain.");
+                if (!arrivingReinforcement) confirm.error("You cannot deploy on terrain.");
                 continue; // Collision found, skip center check for this ship
             }
 
@@ -988,7 +999,7 @@ window.shipManager = {
             if (pos1.equals(pos2)) {
                 if (gamedata.isTerrain(ship2.shipSizeClass, ship2.userid)) {
                     shipsInHex.push(ship2);
-                    confirm.error("You cannot deploy on terrain.");
+                    if (!arrivingReinforcement) confirm.error("You cannot deploy on terrain.");
                 } else {
                     shipsInHex.push(ship2);
                 }
@@ -1086,6 +1097,7 @@ window.shipManager = {
             if (shipManager.isDestroyed(othership)) continue; //no need to list ships already destroyed
             if (othership.flight === true) continue; //can escort only ships
             if (othership.id == ship.id) continue;
+            if (gamedata.isTerrain(othership.shipSizeClass, othership.userid)) continue;            
 
             if (gamedata.isEnemy(ship, othership)) continue;
 
@@ -1148,6 +1160,15 @@ window.shipManager = {
             if (!placingNow) return true;
         }
         if (ship.spawned !== -1 && ship.spawned > gamedata.turn) return true; //Not spawned yet.
+        /* REINFORCEMENTS_PLAN.md STAGE 9 - A PHASING HULL'S ARRIVAL POINT IS NEVER DRAWN. Shadow
+           and other legacy-drive factions leave nothing behind when they go and put nothing on the
+           board when they come back (user ruling 2026-08-29), so the doorway exists server-side -
+           where every arrival, closure and berth rule is anchored on it - and is invisible here.
+           ⭐ THIS ONE LINE IS THE WHOLE SUPPRESSION. shouldBeHidden is what the icon, the facing
+           arrow, the click/hover sweep, the hex ship-list and the replay animation all consult, so
+           there is no second place to remember. What the players see instead is the blue ballistic
+           hex the declaration already draws, labelled REINFORCEMENTS. */
+        if (shipManager.movement.isPhaseInVortex(ship)) return true;
         //Hangar Ops: a partial-dock fragment ("- Split") is born removed=true with
         //spawned == removedTurn == the dock turn — it never existed on the board as
         //its own flight (its craft are shown firing as part of the SOURCE flight).
@@ -1179,6 +1200,19 @@ window.shipManager = {
             var slot = playerManager.getSlotById(ship.slot);
             var depTurn = slot.depavailable;
 
+            /* REINFORCEMENTS_PLAN.md §3.2 — mirror of BaseShip::getTurnDeployed. A reinforcement's
+               arrival turn is decided IN PLAY by the jump point exit it rides through, not by
+               its slot, so depavailable says nothing about it. A null/undefined arrivalTurn means
+               it is still in HYPERSPACE, which reads here as 999 = "not on the board" — the same
+               sentinel a surrendered fleet gets, because it means exactly the same thing. That one
+               line is what keeps a hyperspace unit out of shouldBeHidden, the fleet list, the
+               Deployment phase and every firing/EW gate without touching any of them.
+               BEFORE the surrender check, exactly as on the server: a surrendered slot still wins
+               and takes its reinforcements with it. */
+            if (ship.reinforcement) {
+                depTurn = (ship.arrivalTurn === null || ship.arrivalTurn === undefined) ? 999 : ship.arrivalTurn;
+            }
+
             if (slot.surrendered !== null) {
                 /* 999 is the "not on the board" sentinel — shouldBeHidden() and every
                    deployed-yet check key off it, so a surrendered fleet vanishes from the game. - DK
@@ -1206,7 +1240,7 @@ window.shipManager = {
     /*The turn this unit picks its ENTRY HEX, as opposed to the turn it is physically on the
       board (getTurnDeployed above). Mirrors BaseShip::getTurnPlaced on the server.
 
-      Reinforcements place a turn EARLY: the player commits entry hexes during the Deployment
+      LATE-SLOT arrivals place a turn EARLY: the player commits entry hexes during the Deployment
       phase of turn depTurn-1, and those hexes show to everyone as blue "Jump Point" markers for
       the whole of that turn, so an arriving fleet no longer materialises without warning.
 
@@ -1221,8 +1255,53 @@ window.shipManager = {
         if (ship.osat || ship.base || gamedata.isTerrain(ship.shipSizeClass, ship.userid)) return 1;
         if (ship.spawned !== undefined && ship.spawned !== -1) return ship.spawned;
 
+        /* REINFORCEMENTS_PLAN.md §3.2 / trap 2 — a REINFORCEMENT (the jump point exit kind,
+           not a late slot) places and arrives on the SAME turn: its early warning is the blue jump
+           point that formed last turn, not an early placement. Subtracting one here would give it
+           a Deployment phase a turn before its vortex exists, with nowhere legal to stand. */
+        if (ship.reinforcement) return shipManager.getTurnDeployed(ship);
+
         var depTurn = shipManager.getTurnDeployed(ship); //carries the 999 surrender sentinel
         return (depTurn > 1) ? depTurn - 1 : depTurn;
+    },
+
+
+    /* REINFORCEMENTS_PLAN.md STAGE 7 - is this unit coming out of hyperspace THIS turn? The mirror
+       of JumpEngine::isArrivingReinforcement, and the predicate every Stage 7 branch on this side
+       keys off: the one legal hex, the stacking bypass, the forced facing, the optional placement.
+
+       Note what it is NOT the complement of. `reinforcement && arrivalTurn == null` is HYPERSPACE
+       (the server's isReinforcement); this is the single turn between that and being an ordinary
+       deployed ship. A unit that arrived on an earlier turn must answer false, or it would be
+       offered for re-placement every Deployment phase for the rest of the game. */
+    isArrivingReinforcement: function isArrivingReinforcement(ship) {
+        if (!ship || ship.reinforcement !== true) return false;
+        if (ship.arrivalTurn === null || ship.arrivalTurn === undefined) return false;
+
+        return (parseInt(ship.arrivalTurn, 10) === gamedata.turn);
+    },
+
+    /* ⭐ REINFORCEMENTS_PLAN.md STAGE 9 - HOW MUCH INITIATIVE THIS UNIT IS LOSING FOR COMING OUT
+       OF HYPERSPACE OFF COURSE, as a negative number, or 0.
+
+       -5 per hex of scatter and -10 per 60 degrees of facing shift, on the ARRIVAL TURN ONLY. The
+       number is not computed here: the server sends the figure its own initiative generators
+       applied (BaseShip::getReinforcementArrivalIniModifier, attached in
+       TacGamedata::stripForJson), so the two can never quote different penalties for the same
+       ship - which on a d100 roll is exactly the kind of disagreement nobody would ever notice
+       and everybody would argue about.
+
+       ⚠️ THE KEY'S PRESENCE IS THE WHOLE TEST. It is emitted only when the penalty is non-zero,
+       which already means "a reinforcement, arriving this turn, through a doorway that scattered" -
+       so there is no arrivalTurn or rule test to repeat here. A gate's doorway never deviates and
+       therefore never sends one.
+
+       The single reader for the tooltip line and the ship-window banner both, so the two cannot
+       drift apart. */
+    getArrivalIniPenalty: function getArrivalIniPenalty(ship) {
+        if (!ship || ship.arrivalIniPenalty === undefined || ship.arrivalIniPenalty === null) return 0;
+
+        return parseInt(ship.arrivalIniPenalty, 10) || 0;
     },
 
 

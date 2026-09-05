@@ -24,6 +24,11 @@ window.MovementPhaseStrategy = function () {
         } else {
             gamedata.hideCommitButton();
         }
+
+        //A poll is what advances the initiative bracket, so this is where the not-moved markers go
+        //stale. Before it was called here they were painted once at activate() and then held the
+        //whole phase, so a unit kept its ring after its group had been and gone.
+        this.refreshNotMovedMarkers();
     };
 
     MovementPhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene, shipWindowManager) {
@@ -47,14 +52,97 @@ window.MovementPhaseStrategy = function () {
         this.showAppropriateHighlight();
         this.showAppropriateEW();
 
-        gamedata.ships
-            .filter(window.SimultaneousMovementRule.isNotYetMovedShip)
-            .forEach(function (ship) {
-                var icon = this.shipIconContainer.getByShip(ship);
-                icon.setNotMoved(true);
-            }, this);
+        this.refreshNotMovedMarkers();
 
         return this;
+    };
+
+    /* THE NOT-MOVED MARKERS: the neutral dotted ring, and the movement-group NUMBER over it.
+
+       Both mark the same set - units whose initiative group has not come up yet this turn
+       (SimultaneousMovementRule.isNotYetMovedShip) - so they are painted together and can never
+       disagree. The number is the group number the Order of Battle prints down its left edge, so a
+       player can read "this one moves in group 5" straight off the map instead of hunting the
+       panel for the name.
+
+       ONE BADGE PER HEX, not per ship. A dogpiled hex is drawn as a fan of overlapping icons
+       (ShipIconContainer.getHexOffset), and a number per hull in that fan would be unreadable
+       exactly where it is most wanted. So the hex shows the LOWEST group standing in it - the next
+       one of that pile to move, which is the useful number.
+
+       THE '+' MEANS "AND LATER GROUPS TOO", NOT "AND MORE SHIPS" (user ruling 2026-08-31). Six
+       hulls stacked in one hex that ALL move in group 4 read "4", not "4+": the badge answers WHEN
+       this hex moves, and for those six the answer is complete. It is only when the pile holds a
+       group the number doesn't cover that the badge has to admit it - "4+" means group 4 moves
+       next out of here and something later is in here as well. So the '+' marks an unanswered
+       question, never a headcount; how many hulls are stacked is what the hex stack picker is for.
+
+       Only UN-MOVED units are considered at all. A hex holding one un-moved group-4 ship and three
+       that have already gone reads "4": the badge speaks for the units it is numbering, and an
+       already-moved hull is not one of them.
+
+       The badge is hung on the icon of the unit whose group it names, which is also the one drawn
+       nearest the hex centre - getHexOffset fans units out in initiative order, so the earliest
+       mover is the one with no offset at all. That falls out for free, but it is the reason the
+       number sits over the middle of a pile rather than off on its edge. */
+    MovementPhaseStrategy.prototype.refreshNotMovedMarkers = function () {
+        this.shipIconContainer.getArray().forEach(function (icon) {
+            icon.setNotMoved(false);
+            icon.setIniOrderLabel(null);
+        });
+
+        //Belt and braces: this strategy only runs in gamephase 2, but a replay or a mid-phase
+        //server flip must never leave a movement marker on the board.
+        if (this.gamedata.gamephase !== 2) {
+            return;
+        }
+
+        var pending = this.gamedata.ships.filter(window.SimultaneousMovementRule.isNotYetMovedShip);
+
+        //Keyed by hex: the lowest group standing there, the icon that carries its badge, and
+        //whether any OTHER group is present (which is the only thing that earns a '+').
+        var byHex = {};
+
+        pending.forEach(function (ship) {
+            var icon = this.shipIconContainer.getByShip(ship);
+            if (!icon) {
+                return;
+            }
+
+            icon.setNotMoved(true);
+
+            //Mines, terrain and not-yet-deployed units have no group of their own, so they get the
+            //ring (as they always have) but no number, and they do not swell anyone else's '+'.
+            var group = window.SimultaneousMovementRule.getMovementGroup(ship);
+            if (!group) {
+                return;
+            }
+
+            var move = icon.getLastMovement();
+            if (!move || !move.position) {
+                return;
+            }
+
+            var key = move.position.q + ',' + move.position.r;
+            var entry = byHex[key];
+
+            if (!entry) {
+                byHex[key] = { icon: icon, group: group, mixed: false };
+            } else if (group < entry.group) {
+                //This displaces the badge onto the earlier mover. Whatever it displaced was by
+                //definition a later group, so the hex is mixed however it got here.
+                byHex[key] = { icon: icon, group: group, mixed: true };
+            } else if (group > entry.group) {
+                entry.mixed = true;
+            }
+            //group === entry.group: another hull that moves at the same time as the one already
+            //numbered. It changes nothing a player needs from this badge, so it is not recorded.
+        }, this);
+
+        Object.keys(byHex).forEach(function (key) {
+            var entry = byHex[key];
+            entry.icon.setIniOrderLabel(entry.group + (entry.mixed ? '+' : ''));
+        });
     };
 
     MovementPhaseStrategy.prototype.deactivate = function () {
@@ -66,6 +154,7 @@ window.MovementPhaseStrategy = function () {
             var icon = this.shipIconContainer.getByShip(ship);
             icon.showSideSprite(false);
             icon.setNotMoved(false);
+            icon.setIniOrderLabel(null);
         }, this);
 
         return this;

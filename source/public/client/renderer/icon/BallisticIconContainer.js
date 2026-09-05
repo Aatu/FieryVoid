@@ -40,6 +40,15 @@ window.BallisticIconContainer = function () {
 		//Collected in the same pass, and under exactly the same turn/phase/masking filter the
 		//markers themselves get, so the facing arrows can never outlive or precede their hex.
 		const jumpPointOrders = [];
+		/* REINFORCEMENTS_PLAN.md Stage 4 - EXIT declarations, collected separately because
+		   almost nothing about them shares the entrance path: they are drawn BLUE, their arrow uses the
+		   outward asset, and - the reason they cannot go through createBallisticIcon at all - their
+		   SHOOTER IS IN HYPERSPACE. That unit has no icon (shouldBeHidden keeps it off the board), so
+		   createBallisticIcon's `if (!shooterIcon) return;` would drop the marker outright; and if it
+		   ever DID have one, the launch sprite and the ballistic line would both be drawn from its
+		   'start' movement row at its slot's deployment-box centre - a bright line, on the map, from
+		   a ship that is not there, to the hex it is about to arrive in. */
+		const exitOrders = [];
 
 		ballistics.forEach(ballistic => {
 			if (ballistic.turn === gamedata.turn || !replayData) {
@@ -69,6 +78,14 @@ window.BallisticIconContainer = function () {
 					if (!gateIcon || !gamedata.isJumpGate(gateIcon.ship)) {
 						jumpPointOrders.push(ballistic);
 					}
+				}
+
+				/* An exit draws itself, below, and takes NO part in the icon or line pipeline - see
+				   the note on exitOrders above. Returned from the forEach rather than filtered inside
+				   createBallisticIcon, so no half-built icon record is ever created for one. */
+				if (ballistic.damageclass === 'jumpexit') {
+					if (ballistic.x !== "null" && ballistic.y !== "null") exitOrders.push(ballistic);
+					return;
 				}
 
 				createOrUpdateBallistic.call(this, ballistic, iconContainer, gamedata.turn, !!replayData);
@@ -137,6 +154,7 @@ window.BallisticIconContainer = function () {
 		generateTerrainHexes.call(this, gamedata);
 		generateReinforcementHexes.call(this, gamedata);
 		generateJumpPointArrows.call(this, jumpPointOrders);
+		generateExitHexes.call(this, gamedata, exitOrders);
 		pruneSceneObjects.call(this);
 	};
 
@@ -487,6 +505,128 @@ window.BallisticIconContainer = function () {
 	}
 
 
+	/* REINFORCEMENTS_PLAN.md Stage 4 / section 2.3 - A JUMP POINT EXIT FORMING.
+
+	   On the turn it is declared THIS MARKER IS THE EXIT: the vortex unit is not created until
+	   the end of that turn, and deliberately so - the deviation is rolled then, so until it has
+	   been rolled there is no true hex for anyone's payload to leak (section 2.3's concealment
+	   rule). What everyone sees for the whole of turn N is a blue hex at the DECLARED hex and an
+	   arrow showing which way units will come out of it.
+
+	   BLUE, not yellow: #00b8e6 is FV's 'not here yet' cyan and it is what tells an exit from
+	   an entrance at a glance. The arrow is the mirrored asset, pointing OUTWARD, because an
+	   exit's facing is the doorway out rather than the mouth an entrance is entered through.
+
+	   TWO SOURCES, ONE DRAWING. The OWNER sees their own declaration as a fire order and it
+	   arrives here. An ENEMY never does - TacGamedata::hideHyperspaceReinforcements deletes the
+	   whole opening ship from their payload, orders and all - so the server republishes just the
+	   hex and the facing on the PlayerSlot, and they are folded in here so both viewers get the
+	   identical marker from the identical code (section 3.6).
+
+	   ⭐ ONE OF THEM CAN BE HIGHLIGHTED (user request 2026-08-28). Three drives put three identical
+	   blue hexes on the map and the Manage Reinforcements menu could not say which row owned which
+	   one; selecting a declared row there names its marker here - the opener's NAME in the hex
+	   instead of the generic label, in white, with the arrow at full opacity.
+	     - It rides the ORDER's shooterid, so it can only ever apply to the owner's own half. The
+	       republished enemy entries carry no shooter and are never highlighted, which is correct:
+	       an opponent's menu is not open and the units are hidden from them anyway.
+	     - The label goes into the sprite's SIGNATURE, so syncSceneObject rebuilds exactly the two
+	       hexes whose state changed and leaves every other marker's texture alone.
+	     - ⚠️ The name is read from gamedata at draw time rather than passed in: the highlight is an
+	       ID for the reason ReinforcementEntry documents (every poll replaces every ship object).
+
+	   ⚠️ Its own sweep rather than a line inside createBallisticIcon, for the reason
+	   generateJumpPointArrows gives: an existing ballistic icon is UPDATED, not rebuilt, on later
+	   polls, so a syncSceneObject call in there would run once and then let prune reclaim it. */
+	function generateExitHexes(gamedata, orders) {
+		/* ⭐ STAGE 9 EFFICIENCY GATE (user request 2026-08-29). This runs on EVERY ballistic redraw,
+		   and its second half walks gamedata.slots looking for republished hexes that can only exist
+		   in a game with the rule. `orders` is already empty without it (no unit can be in
+		   hyperspace to declare one), so this is purely about the slot pass - but "already empty"
+		   is a property of today's masking, and a gate that says so is what stops the next change
+		   quietly reintroducing the cost. Cheap enough to be unconditional; it is one property read. */
+		if (!gamedata.reinforcementsAllowed()) return;
+
+		const claimed = new Set();
+
+		const draw = (q, r, facing, label, phasing) => {
+			const hex = new hexagon.Offset(q, r);
+			const hexKey = `${hex.q},${hex.r}`;
+			if (claimed.has(hexKey)) return;
+			claimed.add(hexKey);
+
+			/* ⭐ REINFORCEMENTS_PLAN.md STAGE 9 - A PHASING HULL'S HEX SAYS "REINFORCEMENTS", because
+			   for it nothing is forming: no vortex is torn open and no terrain will appear here
+			   (user ruling 2026-08-29). The marker itself is unchanged - same blue, same arrow, same
+			   public-from-phase-2 rule - so the warning an opponent gets is exactly the warning
+			   §2.3 already trades for; only the noun is honest about what will arrive.
+			   The word is deliberately GENERIC. Naming the faction, the hull or the count here would
+			   give away more than an ordinary declaration does, and §3.6 says none of those is ever
+			   disclosed. */
+			const defaultLabel = phasing ? 'Reinforcements' : 'Jump Point Forming';
+			const signature = `${facing}|${label || ''}|${phasing ? 'p' : ''}`;
+
+			syncSceneObject.call(this, 'jumpexit:' + hexKey, signature, () => {
+				const sprite = new BallisticSprite(this.coordinateConverter.fromHexToGame(hex),
+					'hexBlue', label || defaultLabel, label ? '#ffffff' : '#00b8e6');
+
+				return { object: sprite.mesh, release: () => releaseSprite(sprite) };
+			});
+
+			syncSceneObject.call(this, 'jumpexitArrow:' + hexKey, signature, () => {
+				const size = window.HexagonMath.getHexHeight() * VORTEX_ARROW_SCALE;
+				const sprite = new window.webglSprite('./img/directionOfVortexEntry.png',
+					{ width: size, height: size }, VORTEX_ARROW_Z);
+
+				sprite.setPosition(this.coordinateConverter.fromHexToGame(hex));
+				sprite.setFacing(-mathlib.hexFacingToAngle(facing));
+				sprite.setOpacity(label ? 1 : VORTEX_ARROW_OPACITY);
+
+				return { object: sprite.mesh, release: () => releaseSprite(sprite) };
+			});
+		};
+
+		//Which opener the Manage Reinforcements menu is pointing at, if it is open at all. Guarded
+		//because this container is also driven by the replay, where the module may not be loaded.
+		const highlightId = (window.ReinforcementEntry && ReinforcementEntry.getHighlightedOpener)
+			? ReinforcementEntry.getHighlightedOpener() : null;
+
+		//The owner's own orders. firingMode is the storage for the facing - mode = facing + 1 - the
+		//same convention an entrance uses, so the arrow maths is shared verbatim.
+		orders.forEach(order => {
+			const facing = (((parseInt(order.firingMode, 10) || 1) - 1) % 6 + 6) % 6;
+
+			//Resolved once. ⚠️ Through gamedata rather than held, for the reason ReinforcementEntry
+			//documents at length: every poll replaces every ship object (plan trap 17).
+			const opener = gamedata.getShip(order.shooterid);
+
+			let label = null;
+			if (highlightId !== null && order.shooterid == highlightId && opener) label = opener.name;
+
+			//STAGE 9 - the owner's own half can ask the drive directly: the declaring ship is in
+			//their payload (it is theirs), so the engine that carries the order is reachable.
+			const engine = opener ? shipManager.systems.getSystem(opener, order.weaponid) : null;
+
+			draw(order.x, order.y, facing, label, shipManager.movement.isLegacyJumpEngine(engine));
+		});
+
+		//The republished half, for a viewer whose payload has no opening ship to carry an order.
+		//Empty on the owner's own copy and on their team's, so the two can never double-draw - and
+		//`claimed` would drop the second one anyway if they ever did.
+		//STAGE 9 - `phase` rides the republished entry because this viewer has no opening ship to
+		//ask (hideHyperspaceReinforcements deleted it, engine and all). It is not a disclosure: the
+		//two labels differ only in whether terrain is coming, which the opponent finds out next
+		//turn regardless by looking at the hex.
+		for (const key in gamedata.slots) {
+			const entries = gamedata.slots[key] && gamedata.slots[key].formingExits;
+			if (!Array.isArray(entries)) continue;
+
+			entries.forEach(entry => draw(entry.x, entry.y,
+				(((parseInt(entry.facing, 10) || 0) % 6) + 6) % 6, null, !!entry.phase));
+		}
+	}
+
+
 	/* The whole affected area as one blanket, centre hex included. `size` is the radius in hexes and
 	   the area is the DISC of that radius - which is what the rules mean (IonFieldGenerator, for one,
 	   is documented as "affects all units within 2 hexes" and resolves with getShipsInDistance($target,
@@ -628,7 +768,15 @@ if (ballistic.damageclass === 'Sweeping' || ballistic.damageclass === 'HPC-subor
 		   So a 'jumppoint' order is treated as targetid -1 THROUGHOUT this function - here, in the
 		   duplicate-icon lookup, and in the record pushed at the end - which is exactly what a
 		   ship's own vortex declaration already sends. */
-		const isVortexDeclaration = ballistic.damageclass === 'jumppoint';
+		/* ⚠️⚠️ 'gateexit' MUST BE IN THIS TEST (REINFORCEMENTS_PLAN.md Stage 8), and leaving it out
+		   is the information leak the whole paragraph above describes, not a cosmetic miss. An
+		   ARRIVAL claim is the same order shape with the same targetid - the claiming player's
+		   nearest qualifying unit - so without this line the marker would be hung on that SHIP and a
+		   bright line drawn to it from the gate, on the claimant's own screen, the instant the order
+		   is built and before the server has masked anything. Which unit signalled is never revealed
+		   (JUMP_GATES_PLAN.md section 2.1); this is what keeps that true for the second flavour. */
+		const isVortexDeclaration = ballistic.damageclass === 'jumppoint'
+			|| ballistic.damageclass === 'gateexit';
 		const iconTargetId = isVortexDeclaration ? -1 : ballistic.targetid;
 		//A FIXED GATE signals ITSELF: launch hex and target hex are the same hex, which is what the
 		//label and the launch-sprite suppression below both key off.
@@ -655,10 +803,12 @@ if (ballistic.damageclass === 'Sweeping' || ballistic.damageclass === 'HPC-subor
 			const modeMap = {
 				'1-Blanket Shield': { type: 'hexGreen', text: 'Shade Modulator', color: '#008000' },
 				'3-Blanket Shade': { type: 'hexYellow', text: 'Shade Modulator', color: '#787800' },
+				'Anti-Clockwise': { type: 'hexPurple', text: 'Singularity Mine', color: '#7f00ff' }, // GTS for Singularity Mine
 				'Anti-Fighter Plasma Web': { type: 'hexGreen', text: 'Plasma', color: '#787800' },
 				'Anti-Fighter Sand Caster': { type: 'hexYellow', text: 'Sand', color: '#787800' },
 				'Asteroid Salvo': { type: 'hexWhite', text: 'Asteroid Salvo', color: '#ffffff' },  // GTS for Asteroid Salvo
 				'Basic Mine': { type: 'hexRed', text: 'Basic', color: '#e6140a' },				
+				'Clockwise': { type: 'hexPurple', text: 'Singularity Mine', color: '#7f00ff' }, // GTS for Singularity Mine
 				'Defensive Plasma Web': { type: 'hexGreen', color: '', color: '#787800' },								
 				'Defensive Sand Caster': { type: 'hexYellow', color: '', color: '#787800' },
 				'Energy Mine': { type: 'hexRed', text: 'Energy Mine', color: '#e6140a' },					
@@ -694,7 +844,7 @@ if (ballistic.damageclass === 'Sweeping' || ballistic.damageclass === 'HPC-subor
 				// Call splash hex generation for cases where weapon affects more than one hex.
 				// Guard with targetPosition: mine-targeting fire orders (targetid !== -1) have a targetIcon
 				// but no targetPosition, which would make generateSplashHexes place hexes at 0,0 in Replay.
-				if (['Z - Antimine', 'Shredder', 'Energy Mine', 'Ion Storm', 'Jammer', '1-Blanket Shield', '3-Blanket Shade', 'Flare', 'Asteroid Salvo'].includes(modeName)) {  //GTS Added Flare and Asteroid Salvo
+				if (['Z - Antimine', 'Shredder', 'Energy Mine', 'Ion Storm', 'Jammer', '1-Blanket Shield', '3-Blanket Shade', 'Flare', 'Asteroid Salvo', 'Clockwise', 'Anti-Clockwise'].includes(modeName)) {  //GTS Added Flare, Asteroid Salvo, and spins for Singularity Mine
 					if ((gamedata.isMyOrTeamOneShip(shooter) || replay) && targetPosition) {
 						//A single RADIUS now, not a list of ring sizes: generateSplashHexes fills the whole
 						//disc in one region, so Ion Storm's old [1, 2] - ring 1 plus ring 2, the only way
@@ -720,6 +870,10 @@ if (ballistic.damageclass === 'Sweeping' || ballistic.damageclass === 'HPC-subor
 							// GTS_Triad
 							case 'Asteroid Salvo':
 								size = 2;
+								break;
+							case 'Clockwise':
+							case 'Anti-Clockwise':
+								size = 10;
 								break;
 						}
 
@@ -811,6 +965,29 @@ if (ballistic.damageclass === 'Sweeping' || ballistic.damageclass === 'HPC-subor
 								? 'Maintaining Jump Point'
 								: 'Jump Point Forming');
 						textColour = '#e1b000';
+						break;
+
+					/* ⭐ REINFORCEMENTS_PLAN.md STAGE 8 - THE ARRIVAL CLAIM, IN BLUE. Yellow =
+					   leaving, blue = arriving is the pairing the whole reinforcements feature is
+					   built on (plan section 3.7), and #00b8e6 is FV's one "not here yet" cyan -
+					   the same value the Forming marker, the exit vortex and the fleet list's
+					   hyperspace row use. Without a case of its own this order would fall to the
+					   default RED hex, which reads as incoming fire at a gate nobody is shooting.
+
+					   NO DURATION AND NO CLAIMANT ON THE LABEL, exactly as the yellow twin above:
+					   who signalled is never shown and how long for is not public either. And no
+					   facing, because a gate's is fixed when it is placed and the arrow that says so
+					   belongs to the vortex this claim will spawn.
+
+					   ⚠️ IN PRACTICE ONLY ITS AUTHOR EVER SEES THIS. TacGamedata::hideSystemFireOrders
+					   strips every phase-1 ballistic order from every payload, its author's included,
+					   so the marker exists for the length of one client's Initial Orders and then the
+					   blue vortex unit takes over. It is local feedback, not a public announcement -
+					   which is why saying "Arrival" here leaks nothing. */
+					case 'gateexit':
+						targetType = 'hexBlue';
+						text = 'Arrival Gate Signalled';
+						textColour = '#00b8e6';
 						break;
 				}
 			}

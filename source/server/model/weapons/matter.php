@@ -1132,6 +1132,8 @@ class MatterBolt extends Weapon {
     public $displayName = "Matter Bolt";
     public $iconPath = "GatlingGun.png";
 
+	public $factionAge = 4;//Primordial
+
     public $damageType = "Standard";
     public $weaponClass = "Matter";
     public $shots = 1;

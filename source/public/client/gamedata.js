@@ -140,6 +140,25 @@ window.gamedata = {
     },
 
     getFirstFriendlyShipDeployment: function getFirstFriendlyShipDeployment() {
+        /* ⭐ SOMETHING THAT STILL NEEDS PLACING, IN PREFERENCE TO ANYTHING ELSE
+           (REINFORCEMENTS_PLAN.md Stage 7). On turn 1 every unit places, so this pass returns
+           exactly what the loop below would have; on any LATER Deployment phase the two differ
+           sharply. A player whose only business this turn is a reinforcement arriving through a
+           jump point would otherwise be handed the first ship of their turn-1 fleet - already on
+           the board, nothing to do with it - and would have to hunt the arrival's icon down at the
+           off-map 'start' marker its slot gave it before they could place anything at all.
+           Falls through to the original loop when nothing is placing, so a Pre-Turn phase with no
+           placements still selects a ship to work with. */
+        for (var p in gamedata.ships) {
+            var placing = gamedata.ships[p];
+            if (shipManager.getTurnPlaced(placing) != gamedata.turn) continue;
+            if (placing.pendingDeployDock || placing.pendingLcvDeployDock) continue;
+            if (!gamedata.isMyShip(placing) || placing.mine) continue;
+            if (shipManager.isDestroyed(placing)) continue;
+
+            return placing;
+        }
+
         for (var i in gamedata.ships) {
             var ship = gamedata.ships[i];
 
@@ -347,10 +366,19 @@ window.gamedata = {
         if (shipManager.systems.isDestroyed(gate, engine)) return false;
         if (shipManager.power.isOffline(gate, engine)) return false;
 
-        //A gate holds ONE jump point at a time. While one stands the engine's charge reads 0, so
-        //the load test below covers it too - but say it, because the two are different rules and
-        //the reasons the player is shown differ.
+        /* A gate holds ONE jump point at a time. While one stands the engine's charge reads 0, so
+           the load test below covers it too - but say it, because the two are different rules and
+           the reasons the player is shown differ.
+
+           ⚠️ BOTH KINDS OF VORTEX (Stage 8). getVortexHeldBy is ENTRANCE-ONLY by design - see
+           isJumpVortex, whose callers do not agree on the verdict - so on its own it is blind to a
+           gate holding an EXIT, and this test would answer "free to signal" for a gate that
+           demonstrably is not. The server refuses such a claim outright
+           (Firing::getGateSignalBlock asks hasOpenVortex, which knows nothing of flavour), so the
+           blindness would show up as a button that is offered and then silently rejected at commit
+           - the exact "worst of both" the charge note above exists to avoid. */
         if (shipManager.movement.getVortexHeldBy(gate)) return false;
+        if (shipManager.movement.getExitHeldBy(gate.id)) return false;
 
         //THE 20-TURN RECHARGE. turnsloaded / loadingtime are sent per instance by
         //JumpEngine::stripForJson off getVortexRechargeLoad, so this is the ordinary weapon load
@@ -358,6 +386,51 @@ window.gamedata = {
         if (!weaponManager.isLoaded(engine)) return false;
 
         return !!gamedata.getGateSignalSource(gate);
+    },
+
+    /* ⭐ REINFORCEMENTS_PLAN.md STAGE 8 - MAY I SIGNAL THIS GATE FOR AN ARRIVAL? The condition on
+       the second Initial Orders tooltip button, and the client mirror of the one extra rule
+       Firing::getGateSignalBlock applies to a 'gateexit' claim.
+
+       Everything a departure claim needs, plus the reinforcements rule being on in this game.
+
+       ⭐⭐ AND NOTHING ABOUT WHAT IS IN HYPERSPACE (user ruling 2026-09-02). Until now this also
+       demanded a unit of the player's OWN still waiting, on the reasoning that an arrival doorway
+       with nobody behind it spends the gate's whole charge on a door nobody can use. That test was
+       too narrow in two directions at once: a gate exit stands for the whole of its programmed hold
+       and ANY unit of ANY side may ride it (JUMP_GATES_PLAN.md section 2.6), so it barred a player
+       from opening a doorway their TEAMMATE's reinforcements would come through, and barred opening
+       one this turn for a wave only ready to ride it on a later one. Whether a door is worth the
+       charge is the player's call to make, not this predicate's.
+
+       ⚠️ THE RULE GATE STAYS, AND IT IS NOT DECORATION. The server still refuses an arrival claim
+       in a game without allowReinforcements (Firing::getGateSignalBlock, "this game has no
+       reinforcements rule"), so without this line the button would be offered and the order would be
+       dropped at commit with nothing said. It used to be implicit - myHyperspaceUnits() returns []
+       when the rule is off - and it has to be stated now that the count is gone. */
+    canSignalJumpGateForArrival: function canSignalJumpGateForArrival(gate) {
+        if (!gamedata.canSignalJumpGate(gate)) return false;
+
+        return gamedata.reinforcementsAllowed();
+    },
+
+    /* ⭐ REINFORCEMENTS_PLAN.md STAGE 9 - IS THE REINFORCEMENTS RULE ON IN THIS GAME?
+     *
+     * The efficiency gate for every reinforcements sweep on this side (user request 2026-08-29).
+     * Nothing in the feature can be true in a game without the rule - BuyingGamePhase never sets
+     * the flag - so a game that does not use it should pay one property read rather than a pass
+     * over every ship, on every UI refresh, for the whole battle. The lobby has had the identical
+     * helper since Stage 1b (gamelobby.js reinforcementsAllowed); this is its game.php twin.
+     *
+     * ⚠️ IT IS AN EFFICIENCY GATE AND NEVER A SECURITY ONE. Every rule it guards is also enforced
+     * server-side, where the same test is asked again against the real GameRules object; a client
+     * that lied about it would gain nothing but a button that fails at commit. Do not move a rule
+     * BEHIND this that is not also checked on the server.
+     *
+     * `in` rather than truthiness, matching declarations.js: the rule is stored as the KEY
+     * gamedata.rules.allowReinforcements and its value is not part of the contract. */
+    reinforcementsAllowed: function reinforcementsAllowed() {
+        return !!(gamedata.rules && ('allowReinforcements' in gamedata.rules));
     },
 
     isMyOrTeamOneShip: function isMyOrTeamOneShip(ship) {
@@ -611,7 +684,16 @@ window.gamedata = {
                the "Jump Point Forming" hex marker, the facing arrow and the Jump Engine's map arc
                all use (user request 2026-08-22).
                isJumpVortex holds the class name once, so this and the two movement sweeps that ask
-               the same question cannot drift apart. */
+               the same question cannot drift apart.
+
+               REINFORCEMENTS_PLAN.md §3.7 - AN EXIT TAKES THE SAME TREATMENT IN THE OTHER
+               COLOUR: #00b8e6, FV's "not here yet" cyan, the same value as the blue Jump Point
+               marker and the fleet list's hyperspace rows. Leaving it unmatched would be worse than
+               either colour - it would fall through to the off-white below and read as an asteroid,
+               which is the exact confusion the yellow was introduced to prevent. */
+            if (shipManager.movement && shipManager.movement.isJumpVortexExit(ship)) {
+                return new THREE.Color(0x00 / 255, 0xB8 / 255, 0xE6 / 255).convertSRGBToLinear(); // hexBlue
+            }
             if (shipManager.movement && shipManager.movement.isJumpVortex(ship)) {
                 return new THREE.Color(0xE1 / 255, 0xB0 / 255, 0x00 / 255).convertSRGBToLinear(); // --fv-warn
             }
@@ -954,6 +1036,43 @@ window.gamedata = {
                 html += "<br>";
             }
 
+            /* ⭐ REINFORCEMENTS_PLAN.md STAGE 7 - REINFORCEMENTS LEFT IN HYPERSPACE.
+
+               Since arrivals place themselves (DeploymentPhaseStrategy.autoPlaceArrivingReinforcements,
+               user request 2026-08-28) this is no longer the ordinary "you chose to hold one back"
+               case - it is the FAILURE case, and that makes it more worth saying, not less: the
+               only way to reach it now is a unit whose doorway could not be resolved, which is
+               something the player has no other way of noticing before their jump point closes at
+               the end of this turn and the berth goes with it.
+
+               Silent unless something is actually being left behind, and it names the units rather
+               than counting them. Never a block - the phase still has to be committable. */
+            var leftInHyperspace = [];
+            for (var i in gamedata.ships) {
+                var arrival = gamedata.ships[i];
+                if (arrival.userid != gamedata.thisplayer) continue;
+                if (!shipManager.isArrivingReinforcement(arrival)) continue;
+                if (shipManager.isDestroyed(arrival)) continue;
+                //The two hangar routes are arrivals too, into a hold rather than onto a hex.
+                if (arrival.pendingDeployDock || arrival.pendingLcvDeployDock) continue;
+                if (arrival.deploymove) continue;
+
+                leftInHyperspace.push(arrival);
+            }
+
+            if (leftInHyperspace.length > 0) {
+                if (html !== '') html += "<br>";
+                html += "These reinforcements could not be brought out of hyperspace &mdash; no open "
+                    + "jump point was found for them: ";
+                html += "<br>";
+                for (var h = 0; h < leftInHyperspace.length; h++) {
+                    html += gamedata.shipNameSpan(leftInHyperspace[h]);
+                    html += "<br>";
+                }
+                html += "They stay where they are with nothing spent, and will need another "
+                    + "exit opened for them.<br>";
+            }
+
             confirm.confirm(html + '<br><span class="commit-confirm-q">Are you sure you wish to commit your orders?</span>', gamedata.doCommit);
 
 
@@ -1172,6 +1291,35 @@ window.gamedata = {
                 html += "<br>";
                 for (var ship in vortexClosing) {
                     html += gamedata.shipNameSpan(vortexClosing[ship]);
+                    html += "<br>";
+                }
+                html += "<br>";
+            }
+
+            /* ⭐ REINFORCEMENTS_PLAN.md - REINFORCEMENTS ABOUT TO BE STRANDED FOR GOOD (user
+               report 2026-08-28). The exact sibling of the vortexClosing warning above, and it
+               exists for the same reason: the decision is irreversible one phase later, and
+               nothing said so.
+
+               A reinforcement with no jump drive of its own only ever arrives as a passenger. If
+               the unit that opened this turn's doorway leaves it off the manifest and jumps in
+               alone, nobody able to open the next one is left in hyperspace and those units are
+               unusable for the rest of the battle. ReinforcementEntry.strandedByCommit owns the
+               whole test (and stays silent unless it is really true - see the note on it there);
+               this only renders it.
+
+               ⚠️ Read from the module, NOT from myShips: that list drops everything whose
+               getTurnDeployed is later than this turn, and a unit in hyperspace answers 999.
+               Guarded on the module existing at all, exactly as drawIniGUI's button is. */
+            var strandedReinforcements = window.ReinforcementEntry
+                ? ReinforcementEntry.strandedByCommit() : [];
+            if (strandedReinforcements.length > 0) {
+                html += "These REINFORCEMENTS are not riding any jump point, and no unit able to "
+                    + "open another one will be left in hyperspace &mdash; they can NEVER be "
+                    + "called in: ";
+                html += "<br>";
+                for (var s = 0; s < strandedReinforcements.length; s++) {
+                    html += gamedata.shipNameSpan(strandedReinforcements[s]);
                     html += "<br>";
                 }
                 html += "<br>";
@@ -2171,6 +2319,14 @@ getActiveShipName: function getActiveShipName() {
             fleetListManager.displayFleetLists();
         }
 
+        /* The combat log's turn stepper and its "TURN 7 · FIRING" readout
+           (LOG_PANEL_REDESIGN_PLAN.md Stage 2b). Here rather than in a $(window).on("load")
+           of its own because the page bootstrap calls parseServerData from INSIDE a
+           setTimeout, so a load handler registered by the bundle runs while gamedata.turn
+           is still unset. initPhase runs on every phase change and on the first one, which
+           is exactly when the readout has something new to say. */
+        if (window.combatLog) combatLog.updateTurnControls();
+
 
         gamedata.setPhaseClass();
         //		window.helper.doUpdateHelpContent(gamedata.gamephase,0);        
@@ -2390,6 +2546,38 @@ getActiveShipName: function getActiveShipName() {
                 ini_gui.appendChild(mineBtn);
             }
         }
+
+        /* REINFORCEMENTS_PLAN.md Stage 4 - MANAGE REINFORCEMENTS. Same shape as the mine button
+           above and for the same reason: a bespoke map mode needs somewhere to be switched on, and
+           #iniGui is where this game puts that.
+
+           The whole state machine lives in the module (ReinforcementEntry.buttonLabel /
+           onButtonClicked), so the label and the click cannot disagree - the button opens the
+           menu, or cancels the armed hex mode, and this loop only draws it. drawIniGUI is re-run
+           by the module after every state change, which is what repaints the label.
+           ⚠️ It no longer flips to "Withdraw Jump Point" when a declaration stands (user request
+           2026-08-28) - that state locked the player out of declaring a SECOND exit with a
+           second jump-capable hull. Withdrawing is a row in the menu now.
+
+           Guarded on the module existing at all: game.php loads it `defer` alongside every other
+           phase-strategy file, but this method is also reached from the lobby's shared code paths
+           in some flows, where it is not loaded. */
+        var existingReinfBtn = document.getElementById('reinforcementEntryBtn');
+        if (existingReinfBtn) existingReinfBtn.parentNode.removeChild(existingReinfBtn);
+
+        if (window.ReinforcementEntry && ReinforcementEntry.isOffered()) {
+            var reinfBtn = document.createElement('button');
+            reinfBtn.id = 'reinforcementEntryBtn';
+            reinfBtn.textContent = ReinforcementEntry.buttonLabel();
+            if (ReinforcementEntry.isActive()) reinfBtn.classList.add('active');
+
+            reinfBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                ReinforcementEntry.onButtonClicked();
+            });
+
+            ini_gui.appendChild(reinfBtn);
+        }
     },
 
 
@@ -2458,6 +2646,12 @@ getActiveShipName: function getActiveShipName() {
         //at a turn boundary. Skipped in replay, where stepping across the reveal turn is SUPPOSED to
         //change identity and a reload would throw the viewer out of the replay.
         if (!gamedata.replay && gamedata.hasShipIdentityChanged(serverdata.ships)) return;
+
+        /* REINFORCEMENTS_PLAN.md Stage 7 - a hull arriving mid-session that this page has no
+           blueprint for. Same failure as the Chameleon reveal above and a much commoner one; it
+           fetches the missing faction instead of reloading. Returns true when it has deferred this
+           update - nothing below has run yet, so re-entering with the same payload is clean. */
+        if (gamedata.ensureBlueprintsFor(serverdata)) return;
 
         gamedata.turn = serverdata.turn;
         gamedata.gamephase = serverdata.phase;
@@ -2549,6 +2743,118 @@ getActiveShipName: function getActiveShipName() {
         }
 
         return false;
+    },
+
+    /* ⭐⭐ REINFORCEMENTS_PLAN.md STAGE 7 - A HULL THIS PAGE HAS NO BLUEPRINT FOR
+       (user report 2026-08-28, game 4318).
+
+       window.staticShips is built ONCE, by game.php, from the ships in THIS VIEWER'S payload at the
+       moment the page loaded - and a reinforcement waiting in hyperspace is not in an opponent's
+       payload at all (§3.6 removes it outright). So when the wave arrives, the opponent's client is
+       handed ship JSON for classes it holds no blueprint for: Ship() builds them from the live JSON
+       alone, with no armour, no arcs, no maxhealth and no systems - "no ship information", exactly
+       as reported. The one class that DID render was the Primus, because a front-line Primus was
+       already on the board and had brought its blueprint with it.
+
+       ⭐ THIS IS THE SAME BUG AS hasShipIdentityChanged ABOVE, AND IT IS ANSWERED DIFFERENTLY.
+       That one reloads the page, which is right for it: a Chameleon reveal changes the identity of
+       a ship the page has ALREADY built - its icon, its ship window and every cached reference are
+       made of the old hull, so nothing short of a rebuild is honest. Here the ships do not exist
+       yet. Only the blueprint is missing, so fetching it is enough, and a mid-turn reload is a
+       cost the player should not have to pay for their opponent's reinforcements arriving.
+
+       ⚠️ IT DEFERS THE WHOLE UPDATE RATHER THAN PATCHING AFTERWARDS. Returning true from here
+       leaves parseServerData having touched NOTHING, so the re-entry on completion is an ordinary
+       first pass over the same payload - no half-applied turn, no ships built from a blueprint that
+       had not landed yet. The payload is a moment staler by then, which is the same staleness the
+       reload path accepts.
+
+       ⚠️ EVERY FACTION IS ASKED FOR AT MOST ONCE. A class that is missing even after the fetch (a
+       spawnable that never made it into the static generator, say) must not put the client into a
+       fetch-defer-fetch loop, or worse freeze it out of a turn change - the poll stops once it is
+       this player's move, so a permanently deferred update is a dead screen, not a slow one. After
+       one attempt the payload is applied whatever happened, which is exactly today's behaviour.
+
+       gamelobbyloader.php rather than a new endpoint: it already serves per-faction blueprints with
+       gzip and ETag revalidation, and its output is the SAME static/json/<faction>.json the
+       generator writes. Diffed against BlueprintCache's own output for Primus and Sentri: identical
+       but for the blueprint's ship-level `id`/`flightid` (overwritten from the live JSON by Ship()
+       anyway), one tooltip `data` value that is a string on one side and a number on the other, and
+       the lobby-only `systemEnhancementOffers`. Nothing the game screen reads. */
+    blueprintFetchAttempted: {},
+    blueprintFetchPending: false,
+
+    ensureBlueprintsFor: function ensureBlueprintsFor(serverdata) {
+        //A fetch is already in flight for an earlier payload - defer this one too, and let that
+        //fetch's own re-entry apply what it captured.
+        if (gamedata.blueprintFetchPending) return true;
+        if (!serverdata || !serverdata.ships || !window.staticShips) return false;
+
+        var wanted = {};
+        for (var i in serverdata.ships) {
+            var json = serverdata.ships[i];
+            if (!json || !json.faction || !json.phpclass) continue;
+            if (gamedata.blueprintFetchAttempted[json.faction]) continue;
+
+            var faction = window.staticShips[json.faction];
+            if (faction && faction[json.phpclass]) continue;
+
+            wanted[json.faction] = true;
+        }
+
+        var factions = Object.keys(wanted);
+        if (factions.length === 0) return false;
+
+        factions.forEach(function (faction) { gamedata.blueprintFetchAttempted[faction] = true; });
+        gamedata.blueprintFetchPending = true;
+
+        //Settle on the LAST response, success or failure alike - .always, so a 401/timeout on one
+        //faction cannot strand the update behind it.
+        var remaining = factions.length;
+        var settle = function () {
+            remaining--;
+            if (remaining > 0) return;
+            gamedata.blueprintFetchPending = false;
+            gamedata.parseServerData(serverdata);
+        };
+
+        factions.forEach(function (faction) {
+            $.ajax({
+                type: 'POST',
+                url: 'gamelobbyloader.php',
+                dataType: 'json',
+                contentType: 'application/json',
+                data: JSON.stringify({ faction: String(faction) }),
+                timeout: 30000
+            }).done(function (data) {
+                gamedata.mergeStaticShips(data);
+            }).always(settle);
+        });
+
+        return true;
+    },
+
+    /* Fold a faction blueprint file into window.staticShips. Shape is
+       { "<faction>": { "<phpclass>": {...} } }, which is what staticShips already is.
+
+       ⚠️ ADDS ONLY, NEVER OVERWRITES. The classes already present came from BlueprintCache and are
+       what every Ship on the page was built from; the loader's copies are the lobby's, equivalent
+       but not byte-identical (see ensureBlueprintsFor). Replacing them would swap the blueprint out
+       from under units that are already on the board, to fix a problem those units do not have. */
+    mergeStaticShips: function mergeStaticShips(data) {
+        if (!data || typeof data !== 'object' || data.error) return;
+        if (!window.staticShips) window.staticShips = {};
+
+        for (var faction in data) {
+            var incoming = data[faction];
+            if (!incoming || typeof incoming !== 'object') continue;
+            if (!window.staticShips[faction]) window.staticShips[faction] = {};
+
+            for (var phpclass in incoming) {
+                if (window.staticShips[faction][phpclass]) continue;
+                window.staticShips[faction][phpclass] = incoming[phpclass];
+            }
+        }
     },
 
     setShipsFromJson: function setShipsFromJson(jsonShips) {

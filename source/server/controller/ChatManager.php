@@ -13,6 +13,16 @@ class ChatManager{
 
     private static $dbManager = null;
 
+    /**
+     * Latched connect failure for THIS request. See Manager::$dbUnavailable for the
+     * full reasoning; ChatManager is the most exposed of the three because
+     * chatdata.php calls getChatMessages() once per requested chat (capped at 8, and
+     * client-supplied), so an unlatched outage costs up to 8 connect attempts per
+     * poll instead of one. The live log of 2026-09-01 caught pid 509813 logging two
+     * identical "Too many connections" frames 1.1ms apart -- two chats, one request.
+     */
+    private static $dbUnavailable = null;
+
     private static function getCachePrefix() {
         global $database_name;
         // Use a safe fallback if for some reason db name is missing, though strictly it should be there.
@@ -27,8 +37,34 @@ class ChatManager{
     	global $database_name;
     	global $database_user;
     	global $database_password;
-        if (self::$dbManager == null)
-            self::$dbManager = new DBManager($database_host ?? "localhost", 3306, $database_name, $database_user, $database_password);
+        if (self::$dbUnavailable !== null)
+            throw self::$dbUnavailable;
+
+        if (self::$dbManager == null) {
+            try {
+                self::$dbManager = new DBManager($database_host ?? "localhost", 3306, $database_name, $database_user, $database_password);
+            } catch (Throwable $e) {
+                self::$dbUnavailable = self::asUnavailable($e);
+                throw self::$dbUnavailable;
+            }
+        }
+    }
+
+    /**
+     * Stamp a failed connect with code 300, the marker chat.php uses to tell "the
+     * database is briefly unreachable" (transient — stay quiet, keep polling) from a
+     * real fault (worth a dialog). See Manager::asUnavailable for the full reasoning on
+     * why DBManager's own code 300 never survives, and why the message is replaced
+     * rather than passed through. This class is the one that matters for it: chatdata.php
+     * is what the player has open when the database goes away.
+     */
+    private static function asUnavailable(Throwable $e)
+    {
+        if ($e instanceof Exception && $e->getCode() === 300) {
+            return $e;
+        }
+
+        return new Exception('Database unavailable', 300, $e);
     }
     
     /**
@@ -115,6 +151,9 @@ class ChatManager{
         try
         {
             // APCu Fast Poll - Check BEFORE DB connection!
+            // NOTE: this gate is why a "clamp $lastid to the cached value" fix in the
+            // empty-result branch below would be dead code — everything with
+            // $lastid >= $lastMsgId has already returned by then.
             if (function_exists('apcu_fetch')) {
                  $prefix = self::getCachePrefix();
                  $lastMsgId = apcu_fetch($prefix . 'chat_last_id_' . $gameid);
@@ -144,12 +183,49 @@ class ChatManager{
                     $prefix = self::getCachePrefix();
                     apcu_store($prefix . 'chat_last_id_' . $gameid, $latestId, 3600);
                 } else {
-                    // No new messages: cache the current lastid (even 0) so subsequent polls
-                    // are fast-polled without hitting the DB.
-                    // Use a short TTL when empty (30s) so we periodically recheck for the first real message.
+                    // No new messages. What gets cached here is the WATERMARK that every
+                    // other player's fast poll is then tested against, so it must never
+                    // be higher than an id that really exists.
+                    //
+                    // It used to be $lastid — which is the CLIENT'S CLAIM. chatdata.php's
+                    // ctype_digit rejects "-1" and "1e3" but places no upper bound, so a
+                    // logged-in player sending chats=7183:999999 wrote 999999 here with a
+                    // one-hour TTL. That does not hide messages from anyone: the fast-poll
+                    // test is $lastid >= $lastMsgId, which a real client holding a real id
+                    // simply fails. It does something worse — it makes every one of them
+                    // fail, so every poll from every player in that game falls through to
+                    // MySQL for the life of the entry. One request could switch the
+                    // DB-sparing fast path off for a whole game chat for an hour.
+                    //
+                    // ⚠️ The obvious cheap fix — "clamp to the previously cached value" —
+                    // CANNOT WORK HERE, and it looks like it does. The fast-poll gate at
+                    // the top of this method already returned for every case where
+                    // $lastid >= $cachedLastId, so on arrival here a warm cache is ALWAYS
+                    // higher than the claim and the clamp can never fire. The poisoning
+                    // happens on a COLD cache, which is exactly what such a clamp has
+                    // nothing to compare against.
+                    //
+                    // So ask the database instead. We are already connected and have
+                    // already paid a round trip (this branch is only reachable on a
+                    // fast-poll MISS), and MAX(id) is an index lookup on a table 3-day
+                    // retention keeps at a few dozen rows. Cost lands once per TTL per
+                    // active chat; correctness no longer depends on the client.
+                    $trueMaxId = self::$dbManager->getMaxChatMessageId($gameid);
+
+                    // Belt and braces: never publish a watermark above what the DB just
+                    // vouched for. A stale-LOW value is harmless — it costs one extra DB
+                    // read on the next poll and is corrected by it — so low is always the
+                    // safe direction to err in.
+                    $watermark = min($lastid, $trueMaxId);
+                    if ($watermark < 0) $watermark = 0;
+
+                    // Keep the original short TTL for a chat with no messages at all, so
+                    // the very first message is picked up promptly rather than after an
+                    // hour of fast-polled "[]".
+                    $ttl = ($trueMaxId > 0) ? 3600 : 30;
+
                     $prefix = self::getCachePrefix();
-                    $ttl = ($lastid > 0) ? 3600 : 30;
-                    apcu_store($prefix . 'chat_last_id_' . $gameid, $lastid, $ttl);
+                    apcu_store($prefix . 'chat_last_id_' . $gameid, $watermark, $ttl);
                 }
             }
 

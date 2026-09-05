@@ -1373,7 +1373,14 @@
 
 /* Button row. The buttons keep their .confirmok/.confirmcancel classes so every existing
    click binding still finds them; only the paint changes, and the label comes from the
-   data-label attribute confirm.fleetDialogShell sets. */
+   data-label attribute confirm.fleetDialogShell sets.
+
+   .confirmalt IS AN OPTIONAL THIRD BUTTON a caller may insert between the two - a secondary
+   action that is neither the affirmative answer nor a way out of the dialog (the Manage
+   Reinforcements menu's Jump Manifest is the first of them, REINFORCEMENTS_PLAN.md). The shell
+   never creates one, so this styles nothing unless somebody asks for it; it is deliberately
+   painted as Cancel is rather than as the accented .confirmok, because the affirmative action is
+   still the one on its left. Flex order is DOM order, which is what puts it in the middle. */
 .confirm.fleetDialog .ui {
     display: flex;
     justify-content: flex-end;
@@ -1383,6 +1390,7 @@
 }
 
 .confirm.fleetDialog .ui .confirmok,
+.confirm.fleetDialog .ui .confirmalt,
 .confirm.fleetDialog .ui .confirmcancel {
     position: static;
     width: auto;
@@ -1400,11 +1408,13 @@
 }
 
 .confirm.fleetDialog .ui .confirmok::after,
+.confirm.fleetDialog .ui .confirmalt::after,
 .confirm.fleetDialog .ui .confirmcancel::after {
     content: attr(data-label);
 }
 
 .confirm.fleetDialog .ui .confirmok:hover,
+.confirm.fleetDialog .ui .confirmalt:hover,
 .confirm.fleetDialog .ui .confirmcancel:hover {
     background-color: var(--fv-card-hover);
     color: var(--fv-text-bright);

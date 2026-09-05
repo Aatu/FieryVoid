@@ -201,22 +201,3 @@ var SeekerTorp = function  SeekerTorp(json, ship) {
 };
 SeekerTorp.prototype = Object.create(Weapon.prototype);
 SeekerTorp.prototype.constructor =  SeekerTorp;
-
-var PlasmaDriver = function PlasmaDriver(json, ship) {
-    Weapon.call(this, json, ship);
-};
-PlasmaDriver.prototype = Object.create(Weapon.prototype);
-PlasmaDriver.prototype.constructor = PlasmaDriver;
-
-// GTS_Triad
-var SpatialCutter = function SpatialCutter(json, ship) {
-    Weapon.call(this, json, ship);
-};
-SpatialCutter.prototype = Object.create(Weapon.prototype);
-SpatialCutter.prototype.constructor = SpatialCutter;
-
-var AsteroidSalvo = function AsteroidSalvo(json, ship) {
-    Aoe.call(this, json, ship);
-};
-AsteroidSalvo.prototype = Object.create(Aoe.prototype);
-AsteroidSalvo.prototype.constructor = AsteroidSalvo;

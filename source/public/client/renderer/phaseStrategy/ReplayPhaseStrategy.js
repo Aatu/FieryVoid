@@ -63,21 +63,53 @@ window.ReplayPhaseStrategy = function () {
         // No informPhase() here: the phase banner reports the live game phase, not
         // the replayed one, and overlaps the ReplayUI. informPhase() is guarded
         // against gamedata.replay anyway, but skip it outright on replay entry.
-        // Observers are permanently in replay (see PhaseDirector.resolvePhaseStrategy),
-        // so hiding the combat-log print buttons here would deny them the log entirely.
-        // Hide them only for participants, who get them back on deactivate.
-        var combatLogContainer = document.getElementById('combatLogContainer');
-        if (combatLogContainer) {
-            combatLogContainer.style.display = gamedata.isPlayerInGame() ? 'none' : 'block';
+
+        /* THE PRINT CONTROLS GO, THE LOG STAYS (regression fix, 2026-08-31).
+
+           This used to hide #combatLogContainer, and that WAS right when it was written:
+           back then that element was a separate absolutely-positioned overlay carrying only
+           the print buttons and #LogActual, while the live replay entries were appended
+           straight into #log and so were untouched by it.
+
+           LOG_PANEL_REDESIGN_PLAN.md Stage 2 made #combatLogContainer the WHOLE combat log -
+           control bar, live stream (#logLive) and print (#LogActual) in one flex column - so
+           the same line started hiding the replay log itself. A participant watching a replay
+           saw the shots animate with nothing written against them; the entries were in the
+           DOM the whole time, inside a display:none subtree.
+
+           The CONTROL BAR is the thing that actually has to go: its turn stepper drives the
+           PRINTED log and would fight the ReplayUI's own turn controls. #LogActual is already
+           blanked on replay entry by clearCombatLogs -> showCurrent, so #logLive is left with
+           the whole body, which is what a replay wants.
+
+           Observers are permanently in replay (PhaseDirector.resolvePhaseStrategy), so they
+           KEEP the bar - it is their only route to a printed turn. Same reasoning, same
+           two-arm shape, as the line this replaces. */
+        var combatLogButtons = document.getElementById('combatLogButtons');
+        if (combatLogButtons) {
+            combatLogButtons.style.display = gamedata.isPlayerInGame() ? 'none' : '';
         }
+
+        //Self-heal: a session that ran the old code still carries its inline display on the
+        //container. Clearing it costs a line and stops a stale value outliving this fix.
+        var combatLogContainer = document.getElementById('combatLogContainer');
+        if (combatLogContainer) combatLogContainer.style.display = '';
         return this;
     };
 
     ReplayPhaseStrategy.prototype.deactivate = function () {
         PhaseStrategy.prototype.deactivate.call(this, true);
         gamedata.replay = false;
+        /* '', NOT 'block'. The bar is display:flex in the stylesheet, and so is the
+           container this line used to target - a literal 'block' would have left the element
+           in normal flow rather than restoring the rule, quietly breaking the flex column
+           that gives #logLive its height for the rest of the page's life. Clearing the
+           inline value hands it back to logPanel.css. */
+        var combatLogButtons = document.getElementById('combatLogButtons');
+        if (combatLogButtons) combatLogButtons.style.display = ''; //Print-log controls come back
+
         var combatLogContainer = document.getElementById('combatLogContainer');
-        if (combatLogContainer) combatLogContainer.style.display = 'block'; //Show print Log buttons
+        if (combatLogContainer) combatLogContainer.style.display = '';
         return this;
     };
 
@@ -415,13 +447,19 @@ window.ReplayPhaseStrategy = function () {
         }
     }
 
+    /* Which turn does the replay open on? The live turn, unless the live turn has not been played
+       yet - which is the case for every phase that runs BEFORE movement: Initial Orders (1) and,
+       ⭐ since REINFORCEMENTS made it a phase that recurs mid-battle, the DEPLOYMENT phase (-1).
+       Both sit at the top of turn N with nothing in turn N to show, so they replay N-1.
+
+       ⚠️ `<= 1`, NOT `=== 1`. Deployment's phase id is -1, so an equality test sent it down the
+       "replay the live turn" path and asked replay.php for a turn that had not happened - an empty
+       replay in the one phase (DEPLOYMENT: REINFORCEMENTS) that most needs a full one. The turn-1
+       floor is the same expression: turn 1 Deployment and turn 1 Initial Orders both land on 0,
+       which is the "nothing has been played at all" value turnBack() guards against below. */
     function getInitialReplayTurn() {
 
-        if (this.currentTurn === 1 && this.currentPhase <= 1) {
-            return 0;
-        }
-
-        if (this.currentPhase === 1) {
+        if (this.currentPhase <= 1) {
             return this.currentTurn - 1;
         }
 
