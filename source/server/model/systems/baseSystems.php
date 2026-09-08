@@ -933,6 +933,25 @@ class Shield extends ShipSystem implements DefensiveSystem{
     {
         return "Shield";
     }
+
+    /* CAPACITY-POOL SHIELDS AND THE WALKERS' SCAN (WALKERS_OF_SIGMA_PLAN.md 3.4).
+       The Thirdspace Shield, the Thought Shield and both Trek Shield Projections extend this class
+       and answer getDefensiveType() "Shield", so a Chromatic Pulse Driver scan banks a point off
+       them and they carry the "Scanned by Walkers" marker - but their getDefensiveHitChangeMod and
+       getDefensiveDamageMod are hard 0 (a reinforced Thought Shield's is the one exception). They
+       hold a POOL and absorb out of it instead, so the reduction that lands on the aggregated
+       defensive bucket in BaseShip::getHitChanceMod / getDamageMod reaches nothing on them. This
+       states the same rule in their own currency: against a fleet that has analysed the race, the
+       pool's last N points cannot be spent. Called from their doesProtectFromDamage() and
+       doProtect(); an ordinary Shield never calls it.
+       ⚠️ Gated on TacGamedata::$cpdAdaptationPresent like every other CPD call site (D10) - this
+       sits on the per-shot damage path of every game in the database. Do NOT make it unconditional.
+       ⚠️ Computed per shot and never stored: no DamageEntry, so the pool regenerates from its real
+       remaining health and reads at full strength against every fleet that has not adapted. */
+    protected function getCapacityAgainstShooter($capacity, $shooter){
+        if (!TacGamedata::$cpdAdaptationPresent) return $capacity;
+        return CpdScanRegistry::applyToCapacity($capacity, $this->getUnit(), $shooter);
+    }
     
     public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
         if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn($turn))
@@ -1042,6 +1061,27 @@ class Reactor extends ShipSystem implements SpecialAbility {
         parent::__construct($armour, $maxhealth, $powerReq, $output );        
     }
     
+
+    /* WALKERS OF SIGMA-957 - Energy Draining Field power drain (WALKERS_OF_SIGMA_PLAN.md 2.2).
+       The twin of Engine::getOutput() above; read that comment for why this is a summed param
+       critical and not an $outputMod, and why the gate is the criticals array rather than
+       TacGamedata::$edfPresent. */
+    public function getOutput(){
+        $output = parent::getOutput();
+        if ($output > 0 && !empty($this->criticals)){
+            $output = max(0, $output - (int)$this->sumCriticalParam("EdfPowerDrain"));
+        }
+        return $output;
+    }
+
+    public function stripForJson(){
+        $strippedSystem = parent::stripForJson();
+        if (!empty($this->criticals)){
+            $drain = (int)$this->sumCriticalParam("EdfPowerDrain");
+            if ($drain > 0) $strippedSystem->edfDrain = $drain;
+        }
+        return $strippedSystem;
+    }
     public function addCritical($shipid, $phpclass, $gamedata) {
         if(strcmp($phpclass, "ForcedOfflineOneTurn") == 0){
             // This is the reactor. If it takes a ForcedOffLineForOneTurn,
@@ -1525,6 +1565,35 @@ class Engine extends ShipSystem implements SpecialAbility {
 		$this->data["Own thrust"] = $this->output;
     }
 	
+
+    /* WALKERS OF SIGMA-957 - Energy Draining Field thrust drain (WALKERS_OF_SIGMA_PLAN.md 2.2).
+       One EdfThrustDrain critical carries a whole roll in its param, so it is SUMMED, never
+       counted. sumCriticalParam is turn-filtered and the crit is `oneturn`, so a drain rolled
+       in turn N's Critical Hit step reads here on turn N+1 only - which is the rules' "starting
+       next turn" and is also why this cannot be an $outputMod (effectCriticals sums those with
+       no turn filter at all; see the comment on the crit classes).
+       ⚠️ The gate is $this->criticals being non-empty, NOT TacGamedata::$edfPresent: a Walker's
+       field can be destroyed while its last drain is still in effect, and an undamaged system's
+       criticals array is empty anyway, so this costs nothing in an ordinary game. */
+    public function getOutput(){
+        $output = parent::getOutput();
+        if ($output > 0 && !empty($this->criticals)){
+            $output = max(0, $output - (int)$this->sumCriticalParam("EdfThrustDrain"));
+        }
+        return $output;
+    }
+
+    /* The client computes the thrust budget itself (shipManager.systems.getOutput reads
+       system.output + system.outputMod), so the drain has to be published as its own field or
+       the player would allocate thrust the server will not honour. Only when non-zero. */
+    public function stripForJson(){
+        $strippedSystem = parent::stripForJson();
+        if (!empty($this->criticals)){
+            $drain = (int)$this->sumCriticalParam("EdfThrustDrain");
+            if ($drain > 0) $strippedSystem->edfDrain = $drain;
+        }
+        return $strippedSystem;
+    }
     public function markEngineFlux(){
         $this->specialAbilities[] = "EngineFlux";
         $this->specialAbilityValue = true; //so it is actually recognized as special ability!
@@ -1851,10 +1920,45 @@ class Scanner extends ShipSystem implements SpecialAbility{ //on its own Scanner
                 $output += $power->amount;
             }        
         }        
+
+        /* WALKERS OF SIGMA-957 - Energy Draining Field total-EW drain
+           (WALKERS_OF_SIGMA_PLAN.md 2.2). The third of the three drains that ride the system
+           they take from, alongside Engine::getOutput() and Reactor::getOutput() - read the
+           comment on Engine's for why a whole roll is SUMMED rather than counted, why it cannot
+           be an $outputMod, and why the gate is the criticals array rather than
+           TacGamedata::$edfPresent.
+
+           ⭐ IT LIVES HERE, NOT ON THE CnC (user, 2026-09-04). It used to be a subtraction
+           inside EW::getScannerOutput() reading a critical parked on the CnC, which meant the
+           CLIENT never applied it at all - ew.js sums shipManager.systems.getOutput() over the
+           EW systems and knows nothing about the CnC - so a drained ship let its owner allocate
+           EW the server would not honour. On the Scanner it needs no client code whatsoever:
+           getOutput() already subtracts the published edfDrain for the Engine and the Reactor.
+           ⚠️ The clamp is per-scanner rather than per-ship. It only differs on a hull with a
+           SECOND EW source (an ElintScanner beside a Scanner), where a drain larger than the
+           Scanner's own output stops there instead of eating into the array. */
+        if ($output > 0 && !empty($this->criticals)){
+            $output = max(0, $output - (int)$this->sumCriticalParam("EdfEwDrain"));
+        }
+
         return $output;        
     }    
+
+    /* The client computes the EW budget itself (ew.js getScannerOutput sums
+       shipManager.systems.getOutput over every outputType "EW" system), so the drain is
+       published as its own field exactly as Engine and Reactor publish theirs - and
+       shipManager.systems.getOutput already subtracts it. Only when non-zero. */
+    public function stripForJson(){
+        $strippedSystem = parent::stripForJson();
+        if (!empty($this->criticals)){
+            $drain = (int)$this->sumCriticalParam("EdfEwDrain");
+            if ($drain > 0) $strippedSystem->edfDrain = $drain;
+        }
+        return $strippedSystem;
+    }
 	
 	/*functions adding Advanced/Improved Sensors trait*/
+
 	public function markImproved(){		
 		$this->specialAbilities[] = "ImprovedSensors";	
 		$this->specialAbilityValue = true; //so it is actually recognized as special ability!		
@@ -11218,7 +11322,7 @@ by 4.
 	//function estimating how good this Diffuser is at stopping damage;
 	//in case of diffuser, its effectiveness equals largest shot it can stop, with tiebreaker equal to remaining total capacity
 	//this is for recognizing it as system capable of affecting damage resolution and choosing best one if multiple Diffusers can protect
-	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false) {
+	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false, $shooter = null) {
 		$remainingCapacity = 0;
 		$totalCapacity = 0;
 		$largestCapacity = 0;
@@ -12163,7 +12267,7 @@ class Bulkhead extends ShipSystem{
 	
 	
 	//function estimating how good this Bulkhead is at stopping damage;
-	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false) {
+	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false, $shooter = null) {
 		//first do check whether this system can be protected! (same location or appropriate structure location)
 		if ($systemProtected) {
 			//is it on the same section?
@@ -13367,6 +13471,12 @@ class MindriderHangar extends ShipSystem{
 		}
 
 		public function setSystemDataWindow($turn){
+				/* Every other system calls this and the Shading Field did not, so its window carried no
+				   ID, no Arc, no "Power Used" and - the reason it was noticed - no $critData, which is
+				   what turns a critical's phpclass into readable text. A CPD scan marker landed here
+				   and rendered as "ScannedByWalkers" (WALKERS_OF_SIGMA_PLAN.md 3.4). Called FIRST so
+				   the Special text below still overwrites the parent's. */
+				parent::setSystemDataWindow($turn);
 				$unit = $this->getUnit();
 				if($unit instanceof FighterFlight){
 					//$this->data["Special"] = "Jammer ability, even against Ancients.";
@@ -15023,6 +15133,264 @@ class AmmoMissileS extends AmmoMissileTemplate{
 } //endof class AmmoMissileS
 
 
+/*ammunition for AmmoMagazine - Class HM Homing Missile (for official Missile Racks, Kor-Lyan only)
+  HOMING_MISSILE_PLAN.md - same combat statistics as the Basic missile, but a clean miss does NOT
+  end it: the missile stays in play and comes around for another pass next turn, launching from
+  its target's PREVIOUS hex. Defensive fire that would have turned the miss into a hit destroys it
+  instead. It is lost when its CUMULATIVE travel exceeds the distance range.
+
+  ⭐ ALL of the homing behaviour lives on this class. AmmoMissileRackS only delegates to it (six
+  thin overrides), and nothing in Weapon::fire, Firing:: or the phase classes knows homing exists.
+
+  ⭐ THE THREE-WAY OUTCOME IS ALREADY IN THE ENGINE. Weapon::fire subtracts $totalIntercept from
+  $needed and counts a roll landing in the band above the reduced threshold as $intercepted - and
+  $totalIntercept is ACTIVE defensive fire only, never shields or energy webs. So "hit /
+  shot down / clean miss" is read straight off the resolved order, exactly as the rules define it.*/
+class AmmoMissileHM extends AmmoMissileTemplate{
+	public $name = 'ammoMissileHM';
+	public $displayName = 'Homing Missile';
+	public $modeName = 'Homing';
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'AMMO_HM'; //enhancement name to be enabled
+	public $enhancementDescription = '(AMMO) Homing Missile'; //enhancement description
+	public $enhancementPrice = 12; //PV per missile; book value
+
+	public $rangeMod = 0; //MODIFIER for launch range
+	public $distanceRangeMod = 0; //MODIFIER for distance range
+	public $fireControlMod = array(3, 3, 3); //MODIFIER for weapon fire control!
+	public $minDamage = 20;
+	public $maxDamage = 20;
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 6;
+	public $priorityAF = 5;
+	public $noOverkill = false;
+	public $useOEW = false;
+	public $hidetarget = false;
+
+	/*The one flag the launcher keys off. Deliberately NOT a check on class name or modeName:
+	  a future homing variant only has to set this.*/
+	public $isHoming = true;
+
+	//damageclass stamped on every RE-ATTACK order. Three separate things read it: the launch-hex
+	//override, the firedOnTurn exclusion (so a missile in flight does not freeze the rack's
+	//reload), and the client's ballistic-icon launch position.
+	const REATTACK_CLASS = 'HomingMissile';
+
+    public function getDamage($fireOrder) //actual function to be called, as with weapon!
+    {
+        return 20;
+    }
+
+	/* ======================================================================================
+	   STATE CARRIED BETWEEN TURNS
+	   Packed into an IndividualNote's notevalue (varchar 4096). THE NOTE IS THE ONLY PERSISTED
+	   COPY - see the ⚠️ below.
+
+	     key       - the ORIGINAL launch order's DB id. The missile's identity for its whole life,
+	                 which is what keeps two simultaneous homing missiles from one rack apart.
+	     targetid  - it chases the same target for ever (rules).
+	     travelled - CUMULATIVE hexes flown, for the fuel test.
+	     q, r      - the launch hex for the NEXT pass = where the target was when this pass missed.
+	     mode      - the launcher's firing-mode INDEX.
+	     pass      - how many attack runs it has made.
+	     budget    - THE DISTANCE RANGE AS IT WAS AT LAUNCH. See getFuelBudget.
+
+	   ⚠️⚠️ NOTHING MAY BE CARRIED ON THE FIRE ORDER'S $notes. Weapon::calculateHitBase ASSIGNS
+	   (weapon.php ~1927: `$fireOrder->notes = $notes;`), it does not append - so anything written
+	   there is destroyed the moment the shot's hit chance is computed. The first cut of this
+	   feature put a 'HOM:key:travelled:pass' tag there and it was silently wiped on every pass:
+	   the missile kept its identity for exactly as long as it took to resolve, then came back as a
+	   brand-new pass-1 missile with 0 hexes flown, and would therefore have flown FOREVER
+	   (observed in game 4328, fixed 2026-09-02). The runtime carrier is now
+	   AmmoMissileRackS::$homingStates, an in-memory map keyed off the order object.
+
+	   ⚠️ THE MODE INDEX IS STORED, NOT LOOKED UP BY NAME. onIndividualNotesLoaded runs BEFORE
+	   BaseShip::onConstructed, and onConstructed is what runs Enhancements::setEnhancements - so at
+	   rebuild time the magazine has not yet been given its Homing rounds and $firingModes does not
+	   contain 'Homing' at all. A name lookup there silently finds nothing, every time.
+	   The index is stable for the life of a game: recompileFiringModes walks $ammoClassesArray in
+	   fixed order and keys on getAmmoPresence(), which stays true even at zero rounds remaining.
+	   ====================================================================================== */
+	public function packState($state)
+	{
+		return implode('|', array(
+			(int)$state['key'],
+			(int)$state['targetid'],
+			(int)$state['travelled'],
+			(int)$state['q'],
+			(int)$state['r'],
+			(int)$state['mode'],
+			(int)$state['pass'],
+			(int)$state['budget'],
+			(int)(isset($state['orderid']) ? $state['orderid'] : 0)
+		));
+	}
+
+	public function unpackState($noteValue)
+	{
+		$parts = explode('|', (string)$noteValue);
+		if (count($parts) < 7) return null; //malformed - drop the missile rather than guess
+		return array(
+			'key'       => (int)$parts[0],
+			'targetid'  => (int)$parts[1],
+			'travelled' => (int)$parts[2],
+			'q'         => (int)$parts[3],
+			'r'         => (int)$parts[4],
+			'mode'      => (int)$parts[5],
+			'pass'      => (int)$parts[6],
+			//8th field added 2026-09-02. A 7-field note is a missile that was already in flight
+			//when the fix landed: 0 means "not captured", and the fuel test falls back to the
+			//launcher's live figure for it, exactly as it did before.
+			'budget'    => isset($parts[7]) ? (int)$parts[7] : 0,
+			/*⭐ 9th field, added 2026-09-03 - THE DATABASE ROW OF THE NEXT PASS'S FIRE ORDER, and it
+			  is what gives a missile still in flight a STABLE IDENTITY THE CLIENT CAN NAME.
+
+			  The row is inserted the moment this note is written (turn N phase 4, carrying turn
+			  N+1), so a re-attack now reaches the next turn with a real tac_fireorder id already on
+			  it instead of the -1 it used to carry until that turn's own Firing phase resolved.
+			  EVERYTHING the client does with a shot is keyed on that id - the ballistic icon's
+			  duplicate test, and a manual intercept order, whose targetid IS the id of the order it
+			  intercepts - so with -1 on two missiles at once both silently collapsed the pair into
+			  one: only one launch hex was drawn, and interception declared on either was credited
+			  to both and then thrown away by the server, which could not resolve targetid -1
+			  (game 4328, turn 3: two missiles chasing the same ship from the same hex).
+
+			  0 means "not persisted" - a note written before this landed, or an insert that failed.
+			  Those fall back to the old behaviour exactly: rebuilt in memory at load and given an id
+			  by persistHomingOrders at phase 4.*/
+			'orderid'   => isset($parts[8]) ? (int)$parts[8] : 0
+		);
+	}
+
+	/*⭐ THE FUEL BUDGET IS CAPTURED AT LAUNCH AND NEVER RECOMPUTED (user report, game 4328).
+
+	  A Class-F rack REWRITES its own $rangeArray/$distanceRangeArray as its loading state changes -
+	  AmmoMissileRackF::recalculateFireControl subtracts 20/30 whenever it is short-loaded or fired
+	  in Rapid mode. That is correct for a LAUNCH, and wrong for a missile that is already in the
+	  air: its fuel tank was filled when it left the rails and cannot shrink because the launcher
+	  that fired it has since been reloaded differently. So this is called ONCE, on the pass that
+	  creates the missile, and the answer is carried in the state from then on.
+
+	  Read off the mode ARRAYS rather than $weapon->distanceRange so the answer never depends on
+	  which mode the rack happens to be switched to at the moment of asking. max() mirrors
+	  Weapon::isInDistanceRange: a 0 distanceRange means "same as launch range", and 0 for both
+	  means unlimited.*/
+	public function getFuelBudget($weapon, $mode)
+	{
+		$launch   = isset($weapon->rangeArray[$mode]) ? $weapon->rangeArray[$mode] : $weapon->range;
+		$distance = isset($weapon->distanceRangeArray[$mode]) ? $weapon->distanceRangeArray[$mode] : $weapon->distanceRange;
+		return (int)max($launch, $distance);
+	}
+
+	/* ======================================================================================
+	   THE OUTCOME OF ONE PASS. Called from AmmoMissileRackS::generateIndividualNotes at phase 4,
+	   which runs AFTER fireWeapons on the SAME objects - so the order still carries rolled,
+	   needed, shotshit, intercepted and totalIntercept.
+
+	   Returns the state for the NEXT pass, or null when the missile is gone. Writes the
+	   player-visible line either way.
+	   ====================================================================================== */
+	public function resolveHomingOutcome($gamedata, $weapon, $fireOrder, $priorState = null)
+	{
+		if ($fireOrder->rolled <= 0) return null; //never actually resolved (no target, withdrawn, ...)
+		if ($fireOrder->shotshit > 0) return null; //it hit - it is gone
+		if ($fireOrder->intercepted > 0){          //defensive fire turned a hit into a miss: destroyed
+			$fireOrder->pubnotes .= "<br>Homing Missile destroyed by defensive fire.";
+			$fireOrder->updated = true;
+			return null;
+		}
+
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		$target  = $gamedata->getShipById($fireOrder->targetid);
+		if (!$shooter || !$target) return null;
+		if ($target->isDestroyed()) return null; //nothing left to chase
+
+		/*$priorState is the state THIS pass flew under, handed in by the launcher off its
+		  $homingStates map; null means this is a fresh launch and the missile starts its life here.
+		  It is never re-read off the order - see the ⚠️⚠️ on packState.*/
+		$key    = ($priorState !== null) ? (int)$priorState['key']       : (int)$fireOrder->id;
+		$before = ($priorState !== null) ? (int)$priorState['travelled'] : 0;
+		$pass   = (($priorState !== null) ? (int)$priorState['pass'] : 0) + 1;
+
+		/*⭐ CAPTURED ON PASS 1 AND CARRIED UNCHANGED THEREAFTER. A prior budget of 0 is either a
+		  fresh launch or a missile that predates this field (see unpackState), and both want the
+		  launcher's figure as it stands right now - which for a fresh launch IS the launch value.*/
+		$budget = ($priorState !== null) ? (int)$priorState['budget'] : 0;
+		if ($budget <= 0) $budget = $this->getFuelBudget($weapon, (int)$fireOrder->firingMode);
+
+		if ($key <= 0) return null; //no stable identity (order never reached the DB) - do not persist
+
+		//How far it actually flew this pass: from its launch hex to where the target ended up.
+		$launchPos = $weapon->getFiringHex($gamedata, $fireOrder);
+		$targetPos = $target->getHexPos();
+		if ($launchPos === null) return null;
+
+		/*⚠️ mathlib::getDistanceHex returns a FLOAT (CubeCoordinate stores its axes as floats), and
+		  this figure is round-tripped through a note, a notes tag and a player-visible message on
+		  every pass. Round it to a whole number of hexes here, once, so all three always agree and
+		  a plain (int) cast downstream can never shave a hex off a 3.9999999.*/
+		$travelled = (int)round($before + mathlib::getDistanceHex($launchPos, $targetPos));
+
+		if ($budget > 0 && $travelled > $budget){
+			$fireOrder->pubnotes .= "<br>Homing Missile missed and ran out of fuel (travelled "
+				. $travelled . " of " . $budget . " hexes).";
+			$fireOrder->updated = true;
+			return null;
+		}
+
+		$fireOrder->pubnotes .= "<br>Homing Missile missed and remains in play (travelled "
+			. $travelled . ($budget > 0 ? " of " . $budget : "") . " hexes); it will attack again next turn.";
+		$fireOrder->updated = true;
+
+		/*The target's CURRENT hex becomes the next pass's launch hex - "treating its target's
+		  previous location as its new launch hex for directional purposes".*/
+		return array(
+			'key'       => $key,
+			'targetid'  => (int)$fireOrder->targetid,
+			'travelled' => $travelled,
+			'q'         => $targetPos->q,
+			'r'         => $targetPos->r,
+			'mode'      => (int)$fireOrder->firingMode,
+			'pass'      => $pass,
+			'budget'    => $budget,
+			//Filled in by AmmoMissileRackS::persistNextPassOrder, which inserts the row for the pass
+			//this state describes before the note is written. 0 until then - see unpackState.
+			'orderid'   => 0
+		);
+	}
+
+	/*The next pass, as an ordinary ballistic fire order. Everything that makes it homing rides in
+	  damageclass - the launch-hex override, the firedOnTurn exclusion and the client icon all key
+	  off it - plus x/y, which carry the launch hex. Identity and fuel are NOT on the order; they
+	  live in AmmoMissileRackS::$homingStates for this request and in the IndividualNote between
+	  turns (see the ⚠️⚠️ on packState).
+
+	  ⚠️ addToDB stays FALSE. The only inserts are AmmoMissileRackS::persistNextPassOrder (at the
+	  end of the pass that creates the missile, which is the normal path) and
+	  AmmoMissileRackS::persistHomingOrders (the fallback, at resolution). Left true,
+	  PreFiringGamePhase::advance and the movement-phase jump-out sweep both submit
+	  getNewFireOrders() and would write the order to the DB a phase early - after which every later
+	  load of the same turn would find a persisted order the notes would rebuild a duplicate of.
+
+	  $turn is the turn the order BELONGS TO, which is not always the turn being played:
+	  persistNextPassOrder builds next turn's order at the end of this one, so the row is waiting
+	  with a real id before the client ever sees the missile. Defaults to the current turn for the
+	  in-memory rebuild path.*/
+	public function buildReattackOrder($gamedata, $weapon, $state, $turn = null)
+	{
+		$fireOrder = new FireOrder(
+			-1, "ballistic", $weapon->getUnit()->id, $state['targetid'],
+			$weapon->id, -1, ($turn === null ? $gamedata->turn : $turn), $state['mode'],
+			0, 0, 1, 0, 0,                              //needed, rolled, shots, shotshit, intercepted
+			$state['q'], $state['r'], self::REATTACK_CLASS, -1 //X, Y, damageclass, resolutionOrder
+		);
+		$fireOrder->addToDB = false;
+		return $fireOrder;
+	}
+} //endof class AmmoMissileHM
+
+
 //ammunition for AmmoMagazine - Class I Missile (for official Missile Racks)
 class AmmoMissileI extends AmmoMissileTemplate{	
 	public $name = 'ammoMissileI';
@@ -16502,4 +16870,448 @@ class CoopStructureSelfRepair extends StructureSelfRepair {
 
 
 
+
+
+/* =======================================================================================
+   WALKERS OF SIGMA-957 - ENERGY DRAINING FIELD (WALKERS_OF_SIGMA_PLAN.md 2.1 + 3.5, Stage 4)
+   =======================================================================================
+
+   IT LIVES HERE, NOT IN THE WALKER WEAPON FILES, and that is a load-order decision rather
+   than taste - the same one section 3.4 records for the Chromatic Pulse Driver in reverse.
+   The EDF is a ShipSystem, not a Weapon, so its client twin belongs in
+   client/model/system/baseSystems.js, which BOTH game.php and gamelobby.php load before every
+   weapon file. Putting it in a new pair of files would need two <script> tags, two legacy
+   bundle rebuilds and a fresh chance to get the ordering wrong. Keep the pair symmetric.  */
+
+/* A source of Energy Draining Field hexes. Implemented by ship SYSTEMS (this class, and the
+   Energy Draining Net at Stage 7 which answers radius 0). TacGamedata::setEdfHexes() consumes
+   nothing else - which is what let Stage 6's Energy Draining Mine project a field with no new
+   code at all: the terrain orb it spawns (SpawnEnergyDrainingMine) simply mounts a radius-1
+   EnergyDrainingField of its own.
+
+   getEdfRadius($turn) - hexes of field around the unit, AFTER criticals and boost. 0 means
+                         "this hex only"; a source that is not projecting answers 0 too, but
+                         isEdfActive() is the authority on that.
+   isEdfActive($turn)  - destroyed, offlined, or voluntarily deactivated all answer false. */
+interface EdfSource {
+    public function getEdfRadius($turn);
+    public function isEdfActive($turn);
+}
+
+
+/**
+ * Energy Draining Field - the Walkers' area-denial system.
+ *
+ * PLACEHOLDER STAT TABLE. Per WALKERS_OF_SIGMA_PLAN.md D4 the numbers arrive as a Walker
+ * test hull carrying the system; until that lands, everything in EDF STATS below is a guess
+ * that the mechanics are built around, NOT a control-sheet figure. Nothing outside that block
+ * hard-codes a game number, so a re-stat is an edit to those six constants and nothing else.
+ *
+ * WHAT IT DOES (the machinery, which is not placeholder):
+ *  - projects a disc of hexes, collected once per gamedata load into TacGamedata::$edfHexes
+ *    keyed by hex, so overlapping fields collapse for free - which IS the rules' "overlapping
+ *    hexes are only counted once";
+ *  - every hex records which TEAMS cover it, which is what makes "the rest of the fleet of the
+ *    ship deploying the EDF is immune" a single array lookup rather than a distance sweep;
+ *  - a shot whose hex line crosses field hexes belonging to somebody else takes a to-hit
+ *    penalty of one per hex (doubled for Plasma and Antimatter fired by a young or middleborn
+ *    race) - Weapon::calculateHitBase, mirrored in weaponManager.calculateHitChange.
+ *
+ * VARIABLE FIELDS. $variable = true turns on the existing BOOST mechanism (PowerManagementEntry
+ * type 2, allocated in the Ship Power segment, which is exactly where the rules put the choice).
+ * Double power buys BOOST_RADIUS_BONUS extra hexes of radius. No new power concept.
+ *
+ * DEACTIVATION is $canOffLine - "the player may deactivate the field" is all-or-nothing, and
+ * that is already what offlining a system means in FV.
+ *
+ * CRITICALS escalate on the hasCritical() COUNT, so there is no per-crit bookkeeping:
+ *  - fixed field: every EdfRadiusReduced costs 1 hex of radius, floor 1;
+ *  - variable field: the FIRST EdfBoostLost costs the boost, every further one costs 1 hex,
+ *    floor 0. One crit class covers both stages, which keeps the Self Repair menu short.
+ */
+class EnergyDrainingField extends ShipSystem implements SpecialAbility, EdfSource {
+    public $name = "EnergyDrainingField";
+    public $displayName = "Energy Draining Field";
+    public $iconPath = "EnergyDrainingField.png";
+    public $primary = true;
+
+    public $canOffLine = true;   //"the player may deactivate the field"
+    public $boostEfficiency = 0; //OVERWRITTEN in the ctor with $powerReq - see the note there
+    public $maxBoostLevel = 1;   //one step only: normal radius or boosted radius
+
+    /* Blueprint values. $radius is the NORMAL-power radius; getEdfRadius() derives the rest.
+
+       ALL THREE ARE PUBLIC AND TWO OF THEM MOVE TOGETHER UNDER THE EDF_RANGE ENHANCEMENT
+       (Stage 5, Enhancements::setEnhancementsShip). $radius goes UP by the number of levels
+       bought and $boostRadiusBonus comes DOWN by the same number, floored at 0, because the
+       rules let a variable field buy normal-power radius and explicitly do NOT let it move the
+       double-power one: "a vessel with a Variable Energy Draining Field may only increase the
+       radius of the normal-power field, and does not change the radius of the double-power
+       field". Spending the bonus down is what makes that true with no second stored number -
+       see getEdfBoostedRadius() below, which is the one place that arithmetic is written.
+       ⚠️ Which is also why nothing may hard-code the +3: the client's initializationUpdate did,
+       and would have shown a refitted field a boosted radius it does not have. */
+    public $radius = 5;
+    public $variable = false;
+    public $boostRadiusBonus = 3;
+
+    protected $possibleCriticals = array(21 => "EdfRadiusReduced"); //replaced for a variable field in the ctor
+
+    /* Parameters: ($armour, $maxhealth, $powerReq, $radius, $variable).
+       0 for maxhealth/powerReq takes the class defaults, exactly as the Walker weapons do, so a
+       hull file can mount a "basic version of the system" without inventing numbers. */
+    function __construct($armour, $maxhealth = 0, $powerReq = 0, $radius = null, $variable = false){
+        if ($maxhealth == 0) $maxhealth = 40;
+        if ($powerReq  == 0) $powerReq  = 16;
+        if ($radius === null) $radius = 5;
+
+        parent::__construct($armour, $maxhealth, $powerReq, $radius);
+
+        $this->radius   = (int)$radius;
+        $this->variable = (bool)$variable;
+
+        /* ⚠️ DOUBLE POWER, AND IT HAS TO BE SET FROM $powerReq RATHER THAN DECLARED.
+           boostEfficiency is the EXTRA power ONE boost level costs (power.js
+           countBoostReqPower / countBoostPowerUsed multiply by it), so a field that wants to
+           cost twice as much when boosted must carry its own requirement as its efficiency.
+           The declared 0 above meant the boosted radius was FREE, which is neither what the
+           rules say nor what the class comment claimed - and there is no blueprint constant to
+           write it as, because $powerReq is a ctor argument. */
+        $this->boostEfficiency = (int)$powerReq;
+
+        /* ⚠️ ADDSYSTEM SECTION-ARC TRAP (arch_addsystem_section_arc_trap): a system whose arcs
+           are BOTH 0 has the section's arc stamped onto it by addSystem(), so an EDF mounted aft
+           would advertise itself as an aft-facing system in the ship window. The field is
+           omnidirectional, so declare 0..360 and the guard never fires. */
+        $this->startArc = 0;
+        $this->endArc   = 360;
+
+        if ($this->variable){
+            $this->boostable = true;
+            /* A DIFFERENT CRIT TABLE, NOT A DIFFERENT CLASS. The two fields share a phpclass
+               deliberately: SystemFactory builds the client twin with `new window[name]`, and a
+               second phpclass would need a second client class, a second blueprint entry and a
+               second everything downstream for one changed array. $possibleCriticals is
+               protected instance state, so setting it here is per-instance and safe - unlike the
+               CLIENT side, where same-phpclass instances share field references (plan trap 6);
+               see the isModified handling in stripForJson(). */
+            $this->possibleCriticals = array(20 => "EdfBoostLost");
+        }
+    }
+
+    /* ---------------------------------------------------------------- EdfSource ------ */
+
+    /* Radius after criticals and boost. Never negative.
+       Reads the CRIT COUNT (hasCritical returns how many), not a param - see the two crit
+       classes in cricialClasses.php. */
+    public function getEdfRadius($turn = null){
+        if ($turn === null) $turn = TacGamedata::$currentTurn;
+        if (!$this->isEdfActive($turn)) return 0;
+
+        $radius = $this->radius;
+
+        if ($this->variable){
+            //First EdfBoostLost kills the boost; every further one costs a hex of radius.
+            $hits = (int)$this->hasCritical("EdfBoostLost", $turn);
+            if ($hits < 1 && $this->getEdfBoostLevel($turn) > 0){
+                $radius += $this->boostRadiusBonus;
+            }
+            if ($hits > 1) $radius -= ($hits - 1);
+            return max(0, $radius);
+        }
+
+        /* ⚠️ THE FLOOR IS A FLOOR ON THE CRITICAL REDUCTION, NOT ON THE BLUEPRINT. A hull that
+           deliberately mounts a radius-0 fixed field must keep radius 0 - max(1, ...) alone would
+           silently promote it to a 7-hex field that nothing on the control sheet asked for. So the
+           floor is the SMALLER of the blueprint radius and MIN_RADIUS_FIXED: criticals can never
+           take a normal field below 1, and can never take a designed-small one above itself. */
+        $floor = min($this->radius, 1);
+        $radius -= (int)$this->hasCritical("EdfRadiusReduced", $turn);
+        return max($floor, $radius);
+    }
+
+    /* The radius DOUBLE POWER buys, after criticals. The one place the boost arithmetic is
+       written down; getEdfRadius() above answers the same question for the CURRENT allocation,
+       this one answers "what would boosting be worth", which is what the tooltip and the SCS
+       icon need before the player has allocated anything.
+
+       ⭐ EDF_RANGE DOES NOT MOVE THIS NUMBER, and that is the whole point of spending
+       $boostRadiusBonus down as $radius goes up (see the property block above). Once the bonus
+       reaches 0 this equals the normal radius, i.e. the refit has bought the normal-power field
+       all the way up to the double-power one and double power buys nothing further. That is the
+       rules' intent, not a degenerate case.
+
+       ⚠️ A single EdfBoostLost critical takes the boost away entirely, so from that point on the
+       crit ladder in getEdfRadius() IS the answer and this must not add anything back. */
+    public function getEdfBoostedRadius($turn = null){
+        if ($turn === null) $turn = TacGamedata::$currentTurn;
+        if (!$this->isEdfActive($turn)) return 0;
+        if (!$this->variable) return $this->getEdfRadius($turn);
+        if ((int)$this->hasCritical("EdfBoostLost", $turn) >= 1) return $this->getEdfRadius($turn);
+        return max(0, $this->radius + $this->boostRadiusBonus);
+    }
+
+    /* Destroyed, offlined by a critical, or switched off by its owner - all the same answer.
+       isDestroyed($turn-1), not isDestroyed($turn): a system killed THIS turn kept working
+       for this turn, which is the convention every other defensive system in the tree follows
+       (BaseShip::checkIsValidAffectingSystem). */
+    public function isEdfActive($turn = null){
+        if ($turn === null) $turn = TacGamedata::$currentTurn;
+        if ($this->isDestroyed($turn - 1)) return false;
+        if ($this->isOfflineOnTurn($turn)) return false;
+        return true;
+    }
+
+    /* ---------------------------------------------------------------- internals ------ */
+
+    /* Double-power boost, the same loop every boostable system in this file writes for itself
+       (Engine, Shield Generator, Trek Shield Projector). type 2 == a boost allocation. */
+    private function getEdfBoostLevel($turn){
+        $boostLevel = 0;
+        foreach ($this->power as $i){
+            if ($i->turn != $turn) continue;
+            if ($i->type == 2) $boostLevel += $i->amount;
+        }
+        return $boostLevel;
+    }
+
+    /* SpecialAbility, so a ship can be asked "do you project a field" without walking systems.
+       Returns radius + 1, so a crippled radius-0 field still reads as a truthy "yes". */
+    public function getSpecialAbilityValue($args){
+        $turn = (is_array($args) && isset($args["turn"]) && $args["turn"] !== null)
+              ? $args["turn"] : TacGamedata::$currentTurn;
+        if (!$this->isEdfActive($turn)) return 0;
+        return $this->getEdfRadius($turn) + 1;
+    }
+
+    /* ---------------------------------------------------------------- display -------- */
+
+    public function setSystemDataWindow($turn){
+        parent::setSystemDataWindow($turn);
+
+        /* ⭐ EVERY NUMBER IN THIS TOOLTIP LIVES IN ITS OWN data KEY, AND THE PROSE CARRIES NONE.
+           The Extended Draining Field refit (EDF_RANGE) is bought in the LOBBY, where there is no
+           server round trip and the blueprint's data was baked long before the purchase - so the
+           lobby has to rewrite these entries itself. Rewriting one short numeric line is a
+           one-line mirror; re-deriving a number out of the middle of a four-sentence paragraph is
+           the kind of mirror that rots. Keep the numbers out of "Special".
+           ⚠️ MIRROR PAIR with lobbyEnhancements.syncEdfFieldData (JS) - it writes the SAME two
+           keys with the SAME formatting. If a key name or a format changes here, it changes there,
+           and the only symptom is a lobby tooltip quietly quoting the hull as designed. */
+        $radius = $this->getEdfRadius($turn);
+
+        $this->data["Field radius"] = self::describeEdfRadius($radius);
+        if ($this->variable){
+            $this->data["Boosted radius"] = self::describeEdfRadius($this->getEdfBoostedRadius($turn))
+                                          . ' (double power)';
+        }
+
+        $this->data["Special"]  = "Projects an Energy Draining Field around this unit.";
+        $this->data["Special"] .= "<br>Every hex of field an enemy shot crosses is a -1 penalty to hit; doubled for Plasma and Antimatter weapons of young and middleborn races.";
+        $this->data["Special"] .= "<br>Overlapping fields are counted once - additional fields do not stack.";
+        $this->data["Special"] .= "<br>The rest of the projecting unit's own fleet is unaffected by it.";
+        if ($this->variable){
+            $this->data["Special"] .= "<br>Variable: allocating double power in the Ship Power segment buys the boosted radius above.";
+        }
+        $this->data["Special"] .= "<br>The field may be deactivated by its owner.";
+    }
+
+    /* "5 hexes (91 hexes covered)" - a radius and the size of the disc it describes.
+       ⚠️ MIRROR PAIR with lobbyEnhancements.describeEdfRadius (JS). */
+    public static function describeEdfRadius($radius){
+        $radius = max(0, (int)$radius);
+        $hexes  = 1 + (3 * $radius * ($radius + 1)); //centred hex disc
+        return $radius . ' hex' . ($radius == 1 ? '' : 'es') . ' (' . $hexes . ' hexes covered)';
+    }
+
+    /* TRAP 6 - CLIENT SYSTEM FIELDS ARE SHARED BY REFERENCE across same-phpclass instances.
+       A fixed field and a variable field on the same hull would otherwise share one $data
+       object and one $variable flag, and the second one built would win. Republishing all
+       three per instance is what keeps them apart; $data has to be republished anyway because
+       the radius is per-instance and moves with criticals.
+       ShipCompactor strips FALSE booleans from a blueprint (plan trap 8), so the client must
+       read `system.variable` as truthy/undefined and never as === false. */
+    public function stripForJson(){
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->data     = $this->data;
+        $strippedSystem->radius   = $this->radius;
+        $strippedSystem->variable = $this->variable;
+        /* ⚠️ PUBLISHED UNCONDITIONALLY, AND THE EDF_RANGE REFIT DEPENDS ON THAT. The client
+           builds a system from the per-CLASS blueprint, which cannot know what one ship bought,
+           so the two numbers the refit moves have to ride the per-ship payload or the ship window
+           quotes the hull as designed for the rest of the game. Do not make either conditional.
+           (Enhancements::addSystemEnhancementsForJSON names them again for its own case, which is
+           where a reader of the enhancement code will look; both writes are the same value.) */
+        $strippedSystem->boostRadiusBonus = $this->boostRadiusBonus;
+        /* The radius AFTER criticals and boost, for the map overlay. Published rather than
+           mirrored: the client would otherwise have to reimplement the crit ladder and the boost
+           lookup, and the two would drift the first time either changed. One number, no maths. */
+        $strippedSystem->effectiveRadius = $this->getEdfRadius();
+        /* ⭐ WHAT DOUBLE POWER WOULD BUY, published beside what the field is doing NOW - so the
+           map overlay can answer "how big will this be if I boost" WITHOUT reimplementing the
+           boost or critical ladders. The player allocates a boost in Initial Orders and the
+           server does not see it until the phase is committed, i.e. until exactly the moment
+           they can no longer act on what it shows; PhaseStrategy.getEdfRadiusForShip therefore
+           picks between THESE TWO PUBLISHED NUMBERS on the strength of the local, uncommitted
+           power entry, which is a choice, not a second copy of a rule.
+           It falls out correctly in the cases that would otherwise need special-casing: on a
+           fixed field, and on a variable one that has lost its boost to EdfBoostLost, this
+           EQUALS effectiveRadius - so allocating power to such a field moves nothing on the map,
+           which is the truth. */
+        $strippedSystem->boostedRadius = $this->getEdfBoostedRadius();
+        return $strippedSystem;
+    }
+}
+
+
+/**
+ * Energy Draining Net - the Walkers' DISTRIBUTED Energy Draining Field.
+ * WALKERS_OF_SIGMA_PLAN.md 3.7 (Stage 7). Control sheet: health 12, power 4.
+ *
+ * WHAT MAKES IT DIFFERENT FROM AN EnergyDrainingField. A Net projects a field of RADIUS ZERO -
+ * its own hex and nothing else. The field it is actually for is generated BETWEEN Nets: "the
+ * original implementation of the Energy Draining Field functions only between multiple points.
+ * Several vessels in formation, surveying the environment between them." Two Nets that end
+ * their movement within three hexes of each other extend the field along the corridor between
+ * them, and three or more linked Nets may fill in the area they enclose.
+ *
+ * ⭐ WHICH IS WHY THIS CLASS IS ALMOST EMPTY, AND THAT IS THE DESIGN. Everything that makes a
+ * field a field - the published hex map, the targeting penalty, the drain at the Critical Hit
+ * step, the map overlay - already keys off TacGamedata::$edfHexes and asks nothing about where
+ * a hex came from. So the Net contributes hexes and nothing else: EdfNetLinks (the resolver)
+ * computes the corridors and the fill, setEdfHexes() folds them into the same map, and not one
+ * consumer needed changing. The same argument the Stage 6 mine's orb records for itself.
+ *
+ * "Special Electromagnetic weapon" on the control sheet is a CLASSIFICATION, not a gun: the Net
+ * has no fire order, no arc and no target. It is a ShipSystem for the same reason
+ * EnergyDrainingField is - see the load-order note at the top of this block - and the line is
+ * reproduced in the tooltip so a reader of the ship window sees what the sheet says.
+ *
+ * CRITICALS. "On a result of 20+, the power required to operate the EDN doubles. On successive
+ * rolls the power requirement triples, then 4x power, then 5x, and so on." One crit class,
+ * escalating on the hasCritical() COUNT exactly as the EDF's two do: powerReq = base x (1+count).
+ * "The device may be deactivated as normal" - which is $canOffLine, the same all-or-nothing
+ * switch the EDF uses.
+ */
+class EnergyDrainingNet extends ShipSystem implements SpecialAbility, EdfSource {
+    public $name = "EnergyDrainingNet";
+    public $displayName = "Energy Draining Net";
+    public $iconPath = "EnergyDrainingNet.png";
+    public $primary = true;
+
+    public $canOffLine = true;   //"The device may be deactivated as normal"
+
+    /* ⚠️ THE BLUEPRINT POWER FIGURE, KEPT SEPARATELY FROM $powerReq ON PURPOSE. The critical
+       MULTIPLIES the requirement and onConstructed() is where that multiplication is applied -
+       so it has to start from a number the criticals have never touched. Multiplying $powerReq
+       in place would compound if onConstructed ever ran twice on one instance, and would leave
+       nothing able to answer "what did the sheet say". */
+    public $basePowerReq = 4;
+
+    /* 20+, and one class covers the whole ladder - the system reads the COUNT. */
+    protected $possibleCriticals = array(20 => "EdnPowerDoubled");
+
+    /* Parameters: ($armour, $maxhealth, $powerReq). 0 for health/power takes the CONTROL SHEET
+       defaults (12 / 4), the same convention every other Walker system in this plan follows. */
+    function __construct($armour, $maxhealth = 0, $powerReq = 0){
+        if ($maxhealth == 0) $maxhealth = 12;
+        if ($powerReq  == 0) $powerReq  = 4;
+
+        parent::__construct($armour, $maxhealth, $powerReq, 0);
+
+        $this->basePowerReq = (int)$powerReq;
+
+        /* ⚠️ ADDSYSTEM SECTION-ARC TRAP (arch_addsystem_section_arc_trap), same as the EDF: both
+           arcs at 0 has addSystem() stamp the SECTION's arc on, and the field is omnidirectional
+           - a Net has no facing at all. */
+        $this->startArc = 0;
+        $this->endArc   = 360;
+    }
+
+    /* ---------------------------------------------------------------- EdfSource ------ */
+
+    /* "The normal range of the EDF generated by an EDN is 0 hexes, covering only the hex that
+       the vessel is in." Zero is the whole answer and no critical moves it - this ladder spends
+       itself on POWER instead. setEdfHexes() adds a source's own hex at radius 0, so an unlinked
+       Net still drains whatever is standing on top of it. */
+    public function getEdfRadius($turn = null){
+        return 0;
+    }
+
+    /* Destroyed, offlined by a critical, or switched off by its owner - all one answer, and the
+       same isDestroyed($turn - 1) convention EnergyDrainingField::isEdfActive() explains: a
+       system killed THIS turn kept working for this turn. EdfNetLinks tests this before it will
+       link a Net to anything, so a dead Net breaks its corridors and its share of a fill. */
+    public function isEdfActive($turn = null){
+        if ($turn === null) $turn = TacGamedata::$currentTurn;
+        if ($this->isDestroyed($turn - 1)) return false;
+        if ($this->isOfflineOnTurn($turn)) return false;
+        return true;
+    }
+
+    /* ---------------------------------------------------------------- criticals ------ */
+
+    /* THE POWER LADDER, APPLIED ONCE PER LOAD. x2 on the first EdnPowerDoubled, x3 on the
+       second, and so on - "the power required to operate the EDN doubles ... on successive rolls
+       the power requirement triples, then 4x power".
+       ⚠️ $basePowerReq, never $this->powerReq: see the property. This is idempotent by
+       construction, which the in-place multiplication it replaced would not have been.
+       ⚠️ powerReq is a PUBLISHED property (ShipSystem::stripForJson names it), so the client's
+       power UI, the "Power Used" tooltip row and the server's own allocation all read the
+       escalated figure with no further plumbing. */
+    public function onConstructed($ship, $turn, $phase){
+        parent::onConstructed($ship, $turn, $phase);
+        $this->powerReq = $this->basePowerReq * (1 + (int)$this->hasCritical("EdnPowerDoubled", $turn));
+    }
+
+    /* ---------------------------------------------------------------- display -------- */
+
+    /* SpecialAbility, so "does this unit carry a Net" is one question rather than a system walk.
+       Answers 1 when the Net is up and 0 when it is not - there is no radius to report. */
+    public function getSpecialAbilityValue($args){
+        $turn = (is_array($args) && isset($args["turn"]) && $args["turn"] !== null)
+              ? $args["turn"] : TacGamedata::$currentTurn;
+        return $this->isEdfActive($turn) ? 1 : 0;
+    }
+
+    public function setSystemDataWindow($turn){
+        parent::setSystemDataWindow($turn);
+
+        /* Same rule as the EDF's tooltip: every NUMBER gets its own data key and the prose
+           carries none, so a mirror never has to re-derive a figure out of the middle of a
+           paragraph. The multiplier is the one number here that moves in play. */
+        $multiplier = 1 + (int)$this->hasCritical("EdnPowerDoubled", $turn);
+        if ($multiplier > 1){
+            $this->data["Power multiplier"] = 'x' . $multiplier . ' (' . $this->basePowerReq . ' base)';
+        }
+
+        $this->data["Special"]  = "Special Electromagnetic. Projects an Energy Draining Field over this unit's own hex only.";
+        $this->data["Special"] .= "<br>Two Nets that end their movement within " . EdfNetLinks::LINK_RANGE . " hexes of each other extend the field through the hexes between them.";
+        $this->data["Special"] .= "<br>" . EdfNetLinks::FILL_MIN_NETS . " or more linked Nets fill in the area they enclose, so long as the hexes filled in are fewer than double the number of Nets.";
+        $this->data["Special"] .= "<br>Every hex of field an enemy shot crosses is a -1 penalty to hit; doubled for Plasma and Antimatter weapons of young and middleborn races.";
+        $this->data["Special"] .= "<br>Overlapping fields are counted once - additional fields do not stack.";
+        $this->data["Special"] .= "<br>The rest of the projecting unit's own fleet is unaffected by it.";
+        $this->data["Special"] .= "<br>Criticals multiply the power this system requires; it may be deactivated by its owner.";
+    }
+
+    /* ⚠️⚠️ powerReq HAS TO BE REPUBLISHED PER INSTANCE, AND THIS IS THE WHOLE POINT OF THE CRIT
+       REACHING THE CLIENT AT ALL. `powerReq` is a BLUEPRINT field: ShipSystem::stripForJson leaves
+       it out of the poll payload on purpose (addBlueprintFieldsForJson lists it) because it rides
+       the static ship bundle, which is per CLASS and was baked long before anybody rolled a
+       critical. So a Net whose requirement the server has escalated to 8 would have gone on
+       telling the client's power UI, its allocation arithmetic and its "Power Used" tooltip row
+       that it costs 4 - the player would allocate 4, the server would refuse, and nothing on
+       screen would say why. SystemFactory merges the per-instance JSON over the blueprint
+       (`Object.assign(base, systemJson)`), so naming it here is the whole fix.
+       ⚠️ `data` goes with it for two reasons: the "Power Used" row above is built from the
+       escalated figure and would otherwise still read the blueprint's, and TRAP 6 - client system
+       fields are shared by reference across same-phpclass instances, so two Nets on one hull with
+       different crit counts would share one tooltip and the second built would win. */
+    public function stripForJson(){
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->powerReq = $this->powerReq;
+        $strippedSystem->data     = $this->data;
+        return $strippedSystem;
+    }
+}
 ?>

@@ -263,3 +263,44 @@ var VolleyLaser = function VolleyLaser(json, ship) {
 };
 VolleyLaser.prototype = Object.create(Pulse.prototype);
 VolleyLaser.prototype.constructor = VolleyLaser;
+
+
+/* ================================================================================================
+ * WALKERS OF SIGMA-957 - Chromatic Pulse Driver         WALKERS_OF_SIGMA_PLAN.md section 3.4
+ * ================================================================================================
+ *
+ * Client half of ChromaticPulseDriver (pulse.php). Deliberately thin - and the rest of the Walker
+ * arsenal is in special.js, not here.
+ *
+ * ⚠️ IT IS IN THIS FILE BECAUSE IT MUST EXTEND Pulse, AND special.js LOADS FIRST. game.php and
+ * gamelobby.php both list special.js above pulse.js, so Object.create(Pulse.prototype) evaluated
+ * inside special.js would read `undefined` at load time. SystemFactory does `new window[name]`, so
+ * the class MUST exist as a window global under the server's capitalised $name or every Traveler
+ * blows up on load.
+ *
+ * WHY THERE IS NOTHING ELSE HERE. The two things that vary on this weapon are both published from
+ * the server per instance rather than recomputed on the client:
+ *   - the charge-keyed profile (pulses, die, damage) reaches the client through the per-instance
+ *     `data`, `minDamage(Array)` and `maxDamage(Array)` that ChromaticPulseDriver::stripForJson
+ *     re-publishes, exactly as LaserAccelerator does;
+ *   - the mode swap is $damageTypeArray, which ShipSystem.prototype.changeFiringMode already
+ *     mirrors on its own.
+ * Fire control and range penalty do NOT vary with charge on the current control sheet, so this
+ * weapon needs no calculateSpecialHitChanceMod / calculateSpecialRangePenalty mirror. If a later
+ * sheet makes either of them vary, they have to be mirrored here or the player reads one number
+ * and the server rolls another - see the LightningArray family in special.js for the pattern.
+ *
+ * The SCANNING mode's effect is not predicted here either: it changes the TARGET's shields, and
+ * that is mirrored once, centrally, in Ship.prototype.getHitChangeMod (model/ship.js) off
+ * gamedata.cpdAdaptation - so it applies to every weapon in the fleet, not just to this one.
+ * ------------------------------------------------------------------------------------------------ */
+
+var ChromaticPulseDriver = function ChromaticPulseDriver(json, ship) {
+    Pulse.call(this, json, ship);
+};
+ChromaticPulseDriver.prototype = Object.create(Pulse.prototype);
+ChromaticPulseDriver.prototype.constructor = ChromaticPulseDriver;
+
+//Firing modes - MUST match the MODE_PULSE / MODE_SCANNING constants in pulse.php.
+ChromaticPulseDriver.MODE_PULSE    = 1;
+ChromaticPulseDriver.MODE_SCANNING = 2;

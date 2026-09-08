@@ -64,6 +64,20 @@ window.BallisticIconContainer = function () {
 						if (modeName === 'Gravitic Mine' || modeName === 'Standard - GN' || modeName === 'Priority - GN') return;
 					}
 				}
+				/* ⭐ WALKERS_OF_SIGMA_PLAN.md 3.9 - A SENSOR CHARGE WAYPOINT IS NOT A SHOT, and the
+				   generic hex-ballistic treatment insists that it is: getAllFireOrdersForAllShipsForTurn
+				   admits ANY normal order with targetid -1, so every waypoint drew a red "incoming fire"
+				   hex and a white arrow back to the shooter - a dozen of them fanning out of one hull,
+				   describing a straight line to each corner of a course that is not straight and does not
+				   start there. generateSensorChargeCourses below draws the real thing: the legs, the
+				   direction arrows, the green markers and the reachable fan (user request 2026-09-06).
+
+				   ⚠️ SUPPRESSED AT THE LOOP LEVEL, not inside createBallisticIcon, for the same reason
+				   the Gravitic Mine above is: createOrUpdateBallistic would otherwise find an existing
+				   icon and keep it alive through updateBallisticIcon, so icons left over from a Replay
+				   session would never be swept. */
+				if (ballistic.damageclass === 'sensorcharge') return;
+
 				if (ballistic.damageclass === 'jumppoint' && ballistic.x !== "null" && ballistic.y !== "null") {
 					/* ⚠️ NOT FOR A FIXED JUMP GATE (JUMP_GATES_PLAN.md Stage 3). generateJumpPointArrows
 					   draws an arrow at facing (firingMode - 1), and on a gate the firing mode is the
@@ -152,6 +166,8 @@ window.BallisticIconContainer = function () {
 
 		generateBallisticLines.call(this);
 		generateTerrainHexes.call(this, gamedata);
+		generateEdfNetHexes.call(this, gamedata);
+		generateSensorChargeCourses.call(this, gamedata);
 		generateReinforcementHexes.call(this, gamedata);
 		generateJumpPointArrows.call(this, jumpPointOrders);
 		generateExitHexes.call(this, gamedata, exitOrders);
@@ -243,7 +259,10 @@ window.BallisticIconContainer = function () {
 		hexGreen: 0x00cc00,
 		hexYellow: 0xffff00,
 		hexPurple: 0x7f00ff,
-		hexWhite: 0xffffff
+		hexWhite: 0xffffff,
+		//⚠️ MIRROR of the `rgb(20,80,128)` ShipIcon.showWeaponArc uses for an ordinary firing arc -
+		//EDIT BOTH. It is here so a hex blanket can make the same statement an arc does.
+		hexArcBlue: 0x145080
 	};
 	const HEX_REGION_FILL_OPACITY = 0.10;   //the 0.10 fill baked into the hex textures
 	const HEX_REGION_BORDER_OPACITY = 0.40; //lifted by hand; 0.40 is what the textures stroke at
@@ -335,6 +354,486 @@ window.BallisticIconContainer = function () {
 			});
 		});
 	}
+
+	/* WALKERS OF SIGMA-957 (WALKERS_OF_SIGMA_PLAN.md 3.7, Stage 7) - the Energy Draining NET field.
+
+	   ⭐ WHY THIS IS NOT ShipIcon.showEdfField. Every other Energy Draining Field is a disc round
+	   the unit projecting it, so it is drawn as an overlay parented to that unit's icon - which is
+	   what keeps two overlapping fields legible as two shapes rather than one blob. A Net's field
+	   has no unit at its centre: it is its own hex, the CORRIDOR between two Nets three hexes
+	   apart, and the area three or more of them enclose. There is no icon to hang it on, so the
+	   server publishes the hexes themselves (gamedata.edfNetHexes) and they are drawn here, in the
+	   one container that already knows how to lay a blanket over an arbitrary patch of grid.
+
+	   Purple, matching the EDF disc and the Energy Draining Mine marker: on the board they are the
+	   same phenomenon and the rules treat them as one field.
+
+	   ⚠️ gamedata.edfNetHexes is the cheap gate - the server publishes NULL when no Net is on the
+	   board, so an ordinary game does one property read. And the hex LIST is the signature, so a
+	   formation that has not moved is never rebuilt: syncSceneObject would otherwise re-sweep the
+	   region and mint fresh geometry on every poll of every turn.
+
+	   ⚠️⚠️ ONE OVERLAY PER CONNECTED CLUSTER, NOT ONE FOR THE WHOLE SET, and that is a performance
+	   requirement rather than a visual one. HexRegion.buildRegionFromHexes sizes its sweep from the
+	   FARTHEST hex from the anchor and then tests every hex in that square - so a single overlay
+	   covering two Walkers 60 hexes apart would sweep 121 x 121 = 14,641 hexes to draw a handful.
+	   Two lone unlinked Nets at opposite corners of the board is an ordinary thing to happen, so
+	   this is not a corner case. Splitting on adjacency bounds each sweep by the cluster's own
+	   span, which the link rules cap at LINK_RANGE per step.
+
+	   ⚠️ Teams are not distinguished here (the shape is the information, and each cluster belongs
+	   to one fleet anyway); anything that needs to know WHOSE field a hex is reads
+	   gamedata.edfHexes, which is team-tagged and is what every actual rule uses. */
+	function generateEdfNetHexes(gamedata) {
+		//⭐ THE LIVE PREVIEW WINS WHEN THERE IS ONE. PhaseStrategy.syncEdfNetPreview recomputes the
+		//field from PLOTTED positions while the player is moving, so the corridors and the filled
+		//area form as the ship is dragged rather than a commit later (user request, 2026-09-05).
+		//It is advisory only - see model/EdfNetLinks.js - and falls back to the server's answer the
+		//moment the preview is cleared, which is what every other phase gets.
+		const hexes = gamedata.edfNetPreview || gamedata.edfNetHexes;
+		if (!hexes || !hexes.length) return;
+
+		edfNetClusters(hexes).forEach(cluster => {
+			//The cluster's own first hex anchors it, and the cluster list is built in a stable
+			//order - so both the key and the signature stay put while nothing moves.
+			const centre = { q: cluster[0].q, r: cluster[0].r };
+			const signature = cluster.map(hex => `${hex.q},${hex.r}`).join('|');
+
+			syncSceneObject.call(this, `edfnet:${centre.q},${centre.r}`, signature, () => {
+				const overlay = buildHexRegionOverlay.call(this, centre, cluster, 'hexPurple', 1);
+
+				return overlay && { object: overlay, release: window.HexRegion.dispose };
+			});
+		});
+	}
+
+	/* Redraw the Net field ALONE, outside the consumeGamedata pass - which is what the movement
+	   preview needs, because plotting a move fires no poll.
+
+	   ⚠️⚠️ IT HAS TO PRUNE ITS OWN STALE CLUSTERS. consumeGamedata clears `used` on everything and
+	   calls pruneSceneObjects at the end, so an overlay nothing claimed that pass is reclaimed for
+	   free. Nothing does that here, so a cluster that MOVED - which is exactly what happens on
+	   every step of a plotted move - would leave its previous shape on the board and the field
+	   would smear across the whole plotted path. Marking only this prefix and sweeping only this
+	   prefix keeps that fix from touching ballistics, terrain or jump points.
+
+	   Returns whether anything actually changed, so the caller can decide whether to wake the
+	   idle-gated render loop (trap 10) rather than requesting a frame on every mouse move. */
+	BallisticIconContainer.prototype.refreshEdfNetHexes = function (gamedata) {
+		const before = new Map();
+
+		//Clear the claim on this prefix only, and remember what each cluster looked like.
+		this.sceneObjects.forEach((entry, key) => {
+			if (!key.startsWith('edfnet:')) return;
+
+			before.set(key, entry.signature);
+			entry.used = false;
+		});
+
+		generateEdfNetHexes.call(this, gamedata);
+
+		let changed = false;
+
+		this.sceneObjects.forEach((entry, key) => {
+			if (!key.startsWith('edfnet:')) return;
+
+			if (!entry.used) {
+				//Nothing claimed it this pass, so this cluster has gone or moved.
+				releaseSceneObject.call(this, entry);
+				this.sceneObjects.delete(key);
+				changed = true;
+
+				return;
+			}
+
+			//A key it did claim: new, or the same anchor with a different shape.
+			if (before.get(key) !== entry.signature) changed = true;
+		});
+
+		return changed;
+	};
+
+	/* The published Net hexes split into groups of touching hexes. A Net field is corridors and
+	   filled areas, so each group is compact; what it separates is two FORMATIONS, which can be
+	   anywhere relative to each other.
+
+	   Flood fill over mathlib.getNeighbouringHexes, which is the same odd-row offset frame the
+	   server's Mathlib walks - so a corridor the server built as contiguous reads as contiguous
+	   here. O(hexes), and the whole thing only runs when the board actually has a Net on it. */
+	function edfNetClusters(hexes) {
+		const remaining = new Map();
+
+		hexes.forEach(hex => remaining.set(`${hex.q},${hex.r}`, hex));
+
+		const clusters = [];
+
+		hexes.forEach(hex => {
+			const key = `${hex.q},${hex.r}`;
+			if (!remaining.has(key)) return; //already swallowed by an earlier cluster
+
+			const cluster = [];
+			const stack = [remaining.get(key)];
+
+			remaining.delete(key);
+
+			while (stack.length) {
+				const current = stack.pop();
+
+				cluster.push(current);
+
+				mathlib.getNeighbouringHexes(current, 1).forEach(neighbour => {
+					const neighbourKey = `${neighbour.q},${neighbour.r}`;
+
+					if (!remaining.has(neighbourKey)) return;
+					stack.push(remaining.get(neighbourKey));
+					remaining.delete(neighbourKey);
+				});
+			}
+
+			clusters.push(cluster);
+		});
+
+		return clusters;
+	}
+
+	/* ================================================================================
+	   SENSOR CHARGE COURSES - WALKERS_OF_SIGMA_PLAN.md 3.9 (Stage 9).
+
+	   A Sensor Charge Transceiver's declaration is a COURSE, not a target, so there is nothing
+	   for the ballistic icon layer to draw: no launch hex, no target hex, no unit at the end.
+	   Four overlays instead, ALL of them built from the weapon's own getCoursePlan() so that what
+	   the player sees and what doMultipleHexFireOrders will accept can never disagree:
+
+	     - the COMMITTED course, one line per leg, with chevrons along it saying which way the
+	       charge flies. GREEN once the last waypoint stands on a friendly ship with a transceiver
+	       (the charge would be received); YELLOW until then, because a course that ends nowhere
+	       does no damage at all - that colour change is the whole rule, shown rather than explained.
+	     - the REACHABLE FAN: every hex a further leg could still legally end on, as a blue patch
+	       of grid, drawn only while the transceiver is SELECTED.
+	     - the MARKERS: a green hex wherever the course did something - manoeuvred, ended so far,
+	       or had a unit named on it. See SensorChargeTransceiver.getCourseMarkers for which and why.
+	     - the BUDGET, two rows of figures at the head of the course, also SELECTED-only.
+
+	   ⚠️ THE FAN WAS SIX LINES UNTIL 2026-09-06 and is now hexes, at the user's request: a line
+	   asks the player to judge whether a hex centre sits on it, and the answer to "can I click
+	   there?" is a hex. The cost that argued for lines is real but small - ~96 hexes over a
+	   41x41 sweep, and only when the weapon is selected AND the course changed (syncSceneObject's
+	   signature covers both), which is a handful of rebuilds per turn rather than one per poll.
+	   ================================================================================ */
+	const SCT_COURSE_COLOUR_OPEN = 0xffff00;      //no receiver at the end yet - the charge is lost
+	const SCT_COURSE_COLOUR_RECEIVED = 0x00cc00;  //ends on a friendly transceiver
+	const SCT_COURSE_OPACITY = 0.85;
+	const SCT_COURSE_Z = -4;                      //just above the ballistic lines at -5
+
+	/* ⭐⭐ THE SIX NUMBERS THAT SIZE THIS OVERLAY ARE ALL IN THIS BLOCK, and they are meant to be
+	   edited by hand - every one was set by eye and then cut on the first play test (2026-09-06).
+	   Nothing else changes when you move one: they feed the builders below directly, and each is
+	   expressed in HEXES or in canvas pixels, so it holds at every zoom level.
+
+	     SCT_ARROW_SIZE     how long a chevron's barbs are, in hexes. ⭐ THE arrow knob.
+	     SCT_ARROW_EVERY    hexes between chevrons - raise it for fewer, sparser arrows.
+	     SCT_ARROW_ANGLE    how wide the chevron opens. Below ~20 it reads as a line, above ~45 as a T.
+	     SCT_LABEL_SCALE    how big the whole budget read-out is, in hexes. ⭐ THE font knob.
+	     SCT_LABEL_FONT_PX  glyph size WITHIN the canvas, i.e. text against padding. Leave this alone
+	                        unless the rows crowd each other - SCT_LABEL_SCALE is the one to reach for.
+	     SCT_FAN_DIM        how strongly the reachable fan tints its hexes (1 = the standard hex
+	                        blanket, as the terrain and Net overlays use).                            */
+
+	/* THE DIRECTION ARROWS. A course crosses itself, doubles back and ends nowhere in particular,
+	   so which way round it is flown is not something the geometry says on its own - and it decides
+	   which end has to hold the receiver. One chevron every SCT_ARROW_EVERY hexes, measured BACK
+	   from each waypoint so every leg finishes with one pointing into its corner. */
+	const SCT_ARROW_EVERY = 2;                    //hexes between chevrons
+	const SCT_ARROW_SIZE = 0.12;                  //barb length, as a fraction of one hex
+	const SCT_ARROW_ANGLE = 32;                   //degrees each barb sweeps off the reverse heading
+
+	/* THE BUDGET READ-OUT, in the style of the LoS ruler's distance figure (user request): bold
+	   white on a shadow, sized in world units so it scales with the map like everything else on it.
+	   ⚠️ z > 100 IS THE REQUIREMENT, not z > 0 - the head of a course is exactly the sort of hex
+	   that holds a stack of ships, and a selected or active-mover hull sits at +100 for a whole
+	   phase (arch_map_z_planes). 130 clears that and the ini badge at +120, and still loses to the
+	   +499 hover lift, which is a bring-to-front the player asked for. */
+	const SCT_LABEL_Z = 130;
+	const SCT_LABEL_TEXTURE = 128;                //canvas side in px - the RESOLUTION, not the size
+	const SCT_LABEL_SCALE = 0.7;                  //sprite side, in hexes
+	const SCT_LABEL_FONT_PX = 38;                 //glyph size within that canvas
+
+	/* THE REACHABLE FAN reads in the ordinary WEAPON ARC BLUE (user request 2026-09-06) - the
+	   `rgb(20,80,128)` ShipIcon.showWeaponArc paints every firing arc with. It is the same statement
+	   those arcs make ("this is where this weapon can reach"), so it should not have a colour of its
+	   own; the cyan it launched with belongs to "not here yet" markers instead.
+	   ⚠️ Arc blue is much darker than that cyan, so it needs more than the standard hex-blanket
+	   alpha to read at all over the map - hence SCT_FAN_DIM. */
+	const SCT_FAN_DIM = 2.2;
+
+	//A marker's word sits ON its green hex, so it is drawn in the same green - which is how every
+	//other coloured hex marker on this map pairs its tint with its label.
+	const SCT_MARKER_TEXT_COLOUR = '#00cc00';
+
+	/* EVERY scene-object key prefix this feature owns. refreshSensorChargeCourses marks and sweeps
+	   BY PREFIX, because it runs outside the consumeGamedata pass and that pass is the only thing
+	   that clears `used` on everything - so a prefix left out of this list is an overlay that never
+	   goes away. ('sct:' does not shadow the rest: 'sctray:' does not start with 'sct:'.) */
+	const SCT_KEY_PREFIXES = ['sct:', 'sctray:', 'sctmark:', 'sctfig:'];
+
+	/* A chain of LineSprites as one scene object. `segments` is [{from, to}] in HEX coordinates;
+	   the conversion to game space happens here so callers only ever speak hexes.
+	   ⚠️ The release function disposes geometry AS WELL AS material: LineSprite.destroy() frees
+	   only the material, and each sprite builds its own PlaneGeometry. */
+	function buildLineChain(segments, colour, opacity, z, arrows) {
+		if (!segments.length) return null;
+
+		const group = new THREE.Group();
+		const width = getHexSpriteStrokeWidth();
+		const sprites = [];
+
+		const addSprite = (from, to) => {
+			const sprite = new window.LineSprite(from, to, width, z, colour, opacity);
+
+			sprites.push(sprite);
+			group.add(sprite.mesh);
+		};
+
+		segments.forEach(segment => {
+			const from = this.coordinateConverter.fromHexToGame(segment.from);
+			const to = this.coordinateConverter.fromHexToGame(segment.to);
+
+			addSprite(from, to);
+			if (arrows) addDirectionArrows(addSprite, from, to, segment.length);
+		});
+
+		return {
+			object: group,
+			release: () => sprites.forEach(sprite => {
+				sprite.destroy();
+				if (sprite.mesh && sprite.mesh.geometry) sprite.mesh.geometry.dispose();
+			})
+		};
+	}
+
+	/* Chevrons along one leg, pointing the way the charge flies. Two short lines per arrow, in the
+	   leg's own colour and width, so an arrow is visibly part of the line rather than an ornament
+	   laid over it.
+
+	   `hexes` is the leg's length in HEXES, which is what makes the spacing exact without going
+	   near the coordinate converter: the leg is straight, so one hex of it is gameLength/hexes
+	   whatever the zoom or the bearing. Walked BACKWARDS from the waypoint so that every leg -
+	   including a one-hex slide - ends with an arrow pointing into its corner. */
+	function addDirectionArrows(addSprite, from, to, hexes) {
+		const span = mathlib.distance(from, to);
+		if (!span || !hexes) return;
+
+		const unit = { x: (to.x - from.x) / span, y: (to.y - from.y) / span };
+		const perHex = span / hexes;
+		const size = perHex * SCT_ARROW_SIZE;
+		const step = perHex * SCT_ARROW_EVERY;
+
+		//The two barbs are the REVERSE heading rotated each way by SCT_ARROW_ANGLE.
+		const angle = SCT_ARROW_ANGLE * Math.PI / 180;
+		const cos = Math.cos(angle);
+		const sin = Math.sin(angle);
+		const back = { x: -unit.x, y: -unit.y };
+		const barbs = [
+			{ x: back.x * cos - back.y * sin, y: back.x * sin + back.y * cos },
+			{ x: back.x * cos + back.y * sin, y: back.y * cos - back.x * sin }
+		];
+
+		//The epsilon keeps floating-point dust from minting a zero-length arrow on the launch hex.
+		for (let along = span; along > 0.001; along -= step) {
+			const tip = { x: from.x + unit.x * along, y: from.y + unit.y * along };
+
+			barbs.forEach(barb => addSprite(tip, { x: tip.x + barb.x * size, y: tip.y + barb.y * size }));
+		}
+	}
+
+	/* The green hexes the course leaves behind it (user ruling 2026-09-06). BallisticSprites rather
+	   than one HexRegion blanket, for two reasons: they are scattered rather than contiguous, so a
+	   region would be one loop per hex anyway, and a sprite can carry TEXT - which is how a hex where
+	   the player named a unit says whose name it is.
+	   ⚠️ destroy() frees the MATERIAL only. BallisticSprite's textures are shared statics cached by
+	   content (its TEXTURE_CACHE), so disposing one here would blank every other sprite using it. */
+	function buildCourseMarkers(markers) {
+		if (!markers.length) return null;
+
+		const group = new THREE.Group();
+		const sprites = [];
+
+		markers.forEach(marker => {
+			const position = this.coordinateConverter.fromHexToGame(new hexagon.Offset(marker.q, marker.r));
+			const sprite = new window.BallisticSprite(position, 'hexGreen', marker.text, SCT_MARKER_TEXT_COLOUR);
+
+			sprites.push(sprite);
+			group.add(sprite.mesh);
+		});
+
+		return { object: group, release: () => sprites.forEach(sprite => sprite.destroy()) };
+	}
+
+	/* Two rows of figures over one hex, in the LoS ruler's idiom (mathlib.drawRuler). A THREE.Sprite
+	   rather than a TextSprite plane so it never inherits a rotation from anything, and so it can sit
+	   at a fixed world z without a parent to compensate for.
+	   ⚠️ THIS TEXTURE IS NOT SHARED and MUST be disposed - unlike every other sprite in this file,
+	   whose textures are cached statics. It is minted per set of figures, and the figures change on
+	   every click. */
+	function buildFigureLabel(hex, rows) {
+		const canvas = window.AbstractCanvas.create(SCT_LABEL_TEXTURE, SCT_LABEL_TEXTURE);
+		const context = canvas.getContext('2d');
+		const middle = SCT_LABEL_TEXTURE / 2;
+		//Any number of rows, always centred on the hex: the third one only appears when the weapon
+		//is boosted, and the block must not shift up the map when it does.
+		const spacing = SCT_LABEL_FONT_PX * 1.1;
+		const first = middle - (rows.length - 1) * spacing / 2;
+
+		context.fillStyle = '#ffffff';
+		context.textAlign = 'center';
+		context.textBaseline = 'middle';
+		context.shadowColor = 'rgba(0,0,0,1)';
+		context.shadowBlur = 10;
+		context.font = 'bold ' + SCT_LABEL_FONT_PX + 'px Arial';
+		rows.forEach((row, index) => context.fillText(row, middle, first + index * spacing));
+
+		const texture = new THREE.CanvasTexture(canvas);
+		texture.colorSpace = THREE.SRGBColorSpace;
+		texture.needsUpdate = true;
+
+		const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, transparent: true }));
+		const position = this.coordinateConverter.fromHexToGame(new hexagon.Offset(hex.q, hex.r));
+		const side = this.coordinateConverter.getHexDistance() * SCT_LABEL_SCALE;
+
+		sprite.position.set(position.x, position.y, SCT_LABEL_Z);
+		sprite.scale.set(side, side, 1);
+
+		return {
+			object: sprite,
+			release: object => {
+				if (object.material.map) object.material.map.dispose();
+				object.material.dispose();
+			}
+		};
+	}
+
+	/* Every transceiver on the board with a course declared this turn, plus the reachable fan and
+	   the budget figures of whichever one is selected.
+
+	   ⚠️ NO EXPLICIT OWN-TEAM FILTER, and none is needed: SensorChargeTransceiver is a hidetarget
+	   weapon, so TacGamedata::hideSystemFireOrders blanks x and y on every waypoint order in an
+	   enemy's payload for the turn it was declared on, and getCoursePlan drops a waypoint whose
+	   hex will not parse. An enemy course therefore resolves to an empty plan by construction
+	   rather than by a rule this file has to remember to apply. */
+	function generateSensorChargeCourses(gamedata) {
+		if (!window.SensorChargeTransceiver) return; //no such weapon loaded in this build
+
+		gamedata.ships.forEach(ship => {
+			if (!ship.systems || shipManager.isDestroyed(ship)) return;
+
+			ship.systems.forEach(system => {
+				if (!system || system.name !== 'SensorChargeTransceiver') return;
+				if (typeof system.getCoursePlan !== 'function') return;
+
+				const plan = system.getCoursePlan(ship);
+				if (!plan) return;
+
+				const key = `sct:${ship.id}:${system.id}`;
+
+				if (plan.legs.length) {
+					const colour = plan.receiver ? SCT_COURSE_COLOUR_RECEIVED : SCT_COURSE_COLOUR_OPEN;
+					//The signature has to carry the colour as well as the geometry: a ship moving
+					//onto the last waypoint turns the same course green without changing a leg.
+					const signature = colour + '|' + plan.legs
+						.map(leg => `${leg.from.q},${leg.from.r}>${leg.to.q},${leg.to.r}`).join('|');
+
+					syncSceneObject.call(this, key, signature,
+						() => buildLineChain.call(this, plan.legs, colour, SCT_COURSE_OPACITY, SCT_COURSE_Z, true));
+				}
+
+				//The green markers belong to the COURSE, not to the selection: they are what the
+				//player has committed, and they have to stay readable while another ship is being
+				//given its orders.
+				if (plan.markers.length) {
+					//The text is part of the signature: naming a unit on a hex already marked changes
+					//the sprite without moving it.
+					const markerSignature = plan.markers
+						.map(marker => `${marker.q},${marker.r}:${marker.text}`).join('|');
+
+					syncSceneObject.call(this, `sctmark:${ship.id}:${system.id}`, markerSignature,
+						() => buildCourseMarkers.call(this, plan.markers));
+				}
+
+				//The fan and the figures are a targeting aid, so they belong to the SELECTED weapon
+				//only - otherwise every transceiver in the fleet would paint the map.
+				const selected = gamedata.selectedSystems && gamedata.selectedSystems.indexOf(system) !== -1;
+				if (!selected) return;
+
+				/* WHAT IS STILL AFFORDABLE, as spent-of-total on each axis. The totals are derived
+				   rather than the class constants: boost levels are bought in Initial Orders and can
+				   go to either axis, so "16" is only right until the player buys one. plan.hexesLeft
+				   and plan.manoeuvresLeft already price that the way the player reads it - the most
+				   this axis could still take - so used + left IS the axis total.
+
+				   ⚠️⚠️ AND THAT IS WHY A BOOSTED CHARGE NEEDS THE THIRD ROW (user report 2026-09-06:
+				   "seems to run out of hexes after it goes above the normal 4 manoeuvres"). The two
+				   totals are each "the most THIS axis could take if nothing further goes to the other",
+				   and the boost levels are a SHARED pool - so they cannot both be reached, and the hex
+				   total visibly SHRINKS (19 -> 18 -> 17) as manoeuvres eat levels off it. The maths is
+				   right and the server agrees with it exactly; what was missing was any sign of the pool
+				   the two rows are competing for. `+N` is that pool, shown only when there is one. */
+				const rows = [
+					`${plan.hexesUsed}/${plan.hexesUsed + plan.hexesLeft}`,
+					`${plan.manoeuvresUsed}/${plan.manoeuvresUsed + plan.manoeuvresLeft}`
+				];
+
+				if (plan.boost > 0) rows.push(`+${plan.boostLeft}`);
+
+				syncSceneObject.call(this, `sctfig:${ship.id}:${system.id}`,
+					`${plan.head.q},${plan.head.r}|${rows.join('|')}`,
+					() => buildFigureLabel.call(this, plan.head, rows));
+
+				const reachable = system.getReachableHexes(plan);
+				if (!reachable.length) return;
+
+				//Anchored on the head, which is where buildRegionFromHexes measures its sweep from -
+				//and the fan is symmetric about it, so that is also the smallest sweep available.
+				const reachSignature = `${plan.head.q},${plan.head.r}|` + reachable
+					.map(hex => `${hex.q},${hex.r}`).join('|');
+
+				syncSceneObject.call(this, `sctray:${ship.id}:${system.id}`, reachSignature, () => {
+					const overlay = buildHexRegionOverlay.call(this, plan.head, reachable, 'hexArcBlue', SCT_FAN_DIM);
+
+					return overlay && { object: overlay, release: window.HexRegion.dispose };
+				});
+			});
+		});
+	}
+
+	/* Redraw the courses ALONE, outside the consumeGamedata pass - which is what withdrawing a
+	   waypoint and selecting or unselecting the weapon need, since neither fires a poll.
+
+	   ⚠️⚠️ IT HAS TO PRUNE ITS OWN STALE KEYS, for the same reason refreshEdfNetHexes does:
+	   consumeGamedata clears `used` on everything and sweeps at the end, and nothing does that
+	   here - so a course that shrank by a leg, or a reachable fan whose weapon has just been
+	   unselected, would stay on the board. Marking and sweeping only SCT_KEY_PREFIXES keeps it
+	   away from ballistics, terrain and jump points.
+
+	   The caller does not have to request a frame: every path that reaches this one goes through
+	   webglScene.customEvent, which calls requestRender() itself. */
+	BallisticIconContainer.prototype.refreshSensorChargeCourses = function (gamedata) {
+		//⚠️ EVERY PREFIX THIS FEATURE OWNS, or the one left out is the one that smears: a marker
+		//whose waypoint has just been withdrawn, or a figure label for a course that shrank.
+		const isCourseKey = key => SCT_KEY_PREFIXES.some(prefix => key.startsWith(prefix));
+
+		this.sceneObjects.forEach((entry, key) => {
+			if (isCourseKey(key)) entry.used = false;
+		});
+
+		generateSensorChargeCourses.call(this, gamedata);
+
+		this.sceneObjects.forEach((entry, key) => {
+			if (!isCourseKey(key) || entry.used) return;
+
+			releaseSceneObject.call(this, entry);
+			this.sceneObjects.delete(key);
+		});
+	};
 
 	/* SUPERSEDED - kept for reference while the blanket version beds in. One BallisticSprite (one
 	   draw call, one cloned ShaderMaterial) per hex, rebuilt in full on every consumeGamedata, and
@@ -714,7 +1213,14 @@ if (ballistic.damageclass === 'Sweeping' || ballistic.damageclass === 'HPC-subor
 				: shooterIcon.getFirstMovementOnTurn(turn).position
 		);
 		*/
-		if (ballistic.type === 'normal' || ballistic.type === 'prefiring') {
+		if (ballistic.damageclass === 'HomingMissile') {
+			/* HOMING MISSILE (HOMING_MISSILE_PLAN.md): a re-attack launches from the hex its TARGET
+			   was standing on when the previous pass missed, not from the shooter. That hex rides on
+			   the ORDER (x/y), which is why this cannot go through weapon.hasSpecialLaunchHexCalculation
+			   - that flag is per-WEAPON, and it also switches off the launcher's line-of-sight
+			   fire-control penalty, which must keep applying. */
+			launchPosition = this.coordinateConverter.fromHexToGame(new hexagon.Offset(Number(ballistic.x), Number(ballistic.y)));
+		} else if (ballistic.type === 'normal' || ballistic.type === 'prefiring') {
 			launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement().position);
 		} else {
 			launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getFirstMovementOnTurn(turn).position);
@@ -811,7 +1317,12 @@ if (ballistic.damageclass === 'Sweeping' || ballistic.damageclass === 'HPC-subor
 				'Clockwise': { type: 'hexPurple', text: 'Singularity Mine', color: '#7f00ff' }, // GTS for Singularity Mine
 				'Defensive Plasma Web': { type: 'hexGreen', color: '', color: '#787800' },								
 				'Defensive Sand Caster': { type: 'hexYellow', color: '', color: '#787800' },
-				'Energy Mine': { type: 'hexRed', text: 'Energy Mine', color: '#e6140a' },					
+				'Energy Mine': { type: 'hexRed', text: 'Energy Mine', color: '#e6140a' },
+				//WALKERS OF SIGMA-957 (Stage 6). Purple, not red: the probe deals no damage, and a
+				//red hex on this map means incoming fire. The key is the FIRING MODE NAME as the
+				//server declares it (EnergyDrainingMine::$firingModes) - the label is shorter on
+				//purpose, so it fits the hex.
+				'Energy Draining Mine': { type: 'hexPurple', text: 'Energy Drain Mine', color: '#7f00ff' },
 				'Fighter Bomb': { type: 'hexBlue', text: 'Fighter Bomb', color: '#00b8e6' },
 				'Flare': { type: 'hexWhite', text: 'Flare', color: '#ffffff' },  // GTS for Flare Generator
 				'Gravitic Mine': { type: 'hexGreen', text: 'Gravitic Mine', color: '#008000' },											
@@ -844,12 +1355,14 @@ if (ballistic.damageclass === 'Sweeping' || ballistic.damageclass === 'HPC-subor
 				// Call splash hex generation for cases where weapon affects more than one hex.
 				// Guard with targetPosition: mine-targeting fire orders (targetid !== -1) have a targetIcon
 				// but no targetPosition, which would make generateSplashHexes place hexes at 0,0 in Replay.
-				if (['Z - Antimine', 'Shredder', 'Energy Mine', 'Ion Storm', 'Jammer', '1-Blanket Shield', '3-Blanket Shade', 'Flare', 'Asteroid Salvo', 'Clockwise', 'Anti-Clockwise'].includes(modeName)) {  //GTS Added Flare, Asteroid Salvo, and spins for Singularity Mine
+				if (['Z - Antimine', 'Shredder', 'Energy Mine', 'Energy Draining Mine', 'Ion Storm', 'Jammer', '1-Blanket Shield', '3-Blanket Shade', 'Flare', 'Asteroid Salvo', 'Clockwise', 'Anti-Clockwise'].includes(modeName)) {  //GTS Added Flare, Asteroid Salvo, and spins for Singularity Mine
 					if ((gamedata.isMyOrTeamOneShip(shooter) || replay) && targetPosition) {
 						//A single RADIUS now, not a list of ring sizes: generateSplashHexes fills the whole
 						//disc in one region, so Ion Storm's old [1, 2] - ring 1 plus ring 2, the only way
 						//to cover a radius-2 area a ring at a time - is simply 2.
-						let size = 1; // Shredder / Energy Mine
+						//Energy Draining Mine takes this default deliberately: radius 1 is the seven
+						//hexes its field covers, i.e. EnergyDrainingMine::FIELD_RADIUS. Move both together.
+						let size = 1; // Shredder / Energy Mine / Energy Draining Mine
 
 						switch (modeName) {
 							case 'Z - Antimine':
@@ -1039,7 +1552,16 @@ if (ballistic.damageclass === 'Sweeping' || ballistic.damageclass === 'HPC-subor
 			shooterId: ballistic.shooterid,
 			targetId: iconTargetId,   //see the note above - a vortex declaration is hex-keyed, never unit-keyed
 			launchPosition,
-			position: new hexagon.Offset(ballistic.x, ballistic.y),
+			/* `position` means THE HEX THIS SHOT IS AIMED AT - it is only ever read by
+			   getByTargetIdOrTargetPosition, to stop two orders drawing two markers on one hex. On an
+			   ordinary unit-targeted ballistic x/y are the string "null" and it is harmless nonsense.
+			   A HOMING re-attack is the exception: its x/y hold a REAL hex, but it is the LAUNCH hex
+			   (its target's previous position), not a target - so left as-is it would suppress an
+			   unrelated hex-targeted marker that happened to land where the missile came from.
+			   HOMING_MISSILE_PLAN.md. */
+			position: (ballistic.damageclass === 'HomingMissile' && iconTargetId !== -1)
+				? null
+				: new hexagon.Offset(ballistic.x, ballistic.y),
 			launchSprite,
 			targetSprite,
 			used: true,
@@ -1139,6 +1661,11 @@ if (ballistic.damageclass === 'Sweeping' || ballistic.damageclass === 'HPC-subor
 		}
 		// Get launch position (may be overwritten later)
 		let launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getFirstMovementOnTurn(turn)?.position);
+		// HOMING MISSILE: a re-attack's launch hex is its target's PREVIOUS hex, carried on the
+		// order itself - see the matching branch in createBallisticIcon.
+		if (ballistic.damageclass === 'HomingMissile') {
+			launchPosition = this.coordinateConverter.fromHexToGame(new hexagon.Offset(Number(ballistic.x), Number(ballistic.y)));
+		}
 		let targetPosition;
 
 		// Determine target position

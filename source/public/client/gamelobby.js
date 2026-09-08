@@ -195,6 +195,9 @@ window.gamedata = {
 			case 'Vree Conglomerate':
 				powerRating = 'Tier 1; League Faction';
 				break;
+			case 'Walkers of Sigma-957':
+				powerRating = 'Tier Ancients';
+				break;
 			case 'Yolu Confederation':
 				powerRating = 'Tier 1; Minor Faction';
 				break;

@@ -116,7 +116,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li><a href="#valheru">HOUSE VALHERU</a></li>                  
                 <li><a href="#startrek">STAR TREK</a></li>   
                 <li><a href="#starwars">STAR WARS</a></li>
-                <li><a href="#system">THE SYSTEM (Unofficial)</a></li>                                                          
+                <li><a href="#system">THE SYSTEM</a></li>                                                          
             </ul>     
         </li>
  <!--<li><a href="#tiers" style="margin-right: 5px; margin-left: 5px; margin-top: 10px; font-size: 12px; color: #8bcaf2; font-size: 16px;"><span style="color:gold;">★</span> TIER RATINGS <span style="color:gold;">★</span></a></li>-->                                                                   

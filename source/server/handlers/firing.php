@@ -36,6 +36,27 @@ class Firing
 
             $shooter = $gamedata->getShipById($fire->shooterid);
 
+            /* ⭐ A HOMING MISSILE RE-ATTACK IS NEVER THE CLIENT'S TO SUBMIT
+               (HOMING_MISSILE_PLAN.md). The server creates one at the end of the pass that missed
+               (AmmoMissileRackS::persistNextPassOrder), so a row already exists for it before any
+               player sees it - and since 2026-09-03 the order is VISIBLE during Initial Orders,
+               which is the one phase where DBManager::submitFireorders inserts a ballistic order
+               whatever its ->addToDB says. Without this, every commit would insert a second copy of
+               every missile in the air, and a hand-edited POST could conjure 20 points of damage
+               out of nothing.
+
+               Same reject + detach convention as the corrupt-order path below: the order is dropped
+               silently and the rest of the ship's submission goes through. Dropping it costs the
+               player nothing - the authoritative copy is already in the database. */
+            if ($fire->damageclass === AmmoMissileHM::REATTACK_CLASS) {
+                $fire->rejected = true;
+                Debug::log("validateFireOrders: rejecting POSTED homing-missile re-attack order "
+                    . "(game {$gamedata->id}, shooter {$fire->shooterid}, weaponid {$fire->weaponid}, "
+                    . "id {$fire->id}) - these are server-generated only.");
+                if ($shooter) self::detachFireOrder($shooter, $fire);
+                continue;
+            }
+
             //Uncontrolled-flight guard. A remote-controlled Hunter-Killer flight whose
             //command link is severed (node shortfall or ELINT jamming) is driven entirely
             //by the server: AutomatedMovement moves it (drift/seek) and, if it ends co-located
@@ -835,6 +856,12 @@ class Firing
         //"no such order" apart from "found it", which the old scan silently conflated.
         $ordersById = array();
         foreach ($allIncomingShots as $anyOrder) {
+            /*⚠️ ONLY ORDERS THAT HAVE A REAL ROW. A server-generated order that has not been
+            inserted yet carries id -1, and several can carry it at once - so indexing on it would
+            let one arbitrary shot answer to "-1" and let a stale client's intercept order be
+            credited against a missile nobody aimed at. An order with no id has no identity a client
+            could legitimately have named, so it simply cannot be manually intercepted.*/
+            if ((int)$anyOrder->id <= 0) continue;
             $ordersById[$anyOrder->id] = $anyOrder;
         }
         //Per-weapon tally of manual intercept orders ACCEPTED so far, keyed shipid_weaponid, so the
@@ -1403,6 +1430,13 @@ class Firing
         //Initial Orders or Movement would otherwise still get its pre-firing shots away here.
         self::withdrawSurrenderedFireOrders($gamedata);
 
+        //A flight that spent last turn inside an Energy Draining Field is disrupted and cannot
+        //fire this turn.
+        //⚠️ NOT gated on TacGamedata::$edfPresent: the field that grounded the flight may have
+        //been destroyed since, and the crit outlives it by a turn. The method self-gates on the
+        //flight having any criticals at all, which is free for every ordinary flight.
+        self::withdrawGroundedFighterFireOrders($gamedata);
+
         $ambiguousFireOrders  = array();
         foreach ($gamedata->ships as $ship){
             foreach($ship->getAllFireOrders($gamedata->turn) as $fire){
@@ -1639,6 +1673,13 @@ public static function firePreFiringWeapons($gamedata){
         //phase resolves - see the method for why nothing downstream would have stopped it.
         self::withdrawSurrenderedFireOrders($gamedata);
 
+        //A flight that spent last turn inside an Energy Draining Field is disrupted and cannot
+        //fire this turn (WALKERS_OF_SIGMA_PLAN.md 2.2).
+        //⚠️ NOT gated on TacGamedata::$edfPresent: the field that grounded the flight may have
+        //been destroyed since, and the crit outlives it by a turn. The method self-gates on the
+        //flight having any criticals at all, which is free for every ordinary flight.
+        self::withdrawGroundedFighterFireOrders($gamedata);
+
         //Uncontrolled Hunter-Killers that ended movement co-located with an enemy ram it
         //(no player to submit the ram order). Done before ram orders are gathered below.
         //$dbManager is threaded through so each automated ram FireOrder is persisted
@@ -1812,6 +1853,36 @@ public static function firePreFiringWeapons($gamedata){
 
             //getAllFireOrders builds a fresh array, so detaching inside the loop is safe.
             foreach ($ship->getAllFireOrders($gamedata->turn) as $fire) {
+                $fire->rejected = true;
+                self::detachFireOrder($ship, $fire);
+            }
+        }
+    }
+
+    /* WALKERS OF SIGMA-957 (WALKERS_OF_SIGMA_PLAN.md 2.2) - a flight caught in an Energy
+       Draining Field last turn cannot shoot this turn. Same withdraw-and-detach convention as
+       the surrender sweep above: the orders are rejected rather than failing the whole
+       submission.
+       ⚠️ IT HAS TO BE HERE, ON THE ADVANCE PATH, AND NOT IN validateFireOrders. A POST-side
+       ship is reconstructed without criticals (arch_post_side_ship_reconstruction), so the same
+       test there would read "no crit" for every flight in the game and silently do nothing,
+       for ever. This runs from prepareFiring, where gamedata has been loaded in full.
+       ⚠️ EdfFighterGrounded is a `oneturn` critical, so hasCritical() reports it exactly on the
+       turn AFTER it was rolled - which is the rules' "will not be able to shoot the next turn"
+       with no date arithmetic here. */
+    private static function withdrawGroundedFighterFireOrders($gamedata)
+    {
+        foreach ($gamedata->ships as $ship) {
+            if (!($ship instanceof FighterFlight)) continue;
+
+            $sample = $ship->getSampleFighter();
+            if (!$sample || empty($sample->criticals)) continue;
+            if (!$sample->hasCritical("EdfFighterGrounded", $gamedata->turn)) continue;
+
+            foreach ($ship->getAllFireOrders($gamedata->turn) as $fire) {
+                //A selfIntercept marker is consent, not a shot - leave it, as every other
+                //withdrawal path in this file does.
+                if ($fire->type === 'selfIntercept') continue;
                 $fire->rejected = true;
                 self::detachFireOrder($ship, $fire);
             }

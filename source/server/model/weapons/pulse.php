@@ -1226,5 +1226,379 @@ class VolleyLaser extends Pulse{
 
 } //VolleyLaser
 
+/* ================================================================================================
+ * WALKERS OF SIGMA-957 - Chromatic Pulse Driver         WALKERS_OF_SIGMA_PLAN.md section 3.4
+ * ================================================================================================
+ *
+ * ⚠️ THE REST OF THE WALKER ARSENAL LIVES IN specialWeapons.php / special.js (Lightning Array
+ * family, sections 3.1/3.2). This one is HERE because it is a Pulse weapon and must extend Pulse -
+ * and on the client that is a hard constraint, not a preference: game.php and gamelobby.php load
+ * special.js BEFORE pulse.js, so a class in special.js could not do Object.create(Pulse.prototype)
+ * at load time. Both halves therefore live in the pulse files, so the pairing stays symmetric.
+ *
+ * WHAT A CHROMATIC PULSE DRIVER IS
+ * An ACCELERATOR pulse weapon with two firing modes.
+ *
+ *   1 "Pulse"    - an ordinary pulse attack whose profile grows with charge time. The control
+ *                  sheet gives two rows, one per turn of charge, and $chargeProfile below IS that
+ *                  sheet. No method in this class hard-codes a game number.
+ *   2 "Scanning" - does NO damage, but the to-hit roll resolves normally. A hit on a unit that
+ *                  carries any shield-type defensive system teaches the SCANNING FLEET one point
+ *                  about that RACE's shields, and from the NEXT turn every ship on that team
+ *                  shoots at shields that are one point weaker. See CpdScanRegistry.
+ *
+ * HOW THE ACCELERATOR HALF WORKS
+ * loadingtime 1 / normalload 2: it may fire from one turn of charge, and holding a second turn
+ * moves it to the heavier row. getChargeRow() is the single authority - getPulses(), rollPulses(),
+ * getDamage() and the tooltip all read it, so a re-stat is a table edit. $this->maxpulses and
+ * $this->useDie are ALSO kept in step (applyChargeProfile) because Weapon::fire reads
+ * $this->maxpulses directly, twice, for ->shots and for the interception tally.
+ * ⚠️ It does not begin the scenario fully charged - getStartLoading() seeds ONE turn, exactly as
+ * MediumLightningArray does and for the same reason: 0 is below getLoadingTime(), so the weapon
+ * would be unable to fire at all on turn 1 and would read "0/2" (user report, game 4329).
+ *
+ * HOW THE SCANNING HALF PERSISTS - AND THE FOUR TRAPS IT WALKS PAST
+ *  1. The mode swap is $damageTypeArray, so a Scanning order resolves as a single 'Standard' shot
+ *     rather than as a pulse volley. ⚠️ Firing::fireWeapons does NOT re-apply an order's firing
+ *     mode before calling fire() - only prepareFiring does, and it does so for ALL orders before
+ *     ANY resolve, leaving the weapon in whichever mode the LAST prepared order used. fire() below
+ *     re-applies it, the same idiom AoE::fire uses.
+ *  2. A scan is recorded in beforeDamage (the per-hit hook) into $pendingScans, and written to the
+ *     database by generateIndividualNotes - which FireGamePhase::advance calls for every ship
+ *     immediately after firing resolves. ⚠️ It branches on "do I have pending scans", NEVER on
+ *     $gamedata->phase: advance() has already set the next phase by then (plan trap 3).
+ *  3. notekey "CPDSCAN", notekey_human = the target's faction string. ⚠️ Both columns are
+ *     varchar(40) and an overflow is a fatal that aborts the whole submission - hence substr().
+ *  4. onIndividualNotesLoaded replays every note into the per-load static CpdScanRegistry, and
+ *     counts ONLY notes whose turn is strictly LESS than the current one: the adaptation applies
+ *     "starting in the next Adjust Ship Systems segment". The registry is reset per load in
+ *     DBManager::getSystemDataForShips - one request loads gamedata more than once.
+ *
+ * "The same race" is the RAW $ship->faction string (plan D7). No faction families, no normalising.
+ *
+ * STATS: firing mode 1 is the control sheet (user, 2026-09-03) and is real. Grouping, range
+ * penalty, fire control and intercept are identical on BOTH charge rows of that sheet, so they are
+ * plain properties rather than table columns. If a later sheet makes the fire control or the range
+ * penalty vary with charge they need the LightningArray's treatment - a DELTA on ->needed for fire
+ * control, and a real calculateRangePenalty() override for range, never a delta for that one,
+ * because the parent derives the no-lock and jammer modifiers from it. Still unconfirmed and
+ * marked so in-file: $priority, the health/power defaults, the point cost and the icon.
+ */
+class ChromaticPulseDriver extends Pulse {
+
+    public $name        = "ChromaticPulseDriver";
+    public $displayName = "Chromatic Pulse Driver";
+    //PLACEHOLDER icon - an existing accelerator pulsar, so nothing 404s. Drop a real
+    //ChromaticPulseDriver.png into img/systemicons/ and change this one line.
+    //⚠️ The filename is case-sensitive on live even though it is not on Windows.
+    public $iconPath    = "ChromaticPulseDriver.png";
+
+    public $animation      = "bolt";
+    public $animationColor = array(200, 120, 255);        //chromatic violet
+    //Scanning fires a visibly different, colder bolt - it is a sweep, not a shot.
+    public $animationColorArray = array(
+        1 => array(200, 120, 255),
+        2 => array(120, 255, 220),
+    );
+
+    public $weaponClass = "Electromagnetic"; //all Walker weaponry is Electromagnetic
+    public $factionAge  = 3;                 //Ancient
+
+    /* Mode ids are referenced from the client (pulse.js) too - keep the two in step. */
+    const MODE_PULSE    = 1;
+    const MODE_SCANNING = 2;
+    public $firingModes = array(1 => "Pulse", 2 => "Scanning");
+
+    /* ⚠️ THE MODE SWAP THAT MATTERS. In Scanning mode the weapon must stop being a pulse weapon:
+       Weapon::fire branches on $this->damageType == 'Pulse' to collapse the volley to one shot and
+       to rewrite ->shots and ->intercepted with $this->maxpulses. 'Standard' gives one ordinary
+       shot, which is what a scan is. changeFiringMode() applies this per order. */
+    public $damageTypeArray = array(1 => "Pulse", 2 => "Standard");
+
+    public $loadingtime = 1;                 //may fire from one turn of charge...
+    public $normalload  = 2;                 //...but keeps charging to a heavier profile
+    public $priority    = 5;                 //UNCONFIRMED - the inherited Pulse default
+
+    /* Identical on both charge rows of the control sheet - read the class comment before moving
+       any of these into $chargeProfile. */
+    public $grouping     = 15;
+    public $rangePenalty = 0.5;              // -1 per 2 hexes
+    public $fireControl  = array(4, 4, 4);   // fighters, <=mediums, <=capitals
+    public $intercept    = 1;
+
+    /* THE CONTROL SHEET, keyed by turns charged. 'useDie' is the die rolled for the base number of
+       pulses, 'maxpulses' the ceiling on them, 'damage' the (fixed) damage each pulse does.
+       Row n must exist for every n from 1 to $normalload. */
+    protected $chargeProfile = array(
+        1 => array('useDie' => 3, 'maxpulses' => 4, 'damage' => 14),
+        2 => array('useDie' => 5, 'maxpulses' => 8, 'damage' => 18),
+    );
+
+    /* target faction => scan points earned this turn, waiting to be written as IndividualNotes.
+       Filled in beforeDamage, drained by generateIndividualNotes; never serialised. */
+    protected $pendingScans = array();
+
+    const NOTE_KEY = "CPDSCAN";              //notekey is varchar(40); this fits, a faction may not
+    const SCAN_POINTS_PER_HIT = 1;           //one point of adaptation per scanning hit
+
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+        if ($maxhealth == 0) $maxhealth = 15;  
+        if ($powerReq  == 0) $powerReq  = 6;   
+        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        $this->applyChargeProfile();            //blueprint values describe one turn of charge
+    }
+
+    /* -- The accelerator half ------------------------------------------------------------- */
+
+    /* Turns of charge this weapon is resolving at, clamped into the rows the sheet describes.
+       Never below 1: a weapon able to fire at all has at least the first row. */
+    public function getChargeLevel(){
+        $level = (int)$this->turnsloaded;
+        $max   = max(array_keys($this->chargeProfile));
+        if ($level > $this->normalload) $level = $this->normalload;
+        if ($level > $max) $level = $max;
+        if ($level < 1)    $level = 1;
+        return $level;
+    }
+
+    protected function getChargeRow(){
+        return $this->chargeProfile[$this->getChargeLevel()];
+    }
+
+    /* Keep the two PUBLIC pulse properties in step with the charge row. Everything in this class
+       reads getChargeRow() directly, but Weapon::fire reads $this->maxpulses itself - twice - and
+       Pulse::setSystemDataWindow prints $this->useDie, so both have to be real. */
+    protected function applyChargeProfile(){
+        $row = $this->getChargeRow();
+        $this->maxpulses = $row['maxpulses'];
+        $this->useDie    = $row['useDie'];
+    }
+
+    /* "Does not begin the scenario fully charged" - it begins with ONE turn of charge, i.e. the
+       first row. ⚠️ NOT 0: turnsloaded 0 is below getLoadingTime(), so it could not fire at all on
+       turn 1. Everything else is copied from the parent so overloading and firing-mode seeding
+       keep behaving identically. */
+    public function getStartLoading(){
+        $overloadTurns = $this->overloadturns;
+        if ($overloadTurns === 0 && $this->overloadable) $overloadTurns = 1;
+
+        return new WeaponLoading(
+            1,                       //<- one turn charged (1/2), rather than getNormalLoad()'s full 2
+            $this->overloadshots,
+            0,
+            $overloadTurns,
+            $this->getLoadingTime(),
+            $this->firingMode
+        );
+    }
+
+    protected function getPulses($turn){
+        $row = $this->getChargeRow();
+        return Dice::d($row['useDie']) + $this->fixedBonusPulses;
+    }
+
+    /* Same shape as Pulse::rollPulses, but clamped against the ROW's ceiling rather than against
+       whatever $this->maxpulses happens to be holding - so the cap is right even if something
+       resolves a shot before applyChargeProfile() has run. */
+    public function rollPulses($turn, $needed, $rolled){
+        $row     = $this->getChargeRow();
+        $pulses  = $this->getPulses($turn);
+        $pulses += $this->getExtraPulses($needed, $rolled);
+        return min($pulses, $row['maxpulses']);
+    }
+
+    /* -- Modes ----------------------------------------------------------------------------- */
+
+    /* An order's mode when there is one, the weapon's own when there is not. setMinDamage() and
+       setMaxDamage() call getDamage(null) and are driven by the per-mode loop in
+       Weapon::setSystemDataWindow, which is why the fallback exists. */
+    protected function isScanning($fireOrder = null){
+        if ($fireOrder !== null) return ((int)$fireOrder->firingMode === self::MODE_SCANNING);
+        return ((int)$this->firingMode === self::MODE_SCANNING);
+    }
+
+    public function getDamage($fireOrder){
+        if ($this->isScanning($fireOrder)) return 0;  //a scan carries no energy at all
+        $row = $this->getChargeRow();
+        return $row['damage'];
+    }
+
+    /* Fixed damage per pulse, so both ends are the same number - as on every other Pulse weapon. */
+    public function setMinDamage(){ $this->minDamage = $this->getDamage(null); }
+    public function setMaxDamage(){ $this->maxDamage = $this->getDamage(null); }
+
+    /* ⚠️ changeFiringMode HERE, not only in calculateHitBase. Firing::fireWeapons re-sorts every
+       order in the game by priority and calls fire() straight off that list; only prepareFiring
+       applies an order's mode, and it does so for ALL orders before ANY of them resolve. Without
+       this line a driver that prepared a Pulse order after a Scanning one would resolve the scan
+       as a pulse volley.
+       The ->shots clamp is the server-authoritative half of "a scan is one shot": in Standard
+       damage mode Weapon::fire loops ->shots times, and that number arrives from the client. */
+    public function fire($gamedata, $fireOrder){
+        $this->changeFiringMode($fireOrder->firingMode);
+        $this->applyChargeProfile();
+        if ($this->isScanning($fireOrder)) $fireOrder->shots = 1;
+        parent::fire($gamedata, $fireOrder);
+    }
+
+    /* -- Scanning -------------------------------------------------------------------------- */
+
+    /* The per-hit hook. A Scanning hit does no damage at all - it never calls the parent, so
+       nothing rolls a hit location, nothing touches armour and no DamageEntry is created. */
+    protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){
+        if (!$this->isScanning($fireOrder)) {
+            parent::beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
+            return;
+        }
+        $this->recordScanHit($target, $fireOrder);
+    }
+
+    /* One point of adaptation against the TARGET HULL's faction string, if the target actually
+       carries shields to learn about. ⚠️ Read faction off the hull, never off its ships directory
+       name - the two do not always match, which is why ShipLoader::getFactionDirMap() exists. */
+    protected function recordScanHit($target, $fireOrder){
+        if ($target === null) return;
+
+        if (!self::unitHasShieldSystem($target)) {
+            $fireOrder->pubnotes .= " Scanning hit: no shielding to analyse.";
+            return;
+        }
+
+        $faction = $target->faction;
+        if ($faction === null || $faction === '') return;
+
+        if (!isset($this->pendingScans[$faction])) $this->pendingScans[$faction] = 0;
+        $this->pendingScans[$faction] += self::SCAN_POINTS_PER_HIT;
+
+        $fireOrder->pubnotes .= "<br>Scanning hit: " . $faction . " shielding analysed (-"
+                             . self::SCAN_POINTS_PER_HIT . " shield effectiveness from next turn).";
+    }
+
+    /* Does this unit carry anything the scan can learn from? "Any DefensiveSystem whose
+       getDefensiveType() is a shield type" - which covers Shield, EM Shield, Gravitic Shield,
+       Flare Shielding, Shading Field and the four Weapon-subclass shields (Shield Projector,
+       Flare Generator, Plasma Web, Water Caster) without naming any of them.
+       A FighterFlight keeps its defensive systems on the individual fighters, exactly as
+       FighterFlight::getHitChanceMod has to allow for - hence the second loop. */
+    public static function unitHasShieldSystem($target){
+        if ($target === null || !isset($target->systems)) return false;
+
+        foreach ($target->systems as $system){
+            if (self::isShieldSystem($system)) return true;
+            //FighterFlight: $systems holds Fighters, each with its own $systems
+            if (isset($system->systems) && is_array($system->systems)){
+                foreach ($system->systems as $subsystem){
+                    if (self::isShieldSystem($subsystem)) return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /* Delegated so the marker, the scan and the arithmetic share ONE definition of "shield-ish"
+       - see CpdScanRegistry::isShieldSystem(). */
+    private static function isShieldSystem($system){
+        return CpdScanRegistry::isShieldSystem($system);
+    }
+
+    /* Write this turn's scans to the database. FireGamePhase::advance calls this for every ship
+       immediately after firing resolves, then saves in a second pass.
+       ⚠️ Gated on "are there pending scans", NEVER on $gameData->phase: advance() has already set
+       the next phase before its ship loop (plan trap 3). Everywhere else this method is called -
+       Movement, generateAdditionalNotes - the list is empty and this is a no-op.
+       ⚠️ notekey and notekey_human are varchar(40) and an overflow is a fatal that aborts the whole
+       player submission (plan trap 4). Truncating collides with nothing that matters: the same
+       truncated form is what onIndividualNotesLoaded uses as the registry key. */
+    public function generateIndividualNotes($gameData, $dbManager){
+        if (empty($this->pendingScans)) return;
+
+        $ship = $this->getUnit();
+        if ($ship === null) { $this->pendingScans = array(); return; }
+
+        foreach ($this->pendingScans as $faction => $points){
+            if ($points < 1) continue;
+            $this->individualNotes[] = new IndividualNote(
+                -1,
+                $gameData->id,
+                $gameData->turn,
+                $gameData->phase,
+                $ship->id,
+                $this->id,
+                self::NOTE_KEY,
+                substr($faction, 0, 40),
+                (int)$points
+            );
+        }
+        $this->pendingScans = array();
+    }
+
+    /* Replay this driver's scan history into the per-load registry. Called once per ship per
+       gamedata load by DBManager::getSystemDataForShips, which resets the registry immediately
+       before the sweep - see CpdScanRegistry's class comment for why that reset is mandatory.
+       ⚠️ turn STRICTLY LESS THAN the current one: a scan landing this turn takes effect in the next
+       Adjust Ship Systems segment, not in the firing that produced it.
+       A destroyed scanner keeps its notes and its team keeps the knowledge - the adaptation was
+       learned by the fleet, not stored in the hull. */
+    public function onIndividualNotesLoaded($gamedata){
+        //Cheapest possible exit for a driver that has never scanned - which is most of them, and all
+        //of them on turn 1. Before getUnit(), deliberately.
+        if (empty($this->individualNotes)) return;
+
+        $ship = $this->getUnit();
+        $team = ($ship !== null) ? $ship->team : null;
+
+        foreach ($this->individualNotes as $currNote){
+            if ($currNote->notekey !== self::NOTE_KEY) continue;
+            if ($currNote->turn >= $gamedata->turn) continue;   //takes effect NEXT turn
+            CpdScanRegistry::record($team, $currNote->notekey_human, (int)$currNote->notevalue);
+        }
+
+        $this->individualNotes = array(); //reacted to; they serve no further purpose in memory
+    }
+
+    /* -- Display --------------------------------------------------------------------------- */
+
+    public function setSystemDataWindow($turn){
+        $this->applyChargeProfile();
+        /* A scan is ONE shot. Set before the parent call so the per-mode loop inside
+           Weapon::setSystemDataWindow picks it up, and republished in stripForJson so the live
+           client sees it rather than the blueprint's. Without it the client would build a Scanning
+           order carrying Pulse mode's shot count - harmless, because fire() clamps it, but it would
+           read wrong on the way there. In Pulse mode the number is cosmetic anyway: Weapon::fire
+           rewrites ->shots with $maxpulses, and the "Number of shots" tooltip line is suppressed
+           for every Pulse instance. */
+        $this->defaultShotsArray = array(self::MODE_PULSE    => $this->maxpulses,
+                                         self::MODE_SCANNING => 1);
+        parent::setSystemDataWindow($turn); //Pulse writes the "Pulse mode: Dx, +1/y%, max. z pulses" line
+
+        $this->data["Special"] = "<br>Accelerator weapon. Begins the scenario with one turn of charge.";
+        foreach ($this->chargeProfile as $level => $row){
+            $this->data["Special"] .= "<br> - " . $level . " turn" . ($level > 1 ? "s" : "")
+                                   . " charged: D" . $row['useDie'] . " pulses, max. "
+                                   . $row['maxpulses'] . ", " . $row['damage'] . " damage each";
+        }
+        $this->data["Special"] .= "<br>SCANNING MODE: does no damage, but hitting on a shielded"
+                               . " target analyses that race's shielding. From the NEXT turn every"
+                               . " ship in the fleet treats that factions's shields as 1 point weaker"
+                               . " per scan, to a minimum of 0.";
+    }
+
+    /* The pulse count, the damage and the tooltip all move with charge time, so they have to be
+       re-published per instance or the client keeps showing the blueprint values - the same reason
+       LaserAccelerator overrides this. */
+    public function stripForJson(){
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->data           = $this->data;
+        $strippedSystem->minDamage      = $this->minDamage;
+        $strippedSystem->minDamageArray = $this->minDamageArray;
+        $strippedSystem->maxDamage      = $this->maxDamage;
+        $strippedSystem->maxDamageArray = $this->maxDamageArray;
+        $strippedSystem->defaultShotsArray = $this->defaultShotsArray; //see setSystemDataWindow
+        return $strippedSystem;
+    }
+
+} //endof class ChromaticPulseDriver
+
+
 
 ?>

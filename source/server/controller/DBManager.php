@@ -3518,6 +3518,19 @@ class DBManager
 		//shot at the Warrior resolves without its jink. Guarded so it's a no-op if the class isn't loaded.
 		if (class_exists('GraviticAugmenter')) GraviticAugmenter::resetPerLoadState();
 
+		//Walkers of Sigma-957 (WALKERS_OF_SIGMA_PLAN.md 3.4): the Chromatic Pulse Driver's
+		//fleet-wide shield adaptation is rebuilt from scratch out of the CPDSCAN notes replayed by
+		//the sweep below. Same reason as the line above - one request loads gamedata more than once
+		//(advanceGameState, then the phase's advance()), and without this reset the second load
+		//would count every fleet's adaptation twice.
+		//⚠️ class_exists WITH AUTOLOADING OFF, deliberately. The gate this feature hangs off is
+		//TacGamedata::$cpdAdaptationPresent, and the whole point is that a game with no CPD scan in
+		//it never loads the registry at all: if the class is not loaded its static table is empty
+		//by definition, so there is nothing to reset. Turning autoloading back on here would pull
+		//the file into every gamedata load in the game.
+		TacGamedata::$cpdAdaptationPresent = false;
+		if (class_exists('CpdScanRegistry', false)) CpdScanRegistry::resetPerLoadState();
+
 		foreach ($gamedata->ships as $ship){
             $shipNotes = isset($allNotes[$ship->id]) ? $allNotes[$ship->id] : array();
             

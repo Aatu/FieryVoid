@@ -1223,12 +1223,12 @@ public $canOffLine = true;
 
 
 	//decision whether this system can protect from damage - value used only for choosing strongest shield to balance load.
-	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false) {
+	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false, $shooter = null) {
 		$ship = $this->getUnit(); //GTS
 		if($damageWasDealt || $isUnderShield) return 0; //does not protect from overkill damage, just first impact. Also does not protect from internal damage.
 		if($ship->isCloaked) return 0; //shield is not active when cloaked    GTS
 
-		$remainingCapacity = $this->getRemainingCapacity();
+		$remainingCapacity = $this->getCapacityAgainstShooter($this->getRemainingCapacity(), $shooter); //Walkers of Sigma-957: a fleet that has scanned this race cannot be stopped by this pool's last N points
 		$protectionValue = 0;
 		if($remainingCapacity>0){
 			$protectionValue = ($remainingCapacity / $inflictingShots) + $this->armour; //distribute capacity over shots
@@ -1247,7 +1247,7 @@ public $canOffLine = true;
 
 		if($damageToAbsorb<=0) return $returnValues; //nothing to absorb
 
-		$remainingCapacity = $this->getRemainingCapacity();
+		$remainingCapacity = $this->getCapacityAgainstShooter($this->getRemainingCapacity(), $shooter); //Walkers of Sigma-957: a fleet that has scanned this race cannot be stopped by this pool's last N points
 		$absorbedDamage = 0;
 
 		if($remainingCapacity>0) { //else projection does not protect
@@ -1453,7 +1453,7 @@ class TrekShieldFtr extends ShipSystem{
 
 
 	//decision whether this system can protect from damage - value used only for choosing strongest shield to balance load.
-	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false) {
+	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false, $shooter = null) {
 		if($damageWasDealt || $isUnderShield) return 0; //does not protect from overkill damage, just first impact. Also does not protect from internal damage.
 		
 		$remainingCapacity = $this->getRemainingCapacity();
@@ -3707,12 +3707,12 @@ public $name = "TrekShieldProjection";
 	
 	
 	//decision whether this system can protect from damage - value used only for choosing strongest shield to balance load.
-	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false) {
+	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false, $shooter = null) {
 		$ship = $this->getUnit(); //GTS
 		if($damageWasDealt || $isUnderShield) return 0; //does not protect from overkill damage, just first impact. Also does not protect from internal damage.
 		if($ship->isCloaked) return 0; //shield is not active when cloaked    GTS
 		
-		$remainingCapacity = $this->getRemainingCapacity();
+		$remainingCapacity = $this->getCapacityAgainstShooter($this->getRemainingCapacity(), $shooter); //Walkers of Sigma-957: a fleet that has scanned this race cannot be stopped by this pool's last N points
 		$protectionValue = 0;
 		if($remainingCapacity>0){
 			$protectionValue = ($remainingCapacity / $inflictingShots) + $this->armour; //distribute capacity over shots
@@ -3731,7 +3731,7 @@ public $name = "TrekShieldProjection";
 		
 		if($damageToAbsorb<=0) return $returnValues; //nothing to absorb
 		
-		$remainingCapacity = $this->getRemainingCapacity();
+		$remainingCapacity = $this->getCapacityAgainstShooter($this->getRemainingCapacity(), $shooter); //Walkers of Sigma-957: a fleet that has scanned this race cannot be stopped by this pool's last N points
 		$absorbedDamage = 0;
 		
 		if($remainingCapacity>0) { //else projection does not protect

@@ -70,6 +70,9 @@ hangar	drakhHeavyTender	source/server/model/ships/drakh/drakhHeavyTender.php	$fi
 hangar	drakhMothership	source/server/model/ships/drakh/drakhMothership.php	$fighters declares 84 boxes but the hangar bays hold 24 - populateInitialHangarUsage silently drops the excess
 hangar	drakhSupportShip	source/server/model/ships/drakh/drakhSupportShip.php	$fighters declares 10 boxes but the hangar bays hold 6 - populateInitialHangarUsage silently drops the excess
 hangar	drakhTender	source/server/model/ships/drakh/drakhTender.php	$fighters declares 10 boxes but the hangar bays hold 6 - populateInitialHangarUsage silently drops the excess
+hangar	systemLiberator	source/server/model/ships/theSystem/systemLiberator.php	$fighters declares 12 boxes but the hangar bays hold 4 - populateInitialHangarUsage silently drops the excess
+hangar	systemLiberatorAlt	source/server/model/ships/theSystem/systemLiberatorAlt.php	$fighters declares 12 boxes but the hangar bays hold 4 - populateInitialHangarUsage silently drops the excess
+hangar	systemLightCruiser	source/server/model/ships/theSystem/systemLightCruiser.php	$fighters declares 6 boxes but the hangar bays hold 4 - populateInitialHangarUsage silently drops the excess
 hitchart	AndorianKumari	location 3, roll 12	no system named "Hangar" on location 3 - every hit here is silently rerouted to Structure
 hitchart	AndorianKumari	location 4, roll 12	no system named "Hangar" on location 4 - every hit here is silently rerouted to Structure
 hitchart	AndorianKumariCommand	location 0, roll 13	no system named "Hangar" on location 0 - every hit here is silently rerouted to Structure
@@ -218,8 +221,6 @@ hitchart	technicalTargetDrone	location 31, roll 15	no system carries tag "Weapon
 hitchart	technicalTargetDrone	location 32, roll 15	no system carries tag "Weapon" - every hit here is rerouted to Structure
 hitchart	technicalTargetDrone	location 41, roll 15	no system carries tag "Weapon" - every hit here is rerouted to Structure
 hitchart	technicalTargetDrone	location 42, roll 15	no system carries tag "Weapon" - every hit here is rerouted to Structure
-hitchart	triadArchangel	location 1, roll 9	no system named "Neutron Burst" on location 1 - every hit here is silently rerouted to Structure
-hitchart	triadDevil	location 1, roll 7	no system named "Antimatter Wave" on location 1 - every hit here is silently rerouted to Structure
 ids	ChoukaPenanceBaseAM	CargoBay at systems[10]	id 11 != its array index 10 - persisted thrust/fire/power/crit rows are keyed by this id
 ids	ChoukaPenanceBaseAM	CargoBay at systems[17]	id 18 != its array index 17 - persisted thrust/fire/power/crit rows are keyed by this id
 ids	ChoukaPenanceBaseAM	CargoBay at systems[24]	id 25 != its array index 24 - persisted thrust/fire/power/crit rows are keyed by this id

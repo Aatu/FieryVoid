@@ -2262,7 +2262,34 @@ const getStatusBanners = (ship) => {
         banners.push({ key: 'boarded', color: theme.colors.statusAlert, bg: 'rgba(255, 165, 0, 0.10)', text: 'Ship is being boarded!' });
     }
 
+    /*WALKERS_OF_SIGMA_PLAN.md 2.2 - a flight that ended last turn in an Energy Draining Field
+      "will not be able to shoot the next turn". Firing::withdrawGroundedFighterFireOrders enforces
+      it silently on the advance path, so this and the map tooltip's twin (ShipTooltip.js) are the
+      player's only warning before they spend a turn declaring shots that will be thrown away.
+      Purple, the same EDF_PURPLE the tooltip uses - see the note there.*/
+    if (ship.flight && edfGroundedInEffect(ship)) {
+        banners.push({
+            key: 'edfGrounded', color: EDF_PURPLE, bg: 'rgba(210, 80, 255, 0.12)',
+            text: 'Energy Drained - cannot fire'
+        });
+    }
+
     return banners;
+};
+
+/*The EDF's purple, kept identical to ShipTooltip.js's EDF_PURPLE (itself EWIconContainer's
+  COLOR_JAM) so the map tooltip and the ship window read as one message.*/
+const EDF_PURPLE = '#d250ff';
+
+/*EdfFighterGrounded is a `oneturn` critical rolled in turn T's Critical Hit step and in effect
+  on T+1, so the test is crit.turn + 1 === current turn - the same shape ShipTooltip.js uses for
+  Uncontrolled. It rides the flight's sample fighter (system id 1), which is where EdfExposure
+  hangs every flight-wide record.*/
+const edfGroundedInEffect = (ship) => {
+    const sample = shipManager.systems.getSystem(ship, 1);
+    if (!sample || !sample.criticals) return false;
+    return sample.criticals.some(crit =>
+        crit.phpclass === 'EdfFighterGrounded' && (crit.turn + 1) === window.gamedata.turn);
 };
 
 /*Mirrors ShipTooltip.js's trueStealth block (including the own-ship check of the

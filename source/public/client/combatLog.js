@@ -20,7 +20,35 @@ window.combatLog = {
 
     // Damage lists longer than this start collapsed - one alpha strike against a big hull
     // can otherwise be thirty lines and push every other entry off a 150px panel.
+    //Commented out below for now, but I'll keep the idea in for now.
     COLLAPSE_ROWS_OVER: 4,
+
+    /* ⭐ SERVER-AUTHORED pubnotes CANNOT COLOUR A SHIP NAME, BECAUSE THE COLOUR IS PER-VIEWER.
+       gamedata.getShipLogColorCss answers in the READER's terms - green for mine, blue for an
+       ally, red for an enemy in a 2-team game, the absolute team palette for an observer - and
+       the server has no idea who is reading. So a handler that wants a unit named in a pubnotes
+       row (EdfExposure is the first) emits a BARE link span:
+
+           <span class="shiplink" data-id="123">Traveler</span>
+
+       and this fills the style in on the way to the DOM, exactly as the FIRE:/at <target> parts
+       of an ordinary entry are coloured. The inline style wins over `#log .shiplink`'s flat
+       #deebff, and the span joins the same markup the panel already treats as a ship name (the
+       collapse handler skips clicks on it, and it is what a real link handler would hook).
+
+       ⚠️ Cheap by design - one indexOf on notes that already exist, and no work at all for the
+       overwhelming majority of pubnotes, which name no ship. An unknown id is left exactly as
+       it came so a stale note can never blank a name. */
+    colourShipLinksInNotes: function colourShipLinksInNotes(notes) {
+        if (!notes || notes.indexOf('shiplink') === -1) return notes;
+
+        return notes.replace(/<span class="shiplink" data-id="(\d+)">/g, function (whole, id) {
+            var linked = gamedata.getShip(parseInt(id, 10));
+            if (!linked) return whole;
+            return '<span class="shiplink" data-id="' + id + '" style="'
+                 + gamedata.getShipLogColorCss(linked) + '">';
+        });
+    },
 
     PREF_KEY: 'fv.combatLog.view',
 
@@ -82,6 +110,48 @@ window.combatLog = {
         if (!ship) return '';
         var m = /color\s*:\s*([^;]+)/.exec(gamedata.getShipLogColorCss(ship));
         return m ? 'border-left-color:' + m[1] + ';' : '';
+    },
+
+    /* The craft an Energy Draining Field dropped out of `target` THIS turn, as coloured name
+       spans ready for the log's fighter row. Empty for every order that is not a drain report,
+       and for every game without a Walker in it, which is what keeps it free.
+
+       ⚠️ `crit.turn == fire.turn` EXACTLY, not shipManager.criticals.hasCriticalOnTurn: a
+       DisengagedFighter is PERMANENT (turnend 0) and that helper's test is `crit.turn <= turn`,
+       so it answers true for every turn after the craft left - which would re-list the same
+       fighters under every later drain report.
+
+       ⚠️ Deduped through combatLog.critsShown, the same tracker the damage path uses, so a craft
+       that dropped out under fire is never also claimed by the field (and vice versa - whichever
+       entry renders first wins). The two cannot overlap today, because
+       EdfExposure::rollDropouts skips a craft already destroyed or disengaged, but entries are
+       printed in sort order and the guard costs one array lookup. */
+    getEdfDropoutNames: function getEdfDropoutNames(fire, target) {
+        if (!fire || fire.damageclass !== 'EdfExposure') return [];
+        if (!target || !target.systems) return [];
+        if (!target.flight && !(target.flightSize > 0)) return [];
+
+        var names = [];
+        for (var i in target.systems) {
+            var craft = target.systems[i];
+            if (!craft || !craft.criticals) continue;
+            if (combatLog.critsShown[target.id]?.includes(craft.id)) continue;
+
+            var dropped = false;
+            for (var c in craft.criticals) {
+                var crit = craft.criticals[c];
+                if (crit.phpclass === 'DisengagedFighter' && Number(crit.turn) === Number(fire.turn)) {
+                    dropped = true;
+                    break;
+                }
+            }
+            if (!dropped) continue;
+
+            names.push('<span class="critical">' + shipManager.systems.getDisplayName(craft) + '</span>');
+            if (!combatLog.critsShown[target.id]) combatLog.critsShown[target.id] = [];
+            combatLog.critsShown[target.id].push(craft.id);
+        }
+        return names;
     },
 
     // damageIndex is optional: showLog builds one for the whole printed log so each order is a
@@ -277,7 +347,7 @@ window.combatLog = {
         }
 
         var notestext = "";
-        if (notes) notestext = '<span class="pubotes">' + notes + '</span>';
+        if (notes) notestext = '<span class="pubotes">' + combatLog.colourShipLinksInNotes(notes) + '</span>';
 
         var shortText = false;
         if (weaponManager.doShortLogText(fire, ship)) shortText = true;
@@ -484,14 +554,31 @@ window.combatLog = {
             damageList += "</ul>";
         }
 
+        /* Walkers of Sigma-957 (Stage 4d): an Energy Draining Field dropout leaves NO damage
+           entry behind - the craft is disengaged by a critical alone - so the loop above never
+           sees it and the flight's losses would only ever be the count inside the drain
+           sentence. Emit the same "Fighters disengaged / destroyed:" row a dropout from gunfire
+           gets, so the two read identically wherever a player looks for them. */
+        var edfDropouts = combatLog.getEdfDropoutNames(orders[0], target);
+        if (edfDropouts.length > 0) {
+            var edfRow = '<li> Fighters disengaged / destroyed: ' + edfDropouts.join(', ') + '</li>';
+            //The damage loop above opens its own <ul> only when there ARE damages, which for a
+            //drain report there never are - so open one here when it did not.
+            damageList = damageList
+                ? damageList.replace(/<\/ul>$/, edfRow + '</ul>')
+                : '<ul>' + edfRow + '</ul>';
+            damageRows++;
+        }
+        
         var entryClass = 'logentry fire-' + orders[0].id;
+        /*//Removed as I found that collapsed rows were a bit annoying - DK
         if (damageRows > combatLog.COLLAPSE_ROWS_OVER) {
             // One alpha strike can be thirty rows; start those folded and let the entry be
             // clicked open. The count goes in the affordance so the fold is never silent.
             entryClass += ' collapsible collapsed';
             html += '<span class="logexpand" role="button" tabindex="0">'
                 + damageRows + ' damage lines</span>';
-        }
+        }*/
 
         html = '<div class="' + entryClass + '" style="' + combatLog.logRailStyle(ship) + '">'
             + html + damageList + '</div>';
@@ -660,8 +747,8 @@ window.combatLog = {
         }
     },
 
-    /* Whether the Mine chip can mean anything for this viewer. Split out of the control
-       bar's syncControls because it is the one control whose answer depends on GAMEDATA
+    /* Whether the Mine and Enemy chips can mean anything for this viewer. Split out of the
+       control bar's syncControls because they are the one control whose answer depends on GAMEDATA
        rather than on view state - and gamedata is not populated when syncControls first
        runs.
 
@@ -682,12 +769,19 @@ window.combatLog = {
         if (typeof gamedata.isPlayerInGame !== 'function') return;
 
         var isPlayer = gamedata.isPlayerInGame();
-        var el = document.getElementById('combatLogMineOnly');
-        if (el) el.style.display = isPlayer ? '' : 'none';
 
-        /* An OBSERVER is on nobody's side, so "mine" would filter EVERY group away - there
-           is no unit in the game isMyorMyTeamShip will say yes to. Same two-arm reasoning as
-           every other allegiance surface here (arch_team_colour_logic). */
+        /* BOTH ENDS TOGETHER. Mine and Enemy are one filter drawn as two chips (see the note
+           in combatLog.php), so an observer gets both or neither - hiding one and leaving the
+           other up would offer half a control that cannot mean anything either way. */
+        ['combatLogMineOnly', 'combatLogEnemyOnly'].forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el) el.style.display = isPlayer ? '' : 'none';
+        });
+
+        /* An OBSERVER is on nobody's side, so "mine" would filter EVERY group away - there is
+           no unit in the game isMyorMyTeamShip will say yes to - and "enemy" would filter none
+           of them away, which is a switch that does nothing. Same two-arm reasoning as every
+           other allegiance surface here (arch_team_colour_logic). */
         if (!isPlayer) combatLog.sideFilter = 'all';
     },
 
@@ -894,9 +988,11 @@ window.combatLog = {
        through gamedata.getShip on both paths, so the object this tests is the same one
        the entry is drawn from.
 
-       "Mine" is MY SIDE, allies included - the same isMyorMyTeamShip the rest of this
-       panel gates on, not isMyShip. Two states survive, all and mine; the enemy-only third
-       went with the segment it was a chip of - see the note in combatLog.php. */
+       "Mine" is MY SIDE, allies included - the same isMyorMyTeamShip the rest of this panel
+       gates on, not isMyShip - and "Enemy" is its exact complement, so between them and "all"
+       the three states partition the turn with nothing able to fall down the middle. `enemy`
+       was dropped on 2026-08-31 with the segment it was a chip of and came back as a toggle of
+       its own on 2026-09-02 - see the note in combatLog.php. */
     filterGroups: function filterGroups(groups) {
         var side = combatLog.sideFilter;
         var find = (combatLog.findText || '').trim().toLowerCase();
@@ -909,10 +1005,12 @@ window.combatLog = {
 
             if (side !== 'all') {
                 //An observer is on nobody's side, so isMyorMyTeamShip is false for every
-                //unit and "mine" would empty the log. The control is hidden for observers
+                //unit and "mine" would empty the log. The controls are hidden for observers
                 //(see the init block below), but guard the state anyway.
                 if (!shooter) return false;
-                if (!gamedata.isMyorMyTeamShip(shooter)) return false;
+                var friendly = gamedata.isMyorMyTeamShip(shooter);
+                if (side === 'mine' && !friendly) return false;
+                if (side === 'enemy' && friendly) return false;
             }
 
             if (hitsOnly) {
@@ -1003,10 +1101,10 @@ window.combatLog = {
             if (!raw) return;
             var p = JSON.parse(raw);
             if (p.sortMode) combatLog.sortMode = p.sortMode;
-            //Validated, not trusted: `enemy` was a real stored value until 2026-08-31, and
-            //nothing filters on it any more - a browser still holding one would have shown an
-            //empty log with no control up to explain why.
-            if (p.sideFilter === 'mine' || p.sideFilter === 'all') combatLog.sideFilter = p.sideFilter;
+            //Validated, not trusted: a value nothing filters on is a filter with no chip lit to
+            //explain it. `enemy` is legal again as of 2026-09-02, so a browser still holding one
+            //from before it was dropped on 2026-08-31 simply gets it honoured.
+            if (p.sideFilter === 'mine' || p.sideFilter === 'enemy' || p.sideFilter === 'all') combatLog.sideFilter = p.sideFilter;
             combatLog.hitsOnly = !!p.hitsOnly;
         } catch (e) { /* defaults stand */ }
     },
@@ -1041,6 +1139,7 @@ $(function () {
         });
         combatLog.syncSideControl();
         $("#combatLogMineOnly").attr("aria-pressed", combatLog.sideFilter === 'mine' ? "true" : "false");
+        $("#combatLogEnemyOnly").attr("aria-pressed", combatLog.sideFilter === 'enemy' ? "true" : "false");
         $("#combatLogHitsOnly").attr("aria-pressed", combatLog.hitsOnly ? "true" : "false");
 
         if (window.gamedata && gamedata.turn) combatLog.updateTurnControls();
@@ -1058,13 +1157,20 @@ $(function () {
         applySort(String($(this).data("sort")));
     });
 
-    //A TOGGLE, not one chip of a segment: on = my side only, off = the whole turn.
-    $("#combatLogMineOnly").on("click", function () {
-        combatLog.sideFilter = (combatLog.sideFilter === 'mine') ? 'all' : 'mine';
-        $(this).attr("aria-pressed", combatLog.sideFilter === 'mine' ? "true" : "false");
+    /* TWO CHIPS, ONE STATE. Pressing an unlit chip takes the state off the other one;
+       pressing the lit one drops back to 'all'. It repaints through syncControls rather
+       than setting aria-pressed on `this` the way the old lone Mine toggle could, because
+       the chip that LOSES the state is not the chip that was clicked - painting only the
+       clicked one would leave Mine lit while Enemy filtered. */
+    var applySide = function applySide(want) {
+        combatLog.sideFilter = (combatLog.sideFilter === want) ? 'all' : want;
+        syncControls();
         combatLog.savePrefs();
         combatLog.rerender();
-    });
+    };
+
+    $("#combatLogMineOnly").on("click", function () { applySide('mine'); });
+    $("#combatLogEnemyOnly").on("click", function () { applySide('enemy'); });
 
     $("#combatLogHitsOnly").on("click", function () {
         combatLog.hitsOnly = !combatLog.hitsOnly;

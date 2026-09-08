@@ -71,22 +71,32 @@
 
         <span class="fv-log-divider fv-log-filter" aria-hidden="true"></span>
 
-        <!-- WHAT IS IN THE LOG: two peer toggles, in the same shape, doing the same kind of
-             job. Either one narrows the turn; neither reorders it.
+        <!-- WHAT IS IN THE LOG: three peer toggles, in the same shape, doing the same kind
+             of job. Any one of them narrows the turn; none of them reorders it.
 
-             MINE REPLACES THE OLD `All | Mine | Enemy` SEGMENT (user, 2026-08-31). The
-             three-way control cost ~118px of a bar that must not wrap, and two thirds of
-             it was answering a question nobody asks: ENEMY-ONLY was the third state, and a
-             player wanting to know what was shot at them reads the whole turn, not a
-             half of it with their own return fire cut out. As a plain toggle beside Hits
-             it is also the same shape as the control it sits next to, which the segment
-             never was. combatLog.sideFilter keeps its name and its two surviving values
-             (all / mine), so the filter and the saved preference are unchanged - only
-             `enemy` is gone, and loadPrefs drops a remembered one. -->
+             THESE REPLACED AN `All | Mine | Enemy` SEGMENT (user, 2026-08-31), and ENEMY
+             THEN CAME BACK AS A TOGGLE OF ITS OWN (user, 2026-09-02). What was wrong with
+             the segment was its SHAPE, not its third position: it cost ~118px of a bar that
+             must not wrap and it did not read as the same kind of control as the Hits switch
+             sitting next to it. Two plain toggles do the same work in the shape the bar
+             already speaks.
+
+             MINE AND ENEMY ARE STILL ONE FILTER, not two. They are the two ends of
+             combatLog.sideFilter (all / mine / enemy) and are mutually exclusive by
+             construction: pressing one releases the other, and pressing the lit one lands
+             back on `all`. Nothing anywhere can hold "mine AND enemy" - which would be an
+             empty log every time, since no group is fired by both sides.
+
+             The COLOURS carry which is which, because two identical green chips could only
+             be told apart by reading their labels: MINE lights green like every other lone
+             switch on this bar, ENEMY lights the ladder gold (user, 2026-09-02). See
+             .fv-log-chip--enemy in styles/logPanel.css. -->
         <button type="button" id="combatLogHitsOnly" class="fv-log-chip fv-log-chip--toggle fv-log-filter" aria-pressed="false"
                 title="Only show fire that scored at least one hit">Hits</button>
         <button type="button" id="combatLogMineOnly" class="fv-log-chip fv-log-chip--toggle fv-log-filter" aria-pressed="false"
                 title="Only show fire by my own side">Mine</button>
+        <button type="button" id="combatLogEnemyOnly" class="fv-log-chip fv-log-chip--toggle fv-log-chip--enemy fv-log-filter" aria-pressed="false"
+                title="Only show fire by the other side">Enemy</button>
 
         <span class="fv-log-bar-spacer"></span>
         <!--<span class="fv-log-bar-meta" data-log-meta="log"></span>-->

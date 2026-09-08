@@ -160,7 +160,13 @@ class AutomatedMovement
         }
 
         $jink = isset($intent['jink']) ? (int)$intent['jink'] : 0;
-        $thrustTotal = (int)$ship->freethrust;
+        // getEffectiveFreeThrust, not freethrust: an Energy Draining Field takes thrust off a
+        // flight for the following turn (WALKERS_OF_SIGMA_PLAN.md 2.2), and an HK plotting its
+        // pursuit off the undrained figure would spend thrust it does not have. Falls straight
+        // through to freethrust for every flight that has no drain.
+        $thrustTotal = method_exists($ship, 'getEffectiveFreeThrust')
+                     ? (int)$ship->getEffectiveFreeThrust($gamedata->turn)
+                     : (int)$ship->freethrust;
 
         // 1. Jink budget (clamped to what's available).
         $jink = max(0, min($jink, $thrustTotal));

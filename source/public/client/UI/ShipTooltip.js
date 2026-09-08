@@ -18,6 +18,12 @@ window.ShipTooltip = function () {
         + '<div class="buttons"></div>'
         + '</div>';
 
+    /* The Walkers' Energy Draining Field. The one purple already in the game's UI is
+       EWIconContainer's COLOR_JAM (210, 80, 255), used for the other "your unit is suppressed
+       this turn" state, so the EDF's messages borrow it rather than inventing a second purple.
+       Kept in step with the shipWindow status banner in ShipWindow.js, which uses the same value. */
+    var EDF_PURPLE = '#d250ff';
+
     function ShipTooltip(selectedShip, ships, position, showTargeting, menu, hexagon, ballisticsMenu) {
         this.element = jQuery(HTML);
         this.ships = [].concat(ships);
@@ -253,6 +259,15 @@ window.ShipTooltip = function () {
             //remoteControl (very rare) so ordinary flights skip the crit scan entirely.
             if (ship.remoteControl && firstFighter && uncontrolledInEffect(firstFighter)) {
                 this.addEntryElement('<span style="color:red;"><b>Uncontrolled</b></span>', true);
+            }
+            /* WALKERS_OF_SIGMA_PLAN.md 2.2 - "even if the fighter/shuttle does not drop out, it
+               will not be able to shoot the next turn". Firing::withdrawGroundedFighterFireOrders
+               enforces it on the advance path, so without this line the player declares a full
+               turn's shooting and only finds out when the orders vanish (user request 2026-09-04).
+               PURPLE, matching EWIconContainer's COLOR_JAM: the two Walker/EW "your unit is
+               suppressed this turn" states then read as one family, distinct from red damage. */
+            if (firstFighter && edfGroundedInEffect(firstFighter)) {
+                this.addEntryElement('<span style="color:' + EDF_PURPLE + ';"><b>Energy Drained &mdash; cannot fire</b></span>', true);
             }
         }
 
@@ -774,6 +789,21 @@ window.ShipTooltip = function () {
         for (var i in firstFighter.criticals) {
             var crit = firstFighter.criticals[i];
             if (crit.phpclass === "Uncontrolled" && (crit.turn + 1) === gamedata.turn) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /* Energy Draining Field: the flight cannot fire this turn. EdfFighterGrounded is a `oneturn`
+       crit rolled in turn T's Critical Hit step (turnend = T+1) and in effect on T+1, so the test
+       is the same crit.turn + 1 === current turn as Uncontrolled above. Read off the flight's
+       sample fighter, which is where EdfExposure hangs every flight-wide record. */
+    function edfGroundedInEffect(firstFighter) {
+        if (!firstFighter || !firstFighter.criticals) return false;
+        for (var i in firstFighter.criticals) {
+            var crit = firstFighter.criticals[i];
+            if (crit.phpclass === "EdfFighterGrounded" && (crit.turn + 1) === gamedata.turn) {
                 return true;
             }
         }

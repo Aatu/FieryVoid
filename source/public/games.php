@@ -152,11 +152,11 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       <h3>Latest Updates</h3>
       <ul class="updates-list">
         <!--<li style="--update-colour: #e05b52;"><span class="update-title">Merry Christmas from Fiery Void!</span></li>-->
-        <li><span class="update-title">Reinforcements from Hyperspace</span>Select new 'Allow Reinforcements' option in Create Game to let part of your fleet start the battle in Hyperspace, details in FAQ.</li>        
-        <li><span class="update-title">Jumping to Hyperspace</span>Ships can now open a jump point for themselves and others to exit the scenario into hyperspace, more details in FAQ.</li>
-        <li><span class="update-title">Info Panel Redesign</span>Combat Log, Fleet Info and Declarations tabs are more user friendly, and offer new filter options.  Panel height can also be manually resized.</li>        
-        <li><span class="update-title">Manual Ballistic Intercept</span>Updates to ship tooltips now allow you to manually intercept incoming ballistic shots, see FAQ for details.</li>                    
-        <li><span class="update-title">The System</span>PaulUK (Reman) provides his vision of the System faction from Blake's 7, thanks to Geoffrey for adding to Fiery Void!</li>                             
+        <li><span class="update-title">THE TRIAD</span>New bizarre and terrifying Ancient faction for you to enjoy, courtesy of Geoffrey (and thanks to PaulUK for images).</li>        
+        <li><span class="update-title">Hyperspace Mechanics</span>Ships can now open a jump point to and from Hyperspace for themselves and others to exit/enter the scenario, more details in FAQ.</li>
+        <li><span class="update-title">Info Panel Redesign</span>Combat Log, Fleet Info and Declarations tabs are more user friendly, and offer new filter options.  Panel height can also be manually resized.</li>                           
+        <li><span class="update-title">The System</span>PaulUK (Reman) provides his vision of the System faction from Blake's 7, thanks to Geoffrey for adding to Fiery Void!</li> 
+        <li><span class="update-title">Homing Missile</span>The Kor-Lyan now have one more ballistic toy in their arsenal!</li>                                     
         <li><span class="update-title">Discord Notifications</span>You can now add your Discord account details in 'Set-Up Discord Notifications' to get a message when it's your turn. See Fiery Void FAQ for details!</li>
         <!--<li><span class="update-title">General Fixes</span>Many other small bug fixes/updates. Thanks for the reports!</li>-->
       </ul>

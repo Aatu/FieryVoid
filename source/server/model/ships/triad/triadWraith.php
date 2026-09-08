@@ -7,7 +7,7 @@ class triadWraith extends BaseShip{
 		$this->pointCost = 4300;
 		$this->faction = "The Triad";
         $this->phpclass = "triadWraith";
-        $this->shipClass = "Netrality: Wraith";
+        $this->shipClass = "Neutrality: Wraith";
         $this->imagePath = "img/ships/triadWraith.png";
         $this->canvasSize = 200;
 	    $this->isd = 'Primordial';

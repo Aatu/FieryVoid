@@ -12,7 +12,7 @@ class Thoughtforce extends MindriderCapital{
         $this->shipSizeClass = 3;
 	    $this->isd = 'Ancient';
 		$this->factionAge = 3;
-		$this->canvasSize = 250;							    
+		$this->canvasSize = 200;							    
 
 		$this->notes = 'Special Hull Arrangement';
 		$this->notes .= '<br>Ignores Manoeuvre Hit Modifiers';			
