@@ -9,7 +9,7 @@ class Traveler extends BaseShip{
         $this->phpclass = "Traveler";
         $this->shipClass = "Traveler";
         $this->imagePath = "img/ships/WalkerTraveler.png";
-        $this->canvasSize = 225;
+        $this->canvasSize = 250;
 	    $this->isd = 'Ancient';
         $this->shipSizeClass = 3; 
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
