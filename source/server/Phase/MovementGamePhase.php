@@ -168,8 +168,19 @@ class MovementGamePhase implements Phase
 
 	public function process(TacGamedata $gameData, DBManager $dbManager, Array $ships)
 	{
+		/* ⚠️⚠️ WHICH SHIPS SUBMITTED A MOVE, NOT WHICH SHIPS ARE IN THE PAYLOAD - and the difference
+		   is a real bug (game 4351, WALKERS_OF_SIGMA_PLAN.md §3.14e). ajaxInterface sends an entry
+		   for EVERY ship the player owns, and for an ATTACHED one it deliberately sends an EMPTY
+		   movement list (the client refuses to plot a move for a unit riding a host). So a bare
+		   "is this id in the payload" test reads a rider as having moved itself, and the mirror
+		   below is skipped - leaving it on its preturn `sync` row at the host's START hex while the
+		   host sails away. It never showed up on breaching pods because a pod and its host belong
+		   to DIFFERENT players and so are never in one submission; the Traveler and its Waymarker
+		   are the first attached pair on the SAME side.
+		   An attached ship with a NON-empty list is detaching, which is the case the skip exists
+		   for, and that still reads true here. */
 		$submittedShipIds = array();
-		foreach ($ships as $s) $submittedShipIds[$s->id] = true;
+		foreach ($ships as $s) if (!empty($s->movement)) $submittedShipIds[$s->id] = true;
 
 		$activeShips = $gameData->getMyActiveShips();
 		foreach ($ships as $ship) {
@@ -277,7 +288,8 @@ class MovementGamePhase implements Phase
 				foreach ($activeShip->hasAttached as $attachedShooterId => $location) {
 					$attachedShip = $gameData->getShipById($attachedShooterId);
 					if ($attachedShip && !$attachedShip->isDestroyed() && isset($attachedShip->attached[$activeShip->id])) {
-						// Skip if the attached ship is also submitting its own movement (e.g. detaching)
+						// Skip if the attached ship is also submitting a move of its OWN (e.g. detaching) -
+						// see the note on $submittedShipIds: an empty list is not a move.
 						if (!isset($submittedShipIds[$attachedShip->id]) && !$dbManager->isMovementAlreadySubmitted($gameData->id, $attachedShip->id, $gameData->turn)) {
 							$attachedMoves = array();
 							// Prefer the precise entry-side offset recorded at attach time; fall back to

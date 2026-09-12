@@ -309,7 +309,14 @@ window.PhaseStrategy = function () {
         var changed = false;
 
         this.shipIconContainer.getArray().forEach(function (icon) {
-            var radius = (anyField && !PhaseStrategy.isOffBoardForEdf(icon)) ? PhaseStrategy.getEdfRadiusForShip(icon.ship) : 0;
+            /* ⭐ Stage 19 (3.14d): the disc also covers any field projected by a unit STOWED in this
+               hull, because a docked ship has no icon of its own to hang one on and its field is
+               still operational (user ruling 2026-09-12). The larger of the two wins - they are
+               concentric, sharing the carrier's hex - so a Traveler carrying a Guideship draws the
+               Guideship's wider circle and nothing is drawn twice. */
+            var radius = (anyField && !PhaseStrategy.isOffBoardForEdf(icon))
+                ? Math.max(PhaseStrategy.getEdfRadiusForShip(icon.ship), PhaseStrategy.getStowedEdfRadius(icon.ship))
+                : 0;
 
             /* ⚠️ `changed` is what the icon REPORTS, not "we called it". showEdfField rebuilds
                nothing when the disc it would draw is the one already on screen, and a standing
@@ -381,6 +388,45 @@ window.PhaseStrategy = function () {
        THIS viewer, so an enemy's hidden allocation reads 0; and once orders are committed the
        published numbers say the same thing, which is why this is also correct in every later
        phase. */
+    /* The largest Energy Draining Field radius projected by the units STOWED in this hull, or 0
+       (WALKERS_OF_SIGMA_PLAN.md 3.14d, Stage 19).
+
+       ⭐⭐ TWO SOURCES, AND THE SECOND IS WHY THE FIRST IS NOT ENOUGH. Walking the bay's own ship
+       list gives the OWNER a live answer that follows the power they are allocating this phase -
+       but that list is masked for an opponent, who would then see the drain applied over hexes with
+       no disc drawn on them (the hexes themselves are public in gamedata.edfHexes; only the SOURCE
+       is hidden). So the server also publishes the finished number per hangar, to everyone, and the
+       two are maxed: the owner gets the live figure, the opponent gets the committed one, and
+       neither can see a field that is not really there. Same shape as Stage 18's D47 and for the
+       same reason - a derived figure with a MASKED input needs a published twin, not a wider mask. */
+    PhaseStrategy.getStowedEdfRadius = function (ship) {
+        if (!ship || !ship.systems) return 0;
+        var best = 0;
+        for (var i in ship.systems) {
+            var bay = ship.systems[i];
+            if (!bay) continue;
+            var published = parseInt(bay.stowedEdfRadius, 10);
+            if (!isNaN(published) && published > best) best = published;
+
+            //The live half: only ever populated for the viewer's own side.
+            var ids = [];
+            if (bay.isDockingBay && Array.isArray(bay.shipsDocked)) {
+                bay.shipsDocked.forEach(function (e) { if (e) ids.push(e.shipId); });
+            }
+            if (bay.lcvDocked && bay.lcvDocked.shipId !== undefined) ids.push(bay.lcvDocked.shipId);
+            if (Array.isArray(bay.hangarUsage)) {
+                bay.hangarUsage.forEach(function (e) { if (e && e.dockedFlightId) ids.push(e.dockedFlightId); });
+            }
+            for (var k = 0; k < ids.length; k++) {
+                var stowed = window.gamedata ? gamedata.getShip(ids[k]) : null;
+                if (!stowed || shipManager.isDestroyedByDamage(stowed)) continue;
+                var r = PhaseStrategy.getEdfRadiusForShip(stowed);
+                if (r > best) best = r;
+            }
+        }
+        return best;
+    };
+
     PhaseStrategy.getEdfRadiusForShip = function (ship) {
         if (!ship || !ship.systems) return 0;
 

@@ -15,8 +15,8 @@ window.ShipTooltipFireMenu = function () {
         { className: "targetWeaponsHex", condition: [hasOrderSource, hasHexWeaponsSelected], action: targetHexagon, info: hexButtonLabel },
         { className: "targetSuppWeapons", condition: [isTargetable, hasOrderSource, isFriendly, hasWeaponsSelected, FFWeaponSelected, notSelf], action: targetWeapons, info: "Target Support Weapons" },//30 June 2024 - DK - Added for Ally targeting.
         { className: "removeMultiOrder", condition: [isEnemy, hasWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firing Order" },
-        { className: "launchFighters", condition: [isMine, isFiringPhase, hasLaunchableHangar, isLaunchEnabledGame, carrierNotPivotingOrRolling], action: openHangarLaunch, info: "Launch Fighters" },
-        { className: "recoverFlights", condition: [isMine, isFiringPhase, hasReceivableFlights, isLaunchEnabledGame, carrierNotPivotingOrRolling], action: openHangarRecover, info: "Recover Flights" },
+        { className: "launchFighters", condition: [isMine, isFiringPhase, hasLaunchableHangar, isLaunchEnabledGame, carrierNotPivotingOrRolling], action: openHangarLaunch, info: "Launch" },
+        { className: "recoverFlights", condition: [isMine, isFiringPhase, hasReceivableFlights, isLaunchEnabledGame, carrierNotPivotingOrRolling], action: openHangarRecover, info: "Hangars" },
         //"Enter Hangar" is reused for LCVs: isDockableUnit accepts a flight OR an
         //LCV, and openHangarDock routes an LCV through the LCV-rail dock dialog.
         { className: "dockFlight", condition: [isMine, isFiringPhase, isDockableUnit, isLaunchEnabledGame, hasEligibleCarrierInHex], action: openHangarDock, info: "Enter Hangar" }
@@ -1419,9 +1419,11 @@ window.bayLaunchableShips = function (carrier, bay) {
     if (shipManager.systems.isDestroyed(carrier, bay)) return [];
     if (Array.isArray(bay.pendingDockOrders)
         && bay.pendingDockOrders.some(function (o) { return parseInt((o && o.count) || 0, 10) > 0; })) return [];
-    var deferred = Array.isArray(bay.deferredShipClasses) ? bay.deferredShipClasses : [];
+    // Stage 19: nothing is refused by class any more. A two-turn class launches through the ride
+    // (it leaves the bay this turn and separates at the end of the next), which is a slower launch,
+    // not an ineligible one.
     return bay.shipsDocked.filter(function (e) {
-        if (!e || deferred.indexOf(String(e.phpclass)) !== -1) return false;
+        if (!e) return false;
         return parseInt(e.dockTurn, 10) < gamedata.turn || !!e.deploy;
     });
 };

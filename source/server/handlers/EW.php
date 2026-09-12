@@ -135,6 +135,64 @@
 		   ⚠️ EVERY OTHER TYPE IS LEFT ALONE. "Detect Mines" is the flight's Offensive Bonus being spent
 		   and has nothing to do with this pool; touching it here would break every ordinary flight's
 		   mine detection. */
+		/* ⭐ WALKERS_OF_SIGMA_PLAN.md 3.14f (Stage 19, user ruling 2026-09-12) - A SHIP RIDING A
+		   DOCKING BAY IS OUT OF THE ACTIVE EW GAME, BOTH WAYS.
+
+		   "Waymarkers should also not use EW on transition Docking/Launching turns, nor should
+		   ships have the opportunity to use any targeted EW on it."
+
+		   ⚠️ IT KEEPS ITS DEW (user ruling, same day). Only ACTIVE allocations stop; unspent points
+		   still fall into DEW the way they do for every ship, so a riding Waymarker is no easier to
+		   hit than usual. What it loses is the ability to spend, and what its enemies lose is the
+		   lock - after which they take the ordinary no-lock range penalty, which is the engine's
+		   standing rule and is deliberately untouched.
+
+		   ⚠️⚠️ $ship IS THE POST-SIDE COPY AND HAS NO NOTES, so $ship->attached is EMPTY on it
+		   (arch_post_side_ship_reconstruction). Every predicate here is asked of $gamedata, the
+		   RELOADED authoritative gamedata - which is also why this takes one and clampFlightEw,
+		   its neighbour, does not.
+
+		   Runs beside clampFlightEw for the same reason that one exists: EW::validateEW() returns
+		   true unconditionally, so a submission is otherwise trusted wholesale. The client refuses
+		   the allocation and hides the buttons; this is what makes it a rule. */
+		public static function stripDockingRiderEw($ship, $gamedata, $turn){
+			if (!$gamedata) return;
+
+			$riders = self::collectDockingRiderIds($gamedata);
+			if (empty($riders)) return;                       //empty in every game with no Docking Bay ride
+
+			$sourceSuspended = isset($riders[(int)$ship->id]);
+			$kept = array();
+
+			foreach ($ship->EW as $entry){
+				if ($entry->turn != $turn)        { $kept[] = $entry; continue; }
+				if ($entry->type === 'DEW')       { $kept[] = $entry; continue; }   //the rider keeps its DEW
+				if ($sourceSuspended) continue;                                     //spends nothing else
+				if (isset($riders[(int)$entry->targetid])) continue;                //and nothing is spent AT one
+				$kept[] = $entry;
+			}
+
+			$ship->EW = $kept;
+		}
+
+		/* Every unit currently riding a Docking Bay, as a SET of ids. Collected once per submitting
+		 * ship rather than asked per EW row, and empty in every game that has no Docking Bay in it -
+		 * the isDockingBay test rejects the whole fleet before anything else happens. */
+		private static function collectDockingRiderIds($gamedata){
+			$ids = array();
+			foreach ($gamedata->ships as $carrier){
+				if (!is_array($carrier->systems)) continue;
+				foreach ($carrier->systems as $bay){
+					if (empty($bay->isDockingBay) || empty($bay->shipsAttaching)) continue;
+					foreach ($bay->shipsAttaching as $entry){
+						$id = (int)($entry['shipId'] ?? 0);
+						if ($id > 0) $ids[$id] = true;
+					}
+				}
+			}
+			return $ids;
+		}
+
 		public static function clampFlightEw($ship, $turn){
 			if (!($ship instanceof FighterFlight)) return;
 
@@ -354,14 +412,20 @@
 				}
 				if (empty($systems)) continue;
 
-				if ($ship->isDestroyed()) continue;
-				if ($ship->isReinforcement()) continue;   //still in hyperspace - detects nothing
-
 				$team = isset($ship->team) ? (int)$ship->team : null;
 				if ($team === null) continue;
 
-				$position = $ship->getHexPos();
-				if (!$position) continue;                 //no position yet (lobby / initialisation)
+				/* ⭐ "DOCKED SHIPS WITH EW DETECTORS STILL CONTRIBUTE THEIR SAVED EW TO SHIPS WITHIN
+				   20 HEXES" (user ruling 2026-09-12, WALKERS_OF_SIGMA_PLAN.md 3.14d). The shared
+				   reader with setEdfHexes - destroyed, in hyperspace, never placed and not-arrived-
+				   yet all still exclude a unit, and a STOWED one now detects from its CARRIER'S hex.
+				   Sharing the reader is the point: the two sweeps had four identical exclusions
+				   written out twice, and this rule had to reach both of them.
+				   ⚠️ Range is still measured from the CARRIER, so a Waymarker that docks pulls its
+				   20-hex bubble along with the Traveler - which is the rule, and also why the stowed
+				   unit's own stale movement row must never be used. */
+				$position = HangarOps::projectionOriginFor($ship, $gamedata);
+				if (!$position) continue;                 //not on the board, or no position yet (lobby)
 
 				foreach ($systems as $system){
 					$range = (int)$system->getDetectorRange($turn);   //0 for destroyed or unpowered

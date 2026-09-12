@@ -537,6 +537,15 @@ window.weaponManager = {
         //is a collision, not firing, and the server lets it stand, so it is not refused here either.
         if (!weapon.isRammingAttack && shipManager.movement.isJumpFireForbidden(ship)) return;
 
+        /* WALKERS_OF_SIGMA_PLAN.md 3.14a (Stage 19, user ruling 2026-09-12): a ship riding a Docking
+           Bay's aft through its two-turn procedure may not fire either - it is a ship under tow,
+           steering nothing, with its arcs bolted to another hull. Same shape and same exclusion as
+           the jump refusal above (a ram is a collision, not firing), and the same backstop behind
+           it: Firing::withdrawFireFromDockingRiders drops anything that gets past this.
+           ⚠️ shipManager.isDockingRider, NOT `ship.attached` - a breaching pod's host wears that
+           too, and a boarded ship is emphatically still allowed to shoot. */
+        if (!weapon.isRammingAttack && shipManager.isDockingRider(ship)) return;
+
         //Spent & locked Gravitic Augmenter: already committed its order for the turn and is outside
         //that order's declaration phase — block re-selection from every path (icon click, select-all,
         //right-click) at this single chokepoint.

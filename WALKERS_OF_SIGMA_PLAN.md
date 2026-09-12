@@ -19,10 +19,16 @@ user's notes the same day (D42/D45 one list sorted by priority alone, docked row
 D44 cobalt reinforcement rows) - §3.15a, and STAGE 18 (docked power sharing) COMPLETE 2026-09-12,
 built to both halves of §3.16 with the grant recorded as CLIENT-COMPUTED AND ADVISORY (D46) -
 §3.16a - and a play-test follow-up the same day that gave the OPPONENT the same figure by disclosing
-the bay's ship ids and nothing else (D47) - §3.16b. Stage 19 (the Extra-Dimensional Jump Drive) not
+the bay's ship ids and nothing else (D47) - §3.16b, and STAGE 19 (the Waymarker's two-turn procedure,
+the aft-hit redirect, the hangar-manoeuvre label and what a stowed unit still projects) COMPLETE
+2026-09-12, finishing the one piece D35 had deferred out of Stage 16 and adding three rules from the
+user's notes the same day (D48 least damaged = most structure boxes remaining, D49 a rider can be shot
+but cannot shoot, D50 the banner goes on the unit and a NEW flight gets none, D51 left-click scrolls on
+ALL docked units, which withdraws a Stage 17 exception) - §3.14a / §3.14c / §3.14d, as built §3.14e.
+Stage 20 (the Extra-Dimensional Jump Drive) not
 started. ⚠️ Stages 12, 13
 and 14 all reshuffle `MapmakerProbes`'s positional system ids and MUST deploy together; append
-only after that. Stages 12–19 were added 2026-09-08 — the Mapmaker Sensor Probes' remaining abilities, the
+only after that. Stages 12–20 were added 2026-09-08 — the Mapmaker Sensor Probes' remaining abilities, the
 Traveler's Docking Bay / repair / power sharing, and the traveler and extra-dimensional jump
 drives.** Written 2026-09-02 after a full survey of the existing seams; re-surveyed 2026-09-08 for
 the second wave, whose rulings and control sheet arrived the same day (D11–D26; Q8–Q15 all answered).
@@ -72,7 +78,12 @@ silent everywhere.
 | D32 | Every Walker jump drive leaves slowly, and it is a MARK (2026-09-11) | *"All Walker ships possess this ability, not just Traveler. So the best approach seems to be to mark the Jump Engine as Walker (in the same way we mark Scanner as 'Advanced')."* `JumpEngine::markWalker()` on the six Walker hulls - a flag, not the `TravelerJumpDrive` class §3.17 first proposed, so no autoload change and no system id moves. The Mapmaker flight's engine stays unmarked (§3.12: it *"works normally"*). The targeting rule reuses the Energy Draining Mine's untargetable mechanism (§3.10c) and gives it its server half at last. Promoted from Stage 18 to Stage 15 the same day. §3.17a. |
 | D33 | How a SHIP docks, and what damage does to it (2026-09-11) | **The LCV-rail rules, both halves.** Docking: the Traveler at speed 0, the ship ending its move in the Traveler's hex on the Traveler's heading with at least 1 thrust unspent - `canLCVDock`'s conditions, with its client-and-server thrust backstop. Damage: partial bay damage never removes a docked ship (probes are evicted first, as ever); the bay or the Traveler destroyed forces every docked ship out with the bay's damage + 2d10 to Structure and the launch initiative penalty. No landing damage. §3.14b. |
 | D34 | What a ship costs against the launch rate (2026-09-11) — ⚠️ **SUPERSEDED by D37 the same day** | **Its box cost**, not 1 per ship: the bay's 12 a turn is paid in boxes by a ship, so one Pathfinder uses a whole turn and three Scribes fill it. With it the one-type-per-turn rule (D17) mostly follows from arithmetic - any two ship classes together exceed 12 - leaving Scribes against Mapmakers as the case the lock actually decides. §3.14b. |
-| D35 | The Waymarker's two-turn procedure (2026-09-11) | **Deferred**, as §3.14a suggested: the bay is built and proved with Scribes, Pathfinders/Guideships and Mapmakers. The Waymarker is in the bay's class list and costs 24 boxes, so it counts in the Fleet Checker (D36), but `DockingBay::DEFERRED_SHIP_CLASSES` keeps it out of every dock, launch and deploy-dock until §3.14a lands. |
+| D48 | "Least damaged section" is MOST STRUCTURE BOXES REMAINING (2026-09-12) | The Waymarker's Front Structure is 60 and its Aft is 56, so the plausible readings disagree even on an undamaged hull. The user chose the raw remaining count - the number the player reads off the ship window - over proportion-remaining and over damage-taken, both of which tie on an unhurt hull and need a tiebreak of their own. So an undamaged Waymarker takes a redirected aft hit FORWARD, and swings aft only once the bow is five boxes worse off; ties go forward, the same side an unhurt hull picks. `HangarOps::leastDamagedFrontOrAft`. §3.14e. |
+| D49 | A riding Waymarker can be shot, but cannot shoot (2026-09-12) | It is a ship under tow for the middle turn of its two-turn procedure: steering nothing, arcs bolted to another hull, its crew doing the manoeuvre. It remains a normal target - which is the rule, and is also what makes the aft-hit redirect (D48) a supplement rather than the only way to hurt it. `Firing::withdrawFireFromDockingRiders`, modelled on the Ancient-jump withdrawal beside it, with `weaponManager.selectWeapon` refusing the selection client-side. §3.14e. |
+| D50 | The hangar-manoeuvre banner goes on the UNIT, and a new flight gets none (2026-09-12) | A fighter LAUNCH order names a phpclass and a size, so the flight it creates does not exist until the order resolves and there is nothing to label. Of the three options the user chose "on the unit only - skip new flights" rather than falling back to a banner on the carrier, which keeps *"this label is about the unit wearing it"* true with no exceptions. ⚠️ The gap is the ORDER SHAPE, not the unit's existence, so a RELAUNCHING docked flight is uncovered too; a future fix belongs in the order (a flight id), not in the reader. §3.14c. |
+| D52 | A riding Waymarker KEEPS its DEW (2026-09-12) | *"Waymarkers should also not use EW on transition Docking/Launching turns, nor should ships have the opportunity to use any targeted EW on it."* The ambiguity is that unspent sensor points become DEW automatically (`convertUnusedToDEW`), and an attacker with no lock takes a doubled range penalty - so the two halves pull opposite ways. The user chose: only ACTIVE allocations stop, DEW is untouched, nobody may lock it, and the attacker eats the ordinary no-lock penalty on top. A riding Waymarker is therefore HARDER to hit than usual, not easier - it is shielded by the manoeuvre rather than exposed by it. §3.14f. |
+| D51 | Left-click scrolls, right-click opens the window - on ALL docked units (2026-09-12) | *"Left-click is scroll only, right-click is open shipWindow on ALL docked units e.g. fighters, LCVs and Docking Bay ships."* This **withdraws Stage 17's own exception**, which argued that a docked FLIGHT has no hex of its own and should open its window on left-click. Its CARRIER has one, and that is the honest answer to "show me where this is". `shipManager.carrierHolding` grew the `hangarUsage.dockedFlightId` arm and `isOffBoardButOurs` lost its flight clause, leaving that predicate covering only a reinforcement in hyperspace - the one state genuinely inside no hull at all. §3.14e. |
+| D35 | The Waymarker's two-turn procedure (2026-09-11) | **Deferred**, as §3.14a suggested: the bay is built and proved with Scribes, Pathfinders/Guideships and Mapmakers. The Waymarker is in the bay's class list and costs 24 boxes, so it counts in the Fleet Checker (D36), but `DockingBay::DEFERRED_SHIP_CLASSES` keeps it out of every dock, launch and deploy-dock until §3.14a lands. ⚠️ **SUPERSEDED 2026-09-12 (Stage 19):** §3.14a landed, the deferred list is gone, and its replacement `TWO_TURN_SHIP_CLASSES` is a LABEL rather than a refusal. |
 | D36 | Docked ships count toward the Traveler's hangar requirement (2026-09-11) | *"Purchasing Waymarker (24), Pathfinder/Guideships (12) and Scribes (4) can help meet Traveler hangar capacity in Fleet Checker, along with Mapmaker fighters as usual. Since 24 of its 36 fighters slots are associated with its Aft Docking Bay system."* Every bought ship a Docking Bay in the fleet lists adds its box cost to that bay's `$fleetCheckCategory`, **capped at the fleet's total Docking Bay boxes** - a ship only counts for a bay it could sit in, so a lone Pathfinder cannot meet its own 6-probe minimum and three Pathfinders count 24, not 36, behind one Traveler. §3.14b. |
 | D37 | The Docking Bay's launch rate, corrected (2026-09-11, review of Stage 16) | *"It should be 12 Mapmakers OR 2 Scribes OR 1 Pathfinder."* A **per-class count**, launches and recoveries together, in `DockingBay::$shipLaunchRates` (Scribe 2, Pathfinder / Guideship / Waymarker 1); the Mapmakers keep `$output`. Replaces D34's box pricing, which gave three Scribes. §3.14b "Revisions". |
 | D38 | Fighters fill the side hangars first (2026-09-11) | *"Mapmakers should prioritise side hangars, since only the aft docking bay can store larger units."* `HangarOps::bayFillRank` / `HangarShared.bayFillRank`: reserved bays, then ordinary, then a Docking Bay, at every auto-fill and default-pick site. Also: docked weapons **recharge** as normal and an Energy Draining Mine restocks to its usual 3 - which the code already did; Stage 16's write-up had claimed otherwise without checking. |
@@ -3945,7 +3956,7 @@ marker, **not** by weakening the hull-versus-hull occupancy rule for everyone.
 - ⚠️ The terrain branch must stay intact — a queued craft still cannot be dropped onto terrain, and
   the Huge/`hexOffsets` collision arms of the same function are untouched.
 
-#### 3.14a The Waymarker's two-turn procedure — **OPTIONAL within Stage 16 (D23) — DEFERRED by the user 2026-09-11 (D35)**
+#### 3.14a The Waymarker's two-turn procedure — **BUILT 2026-09-12 (Stage 19)**; deferred from Stage 16 by D35, as built in §3.14e
 
 Everything above is one-turn docking, which is what the bay already does and what the other three
 craft need. The Waymarker needs an **intermediate state**: a turn in which it is neither on the
@@ -4152,6 +4163,304 @@ cadence up to 3, exactly as the user asked. Proved now, not changed.
     replay games (4329, 4331–4334, 4337, 4345) differ by exactly that: the surrendered fleet's
     `edfHexes` (and one `edfNetHexes`), nothing else. Re-record those seven.
   - Verified: server harness 141 (groups 18 and 19 added), client 140, 0 failed.
+
+
+---
+
+#### 3.14c The hangar-manoeuvre label — **BUILT 2026-09-12 (Stage 19)**
+
+*"We should add a new Docking with 'X' tooltip note, and a cyan status banner when ANY unit is
+ordered to enter (or leave) a Hangar during the Firing phase. Then use this new tooltip note/status
+banner to also indicate when a Waymarker is docking throughout the transitional docking/launching
+turn, instead of the normal 'Attached' note and status banner."* (User, 2026-09-12.)
+
+⭐ **ONE READER, TWO SURFACES.** `shipManager.getHangarManoeuvre(ship)` (ships.js) returns
+`{ text, dir, riding, carrier }` or null, and is read by the map tooltip (ShipTooltip.js) and by the
+ship window's banner stack (ShipWindow.js `getStatusBanners`). That is the contract
+`getArrivalIniPenalty` already records: a figure the two surfaces must never disagree about gets one
+function, not two.
+
+**What it answers for.** Any unit named in a queued Firing-phase hangar order — a flight recovering
+(`pendingDockOrders[].flightId`), a ship entering a Docking Bay (`pendingBayShipDockOrders[].shipId`),
+an LCV coming back to its rail, and the two ship-shaped cases going out — plus a Waymarker riding a
+Traveler's aft (`shipsAttaching`), which outranks a queued order on the same unit because it is the
+thing that is actually happening rather than the thing that has been asked for. Wording is
+**"Docking with &lt;carrier&gt;"** inbound and **"Launching from &lt;carrier&gt;"** outbound; the colour
+is the cyan this tooltip already gives Hangar Operations, Just Launched and Arrival Scatter, and the
+window already gives Deploying and Arrival Scatter — something benign the unit is *doing*, not damage.
+
+⚠️⚠️ **A NEW FLIGHT LAUNCHING HAS NO UNIT TO LABEL.** A fighter launch order names a *phpclass and a
+size*; the flight it creates does not exist until the order resolves, so there is nothing to hang a
+banner on. The user ruled this out of scope rather than moving the banner to the carrier ("on the unit
+only — skip new flights"), which keeps *"this label is about the unit wearing it"* true with no
+exceptions. A relaunch of an already-docked flight is a launch order of the same shape, so it is not
+covered either — the gap is the ORDER SHAPE, not the unit's existence, and a future fix belongs in the
+order (a flight id), not in the reader.
+
+⚠️ **IT REPLACES THE ATTACHED PAIR, IT DOES NOT SIT BESIDE THEM.** A riding Waymarker *is* `attached`,
+so without suppression the tooltip reads "Attached to Traveler [Aft]" in boarding green and the
+carrier reads "Ship is being Boarded!" in alert orange — a docking manoeuvre described as an enemy pod
+on the hull. Both surfaces now gate the attached line on `!(manoeuvre && manoeuvre.riding)`, and
+**both filter `hasAttached` through `shipManager.isDockingRider`** so a Traveler with a Waymarker on
+its aft and a real pod on its bow still says it is being boarded.
+
+**Masking is inherited, not re-implemented.** Queued orders ride the carrier's hangar system and are
+own-team-only (`Hangar::stripForJson`), so an opponent simply finds none — an intention to dock is a
+secret. `shipsAttaching` is published to EVERYONE, because the ride is on the map in plain sight and
+its aft-hit redirect is something an attacker must be able to reason about before they shoot.
+
+---
+
+#### 3.14d What a stowed unit still projects — **BUILT 2026-09-12 (Stage 19)**
+
+*"Energy Draining Fields are still operational for Docked craft in Traveler and docked ships with EW
+Detectors still contribute their Saved EW to ships within 20 hexes."* (User, 2026-09-12.)
+
+⭐⭐ **TWO RULES, ONE MISSING FACT.** Both sweeps — `TacGamedata::setEdfHexes` and
+`EW::collectEwDetectors` — opened with the identical four exclusions (destroyed, still in hyperspace,
+never placed, not arrived yet) written out twice, and `isDestroyed()` folds `removed` in, so a docked
+unit was excluded by the FIRST of them. The fix is one shared reader,
+**`HangarOps::projectionOriginFor($ship, $gamedata)`**, which returns the hex a unit projects FROM or
+null: its own, or **its carrier's** when it is stowed. Client twin: `shipManager.getProjectionOrigin`.
+
+⚠️ **THE CARRIER'S HEX, NEVER THE STOWED UNIT'S OWN.** A docked ship's last movement row is wherever it
+happened to dock, and stops being true the moment the Traveler moves. This is why the rule could not be
+a one-line relaxation of the `isDestroyed()` test: the exclusion and the position are the same problem.
+
+**Three homes, one walk.** `HangarOps::stowedInCarrier` — the server twin of
+`ajaxInterface.isDepartedWithCarrier` and of the client's `shipManager.carrierHolding` — finds a
+Docking Bay's `shipsDocked`, a rail's one `lcvDocked`, and a hangar's stored FLIGHTS under
+`hangarUsage[].dockedFlightId`.
+
+⭐ **`BaseShip::isDestroyedByDamage()` is the server twin the client has had since Hangar Ops** — "the
+same question asked of the damage alone". A stowed WRECK projects nothing, and `isDestroyed()` cannot
+tell one from a unit parked inside a hangar. ⚠️ **NOT a change to `isDestroyed()`**, and it must never
+become one; this is the third site in three stages to need that exact carve-out.
+
+⭐⭐ **THE DISC HAS A MASKED INPUT, AND THAT IS A PUBLISHED-TWIN PROBLEM (the Stage 18 D47 shape
+again).** A field projected from inside a hull has no icon of its own to draw a disc on, so the
+CARRIER's icon draws it — but deriving the radius from the bay's ship list gives the opponent nothing,
+because that list is masked, and they would then watch the drain apply over hexes with no disc on them.
+(The hexes themselves are public in `gamedata.edfHexes`; only the SOURCE is hidden.) So the server also
+publishes the finished number per hangar to everyone — `HangarOps::publishStowedEdfRadii` fills a
+**protected** `Hangar::$stowedEdfRadius` during `setEdfHexes`, sent by `stripForJson` only when
+non-zero — and `PhaseStrategy.getStowedEdfRadius` **maxes** it against the live walk. The owner gets a
+figure that follows the power they are allocating this phase; the opponent gets the committed one;
+neither can see a field that is not there. ⚠️ Protected rather than public on purpose: a public
+property rides the static blueprint, which would put a live per-turn number into a cached per-CLASS
+artefact.
+
+⚠️ **The EW half is safe under masking for a reason that will not generalise.** `collectEwDetectors`
+is mirrored on the client, and an enemy's docked list is masked — so their stowed detectors silently
+drop out of the client's sweep. That is harmless HERE and only here: the allowance is filtered to the
+viewer's own team (`countEwDetectorsCovering`), whose bays are disclosed to them. A future rule that
+reads the detector list across teams would need the published-twin treatment the EDF disc got.
+
+⚠️ **`EdfNetLinks::buildOccupancy` is deliberately NOT changed.** It counts units *standing in* a
+corridor for a tie-break; a stowed unit is not standing anywhere of its own, and its carrier is already
+counted.
+
+---
+
+#### 3.14e As built — Stage 19, 2026-09-12 — **STAGE COMPLETE** (signed off by the user after play testing, 2026-09-12; play-test fixes and refinements in §3.14f)
+
+Four rulings opened the stage, all the same day: **least damaged = most structure boxes remaining**;
+a riding Waymarker **can be shot, cannot shoot**; the leaving-side banner is **on the unit only, skip
+new flights**; and in the fleet list **left-click is scroll only, right-click is the ship window, on
+ALL docked units**.
+
+**The state machine.** `DockingBay::$shipsAttaching` — `[{shipId, phpclass, boxes, startTurn, dir}]`,
+`dir` being `'in'` or `'out'` — with its own change-detected `bayShipsAttaching` note beside
+`bayShipsDocked`. Everything else is in `HangarOps`' two-turn section: `beginBayShipAttach`,
+`releaseBayShipAttach`, `completeBayShipAttachments` and `releaseAllBayShipAttachments`.
+`performBayShipDock` and `performBayShipLaunch` divert a two-turn class onto the ride and are
+otherwise untouched, so a Scribe's path is byte-for-byte what it was.
+
+⭐ **THE CLAMP LIVES IN THE CARRIER'S CnC NOTES, THE LIST ONLY SAYS WHY.** `Attached` / `Detached`
+notes are what `CnC::onIndividualNotesLoaded` replays into `->attached` / `->hasAttached` on every
+load, exactly as a breaching pod's are. Keeping the two halves separate is what lets a rider that
+something ELSE detached — the CnC's own boarding sweep writes `Detached` when the host's structure at
+that location dies — be noticed as an **ABORT** rather than completed: the entry is dropped, the boxes
+released, and a Waymarker on its way IN stays on the board where it is.
+
+⭐ **`attached` MEANS BOARDING EVERYWHERE ELSE IN THE TREE**, so no Stage 19 rule may read it directly.
+`HangarOps::attachedBayShipFor` (carrier side), `bayCarrierAttachedTo` (rider side) and
+`shipManager.isDockingRider` (client) are the discriminators, and each opens with the empty-`attached`
+early-out so the whole question costs one array test in a game with no boarding in it.
+
+**Free from the ride, and this is why it was the right mechanism:** movement is mirrored by
+`MovementGamePhase::advance` and `Movement::setPreturnMovementStatusForShip`; the client already
+refuses to plot a move for an attached unit (movement.js, five sites); the pair is never rammed by its
+host; mathlib's same-hex bearing already knows the shape. Not one line of that was re-implemented.
+Facing offset **0**, and that is a fact rather than a simplification — `canBayShipDock` requires the
+docking ship to share the carrier's heading and `resurrectAtCarrier` puts a launch out on it.
+
+**Boxes are reserved from declaration**, through the one choke point: `HangarOps::dockedShipBoxes`
+counts `shipsAttaching` as well as `shipsDocked`, so `effectiveCapacity`, `bayFreeBoxesForShips` and
+the client's `HangarShared.bayShipBoxesHeld` all reserve without knowing they do. The **type lock
+lasts the whole manoeuvre**: `hasShipOrdersThisTurn()` answers true while anything is riding, which is
+the existing one-type-per-turn rule simply lasting as long as the manoeuvre does.
+
+**The -50 launch initiative is paid at SEPARATION, not at the attach.** An attached unit plots no
+movement of its own and its initiative decides nothing, so spending it a turn early would have bought
+nothing.
+
+⭐⭐ **THE AFT-HIT REDIRECT IS SEVEN LINES, AND WHERE IT SITS IS THE WHOLE DESIGN.** The SHOT is never
+redirected — only the hit that has already landed aft. Everything above the insertion point in
+`Weapon::damageOneSheet` has run against the carrier exactly as it would with no rider at all: the
+profile, the to-hit, `beforeDamage` and all 35 of its overrides, and the hit-location roll itself.
+Placed AFTER `$tmpLocation` resolves and BEFORE the Piercing structure count, so the Piercing, Raking
+and standard branches below are already talking about the Waymarker — that is what makes it seven lines
+rather than a fork of the function. The `DamageEntry` follows `$target`
+(`assignDamageReturnOverkill` files against `$target->id`), so the rows land on the Waymarker's own
+sheet and persist there. ⚠️ `$forcePrimary` shots are exempt: they are internal effects aimed at the
+carrier's Primary, not incoming fire that happened to strike the aft. ⚠️ A Piercing shot enters through
+the chosen section (`$facingLocation = $tmpLocation`) rather than re-rolling the rider's facing; its
+exit section is still derived from the bearing, so it behaves like a piercing shot once inside.
+
+**Least damaged = MOST STRUCTURE BOXES REMAINING** (`HangarOps::leastDamagedFrontOrAft`). On a
+Waymarker (Front 60, Aft 56) that means an undamaged hull takes the hit forward and swings aft only
+once the bow is five boxes worse off; ties go FORWARD, the same side an unhurt hull picks, so the rule
+never changes answer for an unhurt Waymarker. A destroyed section is never chosen.
+
+**The fire withdrawal** is `Firing::withdrawFireFromDockingRiders`, modelled on
+`withdrawFireFromJumpingUnits` directly above it down to the exclusions (a ram is a collision, a
+hyperspace log order is not a shot, a selfIntercept marker is consent), called from both
+`prepareFiring` and `preparePreFiring`. ⚠️ On the advance path, not in `validateFireOrders`: the ride
+BEGINS in the previous turn's critical phase, so a POST-side ship reconstructed without its carrier's
+notes cannot answer "am I riding anything". `weaponManager.selectWeapon` refuses the selection
+client-side, with the same ram exemption.
+
+**The fleet list (item 5).** `shipManager.carrierHolding` is now the ONE implementation on the client
+— `fleetListManager.carrierHolding` is a one-line delegate — and it grew the `hangarUsage
+.dockedFlightId` arm, so a docked FLIGHT resolves to its carrier like a docked hull. `isOffBoardButOurs`
+lost its `removed && flight` clause, so that row falls THROUGH to the carrier-scroll branch.
+⭐ **This withdraws Stage 17's own exception on purpose.** §3.15a argued a flight has no hex of its own
+and should open its window; the user's answer is that its CARRIER does, and that is the honest reply to
+"show me where this is". One list, one meaning per gesture: left-click scrolls, right-click and the ⓘ
+affordance open the window, on all three kinds of stowed unit. What is left in `isOffBoardButOurs` is
+the one state genuinely inside no hull at all — a reinforcement still in hyperspace.
+
+**Abandonment.** A destroyed bay or a destroyed carrier simply lets the rider go — deliberately with
+**no fragment damage**, unlike a ship forced out of the bay itself (`forceBayShipOut`): this one was
+never inside, it was clamped to the outside of the hull and is already on the board at the carrier's
+hex. There is no way to cancel a ride once it has begun; cancelling the ORDER before it resolves works
+as it does for any other craft.
+
+**Verification.** 123 server checks (`tests/replay/walkersStage19Harness.php`) - group 10 drives two whole
+turns through the REAL `DockingBay::criticalPhaseEffects`, so the completion pass, the order pass, their
+ORDER and the note round-trip are exercised rather than asserted from the source - and 71 client checks
+(`tests/replay/walkersStage19ClientHarness.js`, the real `hangarShared.js` / `ships.js` / `ew.js` /
+`fleetList.js` / `PhaseStrategy.js` under `vm`), both fatal on the pre-stage tree. `checkShipData.php`
+PASS, 0 new against 237; autoload unchanged; **statics unchanged** (`TWO_TURN_SHIP_CLASSES` is a const and
+`$stowedEdfRadius` is protected, so neither rides a blueprint, and `ShipCompactor` strips an empty
+`shipsAttaching`). **Replay: 120 passed / 13 failed — the SAME 13 games and the same count as the
+pre-stage tree**, so the stage adds no behavioural drift and no new failing game; the only Stage 19
+lines in the diff are `deferredShipClasses: removed` / `twoTurnShipClasses: added` on the ten Traveler
+games, beside Stage 17's `servicesDockedUnits` and Stage 18's `sharesDockedPower`. Re-record to accept.
+
+**Exit criterion (3.14a as written), all met:** a Waymarker rides `attached` for exactly one turn each
+way ✓; its boxes are reserved from declaration ✓; it moves with the Traveler while attached ✓ (through
+the existing mirror, proved by the facing offset and the movement lock-out rather than re-implemented).
+
+**Not built, open for the user:** a rider cannot be told to let go once the manoeuvre has begun; the
+completion is unconditional on the carrier's speed (an attached unit moves with it, so nothing is
+inconsistent, but the rules do not say either way); and a relaunching DOCKED flight still gets no
+banner, because a fighter launch order carries no unit id — see the ⚠️⚠️ in §3.14c.
+
+---
+
+
+---
+
+#### 3.14f Play-test fixes — game 4351, 2026-09-12 (same day)
+
+**1. ⚠️⚠️ THE RIDER SNAPPED BACK TO THE CARRIER'S START HEX WHEN THE FIRING PHASE OPENED, and the
+mirror had never run.** Both Waymarkers followed their Travelers on screen through the Movement
+phase — the client mirrors a plotted move live — and then stood at the hex the Traveler had *begun*
+the turn in. The DB says why: for turn 2 the Traveler had `move` + `end`, and the Waymarker had only
+its preturn `sync` row plus the dummy `end` that `MovementGamePhase::advance` gives every ship at
+the hex its last row names. No `attached` rows were ever written.
+
+⭐ **THE CAUSE IS ONE LINE, AND IT IS A LESSON ABOUT REUSED STATE.**
+`MovementGamePhase::process` built `$submittedShipIds` from *presence in the payload*:
+
+    foreach ($ships as $s) $submittedShipIds[$s->id] = true;
+
+and the mirror skips any attached unit in that set, so that a **detach** submission is not
+overwritten. But `ajaxInterface` sends an entry for **every ship the player owns**, and for an
+attached one it deliberately sends an **empty movement list** (the client refuses to plot a move for
+a unit riding a host). So a rider read as "moved itself" and the mirror was skipped.
+
+⭐⭐ **IT HAD NEVER SHOWN UP BECAUSE A BOARDING POD AND ITS HOST BELONG TO DIFFERENT PLAYERS** and are
+therefore never in one submission. The Traveler and its Waymarker are the first attached pair in the
+game on the **same side** — so reusing `attached` (trap 51) inherited a guard that had only ever
+been exercised across the table. The fix is to count only ships that submitted actual movement
+ROWS; an attached ship with a non-empty list is detaching, which is the case the skip exists for and
+still reads true.
+
+**2. EW is suspended on a rider, both ways** (user, same day). *"Waymarkers should also not use EW on
+transition Docking/Launching turns, nor should ships have the opportunity to use any targeted EW on
+it."*
+
+⚠️ **IT KEEPS ITS DEW (D52).** Only ACTIVE allocations stop — OEW, CCEW, DIST, JAM, SOEW, SDEW, BDEW
+and the two Detect types. Unspent points still fall into DEW through `convertUnusedToDEW` exactly as
+they do for every ship, so a riding Waymarker is no easier to hit than usual; what it loses is the
+ability to spend, and what its enemies lose is the lock. An attacker with no lock then takes the
+ordinary doubled range penalty, which is the engine's standing rule and is deliberately untouched.
+
+**Three layers, because EW has no server validation of its own.** `EW::validateEW()` returns true
+unconditionally, so:
+- `ew.isEwSuspended` gates `ew.AssignOEW` (first point, both ends) and `ew.assignEW` (the increment
+  path and every self-EW type), with DEW exempt.
+- The Initial Orders menu gains `sourceEwNotSuspended` / `targetEwNotSuspended` on **every EW row,
+  `remove` included** — nine adds, ten removes — so the whole EW panel is withdrawn from a rider
+  rather than half of it (trap 47). ⚠️ The first pass gated only the adds, on the grounds that a
+  remove with nothing to remove is a harmless no-op; the user extended it the same day, and the
+  wider version is both simpler to explain and impossible to strand a row with — a rider starts its
+  ride with no active rows at all, because the ride begins at the end of the PREVIOUS turn's Firing
+  phase, before the transitional turn's Initial Orders. ⚠️ `removeMultiOrder` lives in the same
+  table and is deliberately NOT gated: it is a firing-order control, not an EW one.
+- `EW::stripDockingRiderEw` runs beside `EW::clampFlightEw` in `InitialOrdersGamePhase::process` —
+  the one place the server already clamps an EW submission. ⚠️⚠️ It takes `$gd`, the **reloaded**
+  gamedata, because `$ship` there is the POST-side copy and has no attachment state at all
+  (arch_post_side_ship_reconstruction).
+
+⚠️ **`shipManager.isDockingRider` gained a load-bearing early-out.** It is now asked of both ends of
+every EW button and on every weapon click, so the fleet walk inside `getHangarManoeuvre` would run
+dozens of times per gesture. A rider is always `attached`, so one empty-object test rejects every
+unit in every game with no boarding and no docking manoeuvre in it.
+
+**3. ⚠️ THE FIRING MODE SELECTOR STILL OPENED ON A RIDER** (user report, same day). D49's "can be
+shot, cannot shoot" was already enforced at both ends — `weaponManager.selectWeapon` refuses the
+selection and `Firing::withdrawFireFromDockingRiders` drops anything past it — and every other
+weapon control in `SystemInfoButtons` vanished on its own, because they all read
+`hasFiringOrder` / `hasOrderForMode` and a rider holds none.
+
+⭐ **The firing-mode selector is the ONE weapon control in that menu that never asks whether a fire
+order exists.** It gates on the phase, the mode count and `hideFiringModeSelector` alone, so it
+survived every other guard by construction. `canChangeFiringMode`, `canSelfIntercept` and
+`canRemIntercept` now all refuse a rider (`isDockingRiderUnit`), which withdraws the whole
+`<FiringModeSelector>` block — the two intercept buttons are its children.
+
+⚠️ **THE SERVER HALF WENT WITH IT, and had to.** `Firing::automateIntercept` would otherwise have
+handed a unit that may not fire a full set of intercept orders. It now treats a docking rider as
+unarmed exactly as it treats a jumping Ancient (`isJumpingUnarmed`, one line away) — which is also
+the precedent that settles whether interception counts as firing: it does.
+
+**Verification.** The two harnesses grew to 142 server / 98 client, both still fatal on the pre-fix
+tree; `checkShipData.php` PASS, 0 new; replay unchanged against the pre-fix tree (119 passed / 13
+failed on both — games 4175, 4176 and 4350 SKIP for local database reasons that predate this work).
+
+**The faction page** (`factions-tiers.php`) is updated in the same pass: the Docking Bay section now
+lists the Waymarker among the bay's contents and in its launch rate, describes the two-turn ride and
+everything true of a rider (moves with the carrier, may not fire or intercept, may be shot, the aft
+redirect, no EW either way but keeps its DEW), notes that docked craft keep projecting their fields
+and detectors from the carrier's hex, describes the "Docking with X" banner and the stowed-row
+scroll — and the Waymarker is struck from the "not implemented yet" list, which now names only the
+Extra-Dimensional Jump Drive.
+
+---
 
 ### 3.15 The Traveler repairs what it carries — **BUILT 2026-09-12 (Stage 17), as built in §3.15a**
 
@@ -4921,7 +5230,7 @@ Walker drive** - `isWalkerJump()` - since D32 made that the whole population.
 
 ---
 
-### 3.18 Extra-Dimensional Jump Drive — abduction
+### 3.18 Extra-Dimensional Jump Drive — abduction — **Stage 20** (renumbered 2026-09-12 when the Waymarker's two-turn procedure landed as Stage 19)
 
 `class ExtraDimensionalJumpDrive extends JumpEngine`, calling `markWalker()` in its constructor (D32 -
 there is no `TravelerJumpDrive` to extend, and a subclass is right here because the EDJD genuinely adds
@@ -5058,7 +5367,8 @@ Ordered so that each stage is independently shippable and the risky shared-path 
 | **16** ✅ | The Traveler's Docking Bay (§3.14, as built §3.14b) — **DONE 2026-09-11**; the Waymarker's two-turn procedure (§3.14a) DEFERRED (D35) | **292 checks green after the review revisions (D37–D40)** - 131 server, 118 client, and the Stage 14 fleet-check harness's 43 as a regression - with both new harnesses failing on the pre-stage tree; `checkShipData.php` PASS, 0 new against 237; a **2,727-hull differential** in which exactly five facts moved (the four dockable hulls' box cost, the Traveler's aft system class) and no capacity did; replay corpus 133/1 on a clean tree, and with the stage the ten Traveler games differ ONLY by four additive keys. ⚠️ Five traps, 37–41. Criterion as written: 24 Mapmakers **or** 6 Scribes **or** 2 Pathfinders, with the 25th/7th/3rd refused and a mixed load filling to exactly 24 boxes; one craft type per turn; a docked Scribe surviving a reload with damage, power and notes intact; the aft hit-chart row still finding the renamed system (`checkShipData.php` clean); no other hull's hangar accounting moving in the corpus differential; a Scribe, Pathfinder or Waymarker queued for a deployment-phase dock placeable ON the Traveler's hex while two ordinary hulls still refuse to share one. **If §3.14a lands:** a Waymarker rides `attached` for exactly one turn each way with its 24 boxes reserved from declaration. |
 | **17** ✅ | Traveler Self Repair serves docked units (§3.15, as built §3.15a) — **DONE 2026-09-12**, two play-test follow-ups the same day | **127 checks green** — 70 server, 57 client — both harnesses fatal on a stashed pre-stage tree; `checkShipData.php` PASS, 0 new against 237. Criterion as written, all met: a damaged docked Scribe repaired out of the Traveler's pool (and its Thruster, which the Traveler may not touch, out of its own); every healing row filed against the DOCKED ship's id and marked updated, so it persists; the Traveler's own queue order unchanged and a priority of 99 on a docked row still beaten by an own row of 4; a docked Self Repair repaired and every other Self Repair in the game still refused. ⭐ Three additions from the user's notes the same day: **D42** one list, the docked rows marked by their ship name in cyan - first built with a TIER pinning them below every own row, which **D45 withdrew the same day**, so priority alone now decides and the player may put a docked hull first, **D43** a docked unit's OWN Self Repair keeps running — which needs driving, because `removed` reads as destroyed and `Criticals::setCriticals` never reaches it — and **D44** reinforcement fleet-list rows go cobalt so they cannot be read as docked. ⭐ Play-test (game 4350) then found the other half of D43: **a docked ship's whole ship window was inert**, because `SystemIcon.clickSystem`'s guard is `shipManager.isDestroyed(ship)` and that folds `removed` in — carved out with the existing `isDestroyedByDamage` predicate and diverted straight to the info menu, which is also §3.16(a)'s prerequisite arriving a stage early; and left-click on a stowed ship's fleet row now scrolls to its **carrier** rather than opening its window (right-click still does that). ⚠️ Replay corpus 135/0 clean vs 121/14 with the stage, **every diff the same single additive key** `servicesDockedUnits: added (true)` and nothing else — re-record to accept. |
 | **18** ✅ | Docked power sharing (§3.16, as built §3.16a, opponent view §3.16b) — **DONE 2026-09-12**, one play-test follow-up the same day | **134 checks green** — 67 server-free over the REAL `power.js`, 48 in a React harness, 19 in a server harness over the real `Traveler` that bundles the whole `reactJs` tree, evaluates it at module scope, renders `SystemInfo` to static markup and drives `SystemPowerSettings`'s own handlers — each fatal on the tree it was written against (21/37, 23/9, 14/5); `checkShipData.php` PASS, 0 new against 237; a **2,727-hull / 58,548-fact differential** in which exactly TWO lines moved, both `Traveler|sys11` (the flag and one tooltip sentence); replay 121/13 with every diff one of two ADDITIVE keys and no behavioural drift; autoload unchanged. Criterion as written, all met: a docked Scribe's power manageable during Initial Orders and persisted through the commit (the server half needed nothing — no `removed` filter in `InitialOrdersGamePhase::process`, `construcGamedata` or `submitPower`); four points of docked surplus giving the Traveler one and three giving none; flights contributing nothing; the figure recomputing live (on the existing `SystemDataChanged` → `shipWindowManager.update()`, no new event); and the decision written down as **D46 — client-computed and ADVISORY**. ⭐ Play-test follow-up: the OPPONENT saw the Traveler's balance WITHOUT the grant, because the grant is computed per viewer and `shipsDocked` is masked under the private-logistics gate — fixed by disclosing the bay's ship IDS on a separate key (**D47**, §3.16b), so both clients run one function and cannot drift. ⚠️ Three traps, 47–49, plus 50 on the masked-input fact; one adjacent defect flagged but deliberately not fixed; and power management for a unit still in HYPERSPACE left unbuilt but mapped. |
-| **19** | Extra-Dimensional Jump Drive (§3.18) | Power-turns accumulating only while both conditions hold and resetting on a gap; the cost locked at the first turn; completion routed through `Movement::applyJumpOut`; contributors and the half-power-turn plain drive; a friendly jumped on one EW point; ⭐⭐ and a damaged EDJD rolling for detonation every active turn while the same hull's ordinary jump-out does not. |
+| **19** ✅ | The Waymarker's two-turn procedure, the aft-hit redirect, the hangar-manoeuvre label and what a stowed unit projects (§3.14a / §3.14c / §3.14d, as built §3.14e) — **DONE 2026-09-12** | **240 checks green after the play-test fixes (§3.14f)** — 142 server (group 10 drives two whole turns through the real `criticalPhaseEffects`), 98 client over the real `hangarShared.js` / `ships.js` / `ew.js` / `fleetList.js` / `PhaseStrategy.js` under `vm` — both fatal on the pre-stage tree; `checkShipData.php` PASS, 0 new against 237; autoload and **statics both unchanged** (the class list is a const and `$stowedEdfRadius` is protected, so neither rides a blueprint); **replay 120 passed / 13 failed, the SAME 13 games and the same count as the pre-stage tree**, so the stage adds no behavioural drift and no new failing game — its only lines in the diff are `deferredShipClasses: removed` / `twoTurnShipClasses: added` on the ten Traveler games. Criterion as written (§3.14a), all met: a Waymarker rides `attached` for exactly one turn each way; its boxes are reserved from declaration through the single `dockedShipBoxes` choke point; it moves with the Traveler while attached, through the existing mirror rather than a re-implementation. ⭐ Four rulings the same day — **D48** least damaged = most boxes remaining, **D49** can be shot / cannot shoot, **D50** the banner goes on the unit and a new flight gets none, **D51** left-click scrolls on ALL docked units, which withdraws a Stage 17 exception. ⭐ Play-test (game 4351) then found two things the same day (§3.14f): ⚠️⚠️ **the movement mirror had never run for a rider**, because `MovementGamePhase::process` counted PRESENCE in the payload rather than submitted movement rows and the client sends every own ship with an empty list - invisible until now because a boarding pod and its host are never on the same side; EW is suspended on a rider both ways, with **D52** ruling that it KEEPS its DEW; and the FIRING MODE SELECTOR was the one weapon control in the menu that never asks whether a fire order exists, so it alone survived every other guard - withdrawn now along with the intercept pair it parents, and `automateIntercept` matched on the server. The faction page (`factions-tiers.php`) is updated and the Waymarker is struck from its not-implemented list. ⚠️ Six traps, 51–56. |
+| **20** | Extra-Dimensional Jump Drive (§3.18) | Power-turns accumulating only while both conditions hold and resetting on a gap; the cost locked at the first turn; completion routed through `Movement::applyJumpOut`; contributors and the half-power-turn plain drive; a friendly jumped on one EW point; ⭐⭐ and a damaged EDJD rolling for detonation every active turn while the same hull's ordinary jump-out does not. |
 
 **Every stage:** run `fvbuild.ps1 -Check` (ship-data validator + replay harness). ⚠️ The baseline
 drifts on a clean tree — never read a pre-existing FAIL as your regression, and **never
@@ -5361,6 +5671,82 @@ Collected from the survey; each one has bitten this codebase before.
     `fleetListManager.carrierHolding`) read `boxes`, `phpclass` or `dockTurn` off those rows. Pruning
     would have been a silent `NaN` in all four. A separate key that exactly one function reads has
     no blast radius at all.
+
+51. ⚠️⚠️ **`attached` MEANS BOARDING EVERYWHERE ELSE IN THE TREE.** A docking Waymarker and a
+    breaching pod are the same state to the movement mirror, to mathlib's same-hex bearing, to the
+    CnC's detach/destroy sweep, to Firing's spill-to-host rule and to the map tooltip - which read
+    "Ship is being Boarded!" off a docking manoeuvre until Stage 19 filtered it. **No Stage 19 rule
+    may key off `attached` alone**: the bay's own `shipsAttaching` list is the discriminator
+    (`HangarOps::attachedBayShipFor` / `bayCarrierAttachedTo`, `shipManager.isDockingRider`), and
+    each opens with the empty-`attached` early-out so the question is free in a game with no
+    boarding in it.
+    ⭐ **The corollary is what made the feature cheap:** movement mirroring, the client's five
+    movement lock-out sites and the never-rammed-by-your-host rule all came free BECAUSE it is the
+    same state. Reusing a state means inheriting every consumer of it - read them all first, then
+    decide which ones need the discriminator.
+
+52. ⭐ **A TWO-PART STATE WANTS ITS TWO HALVES IN DIFFERENT PLACES.** The `attached` clamp
+    round-trips through the CARRIER's CnC `Attached` / `Detached` notes; the bay's
+    `shipsAttaching` list only records that the ride is a docking one and whose boxes it holds.
+    Because they are separate, a rider that something ELSE detached - the CnC's boarding sweep
+    writes `Detached` the moment the host's structure at that location dies - is noticed as an
+    **ABORT** (entry dropped, boxes released, ship left on the board) instead of being completed
+    blind. A single fused record would have finished a dock for a ship attached to nothing.
+
+53. ⚠️⚠️ **`isDestroyed()` FOLDS `removed` IN, SO EVERY "OUT OF PLAY" SWEEP SILENTLY EXCLUDES A
+    DOCKED UNIT** - and the two that had to stop doing so (`TacGamedata::setEdfHexes`,
+    `EW::collectEwDetectors`) carried the identical four exclusions written out twice.
+    ⭐ **The fix is one shared reader that answers "where does this unit project FROM, or null"**
+    (`HangarOps::projectionOriginFor`, client twin `shipManager.getProjectionOrigin`), because the
+    exclusion and the POSITION are the same problem: a stowed unit's own last movement row is
+    wherever it happened to dock and stops being true the moment its carrier moves. Anything that
+    measures hexes from a unit must ask it.
+    ⚠️ `BaseShip::isDestroyedByDamage()` is now the server twin of a client predicate that has
+    existed since Hangar Ops - the THIRD site in three stages to need that exact carve-out (Stage
+    17's ship window, Stage 18's power menu, this) - and still never a change to `isDestroyed()`.
+    ⚠️ `EdfNetLinks::buildOccupancy` deliberately does NOT get the new reader: it counts units
+    *standing in* a corridor, a stowed unit stands nowhere of its own, and its carrier is already
+    counted.
+
+54. ⭐⭐ **A DERIVED FIGURE WITH A MASKED INPUT NEEDS A PUBLISHED TWIN, NOT A WIDER MASK** - trap 50's
+    shape, hit again in the very next stage and in a different subsystem, which is what makes it a
+    pattern rather than an incident. A field projected from INSIDE a hull has no icon of its own, so
+    the carrier's icon draws the disc - but the radius can only be derived from the bay's ship list,
+    which is masked, so the opponent would have watched the drain apply over hexes with no disc on
+    them. (The hexes are already public in `edfHexes`; only the SOURCE is hidden, which is exactly
+    why publishing the radius discloses nothing new.) The server publishes the finished number per
+    hangar to everyone and the client **MAXes** it against its own live walk: the owner gets a figure
+    that follows the power they are allocating this phase, the opponent gets the committed one.
+    ⚠️ `Hangar::$stowedEdfRadius` is **PROTECTED**. A public property rides the static blueprint,
+    which would put a live per-turn number into a cached per-CLASS artefact and add a key to every
+    hangar in the game; `stripForJson` reflects IS_PUBLIC only, so a protected field is invisible to
+    it and is copied by hand.
+    ⚠️ The EW half of the same ruling needed no twin, and the reason will not generalise: that
+    allowance is filtered to the viewer's own team, whose bays are disclosed to them. A rule that
+    read the detector list ACROSS teams would need the same treatment.
+
+55. ⚠️⚠️ **"IS THIS SHIP IN THE SUBMISSION" IS NOT "DID THIS SHIP MOVE".** `ajaxInterface` sends an
+    entry for EVERY ship the player owns, and for an ATTACHED one it deliberately sends an EMPTY
+    movement list - the client refuses to plot a move for a unit riding a host. So
+    `MovementGamePhase::process`'s `$submittedShipIds`, built from presence alone, read a rider as
+    having moved itself and skipped the mirror that copies the host's path onto it. The rider then
+    sat on its preturn `sync` row at the host's START hex for the whole Firing phase (game 4351).
+    ⭐⭐ **THE REASON IT HAD SURVIVED FOR YEARS IS THE REAL LESSON:** the guard exists so a DETACH
+    submission is not overwritten, and until Stage 19 every attached pair in the game was a boarding
+    pod and its victim - **different players, never in one submission**. Reusing a state (trap 51)
+    inherits every guard written for it, including the ones whose assumptions were never stated.
+    When you put an existing mechanism to a new use, list its consumers AND the conditions each of
+    them has silently been relying on.
+
+56. ⭐ **A PREDICATE THAT MOVES ONTO A HOT PATH NEEDS AN EARLY-OUT, AND THE RIGHT ONE IS A FACT ABOUT
+    THE RULE.** `shipManager.isDockingRider` was written for a banner (a handful of calls) and then
+    became the gate on both ends of every EW button in the Initial Orders menu and on every weapon
+    click - dozens of fleet walks per gesture. The fix is not a cache: a rider is ALWAYS `attached`,
+    so one empty-object test rejects every unit in every game with no boarding and no docking
+    manoeuvre in it, and it cannot go stale because it is the same fact the rule is made of.
+    ⚠️ The same shape appears in `EW::stripDockingRiderEw` (collect the rider ids ONCE per
+    submitting ship, not per EW row) and in `setEdfHexes` / `collectEwDetectors` (the `instanceof`
+    sweep comes first and every other question is deferred behind it).
 
 ---
 

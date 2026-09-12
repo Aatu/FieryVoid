@@ -1768,11 +1768,17 @@ class HangarOps {
 	 * mine count, WALKERS_OF_SIGMA_PLAN.md Stage 6).                         *
 	 * ===================================================================== */
 
-	/* Boxes the whole ships docked in $bay occupy. 0 for anything that is not a Docking Bay. */
+	/* Boxes the whole ships docked in $bay occupy. 0 for anything that is not a Docking Bay.
+	 * ⭐ Stage 19: a Waymarker riding the hull mid-manoeuvre counts HERE, not only once it is
+	 * inside. The boxes are reserved from the moment the order resolves (plan 3.14a) - otherwise a
+	 * player attaches one on turn N and fills the bay with Mapmakers before it arrives on N+1. This
+	 * is the single choke point every capacity question goes through, so reserving here reserves
+	 * everywhere: effectiveCapacity, bayFreeBoxesForShips and the client's twin all read it. */
 	public static function dockedShipBoxes($bay){
-		if (empty($bay->isDockingBay) || !is_array($bay->shipsDocked)) return 0;
+		if (empty($bay->isDockingBay)) return 0;
 		$n = 0;
-		foreach ($bay->shipsDocked as $entry) $n += (int)($entry['boxes'] ?? 0);
+		if (is_array($bay->shipsDocked)) foreach ($bay->shipsDocked as $entry) $n += (int)($entry['boxes'] ?? 0);
+		if (is_array($bay->shipsAttaching)) foreach ($bay->shipsAttaching as $entry) $n += (int)($entry['boxes'] ?? 0);
 		return $n;
 	}
 
@@ -1786,10 +1792,77 @@ class HangarOps {
 		if (empty($bay->isDockingBay) || !in_array($phpclass, $bay->dockableShipClasses, true)) {
 			$reason = 'not dockable in this bay'; return false;
 		}
-		if (in_array($phpclass, DockingBay::DEFERRED_SHIP_CLASSES, true)) {
-			$reason = 'two-turn docking procedure not yet available'; return false;
-		}
 		return true;
+	}
+
+	/* WALKERS_OF_SIGMA_PLAN.md 3.14a (Stage 19). Does this class use the TWO-TURN procedure - one
+	 * turn riding the carrier's aft on `attached`, then in or out on the turn after? The Waymarker
+	 * is 24 boxes and the whole of the bay, and the rules give it two turns each way.
+	 * ⚠️ A CLASS QUESTION, NOT A SIZE ONE. It is deliberately not derived from box cost: a future
+	 * 24-box hull that docks in one turn would silently inherit the ride. */
+	public static function bayShipIsTwoTurn($phpclass){
+		return in_array((string)$phpclass, DockingBay::TWO_TURN_SHIP_CLASSES, true);
+	}
+
+	/* The ship riding $carrier's aft in the middle of a Docking Bay manoeuvre, or null - the reader
+	 * every other Stage 19 rule asks. Cheap by construction: `hasAttached` is empty on every unit in
+	 * virtually every game, so the whole question costs one array test before anything else happens.
+	 * ⭐ IT TELLS A DOCKING RIDE FROM A BOARDING ACTION, which `attached` alone cannot: a breaching
+	 * pod and a docking Waymarker are the same state to the movement mirror, the tooltip and
+	 * mathlib. The bay's own shipsAttaching list is the discriminator. */
+	public static function attachedBayShipFor($carrier, $gamedata){
+		if (!$carrier || empty($carrier->hasAttached) || !is_array($carrier->systems)) return null;
+		foreach ($carrier->systems as $bay){
+			if (empty($bay->isDockingBay) || empty($bay->shipsAttaching)) continue;
+			foreach ($bay->shipsAttaching as $entry){
+				$id = (int)($entry['shipId'] ?? 0);
+				if ($id <= 0 || !isset($carrier->hasAttached[$id])) continue;
+				$rider = $gamedata ? $gamedata->getShipById($id) : null;
+				if ($rider && !$rider->isDestroyed()) return $rider;
+			}
+		}
+		return null;
+	}
+
+	/* The bay of $carrier that is riding $riderId, or null. */
+	public static function attachingBayFor($carrier, $riderId){
+		if (!$carrier || !is_array($carrier->systems)) return null;
+		foreach ($carrier->systems as $bay){
+			if (empty($bay->isDockingBay) || empty($bay->shipsAttaching)) continue;
+			foreach ($bay->shipsAttaching as $entry){
+				if ((int)($entry['shipId'] ?? 0) === (int)$riderId) return $bay;
+			}
+		}
+		return null;
+	}
+
+	/* Is $ship itself riding a carrier in the middle of a Docking Bay manoeuvre? Returns the CARRIER
+	 * or null. The mirror of attachedBayShipFor, asked from the rider's side - which is what the
+	 * fire withdrawal and the status banner need. */
+	public static function bayCarrierAttachedTo($ship, $gamedata){
+		if (!$ship || empty($ship->attached) || !$gamedata) return null;
+		foreach (array_keys($ship->attached) as $hostId){
+			$host = $gamedata->getShipById((int)$hostId);
+			if (!$host) continue;
+			if (self::attachingBayFor($host, $ship->id) !== null) return $host;
+		}
+		return null;
+	}
+
+	/* ⭐ THE LEAST DAMAGED OF FRONT AND AFT, by REMAINING STRUCTURE BOXES (user ruling 2026-09-12).
+	 * Not by proportion and not by damage taken: the raw count is what the player reads off the ship
+	 * window, and on a Waymarker (Front 60, Aft 56) it means an undamaged hull takes the hit forward
+	 * and swings aft only once the bow is five boxes worse off. Ties go FORWARD, which is the same
+	 * side an undamaged hull picks, so the rule never changes answer for an unhurt Waymarker.
+	 * Falls back to the Primary section (0) if a hull somehow has neither - getStructureSystem's own
+	 * fallback, and the one location every hull is guaranteed to have. */
+	public static function leastDamagedFrontOrAft($ship){
+		$front = $ship->getStructureSystem(1);
+		$aft   = $ship->getStructureSystem(2);
+		$fHp = ($front && !$front->isDestroyed()) ? (int)$front->getRemainingHealth() : -1;
+		$aHp = ($aft   && !$aft->isDestroyed())   ? (int)$aft->getRemainingHealth()   : -1;
+		if ($fHp < 0 && $aHp < 0) return 0;
+		return ($aHp > $fHp) ? 2 : 1;
 	}
 
 	/* Free boxes a SHIP could use: remaining health, less the ships already aboard and every
@@ -1860,6 +1933,13 @@ class HangarOps {
 
 	public static function performBayShipDock($bay, $carrier, $docker, $gamedata){
 		$boxes = self::bayShipBoxes($docker);
+		/* Stage 19: a Waymarker does not go in this turn. It grabs the carrier's aft and rides there
+		   for a turn (plan 3.14a); completeBayShipAttachments finishes the job next turn. The boxes
+		   are claimed NOW either way - dockedShipBoxes counts shipsAttaching. */
+		if (self::bayShipIsTwoTurn($docker->phpclass)){
+			self::beginBayShipAttach($bay, $carrier, $docker, 'in', $boxes, $gamedata);
+			return;
+		}
 		$docker->removed = true;
 		$docker->removedTurn = $gamedata->turn;
 		$bay->shipsDocked[] = array(
@@ -1910,7 +1990,6 @@ class HangarOps {
 			$reason = 'docked this turn'; return false;
 		}
 		$cls = (string)($entry['phpclass'] ?? '');
-		if (in_array($cls, DockingBay::DEFERRED_SHIP_CLASSES, true)) { $reason = 'two-turn launch procedure not yet available'; return false; }
 		if ($bay->shipTypeThisTurn !== null && $bay->shipTypeThisTurn !== $cls) {
 			$reason = 'bay already used by another craft type this turn'; return false;
 		}
@@ -1940,6 +2019,20 @@ class HangarOps {
 		if (!$docker) { array_splice($bay->shipsDocked, $idx, 1); return null; }
 		if (!self::resurrectAtCarrier($docker, $carrier, $gamedata)) return null;
 		array_splice($bay->shipsDocked, $idx, 1);
+		/* Stage 19: a Waymarker comes OUT onto the carrier's aft, not onto the board. It is on the
+		   map again from this moment - visible, shootable, steered by the Traveler - and separates
+		   at the end of NEXT turn, which is where its launch initiative penalty is paid too (it has
+		   nothing of its own to decide while it is still attached).
+		   ⚠️ BEFORE the rate and type-lock bookkeeping below, not after: beginBayShipAttach does its
+		   own, so running both would spend two of the bay's slots on one ship. */
+		if (self::bayShipIsTwoTurn($entry['phpclass'] ?? $docker->phpclass)){
+			self::beginBayShipAttach($bay, $carrier, $docker, 'out', (int)($entry['boxes'] ?? self::bayShipBoxes($docker)), $gamedata);
+			Manager::insertIndividualNote(new IndividualNote(
+				-1, $gamedata->id, $gamedata->turn, $gamedata->phase, $carrier->id, $bay->id,
+				'hangarLaunchEvent', 'Docking bay began two-turn launch', $docker->id . ':SHIP:1'
+			));
+			return $docker->id;
+		}
 		$bay->shipsMovedThisTurn++;
 		$bay->shipTypeThisTurn = (string)($entry['phpclass'] ?? $docker->phpclass);
 		self::applyLCVLaunchCrit($docker, $gamedata);   //-50 initiative the turn it launches
@@ -2040,9 +2133,175 @@ class HangarOps {
 		));
 	}
 
+	/* =====================================================================================
+	 * WALKERS_OF_SIGMA_PLAN.md 3.14a (Stage 19) - THE WAYMARKER'S TWO-TURN PROCEDURE
+	 * =====================================================================================
+	 * The only genuinely new idea in the Docking Bay, and the user's own suggestion for it: FV
+	 * already has a "riding on a host, not inside it" state, and it is `attached`. A Waymarker
+	 * spends one whole turn clamped to the Traveler's AFT (location 2) before it goes in, and one
+	 * whole turn clamped there after it comes out.
+	 *
+	 * THE SEQUENCE, both ways round. Turn N: the order resolves in the critical phase and the
+	 * Waymarker takes hold of the aft (a launch also puts it back on the map at that moment). Turn
+	 * N+1: it rides - no movement of its own, no fire (Firing::withdrawFireFromDockingRiders), and
+	 * the carrier's aft hits roll on it (Weapon::damageOneSheet) - and at the END of that turn it
+	 * goes in, or lets go and is a free ship again from turn N+2.
+	 *
+	 * WHAT THE RIDE GIVES US FOR NOTHING. Movement is mirrored by MovementGamePhase::advance and
+	 * Movement::setPreturnMovementStatusForShip; the client already refuses to plot a move for an
+	 * attached unit (movement.js, five sites); the pair is never rammed by its host, and mathlib's
+	 * same-hex bearing already knows the shape. Nothing here re-implements any of that.
+	 *
+	 * WHAT IT DOES NOT GIVE US. `attached` means BOARDING everywhere else in the tree - the map
+	 * tooltip says "Ship is being boarded!", the CnC runs pod detach/destroy logic over
+	 * `hasAttached`, and Firing spills shots from an attached FLIGHT onto its host. So THIS list is
+	 * the discriminator (attachedBayShipFor), and every Stage 19 rule asks it, never `attached`.
+	 *
+	 * THE LINK ITSELF LIVES IN THE CARRIER'S CnC NOTES, not here. `Attached` / `Detached` notes are
+	 * what CnC::onIndividualNotesLoaded replays into ->attached / ->hasAttached on every load,
+	 * exactly as a breaching pod's are; shipsAttaching only records that the ride is a DOCKING one.
+	 * Keeping the two halves separate is what lets a rider that got detached by something else (an
+	 * aft Structure kill, the boarding sweep) be noticed as an ABORT rather than completed. */
+
+	/* Clamp $docker to $carrier's aft and open a two-turn manoeuvre. $dir is 'in' (docking) or
+	 * 'out' (launching); the entry's boxes stay claimed for the whole ride either way. */
+	private static function beginBayShipAttach($bay, $carrier, $docker, $dir, $boxes, $gamedata){
+		/* Facing offset 0, and it is a fact rather than a simplification: canBayShipDock requires the
+		   docking ship to share the carrier's heading, and a launch puts it out on the carrier's own
+		   heading (resurrectAtCarrier). The movement mirror adds this offset to the host's facing
+		   every turn, so anything else would spin the rider as the Traveler manoeuvred. */
+		$docker->attached[$carrier->id] = 2;          //aft
+		$docker->attachedFacing[$carrier->id] = 0;
+		$carrier->hasAttached[$docker->id] = 2;
+		$carrier->hasAttachedFacing[$docker->id] = 0;
+
+		$cnc = $carrier->getSystemByName('CnC');
+		if ($cnc){
+			Manager::insertIndividualNote(new IndividualNote(
+				-1, $gamedata->id, $gamedata->turn, $gamedata->phase, $carrier->id, $cnc->id,
+				'Attached', 'Attached', $docker->id . '=>2:0'
+			));
+		}
+
+		$bay->shipsAttaching[] = array(
+			'shipId'    => (int)$docker->id,
+			'phpclass'  => (string)$docker->phpclass,
+			'boxes'     => (int)$boxes,
+			'startTurn' => (int)$gamedata->turn,
+			'dir'       => ($dir === 'out') ? 'out' : 'in',
+		);
+		$bay->shipsMovedThisTurn++;
+		$bay->shipTypeThisTurn = (string)$docker->phpclass;
+		self::applyHangarOperationsCrit($carrier, $gamedata);
+		Manager::insertIndividualNote(new IndividualNote(
+			-1, $gamedata->id, $gamedata->turn, $gamedata->phase, $carrier->id, $bay->id,
+			'hangarDockEvent', 'Docking bay began two-turn manoeuvre', $docker->id . ':SHIP:1:' . $dir
+		));
+	}
+
+	/* Release the clamp. Writes the `Detached` note the CnC replays, and clears both sides in
+	 * memory so the rest of THIS resolution pass already sees a free ship. */
+	private static function releaseBayShipAttach($carrier, $docker, $gamedata){
+		unset($docker->attached[$carrier->id], $docker->attachedFacing[$carrier->id]);
+		unset($carrier->hasAttached[$docker->id], $carrier->hasAttachedFacing[$docker->id]);
+		$cnc = $carrier->getSystemByName('CnC');
+		if ($cnc){
+			Manager::insertIndividualNote(new IndividualNote(
+				-1, $gamedata->id, $gamedata->turn, $gamedata->phase, $carrier->id, $cnc->id,
+				'Detached', 'Detached', $docker->id . '=>Detach'
+			));
+		}
+	}
+
+	/* Second half of every two-turn manoeuvre, run from DockingBay::criticalPhaseEffects BEFORE this
+	 * turn's fresh orders - it is last turn's business, and finishing a launch frees the boxes the
+	 * bay needs to accept anything new.
+	 *
+	 * AN ENTRY WHOSE RIDER IS NO LONGER ATTACHED IS AN ABORT, NOT A COMPLETION. CnC's boarding
+	 * sweep writes a `Detached` note when the host's structure at that location dies, and a
+	 * destroyed rider leaves the link behind - in both cases the manoeuvre simply stops, the boxes
+	 * are released, and a Waymarker that was on its way IN stays on the board where it is. */
+	public static function completeBayShipAttachments($bay, $carrier, $gamedata){
+		if (empty($bay->isDockingBay) || empty($bay->shipsAttaching)) return;
+		$kept = array();
+		foreach ($bay->shipsAttaching as $entry){
+			$shipId = (int)($entry['shipId'] ?? 0);
+			$docker = $shipId > 0 ? $gamedata->getShipById($shipId) : null;
+			$dir = ((($entry['dir'] ?? 'in')) === 'out') ? 'out' : 'in';
+
+			if (!$docker || $docker->isDestroyed() || !isset($docker->attached[$carrier->id])){
+				if ($docker && isset($docker->attached[$carrier->id])) self::releaseBayShipAttach($carrier, $docker, $gamedata);
+				Manager::insertIndividualNote(new IndividualNote(
+					-1, $gamedata->id, $gamedata->turn, $gamedata->phase, $carrier->id, $bay->id,
+					'hangarDockEvent', 'Docking bay manoeuvre aborted', 'fail:' . $shipId . ':rider no longer attached'
+				));
+				continue;   //boxes released by dropping the entry
+			}
+
+			//Still riding: it separates or goes in at the END of the turn AFTER the one it started.
+			if ((int)($entry['startTurn'] ?? 0) >= (int)$gamedata->turn){ $kept[] = $entry; continue; }
+
+			/* The bay is busy with this rider for the whole completion turn too, so the manoeuvre
+			   costs the type lock and one launch-rate slot on BOTH turns. That is the rule the bay
+			   already applies to every other craft ("one type per turn"), simply lasting as long as
+			   the manoeuvre does. */
+			$bay->shipsMovedThisTurn++;
+			$bay->shipTypeThisTurn = (string)($entry['phpclass'] ?? $docker->phpclass);
+
+			self::releaseBayShipAttach($carrier, $docker, $gamedata);
+
+			if ($dir === 'in'){
+				$docker->removed = true;
+				$docker->removedTurn = (int)$gamedata->turn;
+				$bay->shipsDocked[] = array(
+					'shipId'   => (int)$docker->id,
+					'phpclass' => (string)$docker->phpclass,
+					'boxes'    => (int)($entry['boxes'] ?? self::bayShipBoxes($docker)),
+					'dockTurn' => (int)$gamedata->turn,
+				);
+				Manager::insertIndividualNote(new IndividualNote(
+					-1, $gamedata->id, $gamedata->turn, $gamedata->phase, $carrier->id, $bay->id,
+					'hangarDockEvent', 'Docking bay received ship', $docker->id . ':SHIP:1'
+				));
+			} else {
+				/* The -50 initiative for launching is paid HERE, the turn it first steers itself.
+				   Spending it on the attach turn would have bought nothing: an attached unit plots
+				   no movement of its own and its initiative decides nothing. */
+				self::applyLCVLaunchCrit($docker, $gamedata);
+				Manager::insertIndividualNote(new IndividualNote(
+					-1, $gamedata->id, $gamedata->turn, $gamedata->phase, $carrier->id, $bay->id,
+					'hangarLaunchEvent', 'Docking bay launched ship', $docker->id . ':SHIP:1'
+				));
+			}
+		}
+		$bay->shipsAttaching = array_values($kept);
+	}
+
+	/* A bay or carrier that dies mid-manoeuvre simply lets go. Deliberately NO fragment damage,
+	 * unlike a ship forced out of the bay itself (forceBayShipOut): this one was never inside - it
+	 * was clamped to the outside of the hull, and it is already on the board at the carrier's hex. */
+	public static function releaseAllBayShipAttachments($bay, $carrier, $gamedata, $why){
+		if (empty($bay->isDockingBay) || empty($bay->shipsAttaching)) return false;
+		foreach ($bay->shipsAttaching as $entry){
+			$docker = $gamedata->getShipById((int)($entry['shipId'] ?? 0));
+			if (!$docker) continue;
+			if (isset($docker->attached[$carrier->id])) self::releaseBayShipAttach($carrier, $docker, $gamedata);
+			Manager::insertIndividualNote(new IndividualNote(
+				-1, $gamedata->id, $gamedata->turn, $gamedata->phase, $carrier->id, $bay->id,
+				'hangarLaunchEvent', $why, $docker->id . ':SHIP:1'
+			));
+		}
+		$bay->shipsAttaching = array();
+		return true;
+	}
+
 	/* A bay destroyed this turn forces every ship it holds out. Returns true if any were aboard. */
 	public static function onDockingBayDestroyed($bay, $carrier, $gamedata){
-		if (empty($bay->isDockingBay) || !$bay->isDestroyed() || empty($bay->shipsDocked)) return false;
+		if (empty($bay->isDockingBay) || !$bay->isDestroyed()) return false;
+		//Stage 19: a two-turn rider lets go of a dead bay without ever going in, and without the
+		//fragment damage a ship that was actually inside one takes.
+		$released = self::releaseAllBayShipAttachments($bay, $carrier, $gamedata, 'Manoeuvre abandoned (docking bay destroyed)');
+		if (empty($bay->shipsDocked)) return $released;
 		foreach ($bay->shipsDocked as $entry) self::forceBayShipOut($bay, $carrier, $entry, $gamedata, 'Ship forced out (docking bay destroyed)');
 		$bay->shipsDocked = array();
 		return true;
@@ -2101,6 +2360,118 @@ class HangarOps {
 		}
 	}
 
+	/* =====================================================================================
+	 * WALKERS_OF_SIGMA_PLAN.md 3.14d (Stage 19) - A STOWED UNIT IS STILL SOMEWHERE
+	 * =====================================================================================
+	 * User ruling 2026-09-12: "Energy Draining Fields are still operational for Docked craft in
+	 * Traveler, and docked ships with EW Detectors still contribute their Saved EW to ships within
+	 * 20 hexes." Both rules are about a system that keeps working from INSIDE a hull - so both need
+	 * the same two answers, and neither is available anywhere in the tree today: is this unit stowed
+	 * rather than gone, and where is the hull that is carrying it?
+	 *
+	 * THE CARRIER'S HEX IS THE ANSWER TO "WHERE". A stowed unit's own last movement row is wherever
+	 * it happened to dock, which stops being true the moment the carrier moves; every rule that
+	 * measures from a stowed unit has to measure from its carrier instead.
+	 *
+	 * COSTS NOTHING UNTIL SOMETHING IS ACTUALLY STOWED. Every caller asks the cheap question first -
+	 * does this unit carry the system at all - and `removed` rejects the whole fleet in a normal
+	 * turn. The walk itself is the server twin of fleetListManager.carrierHolding and
+	 * ajaxInterface.isDepartedWithCarrier, and covers the same three homes: a Docking Bay's ships, a
+	 * rail's one LCV, and a hangar's stored FLIGHTS (linked by dockedFlightId, the same link
+	 * TacGamedata::markJumpedDockedFlights follows). */
+	public static function stowedInCarrier($ship, $gamedata){
+		if (!$ship || empty($ship->removed) || !$gamedata) return null;
+		$id = (int)$ship->id;   //ids are STRINGS on anything spawned mid-battle (LAST_INSERT_ID)
+		foreach ($gamedata->ships as $carrier){
+			if (!$carrier || $carrier === $ship || !is_array($carrier->systems)) continue;
+			foreach ($carrier->systems as $sys){
+				if (!empty($sys->isDockingBay) && is_array($sys->shipsDocked)){
+					foreach ($sys->shipsDocked as $entry){
+						if ((int)($entry['shipId'] ?? 0) === $id) return $carrier;
+					}
+				}
+				if (is_array($sys->lcvDocked ?? null) && (int)($sys->lcvDocked['shipId'] ?? 0) === $id) return $carrier;
+				if ($sys instanceof Hangar && is_array($sys->hangarUsage)){
+					foreach ($sys->hangarUsage as $entry){
+						if ((int)($entry['dockedFlightId'] ?? 0) === $id) return $carrier;
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	/* Where a unit projects FROM for the purposes of a rule that measures hexes: its own hex, or its
+	 * carrier's if it is stowed inside one. Returns null when the unit is out of play for real, or
+	 * when the carrier is (destroyed, still in hyperspace, or never placed) - a hull that is not on
+	 * the board projects nothing, and neither does anything it is holding.
+	 * Shared by TacGamedata::setEdfHexes and EW::collectEwDetectors so the two can never disagree
+	 * about which units count; the client twins are PhaseStrategy.isOffBoardForEdf and
+	 * ew.collectEwDetectors. */
+	public static function projectionOriginFor($ship, $gamedata){
+		$from = $ship;
+		if (!empty($ship->removed)){
+			$carrier = self::stowedInCarrier($ship, $gamedata);
+			if (!$carrier) return null;                       //genuinely gone, not stowed
+			if ($ship->isDestroyedByDamage()) return null;    //stowed, but a wreck
+			$from = $carrier;
+		}
+		if ($from->isDestroyed()) return null;
+		if ($from->isReinforcement()) return null;            //still in hyperspace
+		$lastMove = $from->getLastMovement();
+		if ($lastMove && $lastMove->type == 'start' && $from->userid != -5) return null;   //never placed
+		/* ⚠️ getTurnDeployed() reaches for the unit's SLOT, and EW::collectEwDetectors - unlike
+		   TacGamedata::setEdfHexes, which has always been wrapped - has no try/catch of its own. A
+		   gamedata with no slot for a ship is not a state this can fix, so it answers the permissive
+		   thing (the unit IS on the board) rather than silently deleting a real detector or field. */
+		try {
+			if ($from->getTurnDeployed($gamedata) > $gamedata->turn) return null;          //not arrived yet
+		} catch (Exception $e) { /* no slot - fall through */ }
+		return $from->getHexPos();
+	}
+
+	/* Fill every hangar's $stowedEdfRadius, so the map can draw a disc for a field projected from
+	 * inside a hull. Called once from TacGamedata::setEdfHexes and only when a field exists at all,
+	 * so an ordinary game never reaches the loop. */
+	public static function publishStowedEdfRadii($gamedata){
+		foreach ($gamedata->ships as $carrier){
+			if (!is_array($carrier->systems)) continue;
+			foreach ($carrier->systems as $sys){
+				if (!($sys instanceof Hangar)) continue;
+				$sys->setStowedEdfRadius(self::stowedEdfRadius($sys, $carrier, $gamedata));
+			}
+		}
+	}
+
+	/* The largest Energy Draining Field radius projected by the units STOWED in $carrier, or 0.
+	 * Published per hangar system (Hangar::stripForJson) purely so the map can draw the disc: the
+	 * hexes themselves are already in the public $edfHexes map, so this number discloses nothing
+	 * that is not on screen already - and without it the disc would be own-team only, because the
+	 * bay's ship list is masked and the client could not find the source. */
+	public static function stowedEdfRadius($hangar, $carrier, $gamedata){
+		$ids = array();
+		if (!empty($hangar->isDockingBay) && is_array($hangar->shipsDocked)){
+			foreach ($hangar->shipsDocked as $entry) $ids[] = (int)($entry['shipId'] ?? 0);
+		}
+		if (is_array($hangar->lcvDocked ?? null)) $ids[] = (int)($hangar->lcvDocked['shipId'] ?? 0);
+		if (is_array($hangar->hangarUsage)){
+			foreach ($hangar->hangarUsage as $entry) if (!empty($entry['dockedFlightId'])) $ids[] = (int)$entry['dockedFlightId'];
+		}
+		$best = 0;
+		foreach ($ids as $id){
+			if ($id <= 0) continue;
+			$stowed = $gamedata->getShipById($id);
+			if (!$stowed || $stowed->isDestroyedByDamage()) continue;
+			foreach ($stowed->systems as $system){
+				if (!($system instanceof EdfSource)) continue;
+				if (!$system->isEdfActive($gamedata->turn)) continue;
+				$r = (int)$system->getEdfRadius($gamedata->turn);
+				if ($r > $best) $best = $r;
+			}
+		}
+		return $best;
+	}
+
 	/* Pass 3 sibling of processLCVCarrierDestruction. ⚠️ A carrier that LEFT through hyperspace is
 	 * also "destroyed" (it is removed) - its ships leave WITH it, so it is skipped exactly as
 	 * processCarrierDestructionEscapes skips it. */
@@ -2110,7 +2481,11 @@ class HangarOps {
 			if (!$carrier->isDestroyed()) continue;
 			if ($carrier->hasJumpedToHyperspace()) continue;
 			foreach ($carrier->systems as $bay) {
-				if (empty($bay->isDockingBay) || empty($bay->shipsDocked)) continue;
+				if (empty($bay->isDockingBay)) continue;
+				//Stage 19: a rider clamped to the outside of a dying hull simply lets go. It is
+				//already on the board, so it takes none of the fragment damage a ship INSIDE does.
+				self::releaseAllBayShipAttachments($bay, $carrier, $gamedata, 'Ship released from destroyed carrier');
+				if (empty($bay->shipsDocked)) continue;
 				foreach ($bay->shipsDocked as $entry) self::forceBayShipOut($bay, $carrier, $entry, $gamedata, 'Ship escaped destroyed carrier');
 				$bay->shipsDocked = array();
 			}

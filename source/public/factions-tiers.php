@@ -2005,17 +2005,25 @@ at short range versus long range.
     <h5>The Traveler's Docking Bay</h5>
         <ul>
             <li>The Traveler's aft hangar is a <b>Docking Bay</b>: 24 boxes that take Mapmaker Probes exactly like an ordinary hangar, and also <b>whole ships</b> -
-                <b>Scribes</b> (4 boxes each), <b>Pathfinders</b> and <b>Guideships</b> (12 each). Probes and ships share the one pool, so the bay holds 24 probes,
-                or 6 Scribes, or 2 Pathfinders, or any mix that adds up to 24.</li>
+                <b>Scribes</b> (4 boxes each), <b>Pathfinders</b> and <b>Guideships</b> (12 each) and a <b>Waymarker</b> (24). Probes and ships share the one pool,
+                so the bay holds 24 probes, or 6 Scribes, or 2 Pathfinders, or one Waymarker, or any mix that adds up to 24.</li>
             <li><b>Only one type of craft may launch or be recovered through it per turn</b> - on a turn the Scribes use it the probes cannot, and the other way round.
-                Its launch rate is <b>12 Mapmakers, or 2 Scribes, or 1 Pathfinder or Guideship</b> per turn, launches and recoveries together. Mapmakers auto-fill
+                Its launch rate is <b>12 Mapmakers, or 2 Scribes, or 1 Pathfinder, Guideship or Waymarker</b> per turn, launches and recoveries together. Mapmakers auto-fill
                 the Traveler's two side hangars before the Docking Bay, which is the only one that can hold a ship.</li>
             <li>To dock, a ship must end its movement in the Traveler's hex, on the Traveler's heading, with at least 1 thrust unspent, while the Traveler is at speed 0 -
                 the same conditions as an LCV docking on a rail. A docked ship is off the board. It launches at the Traveler's position, heading and speed, takes the
                 usual launch initiative penalty that turn, and cannot launch on the turn it docked.</li>
             <li>Ships may also <b>start the battle aboard</b>: during Deployment, select the ship and click the Traveler to dock it straight into the bay. A Traveler
-                arriving as a reinforcement can bring Scribes, Pathfinders and Guideships in its Docking Bay as well as its probes, and they arrive docked.</li>
+                arriving as a reinforcement can bring Scribes, Pathfinders, Guideships and a Waymarker in its Docking Bay as well as its probes, and they arrive docked.</li>
+            <li>Any unit ordered into or out of <i>any</i> hangar during the Firing phase now says so on itself: <b>"Docking with &lt;ship&gt;"</b> or <b>"Launching
+                from &lt;ship&gt;"</b>, on the map tooltip and as a cyan banner on its ship window. (A flight being launched from scratch has no unit to label until
+                the order resolves, so it carries no banner.)</li>
+            <li>A <b>stowed unit's fleet-list row</b> - a docked ship, a docked fighter flight or a rail-parked LCV alike - scrolls the map to the <b>carrier holding
+                it</b> on left-click, which is where it actually is. Right-click, or the &#9432; affordance, opens its own ship window.</li>
             <li>A docked ship's weapons keep recharging while it is aboard, exactly as on the board; an Energy Draining Mine launcher restocks up to its usual 3.</li>
+            <li><b>Docked craft keep projecting what they project.</b> An <b>Energy Draining Field</b> or <b>Net</b> on a ship inside the bay stays operational, and a
+                docked <b>EW Detector</b> still lets the fleet save EW points within its 20 hexes - both measured from <b>the Traveler's hex</b>, so the bubble travels
+                with the carrier. A docked Guideship's radius-4 field is drawn on the Traveler's own icon.</li>
             <li><b>The Traveler's Self Repair also repairs the ships it carries.</b> Damaged Structure, C&amp;C and Self Repair on a docked ship, and any repairable
                 critical on any of its systems, appear in the Traveler's own repair list, marked with the owning ship's name. They are ordered by priority alongside
                 the Traveler's own entries and nothing is pinned below anything else, so a docked hull may be repaired first if you want it repaired first. A docked
@@ -2031,8 +2039,24 @@ at short range versus long range.
                 public, even though what is in the bay otherwise is not.</li>
             <li>Damage to the bay never forces a ship out - probes are evicted first as boxes are lost. If the Docking Bay or the Traveler is destroyed, every docked
                 ship is forced out and takes the bay's damage plus 2d10 to its Structure.</li>
-            <li>The <b>Waymarker</b> (24 boxes) cannot use the bay yet: its dock and launch take two turns, which is not implemented. It already counts toward the
-                Traveler's probe requirement in the Fleet Checker.</li>
+            <li><b>A Waymarker takes two turns to dock, and two to launch.</b> It is 24 boxes - the whole bay - and it does not go straight in. Order the dock as
+                usual and, when the turn resolves, the Waymarker <b>clamps to the Traveler's aft</b> instead: it is still on the map, in the Traveler's hex, and it
+                stays there for the whole of the following turn before going inside at the end of it. Launching runs the same two steps backwards - it comes out onto
+                the aft, rides there for a turn, and is a free ship again the turn after that. Its 24 boxes are held from the moment the order resolves, so nothing
+                else can be loaded into the bay while it is on its way in or out.</li>
+            <li><b>While it is riding the Traveler's aft</b> a Waymarker:
+                <ul>
+                    <li><b>moves with the Traveler</b> and cannot steer itself - it has no movement of its own to plot;</li>
+                    <li><b>may not fire</b>, and may not intercept. Its weapon menu and firing-mode selector are withdrawn for the turn;</li>
+                    <li><b>may still be shot at</b> normally, and <b>hits on the Traveler's own aft section are rolled on the Waymarker instead</b> - on whichever of
+                        its Front or Aft sections has the <b>most Structure remaining</b>. The Traveler is hit on the ordinary hit chart first; only a hit that lands
+                        aft transfers;</li>
+                    <li><b>uses no EW</b> - it makes no allocations of any kind - and <b>no ship may target it with EW</b>, friendly or hostile. It keeps its own
+                        defensive EW, so it is no easier to hit than usual.</li>
+                </ul>
+                The map tooltip and its ship window both show <b>"Docking with &lt;ship&gt;"</b> (or "Launching from") for the whole of that turn.</li>
+            <li>If the Docking Bay or the Traveler is destroyed while a Waymarker is riding it, the Waymarker simply <b>lets go</b> - it was clamped to the outside of
+                the hull rather than stowed inside it, so it takes none of the fragment damage a docked ship takes.</li>
         </ul>
 
     <h5>Mapmaker Sensor Probes</h5>
@@ -2095,8 +2119,7 @@ at short range versus long range.
                 Pulsar, a Medium Lightning Array that three or six of them fire as one gun, an EW allowance and a Walker jump drive, and needing no hangar space of their own.</li>
         </ul>
         <ul>
-            <li>Not implemented yet, and listed so the page is not read as promising them: the Waymarker's two-turn dock and launch through the Docking Bay; and
-                the Traveler's Extra-Dimensional Jump Drive.</li>
+            <li>Not implemented yet, and listed so the page is not read as promising it: the Traveler's Extra-Dimensional Jump Drive.</li>
         </ul>
 
     <a class="back-to-top" href="#top">↩ Back to Top</a>

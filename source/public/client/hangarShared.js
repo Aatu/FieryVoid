@@ -84,21 +84,37 @@ window.HangarShared = (function () {
         if (Array.isArray(bay.shipsDocked)) {
             bay.shipsDocked.forEach(function (e) { n += parseInt((e && e.boxes) || 0, 10); });
         }
+        // Stage 19 (3.14a): a ship RIDING the hull mid-manoeuvre has already claimed its boxes and
+        // keeps them for the whole ride - the arrival next turn must have somewhere to go. Mirrors
+        // HangarOps::dockedShipBoxes, which counts shipsAttaching for the same reason.
+        if (Array.isArray(bay.shipsAttaching)) {
+            bay.shipsAttaching.forEach(function (e) { n += parseInt((e && e.boxes) || 0, 10); });
+        }
         return n + sumOrderBoxes(bay.pendingBayShipDeployStartOrders) + sumOrderBoxes(bay.pendingBayShipDockOrders);
     }
 
-    // May $bay take $ship at all? Its class is listed, and not deferred (the Waymarker's two-turn
-    // procedure, 3.14a). Mirrors HangarOps::bayDocksShipClass.
+    // May $bay take $ship at all? Mirrors HangarOps::bayDocksShipClass - the class is simply listed
+    // or it is not. (Until Stage 19 the Waymarker was additionally refused here, because its
+    // two-turn procedure was deferred; it now docks like anything else, just slowly.)
     function bayDocksShipClass(bay, ship) {
         if (!isDockingBaySys(bay) || !ship || ship.flight) return false;
         var cls = String(ship.phpclass || '');
-        if (!Array.isArray(bay.dockableShipClasses) || bay.dockableShipClasses.indexOf(cls) === -1) return false;
-        return !(Array.isArray(bay.deferredShipClasses) && bay.deferredShipClasses.indexOf(cls) !== -1);
+        return Array.isArray(bay.dockableShipClasses) && bay.dockableShipClasses.indexOf(cls) !== -1;
+    }
+
+    // Does this class use the two-turn ride (WALKERS_OF_SIGMA_PLAN.md 3.14a)? Mirrors
+    // HangarOps::bayShipIsTwoTurn. Read to LABEL a row and word a confirmation, never to refuse one.
+    function bayShipIsTwoTurn(bay, phpclass) {
+        return !!(bay && Array.isArray(bay.twoTurnShipClasses)
+            && bay.twoTurnShipClasses.indexOf(String(phpclass || '')) !== -1);
     }
 
     // One craft TYPE per turn (D17): queued ship dock/launch orders claim the bay for ships...
     function bayClaimedByShips(bay) {
         if (!isDockingBaySys(bay)) return false;
+        // Stage 19: a rider holds the bay for the WHOLE manoeuvre, not just the turn it was ordered
+        // - the bay is physically occupied by it. Mirrors DockingBay::hasShipOrdersThisTurn.
+        if (Array.isArray(bay.shipsAttaching) && bay.shipsAttaching.length > 0) return true;
         return (Array.isArray(bay.pendingBayShipDockOrders) && bay.pendingBayShipDockOrders.length > 0)
             || (Array.isArray(bay.pendingBayShipLaunchOrders) && bay.pendingBayShipLaunchOrders.length > 0);
     }
@@ -356,6 +372,7 @@ window.HangarShared = (function () {
         shipBoxesForUnitSize:      shipBoxesForUnitSize,
         bayShipBoxesHeld:          bayShipBoxesHeld,
         bayDocksShipClass:         bayDocksShipClass,
+        bayShipIsTwoTurn:          bayShipIsTwoTurn,
         bayClaimedByShips:         bayClaimedByShips,
         bayClaimedByFighters:      bayClaimedByFighters,
         boxesPerCraftFromUnitSize: boxesPerCraftFromUnitSize,

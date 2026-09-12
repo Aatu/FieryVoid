@@ -207,6 +207,12 @@ class ShipCompactor
         // Empty arrays
         $emptyArrayKeys = ['damage','criticals','fireOrders','power','specialAbilities','critData',
                            'revealedTeams',
+                           /* Stage 19 (WALKERS_OF_SIGMA_PLAN.md 3.14a): the Docking Bay's list of
+                              ships riding the hull mid-manoeuvre. Always empty on a blueprint, and
+                              every client read is an Array.isArray() guard, so dropping it keeps the
+                              key out of every cached per-class artefact. The LIVE copy is sent
+                              separately by DockingBay::stripForJson. */
+                           'shipsAttaching',
                            'turnsloadedArray','extraoverloadshotsArray','fireControlArray',
                            'rangeArray','rangePenaltyArray','sustainedTarget',
                            /* Per-firing-mode arrays. Every reader is an

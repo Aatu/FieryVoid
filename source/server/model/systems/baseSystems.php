@@ -3896,6 +3896,15 @@ class Hangar extends ShipSystem{
 	public $launchedThisTurn = 0;         //resets each turn
 	public $landedThisTurn = 0;           //resets each turn
 	public $usagePopulated = false;       //idempotency guard — first hangar on a ship runs initial population once
+	/* WALKERS_OF_SIGMA_PLAN.md 3.14d (Stage 19). The largest Energy Draining Field radius projected
+	   by the units STOWED in this bay, filled by HangarOps::publishStowedEdfRadii during
+	   setEdfHexes() and sent by stripForJson() when it is non-zero. RENDERING ONLY - the hexes
+	   themselves are already in the public $edfHexes map, which is what every RULE reads.
+	   ⚠️ PROTECTED ON PURPOSE. A public property rides the static blueprint (ShipCompactor), which
+	   would put a live, per-turn number into a cached per-CLASS artefact and add a key to every
+	   hangar in the game. stripForJson reflects IS_PUBLIC only, so this is invisible to it and is
+	   copied by hand below. */
+	protected $stowedEdfRadius = 0;
 	private $lastSavedUsage = null;       //serialized snapshot of last persisted hangarUsage (avoids duplicate notes)
 	//Stage 15: per-carrier ordnance reload pool. Only the PRIMARY (first)
 	//hangar on a ship carries the spent counter — HangarOps::drawReload writes
@@ -4721,6 +4730,10 @@ class Hangar extends ShipSystem{
 		if ($hasLcvDeployStartKey) $this->pendingLcvDeployStartTransfer = $cleanLcvDeployStarts;
 	}
 
+	//Stage 19 (3.14d) - the one writer, HangarOps::publishStowedEdfRadii. A setter rather than a
+	//public property, for the blueprint reason recorded on the field itself.
+	public function setStowedEdfRadius($radius){ $this->stowedEdfRadius = max(0, (int)$radius); }
+
 	public function stripForJson(){
 		$strippedSystem = parent::stripForJson();
 		$strippedSystem->hangarType = $this->hangarType;
@@ -4771,6 +4784,12 @@ class Hangar extends ShipSystem{
 		if (!$disclosedUsage) $strippedSystem->hangarUsageHidden = true;
 		$strippedSystem->launchedThisTurn = $this->launchedThisTurn;
 		$strippedSystem->landedThisTurn = $this->landedThisTurn;
+		/* Stage 19 (3.14d): a docked unit's field is drawn as a disc on the CARRIER's icon, because
+		   the stowed unit has no icon of its own. Published to EVERY viewer - the field's hexes are
+		   already public in gamedata.edfHexes, so the radius discloses nothing that is not on the
+		   map, whereas deriving it from the masked ship list would have drawn the disc for one side
+		   of the table only. Omitted when zero, so no ordinary hangar pays a key for it. */
+		if ((int)$this->stowedEdfRadius > 0) $strippedSystem->stowedEdfRadius = (int)$this->stowedEdfRadius;
 		//Stage 15: only the primary hangar carries the carrier-level reload pool.
 		//Send capacity (from HANG_ORD) AND spent so the client can render
 		//remaining without needing to re-derive enhancement totals client-side.
@@ -5167,9 +5186,10 @@ class DockingCollar extends Hangar{
    claim the bay, and it reports zero fighter capacity to every dock gate for the rest of the turn -
    which is what stops the carrier-level coalescer routing a Mapmaker flight in from a sibling bay.
 
-   Deliberately not built: the Waymarker's two-turn procedure (3.14a, D23, deferred by the user
-   2026-09-11). The class is listed - its 24 boxes count in the Fleet Checker - but
-   DEFERRED_SHIP_CLASSES keeps it out of every dock, launch and deploy-dock. */
+   THE WAYMARKER'S TWO-TURN PROCEDURE (3.14a) is Stage 19, 2026-09-12. It does not go straight in:
+   it clamps to the carrier's AFT on `attached` for one whole turn each way, which is what
+   $shipsAttaching records and what HangarOps' two-turn section implements. TWO_TURN_SHIP_CLASSES
+   names the classes that take that route - a label now, not the refusal it used to be. */
 class DockingBay extends Hangar{
     public $displayName = "Docking Bay";
 
@@ -5182,6 +5202,18 @@ class DockingBay extends Hangar{
     public $fleetCheckCategory = '';
     //[{shipId, phpclass, boxes, dockTurn}] - the ship half of the bay's contents.
     public $shipsDocked = array();
+    /* WALKERS_OF_SIGMA_PLAN.md 3.14a (Stage 19) - THE WAYMARKER'S TWO-TURN PROCEDURE, mid-manoeuvre.
+       [{shipId, phpclass, boxes, startTurn, dir}] where dir is 'in' (docking) or 'out' (launching).
+       An entry here is a ship RIDING THE CARRIER'S AFT on `attached`: still on the board, moving with
+       the Traveler, unable to fire and unable to steer. Its boxes are RESERVED from the moment the
+       order resolves (HangarOps::dockedShipBoxes counts this list too), because the arrival on
+       startTurn + 1 must have somewhere to go - otherwise a player attaches a Waymarker and fills the
+       bay with Mapmakers in the same turn (plan 3.14a).
+       Persisted as its own change-detected `bayShipsAttaching` snapshot beside bayShipsDocked. The
+       `attached` link itself round-trips through the CARRIER's CnC Attached/Detached notes exactly as
+       a boarding pod's does; THIS list is what tells every other reader that the ride is a docking
+       manoeuvre and not a boarding action. */
+    public $shipsAttaching = array();
     public $pendingBayShipDockOrder = null;   //latest bayShipDockOrder note for this turn
     public $pendingBayShipLaunchOrder = null; //latest bayShipLaunchOrder note for this turn
     //Transient, resolution-only: the ship phpclass that has used the bay this turn (type lock).
@@ -5208,12 +5240,17 @@ class DockingBay extends Hangar{
     private $shipsClaimedBayThisTurn = false;
     private $refusedShipOrders = array();   //ship ids whose orders the type lock refused at load
     private $lastSavedShipsDocked = null;
+    private $lastSavedShipsAttaching = null;
     private $pendingBayShipDockTransfer = null;
     private $pendingBayShipLaunchTransfer = null;
     private $pendingBayShipDeployStartTransfer = null;
 
-    //A const, not a public static - see the Stage 11 note on MissileRack::stripForJson.
-    const DEFERRED_SHIP_CLASSES = array('Waymarker');
+    /* A const, not a public static - see the Stage 11 note on MissileRack::stripForJson.
+       Stage 19: the Waymarker moved OUT of a DEFERRED list (refused everywhere) into a TWO-TURN one -
+       accepted, but through the attached ride above. Nothing is deferred any more, so the old const is
+       gone, and `deferredShipClasses` on the wire is replaced by `twoTurnShipClasses`, which the client
+       reads to LABEL a row rather than to grey it out. */
+    const TWO_TURN_SHIP_CLASSES = array('Waymarker');
 
     //$dockableShips: phpclass => ships of that class per turn, e.g. array('Scribe' => 2, 'Pathfinder' => 1).
     function __construct($armour, $maxhealth, $output, $direction = 0, $dockableShips = array(), $fleetCheckCategory = ''){
@@ -5228,7 +5265,11 @@ class DockingBay extends Hangar{
 
     /* Ship orders this turn claim the bay for ships (type lock). An empty order - a cancel - claims nothing. */
     public function hasShipOrdersThisTurn(){
-        return $this->shipsClaimedBayThisTurn || !empty($this->pendingBayShipDockOrder) || !empty($this->pendingBayShipLaunchOrder);
+        //Stage 19 (3.14a): a Waymarker riding the hull claims the bay for the WHOLE manoeuvre, not
+        //just the turn it was ordered. The bay is physically occupied by it, and the one-type-per-
+        //turn rule simply lasts as long as the manoeuvre does.
+        return $this->shipsClaimedBayThisTurn || !empty($this->shipsAttaching)
+            || !empty($this->pendingBayShipDockOrder) || !empty($this->pendingBayShipLaunchOrder);
     }
 
     /* A fighter dock or launch order on THIS bay this turn. An empty order (a cancel) is none. */
@@ -5260,6 +5301,13 @@ class DockingBay extends Hangar{
                 $decoded = json_decode($note->notevalue, true);
                 $this->shipsDocked = is_array($decoded) ? array_values($decoded) : array();
                 $this->lastSavedShipsDocked = $note->notevalue;
+            } else if ($note->notekey === 'bayShipsAttaching'){
+                //Stage 19 (3.14a): the ships riding the hull mid-manoeuvre. The `attached` link
+                //itself is replayed by the CARRIER's CnC from its own Attached/Detached notes; this
+                //is only the bay's record that the ride is a docking one, and whose boxes it holds.
+                $decoded = json_decode($note->notevalue, true);
+                $this->shipsAttaching = is_array($decoded) ? array_values($decoded) : array();
+                $this->lastSavedShipsAttaching = $note->notevalue;
             } else if ($note->notekey === 'bayShipDockOrder' && $note->turn == $gamedata->turn){
                 $decoded = json_decode($note->notevalue, true);
                 if (is_array($decoded)) $this->pendingBayShipDockOrder = $decoded;
@@ -5333,6 +5381,17 @@ class DockingBay extends Hangar{
         //Snapshot, change-detected - and written for a DESTROYED carrier too: a forced launch clears
         //the list, and that cleared state must persist or the next load re-removes the ships.
         if (!$placed) return;
+        //Stage 19 (3.14a): the riders' snapshot, same change-detected shape and the same reason -
+        //a CLEARED list (a manoeuvre completed or abandoned) must persist, or the next load
+        //re-reserves boxes for a ship that is already inside or already gone.
+        $attaching = json_encode(array_values($this->shipsAttaching));
+        if ($attaching !== $this->lastSavedShipsAttaching
+            && !($this->lastSavedShipsAttaching === null && empty($this->shipsAttaching))){
+            $this->individualNotes[] = new IndividualNote(-1, $gamedata->id, $gamedata->turn, $gamedata->phase, $ship->id, $this->id,
+                'bayShipsAttaching', 'Docking bay riders', $attaching);
+            $this->lastSavedShipsAttaching = $attaching;
+        }
+
         $current = json_encode(array_values($this->shipsDocked));
         if ($current === $this->lastSavedShipsDocked) return;
         if ($this->lastSavedShipsDocked === null && empty($this->shipsDocked)) return;   //POST-side, nothing to say
@@ -5355,6 +5414,10 @@ class DockingBay extends Hangar{
             if ($this->isDestroyed()){
                 HangarOps::onDockingBayDestroyed($this, $ship, $gamedata);
             } else {
+                /*Stage 19 (3.14a): last turn's two-turn manoeuvres finish FIRST. They are the
+                previous turn's business, and a Waymarker separating frees the 24 boxes this turn's
+                orders may want - while one arriving must claim its slot before anything else does.*/
+                HangarOps::completeBayShipAttachments($this, $ship, $gamedata);
                 HangarOps::processBayShipDockOrders($this, $ship, $gamedata);
                 HangarOps::processBayShipLaunchOrders($this, $ship, $gamedata);
                 /*Stage 17 (3.15): the ships that are STILL aboard after this turn's traffic repair
@@ -5417,7 +5480,9 @@ class DockingBay extends Hangar{
         $strippedSystem->isDockingBay = true;
         $strippedSystem->dockableShipClasses = $this->dockableShipClasses;
         $strippedSystem->shipLaunchRates = (object)$this->shipLaunchRates;   //a map, so never a JSON []
-        $strippedSystem->deferredShipClasses = self::DEFERRED_SHIP_CLASSES;
+        //Stage 19: no longer a refusal list. The client reads it to LABEL a row "(2-turn procedure)"
+        //and to word the confirmation, never to grey it out.
+        $strippedSystem->twoTurnShipClasses = self::TWO_TURN_SHIP_CLASSES;
         //Stage 18 (3.16): sent on the wire as well as riding the static blueprint, for the same
         //reason SelfRepair::servicesDockedUnits is - the tap then works before the statics are
         //regenerated. ShipCompactor strips it from every bay on which it is false.
@@ -5426,6 +5491,16 @@ class DockingBay extends Hangar{
         //has already raised hangarUsageHidden for everyone else), and so do its queued orders.
         $disclosed = $this->isDisclosedToCurrentViewer();
         $strippedSystem->shipsDocked = $disclosed ? array_values($this->shipsDocked) : array();
+        /* Stage 19 (3.14a): the RIDERS are published to EVERYONE, unlike the bay's contents.
+           Nothing about them is private - a Waymarker clamped to the Traveler's aft is on the map,
+           in the same hex, drawn and shootable, and the `attached` link the map tooltip reads is
+           already public. Masking it would only hide from the opponent WHY the ship they can see
+           is not steering, and would take the Aft-hit redirect (which they must be able to reason
+           about before they shoot) with it. */
+        //Only when there IS one, so an ordinary Docking Bay pays no key for it: absent and empty
+        //mean the same thing here (unlike shipsDocked, whose empty list also means "masked"), and
+        //every client reader is an Array.isArray() guard.
+        if (!empty($this->shipsAttaching)) $strippedSystem->shipsAttaching = array_values($this->shipsAttaching);
         /* Stage 18 (3.16b, user ruling 2026-09-12): THE ONE THING AN OPPONENT IS TOLD ABOUT THE
            CONTENTS OF A SHARING BAY - the ids of the ships aboard, and nothing else.
 
@@ -5471,7 +5546,7 @@ class DockingBay extends Hangar{
         $ships = array();
         foreach ($this->dockableShipClasses as $cls){
             $label = $cls . ' (' . HangarOps::boxesPerCraftForClass($cls) . ' boxes, ' . $this->shipLaunchRates[$cls] . ' per turn';
-            if (in_array($cls, self::DEFERRED_SHIP_CLASSES, true)) $label .= ', not yet available';
+            if (in_array($cls, self::TWO_TURN_SHIP_CLASSES, true)) $label .= ', 2-turn procedure';
             $ships[] = $label . ')';
         }
         $this->data["Type"] = ($this->fleetCheckCategory !== '' ? $this->fleetCheckCategory : 'Fighters') . ' + Ships';
@@ -5479,6 +5554,9 @@ class DockingBay extends Hangar{
         if (!empty($ships)) $this->data["Special"] .= "<br>Ships: " . implode(', ', $ships) . ".";
         $this->data["Special"] .= "<br>Only ONE type of craft may launch or be recovered per turn: " . $this->output . " fighters, or the ships per turn listed above (launches and recoveries together).";
         $this->data["Special"] .= "<br>A docking ship must end its move in this hex on the carrier's heading, with 1 thrust unspent, while the carrier is at speed 0.";
+        if (!empty(self::TWO_TURN_SHIP_CLASSES)){
+            $this->data["Special"] .= "<br>" . implode(' / ', self::TWO_TURN_SHIP_CLASSES) . ": docking and launching take TWO turns. The ship rides this vessel's aft for the intervening turn - it cannot steer or fire, and hits on this vessel's aft section are rolled on its own least damaged section instead.";
+        }
         //Stage 18 (3.16): the RULE, not the running figure. The live "+N shared" total is shown on
         //the carrier's Reactor tooltip instead, because it is computed client-side from what the
         //player has powered down this turn - see the ⚠️⚠️ on $sharesDockedPower.

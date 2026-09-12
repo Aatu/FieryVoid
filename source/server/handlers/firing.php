@@ -889,10 +889,16 @@ class Firing
         $allIncomingShots = array();
         foreach ($gamedata->ships as $ship) {
             if($ship->getTurnDeployed($gamedata) > $gamedata->turn)	continue; //Ship not deployed yet. Remove to avoid problems.
-            //An Ancient ship jumping out this turn may not fire, and that includes interception
-            //(JumpEngine::$ancientJump). Its own orders were withdrawn in prepareFiring, which runs
-            //first; this is the half that would otherwise hand it fresh ones.
-            $interceptWeapons = self::isJumpingUnarmed($ship, $gamedata->turn) ? array() : self::getUnassignedInterceptors($gamedata, $ship);
+            /* An Ancient ship jumping out this turn may not fire, and that includes interception
+               (JumpEngine::$ancientJump). Its own orders were withdrawn in prepareFiring, which runs
+               first; this is the half that would otherwise hand it fresh ones.
+               ⭐ Stage 19 (3.14g): a ship riding a Docking Bay's aft is the same case - D49's "can be
+               shot, cannot shoot" covers interception too, and the client stops offering the
+               declaration at the same time (SystemInfoButtons.isDockingRiderUnit). Without this the
+               engine would quietly hand a unit that may not fire a full set of intercept orders. */
+            $unarmed = self::isJumpingUnarmed($ship, $gamedata->turn)
+                || HangarOps::bayCarrierAttachedTo($ship, $gamedata) !== null;
+            $interceptWeapons = $unarmed ? array() : self::getUnassignedInterceptors($gamedata, $ship);
             $allInterceptWeapons = array_merge($allInterceptWeapons, $interceptWeapons);
             $incomingShots = $ship->getAllFireOrders($gamedata->turn);
             $allIncomingShots = array_merge($allIncomingShots, $incomingShots);
@@ -1484,6 +1490,8 @@ class Firing
         //been destroyed since, and the crit outlives it by a turn. The method self-gates on the
         //flight having any criticals at all, which is free for every ordinary flight.
         self::withdrawGroundedFighterFireOrders($gamedata);
+        //Stage 19 (3.14a): a Waymarker riding the Traveler's aft mid-dock holds no fire either.
+        self::withdrawFireFromDockingRiders($gamedata);
 
         //An Ancient ship jumping out this turn may not fire (JumpEngine::$ancientJump) - see the method.
         self::withdrawFireFromJumpingUnits($gamedata);
@@ -1730,6 +1738,8 @@ public static function firePreFiringWeapons($gamedata){
         //been destroyed since, and the crit outlives it by a turn. The method self-gates on the
         //flight having any criticals at all, which is free for every ordinary flight.
         self::withdrawGroundedFighterFireOrders($gamedata);
+        //Stage 19 (3.14a): a Waymarker riding the Traveler's aft mid-dock holds no fire either.
+        self::withdrawFireFromDockingRiders($gamedata);
 
         //An Ancient ship jumping out this turn may not fire (JumpEngine::$ancientJump). This is also
         //what catches a ballistic it declared in Initial Orders alongside its jump.
@@ -1967,6 +1977,42 @@ public static function firePreFiringWeapons($gamedata){
     {
         $engine = JumpEngine::getUnitJumpingEngine($ship, $turn);
         return $engine !== null && $engine->forbidsFireWhileJumping();
+    }
+
+    /* ⭐ WALKERS_OF_SIGMA_PLAN.md 3.14a (Stage 19) - A SHIP RIDING A DOCKING BAY MAY NOT FIRE
+       (user ruling 2026-09-12). A Waymarker clamped to the Traveler's aft for the middle turn of a
+       two-turn dock or launch is a ship under tow: it steers nothing, its arcs are meaningless
+       bolted to another hull, and the manoeuvre is what its crew are doing. It can still BE SHOT,
+       which is the rule too - and hits on the carrier's aft roll on it (Weapon::damageOneSheet).
+
+       Deliberately modelled on withdrawFireFromJumpingUnits directly above, down to the exclusions:
+       a ram is a collision rather than the firing of a weapon, a hyperspace log order is not a
+       shot, and a selfIntercept marker is consent. Interception is not separately suppressed -
+       nothing here is a gun that could be assigned one, and an order it already holds is withdrawn
+       by the sweep below like any other.
+
+       ⚠️ ON THE ADVANCE PATH, NOT IN validateFireOrders, for the same reason every withdrawal in
+       this file is. The ride BEGINS in the critical phase of the previous turn, so a POST-side ship
+       reconstructed without its carrier's notes (arch_post_side_ship_reconstruction) cannot answer
+       "am I riding anything"; here gamedata is loaded in full and the bay's shipsAttaching list is
+       real. The client refuses the selection as well (weaponManager), which is what makes this a
+       backstop rather than the only guard. */
+    private static function withdrawFireFromDockingRiders($gamedata)
+    {
+        foreach ($gamedata->ships as $ship) {
+            if (empty($ship->attached)) continue;   //the cheap exit: empty on every unit, every game
+            if (HangarOps::bayCarrierAttachedTo($ship, $gamedata) === null) continue;
+
+            foreach ($ship->getAllFireOrders($gamedata->turn) as $fire) {
+                if ($fire->type === 'selfIntercept') continue;
+                if (self::isHyperspaceLogOrder($fire)) continue;
+                $weapon = $ship->getSystemById($fire->weaponid);
+                if ($weapon && !empty($weapon->isRammingAttack)) continue;
+
+                $fire->rejected = true;
+                self::detachFireOrder($ship, $fire);
+            }
+        }
     }
 
     private static function withdrawGroundedFighterFireOrders($gamedata)

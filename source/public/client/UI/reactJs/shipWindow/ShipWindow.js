@@ -2300,8 +2300,23 @@ const getStatusBanners = (ship) => {
         });
     }
 
+    /*WALKERS_OF_SIGMA_PLAN.md 3.14c (Stage 19, user request 2026-09-12): this unit is going into or
+      coming out of a hangar. Cyan, the same statusPending as Deploying and Arrival Scatter above -
+      a benign thing the unit is doing. Placed before the attached pair below because for a
+      Waymarker mid-dock it REPLACES them: shipManager.getHangarManoeuvre is the single reader this
+      shares with the map tooltip, and `riding` is what says the attachment is a docking manoeuvre
+      rather than a boarding action.*/
+    const hangarManoeuvre = shipManager.getHangarManoeuvre(ship);
+    if (hangarManoeuvre) {
+        banners.push({
+            key: 'hangarManoeuvre', color: theme.colors.statusPending, bg: 'rgba(0, 184, 230, 0.10)',
+            text: hangarManoeuvre.text
+        });
+    }
+
     //this ship rides a host (e.g. breaching pod attached to its target)
-    if (ship.attached && Object.keys(ship.attached).length > 0 && !ship.detached) {
+    if (ship.attached && Object.keys(ship.attached).length > 0 && !ship.detached
+        && !(hangarManoeuvre && hangarManoeuvre.riding)) {
         const hostShip = window.gamedata.getShip(Object.keys(ship.attached)[0]);
         if (hostShip) {
             const location = Object.values(ship.attached)[0];
@@ -2317,9 +2332,15 @@ const getStatusBanners = (ship) => {
         }
     }
 
-    //something hostile is attached to THIS ship
+    //something hostile is attached to THIS ship - and a docking rider of our own is not that
     if (ship.hasAttached && Object.keys(ship.hasAttached).length > 0) {
-        banners.push({ key: 'boarded', color: theme.colors.statusAlert, bg: 'rgba(255, 165, 0, 0.10)', text: 'Ship is being boarded!' });
+        const boarders = Object.keys(ship.hasAttached).filter((attachedId) => {
+            const rider = window.gamedata.getShip(attachedId);
+            return !(rider && shipManager.isDockingRider(rider));
+        });
+        if (boarders.length > 0) {
+            banners.push({ key: 'boarded', color: theme.colors.statusAlert, bg: 'rgba(255, 165, 0, 0.10)', text: 'Ship is being boarded!' });
+        }
     }
 
     /*WALKERS_OF_SIGMA_PLAN.md 2.2 - a flight that ended last turn in an Energy Draining Field

@@ -2795,6 +2795,7 @@ public function getFullStartLoading()
 	    /*find details of shot, proceed to doDamage*/
 
         $flashDamageAmount = 0; //also read further down, for other fighters in a hit flight - keep it defined on every path
+        $redirectedToDockRider = false; //Stage 19 - see the aft-hit redirect below
         if($this->damageType=='Flash'){
             //other units on target hex receive 25% of damage dealt to target, rounded up from .5.
             //Via a hook so a weapon can score a different fraction - see getFlashCollateralAmount.
@@ -2827,6 +2828,37 @@ public function getFullStartLoading()
 				$tmpLocation = $target->getHitSection($shooter, $fireOrder->turn);
 			}
 		}
+
+		/* ⭐⭐ WALKERS_OF_SIGMA_PLAN.md 3.14a (Stage 19) - THE AFT-HIT REDIRECT (user ruling
+		   2026-09-12). "When a Waymarker is attached, and the Traveler takes any hits on its Aft
+		   section (use normal hit calculations to see if the Traveler is hit), these Aft hits are
+		   rolled on the least damaged section (front or aft) of the docking/launching Waymarker."
+
+		   So the SHOT is never redirected - only the hit that has already landed aft. Everything
+		   above this line has run against the carrier exactly as it would with no rider at all: the
+		   profile, the to-hit, beforeDamage and all 35 of its overrides, and the hit-location roll
+		   itself. Only once that roll has said "aft" does the damage change sheets.
+
+		   ⚠️ IT MUST SIT AFTER $tmpLocation IS RESOLVED AND BEFORE ANYTHING READS $target AGAIN.
+		   The Piercing branch below counts the TARGET's structures and re-derives its own entry and
+		   exit sections; the Raking and standard branches call $target->getHitSystem(). Redirecting
+		   here means every one of them is already talking about the Waymarker, which is what makes
+		   this seven lines rather than a fork of the whole function.
+
+		   ⚠️ $forcePrimary shots are exempt, because there is no location roll to read: they are
+		   internal effects (reactor explosions, some collateral) aimed at the carrier's Primary, not
+		   incoming fire that happened to strike the aft.
+
+		   The DamageEntry follows $target (ShipSystem::assignDamageReturnOverkill files against
+		   $target->id), so the rows land on the Waymarker's own sheet and persist there. */
+		if ((!$forcePrimary) && ($tmpLocation == 2) && (!empty($target->hasAttached))) {
+			$dockRider = HangarOps::attachedBayShipFor($target, $gamedata);
+			if ($dockRider !== null && $dockRider !== $target) {
+				$target = $dockRider;
+				$tmpLocation = HangarOps::leastDamagedFrontOrAft($dockRider);
+				$redirectedToDockRider = true;
+			}
+		}
 		
 		//let's recognize "MCV sized" by number of structures rather than technical target size! (important for eg. Shadows, which are laid out damaged as MCVs even if they use larger ship sizes)
 		$noOfStructures = 0;		
@@ -2841,6 +2873,11 @@ public function getFullStartLoading()
             }else{
                 $facingLocation = $target->getHitSection($shooter, $fireOrder->turn, true); //do accept destroyed section as location
             }
+            /* Stage 19: a redirected aft hit has already been TOLD which section it lands on, so a
+               Piercing shot enters through that one rather than re-rolling the rider's facing. The
+               exit section is still derived from the bearing below, which is what keeps a piercing
+               shot behaving like a piercing shot once it is inside the Waymarker. */
+            if ($redirectedToDockRider) $facingLocation = $tmpLocation;
             
             //find out opposite section...
             $relativeBearing = $this->getIncomingBearing($target, $fireOrder, $gamedata);

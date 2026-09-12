@@ -519,8 +519,33 @@ window.ew = {
     },
 
 
+    /* ⭐ WALKERS_OF_SIGMA_PLAN.md 3.14f (Stage 19, user ruling 2026-09-12) - A SHIP RIDING A
+       DOCKING BAY IS OUT OF THE ACTIVE EW GAME, BOTH WAYS.
+
+       "Waymarkers should also not use EW on transition Docking/Launching turns, nor should ships
+       have the opportunity to use any targeted EW on it." Its sensors are slaved to the manoeuvre
+       for the turn it spends clamped to the carrier's aft.
+
+       ⚠️ IT KEEPS ITS DEW (user ruling, same day). Only ACTIVE allocations stop - OEW, CCEW, DIST,
+       JAM, SOEW, SDEW, BDEW and the two Detect types. Unspent points still fall into DEW through
+       convertUnusedToDEW exactly as they do for every other ship, so the rider is no easier to hit
+       than usual; what it loses is the ability to spend, and what its enemies lose is the lock.
+       An attacker with no lock then takes the ordinary doubled range penalty, which is the engine's
+       standing rule and is left alone.
+
+       ⚠️ shipManager.isDockingRider, NOT `ship.attached` - a breaching pod's host wears that too,
+       and a boarded ship's EW is emphatically its own business. */
+    isEwSuspended: function isEwSuspended(ship) {
+        return !!(ship && window.shipManager && shipManager.isDockingRider(ship));
+    },
+
     AssignOEW: function AssignOEW(selected, ship, type) {
         if (!type) type = "OEW";
+
+        //Stage 19: the rider spends nothing, and nothing may be spent AT it. The menu hides these
+        //buttons too (shipTooltipInitialOrdersMenu) - this is the backstop behind that, and the
+        //server strips anything that still gets through (EW::stripDockingRiderEw).
+        if (ew.isEwSuspended(selected) || ew.isEwSuspended(ship)) return;
 
         for (var i in selected.EW) {
             var EWentry = selected.EW[i];
@@ -596,6 +621,16 @@ window.ew = {
            flight pool and a "Detect Mines" increment against the Offensive Bonus, which is what
            getEwLeftFor separates. Every other unit gets getEWLeft(), unchanged. */
         var entryType = (typeof entry === 'string') ? entry : (entry && entry.type);
+
+        /* Stage 19 (3.14f): the INCREMENT path, and it needs the same two tests as AssignOEW - this
+           is where a second point is added to an OEW row that already exists, and where every
+           self-EW type is added at all. DEW is deliberately exempt: the rider keeps it. */
+        if (entryType !== 'DEW') {
+            if (ew.isEwSuspended(ship)) return;
+            var incTargetId = (typeof entry === 'object' && entry) ? entry.targetid : null;
+            if (incTargetId !== null && incTargetId !== undefined
+                && ew.isEwSuspended(gamedata.getShip(incTargetId))) return;
+        }
         //var left = ew.getDefensiveEW(ship);		
         var left = ew.getEwLeftFor(ship, entryType);
 
@@ -969,11 +1004,20 @@ window.ew = {
             }
             if (systems.length === 0) continue;
 
-            if (shipManager.isDestroyed(ship)) continue;
-            if (shipManager.getTurnDeployed(ship) > gamedata.turn) continue; //not on the board yet
             if (ship.team === undefined || ship.team === null) continue;
 
-            var position = shipManager.getShipPosition(ship);
+            /* ⭐ "DOCKED SHIPS WITH EW DETECTORS STILL CONTRIBUTE THEIR SAVED EW TO SHIPS WITHIN 20
+               HEXES" (user ruling 2026-09-12, WALKERS_OF_SIGMA_PLAN.md 3.14d). The three tests that
+               used to stand here - destroyed, not deployed yet, no position - are all inside
+               shipManager.getProjectionOrigin now, together with the one this rule adds: a unit
+               STOWED in a carrier keeps detecting, from its CARRIER'S hex. Mirror of
+               HangarOps::projectionOriginFor, and it keeps tracking the drag during Movement for
+               the same reason it always did - getShipPosition returns the plotted position.
+               ⚠️ An enemy's docked list is masked, so this answers null for their stowed detectors
+               and they are silently dropped. That is harmless HERE and only here: the allowance is
+               filtered to the viewer's own team (countEwDetectorsCovering), whose bays are
+               disclosed to them. */
+            var position = shipManager.getProjectionOrigin(ship);
             if (!position) continue;
 
             for (var d = 0; d < systems.length; d++) {

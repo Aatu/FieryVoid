@@ -761,31 +761,29 @@ window.fleetListManager = {
 
         /* CLICK BEHAVIOUR FOLLOWS BOARD PRESENCE (plan Stage 3). A unit that is off the
            board has nothing for a scroll to find, so the click opens its window instead:
-             - a DOCKED flight (Hangar Ops Stage 9.1 - the window is the only route to a
-               bay's contents), and
-             - a REINFORCEMENT still in hyperspace, which is yours, which you paid for,
-               and which the window is the only way to look at before it arrives.
-           Ship-window redesign Stage 2d (SHIPWINDOW_REDESIGN_PLAN.md §4.5) routes both
-           through the OpenShipWindowFor event PhaseStrategy already handles.
+           a REINFORCEMENT still in hyperspace, which is yours, which you paid for, and which
+           the window is the only way to look at before it arrives.
+           Ship-window redesign Stage 2d (SHIPWINDOW_REDESIGN_PLAN.md §4.5) routes it through
+           the OpenShipWindowFor event PhaseStrategy already handles.
 
            This sits ABOVE the shouldBeHidden guard, and has to: shouldBeHidden is a
-           BOARD-PRESENCE test - it treats every removed flight as destroyed and every
-           not-yet-deployed unit as hidden - so below the guard neither branch could ever
-           be reached. openShipWindowFor applies the RIGHT test for a window, which is
-           whether this viewer is entitled to the ship at all. */
+           BOARD-PRESENCE test - it treats every not-yet-deployed unit as hidden - so below
+           the guard the branch could never be reached. openShipWindowFor applies the RIGHT
+           test for a window, which is whether this viewer is entitled to the ship at all. */
         if (fleetListManager.isOffBoardButOurs(ship)) {
             fleetListManager.openShipWindowFor(ship);
             return;
         }
 
-        /* WALKERS_OF_SIGMA_PLAN.md 3.15 (Stage 17), user 2026-09-12: a whole SHIP stowed inside
-           another - a Scribe in a Traveler's Docking Bay, an LCV on a rail - scrolls to its
-           CARRIER, which is where it actually is. That keeps left-click meaning the one thing it
-           means everywhere else in this list ("show me where this is") instead of becoming a
-           second way to open a window; RIGHT-CLICK / the ⓘ affordance is the window, and for a
-           docked unit that is the only route to its repair queue and its power.
-           A docked FLIGHT is deliberately NOT here: it has no hex of its own to be shown at and
-           its window has been the row's click since Hangar Ops Stage 9.1 (isOffBoardButOurs above).
+        /* ⭐ EVERY STOWED UNIT SCROLLS TO ITS CARRIER, which is where it actually is.
+           WALKERS_OF_SIGMA_PLAN.md 3.15 (Stage 17) did this for whole SHIPS - a Scribe in a
+           Traveler's Docking Bay, an LCV on a rail - and deliberately left docked FLIGHTS opening
+           their window, on the grounds that a flight has no hex of its own. Stage 19 (user
+           2026-09-12) withdrew that exception: "left-click is scroll only, right-click is open
+           shipWindow on ALL docked units". A flight has no hex, but its CARRIER does, and that is
+           the honest answer to "show me where this is" - the same answer a docked hull gets. One
+           list, one meaning per gesture; RIGHT-CLICK and the ⓘ affordance are the window, and for
+           a docked unit that is still the only route to its repair queue and its power.
            ⚠️ ABOVE the shouldBeHidden guard, and it has to be: that guard reads every removed unit
            as destroyed, so below it this branch could never run. */
         var carrier = fleetListManager.carrierHolding(ship);
@@ -809,38 +807,31 @@ window.fleetListManager = {
     },
 
     /* The ship this one is stowed INSIDE, or null. Twin of ajaxInterface.isDepartedWithCarrier's
-       walk and deliberately the same shape: a rail's one LCV lives in `lcvDocked`, a Docking Bay's
-       ships in `shipsDocked` (WALKERS_OF_SIGMA_PLAN.md 3.14), and a docked FLIGHT is neither - it
-       is linked through hangarUsage and is answered by isOffBoardButOurs instead.
+       walk and of the server's HangarOps::stowedInCarrier, and deliberately the same shape: a
+       rail's one LCV lives in `lcvDocked`, a Docking Bay's ships in `shipsDocked`
+       (WALKERS_OF_SIGMA_PLAN.md 3.14), and a docked FLIGHT in a hangar's `hangarUsage` under
+       `dockedFlightId` - the same link TacGamedata::markJumpedDockedFlights follows.
+       ⚠️ THE FLIGHT ARM IS STAGE 19 (user 2026-09-12). Until then this answered null for a flight
+       and its fleet row opened a window instead; all three stowed kinds now behave alike.
        ⚠️ Ship ids are STRINGS on anything spawned mid-battle (LAST_INSERT_ID), so compare parsed
        numbers, never raw values.
-       Costs nothing until something is actually stowed: the early-outs reject every unit that is
+       Costs nothing until something is actually stowed: the early-out rejects every unit that is
        not `removed`, which in a normal turn is all of them. */
     carrierHolding: function carrierHolding(ship) {
-        if (!ship || !ship.removed || ship.flight) return null;
-        var id = parseInt(ship.id, 10);
-
-        for (var i in gamedata.ships) {
-            var carrier = gamedata.ships[i];
-            if (!carrier || carrier === ship || !Array.isArray(carrier.systems)) continue;
-
-            for (var s = 0; s < carrier.systems.length; s++) {
-                var rail = carrier.systems[s];
-                if (!rail) continue;
-                var aboard = (rail.lcvDocked && parseInt(rail.lcvDocked.shipId, 10) === id)
-                    || (rail.isDockingBay && Array.isArray(rail.shipsDocked)
-                        && rail.shipsDocked.some(function (e) { return parseInt(e.shipId, 10) === id; }));
-                if (aboard) return carrier;
-            }
-        }
-        return null;
+        return shipManager.carrierHolding(ship);
     },
 
     /* "Off the board, but yours and still coming back" - the two states whose row opens a
        window on EITHER click, because scroll-to-ship has nothing to do for them. NOT the
        same question as shouldBeHidden, which also covers units that are gone for good. */
     isOffBoardButOurs: function isOffBoardButOurs(ship) {
-        if (ship.removed && ship.flight) return true;   //docked flight
+        /* ⚠️ A DOCKED FLIGHT USED TO BE THE FIRST CLAUSE HERE and is not any more (Stage 19, user
+           2026-09-12): it now scrolls to its carrier like every other stowed unit, which means it
+           has to fall THROUGH to the carrierHolding branch below. What is left is the one state
+           that genuinely has nowhere to scroll to - a reinforcement still in hyperspace, which is
+           inside no hull at all. A docked flight whose CARRIER has left through a vortex is caught
+           by the carrier branch's own shouldBeHidden guard and simply does nothing, which is the
+           right answer for a unit that is no longer in the battle. */
         if (ship.reinforcement && (ship.arrivalTurn === null || ship.arrivalTurn === undefined)
             && gamedata.isMyorMyTeamShip(ship)) {
             return true;                                 //still in hyperspace
@@ -1003,10 +994,10 @@ window.fleetListManager = {
             if (shipManager.isDestroyed(ship) || jumpingOut) {
                 if (ship.removed) {
                     //Docked flight: same isDestroyed=true filtering, but not
-                    //actually destroyed. Keep .clickable so the player can
-                    //open the flight window (doScrollToShip opens the React
-                    //ship window via OpenShipWindowFor for removed flights
-                    //since they're not on the board).
+                    //actually destroyed. Keep .clickable so the row still responds:
+                    //since Stage 19 left-click scrolls to the CARRIER holding it
+                    //(doScrollToShip -> carrierHolding), and right-click / the (i)
+                    //affordance open its window, exactly as for a docked hull.
                     //Two sources by design - see getJumpedDockedFlightIds: the local walk
                     //covers this flight's owner immediately, the server's jumpedWithCarrier
                     //covers every OTHER viewer, whose copy of the bay is masked empty.

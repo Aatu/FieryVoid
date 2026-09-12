@@ -259,6 +259,11 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
                deliberately runs on ordinary flights too. */
             EW::clampFlightEw($ship, $gameData->turn);
 
+            /* WALKERS_OF_SIGMA_PLAN.md 3.14f (Stage 19): a ship riding a Docking Bay's aft spends no
+               EW, and nothing may be spent at one. $gd is the RELOADED authoritative gamedata -
+               $ship is the POST-side copy and has no attachment state of its own. */
+            EW::stripDockingRiderEw($ship, $gd, $gameData->turn);
+
             if (EW::validateEW($ship, $gd)){
                 $dbManager->submitEW($gameData->id, $ship->id, $ship->EW, $gameData->turn);
             }else{

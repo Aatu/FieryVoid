@@ -2837,7 +2837,18 @@ window.confirm = {
         if (choices.length === 0) return;
 
         var e = $('<div class="confirm error multi-value-confirm hangar-confirm lcvDock bayShipDock"><div class="ui"><div class="confirmok"></div><div class="confirmcancel"></div></div></div>');
-        $('<div class="multi-value-header"></div>').text('Dock ' + ship.name + ' (' + window.bayShipBoxes(ship) + ' boxes)').prependTo(e);
+        /* Stage 19 (3.14a): a two-turn class is offered like anything else, but the player has to be
+           told what they are committing to BEFORE they tick it - the ship takes hold of the
+           carrier's aft this turn and is not aboard until the end of the next, and spends that turn
+           unable to steer or fire with the carrier's aft hits landing on it. */
+        var twoTurn = choices.some(function (c) { return window.HangarShared.bayShipIsTwoTurn(c.bay, ship.phpclass); });
+        $('<div class="multi-value-header"></div>')
+            .text('Dock ' + ship.name + ' (' + window.bayShipBoxes(ship) + ' boxes)' + (twoTurn ? ' — 2-turn procedure' : ''))
+            .prependTo(e);
+        if (twoTurn) { //I don't really think this note is necessary.
+            //$('<div class="multi-value-row" style="justify-content:center;"><span class="multi-value-label" style="font-style:normal;">Rides the carrier\'s aft for one turn: it cannot steer or fire, and hits on the carrier\'s aft section are rolled on it instead.</span></div>')
+            //    .insertAfter(e.find('.multi-value-header'));
+        }
         var container = $('<div class="multi-value-container"></div>').insertAfter(e.find('.multi-value-header'));
 
         var rowChecks = [];
@@ -3051,7 +3062,11 @@ window.confirm = {
             var $chk = $('<input type="checkbox" class="lcvLaunchCheck">');
             if (pre) $chk.prop('checked', true);
             var $labelSpan = $('<span class="multi-value-label" style="flex:0 0 auto; text-align:left; margin:0;"><span class="hangar-craft-name"></span></span>');
-            $labelSpan.find('.hangar-craft-name').text((s && s.name ? s.name : 'Ship ' + shipId) + ' (' + boxes + ' boxes)');
+            //Stage 19: the same warning on the way out - it leaves the bay this turn but does not
+            //separate until the end of the next, and rides the aft in between.
+            var twoTurnOut = window.HangarShared.bayShipIsTwoTurn(r.bay, r.entry.phpclass);
+            $labelSpan.find('.hangar-craft-name').text((s && s.name ? s.name : 'Ship ' + shipId)
+                + ' (' + boxes + ' boxes' + (twoTurnOut ? ', 2-turn procedure' : '') + ')');
             var $why = $('<span class="multi-value-max bay-row-why"></span>').appendTo($labelSpan);
             $chk.appendTo(row);
             $labelSpan.appendTo(row);

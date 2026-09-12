@@ -3299,6 +3299,22 @@ public function getAllEWExceptDEW($turn){
         return false;
     }
 
+    /* WALKERS_OF_SIGMA_PLAN.md 3.14d (Stage 19) - THE SAME QUESTION ASKED OF THE DAMAGE ALONE.
+       isDestroyed() folds `removed` in (see its note), which is right for the 379 call sites that
+       mean "skip anything not on the board" and wrong for every rule that has to tell a WRECK from
+       a unit parked inside a hangar. The client has had this predicate since Hangar Ops
+       (shipManager.isDestroyedByDamage) and has needed it twice more since - Stage 17's ship window
+       and Stage 18's power menu - so this is the server twin, not a new idea.
+       ⚠️ NOT a change to isDestroyed(), and it must never become one. */
+    public function isDestroyedByDamage($turn = false){
+        foreach($this->systems as $system){
+            if ($system instanceof Structure && $system->location == 0 && $system->isDestroyed($turn)){
+                return true;
+            }
+        }
+        return false;
+    }
+
     /* Returns true when the unit is still in play (not destroyed, not removed-by-docking).
      * Stage 5 alias retained for self-documenting call sites; isDestroyed() now folds in the
      * $removed check (Stage 7), so this is just `!isDestroyed($turn)` — kept as a positive

@@ -2251,33 +2251,24 @@ if ($ship->Enormous && !($ship instanceof spawnMeteoroid) && !($ship instanceof 
                 }
                 if (empty($sources)) continue;
 
-                if ($ship->isDestroyed()) continue;
-                if ($ship->isReinforcement()) continue;   //still in hyperspace - projects nothing, reveals nothing
-
-                /* NOT PLACED YET - projects nothing either (user report 2026-09-11). A unit whose only
-                   row is the off-map 'start' marker its slot gave it - turn 1, a late slot, a
-                   reinforcement on its arrival turn, each until its deploy row is written - drew its
-                   Energy Draining Net at that marker, off the edge of the map. 'start' rows are only
-                   ever a unit's FIRST row (DBManager::submitMovement never writes one), so the LAST row
-                   being 'start' means there is nothing else. Generated Terrain (userid -5) is placed BY
-                   its 'start' row - the exemption getLastTurnMovement makes. Client twin:
-                   PhaseStrategy.isOffBoardForEdf. */
-                $lastMove = $ship->getLastMovement();
-                if ($lastMove && $lastMove->type == 'start' && $ship->userid != -5) continue;
-
-                /* NOT ARRIVED YET - projects nothing (user request 2026-09-11). A late-slot unit places
-                   its entry hex the turn BEFORE it arrives (getTurnPlaced), so for that whole turn it
-                   has a real deploy row at the hex its blue Jump Point marker shows - and drained
-                   whatever stood there a turn early. getTurnDeployed is the "is it on the board" test
-                   every other gate uses; it also answers 999 for a surrendered slot, whose fleet has
-                   left the game. */
-                if ($ship->getTurnDeployed($this) > $this->turn) continue;
-
                 $team = isset($ship->team) ? (int)$ship->team : null;
                 if ($team === null) continue;
 
-                $position = $ship->getHexPos();
-                if (!$position) continue;                 //no position yet (lobby / initialisation)
+                /* ⭐ EVERY "IS THIS UNIT ON THE BOARD, AND WHERE" TEST NOW LIVES IN ONE PLACE
+                   (WALKERS_OF_SIGMA_PLAN.md 3.14d, Stage 19). HangarOps::projectionOriginFor folds
+                   in all four exclusions this loop used to spell out - destroyed, still in
+                   hyperspace, never placed (its last row is the off-map 'start' marker, Generated
+                   Terrain exempt), not arrived yet (getTurnDeployed, which also answers 999 for a
+                   surrendered slot) - and adds the fifth the user asked for: a unit STOWED inside a
+                   carrier keeps projecting, FROM ITS CARRIER'S HEX.
+
+                   ⚠️ The carrier's hex, never the stowed unit's own. A docked ship's last movement
+                   row is wherever it happened to dock, and stops being true the moment the Traveler
+                   moves - which is the whole reason this could not be a one-line relaxation of the
+                   isDestroyed() test.
+                   Client twins: PhaseStrategy.isOffBoardForEdf and ew.collectEwDetectors. */
+                $position = HangarOps::projectionOriginFor($ship, $this);
+                if (!$position) continue;                 //not on the board, or no position yet (lobby)
 
                 $shipNets = array();     //Stage 7 - this ship's Nets, and whether it draws a disc too
                 $shipDrawsDisc = false;
@@ -2353,6 +2344,11 @@ if ($ship->Enormous && !($ship instanceof spawnMeteoroid) && !($ship instanceof 
            array(), for the same reason $edfHexes is. */
         $this->edfNetHexes = empty($netHexes) ? null : array_values($netHexes);
         self::$edfPresent = true;
+        /* Stage 19 (3.14d): a field projected from INSIDE a hull has no icon of its own to hang a
+           disc on, so every hangar publishes the largest radius it is carrying and the carrier's
+           icon draws it. After the map is built and gated on there being a field at all, so an
+           ordinary game never runs the sweep. */
+        HangarOps::publishStowedEdfRadii($this);
     } //endof function setEdfHexes
 
     /* One hex of one team's field. Keyed "q,r" so a hex covered by three fields is one entry,
