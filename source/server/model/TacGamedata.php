@@ -47,6 +47,12 @@ class TacGamedata {
       across the double gamedata load (plan trap 1) by construction. Do not add an accumulating
       cache here without adding that reset.*/
     public static $edfPresent = false;
+    /*Extra-Dimensional Jump Drive gate (WALKERS_OF_SIGMA_PLAN.md 3.18, Stage 20) - true once any
+      Jump Engine has restored an 'EDJD' abduction note this load, i.e. some unit has ever been
+      abducted-at in this game. Same shape as $cpdAdaptationPresent and ⚠️ the same reset slot:
+      DBManager::getSystemDataForShips clears it immediately before the note sweep that sets it
+      (plan trap 1 - one request loads gamedata twice).*/
+    public static $abductionPresent = false;
     /*D15, second half: a FINISHED game drops every deception so the post-mortem shows what actually
       happened. Set from $this->status, read by applyChameleonDisguise() and maskChameleonArming().
       Deliberately NOT implemented by forcing the two gates above to false: maskChameleonFireOrders()
@@ -142,6 +148,21 @@ class TacGamedata {
        ⚠️ NULL, never array() (plan trap 9), and it needs its own named copy in gamedata.js
        parseServerData() like every other gamedata-level key (arch_gamedata_named_key_copy). */
     public $edfNetHexes = null;
+    /* Walkers of Sigma-957 (WALKERS_OF_SIGMA_PLAN.md 3.18, Stage 20) - Extra-Dimensional Jump Drive
+       abductions, as { costs: { <unitId>: <power-turns> }, chains: { <targetId>: { total, cost, since } } }
+       where `total` is in HALF power-turns. Built by EdjdAbduction::publish in onConstructed, and only
+       when a Walker drive that can join an abduction is in the game - so an ordinary game never even
+       autoloads the class.
+       PUBLIC TO EVERY VIEWER, deliberately: the declaration is announced (a ballistic marker from
+       Movement on) and the power-turns delivered are the resolution's record. See publish() for the
+       one masking judgement in `costs`.
+       ⚠️ NULL, never array() (plan trap 9), and it needs its own named copy in gamedata.js
+       parseServerData() like every other gamedata-level key (arch_gamedata_named_key_copy). */
+    public $abductions = null;
+    /* Stage 20 - a Walker hull drive is in this game at all (hasAbductionCapableDrive). The gate
+       Firing::fireWeapons asks before it touches EdjdAbduction, so no other game autoloads it. Server
+       only: stripForJson builds its object by hand and never names this. */
+    public $abductionCapable = false;
     public $isStealthPresent = false;
 
     public $areMinesPresent = false; //Marks that ENEMY mines are present.
@@ -278,6 +299,8 @@ class TacGamedata {
         /* Walkers of Sigma-957 (Stage 7) - the Net-generated hexes, for the map overlay only.
            Same null-not-empty contract, same named-key requirement in gamedata.js. */
         if ($this->edfNetHexes !== null) $strippedGamedata->edfNetHexes = $this->edfNetHexes;
+        //Walkers of Sigma-957 (Stage 20) - same null-not-empty contract, same named-key requirement.
+        if ($this->abductions !== null) $strippedGamedata->abductions = $this->abductions;
         $strippedGamedata->isStealthPresent = $this->isStealthPresent;
         $strippedGamedata->areMinesPresent = $this->areMinesPresent;        
 
@@ -391,6 +414,27 @@ class TacGamedata {
            Self-gating: it clears TacGamedata::$edfPresent and rebuilds from scratch, so the double
            gamedata load in one request cannot double-count (plan trap 1). */
         $this->setEdfHexes();
+
+        /* WALKERS_OF_SIGMA_PLAN.md 3.18 (Stage 20) - abduction costs and running chains for the client.
+           Below the per-ship loop for the reason setEdfHexes is: the notes are restored and the hangars
+           loaded by then. Gated on a drive that can join an abduction, so no other game autoloads the
+           handler. */
+        $this->abductionCapable = $this->hasAbductionCapableDrive();
+        $this->abductions = $this->abductionCapable ? EdjdAbduction::publish($this) : null;
+    }
+
+    /* Stage 20 - is there a Walker hull drive in this game? Ancient units only get the system walk, so
+       every other ship in every other game costs two property reads. */
+    private function hasAbductionCapableDrive()
+    {
+        foreach ($this->ships as $ship){
+            if ($ship instanceof FighterFlight) continue;
+            if ((int)$ship->factionAge < 3) continue;
+            foreach ($ship->systems as $system){
+                if ($system instanceof JumpEngine && $system->canJoinAbduction()) return true;
+            }
+        }
+        return false;
     }
 
     /*Every team in this game, on a static because a ShipSystem has no route back to $gamedata -
@@ -1639,9 +1683,12 @@ class TacGamedata {
                    sits on an engine markLegacy() has set $ballistic = false on, so this Firing-phase
                    sweep took it for a direct-fire order and stripped it - the owner's blue marker
                    vanished for the last phase of the formation turn while an ordinary exit's, on a
-                   still-ballistic engine, kept showing. It is a declaration, never a shot. */
+                   still-ballistic engine, kept showing. It is a declaration, never a shot.
+                   ⚠️ AND SO IS AN ABDUCTION (WALKERS §3.18, Stage 20) - the same legacy-drive shape, a
+                   type-'ballistic' order on an engine whose $ballistic is false, and the announcement
+                   must stay on the map through the Firing phase it resolves at the end of. */
                 if ($fire->turn == $this->turn && !$weapon->ballistic && $this->phase == 3 && !$weapon->preFires
-                    && $fire->damageclass !== 'jumpexit'){
+                    && $fire->damageclass !== 'jumpexit' && $fire->damageclass !== JumpEngine::ABDUCTION_CLASS){
                     if($fire->damageclass != 'TerrainCrash' && $fire->damageclass != 'TerrainCollision' && $fire->damageclass != 'AutoRam'){ //RammingAttack isn't PreFire, but we want THESE fireorders to be passed to Front End for Replay.
                         unset($system->fireOrders[$i]);
                     }    

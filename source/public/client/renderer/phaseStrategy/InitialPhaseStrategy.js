@@ -17,6 +17,9 @@ window.InitialPhaseStrategy = function () {
 
     InitialPhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene, shipWindowManager) {
         shipManager.power.repeatLastTurnPower();
+        //WALKERS §3.18 (Stage 20): an abduction that took hold last turn is re-declared. After the power
+        //copy on purpose - a drive left offline must read offline - and before the icons and windows draw.
+        if (typeof JumpEngine !== 'undefined' && typeof JumpEngine.continueAbductions === 'function') JumpEngine.continueAbductions();
         this.changeAnimationStrategy(new window.IdleAnimationStrategy(shipIcons, gamedata.turn));
 
         PhaseStrategy.prototype.activate.call(this, shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene, shipWindowManager);

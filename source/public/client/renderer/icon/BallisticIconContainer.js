@@ -1508,6 +1508,16 @@ if (ballistic.damageclass === 'Sweeping' || ballistic.damageclass === 'HPC-subor
 				}
 			}
 		}
+		/* WALKERS_OF_SIGMA_PLAN.md 3.18 (Stage 20) - AN ABDUCTION IS NOT INCOMING FIRE. Purple, the Walker
+		   field colour the Energy Draining Mine marker uses, hung on the target unit. Outside the modeName
+		   block on purpose: an EDJD's firing mode is its POWER LEVEL, and a legacy drive names only mode 1,
+		   so at level 2 or more there is no mode name and that whole block is skipped. */
+		if (ballistic.damageclass === 'abduction') {
+			targetType = 'hexPurple';
+			//text = 'Abduction';
+			//textColour = '#7f00ff';
+		}
+
 		// LAUNCH SPRITE
 		let launchSprite = null;
 		if (

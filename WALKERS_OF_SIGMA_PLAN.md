@@ -91,6 +91,19 @@ silent everywhere.
 | D47 | The opponent is told the IDS of the ships in a sharing bay (2026-09-12) | The docked-power grant was invisible to the Traveler's opponent, because `shipsDocked` is masked under the private-logistics gate and the grant is computed by each viewer's OWN client (D46). Of the two possible fixes the user chose **publish the ids**: the opponent's client then runs the identical function on the identical ships and reaches the identical number, which a server-side recomputation could not promise. ⚠️ On a SEPARATE key (`sharesDockedPowerIds`), because no client consumer of `shipsDocked` has ever met a partial entry and four of them read `boxes` / `phpclass` / `dockTurn` off those rows. Only on a bay that shares power. §3.16b. |
 | D40 | A reinforcement Traveler brings its ships aboard (2026-09-11) | *"Travelers brought into the game via 'Manage Reinforcements' cannot select Pathfinder, Guideship, Scribe ... only Mapmakers."* A legacy-drive opener's manifest now admits the ships its Docking Bay takes, packed with the fighters in one pass on both sides, and they arrive docked. |
 | D46 | The docked-power grant is client-computed and ADVISORY (2026-09-12) | §3.16 required an explicit written decision. **Advisory**, because there is no server twin of `getReactorPower` anywhere in the tree, `submitPower` validates nothing, and every power figure in Fiery Void is already a client number - a check here would be the codebase's only power validation and would still be reading a balance the server cannot compute. `DockingBay::$sharesDockedPower` therefore publishes the RULE and nothing on the server reads it. ⚠️ §3.16 asked for the tooltip to SAY it is advisory; it was written that way and the user TRIMMED that tail the same day, so the line is the figures alone - the disclosure lives here and on the faction page instead. Enforcing the balance is a cross-cutting project, not a Walkers stage. §3.16a. |
+| D53 | Abduction power is a DECLARATION with a power level, not the drive's boost (2026-09-12) | A Walker drive is a legacy drive: its boost is max level 1, costs 0, and IS Jump to Hyperspace, so §3.18's "power-turns are boost levels" no longer fits. The user chose a type-'ballistic' order, damageclass `abduction`, declared by selecting the drive and clicking the enemy, whose FIRING MODE is the power level (1-4). Each level costs the drive's `powerReq` again, charged on the client's reactor balance and advisory like D46. Setting Jump to Hyperspace withdraws it. §3.18a. |
+| D54 | ONLY THE INITIATOR must meet the two conditions (2026-09-12) | Contributors - a second EDJD, or a Pathfinder/Scribe - add their power whether or not the target is in THEIR field or their OEW beats its DEW. What the conditions decide is who ANCHORS the chain: it continues while at least one EDJD that met both on every turn of it meets them again. §3.18a. |
+| D55 | Friendly abduction is NOT built (2026-09-12) | It was in §3.18 from an earlier rules text, not in the rules the user supplied for Stage 20, and FV has no way to allocate OEW at a friendly unit. The server refuses a friendly target. |
+| D56 | The EDJD's detonation chance is HALVED (2026-09-12) | % of drive boxes lost, halved for an Ancient - the rule every other roll site applies. It rolls every turn the drive is abducting; `isJumpFailureImmune` is not overridden, so the same hull's own jump-out keeps its immunity. §3.18a. |
+| D57 | What a target CARRIES never counts toward its abduction cost (2026-09-13) | *"Hangar contents shouldn't contribute to cost at all, in preview or actual cost."* Flights in hangars, ships in a Docking Bay and a rail's LCV are all left out; only ATTACHED units add their ramming factor. This also made the published preview and the locked cost ONE figure, and withdrew the first build's two-figure answer to the masking problem (trap 60). §3.18a. |
+| D58 | A deactivated or destroyed drive CANCELS its abduction (2026-09-13) | *"The order itself should also be cancelled when Jump Drive is deactivated (or destroyed whilst in an attempt to abduct a ship)."* Client: `shipManager.power.onOfflineClicked` / `offlineAll` remove the order. Server: `EdjdAbduction::getCancellationReason` - drive boxes gone, its section destroyed this turn, or offline - writes a no-hold note and a "cancelled" log line; the drive delivers nothing and rolls no detonation. §3.18a. |
+| D59 | No line of sight is required (2026-09-13) | The declaration inherited `weaponManager.targetShip`'s blocked-LoS skip; an abduction-capable drive now sets `ignoresLoS` per instance beside `hasSpecialTargeting`. The server never tested LoS. |
+| D60 | A "Being abducted" ship-window banner (2026-09-13) | Purple, off the same `JumpEngine.getAbductionChain` reader as the tooltip line, in `ShipWindow.js` beside "Jumping to Hyperspace". |
+| D61 | An EDJD cannot abduct a FIGHTER FLIGHT (2026-09-13, play test 4352) | *"An EDJD cannot target fighter flights."* The first build did not block it on either side. Client: `JumpEngine.doSpecialTargeting` refuses a `flight` target with a message; server: `EdjdAbduction::getDeclarationBlock` returns "a fighter flight cannot be abducted", after the team check. A flight ATTACHED to a hull still adds its RF to that hull's cost (D57) and leaves with it. §3.18a. |
+| D62 | A held abduction CONTINUES by itself (2026-09-13, play test 4352) | *"If an abduction is successfully initiated then the relevant Jump Drive should automatically keep targeting until deactivated/destroyed."* Client-seeded, the way `repeatLastTurnPower` carries power forward: `JumpEngine::getLatestAbductionHold` publishes the drive's latest note as `abductionLastHold` {turn, targetid, level} when it delivered power, and `JumpEngine.continueAbductions` re-declares it at the start of Initial Orders if that turn was last turn, the chain is still published, and `canSelectForAbduction` passes (so deactivated, destroyed, uncharged or jumping drives stop). Supporting drives continue too. Not a server-written row: `submitFireorders` only INSERTS, so a pre-written row would duplicate on commit and survive a CANCEL. ⚠️ A page reload during Initial Orders re-seeds a cancelled order. §3.18a. |
+| D63 | An abduction COOLDOWN (2026-09-13) | User rulings: each drive - EDJD and supporting alike - recharges for its OWN jump delay (Wanderer 4, Traveler 6, Waymarker 6, Guideship 3, Pathfinder 4, Scribe 8), counted from the turn after THAT drive last took part, however its part ended: completed, collapsed on a failed condition, the target destroyed, or cancelled - but only a COMMITTED declaration counts, never one withdrawn before Initial Orders was committed. Built as `JumpEngine::getAbductionRechargeLoad` (latest `EDJD` note of any value; 0 on its own turn, then 1.. up to the delay), folded into `getVortexRechargeLoad` by `min` so every other engine is unchanged and the published `turnsloaded` carries it. A drive that delivered power last turn may still CONTINUE that same unit while recharging (`isContinuingAbduction` / client `getContinuableAbductionTargetId`) - so mid-chain it reads 1/delay and keeps going. The resolver now writes a no-hold note when the target is off the board, which is what makes "target destroyed" count. The Walker's own boost jump is not charge-gated and is unaffected. §3.18a. |
+| D64 | The FIRST turn only TAKES HOLD (2026-09-13, play test) | *"Power Turns should not start accumulating until the turn after the initial targeting has been successful."* It was possible to abduct a small ship on the declaration turn. Now a turn that STARTS a chain (fresh, or a restart after the prior anchors all failed) locks the cost and records the anchors but writes 0 halves for every declaration, and logs "takes hold ... power can be applied from next turn". Power counts from the next turn, which is also the first turn a SUPPORTING drive may declare: `EdjdAbduction::isHeldByTeam` (a chain as of last turn with an anchor on the shooter's team) at submit, `JumpEngine.getAbductionChain` on the client. Client `isAbductionPowered(order)` = a chain stands against the order's target: false -> no reactor draw, no halves, and `JumpEngineMenu` hides the Power row and shows a "Targeting" note. ⚠️ "Held" moved from `halves > 0` to `since > 0` in `getLatestAbductionHold` and `isContinuingAbduction`, or the targeting turn would never be continued. Read at the TARGET level: a second EDJD joining an abduction another EDJD took hold of applies power at once. A restart can still surprise a player - power paid on a turn the old anchors all failed is lost, which the client cannot foresee. §3.18a. |
+| D65 | The field and EW conditions are for TAKING HOLD only (2026-09-13) | *"The Energy Draining Field and more OEW than DEW conditions are only relevant for the initial targeting of a vessel for abduction. They should not be checked in subsequent turns after Abduction has begun."* `EdjdAbduction::resolveTarget` now decides CONTINUING first: a chain that stood last turn continues while at least one EDJD anchored on every turn of it has a WORKING declaration (not cancelled, not jumping) - `getConditionBlock` is never called. Only when no such EDJD is left is the turn a new attempt, judged on the conditions: a restart ("takes hold", the earlier abduction "lapsed") or a collapse naming the reason. So a chain now ends only when its holding EDJDs stop - a gap, a cancel, deactivation or destruction - never because the target moved out of the field or out-jammed it. This also retires the D64 surprise for the common case: a restart now needs every holding EDJD to have STOPPED, not merely failed a check. The menu's powered note no longer mentions the conditions. §3.18a. |
 
 Everything below assumes these.
 
@@ -5230,7 +5243,11 @@ Walker drive** - `isWalkerJump()` - since D32 made that the whole population.
 
 ---
 
-### 3.18 Extra-Dimensional Jump Drive — abduction — **Stage 20** (renumbered 2026-09-12 when the Waymarker's two-turn procedure landed as Stage 19)
+### 3.18 Extra-Dimensional Jump Drive — abduction — **BUILT 2026-09-12 (Stage 20), as built in §3.18a** (renumbered 2026-09-12 when the Waymarker's two-turn procedure landed as Stage 19)
+
+⚠️ The design below predates §3.17b, which made every Walker drive a LEGACY boost-to-jump drive. Where
+the two disagree - the subclass, power-turns as boost levels, friendly use, the `isJumpFailureImmune`
+override - §3.18a and D53-D56 are what was built.
 
 `class ExtraDimensionalJumpDrive extends JumpEngine`, calling `markWalker()` in its constructor (D32 -
 there is no `TravelerJumpDrive` to extend, and a subclass is right here because the EDJD genuinely adds
@@ -5339,6 +5356,123 @@ record rather than a kill; a second EDJD can contribute and a plain traveler dri
 every active turn while the same hull's ordinary jump-out does not; and the whole chain survives a
 mid-abduction reload with no note sweep.
 
+### 3.18a As built — Stage 20, 2026-09-12
+
+**Who.** `JumpEngine::markExtraDimensional()` (= `markWalker()` + protected `$extraDimensional`) on the
+Wanderer, Traveler, Waymarker and Guideship. A flag, not the subclass above, for D32's reasons.
+`canJoinAbduction()` = any Walker drive on a HULL; a Pathfinder/Scribe contributes, a Mapmaker probe
+cannot (no power allocation). The payload carries `extraDimensional` and `abductionMaxPower` (4 on an
+EDJD, 2 on a supporting drive) only when they apply.
+
+**The order (D53).** Type `ballistic`, damageclass `abduction`, firing mode = power level. Client:
+`JumpEngine.canSelectForAbduction` lets `weaponManager.selectWeapon` past `autoFireOnly` and
+`SystemIcon.clickSystem` past its not-ballistic Initial Orders clause; the drive sets
+`hasSpecialTargeting` PER INSTANCE (keyed off `abductionMaxPower`), so `targetShip` diverts to
+`doSpecialTargeting`, which refuses friendly and terrain, replaces a previous abduction, and starts an
+EDJD at level 1 (a supporting drive at 2). `JumpEngineMenu` gained an Abduction panel: target, the
+−/+ level, what it costs, the published cost or progress, and CANCEL. Server:
+`Firing::getVortexDeclarationBlock` takes an `abduction` branch FIRST (the legacy refusal below it
+would drop every Walker order) → `EdjdAbduction::getDeclarationBlock`: Walker hull drive, ballistic,
+unit on board, drive intact/online/charged, enemy target on the board and targetable, level 1-4 (EDJD)
+or exactly 2 (supporting), one abduction per unit per turn. The two CONDITIONS are not judged at submit.
+
+**Power.** `JumpEngine.getAbductionPowerDraw` = level × `powerReq`, subtracted inside the online branch
+of `shipManager.power.getReactorPower`, so the commit gate refuses a deficit. Walker reactors read 0
+surplus, so paying means shutting weapons, fields or detectors down. Advisory, as D46.
+
+**Resolution** - `EdjdAbduction::resolve`, at the end of `Firing::fireWeapons`, before the boost-jump
+sweep, behind `TacGamedata::$abductionCapable`. Per target: every declaration on a WORKING drive (ship
+on board, drive intact this turn, online, unit not jumping) contributes - 2 halves per level for an
+EDJD, 1 half for a supporting drive. An EDJD QUALIFIES when (1) `isInConnectedField` - flood fill over
+the team's `edfHexes`, SEEDED from the hexes `edfSources` credits to that ship (option (a); a Walker
+whose own field is down is never connected) - and (2) `getOEW > getDEW + getSupportedDEW +
+getBlanketDEW`. The chain continues if a prior anchor qualifies again (D54), otherwise restarts when
+anything qualifies, otherwise nothing happens and the attempt is logged with its reason. At
+`halves >= 2 × cost` the target leaves through `Movement::applyJumpOut` (made public), attached units
+with it.
+
+**State (D22).** One `EDJD` note per working declaration per turn:
+`<targetId>:<halves>:<cost>:<since>:<anchor>`; a no-hold attempt writes `<targetId>:0:0:0:0`, which is
+also what makes a second run of the same turn a no-op. `JumpEngine::onIndividualNotesLoaded` claims
+them before the `jumped` fall-through and sets `TacGamedata::$abductionPresent` (reset in
+`DBManager::getSystemDataForShips`). `EdjdAbduction::getChains` rebuilds total, locked cost, start turn
+and the anchor intersection.
+
+**Cost.** `ceil(RF / 50)`, `/ 10` for advanced armour, plus the RF of ATTACHED units only - **D57**:
+nothing a target carries inside it counts; a flight is its live craft × per-craft RF. ⚠️ `getRammingFactor`
+sums the MAX structure of sections standing as of last turn, so it moves only when a section is lost -
+§3.18's "shrinks as it is shot" overstated it; the lock stays regardless.
+
+**Detonation (D56).** `JumpEngine::rollAbductionJumpFailure` from `criticalPhaseEffects`, on an EDJD
+with a declaration on a working drive: % boxes lost, halved for factionAge 3+, `JumpFailure` path.
+`isJumpFailureImmune` is not overridden.
+
+**Publication.** `TacGamedata::$abductions = {costs, chains}` (objects, never `[]`), copied by name in
+`gamedata.js`. `costs` is exactly the figure a chain would lock that turn (D57 removed the bay contents
+that had made it a preview).
+`hideSystemFireOrders` exempts `abduction` from the Firing-phase strip (a legacy drive is not
+ballistic - the `jumpexit` shape again). The map marker is purple "Abduction"; the target's tooltip
+shows "Being abducted: x/y power-turns"; the order is dropped from the INCOMING list; the per-turn log
+row is `Abduction` in `doShortLogText`; `JumpEngine.isSpentLocked` dims the drive and hides the
+remove button outside Initial Orders.
+
+**Verification.** `tests/replay/walkersStage20Harness.php` **89/0** and
+`walkersStage20ClientHarness.js` **57/0**, each fatal on its stashed pre-stage tree. The server
+harness drives the real `Firing::validateFireOrders`, the real resolve, a reload from the stored notes
+alone, and the detonation roll statistically (287/600 at a 45% chance, 530/600 with the halving off,
+0 on every control). `checkShipData.php` PASS, 0 new against 237; autoload +1 line (`EdjdAbduction`).
+Replay 116 passed / 16 failed against 119 / 13 on a stashed tree: every added line is one of three
+ADDITIVE keys (`abductions`, `extraDimensional`, `abductionMaxPower`) on Walker games, no movement,
+to-hit, damage or masking drift - re-record to accept.
+
+**Review revisions (user, 2026-09-13) - D57-D60.** The three observations the first build left open, and
+the cost, were all ruled on the next day: bay contents out of the cost (D57); deactivating the drive
+cancels the order on the client, and a destroyed or offline drive's declaration is logged as
+CANCELLED at resolution (D58); no line of sight (D59); a ship-window banner (D60). Server harness
+**96/0**, client **65/0** - each new client check proved by deleting its one edit and watching it fail.
+Replay unchanged: 116/16, the same three additive keys.
+
+**Play-test refinements (game 4352, user, 2026-09-13).** Six items, all UI except D61:
+(1) the CANCEL button sizes to its label (`$wide`) instead of the 24px square of a −/+ step; (2) the
+drive's icon lights ORANGE in Initial Orders while it holds an abduction, like a jump point
+declaration - `SystemIcon.isFiring` asks `getAbductionOrder` because `hasFiringOrder` cannot see the
+order on a legacy drive (trap 58 again); (3) the Abduction panel uses the Hyach purple palette, as its
+own components in `JumpEngineMenu.js` rather than overrides of `activationMenu.js`'s blue ones; (4) the
+panel shares the Power Settings panel's width - it was a fixed 190px, and is now `width: 100%` +
+`min-width: 190px` + `contain: inline-size`, so it asks the shrink-to-fit tooltip for 190px, adds
+nothing from its own text, and stretches to whatever the menu is (the vortex Maintain panel gets the
+same fix); (5) **D61**, fighter flights refused on both sides; (6) the system info tooltip lists
+"Abduction target: <name>" off the order itself (`SystemInfo.js`). Server harness **99/0**, client
+**66/0** - the flight checks fail with the block removed (97/2, 65/1); the menu and tooltip rendered to
+static markup, with the no-order case showing no line. No serialised field, so no replay run.
+**Second pass, same day:** CANCEL left the purple marker and ballistic line on the map, because
+`PhaseStrategy.onSystemDataChanged` (and `onShipTargeted`) only redraw the ballistic layer for a
+`ballistic` / `hextarget` / `canSplitShots` system - a Walker drive is none of them (trap 58 once more);
+both gates now also admit `abductionMaxPower`. And **D62**, a held abduction continues by itself.
+Server harness **104/0**, client **81/0**, each new check failing with its line undone; replay
+116/16, unchanged, `abductionLastHold` in no diff.
+**Third pass, same day - D63, the cooldown.** ⚠️ Two client gates had to learn the continuation
+exemption as well as `canSelectForAbduction`: `weaponManager.selectWeapon` and `weaponManager.targetShip`
+each test `isLoaded` themselves, so a recharging drive could be offered by the icon and then refused
+silently - the harness's `target()` helper sets the selection by hand and missed the selectWeapon half
+until a check through the real `selectWeapon` was added. Server **125/0**, client **92/0**; each of the
+seven edits undone on its own turns at least one check red; replay output byte-identical with timings
+stripped.
+**Fourth pass, same day - D64, the first turn only takes hold.** Seventeen server and eight client
+checks encoded power on the declaration turn and were rewritten to the new rule (completion now takes
+at least two turns; the anchor-swap restart lands at 0 halves). Server **135/0**, client **103/0**; each
+of the seven D64 edits undone on its own turns at least one check red; the menu rendered to static markup
+in all three states (EDJD targeting: no Power row + targeting note; EDJD next turn: stepper; Scribe
+joining: "Double power"); replay unchanged. `factions-tiers.php` rewritten for the targeting turn, the
+supporting-drive rule and the D63 cooldown.
+**Fifth pass, same day - D65, conditions for taking hold only.** Eight server checks encoded a per-turn
+condition test and were rewritten: the mid-chain collapse is now "the holding EDJD stops and a newcomer
+fails the conditions", the anchor swap now needs the old anchor to STOP, and two new checks prove a
+mid-chain target out of every field with OEW 1 < DEW 5 still counts (with a probe showing
+`getConditionBlock` would refuse that exact position, so the check is not vacuous). Server **138/0**, client
+**104/0**; re-checking the conditions on continuing turns turns four checks red; replay unchanged.
+`factions-tiers.php` updated.
+
 ---
 
 ## 4. Stages & exit criteria
@@ -5368,7 +5502,7 @@ Ordered so that each stage is independently shippable and the risky shared-path 
 | **17** ✅ | Traveler Self Repair serves docked units (§3.15, as built §3.15a) — **DONE 2026-09-12**, two play-test follow-ups the same day | **127 checks green** — 70 server, 57 client — both harnesses fatal on a stashed pre-stage tree; `checkShipData.php` PASS, 0 new against 237. Criterion as written, all met: a damaged docked Scribe repaired out of the Traveler's pool (and its Thruster, which the Traveler may not touch, out of its own); every healing row filed against the DOCKED ship's id and marked updated, so it persists; the Traveler's own queue order unchanged and a priority of 99 on a docked row still beaten by an own row of 4; a docked Self Repair repaired and every other Self Repair in the game still refused. ⭐ Three additions from the user's notes the same day: **D42** one list, the docked rows marked by their ship name in cyan - first built with a TIER pinning them below every own row, which **D45 withdrew the same day**, so priority alone now decides and the player may put a docked hull first, **D43** a docked unit's OWN Self Repair keeps running — which needs driving, because `removed` reads as destroyed and `Criticals::setCriticals` never reaches it — and **D44** reinforcement fleet-list rows go cobalt so they cannot be read as docked. ⭐ Play-test (game 4350) then found the other half of D43: **a docked ship's whole ship window was inert**, because `SystemIcon.clickSystem`'s guard is `shipManager.isDestroyed(ship)` and that folds `removed` in — carved out with the existing `isDestroyedByDamage` predicate and diverted straight to the info menu, which is also §3.16(a)'s prerequisite arriving a stage early; and left-click on a stowed ship's fleet row now scrolls to its **carrier** rather than opening its window (right-click still does that). ⚠️ Replay corpus 135/0 clean vs 121/14 with the stage, **every diff the same single additive key** `servicesDockedUnits: added (true)` and nothing else — re-record to accept. |
 | **18** ✅ | Docked power sharing (§3.16, as built §3.16a, opponent view §3.16b) — **DONE 2026-09-12**, one play-test follow-up the same day | **134 checks green** — 67 server-free over the REAL `power.js`, 48 in a React harness, 19 in a server harness over the real `Traveler` that bundles the whole `reactJs` tree, evaluates it at module scope, renders `SystemInfo` to static markup and drives `SystemPowerSettings`'s own handlers — each fatal on the tree it was written against (21/37, 23/9, 14/5); `checkShipData.php` PASS, 0 new against 237; a **2,727-hull / 58,548-fact differential** in which exactly TWO lines moved, both `Traveler|sys11` (the flag and one tooltip sentence); replay 121/13 with every diff one of two ADDITIVE keys and no behavioural drift; autoload unchanged. Criterion as written, all met: a docked Scribe's power manageable during Initial Orders and persisted through the commit (the server half needed nothing — no `removed` filter in `InitialOrdersGamePhase::process`, `construcGamedata` or `submitPower`); four points of docked surplus giving the Traveler one and three giving none; flights contributing nothing; the figure recomputing live (on the existing `SystemDataChanged` → `shipWindowManager.update()`, no new event); and the decision written down as **D46 — client-computed and ADVISORY**. ⭐ Play-test follow-up: the OPPONENT saw the Traveler's balance WITHOUT the grant, because the grant is computed per viewer and `shipsDocked` is masked under the private-logistics gate — fixed by disclosing the bay's ship IDS on a separate key (**D47**, §3.16b), so both clients run one function and cannot drift. ⚠️ Three traps, 47–49, plus 50 on the masked-input fact; one adjacent defect flagged but deliberately not fixed; and power management for a unit still in HYPERSPACE left unbuilt but mapped. |
 | **19** ✅ | The Waymarker's two-turn procedure, the aft-hit redirect, the hangar-manoeuvre label and what a stowed unit projects (§3.14a / §3.14c / §3.14d, as built §3.14e) — **DONE 2026-09-12** | **240 checks green after the play-test fixes (§3.14f)** — 142 server (group 10 drives two whole turns through the real `criticalPhaseEffects`), 98 client over the real `hangarShared.js` / `ships.js` / `ew.js` / `fleetList.js` / `PhaseStrategy.js` under `vm` — both fatal on the pre-stage tree; `checkShipData.php` PASS, 0 new against 237; autoload and **statics both unchanged** (the class list is a const and `$stowedEdfRadius` is protected, so neither rides a blueprint); **replay 120 passed / 13 failed, the SAME 13 games and the same count as the pre-stage tree**, so the stage adds no behavioural drift and no new failing game — its only lines in the diff are `deferredShipClasses: removed` / `twoTurnShipClasses: added` on the ten Traveler games. Criterion as written (§3.14a), all met: a Waymarker rides `attached` for exactly one turn each way; its boxes are reserved from declaration through the single `dockedShipBoxes` choke point; it moves with the Traveler while attached, through the existing mirror rather than a re-implementation. ⭐ Four rulings the same day — **D48** least damaged = most boxes remaining, **D49** can be shot / cannot shoot, **D50** the banner goes on the unit and a new flight gets none, **D51** left-click scrolls on ALL docked units, which withdraws a Stage 17 exception. ⭐ Play-test (game 4351) then found two things the same day (§3.14f): ⚠️⚠️ **the movement mirror had never run for a rider**, because `MovementGamePhase::process` counted PRESENCE in the payload rather than submitted movement rows and the client sends every own ship with an empty list - invisible until now because a boarding pod and its host are never on the same side; EW is suspended on a rider both ways, with **D52** ruling that it KEEPS its DEW; and the FIRING MODE SELECTOR was the one weapon control in the menu that never asks whether a fire order exists, so it alone survived every other guard - withdrawn now along with the intercept pair it parents, and `automateIntercept` matched on the server. The faction page (`factions-tiers.php`) is updated and the Waymarker is struck from its not-implemented list. ⚠️ Six traps, 51–56. |
-| **20** | Extra-Dimensional Jump Drive (§3.18) | Power-turns accumulating only while both conditions hold and resetting on a gap; the cost locked at the first turn; completion routed through `Movement::applyJumpOut`; contributors and the half-power-turn plain drive; a friendly jumped on one EW point; ⭐⭐ and a damaged EDJD rolling for detonation every active turn while the same hull's ordinary jump-out does not. |
+| **20** ✅ | Extra-Dimensional Jump Drive (§3.18, as built §3.18a) — **BUILT 2026-09-12**, awaiting play test | **146 checks green** — 89 server, 57 client — each fatal on its stashed pre-stage tree; `checkShipData.php` PASS, 0 new against 237; autoload +1 (`EdjdAbduction`); replay 116/16 vs 119/13 clean, every added line one of three additive keys and no behavioural drift. Criterion as written: power-turns accumulate only while an initiating EDJD meets both conditions and restart after a gap; the cost is locked on the first turn (proved against a section destroyed mid-chain); completion at exactly the cost through `Movement::applyJumpOut`, attached units taken; a second EDJD and a Scribe contribute, the Scribe alone cannot carry it; a damaged EDJD rolls every abducting turn at half while the hull's own jump-out stays immune; the chain rebuilds from the stored notes alone. **Changed by ruling:** D53 a declaration with a power level instead of boost levels, D54 only the initiator meets the conditions, **D55 friendly use NOT built**, D56 detonation halved; review revisions 2026-09-13: D57 bay contents out of the cost, D58 deactivation/destruction cancels, D59 no line of sight, D60 a ship-window banner (harnesses now 96 + 65). The faction page gained its own section and the "not implemented" line is gone. ⚠️ Traps 57–60. |
 
 **Every stage:** run `fvbuild.ps1 -Check` (ship-data validator + replay harness). ⚠️ The baseline
 drifts on a clean tree — never read a pre-existing FAIL as your regression, and **never
@@ -5747,6 +5881,25 @@ Collected from the survey; each one has bitten this codebase before.
     ⚠️ The same shape appears in `EW::stripDockingRiderEw` (collect the rider ids ONCE per
     submitting ship, not per EW row) and in `setEdfHexes` / `collectEwDetectors` (the `instanceof`
     sweep comes first and every other question is deferred behind it).
+57. ⚠️⚠️ **A PLAN WRITTEN BEFORE A REWORK MUST BE RE-READ AGAINST IT.** §3.18 said "power-turns are
+    boost levels" - true of the vortex-era drive it was written for, and wrong the day §3.17b made
+    every Walker drive a legacy one whose ONLY boost level is the jump itself. Found by reading
+    `markLegacy()` before designing, not by reading the plan.
+58. ⚠️⚠️ **A LEGACY DRIVE IS INVISIBLE TO EVERY "IS THIS A BALLISTIC ORDER" TEST THAT READS THE WEAPON.**
+    `markLegacy()` sets `$ballistic = false`, so a type-`ballistic` order on one is (a) stripped from
+    every Firing-phase payload by `hideSystemFireOrders` - the `jumpexit` bug again, fixed the same way;
+    (b) never counted by `weaponManager.hasFiringOrder` in Initial Orders, so there is no generic remove
+    button and `canOffline` does not block it; (c) never selected by `SystemIcon`'s Initial Orders
+    clause. Ask the ORDER's type or damageclass, or give the system a predicate of its own.
+59. ⭐ **`hasSpecialTargeting` ON A PROTOTYPE CHANGES EVERY INSTANCE'S ICON CLICK.** `SystemIcon` treats
+    such a weapon's existing order as editable rather than committed. Set it per INSTANCE, keyed off a
+    payload field only the right instances carry (`abductionMaxPower`).
+60. ⭐ **WHEN A RULE'S INPUT IS MASKED, ASK WHETHER THE INPUT BELONGS IN THE RULE AT ALL.** The first
+    build summed docked units' ramming factors into the abduction cost, found that bay contents are
+    own-team-only, and answered with TWO figures - a published preview without them and a locked cost
+    with them. The user's ruling (D57) removed the input instead, and the two figures became one. Before
+    engineering around a masked input (trap 54's published twin, or a split figure), put the question
+    to the user.
 
 ---
 

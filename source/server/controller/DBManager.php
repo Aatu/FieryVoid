@@ -3590,6 +3590,11 @@ class DBManager
 		TacGamedata::$cpdAdaptationPresent = false;
 		if (class_exists('CpdScanRegistry', false)) CpdScanRegistry::resetPerLoadState();
 
+		//Walkers of Sigma-957 (WALKERS_OF_SIGMA_PLAN.md 3.18, Stage 20): the abduction gate is set by
+		//JumpEngine::onIndividualNotesLoaded when it restores an 'EDJD' note, in the sweep below - so it
+		//is cleared here, for the reason the CPD gate above is.
+		TacGamedata::$abductionPresent = false;
+
 		foreach ($gamedata->ships as $ship){
             $shipNotes = isset($allNotes[$ship->id]) ? $allNotes[$ship->id] : array();
             

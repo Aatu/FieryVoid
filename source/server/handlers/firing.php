@@ -187,6 +187,13 @@ class Firing
      * a list. */
     private static function getVortexDeclarationBlock($fire, $weapon, $shooter, $gamedata, $fireOrders)
     {
+        /* ⭐ WALKERS_OF_SIGMA_PLAN.md §3.18 (Stage 20) - AN ABDUCTION IS NOT A VORTEX DECLARATION EITHER,
+           and it has to be taken FIRST: it lives on a Walker drive, which is a legacy engine, and the
+           legacy refusal below would drop every one of them. Its own list, returning, the way the exit
+           and gate branches are. */
+        if ($fire->damageclass === JumpEngine::ABDUCTION_CLASS)
+            return EdjdAbduction::getDeclarationBlock($fire, $weapon, $shooter, $gamedata, $fireOrders);
+
         /* ⭐⭐ REINFORCEMENTS_PLAN.md STAGE 9 - THE ARRIVAL BRANCH IS NOW ABOVE THE LEGACY REFUSAL,
            AND THE ORDER OF THESE TWO LINES IS THE WHOLE OF "SHADOWS PHASE IN" (user ruling
            2026-08-29).
@@ -2228,6 +2235,13 @@ public static function firePreFiringWeapons($gamedata){
         //Attachment outcomes are only known now, so units that failed to attach to an
         //Enormous unit ram it here - see createFailedAttachRamOrders.
         self::createFailedAttachRamOrders($gamedata, $dbManager);
+
+        /* WALKERS_OF_SIGMA_PLAN.md §3.18 (Stage 20) - Extra-Dimensional Jump Drive abductions resolve
+           here: after every shot (a drive or a target destroyed this turn counts for nothing) and
+           BEFORE the boost-jump sweep below, so an abducted unit is already gone when that sweep looks
+           and the sweep's own structure test leaves it alone. The target "ended its movement" in the
+           field this load was built from, which is exactly the rule's moment. */
+        if ($gamedata->abductionCapable) EdjdAbduction::resolve($gamedata);
 
         /* Check if any ships have activated jump engines, and do this after all other fire (in case
            they or their jump engine got destroyed).

@@ -47,6 +47,11 @@ window.gamedata = {
        Net's field is the one field shape with no unit at its centre to hang a disc on - see
        BallisticIconContainer.generateEdfNetHexes. */
     edfNetHexes: null,
+    /* Walkers of Sigma-957 (WALKERS_OF_SIGMA_PLAN.md 3.18, Stage 20) - { costs: { <unitId>: power-turns },
+       chains: { <targetId>: { total, cost, since } } }, total in HALF power-turns. Published by
+       EdjdAbduction::publish; read by the jump engine's menu and the ship tooltip. NULL in every game
+       without a Walker hull drive. */
+    abductions: null,
     /* Walkers of Sigma-957 (Stage 7) - the SAME list, recomputed locally from PLOTTED positions so
        a player can see where their Nets will cover while they are still deciding where to move.
        Written by PhaseStrategy.syncEdfNetPreview, read only by
@@ -2756,6 +2761,10 @@ getActiveShipName: function getActiveShipName() {
            edfHexes) and therefore easier to misread: the corridor between two Nets would drain
            and penalise while being invisible on the map. */
         gamedata.edfNetHexes = serverdata.edfNetHexes || null;
+        /* Walkers of Sigma-957 (Stage 20) - Extra-Dimensional Jump Drive cost previews and standing
+           abduction chains. Same named-key rule and the same null normalisation: the server omits the
+           key in every game without a Walker hull drive. */
+        gamedata.abductions = serverdata.abductions || null;
 
         shipManager.initiated = 0;
 

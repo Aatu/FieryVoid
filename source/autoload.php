@@ -1088,6 +1088,7 @@ spl_autoload_register(
                 'edfradiusreduced' => '/server/model/cricialClasses.php',
                 'edfsource' => '/server/model/systems/baseSystems.php',
                 'edfthrustdrain' => '/server/model/cricialClasses.php',
+                'edjdabduction' => '/server/handlers/EdjdAbduction.php',
                 'ednpowerdoubled' => '/server/model/cricialClasses.php',
                 'egret' => '/server/model/ships/drazi_old/egret.php',
                 'egret1939' => '/server/model/ships/drazi_old/egret1939.php',

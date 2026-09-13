@@ -44,7 +44,7 @@ class Waymarker extends HeavyCombatVessel{
 		$this->addPrimarySystem(new Engine(7, 20, 0, 12, 4));
         $this->addPrimarySystem(new SelfRepair(6, 15, 5)); //armor, structure, output
 		$jumpEngine = new JumpEngine(7, 15, 8, 6);
-		$jumpEngine->markWalker(); //Stage 15: leaves at the END of the turn, untargetable while it waits, no failure roll
+		$jumpEngine->markExtraDimensional(); //Stage 20: a Walker drive (Stage 15) that can also abduct enemy units
 		$this->addPrimarySystem($jumpEngine);
 		//STAGE 7: Energy Draining Net. Args are (armour, maxhealth, powerReq);
 		//0 for health/power takes the CONTROL SHEET values in baseSystems.php - health 12, power 4.
@@ -104,7 +104,7 @@ class Waymarker extends HeavyCombatVessel{
 			0=> array( //PRIMARY
 				7 => "Structure",
 				9 => "Thruster",				
-				11 => "Jump Engine",
+				11 => "Extra-Dimensional Jump Drive",
 				12 => "Energy Draining Net",			
 				13 => "Self Repair",
 				15 => "Scanner",                

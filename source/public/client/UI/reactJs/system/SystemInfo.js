@@ -136,6 +136,18 @@ class SystemInfo extends React.Component {
             if (dockedPowerSummary.donors > 0) dockedPower = dockedPowerSummary;
         }
 
+        /* WALKERS_OF_SIGMA_PLAN.md 3.18 (Stage 20): a Walker jump drive declaring an abduction this turn
+           names its target (user request 2026-09-13). Read off the order itself, like the menu, so it
+           moves the instant the player re-targets or cancels. A lobby object has no orders - null. */
+        var abductionTarget = null;
+        if (typeof system.getAbductionOrder === 'function') {
+            var abductionOrder = system.getAbductionOrder();
+            if (abductionOrder) {
+                var abductee = gamedata.getShip(abductionOrder.targetid);
+                abductionTarget = abductee ? abductee.name : 'Unit ' + abductionOrder.targetid;
+            }
+        }
+
         let isUnrevealedMine = false;
         if (ship.mine) {
             var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
@@ -165,6 +177,8 @@ class SystemInfo extends React.Component {
                 {dockedPower && getEntry('Shared by docked ships',
                     '+' + dockedPower.shared + ' of ' + dockedPower.surplus + ' pooled from '
                     + dockedPower.donors + (dockedPower.donors === 1 ? ' ship' : ' ships'))}
+
+                {abductionTarget !== null && getEntry('Abduction target', abductionTarget)}
 
                 {Object.keys(specialEntry).length > 0 && <Entry key={`special-${reactKey++}`}><Header>Special: </Header>&nbsp;</Entry>}
                 {Object.keys(specialEntry).length > 0 &&

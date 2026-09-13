@@ -986,9 +986,12 @@ const canDeactivate = (ship, system) => system.canDeactivate && typeof system.ca
 //(canMaintainVortex: phase 1, my ship, engine alive and powered, a vortex of ours open and in range,
 //and not on the turn the four-turn cap closes it) and while it already IS, so the player can change
 //their mind before committing.
+//WALKERS §3.18 (Stage 20): and while a Walker drive holds an abduction order this turn - for everyone who
+//can see it, so the opponent can read the power level; only the owner's copy has live buttons.
 const canJumpEngineMenu = (ship, system) => system.name === 'jumpEngine'
 	&& typeof system.canMaintainVortex === 'function'
-	&& (system.canMaintainVortex() || system.canDeactivate());
+	&& (system.canMaintainVortex() || system.canDeactivate()
+		|| (typeof system.getAbductionOrder === 'function' && Boolean(system.getAbductionOrder())));
 
 const canPowerCapacitor = (ship, system) => {
 	if (system.name === 'powerCapacitor' || system.name === 'PowerCapacitor') {

@@ -422,6 +422,17 @@ window.ShipTooltip = function () {
             toDisplay += '<span style="color:#e1b000;">Jumping to Hyperspace</span>; ';
         }
 
+        /* WALKERS_OF_SIGMA_PLAN.md 3.18 (Stage 20) - an Extra-Dimensional Jump Drive abduction standing
+           against this unit, as of the last resolved turn. Purple, the colour its map marker uses.
+           Public (EdjdAbduction::publish): the power-turns delivered are the resolution's own record. */
+        if (typeof JumpEngine !== 'undefined' && typeof JumpEngine.getAbductionChain === 'function') {
+            var abduction = JumpEngine.getAbductionChain(ship.id);
+            if (abduction) {
+                toDisplay += '<span style="color:#b36bff;">Being abducted: '
+                    + JumpEngine.formatAbductionHalves(abduction.total) + '/' + abduction.cost + ' power-turns</span>; ';
+            }
+        }
+
         /* WALKERS_OF_SIGMA_PLAN.md 3.14c (Stage 19, user request 2026-09-12) - a unit ordered into
            or out of a hangar this Firing phase, and a Waymarker riding a Traveler's aft through its
            two-turn procedure. Cyan, the colour this tooltip already gives Hangar Operations, Just

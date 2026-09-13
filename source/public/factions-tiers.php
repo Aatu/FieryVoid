@@ -1981,6 +1981,42 @@ at short range versus long range.
             <li>A Mapmaker flight jumps as one: set Jump to Hyperspace on any probe's drive and the whole flight leaves at the end of the turn.</li>
         </ul>
 
+    <h5>Extra-Dimensional Jump Drive</h5>
+        <ul>
+            <li>The <b>Wanderer, Traveler, Waymarker and Guideship</b> carry an Extra-Dimensional Jump Drive, which can drag an <b>enemy</b> unit into hyperspace over
+                several turns. In Initial Orders, select the jump drive and click the enemy unit. The declaration is visible to everyone from the Movement phase,
+                as a purple "Abduction" marker on the target. <b>No line of sight is needed.</b></li>
+            <li>The <b>first turn only takes hold</b> of the target: it costs no extra power and delivers no power-turns. If the conditions below are met, the
+                abduction has begun, and <b>from the next turn</b> the drive keeps targeting it automatically and power can be applied in the drive's menu.</li>
+            <li>Each power level costs the drive's power requirement again and delivers <b>1 power-turn</b>: normal power is 1, double power is 2, up to 4. The power
+                comes off the reactor like a boost, so Walker ships must shut systems down to pay for it.</li>
+            <li>The abduction only <b>takes hold</b> if, at the end of that first turn's Firing phase, <b>both</b> hold for the ship carrying the drive:
+                <ul class="circle-list">
+                    <li>the target <b>ended its movement in an Energy Draining Field connected to that ship's own field</b> - extended through Energy Draining Mines,
+                        Nets or other Walker ships, but not through an enemy's field;</li>
+                    <li>that ship's <b>OEW on the target is higher than the target's DEW</b>, counting defensive ELINT support (supporting and blanket DEW) but not
+                        offensive ELINT support.</li>
+                </ul>
+            </li>
+            <li>Once the abduction has begun, <b>the field and EW conditions are not checked again</b>. Power-turns must be <b>consecutive</b>: the abduction
+                continues while at least one Extra-Dimensional Jump Drive that took hold of the target keeps applying power every turn. If none does, it ends and
+                everything built up so far is lost.</li>
+            <li>The cost is the target's <b>ramming factor / 50</b> power-turns, or <b>/ 10</b> if it has advanced armour, rounded up, with the ramming factors of
+                any units <b>attached</b> to it added. What it carries in its hangars or docking bays does <b>not</b> count. The cost is shown in the jump drive's
+                menu, is <b>fixed on the turn the abduction takes hold</b>, and does not fall as the target is damaged.</li>
+            <li>When the total is reached the target is <b>removed to hyperspace</b>, as if it had jumped out itself, taking anything attached or docked with it.
+                Progress is shown on the target's tooltip and ship window ("Being abducted") and in the combat log every turn, including the reason a turn did not count.</li>
+            <li><b>Deactivating the jump drive cancels its abduction</b>, and a drive destroyed during an attempt delivers nothing that turn - the combat log says the
+                abduction was cancelled.</li>
+            <li>The <b>Pathfinder and Scribe</b> cannot begin an abduction, but once a friendly Extra-Dimensional Jump Drive has taken hold of a target they may target
+                it too, adding <b>half a power-turn</b> each turn by applying double power to their drive. Mapmaker probes cannot take part.</li>
+            <li>After taking part in an abduction, however it ends, a jump drive <b>recharges for its own jump delay</b> before it can begin another.</li>
+            <li>A drive cannot abduct and jump to hyperspace on the same turn - setting Jump to Hyperspace withdraws the abduction.</li>
+            <li>Unlike the Walkers' ordinary jump, an <b>Extra-Dimensional Jump Drive that is damaged may be destroyed</b>: on every turn it is abducting it rolls
+                for detonation at <b>half</b> the percentage of its boxes lost, as other Ancient jump drives do. Its own jump to hyperspace keeps no chance of failure.</li>
+            <li>Not implemented: abducting friendly units, and asteroids, moons or planets.</li>
+        </ul>
+
     <h5>Hangar Requirements</h5>
         <ul>
             <li>Walker fighters are <b>Mapmaker Sensor Probes</b>, and they occupy their own 'Mapmaker Probes' capacity category. They may be bought with <b>no hangar
@@ -2117,9 +2153,6 @@ at short range versus long range.
             <li><b>Scribe</b> (medium, 750) - the cheap Sensor Charge Transceiver platform, with an Energy Draining Net and two Chromatic Pulse Drivers.</li>
             <li><b>Mapmaker Sensor Probes</b> (heavy fighter flight, up to 6) - very fast gravitic probes with advanced armour and advanced sensors, carrying a Light Chromatic
                 Pulsar, a Medium Lightning Array that three or six of them fire as one gun, an EW allowance and a Walker jump drive, and needing no hangar space of their own.</li>
-        </ul>
-        <ul>
-            <li>Not implemented yet, and listed so the page is not read as promising it: the Traveler's Extra-Dimensional Jump Drive.</li>
         </ul>
 
     <a class="back-to-top" href="#top">↩ Back to Top</a>

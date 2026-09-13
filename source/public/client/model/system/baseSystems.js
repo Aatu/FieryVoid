@@ -1143,6 +1143,16 @@ Magazine.prototype.constructor = Magazine;
    Weapon.prototype available at eval time here. */
 var JumpEngine = function JumpEngine(json, ship) {
 	Weapon.call(this, json, ship);
+	/* WALKERS_OF_SIGMA_PLAN.md §3.18 (Stage 20) - a drive that can join an abduction builds its own
+	   order through weaponManager.targetShip's doSpecialTargeting divert. Per INSTANCE and keyed off
+	   abductionMaxPower, which JumpEngine::stripForJson sends only for such a drive: on the prototype it
+	   would also change how every vortex engine's icon treats a re-click (SystemIcon's `committed`). */
+	if (this.abductionMaxPower) {
+		this.hasSpecialTargeting = true;
+		/* No line of sight is needed to declare an abduction (user ruling 2026-09-13) - without this,
+		   targetShip's blocked-LoS skip drops the click silently. Same per-instance keying, same reason. */
+		this.ignoresLoS = true;
+	}
 };
 JumpEngine.prototype = Object.create(Weapon.prototype);
 JumpEngine.prototype.constructor = JumpEngine;
@@ -1291,6 +1301,12 @@ JumpEngine.prototype.forbidsFireWhileJumping = function () {
 JumpEngine.prototype.onBoostIncrease = function () {
 	this.mirrorFlightBoost(true);
 
+	/* §3.18 (Stage 20) - a Walker drive's boost IS its jump, and it cannot pour the same power into an
+	   abduction as well: setting the jump withdraws this turn's abduction, the way Maintain withdraws a
+	   shot. The server ignores a jumping unit's abduction anyway (EdjdAbduction::isDriveWorking), and
+	   canSelectForAbduction refuses a new one while the boost stands. */
+	if (this.getAbductionOrder()) this.removeAbductionOrder();
+
 	if (!this.forbidsFireWhileJumping()) return;
 
 	var unit = this.getOwningUnit();
@@ -1368,6 +1384,280 @@ JumpEngine.prototype.getFlightSiblingEngines = function () {
 		}
 	}
 	return siblings;
+};
+
+/* ===== WALKERS_OF_SIGMA_PLAN.md §3.18 (Stage 20) - THE EXTRA-DIMENSIONAL JUMP DRIVE ==============
+
+   An EDJD (Wanderer, Traveler, Waymarker, Guideship) is selected in Initial Orders and clicked onto an
+   ENEMY unit to declare an abduction: a type-'ballistic' order, damageclass 'abduction', whose firing
+   mode is the POWER LEVEL. Every other Walker hull drive may add half a power-turn for double power but
+   cannot begin one. Everything that decides whether a turn COUNTS - the target's end-of-movement field,
+   the OEW/DEW contest, the consecutive chain, the locked cost - is the server's (EdjdAbduction), at the
+   end of the Firing phase; nothing here predicts it. What the client owns is the order, its power
+   cost on the reactor balance, and the read-outs of gamedata.abductions. */
+
+//Mirror of JumpEngine::isExtraDimensional().
+JumpEngine.prototype.isExtraDimensional = function () {
+	return Boolean(this.extraDimensional);
+};
+
+//Mirror of JumpEngine::canJoinAbduction(): any Walker drive on a hull, never a Mapmaker probe's.
+JumpEngine.prototype.canJoinAbduction = function () {
+	return this.isWalkerJump() && !this.isFlightMounted();
+};
+
+//This turn's abduction order on this drive, or null.
+JumpEngine.prototype.getAbductionOrder = function () {
+	for (var i in this.fireOrders) {
+		var fire = this.fireOrders[i];
+		if (!fire || fire.turn != gamedata.turn) continue;
+		if (fire.damageclass === 'abduction') return fire;
+	}
+	return null;
+};
+
+JumpEngine.prototype.removeAbductionOrder = function () {
+	for (var i = this.fireOrders.length - 1; i >= 0; i--) {
+		var fire = this.fireOrders[i];
+		if (fire && fire.turn == gamedata.turn && fire.damageclass === 'abduction') this.fireOrders.splice(i, 1);
+	}
+};
+
+/* The power level the order applies: an EDJD's firing mode, clamped to the ceiling the server sent;
+   a supporting drive's is always 2 ("double power"), the only level Firing accepts on one. */
+JumpEngine.prototype.getAbductionPowerLevel = function (order) {
+	order = order || this.getAbductionOrder();
+	if (!order) return 0;
+	if (!this.isExtraDimensional()) return 2;
+	var max = this.abductionMaxPower || 1;
+	return Math.max(1, Math.min(max, parseInt(order.firingMode, 10) || 1));
+};
+
+/* What the order is worth, in HALF power-turns - the server's own unit (JumpEngine::getAbductionHalves),
+   so a supporting drive's half is an integer here too. */
+JumpEngine.prototype.getAbductionHalves = function (order) {
+	order = order || this.getAbductionOrder();
+	if (!order || !this.isAbductionPowered(order)) return 0;
+	return this.isExtraDimensional() ? 2 * this.getAbductionPowerLevel(order) : 1;
+};
+
+/* ⭐ D64 (user ruling 2026-09-13) - DOES THIS ORDER APPLY POWER, OR ONLY TAKE HOLD? Power-turns start the
+   turn AFTER an EDJD's targeting succeeded, so an order at a unit with no standing chain (as of last turn,
+   gamedata.abductions) is a TARGETING order: no power level, no reactor cost, no power-turns. The server
+   decides the same thing at resolution (EdjdAbduction::resolveTarget's $continuing) - and can go one way
+   the client cannot see coming: if last turn's anchors all fail now while another EDJD qualifies, the
+   chain RESTARTS and that turn's power is lost. */
+JumpEngine.prototype.isAbductionPowered = function (order) {
+	order = order || this.getAbductionOrder();
+	return Boolean(order && JumpEngine.getAbductionChain(order.targetid));
+};
+
+/* ⭐ WHAT THE ABDUCTION COSTS THE REACTOR THIS TURN: "applying normal jump engine power (over the
+   standard norm) for an entire turn" is one power-turn, so each level is the drive's powerReq AGAIN.
+   Read by shipManager.power.getReactorPower, which is the whole balance and what the Initial Orders
+   commit gate reads - so a Walker that cannot pay is asked to power something down before it may
+   commit. ⚠️ CLIENT-COMPUTED AND ADVISORY, exactly as D46 rules for the docked grant: the server has no
+   power balance to check against. */
+JumpEngine.prototype.getAbductionPowerDraw = function () {
+	var order = this.getAbductionOrder();
+	if (!order || !this.isAbductionPowered(order)) return 0;   //D64: a targeting turn costs nothing
+	return this.getAbductionPowerLevel(order) * (this.powerReq || 0);
+};
+
+/* May this drive be SELECTED to declare an abduction right now? A legacy drive is autoFireOnly, and
+   neither weaponManager.selectWeapon nor SystemIcon.clickSystem would ever select one in Initial Orders
+   (it is not ballistic either) - both ask this instead of relaxing those flags for every legacy drive.
+   ⚠️ A drive set to Jump to Hyperspace is refused: its boost is the jump. */
+JumpEngine.prototype.canSelectForAbduction = function (ship) {
+	if (typeof gamedata === 'undefined' || gamedata.gamephase !== 1) return false;
+	if (!this.canJoinAbduction()) return false;
+	var unit = this.getOwningUnit() || ship;
+	if (!unit || !gamedata.isMyShip(unit)) return false;
+	if (shipManager.isDestroyed(unit)) return false;
+	if (shipManager.systems.isDestroyed(unit, this)) return false;
+	if (shipManager.power.isOffline(unit, this)) return false;
+	if (shipManager.power.getBoost(this) > 0) return false;
+	if (typeof shipManager.isDockingRider === 'function' && shipManager.isDockingRider(unit)) return false;
+	if (shipManager.getTurnDeployed(unit) > gamedata.turn) return false;
+	//D63: a drive recharging after an abduction may still be selected to CONTINUE the one it fed last turn.
+	return weaponManager.isLoaded(this) || this.getContinuableAbductionTargetId() !== null;
+};
+
+/* Mirror of JumpEngine::isContinuingAbduction, as the id of the unit this drive may keep abducting
+   without a charge, or null: it delivered power to that unit LAST turn and the chain still stands.
+   (turnsloaded already carries the abduction cooldown - JumpEngine::getAbductionRechargeLoad.) */
+JumpEngine.prototype.getContinuableAbductionTargetId = function () {
+	var hold = this.abductionLastHold;
+	if (!hold || typeof gamedata === 'undefined' || parseInt(hold.turn, 10) !== gamedata.turn - 1) return null;
+	if (!JumpEngine.getAbductionChain(hold.targetid)) return null;
+	return parseInt(hold.targetid, 10);
+};
+
+/* ⭐ THE DECLARATION, reached through weaponManager.targetShip's hasSpecialTargeting divert once the
+   generic arc/range/fire-control screens have passed (all trivially true for this system). Refuses what
+   Firing::getVortexDeclarationBlock's abduction branch refuses, with a reason, and REPLACES any
+   abduction this drive already declared this turn - one per unit, and re-clicking another enemy is how
+   a player changes their mind. A new EDJD order starts at power level 1; the level is then set in the
+   drive's own menu (JumpEngineMenu). A called shot is not a thing: the whole unit is taken. */
+JumpEngine.prototype.doSpecialTargeting = function (shooter, target, system) {
+	if (!this.canSelectForAbduction(shooter)) return false;
+
+	if (!target || gamedata.isMyorMyTeamShip(target)) {
+		confirm.error("Only an <b>enemy</b> unit can be abducted by an Extra-Dimensional Jump Drive.");
+		return false;
+	}
+	if (gamedata.isTerrain(target.shipSizeClass, target.userid)) {
+		confirm.error("Terrain cannot be abducted.");
+		return false;
+	}
+	//An EDJD cannot target fighter flights (user ruling 2026-09-13) - EdjdAbduction::getDeclarationBlock agrees.
+	if (target.flight) {
+		confirm.error("A fighter flight cannot be abducted.");
+		return false;
+	}
+	//D64: a supporting drive only joins an abduction an EDJD has already taken hold of (EdjdAbduction::isHeldByTeam).
+	if (!this.isExtraDimensional() && !JumpEngine.getAbductionChain(target.id)) {
+		confirm.error("This jump drive can only contribute when an <b>Extra-Dimensional Jump Drive</b> has already begun an abduction.");
+		return false;
+	}
+	//D63: recharging, it may only keep going against the unit it fed last turn.
+	if (!weaponManager.isLoaded(this) && this.getContinuableAbductionTargetId() !== parseInt(target.id, 10)) {
+		var held = gamedata.getShip(this.getContinuableAbductionTargetId());
+		confirm.error("This jump drive is recharging (" + this.turnsloaded + "/" + this.loadingtime + ")"
+			+ (held ? " and may only continue its abduction of " + held.name + "." : "."));
+		return false;
+	}
+
+	var unit = this.getOwningUnit() || shooter;
+
+	//One abduction per unit: a second Walker drive on the same hull cannot declare beside this one.
+	for (var i in unit.systems) {
+		var other = unit.systems[i];
+		if (!other || other === this || other.name !== 'jumpEngine' || typeof other.getAbductionOrder !== 'function') continue;
+		if (other.getAbductionOrder()) {
+			confirm.error(unit.name + " is already declaring an abduction this turn.");
+			return false;
+		}
+	}
+
+	var level = this.isExtraDimensional() ? 1 : 2;
+	var previous = this.getAbductionOrder();
+	if (previous && previous.targetid === target.id) level = this.getAbductionPowerLevel(previous);
+	this.removeAbductionOrder();
+
+	this.pushAbductionOrder(unit, target, level);
+	return true;
+};
+
+//The abduction order itself - shared by a player's click (doSpecialTargeting) and continueAbduction.
+JumpEngine.prototype.pushAbductionOrder = function (unit, target, level) {
+	this.fireOrders.push({
+		id: unit.id + "_" + this.id + "_" + (this.fireOrders.length + 1),
+		type: 'ballistic',
+		shooterid: unit.id,
+		targetid: target.id,
+		weaponid: this.id,
+		calledid: -1,
+		turn: gamedata.turn,
+		firingMode: level,
+		shots: 1,
+		x: "null",
+		y: "null",
+		damageclass: 'abduction',
+		chance: 100
+	});
+};
+
+/* ⭐ AN ABDUCTION THAT TOOK HOLD KEEPS GOING (user request 2026-09-13, play test 4352) - "the player
+   shouldn't have to manually retarget every turn". At the start of Initial Orders the drive re-declares
+   last turn's order, same target and power level, when ALL of these hold:
+     - its latest note delivered power LAST turn (abductionLastHold, JumpEngine::getLatestAbductionHold) -
+       a no-hold or cancelled turn writes 0 halves and publishes nothing, so a lapsed chain stays lapsed;
+     - the chain is still published (JumpEngine.getAbductionChain) - not completed, target still on board;
+     - the drive may still declare (canSelectForAbduction): the owner's, powered, intact, not set to jump
+       (it is NOT charged - D63's cooldown counts from last turn - and continuing is its exemption). That is "until deactivated/destroyed" - and it runs AFTER repeatLastTurnPower, so a drive
+       left offline last turn reads offline here;
+     - it has no order yet this turn, and no other drive on the unit has one.
+   An ordinary client-side declaration from then on: CANCEL withdraws it, the level can be changed, and the
+   commit gate prices it. ⚠️ A page reload during Initial Orders re-seeds it - nothing server-side records
+   a cancel until the commit. */
+JumpEngine.prototype.continueAbduction = function () {
+	var hold = this.abductionLastHold;
+	if (!hold || parseInt(hold.turn, 10) !== gamedata.turn - 1) return false;
+	if (this.getAbductionOrder()) return false;
+
+	var unit = this.getOwningUnit();
+	if (!unit || !this.canSelectForAbduction(unit)) return false;
+	if (!JumpEngine.getAbductionChain(hold.targetid)) return false;
+
+	var target = gamedata.getShip(hold.targetid);
+	if (!target || shipManager.isDestroyed(target) || target.flight || gamedata.isMyorMyTeamShip(target)) return false;
+
+	for (var i in unit.systems) {
+		var other = unit.systems[i];
+		if (!other || other === this || typeof other.getAbductionOrder !== 'function') continue;
+		if (other.getAbductionOrder()) return false;
+	}
+
+	var level = this.isExtraDimensional() ? Math.max(1, Math.min(this.abductionMaxPower || 1, parseInt(hold.level, 10) || 1)) : 2;
+	this.pushAbductionOrder(unit, target, level);
+	return true;
+};
+
+//Every own Walker drive's continueAbduction - InitialPhaseStrategy.activate, right after repeatLastTurnPower.
+JumpEngine.continueAbductions = function () {
+	if (typeof gamedata === 'undefined' || gamedata.gamephase !== 1) return 0;
+	var count = 0;
+	for (var i in gamedata.ships) {
+		var ship = gamedata.ships[i];
+		if (!ship || ship.flight || !gamedata.isMyShip(ship)) continue;
+		for (var j in ship.systems) {
+			var system = ship.systems[j];
+			if (system && typeof system.continueAbduction === 'function' && system.continueAbduction()) count++;
+		}
+	}
+	return count;
+};
+
+/* ⭐ A DECLARED ABDUCTION IS "SPENT & LOCKED" OUTSIDE INITIAL ORDERS - the Gravitic Augmenter's hook, and
+   the exact state: committed, resolved at the end of Firing, not editable now. It is what keeps the
+   generic remove button off the drive in the Firing phase (weaponManager.hasFiringOrder counts a
+   non-ballistic weapon's order there, and a client-side splice would not un-write the stored row), and
+   what dims the icon to a tick instead of the orange of a shot being fired. getAbductionOrder FIRST,
+   so a lobby object - no orders at all - never reads the game phase. */
+JumpEngine.prototype.isSpentLocked = function () {
+	return Boolean(this.getAbductionOrder()) && gamedata.gamephase !== 1;
+};
+
+/* Set the power level of this turn's order (an EDJD only). Returns false when nothing changed. */
+JumpEngine.prototype.setAbductionPowerLevel = function (level) {
+	var order = this.getAbductionOrder();
+	if (!order || !this.isExtraDimensional()) return false;
+	var max = this.abductionMaxPower || 1;
+	level = Math.max(1, Math.min(max, parseInt(level, 10) || 1));
+	if (parseInt(order.firingMode, 10) === level) return false;
+	order.firingMode = level;
+	return true;
+};
+
+/* The published chain against a unit, or null - {total (halves), cost, since}, from
+   EdjdAbduction::publish via gamedata.abductions. Static in shape, so the tooltip and the menu share it. */
+JumpEngine.getAbductionChain = function (targetId) {
+	if (typeof gamedata === 'undefined' || !gamedata.abductions || !gamedata.abductions.chains) return null;
+	return gamedata.abductions.chains[targetId] || null;
+};
+
+//The published cost preview for a unit (hull and attached units only - see EdjdAbduction::publish), or null.
+JumpEngine.getAbductionCostPreview = function (targetId) {
+	if (typeof gamedata === 'undefined' || !gamedata.abductions || !gamedata.abductions.costs) return null;
+	var cost = gamedata.abductions.costs[targetId];
+	return (cost === undefined) ? null : cost;
+};
+
+//Halves as a display string: 5 -> "2.5", 4 -> "2".
+JumpEngine.formatAbductionHalves = function (halves) {
+	halves = parseInt(halves, 10) || 0;
+	return (halves % 2 === 0) ? String(halves / 2) : (Math.floor(halves / 2) + ".5");
 };
 
 //Does a Maintain declaration for THIS turn stand on this engine?

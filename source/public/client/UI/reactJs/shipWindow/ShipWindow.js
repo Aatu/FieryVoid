@@ -2300,6 +2300,18 @@ const getStatusBanners = (ship) => {
         });
     }
 
+    /*WALKERS_OF_SIGMA_PLAN.md 3.18 (Stage 20, user request 2026-09-13): an Extra-Dimensional Jump Drive
+      abduction standing against this unit, as of the last resolved turn. The same reader and the same
+      purple as the map tooltip's "Being abducted" line and the "Abduction" hex marker.*/
+    const abduction = window.JumpEngine && typeof window.JumpEngine.getAbductionChain === 'function'
+        ? window.JumpEngine.getAbductionChain(ship.id) : null;
+    if (abduction) {
+        banners.push({
+            key: 'abducted', color: '#b36bff', bg: 'rgba(127, 0, 255, 0.10)',
+            text: 'Being abducted: ' + window.JumpEngine.formatAbductionHalves(abduction.total) + '/' + abduction.cost + ' power-turns'
+        });
+    }
+
     /*WALKERS_OF_SIGMA_PLAN.md 3.14c (Stage 19, user request 2026-09-12): this unit is going into or
       coming out of a hangar. Cyan, the same statusPending as Deploying and Arrival Scatter above -
       a benign thing the unit is doing. Placed before the attached pair below because for a

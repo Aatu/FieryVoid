@@ -5865,6 +5865,31 @@ class JumpEngine extends Weapon{
      * markLegacy() gives above. Protected for the same reason as $ancientJump. */
     protected $walkerJump = false;
 
+    /* ⭐⭐ WALKERS_OF_SIGMA_PLAN.md §3.18 (Stage 20) - THE EXTRA-DIMENSIONAL JUMP DRIVE: a Walker drive
+     * that can also drag an ENEMY unit into hyperspace over several consecutive turns. Set by
+     * markExtraDimensional() on the Wanderer, Traveler, Waymarker and Guideship only; every other
+     * Walker hull's drive may CONTRIBUTE half a power-turn but never initiate (canJoinAbduction).
+     * The whole mechanic is EdjdAbduction (handlers/EdjdAbduction.php); this class carries the flag,
+     * the declaration and note readers, and the detonation roll. Protected like $walkerJump. */
+    protected $extraDimensional = false;
+
+    /* §3.18 - this drive's abduction record, one entry per turn it contributed to a chain, rebuilt
+     * from its 'EDJD' IndividualNotes on every load (onIndividualNotesLoaded) and never persisted any
+     * other way: turn => array(target, halves, cost, since, anchor). See EdjdAbduction for what each
+     * field means and why the chain needs no other storage (D22). Protected, so no blueprint key. */
+    protected $abductionNotes = array();
+
+    /* §3.18 - the abduction declaration's damageclass, the note key, and the highest power level an
+     * EDJD may apply in one turn. The damageclass is the discriminator every consumer keys off, the
+     * same way 'jumppoint' and 'jumpexit' are. CONSTANTS, never statics: a public static on a Weapon
+     * subclass is exactly what MissileRack's reflection mistakes for an instance property.
+     * ABDUCTION_MAX_POWER is a UI ceiling only - the rules name none, and every level costs the drive's
+     * whole powerReq again, so a Walker cannot reach it without shutting most of its ship down. It
+     * rides the payload as abductionMaxPower, so the client needs no copy of the number. */
+    const ABDUCTION_CLASS = 'abduction';
+    const ABDUCTION_NOTE = 'EDJD';
+    const ABDUCTION_MAX_POWER = 4;
+
 	//JumpEngine tactically  is not important at all!
 	public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
 
@@ -6086,6 +6111,7 @@ class JumpEngine extends Weapon{
     {
         $this->markAncient();
         $this->walkerJump = true;
+        $this->autoHit = true;
         return $this;
     }
 
@@ -6093,6 +6119,123 @@ class JumpEngine extends Weapon{
     public function isWalkerJump()
     {
         return $this->walkerJump;
+    }
+
+    /* ⭐ WALKERS_OF_SIGMA_PLAN.md §3.18 (Stage 20) - MARK THIS ENGINE AS AN EXTRA-DIMENSIONAL JUMP DRIVE:
+     * a Walker drive (markWalker) that may also INITIATE an abduction. A flag and not the plan's
+     * `ExtraDimensionalJumpDrive extends JumpEngine` subclass, for D32's reasons: no autoload change,
+     * phpclass stays "JumpEngine" for every game already in flight, and no system id moves. Returns $this.
+     *
+     *     $jumpEngine = new JumpEngine(7, 30, 12, 6);
+     *     $jumpEngine->markExtraDimensional();
+     *     $this->addPrimarySystem($jumpEngine);
+     */
+    public function markExtraDimensional()
+    {
+        $this->markWalker();
+        $this->extraDimensional = true;
+        $this->displayName = "Extra-Dimensional Jump Drive";
+        return $this;
+    }
+
+    /* Is this an Extra-Dimensional Jump Drive? See markExtraDimensional(). */
+    public function isExtraDimensional()
+    {
+        return $this->extraDimensional;
+    }
+
+    /* §3.18 - MAY THIS DRIVE TAKE PART IN AN ABDUCTION AT ALL? Every Walker drive on a HULL: an EDJD
+     * initiates and contributes its full power, any other Walker drive contributes half a power-turn
+     * (user, 2026-09-12: "other Walker marked Jump Engines can contribute"). ⚠️ NOT a Mapmaker probe's -
+     * a fighter flight has no power allocation to apply to it, so there is nothing to contribute. */
+    public function canJoinAbduction()
+    {
+        return $this->walkerJump && !$this->isFlightMounted();
+    }
+
+    /* §3.18 - this drive's abduction declaration for $turn, or null. At most one survives validation
+     * (Firing's one-abduction-per-unit rule), and a detached order (a surrendered fleet, a docking
+     * rider) is simply not on the list any more, which is what makes it inactive everywhere. */
+    public function getAbductionDeclaration($turn)
+    {
+        foreach ($this->fireOrders as $fire){
+            if ($fire->damageclass !== self::ABDUCTION_CLASS) continue;
+            if ((int)$fire->turn !== (int)$turn) continue;
+            if (!empty($fire->rejected)) continue;
+            return $fire;
+        }
+        return null;
+    }
+
+    /* §3.18 - what one declaration is worth, in HALF power-turns (integers, so a Scribe's half is
+     * exact on both sides of the wire). An EDJD: its firing mode IS the power level - normal power
+     * for one power-turn, double for two - clamped to the ceiling. Any other Walker drive: "a maximum
+     * of 1/2 of a power-turn for double power ... increased power does not grant further benefits",
+     * and Firing refuses any level but double on one, so it is a flat 1. */
+    public function getAbductionHalves($fire)
+    {
+        if (!$this->canJoinAbduction() || !$fire) return 0;
+        if (!$this->extraDimensional) return 1;
+        return 2 * max(1, min(self::ABDUCTION_MAX_POWER, (int)$fire->firingMode));
+    }
+
+    //§3.18 - turn => parsed note, as restored by onIndividualNotesLoaded. Read by EdjdAbduction::getChains.
+    public function getAbductionNotes()
+    {
+        return $this->abductionNotes;
+    }
+
+    /* §3.18 - the LATEST turn this drive fed an abduction that HELD: array(turn, targetid, level), else
+     * null. "Held" is `since > 0` - the chain stood after that turn - and NOT halves > 0, because D64's
+     * first turn takes hold and delivers nothing. The level is read back from the halves the note stored
+     * (getAbductionHalves' inverse, at least 1 - so the turn after taking hold starts at normal power), and
+     * a supporting drive's is its fixed double. Only the latest note counts: a later no-hold or cancelled
+     * turn (since 0) means the chain ended. */
+    public function getLatestAbductionHold()
+    {
+        if (empty($this->abductionNotes)) return null;
+        $turn = max(array_keys($this->abductionNotes));
+        $note = $this->abductionNotes[$turn];
+        if ($note['since'] <= 0) return null;
+        $level = $this->extraDimensional ? max(1, min(self::ABDUCTION_MAX_POWER, intdiv($note['halves'], 2))) : 2;
+        return array('turn' => (int)$turn, 'targetid' => $note['target'], 'level' => $level);
+    }
+
+    /* ⭐ §3.18 (D63, user rulings 2026-09-13) - THE ABDUCTION COOLDOWN. A drive recharges for its own
+     * jump delay from the turn after it LAST TOOK PART in an abduction - each drive on its own, EDJD and
+     * supporting alike, however that part ended: completed, collapsed on a failed condition, cancelled
+     * (deactivated, destroyed, or the player committing a turn without it) or the target destroyed.
+     * "Took part" = a resolved declaration = any 'EDJD' note, 0 halves included; an order withdrawn
+     * before Initial Orders was committed wrote none and costs nothing.
+     *
+     * Same four-state shape as the jump point: never took part -> full; took part THIS turn -> 0;
+     * then 1 the turn after, climbing to the cap. Notes from later turns are ignored (a replay of an
+     * earlier turn). ⚠️ A drive still IN a chain reads 1 on the next turn too - continuing it is the
+     * exemption isContinuingAbduction grants, not a charge it has. */
+    public function getAbductionRechargeLoad($turn)
+    {
+        $turn   = (int)$turn;
+        $charge = $this->getVortexRechargeTime();
+        if (isset($this->abductionNotes[$turn])) return 0;
+
+        $last = null;
+        foreach (array_keys($this->abductionNotes) as $noteTurn){
+            if ((int)$noteTurn < $turn && ($last === null || (int)$noteTurn > $last)) $last = (int)$noteTurn;
+        }
+        if ($last === null) return $charge;
+        return min($charge, $turn - $last);
+    }
+
+    /* §3.18 (D63) - may this drive declare at $targetId on $turn WITHOUT a charge? Only to keep going:
+     * last turn it took part in an abduction of that same unit that HELD (since > 0 - see
+     * getLatestAbductionHold for why not halves). A drive that stops, or turns to anything else, waits
+     * out its recharge. */
+    public function isContinuingAbduction($turn, $targetId)
+    {
+        $turn = (int)$turn;
+        if (!isset($this->abductionNotes[$turn - 1])) return false;
+        $note = $this->abductionNotes[$turn - 1];
+        return $note['since'] > 0 && (int)$note['target'] === (int)$targetId;
     }
 
     /* ⭐ MAY THE UNIT NOT FIRE ON A TURN THIS DRIVE IS TAKING IT OUT? "Except as noted, the ship may
@@ -6152,10 +6295,13 @@ class JumpEngine extends Weapon{
      * Each one ZEROES its percentage rather than returning early, so every d100 those methods ever
      * drew is still drawn (trap 34) and the log reports the 0% that actually applied.
      *
-     * ⚠️⚠️ THE EXTRA-DIMENSIONAL JUMP DRIVE (§3.18, Stage 19) MUST OVERRIDE THIS to answer false
-     * while an abduction is running - "the EDJD must check for jump engine detonation as any other
-     * damaged jump drive would ... every turn that the EDJD is active". Protected, and handed the
-     * ship and gamedata, for exactly that override. */
+     * ⭐ THE EXTRA-DIMENSIONAL JUMP DRIVE (§3.18, Stage 20) DOES NOT OVERRIDE THIS, although the plan
+     * said it would. Its rule - "the EDJD must check for jump engine detonation as any other damaged
+     * jump drive would ... every turn that the EDJD is active" - is a roll on a turn the drive is
+     * ABDUCTING, and an abducting drive cannot also be jumping out (EdjdAbduction::isDriveWorking), so
+     * none of the three sites here is ever reached on such a turn. The roll has a site of its own,
+     * rollAbductionJumpFailure, which never asks this hook - so the same hull's ordinary jump-out keeps
+     * its immunity and the abduction does not inherit it. */
     protected function isJumpFailureImmune($ship, $gamedata)
     {
         return $this->walkerJump;
@@ -6464,6 +6610,15 @@ class JumpEngine extends Weapon{
        ⚠️ (int) on both sides: $gamedata->turn / TacGamedata::$currentTurn are STRINGS out of
        mysqli (plan section 5 trap 10) while the note's turns are int-cast. */
     public function getVortexRechargeLoad($turn)
+    {
+        /* WALKERS §3.18 (Stage 20, D63) - the charge is ALSO spent by an abduction, so the load is the
+           lower of the two derivations. getAbductionRechargeLoad answers the full charge on any drive
+           that never fed an abduction, so every other engine's figure is exactly what it was. */
+        return min($this->getJumpPointRechargeLoad($turn), $this->getAbductionRechargeLoad($turn));
+    }
+
+    //The jump-point half of getVortexRechargeLoad - the whole of it before Stage 20.
+    protected function getJumpPointRechargeLoad($turn)
     {
         $turn = (int)$turn;
 
@@ -8976,7 +9131,30 @@ class JumpEngine extends Weapon{
 		   value of the ship that opened the exit. */
 		$scatterNotes = array();
 
+		/* ⭐ WALKERS §3.18 (Stage 20) - a FIFTH kind: one 'EDJD' note per turn this drive fed an
+		   abduction. Reset first, because a system object outlives a load (see restoreVortexScatter),
+		   and ⚠️ claimed here for the same reason the scatter note is - the fall-through below would
+		   otherwise take its value for the pre-jump combat value. */
+		$this->abductionNotes = array();
+
 		foreach ($this->individualNotes as $currNote) {
+			if ($currNote->notekey_human === self::ABDUCTION_NOTE){
+				$parts = explode(':', (string)$currNote->notevalue);
+				if (count($parts) >= 5){
+					$this->abductionNotes[(int)$currNote->turn] = array(
+						'target' => (int)$parts[0],
+						'halves' => (int)$parts[1],
+						'cost'   => (int)$parts[2],
+						'since'  => (int)$parts[3],
+						'anchor' => ((int)$parts[4] === 1),
+					);
+					//The per-load gate TacGamedata::onConstructed publishes chains behind. Reset in
+					//DBManager::getSystemDataForShips beside the CPD one, for the same reason (trap 1).
+					TacGamedata::$abductionPresent = true;
+				}
+				continue;
+			}
+
 			if ($currNote->notekey_human === 'Vortex'){
 				$vortexNotes[(string)$currNote->notekey] = $currNote;
 				continue;
@@ -9066,6 +9244,74 @@ class JumpEngine extends Weapon{
 		   ⚠️ JumpgateCapital's engine has TEN boxes, so each point of damage on it is a flat 10%
 		   chance of destroying the whole gate the next time it is signalled. */
 		$this->rollVortexJumpFailure($ship, $gamedata);
+
+		//WALKERS §3.18 (Stage 20) - a damaged EDJD risks detonation on every turn it is abducting.
+		if ($this->extraDimensional) $this->rollAbductionJumpFailure($ship, $gamedata);
+	}
+
+	/* ⭐⭐ WALKERS_OF_SIGMA_PLAN.md §3.18 (Stage 20) - THE EDJD'S DETONATION ROLL.
+	 *
+	 * "If the EDJD is damaged, critical rolls are performed every turn that the engine is active and
+	 * trying to abduct a ship to Hyperspace. The EDJD must check for jump engine detonation as any other
+	 * damaged jump drive would. Note that the check must be performed every turn that the EDJD is active."
+	 *
+	 * ACTIVE = a live declaration on a drive that is working this turn (EdjdAbduction::isDriveWorking),
+	 * whether or not the two conditions held and whether or not it anchored the chain: a drive pouring
+	 * power at a target is trying to abduct it. The percentage is the missing-box share, HALVED for an
+	 * Ancient (D56 - the same factionAge 3+ rule every other roll site applies).
+	 *
+	 * ⚠️⚠️ isJumpFailureImmune() IS NEVER ASKED HERE. That hook is the Walker drive's "no chance of
+	 * failure while in use" and it stays true for the hull's own jump-out; this rule is the one place
+	 * the EDJD gives it up. A plain Walker contributor never reaches this method at all (its drive is
+	 * not extraDimensional), which is its immunity holding.
+	 *
+	 * Same destruction path as rollVortexJumpFailure - 'JumpFailure' damageclass, RammingAttack log
+	 * order - so HangarOps' JumpFailure handling (every docked craft dies with the ship) applies
+	 * unchanged. Runs in Pass 2 of Criticals::setCriticals, i.e. AFTER the abduction resolved at the
+	 * end of Firing, so a detonation never cancels the power-turns the drive delivered this turn. */
+	protected function rollAbductionJumpFailure($ship, $gamedata)
+	{
+		$turn = (int)$gamedata->turn;
+		if ($this->getAbductionDeclaration($turn) === null) return;               //not abducting this turn
+		if (!EdjdAbduction::isDriveWorking($ship, $this, $gamedata)) return;      //not active - nothing to fail
+
+		$healthDiff = $this->maxhealth - $this->getRemainingHealth();
+		if ($healthDiff <= 0) return;                                             //an undamaged drive never fails
+
+		$primaryStruct = $ship->getStructureSystem(0);
+		if (!$primaryStruct || $primaryStruct->isDestroyed($turn)) return;        //already gone this turn
+
+		$missingHealthPercentage = round(($healthDiff / $this->maxhealth) * 100);
+		if ($ship->factionAge >= 3) $missingHealthPercentage = round($missingHealthPercentage / 2); //D56
+
+		if (Dice::d(100) > $missingHealthPercentage) return; //held
+
+		$rammingSystem = $ship->getSystemByName("RammingAttack");
+		if ($rammingSystem){
+			$newFireOrder = new FireOrder(
+				-1, "normal", $ship->id, $ship->id,
+				$rammingSystem->id, -1, $turn, 1,
+				100, 100, 1, 1, 0,
+				0, 0, 'JumpFailure', 10001
+			);
+			$newFireOrder->pubnotes = " overloads its Extra-Dimensional Jump Drive - damage to the drive destroys the ship ("
+				. $missingHealthPercentage . "% chance of failure).";
+			$newFireOrder->addToDB = true;
+			$rammingSystem->fireOrders[] = $newFireOrder;
+		}
+
+		$damageEntry = new DamageEntry(
+			-1, $ship->id, -1, $turn,
+			$primaryStruct->id, $primaryStruct->getRemainingHealth(), 0, 0, -1, true, false,
+			"", 'JumpFailure'
+		);
+		$damageEntry->updated = true;
+		if ($rammingSystem){
+			$damageEntry->shooterid = $ship->id;
+			$damageEntry->weaponid  = $rammingSystem->id;
+		}
+		$primaryStruct->damage[] = $damageEntry;
+		$this->vortexFailureApplied = true;
 	}
 
 	protected function rollVortexJumpFailure($ship, $gamedata)
@@ -9199,9 +9445,18 @@ class JumpEngine extends Weapon{
             if ($this->ancientJump){
                 /* An Ancient special jump drive ($ancientJump). Rules only - this text rides the STATIC
                    blueprint (see setGateSystemDataWindow for why no live numbers belong in here). */
-                $this->data["Special"]  = "<br><b>Ancient jump drive</b> - forms no jump point. Boost it in Initial Orders (Jump to Hyperspace) and the ship leaves the battle at the END of that turn, and can be fired on until it goes.";
+                $this->data["Special"]  = "<br>Ancient jump drive - forms no jump point. Boost it in Initial Orders (Jump to Hyperspace) and the ship leaves the battle at the END of that turn, and can be fired on until it goes.";
                 if ($this->walkerJump){
-                    $this->data["Special"] .= "<br><b>Walker jump drive:</b> the ship MAY fire normally on the turn it jumps, and the drive has NO chance of failure however damaged.";
+                    $this->data["Special"] .= "<br>Walker jump drive: the ship MAY fire normally on the turn it jumps, and the drive has NO chance of failure however damaged.";
+                    //WALKERS §3.18 (Stage 20). Rules only - this rides the static blueprint.
+                    if ($this->extraDimensional){
+                        $this->data["Special"] .= "<br>Extra-Dimensional Jump Drive: Can attempt to abduct ships into Hyperspace by targeting them durign Initial Orders, see Walkers in Factions-Tiers for more info.";
+                        //$this->data["Special"] .= "<br>A turn counts only if the target ENDS ITS MOVEMENT in an Energy Draining Field connected to this ship's own, and this ship's OEW on it is HIGHER than its DEW (including defensive ELINT support).";
+                        //$this->data["Special"] .= "<br>Turns must be consecutive. Cost: ramming factor / 50 power-turns (/ 10 against advanced armour), rounded up, adding anything ATTACHED to it (never what it carries inside); fixed on the first turn. Other Walker drives may add power once it has begun. The target is removed to hyperspace when the total is reached. No line of sight is needed.";
+                        //$this->data["Special"] .= "<br>If damaged, the drive rolls for detonation (half the % of boxes lost) on EVERY turn it is abducting. Deactivating or losing the drive cancels the abduction.";
+                    }elseif (!$this->isFlightMounted()){
+                        $this->data["Special"] .= "<br><b>Abduction support:</b> select it in Initial Orders and click a unit already being abducted to add half a power-turn for double power. It cannot begin an abduction.";
+                    }
                 }else{
                     $this->data["Special"] .= "<br>The ship may NOT fire on the turn it jumps - no interception either.";
                     $this->data["Special"] .= "<br>If the drive is damaged, the ship has HALF the usual chance of being destroyed as it jumps (the % of drive boxes lost, halved).";
@@ -9365,7 +9620,21 @@ class JumpEngine extends Weapon{
            ONLY when set, so every other jump engine's payload is byte-identical, and above the Trek
            early return so nothing can skip them. Public information: the tooltip says the same. */
         if ($this->ancientJump) $strippedSystem->ancientJump = true;
-        if ($this->walkerJump)  $strippedSystem->walkerJump = true;
+        if ($this->walkerJump){
+            $strippedSystem->walkerJump = true;
+            $strippedSystem->autoHit = true; //Walker jump engine can actually target enemies, just show 100% and leave to special calculations.            
+        }  
+        /* WALKERS §3.18 (Stage 20) - the EDJD flag, and the power ceiling on any drive that can join an
+           abduction, so the client's power control needs no copy of the constant. Only when set, so
+           every other engine's payload is byte-identical. */
+        if ($this->extraDimensional) $strippedSystem->extraDimensional = true;
+        if ($this->canJoinAbduction()) $strippedSystem->abductionMaxPower = $this->extraDimensional ? self::ABDUCTION_MAX_POWER : 2;
+        /* §3.18 - AN ABDUCTION THAT TOOK HOLD KEEPS GOING (user request 2026-09-13, play test 4352): the
+           drive's LATEST note, when its chain held (a no-hold or cancelled turn writes since 0), so the
+           client can re-declare it at the start of the next Initial Orders (JumpEngine.continueAbduction).
+           Public: it is last turn's declaration, which every viewer saw on the map and in the log. */
+        $lastHold = $this->getLatestAbductionHold();
+        if ($lastHold !== null) $strippedSystem->abductionLastHold = $lastHold;
 
         /* ⭐ THE ONE ENGINE THAT SENDS THE ORDINARY WEAPON PAYLOAD AND NOTHING ELSE IS THE TREK
            NACELLE (user ruling 2026-08-29 - see $hasJumpRecharge). Its 4th constructor argument is

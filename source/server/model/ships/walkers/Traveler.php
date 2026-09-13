@@ -48,7 +48,7 @@ class Traveler extends BaseShip{
 		$travelerRepair->servicesDockedUnits = true;
 		$this->addPrimarySystem($travelerRepair);
 		$jumpEngine = new JumpEngine(7, 30, 12, 6);
-		$jumpEngine->markWalker(); //Stage 15: leaves at the END of the turn, untargetable while it waits, no failure roll
+		$jumpEngine->markExtraDimensional(); //Stage 20: a Walker drive (Stage 15) that can also abduct enemy units
 		$this->addPrimarySystem($jumpEngine);		
 		
         $this->addFrontSystem(new GraviticThruster(6, 20, 0, 5, 1));
@@ -96,7 +96,7 @@ class Traveler extends BaseShip{
 		$this->hitChart = array(
 			0=> array( //PRIMARY
 				9 => "Structure",
-				11 => "Jump Engine",
+				11 => "Extra-Dimensional Jump Drive",
 				13 => "Self Repair",
 				15 => "Scanner",                
 				17 => "Engine",

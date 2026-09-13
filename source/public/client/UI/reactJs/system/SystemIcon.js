@@ -278,9 +278,13 @@ class SystemIcon extends React.Component {
         //is narrow - Firing phase, own undamaged powered loaded weapon with an intercept rating in
         //some mode, nothing fired this turn, and a round in the magazine - so it can only ever ADD
         //the weapons this feature exists for.
+        //WALKERS §3.18 (Stage 20): a Walker jump drive is not ballistic, so the Initial Orders clause
+        //never selects it - but it declares an abduction in exactly that phase. Asked of the drive.
+        var abductionSelectable = typeof system.canSelectForAbduction === 'function' && system.canSelectForAbduction(ship);
+
         if (!spentLockedAugmenter
             && (system.weapon && (gamedata.gamephase === 3 && !system.ballistic && !system.preFires) || (gamedata.gamephase === 1 && system.ballistic) || (gamedata.gamephase === 5 && system.preFires)
-                || weaponManager.canManuallyInterceptWith(ship, system))) {
+                || weaponManager.canManuallyInterceptWith(ship, system) || abductionSelectable)) {
             //cannoct SELECT weapon when unit is adrift though!
             if (!shipManager.isAdrift(ship)) {
                 if (gamedata.isMyShip(ship)) {
@@ -591,8 +595,13 @@ const renderBadges = (ship, system) => {
 
 //A "spent & locked" Gravitic Augmenter shows the spent (dimmed) look, not the active-firing orange
 //border — its committed order is not being fired/edited in the current phase (see isSpentLocked).
-const isFiring = (ship, system) => weaponManager.hasFiringOrder(ship, system)
+//WALKERS §3.18 (Stage 20): a Walker drive's abduction reads orange in Initial Orders like a jump point
+//declaration - hasFiringOrder cannot see it there, the drive being a legacy one (plan trap 58).
+const isFiring = (ship, system) => (weaponManager.hasFiringOrder(ship, system) || isDeclaringAbduction(system))
     && !(typeof system.isSpentLocked === 'function' && system.isSpentLocked());
+
+const isDeclaringAbduction = (system) => gamedata.gamephase === 1
+    && typeof system.getAbductionOrder === 'function' && Boolean(system.getAbductionOrder());
 
 /* A weapon whose entire contribution this turn is DEFENSIVE - one or more manual 'intercept'
    orders, or a 'selfIntercept' permission marker, and nothing aimed at anyone - reads GREEN rather

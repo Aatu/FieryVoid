@@ -516,7 +516,12 @@ window.weaponManager = {
             return;
         }
 
-        if (!weaponManager.isLoaded(weapon))
+        //WALKERS §3.18 (Stage 20): a Walker jump drive is a legacy drive, so autoFireOnly - but it may be
+        //selected in Initial Orders to declare an abduction. Asked of the drive, not by relaxing the flag.
+        //D63: that includes a drive RECHARGING after an abduction it may still continue, hence before isLoaded.
+        var abductionSelect = typeof weapon.canSelectForAbduction === 'function' && weapon.canSelectForAbduction(ship);
+
+        if (!weaponManager.isLoaded(weapon) && !abductionSelect)
             return;
 
         if (shipManager.power.isOffline(ship, weapon)) {
@@ -529,7 +534,7 @@ window.weaponManager = {
 
         if (weapon.stowed && weapon.stowedArcStart == null) return; //stowed weapons with a stowed arc set (Kirishiac Heavy Orbital) remain operational
 
-        if (weapon.autoFireOnly) return; //this is auto-fire only weapon, should not be fired manually!
+        if (weapon.autoFireOnly && !abductionSelect) return; //this is auto-fire only weapon, should not be fired manually!
 
         //An Ancient ship jumping out this turn may not fire (JumpEngine::$ancientJump). Setting the
         //jump already withdrew its orders (JumpEngine.onBoostIncrease); this stops new ones, and the
@@ -3838,7 +3843,11 @@ window.weaponManager = {
 
             if (loSBlocked && !weapon.ignoresLoS) continue;
 
-            if (shipManager.systems.isDestroyed(selectedShip, weapon) || !weaponManager.isLoaded(weapon) || (weapon.stowed && weapon.stowedArcStart == null)) {
+            //WALKERS §3.18 (D63): a Walker drive recharging after an abduction may still CONTINUE it - asked of
+            //the drive, whose doSpecialTargeting then refuses any unit but the one it may continue.
+            var abductionContinues = !weaponManager.isLoaded(weapon)
+                && typeof weapon.canSelectForAbduction === 'function' && weapon.canSelectForAbduction(selectedShip);
+            if (shipManager.systems.isDestroyed(selectedShip, weapon) || (!weaponManager.isLoaded(weapon) && !abductionContinues) || (weapon.stowed && weapon.stowedArcStart == null)) {
                 debug && console.log("Weapon destroyed, not loaded, or stowed (Kirishiac Orbital docked)"); //a stowed arc set (Heavy Orbital) keeps the weapon operational
                 continue;
             }
@@ -5096,6 +5105,9 @@ window.weaponManager = {
                 return targetingShip; // || targetingHex;
             }));
         }, []).filter(function (fire) {
+            //WALKERS §3.18 (Stage 20): an abduction is not a shot - nothing to intercept, no hit chance. The
+            //target's tooltip reports it on a status line of its own instead (ShipTooltip).
+            if (fire.damageclass === 'abduction') return false;
             return fire.type === "ballistic" || (fire.type === "normal" && fire.damageclass === "Sweeping"); //Ballistics and Shadow Slicers
         }).map(function (fireOrder) {
             var shooter = gamedata.getShip(fireOrder.shooterid);
@@ -5567,7 +5579,10 @@ window.weaponManager = {
             //transceiver itself), so it prints its sentence alone. ⚠️ The shots the charge scored
             //along the way are ORDINARY fire orders carrying damageclass 'electromagnetic', and
             //must NOT be listed here or the log would stop reporting what they hit.
-            "SensorCharge"
+            "SensorCharge",
+            //Abduction (WALKERS_OF_SIGMA_PLAN.md 3.18): the Extra-Dimensional Jump Drive's per-turn report
+            //- power-turns delivered, or why it took no hold. EdfExposure's shape exactly.
+            "Abduction"
         ];
 
         //A crash into Huge terrain (multi-hex asteroid, moon) reads like the small-asteroid

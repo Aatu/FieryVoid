@@ -576,6 +576,14 @@ shipManager.power = {
 						}
 						if (power.type == 3) output -= system.powerReq;
 					}
+					/* WALKERS_OF_SIGMA_PLAN.md 3.18 (Stage 20) - an Extra-Dimensional Jump Drive abduction
+					   costs the drive's powerReq again per power level. Inside the online branch, so an
+					   offline drive (which cannot hold an order - canOffline refuses one) charges nothing.
+					   Exactly 0 on every other system: only a jump engine defines it, and only one holding
+					   an abduction order this turn answers anything but 0. */
+					if (system.name === 'jumpEngine' && typeof system.getAbductionPowerDraw === 'function') {
+						output -= system.getAbductionPowerDraw();
+					}
 				}
 			}
 		}
@@ -1264,6 +1272,9 @@ shipManager.power = {
 
 			array[i].power.push({ id: null, shipid: ship.id, systemid: array[i].id, type: 1, turn: gamedata.turn, amount: 0 });
 
+			//Stage 20 - same rule as onOfflineClicked: a deactivated jump drive's abduction is cancelled.
+			if (typeof array[i].getAbductionOrder === 'function' && array[i].getAbductionOrder()) array[i].removeAbductionOrder();
+
 			shipManager.power.stopOverloading(ship, array[i]);
 		}
 
@@ -1313,6 +1324,14 @@ shipManager.power = {
 
 		if (system.weapon) {
 			weaponManager.unSelectWeapon(ship, system);
+		}
+
+		/* WALKERS_OF_SIGMA_PLAN.md 3.18 (Stage 20, user ruling 2026-09-13): deactivating a jump drive CANCELS
+		   the abduction it was declaring, rather than leaving an order that delivers and costs nothing.
+		   canOffline cannot refuse the click the way it refuses a gun with a shot declared -
+		   weaponManager.hasFiringOrder does not count this order in Initial Orders (plan trap 58). */
+		if (system instanceof JumpEngine && typeof system.getAbductionOrder === 'function' && system.getAbductionOrder()) {
+			system.removeAbductionOrder();
 		}
 
 		//Add new warning for when people ignore tooltip and try to deactivate Jump Drive before they should - DK 10/24

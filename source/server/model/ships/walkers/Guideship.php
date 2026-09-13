@@ -45,7 +45,7 @@ class Guideship extends MediumShip{
 		$this->addPrimarySystem(new Engine(5, 15, 0, 10, 3));		
         $this->addPrimarySystem(new SelfRepair(6, 3, 2)); //armor, structure, output
 		$jumpEngine = new JumpEngine(6, 30, 12, 3);
-		$jumpEngine->markWalker(); //Stage 15: leaves at the END of the turn, untargetable while it waits, no failure roll
+		$jumpEngine->markExtraDimensional(); //Stage 20: a Walker drive (Stage 15) that can also abduct enemy units
 		$this->addPrimarySystem($jumpEngine);
 		$this->addPrimarySystem(new GraviticThruster(6, 20, 0, 5, 3));
 		$this->addPrimarySystem(new GraviticThruster(6, 20, 0, 5, 4));		
@@ -71,7 +71,7 @@ class Guideship extends MediumShip{
 		$this->hitChart = array(
 			0=> array( //PRIMARY
 				7 => "Thruster",			
-				9 => "Jump Engine",			
+				9 => "Extra-Dimensional Jump Drive",			
 				11 => "Self Repair",
 				14 => "Scanner",                
 				17 => "Engine",

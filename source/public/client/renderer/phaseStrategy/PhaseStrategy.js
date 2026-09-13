@@ -1713,6 +1713,7 @@ window.PhaseStrategy = function () {
             && (system.ballistic
                 || system.hextarget //same for direct fire hextarget weapons - they use ballistic highlight...
                 || system.canSplitShots //same for weapon that split shots, ballistic icons used to track these.
+                || system.abductionMaxPower //WALKERS §3.18: a Walker drive's abduction draws a ballistic marker and line, but the drive is not ballistic - without this CANCEL left both on the map (play test 4352)
             )
         ) {
             this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
@@ -1760,7 +1761,7 @@ window.PhaseStrategy = function () {
         */
 
         if (payload.weapons.some(function (weapon) {
-            return weapon.ballistic || weapon.canSplitShots;
+            return weapon.ballistic || weapon.canSplitShots || weapon.abductionMaxPower; //abduction: see onSystemDataChanged
         })) {
             this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
         }
