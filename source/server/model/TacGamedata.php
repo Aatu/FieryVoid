@@ -1329,7 +1329,10 @@ class TacGamedata {
         foreach ($dockedIds as $id){
             $unit = $this->getShipById($id);
             if (!$unit || !$unit->removed) continue;
-            if ($unit->removedTurn !== null && (int)$unit->removedTurn !== (int)$this->turn) continue;
+            //turn - 1 too: a deploy-docked unit reloads with removedTurn one below its dock turn, as it
+            //was never on the board that turn (Hangar / DockingBay ::onIndividualNotesLoaded).
+            if ($unit->removedTurn !== null && (int)$unit->removedTurn !== (int)$this->turn
+                && (int)$unit->removedTurn !== (int)$this->turn - 1) continue;
             $unit->removed = false;
             $unit->removedTurn = null;
         }

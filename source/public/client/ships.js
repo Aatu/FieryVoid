@@ -1365,6 +1365,20 @@ window.shipManager = {
         if (ship.removed && ship.spawned !== undefined && ship.spawned !== -1 &&
             ship.removedTurn != null && ship.spawned >= ship.removedTurn &&
             gamedata.turn >= ship.removedTurn) return true;
+        if (gamedata.replay) {
+            //Hangar Ops: a launch (or escape) resolves at the END of its turn, so in the replay of
+            //that turn the unit was still aboard its carrier - but the replay loads the hangar as it
+            //stood at turn end and would draw it at its launch hex from the start of Movement (game
+            //7386). In live play hangarLaunchTurn is always a past turn. See BaseShip::$hangarLaunchTurn.
+            if (ship.hangarLaunchTurn != null && ship.hangarLaunchTurn >= gamedata.turn) return true;
+            //A flight a hangar SPAWNED (a fresh or split launch, a Fighter Bomb, an escape) has a ship
+            //row from then on, so every earlier replay loads it too - with no launch note yet and no
+            //persisted `spawned` to say it did not exist. Every unit bought for the battle has a turn 1
+            //'start' row, so a flight whose every movement row lies after this turn had not been
+            //launched yet. Flights only: other mid-battle spawns carry their own `spawned`.
+            if (ship.flight && Array.isArray(ship.movement) && ship.movement.length > 0 &&
+                ship.movement.every(function (move) { return move.turn > gamedata.turn; })) return true;
+        }
         if (!gamedata.isMyorMyTeamShip(ship) && ship.trueStealth && !shipManager.isDetected(ship)) return true; //Enemy, stealth ship and not currently detected
         //Stage 7 (Hangar Ops): a flight queued for deployment-phase dock isn't on the
         //board — its icon should be hidden until either the dock is cancelled or the

@@ -4028,8 +4028,19 @@ class Hangar extends ShipSystem{
 			return ($a->id < $b->id) ? -1 : 1;
 		});
 
+		$launchTurns     = array(); //unit id => turn of its latest launch from THIS hangar
+		$deployDockTurns = array(); //unit id => turn it was deploy-start docked into THIS hangar
 		foreach ($this->individualNotes as $note){
-			if ($note->notekey === 'hangarUsage'){
+			if ($note->notekey === 'hangarLaunchEvent' || $note->notekey === 'hangarEscapeEvent'
+				|| $note->notekey === 'hangarDeployStartEvent'){
+				//Replay visibility, applied below. Every successful note's value LEADS with the
+				//unit's ship id (flight, LCV or bay ship); a failure reads 'fail:...', which casts to 0.
+				$unitId = (int)$note->notevalue;
+				if ($unitId > 0){
+					if ($note->notekey === 'hangarDeployStartEvent') $deployDockTurns[$unitId] = (int)$note->turn;
+					else $launchTurns[$unitId] = (int)$note->turn;
+				}
+			} else if ($note->notekey === 'hangarUsage'){
 				$decoded = json_decode($note->notevalue, true);
 				if (is_array($decoded)){
 					$this->hangarUsage = $decoded;
@@ -4161,6 +4172,8 @@ class Hangar extends ShipSystem{
 				if ($lcv) {
 					$lcv->removed = true;
 					$lcv->removedTurn = (int)($this->lcvDocked['dockTurn'] ?? $gamedata->turn);
+					//Deploy-docked: never on the board on its dock turn (see the flight rule below).
+					if (($deployDockTurns[$lcvId] ?? null) === $lcv->removedTurn) $lcv->removedTurn--;
 				}
 			}
 		}
@@ -4172,6 +4185,14 @@ class Hangar extends ShipSystem{
 				if (!$flight) continue;
 				$flight->removed = true;
 				if (isset($entry['dockedTurn'])) $flight->removedTurn = (int)$entry['dockedTurn'];
+				/* A DEPLOY-START dock happens before that turn's Movement, so the flight was never
+				   on the board on its dock turn. removedTurn means "replay shows it up to and
+				   including this turn" (BaseShip), so it is the turn BEFORE - otherwise the replay's
+				   docked-this-turn exception draws it at its off-board 'start' hex all turn (game
+				   7386). TacGamedata::hideDeploymentDocks accepts this value. */
+				if ($flight->removedTurn !== null && ($deployDockTurns[$flightId] ?? null) === $flight->removedTurn) {
+					$flight->removedTurn--;
+				}
 				//A fragment flight (partial-dock detachment) was born $removed at
 				//the dock turn and never existed on the board. $spawned isn't a
 				//tac_ship column, so restore it here from dockedTurn — the replay
@@ -4180,6 +4201,29 @@ class Hangar extends ShipSystem{
 				if (!empty($entry['fragment']) && isset($entry['dockedTurn'])) {
 					$flight->spawned = (int)$entry['dockedTurn'];
 				}
+			}
+		}
+
+		//Hangar Ops: stamp each unit this bay launched (or that escaped it) with its launch turn - see
+		//BaseShip::$hangarLaunchTurn. Latest wins across bays, as a unit can launch from several.
+		foreach ($launchTurns as $unitId => $launchTurn) {
+			$launched = $gamedata->getShipById($unitId);
+			if (!$launched) continue;
+			/* ⚠️ NOT every launch note means "was aboard all turn". A Docking Bay two-turn rider
+			   (WALKERS_OF_SIGMA_PLAN.md 3.14a) spends the turn clamped to the OUTSIDE of the hull, on
+			   the board, and still writes one when it lets go ('Docking bay launched ship' on
+			   completion, 'Manoeuvre abandoned', 'Ship released from destroyed carrier'). Its own
+			   'attached' rows for that turn give it away; a unit that really came out of a hull has
+			   nothing that turn but its launch 'deploy' row (and turn 1's creation 'start' marker).
+			   Only the launch turn's rows matter - hangarLaunchTurn is only ever compared against the
+			   loaded turn, whose rows are always loaded. */
+			$onBoard = false;
+			foreach ((array)$launched->movement as $move) {
+				if ((int)$move->turn === $launchTurn && $move->type !== 'deploy' && $move->type !== 'start') { $onBoard = true; break; }
+			}
+			if ($onBoard) continue;
+			if ($launched->hangarLaunchTurn === null || $launchTurn > $launched->hangarLaunchTurn) {
+				$launched->hangarLaunchTurn = $launchTurn;
 			}
 		}
 
@@ -5342,6 +5386,9 @@ class DockingBay extends Hangar{
             if (!$docked) continue;
             $docked->removed = true;
             $docked->removedTurn = (int)($entry['dockTurn'] ?? $gamedata->turn);
+            //A ship that STARTED aboard was never on the board on its dock turn - see the same rule
+            //for flights in Hangar::onIndividualNotesLoaded.
+            if (!empty($entry['deploy'])) $docked->removedTurn--;
         }
     }
 

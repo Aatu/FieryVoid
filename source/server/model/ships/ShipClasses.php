@@ -44,6 +44,14 @@ class BaseShip {
     public $spawned = -1; //To denote if a unit was spawned by DURING the game, e.g. doesn't count for CPV etc, show in Replay prior to it spawning
     public $removed = false; //Hangar Ops (B5W §10.1): set when a flight has docked. Hides from board/target lists without triggering destruction; record stays in DB for replay history.
     public $removedTurn = null; //Turn the ship docked into a hangar. Lets replay show the flight up to and including this turn.
+    /* Hangar Ops: the turn this unit last came OUT of a carrier - a flight launched or escaping from a
+       hangar, an LCV off its rail, a ship out of a Docking Bay. That resolves at the END of the turn
+       (or during its Firing), so the unit was still aboard for the whole of it - but a replay of that
+       turn loads the hangar as it stood at turn end (notes turn <= N) and so has it already out, drawn
+       at its launch hex from the start of Movement (game 7386). Set per LOAD by
+       Hangar::onIndividualNotesLoaded from the launch/escape notes, never persisted; read only by
+       shipManager.shouldBeHidden and ReplayAnimationStrategy, in replay. */
+    public $hangarLaunchTurn = null;
     /* JUMP_POINTS_PLAN.md Stage 4 x Hangar Ops: this unit was sitting in a carrier's hangar when
        that carrier left through a jump vortex, so it is in hyperspace too. Set per LOAD by
        TacGamedata::markJumpedDockedFlights (never persisted - it is derived from the carrier), and
@@ -844,6 +852,7 @@ class BaseShip {
             $strippedShip->removed = true;
             if ($this->removedTurn !== null) $strippedShip->removedTurn = $this->removedTurn;
         }
+        if ($this->hangarLaunchTurn !== null) $strippedShip->hangarLaunchTurn = $this->hangarLaunchTurn; //only on a launched unit
         //Emitted only when true, so every other unit's payload is byte-identical to before (the
         //fleet list reads a plain falsy on anything that did not leave inside a carrier).
         if ($this->jumpedWithCarrier) $strippedShip->jumpedWithCarrier = true;
