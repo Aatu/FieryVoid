@@ -526,7 +526,7 @@ window.BallisticIconContainer = function () {
 	   41x41 sweep, and only when the weapon is selected AND the course changed (syncSceneObject's
 	   signature covers both), which is a handful of rebuilds per turn rather than one per poll.
 	   ================================================================================ */
-	const SCT_COURSE_COLOUR_OPEN = 0xffff00;      //no receiver at the end yet - the charge is lost
+	const SCT_COURSE_COLOUR_OPEN = 0xff0000;      //no receiver at the end yet - the charge is lost
 	const SCT_COURSE_COLOUR_RECEIVED = 0x00cc00;  //ends on a friendly transceiver
 	const SCT_COURSE_OPACITY = 0.85;
 	const SCT_COURSE_Z = -4;                      //just above the ballistic lines at -5
