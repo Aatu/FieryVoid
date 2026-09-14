@@ -14,6 +14,7 @@ class kirishiacOverlord extends BaseShip{
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
 	    $this->notes = 'Atmospheric capable.';
         $this->variantOf = "Lordship";
+        $this->canvasSize = 300;        
 
         $this->gravitic = true;
 		$this->advancedArmor = true;   

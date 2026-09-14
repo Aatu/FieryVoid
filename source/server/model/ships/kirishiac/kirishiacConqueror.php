@@ -14,6 +14,7 @@ class kirishiacConqueror extends SixSidedHCV{
         $this->shipSizeClass = 2; 
 		$this->factionAge = 4; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
 	    $this->notes = 'Atmospheric capable.';
+        $this->canvasSize = 225;   		
 				
         $this->gravitic = true;
 		$this->advancedArmor = true;   

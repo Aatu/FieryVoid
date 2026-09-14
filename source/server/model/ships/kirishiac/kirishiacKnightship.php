@@ -15,7 +15,8 @@ class KirishiacKnightship extends HeavyCombatVessel{
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
 	    //$this->notes = 'Atmospheric capable.';
 		$this->variantOf = 'Conqueror';
-		$this->occurence = 'rare';		
+		$this->occurence = 'rare';	
+        $this->canvasSize = 225;   			
 				
 		$this->agile = true;
         $this->gravitic = true;

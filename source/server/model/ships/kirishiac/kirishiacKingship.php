@@ -14,6 +14,7 @@ class kirishiacKingship extends BaseShip{
 	    $this->isd = "Ancient";
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
 	    $this->notes = 'Atmospheric capable.';
+        $this->canvasSize = 300;        
 
         $this->gravitic = true;
 		$this->advancedArmor = true;   
