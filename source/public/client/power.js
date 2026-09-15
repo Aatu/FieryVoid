@@ -504,6 +504,7 @@ shipManager.power = {
 				var reactor = reactors[i];
 				if (!reactor.destroyed) {
 					output += reactors[i].outputMod;
+					if (reactors[i].edfDrain) output -= reactors[i].edfDrain; //see the note in the non-base branch below
 					fixedPower = fixedPower || reactors[i].fixedPower; //assume fixed power if ANY reactor gives fixed power
 
 					if (reactor.criticals.length > 0) {
@@ -520,6 +521,16 @@ shipManager.power = {
 		} else {
 			var reactor = shipManager.systems.getSystemByName(ship, "reactor");
 			output = reactor.output + reactor.outputMod;
+			/* Walkers of Sigma-957 (WALKERS_OF_SIGMA_PLAN.md 2.2): the Energy Draining Field takes
+			   power off the reactor for one turn, published as edfDrain by Reactor::stripForJson
+			   (it cannot ride outputMod - see the plan's note on turn-filtered param criticals).
+			   It has to come off HERE and not only in shipManager.systems.getOutput: this function
+			   is the ship's whole power BALANCE, and it is what getShipsNegativePower and the
+			   Initial Orders commit gate read. Without it a drained ship showed no deficit at all,
+			   so its owner was never asked to power anything down (user report, 2026-09-04).
+			   NOT clamped at 0 - unlike an output figure, a balance is meant to go negative; that
+			   negative IS the deficit the player has to cover. */
+			if (reactor.edfDrain) output -= reactor.edfDrain;
 			fixedPower = reactor.fixedPower;
 		}
 

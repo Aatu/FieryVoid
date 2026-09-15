@@ -109,6 +109,15 @@ class Weapon extends ShipSystem
     public $freeinterceptspecial = false;  //has its own routine for handling decision whether it's capable of interception - for freeintercept only?
     public $hidetarget = false;
 	public $hidetargetArray = array();  //for weapons that do not show their target
+	/*true = blank this weapon's fire-order ->notes in enemy/spectator payloads for as long as
+	$hidetarget is masking its x/y and targetid (TacGamedata::hideSystemFireOrders).
+	OPT-IN rather than blanket: ->notes is a general-purpose channel and most of what rides it is
+	either already public or written at resolution, so only a weapon that encodes part of its AIM
+	POINT there needs this. The Sensor Charge Transceiver does - its waypoint token can carry the
+	id of the unit the player chose to hit in a shared hex, which is exactly the information
+	$hidetarget exists to withhold. PROTECTED like $alwaysHideFireOrders so a raw-embedded weapon
+	object (a launcher's missileArray) does not serialize it into the payload.*/
+	protected $hideNotesFromEnemies = false;
 	protected $alwaysHideFireOrders = false; //To not show animtaiton in replay, e.g. for launched mines.
 	/*true = this weapon's use is completely invisible to enemies until it resolves: its pending
 	current-turn fire orders are stripped from enemy/spectator gamedata in every live phase
@@ -528,6 +537,10 @@ class Weapon extends ShipSystem
 
 	public function getHideFireOrdersFromEnemies(){
 		return $this->hideFireOrdersFromEnemies;
+	}
+
+	public function getHideNotesFromEnemies(){
+		return $this->hideNotesFromEnemies;
 	}
 
     public function getRange($fireOrder)
@@ -1263,6 +1276,65 @@ public function getStartLoading()
         return $rangePenalty;
     }
 
+    /* ================= WALKERS OF SIGMA-957 - ENERGY DRAINING FIELD =====================
+       Three small helpers, kept together because they are one rule read three ways. The
+       client mirrors the first two in weaponManager (getEdfPenaltyHexes / getEdfPenalty).
+
+       ⭐ WHAT "ESPECIALLY DISRUPTIVE TO PLASMA AND ANTIMATTER" MEANS (user ruling, 2026-09-04).
+       Every INTERVENING hex of somebody else's field is -1 to hit for every weapon in the game.
+       For a young or middleborn race's Plasma and Antimatter, each of those hexes counts TWICE:
+         - BOTH classes: -2 to hit per hex instead of -1.
+         - PLASMA also: each hex counts twice for the rangeDamagePenalty, so it adds one hex of
+           range apiece at damage time. Antimatter's range is NOT touched anywhere.
+       Nothing else in the range arithmetic changes - $distanceForPenalty is the real distance
+       for every weapon in the game, EDF or no EDF.
+       ==================================================================================== */
+
+    /* How many hexes of somebody ELSE'S field lie between the two ends. INTERVENING ONLY -
+       neither endpoint counts; TacGamedata::getEdfPenaltyHexes is the authority.
+       ⚠️ GATED ON THE STATIC, NOT ON THE MAP. Every caller of this sits on a path that runs
+       for every shot of every weapon in every game, so an ordinary game must pay one false
+       boolean read and nothing else - no hex-line walk, no map lookups. Do not "simplify"
+       the gate away. */
+    protected function getEdfCrossedHexes($shooter, $fromPos, $toPos, $gamedata)
+    {
+        if (!TacGamedata::$edfPresent) return 0;
+        if ($gamedata === null) return 0;
+        if (!($fromPos instanceof OffsetCoordinate) || !($toPos instanceof OffsetCoordinate)) return 0;
+        return (int)$gamedata->getEdfPenaltyHexes($fromPos, $toPos, isset($shooter->team) ? $shooter->team : null);
+    }
+
+    /* The two weapon classes the field is "especially disruptive" to, and only for young and
+       middleborn races - an advanced race's plasma is not affected. */
+    protected function isEdfDisruptedClass($shooter)
+    {
+        if (!$shooter || !isset($shooter->factionAge) || $shooter->factionAge >= 3) return false;
+        return ($this->weaponClass == 'Plasma' || $this->weaponClass == 'Antimatter');
+    }
+
+    /* The to-hit penalty in d20 units: the hex count, doubled for the two disrupted classes.
+       Mirrored client-side by weaponManager.getEdfPenalty - keep the pair in step. */
+    public function getEdfHitPenalty($shooter, $edfHexes)
+    {
+        if ($edfHexes <= 0) return 0;
+        return $this->isEdfDisruptedClass($shooter) ? ($edfHexes * 2) : $edfHexes;
+    }
+
+    /* Extra hexes of range for the rangeDamagePenalty: PLASMA ONLY. Antimatter's half of the
+       rule is spent entirely on the to-hit penalty above and its range is left alone.
+       ⚠️ Recomputed here rather than carried from calculateHitBase: damage is resolved in a
+       separate pass (Firing::fireWeapons -> getDamageMod) with no access to that method's
+       locals, and a ballistic's damage is scored from the hex it flew in from, which is the
+       $pos the caller already resolved. */
+    protected function getEdfDamageRangeBonus($shooter, $target, $sourcePos, $gamedata)
+    {
+        if (!TacGamedata::$edfPresent) return 0;
+        if ($this->weaponClass != 'Plasma') return 0;
+        if (!$this->isEdfDisruptedClass($shooter)) return 0;
+        $targetPos = ($target instanceof BaseShip) ? $target->getHexPos() : $target;
+        return $this->getEdfCrossedHexes($shooter, $sourcePos, $targetPos, $gamedata);
+    }
+
 
 	protected function isFtrFiringNonBallisticWeapons($shooter, $fireOrder)
     {
@@ -1835,6 +1907,32 @@ public function getStartLoading()
 		if (TargetingArrayHandler::targetingArraysExist()){ //Do Targeting Array exist in game?		
 			$mod += TargetingArrayHandler::getHitBonus($gamedata, $fireOrder, $shooter, $target);
 		}
+
+		/* WALKERS OF SIGMA-957 - ENERGY DRAINING FIELD targeting penalty
+		   (WALKERS_OF_SIGMA_PLAN.md 2.1, Stage 4).
+
+		   -1 to hit for every INTERVENING hex of somebody else's Energy Draining Field - the
+		   shooter's own hex and the target's do not count - DOUBLED for a young or middleborn
+		   race's Plasma and Antimatter, which is all "especially disruptive" means on this roll.
+		   In d20 units like every other term here; the *5 to d100 happens once at the bottom.
+		   ⚠️ Plasma pays a SECOND time at damage time (getEdfDamageRangeBonus); Antimatter does
+		   not, and NEITHER of them changes $distanceForPenalty. The range arithmetic above is
+		   the same for every weapon in the game.
+
+		   ⚠️ Gated on the static, not on the map: this method runs for every shot in every game
+		   of every faction and an ordinary game must pay one false read and nothing more. The
+		   hex-line walk and the map lookups happen only when a field is actually on the board.
+		   Do not turn this into an unconditional call.
+
+		   ⚠️ It uses $launchPos, not $pos - a ballistic is drained along the line it actually
+		   flew, from where it was launched, which is the same hex every other range and
+		   line-of-sight term in this method is measured from.
+
+		   The client mirrors it in weaponManager.getEdfPenalty(); the doubling rule is
+		   duplicated there and the two must be changed together. */
+		$edfPenalty = $this->getEdfHitPenalty($shooter,
+		                  $this->getEdfCrossedHexes($shooter, $launchPos, $targetPos, $gamedata));
+
         		
 		//advanced sensors: negates BDEW and SDEW, unless target is unit of advanced race
 		if ( ($target->factionAge < 3) && ($shooter->hasSpecialAbility("AdvancedSensors")) ){
@@ -1857,7 +1955,7 @@ public function getStartLoading()
 		
 
 
-        $hitPenalties = $dew + $bdew + $sdew + $rangePenalty + $jinkSelf + max($jammermod, $jinkTarget) + $noLockMod + $halfphasemod;
+        $hitPenalties = $dew + $bdew + $sdew + $rangePenalty + $jinkSelf + max($jammermod, $jinkTarget) + $noLockMod + $halfphasemod + $edfPenalty;
         $hitBonuses = $oew + $soew + $firecontrol + $mod;
         $hitLoc = null;
 
@@ -1916,7 +2014,7 @@ public function getStartLoading()
         //range penalty already logged in calculateRangePenalty... rpenalty: $rangePenalty,
         //interception penalty not yet calculated, will be logged later
         //$notes = $rp["notes"] . ", defence: $defence, DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, no lock: $noLockMod, jink: $jinkSelf/$jinkTarget, OEW: $oew, SOEW: $soew, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change";
-		$notes = $distanceForPenalty . ", defence: $defence, DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, no lock: $noLockMod, jink: $jinkSelf/$jinkTarget, OEW: $oew, SOEW: $soew, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change, ";
+		$notes = $distanceForPenalty . ", defence: $defence, DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, no lock: $noLockMod, jink: $jinkSelf/$jinkTarget, OEW: $oew, SOEW: $soew, F/C: $firecontrol, mod: $mod, EDF: $edfPenalty, goal: $goal, chance: $change, ";
         
 		//update by arc - this caused some trouble and I want it logged...		
         $relativeBearing = $target->getBearingOnUnit($shooter);
@@ -2340,10 +2438,53 @@ public function getStartLoading()
     }//endof function getArcOverkillStructure
 
 
+    /* Does an Energy Draining Field standing on the TARGET'S hex suppress this weapon's flash
+       collateral entirely? True for every ordinary flash weapon - see the rules quote in
+       doCollateralDamage() below, which is the only caller. A hook rather than an inline test so
+       that a weapon the rules exempt can say so in its own file; the Wide-Beam Lightning Array
+       (WALKERS_OF_SIGMA_PLAN.md 3.3) is the only one today.
+       ⚠️ Keep the TacGamedata::$edfPresent short-circuit first in every override: a game with no
+       field in it must not pay for a hex lookup on every flash hit. */
+    protected function edfSuppressesCollateral($target, $fireOrder, $gamedata)
+    {
+        return TacGamedata::$edfPresent && $gamedata->isHexInEdfField($target->getHexPos());
+    }
+
+    /* How much collateral a flash hit splashes onto everything else in the target's hex, as a
+       function of the damage the DIRECT hit scored. 25%, rounded half up, for every ordinary flash
+       weapon.
+       ⚠️ A hook, and overrides must recompute from $damage rather than scaling the 25% figure:
+       rounding an already-rounded number is systematically high (10 damage gives 3, and doubling
+       that is 6, where 50% of 10 is 5). */
+    protected function getFlashCollateralAmount($damage, $target, $fireOrder, $gamedata)
+    {
+        return (int)round($damage / 4, 0, PHP_ROUND_HALF_UP);
+    }
+
     /*collateral damage from a Flash explosion (if any), called from function damage*/
     public function doCollateralDamage($target, $shooter, $fireOrder, $gamedata, $flashDamageAmount)
     {
         if ($this->noCollateral) return; //Some flash weapons don't actually damage ships in hex e.g. Gravitic Mines.
+        /* WALKERS OF SIGMA-957 (WALKERS_OF_SIGMA_PLAN.md 2.1): "Flash weapons are extremely
+           sensitive to the dampening of the field. If they strike a unit located within the
+           field, they will only affect the target (collateral damage will not be scored). The
+           first unit will still take full damage, however. This applies to advanced race weapons
+           as well."
+           So: the TARGET being in a field hex suppresses the splash entirely; the direct hit is
+           unchanged, and it has already been dealt by the time this is reached.
+           ⚠️ ANY field hex, with no own-fleet exemption. The exemption in the drain and the
+           targeting penalty is about who the field is aimed at; this is the field dampening an
+           explosion, which is a property of the hex - and the rules stress it applies even to
+           advanced-race weapons.
+           ⚠️ Gated on the static, so an ordinary game pays one property read per flash hit.
+           ⚠️ The test itself is a HOOK - see edfSuppressesCollateral() - because the Wide-Beam
+           Lightning Array (WALKERS_OF_SIGMA_PLAN.md 3.3) is the one weapon the rules explicitly
+           exempt: a wide beam still scores its collateral inside a field. */
+        if ($this->edfSuppressesCollateral($target, $fireOrder, $gamedata)) {
+            $fireOrder->pubnotes .= "<br>Energy Draining Field dampens the explosion - no collateral damage. ";
+            return;
+        }
+
 
         $explosionPos = $target->getCoPos();
         $ships1 = $gamedata->getShipsInDistance($target, 0);
@@ -2503,7 +2644,9 @@ public function getStartLoading()
 
         $flashDamageAmount = 0; //also read further down, for other fighters in a hit flight - keep it defined on every path
         if($this->damageType=='Flash'){
-            $flashDamageAmount = (int)round($damage/4, 0, PHP_ROUND_HALF_UP); //other units on target hex receive 25% of damage dealt to target, rounded up from .5
+            //other units on target hex receive 25% of damage dealt to target, rounded up from .5.
+            //Via a hook so a weapon can score a different fraction - see getFlashCollateralAmount.
+            $flashDamageAmount = $this->getFlashCollateralAmount($damage, $target, $fireOrder, $gamedata);
 
             /*Flash splash is dealt to the REAL ships sharing the target's hex, and a phantom sits in the
               same hex as the ship it impersonates - so running this on the mirrored pass would deal the
@@ -2704,6 +2847,12 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
                 $sourcePos = $shooter->getHexPos();
             }
             $dis = mathlib::getDistanceHex($sourcePos, $target);
+            /* WALKERS OF SIGMA-957 - PLASMA ONLY: every INTERVENING hex of somebody else's
+               Energy Draining Field the shot crossed counts as TWO hexes of range here, so it
+               adds one apiece. Plasma's second helping on top of the doubled to-hit penalty both
+               classes take; Antimatter's range is untouched. Free when no field is on the board
+               - see the gate in getEdfDamageRangeBonus. */
+            //$dis += $this->getEdfDamageRangeBonus($shooter, $target, $sourcePos, $gamedata); //Remove EDF penalty for now, can always be re-added.
             $damage -= round($dis * $this->rangeDamagePenalty); //round to avoid damage loss at minimal ranges!
         }
 

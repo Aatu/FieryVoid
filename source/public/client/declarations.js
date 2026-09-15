@@ -369,7 +369,9 @@ window.declarations = {
 				weapon.changeFiringMode();
 				}
 			    }
-		      var toHit = weaponManager.calculateHitChange(ship, targetUnit, weapon, order.calledid).hitChance;
+		      //`order` passed so a ballistic resolves ITS OWN launch hex - a homing missile on a
+		      //later pass flies in from its target's previous hex, not from its launcher.
+		      var toHit = weaponManager.calculateHitChange(ship, targetUnit, weapon, order.calledid, order).hitChance;
 		      if (toHit < dispFireEntry.chanceMin) dispFireEntry.chanceMin = toHit;
 		      if (toHit > dispFireEntry.chanceMax) dispFireEntry.chanceMax = toHit;
 		    }			  
@@ -435,7 +437,8 @@ window.declarations = {
 					weapon.changeFiringMode();
 					}
 				    }
-			      var toHit = weaponManager.calculateHitChange(srcShip, ship, weapon, order.calledid).hitChance;
+			      //`order` passed - see the matching call in the outgoing sweep above.
+			      var toHit = weaponManager.calculateHitChange(srcShip, ship, weapon, order.calledid, order).hitChance;
 			      if (toHit < dispFireEntry.chanceMin) dispFireEntry.chanceMin = toHit;
 			      if (toHit > dispFireEntry.chanceMax) dispFireEntry.chanceMax = toHit;
 			  }

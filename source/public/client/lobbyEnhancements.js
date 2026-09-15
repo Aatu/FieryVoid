@@ -75,6 +75,37 @@ window.lobbyEnhancements = {
 		return entry[1] + (count > 1 ? " (" + count + ")" : ""); //count in plain brackets, no "x"
 	},
 
+	/* ---------------------------------------------------------------- EDF tooltip mirror */
+
+	/* "5 hexes (91 hexes covered)".
+	   ⚠️ MIRROR PAIR with EnergyDrainingField::describeEdfRadius (PHP) - same wording, same
+	   arithmetic. A centred hex disc of radius r holds 1 + 3r(r+1) hexes. */
+	describeEdfRadius: function describeEdfRadius(radius) {
+		var r = Math.max(0, parseInt(radius, 10) || 0);
+		var hexes = 1 + (3 * r * (r + 1));
+		return r + ' hex' + (r === 1 ? '' : 'es') + ' (' + hexes + ' hexes covered)';
+	},
+
+	/* ⭐ THE reason a refit can look like it did nothing. A system's SystemInfo tooltip renders
+	   `system.data` VERBATIM, and data is baked into the STATIC BLUEPRINT at generation time -
+	   long before anybody buys anything. In GAME the server re-sends the recomputed data for the
+	   enhanced system; here in the lobby there is no round trip, so the two numeric entries are
+	   rewritten in place, exactly as systemEnhancements.syncInterceptData does for a weapon.
+	   ⚠️ MIRROR PAIR with EnergyDrainingField::setSystemDataWindow (PHP), which owns the KEY
+	   NAMES and the formatting. That method deliberately keeps every number out of the "Special"
+	   prose so this mirror stays two short lines.
+	   ⚠️ The boosted radius is radius + boostRadiusBonus, and after this refit has spent the bonus
+	   down it is simply the radius - which is the rule, not a rounding error. */
+	syncEdfFieldData: function syncEdfFieldData(system) {
+		if (!system || !system.data) return;
+		system.data["Field radius"] = this.describeEdfRadius(system.radius);
+		if (system.variable) {
+			system.data["Boosted radius"] =
+				this.describeEdfRadius((parseInt(system.radius, 10) || 0)
+					+ (parseInt(system.boostRadiusBonus, 10) || 0)) + ' (double power)';
+		}
+	},
+
 	setEnhancementsShip: function setEnhancementsShip(ship) {
 
 		// Ammo magazine is necessary for some options
@@ -108,6 +139,34 @@ window.lobbyEnhancements = {
 							ship.deployEnh = true;
 					break;		
 					*/
+					/* WALKERS OF SIGMA-957 - Extended Draining Field (WALKERS_OF_SIGMA_PLAN.md
+					   Stage 5). ⚠️ MIRROR PAIR with Enhancements::setEnhancementsShip (PHP).
+
+					   TWO fields move and the second one is the rule: the radius goes UP and
+					   boostRadiusBonus comes DOWN by the same amount, floored at 0, so a VARIABLE
+					   field's double-power radius does not move - "a vessel with a Variable Energy
+					   Draining Field may only increase the radius of the normal-power field, and
+					   does not change the radius of the double-power field". Once the bonus
+					   reaches 0 the normal field has caught the boosted one up and double power
+					   buys nothing further, which is exactly what the rule describes. Harmless on
+					   a fixed field, whose bonus is never read. */
+					case 'EDF_RANGE':
+						if (!ship.edfRangeEnh) {
+							for (let system of ship.systems) {
+								if (system.name == "EnergyDrainingField") {
+									system.radius = (parseInt(system.radius, 10) || 0) + enhCount;
+									system.boostRadiusBonus = Math.max(0,
+										(parseInt(system.boostRadiusBonus, 10) || 0) - enhCount);
+									//`this` - setEnhancementsShip is only ever reached as
+									//this.setEnhancementsShip(ship) from apply(), the same way
+									//apply() already calls this.describeTaken().
+									this.syncEdfFieldData(system);
+								}
+							}
+						}
+						ship.edfRangeEnh = true;
+						break;
+
 					case 'ELITE_CREW':
 						if (!ship.eliteEnh) {
 							ship.forwardDefense -= enhCount;
@@ -797,6 +856,14 @@ window.lobbyEnhancements = {
 							ship.ammoSEnh = true;
 							break;
 
+						case 'AMMO_HM': //Homing Missile
+							if (!ship.ammoHMEnh) {
+								ammoMagazine.data["Special"] += "<br>- Homing Missile: " + enhCount;
+								totalRounds += enhCount;
+							}
+							ship.ammoHMEnh = true;
+							break;
+
 						case 'AMMO_X': //HARM Missile						
 							if (!ship.ammoXEnh) {
 								ammoMagazine.data["Special"] += "<br>- HARM Missile: " + enhCount;
@@ -1477,6 +1544,10 @@ window.lobbyEnhancements = {
 			let enhID = entry[0];
 			//We're just finding the relevant enh and reseting update marker, as during Edit process all systems stats will be reset to defaults.
 			switch (enhID) {
+				case 'EDF_RANGE':
+					ship.edfRangeEnh = false;
+					break;
+
 				case 'ELITE_CREW':
 					ship.eliteEnh = false;
 					break;
@@ -1662,6 +1733,10 @@ window.lobbyEnhancements = {
 
 					case 'AMMO_S': //Stealth Missile						
 						ship.ammoSEnh = false;
+						break;
+
+					case 'AMMO_HM': //Homing Missile
+						ship.ammoHMEnh = false;
 						break;
 
 					case 'AMMO_X': //HARM Missile						

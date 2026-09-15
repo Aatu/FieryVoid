@@ -57,6 +57,7 @@ class VerlokaAM extends BaseShip{
 		$this->enhancementOptionsEnabled[] = 'MINE_BLH';//add enhancement options for mines - Wide-Range Mines
 		$this->enhancementOptionsEnabled[] = 'IFF_SYS'; //Abilty to choose IFF enhancement.		 		 		  	    	    	    
 	    $this->enhancementOptionsEnabled[] = 'AMMO_S';//add enhancement options for other missiles - Class-S
+	    $this->enhancementOptionsEnabled[] = 'AMMO_HM';//add enhancement options for other missiles - Class-HM
  
         
         $this->addPrimarySystem(new Reactor(6, 25, 0, 4));

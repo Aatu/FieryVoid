@@ -57,6 +57,28 @@ class Criticals{
          * jump (or destruction, for JumpFailure). Pass 3
          * (processCarrierDestructionEscapes) then sees the post-dock state. */
         HangarOps::processJumpingCarrierDockOrders($gamedata);
+        /* WALKERS OF SIGMA-957 (WALKERS_OF_SIGMA_PLAN.md 2.2): the Energy Draining Field drain.
+           BEFORE pass 1 on purpose - it rolls its own fighter dropouts and must not interleave
+           with testCritical's.
+           ⚠️ BOTH lines are inside the gate deliberately: even touching EdfExposure::$resolvedTurn
+           would autoload the resolver, so a game with no field on the board must not reach either.
+           The reset is the once-per-advance guard, exactly like HkJamming::$alreadyResolved above;
+           idempotency ACROSS requests is the EdfExposed marker, not this static. */
+        /* WALKERS OF SIGMA-957 (Stage 6): an Energy Draining Mine's probe landed during the Firing
+           step that just ran, so its seven hexes are not in the map setEdfHexes() built at load.
+           Fold them in now, so a unit caught in one is drained on the turn it lands (user ruling
+           2026-09-05) - EnergyDrainingMine::commitPendingFields carries the reasoning.
+           ⚠️ BEFORE the gate, not inside it: registerEdfField is what SETS $edfPresent, so a game
+           whose only field is a probe that has just landed would otherwise skip the resolver.
+           class_exists(..., FALSE) does not autoload, so a game with no AoE weapon in it pays one
+           hash lookup and nothing else. */
+        if (class_exists('EnergyDrainingMine', FALSE)) EnergyDrainingMine::commitPendingFields($gamedata);
+
+        if (TacGamedata::$edfPresent) {
+            EdfExposure::$resolvedTurn = -1;
+            EdfExposure::resolve($gamedata);
+        }
+
 
         // ---- Pass 1: testCritical block --------------------------------
         foreach ($activeShips as $ship){

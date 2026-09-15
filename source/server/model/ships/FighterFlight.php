@@ -128,6 +128,27 @@ class FighterFlight extends BaseShip
     /// dropOutBonus reach the client (they're normally blueprint-only values from staticShips).
     public $isModified = false;
 
+    /* WALKERS OF SIGMA-957 - Energy Draining Field thrust drain on a FLIGHT
+       (WALKERS_OF_SIGMA_PLAN.md 2.2 + decision D1). A flight has no Engine, so the drain crit
+       rides its sample fighter and comes off freethrust instead - which is the number both the
+       client's movement budget (movement.js: `rem = ship.freethrust`) and AutomatedMovement
+       spend from.
+       Summed, not counted: one EdfThrustDrain crit is a whole roll. Never negative.
+       ⚠️ Gated on the sample fighter having criticals at all, so an ordinary flight pays one
+       property read - NOT on TacGamedata::$edfPresent, because the field that caused the drain
+       may already be destroyed while its last drain is still in effect. */
+    public function getEffectiveFreeThrust($turn = null){
+        /* ⚠️ sumCriticalParam() defaults to the current turn on === false, NOT on null, so a null
+           passed straight through makes every turn comparison fail and the drain silently reads 0.
+           Resolve it here. (The test that caught this asserted the PUBLISHED number, not the
+           getter with an explicit turn - which is the only way the two could disagree.) */
+        if ($turn === null) $turn = TacGamedata::$currentTurn;
+        $thrust = (int)$this->freethrust;
+        $sample = $this->getSampleFighter();
+        if (!$sample || empty($sample->criticals)) return $thrust;
+        return max(0, $thrust - (int)$sample->sumCriticalParam("EdfThrustDrain", $turn));
+    }
+
     public function stripForJson() {
         $strippedShip = parent::stripForJson();
 
@@ -135,9 +156,16 @@ class FighterFlight extends BaseShip
 
         //Only emit the buffed combat stats when a system has modified them, so the
         //client overrides its static blueprint values (Ship ctor copies JSON over static).
+        /* An EDF drain also has to reach the client, and the only channel is this block - the
+           client spends ship.freethrust directly. Publishing a drained value means setting
+           isModified, which then also publishes offensivebonus and dropOutBonus at their real
+           (unchanged) values, which is correct by definition. */
+        $effectiveThrust = $this->getEffectiveFreeThrust();
+        if ($effectiveThrust !== (int)$this->freethrust) $this->isModified = true;
+
         if ($this->isModified) {
             $strippedShip->offensivebonus = $this->offensivebonus;
-            $strippedShip->freethrust = $this->freethrust;
+            $strippedShip->freethrust = $effectiveThrust;
             $strippedShip->dropOutBonus = $this->dropOutBonus;
             $strippedShip->isModified = $this->isModified;
         }
@@ -300,6 +328,13 @@ class FighterFlight extends BaseShip
                 $affectingSystems[$system->getDefensiveType()] = $mod;
             }
         }
+        //Chromatic Pulse Driver adaptation (WALKERS_OF_SIGMA_PLAN.md 3.4) - the flight mirror of
+        //BaseShip::getDamageMod. A flight carries its shields on the individual fighters, but the
+        //bucket it aggregates them into is the same shape. Gated on the one static boolean, for the
+        //reason spelled out at BaseShip::getHitChanceMod.
+        if (TacGamedata::$cpdAdaptationPresent) {
+            $affectingSystems = CpdScanRegistry::applyToShieldBucket($affectingSystems, $this, $shooter);
+        }
         return array_sum($affectingSystems);
     }
 
@@ -321,6 +356,11 @@ class FighterFlight extends BaseShip
                 || $affectingSystems[$system->getDefensiveType()] < $mod) {
                 $affectingSystems[$system->getDefensiveType()] = $mod;
             }
+        }
+        //Chromatic Pulse Driver adaptation - the flight mirror of BaseShip::getHitChanceMod, gated
+        //the same way.
+        if (TacGamedata::$cpdAdaptationPresent) {
+            $affectingSystems = CpdScanRegistry::applyToShieldBucket($affectingSystems, $this, $shooter);
         }
         return (-array_sum($affectingSystems));
     }
@@ -613,7 +653,7 @@ class FighterFlight extends BaseShip
 		$protectingSystem = $this->getSystemProtectingFromDamage($shooter, null, $gamedata->turn, $weapon, $craft,$dmgPotential);//let's find biggest one!
 		if($protectingSystem){ //may be unavailable, eg. already filled
 			$shots = ($weapon && $weapon->isLinked) ? $weapon->shots : 1;
-			$protection = $protectingSystem->doesProtectFromDamage($dmgPotential, $craft, false, $shots);
+			$protection = $protectingSystem->doesProtectFromDamage($dmgPotential, $craft, false, $shots, false, $shooter);
 		}
 		$armor += $protection;		
 		

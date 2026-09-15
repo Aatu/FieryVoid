@@ -1215,7 +1215,8 @@ class AmmoMissileRackS extends Weapon{
 			$this->ammoClassesArray[] =  new AmmoMissileD(); //...though only Alacans, Narn and Sorithians use those, as simple Basic missiles are far superior
 			$this->ammoClassesArray[] =  new AmmoMissileC();				
 			$this->ammoClassesArray[] =  new AmmoMissileS();
-			$this->ammoClassesArray[] =  new AmmoMissileJ();			
+			$this->ammoClassesArray[] =  new AmmoMissileHM(); //Homing Missile - only a POTENTIAL mode; becomes real only when the magazine actually holds Homing rounds (AMMO_HM enhancement)
+			$this->ammoClassesArray[] =  new AmmoMissileJ();
 			$this->ammoClassesArray[] =  new AmmoMissileK();
 			$this->ammoClassesArray[] =  new AmmoMissileM();
 			$this->ammoClassesArray[] =  new AmmoMissileKK();
@@ -1360,7 +1361,7 @@ class AmmoMissileRackS extends Weapon{
 			
 		//if there is no ammo available - add entry for first ammo on the list... or don't, just fill firingModes (this one is necessary) - assume basic weapons data resemble something like basic desired mode
 		if ($currMode < 1){
-			$this->FiringModes[1] = 'NoAmmunitionAvailable';
+			$this->firingModes[1] = 'NoAmmunitionAvailable';
 		}
 			
 		//change mode to 1, to call all appropriate routines connected with mode change
@@ -1535,6 +1536,10 @@ class AmmoMissileRackS extends Weapon{
 	    
     public function beforeFiringOrderResolution($gamedata) //For Multiwarhead missile
     {
+	  /*HOMING MISSILE: persist this turn's re-attack orders BEFORE anything resolves, and before
+	    the early return further down. See persistHomingOrders for why it has to be here.*/
+	  $this->persistHomingOrders($gamedata);
+
       $firingOrders = $this->getFireOrders($gamedata->turn);
     	
       $originalFireOrder = null;
@@ -1681,8 +1686,393 @@ class AmmoMissileRackS extends Weapon{
         }
         
         if ($currAmmo) $currAmmo->calculateHitBase($gamedata, $fireOrder);
-        
+
 	}//endof function calculateHitBase
+
+
+	/* ==========================================================================================
+	   HOMING MISSILE (Class HM) - HOMING_MISSILE_PLAN.md
+
+	   Everything below is delegation. The behaviour itself lives on AmmoMissileHM (baseSystems.php);
+	   these are the six places the engine has to be told about it, and between them they keep
+	   Weapon::fire, Firing:: and every phase class completely unaware that homing exists.
+
+	   THE LIFECYCLE, in one place:
+	     turn N   phase 4  generateIndividualNotes() reads the RESOLVED order and, on a clean miss
+	                       with fuel left, INSERTS next turn's re-attack order (persistNextPassOrder)
+	                       and writes a 'HomingMissile' note carrying the missile's identity, its
+	                       cumulative travel, the hex the target was standing on and that row's id.
+	     turn N+1 any load onIndividualNotesLoaded() finds that row already loaded and ADOPTS it by
+	                       id (or, for a note that predates the row, rebuilds it in memory).
+	     turn N+1 phase 4  beforeFiringOrderResolution() is now only the fallback insert, then the
+	                       order resolves like any other missile and the cycle repeats.
+	   ========================================================================================== */
+
+	/*The Homing ammo class this rack could fire, or null. Read off $ammoClassesArray (what the rack
+	  COULD hold) and NOT $ammoClassesUsed (what the magazine actually holds), because
+	  onIndividualNotesLoaded runs BEFORE BaseShip::onConstructed and therefore before
+	  Enhancements::setEnhancements has put a single Homing round in the magazine - at that moment
+	  $ammoClassesUsed and $firingModes know nothing about Homing at all.
+	  Racks that reset $ammoClassesArray to their own short list (A, D) simply answer null here.*/
+	protected function getHomingAmmo()
+	{
+		foreach ($this->ammoClassesArray as $currAmmo){
+			if (!empty($currAmmo->isHoming)) return $currAmmo;
+		}
+		return null;
+	}
+
+	/* ⚠️⚠️ THE RUNTIME CARRIER FOR A MISSILE'S IDENTITY AND FUEL, and it has to be this rather
+	   than anything on the fire order.
+
+	   Weapon::calculateHitBase ASSIGNS $fireOrder->notes (weapon.php ~1927), it does not append, so
+	   a tag written there is destroyed the instant the shot's hit chance is computed. The first cut
+	   of this feature did exactly that: every pass came back as a brand-new pass-1 missile with 0
+	   hexes flown, so it could never run out of fuel and would have flown for ever (game 4328).
+
+	   Scope is ONE REQUEST, which is all that is needed - onIndividualNotesLoaded, calculateHitBase
+	   and generateIndividualNotes all run inside the same FireGamePhase::advance, on the same
+	   objects. Between turns the IndividualNote is the carrier.
+
+	   The order object is held alongside its state deliberately: it pins the object for the life of
+	   the request, so spl_object_id cannot be recycled underneath the key, and lets a lookup prove
+	   identity rather than trust the id. */
+	protected $homingStates = array();
+
+	protected function setHomingState($fireOrder, $state)
+	{
+		$this->homingStates[spl_object_id($fireOrder)] = array('order' => $fireOrder, 'state' => $state);
+	}
+
+	protected function getHomingState($fireOrder)
+	{
+		if ($fireOrder === null) return null;
+		$key = spl_object_id($fireOrder);
+		if (!isset($this->homingStates[$key])) return null;
+		if ($this->homingStates[$key]['order'] !== $fireOrder) return null; //recycled id - not ours
+		return $this->homingStates[$key]['state'];
+	}
+
+	/*Does this persisted order and this note describe the same missile? Everything the note holds
+	  that ALSO survives on the order: the target it is chasing, the hex it is coming from, and the
+	  mode it flies in. Used only to stop a note rebuilding an order that already exists.
+	  ⚠️ Every field off a DB-loaded order is a STRING - cast both sides.*/
+	protected function homingOrderMatchesState($fireOrder, $state)
+	{
+		return ((int)$fireOrder->targetid   === (int)$state['targetid']
+			&&  (int)$fireOrder->x          === (int)$state['q']
+			&&  (int)$fireOrder->y          === (int)$state['r']
+			&&  (int)$fireOrder->firingMode === (int)$state['mode']);
+	}
+
+	/*The per-ORDER launch hex of a homing re-attack: where its target was standing when the
+	  previous pass missed ("treating its target's previous location as its new launch hex").
+	  null for every other order, which is what makes each override below fall through to parent.
+
+	  ⚠️ Takes no $gamedata deliberately - isInDistanceRange is not given any.*/
+	protected function getHomingLaunchHex($fireOrder)
+	{
+		if ($fireOrder === null) return null;
+		if ($fireOrder->damageclass !== AmmoMissileHM::REATTACK_CLASS) return null;
+		if (!is_numeric($fireOrder->x) || !is_numeric($fireOrder->y)) return null;
+		return new OffsetCoordinate((int)$fireOrder->x, (int)$fireOrder->y);
+	}
+
+	/*1 of 6. The launch hex. calculateHitBase, Weapon::fire, getIncomingBearing and getIncomingPos
+	  ALL route through getFiringHex, so bearing, hit section and defence profile come out right
+	  for a re-attack with no further change anywhere.
+
+	  ⚠️ NOT done by setting $hasSpecialLaunchHexCalculation = true. That is a CLASS-WIDE flag and
+	  it also switches off the launcher's line-of-sight fire-control penalty in calculateHitBase -
+	  for ordinary launches from this same rack as well. LoS always matters (user ruling).*/
+	public function getFiringHex($gamedata, $fireOrder)
+	{
+		$homingHex = $this->getHomingLaunchHex($fireOrder);
+		if ($homingHex !== null) return $homingHex;
+		return parent::getFiringHex($gamedata, $fireOrder);
+	}
+
+	/*2 of 6. Fuel. The stock test asks "did the target move further than distanceRange from the
+	  launch hex"; a homing missile has to add everything it has already flown to that.*/
+	public function isInDistanceRange($shooter, $target, $fireOrder)
+	{
+		$launchPos = $this->getHomingLaunchHex($fireOrder);
+		if ($launchPos === null) return parent::isInDistanceRange($shooter, $target, $fireOrder);
+
+		$homing = $this->getHomingAmmo();
+		if ($homing === null) return parent::isInDistanceRange($shooter, $target, $fireOrder);
+
+		/*⭐ THE BUDGET IS THE ONE CAPTURED AT LAUNCH, not the launcher's current figure. A Class-F
+		  rack rewrites its own range arrays as its loading state changes (recalculateFireControl),
+		  and a missile already in the air must not have its fuel tank resized because the rack
+		  that fired it has since been reloaded differently (user report, game 4328).
+		  Falls back to the live figure only for a missile that predates the captured field.*/
+		$state = $this->getHomingState($fireOrder);
+		$budget = ($state !== null && (int)$state['budget'] > 0)
+			? (int)$state['budget']
+			: $homing->getFuelBudget($this, (int)$fireOrder->firingMode);
+		if ($budget <= 0) return true; //0 means unlimited range
+
+		$travelled = ($state !== null) ? (int)$state['travelled'] : 0;
+
+		if (($travelled + mathlib::getDistanceHex($launchPos, $target)) > $budget){
+			$fireOrder->pubnotes .= " FIRING SHOT: Homing Missile ran out of fuel.";
+			return false;
+		}
+		return true;
+	}
+
+	/*3 of 6. ⚠️ NOT OPTIONAL, AND SILENT IF OMITTED.
+	  Weapon::calculateLoading treats ANY fire order on a ballistic weapon this turn as "it fired"
+	  and zeroes the rack's loading. A homing missile in flight is not this launcher firing - it
+	  left the rails on an earlier turn - so without this the rack would never reload and could
+	  never launch again for as long as the missile stayed up.
+
+	  Written as a filter-and-delegate rather than a copy of the parent's body so it cannot drift
+	  from it, and short-circuits on the count comparison for every launcher with nothing in flight
+	  (i.e. all of them, in almost every game).*/
+	public function firedOnTurn($turn)
+	{
+		$allOrders = $this->fireOrders;
+		$realOrders = array();
+		foreach ($allOrders as $fire){
+			if ($fire->damageclass === AmmoMissileHM::REATTACK_CLASS) continue;
+			$realOrders[] = $fire;
+		}
+		if (count($realOrders) === count($allOrders)) return parent::firedOnTurn($turn);
+
+		$this->fireOrders = $realOrders;
+		$firedOnTurn = parent::firedOnTurn($turn);
+		$this->fireOrders = $allOrders;
+		return $firedOnTurn;
+	}
+
+	/*⭐⭐ THE NEXT PASS'S ROW, WRITTEN AT THE END OF THE PASS THAT CREATED IT (2026-09-03).
+
+	  A missile that survives its pass is public knowledge from that moment - it announced itself by
+	  not exploding - so its next attack run must be a real, named, addressable shot from the very
+	  first load of the next turn, not a nameless in-memory ghost that only becomes real when the
+	  Firing phase resolves. Three separate bugs all came from it having id -1 until then
+	  (game 4328):
+
+	    - the ballistic icon container keys its duplicate test on the fire order id, so a SECOND
+	      missile with id -1 was folded into the first and drew no launch hex at all;
+	    - a manual intercept order names the order it intercepts in its own targetid, so declaring
+	      interception on either of two id -1 missiles credited BOTH on the defender's screen;
+	    - and the server then threw those orders away, because Firing::automateIntercept resolves
+	      that targetid against this turn's orders by id and -1 names nothing.
+
+	  Inserting it HERE is what makes the id stable: this runs once, server-side, inside
+	  FireGamePhase::advance, and the row carries turn+1, so it is invisible for the remainder of
+	  this turn (DBManager::getFireOrdersForShips only ever fetches the current turn) and is loaded
+	  and adopted by onIndividualNotesLoaded on every load of the next one.
+
+	  ⚠️ NOT attached to $this->fireOrders. It does not belong to the turn being resolved, and every
+	  sweep that follows in FireGamePhase::advance walks this turn's orders.
+
+	  Returns the new row id, or 0 if the insert failed - in which case the note records 0 and the
+	  missile falls back to the in-memory rebuild plus persistHomingOrders, exactly as before.*/
+	protected function persistNextPassOrder($gamedata, $homing, $state)
+	{
+		$nextTurn = (int)$gamedata->turn + 1;
+		$nextPass = $homing->buildReattackOrder($gamedata, $this, $state, $nextTurn);
+		$newId = (int)Manager::insertSingleFiringOrder($gamedata, $nextPass);
+		return ($newId > 0) ? $newId : 0;
+	}
+
+	/*4 of 6. THE FALLBACK id. Since persistNextPassOrder above, a re-attack normally arrives with a
+	  real id already on it and this finds nothing to do; what is left for it is a missile whose note
+	  predates that change, or whose insert failed. Kept because a synthetic order MUST hold a real
+	  id before it deals damage - see below - and this is the last point at which that can be fixed.
+
+	  ⚠️ WHY HERE AND NOT AT REBUILD TIME. onIndividualNotesLoaded runs on EVERY gamedata build for
+	  EVERY viewer, so inserting there would write a row per poll. Firing::prepareFiring calls
+	  beforeFiringOrderResolution on every system of every ship exactly ONCE per resolution, before
+	  any hit chance is calculated - the one hook that is both single-shot and server-authoritative.
+
+	  ⚠️ AND IT HAS TO HAPPEN BEFORE THE SHOT RESOLVES. DamageEntry copies $fireOrder->id at the
+	  moment damage is dealt; with the usual id = -1 DBManager::submitDamages back-fills it by
+	  querying "same gameid+turn+shooterid+weaponid, shotshit > 0" and taking $result[0] with NO
+	  ORDER BY - so a rack that also fired normally this turn would silently log the homing hit
+	  against the wrong order. See howto_create_fire_orders.
+
+	  Orders that some other path already persisted (the movement-phase jump-out sweep, or
+	  PreFiringGamePhase, both of which submit getNewFireOrders()) come back from the DB with a real
+	  id and are skipped here; onIndividualNotesLoaded's guard is what stops them being rebuilt.*/
+	protected function persistHomingOrders($gamedata)
+	{
+		foreach ($this->getFireOrders($gamedata->turn) as $fire){
+			if ($fire->damageclass !== AmmoMissileHM::REATTACK_CLASS) continue;
+			if ((int)$fire->id > 0) continue; //already in the database
+
+			$fire->id      = (int)Manager::insertSingleFiringOrder($gamedata, $fire);
+			$fire->addToDB = false; //inserted - do not let submitFireorders insert it a second time
+			$fire->updated = true;  //...but DO let updateFireOrders write the resolution back
+		}
+	}
+
+	/*Take a persisted re-attack order back off the launcher - used when its note says the missile
+	  should not be flying this turn after all. Detaches only; the row stays in the database, where
+	  nothing will read it again (it is stamped with this turn and this turn is already loaded).*/
+	protected function withdrawHomingOrder($state, &$persisted, &$byOrderId)
+	{
+		$orderId = (int)$state['orderid'];
+		if ($orderId <= 0 || !isset($byOrderId[$orderId])) return;
+
+		$index = $byOrderId[$orderId];
+		if (!isset($persisted[$index])) return;
+
+		$doomed = $persisted[$index];
+		unset($persisted[$index], $byOrderId[$orderId]);
+
+		foreach ($this->fireOrders as $key => $fire){
+			if ($fire !== $doomed) continue;
+			unset($this->fireOrders[$key]); //gaps are fine - hideSystemFireOrders leaves them too
+			break;
+		}
+	}
+
+	/*5 of 6. Rebuild every missile still in flight into a fire order for THIS turn.
+
+	  Runs on every gamedata build, which is what makes the missile visible to both players and lets
+	  the defender assign manual interception against it in the Fire Declaration phase.
+
+	  ⭐ INCLUDING IN INITIAL ORDERS (2026-09-03, user ruling). deleteHiddenData strips every OTHER
+	  current-turn ballistic order from every phase-1 payload, because a launch declared this turn
+	  is a secret until both sides commit. A missile that is already in the air is the opposite of a
+	  secret - it revealed itself by surviving last turn's pass - and both players need it on the
+	  board while they are deciding this turn's orders, not only after they have committed them.
+	  TacGamedata::hideSystemFireOrders carries the exemption, and Firing::validateFireOrders is
+	  what stops the client posting the now-visible order back and duplicating the row.
+
+	  ⚠️ THE GUARD IS LOAD-ORDER DEPENDENT AND CORRECT: DBManager::getTacShips calls
+	  getFireOrdersForShips BEFORE getSystemDataForShips, so anything already persisted for this
+	  turn is in $this->fireOrders by the time this runs and cannot be duplicated.*/
+	public function onIndividualNotesLoaded($gamedata)
+	{
+		$homing = $this->getHomingAmmo();
+		$lastTurn = (int)$gamedata->turn - 1;
+
+		if ($homing !== null && $lastTurn >= 1){
+			/*Re-attack orders for THIS turn that are already in hand. Since 2026-09-03 that is the
+			  NORMAL case, not the exception: the row was written at the end of last turn's Firing
+			  phase (persistNextPassOrder) and has just been read back. One is claimed per note.*/
+			$persisted = array();
+			foreach ($this->getFireOrders($gamedata->turn) as $fire){
+				if ($fire->damageclass !== AmmoMissileHM::REATTACK_CLASS) continue;
+				$persisted[] = $fire;
+			}
+
+			/*⭐ CLAIM BY ROW ID FIRST. Since 2026-09-03 the note carries the id of the row that was
+			  inserted for it (see AmmoMissileHM::unpackState field 9), so two missiles that are
+			  otherwise INDISTINGUISHABLE - same target, same launch hex, same mode, which is the
+			  normal case for two missiles chasing one ship, and exactly what game 4328 turn 3 had -
+			  stay told apart for ever. The field match below is the legacy path only.*/
+			$byOrderId = array();
+			foreach ($persisted as $i => $fire){
+				$byOrderId[(int)$fire->id] = $i;
+			}
+
+			foreach ($this->individualNotes as $currNote){
+				if ($currNote->notekey !== 'HomingMissile') continue;
+				if ((int)$currNote->turn !== $lastTurn) continue; //only LAST turn's survivors
+
+				$state = $homing->unpackState($currNote->notevalue);
+				if ($state === null) continue;
+
+				/*⚠️ Only "does the target still exist" is asked here. isDestroyed() is NOT reliable
+				  at this point - a system latches $destroyed in onConstructed, which has not run
+				  yet - so that question is left to resolveHomingOutcome at phase 4.
+
+				  The row written for this pass a turn ago has to be taken back off the board with
+				  it. Before the row was written up front, "no target" simply meant nothing was
+				  rebuilt; now the order exists whatever happened to its target, and one left
+				  attached would reach prepareFiring, which hands a null target to calculateHitBase.
+				  The DB row is left where it is - it is for THIS turn only and is never read
+				  again.*/
+				if ($gamedata->getShipById($state['targetid']) === null){
+					$this->withdrawHomingOrder($state, $persisted, $byOrderId);
+					continue;
+				}
+
+				//Already on the board? Adopt it and move on - do NOT build a second one.
+				$claimed = null;
+				$orderId = (int)$state['orderid'];
+
+				if ($orderId > 0 && isset($byOrderId[$orderId])){
+					$i = $byOrderId[$orderId];
+					if (isset($persisted[$i])){
+						$claimed = $persisted[$i];
+						unset($persisted[$i], $byOrderId[$orderId]);
+					}
+				}
+
+				/*Legacy notes ONLY (orderid 0): a missile that was already in flight when the row
+				  started being written up front. Matched on the order's own persisted fields, which
+				  cannot tell two identical missiles apart - which is why it counts rather than keys,
+				  and why it is no longer the primary path.*/
+				if ($claimed === null && $orderId <= 0){
+					foreach ($persisted as $i => $fire){
+						if (!$this->homingOrderMatchesState($fire, $state)) continue;
+						$claimed = $fire;
+						unset($persisted[$i], $byOrderId[(int)$fire->id]);
+						break;
+					}
+				}
+
+				if ($claimed === null){
+					$claimed = $homing->buildReattackOrder($gamedata, $this, $state);
+					$this->fireOrders[] = $claimed;
+				}
+
+				$this->setHomingState($claimed, $state);
+			}
+		}
+
+		parent::onIndividualNotesLoaded($gamedata); //clears the note list, as the base class does
+	}
+
+	/*6 of 6. Record which homing missiles survived their pass.
+
+	  ⚠️ PHASE 4 ONLY, and that is what keeps this off POST-side ships. process() also calls
+	  generateIndividualNotes, on ships rebuilt from the player's submission that have neither
+	  enhancements applied nor notes loaded (arch_post_side_ship_reconstruction) - but those calls
+	  arrive in phases 1 and 3. Phase 4 exists only inside FireGamePhase::advance, which sets it
+	  before loading server-authoritative gamedata and then runs prepareFiring -> fireWeapons ->
+	  THIS, on the very objects that just resolved.*/
+	public function generateIndividualNotes($gamedata, $dbManager)
+	{
+		parent::generateIndividualNotes($gamedata, $dbManager);
+
+		if ((int)$gamedata->phase !== 4) return;
+		$homing = $this->getHomingAmmo();
+		if ($homing === null) return;
+		$ship = $this->getUnit();
+		if ($ship === null) return;
+
+		foreach ($this->getFireOrders($gamedata->turn) as $fire){
+			$isReattack = ($fire->damageclass === AmmoMissileHM::REATTACK_CLASS);
+			$modeName = isset($this->firingModes[$fire->firingMode]) ? $this->firingModes[$fire->firingMode] : null;
+			if (!$isReattack && $modeName !== $homing->modeName) continue;
+
+			//The state this pass FLEW under (null for a fresh launch), off the map rather than the
+			//order - $notes cannot carry it, see the ⚠️⚠️ on $homingStates.
+			$state = $homing->resolveHomingOutcome($gamedata, $this, $fire, $this->getHomingState($fire));
+			if ($state === null) continue; //hit, shot down, or out of fuel - the missile is gone
+
+			//⭐ THE NEXT PASS GETS ITS DATABASE ROW HERE, before its note is written.
+			$state['orderid'] = $this->persistNextPassOrder($gamedata, $homing, $state);
+
+			//notekey 13 chars, notekey_human 30 - both columns are varchar(40) and OVERFLOW IS A
+			//FATAL that aborts the whole submission, not a truncation.
+			$this->individualNotes[] = new IndividualNote(
+				-1, TacGamedata::$currentGameID, $gamedata->turn, $gamedata->phase,
+				$ship->id, $this->id,
+				'HomingMissile', 'Homing missile still in flight',
+				$homing->packState($state)
+			);
+		}
+	}
 
 } //endof class AmmoMissileRackS
 
@@ -2343,8 +2733,14 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 	
 	// This method generates additional non-standard information in the form of individual system notes
 	 public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+			/*⚠️ The parent writes the HOMING MISSILE survival note, and it does it at phase 4 - which
+			  this method's own switch does not handle at all, so the two cannot collide. Without
+			  this call a Homing missile fired from a Class-F rack would simply never come back, on
+			  six of the eleven Kor-Lyan hulls that can buy them. See HOMING_MISSILE_PLAN.md.*/
+			parent::generateIndividualNotes($gameData, $dbManager);
+
 			$ship = $this->getUnit();
-			switch($gameData->phase){								
+			switch($gameData->phase){
 				case 1: //Initial phase 
 					//if weapon is marked as firing in Rapid mode, make a note of it!
 					if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
@@ -2406,8 +2802,13 @@ class AmmoMissileRackF extends AmmoMissileRackS {
         	$this->iconPath = "ClassFMissileRackTechnical.png";
 		}		
 		//and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
-//		$this->recalculateFireControl(); //necessary for the variable to affect actual firing		
-		$this->individualNotes = array();
+//		$this->recalculateFireControl(); //necessary for the variable to affect actual firing
+		/*⚠️ LAST, and in place of the bare "$this->individualNotes = array()" this used to end on.
+		  The parent reads the HOMING MISSILE notes here and rebuilds any missile still in flight -
+		  so it has to run BEFORE the list is emptied, and it does its own clearing on the way out
+		  (ShipSystem::onIndividualNotesLoaded). Without this a Homing missile fired from a Class-F
+		  rack would silently never return. See HOMING_MISSILE_PLAN.md.*/
+		parent::onIndividualNotesLoaded($gamedata);
 	} //endof function onIndividualNotesLoaded
 	
 	

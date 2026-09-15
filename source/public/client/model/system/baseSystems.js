@@ -4245,3 +4245,98 @@ CoopStructureSelfRepair.prototype.constructor = CoopStructureSelfRepair;
    No client-side additions needed — cooperative repair logic runs entirely server-side
    in criticalPhaseEffects. The UI (StructureSelfRepairList) works unchanged since
    SystemInfoButtons checks for both names. */
+
+
+/* =======================================================================================
+   WALKERS OF SIGMA-957 - ENERGY DRAINING FIELD (WALKERS_OF_SIGMA_PLAN.md 2.1 + 3.5, Stage 4)
+   Server twin: EnergyDrainingField in server/model/systems/baseSystems.php.
+
+   IT LIVES HERE, NOT IN A WALKER FILE, deliberately. SystemFactory builds every system with
+   `new window[name]`, so this class has to be defined by the time a Traveler is constructed -
+   and baseSystems.js is the FIRST model file both game.php and gamelobby.php load. The
+   Chromatic Pulse Driver had to go into pulse.js for the mirror-image reason (section 3.4);
+   keeping each pair in matching files is what stops that class of load-order bug.
+
+   The field's arithmetic is entirely server-side and published: the radius, the hex map
+   (gamedata.edfHexes) and the tooltip all arrive on the payload. This class exists so the
+   factory has something to build and so the two per-instance scalars survive.
+   ⚠️ ShipCompactor strips FALSE booleans out of a blueprint (plan trap 8), so `this.variable`
+   arrives as UNDEFINED on a fixed field, never as false. Read it as truthy - never `=== false`.
+   ======================================================================================= */
+var EnergyDrainingField = function EnergyDrainingField(json, ship) {
+	ShipSystem.call(this, json, ship);
+	/* Trap 6 - client system fields are shared by reference across same-phpclass instances.
+	   A hull mounting a fixed AND a variable field would otherwise show one tooltip on both.
+	   The server republishes data/radius/variable per instance; this clone keeps a later
+	   client-side edit of one field's tooltip from bleeding onto the other. */
+	this.data = Object.assign({}, this.data);
+};
+EnergyDrainingField.prototype = Object.create(ShipSystem.prototype);
+EnergyDrainingField.prototype.constructor = EnergyDrainingField;
+
+/* Only a variable field offers the double-power boost. maxBoostLevel rides the blueprint. */
+EnergyDrainingField.prototype.hasMaxBoost = function () {
+	return (this.variable ? this.maxBoostLevel > 0 : false);
+};
+
+/* The number on the SCS icon while a variable field is boosted: the radius double power buys.
+   ⚠️ boostRadiusBonus, NEVER a literal 3. The Extended Draining Field refit (EDF_RANGE,
+   WALKERS_OF_SIGMA_PLAN.md Stage 5) raises `radius` and spends `boostRadiusBonus` down by the
+   same amount, so that a variable field's DOUBLE-power radius does not move - a hard-coded 3
+   would show a refitted field a boosted radius it does not have. It also read `this.output`,
+   which an EDF does not have and which is therefore always 0.
+   The server's own answer (effectiveRadius) cannot be used here: a boost allocated THIS turn has
+   not been submitted yet, and immediate feedback is the whole point of this hook. */
+EnergyDrainingField.prototype.initializationUpdate = function () {
+	/* ⚠️ effectiveRadius FIRST, this.radius only as the fallback. effectiveRadius is the server's
+	   own answer AFTER criticals and boost; this.radius is the blueprint value the refit moved,
+	   which knows nothing about an EdfRadiusReduced / EdfBoostLost crit - so `radius` alone keeps
+	   showing the designed size on a field the enemy has already shot down a hex. The lobby has
+	   no effectiveRadius (stripForJson is the in-game payload, and the static blueprint does not
+	   run it), which is exactly what the fallback is for. */
+	var published = parseInt(this.effectiveRadius, 10);
+	this.outputDisplay = isNaN(published) ? (parseInt(this.radius, 10) || 0) : published;
+
+	/* ⚠️ boostedRadius FIRST here too, for the reason spelled out on
+	   PhaseStrategy.getEdfRadiusForShip: it is the SERVER's answer to "what would double power
+	   buy", so it already knows that an EdfBoostLost critical has taken the boost away - which
+	   radius + boostRadiusBonus cannot, and the client cannot see that crit from here. The local
+	   sum stays as the fallback because the LOBBY has no boostedRadius (stripForJson is the
+	   in-game payload), and in the lobby no critical has been rolled yet, so it is exact there. */
+	if (this.variable && shipManager.power.getBoost(this) > 0) {
+		var boosted = parseInt(this.boostedRadius, 10);
+		this.outputDisplay = isNaN(boosted)
+			? (parseInt(this.radius, 10) || 0) + (parseInt(this.boostRadiusBonus, 10) || 0)
+			: boosted;
+	}
+
+    return this;
+};
+
+
+/* =======================================================================================
+   WALKERS OF SIGMA-957 - ENERGY DRAINING NET (WALKERS_OF_SIGMA_PLAN.md 3.7, Stage 7)
+   Server twin: EnergyDrainingNet in server/model/systems/baseSystems.php.
+
+   Beside the Energy Draining Field for the same load-order reason: SystemFactory builds every
+   system with `new window[name]`, so the class must exist before a Traveler is constructed, and
+   baseSystems.js is the FIRST model file both game.php and gamelobby.php load. A missing class
+   here is not a degraded tooltip - it is a TypeError that stops the ship being built at all.
+
+   THERE IS DELIBERATELY NO ARITHMETIC IN HERE. A Net's field is generated BETWEEN Nets, and
+   which hexes it covers is a fleet-wide question the client cannot answer from one system: the
+   server resolves it in EdfNetLinks and publishes the result twice over - into gamedata.edfHexes
+   (where the to-hit penalty mirror reads it, unchanged from Stage 4) and into gamedata.edfNetHexes
+   (where BallisticIconContainer draws it). The escalating power requirement arrives the same way,
+   as the ordinary published powerReq, so the power UI needs nothing either.
+   ======================================================================================= */
+var EnergyDrainingNet = function EnergyDrainingNet(json, ship) {
+	ShipSystem.call(this, json, ship);
+	/* Trap 6 - client system fields are shared by reference across same-phpclass instances, so
+	   two Nets on one hull would otherwise share one tooltip object and the second built would
+	   win. The server republishes `data` per instance (the power multiplier is per-system); this
+	   clone keeps a later client-side edit of one from bleeding onto the other. */
+	this.data = Object.assign({}, this.data);
+};
+EnergyDrainingNet.prototype = Object.create(ShipSystem.prototype);
+EnergyDrainingNet.prototype.constructor = EnergyDrainingNet;

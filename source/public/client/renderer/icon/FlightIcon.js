@@ -118,7 +118,7 @@ window.FlightIcon = function () {
         //matters most here: a flight's fighters are 17px each, so a badge scaled off them would be
         //illegible at exactly the zoom where flights are hardest to find.
         var badgeSize = window.HexagonMath.getHexHeight() * ShipIcon.INI_BADGE_SCALE;
-        this.iniOrderSprite = new window.ShipIniOrderSprite({ width: badgeSize, height: badgeSize }, 3);
+        this.iniOrderSprite = new window.ShipIniOrderSprite({ width: badgeSize, height: badgeSize }, ShipIcon.INI_BADGE_Z);
         this.mesh.add(this.iniOrderSprite.mesh);
 
         scene.add(this.mesh);

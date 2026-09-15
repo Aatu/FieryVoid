@@ -12,7 +12,7 @@ window.ShipTooltipFireMenu = function () {
 
     ShipTooltipFireMenu.buttons = [
 		{ className: "targetWeapons", condition: [isEnemy, hasWeaponsSelected], action: targetWeapons, info: "Target Weapons" },
-        { className: "targetWeaponsHex", condition: [hasOrderSource, hasHexWeaponsSelected], action: targetHexagon, info: "Target Hex" },
+        { className: "targetWeaponsHex", condition: [hasOrderSource, hasHexWeaponsSelected], action: targetHexagon, info: hexButtonLabel },
         { className: "targetSuppWeapons", condition: [hasOrderSource, isFriendly, hasWeaponsSelected, FFWeaponSelected, notSelf], action: targetWeapons, info: "Target Support Weapons" },//30 June 2024 - DK - Added for Ally targeting.
         { className: "removeMultiOrder", condition: [isEnemy, hasWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firing Order" },
         { className: "launchFighters", condition: [isMine, isFiringPhase, hasLaunchableHangar, isLaunchEnabledGame, carrierNotPivotingOrRolling], action: openHangarLaunch, info: "Launch Fighters" },
@@ -115,8 +115,33 @@ window.ShipTooltipFireMenu = function () {
         weaponManager.targetShip(this.selectedShip, this.targetedShip);
     }	
 	
+    /* WALKERS_OF_SIGMA_PLAN.md 3.9 - THE UNIT IS PART OF THE GESTURE FOR ONE WEAPON.
+
+       This button has always meant "put a hex order on the hex this unit is standing in", and for
+       every other hex weapon that is still all it means. The Sensor Charge Transceiver is the one
+       weapon whose declaration can also say WHICH of the units sharing that hex the charge should
+       hit ("providing that it is sent against only one target per hex"), so the targeted unit's id
+       is handed down with the hex; doMultipleHexFireOrders re-checks it and drops it unless it is
+       a live enemy actually standing there.
+
+       ⚠️ Deliberately NOT gated on isEnemy: the LAST waypoint of a course has to land on a
+       FRIENDLY transceiver or the charge is lost, so right-clicking an ally and pressing this is a
+       normal and necessary move. It simply names nobody. */
     function targetHexagon() {
-        weaponManager.targetHex(this.selectedShip, this.hexagon );
+        weaponManager.targetHex(this.selectedShip, this.hexagon,
+            this.targetedShip ? this.targetedShip.id : null);
+    }
+
+    /* "Target Ship" only when pressing the button would really name one - a Sensor Charge
+       Transceiver among the selected systems AND an enemy under the cursor. Anything else is the
+       plain hex order it has always been, and saying otherwise would promise a choice the order
+       does not carry. */
+    function hexButtonLabel() {
+        var sensorCharge = gamedata.selectedSystems.some(function (system) {
+            return system instanceof Weapon && system.name === 'SensorChargeTransceiver';
+        });
+
+        return (sensorCharge && isEnemy.call(this)) ? "Target Ship" : "Target Hex";
     }
 
 	function hasSplitWeaponFiringOrder() {

@@ -48,7 +48,9 @@ window.systemEnhancements = {
 		SYS_GSGT: 'Gunsights',
 		SYS_HSHLD: 'Hardened Shields',
 		SYS_HARM: 'Hardened Armour',
-		SYS_THR: 'Improved Thrust Rating'
+		SYS_THR: 'Improved Thrust Rating',
+		SYS_WBLA: 'Wide-Beam Lightning Array',
+		SYS_WBMLA: 'Wide-Beam Medium Lightning Array'
 	},
 
 	/* Where a system stashes the blueprint values a refit overwrote. See apply(). */
@@ -401,6 +403,19 @@ window.systemEnhancements = {
 				case 'SYS_HARM':
 					self.rememberBase(system, 'armour');
 					system.armour = (parseInt(system[self.BASE_KEY].armour, 10) || 0) + count;
+					break;
+
+				/* WALKERS_OF_SIGMA_PLAN.md 3.3 - the purchase is the CAPABILITY, one boolean, and
+				   there is nothing else to preview: the -2 per damage die, the doubled flash
+				   collateral and the one turn cooldown all hang off the array being ARMED, which is
+				   a Fire-phase toggle that does not exist in the lobby at all.
+				   A plain scalar, so none of the shared-reference care the array cases below need
+				   applies - but it still goes through rememberBase so that un-buying reverts it,
+				   which is the whole contract of this method. */
+				case 'SYS_WBLA':
+				case 'SYS_WBMLA':
+					self.rememberBase(system, 'wideBeamFitted');
+					system.wideBeamFitted = true;
 					break;
 
 				case 'SYS_HSHLD':

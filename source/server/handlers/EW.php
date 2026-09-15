@@ -59,6 +59,13 @@
 			if ($BSGHybrid && $BSGHybrid->hasCritical("SensorLoss"))
 				$output -= 3*$BSGHybrid->hasCritical("SensorLoss");	
 
+			/* WALKERS OF SIGMA-957 - the Energy Draining Field's total-EW drain used to be
+			   subtracted here off an EdfEwDrain critical parked on the CnC. It now rides the
+			   SCANNER and is applied inside Scanner::getOutput(), so the loop above already
+			   has it - and, unlike this version, so does the client (ew.js sums the same
+			   getOutput over the EW systems; it never looked at the CnC). See the comment on
+			   Scanner::getOutput. */
+
 			
 			    if ($output < 0)
 				$output = 0;

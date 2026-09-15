@@ -1,5 +1,53 @@
 'use strict';
 
+/* WALKERS OF SIGMA-957 - Chromatic Pulse Driver shield adaptation (WALKERS_OF_SIGMA_PLAN.md 3.4).
+ *
+ * Client mirror of CpdScanRegistry::applyToShieldBucket (server/lib/CpdScanRegistry.php). A CPD
+ * scanning hit teaches the SHOOTER's team about the TARGET's race, and from the next turn that
+ * team's shots see that race's shields as N points weaker. The server applies it to the aggregated
+ * per-defensive-type bucket rather than inside each shield class, and this does the same, in the
+ * same place, so the previewed hit chance and the rolled one cannot drift.
+ *
+ * ⚠️ Mirrors the SERVER's arithmetic exactly: only the "Shield" bucket, only when it is positive,
+ * clamped at 0.
+ *
+ * ⭐ AND IT MIRRORS THE SERVER'S GATE TOO. `gamedata.cpdAdaptation` is absent unless a scan has
+ * actually landed - the server omits it rather than sending an empty map, off the same
+ * TacGamedata::$cpdAdaptationPresent boolean the four server-side call sites test. So BOTH callers
+ * below test it before calling, and an ordinary game pays one property read per hit-chance preview
+ * and never enters this function. The checks inside it are a second line of defence for anything
+ * that calls it directly, not the gate - keep the call sites guarded.
+ *
+ * Both `team` and `faction` are published on every stripped ship. A chameleon-disguised ship
+ * publishes its DISGUISED faction, so a fleet that has adapted to the disguise reads no benefit
+ * here - which is the deception working, not a bug.
+ *
+ * ⚠️ SHAPED DIFFERENTLY FROM ITS PHP TWIN, on purpose. applyToShieldBucket() RETURNS the modified
+ * array, because a PHP array is a value. A JS array is a reference, so this one mutates in place
+ * and returns THE NUMBER OF POINTS IT ACTUALLY REMOVED - which the hit-chance tooltip needs in
+ * order to show the target's real shielding and the scan's credit on two separate lines.
+ *
+ * ⭐⭐ "ACTUALLY REMOVED" IS NOT "points". The clamp at 0 means 3 points of adaptation against a
+ * 1-point shield removes 1, not 3. Reporting `points` would put a -15% line in a tooltip whose
+ * total only moved 5%, and calculateHitChange's sum-equals-hitChance invariant would start
+ * warning. Always return the difference the bucket actually saw. */
+function cpdApplyShieldAdaptation(affectingSystems, target, shooter) {
+    if (typeof gamedata === 'undefined' || !gamedata.cpdAdaptation) return 0;
+    if (!target || !shooter) return 0;
+    if (!(affectingSystems['Shield'] > 0)) return 0;
+
+    var byFaction = gamedata.cpdAdaptation[shooter.team];
+    if (!byFaction) return 0;
+
+    var points = byFaction[target.faction];
+    if (!(points > 0)) return 0;
+
+    var before = affectingSystems['Shield'];
+    var after = Math.max(0, before - points);
+    affectingSystems['Shield'] = after;
+    return before - after;
+}
+
 var Ship = function Ship(json) {
     var inputSystems = null;
     var staticSystems = null;
@@ -97,12 +145,26 @@ var Ship = function Ship(json) {
 Ship.prototype = {
     constructor: Ship,
 
-    getHitChangeMod: function getHitChangeMod(shooter, weapon) {
-        if (this.flight) return this.getHitChangeModFlight(shooter, weapon); //separate function for fighter flight - same approach, different loop
+    /* launchPos (optional): the ballistic's launch hex for THIS ORDER, which is what
+       checkIsValidAffectingSystem tests arc-limited defensive systems against. The default below is
+       the shooter's start-of-turn hex, and that is wrong for anything whose launch hex is not its
+       launcher's - a homing missile on its second or later pass comes in from its target's previous
+       hex (HOMING_MISSILE_PLAN.md). The server passes the same value as $posmod.
+       Mirrors weaponManager.getFiringHex(shooter, weapon, fireOrder); callers with no order in hand
+       pass nothing and get exactly the old answer.
+
+       outDetail (optional): an object this fills in with the parts of the answer a tooltip wants
+       spelled out rather than folded into the total. Today that is `shieldAdaptation` - the points
+       a Chromatic Pulse Driver scan took off the target's shields, so the breakdown can show the
+       real shielding and the scan's credit on separate lines. The RETURN VALUE is unchanged either
+       way: it is always the final, adapted sum, so every existing caller and the server mirror are
+       untouched. */
+    getHitChangeMod: function getHitChangeMod(shooter, weapon, launchPos, outDetail) {
+        if (this.flight) return this.getHitChangeModFlight(shooter, weapon, launchPos, outDetail); //separate function for fighter flight - same approach, different loop
 
         var firingPos = null;
         if (weapon.ballistic) { //ballistic weapon uses position fron start of turn; direct fire weapons use ship itself rather than any position - important at range 0!
-            firingPos = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn);
+            firingPos = launchPos || shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn);
         }
 
         var affectingSystems = Array();
@@ -136,6 +198,14 @@ Ship.prototype = {
                 affectingSystems[system.defensiveType] = mod;
             }
         }
+        /* Chromatic Pulse Driver adaptation - mirrors the server line in BaseShip::getHitChanceMod,
+           including its gate: `gamedata.cpdAdaptation` is absent unless a scan has actually landed, so
+           an ordinary game pays one property read here and never enters the helper. The helper mutates
+           the bucket and hands back what it REALLY removed, which the tooltip shows on its own line. */
+        if (window.gamedata && gamedata.cpdAdaptation) {
+            var cpdRemoved = cpdApplyShieldAdaptation(affectingSystems, this, shooter);
+            if (outDetail && cpdRemoved) outDetail.shieldAdaptation = cpdRemoved;
+        }
         var sum = 0;
         for (var i in affectingSystems) {
             sum += affectingSystems[i];
@@ -144,10 +214,11 @@ Ship.prototype = {
     }, //getHitChangeMod
 
     //loop through ALL fighters - sample fighter should be enough, but let's loop through all in case of eg. criticals
-    getHitChangeModFlight: function getHitChangeModFlight(shooter, weapon) {
+    //launchPos / outDetail: as getHitChangeMod above.
+    getHitChangeModFlight: function getHitChangeModFlight(shooter, weapon, launchPos, outDetail) {
         var firingPos = null;
         if (weapon.ballistic) { //ballistic weapon uses position fron start of turn; direct fire weapons use ship itself rather than any position - important at range 0!
-            firingPos = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn);
+            firingPos = launchPos || shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn);
         }
 
         var affectingSystems = Array();
@@ -175,6 +246,14 @@ Ship.prototype = {
                     affectingSystems[system.defensiveType] = mod;
                 }
             }
+        }
+        /* Chromatic Pulse Driver adaptation - mirrors the server line in BaseShip::getHitChanceMod,
+           including its gate: `gamedata.cpdAdaptation` is absent unless a scan has actually landed, so
+           an ordinary game pays one property read here and never enters the helper. The helper mutates
+           the bucket and hands back what it REALLY removed, which the tooltip shows on its own line. */
+        if (window.gamedata && gamedata.cpdAdaptation) {
+            var cpdRemoved = cpdApplyShieldAdaptation(affectingSystems, this, shooter);
+            if (outDetail && cpdRemoved) outDetail.shieldAdaptation = cpdRemoved;
         }
         var sum = 0;
         for (var i in affectingSystems) {

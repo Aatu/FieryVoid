@@ -12,6 +12,20 @@ window.ShipIcon = function () {
     THRUSTER_TEXTURE.colorSpace = THREE.SRGBColorSpace;
     THRUSTER_TEXTURE.colorSpace = THREE.SRGBColorSpace;
 
+    /* ⚠️ THE ENERGY DRAINING FIELD DISC HOLDS AN ABSOLUTE WORLD z, NOT A LOCAL ONE (user report,
+       2026-09-04: the field was tinting the EW lines that crossed it).
+
+       It is a CHILD of the ship's mesh - it has to be, so it follows the hull around the board -
+       and that mesh climbs the z ladder as the icon is selected (baseZ + 100) or hovered
+       (baseZ + 499). A local z would ride up with it and put a translucent purple wash over
+       everything below. The EW lines are drawn straight into the scene at z -5
+       (EWIconContainer's LineSprite), so the disc is pinned below that and above the hex grid
+       at -500: updateEdfFieldZ() subtracts the parent's z every time the parent's z moves.
+
+       ⭐ Generalises to any standing overlay that belongs to the BOARD rather than to the icon
+       carrying it: parent it for position, but compensate the parent's z. */
+    var EDF_FIELD_Z = -20;
+
     function ShipIcon(ship, scene) {
 
         this.shipId = ship.id;
@@ -85,6 +99,22 @@ window.ShipIcon = function () {
        standing over a 34px fighter flight and over a 330px Pirocia; sizing it off canvasSize would
        make it vanish on exactly the small units that are hardest to pick out. */
     ShipIcon.INI_BADGE_SCALE = 0.55;
+
+    /* AND IT SITS ABOVE THE PILE, NOT JUST ABOVE ITS OWN HULL (user, 2026-09-02). The badge is a
+       child of its icon's mesh, so the local z of 3 it used to be given only ever cleared the
+       sprites of the unit CARRYING it - and in a stacked hex that is the wrong contest. Every ship
+       of the initiative group that is moving right now is lifted a whole 100 units by setSelected
+       (MovementPhaseStrategy.highlightUnmovedShips lifts them, and the player's own selected ship
+       is lifted by the same call), so a mover standing in the hex of the un-moved unit the badge
+       belongs to painted its hull straight over the number - and the hex a player most wants to
+       read "and this pile goes at 5" off was the one hex that could not show it.
+
+       120 clears that +100 plane and deliberately nothing else: a HOVERED unit still wins
+       (baseZ + 499, which is a bring-to-front the player asked for), and weapon effects still draw
+       over it (LaserEffect, 201). Safe to move a label this far forward because the board camera
+       is ORTHOGRAPHIC (webglScene, near/far +/-1000) - z here buys draw order only, with no
+       parallax shift and no change of size. */
+    ShipIcon.INI_BADGE_Z = 120;
 
     /* Is this unit a jump vortex? Delegates to the ONE place that holds the class names
        (shipManager.movement) rather than repeating them here - the same discipline
@@ -293,6 +323,7 @@ window.ShipIcon = function () {
                 this.shipDirectionOfMovementSprite.hide();
             }
         }
+        this.updateEdfFieldZ(); //the icon's z just moved - hold the field disc where it was
         //this.selected = value; //Removed when I added code for mobile browsers to show direction sprites.        
     };
 
@@ -321,6 +352,7 @@ window.ShipIcon = function () {
                 }
             }
         }
+        this.updateEdfFieldZ(); //the icon's z just moved - hold the field disc where it was
         this.selected = value;
     };
 
@@ -468,7 +500,7 @@ window.ShipIcon = function () {
            asteroid fields don't each carry an unused mesh. */
         if (!this.terrain) {
             var badgeSize = window.HexagonMath.getHexHeight() * ShipIcon.INI_BADGE_SCALE;
-            this.iniOrderSprite = new window.ShipIniOrderSprite({ width: badgeSize, height: badgeSize }, 3);
+            this.iniOrderSprite = new window.ShipIniOrderSprite({ width: badgeSize, height: badgeSize }, ShipIcon.INI_BADGE_Z);
             this.mesh.add(this.iniOrderSprite.mesh);
         }
 
@@ -829,6 +861,14 @@ window.ShipIcon = function () {
        did. 0 means "no reach at all" - e.g. a Warp Jump whose nacelle damage has taken its range to
        0 - and the callers draw nothing for it. */
     function getWeaponReachInHexes(weapon) {
+        /* ⭐ A WEAPON WHOSE REACH IS NOT ITS RANGE. `range` 0 means "no range limit" and
+           `rangePenalty` 0 means "no penalty", and a weapon carrying BOTH works out to a reach of
+           zero here - so nothing was drawn at all. The Sensor Charge Transceiver is exactly that:
+           its reach is the charge's own hex budget, which has nothing to do with how far a target
+           sits from the ship, so it publishes that budget as arcDisplayRange for this one purpose
+           (user report 2026-09-06: "not showing any arcs on normal hover like it should"). */
+        if (weapon.arcDisplayRange > 0) return Math.floor(weapon.arcDisplayRange);
+
         var maxHexes = weapon.rangePenalty === 0 ? weapon.range : Math.floor(50 / weapon.rangePenalty);
 
         if (weapon.range > 0 && maxHexes > weapon.range) maxHexes = weapon.range;
@@ -1943,6 +1983,82 @@ window.ShipIcon = function () {
         }, this);
 
         this.shipHexagonSpritesMap.clear();
+    };
+
+    /* ---- Energy Draining Field overlay ---------------------------------------------------------
+       WALKERS OF SIGMA-957 (WALKERS_OF_SIGMA_PLAN.md 2.1, Stage 4). A translucent disc around a
+       unit projecting an Energy Draining Field, so the thing that is costing everyone a to-hit
+       penalty and draining their thrust is actually visible on the map.
+
+       ⚠️ NOT drawn from gamedata.edfHexes. That map is COLLAPSED by hex and by team - it is built
+       for the penalty arithmetic and cannot say which source a hex came from - so drawing from it
+       would fuse two overlapping fields into one shapeless blob with no border between them. Each
+       source draws its own disc; where two overlap the fills compound, which reads correctly.
+
+       ⚠️ The radius comes off the SYSTEM as effectiveRadius, published by the server after
+       criticals and boost. Do not recompute it here: mirroring the crit ladder would be a second
+       implementation of a rule that changes.
+
+       Standing, not hover-only: an EDF is a persistent feature of the board, unlike a weapon arc.
+       One overlay per icon.
+
+       ⭐⭐ RETURNS TRUE ONLY WHEN IT ACTUALLY REDREW, AND REDRAWS ONLY WHEN SOMETHING CHANGED
+       (user, 2026-09-04: "gate the expensive processes"). syncAllEdfFields runs on EVERY poll of
+       the game, and buildHexRegion sweeps the whole range-N square and builds fresh geometry
+       every time it is called - at radius 8 that is 289 hex tests, a new BufferGeometry and a
+       disposal, for a disc pixel-identical to the one already on screen. A disc is fully
+       described by its RADIUS and the HEX it is anchored on, so those two are the cache key.
+       ⚠️ The return value is also what stops a standing field waking the idle-gated render loop
+       on every poll (trap 10 in reverse): requestRender is for changes, and nothing changed. */
+    ShipIcon.prototype.showEdfField = function (radius, color, opacity) {
+        radius = Math.floor(radius);
+        if (isNaN(radius) || radius < 0) return this.removeEdfField();
+
+        //Anchored on the hex rather than on the sprite - the icon is nudged off centre in a
+        //stacked hex and sits between hexes mid-animation. Resolved before the cache test
+        //because the hex it lands on is half of the key.
+        var anchor = getHexAnchor(this);
+        var key = radius + '@' + Math.round(anchor.centre.x) + ',' + Math.round(anchor.centre.y);
+        if (this.edfFieldSprite && this.edfFieldKey === key) return false; //identical disc already up
+
+        this.removeEdfField();
+
+        var hexDistance = window.coordinateConverter.getHexDistance();
+        //A full disc: every hex within range is in, the projecting unit's own hex included.
+        var loops = buildHexRegion(radius, hexDistance, function () { return true; });
+        if (!loops.length) return false;
+
+        if (color == null) color = new THREE.Color(0.55, 0.15, 0.75).convertSRGBToLinear();
+        if (opacity == null) opacity = 0.1; //it can cover a lot of board - keep it faint
+
+        //Border at a higher opacity than the fill so the edge of the field is readable at a glance,
+        //which is the number that actually matters when plotting a course around it.
+        var hexagon = buildRegionOverlay(loops, color, opacity, color, 0.55);
+
+        //Measured in hexes, so grid-locked (see normaliseGridLockedChildren).
+        addGridLockedOverlay(this.mesh, hexagon, anchor.offset);
+        this.edfFieldSprite = hexagon;
+        this.edfFieldKey = key;
+        this.updateEdfFieldZ();
+        return true;
+    };
+
+    /* Hold the disc at EDF_FIELD_Z in WORLD space however the parent icon rises - see the
+       constant. Called from showEdfField and from both places that move the icon's z.
+       normaliseGridLockedChildren only ever touches x, y and scale, so this is not fighting it. */
+    ShipIcon.prototype.updateEdfFieldZ = function () {
+        if (!this.edfFieldSprite) return;
+        this.edfFieldSprite.position.z = EDF_FIELD_Z - this.mesh.position.z;
+    };
+
+    /* Returns whether it removed anything, so callers can tell a real change from a no-op. */
+    ShipIcon.prototype.removeEdfField = function () {
+        if (!this.edfFieldSprite) return false;
+        this.mesh.remove(this.edfFieldSprite);
+        disposeOverlay(this.edfFieldSprite);
+        this.edfFieldSprite = null;
+        this.edfFieldKey = null;
+        return true;
     };
 
     ShipIcon.prototype.positionAndFaceIcon = function (offset) {
