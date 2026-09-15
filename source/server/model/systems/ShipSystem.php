@@ -933,7 +933,11 @@ public function setParentFighter($fighter) {
 				$this->endMarineMission($critical, $gamedata); // Terminate this specific system sabotage, moved to CnC.
 				return;
 			}else{
-                $newFireOrder->pubnotes .= " and will continue sabotage operations next turn.";
+				if ($sabotageRoll <= 5 && ($sabotageRoll >= 4)){
+				//No extra note here, Marines were eliminated.
+				}else{				
+					$newFireOrder->pubnotes .= " and will continue sabotage operations next turn.";
+				}
 			}
 		}
 
