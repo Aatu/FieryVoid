@@ -42,8 +42,23 @@ window.ShipTooltipBallisticsMenu = function () {
             targetid: ball.fireOrder.targetid,
             shooterid: ball.shooter.id,
             fireOrderId: ball.fireOrder.id,
-            position: this.shipIconContainer.getByShip(ball.shooter).getFirstMovementOnTurn(this.turn).position
+            //the ORDER itself, so calculataBallisticHitChange can resolve a per-order launch hex
+            //(a homing re-attack's) rather than assuming the launcher's - see getFiringHex.
+            fireOrder: ball.fireOrder,
+            position: getLaunchHex.call(this, ball)
         };
+    }
+
+    /* Where this shot is coming FROM. Almost always the shooter's hex at the start of the turn -
+       except for a homing missile on its second or later pass, which runs in from the hex its TARGET
+       was standing on when the previous pass missed. That hex is per-ORDER (it rides on x/y), so two
+       missiles from one rack chasing two different ships genuinely approach from two different
+       directions, and the arc tests in canInterceptBallistic have to be given each one's own.
+       See HOMING_MISSILE_PLAN.md and weaponManager.getIncomingSourcePos. */
+    function getLaunchHex(ball) {
+        var homingHex = weaponManager.getHomingLaunchHex(ball.fireOrder);
+        if (homingHex) return homingHex;
+        return this.shipIconContainer.getByShip(ball.shooter).getFirstMovementOnTurn(this.turn).position;
     }
 
     // Groups collapse identical shots into one row. They now KEEP their members: the group key
@@ -56,7 +71,16 @@ window.ShipTooltipBallisticsMenu = function () {
         ballistics.forEach(ballistic => {
             //const key = ballistic.shooter.id + '-' +  ballistic.weapon.displayName + '-' + weaponManager.calculataBallisticHitChange(getBallisticEntry.call(this, ballistic));
 			//let's differentiate by mode as well!
-			const key = ballistic.shooter.id + '-' +  ballistic.weapon.displayName + '-' +  ballistic.fireOrder.firingMode +'-' + weaponManager.calculataBallisticHitChange(getBallisticEntry.call(this, ballistic));
+			//...and by LAUNCH HEX. Grouped shots are treated as interchangeable - one eligibility
+			//test is run against members[0] and reused for the whole row - which is only true while
+			//they share their geometry. A homing missile on a later pass comes in from its target's
+			//previous hex rather than from the launcher, so two of them from one rack can approach
+			//from opposite sides and must not collapse into one row (HOMING_MISSILE_PLAN.md).
+			//A no-op for every other ballistic: their launch hex is the shooter's, already in the key.
+			//⚠️ q/r, NOT x/y - hexagon.Offset carries only q and r, and a movement row's .position
+			//is one too. Reading .x here would key every shot in the game on "undefined,undefined".
+			const launchHex = getLaunchHex.call(this, ballistic);
+			const key = ballistic.shooter.id + '-' +  ballistic.weapon.displayName + '-' +  ballistic.fireOrder.firingMode +'-' + weaponManager.calculataBallisticHitChange(getBallisticEntry.call(this, ballistic)) + '-' + (launchHex ? launchHex.q + ',' + launchHex.r : '');
 
             if (listObject[key]) {
                 listObject[key].members.push(ballistic);
@@ -156,23 +180,33 @@ window.ShipTooltipBallisticsMenu = function () {
                 var ballisticEntry = getBallisticEntry.call(this, ball);
 
                 // The launch hex, which every interception predicate needs (arc, freeintercept
-                // geometry). getBallisticEntry already resolved it from the shooter's icon.
-                members.forEach(function (member) { member.position = ballisticEntry.position; });
+                // geometry). Resolved PER MEMBER, not copied from the group's representative: a
+                // homing missile's launch hex is its target's previous hex and rides on its own
+                // order, so members of one row can differ (HOMING_MISSILE_PLAN.md). The group key
+                // already includes it, so in practice they agree - but nothing downstream should
+                // depend on that.
+                members.forEach(function (member) { member.position = getLaunchHex.call(this, member); }, this);
 
-                // Set correct firing mode
-                var modeIteration = ball.fireOrder.firingMode;
-                if (modeIteration != ball.weapon.firingMode && !ball.weapon.multiModeSplit) {
-                    while (modeIteration != ball.weapon.firingMode) {
-                        ball.weapon.changeFiringMode();
-                    }
-                }
+                // Set correct firing mode, so every per-mode figure read below (damage, range, hit
+                // chance) is the one this SHOT was declared with.
+                // ⚠️ ball.weapon is the LIVE launcher on the shooter - getAllBallisticsAgainst hands
+                // back shipManager.systems.getSystem(...) - so the switch is undone at the end of
+                // this row. See weaponManager.setModeForFireOrder for what an unrestored one does to
+                // a homing missile's launcher.
+                var restoreMode = weaponManager.setModeForFireOrder(ball.weapon, ball.fireOrder);
 
                 // Set display text. The shooter is named by the heading above, so the row carries only
                 // the shot: how many, of what, in which mode, and - for a Shadow split weapon - what
                 // the shot is made of. The count is always written - including "1x" - so the weapon
                 // names line up down the column.
-                var textToDisplay = amount + 'x ' + ball.weapon.displayName
-                    + ' (' + ball.weapon.firingModes[ball.fireOrder.firingMode] + ')'
+                //
+                // shotsInGroup, not `amount`: one fire order is not always one shot. A Lightning
+                // Array fuses several discharges into a single combined order and answers for it in
+                // getIncomingShotCount, so the row reads "2x Lightning Array (Combined Fire)".
+                // `amount` stays the MEMBER count, because that is what the disclosure caret opens
+                // into and what the per-shot interception sub-rows are.
+                var textToDisplay = shotsInGroup(ball.weapon, members) + 'x ' + ball.weapon.displayName
+                    + ' (' + modeName(ball.weapon, ball.fireOrder) + ')'
                     + diceSuffix(ball.weapon, members);
                 jQuery(".weapon", ballElement).html(textToDisplay).attr('title', textToDisplay);
 
@@ -182,8 +216,12 @@ window.ShipTooltipBallisticsMenu = function () {
                 // Live re-derived breakdown for the hover tooltip (geometry is locked
                 // at start of turn via getFiringHex, so the breakdown remains representative
                 // of how the chance was derived at launch).
+                // ⭐ THE ORDER IS PASSED: a homing missile on its second or later pass launches from
+                // its target's PREVIOUS hex, and without it the target's defence profile - the
+                // biggest single term in the goal - is resolved against the wrong bearing, so the
+                // tooltip disagrees with what the server rolls against (HOMING_MISSILE_PLAN.md).
                 var ballTarget = gamedata.getShip(ball.fireOrder.targetid);
-                var hitChanceResult = weaponManager.calculateHitChange(ball.shooter, ballTarget, ball.weapon, undefined);
+                var hitChanceResult = weaponManager.calculateHitChange(ball.shooter, ballTarget, ball.weapon, undefined, ball.fireOrder);
 
                 // Build hitchance list manually, based on number of ballistics.
                 /*let hitchanceList = [];
@@ -396,7 +434,7 @@ window.ShipTooltipBallisticsMenu = function () {
                         subElement.addClass('ballsub');
 
                         var subText = ball.weapon.displayName
-                            + ' (' + ball.weapon.firingModes[ball.fireOrder.firingMode] + ')'
+                            + ' (' + modeName(ball.weapon, member.fireOrder) + ')'
                             + diceSuffix(ball.weapon, [member]);
                         jQuery(".weapon", subElement).html(subText).attr('title', subText);
 
@@ -428,6 +466,11 @@ window.ShipTooltipBallisticsMenu = function () {
                         jQuery(".incoming", element).append(subElement);
                     }, this);
                 }
+
+                // Put the launcher back in the mode the PLAYER left it in. Everything above that
+                // needed the shot's own mode has been read by now; the click handlers attached to
+                // the row read the weapon live, and they want the player's mode, not this shot's.
+                weaponManager.restoreFiringMode(ball.weapon, restoreMode);
             }, this);
         }, this);
     };
@@ -458,6 +501,33 @@ window.ShipTooltipBallisticsMenu = function () {
     function joinRange(lo, hi) {
         if (lo === null || lo === undefined || lo === hi) return hi + '%';
         return (lo < 0) ? lo + '%-' + hi + '%' : lo + '-' + hi + '%';
+    }
+
+    /* How many SHOTS a grouped row represents. One fire order is normally one shot, so this is the
+       member count — but a weapon that fuses several shots into ONE order (the Lightning Array's
+       combined fire) may say so by implementing getIncomingShotCount(fireOrder). Everything else is
+       untouched: a bare `|| 1` fallback would be wrong for the Molecular Slicer, whose orders carry
+       DICE in ->shots, which is why this is opt-in rather than a sum of ->shots. */
+    function shotsInGroup(weapon, members) {
+        if (!weapon || typeof weapon.getIncomingShotCount !== "function") return members.length;
+        return members.reduce(function (total, member) {
+            var n = parseInt(weapon.getIncomingShotCount(member.fireOrder), 10);
+            return total + ((isNaN(n) || n < 1) ? 1 : n);
+        }, 0);
+    }
+
+    /* The mode name a row prints in its brackets. Weapon.getFiringModeDisplayName is a plain
+       firingModes lookup for everything in the game; the hook exists so a weapon whose shot carries
+       something the mode id does not can say so - the Wide-Beam Lightning Array appends "-Wide"
+       while it is armed, because the arm is a per-turn toggle orthogonal to the mode and two shots
+       that roll different dice would otherwise read identically (user report 2026-09-06).
+       ⚠️ The typeof guard is not decoration: replay and older payloads can put an object here that
+       predates the hook, and a row is not worth a TypeError. */
+    function modeName(weapon, fireOrder) {
+        if (weapon && typeof weapon.getFiringModeDisplayName === "function") {
+            return weapon.getFiringModeDisplayName(fireOrder);
+        }
+        return (weapon && weapon.firingModes) ? weapon.firingModes[fireOrder.firingMode] : '';
     }
 
     /* "(3d + 12)" - the dice and set damage a Shadow split weapon has committed to a row's shots.

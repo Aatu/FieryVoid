@@ -123,7 +123,7 @@ class ShadowFighterAutonomous extends FighterFlight{
 			$diffuser = $this->getSystemProtectingFromDamage($shooter, null, $gamedata->turn, $weapon, $craft,$dmgPotential);//let's find biggest one!
 			if($diffuser){ //may be unavailable, eg. already filled
 				$shots = ($weapon && $weapon->isLinked) ? $weapon->shots : 1;
-				$protection = $diffuser->doesProtectFromDamage($dmgPotential, $craft, false, $shots);
+				$protection = $diffuser->doesProtectFromDamage($dmgPotential, $craft, false, $shots, false, $shooter);
 			}
 			$armor += $protection;		
 			$dmgPotential = max(0, $dmgPotential-$armor);//never negative damage ;)

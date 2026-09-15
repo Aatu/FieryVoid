@@ -129,6 +129,24 @@ window.weaponManager = {
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: weapon });
     },
 
+    /* HOMING MISSILE (HOMING_MISSILE_PLAN.md): is this fire order a missile ALREADY IN THE AIR,
+       coming round for another pass, rather than something this player declared?
+
+       It sits on the launcher's fireOrders exactly like a fresh launch, and since 2026-09-03 it is
+       there from Initial Orders onward - which is the whole point, both sides should be looking at
+       an incoming missile while they plan the turn. But the player did not order it and cannot
+       change it: the server built it and the row is already in the database. So every place that
+       asks "has this weapon been given an order this turn" has to answer NO for it, or the rack
+       reads as fired, cannot be taken offline, cannot be powered down, and - the one that actually
+       loses information - has its in-flight missile silently spliced away by removeFiringOrder the
+       moment the player declares a new launch with the same rack.
+
+       This mirrors AmmoMissileRackS::firedOnTurn on the server, which excludes the same orders from
+       the same question for the same reason. */
+    isHomingReattack: function isHomingReattack(fire) {
+        return !!fire && fire.damageclass === 'HomingMissile';
+    },
+
     checkConflictingFireOrder: function checkConflictingFireOrder(ship, weapon, alert) {
         var p = ship;
         if (ship.flight) {
@@ -149,6 +167,62 @@ window.weaponManager = {
         }
 
         return false;
+    },
+
+    /* ⭐ WALKERS_OF_SIGMA_PLAN.md §3.13 (Stage 14), D16 - FLIGHT-WIDE WEAPON EXCLUSIVITY.
+       Weapons that share a `flightExclusiveGroup` string may not both be fired by one FLIGHT in one
+       turn: if any Mapmaker fires its Medium Lightning Array, no Mapmaker may fire its Light
+       Chromatic Pulsar, and the reverse.
+
+       ⚠️ WHY checkConflictingFireOrder ABOVE CANNOT EXPRESS THIS. That one narrows to the CRAFT
+       (getFighterBySystem) before it looks, which is right for the `exclusive` flag it enforces - a
+       fighter's own two mounts - and wrong here: it would happily let probe #2 fire the pulsar while
+       probe #1 fired the array, which is exactly the combination the rule forbids. So this walks the
+       flight's craft instead, and asks nothing of a non-flight.
+
+       Same kind never conflicts with same kind (six arrays firing together IS the weapon). Returns
+       null when the declaration is allowed, or an HTML reason string when it is blocked - the same
+       contract getLinkedFiringBlock uses, and it shares that caller's one-popup-per-click guard.
+
+       ⚠️ OFFENSIVE ORDERS ONLY, and hasFiringOrder() is therefore the wrong question: it answers
+       true for a manual 'intercept' order and for a selfIntercept marker as well. D16 is a rule
+       about FIRING - a probe that has committed its pulsar to interception has not fired it - and
+       the server's own test (MedLightningArrayFtr::planFlightVolley) filters to type 'normal'.
+       Asking the looser question here would refuse a declaration the server then allows.
+
+       Free for every other weapon in the game: `flightExclusiveGroup` is declared on the two
+       Mapmaker classes only, so the first line returns for everything else. */
+    getFlightExclusivityBlock: function getFlightExclusivityBlock(shooter, weapon) {
+        if (!weapon || !weapon.flightExclusiveGroup) return null;
+        if (!shooter || !shooter.flight) return null;
+
+        var hasOffensiveOrder = function (sys) {
+            for (var f in sys.fireOrders) {
+                var fire = sys.fireOrders[f];
+                if (fire.weaponid != sys.id || fire.turn != gamedata.turn || fire.rolled) continue;
+                if (fire.type === 'intercept' || fire.type === 'selfIntercept') continue;
+                if (weaponManager.isHomingReattack(fire)) continue; //in flight, not declared
+                return true;
+            }
+            return false;
+        };
+
+        for (var i in shooter.systems) {
+            var craft = shooter.systems[i];
+            if (!craft || !craft.systems) continue;
+
+            for (var a in craft.systems) {
+                var sys = craft.systems[a];
+                if (!sys || sys.id == weapon.id) continue;
+                if (sys.flightExclusiveGroup !== weapon.flightExclusiveGroup) continue;
+                if (sys.name === weapon.name) continue; //the same weapon on another craft - that is the point
+                if (!hasOffensiveOrder(sys)) continue;
+
+                return "This flight cannot fire its <b>" + weapon.displayName + "</b> and its <b>"
+                     + sys.displayName + "</b> in the same turn.";
+            }
+        }
+        return null;
     },
 
     //Smallest angular separation (0-180 deg) between two units as seen from a common observer.
@@ -442,7 +516,12 @@ window.weaponManager = {
             return;
         }
 
-        if (!weaponManager.isLoaded(weapon))
+        //WALKERS §3.18 (Stage 20): a Walker jump drive is a legacy drive, so autoFireOnly - but it may be
+        //selected in Initial Orders to declare an abduction. Asked of the drive, not by relaxing the flag.
+        //D63: that includes a drive RECHARGING after an abduction it may still continue, hence before isLoaded.
+        var abductionSelect = typeof weapon.canSelectForAbduction === 'function' && weapon.canSelectForAbduction(ship);
+
+        if (!weaponManager.isLoaded(weapon) && !abductionSelect)
             return;
 
         if (shipManager.power.isOffline(ship, weapon)) {
@@ -455,7 +534,22 @@ window.weaponManager = {
 
         if (weapon.stowed && weapon.stowedArcStart == null) return; //stowed weapons with a stowed arc set (Kirishiac Heavy Orbital) remain operational
 
-        if (weapon.autoFireOnly) return; //this is auto-fire only weapon, should not be fired manually!
+        if (weapon.autoFireOnly && !abductionSelect) return; //this is auto-fire only weapon, should not be fired manually!
+
+        //An Ancient ship jumping out this turn may not fire (JumpEngine::$ancientJump). Setting the
+        //jump already withdrew its orders (JumpEngine.onBoostIncrease); this stops new ones, and the
+        //server withdraws anything that gets past both (Firing::withdrawFireFromJumpingUnits). A ram
+        //is a collision, not firing, and the server lets it stand, so it is not refused here either.
+        if (!weapon.isRammingAttack && shipManager.movement.isJumpFireForbidden(ship)) return;
+
+        /* WALKERS_OF_SIGMA_PLAN.md 3.14a (Stage 19, user ruling 2026-09-12): a ship riding a Docking
+           Bay's aft through its two-turn procedure may not fire either - it is a ship under tow,
+           steering nothing, with its arcs bolted to another hull. Same shape and same exclusion as
+           the jump refusal above (a ram is a collision, not firing), and the same backstop behind
+           it: Firing::withdrawFireFromDockingRiders drops anything that gets past this.
+           ⚠️ shipManager.isDockingRider, NOT `ship.attached` - a breaching pod's host wears that
+           too, and a boarded ship is emphatically still allowed to shoot. */
+        if (!weapon.isRammingAttack && shipManager.isDockingRider(ship)) return;
 
         //Spent & locked Gravitic Augmenter: already committed its order for the turn and is outside
         //that order's declaration phase — block re-selection from every path (icon click, select-all,
@@ -796,7 +890,10 @@ window.weaponManager = {
                     value = weapon.firingModes[value];
                     var keys = Object.keys(weapon.firingModes);
 
-                    if (ship.Huge > 0 || attachedUnitHidden || attachedWeaponHidden || clawBlindSpot) { //Cannot Target larger terrain or POds that are attached to non-facing sides
+                    //!isTargetable: a unit there is no point in shooting at (the Energy Draining
+                    //Mine's orb - plan 3.10c). Same refusal as Huge terrain, and deliberately in
+                    //the same line: what the player needs is one "Cannot Target", not a new reason.
+                    if (ship.Huge > 0 || !shipManager.isTargetable(ship) || attachedUnitHidden || attachedWeaponHidden || clawBlindSpot) { //Cannot Target larger terrain or POds that are attached to non-facing sides
                         $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="cannotTarget"> Cannot Target</span></div>').appendTo(f);
                     } else if (loSBlocked) {
                         // LOS is blocked - only display the blocked message
@@ -1077,11 +1174,16 @@ window.weaponManager = {
         return false;
     },
 
-    calculateRangePenalty: function calculateRangePenalty(distance, weapon) {
+    /* `target`, `calledid` and `fireOrder` are OPTIONAL and only reach the weapon-specific branch: every
+       calculateSpecialRangePenalty implementation but one ignores them. The Lightning Array needs
+       them because its per-hex penalty depends on how many discharges the shot against THAT target
+       fuses, and the hook is otherwise handed nothing but a distance - which would leave the range
+       half of a prediction describing a different shot from the fire-control half. */
+    calculateRangePenalty: function calculateRangePenalty(distance, weapon, target, calledid, fireOrder) {
         var rangePenalty = 0;
 
         if (weapon.specialRangeCalculation) {
-            rangePenalty = weapon.calculateSpecialRangePenalty(distance);
+            rangePenalty = weapon.calculateSpecialRangePenalty(distance, target, calledid, fireOrder);
         } else { //standard calculation
             rangePenalty = weapon.rangePenalty * distance;
         }
@@ -1089,11 +1191,14 @@ window.weaponManager = {
     },
 
     /*Marcin Sawicki, September 2019: simplified to using calculateHitChange instead*/
+    //`ball.fireOrder`, where the caller has it, is what lets a homing re-attack resolve its own
+    //launch hex rather than its launcher's - see getFiringHex. Optional: an entry built without one
+    //behaves exactly as before.
     calculataBallisticHitChange: function calculataBallisticHitChange(ball, calledid) {
         var shooter = gamedata.getShip(ball.shooterid);
         var weapon = shipManager.systems.getSystem(shooter, ball.weaponid);
         var target = gamedata.getShip(ball.targetid);
-        return weaponManager.calculateHitChange(shooter, target, weapon, calledid).hitChance;
+        return weaponManager.calculateHitChange(shooter, target, weapon, calledid, ball.fireOrder).hitChance;
     },//endof calculataBallisticHitChange
 
     /* Kept only as the legacy entry point: it was always called as getInterception(ball) where
@@ -1770,8 +1875,23 @@ window.weaponManager = {
     ------------------------------------------------------------ */
 
 
-    getFiringHex: function getFiringHex(shooter, weapon) {
+    /* Where a shot is fired FROM, in hex coordinates. The client mirror of
+       Weapon::getFiringHex($gamedata, $fireOrder) on the server.
+
+       ⭐ $fireOrder IS OPTIONAL BUT MATTERS: the server's version is per-ORDER and this one used to
+       be per-WEAPON only, which is a real divergence for anything whose launch hex is not its
+       launcher's. A homing missile on its second or later pass runs in from the hex its TARGET was
+       standing on when the previous pass missed, and that hex rides on the order (x/y) - so a
+       preview computed without the order resolves the target's DEFENCE PROFILE against the wrong
+       bearing and disagrees with the server by whatever the two profiles differ by (game 4328
+       turn 3: client 0-20%, server -5%-15%).
+       Pass the order wherever you have it. Callers that legitimately have none (a shot the player
+       has not declared yet) get exactly the old answer. */
+    getFiringHex: function getFiringHex(shooter, weapon, fireOrder) {
         var sPosLaunch = null;
+
+        var homingHex = weaponManager.getHomingLaunchHex(fireOrder);
+        if (homingHex) return homingHex;
 
         if (weapon.hasSpecialLaunchHexCalculation) { //Does weapon have a different method of determining point of shot e.g. Proximity Laser?
             sPosLaunch = weapon.getFiringHex(shooter, weapon);
@@ -1819,12 +1939,34 @@ window.weaponManager = {
 
         if (!target.flight) {
             dew = ew.getDefensiveEW(target);
+        } else if (ew.isFlightEwPool(target)) {
+            /* ⭐ WALKERS OF SIGMA-957 (WALKERS_OF_SIGMA_PLAN.md 3.11, Stage 12) - A MAPMAKER'S OWN
+               DEW, which is the half of the rule that is easy to forget: "Mapmaker DEW works
+               exactly the same as ship DEW e.g. is ignored by fighters". The server has always
+               read it - $dew = $target->getDEW($turn) works on a FighterFlight - so before Stage
+               12 the two agreed only because no flight had ever had a DEW row. A ship shooting at
+               a Mapmaker that took DEW would otherwise preview a hit chance the resolution does
+               not honour.
+               ⚠️ ew.getFlightDEW, NOT ew.getDefensiveEW: the latter is an alias for getEWLeft()
+               and on a flight answers with the MINE-DETECTION allowance (see ew.js). */
+            dew = ew.getFlightDEW(target);
         }
 
         sdew = ew.getSupportedDEW(target);
         bdew = ew.getSupportedBDEW(target);
 
-        if (shooter && shooter.flight && !weapon.ballistic) {
+        /* WALKERS_OF_SIGMA_PLAN.md 3.13c: the total BEFORE the fighter waiver below, which is
+           what cancels an ordinary fighter weapon's flight OEW (never its offensive bonus - the
+           target's DEW, blanket and supported EW stack inside the subtraction). computeOEW cannot
+           re-derive it, because the waiver has zeroed all three by the time it runs. 0 for every
+           shot the waiver does not fire on.
+           ⚠️ A useFlightEW weapon (the Mapmakers' Medium Lightning Array) is NOT waived: it uses
+           ship rules, so the target's DEW/BDEW/SDEW stay in the profile total as for a ship.
+           MIRROR PAIR with the FighterFlight branch of Weapon::calculateHitBase. */
+        var defensiveEwBeforeWaiver = 0;
+
+        if (shooter && shooter.flight && !weapon.ballistic && !weapon.useFlightEW) {
+            defensiveEwBeforeWaiver = dew + bdew + sdew;
             dew = 0;
             bdew = 0;
             sdew = 0;
@@ -1855,6 +1997,10 @@ window.weaponManager = {
             dew: dew,
             sdew: sdew,
             bdew: bdew,
+            //Stage 12/3.13c: only computeOEW reads this, and only for an ORDINARY fighter weapon. It
+            //is NOT a modifier and must never join the goal - the three fields above are already 0
+            //when it is non-zero, which is the fighter waiver saying the shot ignores defensive EW.
+            defensiveEwBeforeWaiver: defensiveEwBeforeWaiver,
             jinking: jink,
             halfPhase: halfphase,
             total: base - dew - jink - bdew - sdew - halfphase
@@ -1862,7 +2008,9 @@ window.weaponManager = {
     },
 
     // Returns shooter's offensive EW: { oew, soew }. Handles fighter offensive bonus path.
-    computeOEW: function computeOEW(shooter, target, weapon, sPosTarget) {
+    // defensiveEw: the target's DEW + BDEW + SDEW as they stood BEFORE the fighter waiver zeroed
+    // them (computeBaseDefenceBreakdown.defensiveEwBeforeWaiver). Stage 12 only; 0 otherwise.
+    computeOEW: function computeOEW(shooter, target, weapon, sPosTarget, defensiveEw) {
         var oew = 0;
         var soew = 0;
 
@@ -1879,9 +2027,41 @@ window.weaponManager = {
             var firstFighter = shooter.systems[1];
             var OBcrit = shipManager.criticals.hasCritical(firstFighter, "tmpsensordown");
             var mdew = ew.getDetectMEW(shooter);
-            oew = shooter.offensivebonus - OBcrit - (mdew * 2);
+            /* ⭐⭐ WALKERS OF SIGMA-957 (WALKERS_OF_SIGMA_PLAN.md 3.11/3.13c) - THE FLIGHT'S OWN
+               OEW, and the two ways a fighter weapon may use it. MIRROR PAIR with the
+               `$shooter instanceof FighterFlight` branch of Weapon::calculateHitBase (PHP).
+               CORRECTED 2026-09-11 from the rulebook text: the DEW contest belongs to the Pulsar.
+
+               `oew` currently holds ew.getTargetingEW(shooter, target) - DIST, floored at 0, from
+               the useOEW block above. For every flight in the game except a Mapmaker it is 0,
+               because nothing else can write a flight OEW row - which is what makes both terms
+               below free everywhere else.
+
+                 ordinary fighter weapon   offensive bonus PLUS (flight OEW - target DEW, min 0).
+                                           The target's DEW + BDEW + SDEW can cancel the OEW term
+                                           but never eat into the bonus ("+0, not -2").
+                 useFlightEW weapon        SHIP RULES: flight OEW is the lock, no offensive bonus.
+                                           The target's defensive EW is NOT waived for it (see
+                                           computeBaseDefenceBreakdown), and no OEW means the
+                                           ordinary no-lock penalty in computeJammerNoLock.
+
+               ⚠️ getTargetingEW would add CCEW against a flight target, which the server's
+               FighterFlight::getOEW does not - harmless only because no flight can allocate CCEW
+               (addCCEW carries notFlight, and Stage 12 relaxed the OEW entries alone).
+
+               ⚠️ THE BALLISTIC BRANCH BELOW IS UNTOUCHED, matching the server: its `oew` is not a
+               lock at all but a CONDITIONAL GRANT of the offensive bonus (navigator, arc, LoS,
+               skindancing), and no flight with an EW pool carries a ballistic. */
+            var flightOew = Math.max(0, oew);
+            //max(0) here, not only on the sum below: the server clamps $effectiveOB before it is
+            //used, so a crit-suppressed bonus must not eat into the flight's own OEW.
+            var effectiveOB = Math.max(0, shooter.offensivebonus - OBcrit - (mdew * 2));
 
             if (weapon.ballistic) {
+                //A ballistic's bonus is a CONDITIONAL GRANT, not a lock, and flight OEW plays no
+                //part in it - the server sets $oew = 0 and then re-grants $effectiveOB alone.
+                oew = effectiveOB;
+
                 var shooterLoSBlocked = false;
                 var blockedLosHex = gamedata.blockedHexes;
                 if (blockedLosHex && blockedLosHex.length > 0) {
@@ -1895,6 +2075,10 @@ window.weaponManager = {
                     Object.values(shooter.skinDancing).includes("Failed")) {
                     oew = 0;
                 }
+            } else {
+                oew = weapon.useFlightEW
+                    ? flightOew
+                    : (effectiveOB + Math.max(0, flightOew - (defensiveEw || 0)));
             }
             oew = Math.max(0, oew);
             if (oew == 0) soew = 0;
@@ -1906,7 +2090,7 @@ window.weaponManager = {
     // Computes jammer + no-lock penalties as a combined pair.
     // Returns { jammermod, noLockMod, soewSuppressed, oewSuppressed }.
     // Caller applies suppression to the OEW result it already holds.
-    computeJammerNoLock: function computeJammerNoLock(shooter, target, weapon, oew, distance, rangePenalty) {
+    computeJammerNoLock: function computeJammerNoLock(shooter, target, weapon, oew, distance, rangePenalty, calledid, fireOrder) {
         var noLockPenalty = 0;
         var noLockMod = 0;
         var jammermod = 0;
@@ -1920,6 +2104,10 @@ window.weaponManager = {
         }
 
         if (shooter.mine) noLockPenalty = 0; //mines assume lock; jammer may still apply
+
+        /* WALKERS_OF_SIGMA_PLAN.md 3.13c: a useFlightEW shot takes this penalty exactly like a
+           ship - its oew is the allocated OEW, uncancelled by DEW, so it is < 1 only when no OEW
+           was allocated. MIRROR PAIR with the same comment in Weapon::calculateHitBase. */
 
         jammermod = ew.getJammerValueFromTo(shooter, target);
 
@@ -1942,9 +2130,9 @@ window.weaponManager = {
         if ((jammermod > 0) || (noLockPenalty > 0)) {
             if (weapon.doubleRangeIfNoLock) { //e.g. Antimatter
                 var modifiedDistance = distance * (1 + noLockPenalty);
-                noLockMod = weaponManager.calculateRangePenalty(modifiedDistance, weapon) - rangePenalty;
+                noLockMod = weaponManager.calculateRangePenalty(modifiedDistance, weapon, target, calledid, fireOrder) - rangePenalty;
                 modifiedDistance = distance * (1 + jammermod);
-                jammermod = weaponManager.calculateRangePenalty(modifiedDistance, weapon) - rangePenalty;
+                jammermod = weaponManager.calculateRangePenalty(modifiedDistance, weapon, target, calledid, fireOrder) - rangePenalty;
             } else {
                 noLockMod = rangePenalty * noLockPenalty;
                 jammermod = jammermod * rangePenalty;
@@ -2013,8 +2201,83 @@ window.weaponManager = {
     //   calledShot        (signed - added to goal when calledid > 0)
     //   otherTotal        (signed sum of otherDetail entries)
     //   otherDetail       ([{label, value}, ...] for future tooltip expansion)
-    computeShotModifiers: function computeShotModifiers(shooter, target, weapon, calledid, distance) {
-        var defensiveSystems = target.getHitChangeMod(shooter, weapon);
+    //   launchPos (optional): the ballistic's launch hex, per ORDER. Mirrors the server's $posmod
+    //                         argument to getHitChanceMod - it is the bearing the target's
+    //                         arc-limited defensive systems are tested against.
+
+    /* ------------------------------------------------------------------------------------
+       WALKERS OF SIGMA-957 - ENERGY DRAINING FIELD targeting penalty, CLIENT MIRROR.
+       (WALKERS_OF_SIGMA_PLAN.md 2.1, Stage 4.)
+
+       Server twin: TacGamedata::getEdfPenaltyHexes(). Returns a raw HEX COUNT - how many hexes
+       of somebody ELSE'S field lie BETWEEN the two ends.
+
+       ⚠️⚠️ INTERVENING HEXES ONLY (user ruling, 2026-09-04): mathlib.hexLine mirrors the
+       server's i = 0 .. steps and so returns BOTH endpoints, and neither of them counts. The
+       shot is drained by the field it crosses, not by the field its two ends are standing in.
+       Adjacent and same-hex shots therefore cross nothing. Change this with its server twin.
+
+       The count is -1 to hit per hex, DOUBLED for a young or middleborn race's Plasma and
+       Antimatter - see getEdfPenalty below, which mirrors Weapon::getEdfHitPenalty. Plasma's
+       extra helping at damage time is server-side only (Weapon::getEdfDamageRangeBonus); the
+       client draws no damage preview, and neither class touches the RANGE arithmetic anywhere.
+
+       "Somebody else's" is the shooter's team: a hex covered ONLY by the shooter's own team is
+       free, which is the rules' "the rest of the fleet of the ship deploying the EDF is immune".
+
+       ⚠️ Gated on gamedata.edfHexes, which the server publishes as null (never []) when no field
+       is on the board - so an ordinary game costs one property read per preview. gamedata.js
+       must copy the key by name or this reads null forever; see the note beside cpdAdaptation
+       in parseServerData.
+       ------------------------------------------------------------------------------------ */
+    getEdfPenaltyHexes: function getEdfPenaltyHexes(fromPos, toPos, shooterTeam) {
+        var map = window.gamedata && gamedata.edfHexes;
+        if (!map) return 0;
+        if (!fromPos || !toPos) return 0;
+
+        var line = mathlib.hexLine(fromPos, toPos);
+        var count = 0;
+        for (var i = 1; i < line.length - 1; i++) { //INTERVENING ONLY - endpoints deliberately skipped
+            var entry = map[line[i].q + ',' + line[i].r];
+            if (!entry) continue;
+            var teams = Object.keys(entry.teams || {});
+            //own-fleet immunity: covered by exactly one team, and that team is the shooter's
+            if (shooterTeam !== null && shooterTeam !== undefined
+                && teams.length === 1 && String(teams[0]) === String(shooterTeam)) continue;
+            count++;
+        }
+        return count;
+    },
+
+    /* The full penalty in d20 units, doubling included. Mirrors Weapon::getEdfHitPenalty:
+       -1 per INTERVENING hex, doubled for a young or middleborn race's Plasma and Antimatter,
+       which is the whole of "especially disruptive to plasma and antimatter" as far as a to-hit
+       roll is concerned. Plasma also counts each hex twice for its rangeDamagePenalty, but that
+       is a damage-time figure the client never previews - and NEITHER class changes the range
+       the ordinary range penalty is computed at. Keep this in step with the server. */
+    getEdfPenalty: function getEdfPenalty(shooter, target, weapon, launchPos, targetPos) {
+        var hexes = weaponManager.getEdfPenaltyHexes(launchPos, targetPos,
+                        (shooter && shooter.team !== undefined) ? shooter.team : null);
+        if (hexes <= 0) return 0;
+        if (shooter && shooter.factionAge < 3
+            && (weapon.weaponClass === 'Plasma' || weapon.weaponClass === 'Antimatter')) {
+            return hexes * 2; //"especially disruptive to plasma and antimatter"
+        }
+        return hexes;
+    },
+    computeShotModifiers: function computeShotModifiers(shooter, target, weapon, calledid, distance, launchPos, fireOrder) {
+        /* Chromatic Pulse Driver shield adaptation (WALKERS_OF_SIGMA_PLAN.md 3.4). getHitChangeMod
+           returns the ADAPTED total - that is what the server rolls and it must not change. But a
+           breakdown that silently shows the target's shields one point weaker than their sheet says
+           is unreadable, so the reduction is asked for separately and split back out: the
+           'Defensive Systems' row shows the REAL shielding and 'Shield Adaptation' shows what the
+           scan bought. calculateHitChange adds it straight back, so the goal is bit-identical.
+           ⚠️ Gated on the same property the server's TacGamedata::$cpdAdaptationPresent publishes,
+           so an ordinary game does one property read and does not even allocate the out-object. */
+        var cpdDetail = (window.gamedata && gamedata.cpdAdaptation) ? {} : null;
+        var defensiveSystems = target.getHitChangeMod(shooter, weapon, launchPos, cpdDetail);
+        var shieldAdaptation = (cpdDetail && cpdDetail.shieldAdaptation) || 0;
+        if (shieldAdaptation) defensiveSystems += shieldAdaptation; //un-reduce, FOR DISPLAY ONLY
         var calledShot = 0;
         var otherDetail = [];
 
@@ -2025,7 +2288,7 @@ window.weaponManager = {
         }
 
         if (weapon.specialHitChanceCalculation) {
-            var specialMod = weapon.calculateSpecialHitChanceMod(shooter, target, calledid);
+            var specialMod = weapon.calculateSpecialHitChanceMod(shooter, target, calledid, fireOrder);
             if (specialMod !== 0) otherDetail.push({ label: 'Weapon Special', value: specialMod });
         }
 
@@ -2083,6 +2346,7 @@ window.weaponManager = {
         var otherTotal = otherDetail.reduce(function (s, d) { return s + d.value; }, 0);
         return {
             defensiveSystems: defensiveSystems,
+            shieldAdaptation: shieldAdaptation,
             calledShot: calledShot,
             otherTotal: otherTotal,
             otherDetail: otherDetail
@@ -2099,7 +2363,10 @@ window.weaponManager = {
     //     _otherDetail: [{label,value}, ...]    // sub-breakdown of the 'Other' line
     //   }
     // Invariant: Math.round(sum(modifiers[*].value) / 20 * 100) === hitChance
-    calculateHitChange: function calculateHitChange(shooter, target, weapon, calledid) {
+    // fireOrder (optional): the ORDER being previewed. Only ballistics care, and only to resolve
+    // their launch hex - see getFiringHex. Without it a homing missile's preview is computed from
+    // its launcher's hex instead of the hex it is actually flying in from.
+    calculateHitChange: function calculateHitChange(shooter, target, weapon, calledid, fireOrder) {
         function makeResult(hitChance, opts) {
             opts = opts || {};
             return {
@@ -2141,11 +2408,16 @@ window.weaponManager = {
         }
 
         //Geometry: defence value + distance + sPosTarget (used by helpers for ballistics)
+        //⭐ THE LAUNCH HEX IS PER-ORDER, not per-weapon (see getFiringHex). It decides which of the
+        //target's profiles the shot is resolved against - and on the server it is
+        //getHitSectionProfilePos($launchPos), the single largest term in the goal. Getting it from
+        //the shooter for a homing re-attack is what made the preview disagree.
         var defence = 0;
         var distance = 0;
         var sPosTarget = null;
+        var sPosLaunch = null;
         if (weapon.ballistic) {
-            var sPosLaunch = weaponManager.getFiringHex(shooter, weapon);
+            sPosLaunch = weaponManager.getFiringHex(shooter, weapon, fireOrder);
             sPosTarget = shipManager.getShipPosition(target);
             defence = weaponManager.getShipDefenceValuePos(sPosLaunch, target);
             distance = sPosLaunch.distanceTo(sPosTarget).toFixed(2);
@@ -2171,23 +2443,48 @@ window.weaponManager = {
 
         //Compute components via helpers
         var baseBreakdown = weaponManager.computeBaseDefenceBreakdown(shooter, target, weapon, defence);
-        var ewLock = weaponManager.computeOEW(shooter, target, weapon, sPosTarget);
-        var rangePenalty = weaponManager.calculateRangePenalty(distance, weapon);
-        var jammer = weaponManager.computeJammerNoLock(shooter, target, weapon, ewLock.oew, distance, rangePenalty);
+        //Stage 12: defensiveEwBeforeWaiver is what a useFlightEW shot is contested by. Every other
+        //shot gets 0 and computeOEW never looks at it.
+        var ewLock = weaponManager.computeOEW(shooter, target, weapon, sPosTarget, baseBreakdown.defensiveEwBeforeWaiver);
+        var rangePenalty = weaponManager.calculateRangePenalty(distance, weapon, target, calledid, fireOrder);
+        var jammer = weaponManager.computeJammerNoLock(shooter, target, weapon, ewLock.oew, distance, rangePenalty, calledid, fireOrder);
         if (jammer.oewSuppressed) { ewLock.oew = 0; ewLock.soew = 0; }
         else if (jammer.soewSuppressed) ewLock.soew = 0;
         var fireControl = weaponManager.computeFireControl(shooter, target, weapon, sPosTarget, calledid);
-        var shotMods = weaponManager.computeShotModifiers(shooter, target, weapon, calledid, distance);
+        //sPosLaunch threaded in for the same reason as above: the server passes $launchPos to
+        //getHitChanceMod as $posmod, and it is what decides which ARC-LIMITED defensive systems
+        //(shields, webs) actually cover the incoming shot.
+        var shotMods = weaponManager.computeShotModifiers(shooter, target, weapon, calledid, distance, sPosLaunch, fireOrder);
+        /* Walkers of Sigma-957 (Stage 4): -1 to hit per INTERVENING hex of somebody else's Energy
+           Draining Field, doubled for young/middleborn Plasma and Antimatter. Mirrors the
+           $edfPenalty line in Weapon::calculateHitBase. Nothing above it changes - neither class
+           lengthens the range the range penalty is computed at.
+           ⚠️ sPosLaunch/sPosTarget are only filled in for BALLISTICS above - direct fire leaves
+           both null, so both ends are resolved here. The server measures the same two hexes:
+           $launchPos comes from getFiringHex(), which answers the shooter's own hex for a
+           non-ballistic, and $targetPos is $target->getHexPos(). A ballistic is drained along
+           the line it actually flew, from where it was launched.
+           ⚠️ getEdfPenaltyHexes' own gate on gamedata.edfHexes is what keeps this free in an
+           ordinary game - one property read per preview and no line walk. */
+        var edfFrom = sPosLaunch || shipManager.getShipPosition(shooter);
+        var edfTo   = sPosTarget || shipManager.getShipPosition(target);
+        var edfPenalty = weaponManager.getEdfPenalty(shooter, target, weapon, edfFrom, edfTo);
 
         //Goal: identical to old formula (baseDef - jammermod - noLockMod - rangePenalty + oew + soew + firecontrol + mod)
         //where mod = -defensiveSystems + calledShot + otherTotal
+        //⭐ shieldAdaptation is a pure REGROUPING, not a new term: computeShotModifiers handed back
+        //the target's FULL shielding plus the points a CPD scan removed from it, so subtracting the
+        //full value and adding the reduction back reproduces the adapted total exactly. It is here
+        //only so the breakdown can show the two separately; it is 0 in every game with no scan.
         var goal = baseBreakdown.total
                  - jammer.jammermod - jammer.noLockMod
                  - rangePenalty
                  + ewLock.oew + ewLock.soew + fireControl
                  - shotMods.defensiveSystems
+                 + shotMods.shieldAdaptation
                  + shotMods.calledShot
-                 + shotMods.otherTotal;
+                 + shotMods.otherTotal
+                 - edfPenalty;
         var hitChance = Math.round(goal * 5);
 
         //Build modifier list (zeros omitted)
@@ -2207,7 +2504,11 @@ window.weaponManager = {
         pushIfNonZero('range',            'Range',             -rangePenalty);
         pushIfNonZero('jammerNoLock',     'No Lock',            -(jammer.jammermod + jammer.noLockMod));
         pushIfNonZero('defensiveSystems', 'Defensive Systems', -shotMods.defensiveSystems);
+        //Immediately under the shielding it is discounting, so the two read as one statement:
+        //"Defensive Systems -20%, Shield Adaptation +5%".
+        pushIfNonZero('shieldAdaptation', 'Shield Adaptation',  shotMods.shieldAdaptation);
         if (calledid > 0) pushIfNonZero('calledShot', 'Called Shot', shotMods.calledShot);
+        pushIfNonZero('edfPenalty',       'Energy Draining Field', -edfPenalty);
         pushIfNonZero('other',            'Other',             shotMods.otherTotal);
 
         //Dev-mode invariant: breakdown sum must reproduce hitChance
@@ -2585,6 +2886,50 @@ window.weaponManager = {
         return weapon[flagName];
     },
 
+    /* Put a weapon into the mode one of its fire orders was declared in, for a DISPLAY-ONLY read (a
+       hit-chance recalculation, a per-mode damage or range line), and hand back the mode it was in
+       so the caller can put it back with restoreFiringMode.
+
+       ⚠️⚠️ ALWAYS RESTORE IT. These are the LIVE system objects on the ship - the very objects a new
+       declaration reads `firingMode` off (every weapon model builds its order with
+       `firingMode: this.firingMode`) - so a display switch that is never undone silently re-arms the
+       player's weapon. A homing missile still in the air is a CURRENT-TURN ballistic order sitting in
+       'Homing' mode on a rack that is deliberately NOT counted as fired (isHomingReattack), so merely
+       rendering its row in the INCOMING list or the declarations panel flipped the rack to Homing and
+       the player's next launch went out as a homing missile they never chose (user report).
+
+       The cycle is bounded by the number of declared modes: changeFiringMode() wraps around, so an
+       order naming a mode this weapon does not have - the Chameleon fire-order remap can produce
+       exactly that - would otherwise spin forever and hang the tab. */
+    setModeForFireOrder: function setModeForFireOrder(weapon, fireOrder) {
+        if (!weapon || !fireOrder) return null;
+        var previous = weapon.firingMode;
+        //A multiModeSplit weapon holds orders in both modes at once - there is no single mode to
+        //switch it to, and the display paths already leave it alone.
+        if (weapon.multiModeSplit) return previous;
+
+        var wanted = fireOrder.firingMode;
+        var guard = weapon.firingModes ? Object.keys(weapon.firingModes).length : 1;
+        while (wanted != weapon.firingMode && guard-- > 0) {
+            weapon.changeFiringMode();
+        }
+        return previous;
+    },
+
+    /* Undo setModeForFireOrder - put the weapon back in the mode the PLAYER left it in. */
+    restoreFiringMode: function restoreFiringMode(weapon, mode) {
+        if (!weapon || mode === null || mode === undefined) return;
+        if (weapon.firingMode === mode) return;
+        if (typeof weapon.setFiringMode === 'function') {
+            weapon.setFiringMode(mode);
+            if (weapon.firingMode === mode) return;
+        }
+        //Fallback for a weapon whose only way round is changeFiringMode (a magazine-fed rack skips
+        //the modes it holds no ammo for) - same bound as above.
+        var guard = weapon.firingModes ? Object.keys(weapon.firingModes).length : 1;
+        while (weapon.firingMode !== mode && guard-- > 0) weapon.changeFiringMode();
+    },
+
     /* Where an incoming shot is bearing FROM, in hex coordinates.
        Ballistic: the launch hex - what the server's getFiringHex resolves to, and what the tooltip
        already recorded as ball.position. Non-ballistic (a Sweeping shot): the server bears on the
@@ -2595,8 +2940,31 @@ window.weaponManager = {
         if (!ball.weapon || !ball.weapon.ballistic) {
             return shooter ? shipManager.getShipPosition(shooter) : null;
         }
+        /* ⭐ A HOMING MISSILE IS NOT COMING FROM ITS LAUNCHER. On every pass after the first it
+           runs in from the hex its TARGET was standing on when the last pass missed - that is the
+           rules' "treating its target's previous location as its new launch hex for directional
+           purposes", and the server has always resolved it that way through
+           AmmoMissileRackS::getFiringHex. The launch hex rides on the ORDER (x/y), per-order and
+           not per-weapon, so it is read here and not from hasSpecialLaunchHexCalculation.
+
+           This is the bearing every interception predicate below measures: which defensive arcs
+           cover the shot, and where a freeintercept escort has to be standing. Read off the
+           shooter, two missiles chasing two different ships would both be judged as though they
+           came in over the launching ship - and the escort geometry would be measured against a hull
+           that may be nowhere near the missile's actual approach. */
+        var homingHex = weaponManager.getHomingLaunchHex(ball.fireOrder);
+        if (homingHex) return homingHex;
         if (ball.position) return new hexagon.Offset(ball.position);
         return shooter ? shipManager.movement.getPositionAtStartOfTurn(shooter) : null;
+    },
+
+    /* The per-ORDER launch hex of a homing missile re-attack, or null for anything else.
+       Mirrors AmmoMissileRackS::getHomingLaunchHex on the server. */
+    getHomingLaunchHex: function getHomingLaunchHex(fire) {
+        if (!weaponManager.isHomingReattack(fire)) return null;
+        if (fire.x === undefined || fire.y === undefined) return null;
+        if (fire.x === null || fire.y === null || fire.x === "null" || fire.y === "null") return null;
+        return new hexagon.Offset(Number(fire.x), Number(fire.y));
     },
 
     /* Which firing mode would this weapon intercept in? Mirrors MissileLauncher::switchModeForIntercept.
@@ -2640,6 +3008,10 @@ window.weaponManager = {
         for (var i = 0; i < weapon.fireOrders.length; i++) {
             var fire = weapon.fireOrders[i];
             if (fire.turn != gamedata.turn) continue;
+            //A homing missile in flight is not a shot this launcher took this turn, which is exactly
+            //what AmmoMissileRackS::firedOnTurn decides on the server. Counted, it would read as an
+            //offensive order and bar the rack from being hand-assigned to interception (R7).
+            if (weaponManager.isHomingReattack(fire)) continue;
             if (fire.type === 'selfIntercept') counts.selfIntercept++;
             else if (fire.type === 'intercept') counts.intercept++;
             else counts.offensive++;
@@ -2658,6 +3030,15 @@ window.weaponManager = {
         if (weaponManager.getModeFlag(ball.weapon, 'doNotIntercept', mode)) return 'Cannot be intercepted';
         if (weaponManager.getModeFlag(ball.weapon, 'hextarget', mode)) return 'Hex-targeted';
         if (!gamedata.getShip(ball.fireOrder.targetid)) return 'No target';
+        /* A homing missile whose fire order has not reached the database cannot be NAMED by an
+           intercept order (its targetid is the intercepted order's id), so the server would drop
+           any declaration against it - Firing::automateIntercept resolves that id and -1 matches
+           nothing. Say so rather than letting the player spend weapons on a silent no-op.
+           Only reachable for a missile whose note predates the up-front row insert; a normal one
+           carries a real id from the first load of the turn (HOMING_MISSILE_PLAN.md). */
+        if (weaponManager.isHomingReattack(ball.fireOrder) && !(Number(ball.fireOrder.id) > 0)) {
+            return 'Missile not yet trackable this turn';
+        }
         return null;
     },
 
@@ -2888,6 +3269,18 @@ window.weaponManager = {
        is deliberately not previewed, and a teammate's uncommitted orders are not in this payload -
        hence the "Committed" wording on the row rather than "Interception". */
     getDeclaredInterception: function getDeclaredInterception(fireOrderId, interceptedWeapon) {
+        /* ⚠️ AN ORDER WITH NO ROW HAS NO IDENTITY, and crediting interception to it credits it to
+           every other order in the same state. A server-generated shot that has not been inserted
+           yet carries id -1, and an intercept order declared against one carries targetid -1 too -
+           so the loop below matched BOTH, and two homing missiles in flight each showed the other's
+           declared interception while the server, which resolves that targetid by id, threw the
+           orders away entirely (game 4328). Homing re-attacks now arrive with a real id; this is
+           what stops anything else in that state from repeating it.
+           A locally-built order's id is a STRING ("<ship>_<weapon>_<n>") and must NOT be caught by
+           this, hence the isNaN guard rather than a bare <= 0. */
+        var numericId = Number(fireOrderId);
+        if (!isNaN(numericId) && numericId <= 0) return 0;
+
         var degrades = interceptedWeapon
             ? (interceptedWeapon.doInterceptDegradation
                 || !(interceptedWeapon.ballistic || interceptedWeapon.noInterceptDegradation))
@@ -2941,10 +3334,12 @@ window.weaponManager = {
         if (!shooter || !ball.weapon) return 0;
 
         //Same call - and therefore the same number - the row's headline and the grouping key use.
+        //fireOrder carried so a homing re-attack resolves its own launch hex (see getFiringHex).
         return weaponManager.calculataBallisticHitChange({
             weaponid: ball.weapon.id,
             targetid: ball.fireOrder.targetid,
-            shooterid: shooter.id
+            shooterid: shooter.id,
+            fireOrder: ball.fireOrder
         });
     },
 
@@ -3367,6 +3762,7 @@ window.weaponManager = {
         if (shipManager.isDestroyed(selectedShip)) return;
         if (selectedShip.mine && ship.mine) return;  //Mine can't shoot mines.
         if (ship.Huge > 0) return; //Do not allow targeting of large muti-hex terrain.
+        if (!shipManager.isTargetable(ship)) return; //Nothing to gain by shooting it - see plan 3.10c.
         if (!selectedShip.flight && shipManager.isDisabled(selectedShip)) return;
         if (weaponManager.isHidden(selectedShip)) return; //Block invisible ships from firing where appropriate.
 
@@ -3393,8 +3789,14 @@ window.weaponManager = {
         var toUnselect = [];
         var splitTargeted = [];
         var linkedWarned = {}; //firing-link groups already warned about this click (one popup per group)
+        /* Weapons that want to look at the WHOLE declaration pass rather than at one order - see the
+           afterTargetingPass hook below the loop. Collected before any `continue` so a weapon that
+           declared nothing at all still gets to say why. */
+        var passHooks = [];
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
+
+            if (typeof weapon.afterTargetingPass === 'function') passHooks.push(weapon);
 
             // Attachment firing restriction: Flights attached to anything, or non-flights targeting their host.
             if (selectedShip.attached && Object.keys(selectedShip.attached).length > 0) {
@@ -3441,7 +3843,11 @@ window.weaponManager = {
 
             if (loSBlocked && !weapon.ignoresLoS) continue;
 
-            if (shipManager.systems.isDestroyed(selectedShip, weapon) || !weaponManager.isLoaded(weapon) || (weapon.stowed && weapon.stowedArcStart == null)) {
+            //WALKERS §3.18 (D63): a Walker drive recharging after an abduction may still CONTINUE it - asked of
+            //the drive, whose doSpecialTargeting then refuses any unit but the one it may continue.
+            var abductionContinues = !weaponManager.isLoaded(weapon)
+                && typeof weapon.canSelectForAbduction === 'function' && weapon.canSelectForAbduction(selectedShip);
+            if (shipManager.systems.isDestroyed(selectedShip, weapon) || (!weaponManager.isLoaded(weapon) && !abductionContinues) || (weapon.stowed && weapon.stowedArcStart == null)) {
                 debug && console.log("Weapon destroyed, not loaded, or stowed (Kirishiac Orbital docked)"); //a stowed arc set (Heavy Orbital) keeps the weapon operational
                 continue;
             }
@@ -3483,6 +3889,30 @@ window.weaponManager = {
                     weaponManager.unSelectWeapon(selectedShip, sel_weapon);
                 }
                 return;
+            }
+
+            /* Flight-wide exclusivity (WALKERS_OF_SIGMA_PLAN.md §3.13, D16). Warned once per group
+               per click and the whole declaration abandoned - unlike the per-craft check above, this
+               one withdraws nothing that is already declared: the standing orders are the LEGAL half
+               of the pair and the click is what has to give way. The server refuses it as well, in
+               MedLightningArrayFtr::planFlightVolley, which is the half a POST cannot edit out. */
+            var flightBlock = weaponManager.getFlightExclusivityBlock(selectedShip, weapon);
+            if (flightBlock) {
+                if (!linkedWarned['fx:' + weapon.flightExclusiveGroup]) {
+                    linkedWarned['fx:' + weapon.flightExclusiveGroup] = true;
+                    confirm.warning(flightBlock);
+                }
+                continue;
+            }
+
+            /* WALKERS_OF_SIGMA_PLAN.md §3.13 (Stage 14): a probe that has taken ANY damage cannot
+               contribute to a combined array, and the server marks its order technical. Skipped
+               SILENTLY here, exactly as the destroyed/unloaded skips above are - with six craft
+               selected, one popup per damaged probe would be worse than the missing order, and the
+               shortfall it causes is what afterTargetingPass below speaks up about. */
+            if (typeof weapon.isCraftEligible === 'function' && !weapon.isCraftEligible(selectedShip)) {
+                debug && console.log("craft not eligible to contribute with this weapon");
+                continue;
             }
 
             if (ship.flight && weapon.fireControl[0] === null) {
@@ -3614,6 +4044,19 @@ window.weaponManager = {
             }
         }
 
+        /* Weapons whose rule is about the WHOLE pass rather than one order get a look at it here -
+           the Mapmakers' Medium Lightning Array combines 3 or 6 craft into one shot, so "did enough
+           of you declare together?" is a question no single order can answer, and it is asked ONCE
+           per weapon KIND rather than once per mount. Runs before the unselect below so the hook
+           sees the selection as the player left it. */
+        var passHooksDone = {};
+        for (var ph = 0; ph < passHooks.length; ph++) {
+            var hookWeapon = passHooks[ph];
+            if (passHooksDone[hookWeapon.name]) continue;
+            passHooksDone[hookWeapon.name] = true;
+            hookWeapon.afterTargetingPass(selectedShip, ship);
+        }
+
         for (var i in toUnselect) {
             weaponManager.unSelectWeapon(selectedShip, toUnselect[i]);
         }
@@ -3654,7 +4097,8 @@ window.weaponManager = {
 
         var stealthSystem = shipManager.systems.getSystemByName(target, "stealth");
 
-        if (stealthSystem && distance > 5 && weapon.ballistic && target.flight) {
+		//GTS_Triad - Allowing Ancients to ignore stealth with ballistics (Triad Missile Rack and Phased Gravitic Torpedo)
+        if (stealthSystem && distance > 5 && weapon.ballistic && target.flight && weapon.factionAge < 3) {
             return false;
         }
 
@@ -3694,7 +4138,13 @@ window.weaponManager = {
     },
 
 
-    targetHex: function targetHex(selectedShip, hexpos) {
+    /* preferredTargetId is OPTIONAL and is only ever set by the ship tooltip's hex button, which
+       knows which UNIT the player right-clicked (shipTooltipFireMenu.js). It reaches a split-shot
+       weapon's doMultipleHexFireOrders and nothing else - a hex is still a hex to every other
+       weapon here, and none of the checks in this loop are about the unit standing on it.
+       WALKERS_OF_SIGMA_PLAN.md 3.9: the Sensor Charge Transceiver uses it to record which of the
+       units sharing a hex the charge should hit. */
+    targetHex: function targetHex(selectedShip, hexpos, preferredTargetId) {
         if (shipManager.isDestroyed(selectedShip)) return;
         if (!selectedShip.flight && shipManager.isDisabled(selectedShip)) return;
         var hidden = weaponManager.isHidden(selectedShip); //Block invisible ships from firing where appropriate.
@@ -3702,6 +4152,7 @@ window.weaponManager = {
         var toUnselect = Array();
         var splitTargeted = [];
         var linkedWarned = {}; //one firing-link warning per group, not per weapon
+        var vortexQueued = false; //Stage 13 - one vortex declaration per pass, however many engines are selected
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
 
@@ -3771,6 +4222,20 @@ window.weaponManager = {
             //otherwise drop the order without telling anyone. The weapon stays SELECTED so the
             //next right-click can try a different hex.
             if (weapon.name === 'jumpEngine') {
+                /* ⭐⭐ WALKERS_OF_SIGMA_PLAN.md §3.12 (Stage 13) - A FLIGHT DECLARES WITH ONE ENGINE.
+                   The player clicks whichever craft's icon is under the mouse, but the declaration
+                   belongs to the FLIGHT ("only let an entire flight of Mapmakers open 1 jump point,
+                   not one per fighter" - user, D13), so the order is built on the flight's engine
+                   whichever one was selected. vortexQueued then makes "select all six and
+                   right-click" produce ONE facing dialog and ONE order rather than six of each.
+                   The server normalises the weaponid again at the wire, so this is the UX half of
+                   the rule, not the enforcement. */
+                if (selectedShip.flight) {
+                    if (vortexQueued) continue;
+                    var flightEngine = weaponManager.getFlightJumpEngine(selectedShip);
+                    if (flightEngine) weapon = flightEngine;
+                }
+
                 //STAGE 5 - one vortex per ship, across turns. Told rather than silently dropped:
                 //the server refuses a second opening (Firing::getVortexDeclarationBlock) and the
                 //player would otherwise watch the order vanish at commit with no explanation.
@@ -3820,7 +4285,18 @@ window.weaponManager = {
                 type = 'prefiring';
             }
 
-            if (weaponManager.isPosOnWeaponArc(selectedShip, hexpos, weapon)) {
+            /* ⭐ A WEAPON MAY ANSWER THE ARC QUESTION ITSELF. For every weapon that SHOOTS at a
+               hex, "is that hex in my arc" is the right question and isPosOnWeaponArc is the right
+               answer. For one whose hex declaration is a FLIGHT PATH rather than an aim point it
+               is not: the Sensor Charge Transceiver's mount aims the launch, and the waypoints
+               after it go wherever the charge can steer (WALKERS_OF_SIGMA_PLAN.md 3.9). Without
+               this hook every waypoint outside the ship's forward wedge was dropped here - and
+               dropped SILENTLY, since this `if` has no else. */
+            var onArc = (typeof weapon.isHexOnFiringArc === 'function')
+                ? weapon.isHexOnFiringArc(selectedShip, hexpos)
+                : weaponManager.isPosOnWeaponArc(selectedShip, hexpos, weapon);
+
+            if (onArc) {
 
                 //Check for Line of sight
                 //var blockedLosHex = weaponManager.getBlockedHexes();
@@ -3840,7 +4316,7 @@ window.weaponManager = {
                 if (weapon.range === 0 || shipManager.getShipPosition(selectedShip).distanceTo(hexpos) <= weapon.range) {
 
                     if (weapon.canSplitShots) {
-                        var fire = weapon.doMultipleHexFireOrders(selectedShip, hexpos);
+                        var fire = weapon.doMultipleHexFireOrders(selectedShip, hexpos, preferredTargetId);
                         if (!Array.isArray(fire)) fire = fire ? [fire] : []; // Ensure fire is an array or an empty one                       
                         if (fire.length === 0) continue;
 
@@ -3863,6 +4339,7 @@ window.weaponManager = {
                         //createJumpPointOrder). Clicking away instead simply never calls it,
                         //which is what makes discarding cost nothing to clean up.
                         weaponManager.queueJumpPointOrder(selectedShip, weapon, hexpos, type);
+                        vortexQueued = true; //Stage 13 - a flight's other five engines must not raise a second dialog
                         continue;
                     } else if (weapon.name === 'ShadowFighterBomb') {
                         //Stage S (S-f): the Fighter Bomb launches a player-chosen
@@ -4063,6 +4540,17 @@ window.weaponManager = {
         });
 
         weaponManager.unSelectWeapon(ship, weapon);
+
+        /* Stage 13 - AND EVERY OTHER JUMP ENGINE THE PLAYER HAD SELECTED ON THIS UNIT. On a flight
+           the order was built on the flight's engine (see targetHex) rather than on whichever
+           craft's icon was clicked, so without this the clicked one stays lit with nothing to do.
+           A hull never has more than one selected here, so this is a no-op for every other unit.
+           Iterated backwards because unSelectWeapon splices the array it is walking. */
+        for (var u = gamedata.selectedSystems.length - 1; u >= 0; u--) {
+            var selected = gamedata.selectedSystems[u];
+            if (selected && selected.name === 'jumpEngine') weaponManager.unSelectWeapon(ship, selected);
+        }
+
         webglScene.customEvent('HexTargeted', { shooter: ship, hexagon: hexpos });
     },
 
@@ -4339,11 +4827,27 @@ window.weaponManager = {
     },
 
     removeFiringOrder: function removeFiringOrder(ship, system) {
+        /* Stage 13 - THE MIRROR OF hasFiringOrder's DIVERT, and it has to be here or the rule is a
+           trap: all six of a flight's Jump Engine icons report the declaration, so the player will
+           withdraw it from whichever one they are looking at - and on five of them the order is not
+           theirs to splice. Withdrawing from the flight's engine is what makes the icon they
+           clicked actually clear. */
+        if (ship && ship.flight && system && system.name === 'jumpEngine') {
+            var flightJumpEngine = weaponManager.getFlightJumpEngine(ship);
+            if (flightJumpEngine && flightJumpEngine !== system) system = flightJumpEngine;
+        }
+
         if (system.multiModeSplit) { //Divert to weapon function for these specific weapons.
             system.removeAllMultiModeSplit(ship);
             return;
         }
         for (var i = system.fireOrders.length - 1; i >= 0; i--) {
+            //⚠️ A homing missile already in the air is NOT this weapon's declared order and must
+            //survive being cleared. targetShip() calls this before every new non-split declaration,
+            //so without the guard launching a fresh missile made the one still chasing a target
+            //vanish off the map (its DB row lives on, so the icon simply came back on the next
+            //poll - which is worse, not better).
+            if (weaponManager.isHomingReattack(system.fireOrders[i])) continue;
             if (system.fireOrders[i].weaponid == system.id) {
                 system.fireOrders.splice(i, 1);
             }
@@ -4371,6 +4875,7 @@ window.weaponManager = {
                 // When a tooltip button is pressed on targeted enemy ship, check for a matching fireOrder and remove
                 for (var i = system.fireOrders.length - 1; i >= 0; i--) {
                     var fireOrder = system.fireOrders[i];
+                    if (weaponManager.isHomingReattack(fireOrder)) continue; //in flight, not declared
                     // Check if the fire order's target matches the provided target
                     if (fireOrder.targetid == target?.id) {
                         if (fireOrder.hitmod > 0) { //Slicers have cumulative hitmod on split shots, when a fireOrder is removed all orders are reclaculated.
@@ -4387,7 +4892,8 @@ window.weaponManager = {
             } else {
                 // Default case: Remove only the LAST fire order. No need to adjust hitMod as it's the last order anyway.'
                 var lastFireOrder = system.fireOrders[system.fireOrders.length - 1];
-                if (lastFireOrder.weaponid == system.id && lastFireOrder.turn == gamedata.turn) {
+                if (lastFireOrder.weaponid == system.id && lastFireOrder.turn == gamedata.turn
+                        && !weaponManager.isHomingReattack(lastFireOrder)) { //in flight, not declared
                     system.fireOrders.pop(); // Remove the last firing order
                     system.maxVariableShots++; // Increment your counter
                     var targetShip = gamedata.getShip(lastFireOrder.targetid);
@@ -4443,8 +4949,22 @@ window.weaponManager = {
 
 
     hasFiringOrder: function hasFiringOrder(ship, system) {
+        /* ⭐ WALKERS_OF_SIGMA_PLAN.md §3.12 (Stage 13) - "IF ONE JUMP ENGINE HAS A fireOrder THEY
+           ALL DO" (user, D13), literally. A flight declares with its ONE engine (see
+           getFlightJumpEngine), so the other five craft would otherwise draw an un-ordered icon for
+           a declaration the flight has certainly made. Asking the flight engine here is the whole of
+           it: this is the single chokepoint the SCS icon, the select/unselect gate and
+           selectAllWeapons all read.
+           Narrow by construction - only a flight, only a jumpEngine - so nothing else in the game
+           sees a different answer. */
+        if (ship && ship.flight && system && system.name === 'jumpEngine') {
+            var flightEngine = weaponManager.getFlightJumpEngine(ship);
+            if (flightEngine && flightEngine !== system) system = flightEngine;
+        }
+
         for (var i in system.fireOrders) {
             var fire = system.fireOrders[i];
+            if (weaponManager.isHomingReattack(fire)) continue; //in flight, not declared - see isHomingReattack
             if (fire.weaponid == system.id && fire.turn == gamedata.turn && !fire.rolled) {
                 if ((gamedata.gamephase == 1 || gamedata.gamephase == 3) && system.ballistic || gamedata.gamephase == 3 && !system.ballistic || gamedata.gamephase == 5 && system.preFires) {
                     if (fire.type == "selfIntercept") {
@@ -4459,6 +4979,7 @@ window.weaponManager = {
     hasOrderForMode: function hasOrderForMode(system) {
         for (var i in system.fireOrders) {
             var fire = system.fireOrders[i];
+            if (weaponManager.isHomingReattack(fire)) continue; //in flight, not declared
             if (fire.weaponid == system.id && fire.turn == gamedata.turn && !fire.rolled) {
                 if ((gamedata.gamephase == 1 || gamedata.gamephase == 3) && system.ballistic || gamedata.gamephase == 3 && !system.ballistic || gamedata.gamephase == 5 && system.preFires) {
                     if (fire.firingMode == system.firingMode) {
@@ -4474,6 +4995,7 @@ window.weaponManager = {
     hasTargetedThisShip: function hasTargetedThisShip(target, system) {
         for (var i in system.fireOrders) {
             var fire = system.fireOrders[i];
+            if (weaponManager.isHomingReattack(fire)) continue; //in flight, not declared
             if (fire.weaponid == system.id && fire.turn == gamedata.turn && !fire.rolled && fire.targetid == target.id) {
                 if ((gamedata.gamephase == 1 || gamedata.gamephase == 3) && system.ballistic || gamedata.gamephase == 3 && !system.ballistic || gamedata.gamephase == 5 && system.preFires) {
                     return true;
@@ -4583,6 +5105,9 @@ window.weaponManager = {
                 return targetingShip; // || targetingHex;
             }));
         }, []).filter(function (fire) {
+            //WALKERS §3.18 (Stage 20): an abduction is not a shot - nothing to intercept, no hit chance. The
+            //target's tooltip reports it on a status line of its own instead (ShipTooltip).
+            if (fire.damageclass === 'abduction') return false;
             return fire.type === "ballistic" || (fire.type === "normal" && fire.damageclass === "Sweeping"); //Ballistics and Shadow Slicers
         }).map(function (fireOrder) {
             var shooter = gamedata.getShip(fireOrder.shooterid);
@@ -5043,7 +5568,21 @@ window.weaponManager = {
             "HyperspaceJump", "JumpFailure", "JumpVortex", "SelfDestruct", "ContainmentBreach",
             "Reactor", "Sabotage", "WreakHavoc", "Capture", "Rescue", "LimpetBore",
             "MagazineExplosion", "NoHangar", "TerrainCollision", "HalfPhase", "TranverseCrit", "Boarding",
-            "InadequateHangar", "HkJamming"
+            //EdfExposure (WALKERS_OF_SIGMA_PLAN.md 2.2): the Energy Draining Field's per-unit drain
+            //report. Like HkJamming beside it, the order is a log line wearing a fire order's
+            //clothes - self-targeted, 0 shots - so without this it printed "firing 1x Ramming
+            //Attack at <itself>. 0/0 shots hit" in front of the sentence that matters.
+            "InadequateHangar", "HkJamming", "EdfExposure",
+            //SensorCharge (WALKERS_OF_SIGMA_PLAN.md 3.9): the Sensor Charge Transceiver's report of
+            //where its charge went - received, or lost for want of a transceiver at the end of the
+            //course. Also a log line wearing a fire order's clothes (0 shots, hosted on the
+            //transceiver itself), so it prints its sentence alone. ⚠️ The shots the charge scored
+            //along the way are ORDINARY fire orders carrying damageclass 'electromagnetic', and
+            //must NOT be listed here or the log would stop reporting what they hit.
+            "SensorCharge",
+            //Abduction (WALKERS_OF_SIGMA_PLAN.md 3.18): the Extra-Dimensional Jump Drive's per-turn report
+            //- power-turns delivered, or why it took no hold. EdfExposure's shape exactly.
+            "Abduction"
         ];
 
         //A crash into Huge terrain (multi-hex asteroid, moon) reads like the small-asteroid
@@ -5059,6 +5598,39 @@ window.weaponManager = {
         }
 
         return shortLogTypes.includes(fire.damageclass);
+    },
+
+    /* ⭐⭐ WALKERS_OF_SIGMA_PLAN.md §3.12 (Stage 13) - THE ONE JUMP ENGINE A FLIGHT HAS, or null.
+
+       The client mirror of FighterFlight::getFlightJumpEngine, and it exists for the same reason:
+       six Mapmakers carry six engines but "an entire flight opens 1 jump point, not one per
+       fighter" (user, D13). The SAMPLE fighter's is the flight's, and systems[1] is that craft on
+       both sides - a flight's system ids are construction order, so the first fighter is 1.
+
+       ⚠️ THE SERVER IS THE AUTHORITY, NOT THIS. Firing::validateVortexDeclaration re-points every
+       flight declaration at the flight engine's id whatever the client sent, so a mismatch here
+       could only ever cost a highlight, never a wrong vortex. The fallback scan is for exactly that
+       reason - answer something sensible rather than nothing.
+
+       Returns null for a hull (which does not need it - its engines are its own systems) and for
+       every flight in the game but a Mapmaker's. */
+    getFlightJumpEngine: function getFlightJumpEngine(ship) {
+        if (!ship || !ship.flight || !ship.systems) return null;
+
+        var craftList = ship.systems[1] ? [ship.systems[1]] : [];
+        for (var f in ship.systems) {
+            if (ship.systems[f] && ship.systems[f] !== craftList[0]) craftList.push(ship.systems[f]);
+        }
+
+        for (var c = 0; c < craftList.length; c++) {
+            var craft = craftList[c];
+            if (!craft || !craft.systems) continue;
+            for (var s in craft.systems) {
+                if (craft.systems[s] && craft.systems[s].name === 'jumpEngine') return craft.systems[s];
+            }
+        }
+
+        return null;
     },
 
     /* JUMP_POINTS_PLAN.md STAGE 2 - the client half of Firing::getVortexDeclarationBlock. Returns

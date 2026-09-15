@@ -933,7 +933,11 @@ public function setParentFighter($fighter) {
 				$this->endMarineMission($critical, $gamedata); // Terminate this specific system sabotage, moved to CnC.
 				return;
 			}else{
-                $newFireOrder->pubnotes .= " and will continue sabotage operations next turn.";
+				if ($sabotageRoll <= 5 && ($sabotageRoll >= 4)){
+				//No extra note here, Marines were eliminated.
+				}else{				
+					$newFireOrder->pubnotes .= " and will continue sabotage operations next turn.";
+				}
 			}
 		}
 
@@ -1168,7 +1172,25 @@ public function setParentFighter($fighter) {
 	/*generates individual notes (if necessary)
 	base version is empty, to be redefined by systems as necessary
 	*/
-	public function generateIndividualNotes($gamedata, $dbManager){	}	
+	public function generateIndividualNotes($gamedata, $dbManager){	}
+
+	/* A per-system DECLARATION made in the Fire phase, persisted so the advance can read it back.
+	   Called from FireGamePhase::process, for the submitting player's own ships only, immediately
+	   before saveIndividualNotes(). Push IndividualNote objects onto $this->individualNotes; the
+	   base version does nothing, which is the answer for every system but one.
+
+	   ⚠️⚠️ THIS IS DELIBERATELY NOT generateIndividualNotes(), and the difference is the whole
+	   reason it exists. Every other phase runs the generic generateIndividualNotes sweep, but the
+	   Fire phase never has - and 34 of the ~80 overrides in this codebase have NO phase guard at
+	   all (plus one with an explicit `case 3`), so switching that sweep on here would wake all of
+	   them in a phase they have never run in. A narrow hook that answers "nothing" by default
+	   cannot do that. See WALKERS_OF_SIGMA_PLAN.md 3.3; the Wide-Beam Lightning Array toggle is
+	   the only user today.
+
+	   ⚠️ The system this runs on is a POST-SIDE rebuild - no enhancements, no loaded notes
+	   (arch_post_side_ship_reconstruction). Write what the client asked for; judge it on the real
+	   ship when the note is read back. */
+	public function saveFirePhaseDeclaration($gamedata, $dbManager){	}
 	
 	public function addIndividualNote($noteObject){
 		$this->individualNotes[] = $noteObject;
@@ -1694,7 +1716,13 @@ public function setParentFighter($fighter) {
     }
 	
 	
-	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false){ //hook - systems that can affect damage dealing will return positive value; strongest one will be chosen to interact
+	/* $shooter was added 2026-09-04 so a capacity-pool shield can size its pool against the
+	   fleet actually shooting at it (Walkers of Sigma-957 CPD adaptation - see
+	   Shield::getCapacityAgainstShooter). It is LAST and OPTIONAL so every existing caller and
+	   override stays valid; getSystemProtectingFromDamage() and the three fighter-flight damage
+	   estimators pass it. Anything that needs the shooter here must tolerate null - the value is
+	   advisory (it only ranks candidate protectors), and doProtect() has always had the real one. */
+	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false, $shooter = null){ //hook - systems that can affect damage dealing will return positive value; strongest one will be chosen to interact
 		return 0;
 	}
 	public function doProtect($gamedata, $fireOrder, $target, $shooter, $weapon, $systemProtected, $effectiveDamage,$effectiveArmor){ //hook for actual effect of protection - return modified values of damage and armor that should be used in further calculations

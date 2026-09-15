@@ -148,6 +148,19 @@ Weapon.prototype.getModeNameForEnemy = function (fireOrder) {
 	return this.weaponClass.firingMode[1];
 };
 
+/* How a DECLARED shot's firing mode is named in the UI - the INCOMING list's
+   "2x Lightning Array (Combined)" row and its per-shot sub-rows.
+   Plain firingModes lookup for every weapon in the game; it exists as a hook so a weapon whose
+   shot carries more than the mode id can say so - the Wide-Beam Lightning Array appends "-Wide"
+   because the arm is a per-turn toggle ORTHOGONAL to the mode, and the row would otherwise read
+   identically for two shots that roll different dice (user report 2026-09-06).
+   ⚠️ Pass the fire order: the mode belongs to the SHOT, not to whatever mode the weapon happens
+   to be sitting in now - a multiModeSplit weapon can hold orders in both at once. */
+Weapon.prototype.getFiringModeDisplayName = function (fireOrder) {
+	var mode = (fireOrder && fireOrder.firingMode !== undefined) ? fireOrder.firingMode : this.firingMode;
+	return this.firingModes ? this.firingModes[mode] : null;
+};
+
 Weapon.prototype.translateFCtoD100txt = function (fireControl) {
 	var FCtxt = '';
 	var i = 0;

@@ -5,7 +5,7 @@ class triadTriumviron extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 5175;
-		$this->faction = "";
+		$this->faction = "The Triad";
         $this->phpclass = "triadTriumviron";
         $this->shipClass = "The Triumviron";
         $this->imagePath = "img/ships/triadTriumviron.png";
@@ -28,10 +28,11 @@ class triadTriumviron extends BaseShip{
         $this->pivotcost = 4;
 		$this->iniativebonus = 2 *5;
 
-		$this->notes = "Can control 24 fighters";		
-		$this->notes .= '<br>Unified Triad'; 
+		$this->notes = 'Unified Triad'; 
 		$this->notes .= '<br>Triad Capital Ship'; 
 		$this->notes .= '<br>Atmospheric capable'; 
+
+		$this->fighters = array("Triad Fighter"=>24);
 
 		$t1l = new GraviticThruster(7, 13, 0, 5, 1);
 		$t3l = new GraviticThruster(7, 25, 0, 8, 3);
@@ -43,6 +44,9 @@ class triadTriumviron extends BaseShip{
 		$this->addLeftSystem($t3l);
 		$this->addRightSystem($t1r);
 		$this->addRightSystem($t4r);
+
+		/*Triad use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'TriadShip');
 		
 		$this->addPrimarySystem(new Reactor(8, 30, 0, 0));//armor, structure, power req, output
         $this->addPrimarySystem(new CnC(8, 24, 0, 0));
@@ -62,7 +66,7 @@ class triadTriumviron extends BaseShip{
 		$this->addAftSystem(new GraviticThruster(7, 20, 0, 6, 2));
 		$this->addAftSystem(new GraviticThruster(7, 10, 0, 4, 2));
         $this->addAftSystem(new SelfRepair(6, 12, 6)); //armor, structure, output
-		$this->addAftSystem(new JumpEngine(6, 25, 6, 8));        
+		$this->addAftSystem((new JumpEngine(6, 25, 6, 8))->markAncient());        
 
 		$hyperplasma = new HyperplasmaCutter(7, 16, 9, 270, 90);
 			$hyperplasma->displayName = 'Hyperplasma Cutter B';

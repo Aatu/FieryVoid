@@ -57,6 +57,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li><a href="#shadows">Shadow Association</a></li>
                 <li><a href="#thirdspace">Thirdspace</a></li>                    
                 <li><a href="#vorlons">Vorlon Empire</a></li>
+                <li><a href="#walkers">Walkers of Sigma-957</a></li>
             </ul>
       </li>
         <li><a href="#systemenhancements">System Enhancements</a>
@@ -96,6 +97,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
       <li><strong>Class D - Light Missile (2178)</strong> - Range 15 - Damage 12 - Fire Control: +3/+3/+3,</li>   
       <li><strong>Class F - Flash Missile (2225)</strong> - Range 20 - Damage 20 - Fire Control: +3/+3/+3 - Deals Flash damage,</li>  
       <li><strong>Class H - Heavy Missile (2225)</strong> - Range 10 - Damage 30 - Fire Control: +0/+3/+3,</li>         
+      <li><strong>Class HM - Homing Missile (2252)</strong> - Range 20 - Damage 20 - Fire Control: +3/+3/+3 - Kor-Lyan only. If it misses without being intercepted it stays in play and attacks again, launching from its target's previous hex, until out of fuel.</li>
       <li><strong>Class I - Interceptor Missile (2250/2263)</strong> - Range 0 - Damage 0 - Fire Control: -/-/-,  Fires defensively for -30 intercept rating against ballistic weapons,</li>      
       <li><strong>Class L - Long Range Missile (2225)</strong> - Range 30 - Damage 15 - Fire Control: +3/+3/+3,</li>  
       <li><strong> Class K - Starburst Missile (2260/2264)</strong> - Range 15 - Damage 10*[D3+3] - Fire Control: +3/+3/+3 - Deals damage in pulse mode,</li>   
@@ -145,7 +147,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <ul>  
       <li><strong>Elite Crew</strong>
         <ul class="circle-list">
-            <li>Effect: +1 to hit with all weapons, +5 Initiative, +2 Engine, +1 Sensors, +2 Reactor power, -5% Defence Rating, -2 to critical results</li>
+            <li>Effect: +1 to hit with all weapons, +5 Initiative, +2 Engine, +1 Sensors, +2 Reactor power, -5% Defence Rating, -1 to critical results</li>
             <li>Points Cost: +40% of ship cost (second time: +60%)</li>
             <li>Limit: 2</li>
         </ul>      
@@ -515,6 +517,19 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li>Effect: Power Capacitor gains +2 storage points and +1 recharge point</li>
                 <li>Points Cost: 20 * new Capacitor recharge rate</li>
                 <li>Limit: 6</li>
+            </ul>      
+          </li>
+      </ul>
+    <a class="back-to-top" href="#top">↩ Back to Top</a>
+
+    <h4 id="walkers" style="margin-top: 15px;">Walkers of Sigma-957:</h4>
+      <ul>
+        <li><strong>Extended Draining Field</strong>
+            <ul class="circle-list">
+                <li>Effect: +1 hex of radius for every Energy Draining Field on the unit.</li>
+                <li>Points Cost: 300 * new radius, for each field (that is 50 points per hex of field gained, and a hex of radius adds 6 x radius new hexes)</li>
+                <li>Limit: 3</li>
+                <li>Notes: On a <em>Variable</em> Energy Draining Field this raises the normal-power radius only - the double-power radius does not move, so each hex bought is one hex less that double power is worth. Once the two meet, boosting the field buys nothing further.</li>
             </ul>      
           </li>
       </ul>

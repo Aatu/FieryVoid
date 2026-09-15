@@ -170,6 +170,24 @@ class FireGamePhase implements Phase
             if (Firing::validateFireOrders($ship->getAllFireOrders(), $gameData)){
                 $dbManager->submitFireorders($gameData->id, $ship->getAllFireOrders(), $gameData->turn, $gameData->phase);
             }
+
+            /* WALKERS_OF_SIGMA_PLAN.md 3.3 - per-system DECLARATIONS made in the Fire phase, which
+               have to outlive this POST: advance() re-loads gamedata from the database, so anything
+               left on these POST-side objects is gone by the time prepareFiring runs. The Wide-Beam
+               Lightning Array's toggle is the only one today.
+
+               ⚠️⚠️ A NARROW HOOK, NOT the generic generateIndividualNotes sweep the other phases
+               run. That sweep has never run in the Fire phase, and 34 of the ~80 overrides in the
+               codebase carry no phase guard at all (one has an explicit `case 3`) - switching it on
+               here would wake every one of them in a phase they have never seen. ShipSystem's
+               version of this hook does nothing, so every other system in the game is unaffected by
+               construction. See ShipSystem::saveFirePhaseDeclaration.
+
+               Inside the own-ship guard above, so a POST can only ever declare for its own units. */
+            foreach ($ship->systems as $system){
+                $system->saveFirePhaseDeclaration($gameData, $dbManager);
+            }
+            $ship->saveIndividualNotes($dbManager);
             /*//Attempted segment when boosting in other phases was allowed
             $powers = array();
             //Can now bosot Fighter Systems, so look for this.
@@ -215,6 +233,17 @@ class FireGamePhase implements Phase
             //Sadly we have to add a quick process here to catch things like ships that have used their Specialists in Phase 3, otherwise notes aren't created before firing.
             $ship->generateAdditionalNotes($gameData, $dbManager);            
         }		
+
+        /* WALKERS OF SIGMA-957 (WALKERS_OF_SIGMA_PLAN.md 3.8, Stage 10B) - EW points an EW Detector
+           let this fleet hold back from Initial Orders, spent now. The SAME budget as the Pre-Firing
+           window, not a second one: submitLateEw diffs the POST against what is already stored, so
+           points spent in phase 5 are stored rows here and only the remainder is still spendable.
+           Both phases are open because a turn whose Initial Orders had nothing to activate skips
+           phase 5 entirely (InitialOrdersGamePhase::advance) and would otherwise lose the allowance.
+           OUTSIDE the per-ship loop: the fleet's detectors are collected once for the whole POST
+           rather than once per ship. It reloads nothing - $gameData already IS the authoritative
+           load - and never touches the database in a game with no EW Detector in it. */
+        EW::submitLateEw($gameData, $dbManager, $ships);
 
         $dbManager->updatePlayerStatus($gameData->id, $gameData->forPlayer, $gameData->phase, $gameData->turn);
         $dbManager->setPlayerWaitingStatus($gameData->forPlayer, $gameData->id, true);

@@ -236,6 +236,24 @@ class BlueprintCache
                             foreach ($system->allowedFighterClasses as $c) $spawn[] = $c;
                         }
                     }
+
+                    /* ⭐ A FIGHTER FLIGHT'S SPAWNERS ARE ONE LEVEL DOWN (WALKERS_OF_SIGMA_PLAN.md
+                       §3.12, Stage 13). $ship->systems on a flight is a list of Fighter objects and
+                       the weapons are inside those, so the scan above saw nothing at all on one -
+                       which was free until a fighter-mounted weapon could put a unit on the board.
+                       The Mapmaker's Jump Engine can, and without this the FIRST jump point a
+                       Mapmaker flight ever opens has no blueprint to resolve against and renders as
+                       an empty hex until the page is reloaded (the exact failure $spawnableClasses
+                       exists to prevent).
+                       ⚠️ Fighters carry no Hangar, so only the spawnable half is walked; $hasHangar
+                       stays a hull question. */
+                    if (!empty($system->fighter) && !empty($system->systems) && is_array($system->systems)) {
+                        foreach ($system->systems as $craftSystem) {
+                            if (!empty($craftSystem->spawnableClasses)) {
+                                foreach ($craftSystem->spawnableClasses as $c) $spawn[] = $c;
+                            }
+                        }
+                    }
                 }
                 if (!empty($ship->fighters) && is_array($ship->fighters)) {
                     foreach ($ship->fighters as $category => $count) {

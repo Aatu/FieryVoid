@@ -91,6 +91,20 @@ public function calculateHit($gamedata, $fireOrder){
             //do damage to ships in range...
             $ships1 = $gamedata->getShipsInDistance($target);
             $ships2 = $gamedata->getShipsInDistance($target, 1);
+            /* WALKERS OF SIGMA-957 (WALKERS_OF_SIGMA_PLAN.md 2.1): "Proximity weapons, such as
+               energy mines, that land within a field hex only detonate in that hex, losing any
+               explosion radius they might normally have. They will still cause their full damage
+               within the target hex, affecting any unit therein. This applies to advanced race
+               weapons as well."
+               So the range-1 ring is dropped and the target hex is unchanged - which is exactly
+               "$ships2 becomes $ships1". Measured at the hex the shot ACTUALLY landed on, after
+               any deviation above.
+               ⚠️ Team-blind (isHexInEdfField), and gated on the static so an ordinary game pays
+               one property read per proximity detonation. */
+            if (TacGamedata::$edfPresent && $gamedata->isHexInEdfField($target)) {
+                $ships2 = $ships1;
+                $fireOrder->pubnotes .= "<br>Energy Draining Field contains the blast to its own hex. ";
+            }
             foreach ($ships2 as $targetShip) {
                 if (isset($ships1[$targetShip->id])) { //ship on target hex!
                     $sourceHex = $posLaunch;
@@ -1043,3 +1057,395 @@ class ProximityMine extends Weapon implements SpecialAbility{
     }
 	    
 } //endof class ProximityMine
+
+
+/* =======================================================================================
+   WALKERS OF SIGMA-957 - ENERGY DRAINING MINE (WALKERS_OF_SIGMA_PLAN.md 3.6, Stage 6)
+   =======================================================================================
+
+   "When the need arises to map a particularly dangerous spatial anomaly, certain advanced races
+    deploy temporary sensor probes. They appear like chromatic pulse orbs, but are approximately
+    four times the diameter. Targeted like an energy mine, they produce an Energy Draining Field,
+    with all applicable rules, covering the destination hex and those immediately surrounding that
+    hex (seven hexes in total). This field lasts for one turn."
+
+   IT LIVES IN AoE.php BY THE USER'S INSTRUCTION ("Electromagnetic, but created in AoE files") and
+   because it is mechanically an Energy Mine: hex-targeted, ballistic, scatters on a miss. The
+   client twin is in model/weapon/aoe.js, which is the mirror file - keep the pair symmetric.
+
+   THREE EXISTING PATTERNS, NO NEW MACHINERY:
+    1. STORAGE is BallisticTorpedo's (torpedo.php:79). turnsloaded is a COUNT OF MINES HELD, not a
+       charge level; loadingtime stays 1 so "one mine held" reads as "loaded" everywhere
+       (Firing::getFireOrderBlock and weaponManager.isLoaded both test turnsloaded >= loadingtime).
+    2. SCATTER is the AoE family's d100 shape, carrying this weapon's own numbers - see fire().
+    3. THE FIELD is a spawned TERRAIN unit carrying an ordinary EnergyDrainingField, exactly the
+       recipe spawnHyperspaceWaveform uses (specialWeapons.php). Nothing about the drain, the
+       targeting penalty or the map overlay had to learn about mines: TacGamedata::setEdfHexes()
+       consumes EdfSource, and the orb mounts one. See SpawnEnergyDrainingMine.
+
+   ⚠️ IT DOES NO DAMAGE AT ALL. fire() is a complete override with no call to AOEdamage; the
+   inherited min/max damage are zeroed so the tooltip cannot advertise any.
+*/
+class EnergyDrainingMine extends AoE {
+
+    public $name        = "EnergyDrainingMine";
+    public $displayName = "Energy Draining Mine";
+    //⚠️ Case-sensitive on live (arch_dockingcollar_icon_case): img/systemicons/EnergyDrainingMine.png.
+    public $iconPath    = "EnergyDrainingMine.png";
+
+    public $factionAge  = 3;                  //Ancient - matters to several to-hit and EDF rules
+    public $weaponClass = "Electromagnetic";  //per the rules text
+    public $range       = 150;
+
+    public $ballistic  = true;
+    public $hextarget  = true;
+    public $hidetarget = true;                //as EnergyMine: the aim point is not shown to the enemy
+    public $priority   = 1;                   //resolves with the rest of the mine family
+    public $intercept  = 0;                   //hextarget weapons are uninterceptable anyway
+
+    /* STORAGE (BallisticTorpedo pattern). loadingtime 1 == "one held mine is a loaded weapon";
+       normalload 3 == "may store mines up to a maximum of 3". The RELOAD CADENCE is a separate
+       number - see $reloadInterval - because raising loadingtime would mean a crippled launcher
+       needed two mines in store before it counted as loaded at all. */
+    public $loadingtime = 1;
+    public $normalload  = 3;
+    public $shots        = 3;                 //overwritten per instance in onConstructed()
+    public $defaultShots = 1;                 //one mine per declared shot
+    public $guns         = 1;
+
+    public $canSplitShots    = true;          //"the full complement need not be launched"
+    public $maxVariableShots = 3;             //client hint; the server clamps against turnsloaded
+
+    public $firingModes = array(1 => "Energy Draining Mine");
+
+    /* "On a result of 20+, reduce the rate of fire to 1 per 2 turns. Successive rolls continue to
+       lengthen the recharge rate by 1 turn, to 1 per 3 turns, 1 per 4 turns, and so on."
+       IncreasedRecharge1 already means exactly "recharge increased by one turn" and is repeatable,
+       so the ladder is the crit COUNT and needs no class of its own. */
+    protected $possibleCriticals = array(20 => "IncreasedRecharge1");
+
+    /* Turns between reloads at zero criticals. NOT $loadingtime - see the storage note above. */
+    protected $reloadInterval = 1;
+
+    /* ⭐⭐ PROBES THAT LANDED THIS REQUEST, WAITING TO BE FOLDED INTO THE EDF MAP.
+     *
+     * "The field should also drain at the end of the turn it is fired" (user ruling 2026-09-05):
+     * a unit caught in the seven hexes on the landing turn counts that as its FIRST turn in a
+     * field, and the field then persists for the following turn as before. So a probe has to be
+     * on the map in time for the Critical Hit step of its own turn - but TacGamedata::setEdfHexes()
+     * ran at gamedata load, hours of game logic earlier, and knows nothing about it.
+     *
+     * ⚠️ THE ENTRIES ARE QUEUED HERE RATHER THAN REGISTERED FROM fire(), AND THAT IS DELIBERATE.
+     * Registering at spawn time would make the field visible to weapons that resolve LATER in the
+     * same Firing step - AoE::fire asks isHexInEdfField() to decide whether a proximity blast is
+     * contained - so whether an enemy energy mine kept its blast radius would depend on weapon
+     * resolution ORDER. The rules put the drain at the Critical Hit step, so the map changes
+     * exactly once, there: Criticals::setCriticals drains this queue before it resolves anything.
+     *
+     * ⚠️ VALUES, NOT OBJECTS. The launching ship may itself be destroyed later in the same Firing
+     * step; the probe is already away and its field forms regardless.
+     * Static, and never persisted: on every LATER load the probe is an ordinary ship in
+     * $gamedata->ships and setEdfHexes() picks its EnergyDrainingField up the usual way. */
+    public static $pendingFields = array();
+
+    /* The scatter table as percentages, so the d100 roll every other AoE weapon makes can carry it
+       (see fire() for the mapping back to the rules' dice). */
+    const ON_TARGET_PCT = 75;   //d20 1-15
+    const SCATTER_PCT   = 60;   //of the rest: d10 1-6 scatters, 7-10 is no effect
+    const SCATTER_DIE   = 5;    //"scatters d5 hexes along the indicated hex facing"
+
+    const FIELD_RADIUS  = 1;    //"the destination hex and those immediately surrounding it" = 7 hexes
+
+    /* PLACEHOLDER STATS (WALKERS_OF_SIGMA_PLAN.md D4) - health and power are guesses until the
+       control sheet lands. 0 for either takes these, as every other Walker weapon does. */
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+        if ($maxhealth == 0) $maxhealth = 12;
+        if ($powerReq  == 0) $powerReq  = 5;
+        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+    }
+
+    /* ------------------------------------------------------------------ storage ------ */
+
+    public function onConstructed($ship, $turn, $phase){
+        parent::onConstructed($ship, $turn, $phase);
+        $this->shots = $this->turnsloaded; //mines held, not shots per gun
+    }
+
+    /* "The weapon begins battles loaded with 1 mine." Weapon::getStartLoading seeds the first slot
+       with getNormalLoad() (3 here); seeding 1 instead is the whole of that rule - onConstructed
+       writes whatever this returns straight into tac_systemdata. */
+    public function getStartLoading(){
+        return new WeaponLoading(1, 0, 0, 0, $this->getLoadingTime(), $this->firingMode);
+    }
+
+    /* Turns between reloads, after criticals. One extra turn per IncreasedRecharge1, so one crit
+       is "1 per 2 turns", two is "1 per 3", and so on - the rules' ladder verbatim. */
+    public function getReloadInterval(){
+        return max(1, $this->reloadInterval + (int)$this->hasCritical("IncreasedRecharge1"));
+    }
+
+    /* Does a mine arrive at the start of $turn?
+     *
+     * ⚠️⚠️ TURN ONE NEVER RELOADS, BECAUSE getStartLoading() *IS* TURN ONE'S LOAD. The reload
+     * branch in calculateLoading() fires when the game advances OUT of the DEPLOYMENT phase -
+     * DeploymentGamePhase::advance() sets phase 1 before Manager::advanceGameState runs its
+     * onAdvancingGamedata sweep - so on turn 1 it lands BEFORE the player's first Initial Orders.
+     * Without this guard the launcher opened the battle at 2/3 rather than the 1/3 the rules ask
+     * for (user report, game 4337: Traveler #1 was able to declare two probes on turn 1).
+     * ⚠️ The fix is NOT to seed getStartLoading() with 0 and let the bump make it 1: the ship
+     * window would then read 0/3 for the whole of the Deployment phase, which is the complaint
+     * MediumLightningArray already answered the same way (game 4329).
+     *
+     * ⭐ THE CADENCE IS READ OFF THE TURN NUMBER, NOT OFF A STORED COUNTER, and that is
+     * deliberate. The obvious place to keep "turns since the last mine" is the WeaponLoading
+     * overloading slot - which BallisticTorpedo leaves at 0 - but weaponManager.isLoaded() answers
+     * `loadingtime <= turnsloaded || loadingtime <= overloadturns`, so a counter sitting at 1 would
+     * make an EMPTY launcher read as loaded on the client. The turn number needs no storage, cannot
+     * drift across the double gamedata load, and replays identically. */
+    public function reloadsOnTurn($turn){
+        if ($turn <= 1) return false;
+        $interval = $this->getReloadInterval();
+        return ($interval <= 1) || (($turn % $interval) == 0);
+    }
+
+    //Mines LAUNCHED this turn (BallisticTorpedo's override: a count, not a boolean).
+    public function firedOnTurn($turn){
+        $totalShots = 0;
+        foreach ($this->fireOrders as $fire){
+            if ($fire->weaponid == $this->id && $fire->turn == $turn){
+                $totalShots += $fire->shots;
+            }
+        }
+        return $totalShots;
+    }
+
+    /* BallisticTorpedo::calculateLoading with one change: the reload is CADENCED, and
+       reloadsOnTurn() above is the single authority on when it happens (including why turn 1 is
+       exempt). The two branch labels are worth spelling out, because neither is the phase you
+       would guess: onAdvancingGamedata runs AFTER the phase advance has already set the NEXT
+       phase, so `currentPhase == 1` means "we just left DEPLOYMENT" and `currentPhase == 2` means
+       "we just left INITIAL ORDERS", which is exactly when ballistics are committed. */
+    public function calculateLoading(TacGamedata $gamedata)
+    {
+        $loading = new WeaponLoading($this->turnsloaded, 0, 0, 0, $this->getLoadingTime(), $this->firingMode);
+        $shotsfired = $this->firedOnTurn(TacGamedata::$currentTurn);
+
+        if (TacGamedata::$currentPhase == 2)
+        {
+            if ($this->isOfflineOnTurn(TacGamedata::$currentTurn))
+            {
+                $loading = new WeaponLoading(0, 0, 0, 0, $this->getLoadingTime(), $this->firingMode);
+            }
+            else if ($shotsfired)
+            {
+                $newloading = max(0, $this->turnsloaded - $shotsfired);
+                $loading = new WeaponLoading($newloading, 0, 0, 0, $this->getLoadingTime(), $this->firingMode);
+            }
+        }
+        else if (TacGamedata::$currentPhase == 1)
+        {
+            $newloading = $this->turnsloaded;
+            if ($this->reloadsOnTurn(TacGamedata::$currentTurn)){
+                $newloading++;
+                if ($newloading > $this->getNormalLoad()) $newloading = $this->getNormalLoad();
+            }
+            $loading = new WeaponLoading($newloading, 0, 0, 0, $this->getLoadingTime(), $this->firingMode);
+        }
+
+        return $loading;
+    }//endof calculateLoading()
+
+    /* ------------------------------------------------------------------ firing ------- */
+
+    /* Chance that the shot produces a field SOMEWHERE, which is what `needed` means for every
+       weapon in this family. Derived from the rules' table rather than written as a literal:
+       75% on target, and 60% of the remaining 25% scatters instead of fizzling. = 90.
+       ⚠️ No to-hit modifiers, exactly as AoE::calculateHitBase - a probe's scatter is not a
+       gunnery roll, so fire control, range and the EDF penalty all sit this one out. */
+    public function calculateHitBase($gamedata, $fireOrder)
+    {
+        $fireOrder->needed = self::ON_TARGET_PCT
+                           + (int)round((100 - self::ON_TARGET_PCT) * self::SCATTER_PCT / 100);
+        $fireOrder->updated = true;
+    }
+
+    /**
+     * @param TacGamedata $gamedata
+     * @param FireOrder $fireOrder
+     *
+     * THE RULES' TABLE, ON THE FAMILY'S d100:
+     *   d20 1-15  = on target                     ->  rolled <= 75
+     *   d20 16-20 = scatter, then d10 1-6         ->  rolled 76..90, deviating d5 hexes
+     *                        d10 7-10 = no effect ->  rolled > 90 (= $fireOrder->needed)
+     * The direction is a separate uniform d6 rather than being read off the same d10; the
+     * distribution over the six hex facings is identical either way.
+     *
+     * ⚠️ NO DAMAGE IS DEALT ANYWHERE IN HERE. The orb is the entire effect.
+     */
+    public function fire($gamedata, $fireOrder)
+    {
+        $this->changeFiringMode($fireOrder->firingMode);
+        $shooter = $gamedata->getShipById($fireOrder->shooterid);
+
+        /** @var MovementOrder $movement */
+        $movement  = $shooter->getLastTurnMovement($fireOrder->turn);
+        $posLaunch = $movement->position; //at the moment of launch
+
+        //A player CAN manage to target a ship after all - correct it to that ship's hex, as AoE does.
+        if ($fireOrder->targetid != -1) {
+            $targetship = $gamedata->getShipById($fireOrder->targetid);
+            $movement = $targetship->getLastTurnMovement($fireOrder->turn);
+            $fireOrder->x = $movement->position->q;
+            $fireOrder->y = $movement->position->r;
+            $fireOrder->targetid = -1;
+        }
+
+        $target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
+
+        $rolled = Dice::d(100);
+        $fireOrder->rolled = $rolled;
+
+        if ($rolled > $fireOrder->needed) { //d10 7-10: the pulse never forms
+            $fireOrder->pubnotes .= "<br>An Energy Draining Mine dissipates. ";
+        } else {
+            $fireOrder->shotshit++;
+
+            if ($rolled > self::ON_TARGET_PCT) { //d20 16-20 then d10 1-6: scatter
+                /* "Like Energy Mines, scatter rules apply" - which includes the family's cap of the
+                   distance actually flown, so a probe lobbed into the next hex cannot land five
+                   hexes past its launcher. */
+                $maxdis    = $posLaunch->distanceTo($target);
+                $dis       = min(Dice::d(self::SCATTER_DIE), floor($maxdis));
+                $direction = Dice::d(6) - 1;
+
+                $target = $target->moveToDirection($direction, $dis);
+
+                $fireOrder->pubnotes .= " Deviation from " . $fireOrder->x . ' ' . $fireOrder->y;
+                $fireOrder->x = $target->q;
+                $fireOrder->y = $target->r;
+                $fireOrder->pubnotes .= " to " . $fireOrder->x . ' ' . $fireOrder->y . '. ';
+                $fireOrder->pubnotes .= "Probe scatters $dis hexes. ";
+            }
+
+            $this->spawnFieldOrb($gamedata, $shooter, $target);
+            $fireOrder->pubnotes .= "<br>Energy Draining Field projected over " . $target->q . ' ' . $target->r
+                                 . " and the six hexes around it, for one turn. ";
+        }
+
+        $fireOrder->rolled = max(1, $fireOrder->rolled); //marks the order handled
+    } //endof function fire
+
+    /* The orb, spawned exactly the way spawnHyperspaceWaveform is (specialWeapons.php): insert the
+       ship, give it a 'deploy' movement at the hex, initialise its system data, then drop it out of
+       THIS request's ship list - a half-built unit with no in-memory movement row has no business
+       in the sweeps that follow (it would answer getHexPos() with null), and every later load
+       rebuilds it properly from the DB.
+       ⚠️ Dropping the UNIT does not drop its FIELD: that is queued in $pendingFields and folded
+       into the EDF map at the Critical Hit step, so the probe drains on the turn it lands.
+       Its lifetime is encoded in its NAME ("EDM<turn>") and read back by
+       SpawnEnergyDrainingMine::onConstructed - no note, no extra table and no cleanup sweep, so it
+       expires correctly even if this launcher is destroyed first.
+       ⚠️ LAST_INSERT_ID comes back as a STRING; Manager::insertSingleShip casts it.
+       PROTECTED, not private: fire() calls it through $this, and a private method is bound to THIS
+       class - so a variant launcher (or a test double) could not replace it. */
+    protected function spawnFieldOrb($gamedata, $shooter, $hex)
+    {
+        $orb = new SpawnEnergyDrainingMine($gamedata->id, -5, "EDM" . $gamedata->turn, $shooter->slot);
+
+        $shipid = Manager::insertSingleShip($gamedata, $orb, -5);
+        $orb->id = $shipid;
+
+        $deployMove = new MovementOrder(
+            null, "deploy",
+            new OffsetCoordinate($hex->q, $hex->r),
+            0, 0, 0, 0, 0, false, $gamedata->turn, 0, 0
+        );
+        Manager::insertSingleMovement($gamedata->id, $shipid, $deployMove);
+
+        SystemData::initSystemData($gamedata->turn, $gamedata->id);
+        foreach ($orb->systems as $system) {
+            $system->setInitialSystemData($orb);
+        }
+        Manager::insertSystemData(SystemData::getAndPurgeAllSystemData());
+
+        unset($gamedata->ships[$shipid]);
+
+        /* The field is live from the moment the probe lands, so it has to drain at the Critical
+           Hit step of THIS turn. Queued rather than registered - see $pendingFields.
+           ⚠️ The TEAM is the LAUNCHER's, which is what makes the launching fleet immune to its own
+           probe (and is also what a later load derives, since the orb inherits $shooter->slot). */
+        self::$pendingFields[] = array(
+            'q'      => $hex->q,
+            'r'      => $hex->r,
+            'radius' => self::FIELD_RADIUS,
+            'team'   => isset($shooter->team) ? (int)$shooter->team : null,
+            'shipId' => (int)$shooter->id,
+        );
+    }
+
+    /* Fold every probe that landed this request into TacGamedata's EDF map, then forget them.
+     *
+     * Called from the TOP of Criticals::setCriticals - before the $edfPresent gate, because a game
+     * whose only field is a probe that has just landed would otherwise never reach the resolver at
+     * all (registerEdfField sets the static). Draining the queue makes it idempotent on its own;
+     * registerEdfField is idempotent per hex too, so a second call changes nothing either way. */
+    public static function commitPendingFields($gamedata)
+    {
+        if (empty(self::$pendingFields)) return;
+
+        $pending = self::$pendingFields;
+        self::$pendingFields = array();
+
+        if (!$gamedata) return;
+
+        foreach ($pending as $field){
+            if ($field['team'] === null) continue; //no team, no own-fleet immunity to express
+            $gamedata->registerEdfField(
+                new OffsetCoordinate($field['q'], $field['r']),
+                $field['radius'],
+                $field['team'],
+                $field['shipId']
+            );
+        }
+    }
+
+    /* ------------------------------------------------------------------ display ------ */
+
+    //No damage at all - the field is the effect. Both are read by setSystemDataWindow below.
+    public function getDamage($fireOrder) { return 0; }
+    public function setMinDamage()        { $this->minDamage = 0; }
+    public function setMaxDamage()        { $this->maxDamage = 0; }
+
+    public function setSystemDataWindow($turn)
+    {
+        parent::setSystemDataWindow($turn);
+
+        /* AoE's prose describes an energy mine's blast, which this weapon does not have, so it is
+           replaced wholesale rather than appended to. */
+        unset($this->data["Damage type"]);
+        $this->data["Damage"] = "None";
+
+        $interval = $this->getReloadInterval();
+        $this->data["Mines stored"] = $this->turnsloaded . "/" . $this->getNormalLoad();
+        $this->data["Reload rate"]  = ($interval == 1)
+            ? "1 mine per turn"
+            : "1 mine per " . $interval . " turns";
+
+        $this->data["Special"] = "<br>On landing it projects an Energy Draining Field over the target and surrounding hexes for one turn. Does not affect allies.";
+        $this->data["Special"] .= "<br>Hit chance (of target hex): " . self::ON_TARGET_PCT . "%. A miss scatters d" . self::SCATTER_DIE . " hexes in a random direction, or dissipates.";
+        $this->data["Special"] .= "<br>Stores up to " . $this->getNormalLoad() . " mines and need not launch them all in one turn.";
+    }
+
+    /* Everything named here moves per instance - the store with firing, the reload rate with
+       criticals - so the client must not read the shared blueprint values.
+       maxVariableShots is BallisticTorpedo's contract with its client half: it is the ceiling on
+       separate hexes this launcher may still declare, and aoe.js decrements it as they are picked. */
+    public function stripForJson()
+    {
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->data             = $this->data;
+        $strippedSystem->maxVariableShots = $this->turnsloaded;
+        return $strippedSystem;
+    }
+
+} //endof class EnergyDrainingMine

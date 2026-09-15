@@ -997,11 +997,11 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 			
 		
 		//decision whether this system can protect from damage - value used only for choosing strongest shield to balance load.
-		public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false) {	
+		public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false, $shooter = null) {	
 			
 			if($isUnderShield) return 0; //shield does not protect from internal damage
 
-			$remainingCapacity = $this->getRemainingCapacity();
+			$remainingCapacity = $this->getCapacityAgainstShooter($this->getRemainingCapacity(), $shooter); //Walkers of Sigma-957: a fleet that has scanned this race cannot be stopped by this pool's last N points
 			$protectionValue = 0;
 			if($remainingCapacity>0){
 				$protectionValue = ($remainingCapacity / $inflictingShots) + $this->armour; //distribute capacity over shots
@@ -1016,7 +1016,7 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 			
 			if($damageToAbsorb<=0) return $returnValues; //nothing to absorb
 			
-			$remainingCapacity = $this->getRemainingCapacity();
+			$remainingCapacity = $this->getCapacityAgainstShooter($this->getRemainingCapacity(), $shooter); //Walkers of Sigma-957: a fleet that has scanned this race cannot be stopped by this pool's last N points
 			$absorbedDamage = 0;
 			
 			if($remainingCapacity>0) { //else projection does not protect
@@ -1346,11 +1346,11 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 		}//endof checkShieldDeduction		
 		
 		//decision whether this system can protect from damage - value used only for choosing strongest shield to balance load.
-		public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false) {
+		public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false, $shooter = null) {
 			
 			if($isUnderShield) return 0; //shield does not protect from internal damage
 
-			$remainingCapacity = $this->getRemainingCapacity();
+			$remainingCapacity = $this->getCapacityAgainstShooter($this->getRemainingCapacity(), $shooter); //Walkers of Sigma-957: a fleet that has scanned this race cannot be stopped by this pool's last N points
 			$protectionValue = 0;
 			if($remainingCapacity>0){
 				$protectionValue = $remainingCapacity;
@@ -1373,7 +1373,7 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 			
 			if($damageToAbsorb<=0) return $returnValues; //nothing to absorb
 			
-			$remainingCapacity = $this->getRemainingCapacity();
+			$remainingCapacity = $this->getCapacityAgainstShooter($this->getRemainingCapacity(), $shooter); //Walkers of Sigma-957: a fleet that has scanned this race cannot be stopped by this pool's last N points
 			$absorbedDamage = 0;
 			
 			if($remainingCapacity>0) { //else projection does not protect

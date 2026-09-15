@@ -6,7 +6,7 @@ class triadAngel extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 2850;
-        $this->faction = "";
+        $this->faction = "The Triad";
         $this->phpclass = "triadAngel";
         $this->imagePath = "img/ships/triadAngel.png";
         $this->shipClass = "Order: Angel";
@@ -29,7 +29,10 @@ class triadAngel extends HeavyCombatVessel{
         $this->pivotcost = 3;
         $this->iniativebonus = 50;
 
-		$this->notes = "Can control 6 fighters";		
+		$this->fighters = array("Triad Fighter"=>6);
+
+		/*Triad use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'TriadShip');
          
         $this->addPrimarySystem(new Reactor(8, 25, 0, 0));
         $this->addPrimarySystem(new CnC(9, 16, 0, 0));
@@ -53,7 +56,7 @@ class triadAngel extends HeavyCombatVessel{
         $this->addAftSystem(new GraviticThruster(8, 15, 0, 4, 2));
         $this->addAftSystem(new GraviticThruster(8, 15, 0, 4, 2));
         $this->addAftSystem(new PhotonicPrismBeam(8, 24, 8, 90, 270));	
-		$this->addAftSystem(new JumpEngine(8, 15, 4, 8));        
+		$this->addAftSystem((new JumpEngine(8, 15, 4, 8))->markAncient());        
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 8, 75));

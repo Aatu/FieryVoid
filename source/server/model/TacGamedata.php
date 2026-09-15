@@ -26,6 +26,33 @@ class TacGamedata {
     /*Every team id in this game. Needed because ChameleonSensors::isDisguisedFrom() has to answer
       "has EVERY team seen through this?" for an observer, and a system has no route to $gamedata.*/
     public static $chameleonAllTeams = array();
+    /*Chromatic Pulse Driver gate (WALKERS_OF_SIGMA_PLAN.md 3.4), same idea as $chameleonPresent
+      above and for the same reason: the CPD is one weapon on one Ancient faction, but its shield
+      adaptation has to be consulted by the FOUR defensive-mod aggregators that every shot in every
+      game runs through. So the whole feature hangs off this one boolean and an ordinary game pays
+      for four false checks and nothing else - not even the autoload of CpdScanRegistry.
+      ⚠️ Set by CpdScanRegistry::record(), i.e. only once a scan note has actually been replayed -
+      NOT by the presence of a CPD on a hull, because an unfired driver changes nothing. Cleared in
+      DBManager::getSystemDataForShips, immediately before the note sweep that would set it: it
+      cannot be cleared in markUnavailableSetMarkers() with the other markers, because that runs
+      from onConstructed() - long after the sweep - and would wipe the answer.*/
+    public static $cpdAdaptationPresent = false;
+    /*Energy Draining Field gate (WALKERS_OF_SIGMA_PLAN.md 2.1, Stage 4) - the same idea as
+      $cpdAdaptationPresent above and adopted for the same reason: the EDF is one system on one
+      Ancient faction, but its targeting penalty has to be consulted by Weapon::calculateHitBase,
+      which every shot in every game passes through. A game with no field on the board pays for
+      one false static read per shot and nothing else.
+      ⚠️ Unlike $cpdAdaptationPresent this needs NO reset in DBManager: setEdfHexes() rebuilds the
+      whole map from scratch on every load and clears the flag at its top, so it is self-resetting
+      across the double gamedata load (plan trap 1) by construction. Do not add an accumulating
+      cache here without adding that reset.*/
+    public static $edfPresent = false;
+    /*Extra-Dimensional Jump Drive gate (WALKERS_OF_SIGMA_PLAN.md 3.18, Stage 20) - true once any
+      Jump Engine has restored an 'EDJD' abduction note this load, i.e. some unit has ever been
+      abducted-at in this game. Same shape as $cpdAdaptationPresent and ⚠️ the same reset slot:
+      DBManager::getSystemDataForShips clears it immediately before the note sweep that sets it
+      (plan trap 1 - one request loads gamedata twice).*/
+    public static $abductionPresent = false;
     /*D15, second half: a FINISHED game drops every deception so the post-mortem shows what actually
       happened. Set from $this->status, read by applyChameleonDisguise() and maskChameleonArming().
       Deliberately NOT implemented by forcing the two gates above to false: maskChameleonFireOrders()
@@ -53,7 +80,91 @@ class TacGamedata {
     public $waitingForThisPlayer = false;
     public $rules;
     public $blockedHexes;
+    /* Walkers of Sigma-957 (WALKERS_OF_SIGMA_PLAN.md 3.4). Chromatic Pulse Driver shield
+       adaptation, as { <teamId>: { <faction>: <points> } }, so the client's hit-chance preview
+       agrees with the dice. Built in onConstructed() from CpdScanRegistry - which the ship load
+       has already filled by then - and consumed by Ship.prototype.getHitChangeMod in
+       model/ship.js. Adaptation is public knowledge: it is earned by a scanning shot that
+       resolves and is logged like any other, and a defender needs to see why their shields read
+       low, so every team's entry is published rather than only the viewer's.
+       ⚠️ NULL, never array(), when there is nothing - an empty PHP array encodes as JSON `[]` and
+       the client indexes this like an object. */
+    public $cpdAdaptation = null;
+    /* Walkers of Sigma-957 (WALKERS_OF_SIGMA_PLAN.md 2.1, Stage 4). Every hex covered by an
+       Energy Draining Field, as { "q,r": { "teams": { <teamId>: 1 } } }.
+
+       KEYED BY HEX, so overlapping fields collapse for free - which IS the rules' "overlapping
+       hexes are only counted once", rather than a special case bolted on afterwards. "teams"
+       records which teams project into the hex, which is what turns "the rest of the fleet of
+       the ship deploying the EDF is immune" into a single array lookup instead of a per-shot
+       distance sweep over every field source in the game.
+
+       NOT PER-VIEWER, exactly like blockedHexes, and that is correct - an EDF is a visible
+       phenomenon (D5: no Walker hull can conceal itself, so a concealed ship cannot disclose
+       itself through its own field).
+       ⚠️ That is a property of the FLEET, not of this design. The day an EDF reaches a hull that
+       CAN conceal itself - a refit, a custom hull, a `whatif` pack - this map discloses its
+       position to every viewer, silently and with no error anywhere. The answer then is "a
+       concealed ship projects no field", and the guard belongs in setEdfHexes() beside the
+       isReinforcement() one it already carries.
+
+       ⚠️ NULL, never array(), when there is nothing - an empty PHP array encodes as JSON `[]`
+       and the client indexes this like an object (plan trap 9). setEdfHexes() enforces that.
+       ⚠️ A new gamedata-LEVEL field reaches the client ONLY if gamedata.js parseServerData()
+       copies it BY NAME. Publishing it here is half the job; see arch_gamedata_named_key_copy,
+       and section 3.4's record of the day the whole CPD client half was dead for that reason. */
+    public $edfHexes = null;
+    /* Walkers of Sigma-957 (Stage 4c): WHICH unit projects the field over each hex - "q,r" =>
+       array(shipId => team). The twin of $edfHexes above, built in the same loop, and the ONLY
+       thing that can answer "who is draining this ship" once $edfHexes has collapsed its own
+       sources into a team set.
+
+       ⚠️⚠️ SERVER-SIDE ONLY. It is deliberately NOT copied in stripForJson(): $edfHexes already
+       tells a viewer that SOME enemy field covers a hex, which is all the targeting penalty
+       needs, while this names the hull - and a Walker sitting outside anybody's scanner range
+       would be announced by its own field's footprint. EdfExposure is the only reader. */
+    public $edfSources = null;
+    /* Walkers of Sigma-957 (Stage 7): the hexes an Energy Draining NET contributes - its own hex
+       plus every corridor and fill hex EdfNetLinks produced - as a flat list of {q, r}.
+
+       ⭐ PUBLISHED PURELY SO THE MAP CAN DRAW THEM, and it exists because the field overlay is
+       drawn PER SOURCE, as a disc anchored on the projecting unit's icon (ShipIcon.showEdfField
+       explains why: drawing from $edfHexes would fuse two overlapping fields into one shapeless
+       blob). A Net's field is not a disc round anything - it is a corridor between two hulls and
+       an area between several - so it is the one field shape that has no icon to hang off, and
+       the client gets the hexes themselves instead.
+
+       ⚠️ IT IS NOT AN AUTHORITY ON ANYTHING. $edfHexes already holds every one of these hexes,
+       team-tagged, and every RULE - the targeting penalty, the drain, own-fleet immunity - reads
+       that map and only that map. This list is a rendering hint; never make a rule read it, or
+       there will be two answers to "is this hex field" for exactly one field type.
+       ⚠️ NO TEAM TAG, deliberately. It is drawn identically whoever owns it (the shape is the
+       information), and the team set is in $edfHexes for anything that needs to care.
+       ⚠️ NOT PER-VIEWER, and it inherits $edfHexes' caveat WITH ONE EXTRA EDGE: these hexes are
+       the Nets' own positions and the corridors between them, so the day an EDN reaches a hull
+       that can conceal itself this list traces that hull's exact position and its formation. The
+       answer is the same one $edfHexes gives - a concealed ship projects no field - and the guard
+       belongs in the same place, beside setEdfHexes()' isReinforcement() test.
+       ⚠️ NULL, never array() (plan trap 9), and it needs its own named copy in gamedata.js
+       parseServerData() like every other gamedata-level key (arch_gamedata_named_key_copy). */
+    public $edfNetHexes = null;
+    /* Walkers of Sigma-957 (WALKERS_OF_SIGMA_PLAN.md 3.18, Stage 20) - Extra-Dimensional Jump Drive
+       abductions, as { costs: { <unitId>: <power-turns> }, chains: { <targetId>: { total, cost, since } } }
+       where `total` is in HALF power-turns. Built by EdjdAbduction::publish in onConstructed, and only
+       when a Walker drive that can join an abduction is in the game - so an ordinary game never even
+       autoloads the class.
+       PUBLIC TO EVERY VIEWER, deliberately: the declaration is announced (a ballistic marker from
+       Movement on) and the power-turns delivered are the resolution's record. See publish() for the
+       one masking judgement in `costs`.
+       ⚠️ NULL, never array() (plan trap 9), and it needs its own named copy in gamedata.js
+       parseServerData() like every other gamedata-level key (arch_gamedata_named_key_copy). */
+    public $abductions = null;
+    /* Stage 20 - a Walker hull drive is in this game at all (hasAbductionCapableDrive). The gate
+       Firing::fireWeapons asks before it touches EdjdAbduction, so no other game autoloads it. Server
+       only: stripForJson builds its object by hand and never names this. */
+    public $abductionCapable = false;
     public $isStealthPresent = false;
+
     public $areMinesPresent = false; //Marks that ENEMY mines are present.
     
     
@@ -179,6 +290,17 @@ class TacGamedata {
         $strippedGamedata->rules = $this->rules;
         $strippedGamedata->forPlayer = $this->forPlayer;
         $strippedGamedata->blockedHexes = $this->blockedHexes;
+        if ($this->cpdAdaptation !== null) $strippedGamedata->cpdAdaptation = $this->cpdAdaptation;
+        /* Walkers of Sigma-957 (Stage 4). Published only when there IS a field: null rather than
+           an empty array, because an empty PHP array encodes as JSON `[]` and the client indexes
+           this like an object (plan trap 9). ⚠️ gamedata.js parseServerData() must copy this key
+           BY NAME or the whole client half is silently dead - see arch_gamedata_named_key_copy. */
+        if ($this->edfHexes !== null) $strippedGamedata->edfHexes = $this->edfHexes;
+        /* Walkers of Sigma-957 (Stage 7) - the Net-generated hexes, for the map overlay only.
+           Same null-not-empty contract, same named-key requirement in gamedata.js. */
+        if ($this->edfNetHexes !== null) $strippedGamedata->edfNetHexes = $this->edfNetHexes;
+        //Walkers of Sigma-957 (Stage 20) - same null-not-empty contract, same named-key requirement.
+        if ($this->abductions !== null) $strippedGamedata->abductions = $this->abductions;
         $strippedGamedata->isStealthPresent = $this->isStealthPresent;
         $strippedGamedata->areMinesPresent = $this->areMinesPresent;        
 
@@ -190,6 +312,25 @@ class TacGamedata {
         self::$currentGameFinished = $this->isGameOver(); //post-mortem discloses private logistics (ammo loads, hangar contents)
         $this->setChameleonTeamList();
         $this->setBlockedHexes();
+        /* ⚠️⚠️ THE EDF HEX MAP IS BUILT AT THE *END* OF THIS METHOD, NOT HERE BESIDE
+           setBlockedHexes(), AND THE DIFFERENCE IS LOAD-BEARING. It sat here from Stage 4 because
+           the two maps are twins in every other way - same shape, same lifecycle, same
+           publish-once contract. But blockedHexes depends only on where ships ARE, while the EDF
+           map depends on a ship's field RADIUS, and radius is moved by the Extended Draining
+           Field enhancement (EDF_RANGE, Stage 5) - which is applied by BaseShip::onConstructed(),
+           in the per-ship loop BELOW. Built here, the map was drawn from BLUEPRINT radii and a
+           refitted field drained at its unenhanced range, on the server and on the client alike:
+           game 4336, three Travelers refitted to radius 3/4/5, all three still projecting 2.
+           Nothing between here and there reads $edfHexes or $edfPresent - every consumer is in
+           firing / criticals / AoE, i.e. a later step of a later request - so the call simply
+           moves. See the note at its new call site. */
+        /* Chromatic Pulse Driver adaptation, for the client's hit-chance mirror. Safe here and
+           only here: getTacShips() -> getSystemDataForShips() has already reset the registry and
+           replayed every CPDSCAN note into it, and this runs before stripForJson().
+           Gated on the boolean rather than on class_exists(), so a game that has never seen a CPD
+           scan does not even autoload the registry - see $cpdAdaptationPresent. If the flag is set
+           the class is loaded by definition, because record() is what set it. */
+        if (self::$cpdAdaptationPresent) $this->cpdAdaptation = CpdScanRegistry::publishAll();
         $this->waitingForThisPlayer = $this->getIsWaitingForThisPlayer();
         $this->doSortShips();
 
@@ -257,6 +398,43 @@ class TacGamedata {
         //more accurate, because every ship is now fully constructed - which the Chameleon gate
         //requires, since onConstructed() is what applies enhancements and fills special abilities.
         $this->markUnavailableSetMarkers();
+
+        /* Walkers of Sigma-957 (Stage 4): the EDF hex map - the twin of setBlockedHexes() above,
+           built for the same reason (the targeting penalty has to be mirrored to the point by the
+           client, and map-once/publish-once is what keeps the two in step).
+
+           ⭐ IT RUNS *HERE*, AFTER THE PER-SHIP LOOP, FOR EXACTLY THE REASON markUnavailableSetMarkers
+           DOES: BaseShip::onConstructed() is what applies enhancements, and the Extended Draining
+           Field refit (EDF_RANGE) MOVES A FIELD'S RADIUS. Called beside setBlockedHexes() - where
+           it was until 2026-09-05 - it read the blueprint radius off a ship whose refit had not
+           been applied yet, so a Traveler bought at radius 5 drained at 2. The generalisation is
+           the one that comment already makes for the Chameleon gate: anything that reads a
+           number an ENHANCEMENT can move belongs below this loop, not above it.
+
+           Self-gating: it clears TacGamedata::$edfPresent and rebuilds from scratch, so the double
+           gamedata load in one request cannot double-count (plan trap 1). */
+        $this->setEdfHexes();
+
+        /* WALKERS_OF_SIGMA_PLAN.md 3.18 (Stage 20) - abduction costs and running chains for the client.
+           Below the per-ship loop for the reason setEdfHexes is: the notes are restored and the hangars
+           loaded by then. Gated on a drive that can join an abduction, so no other game autoloads the
+           handler. */
+        $this->abductionCapable = $this->hasAbductionCapableDrive();
+        $this->abductions = $this->abductionCapable ? EdjdAbduction::publish($this) : null;
+    }
+
+    /* Stage 20 - is there a Walker hull drive in this game? Ancient units only get the system walk, so
+       every other ship in every other game costs two property reads. */
+    private function hasAbductionCapableDrive()
+    {
+        foreach ($this->ships as $ship){
+            if ($ship instanceof FighterFlight) continue;
+            if ((int)$ship->factionAge < 3) continue;
+            foreach ($ship->systems as $system){
+                if ($system instanceof JumpEngine && $system->canJoinAbduction()) return true;
+            }
+        }
+        return false;
     }
 
     /*Every team in this game, on a static because a ShipSystem has no route back to $gamedata -
@@ -837,6 +1015,15 @@ class TacGamedata {
             $this->deleteHiddenData();
         }
         $this->markJumpedDockedFlights(); //after deleteHiddenData: it reads the MASKED movement (see the method)
+        /* Walkers of Sigma-957 (WALKERS_OF_SIGMA_PLAN.md 3.4) - the "Scanned by Walkers"
+           markers on the shield systems of every race a Chromatic Pulse Driver has analysed.
+           Display only and never saved; the method comment carries the ordering constraints,
+           of which the two that pin it HERE are: before setPreTurnTasks(), whose beforeTurn()
+           sweep rebuilds critData out of the criticals, and before applyChameleonDisguise(),
+           so a marker can never land on a phantom sheet.
+           Gated on the boolean rather than class_exists(), like the publication in
+           onConstructed() - an ordinary game pays one static-property read (D10). */
+        if (self::$cpdAdaptationPresent) CpdScanRegistry::applyScanMarkers($this);
         $this->setPreTurnTasks();
         $this->applyChameleonDisguise(); //after setPreTurnTasks: it reads live system state
         $this->maskChameleonFireOrders(); //after applyChameleonDisguise: it reads the flag it sets
@@ -1122,13 +1309,30 @@ class TacGamedata {
                     if (!empty($system->lcvDocked['shipId'])) $dockedIds[] = (int)$system->lcvDocked['shipId'];
                     $system->lcvDocked = null;
                 }
+
+                //A Docking Bay (WALKERS_OF_SIGMA_PLAN.md 3.14) holds a LIST of whole ships, each
+                //entry carrying its own dock turn.
+                if (!empty($system->isDockingBay) && is_array($system->shipsDocked) && !empty($system->shipsDocked)){
+                    $keptShips = array();
+                    foreach ($system->shipsDocked as $entry){
+                        if ((int)($entry['dockTurn'] ?? 0) === (int)$this->turn){
+                            if (!empty($entry['shipId'])) $dockedIds[] = (int)$entry['shipId'];
+                            continue;
+                        }
+                        $keptShips[] = $entry;
+                    }
+                    $system->shipsDocked = $keptShips;
+                }
             }
         }
 
         foreach ($dockedIds as $id){
             $unit = $this->getShipById($id);
             if (!$unit || !$unit->removed) continue;
-            if ($unit->removedTurn !== null && (int)$unit->removedTurn !== (int)$this->turn) continue;
+            //turn - 1 too: a deploy-docked unit reloads with removedTurn one below its dock turn, as it
+            //was never on the board that turn (Hangar / DockingBay ::onIndividualNotesLoaded).
+            if ($unit->removedTurn !== null && (int)$unit->removedTurn !== (int)$this->turn
+                && (int)$unit->removedTurn !== (int)$this->turn - 1) continue;
             $unit->removed = false;
             $unit->removedTurn = null;
         }
@@ -1344,9 +1548,11 @@ class TacGamedata {
         if (!isset($this->slots[$ship->slot])) return;
         if (!is_array($ship->systems)) return;
 
-        foreach ($ship->systems as $system){
-            if (!($system instanceof JumpEngine)) continue;
-
+        //getUnitJumpEngines, not a bare loop: a FIGHTER FLIGHT's engine is one level down, inside
+        //its craft, and only the sample fighter's speaks for the flight (WALKERS_OF_SIGMA_PLAN.md
+        //§3.12, Stage 13). A Mapmaker flight arriving as a reinforcement declares its exit like any
+        //other unit, and the forming marker has to reach the other side the same way.
+        foreach (JumpEngine::getUnitJumpEngines($ship) as $system){
             foreach ($system->fireOrders as $fire){
                 if ($fire->damageclass !== 'jumpexit') continue;
                 if ((int)$fire->turn !== (int)$this->turn) continue;
@@ -1395,6 +1601,17 @@ class TacGamedata {
             }
 
             $this->hideDeploymentDocks();
+
+            /* ⚠️ AND THE FIELD MAP HAS TO FORGET THEM TOO (user request 2026-09-11). setEdfHexes() ran
+               in onConstructed, on the UNMASKED ships, so the published edfHexes / edfNetHexes still
+               held the Nets and discs of Walkers an opponent had already committed this phase -
+               nothing drew them, but the payload carried their positions. Rebuilt from the masked
+               ships, where such a unit is back on its off-map 'start' row (or un-docked onto it) and
+               setEdfHexes skips it. This viewer's payload only: prepareForPlayer is the payload
+               builder, and nothing resolves a rule from this object afterwards. Gated on there
+               being a field at all, so an ordinary game pays nothing - masking removes sources,
+               it never adds one. */
+            if ($this->edfHexes !== null) $this->setEdfHexes();
         }
 
         if ($this->phase == 1){
@@ -1464,8 +1681,18 @@ class TacGamedata {
                 $fire = $system->fireOrders[$i];
                 $weapon = $ship->getSystemById($fire->weaponid);
                 
-                if ($fire->turn == $this->turn && !$weapon->ballistic && $this->phase == 3 && !$weapon->preFires){
-                    if($fire->damageclass != 'TerrainCrash' && $fire->damageclass != 'TerrainCollision' && $fire->damageclass != 'AutoRam'){ //RammingAttack isn't PreFire, but we want THESE fireorders to be passed to Front End for Replay.                         
+                /* ⚠️ 'jumpexit' IS EXEMPT (user report 2026-09-11). A LEGACY drive's exit declaration
+                   (Shadows and every Ancient special jump drive, arriving through a phase-in doorway)
+                   sits on an engine markLegacy() has set $ballistic = false on, so this Firing-phase
+                   sweep took it for a direct-fire order and stripped it - the owner's blue marker
+                   vanished for the last phase of the formation turn while an ordinary exit's, on a
+                   still-ballistic engine, kept showing. It is a declaration, never a shot.
+                   ⚠️ AND SO IS AN ABDUCTION (WALKERS §3.18, Stage 20) - the same legacy-drive shape, a
+                   type-'ballistic' order on an engine whose $ballistic is false, and the announcement
+                   must stay on the map through the Firing phase it resolves at the end of. */
+                if ($fire->turn == $this->turn && !$weapon->ballistic && $this->phase == 3 && !$weapon->preFires
+                    && $fire->damageclass !== 'jumpexit' && $fire->damageclass !== JumpEngine::ABDUCTION_CLASS){
+                    if($fire->damageclass != 'TerrainCrash' && $fire->damageclass != 'TerrainCollision' && $fire->damageclass != 'AutoRam'){ //RammingAttack isn't PreFire, but we want THESE fireorders to be passed to Front End for Replay.
                         unset($system->fireOrders[$i]);
                     }    
                 }
@@ -1475,10 +1702,25 @@ class TacGamedata {
                 Gravitic Augmenter Modes 1/2), and the client draws launch/target hexes straight from
                 fire orders - so those leaked the moment the owner committed. Load-generated plasma
                 cloud markers (damageclass 'PersistentEffectPlasma') represent LAST turn's already
-                public cloud and must keep flowing.*/
+                public cloud and must keep flowing.
+
+                ⭐ AND SO DOES A HOMING MISSILE STILL IN THE AIR (HOMING_MISSILE_PLAN.md, user
+                ruling 2026-09-03). The secrecy this rule protects is "what am I launching THIS
+                turn"; a re-attack order (damageclass 'HomingMissile') is not a launch at all - the
+                missile left the rails on an earlier turn and told both players it was still there
+                by surviving its last pass. Stripped here it only reappeared once BOTH sides had
+                committed their Initial Orders, which is the one moment the information is no longer
+                any use: both players should be looking at it while they decide.
+
+                ⚠️ THIS ORDER MUST NOT COME BACK IN ON THE POST. Phase 1 is the one phase where
+                DBManager::submitFireorders inserts a ballistic order regardless of ->addToDB, so
+                anything visible here is re-inserted verbatim when its owner commits.
+                Firing::validateFireOrders rejects a posted 'HomingMissile' order for exactly that
+                reason - the server writes these and nobody else does.*/
                 if ($fire->turn == $this->turn && $this->phase == 1
                     && ($weapon->ballistic || $fire->type == 'ballistic')
-                    && $fire->damageclass != 'PersistentEffectPlasma'){
+                    && $fire->damageclass != 'PersistentEffectPlasma'
+                    && $fire->damageclass !== AmmoMissileHM::REATTACK_CLASS){
                     unset($system->fireOrders[$i]);
                 }
 
@@ -1503,6 +1745,43 @@ class TacGamedata {
                     unset($system->fireOrders[$i]);
                 }
                
+                /* ⭐ HOMING MISSILE (HOMING_MISSILE_PLAN.md section 5) - "the defending player does
+                   not know if a missile being used against him is a homing missile until it misses
+                   once and sticks around".
+
+                   FV normally shows an incoming ballistic's firing mode to everyone, so a Homing
+                   launch would announce itself on the way out. This reports it to non-allies as
+                   BASIC until its first miss - and a re-attack order (damageclass 'HomingMissile')
+                   is deliberately NOT masked, which is exactly the reveal the rules describe: the
+                   propulsion did not shut down, so it is obvious.
+
+                   ⭐ THE DECEPTION IS FREE BECAUSE THE TWO ARE STATISTICALLY IDENTICAL - both are
+                   damage 20, FC +3/+3/+3, range 20/60. So the deceived client's hit-chance preview,
+                   ballistic icon, tooltip and interception maths all read Basic and all produce
+                   numbers that are correct anyway. No second threshold, none of the machinery the
+                   Chameleon Sensor Suite needed for the same shape of problem.
+
+                   ⚠️ CURRENT TURN ONLY, per the standing convention on this method. Once the turn
+                   is history the missile has hit, been shot down, or come back and revealed itself,
+                   so the replay and combat log can tell the truth - and a permanent mask would make
+                   the log state something FALSE about a resolved shot.
+
+                   A no-op in Initial Orders: every current-turn ballistic order is already gone by
+                   then, for everyone. */
+                if ($fire->turn == $this->turn && !$isAlly
+                    && $weapon instanceof AmmoMissileRackS
+                    && $fire->damageclass !== AmmoMissileHM::REATTACK_CLASS
+                    && isset($weapon->firingModes[$fire->firingMode])
+                    && $weapon->firingModes[$fire->firingMode] === 'Homing'){
+
+                    $basicMode = array_search('Basic', $weapon->firingModes, true);
+                    if ($basicMode === false){ //no Basic rounds aboard: hide behind whatever is first
+                        $modes = array_keys($weapon->firingModes);
+                        $basicMode = empty($modes) ? $fire->firingMode : min($modes);
+                    }
+                    $fire->firingMode = $basicMode;
+                }
+
 				$weapon->changeFiringMode($fire->firingMode); //Select the current mode so the correct variables are considered, important for Stealth missile.
 
                 /* ⭐⭐ JUMP GATES (PHASE 2) - THE ONLY FIELD THAT NAMES A GATE'S SIGNALLER, AND THE
@@ -1545,6 +1824,13 @@ class TacGamedata {
                     $fire->targetid = -1;
                     $fire->x = "null";
                     $fire->y = "null";
+                    /*A weapon that encodes part of its aim point in ->notes has to lose that too, or
+                      the mask is only half applied. Opt-in (Weapon::$hideNotesFromEnemies) - see the
+                      property for why this is not done for every hidetarget weapon.
+                      WALKERS_OF_SIGMA_PLAN.md 3.9: the Sensor Charge Transceiver's waypoint token can
+                      carry the unit the player picked out of a shared hex, so leaving it here would
+                      name a ship standing on a course whose hexes have just been blanked.*/
+                    if ($weapon->getHideNotesFromEnemies()) $fire->notes = "";
 
                     foreach ($this->ballistics as $ball){
                         if ($ball->fireOrderId == $fire->id){
@@ -1965,6 +2251,303 @@ if ($ship->Enormous && !($ship instanceof spawnMeteoroid) && !($ship instanceof 
 
         $this->blockedHexes = $blockedHexes;
     } //endof function setBlockedHexes    
+
+    /**
+     * Walkers of Sigma-957 (WALKERS_OF_SIGMA_PLAN.md 2.1, Stage 4) - build $edfHexes.
+     *
+     * Deliberately the same shape, the same lifecycle and the same call site as
+     * setBlockedHexes() above: computed once per gamedata load in onConstructed(), published
+     * whole in stripForJson(), not per-viewer. blockedHexes has proved that map-once /
+     * publish-once stays in sync with the client, and the EDF needs exactly that because the
+     * targeting penalty has to be mirrored to the point.
+     *
+     * WHY A MAP AND NOT PER-SHIP DISTANCE CHECKS: the penalty is evaluated for every fire order
+     * in the game and the client has to reproduce it exactly. A hex-keyed map also makes
+     * "overlapping hexes are only counted once" and "additional fields do not stack" structural
+     * rather than special cases.
+     *
+     * ⚠️ THREE EXCLUSIONS, each of which is a bug if dropped:
+     *   - a DESTROYED unit projects nothing;
+     *   - a unit still in HYPERSPACE projects nothing (isReinforcement()) - the same leak
+     *     setBlockedHexes() guards against, and worse here, because this map is published to
+     *     every viewer and would announce a reinforcement's arrival box a turn early;
+     *   - a unit with no position yet (lobby / initialisation) is skipped.
+     *
+     * ⚠️ The result is NULL, never array(), when nothing projects: an empty PHP array encodes as
+     * JSON `[]` and the client indexes this like an object (plan trap 9).
+     */
+    public function setEdfHexes() {
+        $this->edfHexes = null;
+        $this->edfSources = null;
+        $this->edfNetHexes = null;
+        self::$edfPresent = false;      //self-resetting across the double gamedata load - see the static
+
+        $edfHexes = array();
+        $edfSources = array();          //server-side only - see the property
+        $nets = array();                //Energy Draining Nets, collected for the linking pass below
+        $netHexes = array();            //"q,r" => hex, for the client's Net-field overlay only
+
+        try {
+            foreach ($this->ships as $ship){
+                /* ⚠️ THE SYSTEM SWEEP COMES FIRST AND EVERY OTHER QUESTION IS DEFERRED BEHIND IT.
+                   This method runs on every gamedata load of every game, and in all but a handful
+                   of them NOTHING implements EdfSource. `instanceof` is the cheapest question
+                   available here; getHexPos(), isDestroyed() and isReinforcement() are not, and
+                   none of them is worth asking of a ship that projects no field. Same three
+                   exclusions as before - just not paid for by the whole fleet. */
+                $sources = array();
+                foreach ($ship->systems as $system){
+                    if ($system instanceof EdfSource) $sources[] = $system;
+                }
+                if (empty($sources)) continue;
+
+                $team = isset($ship->team) ? (int)$ship->team : null;
+                if ($team === null) continue;
+
+                /* ⭐ EVERY "IS THIS UNIT ON THE BOARD, AND WHERE" TEST NOW LIVES IN ONE PLACE
+                   (WALKERS_OF_SIGMA_PLAN.md 3.14d, Stage 19). HangarOps::projectionOriginFor folds
+                   in all four exclusions this loop used to spell out - destroyed, still in
+                   hyperspace, never placed (its last row is the off-map 'start' marker, Generated
+                   Terrain exempt), not arrived yet (getTurnDeployed, which also answers 999 for a
+                   surrendered slot) - and adds the fifth the user asked for: a unit STOWED inside a
+                   carrier keeps projecting, FROM ITS CARRIER'S HEX.
+
+                   ⚠️ The carrier's hex, never the stowed unit's own. A docked ship's last movement
+                   row is wherever it happened to dock, and stops being true the moment the Traveler
+                   moves - which is the whole reason this could not be a one-line relaxation of the
+                   isDestroyed() test.
+                   Client twins: PhaseStrategy.isOffBoardForEdf and ew.collectEwDetectors. */
+                $position = HangarOps::projectionOriginFor($ship, $this);
+                if (!$position) continue;                 //not on the board, or no position yet (lobby)
+
+                $shipNets = array();     //Stage 7 - this ship's Nets, and whether it draws a disc too
+                $shipDrawsDisc = false;
+
+                foreach ($sources as $system){
+                    if (!$system->isEdfActive($this->turn)) continue;
+
+                    $radius = (int)$system->getEdfRadius($this->turn);
+                    if ($radius < 0) continue;
+
+                    //the source's own hex is always in the field, even at radius 0
+                    self::addEdfHex($edfHexes, $edfSources, $position->q, $position->r, $team, $ship->id);
+
+                    if ($radius > 0){
+                        $shipDrawsDisc = true;
+                        foreach (Mathlib::getNeighbouringHexes($position, $radius) as $hex){
+                            self::addEdfHex($edfHexes, $edfSources, $hex['q'], $hex['r'], $team, $ship->id);
+                        }
+                    }
+
+                    /* Walkers of Sigma-957 (Stage 7). A Net's OWN hex is already in the map -
+                       it is an EdfSource of radius 0, so the line above covered it. What it
+                       cannot do for itself is link to the other Nets in its formation, which
+                       needs the whole fleet's Nets in one place; collect them here, where the
+                       three exclusions and isEdfActive() have already been paid for. */
+                    if ($system instanceof EnergyDrainingNet){
+                        $nets[] = array('ship' => $ship, 'system' => $system,
+                                        'pos' => $position, 'team' => $team);
+                        $shipNets[] = $system;
+                    }
+                }
+
+                /* ⚠️ A Net's own hex goes into the OVERLAY list only when nothing else is already
+                   drawing it. The Traveler carries a Net AND a radius-2 field, and ShipIcon's
+                   per-source disc already covers the hex both of them stand in - so publishing it
+                   here as well would lay a second purple blanket over one hex in the middle of
+                   that disc, which reads as a marked hex rather than as more of the same field.
+                   Tested per SHIP rather than against the finished map on purpose: the disc is
+                   drawn from the SHIP's icon, so "is this hex already drawn" is a question about
+                   this hull, not about whatever else happens to cover the hex. */
+                if (!empty($shipNets) && !$shipDrawsDisc){
+                    $netHexes[$position->q . ',' . $position->r] = array('q' => $position->q, 'r' => $position->r);
+                }
+            }
+
+            /* ⭐ THE ENERGY DRAINING NET LINKING PASS, AND IT RUNS *AFTER* THE DISC SWEEP ON
+               PURPOSE. EdfNetLinks answers "which hexes are already field" by looking in the map,
+               which is how the rules' "it is not necessary to count those hexes in an EDF
+               generated by another vessel" is enforced against the fill cap - so the map has to
+               be complete before it is asked. Inside the try, because it reads getHexPos() the
+               same way the loop above does.
+               Its output is folded in through the SAME addEdfHex() as everything else, so a
+               corridor hex is indistinguishable from a projected one to every consumer: the
+               targeting penalty, the drain, own-fleet immunity and overlap collapse all work on
+               Stage 7 without a line of new code. */
+            if (count($nets) > 1){
+                foreach (EdfNetLinks::resolve($this, $nets, $edfHexes) as $hex){
+                    self::addEdfHex($edfHexes, $edfSources, $hex['q'], $hex['r'], $hex['team'], $hex['shipId']);
+                    $netHexes[$hex['q'] . ',' . $hex['r']] = array('q' => $hex['q'], 'r' => $hex['r']);
+                }
+            }
+        } catch (Exception $e) {
+            // Ignore exceptions during field calculation (e.g. in Lobby) - same contract as setBlockedHexes()
+        }
+
+        if (empty($edfHexes)) return;                     //stays null, NOT array() - plan trap 9
+
+        $this->edfHexes = $edfHexes;
+        $this->edfSources = $edfSources;
+        /* ⚠️ array_values(), because this is published and the client iterates it as a LIST.
+           $netHexes is keyed by hex to dedupe, and a PHP array with string keys encodes as a
+           JSON object, not an array (the other half of plan trap 9). NULL when empty, never
+           array(), for the same reason $edfHexes is. */
+        $this->edfNetHexes = empty($netHexes) ? null : array_values($netHexes);
+        self::$edfPresent = true;
+        /* Stage 19 (3.14d): a field projected from INSIDE a hull has no icon of its own to hang a
+           disc on, so every hangar publishes the largest radius it is carrying and the carrier's
+           icon draws it. After the map is built and gated on there being a field at all, so an
+           ordinary game never runs the sweep. */
+        HangarOps::publishStowedEdfRadii($this);
+    } //endof function setEdfHexes
+
+    /* One hex of one team's field. Keyed "q,r" so a hex covered by three fields is one entry,
+       and $teams is a SET (teamId => 1) so a team covering it twice is still one member.
+       $edfSources records the same hex the other way round - shipId => team - so the drain
+       resolver can name the hull doing the draining. Two flat maps rather than one nested one
+       because only the first is published. */
+    private static function addEdfHex(&$edfHexes, &$edfSources, $q, $r, $team, $shipId){
+        $key = $q . ',' . $r;
+        if (!isset($edfHexes[$key])) $edfHexes[$key] = array('teams' => array());
+        $edfHexes[$key]['teams'][$team] = 1;
+
+        if (!isset($edfSources[$key])) $edfSources[$key] = array();
+        $edfSources[$key][(int)$shipId] = $team;
+    }
+
+    /**
+     * Walkers of Sigma-957 (Stage 6): fold ONE field into the already-built map, mid-request.
+     *
+     * ⭐ WHY THIS EXISTS AT ALL. setEdfHexes() builds the map once per gamedata load, in
+     * onConstructed() - long before Firing. An Energy Draining Mine's probe lands DURING the
+     * Firing step and its field has to be in place for the Critical Hit step that follows, so
+     * that units caught in it are drained on the turn it lands (user ruling 2026-09-05). That is
+     * one hex-disc arriving late, not a reason to rebuild everything.
+     *
+     * ⚠️⚠️ AND IT MUST NOT BE A REBUILD. Calling setEdfHexes() again after Firing would ALSO
+     * re-evaluate every existing field against post-firing state, and setEdfHexes() skips
+     * $ship->isDestroyed() with no turn argument - so a Walker shot down in that same Firing step
+     * would silently stop draining on the turn it died, which is not what
+     * EnergyDrainingField::isEdfActive() says (it asks isDestroyed($turn - 1): a system killed
+     * this turn worked for this turn). Additive, therefore, and only additive.
+     *
+     * Idempotent: $edfHexes is keyed by hex and its `teams` is a set, so registering the same
+     * disc twice is a no-op - which is what makes it safe to call from a resolver that may run
+     * more than once in a request.
+     *
+     * ⚠️ Takes the hex EXPLICITLY rather than a source ship. The probe is unset from
+     * $gamedata->ships the moment it is inserted (see EnergyDrainingMine::spawnFieldOrb), and it
+     * has no in-memory movement row either, so there is nothing to ask getHexPos().
+     * $sourceShipId is the LAUNCHER, for the combat log's "who drained me" line - the orb itself
+     * is not in ships this request and getEdfSourceShip() could not resolve it.
+     *
+     * ⚠️ $edfPresent is set here, and callers rely on it: the whole drain block in
+     * Criticals::setCriticals is gated on that static, so a game whose ONLY field is a probe that
+     * just landed would otherwise never resolve one.
+     */
+    public function registerEdfField($pos, $radius, $team, $sourceShipId)
+    {
+        if (!$pos || $team === null) return;
+
+        //NULL until something projects (trap 9) - so the first registration creates the maps.
+        if ($this->edfHexes === null)   $this->edfHexes = array();
+        if ($this->edfSources === null) $this->edfSources = array();
+
+        $team   = (int)$team;
+        $radius = (int)$radius;
+
+        //the source's own hex is always in the field, even at radius 0
+        self::addEdfHex($this->edfHexes, $this->edfSources, $pos->q, $pos->r, $team, $sourceShipId);
+
+        if ($radius > 0){
+            foreach (Mathlib::getNeighbouringHexes($pos, $radius) as $hex){
+                self::addEdfHex($this->edfHexes, $this->edfSources, $hex['q'], $hex['r'], $team, $sourceShipId);
+            }
+        }
+
+        self::$edfPresent = true;
+    }
+
+    /* Walkers of Sigma-957 (Stage 4c): the unit whose Energy Draining Field is draining $victim
+       where it stands - the first source over that hex that is NOT on the victim's own team.
+       Returns null when nothing qualifies (no map, no entry, or a hex covered only by the
+       victim's own fleet, which is the case EdfExposure::resolve already skips).
+       ⚠️ Deliberately answers with ONE ship even where three fields overlap: "additional fields
+       do not provide cumulative modifiers", so the drain has exactly one author. */
+    public function getEdfSourceShip($pos, $victim){
+        if (empty($this->edfSources) || !$pos) return null;
+
+        $key = $pos->q . ',' . $pos->r;
+        if (!isset($this->edfSources[$key])) return null;
+
+        $victimTeam = isset($victim->team) ? (int)$victim->team : null;
+        foreach ($this->edfSources[$key] as $shipId => $team){
+            if ($victimTeam !== null && (int)$team === $victimTeam) continue;
+            $source = $this->getShipById($shipId);
+            if ($source) return $source;
+        }
+        return null;
+    }
+
+    /**
+     * The EDF targeting penalty for a shot: how many hexes of SOMEBODY ELSE'S field lie BETWEEN
+     * $fromPos and $toPos. Both ends are OffsetCoordinates.
+     *
+     * ⚠️⚠️ INTERVENING HEXES ONLY - THE SHOOTER'S OWN HEX AND THE TARGET'S ARE NOT COUNTED
+     * (user ruling, 2026-09-04). The shot is drained by the field it has to cross, not by the
+     * field the two ends happen to be standing in, so a Walker shooting out of its own field
+     * pays nothing for the hex it occupies and a target sitting in one is not penalised twice
+     * over for it. HexZone::line() returns i = 0 .. steps, i.e. BOTH endpoints, so the loop
+     * skips the first and last entries; adjacent and same-hex shots therefore cross nothing.
+     *
+     * The single authority for the server half; Weapon::calculateHitBase calls it and the
+     * client mirrors it in weaponManager.getEdfPenaltyHexes(). Returns a raw HEX COUNT: it is
+     * -1 to hit per hex for EVERYBODY, and what young/middleborn Plasma and Antimatter do with
+     * the same count on top of that is the WEAPON's business (Weapon::getEdfRangeBonus), because
+     * only the weapon knows its class and its shooter's factionAge.
+     *
+     * "Somebody else's" is the shooter's team, per the rules' "the rest of the fleet of the ship
+     * deploying the EDF is immune" - so an allied field is free to shoot through and an enemy's
+     * is not, whoever is standing in it.
+     *
+     * ⚠️ Gated by the caller on self::$edfPresent. The empty test here is a second line of
+     * defence, not the gate.
+     */
+    public function getEdfPenaltyHexes($fromPos, $toPos, $shooterTeam) {
+        if (empty($this->edfHexes)) return 0;
+        if ($fromPos === null || $toPos === null) return 0;
+
+        $shooterTeam = ($shooterTeam === null) ? null : (int)$shooterTeam;
+        $count = 0;
+
+        $line = HexZone::line($fromPos, $toPos);
+        $last = count($line) - 1;
+        for ($i = 1; $i < $last; $i++){          //INTERVENING ONLY - endpoints deliberately skipped
+            $hex = $line[$i];
+            $key = $hex->q . ',' . $hex->r;
+            if (!isset($this->edfHexes[$key])) continue;
+            $teams = $this->edfHexes[$key]['teams'];
+            //own-fleet immunity: a hex covered ONLY by the shooter's own team is free
+            if ($shooterTeam !== null && count($teams) == 1 && isset($teams[$shooterTeam])) continue;
+            $count++;
+        }
+        return $count;
+    } //endof function getEdfPenaltyHexes
+
+    /* Is this hex covered by ANY Energy Draining Field? (WALKERS_OF_SIGMA_PLAN.md 2.1.)
+       ⚠️ Deliberately team-blind, unlike getEdfPenaltyHexes() above. The own-fleet exemption is
+       about who the field is aimed AT; the two rules that use this one are about the field
+       dampening an explosion, which is a property of the hex:
+         - flash weapons score no collateral damage against a target inside a field;
+         - proximity weapons landing in a field hex lose their blast radius.
+       The rules stress that both apply to advanced-race weapons as well, i.e. no exemptions.
+       Callers gate on TacGamedata::$edfPresent; the empty test here is a second line of defence. */
+    public function isHexInEdfField($pos) {
+        if (empty($this->edfHexes)) return false;
+        if ($pos === null) return false;
+        return isset($this->edfHexes[$pos->q . ',' . $pos->r]);
+    }
+
 
     
     public function getEnormousHexes() {

@@ -55,7 +55,17 @@ window.ShipTooltipMenu = function () {
                 'user-select': 'none'
             });
             bindButton.call(this, element, shipTooltip, buttonData.action, buttonData.supportsMaxClick);
-            element.on('mouseover', getMouseOver.call(this, menu, buttonData.info));
+            /* A button's info line may be a FUNCTION of the menu it is being drawn into, not just
+               a fixed string - the same action can mean something different depending on what is
+               selected and what was right-clicked. Resolved at render time, with the menu as
+               `this`, so it sees the same selectedShip/targetedShip every condition above does.
+               (WALKERS_OF_SIGMA_PLAN.md 3.9: "Target Hex" reads "Target Ship" when a Sensor Charge
+               Transceiver is up and the unit under the cursor is one the charge could hit.) */
+            var info = (typeof buttonData.info === 'function')
+                ? buttonData.info.call(this)
+                : buttonData.info;
+
+            element.on('mouseover', getMouseOver.call(this, menu, info));
             element.on('mouseout', mouseOut.bind(this, menu));
             jQuery(".action-buttons", menu).append(element);
         }, this);

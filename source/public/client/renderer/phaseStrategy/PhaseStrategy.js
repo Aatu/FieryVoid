@@ -154,6 +154,8 @@ window.PhaseStrategy = function () {
         this.ewIconContainer.hide();
         this.ballisticIconContainer.show();
         this.syncAllDeclaredAreas(); //a poll rebuilds every ship, so re-read what each weapon has declared
+        this.syncAllEdfFields();     //standing overlay, same reason
+        this.syncEdfNetPreview();    //and the Net field, which a poll may have moved under us
     };
 
     /*// A same-phase poll (this.update, as opposed to a phase-change activate()) refreshes ship
@@ -190,6 +192,8 @@ window.PhaseStrategy = function () {
         this.showAppropriateHighlight();
         this.showAppropriateEW();
         this.syncAllDeclaredAreas();
+        this.syncAllEdfFields();
+        this.syncEdfNetPreview();
         return this;
     };
 
@@ -287,6 +291,334 @@ window.PhaseStrategy = function () {
         this.shipIconContainer.getArray().forEach(function (icon) {
             this.syncDeclaredAreas(icon.ship);
         }, this);
+    };
+
+    /* WALKERS OF SIGMA-957 (WALKERS_OF_SIGMA_PLAN.md 2.1, Stage 4). Redraw every Energy Draining
+       Field disc. Same shape and the same two call sites as syncAllDeclaredAreas above: a poll
+       rebuilds every ship object, so a standing overlay has to be re-read rather than assumed.
+
+       ⚠️ requestRender() (plan trap 10 / arch_render_loop_idle_gating): the render loop is idle-
+       gated, so a scene mutation made outside the animation list is simply never drawn without it.
+       Only asked for when something actually changed - a redraw of nothing must not wake the loop
+       on every poll of every game.
+
+       ⚠️ gamedata.edfHexes is the cheap gate: the server publishes it as null when no field is on
+       the board, so an ordinary game does one property read and skips the whole sweep. */
+    PhaseStrategy.prototype.syncAllEdfFields = function () {
+        var anyField = !!(window.gamedata && gamedata.edfHexes);
+        var changed = false;
+
+        this.shipIconContainer.getArray().forEach(function (icon) {
+            /* ⭐ Stage 19 (3.14d): the disc also covers any field projected by a unit STOWED in this
+               hull, because a docked ship has no icon of its own to hang one on and its field is
+               still operational (user ruling 2026-09-12). The larger of the two wins - they are
+               concentric, sharing the carrier's hex - so a Traveler carrying a Guideship draws the
+               Guideship's wider circle and nothing is drawn twice. */
+            var radius = (anyField && !PhaseStrategy.isOffBoardForEdf(icon))
+                ? Math.max(PhaseStrategy.getEdfRadiusForShip(icon.ship), PhaseStrategy.getStowedEdfRadius(icon.ship))
+                : 0;
+
+            /* ⚠️ `changed` is what the icon REPORTS, not "we called it". showEdfField rebuilds
+               nothing when the disc it would draw is the one already on screen, and a standing
+               field must not wake the idle-gated render loop on every poll of every turn. */
+            if (radius > 0) {
+                if (icon.showEdfField(radius)) changed = true;
+            } else if (icon.removeEdfField()) {
+                changed = true;
+            }
+        }, this);
+
+        if (changed && window.webglScene && window.webglScene.requestRender) window.webglScene.requestRender();
+    };
+
+    /* IS THIS UNIT OFF THE BOARD, as far as its fields go (user report 2026-09-11)? Not placed yet -
+       its only row is the off-map 'start' marker its slot gave it (turn 1, a late slot, a
+       reinforcement on its arrival turn) - or queued into a hangar or Docking Bay during Deployment.
+       Either way it projects nothing, so neither its disc nor its Net is drawn; before this a Walker
+       waiting to deploy drew both at that marker, off the edge of the map. Mirrors the test in
+       TacGamedata::setEdfHexes. 'start' rows are only ever a unit's FIRST row (submitMovement never
+       writes one), so the last row being 'start' means it has no other; Generated Terrain (userid
+       -5) is placed BY its 'start' row, the exemption getLastTurnMovement makes. */
+    PhaseStrategy.isOffBoardForEdf = function (icon) {
+        var ship = icon && icon.ship;
+        if (!ship) return true;
+        if (ship.pendingDeployDock || ship.pendingLcvDeployDock) return true;
+        //Placed but not ARRIVED: a late-slot unit stands at its entry hex the turn before it comes in
+        //(user request 2026-09-11). Its icon is hidden in later phases, but the Net preview walks
+        //hidden icons too, so without this it linked a Net that is not on the board yet.
+        if (window.shipManager && window.gamedata && shipManager.getTurnDeployed(ship) > gamedata.turn) return true;
+        if (ship.userid == -5) return false;
+        var move = icon.getLastMovement();
+        return !!(move && move.type === 'start');
+    };
+
+    /* The largest active field this unit projects, or 0. effectiveRadius is published by
+       EnergyDrainingField::stripForJson AFTER criticals and boost - see the note on
+       ShipIcon.showEdfField for why it is not recomputed here.
+       A destroyed or offlined field publishes 0 from getEdfRadius(), so no separate test is
+       needed; a hidden ship has no icon in the container in the first place.
+
+       ⭐ THE UNCOMMITTED BOOST (user request 2026-09-05). Double power is allocated in Initial
+       Orders and the server does not learn about it until the phase is SUBMITTED - so a player
+       deciding whether the extra hexes are worth the power saw the disc grow only after it was
+       too late to change their mind. The uncommitted allocation lives in system.power, which is
+       what shipManager.power.getBoost reads, so the local answer is available the instant the
+       + or - is clicked.
+
+       ⚠️ IT PICKS BETWEEN TWO PUBLISHED NUMBERS - it does NOT add boostRadiusBonus itself. That
+       matters: a variable field that has taken an EdfBoostLost critical can still have power
+       allocated to it (the client cannot see criticals here and hasMaxBoost does not test them),
+       and adding the bonus locally would draw a disc the server will never honour. The server
+       publishes boostedRadius from getEdfBoostedRadius(), which already answers "the boost is
+       gone" by returning the unboosted radius - so the two numbers come out EQUAL and clicking
+       + correctly changes nothing on the map. Same reasoning as the note on showEdfField: the
+       radius is published, never mirrored.
+
+       ⭐ THE UNCOMMITTED OFFLINE is the same request from the other end (user 2026-09-05): a
+       deactivated field projects nothing, so its disc has to go the moment it is switched off
+       rather than at commit - and come back if the player changes their mind in the same phase.
+       Deliberately tested FIRST and allowed to win outright: offlining does not clear a boost
+       allocation, so both entries can sit on one system, and the server resolves that the same
+       way (EnergyDrainingField::getEdfRadius returns 0 on !isEdfActive before it looks at
+       anything else). shipManager.power.isOffline also answers true for the ForcedOffline*
+       criticals, which the server has ALREADY folded into effectiveRadius - agreeing with it
+       costs nothing and disagreeing would be the bug.
+
+       No viewer test is needed for either. system.power is whatever the server chose to send
+       THIS viewer, so an enemy's hidden allocation reads 0; and once orders are committed the
+       published numbers say the same thing, which is why this is also correct in every later
+       phase. */
+    /* The largest Energy Draining Field radius projected by the units STOWED in this hull, or 0
+       (WALKERS_OF_SIGMA_PLAN.md 3.14d, Stage 19).
+
+       ⭐⭐ TWO SOURCES, AND THE SECOND IS WHY THE FIRST IS NOT ENOUGH. Walking the bay's own ship
+       list gives the OWNER a live answer that follows the power they are allocating this phase -
+       but that list is masked for an opponent, who would then see the drain applied over hexes with
+       no disc drawn on them (the hexes themselves are public in gamedata.edfHexes; only the SOURCE
+       is hidden). So the server also publishes the finished number per hangar, to everyone, and the
+       two are maxed: the owner gets the live figure, the opponent gets the committed one, and
+       neither can see a field that is not really there. Same shape as Stage 18's D47 and for the
+       same reason - a derived figure with a MASKED input needs a published twin, not a wider mask. */
+    PhaseStrategy.getStowedEdfRadius = function (ship) {
+        if (!ship || !ship.systems) return 0;
+        var best = 0;
+        for (var i in ship.systems) {
+            var bay = ship.systems[i];
+            if (!bay) continue;
+            var published = parseInt(bay.stowedEdfRadius, 10);
+            if (!isNaN(published) && published > best) best = published;
+
+            //The live half: only ever populated for the viewer's own side.
+            var ids = [];
+            if (bay.isDockingBay && Array.isArray(bay.shipsDocked)) {
+                bay.shipsDocked.forEach(function (e) { if (e) ids.push(e.shipId); });
+            }
+            if (bay.lcvDocked && bay.lcvDocked.shipId !== undefined) ids.push(bay.lcvDocked.shipId);
+            if (Array.isArray(bay.hangarUsage)) {
+                bay.hangarUsage.forEach(function (e) { if (e && e.dockedFlightId) ids.push(e.dockedFlightId); });
+            }
+            for (var k = 0; k < ids.length; k++) {
+                var stowed = window.gamedata ? gamedata.getShip(ids[k]) : null;
+                if (!stowed || shipManager.isDestroyedByDamage(stowed)) continue;
+                var r = PhaseStrategy.getEdfRadiusForShip(stowed);
+                if (r > best) best = r;
+            }
+        }
+        return best;
+    };
+
+    PhaseStrategy.getEdfRadiusForShip = function (ship) {
+        if (!ship || !ship.systems) return 0;
+
+        var power = (window.shipManager && shipManager.power) ? shipManager.power : null;
+        var best = 0;
+        for (var i in ship.systems) {
+            var system = ship.systems[i];
+            if (!system || system.name !== 'EnergyDrainingField') continue;
+
+            if (power && power.isOffline(ship, system)) continue;   //deactivated: projects nothing
+
+            var radius = parseInt(system.effectiveRadius, 10);
+            if (isNaN(radius)) continue;
+
+            if (power && power.getBoost(system) > 0) {
+                var boosted = parseInt(system.boostedRadius, 10);
+                if (!isNaN(boosted) && boosted > radius) radius = boosted;
+            }
+
+            if (radius > best) best = radius;
+        }
+        return best;
+    };
+
+    /* Does this unit mount an Energy Draining Field at all? Only used as the gate in
+       onSystemDataChanged for the events that carry no system - see the note there. */
+    PhaseStrategy.shipCarriesEdf = function (ship) {
+        if (!ship || !ship.systems) return false;
+        for (var i in ship.systems) {
+            if (ship.systems[i] && ship.systems[i].name === 'EnergyDrainingField') return true;
+        }
+        return false;
+    };
+
+    /* ---- Energy Draining NET live preview (WALKERS_OF_SIGMA_PLAN.md 3.7) ----------------------
+       ⭐ WHY THIS IS NOT syncAllEdfFields. An Energy Draining FIELD is a disc around one unit, so
+       its overlay hangs off that unit's icon and follows a plotted move for free. A NET's field is
+       generated BETWEEN Nets - a corridor to each linked partner, and the area a ring of them
+       encloses - so it is a function of where the WHOLE FORMATION is standing, and no single icon
+       owns it. It therefore has to be recomputed whenever any of them moves, which is what this
+       does (user request, 2026-09-05: "so the player can see where the Nets will cover as they
+       consider where to move the ships").
+
+       ⭐⭐ ADVISORY ONLY. gamedata.edfNetPreview overrides the server's edfNetHexes for DRAWING and
+       for nothing else: the to-hit penalty, the drain and own-fleet immunity all read
+       gamedata.edfHexes, which only ever comes from the server. See model/EdfNetLinks.js.
+
+       ⚠️ ONLY WHERE POSITIONS ARE STILL MOVING - deployment (-1) and movement (2). Everywhere else
+       the server's answer is both authoritative AND current, so letting a mirror override it there
+       would turn any divergence into a permanent wrong picture instead of a self-correcting one. */
+    PhaseStrategy.EDF_NET_PREVIEW_PHASES = [-1, 2];
+
+    /* The cheap gate for the busy call sites. A game with no Net on the board must not pay for a
+       walk of every icon on every plotted hex, and this answers in one pass over the ships that
+       stops at the first hit. Cached per poll: gamedata.edfNetHexes is the server's own "is there
+       a Net" signal, but it is NULL while the only Net is one the viewer has not yet committed a
+       move for, so the system sweep is what actually settles it. */
+    PhaseStrategy.anyEdfNetPresent = function () {
+        if (!window.gamedata || !gamedata.ships) return false;
+        if (gamedata.edfNetHexes || gamedata.edfNetPreview) return true;
+
+        for (var i in gamedata.ships) {
+            var ship = gamedata.ships[i];
+            if (!ship || !ship.systems) continue;
+            for (var s in ship.systems) {
+                if (ship.systems[s] && ship.systems[s].name === 'EnergyDrainingNet') return true;
+            }
+        }
+        return false;
+    };
+
+    PhaseStrategy.prototype.syncEdfNetPreview = function () {
+        if (!window.gamedata) return;
+
+        gamedata.edfNetPreview = (PhaseStrategy.EDF_NET_PREVIEW_PHASES.indexOf(gamedata.gamephase) === -1)
+            ? null
+            : PhaseStrategy.buildEdfNetPreview(this.shipIconContainer);
+
+        if (!this.ballisticIconContainer || !this.ballisticIconContainer.refreshEdfNetHexes) return;
+
+        /* ⚠️ requestRender ONLY on a real change (trap 10). This is called on every step of a
+           plotted move, and a formation whose field has not changed shape must not wake the
+           idle-gated render loop. refreshEdfNetHexes reports whether it actually redrew. */
+        if (this.ballisticIconContainer.refreshEdfNetHexes(gamedata)
+            && window.webglScene && webglScene.requestRender) {
+            webglScene.requestRender();
+        }
+    };
+
+    /* The whole Net field as it would stand if every ship stopped where it is PLOTTED right now.
+       Mirrors TacGamedata::setEdfHexes()' pre-pass and then hands off to the ported resolver:
+       build the coverage the discs and the Nets' own hexes already provide, note where every unit
+       is standing for the corridor tie-break, then link.
+
+       Returns null when no Net is on the board, which is the signal to fall back to the server.
+
+       ⚠️ ICON positions, not shipManager.getShipPosition - that one reads the last COMMITTED move
+       and would preview the field the player is trying to move away from. The icon's own movement
+       list is what the map is drawing, so the field always agrees with the ships under it.
+       ⚠️ Only ships with ICONS are considered, which is the right set by construction: a unit with
+       no icon is undeployed, docked, destroyed or hidden from this viewer, and none of those
+       project a field the viewer may see. */
+    PhaseStrategy.buildEdfNetPreview = function (iconContainer) {
+        if (!window.EdfNetLinks || !iconContainer) return null;
+
+        var nets = [];
+        var coverage = {};
+        var occupancy = {};
+        var ownHexes = [];
+
+        var mark = function (map, hex, team, value) {
+            var key = hex.q + ',' + hex.r;
+            if (!map[key]) map[key] = {};
+            map[key][team] = (map[key][team] || 0) + value;
+        };
+
+        var sawOffBoardNet = false;
+
+        iconContainer.getArray().forEach(function (icon) {
+            var ship = icon.ship;
+            if (!ship || ship.team === undefined || ship.team === null) return;
+            if (window.shipManager && shipManager.isDestroyed(ship)) return;
+
+            var move = icon.getLastMovement();
+            if (!move || !move.position) return;
+
+            /* NOT ON THE BOARD (user request 2026-09-11): a unit queued into a hangar or Docking Bay
+               during Deployment (either deploy-dock marker), or not placed at all yet - still on its
+               slot's off-map `start` row - projects no field. So a Net aboard a Traveler, or one still
+               waiting to be put down, draws nothing until the ship is on the map. It still counts as
+               "there is a Net", so the preview answers EMPTY below rather than falling back to the
+               server's map, which can still hold it at the position it had before it docked. */
+            if (PhaseStrategy.isOffBoardForEdf(icon)) {
+                for (var n in ship.systems) {
+                    if (ship.systems[n] && ship.systems[n].name === 'EnergyDrainingNet') { sawOffBoardNet = true; break; }
+                }
+                return;
+            }
+
+            var pos = { q: move.position.q, r: move.position.r };
+            var team = parseInt(ship.team, 10);
+
+            occupancy[pos.q + ',' + pos.r] = occupancy[pos.q + ',' + pos.r] || {};
+            occupancy[pos.q + ',' + pos.r][team] = (occupancy[pos.q + ',' + pos.r][team] || 0) + 1;
+
+            //The disc half of the field, so the corridor tie-break and the fill cap both see the
+            //hexes this fleet already covers. getEdfRadiusForShip answers 0 for a ship with no
+            //field, and already folds in criticals, the uncommitted boost and an offlined field.
+            var radius = PhaseStrategy.getEdfRadiusForShip(ship);
+            var carriesSource = false;
+
+            if (PhaseStrategy.shipCarriesEdf(ship)) {
+                carriesSource = true;
+                mark(coverage, pos, team, 1);
+                if (radius > 0) {
+                    mathlib.getNeighbouringHexes(pos, radius).forEach(function (hex) {
+                        mark(coverage, hex, team, 1);
+                    });
+                }
+            }
+
+            var power = (window.shipManager && shipManager.power) ? shipManager.power : null;
+
+            for (var i in ship.systems) {
+                var system = ship.systems[i];
+                if (!system || system.name !== 'EnergyDrainingNet') continue;
+                if (shipManager.systems.isDestroyed(ship, system)) continue;
+                if (power && power.isOffline(ship, system)) continue;   //deactivated: projects nothing
+
+                //A Net is an EdfSource of radius 0 - its own hex is field before anything links.
+                mark(coverage, pos, team, 1);
+                nets.push({ shipId: parseInt(ship.id, 10), systemId: parseInt(system.id, 10),
+                            team: team, pos: pos });
+
+                //Mirrors the server's rule for the overlay list: a Net's own hex is only published
+                //when nothing else is drawing it, so it does not lay a second blanket over the
+                //middle of this ship's own disc.
+                if (!carriesSource) ownHexes.push(pos);
+            }
+        });
+
+        //No Net anywhere: the server's answer stands. Nets that exist but are all off the board
+        //(docked, unplaced): nothing is drawn - an empty preview, not the server's stale one.
+        if (!nets.length) return sawOffBoardNet ? [] : null;
+
+        var hexes = ownHexes.map(function (hex) { return { q: hex.q, r: hex.r }; });
+
+        EdfNetLinks.resolve(nets, coverage, occupancy).forEach(function (hex) {
+            hexes.push({ q: hex.q, r: hex.r });
+        });
+
+        return hexes;
     };
 
     PhaseStrategy.prototype.onScrollToShip = function (payload) {
@@ -1135,6 +1467,16 @@ window.PhaseStrategy = function () {
         this.ballisticIconContainer.updateLinesForShip(ship, this.shipIconContainer);
         this.redrawMovementUI(ship);
 
+        /* WALKERS OF SIGMA-957 (Stage 7): a Net's field is a function of where the whole formation
+           stands, so any plotted step can change it - including a step by a ship with no Net of its
+           own, because the corridor tie-break counts enemy units standing in the candidate hexes.
+           ⚠️ Gated on there being a Net on the board at all: this is one of the busiest handlers in
+           the client (every hex of every plotted move) and buildEdfNetPreview walks every icon. */
+        if (PhaseStrategy.anyEdfNetPresent()) this.syncEdfNetPreview();
+        //...and in Deployment, a unit stepping off its off-map marker onto the board starts drawing
+        //its field disc (isOffBoardForEdf). Deployment only: no other phase has a unit on a 'start' row.
+        if (this.gamedata && this.gamedata.gamephase == -1) this.syncAllEdfFields();
+
         // Mirror movement to attached units (e.g. pods) - DK 04/26
         if (ship.hasAttached && Object.keys(ship.hasAttached).length > 0) {
             for (var attachedId in ship.hasAttached) {
@@ -1248,6 +1590,52 @@ window.PhaseStrategy = function () {
         //overlay appears and disappears in response to the player - see syncDeclaredAreas.
         this.syncDeclaredAreas(ship);
 
+        /* Boosting, unboosting, deactivating or reactivating an Energy Draining Field resizes or
+           removes its map disc IMMEDIATELY, so the player can see what double power buys - and
+           what switching the field off costs - while they still have the option (user requests
+           2026-09-05). Every one of those paths (power.clickPlus / clickMinus / onOfflineClicked /
+           onOnlineClicked / offlineAll / onlineAll) raises SystemDataChanged, which is what makes
+           this the seam.
+
+           ⚠️ GATED, because this handler is one of the busiest in the file - every weapon
+           selection and every other system's power click lands here - and syncAllEdfFields walks
+           every icon on the board. (The sweep would still be cheap: showEdfField rebuilds nothing
+           when the disc it would draw is already up, and syncAllEdfFields only wakes the render
+           loop on a reported change. Cheap is not free.)
+
+           ⚠️ TWO SHAPES OF PAYLOAD, and testing only the first would miss half the feature:
+           the per-system clicks send {ship, system}, but offlineAll / onlineAll - the "all systems
+           of this name" buttons in SystemInfoButtons and SystemPowerSettings, which an EDF is as
+           eligible for as anything else - send {ship} alone. Falling back to "does this ship carry
+           a field" keeps the gate exact rather than widening it to every systemless event. */
+        if (system ? system.name === 'EnergyDrainingField' : PhaseStrategy.shipCarriesEdf(ship)) {
+            this.syncAllEdfFields();
+        }
+
+        /* The Net's half of the same request. Deactivating a Net drops it out of the formation
+           entirely - its corridors go, and a ring it was closing stops being an area - so the
+           preview has to answer the click, not the commit. It also reacts to an EDF being
+           switched: a disc is part of the coverage the fill cap counts against.
+           ⚠️ Same two payload shapes, same reason - see above. */
+        if (PhaseStrategy.anyEdfNetPresent()
+            && (system ? (system.name === 'EnergyDrainingNet' || system.name === 'EnergyDrainingField') : true)) {
+            this.syncEdfNetPreview();
+        }
+
+        /* WALKERS_OF_SIGMA_PLAN.md 3.9 - the Sensor Charge course overlay. Declaring a waypoint
+           goes through onHexTargeted, which rebuilds everything; the three things that DON'T are
+           withdrawing a waypoint, selecting the transceiver and unselecting it, and all three land
+           here. Selection is what the blue reachable-ray fan is gated on, so without this the rays
+           would appear only after the next poll and linger after the weapon was put away.
+           ⚠️ Gated on the system, and cheaply: this handler is one of the busiest in the file. The
+           systemless payload shape (offlineAll / onlineAll) is deliberately NOT covered - a
+           transceiver taken offline still has its course drawn until the next poll, which is a
+           cosmetic lag rather than a wrong answer. */
+        if (system && system.name === 'SensorChargeTransceiver'
+            && this.ballisticIconContainer && this.ballisticIconContainer.refreshSensorChargeCourses) {
+            this.ballisticIconContainer.refreshSensorChargeCourses(this.gamedata);
+        }
+
         if (this.selectedShip === ship) {
             this.uiManager.showWeaponList({ ship: ship, gamePhase: gamedata.gamephase })
         }
@@ -1293,8 +1681,8 @@ window.PhaseStrategy = function () {
         //ShipTooltip.refreshButtons).
         //
         //Both are unphased on purpose - they render whatever createForSingleShip would render
-        //right now, and hide themselves when nothing is selected - whereas the INCOMING rebuild
-        //below stays pinned to the Firing phase, where interception may be declared.
+        //right now, and hide themselves when nothing is selected - and so, now, is the INCOMING
+        //rebuild below, for the two phases in which that list can go stale under an open tooltip.
         if (this.shipTooltip && typeof this.shipTooltip.refreshTargeting === 'function') {
             this.shipTooltip.refreshTargeting();
         }
@@ -1303,7 +1691,20 @@ window.PhaseStrategy = function () {
             this.shipTooltip.refreshButtons();
         }
 
-        if (gamedata.gamephase === 3 && this.shipTooltip && this.shipTooltip.ballisticsMenu
+        /* The INCOMING list, for the two phases that can change it while a tooltip is open:
+           Firing (3), where interception is declared against these shots, and INITIAL ORDERS (1),
+           where the shots themselves are declared and withdrawn (user request 2026-09-10).
+           Withdrawing a ballistic order raises SystemDataChanged from removeFiringOrder /
+           removeFiringOrderMulti / removeFiringOrderAll, and the map icon already answers it via
+           ballisticIconContainer.consumeGamedata below - but the TARGET's open tooltip went on
+           listing a missile that no longer existed until the pointer left the ship and came back.
+           The event names the SHOOTER and the tooltip is usually the target's, so this deliberately
+           does not test the ship: the menu re-runs getAllBallisticsAgainst for whatever it is
+           showing, which is the only thing that can answer "is that shot still declared".
+           Still gated rather than unphased: this handler is one of the busiest in the file, and in
+           every other phase the list is a read-only record of shots already in the air. */
+        if ((gamedata.gamephase === 1 || gamedata.gamephase === 3)
+            && this.shipTooltip && this.shipTooltip.ballisticsMenu
             && typeof this.shipTooltip.ballisticsMenu.refresh === 'function') {
             this.shipTooltip.ballisticsMenu.refresh();
         }
@@ -1312,6 +1713,7 @@ window.PhaseStrategy = function () {
             && (system.ballistic
                 || system.hextarget //same for direct fire hextarget weapons - they use ballistic highlight...
                 || system.canSplitShots //same for weapon that split shots, ballistic icons used to track these.
+                || system.abductionMaxPower //WALKERS §3.18: a Walker drive's abduction draws a ballistic marker and line, but the drive is not ballistic - without this CANCEL left both on the map (play test 4352)
             )
         ) {
             this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
@@ -1359,7 +1761,7 @@ window.PhaseStrategy = function () {
         */
 
         if (payload.weapons.some(function (weapon) {
-            return weapon.ballistic || weapon.canSplitShots;
+            return weapon.ballistic || weapon.canSplitShots || weapon.abductionMaxPower; //abduction: see onSystemDataChanged
         })) {
             this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
         }

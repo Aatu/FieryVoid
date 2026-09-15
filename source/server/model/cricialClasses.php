@@ -619,6 +619,175 @@ class MayOverheat extends Critical {
     }
 }
 
+/* Walkers of Sigma-957 (WALKERS_OF_SIGMA_PLAN.md 3.4) - the marker a Chromatic Pulse Driver
+   scan leaves on the RACE it analysed. Purely a label: the actual reduction lives in
+   CpdScanRegistry and is applied to the aggregated defensive bucket, never to this system.
+   ⚠⚠ NEVER PERSISTED. CpdScanRegistry::applyScanMarkers() rebuilds these from the registry
+   on every payload-building load and leaves $updated / $newCrit false, so
+   TacGamedata::getUpdatedCriticals() cannot pick them up and nothing reaches tac_critical.
+   The source of truth stays the CPDSCAN IndividualNotes. forInfo = true also keeps it out of
+   pre-battle damage (PreBattleDamage::isValidCriticalType refuses forInfo classes) and out of
+   Save Fleet (battleDamage.summariseCriticals refuses them client-side for the same reason).
+   The instance overwrites $description with the magnitude - see applyScanMarkers(). */
+class ScannedByWalkers extends Critical{
+    public $description = "Scanned by Walkers";
+    public $repairPriority = 0; //not a real crit - nothing can repair being understood
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, true); //forInfo: display only
+    }
+}
+
+/* ===================================================================================
+   WALKERS OF SIGMA-957 - Energy Draining Field criticals (WALKERS_OF_SIGMA_PLAN.md 3.5).
+
+   Both escalate on the hasCritical() COUNT rather than on a param, so there is no per-crit
+   bookkeeping: the field asks "how many of these do I carry" and shrinks accordingly.
+   ⚠️ They are ORDINARY, PERSISTED criticals (not forInfo, not oneturn) - a damaged projector
+   stays damaged until repaired, which is what makes the count meaningful. Contrast
+   ScannedByWalkers above, which is rebuilt from scratch every load and never saved.
+   =================================================================================== */
+
+/* One step of radius off a fixed-radius Energy Draining Field. Floors at radius 1 -
+   EnergyDrainingField::getEdfRadius() owns that clamp, not this class. */
+class EdfRadiusReduced extends Critical{
+    public $description = "Field radius reduced by 1";
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend);
+    }
+}
+
+/* A Variable EDF loses its boost bonus first; every further hit is a radius step, floor 0.
+   Same class for both stages - the field reads the count and spends the first one on the
+   boost. See EnergyDrainingField::getEdfRadius(). */
+class EdfBoostLost extends Critical{
+    public $description = "Field cannot be boosted";
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend);
+    }
+}
+
+/* WALKERS OF SIGMA-957 - Energy Draining Net critical (WALKERS_OF_SIGMA_PLAN.md 3.7, Stage 7).
+   "On a result of 20+, the power required to operate the EDN doubles. On successive rolls the
+   power requirement triples, then 4x power, then 5x, and so on."
+
+   The third member of the family above: ORDINARY and PERSISTED (not forInfo, not oneturn),
+   escalating on the hasCritical() COUNT rather than on a param, so there is no per-crit
+   bookkeeping and repairing one steps the multiplier back down by itself.
+   ⚠️ The description cannot name the multiplier - one crit does not know how many siblings it
+   has. EnergyDrainingNet::setSystemDataWindow publishes the actual figure as its own tooltip
+   key, which is where a player reads it. */
+class EdnPowerDoubled extends Critical{
+    public $description = "Power requirement increased";
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend);
+    }
+}
+
+/* ===================================================================================
+   WALKERS OF SIGMA-957 - Energy Draining Field EXPOSURE criticals
+   (WALKERS_OF_SIGMA_PLAN.md 2.2, Stage 4b). Applied by EdfExposure::resolve().
+
+   ⭐ ALL SIX ARE `oneturn`, AND THAT IS THE MECHANISM, NOT A DETAIL. hasCritical() and
+   sumCriticalParam() report a oneturn critical ONLY when `crit->turn + 1 == the turn being
+   asked about`, so a drain rolled in the Critical Hit step of turn N is invisible on turn N
+   and lands on turn N+1 - which is exactly the rules' "starting next turn". It also expires
+   by itself: nothing has to clean these up.
+
+   ⚠️ FOUR OF THEM CARRY THEIR MAGNITUDE IN `param` and must be read with
+   sumCriticalParam(), never hasCritical(). One crit is a whole Nd10 roll, not one point -
+   the same convention DamageReductionReduced uses. Counting them instead of summing them
+   silently reads every drain as 1.
+
+   ⚠️ DO NOT give any of these an `$outputMod`. ShipSystem::effectCriticals() sums outputMod
+   across EVERY critical with NO turn filter (it is built for permanent OutputReduced* crits
+   and is called once from onConstructed), so a one-turn crit with an outputMod would apply
+   from the turn it was rolled and then forever. The Engine and Reactor read their drain
+   through sumCriticalParam() in getOutput() instead, which IS turn-filtered.
+   =================================================================================== */
+
+/* Thrust drain. Lands on the victim's Engine (ships) or on the flight's sample fighter
+   (flights, which have no Engine - FighterFlight reduces its published freethrust instead).
+   Read by Engine::getOutput(). Thrusters are untouched, per plan decision D1. */
+class EdfThrustDrain extends Critical{
+    public $description = "Engine output drained";
+    public $oneturn = true;
+    public $repairPriority = 0; //nothing to repair - it lapses on its own
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0, $forInfo = false, $param = null){
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, $forInfo, $param);
+        if ($param !== null) $this->description = "Engine output drained by " . (int)$param;
+    }
+}
+
+/* Energy drain. Lands on the victim's Reactor. Read by Reactor::getOutput(). */
+class EdfPowerDrain extends Critical{
+    public $description = "Reactor output drained";
+    public $oneturn = true;
+    public $repairPriority = 0;
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0, $forInfo = false, $param = null){
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, $forInfo, $param);
+        if ($param !== null) $this->description = "Reactor output drained by " . (int)$param;
+    }
+}
+
+/* Initiative drain. Lands on the victim's CnC (flight: sample fighter, which is where
+   getCommonIniModifiers already reads a flight's initiative crits).
+   ⚠️ The param is in TABLETOP points. FV initiative is d100, so the reader multiplies by 5 -
+   plan trap 5. The rules' -20 cap is therefore -100 there, and the reader owns the clamp. */
+class EdfIniDrain extends Critical{
+    public $description = "Initiative drained";
+    public $oneturn = true;
+    public $repairPriority = 0;
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0, $forInfo = false, $param = null){
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, $forInfo, $param);
+        if ($param !== null) $this->description = "Initiative reduced by " . ((int)$param * 5);
+    }
+}
+
+/* Total-EW drain. Lands on the victim's SCANNER (user, 2026-09-04 - it used to ride the CnC),
+   which is what lets the client see it: Scanner::getOutput() subtracts it and
+   Scanner::stripForJson() publishes it as edfDrain, exactly as Engine and Reactor do for their
+   own drains. EW::getScannerOutput() picks it up for free by summing those outputs. */
+class EdfEwDrain extends Critical{
+    public $description = "EW capacity drained";
+    public $oneturn = true;
+    public $repairPriority = 0;
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0, $forInfo = false, $param = null){
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, $forInfo, $param);
+        if ($param !== null) $this->description = "EW capacity drained by " . (int)$param;
+    }
+}
+
+/* "The flight will not be able to shoot the next turn." Lands on the flight's sample fighter.
+   Read by Firing::withdrawGroundedFighterFireOrders(), on the ADVANCE path - ⚠️ NOT on the
+   POST path, where a reconstructed ship carries no criticals at all
+   (arch_post_side_ship_reconstruction) and any check would silently never fire. */
+class EdfFighterGrounded extends Critical{
+    public $description = "Disrupted by an Energy Draining Field - cannot fire this turn";
+    public $oneturn = true;
+    public $repairPriority = 0;
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend);
+    }
+}
+
+/* The escalation counter, and the once-per-turn idempotency marker.
+   `param` is the number of CONSECUTIVE turns this unit has now been in a field: turn N+1 reads
+   turn N's marker and adds one, or starts at 1 if there is none. That is the whole escalation
+   mechanism - no new storage, no per-unit table.
+   ⚠️ forInfo, so it never reaches pre-battle damage or Save Fleet, but it IS persisted (unlike
+   ScannedByWalkers) because the count has to survive to next turn. */
+class EdfExposed extends Critical{
+    public $description = "Caught in an Energy Draining Field";
+    public $oneturn = true;
+    public $repairPriority = 0;
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0, $forInfo = true, $param = null){
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, true, $param);
+        if ($param !== null && (int)$param > 1){
+            $this->description = "Caught in an Energy Draining Field (" . (int)$param . " turns running)";
+        }
+    }
+}
+
 class Sabotage extends Critical{
 	//Used by Breaching Pods to mark when Marines are trying to sabotage a system / wreck havoc.
     public $description = "Marine are sabotaging this system"; 

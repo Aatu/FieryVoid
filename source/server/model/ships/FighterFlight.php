@@ -39,6 +39,7 @@ class FighterFlight extends BaseShip
     public $offensivebonus, $freethrust;
     public $jinkinglimit = 0;
 	public $hangarRequired = 'fighters'; //if left 'fighters', will be classified based on Ini; fleet check only
+	public $noHangarRequired = false; //For Fleet Checker only    
 	public $unitSize = 1; //most fighters are taken one per slot - but some are not
 	//B5Wars example are some ultralight fighters, that can be carried two per hangar slot
 	//and some superheavies that can use hangars (eg. Vorlon SHF) but take more slots
@@ -50,6 +51,27 @@ class FighterFlight extends BaseShip
 		//dwell completes forfeits the regeneration entirely. See HangarOps::applyDockedRegeneration.
 	public $deploysInHangar = false; //Some fighters like HK's MUST deploy in Hangars
     public $minesweeper = false;
+	/* WALKERS OF SIGMA-957 (WALKERS_OF_SIGMA_PLAN.md 3.11, Stage 12) - MAPMAKER ELECTRONIC WARFARE.
+	   "Can use up to 3 OEW or DEW per turn, like a ship. Mapmakers are the only fighter unit that
+	   need this, so we should make sure it has a simple gate to prevent unnecessary work for all
+	   other fighters."
+
+	   THE GATE IS THIS ONE PROPERTY, and it is 0 on every flight in the game but MapmakerProbes.
+	   Every branch Stage 12 adds - server and client - opens with a test on it, so an ordinary
+	   flight pays one falsy read per site and nothing else.
+
+	   Static blueprint property: it travels to the client on the static-ship JSON exactly as
+	   $minesweeper and $remoteControl do (the Ship constructor in model/ship.js copies every
+	   non-systems key of window.staticShips[faction][phpclass] onto the live unit), so it needs no
+	   stripForJson handling. Reachable as ship.ewCapacity in ew.js and weaponManager.
+
+	   TWO POOLS, NEVER ONE (3.11). A flight's OTHER EW number - the mine-detection allowance a
+	   fighter buys with its Offensive Bonus - is ew.getScannerOutput()/getOffensiveBonus and is
+	   deliberately untouched by this. Merging them would let an ordinary fighter spend mine
+	   detection on OEW and a Mapmaker spend its OEW pool on mine detection, in both directions and
+	   silently. EW::getFlightEwCapacity (handlers/EW.php) and ew.getFlightEwCapacity (ew.js) are
+	   the mirror pair that reads this one. */
+	public $ewCapacity = 0;
 	public $remoteControl = false; //true for remotely-controlled flights (Orieni Hunter-Killers); enables ELINT Jamming disruption.
 		//Static blueprint property: travels to client via static-ship JSON, no stripForJson handling needed.
 
@@ -128,6 +150,27 @@ class FighterFlight extends BaseShip
     /// dropOutBonus reach the client (they're normally blueprint-only values from staticShips).
     public $isModified = false;
 
+    /* WALKERS OF SIGMA-957 - Energy Draining Field thrust drain on a FLIGHT
+       (WALKERS_OF_SIGMA_PLAN.md 2.2 + decision D1). A flight has no Engine, so the drain crit
+       rides its sample fighter and comes off freethrust instead - which is the number both the
+       client's movement budget (movement.js: `rem = ship.freethrust`) and AutomatedMovement
+       spend from.
+       Summed, not counted: one EdfThrustDrain crit is a whole roll. Never negative.
+       ⚠️ Gated on the sample fighter having criticals at all, so an ordinary flight pays one
+       property read - NOT on TacGamedata::$edfPresent, because the field that caused the drain
+       may already be destroyed while its last drain is still in effect. */
+    public function getEffectiveFreeThrust($turn = null){
+        /* ⚠️ sumCriticalParam() defaults to the current turn on === false, NOT on null, so a null
+           passed straight through makes every turn comparison fail and the drain silently reads 0.
+           Resolve it here. (The test that caught this asserted the PUBLISHED number, not the
+           getter with an explicit turn - which is the only way the two could disagree.) */
+        if ($turn === null) $turn = TacGamedata::$currentTurn;
+        $thrust = (int)$this->freethrust;
+        $sample = $this->getSampleFighter();
+        if (!$sample || empty($sample->criticals)) return $thrust;
+        return max(0, $thrust - (int)$sample->sumCriticalParam("EdfThrustDrain", $turn));
+    }
+
     public function stripForJson() {
         $strippedShip = parent::stripForJson();
 
@@ -135,9 +178,16 @@ class FighterFlight extends BaseShip
 
         //Only emit the buffed combat stats when a system has modified them, so the
         //client overrides its static blueprint values (Ship ctor copies JSON over static).
+        /* An EDF drain also has to reach the client, and the only channel is this block - the
+           client spends ship.freethrust directly. Publishing a drained value means setting
+           isModified, which then also publishes offensivebonus and dropOutBonus at their real
+           (unchanged) values, which is correct by definition. */
+        $effectiveThrust = $this->getEffectiveFreeThrust();
+        if ($effectiveThrust !== (int)$this->freethrust) $this->isModified = true;
+
         if ($this->isModified) {
             $strippedShip->offensivebonus = $this->offensivebonus;
-            $strippedShip->freethrust = $this->freethrust;
+            $strippedShip->freethrust = $effectiveThrust;
             $strippedShip->dropOutBonus = $this->dropOutBonus;
             $strippedShip->isModified = $this->isModified;
         }
@@ -236,6 +286,44 @@ class FighterFlight extends BaseShip
         return $this->systems[1];
     }
 
+    /* ⭐⭐ WALKERS_OF_SIGMA_PLAN.md §3.12 (Stage 13) - THIS FLIGHT'S ONE JUMP ENGINE.
+     *
+     * "For simplicity we should only let an entire flight of Mapmakers open 1 jump point, not one
+     * per fighter. So if one Jump Engine has a fireOrder they all do, but only generate ONE jump
+     * point" (user, D13). The charge is per SYSTEM - six Mapmakers carry six engines and each one
+     * has its own loading state - while the RULE is per flight, so every read and write about "the
+     * flight's jump engine" has to land on ONE of them or a flight that has just spent its charge
+     * would have five fully charged engines left to declare with next turn.
+     *
+     * THE SAMPLE FIGHTER'S IS THE ONE, and that is a deliberate choice of ANCHOR rather than of
+     * hardware: getSampleFighter() answers systems[1] whether or not that craft is still alive, so
+     * the identity is stable for the whole game - which is exactly the property EdfExposure and
+     * Movement::applyJumpOut's CV note already rely on. A dead craft's SUBSYSTEMS are not damaged
+     * (a fighter is destroyed as a whole), so the engine still answers isDestroyed() false and the
+     * flight can still jump with craft 1 gone, which is the right answer.
+     *
+     * ⚠️ DO NOT STORE THE CHARGE ON A CRAFT THAT CAN DIE. Nothing here does - the vortex state is
+     * rebuilt on every load from the IndividualNote this engine writes - but if a per-flight fact
+     * ever has to outlive the sample fighter's system data it belongs in a note on the sample
+     * fighter, not in a column of its own.
+     *
+     * Readers: JumpEngine::getUnitJumpEngines (which is what every vortex sweep in the game goes
+     * through), JumpEngine::stripForJson (so all six icons read one charge) and
+     * Firing::validateVortexDeclaration (which normalises a declaration made on ANY craft onto this
+     * engine's id). Returns null for a flight with no jump engine, which is every other flight in
+     * the game. */
+    public function getFlightJumpEngine()
+    {
+        $sample = $this->getSampleFighter();
+        if (!$sample || !is_array($sample->systems)) return null;
+
+        foreach ($sample->systems as $system){
+            if ($system instanceof JumpEngine) return $system;
+        }
+
+        return null;
+    }
+
     /* ================ JUMP_POINTS_PLAN.md Stage 6 - A FLIGHT CAN LEAVE THROUGH A JUMP POINT =====
      *
      * BaseShip answers both of these off the ship's PRIMARY STRUCTURE, and a flight has none
@@ -300,6 +388,13 @@ class FighterFlight extends BaseShip
                 $affectingSystems[$system->getDefensiveType()] = $mod;
             }
         }
+        //Chromatic Pulse Driver adaptation (WALKERS_OF_SIGMA_PLAN.md 3.4) - the flight mirror of
+        //BaseShip::getDamageMod. A flight carries its shields on the individual fighters, but the
+        //bucket it aggregates them into is the same shape. Gated on the one static boolean, for the
+        //reason spelled out at BaseShip::getHitChanceMod.
+        if (TacGamedata::$cpdAdaptationPresent) {
+            $affectingSystems = CpdScanRegistry::applyToShieldBucket($affectingSystems, $this, $shooter);
+        }
         return array_sum($affectingSystems);
     }
 
@@ -321,6 +416,11 @@ class FighterFlight extends BaseShip
                 || $affectingSystems[$system->getDefensiveType()] < $mod) {
                 $affectingSystems[$system->getDefensiveType()] = $mod;
             }
+        }
+        //Chromatic Pulse Driver adaptation - the flight mirror of BaseShip::getHitChanceMod, gated
+        //the same way.
+        if (TacGamedata::$cpdAdaptationPresent) {
+            $affectingSystems = CpdScanRegistry::applyToShieldBucket($affectingSystems, $this, $shooter);
         }
         return (-array_sum($affectingSystems));
     }
@@ -613,7 +713,7 @@ class FighterFlight extends BaseShip
 		$protectingSystem = $this->getSystemProtectingFromDamage($shooter, null, $gamedata->turn, $weapon, $craft,$dmgPotential);//let's find biggest one!
 		if($protectingSystem){ //may be unavailable, eg. already filled
 			$shots = ($weapon && $weapon->isLinked) ? $weapon->shots : 1;
-			$protection = $protectingSystem->doesProtectFromDamage($dmgPotential, $craft, false, $shots);
+			$protection = $protectingSystem->doesProtectFromDamage($dmgPotential, $craft, false, $shots, false, $shooter);
 		}
 		$armor += $protection;		
 		

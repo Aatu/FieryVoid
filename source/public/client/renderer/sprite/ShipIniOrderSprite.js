@@ -41,8 +41,8 @@ window.ShipIniOrderSprite = function () {
     var GLYPH_COLOR = "rgba(255,214,150,1)";
     var HALO_COLOR = "rgba(0,0,0,0.85)";
 
-    var MIN_OPACITY = 0.45;   // zoom <= 1 (default / zoomed in): present, but the hull wins
-    var MAX_OPACITY = 0.7;   // zoomed out past FULL_STRENGTH_ZOOM
+    var MIN_OPACITY = 0.4;   // zoom <= 1 (default / zoomed in): present, but the hull wins
+    var MAX_OPACITY = 0.55;   // zoomed out past FULL_STRENGTH_ZOOM
     var FULL_STRENGTH_ZOOM = 3;
 
     function ShipIniOrderSprite(size, z) {

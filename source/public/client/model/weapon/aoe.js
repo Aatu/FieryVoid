@@ -371,3 +371,79 @@ var AsteroidSalvo = function AsteroidSalvo(json, ship) {
 };
 AsteroidSalvo.prototype = Object.create(Aoe.prototype);
 AsteroidSalvo.prototype.constructor = AsteroidSalvo;
+
+/* WALKERS OF SIGMA-957 - ENERGY DRAINING MINE (WALKERS_OF_SIGMA_PLAN.md 3.6, Stage 6).
+ * Client half of EnergyDrainingMine (AoE.php) - keep the pair symmetric.
+ *
+ * It is BallisticTorpedo's storage UI over a HEX target: turnsloaded is the number of mines held,
+ * one right-click on a hex declares one mine, and the launcher stays selected until the store is
+ * spent. Everything else (the arc test, the range test, the ballistic phase gate) is
+ * weaponManager.targetHex's, which routes a canSplitShots weapon here.
+ *
+ * ⚠️ REMAINING IS DERIVED, NOT COUNTED DOWN FROM A STORED FIELD. torpedo.js keeps a running
+ * this.maxVariableShots, which comes back from the server at its FULL value on every poll - so a
+ * page reload with two mines already declared reports three still available. turnsloaded minus the
+ * orders actually standing cannot drift, and it stays right when an order is withdrawn (the shared
+ * withdraw path in weaponManager.removeFiringOrderMulti pops the order, which is all this needs).
+ * maxVariableShots is still kept in step for the generic UI that reads it.
+ */
+var EnergyDrainingMine = function EnergyDrainingMine(json, ship) {
+	Aoe.call(this, json, ship);
+	//Plan trap 6: client system fields are shared BY REFERENCE across same-phpclass instances, and
+	//the store line below is per-instance. Two launchers on one hull would otherwise share a
+	//tooltip and the second one built would win.
+	this.data = Object.assign({}, this.data);
+};
+EnergyDrainingMine.prototype = Object.create(Aoe.prototype);
+EnergyDrainingMine.prototype.constructor = EnergyDrainingMine;
+
+//Mines still available to declare this turn.
+EnergyDrainingMine.prototype.getMinesRemaining = function () {
+	var held = parseInt(this.turnsloaded, 10);
+	if (isNaN(held)) held = 0;
+	return Math.max(0, held - this.fireOrders.length);
+};
+
+EnergyDrainingMine.prototype.initializationUpdate = function () {
+	var remaining = this.getMinesRemaining();
+	this.maxVariableShots = remaining;
+	this.data["Mines stored"] = remaining + "/" + this.normalload;
+	return this;
+};
+
+EnergyDrainingMine.prototype.doMultipleHexFireOrders = function (shooter, hexpos) {
+
+	if (this.getMinesRemaining() <= 0) {
+		confirm.error("This <b>" + this.displayName + "</b> has no mines left to launch this turn.");
+		return [];
+	}
+
+	var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+
+	var fire = {
+		id: fireid,
+		type: 'ballistic',
+		shooterid: shooter.id,
+		targetid: -1,
+		weaponid: this.id,
+		calledid: -1,
+		turn: gamedata.turn,
+		firingMode: this.firingMode,
+		shots: this.defaultShots,
+		x: hexpos.q,
+		y: hexpos.r,
+		//The launcher is Electromagnetic; the icon layer treats an unknown class generically, which
+		//is what a probe that deals no damage wants.
+		damageclass: 'electromagnetic',
+		notes: "Split"
+	};
+
+	this.maxVariableShots = Math.max(0, this.maxVariableShots - fire.shots);
+
+	return [fire];
+};
+
+//Unselect the launcher once every held mine has been aimed.
+EnergyDrainingMine.prototype.checkFinished = function () {
+	return this.getMinesRemaining() <= 0;
+};

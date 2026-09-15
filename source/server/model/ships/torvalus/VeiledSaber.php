@@ -59,7 +59,7 @@ class VeiledSaber extends MediumShip{
 		$this->addAftSystem(new GraviticThruster(5, 12, 0, 4, 2));
 		$this->addAftSystem(new GraviticThruster(5, 12, 0, 4, 2));
 		$this->addAftSystem(new GraviticThruster(5, 12, 0, 4, 2));        
-		$this->addAftSystem(new JumpEngine(5, 15, 4, 10));
+		$this->addAftSystem((new JumpEngine(5, 15, 4, 10))->markAncient());
 		
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

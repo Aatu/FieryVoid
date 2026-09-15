@@ -1721,8 +1721,10 @@ body {
 }
 /* ── Reinforcements: calling a jump point exit (REINFORCEMENTS_PLAN.md Stage 4) ──────
    #00b8e6 throughout - FV's established "not here yet" cyan, the same value as the blue
-   Jump Point marker, the fleet list's .docked / .hyperspace rows and the fleet header's
-   [Deploys on Turn N]. Do NOT introduce a second blue for this. */
+   Jump Point marker, the fleet list's .docked rows and the fleet header's
+   [Deploys on Turn N]. Do NOT introduce a second blue for this.
+   (The fleet list's .hyperspace ROW is the one deliberate exception, cobalt since
+   2026-09-12 so it cannot be mistaken for a docked row - logPanel.css carries the reason.) */
 
 /* The #iniGui button. Deliberately the same shape as #mineDeployBtn beside it - it is the
    same kind of thing, a switch that arms a bespoke map mode - and differs only in the

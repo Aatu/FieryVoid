@@ -2017,6 +2017,65 @@ class DBManager
         }
     }
 
+
+    /* ===== WALKERS OF SIGMA-957 - LATE EW ALLOCATION (WALKERS_OF_SIGMA_PLAN.md 3.8, Stage 10B) ====
+       The two writes EW::submitLateEw needs and submitEW cannot provide. submitEW INSERTS the whole
+       of a ship's turn in one go, which is right for the Initial Orders commit and wrong for every
+       later phase: calling it again would duplicate every row already stored.
+
+       ⚠️ RAISING AN EXISTING ROW RATHER THAN ADDING A SECOND ONE IS THE POINT. getEWbyType() and
+       getDEW() return the FIRST matching row, while getOEW() SUMS - so two rows for one
+       (ship, turn, type, target) would be read differently by the shooting maths and by everything
+       else. One row per combination is the invariant the Initial Orders commit already keeps.
+
+       ⚠️ Both are addressed by (gameid, shipid, turn, type, targetid), which is that invariant
+       expressed as a WHERE clause, and both are integer-cast at the boundary: $type is the only
+       non-numeric column and comes from a fixed vocabulary the diff never invents. */
+    public function adjustEwAmount($gameid, $shipid, $turn, $type, $targetid, $delta)
+    {
+        $gameid   = (int)$gameid;
+        $shipid   = (int)$shipid;
+        $turn     = (int)$turn;
+        $targetid = (int)$targetid;
+        $delta    = (int)$delta;
+        $type     = $this->DBEscape($type);
+
+        if ($delta === 0) return;
+
+        /* GREATEST(...) rather than a bare subtraction: nothing should ever drive a pool negative,
+           and a row that has already been debited to 0 by a concurrent write must stay at 0 rather
+           than wrapping into a credit for the shooting maths. */
+        $sql = "UPDATE `tac_ew`
+                   SET amount = GREATEST(0, amount + ($delta))
+                 WHERE gameid = $gameid
+                   AND shipid = $shipid
+                   AND turn = $turn
+                   AND type = '$type'
+                   AND targetid = $targetid
+                 LIMIT 1";
+
+        $this->update($sql);
+    }
+
+    /* One new EW row, for a (type, target) the ship did not already hold. Same column order as
+       submitEW's INSERT, which is positional - if a column is ever added to tac_ew, BOTH of these
+       have to be given an explicit column list in the same edit. */
+    public function insertEwEntry($gameid, $shipid, $turn, $type, $amount, $targetid)
+    {
+        $gameid   = (int)$gameid;
+        $shipid   = (int)$shipid;
+        $turn     = (int)$turn;
+        $amount   = (int)$amount;
+        $targetid = (int)$targetid;
+        $type     = $this->DBEscape($type);
+
+        if ($amount <= 0) return;
+
+        $sql = "INSERT INTO `tac_ew` VALUES (null, $gameid, $shipid, $turn, '$type', $amount, $targetid)";
+
+        $this->update($sql);
+    }
+
 /* no longer needed, Adaptive Armor redone
     public function updateAdaptiveArmour($gameid, $shipid, $settings)
     {
@@ -3517,6 +3576,24 @@ class DBManager
 		//advanceGameState then FireGamePhase::advance) - otherwise the second load skips the buff and a
 		//shot at the Warrior resolves without its jink. Guarded so it's a no-op if the class isn't loaded.
 		if (class_exists('GraviticAugmenter')) GraviticAugmenter::resetPerLoadState();
+
+		//Walkers of Sigma-957 (WALKERS_OF_SIGMA_PLAN.md 3.4): the Chromatic Pulse Driver's
+		//fleet-wide shield adaptation is rebuilt from scratch out of the CPDSCAN notes replayed by
+		//the sweep below. Same reason as the line above - one request loads gamedata more than once
+		//(advanceGameState, then the phase's advance()), and without this reset the second load
+		//would count every fleet's adaptation twice.
+		//⚠️ class_exists WITH AUTOLOADING OFF, deliberately. The gate this feature hangs off is
+		//TacGamedata::$cpdAdaptationPresent, and the whole point is that a game with no CPD scan in
+		//it never loads the registry at all: if the class is not loaded its static table is empty
+		//by definition, so there is nothing to reset. Turning autoloading back on here would pull
+		//the file into every gamedata load in the game.
+		TacGamedata::$cpdAdaptationPresent = false;
+		if (class_exists('CpdScanRegistry', false)) CpdScanRegistry::resetPerLoadState();
+
+		//Walkers of Sigma-957 (WALKERS_OF_SIGMA_PLAN.md 3.18, Stage 20): the abduction gate is set by
+		//JumpEngine::onIndividualNotesLoaded when it restores an 'EDJD' note, in the sweep below - so it
+		//is cleared here, for the reason the CPD gate above is.
+		TacGamedata::$abductionPresent = false;
 
 		foreach ($gamedata->ships as $ship){
             $shipNotes = isset($allNotes[$ship->id]) ? $allNotes[$ship->id] : array();

@@ -37,7 +37,7 @@ class kirishiacLordship extends BaseShip{
 		$scanner->markAdvanced();
 		$this->addPrimarySystem($scanner);			
         $this->addPrimarySystem(new Engine(7, 25, 0, 12, 4));
-        $this->addPrimarySystem(new JumpEngine(8, 25, 6, 8));
+        $this->addPrimarySystem((new JumpEngine(8, 25, 6, 8))->markAncient());
         $this->addPrimarySystem(new SelfRepair(7, 12, 6)); //armor, structure, output
 
 		$this->addFrontSystem(new AntigravityBeam(6, 6, 3, 270, 90));

@@ -501,6 +501,42 @@ private static $neighbours = [
         return $current;
     }
 
+    /* Which of the six hex bearings takes you from $from to $to in a STRAIGHT run, or null when
+       the two hexes do not lie on a common hex axis at all.
+
+       WALKERS_OF_SIGMA_PLAN.md 3.9 (Sensor Charge Transceiver): a sensor charge flies in straight
+       legs and pays a manoeuvre to change direction, so "is this waypoint reachable without
+       manoeuvring, and which way is it" has to be one answerable question. Answered by WALKING
+       rather than by trigonometry: moveInDirection() above is the only definition of what a hex
+       direction means in this codebase, and re-deriving one from a pixel heading would give a
+       second definition that disagrees with it on the odd/even row offset.
+
+       O(6 x distance), and never called with a distance above the charge range. Returns 0 for
+       $from == $to, which callers must read as "no leg", not as "due east".
+
+       ⚠️ MIRROR PAIR with mathlib.getHexDirection in mathlib.js. The two must agree exactly, or a
+       path the client drew is a path the server refuses. */
+    public static function getHexDirection($from, $to){
+        $distance = self::getDistanceHex($from, $to);
+        if ($distance <= 0) return 0;
+
+        foreach (array(0, 60, 120, 180, 240, 300) as $bearing){
+            $walk = self::moveInDirection($from, $bearing, $distance);
+            if ($walk->q == $to->q && $walk->r == $to->r) return $bearing;
+        }
+
+        return null;
+    }
+
+    /* Manoeuvres spent turning from one hex bearing to another: 1, 2 or 3, whichever way round the
+       compass is shorter, and 0 for no change. A 60 degree turn is one manoeuvre, which is also
+       what a slide costs, so this covers both of the things the rules call a manoeuvre.
+       ⚠️ MIRROR PAIR with mathlib.getHexTurnCost in mathlib.js. */
+    public static function getHexTurnCost($fromBearing, $toBearing){
+        $steps = ((int)abs(((int)$fromBearing - (int)$toBearing) / 60)) % 6;
+        return (int)min($steps, 6 - $steps);
+    }
+
     /**
      * Convert bearing in degrees → neighbour index 0–5.  This might actually exist somewhere already, but it was convenient to have it nearby moveInDirection() above
      */

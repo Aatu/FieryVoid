@@ -207,6 +207,12 @@ class ShipCompactor
         // Empty arrays
         $emptyArrayKeys = ['damage','criticals','fireOrders','power','specialAbilities','critData',
                            'revealedTeams',
+                           /* Stage 19 (WALKERS_OF_SIGMA_PLAN.md 3.14a): the Docking Bay's list of
+                              ships riding the hull mid-manoeuvre. Always empty on a blueprint, and
+                              every client read is an Array.isArray() guard, so dropping it keeps the
+                              key out of every cached per-class artefact. The LIVE copy is sent
+                              separately by DockingBay::stripForJson. */
+                           'shipsAttaching',
                            'turnsloadedArray','extraoverloadshotsArray','fireControlArray',
                            'rangeArray','rangePenaltyArray','sustainedTarget',
                            /* Per-firing-mode arrays. Every reader is an
@@ -247,7 +253,24 @@ class ShipCompactor
                       'canTargetAll','autoFireOnly','ignoreAllEW','uninterceptable',
                       'doNotIntercept','ignoresLoS','isModified','hidetarget','exclusive',
                       'noProjectile','hextarget','ballistic','excludeFromDefaultShuttles',
-                      'designedToRam','noLockPenalty','useOEW'];
+                      'designedToRam','noLockPenalty','useOEW',
+                      /* Stage 12 (WALKERS_OF_SIGMA_PLAN.md 3.11): the flight-EW lock-on flag. Read in
+                         exactly one client site, weaponManager.computeOEW, as a truthy test. */
+                      'useFlightEW',
+                      /* Stage 17 (WALKERS_OF_SIGMA_PLAN.md 3.15): the Traveler's "also repairs the
+                         ships in my bays" flag. One client read site, SelfRepairList, truthy. The
+                         Traveler's own mount is TRUE, so this only drops it off the several hundred
+                         Self Repairs that are not it. The live wire copy is separate - see
+                         SelfRepair::stripForJson - so the menu works before the statics are rebuilt. */
+                      'servicesDockedUnits',
+                      /* Stage 17: DockingBay's transient once-per-resolution guard. Never anything
+                         but false on a blueprint, and nothing on the client reads it at all. */
+                      'dockedSelfRepairDone',
+                      /* Stage 18 (WALKERS_OF_SIGMA_PLAN.md 3.16): DockingBay's "the ships aboard
+                         feed my reactor" flag. One client read site, shipManager.power
+                         .getDockedPowerShared, truthy. The live wire copy is separate - see
+                         DockingBay::stripForJson. */
+                      'sharesDockedPower'];
         foreach ($falseKeys as $key) {
             if (isset($system[$key]) && $system[$key] === false) {
                 unset($system[$key]);

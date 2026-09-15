@@ -44,6 +44,14 @@ class BaseShip {
     public $spawned = -1; //To denote if a unit was spawned by DURING the game, e.g. doesn't count for CPV etc, show in Replay prior to it spawning
     public $removed = false; //Hangar Ops (B5W §10.1): set when a flight has docked. Hides from board/target lists without triggering destruction; record stays in DB for replay history.
     public $removedTurn = null; //Turn the ship docked into a hangar. Lets replay show the flight up to and including this turn.
+    /* Hangar Ops: the turn this unit last came OUT of a carrier - a flight launched or escaping from a
+       hangar, an LCV off its rail, a ship out of a Docking Bay. That resolves at the END of the turn
+       (or during its Firing), so the unit was still aboard for the whole of it - but a replay of that
+       turn loads the hangar as it stood at turn end (notes turn <= N) and so has it already out, drawn
+       at its launch hex from the start of Movement (game 7386). Set per LOAD by
+       Hangar::onIndividualNotesLoaded from the launch/escape notes, never persisted; read only by
+       shipManager.shouldBeHidden and ReplayAnimationStrategy, in replay. */
+    public $hangarLaunchTurn = null;
     /* JUMP_POINTS_PLAN.md Stage 4 x Hangar Ops: this unit was sitting in a carrier's hangar when
        that carrier left through a jump vortex, so it is in hyperspace too. Set per LOAD by
        TacGamedata::markJumpedDockedFlights (never persisted - it is derived from the carrier), and
@@ -338,6 +346,15 @@ class BaseShip {
 			    $mod += -5*($CnC->hasCritical("ShadowPilotPain", $gamedata->turn));
 				$mod += -20*($CnC->hasCritical("HangarOperations", $gamedata->turn));
 				$mod += -50*($CnC->hasCritical("LCVLaunchedThisTurn", $gamedata->turn));
+			/* WALKERS OF SIGMA-957 - Energy Draining Field initiative drain
+			   (WALKERS_OF_SIGMA_PLAN.md 2.2). ⚠️ The crit's param is in TABLETOP points and FV
+			   initiative is d100, so it is multiplied by 5 - plan trap 5. The rules cap the
+			   drain at -20 tabletop, which is -100 here, and the cap belongs on the EDF's own
+			   accumulated total rather than on $mod (everything else in this method is a
+			   separate effect and must not be squeezed by it).
+			   Summed, not counted: one crit is a whole roll (see the crit classes). */
+			$edfIni = (int)$CnC->sumCriticalParam("EdfIniDrain", $gamedata->turn);
+			if ($edfIni > 0) $mod -= min($edfIni, EdfExposure::INI_CAP) * EdfExposure::INI_SCALE;
 			}
 		    if ($this instanceof FighterFlight){
 			    $firstFighter = $this->getSampleFighter();
@@ -350,6 +367,11 @@ class BaseShip {
 					$mod += -10* $firstFighter->hasCritical("ReducedIniative", $gamedata->turn);
 					//Uncontrolled = -3 tabletop ini for the lost-control turn (-15 in FV d100 units).
 					$mod += -15* $firstFighter->hasCritical("Uncontrolled", $gamedata->turn);
+					/* EDF initiative drain on a flight - the crit rides the sample fighter,
+					   which is where every other flight initiative crit above lives. Same
+					   x5 conversion and same -20-tabletop cap as the ship branch. */
+					$edfIniFtr = (int)$firstFighter->sumCriticalParam("EdfIniDrain", $gamedata->turn);
+					if ($edfIniFtr > 0) $mod -= min($edfIniFtr, EdfExposure::INI_CAP) * EdfExposure::INI_SCALE;
 			    }
 		    }
             if (!empty($this->attached)) $mod += -10;//Attached Pods get -10 to Iniative as if just launched.
@@ -830,6 +852,7 @@ class BaseShip {
             $strippedShip->removed = true;
             if ($this->removedTurn !== null) $strippedShip->removedTurn = $this->removedTurn;
         }
+        if ($this->hangarLaunchTurn !== null) $strippedShip->hangarLaunchTurn = $this->hangarLaunchTurn; //only on a launched unit
         //Emitted only when true, so every other unit's payload is byte-identical to before (the
         //fleet list reads a plain falsy on anything that did not leave inside a carrier).
         if ($this->jumpedWithCarrier) $strippedShip->jumpedWithCarrier = true;
@@ -2754,7 +2777,7 @@ class BaseShip {
         //foreach($this->systems as $system){
 		foreach($listOfPotentialSystems as $system){
 
-			$value=$system->doesProtectFromDamage($expectedDmg, $systemhit, $damageWasDealt, $shots, $isUnderShield);
+			$value=$system->doesProtectFromDamage($expectedDmg, $systemhit, $damageWasDealt, $shots, $isUnderShield, $shooter);
             if ($value<1) continue;
 			if ($system->isDestroyed($turn-1)) continue;
 			if ($system->isOfflineOnTurn($turn)) continue;
@@ -2840,6 +2863,19 @@ class BaseShip {
                 $affectingSystems[$system->getDefensiveType()] = $mod;
             }
         }
+        /* Walkers of Sigma-957 (WALKERS_OF_SIGMA_PLAN.md 3.4): a Chromatic Pulse Driver scan
+           teaches the SHOOTER's team about this ship's RACE, and from the next turn its shields
+           read weaker for everything that team fires. Applied to the aggregated bucket, not inside
+           each shield class: the bucket already holds only the strongest single "Shield" source, so
+           the reduction lands exactly once however many shields are mounted, and one edit covers
+           every shield-type system in the game.
+           ⚠️ This method runs for every shot in every game, so the feature hangs off ONE static
+           boolean - see TacGamedata::$cpdAdaptationPresent. False until a scan note has actually
+           been replayed, which means no method call, no argument passing and not even an autoload
+           of CpdScanRegistry in an ordinary game. Do not turn this into an unconditional call. */
+        if (TacGamedata::$cpdAdaptationPresent) {
+            $affectingSystems = CpdScanRegistry::applyToShieldBucket($affectingSystems, $this, $shooter);
+        }
         return (-array_sum($affectingSystems));
     }
 
@@ -2857,6 +2893,12 @@ class BaseShip {
                 || $affectingSystems[$system->getDefensiveType()] < $mod){
                 $affectingSystems[$system->getDefensiveType()] = $mod;
             }
+        }
+        //Chromatic Pulse Driver adaptation - see the gated block in getHitChanceMod above for why
+        //the boolean is there. The same points reduce BOTH halves of a shield, which is what "the
+        //shields are weaker" means: damage absorption here, profile reduction there.
+        if (TacGamedata::$cpdAdaptationPresent) {
+            $affectingSystems = CpdScanRegistry::applyToShieldBucket($affectingSystems, $this, $shooter);
         }
         return array_sum($affectingSystems);
     }
@@ -3212,6 +3254,33 @@ public function getAllEWExceptDEW($turn){
     }
 
 
+    /* ⭐ MAY A SHOOTER DELIBERATELY PICK THIS UNIT AS A TARGET? (WALKERS_OF_SIGMA_PLAN.md 3.10c.)
+     *
+     * Default true for everything. False on a unit that CANNOT USEFULLY BE SHOT AT - the Energy
+     * Draining Mine's orb is the first: its Structure is indestructible, its notes already say
+     * "Destroying this probe has no in-game effect", and offering it as a target only invites a
+     * wasted shot (user ruling 2026-09-08: "prevent people targeting it, since there's no point in
+     * destroying it"). Hiding it was the alternative and would have deleted the feature - the orb's
+     * icon IS the seven-hex field marker.
+     *
+     * ⚠️ THIS GOVERNS THE DELIBERATE SELECTION OF THIS UNIT AND NOTHING ELSE. It must not gate the
+     * FIELD (TacGamedata::setEdfHexes collects every EdfSource regardless), nor ramming, collateral
+     * or any area effect that happens to cover the orb's hex, and it must not hide the unit.
+     *
+     * The one fact is the $unTargetable property, declared only on the classes that opt out, so
+     * every other blueprint's payload is byte-identical to before and the CLIENT mirror
+     * (shipManager.isTargetable) reads the same field. empty() rather than a plain property read:
+     * the property does not exist on 2,556 of the 2,557 ship classes.
+     *
+     * ⚠️ CLIENT-ONLY ENFORCEMENT SO FAR. weaponManager consults the mirror at both of its sites
+     * (the tooltip line and the click), which is all a wasted shot needs; nothing on the server
+     * refuses such a fire order yet - see plan 3.17/Stage 18, where a real rule depends on it.
+     */
+    public function isTargetableBy($shooter = null, $turn = false){
+        return empty($this->unTargetable);
+    }
+
+
     public function isDestroyed($turn = false){
         //Hangar Ops Stage 7: a docked flight has $removed=true; treat as
         //destroyed for filtering purposes so the 379+ isDestroyed callsites
@@ -3236,6 +3305,22 @@ public function getAllEWExceptDEW($turn){
 
         }
 
+        return false;
+    }
+
+    /* WALKERS_OF_SIGMA_PLAN.md 3.14d (Stage 19) - THE SAME QUESTION ASKED OF THE DAMAGE ALONE.
+       isDestroyed() folds `removed` in (see its note), which is right for the 379 call sites that
+       mean "skip anything not on the board" and wrong for every rule that has to tell a WRECK from
+       a unit parked inside a hangar. The client has had this predicate since Hangar Ops
+       (shipManager.isDestroyedByDamage) and has needed it twice more since - Stage 17's ship window
+       and Stage 18's power menu - so this is the server twin, not a new idea.
+       ⚠️ NOT a change to isDestroyed(), and it must never become one. */
+    public function isDestroyedByDamage($turn = false){
+        foreach($this->systems as $system){
+            if ($system instanceof Structure && $system->location == 0 && $system->isDestroyed($turn)){
+                return true;
+            }
+        }
         return false;
     }
 

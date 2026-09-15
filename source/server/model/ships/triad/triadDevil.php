@@ -5,7 +5,7 @@ class triadDevil extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 1625;
-		$this->faction = "";
+		$this->faction = "The Triad";
 		$this->phpclass = "triadDevil";
 		$this->imagePath = "img/ships/triadDevil.png";
 		$this->shipClass = "Chaos: Devil";
@@ -33,6 +33,9 @@ class triadDevil extends MediumShip{
 		$this->notes = "Cannot control fighters";		
 		$this->notes .= "<br>Atmospheric Capable";		
 
+		/*Triad use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'TriadShip');
+
 		$this->addPrimarySystem(new Reactor(8, 25, 0, 0));
 		$this->addPrimarySystem(new CnC(8, 12, 0, 0));
 		$scanner = new Scanner(8, 16, 0, 12);
@@ -55,7 +58,7 @@ class triadDevil extends MediumShip{
 		$this->addAftSystem(new GraviticThruster(7, 15, 0, 4, 2));
 		$this->addAftSystem(new GraviticThruster(7, 15, 0, 4, 2));
         $this->addAftSystem(new SelfRepair(8, 9, 4)); //armor, structure, output
-		$this->addAftSystem(new JumpEngine(8, 15, 5, 8));        
+		$this->addAftSystem((new JumpEngine(8, 15, 5, 8))->markAncient());        
 	
         $this->addPrimarySystem(new Structure( 8, 90));
 		

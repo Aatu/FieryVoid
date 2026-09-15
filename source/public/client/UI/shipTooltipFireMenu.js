@@ -11,21 +11,48 @@ window.ShipTooltipFireMenu = function () {
     ShipTooltipFireMenu.prototype = Object.create(ShipTooltipMenu.prototype);
 
     ShipTooltipFireMenu.buttons = [
-		{ className: "targetWeapons", condition: [isEnemy, hasWeaponsSelected], action: targetWeapons, info: "Target Weapons" },
-        { className: "targetWeaponsHex", condition: [hasOrderSource, hasHexWeaponsSelected], action: targetHexagon, info: "Target Hex" },
-        { className: "targetSuppWeapons", condition: [hasOrderSource, isFriendly, hasWeaponsSelected, FFWeaponSelected, notSelf], action: targetWeapons, info: "Target Support Weapons" },//30 June 2024 - DK - Added for Ally targeting.
+		{ className: "targetWeapons", condition: [isTargetable, isEnemy, hasWeaponsSelected], action: targetWeapons, info: "Target Weapons" },
+        { className: "targetWeaponsHex", condition: [hasOrderSource, hasHexWeaponsSelected], action: targetHexagon, info: hexButtonLabel },
+        { className: "targetSuppWeapons", condition: [isTargetable, hasOrderSource, isFriendly, hasWeaponsSelected, FFWeaponSelected, notSelf], action: targetWeapons, info: "Target Support Weapons" },//30 June 2024 - DK - Added for Ally targeting.
         { className: "removeMultiOrder", condition: [isEnemy, hasWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firing Order" },
-        { className: "launchFighters", condition: [isMine, isFiringPhase, hasLaunchableHangar, isLaunchEnabledGame, carrierNotPivotingOrRolling], action: openHangarLaunch, info: "Launch Fighters" },
-        { className: "recoverFlights", condition: [isMine, isFiringPhase, hasReceivableFlights, isLaunchEnabledGame, carrierNotPivotingOrRolling], action: openHangarRecover, info: "Recover Flights" },
+        { className: "launchFighters", condition: [isMine, isFiringPhase, hasLaunchableHangar, isLaunchEnabledGame, carrierNotPivotingOrRolling], action: openHangarLaunch, info: "Launch" },
+        { className: "recoverFlights", condition: [isMine, isFiringPhase, hasReceivableFlights, isLaunchEnabledGame, carrierNotPivotingOrRolling], action: openHangarRecover, info: "Hangars" },
         //"Enter Hangar" is reused for LCVs: isDockableUnit accepts a flight OR an
         //LCV, and openHangarDock routes an LCV through the LCV-rail dock dialog.
         { className: "dockFlight", condition: [isMine, isFiringPhase, isDockableUnit, isLaunchEnabledGame, hasEligibleCarrierInHex], action: openHangarDock, info: "Enter Hangar" }
-        //{ className: "targetSuppWeapons", condition: [isFriendly, hasWeaponsSelected, notSelf], action: targetWeapons, info: "Target support weapons" },//30 June 2024 - DK - Added for Ally targeting.
-        //{ className: "removeMultiOrder", condition: [hasWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firing Order" }
 	];
 
     ShipTooltipFireMenu.prototype.getAllButtons = function () {
-        return ShipTooltipFireMenu.buttons.concat(ShipTooltipMenu.prototype.getAllButtons.call(this));
+        var buttons = ShipTooltipFireMenu.buttons;
+
+        /* ⭐⭐ WALKERS OF SIGMA-957 (WALKERS_OF_SIGMA_PLAN.md 3.8, Stage 10B) - THE LATE EW WINDOW.
+           An EW Detector lets every friendly unit in range hold one or more EW points back from
+           Initial Orders and allocate them "as late as the end of the movement segment", which in FV
+           is the start of Pre-Firing (or of Firing, when there is no Pre-Firing). This menu serves
+           both phases, so the whole EW button set is borrowed from the Initial Orders menu rather
+           than copied - see the note on ShipTooltipInitialOrdersMenu.ewButtons.
+
+           ⚠️ ONE GATE, AT THE MENU LEVEL, NOT TWENTY CONDITIONS. The button objects are SHARED with
+           the Initial Orders menu, so a phase condition added to them there would also apply there.
+           isLateEwWindowOpen answers the whole question: right phase, my ship, not yet committed,
+           and an allowance that is actually worth something (ladder ∩ unspent DEW).
+
+           ⚠️ this.selectedShip is ROUTINELY null here (see the ⭐ on FirePhaseStrategy.targetShip),
+           and isLateEwWindowOpen answers false for it rather than throwing - which matters, because
+           ONE throwing condition takes the entire tooltip down, Open Ship Details included.
+
+           ⚠️ Guarded on the class existing at all: this file and shipTooltipInitialOrdersMenu.js are
+           separate script tags and only document order puts them in sequence.
+
+           The buttons go FIRST, matching where they sit in the Initial Orders menu, so a player who
+           has used them all game finds them in the same place. */
+        if (window.ShipTooltipInitialOrdersMenu
+            && ShipTooltipInitialOrdersMenu.ewButtons
+            && window.ew && ew.isLateEwWindowOpen(this.selectedShip)) {
+            buttons = ShipTooltipInitialOrdersMenu.ewButtons.concat(buttons);
+        }
+
+        return buttons.concat(ShipTooltipMenu.prototype.getAllButtons.call(this));
     };
 
     // Per-craft box cost helpers — canonical bodies live in HangarShared
@@ -115,8 +142,33 @@ window.ShipTooltipFireMenu = function () {
         weaponManager.targetShip(this.selectedShip, this.targetedShip);
     }	
 	
+    /* WALKERS_OF_SIGMA_PLAN.md 3.9 - THE UNIT IS PART OF THE GESTURE FOR ONE WEAPON.
+
+       This button has always meant "put a hex order on the hex this unit is standing in", and for
+       every other hex weapon that is still all it means. The Sensor Charge Transceiver is the one
+       weapon whose declaration can also say WHICH of the units sharing that hex the charge should
+       hit ("providing that it is sent against only one target per hex"), so the targeted unit's id
+       is handed down with the hex; doMultipleHexFireOrders re-checks it and drops it unless it is
+       a live enemy actually standing there.
+
+       ⚠️ Deliberately NOT gated on isEnemy: the LAST waypoint of a course has to land on a
+       FRIENDLY transceiver or the charge is lost, so right-clicking an ally and pressing this is a
+       normal and necessary move. It simply names nobody. */
     function targetHexagon() {
-        weaponManager.targetHex(this.selectedShip, this.hexagon );
+        weaponManager.targetHex(this.selectedShip, this.hexagon,
+            this.targetedShip ? this.targetedShip.id : null);
+    }
+
+    /* "Target Ship" only when pressing the button would really name one - a Sensor Charge
+       Transceiver among the selected systems AND an enemy under the cursor. Anything else is the
+       plain hex order it has always been, and saying otherwise would promise a choice the order
+       does not carry. */
+    function hexButtonLabel() {
+        var sensorCharge = gamedata.selectedSystems.some(function (system) {
+            return system instanceof Weapon && system.name === 'SensorChargeTransceiver';
+        });
+
+        return (sensorCharge && isEnemy.call(this)) ? "Target Ship" : "Target Hex";
     }
 
 	function hasSplitWeaponFiringOrder() {
@@ -158,6 +210,10 @@ window.ShipTooltipFireMenu = function () {
     function notSelf() {//30 June 2024 - DK - Added for Ally targeting.
         return this.selectedShip !== this.targetedShip;
     }
+
+    function isTargetable() {
+        return shipManager.isTargetable(this.targetedShip);
+    }        
 
     function hasWeaponsSelected() {
         return gamedata.selectedSystems.some(function (system) {
@@ -213,6 +269,8 @@ window.ShipTooltipFireMenu = function () {
             //ordinary "Launch Fighters" button — its fighters leave ONLY via the
             //Fighter Bomb weapon (a normal fireable weapon). Landing is unaffected.
             if (sys.isShadowHangar) continue;
+            //A Docking Bay whose SHIPS have claimed this turn launches no fighters.
+            if (window.HangarShared.bayClaimedByShips(sys)) continue;
             if (!Array.isArray(sys.hangarUsage) || sys.hangarUsage.length === 0) continue;
             //Stage 16.5: a cannotLaunch wreck (fighter destroyed landing on a
             //damaged catapult) occupies the bay but can never relaunch — it
@@ -228,8 +286,9 @@ window.ShipTooltipFireMenu = function () {
             return true;
         }
         //LCV rails: the "Launch Fighters" button also surfaces when a rail holds
-        //an LCV and still has launch budget this turn.
-        return window.hasLaunchableLCVRail(ship);
+        //an LCV and still has launch budget this turn - and so does a Docking Bay
+        //holding a ship that may launch (WALKERS_OF_SIGMA_PLAN.md 3.14).
+        return window.hasLaunchableLCVRail(ship) || window.hasLaunchableBayShip(ship);
     }
 
     function carrierNotPivotingOrRolling() {
@@ -267,11 +326,16 @@ window.ShipTooltipFireMenu = function () {
         return !!(ship && !ship.flight && String(ship.hangarRequired || '').toLowerCase() === 'lcvs');
     }
 
-    // The dock button surfaces for a fighter flight OR an LCV. The downstream
-    // gate (hasEligibleCarrierInHex) and action (openHangarDock) branch on which.
+    // A ship some Docking Bay in this game docks whole (WALKERS_OF_SIGMA_PLAN.md 3.14).
+    function isBayDockableShip(ship) {
+        return !!(ship && !ship.flight && !isLCVUnit(ship) && window.isShipDockableInSomeBay(ship));
+    }
+
+    // The dock button surfaces for a fighter flight, an LCV or a bay-dockable ship. The
+    // downstream gate (hasEligibleCarrierInHex) and action (openHangarDock) branch on which.
     function isDockableUnit() {
         var ship = this.targetedShip;
-        return !!(ship && (ship.flight || isLCVUnit(ship)));
+        return !!(ship && (ship.flight || isLCVUnit(ship) || isBayDockableShip(ship)));
     }
 
     // Looks for at least one friendly carrier in the same hex with a hangar
@@ -287,6 +351,11 @@ window.ShipTooltipFireMenu = function () {
             if (window.findEligibleLCVRailsForDock(unit).length > 0) return true;
             return !!window.lcvQueuedDockRail(unit);
         }
+        if (isBayDockableShip(unit)) {
+            //Same re-open rule as the LCV above: a queued dock keeps the button so it can be undone.
+            if (window.findEligibleBaysForShipDock(unit).length > 0) return true;
+            return !!window.bayQueuedDock(unit);
+        }
         if (!unit.flight) return false;
         var carriers = findEligibleCarriersForDock(unit);
         return carriers.length > 0;
@@ -297,6 +366,12 @@ window.ShipTooltipFireMenu = function () {
         if (isLCVUnit(unit)) {
             if (window.confirm && typeof window.confirm.lcvDock === 'function') {
                 window.confirm.lcvDock(unit);
+            }
+            return;
+        }
+        if (isBayDockableShip(unit)) {
+            if (window.confirm && typeof window.confirm.bayShipDock === 'function') {
+                window.confirm.bayShipDock(unit);
             }
             return;
         }
@@ -318,8 +393,10 @@ window.ShipTooltipFireMenu = function () {
         var flights = findEligibleFlightsForDocking(ship);
         if (flights.length > 0) return true;
         //LCV rails: the same "Recover Flights" button also surfaces when this
-        //carrier has a free LCV rail and an eligible LCV sharing its hex.
-        return window.findEligibleLCVsForRecover(ship).length > 0;
+        //carrier has a free LCV rail and an eligible LCV sharing its hex - and a
+        //Docking Bay when a ship it docks meets the conditions (3.14).
+        return window.findEligibleLCVsForRecover(ship).length > 0
+            || window.findEligibleBayShipsForRecover(ship).length > 0;
     }
 
     function openHangarRecover() {
@@ -437,20 +514,11 @@ window.findEligibleCarriersForDock = function (flight) {
                 if (fHeading !== requiredHeading) return;
             }
 
-            // Effective free boxes. Catapult capacity is a flat 1 regardless of
-            // box count / damage; ordinary hangars use maxhealth - net damage.
-            var effective;
-            if (isCat) {
-                effective = 1;
-            } else {
-                var netDamage = 0;
-                if (Array.isArray(sys.damage)) {
-                    sys.damage.forEach(function (d) {
-                        netDamage += Math.max(0, parseInt(d.damage || 0, 10) - parseInt(d.armour || 0, 10));
-                    });
-                }
-                effective = Math.max(0, parseInt(sys.maxhealth, 10) - netDamage);
-            }
+            // Effective free boxes (HangarShared.effectiveHangarBoxes): a catapult is a
+            // flat 1 regardless of box count / damage; an ordinary hangar is maxhealth -
+            // net damage; a Docking Bay also nets out its ships, and takes no fighters on
+            // a turn its ships have claimed it (WALKERS_OF_SIGMA_PLAN.md 3.14).
+            var effective = window.HangarShared.effectiveHangarBoxes(sys);
             // Occupied boxes (this bay's own committed entries + sibling bays'
             // occupancy spilling here; a regen flight reserves its full roster).
             // unitSize<1 craft consume >1 box each, ultralights a FRACTIONAL box;
@@ -496,6 +564,12 @@ window.findEligibleCarriersForDock = function (flight) {
             // floor(free boxes / boxes-per-craft) of THIS flight, capped by budget.
             var capacity = isCat ? free : Math.min(Math.floor(free / bpcFlight), budget);
             if (capacity > 0) hangars.push({ hangar: sys, capacity: capacity });
+        });
+
+        // Fill order: reserved bays first, a Docking Bay last (HangarShared.bayFillRank) - so
+        // the dialog's default pick and the cap truncation below both leave the bay to ships.
+        hangars.sort(function (a, b) {
+            return window.HangarShared.bayFillRank(a.hangar, flight) - window.HangarShared.bayFillRank(b.hangar, flight);
         });
 
         // Per-carrier custom combat category cap (e.g. Hunter-Killers): the bay
@@ -739,18 +813,8 @@ window.findEligibleFlightsForDocking = function (carrier) {
                 if (rFlightHeading !== requiredHeading) return;
             }
 
-            var effective;
-            if (isCat) {
-                effective = 1;
-            } else {
-                var netDamage = 0;
-                if (Array.isArray(sys.damage)) {
-                    sys.damage.forEach(function (d) {
-                        netDamage += Math.max(0, parseInt(d.damage || 0, 10) - parseInt(d.armour || 0, 10));
-                    });
-                }
-                effective = Math.max(0, parseInt(sys.maxhealth, 10) - netDamage);
-            }
+            // HangarShared.effectiveHangarBoxes - catapult 1, Docking Bay nets out its ships.
+            var effective = window.HangarShared.effectiveHangarBoxes(sys);
             // Occupied boxes (this bay's own committed entries + sibling bays'
             // occupancy spilling here; a regen flight reserves its full roster).
             // unitSize<1 craft consume >1 box each, ultralights a FRACTIONAL box;
@@ -798,6 +862,10 @@ window.findEligibleFlightsForDocking = function (carrier) {
         //Combined-pool fit: the carrier's rails/bays together hold the flight even
         //when no single bay does (the dialog then auto-distributes across bays). For a
         //regen flight this is the full-roster reservation, not just the living craft.
+        //Same fill order as the dock dialog: reserved first, a Docking Bay last.
+        hangars.sort(function (a, b) {
+            return window.HangarShared.bayFillRank(a.hangar, flight) - window.HangarShared.bayFillRank(b.hangar, flight);
+        });
         hangars.combinedFit = (combinedCraft >= reserveSize);
         return hangars;
     }
@@ -956,6 +1024,7 @@ window.hasLaunchableFighterHangar = function (carrier) {
         //Stage S (S-f): ShadowHangars launch only via the Fighter Bomb weapon, not
         //the ordinary launch dialog — exclude them here too (parallels hasLaunchableHangar).
         if (sys.isShadowHangar) return false;
+        if (window.HangarShared.bayClaimedByShips(sys)) return false;   //ships own this bay's turn
         if (!Array.isArray(sys.hangarUsage) || sys.hangarUsage.length === 0) return false;
         if (!sys.hangarUsage.some(function (e) { return e && !e.cannotLaunch; })) return false;
         if (isCat) return true;
@@ -1124,4 +1193,242 @@ window.lcvRailLabel = function (carrier, rail) {
     if (siblings.length <= 1) return base;
     var idx = siblings.indexOf(rail);
     return base + ' ' + (idx + 1);
+};
+
+// ===================================================================== //
+// Docking Bay (WALKERS_OF_SIGMA_PLAN.md 3.14, Stage 16) — whole-SHIP     //
+// dock/launch helpers. The bay is a plain Hangar on this side (its       //
+// server $name is 'hangar', so the Mapmakers keep every fighter path)    //
+// that also docks Scribes / Pathfinders / Guideships by phpclass.        //
+// Mirrors HangarOps::canBayShipDock / canBayShipLaunch: the LCV-rail     //
+// conditions, one pool of boxes shared with the fighters, a launch rate  //
+// a ship pays in BOXES, and one craft type per turn.                     //
+// ===================================================================== //
+
+window.isDockingBaySystem = function (sys) {
+    return window.HangarShared.isDockingBaySys(sys);
+};
+
+// Boxes one ship costs - its unitSize, as a superheavy fighter's (D18).
+window.bayShipBoxes = function (ship) {
+    return window.HangarShared.shipBoxesForUnitSize(ship ? ship.unitSize : 1);
+};
+
+// Box cost / class of a queued ship order. Orders queued here carry both; orders
+// hydrated from the server were sanitised down to {shipId}, so look those up.
+window.bayOrderBoxes = function (order) {
+    if (!order) return 0;
+    if (order.boxes != null) return parseInt(order.boxes, 10) || 0;
+    var s = gamedata.getShip(order.shipId);
+    return s ? window.bayShipBoxes(s) : 0;
+};
+window.bayOrderClass = function (order) {
+    if (!order) return '';
+    if (order.phpclass) return String(order.phpclass);
+    var s = gamedata.getShip(order.shipId);
+    return s ? String(s.phpclass) : '';
+};
+
+// A fresh queued order for $ship, carrying the client's own box projection.
+window.bayShipOrderFor = function (ship, withThrust) {
+    var o = { shipId: parseInt(ship.id, 10), boxes: window.bayShipBoxes(ship), phpclass: String(ship.phpclass) };
+    if (withThrust) o.thrustLeft = window.lcvRemainingThrust(ship);
+    return o;
+};
+
+// The ship class a queued order has claimed $bay for this turn, ignoring
+// $exceptShipId's own order (so re-editing it does not lock itself out).
+window.bayShipClassThisTurn = function (bay, exceptShipId) {
+    var except = exceptShipId != null ? parseInt(exceptShipId, 10) : null;
+    var lists = [bay.pendingBayShipDockOrders, bay.pendingBayShipLaunchOrders];
+    for (var l = 0; l < lists.length; l++) {
+        if (!Array.isArray(lists[l])) continue;
+        for (var i = 0; i < lists[l].length; i++) {
+            if (except !== null && parseInt(lists[l][i].shipId, 10) === except) continue;
+            return window.bayOrderClass(lists[l][i]);
+        }
+    }
+    return null;
+};
+
+// Ships of $phpclass that may still launch or be recovered through $bay this turn, after every queued
+// ship order but $exceptShipId's - the per-class rate ("12 Mapmakers OR 2 Scribes OR 1 Pathfinder",
+// user 2026-09-11), launches and recoveries together. Mirrors HangarOps::bayShipRateLeft.
+window.bayShipRateLeft = function (bay, phpclass, exceptShipId) {
+    var except = exceptShipId != null ? parseInt(exceptShipId, 10) : null;
+    var rates = bay.shipLaunchRates || {};
+    var used = 0;
+    [bay.pendingBayShipDockOrders, bay.pendingBayShipLaunchOrders].forEach(function (list) {
+        if (!Array.isArray(list)) return;
+        list.forEach(function (o) {
+            if (except === null || parseInt(o.shipId, 10) !== except) used++;
+        });
+    });
+    return Math.max(0, (parseInt(rates[phpclass], 10) || 0) - used);
+};
+
+// Free boxes a SHIP could use: undamaged boxes, less the ships aboard or queued in
+// (bar $exceptShipId's own queued dock) and every fighter box. A queued LAUNCH frees
+// nothing - the server resolves docks first. Mirrors HangarOps::bayFreeBoxesForShips.
+window.bayFreeBoxesForShips = function (carrier, bay, exceptShipId) {
+    var except = exceptShipId != null ? parseInt(exceptShipId, 10) : null;
+    var netDamage = 0;
+    if (Array.isArray(bay.damage)) {
+        bay.damage.forEach(function (d) { netDamage += Math.max(0, parseInt(d.damage || 0, 10) - parseInt(d.armour || 0, 10)); });
+    }
+    var free = Math.max(0, parseInt(bay.maxhealth, 10) - netDamage);
+    if (Array.isArray(bay.shipsDocked)) bay.shipsDocked.forEach(function (e) { free -= parseInt(e.boxes || 0, 10); });
+    [bay.pendingBayShipDockOrders, bay.pendingBayShipDeployStartOrders].forEach(function (list) {
+        if (!Array.isArray(list)) return;
+        list.forEach(function (o) {
+            if (except !== null && parseInt(o.shipId, 10) === except) return;
+            free -= window.bayOrderBoxes(o);
+        });
+    });
+    free -= Math.ceil(window.hangarUsedBoxesOnBay(carrier, bay, false));
+    return Math.max(0, free);
+};
+
+// Could $bay take $ship this turn, on its own? Class, damage, the type lock, rate and room.
+window.bayCanTakeShipNow = function (carrier, bay, ship) {
+    if (!window.HangarShared.bayDocksShipClass(bay, ship)) return false;
+    if (shipManager.systems.isDestroyed(carrier, bay)) return false;
+    if (window.HangarShared.bayClaimedByFighters(bay)) return false;   //one craft type per turn
+    var claimed = window.bayShipClassThisTurn(bay, ship.id);
+    if (claimed && claimed !== String(ship.phpclass)) return false;
+    if (window.bayShipRateLeft(bay, String(ship.phpclass), ship.id) < 1) return false;
+    return window.bayFreeBoxesForShips(carrier, bay, ship.id) >= window.bayShipBoxes(ship);
+};
+
+// Is $ship a class some Docking Bay in this game lists at all? The menu's cheap gate:
+// only a hull with unitSize < 1 can be one, so every other ship stops at the first test.
+window.isShipDockableInSomeBay = function (ship) {
+    if (!ship || ship.flight || ship.mine) return false;
+    if (!(parseFloat(ship.unitSize) < 1)) return false;
+    for (var key in gamedata.ships) {
+        var carrier = gamedata.ships[key];
+        if (!carrier || carrier.flight || !Array.isArray(carrier.systems)) continue;
+        for (var i = 0; i < carrier.systems.length; i++) {
+            if (window.HangarShared.bayDocksShipClass(carrier.systems[i], ship)) return true;
+        }
+    }
+    return false;
+};
+
+// Friendly carriers $ship could dock into right now, on the LCV-rail conditions (carrier at
+// speed 0, same hex, same heading, the ship with thrust to spare). [{ ship: carrier, bays }].
+window.findEligibleBaysForShipDock = function (ship) {
+    var out = [];
+    if (!ship || ship.flight || ship.mine) return out;
+    if (shipManager.isDestroyed(ship)) return out;
+    var move = shipManager.movement.getLastCommitedMove(ship);
+    if (!move || !move.position) return out;
+    if (window.lcvRemainingThrust(ship) < 1) return out;
+
+    for (var key in gamedata.ships) {
+        var carrier = gamedata.ships[key];
+        if (!carrier || carrier.id === ship.id || carrier.flight) continue;
+        if (!Array.isArray(carrier.systems)) continue;
+        if (shipManager.isDestroyed(carrier)) continue;
+        if (!gamedata.isMyorMyTeamShip(carrier)) continue;
+        var cMove = shipManager.movement.getLastCommitedMove(carrier);
+        if (!cMove || !cMove.position) continue;
+        if (parseInt(cMove.speed, 10) !== 0) continue;
+        if (cMove.position.q !== move.position.q || cMove.position.r !== move.position.r) continue;
+        if (parseInt(cMove.heading, 10) !== parseInt(move.heading, 10)) continue;
+        var bays = carrier.systems.filter(function (bay) { return window.bayCanTakeShipNow(carrier, bay, ship); });
+        if (bays.length > 0) out.push({ ship: carrier, bays: bays });
+    }
+    return out;
+};
+
+// The carrier-side mirror: ships in $carrier's hex that meet the conditions for one of its
+// bays. Room and rate are left to the dialog, which prices every checked row together.
+window.findEligibleBayShipsForRecover = function (carrier) {
+    var out = [];
+    if (!carrier || carrier.flight || !Array.isArray(carrier.systems)) return out;
+    if (shipManager.isDestroyed(carrier)) return out;
+    var bays = carrier.systems.filter(function (s) {
+        return window.isDockingBaySystem(s) && !shipManager.systems.isDestroyed(carrier, s);
+    });
+    if (bays.length === 0) return out;
+    var cMove = shipManager.movement.getLastCommitedMove(carrier);
+    if (!cMove || !cMove.position || parseInt(cMove.speed, 10) !== 0) return out;
+
+    for (var key in gamedata.ships) {
+        var s = gamedata.ships[key];
+        if (!s || s.id === carrier.id || s.flight || s.mine) continue;
+        if (shipManager.isDestroyed(s)) continue;
+        if (!gamedata.isMyorMyTeamShip(s)) continue;
+        var move = shipManager.movement.getLastCommitedMove(s);
+        if (!move || !move.position) continue;
+        if (move.position.q !== cMove.position.q || move.position.r !== cMove.position.r) continue;
+        if (parseInt(move.heading, 10) !== parseInt(cMove.heading, 10)) continue;
+        if (window.lcvRemainingThrust(s) < 1) continue;
+        var bay = bays.filter(function (b) { return window.HangarShared.bayDocksShipClass(b, s); })[0];
+        if (bay) out.push({ ship: s, bay: bay });
+    }
+    return out;
+};
+
+// The bay (and carrier) holding a queued dock order for $ship this turn, or null.
+window.bayQueuedDock = function (ship) {
+    if (!ship) return null;
+    var shipId = parseInt(ship.id, 10);
+    for (var key in gamedata.ships) {
+        var carrier = gamedata.ships[key];
+        if (!carrier || !Array.isArray(carrier.systems)) continue;
+        for (var i = 0; i < carrier.systems.length; i++) {
+            var bay = carrier.systems[i];
+            if (!window.isDockingBaySystem(bay) || !Array.isArray(bay.pendingBayShipDockOrders)) continue;
+            if (bay.pendingBayShipDockOrders.some(function (o) { return parseInt(o.shipId, 10) === shipId; })) {
+                return { carrier: carrier, bay: bay };
+            }
+        }
+    }
+    return null;
+};
+
+// Remove any queued dock order for $ship from every bay, dirtying each one touched so an
+// emptied list is still submitted (the cancel path).
+window.clearQueuedBayShipDock = function (ship) {
+    if (!ship) return;
+    var shipId = parseInt(ship.id, 10);
+    for (var key in gamedata.ships) {
+        var carrier = gamedata.ships[key];
+        if (!carrier || !Array.isArray(carrier.systems)) continue;
+        carrier.systems.forEach(function (bay) {
+            if (!window.isDockingBaySystem(bay) || !Array.isArray(bay.pendingBayShipDockOrders)) return;
+            var before = bay.pendingBayShipDockOrders.length;
+            bay.pendingBayShipDockOrders = bay.pendingBayShipDockOrders.filter(function (o) { return parseInt(o.shipId, 10) !== shipId; });
+            if (bay.pendingBayShipDockOrders.length === before) return;
+            bay.pendingBayShipDockOrdersDirty = true;
+            if (typeof bay.refreshHangarTooltip === 'function') bay.refreshHangarTooltip();
+        });
+    }
+};
+
+// Committed ships in $bay that may launch this turn. Never out the turn they came in,
+// unless they STARTED the battle aboard (a Deployment dock, flagged `deploy`).
+// ⚠️ Only a queued fighter RECOVERY locks them out here. Fighters queued to LAUNCH from the bay are
+// the launch dialog's own rows, which it rewrites on OK - it lists both and greys whichever type the
+// player has not picked (confirm.hangarLaunchNoSplit), so dropping the ships here would leave no way
+// to switch back to them without cancelling the fighters from another dialog first.
+window.bayLaunchableShips = function (carrier, bay) {
+    if (!window.isDockingBaySystem(bay) || !Array.isArray(bay.shipsDocked)) return [];
+    if (shipManager.systems.isDestroyed(carrier, bay)) return [];
+    if (Array.isArray(bay.pendingDockOrders)
+        && bay.pendingDockOrders.some(function (o) { return parseInt((o && o.count) || 0, 10) > 0; })) return [];
+    // Stage 19: nothing is refused by class any more. A two-turn class launches through the ride
+    // (it leaves the bay this turn and separates at the end of the next), which is a slower launch,
+    // not an ineligible one.
+    return bay.shipsDocked.filter(function (e) {
+        if (!e) return false;
+        return parseInt(e.dockTurn, 10) < gamedata.turn || !!e.deploy;
+    });
+};
+
+window.hasLaunchableBayShip = function (carrier) {
+    if (!carrier || !Array.isArray(carrier.systems)) return false;
+    return carrier.systems.some(function (s) { return window.bayLaunchableShips(carrier, s).length > 0; });
 };

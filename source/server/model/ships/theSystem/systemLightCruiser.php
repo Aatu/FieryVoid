@@ -19,8 +19,7 @@ class systemLightCruiser extends BaseShipNoAft{
 
 	    $this->isd = 'Ancient';
 
-		$this->notes = "Can control 6 drones";		
-		$this->notes .= "<br>Resistant to criticals";		
+		$this->notes = "Resistant to criticals";		
 
 		$this->critRollMod -= 2;
 		$this->enhancementOptionsDisabled[] = 'VULN_CRIT';
@@ -34,6 +33,11 @@ class systemLightCruiser extends BaseShipNoAft{
         $this->rollcost = 5;
         $this->pivotcost = 3;
         $this->iniativebonus = 15;
+
+		$this->fighters = array("System Drone"=>6);
+
+		/*The System use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'SystemShip');
 
 		$this->addPrimarySystem(new Reactor(5, 18, 0, 0));
 		$this->addPrimarySystem(new CnC(6, 16, 0, 0));

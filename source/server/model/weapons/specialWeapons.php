@@ -3642,8 +3642,11 @@ $fireOrder->updated = true;
  *          getDeparturesThrough for how "left the battle" is turned back into "died");
  *        - a BLUE EXIT killed the reinforcements riding it, who are still in hyperspace waiting to
  *          come through on a later turn.
- *   5. An ANCIENT hull (factionAge 3+, whose drives were redesigned in answer to this weapon) rolls
- *      to slip through the collapsing rift first - see rollAncientEscape.
+ *   5. "ANCIENT JUMP DRIVES CANNOT BE AFFECTED BY VORTEX DISRUPTORS" (user ruling 2026-09-11). A
+ *      doorway an Ancient special jump drive holds (JumpEngine::$ancientJump) does not collapse, and
+ *      an Ancient unit inside any other doorway is spared without a roll - see isImmuneToDisruption.
+ *      The Vorlons and The System, which keep ordinary vortex-opening engines, are the exception.
+ *   6. Those two roll to slip through the collapsing rift first - see rollAncientEscape.
  *
  * ⚠️ ALL OF THIS LIVES IN fire(), NOT IN beforeFiringOrderResolution(). The hook runs from
  * Firing::prepareFiring, which calls it BEFORE calculateHitBase - so at that point the order has
@@ -3707,8 +3710,15 @@ class VortexDisruptor extends Weapon{
 
 	/* THE AGE AT WHICH A DRIVE CAN OUTRUN THE COLLAPSE. "factionAge 3+ ships use a slightly
 	   advanced form of jump engine, developed in response to the vortex disruptor" - the same
-	   threshold JumpEngine::openVortex already uses to halve an Ancient's jump-failure chance. */
+	   threshold JumpEngine::openVortex already uses to halve an Ancient's jump-failure chance.
+	   ⚠️ Since 2026-09-11 almost every Ancient is spared outright before this is asked
+	   (isImmuneToDisruption), so the escape roll is only ever reached by the factions below. */
 	const ANCIENT_FACTION_AGE = 3;
+
+	/* THE ANCIENT FACTIONS A VORTEX DISRUPTOR STILL REACHES (user ruling 2026-09-11): the only
+	   factionAge 3+ factions whose engines still open B5 jump points. Every other Ancient is immune -
+	   "Ancient jump drives cannot be affected by vortex disruptors". Matched against $unit->faction. */
+	const DISRUPTABLE_ANCIENT_FACTIONS = array('Vorlon Empire', 'The System');
 
 
 	//in pickup play it's essentially a power source - and Shadows don't have all that much use for extra power. Very low repair priority,although maybe above Hangars ;)
@@ -3719,7 +3729,8 @@ class VortexDisruptor extends Weapon{
 		parent::setSystemDataWindow($turn);
 		$this->data["Special"] = "Fired into a jump point - either an open ENTRANCE (yellow, units leaving) or an EXIT (blue, reinforcements arriving), including one that is still forming.";
 		$this->data["Special"] .= "<br>On a hit collapses the jump point at end of turn, destroying anything transitting the jump point at the time.";
-		$this->data["Special"] .= "<br>Ancient hulls may escape: roll 1d100 against the shot's to-hit margin plus the distance*5 ship travelled this turn, escaping on equal or higher.";
+		$this->data["Special"] .= "<br>Ancient jump drives are unaffected: a jump point one holds cannot be collapsed, and Ancient units (Shadows, Kirishiac, Mindriders, Torvalus, Triad, Thirdspace, Walkers) inside any jump point are spared.";
+		$this->data["Special"] .= "<br>Vorlon and System hulls may escape: roll 1d100 against the shot's to-hit margin plus the distance*5 ship travelled this turn, escaping on equal or higher.";
 		$this->data["Special"] .= "<br>A miss has no effect at all and cannot fired while half-phased.";
 	}
 
@@ -3793,6 +3804,20 @@ class VortexDisruptor extends Weapon{
 		$isExit = ($vortex instanceof SpawnJumpPointExit);
 		$engine = JumpEngine::getHoldingEngine($vortex, $gamedata);
 
+		/* ⭐ "ANCIENT JUMP DRIVES CANNOT BE AFFECTED BY VORTEX DISRUPTORS" (user ruling 2026-09-11). A
+		   doorway an Ancient drive holds does not collapse, and nothing riding it is touched. Asked
+		   before the "already collapsing" test, because it never can be.
+		   ⚠️ A PHASE-IN doorway - the only kind an Ancient drive opens, being a legacy drive - is never
+		   drawn for anybody, so the log must not confirm that one is there: it reads exactly as a shot
+		   into an empty hex. A VISIBLE one (opened before its drive became Ancient, in a game that spans
+		   the deploy) says why nothing happened. */
+		if ($engine && $engine->isAncientJump()){
+			$fireOrder->pubnotes .= ($vortex instanceof SpawnJumpPointPhaseIn)
+				? " HIT - but there was no jump point in the target hex, so nothing happened. "
+				: " HIT - but the jump point is held by an Ancient jump drive, which a Vortex Disruptor cannot affect. ";
+			return;
+		}
+
 		//A SECOND SHOT INTO THE SAME COLLAPSING DOORWAY disrupts nothing further, and more
 		//importantly must not kill the same units twice - so it reports and stops. Same-turn only:
 		//once the closure is recorded the jump point fails getDisruptableVortexInHex's window on
@@ -3828,12 +3853,20 @@ class VortexDisruptor extends Weapon{
 
 		$killed  = array();
 		$escaped = array();
+		$spared  = array();
 
 		foreach ($victims as $group){
 			//THE GROUP'S FATE IS THE HOST'S. An attached pod mirrors its host's movement and was
 			//carried into hyperspace by it (Movement::resolveJumpOuts), so it cannot roll for
 			//itself - it goes wherever the hull it is bolted to goes, whatever its own faction age.
 			$host = $group[0];
+
+			//"Ancient jump drives cannot be affected by vortex disruptors" - spared outright, with no
+			//roll and no die drawn. See isImmuneToDisruption.
+			if (self::isImmuneToDisruption($host)){
+				$spared[] = $host->name;
+				continue;
+			}
 
 			$distance = $isExit
 				? 0   //still in hyperspace - it moved no distance to reach the doorway
@@ -3871,9 +3904,13 @@ class VortexDisruptor extends Weapon{
 			if (!empty($escaped)){
 				$fireOrder->pubnotes .= " " . count($escaped) . " slipped clear before it closed.";
 			}
+			if (!empty($spared)){
+				$fireOrder->pubnotes .= " " . count($spared) . " unaffected - Ancient jump drive" . (count($spared) == 1 ? "." : "s.");
+			}
 		}else{
 			if (!empty($killed))  $fireOrder->pubnotes .= " Destroyed in the rift: " . implode(", ", $killed) . ".";
 			if (!empty($escaped)) $fireOrder->pubnotes .= " Slipped through before it closed: " . implode(", ", $escaped) . ".";
+			if (!empty($spared))  $fireOrder->pubnotes .= " Unaffected (Ancient jump drive): " . implode(", ", $spared) . ".";
 		}
 		$fireOrder->pubnotes .= " ";
 	}
@@ -4004,6 +4041,31 @@ class VortexDisruptor extends Weapon{
 		}
 
 		return $groups;
+	}
+
+
+	/* ⭐ IS $unit OUT OF THE DISRUPTOR'S REACH ALTOGETHER? (user ruling 2026-09-11.)
+	 *
+	 * "Ancient jump drives cannot be affected by vortex disruptors" - and the Vorlons and The System,
+	 * whose engines still open B5 jump points, are the only factionAge 3+ factions it still reaches.
+	 * Either test is enough:
+	 *   1. the unit CARRIES an Ancient special jump drive (JumpEngine::$ancientJump), destroyed or not -
+	 *      found through getUnitJumpEngines, so a Mapmaker flight's is found one level down;
+	 *   2. it is an Ancient of any faction but those two - which is what covers the drive-less units
+	 *      of the Ancient-drive factions (a Torvalus Stiletto, a Triad Imp, a Kirishiac Warrior)
+	 *      caught riding somebody else's doorway.
+	 * Everything else goes on to rollAncientEscape exactly as before, which answers false at once for
+	 * anything under factionAge 3. */
+	protected static function isImmuneToDisruption($unit)
+	{
+		if (!$unit) return false;
+
+		foreach (JumpEngine::getUnitJumpEngines($unit) as $engine){
+			if ($engine->isAncientJump()) return true;
+		}
+
+		if ((int)$unit->factionAge < self::ANCIENT_FACTION_AGE) return false;
+		return !in_array($unit->faction, self::DISRUPTABLE_ANCIENT_FACTIONS, true);
 	}
 
 
@@ -10130,6 +10192,8 @@ class NeutronBurst extends Weapon {
     public $fireControl  = array(2, 5, 5);
     public $uninterceptable = true;
 
+	public $factionAge = 4;//Ancient weapon, which sometimes has consequences!
+
     // Tracks system+order pairs already processed for Shadow vessels
     public $shadowEffectsApplied = array();
     // Tracks turns on which structure power loss has already been applied
@@ -10241,28 +10305,29 @@ class NeutronBurst extends Weapon {
 
         // --- Weapon hit: deactivate for one turn, power is lost ---
         if ($system instanceof Weapon) {
-            $system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
-            $fireOrder->pubnotes .= " [Neutron Burst: weapon deactivated] ";
-
-            $capacitor = $ship->getSystemByName("PowerCapacitor");
-            if ($capacitor) {
-                // Capacitor vessel: drain powerReq (power loss) + minimum firing cost
-                $powerLoss = $system->powerReq; // 0 for Vorlon weapons, non-zero for others
-                $minCost   = $this->getMinCapacitorCost($system);
-                $totalDrain = $powerLoss + $minCost;
-                if ($totalDrain > 0) {
-                    $capacitor->doDrawPower($totalDrain);
-                    $fireOrder->pubnotes .= " [Neutron Burst: -{$totalDrain} capacitor charge] ";
-                }
-            } else {
-                // Reactor vessel: apply OutputReduced1 per point of powerReq
-                if ($system->powerReq > 0) {
-                    $reactor = $ship->getSystemByName("Reactor");
-                    if ($reactor) {
-                        for ($i = 0; $i < $system->powerReq; $i++) {
-                            $crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn, $gamedata->turn + 1);
-                            $crit->updated = true;
-                            $reactor->setCritical($crit);
+            if (!$system->isDestroyed()) {
+                $system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
+                $fireOrder->pubnotes .= " [Neutron Burst: weapon deactivated] ";
+                $capacitor = $ship->getSystemByName("PowerCapacitor");
+                if ($capacitor) {
+                    // Capacitor vessel: drain powerReq (power loss) + minimum firing cost
+                    $powerLoss = $system->powerReq; // 0 for Vorlon weapons, non-zero for others
+                    $minCost   = $this->getMinCapacitorCost($system);
+                    $totalDrain = $powerLoss + $minCost;
+                    if ($totalDrain > 0) {
+                        $capacitor->doDrawPower($totalDrain);
+                        $fireOrder->pubnotes .= " [Neutron Burst: -{$totalDrain} capacitor charge] ";
+                    }
+                } else {
+                    // Reactor vessel: apply OutputReduced1 per point of powerReq
+                    if ($system->powerReq > 0) {
+                        $reactor = $ship->getSystemByName("Reactor");
+                        if ($reactor) {
+                            for ($i = 0; $i < $system->powerReq; $i++) {
+                                $crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn, $gamedata->turn + 1);
+                                $crit->updated = true;
+                                $reactor->setCritical($crit);
+                            }
                         }
                     }
                 }
@@ -11098,8 +11163,12 @@ class SpatialCutter extends Weapon {
         unset($gamedata->ships[$shipid]);
     }
 
+    /* Moved to HexZone::line() - the Walkers' EDF targeting corridor and Sensor Charge
+       Transceiver need the same tracer and neither is a spatial cutter. Kept as a
+       delegating alias because getHexLine() reads better at the call site below. */
     public static function getHexLine(OffsetCoordinate $start, OffsetCoordinate $end) {
-        $startCube = self::offsetToCube($start);
+        /*
+		$startCube = self::offsetToCube($start);
         $endCube   = self::offsetToCube($end);
 
         $dx = $endCube[0] - $startCube[0];
@@ -11149,7 +11218,9 @@ class SpatialCutter extends Weapon {
 		$q = $cube[0] + ($cube[2] + ($cube[2] & 1)) / 2;
 		$r = $cube[2];
 		return new OffsetCoordinate($q, $r);
-	}
+	*/        
+		return HexZone::line($start, $end);
+    }
 
     public static function getWaveformDamage($ship) {
         $move  = $ship->getLastMovement();
@@ -11726,5 +11797,2146 @@ class HyperplasmaStream extends Plasma{
 }//endof class hyperplasmaStream
 
 
+
+
+/* ================================================================================================
+ * WALKERS OF SIGMA-957 - Lightning Array family        WALKERS_OF_SIGMA_PLAN.md sections 3.1 / 3.2
+ * ================================================================================================
+ *
+ * STATS ARE FROM THE CONTROL SHEET (user, 2026-09-03). Damage, fire control, range penalty, power,
+ * health, pool sizes and intercept ratings are real. Still carrying a value nobody has confirmed:
+ * $damageType ("Standard" - switch to Raking if the sheet says so), $priority and $loadingtime.
+ * Every number lives in a table or a property at the top of its class and no method below hard-codes
+ * one, so re-statting stays a table edit.
+ *
+ * WHAT A LIGHTNING ARRAY IS
+ * Four independent discharges per turn. The player may spend them as up to four separate shots at
+ * up to four different targets, or FUSE any number of them into one heavier shot - "combined
+ * fire" - which hits harder but is harder to aim AND carries a different range penalty. All THREE
+ * of those move together, off three tables keyed by the fused count: $combinedDamageArray,
+ * $combinedFireControlArray and $combinedRangePenaltyArray. The rules' "the decision to use combined fire is
+ * announced before any shots are taken" needs no machinery: in FV every fire order is declared
+ * before beforeFiringOrderResolution runs.
+ *
+ * DECLARING A COMBINED SHOT - AND HOW THE COUNT REACHES THE SERVER
+ * There is NO allocation dialog. These are ordinary split-shot weapons, exactly like the Vorlon
+ * Discharge Gun: one gun IS one discharge, and one click declares one. In Combined Fire mode a
+ * SECOND click on the same target does not declare a second shot - it fuses another discharge into
+ * the shot already standing against that target, and the fire control, range penalty and damage all
+ * move to that row of the tables. Four clicks on one ship therefore produce ONE 4-discharge shot;
+ * four clicks on four ships produce four single ones.
+ *
+ * The count rides in FireOrder->shots and nowhere else - the same field every other split-shot
+ * weapon uses for its shot count. It is a whitelisted FireOrder constructor argument (Manager.php),
+ * so it survives the POST rebuild on both the ship and the fighter branch, and it needs no token in
+ * ->notes: ->notes stays the plain "Split" that the ballistic-icon and INCOMING-list machinery
+ * expects to see on a split-shot order (BallisticIconContainer keys re-creation on it).
+ *
+ * beforeFiringOrderResolution RE-CLAMPS the total against the real pool - client input is never
+ * trusted - stashes the per-order count and sets ->shots back to 1.
+ *
+ * TWO FIRING MODES, and only ever two - the Wide Beam refit is a TOGGLE, not a third mode.
+ *   1 "Combined Fire" (default) - repeat clicks on one target fuse into a single heavier shot.
+ *   2 "Single Shots"            - every click is a separate one-discharge shot, never fused. Useful
+ *     against fighters, where four small shots beat one big one. A single-shot order is EXCLUDED
+ *     from combining entirely: beforeFiringOrderResolution forces its count to 1 and ignores
+ *     ->shots, so a stale or hand-edited client cannot smuggle a fused shot through the cheap mode.
+ * ⚠️ Ask isSingleShotMode($mode) rather than comparing against MODE_SINGLE. It is one line either
+ * way today; it exists so that the wide beam - which is orthogonal to the grouping choice - can
+ * never be confused with it, and so a future third GROUPING mode has one place to be added.
+ * ⚠️ Read $order->firingMode, never $this->firingMode, inside beforeFiringOrderResolution:
+ * prepareFiring only calls changeFiringMode AFTER it, so the weapon's own mode is not yet the
+ * order's mode at that point (the Slicer's class comment records the same trap).
+ *
+ * INTERCEPTION - AND WHY $guns IS REWRITTEN EVERY TURN
+ * These arrays DO intercept, and that makes the engine's gun accounting wrong unless it is
+ * corrected, because the engine counts ORDERS while a Lightning Array spends DISCHARGES. One
+ * combined shot of four is a single fire order that empties the whole pool; left alone,
+ * Firing::isValidInterceptor and Firing::automateIntercept would both read three discharges as
+ * still available.
+ *
+ * Both of those sites do their arithmetic against $this->guns, so beforeFiringOrderResolution sets
+ *     guns = pool - dischargesSpentOffensively + numberOfOffensiveOrders
+ * which makes BOTH come out right (derivation in the method). The client mirrors the identical
+ * formula in initializationUpdate, so its manual-intercept cap agrees with the server's.
+ *
+ * A 'selfIntercept' order is a PERMISSION MARKER, not a shot: it cancels out of the formula and
+ * costs no discharge. It is only needed at all when max(loadingtime, normalload) > 1, which is true
+ * of the Medium (normalload 2) and not of the full Array - see Firing::isValidInterceptor.
+ * A manual 'intercept' order DOES cost one discharge, and the formula charges it.
+ *
+ * WIDE BEAM - A PER-TURN TOGGLE, NOT A FIRING MODE (WALKERS_OF_SIGMA_PLAN.md 3.3)
+ * The Wide-Beam refit (SYS_WBLA / SYS_WBMLA in Enhancements.php, 300 / 200 points, one per array)
+ * sets $wideBeamFitted on the array it is bought for, via enableWideBeam(). A fitted array then
+ * shows a "Wide Beam" / "Normal Beam" toggle in its SystemActivation box during the Fire phase,
+ * and ARMING it applies to every shot that array fires this turn, in EITHER firing mode.
+ *
+ * ⭐⭐ IT IS A TOGGLE BECAUSE IT IS AN INDEPENDENT CHOICE. The rules apply the -2 per die "in all
+ * modes", i.e. whatever the shot's discharge count - spreading the beam and grouping the discharges
+ * are orthogonal. Modelling it as extra firing modes (which this weapon did until 2026-09-06) means
+ * enumerating the product, and a four-entry selector is what the player pays for that. The toggle
+ * costs one boolean instead, and the rules' own framing - "the lightning array MAY BE CONFIGURED to
+ * fire a wide beam", one declaration for the array for the turn - is exactly a toggle.
+ *
+ * An ARMED array, in either firing mode:
+ *   - rolls every damage die at -2, with a floor of 1 PER DIE - so it must be rolled one die at a
+ *     time, and the flat +N on the row is untouched because it is not a die;
+ *   - scores flash collateral at 50% of the damage dealt instead of 25%, and the field suppression
+ *     that silences every other flash weapon inside an Energy Draining Field does NOT apply -
+ *     inside a field it simply scores the ordinary 25%;
+ *   - goes into a ONE TURN COOLDOWN if it actually fired: calculateLoading() zeroes the turn-advance
+ *     reload, so the array is not loaded for the following turn and cannot fire OR intercept with it
+ *     (both intercept gates in firing.php test getTurnsloaded() against getLoadingTime()).
+ *
+ * HOW THE TOGGLE REACHES THE SERVER, and why it is not simpler than this:
+ *   1. the player clicks in the Fire phase; the client sets ->active and posts [1] (or [0]) in the
+ *      system's individualNotesTransfer;
+ *   2. Manager::parseShips calls doIndividualNotesTransfer() on EVERY post in EVERY phase, which
+ *      stashes it in $wideBeamRequested on the POST-SIDE ship;
+ *   3. FireGamePhase::process calls saveFirePhaseDeclaration() - a narrow hook, see there - which
+ *      writes it to tac_individual_notes;
+ *   4. the advance re-loads gamedata from the database, and onIndividualNotesLoaded() sets
+ *      $wideBeamArmed on the REAL array before prepareFiring runs.
+ * ⚠️⚠️ Step 3 CANNOT be gated on $wideBeamFitted: a POST-side ship is rebuilt without enhancements
+ * (arch_post_side_ship_reconstruction), so the refit is invisible there and the array would never
+ * write its note. The refit is checked at READ time instead, on the real ship, in isWideBeamShot().
+ *
+ * ⚠️ TIMING DEVIATION, ACCEPTED (plan D6, re-confirmed by the user 2026-09-06): the rules configure
+ * a wide beam during Prepare Weapons (Initial Orders); this toggle is in the Fire phase, alongside
+ * declaring the shots. The cooldown is what keeps it a decision rather than a free upgrade.
+ *
+ * WHAT THESE WEAPONS DELIBERATELY DO NOT DO
+ * - They are NOT uninterceptable: the rules make the Lightning Array explicitly susceptible to
+ *   interception, so $uninterceptable stays false (the Weapon default).
+ */
+class LightningArray extends Weapon {
+
+    public $name        = "LightningArray";
+    public $displayName = "Lightning Array";
+    public $iconPath    = "LightningArray.png";
+
+    public $animation      = "bolt";
+    public $animationColor = array(140, 210, 255); //pale electric blue
+
+    public $damageType  = "Flash"; 
+    public $weaponClass = "Electromagnetic"; //all Walker weaponry is Electromagnetic
+    public $factionAge  = 3;                 //Ancient - matters to several to-hit and EDF rules
+
+    /* Mode ids are referenced from the client (special.js) too - keep the two in step. The wide
+       beam is NOT one of these: it is an orthogonal per-turn toggle, see the class comment. */
+    const MODE_COMBINED = 1;
+    const MODE_SINGLE   = 2;
+    public $firingModes = array(1 => "Combined", 2 => "Single");
+
+    /* -2 on every damage die while armed, floored at 1 per die. Named because three separate
+       places read them: the roll, the tooltip damage span and the client mirror in special.js. */
+    const WIDEBEAM_DIE_PENALTY = 2;
+    const WIDEBEAM_DIE_FLOOR   = 1;
+
+    /* The note key the Fire-phase toggle is persisted under. ⚠️ notekey_human is varchar(40) -
+       anything longer is silently truncated by MySQL. */
+    const WIDEBEAM_NOTEKEY = 'wideBeam';
+
+    /* THE REFIT. Set once at construction by enableWideBeam(), from the stored SYS_WBLA / SYS_WBMLA
+       purchase. Published per instance (stripForJson) because it is what tells the client to offer
+       the toggle at all, and because a blueprint value cannot carry a per-mount purchase. */
+    public $wideBeamFitted = false;
+
+    /* THE PER-TURN DECLARATION, rebuilt from the individual notes on every gamedata load. Published
+       as ->active, which is the field the generic SystemActivation box reads. */
+    public $wideBeamArmed = false;
+
+    /* What the CLIENT just asked for, on a POST-side ship only: 1, 0 or null for "said nothing".
+       Transient - never persisted, never serialised, and meaningless on a loaded ship. */
+    protected $wideBeamRequested = null;
+
+    public $loadingtime  = 1;                //unconfirmed
+    public $priority     = 6;                //unconfirmed
+    /* ⚠️ THESE TWO MUST EQUAL ROW 1 of the combined tables below. They are the weapon's profile for
+       a SINGLE discharge, and they are what the "Fire control" and "Range penalty" tooltip lines
+       report. The combined tables override them per shot, so a mismatch does not change what gets
+       rolled - it just makes the ship window quote numbers the weapon never uses, which is worse
+       than a visible bug. $rangePenalty is also the fallback whenever no fused count is live. */
+    public $rangePenalty = 0.33;             // -1 per 3 hexes = combinedRangePenaltyArray[1]
+    public $fireControl  = array(8, 6, 4);   // fighters, <=mediums, <=capitals = combinedFireControlArray[1]
+    public $intercept    = 5;                //one discharge per engagement; see the class comment
+
+    /* Split-shot plumbing. $canSplitShots stays true in BOTH firing modes and at every pool size:
+       it is what routes a click through doMultipleFireOrders (client) so one click declares one
+       discharge, and it is also what the manual-interception UI reads. $maxVariableShots is the
+       client's own ceiling on separate shots; the authoritative one is getDischargePool() below,
+       which the server re-clamps against.
+       ⚠️ $guns here is only the UNFIRED value, used before anything is declared and by the fleet
+       builder. beforeFiringOrderResolution REWRITES it every turn for the intercept accounting -
+       see the class comment - so do not read this literal anywhere that matters. */
+    public $canSplitShots     = true;
+    public $guns              = 4;           //one per discharge, before anything is spent
+    public $maxVariableShots  = 4;
+    /* Shots may be declared in BOTH modes in the same turn: fuse a couple of combined shots, switch
+       to Single Shots and pepper a flight with the rest, switch back. Without this the firing-mode
+       selector locks the moment the first order is declared (weaponManager.onModeClicked and
+       SystemInfoButtons.canChangeFiringMode both gate on it), which would make the two modes an
+       either/or choice for the whole turn rather than a per-shot one.
+       ⚠️ It is protected on Weapon and NOT published by the base stripForJson - the override below
+       has to pass it, or the client never sees it and the lock stays on. Nothing on the server reads
+       it: Firing::prepareFiring already switches the weapon per ORDER before resolving each shot,
+       which is why beforeFiringOrderResolution must read $order->firingMode (see the class comment). */
+    protected $multiModeSplit = true;
+    /* Both of these tell the CLIENT to ask this weapon for its own numbers instead of using the
+       generic formulae - the server always calls its own overrides regardless. Combined fire moves
+       BOTH the fire control and the range penalty, so both hooks are needed or the player's
+       predicted hit chance disagrees with the dice. */
+    public $specialHitChanceCalculation = true;
+    public $specialRangeCalculation     = true;
+
+    /* Discharges available per turn. LightningArray's is flat; MediumLightningArray
+       overrides getDischargePool() to grow it with charge time. */
+    protected $dischargePool = 4;
+
+    /* DAMAGE TABLE, keyed by the number of discharges fused into one shot.
+       'dice' d10s plus a flat 'add'. Row n MUST exist for every n from 1 to the pool size. */
+    protected $combinedDamageArray = array(
+        1 => array('dice' => 5, 'add' => 20),   
+        2 => array('dice' => 10, 'add' => 20),   
+        3 => array('dice' => 15, 'add' => 20),  
+        4 => array('dice' => 20, 'add' => 20),  
+    );
+
+    /* FIRE CONTROL TABLE, same shape as $fireControl (fighters, <=mediums, <=capitals), keyed by
+       fused discharge count. The two ends pull in OPPOSITE directions: fusing makes the shot much
+       harder to land on a fighter (8 -> 2) and easier on a capital (4 -> 6), which is what makes the
+       Single Shots mode worth having. Row 1 IS $fireControl - it is applied as a delta against it,
+       so keep the two in step or the tooltip lies about the single-discharge profile. */
+    protected $combinedFireControlArray = array(
+        1 => array( 8, 6, 4),
+        2 => array( 6, 6, 5),
+        3 => array( 4, 6, 6),
+        4 => array( 2, 6, 6),
+    );
+
+    /* RANGE PENALTY TABLE, keyed by fused discharge count - per-hex penalties, the same units as
+       $rangePenalty. Fusing IMPROVES the reach (a tighter bolt carries further), which is the
+       opposite of what the fighter column of the fire-control table does. Row 1 IS $rangePenalty. */
+    protected $combinedRangePenaltyArray = array(
+        1 => 0.33,  // -1 per 3 hexes
+        2 => 0.25,  // -1 per 4 hexes
+        3 => 0.25,  // -1 per 4 hexes
+        4 => 0.2,   // -1 per 5 hexes
+    );
+
+    /* fire order id => discharges fused into it. Rebuilt from scratch every
+       beforeFiringOrderResolution; never persisted. */
+    protected $combinedCount = array();
+
+    /* The order currently being resolved, published for the duration of ONE calculateHitBase call.
+       calculateRangePenalty() is handed nothing but a distance - and the parent calls it up to three
+       times per shot (the base penalty, then the no-lock and jammer variants) - so the fused count
+       has to reach it out of band. Always cleared in a finally; never persisted, never serialised. */
+    protected $activeCombinedCount = null;
+
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+        if ($maxhealth == 0) $maxhealth = 40;
+        if ($powerReq  == 0) $powerReq  = 16;
+        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+    }
+
+    /* Total discharges this weapon may spend this turn. The single authority - the client's $guns /
+       $maxVariableShots are only hints, and beforeFiringOrderResolution clamps against THIS.
+       ⚠️ Deliberately NOT gated on the array being loaded: the tooltip, setMaxDamage and the
+       fleet builder all read it on a weapon that is mid-reload and must still describe the mount.
+       The "may it fire at all right now" question is asked once, in beforeFiringOrderResolution. */
+    public function getDischargePool(){
+        return $this->dischargePool;
+    }
+
+    /* ---------------------------------------------------------------- Wide Beam (plan 3.3) */
+
+    /* Called by the SYS_WBLA / SYS_WBMLA applier in Enhancements.php, once per construction, on the
+       ONE array the refit was bought for. It buys the CAPABILITY; arming it is a per-turn decision.
+       ⚠️ A plain instance property, so two Lightning Arrays on one hull are refitted independently -
+       which is what the rules ask for ("the player pays to enhance each one separately"). */
+    public function enableWideBeam(){
+        $this->wideBeamFitted = true;
+    }
+
+    /* Was this array refitted? */
+    public function hasWideBeam(){
+        return $this->wideBeamFitted;
+    }
+
+    /* Is this array firing a wide beam THIS TURN? Both halves are required: the refit (blueprint
+       purchase, applied at construction) and the arm (this turn's toggle, replayed from the notes).
+       ⚠️ Takes no fire order, on purpose. The rules configure the ARRAY, not the shot - one
+       declaration covers every discharge it fires this turn, in either firing mode - so there is
+       nothing per-order to read and no way for two shots in one turn to disagree. */
+    public function isWideBeamShot(){
+        return $this->wideBeamFitted && $this->wideBeamArmed;
+    }
+
+    /* Does this firing mode never fuse? One line today, because there is one such mode. It exists
+       so that the grouping question is asked by NAME everywhere - the wide beam is a separate,
+       orthogonal choice, and the two were briefly modelled as four firing modes (2026-09-06) with
+       exactly the confusion that invites. A future third grouping mode adds itself here. */
+    public static function isSingleShotMode($mode){
+        return ((int)$mode) === self::MODE_SINGLE;
+    }
+
+    /* ---------------------------------------------- the toggle's round trip (class comment, 3) */
+
+    /* Step 2. Called by Manager::parseShips on every POST, in every phase, as soon as the POST-side
+       system exists. All it does is remember what was asked; the write is step 3.
+       ⚠️ NOT gated on $wideBeamFitted - a POST-side ship is rebuilt WITHOUT enhancements
+       (arch_post_side_ship_reconstruction), so the refit reads false here on a fitted array and
+       gating would silently drop every declaration. The refit is re-checked at read time instead. */
+    public function doIndividualNotesTransfer(){
+        if (is_array($this->individualNotesTransfer) && isset($this->individualNotesTransfer[0])) {
+            $this->wideBeamRequested = ((int)$this->individualNotesTransfer[0] === 1) ? 1 : 0;
+        }
+        $this->individualNotesTransfer = array();
+    }
+
+    /* Step 3. Called from FireGamePhase::process for the submitting player's own ships only - see
+       the hook on ShipSystem for why this is a narrow hook rather than the generic
+       generateIndividualNotes sweep the other phases run.
+       Writes BOTH states, so that re-committing after un-arming is not stuck on a stale 1;
+       onIndividualNotesLoaded takes the LAST note of the turn. Nothing is written at all unless the
+       client sent a toggle state, so a game with no fitted array never touches the table. */
+    public function saveFirePhaseDeclaration($gamedata, $dbManager){
+        if ($this->wideBeamRequested === null) return;
+
+        $ship = $this->getUnit();
+        if (!$ship) return;
+
+        $this->individualNotes[] = new IndividualNote(
+            -1, TacGamedata::$currentGameID, $gamedata->turn, $gamedata->phase,
+            $ship->id, $this->id,
+            self::WIDEBEAM_NOTEKEY,
+            'Wide beam declaration',      //notekey_human is varchar(40) - keep it short
+            $this->wideBeamRequested
+        );
+        $this->wideBeamRequested = null;
+    }
+
+    /* Step 4. Rebuilds this turn's declaration on every gamedata load, before prepareFiring runs.
+       ⚠️ getIndividualNotesForGame loads `turn <= current`, so the turn test is what makes this a
+       PER-TURN declaration rather than a permanent one - without it, arming once would arm the
+       array for the rest of the game.
+       ⚠️ Highest id wins, not last in the array: the query orders by turn and phase only, so two
+       notes written in the same phase (arm, then re-commit un-armed) come back in an order MySQL
+       does not promise. Ids are auto-increment, so they are the write order. */
+    public function onIndividualNotesLoaded($gamedata){
+        $bestId = -1;
+        foreach ($this->individualNotes as $currNote){
+            if ($currNote->notekey !== self::WIDEBEAM_NOTEKEY) continue;
+            if ($currNote->turn != $gamedata->turn) continue;
+            if ((int)$currNote->id < $bestId) continue;
+            $bestId = (int)$currNote->id;
+            $this->wideBeamArmed = ((int)$currNote->notevalue === 1);
+        }
+        parent::onIndividualNotesLoaded($gamedata);   //clears the array, as every other reader does
+    }
+
+    /* Did this array fire a wide beam on $turn? Used only at the turn advance, where the fire
+       orders in memory ARE that turn's (DBManager::getFireOrdersForShips loads one turn, and
+       $gamedata->turn has already been stepped past it by then) - which is also why the cooldown
+       cannot be re-derived during the following turn's Fire phase and has to live in the persisted
+       loading state instead.
+       ⚠️ OFFENSIVE orders only. Interception is a single discharge and never a wide beam
+       (getInterceptOrderMode), so defending must not cost the array the following turn as well. */
+    protected function firedWideBeamOnTurn($turn){
+        if (!$this->isWideBeamShot()) return false;
+        foreach ($this->fireOrders as $order){
+            if ($order->type != "normal") continue;
+            if ($order->weaponid != $this->id) continue;
+            if ($order->turn != $turn) continue;
+            return true;
+        }
+        return false;
+    }
+
+    /* THE COOLDOWN. "The operation of a lightning array in this mode is stressful on its systems,
+       and therefore requires a 1 turn cooldown period."
+     *
+     * The turn advance (phase -1) is the one write that decides what the array has next turn, and
+     * the parent's version of it hands an ordinary loading-1 weapon its charge straight back:
+     * fired on turn T -> loading 0 -> +1 -> 1 -> loaded again on T+1. Zeroing that ONE write is the
+     * entire cooldown. On T+1 the array holds 0/1 and is not loaded, so:
+     *   - the client greys it out (weaponManager.isLoaded tests turnsloaded AND overloadturns, and
+     *     the phase-2 write leaves overloadturns at 0 for a non-overloading weapon);
+     *   - Firing::isValidInterceptor and validateManualIntercept both refuse it, so a wide beam
+     *     costs the array its DEFENCE for the following turn too, which is what "stressful on its
+     *     systems" should mean;
+     *   - beforeFiringOrderResolution gives it a pool of 0, so a tampered POST buys nothing.
+     * Advancing T+1 -> T+2 finds no shot on T+1, so the ordinary +1 puts it back at 1/1 (and the
+     * Medium back at 1/2, part-charged, which is where it starts a scenario anyway).
+     *
+     * ⚠️ NOT done by raising $loadingtime for a turn. That number is a BLUEPRINT field riding the
+     * per-class static bundle rather than the poll payload, so the client would have gone on
+     * reading 1 and shown a loaded array - the Stage 7 trap. $turnsloaded IS published per
+     * instance by Weapon::stripForJson, so this way the cooldown is visible for free. */
+    public function calculateLoading(TacGamedata $gamedata){
+        $loading = parent::calculateLoading($gamedata);
+        if (!$loading) return $loading;
+        if ($gamedata->phase != -1) return $loading;                    //only the turn-advance write reloads
+        if (!$this->firedWideBeamOnTurn($gamedata->turn - 1)) return $loading;
+
+        return new WeaponLoading(
+            0,                          //<- no charge regained this turn: THE cooldown
+            $loading->extrashots,
+            $loading->loadedammo,
+            0,                          //<- and no overload credit either, or the client reads it as loaded
+            $loading->loadingtime,
+            $loading->firingmode
+        );
+    }
+
+    /* Is the array able to shoot at all right now? The same test both intercept gates in firing.php
+       make, reused here because nothing on the server stops an UNLOADED weapon from resolving an
+       offensive order - the client's isLoaded is the only gate on that path, and a cooldown that
+       only the client enforced would not be a cooldown. */
+    protected function isReadyToFire(){
+        return $this->getTurnsloaded() >= $this->getLoadingTime();
+    }
+
+    /* Highest fused count the damage/FC tables actually describe. Guards against a control sheet
+       whose pool is raised without the tables being extended: a shot is never resolved against a
+       row that does not exist. */
+    protected function getMaxTabledCount(){
+        $keys = array_keys($this->combinedDamageArray);
+        return empty($keys) ? 1 : max($keys);
+    }
+
+    public function beforeFiringOrderResolution($gamedata){
+        $this->combinedCount = array();
+
+        /* An array in its Wide Beam cooldown - or offline, or otherwise mid-reload - has nothing to
+           spend. Every order below then clamps to 0 discharges and does 0 damage, which is this
+           weapon's established loud failure (a 0-damage line in the log rather than a silently
+           dropped order). The client refuses to declare in the first place; this is the half that
+           cannot be edited out of a POST. */
+        $pool   = $this->isReadyToFire() ? $this->getDischargePool() : 0;
+        $left   = $pool;
+        $maxRow = $this->getMaxTabledCount();
+
+        $offensiveOrders     = 0; //O - number of "normal" orders
+        $dischargesSpent     = 0; //D - discharges those orders consumed between them
+
+        foreach ($this->fireOrders as $order){
+            if ($order->type != "normal") continue;
+            $offensiveOrders++;
+
+            /* ⚠️ NO WIDE-BEAM CHECK HERE, and that is the point of the toggle: the wide beam is a
+               property of the ARRAY this turn, not of the order, so there is no per-order claim to
+               validate or demote. An array that was never refitted answers false to
+               isWideBeamShot() whatever its notes say, so a hand-written note buys nothing.
+
+               A SINGLE SHOTS order is exactly one discharge, whatever the order claims. Reading
+               $order->firingMode and not $this->firingMode is load-bearing: prepareFiring calls
+               changeFiringMode only AFTER this method, so the weapon's own mode is still last
+               turn's here. Ignoring ->shots rather than clamping it is deliberate - it means a
+               stale or hand-edited client cannot declare a fused shot in the cheap mode. */
+            if (self::isSingleShotMode($order->firingMode)) {
+                $count = 1;
+            } else {
+                //->shots IS the fused count, exactly as it is the shot count on every other
+                //split-shot weapon. It is a whitelisted FireOrder constructor argument
+                //(Manager.php), so it survives the POST rebuild on both the ship and the fighter
+                //branch. An order that carried nothing (a hand-built payload, or a client that
+                //predates this weapon) is treated as a single discharge, the smallest thing it
+                //could have meant.
+                $count = (int)$order->shots;
+                if ($count < 1) $count = 1;
+            }
+
+            //Re-clamp: against the rows the tables describe, then against what is actually left in
+            //the pool. A shot the pool cannot pay for gets 0 and does nothing - the same thing the
+            //Slicer does with an over-allocated volley. It stays visible in the combat log at 0
+            //damage rather than vanishing, which is the loud failure mode.
+            if ($count > $maxRow) $count = $maxRow;
+            if ($count > $left)   $count = $left;
+            if ($count < 0)       $count = 0;
+            $left -= $count;
+            $dischargesSpent += $count;
+
+            $this->combinedCount[$order->id] = $count;
+            $order->shots = 1; //one shot; the fused count now lives in $this->combinedCount
+        }
+
+        $this->guns = $this->getGunsForInterceptAccounting($pool, $dischargesSpent, $offensiveOrders);
+    }
+
+    /* What $this->guns has to be for the engine's ORDER-counting intercept arithmetic to land on
+       this weapon's real DISCHARGE count. Both consumers are in firing.php:
+     *
+     *   Firing::isValidInterceptor   refuses when  (allOrders - selfIntercepts) >= guns
+     *                                          i.e. when  O + M >= guns
+     *   Firing::automateIntercept    grants        guns - allOrders + selfIntercepts
+     *                                          i.e.       guns - O - M
+     *
+     * with O = offensive orders, M = manual 'intercept' orders, S = selfIntercept markers.
+     * We want both to key off the discharges actually left, R = pool - D - M (a manual intercept
+     * costs one discharge; a marker is consent and costs nothing). Setting
+     *
+     *     guns = pool - D + O
+     *
+     * gives  automateIntercept:  pool - D + O - O - M  =  pool - D - M  =  R          ✔
+     * and    isValidInterceptor: O + M >= pool - D + O  ⟺  M >= pool - D  ⟺  R <= 0   ✔
+     *
+     * S cancels out of both, which is why a marker is free. Nothing declared gives guns = pool, so
+     * an idle array can intercept with every discharge it has.
+     *
+     * ⚠️ This is the Slicer's $guns-padding problem in a different currency, and it has the same
+     * sharp edge: a manual 'intercept' order appears in BOTH terms of automateIntercept's
+     * expression. Here it is charged exactly once, via M in the derivation above - the Slicer's
+     * game-4306 bug was letting it cancel itself out and spending the same allowance twice. */
+    protected function getGunsForInterceptAccounting($pool, $dischargesSpent, $offensiveOrders){
+        return max(0, $pool - $dischargesSpent) + $offensiveOrders;
+    }
+
+    /* Discharges fused into this order. 0 when beforeFiringOrderResolution clamped it away, or when
+       it never ran for this order - deliberately NOT 1, so a plumbing failure shows up as a
+       0-damage shot in the log instead of quietly granting a free discharge. */
+    protected function getCombinedCount($fireOrder){
+        return isset($this->combinedCount[$fireOrder->id]) ? $this->combinedCount[$fireOrder->id] : 0;
+    }
+
+    public function getDamage($fireOrder){
+        $n = $this->getCombinedCount($fireOrder);
+        if ($n < 1 || !isset($this->combinedDamageArray[$n])) return 0;
+        $row = $this->combinedDamageArray[$n];
+
+        /* ⚠️ WIDE BEAM IS ROLLED ONE DIE AT A TIME. The floor is per DIE, not on the total, so
+           Dice::d(10, $n) - which returns a sum - cannot express it: five dice each floored at 1
+           can never total less than 5, while a floor applied to their sum would allow 1. The flat
+           +N on the row is not a die and is not touched. */
+        if ($this->isWideBeamShot()) {
+            $total = 0;
+            for ($i = 0; $i < $row['dice']; $i++) {
+                $total += max(self::WIDEBEAM_DIE_FLOOR, Dice::d(10) - self::WIDEBEAM_DIE_PENALTY);
+            }
+            return $total + $row['add'];
+        }
+
+        return Dice::d(10, $row['dice']) + $row['add'];
+    }
+
+    /* WIDE BEAM COLLATERAL, both halves of the rule, and they pull in opposite directions.
+     *
+     *   "Collateral flash damage is scored as normal when the target is inside an energy draining
+     *    field (i.e. 25% on any other targets in the same hex). If the target is not in an energy
+     *    draining field, collateral flash damage is scored at an amount of 50%."
+     *
+     * The general rule (weapon.php, plan 2.1) is that a flash weapon striking a unit INSIDE a field
+     * scores no collateral at all. A wide beam is the exception the rules carve out: inside a field
+     * it drops back to the ordinary 25% instead of to nothing, and outside one it doubles to 50%.
+     * ⚠️ 50% is computed from the damage, not by doubling the 25% figure - see the parent hook. */
+    protected function edfSuppressesCollateral($target, $fireOrder, $gamedata){
+        if ($this->isWideBeamShot()) return false;
+        return parent::edfSuppressesCollateral($target, $fireOrder, $gamedata);
+    }
+
+    /* The one genuinely surprising outcome gets a log line: everything else in the game scores NO
+       collateral against a target standing in a draining field, so a wide beam splashing there
+       looks like a bug unless the log says otherwise. The 50% case outside a field needs no note -
+       nothing about it contradicts what the player already expects of a flash weapon.
+       ⚠️ Written before the parent runs, and unconditionally, exactly as the suppression note it
+       replaces is: neither knows yet whether anything is actually sharing the hex. */
+    public function doCollateralDamage($target, $shooter, $fireOrder, $gamedata, $flashDamageAmount){
+        if ($this->isWideBeamShot()
+            && TacGamedata::$edfPresent && $gamedata->isHexInEdfField($target->getHexPos())) {
+            $fireOrder->pubnotes .= "<br>Wide beam deals Flash damage through the Energy Draining Field -"
+                                 . " 25% collateral damage is scored. ";
+        }
+        parent::doCollateralDamage($target, $shooter, $fireOrder, $gamedata, $flashDamageAmount);
+    }
+
+    protected function getFlashCollateralAmount($damage, $target, $fireOrder, $gamedata){
+        if (!$this->isWideBeamShot()) {
+            return parent::getFlashCollateralAmount($damage, $target, $fireOrder, $gamedata);
+        }
+        //Same hex test the suppression uses - ANY field hex, no own-fleet exemption: this is the
+        //field dampening an explosion, which is a property of the hex.
+        $inField = TacGamedata::$edfPresent && $gamedata->isHexInEdfField($target->getHexPos());
+        return (int)round($damage / ($inField ? 4 : 2), 0, PHP_ROUND_HALF_UP);
+    }
+
+    /* Combined fire is harder to aim. Applied as a DELTA on top of whatever the parent worked out,
+       rather than by swapping $this->fireControl around the parent call: fireControl is read in
+       several places during that call, and a temporarily-mutated copy is a per-instance mutation of
+       a property the blueprint shares. The delta is in d100 units because $fireOrder->needed is;
+       the client mirrors it in d20 units in calculateSpecialHitChanceMod. */
+    public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder){
+        /* Publish this shot's fused count for the duration of the parent call so
+           calculateRangePenalty() below can see it. try/finally rather than a plain clear: if the
+           parent throws, a count left standing would silently apply to the NEXT shot this weapon
+           resolves, which is the kind of bug that only shows up as a wrong hit chance months later. */
+        $this->activeCombinedCount = $this->getCombinedCount($fireOrder);
+        try {
+            parent::calculateHitBase($gamedata, $fireOrder);
+        } finally {
+            $this->activeCombinedCount = null;
+        }
+
+        //needed <= 0 is the parent's auto-miss marker (out of range, null target, ...). Adding a
+        //delta to it would silently un-miss the shot.
+        if ($fireOrder->needed <= 0) return;
+
+        $delta = $this->getCombinedFireControlMod($gamedata, $fireOrder);
+        if ($delta !== 0) {
+            $fireOrder->needed += $delta * 5; //d20 table -> d100 roll
+            $fireOrder->notes  .= " Combined fire x" . $this->getCombinedCount($fireOrder)
+                               . ": " . ($delta > 0 ? "+" : "") . $delta . " FC.";
+        }
+
+        /* Wide Beam changes no hit chance at all - it is the same bolt spread wider - so this is
+           purely the log saying why the damage came out low. Written here rather than in getDamage
+           so that a MISS still records what was fired, and so a withdrawn shot records nothing. */
+        if ($this->isWideBeamShot()) {
+            $fireOrder->notes .= " Wide beam: -" . self::WIDEBEAM_DIE_PENALTY . " per damage die"
+                              . " (min " . self::WIDEBEAM_DIE_FLOOR . ").";
+        }
+    }
+
+    /* The combined-fire fire-control change for this order, in d20 units, as a delta against the
+       weapon's normal fire control for that target class. Shared with the client, which computes
+       the identical number from an identical table. */
+    protected function getCombinedFireControlMod(TacGamedata $gamedata, FireOrder $fireOrder){
+        $n = $this->getCombinedCount($fireOrder);
+        if ($n < 1 || !isset($this->combinedFireControlArray[$n])) return 0;
+
+        $target = $gamedata->getShipById($fireOrder->targetid);
+        if ($target === null) return 0;
+
+        $fcIndex = $target->getFireControlIndex();
+        if (!isset($this->combinedFireControlArray[$n][$fcIndex])) return 0;
+        if (!isset($this->fireControl[$fcIndex])) return 0;
+
+        return $this->combinedFireControlArray[$n][$fcIndex] - $this->fireControl[$fcIndex];
+    }
+
+    /* Combined fire also changes the RANGE penalty, so this is a real override of the parent's
+       formula rather than another delta on ->needed. That matters: the parent derives the no-lock
+       and jammer modifiers from the range penalty - and in the doubleRangeIfNoLock branch calls this
+       method a second and third time at modified distances - so overriding here keeps all three
+       consistent, where a flat delta on ->needed would have moved the base penalty and left its two
+       derivatives computing off the single-discharge value.
+
+       Falls back to the plain $rangePenalty whenever there is no active count: that covers a shot
+       resolved outside calculateHitBase and any future caller that has no fire order to hand. */
+    public function calculateRangePenalty($distance){
+        return $this->getCombinedRangePenalty() * $distance;
+    }
+
+    /* Per-hex range penalty for the shot currently being resolved. */
+    protected function getCombinedRangePenalty(){
+        $n = $this->activeCombinedCount;
+        if ($n !== null && isset($this->combinedRangePenaltyArray[$n])) {
+            return $this->combinedRangePenaltyArray[$n];
+        }
+        return $this->rangePenalty;
+    }
+
+    public function setSystemDataWindow($turn){
+        parent::setSystemDataWindow($turn);
+        if (!isset($this->data["Special"])) {
+            $this->data["Special"] = '';
+        } else {
+            $this->data["Special"] .= '<br>';
+        }
+        $this->data["Special"] .= "Fires up to " . $this->getDischargePool()
+                               . " separate shots per turn, at the same or different targets.";
+        $this->data["Special"] .= "<br>Combined Fire mode: Every shot on the same target adds"
+                               . " fuses together into one heavier hit.";
+        $this->data["Special"] .= "<br>Single Shots mode: Every shot is a separate one-discharge"
+                               . " shot.";
+        $this->data["Special"] .= $this->getWideBeamTooltip();
+        $this->data["Special"] .= $this->getCombinedFireTooltip();
+        $this->data["Special"] .= "<br>Each shot not fired will instead intercept one incoming shot.";
+    }
+
+    /* The Wide Beam block, present only on a refitted array. ⚠️ It reaches the client because this
+       class's stripForJson() republishes $this->data per instance - $data is otherwise baked into
+       the per-class static blueprint, so an enhanced mount would quote the hull as designed. */
+    protected function getWideBeamTooltip(){
+        if (!$this->hasWideBeam()) return "";
+        return "<br>Wide Beam (enhancement): toggled on this array for the whole turn, in EITHER"
+             . " firing mode. While armed, every damage die is rolled at -"
+             . self::WIDEBEAM_DIE_PENALTY . " (minimum " . self::WIDEBEAM_DIE_FLOOR . " per die)."
+             . "<br> - Collateral flash damage is 50% instead of 25%, or the usual 25% when the"
+             . " target stands inside an Energy Draining Field (where a flash weapon normally"
+             . " scores none at all)."
+             . "<br> - Firing a wide beam puts this array into a one turn cooldown: it cannot fire"
+             . " or intercept on the following turn."
+             . ($this->wideBeamArmed ? "<br> - ARMED THIS TURN." : "");
+    }
+
+    /* The combined-fire table as tooltip rows, generated from the tables themselves so a re-stat
+       can never leave the tooltip describing the old numbers. */
+    protected function getCombinedFireTooltip(){
+        $out  = "";
+        $pool = min($this->getDischargePool(), $this->getMaxTabledCount());
+        for ($n = 1; $n <= $pool; $n++){
+            if (!isset($this->combinedDamageArray[$n])) continue;
+            $row  = $this->combinedDamageArray[$n];
+            $out .= "<br> - " . $n . " discharge" . ($n > 1 ? "s" : "") . ": "
+                 . $row['dice'] . "d10+" . $row['add'];
+            if (isset($this->combinedFireControlArray[$n])) {
+                $out .= " (FC " . implode("/", $this->combinedFireControlArray[$n]) . ")";
+            }
+            if (isset($this->combinedRangePenaltyArray[$n]) && $this->combinedRangePenaltyArray[$n] > 0) {
+                //Same units the generic "Range penalty" tooltip line uses: penalty x5 per hex.
+                $out .= " (range -" . number_format($this->combinedRangePenaltyArray[$n] * 5, 2) . "/hex)";
+            }
+        }
+        return $out;
+    }
+
+    /* Tooltip damage spans one discharge at its worst to the whole pool at its best, which is what
+       the weapon can actually produce in a turn.
+       ⚠️ These two are called by Weapon::setSystemDataWindow inside a loop that walks $firingModes
+       and calls changeFiringMode() before each pair, filling minDamageArray/maxDamageArray. So
+       $this->firingMode IS the mode being described here - the one place in this class where
+       reading it rather than an order is correct - and adding mode 3 to $firingModes is all it
+       takes for the ship window to quote the wide beam's own span. */
+    public function setMinDamage(){
+        $row = isset($this->combinedDamageArray[1]) ? $this->combinedDamageArray[1] : array('dice' => 0, 'add' => 0);
+        //Unchanged by Wide Beam: a d10 already rolls a 1 at worst, and the floor is 1 as well.
+        $this->minDamage = $row['dice'] + $row['add'];
+    }
+
+    public function setMaxDamage(){
+        $n   = min($this->getDischargePool(), $this->getMaxTabledCount());
+        $row = isset($this->combinedDamageArray[$n]) ? $this->combinedDamageArray[$n] : array('dice' => 0, 'add' => 0);
+        $this->maxDamage = ($row['dice'] * $this->getDieCeiling()) + $row['add'];
+    }
+
+    /* Highest a single damage die can roll - 10, or 8 while the array is armed for a wide beam. The
+       floor never binds at the top of the range, so the penalty is the whole difference. Applies to
+       BOTH firing modes, which is what makes the arm and the mode independent in the ship window
+       exactly as they are in the dice. */
+    protected function getDieCeiling(){
+        if (!$this->isWideBeamShot()) return 10;
+        return max(self::WIDEBEAM_DIE_FLOOR, 10 - self::WIDEBEAM_DIE_PENALTY);
+    }
+
+    /* The pool, the damage span and the tooltip all move with charge time on the Medium variant, so
+       they have to be re-published per instance or the client keeps showing the blueprint values -
+       the same reason LaserAccelerator overrides this. Everything named here is a value the client
+       re-reads from the live system, so ShipCompactor stripping it at its default is harmless. */
+    public function stripForJson(){
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->data           = $this->data;
+        $strippedSystem->minDamage      = $this->minDamage;
+        $strippedSystem->minDamageArray = $this->minDamageArray;
+        $strippedSystem->maxDamage      = $this->maxDamage;
+        $strippedSystem->maxDamageArray = $this->maxDamageArray;
+        //$multiModeSplit is protected on Weapon and the base stripForJson does not publish it -
+        //see the property comment. Without this line the client locks the firing-mode selector as
+        //soon as one shot is declared.
+        $strippedSystem->multiModeSplit = $this->multiModeSplit;
+
+        /* THE WIDE BEAM TOGGLE, both halves.
+           - wideBeamFitted is the REFIT, and the registry's `serialise` list would publish it for
+             the enhanced mount anyway; naming it here as well costs nothing and keeps the two
+             halves of one feature together.
+           - active is THIS TURN's arm. Published under that name because the generic
+             <SystemActivation> box reads system.active - the same thing ChameleonSensors does. */
+        if ($this->wideBeamFitted) {
+            $strippedSystem->wideBeamFitted = true;
+            $strippedSystem->active         = $this->wideBeamArmed;
+        }
+        return $strippedSystem;
+    }
+
+}//endof class LightningArray
+
+
+/* Accelerator variant: it charges over several turns and its discharge pool GROWS with the charge.
+ * One turn of charge is one discharge, so "may only split its shots once it has charged for two or
+ * more turns" falls out of the pool rather than needing a rule of its own - at one turn there is
+ * simply nothing to split.
+ *
+ * It does NOT begin the game charged (getStartLoading below). That is the whole of that rule:
+ * onConstructed writes whatever getStartLoading returns straight into tac_systemdata.
+ */
+class MediumLightningArray extends LightningArray {
+
+    public $name        = "MediumLightningArray";
+    public $displayName = "Medium Lightning Array";
+    public $iconPath    = "LightningArrayMed.png"; //case-sensitive on live - see LightningArray
+
+    public $loadingtime  = 1;               //one turn per discharge
+    public $normalload   = 2;               
+    public $priority     = 6;               
+    //As on the parent, these two are row 1 of the tables below - the single-discharge profile.
+    public $rangePenalty = 0.33;            // = combinedRangePenaltyArray[1]
+    public $fireControl  = array(6, 4, 2);  // = combinedFireControlArray[1]
+
+    /* ⚠️ One gun per TURN LOADED, not per $normalload: getDischargePool() below is the authority and
+       both halves recompute $guns from it (server in beforeFiringOrderResolution, client in
+       initializationUpdate). This literal is only what an unloaded array reports before either has
+       run - the fleet builder shows the full pool, because getDischargePool() returns $normalload
+       in the lobby phase. */
+    public $guns             = 1;
+    public $maxVariableShots = 2;
+	public $intercept = 4;
+
+    /* Lighter than the full Array at every charge level. Only TWO rows - its pool never exceeds 2. */
+    protected $combinedDamageArray = array(
+        1 => array('dice' => 4, 'add' => 12),   //  3 - 21
+        2 => array('dice' => 8, 'add' => 12),   //  7 - 34
+    );
+
+    //Row 1 IS $fireControl, as on the parent.
+    protected $combinedFireControlArray = array(
+        1 => array( 6, 4, 2),
+        2 => array( 4, 5, 5),
+    );
+
+    /* Per-hex, matching $rangePenalty's units. Row 1 IS $rangePenalty. */
+    protected $combinedRangePenaltyArray = array(
+        1 => 0.33,  // -1 per 3 hexes
+        2 => 0.25,  // -1 per 4 hexes
+    );
+
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+        if ($maxhealth == 0) $maxhealth = 24;
+        if ($powerReq  == 0) $powerReq  = 12;
+        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+    }
+
+    /* One discharge per turn charged, capped at the charge ceiling. Everything else - the split-shot
+       ceiling, the combined-fire ceiling, the tooltip - is derived from this one number. */
+    public function getDischargePool(){
+        $pool = (int)$this->turnsloaded;
+        if ($pool > $this->normalload) $pool = $this->normalload;
+        if ($pool < 1) $pool = 1; //a weapon ready to fire at all has at least one discharge
+        return $pool;
+    }
+
+    /* "Does not begin the scenario fully charged" - it begins it with ONE turn of charge, i.e. one
+       discharge, which is what the control sheet's 1/2 means. Weapon::getFullStartLoading seeds the
+       first slot with getNormalLoad() (2 here, fully charged); seeding 1 instead is the entire
+       change, and onConstructed writes it straight into tac_systemdata.
+       ⚠️ NOT 0: turnsloaded 0 is below getLoadingTime(), so the array would be UNABLE TO FIRE AT ALL
+       on turn 1 and would read "0/2" in the ship window (user report, game 4329). Everything else is
+       copied from the parent so overloading and firing-mode seeding keep behaving identically.
+       ⚠️ AND THE WANDERER IS EXEMPT (user ruling 2026-09-09, plan 3.10e): $seedsBelowFullCharge is
+       what tells Weapon::getStartLoadingForShip that this seed is a restriction it may lift for a
+       hull in Weapon::FULLY_CHARGED_HULL_CLASSES. This method itself never learns which hull it is on
+       - it has no ship to ask - so it must keep answering the restricted value. */
+    protected $seedsBelowFullCharge = true;
+
+    public function getStartLoading(){
+        $overloadTurns = $this->overloadturns;
+        if ($overloadTurns === 0 && $this->overloadable) $overloadTurns = 1;
+
+        return new WeaponLoading(
+            1,                       //<- one turn charged (1/2), rather than getNormalLoad()'s full 2
+            $this->overloadshots,
+            0,
+            $overloadTurns,
+            $this->getLoadingTime(),
+            $this->firingMode
+        );
+    }
+
+    public function setSystemDataWindow($turn){
+        parent::setSystemDataWindow($turn);
+        $this->data["Special"] .= "<br>Accelerator: gains one discharge per turn charged, up to "
+                               . $this->normalload . ". Cannot combine its discharges until it has"
+                               . " charged for at least two turns.";
+        $this->data["Special"] .= "<br>Begins the scenario part-charged, with one discharge ready.";
+        //Its effective loading time is max(loadingtime, normalload) = normalload > 1, so unlike the
+        //full Array it will NOT be auto-assigned to interception without the player's consent -
+        //Firing::isValidInterceptor demands a selfIntercept marker first.
+        $this->data["Special"] .= "<br>Must be explicitly committed to interception to defend.";
+    }
+
+}//endof class MediumLightningArray
+
+/* SENSOR CHARGE TRANSCEIVER - WALKERS_OF_SIGMA_PLAN.md 3.9 (Stage 9), decision D2.
+ *
+ * "This system is used by advanced races to chart irregularities in the fabric of space... The
+ *  transceiver launches a precisely modulated sensor charge encased in a force field that steers
+ *  the charge through the field of interest to gather data. The pulse is then returned to the
+ *  transceiver for analysis. The main disadvantage is that the charges need to have a complete
+ *  path from and to a transceiver to be of any use."
+ *
+ * WHAT MAKES THIS WEAPON UNLIKE EVERY OTHER ONE IN THE TREE
+ * It does not shoot at a target. The player plots a COURSE - a chain of straight legs from the
+ * firing ship to a friendly ship that also carries a transceiver - and the charge damages whatever
+ * enemy units it passes through on the way. So the declaration and the shots are two different
+ * things, and most of this class is the bridge between them:
+ *
+ *   1. THE CLIENT (special.js) declares one hex fire order PER WAYPOINT, each carrying a
+ *      "SCT|w:<n>" token in ->notes. That is the split-shot channel the Slicer's class comment
+ *      describes, used here to carry a path rather than an allocation. None of those orders is a
+ *      shot.
+ *   2. beforeFiringOrderResolution() re-walks the path from scratch (client input is never
+ *      trusted), DETACHES every waypoint order from $this->fireOrders, and puts back one real
+ *      damage order per enemy-occupied hex plus one informational order for the combat log.
+ *   3. Firing::prepareFiring then rolls those the ordinary way.
+ *
+ * ⚠️ THE WAYPOINT ORDERS ARE ALREADY IN THE DATABASE by the time step 2 runs - FireGamePhase::
+ * process persisted them at the POST - so detaching them is an in-memory act only. That is
+ * deliberate, and it is what makes the course re-derivable: see getChargeOutcome(), which the turn
+ * advance calls a second time, on a DIFFERENT gamedata object, to decide the reload.
+ *
+ * THE PATH MODEL (D2, and the one simplification in this class worth arguing about)
+ * The rules move the charge "in a manner similar to a fighter... speed 16 with 16 thrust and a 1/4
+ * turn cost", i.e. 16 hexes and 4 manoeuvres, "with a manoeuvre counting as a turn or slide". A
+ * full fighter plotter would be a second movement engine; instead each click is a WAYPOINT, and a
+ * leg between two waypoints must run along one of the six hex axes. Changing axis at a waypoint
+ * costs mathlib::getHexTurnCost() manoeuvres - 1 for 60 degrees, 2 for 120, 3 for a reversal -
+ * which is what the same course would cost a fighter, and a one-hex leg at 60 degrees is a slide
+ * priced at a slide's own cost. The first leg is free: the charge is launched, not turned.
+ *
+ * THE BOOST ("every additional 2 points of power applied as a boost produces either 1 additional
+ * hex of range or adds the capability for an extra manoeuvre")
+ * $boostEfficiency = 2 is those two points; one boost level buys ONE point, spendable on either.
+ * ⭐ THE SPLIT IS NOT DECLARED - it is inferred at resolution from the course actually plotted
+ * (hexes overspent plus manoeuvres overspent must fit the boost bought). That is a convenience,
+ * not a power increase: the totals are identical either way, and it saves an Initial Orders
+ * allocation dialog for a choice the player cannot make properly until they can see the board. The
+ * BOOST ITSELF is still bought in Initial Orders, which is what the rules' "must be configured for
+ * firing" is asking for.
+ *
+ * THE RECEIVING TRANSCEIVER PAYS FOR A SHORT COURSE
+ * "For every 2 full hexes of possible range remaining on a received charge, the SCT must take a
+ * point of damage, rolling critical hits as normal." Remaining is measured against the BASE range
+ * (16), never the boosted one: a player who buys boost and spends it on manoeuvres has not
+ * lengthened the charge, and one who spends it on hexes has by definition used those hexes. The
+ * damage lands as an ordinary DamageEntry on the receiving system, so Criticals::setCriticals rolls
+ * its critical in the same pass as every other system damaged this turn (isDamagedOnTurn).
+ *
+ * THE DUAL RECHARGE
+ * "The rate of fire is 1 per 3 turns. This refers to the weapon's ability to fire a RECOVERED
+ * charge. If a charge is not recovered (if it is intercepted, for example), then the recharge rate
+ * is increased to 1 per turn." So a course that ends nowhere is not purely a loss - the transceiver
+ * simply modulates a fresh charge, which is quick. calculateLoading() below is the whole of it.
+ * ⚠️ INTERCEPTION IS NOT MODELLED AS AN EVENT OF ITS OWN. FV only intercepts ballistics, and this
+ * weapon declares and resolves inside the Fire phase; "not recovered" is the general case that the
+ * rules give interception as one example of, and it is the case implemented here.
+ *
+ * WHAT THIS CLASS DELIBERATELY DOES NOT DO
+ * - The charge does not get its own hit section: a shot resolves on the FIRING ship's bearing, like
+ *   any other direct-fire weapon, rather than on the bearing of the leg it arrived along. Doing it
+ *   properly means a ballistic-style hit LOCATION and a ballistic-style defence PROFILE, and the
+ *   two have to move together or the profile and the section describe different shots.
+ * - It does not test line of sight along the course. A steered charge is not a beam, and the
+ *   engine's only LoS test is a straight line from shooter to target hex, which a course is not.
+ */
+class SensorChargeTransceiver extends Weapon {
+
+    public $name        = "SensorChargeTransceiver";
+    public $displayName = "Sensor Charge Transceiver";
+    //⚠️ Case-sensitive on the live Linux box (arch_dockingcollar_icon_case).
+    public $iconPath    = "SensorChargeTransceiver.png";
+
+    public $animation      = "bolt";
+    public $animationColor = array(120, 255, 210); //pale sensor green
+
+    public $weaponClass = "Electromagnetic"; //all Walker weaponry is Electromagnetic
+    public $factionAge  = 3;                 //Ancient - matters to several to-hit and EDF rules
+
+    public $damageType  = "Standard";
+    /* "Damage is scored as a single standard-mode volley with overkill not transferring to
+       structure (similar to a matter weapon volley)." */
+    public $noOverkill  = true;
+
+    public $loadingtime = 3;                 //"1 per 3 turns" - calculateLoading has the other rate
+    public $priority    = 6;
+    public $fireControl = array(1, 2, 3);    //fighters, <=mediums, <=capitals
+    /* "Range penalty: None." Implemented as a real override of calculateRangePenalty() rather than
+       a delta on ->needed, because the parent derives the no-lock and jammer modifiers from it. */
+    public $rangePenalty = 0;
+    /* 0 means UNLIMITED to weaponManager.targetHex and to isInDistanceRange. The charge's reach is
+       its own hex budget, which has nothing to do with how far a target sits from the ship. */
+    public $range        = 0;
+
+    public $hextarget     = true;
+    public $canSplitShots = true;            //D2: routes each click through doMultipleHexFireOrders
+    /* The aim point is a COURSE, and a course drawn on the enemy's map a phase early would hand
+       them every hex the charge is about to cross. TacGamedata::hideSystemFireOrders blanks x/y on
+       a hidetarget order for anyone not on the shooter's team, for the turn it is declared on. */
+    public $hidetarget    = true;
+    /* And its ->notes with it. A waypoint token can name the unit the player picked out of a
+       shared hex (TARGET_TOKEN below), and that hex is on the very course hidetarget has just
+       blanked - so the two masks have to move together. See Weapon::$hideNotesFromEnemies. */
+    protected $hideNotesFromEnemies = true;
+    /* Nothing to shoot down: FV's interception machinery is for ballistics in flight, and this
+       charge is declared and resolved inside one Fire phase. The rules' "a successful interception
+       results in the loss of the charge" is folded into the not-recovered branch - class comment. */
+    public $uninterceptable = true;
+    public $doNotIntercept  = true;
+    public $intercept       = 0;
+
+    public $guns         = 1;
+    public $defaultShots = 1;
+    public $maxVariableShots = 5;            //client hint: the manoeuvres plus the free first leg
+    public $firingModes  = array(1 => "Sensor Charge");
+    public $hideFiringModeSelector = true;   //one mode; the selector would be a dead control
+
+    /* THE BOOST. $boostEfficiency is the EXTRA power one level costs - the trap recorded against
+       the Energy Draining Field, where a declared 0 made the boost free. The rules price a level at
+       2 points and give it either a hex or a manoeuvre. $maxBoostLevel caps it at 4 (8 power on top
+       of the base 5); the rules state no ceiling, so this is the tunable number. */
+    public $boostable     = true;
+    public $maxBoostLevel = 4;
+    public $boostEfficiency = self::BOOST_POWER_PER_LEVEL;
+
+    /* THE CHARGE'S OWN MOVEMENT ALLOWANCE. Named because four things read them: the resolver, the
+       tooltip, the client mirror in special.js, and the plan.
+       ⚠️ MIRROR PAIR with SensorChargeTransceiver.prototype.chargeRange / chargeManoeuvres. */
+    const CHARGE_RANGE      = 16;    //"a charge defaults to a range of 16 hexes"
+    const CHARGE_MANOEUVRES = 4;     //"and the ability to make 4 manoeuvres"
+    const BOOST_POWER_PER_LEVEL = 2; //"every additional 2 points of power applied as a boost"
+    const SELFDAMAGE_PER_HEXES  = 2; //"for every 2 full hexes of possible range remaining"
+
+    /* The waypoint token the client encodes into ->notes. The index is what orders the course:
+       fire orders come back from the database in an order MySQL does not promise, and a path read
+       out of sequence is a different path. */
+    const WAYPOINT_TOKEN = 'SCT|w:';
+
+    /* The OPTIONAL second half of that token: "|t:<shipid>", the unit the player chose to hit in
+       that waypoint's hex ("providing that it is sent against only one target per hex" gives the
+       player the choice between units sharing one). A waypoint that continues on the SAME bearing
+       costs no manoeuvre, so dropping one on a crowded hex is a free way to say which - which is
+       why the choice rides the waypoint rather than needing a per-hex gesture of its own.
+       ⚠️ ADVISORY, NEVER AUTHORITATIVE: the named unit still has to pass every eligibility test in
+       pickTargetInHex, and anything that does not falls silently back to the automatic pick. So a
+       stale or hostile POST can change WHICH legal enemy in that hex is hit and nothing else.
+       ⚠️ MIRROR PAIR with SensorChargeTransceiver.TARGET_TOKEN in special.js. */
+    const TARGET_TOKEN = '|t:';
+
+    /* damageclass on the informational order that reports the transfer. ⚠️ It is also the key
+       weaponManager.doShortLogText's shortLogTypes matches on, which is what makes the combat log
+       print the pubnotes ALONE rather than behind "firing 1x ... at ...". Because of that, the
+       pubnotes must name the ships itself, as bare shiplink spans. */
+    const LOG_DAMAGECLASS = 'SensorCharge';
+
+    /* 6d10 (rules). A flat volley - the charge either reaches a hex or it does not, and nothing
+       about the course changes what it is carrying when it gets there. */
+    protected $damageDice = 6;
+
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+        if ($maxhealth == 0) $maxhealth = 8;   //"Health 8"
+        if ($powerReq  == 0) $powerReq  = 5;   //"Power 5"
+        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+    }
+
+    /* ------------------------------------------------------------------ the charge's budget --- */
+
+    /* Boost levels bought for $turn. The same loop every boostable system in the tree writes for
+       itself (Engine, Shield Generator, Energy Draining Field); type 2 is a boost allocation. */
+    protected function getChargeBoost($turn){
+        $boost = 0;
+        foreach ($this->power as $entry){
+            if ($entry->turn != $turn) continue;
+            if ($entry->type == 2) $boost += $entry->amount;
+        }
+        return (int)$boost;
+    }
+
+    /* Is this transceiver able to send a charge at all right now? The same test both intercept
+       gates in firing.php make, reused here because NOTHING on the server refuses an offensive
+       order from an unloaded weapon - the client's isLoaded is the only gate on that path, and a
+       three-turn recharge that only the client enforced would not be a recharge. */
+    protected function isReadyToFire(){
+        return $this->getTurnsloaded() >= $this->getLoadingTime();
+    }
+
+    /* Can this transceiver RECEIVE a charge? Deliberately weaker than isReadyToFire(): receiving is
+       not firing, so a transceiver still recharging - or one that has already sent its own charge
+       this turn - is a perfectly good destination. Only a wrecked one is not. */
+    public function canReceiveCharge($turn){
+        return !$this->isDestroyed($turn);
+    }
+
+    /* ------------------------------------------------------------------ the resolver ---------- */
+
+    /* Waypoint orders belonging to this weapon on $turn, in the order the player clicked them.
+       ⚠️ Sorted by the token index, not by array position: DBManager hands fire orders back in
+       whatever order the query produced, and the legs of a course are not commutative. */
+    protected function getWaypointOrders($turn){
+        $found = array();
+        foreach ($this->fireOrders as $order){
+            if ($order->weaponid != $this->id) continue;
+            if ($order->turn != $turn) continue;
+            if ($order->type != "normal") continue;
+            $index = self::readWaypointIndex($order);
+            if ($index === null) continue;
+            $found[] = array('index' => $index, 'order' => $order);
+        }
+
+        usort($found, function($a, $b){
+            if ($a['index'] == $b['index']) return 0;
+            return ($a['index'] < $b['index']) ? -1 : 1;
+        });
+
+        $orders = array();
+        foreach ($found as $entry) $orders[] = $entry['order'];
+        return $orders;
+    }
+
+    /* The waypoint's position in the course, or null when the order carries no token at all - so it
+       is not a waypoint (a hand-built payload, or a client that predates this weapon). */
+    public static function readWaypointIndex($order){
+        if (empty($order->notes)) return null;
+        if (!preg_match('/SCT\|w:(\d+)/', $order->notes, $matches)) return null;
+        return (int)$matches[1];
+    }
+
+    /* The unit the player named for this waypoint's hex, or null when they named none.
+       ⚠️ Deliberately a SEPARATE match rather than one regex with an optional group: a waypoint
+       with no choice is the ordinary case, and readWaypointIndex must keep answering for the
+       courses declared before this token existed. */
+    public static function readWaypointTarget($order){
+        if (empty($order->notes)) return null;
+        if (!preg_match('/SCT\|w:\d+\|t:(\d+)/', $order->notes, $matches)) return null;
+        return (int)$matches[1];
+    }
+
+    /* ⭐⭐ THE SINGLE AUTHORITY ON WHAT A DECLARED COURSE DOES, and it is called from TWO places, on
+     * two different gamedata objects:
+     *
+     *   - beforeFiringOrderResolution(), during the Fire phase advance, to build the shots;
+     *   - calculateLoading(), at the turn advance, to decide whether the reload is 1 turn or 3.
+     *
+     * ⚠️ THE SECOND CALLER IS WHY THIS RE-DERIVES EVERYTHING AND PERSISTS NOTHING. The turn advance
+     * sweep runs on the gamedata object Manager::advanceGameState loaded BEFORE the Fire phase
+     * resolved, so an individual note written during that resolution is in the database but not on
+     * this object. Re-walking the same waypoints against the same positions gives the same answer
+     * with no storage at all, and replays identically. (The waypoint orders themselves ARE on both
+     * objects: the client's POST persisted them, and both loads read the same turn's fire orders.)
+     *
+     * Returns null when there is nothing to resolve. Otherwise:
+     *   accepted   - the waypoint orders that fitted the budget, in flight order
+     *   rejected   - the ones that did not (a tampered or stale POST; the client never sends these)
+     *   hexes      - every hex the charge enters, origin EXCLUDED, in flight order, deduplicated
+     *   hexesUsed / manoeuvresUsed  - what the course actually spent
+     *   remaining  - unused BASE range, which is what the receiving transceiver pays for
+     *   receiver / receiverSystem   - the friendly ship and transceiver the charge reached, or null
+     *   ready      - was this weapon loaded at all
+     */
+    public function getChargeOutcome($gamedata, $turn){
+        $orders = $this->getWaypointOrders($turn);
+        if (empty($orders)) return null;
+
+        $shooter = $this->getUnit();
+        if (!$shooter) return null;
+
+        $outcome = array(
+            'accepted' => array(), 'rejected' => array(), 'hexes' => array(),
+            'hexesUsed' => 0, 'manoeuvresUsed' => 0, 'remaining' => self::CHARGE_RANGE,
+            'receiver' => null, 'receiverSystem' => null, 'ready' => $this->isReadyToFire(),
+            //hexKey => shipid, from the accepted waypoints that named one. See TARGET_TOKEN.
+            'targetChoices' => array(),
+        );
+
+        $boost       = $this->getChargeBoost($turn);
+        $previous    = $shooter->getHexPos();
+        $lastBearing = null;
+        $seen        = array(self::hexKey($previous) => true);
+
+        foreach ($orders as $order){
+            $to = new OffsetCoordinate((int)$order->x, (int)$order->y);
+
+            //⚠️ CAST. OffsetCoordinate::distanceTo works in cube coordinates and answers a FLOAT,
+            //which would otherwise make hexesUsed and remaining floats too - and 'remaining' is
+            //divided to produce the receiver's damage, which has to be a whole number of points.
+            $legLength = (int)round(mathlib::getDistanceHex($previous, $to));
+            $bearing   = mathlib::getHexDirection($previous, $to);
+
+            //A leg has to go somewhere, and it has to go somewhere STRAIGHT.
+            $legValid = ($legLength >= 1) && ($bearing !== null);
+            $turnCost = 0;
+
+            /* And the FIRST one has to go somewhere the mount can point. Truncating at leg 1
+               rejects the whole course, which is right: a charge that cannot be launched has not
+               been launched. ⚠️ Only the first - $lastBearing is still null exactly then. */
+            if ($legValid && $lastBearing === null && !$this->isLaunchBearingOnArc($shooter, $bearing)){
+                $legValid = false;
+            }
+
+            if ($legValid){
+                $turnCost = ($lastBearing === null)
+                          ? 0                                                //the launch is free
+                          : mathlib::getHexTurnCost($lastBearing, $bearing);
+
+                $hexes      = $outcome['hexesUsed'] + $legLength;
+                $manoeuvres = $outcome['manoeuvresUsed'] + $turnCost;
+
+                /* THE DEFERRED BOOST ALLOCATION, in one expression. Overspending on hexes and
+                   overspending on manoeuvres both come out of the same pool of boost levels, so the
+                   player never has to say in advance which of the two they bought. */
+                $overspend = max(0, $hexes - self::CHARGE_RANGE)
+                           + max(0, $manoeuvres - self::CHARGE_MANOEUVRES);
+                $legValid  = ($overspend <= $boost);
+            }
+
+            /* ⚠️ TRUNCATE, do not skip. The legs of a course are a chain: dropping one in the middle
+               would silently teleport the charge across the gap. The first leg the budget cannot pay
+               for ends the course, and everything after it is rejected with it. */
+            if (!$legValid || !empty($outcome['rejected'])){
+                $outcome['rejected'][] = $order;
+                continue;
+            }
+
+            $walk = $previous;
+            for ($step = 0; $step < $legLength; $step++){
+                $walk = mathlib::moveInDirection($walk, $bearing, 1);
+                $key  = self::hexKey($walk);
+                if (isset($seen[$key])) continue;   //a course may cross itself; a hex is hit once
+                $seen[$key] = true;
+                $outcome['hexes'][] = $walk;
+            }
+
+            $outcome['hexesUsed']      += $legLength;
+            $outcome['manoeuvresUsed'] += $turnCost;
+            $outcome['accepted'][]      = $order;
+
+            //Only an ACCEPTED waypoint's choice counts: a rejected leg is never flown, so its hex
+            //is not on the course at all and a preference recorded for it would name a unit the
+            //charge never reaches.
+            $chosen = self::readWaypointTarget($order);
+            if ($chosen !== null) $outcome['targetChoices'][self::hexKey($to)] = $chosen;
+            $previous    = $to;
+            $lastBearing = $bearing;
+        }
+
+        //Unused BASE range - the class comment says why the boosted range is not the yardstick.
+        $outcome['remaining'] = max(0, self::CHARGE_RANGE - $outcome['hexesUsed']);
+
+        /* "The charge must end its movement in the same hex as another ship with a SCT" - and
+           "(or possibly returning to the originator)", so the firing ship's own hex counts. */
+        if (!empty($outcome['accepted'])){
+            $receiver = self::findReceiver($gamedata, $shooter, $previous, $turn);
+            if ($receiver !== null){
+                $outcome['receiver']       = $receiver['ship'];
+                $outcome['receiverSystem'] = $receiver['system'];
+            }
+        }
+
+        return $outcome;
+    }
+
+    /* ⭐⭐ THE MOUNT AIMS THE LAUNCH, NOT THE COURSE (user ruling 2026-09-06). The Scribe's
+       transceiver is a 300..60 mount, and until now that arc did nothing here at all - the plan
+       had it as 0..360 on the reasoning that "the charge steers, so the section is for damage, not
+       coverage". The arc is real, and what it bounds is the direction the charge LEAVES ON: the
+       first leg must run along one of the hex lines the mount covers, and after that the charge
+       steers wherever its manoeuvres will take it.
+
+       ⚠️ Asked through the ship's OWN getBearingOnPos, about the hex one step along the launch
+       bearing, rather than by comparing degrees here. That is the same call every other arc test
+       on the server makes, so this inherits the facing arithmetic and the ROLL mirror for free -
+       and it never has to assume that a hex direction and a compass heading are the same number.
+       ⚠️ MIRROR PAIR with SensorChargeTransceiver.prototype.isLaunchBearingOnArc in special.js,
+       which asks weaponManager.isPosOnWeaponArc the identical question about the identical hex. */
+    protected function isLaunchBearingOnArc($shooter, $bearing){
+        //A mount with no arc at all, or a full circle (isInArc's own start == end case).
+        if (!is_int($this->startArc) || !is_int($this->endArc)) return true;
+
+        $oneStep  = mathlib::moveInDirection($shooter->getHexPos(), $bearing, 1);
+        $relative = $shooter->getBearingOnPos($oneStep);
+
+        return mathlib::isInArc($relative, $this->startArc, $this->endArc);
+    }
+
+    /* The friendly ship standing on $hex with a transceiver able to take the charge, or null.
+       Same TEAM rather than same player: "any other ship in the fleet" is a fleet question, and FV
+       treats a team as one fleet everywhere else a friendly is asked for. */
+    protected static function findReceiver($gamedata, $shooter, OffsetCoordinate $hex, $turn){
+        $wanted = self::hexKey($hex);
+
+        foreach ($gamedata->ships as $ship){
+            if ($ship->team != $shooter->team) continue;
+            if ($ship->isDestroyed()) continue;
+            if (empty($ship->movement)) continue;                       //never placed - no position
+            if ($ship->getTurnDeployed($gamedata) > $turn) continue;    //not on the board yet
+            if (self::hexKey($ship->getHexPos()) !== $wanted) continue;
+
+            foreach ($ship->systems as $system){
+                if (!($system instanceof SensorChargeTransceiver)) continue;
+                if (!$system->canReceiveCharge($turn)) continue;
+                return array('ship' => $ship, 'system' => $system);
+            }
+        }
+
+        return null;
+    }
+
+    protected static function hexKey($hex){
+        return ((int)$hex->q) . ',' . ((int)$hex->r);
+    }
+
+    /* ------------------------------------------------------------------ resolution ------------ */
+
+    public function beforeFiringOrderResolution($gamedata){
+        $outcome = $this->getChargeOutcome($gamedata, $gamedata->turn);
+        if ($outcome === null) return;
+
+        $shooter = $this->getUnit();
+
+        /* STEP 1 - every waypoint order comes off the weapon, accepted or not. They are a
+           DECLARATION, not shots: left in place, Firing::prepareFiring would hand each one to
+           calculateHitBase with targetid -1 and stamp "ERROR: Null target shot attempted in normal
+           fire routines" into the player's own combat log. Their database rows are untouched. */
+        $waypoints = array_merge($outcome['accepted'], $outcome['rejected']);
+        $keep = array();
+        foreach ($this->fireOrders as $order){
+            if (!in_array($order, $waypoints, true)) $keep[] = $order;
+        }
+        $this->fireOrders = $keep;
+
+        if (!$outcome['ready']){
+            //A tampered or stale POST from a transceiver that is still recharging. Said out loud
+            //rather than silently dropped: an order vanishing with no explanation is the failure
+            //mode this avoids.
+            $this->logChargeEvent($gamedata, $shooter, $shooter,
+                "'s <b>Sensor Charge Transceiver</b> is still modulating and could not send a charge.");
+            return;
+        }
+
+        if (empty($outcome['accepted'])) return;   //nothing survived validation - nothing happened
+
+        /* STEP 2 - did the charge come home? "If it does not, then the charge is lost, and it is
+           unable to do any damage during the turn." No shots at all, whatever it flew over. */
+        if ($outcome['receiver'] === null){
+            $this->logChargeEvent($gamedata, $shooter, $shooter,
+                "'s sensor charge ran its course of " . (int)$outcome['hexesUsed']
+                . " hexes with no transceiver to receive it. <b>The charge is lost</b> and does no"
+                . " damage; a fresh charge is modulated in one turn instead of three.");
+            return;
+        }
+
+        /* STEP 3 - one shot per enemy-occupied hex on the course, "providing that it is sent
+           against only one target per hex". Built before the receiver's self-damage so that the
+           informational row sits after the shots it describes. */
+        $shots = 0;
+        foreach ($outcome['hexes'] as $hex){
+            $key    = self::hexKey($hex);
+            $chosen = isset($outcome['targetChoices'][$key]) ? $outcome['targetChoices'][$key] : null;
+            $target = self::pickTargetInHex($gamedata, $shooter, $hex, $gamedata->turn, $chosen);
+            if ($target === null) continue;
+            $this->createChargeShot($gamedata, $shooter, $target, $hex);
+            $shots++;
+        }
+
+        /* STEP 4 - "For every 2 full hexes of possible range remaining on a received charge, the
+           SCT must take a point of damage, rolling critical hits as normal." */
+        $selfDamage = (int)floor($outcome['remaining'] / self::SELFDAMAGE_PER_HEXES);
+        $logOrder   = $this->logChargeEvent($gamedata, $shooter, $outcome['receiver'],
+            "'s sensor charge ran " . (int)$outcome['hexesUsed'] . " hexes through "
+            . $shots . " enemy " . ($shots == 1 ? "hex" : "hexes")
+            . " and was received by " . self::shipLink($outcome['receiver']) . ".");
+
+        if ($selfDamage > 0){
+            $this->applyReceiverDamage($gamedata, $shooter, $outcome, $selfDamage, $logOrder);
+        }
+    }
+
+    /* One enemy unit standing on $hex, or null. The rules make hitting optional ("the SCT MAY
+       attempt to hit it") and that half is still resolved here - declining a free hit is never a
+       decision.
+
+       ⭐ THE CHOICE BETWEEN UNITS SHARING A HEX IS THE PLAYER'S when they asked for it, and the
+       automatic pick when they did not (user ruling 2026-09-06). $preferredId is whatever a
+       waypoint on this hex named, and it wins ONLY by passing the same eligibility loop every
+       other candidate does - so an id that is friendly, dead, terrain, not yet deployed or simply
+       somewhere else is not an error, it just leaves the automatic pick in charge.
+
+       That automatic pick is unchanged and stays deterministic and replay-stable: capitals before
+       small craft, bigger before smaller, then lowest id. */
+    protected static function pickTargetInHex($gamedata, $shooter, OffsetCoordinate $hex, $turn, $preferredId = null){
+        $wanted = self::hexKey($hex);
+        $best   = null;
+
+        foreach ($gamedata->ships as $ship){
+            if ($ship->team == $shooter->team) continue;
+            if ($ship instanceof Terrain) continue;
+            if ($ship->isDestroyed()) continue;
+            if (empty($ship->movement)) continue;
+            if ($ship->getTurnDeployed($gamedata) > $turn) continue;
+            if (self::hexKey($ship->getHexPos()) !== $wanted) continue;
+
+            //Named by the player, and legal - nothing else in the hex is even considered.
+            if ($preferredId !== null && (int)$ship->id === (int)$preferredId) return $ship;
+
+            if ($best === null || self::isBetterTarget($ship, $best)) $best = $ship;
+        }
+
+        return $best;
+    }
+
+    protected static function isBetterTarget($candidate, $incumbent){
+        $candidateSmall = ($candidate instanceof FighterFlight) || $candidate->mine;
+        $incumbentSmall = ($incumbent instanceof FighterFlight) || $incumbent->mine;
+        if ($candidateSmall != $incumbentSmall) return !$candidateSmall;
+
+        if ($candidate->shipSizeClass != $incumbent->shipSizeClass){
+            return $candidate->shipSizeClass > $incumbent->shipSizeClass;
+        }
+
+        return $candidate->id < $incumbent->id;   //the tie-break that makes a replay identical
+    }
+
+    /* A real shot. ⚠️ INSERTED IMMEDIATELY to claim a database id: several of these exist per turn
+       on one weapon, and DamageEntry copies $fireOrder->id at the moment damage is dealt. Left at
+       -1 they would all share it, and DBManager::submitDamages' back-fill (same shooter + weapon +
+       turn, first row, no ORDER BY) would file every hit against whichever row it found first. */
+    protected function createChargeShot($gamedata, $shooter, $target, OffsetCoordinate $hex){
+        $order = new FireOrder(
+            -1, "normal", $shooter->id, $target->id,
+            $this->id, -1, $gamedata->turn, $this->firingMode,
+            0, 0, 1, 0, 0,                       //needed, rolled, shots, shotshit, intercepted
+            $hex->q, $hex->r, strtolower($this->weaponClass), -1
+        );
+        $order->pubnotes = " Sensor charge passes through this hex.";
+        $order->addToDB  = true;
+
+        $newId = Manager::insertSingleFiringOrder($gamedata, $order);
+        if ($newId) $order->id = (int)$newId;
+        $order->addToDB = false;
+        $order->updated = true;
+
+        $this->fireOrders[] = $order;
+        return $order;
+    }
+
+    /* The combat log row for the transfer itself. HOSTED ON THIS WEAPON, not on RammingAttack: the
+       client resolves fire.weaponid against the SHOOTER and demands a Weapon, and both are true of
+       the transceiver that sent the charge.
+       ⚠️ $rolled MUST be non-zero or the printed log drops the row without a word
+       (weaponManager.isResolvedFireOrder is literally `Number(fire.rolled) > 0`), while $shots and
+       $shotshit MUST stay 0 so the row can never steal a real shot's damage in submitDamages'
+       back-fill. A non-zero rolled is ALSO what stops Firing::fire from passing this to fire(). */
+    protected function logChargeEvent($gamedata, $shooter, $subject, $text){
+        $order = new FireOrder(
+            -1, "normal", $shooter->id, $subject->id,
+            $this->id, -1, $gamedata->turn, $this->firingMode,
+            100, 1, 0, 0, 0,                     //needed, rolled=1 marker, no shots
+            0, 0, self::LOG_DAMAGECLASS, 10000
+        );
+        /* ⚠️ THE SHOOTER IS ALREADY NAMED - DO NOT NAME IT AGAIN (user report 2026-09-06: the
+           name appeared twice, once white and once in team colour). combatLog.js opens EVERY entry
+           with `FIRE: <shiplink shooter>`, and a short-log entry (doShortLogText) then appends the
+           pubnotes to that same line with no separator - so a pubnotes beginning with its own
+           shipLink printed the name twice running. Every $text handed to this method therefore
+           starts with "'s", and the rendered line reads "FIRE: Scribe #2's sensor charge ran...".
+           ⚠️ Other ships named MID-sentence still need a bare shipLink span, and the receiver's
+           does - log colours are per-VIEWER (howto_create_fire_orders). It is only the LEADING
+           one, the shooter's, that the header has already supplied. */
+        $order->pubnotes = $text;
+        $order->addToDB  = true;
+
+        $newId = Manager::insertSingleFiringOrder($gamedata, $order);
+        if ($newId) $order->id = (int)$newId;
+        $order->addToDB = false;
+
+        $this->fireOrders[] = $order;
+        return $order;
+    }
+
+    /* "the SCT must take a point of damage, rolling critical hits as normal". The critical is NOT
+       rolled here: this runs inside the Fire phase advance, and Criticals::setCriticals' first pass
+       tests every system that isDamagedOnTurn() a moment later. */
+    protected function applyReceiverDamage($gamedata, $shooter, $outcome, $points, $logOrder){
+        $system = $outcome['receiverSystem'];
+        $ship   = $outcome['receiver'];
+
+        $remainingHealth = $system->getRemainingHealth();
+        $destroyed       = ($points >= $remainingHealth);
+        $dealt           = min($points, $remainingHealth);
+
+        $entry = new DamageEntry(
+            -1, $ship->id, -1, $gamedata->turn, $system->id,
+            $dealt, 0, 0, (int)$logOrder->id, $destroyed, false, "", self::LOG_DAMAGECLASS
+        );
+        $entry->updated = true;
+        //Named anyway, even though fireorderid is already real: submitDamages only falls back to
+        //these when it is not, and a future change that loses the id should not lose the shooter.
+        $entry->shooterid = $shooter->id;
+        $entry->weaponid  = $this->id;
+        $system->damage[] = $entry;
+
+        $logOrder->pubnotes .= " " . (int)$outcome['remaining'] . " hexes of range went unused, so"
+            . " the receiving transceiver absorbs " . $dealt . " point"
+            . ($dealt == 1 ? "" : "s") . " of damage"
+            . ($destroyed ? " and is destroyed." : ".");
+    }
+
+    /* A ship name in the combat log is drawn in the READER's team colours and the server has no
+       idea who is reading - so it goes out with no colour of its own, and
+       combatLog.colourShipLinksInNotes() fills it in per viewer on the way to the DOM. */
+    protected static function shipLink($ship){
+        return '<span class="shiplink" data-id="' . (int)$ship->id . '">' . $ship->name . '</span>';
+    }
+
+    /* ------------------------------------------------------------------ to hit and damage ----- */
+
+    public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder){
+        //The informational row is not a shot, and must keep the needed/rolled it was built with.
+        if ($fireOrder->damageclass === self::LOG_DAMAGECLASS) return;
+        parent::calculateHitBase($gamedata, $fireOrder);
+    }
+
+    /* "All EW and fire control modifiers apply (although there is no range penalty)... There is no
+       degradation on the chance to hit." A real override rather than a delta on ->needed: the
+       parent derives the no-lock and the jammer modifiers from this same method, and in the
+       doubleRangeIfNoLock branch calls it again at two modified distances. */
+    public function calculateRangePenalty($distance){
+        return 0;
+    }
+
+    public function getDamage($fireOrder){
+        return Dice::d(10, $this->damageDice);
+    }
+
+    public function setMinDamage(){
+        $this->minDamage = $this->damageDice;
+    }
+
+    public function setMaxDamage(){
+        $this->maxDamage = $this->damageDice * 10;
+    }
+
+    /* ------------------------------------------------------------------ the dual recharge ----- */
+
+    /* "The rate of fire is 1 per 3 turns. This refers to the weapon's ability to fire a RECOVERED
+     * charge. If a charge is not recovered... then the recharge rate is increased to 1 per turn."
+     *
+     * The turn advance (phase -1) is the one write that decides what this weapon has next turn, and
+     * the parent's version of it hands a weapon that fired last turn a single point of charge
+     * (0 -> +1 -> 1/3). Filling it instead is the whole of the fast rate.
+     *
+     * ⚠️ $gamedata->turn has ALREADY been stepped past the turn that fired by the time this runs,
+     * which is why the outcome is asked about turn - 1. The fire orders loaded on this object are
+     * that turn's, exactly as the Wide-Beam cooldown relies on.
+     *
+     * ⚠️ NOT done by lowering $loadingtime for a turn. That is a BLUEPRINT field riding the
+     * per-class static bundle rather than the poll payload, so the client would go on reading 3 -
+     * the Stage 7 trap. $turnsloaded IS published per instance by Weapon::stripForJson, so filling
+     * it is visible for free. */
+    public function calculateLoading(TacGamedata $gamedata){
+        /* ⚠️⚠️ ASKED BEFORE THE PARENT RUNS, and that ordering is load-bearing.
+           parent::calculateLoading's phase -1 branch calls setLoading(), which writes
+           $turnsloaded back to 0 for a weapon that fired - and isReadyToFire() inside
+           getChargeOutcome() reads exactly that field. Asked afterwards, every charge looks as
+           though it was sent by an unloaded transceiver, the fast rate never fires, and the only
+           symptom is a recharge that is silently always three turns. */
+        $outcome = ($gamedata->phase == -1)
+                 ? $this->getChargeOutcome($gamedata, $gamedata->turn - 1)
+                 : null;
+
+        $loading = parent::calculateLoading($gamedata);
+        if (!$loading) return $loading;
+        if ($gamedata->phase != -1) return $loading;
+
+        if ($outcome === null) return $loading;             //declared nothing last turn
+        if (!$outcome['ready']) return $loading;            //was not loaded, so it never fired
+        if (empty($outcome['accepted'])) return $loading;
+        if ($outcome['receiver'] !== null) return $loading; //recovered: the slow rate stands
+
+        return new WeaponLoading(
+            $this->getLoadingTime(),   //<- a fresh charge is ready NEXT turn: THE fast rate
+            $loading->extrashots,
+            $loading->loadedammo,
+            $loading->overloading,
+            $loading->loadingtime,
+            $loading->firingmode
+        );
+    }
+
+    /* ------------------------------------------------------------------ display --------------- */
+
+    public function setSystemDataWindow($turn){
+        parent::setSystemDataWindow($turn);
+        if (!isset($this->data["Special"])) {
+            $this->data["Special"] = '';
+        } else {
+            $this->data["Special"] .= '<br>';
+        }
+
+        $boost = $this->getChargeBoost($turn);
+
+        $this->data["Special"] .= "Plots a course for a sensor charge, and damages every"
+            . " enemy unit it passes through - one target per hex with no"
+            . " range penalty.";
+        $this->data["Special"] .= "<br>The charge flies in straight legs: " . self::CHARGE_RANGE
+            . " hexes and " . self::CHARGE_MANOEUVRES . " manoeuvres, a manoeuvre being each 60"
+            . "&deg; turn taken.";
+        $this->data["Special"] .= "<br>Every " . self::BOOST_POWER_PER_LEVEL . " points of boost"
+            . " power buy one more hex OR one more manoeuvre, spent as the course needs them."
+            . ($boost > 0 ? " <b>Boosted this turn: +" . $boost . ".</b>" : "");
+        $this->data["Special"] .= "<br>The course MUST end at a friendly ship with a"
+            . " Sensor Charge Transceiver or the charge is lost and does no"
+            . " damage.";
+        $this->data["Special"] .= "<br>The receiving transceiver takes 1 point of damage, rolling"
+            . " criticals as normal, for every " . self::SELFDAMAGE_PER_HEXES . " full hexes of"
+            . " range the charge did not use.";
+        $this->data["Special"] .= "<br>Recharges in " . $this->loadingtime . " turns after a"
+            . " recovered charge, but in 1 turn when a charge is lost.";
+    }
+
+    /* The tooltip quotes this turn's boost, so it is per instance and cannot ride the per-class
+       static blueprint. Everything else here is re-read from the live system, so ShipCompactor
+       stripping a value at its default is harmless.
+
+       ⚠️ THE OTHER TWO ARE DISPLAY-ONLY AND THE CLIENT CANNOT DERIVE EITHER (user report
+       2026-09-06: "SCT is also not showing any arcs on normal hover like it should as a weapon").
+       ShipIcon.showWeaponArc sizes every arc through getWeaponReachInHexes(), which reads
+       ->range and ->rangePenalty - and this weapon carries BOTH at 0, meaning "no range limit"
+       and "no range penalty". That works out to a reach of ZERO hexes, and nothing was drawn at
+       all. $arcDisplayRange is the reach to draw instead: the charge's own BASE range, which is
+       the honest answer to "how far does this thing reach" even though it has nothing to do with
+       how far a target sits from the ship. Base rather than boosted, because a hover arc is a
+       property of the mount and the boost is bought per turn.
+
+       $shootsStraight then picks showStraightArcs' STAR OF HEX LINES over a smooth wedge, which
+       is exactly the set of hexes a charge flying along hex axes can launch onto - and it is
+       clipped to the mount's arc, so a 300..60 transceiver draws its three arms and no more.
+       Both are protected on Weapon and reach the client only by being named here. */
+    public function stripForJson(){
+        $strippedSystem = parent::stripForJson();
+
+        $strippedSystem->data            = $this->data;
+        $strippedSystem->shootsStraight  = $this->shootsStraight;
+        $strippedSystem->arcDisplayRange = self::CHARGE_RANGE;
+
+        return $strippedSystem;
+    }
+
+}//endof class SensorChargeTransceiver
+
+    class LightChromaticPulsar extends LinkedWeapon{
+        public $name = "LightChromaticPulsar";
+        public $displayName = "Light Chromatic Pulsar"; //it's not 'paired' in any way, except being usually mounted twin linked - like most fighter weapons...
+        public $animation = "bolt";
+    	public $animationColor = array(140, 210, 255); //pale electric blue
+
+        public $intercept = 2;
+
+        public $loadingtime = 1;
+        public $shots = 2;
+        public $defaultShots = 2;
+		public $priority = 4; //correct for d6+2 and lighter
+
+        public $rangePenalty = 2;
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+        private $damagebonus = 0;
+        
+        public $damageType = "Standard";
+        public $weaponClass = "Electromagnetic";
+
+        /* D16 (WALKERS_OF_SIGMA_PLAN.md 3.13, Stage 14) - THE FLIGHT-WIDE EXCLUSIVITY GROUP. If any
+           craft in the flight fires its Medium Lightning Array, no craft may fire its pulsar this
+           turn, and the reverse. The whole rule lives in MedLightningArrayFtr::planFlightVolley -
+           this class carries the group name so the sweep can find it, and the two members below so
+           it can be told it lost. See that class for why the existing per-CRAFT $exclusive pair
+           cannot express a flight-wide rule. */
+        public $flightExclusiveGroup = 'MapmakerPrimary';
+
+        /* Orders MedLightningArrayFtr cancelled, id => reason. Written during
+           beforeFiringOrderResolution and read a moment later in calculateHitBase, both in the same
+           request on the same object graph - exactly how NeutronBlaster's $isCombined marker travels.
+           WARNING: protected, so an empty array never rides the static blueprint as JSON []. */
+        protected $flightExclusionCancelled = array();
+
+        public function cancelForFlightExclusion($fireOrder, $reason){
+            $this->flightExclusionCancelled[$fireOrder->id] = $reason;
+        }
+
+        function __construct($startArc, $endArc){
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            if (!isset($this->data["Special"])) {
+                $this->data["Special"] = '';
+            } else {
+                $this->data["Special"] .= '<br>';
+            }
+            $this->data["Special"] .= "The flight cannot fire its Light Chromatic Pulsars and its"
+                                   . " Medium Lightning Arrays in the same turn.";
+        }
+
+        /* The losing half of D16. Marked technical rather than silently dropped: the player gets a
+           line saying why the shot did not happen, and letting the parent run would compute a fresh
+           ->needed and un-refuse it. */
+        public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder){
+            if (isset($this->flightExclusionCancelled[$fireOrder->id])){
+                MedLightningArrayFtr::markTechnical(
+                    $this, $fireOrder, $this->flightExclusionCancelled[$fireOrder->id]);
+                return;
+            }
+            parent::calculateHitBase($gamedata, $fireOrder);
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(6, 2);   }
+        public function setMinDamage(){     $this->minDamage = 2;      }
+        public function setMaxDamage(){     $this->maxDamage = 12;      }
+    } //endof LightChromaticPulsar
+
+/* MEDIUM LIGHTNING ARRAY, FIGHTER MOUNT - WALKERS_OF_SIGMA_PLAN.md 3.13 (Stage 14), D15/D16/D24/D25/D26.
+ *
+ * The Mapmaker Sensor Probes' heavy weapon. Three or six probes fire as ONE gun - the flight
+ * concentrates its arrays into a single bolt, and a lone probe's array does nothing at all.
+ *
+ * "Uses EW for lock-on. Effected by DEW. Does not use Flight-Level combat or Offensive Bonus.
+ *  Cannot fire MLA and LCP in same turn. May fire in combined mode on first turn."
+ *
+ * THE CONTROL SHEET (D24) - read from the sheet, nothing inferred:
+ *
+ *                     3-Probe group      6-Probe group
+ *   Guns              1 per 3 craft      1 per 6 craft
+ *   Damage            4d10+12 (16-52)    8d10+12 (20-92)
+ *   Range penalty     -1 per 3 hexes     -1 per 4 hexes
+ *   Fire control      +2 / +4 / +6       +5 / +5 / +4
+ *   Class             Electromagnetic    Electromagnetic
+ *   Mode              Flash              Flash
+ *   Rate of fire      1 per 4 turns      1 per 4 turns
+ *
+ * WARNING: THE FLAT +12 DOES NOT DOUBLE. 8d10+12 is not two lots of 4d10+12, so both profiles are
+ * written out in $damageProfile and neither is derived from the other - the same finding Stage 8
+ * recorded about the Wide Beam's 50% collateral.
+ *
+ * WARNING: THE 6-GROUP IS NOT A STRICT UPGRADE. Its fire control is BETTER against fighters (5 vs 2)
+ * and WORSE against capitals (4 vs 6), so the modes are a real choice. Any "bigger is better"
+ * shortcut in a mode hint, here or on the client, would be wrong.
+ *
+ * WARNING: THIS DOES NOT EXTEND LightningArray, deliberately. MediumLightningArray does (above), and
+ * inheriting that branch would hand a fighter weapon two things it must not have: an entry in the
+ * SYS_WBLA / SYS_WBMLA refit registry a fighter cannot buy from, and
+ * LightningArray::edfSuppressesCollateral(), which is the Wide Beam's exemption from the field rule
+ * below. If that is ever revisited, every `instanceof LightningArray` in the tree has to be re-read.
+ *
+ * FLASH COLLATERAL INSIDE AN ENERGY DRAINING FIELD COSTS THIS CLASS NO CODE AT ALL (D26).
+ * "Flash damage always loses its collateral damage (friend or foe) in Energy Draining Fields, unless
+ * the Lightning Array is boosted by the Wide Beam enhancement" - and that is exactly what Stage 4
+ * built: Weapon::edfSuppressesCollateral() defaults to true and TacGamedata::isHexInEdfField() is
+ * deliberately team-blind, because a field dampening an explosion is a property of the HEX. Wide
+ * Beam is a ship refit Mapmakers cannot buy, so this weapon simply inherits the default and is
+ * silenced in every field on the board, its own fleet's included.
+ *
+ * IT BEGINS THE GAME CHARGED, and that is the DEFAULT rather than an override:
+ * Weapon::getStartLoading() returns a full charge. "May fire in combined mode on first turn" is
+ * therefore the absence of the "does not begin the game fully charged" override, not the presence
+ * of anything.
+ *
+ * LOCK-ON IS THE FLIGHT'S EW ON SHIP RULES, NOT ITS OFFENSIVE BONUS (plan 3.13c, corrected
+ * 2026-09-11 from the rulebook text). One flag, $useFlightEW, built in Stage 12; this weapon is its
+ * only consumer. The flight's OEW is added as a ship's would be, the target's DEW/BDEW/SDEW apply as
+ * the ordinary to-hit penalty they are against a ship, and no OEW doubles the range penalty as usual.
+ * "Does not use Flight-Level combat or Offensive Bonus" is ONE exclusion - flight-level combat is not
+ * an FV concept (Q15). The Light Chromatic Pulsar on the same craft keeps offensive bonus PLUS the
+ * flight's OEW less the target's DEW (minimum 0), and otherwise ignores defensive EW.
+ *
+ * HOW A GROUP IS FORMED (D15). Within ONE flight, this turn's `normal` orders on this weapon are
+ * bucketed by target, called system and firing mode; each bucket forms floor(n / required) complete
+ * groups and every leftover order goes technical. So a flight of six may fire two 3-groups (at the
+ * same or at different targets) or one 6-group; four or five declaring in mode 1 fire one 3-group
+ * and waste the rest, which is the ruling exactly.
+ *
+ * The shape is NeutronBlaster's (per-mode stat arrays plus a "not enough partners, mark technical"
+ * branch) reaching for partners the way HyperplasmaMatrix does (walk the flight's craft, elect a
+ * primary, fully nullify the rest). Two things are NOT copied from those precedents:
+ *
+ *   WARNING: "Damaged craft cannot contribute" is NOT isDestroyed(). HyperplasmaMatrix's
+ *      getAliveFighterCount counts everything not destroyed; this weapon needs the craft at FULL
+ *      health. Copying the precedent's test is the obvious mistake and it is silent - a battered
+ *      flight would simply keep firing at full strength.
+ *
+ *   WARNING: NOTHING ON THE SERVER REFUSES AN OFFENSIVE ORDER FROM AN UNLOADED WEAPON (Stage 8's
+ *      finding), and a 4-turn reload makes that expensive. An order from an array that is not
+ *      charged goes technical here, which is the half a POST cannot edit out.
+ *
+ * $guns AND THE INTERCEPTION ENGINE (trap 11). One order carries the whole 3- or 6-craft discharge,
+ * and $guns stays at the default 1 - the combined shot is ONE order on ONE mount, so
+ * Firing::automateIntercept's `guns - orders` arithmetic already lands on the right number and there
+ * is nothing to pad. The Slicer's game-4306 bug was padding that had to skip manual 'intercept'
+ * orders; this weapon has no padding at all, and $intercept is 0, so it never presents itself as an
+ * interceptor either.
+ *
+ * NO SELF-IMMUNITY, deliberately. HyperplasmaMatrix exempts its own flight from its splash at range
+ * 0 because that is a rule of that weapon; the control sheet grants this one nothing of the kind, so
+ * a Mapmaker flight sharing a hex with its target takes the ordinary 25% collateral like anyone else
+ * - or none at all, if the hex is inside an Energy Draining Field.
+ */
+class MedLightningArrayFtr extends Weapon {
+
+    public $name        = "MedLightningArrayFtr";
+    public $displayName = "Medium Lightning Array";
+    public $iconPath    = "LightningArrayMed.png";
+
+    public $animation      = "bolt";
+    public $animationColor = array(140, 210, 255); //pale electric blue, as the ship-mounted arrays
+
+    public $damageType  = "Flash";
+    public $weaponClass = "Electromagnetic"; //all Walker weaponry is Electromagnetic
+    public $factionAge  = 3;                 //Ancient - matters to several to-hit and EDF rules
+
+    /* Mode ids are referenced from the client (special.js) too - keep the two in step. */
+    const MODE_THREE = 1;
+    const MODE_SIX   = 2;
+
+    public $firingMode  = 1;
+    public $firingModes = array(1 => "3-Probes", 2 => "6-Probes");
+
+    /* Craft that must declare together, at the same target and in the same mode, to form one shot
+       (D15). WARNING: a const rather than a public static - a public static on a weapon class is read
+       back as an instance property by MissileRack::stripForJson's reflection walk and takes every
+       missile ship's payload with it (Stage 11). A const is neither iterated nor serialised. */
+    const CRAFT_REQUIRED = array(1 => 3, 2 => 6);
+
+    public $loadingtime = 4;  //D24: rate of fire 1 per 4 turns. The brief's "2 turns" was a slip (Q14).
+    /* Matches the ship-mounted LightningArray family, whose own value is marked unconfirmed. It only
+       orders simultaneous shots against each other, so a re-stat costs nothing but a re-record. */
+    public $priority    = 6;
+    public $intercept   = 0;  //the sheet gives this mount no intercept rating: it never intercepts
+
+    /* WARNING: THESE TWO MUST EQUAL THE MODE_THREE ROW of the arrays below. They are what the generic
+       "Fire control" and "Range penalty" tooltip lines report before a mode is picked, and
+       changeFiringMode() overwrites them from the arrays on every mode change (both sheets). */
+    public $rangePenalty      = 0.33;                            // -1 per 3 hexes
+    public $rangePenaltyArray = array(1 => 0.33, 2 => 0.25);     // -1 per 3 hexes / per 4 hexes
+    public $fireControl       = array(2, 4, 6);                  // fighters, <=mediums, <=capitals
+    public $fireControlArray  = array(1 => array(2, 4, 6), 2 => array(5, 5, 4));
+
+    /* Plan 3.13c. Flight EW INSTEAD of the offensive bonus, on ship rules: the target's defensive
+       EW is not waived and no OEW means a no-lock penalty. Read in the FighterFlight branch of
+       Weapon::calculateHitBase, mirrored on the client by weaponManager.computeBaseDefenceBreakdown
+       (the waiver) and weaponManager.computeOEW (the lock). */
+    public $useFlightEW = true;
+
+    /* D16 - THE FLIGHT-WIDE EXCLUSIVITY GROUP. Weapons sharing this string on one FLIGHT may not both
+       be fired in one turn: if any craft fires the array, no craft may fire its Light Chromatic
+       Pulsar, and the reverse. WARNING: FLIGHT-WIDE, NOT PER CRAFT, which is why the existing
+       weaponManager.checkConflictingFireOrder / $exclusive pair cannot express it - that one asks the
+       CRAFT (getFighterBySystem) and would happily let probe #2 fire the pulsar while probe #1 fired
+       the array. Declared on the two Mapmaker weapons only, never on Weapon, so every read is a
+       truthy test and no other mount in the game grows a key. */
+    public $flightExclusiveGroup = 'MapmakerPrimary';
+
+    /* THE TWO DAMAGE PROFILES, keyed by firing mode. WARNING: written out independently - the flat
+       +12 is the same in both rows and does NOT double with the dice. */
+    protected $damageProfile = array(
+        1 => array('dice' => 4, 'add' => 12),   //4d10+12,  16-52
+        2 => array('dice' => 8, 'add' => 12),   //8d10+12,  20-92
+    );
+
+    /* What beforeFiringOrderResolution decided about each of THIS mount's orders, keyed by order id.
+       Either one of the two ROLE_ constants or a human-readable refusal. Rebuilt from scratch every
+       turn, never persisted, never serialised. */
+    protected $orderRoles = array();
+    const ROLE_PRIMARY     = '=primary';
+    const ROLE_SUBORDINATE = '=subordinate';
+
+    function __construct($startArc, $endArc){
+        parent::__construct(0, 1, 0, $startArc, $endArc);
+    }
+
+    /* Craft needed to form one shot in $mode. Falls back to the 3-probe requirement rather than to 1,
+       so an unknown mode can never be made to fire a group of one. */
+    public static function craftRequired($mode){
+        $mode = (int)$mode;
+        $table = self::CRAFT_REQUIRED;
+        return isset($table[$mode]) ? $table[$mode] : $table[self::MODE_THREE];
+    }
+
+    /* May this craft contribute to a group? WARNING: FULL HEALTH, not "not destroyed" - see the class
+       comment. A craft carrying so much as one point of damage is out. */
+    public static function isCraftUndamaged($craft){
+        if (!$craft) return false;
+        if ($craft->isDestroyed()) return false;
+        return $craft->getRemainingHealth() >= $craft->maxhealth;
+    }
+
+    /* ---------------------------------------------------------------- damage */
+
+    protected function getProfile($mode){
+        $mode = (int)$mode;
+        return isset($this->damageProfile[$mode])
+             ? $this->damageProfile[$mode]
+             : $this->damageProfile[self::MODE_THREE];
+    }
+
+    /* WARNING: READS THE ORDER'S MODE, NOT THE WEAPON'S. Firing::fireWeapons does NOT call
+       changeFiringMode before fire() - only prepareFiring does, once per order - so by the time the
+       dice are rolled $this->firingMode is whatever the LAST hit-chance pass left behind. One order
+       per mount makes that harmless today; reading the order makes it harmless for good. */
+    public function getDamage($fireOrder){
+        $row = $this->getProfile($fireOrder ? $fireOrder->firingMode : $this->firingMode);
+        return Dice::d(10, $row['dice']) + $row['add'];
+    }
+
+    /* WARNING: these two are called by Weapon::setSystemDataWindow inside a loop that walks
+       $firingModes and calls changeFiringMode() before each pair, filling
+       minDamageArray/maxDamageArray. So $this->firingMode IS the mode being described here - the one
+       place in this class where reading it rather than an order is correct. */
+    public function setMinDamage(){
+        $row = $this->getProfile($this->firingMode);
+        $this->minDamage = $row['dice'] + $row['add'];
+    }
+
+    public function setMaxDamage(){
+        $row = $this->getProfile($this->firingMode);
+        $this->maxDamage = ($row['dice'] * 10) + $row['add'];
+    }
+
+    /* ---------------------------------------------------------------- the flight's volley */
+
+    /* Is this mount able to shoot at all right now? The same test both intercept gates in firing.php
+       make, reused here because nothing on the server stops an UNLOADED weapon from resolving an
+       offensive order - the client's isLoaded is the only gate on that path (Stage 8's finding), and
+       a 4-turn reload that only the client enforced would not be a reload. */
+    protected function isReadyToFire(){
+        return $this->getTurnsloaded() >= $this->getLoadingTime();
+    }
+
+    /* Sort key that puts the EARLIEST-DECLARED order first. Fire order ids are the tac_fireorder
+       auto-increment, so a smaller id was inserted first; a server-made order carries -1 and has no
+       identity at all, and anything non-numeric sorts last rather than first. */
+    protected static function orderSortKey($order){
+        return is_numeric($order->id) ? (int)$order->id : PHP_INT_MAX;
+    }
+
+    /* Fully nullified: no log line, no animation, no missed-shot display. The exact quadruple
+       HyperplasmaMatrix uses, and calculateHitBase / fire below short-circuit on it. */
+    protected static function nullifyOrder($order){
+        $order->shots    = 0;
+        $order->shotshit = 0;
+        $order->needed   = 0;
+        $order->rolled   = 100;
+        $order->pubnotes = "";
+        $order->updated  = true;
+    }
+
+    /* Technical: the shot is not fired, but it stays in the log saying WHY - a wasted order on a
+       4-turn weapon is worth a line. NeutronBlaster's shape, and public because the Light Chromatic
+       Pulsar's own calculateHitBase uses it when the exclusivity contest goes the other way. */
+    public static function markTechnical($weapon, $order, $reason){
+        $order->chosenLocation = 0;
+        $order->needed         = 0;
+        $order->shots          = 0;
+        $order->notes          = "technical fire order - " . $reason;
+        $order->updated        = true;
+        $weapon->doNotIntercept = true;
+    }
+
+    /* THE WHOLE FLIGHT'S VOLLEY, decided from scratch and identically by every array in the flight.
+     * Returns orderId => ROLE_PRIMARY | ROLE_SUBORDINATE | refusal string, covering every array order
+     * in the flight - this mount then applies only its own rows.
+     *
+     * Every instance recomputing the same plan is the HyperplasmaMatrix pattern, and it is what makes
+     * the result independent of the order the hook happens to run in. */
+    protected function planFlightVolley($flight, $gamedata){
+        $plan        = array();
+        $arrayOrders = array();  //every array order in the flight, with its mount and craft
+        $otherKind   = array();  //the flight's OTHER exclusivity-group orders (the pulsars)
+        $arrayFirst  = null;
+        $otherFirst  = null;
+
+        foreach ($flight->systems as $craft){
+            if (!is_object($craft) || empty($craft->systems)) continue;
+            $undamaged = self::isCraftUndamaged($craft);
+
+            foreach ($craft->systems as $sys){
+                if (empty($sys->flightExclusiveGroup)) continue;
+                if ($sys->flightExclusiveGroup !== $this->flightExclusiveGroup) continue;
+                $isArray = ($sys instanceof MedLightningArrayFtr);
+
+                foreach ($sys->fireOrders as $order){
+                    if ($order->type != 'normal' || $order->turn != $gamedata->turn) continue;
+                    $key = self::orderSortKey($order);
+
+                    if ($isArray){
+                        if ($arrayFirst === null || $key < $arrayFirst) $arrayFirst = $key;
+                        $arrayOrders[] = array(
+                            'order' => $order, 'weapon' => $sys, 'craft' => $craft,
+                            'key' => $key, 'undamaged' => $undamaged,
+                        );
+                    } else {
+                        if ($otherFirst === null || $key < $otherFirst) $otherFirst = $key;
+                        $otherKind[] = array('order' => $order, 'weapon' => $sys);
+                    }
+                }
+            }
+        }
+
+        if (empty($arrayOrders)) return $plan;
+
+        /* D16, THE EXCLUSIVITY CONTEST. The kind declared LATER loses the whole turn. The client
+           refuses the second kind before the click lands, so this is only ever reached by a stale or
+           hand-edited POST - but it has to answer deterministically when it is, and "whichever was
+           declared first" is the least surprising answer to give a player. */
+        $arrayLoses = false;
+        if ($otherFirst !== null && $arrayFirst !== null){
+            if ($otherFirst < $arrayFirst){
+                $arrayLoses = true;
+            } else {
+                foreach ($otherKind as $entry){
+                    if (method_exists($entry['weapon'], 'cancelForFlightExclusion')){
+                        $entry['weapon']->cancelForFlightExclusion(
+                            $entry['order'],
+                            "flight is firing its Medium Lightning Arrays this turn"
+                        );
+                    }
+                }
+            }
+        }
+
+        //Deterministic: lowest order id first, ties broken by mount id, so the plan cannot depend on
+        //the order gamedata happened to hand back the craft.
+        usort($arrayOrders, function($a, $b){
+            if ($a['key'] !== $b['key']) return ($a['key'] < $b['key']) ? -1 : 1;
+            if ($a['weapon']->id == $b['weapon']->id) return 0;
+            return ($a['weapon']->id < $b['weapon']->id) ? -1 : 1;
+        });
+
+        //Bucket the eligible orders by what they are actually shooting at, in what mode. Everything
+        //refused for a reason of its own never reaches a bucket.
+        $buckets = array();
+        foreach ($arrayOrders as $entry){
+            $order = $entry['order'];
+
+            if ($arrayLoses){
+                $plan[$order->id] = "flight is firing its Light Chromatic Pulsars this turn";
+                continue;
+            }
+            if (!$entry['undamaged']){
+                $plan[$order->id] = "a damaged probe cannot contribute to a combined array";
+                continue;
+            }
+            if (!$entry['weapon']->isReadyToFire()){
+                $plan[$order->id] = "array not charged";
+                continue;
+            }
+
+            $bucketKey = $order->targetid . '|' . $order->calledid . '|' . (int)$order->firingMode;
+            if (!isset($buckets[$bucketKey])) $buckets[$bucketKey] = array();
+            $buckets[$bucketKey][] = $entry;
+        }
+
+        foreach ($buckets as $bucket){
+            $mode   = (int)$bucket[0]['order']->firingMode;
+            $label  = isset($this->firingModes[$mode]) ? $this->firingModes[$mode] : "combined array";
+            $needed = self::craftRequired($mode);
+            $count  = count($bucket);
+            $full   = (int)floor($count / $needed) * $needed;
+
+            for ($i = 0; $i < $count; $i++){
+                $order = $bucket[$i]['order'];
+                if ($i >= $full){
+                    $plan[$order->id] = "only " . ($count - $full) . " of the " . $needed
+                                      . " probes a " . $label . " needs declared this shot";
+                    continue;
+                }
+                //One primary per complete group; the rest of the group is silent.
+                $plan[$order->id] = (($i % $needed) === 0) ? self::ROLE_PRIMARY : self::ROLE_SUBORDINATE;
+            }
+        }
+
+        return $plan;
+    }
+
+    public function beforeFiringOrderResolution($gamedata){
+        $this->orderRoles = array();
+
+        $flight = $this->getUnit();
+        /* WARNING: A FLIGHT'S SYSTEMS ARE CRAFT and this weapon lives one level further down, so
+           there is no meaningful volley without the flight. A Mapmaker array mounted on a hull would
+           simply never combine - which is the safe failure, and no hull mounts one. */
+        if (!($flight instanceof FighterFlight)) return;
+
+        $plan = $this->planFlightVolley($flight, $gamedata);
+
+        foreach ($this->fireOrders as $order){
+            if ($order->type != 'normal' || $order->turn != $gamedata->turn) continue;
+
+            $role = isset($plan[$order->id]) ? $plan[$order->id] : "order not resolved";
+            $this->orderRoles[$order->id] = $role;
+
+            if ($role === self::ROLE_PRIMARY){
+                $order->shots = 1; //one shot carrying the whole group; the profile comes from the mode
+                continue;
+            }
+            if ($role === self::ROLE_SUBORDINATE){
+                self::nullifyOrder($order);
+                $this->doNotIntercept = true;
+                continue;
+            }
+            self::markTechnical($this, $order, $role);
+        }
+    }
+
+    /* Was this order fully nullified as a subordinate? The exact quadruple nullifyOrder writes -
+       matched rather than re-read from $orderRoles so a second pass cannot resurrect a shot the first
+       pass silenced. */
+    protected static function isNullified($fireOrder){
+        return $fireOrder->shots == 0 && $fireOrder->shotshit == 0
+            && $fireOrder->needed == 0 && $fireOrder->rolled == 100;
+    }
+
+    public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder){
+        if (self::isNullified($fireOrder)){
+            $fireOrder->pubnotes  = "";
+            $fireOrder->updated   = true;
+            $this->doNotIntercept = true;
+            return;
+        }
+        //A technical order has already had its reason written and its shot taken away; letting the
+        //parent run would compute a fresh ->needed and un-refuse it.
+        if (isset($this->orderRoles[$fireOrder->id])
+            && $this->orderRoles[$fireOrder->id] !== self::ROLE_PRIMARY){
+            return;
+        }
+
+        parent::calculateHitBase($gamedata, $fireOrder);
+
+        if ($fireOrder->needed <= 0) return; //the parent's auto-miss marker; do not annotate it
+
+        $needed = self::craftRequired($fireOrder->firingMode);
+        $row    = $this->getProfile($fireOrder->firingMode);
+        $fireOrder->pubnotes .= " [" . $needed . " probes combined, "
+                             . $row['dice'] . "d10+" . $row['add'] . "]";
+    }
+
+    public function fire($gamedata, $fireOrder){
+        if (self::isNullified($fireOrder)) return;
+        parent::fire($gamedata, $fireOrder);
+    }
+
+    public function setSystemDataWindow($turn){
+        parent::setSystemDataWindow($turn);
+        if (!isset($this->data["Special"])) {
+            $this->data["Special"] = '';
+        } else {
+            $this->data["Special"] .= '<br>';
+        }
+        $this->data["Special"] .= "Fires at Flight level: 3 or 6 probes fire their arrays"
+                               . " into one bolt, a lone array cannot fire at all.";
+        foreach ($this->firingModes as $mode => $label){
+            $row = $this->getProfile($mode);
+            $fc  = isset($this->fireControlArray[$mode]) ? $this->fireControlArray[$mode] : $this->fireControl;
+            $rp  = isset($this->rangePenaltyArray[$mode]) ? $this->rangePenaltyArray[$mode] : $this->rangePenalty;
+            $this->data["Special"] .= "<br> - " . $label . ": " . self::craftRequired($mode)
+                                   . " probes, " . $row['dice'] . "d10+" . $row['add']
+                                   . " (FC " . implode("/", $fc) . ")"
+                                   . " (range -" . number_format($rp * 5, 2) . "/hex)";
+        }
+        $this->data["Special"] .= "<br>Every contributing probe must declare at the SAME target in the"
+                               . " SAME mode.";
+        $this->data["Special"] .= "<br>A probe that has taken ANY damage cannot contribute.";
+        $this->data["Special"] .= "<br>The flight cannot fire its Medium Lightning Arrays and its"
+                               . " Light Chromatic Pulsars in the same turn.";
+        $this->data["Special"] .= "<br>Locks on with the flight's own EW instead of its offensive"
+                               . " bonus.";
+    }
+
+}//endof class MedLightningArrayFtr
 
 ?>

@@ -1223,12 +1223,12 @@ public $canOffLine = true;
 
 
 	//decision whether this system can protect from damage - value used only for choosing strongest shield to balance load.
-	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false) {
+	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false, $shooter = null) {
 		$ship = $this->getUnit(); //GTS
 		if($damageWasDealt || $isUnderShield) return 0; //does not protect from overkill damage, just first impact. Also does not protect from internal damage.
 		if($ship->isCloaked) return 0; //shield is not active when cloaked    GTS
 
-		$remainingCapacity = $this->getRemainingCapacity();
+		$remainingCapacity = $this->getCapacityAgainstShooter($this->getRemainingCapacity(), $shooter); //Walkers of Sigma-957: a fleet that has scanned this race cannot be stopped by this pool's last N points
 		$protectionValue = 0;
 		if($remainingCapacity>0){
 			$protectionValue = ($remainingCapacity / $inflictingShots) + $this->armour; //distribute capacity over shots
@@ -1247,7 +1247,7 @@ public $canOffLine = true;
 
 		if($damageToAbsorb<=0) return $returnValues; //nothing to absorb
 
-		$remainingCapacity = $this->getRemainingCapacity();
+		$remainingCapacity = $this->getCapacityAgainstShooter($this->getRemainingCapacity(), $shooter); //Walkers of Sigma-957: a fleet that has scanned this race cannot be stopped by this pool's last N points
 		$absorbedDamage = 0;
 
 		if($remainingCapacity>0) { //else projection does not protect
@@ -1453,7 +1453,7 @@ class TrekShieldFtr extends ShipSystem{
 
 
 	//decision whether this system can protect from damage - value used only for choosing strongest shield to balance load.
-	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false) {
+	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false, $shooter = null) {
 		if($damageWasDealt || $isUnderShield) return 0; //does not protect from overkill damage, just first impact. Also does not protect from internal damage.
 		
 		$remainingCapacity = $this->getRemainingCapacity();
@@ -3707,12 +3707,12 @@ public $name = "TrekShieldProjection";
 	
 	
 	//decision whether this system can protect from damage - value used only for choosing strongest shield to balance load.
-	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false) {
+	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false, $shooter = null) {
 		$ship = $this->getUnit(); //GTS
 		if($damageWasDealt || $isUnderShield) return 0; //does not protect from overkill damage, just first impact. Also does not protect from internal damage.
 		if($ship->isCloaked) return 0; //shield is not active when cloaked    GTS
 		
-		$remainingCapacity = $this->getRemainingCapacity();
+		$remainingCapacity = $this->getCapacityAgainstShooter($this->getRemainingCapacity(), $shooter); //Walkers of Sigma-957: a fleet that has scanned this race cannot be stopped by this pool's last N points
 		$protectionValue = 0;
 		if($remainingCapacity>0){
 			$protectionValue = ($remainingCapacity / $inflictingShots) + $this->armour; //distribute capacity over shots
@@ -3731,7 +3731,7 @@ public $name = "TrekShieldProjection";
 		
 		if($damageToAbsorb<=0) return $returnValues; //nothing to absorb
 		
-		$remainingCapacity = $this->getRemainingCapacity();
+		$remainingCapacity = $this->getCapacityAgainstShooter($this->getRemainingCapacity(), $shooter); //Walkers of Sigma-957: a fleet that has scanned this race cannot be stopped by this pool's last N points
 		$absorbedDamage = 0;
 		
 		if($remainingCapacity>0) { //else projection does not protect
@@ -3808,19 +3808,24 @@ class TrekPhaserKelly extends TrekPhaser{
         public $raking = 10;
         
         public $intercept = 2;
-	    public $priority = 7; //heavy Raking - they are light Raking technically, but among Federation weapons they're heavier ones
+	    public $priority = 6; //heavy Raking - they are light Raking technically, but among Federation weapons they're heavier ones
 		public $priorityAF = 6; //count as moderately strong vs fighters
 		
         public $loadingtime = 1;
 		public $normalload = 2;
-		
+		public $guns = 2;		
+		public $gunsArray = array( 1 => 2, 2=> 3);		
         public $rangePenalty = 0.3; //1.5 per hex.
+        public $rangePenaltyArray = array(1=> 0.3, 2=> 1);		
         public $fireControl = array(3, 3, 3);
+        public $fireControlArray = array(1=> array(3, 3, 3), 2=> array(6, 2, 0));		
 
         public $damageType = "Raking";
+		public $damageTypeArray = array( 1 => "Raking", 2=> "Standard");		
 		public $weaponClass = "Particle";
-		public $firingModes = array( 1 => "Raking");
+		public $firingModes = array( 1 => "Raking", 2=> "AntiFighter");
 		public $uninterceptable = true;
+		private $damageRolled = null;
 
 	 	public function getInterceptRating($turn){
 			return 2;
@@ -3837,15 +3842,35 @@ class TrekPhaserKelly extends TrekPhaser{
 			}
 	
 		public function getDamage($fireOrder){
-        	switch($this->turnsloaded){
-            	case 0:
-            	case 1:
-                	return Dice::d(10)+4;
-			    	break;
-            	default:
-                	return Dice::d(10,2)+14;
-			    	break;
-        	}
+			if($fireOrder->firingMode == 1){
+				switch($this->turnsloaded){
+					case 0:
+					case 1:
+						return Dice::d(10)+4;
+					default:
+						return Dice::d(10,2)+14;
+				}
+			}else if($fireOrder->firingMode == 2){
+
+				if($this->damageRolled == null){ // Roll damage for this firing round
+
+					switch($this->turnsloaded){
+						case 0:
+						case 1:
+							$this->damageRolled = Dice::d(10) + 4;
+							break;
+
+						default:
+							$this->damageRolled = Dice::d(10, 2) + 14;
+							break;
+					}
+				}
+
+				return round($this->damageRolled / 3);
+
+			}else{
+				return 0; // Safety check.
+			}
 		}
 
  		public function setMinDamage(){

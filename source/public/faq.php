@@ -695,9 +695,10 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                         Structure damage equal to the rail's lost hit points <strong>plus 2d10</strong> Matter damage from the resulting debris.</li>
                     <li><strong>Carrier destroyed:</strong> If the whole carrier is destroyed, every docked LCV escapes in the same way — each is forced to launch and takes the
                         rail's damage plus 2d10.</li>
-                    <li><strong>Deployment phase docking:</strong> Because LCVs are the smallest vessels, they may share the carrier's hex during deployment.  You can
-                        deploy an LCV directly onto a chosen rail (it starts the battle docked), place it in the carrier's hex, or un-dock a deploy-docked LCV from the
-                        carrier's "Deploy Flights in Hangar" menu before committing.</li>
+                    <li><strong>Deployment phase docking:</strong> An LCV may not share a hex with another ship during deployment. To start the battle docked,
+                        select the LCV and click its carrier: the DOCK button puts it straight onto a chosen rail without placing it on the map. You can un-dock a
+                        deploy-docked LCV from the carrier's "Deploy Flights in Hangar" menu before committing; it then returns to wherever it was placed, or
+                        waits to be placed.</li>
                 </ul>
             </li>
             <br>

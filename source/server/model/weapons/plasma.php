@@ -2241,6 +2241,8 @@ class HyperplasmaMatrix extends Weapon {
     public $displayName = "Hyperplasma Matrix";
     public $iconPath = "HyperplasmaCutter.png";
 
+	public $factionAge = 4;//Ancient weapon, which sometimes has consequences!
+
     public $damageType  = "Flash";
     public $weaponClass = "Plasma";
     public $firingModes = array(1 => "Flash");
@@ -2411,6 +2413,8 @@ class PlasmaDriver extends Pulse{
         public $displayName = "Plasma Driver";
 		public $iconPath = "PlasmaDriver.png";
 
+		public $factionAge = 4;//Ancient weapon, which sometimes has consequences!
+
         public $animation = "bolt";
         public $animationColor = array(75, 250, 90);
 
@@ -2464,6 +2468,8 @@ class FuserArray extends Plasma{
 
     public $priority = 2;
     public $rangeDamagePenalty = 0.66;
+
+	public $factionAge = 4;//Ancient weapon, which sometimes has consequences!
 		        
     public $loadingtime = 1;			
     public $guns = 2;

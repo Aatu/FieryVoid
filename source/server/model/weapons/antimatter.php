@@ -749,6 +749,8 @@ class AntiprotonGun extends AntimatterWeapon{
         public $animation = "ball";
         public $animationExplosionScale = 0.9;
  		public $repairPriority = 6;//heavy AM weapons get a bit higher priority - this will be relevant for allocating hits by TAG, too
+
+		public $factionAge = 4;//Ancient weapon, which sometimes has consequences!
 		
         public $priority = 2; 
         public $loadingtime = 1;
@@ -761,7 +763,7 @@ class AntiprotonGun extends AntimatterWeapon{
 		public $damageType = "Flash"; 
 	
 		public $rngNoPenalty = 0; //maximum range at which weapon suffers no penalty
-		public $rngNormalPenalty = 0;//maximum range at which weapon suffers regular penalty
+		public $rngNormalPenalty = 100;//maximum range at which weapon suffers regular penalty
 		public $maxX = 25; //maximum value of X
 		public $dmgEquation = '5X+10'; //to be able to automatically incorporate this into weapon description
 
@@ -779,7 +781,7 @@ class AntiprotonGun extends AntimatterWeapon{
 				return $damage ;
             }
 
-        public function setMinDamage(){     $this->minDamage = 10;      }
+        public function setMinDamage(){     $this->minDamage = 15;      }
         public function setMaxDamage(){     $this->maxDamage = 135;      }
 	
 	} //end of class AntimatterWave	
@@ -792,6 +794,8 @@ class AntiprotonGun extends AntimatterWeapon{
         public $animation = "laser";
         public $animationExplosionScale = 0.5;
 		public $repairPriority = 6;//heavy AM weapons get a bit higher priority - this will be relevant for allocating hits by TAG, too
+
+		public $factionAge = 4;//Ancient weapon, which sometimes has consequences!
 		
         public $priority = 8; //that's heavy Raking hit!
 		public $priorityArray = array(1=>8, 2=>2); //heavy Raking in primary mode, Piercing in alternate mode

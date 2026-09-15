@@ -350,6 +350,10 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     <script defer src="client/gamedata.js"></script>
     <script defer src="client/windowevents.js"></script>
     <script defer src="client/mathlib.js"></script>
+    <!-- Walkers of Sigma-957 Stage 7: the client mirror of the Energy Draining Net linking rules,
+         for the movement-phase preview. AFTER mathlib.js, which it calls at runtime. Not loaded by
+         gamelobby.php - there is no map to preview a formation on there. -->
+    <script defer src="client/model/EdfNetLinks.js"></script>
     <script defer src="client/lib/seedRandom.js"></script>
     <script defer src="client/ajaxInterface.js"></script>
     <script defer src="client/ew.js"></script>

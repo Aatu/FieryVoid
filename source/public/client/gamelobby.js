@@ -174,6 +174,9 @@ window.gamedata = {
 			case 'The System':
 				powerRating = 'Tier Ancients, Custom faction, Playtest';
 				break;
+			case 'The Triad':
+				powerRating = 'Tier Ancients';
+				break;
 			case 'Thirdspace':
 				powerRating = 'Tier Ancients, Custom faction';
 				break;
@@ -191,6 +194,9 @@ window.gamedata = {
 				break;
 			case 'Vree Conglomerate':
 				powerRating = 'Tier 1; League Faction';
+				break;
+			case 'Walkers of Sigma-957':
+				powerRating = 'Tier Ancients';
 				break;
 			case 'Yolu Confederation':
 				powerRating = 'Tier 1; Minor Faction';
@@ -1021,8 +1027,10 @@ window.gamedata = {
 		var totalPointsSpent = 0;
 		var units10 = 0;
 		var units33 = 0;
+		var units50 = 0;
 		var points10 = 0;
 		var points33 = 0;
+		var points50 = 0;
 		var totalU = 0;
 		var totalR = 0;
 		var jumpDrivePresent = false;
@@ -1059,6 +1067,30 @@ window.gamedata = {
 		var hangarConversionsAS = 0; //How many converted hangar slots TO Assault Shuttle slots.
 		var totalFtrOther = new Array();//total other small craft
 		var smallCraftUsed = new Array();//small craft sizes that happen to be present, whether as hangar space or actual craft
+		/* Small-craft categories whose craft may be taken WITHOUT hangar space, and whose declared
+		   capacity is therefore reported with a 50% MINIMUM and no maximum. Mapmaker Sensor Probes
+		   are the only one today.
+
+		   ⚠️ SEEDED FROM A DECLARED LIST, NOT DERIVED FROM THE FLEET ALONE. The half-full rule has to
+		   bite on an EMPTY carrier - a Traveler carrying no probes at all is exactly what "at least
+		   half full" exists to forbid - and a set built only from the craft actually bought is empty
+		   in precisely that case. The flights' own $noHangarRequired flag then ADDS to this below,
+		   which covers probes bought with no carrier in the fleet at all; the two must name the same
+		   category string, and MapmakerProbes::$hangarRequired is where that string comes from.
+		   See the small-craft report loop below, and WALKERS_OF_SIGMA_PLAN.md 3.13. */
+		var noHangarMaxCraftTypes = ['Mapmaker Probes'];
+		/* WALKERS_OF_SIGMA_PLAN.md 3.14 (Stage 16) - DOCKED SHIPS COUNT TOWARD A DOCKING BAY'S CATEGORY
+		   (user, 2026-09-11): "purchasing Waymarker (24), Pathfinder/Guideships (12) and Scribes (4) can
+		   help meet Traveler hangar capacity in Fleet Checker, along with Mapmaker fighters as usual.
+		   Since 24 of its 36 fighter slots are associated with its Aft Docking Bay system."
+		   So every bought ship a Docking Bay in the fleet can take adds its BOX cost to that bay's
+		   category ($fleetCheckCategory), CAPPED at the fleet's total Docking Bay boxes - a ship only
+		   fills the slots it could physically sit in, so a lone Pathfinder cannot satisfy its own
+		   6-probe minimum, and a second Traveler's worth of ships adds nothing without a second
+		   Traveler. The Waymarker counts although it cannot dock in play yet (3.14a deferred). */
+		var dockingBayPools = {};     //category -> {capacity, classes: {phpclass: true}}
+		var fleetShipsForBays = [];   //every non-flight unit's {phpclass, unitSize}
+		var dockedShipBoxesByCategory = {};   //category -> boxes the report credits to docked ships
 		var totalShuttleCapacity = 0; //sum of default shuttle/flyer pool capacity across the fleet (excludes minesweeping shuttles)
 		var defaultShuttleKeyList = []; //distinct lship.fighters keys used by default shuttle pools (e.g. "shuttles", "minbari flyers")
 
@@ -1076,6 +1108,20 @@ window.gamedata = {
 			//rowPointCost, not pointCost: a bulk row (mines, OSATs) is N units, and this
 			//figure is what stands in for the fleet limit when the fleet has none.
 			totalPointsSpent += gamedata.rowPointCost(lship);
+
+			//Docking Bays and the ships that could fill them (see dockingBayPools above) - credited
+			//to the bay's category in the small-craft report below.
+			if (!lship.flight) {
+				fleetShipsForBays.push({ phpclass: String(lship.phpclass), unitSize: lship.unitSize });
+				for (var dbk in lship.systems) {
+					var dbSys = lship.systems[dbk];
+					if (!dbSys || !dbSys.isDockingBay || !dbSys.fleetCheckCategory) continue;
+					var dbPool = dockingBayPools[dbSys.fleetCheckCategory]
+						|| (dockingBayPools[dbSys.fleetCheckCategory] = { capacity: 0, classes: {} });
+					dbPool.capacity += parseInt(dbSys.maxhealth || 0, 10);
+					(dbSys.dockableShipClasses || []).forEach(function (cls) { dbPool.classes[cls] = true; });
+				}
+			}
 
 			// 10%/33% deployment brackets use the BASE ship cost only (no ammo, no
 			// enhancements). lship.pointCost is overwritten at purchase to the post-
@@ -1098,6 +1144,10 @@ window.gamedata = {
 			if (lship.limited == 33) {
 				points33 += bracketBaseCost;
 				units33 += 1;
+			}
+			if (lship.limited == 50) {
+				points50 += bracketBaseCost;
+				units50 += 1;
 			}
 			totalEnhancementsValue += lship.pointCostEnh;
 			var vLetter = gamedata.variantLetter(lship);
@@ -1417,6 +1467,33 @@ window.gamedata = {
 				//them entirely; totalShips++ above still counts them as a unit present.
 				var isShadowFighterFlight = (lship.faction == "Shadow Association");
 
+				/* ⭐ WALKERS_OF_SIGMA_PLAN.md §3.12 (Stage 13) - "They do not require hangars at all
+				   in Fleet Checker (so can be taken even if the fleet does not have enough hangar
+				   space)" (user, original rules text). The craft is still a UNIT PRESENT
+				   (totalShips++ ran above) and still counts for points, tiers and every other fleet
+				   rule.
+
+				   ⭐⭐ IT LIFTS THE MAXIMUM, NOT THE ACCOUNTING (user ruling, 2026-09-10). The craft
+				   is still TALLIED against its own category - a Mapmaker sets $hangarRequired to
+				   'Mapmaker Probes', which is the same string the Walker hulls declare their capacity
+				   in - so that buying probes is what FILLS a Walker's hangar. What the flag removes
+				   is the "allowed up to N" ceiling, so a fleet with no carrier at all still passes.
+				   ⚠️ Before this the flag skipped the tally ENTIRELY (which is what the Shadow skip
+				   above still does), and the two halves of the rule never met: the Walker hulls
+				   declared Mapmaker Probes capacity that nothing could ever fill, so the 50%
+				   full-hangar rule was silently unenforceable on every one of them.
+
+				   ⚠️ noHangarRequired IS A FLEET-BUILDING FLAG AND NOTHING ELSE. It is declared on
+				   the hull (MapmakerProbes) and rides the static blueprint verbatim, exactly as
+				   Stage 11's unTargetable does. It does NOT make the craft hangar-less in play: a
+				   Mapmaker still fills boxes the moment a Traveler carries one, which is what
+				   Stage 15's docking bay depends on, so HangarOps is deliberately not taught about
+				   it. */
+				var noHangarRequired = Boolean(lship.noHangarRequired);
+				if (noHangarRequired && smallCraftSize != '' && noHangarMaxCraftTypes.indexOf(smallCraftSize) === -1) {
+					noHangarMaxCraftTypes.push(smallCraftSize);
+				}
+
 				//now translate size into hangar space used...
 				if (smallCraftSize != '' && !isShadowFighterFlight) {
 					if (lship.customFtrName) {
@@ -1461,6 +1538,19 @@ window.gamedata = {
 				for (var a in lship.systems) {
 					var sSystem = lship.systems[a];
 					if (sSystem.name == 'jumpEngine') jumpDrivePresent = true;
+
+					/* ⭐ A FLIGHT'S ENGINES ARE ONE LEVEL DOWN (WALKERS_OF_SIGMA_PLAN.md §3.12,
+					   Stage 13). lship.systems on a flight is a list of CRAFT and their systems are
+					   inside those, so this scan answered "no jump engine" for a fleet of Mapmakers
+					   - which each carry one and whose whole point is that they arrive under their
+					   own power. The fleet-wide "at least one is required" rule is the only reader,
+					   and it should be told the truth. Free for every other flight in the game:
+					   they have no jumpEngine to find. */
+					if (sSystem.fighter && sSystem.systems) {
+						for (var fs in sSystem.systems) {
+							if (sSystem.systems[fs].name == 'jumpEngine') jumpDrivePresent = true;
+						}
+					}
 				}
 			}
 			if (lship.shipSizeClass >= 3) capitalShips++;
@@ -1583,6 +1673,7 @@ window.gamedata = {
 
 		var limit10 = Math.floor(calcPoints * 0.1);
 		var limit33 = Math.floor(calcPoints * 0.33);
+		var limit50 = Math.floor(calcPoints * 0.5);
 		/*if (calcPoints == -1) { //If unlimited points, assess against points spent so far.
 			limit10 = totalPointsSpent;
 			limit33 = totalPointsSpent;
@@ -1592,7 +1683,7 @@ window.gamedata = {
 		//"one single ship is allowed to break limit" exception). The old
 		//oneOverAllowed flag that gated this was always false (its only writes
 		//are commented out, since Restricted/Limited pools are checked
-		//separately), so the units10/units33 == 1 test alone is the live rule.
+		//separately), so the units10/units33/units50 == 1 test alone is the live rule.
 		checkResult += "<br><u><b>Deployment restrictions:</b></u><br><br>";
 		checkResult += " - 10% bracket: " + points10 + "/" + limit10 + ": ";
 		if (points10 <= limit10) {
@@ -1617,6 +1708,20 @@ window.gamedata = {
 				problemFound = true;
 			}
 		}
+		checkResult += "<br>";
+		checkResult += " - 50% bracket: " + points50 + "/" + limit50 + ": ";
+		if (points50 <= limit50) {
+			checkResult += R_OK;
+		} else {
+			if (units50 == 1) { //only 1 unit - allowed to break limit
+				checkResult += "<span style='color: #33cc33;'>OK</span> (one single ship is allowed to break limit)";
+			} else {
+				checkResult += "<b><span style='color: red;'>FAILED!</span></b> (too many points in this deployment bracket)";
+				problemFound = true;
+			}
+		}
+		//The escort rule is a rule about RESTRICTED (10%) units only - it must not
+		//learn about the 33% or 50% brackets.
 		if (points10 > 0 && totalShips < 2) {
 			checkResult += "<br>Restricted (10%) ship present without escort! Such a rare ship needs to be accompanied by at least one other unit, unless it's Dargan or a Minbari ship.";
 			problemFound = true;
@@ -1921,17 +2026,56 @@ window.gamedata = {
 			//Title-case the slot key for display ("shuttles" → "Shuttles", "minesweeping
 			//shuttles" → "Minesweeping Shuttles"). Mirrors the pattern used in shipwindow.js.
 			var scLabel = scSize.split(' ').map(function (w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join(' ');
+			/* Two categories carry a MINIMUM as well as (or instead of) a maximum, and they are not the
+			   same rule:
+			     - 'Fighter Squadrons' are treated as fighters, so half the capacity must be filled. Kept
+			       EXACTLY as it was, unrounded halving included: those capacities are fractional (0.5 on
+			       several Star Wars hulls) and rounding them up would move existing verdicts.
+			     - a $noHangarRequired category (Mapmaker Probes) has NO maximum at all, and the same 50%
+			       minimum the ordinary fighter rule uses - Math.ceil, matching minFtrRequired above.
+			       Walker capacities are 6/18/36 so the rounding never bites; it is written this way
+			       because it IS the fighter rule, applied to a custom category.
+			   Every other custom category is unchanged: no minimum, "allowed up to N" (the Torvalus
+			   Stiletto and the rest). WALKERS_OF_SIGMA_PLAN.md 3.13. */
+			//Docking Bays (3.14): credit this category with the box cost of every bought ship its
+			//bays could take, capped at the boxes those bays actually have.
+			if (dockingBayPools[scSize]) {
+				var dbp = dockingBayPools[scSize];
+				var bayShipBoxTotal = 0;
+				fleetShipsForBays.forEach(function (fs) {
+					if (dbp.classes[fs.phpclass]) bayShipBoxTotal += window.HangarShared.shipBoxesForUnitSize(fs.unitSize);
+				});
+				var credited = Math.min(bayShipBoxTotal, dbp.capacity);
+				if (credited > 0) {
+					totalFtrCurr += credited;
+					dockedShipBoxesByCategory[scSize] = credited;
+				}
+			}
+			var scNoMaximum = (noHangarMaxCraftTypes.indexOf(scSize) !== -1);
+			var scMinRequired = 0;
+			if (scSize == 'Fighter Squadrons') {
+				scMinRequired = totalHangarCurr / 2;
+			} else if (scNoMaximum) {
+				scMinRequired = Math.ceil(totalHangarCurr / 2);
+			}
+
 			checkResult += " - " + scLabel + ": " + totalFtrCurr;
-			if (scSize != 'Fighter Squadrons') { //standard
+			if (dockedShipBoxesByCategory[scSize]) {
+				checkResult += " (incl. " + dockedShipBoxesByCategory[scSize] + " Docking Bay boxes of ships)";
+			}
+			if (scNoMaximum) {
+				checkResult += (scMinRequired > 0)
+					? " (at least " + scMinRequired + " required, no maximum)"
+					: " (no hangar space required)";
+			} else if (scSize != 'Fighter Squadrons') { //standard
 				checkResult += " (allowed up to " + totalHangarCurr + ")";
 			} else { //Fighter Squadrons get treated as fighters - eg. half are required
-				var halfH = totalHangarCurr / 2;
-				checkResult += " (allowed between " + halfH + " and " + totalHangarCurr + ")";
+				checkResult += " (allowed between " + scMinRequired + " and " + totalHangarCurr + ")";
 			}
-			if (totalFtrCurr > totalHangarCurr) { //small craft total is not within limits
+			if (!scNoMaximum && totalFtrCurr > totalHangarCurr) { //small craft total is not within limits
 				checkResult += R_TOOMANY;
 				problemFound = true;
-			} else if ((scSize == 'Fighter Squadrons') && (totalFtrCurr < totalHangarCurr / 2)) {
+			} else if (scMinRequired > 0 && totalFtrCurr < scMinRequired) {
 				checkResult += R_FAILURE;
 				problemFound = true;
 			} else {

@@ -543,11 +543,9 @@ window.SelectFromShips = function () {
                 return gamedata.isTerrain(s.shipSizeClass, s.userid) || (s.Huge > 0 && s.Huge <= 3);
             });
 
-            //LCVs are exempt from the same-hex occupancy block (mirrors
-            //DeploymentPhaseStrategy.onHexClicked) so an undocked LCV can be placed
-            //in the carrier's hex. Terrain still blocks them.
-            var selIsLcvUnit = !this.phaseStrategy.selectedShip.flight && !this.phaseStrategy.selectedShip.mine
-                && String(this.phaseStrategy.selectedShip.hangarRequired || '').toLowerCase() === 'lcvs';
+            //⚠️ LCVs are no longer exempt from the same-hex block (revised 2026-09-11, the Docking
+            //Bay's rule - mirrors DeploymentPhaseStrategy.onHexClicked): over a carrier's hex an LCV
+            //gets the DOCK button below, never DEPLOY.
 
             /* REINFORCEMENTS_PLAN.md STAGE 7 - an arrival bypasses BOTH blocks, exactly as it does
                in DeploymentPhaseStrategy.onHexClicked (which this whole check is a copy of - keep
@@ -558,7 +556,7 @@ window.SelectFromShips = function () {
                 isBlocked = false;
             } else if (hasTerrain) {
                 isBlocked = true;
-            } else if (!(this.phaseStrategy.selectedShip.mine || this.phaseStrategy.selectedShip.flight || selIsLcvUnit)) {
+            } else if (!(this.phaseStrategy.selectedShip.mine || this.phaseStrategy.selectedShip.flight)) {
                 isBlocked = shipsInHex.some(function (s) { return !(s.mine || s.flight); });
             }
 
@@ -662,8 +660,8 @@ window.SelectFromShips = function () {
                 }
             }
 
-            // LCV Rails: an LCV can share the carrier's deploy hex (Issue 2), and
-            // deploy-docks onto a free LCV rail. When an LCV is the selected ship
+            // LCV Rails: an LCV deploy-docks onto a free LCV rail rather than sharing
+            // the carrier's hex, which it may not (2026-09-11). When an LCV is the selected ship
             // and the clicked ship(s) include LCV-capable carriers with a free rail,
             // expose a DOCK button. Exactly ONE free rail total → auto-queue; more
             // than one → the per-rail picker dialog so the player chooses the exact
@@ -703,6 +701,41 @@ window.SelectFromShips = function () {
                             } else if (window.confirm
                                 && typeof window.confirm.lcvDeployDockCarrierPicker === 'function') {
                                 window.confirm.lcvDeployDockCarrierPicker(selLcv, lcvCarriers);
+                            }
+                            this.destroy();
+                        }.bind(this)
+                    });
+                }
+            }
+
+            // WALKERS_OF_SIGMA_PLAN.md 3.14 (D30): a Scribe / Pathfinder / Guideship may START the
+            // battle inside a friendly carrier's Docking Bay. DOCK only - the DEPLOY button above
+            // stays refused over an occupied hex, because two hulls still may not share one.
+            var selBayShip = this.phaseStrategy.selectedShip;
+            if (selBayShip && !selBayShip.flight && !selBayShip.mine
+                && window.DeploymentDock
+                && typeof window.DeploymentDock.carrierAcceptsBayShipDeployDock === 'function') {
+                var bayCarriers = this.ships.filter(function (s) {
+                    return window.DeploymentDock.carrierAcceptsBayShipDeployDock(s, selBayShip);
+                });
+                if (bayCarriers.length > 0) {
+                    actions.push({
+                        kind: 'dock',
+                        label: 'DOCK ' + selBayShip.name.toUpperCase(),
+                        note: bayCarriers.length > 1 ? bayCarriers.length + ' carriers' : '',
+                        onActivate: function () {
+                            if (bayCarriers.length === 1) {
+                                if (window.DeploymentDock.queueBayShipDeployDock(bayCarriers[0], selBayShip)) {
+                                    if (typeof window.refreshDeploymentUIForDeployStart === 'function') {
+                                        window.refreshDeploymentUIForDeployStart();
+                                    }
+                                    if (typeof window.selectShipInDeploymentPhase === 'function') {
+                                        window.selectShipInDeploymentPhase(bayCarriers[0]);
+                                    }
+                                }
+                            } else if (window.confirm
+                                && typeof window.confirm.bayShipDeployDockCarrierPicker === 'function') {
+                                window.confirm.bayShipDeployDockCarrierPicker(selBayShip, bayCarriers);
                             }
                             this.destroy();
                         }.bind(this)

@@ -5,7 +5,7 @@ class triadArchangel extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 6400;
-		$this->faction = "";
+		$this->faction = "The Triad";
         $this->phpclass = "triadArchangel";
         $this->shipClass = "Order: Archangel";
         $this->imagePath = "img/ships/triadArchangel.png";
@@ -29,8 +29,12 @@ class triadArchangel extends BaseShip{
         $this->pivotcost = 4;
 		$this->iniativebonus = 3 *5;
 
-		$this->notes = "Can control 12 fighters";		
-		$this->notes .= '<br>Triad Capital Ship'; 
+		$this->notes = 'Triad Capital Ship'; 
+
+		$this->fighters = array("Triad Fighter"=>12);
+
+		/*Triad use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'TriadShip');
 
 		$this->addPrimarySystem(new Reactor(8, 25, 0, 0));//armor, structure, power req, output
         $this->addPrimarySystem(new CnC(8, 24, 0, 0));
@@ -58,7 +62,7 @@ class triadArchangel extends BaseShip{
 		$this->addAftSystem(new GraviticThruster(8, 20, 0, 6, 2));
 		$this->addAftSystem(new GraviticThruster(8, 20, 0, 6, 2));
         $this->addAftSystem(new PhotonicPrismBeam(8, 24, 8, 90, 270));	
-		$this->addAftSystem(new JumpEngine(8, 25, 5, 8));        
+		$this->addAftSystem((new JumpEngine(8, 25, 5, 8))->markAncient());        
 
         $this->addLeftSystem(new GraviticThruster(8, 25, 0, 8, 3)); 		
         $this->addLeftSystem(new PhotonicPrismBeam(8, 24, 8, 210, 30));	

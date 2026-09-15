@@ -120,7 +120,14 @@ const ActionButton = styled.div`
         }
     `}
 
-    ${props => props.$variant === 'activate' && props.$isWeapon && `
+    /* An ordinary weapon's Fire button is orange whether or not it has fired: that colour is the
+       "this menu belongs to a weapon" signal, not a state readout, and it stays that way.
+       ⭐ A TOGGLE weapon ($isToggle - activationIsToggle) is the exception. Its two buttons are the
+       two states of ONE switch, so the button that is NOT the current state has to fall through to
+       the idle chrome above, the same muted blue its opposite number wears - otherwise both sides
+       are lit and nothing on the box says which mode the array is actually in (user request
+       2026-09-06, Wide Beam / Normal Beam). */
+    ${props => props.$variant === 'activate' && props.$isWeapon && !(props.$isToggle && !props.$active) && `
         background: #7a3b00e5;
         color: #fff3e0;
         border: 1px solid #ff9900b6;
@@ -253,8 +260,14 @@ class SystemActivation extends Component {
     render() {
         const { ship, system } = this.props;
 
-        // Robust detection of active state
-        const isActive = system.active || (system.weapon && weaponManager.hasFiringOrder(ship, system));
+        /* Robust detection of active state.
+           ⚠️ For most weapons this box IS the fire button, so "has a fire order" reads as active.
+           A weapon whose Activate/Deactivate pair is a persistent TOGGLE with nothing to do with
+           declaring a shot opts out with `activationIsToggle` - otherwise its button would light up
+           the moment the player declared anything, whichever way the toggle was actually set. The
+           Wide-Beam Lightning Array is the first (WALKERS_OF_SIGMA_PLAN.md 3.3). */
+        const isActive = system.active
+            || (system.weapon && !system.activationIsToggle && weaponManager.hasFiringOrder(ship, system));
 
         //systems may supply their own button labels (e.g. Kirishiac Orbital: Dock / Deploy)
         const customActivate = typeof system.getActivateLabel === 'function' ? system.getActivateLabel() : null;
@@ -267,7 +280,12 @@ class SystemActivation extends Component {
         //with one disabled.
         const single = Boolean(system.singleActivationButton);
         const showActivate = !single || this.canActivate();
-        const showDeactivate = !system.weapon && (!single || this.canDeactivate());
+        /* A weapon normally gets NO deactivate button: for a weapon this box IS the fire button,
+           and a declared shot is withdrawn with the top-row "remove fire order" control instead.
+           A weapon whose pair is a persistent TOGGLE opts out with activationIsToggle (the same
+           flag as isActive above) - otherwise it could be switched ON and never OFF, which is
+           what the Wide-Beam Lightning Array hit (user report 2026-09-06). */
+        const showDeactivate = (!system.weapon || system.activationIsToggle) && (!single || this.canDeactivate());
 
         //Opt-in purple chrome (see PURPLE above). A weapon menu keeps its red signal either way.
         const isPurple = Boolean(system.activationMenuPurple) && !system.weapon;
@@ -278,7 +296,7 @@ class SystemActivation extends Component {
                 <Row $isPurple={isPurple}>
                     <Controls>
                         {showActivate && (
-                            <ActionButton onClick={() => this.handleActivate()} onContextMenu={(e) => this.handleActivateAll(e)} disabled={!this.canActivate()} $active={isActive} $variant="activate" $isWeapon={system.weapon} $isPurple={isPurple}>{activateLabel}</ActionButton>
+                            <ActionButton onClick={() => this.handleActivate()} onContextMenu={(e) => this.handleActivateAll(e)} disabled={!this.canActivate()} $active={isActive} $variant="activate" $isWeapon={system.weapon} $isToggle={Boolean(system.activationIsToggle)} $isPurple={isPurple}>{activateLabel}</ActionButton>
                         )}
                         {showDeactivate && (
                             <ActionButton onClick={() => this.handleDeactivate()} onContextMenu={(e) => this.handleDeactivateAll(e)} disabled={!this.canDeactivate()} $active={!isActive} $variant="deactivate" $isPurple={isPurple}>{deactivateLabel}</ActionButton>

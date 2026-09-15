@@ -78,7 +78,44 @@ window.FirePhaseStrategy = function () {
             return system instanceof Weapon && system.hextarget === true;
         });
 
-        if (gamedata.rules && gamedata.rules.friendlyFire === 1 || hexWeaponSelected) {
+        /* WALKERS OF SIGMA-957 (WALKERS_OF_SIGMA_PLAN.md 3.8, Stage 10B follow-up - user report
+           2026-09-10, game 4344): AN ELINT KEEPS THE SELECTION WHILE ITS LATE EW WINDOW IS OPEN,
+           which is the only thing that lets it spend a saved point on SOEW/SDEW.
+
+           THE MISSING BUTTONS WERE NEVER THE MENU'S FAULT. ShipTooltipFireMenu already borrows the
+           WHOLE Initial Orders EW button set (see its getAllButtons), so SOEW, SDEW, DIST, BDEW and
+           Detect Stealth were all present and all correctly conditioned. What they could not get
+           was a MENU IN WHICH THEY APPLY: SOEW/SDEW ask for isFriendly AND notSelf, and in these
+           two phases clicking one of my own ships RE-SELECTED it, so the source and the target were
+           forever the same unit. The player was left with exactly the two that shape allows - CCEW
+           (isSelf) and OEW/DIST on an enemy, which route through targetShip instead - and every
+           friendly-target ELINT function was unreachable. isElint was fine all along.
+
+           InitialPhaseStrategy.selectShip has carried the same branch for years (its
+           isElintOrAlliedEW test); this is that rule, narrowed to the window Stage 10B opened.
+
+           NARROWED DELIBERATELY. Gating on ew.isLateEwWindowOpen rather than on isElint alone means
+           an ordinary Firing phase - no EW Detector, or the allowance already spent - clicks exactly
+           as it always has, so a fleet with an ELINT in it does not silently acquire a
+           double-click-to-select in the phase where players are targeting weapons. The "Select ship"
+           button is the escape hatch, identically to Initial Orders. */
+        var canSourceLateEw = this.selectedShip && ship !== this.selectedShip
+            && window.ew && ew.isLateEwWindowOpen(this.selectedShip)
+            && (shipManager.isElint(this.selectedShip) || shipManager.hasSpecialAbility(this.selectedShip, "alliedEW"));
+
+        if (canSourceLateEw) {
+            var menu = new ShipTooltipFireMenu(this.selectedShip, ship, this.gamedata.turn);
+            var ballisticsMenu = new ShipTooltipBallisticsMenu(this.shipIconContainer, this.gamedata.turn, true, this.selectedShip);
+            menu.addButton("selectShip",
+                function () {
+                    return this.selectedShip !== ship;
+                },
+                function () {
+                    PhaseStrategy.prototype.setSelectedShip.call(this, ship);
+                    this.showShipEW(this.selectedShip);
+                }.bind(this), "Select ship");
+            if (!gamedata.showLoS) this.showShipTooltip(ship, payload, menu, false, ballisticsMenu);
+        } else if (gamedata.rules && gamedata.rules.friendlyFire === 1 || hexWeaponSelected) {
 
             //if(gamedata.isMyorMyTeamShip(this.selectedShip) && weaponManager.hasShipWeaponsSelected()){            
             if (gamedata.isMyorMyTeamShip(this.selectedShip)) {
