@@ -34,10 +34,11 @@ window.HangarShared = (function () {
         return !!(sys && (sys.isCatapult || sys.name === 'catapult'));
     }
 
-    // Effective capacity in BOXES: a catapult is a single-fighter rail (flat 1,
-    // its extra boxes are structural HP and it operates regardless of damage);
-    // an ordinary hangar/rail is maxhealth minus damage that got past armour.
-    // Mirrors HangarOps::effectiveCapacity (PHP).
+    // Effective capacity in BOXES FOR FIGHTERS: a catapult is a single-fighter rail
+    // (flat 1, its extra boxes are structural HP and it operates regardless of damage);
+    // an ordinary hangar/rail is maxhealth minus damage that got past armour; a Docking
+    // Bay also nets out the ships it holds and reads 0 on a turn its ships have claimed
+    // it (one craft type per turn). Mirrors HangarOps::effectiveCapacity (PHP).
     function effectiveHangarBoxes(hangar) {
         if (!hangar) return 0;
         if (isCatapultSys(hangar)) return 1;
@@ -47,7 +48,85 @@ window.HangarShared = (function () {
                 netDamage += Math.max(0, parseInt(d.damage || 0, 10) - parseInt(d.armour || 0, 10));
             });
         }
-        return Math.max(0, parseInt(hangar.maxhealth, 10) - netDamage);
+        var boxes = Math.max(0, parseInt(hangar.maxhealth, 10) - netDamage);
+        if (isDockingBaySys(hangar)) {
+            if (bayClaimedByShips(hangar)) return 0;
+            boxes = Math.max(0, boxes - bayShipBoxesHeld(hangar));
+        }
+        return boxes;
+    }
+
+    // ---- WALKERS_OF_SIGMA_PLAN.md 3.14 (Stage 16): the Docking Bay ----
+    // A Hangar (name 'hangar', so every fighter helper here still sees it) that also docks
+    // whole SHIPS. Committed ships are bay.shipsDocked [{shipId, phpclass, boxes, dockTurn}]
+    // with a server-stamped box cost; a QUEUED ship order carries its own `boxes` (stamped
+    // by the client when it queues, ignored by the server, which prices the ship itself) so
+    // these stay pure.
+    function isDockingBaySys(sys) {
+        return !!(sys && sys.isDockingBay);
+    }
+
+    // Box cost of one ship - its unitSize read exactly as a superheavy fighter's (D18).
+    function shipBoxesForUnitSize(unitSize) {
+        return Math.ceil(boxesPerCraftFromUnitSize(unitSize));
+    }
+
+    function sumOrderBoxes(orders) {
+        var n = 0;
+        if (Array.isArray(orders)) orders.forEach(function (o) { n += parseInt((o && o.boxes) || 0, 10); });
+        return n;
+    }
+
+    // Boxes the bay's ships hold or have claimed: committed + queued deploy-docks + queued docks.
+    function bayShipBoxesHeld(bay) {
+        if (!isDockingBaySys(bay)) return 0;
+        var n = 0;
+        if (Array.isArray(bay.shipsDocked)) {
+            bay.shipsDocked.forEach(function (e) { n += parseInt((e && e.boxes) || 0, 10); });
+        }
+        // Stage 19 (3.14a): a ship RIDING the hull mid-manoeuvre has already claimed its boxes and
+        // keeps them for the whole ride - the arrival next turn must have somewhere to go. Mirrors
+        // HangarOps::dockedShipBoxes, which counts shipsAttaching for the same reason.
+        if (Array.isArray(bay.shipsAttaching)) {
+            bay.shipsAttaching.forEach(function (e) { n += parseInt((e && e.boxes) || 0, 10); });
+        }
+        return n + sumOrderBoxes(bay.pendingBayShipDeployStartOrders) + sumOrderBoxes(bay.pendingBayShipDockOrders);
+    }
+
+    // May $bay take $ship at all? Mirrors HangarOps::bayDocksShipClass - the class is simply listed
+    // or it is not. (Until Stage 19 the Waymarker was additionally refused here, because its
+    // two-turn procedure was deferred; it now docks like anything else, just slowly.)
+    function bayDocksShipClass(bay, ship) {
+        if (!isDockingBaySys(bay) || !ship || ship.flight) return false;
+        var cls = String(ship.phpclass || '');
+        return Array.isArray(bay.dockableShipClasses) && bay.dockableShipClasses.indexOf(cls) !== -1;
+    }
+
+    // Does this class use the two-turn ride (WALKERS_OF_SIGMA_PLAN.md 3.14a)? Mirrors
+    // HangarOps::bayShipIsTwoTurn. Read to LABEL a row and word a confirmation, never to refuse one.
+    function bayShipIsTwoTurn(bay, phpclass) {
+        return !!(bay && Array.isArray(bay.twoTurnShipClasses)
+            && bay.twoTurnShipClasses.indexOf(String(phpclass || '')) !== -1);
+    }
+
+    // One craft TYPE per turn (D17): queued ship dock/launch orders claim the bay for ships...
+    function bayClaimedByShips(bay) {
+        if (!isDockingBaySys(bay)) return false;
+        // Stage 19: a rider holds the bay for the WHOLE manoeuvre, not just the turn it was ordered
+        // - the bay is physically occupied by it. Mirrors DockingBay::hasShipOrdersThisTurn.
+        if (Array.isArray(bay.shipsAttaching) && bay.shipsAttaching.length > 0) return true;
+        return (Array.isArray(bay.pendingBayShipDockOrders) && bay.pendingBayShipDockOrders.length > 0)
+            || (Array.isArray(bay.pendingBayShipLaunchOrders) && bay.pendingBayShipLaunchOrders.length > 0);
+    }
+
+    // ...and queued fighter dock/launch orders claim it for fighters.
+    function bayClaimedByFighters(bay) {
+        if (!isDockingBaySys(bay)) return false;
+        var docking = Array.isArray(bay.pendingDockOrders)
+            && bay.pendingDockOrders.some(function (o) { return parseInt((o && o.count) || 0, 10) > 0; });
+        var launching = Array.isArray(bay.pendingLaunchOrders)
+            && bay.pendingLaunchOrders.some(function (o) { return parseInt((o && o.size) || 0, 10) > 0; });
+        return docking || launching;
     }
 
     // Hangar boxes a single craft occupies. A unitSize<1 craft (Vorlon Assault
@@ -140,6 +219,15 @@ window.HangarShared = (function () {
         var hType = String(sys.hangarType || '').toLowerCase().trim();
         if (hType === '' || hType === 'fighters' || hType === 'normal') return false;
         return hType === String(categoryForFlight(flight)).toLowerCase().trim();
+    }
+
+    // Auto-fill order for a FIGHTER flight - mirror of HangarOps::bayFillRank. Bays reserved for it
+    // first (bayReservesFlight), ordinary bays next, a Docking Bay LAST: its boxes are the only ones a
+    // ship can use, so fighters leave them free while any other bay has room (user, 2026-09-11).
+    // Ordering only, never eligibility.
+    function bayFillRank(sys, flight) {
+        if (bayReservesFlight(sys, flight)) return 0;
+        return isDockingBaySys(sys) ? 2 : 1;
     }
 
     function lowerKeys(obj) {
@@ -280,6 +368,13 @@ window.HangarShared = (function () {
         isDockHangar:              isDockHangar,
         isCatapultSys:             isCatapultSys,
         effectiveHangarBoxes:      effectiveHangarBoxes,
+        isDockingBaySys:           isDockingBaySys,
+        shipBoxesForUnitSize:      shipBoxesForUnitSize,
+        bayShipBoxesHeld:          bayShipBoxesHeld,
+        bayDocksShipClass:         bayDocksShipClass,
+        bayShipIsTwoTurn:          bayShipIsTwoTurn,
+        bayClaimedByShips:         bayClaimedByShips,
+        bayClaimedByFighters:      bayClaimedByFighters,
         boxesPerCraftFromUnitSize: boxesPerCraftFromUnitSize,
         boxesPerCraftForEntry:     boxesPerCraftForEntry,
         entryBoxesInHangar:        entryBoxesInHangar,
@@ -288,6 +383,7 @@ window.HangarShared = (function () {
         hangarAcceptsFighterClass: hangarAcceptsFighterClass,
         bayReservesFighterClass:   bayReservesFighterClass,
         bayReservesFlight:         bayReservesFlight,
+        bayFillRank:               bayFillRank,
         hangarAcceptsCategory:     hangarAcceptsCategory,
         isCustomCombatCategory:    isCustomCombatCategory,
         hangarLabelFor:            hangarLabelFor,

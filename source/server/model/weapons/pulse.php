@@ -1377,7 +1377,13 @@ class ChromaticPulseDriver extends Pulse {
     /* "Does not begin the scenario fully charged" - it begins with ONE turn of charge, i.e. the
        first row. ⚠️ NOT 0: turnsloaded 0 is below getLoadingTime(), so it could not fire at all on
        turn 1. Everything else is copied from the parent so overloading and firing-mode seeding
-       keep behaving identically. */
+       keep behaving identically.
+       ⚠️ AND THE WANDERER IS EXEMPT (user ruling 2026-09-09, plan 3.10e): $seedsBelowFullCharge is
+       what tells Weapon::getStartLoadingForShip that this seed is a restriction it may lift for a
+       hull in Weapon::FULLY_CHARGED_HULL_CLASSES. This method has no ship to ask, so it must keep
+       answering the restricted value. */
+    protected $seedsBelowFullCharge = true;
+
     public function getStartLoading(){
         $overloadTurns = $this->overloadturns;
         if ($overloadTurns === 0 && $this->overloadable) $overloadTurns = 1;

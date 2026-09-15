@@ -225,6 +225,16 @@ window.ReinforcementEntry = (function () {
         });
     }
 
+    //Every berth on $opener that is NOT a rider it can carry - kept apart from clearManifest because an
+    //opener books ITSELF onto its own doorway (arrivalVia == its own id) and that must survive.
+    function clearManifestExceptOpener(opener) {
+        var keep = manifestRiders(opener);
+        myHyperspaceUnits().forEach(function (ship) {
+            if (ship.id == opener.id) return;
+            if (ship.arrivalVia == opener.id && keep.indexOf(ship) === -1) ship.arrivalVia = null;
+        });
+    }
+
     function manifestOf(openerId) {
         return myHyperspaceUnits().filter(function (ship) {
             return ship.arrivalVia == openerId;
@@ -241,10 +251,35 @@ window.ReinforcementEntry = (function () {
        would put a button on screen whose only possible outcome is a notice. One rule, two callers,
        so the button and the dialog can never disagree about whether there is anything to choose. */
     function manifestRiders(opener) {
+        var legacy = isLegacyOpener(opener);
         return myHyperspaceUnits().filter(function (ship) {
             if (ship.id == opener.id) return false;
-            return ship.arrivalVia === null || ship.arrivalVia === undefined || ship.arrivalVia == opener.id;
+            if (!(ship.arrivalVia === null || ship.arrivalVia === undefined || ship.arrivalVia == opener.id)) return false;
+            //A legacy opener takes only fighters that fit its hangars and ships its Docking Bay can
+            //hold - see isLegacyOpener. legacyFits answers both, and nothing else.
+            if (legacy) return legacyFits(opener, [ship]).length === 1;
+            return true;
         });
+    }
+
+    /* ⭐ A LEGACY-DRIVE OPENER CARRIES ONLY FIGHTERS, AND ONLY WHAT ITS HANGARS HOLD (user ruling
+       2026-09-11). An Ancient special jump drive, a Shadow Phasing Drive or a BSG / Star Wars / Trek drive
+       phases its own ship in and opens no jump point, so nothing can "ride through" it - only be carried
+       aboard. The riders arrive docked (DeploymentPhaseStrategy.autoPlaceArrivingReinforcements). A gate
+       is never one. Server twins: JumpEngine::isLegacyOpener + InitialOrdersGamePhase::legacyBerthFits.
+       ⭐ AND THE SHIPS A DOCKING BAY TAKES (WALKERS_OF_SIGMA_PLAN.md 3.14b, user 2026-09-11) - a Traveler
+       brings Scribes, Pathfinders and Guideships in its Docking Bay beside its Mapmakers. */
+    function isLegacyOpener(opener) {
+        if (!opener || gamedata.isJumpGate(opener)) return false;
+        //Guarded: this module is also driven by harnesses that stub shipManager.movement.
+        return typeof shipManager.movement.isLegacyOpener === 'function' && shipManager.movement.isLegacyOpener(opener);
+    }
+
+    //Which of $flights (and Docking Bay ships) fit in $opener TOGETHER, in order - the same packer the
+    //Deployment phase will dock them with, so the manifest cannot promise a berth the dock would refuse.
+    function legacyFits(opener, flights) {
+        if (!window.DeploymentDock || typeof DeploymentDock.planFlightsIntoCarrier !== 'function') return [];
+        return DeploymentDock.planFlightsIntoCarrier(opener, flights);
     }
 
     /* ---------------------------------------------------------------- the stranding check */
@@ -1105,6 +1140,7 @@ window.ReinforcementEntry = (function () {
            is never in myHyperspaceUnits(), so the self-exclusion simply never matches one - which is
            why this is a wording branch and not a structural one. */
         var isGateDoor = gamedata.isJumpGate(opener);
+        var legacy = isLegacyOpener(opener);
 
         var riders = manifestRiders(opener);
 
@@ -1114,6 +1150,15 @@ window.ReinforcementEntry = (function () {
            longer the only reason a gate can have nobody to offer). A drive is never in this case in
            the same sense: it always rides its own doorway, so the message is about IT. */
         if (riders.length === 0) {
+            /*if (legacy) { //This warning was more annoying than helpful, removed for now - DK
+                //Anything booked here that cannot ride (a non-fighter) is let go, as applyManifest would.
+                clearManifestExceptOpener(opener);
+                confirm.warning("<b>" + opener.name + "</b> jumps in through its own drive and opens no jump "
+                    + "point, so it can bring only fighters that fit in its hangars - and none of yours "
+                    + "that are waiting do.");
+                gamedata.drawIniGUI();
+                return;
+            }*/
             confirm.warning(!isGateDoor
                 ? "<b>" + opener.name + "</b> will open a jump point and arrive through it next turn."
                 : (myHyperspaceUnits().length === 0
@@ -1142,7 +1187,11 @@ window.ReinforcementEntry = (function () {
                 ? opener.name + " holds a jump point open. Which of your reinforcements ride "
                   + "through it? They arrive next turn, and the gate can bring another wave on "
                   + "every turn it holds the doorway."
-                : opener.name + " arrives through this jump point. Which others ride with it?",
+                : (legacy
+                    ? opener.name + " jumps in through its own drive and opens no jump point. Only fighters "
+                      + "that fit in its hangars, and ships its Docking Bay can hold, can come with it - "
+                      + "and they arrive docked."
+                    : opener.name + " arrives through this jump point. Which others ride with it?"),
             rows, "Confirm");
 
         //Same width as the menu it was opened from - see .reinforcementDialog in tactical.css.
@@ -1160,12 +1209,43 @@ window.ReinforcementEntry = (function () {
             $(".reinforcementRider:checked", e).each(function () { chosen[$(this).val()] = true; });
             e.remove();
 
+            //A legacy opener's berths must all fit TOGETHER, in list order, exactly as the Deployment
+            //phase will dock them - so trim to what does, whatever the dialog let through.
+            if (legacy) {
+                var fit = {};
+                legacyFits(opener, riders.filter(function (s) { return chosen[s.id]; }))
+                    .forEach(function (id) { fit[id] = true; });
+                chosen = fit;
+                //...and anything booked here that is not a rider at all (a non-fighter) is let go.
+                clearManifestExceptOpener(opener);
+            }
+
             riders.forEach(function (ship) {
                 if (chosen[ship.id]) ship.arrivalVia = opener.id;
                 else if (ship.arrivalVia == opener.id) ship.arrivalVia = null;
             });
 
             gamedata.drawIniGUI();
+        }
+
+        /* A legacy opener's hangars fill as rows are ticked: a row that would no longer fit beside the
+           ones already ticked is greyed, so the player can never tick a set the dock would refuse. */
+        if (legacy) {
+            var refit = function () {
+                var ticked = riders.filter(function (s) {
+                    return $(".reinforcementRider[value='" + s.id + "']", e).is(':checked');
+                });
+                $(".reinforcementRider", e).each(function () {
+                    if (this.checked) { this.disabled = false; this.title = ''; return; }
+                    var value = this.value;
+                    var candidate = riders.filter(function (s) { return s.id == value; })[0];
+                    var fits = !!candidate && legacyFits(opener, ticked.concat([candidate])).length === ticked.length + 1;
+                    this.disabled = !fits;
+                    this.title = fits ? '' : 'No room left in its hangars';
+                });
+            };
+            $(".reinforcementRider", e).on("change", refit);
+            refit();
         }
 
         $(".confirmok", e).on("click", applyManifest);

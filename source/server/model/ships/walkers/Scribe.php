@@ -9,13 +9,14 @@ class Scribe extends MediumShip{
         $this->phpclass = "Scribe";
         $this->shipClass = "Scribe";
         $this->imagePath = "img/ships/WalkerScribe.png";
-        $this->canvasSize = 175;
+        $this->canvasSize = 125;
 	    $this->isd = 'Ancient';
 		$this->factionAge = 4; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
-		$this->variantOf = "NONE";
+		//$this->variantOf = "NONE";
 				
         $this->gravitic = true;
 		$this->advancedArmor = true;  
+		$this->agile = true;
         
         $this->forwardDefense = 9;
         $this->sideDefense = 11;
@@ -26,6 +27,9 @@ class Scribe extends MediumShip{
         $this->rollcost = 1;
         $this->pivotcost = 2;
 		$this->iniativebonus = 14 *5;
+		//Docking Bay box cost (WALKERS_OF_SIGMA_PLAN.md 3.14, D18): 4 boxes. Inert everywhere else - the
+		//fleet check reads a HULL's unitSize only when it sets hangarRequired, which this one does not.
+		$this->unitSize = 1/4;
 
 		/*Walkers will use their own enhancement set */		
 		Enhancements::nonstandardEnhancementSet($this, 'WalkerShip');
@@ -38,7 +42,9 @@ class Scribe extends MediumShip{
 		$this->addPrimarySystem($scanner);			
 		$this->addPrimarySystem(new Engine(6, 12, 0, 10, 2));
         $this->addPrimarySystem(new SelfRepair(5, 3, 2)); //armor, structure, output
-		$this->addPrimarySystem(new JumpEngine(6, 9, 8, 8));
+		$jumpEngine = new JumpEngine(6, 9, 8, 8);
+		$jumpEngine->markWalker(); //Stage 15: leaves at the END of the turn, untargetable while it waits, no failure roll
+		$this->addPrimarySystem($jumpEngine);
 		$this->addPrimarySystem(new GraviticThruster(6, 13, 0, 5, 3));
 		$this->addPrimarySystem(new GraviticThruster(6, 13, 0, 5, 4));		
 		

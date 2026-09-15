@@ -2212,40 +2212,27 @@ class Manager{
                             $fig->doIndividualNotesTransfer();
                         }
 
-                        //Some fighter systems CAN be boosted now
-                        // --- inside foreach ($system["systems"] as $fightersys) { ... }
+                        /* Some fighter systems CAN be boosted now.
+                           ⚠️ ONE setPower() PER ENTRY (fixed 2026-09-11). ShipSystem::setPower APPENDS
+                           whatever it is given, and this used to hand it the whole list - twice, because
+                           the block was duplicated - so a POST-side fighter system's $power held NESTED
+                           ARRAYS instead of entries. DBManager::submitPower quietly flattens that shape,
+                           which is why nothing noticed until something asked a POST-side fighter's power a
+                           question: JumpEngine::isOverloading, via
+                           InitialOrdersGamePhase::dropFireOfJumpingShip, fataled with "Attempt to read
+                           property turn on array" (game 4347). The shape now matches the DB-loaded one,
+                           which also sets one entry at a time. */
                         if (isset($fightersys["power"]) && is_array($fightersys["power"])) {
-                            $powers = []; // different name
                             foreach ($fightersys["power"] as $p) {
-                                $powerEntry = new PowerManagementEntry(
+                                $fig->setPower(new PowerManagementEntry(
                                     $p["id"] ?? -1,
                                     $p["shipid"] ?? -1,
                                     $p["systemid"] ?? -1,
                                     $p["type"] ?? "",
                                     $p["turn"] ?? 0,
                                     $p["amount"] ?? 0
-                                );
-                                $powers[] = $powerEntry;
+                                ));
                             }
-                            $fig->setPower($powers);
-                        }
-
-                        //Some fighter systems CAN be boosted now
-                        // --- inside foreach ($system["systems"] as $fightersys) { ... }
-                        if (isset($fightersys["power"]) && is_array($fightersys["power"])) {
-                            $powers = []; // different name
-                            foreach ($fightersys["power"] as $p) {
-                                $powerEntry = new PowerManagementEntry(
-                                    $p["id"] ?? -1,
-                                    $p["shipid"] ?? -1,
-                                    $p["systemid"] ?? -1,
-                                    $p["type"] ?? "",
-                                    $p["turn"] ?? 0,
-                                    $p["amount"] ?? 0
-                                );
-                                $powers[] = $powerEntry;
-                            }
-                            $fig->setPower($powers);
                         }
                     }
                 }

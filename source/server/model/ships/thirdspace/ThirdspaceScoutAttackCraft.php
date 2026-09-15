@@ -46,7 +46,7 @@ class ThirdspaceScoutAttackCraft extends LCV{ //Actually an LCV.
     $scanner = new ElintScanner(5, 16, 8, 11);
 		$scanner->markThirdspace();
 		$this->addPrimarySystem($scanner);	
-	$this->addPrimarySystem(new JumpEngine(5, 6, 3, 8));//Added a small jump drive, how they travel is unknown but if White Star can house a jump drive it's not unfeasible Thirdspace aliens would have a FTL drive on their smaller craft.
+	$this->addPrimarySystem((new JumpEngine(5, 6, 3, 8))->markAncient());//Added a small jump drive, how they travel is unknown but if White Star can house a jump drive it's not unfeasible Thirdspace aliens would have a FTL drive on their smaller craft.
 	$this->addPrimarySystem(new Engine(5, 12, 0, 8, 2));
 	$this->addPrimarySystem(new ThirdspaceShieldGenerator(5, 6, 0, 10, 2, 2)); //$armor, $maxhealth, $power used, output, maxBoost, boostEfficiency	
     $this->addPrimarySystem(new ThirdspaceSelfRepair(5, 6, 3, 3)); //armor, structure, output, maxBoost  	

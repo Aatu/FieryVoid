@@ -487,8 +487,13 @@
          *
          * That closes the Stage 4 gap: flights were blocked from jumping out on both sides
          * because this removal path did not exist for them.
+         *
+         * ⭐ PUBLIC SINCE WALKERS §3.18 (Stage 20): an Extra-Dimensional Jump Drive's abduction takes
+         * its target out "as if it had left the game of its own accord via a jump point", which is this
+         * function's exact contract - EdjdAbduction::abduct calls it rather than restating the three
+         * records.
          */
-        private static function applyJumpOut($ship, $gamedata, $pubNotes){
+        public static function applyJumpOut($ship, $gamedata, $pubNotes){
             $rammingSystem = $ship->getSystemByName("RammingAttack");
 
             if ($rammingSystem){

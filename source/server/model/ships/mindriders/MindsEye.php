@@ -60,7 +60,7 @@ class MindsEye extends SixSidedShip{
         $this->addPrimarySystem(new UltraPulseCannon(7, 0, 0, 0, 360));        
         $this->addPrimarySystem(new SecondSight(7, 0, 0, 0, 360));       
 		$this->addPrimarySystem(new ThoughtWave(7, 0, 0, 0, 360, 15));     
-		$this->addPrimarySystem(new JumpEngine(7, 25, 8, 8));   		  		
+		$this->addPrimarySystem((new JumpEngine(7, 25, 8, 8))->markAncient());   		  		
       
 		$this->addLeftAftSystem(new ThoughtShield(0, 50, 25, 210, 270, 'AP'));
 		$this->addFrontSystem(new ThoughtShield(0, 50, 25, 330, 30, 'F'));			

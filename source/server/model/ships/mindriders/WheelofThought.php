@@ -52,7 +52,7 @@ class WheelofThought extends MindriderMCV{
 		$scanner->markMindrider();
 		$this->addPrimarySystem($scanner);	        
         $this->addPrimarySystem(new Engine(7, 16, 0, 8, 3));
-		$this->addPrimarySystem(new JumpEngine(7, 11, 6, 10)); 
+		$this->addPrimarySystem((new JumpEngine(7, 11, 6, 10))->markAncient()); 
         $this->addPrimarySystem(new MindriderHangar(0, 1, 0, 0)); 	//technical system only		                	
 		$this->addPrimarySystem(new ThoughtShieldGenerator(6, 15, 4, 15)); //$armor, $maxhealth, $power used, output           
         $this->addPrimarySystem(new TelekineticCutter(6, 0, 0, 0, 360));

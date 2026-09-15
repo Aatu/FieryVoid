@@ -2264,6 +2264,12 @@ SensorChargeTransceiver.prototype.getCoursePlan = function (shooter) {
        manoeuvre, which is exactly what makes it a free way to pick a unit out of a crowded hex -
        and without a marker that choice would have nothing on screen to confirm it.
 
+   ⚠️ THE MARKER CARRIES NO WORD (user ruling 2026-09-08: the green name was "somewhat useless,
+   since it's obscured by ship sprites and would be hard to read if several SCT charges passed
+   through the same hex"). The HEX stays - it is still the only on-screen confirmation that a
+   choice was recorded there, and the SCT|w:<n>|t:<id> token still rides the order - but the
+   named unit is no longer written on it, so the marker only ever says WHERE, never WHOM.
+
    A manoeuvre is paid AT the waypoint a leg starts from, so leg i's turn cost marks legs[i].from,
    which is legs[i-1].to - and the choice recorded there is legs[i-1]'s. The first leg is the
    launch and is free (measureLeg), so the previous leg always exists in that branch. */
@@ -2271,25 +2277,20 @@ SensorChargeTransceiver.prototype.getCourseMarkers = function (plan) {
 	var markers = [];
 	var seen = {};
 
-	function add(hex, targetId) {
+	function add(hex) {
 		var key = hex.q + ',' + hex.r;
 		if (seen[key]) return;                 //a course may cross itself; one marker per hex
 		seen[key] = true;
 
-		var target = (targetId !== null && targetId !== undefined) ? gamedata.getShip(targetId) : null;
-
-		markers.push({ q: hex.q, r: hex.r, text: target ? target.name : "" });
+		markers.push({ q: hex.q, r: hex.r });
 	}
 
 	for (var i = 1; i < plan.legs.length; i++) {
 		var previous = plan.legs[i - 1];
-		if (plan.legs[i].turnCost > 0 || previous.targetId !== null) add(previous.to, previous.targetId);
+		if (plan.legs[i].turnCost > 0 || previous.targetId !== null) add(previous.to);
 	}
 
-	if (plan.legs.length) {
-		var last = plan.legs[plan.legs.length - 1];
-		add(plan.head, last.targetId);
-	}
+	if (plan.legs.length) add(plan.head);
 
 	return markers;
 };
@@ -2634,3 +2635,162 @@ var LightChromaticPulsar = function LightChromaticPulsar(json, ship) {
 };
 LightChromaticPulsar.prototype = Object.create(Weapon.prototype);
 LightChromaticPulsar.prototype.constructor = LightChromaticPulsar;
+
+
+/* ------------------------------------------------------------------------------------------------
+ * MEDIUM LIGHTNING ARRAY, FIGHTER MOUNT - client half of MedLightningArrayFtr (specialWeapons.php).
+ * WALKERS_OF_SIGMA_PLAN.md 3.13 (Stage 14), D15/D16/D24/D25.
+ *
+ * ⭐ THE STATS NEED NO MIRROR HERE AT ALL, and that is deliberate. Both firing modes differ only in
+ * fire control, range penalty and damage span, and all three of those already travel as the generic
+ * per-mode arrays the engine understands - $fireControlArray / $rangePenaltyArray on the server,
+ * fireControlArray / rangePenaltyArray plus minDamageArray / maxDamageArray read by
+ * Weapon.prototype.changeFiringMode here. There is no second copy of the control sheet in this file
+ * to drift out of step with the PHP, which is what LightningArray's six hand-mirrored tables cost.
+ *
+ * What DOES live here is the part the engine has no concept of: three or six probes fire as ONE gun.
+ *
+ *   isCraftEligible()     - a probe that has taken ANY damage cannot contribute (⚠️ full health, not
+ *                           "not destroyed"), so weaponManager.targetShip skips its mount silently
+ *                           rather than spending a click on an order the server will mark technical.
+ *   afterTargetingPass()  - asked ONCE per click, after every selected mount has declared, because
+ *                           "did enough of you fire together?" is a question no single order can
+ *                           answer. A 4-turn reload makes a wasted declaration expensive enough to
+ *                           interrupt for.
+ *
+ * The exclusivity with the Light Chromatic Pulsar (D16) is NOT here either: it is a rule about two
+ * different weapons on one flight, so it lives at the one chokepoint that sees both -
+ * weaponManager.getFlightExclusivityBlock, driven by the `flightExclusiveGroup` string both classes
+ * declare.
+ * ------------------------------------------------------------------------------------------------ */
+
+var MedLightningArrayFtr = function MedLightningArrayFtr(json, ship) {
+	Weapon.call(this, json, ship);
+};
+MedLightningArrayFtr.prototype = Object.create(Weapon.prototype);
+MedLightningArrayFtr.prototype.constructor = MedLightningArrayFtr;
+
+/* Firing modes - MUST match the MODE_* constants in specialWeapons.php. */
+MedLightningArrayFtr.MODE_THREE = 1;
+MedLightningArrayFtr.MODE_SIX = 2;
+
+/* ⚠️ MIRROR PAIR with MedLightningArrayFtr::CRAFT_REQUIRED in specialWeapons.php - the ONE number
+   this file duplicates, and the server re-derives it rather than trusting anything the client sends,
+   so a drift here costs a wrong warning and never a wrong shot. */
+MedLightningArrayFtr.craftRequired = function (mode) {
+	var table = { 1: 3, 2: 6 };
+	var m = parseInt(mode, 10);
+	return table[m] ? table[m] : table[MedLightningArrayFtr.MODE_THREE];
+};
+
+/* The probe carrying this mount. ⚠️ A fighter subsystem's `this.ship` is the CRAFT on the client and
+   the FLIGHT on the server (Stage 13, finding 1), so neither one is asked - the craft is looked up
+   from the flight the caller already has. */
+MedLightningArrayFtr.prototype.getOwningCraft = function (flight) {
+	if (!flight || !flight.flight) return null;
+	return shipManager.systems.getFighterBySystem(flight, this.id);
+};
+
+/* Damage standing on one craft. ⚠️⚠️ NOT shipManager.systems.getRemainingHealth(craft), which is
+   what this used to call and which CRASHES on an undamaged one: it reads `system.damage.length`,
+   and ShipCompactor strips an EMPTY damage array out of the payload entirely
+   ($emptyArrayKeys, trap 8), so `craft.damage` is undefined on every craft that has not been hit -
+   which is to say on every craft, most of the time. damageManager.getDamage walks it with a
+   `for..in` and is safe on undefined; it is also what FighterIcon.js uses to draw a craft's health
+   bar, so this reads the same number the player is looking at. */
+MedLightningArrayFtr.prototype.getCraftDamage = function (flight, craft) {
+	return damageManager.getDamage(flight, craft);
+};
+
+/* May this mount's probe contribute to a combined array? ⚠️ FULL HEALTH, not "not destroyed" -
+   copying the obvious isDestroyed() test would let a battered flight keep firing at full strength,
+   silently. Mirrors MedLightningArrayFtr::isCraftUndamaged in specialWeapons.php.
+   A mount somehow not on a flight answers `true` and lets the server have the last word. */
+MedLightningArrayFtr.prototype.isCraftEligible = function (flight) {
+	var craft = this.getOwningCraft(flight);
+	if (!craft) return !flight || !flight.flight;
+	if (craft.destroyed) return false;
+	return this.getCraftDamage(flight, craft) <= 0;
+};
+
+/* Every array order this flight has standing this turn, bucketed exactly the way
+   MedLightningArrayFtr::planFlightVolley buckets them: same target, same called system, same mode.
+   Returns { key: {mode, count} }. */
+MedLightningArrayFtr.prototype.getFlightVolleyBuckets = function (flight) {
+	var buckets = {};
+	if (!flight || !flight.flight) return buckets;
+
+	for (var i in flight.systems) {
+		var craft = flight.systems[i];
+		if (!craft || !craft.systems) continue;
+
+		for (var a in craft.systems) {
+			var sys = craft.systems[a];
+			if (!sys || sys.name !== this.name) continue;
+
+			for (var f in sys.fireOrders) {
+				var fire = sys.fireOrders[f];
+				if (fire.turn != gamedata.turn || fire.rolled) continue;
+				if (fire.type !== 'normal') continue;
+
+				var key = fire.targetid + '|' + fire.calledid + '|' + parseInt(fire.firingMode, 10);
+				if (!buckets[key]) buckets[key] = { mode: parseInt(fire.firingMode, 10), count: 0 };
+				buckets[key].count++;
+			}
+		}
+	}
+	return buckets;
+};
+
+/* Called once per click by weaponManager.targetShip, after every selected mount has had its turn.
+   Says the two things a single order cannot: that the group is short, and that nothing declared
+   because every probe is damaged. One popup at most - the shortfall is the louder of the two and
+   wins when both apply. */
+MedLightningArrayFtr.prototype.afterTargetingPass = function (flight, target) {
+	if (!flight || !flight.flight) return;
+
+	var buckets = this.getFlightVolleyBuckets(flight);
+	var declared = 0;
+	var shortfall = null;
+
+	for (var key in buckets) {
+		declared += buckets[key].count;
+		var needed = MedLightningArrayFtr.craftRequired(buckets[key].mode);
+		var wasted = buckets[key].count % needed;
+		if (wasted > 0 && shortfall === null) {
+			shortfall = { wasted: wasted, needed: needed, mode: buckets[key].mode };
+		}
+	}
+
+	if (shortfall !== null) {
+		var label = (this.firingModes && this.firingModes[shortfall.mode])
+			? this.firingModes[shortfall.mode] : 'combined array';
+		var plural = (shortfall.wasted === 1);
+		confirm.warning("Only " + shortfall.wasted + " of the " + shortfall.needed
+			+ " probes a Lightning Array shot needs " + (plural ? "is" : "are") + " available." 
+            + "<br>You must fire in groups of 3 or 6 to avoid wasting shots.");
+		return;
+	}
+
+	if (declared > 0) return;
+
+	//The D16 refusal has already said its piece this click, and following it with "no probe fired
+	//because of damage" would be a second popup naming the wrong reason.
+	if (weaponManager.getFlightExclusivityBlock(flight, this)) return;
+
+	//Nothing declared. Only speak up when the reason is one the player cannot see - a probe out of
+	//arc or out of range is already obvious, a probe refused for one point of damage is not.
+	var damagedProbes = 0;
+	for (var i in flight.systems) {
+		var craft = flight.systems[i];
+		if (!craft || !craft.systems || craft.destroyed) continue;
+		for (var a in craft.systems) {
+			if (craft.systems[a].name !== this.name) continue;
+			if (this.getCraftDamage(flight, craft) > 0) damagedProbes++;
+		}
+	}
+	if (damagedProbes > 0) {
+		confirm.warning("No probe fired: a probe that has taken ANY damage cannot contribute to a"
+			+ " combined <b>" + this.displayName + "</b>.");
+	}
+};

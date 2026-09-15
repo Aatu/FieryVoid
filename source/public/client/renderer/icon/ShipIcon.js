@@ -767,6 +767,28 @@ window.ShipIcon = function () {
     }
 
     ShipIcon.prototype.showWeaponArc = function (ship, weapon) {
+        /* ⭐ WALKERS OF SIGMA-957 - THE EW DETECTOR IS NOT A WEAPON AND STILL HAS A REACH, and it
+           is answered FIRST, ahead of the weapon gate below (which would return null on it) and
+           ahead of showInterceptArc (which has nothing to say about a support system).
+
+           An omnidirectional disc, because the detection is: the class declares 0..360 precisely so
+           addSystem's section-arc trap cannot stamp a facing on it. Everything else - the hex
+           mapping, the grid lock, the sweep on mouse-out - is the ordinary weapon-arc machinery,
+           which is what "like weapons do" asked for: showRangeArc pushes into this.weaponArcs, so
+           PhaseStrategy.refreshSystemArcs raises and drops it exactly as it does a gun's.
+
+           No info-bleed question to answer: the range is already printed on the system's own
+           datasheet (EWDetector::setSystemDataWindow writes data["Range"]) and the ship's hex is on
+           the board, so the disc restates two things the viewer can already see - the same footing
+           showBDEW has drawn an enemy's blanket on for years. */
+        var detectorReach = getEwDetectorReach(weapon);
+        if (detectorReach > 0) {
+            this.showRangeArc(detectorReach, window.coordinateConverter.getHexDistance(),
+                              [{ start: 0, end: 360 }],
+                              EW_DETECTOR_ARC_COLOUR, EW_DETECTOR_ARC_FILL_OPACITY);
+            return null;
+        }
+
         if (!(weapon instanceof Weapon) && !(weapon instanceof Thruster) && !(weapon.defensiveSystem)) return null; // Only show arcs for weapons
         if(weapon.stowed && weapon.stowedArcStart == null) return null; //stowed weapon with no stowed arc (Kirishiac Orbital docked) - non-operational, no arc to show. A stowed arc set (Heavy Orbital) keeps the weapon live: draw its current (reduced) arc.
 
@@ -911,6 +933,30 @@ window.ShipIcon = function () {
        BallisticIconContainer's 'Jump Point Forming' text colour and UI.vortexFacing's arrow. */
     var VORTEX_ARC_COLOUR = "rgb(225,176,0)";
     var VORTEX_ARC_FILL_OPACITY = 0.22;              //see REDUCED_ARC_FILL_OPACITY - yellow runs hot
+
+    /* ⭐ WALKERS OF SIGMA-957 - THE EW DETECTOR'S REACH (user request 2026-09-10: "make EWDetector
+       display its 20 hex arc like weapons do, so when the player hovers over it they can see area
+       of effect"). #e0d39a is the same soft gold the ship window's EW panel gives the "Saved EW"
+       row (reactJs/shipWindow/ShipWindowEw.js EW_LABEL_COLORS) - a player who has seen the number
+       recognises the area it comes from. Filled quietly for the same reason the vortex yellow is:
+       it is a 20-hex disc, so a normal firing-arc fill would wash out everything under it. */
+    var EW_DETECTOR_ARC_COLOUR = "rgb(224,211,154)";
+    var EW_DETECTOR_ARC_FILL_OPACITY = 0.15;         //a 1,261-hex disc - see VORTEX_ARC_FILL_OPACITY
+
+    /* This system's detection reach in hexes, or 0 if it is not a detector (or is dead/unpowered).
+       ⚠️ SAME READ AS ew.collectEwDetectors, INCLUDING THE FALLBACK: `effectiveRange` is the
+       server's answer after destruction and power-down and is what the in-game payload carries;
+       `range` is the blueprint value the lobby has instead. A destroyed or offlined detector
+       publishes effectiveRange 0, so it draws nothing - which is the honest answer, since it is
+       granting nobody an allowance either. */
+    function getEwDetectorReach(system) {
+        if (!system || system.name !== 'EWDetector') return 0;
+
+        var published = parseInt(system.effectiveRange, 10);
+        var reach = isNaN(published) ? (parseInt(system.range, 10) || 0) : published;
+
+        return reach > 0 ? reach : 0;
+    }
 
     /* A ranged weapon's arc, as the grid hexes it covers. arcsList is one or more ship-frame arcs -
        a split-arc mount hands both over at once, so its two regions share a single overlay and any

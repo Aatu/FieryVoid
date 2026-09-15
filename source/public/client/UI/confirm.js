@@ -2724,6 +2724,478 @@ window.confirm = {
         e.appendTo("body").fadeIn(250);
     },
 
+    // === Docking Bay (WALKERS_OF_SIGMA_PLAN.md 3.14, Stage 16) — whole-ship dialogs ===
+    //
+    // The LCV-rail dialogs above with a LIST instead of one slot. A Docking Bay is a plain
+    // Hangar on this side, so its ship orders ride their own queues on the bay -
+    // pendingBayShipDockOrders / pendingBayShipLaunchOrders / pendingBayShipDeployStartOrders,
+    // each [{shipId, boxes, phpclass(, thrustLeft)}] - serialised by Hangar.doIndividualNotesTransfer
+    // and resolved end-of-turn by HangarOps::processBayShipDockOrders / processBayShipLaunchOrders.
+    // Every check here is the client half of one there: one pool of boxes shared with the
+    // fighters, a launch rate a ship pays in BOXES, and one craft type per turn.
+
+    // "Carrier — Docking Bay" (numbered only if a hull ever carries more than one).
+    bayShipLabel: function bayShipLabel(carrier, bay) {
+        var bays = (carrier && Array.isArray(carrier.systems))
+            ? carrier.systems.filter(function (s) { return window.HangarShared.isDockingBaySys(s); }) : [];
+        var name = bays.length > 1 ? 'Docking Bay ' + (bays.indexOf(bay) + 1) : 'Docking Bay';
+        return carrier ? carrier.name + ' — ' + name : name;
+    },
+
+    // THE one verdict behind both the greyed rows and the OK-time guard: why $bay cannot take the
+    // ship rows ticked in $checks ({bay, boxes, cls, $chk}) plus $extra (a row not ticked yet, or
+    // null), as {msg, short}, or null. $baseFor(bay) -> {free, used}: the room with the dialog's own
+    // queued rows handed back, and how many ship moves the OTHER queue has already spent from the
+    // per-class rate this turn; $otherClass(bay) -> the ship class that other queue (launches for a
+    // recover dialog, docks for a launch dialog) has claimed the bay for, or null; $fighterClaim(bay)
+    // -> true while fighters use the bay this turn (default: their queued orders - a dialog that
+    // edits fighter orders of its own passes its LIVE rows instead).
+    bayShipBayProblem: function bayShipBayProblem(checks, bay, extra, baseFor, otherClass, fighterClaim) {
+        var t = { boxes: 0, count: 0, classes: [] };
+        checks.forEach(function (c) {
+            if (c.bay !== bay || !(c === extra || c.$chk.is(':checked'))) return;
+            t.boxes += c.boxes;
+            t.count++;
+            if (t.classes.indexOf(c.cls) === -1) t.classes.push(c.cls);
+        });
+        if (t.count === 0) return null;
+
+        if (fighterClaim ? fighterClaim(bay) : window.HangarShared.bayClaimedByFighters(bay)) {
+            return { msg: 'Fighters are launching or being recovered through the Docking Bay this turn - only one type of craft may use it per turn.',
+                     short: 'fighters are using the bay this turn' };
+        }
+        var other = otherClass(bay);
+        if (t.classes.length > 1 || (other && t.classes[0] !== other)) {
+            //The class the bay is already taken by: the other queue's, else a ticked row's.
+            var held = other || t.classes.filter(function (cls) { return !extra || cls !== extra.cls; })[0];
+            return { msg: 'Only one type of craft may launch or be recovered through the Docking Bay per turn.',
+                     short: (held || 'another type') + ' only this turn' };
+        }
+        var base = baseFor(bay);
+        if (t.boxes > base.free) {
+            var left = base.free - (t.boxes - (extra ? extra.boxes : 0));
+            return { msg: 'Not enough room in the Docking Bay (' + t.boxes + ' boxes needed, ' + base.free + ' free).',
+                     short: 'not enough room (' + Math.max(0, left) + ' boxes left)' };
+        }
+        var cls = t.classes[0];
+        var rate = parseInt((bay.shipLaunchRates || {})[cls], 10) || 0;
+        if (t.count + base.used > rate) {
+            var per = rate + ' ' + cls + (rate === 1 ? '' : 's') + ' per turn';
+            return { msg: 'The Docking Bay can launch or recover only ' + per + ', launches and recoveries together.',
+                     short: 'limit of ' + per + ' reached' };
+        }
+        return null;
+    },
+
+    // The OK-time guard: the first problem with what is ticked, as a message, or null. With the
+    // rows greyed (refitBayShipRows) it is only reachable from a state the dialog OPENED in.
+    bayShipSelectionProblem: function bayShipSelectionProblem(checks, baseFor, otherClass, fighterClaim) {
+        var bays = [];
+        checks.forEach(function (c) { if (c.$chk.is(':checked') && bays.indexOf(c.bay) === -1) bays.push(c.bay); });
+        for (var i = 0; i < bays.length; i++) {
+            var p = window.confirm.bayShipBayProblem(checks, bays[i], null, baseFor, otherClass, fighterClaim);
+            if (p) return p.msg;
+        }
+        return null;
+    },
+
+    // Grey out (or restore) one dialog row and say why - the Reinforcement Manifest's convention
+    // (user request 2026-09-11: grey what is no longer valid instead of refusing at OK). The
+    // controls are disabled, the row dimmed, and the reason is both its tooltip and a note after
+    // its label (a tooltip alone is invisible on a touch screen).
+    setDialogRowBlocked: function setDialogRowBlocked($row, $controls, $why, reason) {
+        $controls.prop('disabled', !!reason);
+        $row.css('opacity', reason ? 0.5 : '')
+            .attr('title', reason ? reason.charAt(0).toUpperCase() + reason.slice(1) : null);
+        if ($why) $why.text(reason ? ' - ' + reason : '');
+    },
+
+    // Re-grey a Docking Bay section's ship rows: every UNticked row that could not be added to
+    // what is ticked (bayShipBayProblem with it as $extra). A ticked row is never greyed, so a
+    // selection can always be undone.
+    refitBayShipRows: function refitBayShipRows(checks, baseFor, otherClass, fighterClaim) {
+        checks.forEach(function (c) {
+            var p = c.$chk.is(':checked') ? null
+                : window.confirm.bayShipBayProblem(checks, c.bay, c, baseFor, otherClass, fighterClaim);
+            window.confirm.setDialogRowBlocked(c.$row, c.$chk, c.$why, p ? p.short : null);
+        });
+    },
+
+    // Dock dialog from a ship's own "Enter Hangar" button: one row per eligible bay, mutually
+    // exclusive. Unchecking the queued one un-declares the dock.
+    bayShipDock: function bayShipDock(ship) {
+        if (!ship || typeof window.findEligibleBaysForShipDock !== 'function') return;
+        var choices = [];   // { carrier, bay }
+        window.findEligibleBaysForShipDock(ship).forEach(function (c) {
+            c.bays.forEach(function (bay) { choices.push({ carrier: c.ship, bay: bay }); });
+        });
+        //The queued bay stays offered even if it no longer qualifies, so it can be undone.
+        var queued = window.bayQueuedDock(ship);
+        if (queued && !choices.some(function (c) { return c.bay === queued.bay; })) {
+            choices.unshift({ carrier: queued.carrier, bay: queued.bay });
+        }
+        if (choices.length === 0) return;
+
+        var e = $('<div class="confirm error multi-value-confirm hangar-confirm lcvDock bayShipDock"><div class="ui"><div class="confirmok"></div><div class="confirmcancel"></div></div></div>');
+        /* Stage 19 (3.14a): a two-turn class is offered like anything else, but the player has to be
+           told what they are committing to BEFORE they tick it - the ship takes hold of the
+           carrier's aft this turn and is not aboard until the end of the next, and spends that turn
+           unable to steer or fire with the carrier's aft hits landing on it. */
+        var twoTurn = choices.some(function (c) { return window.HangarShared.bayShipIsTwoTurn(c.bay, ship.phpclass); });
+        $('<div class="multi-value-header"></div>')
+            .text('Dock ' + ship.name + ' (' + window.bayShipBoxes(ship) + ' boxes)' + (twoTurn ? ' — 2-turn procedure' : ''))
+            .prependTo(e);
+        if (twoTurn) { //I don't really think this note is necessary.
+            //$('<div class="multi-value-row" style="justify-content:center;"><span class="multi-value-label" style="font-style:normal;">Rides the carrier\'s aft for one turn: it cannot steer or fire, and hits on the carrier\'s aft section are rolled on it instead.</span></div>')
+            //    .insertAfter(e.find('.multi-value-header'));
+        }
+        var container = $('<div class="multi-value-container"></div>').insertAfter(e.find('.multi-value-header'));
+
+        var rowChecks = [];
+        choices.forEach(function (choice) {
+            var free = window.bayFreeBoxesForShips(choice.carrier, choice.bay, ship.id);
+            var row = $('<div class="multi-value-row" style="justify-content:center; gap:8px;"></div>');
+            var $chk = $('<input type="checkbox" class="lcvDockCheck">');
+            if (queued && choice.bay === queued.bay) $chk.prop('checked', true);
+            var $labelSpan = $('<span class="multi-value-label" style="flex:0 0 auto; text-align:left; margin:0;"><span class="hangar-craft-name"></span></span>');
+            $labelSpan.find('.hangar-craft-name').text(window.confirm.bayShipLabel(choice.carrier, choice.bay) + ': ' + free + ' boxes free');
+            $chk.appendTo(row);
+            $labelSpan.appendTo(row);
+            container.append(row);
+            rowChecks.push({ $chk: $chk, choice: choice });
+            $chk.on('change', function () {
+                if ($chk.is(':checked')) rowChecks.forEach(function (rc) { if (rc.$chk !== $chk) rc.$chk.prop('checked', false); });
+            });
+        });
+
+        $(".confirmok", e).on("click", function () {
+            window.clearQueuedBayShipDock(ship);
+            var picked = rowChecks.filter(function (rc) { return rc.$chk.is(':checked'); })[0];
+            if (picked) {
+                var bay = picked.choice.bay;
+                if (!Array.isArray(bay.pendingBayShipDockOrders)) bay.pendingBayShipDockOrders = [];
+                bay.pendingBayShipDockOrders.push(window.bayShipOrderFor(ship, true));
+                bay.pendingBayShipDockOrdersDirty = true;
+                if (typeof bay.refreshHangarTooltip === 'function') bay.refreshHangarTooltip();
+            }
+            if (typeof window.refreshFiringHangarTooltips === 'function') window.refreshFiringHangarTooltips();
+            e.remove();
+        });
+        $(".confirmcancel", e).on("click", function () { e.remove(); });
+        e.appendTo("body").fadeIn(250);
+    },
+
+    // Carrier-side recover section: one checkbox row per ship in the hex that meets the dock
+    // conditions (plus any already queued here, so it can be un-declared), with a live room /
+    // rate readout per bay. DEFERRED commit, like appendLcvRecoverSection. hasOverflow() returns
+    // the first problem as a MESSAGE (or null); selectedBayIds() lets the host refuse fighters
+    // and ships through one bay in the same dialog.
+    // $opts (optional): fighterClaim(bay) - see bayShipBayProblem - and onChange(), called after a
+    // row is ticked or unticked, so a host dialog can re-grey its own fighter rows.
+    appendBayShipRecoverSection: function appendBayShipRecoverSection(container, carrier, opts) {
+        opts = opts || {};
+        var noop = { count: 0, commit: function () {}, hasOverflow: function () { return null; }, selectedBayIds: function () { return {}; }, refit: function () {} };
+        if (!carrier || !Array.isArray(carrier.systems) || typeof window.findEligibleBayShipsForRecover !== 'function') return noop;
+
+        var rows = window.findEligibleBayShipsForRecover(carrier);   //[{ship, bay}]
+        var queuedHere = {};
+        carrier.systems.forEach(function (bay) {
+            if (!window.HangarShared.isDockingBaySys(bay) || !Array.isArray(bay.pendingBayShipDockOrders)) return;
+            bay.pendingBayShipDockOrders.forEach(function (o) {
+                var qid = parseInt(o.shipId, 10);
+                queuedHere[qid] = true;
+                if (rows.some(function (r) { return parseInt(r.ship.id, 10) === qid; })) return;
+                var qs = gamedata.getShip(qid);
+                if (qs) rows.push({ ship: qs, bay: bay });
+            });
+        });
+        if (rows.length === 0) return noop;
+
+        var rowIds = {};
+        rows.forEach(function (r) { rowIds[parseInt(r.ship.id, 10)] = true; });
+
+        //Room with THIS dialog's queued rows handed back - they are what it edits - and the ship
+        //moves this turn's queued LAUNCHES have already spent from the per-class rate.
+        function baseFor(bay) {
+            var free = window.bayFreeBoxesForShips(carrier, bay, null);
+            (bay.pendingBayShipDockOrders || []).forEach(function (o) {
+                if (rowIds[parseInt(o.shipId, 10)]) free += window.bayOrderBoxes(o);
+            });
+            return { free: free, used: (bay.pendingBayShipLaunchOrders || []).length };
+        }
+        function otherClass(bay) {
+            var l = bay.pendingBayShipLaunchOrders;
+            return (Array.isArray(l) && l.length > 0) ? window.bayOrderClass(l[0]) : null;
+        }
+
+        $('<div class="multi-value-row" style="justify-content:center;"><span class="hangar-section-name">Docking Bay</span></div>').appendTo(container);
+        var $capRow = $('<div class="multi-value-row hangarCapacityHeader" style="font-style:normal;"></div>');
+        container.append($capRow);
+
+        var checks = [];
+        function recompute() {
+            var bays = [];
+            checks.forEach(function (c) { if (bays.indexOf(c.bay) === -1) bays.push(c.bay); });
+            var $pills = $('<span class="hangar-capacity-pills"></span>');
+            bays.forEach(function (bay) {
+                var used = 0;
+                checks.forEach(function (c) { if (c.bay === bay && c.$chk.is(':checked')) used += c.boxes; });
+                var base = baseFor(bay);
+                $('<span class="hangar-capacity-pill"></span>')
+                    .css('color', used > base.free ? '#ff7070' : (used > 0 ? '#ffff80' : '#bdbdbd'))
+                    .text(window.confirm.bayShipLabel(null, bay) + ': ' + Math.max(0, base.free - used) + ' boxes free')
+                    .appendTo($pills);
+            });
+            $capRow.empty().append('<span class="hangar-capacity-label">Docking Bay:</span>').append($pills);
+            window.confirm.refitBayShipRows(checks, baseFor, otherClass, opts.fighterClaim);
+        }
+        function changed() {
+            recompute();
+            if (opts.onChange) opts.onChange();
+        }
+
+        rows.forEach(function (r) {
+            var shipId = parseInt(r.ship.id, 10);
+            var boxes = window.bayShipBoxes(r.ship);
+            var row = $('<div class="multi-value-row" style="justify-content:center; gap:8px;"></div>');
+            var $chk = $('<input type="checkbox" class="lcvRecoverCheck">');
+            if (queuedHere[shipId]) $chk.prop('checked', true);
+            var $labelSpan = $('<span class="multi-value-label" style="flex:0 0 auto; text-align:left; margin:0;"><span class="hangar-craft-name"></span></span>');
+            var perTurn = parseInt((r.bay.shipLaunchRates || {})[String(r.ship.phpclass)], 10) || 0;
+            $labelSpan.find('.hangar-craft-name').text(r.ship.name + ' (' + boxes + ' boxes, ' + perTurn + ' per turn)');
+            var $why = $('<span class="multi-value-max bay-row-why"></span>').appendTo($labelSpan);
+            $chk.appendTo(row);
+            $labelSpan.appendTo(row);
+            container.append(row);
+            checks.push({ ship: r.ship, bay: r.bay, boxes: boxes, cls: String(r.ship.phpclass), $chk: $chk, $row: row, $why: $why });
+            $chk.on('change', changed);
+        });
+        recompute();
+
+        function commit() {
+            //A checked row is rewritten here; an unchecked one is cleared only if it was queued
+            //HERE - a dock the player queued into another carrier is left alone.
+            checks.forEach(function (c) {
+                if (c.$chk.is(':checked') || queuedHere[parseInt(c.ship.id, 10)]) window.clearQueuedBayShipDock(c.ship);
+            });
+            checks.forEach(function (c) {
+                if (!c.$chk.is(':checked')) return;
+                if (!Array.isArray(c.bay.pendingBayShipDockOrders)) c.bay.pendingBayShipDockOrders = [];
+                c.bay.pendingBayShipDockOrders.push(window.bayShipOrderFor(c.ship, true));
+                c.bay.pendingBayShipDockOrdersDirty = true;
+                if (typeof c.bay.refreshHangarTooltip === 'function') c.bay.refreshHangarTooltip();
+            });
+            if (typeof window.refreshFiringHangarTooltips === 'function') window.refreshFiringHangarTooltips();
+        }
+        function selectedBayIds() {
+            var ids = {};
+            checks.forEach(function (c) { if (c.$chk.is(':checked')) ids[c.bay.id] = true; });
+            return ids;
+        }
+        return {
+            count: checks.length,
+            commit: commit,
+            hasOverflow: function () { return window.confirm.bayShipSelectionProblem(checks, baseFor, otherClass, opts.fighterClaim); },
+            selectedBayIds: selectedBayIds,
+            refit: recompute
+        };
+    },
+
+    // Launch section: one checkbox row per ship that may leave a bay this turn. Same shape and
+    // return value as appendBayShipRecoverSection. Room is no question for a ship on its way out,
+    // only the launch rate, which launches and docks share.
+    appendBayShipLaunchSection: function appendBayShipLaunchSection(container, carrier, opts) {
+        opts = opts || {};
+        var noop = { count: 0, commit: function () {}, hasOverflow: function () { return null; }, selectedBayIds: function () { return {}; }, refit: function () {} };
+        if (!carrier || !Array.isArray(carrier.systems) || typeof window.bayLaunchableShips !== 'function') return noop;
+        var rows = [];
+        carrier.systems.forEach(function (bay) {
+            if (!window.HangarShared.isDockingBaySys(bay)) return;
+            window.bayLaunchableShips(carrier, bay).forEach(function (entry) { rows.push({ bay: bay, entry: entry }); });
+        });
+        if (rows.length === 0) return noop;
+
+        //Room is no question for a ship on its way out; the rate is shared with this turn's docks.
+        function baseFor(bay) {
+            return { free: Infinity, used: (bay.pendingBayShipDockOrders || []).length };
+        }
+        function otherClass(bay) {
+            var d = bay.pendingBayShipDockOrders;
+            return (Array.isArray(d) && d.length > 0) ? window.bayOrderClass(d[0]) : null;
+        }
+
+        $('<div class="multi-value-row" style="justify-content:center;"><span class="hangar-section-name">Docking Bay</span></div>').appendTo(container);
+        var $capRow = $('<div class="multi-value-row hangarCapacityHeader" style="font-style:normal;"></div>');
+        container.append($capRow);
+
+        var checks = [];
+        function recompute() {
+            var bays = [];
+            checks.forEach(function (c) { if (bays.indexOf(c.bay) === -1) bays.push(c.bay); });
+            var $pills = $('<span class="hangar-capacity-pills"></span>');
+            bays.forEach(function (bay) {
+                var picked = checks.filter(function (c) { return c.bay === bay && c.$chk.is(':checked'); });
+                var cls = picked.length ? picked[0].cls : null;
+                var rate = cls ? (parseInt((bay.shipLaunchRates || {})[cls], 10) || 0) : 0;
+                var over = cls && picked.length + baseFor(bay).used > rate;
+                $('<span class="hangar-capacity-pill"></span>')
+                    .css('color', over ? '#ff7070' : (picked.length > 0 ? '#ffff80' : '#bdbdbd'))
+                    .text(window.confirm.bayShipLabel(null, bay) + ': '
+                        + (cls ? picked.length + ' of ' + rate + ' ' + cls + ' per turn' : 'none selected'))
+                    .appendTo($pills);
+            });
+            $capRow.empty().append('<span class="hangar-capacity-label">Docking Bay:</span>').append($pills);
+            window.confirm.refitBayShipRows(checks, baseFor, otherClass, opts.fighterClaim);
+        }
+        function changed() {
+            recompute();
+            if (opts.onChange) opts.onChange();
+        }
+
+        rows.forEach(function (r) {
+            var shipId = parseInt(r.entry.shipId, 10);
+            var s = gamedata.getShip(shipId);
+            var boxes = parseInt(r.entry.boxes || 0, 10);
+            var pre = Array.isArray(r.bay.pendingBayShipLaunchOrders)
+                && r.bay.pendingBayShipLaunchOrders.some(function (o) { return parseInt(o.shipId, 10) === shipId; });
+            var row = $('<div class="multi-value-row" style="justify-content:center; gap:8px;"></div>');
+            var $chk = $('<input type="checkbox" class="lcvLaunchCheck">');
+            if (pre) $chk.prop('checked', true);
+            var $labelSpan = $('<span class="multi-value-label" style="flex:0 0 auto; text-align:left; margin:0;"><span class="hangar-craft-name"></span></span>');
+            //Stage 19: the same warning on the way out - it leaves the bay this turn but does not
+            //separate until the end of the next, and rides the aft in between.
+            var twoTurnOut = window.HangarShared.bayShipIsTwoTurn(r.bay, r.entry.phpclass);
+            $labelSpan.find('.hangar-craft-name').text((s && s.name ? s.name : 'Ship ' + shipId)
+                + ' (' + boxes + ' boxes' + (twoTurnOut ? ', 2-turn procedure' : '') + ')');
+            var $why = $('<span class="multi-value-max bay-row-why"></span>').appendTo($labelSpan);
+            $chk.appendTo(row);
+            $labelSpan.appendTo(row);
+            container.append(row);
+            checks.push({ shipId: shipId, bay: r.bay, boxes: boxes, cls: String(r.entry.phpclass), $chk: $chk, $row: row, $why: $why });
+            $chk.on('change', changed);
+        });
+        recompute();
+
+        function commit() {
+            var bays = [];
+            checks.forEach(function (c) { if (bays.indexOf(c.bay) === -1) bays.push(c.bay); });
+            bays.forEach(function (bay) {
+                bay.pendingBayShipLaunchOrders = checks
+                    .filter(function (c) { return c.bay === bay && c.$chk.is(':checked'); })
+                    .map(function (c) { return { shipId: c.shipId, boxes: c.boxes, phpclass: c.cls }; });
+                bay.pendingBayShipLaunchOrdersDirty = true;
+                if (typeof bay.refreshHangarTooltip === 'function') bay.refreshHangarTooltip();
+            });
+            if (typeof window.refreshFiringHangarTooltips === 'function') window.refreshFiringHangarTooltips();
+        }
+        function selectedBayIds() {
+            var ids = {};
+            checks.forEach(function (c) { if (c.$chk.is(':checked')) ids[c.bay.id] = true; });
+            return ids;
+        }
+        return {
+            count: checks.length,
+            commit: commit,
+            hasOverflow: function () { return window.confirm.bayShipSelectionProblem(checks, baseFor, otherClass, opts.fighterClaim); },
+            selectedBayIds: selectedBayIds,
+            refit: recompute
+        };
+    },
+
+    // Standalone ship-launch dialog - a carrier whose only launchable craft are docked ships.
+    bayShipLaunch: function bayShipLaunch(carrier) {
+        if (!carrier) return;
+        var e = $('<div class="confirm error multi-value-confirm hangar-confirm hangarLaunch lcvLaunch"><div class="ui"><div class="confirmok"></div><div class="confirmcancel"></div></div></div>');
+        $('<div class="multi-value-header"></div>').text('Launch ships from ' + carrier.name).prependTo(e);
+        var container = $('<div class="multi-value-container"></div>').insertAfter(e.find('.multi-value-header'));
+        var section = window.confirm.appendBayShipLaunchSection(container, carrier);
+        if (section.count === 0) {
+            $('<div class="multi-value-row"><span class="multi-value-label" style="font-style:normal;">No docked ship can launch this turn.</span></div>').appendTo(container);
+        }
+        $(".confirmok", e).on("click", function () {
+            var msg = section.hasOverflow();
+            if (msg) { alert(msg); return; }
+            section.commit();
+            e.remove();
+        });
+        $(".confirmcancel", e).on("click", function () { e.remove(); });
+        e.appendTo("body").fadeIn(250);
+    },
+
+    // DEPLOYMENT un-dock section: one pre-checked row per ship queued to start the battle in one
+    // of $carrier's bays. Unchecking + OK releases it (DeploymentDock.unqueueBayShipDeployDock),
+    // back to wherever it was placed, or unplaced. Same shape as appendLcvDeployDockSection.
+    appendBayShipDeployDockSection: function appendBayShipDeployDockSection(container, carrier) {
+        var noop = { count: 0, commit: function () {} };
+        if (!carrier || !Array.isArray(carrier.systems)) return noop;
+        var rows = [];
+        carrier.systems.forEach(function (bay) {
+            if (!window.HangarShared.isDockingBaySys(bay) || !Array.isArray(bay.pendingBayShipDeployStartOrders)) return;
+            bay.pendingBayShipDeployStartOrders.forEach(function (o) {
+                var s = gamedata.getShip(o.shipId);
+                if (s) rows.push({ ship: s, boxes: parseInt(o.boxes || 0, 10) });
+            });
+        });
+        if (rows.length === 0) return noop;
+
+        $('<div class="multi-value-row" style="justify-content:center;"><span class="hangar-section-name">Docking Bay</span></div>').appendTo(container);
+        rows.forEach(function (r) {
+            var row = $('<div class="multi-value-row" style="justify-content:center; gap:8px;"></div>');
+            r.$chk = $('<input type="checkbox" class="lcvDeployDockCheck">').prop('checked', true);
+            //Arrived aboard a legacy-drive reinforcement: docked by rule, so not releasable.
+            if (r.ship.forcedDeployDock) r.$chk.prop('disabled', true);
+            var $labelSpan = $('<span class="multi-value-label" style="flex:0 0 auto; text-align:left; margin:0;"><span class="hangar-craft-name"></span></span>');
+            $labelSpan.find('.hangar-craft-name').text(r.ship.name + ' (' + r.boxes + ' boxes)' + (r.ship.forcedDeployDock ? ' - arrives aboard' : ''));
+            r.$chk.appendTo(row);
+            $labelSpan.appendTo(row);
+            container.append(row);
+        });
+        function commit() {
+            rows.forEach(function (r) {
+                if (r.$chk.is(':checked')) return;
+                if (window.DeploymentDock && typeof window.DeploymentDock.unqueueBayShipDeployDock === 'function') {
+                    window.DeploymentDock.unqueueBayShipDeployDock(r.ship);
+                }
+            });
+        }
+        return { count: rows.length, commit: commit };
+    },
+
+    // Deployment: more than one carrier in the hex can take $ship - pick one. $carriers is a list
+    // of ships (each already known to accept it).
+    bayShipDeployDockCarrierPicker: function bayShipDeployDockCarrierPicker(ship, carriers) {
+        if (!ship || !Array.isArray(carriers) || carriers.length === 0) return;
+        if (!window.DeploymentDock || typeof window.DeploymentDock.queueBayShipDeployDock !== 'function') return;
+        var e = $('<div class="confirm error multi-value-confirm hangar-confirm hangarDeployCarrierPicker"><div class="ui"><div class="confirmok"></div><div class="confirmcancel"></div></div></div>');
+        $('<div class="multi-value-header"></div>').text('Dock ' + ship.name + ' — choose carrier').prependTo(e);
+        var container = $('<div class="multi-value-container"></div>').insertAfter(e.find('.multi-value-header'));
+        var rowChecks = [];
+        carriers.forEach(function (carrier, idx) {
+            var row = $('<div class="multi-value-row" style="justify-content:center; gap:8px;"></div>');
+            var $chk = $('<input type="checkbox" class="lcvDeployDockCheck">');
+            if (idx === 0) $chk.prop('checked', true);
+            var $labelSpan = $('<span class="multi-value-label" style="flex:0 0 auto; text-align:left; margin:0;"><span class="hangar-craft-name"></span></span>');
+            $labelSpan.find('.hangar-craft-name').text(carrier.name + ' — Docking Bay');
+            $chk.appendTo(row);
+            $labelSpan.appendTo(row);
+            container.append(row);
+            rowChecks.push({ $chk: $chk, carrier: carrier });
+            $chk.on('change', function () {
+                if ($chk.is(':checked')) rowChecks.forEach(function (rc) { if (rc.$chk !== $chk) rc.$chk.prop('checked', false); });
+            });
+        });
+        $(".confirmok", e).on("click", function () {
+            var picked = rowChecks.filter(function (rc) { return rc.$chk.is(':checked'); })[0];
+            e.remove();
+            if (picked && window.DeploymentDock.queueBayShipDeployDock(picked.carrier, ship)) {
+                if (typeof window.refreshDeploymentUIForDeployStart === 'function') window.refreshDeploymentUIForDeployStart();
+                if (typeof window.selectShipInDeploymentPhase === 'function') window.selectShipInDeploymentPhase(picked.carrier);
+            }
+        });
+        $(".confirmcancel", e).on("click", function () { e.remove(); });
+        e.appendTo("body").fadeIn(250);
+    },
+
     // === Hangar Operations Stage 4: launch fighters/shuttles dialog ===
     //
     // Builds a per-hangar list of stored craft with size selectors and on
@@ -2760,6 +3232,10 @@ window.confirm = {
             //Stage S (S-f): a ShadowHangar keeps name 'hangar' but never appears as a
             //launch source — its fighters leave only via the Fighter Bomb weapon.
             if (sys.isShadowHangar) continue;
+            //A Docking Bay whose ships are being RECOVERED this turn launches no fighters (3.14).
+            //Ships LAUNCHING from it are this dialog's own rows: it lists both and greys whichever
+            //type the player has not picked (hangarLaunchNoSplit's refitBayConflicts).
+            if (Array.isArray(sys.pendingBayShipDockOrders) && sys.pendingBayShipDockOrders.length > 0) continue;
             all.push(sys);
         }
         // Set of system ids referenced by any occupancy list on the ship.
@@ -2774,7 +3250,13 @@ window.confirm = {
             var hasOwn = Array.isArray(h.hangarUsage) && h.hangarUsage.length > 0;
             return hasOwn || occupiedIds[parseInt(h.id, 10)];
         });
-        if (hangars.length === 0) return;
+        if (hangars.length === 0) {
+            //No fighter to launch - but a Docking Bay may still hold ships that can (3.14).
+            if (typeof window.hasLaunchableBayShip === 'function' && window.hasLaunchableBayShip(ship)) {
+                window.confirm.bayShipLaunch(ship);
+            }
+            return;
+        }
 
         return window.confirm.hangarLaunchNoSplit(ship, hangars);
     },
@@ -2953,6 +3435,8 @@ window.confirm = {
                 $span.text(rem);
                 $span.css('color', rem <= 0 ? '#ff6666' : '');
             });
+
+            refitBayConflicts();   //a fighter charging a Docking Bay greys its ship rows
         }
 
         // Pre-fill helper: sum prior pendingLaunchOrders on a bay matching a key.
@@ -3101,7 +3585,7 @@ window.confirm = {
                 var $in = $('<input type="number" class="multiConfirmInput multi-value-input main-input launchSize" value="' + preset + '" min="0" max="' + max + '">').appendTo(iw);
                 container.append(row);
 
-                var rd = { $input: $in, dockedFlightId: 0, phpclass: cls, entryHangar: hangar, max: max, isAnon: true, splitActive: false, splitInputs: null };
+                var rd = { $input: $in, dockedFlightId: 0, phpclass: cls, entryHangar: hangar, max: max, isAnon: true, splitActive: false, splitInputs: null, $splitChk: $splitChk };
                 rowData.push(rd);
                 $in.on('input change', updateBudgets);
 
@@ -3262,6 +3746,59 @@ window.confirm = {
         //a carrier with both shows them together. Deferred commit — called from
         //the OK handler below after the fighter launch orders are built.
         var lcvLaunchSection = window.confirm.appendLcvLaunchSection(container, ship);
+        //And the ships in a Docking Bay (3.14), committed the same deferred way. ONE craft type per
+        //bay per turn is kept by greying, both ways (user request 2026-09-11, in place of the OK-time
+        //refusal): fighters charging a bay grey its ship rows (fighterClaim), and a ticked ship holds
+        //its bay against the fighter rows (refitBayConflicts).
+        var bayLaunchSection = window.confirm.appendBayShipLaunchSection(container, ship, {
+            //Fighters using a bay as THIS dialog has them: its launch rows' live charges (the queued
+            //launch orders are what OK rewrites), plus any fighter recovery queued elsewhere.
+            fighterClaim: function (bay) {
+                if ((tallyCharges()[parseInt(bay.id, 10)] || 0) > 0) return true;
+                return Array.isArray(bay.pendingDockOrders)
+                    && bay.pendingDockOrders.some(function (o) { return parseInt((o && o.count) || 0, 10) > 0; });
+            },
+            onChange: refitBayConflicts
+        });
+        refitBayConflicts();
+
+        // The fighter half of the lock. A bay with a ship ticked takes no fighter charge: a row that
+        // draws only on it is greyed, and a docked flight spread over several bays is capped at the
+        // craft that come out of its OTHER bays first - the drain order chargesForRow mirrors from
+        // the server. Then the ship rows are re-greyed against the fighters' charges.
+        function refitBayConflicts() {
+            if (!bayLaunchSection) return;   //updateBudgets runs while the rows are still being built
+            var held = bayLaunchSection.selectedBayIds();
+            var clamped = false;
+            rowData.forEach(function (rd) {
+                if (rd.isCat) return;
+                var limit;
+                if (rd.dockedFlightId > 0 && rd.occBays && rd.occBays.length) {
+                    limit = 0;
+                    for (var i = 0; i < rd.occBays.length && !held[rd.occBays[i].hangarId]; i++) limit += rd.occBays[i].craft;
+                    limit = Math.min(rd.max, limit);
+                } else {
+                    limit = held[parseInt(rd.entryHangar.id, 10)] ? 0 : rd.max;
+                }
+                if (limit === 0 && rd.splitActive && rd.$splitChk) rd.$splitChk.prop('checked', false).trigger('change');
+                if (rowTotal(rd) > limit) {
+                    rd.$input.val(limit);
+                    rd.lastVal = limit;
+                    clamped = true;
+                }
+                rd.$input.attr('max', limit);
+
+                var $row = rd.$input.closest('.multi-value-row');
+                if (!rd.$why) rd.$why = $('<span class="multi-value-max bay-row-why"></span>').appendTo($row.find('.multi-value-label').first());
+                var why = 'ships are launching from the Docking Bay this turn';
+                window.confirm.setDialogRowBlocked($row, rd.$splitChk ? rd.$input.add(rd.$splitChk) : rd.$input, rd.$why,
+                    limit === 0 ? why : null);
+                //Capped rather than closed: still editable, but say why the ceiling dropped.
+                if (limit > 0 && limit < rd.max) rd.$why.text(' - up to ' + limit + ': ' + why);
+            });
+            if (clamped) updateBudgets();   //re-reads the charges, and calls back here clamping nothing
+            bayLaunchSection.refit();
+        }
 
         $(".confirmok", e).on("click", function () {
             // Build per-bay order lists keyed by the entry's hangar. Seed EVERY
@@ -3322,6 +3859,21 @@ window.confirm = {
                 return;
             }
 
+            //Docking Bay (3.14): the ship rows' own verdict, then one craft type per turn -
+            //fighters charged to a bay (directly or through occupancy) and ships out of it
+            //cannot both launch this turn.
+            var bayMsg = bayLaunchSection.hasOverflow();
+            if (!bayMsg) {
+                var baySelected = bayLaunchSection.selectedBayIds();
+                for (var selBayId in baySelected) {
+                    if ((charged[selBayId] || 0) > 0) {
+                        bayMsg = 'Only one type of craft may launch through the Docking Bay per turn - launch its ships or its fighters, not both.';
+                        break;
+                    }
+                }
+            }
+            if (bayMsg) { alert(bayMsg); return; }
+
             byHangar.forEach(function (orders, hangar) {
                 hangar.pendingLaunchOrders = orders;
                 hangar.pendingLaunchOrdersDirty = true;
@@ -3329,6 +3881,7 @@ window.confirm = {
 
             //Commit the LCV launch selections alongside the fighter launches.
             if (lcvLaunchSection.commit) lcvLaunchSection.commit();
+            bayLaunchSection.commit();
 
             if (typeof window.refreshFiringHangarTooltips === 'function') window.refreshFiringHangarTooltips();
             $(".confirm").remove();
@@ -3891,16 +4444,21 @@ window.confirm = {
         if (eligibleEntries.length === 0) {
             // No fighter flights — but the carrier may still have eligible LCVs.
             var lcvSectionOnly = window.confirm.appendLcvRecoverSection(container, carrier);
-            if (lcvSectionOnly.count === 0) {
+            //...or ships its Docking Bay can take (3.14).
+            var baySectionOnly = window.confirm.appendBayShipRecoverSection(container, carrier);
+            if (lcvSectionOnly.count === 0 && baySectionOnly.count === 0) {
                 $('<div class="multi-value-row"><span class="multi-value-label" style="font-style:normal;">No friendly flights in this hex are eligible for recovery.</span></div>').appendTo(container);
             }
-            //OK commits the LCV selections (no fighter allocation in this branch).
+            //OK commits the LCV and ship selections (no fighter allocation in this branch).
             $(".confirmok", e).on("click", function () {
                 if (lcvSectionOnly.hasOverflow && lcvSectionOnly.hasOverflow()) {
                     alert('More LCVs selected than free rails. Uncheck some and try again.');
                     return;
                 }
+                var bayMsgOnly = baySectionOnly.hasOverflow();
+                if (bayMsgOnly) { alert(bayMsgOnly); return; }
                 lcvSectionOnly.commit();
+                baySectionOnly.commit();
                 e.remove();
             });
             $(".confirmcancel", e).on("click", function () { e.remove(); });
@@ -4074,6 +4632,67 @@ window.confirm = {
         //carrier with both shows them in one dialog. Deferred commit — the OK
         //handler below calls lcvSection.commit() after the fighter allocation.
         var lcvSection = window.confirm.appendLcvRecoverSection(container, carrier);
+        //And the ships its Docking Bay can take (3.14), committed the same deferred way. ONE craft
+        //type per bay per turn is kept by greying, both ways (user request 2026-09-11, in place of the
+        //OK-time refusal): a flight planned into a bay greys its ship rows (fighterClaim), and a
+        //ticked ship holds its bay against the flight rows (refitRecoverConflicts).
+        var shipHeldBays = {};   //bay id -> true while a ship is ticked to dock there (refitRecoverConflicts)
+        var baySection = window.confirm.appendBayShipRecoverSection(container, carrier, {
+            //Fighters using a bay as THIS dialog has them: its rows' live plans (their queued docks
+            //are what OK rewrites), plus fighter launches and other flights' docks queued elsewhere.
+            fighterClaim: function (bay) {
+                if ((computePerHangarUsage().get(bay.id) || 0) > 0) return true;
+                var launching = Array.isArray(bay.pendingLaunchOrders)
+                    && bay.pendingLaunchOrders.some(function (o) { return parseInt((o && o.size) || 0, 10) > 0; });
+                return launching || (Array.isArray(bay.pendingDockOrders) && bay.pendingDockOrders.some(function (o) {
+                    return !rowFlightIds.has(parseInt(o.flightId, 10)) && parseInt((o && o.count) || 0, 10) > 0;
+                }));
+            },
+            onChange: refitRecoverConflicts
+        });
+        refitRecoverConflicts();
+
+        // The flight half of the lock: a bay with a ship ticked takes no flight. An unticked row that
+        // could only go there is greyed, a pick-list loses that bay (moving off it if it was the pick),
+        // and an auto-distributed flight is routed round it (distributeFlightAcrossBays reads
+        // shipHeldBays). A ticked row is left alone, so it can always be unticked. Then the ship rows
+        // are re-greyed against the flights' plans.
+        function refitRecoverConflicts() {
+            if (!baySection) return;   //recomputeCapacity runs while the rows are still being built
+            shipHeldBays = baySection.selectedBayIds();
+            var why = 'ships are docking in the Docking Bay this turn';
+            rowData.forEach(function ($row) {
+                var $check = $row.find('.deployDockCheck');
+                var checked = $check.is(':checked');
+                var $pick = $row.find('.deployDockHangar');
+                var reason = null;
+                if ($pick.length) {
+                    var eligible = $row.data('eligibleHangars') || [];
+                    var heldAt = function (i) { var h = eligible[i]; return !!(h && shipHeldBays[h.hangar.id]); };
+                    if (!checked && heldAt(parseInt($pick.val() || 0, 10))) {
+                        var clear = -1;
+                        eligible.forEach(function (_h, i) { if (clear === -1 && !heldAt(i)) clear = i; });
+                        if (clear !== -1) $pick.val(clear);
+                        else reason = why;
+                    }
+                    var picked = parseInt($pick.val() || 0, 10);
+                    $pick.find('option').each(function () {
+                        var i = parseInt(this.value, 10);
+                        this.disabled = heldAt(i) && i !== picked;
+                    });
+                } else if (!checked) {
+                    var chosen = $row.data('chosenHangar');
+                    if (chosen ? shipHeldBays[chosen.id] : planForRow($row).length === 0) reason = why;
+                }
+                var $why = $row.data('bayWhy');
+                if (!$why) {
+                    $why = $('<span class="multi-value-max bay-row-why"></span>').appendTo($row.find('.multi-value-label').first());
+                    $row.data('bayWhy', $why);
+                }
+                window.confirm.setDialogRowBlocked($row, $pick.length ? $check.add($pick) : $check, $why, reason);
+            });
+            baySection.refit();
+        }
 
         $(".confirmok", e).on("click", function () {
             // Reject if any hangar would overflow free boxes OR the shared
@@ -4136,6 +4755,17 @@ window.confirm = {
                 return;
             }
 
+            //Docking Bay (3.14): the ship rows' own verdict, then one craft type per turn - a
+            //flight planned into a bay and ships docking into it cannot share the turn.
+            var bayMsg = baySection.hasOverflow();
+            if (!bayMsg) {
+                var baySel = baySection.selectedBayIds();
+                perBoxes.forEach(function (_boxes, hangarId) {
+                    if (baySel[hangarId]) bayMsg = 'Only one type of craft may be recovered through the Docking Bay per turn - recover its ships or its fighters, not both.';
+                });
+            }
+            if (bayMsg) { alert(bayMsg); return; }
+
             rowData.forEach(function ($row) {
                 var flight = $row.data('flight');
                 if (!flight) return;
@@ -4163,6 +4793,7 @@ window.confirm = {
             //Commit the LCV section's selections (deferred until OK, same as the
             //fighter rows). Done after the fighter allocation so both apply together.
             if (lcvSection.commit) lcvSection.commit();
+            baySection.commit();
 
             //Stage 10.2: project bulk-recover orders into every hangar tooltip
             //so the carrier's hangar systemInfo shows "(Recovering)" lines and
@@ -4236,6 +4867,9 @@ window.confirm = {
             carrier.systems.forEach(function (sys) {
                 if (!sys || !isDockHangar(sys)) return;
                 if (!baseFreeByHangar.has(sys.id)) return;
+                //A Docking Bay a ship is ticked to dock in takes no flight this turn (3.14).
+                //Guarded: this runs from recomputeCapacity before the ship section exists.
+                if (shipHeldBays && shipHeldBays[sys.id]) return;
                 var freeBoxes = baseFreeByHangar.get(sys.id);
                 var budget    = baseBudgetByHangar.get(sys.id);
                 var isCat = isCatapultSys(sys);
@@ -4245,7 +4879,12 @@ window.confirm = {
                                      : Math.min(Math.floor(freeBoxes / perCraftBoxes), budget);
                 if (craftFit > 0) bays.push({ hangar: sys, fit: craftFit, free: freeBoxes });
             });
-            bays.sort(function (a, b) { return b.free - a.free; });   //biggest free first
+            //Fill rank first - a Docking Bay LAST, its boxes being the only ones a ship can use
+            //(HangarShared.bayFillRank, user 2026-09-11) - then biggest free first.
+            bays.sort(function (a, b) {
+                return (window.HangarShared.bayFillRank(a.hangar, flight) - window.HangarShared.bayFillRank(b.hangar, flight))
+                    || (b.free - a.free);
+            });
 
             var remaining = count;
             var plan = [];
@@ -4339,6 +4978,8 @@ window.confirm = {
                 .append('<span class="hangar-capacity-label">Available Hangar Capacity:</span>')
                 .append($pillContainer);
             $('.confirmok', e).css('opacity', anyOverflow ? 0.6 : 1);
+
+            refitRecoverConflicts();   //a flight planned into a Docking Bay greys its ship rows
         }
 
         // Remove all queued dock-order entries for $flight from every hangar
@@ -4581,7 +5222,17 @@ window.confirm = {
             });
         }
 
-        if (pending.length === 0 && lcvDeployRailCount === 0) {
+        //Docking Bay (3.14): a ship deploy-docked into a bay keeps the dialog open the same way.
+        var bayDeployShipCount = 0;
+        if (Array.isArray(carrier.systems)) {
+            carrier.systems.forEach(function (s) {
+                if (window.HangarShared.isDockingBaySys(s) && Array.isArray(s.pendingBayShipDeployStartOrders)) {
+                    bayDeployShipCount += s.pendingBayShipDeployStartOrders.length;
+                }
+            });
+        }
+
+        if (pending.length === 0 && lcvDeployRailCount === 0 && bayDeployShipCount === 0) {
             $('<div class="multi-value-row"><span class="multi-value-label" style="font-style:normal;">No Hangar Operations available.</span></div>').appendTo(container);
             //Hide OK — there's nothing to commit. Cancel just closes.
             $('.confirmok', e).hide();
@@ -4718,6 +5369,8 @@ window.confirm = {
         //rail this session (Issue 1 — previously the only way to release a
         //deploy-docked LCV was a page refresh). Unchecking + OK releases it.
         var lcvDeploySection = window.confirm.appendLcvDeployDockSection(container, carrier);
+        //And the ships deploy-docked into its Docking Bay (3.14).
+        var bayDeploySection = window.confirm.appendBayShipDeployDockSection(container, carrier);
 
         /* ⭐ NOTHING DOCKABLE IS AN ANSWER, NOT A REASON TO VANISH (user report 2026-08-28, game
            4318). This used to `e.remove(); return;` — the dialog was built and then thrown away
@@ -4734,7 +5387,7 @@ window.confirm = {
            several pending and the player needs to know which ones are stuck, and the per-bay free
            count is shown because "0 free" is the whole explanation and is otherwise invisible
            (hangarUsage is a tooltip away). No OK button - there is nothing to commit. */
-        if (rowData.length === 0 && lcvDeploySection.count === 0) {
+        if (rowData.length === 0 && lcvDeploySection.count === 0 && bayDeploySection.count === 0) {
             container.empty();
 
             var $why = $('<div class="multi-value-row"></div>');
@@ -4841,6 +5494,7 @@ window.confirm = {
             //their deploy-docked LCV back onto the map). No overflow guard — each
             //rail holds at most one LCV and we only ever remove here.
             lcvDeploySection.commit();
+            bayDeploySection.commit();
 
             e.remove();
             if (typeof window.refreshDeploymentUIForDeployStart === 'function') {

@@ -95,6 +95,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li><a href="#triad">THE TRIAD</a></li>                                   
                 <li><a href="#torvalus">TORVALUS SPECULATORS</a></li>                                   
                 <li><a href="#vorlons">VORLON EMPIRE</a></li> 
+                <li><a href="#walkers">WALKERS OF SIGMA-957</a></li> 
             </ul>
         </li>
     </ul>       
@@ -1033,7 +1034,17 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             Cost of critical repair has been changed in places (in particular C&C criticals aren't that costly to fix), and there's no partial repair of crits.  
             If a Self-Repair system is destroyed or damaged, unused repair points are not lost.</li>
     </ul>
-<a class="back-to-top" href="#top">↩ Back to Top</a> 
+<h5>Ancient Jump Drives</h5>
+        <ul>
+<li>Each Ancient race has its own way into hyperspace, listed on the control sheet as a special jump drive. The <b>Shadows, Kirishiac, Mindriders, Torvalus, Triad, Thirdspace and Walkers</b>
+            jump to hyperspace directly and <b>do not open jump points</b>: set <b>Jump to Hyperspace</b> on the drive in Initial Orders and the ship leaves the battle at the
+            <b>end of that turn</b>. It can still be fired on until it goes.</li>
+<li>A ship jumping out <b>may not fire</b> that turn, and that includes interception - setting the jump withdraws any fire orders it already has. The Walkers are the
+            exception: their ships fire normally on the turn they jump.</li>
+<li>If the drive is damaged, the chance of it destroying the ship as it jumps is <b>halved</b>. The Walkers' drives have no chance of failure at all.</li>
+<li>Ancient jump drives <b>cannot be affected by a Vortex Disruptor</b>. The Vorlon Empire (and The System) use jump engines that open ordinary jump points, and remain vulnerable to it.</li>
+    </ul>
+<a class="back-to-top" href="#top">↩ Back to Top</a>
 
 
 
@@ -1798,6 +1809,336 @@ at short range versus long range.
         </li>            
     <a class="back-to-top" href="#top">↩ Back to Top</a>        
  
+
+    <h4 id="walkers" >WALKERS OF SIGMA-957</h4>
+    <p>The Walkers are the enigmatic inhabitants of Sigma-957, an Ancient race that surveys and maps the galaxy rather than conquering it.
+        Below is a list of the systems used by the Walkers, with a short description of effect and any notable design differences from their original tabletop versions.</p>
+
+    <h5>Electromagnetic Weaponry</h5>
+        <ul>
+            <li>Every Walker weapon is of the Electromagnetic weapon class, and counts as Ancient (First One) technology for any rule that asks.</li>
+            <li>Some of them are <b>accelerators</b>: they gain more damage when fully charged, and they do <b>not</b> begin the battle fully charged.
+                A freshly deployed Medium Lightning Array or Chromatic Pulse Driver opens turn 1 with one turn of charge (1/2) rather than two.
+                The one exception is <i>The Wanderer</i>, whose weapons do start the battle fully charged.</li>
+        </ul>
+
+    <h5>Lightning Array / Medium Lightning Array</h5>
+        <ul>
+            <li>The Array fires <b>discharges</b>. Each click on a target declares one discharge; a further click on the <b>same</b> target fuses another discharge into the shot
+                already standing there rather than declaring a second one. Four clicks on one ship therefore produce one four-discharge bolt, while four clicks on four ships
+                produce four single ones.</li>
+            <li>Fusing several shots changes weapon's stats: the <b>damage</b>, the <b>fire control</b> and the <b>range penalty</b>. A fused shot is
+                not simply a bigger one - it is markedly better against capital ships and markedly worse against fighters.</li>
+            <li>Two firing modes, and both are usable in the same turn:
+            <ul class="circle-list">
+                <li><b>Combined Fire</b> (default) - repeat clicks on one target fuse into a single shot.</li>
+                <li><b>Single Shots</b> - every click is a separate one-discharge order, which is what you want against a fighter flight where four small shots usually are better than one larger shot.</li>
+            </ul>
+            </li>
+            <li>'Remove a firing order' <b>peels one discharge</b> off a combined shot rather than deleting the whole thing, and the shot's hit chance is re-priced at its new
+                size. A single-discharge order simply goes.</li>
+            <li>The <b>Medium</b> Array is also an accelerator: its pool is one discharge per turn charged, up to two. That is also why it cannot combine its shots until it has
+                charged for at least two turns - at one turn of charge there is only one discharge, and nothing to combine.</li>
+            <li>Both weapons carry an intercept rating and can be used defensively, and both spend from available <b>discharges</b> when they do.</li>
+        </ul>
+
+    <h5>Wide-Beam Lightning Array Enhancement</h5>
+        <ul>
+            <li>A per-mount refit available to Ancient hulls only, bought in the lobby as a System Enhancement by clicking on Lightning Array system: <b>300 points</b> for a full Lightning Array, <b>200 points</b> for a Medium one, one level
+                each. Two Arrays on the same hull are refitted separately.</li>
+            <li>The purchase buys the <i>capability</i>; the wide beam itself is a <b>per-turn toggle</b> in the Array's activation box, declared in the Firing phase, and it
+                applies in whichever firing mode is used.</li>
+            <li>A wide beam trades power for spread: <b>-2 on every damage die, to a minimum of 1 per die</b>. Flat damage bonuses are untouched.</li>
+            <li>It doubles the weapon's collateral damage to <b>50%</b> of the damage scored - and it is the one flash weapon that still scores collateral <b>inside</b> an
+                Energy Draining Field, where it falls back to the ordinary 25%.</li>
+            <li>Firing a wide beam costs the Array its <b>next</b> turn: the weapon does not recharge on the turn advance following a wide-beam shot.</li>
+        </ul>
+
+    <h5>Chromatic Pulse Driver</h5>
+        <ul>
+            <li>An accelerator pulse weapon with two firing modes:
+            <ul class="circle-list">
+                <li><b>Pulse</b> - charged one turn: D3 pulses, up to 4, at 14 damage. Charged two turns: D5 pulses, up to 8, at 18 damage.</li>
+                <li><b>Scanning</b> - a single shot that does no damage at all, but which analyses the target's shielding when it hits.</li>
+            </ul>
+            </li>
+            <li>A scanning hit on any unit carrying a shield-type system banks <b>one point of shield adaptation against that race</b>, and the adaptation is <b>fleet-wide</b>:
+                from the next turn on, every Walker in the fleet treats that race's shields as one point weaker, in both hit chance and damage reduction. Further scans stack.</li>
+            <li>'That race' is the target's faction exactly as written, so (for example) the Brakiri and Abbai adapt separately even though both use Gravitic Shields.</li>
+            <li>Overlapping shields are not cumulative, and neither is the adaptation: it is applied once, against the strongest shield source protecting the target - including
+                the shield types that hold a capacity pool rather than a flat rating.</li>
+            <li>Adaptation is public knowledge, so a defender can see why how many times their shields have been scanned.</li>
+        </ul>
+
+    <h5>Energy Draining Field</h5>
+        <ul>
+            <li>A permanent, omnidirectional field centred on the ship, covering a radius in hexes (e.g 5 on a Traveler field). It can be deactivated like any other system, and a
+                <b>Variable</b> field can be run at <b>double power</b> in the Ship Power segment of Initial Orders for a larger radius.</li>
+            <li>The field is <b>public</b> - it is drawn on the map for everybody, because an energy drain is a visible phenomenon. Overlapping field hexes are counted once, and
+                <b>the rest of the fleet that deployed the field is immune to it</b>.</li>
+            <li><b>Shooting through a field is more dififcult.</b> Every field hex a shot crosses (your own fleet's fields excepted) is a -1 penalty on the d20 to-hit table. For
+                <b>Plasma</b> and <b>Antimatter</b> weapons belonging to a younger race the penalty is <b>doubled</b>, and Plasma additionally treats the crossed hexes as extra
+                range for its damage falloff.</li>
+            <li><b>Flash and proximity weapons lose their collateral damage and their blast radius inside a field</b>, friend and foe alike. The only exception is a Wide-Beam
+                Lightning Array.</li>
+            <li><b>The drain.</b> Any unit that ends its turn in somebody else's field has the following drained <b>for the next turn</b>, resolved at the Critical Hit step:
+            <ul class="circle-list">
+                <li><b>1d10 thrust</b> - Engine output, or free thrust on a fighter flight,</li>
+                <li><b>1d10 power</b> - Reactor output; a reactor drained to zero blacks out every powered system on the ship,</li>
+                <li><b>1d10 initiative</b> - x5 in FV units, and the total penalty cannot exceed -100,</li>
+                <li><b>1d6 total EW.</b></li>
+            </ul>
+            </li>
+            <li>Every further <b>consecutive</b> turn ended in a field adds one more die to the total already in force, so the drain only ever grows while a unit stays put.
+                Nothing but initiative can be driven below zero. <b>Enormous units are limited to the first die</b> and never escalate.</li>
+            <li>A <b>fighter flight</b> in a field must additionally roll for drop-out on <b>2d10</b> instead of the usual 1d10, plus a further 1d10 per successive turn, and a
+                grounded flight cannot shoot on the following turn.</li>
+            <li>Additional fields do <b>not</b> stack: standing in three overlapping fields drains exactly as standing in one.</li>
+            <li>Criticals shrink the field - a fixed field loses a hex of radius per critical result (floor 1), while a variable one loses its double-power bonus first and then a
+                hex at a time (floor 0).</li>
+        </ul>
+
+    <h5>Extended Draining Field Enhancement</h5>
+        <ul>
+            <li>Buys <b>+1 hex of Energy Draining Field radius per level</b>, up to 3 levels, applying to every field on the hull. The cost is the rules' own formula - 50 points
+                per hex added, i.e. 300 x (radius + 1) for the first level - summed over each field the ship mounts.</li>
+            <li>On a <b>Variable</b> field the refit raises the normal-power radius only: the double-power radius does not move, so every level bought is one level of boost made
+                redundant. Once the two meet, boosting the field buys nothing.</li>
+        </ul>
+
+    <h5>Energy Draining Mine</h5>
+        <ul>
+            <li>A ballistic launcher that fires <b>sensor probes at a hex</b> rather than at a unit.</li>
+            <li>The launcher stores <b>3</b> probes and <b>begins the battle with 1</b>, gaining one per turn - a critical result slows that to one every two turns, then every
+                three, and so on. Any number of stored probes may be launched, at any number of hexes, in one turn.</li>
+            <li>Scatter, as the rules' table: <b>75%</b> the probe lands on the chosen hex, <b>15%</b> it scatters up to 5 hexes, <b>10%</b> it fails to arrive.</li>
+            <li>A probe that lands deals no damage but instead projects an Energy Draining Field over <b>its hex and the six around it</b> for one turn, with every field rule above - the targeting
+                penalty and its own fleet's immunity included. It drains on the turn it lands <b>and</b> on the turn after, so a unit caught by both escalates.</li>
+            <li>The orb shows on the map as a purple seven-hex disc. <b>It cannot be targeted</b>: its structure is indestructible and destroying it would achieve nothing anyway.
+                A blast that happens to cover its hex still resolves normally against everything else standing there.</li>
+        </ul>
+
+    <h5>Energy Draining Net</h5>
+        <ul>
+            <li><b>Links up with other Nets in the same fleet</b> to turn empty space into an Energy Draining Field.</li>
+            <li>Any two active Nets of the same fleet within <b>3 hexes</b> of one another link, and the hexes <b>between</b> them join the Energy Draining Field - two hexes at
+                range 3, one at range 2, none at range 1 (adjacent Nets still count as linked).</li>
+            <li>Where linked Nets form a <b>closed ring</b>, the area enclosed is filled with field as well. A chain of Nets is not a ring and fills nothing; a ring with a
+                trailing Net keeps its ring. The fill is capped by the number of Nets involved, and an over-large enclosure fills nothing at all.</li>
+            <li>Where several corridors of equal length are possible the game picks one for you, preferring the corridor that catches the most enemy units.</li>
+        </ul>
+
+    <h5>Electronic Warfare Detector</h5>
+        <ul>
+            <li>Reads the configuration of enemy EW suites and reports it to the whole fleet, giving every friendly unit within <b>20 hexes</b> the Expert Scanner benefit: a
+                point of EW may be held back and spent <b>late</b>, once movement has been resolved.</li>
+            <li>In FV that late window is usually at the start of the <b>Firing</b> phase, or the <b>Pre-Firing</b> phase if one occurs, and it uses the same EW buttons the
+                Initial Orders menu does.</li>
+            <li>Multiple Detectors are cumulative, but their efficiency degrades: detectors <b>1-4</b> allow 1 saved point each, <b>5-8</b> allow half a point each, and
+                <b>9 or more</b> allow a quarter each. Fractions of a quarter and a half round down; three quarters rounds up.</li>
+            <li>The saved point comes out of <b>unspent DEW only</b>. A ship that has already committed all of its EW to OEW, CCEW or other EW functions has nothing
+                left to save, and the figure in the ship window falls as you allocate during Initial Orders.</li>
+            <li>Range is measured at the unit's <b>post-movement</b> hex, so a ship that drifts out of range of every Detector finds its saved EW allowance is zero (and just treated as DEW as per usual). ELINT ships may save
+                points too, on the same terms.</li>
+        </ul>
+
+    <h5>Sensor Charge Transceiver</h5>
+        <ul>
+            <li>Only found on the Scribe, and unlike other weapons it does not shoot at anything. Instead, the player plots a <b>course</b> for a sensor charge, and the
+                charge damages every enemy unit in the hexes it passes through (Standard 6d10, no overkill, three turns to recharge).</li>
+            <li>Plotting: click hexes to lay down waypoints. A leg must run along one of the six hex axes, and the <b>first</b> leg is the launch, which must leave along an axis
+                the mount's own arc covers. After that the charge steers freely.</li>
+            <li>The charge has <b>16 hexes of range and 4 manoeuvres</b>. Changing axis at a waypoint costs 1 manoeuvre for 60 degrees, 2 for 120 and 3 for a reversal; the launch
+                itself is free. Boosting the transceiver in Initial Orders buys further hexes <b>or</b> manoeuvres out of one shared pool - which axis a level goes to is worked
+                out from the course you actually plot.</li>
+            <li>While the weapon is selected the map shows the course with direction chevrons, the hexes reachable from the head of the course in arc blue, and a spent-of-total
+                read-out for hexes and manoeuvres (plus the shared boost pool, when the weapon is boosted). Green hexes mark the places where something happened - where the
+                charge manoeuvred, the head of the course, and any hex where you named a unit to hit.</li>
+            <li>Where several units share a hex, the choice of which to hit is yours, through the 'Target Ship' button on that hex's tooltip.</li>
+            <li>The course ends when it reaches a friendly transceiver - the charge is home, and that transceiver recharges faster for having caught it. You can always re-select
+                the weapon and fly on past a receiver if you would rather.</li>
+        </ul>
+
+    <h5>Gravitic Drives and Advanced Armour</h5>
+        <ul>
+            <li>Walker hulls are gravitic: they can undertake manoeuvres even while pivoted or pivoting, using the thrusters appropriate to their current orientation, and their
+                thrusters ignore the first 'Efficiency Reduced' critical they receive.</li>
+            <li>Every Walker unit carries Advanced Armour, and every Walker ship mounts Self Repair.</li>
+        </ul>
+
+    <h5>Walker Jump Drives</h5>
+        <ul>
+            <li>Every Walker ship and every Mapmaker probe carries a <b>Walker jump drive</b> - an Ancient jump drive (see Ancient Factions above), so it opens no jump points
+                and jumps to hyperspace at the end of the turn it is set to - with two differences: a Walker unit <b>may fire normally</b> on the turn it jumps, and its drive
+                has <b>no chance of failure</b>, however badly damaged.</li>
+            <li>A Mapmaker flight jumps as one: set Jump to Hyperspace on any probe's drive and the whole flight leaves at the end of the turn.</li>
+        </ul>
+
+    <h5>Extra-Dimensional Jump Drive</h5>
+        <ul>
+            <li>The <b>Wanderer, Traveler, Waymarker and Guideship</b> carry an Extra-Dimensional Jump Drive, which can drag an <b>enemy</b> unit into hyperspace over
+                several turns. In Initial Orders, select the jump drive and click the enemy unit. The declaration is visible to everyone from the Movement phase,
+                as a purple "Abduction" marker on the target. <b>No line of sight is needed.</b></li>
+            <li>The <b>first turn only takes hold</b> of the target: it costs no extra power and delivers no power-turns. If the conditions below are met, the
+                abduction has begun, and <b>from the next turn</b> the drive keeps targeting it automatically and power can be applied in the drive's menu.</li>
+            <li>Each power level costs the drive's power requirement again and delivers <b>1 power-turn</b>: normal power is 1, double power is 2, up to 4. The power
+                comes off the reactor like a boost, so Walker ships must shut systems down to pay for it.</li>
+            <li>The abduction only <b>takes hold</b> if, at the end of that first turn's Firing phase, <b>both</b> hold for the ship carrying the drive:
+                <ul class="circle-list">
+                    <li>the target <b>ended its movement in an Energy Draining Field connected to that ship's own field</b> - extended through Energy Draining Mines,
+                        Nets or other Walker ships, but not through an enemy's field;</li>
+                    <li>that ship's <b>OEW on the target is higher than the target's DEW</b>, counting defensive ELINT support (supporting and blanket DEW) but not
+                        offensive ELINT support.</li>
+                </ul>
+            </li>
+            <li>Once the abduction has begun, <b>the field and EW conditions are not checked again</b>. Power-turns must be <b>consecutive</b>: the abduction
+                continues while at least one Extra-Dimensional Jump Drive that took hold of the target keeps applying power every turn. If none does, it ends and
+                everything built up so far is lost.</li>
+            <li>The cost is the target's <b>ramming factor / 50</b> power-turns, or <b>/ 10</b> if it has advanced armour, rounded up, with the ramming factors of
+                any units <b>attached</b> to it added. What it carries in its hangars or docking bays does <b>not</b> count. The cost is shown in the jump drive's
+                menu, is <b>fixed on the turn the abduction takes hold</b>, and does not fall as the target is damaged.</li>
+            <li>When the total is reached the target is <b>removed to hyperspace</b>, as if it had jumped out itself, taking anything attached or docked with it.
+                Progress is shown on the target's tooltip and ship window ("Being abducted") and in the combat log every turn, including the reason a turn did not count.</li>
+            <li><b>Deactivating the jump drive cancels its abduction</b>, and a drive destroyed during an attempt delivers nothing that turn - the combat log says the
+                abduction was cancelled.</li>
+            <li>The <b>Pathfinder and Scribe</b> cannot begin an abduction, but once a friendly Extra-Dimensional Jump Drive has taken hold of a target they may target
+                it too, adding <b>half a power-turn</b> each turn by applying double power to their drive. Mapmaker probes cannot take part.</li>
+            <li>After taking part in an abduction, however it ends, a jump drive <b>recharges for its own jump delay</b> before it can begin another.</li>
+            <li>A drive cannot abduct and jump to hyperspace on the same turn - setting Jump to Hyperspace withdraws the abduction.</li>
+            <li>Unlike the Walkers' ordinary jump, an <b>Extra-Dimensional Jump Drive that is damaged may be destroyed</b>: on every turn it is abducting it rolls
+                for detonation at <b>half</b> the percentage of its boxes lost, as other Ancient jump drives do. Its own jump to hyperspace keeps no chance of failure.</li>
+            <li>Not implemented: abducting friendly units, and asteroids, moons or planets.</li>
+        </ul>
+
+    <h5>Hangar Requirements</h5>
+        <ul>
+            <li>Walker fighters are <b>Mapmaker Sensor Probes</b>, and they occupy their own 'Mapmaker Probes' capacity category. They may be bought with <b>no hangar
+                space at all</b> - a Walker fleet needs no carrier to field them.</li>
+            <li>When susing standard Fleet Composition rules, <b>the 50% full-hangar rule still applies to the capacity a Walker hull declares.</b> Walker ships are not exempt from it: a hull carrying Mapmaker Probe
+                capacity must have at least half of it filled with probes, exactly like any other hangar in the game. A Traveler with no probes in the fleet fails the
+                Fleet Checker.</li>
+            <li>Mapmaker Probe capacity per hull, which is both the control/hangar figure and the basis of the half-full requirement:
+            <ul class="circle-list">
+                <li>Traveler - 36 probes (at least 18 required)</li>
+                <li>Waymarker - 18 probes (at least 9 required)</li>
+                <li>Pathfinder - 6 probes (at least 3 required)</li>
+                <li>Guideship - 6 probes (at least 3 required)</li>
+            </ul>
+            </li>
+            <li><b>Ships count toward a Traveler's capacity too.</b> 24 of the Traveler's 36 boxes are its <b>Docking Bay</b> (see below), so every Waymarker (24 boxes),
+                Pathfinder or Guideship (12) and Scribe (4) in the fleet counts its boxes toward the Mapmaker Probe requirement - up to 24 boxes for each Traveler in the
+                fleet, because a ship only counts for a bay it could actually sit in. A Pathfinder or Waymarker cannot meet its own probe capacity that way. Example: a
+                Traveler and three Scribes (12 boxes) need only 6 more probes to reach the 18 required.</li>
+        </ul>
+
+    <h5>The Traveler's Docking Bay</h5>
+        <ul>
+            <li>The Traveler's aft hangar is a <b>Docking Bay</b>: 24 boxes that take Mapmaker Probes exactly like an ordinary hangar, and also <b>whole ships</b> -
+                <b>Scribes</b> (4 boxes each), <b>Pathfinders</b> and <b>Guideships</b> (12 each) and a <b>Waymarker</b> (24). Probes and ships share the one pool,
+                so the bay holds 24 probes, or 6 Scribes, or 2 Pathfinders, or one Waymarker, or any mix that adds up to 24.</li>
+            <li><b>Only one type of craft may launch or be recovered through it per turn</b> - on a turn the Scribes use it the probes cannot, and the other way round.
+                Its launch rate is <b>12 Mapmakers, or 2 Scribes, or 1 Pathfinder, Guideship or Waymarker</b> per turn, launches and recoveries together. Mapmakers auto-fill
+                the Traveler's two side hangars before the Docking Bay, which is the only one that can hold a ship.</li>
+            <li>To dock, a ship must end its movement in the Traveler's hex, on the Traveler's heading, with at least 1 thrust unspent, while the Traveler is at speed 0 -
+                the same conditions as an LCV docking on a rail. A docked ship is off the board. It launches at the Traveler's position, heading and speed, takes the
+                usual launch initiative penalty that turn, and cannot launch on the turn it docked.</li>
+            <li>Ships may also <b>start the battle aboard</b>: during Deployment, select the ship and click the Traveler to dock it straight into the bay. A Traveler
+                arriving as a reinforcement can bring Scribes, Pathfinders, Guideships and a Waymarker in its Docking Bay as well as its probes, and they arrive docked.</li>
+            <li>Any unit ordered into or out of <i>any</i> hangar during the Firing phase now says so on itself: <b>"Docking with &lt;ship&gt;"</b> or <b>"Launching
+                from &lt;ship&gt;"</b>, on the map tooltip and as a cyan banner on its ship window. (A flight being launched from scratch has no unit to label until
+                the order resolves, so it carries no banner.)</li>
+            <li>A <b>stowed unit's fleet-list row</b> - a docked ship, a docked fighter flight or a rail-parked LCV alike - scrolls the map to the <b>carrier holding
+                it</b> on left-click, which is where it actually is. Right-click, or the &#9432; affordance, opens its own ship window.</li>
+            <li>A docked ship's weapons keep recharging while it is aboard, exactly as on the board; an Energy Draining Mine launcher restocks up to its usual 3.</li>
+            <li><b>Docked craft keep projecting what they project.</b> An <b>Energy Draining Field</b> or <b>Net</b> on a ship inside the bay stays operational, and a
+                docked <b>EW Detector</b> still lets the fleet save EW points within its 20 hexes - both measured from <b>the Traveler's hex</b>, so the bubble travels
+                with the carrier. A docked Guideship's radius-4 field is drawn on the Traveler's own icon.</li>
+            <li><b>The Traveler's Self Repair also repairs the ships it carries.</b> Damaged Structure, C&amp;C and Self Repair on a docked ship, and any repairable
+                critical on any of its systems, appear in the Traveler's own repair list, marked with the owning ship's name. They are ordered by priority alongside
+                the Traveler's own entries and nothing is pinned below anything else, so a docked hull may be repaired first if you want it repaired first. A docked
+                ship's <i>own</i> Self Repair keeps working as well, and spends its own points before the Traveler spends any - so a docked Scribe can have its
+                Thruster mended out of its own pool while the Traveler mends its Structure.</li>
+            <li><b>Docked ships share power with the Traveler.</b> Every 4 points of spare reactor power across all the ships aboard gives the Traveler <b>1 extra
+                point</b>: the surpluses are added together first and the total is then divided by four and rounded down, so 4 shared gives 1, 7 gives 1 and 8 gives 2.
+                Docked <i>probes</i> share nothing. The donor is not charged for it - what it costs is having the spare power in the first place, which is why you can
+                now <b>manage a docked ship's power from its own ship window</b> during Initial Orders: open it from its fleet-list row (right-click, or the &#9432;
+                affordance) and switch systems off, boost, overcharge and so on exactly as you would on the board. Power a docked Scribe's thrusters down and the
+                Traveler's available power goes up on the same click. The Traveler's Reactor tooltip shows how much is being shared and how much surplus is being
+                pooled to get it, and the <b>opposing player sees the same figure</b> on the Traveler's reactor once Initial Orders are committed - sharing power is
+                public, even though what is in the bay otherwise is not.</li>
+            <li>Damage to the bay never forces a ship out - probes are evicted first as boxes are lost. If the Docking Bay or the Traveler is destroyed, every docked
+                ship is forced out and takes the bay's damage plus 2d10 to its Structure.</li>
+            <li><b>A Waymarker takes two turns to dock, and two to launch.</b> It is 24 boxes - the whole bay - and it does not go straight in. Order the dock as
+                usual and, when the turn resolves, the Waymarker <b>clamps to the Traveler's aft</b> instead: it is still on the map, in the Traveler's hex, and it
+                stays there for the whole of the following turn before going inside at the end of it. Launching runs the same two steps backwards - it comes out onto
+                the aft, rides there for a turn, and is a free ship again the turn after that. Its 24 boxes are held from the moment the order resolves, so nothing
+                else can be loaded into the bay while it is on its way in or out.</li>
+            <li><b>While it is riding the Traveler's aft</b> a Waymarker:
+                <ul>
+                    <li><b>moves with the Traveler</b> and cannot steer itself - it has no movement of its own to plot;</li>
+                    <li><b>may not fire</b>, and may not intercept. Its weapon menu and firing-mode selector are withdrawn for the turn;</li>
+                    <li><b>may still be shot at</b> normally, and <b>hits on the Traveler's own aft section are rolled on the Waymarker instead</b> - on whichever of
+                        its Front or Aft sections has the <b>most Structure remaining</b>. The Traveler is hit on the ordinary hit chart first; only a hit that lands
+                        aft transfers;</li>
+                    <li><b>uses no EW</b> - it makes no allocations of any kind - and <b>no ship may target it with EW</b>, friendly or hostile. It keeps its own
+                        defensive EW, so it is no easier to hit than usual.</li>
+                </ul>
+                The map tooltip and its ship window both show <b>"Docking with &lt;ship&gt;"</b> (or "Launching from") for the whole of that turn.</li>
+            <li>If the Docking Bay or the Traveler is destroyed while a Waymarker is riding it, the Waymarker simply <b>lets go</b> - it was clamped to the outside of
+                the hull rather than stowed inside it, so it takes none of the fragment damage a docked ship takes.</li>
+        </ul>
+
+    <h5>Mapmaker Sensor Probes</h5>
+        <ul>
+            <li>The Walkers' only small craft, and the only fighter flight in the game with an <b>EW allowance of its own</b>: <b>3 points per flight per turn</b>, split freely
+                between OEW and DEW exactly as a ship spends its scanner output, with anything unspent becoming DEW when Initial Orders are committed. It is 3 per <i>flight</i>,
+                not 3 per craft. Their own mine-detection allowance is a separate pool, bought as usual with the flight's Offensive Bonus.</li>
+            <li>They need <b>no hangar space at all</b> in the Fleet Checker, so a Walker fleet may take them whether or not it brings a carrier - but any Walker hull that
+                does declare Mapmaker Probe capacity must still have at least half of it filled. See Hangar Requirements above.</li>
+            <li>Every probe also carries a <b>Medium Lightning Array</b>, and it is the only weapon in the game that <b>several craft fire as one gun</b>. A lone array
+                cannot fire at all: three or six probes must declare together, at the same target and in the same firing mode, and the group resolves as a single shot.
+            <ul class="circle-list">
+                <li><b>3-Probes</b> - 4d10+12, fire control +2/+4/+6, -1 to hit per 3 hexes.</li>
+                <li><b>6-Probes</b> - 8d10+12, fire control +5/+5/+4, -1 to hit per 4 hexes. Note it is <i>better</i> against fighters and <i>worse</i> against
+                    capital ships than the 3-probe group: the two modes are a real choice, not an upgrade.</li>
+            </ul>
+            </li>
+            <li>A flight of six may therefore fire <b>two 3-probe groups</b> (at the same target or at two different ones) <b>or one 6-probe group</b>. Four or five
+                declaring in 3-probe mode fire one group and waste the rest, and the client warns before the click lands.</li>
+            <li><b>A probe that has taken ANY damage cannot contribute</b> to a group - not merely a destroyed one. A battered flight loses the weapon before it loses
+                the craft.</li>
+            <li>The array recharges over <b>4 turns</b>, but it does begin the battle fully charged, so a flight may fire a combined shot on turn 1. Unlike the ship-mounted
+                accelerators, it is not an accelerator: waiting longer buys nothing.</li>
+            <li><b>The flight cannot fire its Medium Lightning Arrays and its Light Chromatic Pulsars in the same turn</b> - the restriction is flight-wide, not per craft,
+                so one probe firing its pulsar locks the arrays out for every other probe as well.</li>
+            <li>The array locks on with the <b>flight's own EW, exactly as a ship would</b>: it does not use the Offensive Bonus, it uses its own fire control, the
+                flight's OEW on the target is added to the roll, and the target's defensive EW (DEW, plus any blanket or supported DEW) counts against it just as it would
+                against a ship's shot. With no OEW allocated to the target it has <b>no lock-on</b>, and its range penalty is doubled as usual.</li>
+            <li>The <b>Light Chromatic Pulsar</b> keeps the flight's Offensive Bonus and adds the flight's OEW on the target <b>less the target's defensive EW</b>, never
+                below +0 - so enemy DEW can cancel the OEW but never eats into the bonus, and the pulsar never suffers the no-lock penalty. Against a target with 5 DEW,
+                3 OEW adds nothing; against one with 2 DEW, it adds +1.</li>
+            <li>The array deals <b>Flash</b> damage, so it scores no collateral damage at all against a target standing inside <i>any</i> Energy Draining Field - the
+                Walkers' own included.</li>
+            <li>Every probe carries a <b>Walker jump drive</b> - see Walker Jump Drives above. The flight opens no jump points; it jumps to hyperspace as one, at the end of any
+                turn Jump to Hyperspace is set on one probe's drive, and may fire that turn.</li>
+        </ul>
+
+    <h5>The Hulls</h5>
+        <ul>
+            <li><b>Traveler</b> (capital, 5400pts) - the core of the fleet: a full Lightning Array, three Chromatic Pulse Drivers, an Energy Draining Field, a Docking Bay and two hangars.</li>
+            <li><b>The Wanderer</b> (capital, 8750pts, Unique) - an Elite Crew hull carrying a Lightning Array, three Chromatic Pulse Drivers, two Energy Draining Mine launchers, an
+                Energy Draining Field and an EW Detector. Alone among Walker ships, <b>its weapons begin the battle fully charged</b>.</li>
+            <li><b>Waymarker</b> (Heavy Combat Vessel, 2575pts) - the net-layer: an Energy Draining Net, four Energy Draining Mine launchers, two Medium Lightning Arrays, three
+                Chromatic Pulse Drivers and an EW Detector.</li>
+            <li><b>Pathfinder</b> (Medium Ship, 3150pts, <b>Limited 50%</b>) - an ELINT hull with an Energy Draining Field, a Medium Lightning Array, a Chromatic Pulse Driver and a mine
+                launcher.</li>
+            <li><b>Guideship</b> (Medium Ship, 2350pts) - an Energy Draining Field, a Medium Lightning Array, two Chromatic Pulse Drivers and a mine launcher.</li>
+            <li><b>Scribe</b> (Medium Ship, 750pts) - agile.  Carries the Sensor Charge Transceiver, with an Energy Draining Net and two Chromatic Pulse Drivers.</li>
+            <li><b>Mapmaker Sensor Probes</b> (Heavy Fighters) - very fast gravitic probes with advanced armour and advanced sensors, carrying a Light Chromatic
+                Pulsar, a Medium Lightning Array that three or six of them fire as one gun, an EW allowance and a Walker jump drive, and needing no hangar space of their own.</li>
+        </ul>
+
+    <a class="back-to-top" href="#top">↩ Back to Top</a>
 
 <h3 id="otherfactions" >OTHER FACTIONS</h3>
 

@@ -168,9 +168,15 @@ window.BallisticIconContainer = function () {
 		generateTerrainHexes.call(this, gamedata);
 		generateEdfNetHexes.call(this, gamedata);
 		generateSensorChargeCourses.call(this, gamedata);
-		generateReinforcementHexes.call(this, gamedata);
+		/* ONE BLUE MARKER PER HEX ACROSS BOTH SWEEPS (user report 2026-09-11, replay of game 4348).
+		   A forming exit and the wave that will come out of it are drawn by two sweeps at the SAME
+		   hex, each with its own per-pass claim set, so the replay stacked "Jump Point Forming" over
+		   "Jump Point" / "Reinforcement". One set, exit sweep first: the exit is the one that knows
+		   the facing, so it wins the hex and the other two stand aside. */
+		const reinforcementClaims = new Set();
+		generateExitHexes.call(this, gamedata, exitOrders, reinforcementClaims);
+		generateReinforcementHexes.call(this, gamedata, reinforcementClaims);
 		generateJumpPointArrows.call(this, jumpPointOrders);
-		generateExitHexes.call(this, gamedata, exitOrders);
 		pruneSceneObjects.call(this);
 	};
 
@@ -520,7 +526,7 @@ window.BallisticIconContainer = function () {
 	   41x41 sweep, and only when the weapon is selected AND the course changed (syncSceneObject's
 	   signature covers both), which is a handful of rebuilds per turn rather than one per poll.
 	   ================================================================================ */
-	const SCT_COURSE_COLOUR_OPEN = 0xffff00;      //no receiver at the end yet - the charge is lost
+	const SCT_COURSE_COLOUR_OPEN = 0xff0000;      //no receiver at the end yet - the charge is lost
 	const SCT_COURSE_COLOUR_RECEIVED = 0x00cc00;  //ends on a friendly transceiver
 	const SCT_COURSE_OPACITY = 0.85;
 	const SCT_COURSE_Z = -4;                      //just above the ballistic lines at -5
@@ -565,10 +571,6 @@ window.BallisticIconContainer = function () {
 	   ⚠️ Arc blue is much darker than that cyan, so it needs more than the standard hex-blanket
 	   alpha to read at all over the map - hence SCT_FAN_DIM. */
 	const SCT_FAN_DIM = 2.2;
-
-	//A marker's word sits ON its green hex, so it is drawn in the same green - which is how every
-	//other coloured hex marker on this map pairs its tint with its label.
-	const SCT_MARKER_TEXT_COLOUR = '#00cc00';
 
 	/* EVERY scene-object key prefix this feature owns. refreshSensorChargeCourses marks and sweeps
 	   BY PREFIX, because it runs outside the consumeGamedata pass and that pass is the only thing
@@ -647,9 +649,11 @@ window.BallisticIconContainer = function () {
 	}
 
 	/* The green hexes the course leaves behind it (user ruling 2026-09-06). BallisticSprites rather
-	   than one HexRegion blanket, for two reasons: they are scattered rather than contiguous, so a
-	   region would be one loop per hex anyway, and a sprite can carry TEXT - which is how a hex where
-	   the player named a unit says whose name it is.
+	   than one HexRegion blanket because they are scattered rather than contiguous, so a region would
+	   be one loop per hex anyway.
+	   ⚠️ THE HEX CARRIES NO WORD (user ruling 2026-09-08): the named unit used to be written on it in
+	   green, and a ship sprite standing in that hex covered it up. A plain green hex, which is still
+	   the confirmation that a choice was recorded there.
 	   ⚠️ destroy() frees the MATERIAL only. BallisticSprite's textures are shared statics cached by
 	   content (its TEXTURE_CACHE), so disposing one here would blank every other sprite using it. */
 	function buildCourseMarkers(markers) {
@@ -660,7 +664,7 @@ window.BallisticIconContainer = function () {
 
 		markers.forEach(marker => {
 			const position = this.coordinateConverter.fromHexToGame(new hexagon.Offset(marker.q, marker.r));
-			const sprite = new window.BallisticSprite(position, 'hexGreen', marker.text, SCT_MARKER_TEXT_COLOUR);
+			const sprite = new window.BallisticSprite(position, 'hexGreen');
 
 			sprites.push(sprite);
 			group.add(sprite.mesh);
@@ -750,10 +754,10 @@ window.BallisticIconContainer = function () {
 				//player has committed, and they have to stay readable while another ship is being
 				//given its orders.
 				if (plan.markers.length) {
-					//The text is part of the signature: naming a unit on a hex already marked changes
-					//the sprite without moving it.
+					//Hexes only: a marker has nothing but its position since the green name went
+					//(user ruling 2026-09-08), so the signature changes exactly when the SET does.
 					const markerSignature = plan.markers
-						.map(marker => `${marker.q},${marker.r}:${marker.text}`).join('|');
+						.map(marker => `${marker.q},${marker.r}`).join('|');
 
 					syncSceneObject.call(this, `sctmark:${ship.id}:${system.id}`, markerSignature,
 						() => buildCourseMarkers.call(this, plan.markers));
@@ -881,10 +885,10 @@ window.BallisticIconContainer = function () {
 	   Jump Points are drawn FIRST so that when a pending arrival and an arriving unit claim the
 	   same hex, the Jump Point wins: the arriving unit is already visible as itself, while the
 	   pending one has nothing else on the map to represent it. */
-	function generateReinforcementHexes(gamedata) {
+	function generateReinforcementHexes(gamedata, claimed) {
 		if (gamedata.gamephase == -1) return;
 
-		const claimed = new Set();
+		claimed = claimed || new Set();   //shared with generateExitHexes - see consumeGamedata
 
 		generateJumpPointHexes.call(this, gamedata, claimed);
 
@@ -924,9 +928,14 @@ window.BallisticIconContainer = function () {
 				const move = getCommittedDeployMove(ship);
 				if (!move) return;
 
-				markReinforcementHex.call(this, new hexagon.Offset(move.position), 'Jump Point', claimed);
+				//Blue text as well as a blue hex (user request 2026-09-11): the same "Jump Point" a
+				//forming exit shows, so the two can never read as two different things.
+				markReinforcementHex.call(this, new hexagon.Offset(move.position), 'Jump Point', claimed, JUMP_POINT_TEXT_COLOUR);
 			});
 	}
+
+	//FV's one "not here yet" cyan - the exit vortex, the fleet list's hyperspace row and these markers.
+	const JUMP_POINT_TEXT_COLOUR = '#00b8e6';
 
 	function getCommittedDeployMove(ship) {
 		for (const key in ship.movement) {
@@ -943,13 +952,13 @@ window.BallisticIconContainer = function () {
 
 	   The LABEL is part of the signature so a hex that flips from "Jump Point" to "Reinforcement"
 	   when the wave arrives rebuilds its sprite rather than keeping the stale text. */
-	function markReinforcementHex(pos, label, claimed) {
+	function markReinforcementHex(pos, label, claimed, textColour) {
 		const hexKey = `${pos.q},${pos.r}`;
 		if (claimed.has(hexKey)) return;
 		claimed.add(hexKey);
 
-		syncSceneObject.call(this, 'reinforcement:' + hexKey, label, () => {
-			const sprite = new BallisticSprite(this.coordinateConverter.fromHexToGame(pos), "hexBlue", label);
+		syncSceneObject.call(this, 'reinforcement:' + hexKey, label + '|' + (textColour || ''), () => {
+			const sprite = new BallisticSprite(this.coordinateConverter.fromHexToGame(pos), "hexBlue", label, textColour);
 
 			return { object: sprite.mesh, release: () => releaseSprite(sprite) };
 		});
@@ -1037,7 +1046,7 @@ window.BallisticIconContainer = function () {
 	   ⚠️ Its own sweep rather than a line inside createBallisticIcon, for the reason
 	   generateJumpPointArrows gives: an existing ballistic icon is UPDATED, not rebuilt, on later
 	   polls, so a syncSceneObject call in there would run once and then let prune reclaim it. */
-	function generateExitHexes(gamedata, orders) {
+	function generateExitHexes(gamedata, orders, claimed) {
 		/* ⭐ STAGE 9 EFFICIENCY GATE (user request 2026-08-29). This runs on EVERY ballistic redraw,
 		   and its second half walks gamedata.slots looking for republished hexes that can only exist
 		   in a game with the rule. `orders` is already empty without it (no unit can be in
@@ -1046,28 +1055,26 @@ window.BallisticIconContainer = function () {
 		   quietly reintroducing the cost. Cheap enough to be unconditional; it is one property read. */
 		if (!gamedata.reinforcementsAllowed()) return;
 
-		const claimed = new Set();
+		claimed = claimed || new Set();   //shared with generateReinforcementHexes - see consumeGamedata
 
-		const draw = (q, r, facing, label, phasing) => {
+		const draw = (q, r, facing, label) => {
 			const hex = new hexagon.Offset(q, r);
 			const hexKey = `${hex.q},${hex.r}`;
 			if (claimed.has(hexKey)) return;
 			claimed.add(hexKey);
 
-			/* ⭐ REINFORCEMENTS_PLAN.md STAGE 9 - A PHASING HULL'S HEX SAYS "REINFORCEMENTS", because
-			   for it nothing is forming: no vortex is torn open and no terrain will appear here
-			   (user ruling 2026-08-29). The marker itself is unchanged - same blue, same arrow, same
-			   public-from-phase-2 rule - so the warning an opponent gets is exactly the warning
-			   §2.3 already trades for; only the noun is honest about what will arrive.
-			   The word is deliberately GENERIC. Naming the faction, the hull or the count here would
-			   give away more than an ordinary declaration does, and §3.6 says none of those is ever
-			   disclosed. */
-			const defaultLabel = phasing ? 'Reinforcements' : 'Jump Point Forming';
-			const signature = `${facing}|${label || ''}|${phasing ? 'p' : ''}`;
+			/* ⭐ ONE WORD FOR EVERY EXIT: "Jump Point", in blue (user request 2026-09-11). It used to
+			   say "Jump Point Forming", or "Reinforcements" over a legacy (phase-in) hull's hex - and
+			   the replay then stacked the reinforcement sweep's own white label on top. The word is
+			   deliberately GENERIC: naming the faction, the hull or the count would give away more
+			   than an ordinary declaration does, and REINFORCEMENTS_PLAN.md §3.6 says none of those is
+			   ever disclosed. (The server still publishes formingExits[].phase; nothing reads it now.) */
+			const defaultLabel = 'Jump Point';
+			const signature = `${facing}|${label || ''}`;
 
 			syncSceneObject.call(this, 'jumpexit:' + hexKey, signature, () => {
 				const sprite = new BallisticSprite(this.coordinateConverter.fromHexToGame(hex),
-					'hexBlue', label || defaultLabel, label ? '#ffffff' : '#00b8e6');
+					'hexBlue', label || defaultLabel, label ? '#ffffff' : JUMP_POINT_TEXT_COLOUR);
 
 				return { object: sprite.mesh, release: () => releaseSprite(sprite) };
 			});
@@ -1102,11 +1109,7 @@ window.BallisticIconContainer = function () {
 			let label = null;
 			if (highlightId !== null && order.shooterid == highlightId && opener) label = opener.name;
 
-			//STAGE 9 - the owner's own half can ask the drive directly: the declaring ship is in
-			//their payload (it is theirs), so the engine that carries the order is reachable.
-			const engine = opener ? shipManager.systems.getSystem(opener, order.weaponid) : null;
-
-			draw(order.x, order.y, facing, label, shipManager.movement.isLegacyJumpEngine(engine));
+			draw(order.x, order.y, facing, label);
 		});
 
 		//The republished half, for a viewer whose payload has no opening ship to carry an order.
@@ -1121,7 +1124,7 @@ window.BallisticIconContainer = function () {
 			if (!Array.isArray(entries)) continue;
 
 			entries.forEach(entry => draw(entry.x, entry.y,
-				(((parseInt(entry.facing, 10) || 0) % 6) + 6) % 6, null, !!entry.phase));
+				(((parseInt(entry.facing, 10) || 0) % 6) + 6) % 6, null));
 		}
 	}
 
@@ -1505,6 +1508,16 @@ if (ballistic.damageclass === 'Sweeping' || ballistic.damageclass === 'HPC-subor
 				}
 			}
 		}
+		/* WALKERS_OF_SIGMA_PLAN.md 3.18 (Stage 20) - AN ABDUCTION IS NOT INCOMING FIRE. Purple, the Walker
+		   field colour the Energy Draining Mine marker uses, hung on the target unit. Outside the modeName
+		   block on purpose: an EDJD's firing mode is its POWER LEVEL, and a legacy drive names only mode 1,
+		   so at level 2 or more there is no mode name and that whole block is skipped. */
+		if (ballistic.damageclass === 'abduction') {
+			targetType = 'hexPurple';
+			//text = 'Abduction';
+			//textColour = '#7f00ff';
+		}
+
 		// LAUNCH SPRITE
 		let launchSprite = null;
 		if (

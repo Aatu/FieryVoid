@@ -38,6 +38,42 @@ import ShipInfo from "../system/ShipInfo";
   store blueprints open left, own-fleet ships right - the legacy lobby's
   userid == 0 split, resolved by ShipWindowManager.isLeftSide.*/
 
+/* WALKERS OF SIGMA-957 (WALKERS_OF_SIGMA_PLAN.md 3.11, Stage 12) - the Mapmaker flight window's
+   two-column body: fighter icons on the left, the EW block top-right and OUTSIDE them, which is
+   where the user asked for it.
+
+   ⚠️ THE 400px CAP IS THE WHOLE POINT OF FlightFighterArea. FighterListContainer is
+   `width: 100%; flex-wrap: wrap`, so where it wraps is decided by whatever box it is given -
+   and it has always been given a 400px window. Capping the column at the same 400px (and
+   widening the WINDOW to make room for the panel instead) is what keeps a Mapmaker's icon grid
+   laid out identically to every other flight in the game rather than re-wrapping to fit.
+
+   ⚠️ `width: max-content` UNDER THAT CAP IS WHAT CLOSES THE GAP (user report 2026-09-10: "too
+   much margin to the left"). FighterListContainer is `justify-content: space-around`, so given a
+   flat 400px it SPREADS its icons across the whole of it - and a flight that does not fill the row
+   leaves dead space between its last icon and the EW panel. Sizing the column to its content first
+   and only then capping it gives space-around nothing to spread; a full row still wraps at exactly
+   400px, so nothing changes for a flight that fills it.
+
+   align-items: flex-start pins the panel to the TOP of the row - 'top-right' - rather than letting
+   it stretch down the height of the icon grid, and the body's padding is the small top and right
+   margin that keeps the panel off the window edge.*/
+const FLIGHT_MAX_WIDTH = 400;
+
+const FlightEwBody = styled.div`
+    display: flex;
+    align-items: flex-start;
+    gap: 2px;
+    padding: 4px 4px 0 0;
+`;
+
+const FlightFighterArea = styled.div`
+    flex: 0 1 auto;
+    min-width: 0;
+    width: max-content;
+    max-width: ${FLIGHT_MAX_WIDTH}px;
+`;
+
 const ShipWindowContainer = styled.div`
     display: flex;
     flex-direction: column;
@@ -51,11 +87,17 @@ const ShipWindowContainer = styled.div`
     }}
     width: ${props => {
         if (props.$variant === 'terrain') return '250px';
-        if (props.$variant === 'flight') return 'auto';
+        if (props.$variant === 'flight' || props.$variant === 'flightEw') return 'auto';
         return 'fit-content';
     }};
     max-width: ${props => {
         if (props.$variant === 'flight') return '400px';
+        /*WALKERS OF SIGMA-957 (WALKERS_OF_SIGMA_PLAN.md 3.11, Stage 12): the Mapmaker's flight
+          window carries an EW panel beside the icons. FLIGHT_MAX_WIDTH + the panel + the gap,
+          so the FighterList keeps the EXACT 400px it has always wrapped against - widening the
+          window rather than squeezing the icons is what keeps the fighter layout identical to
+          every other flight in the game.*/
+        if (props.$variant === 'flightEw') return '574px';
         if (props.$variant === 'flightLobby') return '620px'; /*FighterList + datasheet rail*/
         return 'unset';
     }};
@@ -102,6 +144,7 @@ const ShipWindowContainer = styled.div`
         width: ${props => props.$variant === 'terrain' ? '250px' : 'max-content'};
         max-width: ${props => {
         if (props.$variant === 'flight') return '400px';
+        if (props.$variant === 'flightEw') return '574px'; /*Stage 12 - see the desktop rule*/
         if (props.$variant === 'flightLobby') return '620px';
         return 'none';
     }};
@@ -1765,10 +1808,27 @@ class ShipWindow extends React.Component {
                     </ShipWindowContainer>
                 )
             }
+            /* WALKERS OF SIGMA-957 (WALKERS_OF_SIGMA_PLAN.md 3.11, Stage 12): the ONE flight
+               class in the game with an EW pool gets the ship EW block beside its icons. The
+               gate is a single static-blueprint property read (ship.ewCapacity), so every other
+               flight window renders byte-identically to before.
+               ⚠️ window.ew is guarded because this component ships in the LOBBY bundle too and
+               the lobby does not load ew.js. The lobby flight branch above returns before this
+               line today, so the guard is belt-and-braces - but it costs one property read and
+               it is what stops a future reshuffle of those two branches from throwing.*/
+            const withFlightEw = Boolean(window.ew && ew.isFlightEwPool(ship));
+
             return (
-                <ShipWindowContainer ref={this.elementRef} onClick={shipWindowClicked} onContextMenu={e => { e.preventDefault(); e.stopPropagation(); }} $isMyTeam={isMyTeam} $variant="flight">
+                <ShipWindowContainer ref={this.elementRef} onClick={shipWindowClicked} onContextMenu={e => { e.preventDefault(); e.stopPropagation(); }} $isMyTeam={isMyTeam} $variant={withFlightEw ? "flightEw" : "flight"}>
                     {this.renderHeader(shipName, unitName, getHeaderTint(ship))}
-                    <FighterList ship={ship} />
+                    {withFlightEw
+                        ? (
+                            <FlightEwBody>
+                                <FlightFighterArea><FighterList ship={ship} /></FlightFighterArea>
+                                <ShipWindowEw ship={ship} flight />
+                            </FlightEwBody>
+                        )
+                        : <FighterList ship={ship} />}
                     {this.renderStatusStrip(ship)}
                 </ShipWindowContainer>
             )
@@ -2240,8 +2300,35 @@ const getStatusBanners = (ship) => {
         });
     }
 
+    /*WALKERS_OF_SIGMA_PLAN.md 3.18 (Stage 20, user request 2026-09-13): an Extra-Dimensional Jump Drive
+      abduction standing against this unit, as of the last resolved turn. The same reader and the same
+      purple as the map tooltip's "Being abducted" line and the "Abduction" hex marker.*/
+    const abduction = window.JumpEngine && typeof window.JumpEngine.getAbductionChain === 'function'
+        ? window.JumpEngine.getAbductionChain(ship.id) : null;
+    if (abduction) {
+        banners.push({
+            key: 'abducted', color: '#b36bff', bg: 'rgba(127, 0, 255, 0.10)',
+            text: 'Being abducted: ' + window.JumpEngine.formatAbductionHalves(abduction.total) + '/' + abduction.cost + ' power-turns'
+        });
+    }
+
+    /*WALKERS_OF_SIGMA_PLAN.md 3.14c (Stage 19, user request 2026-09-12): this unit is going into or
+      coming out of a hangar. Cyan, the same statusPending as Deploying and Arrival Scatter above -
+      a benign thing the unit is doing. Placed before the attached pair below because for a
+      Waymarker mid-dock it REPLACES them: shipManager.getHangarManoeuvre is the single reader this
+      shares with the map tooltip, and `riding` is what says the attachment is a docking manoeuvre
+      rather than a boarding action.*/
+    const hangarManoeuvre = shipManager.getHangarManoeuvre(ship);
+    if (hangarManoeuvre) {
+        banners.push({
+            key: 'hangarManoeuvre', color: theme.colors.statusPending, bg: 'rgba(0, 184, 230, 0.10)',
+            text: hangarManoeuvre.text
+        });
+    }
+
     //this ship rides a host (e.g. breaching pod attached to its target)
-    if (ship.attached && Object.keys(ship.attached).length > 0 && !ship.detached) {
+    if (ship.attached && Object.keys(ship.attached).length > 0 && !ship.detached
+        && !(hangarManoeuvre && hangarManoeuvre.riding)) {
         const hostShip = window.gamedata.getShip(Object.keys(ship.attached)[0]);
         if (hostShip) {
             const location = Object.values(ship.attached)[0];
@@ -2257,9 +2344,15 @@ const getStatusBanners = (ship) => {
         }
     }
 
-    //something hostile is attached to THIS ship
+    //something hostile is attached to THIS ship - and a docking rider of our own is not that
     if (ship.hasAttached && Object.keys(ship.hasAttached).length > 0) {
-        banners.push({ key: 'boarded', color: theme.colors.statusAlert, bg: 'rgba(255, 165, 0, 0.10)', text: 'Ship is being boarded!' });
+        const boarders = Object.keys(ship.hasAttached).filter((attachedId) => {
+            const rider = window.gamedata.getShip(attachedId);
+            return !(rider && shipManager.isDockingRider(rider));
+        });
+        if (boarders.length > 0) {
+            banners.push({ key: 'boarded', color: theme.colors.statusAlert, bg: 'rgba(255, 165, 0, 0.10)', text: 'Ship is being boarded!' });
+        }
     }
 
     /*WALKERS_OF_SIGMA_PLAN.md 2.2 - a flight that ended last turn in an Energy Draining Field

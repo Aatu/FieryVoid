@@ -60,7 +60,7 @@ class triadFiend extends HeavyCombatVessel{
         $this->addAftSystem(new GraviticThruster(7, 15, 0, 4, 2));
         $this->addAftSystem(new GraviticThruster(7, 15, 0, 4, 2));
         $this->addAftSystem(new PlasmaDriver(5, 6, 6, 120, 240));	
-		$this->addAftSystem(new JumpEngine(8, 25, 5, 8));        
+		$this->addAftSystem((new JumpEngine(8, 25, 5, 8))->markAncient());        
         $this->addAftSystem(new SelfRepair(8, 15, 6)); //armor, structure, output
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

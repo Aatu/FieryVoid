@@ -62,7 +62,7 @@ class triadArchangel extends BaseShip{
 		$this->addAftSystem(new GraviticThruster(8, 20, 0, 6, 2));
 		$this->addAftSystem(new GraviticThruster(8, 20, 0, 6, 2));
         $this->addAftSystem(new PhotonicPrismBeam(8, 24, 8, 90, 270));	
-		$this->addAftSystem(new JumpEngine(8, 25, 5, 8));        
+		$this->addAftSystem((new JumpEngine(8, 25, 5, 8))->markAncient());        
 
         $this->addLeftSystem(new GraviticThruster(8, 25, 0, 8, 3)); 		
         $this->addLeftSystem(new PhotonicPrismBeam(8, 24, 8, 210, 30));	

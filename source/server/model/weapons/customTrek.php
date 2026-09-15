@@ -3808,19 +3808,24 @@ class TrekPhaserKelly extends TrekPhaser{
         public $raking = 10;
         
         public $intercept = 2;
-	    public $priority = 7; //heavy Raking - they are light Raking technically, but among Federation weapons they're heavier ones
+	    public $priority = 6; //heavy Raking - they are light Raking technically, but among Federation weapons they're heavier ones
 		public $priorityAF = 6; //count as moderately strong vs fighters
 		
         public $loadingtime = 1;
 		public $normalload = 2;
-		
+		public $guns = 2;		
+		public $gunsArray = array( 1 => 2, 2=> 3);		
         public $rangePenalty = 0.3; //1.5 per hex.
+        public $rangePenaltyArray = array(1=> 0.3, 2=> 1);		
         public $fireControl = array(3, 3, 3);
+        public $fireControlArray = array(1=> array(3, 3, 3), 2=> array(6, 2, 0));		
 
         public $damageType = "Raking";
+		public $damageTypeArray = array( 1 => "Raking", 2=> "Standard");		
 		public $weaponClass = "Particle";
-		public $firingModes = array( 1 => "Raking");
+		public $firingModes = array( 1 => "Raking", 2=> "AntiFighter");
 		public $uninterceptable = true;
+		private $damageRolled = null;
 
 	 	public function getInterceptRating($turn){
 			return 2;
@@ -3837,15 +3842,35 @@ class TrekPhaserKelly extends TrekPhaser{
 			}
 	
 		public function getDamage($fireOrder){
-        	switch($this->turnsloaded){
-            	case 0:
-            	case 1:
-                	return Dice::d(10)+4;
-			    	break;
-            	default:
-                	return Dice::d(10,2)+14;
-			    	break;
-        	}
+			if($fireOrder->firingMode == 1){
+				switch($this->turnsloaded){
+					case 0:
+					case 1:
+						return Dice::d(10)+4;
+					default:
+						return Dice::d(10,2)+14;
+				}
+			}else if($fireOrder->firingMode == 2){
+
+				if($this->damageRolled == null){ // Roll damage for this firing round
+
+					switch($this->turnsloaded){
+						case 0:
+						case 1:
+							$this->damageRolled = Dice::d(10) + 4;
+							break;
+
+						default:
+							$this->damageRolled = Dice::d(10, 2) + 14;
+							break;
+					}
+				}
+
+				return round($this->damageRolled / 3);
+
+			}else{
+				return 0; // Safety check.
+			}
 		}
 
  		public function setMinDamage(){

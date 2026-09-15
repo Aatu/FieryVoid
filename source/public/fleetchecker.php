@@ -104,7 +104,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 </ul>
             </li>
             <li>Most units of LCV size or smaller need to have hangars present (there are exceptions, especially for custom factions from other universes).</li>
-            <li>At least half of fighter hangars need to be filled (this rule is only relevant for regular fighters, not for other craft like assault shuttles, LCVs or even SHFs).</li>
+            <li>At least half of fighter hangars need to be filled (this rule is only relevant for regular fighters, not for other craft like assault shuttles, LCVs or even SHFs). A few craft that may be bought <i>without</i> any hangar space still fill their own hangar category, and that category is subject to the same half-full rule - Walker Mapmaker Sensor Probes are the example.</li>
             <li>At most 1 flight smaller than 6 craft (checked only for craft with maximum flight size of 6 or more).</li>
             <li>Variant restrictions observed (see below).</li>
             <li>Deployment restrictions observed (see below).</li>
@@ -158,16 +158,17 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
         <h3 id="deployment" >Deployment Restrictions</h3>
-        <p>Every unit in game has availability rating. It's one of three categories:</p> 
+        <p>Every unit in game has availability rating. It's one of four categories:</p> 
         <ul>
             <li>Unlimited (100%) - unit is common in a given fleet</li>  
+            <li>Limited (50%) - units that are common enough, but still shouldn't make up the bulk of a fleet (mostly used by Ancient fleets).</li>
             <li>Limited (33%) - mostly specialty support units, like dedicated missile ships and ELINT ships.</li>
             <li>Restricted (10%) - rarest of units, like newest/experimental designs and largest battleships.</li>
             <li>Unique (Q) - only very few (possibly even one) exist. For fleet selection rules treat them as Rare, but with added limitation than no more than 1 may be present.</li>  
             <li>Special (X) - non-standard restrictions that require special player attention. Actual restriction is present in unit description. Fleet Checker will NOT check them correctly, but will bring them to player's attention with appropriate note.</li>                        
         </ul>
 
-        <p>To put it simply, total value of units in a given category cannot exceed appropriate percentage (so you can spend up to 33% of total fleet allowance on Limited units, for example). There are two additional rules though:</p> 
+        <p>To put it simply, total value of units in a given category cannot exceed appropriate percentage (so you can spend up to 33% of total fleet allowance on Limited (33%) units, for example). There are two additional rules though:</p> 
         <ul>
             <li>If you have only one unit in a given category, it can exceed the limit (to allow taking such units in small battles, basically).</li>  
             <li>If you have Restricted unit - it needs another unit as escort (such rare vessels aren't usually allowed to wander all alone).</li>

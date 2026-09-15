@@ -39,6 +39,13 @@ class SpawnEnergyDrainingMine extends Terrain{
        case onConstructed() skips. */
     public $spawnTurn = 0;
 
+    /* NOBODY MAY AIM AT IT (plan 3.10c, user ruling 2026-09-08). Read by BaseShip::isTargetableBy
+       on the server and, because it rides the static blueprint verbatim, by shipManager.isTargetable
+       on the client - which is where weaponManager actually refuses the tooltip line and the click.
+       Not a hide: the orb's icon is the seven-hex field marker, so taking it off the map would take
+       the field off the map. A shot that merely happens to cover this hex still resolves. */
+    public $unTargetable = true;
+
     function __construct($id, $userid, $name, $slot){
         parent::__construct($id, $userid, $name, $slot);
 

@@ -70,6 +70,7 @@ window.DeploymentDock = (function () {
     var hangarAcceptsFighterClass = HS.hangarAcceptsFighterClass;
     var bayReservesFighterClass   = HS.bayReservesFighterClass;
     var bayReservesFlight         = HS.bayReservesFlight;
+    var bayFillRank               = HS.bayFillRank;
     var hangarAcceptsCategory     = HS.hangarAcceptsCategory;
     var isCustomCombatCategory    = HS.isCustomCombatCategory;
 
@@ -91,12 +92,14 @@ window.DeploymentDock = (function () {
     // boxes (accounting for current usage AND already-queued deploy starts).
     // $reclaimFlightId (optional): that flight's own reservations are treated as
     // reclaimable (for re-planning an already-queued flight).
-    function collectUsableHangars(ship, reclaimFlightId) {
+    // $extraReserved (optional): {hangarId: boxes} already promised to other flights by a PLAN that has
+    // not been queued - see planFlightsIntoCarrier.
+    function collectUsableHangars(ship, reclaimFlightId, extraReserved) {
         var out = [];
         ship.systems.forEach(function (sys) {
             if (!sys || !isDockHangar(sys)) return;
             if (shipManager.systems.isDestroyed(ship, sys)) return;
-            var free = hangarFreeBoxes(sys, reclaimFlightId);
+            var free = hangarFreeBoxes(sys, reclaimFlightId) - ((extraReserved && extraReserved[sys.id]) || 0);
             if (free > 0) out.push({ hangar: sys, free: free });
         });
         return out;
@@ -189,6 +192,8 @@ window.DeploymentDock = (function () {
 
             //If queued on a DIFFERENT carrier, don't show — player can re-edit there.
             if (s.pendingDeployDock && s.pendingDeployDock.carrierId !== carrier.id) continue;
+            //Docked in its legacy opener by rule, not by choice: nothing to amend, so not offered.
+            if (s.forcedDeployDock) continue;
 
             //Same-hex check: flight must visually share the carrier's hex (or be
             //already queued on this carrier — in which case its icon is hidden
@@ -226,7 +231,7 @@ window.DeploymentDock = (function () {
     // capacity is floor(free / perCraftBoxes) — which is 2 craft per box for Zorth.
     // $reclaimFlightId (optional): re-planning an already-queued flight — its own
     // existing reservations are reclaimed so the plan sees true free capacity.
-    function distributeFlightAcrossHangars(carrier, flight, reclaimFlightId) {
+    function distributeFlightAcrossHangars(carrier, flight, reclaimFlightId, extraReserved) {
         var cat = categoryForFlight(flight);
         var perCraft = craftBoxesInHangar(null, 1, flight.unitSize); //boxes per single craft (catapult-agnostic here; rails/hangars are non-catapult)
         if (perCraft <= 0) perCraft = 1;   //don't clamp to >=1: ultralights are 0.5 box/craft
@@ -252,7 +257,7 @@ window.DeploymentDock = (function () {
             if (ftrCap < remaining) return [];   //carrier isn't outfitted for this custom fighter
         }
 
-        var hangars = collectUsableHangars(carrier, reclaimFlightId).filter(function (h) {
+        var hangars = collectUsableHangars(carrier, reclaimFlightId, extraReserved).filter(function (h) {
             //Stage S: integrated-fighter bays accept only their own integrated
             //fighters (see eligibleHangarsForFlight — same gate).
             if (h.hangar.isShadowHangar && String(flight.phpclass) !== 'ShadowMediumFighterFlight') return false;
@@ -262,13 +267,13 @@ window.DeploymentDock = (function () {
         //Fill order: bays SPECIFICALLY reserved for this flight first — by phpclass
         //allow-list OR exact hangarType match (bayReservesFlight) — so a Reska fills
         //the Suom's Reska-only bay and an ultralight fills the Qoricc's dedicated
-        //'ultralight' bay before spilling into the universal primary; THEN biggest
-        //free first (fewest bays — prefer the 6-box rail before the 3-box ones).
-        //Ties keep encounter order.
+        //'ultralight' bay before spilling into the universal primary; a Docking Bay
+        //LAST (bayFillRank - its boxes are the only ones a ship can use, so Mapmakers
+        //take the Traveler's side hangars first); THEN biggest free first (fewest
+        //bays — prefer the 6-box rail before the 3-box ones). Ties keep encounter order.
         hangars.sort(function (a, b) {
-            var ra = bayReservesFlight(a.hangar, flight) ? 1 : 0;
-            var rb = bayReservesFlight(b.hangar, flight) ? 1 : 0;
-            if (ra !== rb) return rb - ra;        //reserved bays first
+            var ra = bayFillRank(a.hangar, flight), rb = bayFillRank(b.hangar, flight);
+            if (ra !== rb) return ra - rb;        //reserved first, Docking Bay last
             return b.free - a.free;
         });
 
@@ -285,6 +290,58 @@ window.DeploymentDock = (function () {
         }
         if (remaining > 0) return [];   //combined capacity insufficient
         return plan;
+    }
+
+    // ⭐ WHICH OF $flights FIT IN $carrier TOGETHER, in list order - their ids (user ruling 2026-09-11:
+    // a legacy-drive opener's manifest may hold only fighters its hangars can take, and they arrive
+    // docked). The same packer queueDeployStartDock uses, run once per flight against a SCRATCH map of
+    // the boxes the earlier flights would take - so nothing is queued and no hangar is touched. A
+    // flight that does not fit is skipped and the next one is still tried.
+    //
+    // ⭐ SHIPS TOO (WALKERS_OF_SIGMA_PLAN.md 3.14b, user 2026-09-11): a ship a Docking Bay docks takes
+    // the first such bay with room beside everything already planned, into the SAME scratch map - so a
+    // Pathfinder planned first leaves the fighters 12 fewer boxes in the bay, and fighters planned
+    // first (side hangars before the bay, bayFillRank) leave the bay to the ships. Mirror of the server's
+    // InitialOrdersGamePhase::legacyBerthFits.
+    function planFlightsIntoCarrier(carrier, flights) {
+        var reserved = {};
+        var fits = [];
+        if (!carrier || !Array.isArray(carrier.systems)) return fits;
+
+        (flights || []).forEach(function (flight) {
+            if (!flight) return;
+            if (!flight.flight) {
+                var bay = bayForShipPlan(carrier, flight, reserved);
+                if (!bay) return;
+                reserved[bay.id] = (reserved[bay.id] || 0) + HS.shipBoxesForUnitSize(flight.unitSize);
+                fits.push(parseInt(flight.id, 10));
+                return;
+            }
+            var plan = distributeFlightAcrossHangars(carrier, flight, null, reserved);
+            if (plan.length === 0) return;
+
+            plan.forEach(function (slot) {
+                var isCat = !!(slot.hangar.isCatapult || slot.hangar.name === 'catapult');
+                var boxes = isCat ? slot.count : craftBoxesInHangar(slot.hangar, slot.count, flight.unitSize);
+                reserved[slot.hangar.id] = (reserved[slot.hangar.id] || 0) + boxes;
+            });
+            fits.push(parseInt(flight.id, 10));
+        });
+        return fits;
+    }
+
+    // The first Docking Bay on $carrier that docks $ship's class and has its boxes free beside $reserved
+    // (a scratch map of boxes already promised, hangar id => boxes). No turn or fleet gates - the
+    // manifest plans a carrier that is still in hyperspace.
+    function bayForShipPlan(carrier, ship, reserved) {
+        var boxes = HS.shipBoxesForUnitSize(ship.unitSize);
+        for (var i = 0; i < carrier.systems.length; i++) {
+            var bay = carrier.systems[i];
+            if (!HS.bayDocksShipClass(bay, ship)) continue;
+            if (shipManager.systems.isDestroyed(carrier, bay)) continue;
+            if (hangarFreeBoxes(bay) - ((reserved && reserved[bay.id]) || 0) >= boxes) return bay;
+        }
+        return null;
     }
 
     // Queue $flight for deployment-dock onto $carrier, auto-distributing across
@@ -326,6 +383,9 @@ window.DeploymentDock = (function () {
     // its stale pre-dock hex.
     function unqueueDeployStartDock(flight) {
         if (!flight) return;
+        //A fighter riding a legacy drive has no hex to be put back on - it arrives in the hangar or not at
+        //all (DeploymentPhaseStrategy.autoPlaceArrivingReinforcements, user ruling 2026-09-11).
+        if (flight.forcedDeployDock) return;
         var flightId = parseInt(flight.id, 10);
 
         //Capture the host carrier BEFORE deleting pendingDeployDock — the
@@ -375,6 +435,7 @@ window.DeploymentDock = (function () {
     // the flight (caller should keep the deploy option visible in that case).
     function autoQueueDockOnCarrier(carrier, flight) {
         if (!carrier || !flight) return null;
+        if (flight.forcedDeployDock) return null;   //aboard its legacy opener by rule - not re-routable
         if (flight.pendingDeployDock) {
             //Already queued somewhere — re-route by un-queueing first so the old
             //hangar releases its reservation, then re-queue here.
@@ -438,6 +499,8 @@ window.DeploymentDock = (function () {
             var free = hangarFreeBoxes(sys, flightId);
             if (free >= craftBoxesInHangar(sys, size, flight.unitSize)) out.push({ hangar: sys, capacity: free });
         });
+        //The dialog pre-selects the first entry: same order as the packer (a Docking Bay last).
+        out.sort(function (a, b) { return bayFillRank(a.hangar, flight) - bayFillRank(b.hangar, flight); });
         return out;
     }
 
@@ -610,20 +673,15 @@ window.DeploymentDock = (function () {
     }
 
     // Remove $lcv from any rail's pendingLcvDeployStartOrders and clear its marker.
-    // Idempotent. Snaps the released LCV to the host carrier's CURRENT hex so it
-    // reappears co-located with the carrier (LCVs are now allowed to share the
-    // carrier's hex — see DeploymentPhaseStrategy same-hex exemption); the player
-    // can then move it off or re-dock. Mirrors unqueueDeployStartDock's re-deploy.
+    // Idempotent. ⚠️ NO SNAP (revised 2026-09-11 to the Docking Bay's rule, user
+    // request): an LCV may no longer share a hex with another ship during Deployment,
+    // so the released LCV goes back to wherever it was placed, or stays unplaced for
+    // the player to put down - it is never dropped onto the carrier's hex.
     function unqueueLcvDeployDock(lcv) {
         if (!lcv) return;
+        //A Docking Bay ship shares this marker (see below) but not this release path.
+        if (lcv.pendingLcvDeployDock && lcv.pendingLcvDeployDock.bay) { unqueueBayShipDeployDock(lcv); return; }
         var lcvId = parseInt(lcv.id, 10);
-
-        //Capture the host carrier BEFORE clearing the marker — it tells us where
-        //to re-place the LCV.
-        var carrier = null;
-        if (lcv.pendingLcvDeployDock && lcv.pendingLcvDeployDock.carrierId != null) {
-            carrier = gamedata.getShip(lcv.pendingLcvDeployDock.carrierId);
-        }
 
         for (var key in gamedata.ships) {
             var s = gamedata.ships[key];
@@ -641,22 +699,108 @@ window.DeploymentDock = (function () {
             });
         }
         delete lcv.pendingLcvDeployDock;
+    }
 
-        //Re-deploy the LCV at the carrier's current hex so its icon reappears there
-        //(same-hex placement is allowed for LCVs). shipManager.movement.deploy is
-        //idempotent: it updates the existing deploy entry or creates one.
-        if (carrier && typeof shipManager.movement !== 'undefined'
-            && typeof shipManager.movement.deploy === 'function') {
-            try {
-                var carrierPos = shipManager.getShipPosition(carrier);
-                if (carrierPos) shipManager.movement.deploy(lcv, carrierPos);
-            } catch (e) {
-                //fail-soft: a missing position shouldn't break the un-queue
-            }
+    // === Docking Bay (WALKERS_OF_SIGMA_PLAN.md 3.14, Stage 16) — deployment-phase SHIP dock ===
+    //
+    // A Scribe / Pathfinder / Guideship may START the battle inside a friendly carrier's Docking
+    // Bay, the carrier being placed this turn and arriving on the same turn (the fighter and LCV
+    // deploy-docks' own rules). Queue: bay.pendingBayShipDeployStartOrders [{shipId, boxes,
+    // phpclass}]; the server resolves it at commit (HangarOps::processBayShipDeployStartTransfer).
+    //
+    // ⭐ THE SHIP CARRIES THE LCV DEPLOY-DOCK MARKER, `pendingLcvDeployDock`, with `bay: true`
+    // (D30). Every "this unit is inside a carrier, not on the board" test in the client already
+    // reads it - getShipsInSameHex, validateAllDeployment, first-unit selection, the ballistic
+    // layer - so the queued ship stops blocking its hex without a single one of them changing, and
+    // two ordinary hulls still refuse to share one. What differs is only the release: an LCV is
+    // snapped back onto the carrier's hex, which a HULL may not share, so a bay ship is simply
+    // un-docked and left for the player to place.
+
+    // May $carrier's bays hold $ship from the start of the battle? Returns the bay, or null.
+    function freeBayForShipDeploy(carrier, ship) {
+        if (!carrier || !ship || ship.flight || ship.mine || carrier.flight) return null;
+        if (!gamedata.isMyShip(carrier) || !Array.isArray(carrier.systems)) return null;
+        if (gamedata.isTerrain && gamedata.isTerrain(carrier.shipSizeClass, carrier.userid)) return null;
+        if (shipManager.getTurnPlaced(carrier) !== gamedata.turn) return null;
+        if (!arrivesOnSameTurn(carrier, ship)) return null;
+        if (parseInt(carrier.slot, 10) !== parseInt(ship.slot, 10)) return null;
+        if (parseInt(carrier.userid, 10) !== parseInt(ship.userid, 10)) return null;
+        var boxes = HS.shipBoxesForUnitSize(ship.unitSize);
+        for (var i = 0; i < carrier.systems.length; i++) {
+            var bay = carrier.systems[i];
+            if (!HS.bayDocksShipClass(bay, ship)) continue;
+            if (shipManager.systems.isDestroyed(carrier, bay)) continue;
+            if (bayFreeDeployBoxes(bay, ship.id) >= boxes) return bay;
         }
+        return null;
+    }
+
+    // Boxes free in $bay for a deploy-docking ship. hangarFreeBoxes is already the answer for
+    // anything - effectiveHangarBoxes nets out the ships held or queued - so only $reclaimShipId's
+    // OWN queued boxes are handed back, for a re-open or a re-route.
+    function bayFreeDeployBoxes(bay, reclaimShipId) {
+        var free = hangarFreeBoxes(bay);
+        if (reclaimShipId != null && Array.isArray(bay.pendingBayShipDeployStartOrders)) {
+            bay.pendingBayShipDeployStartOrders.forEach(function (o) {
+                if (parseInt(o.shipId, 10) === parseInt(reclaimShipId, 10)) free += parseInt(o.boxes || 0, 10);
+            });
+        }
+        return free;
+    }
+
+    function carrierAcceptsBayShipDeployDock(carrier, ship) {
+        return !!freeBayForShipDeploy(carrier, ship);
+    }
+
+    // Queue $ship into $carrier's bay. Returns the bay, or null.
+    function queueBayShipDeployDock(carrier, ship) {
+        if (!carrier || !ship) return null;
+        if (ship.forcedDeployDock && ship.pendingLcvDeployDock) return null;   //aboard its legacy opener by rule
+        if (ship.pendingLcvDeployDock) unqueueLcvDeployDock(ship);   //re-route: release the old reservation
+        var bay = freeBayForShipDeploy(carrier, ship);
+        if (!bay) return null;
+        if (!Array.isArray(bay.pendingBayShipDeployStartOrders)) bay.pendingBayShipDeployStartOrders = [];
+        bay.pendingBayShipDeployStartOrders.push({
+            shipId: parseInt(ship.id, 10),
+            boxes: HS.shipBoxesForUnitSize(ship.unitSize),
+            phpclass: String(ship.phpclass)
+        });
+        bay.pendingBayShipDeployStartOrdersDirty = true;
+        ship.pendingLcvDeployDock = { carrierId: parseInt(carrier.id, 10), railId: parseInt(bay.id, 10), bay: true };
+        if (typeof bay.refreshHangarTooltip === 'function') bay.refreshHangarTooltip();
+        return bay;
+    }
+
+    // Release $ship from every bay's deploy queue and clear its marker. Idempotent. No snap -
+    // a hull may not share its carrier's hex, so it goes back to wherever it was (or unplaced).
+    function unqueueBayShipDeployDock(ship) {
+        if (!ship) return;
+        //Arrived aboard a legacy-drive opener (a reinforcement): docked by rule, not by choice, and
+        //has nowhere else to be - same as unqueueDeployStartDock's guard for a fighter.
+        if (ship.forcedDeployDock) return;
+        var shipId = parseInt(ship.id, 10);
+        for (var key in gamedata.ships) {
+            var s = gamedata.ships[key];
+            if (!s || !Array.isArray(s.systems)) continue;
+            s.systems.forEach(function (sys) {
+                if (!HS.isDockingBaySys(sys) || !Array.isArray(sys.pendingBayShipDeployStartOrders)) return;
+                var before = sys.pendingBayShipDeployStartOrders.length;
+                sys.pendingBayShipDeployStartOrders = sys.pendingBayShipDeployStartOrders.filter(function (o) {
+                    return parseInt(o.shipId, 10) !== shipId;
+                });
+                if (sys.pendingBayShipDeployStartOrders.length !== before) {
+                    sys.pendingBayShipDeployStartOrdersDirty = true;
+                    if (typeof sys.refreshHangarTooltip === 'function') sys.refreshHangarTooltip();
+                }
+            });
+        }
+        delete ship.pendingLcvDeployDock;
     }
 
     return {
+        carrierAcceptsBayShipDeployDock: carrierAcceptsBayShipDeployDock,
+        queueBayShipDeployDock:       queueBayShipDeployDock,
+        unqueueBayShipDeployDock:     unqueueBayShipDeployDock,
         shipHasOpenableDockDialog:    shipHasOpenableDockDialog,
         arrivesOnSameTurn:            arrivesOnSameTurn,
         carrierAcceptsLcvDeployDock:  carrierAcceptsLcvDeployDock,
@@ -670,7 +814,8 @@ window.DeploymentDock = (function () {
         autoQueueDockOnCarrier:       autoQueueDockOnCarrier,
         unqueueDeployStartDock:       unqueueDeployStartDock,
         hangarFreeBoxes:              hangarFreeBoxes,
-        distributeFlightAcrossHangars: distributeFlightAcrossHangars
+        distributeFlightAcrossHangars: distributeFlightAcrossHangars,
+        planFlightsIntoCarrier:       planFlightsIntoCarrier
     };
 })();
 
@@ -752,6 +897,16 @@ window.refreshDeploymentUIForDeployStart = function () {
             : null;
         if (ps && typeof ps.consumeGamedata === 'function') {
             ps.consumeGamedata();
+        }
+        //A ship carrying an Energy Draining Net that went into (or came out of) a hangar changes
+        //the Net field's preview - it projects nothing while aboard (WALKERS_OF_SIGMA_PLAN.md 3.14b).
+        if (ps && typeof ps.syncEdfNetPreview === 'function') {
+            ps.syncEdfNetPreview();
+        }
+        //...and a ship's field disc, which is not drawn while it is aboard or back on its off-map
+        //marker (PhaseStrategy.isOffBoardForEdf).
+        if (ps && typeof ps.syncAllEdfFields === 'function') {
+            ps.syncAllEdfFields();
         }
         //Issue 3: any currently-open systemInfo (e.g. the hangar tooltip)
         //is mounted with stale props because React class components don't

@@ -31,6 +31,7 @@ const EW_LABEL_COLORS = {
     'DIST': '#e6b98f',              //soft orange
     'SOEW': theme.colors.text,        //soft orange
     'OEW_HOSTILE': '#e49b9b',       //soft red - pseudo-label, see ewLabelColor
+    'Saved EW': '#e0d39a',          //soft gold - the EW Detector allowance (WALKERS_OF_SIGMA_PLAN.md 3.8)
 };
 
 /*OEW is the one CONTEXTUAL label (user request 2026-07-23): it keeps the green while the
@@ -67,8 +68,15 @@ const ewLabelColor = (label, ship) => {
   showMDEW). See setRangeOverlay.*/
 
 const EwPanel = styled.div`
-    grid-area: ew;
-    justify-self: center; /*centred in its column, matching the Hit Chart / Notes stack*/
+    /*WALKERS OF SIGMA-957 (WALKERS_OF_SIGMA_PLAN.md 3.11, Stage 12): $flight is the Mapmaker's
+      copy of this panel in the FLIGHT window, which has no SCS grid to sit in - it is a flex
+      row beside the FighterList (see ShipWindow's FlightEwBody). grid-area/justify-self are
+      inert in a flex parent, but naming them only for the grid keeps the two placements from
+      being confused later.*/
+    ${props => props.$flight ? '' : css`
+        grid-area: ew;
+        justify-self: center; /*centred in its column, matching the Hit Chart / Notes stack*/
+    `}
     align-self: start;
     position: relative; /*above the watermark + ship-click underlay*/
     z-index: 1;
@@ -273,7 +281,29 @@ class ShipWindowEw extends React.Component {
     }
 
     render() {
-        const { ship } = this.props;
+        const { ship, flight } = this.props;
+
+        /* ⭐ WALKERS OF SIGMA-957 (WALKERS_OF_SIGMA_PLAN.md 3.11, Stage 12) - THE MAPMAKER'S EW
+           BLOCK, and it gets its OWN row list rather than the ship one.
+
+           ⚠️ getShipRows() asks ew.getCCEW / getBDEW / getDetectSEW / getSavedEwAllowance about
+           the unit, and every one of those is a question a flight was never meant to answer:
+           its DEW row would come back as the MINE-DETECTION allowance (ew.getDefensiveEW is an
+           alias for getEWLeft), and the Saved EW row would advertise an EW Detector allowance
+           that EW::getDetectorAllowance explicitly refuses a flight. A flight has exactly one
+           meaningful subset - its DEW, plus its OEW target rows - so that is what it renders.
+
+           The target rows below are shared verbatim: getTargetRows filters on the EW array and
+           a flight can only ever hold OEW entries in it.*/
+        if (flight) {
+            return (
+                <EwPanel $flight>
+                    <EwTitle>Electronic Warfare</EwTitle>
+                    {getFlightRows(ship)}
+                    {getTargetRows(ship, this)}
+                </EwPanel>
+            );
+        }
 
         /*An undeployed ship used to replace this whole panel with a lone "Deploys on turn N"
           row. That message now lives where it belongs - the cyan "Deploying on Turn N" status
@@ -289,6 +319,78 @@ class ShipWindowEw extends React.Component {
         );
     }
 
+}
+
+/* WALKERS OF SIGMA-957 (WALKERS_OF_SIGMA_PLAN.md 3.11, Stage 12) - the flight list. ONE row.
+
+   ⭐ IT DOUBLES AS THE ALLOCATION COUNTER, which is why it is always rendered even at 0. During
+   Initial Orders there is no committed DEW row yet (convertUnusedToDEW writes it at the
+   commit), so ew.getFlightDEW falls back to the live remainder of the 3-point pool - i.e. this
+   figure counts DOWN as the player spends points on OEW and settles as the flight's actual DEW
+   the moment they commit. That is exactly how a ship's DEW row behaves, and it is what tells
+   the player how much of the pool is left without a second 'available' line.
+
+   ⚠️ NOT ew.getDefensiveEW: on a flight that is getEWLeft(), the MINE-DETECTION allowance.*/
+const getFlightRows = (ship) => {
+    const list = [
+        <Row key={`dew-scs-${ship.id}`}>
+            <RowLabel $color={ewLabelColor('DEW')}>DEW</RowLabel>
+            <RowValue>{formatEW(ew.getFlightDEW(ship))}</RowValue>
+        </Row>
+    ];
+
+    /* ⭐ A MAPMAKER CAN SAVE AN EW POINT TOO (user ruling 2026-09-10: "the effect applies to all
+       Walker units"), so it gets the same row a ship does - SHARED, not copied, because the
+       n / total form and the own-side guard are rules rather than layout. */
+    const savedEwRow = getSavedEwRow(ship);
+    if (savedEwRow) list.push(savedEwRow);
+
+    return list;
+}
+
+/* THE EW DETECTOR ALLOWANCE ROW (WALKERS_OF_SIGMA_PLAN.md 3.8, Stage 10A/10B), shared by the
+   ship list and the flight list. Returns null when there is no row to draw.
+
+   Last in either list because it is an ALLOWANCE rather than an allocation: every row above it
+   is EW that has been spent.
+
+   ⚠️ OWN SIDE ONLY, and deliberately - the same ruling the stealth-toggle forecast carries. The
+   number is a live read of where FRIENDLY detectors are, so rendering it on an enemy hull would
+   answer "how many EW Detectors cover this hex" for a fleet the viewer is not in.
+   isPlayerInGame() guards the observer case, who has no side and therefore sees no row.
+
+   ⚠️ SUPPRESSED WHEN THE ALLOWANCE IS ZERO - which is not the same as "when the value is zero".
+   A fleet with no detector is every game in the corpus but a handful, and a permanent
+   "Saved EW 0" line on all of them is noise; but a unit that has SPENT its whole allowance in the
+   late window still has an allowance, and the row disappearing at the moment it is used up would
+   read as the feature breaking.
+
+   ⭐ THE VALUE CHANGES MEANING WITH THE PHASE, and the "n / total" form is what says so. During
+   Initial Orders and Movement there is nothing to spend it on yet, so the row is a forecast and
+   shows the allowance alone. Once the Pre-Firing/Firing window opens it becomes a budget, and the
+   player needs to see what is LEFT beside what they started with.
+
+   ⚠️ THE FORECAST TRACKS THE PLAYER'S OWN CLICKING, which is what the user asked for: the
+   allowance is the ladder clamped by the UNSPENT pool (ew.getSavedEwPool), so a unit that has
+   just put its last point into OEW watches this row fall to zero rather than promising a saved
+   point it can no longer keep.*/
+const getSavedEwRow = (ship) => {
+    if (!gamedata.isPlayerInGame() || !gamedata.isMyorMyTeamShip(ship)) return null;
+
+    const savedEW = ew.getSavedEwAllowance(ship);
+    if (savedEW <= 0) return null;
+
+    const spendable = ew.isLateEwWindowOpen(ship) || (ew.isLateEwPhase() && gamedata.isMyShip(ship));
+    const value = spendable
+        ? `${formatEW(ew.getLateEwRemaining(ship))} / ${formatEW(savedEW)}`
+        : formatEW(savedEW);
+
+    return (
+        <Row key={`savedew-scs-${ship.id}`}>
+            <RowLabel $color={ewLabelColor('Saved EW')}>Saved EW</RowLabel>
+            <RowValue>{value}</RowValue>
+        </Row>
+    );
 }
 
 const getShipRows = (ship, component) => {
@@ -329,6 +431,36 @@ const getShipRows = (ship, component) => {
     if (detectSEW) {
         list.push(<Row key={`DetectSEW-scs-${ship.id}`}><RowLabel $color={ewLabelColor('Detect Stealth')}>Detect Stealth</RowLabel><RowValue>{formatEW(detectSEW)}</RowValue></Row>);
     }
+
+
+    /*WALKERS OF SIGMA-957 (WALKERS_OF_SIGMA_PLAN.md 3.8, Stage 10A) - EW points this unit may HOLD
+      BACK from Initial Orders and spend as late as the end of the Movement segment, granted by
+      friendly EW Detectors in range. The row is built by getSavedEwRow above, which the FLIGHT
+      list shares (Stage 12: a Mapmaker can save a point too); everything that used to be written
+      out here now lives on that function.
+
+      ⚠️ OWN SIDE ONLY, and deliberately - the same ruling the stealth-toggle forecast carries.
+      The number is a live read of where FRIENDLY detectors are, so rendering it on an enemy hull
+      would answer "how many EW Detectors cover this hex" for a fleet the viewer is not in.
+      isPlayerInGame() guards the observer case, who has no side and therefore sees no row.
+
+      ⚠️ SUPPRESSED WHEN THE ALLOWANCE IS ZERO - which is not the same as "when the value is zero".
+      A fleet with no detector is every game in the corpus but a handful, and a permanent
+      "Saved EW 0" line on all of them is noise; but a unit that has SPENT its whole allowance in
+      the late window still has an allowance, and the row disappearing at the moment it is used up
+      would read as the feature breaking.
+
+      ⭐ STAGE 10B - THE VALUE CHANGES MEANING WITH THE PHASE, and the "n / total" form is what says
+      so. During Initial Orders and Movement there is nothing to spend it on yet, so the row is a
+      forecast and shows the allowance alone. Once the Pre-Firing/Firing window opens it becomes a
+      budget, and the player needs to see what is LEFT beside what they started with.
+
+      ⚠️ THE FORECAST TRACKS THE PLAYER'S OWN CLICKING, which is what the user asked for: the
+      allowance is the ladder clamped by the UNSPENT pool (ew.getSavedEwPool), so a ship that has
+      just put its last point into OEW watches this row fall to zero rather than promising a saved
+      point it can no longer keep.*/
+    const savedEwRow = getSavedEwRow(ship);
+    if (savedEwRow) list.push(savedEwRow);
 
     return list;
 }

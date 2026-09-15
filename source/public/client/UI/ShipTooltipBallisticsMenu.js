@@ -187,13 +187,13 @@ window.ShipTooltipBallisticsMenu = function () {
                 // depend on that.
                 members.forEach(function (member) { member.position = getLaunchHex.call(this, member); }, this);
 
-                // Set correct firing mode
-                var modeIteration = ball.fireOrder.firingMode;
-                if (modeIteration != ball.weapon.firingMode && !ball.weapon.multiModeSplit) {
-                    while (modeIteration != ball.weapon.firingMode) {
-                        ball.weapon.changeFiringMode();
-                    }
-                }
+                // Set correct firing mode, so every per-mode figure read below (damage, range, hit
+                // chance) is the one this SHOT was declared with.
+                // ⚠️ ball.weapon is the LIVE launcher on the shooter - getAllBallisticsAgainst hands
+                // back shipManager.systems.getSystem(...) - so the switch is undone at the end of
+                // this row. See weaponManager.setModeForFireOrder for what an unrestored one does to
+                // a homing missile's launcher.
+                var restoreMode = weaponManager.setModeForFireOrder(ball.weapon, ball.fireOrder);
 
                 // Set display text. The shooter is named by the heading above, so the row carries only
                 // the shot: how many, of what, in which mode, and - for a Shadow split weapon - what
@@ -466,6 +466,11 @@ window.ShipTooltipBallisticsMenu = function () {
                         jQuery(".incoming", element).append(subElement);
                     }, this);
                 }
+
+                // Put the launcher back in the mode the PLAYER left it in. Everything above that
+                // needed the shot's own mode has been read by now; the click handlers attached to
+                // the row read the weapon live, and they want the player's mode, not this shot's.
+                weaponManager.restoreFiringMode(ball.weapon, restoreMode);
             }, this);
         }, this);
     };

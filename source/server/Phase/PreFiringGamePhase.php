@@ -101,6 +101,14 @@ class PreFiringGamePhase implements Phase
             */
         }		
 
+        /* WALKERS OF SIGMA-957 (WALKERS_OF_SIGMA_PLAN.md 3.8, Stage 10B) - EW points an EW Detector
+           let this fleet hold back from Initial Orders, spent now. OUTSIDE the per-ship loop above
+           because it re-derives the budget SERVER-side and collects the fleet's detectors ONCE for
+           the whole POST rather than once per ship. It reloads nothing - $gameData already IS the
+           authoritative load - and returns without touching the database at all in any game with no
+           EW Detector in it. */
+        EW::submitLateEw($gameData, $dbManager, $ships);
+
         $dbManager->updatePlayerStatus($gameData->id, $gameData->forPlayer, $gameData->phase, $gameData->turn);
         $dbManager->setPlayerWaitingStatus($gameData->forPlayer, $gameData->id, true);
         

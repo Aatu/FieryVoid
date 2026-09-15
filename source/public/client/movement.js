@@ -669,13 +669,85 @@ shipManager.movement = {
        blueprint carry none of the three keys, so they read as legacy here - which is the safe way
        round, since the only thing this drives is a marker LABEL.
 
-       Used for exactly one thing: whether the blue declaration marker says REINFORCEMENTS (a hull
-       that will fade in, leaving no vortex) or "Jump Point Forming" (a hull that will tear one
-       open). It is NOT the gate test - a gate's engine passes all three - and it must never be used
+       Used for exactly one thing since 2026-09-11: whether a "Jump to Hyperspace" boost on this
+       engine means the ship is leaving at the end of the turn (shipManager.isJumpingToHyperspace).
+       It used to pick the blue exit marker's word; that marker now says "Jump Point" for every
+       drive. It is NOT the gate test - a gate's engine passes all three - and it must never be used
        to decide whether an arrival is legal, which is a server rule with no legacy test in it. */
     isLegacyJumpEngine: function isLegacyJumpEngine(system) {
         if (!system || system.name !== 'jumpEngine') return false;
         return !system.ballistic || !system.hextarget || !(system.range > 0);
+    },
+
+    /* ⭐ DOES THIS UNIT OPEN ITS WAY IN WITH A LEGACY DRIVE? (Ancient special jump drives, the Shadow
+       Phasing Drive, BSG / Star Wars / Trek drives.) Such a unit phases in through a doorway of its own
+       and opens no jump point, so its manifest may hold only fighters its hangars can take, and those
+       arrive docked (user ruling 2026-09-11). Mirror of JumpEngine::isLegacyOpener. A gate is never
+       one; a FLIGHT's engines are one level down, on its craft. */
+    isLegacyOpener: function isLegacyOpener(unit) {
+        if (!unit || !unit.systems) return false;
+        if (typeof gamedata !== 'undefined' && typeof gamedata.isJumpGate === 'function' && gamedata.isJumpGate(unit)) return false;
+
+        for (var i in unit.systems) {
+            var system = unit.systems[i];
+            if (!system) continue;
+            if (unit.flight) {
+                for (var j in system.systems) {
+                    var sub = system.systems[j];
+                    if (sub && sub.name === 'jumpEngine') return shipManager.movement.isLegacyJumpEngine(sub);
+                }
+                continue;
+            }
+            if (system.name === 'jumpEngine') return shipManager.movement.isLegacyJumpEngine(system);
+        }
+        return false;
+    },
+
+    /* The legacy-drive opener this unit is booked to arrive INSIDE, or null - a flight, or a ship its
+       Docking Bay takes (WALKERS_OF_SIGMA_PLAN.md 3.14b); the manifest admits nothing else onto a legacy
+       opener. Mirror of JumpEngine::getLegacyRideHost. Its own doorway (arrivalVia == its own id) is
+       not a ride. */
+    getLegacyRideHost: function getLegacyRideHost(ship) {
+        if (!ship) return null;
+        var via = ship.arrivalVia;
+        if (via === null || via === undefined || via == ship.id) return null;
+
+        var opener = gamedata.getShip(via);
+        return shipManager.movement.isLegacyOpener(opener) ? opener : null;
+    },
+
+    /* The jump engine taking this unit out of the battle at the end of THIS turn - the one with a
+       "Jump to Hyperspace" boost set - or null. Mirror of JumpEngine::getUnitJumpingEngine, and like
+       it ⚠️ it descends into EVERY craft of a flight: the boost sits on whichever probe's engine the
+       player clicked, not on the sample fighter's. */
+    getJumpingOutEngine: function getJumpingOutEngine(ship) {
+        if (!ship || !ship.systems) return null;
+
+        var isJumping = function (system) {
+            return Boolean(system && system.name === 'jumpEngine' && shipManager.power.getBoost(system));
+        };
+
+        for (var i in ship.systems) {
+            var system = ship.systems[i];
+            if (!system) continue;
+            if (ship.flight) {
+                for (var j in system.systems) {
+                    if (isJumping(system.systems[j])) return system.systems[j];
+                }
+                continue;
+            }
+            if (isJumping(system) && !shipManager.systems.isDestroyed(ship, system)) return system;
+        }
+
+        return null;
+    },
+
+    /* ⭐ MAY THIS UNIT NOT FIRE THIS TURN BECAUSE ITS ANCIENT DRIVE IS TAKING IT OUT? (user ruling
+       2026-09-11 - JumpEngine::$ancientJump.) Read off the payload flags rather than the class so it
+       works on a plain object too. The Walkers' drive is the exception: they may fire. */
+    isJumpFireForbidden: function isJumpFireForbidden(ship) {
+        var engine = shipManager.movement.getJumpingOutEngine(ship);
+        return Boolean(engine && engine.ancientJump && !engine.walkerJump);
     },
 
     /* Either kind of vortex - for the sites that care that this is a hole in space, not which way

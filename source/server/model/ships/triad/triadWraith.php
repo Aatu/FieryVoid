@@ -74,7 +74,7 @@ class triadWraith extends BaseShip{
 		$this->addAftSystem(new GraviticThruster(7, 20, 0, 6, 2));
 		$this->addAftSystem(new GraviticThruster(7, 20, 0, 6, 2));
 		$this->addAftSystem(new GraviticThruster(7, 20, 0, 6, 2));
-		$this->addAftSystem(new JumpEngine(8, 25, 6, 8));        
+		$this->addAftSystem((new JumpEngine(8, 25, 6, 8))->markAncient());        
         $this->addAftSystem(new SelfRepair(8, 15, 6)); //armor, structure, output
 
         $this->addLeftSystem(new GraviticThruster(8, 25, 0, 8, 3)); 		

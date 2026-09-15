@@ -78,7 +78,7 @@ class triadBanshee extends HeavyCombatVessel{
         $this->addAftSystem(new AmmoMissileRackTriad(7, 6, 0, 150, 30, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addAftSystem(new AmmoMissileRackTriad(7, 6, 0, 60, 300, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addAftSystem(new AdvParticleBlastGun(6, 16, 8, 120, 240));	
-		$this->addAftSystem(new JumpEngine(7, 20, 6, 8));        
+		$this->addAftSystem((new JumpEngine(7, 20, 6, 8))->markAncient());        
         $this->addAftSystem(new SelfRepair(7, 6, 3)); //armor, structure, output
         $this->addAftSystem(new AmmoMissileRackTriad(7, 6, 0, 60, 300, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addAftSystem(new AmmoMissileRackTriad(7, 6, 0, 330, 210, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base

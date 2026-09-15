@@ -949,14 +949,31 @@ const canRemoveFireOrder = (ship, system) => system.weapon && weaponManager.hasF
 //firing-mode selector grid. So does anything carrying hideFiringModeSelector: the Jump Engine's
 //seven "modes" are the vortex FACING (JUMP_POINTS_PLAN.md section 3.1), which is chosen on the map
 //as part of the declaration, not by picking a letter out of a grid.
-const canChangeFiringMode = (ship, system) => system.weapon && !ship.mine && !system.stowed && !system.hideFiringModeSelector && system.name !== 'GraviticAugmenter' && system.name !== 'MinorThoughtPulsar' && ((gamedata.gamephase === 1 && system.ballistic) || (gamedata.gamephase === 5 && system.preFires) || (gamedata.gamephase === 3 && !system.ballistic && !system.preFires)) && (!weaponManager.hasFiringOrder(ship, system) || system.multiModeSplit) && (Object.keys(system.firingModes).length > 1);
+/* ⭐ WALKERS_OF_SIGMA_PLAN.md 3.14g (Stage 19, user report 2026-09-12) - A SHIP RIDING A DOCKING
+   BAY OFFERS NO WEAPON MENU AT ALL.
+
+   D49 says it can be shot and cannot shoot, and both halves of that were already enforced
+   (weaponManager.selectWeapon refuses the selection, Firing::withdrawFireFromDockingRiders drops
+   anything that gets past it) - but the FIRING MODE SELECTOR still opened. It is the one weapon
+   control in this menu that does NOT ask whether a fire order exists: it gates on the phase, the
+   mode count and `hideFiringModeSelector` alone, so every sibling control vanished on its own
+   (they all read hasFiringOrder / hasOrderForMode, which is empty on a rider) and this one did not.
+
+   ⚠️ THE INTERCEPT PAIR GOES WITH IT, and that is deliberate rather than collateral. The two
+   buttons are CHILDREN of `<FiringModeSelector>`, so suppressing the block suppresses them - and
+   interception is firing, which is exactly the reading the Ancient-jump precedent already takes
+   (Firing::automateIntercept hands a jumping unit no interceptors either). The server half now
+   matches: see the isJumpingUnarmed line there. */
+const isDockingRiderUnit = (ship) => !!(window.shipManager && shipManager.isDockingRider(ship));
+
+const canChangeFiringMode = (ship, system) => system.weapon && !ship.mine && !system.stowed && !system.hideFiringModeSelector && !isDockingRiderUnit(ship) && system.name !== 'GraviticAugmenter' && system.name !== 'MinorThoughtPulsar' && ((gamedata.gamephase === 1 && system.ballistic) || (gamedata.gamephase === 5 && system.preFires) || (gamedata.gamephase === 3 && !system.ballistic && !system.preFires)) && (!weaponManager.hasFiringOrder(ship, system) || system.multiModeSplit) && (Object.keys(system.firingModes).length > 1);
 
 //can declare eligibility for interception: charged, recharge time >1 turn, intercept rating >0, no firing order
-const canSelfIntercept = (ship, system) => system.weapon && weaponManager.canSelfInterceptSingle(ship, system);
+const canSelfIntercept = (ship, system) => system.weapon && !isDockingRiderUnit(ship) && weaponManager.canSelfInterceptSingle(ship, system);
 //Non-split weapons hold only a single order, so their self-intercept is cancelled via the
 //top-row "remove fire order" button; only split-capable weapons need an in-menu intercept-remove
 //button to peel off one of several orders.
-const canRemIntercept = (ship, system) => system.weapon && system.canSplitShots && weaponManager.canRemInterceptSingle(ship, system);
+const canRemIntercept = (ship, system) => system.weapon && system.canSplitShots && !isDockingRiderUnit(ship) && weaponManager.canRemInterceptSingle(ship, system);
 
 //GraviticAugmenter excluded: its Activate/Deactivate lives in its own green menu, not the generic SystemActivation box.
 //jumpEngine joins the exclusions: its activation pair is the Maintain toggle, which JumpEngineMenu
@@ -969,9 +986,12 @@ const canDeactivate = (ship, system) => system.canDeactivate && typeof system.ca
 //(canMaintainVortex: phase 1, my ship, engine alive and powered, a vortex of ours open and in range,
 //and not on the turn the four-turn cap closes it) and while it already IS, so the player can change
 //their mind before committing.
+//WALKERS §3.18 (Stage 20): and while a Walker drive holds an abduction order this turn - for everyone who
+//can see it, so the opponent can read the power level; only the owner's copy has live buttons.
 const canJumpEngineMenu = (ship, system) => system.name === 'jumpEngine'
 	&& typeof system.canMaintainVortex === 'function'
-	&& (system.canMaintainVortex() || system.canDeactivate());
+	&& (system.canMaintainVortex() || system.canDeactivate()
+		|| (typeof system.getAbductionOrder === 'function' && Boolean(system.getAbductionOrder())));
 
 const canPowerCapacitor = (ship, system) => {
 	if (system.name === 'powerCapacitor' || system.name === 'PowerCapacitor') {

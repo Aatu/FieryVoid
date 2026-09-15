@@ -8,13 +8,13 @@ class Guideship extends MediumShip{
 		$this->faction = "Walkers of Sigma-957";
         $this->phpclass = "Guideship";
         $this->shipClass = "Guideship";
-        $this->imagePath = "img/ships/WalkerScribe.png";
-        $this->canvasSize = 200;
+        $this->imagePath = "img/ships/WalkerPathfinder.png";
+        $this->canvasSize = 150;
 	    $this->isd = 'Ancient';
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
 
 		$this->variantOf = 'Pathfinder';
-		$this->variantOf = "NONE";
+		//$this->variantOf = "NONE";
 
         $this->gravitic = true;
 		$this->advancedArmor = true;  
@@ -28,9 +28,13 @@ class Guideship extends MediumShip{
         $this->rollcost = 1;
         $this->pivotcost = 2;
 		$this->iniativebonus = 14 *5;
+		//Docking Bay box cost (WALKERS_OF_SIGMA_PLAN.md 3.14, D18): 12 boxes, as the Pathfinder.
+		$this->unitSize = 1/12;
 
 		/*Walkers will use their own enhancement set */		
 		Enhancements::nonstandardEnhancementSet($this, 'WalkerShip');
+
+		$this->fighters = array("Mapmaker Probes"=>6);			
 		
          
 		$this->addPrimarySystem(new Reactor(6, 12, 0, 0));//armor, structure, power req, output
@@ -40,7 +44,9 @@ class Guideship extends MediumShip{
 		$this->addPrimarySystem($scanner);			
 		$this->addPrimarySystem(new Engine(5, 15, 0, 10, 3));		
         $this->addPrimarySystem(new SelfRepair(6, 3, 2)); //armor, structure, output
-		$this->addPrimarySystem(new JumpEngine(6, 30, 12, 3));
+		$jumpEngine = new JumpEngine(6, 30, 12, 3);
+		$jumpEngine->markExtraDimensional(); //Stage 20: a Walker drive (Stage 15) that can also abduct enemy units
+		$this->addPrimarySystem($jumpEngine);
 		$this->addPrimarySystem(new GraviticThruster(6, 20, 0, 5, 3));
 		$this->addPrimarySystem(new GraviticThruster(6, 20, 0, 5, 4));		
 		
@@ -65,7 +71,7 @@ class Guideship extends MediumShip{
 		$this->hitChart = array(
 			0=> array( //PRIMARY
 				7 => "Thruster",			
-				9 => "Jump Engine",			
+				9 => "Extra-Dimensional Jump Drive",			
 				11 => "Self Repair",
 				14 => "Scanner",                
 				17 => "Engine",

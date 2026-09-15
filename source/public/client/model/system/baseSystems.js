@@ -360,6 +360,18 @@ var Hangar = function (json, ship) {
 	this.pendingLaunchOrdersDirty      = false;
 	this.pendingDockOrdersDirty        = false;
 	this.pendingDeployStartOrdersDirty = false;
+	//WALKERS_OF_SIGMA_PLAN.md 3.14 - a Docking Bay is a plain Hangar on this side (its server
+	//$name is 'hangar'); isDockingBay marks the one that also queues whole-SHIP orders, by shipId.
+	//Same hydrate-then-dirty pattern as the fighter orders above. Deploy-docks are one-shot, as
+	//for fighters, so there is nothing to hydrate for them.
+	if (this.isDockingBay) {
+		this.pendingBayShipDockOrders   = Array.isArray(this.pendingBayShipDockOrder)   ? this.pendingBayShipDockOrder.slice()   : [];
+		this.pendingBayShipLaunchOrders = Array.isArray(this.pendingBayShipLaunchOrder) ? this.pendingBayShipLaunchOrder.slice() : [];
+		this.pendingBayShipDeployStartOrders = [];
+		this.pendingBayShipDockOrdersDirty        = false;
+		this.pendingBayShipLaunchOrdersDirty      = false;
+		this.pendingBayShipDeployStartOrdersDirty = false;
+	}
 	this.refreshHangarTooltip();
 }
 Hangar.prototype = Object.create(ShipSystem.prototype);
@@ -384,7 +396,13 @@ Hangar.prototype.doIndividualNotesTransfer = function () {
 	var hasLaunch       = launchDirty      || (Array.isArray(this.pendingLaunchOrders)      && this.pendingLaunchOrders.length      > 0);
 	var hasDock         = dockDirty        || (Array.isArray(this.pendingDockOrders)        && this.pendingDockOrders.length        > 0);
 	var hasDeployStart  = deployStartDirty || (Array.isArray(this.pendingDeployStartOrders) && this.pendingDeployStartOrders.length > 0);
-	if (!hasLaunch && !hasDock && !hasDeployStart) {
+	//Docking Bay ship orders (WALKERS_OF_SIGMA_PLAN.md 3.14) - DockingBay::doIndividualNotesTransfer
+	//takes these keys out before the ordinary hangar parser sees the payload.
+	var bay = !!this.isDockingBay;
+	var hasShipDock   = bay && (!!this.pendingBayShipDockOrdersDirty        || (Array.isArray(this.pendingBayShipDockOrders)        && this.pendingBayShipDockOrders.length        > 0));
+	var hasShipLaunch = bay && (!!this.pendingBayShipLaunchOrdersDirty      || (Array.isArray(this.pendingBayShipLaunchOrders)      && this.pendingBayShipLaunchOrders.length      > 0));
+	var hasShipDeploy = bay && (!!this.pendingBayShipDeployStartOrdersDirty || (Array.isArray(this.pendingBayShipDeployStartOrders) && this.pendingBayShipDeployStartOrders.length > 0));
+	if (!hasLaunch && !hasDock && !hasDeployStart && !hasShipDock && !hasShipLaunch && !hasShipDeploy) {
 		this.individualNotesTransfer = "";
 		return;
 	}
@@ -392,7 +410,18 @@ Hangar.prototype.doIndividualNotesTransfer = function () {
 	if (hasLaunch)      payload.launches     = Array.isArray(this.pendingLaunchOrders)      ? this.pendingLaunchOrders      : [];
 	if (hasDock)        payload.docks        = Array.isArray(this.pendingDockOrders)        ? this.pendingDockOrders        : [];
 	if (hasDeployStart) payload.deployStarts = Array.isArray(this.pendingDeployStartOrders) ? this.pendingDeployStartOrders : [];
+	if (hasShipDock)    payload.bayShipDocks        = Array.isArray(this.pendingBayShipDockOrders)        ? this.pendingBayShipDockOrders        : [];
+	if (hasShipLaunch)  payload.bayShipLaunches     = Array.isArray(this.pendingBayShipLaunchOrders)      ? this.pendingBayShipLaunchOrders      : [];
+	if (hasShipDeploy)  payload.bayShipDeployStarts = Array.isArray(this.pendingBayShipDeployStartOrders) ? this.pendingBayShipDeployStartOrders : [];
 	this.individualNotesTransfer = JSON.stringify(payload);
+	if (bay) {
+		this.pendingBayShipDockOrders = [];
+		this.pendingBayShipLaunchOrders = [];
+		this.pendingBayShipDeployStartOrders = [];
+		this.pendingBayShipDockOrdersDirty = false;
+		this.pendingBayShipLaunchOrdersDirty = false;
+		this.pendingBayShipDeployStartOrdersDirty = false;
+	}
 	// Reset state — the next gamedata reload will re-hydrate from the server.
 	this.pendingLaunchOrders = [];
 	this.pendingDockOrders = [];
@@ -647,6 +676,38 @@ Hangar.prototype.refreshHangarTooltip = function () {
 		}
 	}
 
+	// WALKERS_OF_SIGMA_PLAN.md 3.14 - a Docking Bay's SHIPS share these boxes. Committed ships count
+	// (a ship queued to launch is listed "(Launching)" and frees its boxes, as a fighter does), and
+	// queued docks and deploy-docks count in. A server-hydrated order carries no box cost, so it is
+	// priced off the ship's unitSize, the same arithmetic as boxesPerCraftOf above.
+	var shipLines = [];
+	if (this.isDockingBay && typeof gamedata !== 'undefined' && gamedata.getShip) {
+		var bayShipName = function (id) {
+			var s = gamedata.getShip(id);
+			return (s && s.name) ? s.name : ('Ship ' + id);
+		};
+		var bayShipBoxesOf = function (o) {
+			if (o && o.boxes != null) return parseInt(o.boxes, 10) || 0;
+			var s = gamedata.getShip(o.shipId);
+			return Math.ceil(boxesPerCraftOf({ unitSize: s ? s.unitSize : 1 }));
+		};
+		var shipsLeaving = {};
+		(this.pendingBayShipLaunchOrders || []).forEach(function (o) { shipsLeaving[parseInt(o.shipId, 10)] = true; });
+		(this.shipsDocked || []).forEach(function (e) {
+			var leaving = !!shipsLeaving[parseInt(e.shipId, 10)];
+			if (!leaving) totalStored += parseInt(e.boxes || 0, 10);
+			shipLines.push(bayShipName(e.shipId) + ' (' + parseInt(e.boxes || 0, 10) + ' boxes)' + (leaving ? ' (Launching)' : ''));
+		});
+		(this.pendingBayShipDockOrders || []).forEach(function (o) {
+			totalStored += bayShipBoxesOf(o);
+			shipLines.push(bayShipName(o.shipId) + ' (Recovering)');
+		});
+		(this.pendingBayShipDeployStartOrders || []).forEach(function (o) {
+			totalStored += bayShipBoxesOf(o);
+			shipLines.push(bayShipName(o.shipId) + ' (Deploying)');
+		});
+	}
+
 	// Effective capacity = maxhealth - damage that got past armour, clamped >= 0.
 	// Damage is needed in the line to make hangar damage visible — without it,
 	// "Carrying: 8 / 14" never changes when boxes are destroyed but no craft
@@ -719,7 +780,7 @@ Hangar.prototype.refreshHangarTooltip = function () {
 			}
 		}
 	}
-	if (displayEntries.length === 0 && !hasLaunches && !hasForeignOccupancy) {
+	if (displayEntries.length === 0 && !hasLaunches && !hasForeignOccupancy && shipLines.length === 0) {
 		delete this.data["Stored Craft"];
 		return;
 	}
@@ -883,6 +944,7 @@ Hangar.prototype.refreshHangarTooltip = function () {
 	for (var lk in launchByClass) {
 		lines.push(launchByClass[lk].count + " x " + launchByClass[lk].name + ' (Launching)');
 	}
+	for (var sl = 0; sl < shipLines.length; sl++) lines.push(shipLines[sl]);   //Docking Bay ships (3.14)
 	this.data["Stored Craft"] = "<br>" + lines.join("<br>");
 };
 
@@ -1081,6 +1143,16 @@ Magazine.prototype.constructor = Magazine;
    Weapon.prototype available at eval time here. */
 var JumpEngine = function JumpEngine(json, ship) {
 	Weapon.call(this, json, ship);
+	/* WALKERS_OF_SIGMA_PLAN.md §3.18 (Stage 20) - a drive that can join an abduction builds its own
+	   order through weaponManager.targetShip's doSpecialTargeting divert. Per INSTANCE and keyed off
+	   abductionMaxPower, which JumpEngine::stripForJson sends only for such a drive: on the prototype it
+	   would also change how every vortex engine's icon treats a re-click (SystemIcon's `committed`). */
+	if (this.abductionMaxPower) {
+		this.hasSpecialTargeting = true;
+		/* No line of sight is needed to declare an abduction (user ruling 2026-09-13) - without this,
+		   targetShip's blocked-LoS skip drops the click silently. Same per-instance keying, same reason. */
+		this.ignoresLoS = true;
+	}
 };
 JumpEngine.prototype = Object.create(Weapon.prototype);
 JumpEngine.prototype.constructor = JumpEngine;
@@ -1116,9 +1188,34 @@ JumpEngine.prototype.hasMaxBoost = function () {
    system so only JumpEngineMenu's labelled row appears, the same exclusion powerCapacitor and
    GraviticAugmenter already carry. */
 
+/* ⭐⭐ WALKERS_OF_SIGMA_PLAN.md §3.12 (Stage 13) - THE UNIT THIS ENGINE BELONGS TO, which is NOT
+   always this.ship.
+
+   SystemFactory builds a hull's systems with `new window[name](args, ship)` but a FIGHTER's systems
+   with `new window[name](args, fighter)` - so on a Mapmaker the engine's `this.ship` is the CRAFT,
+   an object with a per-flight autoid for an id and no position, no team and no vortex. Every method
+   below asks about the flight: which vortex it holds (matched on the flight's ship id), where it is,
+   whether it is mine. Ask the craft and they all silently answer "no".
+
+   The join is `flightid`, which Fighter::stripForJson has always published. Falls back to this.ship
+   for every ship-mounted engine in the game, so their behaviour is unchanged. */
+JumpEngine.prototype.getOwningUnit = function () {
+	var host = this.ship;
+	if (host && host.fighter && host.flightid !== undefined && host.flightid !== null && window.gamedata) {
+		/* ⚠️ gamedata.getShip - THE CLIENT HAS NO getShipById (that is the SERVER's name). This used to
+		   ask for getShipById behind a typeof guard, so on every real client it silently fell back to the
+		   CRAFT, and every flight rule keyed off the owning unit answered "no" - which is why boosting one
+		   Mapmaker drive never boosted the others (user report 2026-09-11, game 4347). */
+		var lookup = (typeof gamedata.getShip === 'function') ? gamedata.getShip
+			: ((typeof gamedata.getShipById === 'function') ? gamedata.getShipById : null);
+		if (lookup) return lookup.call(gamedata, host.flightid) || host;
+	}
+	return host;
+};
+
 //The open vortex this ship is holding, or null. Also the source of the target hex.
 JumpEngine.prototype.getHeldVortex = function () {
-	return shipManager.movement.getVortexHeldBy(this.ship);
+	return shipManager.movement.getVortexHeldBy(this.getOwningUnit());
 };
 
 /* STAGE 6 - WHAT THE SYSTEM ICON SHOWS, when it should show something other than the ordinary
@@ -1143,8 +1240,12 @@ JumpEngine.prototype.getVortexIconLoad = function () {
 	   denominator, which on a FIXED JUMP GATE is the PROGRAMMED HOLD (1-4 turns, chosen when the
 	   gate was signalled) rather than the four turns a ship's vortex may be maintained to
 	   (JUMP_GATES_PLAN.md Stage 4). So a gate signalled for two turns reads 1/2 then 2/2 and closes,
-	   which is what the player asked for. */
-	var max = this.vortexMaxTurns || 4;
+	   which is what the player asked for.
+
+	   ⭐ AND ON A FIGHTER FLIGHT IT IS 1 (WALKERS §3.12, Stage 13, user ruling 2026-09-10): a flight
+	   has no Maintain, so its jump point is open for exactly one turn and the icon reads "1/1". The
+	   server sends that denominator too; this only decides what the FALLBACK below counts out of. */
+	var max = this.vortexMaxTurns || (this.isFlightMounted() ? 1 : 4);
 
 	if (this.vortexTurnsOpen !== undefined && this.vortexTurnsOpen !== null) {
 		return this.vortexTurnsOpen + "/" + max;
@@ -1157,6 +1258,406 @@ JumpEngine.prototype.getVortexIconLoad = function () {
 	if (age < 0) return null;
 
 	return Math.min(age, max) + "/" + max;
+};
+
+/* ⭐ Stage 13 - IS THIS ENGINE MOUNTED ON A FIGHTER CRAFT? The client mirror of
+   JumpEngine::isFlightMounted(), and it asks the DIRECT fact - SystemFactory hands a fighter's
+   systems the CRAFT as their `ship` - rather than going through getOwningUnit(), so it cannot be
+   wrong even when the flight lookup finds nothing (the lobby, a mid-poll payload). */
+JumpEngine.prototype.isFlightMounted = function () {
+	return Boolean(this.ship && this.ship.fighter);
+};
+
+/* ⭐ AN ANCIENT SPECIAL JUMP DRIVE (user ruling 2026-09-11) - mirror of JumpEngine::isAncientJump().
+   A legacy drive (no jump point; it jumps by the Initial Orders "Jump to Hyperspace" boost) whose
+   ship may NOT fire on the turn it jumps and which no Vortex Disruptor can touch. Shadows, Kirishiac,
+   Mindriders, Torvalus, Triad, Thirdspace and the Walkers carry one.
+   `ancientJump` / `walkerJump` ride the in-game payload (JumpEngine::stripForJson), sent only when
+   set, so both are absent - falsy - on every other engine in the game. */
+JumpEngine.prototype.isAncientJump = function () {
+	return Boolean(this.ancientJump);
+};
+
+/* WALKERS_OF_SIGMA_PLAN.md §3.17 - an Ancient drive whose ship MAY fire on its jump turn and which
+   has no chance of failure. Mirror of JumpEngine::isWalkerJump(). */
+JumpEngine.prototype.isWalkerJump = function () {
+	return Boolean(this.walkerJump);
+};
+
+//Mirror of JumpEngine::forbidsFireWhileJumping(): "except as noted, the ship may not fire weapons
+//while jumping" - and the Walkers are the note.
+JumpEngine.prototype.forbidsFireWhileJumping = function () {
+	return this.isAncientJump() && !this.isWalkerJump();
+};
+
+/* ⭐ SETTING "JUMP TO HYPERSPACE" ON AN ANCIENT DRIVE WITHDRAWS THIS TURN'S FIRE ORDERS - a ship
+   jumping out may not fire (Firing::withdrawFireFromJumpingUnits is the server's rule). Called by
+   shipManager.power.clickPlus straight after the boost is written, which is the choke point every
+   boost path goes through. Same one-click shape as Maintain's doActivate: the rule is all or
+   nothing, so withdraw the orders rather than make the player find each one - and after this,
+   weaponManager.selectWeapon refuses a new one (shipManager.movement.isJumpFireForbidden).
+   The drive itself holds no orders (a legacy engine is autoFireOnly), and on a flight
+   getOwningUnit is the flight, whose weapons are one level down on the craft. */
+JumpEngine.prototype.onBoostIncrease = function () {
+	this.mirrorFlightBoost(true);
+
+	/* §3.18 (Stage 20) - a Walker drive's boost IS its jump, and it cannot pour the same power into an
+	   abduction as well: setting the jump withdraws this turn's abduction, the way Maintain withdraws a
+	   shot. The server ignores a jumping unit's abduction anyway (EdjdAbduction::isDriveWorking), and
+	   canSelectForAbduction refuses a new one while the boost stands. */
+	if (this.getAbductionOrder()) this.removeAbductionOrder();
+
+	if (!this.forbidsFireWhileJumping()) return;
+
+	var unit = this.getOwningUnit();
+	if (!unit || !unit.systems) return;
+
+	var weapons = [];
+	for (var i in unit.systems) {
+		var system = unit.systems[i];
+		if (!system) continue;
+		if (unit.flight) {
+			for (var j in system.systems) weapons.push(system.systems[j]);
+		} else {
+			weapons.push(system);
+		}
+	}
+
+	for (var w = 0; w < weapons.length; w++) {
+		var weapon = weapons[w];
+		if (!weapon || !weapon.weapon || weapon.name === 'jumpEngine') continue;
+		if (weapon.isRammingAttack) continue; //a collision, not firing - the server leaves rams alone too
+		if (!weaponManager.hasFiringOrder(unit, weapon)) continue;
+		weaponManager.removeFiringOrder(unit, weapon);
+	}
+};
+
+JumpEngine.prototype.onBoostDecrease = function () {
+	this.mirrorFlightBoost(false);
+};
+
+/* ⭐ A MAPMAKER FLIGHT JUMPS AS ONE, SO ITS DRIVES SHOW THE JUMP AS ONE (user report 2026-09-11,
+   game 4347: boosting one probe's drive left the others reading unboosted). Same shape as the Stiletto
+   Shading Field's doActivate - set one and they all go. The server needs none of it
+   (JumpEngine::getUnitJumpingEngine takes the whole flight off ANY boosted craft); this is so every
+   probe's icon and power row agree, and so "No" on any probe cancels the jump for the whole flight.
+   One real row per engine, written in the shape shipManager.power.setBoost writes, so each travels to
+   the server with the ordinary power submit. A hull-mounted engine has no siblings: no-op. */
+JumpEngine.prototype.mirrorFlightBoost = function (boosted) {
+	var flight = this.getOwningUnit();
+	var siblings = this.getFlightSiblingEngines();
+	if (!siblings.length) return;
+
+	for (var i = 0; i < siblings.length; i++) {
+		var sibling = siblings[i];
+		if (!Array.isArray(sibling.power)) sibling.power = [];
+
+		if (boosted) {
+			if (!shipManager.power.getBoost(sibling)) {
+				sibling.power.push({ id: null, shipid: flight.id, systemid: sibling.id, type: 2, turn: gamedata.turn, amount: 1 });
+			}
+		} else {
+			while (shipManager.power.getBoost(sibling) > 0) shipManager.power.unsetBoost(flight, sibling);
+		}
+		if (typeof sibling.initializationUpdate === 'function') sibling.initializationUpdate(); //the "JUMP" read-out
+	}
+
+	if (typeof webglScene !== 'undefined' && webglScene.customEvent) {
+		webglScene.customEvent('SystemDataChanged', { ship: flight, system: this });
+	}
+};
+
+//The OTHER jump engines of this engine's fighter flight, skipping destroyed craft - or [] on a hull.
+JumpEngine.prototype.getFlightSiblingEngines = function () {
+	if (!this.isFlightMounted()) return [];
+	var flight = this.getOwningUnit();
+	if (!flight || !flight.flight || !flight.systems) return [];
+
+	var siblings = [];
+	for (var i in flight.systems) {
+		var craft = flight.systems[i];
+		if (!craft || !craft.systems) continue;
+		if (shipManager.systems.isDestroyed(flight, craft)) continue;
+		for (var j in craft.systems) {
+			var system = craft.systems[j];
+			if (system && system !== this && system.name === 'jumpEngine') siblings.push(system);
+		}
+	}
+	return siblings;
+};
+
+/* ===== WALKERS_OF_SIGMA_PLAN.md §3.18 (Stage 20) - THE EXTRA-DIMENSIONAL JUMP DRIVE ==============
+
+   An EDJD (Wanderer, Traveler, Waymarker, Guideship) is selected in Initial Orders and clicked onto an
+   ENEMY unit to declare an abduction: a type-'ballistic' order, damageclass 'abduction', whose firing
+   mode is the POWER LEVEL. Every other Walker hull drive may add half a power-turn for double power but
+   cannot begin one. Everything that decides whether a turn COUNTS - the target's end-of-movement field,
+   the OEW/DEW contest, the consecutive chain, the locked cost - is the server's (EdjdAbduction), at the
+   end of the Firing phase; nothing here predicts it. What the client owns is the order, its power
+   cost on the reactor balance, and the read-outs of gamedata.abductions. */
+
+//Mirror of JumpEngine::isExtraDimensional().
+JumpEngine.prototype.isExtraDimensional = function () {
+	return Boolean(this.extraDimensional);
+};
+
+//Mirror of JumpEngine::canJoinAbduction(): any Walker drive on a hull, never a Mapmaker probe's.
+JumpEngine.prototype.canJoinAbduction = function () {
+	return this.isWalkerJump() && !this.isFlightMounted();
+};
+
+//This turn's abduction order on this drive, or null.
+JumpEngine.prototype.getAbductionOrder = function () {
+	for (var i in this.fireOrders) {
+		var fire = this.fireOrders[i];
+		if (!fire || fire.turn != gamedata.turn) continue;
+		if (fire.damageclass === 'abduction') return fire;
+	}
+	return null;
+};
+
+JumpEngine.prototype.removeAbductionOrder = function () {
+	for (var i = this.fireOrders.length - 1; i >= 0; i--) {
+		var fire = this.fireOrders[i];
+		if (fire && fire.turn == gamedata.turn && fire.damageclass === 'abduction') this.fireOrders.splice(i, 1);
+	}
+};
+
+/* The power level the order applies: an EDJD's firing mode, clamped to the ceiling the server sent;
+   a supporting drive's is always 2 ("double power"), the only level Firing accepts on one. */
+JumpEngine.prototype.getAbductionPowerLevel = function (order) {
+	order = order || this.getAbductionOrder();
+	if (!order) return 0;
+	if (!this.isExtraDimensional()) return 2;
+	var max = this.abductionMaxPower || 1;
+	return Math.max(1, Math.min(max, parseInt(order.firingMode, 10) || 1));
+};
+
+/* What the order is worth, in HALF power-turns - the server's own unit (JumpEngine::getAbductionHalves),
+   so a supporting drive's half is an integer here too. */
+JumpEngine.prototype.getAbductionHalves = function (order) {
+	order = order || this.getAbductionOrder();
+	if (!order || !this.isAbductionPowered(order)) return 0;
+	return this.isExtraDimensional() ? 2 * this.getAbductionPowerLevel(order) : 1;
+};
+
+/* ⭐ D64 (user ruling 2026-09-13) - DOES THIS ORDER APPLY POWER, OR ONLY TAKE HOLD? Power-turns start the
+   turn AFTER an EDJD's targeting succeeded, so an order at a unit with no standing chain (as of last turn,
+   gamedata.abductions) is a TARGETING order: no power level, no reactor cost, no power-turns. The server
+   decides the same thing at resolution (EdjdAbduction::resolveTarget's $continuing) - and can go one way
+   the client cannot see coming: if last turn's anchors all fail now while another EDJD qualifies, the
+   chain RESTARTS and that turn's power is lost. */
+JumpEngine.prototype.isAbductionPowered = function (order) {
+	order = order || this.getAbductionOrder();
+	return Boolean(order && JumpEngine.getAbductionChain(order.targetid));
+};
+
+/* ⭐ WHAT THE ABDUCTION COSTS THE REACTOR THIS TURN: "applying normal jump engine power (over the
+   standard norm) for an entire turn" is one power-turn, so each level is the drive's powerReq AGAIN.
+   Read by shipManager.power.getReactorPower, which is the whole balance and what the Initial Orders
+   commit gate reads - so a Walker that cannot pay is asked to power something down before it may
+   commit. ⚠️ CLIENT-COMPUTED AND ADVISORY, exactly as D46 rules for the docked grant: the server has no
+   power balance to check against. */
+JumpEngine.prototype.getAbductionPowerDraw = function () {
+	var order = this.getAbductionOrder();
+	if (!order || !this.isAbductionPowered(order)) return 0;   //D64: a targeting turn costs nothing
+	return this.getAbductionPowerLevel(order) * (this.powerReq || 0);
+};
+
+/* May this drive be SELECTED to declare an abduction right now? A legacy drive is autoFireOnly, and
+   neither weaponManager.selectWeapon nor SystemIcon.clickSystem would ever select one in Initial Orders
+   (it is not ballistic either) - both ask this instead of relaxing those flags for every legacy drive.
+   ⚠️ A drive set to Jump to Hyperspace is refused: its boost is the jump. */
+JumpEngine.prototype.canSelectForAbduction = function (ship) {
+	if (typeof gamedata === 'undefined' || gamedata.gamephase !== 1) return false;
+	if (!this.canJoinAbduction()) return false;
+	var unit = this.getOwningUnit() || ship;
+	if (!unit || !gamedata.isMyShip(unit)) return false;
+	if (shipManager.isDestroyed(unit)) return false;
+	if (shipManager.systems.isDestroyed(unit, this)) return false;
+	if (shipManager.power.isOffline(unit, this)) return false;
+	if (shipManager.power.getBoost(this) > 0) return false;
+	if (typeof shipManager.isDockingRider === 'function' && shipManager.isDockingRider(unit)) return false;
+	if (shipManager.getTurnDeployed(unit) > gamedata.turn) return false;
+	//D63: a drive recharging after an abduction may still be selected to CONTINUE the one it fed last turn.
+	return weaponManager.isLoaded(this) || this.getContinuableAbductionTargetId() !== null;
+};
+
+/* Mirror of JumpEngine::isContinuingAbduction, as the id of the unit this drive may keep abducting
+   without a charge, or null: it delivered power to that unit LAST turn and the chain still stands.
+   (turnsloaded already carries the abduction cooldown - JumpEngine::getAbductionRechargeLoad.) */
+JumpEngine.prototype.getContinuableAbductionTargetId = function () {
+	var hold = this.abductionLastHold;
+	if (!hold || typeof gamedata === 'undefined' || parseInt(hold.turn, 10) !== gamedata.turn - 1) return null;
+	if (!JumpEngine.getAbductionChain(hold.targetid)) return null;
+	return parseInt(hold.targetid, 10);
+};
+
+/* ⭐ THE DECLARATION, reached through weaponManager.targetShip's hasSpecialTargeting divert once the
+   generic arc/range/fire-control screens have passed (all trivially true for this system). Refuses what
+   Firing::getVortexDeclarationBlock's abduction branch refuses, with a reason, and REPLACES any
+   abduction this drive already declared this turn - one per unit, and re-clicking another enemy is how
+   a player changes their mind. A new EDJD order starts at power level 1; the level is then set in the
+   drive's own menu (JumpEngineMenu). A called shot is not a thing: the whole unit is taken. */
+JumpEngine.prototype.doSpecialTargeting = function (shooter, target, system) {
+	if (!this.canSelectForAbduction(shooter)) return false;
+
+	if (!target || gamedata.isMyorMyTeamShip(target)) {
+		confirm.error("Only an <b>enemy</b> unit can be abducted by an Extra-Dimensional Jump Drive.");
+		return false;
+	}
+	if (gamedata.isTerrain(target.shipSizeClass, target.userid)) {
+		confirm.error("Terrain cannot be abducted.");
+		return false;
+	}
+	//An EDJD cannot target fighter flights (user ruling 2026-09-13) - EdjdAbduction::getDeclarationBlock agrees.
+	if (target.flight) {
+		confirm.error("A fighter flight cannot be abducted.");
+		return false;
+	}
+	//D64: a supporting drive only joins an abduction an EDJD has already taken hold of (EdjdAbduction::isHeldByTeam).
+	if (!this.isExtraDimensional() && !JumpEngine.getAbductionChain(target.id)) {
+		confirm.error("This jump drive can only contribute when an <b>Extra-Dimensional Jump Drive</b> has already begun an abduction.");
+		return false;
+	}
+	//D63: recharging, it may only keep going against the unit it fed last turn.
+	if (!weaponManager.isLoaded(this) && this.getContinuableAbductionTargetId() !== parseInt(target.id, 10)) {
+		var held = gamedata.getShip(this.getContinuableAbductionTargetId());
+		confirm.error("This jump drive is recharging (" + this.turnsloaded + "/" + this.loadingtime + ")"
+			+ (held ? " and may only continue its abduction of " + held.name + "." : "."));
+		return false;
+	}
+
+	var unit = this.getOwningUnit() || shooter;
+
+	//One abduction per unit: a second Walker drive on the same hull cannot declare beside this one.
+	for (var i in unit.systems) {
+		var other = unit.systems[i];
+		if (!other || other === this || other.name !== 'jumpEngine' || typeof other.getAbductionOrder !== 'function') continue;
+		if (other.getAbductionOrder()) {
+			confirm.error(unit.name + " is already declaring an abduction this turn.");
+			return false;
+		}
+	}
+
+	var level = this.isExtraDimensional() ? 1 : 2;
+	var previous = this.getAbductionOrder();
+	if (previous && previous.targetid === target.id) level = this.getAbductionPowerLevel(previous);
+	this.removeAbductionOrder();
+
+	this.pushAbductionOrder(unit, target, level);
+	return true;
+};
+
+//The abduction order itself - shared by a player's click (doSpecialTargeting) and continueAbduction.
+JumpEngine.prototype.pushAbductionOrder = function (unit, target, level) {
+	this.fireOrders.push({
+		id: unit.id + "_" + this.id + "_" + (this.fireOrders.length + 1),
+		type: 'ballistic',
+		shooterid: unit.id,
+		targetid: target.id,
+		weaponid: this.id,
+		calledid: -1,
+		turn: gamedata.turn,
+		firingMode: level,
+		shots: 1,
+		x: "null",
+		y: "null",
+		damageclass: 'abduction',
+		chance: 100
+	});
+};
+
+/* ⭐ AN ABDUCTION THAT TOOK HOLD KEEPS GOING (user request 2026-09-13, play test 4352) - "the player
+   shouldn't have to manually retarget every turn". At the start of Initial Orders the drive re-declares
+   last turn's order, same target and power level, when ALL of these hold:
+     - its latest note delivered power LAST turn (abductionLastHold, JumpEngine::getLatestAbductionHold) -
+       a no-hold or cancelled turn writes 0 halves and publishes nothing, so a lapsed chain stays lapsed;
+     - the chain is still published (JumpEngine.getAbductionChain) - not completed, target still on board;
+     - the drive may still declare (canSelectForAbduction): the owner's, powered, intact, not set to jump
+       (it is NOT charged - D63's cooldown counts from last turn - and continuing is its exemption). That is "until deactivated/destroyed" - and it runs AFTER repeatLastTurnPower, so a drive
+       left offline last turn reads offline here;
+     - it has no order yet this turn, and no other drive on the unit has one.
+   An ordinary client-side declaration from then on: CANCEL withdraws it, the level can be changed, and the
+   commit gate prices it. ⚠️ A page reload during Initial Orders re-seeds it - nothing server-side records
+   a cancel until the commit. */
+JumpEngine.prototype.continueAbduction = function () {
+	var hold = this.abductionLastHold;
+	if (!hold || parseInt(hold.turn, 10) !== gamedata.turn - 1) return false;
+	if (this.getAbductionOrder()) return false;
+
+	var unit = this.getOwningUnit();
+	if (!unit || !this.canSelectForAbduction(unit)) return false;
+	if (!JumpEngine.getAbductionChain(hold.targetid)) return false;
+
+	var target = gamedata.getShip(hold.targetid);
+	if (!target || shipManager.isDestroyed(target) || target.flight || gamedata.isMyorMyTeamShip(target)) return false;
+
+	for (var i in unit.systems) {
+		var other = unit.systems[i];
+		if (!other || other === this || typeof other.getAbductionOrder !== 'function') continue;
+		if (other.getAbductionOrder()) return false;
+	}
+
+	var level = this.isExtraDimensional() ? Math.max(1, Math.min(this.abductionMaxPower || 1, parseInt(hold.level, 10) || 1)) : 2;
+	this.pushAbductionOrder(unit, target, level);
+	return true;
+};
+
+//Every own Walker drive's continueAbduction - InitialPhaseStrategy.activate, right after repeatLastTurnPower.
+JumpEngine.continueAbductions = function () {
+	if (typeof gamedata === 'undefined' || gamedata.gamephase !== 1) return 0;
+	var count = 0;
+	for (var i in gamedata.ships) {
+		var ship = gamedata.ships[i];
+		if (!ship || ship.flight || !gamedata.isMyShip(ship)) continue;
+		for (var j in ship.systems) {
+			var system = ship.systems[j];
+			if (system && typeof system.continueAbduction === 'function' && system.continueAbduction()) count++;
+		}
+	}
+	return count;
+};
+
+/* ⭐ A DECLARED ABDUCTION IS "SPENT & LOCKED" OUTSIDE INITIAL ORDERS - the Gravitic Augmenter's hook, and
+   the exact state: committed, resolved at the end of Firing, not editable now. It is what keeps the
+   generic remove button off the drive in the Firing phase (weaponManager.hasFiringOrder counts a
+   non-ballistic weapon's order there, and a client-side splice would not un-write the stored row), and
+   what dims the icon to a tick instead of the orange of a shot being fired. getAbductionOrder FIRST,
+   so a lobby object - no orders at all - never reads the game phase. */
+JumpEngine.prototype.isSpentLocked = function () {
+	return Boolean(this.getAbductionOrder()) && gamedata.gamephase !== 1;
+};
+
+/* Set the power level of this turn's order (an EDJD only). Returns false when nothing changed. */
+JumpEngine.prototype.setAbductionPowerLevel = function (level) {
+	var order = this.getAbductionOrder();
+	if (!order || !this.isExtraDimensional()) return false;
+	var max = this.abductionMaxPower || 1;
+	level = Math.max(1, Math.min(max, parseInt(level, 10) || 1));
+	if (parseInt(order.firingMode, 10) === level) return false;
+	order.firingMode = level;
+	return true;
+};
+
+/* The published chain against a unit, or null - {total (halves), cost, since}, from
+   EdjdAbduction::publish via gamedata.abductions. Static in shape, so the tooltip and the menu share it. */
+JumpEngine.getAbductionChain = function (targetId) {
+	if (typeof gamedata === 'undefined' || !gamedata.abductions || !gamedata.abductions.chains) return null;
+	return gamedata.abductions.chains[targetId] || null;
+};
+
+//The published cost preview for a unit (hull and attached units only - see EdjdAbduction::publish), or null.
+JumpEngine.getAbductionCostPreview = function (targetId) {
+	if (typeof gamedata === 'undefined' || !gamedata.abductions || !gamedata.abductions.costs) return null;
+	var cost = gamedata.abductions.costs[targetId];
+	return (cost === undefined) ? null : cost;
+};
+
+//Halves as a display string: 5 -> "2.5", 4 -> "2".
+JumpEngine.formatAbductionHalves = function (halves) {
+	halves = parseInt(halves, 10) || 0;
+	return (halves % 2 === 0) ? String(halves / 2) : (Math.floor(halves / 2) + ".5");
 };
 
 //Does a Maintain declaration for THIS turn stand on this engine?
@@ -1203,10 +1704,21 @@ JumpEngine.prototype.canMaintainVortex = function () {
 	   reading the gate feature is to "let the owner keep their gate open", which is the opposite of
 	   the ruling. The server refuses it independently: JumpEngine::getMaintainDeclaration returns
 	   null outright for a gate engine, so a tampered mode-7 order cannot get there either. */
-	if (!gamedata.isMyShip(this.ship)) return false;
-	if (shipManager.isDestroyed(this.ship)) return false;
-	if (shipManager.systems.isDestroyed(this.ship, this)) return false;
-	if (shipManager.power.isOffline(this.ship, this)) return false;
+	//getOwningUnit, not this.ship - on a Mapmaker this.ship is the CRAFT (Stage 13).
+	var unit = this.getOwningUnit();
+
+	/* ⭐⭐ WALKERS §3.12 (Stage 13, user ruling 2026-09-10) - A FIGHTER FLIGHT HAS NO MAINTAIN:
+	   "as fighters, Mapmakers cannot hold a jump point open for more than 1 turn". So the control is
+	   not offered at all, which is also what stops every question below it being asked of a unit
+	   they do not fit - the all-systems-offline half of Maintain is a rule about a SHIP's power
+	   allocation and a flight has none. The server refuses it independently in
+	   JumpEngine::getMaintainDeclaration and at the wire in Firing::getVortexDeclarationBlock. */
+	if (this.isFlightMounted()) return false;
+
+	if (!gamedata.isMyShip(unit)) return false;
+	if (shipManager.isDestroyed(unit)) return false;
+	if (shipManager.systems.isDestroyed(unit, this)) return false;
+	if (shipManager.power.isOffline(unit, this)) return false;
 
 	var vortex = this.getHeldVortex();
 	if (!vortex) return false;
@@ -1215,7 +1727,7 @@ JumpEngine.prototype.canMaintainVortex = function () {
 
 	//Out of range NOW is refused by the server's declaration test too. (Straying out of range
 	//LATER, during Movement, closes the vortex at end of turn - that one is not preventable here.)
-	var distance = shipManager.getShipPosition(this.ship).distanceTo(shipManager.getShipPosition(vortex));
+	var distance = shipManager.getShipPosition(unit).distanceTo(shipManager.getShipPosition(vortex));
 	if (distance > this.range) return false;
 
 	return true;
@@ -1226,7 +1738,7 @@ JumpEngine.prototype.canActivate = function () {
 };
 
 JumpEngine.prototype.canDeactivate = function () {
-	return gamedata.gamephase === 1 && gamedata.isMyShip(this.ship) && this.isMaintainingVortex();
+	return gamedata.gamephase === 1 && gamedata.isMyShip(this.getOwningUnit()) && this.isMaintainingVortex();
 };
 
 /* Turn Maintain ON: make the declaration, and take the ship dark in the same click.
@@ -1238,7 +1750,7 @@ JumpEngine.prototype.canDeactivate = function () {
 JumpEngine.prototype.doActivate = function () {
 	if (!this.canActivate()) return;
 
-	var ship = this.ship;
+	var ship = this.getOwningUnit();
 	var vortex = this.getHeldVortex();
 	if (!vortex) return;
 
@@ -1291,7 +1803,7 @@ JumpEngine.prototype.doActivate = function () {
 JumpEngine.prototype.doDeactivate = function () {
 	if (!this.canDeactivate()) return;
 
-	var ship = this.ship;
+	var ship = this.getOwningUnit();
 	this.removeVortexMaintainOrder();
 
 	for (var i in ship.systems) {
@@ -4340,3 +4852,43 @@ var EnergyDrainingNet = function EnergyDrainingNet(json, ship) {
 };
 EnergyDrainingNet.prototype = Object.create(ShipSystem.prototype);
 EnergyDrainingNet.prototype.constructor = EnergyDrainingNet;
+
+
+/* =======================================================================================
+   WALKERS OF SIGMA-957 - EW DETECTOR (WALKERS_OF_SIGMA_PLAN.md 3.8, Stage 10A)
+   Server twin: EWDetector in server/model/systems/baseSystems.php.
+
+   Beside the Energy Draining Field and Net for the same load-order reason: SystemFactory builds
+   every system with `new window[name]`, so the class must exist before a Waymarker is constructed,
+   and baseSystems.js is the FIRST model file both game.php and gamelobby.php load. A missing class
+   here is not a degraded tooltip - it is a TypeError that stops the ship being built at all.
+
+   THE ARITHMETIC IS NOT IN HERE, but unlike the Net's it is not on the server either - it is in
+   ew.js, because the answer depends on where every friendly ship ENDS its movement, which is a
+   fleet-wide question over PLOTTED, UNCOMMITTED positions. This class carries the detector's own
+   two numbers and nothing else; ew.collectEwDetectors reads them off it.
+
+   ⚠️ `effectiveRange` is the server's answer AFTER destruction and power-down and is what the
+   sweep reads; `range` is the blueprint value and is the LOBBY's only answer, since stripForJson
+   is the in-game payload and the static blueprint never runs it. Same fallback shape as the EDF's
+   effectiveRadius.
+   ======================================================================================= */
+var EWDetector = function EWDetector(json, ship) {
+	ShipSystem.call(this, json, ship);
+	/* Trap 6 - client system fields are shared by reference across same-phpclass instances, so two
+	   detectors on one hull would otherwise share one tooltip object and the second built would
+	   win. The server republishes `data` per instance; this clone keeps a later client-side edit of
+	   one from bleeding onto the other. */
+	this.data = Object.assign({}, this.data);
+};
+EWDetector.prototype = Object.create(ShipSystem.prototype);
+EWDetector.prototype.constructor = EWDetector;
+
+/* The range shown on the SCS icon. Published value first, blueprint as the lobby fallback - see
+   the class note. */
+EWDetector.prototype.initializationUpdate = function () {
+	var published = parseInt(this.effectiveRange, 10);
+	this.outputDisplay = isNaN(published) ? (parseInt(this.range, 10) || 0) : published;
+
+	return this;
+};

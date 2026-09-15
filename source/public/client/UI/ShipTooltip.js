@@ -422,7 +422,32 @@ window.ShipTooltip = function () {
             toDisplay += '<span style="color:#e1b000;">Jumping to Hyperspace</span>; ';
         }
 
-        if (ship.attached && Object.keys(ship.attached).length > 0 && !ship.detached) {
+        /* WALKERS_OF_SIGMA_PLAN.md 3.18 (Stage 20) - an Extra-Dimensional Jump Drive abduction standing
+           against this unit, as of the last resolved turn. Purple, the colour its map marker uses.
+           Public (EdjdAbduction::publish): the power-turns delivered are the resolution's own record. */
+        if (typeof JumpEngine !== 'undefined' && typeof JumpEngine.getAbductionChain === 'function') {
+            var abduction = JumpEngine.getAbductionChain(ship.id);
+            if (abduction) {
+                toDisplay += '<span style="color:#b36bff;">Being abducted: '
+                    + JumpEngine.formatAbductionHalves(abduction.total) + '/' + abduction.cost + ' power-turns</span>; ';
+            }
+        }
+
+        /* WALKERS_OF_SIGMA_PLAN.md 3.14c (Stage 19, user request 2026-09-12) - a unit ordered into
+           or out of a hangar this Firing phase, and a Waymarker riding a Traveler's aft through its
+           two-turn procedure. Cyan, the colour this tooltip already gives Hangar Operations, Just
+           Launched and Arrival Scatter: something benign the unit is DOING, not damage.
+           shipManager.getHangarManoeuvre is the single reader shared with the ship window's banner. */
+        var hangarManoeuvre = shipManager.getHangarManoeuvre(ship);
+        if (hangarManoeuvre) {
+            toDisplay += '<span style="color:cyan;">' + hangarManoeuvre.text + '</span>; ';
+        }
+
+        /* ⚠️ SUPPRESSED FOR A DOCKING RIDE. A Waymarker mid-dock IS `attached`, so without this it
+           would read "Attached to Traveler [Aft]" in boarding green - which describes a docking
+           manoeuvre as an enemy pod on the hull. The line above replaces it for the whole ride. */
+        if (ship.attached && Object.keys(ship.attached).length > 0 && !ship.detached
+            && !(hangarManoeuvre && hangarManoeuvre.riding)) {
             var targetId = Object.keys(ship.attached)[0];
             var location = Object.values(ship.attached)[0];
             var locationTip = '';
@@ -443,9 +468,15 @@ window.ShipTooltip = function () {
             }
         }
         
+        /* ⚠️ And the same suppression from the CARRIER's side: every id in hasAttached that is one of
+           our own docking riders has to drop out before "Ship is being Boarded!" is justified. A
+           Traveler with a Waymarker on its aft and a real pod on its bow must still say it. */
         if (ship.hasAttached && Object.keys(ship.hasAttached).length > 0) {
-            var keys = Object.keys(ship.hasAttached);
-            if (keys.length > 0) {
+            var boarders = Object.keys(ship.hasAttached).filter(function (attachedId) {
+                var rider = gamedata.getShip(attachedId);
+                return !(rider && shipManager.isDockingRider(rider));
+            });
+            if (boarders.length > 0) {
                 toDisplay += '<span style="color:orange;">Ship is being Boarded!</span>; ';
             }
         }
