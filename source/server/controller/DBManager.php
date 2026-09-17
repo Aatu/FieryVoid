@@ -129,9 +129,33 @@ class DBManager
         }
     }
 
+    /**
+     * Release the connection. Safe to call more than once, and safe to call at all.
+     *
+     * It was neither until 2026-09-17. mysqli_close() was called unconditionally, and
+     * __destruct() calls this method — so ANY explicit close() was followed by a second
+     * close() at destruct time, and under PHP 8 mysqli_close() on an already-closed handle
+     * throws Error: "mysqli object is already closed". Not a warning: an uncaught Error.
+     *
+     * Nothing in the app called close(), which is the only reason this was never seen
+     * (DBManager.php:2681 has one commented out). It mattered because
+     * CHAT_DB_RESILIENCE_PLAN item 8 proposes calling close() early on gamedata.php's hot
+     * path; doing that against the old code fataled the request at shutdown, every time.
+     * Verified in the php container before the fix — see that item for the measurement
+     * that then talked item 8 out of itself.
+     *
+     * Nulling the handle is also what makes a later reconnect possible rather than a use
+     * of a dead handle: query()/insert()/update() all test $this->connection first, so
+     * they now raise their own clean "connection failed" exception instead of an Error
+     * from inside mysqli.
+     */
     public function close()
     {
+        if ($this->connection === null)
+            return;
+
         mysqli_close($this->connection);
+        $this->connection = null;
     }
 
     public function getActiveGames() {

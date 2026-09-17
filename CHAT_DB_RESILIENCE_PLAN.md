@@ -2,16 +2,28 @@
 
 Follow-up to the live `1040 Too many connections` bursts of **2026-09-01**.
 
-Status: **Item 0 has reported (2026-09-01) and the answer is: the shared instance is chronically
-saturated, and FieryVoid cannot be the primary cause.** See "Item 0 — RESULTS" below for the numbers
-and the arithmetic. **Items 4, 5 and 7 are BUILT and verified. Item 6 is not built — but its
-prerequisite measurement (item 6a) is, and is waiting to be deployed for a week. Item 8 is still
-conditional on a `SHOW PROCESSLIST` that has not been taken.** The first diagnosis was wrong and is
-dissected below so it is not rebuilt.
+Status: **effectively closed as of 2026-09-17. Every measurement this plan asked for has been taken,
+and between them they ended the two items that were still open.**
+
+| item | | |
+|---|---|---|
+| 0 | measure the pool | ✅ reported 2026-09-01 — the shared instance is chronically saturated and FieryVoid cannot be the primary cause |
+| 4 | one connect attempt per request | ✅ **BUILT** and verified 2026-09-01 |
+| 5 | stop trusting the client's `lastid` | ✅ **BUILT** and verified 2026-09-01 |
+| 6 | cap `gamedata.php` concurrency | ❌ **DO NOT BUILD** — 2026-09-17. Peak concurrency over two weeks was **4**; 99.4% of heavy requests are alone in flight. There is nothing to cap. |
+| 6a | the instrument | ✅ BUILT, ran on live for 336 hours, **reported 2026-09-17**. It killed items 6 *and* 8. Turn it off with the kill switch. |
+| 7 | no dialog when the DB is busy | ✅ **BUILT** and verified 2026-09-01 |
+| 8 | close the connection before serialisation | ❌ **DO NOT BUILD** — 2026-09-17. The window is **5.8 ms of a 420 ms request (1.4%)**, not "seconds of pure CPU". One real bug found and fixed in passing: `DBManager::close()` was not idempotent and would have fataled every heavy request. |
+| 9 | is the load guard still fit for purpose? | 📋 **REVIEWED. Option 1 BUILT 2026-09-17** — the global limiter could spin its full budget and 503 for nothing whenever its counter key expired mid-wait; fixed, with the three control cases proved unchanged. Options 2–5 still need a decision. |
 
 ⚠️ **Read this before starting any item below.** Items 4–7 make the app degrade gracefully when the
 database is already in trouble, and close two ways it can make its own trouble worse. **Not one of
 them is known to address the 2026-09-01 outage.** Do not let finishing them feel like fixing it.
+
+⚠️⚠️ **The most valuable thing in this file is the record of three plausible stories that measurement
+refuted** — the MyISAM table lock (below), item 6's concurrency pile-up, and item 8's idle connection.
+All three were persuasive, none survived a number. The one action still outstanding that could
+actually change anything is not in the code at all: **ask the host** (item 0, last section).
 
 ---
 
@@ -174,10 +186,17 @@ their own instance's saturation and asks a specific question about capacity.
 
 ---
 
-## Item 8 — close the connection before the expensive part (NEW, promoted)
+## Item 8 — close the connection before the expensive part ❌ NOT BUILT — premise measured and wrong (2026-09-17)
 
-**This is now the leading code-side hypothesis, and it should be confirmed by Item 0's
-`SHOW PROCESSLIST` before being built.**
+> **Status: the gate below was honoured, the measurement was taken, and it says don't build this.**
+> The window item 8 wanted to close is **5.8–6.7 ms out of a 420–480 ms request (1.2–1.6%)**, not the
+> "seconds of pure CPU" the original reasoning assumed. The one thing that *was* built is the
+> `DBManager::close()` bug this investigation exposed — see "What was built" at the foot of this item.
+>
+> ⚠️ **Do not re-promote item 8 from the story below.** The story is still superficially persuasive
+> and the numbers are three commands away. They are recorded here so nobody has to re-derive them.
+
+### The original hypothesis (kept, because it reads as obviously true and isn't)
 
 Neither `Manager` nor `ChatManager` ever calls `close()`. The connection opens at the first query and
 is released only at request shutdown. For `gamedata.php` that means one connection is held across the
@@ -189,19 +208,119 @@ This matters far more than it would have on localhost, because **live's database
 shared**. A connection held idle for four seconds on `sql-005` is four seconds of a scarce instance-wide
 resource, spent on work that does not need it.
 
-The shape of the outage fits: an APCu `last_update` bump on a turn advance invalidates **every**
-player's fast poll at once, so N players simultaneously run the full heavy path, each holding a
-connection throughout. The bursts hit several games at once, which is what a busy evening of
-simultaneous turn advances looks like.
+⚠️ The gate attached to it: *"Confirm before building. Do not implement on the strength of the story
+alone — that is exactly the error that produced the MyISAM diagnosis."*
 
-⚠️ **Confirm before building.** If `SHOW PROCESSLIST` during a burst shows FieryVoid connections
-mostly *idle*, this is the answer. If it shows few FieryVoid connections at all, this is a dead end
-and the problem is the host's. Do not implement on the strength of the story alone — that is exactly
-the error that produced the MyISAM diagnosis.
+### What the measurement says
 
-If confirmed, the fix is to release the connection once the DB work is done and before serialisation
-begins. `DBManager::close()` already exists but nothing calls it; the static would need to be nulled
-so a later query can reconnect rather than use a closed handle.
+`SHOW PROCESSLIST` during a burst was never obtainable, but it turned out not to be the limiting
+evidence. The question "how long is the connection held with nothing using it, and where in the
+request is that time?" is answerable directly, on the dev box, and that is what was done: the biggest
+game in the local database (4277, **74 ships, 126 KB of gamedata JSON**), driven through exactly the
+call sequence `gamedata.php` runs.
+
+| phase | | ms |
+|---|---|---|
+| `getTacGamedata` | DB phase — connection in use | **393–449** |
+| `prepareForPlayer` | DB phase | 20–25 |
+| `stripForJson` | ← item 8's window | 3.1 |
+| `json_encode` | ← item 8's window | 0.4–1.9 |
+| `md5` (ETag, in `fv_compress_output`) | ← item 8's window | 0.2 |
+| `gzencode` | ← item 8's window | 1.5 |
+| | **item 8's window, total** | **5.8–6.7 ms = 1.2–1.6% of the request** |
+
+**The ship tree is not built after the DB phase. It is built *inside* it.** `getTacShips` constructs
+ships as it walks the result rows, so "ship-tree construction" — the expensive part the original
+reasoning wanted to move the connection out of — is interleaved with the queries and has no seam in
+front of it. What actually remains after the last query is `stripForJson` + `json_encode` + the
+shutdown compression, and that is single-digit milliseconds even on the largest game in the corpus.
+
+### ⭐ The one part of the story that IS true — and why it still doesn't rescue item 8
+
+The connection really is held idle for most of a heavy request. Same game, same process, measuring
+the queries themselves via MariaDB's global `Questions` counter:
+
+| | ms | queries |
+|---|---|---|
+| `getTacGamedata`, cold process | 410.79 | 21 |
+| `getTacGamedata`, warm process (identical SQL) | 12.55 | 19 |
+| **difference = PHP work done with the connection open and idle** | **398.23 (96.9%)** | — |
+
+So ~97% of a cold heavy request is PHP, and the connection is open and unused throughout. The
+instinct behind item 8 is sound. **But that idle time is distributed *through* `getTacGamedata`,
+between its 21 queries — not after it.** Closing the connection where item 8 proposes captures the
+5.8 ms tail and none of the 398 ms. Capturing the rest would mean restructuring `getTacShips` so
+construction happens after the reads, which is a deep change to the app's hottest path.
+
+Two further notes on those numbers before anyone re-reads them as worse than they are:
+
+- **21 queries is not a round-trip problem.** A remote DB at even 3 ms RTT adds ~60 ms, which is
+  consistent with live's observed heavy median of 100–250 ms (item 6a's corpus). There is no N+1 here.
+- **The 398 ms is cold-process PHP** — autoload compile plus `ShipLoader`/`SystemFactory` static
+  warm-up. On live, opcache removes the compile share, which is why live's heavy median is 100–250 ms
+  rather than 420 ms. The *shape* holds (mostly PHP, connection idle); the magnitude is smaller.
+
+### `game.php` was checked too, because it holds the connection across far more
+
+It is the biggest request in the app, and everything after `Manager::getTacGamedataJSON()` at
+[game.php:29](source/public/game.php#L29) — `json_decode` of the payload, `BlueprintCache`, the whole
+HTML render, then md5 + gzip of the assembled document — runs with the connection still open.
+
+| | ms |
+|---|---|
+| DB phase | 451.45 |
+| `json_decode` of the payload | 1.30 |
+| `BlueprintCache::getStaticShipsJson` | 126.07 **cold** / ~4 warm on live |
+| md5 (whole page) | 0.65 |
+| `gzencode` (whole page) | 6.67 |
+| **tail, warm-cache equivalent** | **~13 ms** |
+
+Still not worth it — and `BlueprintCache` issued **one further DB query**, so closing the connection
+before it would force a reconnect, trading a saving for an extra connect against the same scarce pool.
+
+### The verdict, and how it squares with item 0
+
+Item 0 already established that FieryVoid is capped at **100** connections by `max_user_connections`,
+was refused with **1040** (instance-wide) rather than **1203** (per-account), and therefore was under
+its own cap when it failed. Item 6a's corpus now puts a number on how far under: **peak concurrency of
+4, once, in two weeks** (see item 6). Four connections against a cap of 100.
+
+Shaving 1.5% off the hold time of a request that is one of at most four is not a saving that exists.
+Item 8 was promoted as "good citizenship, not the cure" — and at this size it is not even that.
+
+### What WAS built: `DBManager::close()` was broken, and item 8 would have fataled on it ✅
+
+Item 8's sketch said "`DBManager::close()` already exists but nothing calls it; the static would need
+to be nulled". That understates it. `close()` did:
+
+```php
+public function close() { mysqli_close($this->connection); }
+```
+
+— unconditionally, and `__destruct()` calls `close()`. So **any** explicit `close()` was followed by a
+second one at destruct time, and under PHP 8 `mysqli_close()` on an already-closed handle throws
+`Error: mysqli object is already closed`. Not a warning — an uncaught `Error`.
+
+Item 8 as specified would therefore have fataled **every heavy `gamedata.php` request**, at shutdown,
+after the response was already composed. Observed directly while measuring:
+
+```
+close() behaviour, as item 8 would use it:
+  explicit close()            OK
+  second close()              THREW: Error: mysqli object is already closed
+  now letting __destruct run:
+PHP Fatal error:  Uncaught Error: mysqli object is already closed in DBManager.php:134
+  #1 DBManager.php(41): DBManager->close()   ← __destruct
+```
+
+`close()` is now idempotent and nulls the handle, so a second call returns, `__destruct` is safe, and
+a later query gets `query()`'s own clean "connection failed" exception rather than an `Error` from
+inside mysqli. After the fix the same harness prints `explicit close() OK / second close() OK /
+survived __destruct OK`.
+
+Nothing calls `close()` today, so this changes no behaviour — it removes a trap that was armed and
+pointing at exactly the change item 8 proposed. `fvbuild.ps1 -Check` green afterwards (autoload map
+current, ship-data validator clean, replay harness **133 passed, 0 failed**).
 
 ---
 
@@ -399,55 +518,134 @@ work.
 
 ---
 
-## Item 6 — cap `gamedata.php` concurrency
+## Item 6 — cap `gamedata.php` concurrency ❌ DO NOT BUILD — the instrument reported (2026-09-17)
 
-**Priority: medium. Highest risk of the four — this one can take the game down if it is got wrong.**
+> **Status: resolved by measurement, and the answer is no.** Item 6a ran on live from **2026-09-02 14:00
+> to 2026-09-17 05:00 UTC** — 336 hours, **44,363** instrumented requests, **8,593** of them heavy.
+> There is no concurrency to cap. The instrument did its job: it talked the plan out of its own
+> highest-risk item.
 
-> **Status: NOT built. The measurement it demands is built and ready to deploy — see
-> "Item 6a — the instrument" immediately below.** Do not pick a cap until it has reported.
+### What the corpus says
 
-### The fault
+`min_all` is **1 in all 336 rows**, lowest and highest. That is the leak detector reading clean, so
+every peak below is real as it stands. (Note for anyone re-reading item 6a's header: it predicts
+`min_all = 0` for an honest counter, but the floor is structurally **1** — `lower()` is called *after*
+`apcu_inc`, so the incrementing request is always counted. `min_all = 1` is the clean reading; a leak
+would show as `2, 3, 4…` climbing hour on hour. See "the hourly rebase" below.)
 
-[server_load_guard.php:54](source/server/server_load_guard.php#L54):
+**Concurrency, every instrumented request in the corpus:**
 
-```php
-$knownScripts = ['chatdata.php', 'gamedata.php', 'gamelobbyloader.php', 'allgames.php', 'games.php', 'guard_debug.php'];
-```
+| simultaneous | ALL requests | | HEAVY (full build) | |
+|---|---|---|---|---|
+| 1 | 43,898 | 98.952% | 8,545 | 99.441% |
+| 2 | 458 | 1.032% | 45 | 0.524% |
+| 3 | 2 | 0.005% | 2 | 0.023% |
+| 4 | 5 | 0.011% | 1 | 0.012% |
 
-Anything matching is `$isKnownPoll`, which skips **both** the per-IP limiter (`$maxIP = 20`) and the
-23-slot global limiter. So the guard constrains cheap pages while `gamedata.php` — the single most
-expensive request in the app, and the one seen dying of the LVE memory limit at `04:30:58` in the same
-log — runs with no concurrency cap at all. That is why the pool can empty while the guard still
-reports headroom.
+**99.44% of heavy `gamedata.php` requests are alone in flight.** Across two weeks, exactly **three**
+heavy requests were ever observed at a depth of 3 or more. Peak concurrency, all fourteen days, all
+hours: **4**, reached once.
 
-The exemption is *correct* for `chatdata.php`, which fast-polls out before any DB work and must stay
-cheap. It is wrong for `gamedata.php`.
+Per-hour peaks agree: `peak_heavy` was 0 or 1 in **308 of 336 hours**, 2 in 26, and 3 or 4 in one hour
+each. `err5xx` is **0** for the entire corpus.
 
-### The fix
+### Why the plan's own sizing rule refuses to produce a cap
 
-Not "remove it from the list" — that would subject gamedata to the same 23-slot pool as page loads and
-make every heavy turn fight the lobby for slots. Give polls their **own, separate, higher** counter:
+The rule was: *"Set the cap above the 99.9th percentile of HEAVY concurrency."* The 99.9th percentile
+of heavy concurrency is **2**. So the rule yields a cap of **3** — and a cap of 3 would have fired
+three times in two weeks, every one of them during an incident (below). A cap high enough to be safe
+is a cap that can never fire.
 
-- a second APCu key, e.g. `..._server_active_polls`, with its own limit
-- `gamedata.php` (and `gamelobbyloader.php`) acquire from that pool; `chatdata.php` stays fully exempt
-- over the limit → `503`, which the client already handles
+Little's Law says the same thing from the other direction. The busiest hour in the corpus is
+2026-09-04 20:00 with 658 requests — **0.18 requests/second**. At the measured median heavy duration
+of ~150 ms, expected concurrency is **0.027**. The observed peaks of 2–4 are ordinary Poisson
+clustering around a mean of essentially zero. **Reaching a cap of even 5 would need ~40× the current
+traffic.**
 
-### Why 503 is safe here, and the one place it is not
+### ⭐ The finding that actually matters: concurrency here is a *duration* symptom, not a *rate* one
 
-[ajaxInterface.js:222](source/public/client/ajaxInterface.js#L222) retries `[503, 507]` with
-exponential backoff up to 5 attempts, so a shed gamedata poll retries itself. **But check the submit
-path before shipping this.** A shed *poll* is invisible; a shed **turn submission** is a player losing
-their orders. Either exempt POSTs to gamedata.php from the cap entirely, or confirm the submit path
-retries 503 all the way through — `submitGamedata` sets `ajaxInterface.submiting = true` and shows a
-blocking overlay, and how that interacts with a 5-attempt retry needs to be read, not assumed.
+The only hours that reached depth 3 or 4 are the hours containing absurdly slow requests:
 
-⚠️ **Pick the limit from a measurement, not a guess.** Instrument first: log the observed concurrent
-gamedata count for a week and set the cap above the normal peak, so it only bites during a genuine
-pile-up. A cap set too low is indistinguishable to players from the outage it is meant to prevent.
+| hour (UTC) | requests | heavy | peak | slowest request |
+|---|---|---|---|---|
+| 2026-09-15 18 | **55** | 30 | **4** | **125,802 ms** |
+| 2026-09-15 10 | **11** | 11 | 2 | **102,126 ms** |
+| 2026-09-15 15 | 125 | 27 | 2 | **94,607 ms** |
+| 2026-09-14 11 | 165 | 50 | 2 | **85,183 ms** |
+| 2026-09-04 16 | 617 | 318 | 3 | 1,353 ms |
+
+The worst hour in the entire fortnight carried **55 requests** — one of the quietest hours in the
+corpus — and still hit depth 4, because four of its requests ran for more than eight seconds and one
+ran for over two minutes. Meanwhile 2026-09-04 16:00, with **eleven times the traffic**, peaked at 3.
+
+**A cap sized against arrival rate would never have fired; a cap low enough to fire would have shed
+requests during an incident it could not have caused.** In those hours something else — the shared
+`sql-005` instance, or the host — was already sick. Shedding FieryVoid's own polls at that moment
+takes away the retry ladder's work and adds nothing.
+
+### Duration, for the record — and the number item 8 needed
+
+| | ALL (n=44,361) | HEAVY (n=8,593) |
+|---|---|---|
+| < 25 ms | 84.90% | 22.05% |
+| 50–100 ms | 4.86% | 25.07% |
+| 100–250 ms | 6.63% | 34.23% |
+| 250–500 ms | 2.47% | 12.73% |
+| 0.5–1 s | 0.87% | 4.48% |
+| ≥ 1 s | 0.28% | **1.44%** |
+| ≥ 4 s | 0.057% | **0.29%** (25 requests in two weeks) |
+
+The fast path works: **85% of all gamedata requests finish in under 25 ms.** A heavy request's median
+lands in the **100–250 ms** band and 94% finish inside half a second. This is the number that
+demolished item 8's "seconds of pure CPU" premise — see that item.
+
+(22% of *heavy* requests also land under 25 ms. `markHeavy()` fires on everything that misses the
+fast poll, which includes POSTs and first loads that have little to build — a WAITING player is served
+no ship data at all. Not an anomaly.)
+
+### The `workers` column — the one caveat item 6a flagged, discharged
+
+Item 6a warned that a small pid set would mean the host splits the account across lsphp pools and every
+figure is a per-pool undercount. `workers` tracks `requests` closely across the corpus (617 workers for
+617 requests in the busiest hour). The APCu segment is shared widely; the numbers are not a per-pool
+fragment. Hours reading `workers=0` are hours whose rollup was written more than an hour later, after
+the 3600 s `pid_` keys had expired — an artefact of the gap, not evidence of a small pool.
+
+### What to do with the instrument
+
+It has answered its question and it costs 6–10 `apcu_*` calls on every `gamedata.php` request. **Stop
+it with the kill switch** — upload an empty `source/logs/pollstats.off`. That needs no deploy, keeps
+`pollstats.csv` intact, and leaves the whole apparatus in place if a future incident makes the question
+live again. Deleting the code is not worth the diff.
+
+⚠️ If it is ever restarted, fix the hourly rebase first: `rollHourIfNeeded` subtracts `min_all` from
+`inflight_all` at each boundary, and with `min_all` structurally 1 that decrements the live counter by
+one every hour whether or not anything leaked. It is self-limiting (`dec()` floors at 0) and did not
+distort this corpus, but it would mask a genuine one-per-hour leak.
+
+### Two things settled along the way, worth keeping
+
+- **The submit path does retry a 503.** Item 6's ⚠️ said to check this before shipping any cap.
+  `submitGamedata` at [ajaxInterface.js:338](source/public/client/ajaxInterface.js#L338) goes through
+  `ajaxWithRetry` with no `maxAttempts` override, so it takes the default **5** attempts against
+  `retryCodes = [503, 507]` with exponential backoff (~400/800/1600/3200 ms). A shed turn submission
+  would have retried, not been lost. The blocking overlay stays up across the retries, so the player
+  would have seen a longer "TRANSMITTING ORDERS" and nothing worse.
+  (Note there is a *second* `ajaxWithRetry` at line 301 that retries only 507 — it is inside a
+  `/* … */` block and is dead. Don't read it as the live one.)
+- **The original fault statement is right but incomplete.** Item 6 said the guard "constrains cheap
+  pages while `gamedata.php` runs with no concurrency cap at all". True — but the pages it constrains
+  are not all cheap, and the ones it exempts are not all polls. That is now item 9.
 
 ---
 
-## Item 6a — the instrument ✅ BUILT 2026-09-01, ready to deploy
+## Item 6a — the instrument ✅ BUILT 2026-09-01 · ✅ RAN ON LIVE · ✅ REPORTED 2026-09-17
+
+> **It worked, and it earned its keep.** 336 hours of live data (2026-09-02 → 2026-09-17), 44,363
+> requests, no leak, no 5xx. It killed item 6 outright and supplied the duration distribution that
+> killed item 8 as well. The results and their reading are in item 6 above; what follows is how it was
+> built, which is still worth having if it is ever restarted. **Turn it off with the kill switch** —
+> see "What to do with the instrument" in item 6.
 
 Answers the ⚠️ above. **Measures only — it limits nothing, sheds nothing and changes no behaviour.**
 
@@ -621,6 +819,211 @@ before-figure during the 07:11 burst was double.
 
 ---
 
+## Item 9 — is `server_load_guard.php` still fit for purpose? (REVIEW, 2026-09-17 — nothing changed yet)
+
+**Why this is being asked now.** The guard was written for a condition that no longer exists. It went
+in when FieryVoid had just moved hosts and **APCu was not yet enabled**, so the site was throwing
+"too many threads" errors and the guard was deliberately made very strict. APCu is now on, and with it
+the whole `BlueprintCache` / gamedata JSON cache / fast-poll layer. Item 6a has since measured the
+traffic the guard is nominally protecting against. This is the review of whether its settings still
+describe reality.
+
+**Summary: it is not doing harm, and it is not doing much good either.** Nothing in two weeks of data
+came within an order of magnitude of any of its thresholds. What it *does* have are three
+specification problems that would matter the day it ever engaged — which is to say, during an
+incident, which is the only time anyone would find out.
+
+### What it actually limits today, which is not what the list looks like
+
+Matching is `strpos($script, $ks) !== false` — substring, not filename. Deriving the true exempt set
+from the code rather than reading the array:
+
+| exempt | why |
+|---|---|
+| `chatdata.php` | listed — correct, it is the cheapest path in the app |
+| `gamedata.php` | listed — the poll |
+| `gamelobbyloader.php` | listed — the poll |
+| `allgames.php` | listed |
+| `games.php` | listed — but this is a **page load**, not a poll |
+| `gamelobby.php` | special-cased — also a **page load** |
+| `guard_debug.php` | listed — the diagnostic, correctly exempt |
+| **`recentgames.php`** | **not listed — exempt by accident, because its name contains `games.php`** |
+
+Everything else is limited, and that set includes **`game.php`** — by some distance the heaviest
+request in the app: a full heavy gamedata build, plus `BlueprintCache`, plus ~1.6 MB of inlined
+blueprint JSON, plus md5 and gzip over the assembled document. Also `replay.php`, `saveFleet.php`,
+`loadSavedFleet.php`, `slot.php`.
+
+So the shape is upside down relative to cost: **the endpoint with no cap (`gamedata.php`) is cheaper
+than the one with a cap (`game.php`), and three page loads are exempt while the heaviest page is not.**
+Item 6's framing — "the guard constrains cheap pages while `gamedata.php` runs with no cap" — had the
+right instinct and the wrong example.
+
+`recentgames.php` being exempt by substring accident is the kind of thing that is harmless right up
+until someone adds `deletegames.php` or `archivedgames.php` and silently exempts it too.
+
+### Three specification problems, in the order they would bite
+
+**1. ⭐ The spin holds an lsphp worker for a full second before shedding.**
+
+```php
+do {
+    $count = apcu_fetch($keyGlobal);
+    if ($count === false || $count < $maxGlobal) { ... break; }
+    usleep(50000);
+} while ((microtime(true) - $start) < 1.0);
+if (!$globalAcquired) { header("HTTP/1.1 503 ..."); exit; }
+```
+
+Under contention a request sleeps in 50 ms steps for up to a second and *then* 503s. On LiteSpeed the
+scarce resource is the worker pool ([[reference_fv_live_litespeed]]), so a genuine pile-up is converted
+into *more* workers held, each doing nothing, for a second each — and the client is told to go away
+anyway. If the intent is to shed load, shedding immediately is strictly better; the waiting room only
+helps if slots free up quickly, and a request that is holding a slot is by definition one that has not.
+
+**2. ⭐ If the global key expires mid-loop, the request is guaranteed to 503 for no reason.**
+
+`apcu_add($keyGlobal, 0, $ttlGlobal)` runs **once, before** the loop. `apcu_cas()` fails on a key that
+does not exist, and nothing inside the loop recreates it. So if the key expires between the `apcu_add`
+and a later iteration, every subsequent `apcu_fetch` returns `false`, every `apcu_cas` fails, and the
+request spins the full second and 503s — while the counter is, in truth, empty.
+
+The window is microseconds under no contention (the loop breaks on its first iteration). But under
+contention a request sits in that loop for up to a second against a 30-second TTL, so the exposure is
+roughly **1 in 30 — precisely when the limiter is engaged**. Latent today because nothing reaches the
+limit; a real bug the first time anything does.
+
+**3. The global counter silently resets every 30 seconds.** `apcu_add` sets the TTL only on creation
+and `apcu_cas` does not refresh it, so `..._server_active_requests` expires 30 s after it is created
+regardless of traffic, and the count restarts at 0. In-flight requests then decrement a counter that
+knows nothing about them (floored at 0 by the guard's own check). The effect is that the limiter
+systematically **under**-counts — which also means it self-heals any leaked slot, so this one is closer
+to an accidental feature than a bug. Worth knowing before anyone tunes `$maxGlobal` against observed
+values from `guard_debug.php`: those values are a floor.
+
+> **Both 2 and 3 were verified against real APCu in the php container, not reasoned from the docs:**
+>
+> ```
+> apcu_cas('k', 0, 1) on missing key => false        (and the key still does not exist)
+> apcu_add on an EXISTING key        => false        (no-op — does NOT refresh the TTL)
+> apcu_cas on an existing key        => value bumped, TTL untouched
+> at 2.2s against a 2s TTL           => key gone, despite add+cas at 1.2s
+> ```
+>
+> So the loop genuinely cannot recover from a vanished key, and the counter genuinely expires from
+> **creation** rather than from last use.
+
+Two smaller notes, neither worth acting on alone: the IP counter does `apcu_inc` then
+`apcu_store($keyIP, $ipCount, 20)`, which is a lost-update race under concurrency (and the `store` is
+what refreshes that TTL, so the IP limiter does not have problem 3); and `guard_debug.php?clear`
+clears the IP keys but not the global one, so it cannot unstick the counter it most usefully would.
+
+### Is it still fit for purpose?
+
+**Its original purpose is gone.** It was sized for a pre-APCu site that was falling over. Every layer
+that made that site fragile has since been built: the gamedata JSON cache, the fast poll, the chat
+watermark piggyback, `BlueprintCache`. 85% of gamedata requests now finish in under 25 ms.
+
+**Its current purpose is unclear, and the measurements do not supply one.**
+
+- Against the **database**: item 0 established FieryVoid is capped at 100 connections by
+  `max_user_connections`, and was refused with `1040` (instance-wide) not `1203` (per-account), so it
+  was under its own cap when it failed. Item 6a now bounds the peak: **4 concurrent gamedata requests
+  in two weeks**. Even adding page loads generously, FieryVoid is nowhere near 100. A 23-slot request
+  limiter is not what stands between the app and the connection pool.
+- Against the **lsphp worker pool / LVE memory limit**: this is the constraint that is actually real on
+  live — but it is a **per-process memory** limit, and a concurrency counter does not address it. One
+  `game.php` load on a 130-ship game can trip it on its own, with the guard reporting full headroom.
+  (That is the failure mode `arch_static_generator_streaming` was written about.)
+- Against **abuse / a scraper**: the per-IP limiter is the part with an ongoing rationale, and `$maxIP
+  = 20` concurrent non-poll requests from one address is generous but sane. Worth keeping.
+
+**Verdict: keep the per-IP limiter, and the global limiter is doing nothing measurable.** It should
+either be given a threshold that means something, or have its two bugs fixed so it behaves correctly on
+the day it engages. What it should *not* do is stay as it is on the assumption that it is protecting
+something — the evidence is that it is not.
+
+### Options, cheapest first — **option 1 BUILT 2026-09-17; 2–5 still need a decision**
+
+Option 1 is done (see "Option 1, as built" below). Options 2–5 have **not** been implemented. The guard
+is the one file in this plan flagged as able to take the game down if got wrong, and each of those
+changes live load-shedding behaviour.
+
+1. ✅ **BUILT.** **Fix problem 2 only** (re-`apcu_add` inside the loop). Pure bug fix, no threshold change, strictly
+   fewer spurious 503s. The safest thing on this list and the only one with no behavioural downside.
+2. **Drop the spin** — try once, and on failure serve the 503 immediately. Frees a worker a second
+   earlier per shed request. Client-side this is invisible: `ajaxWithRetry` already backs off 503s.
+3. **Add `game.php` and `replay.php` to the exempt list, and remove `games.php` / `gamelobby.php` /
+   `allgames.php` from it.** Makes the exemptions describe *polls*, which is what the variable
+   `$isKnownPoll` claims. ⚠️ This is the one that inverts real behaviour on live: it uncaps the app's
+   heaviest page and caps three pages that currently run free. Do not do it without deciding what the
+   cap is *for* first.
+4. **Anchor the matching** — compare `basename($script)` against an exact list instead of `strpos`.
+   Removes the `recentgames.php` accident and the trap for future filenames.
+5. **Raise `$maxGlobal`.** There is no evidence-based number to raise it *to*; item 6a never
+   instrumented the non-exempt population, so the limited set is the one part of the app with no data.
+   If the global limiter is to be kept and tuned rather than fixed or dropped, that measurement comes
+   first — the same discipline item 6a applied to `gamedata.php`, and it is the reason item 6 ended in
+   a defensible "no" instead of a guessed cap.
+
+
+### Option 1, as built ✅ 2026-09-17
+
+One line moved, from above the `do` to the top of the loop body, plus the comment explaining why it
+has to live there. `$maxGlobal`, `$maxIP`, the 1-second budget, the 50 ms sleep and the exempt list are
+all **untouched** — this changes what happens when the counter's key vanishes, and nothing else.
+
+```php
+do {
+    apcu_add($keyGlobal, 0, $ttlGlobal);   // ← was above the loop, where it could not help
+    $count = apcu_fetch($keyGlobal);
+    if ($count === false || $count < $maxGlobal) {
+        if (apcu_cas($keyGlobal, (int)$count, (int)$count + 1)) { $globalAcquired = true; break; }
+    }
+    usleep(50000);
+} while ((microtime(true) - $start) < 1.0);
+```
+
+The `$count === false` branch is deliberately left in place. It is now nearly unreachable — the add
+above it guarantees the key exists — but it still covers the microsecond race where the key expires
+between the add and the fetch. In that case `apcu_cas` fails, the loop sleeps once, and the next
+iteration's add rebuilds it. Worst case one 50 ms sleep, against the old worst case of the full budget.
+
+**Problems 1 and 3 are untouched and still stand.** The spin still holds a worker for up to a second
+before shedding (problem 1), and the counter still resets every 30 s because `apcu_add` on an existing
+key does not refresh the TTL (problem 3) — that is *why* this fix is safe: the no-op add changes no
+timing.
+
+#### Verified — and the test discriminates
+
+The BEFORE loop was taken verbatim from `git show HEAD:source/server/server_load_guard.php`, not
+retyped, so the baseline is the committed code. Both variants were driven against real APCu in the php
+container with the limiter **engaged** (counter at `$maxGlobal`, so the request must queue) and the key
+pre-aged to a 1 s TTL then slept on for 0.9 s, so it expires ~0.1 s into a real 1.0-second budget.
+
+| | BEFORE (HEAD) | AFTER |
+|---|---|---|
+| **1. limiter engaged, key expires mid-spin** | **503 after 1002.1 ms, 20 iterations** | **acquired at 200.4 ms, 5 iterations** |
+| 2. quiet site, counter empty | acquired at 0.0 ms, counter → 1 | acquired at 0.0 ms, counter → 1 |
+| 3. counter genuinely full, key not expiring | 503 after 1001.9 ms, 20 iterations | 503 after 1001.9 ms, 20 iterations |
+| 4. one slot free below the cap | acquired at 0.0 ms, counter → 23 | acquired at 0.0 ms, counter → 23 |
+
+Row 1 is the bug and it is fixed. **Rows 2–4 are identical in both columns**, which is the part worth
+keeping: case 3 in particular proves the fix does not weaken the limiter — a request that *should* be
+shed is still shed, at the same moment, for the same reason.
+
+⚠️ **`fvbuild.ps1 -Check` does not exercise this and cannot.** The guard's first statement is
+`if (PHP_SAPI === 'cli' || !apcu_enabled()) return;`, so the replay harness never reaches the limiter.
+The gate was run and is green (autoload current, ship-data validator clean, replay harness 133 passed /
+0 failed), but it is a regression check on everything else — the table above is the evidence for this
+change.
+
+⚠️ **The item 6 lesson applies to the guard itself.** A limit chosen without a measurement of the
+population it governs is how you get a threshold that is invisible until the worst possible moment.
+`$maxGlobal = 23` and `$maxIP = 20` have never been checked against live numbers; they were chosen for
+a site that no longer exists.
+
+---
 ## Not part of any item above, but in the same files
 
 ~~`playerChatInfo.php` ships with `ini_set('display_errors', 1); error_reporting(E_ALL);`~~
