@@ -309,7 +309,7 @@ shipManager.power = {
 			if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship)) continue;
 
 			var deployTurn = shipManager.getTurnDeployed(ship);
-			if (deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.
+			if (deployTurn > gamedata.turn && !shipManager.canManagePowerFromHyperspace(ship)) continue;  //Not on the board yet - but a reinforcement may set its power up while it waits in hyperspace (HYPERSPACE_IMPROVEMENTS_PLAN.md item 5), and a commit gate that skipped it would let an illegal allocation through.
 
 			if (!ship.checkShieldGenerator()) {
 				ships[counter] = ship;
@@ -339,7 +339,7 @@ shipManager.power = {
 			if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship)) continue;
 
 			var deployTurn = shipManager.getTurnDeployed(ship);
-			if (deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.
+			if (deployTurn > gamedata.turn && !shipManager.canManagePowerFromHyperspace(ship)) continue;  //Not on the board yet - but a reinforcement may set its power up while it waits in hyperspace (HYPERSPACE_IMPROVEMENTS_PLAN.md item 5), and a commit gate that skipped it would let an illegal allocation through.
 
 			//A reactor output-reduction crit forces the player to power systems down until
 			//the reactor balance is non-negative. Some systems draw reactor power yet CANNOT
@@ -396,7 +396,7 @@ shipManager.power = {
 			if (ship.flight) continue;
 			if (ship.userid != gamedata.thisplayer) continue;
 			var deployTurn = shipManager.getTurnDeployed(ship);
-			if (deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.							
+			if (deployTurn > gamedata.turn && !shipManager.canManagePowerFromHyperspace(ship)) continue;  //...including in hyperspace - see getShipsNegativePower above.
 			if (!(shipManager.systems.getSystemByName(ship, "powerCapacitor"))) continue;
 			if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship)) continue;
 			if (shipManager.power.getReactorPower(ship, shipManager.systems.getSystemByName(ship, "reactor")) < 0) {
@@ -420,7 +420,7 @@ shipManager.power = {
 			if (ship.flight) continue;
 			if (ship.userid != gamedata.thisplayer) continue;
 			var deployTurn = shipManager.getTurnDeployed(ship);
-			if (deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.					
+			if (deployTurn > gamedata.turn && !shipManager.canManagePowerFromHyperspace(ship)) continue;  //...including in hyperspace - see getShipsNegativePower above.
 			if (!(shipManager.systems.getSystemByName(ship, "PlasmaBattery"))) continue;
 			if (shipManager.isDestroyed(ship)) continue;
 

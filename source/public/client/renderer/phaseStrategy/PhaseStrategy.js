@@ -1762,7 +1762,19 @@ window.PhaseStrategy = function () {
             return;
         }
 
-        if (shipManager.getTurnDeployed(ship) > gamedata.turn) return;
+        /* ⭐⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md §3 (Item 5) - A REINFORCEMENT WAITING IN HYPERSPACE
+           IS THE ONE EXCEPTION, and it was this line that made the reported symptom ("I can bring
+           up the shipWindow but none of the systems I click on respond during Initial Orders"):
+           the click was swallowed here, before showSystemInfo, so the system menu never opened at
+           all. A unit in hyperspace answers 999 to getTurnDeployed, exactly as a surrendered fleet
+           does, so it was caught by the same guard that stops a late-slot ship being fiddled with
+           while it stands at its entry hex.
+
+           The guard is right for everything else and stays. canManagePowerFromHyperspace is
+           narrow: my own reinforcement, no arrival turn yet, Initial Orders, not a replay - see
+           its comment in ships.js, including why it is a POWER permission and not an EW one. */
+        if (shipManager.getTurnDeployed(ship) > gamedata.turn
+            && !shipManager.canManagePowerFromHyperspace(ship)) return;
 
         this.showSystemInfo(ship, system, element, true);
         PhaseStrategy.prototype.onSystemDataChanged.call(this, { ship: ship, system: system });
