@@ -909,7 +909,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                         Without either, your reinforcements sit in hyperspace for the whole battle and their points are wasted &mdash; the lobby warns you
                         before you click Ready.</li>
                     <li><b>What the enemy sees.</b> Nothing but a line in your fleet list reading <i>Reinforcements &mdash; N units, X pts</i>. Not which hulls,
-                        not what they carry, not who can open a jump point. You see your own in full.</li>
+                        not what they carry, not who can open a jump point. You see your own in full and can manage their power systems during Initial Orders by bringing up their ship window from Fleet Info tab.</li>
                     <li><b>Calling them in.</b> During <b>Initial Orders</b>, press <b>Manage Reinforcements</b>. Every jump-capable unit you have in hyperspace is
                         listed; choose one, press <b>Choose Hex</b>, click the hex you want the jump point to open in, set the <b>facing</b> with the arrow
                         control, and then tick the units that will ride through it &mdash; the <b>Jump Point Manifest</b>. The opening ship always rides its own
