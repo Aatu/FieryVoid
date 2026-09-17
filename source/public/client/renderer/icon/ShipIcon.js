@@ -373,10 +373,20 @@ window.ShipIcon = function () {
 
     /* Show the unit's movement-group number, or clear it with a falsy label. Driven ONLY from
        MovementPhaseStrategy, which owns the "one badge per stacked hex, lowest group wins, '+' if
-       there are more" rule - an icon has no idea what else is standing in its hex. */
+       there are more" rule - an icon has no idea what else is standing in its hex.
+
+       ⭐ THE PLAYER CAN TURN THE BADGE OFF (OPTIONS tab -> "Show Initiative Overlay"). The gate
+       is HERE rather than in MovementPhaseStrategy's badge loop on purpose: this is the single
+       door every path to the sprite goes through - FlightIcon inherits this method rather than
+       carrying its own - so no caller can reach the sprite around the preference. Toggling it
+       calls back into refreshNotMovedMarkers, which repaints through this same door.
+
+       ⚠️ It suppresses the NUMBER ONLY. The neutral dotted ring over an unmoved unit is the
+       NotMovedSprite and a separate marker (setNotMoved); the option does not touch it. */
     ShipIcon.prototype.setIniOrderLabel = function (label) {
         if (this.iniOrderSprite) {
-            this.iniOrderSprite.setLabel(label);
+            var show = !window.gameOptions || gameOptions.get("showIniOverlay");
+            this.iniOrderSprite.setLabel(show ? label : null);
         }
     };
 

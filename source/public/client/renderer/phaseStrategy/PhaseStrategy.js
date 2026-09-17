@@ -35,8 +35,31 @@ window.PhaseStrategy = function () {
         this.uiManager = new window.UIManager($("body")[0]);
     }
 
+    /* `payload.select` additionally makes the ship the selected ship, for callers where
+       clicking its name means "this is the one I want to act on" - the fleet list's rows
+       (user, 2026-09-17). OFF BY DEFAULT and it matters: the map's own tooltip menu opens a
+       window for a ship that is already selected or targeted (shipTooltipMenu.js), and must
+       not steal the selection out from under itself.
+
+       THE SAME THREE GUARDS AS onScrollToShip, in the same order and for the same reasons:
+       setSelectedShip calls getByShip(...).setSelected, which throws for a unit with no icon
+       (a docked flight, a hyperspace reinforcement); shouldBeHidden keeps an undetected enemy
+       and an undeployed hull out; and canSelectShip carries each phase's own rule, so a row
+       click can neither declare a fire order nor jump the movement sequence.
+
+       ⚠️ The guards are around the SELECTION, never around the window. Opening a window
+       reveals no board position, which is the only thing those guards exist to protect - and
+       for a docked unit the window is the only route to its contents at all. */
     PhaseStrategy.prototype.onOpenShipWindowFor = function (payload) {
         this.shipWindowManager.open(payload.ship);
+
+        if (!payload.select || !payload.ship) return;
+        if (!this.shipIconContainer.getById(payload.ship.id)) return;
+        if (shipManager.shouldBeHidden(payload.ship)) return;
+
+        if (this.canSelectShip(payload.ship)) {
+            this.setSelectedShip(payload.ship);
+        }
     }
 
     PhaseStrategy.prototype.onCloseShipWindow = function (payload) {

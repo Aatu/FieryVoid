@@ -111,16 +111,17 @@ window.savedFleets = {
 	//Last state written to the DOM, so an unchanged poll costs nothing - see below.
 	panelState: null,
 
-	/* game.php's SAVE FLEET panel: tab visibility, button state and the "N units will be
-	   saved" line. No-op in the lobby, which has no such panel.
+	/* game.php's Save Fleet SECTION, at the bottom of the OPTIONS tab: its visibility,
+	   the button's state and the "N units will be saved" line. No-op in the lobby, which
+	   has no such panel.
 	   ⚠️ Called from gamedata.parseServerData, i.e. on EVERY POLL - that is what keeps the
 	   count honest as units die during the battle, but it also means everything here is on
 	   the hottest client path in the game. The ship walk is one pass (saveSummary answers
 	   both questions), and the four jQuery writes are skipped unless the numbers actually
 	   moved, which for most polls they have not. */
 	refreshSavePanel: function refreshSavePanel() {
-		var tab = $("#fleetSaveTab");
-		if (!tab.length) return;
+		var panel = $("#fleetSavePanel");
+		if (!panel.length) return;
 
 		var summary = savedFleets.saveSummary();
 		var hasFleet = summary.present;
@@ -129,11 +130,16 @@ window.savedFleets = {
 		if (state === savedFleets.panelState) return;
 		savedFleets.panelState = state;
 
-		//css(), not toggle(): jQuery's show() writes an INLINE display when a stylesheet
-		//rule is hiding the element, and the mobile breakpoint hides every .logUiEntry
-		//unless #logcontainer is .large - an inline display:block would pin this one tab
-		//open in the collapsed state. Clearing the property lets the CSS decide.
-		tab.css("display", hasFleet ? "" : "none");
+		/* ⚠️ THE SECTION HIDES, NOT THE TAB (2026-09-17). This used to hide #fleetSaveTab
+		   itself, which was right while the tab WAS Save Fleet and had nothing else in it.
+		   The tab is OPTIONS now and carries the player's display preferences above this
+		   section, so hiding it would take those away from anyone with no units of their
+		   own - an observer, or a player whose whole fleet has been destroyed.
+
+		   css("") rather than show(), kept from the old tab version: clearing the property
+		   hands the decision back to the stylesheet, where show() would write an inline
+		   display that any later rule for this panel would then have to fight. */
+		panel.css("display", hasFleet ? "" : "none");
 		$("#fleetSaveButton").prop("disabled", !(hasFleet && summary.saveable > 0));
 
 		var text;
@@ -163,13 +169,13 @@ window.savedFleets = {
    deliberately usable in every phase including FINISHED games and replay - reloading from
    the end of the previous battle is exactly what it is for. */
 jQuery(function () {
-	if (!$("#fleetsave").length) return;   //lobby, or any page without the panel
+	if (!$("#gameoptions").length) return;   //lobby, or any page without the panel
 
 	$("#fleetSaveButton").on("click", function () {
 		savedFleets.saveCurrentFleet();
 	});
 
-	$("#fleetsave").on("onshow", function () {
+	$("#gameoptions").on("onshow", function () {
 		savedFleets.refreshSavePanel();
 	});
 
