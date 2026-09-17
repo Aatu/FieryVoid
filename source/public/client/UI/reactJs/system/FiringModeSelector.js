@@ -74,8 +74,14 @@ export default class FiringModeSelector extends React.Component {
     render() {
         const { ship, system } = this.props;
 
-        // showModes lets callers host other controls (e.g. self-intercept) inside
-        // this styled box without the firing-mode grid when there's nothing to pick.
+        // showModes lets callers host other controls (self-intercept, the fire-order remove
+        // pair) inside this styled box without the firing-mode grid when there's nothing to pick.
+        // ⚠️ PASS A REAL BOOLEAN. React cannot tell an absent prop from an explicit `undefined`,
+        // so the "no prop given means show the grid" default below also swallows a predicate that
+        // returns undefined instead of false - which an && chain does whenever its last evaluated
+        // operand is a missing property (canChangeFiringMode ends on `system.multiModeSplit` for
+        // any weapon that already holds a fire order). That is why the call site wraps it in
+        // Boolean(); it cannot be defended from in here.
         const showModes = this.props.showModes !== false;
 
         const currentModeIndex = parseInt(system.firingMode);

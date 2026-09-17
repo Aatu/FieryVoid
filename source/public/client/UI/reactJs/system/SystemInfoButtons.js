@@ -566,14 +566,18 @@ class SystemInfoButtons extends React.Component {
 				<ButtonRow>
 					{canAddShots(ship, system) && <Button title="More shots" onClick={this.addShots.bind(this)} img="./img/plussquare.png"></Button>}
 					{canReduceShots(ship, system) && <Button title="Less shots" onClick={this.reduceShots.bind(this)} img="./img/minussquare.png"></Button>}
-					{canRemoveFireOrderMulti(ship, system) && <Button title="Remove last fire order" onClick={this.removeFireOrderMulti.bind(this)} img="./img/unfiringSmall.png"></Button>}
-					{canRemoveFireOrder(ship, system) && <Button title="Remove all fire orders (RMB = All weapons selected)" onClick={this.removeFireOrder.bind(this)} onContextMenu={this.removeFireOrderAll.bind(this)} img="./img/firing.png"></Button>}
 				</ButtonRow>
 
-				{(canChangeFiringMode(ship, system) || canSelfIntercept(ship, system) || canRemIntercept(ship, system)) && (
-					<FiringModeSelector ship={ship} system={system} showModes={canChangeFiringMode(ship, system)}>
+				{/* The weapon-order menu: the firing-mode grid plus the intercept pair and the
+				    fire-order remove pair as CHILDREN of the same box, so none of them floats
+				    loose above the styled menus. showModes=false drops the grid and its header
+				    when there is no mode to pick (a live fire order usually rules the grid out). */}
+				{canWeaponMenu(ship, system) && (
+					<FiringModeSelector ship={ship} system={system} showModes={Boolean(canChangeFiringMode(ship, system))}>
 						{canSelfIntercept(ship, system) && <Button title="Allow interception (RMB = All systems selected)" onClick={this.declareSelfIntercept.bind(this)} onContextMenu={this.declareSelfInterceptAll.bind(this)} img="./img/addSelfIntercept.png"></Button>}
 						{canRemIntercept(ship, system) && <Button title="Remove an intercept order" onClick={this.remSelfIntercept.bind(this)} onContextMenu={this.remSelfIntercept.bind(this)} img="./img/remSelfIntercept.png"></Button>}
+						{canRemoveFireOrderMulti(ship, system) && <Button title="Remove last fire order" onClick={this.removeFireOrderMulti.bind(this)} img="./img/unfiringSmall.png"></Button>}
+						{canRemoveFireOrder(ship, system) && <Button title="Remove all fire orders (RMB = All weapons selected)" onClick={this.removeFireOrder.bind(this)} onContextMenu={this.removeFireOrderAll.bind(this)} img="./img/firing.png"></Button>}
 					</FiringModeSelector>
 				)}
 				<ButtonRow>
@@ -959,8 +963,10 @@ const canRemoveFireOrder = (ship, system) => system.weapon && weaponManager.hasF
    mode count and `hideFiringModeSelector` alone, so every sibling control vanished on its own
    (they all read hasFiringOrder / hasOrderForMode, which is empty on a rider) and this one did not.
 
-   ⚠️ THE INTERCEPT PAIR GOES WITH IT, and that is deliberate rather than collateral. The two
-   buttons are CHILDREN of `<FiringModeSelector>`, so suppressing the block suppresses them - and
+   ⚠️ THE INTERCEPT PAIR GOES WITH IT, and that is deliberate rather than collateral. Both it and
+   the fire-order remove pair are CHILDREN of `<FiringModeSelector>` (see canWeaponMenu), so
+   suppressing the block suppresses them - immaterial for the remove pair, which a rider can never
+   light up anyway (it holds no fire orders), and the whole point for the intercept pair, because
    interception is firing, which is exactly the reading the Ancient-jump precedent already takes
    (Firing::automateIntercept hands a jumping unit no interceptors either). The server half now
    matches: see the isJumpingUnarmed line there. */
@@ -971,9 +977,16 @@ const canChangeFiringMode = (ship, system) => system.weapon && !ship.mine && !sy
 //can declare eligibility for interception: charged, recharge time >1 turn, intercept rating >0, no firing order
 const canSelfIntercept = (ship, system) => system.weapon && !isDockingRiderUnit(ship) && weaponManager.canSelfInterceptSingle(ship, system);
 //Non-split weapons hold only a single order, so their self-intercept is cancelled via the
-//top-row "remove fire order" button; only split-capable weapons need an in-menu intercept-remove
-//button to peel off one of several orders.
+//"remove fire order" button sitting beside this one in the same box; only split-capable weapons
+//need a dedicated intercept-remove button to peel off one of several orders.
 const canRemIntercept = (ship, system) => system.weapon && system.canSplitShots && !isDockingRiderUnit(ship) && weaponManager.canRemInterceptSingle(ship, system);
+
+/* The firing-mode box is the whole weapon-order menu, not just the mode grid: the intercept pair
+   and the fire-order remove pair are rendered as its children, so any one of the five predicates
+   is reason enough to draw it. The grid's own gate (canChangeFiringMode) still decides showModes,
+   which is what keeps the "Select Firing Mode" header off a box that is only hosting buttons. */
+const canWeaponMenu = (ship, system) => canChangeFiringMode(ship, system) || canSelfIntercept(ship, system)
+	|| canRemIntercept(ship, system) || canRemoveFireOrderMulti(ship, system) || canRemoveFireOrder(ship, system);
 
 //GraviticAugmenter excluded: its Activate/Deactivate lives in its own green menu, not the generic SystemActivation box.
 //jumpEngine joins the exclusions: its activation pair is the Maintain toggle, which JumpEngineMenu
@@ -1048,9 +1061,7 @@ export const hasStyledMenu = (ship, system) => {
 		canPowerCapacitor(ship, system) ||
 		canSystemPowerSettings(ship, system) ||
 		canSystemActivation(ship, system) ||
-		canChangeFiringMode(ship, system) ||
-		canSelfIntercept(ship, system) ||
-		canRemIntercept(ship, system);
+		canWeaponMenu(ship, system);
 };
 
 
