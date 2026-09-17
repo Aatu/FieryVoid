@@ -277,7 +277,10 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         //JumpVortex (JUMP_POINTS_PLAN.md Stage 6) is the same shape: a log line wearing a fire
         //order's clothes, with the jump point's own swirl played separately by
         //ReplayAnimationStrategy.animateVortexLifecycle.
-        if (incomingFire.fireOrder.damageclass == "HyperspaceJump" || incomingFire.fireOrder.damageclass == "JumpVortex") {
+        //⚠️ JumpVortexExit is its BLUE twin (HYPERSPACE_IMPROVEMENTS_PLAN.md Item 1) and every site
+        //that names one must name the other - they differ only in the log colour they earn.
+        if (incomingFire.fireOrder.damageclass == "HyperspaceJump" || incomingFire.fireOrder.damageclass == "JumpVortex"
+            || incomingFire.fireOrder.damageclass == "JumpVortexExit") {
             damage = 0;
             hit = false;
         }
@@ -505,7 +508,8 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         }
     */
     function getSystemNamesDestroyed(incomingFire) {
-        if (incomingFire.fireOrder.damageclass === "HyperspaceJump" || incomingFire.fireOrder.damageclass === "JumpVortex") {
+        if (incomingFire.fireOrder.damageclass === "HyperspaceJump" || incomingFire.fireOrder.damageclass === "JumpVortex"
+            || incomingFire.fireOrder.damageclass === "JumpVortexExit") {   //the blue twin - see the note above
             return; // Return nothing if "HyperspaceJump", we don't want the text showing Primary Structure to show.
         }
 

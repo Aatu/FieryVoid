@@ -5565,7 +5565,10 @@ window.weaponManager = {
             //other entry here it is a log line wearing a fire order's clothes - there is no shot,
             //no target and no damage - so the log prints its sentence alone rather than "firing 1x
             //Ramming Attack ... 1/1 shots hit" at a ship nobody shot at.
-            "HyperspaceJump", "JumpFailure", "JumpVortex", "SelfDestruct", "ContainmentBreach",
+            //JumpVortexExit is the BLUE doorway's twin of JumpVortex, split off so the combat log
+            //can head the two in different colours (HYPERSPACE_IMPROVEMENTS_PLAN.md Item 1). It is
+            //the same kind of order and belongs on this list for the same reason.
+            "HyperspaceJump", "JumpFailure", "JumpVortex", "JumpVortexExit", "SelfDestruct", "ContainmentBreach",
             "Reactor", "Sabotage", "WreakHavoc", "Capture", "Rescue", "LimpetBore",
             "MagazineExplosion", "NoHangar", "TerrainCollision", "HalfPhase", "TranverseCrit", "Boarding",
             //EdfExposure (WALKERS_OF_SIGMA_PLAN.md 2.2): the Energy Draining Field's per-unit drain

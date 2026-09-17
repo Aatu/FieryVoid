@@ -710,7 +710,7 @@ harness green.
 
 | Stage | Expected diff |
 |---|---|
-| H1 | none (nothing reaches `stripForJson`) |
+| H1 | none — CONFIRMED 2026-09-17: nothing reaches `stripForJson`, and no corpus game exercises the new class |
 | H2 | none (client only) |
 | H3 | `powerReq` on 12 Vorlon hulls in the **statics**; harness only if a Vorlon is in the corpus |
 | H4 | `turnsloaded` **only on drives that boosted** — in a corpus with no boosts, **nothing at all**. A whole-corpus move means the charge credit was implemented within-turn instead of at turn end. |
@@ -872,3 +872,78 @@ Sustain mode. The machinery is turn-indexed rather than position-indexed and not
 undeployed ship on the paths that matter, but that is an argument, not a measurement. Create a game
 with a reinforcement, overload one of its weapons in Initial Orders while it waits, commit, and
 check `tac_power` for a type-3 row and the arrival turn's `overloadturns`.
+
+---
+
+### Stage H1 — "HYPERSPACE" in the combat log (Item 1) — BUILT 2026-09-17
+
+Built as §2 designed it: `writeVortexLogOrder` gains a 4th argument and stamps **`JumpVortexExit`**
+on a blue doorway's line, `JumpVortex` on a yellow one, and the client heads every hyperspace entry
+**`HYPERSPACE:`** in the map marker's own colour — `#e1b000` leaving, `#00b8e6` arriving.
+
+**The six callers, and how each one knows which it is:**
+
+| Caller | Doorway | How it decides |
+|---|---|---|
+| `openVortex` | 🟡 yellow | the default — it is the yellow sweep |
+| `openExitVortex` | 🔵 blue | `true`, literal; it only ever opens blue (a legacy hull phasing in included) |
+| `openVortexAtGate` | either | the `$exit` flag its own sentence already branches on |
+| `resolveGateClaims` ×2 (claim refused, hold clamped) | either | `$exit` — see below |
+| `recordVortexClosure` | either | **derives it**, `instanceof SpawnJumpPointExit` on its own `$activeVortexId` |
+
+⭐ **Two callers write their line BEFORE any vortex exists** — the gate claim refusal and the
+reactor-damage hold clamp — so there is nothing to ask `instanceof` of. That is why the flag is
+*passed* rather than derived everywhere: a signature that could only be derived would have no
+answer at those two sites. They take the colour of the doorway the gate actually opened, which is
+what the refusal is a consequence of; there is no vortex of the *loser's* to colour by.
+
+**⚠️⚠️ TWO CLIENT SITES THIS PLAN DID NOT LIST, and both would have been silent.**
+`AllWeaponFireAgainstShipAnimation.js` matches the class name **twice** — once to suppress the
+explosion and damage on a log-only order, once to keep "Primary Structure destroyed" out of the
+replay caption. A blue doorway's line would have been animated as a real hit on its own opener.
+The general rule, now stated at both sites: **`JumpVortexExit` is `JumpVortex`'s twin and every
+site that names one must name the other.** The full list as of today is four: those two,
+`Firing::isHyperspaceLogOrder`, and `weaponManager.doShortLogText`.
+
+⚠️ **`spawnDeclaredVortices`' submit scan was deliberately left `'JumpVortex'`-only.** It runs
+FIRST of the three sweeps in `InitialOrdersGamePhase::advance`, so no exit or gate line exists yet
+to pick up, and both later sweeps submit through their own `$logOrders` array. Widening it would
+duplicate every one of their rows — the trap the comment above it already describes. Commented so
+it is not "fixed".
+
+⭐ **The colour lives in `logPanel.css`, not in the JS.** `combatLog.js` emits a class and an
+**empty** `style` attribute; the two literals were already owned by the stylesheets. That empty
+attribute is load-bearing: every other entry's header is team-coloured *inline*, which no rule can
+beat, so writing nothing is what lets the stylesheet win for these four classes and only these.
+
+⚠️ **Accepted trade: the hyperspace header is the ONE header that is not team-coloured.** The 3px
+allegiance rail on the entry comes from the same `getShipLogColorCss` and is untouched, so the
+owner is still readable. If that rail is ever restyled, revisit this.
+
+⚠️ **Known side effect, one line to reverse if unwanted.** `destroyGateOnReactorLoss` *reuses*
+`'JumpFailure'` for "loses its reactor entirely — the jump gate collapses" (deliberately, for three
+behaviours the comment there lists). That line now heads `HYPERSPACE:` in yellow, which is not
+really a hyperspace event. Either drop `JumpFailure` from `HYPERSPACE_LOG_KINDS` (and a real
+jump-drive detonation goes back to reading `FIRE:`, which is worse), or give the gate collapse a
+damageclass of its own. Left as-is pending a call.
+
+**Harnesses added** (run both after any change to this family):
+
+- `tests/replay/hyperspaceLogHarness.php` — **12 assertions**, in memory, no DB.
+  `docker exec -w /usr/src/current fieryvoid-php-1 php tests/replay/hyperspaceLogHarness.php`
+  Reaches the protected static by reflection, and drives the 3-argument call **variadically** so it
+  exercises the *method's* default rather than the harness's.
+- `tests/replay/hyperspaceLogClientHarness.js` — **13 assertions**, `node`, over the REAL
+  `combatLog.js` + `weaponManager.js` (`global.window = global`, plus a Proxy jQuery so the
+  document-ready block at the foot of `combatLog.js` evaluates).
+  ⭐ Its last section is driven off `HYPERSPACE_LOG_KINDS`' **keys**, so the
+  "HYPERSPACE: implies short-log" invariant covers any class added later without editing the test.
+  It also asserts the opposite direction — an ordinary shot still heads `FIRE:`, and a near-miss
+  name like `JumpVortexOther` does **not** match — because a table that was too broad would look
+  correct in a test that only checked the four classes.
+
+**Gate after H1** (`fvbuild.ps1 -Check`): autoload map **up to date**, ship-data validator **0 new**,
+replay harness **128 passed / 1 failed** — the same game 4302, with a **byte-identical** diff to the
+H2 run and **no `damageclass` paths in it at all**, which is the proof that this server change moved
+nothing in the corpus. `php -l` clean on both server files. Legacy bundle rebuilt
+(`yarn build:legacy`); `UI.bundle.js` untouched.

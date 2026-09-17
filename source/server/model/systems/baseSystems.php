@@ -6894,6 +6894,11 @@ class JumpEngine extends Weapon{
          * a row rather than fail loudly. */
         if ($dbManager === null) return;
 
+        /* ⚠️ 'JumpVortex' ONLY, AND NOT ALSO 'JumpVortexExit' (Item 1, 2026-09-17). This sweep runs
+           FIRST of the three in advance() - before openSignalledGates and spawnExitVortices - so no
+           exit or gate line exists yet to pick up, and both of those sweeps submit the orders THEY
+           wrote through their own $logOrders array. Widening this test would make the narrowing the
+           comment above describes pointless and duplicate every one of their rows. */
         $logOrders = array();
         foreach ($gamedata->getNewFireOrders() as $fire){
             if ($fire->damageclass === 'JumpVortex') $logOrders[] = $fire;
@@ -7665,7 +7670,8 @@ class JumpEngine extends Weapon{
             //$opens . " - sensors " . $scatter['sensors'] . ", roll " . $scatter['roll']
 			$opens . "- rolled " . $scatter['roll']
             . " (" . $scatter['band'] . "). It forms " . $where . $turned
-            . ", and the units riding it arrive through it next turn.");
+            . ", and the units riding it arrive through it next turn.",
+            true);   //Item 1: a BLUE doorway - the log line takes the arriving colour
         if ($log && is_array($logOrders)) $logOrders[] = $log;
 
         Debug::log("Jump point exit: ship {$opener->id} opens vortex {$vortex->id} at "
@@ -8055,7 +8061,10 @@ class JumpEngine extends Weapon{
             $log = self::writeVortexLogOrder($gate, $gamedata,
                 " refuses the signal from " . self::playerLabel($userId, $gamedata) . ": their nearest unit is "
                 . $distance . ($distance == 1 ? " hex" : " hexes") . " away, against "
-                . $distances[$winner] . " for " . self::playerLabel($winner, $gamedata) . ".");
+                . $distances[$winner] . " for " . self::playerLabel($winner, $gamedata) . ".",
+                //Item 1: coloured by the doorway the gate actually opened, which is what this
+                //refusal is the consequence of - there is no vortex of the LOSER's to colour by.
+                $exit);
             if ($log) $logOrders[] = $log;
         }
 
@@ -8064,7 +8073,8 @@ class JumpEngine extends Weapon{
         if ($hold < (int)$claims[$winner]['hold']){
             $log = self::writeVortexLogOrder($gate, $gamedata,
                 " cannot hold its jump point for " . (int)$claims[$winner]['hold'] . " turns - reactor damage caps it at "
-                . $hold . ($hold == 1 ? " turn" : " turns") . ".");
+                . $hold . ($hold == 1 ? " turn" : " turns") . ".",
+                $exit);   //Item 1: the doorway this hold belongs to
             if ($log) $logOrders[] = $log;
         }
 
@@ -8514,7 +8524,8 @@ class JumpEngine extends Weapon{
             . ($exit ? "an ARRIVAL jump point" : "its jump point") . " for "
             . $hold . ($hold == 1 ? " turn" : " turns")
             . ". It forms at the end of this turn and can be "
-            . ($exit ? "arrived through" : "entered") . " from next turn.");
+            . ($exit ? "arrived through" : "entered") . " from next turn.",
+            $exit);   //Item 1: the sentence already branches on it, and so does the colour
         if ($log) $logOrders[] = $log;
 
         return true;
@@ -8587,8 +8598,27 @@ class JumpEngine extends Weapon{
      * it, so the log prints the sentence alone rather than "firing 1x Ramming Attack ... 1/1 shots
      * hit" at a ship that was never shot at.
      *
+     * ⭐⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md §2 (Item 1, user request 2026-09-17) - AND THE CLASS IS
+     * SPLIT IN TWO, BECAUSE THE LOG HAS TO COLOUR THE TWO DOORWAYS DIFFERENTLY. The combat log
+     * heads these entries HYPERSPACE: rather than FIRE:, in the SAME colours the map markers use -
+     * #e1b000 yellow for a yellow jump point (leaving) and #00b8e6 cobalt for a blue one
+     * (arriving) - and until now every vortex line, yellow and blue, ship and gate, carried the
+     * one class 'JumpVortex' with nothing to tell them apart. Parsing the sentence was the
+     * alternative and is not one.
+     *
+     * ⚠️ $isExit IS PASSED, NOT DERIVED, AND THAT IS NOT LAZINESS. Two of the six callers write
+     * their line BEFORE any vortex exists - the gate claim refusal and the reactor-damage hold
+     * clamp, both in resolveGateClaims - so there is nothing to ask `instanceof` of. They pass the
+     * $exit flag the claim itself carried. The one caller that CAN derive it (recordVortexClosure)
+     * does, from its own $activeVortexId.
+     *
+     * ⚠️ ANYTHING MATCHING ON THE CLASS NAME MUST LEARN BOTH. Today that is
+     * Firing::isHyperspaceLogOrder (the four gathers) and weaponManager.doShortLogText (the log
+     * wording). Miss the first and a blue doorway's own log line is re-resolved as a ram, four
+     * times, on the turns after it was written - the Stage 4 trap, exactly.
+     *
      * No damage entry, deliberately: nothing is being hurt. */
-    protected static function writeVortexLogOrder($ship, $gamedata, $pubNotes)
+    protected static function writeVortexLogOrder($ship, $gamedata, $pubNotes, $isExit = false)
     {
         $rammingSystem = $ship->getSystemByName("RammingAttack");
         if (!$rammingSystem) return null;   //every ship has one, and BaseShip gives a jump gate one too
@@ -8597,7 +8627,7 @@ class JumpEngine extends Weapon{
             -1, "normal", $ship->id, $ship->id,
             $rammingSystem->id, -1, $gamedata->turn, 1,
             100, 100, 1, 1, 0,
-            0, 0, 'JumpVortex', 10001
+            0, 0, ($isExit ? 'JumpVortexExit' : 'JumpVortex'), 10001
         );
         $newFireOrder->pubnotes = $pubNotes;
         $newFireOrder->addToDB = true;
@@ -8747,7 +8777,7 @@ class JumpEngine extends Weapon{
            Trap 5 is unaffected: a gate's engine is released by the hold expiring, and a gate that
            never closed its jump point would be broken for Phase 2 entrances too. */
         if ($vortex instanceof SpawnJumpPointExit && !$this->isGateJump()){
-            return ($turn > (int)$this->vortexOpenTurn) ? 'reinforcements have arrived' : null;
+            return ($turn > (int)$this->vortexOpenTurn) ? 'no longer maintained' : null;
         }
 
         /* ⭐⭐ JUMP GATES (PHASE 2) - THE GATE BRANCH, TAKEN FIRST AND RETURNING, because a gate's
@@ -8865,8 +8895,17 @@ class JumpEngine extends Weapon{
          * this feature a player can act on ("systems left online: Heavy Laser; ...") and it was
          * Stage 5's first reported gap. FireGamePhase::advance submits new fire orders after this
          * sweep, so the order needs no submit of its own - unlike the opening one. */
+        /* Item 1: the ONE caller that can derive its own colour, and it should - the vortex it is
+           closing is still on the board at this point (closure is end-of-turn, and the unit is
+           removed a turn later), so `instanceof` answers for both flavours and for the invisible
+           phase-in subclass as well. Defensive on a null: a note that outlived its unit closes as
+           an ordinary yellow line rather than throwing, which is the same charity
+           getVortexClosureReason's first branch extends. */
+        $closing = ($this->activeVortexId === null) ? null : $gamedata->getShipById((int)$this->activeVortexId);
+
         self::writeVortexLogOrder($ship, $gamedata,
-            " loses its jump point at the end of this turn - " . $reason . ".");
+            " loses its jump point at the end of this turn - " . $reason . ".",
+            $closing instanceof SpawnJumpPointExit);
 
         /*Debug::log("Jump vortex " . $this->activeVortexId . " (opened turn " . $this->vortexOpenTurn
             . " by ship " . $ship->id . ", game " . $gamedata->id . ") closes at the end of turn "

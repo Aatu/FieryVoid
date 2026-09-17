@@ -852,6 +852,23 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     color: #c54120;
 }
 
+/* HYPERSPACE_IMPROVEMENTS_PLAN.md Item 1 - THE HYPERSPACE HEADER, in the colours of the map
+   markers it is reporting. #e1b000 is the yellow BallisticIconContainer paints a departure jump
+   point in; #00b8e6 is FV's established "not here yet" cyan, the blue of an arrival doorway, the
+   .docked rows and the [Deploys on Turn N] header. DO NOT introduce a third blue or a second
+   yellow here - the reader is looking at the same two colours on the map.
+
+   ⚠️ These two win over the inline style attribute only because combatLog.js writes an EMPTY one
+   for a hyperspace entry. Every other entry's header is team-coloured inline, which no stylesheet
+   rule can (or should) beat - see the note in logFireOrders. */
+#log .logheader.hyperspace.leaving {
+    color: #e1b000;
+}
+
+#log .logheader.hyperspace.arriving {
+    color: #00b8e6;
+}
+
 #log .damage {
     color: #c54120;
 }

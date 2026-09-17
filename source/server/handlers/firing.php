@@ -1716,7 +1716,11 @@ public static function firePreFiringWeapons($gamedata){
     public static function isHyperspaceLogOrder($fire){
         return $fire->damageclass === 'HyperspaceJump'
             || $fire->damageclass === 'JumpFailure'
-            || $fire->damageclass === 'JumpVortex';   //STAGE 6 - a jump point opening or closing
+            || $fire->damageclass === 'JumpVortex'        //STAGE 6 - a YELLOW jump point opening or closing
+            //HYPERSPACE_IMPROVEMENTS_PLAN.md Item 1 - and the BLUE one, split off so the combat log
+            //can colour the two doorways differently. Same order, same inertness; only the class
+            //name differs, so it must be skipped by the four gathers exactly as its twin is.
+            || $fire->damageclass === 'JumpVortexExit';
     }
 
     public static function prepareFiring($gamedata, $dbManager = null){
