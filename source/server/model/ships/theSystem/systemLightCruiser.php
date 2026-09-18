@@ -50,7 +50,7 @@ class systemLightCruiser extends BaseShipNoAft{
         $this->addPrimarySystem(new SelfRepair(6, 8, 6)); //armor, structure, output
 		$this->addAftSystem(new GraviticThruster(5, 15, 0, 7, 2));
 		$this->addAftSystem(new GraviticThruster(5, 15, 0, 7, 2));
-		$this->addAftSystem(new JumpEngine(6, 25, 6, 8));        
+		$this->addAftSystem((new JumpEngine(6, 25, 6, 8))->markLegacy()); //HYPERSPACE_IMPROVEMENTS_PLAN.md 10 A2 - out of B5 jump-point mechanics (Stage H4)
 
 		$this->addFrontSystem(new GraviticThruster(5, 12, 0, 3, 1));
 		$this->addFrontSystem(new GraviticThruster(5, 12, 0, 3, 1));

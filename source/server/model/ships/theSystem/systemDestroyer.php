@@ -62,7 +62,7 @@ class systemDestroyer extends HeavyCombatVessel{
         $this->addAftSystem(new SeekerTorp(5, 6, 5, 90, 270));
         $this->addAftSystem(new SeekerTorp(5, 6, 5, 90, 270));
 		$this->addAftSystem(new ThirdspaceShield(0, 120, 60, 90, 270, 'A'));		
-		$this->addAftSystem(new JumpEngine(6, 15, 6, 12));        
+		$this->addAftSystem((new JumpEngine(6, 15, 6, 12))->markLegacy()); //HYPERSPACE_IMPROVEMENTS_PLAN.md 10 A2 - out of B5 jump-point mechanics (Stage H4)
         $this->addAftSystem(new PlasmaArray(5, 8, 4, 90, 270));
     
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

@@ -3449,6 +3449,7 @@ spl_autoload_register(
                 'trekphaser' => '/server/model/weapons/customTrek.php',
                 'trekphaserbase' => '/server/model/weapons/customTrek.php',
                 'trekphaserkelly' => '/server/model/weapons/customTrek.php',
+                'trekphaserkellytype7' => '/server/model/weapons/customTrek.php',
                 'trekphaserlance' => '/server/model/weapons/customTrek.php',
                 'trekphotonictorp' => '/server/model/weapons/customTrek.php',
                 'trekphotontorp' => '/server/model/weapons/customTrek.php',

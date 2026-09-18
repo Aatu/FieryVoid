@@ -801,6 +801,144 @@ tooltip (`setSystemDataWindow`) so the restriction is discoverable rather than s
 
 ## 11. Build log
 
+### Stage H4 — boosting the recharge (Item 2) — BUILT 2026-09-18
+
+Built to §5's design — R2 (one boost carrier, disambiguated by the charge at the START of the turn),
+R3 (boost N ⇒ N+1 turns, at most 3 levels), A4 (no use at all until charged, jumping out included)
+and A2 (The System's five drives `markLegacy()`, in this stage as §10 asked). **Five things §5 did not
+have**, two of which would have been silent in play:
+
+**⚠️⚠️ 1. THE BOOST ROWS ARE NOT THERE TO WALK.** §5 derives the load from each turn's boost, but
+`DBManager::getPowerForShips` loads `tac_power` for **this turn and last turn only** — a boost bought
+three turns ago simply does not exist on a loaded ship. So the credit is **persisted**: a
+`'ChargeBoost'` IndividualNote on the drive (turn ⇒ levels), written by
+`JumpEngine::generateIndividualNotes` at **phase 4** (`FireGamePhase::advance`, the one note hook that
+runs on a real reload with notes loaded and this turn's power present), restored into
+`$chargeBoostNotes` by `onIndividualNotesLoaded`. The EDJD's abduction record is the same shape of
+answer to the same problem.
+- ⭐ **The server decides what the boost was worth**: the note is `min(boost, getChargeBoostMax())`, so a
+  forged row cannot buy more than 3 levels or charge that would not count, and a CHARGED drive's boost
+  (a jump) writes nothing. Offline / destroyed drives write nothing. Idempotent on a double advance.
+- ⚠️ **The note must be CLAIMED on load** — the fall-through at the foot of `onIndividualNotesLoaded`
+  takes any unknown note for the pre-jump combat value (the trap the scatter and EDJD notes already
+  record). Asserted.
+
+**⚠️ 2. §5's WALK WAS OFF BY ONE.** As written it answers **0** on the turn after the closure, where the
+closed form answers 1, so it would have moved every recharging drive in the corpus. Built as: 1 on
+`closeTurn + 1`, then `+1 + boost(t)` for each `t` strictly before the query turn — and with **no**
+notes the closed form itself is returned untouched. `rechargeBoostHarness.php` asserts the no-boost
+walk equals the old closed form over a 175-cell grid.
+
+**⚠️⚠️ 3. `copyLastTurnPower` WOULD HAVE TURNED A CHARGE BOOST INTO A JUMP (not in §5).** It repeats
+EVERY power row into the new turn, boosts included — and on an Ancient-charging drive a charge boost
+carried onto the turn the drive finishes charging **is Jump to Hyperspace**: the ship leaves the battle
+on a click made for something else. `JumpEngine.getRepeatableBoost` now decides: carried (clamped)
+while still charging, **dropped** otherwise; every other system copies exactly as before.
+
+**4. A second payload key, `chargeBoostMax`.** `advancedCharging` alone cannot tell the client whether a
+boost buys anything: `turnsloaded` is the MIN of the jump-point recharge and the EDJD abduction
+cooldown (the latter is not chargeable, §5 trap), and it is 0 while a jump point stands (where the
+charge does not move). So the server publishes `getChargeBoostMax($turn)` — non-zero only while the
+jump-point recharge is actually running, capped at 3 **and at what finishes the charge by next turn**
+(at 7/8 the drive is full next turn unboosted, so a boost would be power for nothing and is not
+offered). Flights never get one.
+
+**5. `hasMaxBoost` did not need changing.** §5 reads it as "is at max"; `power.clickPlus` uses it as
+"has a cap" and then tests `maxBoostLevel`. It stays `true`, and `boostable` / `maxBoostLevel` are set
+**per instance** in the client constructor from the two keys (the shape `AmmoMissileRackTriad` already
+uses; primitives, so no shared-reference trap):
+
+| start-of-turn state | `boostable` | `maxBoostLevel` | control |
+|---|---|---|---|
+| recharging, `chargeBoostMax` sent | true | `chargeBoostMax` | **Extra Charging** `- N +` |
+| recharging, nothing to buy | **false** | — | none: it cannot jump (A4) and cannot charge |
+| charged | blueprint (true on legacy, false on a Vorlon) | 1 | Jump to Hyperspace Yes/No (legacy only) |
+
+**Who charges the Ancient way** — `JumpEngine::hasAdvancedCharging()`: unit `factionAge >= 3`, a real
+jump recharge (not the Trek Nacelle), not a gate. That is Vorlons, The System, Shadows, Kirishiac,
+Mindriders, Torvalus, Triad, Thirdspace and the Walkers. Young-race drives — including every BSG / Star
+Wars / Trek legacy drive — keep boost-means-jump unconditionally.
+- ⚠️ **Fighter flights (the Mapmakers): the A4 gate applies, charging does not.** The gate reads the
+  charge off the flight's vortex-holding engine (`getChargeSource()` → `getFlightJumpEngine`, the same
+  routing `stripForJson` uses), so a Mapmaker that phased in cannot jump out for its 10-turn delay and
+  has no way to speed it up. That is A4 read literally; if Mapmakers should be exempt, the one line is
+  `if ($this->isFlightMounted()) return true;` near the top of `isJumpOutBoost`, plus its client mirror
+  in `isChargedForJump`.
+- A charge boost also withdraws the drive's abduction order, as a jump boost does: `canSelectForAbduction`
+  already refuses on ANY boost, so the drive does one thing a turn either way.
+
+**The gate, both ends.** Server: `JumpEngine::isJumpOutBoost($turn)` = legacy **and** boosted **and**
+(young-race **or** fully charged), and `getUnitJumpingEngine` asks it instead of the bare
+`isOverloading`. That one change moves the end-of-Fire sweep, `withdrawFireFromJumpingUnits`,
+`automateIntercept`'s `isJumpingUnarmed` and `EdjdAbduction::isDriveWorking`.
+`InitialOrdersGamePhase::dropFireOfJumpingShip` now asks the **DB copy** (`$gd`, reloaded after
+`submitPower`, so it has this POST's boost AND the notes) — the POST-side ship reads every drive as
+charged and would have dropped a charging Ancient's orders as a jump; asserted in both directions.
+Client: `JumpEngine.isJumpBoost()` behind `movement.getJumpingOutEngine` (so `isJumpingToHyperspace`
+and `isJumpFireForbidden`), the `jumping[]` commit checklist in `gamedata.js`, `onBoostIncrease` (fire
+orders and the flight mirror only for a jump) and the "JUMP" read-out (a charge boost keeps the
+`N/M` counter).
+
+**The cost** is `JumpEngine.getChargeBoostPowerDraw()` = levels × `powerReq`, in `getReactorPower` beside
+the abduction draw. ⭐ **One payer, the front end:** there is no server draw, so on a Vorlon it is spent
+by the capacitor storing less at the commit — and deliberately NOT in `getVortexUpkeepReserved`'s
+add-back (asserted). `boostEfficiency` stays 0, so the JUMP is still free.
+
+**Files:**
+
+| File | Change |
+|---|---|
+| [baseSystems.php](source/server/model/systems/baseSystems.php) | `$chargeBoostNotes`, `CHARGE_BOOST_MAX`, `CHARGE_BOOST_NOTE`; `hasAdvancedCharging`, `getChargeSource`, `getChargeBoostMax`, `getRechargeBoostLevel`, `isJumpOutBoost`; `getUnitJumpingEngine` on it; the walk in `getJumpPointRechargeLoad`; note claim + `generateIndividualNotes` (phase 4); `stripForJson` (`advancedCharging`, `chargeBoostMax`); `getAdvancedChargingText` in all three tooltip branches |
+| [InitialOrdersGamePhase.php](source/server/Phase/InitialOrdersGamePhase.php) | `dropFireOfJumpingShip` asks `$gd` |
+| [firing.php](source/server/handlers/firing.php) | comment only — the "NOT narrowed to isLegacyJump()" note was no longer true |
+| 5 System ship files | `(new JumpEngine(...))->markLegacy()` (A2) |
+| [model/system/baseSystems.js](source/public/client/model/system/baseSystems.js) | per-instance `boostable` / `maxBoostLevel`; `hasAdvancedCharging`, `getChargeBoostMax`, `isChargedForJump`, `isChargeBoost`, `isJumpBoost`, `getChargeBoostPowerDraw`, `getRepeatableBoost`; `initializationUpdate`, `onBoostIncrease` |
+| [power.js](source/public/client/power.js) | the draw in `getReactorPower`; the filter in `copyLastTurnPower` |
+| [movement.js](source/public/client/movement.js) | `getJumpingOutEngine` → `isJumpBoost` |
+| [gamedata.js](source/public/client/gamedata.js) | `jumping[]` commit checklist → `isJumpBoost` |
+| [SystemPowerSettings.js](source/public/client/UI/reactJs/system/SystemPowerSettings.js) | "Extra Charging" stepper while charging |
+
+**Harnesses added** (both in `tests/`, which is gitignored — local only, like every other harness):
+- `tests/replay/rechargeBoostHarness.php` — **95 assertions**, real ship files, notes through the real
+  `onIndividualNotesLoaded`. The identity grid, the hand-worked boosted table, rule 2 (a boost never
+  moves its own turn), `getChargeBoostMax` in every state, `isJumpOutBoost` / `getUnitJumpingEngine`
+  in BOTH directions (boosted recharging Vorlon ⇒ nobody leaves; boosted charged Ancient ⇒ it does),
+  the note (phase, clamp, idempotency, claim), the payload, the tooltip, and the POST-side trap.
+  Self-tested by deletion four ways (bare `isOverloading` back in the sweep; no phase guard; credit
+  within the turn; note not claimed) — each fails 3-11 assertions.
+- `tests/replay/rechargeBoostClientHarness.js` — **42 assertions**, `node`, over the real `power.js`,
+  `movement.js` and `baseSystems.js`. Self-tested by deletion three ways (withdrawal on any boost; the
+  `copyLastTurnPower` filter; `getJumpingOutEngine` on a bare boost).
+- `legacyRechargeHarness.php` **extended** (33 ⇒ 36): the same Shadow drive boosted and unboosted.
+- `SystemPowerSettings.js` verified without touching `UI.bundle.js`: esbuild bundle + `renderToString`
+  in four states (charging stepper, charged Yes/No, a pre-H4 payload, the reactor).
+
+**Gate:** ship-data validator **0 new** (237, all baselined). Replay harness **73 passed / 53 failed / 4
+skipped**, and every failure was read by SHAPE with no diff limit: **no `turnsloaded` path anywhere**
+(the corpus holds no boosts, as §9 predicted); 51 games gain only `advancedCharging: added (true)`, game
+4350 also `chargeBoostMax: added (1)` on one recharging drive, and **4302** is the stale playtest game —
+its diff is **byte-identical** with the H4 server files swapped back to HEAD, apart from the new key.
+⚠️ **NOT re-recorded**: the merge-record (back up, `record --games=<the 52>`, merge the other 78
+manifest entries back) was blocked by the session's permission guard. Do it by hand, or run a full
+`record` and restore `baseline/game_4302/` as H3 did.
+⚠️ **Autoload check: STALE, and not H4's** — `TrekPhaserKellyType7` (commit `827326597`, "Update
+customTrek.php") is not in the map. `fvbuild.ps1 -Autoload` fixes it.
+Other harnesses unchanged from their H3 state (Stage 6 still 180/6 on the H1 rename; the two Stage 8/9
+client harnesses and `initialOrdersTooltipHarness.js` fail identically at HEAD). `php -l` clean on all
+eight server files; legacy bundles rebuilt (`yarn build:legacy`); statics regenerated — the RECHARGE
+tooltip reaches exactly the ten age-3+ faction files, and `advancedCharging` / `chargeBoostNotes` reach
+none (payload-only / protected).
+
+**Not verified here, and it needs a play test:** a Vorlon that closes a jump point should, next turn,
+offer **Extra Charging** `- 0 +` (up to 3) and lose 5–8 power per level; the turn after, its charge
+should read 1 + 1 + levels higher, and its fire orders must survive the boost. A Shadow/Kirishiac that
+phased in should show NO boost row until charged (or while it can buy nothing), and then Jump to
+Hyperspace as before. Set a charge boost, commit, and check next turn that it carried (while
+charging) or vanished (once charged) — and check `tac_individual_notes` for the `ChargeBoost` row at
+phase 4.
+
+---
+
 ### Stage H3 follow-up — the recharge display and carrying Maintain forward — BUILT 2026-09-18
 
 Two user reports from play test **4348** (a Vorlon Heavy Cruiser: capacitor 32, recharge 14, drive 6).
