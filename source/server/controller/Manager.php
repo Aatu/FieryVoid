@@ -146,6 +146,14 @@ class Manager{
             self::$dbManager->leaveSlot($user, $gameid, $slotid);
             self::$dbManager->deleteEmptyGames();
             self::touchGame($gameid);
+
+            // Drop the leaver's cached games list (getTacGames, 2s TTL): leaving redirects
+            // straight to games.php, and a list cached a moment earlier still holds this game.
+            // Locally that is every quick leave — /favicon.ico falls through nginx to index.php,
+            // which redirects to games.php and primes the cache ~1s after each page load.
+            if (function_exists('apcu_delete')) {
+                apcu_delete(self::getCachePrefix() . "gameslist_" . $user);
+            }
         }
         catch(exception $e) {
             throw $e;
