@@ -1074,13 +1074,7 @@
         public $displayName = "Particle Gun"; //it's not 'paired' in any way, except being usually mounted twin linked - like most fighter weapons...
         public $animation = "bolt";
         public $animationColor = array(255, 163, 26);
-	    /*
-        public $trailColor = array(255, 163, 26);
-        public $animationExplosionScale = 0.10;
-        public $projectilespeed = 12;
-        public $animationWidth = 2;
-        public $trailLength = 10;
-	*/
+
         public $intercept = 2;
 
         public $loadingtime = 1;
