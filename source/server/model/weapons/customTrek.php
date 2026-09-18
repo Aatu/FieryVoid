@@ -3897,6 +3897,41 @@ class TrekPhaserKelly extends TrekPhaser{
 
 }//end of class TrekPhaserKelly
 
+
+class TrekPhaserKellyType7 extends TrekPhaserKelly{
+		public $name = "TrekPhaser";
+        public $displayName = "Type 7 Phaser";
+        public $iconPath = "TrekPhaserM.png"; 
+        //public $animationExplosionScale = 0.3;
+
+        public $raking = 10;
+        
+        public $intercept = 2;
+	    public $priority = 6; //heavy Raking - they are light Raking technically, but among Federation weapons they're heavier ones
+		public $priorityAF = 6; //count as moderately strong vs fighters
+		
+        public $loadingtime = 1;
+		public $normalload = 2;
+		public $guns = 2;		
+		public $gunsArray = array( 1 => 2, 2=> 3);		
+        public $rangePenalty = 0.3; //1.5 per hex.
+        public $rangePenaltyArray = array(1=> 0.3, 2=> 1);		
+        public $fireControl = array(3, 3, 3);
+        public $fireControlArray = array(1=> array(3, 3, 3), 2=> array(6, 2, 0));		
+
+        public $damageType = "Raking";
+		public $damageTypeArray = array( 1 => "Raking", 2=> "Standard");		
+		public $weaponClass = "Particle";
+		public $firingModes = array( 1 => "Raking", 2=> "AntiFighter");
+		public $uninterceptable = true;
+		private $damageRolled = null;
+
+
+
+
+}
+
+
 //New version of Photon Torp so it can be adjusteted in KellyTrek without affecting existing Trek units
 class TrekPhotonTorpKelly extends TrekPhotonTorp{
         public $name = "TrekPhotonTorp";
