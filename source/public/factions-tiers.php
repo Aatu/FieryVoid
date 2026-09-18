@@ -1038,7 +1038,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <ul>
 <li>Each Ancient race has its own way into hyperspace, listed on the control sheet as a special jump drive. The <b>Shadows, Kirishiac, Mindriders, Torvalus, Triad, Thirdspace and Walkers</b>
             jump to hyperspace directly and <b>do not open jump points</b>: set <b>Jump to Hyperspace</b> on the drive in Initial Orders and the ship leaves the battle at the
-            <b>end of that turn</b>. It can still be fired on until it goes.</li>
+            <b>end of that turn</b>. It can still be fired upon until it goes, only Walker ships may fire at enemies on a turn where they jump to Hyperspace.</li>
+<li>Ancient factions can also spend power to boost a recharging Jump Engine, with each level of boost adding +1 to the recharge rate on that turn.</li>            
 <li>A ship jumping out <b>may not fire</b> that turn, and that includes interception - setting the jump withdraws any fire orders it already has. The Walkers are the
             exception: their ships fire normally on the turn they jump.</li>
 <li>If the drive is damaged, the chance of it destroying the ship as it jumps is <b>halved</b>. The Walkers' drives have no chance of failure at all.</li>
