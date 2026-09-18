@@ -1153,18 +1153,118 @@ var JumpEngine = function JumpEngine(json, ship) {
 		   targetShip's blocked-LoS skip drops the click silently. Same per-instance keying, same reason. */
 		this.ignoresLoS = true;
 	}
+	/* ⭐⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md §5 (Stage H4) - WHAT A BOOST MEANS ON THIS DRIVE THIS TURN,
+	   decided ONCE, from the payload's start-of-turn charge (R2). Only on a drive that charges the Ancient
+	   way (advancedCharging, JumpEngine::hasAdvancedCharging); every other engine keeps its blueprint
+	   boostable / maxBoostLevel untouched. Per INSTANCE and primitives only, so no shared-reference trap -
+	   the same shape AmmoMissileRackTriad.changeFiringMode uses to switch its boost on and off.
+	     recharging, chargeBoostMax sent -> EXTRA CHARGING: boostable, up to that many levels (a Vorlon
+	                                        drive is not boostable in its blueprint - this is what lets it);
+	     recharging, nothing to buy       -> NO BOOST AT ALL: it may not jump until charged (§10 A4), and a
+	                                        boost could not add charge (a jump point still standing, only
+	                                        the abduction cooldown running, a flight, or one turn short);
+	     fully charged                     -> the blueprint's answer: Jump to Hyperspace on a legacy drive,
+	                                        nothing on a Vorlon's. One level - it is a Yes/No. */
+	if (this.advancedCharging) {
+		var chargeBoostMax = parseInt(this.chargeBoostMax, 10) || 0;
+		if (chargeBoostMax > 0) {
+			this.boostable = true;
+			this.maxBoostLevel = chargeBoostMax;
+		} else if (!this.isChargedForJump()) {
+			this.boostable = false;
+		} else {
+			this.maxBoostLevel = 1;
+		}
+	}
 };
 JumpEngine.prototype = Object.create(Weapon.prototype);
 JumpEngine.prototype.constructor = JumpEngine;
 
 JumpEngine.prototype.initializationUpdate = function () {
-	if (shipManager.power.isBoosted(this.ship, this)) {
+	/* Stage H4 - "JUMP" only when the boost IS the jump. On an Ancient-charging drive the boost may be
+	   EXTRA CHARGING instead, and then the icon keeps its "charge / recharge time" counter (outputDisplay
+	   0 falls through to it). Asked of THIS turn's boost on such a drive: isBoosted's Deployment-phase
+	   look at last turn would call last turn's charge boost a jump - a drive still on the board did not
+	   jump. Every other drive is exactly as before. */
+	var jumping = this.hasAdvancedCharging() ? this.isJumpBoost() : shipManager.power.isBoosted(this.ship, this);
+	if (jumping) {
 		this.outputDisplay = "JUMP";
 	} else {
 		this.outputDisplay = this.output;
 	}
 	return this;
 }
+
+/* ===== HYPERSPACE_IMPROVEMENTS_PLAN.md §5 (Stage H4) - BOOSTING THE RECHARGE ======================
+
+   An Ancient's drive (factionAge 3+: Vorlons, The System, every Ancient / Walker drive) cannot be used
+   at all until fully charged - jumping out included - and while it recharges it may be BOOSTED to
+   charge faster: boost N = N extra turns of charging, credited at the END of the turn, up to 3 a turn,
+   for the drive's powerReq per level. Every rule's authority is the server (JumpEngine::isJumpOutBoost,
+   getChargeBoostMax, the 'ChargeBoost' note); these read what it published and nothing else. */
+
+//Mirror of JumpEngine::hasAdvancedCharging(). `advancedCharging` rides the payload only when true.
+JumpEngine.prototype.hasAdvancedCharging = function () {
+	return Boolean(this.advancedCharging);
+};
+
+/* How many levels of EXTRA CHARGING a boost may buy THIS turn, or 0 when a boost buys none - the server's
+   JumpEngine::getChargeBoostMax, published as chargeBoostMax only when non-zero. */
+JumpEngine.prototype.getChargeBoostMax = function () {
+	if (!this.hasAdvancedCharging()) return 0;
+	return parseInt(this.chargeBoostMax, 10) || 0;
+};
+
+/* Is the drive charged enough to be USED this turn? Always, on a drive that does not charge the Ancient way
+   (its boost-jump never had a charge test); otherwise the start-of-turn charge, which is what the server's
+   isJumpOutBoost reads. turnsloaded already carries the abduction cooldown (getVortexRechargeLoad). */
+JumpEngine.prototype.isChargedForJump = function () {
+	if (this.isFlightMounted()) return true;
+	if (!this.hasAdvancedCharging()) return true;
+	return !(parseInt(this.turnsloaded, 10) < parseInt(this.loadingtime, 10));
+};
+
+//Is this turn's boost EXTRA CHARGING? The two meanings cannot both hold (R2): chargeBoostMax is only
+//ever published for a drive that is NOT charged.
+JumpEngine.prototype.isChargeBoost = function () {
+	return this.getChargeBoostMax() > 0 && shipManager.power.getBoost(this) > 0;
+};
+
+/* ⭐ IS THIS TURN'S BOOST A JUMP TO HYPERSPACE? Mirror of JumpEngine::isJumpOutBoost, and what every
+   client "who is leaving" question asks instead of a bare boost test: the commit checklist
+   (gamedata.js), shipManager.movement.getJumpingOutEngine (and through it isJumpingToHyperspace and
+   isJumpFireForbidden), onBoostIncrease and the "JUMP" read-out. A legacy drive only - a Vorlon's boost is
+   only ever charging - and on an Ancient-charging drive only once it is charged. */
+JumpEngine.prototype.isJumpBoost = function () {
+	if (!(shipManager.power.getBoost(this) > 0)) return false;
+	if (!shipManager.movement.isLegacyJumpEngine(this)) return false;
+	return this.isChargedForJump();
+};
+
+/* ⭐ WHAT EXTRA CHARGING COSTS THE REACTOR THIS TURN: "the same as their normal power required", per level
+   (user request, Item 2) - the drive's powerReq again for each level, and 0 on every drive that is not
+   charging. It is THE BOOST'S PRICE: shipManager.power.countBoostPowerUsed returns it for a jump engine,
+   so getReactorPower charges it and PowerCapacitor.initializationUpdate adds it back after the commit,
+   like any other boost. (Charged beside the abduction draw instead, it was subtracted a second time after
+   the commit - game 4348, "cost 22".)
+   ⚠️ NEVER boostEfficiency: that is what the JUMP boost costs, it is 0, and 195 young-race hulls rely on it.
+   ⭐ ONE PAYER, THE FRONT END. Unlike the H3 upkeep there is no server draw, so on a Vorlon this is spent
+   by the capacitor storing less at the commit (PowerCapacitor.doIndividualNotesTransfer) - which is why it
+   is NOT in getVortexUpkeepReserved's add-back. */
+JumpEngine.prototype.getChargeBoostPowerDraw = function () {
+	if (!this.isChargeBoost()) return 0;
+	return Math.min(shipManager.power.getBoost(this), this.getChargeBoostMax()) * (this.powerReq || 0);
+};
+
+/* ⚠️⚠️ HOW MUCH OF LAST TURN'S BOOST shipManager.power.copyLastTurnPower MAY CARRY INTO THIS TURN.
+   It copies every power row forward, boosts included - and on an Ancient-charging drive a charge boost
+   carried onto a turn the drive is fully charged IS A JUMP TO HYPERSPACE: the ship would leave the battle
+   on a click the player made for something else. So a boost carries only while the drive is still
+   charging, and never more than can still count; 0 drops it. Any other drive: unchanged. */
+JumpEngine.prototype.getRepeatableBoost = function (amount) {
+	if (!this.hasAdvancedCharging()) return amount;
+	return Math.min(amount, this.getChargeBoostMax());
+};
 
 JumpEngine.prototype.hasMaxBoost = function () {
 	return true;
@@ -1376,13 +1476,20 @@ JumpEngine.prototype.forbidsFireWhileJumping = function () {
    The drive itself holds no orders (a legacy engine is autoFireOnly), and on a flight
    getOwningUnit is the flight, whose weapons are one level down on the craft. */
 JumpEngine.prototype.onBoostIncrease = function () {
-	this.mirrorFlightBoost(true);
-
 	/* §3.18 (Stage 20) - a Walker drive's boost IS its jump, and it cannot pour the same power into an
 	   abduction as well: setting the jump withdraws this turn's abduction, the way Maintain withdraws a
 	   shot. The server ignores a jumping unit's abduction anyway (EdjdAbduction::isDriveWorking), and
-	   canSelectForAbduction refuses a new one while the boost stands. */
+	   canSelectForAbduction refuses a new one while the boost stands. (Stage H4: a charging boost too -
+	   canSelectForAbduction refuses on ANY boost, so the drive does one thing a turn either way.) */
 	if (this.getAbductionOrder()) this.removeAbductionOrder();
+
+	/* ⭐⭐ STAGE H4 - EXTRA CHARGING IS NOT A JUMP, AND THIS IS WHERE THAT MATTERS MOST. Everything
+	   below is the jump's: withdraw every fire order on the unit and mirror the boost across a flight.
+	   Run it for a charge boost and a Vorlon that speeds its recharge silently loses every shot it had
+	   declared. (A flight never charges - chargeBoostMax is never sent for one - so nothing to mirror.) */
+	if (!this.isJumpBoost()) return;
+
+	this.mirrorFlightBoost(true);
 
 	if (!this.forbidsFireWhileJumping()) return;
 
@@ -3684,13 +3791,11 @@ PowerCapacitor.prototype.getRegeneration = function () {
      - on a capacitor already at or above its maximum (never NEGATIVE: a damaged capacitor holding more
        than its shrunken maximum is not reduced by the display, only by the server's cap).
 
-   ⚠️ THE ECONOMY IS UNCHANGED, and doIndividualNotesTransfer is what guarantees it: it takes this back
-   out before adding the full recharge, so the committed figure is EXACTLY the pre-change
-   min(stored - allocations + recharge, max). A full capacitor still absorbs Initial Orders spending up
-   to its recharge for free, as it always has. The one thing that genuinely widens is the commit gate
-   (getCapacitorShipsNegativePower reads this balance): a player may now allocate this turn's recharge,
-   which is what "produced in the Initial Orders phase" says. It cannot drive the stored figure below
-   zero - the top-up never exceeds the recharge it is later replaced by. */
+   ⚠️ SINCE THE H4 FOLLOW-UP (user ruling 2026-09-18, game 4348) THIS IS THE RECHARGE, FULL STOP:
+   doIndividualNotesTransfer banks the balance as displayed, so the stored figure is what was LEFT after
+   this turn's recharge and allocations, and a full capacitor no longer absorbs Initial Orders spending
+   up to its recharge for free (which the first version of this deliberately preserved). The commit gate
+   (getCapacitorShipsNegativePower) reads the same balance, so it cannot bank below zero. */
 PowerCapacitor.prototype.getTurnStartTopUp = function () {
 	if (typeof gamedata === 'undefined' || gamedata.gamephase !== 1) return 0;
 	if (this.rechargedThisTurn) return 0;
@@ -3723,12 +3828,15 @@ PowerCapacitor.prototype.doIndividualNotesTransfer = function () { //prepare ind
 	   server takes it. Exactly 0 on every other ship in the game - only a Vorlon drive maintaining a
 	   jump point this turn answers anything but 0. */
 	powerRemaining = powerRemaining + shipManager.power.getVortexUpkeepReserved(this.ship);
-	/* Stage H3 follow-up: the balance above already INCLUDES the part of this turn's recharge the
-	   display shows from the start of Initial Orders (getTurnStartTopUp). Take it back out before adding
-	   the full recharge, or it is banked twice. This line is what keeps the committed figure identical to
-	   the pre-change min(stored - allocations + recharge, max) - see the note on getTurnStartTopUp. */
-	powerRemaining = powerRemaining - this.getTurnStartTopUp();
-	powerRemaining = powerRemaining + this.getRegeneration();
+	/* ⭐⭐ Stage H4 follow-up (user ruling 2026-09-18, game 4348) - THE CAPACITOR BANKS WHAT IS LEFT.
+	   The balance above already holds this turn's recharge, capped at the maximum (getTurnStartTopUp),
+	   so it is posted as it stands: min(stored + recharge, max) - allocations. "32 - 18 = 14 on turn 4,
+	   then 14 + 14 = 28 at the start of turn 5."
+	   It used to take the top-up back out and add the FULL recharge instead - the pre-H3 banking,
+	   min(stored - allocations + recharge, max) - which on a full or nearly full capacitor let Initial
+	   Orders spending up to the recharge cost nothing at all: 32 - 18 banked 28, and turn 5 opened on 32.
+	   The two agree whenever the recharge fits under the cap, which is why the H3 play test (upkeep only,
+	   added back above) never told them apart. */
 	powerRemaining = Math.min(powerRemaining, this.powerMax);
 	//this.individualNotesTransfer.push(powerRemaining);
 	this.individualNotesTransfer = {

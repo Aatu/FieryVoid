@@ -2260,10 +2260,13 @@ public static function firePreFiringWeapons($gamedata){
            families that markLegacy() now puts back on the boost path, so the two had to be fixed
            together. Any future "find the jump engines" sweep should test instanceof, never a name.
 
-           NOT narrowed to isLegacyJump(): a boost committed on a NON-legacy engine before the
-           Stage 2 deploy must still resolve (that is the whole reason Stage 2 left this code in
-           place - see JumpEngine::$boostable). isOverloading() is the real gate, and a non-legacy
-           engine can no longer be given a new boost, so it never fires for one by accident.
+           ⭐⭐ NARROWED TO LEGACY DRIVES SINCE HYPERSPACE_IMPROVEMENTS_PLAN.md STAGE H4, and it had to
+           be. This used to rest on isOverloading() alone, safe only because a non-legacy engine
+           could not be boosted; H4 lets a Vorlon drive boost to charge faster, and every Vorlon that
+           did would have left the battle here. JumpEngine::isJumpOutBoost is the gate now: a legacy
+           drive's boost, and on an Ancient-charging drive only once it is fully charged. (The
+           pre-Stage-2 committed boost this once had to honour resolved at the end of its own turn,
+           a month before H4.)
 
            isDestroyed() restates the filter getSystemsByName applied for free. doHyperspaceJump
            re-checks the engine's health and its host section itself, but a destroyed engine should

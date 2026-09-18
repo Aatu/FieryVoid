@@ -143,10 +143,20 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
      *
      * Left in: the drive's own orders (a legacy drive has none, but a stale client might send one
      * that validateFireOrders should judge), rams (a collision, not firing - the server lets them
-     * stand at resolution too) and log-only orders. */
-    private static function dropFireOfJumpingShip($ship, $orders, $turn)
+     * stand at resolution too) and log-only orders.
+     *
+     * ⚠️⚠️ STAGE H4 - AND THE QUESTION IS NOW ASKED OF THE DB COPY ($gd), NOT THE POST-SIDE SHIP.
+     * "Is this boost a jump?" needs the drive's CHARGE (JumpEngine::isJumpOutBoost), and the charge is
+     * derived from the vortex and 'ChargeBoost' notes - which a POST-side ship never has loaded, so on
+     * it every drive reads fully charged, and a recharging Ancient that boosted for EXTRA CHARGING would
+     * have every order it declared silently dropped as though it were leaving. $gd is reloaded AFTER
+     * the power loop above has submitted this POST's rows (submitPower runs before either reload), so
+     * it has this turn's boost AND the notes. The POST-side ship is the fallback only if the lookup
+     * finds nothing. */
+    private static function dropFireOfJumpingShip($ship, $orders, $turn, $gd = null)
     {
-        $engine = JumpEngine::getUnitJumpingEngine($ship, $turn);
+        $source = ($gd && $gd->getShipById($ship->id)) ? $gd->getShipById($ship->id) : $ship;
+        $engine = JumpEngine::getUnitJumpingEngine($source, $turn);
         if (!$engine || !$engine->forbidsFireWhileJumping()) return $orders;
 
         $kept = array();
@@ -333,7 +343,7 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
 
             //An Ancient ship that has set its drive to jump out may not fire this turn, so what it
             //declared is never written - see the method.
-            if ($gateEngineOrders === null) $orders = self::dropFireOfJumpingShip($ship, $orders, $gameData->turn);
+            if ($gateEngineOrders === null) $orders = self::dropFireOfJumpingShip($ship, $orders, $gameData->turn, $gd);
 
             if (Firing::validateFireOrders($orders, $gd)){
                 $dbManager->submitFireorders($gameData->id, $orders, $gameData->turn, $gameData->phase);

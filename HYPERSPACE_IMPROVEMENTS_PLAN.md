@@ -801,6 +801,64 @@ tooltip (`setSystemDataWindow`) so the restriction is discoverable rather than s
 
 ## 11. Build log
 
+### Stage H4 follow-up — the Vorlon charge cost, and boosting on the arrival turn — 2026-09-18
+
+Two user reports from play tests **4348** and **4349**.
+
+**1. "3 levels should cost 18 but cost 22, and turn 5 opens on 32 with only 14 recharge" (4348, Vorlon
+Heavy Cruiser: capacitor 32, recharge 14, drive 6).** Two bugs, and the second is a RULING that reverses
+the H3 follow-up's "economy unchanged":
+- **The "22" was a double subtraction after the commit.** The capacitor's stored figure is net of this
+  turn's boosts once committed, so in Movement onwards `PowerCapacitor.initializationUpdate` adds each
+  system's `countBoostPowerUsed` back. The charge cost was charged beside the abduction draw instead,
+  so nothing added it back: 28 − 18 = 10 displayed. Fix: `countBoostPowerUsed` now returns
+  `getChargeBoostPowerDraw()` for a jump engine (0 for the jump, which stays free), and the separate
+  line in `getReactorPower` is gone. ⭐ **A per-level cost on a boost belongs in `countBoostPowerUsed`**
+  — it is the only thing the capacitor's post-commit add-back reads.
+- **⭐⭐ THE CAPACITOR NOW BANKS WHAT IS LEFT (user ruling: "32 − 18 on turn 4, then 14 + 14 = 28 at the
+  start of turn 5").** `PowerCapacitor.doIndividualNotesTransfer` used to post
+  `balance − topUp + recharge`, i.e. the pre-H3 `min(stored − allocations + recharge, max)`, which on a
+  full or nearly full capacitor let Initial Orders spending up to the recharge cost nothing (32 − 18
+  banked 28, and the top-up then opened turn 5 on 32). It now posts the balance as displayed, which
+  already holds this turn's recharge capped at the maximum: `min(stored + recharge, max) − allocations`
+  (+ the H3 upkeep reservation, unchanged). **This is a Vorlon-wide economy change, not an H4-only
+  one** — every Initial Orders allocation on a full capacitor now costs in full. The two rules agree
+  whenever the recharge fits under the cap, which is why the H3 play test never told them apart.
+  `vorlonUpkeepClientHarness.js` §6 asserted the old rule and now asserts this one, with two cases where
+  they differ.
+- ⚠️ Game 4348 already banked 28 on turn 4, so ITS turn 5 still opens on 32. From turn 5 on it banks
+  correctly; a fresh game shows the whole sequence.
+
+**2. "The Traveler and Mastership can't boost their Jump Engines" (4349, both phased in on turn 2).**
+On the arrival turn the phase-in doorway still stands — its closure is only written at the end of that
+turn — so `getChargeBoostMax` answered 0 and the drive offered no boost at all. But a one-shot doorway
+IN closes at the end of the arrival turn whatever anybody declares. So:
+- `getCertainCloseTurn()`: the recorded closure, or — for a ship-held `SpawnJumpPointExit`
+  (`SpawnJumpPointPhaseIn` included), known from a new protected `$vortexIsExit` set by
+  `restoreVortexState` — `openTurn + 1`. Any other standing jump point may yet be maintained and answers
+  null. ⚠️ **H5 makes ship-held blue exits maintainable: narrow this to `SpawnJumpPointPhaseIn` then.**
+- `getChargeBoostMax` offers from the closing turn on (`$turn >= closeTurn`), not only after it.
+- The walk now starts AT the closing turn with 0, each turn adding `1 + boost(t)`. With no boosts that
+  is still exactly `turn − closeTurn` (identity grid unchanged); what changes is that a boost ON the
+  closing turn is credited — the turn after arrival reads 1 + levels.
+
+**3. "The Traveler and Mastership's drive shows 1/4 on the arrival turn" (4349).** The phase-in doorway
+still stands on that turn, so `stripForJson` sent the Maintain counter (`vortexTurnsOpen` 1,
+`vortexMaxTurns` 4) and the icon drew it instead of the charge. An Ancient — any legacy drive — holds no
+jump point open, so **a legacy drive now sends no vortex counter at all** and the icon falls through to
+the charge, 0/N on arrival. This reverses the Stage 9 note that "the vortex counter block is right for
+them too". Nothing else reads the counter for a ship drive (`ReinforcementEntry` reads it for GATES
+only), and a real entrance held by a drive reverted to legacy mid-game (The System, H4) still draws its
+counter through the client's fallback, which derives it from the vortex unit and finds entrances only.
+
+**Harnesses:** `rechargeBoostClientHarness.js` §6 replays 4348 (42 ⇒ 49); `rechargeBoostHarness.php` §3b
+replays 4349 (95 ⇒ 108, the last three for item 3). All four fixes self-tested by deletion. Replay harness **125 passed / 1 failed
+/ 2 skipped** against the corpus as you re-recorded it: the one failure is **4349**, whose only diff is
+`chargeBoostMax: added (3)` on the Mastership's and Traveler's drives — this fix, intended. Legacy
+bundles rebuilt; statics unaffected (no public property or tooltip change).
+
+---
+
 ### Stage H4 — boosting the recharge (Item 2) — BUILT 2026-09-18
 
 Built to §5's design — R2 (one boost carrier, disambiguated by the charge at the START of the turn),

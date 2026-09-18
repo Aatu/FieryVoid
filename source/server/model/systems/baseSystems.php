@@ -5981,6 +5981,40 @@ class JumpEngine extends Weapon{
      * entries. The client learns it from stripForJson, and only on the drives that have it. */
     protected $vortexUpkeep = false;
 
+    /* ⭐⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md §5 (Stage H4) - BOOSTING THE RECHARGE.
+     *
+     * An Ancient's drive (factionAge 3+ - see hasAdvancedCharging) may be boosted while it RECHARGES:
+     * "each time the listed amount of extra power is applied, the jump engine is considered to have
+     * been operating for an additional turn". Boost N buys N extra turns of charging (R3), at most
+     * CHARGE_BOOST_MAX in one turn, for the drive's powerReq per level.
+     *
+     * ⭐ THE BOOST CARRIER IS SHARED WITH "JUMP TO HYPERSPACE" (R2), and the charge at the START of the
+     * turn is what says which one a boost is: fully charged -> a jump (isJumpOutBoost), recharging ->
+     * extra charging (getChargeBoostMax). The two states cannot both hold, which is what makes one
+     * carrier safe.
+     *
+     * turn => level, one entry per turn a boost bought charge, rebuilt on every load from this
+     * drive's 'ChargeBoost' IndividualNotes (onIndividualNotesLoaded) and written at the end of the
+     * turn it was bought (generateIndividualNotes, phase 4).
+     *
+     * ⚠️⚠️ WHY A NOTE AND NOT THE BOOST ROWS THEMSELVES, which is what the plan sketched: the server
+     * loads tac_power for THIS turn and LAST turn only (DBManager::getPowerForShips), so a boost
+     * bought three turns ago is simply not there to count. The note is the same shape of answer the
+     * EDJD's abduction record gives the same problem.
+     *
+     * Protected like every other piece of vortex state: json_encode takes public properties only. */
+    protected $chargeBoostNotes = array();
+
+    /* Is this engine's CURRENT vortex a doorway IN (SpawnJumpPointExit, SpawnJumpPointPhaseIn
+     * included)? Set by restoreVortexState, which is where the vortex unit is resolved; read only by
+     * getCertainCloseTurn. Protected, so no payload key. */
+    protected $vortexIsExit = false;
+
+    //§5 R3 - "boost N => N+1 turns of charging, capped at 4 turns in any one turn".
+    const CHARGE_BOOST_MAX = 3;
+    //The note key, both columns - well inside notekey_human's varchar(40).
+    const CHARGE_BOOST_NOTE = 'ChargeBoost';
+
 	//JumpEngine tactically  is not important at all!
 	public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
 
@@ -6451,9 +6485,120 @@ class JumpEngine extends Weapon{
         return $this->ancientJump && !$this->walkerJump;
     }
 
+    /* ⭐⭐ STAGE H4 - DOES THIS DRIVE CHARGE THE ANCIENT WAY? The drives of factionAge 3+ units: the
+     * Vorlons, The System, and every Ancient / Walker legacy drive. Two things follow, and both are
+     * rulings (§10 A4, R2):
+     *   1. it cannot be USED AT ALL until it is fully charged - jumping out included (isJumpOutBoost);
+     *   2. while it recharges it may be boosted to charge faster (getChargeBoostMax).
+     * ⭐ A young-race drive (Trek, BSG, Star Wars, every B5 younger race) answers false and keeps its
+     * boost-means-jump behaviour unconditionally - zero behaviour change for those hulls.
+     *
+     * Asked at READ time through getUnit(), the way getVortexRechargeTime resolves the gate term:
+     * factionAge is a SHIP property and this is a system question. Not on the Trek Nacelle (its 4th
+     * argument is no recharge at all - $hasJumpRecharge) and never on a fixed gate (signalled, not
+     * boosted). A Mapmaker's drive answers for its FLIGHT's age - getUnit() is the flight. */
+    public function hasAdvancedCharging()
+    {
+        if (!$this->hasJumpRecharge) return false;
+        if ($this->gateJump) return false;
+        $unit = $this->getUnit();
+        return $unit && (int)$unit->factionAge >= 3;
+    }
+
+    /* The engine whose CHARGE this one reports. Itself on every hull; on a fighter craft, the flight's
+     * one engine that holds the vortex state (FighterFlight::getFlightJumpEngine) - the same routing
+     * stripForJson uses, so the gate reads the charge every craft's icon shows. */
+    protected function getChargeSource()
+    {
+        $unit = $this->getUnit();
+        if ($unit instanceof FighterFlight){
+            $flightEngine = $unit->getFlightJumpEngine();
+            if ($flightEngine) return $flightEngine;
+        }
+        return $this;
+    }
+
+    /* ⭐ STAGE H4 - THE MOST A BOOST ON $turn MAY BUY, in extra turns of charging, or 0 when a boost on
+     * $turn buys nothing. Non-zero only while the JUMP-POINT recharge is running:
+     *   - the drive charges the Ancient way (hasAdvancedCharging);
+     *   - it is not on a fighter flight - refused outright, as Maintain is (§5; a flight's drives mirror
+     *     one boost, which is a JUMP, and a Mapmaker's powerReq is 0 so a charge would be free);
+     *   - it has spent a charge, and the jump point that spent it closes at the end of $turn at the
+     *     latest - the charge does not move while one stands, and a boost on a turn it will still be
+     *     standing afterwards would buy nothing. ⭐ THE CLOSING TURN ITSELF COUNTS (user report
+     *     2026-09-18, game 4349): the recharge walk credits it (getJumpPointRechargeLoad), so an Ancient
+     *     that has just PHASED IN may boost on its arrival turn, whose doorway closes at its end
+     *     whatever anybody declares - see getCertainCloseTurn;
+     *   - and there is charge left that the boost can actually add. Capped at CHARGE_BOOST_MAX (R3) and
+     *     at what finishes the charge BY NEXT TURN: at 7/8 the drive reads 8/8 next turn unboosted, so a
+     *     boost there would be power for nothing and is not offered at all.
+     * ⚠️ THE ABDUCTION COOLDOWN IS NOT CHARGEABLE (§5 trap): a drive waiting out only that reads 0 here,
+     * because getJumpPointRechargeLoad is already full.
+     * One authority for both ends: stripForJson publishes it as chargeBoostMax, and
+     * generateIndividualNotes clamps what it credits to it. */
+    public function getChargeBoostMax($turn)
+    {
+        if (!$this->hasAdvancedCharging()) return 0;
+        if ($this->isFlightMounted()) return 0;
+
+        $turn = (int)$turn;
+        if ($this->vortexOpenTurn === null) return 0;                            //never spent a charge
+        if ((int)$this->vortexOpenTurn > $turn) return 0;                        //a later one, from an earlier replay turn
+        $closeTurn = $this->getCertainCloseTurn();
+        if ($closeTurn === null || $turn < $closeTurn) return 0;                 //still standing after this turn
+
+        $left = $this->getVortexRechargeTime() - $this->getJumpPointRechargeLoad($turn) - 1;
+        return max(0, min(self::CHARGE_BOOST_MAX, $left));
+    }
+
+    /* ⭐ STAGE H4 - THE TURN AT WHOSE END THIS ENGINE'S JUMP POINT CLOSES, if that is already CERTAIN,
+     * else null. The recorded closure when there is one. Otherwise, only a ship's own doorway IN: a
+     * one-shot exit (SpawnJumpPointPhaseIn included) closes at the end of the turn after it formed -
+     * the arrival turn - whatever anybody declares (getVortexClosureReason's exit branch), and its
+     * opener is on the board by then. Every other standing jump point may yet be maintained, so it is
+     * uncertain and answers null.
+     * ⚠️ HYPERSPACE_IMPROVEMENTS_PLAN.md Stage H5 makes a ship-held blue exit MAINTAINABLE. When it
+     * lands, only SpawnJumpPointPhaseIn stays certain here - narrow this line with it. */
+    protected function getCertainCloseTurn()
+    {
+        if ($this->vortexOpenTurn === null) return null;
+        if ((int)$this->vortexCloseTurn >= 0) return (int)$this->vortexCloseTurn;
+        if ($this->vortexIsExit && !$this->gateJump) return (int)$this->vortexOpenTurn + 1;
+        return null;
+    }
+
+    //The charge a boost on $turn bought, in extra turns (0 when none). See $chargeBoostNotes.
+    public function getRechargeBoostLevel($turn)
+    {
+        $turn = (int)$turn;
+        return isset($this->chargeBoostNotes[$turn]) ? (int)$this->chargeBoostNotes[$turn] : 0;
+    }
+
+    /* ⭐⭐ STAGE H4 - IS THIS DRIVE'S BOOST ON $turn A JUMP TO HYPERSPACE? The narrow reader every
+     * "who is leaving" question now asks, instead of the bare isOverloading() it used to be.
+     *
+     *   - only a LEGACY drive leaves this way. A Vorlon drive opens jump points; its boost is only ever
+     *     extra charging, and without this line every Vorlon that boosted its drive would leave the
+     *     battle at the end of the Fire phase (the §5 trap);
+     *   - an Ancient-charging drive must be FULLY CHARGED at the start of the turn (§10 A4). While it
+     *     recharges its boost is extra charging, and the drive cannot jump at all;
+     *   - every other legacy drive - Trek, BSG, Star Wars - jumps on the boost exactly as before.
+     * The charge is read from getChargeSource(), so every craft of a flight answers alike. */
+    public function isJumpOutBoost($turn)
+    {
+        if (!$this->legacyJump) return false;
+        if ($this->isFlightMounted()) return true;        
+        if (!$this->isOverloading($turn)) return false;
+        if (!$this->hasAdvancedCharging()) return true;
+
+        $source = $this->getChargeSource();
+        return $source->getVortexRechargeLoad($turn) >= $source->getVortexRechargeTime();
+    }
+
     /* ⭐ THE ENGINE TAKING $unit OUT OF THE BATTLE AT THE END OF $turn, or null: the first one with a
-     * Jump-to-Hyperspace boost committed for that turn (isOverloading reads power type 2, which
-     * despite the name is the BOOST record). ONE reader for the end-of-Fire sweep that performs the
+     * Jump-to-Hyperspace boost committed for that turn (isJumpOutBoost - Stage H4: a legacy drive's
+     * boost, and on an Ancient-charging drive only once it is fully charged; power type 2 is the
+     * BOOST record). ONE reader for the end-of-Fire sweep that performs the
      * jump and for the Firing withdrawal that enforces the no-fire rule, so the two cannot disagree
      * about which units are leaving.
      *
@@ -6474,7 +6619,7 @@ class JumpEngine extends Weapon{
             foreach ($unit->systems as $craft){
                 if (!is_array($craft->systems)) continue;
                 foreach ($craft->systems as $system){
-                    if ($system instanceof JumpEngine && $system->isOverloading($turn)) return $system;
+                    if ($system instanceof JumpEngine && $system->isJumpOutBoost($turn)) return $system;
                 }
             }
             return null;
@@ -6483,7 +6628,7 @@ class JumpEngine extends Weapon{
         foreach ($unit->systems as $system){
             if (!($system instanceof JumpEngine)) continue;
             if ($system->isDestroyed()) continue;
-            if ($system->isOverloading($turn)) return $system;
+            if ($system->isJumpOutBoost($turn)) return $system;
         }
 
         return null;
@@ -6840,7 +6985,25 @@ class JumpEngine extends Weapon{
         $closeTurn = (int)$this->vortexCloseTurn;
         if ($closeTurn < 0 || $turn <= $closeTurn) return 0;      //open, or closing at the end of this turn
 
-        return min($charge, $turn - $closeTurn);                  //recharging, from the turn AFTER it closed
+        /* ⚠️ A DRIVE THAT NEVER BOUGHT CHARGE ANSWERS EXACTLY WHAT IT ALWAYS DID - the closed form,
+           untouched - so every replay snapshot of an unboosted drive is bit-for-bit unchanged. */
+        if (empty($this->chargeBoostNotes)) return min($charge, $turn - $closeTurn);   //recharging, from the turn AFTER it closed
+
+        /* ⭐⭐ STAGE H4 - THE SAME CLIMB, WALKED FORWARD, with each turn's boost credited at the END of
+           the turn that bought it: every turn from the CLOSING turn on adds 1 plus that turn's boost -
+           which is why the turn after the closure reads 1 (the closing turn's own +1). The closing
+           turn's boost counts too: on a phase-in doorway's arrival turn the closure is certain, so a
+           boost there is offered (getChargeBoostMax) and must be credited.
+           "Strictly before $turn" is load-bearing - a boost that counted toward its own turn could
+           complete the charge and flip its own meaning from charging to jumping mid-turn (§5 rule 2).
+           With no boost in the range the walk IS the closed form above. A note from before the
+           closing turn belongs to an earlier cycle and is outside the range; one from $turn or later
+           (an earlier replay turn) likewise. */
+        $load = 0;
+        for ($t = $closeTurn; $t < $turn && $load < $charge; $t++){
+            $load = min($charge, $load + 1 + $this->getRechargeBoostLevel($t));
+        }
+        return $load;
     }
 
     /* How many turns the vortex this engine holds has been OPEN as of $turn, or null when it holds
@@ -9166,6 +9329,7 @@ class JumpEngine extends Weapon{
         //is. Ordering makes it academic in practice (loads happen before firing, never after), but
         //leaving one of the per-vortex fields out of the reset is how the next one drifts.
         $this->vortexDisrupted   = false;
+        $this->vortexIsExit      = false;
 
         foreach ($vortexNotes as $note){
             //LIMIT 3: the closure reason is free text and can contain commas.
@@ -9201,6 +9365,8 @@ class JumpEngine extends Weapon{
             $this->vortexOpenTurn    = $openTurn;
             $this->vortexCloseTurn   = $closeTurn;
             $this->vortexCloseReason = $reason;
+            //Stage H4 - whether it is a doorway IN (the one-shot exit), for getCertainCloseTurn.
+            $this->vortexIsExit      = ($vortex instanceof SpawnJumpPointExit);
         }
 
         /* ⭐ JUMP GATES (PHASE 2) - THE HOLD, keyed by the SAME vortex id, applied AFTER the loop
@@ -9430,7 +9596,16 @@ class JumpEngine extends Weapon{
 		   otherwise take its value for the pre-jump combat value. */
 		$this->abductionNotes = array();
 
+		/* ⭐ STAGE H4 - a SIXTH kind: one 'ChargeBoost' note per turn a boost bought this drive extra
+		   charge (see $chargeBoostNotes). Reset and claimed for the same two reasons as the EDJD's. */
+		$this->chargeBoostNotes = array();
+
 		foreach ($this->individualNotes as $currNote) {
+			if ($currNote->notekey_human === self::CHARGE_BOOST_NOTE){
+				$this->chargeBoostNotes[(int)$currNote->turn] = max(0, (int)$currNote->notevalue);
+				continue;
+			}
+
 			if ($currNote->notekey_human === self::ABDUCTION_NOTE){
 				$parts = explode(':', (string)$currNote->notevalue);
 				if (count($parts) >= 5){
@@ -9474,6 +9649,48 @@ class JumpEngine extends Weapon{
 		//needs, and for the same reason.
 		$this->restoreVortexScatter($scatterNotes);
 	}//endof onIndividualNotesLoaded
+
+	/* ⭐⭐ STAGE H4 - RECORD THE CHARGE A BOOST BOUGHT THIS TURN, at the END of the turn.
+	 *
+	 * Phase 4 is FireGamePhase::advance, and nothing else: it reloads the game ($servergamedata), so
+	 * the vortex state and every earlier 'ChargeBoost' note are loaded, and this turn's power rows are
+	 * there to read. Every other phase runs this hook on POST-side ships, which have neither
+	 * (arch_post_side_ship_reconstruction) - so the phase test is what keeps it off them.
+	 *
+	 * ⭐ THE SERVER DECIDES WHAT THE BOOST WAS WORTH, not the row: only up to getChargeBoostMax, which
+	 * is 0 on a drive that was fully charged (its boost was a JUMP), still holding a jump point, only
+	 * cooling down from an abduction, on a flight, or young-race. A tampered POST cannot buy more than
+	 * CHARGE_BOOST_MAX, nor charge that would not count. After closeExpiredVortices, deliberately: a
+	 * jump point closing THIS turn reads as still standing, and a boost on it buys nothing.
+	 *
+	 * An offline or destroyed drive is not charging. Idempotent: a second advance() over the same turn
+	 * finds the note the first one wrote and writes nothing. */
+	public function generateIndividualNotes($gamedata, $dbManager)
+	{
+		parent::generateIndividualNotes($gamedata, $dbManager);
+		if ((int)$gamedata->phase !== 4) return;
+
+		$turn = (int)$gamedata->turn;
+		if (isset($this->chargeBoostNotes[$turn])) return;
+
+		$boost = 0;
+		foreach ($this->power as $power){
+			if ((int)$power->turn === $turn && (int)$power->type === 2) $boost += (int)$power->amount;
+		}
+		if ($boost <= 0) return;
+
+		if ($this->isDestroyed($turn) || $this->isOfflineOnTurn($turn)) return;
+
+		$level = min($boost, $this->getChargeBoostMax($turn));
+		if ($level <= 0) return;
+
+		$unit = $this->getUnit();
+		if (!$unit) return;
+
+		$this->individualNotes[] = new IndividualNote(-1, TacGamedata::$currentGameID, $turn, $gamedata->phase,
+			$unit->id, $this->id, self::CHARGE_BOOST_NOTE, self::CHARGE_BOOST_NOTE, $level);
+		$this->chargeBoostNotes[$turn] = $level;
+	}
 
 	/* ⭐ REINFORCEMENTS STAGE 6 - the scatter half of the note restore, keyed by vortex ship id
 	   exactly as the other two are.
@@ -9748,19 +9965,21 @@ class JumpEngine extends Weapon{
                         //$this->data["Special"] .= "<br>Turns must be consecutive. Cost: ramming factor / 50 power-turns (/ 10 against advanced armour), rounded up, adding anything ATTACHED to it (never what it carries inside); fixed on the first turn. Other Walker drives may add power once it has begun. The target is removed to hyperspace when the total is reached. No line of sight is needed.";
                         //$this->data["Special"] .= "<br>If damaged, the drive rolls for detonation (half the % of boxes lost) on EVERY turn it is abducting. Deactivating or losing the drive cancels the abduction.";
                     }elseif (!$this->isFlightMounted()){
-                        $this->data["Special"] .= "<br><b>Abduction support:</b> select it in Initial Orders and click a unit already being abducted to add half a power-turn for double power. It cannot begin an abduction.";
+                        $this->data["Special"] .= "<br>Abduction support:</b> select it in Initial Orders and click a unit already being abducted to add half a power-turn for double power. It cannot begin an abduction.";
                     }
                 }else{
                     $this->data["Special"] .= "<br>The ship may NOT fire on the turn it jumps - no interception either.";
                     $this->data["Special"] .= "<br>If the drive is damaged, the ship has HALF the usual chance of being destroyed as it jumps (the % of drive boxes lost, halved).";
                 }
                 $this->data["Special"] .= "<br>Cannot be affected by a Vortex Disruptor.";
+                $this->data["Special"] .= $this->getAdvancedChargingText();
                 $this->data["Special"] .= "<br>WARNING - Jumping to hyperspace REMOVES ship from rest of the battle.";
                 $this->data["Special"] .= "<br>SHOULD NOT be shut down for power (unless damaged >50% or if Desperate rules apply).";
                 ShipSystem::setSystemDataWindow($turn);
                 return;
             }
             $this->data["Special"]  = "<br>Boost in Initial Orders to jump to hyperspace at end of turn.";
+            $this->data["Special"] .= $this->getAdvancedChargingText();
             $this->data["Special"] .= "<br>WARNING - Jumping to hyperspace REMOVES ship from rest of the battle.";
             $this->data["Special"] .= "<br>If Jump Engine is damaged, ship has a % chance of being destroyed opening jump point.";
             $this->data["Special"] .= "<br>SHOULD NOT be shut down for power (unless damaged >50% or if Desperate rules apply).";
@@ -9795,14 +10014,12 @@ class JumpEngine extends Weapon{
            reads, so the tooltip cannot promise a rule the server will not apply. */
         if ($this->chargesVortexUpkeep()){
             $cost = $this->getVortexUpkeepCost();
-            $this->data["Special"] .= "<br><b>POWER:</b> this drive draws " . $cost . " power from the Power Capacitor ONLY on a turn it is used"
-                . " - the turn it opens a jump point, and every turn it maintains one. It costs nothing on any other turn.";
-            $this->data["Special"] .= "<br><b>UPKEEP:</b> the " . $cost . " is taken at the END of the turn. In exchange the ship does NOT have to"
-                . " shut its systems down to hold the jump point open, and the jump point has NO four-turn limit: it stands for as long as the"
-                . " upkeep is paid. If the Capacitor cannot cover it, the jump point closes.";
+            $this->data["Special"] .= "<br>POWER: this drive draws " . $cost . " power from the Power Capacitor ONLY on a turn it is used.";
+            $this->data["Special"] .= "<br>UPKEEP: The ship does NOT have to shut its systems down to hold the jump point open, and jump point turn";
         }
         //Stage H3 follow-up (user request 2026-09-18): JumpEngine.continueVortexMaintain re-declares it each turn.
-        $this->data["Special"] .= "<br>Once you set <b>Maintain</b>, it carries over to the following turns automatically until you turn it OFF.";
+        $this->data["Special"] .= "<br>Once you set Maintain, it carries over to the following turns automatically until you turn it OFF.";
+        $this->data["Special"] .= $this->getAdvancedChargingText();
         $this->data["Special"] .= "<br>See FAQ for full rules for Jump Drives.";
         $this->data["Special"] .= "<br>SHOULD NOT be shut down for power (unless damaged >50% or if Desperate rules apply).";
 		/* ShipSystem, not parent. Weapon::setSystemDataWindow appends a gun's tooltip block -
@@ -9816,6 +10033,23 @@ class JumpEngine extends Weapon{
 		ShipSystem::setSystemDataWindow($turn);
 		$this->data["Weapon type"] = $this->weaponClass;
 		$this->data["Range"] = $this->range;
+    }
+
+    /* ⭐ STAGE H4 (§10 A4) - THE CHARGING RULE, STATED WHERE THE PLAYER MEETS IT, so a drive that
+     * refuses to jump while it recharges is a rule they can read rather than a surprise. '' on every
+     * drive hasAdvancedCharging() does not cover. Rules and the per-level cost only - this text rides
+     * the STATIC blueprint (see setGateSystemDataWindow for why no live numbers belong in here). */
+    protected function getAdvancedChargingText()
+    {
+        if (!$this->hasAdvancedCharging()) return '';
+
+        $use  = $this->legacyJump ? "jump to hyperspace" : "open a jump point";
+        $text = "<br><b>RECHARGE:</b> this drive cannot " . $use . " until it is FULLY recharged.";
+        if ($this->isFlightMounted()) return $text;
+
+        $text .= " While it recharges, boost it in Initial Orders (Extra Charging): each level adds a turn of charging, up to "
+            . self::CHARGE_BOOST_MAX . " a turn, for " . (int)$this->powerReq . " power per level.";
+        return $text;
     }
 
     /* ⭐ THE FIXED GATE TOOLTIP (JUMP_GATES_PLAN.md Stage 5). Its own text, not a variant of the
@@ -9845,29 +10079,6 @@ class JumpEngine extends Weapon{
         //is the gate's base recharge whatever hull it is mounted on.
         $recharge = max(1, (int)$this->delay);
         $maxHold  = self::MAX_VORTEX_TURNS;
-
-        /*$this->data["Special"]  = "<br><b>SIGNALLING THE GATE.</b> In Initial Orders, CLICK THE GATE - no ship needs to be";
-        $this->data["Special"] .= " selected. The button is offered if you have any live unit within " . $this->range . " hexes of it;";
-        $this->data["Special"] .= " which unit does not matter, and NO line of sight is needed. Signalling never reveals a";
-        $this->data["Special"] .= " stealthed, shaded or cloaked unit. ANY player may signal ANY gate, including one the enemy bought.";
-        $this->data["Special"] .= "<br><b>THE DURATION.</b> Set how many turns to hold the jump point open - 1 to " . $maxHold;
-        $this->data["Special"] .= " on an undamaged gate - and press SIGNAL. It cannot be changed afterwards: there is no Maintain. The jump point";
-        $this->data["Special"] .= " forms at the end of that turn and can be entered from the NEXT turn.";
-        $this->data["Special"] .= "<br><b>THE FACING CANNOT BE CHOSEN.</b> The vortex always takes the GATE'S OWN facing, set when";
-        $this->data["Special"] .= " the gate was placed. The arrow drawn over the gate is its mouth: a unit must be TRAVELLING";
-        $this->data["Special"] .= " INTO that side on the step that carries it into the hex, then press Jump to Hyperspace.";
-        $this->data["Special"] .= " Movement ends there and the unit leaves the battle keeping its full combat value.";
-        $this->data["Special"] .= "<br><b>CONTESTED GATES.</b> If several players signal the same gate in one turn, the one whose";
-        $this->data["Special"] .= " nearest unit is CLOSEST wins - the owner has no priority - and an exact tie is rolled off.";
-        $this->data["Special"] .= " The winner's duration is used; the losers lose nothing but the turn's claim.";
-        $this->data["Special"] .= "<br><b>RECHARGE.</b> Opening a jump point spends the gate's whole charge. It recharges from the";
-        $this->data["Special"] .= " turn after that jump point closes, 1 per turn, and cannot be signalled again until it reads";
-        $this->data["Special"] .= " " . $recharge . "/" . $recharge . " on this system's icon.";
-        $this->data["Special"] .= "<br><b>DAMAGE.</b> The gate's condition is its REACTOR. Every 3 points of damage on it adds a";
-        $this->data["Special"] .= " turn to the recharge, every 15 points costs a turn off the longest hold, and losing the";
-        $this->data["Special"] .= " reactor entirely destroys the gate.";
-        $this->data["Special"] .= "<br>A DAMAGED Jump Engine may fail: at the end of a turn the gate opens a jump point, the gate";
-        $this->data["Special"] .= " is destroyed on a d100 roll at or under the percentage of Jump Engine boxes lost.";*/
 
 		$this->data["Special"]  = "<br>Gate can be signalled to open by any unit within " . $this->range . " hexes";
         $this->data["Special"] .= "<br>Set how many turns to hold the jump point open - 1 to " . $maxHold . ". It cannot be changed afterwards and the jump point forms at the end of that turn and can be entered from the NEXT turn.";
@@ -9953,9 +10164,8 @@ class JumpEngine extends Weapon{
            ⚠️ THIS USED TO TEST $legacyJump, AND THAT WAS THE BUG. Stage 9 gave every legacy drive a
            way to phase IN, so a Phasing Drive / Hyperdrive / FTL Drive spends and recovers its
            charge exactly as a B5 Jump Engine does - and short-circuiting here left all of them
-           drawing a flat 1/1 while the real state moved underneath. The vortex counter block below
-           is right for them too: a phase-in doorway is a vortex, invisible or not, and its holder's
-           icon should count it. */
+           drawing a flat 1/1 while the real state moved underneath. (The vortex counter block below
+           used to be "right for them too" - it is not, see the Stage H4 note there.) */
         if (!$this->hasJumpRecharge) return $strippedSystem;
 
         $turn = (int)TacGamedata::$currentTurn;   //(int): mysqli hands the turn back as a STRING
@@ -9987,6 +10197,21 @@ class JumpEngine extends Weapon{
            claim then rejected, which is the worst of both. */
         $strippedSystem->loadingtime = $source->getVortexRechargeTime();
 
+        /* ⭐⭐ STAGE H4 - THE ANCIENT CHARGING RULE, and the client's whole knowledge of it.
+             advancedCharging - this drive cannot be used until fully charged, jumping out included
+                                (the client's mirror of isJumpOutBoost reads it with the pair above);
+             chargeBoostMax   - THIS turn, a boost is EXTRA CHARGING, up to this many levels: the
+                                stepper replaces "Jump to Hyperspace" and the reactor pays powerReq a
+                                level. Absent = a boost means nothing but a jump (or nothing at all).
+           Both sent ONLY when they mean something, so every young-race drive's payload is
+           byte-identical. Off $source, like the pair above, so the craft of a flight agree - though a
+           flight never has a chargeBoostMax (getChargeBoostMax refuses one outright). */
+        if ($source->hasAdvancedCharging()){
+            $strippedSystem->advancedCharging = true;
+            $chargeBoostMax = $source->getChargeBoostMax($turn);
+            if ($chargeBoostMax > 0) $strippedSystem->chargeBoostMax = $chargeBoostMax;
+        }
+
         /* ⭐⭐ STAGE H3 - THE CAPACITOR-FED FLAG, and it is the CLIENT'S whole knowledge of the Vorlon
            upkeep rule. Three client sites read it and every one of them would otherwise be wrong on a
            Vorlon: the Maintain toggle must stay offered past the four-turn cap that no longer applies
@@ -10011,7 +10236,16 @@ class JumpEngine extends Weapon{
             $strippedSystem->vortexUpkeepCost = $source->getVortexUpkeepCost();
         }
 
-        $age = $source->getVortexAge($turn);
+        /* ⭐ STAGE H4 follow-up (user report 2026-09-18, game 4349) - A LEGACY DRIVE NEVER COUNTS A JUMP
+           POINT. Ancients (and every other legacy drive) hold no jump points open; the doorway one phases
+           in through is an invisible SpawnJumpPointPhaseIn that stands only for its arrival turn, and on
+           that turn the icon read "1/4" - a Maintain counter for something that cannot be maintained. With
+           no counter the icon falls through to the charge, "0/N" on arrival, which is what matters: the
+           drive has just spent it (JumpEngine.getVortexIconLoad / SystemIcon.getText).
+           ⭐ A REAL entrance held by a drive reverted to legacy mid-game (The System, markLegacy'd in H4,
+           with a jump point already open) still shows its counter: the client's fallback derives it from
+           the vortex unit, and getVortexHeldBy finds entrances only - never a phase-in doorway. */
+        $age = $this->legacyJump ? null : $source->getVortexAge($turn);
         if ($age !== null){
             $strippedSystem->vortexTurnsOpen = $age;
             /* ⭐ JUMP GATES (PHASE 2): a gate's jump point runs for the duration PROGRAMMED when it

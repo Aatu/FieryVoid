@@ -53,6 +53,14 @@ shipManager.power = {
 			if (power.turn == gamedata.turn - 1) {
 				var newPower = jQuery.extend({}, power);
 				newPower.turn = gamedata.turn;
+				/* HYPERSPACE_IMPROVEMENTS_PLAN.md 5 (Stage H4) - a jump engine decides how much of last
+				   turn's BOOST may carry: on an Ancient-charging drive, last turn's extra charging carried
+				   onto a turn the drive is charged would be a JUMP TO HYPERSPACE. See
+				   JumpEngine.getRepeatableBoost; every other system copies exactly as before. */
+				if (power.type == 2 && typeof system.getRepeatableBoost === 'function') {
+					newPower.amount = system.getRepeatableBoost(parseInt(power.amount, 10) || 0);
+					if (!(newPower.amount > 0)) continue;
+				}
 				powers.push(newPower);
 			}
 		}
@@ -1070,6 +1078,13 @@ shipManager.power = {
 		var boost = shipManager.power.getBoost(system); 2;
 
 		if (boost == 0 || shipManager.systems.isDestroyed(ship, system)) return 0;
+
+		/* HYPERSPACE_IMPROVEMENTS_PLAN.md 5 (Stage H4) - a jump engine prices its own boost: powerReq a
+		   level while it is EXTRA CHARGING, and 0 as a Jump to Hyperspace (boostEfficiency is 0 on every
+		   jump engine and the jump must stay free). Priced HERE, as a boost, because this is also what
+		   PowerCapacitor.initializationUpdate adds back after the commit - a charge cost counted anywhere
+		   else was subtracted a second time from a stored figure that had already paid it (game 4348). */
+		if (typeof system.getChargeBoostPowerDraw === 'function') return system.getChargeBoostPowerDraw();
 
 		if (system.boostEfficiency.toString().search(/^[0-9]+$/) == 0) {
 			return system.boostEfficiency * boost;

@@ -723,8 +723,12 @@ shipManager.movement = {
     getJumpingOutEngine: function getJumpingOutEngine(ship) {
         if (!ship || !ship.systems) return null;
 
+        /* Stage H4 - isJumpBoost, not a bare boost test: on an Ancient-charging drive a boost may be
+           EXTRA CHARGING, which takes nobody anywhere (JumpEngine::isJumpOutBoost is the server's twin). */
         var isJumping = function (system) {
-            return Boolean(system && system.name === 'jumpEngine' && shipManager.power.getBoost(system));
+            if (!system || system.name !== 'jumpEngine') return false;
+            if (typeof system.isJumpBoost === 'function') return system.isJumpBoost();
+            return Boolean(shipManager.power.getBoost(system));
         };
 
         for (var i in ship.systems) {

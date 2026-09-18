@@ -1148,9 +1148,15 @@ window.gamedata = {
                                 }
                             }
                         } else if (myShips[ship].systems[syst].name == "jumpEngine") {
-                            for (var pow in myShips[ship].systems[syst].power) {
-                                if (myShips[ship].systems[syst].power[pow].turn == gamedata.turn && myShips[ship].systems[syst].power[pow].type == 2) {
-                                    jumping.push(myShips[ship]);
+                            //HYPERSPACE_IMPROVEMENTS_PLAN.md 5 (Stage H4): a boost may be EXTRA CHARGING, which is no jump.
+                            var jumpSystem = myShips[ship].systems[syst];
+                            if (typeof jumpSystem.isJumpBoost === 'function') {
+                                if (jumpSystem.isJumpBoost()) jumping.push(myShips[ship]);
+                            } else {
+                                for (var pow in myShips[ship].systems[syst].power) {
+                                    if (myShips[ship].systems[syst].power[pow].turn == gamedata.turn && myShips[ship].systems[syst].power[pow].type == 2) {
+                                        jumping.push(myShips[ship]);
+                                    }
                                 }
                             }
                         } else if (myShips[ship].systems[syst].name == "adaptiveArmorController") {
