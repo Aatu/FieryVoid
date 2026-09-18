@@ -454,8 +454,10 @@ class Weapon extends ShipSystem
 			//Don't send empty arrays/strings in JSON payload
 			if ($this->stowed) $strippedSystem->stowed = true; //non-operational (Kirishiac Orbital docked)
 			if (!empty($this->turnsloadedArray)) $strippedSystem->turnsloadedArray = $this->turnsloadedArray;
-			if ($this->overloadturns !== 0) $strippedSystem->overloadturns = $this->overloadturns;
-			if ($this->overloadshots !== 0) $strippedSystem->overloadshots = $this->overloadshots;
+			//Sustained (alwaysoverloading) classes default these to NON-zero, and game.php fills an
+			//absent key from the static blueprint - so their 0 must be sent, or it reads as e.g. "S2".
+			if ($this->overloadturns !== 0 || $this->alwaysoverloading) $strippedSystem->overloadturns = $this->overloadturns;
+			if ($this->overloadshots !== 0 || $this->alwaysoverloading) $strippedSystem->overloadshots = $this->overloadshots;
 			if ($this->extraoverloadshots !== 0) $strippedSystem->extraoverloadshots = $this->extraoverloadshots;
 			if (!empty($this->extraoverloadshotsArray)) $strippedSystem->extraoverloadshotsArray = $this->extraoverloadshotsArray;
 			$strippedSystem->fireOrders = $this->fireOrders;         
@@ -3359,6 +3361,11 @@ full Advanced Armor effects (by rules) for reference:
     {
         return null;    
     }     
+
+    public function hasSustainedCooldown()
+    {
+        return true;    
+    }         
 
     public function isLoSBlocked($shooterPos, $targetPos, $gamedata) {
         //$blockedLosHex = $gamedata->getBlockedHexes();

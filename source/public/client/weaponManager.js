@@ -85,6 +85,9 @@ window.weaponManager = {
             if (weaponManager.hasFiringOrder(ship, weapon) && !weapon.multiModeSplit) continue;
 
             if (weapon.firingMode == modeSet) continue;
+            //A weapon whose own selector is hidden (e.g. a Sustained weapon mid-sequence) must not be
+            //switched by a right-click on a sibling's grid either.
+            if (weapon.hideFiringModeSelector) continue;
             //Replicate canChangeFiringMode logic
             if (!((gamedata.gamephase === 1 && weapon.ballistic) || (gamedata.gamephase === 5 && weapon.preFires) || (gamedata.gamephase === 3 && !weapon.ballistic && !weapon.preFires))) continue;
 
