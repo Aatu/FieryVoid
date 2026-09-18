@@ -133,11 +133,61 @@ shipManager.power = {
 		return false;
 	},
 
+	/* HYPERSPACE_IMPROVEMENTS_PLAN.md 4 (Stage H3) - DOES THIS SHIP'S JUMP DRIVE PAY AN UPKEEP
+	   INSTEAD OF GOING DARK? The Vorlon rule (R4), and the one predicate the two Maintain power
+	   sites below both ask, so "which ships are exempt from the all-systems-dark rule" is stated
+	   once.
+
+	   A SHIP-level question because both callers are: they are about this hull's power allocation,
+	   not about one engine. That is unambiguous in practice - no hull in the game mixes a
+	   capacitor-fed drive with an ordinary one, and a hull with two Vorlon drives has both marked.
+	   `vortexUpkeep` is sent by JumpEngine::stripForJson only on a drive the server will really
+	   charge, so this is false on every other ship in the game and in the lobby. */
+	hasVortexUpkeepDrive: function hasVortexUpkeepDrive(ship) {
+		if (!ship || !ship.systems) return false;
+
+		for (var i in ship.systems) {
+			var system = ship.systems[i];
+			if (!system || system.name !== 'jumpEngine') continue;
+			if (typeof system.chargesVortexUpkeep !== 'function') continue;
+			if (system.chargesVortexUpkeep()) return true;
+		}
+
+		return false;
+	},
+
+	/* Stage H3 - the upkeep this ship's drives are RESERVING out of the reactor balance this turn,
+	   summed. Read by PowerCapacitor.doIndividualNotesTransfer, which has to put it back into the
+	   power the capacitor stores because the SERVER is what spends it - see the long note there.
+	   0 on every ship that is not a Vorlon holding a jump point open. */
+	getVortexUpkeepReserved: function getVortexUpkeepReserved(ship) {
+		var reserved = 0;
+		if (!ship || !ship.systems) return reserved;
+
+		for (var i in ship.systems) {
+			var system = ship.systems[i];
+			if (!system || system.name !== 'jumpEngine') continue;
+			if (typeof system.getVortexUpkeepDraw !== 'function') continue;
+			if (shipManager.systems.isDestroyed(ship, system)) continue;
+			if (shipManager.power.isOfflineOnTurn(ship, system, gamedata.turn)) continue;
+
+			reserved += system.getVortexUpkeepDraw();
+		}
+
+		return reserved;
+	},
+
 	//Every power-absorbing system that is still ONLINE and so would break the rule. SYSTEMS, not
 	//names, because the caller both names them (the menu) and switches them off (the toggle).
+	//
+	//Stage H3: EMPTY on a capacitor-fed (Vorlon) drive's ship. Paying the upkeep REPLACES the
+	//all-systems-dark rule (R4), so there is nothing here that would break it - and answering
+	//anything else would have doActivate black the ship out and then isVortexLockedOffline refuse to
+	//give the power back, for a rule that does not apply to it.
 	getVortexMaintainBlockers: function getVortexMaintainBlockers(ship) {
 		var blockers = [];
 		if (!ship || !ship.systems) return blockers;
+		if (shipManager.power.hasVortexUpkeepDrive(ship)) return blockers;
 
 		for (var i in ship.systems) {
 			var system = ship.systems[i];
@@ -160,6 +210,10 @@ shipManager.power = {
 	isVortexLockedOffline: function isVortexLockedOffline(ship, system) {
 		if (!system || shipManager.power.isVortexExemptSystem(system)) return false;
 		if (!(system.powerReq > 0)) return false;
+		//Stage H3 (R4): a capacitor-fed Vorlon drive pays an upkeep instead of taking the ship dark,
+		//so there is no all-or-nothing shutdown to lock. Without this the one-click Maintain would
+		//refuse to power anything back on for a rule the ship is not subject to.
+		if (shipManager.power.hasVortexUpkeepDrive(ship)) return false;
 
 		return shipManager.power.isMaintainingVortex(ship);
 	},
@@ -583,6 +637,37 @@ shipManager.power = {
 					   an abduction order this turn answers anything but 0. */
 					if (system.name === 'jumpEngine' && typeof system.getAbductionPowerDraw === 'function') {
 						output -= system.getAbductionPowerDraw();
+					}
+					/* HYPERSPACE_IMPROVEMENTS_PLAN.md 4 (Stage H3) - THE VORLON JUMP DRIVE IS A
+					   PER-USE COST, NOT A STANDING ONE (user ruling 2026-09-18): it draws power only
+					   on a turn it is actually used to OPEN or MAINTAIN a jump point, and nothing at
+					   all on every other turn.
+
+					   ⚠️⚠️ WHICH TAKES TWO STEPS ON A VORLON, AND THE FIRST ONE IS EASY TO MISS.
+					   MagGravReactorTechnical sets fixedPower, so the branch above has ALREADY
+					   subtracted this drive's powerReq as a standing cost like every other system's -
+					   and the drive is the only Vorlon system with a non-zero one. Give that back
+					   first, then charge the USE. Without the give-back an idle Vorlon holding no
+					   jump point at all is 5-8 power poorer every turn, which is what this code did
+					   when H3 first landed.
+
+					   ⚠️ GUARDED ON fixedPower, because the give-back is only undoing something. On a
+					   hull with an ordinary reactor nothing was subtracted (a reactor's output already
+					   nets its ship's base draw), so giving it back there would be a gift.
+
+					   RESERVATION, NOT PAYMENT - the server spends it at end of turn
+					   (JumpEngine::payVortexUpkeep) and PowerCapacitor.doIndividualNotesTransfer adds
+					   it back into the stored figure so it is not charged twice.
+
+					   Exactly 0 on every other system and every other jump engine: only JumpEngine
+					   defines these, and only a marked drive with a jump-point order this turn
+					   answers anything but 0. */
+					if (system.name === 'jumpEngine' && typeof system.getVortexUpkeepDraw === 'function') {
+						if (fixedPower == true && typeof system.chargesVortexUpkeep === 'function'
+						    && system.chargesVortexUpkeep()) {
+							output += system.powerReq;   //undo the standing draw - this drive has none
+						}
+						output -= system.getVortexUpkeepDraw();
 					}
 				}
 			}

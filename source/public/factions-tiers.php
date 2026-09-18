@@ -1754,7 +1754,7 @@ at short range versus long range.
 <h5>Power Capacitor</h5>
         <li>Produces power for Vorlon ships and can hold Power between turns up to its maximum capacity.  Some key points to note about it are:
                 <ul class="circle-list">
-                    <li>New power is produced in the Initial Orders phase.  The power produced can be doubled (along with Self Repair at end of turn) at the cost of deactivating all weapons and shields on that turn.</li>
+                    <li>New power is produced in the Initial Orders phase, and is shown and usable from the <b>start</b> of that phase: the Reactor display already includes this turn's recharge (up to the Capacitor's maximum), so power drawn at the end of the previous turn - by weapon fire, or by a Jump Drive - is topped back up before you allocate anything.  The power produced can be doubled (along with Self Repair at end of turn) at the cost of deactivating all weapons and shields on that turn.</li>
                     <li>Separately, you can also open petals on some Vorlon ships but this will reduce the armor on all of the ship’s primary systems by 2 and increase Defence Profiles by 5% for that turn, but adds 50% to power generation.</li> 
                     <li>Capacitor destruction would leave the ship powerless, but doesn't cause a catastrophic explosion like Reactor destruction.  In FV it will leave ship powerless (as the Capacitor is the main power source on Vorlon ships), 
                         add Power reduction critical to Reactor (so ship goes out of control) and Self Repair system so that the damage isn't just repaired in a few turns.</li> 
@@ -1764,10 +1764,33 @@ at short range versus long range.
     <h5>Mag-Gravitic Reactor </h5>
         <ul>
 <li>For technical reasons, Vorlons in FV are using Mag-Gravitic Reactor. This means destroying power-using systems will free appropriate power. 
-            Note that technically Vorlons in FV do not have power using systems.</li>
+            Note that the <b>Jump Drive is the only Vorlon system with a power requirement at all</b> - everything else on the hull is nominally 0.</li>
             <li>Scanner uses no power: its operating costs are base hull features and do not affect power usage. 
-                Vorlon Jump Drives also uses no power as their operating costs are base hull features and do not affect power usage.</li>
+                The <b>Jump Drive is the exception</b> - it is the one Vorlon system with a real power requirement, though it only draws it on a turn it is actually used. See <b>Jump Drive</b> below.</li>
             <li>All Vorlon weapons have nominally 0 Power usage - they still technically need Power to actually shoot, but that is only decided and taken from Reactor at the moment of firing.</li>                                            
+    </ul>
+<h5>Jump Drive</h5>
+        <ul>
+<li>Vorlons open <b>ordinary jump points</b> rather than jumping out directly the way the other Ancients do (see <b>Ancient Jump Drives</b> in the general rules),
+            and they can throw one a very long way: a Vorlon jump point may be projected up to <b>12 hexes</b> from the ship, against the standard 4.
+            Because it is an ordinary jump point, it <b>can be shot out by a Vortex Disruptor</b> - Vorlons and The System are the only Ancient-era fleets that remain vulnerable to one.</li>
+<li>Unlike every other Vorlon system, the Jump Drive <b>does use power</b>, drawn from the Power Capacitor:
+            <b>8</b> on the Planet Killer, <b>6</b> on the Strike Cruiser, Heavy Cruiser and Heavy Carrier, and <b>5</b> on the Battle Destroyer, Destroyer Escort, Dreadnought, Heavy Destroyer,
+            Light Carrier, Light Cruiser and Scout. The Transport carries no drive at all.</li>
+<li><b>It is a per-use cost, not a standing one.</b> The drive draws that power <b>only on a turn it is actually used</b> - the turn it <b>opens</b> a jump point, and every turn it
+            <b>maintains</b> one. On any other turn it costs the ship nothing at all, so a Vorlon carrying an idle jump drive has its full power available.</li>
+<li>When it is used, the cost is reserved out of your power allocation in Initial Orders and drawn from stored power at the <b>end of that turn</b>. Opening and holding cost the same,
+            so a jump point opened on one turn and held for three more costs the drive's power requirement four times. The Capacitor's recharge tops the store back up at the start of
+            the next Initial Orders, so a ship whose recharge covers the cost starts every turn full.</li>
+<li>Once you set <b>Maintain Vortex</b>, it <b>carries over automatically</b> to each following turn until you turn it OFF - you do not have to re-declare it every turn.
+            If the Capacitor cannot cover it, the Initial Orders power check will say so before you commit.</li>
+<li>In exchange, a Vorlon is <b>exempt from the all-systems-dark rule</b>: where any other race must shut down every powered system for the whole turn to hold a jump point open,
+            a Vorlon simply pays the upkeep and fights on normally.</li>
+<li>And a paid jump point has <b>no four-turn limit</b>. It stands for <b>as long as the upkeep is paid</b>, so the system icon counts the turns open without a denominator
+            ("5" rather than "5/4"), and the Maintain toggle stays available indefinitely.</li>
+<li>If the Capacitor <b>cannot cover the upkeep</b> at the end of the turn - drained by weapon fire, emptied or halved by a critical, or shot out altogether - the jump point
+            <b>closes</b>, and the combat log says so. Everything else still applies as normal: the jump point also closes if the holder is destroyed, drifts more than 12 hexes away,
+            or simply stops declaring Maintain.</li>
     </ul>
 <h5>Gravitic Drives</h5>
         <ul>

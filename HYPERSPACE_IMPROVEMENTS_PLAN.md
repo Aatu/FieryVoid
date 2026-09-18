@@ -801,6 +801,249 @@ tooltip (`setSystemDataWindow`) so the restriction is discoverable rather than s
 
 ## 11. Build log
 
+### Stage H3 follow-up — the recharge display and carrying Maintain forward — BUILT 2026-09-18
+
+Two user reports from play test **4348** (a Vorlon Heavy Cruiser: capacitor 32, recharge 14, drive 6).
+
+**1. "Turn 2 opens on 26 instead of 32, and so does turn 3."** The capacitor arithmetic was right —
+`tac_individual_notes` for the hull reads 32 → (open) 26 → 32 → (maintain) 26 → 32 at every commit,
+exactly 6 per used turn — but **the capacitor refills at the COMMIT of Initial Orders, not at its
+start.** `PowerCapacitor.doIndividualNotesTransfer` posts `balance + regeneration` (the 2021 "Power
+Capacitor rework", which moved the recharge there out of the Initial Orders display). So for the whole
+of Initial Orders the reactor showed **last turn's leftovers**, and anything drawn at the end of a turn
+read as missing at the start of the next one. Not new with H3: a Vorlon that fired weapons has always
+opened the next Initial Orders on the drained figure. H3 only made it every turn and very visible.
+
+The fix shows the recharge from the start of Initial Orders, matching the rules text ("New power is
+produced in the Initial Orders phase"), **without changing what is banked**:
+
+- `PowerCapacitor.getTurnStartTopUp()` = `min(stored + recharge, max) - stored`, never negative, and
+  **0** outside Initial Orders or once this turn's recharge is banked. `initializationUpdate` adds it to
+  the power the capacitor injects.
+- `doIndividualNotesTransfer` **takes it back out** before adding the full recharge, so the committed
+  figure is EXACTLY the pre-change `min(stored − allocations + recharge, max)`. A full capacitor still
+  absorbs Initial Orders spending up to its recharge for free, as it always has.
+- ⭐ **The one genuine widening is the commit gate**: `getCapacitorShipsNegativePower` reads this
+  balance, so a player may now allocate this turn's recharge. It cannot drive the stored figure below
+  zero — the top-up never exceeds the recharge it is replaced by.
+- ⚠️ **Why a server flag.** After a commit the stored figure already includes the recharge, and a
+  player who reloads while waiting would see it added twice. `PowerCapacitor::$rechargedThisTurn`
+  (protected; published only when true) is set from the same notes that set the stored power: a
+  `powerStored` note from THIS turn, phase ≥ 1. The turn-1 Deployment fill is phase −1, so the first
+  Initial Orders still tops up. ⚠️ It compares against `$gamedata->turn` at note load, which is the
+  CURRENT turn on a live load; a historical `getTacGamedata($turn)` reload reads later turns' notes and
+  the game's current turn, so it cannot reproduce a past turn's pre-commit state — the same limitation
+  the capacitor's existing `doubled` flag has.
+
+**2. "Maintain should carry on automatically until I turn it off."**
+`JumpEngine.continueVortexMaintain()`, swept by `JumpEngine.continueVortexMaintains()` from
+`InitialPhaseStrategy.activate` beside `continueAbductions` (after `repeatLastTurnPower`, so a drive left
+offline reads offline). `doActivate` was split: `declareVortexMaintain()` makes the order and the
+shutdown and draws nothing, so it is safe before the phase strategy activates (the marker is rebuilt from
+the fire orders by `ballisticIconContainer.consumeGamedata`).
+
+⭐ **Last turn's Maintain order is not available, and is not needed.** `getFireOrdersForShips` loads ONE
+turn, so the mode-7 order cannot be read back. It is derived, exactly: a jump point still open now that
+was not opened last turn survived last turn only by being maintained (on any turn after its opening
+turn, an undeclared jump point closes). Client-side, `spawned == openTurn + 1`, so the rule is
+`gamedata.turn > vortex.spawned`.
+
+- ⚠️ **The first Maintain is always the player's** — on the first open turn nothing is re-declared;
+  opening is not a decision to hold.
+- **Applies to every vortex-opening drive, not only Vorlons.** Everything else is `canActivate`'s, so an
+  ordinary drive stops on its four-turn cap turn exactly as the manual toggle does, and on an ordinary
+  ship the re-declaration takes the ship dark again (which `repeatLastTurnPower` has mostly done
+  already). If only Vorlons should carry it, the guard is one `chargesVortexUpkeep()` test.
+- ⚠️ A page reload during Initial Orders re-seeds it — nothing server-side records the OFF until the
+  commit, exactly as for `continueAbduction`.
+
+**Harnesses:** `vorlonUpkeepClientHarness.js` §6 replays the 4348 sequence (opens on 32, maintain → 26,
+commit banks 32, next turn opens on 32) and asserts the committed figure equals the pre-change formula
+across six states; §7 covers the carry-forward. `vorlonUpkeepHarness.php` §9 covers the server flag.
+Both new guards were self-tested by deletion (the take-back line; the first-open-turn rule). **62** and
+**120** assertions, all green.
+
+**Gate:** autoload current, validator 0 new, replay **127 passed / 1 failed / 2 skipped**. The failure is
+4302 as ever. Six corpus games moved by `rechargedThisTurn: added (true)` on a Vorlon capacitor and
+nothing else, and were re-recorded **by merging the manifest** (backed up, recorded the six, merged the
+old entries back — see the `--games=` trap below). The two skips are **4348 and 4354**, both played
+since they were recorded; left alone, as 4302 is.
+
+---
+
+### Stage H3 — the Vorlon jump-drive upkeep (Item 6) — BUILT 2026-09-18
+
+Built as §4 designed it, with **one piece of arithmetic §4 did not have** — see "the double charge"
+below. The eleven Vorlon hulls got their §10 A1 numbers, `markCapacitorFed()` marks the drive, and
+R4/R5/R6 all landed where §4 said they would.
+
+**The predicate, and why it is not the flag.** `JumpEngine::chargesVortexUpkeep()` is what every
+reader asks — server and client — and it is three questions, not one: the drive is marked, its
+`powerReq` is non-zero, **and the hull actually has a `PowerCapacitor` to pay from**. A drive marked
+on a hull with no capacitor falls back to the ORDINARY B5 rules (cap, all-systems-dark and all),
+which is the only fallback that neither hands it a free indefinite jump point nor closes it every
+turn for a reason its owner cannot act on. `stripForJson` publishes `vortexUpkeep` off that same
+method, so the two ends cannot disagree about *which* drives the rule covers.
+
+⚠️ **The FITTING and the STATE are separate questions on purpose.** `chargesVortexUpkeep()` asks
+"does this hull have a capacitor" (a build fact); `payVortexUpkeep()` asks "can it pay right now"
+(play). A capacitor that has just been shot out must read as **cannot pay** — not as "this hull was
+never capacitor-fed", which would silently hand the four-turn cap and the dark rule back in the
+middle of a game.
+
+**⚠️⚠️ THE DOUBLE CHARGE — the one thing §4 got wrong, and it would have been invisible.**
+§4(b) asks for BOTH a client draw in `getReactorPower` AND a server draw through
+`canDrawPower` / `doDrawPower`. Those are not independent: `PowerCapacitor.doIndividualNotesTransfer`
+posts `getReactorPower(...) + getRegeneration()` as the capacitor's **stored power**
+(`powerReceivedFromFrontEnd` → `setPowerHeld`), so subtracting the upkeep there already spends it —
+and then the closure sweep spends it again. A Vorlon would have paid twice a turn, and nothing on
+screen would have said so.
+
+The split that resolves it is the one the Vorlon economy already uses for **weapon fire**:
+
+| | who | when |
+|---|---|---|
+| **RESERVATION** | client, `JumpEngine.getVortexUpkeepDraw` off `getReactorPower`, on any turn `isUsingVortexThisTurn()` | Initial Orders — constrains what may be ALLOCATED, and the commit gate (`getCapacitorShipsNegativePower`) names a player who allocated it away |
+| **PAYMENT** | server, `JumpEngine::payVortexUpkeep` → `PowerCapacitor::doDrawPower` | end of turn, in the closure sweep |
+
+…plus **one line** in `PowerCapacitor.doIndividualNotesTransfer` that adds the reservation back into
+the figure it stores. That line is not a refund: it is what leaves the power IN the capacitor for
+the server to take. `tests/replay/vorlonUpkeepClientHarness.js` §3 is its whole guard, and it was
+self-tested by deleting the line (stored power then dropped by exactly the upkeep).
+
+⭐ **The draw lands because `closeExpiredVortices` runs BEFORE the `generateIndividualNotes` loop in
+`FireGamePhase::advance`** — `doDrawPower` adds to `powerReceivedFromBackEnd`, which the phase-4
+capacitor note turns into the stored figure a few lines later. Reverse that order and the upkeep
+would be charged to a note that had already been written.
+
+⭐ **Idempotent by inheritance, not by a new guard.** `getVortexClosureReason` has exactly ONE caller,
+`closeVortexIfDue`, which is already guarded three ways over (`hasOpenVortex`, a real
+`$vortexCloseTurn`, and an open turn not yet reached), so a double `advance()` cannot draw twice.
+
+**Where the three rulings landed:**
+
+| Ruling | Site | Shape |
+|---|---|---|
+| R4 — upkeep replaces all-systems-dark | `getVortexClosureReason` | the upkeep branch **returns**, so `getVortexPowerViolations` is never reached |
+| R5 — no `MAX_VORTEX_TURNS` | `getVortexClosureReason`, `getVortexAge`, `stripForJson`, `JumpEngine.canMaintainVortex`, `getVortexIconLoad` | five sites, and the client's `canMaintainVortex` is the one that matters — without it the toggle vanishes on `spawned+3` and the player loses the control that keeps a paid jump point open |
+| R6 — failure to pay closes it | `payVortexUpkeep`, called from both the opening-turn branch and the maintain branch | `'jump point not powered'` |
+
+**⭐⭐ R4 IS INERT ON TODAY'S ELEVEN HULLS, and that was measured rather than assumed.** After H3 the
+Jump Engine is the **only** system on any Vorlon hull with a non-zero `powerReq` — exactly what the
+ship files have always said ("the only system onboard that does so") — and
+`getVortexPowerViolations` skips jump engines. So a Vorlon's violation list was already empty, with
+or without R4: **a Vorlon has always been able to hold a jump point open for four turns for free**,
+the same vacuous pass §3.12 of WALKERS_OF_SIGMA_PLAN.md caught on a Mapmaker.
+
+That makes the real content of H3 **R5 + R6**: a Vorlon now *pays* 5–8 a turn for a doorway it can
+hold *indefinitely*. R4 is still worth stating — a future Vorlon system with a power requirement, or
+an enhancement that adds one, would otherwise start closing jump points — but it changes nothing
+today. The PHP harness asserts the vacuity directly (first line of its §4) so that the day it stops
+being true, something says so.
+
+**⚠️⚠️ AND A SECOND THING THE SAME MEASUREMENT EXPOSED — CORRECTED 2026-09-18 ON THE USER'S RULING.**
+Built §4(b) literally, the drive's `powerReq` became a **standing** cost: `MagGravReactorTechnical`
+sets `fixedPower`, so `getReactorPower` subtracts every online system's `powerReq`, and the drive is
+the only Vorlon system with a number. An idle Vorlon holding **no jump point at all** silently lost
+5–8 power every turn.
+
+**The ruling: the jump drive draws power ONLY on a turn it is actually used** — the turn it **opens**
+a jump point, and every turn it **maintains** one. Every other turn it costs the ship nothing. So:
+
+- `getReactorPower` **gives back** what `fixedPower` took (guarded on `fixedPower`, inside the online
+  branch, so an ordinary-reactor hull gets no gift and an offline drive is not credited twice), then
+  subtracts the use;
+- `getVortexUpkeepDraw` fires on `JumpEngine.isUsingVortexThisTurn()` — **any `jumppoint` order this
+  turn**, opening (modes 1–6) or Maintain (mode 7) — not on `isMaintainingVortex()` alone;
+- `getVortexClosureReason` charges the **opening turn** too, in the `$turn == $vortexOpenTurn`
+  branch. ⚠️ That branch's existing exemption is from MAINTAIN and from the all-systems-dark rule,
+  which is a *different* bill and still applies to everyone; only the power changed.
+
+⭐ **A blue EXIT is deliberately NOT charged, and the two ends agree by construction.** The server's
+one-shot exit branch returns near the top of `getVortexClosureReason`, long before the upkeep; the
+client tests `damageclass === 'jumppoint'`, and an exit declaration carries `'jumpexit'`. Testing the
+damageclass rather than the firing mode is what makes that automatic.
+
+⚠️ A declaration the server later refuses (illegal hex) is **reserved for but never spent** — the
+player keeps the power and is out by one turn's reservation. That is the safe direction; reserving
+nothing until the doorway exists would let them allocate away the very power the opening needs.
+
+⭐ Guarded by `vorlonUpkeepClientHarness.js` §2, which asserts the idle balance is **unchanged from
+pre-H3** and was self-tested by deleting the give-back (idle dropped from 18 to 13).
+
+**Files:**
+
+| File | Change |
+|---|---|
+| [baseSystems.php](source/server/model/systems/baseSystems.php) | `$vortexUpkeep`, `markCapacitorFed()`, `chargesVortexUpkeep()`, `getVortexUpkeepCost()`, `getUpkeepCapacitor()`, `payVortexUpkeep()`; R4/R5/R6 in `getVortexClosureReason`; `getVortexAge` uncapped; `stripForJson` (`vortexUpkeep` / `vortexUpkeepCost` in, conditional `vortexMaxTurns`); the tooltip |
+| 11 Vorlon ship files | the 3rd constructor argument + `->markCapacitorFed()`; the 5th (range 12) untouched |
+| [power.js](source/public/client/power.js) | in `getReactorPower`, the `fixedPower` **give-back** plus the per-use draw; `hasVortexUpkeepDrive`, `getVortexUpkeepReserved`; `getVortexMaintainBlockers` and `isVortexLockedOffline` no-op for an upkeep hull |
+| [model/system/baseSystems.js](source/public/client/model/system/baseSystems.js) | `chargesVortexUpkeep` / `getVortexUpkeepCost` / `isUsingVortexThisTurn` / `getVortexUpkeepDraw`; open-ended `getVortexIconLoad`; the cap test out of `canMaintainVortex`; `doActivate` / `doDeactivate` guards; **the add-back in `PowerCapacitor.doIndividualNotesTransfer`** |
+| [JumpEngineMenu.js](source/public/client/UI/reactJs/system/JumpEngineMenu.js) | the Maintain note text for an upkeep drive |
+| [factions-tiers.php](source/public/factions-tiers.php) | a new **Jump Drive** section under VORLON EMPIRE, and the two Mag-Gravitic Reactor bullets that said the drive used no power |
+
+**Traps §4 listed — which mattered and which did not:**
+
+- ✅ **`canMaintainVortex`'s `spawned + 3`** — real, and the highest-consequence line of the client
+  half.
+- ✅ **`vortexMaxTurns` with no value to send** — done as "emitted only when it means something";
+  `getVortexIconLoad` draws `"5"` instead of `"5/4"`. A published denominator still wins, so a gate
+  is unaffected.
+- ⚪ **`getVortexMaintainBlockers` / `isVortexLockedOffline`** — guarded, but belt-and-braces: a
+  Vorlon's only powered system is the drive and the drive is on `vortexMaintainExemptNames`, so both
+  already answered harmlessly. Kept, because the exemption should be a statement and not an accident.
+- ⚪ **"check the point cost"** — `powerReq` feeds no cost formula; `pointCost` is set by hand per
+  ship file. Ship-data validator: **0 new findings**, 237 all in the committed baseline.
+- ✅ **`getVortexUpkeepDraw` answers 0 on every other drive** — asserted in both harnesses.
+
+**Harnesses added** (run both after any change to this family):
+
+- `tests/replay/vorlonUpkeepHarness.php` — **115 assertions**, in memory, no DB, against the REAL
+  ship files (half of what H3 changed IS the ship files, and a hand-built engine would not see them).
+  `docker exec -w /usr/src/current fieryvoid-php-1 php tests/replay/vorlonUpkeepHarness.php`
+  ⭐ R4 and R5 are asserted in **both directions on the same fixture** — the Vorlon is exempt, an
+  ordinary ship in the identical state is not — because an exemption that is too wide looks exactly
+  like a pass. And every "was it charged" assertion reads the **capacitor's own counter**, never the
+  return value: a method that answered true and drew nothing would pass on the return alone.
+- `tests/replay/vorlonUpkeepClientHarness.js` — **37 assertions**, `node`, over the REAL `power.js`
+  and `model/system/baseSystems.js`. Its §2 is the no-standing-cost guard and its §3 the
+  double-charge guard; both were self-tested by deleting the line each one protects.
+
+**Gate after H3** (`fvbuild.ps1 -Check`): autoload map **up to date**, ship-data validator **0 new
+errors / 0 new warnings** (237 findings, all baselined), replay harness **129 passed / 1 failed** —
+game 4302 again, with a diff containing **no `vortex*` paths at all** and the same shape H1 and H2
+recorded. `php -l` clean on all 13 server files; legacy bundles rebuilt (`yarn build:legacy`, all
+five new symbols verified present); `UI.bundle.js` deliberately untouched, with the React tree
+verified instead by esbuild bundle + vm evaluation (self-tested against a deliberately broken module
+first).
+
+**⚠️⚠️ `replayHarness.php record --games=…` REWRITES THE WHOLE MANIFEST, IT DOES NOT MERGE.**
+Re-recording the 15 corpus games whose only diff was the new payload keys silently shrank the corpus
+from 130 games to 15 — `cmdRecord` builds a fresh `manifest['games']` from the games it recorded and
+writes it over the old one, and the next `check` then runs only those. Recovered by backing up
+`baseline/game_4302/`, running a full `record`, and restoring 4302's files — so the corpus is 130
+again and 4302 keeps the stale baseline H1 and H2 declined to accept. **Never use `--games=` to
+record unless you mean to narrow the corpus.**
+
+**Two pre-existing failures found while running the plan's eight harnesses, neither of them H3's**
+(both confirmed by putting the 12 changed server files back to HEAD and re-running):
+
+- `reinforcementsStage6Harness.php` — **180 passed, 6 failed.** It asserts
+  `damageclass === 'JumpVortex'` on an EXIT doorway's log order, which **Stage H1 renamed** to
+  `JumpVortexExit`. A stale expectation left over from H1; the fix is one string in the test.
+- `initialOrdersTooltipHarness.js` (4/10, `shipManager.isTargetable is not a function`) and
+  `reinforcementsStage{8,9}ClientHarness.js` (both `Error: export marker not found`) fail identically
+  at HEAD.
+
+**Not verified here, and it needs a play test:** that the reservation and the payment really do meet
+in a live game — a Vorlon **with no jump point** should show its **full** power available, one
+opening or maintaining a jump point should show its balance 5–8 lower in Initial Orders, and after
+committing the capacitor should end the turn exactly that much lower and **no more**. Create a game
+with a Vorlon, check its idle balance first, then open a jump point, Maintain it on the next turn,
+and read `tac_individualnote` for each turn's phase-1 and phase-4 `powerStored` rows.
+
+---
+
 ### Stage H2 — power management from hyperspace (Item 5) — BUILT 2026-09-17
 
 ⭐⭐ **POWER ONLY, NEVER EW (user ruling 2026-09-17).** A unit in hyperspace manages its power

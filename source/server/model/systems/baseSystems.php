@@ -5937,6 +5937,50 @@ class JumpEngine extends Weapon{
     const ABDUCTION_NOTE = 'EDJD';
     const ABDUCTION_MAX_POWER = 4;
 
+    /* ⭐⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md §4 (Stage H3) - A CAPACITOR-FED JUMP DRIVE: the Vorlon rule.
+     *
+     * "Vorlon Jump Engines normally do use power (the only system onboard that does so)" - the comment
+     * every Vorlon ship file carries beside a drive built with powerReq 0. H3 gives the eleven of them
+     * their real numbers (8 on the Planet Killer, 6 on the Strike Cruiser / Heavy Cruiser / Heavy
+     * Carrier, 5 on the other seven - user, 2026-09-17) and this flag is what makes the number mean
+     * something beyond the ordinary allocation.
+     *
+     * ⭐⭐ IT IS A PER-USE COST, NEVER A STANDING ONE (user ruling 2026-09-18, correcting the plan).
+     * The drive draws its powerReq ONLY on a turn it is actually used - the turn it OPENS a jump
+     * point, and every turn it MAINTAINS one. An idle Vorlon drive costs its ship nothing at all.
+     *
+     * ⚠️⚠️ THAT TAKES A DELIBERATE GIVE-BACK ON THE CLIENT, because a Vorlon's
+     * MagGravReactorTechnical sets fixedPower and shipManager.power.getReactorPower therefore
+     * subtracts EVERY online system's powerReq as a standing cost - and after H3 this drive is the
+     * only Vorlon system with a non-zero one. getReactorPower hands that back before charging the
+     * use. Built the other way first (2026-09-18): every Vorlon silently lost 5-8 power a turn while
+     * holding no jump point at all.
+     *
+     * WHAT IT CHANGES, and all three are rulings R4-R6 of that plan:
+     *   R4. THE UPKEEP REPLACES THE ALL-SYSTEMS-DARK MAINTAIN RULE. A Vorlon holding a jump point open
+     *       pays its drive's powerReq again out of the Power Capacitor and fights on; it does NOT also
+     *       have to shut every powered system down. getVortexPowerViolations is never consulted for one.
+     *   R5. AND THE UPKEEP OVERRIDES MAX_VORTEX_TURNS. A paid jump point is held INDEFINITELY, so the
+     *       four-turn cap does not run - which is also why getVortexAge stops clamping for one, and why
+     *       stripForJson sends it no vortexMaxTurns: a bounded counter would claim the doorway was about
+     *       to close from turn 4 onwards, every turn, forever.
+     *   R6. FAILING TO PAY CLOSES IT, with a closure reason of its own - 'jump point not powered'.
+     *
+     * ⭐ IT IS A PROPERTY OF THE DRIVE, NEVER OF THE FACTION STRING. Set by markCapacitorFed() from the
+     * eleven Vorlon ship files, the same way markAncient() is set. `$ship->faction === "Vorlon Empire"`
+     * would be the third such string test in the tree and would break the moment somebody builds a
+     * custom Vorlon-derived faction - which is exactly what a faction directory is for.
+     *
+     * ⭐ ASK chargesVortexUpkeep(), NOT THIS FLAG. A drive marked capacitor-fed on a hull with no Power
+     * Capacitor has nothing to pay from; that predicate answers false for it and the drive then behaves
+     * as an ordinary B5 jump engine - cap, all-systems-dark and all - which is the only fallback that
+     * neither holds the doorway open forever nor closes it for a reason the player cannot act on.
+     *
+     * ⚠️ PROTECTED, like $legacyJump / $ancientJump / $gateJump: json_encode takes public properties only
+     * and the static generator encodes the CONSTRUCTED ship, so a public default would cost 776 blueprint
+     * entries. The client learns it from stripForJson, and only on the drives that have it. */
+    protected $vortexUpkeep = false;
+
 	//JumpEngine tactically  is not important at all!
 	public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
 
@@ -6189,6 +6233,119 @@ class JumpEngine extends Weapon{
     public function isExtraDimensional()
     {
         return $this->extraDimensional;
+    }
+
+    /* ⭐⭐ STAGE H3 - MARK THIS ENGINE AS CAPACITOR-FED: it pays an UPKEEP out of the ship's Power
+     * Capacitor for every turn it holds a jump point open, and in exchange is exempt from the
+     * all-systems-dark Maintain rule and from the four-turn cap. See $vortexUpkeep for the rule and
+     * for why this is a flag on the DRIVE rather than a test on the faction string.
+     *
+     * Called from a ship file straight after the engine is built, in the one-liner form markAncient()
+     * established:
+     *
+     *     $this->addAftSystem((new JumpEngine(5, 16, 5, 12, 12))->markCapacitorFed());
+     *
+     * ⚠️ IT DOES NOT SET THE POWER REQUIREMENT. The upkeep IS the drive's powerReq - the 3rd
+     * constructor argument - so the number stays where every other system's does and the power icon,
+     * getReactorPower and the lobby blueprint all read it without knowing this flag exists. Marking a
+     * drive whose powerReq is 0 costs nothing and buys nothing, which is the honest answer for one.
+     *
+     * Returns $this. */
+    public function markCapacitorFed()
+    {
+        $this->vortexUpkeep = true;
+        return $this;
+    }
+
+    /* ⭐ DOES THIS DRIVE ACTUALLY CHARGE AN UPKEEP? THE PREDICATE EVERY READER ASKS - never the raw
+     * flag, and never the powerReq alone. Three things have to be true together:
+     *
+     *   1. the drive is marked capacitor-fed (markCapacitorFed);
+     *   2. its powerReq is a real number - a 0-power drive has no upkeep to pay, so the R4/R5/R6
+     *      rules would be a pure gift: no cap, no all-systems-dark, and nothing owed for either;
+     *   3. there IS a Power Capacitor to pay from. All eleven Vorlon hulls that carry a drive carry
+     *      one, so this is about a custom hull that marked the drive and forgot the capacitor. Such a
+     *      drive falls back to the ORDINARY B5 rules rather than being given a free indefinite jump
+     *      point or being closed every turn for a reason its owner cannot act on.
+     *
+     * ⭐ ONE AUTHORITY, BOTH ENDS. stripForJson publishes `vortexUpkeep` off this same method, so the
+     * client's mirror cannot answer differently from the server for a hull the server would not charge.
+     *
+     * ⚠️ A FIGHTER FLIGHT IS EXCLUDED, for §3.12's reason: a flight has no power allocation and no
+     * capacitor of its own, so there is nothing to pay the upkeep from. getUpkeepCapacitor answers
+     * null on one anyway (a Fighter's systems hold no PowerCapacitor), so this falls out rather than
+     * needing a branch - stated here because it is the kind of thing that is re-derived wrongly. */
+    public function chargesVortexUpkeep()
+    {
+        if (!$this->vortexUpkeep) return false;
+        if ((int)$this->powerReq <= 0) return false;
+        return $this->getUpkeepCapacitor() !== null;
+    }
+
+    /* WHAT ONE TURN OF HOLDING THE JUMP POINT COSTS: "the same as their normal power required"
+     * (user request, Item 6). Named rather than inlined because the client mirrors the number in
+     * JumpEngine.getVortexUpkeepDraw and the tooltip prints it. 0 when this drive charges nothing,
+     * so a caller can subtract it unconditionally. */
+    public function getVortexUpkeepCost()
+    {
+        return $this->chargesVortexUpkeep() ? (int)$this->powerReq : 0;
+    }
+
+    /* THE POWER CAPACITOR THIS DRIVE DRAWS ITS UPKEEP FROM, or null.
+     *
+     * ⚠️ A DESTROYED CAPACITOR IS NOT A CAPACITOR. getSystemByName hands back the system whatever
+     * state it is in, and a destroyed one holds nothing and can pay nothing - which is a real and
+     * rather good way to lose a jump point, so it must read as "cannot pay" (R6) and not as "this
+     * hull was never capacitor-fed" (which would silently hand the drive the four-turn cap and the
+     * all-systems-dark rule back in the middle of a game).
+     * ⭐ Hence the two are asked separately: chargesVortexUpkeep() tests the FITTING (does this hull
+     * have one at all), payVortexUpkeep() tests the STATE. A hull with no capacitor in its blueprint
+     * is a build error; a hull whose capacitor has just been shot out is play.
+     *
+     * getUnit(), not $this->unit: on a fighter's subsystem the unit is the FLIGHT (§3.12). */
+    protected function getUpkeepCapacitor()
+    {
+        $unit = $this->getUnit();
+        if (!$unit || !is_array($unit->systems)) return null;
+
+        foreach ($unit->systems as $system){
+            if ($system instanceof PowerCapacitor) return $system;
+        }
+
+        return null;
+    }
+
+    /* ⭐⭐ R6 - CAN THIS DRIVE PAY THIS TURN'S UPKEEP, AND IF SO, SPEND IT.
+     *
+     * Returns true when the jump point stays open. Called exactly once per engine per turn, from
+     * getVortexClosureReason inside closeVortexIfDue - which is itself guarded three ways over, so
+     * a double advance() cannot charge twice.
+     *
+     * ⚠️⚠️ THE DRAW IS THE SERVER'S, AND THE CLIENT MUST NOT ALSO SPEND IT. PowerCapacitor's stored
+     * power comes from the FRONT END (powerReceivedFromFrontEnd, out of
+     * PowerCapacitor.doIndividualNotesTransfer, which is shipManager.power.getReactorPower plus the
+     * regeneration) - so the client subtracting the upkeep in getReactorPower AND this drawing it
+     * here would charge the same power twice. The client therefore RESERVES it (so the player cannot
+     * allocate it away and the commit gate names them if they try) and adds it straight back into the
+     * figure it stores. The spend happens here, once, at the end of the turn - exactly the way Vorlon
+     * weapon fire already spends from the capacitor in calculateHitBase.
+     *
+     * ⚠️ doDrawPower, not setPowerHeld. It adds to $powerReceivedFromBackEnd, which the Firing phase's
+     * generateIndividualNotes turns into the stored figure a few lines later in FireGamePhase::advance
+     * (closeExpiredVortices runs BEFORE that loop - that ordering is what makes this land at all). */
+    protected function payVortexUpkeep($turn)
+    {
+        $cost = $this->getVortexUpkeepCost();
+        if ($cost <= 0) return true;                    //nothing owed - cannot fail
+
+        $capacitor = $this->getUpkeepCapacitor();
+        //Shot out between the declaration and the end of the turn: nothing left to pay from (R6).
+        if (!$capacitor || $capacitor->isDestroyed($turn)) return false;
+
+        if (!$capacitor->canDrawPower($cost)) return false;
+
+        $capacitor->doDrawPower($cost);
+        return true;
     }
 
     /* §3.18 - MAY THIS DRIVE TAKE PART IN AN ABDUCTION AT ALL? Every Walker drive on a HULL: an EDJD
@@ -6691,7 +6848,13 @@ class JumpEngine extends Weapon{
        a unit can fly into it, up to MAX_VORTEX_TURNS.
 
        This is the counter Stage 5 used to smuggle out through $turnsloaded. It now travels as a
-       field of its own (see stripForJson) so that the loading state can mean loading. */
+       field of its own (see stripForJson) so that the loading state can mean loading.
+
+       ⭐ STAGE H3 / R5 - AND IT DOES NOT CLAMP ON A CAPACITOR-FED DRIVE. That drive has no four-turn
+       cap (see getVortexClosureReason), so clamping here would freeze the counter at 4 and a Vorlon
+       jump point held for eight turns would read "4" on its seventh. The denominator is dropped for
+       the same reason - stripForJson sends no vortexMaxTurns for one, and the icon draws an
+       open-ended count instead. */
     public function getVortexAge($turn)
     {
         $turn = (int)$turn;
@@ -6700,7 +6863,10 @@ class JumpEngine extends Weapon{
         if ((int)$this->vortexOpenTurn > $turn) return null;      //a later vortex, from an earlier replay turn
         if (!$this->hasOpenVortex($turn)) return null;            //closed - the engine is free again
 
-        return min($turn - (int)$this->vortexOpenTurn, self::MAX_VORTEX_TURNS);
+        $age = $turn - (int)$this->vortexOpenTurn;
+        if ($this->chargesVortexUpkeep()) return $age;
+
+        return min($age, self::MAX_VORTEX_TURNS);
     }
 
     /* Has $ship declared a vortex on $turn? Public static because the CONCEALMENT systems need to
@@ -8802,12 +8968,37 @@ class JumpEngine extends Weapon{
             return $ship->hasJumpedToHyperspace() ? 'holder left through a vortex' : 'holder destroyed';
         }
 
-        if ($turn >= $this->vortexOpenTurn + self::MAX_VORTEX_TURNS) return 'four-turn limit reached';
+        /* ⭐⭐ STAGE H3 / R5 - A CAPACITOR-FED DRIVE HAS NO CAP. A Vorlon jump point is held for as
+           long as the upkeep is paid (user ruling 2026-09-17), so the four-turn limit must not run
+           for one - it is the rule the upkeep REPLACES, along with the all-systems-dark rule below.
+           Asked through chargesVortexUpkeep(), so a marked drive with no Power Capacitor to pay from
+           keeps the cap it has today rather than getting an indefinite jump point for nothing. */
+        if (!$this->chargesVortexUpkeep()
+            && $turn >= $this->vortexOpenTurn + self::MAX_VORTEX_TURNS) return 'four-turn limit reached';
 
         $distance = $ship->getHexPos()->distanceTo($vortex->getHexPos());
         if ($distance > $this->range) return 'holder is ' . $distance . ' hexes away';
 
-        if ($turn == $this->vortexOpenTurn) return null; //the turn it was declared - nothing more to ask
+        if ($turn == $this->vortexOpenTurn){
+            /* ⭐⭐ STAGE H3 (user ruling 2026-09-18) - OPENING COSTS WHAT HOLDING COSTS. A Vorlon
+               jump drive draws power ONLY on a turn it is actually used, and opening a jump point is
+               using it: idle turns are free, the opening turn costs powerReq, and every maintained
+               turn costs it again (the branch further down).
+
+               ⚠️ THIS IS NOT THE SAME EXEMPTION AS THE ONE ON THE NEXT LINE. The opening turn is
+               exempt from MAINTAIN and from the all-systems-dark rule - "opening a jump point costs
+               nothing and does not stop the ship fighting" (JUMP_POINTS_PLAN.md §2.4) - and that is
+               still true for everybody, Vorlons included. What it is not exempt from is the Vorlon
+               drive's own power draw, which is a different bill entirely.
+
+               ⚠️ AND A BLUE EXIT NEVER REACHES HERE: the one-shot exit branch near the top of this
+               method returns first, so a reinforcement's arrival doorway is not charged. The client
+               agrees by construction - JumpEngine.isUsingVortexThisTurn tests for damageclass
+               'jumppoint', and an exit declaration carries 'jumpexit'. */
+            if ($this->chargesVortexUpkeep() && !$this->payVortexUpkeep($turn)) return 'jump point not powered';
+
+            return null; //the turn it was declared - nothing more to ask
+        }
 
         /* ⭐⭐ WALKERS §3.12 (Stage 13) - A FIGHTER FLIGHT'S JUMP POINT IS OPEN FOR EXACTLY ONE TURN
            (user ruling 2026-09-10). getMaintainDeclaration already refuses a flight, so the line
@@ -8819,6 +9010,22 @@ class JumpEngine extends Weapon{
         if ($this->isFlightMounted()) return 'a fighter flight cannot hold a jump point open';
 
         if (!$this->getMaintainDeclaration($turn)) return 'not maintained';
+
+        /* ⭐⭐ STAGE H3 / R4 + R6 - THE CAPACITOR-FED BRANCH, AND IT RETURNS.
+           A Vorlon pays its drive's powerReq out of the Power Capacitor for this turn and fights on:
+           the all-systems-dark test below is the rule the upkeep REPLACES, not a second bill (R4,
+           user ruling 2026-09-17). If the capacitor cannot cover it - drained by weapon fire, halved
+           or emptied by a critical, or shot out altogether - the jump point closes with a reason of
+           its own (R6), which is the only place in this method that spends anything.
+
+           ⚠️ BELOW THE OPENING-TURN EXEMPTION AND BELOW THE MAINTAIN TEST, deliberately. Opening a
+           jump point is free (the `$turn == $this->vortexOpenTurn` line above returns before this),
+           and a doorway nobody declared Maintain on is closing anyway - charging for either would
+           take power for a turn the drive got no upkeep out of. */
+        if ($this->chargesVortexUpkeep()){
+            if (!$this->payVortexUpkeep($turn)) return 'jump point not powered';
+            return null;
+        }
 
         $violations = self::getVortexPowerViolations($ship, $turn);
         if (!empty($violations)){
@@ -9581,6 +9788,21 @@ class JumpEngine extends Weapon{
         $this->data["Special"]  = "<br>Select this system in Initial Orders and target a hex within " . $this->range . " hexes.";
         $this->data["Special"] .= "Set the vortex FACING with the on-map arrow, then confirm. The jump point forms at the end of that turn and can be entered from the NEXT turn.";
         $this->data["Special"] .= "<br>A damaged Jump Engine may fail: at the end of every turn it opens or maintains a jump point, the ship is destroyed on a d100 roll at or under the percentage of Jump Engine boxes lost.";
+        /* ⭐⭐ STAGE H3 - THE VORLON UPKEEP, STATED WHERE THE PLAYER MEETS IT. Two rules of this
+           tooltip's text are simply untrue for a capacitor-fed drive - the four-turn cap and the
+           all-systems-dark requirement - so the sentence replaces them rather than being appended to
+           them. Asked through chargesVortexUpkeep(), which is the same predicate the closure sweep
+           reads, so the tooltip cannot promise a rule the server will not apply. */
+        if ($this->chargesVortexUpkeep()){
+            $cost = $this->getVortexUpkeepCost();
+            $this->data["Special"] .= "<br><b>POWER:</b> this drive draws " . $cost . " power from the Power Capacitor ONLY on a turn it is used"
+                . " - the turn it opens a jump point, and every turn it maintains one. It costs nothing on any other turn.";
+            $this->data["Special"] .= "<br><b>UPKEEP:</b> the " . $cost . " is taken at the END of the turn. In exchange the ship does NOT have to"
+                . " shut its systems down to hold the jump point open, and the jump point has NO four-turn limit: it stands for as long as the"
+                . " upkeep is paid. If the Capacitor cannot cover it, the jump point closes.";
+        }
+        //Stage H3 follow-up (user request 2026-09-18): JumpEngine.continueVortexMaintain re-declares it each turn.
+        $this->data["Special"] .= "<br>Once you set <b>Maintain</b>, it carries over to the following turns automatically until you turn it OFF.";
         $this->data["Special"] .= "<br>See FAQ for full rules for Jump Drives.";
         $this->data["Special"] .= "<br>SHOULD NOT be shut down for power (unless damaged >50% or if Desperate rules apply).";
 		/* ShipSystem, not parent. Weapon::setSystemDataWindow appends a gun's tooltip block -
@@ -9765,6 +9987,30 @@ class JumpEngine extends Weapon{
            claim then rejected, which is the worst of both. */
         $strippedSystem->loadingtime = $source->getVortexRechargeTime();
 
+        /* ⭐⭐ STAGE H3 - THE CAPACITOR-FED FLAG, and it is the CLIENT'S whole knowledge of the Vorlon
+           upkeep rule. Three client sites read it and every one of them would otherwise be wrong on a
+           Vorlon: the Maintain toggle must stay offered past the four-turn cap that no longer applies
+           (JumpEngine.canMaintainVortex), the toggle must NOT black the ship out and lock it down
+           (shipManager.power.getVortexMaintainBlockers / isVortexLockedOffline), and the reactor
+           balance must reserve the draw on a turn the drive is USED while GIVING BACK the standing
+           cost fixedPower would otherwise take from a Vorlon (JumpEngine.getVortexUpkeepDraw, plus
+           the give-back in shipManager.power.getReactorPower - this drive has no standing cost).
+
+           `vortexUpkeepCost` rides along so the client needs no copy of the arithmetic - it is the
+           drive's own powerReq, but saying so twice is how the two ends drift apart.
+
+           ⭐ SENT ONLY WHEN THE DRIVE ACTUALLY CHARGES, off the same chargesVortexUpkeep() the server
+           rules read, so a marked drive on a hull with no Power Capacitor publishes nothing and the
+           client keeps the ordinary behaviour the server will also give it. Every other jump engine's
+           payload stays byte-identical - the convention ancientJump, walkerJump and abductionLastHold
+           all follow.
+           ⚠️ Read off $source, like everything else in this block, so all six craft of a flight would
+           agree - though a flight can never answer true here (a Fighter holds no PowerCapacitor). */
+        if ($source->chargesVortexUpkeep()){
+            $strippedSystem->vortexUpkeep     = true;
+            $strippedSystem->vortexUpkeepCost = $source->getVortexUpkeepCost();
+        }
+
         $age = $source->getVortexAge($turn);
         if ($age !== null){
             $strippedSystem->vortexTurnsOpen = $age;
@@ -9779,9 +10025,19 @@ class JumpEngine extends Weapon{
                and the icon must say so: "1/1", not "1/4", which would promise three turns the unit
                can never have. Read off the SOURCE engine like everything else in this block, so all
                six craft agree. */
-            $strippedSystem->vortexMaxTurns  = ($source->vortexHoldTurns !== null)
-                ? (int)$source->vortexHoldTurns
-                : ($source->isFlightMounted() ? 1 : self::MAX_VORTEX_TURNS);
+            /* ⭐⭐ STAGE H3 / R5 - AND A CAPACITOR-FED DRIVE SENDS NO DENOMINATOR AT ALL. There is no
+               cap on it, so there is no number to count out of: "4/4" on a Vorlon jump point that is
+               going nowhere would claim it was about to close, every turn from the fourth onwards,
+               for as long as the player kept paying. Absent is the honest answer, and the client's
+               getVortexIconLoad draws an open-ended counter when it is missing - the same "emitted
+               only when it means something" convention arrivalIniPenalty and abductionLastHold use.
+               ⚠️ A GATE STILL SENDS ITS HOLD even if its drive were ever marked: the programmed hold
+               is a real cap and the gate branch of getVortexClosureReason still enforces it. */
+            if ($source->vortexHoldTurns !== null){
+                $strippedSystem->vortexMaxTurns = (int)$source->vortexHoldTurns;
+            } elseif (!$source->chargesVortexUpkeep()){
+                $strippedSystem->vortexMaxTurns = $source->isFlightMounted() ? 1 : self::MAX_VORTEX_TURNS;
+            }
         }
 
         return $strippedSystem;
@@ -13722,6 +13978,20 @@ class PowerCapacitor extends ShipSystem{
     public $boostEfficiency = 0;
 	protected $active = false; //To track in Front End whether system was ever activate this turn during Deployment, since boost can be toggled during Firing Phase.
 	private $doubled = false; //Passed from Front End, to generate note to double Self Repair output at end of turn.		
+
+	/* HAS THIS TURN'S RECHARGE ALREADY BEEN BANKED? (HYPERSPACE_IMPROVEMENTS_PLAN.md Stage H3 follow-up,
+	   user report 2026-09-18, game 4348.)
+
+	   The recharge is added to the stored figure at the COMMIT of Initial Orders (the front end posts
+	   balance + regeneration, see PowerCapacitor.doIndividualNotesTransfer), which is when the phase-1
+	   'powerStored' note is written. The client shows the recharge from the START of Initial Orders
+	   instead, so it has to know whether the figure it was sent has had this turn's recharge added
+	   yet - otherwise a player who commits and then reloads while waiting sees it added twice.
+
+	   True exactly when a 'powerStored' note from THIS turn, phase 1 or later, has been applied. The
+	   turn-1 Deployment fill is phase -1, so it does not count: the first Initial Orders still tops up.
+	   Protected, so no blueprint key; sent from stripForJson only when true. */
+	protected $rechargedThisTurn = false;
 	
 /*
 	1-17: No effect.
@@ -13858,6 +14128,8 @@ capacitor is completely emptied.
 			switch($currNote->notekey){
 				case 'powerStored': //power that should be stored at this moment
 					$this->setPowerHeld($currNote->notevalue);
+					//Stage H3 follow-up: this turn's recharge is banked once the Initial Orders note exists - see $rechargedThisTurn.
+					if ((int)$currNote->turn === (int)$gamedata->turn && (int)$currNote->phase >= 1) $this->rechargedThisTurn = true;
 					break;								
 			}
 		}
@@ -13975,7 +14247,8 @@ capacitor is completely emptied.
         }		
 		//$strippedSystem->individualNotesTransfer = $this->individualNotesTransfer;
 		$strippedSystem->active = $this->active;
-		$strippedSystem->doubled = $this->doubled;					
+		$strippedSystem->doubled = $this->doubled;
+		if ($this->rechargedThisTurn) $strippedSystem->rechargedThisTurn = true; //only when true - see the property					
         return $strippedSystem;
     }
 
