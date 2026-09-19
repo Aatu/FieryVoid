@@ -1806,8 +1806,28 @@ at short range versus long range.
         <ul>
 <li>These have the accelerator property just so that the weapon requires explicit permission to intercept (and draw power). 
             It does not affect the weapon in any other way e.g. leaving it to recharge for two turns will not increase power of shot.</li>
-        <li>Can combine Lightning Cannons for higher power shots. To do so, the appropriate number of cannons must have the same firing mode and target assigned. 
-            If player mis-declares and not enough weapons are assigned for declared mode, shot automatically misses and does not drain power.</li>
+        <li>Can combine Lightning Cannons for higher power shots. To do so, the appropriate number of cannons must have the same firing mode and target assigned.
+            If player mis-declares and not enough weapons are assigned for declared mode, shot automatically misses and does not drain power.
+            The commit window warns you about any such shot before you commit your fire orders.</li>
+    </ul>
+<h5>Lightning Gun</h5>
+        <ul>
+<li>Each Lightning Gun is a <b>single system that fires up to twice per turn</b>. (Strike Cruisers in games started before this change still show the older version: a Lightning Gun plus a separate "Mirror Lightning Gun".)</li>
+        <li>Every click on a target declares <b>one shot</b> in the gun's current firing mode. The firing mode can be changed between clicks, so the two shots may go at different targets, in different modes.
+            Each declared shot, and its mode, is listed in the target's incoming fire list.</li>
+        <li>A single gun fires in <b>1 Prong</b> (Light) mode. Heavier modes <b>combine one shot from each of several different Lightning Guns</b> on the same ship:
+            <ul class="circle-list">
+                <li><b>2 Prongs</b> (Medium, Raking) - 2 guns.</li>
+                <li><b>3 Prongs</b> (Heavy, Raking 15) or <b>P3Piercing</b> (Heavy, Piercing) - 3 guns.</li>
+                <li><b>4 Prongs</b> (Mega, Raking 20) or <b>Q4Piercing</b> (Mega, Piercing) - 4 guns.</li>
+            </ul>
+            A gun cannot combine its own two shots together.</li>
+        <li><b>How to fire a combined shot:</b> select the Lightning Guns you want to combine, set them all to the same firing mode, and click the target. Each selected gun declares one shot and they are fused into a single shot when fire is resolved.
+            Click the target again to fire a second combined shot with the same guns. All shots being combined must have the same target, the same firing mode, and the same called system (if any).</li>
+        <li>If a combined shot is declared without enough Lightning Guns, each of its shots <b>fires as 1 Prong instead</b>, at the same target, drawing 1 power; the combat log notes it.
+            The commit window warns you about any such shot before you commit your fire orders. A combined shot that does fire appears in the log as a single shot.</li>
+        <li>Power is drawn from the Power Capacitor for <b>each shot separately</b>: 1 for 1 Prong, 3 for 2 Prongs, 9 for 3 Prongs, and 18 for 4 Prongs. Each gun shows its own share of the power for the shots it takes part in.</li>
+        <li>All modes are uninterceptable. As with the Lightning Cannon, the accelerator property only means the gun must be explicitly ordered to intercept; each unused shot may then intercept, drawing 1 power per interception.</li>
     </ul>
 <h5>Discharge Gun & Discharge Cannon</h5>
         <ul>

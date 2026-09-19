@@ -1685,7 +1685,11 @@ window.gamedata = {
                 }
             }
 
-            if (hasNoFO.length == 0 && hasSplitFO.length == 0 && notLaunchedFighters.length == 0) { //No warnings at all.
+            //Lightning Cannon / Lightning Gun shots declared without enough weapons to combine. One faction
+            //comparison per ship for any non-Vorlon fleet - see VorlonLightningCombination in special.js.
+            var lightningWarning = VorlonLightningCombination.getCommitWarning(myShips);
+
+            if (hasNoFO.length == 0 && hasSplitFO.length == 0 && notLaunchedFighters.length == 0 && lightningWarning === '') { //No warnings at all.
                 confirm.confirm('<span class="commit-confirm-q">Are you sure you wish to COMMIT YOUR FIRE ORDERS?</span>', gamedata.doCommit);
             } else {
                 var html = '';
@@ -1719,6 +1723,10 @@ window.gamedata = {
                         html += gamedata.shipNameSpan(notLaunchedFighters[ship]);
                         html += "<br>";
                     }
+                }
+                if (lightningWarning !== '') {
+                    if (html != '') html += "<br>";
+                    html += lightningWarning;
                 }
                 //confirm.confirm(html + "<br>Are you sure you wish to COMMIT YOUR FIRE ORDERS?", gamedata.doCommit);
                 confirm.confirm(

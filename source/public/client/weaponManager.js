@@ -2907,9 +2907,11 @@ window.weaponManager = {
     setModeForFireOrder: function setModeForFireOrder(weapon, fireOrder) {
         if (!weapon || !fireOrder) return null;
         var previous = weapon.firingMode;
-        //A multiModeSplit weapon holds orders in both modes at once - there is no single mode to
-        //switch it to, and the display paths already leave it alone.
-        if (weapon.multiModeSplit) return previous;
+        //A multiModeSplit weapon holds orders in several modes at once, so it is left alone unless it
+        //opts in with displaysOrdersInOwnMode: one whose per-mode numbers follow its firingMode (the
+        //Vorlon Lightning Gun, the Heavy Slicer) is safe to switch per ORDER, now that every caller
+        //restores it - and restoreFiringMode lets it rebuild its own readouts afterwards.
+        if (weapon.multiModeSplit && !weapon.displaysOrdersInOwnMode) return previous;
 
         var wanted = fireOrder.firingMode;
         var guard = weapon.firingModes ? Object.keys(weapon.firingModes).length : 1;
@@ -2923,14 +2925,20 @@ window.weaponManager = {
     restoreFiringMode: function restoreFiringMode(weapon, mode) {
         if (!weapon || mode === null || mode === undefined) return;
         if (weapon.firingMode === mode) return;
-        if (typeof weapon.setFiringMode === 'function') {
-            weapon.setFiringMode(mode);
-            if (weapon.firingMode === mode) return;
-        }
+        if (typeof weapon.setFiringMode === 'function') weapon.setFiringMode(mode);
         //Fallback for a weapon whose only way round is changeFiringMode (a magazine-fed rack skips
         //the modes it holds no ammo for) - same bound as above.
         var guard = weapon.firingModes ? Object.keys(weapon.firingModes).length : 1;
         while (weapon.firingMode !== mode && guard-- > 0) weapon.changeFiringMode();
+
+        //Both switches ran updateFiringModeData, which rewrites the generic per-mode readouts
+        //("Damage", "Fire control", "Loading"). An opted-in multiModeSplit weapon may keep its own
+        //versions of those - the Heavy Slicer's pool-based damage and its charge-dependent Piercing
+        //fire control - so let it rebuild them, or the ship window shows the generic ones until
+        //something else happens to re-run initializationUpdate.
+        if (weapon.displaysOrdersInOwnMode && typeof weapon.initializationUpdate === 'function') {
+            weapon.initializationUpdate();
+        }
     },
 
     /* Where an incoming shot is bearing FROM, in hex coordinates.

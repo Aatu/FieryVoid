@@ -80,7 +80,17 @@ window.ShipTooltipBallisticsMenu = function () {
 			//⚠️ q/r, NOT x/y - hexagon.Offset carries only q and r, and a movement row's .position
 			//is one too. Reading .x here would key every shot in the game on "undefined,undefined".
 			const launchHex = getLaunchHex.call(this, ballistic);
-			const key = ballistic.shooter.id + '-' +  ballistic.weapon.displayName + '-' +  ballistic.fireOrder.firingMode +'-' + weaponManager.calculataBallisticHitChange(getBallisticEntry.call(this, ballistic)) + '-' + (launchHex ? launchHex.q + ',' + launchHex.r : '');
+			//...and price the hit chance in the mode the SHOT was declared in, exactly as the row itself
+			//does in renderTo. Without this a Lightning Gun switched to another mode after declaring keyed
+			//its earlier shot on the NEW mode's hit chance, and it split off into a row of its own.
+			const restoreMode = weaponManager.setModeForFireOrder(ballistic.weapon, ballistic.fireOrder);
+			let hitChance;
+			try {
+				hitChance = weaponManager.calculataBallisticHitChange(getBallisticEntry.call(this, ballistic));
+			} finally {
+				weaponManager.restoreFiringMode(ballistic.weapon, restoreMode);
+			}
+			const key = ballistic.shooter.id + '-' +  ballistic.weapon.displayName + '-' +  ballistic.fireOrder.firingMode +'-' + hitChance + '-' + (launchHex ? launchHex.q + ',' + launchHex.r : '');
 
             if (listObject[key]) {
                 listObject[key].members.push(ballistic);
