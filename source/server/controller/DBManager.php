@@ -5103,7 +5103,7 @@ public function setLastTimeChatChecked($userid, $gameid)
     public function deleteOldChatMessages()
     {
         /* The cutoff is computed on the RIGHT of the comparison, never by wrapping the
-           column. This used to read `DATE_ADD(time, INTERVAL 3 DAY) < NOW()`, which
+           column. This used to read `DATE_ADD(time, INTERVAL 5 DAY) < NOW()`, which
            selects exactly the same rows but is not sargable: a column inside a function
            cannot be matched against an index, so no index on `time` could ever be used
            however the table was defined.
@@ -5123,7 +5123,7 @@ public function setLastTimeChatChecked($userid, $gameid)
             DELETE FROM
                 chat
             WHERE
-                time < NOW() - INTERVAL 3 DAY
+                time < NOW() - INTERVAL 5 DAY
         ");
 
         if ($stmt) {
