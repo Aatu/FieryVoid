@@ -1807,7 +1807,7 @@ at short range versus long range.
 <li>These have the accelerator property just so that the weapon requires explicit permission to intercept (and draw power). 
             It does not affect the weapon in any other way e.g. leaving it to recharge for two turns will not increase power of shot.</li>
         <li>Can combine Lightning Cannons for higher power shots. To do so, the appropriate number of cannons must have the same firing mode and target assigned.
-            If player mis-declares and not enough weapons are assigned for declared mode, shot automatically misses and does not drain power.
+            If player mis-declares and not enough weapons are assigned for declared mode, each of those shots <b>fires as 1 Prong instead</b>, at the same target, drawing 1 power; the combat log notes it.
             The commit window warns you about any such shot before you commit your fire orders.</li>
     </ul>
 <h5>Lightning Gun</h5>

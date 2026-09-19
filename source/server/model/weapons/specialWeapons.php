@@ -5128,9 +5128,9 @@ class VorlonLightningCannon extends Weapon{
 		$this->data["Special"] .= "<br> - 3 Prongs: 12 Power, 4d10+32 Raking(15), -1.65/hex"; 
 		$this->data["Special"] .= "<br> - 4 Prongs: 24 Power, 8d10+64 Raking(20), -1.25/hex"; 
 		$this->data["Special"] .= "<br> - 3 Prongs Piercing: 12 Power, 4d10+32 Piercing, -1.65/hex"; 
-		$this->data["Special"] .= "<br> - 4 Prongs Piercing: 24 Power, 8d10+64 Piercing, -1.25/hex"; 
-		$this->data["Special"] .= "<br>If weapon is mis-declared (shot is declared but not enough prongs are allocated in appropriate mode) shot will automatically miss and Power will NOT be drained."; 
-		$this->data["Special"] .= "<br>You must explicitly order this weapon to intercept.";		
+		$this->data["Special"] .= "<br> - 4 Prongs Piercing: 24 Power, 8d10+64 Piercing, -1.25/hex";
+		$this->data["Special"] .= "<br>If weapon is mis-declared (shot is declared but not enough prongs are allocated in appropriate mode) the shot fires as 1 Prong instead, and draws that mode's 1 Power.";
+		$this->data["Special"] .= "<br>You must explicitly order this weapon to intercept.";
 	}
 		
 		
@@ -5267,16 +5267,23 @@ class VorlonLightningCannon extends Weapon{
 				}				
 				$doDrain = true;
 				$doCalculate = true;
-			}else{//not enough weapons to combine in this mode - mark combined and effectively don't fire
-				$notes = "technical fire order - weapon mis-declared";
-				$fireOrder->chosenLocation = 0; //tylko techniczne i tak
-				$fireOrder->needed = 0;
-				$fireOrder->shots = 0;
-				$fireOrder->notes = $notes;
-				$fireOrder->updated = true;
-				$this->doNotIntercept = true;
-				$doDrain = false;
-				$doCalculate = false;
+			}else{//not enough weapons to combine in this mode - fall back to a single prong (user ruling, 2026-09-20)
+				//The shot is NOT cancelled: it fires as 1 Prong at the same target, for that mode's 1 Power.
+				//The order's mode is rewritten (and persisted - updateFireOrders writes firingmode), so the hit
+				//chance, damage, log and replay all describe the shot that was actually fired. Same ruling as
+				//VorlonLightningGunSplit; the client warns about it at commit (VorlonLightningCombination).
+				$fireOrder->firingMode = 1;
+				$this->changeFiringMode(1);
+				//prepareFiring set the resolution priority from the DECLARED mode before calling this -
+				//re-derive it exactly as it does, now that the mode has changed.
+				$target = $gamedata->getShipById($fireOrder->targetid);
+				$fireOrder->priority = ($target instanceof FighterFlight) ? $this->priorityAF : $this->priority;
+				$fireOrder->pubnotes .= " Not enough Lightning Cannons combined - fired as 1 Prong.";
+				$powerRequired = $this->powerRequiredArray[1];
+				$prongsNeeded = $powerRequired[0];
+				$powerPerProng = $powerRequired[1];
+				$doDrain = true;
+				$doCalculate = true;
 			}
 		}
 		
