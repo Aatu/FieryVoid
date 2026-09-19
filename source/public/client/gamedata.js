@@ -1183,7 +1183,11 @@ window.gamedata = {
                        no other way of seeing coming. getVortexHeldBy returns null on the turn a
                        vortex was declared (it has not formed yet), so a fresh declaration never
                        warns about itself. */
-                    var heldVortex = shipManager.movement.getVortexHeldBy(myShips[ship]);
+                    /* ⭐ STAGE H5 - AND THE BLUE EXIT A SHIP CAME OUT THROUGH, which it now holds exactly
+                       as it would an entrance (getVortexHeldBy stays entrance-only by design, so the
+                       exit is asked beside it). Let go, it closes tonight and takes any next wave with it. */
+                    var heldVortex = shipManager.movement.getVortexHeldBy(myShips[ship])
+                        || shipManager.movement.getMaintainableExitHeldBy(myShips[ship]);
                     if (heldVortex) {
                         var jumpEngine = shipManager.systems.getSystemByName(myShips[ship], "jumpEngine");
                         var maintaining = jumpEngine && typeof jumpEngine.isMaintainingVortex === 'function'

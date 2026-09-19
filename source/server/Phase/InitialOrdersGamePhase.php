@@ -375,6 +375,9 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
      *   2. arrivalVia must name a unit of theirs that is ALSO still in hyperspace
      *   3. that named unit must hold a legal 'jumpexit' declaration for THIS turn
      *
+     * ⭐ OR (STAGE H5) arrivalVia names a unit of theirs ON THE BOARD that is holding its blue exit open
+     * with a Maintain declaration made in this same submission - see collectHeldExitOpeners.
+     *
      * ⭐ OR (STAGE 8) arrivalVia names a FIXED GATE that is a doorway in - see collectGateOpeners.
      * A gate is the one opener a player does not own, does not have in hyperspace and may not even
      * have signalled themselves, so it cannot be found by the ship sweep below and is collected
@@ -501,6 +504,7 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
         }
 
         self::collectGateOpeners($gd, $gameData, $openers);
+        self::collectHeldExitOpeners($gd, $gameData, $openers);
 
         $reserved = array();   //per LEGACY opener: hangar id => boxes promised earlier in this pass
 
@@ -602,6 +606,42 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
                     break 2;
                 }
             }
+        }
+    }
+
+    /* ⭐⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md STAGE H5 - EVERY UNIT OF THIS PLAYER'S ON THE BOARD THAT IS
+     * HOLDING ITS BLUE EXIT OPEN FOR ANOTHER WAVE, added to $openers. A ship-held exit now behaves like a
+     * gate's: it may bring a fresh wave on every turn it is held.
+     *
+     * ⭐ AND "HELD" MEANS THIS TURN'S MAINTAIN DECLARATION, WHICH ARRIVED IN THIS SAME POST. The two
+     * decisions are made in one Initial Orders phase - keep the jump point open, and who comes through
+     * it next turn - and a player who books a wave and then turns Maintain off has cancelled the wave
+     * (the user's own statement of the ordering problem, plan section 6). Both halves are in hand here:
+     * the fire orders were validated and written before this runs, so $gd's engine carries the Maintain
+     * order exactly when it survived validation. No Maintain, no opener - and every berth naming the
+     * unit is written as NULL below, which is the existing refund path with nothing spent.
+     *
+     * ⚠️ THE SERVER IS THE AUTHORITY, THE CLIENT IS LENIENT (the REINFORCEMENTS_PLAN.md rule for "is this
+     * berth still good?"): JumpEngine.doDeactivate clears the riders and says so, and the menu greys the
+     * doorway while Maintain is off, but neither is trusted - this is what decides. And it is not the
+     * last word either: an exit that is maintained but then breaks the range, the cap, the dark rule or
+     * the upkeep closes at end of turn, and JumpEngine::stampExitManifests refunds its berths then.
+     *
+     * OWN UNITS ONLY. A gate belongs to nobody and anybody may ride it; a ship's exit is held by its
+     * owner's drive, and a teammate's Maintain would arrive in a different POST - the ordering above
+     * could not be kept. */
+    private static function collectHeldExitOpeners(TacGamedata $gd, TacGamedata $gameData, Array &$openers)
+    {
+        $turn = (int)$gameData->turn;
+
+        foreach ($gd->ships as $unit){
+            if ($unit->userid != $gameData->forPlayer) continue;
+
+            $engine = JumpEngine::getHeldExitEngine($unit, $gd, $turn);
+            if (!$engine) continue;
+            if (!$engine->getMaintainDeclaration($turn)) continue;
+
+            $openers[(int)$unit->id] = true;
         }
     }
 

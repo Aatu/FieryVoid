@@ -339,16 +339,26 @@ class Firing
             if (!($vortex instanceof SpawnJumpPoint))
                 return "this ship's vortex unit is gone";
 
-            /* REINFORCEMENTS_PLAN.md §2.6 / §2.3 - AN EXIT HAS NO MAINTAIN. It is one-shot:
-               it forms at the end of the turn it was declared, delivers its manifest on the next,
-               and closes at the end of that one whatever anybody declares. The client never offers
-               the control (isJumpVortex stays entrance-only, so JumpEngine.canMaintainVortex cannot see
-               an exit), so only a tampered POST arrives here - but without this line a forged
-               mode-7 order would hold an exit open indefinitely, and the ship that opened it
-               could never open anything else (trap 5).
-               Same shape and same reasoning as getMaintainDeclaration's gate refusal. */
-            if ($vortex instanceof SpawnJumpPointExit)
-                return "a jump point exit is one-shot and cannot be maintained";
+            /* ⭐⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md STAGE H5 - A SHIP'S BLUE EXIT MAY NOW BE MAINTAINED,
+               from the turn its opener arrives, exactly as an entrance is (and on a Vorlon without the
+               four-turn cap, paid from the capacitor - user, 2026-09-19). What used to be a blanket
+               refusal of every exit narrows to the two that still cannot be held:
+
+                 - a legacy drive's PHASE-IN doorway. Invisible, one-shot, and a legacy drive has no
+                   Maintain (the isLegacyJump refusal above already catches it - this names the rule
+                   in case a future drive ever holds one without the flag);
+                 - an exit whose opener is still IN HYPERSPACE - it was released rather than placed.
+                   Its getHexPos() is its slot's 'start' marker, a fiction, so the range test above
+                   measured nothing real.
+
+               The end-of-turn half is getVortexClosureReason's exit branch, which falls through to
+               the ship list from the arrival turn on. Trap 5 is still kept - by the four-turn cap on
+               a young race's exit and by the upkeep (R6) on a Vorlon's. */
+            if ($vortex instanceof SpawnJumpPointPhaseIn)
+                return "a phase-in doorway is one-shot and cannot be maintained";
+
+            if ($vortex instanceof SpawnJumpPointExit && $shooter->getTurnDeployed($gamedata) > (int)$gamedata->turn)
+                return "the opener is still in hyperspace and cannot hold its jump point exit";
 
             if (!$vortex->getHexPos()->equals($target))
                 return "maintain must target this ship's own vortex hex";

@@ -1313,9 +1313,21 @@ JumpEngine.prototype.getOwningUnit = function () {
 	return host;
 };
 
-//The open vortex this ship is holding, or null. Also the source of the target hex.
+/* The open vortex this ship is holding, or null. Also the source of the target hex.
+
+   ⭐ STAGE H5 - AN ENTRANCE, OR THE SHIP'S OWN BLUE EXIT ONCE IT HAS COME OUT THROUGH IT. From its
+   arrival turn a ship holds its exit exactly as it would an entrance, so every reader of this - the
+   Maintain toggle (canMaintainVortex / declareVortexMaintain), its carry-forward
+   (continueVortexMaintain), the icon counter's fallback and SystemInfoButtons' "holding a vortex, no
+   fire-order buttons" - is right for it unchanged. The exit half is asked SECOND and separately:
+   getVortexHeldBy stays entrance-only by design (see shipManager.movement.isJumpVortex).
+   Guarded, because harnesses drive this file against a stubbed shipManager.movement. */
 JumpEngine.prototype.getHeldVortex = function () {
-	return shipManager.movement.getVortexHeldBy(this.getOwningUnit());
+	var unit = this.getOwningUnit();
+	var entrance = shipManager.movement.getVortexHeldBy(unit);
+	if (entrance) return entrance;
+	if (typeof shipManager.movement.getMaintainableExitHeldBy !== 'function') return null;
+	return shipManager.movement.getMaintainableExitHeldBy(unit);
 };
 
 /* STAGE 6 - WHAT THE SYSTEM ICON SHOWS, when it should show something other than the ordinary
@@ -1399,19 +1411,23 @@ JumpEngine.prototype.getVortexUpkeepCost = function () {
 };
 
 /* ⭐ IS THIS DRIVE BEING USED ON A JUMP POINT THIS TURN? An OPENING declaration (firing modes 1-6,
-   the six vortex facings) or a MAINTAIN one (mode 7) - both are the drive in use, and both are the
-   same order shape: a ballistic order at a hex with damageclass 'jumppoint'.
+   the six vortex facings), a MAINTAIN one (mode 7) - both 'jumppoint' - or (⭐ Stage H5) a blue EXIT
+   declaration from hyperspace, 'jumpexit'. All three are the drive in use.
 
-   ⚠️ THE DAMAGECLASS IS THE TEST, NOT THE MODE, and that is what keeps a blue EXIT doorway out of
-   it: a reinforcement's exit declaration carries 'jumpexit' and is deliberately NOT charged, which
-   matches the server - getVortexClosureReason's one-shot exit branch returns long before the upkeep
-   is reached. Any future order type on this system (an abduction carries 'abduction') is excluded
-   for free by the same test. */
+   ⭐⭐ THE EXIT IS CHARGED NOW (user ruling 2026-09-19, reversing H3): opening a jump point is using
+   the drive whichever way the doorway faces, so a Vorlon forming its exit from hyperspace pays powerReq
+   exactly as it would opening an entrance. The server takes it in getVortexClosureReason's exit branch
+   on the forming turn. Maintaining the exit once the ship is on the board is an ordinary mode-7
+   'jumppoint' order and was always counted.
+
+   ⚠️ THE DAMAGECLASS IS STILL THE TEST, NOT THE MODE: any other order type on this system (an
+   abduction carries 'abduction', a gate claim 'gateexit' on a gate's engine) stays excluded for free. */
 JumpEngine.prototype.isUsingVortexThisTurn = function () {
 	for (var i in this.fireOrders) {
 		var fire = this.fireOrders[i];
 		if (fire.turn != gamedata.turn) continue;
-		if (String(fire.damageclass).toLowerCase() !== 'jumppoint') continue;
+		var damageclass = String(fire.damageclass).toLowerCase();
+		if (damageclass !== 'jumppoint' && damageclass !== 'jumpexit') continue;
 		return true;
 	}
 
@@ -2063,6 +2079,7 @@ JumpEngine.prototype.doDeactivate = function () {
 
 	var ship = this.getOwningUnit();
 	this.removeVortexMaintainOrder();
+	this.releaseHeldExitManifest(ship);
 
 	/* ⭐⭐ STAGE H3 / R4 - AND NOTHING TO RESTORE ON A CAPACITOR-FED (VORLON) DRIVE, because
 	   doActivate shut nothing down. The restore below is deliberately BROAD (see the note above), so
@@ -2087,6 +2104,29 @@ JumpEngine.prototype.doDeactivate = function () {
 	}
 
 	webglScene.customEvent('SystemDataChanged', { ship: ship, system: this });
+};
+
+/* ⭐⭐ STAGE H5 - TURNING MAINTAIN OFF ON A HELD BLUE EXIT CANCELS THE WAVE BOOKED THROUGH IT.
+   Both decisions are made in the same Initial Orders: hold the doorway open, and who comes through it
+   next turn. A doorway let go closes at the end of this turn, so a berth on it can never be honoured -
+   this un-books those riders and names them, which is FEEDBACK, not enforcement. The server is the
+   authority (InitialOrdersGamePhase::collectHeldExitOpeners writes a berth as NULL unless the opener
+   re-declared Maintain in the same commit); this only stops the player committing a manifest they
+   would then watch vanish.
+   An entrance has no riders, and a ship still in hyperspace has no Maintain to turn off, so this is a
+   no-op everywhere but a held exit. Guarded on the module: harnesses and the lobby load this file
+   without ReinforcementEntry. */
+JumpEngine.prototype.releaseHeldExitManifest = function (ship) {
+	if (!ship || !window.ReinforcementEntry || typeof ReinforcementEntry.releaseManifest !== 'function') return;
+	if (typeof shipManager.movement.getMaintainableExitHeldBy !== 'function') return;
+	if (!shipManager.movement.getMaintainableExitHeldBy(ship)) return;
+
+	var released = ReinforcementEntry.releaseManifest(ship.id);
+	if (released.length === 0) return;
+
+	var names = released.map(function (unit) { return '<b>' + unit.name + '</b>'; }).join(', ');
+	confirm.warning(ship.name + "'s jump point will close at the end of this turn, so nothing can come "
+		+ "through it next turn. Taken off its manifest and left waiting in hyperspace: " + names + ".");
 };
 
 var Structure = function Structure(json, ship) {
@@ -3825,8 +3865,8 @@ PowerCapacitor.prototype.doIndividualNotesTransfer = function () { //prepare ind
 	   again by the closure sweep drawing from what is left.
 
 	   So: the reservation constrains the ALLOCATION, the power stays in the capacitor, and the
-	   server takes it. Exactly 0 on every other ship in the game - only a Vorlon drive maintaining a
-	   jump point this turn answers anything but 0. */
+	   server takes it. Exactly 0 on every other ship in the game - only a Vorlon drive opening or
+	   maintaining a jump point this turn (a blue exit included, from Stage H5) answers anything but 0. */
 	powerRemaining = powerRemaining + shipManager.power.getVortexUpkeepReserved(this.ship);
 	/* ⭐⭐ Stage H4 follow-up (user ruling 2026-09-18, game 4348) - THE CAPACITOR BANKS WHAT IS LEFT.
 	   The balance above already holds this turn's recharge, capped at the maximum (getTurnStartTopUp),

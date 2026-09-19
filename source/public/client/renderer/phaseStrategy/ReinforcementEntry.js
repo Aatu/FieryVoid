@@ -16,7 +16,9 @@
  *             |       \-> manifest dialog     doorway - re-open the passenger list without taking
  *             |                              the jump point back first (2026-09-02). The manifest
  *             |                              has its own way back HERE, so the two are a loop
- *             |-> "Select Reinforcements" . a GATE whose jump point is already open (Stage 8)
+ *             |-> "Select Reinforcements" . a GATE whose jump point is already open (Stage 8), or
+ *             |       |                     a ship of mine ON THE BOARD maintaining the blue exit
+ *             |       |                     it arrived through (HYPERSPACE_IMPROVEMENTS_PLAN.md H5)
  *             |       \-> manifest dialog ..... who rides through, this turn
  *             |-> "Withdraw Gate Signal" .. a gate this client claimed for arrival this turn
  *             \-> "Choose Hex" ............ the map is armed; the next click is the exit hex
@@ -300,6 +302,11 @@ window.ReinforcementEntry = (function () {
            to form. gateDoorway() answers both cases and is the single place that rule lives. */
         if (gamedata.isJumpGate(opener)) return !!gateDoorway(opener);
 
+        /* STAGE H5 - A SHIP ON THE BOARD HOLDING ITS EXIT honours a berth only while it is being
+           MAINTAINED this turn: let go, the doorway closes at the end of the turn and the wave named
+           now would arrive to nothing. The server rule is the same (collectHeldExitOpeners). */
+        if (heldExitOn(opener)) return heldExitTakesAWave(opener);
+
         return !!declarationOn(opener);
     }
 
@@ -365,6 +372,9 @@ window.ReinforcementEntry = (function () {
         var left = waiting.filter(function (ship) { return !ridingOut(ship); });
         if (left.some(canOpen)) return [];
         if (anyLiveGate()) return [];
+        //Stage H5 - a ship holding its exit open this turn may hold it for the next wave too. As loose
+        //as the gate test above, for the same reason: silence is the right way to be wrong here.
+        if (heldExitCandidates().some(heldExitTakesAWave)) return [];
 
         return left;
     }
@@ -467,6 +477,63 @@ window.ReinforcementEntry = (function () {
 
             return !!gateExitOn(unit) || !!gateClaimOn(unit);
         });
+    }
+
+    /* ------------------------------------------------ ships holding their exit open (Stage H5) */
+
+    /* ⭐⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md STAGE H5 - THE THIRD KIND OF DOORWAY: A SHIP OF MINE, ON THE
+     * BOARD, HOLDING OPEN THE BLUE EXIT IT CAME OUT THROUGH.
+     *
+     * From its arrival turn a ship holds its exit exactly as it would an entrance - Maintain on the
+     * Jump Engine keeps it open (without the four-turn cap on a Vorlon, paid from the capacitor) - and
+     * every turn it is held it can bring another wave through. So it sits in this menu the way a gate
+     * does: already open, nothing to aim, and "Select Reinforcements" is the only thing to do with it.
+     *
+     * ⭐ THE DIFFERENCE FROM A GATE IS THAT THE PLAYER DECIDES, THIS TURN, WHETHER IT STAYS OPEN. A wave
+     * named now arrives next turn, so the doorway is only offered while this turn's Maintain is ON.
+     * Off, the row is greyed and says what to do; turning Maintain off after naming a wave un-books it
+     * (JumpEngine.releaseHeldExitManifest). The server is the authority either way -
+     * InitialOrdersGamePhase::collectHeldExitOpeners refuses a berth on an unmaintained exit.
+     *
+     * ⚠️ Like every reader in this file, these take a LIVE ship object and re-read it - see _openerId. */
+
+    function heldExitOn(ship) {
+        if (!ship || !gamedata.isMyShip(ship) || shipManager.isDestroyed(ship)) return null;
+        //Guarded: harnesses drive this module against a stubbed shipManager.movement.
+        if (typeof shipManager.movement.getMaintainableExitHeldBy !== 'function') return null;
+        return shipManager.movement.getMaintainableExitHeldBy(ship);
+    }
+
+    //This turn's Maintain declaration, on whichever of the ship's drives made it.
+    function heldExitMaintained(ship) {
+        return typeof shipManager.power.isMaintainingVortex === 'function' && shipManager.power.isMaintainingVortex(ship);
+    }
+
+    //Could Maintain be declared on it at all this turn? False on a young race's four-turn cap turn, out
+    //of range, or with the drive offline - JumpEngine.canMaintainVortex is the single place that decides.
+    function heldExitMaintainable(ship) {
+        for (var i in ship.systems) {
+            var s = ship.systems[i];
+            if (s && s.name === 'jumpEngine' && typeof s.canMaintainVortex === 'function' && s.canMaintainVortex()) return true;
+        }
+        return false;
+    }
+
+    function heldExitTakesAWave(ship) {
+        return !!heldExitOn(ship) && heldExitMaintained(ship);
+    }
+
+    function heldExitCandidates() {
+        return gamedata.ships.filter(function (unit) { return !!heldExitOn(unit); });
+    }
+
+    /* Un-book everything riding $openerId's doorway, and hand back who it was. The one caller is
+       JumpEngine.releaseHeldExitManifest, when Maintain is turned off on a held exit. */
+    function releaseManifest(openerId) {
+        var released = manifestOf(openerId);
+        released.forEach(function (ship) { ship.arrivalVia = null; });
+        if (released.length > 0) gamedata.drawIniGUI();
+        return released;
     }
 
     /* ---------------------------------------------------------------- the hex-click mode */
@@ -750,10 +817,11 @@ window.ReinforcementEntry = (function () {
     function manageReinforcements() {
         var candidates = openerCandidates();
         var gates      = gateCandidates();
+        var held       = heldExitCandidates();   //Stage H5
 
-        if (candidates.length === 0 && gates.length === 0) {
-            confirm.error("None of your reinforcements can open a jump point, and no jump gate is "
-                + "holding one open for you.");
+        if (candidates.length === 0 && gates.length === 0 && held.length === 0) {
+            confirm.error("None of your reinforcements can open a jump point, and no jump gate or "
+                + "ship of yours is holding one open for you.");
             return;
         }
 
@@ -764,8 +832,8 @@ window.ReinforcementEntry = (function () {
            no confirmation is not something a player should be able to trip over.
            ⚠️ AND NOT WHEN A GATE IS LISTED (Stage 8). With a doorway standing there is a second
            real answer, so the shortcut would be choosing for the player - and it would choose the
-           harder-to-reverse of the two. */
-        if (gates.length === 0 && candidates.length === 1 && !declarationOn(candidates[0])) {
+           harder-to-reverse of the two. The same goes for a ship holding its exit open (Stage H5). */
+        if (gates.length === 0 && held.length === 0 && candidates.length === 1 && !declarationOn(candidates[0])) {
             activate(candidates[0]);
             return;
         }
@@ -893,6 +961,21 @@ window.ReinforcementEntry = (function () {
                 return;
             }
 
+            /* ⭐ STAGE H5 - A SHIP HOLDING ITS EXIT, the gate branch's twin and for the same reason
+               taken before isMine(): the ship is on the board, not in hyperspace. Its one action is the
+               manifest, and only while Maintain is on - re-read here, since the player may have turned
+               it off in the ship window while this dialog stood. */
+            if (heldExitOn(live)) {
+                if (heldExitTakesAWave(live)) {
+                    highlight(null);
+                    e.remove();
+                    showManifestDialog(live);
+                    return;
+                }
+                render(live.id);
+                return;
+            }
+
             if (!isMine(live)) { highlight(null); e.remove(); return; }
 
             if (declarationOn(live)) {
@@ -928,7 +1011,8 @@ window.ReinforcementEntry = (function () {
             var live = gamedata.getShip(id);
             if (!live) { highlight(null); e.remove(); return; }
 
-            var doorway = gamedata.isJumpGate(live) ? !!gateDoorway(live) : !!declarationOn(live);
+            var doorway = gamedata.isJumpGate(live) ? !!gateDoorway(live)
+                : (heldExitOn(live) ? heldExitTakesAWave(live) : !!declarationOn(live));
             if (!doorway) { render(live.id); return; }
 
             highlight(null);
@@ -940,8 +1024,28 @@ window.ReinforcementEntry = (function () {
         //nothing, so deactivate() is never reached on this path.
         $(".confirmcancel", e).on("click", function () { highlight(null); e.remove(); });
 
+        /* ⭐ STAGE H5 FOLLOW-UP - THE DIALOG IS NOT MODAL, SO WHAT CHANGES OUTSIDE IT HAS TO REACH IT
+           (user report 2026-09-19). The ship window stays live beside it, and turning Maintain on or
+           off there is exactly what opens or greys a held exit's row - which went on showing the old
+           state until the menu was closed and reopened. refreshMenu() (from
+           InitialPhaseStrategy.onSystemDataChanged) re-renders on the selected row.
+           ⚠️ Every close path is a bare e.remove(), so "is it still open" is asked of the DOM rather
+           than tracked at each of them. */
+        _menuRefresh = function () {
+            if (!document.body.contains(e[0])) { _menuRefresh = null; return; }
+            var checked = $("input[name='reinforcementOpener']:checked", e);
+            render(checked.length > 0 ? checked.val() : null);
+        };
+
         render(null);
         e.appendTo("body").fadeIn(250);
+    }
+
+    //The open Manage Reinforcements dialog's re-render, or null. Set by manageReinforcements.
+    var _menuRefresh = null;
+
+    function refreshMenu() {
+        if (_menuRefresh) _menuRefresh();
     }
 
     /* THE WHOLE WAVE, IN TWO GROUPS (user request 2026-08-28). Every unit of mine still in
@@ -978,7 +1082,11 @@ window.ReinforcementEntry = (function () {
 
            GATES COME FIRST because a standing doorway is the cheaper thing to use: it costs no
            drive, no charge and no hex, and it is usually what the player opened the menu for. */
-        var rows = gateCandidates().map(gateRow).concat(openerCandidates().map(openerRow));
+        //Stage H5 - a ship holding its exit open sits beside the gates: the same kind of row, a
+        //doorway already standing that costs no drive, charge or hex to use.
+        var rows = gateCandidates().map(gateRow)
+            .concat(heldExitCandidates().map(heldExitRow))
+            .concat(openerCandidates().map(openerRow));
 
         var pickIndex = -1;
         for (var i = 0; i < rows.length; i++) {
@@ -1086,7 +1194,36 @@ window.ReinforcementEntry = (function () {
             manifest: false,
             action: 'Select Reinforcements',
             tag: takesAWave ? 'OPEN' : null, tagRiding: false,
-            detail: takesAWave ? ('jump point open &mdash; ' + riderText) : 'jump point closes this turn'
+            detail: takesAWave ? ('Jump point maintained &mdash; ' + riderText) : 'Jump point closes this turn'
+        };
+    }
+
+    /* ⭐⭐ STAGE H5 - A SHIP HOLDING ITS EXIT OPEN. The gate row's shape, and the same three states,
+       except that whether the doorway lasts into next turn is THIS player's choice this turn:
+
+         MAINTAINED ........................ SELECT REINFORCEMENTS, tagged OPEN.
+         NOT MAINTAINED, but it could be ... greyed: turn Maintain on (the Jump Engine's own menu) and
+             the row opens. Not done from here, because on a young race Maintain also takes the whole
+             ship dark - a side effect no manifest button should have.
+         CANNOT BE MAINTAINED this turn .... greyed: it closes this turn. A young race's four-turn cap,
+             the ship out of range of its doorway, or the drive offline.
+
+       ⚠️ manifest FALSE, as on the gate's open row: the primary button already IS the manifest. */
+    function heldExitRow(ship) {
+        var takesAWave = heldExitTakesAWave(ship);
+        var riders = manifestOf(ship.id).length;
+
+        var detail;
+        if (takesAWave) detail = 'jump point open &mdash; ' + riders + ' unit' + (riders === 1 ? '' : 's');
+        else if (heldExitMaintainable(ship)) detail = 'Maintain the jump point to use next turn';
+        else detail = 'jump point closes this turn';
+
+        return {
+            ship: ship, gate: false, open: takesAWave, blocked: !takesAWave,
+            manifest: false,
+            action: 'Select Reinforcements',
+            tag: takesAWave ? 'OPEN' : null, tagRiding: false,
+            detail: detail
         };
     }
 
@@ -1140,6 +1277,9 @@ window.ReinforcementEntry = (function () {
            is never in myHyperspaceUnits(), so the self-exclusion simply never matches one - which is
            why this is a wording branch and not a structural one. */
         var isGateDoor = gamedata.isJumpGate(opener);
+        //Stage H5 - a ship on the board holding its exit open. Like a gate it is not itself arriving,
+        //so only the words differ (it is never in myHyperspaceUnits, so it is never in its own list).
+        var isHeldDoor = !isGateDoor && !!heldExitOn(opener);
         var legacy = isLegacyOpener(opener);
 
         var riders = manifestRiders(opener);
@@ -1159,7 +1299,10 @@ window.ReinforcementEntry = (function () {
                 gamedata.drawIniGUI();
                 return;
             }*/
-            confirm.warning(!isGateDoor
+            confirm.warning(isHeldDoor
+                ? "<b>" + opener.name + "</b> is holding its jump point open, but everything you have in "
+                  + "hyperspace is already riding another one."
+                : !isGateDoor
                 ? "<b>" + opener.name + "</b> will open a jump point and arrive through it next turn."
                 : (myHyperspaceUnits().length === 0
                     ? "<b>" + opener.name + "</b> will open a jump point, but you have nothing in "
@@ -1187,6 +1330,10 @@ window.ReinforcementEntry = (function () {
                 ? opener.name + " holds a jump point open. Which of your reinforcements ride "
                   + "through it? They arrive next turn, and the gate can bring another wave on "
                   + "every turn it holds the doorway."
+                : isHeldDoor
+                ? opener.name + " is holding its jump point open. Which of your reinforcements ride "
+                  + "through it? They arrive next turn, and it can bring another wave on every turn "
+                  + "it is maintained."
                 : (legacy
                     ? opener.name + " jumps in through its own drive and opens no jump point. Only fighters "
                       + "that fit in its hangars, and ships its Docking Bay can hold, can come with it - "
@@ -1365,6 +1512,10 @@ window.ReinforcementEntry = (function () {
         //to answer gamedata.canSignalJumpGateForArrival; that rule was dropped on 2026-09-02, so it
         //is exported now only as the module's public "what is still waiting" reader.)
         showGateManifest: showGateManifest,
-        clearGateManifest: clearGateManifest
+        clearGateManifest: clearGateManifest,
+        //STAGE H5 - JumpEngine.releaseHeldExitManifest's, when Maintain is turned off on a held exit.
+        releaseManifest: releaseManifest,
+        //STAGE H5 follow-up - InitialPhaseStrategy.onSystemDataChanged's, so an open menu follows Maintain.
+        refreshMenu: refreshMenu
     };
 })();

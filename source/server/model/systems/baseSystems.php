@@ -6005,10 +6005,12 @@ class JumpEngine extends Weapon{
      * Protected like every other piece of vortex state: json_encode takes public properties only. */
     protected $chargeBoostNotes = array();
 
-    /* Is this engine's CURRENT vortex a doorway IN (SpawnJumpPointExit, SpawnJumpPointPhaseIn
-     * included)? Set by restoreVortexState, which is where the vortex unit is resolved; read only by
-     * getCertainCloseTurn. Protected, so no payload key. */
-    protected $vortexIsExit = false;
+    /* Is this engine's CURRENT vortex a legacy drive's PHASE-IN doorway (SpawnJumpPointPhaseIn)? Set by
+     * restoreVortexState, which is where the vortex unit is resolved; read only by getCertainCloseTurn.
+     * Protected, so no payload key.
+     * ⚠️ Stage H5 NARROWED THIS from "any doorway IN": a ship-held blue exit may now be maintained, so
+     * its closing turn is no longer certain. Only the phase-in doorway is still one-shot. */
+    protected $vortexIsPhaseIn = false;
 
     //§5 R3 - "boost N => N+1 turns of charging, capped at 4 turns in any one turn".
     const CHARGE_BOOST_MAX = 3;
@@ -6552,18 +6554,17 @@ class JumpEngine extends Weapon{
     }
 
     /* ⭐ STAGE H4 - THE TURN AT WHOSE END THIS ENGINE'S JUMP POINT CLOSES, if that is already CERTAIN,
-     * else null. The recorded closure when there is one. Otherwise, only a ship's own doorway IN: a
-     * one-shot exit (SpawnJumpPointPhaseIn included) closes at the end of the turn after it formed -
-     * the arrival turn - whatever anybody declares (getVortexClosureReason's exit branch), and its
-     * opener is on the board by then. Every other standing jump point may yet be maintained, so it is
-     * uncertain and answers null.
-     * ⚠️ HYPERSPACE_IMPROVEMENTS_PLAN.md Stage H5 makes a ship-held blue exit MAINTAINABLE. When it
-     * lands, only SpawnJumpPointPhaseIn stays certain here - narrow this line with it. */
+     * else null. The recorded closure when there is one. Otherwise, only a legacy drive's PHASE-IN
+     * doorway: it closes at the end of the turn after it formed - the arrival turn - whatever anybody
+     * declares (getVortexClosureReason's exit branch), and its opener is on the board by then. Every
+     * other standing jump point may yet be maintained, so it is uncertain and answers null.
+     * ⭐ Stage H5 narrowed this from every ship-held exit: a blue exit may now be maintained from its
+     * arrival turn on, exactly as an entrance is, so only SpawnJumpPointPhaseIn is still certain. */
     protected function getCertainCloseTurn()
     {
         if ($this->vortexOpenTurn === null) return null;
         if ((int)$this->vortexCloseTurn >= 0) return (int)$this->vortexCloseTurn;
-        if ($this->vortexIsExit && !$this->gateJump) return (int)$this->vortexOpenTurn + 1;
+        if ($this->vortexIsPhaseIn && !$this->gateJump) return (int)$this->vortexOpenTurn + 1;
         return null;
     }
 
@@ -7559,9 +7560,9 @@ class JumpEngine extends Weapon{
      *     before that sweep has run, $vortexCloseTurn is still -1 and holdsExitOpenOn answers YES -
      *     so a whole wave would be stamped for a turn on which its doorway no longer exists, get a
      *     Deployment phase with no legal hex in it, and be stuck there.
-     *   - A SHIP'S exit is one-shot and closes at the end of the arrival turn. Asked before the
-     *     closure, a rider that stayed behind would have its berth renewed for another turn instead
-     *     of refunded.
+     *   - A SHIP'S exit closes at the end of the arrival turn unless its opener MAINTAINS it (Stage
+     *     H5). Asked before the closure, a berth on an exit that was let go would be renewed for
+     *     another turn instead of refunded.
      *
      * ⭐ AND $opened IS REBUILT FROM THE BOARD, not carried over from the spawn half. The two sweeps
      * now run in different phases off different gamedata loads, so there is nothing to carry; the
@@ -7582,7 +7583,17 @@ class JumpEngine extends Weapon{
 
         foreach ($gamedata->ships as $ship){
             if ($ship->isTerrain()) continue;            //gates are collectGateExits' half, below
-            if (!$ship->isReinforcement()) continue;     //an opener rides its own doorway, so it is still in hyperspace
+
+            /* TWO KINDS OF SHIP OPENER. A reinforcement still in hyperspace, whose exit formed this
+               turn - it rides its own doorway, so it is stamped from this list. And (⭐ Stage H5) a
+               unit ON THE BOARD that came out through its exit and has MAINTAINED it: its doorway
+               takes a fresh wave on every turn it is held, exactly as a gate's does, and its riders
+               are stamped from this list too. The opener itself is on the board, so
+               stampArrivingReinforcements' reinforcement filter leaves it alone.
+               closeExpiredVortices has already run, so an exit that was NOT maintained - or broke
+               the range, the cap, the dark rule or the upkeep - answers false below and its berths
+               are refunded, which is the server half of "turning Maintain off cancels the wave". */
+            if (!$ship->isReinforcement() && !self::getHeldExitEngine($ship, $gamedata, $turn)) continue;
 
             foreach (self::getUnitJumpEngines($ship) as $system){
                 /* THE SAME QUESTION THE GATE PASS ASKS, deliberately: is the jump point this engine
@@ -7660,6 +7671,45 @@ class JumpEngine extends Weapon{
         if (!($vortex instanceof SpawnJumpPointExit)) return false;
 
         return ((int)$vortex->spawned <= (int)$turn);
+    }
+
+    /* ⭐⭐ STAGE H5 - IS THIS ENGINE HOLDING A BLUE EXIT THAT IT MAY MAINTAIN, standing on $turn?
+     *
+     * A ship's own exit that has FORMED ($spawned <= $turn, so not on its forming turn) and has not
+     * closed. Neither a gate's (a gate has no Maintain - it runs a programmed hold) nor a legacy drive's
+     * (its SpawnJumpPointPhaseIn is one-shot and a legacy drive has no Maintain either). Whether the
+     * OPENER is on the board is the caller's question - see getHeldExitEngine, which asks both.
+     *
+     * The client mirror is shipManager.movement.getMaintainableExitHeldBy. */
+    public function holdsMaintainableExit($gamedata, $turn)
+    {
+        if ($this->gateJump || $this->legacyJump) return false;
+        if (!$this->hasOpenVortex($turn)) return false;
+
+        $vortex = $gamedata->getShipById((int)$this->activeVortexId);
+        if (!($vortex instanceof SpawnJumpPointExit)) return false;
+        if ($vortex instanceof SpawnJumpPointPhaseIn) return false;
+
+        return ((int)$vortex->spawned <= (int)$turn);
+    }
+
+    /* ⭐⭐ STAGE H5 - THE ENGINE ON $unit HOLDING A MAINTAINABLE BLUE EXIT ON $turn, or null. The unit has
+     * to be ON THE BOARD - it arrived through that exit and holds it from a hex - which is what separates
+     * it from a reinforcement still in hyperspace, whose forming exit is stampExitManifests' first case.
+     * Three readers: stampExitManifests (does the doorway take next turn's wave), the Initial Orders
+     * manifest (may a berth name this unit) and the Deployment phase's release (does an unplaced rider
+     * keep its berth). Through getUnitJumpEngines, never a raw systems sweep. */
+    public static function getHeldExitEngine($unit, $gamedata, $turn)
+    {
+        if (!$unit || $unit->isTerrain()) return null;
+        if ($unit->getTurnDeployed($gamedata) > (int)$turn) return null;   //still in hyperspace
+        if ($unit->isDestroyed($turn)) return null;
+
+        foreach (self::getUnitJumpEngines($unit) as $engine){
+            if ($engine->holdsMaintainableExit($gamedata, $turn)) return $engine;
+        }
+
+        return null;
     }
 
     /* Does anybody in this game hold a berth that might need clearing? Asked only when NO exit
@@ -7865,7 +7915,18 @@ class JumpEngine extends Weapon{
 
         foreach (self::getUnitJumpEngines($opener) as $system){
             $scatter = $system->getVortexScatter();
-            if ($scatter !== null) return $scatter;
+            if ($scatter === null) continue;
+
+            /* ⭐ STAGE H5 (user ruling 2026-09-19) - THE FIRST WAVE ONLY. A maintained exit takes a
+               fresh wave every turn it is held, and a later wave comes out of a doorway that has
+               already FORMED - it did not scatter, so nothing disorders it, exactly as nothing
+               disorders a wave through a gate. The first wave is the one arriving on the turn after
+               the doorway formed. Compared on the UNIT's arrival turn rather than the turn being
+               loaded, so the answer does not depend on which side of the turn boundary the
+               initiative roll asks it from. */
+            if ((int)$unit->arrivalTurn !== (int)$system->vortexOpenTurn + 1) return null;
+
+            return $scatter;
         }
 
         return null;
@@ -9104,9 +9165,33 @@ class JumpEngine extends Weapon{
            So ONE-SHOT IS A SHIP'S RULE. A gate falls through to getGateVortexClosureReason below,
            which is where the hold lives, and which already closes a gate vortex of either flavour.
            Trap 5 is unaffected: a gate's engine is released by the hold expiring, and a gate that
-           never closed its jump point would be broken for Phase 2 entrances too. */
+           never closed its jump point would be broken for Phase 2 entrances too.
+
+           ⭐⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md STAGE H5 - AND NOW ONE-SHOT ONLY UNTIL THE OPENER ARRIVES.
+           From the arrival turn a ship's blue exit is held EXACTLY AS AN ENTRANCE IS: it falls through
+           to the ship list below - destroyed, the four-turn cap, range, Maintain, and then either the
+           all-systems-dark rule or, on a Vorlon, the upkeep with no cap (user, 2026-09-19: "Vorlons ...
+           should act in the same way as Younger Races in that regard, albeit without the 4 turn limit").
+           Everything on that list is answerable now, because the opener came out through its own
+           doorway and has a hex. Trap 5 still holds: the cap closes a young race's exit, and a Vorlon's
+           closes the turn it stops being paid for (R6). Three things stay one-shot, in order:
+             - the FORMING turn. The opener is still in hyperspace, so there is nothing to hold it with.
+               ⭐ But a Vorlon PAYS for forming it (user ruling 2026-09-19, reversing H3's free exit):
+               opening a jump point is using the drive, whichever way the doorway faces. Failing to pay
+               closes it on the turn it formed, which is how "it never forms" is expressed - the wave's
+               berths are then refunded by stampExitManifests.
+             - a legacy drive's PHASE-IN doorway. It is invisible, carries only docked fighters, and a
+               legacy drive has no Maintain (getMaintainDeclaration refuses it) - plan trap 3.
+             - an opener that did NOT come through (its placement was released back to hyperspace). It
+               has no hex to measure the range from, and nothing to maintain with. */
         if ($vortex instanceof SpawnJumpPointExit && !$this->isGateJump()){
-            return ($turn > (int)$this->vortexOpenTurn) ? 'no longer maintained' : null;
+            if ((int)$turn <= (int)$this->vortexOpenTurn){
+                if ($this->chargesVortexUpkeep() && !$this->payVortexUpkeep($turn)) return 'jump point not powered';
+                return null;
+            }
+            if ($vortex instanceof SpawnJumpPointPhaseIn) return 'no longer maintained';
+            if ($ship->getTurnDeployed($gamedata) > (int)$turn) return 'no longer maintained';
+            //From the arrival turn on: the ordinary ship list below.
         }
 
         /* ⭐⭐ JUMP GATES (PHASE 2) - THE GATE BRANCH, TAKEN FIRST AND RETURNING, because a gate's
@@ -9154,10 +9239,11 @@ class JumpEngine extends Weapon{
                still true for everybody, Vorlons included. What it is not exempt from is the Vorlon
                drive's own power draw, which is a different bill entirely.
 
-               ⚠️ AND A BLUE EXIT NEVER REACHES HERE: the one-shot exit branch near the top of this
-               method returns first, so a reinforcement's arrival doorway is not charged. The client
-               agrees by construction - JumpEngine.isUsingVortexThisTurn tests for damageclass
-               'jumppoint', and an exit declaration carries 'jumpexit'. */
+               ⚠️ A BLUE EXIT NEVER REACHES HERE, but it is charged all the same: the exit branch near
+               the top of this method returns on its forming turn and takes the same payment there
+               (Stage H5, user ruling 2026-09-19 - it was free under H3). The client agrees -
+               JumpEngine.isUsingVortexThisTurn counts a 'jumpexit' declaration as well as a
+               'jumppoint' one. */
             if ($this->chargesVortexUpkeep() && !$this->payVortexUpkeep($turn)) return 'jump point not powered';
 
             return null; //the turn it was declared - nothing more to ask
@@ -9181,10 +9267,10 @@ class JumpEngine extends Weapon{
            or emptied by a critical, or shot out altogether - the jump point closes with a reason of
            its own (R6), which is the only place in this method that spends anything.
 
-           ⚠️ BELOW THE OPENING-TURN EXEMPTION AND BELOW THE MAINTAIN TEST, deliberately. Opening a
-           jump point is free (the `$turn == $this->vortexOpenTurn` line above returns before this),
-           and a doorway nobody declared Maintain on is closing anyway - charging for either would
-           take power for a turn the drive got no upkeep out of. */
+           ⚠️ BELOW THE OPENING-TURN BRANCH AND BELOW THE MAINTAIN TEST, deliberately. The opening turn
+           pays in its own branch above (and a blue exit's forming turn in the exit branch), and a
+           doorway nobody declared Maintain on is closing anyway - charging for it would take power for
+           a turn the drive got no upkeep out of. */
         if ($this->chargesVortexUpkeep()){
             if (!$this->payVortexUpkeep($turn)) return 'jump point not powered';
             return null;
@@ -9329,7 +9415,7 @@ class JumpEngine extends Weapon{
         //is. Ordering makes it academic in practice (loads happen before firing, never after), but
         //leaving one of the per-vortex fields out of the reset is how the next one drifts.
         $this->vortexDisrupted   = false;
-        $this->vortexIsExit      = false;
+        $this->vortexIsPhaseIn   = false;
 
         foreach ($vortexNotes as $note){
             //LIMIT 3: the closure reason is free text and can contain commas.
@@ -9365,8 +9451,8 @@ class JumpEngine extends Weapon{
             $this->vortexOpenTurn    = $openTurn;
             $this->vortexCloseTurn   = $closeTurn;
             $this->vortexCloseReason = $reason;
-            //Stage H4 - whether it is a doorway IN (the one-shot exit), for getCertainCloseTurn.
-            $this->vortexIsExit      = ($vortex instanceof SpawnJumpPointExit);
+            //Stage H4/H5 - whether it is a phase-in doorway (still one-shot), for getCertainCloseTurn.
+            $this->vortexIsPhaseIn   = ($vortex instanceof SpawnJumpPointPhaseIn);
         }
 
         /* ⭐ JUMP GATES (PHASE 2) - THE HOLD, keyed by the SAME vortex id, applied AFTER the loop
@@ -9852,10 +9938,18 @@ class JumpEngine extends Weapon{
 		   fixed gate rolls on the turn it opens a jump point of EITHER flavour (user ruling
 		   2026-08-23, offered as an exemption and deliberately not taken).
 
-		   After the two cheap tests above, so the ship lookup is only paid when a roll is pending. */
+		   After the two cheap tests above, so the ship lookup is only paid when a roll is pending.
+
+		   ⭐⭐ STAGE H5 (user ruling 2026-09-19) - THE EXEMPTION IS THE FORMING TURN'S, NOT THE EXIT'S.
+		   Once the opener is on the board it may MAINTAIN its exit, and maintaining one asks exactly
+		   what maintaining an entrance asks of the drive - so a Maintain turn rolls like any other.
+		   The original ruling was written when an exit could not be maintained at all ("on N+1 it was
+		   opened on N and has no Maintain"), and this keeps it for the case it was about: the turn the
+		   doorway forms, with its opener still in hyperspace. A phase-in doorway never gets here with
+		   a Maintain (getMaintainDeclaration refuses a legacy drive). */
 		if (!$this->gateJump){
 			$openVortex = $gamedata->getShipById((int)$this->activeVortexId);
-			if ($openVortex instanceof SpawnJumpPointExit) return;
+			if ($openVortex instanceof SpawnJumpPointExit && !$this->getMaintainDeclaration($turn)) return;
 		}
 
 		//An undamaged drive never fails. Same measure doHyperspaceJump uses for the boost path.

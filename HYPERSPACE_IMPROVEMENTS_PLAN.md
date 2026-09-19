@@ -439,6 +439,10 @@ charging this turn. Server mirror for the commit gate.
 
 ## 6. Stage H5 — maintaining a blue doorway (Item 3)
 
+> **BUILT 2026-09-19 — see §11.** Four rulings were added at build time (H5-1 … H5-4), and several
+> statements below turned out wrong (the snippet, "`getHeldVortex` already finds a blue one", where the ship
+> sweep goes). The build log is the authority.
+
 ### What changes
 
 One branch. `getVortexClosureReason`
@@ -714,7 +718,7 @@ harness green.
 | H2 | none (client only) |
 | H3 | `powerReq` on 12 Vorlon hulls in the **statics**; harness only if a Vorlon is in the corpus |
 | H4 | `turnsloaded` **only on drives that boosted** — in a corpus with no boosts, **nothing at all**. A whole-corpus move means the charge credit was implemented within-turn instead of at turn end. |
-| H5 | none unless a corpus game holds a blue doorway |
+| H5 | none unless a corpus game holds a blue doorway — CONFIRMED 2026-09-19: none (4317-4319 hold exits and pass) |
 | H6 | new `deploy` movement rows for arrivals; `movement.txt` diffs on any corpus game with a wave in it. **Re-record only after reading them.** |
 
 **Existing harnesses to re-run, all eight:**
@@ -800,6 +804,110 @@ tooltip (`setSystemDataWindow`) so the restriction is discoverable rather than s
 ---
 
 ## 11. Build log
+
+### Stage H5 — maintaining a blue doorway (Item 3) — BUILT 2026-09-19
+
+From its **arrival turn** a ship's blue exit is held **exactly as an entrance is**: Maintain on the Jump
+Engine, the range test, the four-turn cap, the all-systems-dark rule — and on a **Vorlon** the upkeep with
+**no cap** (user, 2026-09-19: *"Vorlons … should act in the same way as Younger Races in that regard,
+albeit without the 4 turn limit since they can maintain a jump point so long as they have power to draw
+from the capacitor"*). Every turn it is held it brings **another wave** through, like a gate's.
+
+**Four rulings made at build time (user, 2026-09-19)** — none was in the plan:
+
+| # | Question | Ruling |
+|---|---|---|
+| H5-1 | Does maintaining an exit roll for jump failure? | **Yes, on every Maintain turn.** The forming turn stays exempt (the opener is in hyperspace). The old "an exit never rolls" was written when an exit could not be maintained — its own reasoning was *"on N+1 it was opened on N and has no Maintain"*. |
+| H5-2 | Does a later wave take the arrival initiative penalty? | **First wave only.** A later wave comes out of a doorway that has already formed, as through a gate. |
+| H5-3 | Does an unplaced rider keep its berth on a held ship exit? | **Yes, like a gate berth** — optimistically; the two authorities below clear it if the exit is not held. |
+| H5-4 | Does a Vorlon pay to FORM its exit? | **Yes — reverses H3's free exit.** Forming is using the drive, whichever way the doorway faces. |
+
+**What was built, and where:**
+
+| Piece | Site |
+|---|---|
+| The closure rule | `getVortexClosureReason`'s exit branch: forming turn → null (a Vorlon pays here, H5-4, and an unpaid one closes on its forming turn = "never forms"); a `SpawnJumpPointPhaseIn` or an opener still in hyperspace → the old one-shot `'no longer maintained'`; otherwise **fall through to the ship list**. |
+| One shared predicate | `JumpEngine::holdsMaintainableExit` + `getHeldExitEngine($unit, $gd, $turn)` — a formed, open, non-phase-in, non-gate exit whose opener is ON THE BOARD. Client twin `shipManager.movement.getMaintainableExitHeldBy`. |
+| Submit legality | `Firing::getVortexDeclarationBlock`'s Maintain arm: the blanket exit refusal narrows to a phase-in doorway and an opener still in hyperspace. |
+| The next wave, IO | `InitialOrdersGamePhase::collectHeldExitOpeners` — an own on-board unit holding its exit **with THIS turn's Maintain in the same POST** is an opener. No Maintain ⇒ every berth on it is written NULL. **The server is the authority.** |
+| The next wave, end of turn | `stampExitManifests`' ship loop admits an on-board holder (`getHeldExitEngine`), so a doorway that survived `closeExpiredVortices` stamps its riders for next turn, and one that did not refunds them. |
+| Unplaced riders (H5-3) | `DeploymentGamePhase::releaseUnplacedReinforcements` keeps a berth whose opener holds an exit. |
+| Jump failure (H5-1) | `rollVortexJumpFailure`: the exit exemption applies only with no Maintain declaration — i.e. the forming turn. |
+| First wave only (H5-2) | `getArrivalScatter` answers null unless the unit's `arrivalTurn == vortexOpenTurn + 1`. Compared on the UNIT's turn, not the loaded one, so it cannot depend on which side of the turn boundary initiative asks from. |
+| H4's note | `getCertainCloseTurn` narrowed to `SpawnJumpPointPhaseIn` (`$vortexIsExit` → `$vortexIsPhaseIn`), as the H4 follow-up asked. A Vorlon arriving through its exit is no longer offered charging on the arrival turn — it may maintain. |
+| Client: Maintain | `JumpEngine.getHeldVortex` asks `getVortexHeldBy` (entrance) **then** the held exit, so the toggle, its carry-forward, the icon fallback and `SystemInfoButtons`' "holding a vortex" are right unchanged. |
+| Client: Vorlon forming charge (H5-4) | `JumpEngine.isUsingVortexThisTurn` counts `'jumpexit'` too; the H3 add-back in `PowerCapacitor.doIndividualNotesTransfer` puts it back for the server to take, unchanged. |
+| Client: Maintain OFF cancels the wave | `JumpEngine.releaseHeldExitManifest` (from `doDeactivate`) → `ReinforcementEntry.releaseManifest`, with a `confirm.warning` naming who was taken off. Feedback, not enforcement. |
+| Client: Manage Reinforcements | A third row kind, `heldExitRow`, beside the gates: **Select Reinforcements** tagged OPEN while Maintain is on; greyed "Maintain the jump point to bring a wave" while it is off; greyed "jump point closes this turn" when it cannot be maintained. Not auto-maintained from the menu — on a young race Maintain takes the ship dark. `ridingOut`, `strandedByCommit` (silent while a held exit takes a wave), the one-candidate shortcut and the manifest dialog's wording all know it. |
+| Client: commit warning | `gamedata.js`'s "JUMP POINTS … will CLOSE" list includes an unmaintained held exit. |
+| Client: map | `BallisticIconContainer`: a Maintain on a blue exit draws **blue** (`hexBlue`, `#00b8e6`), per the yellow-leaving / blue-arriving rule. |
+| Docs | `faq.php` (arriving, the penalty line), `factions-tiers.php` (Vorlon Jump Drive: exits). The Jump Engine tooltip was left alone — it points at the FAQ, and a change there regenerates every faction's statics. |
+
+**⚠️ Things §6 had wrong or did not list:**
+
+- **§6's code snippet was stale.** The exit branch returned `'no longer maintained'`, not `'reinforcements have arrived'`.
+- **"`getHeldVortex` resolves the vortex by id, so it already finds a blue one" — FALSE.** It went through
+  `getVortexHeldBy`, which is entrance-only by design (`isJumpVortex`; its callers disagree on the verdict).
+  Widening that would have flipped `canJumpOut` and friends. The exit is asked **beside** it, second.
+- **The ship sweep does not belong in `collectGateExits`** (§6's table). `stampExitManifests` already has a
+  ship loop; it was gated on `isReinforcement()`, and widening that one line is the whole change.
+  `collectGateExits` stays gates-only.
+- **The Maintain marker was yellow on a blue doorway** — not in §6.
+- **The jump-failure exemption keyed on the vortex class, not the turn** — invisible until an exit could
+  carry a Maintain.
+- **`reinforcementsStage9Harness.php` built an impossible engine** (a vortex id and a scatter, no open turn —
+  `restoreVortexState` always sets both). H5-2 reads the open turn, so the fixture now sets it.
+
+**Harnesses** (gitignored, local only):
+- NEW `tests/replay/heldExitHarness.php` — **41**, real ship files (Primus, Vorlon Heavy Cruiser), a
+  constructor-less real `TacGamedata`. Closure in both directions (dark rule non-vacuous, cap, range,
+  released opener, phase-in, Vorlon no-cap + R6), the forming-turn charge read off the capacitor's own
+  counter, the jump-failure roll with a 100%-failure drive (so "did it roll" is exact), submit legality, the
+  manifest openers and the end-of-turn stamp. **Self-tested by deletion six ways** (exit branch reverted; the
+  forming charge; the roll's Maintain test; the stamp widening; the manifest's Maintain test; the Firing
+  refusal) — each fails 1–12.
+- NEW `tests/replay/heldExitClientHarness.js` — **29**, `node`, over the real `movement.js`, `baseSystems.js`
+  and `ReinforcementEntry.js`. Self-tested by deletion five ways.
+- **Inverted, not deleted:** `reinforcementsStage7Harness.php` (the stayer now KEEPS its berth, + a control
+  where its opener went back to hyperspace: 80 ⇒ 82), `rechargeBoostHarness.php` (a Vorlon arriving through
+  its exit is no longer offered charging), `vorlonUpkeepClientHarness.js` (an exit IS charged, + the
+  add-back for it: 63 ⇒ 65). `reinforcementsStage9Harness.php` gains the second-wave assertions (123 ⇒ 132).
+- Unchanged and identical to the pre-H5 run, failures included: Stage 6 (180/6, the H1 rename), Walkers 13
+  (46/13), 15 (87/5), 20 (137/1); the Stage 8/9 / Walkers 13 client harnesses still crash on
+  "export marker not found", and `initialOrdersTooltipHarness.js` is still 4/10 — all as at HEAD.
+
+**Gate** (`fvbuild.ps1 -Check`): autoload **up to date**, validator **0 new** (237 baselined), replay
+**124 passed / 2 failed / 2 skipped**. No failure is H5's: **4349** is the known H4 re-record (phase-in
+doorways, `chargeBoostMax` added / counter removed — H5 leaves phase-in doorways certain), and **4297** is a
+KellyTrek Constitution whose system list shifted in HEAD commits `452803519` / `6a87ccf40` (2026-09-19 01:00,
+after the baseline was recorded 2026-09-18 18:55) — `TrekPhaser → TrekPhaserKellyType7` at index 11, every
+later id moved. No ship file is in the H5 diff. `php -l` clean on all four server files; legacy bundles
+rebuilt; statics unaffected (no public property, no tooltip change).
+
+**Not verified here, needs a play test:** a young-race opener arrives, turns Maintain ON (the ship goes
+dark), Manage Reinforcements lists it with **Select Reinforcements**, a wave is named; next turn that wave
+gets a Deployment phase through the same doorway with **no** arrival penalty. Turning Maintain OFF after
+naming the wave should warn and un-book it. On the cap turn the toggle vanishes and the row greys. A
+Vorlon should show its drive's power reserved on the turn it declares the exit from hyperspace, and
+`tac_individual_notes` should show that turn's phase-4 `powerStored` exactly that much lower.
+
+#### H5 follow-up — 2026-09-19 (play test 4367)
+
+- **Manage Reinforcements now follows Maintain while it is open.** The dialog is not modal, and toggling
+  Maintain in the ship window left the held-exit row stale until the menu was reopened. The open dialog
+  registers its own re-render (`ReinforcementEntry.refreshMenu`, keeping the selected row), and
+  `InitialPhaseStrategy.onSystemDataChanged` calls it — Maintain on/off and a drive powered down all
+  raise that event. "Still open" is asked of the DOM, because every close path is a bare `e.remove()`.
+- **The Vorlon Jump Engine's yellow REACH ARC stayed on the map into DEPLOYMENT: REINFORCEMENTS** until a
+  system was hovered (not the blue Maintain marker — the first report said "ballistic icon"). Not an H5
+  bug, and not jump-engine specific: `PhaseStrategy.deactivate` sets `inactive` and THEN deselects, so the
+  deselect's `SystemDataChanged` is dropped by `PhaseDirector.relayEvent`, and its only other arc sweep
+  sits inside `hideSystemInfo(true)` behind "is an info panel open". A SELECTED arc-when-selected system (a
+  Jump Engine clicked in Initial Orders) therefore kept its arc through every later phase until the next
+  hover. `deactivate` now clears `hoveredArcSystem` and every icon's weapon arcs unconditionally.
+  Reproduced against the real `PhaseStrategy.js` in node before the fix, clean after.
+
+---
 
 ### Stage H4 follow-up — the Vorlon charge cost, and boosting on the arrival turn — 2026-09-18
 

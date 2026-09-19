@@ -862,6 +862,31 @@ shipManager.movement = {
         return null;
     },
 
+    /* ⭐⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md STAGE H5 - THE BLUE EXIT THIS SHIP IS HOLDING AND MAY
+       MAINTAIN, or null. The client mirror of JumpEngine::getHeldExitEngine.
+
+       A ship that came out through its own exit now holds it exactly as it would hold an entrance:
+       Maintain keeps it open (without the four-turn cap on a Vorlon), and every turn it is held it can
+       bring another wave through. So the Maintain toggle, the "your jump point closes" commit warning
+       and the Manage Reinforcements menu all need to find it - and getVortexHeldBy cannot, because it
+       is ENTRANCE-ONLY by design (see isJumpVortex). This is the exit half, asked beside it, never
+       folded into it.
+
+       NOT for a GATE (a gate runs its programmed hold and has no Maintain), NOT for a phase-in doorway
+       (a legacy drive's, one-shot and invisible), and NOT while the ship is still in hyperspace - its
+       exit is forming, and the opener has no hex to hold it from. getExitHeldBy supplies the rest of
+       the window: formed (spawned <= turn) and not yet closed. */
+    getMaintainableExitHeldBy: function getMaintainableExitHeldBy(ship) {
+        if (!ship) return null;
+        if (typeof gamedata.isJumpGate === 'function' && gamedata.isJumpGate(ship)) return null;
+        if (shipManager.getTurnDeployed(ship) > gamedata.turn) return null;   //still in hyperspace
+
+        var exit = shipManager.movement.getExitHeldBy(ship.id);
+        if (!exit || shipManager.movement.isPhaseInVortex(exit)) return null;
+
+        return exit;
+    },
+
     /* The facing an arriving reinforcement is FORCED onto, or null if it has no doorway.
 
        ⚠️ NOT getVortexEntryDirection. On an ENTRANCE the facing names the mouth a unit crosses inbound,

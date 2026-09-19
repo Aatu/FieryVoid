@@ -1792,6 +1792,10 @@ at short range versus long range.
 <li>If the Capacitor <b>cannot cover the upkeep</b> at the end of the turn - drained by weapon fire, emptied or halved by a critical, or shot out altogether - the jump point
             <b>closes</b>, and the combat log says so. Everything else still applies as normal: the jump point also closes if the holder is destroyed, drifts more than 12 hexes away,
             or simply stops declaring Maintain.</li>
+<li><b>Arriving as reinforcements</b> works the same way. Opening a jump point <b>exit</b> from hyperspace uses the drive, so it costs the power requirement on the turn the
+            exit forms (reserved in that turn's Initial Orders, as for any other use); if the Capacitor cannot pay, the exit collapses at the end of that turn before anything
+            comes through it, and the wave waits in hyperspace with nothing spent. Once the
+            ship is on the board it may <b>maintain</b> its exit like any jump point - paying the upkeep, with no four-turn limit - and bring a fresh wave through on every turn it does.</li>
     </ul>
 <h5>Gravitic Drives</h5>
         <ul>

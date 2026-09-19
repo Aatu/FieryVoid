@@ -928,11 +928,18 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                         point never forms inside terrain or an Enormous unit &mdash; if the dice put it there it is nudged to the nearest legal hex.</li>
                     <li><b>Arriving.</b> On the <i>next</i> turn the owner gets a <b>Deployment Phase</b>. The wave places itself in the jump point's hex on the
                         jump point's facing, stacked, and all you set is each unit's <b>speed</b>. Anything you leave unplaced goes back to hyperspace with
-                        nothing spent, and can be called in again later. A ship's jump point is <b>one-shot</b>: it closes at the end of the arrival turn, and the
-                        drive can then be used normally (including to open a way out).</li>
+                        nothing spent, and can be called in again later. A ship's jump point closes at the end of the arrival turn <b>unless the ship maintains it</b>:
+                        once it is on the board it can hold the jump point open exactly as it would a way out &mdash; <b>Maintain Vortex</b> on the Jump Engine, which
+                        shuts down all its powered systems except the Scanner, for at most four turns open (a Vorlon pays its drive's power from the Power Capacitor
+                        instead, with no turn limit, and also pays it on the turn the jump point forms). On every turn it is maintained, <b>Manage Reinforcements</b>
+                        lists it with <b>Select Reinforcements</b> so another wave can come through next turn; turning Maintain off cancels that wave. A unit left
+                        unplaced keeps its place on a jump point that is still being held. A damaged drive rolls for failure on every turn it maintains the jump point,
+                        though never on the turn it forms. Once it closes, the drive recharges and can then be used normally (including to open a way out).</li>
                     <li><b>Arriving is disorderly.</b> A wave that comes out of hyperspace off course spends the turn sorting itself out: on its <b>arrival turn
                         only</b>, every unit that rode that jump point takes an <b>initiative penalty of 1 per hex it scattered, plus 2 for every 60&deg; the
-                        facing was turned</b>. A precise arrival costs nothing at all, which is one more reason the modifiers above are worth having.</li>
+                        facing was turned</b>. A precise arrival costs nothing at all, which is one more reason the modifiers above are worth having. Only the
+                        first wave is disordered: a later wave through a jump point that is being held open comes out of a doorway that has already formed, and
+                        takes no penalty.</li>
                     <li><b>Jump Gates.</b> A fixed Jump Gate can be signalled to open a jump point <i>inward</i> instead of outward: click the gate in Initial
                         Orders and choose <b>Signal Gate for Arrival</b>, which opens the same Manifest window. A gate's jump point does not deviate &mdash; it
                         opens in the gate's own mouth, on the gate's own facing, with no initiative penalty &mdash; and it stays open for its programmed hold, so

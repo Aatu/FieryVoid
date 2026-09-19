@@ -184,6 +184,18 @@ class DeploymentGamePhase implements Phase
             $opener = ($unit->arrivalVia === null) ? null : $gamedata->getShipById((int)$unit->arrivalVia);
             $keepsBerth = ($opener !== null && $opener->isTerrain());
 
+            /* ⭐ STAGE H5 (user ruling 2026-09-19) - AND SO DOES A BERTH ON A SHIP THAT IS HOLDING ITS
+               BLUE EXIT OPEN, for the gate's reason: that doorway may take another wave next turn, and
+               re-naming the same rider every turn is busywork. The same OPTIMISM as the gate's - the
+               authorities come later and are unchanged: the Initial Orders commit writes the berth as
+               NULL unless the opener re-declares Maintain (InitialOrdersGamePhase::
+               collectHeldExitOpeners), and stampExitManifests refunds it if the exit then closes.
+               ⚠️ getHeldExitEngine asks whether the opener is ON THE BOARD, so an opener released back
+               to hyperspace in this same pass does not keep its riders' berths - unless the release
+               loop reaches the rider first, in which case the two authorities above clear it. */
+            if (!$keepsBerth && $opener !== null && (int)$opener->id !== (int)$unit->id
+                && JumpEngine::getHeldExitEngine($opener, $gamedata, (int)$gamedata->turn)) $keepsBerth = true;
+
             if (!$keepsBerth){
                 $unit->arrivalVia = null;
                 $dbManager->setShipArrivalVia($unit->id, null);

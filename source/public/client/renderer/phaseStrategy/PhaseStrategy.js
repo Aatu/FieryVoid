@@ -258,6 +258,19 @@ window.PhaseStrategy = function () {
 
         this.uiManager.hideWeaponList();
         this.hideSystemInfo(true);
+
+        /* ⭐ AND EVERY WEAPON ARC COMES DOWN, WHATEVER hideSystemInfo DID (HYPERSPACE_IMPROVEMENTS_PLAN.md
+           H5 follow-up, play test 4367). hideSystemInfo only sweeps arcs while an info panel is open, and
+           the deselect above cannot do it either: its unSelectWeapon raises SystemDataChanged, which
+           PhaseDirector.relayEvent drops because this strategy is already inactive. So a SELECTED
+           arc-when-selected system - a Jump Engine clicked in Initial Orders - left its yellow reach disc
+           on the map into the phases after, until something next hovered a system. The new phase draws
+           whatever arcs it wants itself. */
+        this.hoveredArcSystem = null;
+        if (this.shipIconContainer) {
+            this.shipIconContainer.getArray().forEach(function (icon) { icon.hideWeaponArcs(); });
+        }
+
         this.shipWindowManager.closeAll();
 
         this.shipIconContainer.getArray(icon => {

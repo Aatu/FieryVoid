@@ -225,6 +225,15 @@ window.InitialPhaseStrategy = function () {
         //the selection complete. Switching the selected ship above is all this handler still owns.
     };
 
+    /* HYPERSPACE_IMPROVEMENTS_PLAN.md H5 follow-up - an open Manage Reinforcements dialog re-reads its
+       rows. Maintain on/off, a drive powered down: every change that opens or greys a held exit's row
+       raises SystemDataChanged, and the dialog stays open beside the ship window it was made in. A
+       no-op when the dialog is closed. */
+    InitialPhaseStrategy.prototype.onSystemDataChanged = function (payload) {
+        PhaseStrategy.prototype.onSystemDataChanged.call(this, payload);
+        if (window.ReinforcementEntry && typeof ReinforcementEntry.refreshMenu === 'function') ReinforcementEntry.refreshMenu();
+    };
+
     InitialPhaseStrategy.prototype.onSystemTargeted = function (payload) { //25.11.23 - Added onSystemTargeted here to allow Called Shots in Initial Orders phase e.g. Limpet Bore.
         var ship = payload.ship;
         var system = payload.system;
