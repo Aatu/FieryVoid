@@ -1945,6 +1945,15 @@ class Manager{
         //them visible in OOB but unselectable in the Movement Phase.
         $servergamedata = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
 
+        /* HYPERSPACE_IMPROVEMENTS_PLAN.md STAGE H6c - THE WAVE WALKS OUT OF ITS DOORWAY HERE, with no
+           DEPLOYMENT: REINFORCEMENTS phase to do it in. HERE rather than at the end of FireGamePhase::
+           advance (where the plan first put it) because this load is the one the retired phase used to
+           act on: turn N+1, phase -1, arrivals stamped - so the deploy rows, the hangar docks and their
+           notes come out exactly as the phase wrote them, and every "is it placing this turn" gate the
+           dock path asks answers yes without a special case. BEFORE generateIniative, so a wave that
+           chose a speed rolls on it (the old -50 for speed 0 no longer applies to it). */
+        JumpEngine::placeArrivingReinforcements($servergamedata, self::$dbManager);
+
         self::generateIniative($servergamedata);
 
         foreach ($servergamedata->ships as $key=>$ship){
@@ -2111,6 +2120,15 @@ class Manager{
                "unassigned" has exactly one representation. */
             $arrivalVia = isset($value["arrivalVia"]) ? (int)$value["arrivalVia"] : 0;
             $ship->arrivalVia = ($arrivalVia > 0) ? $arrivalVia : null;
+
+            /* HYPERSPACE_IMPROVEMENTS_PLAN.md STAGE H6a/H6b - the arrival SPEED and the carrier to START
+               IN, beside the berth they belong to, and the same kind of thing: a claim.
+               InitialOrdersGamePhase::persistManifest clamps the speed, re-fits the hangar and writes
+               what it believes; nothing else reads them. Only meaningful with a berth. */
+            if ($ship->arrivalVia !== null && isset($value["arrivalSpeed"])) {
+                $hangar = isset($value["arrivalHangar"]) ? (int)$value["arrivalHangar"] : 0;
+                $ship->setArrivalOrderClaim((int)$value["arrivalSpeed"], ($hangar > 0) ? $hangar : null);
+            }
 
             $ship->enhancementOptions = $value["enhancementOptions"] ?? [];
 

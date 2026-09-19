@@ -2266,6 +2266,19 @@ class DBManager
                 if ($movement->type == "start" || $movement->turn != $turn)
                     continue;
 
+                /* A 'deploy' row that already has a DATABASE ID is an echo, never a new move (fixed
+                   2026-09-19). The client posts back every movement row dated the current turn, committed
+                   ones included, so every unit placed this turn - every ship on turn 1, every arrival from
+                   hyperspace - sent its deploy row back with its Movement orders and got it inserted a
+                   SECOND time (game 4367: every one of them). No deploy row is ever meant to come through
+                   here: DeploymentGamePhase, JumpEngine::placeArrivingReinforcements and the hangar / mine /
+                   vortex spawns all write theirs with insertMovement / Manager::insertSingleMovement.
+                   isMovementAlreadySubmitted and deleteMovement already leave 'deploy' out for the same
+                   reason. Keyed on the id, not the type alone, so a genuinely new row (id -1 / 0) would
+                   still be written. */
+                if ($movement->type == "deploy" && (int)$movement->id > 0)
+                    continue;
+
                 //Transient forced JINKS (Gravitic Augmenter free jinks) are re-added in-memory
                 //every load and must never be written to the DB, or they would accumulate.
                 //Only jinks: forced pivots (pivotleft/right, rotateLeft/right) are real committed

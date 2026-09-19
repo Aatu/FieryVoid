@@ -1088,6 +1088,12 @@ window.gamedata = {
                 //The two hangar routes are arrivals too, into a hold rather than onto a hex.
                 if (arrival.pendingDeployDock || arrival.pendingLcvDeployDock) continue;
                 if (arrival.deploymove) continue;
+                /* HYPERSPACE_IMPROVEMENTS_PLAN.md H6c - placed or docked by the SERVER at the start of the
+                   turn (JumpEngine::placeArrivingReinforcements), before this phase existed: a committed
+                   deploy row, or aboard its carrier. Neither has a client-side deploymove, and both are
+                   out of hyperspace - naming them here would be telling the player the opposite of true. */
+                if (arrival.removed) continue;
+                if ((arrival.movement || []).some(function (m) { return m.type === 'deploy' && m.turn == gamedata.turn; })) continue;
 
                 leftInHyperspace.push(arrival);
             }

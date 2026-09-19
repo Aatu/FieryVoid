@@ -2615,10 +2615,12 @@ if ($ship->Enormous && !($ship instanceof spawnMeteoroid) && !($ship instanceof 
     }
 
     /* REINFORCEMENTS_PLAN.md STAGE 7 - does this player have anything coming out of hyperspace on
-       $turn? The clause that GRANTS the Deployment phase in FireGamePhase::advance's slot loop
-       (plan §4 Stage 7), and the only thing that does: a reinforcement's arrival turn is decided in
-       play by the exit it rides, so no slot value - depavailable, getMinTurnPlacedSlot or
-       otherwise - can predict it.
+       $turn? It WAS the clause that granted the Deployment phase in FireGamePhase::advance's slot
+       loop (plan §4 Stage 7). ⚠️ HYPERSPACE_IMPROVEMENTS_PLAN.md STAGE H6 RETIRED THAT: the server
+       places the wave itself (JumpEngine::placeArrivingReinforcements), so nothing in the game calls
+       this any more. Kept as the one-line reader the Stage 7 and 8 harnesses probe the stamp with. A
+       reinforcement's arrival turn is decided in play by the exit it rides, so no slot value -
+       depavailable, getMinTurnPlacedSlot or otherwise - can predict it.
 
        ⚠️ ASK IT OF THE GAMEDATA THE SWEEP STAMPED. JumpEngine::stampExitManifests writes
        arrivalTurn to the DB and to its own in-memory ships; the outer $gameData FireGamePhase was
@@ -2647,7 +2649,39 @@ if ($ship->Enormous && !($ship instanceof spawnMeteoroid) && !($ship instanceof 
     }
 
 
-    //A check for Manager in case there are no ships deployed at all, in which case just proceed to next phase. 
+    /* ⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md H6 follow-up (user ruling 2026-09-19) - does this SLOT have a unit
+       arriving through a jump point on $turn with HYACH SPECIALISTS still to choose?
+
+       The one arrival that still needs a Deployment phase. Specialists are chosen ONLY in a Deployment phase
+       (HyachSpecialists::generateIndividualNotes case -1, and the client's "placement turn, phase -1" gates),
+       and they must be chosen there rather than in Initial Orders because the Initial Orders ones (Computer,
+       Power, Repair, Sensor) have to be USABLE on the arrival turn: a Deployment-phase choice is loaded back by
+       then. The unit is already on its doorway when the phase opens (JumpEngine::placeArrivingReinforcements
+       runs first, from Manager::changeTurn); the phase is only for the choice, and the Deployment commit block
+       (gamedata.doCommit, getUnusedSpecialists) holds the player to it.
+
+       PER SLOT, not per player like hasReinforcementsArriving was: a player's other slots have nothing to do.
+       Cheapest tests first - it runs in FireGamePhase's slot loop every turn - and getSystemByName, never
+       getHyachSpecialists(), which reads a property only Hyach hulls declare. Asked of $servergamedata, whose
+       arrival turns stampExitManifests has just written. */
+    public function hasArrivingSpecialistChoices($slotid, $turn) {
+        foreach ($this->ships as $ship) {
+            if ($ship->slot != $slotid) continue;
+            if (!$ship->reinforcement) continue;
+            if ($ship->arrivalTurn === null || (int)$ship->arrivalTurn !== (int)$turn) continue;
+            if ($ship->isDestroyed()) continue;
+
+            $specialists = $ship->getSystemByName("HyachSpecialists");
+            if (!$specialists) continue;
+            if (!empty($specialists->availableSpec)) continue;   //already chosen - never, for a first arrival
+
+            return true;
+        }
+
+        return false;
+    }
+
+    //A check for Manager in case there are no ships deployed at all, in which case just proceed to next phase.
     public function areDeployedShips() {
         foreach ($this->ships as $ship) {
             if (

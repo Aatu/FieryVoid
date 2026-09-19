@@ -1969,3 +1969,158 @@ body {
     letter-spacing: 0.5px;
     text-align: center;
 }
+
+/* ⓘ ON EVERY ROW OF BOTH REINFORCEMENT DIALOGS (user request 2026-09-19): right-click the row, or this,
+   and the ship window opens - the fleet list's two gestures (.fleetlist .rowinfo in logPanel.css), for
+   the same reason: a unit in hyperspace has no icon to right-click. Hidden until the row is pointed at
+   so the list stays quiet, always there on touch, where it is the only way in. It works on a greyed
+   row too - a unit that cannot be picked can still be looked at - and fades with it (the row's
+   opacity takes its whole subtree; that is the one signal it is still the same row). */
+.confirm.fleetDialog .reinforcementRowInfo {
+    flex: 0 0 auto;
+    visibility: hidden;
+    color: var(--fv-accent);
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+}
+
+.confirm.fleetDialog .reinforcementRow:hover .reinforcementRowInfo {
+    visibility: visible;
+}
+
+@media (pointer: coarse) {
+    .confirm.fleetDialog .reinforcementRow .reinforcementRowInfo {
+        visibility: visible;
+    }
+}
+
+/* ⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md H6a/H6b - A MANIFEST ROW CARRIES THREE CONTROLS NOW: ride, start in a
+   hangar, and the speed it comes out at. So it is a <div> with a <label> inside it for the ride box
+   alone (a click anywhere in a label activates its FIRST control, which would have ticked the ride
+   whenever Hangar or Speed was touched), and only that label keeps the pointer. */
+.confirm.fleetDialog .reinforcementManifestRow {
+    cursor: default;
+    /* Centred, not the family's baseline (user request 2026-09-19): baseline pinned the Hangar and Speed
+       controls to the NAME's first line, so they sat high against the two-line name/class stack. */
+    align-items: center;
+}
+
+.confirm.fleetDialog .reinforcementRowPick {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex: 1 1 auto;
+    min-width: 0;
+    cursor: pointer;
+}
+
+/* The class line under a manifest row's name - the menu shows it on the right, where these rows now
+   keep their controls. */
+.confirm.fleetDialog .reinforcementRowSub {
+    display: block;
+    color: var(--fv-text-dim);
+    font-size: 11px;
+}
+
+.confirm.fleetDialog .reinforcementArrival {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 12px;
+    color: var(--fv-text-dim);
+    font-size: 12px;
+}
+
+/* "Hangar" and its dropdown of carriers (user request 2026-09-19). A FIXED width, and the same width when
+   the cell is empty, so the Speed column lines up down the list whether or not a row can go into a hangar
+   at all. The select is fixed too: a long carrier name is cut by the control, not allowed to push Speed. */
+.confirm.fleetDialog .reinforcementHangarPick {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 5px;
+    width: 172px;
+    white-space: nowrap;
+}
+
+.confirm.fleetDialog .reinforcementHangar {
+    width: 120px;
+    padding: 1px 2px;
+    border: 1px solid var(--fv-line-scs);
+    border-radius: 0;
+    background: var(--fv-well);
+    color: var(--fv-text);
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.confirm.fleetDialog .reinforcementSpeedPick {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    white-space: nowrap;
+}
+
+/* The number box, with the browser's own spinner HIDDEN (user request 2026-09-19: it took half the box) -
+   the − and + either side replace it. The same two resets .stepper-input uses in confirm.css. margin-left
+   is a real override: `.confirm input` gives every input 10px. */
+.confirm.fleetDialog .reinforcementSpeed {
+    width: 26px;
+    margin-left: 0;
+    padding: 1px 2px;
+    border: 1px solid var(--fv-line-scs);
+    border-radius: 0;
+    background: var(--fv-well);
+    color: var(--fv-text);
+    font-family: var(--fv-mono);
+    font-size: 12px;
+    text-align: center;
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.confirm.fleetDialog .reinforcementSpeed::-webkit-outer-spin-button,
+.confirm.fleetDialog .reinforcementSpeed::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+}
+
+.confirm.fleetDialog .reinforcementSpeedStep {
+    width: 16px;
+    height: 18px;
+    padding: 0;
+    border: 1px solid var(--fv-line-scs);
+    border-radius: 0;
+    background: var(--fv-well);
+    color: var(--fv-accent);
+    font-family: var(--fv-mono);
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.confirm.fleetDialog .reinforcementSpeedStep:hover:not(:disabled) {
+    background: var(--fv-card-hover);
+}
+
+/* Greyed rather than hidden: a unit riding in a hangar has no speed of its own, and a unit not riding
+   has neither - but both columns stay where they are, so the list does not jump as rows are ticked. */
+.confirm.fleetDialog .reinforcementSpeed:disabled,
+.confirm.fleetDialog .reinforcementSpeedStep:disabled,
+.confirm.fleetDialog .reinforcementHangar:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+/* "X no longer fits in a hangar" - said inline rather than in a pop-up over the dialog the player is
+   still working in (plan §7 H6b: un-tick and warn). text-align is a real override: .confirm centres. */
+.confirm.fleetDialog .reinforcementManifestNote {
+    display: none;
+    margin-top: 8px;
+    padding: 2px;
+    color: var(--fv-warning);
+    font-size: 12px;
+    text-align: left;
+}

@@ -89,6 +89,15 @@ class BaseShip {
        client's claim in its own field means $reinforcement always means "the DB said so", which is
        what all ~80 getTurnDeployed call sites assume. NOT a tac_ship column. */
     public $reinforcementClaim = false;
+    /* HYPERSPACE_IMPROVEMENTS_PLAN.md STAGE H6a/H6b - THE MANIFEST'S ARRIVAL ORDER, AS CLAIMED:
+       array('speed' => int|null, 'carrier' => int|null), or null when the POST said nothing.
+       Written only by Manager::getShipsFromJSON and read only by InitialOrdersGamePhase::
+       persistManifest, which validates it and writes the 'ArrivalOrder' note that
+       JumpEngine::placeArrivingReinforcements reads once.
+       ⚠️ PROTECTED, NOT PUBLIC LIKE ITS NEIGHBOURS. A public property - even a null one - lands in
+       every static blueprint (the generators json_encode the raw ship), and nothing on the client
+       reads this back. */
+    protected $arrivalOrderClaim = null;
     public $unavailable = false;
     public $minesweeperbonus = 0;
     public $base = false;
@@ -3393,6 +3402,18 @@ public function getAllEWExceptDEW($turn){
 	   answering true: from then on it is an ordinary unit with a late deploy turn. */
 	public function isReinforcement(){
 		return $this->reinforcement && $this->arrivalTurn === null;
+	}
+
+	//Stage H6 - see $arrivalOrderClaim. Null speed / carrier = the POST did not say.
+	public function setArrivalOrderClaim($speed, $carrier){
+		$this->arrivalOrderClaim = array(
+			'speed'   => ($speed === null) ? null : (int)$speed,
+			'carrier' => ($carrier === null) ? null : (int)$carrier,
+		);
+	}
+
+	public function getArrivalOrderClaim(){
+		return $this->arrivalOrderClaim;
 	}
 
 	/* ⭐ IS THIS UNIT ON THE BOARD FROM TURN 1 NO MATTER WHAT THE SLOT OR THE FLAG SAYS?

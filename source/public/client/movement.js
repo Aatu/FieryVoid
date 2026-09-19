@@ -879,10 +879,16 @@ shipManager.movement = {
     getMaintainableExitHeldBy: function getMaintainableExitHeldBy(ship) {
         if (!ship) return null;
         if (typeof gamedata.isJumpGate === 'function' && gamedata.isJumpGate(ship)) return null;
-        if (shipManager.getTurnDeployed(ship) > gamedata.turn) return null;   //still in hyperspace
 
+        /* The exit FIRST, and only then whether the ship is on the board. ⚠️ ORDER IS LOAD-BEARING: this runs
+           from JumpEngine.getHeldVortex, which the ship window's system icon asks - in the LOBBY too, where
+           there is no game slot and getTurnDeployed throws on playerManager.getSlotById's null (the
+           JUMP_GATES_PLAN.md trap 11 shape; user report 2026-09-19, lobby Details on a Vorlon). There are no
+           exits in a lobby, so asking for one first never reaches getTurnDeployed there. */
         var exit = shipManager.movement.getExitHeldBy(ship.id);
         if (!exit || shipManager.movement.isPhaseInVortex(exit)) return null;
+
+        if (shipManager.getTurnDeployed(ship) > gamedata.turn) return null;   //still in hyperspace
 
         return exit;
     },

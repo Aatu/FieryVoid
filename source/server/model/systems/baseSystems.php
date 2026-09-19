@@ -7808,7 +7808,8 @@ class JumpEngine extends Weapon{
      * own ship in through a doorway nobody else can use - it opens no jump point - so its manifest may
      * hold only FIGHTERS its hangars can take, and SHIPS its Docking Bay can (WALKERS_OF_SIGMA_PLAN.md
      * 3.14b), and those arrive DOCKED inside it
-     * (InitialOrdersGamePhase::legacyBerthFits at the manifest, DeploymentGamePhase at arrival). A gate
+     * (InitialOrdersGamePhase::legacyBerthFits at the manifest, placeArrivingReinforcements at arrival
+     * since Stage H6). A gate
      * is never one. Goes through getUnitJumpEngines, so a Mapmaker flight's drive is found on its craft.
      * Client mirror: shipManager.movement.isLegacyOpener. */
     public static function isLegacyOpener($unit)
@@ -7945,6 +7946,321 @@ class JumpEngine extends Weapon{
         if ($unit->arrivalTurn === null) return false;
 
         return ((int)$unit->arrivalTurn === (int)$gamedata->turn);
+    }
+
+    /* ============ HYPERSPACE_IMPROVEMENTS_PLAN.md STAGE H6 - THE WAVE PLACES ITSELF, ON THE SERVER ============
+     *
+     * The DEPLOYMENT: REINFORCEMENTS phase had three jobs left (plan §7): the player set each arrival's
+     * SPEED, flights riding a legacy opener were docked into it, and a unit whose doorway had gone went
+     * back to hyperspace. The first two are now decided a turn earlier, in the Jump Manifest, and this
+     * does all three with no phase at all.
+     *
+     * ⭐ THE ARRIVAL ORDER. What the manifest decided for one rider beyond "which doorway": the speed it
+     * comes out at (H6a) and the carrier it STARTS INSIDE, if any (H6b). One 'ArrivalOrder' note per
+     * rider per Initial Orders commit, value "speed:carrierId" (0 = onto the map), written by
+     * InitialOrdersGamePhase::persistManifest after it has validated both, and read ONCE, by
+     * placeArrivingReinforcements. From then on the deploy row (or the hangar entry) is the authority
+     * and the note is history - plan §10 A3: nothing else may ever read it.
+     *
+     * ⚠️ HOSTED ON A STRUCTURE (or a flight's first craft), NEVER ON A JUMP ENGINE. The engine's
+     * onIndividualNotesLoaded takes any note it does not recognise for the pre-jump combat value;
+     * Structure and Fighter ignore keys they do not know. The reader goes to the database by ship id,
+     * so no loader has to claim the key either. */
+    const ARRIVAL_ORDER_NOTE = 'ArrivalOrder';
+    //The 0-10 the retired phase's accel arrows allowed (shipManager.movement.doDeploymentAccel).
+    const ARRIVAL_SPEED_MAX = 10;
+
+    public static function getArrivalNoteHost($unit)
+    {
+        if (!$unit || !is_array($unit->systems)) return null;
+
+        if ($unit instanceof FighterFlight){
+            foreach ($unit->systems as $craft) if ($craft instanceof Fighter) return $craft;
+            return null;
+        }
+
+        $structure = $unit->getStructureSystem(0);
+        if ($structure) return $structure;
+        foreach ($unit->systems as $system) if ($system instanceof Structure) return $system;
+
+        return null;
+    }
+
+    /* ⚠️ THE SPEED IS PLAYER-SUPPLIED AND BECOMES A MOVEMENT ROW's `speed`, so it is clamped both when
+     * it is written and when it is read. 0 on a base or an OSAT, as shipManager.movement.deploy has
+     * always forced (neither can be a reinforcement today - alwaysDeploysTurnOne - but a clamp that
+     * leaned on that would be one refactor from a hole). */
+    public static function clampArrivalSpeed($unit, $speed)
+    {
+        if ($unit->osat || $unit->base) return 0;
+        return max(0, min(self::ARRIVAL_SPEED_MAX, (int)$speed));
+    }
+
+    /* The speed a unit comes out at when its manifest said nothing - a game that was mid-flight when this
+     * deployed, or a berth kept from an earlier turn. Its last movement row's speed, which is exactly
+     * what the retired phase's placement started from (shipManager.movement.deploy copies it). */
+    public static function getDefaultArrivalSpeed($unit)
+    {
+        $last = $unit->getLastMovement();
+        return self::clampArrivalSpeed($unit, $last ? (int)$last->speed : 0);
+    }
+
+    public static function makeArrivalOrderNote($unit, $gamedata, $speed, $carrierId)
+    {
+        $host = self::getArrivalNoteHost($unit);
+        if (!$host) return null;
+
+        return new IndividualNote(-1, $gamedata->id, $gamedata->turn, $gamedata->phase, $unit->id, $host->id,
+            self::ARRIVAL_ORDER_NOTE, 'Arrival order',
+            self::clampArrivalSpeed($unit, $speed) . ':' . max(0, (int)$carrierId));
+    }
+
+    /* The LATEST arrival order on $unit, as array('speed' => int|null, 'carrier' => int|null). Null speed
+     * means "none written" (take getDefaultArrivalSpeed); null carrier means "onto the map". Latest by
+     * turn, then by note id - persistManifest writes one per commit, so the newest is the manifest that
+     * got this unit its arrival turn. */
+    public static function readArrivalOrder($unit, $gamedata, $dbManager)
+    {
+        $order = array('speed' => null, 'carrier' => null);
+        if ($dbManager === null || !method_exists($dbManager, 'getIndividualNotesForShip')) return $order;
+
+        $latest = null;
+        foreach ($dbManager->getIndividualNotesForShip($gamedata, (int)$gamedata->turn, (int)$unit->id) as $note){
+            if ($note->notekey !== self::ARRIVAL_ORDER_NOTE) continue;
+            if ($latest === null || (int)$note->turn > (int)$latest->turn
+                || ((int)$note->turn === (int)$latest->turn && (int)$note->id > (int)$latest->id)) $latest = $note;
+        }
+        if ($latest === null) return $order;
+
+        $parts = explode(':', (string)$latest->notevalue);
+        $order['speed'] = self::clampArrivalSpeed($unit, (int)$parts[0]);
+        $carrier = isset($parts[1]) ? (int)$parts[1] : 0;
+        $order['carrier'] = ($carrier > 0) ? $carrier : null;
+
+        return $order;
+    }
+
+    /* ⭐ SEND $unit BACK TO HYPERSPACE WITH NOTHING SPENT (REINFORCEMENTS_PLAN.md §2.4, "goes back to
+     * unassigned"). Moved here from DeploymentGamePhase::releaseUnplacedReinforcements, which still
+     * calls it, so the two ways a unit can now fail to arrive cannot disagree about what that means.
+     * Returns whether the berth was kept.
+     *
+     * ⚠️ arrivalTurn MUST BE CLEARED, not just arrivalVia. Left set, the unit reads as an ordinary ship
+     * that deployed on a turn now in the past - on the board, shootable, and standing at the off-map
+     * 'start' marker its slot gave it, for the rest of the game.
+     *
+     * ⭐⭐ A GATE BERTH IS KEPT, A SHIP BERTH IS NOT (Stage 8) - a gate's doorway may have turns left on
+     * its programmed hold - and (⭐ Stage H5, user ruling 2026-09-19) nor is a berth on a ship holding its
+     * blue exit open. OPTIMISTICALLY: the authorities come later and are unchanged - the Initial Orders
+     * commit writes the berth NULL unless the opener re-declares Maintain
+     * (InitialOrdersGamePhase::collectHeldExitOpeners), and stampExitManifests refunds it if the exit then
+     * closes. arrivalTurn is cleared in every case: keeping a berth is not staying an arrival.
+     *
+     * $dbManager is UNTYPED so the harnesses can drive this with a write-capturing stub. */
+    public static function returnToHyperspace($unit, $gamedata, $dbManager)
+    {
+        $unit->arrivalTurn = null;
+        if ($dbManager !== null) $dbManager->setShipArrivalTurn($unit->id, null);
+
+        //getShipById, never a posted object: isTerrain() is a blueprint property.
+        $opener = ($unit->arrivalVia === null) ? null : $gamedata->getShipById((int)$unit->arrivalVia);
+        $keepsBerth = ($opener !== null && $opener->isTerrain());
+
+        //getHeldExitEngine asks whether the opener is ON THE BOARD, so an opener sent back in this same
+        //pass does not keep its riders' berths.
+        if (!$keepsBerth && $opener !== null && (int)$opener->id !== (int)$unit->id
+            && self::getHeldExitEngine($opener, $gamedata, (int)$gamedata->turn)) $keepsBerth = true;
+
+        if (!$keepsBerth){
+            $unit->arrivalVia = null;
+            if ($dbManager !== null) $dbManager->setShipArrivalVia($unit->id, null);
+        }
+
+        Debug::log("Jump point exit: ship {$unit->id} was not brought out and returns to hyperspace"
+            . ($keepsBerth ? ", keeping its berth on {$unit->arrivalVia}" : "")
+            . " (game {$gamedata->id}, turn {$gamedata->turn}).");
+
+        return $keepsBerth;
+    }
+
+    /* ⭐⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md STAGE H6c - EVERY UNIT ARRIVING THIS TURN, PLACED OR DOCKED OR
+     * SENT BACK, with no Deployment phase for any of it.
+     *
+     * Called once, from Manager::changeTurn, off the reload of the NEW turn and before initiative is
+     * rolled. ⚠️ NOT from FireGamePhase::advance, where the plan first put it: that load is turn N, and
+     * every question below is "arriving on THIS turn" - getArrivalVortex, the doorway's formed window,
+     * and the hangar dock's own "flight and carrier are both placing this turn" gates
+     * (HangarOps::validateDeployBayOrders) all answer no a turn early. From changeTurn this sees the load
+     * the retired phase used to act on - turn N+1, phase -1, arrivals stamped - so the deploy rows, the
+     * hangar entries and their notes come out exactly as that phase wrote them, and replay reads them the
+     * same way.
+     *
+     * THREE PASSES, IN THIS ORDER:
+     *   1. everything coming out ONTO THE MAP gets a 'deploy' row at its doorway, on the doorway's facing
+     *      (heading too - validateReinforcementArrival's rule), at the speed its manifest chose;
+     *      a unit whose doorway has gone goes back to hyperspace;
+     *   2. everything STARTING INSIDE A CARRIER is docked into it - the carrier must have come out in
+     *      pass 1, through the same doorway. A flight riding a LEGACY opener is aboard by rule (user
+     *      ruling 2026-09-11) whatever its note says. A refused dock sends the unit back, as the retired
+     *      phase's dock did;
+     *   3. each carrier that took anything persists its hangar snapshot through its own
+     *      generateIndividualNotes - the same change-detected tail the Deployment phase wrote it through.
+     *
+     * ⚠️ THE MOVE IS PUSHED ONTO THE IN-MEMORY SHIP AS WELL AS WRITTEN: generateIniative runs next, off
+     * this same object, and getSpeed() reads the last movement row. That is what takes the old -50 for
+     * speed 0 off a wave that chose a speed (plan §7 H6a - a balance change, flagged there).
+     *
+     * IDEMPOTENT: a unit already carrying this turn's deploy row, or already aboard (removed), is skipped.
+     * $dbManager is untyped for the harness. Returns the ids placed / docked / released. */
+    public static function placeArrivingReinforcements($gamedata, $dbManager = null)
+    {
+        $result = array('placed' => array(), 'docked' => array(), 'released' => array());
+        if (!$gamedata->rules || !$gamedata->rules->hasRuleName('allowReinforcements')) return $result;
+
+        $turn = (int)$gamedata->turn;
+
+        $arrivals = array();
+        foreach ($gamedata->ships as $unit){
+            if (!self::isArrivingReinforcement($unit, $gamedata)) continue;
+            if ($unit->alwaysDeploysTurnOne()) continue;
+            if ($unit->isDestroyed()) continue;
+            if ($unit->removed) continue;                          //already aboard - a second pass
+            if (self::hasDeployMoveOn($unit, $turn)) continue;      //already out - a second pass
+
+            $order = self::readArrivalOrder($unit, $gamedata, $dbManager);
+            $legacyHost = self::getLegacyRideHost($unit, $gamedata);
+            if ($legacyHost) $order['carrier'] = (int)$legacyHost->id;   //aboard by rule, not by choice
+
+            $arrivals[] = array('unit' => $unit, 'order' => $order);
+        }
+
+        //1. Onto the map. Carriers are in this pass, so pass 2 can dock into them.
+        $out = array();
+        foreach ($arrivals as $arrival){
+            if ($arrival['order']['carrier'] !== null) continue;
+            $unit = $arrival['unit'];
+
+            $vortex = self::getArrivalVortex($unit, $gamedata);
+            if ($vortex === null){
+                self::returnToHyperspace($unit, $gamedata, $dbManager);
+                $result['released'][] = (int)$unit->id;
+                continue;
+            }
+
+            $speed = ($arrival['order']['speed'] === null)
+                ? self::getDefaultArrivalSpeed($unit) : $arrival['order']['speed'];
+            $facing = (int)$vortex->getLastMovement()->facing;
+
+            $move = new MovementOrder(null, "deploy", $vortex->getHexPos(), 0, 0,
+                $speed, $facing, $facing, false, $turn, 0, 0);
+            $unit->movement[] = $move;
+            if ($dbManager !== null) $dbManager->insertMovement($gamedata->id, $unit->id, $move);
+
+            $out[(int)$unit->id] = true;
+            $result['placed'][] = (int)$unit->id;
+        }
+
+        /* 2. Into a carrier. SHIPS BEFORE FLIGHTS, the Deployment phase's own order
+           (DockingBay::generateIndividualNotes): a Pathfinder claims its Docking Bay boxes first, and a
+           Mapmaker flight packed after it finds them taken rather than the other way round. */
+        $docking = array();
+        foreach ($arrivals as $arrival){
+            if ($arrival['order']['carrier'] === null) continue;
+            if ($arrival['unit'] instanceof FighterFlight) $docking[] = $arrival;
+            else array_unshift($docking, $arrival);
+        }
+
+        $touched = array();
+        foreach ($docking as $arrival){
+            $unit = $arrival['unit'];
+            $carrier = $gamedata->getShipById($arrival['order']['carrier']);
+
+            if (!self::canCarryArrival($carrier, $unit, $out) || !self::dockArrival($unit, $carrier, $gamedata)){
+                self::returnToHyperspace($unit, $gamedata, $dbManager);
+                $result['released'][] = (int)$unit->id;
+                continue;
+            }
+
+            $touched[(int)$carrier->id] = $carrier;
+            $result['docked'][] = (int)$unit->id;
+        }
+
+        //3. Persist what went aboard.
+        foreach ($touched as $carrier){
+            foreach (HangarOps::collectHangars($carrier) as $hangar){
+                $hangar->generateIndividualNotes($gamedata, $dbManager);
+                if ($dbManager !== null) $hangar->saveIndividualNotes($dbManager);
+            }
+        }
+
+        return $result;
+    }
+
+    //A deploy row for $turn already on this unit, as DeploymentGamePhase::validateDeployment reads them.
+    public static function hasDeployMoveOn($unit, $turn)
+    {
+        if (!is_array($unit->movement)) return false;
+        foreach ($unit->movement as $move){
+            if ($move->type == "deploy" && (int)$move->turn === (int)$turn) return true;
+        }
+        return false;
+    }
+
+    /* May $carrier take $unit aboard as it arrives? It must be the rider's own, have come out onto the
+     * map in pass 1 (not sent back, not itself aboard something), and have come through the SAME
+     * doorway - it is either the doorway's opener or another rider of it. The hangar rules themselves
+     * are the dock's (HangarOps), asked next. */
+    protected static function canCarryArrival($carrier, $unit, array $out)
+    {
+        if (!$carrier || (int)$carrier->id === (int)$unit->id) return false;
+        if ((int)$carrier->userid !== (int)$unit->userid) return false;
+        if (!isset($out[(int)$carrier->id])) return false;
+
+        $door = ($unit->arrivalVia === null) ? (int)$unit->id : (int)$unit->arrivalVia;
+        $carrierDoor = ($carrier->arrivalVia === null) ? (int)$carrier->id : (int)$carrier->arrivalVia;
+
+        return (int)$carrier->id === $door || $carrierDoor === $door;
+    }
+
+    /* Put $unit aboard $carrier through the Deployment phase's own dock path, which is the authority on
+     * every hangar rule: HangarOps::validateDeployBayOrders + performDeployStartDockFromOrders for a
+     * flight, processBayShipDeployStartTransfer for a ship a Docking Bay takes. The carrier is both the
+     * "POST-side" and the "DB-side" ship here - there is only the one load - which every one of them
+     * accepts. True when it is aboard. */
+    protected static function dockArrival($unit, $carrier, $gamedata)
+    {
+        if ($unit instanceof FighterFlight){
+            $entryHost = HangarOps::primaryHangar($carrier);
+            if (!$entryHost) return false;
+
+            //Fill order = the dock's own (reserved bays first, a Docking Bay last), which is the order
+            //persistManifest's fit check and the client's planFlightsIntoCarrier promised.
+            $bayOrders = array();
+            foreach (HangarOps::sortBaysReservedFirst(HangarOps::collectHangars($carrier), $unit) as $bay){
+                if (!empty($bay->isLCVRail)) continue;
+                $bayOrders[] = array('hangar' => $bay, 'count' => null);
+            }
+
+            $reason = null;
+            if (!HangarOps::validateDeployBayOrders($carrier, $carrier, $unit, $bayOrders, $gamedata, $reason)){
+                Manager::insertIndividualNote(new IndividualNote(-1, $gamedata->id, $gamedata->turn, $gamedata->phase,
+                    $carrier->id, $entryHost->id, 'hangarDeployStartEvent', 'Hangar deploy-start dock failed',
+                    'fail:' . $unit->id . ':' . ($reason ?? 'unknown')));
+                return false;
+            }
+
+            return HangarOps::performDeployStartDockFromOrders($entryHost, $carrier, $unit, $bayOrders, $gamedata, $carrier) > 0;
+        }
+
+        foreach (HangarOps::collectHangars($carrier) as $bay){
+            if (empty($bay->isDockingBay) || $bay->isDestroyed()) continue;
+            if (!HangarOps::bayDocksShipClass($bay, (string)$unit->phpclass)) continue;
+
+            HangarOps::processBayShipDeployStartTransfer($bay, $carrier, $gamedata, array(array('shipId' => (int)$unit->id)));
+            if (HangarOps::findBayShipEntry($bay, $unit->id) !== null) return true;
+        }
+
+        return false;
     }
 
     /* THIS ENGINE'S EXIT DECLARATION FOR $turn, or null. The mirror of getVortexDeclaration and

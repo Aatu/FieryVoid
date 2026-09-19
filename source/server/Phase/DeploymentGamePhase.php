@@ -114,6 +114,13 @@ class DeploymentGamePhase implements Phase
 
     /* REINFORCEMENTS_PLAN.md STAGE 7 - WHAT THE PLAYER DID NOT BRING THROUGH GOES BACK (plan §2.4).
      *
+     * ⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md STAGE H6 - NEARLY ALWAYS A NO-OP NOW. The server places, docks
+     * or sends back every arrival itself at the start of the turn (JumpEngine::placeArrivingReinforcements),
+     * so by the time a Deployment phase exists every arrival already has its deploy row, is aboard
+     * (removed) or is back in hyperspace - and each of those is skipped below. What is left for this is a
+     * game that was part-way through a DEPLOYMENT: REINFORCEMENTS phase when H6 was deployed, whose wave
+     * the client still places the old way. Kept for that, and because it costs nothing.
+     *
      * Placement is optional, so a wave of four can arrive as a wave of two. The two left behind are
      * not stranded and nothing about them is spent: both arrival fields are cleared, which puts them
      * straight back where they were before the exit formed - `reinforcement` with a NULL
@@ -175,35 +182,11 @@ class DeploymentGamePhase implements Phase
             }
             if ($placed) continue;
 
-            $unit->arrivalTurn = null;
-            $dbManager->setShipArrivalTurn($unit->id, null);
-
-            //A gate keeps its berth - see the ⭐⭐ above. getShipById, never the posted object:
-            //isTerrain() is a blueprint property and a POST-side unit is not what this list holds
-            //anyway ($gamedata->ships is the real load).
-            $opener = ($unit->arrivalVia === null) ? null : $gamedata->getShipById((int)$unit->arrivalVia);
-            $keepsBerth = ($opener !== null && $opener->isTerrain());
-
-            /* ⭐ STAGE H5 (user ruling 2026-09-19) - AND SO DOES A BERTH ON A SHIP THAT IS HOLDING ITS
-               BLUE EXIT OPEN, for the gate's reason: that doorway may take another wave next turn, and
-               re-naming the same rider every turn is busywork. The same OPTIMISM as the gate's - the
-               authorities come later and are unchanged: the Initial Orders commit writes the berth as
-               NULL unless the opener re-declares Maintain (InitialOrdersGamePhase::
-               collectHeldExitOpeners), and stampExitManifests refunds it if the exit then closes.
-               ⚠️ getHeldExitEngine asks whether the opener is ON THE BOARD, so an opener released back
-               to hyperspace in this same pass does not keep its riders' berths - unless the release
-               loop reaches the rider first, in which case the two authorities above clear it. */
-            if (!$keepsBerth && $opener !== null && (int)$opener->id !== (int)$unit->id
-                && JumpEngine::getHeldExitEngine($opener, $gamedata, (int)$gamedata->turn)) $keepsBerth = true;
-
-            if (!$keepsBerth){
-                $unit->arrivalVia = null;
-                $dbManager->setShipArrivalVia($unit->id, null);
-            }
-
-            Debug::log("Jump point exit: ship {$unit->id} was not placed and returns to hyperspace"
-                . ($keepsBerth ? ", keeping its berth on gate {$unit->arrivalVia}" : "")
-                . " (game {$gamedata->id}, turn {$gamedata->turn}).");
+            /* The release itself - arrivalTurn cleared, and the berth kept only on a gate or on a ship
+               holding its blue exit open (Stages 8 and H5) - is JumpEngine::returnToHyperspace, shared
+               with the server's own placement sweep (HYPERSPACE_IMPROVEMENTS_PLAN.md H6c) so the two
+               ways a unit can fail to arrive cannot disagree about what that means. */
+            JumpEngine::returnToHyperspace($unit, $gamedata, $dbManager);
         }
     }
 
@@ -388,6 +371,19 @@ class DeploymentGamePhase implements Phase
 
             $moves = array();
             $found = false;
+
+            /* ⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md STAGE H6c - AN ARRIVAL THE SERVER HAS ALREADY PLACED.
+               JumpEngine::placeArrivingReinforcements wrote its deploy row at the start of the turn, so
+               it has nothing to supply here - and it will SUPPLY it anyway: the client posts every
+               movement row dated this turn, and this phase still exists whenever the same slot also has a
+               real placement to make. Accepting it would insert the row a second time, and the loop below
+               throws "more than one deployment entry" on anything that follows one. The committed row is
+               the authority; the posted copy is ignored. */
+            if ($servership !== null && JumpEngine::isArrivingReinforcement($servership, $gamedata)
+                && JumpEngine::hasDeployMoveOn($servership, $gamedata->turn)) {
+                $shipIdMoves[$ship->id] = array();
+                continue;
+            }
 
             if($placeTurn == $gamedata->turn){ //Is ship picking its entry hex this turn?
                 foreach ($ship->movement as $move)

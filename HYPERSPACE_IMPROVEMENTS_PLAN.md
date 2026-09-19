@@ -530,6 +530,11 @@ that bit `canSignalJumpGate` and `isJumpVortexExit`.
 
 ## 7. Stage H6 — retire DEPLOYMENT: REINFORCEMENTS (Item 4)
 
+> **BUILT 2026-09-19 — see §11.** One structural deviation: the placement sweep runs from
+> `Manager::changeTurn` at the start of turn N+1, **not** from `FireGamePhase::advance` at the end of turn N
+> as H6c below says, and the reason is in the build log. The hangar-berth intent lives in the same
+> `ArrivalOrder` note as the speed, on the RIDER, not on the opener's engine.
+
 The largest of the six, and the one with the most ways to strand a unit off-board permanently.
 Build it **last** and in three sub-stages that each leave the tree shippable.
 
@@ -719,7 +724,7 @@ harness green.
 | H3 | `powerReq` on 12 Vorlon hulls in the **statics**; harness only if a Vorlon is in the corpus |
 | H4 | `turnsloaded` **only on drives that boosted** — in a corpus with no boosts, **nothing at all**. A whole-corpus move means the charge credit was implemented within-turn instead of at turn end. |
 | H5 | none unless a corpus game holds a blue doorway — CONFIRMED 2026-09-19: none (4317-4319 hold exits and pass) |
-| H6 | new `deploy` movement rows for arrivals; `movement.txt` diffs on any corpus game with a wave in it. **Re-record only after reading them.** |
+| H6 | ~~new `deploy` movement rows for arrivals~~ — CONFIRMED 2026-09-19: **none**. The harness replays recorded state and never crosses a turn boundary, and the sweep runs only in `Manager::changeTurn`. 4297 / 4349 fail byte-identically with `source/server` stashed. |
 
 **Existing harnesses to re-run, all eight:**
 `tests/replay/reinforcementsStage{6,7,8,9}Harness.php`, `legacyRechargeHarness.php`,
@@ -804,6 +809,137 @@ tooltip (`setSystemDataWindow`) so the restriction is discoverable rather than s
 ---
 
 ## 11. Build log
+
+### Stage H6 — retire DEPLOYMENT: REINFORCEMENTS (Item 4) — BUILT 2026-09-19
+
+A wave arriving through a jump point no longer gets a Deployment phase. Its speed and "start in hangar" are
+chosen in the **Jump Manifest** (H6a/H6b), and the server places, docks or sends back every arrival itself
+at the start of the arrival turn (H6c). Plus a user addition made at build time: **right-click a row of
+either reinforcement dialog, or its ⓘ, to open that unit's ship window** — the fleet list's two gestures,
+through the same `fleetListManager.openShipWindowFor`.
+
+**⚠️⚠️ THE ONE STRUCTURAL DEVIATION — THE SWEEP RUNS FROM `Manager::changeTurn`, NOT `FireGamePhase::advance`.**
+§7 H6c put `placeArrivingReinforcements` between `stampExitManifests` and the slot loop, i.e. on the turn-N
+load. Every question the sweep asks is "arriving on THIS turn": `getArrivalVortex` (`isArrivingReinforcement`
+and the doorway's `spawned <= turn` window), and the hangar dock's own gates
+(`HangarOps::validateDeployBayOrders`: flight and carrier both *placing this turn*, and
+`Hangar::generateIndividualNotes` returning early for a carrier placed after the current turn — which would
+have silently dropped the hangar snapshot). All answer no a turn early. `changeTurn` reloads the game at
+turn N+1, phase −1, arrivals stamped: **the exact load the retired phase acted on**. So the deploy rows, the
+hangar entries and their notes come out byte-shaped as the phase wrote them (`hangarDeployStartEvent` at
+N+1/−1, `dockedTurn` N+1), replay reads them unchanged, and §7's "a movement row for turn N+1 written during
+turn N is new" trap is gone. It runs **before** `generateIniative`, off the same object, with the deploy
+row pushed into memory, so initiative sees the chosen speed.
+
+**What was built, and where:**
+
+| Piece | Site |
+|---|---|
+| The arrival order | One `'ArrivalOrder'` note per rider per IO commit, value `"speed:carrierId"` (0 = the map). Written by `InitialOrdersGamePhase::persistArrivalOrders`, read once by `JumpEngine::readArrivalOrder` straight from the DB (`getIndividualNotesForShip`), latest by turn then id. ⚠️ **Hosted on Structure 0, or on a flight's first craft, NEVER on a Jump Engine**: the engine's loader takes any unknown note for the pre-jump CV, while Structure and Fighter ignore unknown keys. The direct DB read means no loader has to claim the key. |
+| Speed (H6a) | `JumpEngine::clampArrivalSpeed` (0–10, 0 for base/OSAT), clamped when written AND when read. Default when the manifest said nothing = `getDefaultArrivalSpeed` = the unit's last movement row's speed, i.e. its `start` row's 5 — what `movement.deploy` copied in the retired phase. |
+| Hangar (H6b), server | `persistArrivalOrders` re-fits every carrier claim with `legacyBerthFits` (cumulative, `$gd->ships` order). A claim is only honoured for a carrier that is the rider's own, arrives through the **same doorway** (the opener itself when it is coming out of hyperspace, or another rider), and is not itself asking for a hangar. A failed claim is **not** a refusal of the berth: the rider comes out onto the map. A legacy opener's riders get the opener written as their carrier by rule. `legacyBerthFits` keeps its name: the two Walkers harnesses reflect on it. |
+| Hangar (H6b), client | `ReinforcementEntry.planManifestHangars` (pure, exported): hosts = the opener if it is arriving + ticked riders not themselves asking for a hangar; passengers packed in list order into the first host with room via `planFlightsIntoCarrier`. The dialog re-runs it on every tick. A passenger that no longer fits is **un-ticked and said inline** (plan: "un-tick and warn"). On a legacy opener it comes off the manifest, since there is no map for it. The old legacy-only `refit()` is folded into this. |
+| The manifest dialog | A fixed first row for a hyperspace opener (its own speed), so the dialog now opens even with nobody else to name. Per rider: ride tick, a **Hangar** tick (only when some carrier on the doorway could ever take it), a **Speed** box. Rows are a `<div>` with a `<label>` for the ride tick alone: a click anywhere in a label activates its FIRST control, so Hangar/Speed would otherwise toggle the ride. A declared drive's menu row now always offers **Jump Manifest**, since its own speed can change with nobody left to name. |
+| The POST | `ajaxInterface` sends `arrivalSpeed` (+ `arrivalHangar`) beside `arrivalVia`, only when the manifest set them. `Manager::getShipsFromJSON` → `BaseShip::setArrivalOrderClaim`, a **protected** `$arrivalOrderClaim` (a public null would ride every static blueprint — `"arrivalVia":null` already does). |
+| Placement (H6c) | `JumpEngine::placeArrivingReinforcements`: (1) onto the map — deploy row at the doorway hex, on its facing (heading too), at the chosen speed; doorway gone → `returnToHyperspace`; (2) into a carrier — ships before flights (the Deployment phase's order), through `validateDeployBayOrders` + `performDeployStartDockFromOrders` / `processBayShipDeployStartTransfer`; the carrier must have come out in pass 1 through the same doorway; refused → back to hyperspace, as the phase's dock did; (3) each touched carrier's hangars run their own change-detected `generateIndividualNotes` tail + `saveIndividualNotes`. Idempotent (a unit with this turn's deploy row, or removed, is skipped). |
+| The release | `JumpEngine::returnToHyperspace`, moved out of `DeploymentGamePhase::releaseUnplacedReinforcements` (which now calls it), so the two ways a unit can fail to arrive cannot disagree. Gate berths and held-exit berths kept, as before. |
+| No phase for a wave | `FireGamePhase::advance`'s `hasReinforcementsArriving` clause deleted. `TacGamedata::hasReinforcementsArriving` kept: no game caller any more, but the Stage 7/8 harnesses probe the stamp with it. |
+| The mixed case | A slot that also has a real placement still gets its phase. `DeploymentGamePhase::validateDeployment` skips an arrival whose server-side ship already has this turn's deploy row: the client posts every row dated this turn, so without it the committed row was **re-inserted**. The client's `autoPlaceArrivingReinforcements` skips a unit already aboard (`removed`), and the phase −1 commit warning no longer names server-placed or docked arrivals as "could not be brought out". |
+| Ship window (user) | `bindShipWindowGestures` on both dialogs: `contextmenu` on any `.reinforcementRow[data-shipid]`, click on `.reinforcementRowInfo` (the ⓘ, hidden until hover, always shown on coarse pointers, as `.fleetlist .rowinfo`). ⚠️ The ⓘ click `preventDefault`s: the menu rows are `<label>`s, and without it opening a window would also pick the row. |
+| Docs | `faq.php`: "Calling them in" (+ⓘ), a new "How they come out" bullet, "Arriving" (no phase; hangar), the Shadows bullet. |
+
+**⚠️ Things §7 had wrong or did not list:**
+
+- **The seam** — above.
+- **"`HangarBerth` note on the opener's jump engine"** — a jump engine is the one host whose loader misreads an unknown note. And a gate's engine belongs to whoever bought the gate, possibly the enemy, with anybody's riders on it. Both halves of the order now live in one note on the rider.
+- **"Verify `hasDeployMoveThisTurn` fires against a server-written row"** — it does on the client. The real hole was the SERVER: `validateDeployment` would have re-inserted the posted copy, and its `if ($found) throw` fires on any row after a deploy.
+- **"`releaseUnplacedReinforcements` must not run twice"** — it reads `$gamedata->ships` (the real load), so a placed arrival has its deploy row and a docked one is `removed`. Both are skipped. Confirmed; nothing needed.
+- **An opener's forged carrier claim barred it from carrying its own riders** (caught by the new harness). The no-nesting rule counted it as "wanting a hangar" although its claim is ignored. The opener is excluded now.
+
+**⭐ Observations, NOT changed (scope):**
+
+- ~~**An arriving HYACH reinforcement can no longer choose its Specialists.**~~ RESOLVED in the follow-up below: its slot gets a Deployment phase on the arrival turn (user ruling).
+- ~~**Every unit's `deploy` row is inserted TWICE**~~ — FIXED in the follow-up below (user: "ok to fix if we are sure it's a bug").
+- **Balance, as §7 H6a warned**: a wave that chose a speed of 5+ no longer takes the −50 initiative for speed 0 on its arrival turn. The arrival *penalty* (scatter/facing) is unchanged; `getArrivalScatter` reads the unit's `arrivalTurn`, not the load.
+
+**Harnesses** (gitignored, local only):
+- NEW `tests/replay/arrivalPlacementHarness.php` — **75**, real ship files (Primus 14-box hangar, Sentri, Traveler + MapmakerProbes + Pathfinder), constructor-less `TacGamedata`, a `DBManager` stub recording every write. The note (host, clamp both ways, latest wins, both loaders ignore it); onto the map (hex, facing+heading, speed, default speed, in-memory push → `getSpeed`, idempotency, the rule gate); doorway gone; hangar (docked, snapshot persisted at phase −1, a third flight refused and sent back, a carrier sent back takes its passenger, another doorway's or another player's carrier refused); legacy (aboard with no note, ships first); the mixed case in both directions; `persistArrivalOrders` (clamp, cumulative, co-rider host, no nesting, wrong doorway, silence, legacy forced); the POST whitelist (and the claim never json-encoded); the two seams. **Self-tested by deletion seven ways**: the validateDeployment skip, the in-memory push, the legacy host, ships-first, the cumulative reserve, the opener exclusion, the changeTurn call. Each fails 1–3, or fatals.
+- NEW `tests/replay/arrivalManifestClientHarness.js` — **26**, `node`, over the real `hangarShared.js`, `DeploymentDock.js` and `ReinforcementEntry.js`: the planner (list order, cumulative, a second carrier, un-ticking evicts, no nesting, a gate's doorway, legacy hosts only itself even when told otherwise, the "pretend" question), `arrivalSpeedOf`, un-booking clears speed and hangar, the POST branch. **Self-tested by deletion four ways.**
+- `reinforcementsStage7Harness.php` **82 ⇒ 84**. Its "off the doorway is refused" check ran on a server ship its own previous call had just pushed a deploy row onto, which under H6c reads as "already placed — ignore the posted copy". The row is stripped for that check, and the H6 direction is asserted beside it: once placed, a tampered row is ignored, no throw.
+- Unchanged and identical to the H5 run: Stage 6 180/6, 8 130, 9 132, legacy recharge 36, held exit 41, recharge boost 108, Vorlon upkeep 120, hyperspace log 12, Walkers 13 46/13, 15 87/5, 16 141, 19 142, 20 137/1, Vortex Disruptor 58. Client: held exit 29, recharge boost 49, Vorlon upkeep 65, hyperspace log 13, gate ticker 13, Vortex Disruptor 30, Walkers 15/16/19/20 green. Stage 8/9 client ("export marker not found"), `initialOrdersTooltipHarness.js` 4/10 and Walkers 13 client (a circular-JSON TypeError) fail **identically with the four client files stashed**.
+
+**Gate** (`fvbuild.ps1 -Check`): autoload **up to date**, validator **0 new**, replay **123 passed / 2 failed / 3 skipped**. The two are **4297** and **4349**, byte-identical with `source/server` stashed (the known re-records). The skips are 4348 (advanced), and **3955 / 4189, no longer in the local database** — that, not code, is the 124 ⇒ 123. `php -l` clean on all seven server files and `faq.php`; `node --check` clean on the four client files; legacy bundles rebuilt (`yarn build:legacy`); statics unaffected (no public property, no tooltip change); `UI.bundle.js` untouched.
+
+**Not verified here, needs a play test:** declare an exit from hyperspace. The manifest now opens with the opener's own Speed row even alone. Name a wave with speeds and tick **Hangar** on a fighter flight riding a carrier (the opener, or a second carrier riding with it). Commit. Next turn there must be **no Deployment phase**: the wave stands on the doorway at the chosen speeds, the flight is docked (fleet list: scrolls to its carrier), and `tac_individual_notes` holds one `ArrivalOrder` per rider on the manifest turn plus the carrier's `hangarUsage` at phase −1. Initiative should reflect the chosen speeds. A legacy opener (Shadow / Traveler) should arrive with its fighters aboard and no phase. Then a slot with BOTH a late deployment and an arrival on the same turn: the phase appears, the arrival is already placed, and the commit carries exactly one new deploy row for it. Right-click and the ⓘ on the menu rows should open ship windows, the reinforcement in hyperspace included.
+
+#### H6 follow-up — 2026-09-19 (user review of the build)
+
+**1. Hyach Specialists (user ruling, final): a slot whose jump-point wave brings a Hyach unit with Specialists
+still to choose GETS A DEPLOYMENT PHASE on the arrival turn** — the one arrival that still does. The unit is
+already standing on its doorway when the phase opens (placement runs first, from `Manager::changeTurn`); the
+phase exists only for the choice.
+- ⚠️ **First built as "choose in the arrival turn's Initial Orders" and REVERTED the same day** (user: the
+  Initial Orders Specialists — Computer, Power, Repair, Sensor — must be USABLE on the arrival turn, and a
+  choice made in Initial Orders is not loaded back until the next phase). A Deployment-phase choice is written
+  at phase −1 and is live by Initial Orders. The client selection gates, `getUnusedSpecialists`, the commented
+  Initial Orders commit block and the server's phase-1 path are all back to HEAD byte for byte.
+- Server: `TacGamedata::hasArrivingSpecialistChoices($slotid, $turn)` — per SLOT (a player's other slots have
+  nothing to do), a `reinforcement` whose `arrivalTurn` is `$turn`, alive, with a `HyachSpecialists` system
+  (`getSystemByName` — ⚠️ never `getHyachSpecialists()`, which reads a property only Hyach hulls set, and the
+  global error handler rethrows the warning) and nothing chosen. `FireGamePhase::advance`'s slot loop asks it
+  of `$servergamedata` beside the other clauses.
+- **Nothing else needed changing, and that is H6's mixed case paying off**: a jump-point arrival's placement
+  turn IS its arrival turn, so the unchanged "placement turn && phase −1" gates open selection to it and the
+  unchanged Deployment commit block (`getUnusedSpecialists`) holds the player to it; `validateDeployment`
+  ignores its posted deploy row, `autoPlaceArrivingReinforcements` skips it, and the phase's commit button arms
+  because an arrival is an optional placement. One cosmetic touch: the header counts server-placed arrivals, so
+  such a phase reads **DEPLOYMENT: REINFORCEMENTS**.
+- ⚠️ Worth knowing from the reverted attempt: `HyachSpecialists.canSelectAnything` never terminates on a system
+  OUTSIDE its selection window whose `availableSpec` is empty (`nextCurrClass` walks into `undefined`).
+  `getUnusedSpecialists`' placement-turn test is what keeps such systems away from it — do not loosen it.
+
+**2. The duplicate deploy row, FIXED.** `DBManager::submitMovement` skips a `deploy` row that already has a
+database id: it can only be the echo of a committed row. Every deploy row in the server is written through
+`insertMovement` / `Manager::insertSingleMovement` (checked: Deployment, H6 placement, the ten HangarOps
+spawns, the mines, the vortex), none through `submitMovement`, whose every caller passes either the POST or
+brand-new server rows (id −1 / 0). Recorded games keep their duplicates; nothing reads the count, and games
+with a single deploy row (4317, 4319, 4349) were already normal.
+
+**3. The manifest's Hangar control is a DROPDOWN of carriers, default None (user request).** The player picks
+the SHIP; which of its hangars is still the dock's auto-allocation. `planManifestHangars` now takes the
+PICK (`chosenCarrier`) instead of a want-a-hangar flag, and checks it — in list order, cumulatively, no
+carrier in a carrier, a pick of something that is no host evicted — and returns `hosts`, the dropdown's
+candidates. Each option is offered only if picking it evicts nobody (else "(no room)", disabled); a rider
+carrying others cannot pick at all. The pick lives in the select's `data-picked`, because `refit()`
+rebuilds the options on every change. The server needed nothing: `persistArrivalOrders` always took an
+explicit carrier.
+
+**4. Speed = small − / + buttons either side of the box**, the native spinner hidden (`.stepper-input`'s two
+resets). A `<span>`, not a `<label>`: a label's control is its first LABELABLE descendant, and a `<button>` is
+one, so clicking "Speed" would have clicked the minus. **5. Rows vertically centred** — the manifest row and
+its controls `align-items: center` instead of the family's `baseline`, which pinned them to the name's
+first line.
+
+**6. An H5 bug, found in the lobby (user report 2026-09-19).** Opening a Vorlon's ship window from the lobby's
+Details threw `Cannot read properties of null (reading 'depavailable')`: the system icon asks
+`JumpEngine.getVortexIconLoad` → `getHeldVortex` → `shipManager.movement.getMaintainableExitHeldBy`, which
+asked `getTurnDeployed` FIRST — and the lobby has no game slot, so `playerManager.getSlotById` is null (the
+JUMP_GATES_PLAN.md trap 11 shape, which §3 of this plan also warned about). It now looks for the exit first
+(there is never one in a lobby) and asks whether the ship is on the board only once one exists. Reproduced in
+node against HEAD's `movement.js` (throws) and the fix (null); held-exit client harness unchanged at 29.
+
+**Harnesses:** `arrivalPlacementHarness.php` 75 ⇒ **86** (§10 `hasArrivingSpecialistChoices` in both
+directions — other turn, other slot, no Specialists, a late-slot Hyach, already chosen, still in hyperspace —
+the Deployment path writing the choice, Initial Orders still writing none, and the `FireGamePhase` clause;
+§11 the echo skip through the real `submitMovement`); `arrivalManifestClientHarness.js` 26 ⇒ **37** (§1
+rewritten for picks, incl. "the pick wins over first fit"; §5 a jump arrival and a late-slot ship both
+choosing in Deployment, held by the commit block until they have, and the choice USABLE in the arrival
+turn's Initial Orders). **Self-tested by deletion**: the `FireGamePhase` clause, the Specialists test, the
+already-chosen test and the per-slot filter each fail 1 (the reverted attempt's five also failed or hung,
+before it was reverted), plus the echo skip. All other harnesses and the gate unchanged: 123 / 2 (4297, 4349)
+/ 3. `yarn build` run.
+
+---
 
 ### Stage H5 — maintaining a blue doorway (Item 3) — BUILT 2026-09-19
 
