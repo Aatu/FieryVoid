@@ -401,7 +401,9 @@ appended, e.g.
     https://fieryvoid.eu/game/generateStaticShipFileWeb.php?key=some-long-random-string
 
 The key only has to be supplied once per browser session -- it is remembered in the session, so the
-optimiser's own AJAX calls do not need it. Without a valid key the tools answer **404** (not 403, so
+optimiser's and the static ship generator's own AJAX calls do not need it. (Since 09.2026 the generator
+page drives the job as ~20 short steps and retries a step the server refuses; keep the tab open until it
+says "Finished".) Without a valid key the tools answer **404** (not 403, so
 they stay distinguishable from a host-level block). **CLI is always exempt**, so `fvbuild.ps1` and
 `docker exec ... php generateStaticShipFile.php` are unaffected and need no key.
 
