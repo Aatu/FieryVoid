@@ -1,7 +1,7 @@
 <?php
 /**
  * Extra-Dimensional Jump Drive abductions — the Walkers of Sigma-957 hyperspace kidnap.
- * WALKERS_OF_SIGMA_PLAN.md section 3.18 (Stage 20).
+ * WALKERS_OF_SIGMA_PLAN.md section 3.18 (Stage 20), extended to TERRAIN by section 3.18b (2026-09-20).
  *
  * THE RULE, AS BUILT
  * An EDJD (JumpEngine::markExtraDimensional - Wanderer, Traveler, Waymarker, Guideship) declares an
@@ -25,6 +25,13 @@
  *     had left the game of its own accord".
  *   - A declaration whose drive is DESTROYED or DEACTIVATED by the time it resolves is CANCELLED (user
  *     ruling 2026-09-13): no power, a log line saying so, and no detonation roll.
+ *
+ * ⭐ TERRAIN CAN BE ABDUCTED TOO (§3.18b, user ruling 2026-09-20 - Stage 20's Q13 reopened). An asteroid,
+ * a moon, a fixed jump gate or a shipyard is an object like any other and pays the same ceil(RF / 50);
+ * a jump point is a hole in space and is refused (isAbductableTerrain); terrain belongs to nobody, so the
+ * "enemy only" rule does not apply to it. The one rule that genuinely changes shape is the FIELD: a unit
+ * standing in more than one hex - an irregular hexOffsets asteroid, or a moon with a Huge radius - needs
+ * EVERY hex of its footprint inside the connected field, not just its centre (isInConnectedField).
  *
  * ⭐⭐ NO STORED STATE BUT ONE NOTE PER DRIVE PER TURN (D22). Each working declaration writes
  * `<targetId>:<halves>:<cost>:<since>:<anchor>` on its drive ('EDJD'). The chain is re-derived from
@@ -306,11 +313,21 @@ class EdjdAbduction
         return null;
     }
 
-    //Null when both conditions hold for this EDJD ship, otherwise the reason for the log.
+    /* Null when both conditions hold for this EDJD ship, otherwise the reason for the log.
+       ⭐ §3.18b - BOTH CONDITIONS ARE ASKED OF TERRAIN TOO (user ruling 2026-09-20). Terrain carries no
+       EW, so "more OEW than DEW" costs the Walker exactly one OEW point allocated to the rock - which
+       the client has always allowed (shipTooltipInitialOrdersMenu's isTargetable + isEnemyEW both pass
+       on terrain) and which is a real price, since a Walker's EW is a real budget. The field condition
+       is where terrain actually differs, and the difference lives in isInConnectedField: a multi-hex
+       unit needs its WHOLE footprint covered, not its centre hex. */
     private static function getConditionBlock($ship, $target, $gamedata)
     {
-        if (!self::isInConnectedField($ship, $target, $gamedata))
+        if (!self::isInConnectedField($ship, $target, $gamedata)){
+            //"end its movement" is meaningless for a rock, and a moon fails this on ONE uncovered hex.
+            if ($target->isTerrain())
+                return "not every hex it occupies is inside an Energy Draining Field connected to " . self::link($ship) . "'s own";
             return "it did not end its movement in an Energy Draining Field connected to " . self::link($ship) . "'s own";
+        }
 
         $turn = (int)$gamedata->turn;
         $oew = $ship->getOEW($target, $turn);
@@ -329,16 +346,23 @@ class EdjdAbduction
        over the hexes this ship's TEAM fields reaches everything "extended through ED Mines or other
        ships" (plan §3.18 option (a) - no new publication, no widened payload).
        ⚠️ Seeded from the ship's OWN source hexes, never from its position: a Walker whose field is
-       down, sitting in an ally's field, is not connected to a field of its own. */
+       down, sitting in an ally's field, is not connected to a field of its own.
+
+       ⭐⭐ §3.18b - EVERY HEX OF THE TARGET, NOT ITS CENTRE (user ruling 2026-09-20). A ship stands in one
+       hex and the question was "did the fill reach it"; a moon stands in nineteen, and "the target ended
+       its movement in an Energy Draining Field" means the field covers ALL of them. So the fill no longer
+       stops at the first goal - it crosses each one off and succeeds only when the set is empty, which is
+       the same answer as before for every single-hex target (the old early exit was an optimisation, not
+       a rule) and the whole of the multi-hex rule for terrain. A footprint hex inside a DISCONNECTED field
+       of the same team is still a miss: only popped hexes count, and only reachable hexes are popped. */
     public static function isInConnectedField($ship, $target, $gamedata)
     {
         $hexes   = $gamedata->edfHexes;
         $sources = $gamedata->edfSources;
         if (!is_array($hexes) || !is_array($sources)) return false;
 
-        $pos = $target->getHexPos();
-        if (!$pos) return false;
-        $goal = $pos->q . ',' . $pos->r;
+        $goals = self::getFootprintKeys($target);
+        if (empty($goals)) return false;
         $team = (int)$ship->team;
 
         $queue = array();
@@ -352,7 +376,8 @@ class EdjdAbduction
 
         while (!empty($queue)){
             $key = array_pop($queue);
-            if ($key === $goal) return true;
+            unset($goals[$key]);
+            if (empty($goals)) return true;
             list($q, $r) = explode(',', $key);
             foreach (Mathlib::getNeighbouringHexes(new OffsetCoordinate((int)$q, (int)$r), 1) as $n){
                 $nKey = $n['q'] . ',' . $n['r'];
@@ -365,17 +390,64 @@ class EdjdAbduction
         return false;
     }
 
-    //On the board and a unit at all - shared by submit-time validation and resolution.
+    /* §3.18b - every hex $target occupies, as a set of 'q,r' keys. One hex for anything with a crew;
+       for terrain the WHOLE footprint, which is an irregular hexOffsets shape rotated to its facing or
+       a circular Huge radius. RammingAttack::getTerrainOccupiedHexes is the one place in the game that
+       knows that shape (the collision sweep, the PlanetCrackerBeam and the client's getVortexHexBlock
+       all read it or mirror it), so this only keys what it returns.
+       ⚠️ The centre is checked FIRST: getTerrainOccupiedHexes hands its centre hex to Mathlib on the
+       irregular path, and a unit with no position at all would take it a null. */
+    private static function getFootprintKeys($target)
+    {
+        $keys = array();
+        $pos = $target->getHexPos();
+        if (!$pos) return $keys;
+
+        if ($target->isTerrain()){
+            foreach (RammingAttack::getTerrainOccupiedHexes($target) as $hex){
+                if (!$hex) continue;
+                $keys[$hex->q . ',' . $hex->r] = true;
+            }
+            return $keys;
+        }
+
+        $keys[$pos->q . ',' . $pos->r] = true;
+        return $keys;
+    }
+
+    /* On the board and a unit at all - shared by submit-time validation and resolution.
+       ⭐ TERRAIN IS NOT REFUSED HERE ANY MORE (§3.18b, user request 2026-09-20). This asks only "is it a
+       unit standing on the map"; WHAT may be dragged off it is isAbductableTerrain's question, and the
+       two are asked separately so a vortex is refused with its own reason rather than as an absence. */
     private static function isOnBoard($unit, $gamedata)
     {
         if (!$unit) return false;
-        if ($unit->isTerrain()) return false;
         if ($unit->isDestroyed()) return false;
         if ($unit->isReinforcement()) return false;
         try {
             if ($unit->getTurnDeployed($gamedata) > $gamedata->turn) return false;
         } catch (Exception $e) { /* no slot - treat as on the board */ }
         return true;
+    }
+
+    /* ⭐⭐ §3.18b - MAY THIS TERRAIN UNIT BE DRAGGED INTO HYPERSPACE? (user ruling 2026-09-20 - Q13, which
+       Stage 20 answered "out of scope for now", reopened and answered yes.)
+
+       An asteroid, a moon, a fixed jump gate and a shipyard are all OBJECTS: the drive that takes a
+       battlecruiser out can take a rock out, and the cost needs no new formula - the user chose the
+       ordinary ceil(RF / 50) over the rules table's "Asteroid, Moon, Planetoid: 10 x radius cubed",
+       which FV cannot express (terrain has no radius property, only a Huge hex reach that is 0 on the
+       three round asteroids). A JUMP POINT is not an object but a hole in space, so SpawnJumpPoint and
+       its two subclasses - the exit and the phase-in doorway - are refused by name.
+
+       ⚠️ The Energy Draining Mine's orb gets no line of its own: it is unTargetable, and that is the
+       test. Asked with no arguments, which is all $unTargetable amounts to today (ShipClasses.php), so
+       the orb stays out of the published cost list as well as out of a declaration. */
+    public static function isAbductableTerrain($unit)
+    {
+        if (!$unit) return false;
+        if ($unit instanceof SpawnJumpPoint) return false;   //covers SpawnJumpPointExit and ...PhaseIn
+        return $unit->isTargetableBy();
     }
 
     /* ================================================================ the cost ============== */
@@ -451,9 +523,16 @@ class EdjdAbduction
 
         $target = $gamedata->getShipById((int)$fire->targetid);
         if (!self::isOnBoard($target, $gamedata)) return "no unit on the board to abduct";
-        if ($target->team == $shooter->team) return "only an enemy unit can be abducted";
+        /* ⭐ §3.18b - TERRAIN BELONGS TO NOBODY (user ruling 2026-09-20), which is the convention the whole
+           client already runs on: gamedata.isMyorMyTeamShip answers false for EVERY terrain unit outside
+           deployment, whoever bought it. So the team test is for units with a crew, and a Walker may drag
+           its own fleet's asteroid out of the way as readily as the enemy's. Without this exception the
+           client would offer the declaration and the server would silently reject it. */
+        if (!$target->isTerrain() && $target->team == $shooter->team) return "only an enemy unit can be abducted";
         if ($target instanceof FighterFlight) return "a fighter flight cannot be abducted";
         if (!$target->isTargetableBy($shooter, $gamedata->turn)) return "that unit cannot be targeted";
+        //§3.18b: terrain may be abducted, but a jump point is a hole in space - there is nothing to take hold of.
+        if ($target->isTerrain() && !self::isAbductableTerrain($target)) return "a jump point cannot be abducted";
 
         $mode = (int)$fire->firingMode;
         if ($weapon->isExtraDimensional()){
@@ -503,6 +582,11 @@ class EdjdAbduction
         $costs = array();
         foreach ($gamedata->ships as $unit){
             if (!self::isOnBoard($unit, $gamedata)) continue;
+            /* §3.18b: terrain now carries a cost like anything else, EXCEPT the two kinds that can never
+               be a target - a jump point and the unTargetable orb. Terrain was excluded wholesale until
+               2026-09-20 (isOnBoard's line), so this is an ADDITIVE change to the published payload:
+               every key that was there before is still there and unchanged. */
+            if ($unit->isTerrain() && !self::isAbductableTerrain($unit)) continue;
             $costs[(string)$unit->id] = self::getCost($unit, $gamedata);
         }
 

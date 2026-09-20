@@ -104,6 +104,7 @@ silent everywhere.
 | D63 | An abduction COOLDOWN (2026-09-13) | User rulings: each drive - EDJD and supporting alike - recharges for its OWN jump delay (Wanderer 4, Traveler 6, Waymarker 6, Guideship 3, Pathfinder 4, Scribe 8), counted from the turn after THAT drive last took part, however its part ended: completed, collapsed on a failed condition, the target destroyed, or cancelled - but only a COMMITTED declaration counts, never one withdrawn before Initial Orders was committed. Built as `JumpEngine::getAbductionRechargeLoad` (latest `EDJD` note of any value; 0 on its own turn, then 1.. up to the delay), folded into `getVortexRechargeLoad` by `min` so every other engine is unchanged and the published `turnsloaded` carries it. A drive that delivered power last turn may still CONTINUE that same unit while recharging (`isContinuingAbduction` / client `getContinuableAbductionTargetId`) - so mid-chain it reads 1/delay and keeps going. The resolver now writes a no-hold note when the target is off the board, which is what makes "target destroyed" count. The Walker's own boost jump is not charge-gated and is unaffected. §3.18a. |
 | D64 | The FIRST turn only TAKES HOLD (2026-09-13, play test) | *"Power Turns should not start accumulating until the turn after the initial targeting has been successful."* It was possible to abduct a small ship on the declaration turn. Now a turn that STARTS a chain (fresh, or a restart after the prior anchors all failed) locks the cost and records the anchors but writes 0 halves for every declaration, and logs "takes hold ... power can be applied from next turn". Power counts from the next turn, which is also the first turn a SUPPORTING drive may declare: `EdjdAbduction::isHeldByTeam` (a chain as of last turn with an anchor on the shooter's team) at submit, `JumpEngine.getAbductionChain` on the client. Client `isAbductionPowered(order)` = a chain stands against the order's target: false -> no reactor draw, no halves, and `JumpEngineMenu` hides the Power row and shows a "Targeting" note. ⚠️ "Held" moved from `halves > 0` to `since > 0` in `getLatestAbductionHold` and `isContinuingAbduction`, or the targeting turn would never be continued. Read at the TARGET level: a second EDJD joining an abduction another EDJD took hold of applies power at once. A restart can still surprise a player - power paid on a turn the old anchors all failed is lost, which the client cannot foresee. §3.18a. |
 | D65 | The field and EW conditions are for TAKING HOLD only (2026-09-13) | *"The Energy Draining Field and more OEW than DEW conditions are only relevant for the initial targeting of a vessel for abduction. They should not be checked in subsequent turns after Abduction has begun."* `EdjdAbduction::resolveTarget` now decides CONTINUING first: a chain that stood last turn continues while at least one EDJD anchored on every turn of it has a WORKING declaration (not cancelled, not jumping) - `getConditionBlock` is never called. Only when no such EDJD is left is the turn a new attempt, judged on the conditions: a restart ("takes hold", the earlier abduction "lapsed") or a collapse naming the reason. So a chain now ends only when its holding EDJDs stop - a gap, a cancel, deactivation or destruction - never because the target moved out of the field or out-jammed it. This also retires the D64 surprise for the common case: a restart now needs every holding EDJD to have STOPPED, not merely failed a check. The menu's powered note no longer mentions the conditions. §3.18a. |
+| D66 | TERRAIN can be abducted (2026-09-20) | Q13's *"out of scope for now"* reopened at the user's request. Four rulings taken together: the cost is the **ordinary `ceil(RF / 50)`**, not the rules table's `10 x radius³` (FV terrain has no radius, only a `Huge` hex reach that is 0 on the three round asteroids, so the formula cannot be expressed - and the ramming-factor figures already make a small asteroid a two-turn job and a moon effectively impossible); **everything but a jump point** is a legal target - asteroids, moons, fixed jump gates and shipyards, with `SpawnJumpPoint` and its two subclasses refused by name and the Energy Draining Mine's orb refused for free by `unTargetable`; the **EW condition stays**, which on a unit with no EW means one OEW point; and terrain **belongs to nobody**, so the "enemy only" rule does not apply to it - the convention `gamedata.isMyorMyTeamShip` has always used. The one rule that changes shape is the FIELD: a multi-hex unit needs its WHOLE footprint inside the connected field. §3.18b. |
 
 Everything below assumes these.
 
@@ -5308,7 +5309,7 @@ power-turn per turn, two levels are two, and `maxBoostLevel` is the ceiling.
 |---|---|
 | Any unit (shuttle up to Enormous) | `ceil(rammingFactor / 50)` |
 | …with advanced armour or better | `ceil(rammingFactor / 10)` |
-| Asteroid / Moon / Planetoid | `10 × radius³` — **out of scope** (Q13, 2026-09-08) |
+| Asteroid / Moon / Planetoid | `10 × radius³` — **never built**. Terrain became abductable on 2026-09-20 (D66, §3.18b) and pays the ordinary `ceil(rammingFactor / 50)` instead; FV terrain has no radius property to put in this formula. |
 
 `BaseShip::getRammingFactor()` ([ShipClasses.php:4324](source/server/model/ships/ShipClasses.php#L4324))
 and `$this->advancedArmor` answer both rows. Docked or otherwise connected units add their ramming
@@ -5473,6 +5474,107 @@ mid-chain target out of every field with OEW 1 < DEW 5 still counts (with a prob
 **104/0**; re-checking the conditions on continuing turns turns four checks red; replay unchanged.
 `factions-tiers.php` updated.
 
+### 3.18b Abducting TERRAIN — **BUILT 2026-09-20**, awaiting play test (D66)
+
+Stage 20 shipped with Q13 answered *"out of scope for now"*. Reopened at the user's request: *"one part
+of the EDJB stage was that we consciously decided to skip being able to abduct Terrain units into
+Hyperspace. I'd now like to add that."* Four rulings settled it (D66) and the build is small, because
+almost nothing about an abduction cares what its target is.
+
+**What was actually in the way** — three refusals and one geometry rule:
+
+| Site | Was | Now |
+|---|---|---|
+| `EdjdAbduction::isOnBoard` | `if ($unit->isTerrain()) return false;` — terrain was invisible to the resolver AND to the published cost list | the terrain line is gone; `isOnBoard` answers only "is it a unit standing on the map" |
+| `EdjdAbduction::getDeclarationBlock` | `$target->team == $shooter->team` → "only an enemy unit" | that test is skipped for terrain (**terrain belongs to nobody**), and a new refusal names a jump point |
+| `weaponManager.targetShip` / `targetingTooltip` | `if (ship.Huge > 0) return;` — a blanket refusal of multi-hex terrain to every weapon | a **per-weapon** skip: an abduction-capable Walker drive is let through, everything else still skips silently. The tooltip gains an "Abduction" line so it no longer says "Cannot Target" on a target the click is about to accept |
+| `JumpEngine.doSpecialTargeting` | `"Terrain cannot be abducted."` | replaced by `JumpEngine.isAbductableTarget`, the client mirror of the server's three refusals |
+
+⭐⭐ **THE ONE RULE THAT CHANGES SHAPE IS THE FIELD.** *"The target ended its movement in an Energy
+Draining Field"* is one hex for anything with a crew and **nineteen for a medium moon**, so
+`isInConnectedField` no longer stops at the first goal: it takes the whole footprint as a key set,
+crosses each hex off as the flood fill pops it, and succeeds only when the set is empty. For a
+single-hex target that is the same answer as before — the old early exit was an optimisation, not a
+rule — and a footprint hex sitting in a *disconnected* field of the same team is still a miss, because
+only reachable hexes are ever popped. The footprint itself is `RammingAttack::getTerrainOccupiedHexes`,
+the one place in the game that knows a terrain shape (⚠️ hexOffsets and `Huge` are **alternatives**
+there, not additive — `asteroidTwoHex` declares `Huge = 1` *and* an offset list, and occupies the two
+offset hexes, not a disc).
+
+**The cost is the ordinary one.** `ceil(RF / 50)`, which for terrain is `maxStructure × 1.1`: small
+asteroid **7**, medium **14**, large **20**, oblong **27**, triangular **33**, small moon **55**,
+medium moon **110**, large moon **165**. An EDJD at power 4 takes a small asteroid in three turns
+(one to take hold, two of power) and will never take a moon, which is the right answer for a rule
+whose own table says *"Planet or larger: Unknown"*. The rules' `10 × radius³` row stays unbuilt — FV
+terrain has no radius property, and `Huge` is 0 on all three round asteroids, so the formula cannot be
+expressed at all (D66).
+
+**Scope.** `EdjdAbduction::isAbductableTerrain` holds both exclusions: `SpawnJumpPoint` (and so the
+exit and the phase-in doorway) because a jump point is a hole in space rather than an object, and
+anything `unTargetable`, which is the Energy Draining Mine's orb. Everything else that answers
+`isTerrain()` is fair game — asteroids, moons, **fixed jump gates and shipyards**. The vortices were
+already out of the client's click sweep (`getInterestingStuffInPosition`), so the client refusal is
+belt-and-braces with a message.
+
+**Publication.** `abductions.costs` now carries a key per terrain unit. That is **additive**: every key
+that was published before is still published and unchanged, and the whole payload is still behind
+`TacGamedata::$abductionCapable`, so a game with no Walker in it sees nothing.
+
+**Everything else was already general.** The chain, the notes, the lock, the cooldown, D64's targeting
+turn, D65's conditions-on-taking-hold-only, the detonation roll, the log, the map marker, the "Being
+abducted" tooltip and ship-window banner, and `Movement::applyJumpOut` — all read `$target->id` and
+needed no edit. A terrain unit has a primary `Structure` and a `RammingAttack` (every hull that calls
+`addPrimarySystem(new Structure(...))` gets one), which is exactly what `applyJumpOut` writes its three
+records against, and a destroyed terrain unit already drops out of `setBlockedHexes`, so an abducted
+asteroid stops blocking line of sight by itself.
+
+**UI wording.** `JumpEngineMenu`'s targeting note says *"takes hold if every hex it occupies is inside
+your connected field"* for multi-hex terrain and *"if it is inside"* for one-hex terrain, mirroring the
+two messages `getConditionBlock` now writes to the combat log.
+
+**Verification.** `walkersStage20ClientHarness.js` **109/0** (was 104/0): the group that asserted
+*"CONTROL: terrain is refused, with a message"* now asserts the opposite, plus a moon declaring, a gun
+selected alongside still refused, a jump point refused by name and the orb refused silently.
+`walkersStage20Harness.php` **162/0** (was 138/0), with a new group 14 of **22 checks** — the six
+declaration verdicts, the wire path through the real `Firing::validateFireOrders` both ways, the
+footprint geometry on a two-hex asteroid and on a moon (each proved in both directions by widening the
+field), the cost, the published preview with its two exclusions, and an end-to-end run that takes hold
+on turn one and drags a small asteroid out in exactly `ceil(7 / 4)` powered turns.
+
+⚠️ **One check in group 8 was stale, not broken by this work.** *"... and the log says the abduction is
+complete"* had been red since commit `985f9c7b7` (2026-09-13) removed that suffix as *"Unnecesary
+info"*; confirmed by stash-and-compare, and rewritten to assert the shipped progress line instead
+(user ruling 2026-09-20). That is why the count is 162 and not 161/1.
+
+`checkShipData.php` PASS, 0 new against 237; autoload map up to date; `yarn build` ran.
+**Replay: 122 passed / 3 failed**, which is the clean-tree line for HEAD `81818b3d2` (3671, 4297,
+4349 — all pre-existing, proved by stashing `EdjdAbduction.php` and re-running the whole gate). The one
+game this change touched was **4329**, whose entire diff was five added `abductions/costs` keys (five
+large asteroids at 20 power-turns each) identical for both viewers, with no movement, to-hit, damage or
+masking line moved — accepted by the documented merge re-record (manifest 128 → 1 → 128, then a full
+check reproducing the clean-tree line exactly).
+
+**Play-test fix (game 4371, user 2026-09-20) — the CANCEL MOVE icon vanished.** Commit Initial Orders
+with an abduction standing, move in the Movement phase, and the Traveler could not undo the move; with
+no abduction it worked. **Trap 58 (d)**, and nothing to do with terrain: `UI.shipMovement` gates that
+icon on `weaponManager.canCombatTurn`, which refuses while the ship holds a live order this turn whose
+WEAPON is not `ballistic` — and `markLegacy()` clears exactly that flag, so the type-`ballistic`
+abduction read as declared direct fire. Confirmed against the game's own row (`tac_fireorder` 497507,
+`type='ballistic' damageclass='abduction' rolled=0`) before any code was touched.
+
+⭐ **`jumpexit` had the identical bug and is fixed in the same line** — a Shadow or Ancient hull
+declaring a hyperspace exit and then moving lost the icon too. Both damageclasses are now skipped in
+`canCombatTurn`, which is the **same pair, for the same reason**, that
+`TacGamedata::hideSystemFireOrders` already exempts; the comment at each site points at the other, and
+an ordinary drive's `jumppoint` still needs no exemption because its engine stays ballistic. That
+asymmetry — vortex fine, abduction broken — is what identified the line.
+
+`canCombatTurn`'s only other caller is `movement.canPivot`'s flight-in-Firing-phase branch, which a
+flight can never reach with either damageclass, so the blast radius is the icon alone. Client harness
+**114/0** (+5: the no-order control, the standing abduction, ⭐ the same order re-labelled `Standard`
+refusing so the check is not vacuous, and the `jumpexit` twin); server **162/0** unchanged; replay
+unchanged at 122/3 — `canCombatTurn` is client-only and serialises nothing.
+
 ---
 
 ## 4. Stages & exit criteria
@@ -5502,7 +5604,7 @@ Ordered so that each stage is independently shippable and the risky shared-path 
 | **17** ✅ | Traveler Self Repair serves docked units (§3.15, as built §3.15a) — **DONE 2026-09-12**, two play-test follow-ups the same day | **127 checks green** — 70 server, 57 client — both harnesses fatal on a stashed pre-stage tree; `checkShipData.php` PASS, 0 new against 237. Criterion as written, all met: a damaged docked Scribe repaired out of the Traveler's pool (and its Thruster, which the Traveler may not touch, out of its own); every healing row filed against the DOCKED ship's id and marked updated, so it persists; the Traveler's own queue order unchanged and a priority of 99 on a docked row still beaten by an own row of 4; a docked Self Repair repaired and every other Self Repair in the game still refused. ⭐ Three additions from the user's notes the same day: **D42** one list, the docked rows marked by their ship name in cyan - first built with a TIER pinning them below every own row, which **D45 withdrew the same day**, so priority alone now decides and the player may put a docked hull first, **D43** a docked unit's OWN Self Repair keeps running — which needs driving, because `removed` reads as destroyed and `Criticals::setCriticals` never reaches it — and **D44** reinforcement fleet-list rows go cobalt so they cannot be read as docked. ⭐ Play-test (game 4350) then found the other half of D43: **a docked ship's whole ship window was inert**, because `SystemIcon.clickSystem`'s guard is `shipManager.isDestroyed(ship)` and that folds `removed` in — carved out with the existing `isDestroyedByDamage` predicate and diverted straight to the info menu, which is also §3.16(a)'s prerequisite arriving a stage early; and left-click on a stowed ship's fleet row now scrolls to its **carrier** rather than opening its window (right-click still does that). ⚠️ Replay corpus 135/0 clean vs 121/14 with the stage, **every diff the same single additive key** `servicesDockedUnits: added (true)` and nothing else — re-record to accept. |
 | **18** ✅ | Docked power sharing (§3.16, as built §3.16a, opponent view §3.16b) — **DONE 2026-09-12**, one play-test follow-up the same day | **134 checks green** — 67 server-free over the REAL `power.js`, 48 in a React harness, 19 in a server harness over the real `Traveler` that bundles the whole `reactJs` tree, evaluates it at module scope, renders `SystemInfo` to static markup and drives `SystemPowerSettings`'s own handlers — each fatal on the tree it was written against (21/37, 23/9, 14/5); `checkShipData.php` PASS, 0 new against 237; a **2,727-hull / 58,548-fact differential** in which exactly TWO lines moved, both `Traveler|sys11` (the flag and one tooltip sentence); replay 121/13 with every diff one of two ADDITIVE keys and no behavioural drift; autoload unchanged. Criterion as written, all met: a docked Scribe's power manageable during Initial Orders and persisted through the commit (the server half needed nothing — no `removed` filter in `InitialOrdersGamePhase::process`, `construcGamedata` or `submitPower`); four points of docked surplus giving the Traveler one and three giving none; flights contributing nothing; the figure recomputing live (on the existing `SystemDataChanged` → `shipWindowManager.update()`, no new event); and the decision written down as **D46 — client-computed and ADVISORY**. ⭐ Play-test follow-up: the OPPONENT saw the Traveler's balance WITHOUT the grant, because the grant is computed per viewer and `shipsDocked` is masked under the private-logistics gate — fixed by disclosing the bay's ship IDS on a separate key (**D47**, §3.16b), so both clients run one function and cannot drift. ⚠️ Three traps, 47–49, plus 50 on the masked-input fact; one adjacent defect flagged but deliberately not fixed; and power management for a unit still in HYPERSPACE left unbuilt but mapped. |
 | **19** ✅ | The Waymarker's two-turn procedure, the aft-hit redirect, the hangar-manoeuvre label and what a stowed unit projects (§3.14a / §3.14c / §3.14d, as built §3.14e) — **DONE 2026-09-12** | **240 checks green after the play-test fixes (§3.14f)** — 142 server (group 10 drives two whole turns through the real `criticalPhaseEffects`), 98 client over the real `hangarShared.js` / `ships.js` / `ew.js` / `fleetList.js` / `PhaseStrategy.js` under `vm` — both fatal on the pre-stage tree; `checkShipData.php` PASS, 0 new against 237; autoload and **statics both unchanged** (the class list is a const and `$stowedEdfRadius` is protected, so neither rides a blueprint); **replay 120 passed / 13 failed, the SAME 13 games and the same count as the pre-stage tree**, so the stage adds no behavioural drift and no new failing game — its only lines in the diff are `deferredShipClasses: removed` / `twoTurnShipClasses: added` on the ten Traveler games. Criterion as written (§3.14a), all met: a Waymarker rides `attached` for exactly one turn each way; its boxes are reserved from declaration through the single `dockedShipBoxes` choke point; it moves with the Traveler while attached, through the existing mirror rather than a re-implementation. ⭐ Four rulings the same day — **D48** least damaged = most boxes remaining, **D49** can be shot / cannot shoot, **D50** the banner goes on the unit and a new flight gets none, **D51** left-click scrolls on ALL docked units, which withdraws a Stage 17 exception. ⭐ Play-test (game 4351) then found two things the same day (§3.14f): ⚠️⚠️ **the movement mirror had never run for a rider**, because `MovementGamePhase::process` counted PRESENCE in the payload rather than submitted movement rows and the client sends every own ship with an empty list - invisible until now because a boarding pod and its host are never on the same side; EW is suspended on a rider both ways, with **D52** ruling that it KEEPS its DEW; and the FIRING MODE SELECTOR was the one weapon control in the menu that never asks whether a fire order exists, so it alone survived every other guard - withdrawn now along with the intercept pair it parents, and `automateIntercept` matched on the server. The faction page (`factions-tiers.php`) is updated and the Waymarker is struck from its not-implemented list. ⚠️ Six traps, 51–56. |
-| **20** ✅ | Extra-Dimensional Jump Drive (§3.18, as built §3.18a) — **BUILT 2026-09-12**, awaiting play test | **146 checks green** — 89 server, 57 client — each fatal on its stashed pre-stage tree; `checkShipData.php` PASS, 0 new against 237; autoload +1 (`EdjdAbduction`); replay 116/16 vs 119/13 clean, every added line one of three additive keys and no behavioural drift. Criterion as written: power-turns accumulate only while an initiating EDJD meets both conditions and restart after a gap; the cost is locked on the first turn (proved against a section destroyed mid-chain); completion at exactly the cost through `Movement::applyJumpOut`, attached units taken; a second EDJD and a Scribe contribute, the Scribe alone cannot carry it; a damaged EDJD rolls every abducting turn at half while the hull's own jump-out stays immune; the chain rebuilds from the stored notes alone. **Changed by ruling:** D53 a declaration with a power level instead of boost levels, D54 only the initiator meets the conditions, **D55 friendly use NOT built**, D56 detonation halved; review revisions 2026-09-13: D57 bay contents out of the cost, D58 deactivation/destruction cancels, D59 no line of sight, D60 a ship-window banner (harnesses now 96 + 65). The faction page gained its own section and the "not implemented" line is gone. ⚠️ Traps 57–60. |
+| **20** ✅ | Extra-Dimensional Jump Drive (§3.18, as built §3.18a) — **BUILT 2026-09-12**, awaiting play test | **146 checks green** — 89 server, 57 client — each fatal on its stashed pre-stage tree; `checkShipData.php` PASS, 0 new against 237; autoload +1 (`EdjdAbduction`); replay 116/16 vs 119/13 clean, every added line one of three additive keys and no behavioural drift. Criterion as written: power-turns accumulate only while an initiating EDJD meets both conditions and restart after a gap; the cost is locked on the first turn (proved against a section destroyed mid-chain); completion at exactly the cost through `Movement::applyJumpOut`, attached units taken; a second EDJD and a Scribe contribute, the Scribe alone cannot carry it; a damaged EDJD rolls every abducting turn at half while the hull's own jump-out stays immune; the chain rebuilds from the stored notes alone. **Changed by ruling:** D53 a declaration with a power level instead of boost levels, D54 only the initiator meets the conditions, **D55 friendly use NOT built**, D56 detonation halved; review revisions 2026-09-13: D57 bay contents out of the cost, D58 deactivation/destruction cancels, D59 no line of sight, D60 a ship-window banner (harnesses now 96 + 65). The faction page gained its own section and the "not implemented" line is gone. ⚠️ Traps 57–60. **Extended 2026-09-20 (D66, §3.18b): TERRAIN can be abducted** — asteroids, moons, jump gates and shipyards, at the ordinary `ceil(RF / 50)`, with a multi-hex unit needing its whole footprint in the field; server harness **162/0** (+22 checks, and a stale group-8 assertion rewritten), client **109/0**, `checkShipData.php` PASS, replay clean-tree line restored after a merge re-record of game 4329 (five additive `abductions/costs` keys). Awaiting play test. |
 
 **Every stage:** run `fvbuild.ps1 -Check` (ship-data validator + replay harness). ⚠️ The baseline
 drifts on a clean tree — never read a pre-existing FAIL as your regression, and **never
@@ -5890,7 +5992,13 @@ Collected from the survey; each one has bitten this codebase before.
     every Firing-phase payload by `hideSystemFireOrders` - the `jumpexit` bug again, fixed the same way;
     (b) never counted by `weaponManager.hasFiringOrder` in Initial Orders, so there is no generic remove
     button and `canOffline` does not block it; (c) never selected by `SystemIcon`'s Initial Orders
-    clause. Ask the ORDER's type or damageclass, or give the system a predicate of its own.
+    clause; (d) **taken for DECLARED DIRECT FIRE by `weaponManager.canCombatTurn`**, which is what gates
+    the CANCEL MOVE icon (`UI.shipMovement`) - so a ship with a standing abduction could not undo a
+    plotted move for the whole Movement phase (user report 2026-09-20, game 4371; `jumpexit` had the
+    identical bug and was fixed with it). Ask the ORDER's type or damageclass, or give the system a
+    predicate of its own. ⭐ **The tell is always the same**: the ordinary-drive version of the gesture
+    (a `jumppoint` order, on a still-ballistic engine) behaves correctly, and only the legacy one
+    misbehaves. When a Walker-only symptom has an ordinary-drive twin that works, look here first.
 59. ⭐ **`hasSpecialTargeting` ON A PROTOTYPE CHANGES EVERY INSTANCE'S ICON CLICK.** `SystemIcon` treats
     such a weapon's existing order as editable rather than committed. Set it per INSTANCE, keyed off a
     payload field only the right instances carry (`abductionMaxPower`).
@@ -5959,10 +6067,16 @@ cap is needed at all. The Waymarker's real condition is a **two-turn** dock/laun
 first power-turn and carried in the note, so a target that is abducted *and* shot does not get
 cheaper as its ramming factor falls. §3.18.
 
-**Q13 — Do the terrain rows of the EDJD table matter? (asked 2026-09-08). → ANSWERED: out of scope
-for now.** *"Asteroid, Moon, Planetoid: 10 × radius³"* and *"Planet or larger: Unknown"* are not
-built. Terrain has no radius property in FV, `moonNew`'s ramming factor is 5,500, and nothing in the
-codebase would let a moon leave the board.
+**Q13 — Do the terrain rows of the EDJD table matter? (asked 2026-09-08). → ANSWERED twice.**
+*First, 2026-09-08: out of scope for now.* *"Asteroid, Moon, Planetoid: 10 × radius³"* and *"Planet or
+larger: Unknown"* are not built. Terrain has no radius property in FV, `moonNew`'s ramming factor is
+5,500, and nothing in the codebase would let a moon leave the board.
+**REOPENED AND ANSWERED 2026-09-20 (D66): terrain CAN be abducted, and the `10 × radius³` row still is
+not built.** The two halves of the first answer came apart: *"nothing would let a moon leave the board"*
+was wrong — `Movement::applyJumpOut` works on any unit with a primary Structure, which terrain has —
+while *"terrain has no radius property"* was right and is exactly why the formula stays unbuilt. Terrain
+pays the ordinary `ceil(RF / 50)`, which leaves `moonNew` at 110 power-turns, so the practical answer to
+*"can you abduct a moon"* is still no. §3.18b.
 
 **Q14 — Is the fighter Medium Lightning Array's reload 2 turns or 4? (raised 2026-09-08).
 → ANSWERED: 4.** The brief said *"a recharge rate of 2 turns"* and the control sheet said

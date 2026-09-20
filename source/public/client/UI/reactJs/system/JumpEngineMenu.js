@@ -244,7 +244,17 @@ class JumpEngineMenu extends Component {
                 + 'So far ' + window.JumpEngine.formatAbductionHalves(chain.total) + ' of ' + chain.cost + ' power-turns.';
             //D65: the field and EW conditions were for taking hold only - nothing to meet from here on.
         } else {
-            note = 'Targeting: takes hold if the target ends its move in your connected field and your OEW beats its DEW.'
+            /* §3.18b: terrain does not move, and a multi-hex asteroid or a moon needs its WHOLE footprint
+               inside the field rather than one hex - which is a rule the player has to be told before
+               spending a turn taking hold. Mirrors EdjdAbduction::getConditionBlock's two messages. */
+            const terrain = Boolean(target) && gamedata.isTerrain(target.shipSizeClass, target.userid);
+            const multiHex = Boolean(target) && (((target.hexOffsets || []).length > 0) || target.Huge > 0);
+            const condition = terrain
+                ? 'Targeting: takes hold if ' + (multiHex ? 'every hex it occupies is' : 'it is')
+                  + ' inside your connected field and your OEW beats its DEW.'
+                : 'Targeting: takes hold if the target ends its move in your connected field and your OEW beats its DEW.';
+
+            note = condition
                 + ' Power can be applied from next turn'
                 + (preview !== null ? ', and ' + preview + ' power-turns will abduct it.' : '.');
         }

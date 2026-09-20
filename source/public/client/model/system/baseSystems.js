@@ -1706,13 +1706,21 @@ JumpEngine.prototype.doSpecialTargeting = function (shooter, target, system) {
 		confirm.error("Only an <b>enemy</b> unit can be abducted by an Extra-Dimensional Jump Drive.");
 		return false;
 	}
-	if (gamedata.isTerrain(target.shipSizeClass, target.userid)) {
-		confirm.error("Terrain cannot be abducted.");
-		return false;
-	}
 	//An EDJD cannot target fighter flights (user ruling 2026-09-13) - EdjdAbduction::getDeclarationBlock agrees.
 	if (target.flight) {
 		confirm.error("A fighter flight cannot be abducted.");
+		return false;
+	}
+	/* ⭐ §3.18b (user ruling 2026-09-20) - TERRAIN CAN BE ABDUCTED, and the blanket "Terrain cannot be
+	   abducted" that stood here is gone. An asteroid, a moon, a fixed jump gate and a shipyard are all
+	   objects the drive can take hold of; terrain belongs to nobody, so the friendly refusal above lets
+	   it straight through (gamedata.isMyorMyTeamShip is false for every terrain unit outside deployment)
+	   and the server agrees by exempting terrain from its own team test. What is still refused is a unit
+	   that is not an object at all - a jump point - and anything untargetable. */
+	if (!JumpEngine.isAbductableTarget(target)) {
+		confirm.error(shipManager.movement.isAnyJumpVortex(target)
+			? "A <b>jump point</b> cannot be abducted - there is nothing standing there to take hold of."
+			: "This unit cannot be abducted.");
 		return false;
 	}
 	//D64: a supporting drive only joins an abduction an EDJD has already taken hold of (EdjdAbduction::isHeldByTeam).
@@ -1888,6 +1896,23 @@ JumpEngine.prototype.setAbductionPowerLevel = function (level) {
 	level = Math.max(1, Math.min(max, parseInt(level, 10) || 1));
 	if (parseInt(order.firingMode, 10) === level) return false;
 	order.firingMode = level;
+	return true;
+};
+
+/* ⭐⭐ §3.18b (user ruling 2026-09-20) - MAY THIS UNIT BE DRAGGED INTO HYPERSPACE AT ALL? The client
+   mirror of EdjdAbduction::isAbductableTerrain and the two refusals that sit beside it in
+   getDeclarationBlock, held in ONE place because three sites ask and they must not drift apart:
+   doSpecialTargeting (the click), weaponManager.targetShip (whose blanket Huge-terrain refusal now has
+   this one exception) and the targeting tooltip's line for the drive.
+
+   ⚠️ NO TEAM TEST HERE. Terrain belongs to nobody - gamedata.isMyorMyTeamShip answers false for every
+   terrain unit outside deployment, whoever bought it - and whether an ordinary unit is a legal target
+   is the caller's question, not this one's. */
+JumpEngine.isAbductableTarget = function (target) {
+	if (!target) return false;
+	if (target.flight) return false;                                                    //D61
+	if (!shipManager.isTargetable(target)) return false;                                //the Energy Draining Mine's orb
+	if (shipManager.movement.isAnyJumpVortex(target)) return false;                     //a hole in space, not an object
 	return true;
 };
 

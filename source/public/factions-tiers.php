@@ -2027,6 +2027,10 @@ at short range versus long range.
             <li>The <b>Wanderer, Traveler, Waymarker and Guideship</b> carry an Extra-Dimensional Jump Drive, which can drag an <b>enemy</b> unit into hyperspace over
                 several turns. In Initial Orders, select the jump drive and click the enemy unit. The declaration is visible to everyone from the Movement phase,
                 as a purple "Abduction" marker on the target. <b>No line of sight is needed.</b></li>
+            <li><b>Terrain can be abducted too</b> - asteroids, moons, fixed jump gates and shipyards, whoever bought them, and including the large multi-hex
+                terrain no weapon can shoot at. Jump points cannot be abducted, and neither can fighter flights. A terrain unit carries no EW of its own, so
+                one point of OEW on it satisfies the EW condition below - but a unit occupying <b>more than one hex</b> needs <b>every hex it stands in</b>
+                inside your connected Energy Draining Field, not just its centre.</li>
             <li>The <b>first turn only takes hold</b> of the target: it costs no extra power and delivers no power-turns. If the conditions below are met, the
                 abduction has begun, and <b>from the next turn</b> the drive keeps targeting it automatically and power can be applied in the drive's menu.</li>
             <li>Each power level costs the drive's power requirement again and delivers <b>1 power-turn</b>: normal power is 1, double power is 2, up to 4. The power
@@ -2055,7 +2059,8 @@ at short range versus long range.
             <li>A drive cannot abduct and jump to hyperspace on the same turn - setting Jump to Hyperspace withdraws the abduction.</li>
             <li>Unlike the Walkers' ordinary jump, an <b>Extra-Dimensional Jump Drive that is damaged may be destroyed</b>: on every turn it is abducting it rolls
                 for detonation at <b>half</b> the percentage of its boxes lost, as other Ancient jump drives do. Its own jump to hyperspace keeps no chance of failure.</li>
-            <li>Not implemented: abducting friendly units, and asteroids, moons or planets.</li>
+            <li>Not implemented: abducting friendly units. Asteroids and moons use the same ramming-factor cost as anything else rather than the rulebook's
+                "10 x radius cubed", so a moon is a very long job indeed.</li>
         </ul>
 
     <h5>Hangar Requirements</h5>
