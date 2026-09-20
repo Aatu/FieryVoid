@@ -31,7 +31,7 @@ class Wanderer extends BaseShip{
 
 		//Has Elite Crew stats
 		$this->notes = "Elite Crew";
-		$this->notes .= "WEapons begin battle fully charged";		
+		$this->notes .= "<br>Weapons begin battle fully charged";		
 		$this->critRollMod = -1;
 		$this->toHitBonus = 1;		
 
