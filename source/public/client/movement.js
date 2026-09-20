@@ -37,6 +37,37 @@ shipManager.movement = {
         return (ship && ship.dockedLCVs) ? (parseInt(ship.dockedLCVs, 10) || 0) : 0;
     },
 
+    // ELITE / POOR CREW: a FLAT modifier on the delay a turn costs this ship - Elite Crew
+    // shortens it by 1 per level (never below 1), Poor Crew lengthens it by 1 per level. It is
+    // NOT a change to ship.turndelaycost, which is the RATE the readouts print in parentheses.
+    // The server sends ship.crewTurnDelayMod only when it is non-zero (Enhancements::
+    // addShipEnhancementsForJSON), so an ordinary hull answers 0 here.
+    getCrewTurnDelayModifier: function getCrewTurnDelayModifier(ship) {
+        return (ship && ship.crewTurnDelayMod) ? (parseInt(ship.crewTurnDelayMod, 10) || 0) : 0;
+    },
+
+    // The rule itself, in ONE place, because four call sites need it and they do their
+    // surrounding arithmetic differently: calculateTurndelay (post-overthrust),
+    // calculateTurndelayAtMove (the required-delay seed), and the two readouts that print a
+    // turn's delay (UI/ShipTooltip.js and reactJs/shipWindow/ShipNotesPanel.js).
+    //
+    // The two directions are NOT symmetrical, and that asymmetry is the whole of the rule:
+    //  - POOR CREW always adds. "Whenever the ship turns, it adds 1 to turn delay" - even where
+    //    overthrust had shortened the turn to nothing, which is the case its own clause covers.
+    //  - ELITE CREW only ever reduces a delay that EXISTS, and never past 1. Without the
+    //    "turndelay > 0" test a turn already shortened to 0 delay by overthrust would come back
+    //    as 1 - the enhancement making the ship worse, which is the bug this guard exists for.
+    //
+    // Server twin: Movement::calculateTurndelay, where the floor is that function's own
+    // pre-existing clamp to 1.
+    applyCrewTurnDelay: function applyCrewTurnDelay(ship, turndelay) {
+        var mod = shipManager.movement.getCrewTurnDelayModifier(ship);
+        if (mod === 0) return turndelay;
+        if (mod > 0) return turndelay + mod;              //Poor Crew
+        if (turndelay <= 0) return turndelay;             //Elite Crew cannot create a delay
+        return Math.max(1, turndelay + mod);              //Elite Crew, floored at 1
+    },
+
     isManeuverBlockedByAttachment: function (ship) {
         if (ship.hasAttached && Object.keys(ship.hasAttached).length > 0) {
             for (var attachedId in ship.hasAttached) {
@@ -3111,6 +3142,11 @@ shipManager.movement = {
         var turndelay = 0;
         if (setMoveNo >= 0) {
             turndelay = Math.ceil(ship.movement[setMoveNo].speed * shipManager.movement.getTurnDelayCost(ship)); //delay at current speed - at least as many moves are required for turn delay to be satisfied
+            //ELITE / POOR CREW: the flat crew modifier moves the REQUIRED delay, before the
+            //moves already made (and the overthrust credited as moves, below) are subtracted
+            //from it. Ahead of the LCV surcharge so an Elite Crew can never eat a docked LCV's
+            //penalty instead of the ship's own delay. See applyCrewTurnDelay.
+            turndelay = shipManager.movement.applyCrewTurnDelay(ship, turndelay);
             //LCV Rails: each docked LCV adds +1 to the required turn delay (only
             //meaningful when a turn was actually made — gated by didTurn below).
             turndelay += shipManager.movement.getDockedLcvTurnSurcharge(ship);
@@ -3205,6 +3241,11 @@ shipManager.movement = {
         if (ship.flight) return turndelay; //Marcin Sawicki: fighters are NOT exception to delay rules! But so far fighters cannot overthrust...
         turndelay -= shipManager.movement.calculateExtraThrustSpent(ship, movement);
         if (turndelay < 0) turndelay = 0; //Marcin Sawicki: just in case, no negative values
+        //ELITE / POOR CREW: applied after the overthrust reduction and its zero-clamp, so
+        //"reduced by 1 to a minimum of 1" is measured against the delay this turn actually
+        //incurred - and so an already-zeroed delay is not resurrected as 1. See
+        //applyCrewTurnDelay for why the two directions are not symmetrical.
+        turndelay = shipManager.movement.applyCrewTurnDelay(ship, turndelay);
         //LCV Rails: each docked LCV adds +1 to the turn delay (flat, on top of the
         //base delay — the ship's turndelaycost rate is unchanged). Applied after the
         //overthrust reduction + zero-clamp so it always extends the delay.

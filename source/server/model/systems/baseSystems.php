@@ -7162,6 +7162,55 @@ class JumpEngine extends Weapon{
         return $engines;
     }
 
+    /* ⭐ ELITE / POOR CREW - THE JUMP DELAY, MOVED ONCE AND STORED, NOT RE-DERIVED PER READ.
+     *
+     * Elite Crew: "the jump delay time of the ship is reduced by 20% (round fractions of 0.5 or
+     * more up)". Poor Crew: the same 20% the other way, "for each level of Poor Crew". Called from
+     * Enhancements::setEnhancementsShip once per load, through
+     * JumpEngine::getUnitJumpEngines($ship) so a flight-mounted drive is found the same way every
+     * other rule finds it - never by sweeping $ship->systems directly.
+     *
+     * ⭐ IT WRITES $delay, WHICH IS THE ONLY DURABLE FIELD. $loadingtime is overwritten from the
+     * stored tac_systemdata row by Weapon::setLoading on every load, which is precisely why
+     * getVortexRechargeTime() - the ONE authority for "how many turns does a vortex take to
+     * charge", and the number stripForJson sends the client as loadingtime - reads $delay and
+     * nothing else. The other two are set to match so anything reading them before setLoading
+     * runs sees a consistent engine.
+     *
+     * ⚠⚠ REFUSED ON A DRIVE WITH NO JUMP RECHARGE, and that guard is the whole reason this is a
+     * method on JumpEngine rather than three lines in the enhancement switch: the Star Trek
+     * Nacelle passes an IMPULSE RATING as its 4th constructor argument, not a jump delay, and
+     * TrekWarpDrive feeds TrekImpulseDrive's sublight thrust off it. Scaling it by 0.8 would
+     * quietly re-rate a Trek ship's engines. $hasJumpRecharge is protected, so only this class can
+     * ask - see its declaration.
+     *
+     * Per level and COMPOUNDING (0.8 twice = 0.64, not 0.6), with the round-half-up applied at
+     * each step, because the rules state the reduction per level rather than as a total. PHP's
+     * round() is half-away-from-zero, which on a positive delay is exactly "fractions of 0.5 or
+     * more round up". Floored at 1: a drive that recharges instantly is a state the rest of the
+     * vortex code does not model (see the max(1, ...) in the constructor).
+     *
+     * $levels is the SIGNED crew quality - positive Elite (shorter), negative Poor (longer). */
+    public function applyCrewJumpDelayModifier($levels)
+    {
+        $levels = (int)$levels;
+        if ($levels === 0) return;
+        if (!$this->hasJumpRecharge) return;   //Trek Nacelle: the 4th ctor argument is not a delay
+
+        $delay = (int)$this->delay;
+        if ($delay <= 0) return;               //nothing to scale - markLegacy/markGate zero it
+
+        $factor = ($levels > 0) ? 0.8 : 1.2;
+        $steps  = abs($levels);
+        for ($i = 0; $i < $steps; $i++){
+            $delay = max(1, (int)round($delay * $factor));
+        }
+
+        $this->delay       = $delay;
+        $this->loadingtime = $delay;
+        $this->turnsloaded = $delay;
+    }
+
     /* ================= STAGE 3 - THE VORTEX UNIT ==================================
      *
      * THE SPAWN SWEEP. Every legal vortex declaration made this Initial Orders turns into a

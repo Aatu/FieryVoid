@@ -192,11 +192,58 @@ class HangarOps {
 				$mswRemaining -= $take;
 			}
 
+			/* ⭐ ELITE CREW - ONE DEFAULT SHUTTLE PER LEVEL BECOMES THE FACTION'S ARMED SHUTTLE,
+			   free. Built as a RETYPE of the leftover pool, exactly like the HANG_MSW block
+			   above, and for the same reason: the armed shuttle takes a box that was already
+			   paid for, so default-shuttle CAPACITY is unchanged and the lobby's checkChoices -
+			   which never sees this upgrade, because it is not a purchase - still balances.
+
+			   ⚠ TAKEN OUT OF THE *POST-MINESWEEPER* REMAINDER. A carrier that bought HANG_MSW
+			   as well must not have the same box retyped twice, so the armed count is capped at
+			   what is left after the minesweepers have been placed. On a hull whose leftover pool
+			   is Minesweeping Shuttles the upgrade still applies - an armed shuttle is a strictly
+			   better use of a box than a minesweeper the player did not ask for - which is why
+			   this is NOT gated on isMinesweepingShuttleClass the way $hangMswRetype is.
+
+			   ⚠ THE RECORD HOLDS A FighterFlight PHPCLASS, NOT A Shuttle SUBCLASS. Three things
+			   follow, all already handled: shuttleDisplayNameFor labels it through
+			   isArmedShuttleClass; game.php's carrier preload must resolve the class or the flight
+			   renders as "undefined" on launch (see the armedShuttleClassForFactionName call
+			   there); and hangarType stays 'shuttles', so it keeps drawing on the same pool and
+			   every capacity gate answers exactly as it did for the shuttle it replaced. */
+			$eliteArmedRetype = 0;
+			$eliteArmedClass = null;
+			$eliteArmedUpgrades = self::crewArmedShuttleUpgrades($ship);
+			if ($eliteArmedUpgrades > 0){
+				$eliteArmedRetype = min($eliteArmedUpgrades, $leftover - $hangMswRetype);
+				$eliteArmedClass  = self::factionArmedShuttleClass($ship);
+			}
+			if ($eliteArmedRetype > 0){
+				$eliteArmedName = self::shuttleDisplayNameFor($eliteArmedClass);
+				$armedRemaining = $eliteArmedRetype;
+				while ($armedRemaining > 0){
+					$hangar = self::pickHangarForShuttle($shuttleHangars, 1);
+					if (!$hangar) break;
+					$free = (int)$hangar->maxhealth - self::usageCountFor($hangar);
+					$take = min($armedRemaining, $free, self::fairShareCap($shuttleHangars, $armedRemaining));
+					if ($take <= 0) break;
+					$hangar->hangarUsage[] = array(
+						'phpclass'    => $eliteArmedClass,
+						'name'        => $eliteArmedName,
+						'flightSize'  => $take,
+						'hangarType'  => 'shuttles',
+					);
+					$armedRemaining -= $take;
+				}
+				//whatever could not be placed stays an ordinary default shuttle below
+				$eliteArmedRetype -= $armedRemaining;
+			}
+
 			$leftoverClass = $baseClass;
 			$leftoverCategory = $baseCategory;
 			$leftoverName = $baseName;
 
-			$count = $leftover - $hangMswRetype;
+			$count = $leftover - $hangMswRetype - $eliteArmedRetype;
 			while ($count > 0){
 				$hangar = self::pickHangarForShuttle($shuttleHangars, 1);
 				if (!$hangar) break;
@@ -299,6 +346,11 @@ class HangarOps {
 	 */
 	public static function suppressDefaultShuttlesForArmed($ship, $gamedata, $thisCarrierLeftover){
 		if ($thisCarrierLeftover <= 0) return 0;
+		//POOR CREW cannot accommodate armed shuttles at all, so none of the fleet's purchases can
+		//have been meant for this carrier and none of its boxes may be taken to pay for them.
+		//Mirrors the exclusion defaultShuttleLeftoverBoxes makes on the apportioning side, and the
+		//lobby's Fleet Checker, which leaves this hull out of totalShuttleCapacity.
+		if (self::crewBlocksArmedShuttles($ship)) return 0;
 		if (!$gamedata || !isset($gamedata->ships) || !is_array($gamedata->ships)) return 0;
 
 		//Total armed-shuttle BOXES this PLAYER bought (matched by userid+slot, same
@@ -365,6 +417,12 @@ class HangarOps {
 	 * (getDefaultShuttles() is similar but omits the HANG_BP subtraction, so it
 	 * can't be reused for an exact match here.) */
 	public static function defaultShuttleLeftoverBoxes($carrier){
+		//POOR CREW berths no armed shuttles - this method exists ONLY to apportion the fleet's
+		//armed-shuttle debt across carriers in ship order, so such a hull must contribute 0 or a
+		//LATER carrier would be charged for a debt this one never absorbed. See
+		//crewBlocksArmedShuttles; its twin guard is in suppressDefaultShuttlesForArmed.
+		if (self::crewBlocksArmedShuttles($carrier)) return 0;
+
 		$hasCatapult = false;
 		$capacity = 0;
 		foreach (self::collectHangars($carrier) as $h){
@@ -596,6 +654,123 @@ class HangarOps {
 		return is_subclass_of($phpclass, 'Shuttle');
 	}
 
+	/* ⭐ ELITE CREW - THE FACTION'S CHEAPEST ARMED SHUTTLE, one per Elite level, free.
+	 *
+	 * "If the ship has any default shuttles, one of these is upgraded to the cheapest armed
+	 *  shuttle for that faction listing at no additional cost. If the faction has no armed
+	 *  shuttles, give it a Civilian Armed shuttle instead."
+	 *
+	 * A CURATED MAP, exactly like $factionShuttleMap above, and for the same two reasons: it is
+	 * read on the hangar-population path of every carrier load, and deriving "cheapest" at
+	 * runtime would mean instantiating every armed-shuttle class in a faction (ShipLoader's
+	 * faction sweep is the single most expensive thing in the codebase - see
+	 * getFactionDirMap). The costs as at 2026-09-20 are in the comments so a future edit can
+	 * re-check the choice without opening 16 files.
+	 *
+	 * ⚠ THE CHEAPEST *GUN-ARMED* SHUTTLE, NOT THE LOWEST pointCost IN THE LISTING. A missile
+	 * shuttle's pointCost excludes its ordnance, which is bought separately as an ammo
+	 * enhancement - so ArmedMissileShuttleEA (120) is not really cheaper than ArmedShuttleEA
+	 * (180), and a free one would hand the player an empty launcher. The missile variants
+	 * (ArmedMissileShuttleEA, MerkulMissileAM) are deliberately absent.
+	 *
+	 * Anything not listed falls through to genericArmedShuttle - the Civilian armed shuttle,
+	 * which is what the rule asks for and is already registered in the autoload classmap. */
+	private static $factionArmedShuttleMap = array(
+		'Brakiri Syndicracy'      => 'ArmedShuttleBrakiri',   //156
+		'Centauri Republic'       => 'ArmedShuttleCent',      //168
+		'Centauri Republic (WotCR)' => 'ArmedShuttleCent',    //168
+		'Drazi Freehold'          => 'ArmedShuttleDrazi',     //144 (ArmoredShuttleDrazi is 192)
+		'Drazi Freehold (WotCR)'  => 'ArmedShuttleDrazi',     //144
+		'Earth Alliance'          => 'ArmedShuttleEA',        //180 - see the missile-variant note above
+		'Earth Alliance (Early)'  => 'ArmedShuttleEA',        //180
+		'Gaim Intelligence'       => 'ArmedShuttleGaim',      //132
+		'Kor-Lyan Kingdoms'       => 'MerkulArmedAM',         //150 (MerkulAM is the unarmed default)
+		'Llort'                   => 'ArmedShuttleLlort',     //96
+		'Narn Regime'             => 'ArmedShuttleNarn',      //180
+		"Pak'ma'ra Confederacy"   => 'ArmedShuttlePakMaRa',   //144
+		'Vree Conglomerate'       => 'ArmedShuttleVree',      //192 (ArmedShuttleVreeCannon is 288)
+	);
+
+	/* The armed-shuttle phpclass an Elite Crew carrier of this faction is given.
+	 * class_exists() guards the fallback the same way factionMinesweepingShuttleClass does, so a
+	 * map entry that loses its autoload key degrades to the Civilian shuttle instead of writing
+	 * an unloadable phpclass into a hangarUsage record that has to survive a deserialize. */
+	public static function factionArmedShuttleClass($ship){
+		$faction = ($ship && isset($ship->faction)) ? $ship->faction : '';
+		return self::armedShuttleClassForFactionName($faction);
+	}
+
+	/* By-faction-name variant, for game.php's blueprint preload pass. Unlike
+	 * shuttleClassForFactionName this never returns null: the Civilian fallback is a real class
+	 * the client must be able to resolve, and it is NOT one of Hangar's preload defaults. */
+	public static function armedShuttleClassForFactionName($faction){
+		$candidate = 'genericArmedShuttle';
+		if (is_string($faction) && isset(self::$factionArmedShuttleMap[$faction])){
+			$candidate = self::$factionArmedShuttleMap[$faction];
+		}
+		return class_exists($candidate) ? $candidate : 'genericArmedShuttle';
+	}
+
+	/* ⚠⚠ THE SIGNED CREW LEVEL, READ OFF enhancementOptions AND *NOT* OFF getCrewQuality().
+	 *
+	 * Everything in this file runs from onIndividualNotesLoaded, during ship/note hydration -
+	 * and Enhancements::setEnhancementsShip, the only writer of BaseShip::$crewQuality, does not
+	 * run until TacGamedata::onConstructed, which fires AFTERWARDS. getCrewQuality() would
+	 * therefore read 0 on every carrier in the game and both rules below would silently never
+	 * fire. This is the same ordering the HANG_BP and HANG_MSW blocks in
+	 * populateInitialHangarUsage already work around, in exactly the same way.
+	 *
+	 * Everywhere OUTSIDE this file - weapon dice, turn delay - runs long after onConstructed and
+	 * must use getCrewQuality(); this array walk is not the general answer, it is the answer for
+	 * the load-time hangar pass. */
+	private static function crewQualityAtLoad($ship){
+		if (!$ship || !isset($ship->enhancementOptions) || !is_array($ship->enhancementOptions)) return 0;
+		$level = 0;
+		foreach ($ship->enhancementOptions as $opt){
+			$count = (int)($opt[2] ?? 0);
+			if ($count <= 0) continue;
+			if (($opt[0] ?? '') === 'ELITE_CREW') $level += $count;
+			elseif (($opt[0] ?? '') === 'POOR_CREW') $level -= $count;
+		}
+		return $level;
+	}
+
+	/* How many default shuttles this carrier upgrades to armed shuttles for free: one per ELITE
+	 * Crew level, none otherwise. Poor Crew answers 0 through the same expression. */
+	public static function crewArmedShuttleUpgrades($ship){
+		return max(0, self::crewQualityAtLoad($ship));
+	}
+
+	/* ⭐ POOR CREW - "CANNOT PURCHASE ARMED SHUTTLES, OR ACCOMMODATE THEM IN FLEET CHECKER."
+	 *
+	 * A Poor Crew hull contributes NO armed-shuttle berths to the fleet. Read in two places that
+	 * have to agree or the lobby and the server will disagree about how many default shuttles a
+	 * carrier ends up holding:
+	 *   - defaultShuttleLeftoverBoxes(), so this carrier's pool is not counted as debt already
+	 *     absorbed when a LATER carrier works out its share;
+	 *   - suppressDefaultShuttlesForArmed(), so a bought armed shuttle never evicts one of THIS
+	 *     carrier's default shuttles.
+	 * Mirrored in the lobby's checkChoices (gamelobby.js), which simply does not add a Poor Crew
+	 * hull's default-shuttle pool to totalShuttleCapacity.
+	 *
+	 * The hull still GETS its default shuttles - unarmed ones are not affected by the rule. */
+	public static function crewBlocksArmedShuttles($ship){
+		return (self::crewQualityAtLoad($ship) < 0);   //see crewQualityAtLoad for why not getCrewQuality()
+	}
+
+	/* True for any class $factionArmedShuttleMap can hand out, plus the Civilian fallback. A cheap
+	 * string test over the map - shuttleDisplayNameFor runs it per stored record per carrier per
+	 * load, so it must not instantiate anything.
+	 * ⚠ Deliberately NOT consulted by evictionPriorityFor: every armed shuttle except
+	 * MerkulArmedAM already matches that method's `stripos($phpclass, 'shuttle')` test and is
+	 * shed before real fighters, which is the behaviour a BOUGHT armed shuttle docking into a bay
+	 * has always had. Changing it would re-order eviction in games already in progress. */
+	public static function isArmedShuttleClass($phpclass){
+		if (!is_string($phpclass) || $phpclass === '') return false;
+		if ($phpclass === 'genericArmedShuttle') return true;
+		return in_array($phpclass, self::$factionArmedShuttleMap, true);
+	}
+
 	/* Display name for a shuttle phpclass — used in hangar tooltip aggregation. */
 	public static function shuttleDisplayNameFor($phpclass){
 	if (self::isMinesweepingShuttleClass($phpclass)) return 'Minesweeping Shuttle';	
@@ -618,6 +793,14 @@ class HangarOps {
 				return 'Yacht';
 			case 'Shuttle':
 			default:
+				/* Elite Crew's free upgrade puts an ARMED shuttle class into a hangarUsage record,
+				   and those are FighterFlights rather than Shuttle subclasses - so without this
+				   branch they fall through to the plain "Shuttle" label and the Hangar
+				   system-info tooltip hides the one thing that makes them worth having.
+				   ⚠ A STRING TEST, NOT A PROBE INSTANCE. evictionPriorityFor may afford a
+				   `new $phpclass` because it runs once per eviction; this runs per stored record
+				   per carrier per load, so it must stay free. */
+				if (self::isArmedShuttleClass($phpclass)) return 'Armed Shuttle';
 				return 'Shuttle';
 		}
 	}
