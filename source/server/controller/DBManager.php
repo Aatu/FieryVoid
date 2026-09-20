@@ -5224,13 +5224,17 @@ public function setLastTimeChatChecked($userid, $gameid)
 
     public function getLadderHistory($playerid)
     {
+        // Ordered by when the match FINISHED, not when it was created. lg.recorded_at is
+        // stamped as registerLadderResult() writes the result, whereas g.id is creation
+        // order, so a long-running game used to sort above later matches that had already
+        // ended. lg.id breaks ties between two results recorded in the same second.
         $sql = "SELECT g.id, g.name, lg.status, p_opp.username as opponent_name, p_opp.id as opponent_id
                 FROM tac_ladder_games lg
                 JOIN tac_game g ON lg.gameid = g.id
                 LEFT JOIN tac_ladder_games lg_opp ON lg_opp.gameid = g.id AND lg_opp.playerid != lg.playerid
                 LEFT JOIN player p_opp ON lg_opp.playerid = p_opp.id
                 WHERE lg.playerid = $playerid
-                ORDER BY g.id DESC
+                ORDER BY lg.recorded_at DESC, lg.id DESC
                 LIMIT 20";
         return $this->query($sql);
     }
