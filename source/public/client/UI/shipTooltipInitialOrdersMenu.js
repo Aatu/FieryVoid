@@ -9,31 +9,54 @@ window.ShipTooltipInitialOrdersMenu = function () {
 
     ShipTooltipInitialOrdersMenu.prototype = Object.create(ShipTooltipMenu.prototype);
 
-    ShipTooltipInitialOrdersMenu.buttons = [
-        { className: "addCCEW", condition: [isSelf, notFlight, notMine], action: addCCEW, info: "Add CCEW (right-click: max)", supportsMaxClick: true },
-        { className: "removeCCEW", condition: [isSelf, notFlight, notMine], action: removeCCEW, info: "Remove CCEW (right-click: clear)", supportsMaxClick: true },
-        { className: "addOEW", condition: [notSelf, isEnemyEW, sourceNotFlight], action: getAddOEW('OEW'), info: "Add OEW (right-click: max)", supportsMaxClick: true },
-        { className: "removeOEW", condition: [notSelf, isEnemyEW, sourceNotFlight], action: getRemoveOEW('OEW'), info: "Remove OEW (right-click: clear)", supportsMaxClick: true },
-        { className: "addMDEW", condition: [isSelf, enemyMines], action: addMDEW, info: "Add Mine Detection (right-click: max)", supportsMaxClick: true },
-        { className: "removeMDEW", condition: [isSelf, enemyMines], action: removeMDEW, info: "Remove Mine Detection (right-click: clear)", supportsMaxClick: true },
-        { className: "addDIST", condition: [notSelf, isEnemyEW, isElint, notFlight, notMine, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getAddOEW('DIST'), info: "Add DIST (right-click: max)", supportsMaxClick: true },
-        { className: "removeDIST", condition: [notSelf, isEnemyEW, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, hasDIST], action: getRemoveOEW('DIST'), info: "Remove DIST (right-click: clear)", supportsMaxClick: true },
+    /* ⭐⭐ THE EW ALLOCATION BUTTONS ARE A NAMED SUBSET, because Stage 10B reuses them VERBATIM in
+       the Pre-Firing and Firing menus (WALKERS_OF_SIGMA_PLAN.md 3.8). An EW Detector lets a fleet
+       hold a point back from Initial Orders and spend it at the end of Movement, and "spend it"
+       means exactly these buttons - so the alternative was a second copy of twenty entries and
+       their fifteen condition helpers in shipTooltipFireMenu.js, which would rot the first time
+       one of them changed.
+
+       ⚠️ THE SUBSET STOPS BEFORE removeAllEW, and that omission is deliberate rather than tidy:
+       "Remove All EW" clears the whole turn, Initial Orders allocations included, and those are
+       committed rows the late window cannot un-write (EW::diffLateEw takes positive deltas only).
+       ew.removeEW refuses outside phase 1 for the same reason; leaving the button out of the late
+       menu is what stops the player finding a control that silently does nothing.
+
+       ⚠️ Every entry below reads this.selectedShip / this.targetedShip and nothing else off the
+       menu, which is what makes them portable - ShipTooltipFireMenu has both. None touches
+       this.hexagon, which only this class carries.
+
+       ⚠️ NO EXTRA PHASE CONDITION IS ADDED TO THESE ENTRIES. The gate is one test at the MENU
+       level (ShipTooltipFireMenu.getAllButtons), because these objects are SHARED between the two
+       menus - pushing a condition into them here would push it into Initial Orders too. */
+    ShipTooltipInitialOrdersMenu.ewButtons = [
+        { className: "addCCEW", condition: [isSelf, notFlight, notMine, sourceEwNotSuspended], action: addCCEW, info: "Add CCEW (right-click: max)", supportsMaxClick: true },
+        { className: "removeCCEW", condition: [isSelf, notFlight, notMine, sourceEwNotSuspended], action: removeCCEW, info: "Remove CCEW (right-click: clear)", supportsMaxClick: true },
+        /* ⭐ WALKERS OF SIGMA-957 (WALKERS_OF_SIGMA_PLAN.md 3.11, Stage 12): sourceCanAllocateOEW
+           is sourceNotFlight PLUS the one flight class that has an EW pool. These are the only
+           two entries in the array that relax for a flight; DIST/SOEW/SDEW/BDEW/Detect Stealth
+           are ELINT functions and stay ship-only. */
+        { className: "addOEW", condition: [isTargetable, notSelf, isEnemyEW, sourceCanAllocateOEW, sourceEwNotSuspended, targetEwNotSuspended], action: getAddOEW('OEW'), info: "Add OEW (right-click: max)", supportsMaxClick: true },
+        { className: "removeOEW", condition: [isTargetable,notSelf, isEnemyEW, sourceCanAllocateOEW, sourceEwNotSuspended, targetEwNotSuspended], action: getRemoveOEW('OEW'), info: "Remove OEW (right-click: clear)", supportsMaxClick: true },
+        { className: "addMDEW", condition: [isSelf, enemyMines, sourceEwNotSuspended], action: addMDEW, info: "Add Mine Detection (right-click: max)", supportsMaxClick: true },
+        { className: "removeMDEW", condition: [isSelf, enemyMines, sourceEwNotSuspended], action: removeMDEW, info: "Remove Mine Detection (right-click: clear)", supportsMaxClick: true },
+        { className: "addDIST", condition: [isTargetable,notSelf, isEnemyEW, isElint, notFlight, notMine, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, sourceEwNotSuspended, targetEwNotSuspended], action: getAddOEW('DIST'), info: "Add DIST (right-click: max)", supportsMaxClick: true },
+        { className: "removeDIST", condition: [isTargetable,notSelf, isEnemyEW, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, hasDIST, sourceEwNotSuspended, targetEwNotSuspended], action: getRemoveOEW('DIST'), info: "Remove DIST (right-click: clear)", supportsMaxClick: true },
         //Jamming: ELINT disrupts a remote-controlled fighter flight's command link (Orieni Hunter-Killers). Target IS a flight, so no notFlight gate.
-        { className: "addJAM", condition: [notSelf, isEnemyEW, isElint, sourceNotFlight, targetIsRemoteControl, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getAddOEW('JAM'), info: "Add Jamming (right-click: max)", supportsMaxClick: true },
-        { className: "removeJAM", condition: [notSelf, isElint, sourceNotFlight, targetIsRemoteControl, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, hasJAM], action: getRemoveOEW('JAM'), info: "Remove Jamming (right-click: clear)", supportsMaxClick: true },
-        //{ className: "addOEW", condition: [notSelf, sourceNotFlight], action: addOEW, info: "Add OEW" },
-        //{ className: "removeOEW", condition: [notSelf, sourceNotFlight], action: removeOEW, info: "Remove OEW" },
-        //{ className: "addDIST", condition: [notSelf, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getAddOEW('DIST'), info: "Add DIST" },
-        //{ className: "removeDIST", condition: [notSelf, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, hasDIST], action: getRemoveOEW('DIST'), info: "Remove DIST" },
-        { className: "addSOEW", condition: [isFriendly, isElint, notFlight, notMine, notSelf, isInElintDistance(30), doesNotHaveBDEW], action: getAddOEW('SOEW'), info: "Add SOEW", supportsMaxClick: true },
-        { className: "removeSOEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW, hasSOEW], action: getRemoveOEW('SOEW'), info: "Remove SOEW (right-click: clear)", supportsMaxClick: true },
-        { className: "addSDEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW], action: getAddOEW('SDEW'), info: "Add SDEW (right-click: max)", supportsMaxClick: true },
-        { className: "removeSDEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW, hasSDEW], action: getRemoveOEW('SDEW'), info: "Remove SDEW (right-click: clear)", supportsMaxClick: true },
-        { className: "addBDEW", condition: [isSelf, isElint, notFlight, doesNotHaveOtherElintEWThanBDEW], action: addBDEW, info: "Add BDEW (right-click: max)", supportsMaxClick: true },
-        { className: "removeBDEW", condition: [isSelf, isElint, notFlight, doesNotHaveOtherElintEWThanBDEW], action: removeBDEW, info: "Remove BDEW (right-click: clear)", supportsMaxClick: true },
-        { className: "addDetectSEW", condition: [isSelf, isElint, notFlight, doesNotHaveBDEW, enemyStealth], action: addDetectSEW, info: "Add Detect Stealth (right-click: max)", supportsMaxClick: true },
-        { className: "removeDetectSEW", condition: [isSelf, isElint, notFlight, doesNotHaveBDEW, enemyStealth], action: removeDetectSEW, info: "Remove Detect Stealth (right-click: clear)", supportsMaxClick: true },
-        { className: "removeAllEW", condition: [isSelf, notFlight, notMine], action: removeAllEW, info: "Remove All EW" },
+        { className: "addJAM", condition: [isTargetable,notSelf, isEnemyEW, isElint, sourceNotFlight, targetIsRemoteControl, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, sourceEwNotSuspended, targetEwNotSuspended], action: getAddOEW('JAM'), info: "Add Jamming (right-click: max)", supportsMaxClick: true },
+        { className: "removeJAM", condition: [isTargetable,notSelf, isElint, sourceNotFlight, targetIsRemoteControl, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, hasJAM, sourceEwNotSuspended, targetEwNotSuspended], action: getRemoveOEW('JAM'), info: "Remove Jamming (right-click: clear)", supportsMaxClick: true },
+        { className: "addSOEW", condition: [isTargetable,isFriendly, isElint, notFlight, notMine, notSelf, isInElintDistance(30), doesNotHaveBDEW, sourceEwNotSuspended, targetEwNotSuspended], action: getAddOEW('SOEW'), info: "Add SOEW", supportsMaxClick: true },
+        { className: "removeSOEW", condition: [isTargetable,isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW, hasSOEW, sourceEwNotSuspended, targetEwNotSuspended], action: getRemoveOEW('SOEW'), info: "Remove SOEW (right-click: clear)", supportsMaxClick: true },
+        { className: "addSDEW", condition: [isTargetable,isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW, sourceEwNotSuspended, targetEwNotSuspended], action: getAddOEW('SDEW'), info: "Add SDEW (right-click: max)", supportsMaxClick: true },
+        { className: "removeSDEW", condition: [isTargetable,isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW, hasSDEW, sourceEwNotSuspended, targetEwNotSuspended], action: getRemoveOEW('SDEW'), info: "Remove SDEW (right-click: clear)", supportsMaxClick: true },
+        { className: "addBDEW", condition: [isSelf, isElint, notFlight, doesNotHaveOtherElintEWThanBDEW, sourceEwNotSuspended], action: addBDEW, info: "Add BDEW (right-click: max)", supportsMaxClick: true },
+        { className: "removeBDEW", condition: [isSelf, isElint, notFlight, doesNotHaveOtherElintEWThanBDEW, sourceEwNotSuspended], action: removeBDEW, info: "Remove BDEW (right-click: clear)", supportsMaxClick: true },
+        { className: "addDetectSEW", condition: [isSelf, isElint, notFlight, doesNotHaveBDEW, enemyStealth, sourceEwNotSuspended], action: addDetectSEW, info: "Add Detect Stealth (right-click: max)", supportsMaxClick: true },
+        { className: "removeDetectSEW", condition: [isSelf, isElint, notFlight, doesNotHaveBDEW, enemyStealth, sourceEwNotSuspended], action: removeDetectSEW, info: "Remove Detect Stealth (right-click: clear)", supportsMaxClick: true },
+    ];
+
+    ShipTooltipInitialOrdersMenu.buttons = ShipTooltipInitialOrdersMenu.ewButtons.concat([
+        { className: "removeAllEW", condition: [isSelf, notFlight, notMine, sourceEwNotSuspended], action: removeAllEW, info: "Remove All EW" },
         { className: "targetWeapons", condition: [isEnemy, hasShipWeaponsSelected], action: targetWeapons, info: "Target selected weapons on ship" },
         { className: "targetWeaponsHex", condition: [hasOrderSource, hasHexWeaponsSelected], action: targetHexagon, info: "Target selected weapons on hexagon" },
         { className: "targetSuppWeapons", condition: [isFriendly, hasShipWeaponsSelected, FFWeaponSelected, notSelf], action: targetWeapons, info: "Target support weapons" },//30 June 2024 - DK - Added for Ally targeting.
@@ -61,7 +84,7 @@ window.ShipTooltipInitialOrdersMenu = function () {
            same shape the two mutually-exclusive buttons above already have. */
         { className: "signalJumpGateArrival", condition: [isJumpGate, canSignalGateForArrival, noGateSignalYet], action: signalJumpGateForArrival, info: "Signal Gate for Arrival" },
         { className: "cancelJumpGateSignal", condition: [isJumpGate, hasGateSignal], action: cancelJumpGateSignal, info: "Cancel Gate Signal" }
-    ];
+    ]);
 
 
     ShipTooltipInitialOrdersMenu.prototype.getAllButtons = function () {
@@ -127,18 +150,22 @@ window.ShipTooltipInitialOrdersMenu = function () {
         });
     }
 
+    /* Stage 12 (3.11): the max-click loops below spend until the POOL THIS TYPE COMES OUT OF is
+       empty, which on a Mapmaker is not the same pool for OEW as it is for mine detection.
+       ew.getEwLeftFor answers with getEWLeft() for every other unit in the game, so the two
+       loops are unchanged everywhere else. */
     function addSelfEW(ewType, isMaxClick) {
         do {
             var entry = ew.getEntryByTargetAndType(this.selectedShip, null, ewType, this.turn);
-            var before = ew.getEWLeft(this.selectedShip);
+            var before = ew.getEwLeftFor(this.selectedShip, ewType);
             if (!entry) {
                 ew.assignEW(this.selectedShip, ewType);
             } else {
                 ew.assignEW(this.selectedShip, entry);
             }
             if (!isMaxClick) return;
-            if (ew.getEWLeft(this.selectedShip) >= before) return;
-        } while (ew.getEWLeft(this.selectedShip) > 0);
+            if (ew.getEwLeftFor(this.selectedShip, ewType) >= before) return;
+        } while (ew.getEwLeftFor(this.selectedShip, ewType) > 0);
     }
 
     function removeSelfEW(ewType, isMaxClick) {
@@ -175,15 +202,15 @@ window.ShipTooltipInitialOrdersMenu = function () {
 
         do {
             var entry = ew.getEntryByTargetAndType(this.selectedShip, this.targetedShip, type, this.turn);
-            var before = ew.getEWLeft(this.selectedShip);
+            var before = ew.getEwLeftFor(this.selectedShip, type);
             if (!entry) {
                 ew.AssignOEW(this.selectedShip, this.targetedShip, type);
             } else {
                 ew.assignEW(this.selectedShip, entry);
             }
             if (!isMaxClick) return;
-            if (ew.getEWLeft(this.selectedShip) >= before) return;
-        } while (ew.getEWLeft(this.selectedShip) > 0);
+            if (ew.getEwLeftFor(this.selectedShip, type) >= before) return;
+        } while (ew.getEwLeftFor(this.selectedShip, type) > 0);
     }
 
     function getRemoveOEW(type) {
@@ -278,6 +305,10 @@ window.ShipTooltipInitialOrdersMenu = function () {
         return this.selectedShip !== this.targetedShip;
     }
 
+    function isTargetable() {
+        return shipManager.isTargetable(this.targetedShip);
+    }    
+
     function isEnemy() {
         return this.selectedShip && !gamedata.isMyorMyTeamShip(this.targetedShip);
     }
@@ -324,6 +355,44 @@ window.ShipTooltipInitialOrdersMenu = function () {
 
     function sourceNotFlight() {
         return (!this.selectedShip || !this.selectedShip.flight);
+    }
+
+    /* ⭐⭐ WALKERS OF SIGMA-957 (WALKERS_OF_SIGMA_PLAN.md 3.11, Stage 12) - THE ONE RELAXATION.
+       "Can use up to 3 OEW or DEW per turn, like a ship", for the Mapmaker Sensor Probes and
+       for nothing else in the game. ew.isFlightEwPool is one property read on the static
+       blueprint (ship.ewCapacity), so every other flight fails it as cheaply as sourceNotFlight
+       already did.
+
+       ⚠️ DO NOT REACH FOR notFlight() HERE, and do not relax that one. It refuses when the
+       TARGET is a flight as well, which is a separate and still-correct rule (you cannot point
+       an ELINT function at a fighter flight); this predicate is about the SOURCE only.
+
+       ⚠️ THERE IS NO DEW BUTTON, deliberately - there is none for a ship either. Unspent points
+       become DEW at the commit, in ew.convertUnusedToDEW, which Stage 12 opened to this one
+       flight class. */
+    function sourceCanAllocateOEW() {
+        return sourceNotFlight.call(this) || ew.isFlightEwPool(this.selectedShip);
+    }
+
+    /* ⭐ WALKERS_OF_SIGMA_PLAN.md 3.14f (Stage 19, user ruling 2026-09-12). A ship riding a Docking
+       Bay's aft through its two-turn procedure spends no EW of its own, and nobody may spend any AT
+       it. Two helpers rather than one because the two halves land on different buttons: the self-EW
+       rows only need the SOURCE test, the targeted rows need both.
+       ⚠️ ON EVERY ROW, `remove` INCLUDED (user, 2026-09-12). The first pass gated only the `add`
+       rows, reasoning that a remove with nothing to remove is a harmless no-op; the whole EW menu
+       is now withdrawn from a rider instead, which is the simpler thing to explain and leaves no
+       half-live panel on a unit that is out of the EW game altogether. Nothing can be stranded by
+       it: a rider starts its ride with no active rows (the ride begins at the end of the PREVIOUS
+       turn's Firing phase, before the transitional turn's Initial Orders), the handlers refuse
+       regardless (ew.AssignOEW / ew.assignEW), and the server strips whatever survives
+       (EW::stripDockingRiderEw).
+       ⚠️ DEW is NOT suspended - the rider keeps it, and nothing here touches convertUnusedToDEW. */
+    function sourceEwNotSuspended() {
+        return !ew.isEwSuspended(this.selectedShip);
+    }
+
+    function targetEwNotSuspended() {
+        return !ew.isEwSuspended(this.targetedShip);
     }
 
     function targetNotFlight() {

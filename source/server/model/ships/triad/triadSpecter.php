@@ -60,7 +60,7 @@ class triadSpecter extends MediumShip{
 		$this->addAftSystem(new GraviticThruster(6, 13, 0, 4, 2));
         $this->addAftSystem(new AdvParticleBlastGun(6, 16, 8, 120, 240));	
         $this->addAftSystem(new SelfRepair(7, 4, 2)); //armor, structure, output
-		$this->addAftSystem(new JumpEngine(7, 16, 7, 10));        
+		$this->addAftSystem((new JumpEngine(7, 16, 7, 10))->markAncient());        
 	
         $this->addPrimarySystem(new Structure( 8, 60));
 		

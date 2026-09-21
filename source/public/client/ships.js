@@ -513,6 +513,24 @@ window.shipManager = {
         return primary;
     },
 
+    /* ⭐ MAY THIS UNIT BE DELIBERATELY PICKED AS A TARGET? Mirrors BaseShip::isTargetableBy
+       (WALKERS_OF_SIGMA_PLAN.md 3.10c) and reads the same one field, which rides the static
+       blueprint verbatim: `unTargetable` is declared only on the classes that opt out, so it is
+       ABSENT on every other hull and the test has to be a truthy one.
+
+       The Energy Draining Mine's orb is the first and only such unit: its Structure is
+       indestructible and its notes say "Destroying this probe has no in-game effect", so offering
+       it as a target only invites a wasted shot (user ruling 2026-09-08).
+
+       ⚠️ IT DOES NOT HIDE ANYTHING AND IT BLOCKS NOTHING ELSE. The orb's icon IS the seven-hex
+       field marker, so it stays on the map, keeps its window and its notes, and a blast that
+       happens to cover its hex still resolves there. Consulted only where a target is CHOSEN -
+       weaponManager's tooltip line and its targetShip click. */
+    isTargetable: function isTargetable(ship) {
+        if (!ship) return false;
+        return !ship.unTargetable;
+    },
+
     isDisabled: function isDisabled(ship) {
         if (ship.base) {
             var primary = shipManager.getPrimaryCnC(ship);
@@ -555,11 +573,179 @@ window.shipManager = {
      * Guarded on weaponManager because ships.js is loaded by the LOBBY as well, where it does not
      * exist and no ship has orders of any kind.
      */
+    /* ⭐⭐ WALKERS_OF_SIGMA_PLAN.md 3.14c (Stage 19) - "THIS UNIT IS GOING INTO, OR COMING OUT OF,
+     * A HANGAR" (user request 2026-09-12). Returns { text, dir, carrier } or null.
+     *
+     * THE SINGLE READER for the map tooltip's line and the ship window's banner both, so the two
+     * can never drift apart - the same contract shipManager.getArrivalIniPenalty records.
+     *
+     * TWO THINGS WEAR THE SAME LABEL, and that is the point of the request:
+     *   1. AN ORDER. Any unit named in a hangar's queued Firing-phase dock or launch order - a
+     *      flight recovering, a ship entering a Docking Bay, an LCV coming back to its rail, and
+     *      the same three going out. Until now a player committed one of these and got no
+     *      confirmation anywhere on the unit itself.
+     *   2. THE RIDE. A Waymarker clamped to a Traveler's aft for the middle turn of its two-turn
+     *      procedure (3.14a). It REPLACES the ordinary "Attached to X" line and green banner,
+     *      which would otherwise describe a docking manoeuvre as a boarding action - the callers
+     *      suppress the attached line when this answers.
+     *
+     * ⚠️ A NEW FLIGHT LAUNCHING HAS NO UNIT TO LABEL, and is deliberately not covered (user
+     * ruling): a fighter launch order names a phpclass and a size, and the flight it creates does
+     * not exist until the order resolves. Only units that already exist get a banner; the launching
+     * carrier gets none either, which keeps "this label is about the unit wearing it" true.
+     *
+     * ⚠️ MASKING IS INHERITED, NOT RE-IMPLEMENTED. Queued orders ride the carrier's hangar system
+     * and are own-team-only (Hangar::stripForJson), so an opponent simply finds none - an intention
+     * to dock is a secret. shipsAttaching is published to everyone, because the ride itself is on
+     * the map in plain sight and its aft-hit redirect is something an attacker must be able to
+     * reason about before they shoot.
+     *
+     * Guarded for the LOBBY, which loads ships.js and has no gamedata.ships worth walking. */
+    getHangarManoeuvre: function getHangarManoeuvre(ship) {
+        if (!ship || typeof gamedata === 'undefined' || !gamedata.ships) return null;
+        if (gamedata.gamephase === -2) return null;   //lobby
+
+        var id = parseInt(ship.id, 10);
+        if (isNaN(id)) return null;
+
+        var named = function (orders) {
+            if (!Array.isArray(orders)) return false;
+            for (var i = 0; i < orders.length; i++) {
+                var o = orders[i];
+                if (!o) continue;
+                //flightId on a fighter recovery, shipId on a hull or an LCV - one shape each.
+                var oid = parseInt(o.shipId !== undefined ? o.shipId : o.flightId, 10);
+                if (oid === id) return true;
+            }
+            return false;
+        };
+
+        for (var s in gamedata.ships) {
+            var carrier = gamedata.ships[s];
+            if (!carrier || carrier === ship || !Array.isArray(carrier.systems)) continue;
+
+            for (var i = 0; i < carrier.systems.length; i++) {
+                var bay = carrier.systems[i];
+                if (!bay) continue;
+
+                //The RIDE first: it outranks a queued order on the same unit, being the thing that
+                //is actually happening rather than the thing that has been asked for.
+                if (Array.isArray(bay.shipsAttaching)) {
+                    for (var a = 0; a < bay.shipsAttaching.length; a++) {
+                        var e = bay.shipsAttaching[a];
+                        if (!e || parseInt(e.shipId, 10) !== id) continue;
+                        var out = (e.dir === 'out');
+                        return {
+                            dir: out ? 'out' : 'in',
+                            riding: true,
+                            carrier: carrier,
+                            text: (out ? 'Launching from ' : 'Docking with ') + carrier.name
+                        };
+                    }
+                }
+
+                if (named(bay.pendingDockOrders) || named(bay.pendingBayShipDockOrders) || named(bay.pendingLcvDockOrders)) {
+                    return { dir: 'in', riding: false, carrier: carrier, text: 'Docking with ' + carrier.name };
+                }
+                if (named(bay.pendingBayShipLaunchOrders) || named(bay.pendingLcvLaunchOrders)) {
+                    return { dir: 'out', riding: false, carrier: carrier, text: 'Launching from ' + carrier.name };
+                }
+            }
+        }
+        return null;
+    },
+
+    /* Is this unit riding a carrier through a Docking Bay's two-turn procedure (3.14a)? The ONE
+     * question every "it is docking, not being boarded" branch asks - the map tooltip, the ship
+     * window banner and the weapon menu all key off it, and none of them may read `attached` on its
+     * own, because a breaching pod wears that too. */
+    isDockingRider: function isDockingRider(ship) {
+        /* ⚠️ THE EARLY-OUT IS LOAD-BEARING, not tidiness. Stage 19's EW rule (3.14f) asks this of
+           the source AND the target of every EW button in the Initial Orders menu, and
+           weaponManager.selectWeapon asks it on every weapon click - so the fleet walk inside
+           getHangarManoeuvre would run dozens of times per gesture. A rider is ALWAYS attached
+           (that is what the ride is), so one empty-object test rejects every unit in every game
+           with no boarding and no docking manoeuvre in it. */
+        if (!ship || !ship.attached || Object.keys(ship.attached).length === 0) return false;
+        var m = shipManager.getHangarManoeuvre(ship);
+        return !!(m && m.riding);
+    },
+
+    /* ⭐ WALKERS_OF_SIGMA_PLAN.md 3.14d (Stage 19) - THE SHIP THIS ONE IS STOWED INSIDE, or null.
+     * The client twin of HangarOps::stowedInCarrier, and the ONE implementation on this side: the
+     * fleet list's row click, the EW Detector sweep and the Energy Draining Field overlay all ask
+     * it, and three copies of a three-armed walk is how they drift.
+     *
+     * Three homes, because there are three ways to be stowed: a Docking Bay's `shipsDocked`
+     * (WALKERS_OF_SIGMA_PLAN.md 3.14), an LCV rail's one `lcvDocked`, and a hangar's stored FLIGHTS
+     * under `hangarUsage[].dockedFlightId` - the same link TacGamedata::markJumpedDockedFlights
+     * follows.
+     *
+     * ⚠️ Ship ids are STRINGS on anything spawned mid-battle (LAST_INSERT_ID), so compare parsed
+     * numbers, never raw values.
+     * ⚠️ MASKED FOR AN OPPONENT. An enclosed bay's contents are own-team-only, so this answers null
+     * for an enemy's docked unit. Every caller is already own-side (the fleet list is the viewer's
+     * own list; the EW allowance is filtered to the viewer's own team), but a new one must check.
+     * Costs nothing until something is actually stowed: `removed` rejects the whole fleet in a
+     * normal turn. */
+    carrierHolding: function carrierHolding(ship) {
+        if (!ship || !ship.removed || typeof gamedata === 'undefined' || !gamedata.ships) return null;
+        var id = parseInt(ship.id, 10);
+        if (isNaN(id)) return null;
+
+        for (var i in gamedata.ships) {
+            var carrier = gamedata.ships[i];
+            if (!carrier || carrier === ship || !Array.isArray(carrier.systems)) continue;
+
+            for (var s = 0; s < carrier.systems.length; s++) {
+                var bay = carrier.systems[s];
+                if (!bay) continue;
+                var aboard = (bay.lcvDocked && parseInt(bay.lcvDocked.shipId, 10) === id)
+                    || (bay.isDockingBay && Array.isArray(bay.shipsDocked)
+                        && bay.shipsDocked.some(function (e) { return parseInt(e.shipId, 10) === id; }))
+                    || (Array.isArray(bay.hangarUsage)
+                        && bay.hangarUsage.some(function (e) { return e && parseInt(e.dockedFlightId, 10) === id; }));
+                if (aboard) return carrier;
+            }
+        }
+        return null;
+    },
+
+    /* Where a unit projects FROM for any rule that measures hexes: its own plotted position, or its
+     * carrier's if it is stowed inside one. Null when it is out of play for real.
+     * Mirror of HangarOps::projectionOriginFor. ⚠️ THE CARRIER'S HEX, NEVER THE STOWED UNIT'S OWN -
+     * a docked ship's last movement row is wherever it happened to dock and stops being true the
+     * moment the carrier moves, which is the whole reason this exists. */
+    getProjectionOrigin: function getProjectionOrigin(ship) {
+        var from = ship;
+        if (ship && ship.removed) {
+            var carrier = shipManager.carrierHolding(ship);
+            if (!carrier) return null;                            //genuinely gone, not stowed
+            if (shipManager.isDestroyedByDamage(ship)) return null;//stowed, but a wreck
+            from = carrier;
+        }
+        if (!from || shipManager.isDestroyed(from)) return null;
+        if (shipManager.getTurnDeployed(from) > gamedata.turn) return null;   //not on the board yet
+        return shipManager.getShipPosition(from);
+    },
+
     isJumpingToHyperspace: function isJumpingToHyperspace(ship) {
         if (!ship || typeof gamedata === 'undefined') return false;
         if (gamedata.gamephase === -2) return false;   //lobby
 
         if (shipManager.movement.hasJumpedOut(ship) && !shipManager.movement.hasCommittedJumpOut(ship)) return true;
+
+        /* ⭐ 3. A LEGACY DRIVE SET TO "JUMP TO HYPERSPACE" THIS TURN (user request 2026-09-11) - every
+           Ancient special jump drive, the Shadow Phasing Drive and the BSG / Star Wars / Trek drives:
+           the ship leaves at the END of the turn, so it is on its way out for the whole of it.
+           Not a leak: an enemy's power rows are stripped from the payload while Initial Orders are
+           open (TacGamedata::deleteHiddenData) and are public from Movement on, the same moment
+           every other jump declaration becomes public. The destroyed test stops the banner outliving
+           the jump itself (the boost row is still there for the rest of that turn). */
+        if (!shipManager.isDestroyed(ship)) {
+            var jumpingEngine = shipManager.movement.getJumpingOutEngine(ship);
+            if (jumpingEngine && shipManager.movement.isLegacyJumpEngine(jumpingEngine)) return true;
+        }
         /*
         if (typeof weaponManager === 'undefined') return false;
 
@@ -1179,6 +1365,20 @@ window.shipManager = {
         if (ship.removed && ship.spawned !== undefined && ship.spawned !== -1 &&
             ship.removedTurn != null && ship.spawned >= ship.removedTurn &&
             gamedata.turn >= ship.removedTurn) return true;
+        if (gamedata.replay) {
+            //Hangar Ops: a launch (or escape) resolves at the END of its turn, so in the replay of
+            //that turn the unit was still aboard its carrier - but the replay loads the hangar as it
+            //stood at turn end and would draw it at its launch hex from the start of Movement (game
+            //7386). In live play hangarLaunchTurn is always a past turn. See BaseShip::$hangarLaunchTurn.
+            if (ship.hangarLaunchTurn != null && ship.hangarLaunchTurn >= gamedata.turn) return true;
+            //A flight a hangar SPAWNED (a fresh or split launch, a Fighter Bomb, an escape) has a ship
+            //row from then on, so every earlier replay loads it too - with no launch note yet and no
+            //persisted `spawned` to say it did not exist. Every unit bought for the battle has a turn 1
+            //'start' row, so a flight whose every movement row lies after this turn had not been
+            //launched yet. Flights only: other mid-battle spawns carry their own `spawned`.
+            if (ship.flight && Array.isArray(ship.movement) && ship.movement.length > 0 &&
+                ship.movement.every(function (move) { return move.turn > gamedata.turn; })) return true;
+        }
         if (!gamedata.isMyorMyTeamShip(ship) && ship.trueStealth && !shipManager.isDetected(ship)) return true; //Enemy, stealth ship and not currently detected
         //Stage 7 (Hangar Ops): a flight queued for deployment-phase dock isn't on the
         //board — its icon should be hidden until either the dock is cancelled or the

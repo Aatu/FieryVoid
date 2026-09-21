@@ -128,6 +128,39 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
     $dbManager->updateGamedata($gameData);
 }
 
+    /* ⭐ AN ANCIENT SHIP JUMPING OUT DECLARES NOTHING (user request 2026-09-11, JumpEngine::$ancientJump).
+     *
+     * Returns $orders minus every current-turn order a non-Walker Ancient ship would have fired, when
+     * its drive is set to "Jump to Hyperspace" in this same POST. Firing::withdrawFireFromJumpingUnits
+     * already stops them RESOLVING - but by then a ballistic has been sitting on the map as an
+     * incoming launch through Movement and Pre-Firing, for a ship that was never going to fire. Not
+     * writing it at all is what removes that.
+     *
+     * ⭐ THIS WORKS HERE, AND NOT IN Firing::validateFireOrders, BECAUSE $ship IS THE POST-SIDE SHIP:
+     * the power loop above has just written its boost rows from the very same object, so
+     * getUnitJumpingEngine can see this turn's jump. validateFireOrders judges against the DB copy,
+     * which has not got them yet (arch_post_side_ship_reconstruction).
+     *
+     * Left in: the drive's own orders (a legacy drive has none, but a stale client might send one
+     * that validateFireOrders should judge), rams (a collision, not firing - the server lets them
+     * stand at resolution too) and log-only orders. */
+    private static function dropFireOfJumpingShip($ship, $orders, $turn)
+    {
+        $engine = JumpEngine::getUnitJumpingEngine($ship, $turn);
+        if (!$engine || !$engine->forbidsFireWhileJumping()) return $orders;
+
+        $kept = array();
+        foreach ($orders as $fire){
+            $weapon = $ship->getSystemById($fire->weaponid);
+            $keep = ((int)$fire->turn !== (int)$turn)
+                || ($weapon instanceof JumpEngine)
+                || ($weapon && !empty($weapon->isRammingAttack))
+                || Firing::isHyperspaceLogOrder($fire);
+            if ($keep) $kept[] = $fire;
+        }
+        return $kept;
+    }
+
     public function process(TacGamedata $gameData, DBManager $dbManager, Array $ships)
     {
 
@@ -216,6 +249,21 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
             if ($ship->userid != $gameData->forPlayer)
                 continue;
 
+            /* WALKERS OF SIGMA-957 (WALKERS_OF_SIGMA_PLAN.md 3.11, Stage 12) - THE FLIGHT EW CAP,
+               and the only place the server enforces one. EW::validateEW() below returns true
+               unconditionally (the ship-side budget check was disabled years ago for Constrained
+               ELINT hulls), so without this a tampered client could post a fighter flight with any
+               amount of OEW it liked - including a flight class that is supposed to have none.
+               clampFlightEw() returns immediately for anything that is not a FighterFlight, so every
+               ship in every game pays one instanceof. See its comment for what it clamps and why it
+               deliberately runs on ordinary flights too. */
+            EW::clampFlightEw($ship, $gameData->turn);
+
+            /* WALKERS_OF_SIGMA_PLAN.md 3.14f (Stage 19): a ship riding a Docking Bay's aft spends no
+               EW, and nothing may be spent at one. $gd is the RELOADED authoritative gamedata -
+               $ship is the POST-side copy and has no attachment state of its own. */
+            EW::stripDockingRiderEw($ship, $gd, $gameData->turn);
+
             if (EW::validateEW($ship, $gd)){
                 $dbManager->submitEW($gameData->id, $ship->id, $ship->EW, $gameData->turn);
             }else{
@@ -283,6 +331,10 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
 
             $orders = ($gateEngineOrders !== null) ? $gateEngineOrders : $ship->getAllFireOrders();
 
+            //An Ancient ship that has set its drive to jump out may not fire this turn, so what it
+            //declared is never written - see the method.
+            if ($gateEngineOrders === null) $orders = self::dropFireOfJumpingShip($ship, $orders, $gameData->turn);
+
             if (Firing::validateFireOrders($orders, $gd)){
                 $dbManager->submitFireorders($gameData->id, $orders, $gameData->turn, $gameData->phase);
             }else{
@@ -333,6 +385,71 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
      * unit the player owns rather than only the ones the POST mentioned. Skipping the write when
      * nothing changed keeps an ordinary turn's DB traffic at zero.
      */
+    /* ⭐ CAN $unit RIDE ABOARD LEGACY OPENER $opener, beside what $reserved already promises? (user
+     * ruling 2026-09-11 - see JumpEngine::isLegacyOpener.) A FIGHTER FLIGHT whose whole flight fits the
+     * opener's hangars, or a SHIP one of its Docking Bays takes, with room (WALKERS_OF_SIGMA_PLAN.md
+     * 3.14b, user 2026-09-11). On success its boxes are added to $reserved, so the next berth in the
+     * pass sees them taken - the cumulative check the client's manifest dialog makes with
+     * DeploymentDock.planFlightsIntoCarrier. Fighters are packed in the Deployment dock's own order
+     * (HangarOps::sortBaysReservedFirst - a Docking Bay last), so both sides promise the same bays.
+     *
+     * The same bay rules the deploy-start dock uses (HangarOps): category, per-bay class allow-list,
+     * integrated Shadow bays for their own fighters only, box cost per craft, catapults 1:1, and the
+     * carrier-wide custom-fighter and category caps. ⚠️ NOT THE AUTHORITY - the Deployment phase's
+     * dock (HangarOps::performDeployStartDockFromOrders) is, and a flight that fails there is simply
+     * not placed and goes back to hyperspace. This only stops a berth being written that could
+     * never be honoured. */
+    private static function legacyBerthFits($unit, $opener, array &$reserved)
+    {
+        if (!($unit instanceof FighterFlight)){
+            $boxes = HangarOps::bayShipBoxes($unit);
+            foreach (HangarOps::collectHangars($opener) as $bay){
+                if (empty($bay->isDockingBay) || $bay->isDestroyed()) continue;
+                if (!HangarOps::bayDocksShipClass($bay, (string)$unit->phpclass)) continue;
+                $free = HangarOps::bayFreeBoxesForShips($bay, $opener) - (isset($reserved[$bay->id]) ? $reserved[$bay->id] : 0);
+                if ($free < $boxes) continue;
+                $reserved[$bay->id] = (isset($reserved[$bay->id]) ? $reserved[$bay->id] : 0) + $boxes;
+                return true;
+            }
+            return false;
+        }
+
+        $category = HangarOps::trueSizeOf($unit);
+        $bpc      = HangarOps::boxesPerCraftForClass($unit->phpclass);
+        $size     = max(1, (int)$unit->flightSize);
+
+        $customName = isset($unit->customFtrName) ? (string)$unit->customFtrName : '';
+        if ($customName !== '' && HangarOps::customFighterRemaining($opener, $customName) < $size) return false;
+        if (HangarOps::categoryCapRemaining($opener, $category) < $size) return false;
+
+        $plan = array();
+        $remaining = $size;
+        foreach (HangarOps::sortBaysReservedFirst(HangarOps::collectHangars($opener), $unit) as $hangar){
+            if ($remaining <= 0) break;
+            if ($hangar->isDestroyed()) continue;
+            if (!empty($hangar->isShadowHangar) && $unit->phpclass !== 'ShadowMediumFighterFlight') continue;
+            if (!HangarOps::hangarAcceptsFighterClass($hangar, $unit)) continue;
+
+            $isCatapult = !empty($hangar->isCatapult);
+            $free = HangarOps::freeBoxesByCategory($hangar, $category, $opener)
+                  - (isset($reserved[$hangar->id]) ? $reserved[$hangar->id] : 0);
+            if ($free <= 0) continue;
+
+            $fit = $isCatapult ? (int)$free : (int)floor($free / max(0.0001, $bpc));
+            if ($fit <= 0) continue;
+
+            $take = min($remaining, $fit);
+            $plan[$hangar->id] = $isCatapult ? $take : $take * $bpc;
+            $remaining -= $take;
+        }
+        if ($remaining > 0) return false;
+
+        foreach ($plan as $hangarId => $boxes){
+            $reserved[$hangarId] = (isset($reserved[$hangarId]) ? $reserved[$hangarId] : 0) + $boxes;
+        }
+        return true;
+    }
+
     private static function persistManifest(TacGamedata $gameData, DBManager $dbManager, Array $ships)
     {
         /* ⚠️ THE RULE GATE IS AN EFFICIENCY GUARD AS WELL AS A CORRECTNESS ONE, and it must stay
@@ -375,12 +492,26 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
 
         self::collectGateOpeners($gd, $gameData, $openers);
 
+        $reserved = array();   //per LEGACY opener: hangar id => boxes promised earlier in this pass
+
         foreach ($gd->ships as $unit){
             if ($unit->userid != $gameData->forPlayer) continue;
             if (!$unit->isReinforcement()) continue;
 
             $wanted = isset($claims[(int)$unit->id]) ? $claims[(int)$unit->id] : null;
             if ($wanted !== null && !isset($openers[$wanted])) $wanted = null; //no such exit
+
+            /* ⭐ A LEGACY OPENER CARRIES ONLY FIGHTERS (AND DOCKING BAY SHIPS), AND ONLY WHAT ITS HANGARS
+               HOLD (user ruling 2026-09-11) - see JumpEngine::isLegacyOpener. The opener's own booking (its own id) is
+               not a ride and passes untouched. Anything else is refused here as "no berth", exactly as
+               a berth on a missing exit is: the unit simply stays in hyperspace. */
+            if ($wanted !== null && $wanted !== (int)$unit->id){
+                $host = $gd->getShipById($wanted);
+                if (JumpEngine::isLegacyOpener($host)){
+                    if (!isset($reserved[$wanted])) $reserved[$wanted] = array();
+                    if (!self::legacyBerthFits($unit, $host, $reserved[$wanted])) $wanted = null;
+                }
+            }
 
             $current = ($unit->arrivalVia === null) ? null : (int)$unit->arrivalVia;
             if ($current === $wanted) continue; //nothing to write

@@ -495,8 +495,12 @@ window.ajaxInterface = {
 
             for (var s = 0; s < carrier.systems.length; s++) {
                 var rail = carrier.systems[s];
-                if (!rail || !rail.lcvDocked) continue;
-                if (parseInt(rail.lcvDocked.shipId, 10) !== lcvId) continue;
+                if (!rail) continue;
+                //A rail's one LCV, or one of a Docking Bay's ships (WALKERS_OF_SIGMA_PLAN.md 3.14).
+                var aboard = (rail.lcvDocked && parseInt(rail.lcvDocked.shipId, 10) === lcvId)
+                    || (rail.isDockingBay && Array.isArray(rail.shipsDocked)
+                        && rail.shipsDocked.some(function (e) { return parseInt(e.shipId, 10) === lcvId; }));
+                if (!aboard) continue;
 
                 /* The same "has it left through a vortex?" pairing fleetList.js uses: a
                    COMMITTED jump-out counts from the moment it is plotted (the server does not

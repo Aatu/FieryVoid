@@ -12,7 +12,7 @@ class Waymarker extends HeavyCombatVessel{
         $this->canvasSize = 180;
 	    $this->isd = 'Ancient';
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
-		$this->variantOf = "NONE";
+		//$this->variantOf = "NONE";
 				
         $this->gravitic = true;
 		$this->advancedArmor = true;  
@@ -26,6 +26,9 @@ class Waymarker extends HeavyCombatVessel{
         $this->rollcost = 1;
         $this->pivotcost = 5;
 		$this->iniativebonus = 10 *5;
+		//Docking Bay box cost (WALKERS_OF_SIGMA_PLAN.md 3.14, D18): the whole 24-box bay. Counted by the
+		//Fleet Checker today; the two-turn dock/launch itself (3.14a) is deferred.
+		$this->unitSize = 1/24;
 
 		$this->fighters = array("Mapmaker Probes"=>18);
 
@@ -40,7 +43,9 @@ class Waymarker extends HeavyCombatVessel{
 		$this->addPrimarySystem($scanner);			
 		$this->addPrimarySystem(new Engine(7, 20, 0, 12, 4));
         $this->addPrimarySystem(new SelfRepair(6, 15, 5)); //armor, structure, output
-		$this->addPrimarySystem(new JumpEngine(7, 15, 8, 6));
+		$jumpEngine = new JumpEngine(7, 15, 8, 6);
+		$jumpEngine->markExtraDimensional(); //Stage 20: a Walker drive (Stage 15) that can also abduct enemy units
+		$this->addPrimarySystem($jumpEngine);
 		//STAGE 7: Energy Draining Net. Args are (armour, maxhealth, powerReq);
 		//0 for health/power takes the CONTROL SHEET values in baseSystems.php - health 12, power 4.
 		//⚠️ ONE Net alone can only field its own hex: linking needs a SECOND Net within 3 hexes,
@@ -62,10 +67,23 @@ class Waymarker extends HeavyCombatVessel{
 		//⚠️ 0..360 rather than 0..0 on purpose - a system with both arcs at zero has its SECTION's
 		//arc stamped onto it by addSystem() (arch_addsystem_section_arc_trap), and the probe is
 		//launched in any direction.
-		$this->addFrontSystem(new EnergyDrainingMine(6, 0, 0, 240, 360));	
+		$this->addFrontSystem(new EnergyDrainingMine(6, 0, 0, 240, 360));			
+		$this->addFrontSystem(new EnergyDrainingMine(6, 0, 0, 300, 60));	
+		$this->addFrontSystem(new EnergyDrainingMine(6, 0, 0, 300, 60));				
 		$this->addFrontSystem(new EnergyDrainingMine(6, 0, 0, 0, 120));				
 		$this->addFrontSystem(new ChromaticPulseDriver(6, 0, 0, 240, 360));
-		$this->addFrontSystem(new ChromaticPulseDriver(6, 0, 0, 0, 120));		
+		$this->addFrontSystem(new ChromaticPulseDriver(6, 0, 0, 0, 120));
+
+		//STAGE 10A: EW Detector. Args are (armour, maxhealth, powerReq, range);
+		//0 for health/power/range takes the CONTROL SHEET values in baseSystems.php - health 20,
+		//power 6, range 20 hexes.
+		//⚠️ NO ARCS. The detector declares 0..360 in its own constructor (it is omnidirectional),
+		//which is also what keeps addSystem() from stamping the FRONT section's arc onto it
+		//(arch_addsystem_section_arc_trap).
+		//⚠️ ONE detector grants an allowance of 1 saved EW point to every friendly unit within 20
+		//hexes. Testing the degrading ladder needs FOUR Waymarkers for the first bracket and NINE
+		//to reach the quarter-point one - see EW::savedEwAllowanceFromDetectors.
+		$this->addFrontSystem(new EWDetector(6, 0, 0, 0));		
 
 
 		$this->addAftSystem(new MediumLightningArray(6, 0, 0, 120, 240));
@@ -86,7 +104,7 @@ class Waymarker extends HeavyCombatVessel{
 			0=> array( //PRIMARY
 				7 => "Structure",
 				9 => "Thruster",				
-				11 => "Jump Engine",
+				11 => "Extra-Dimensional Jump Drive",
 				12 => "Energy Draining Net",			
 				13 => "Self Repair",
 				15 => "Scanner",                
@@ -98,7 +116,7 @@ class Waymarker extends HeavyCombatVessel{
 				3 => "Thruster",
 				6 => "Medium Lightning Array",
 				8 => "Energy Draining Mine",
-				//10 => "EW Detector",								
+				10 => "Electronic Warfare Detector",
 				12=> "Chromatic Pulse Driver",
 				18 => "Structure",
 				20 => "Primary",
@@ -106,7 +124,7 @@ class Waymarker extends HeavyCombatVessel{
 			2=> array( //Aft
 				4 => "Thruster",
 				7 => "Medium Lightning Array",
-				9=> "Chromatic Pulse Driver",				
+				9 => "Chromatic Pulse Driver",				
 				11 => "Hangar",
 				18 => "Structure",
 				20 => "Primary",

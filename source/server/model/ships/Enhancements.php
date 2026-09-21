@@ -2353,12 +2353,12 @@ class Enhancements{
 						}
 						break;
 
-					case 'ELITE_CREW': //Elite Crew: +5 Initiative, +2 Engine, +1 Sensors, +2 Reactor power, -1 Profile, -2 to critical results, +1 to hit all weapons
+					case 'ELITE_CREW': //Elite Crew: +5 Initiative, +2 Engine, +1 Sensors, +2 Reactor power, -1 Profile, -1 to critical results, +1 to hit all weapons
 						//fixed values
 						$ship->forwardDefense -= $enhCount;
 						$ship->sideDefense -= $enhCount;
 						$ship->iniativebonus += $enhCount*5;
-						$ship->critRollMod -= $enhCount*2;
+						$ship->critRollMod -= $enhCount;
 						$ship->toHitBonus += $enhCount;						
 						
 						//system mods: Scanner						

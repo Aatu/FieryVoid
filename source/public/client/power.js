@@ -576,11 +576,143 @@ shipManager.power = {
 						}
 						if (power.type == 3) output -= system.powerReq;
 					}
+					/* WALKERS_OF_SIGMA_PLAN.md 3.18 (Stage 20) - an Extra-Dimensional Jump Drive abduction
+					   costs the drive's powerReq again per power level. Inside the online branch, so an
+					   offline drive (which cannot hold an order - canOffline refuses one) charges nothing.
+					   Exactly 0 on every other system: only a jump engine defines it, and only one holding
+					   an abduction order this turn answers anything but 0. */
+					if (system.name === 'jumpEngine' && typeof system.getAbductionPowerDraw === 'function') {
+						output -= system.getAbductionPowerDraw();
+					}
 				}
 			}
 		}
 
+		/* WALKERS_OF_SIGMA_PLAN.md 3.16 (Stage 18, D20) - THE SHIPS IN THIS HULL'S DOCKING BAY FEED IT.
+		   LAST, after this hull's own balance is fully known, and additive: a grant from elsewhere is
+		   not a system's draw and must not be folded into the loop above, which is indexed by this
+		   ship's own systems and reads powerReq off each one. Exactly 0 on every other hull in the
+		   game - see getDockedPowerSummary for what it costs to answer that. */
+		output += shipManager.power.getDockedPowerShared(ship);
+
 		return output;
+	},
+
+	/* WALKERS_OF_SIGMA_PLAN.md 3.16 (Stage 18, D20) - POWER SHARED BY THE SHIPS IN THIS HULL'S BAYS.
+	   Every Docking Bay marked `sharesDockedPower` (the Traveler's aft bay, and nothing else in the
+	   game) is asked for the SHIPS aboard it. Each one's reactor surplus is read with the same
+	   getReactorPower every hull uses, the surpluses are summed, and the total is divided by 4 and
+	   FLOORED: four points of docked surplus give the carrier one, three give it none.
+	   Returns {donors, surplus, shared} because the Reactor tooltip has to show the pooled surplus
+	   and the donor count as well as the grant - a player who has pooled 3 and been given 0 needs to
+	   be able to see why (SystemInfo.js).
+
+	   ⚠️ SHIPS ONLY, NEVER A FLIGHT (D20). Docked fighters are not in `shipsDocked` at all - they
+	   ride hangarUsage - so the `flight` test below is belt and braces against a bay that ever
+	   lists one.
+	   ⚠️ THE DONOR IS NOT CHARGED. D20 is a transfer at a quarter rate, not a spend, and it has to
+	   be: deducting the four points would drop the donor's surplus and the very next recompute would
+	   take the grant away again, oscillating. What the donor really pays is the powering-down its
+	   owner must do to have a surplus at all, which is exactly why 3.16(a) is the same stage.
+	   ⚠️ A NEGATIVE surplus contributes NOTHING rather than taxing the carrier - clamped per ship,
+	   BEFORE the sum, so one over-boosted docked hull cannot drain the Traveler.
+	   ⚠️⚠️ THE FIGURE IS ADVISORY, and that is a recorded decision rather than an oversight: there
+	   is no server twin of getReactorPower anywhere in the tree, the whole power balance lives in
+	   this file, and the server trusts the power rows it is handed. See DockingBay::$sharesDockedPower
+	   (baseSystems.php) and plan 3.16a.
+	   ⭐ AN ENEMY VIEWER COMPUTES 0 HERE AND IS MEANT TO. DockingBay::stripForJson masks shipsDocked
+	   to [] for anyone outside the owning team, so the grant is INVISIBLE to an opponent rather than
+	   leaking what the Traveler is carrying - the safe direction for a number nothing enforces.
+	   ⚠️ THE LOBBY HAS A DIFFERENT gamedata.getShip - `getShip(phpclass, faction)`, answering with a
+	   BLUEPRINT - so this walk must never start there. Two things guarantee it does not: the
+	   gamephase -2 early-out, and a bay bought in the lobby having an empty shipsDocked. */
+	getDockedPowerSummary: function getDockedPowerSummary(carrier) {
+		var none = { donors: 0, surplus: 0, shared: 0 };
+		if (!carrier || carrier.flight || !carrier.systems) return none;
+		if (gamedata.gamephase === -2) return none;          //the lobby - see the ⚠️ above
+		/* Re-entrancy guard. getReactorPower(donor) calls straight back here for the DONOR's own
+		   bays; a docked ship cannot itself hold docked ships today, so this can only ever break a
+		   cycle that should not exist - but a stack overflow is not the way to find out that it does. */
+		if (shipManager.power.dockedPowerWalk) return none;
+
+		var donors = 0, surplus = 0;
+		shipManager.power.dockedPowerWalk = true;
+		try {
+			for (var s = 0; s < carrier.systems.length; s++) {
+				var bay = carrier.systems[s];
+				if (!bay || !bay.sharesDockedPower || !bay.isDockingBay) continue;
+				/* ⭐ EITHER LIST, and an OUTSIDE VIEWER gets the second one (plan 3.16b, user
+				   ruling 2026-09-12). The owner and their team get the real shipsDocked; everyone
+				   else gets sharesDockedPowerIds - bare ids, published by DockingBay::stripForJson
+				   precisely so that this function, and not a second implementation on the server,
+				   is what answers the question for both players. The docked ships' own rows and
+				   power are in every viewer's payload already (the removed flag is published
+				   unconditionally), so the ids are the only thing that was missing.
+				   ⚠️ NEVER read boxes/phpclass/dockTurn off an entry here: the outside-viewer
+				   form has none, which is exactly why it is a separate key. */
+				var dockedIds = null;
+				if (Array.isArray(bay.shipsDocked) && bay.shipsDocked.length > 0) {
+					dockedIds = bay.shipsDocked.map(function (e) { return e.shipId; });
+				} else if (Array.isArray(bay.sharesDockedPowerIds) && bay.sharesDockedPowerIds.length > 0) {
+					dockedIds = bay.sharesDockedPowerIds;
+				}
+				if (!dockedIds) continue;
+				//A destroyed bay has already put its ships back on the board
+				//(HangarOps::onDockingBayDestroyed), so it taps nothing while the list drains.
+				if (shipManager.systems.isDestroyed(carrier, bay)) continue;
+
+				for (var i = 0; i < dockedIds.length; i++) {
+					var docked = gamedata.getShip(dockedIds[i]);
+					if (!docked || docked === carrier || docked.flight) continue;
+					if (!docked.removed) continue;                             //launched again already
+					if (shipManager.isDestroyedByDamage(docked)) continue;      //a wreck generates nothing
+					if (shipManager.systems.isReactorDestroyed(docked)) continue;
+					var reactor = shipManager.systems.getSystemByName(docked, "reactor");
+					if (!reactor) continue;
+					donors++;
+					var own = shipManager.power.getReactorPower(docked, reactor);
+					if (own > 0) surplus += own;
+				}
+			}
+		} finally {
+			shipManager.power.dockedPowerWalk = false;
+		}
+
+		return { donors: donors, surplus: surplus, shared: Math.floor(surplus / 4) };
+	},
+
+	//The grant alone - what getReactorPower adds to the carrier's balance. See the summary above.
+	getDockedPowerShared: function getDockedPowerShared(carrier) {
+		return shipManager.power.getDockedPowerSummary(carrier).shared;
+	},
+
+	//Transient re-entrancy latch for the walk above; never persisted, never serialised.
+	dockedPowerWalk: false,
+
+	/* WALKERS_OF_SIGMA_PLAN.md 3.16 (Stage 18) - "MAY THE PLAYER STILL MANAGE THIS UNIT'S POWER?",
+	   and it is the ONE named predicate the power mutations below ask instead of isDestroyed.
+
+	   A ship sitting in a Traveler's Docking Bay - and equally a rail-parked LCV or a docked
+	   flight - is `removed`, and shipManager.isDestroyed folds `removed` in. So every mutation in
+	   this file refused on one: onOfflineClicked, onOnlineClicked, onOverloadClicked and
+	   onStopOverloadClicked each opened with `if (shipManager.isDestroyed(ship)) return;`, which is
+	   why a docked ship's Power Settings menu drew its buttons and then did nothing at all when they
+	   were clicked (user report 2026-09-12). Boost and unboost already worked - clickPlus/clickMinus
+	   never had the guard - which is what made the menu look half-broken rather than switched off.
+
+	   ⚠️⚠️ NOT A CHANGE TO shipManager.isDestroyed, which also stands in front of shouldBeHidden,
+	   the fleet list, the icon, the movement sequence and every "is this unit on the board" test in
+	   the client - widening it would put a docked ship back on the map (plan 3.16). This is the same
+	   carve-out, on the same reasoning and with the same existing predicate, as
+	   SystemIcon.clickSystem's `stowed` from Stage 17: isDestroyedByDamage is the codebase's name
+	   for "the same question asked of the damage alone", so a unit that is removed but not a wreck is
+	   parked out of sight and is still its owner's to manage.
+	   ⚠️ POWER PATHS ONLY, and it changes NOTHING for a unit on the board: with `removed` false this
+	   answers exactly what `!shipManager.isDestroyed(ship)` answered. Ownership is still checked
+	   separately at every call site - this predicate is about the unit's state, not about whose it is. */
+	isPowerManageable: function isPowerManageable(ship) {
+		if (!ship) return false;
+		return !shipManager.isDestroyedByDamage(ship);
 	},
 
 	isPowerless: function isPowerless(ship) {
@@ -1140,6 +1272,9 @@ shipManager.power = {
 
 			array[i].power.push({ id: null, shipid: ship.id, systemid: array[i].id, type: 1, turn: gamedata.turn, amount: 0 });
 
+			//Stage 20 - same rule as onOfflineClicked: a deactivated jump drive's abduction is cancelled.
+			if (typeof array[i].getAbductionOrder === 'function' && array[i].getAbductionOrder()) array[i].removeAbductionOrder();
+
 			shipManager.power.stopOverloading(ship, array[i]);
 		}
 
@@ -1164,7 +1299,7 @@ shipManager.power = {
 
 		if (gamedata.gamephase != 1) return;
 
-		if (shipManager.isDestroyed(ship) || shipManager.systems.isDestroyed(ship, system)) return;
+		if (!shipManager.power.isPowerManageable(ship) || shipManager.systems.isDestroyed(ship, system)) return;
 
 		if (!gamedata.isMyShip(ship)) return;
 
@@ -1189,6 +1324,14 @@ shipManager.power = {
 
 		if (system.weapon) {
 			weaponManager.unSelectWeapon(ship, system);
+		}
+
+		/* WALKERS_OF_SIGMA_PLAN.md 3.18 (Stage 20, user ruling 2026-09-13): deactivating a jump drive CANCELS
+		   the abduction it was declaring, rather than leaving an order that delivers and costs nothing.
+		   canOffline cannot refuse the click the way it refuses a gun with a shot declared -
+		   weaponManager.hasFiringOrder does not count this order in Initial Orders (plan trap 58). */
+		if (system instanceof JumpEngine && typeof system.getAbductionOrder === 'function' && system.getAbductionOrder()) {
+			system.removeAbductionOrder();
 		}
 
 		//Add new warning for when people ignore tooltip and try to deactivate Jump Drive before they should - DK 10/24
@@ -1244,7 +1387,7 @@ shipManager.power = {
 
 		if (gamedata.gamephase != 1) return;
 
-		if (shipManager.isDestroyed(ship) || shipManager.systems.isDestroyed(ship, system)) return;
+		if (!shipManager.power.isPowerManageable(ship) || shipManager.systems.isDestroyed(ship, system)) return;
 
 		if (ship.userid != gamedata.thisplayer) return;
 
@@ -1266,7 +1409,7 @@ shipManager.power = {
 	onOverloadClicked: function onOverloadClicked(ship, system) {
 		if (gamedata.gamephase != 1) return;
 
-		if (shipManager.isDestroyed(ship) || shipManager.systems.isDestroyed(ship, system)) return;
+		if (!shipManager.power.isPowerManageable(ship) || shipManager.systems.isDestroyed(ship, system)) return;
 
 		if (ship.userid != gamedata.thisplayer) return;
 
@@ -1282,7 +1425,12 @@ shipManager.power = {
 
 		if (gamedata.gamephase != 1) return;
 
-		if (shipManager.isDestroyed(ship) || shipManager.isDestroyed(ship, system) /*|| shipManager.isAdrift(ship)*/) return; //should work with disabled ship after all!
+		//⚠️ The second clause has always been isDestroyed(ship) a second time - that function takes ONE
+		//argument - so it never asked anything about the system. Left exactly as it was in effect
+		//(deliberately NOT quietly turned into a real system test, which would be a rules change on
+		//every hull in the game); only the ship-level half is relaxed for a stowed unit. See
+		//isPowerManageable, and the same observation on SystemIcon.clickSystem's guard in Stage 17.
+		if (!shipManager.power.isPowerManageable(ship) /*|| shipManager.isAdrift(ship)*/) return; //should work with disabled ship after all!
 
 		if (ship.userid != gamedata.thisplayer) return;
 

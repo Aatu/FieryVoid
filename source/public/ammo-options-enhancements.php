@@ -97,7 +97,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
       <li><strong>Class D - Light Missile (2178)</strong> - Range 15 - Damage 12 - Fire Control: +3/+3/+3,</li>   
       <li><strong>Class F - Flash Missile (2225)</strong> - Range 20 - Damage 20 - Fire Control: +3/+3/+3 - Deals Flash damage,</li>  
       <li><strong>Class H - Heavy Missile (2225)</strong> - Range 10 - Damage 30 - Fire Control: +0/+3/+3,</li>         
-      <li><strong>Class HM - Homing Missile (2252)</strong> - Range 20 - Damage 20 - Fire Control: +3/+3/+3 - Kor-Lyan only. If it misses without being shot down it stays in play and attacks again next turn, launching from its target's previous hex. Defensive fire that would have turned the miss into a hit destroys it instead. Lost once its cumulative travel exceeds its distance range. The enemy is not told a missile is Homing until it has missed once.</li>
+      <li><strong>Class HM - Homing Missile (2252)</strong> - Range 20 - Damage 20 - Fire Control: +3/+3/+3 - Kor-Lyan only. If it misses without being intercepted it stays in play and attacks again, launching from its target's previous hex, until out of fuel.</li>
       <li><strong>Class I - Interceptor Missile (2250/2263)</strong> - Range 0 - Damage 0 - Fire Control: -/-/-,  Fires defensively for -30 intercept rating against ballistic weapons,</li>      
       <li><strong>Class L - Long Range Missile (2225)</strong> - Range 30 - Damage 15 - Fire Control: +3/+3/+3,</li>  
       <li><strong> Class K - Starburst Missile (2260/2264)</strong> - Range 15 - Damage 10*[D3+3] - Fire Control: +3/+3/+3 - Deals damage in pulse mode,</li>   
@@ -147,7 +147,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <ul>  
       <li><strong>Elite Crew</strong>
         <ul class="circle-list">
-            <li>Effect: +1 to hit with all weapons, +5 Initiative, +2 Engine, +1 Sensors, +2 Reactor power, -5% Defence Rating, -2 to critical results</li>
+            <li>Effect: +1 to hit with all weapons, +5 Initiative, +2 Engine, +1 Sensors, +2 Reactor power, -5% Defence Rating, -1 to critical results</li>
             <li>Points Cost: +40% of ship cost (second time: +60%)</li>
             <li>Limit: 2</li>
         </ul>      

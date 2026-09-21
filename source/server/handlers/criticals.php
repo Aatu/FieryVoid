@@ -151,6 +151,10 @@ class Criticals{
          * sustained damage + 2d10 fragments — same as a destroyed rail. */
         HangarOps::processLCVCarrierDestruction($gamedata);
 
+        /* Docking Bay (WALKERS_OF_SIGMA_PLAN.md 3.14): the same disposition for the whole ships in
+         * a destroyed carrier's Docking Bay - each is forced out with the bay's damage + 2d10. */
+        HangarOps::processDockingBayCarrierDestruction($gamedata);
+
         /* HK Jamming: roll the ELINT-jamming disruption table for every jammed
          * remote-controlled fighter flight (Orieni Hunter-Killers). Runs last so it
          * sees final post-firing state (impact exemption reads this turn's ram) and

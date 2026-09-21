@@ -58,7 +58,7 @@ class triadDevil extends MediumShip{
 		$this->addAftSystem(new GraviticThruster(7, 15, 0, 4, 2));
 		$this->addAftSystem(new GraviticThruster(7, 15, 0, 4, 2));
         $this->addAftSystem(new SelfRepair(8, 9, 4)); //armor, structure, output
-		$this->addAftSystem(new JumpEngine(8, 15, 5, 8));        
+		$this->addAftSystem((new JumpEngine(8, 15, 5, 8))->markAncient());        
 	
         $this->addPrimarySystem(new Structure( 8, 90));
 		

@@ -222,9 +222,36 @@ class SystemIcon extends React.Component {
 
         if ((gamedata.waiting || gamedata.replay) && !preBattleDamage) return;
 
+        /* WALKERS_OF_SIGMA_PLAN.md 3.15 (Stage 17) - STOWED IS NOT DEAD, AND THIS ONE LINE IS WHY
+           A DOCKED SHIP'S WHOLE WINDOW WAS INERT (user report 2026-09-12).
+           shipManager.isDestroyed folds `removed` in, so every system icon of a ship sitting in a
+           Traveler's Docking Bay - or of a rail-parked LCV, or a docked flight - failed this guard
+           and no click did anything at all. isDestroyedByDamage is the codebase's existing name for
+           the same question asked of the damage alone ("gone" vs "parked out of sight"), so a
+           stowed unit is one that is removed and NOT a wreck.
+           ⚠️⚠️ NOT a change to isDestroyed, which also stands in front of shouldBeHidden, the fleet
+           list, the icon and every "is this unit on the board" test - widening it would put a
+           docked ship back on the map (plan §3.16). It is carved out HERE and nowhere else, and a
+           stowed unit is diverted straight to the info menu below rather than being let into the
+           select / target / launch workflow it has no business in while it is inside a hangar. */
+        const stowed = !!ship.removed && !shipManager.isDestroyedByDamage(ship);
+
         //clickableWhenDestroyed: a destroyed Kirishiac Orbital can still be recovered (docked) for regeneration, so its menu must stay reachable
         //preBattleDamage also passes: you must be able to UN-destroy what you just destroyed.
-        if (!preBattleDamage && (shipManager.isDestroyed(ship) || (shipManager.isDestroyed(ship, system) && !system.clickableWhenDestroyed)) /*|| shipManager.isAdrift(ship)*/) return;//should work with disabled ship after all!
+        if (!preBattleDamage && !stowed && (shipManager.isDestroyed(ship) || (shipManager.isDestroyed(ship, system) && !system.clickableWhenDestroyed)) /*|| shipManager.isAdrift(ship)*/) return;//should work with disabled ship after all!
+
+        /* A stowed unit's icons open the INFO MENU and nothing else. That is the whole point of the
+           carve-out: from Stage 17 the player manages a docked ship's own repair queue in this
+           window, and from Stage 18 its power - but it is not on the board, so it must not reach
+           weapon selection, called shots, a hangar launch dialog or an LCV rail below.
+           Enemy/allied stowed units are simply refused: SystemTargeted on something inside a
+           hangar is meaningless, and a docked enemy is masked out of the payload anyway. */
+        if (stowed && !preBattleDamage) {
+            if (gamedata.isMyShip(ship)) {
+                window.uiEvents.relay('SystemClicked', { ship: ship, system: system, element: e.currentTarget, showMenu: true });
+            }
+            return;
+        }
 
         //New block to allow called shots on allied ships
         if (gamedata.rules && gamedata.rules.friendlyFire === 1) {
@@ -251,9 +278,13 @@ class SystemIcon extends React.Component {
         //is narrow - Firing phase, own undamaged powered loaded weapon with an intercept rating in
         //some mode, nothing fired this turn, and a round in the magazine - so it can only ever ADD
         //the weapons this feature exists for.
+        //WALKERS §3.18 (Stage 20): a Walker jump drive is not ballistic, so the Initial Orders clause
+        //never selects it - but it declares an abduction in exactly that phase. Asked of the drive.
+        var abductionSelectable = typeof system.canSelectForAbduction === 'function' && system.canSelectForAbduction(ship);
+
         if (!spentLockedAugmenter
             && (system.weapon && (gamedata.gamephase === 3 && !system.ballistic && !system.preFires) || (gamedata.gamephase === 1 && system.ballistic) || (gamedata.gamephase === 5 && system.preFires)
-                || weaponManager.canManuallyInterceptWith(ship, system))) {
+                || weaponManager.canManuallyInterceptWith(ship, system) || abductionSelectable)) {
             //cannoct SELECT weapon when unit is adrift though!
             if (!shipManager.isAdrift(ship)) {
                 if (gamedata.isMyShip(ship)) {
@@ -564,8 +595,13 @@ const renderBadges = (ship, system) => {
 
 //A "spent & locked" Gravitic Augmenter shows the spent (dimmed) look, not the active-firing orange
 //border — its committed order is not being fired/edited in the current phase (see isSpentLocked).
-const isFiring = (ship, system) => weaponManager.hasFiringOrder(ship, system)
+//WALKERS §3.18 (Stage 20): a Walker drive's abduction reads orange in Initial Orders like a jump point
+//declaration - hasFiringOrder cannot see it there, the drive being a legacy one (plan trap 58).
+const isFiring = (ship, system) => (weaponManager.hasFiringOrder(ship, system) || isDeclaringAbduction(system))
     && !(typeof system.isSpentLocked === 'function' && system.isSpentLocked());
+
+const isDeclaringAbduction = (system) => gamedata.gamephase === 1
+    && typeof system.getAbductionOrder === 'function' && Boolean(system.getAbductionOrder());
 
 /* A weapon whose entire contribution this turn is DEFENSIVE - one or more manual 'intercept'
    orders, or a 'selfIntercept' permission marker, and nothing aimed at anyone - reads GREEN rather

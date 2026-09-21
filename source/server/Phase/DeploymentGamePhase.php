@@ -286,6 +286,12 @@ class DeploymentGamePhase implements Phase
      * (CubeCoordinate rounds, and round() returns float in PHP), so `$d === 0` is false for a unit
      * standing exactly on the spot - the trap Stage 6 recorded and the shape of rule this is. */
     private static function validateReinforcementArrival($gamedata, $ship, $move) {
+        /* ⭐ A FIGHTER RIDING A LEGACY DRIVE HAS NO HEX OF ITS OWN (user ruling 2026-09-11). The drive
+           phased its own ship in and opened no jump point, so the flight is aboard it: the client
+           queues its deploy-start dock automatically and never places it. Only a stale or tampered POST
+           reaches here with a map position for one. */
+        if (JumpEngine::getLegacyRideHost($ship, $gamedata) !== null) return false;
+
         $vortex = JumpEngine::getArrivalVortex($ship, $gamedata);
 
         //No doorway: the exit closed, was never formed, or the berth names something that is

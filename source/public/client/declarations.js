@@ -362,16 +362,14 @@ window.declarations = {
 		    }
 	            dispFireEntry.count++;
 	            if(dispFireEntry.oppId > -1){ //fire at actual target
-			var modeIteration = 0;
-			modeIteration = order.firingMode; //change weapons data to reflect mode actually used
-			    if(modeIteration != weapon.firingMode){
-				while(modeIteration != weapon.firingMode){ //will loop until correct mode is found
-				weapon.changeFiringMode();
-				}
-			    }
+		      //Read the shot in the mode it was DECLARED in, then put the weapon back: `weapon`
+		      //is the live system object a new declaration reads firingMode off, so an unrestored
+		      //switch re-arms it behind the player's back - see weaponManager.setModeForFireOrder.
+		      var restoreMode = weaponManager.setModeForFireOrder(weapon, order);
 		      //`order` passed so a ballistic resolves ITS OWN launch hex - a homing missile on a
 		      //later pass flies in from its target's previous hex, not from its launcher.
 		      var toHit = weaponManager.calculateHitChange(ship, targetUnit, weapon, order.calledid, order).hitChance;
+		      weaponManager.restoreFiringMode(weapon, restoreMode);
 		      if (toHit < dispFireEntry.chanceMin) dispFireEntry.chanceMin = toHit;
 		      if (toHit > dispFireEntry.chanceMax) dispFireEntry.chanceMax = toHit;
 		    }			  
@@ -430,15 +428,11 @@ window.declarations = {
 			      dispShip.fire.push(dispFireEntry);
 			    }
 			    dispFireEntry.count++;		
-				var modeIteration = 0;		  
-				modeIteration = order.firingMode; //change weapons data to reflect mode actually used
-				    if(modeIteration != weapon.firingMode){
-					while(modeIteration != weapon.firingMode){ //will loop until correct mode is found
-					weapon.changeFiringMode();
-					}
-				    }
+			      //Mode saved and restored - see the matching call in the outgoing sweep above.
+			      var restoreMode = weaponManager.setModeForFireOrder(weapon, order);
 			      //`order` passed - see the matching call in the outgoing sweep above.
 			      var toHit = weaponManager.calculateHitChange(srcShip, ship, weapon, order.calledid, order).hitChance;
+			      weaponManager.restoreFiringMode(weapon, restoreMode);
 			      if (toHit < dispFireEntry.chanceMin) dispFireEntry.chanceMin = toHit;
 			      if (toHit > dispFireEntry.chanceMax) dispFireEntry.chanceMax = toHit;
 			  }

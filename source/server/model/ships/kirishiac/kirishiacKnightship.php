@@ -15,7 +15,8 @@ class KirishiacKnightship extends HeavyCombatVessel{
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
 	    //$this->notes = 'Atmospheric capable.';
 		$this->variantOf = 'Conqueror';
-		$this->occurence = 'rare';		
+		$this->occurence = 'rare';	
+        $this->canvasSize = 225;   			
 				
 		$this->agile = true;
         $this->gravitic = true;
@@ -56,7 +57,7 @@ class KirishiacKnightship extends HeavyCombatVessel{
         $this->addPrimarySystem(new SelfRepair(7, 8, 4)); //armor, structure, output
         $this->addPrimarySystem(new GraviticThruster(6, 15, 0, 6, 3));
         $this->addPrimarySystem(new GraviticThruster(6, 15, 0, 6, 4));
-		$this->addPrimarySystem(new JumpEngine(6, 20, 8, 9));
+		$this->addPrimarySystem((new JumpEngine(6, 20, 8, 9))->markAncient());
 
 		$orbitalA = new KirishiacOrbitalLight(5, 15, 'L', 'A', -7, $orbitalHitChart);
 		$beamA = new MedAntigravityBeam(5, 6, 2, 180, 360, 'A');

@@ -309,7 +309,14 @@ window.PhaseStrategy = function () {
         var changed = false;
 
         this.shipIconContainer.getArray().forEach(function (icon) {
-            var radius = anyField ? PhaseStrategy.getEdfRadiusForShip(icon.ship) : 0;
+            /* ⭐ Stage 19 (3.14d): the disc also covers any field projected by a unit STOWED in this
+               hull, because a docked ship has no icon of its own to hang one on and its field is
+               still operational (user ruling 2026-09-12). The larger of the two wins - they are
+               concentric, sharing the carrier's hex - so a Traveler carrying a Guideship draws the
+               Guideship's wider circle and nothing is drawn twice. */
+            var radius = (anyField && !PhaseStrategy.isOffBoardForEdf(icon))
+                ? Math.max(PhaseStrategy.getEdfRadiusForShip(icon.ship), PhaseStrategy.getStowedEdfRadius(icon.ship))
+                : 0;
 
             /* ⚠️ `changed` is what the icon REPORTS, not "we called it". showEdfField rebuilds
                nothing when the disc it would draw is the one already on screen, and a standing
@@ -322,6 +329,27 @@ window.PhaseStrategy = function () {
         }, this);
 
         if (changed && window.webglScene && window.webglScene.requestRender) window.webglScene.requestRender();
+    };
+
+    /* IS THIS UNIT OFF THE BOARD, as far as its fields go (user report 2026-09-11)? Not placed yet -
+       its only row is the off-map 'start' marker its slot gave it (turn 1, a late slot, a
+       reinforcement on its arrival turn) - or queued into a hangar or Docking Bay during Deployment.
+       Either way it projects nothing, so neither its disc nor its Net is drawn; before this a Walker
+       waiting to deploy drew both at that marker, off the edge of the map. Mirrors the test in
+       TacGamedata::setEdfHexes. 'start' rows are only ever a unit's FIRST row (submitMovement never
+       writes one), so the last row being 'start' means it has no other; Generated Terrain (userid
+       -5) is placed BY its 'start' row, the exemption getLastTurnMovement makes. */
+    PhaseStrategy.isOffBoardForEdf = function (icon) {
+        var ship = icon && icon.ship;
+        if (!ship) return true;
+        if (ship.pendingDeployDock || ship.pendingLcvDeployDock) return true;
+        //Placed but not ARRIVED: a late-slot unit stands at its entry hex the turn before it comes in
+        //(user request 2026-09-11). Its icon is hidden in later phases, but the Net preview walks
+        //hidden icons too, so without this it linked a Net that is not on the board yet.
+        if (window.shipManager && window.gamedata && shipManager.getTurnDeployed(ship) > gamedata.turn) return true;
+        if (ship.userid == -5) return false;
+        var move = icon.getLastMovement();
+        return !!(move && move.type === 'start');
     };
 
     /* The largest active field this unit projects, or 0. effectiveRadius is published by
@@ -360,6 +388,45 @@ window.PhaseStrategy = function () {
        THIS viewer, so an enemy's hidden allocation reads 0; and once orders are committed the
        published numbers say the same thing, which is why this is also correct in every later
        phase. */
+    /* The largest Energy Draining Field radius projected by the units STOWED in this hull, or 0
+       (WALKERS_OF_SIGMA_PLAN.md 3.14d, Stage 19).
+
+       ⭐⭐ TWO SOURCES, AND THE SECOND IS WHY THE FIRST IS NOT ENOUGH. Walking the bay's own ship
+       list gives the OWNER a live answer that follows the power they are allocating this phase -
+       but that list is masked for an opponent, who would then see the drain applied over hexes with
+       no disc drawn on them (the hexes themselves are public in gamedata.edfHexes; only the SOURCE
+       is hidden). So the server also publishes the finished number per hangar, to everyone, and the
+       two are maxed: the owner gets the live figure, the opponent gets the committed one, and
+       neither can see a field that is not really there. Same shape as Stage 18's D47 and for the
+       same reason - a derived figure with a MASKED input needs a published twin, not a wider mask. */
+    PhaseStrategy.getStowedEdfRadius = function (ship) {
+        if (!ship || !ship.systems) return 0;
+        var best = 0;
+        for (var i in ship.systems) {
+            var bay = ship.systems[i];
+            if (!bay) continue;
+            var published = parseInt(bay.stowedEdfRadius, 10);
+            if (!isNaN(published) && published > best) best = published;
+
+            //The live half: only ever populated for the viewer's own side.
+            var ids = [];
+            if (bay.isDockingBay && Array.isArray(bay.shipsDocked)) {
+                bay.shipsDocked.forEach(function (e) { if (e) ids.push(e.shipId); });
+            }
+            if (bay.lcvDocked && bay.lcvDocked.shipId !== undefined) ids.push(bay.lcvDocked.shipId);
+            if (Array.isArray(bay.hangarUsage)) {
+                bay.hangarUsage.forEach(function (e) { if (e && e.dockedFlightId) ids.push(e.dockedFlightId); });
+            }
+            for (var k = 0; k < ids.length; k++) {
+                var stowed = window.gamedata ? gamedata.getShip(ids[k]) : null;
+                if (!stowed || shipManager.isDestroyedByDamage(stowed)) continue;
+                var r = PhaseStrategy.getEdfRadiusForShip(stowed);
+                if (r > best) best = r;
+            }
+        }
+        return best;
+    };
+
     PhaseStrategy.getEdfRadiusForShip = function (ship) {
         if (!ship || !ship.systems) return 0;
 
@@ -476,6 +543,8 @@ window.PhaseStrategy = function () {
             map[key][team] = (map[key][team] || 0) + value;
         };
 
+        var sawOffBoardNet = false;
+
         iconContainer.getArray().forEach(function (icon) {
             var ship = icon.ship;
             if (!ship || ship.team === undefined || ship.team === null) return;
@@ -483,6 +552,19 @@ window.PhaseStrategy = function () {
 
             var move = icon.getLastMovement();
             if (!move || !move.position) return;
+
+            /* NOT ON THE BOARD (user request 2026-09-11): a unit queued into a hangar or Docking Bay
+               during Deployment (either deploy-dock marker), or not placed at all yet - still on its
+               slot's off-map `start` row - projects no field. So a Net aboard a Traveler, or one still
+               waiting to be put down, draws nothing until the ship is on the map. It still counts as
+               "there is a Net", so the preview answers EMPTY below rather than falling back to the
+               server's map, which can still hold it at the position it had before it docked. */
+            if (PhaseStrategy.isOffBoardForEdf(icon)) {
+                for (var n in ship.systems) {
+                    if (ship.systems[n] && ship.systems[n].name === 'EnergyDrainingNet') { sawOffBoardNet = true; break; }
+                }
+                return;
+            }
 
             var pos = { q: move.position.q, r: move.position.r };
             var team = parseInt(ship.team, 10);
@@ -526,7 +608,9 @@ window.PhaseStrategy = function () {
             }
         });
 
-        if (!nets.length) return null;   //no Net on the board: the server's answer stands
+        //No Net anywhere: the server's answer stands. Nets that exist but are all off the board
+        //(docked, unplaced): nothing is drawn - an empty preview, not the server's stale one.
+        if (!nets.length) return sawOffBoardNet ? [] : null;
 
         var hexes = ownHexes.map(function (hex) { return { q: hex.q, r: hex.r }; });
 
@@ -1389,6 +1473,9 @@ window.PhaseStrategy = function () {
            ⚠️ Gated on there being a Net on the board at all: this is one of the busiest handlers in
            the client (every hex of every plotted move) and buildEdfNetPreview walks every icon. */
         if (PhaseStrategy.anyEdfNetPresent()) this.syncEdfNetPreview();
+        //...and in Deployment, a unit stepping off its off-map marker onto the board starts drawing
+        //its field disc (isOffBoardForEdf). Deployment only: no other phase has a unit on a 'start' row.
+        if (this.gamedata && this.gamedata.gamephase == -1) this.syncAllEdfFields();
 
         // Mirror movement to attached units (e.g. pods) - DK 04/26
         if (ship.hasAttached && Object.keys(ship.hasAttached).length > 0) {
@@ -1594,8 +1681,8 @@ window.PhaseStrategy = function () {
         //ShipTooltip.refreshButtons).
         //
         //Both are unphased on purpose - they render whatever createForSingleShip would render
-        //right now, and hide themselves when nothing is selected - whereas the INCOMING rebuild
-        //below stays pinned to the Firing phase, where interception may be declared.
+        //right now, and hide themselves when nothing is selected - and so, now, is the INCOMING
+        //rebuild below, for the two phases in which that list can go stale under an open tooltip.
         if (this.shipTooltip && typeof this.shipTooltip.refreshTargeting === 'function') {
             this.shipTooltip.refreshTargeting();
         }
@@ -1604,7 +1691,20 @@ window.PhaseStrategy = function () {
             this.shipTooltip.refreshButtons();
         }
 
-        if (gamedata.gamephase === 3 && this.shipTooltip && this.shipTooltip.ballisticsMenu
+        /* The INCOMING list, for the two phases that can change it while a tooltip is open:
+           Firing (3), where interception is declared against these shots, and INITIAL ORDERS (1),
+           where the shots themselves are declared and withdrawn (user request 2026-09-10).
+           Withdrawing a ballistic order raises SystemDataChanged from removeFiringOrder /
+           removeFiringOrderMulti / removeFiringOrderAll, and the map icon already answers it via
+           ballisticIconContainer.consumeGamedata below - but the TARGET's open tooltip went on
+           listing a missile that no longer existed until the pointer left the ship and came back.
+           The event names the SHOOTER and the tooltip is usually the target's, so this deliberately
+           does not test the ship: the menu re-runs getAllBallisticsAgainst for whatever it is
+           showing, which is the only thing that can answer "is that shot still declared".
+           Still gated rather than unphased: this handler is one of the busiest in the file, and in
+           every other phase the list is a read-only record of shots already in the air. */
+        if ((gamedata.gamephase === 1 || gamedata.gamephase === 3)
+            && this.shipTooltip && this.shipTooltip.ballisticsMenu
             && typeof this.shipTooltip.ballisticsMenu.refresh === 'function') {
             this.shipTooltip.ballisticsMenu.refresh();
         }
@@ -1613,6 +1713,7 @@ window.PhaseStrategy = function () {
             && (system.ballistic
                 || system.hextarget //same for direct fire hextarget weapons - they use ballistic highlight...
                 || system.canSplitShots //same for weapon that split shots, ballistic icons used to track these.
+                || system.abductionMaxPower //WALKERS §3.18: a Walker drive's abduction draws a ballistic marker and line, but the drive is not ballistic - without this CANCEL left both on the map (play test 4352)
             )
         ) {
             this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
@@ -1660,7 +1761,7 @@ window.PhaseStrategy = function () {
         */
 
         if (payload.weapons.some(function (weapon) {
-            return weapon.ballistic || weapon.canSplitShots;
+            return weapon.ballistic || weapon.canSplitShots || weapon.abductionMaxPower; //abduction: see onSystemDataChanged
         })) {
             this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
         }

@@ -39,6 +39,7 @@ class FighterFlight extends BaseShip
     public $offensivebonus, $freethrust;
     public $jinkinglimit = 0;
 	public $hangarRequired = 'fighters'; //if left 'fighters', will be classified based on Ini; fleet check only
+	public $noHangarRequired = false; //For Fleet Checker only    
 	public $unitSize = 1; //most fighters are taken one per slot - but some are not
 	//B5Wars example are some ultralight fighters, that can be carried two per hangar slot
 	//and some superheavies that can use hangars (eg. Vorlon SHF) but take more slots
@@ -50,6 +51,27 @@ class FighterFlight extends BaseShip
 		//dwell completes forfeits the regeneration entirely. See HangarOps::applyDockedRegeneration.
 	public $deploysInHangar = false; //Some fighters like HK's MUST deploy in Hangars
     public $minesweeper = false;
+	/* WALKERS OF SIGMA-957 (WALKERS_OF_SIGMA_PLAN.md 3.11, Stage 12) - MAPMAKER ELECTRONIC WARFARE.
+	   "Can use up to 3 OEW or DEW per turn, like a ship. Mapmakers are the only fighter unit that
+	   need this, so we should make sure it has a simple gate to prevent unnecessary work for all
+	   other fighters."
+
+	   THE GATE IS THIS ONE PROPERTY, and it is 0 on every flight in the game but MapmakerProbes.
+	   Every branch Stage 12 adds - server and client - opens with a test on it, so an ordinary
+	   flight pays one falsy read per site and nothing else.
+
+	   Static blueprint property: it travels to the client on the static-ship JSON exactly as
+	   $minesweeper and $remoteControl do (the Ship constructor in model/ship.js copies every
+	   non-systems key of window.staticShips[faction][phpclass] onto the live unit), so it needs no
+	   stripForJson handling. Reachable as ship.ewCapacity in ew.js and weaponManager.
+
+	   TWO POOLS, NEVER ONE (3.11). A flight's OTHER EW number - the mine-detection allowance a
+	   fighter buys with its Offensive Bonus - is ew.getScannerOutput()/getOffensiveBonus and is
+	   deliberately untouched by this. Merging them would let an ordinary fighter spend mine
+	   detection on OEW and a Mapmaker spend its OEW pool on mine detection, in both directions and
+	   silently. EW::getFlightEwCapacity (handlers/EW.php) and ew.getFlightEwCapacity (ew.js) are
+	   the mirror pair that reads this one. */
+	public $ewCapacity = 0;
 	public $remoteControl = false; //true for remotely-controlled flights (Orieni Hunter-Killers); enables ELINT Jamming disruption.
 		//Static blueprint property: travels to client via static-ship JSON, no stripForJson handling needed.
 
@@ -262,6 +284,44 @@ class FighterFlight extends BaseShip
     public function getSampleFighter()
     {
         return $this->systems[1];
+    }
+
+    /* ⭐⭐ WALKERS_OF_SIGMA_PLAN.md §3.12 (Stage 13) - THIS FLIGHT'S ONE JUMP ENGINE.
+     *
+     * "For simplicity we should only let an entire flight of Mapmakers open 1 jump point, not one
+     * per fighter. So if one Jump Engine has a fireOrder they all do, but only generate ONE jump
+     * point" (user, D13). The charge is per SYSTEM - six Mapmakers carry six engines and each one
+     * has its own loading state - while the RULE is per flight, so every read and write about "the
+     * flight's jump engine" has to land on ONE of them or a flight that has just spent its charge
+     * would have five fully charged engines left to declare with next turn.
+     *
+     * THE SAMPLE FIGHTER'S IS THE ONE, and that is a deliberate choice of ANCHOR rather than of
+     * hardware: getSampleFighter() answers systems[1] whether or not that craft is still alive, so
+     * the identity is stable for the whole game - which is exactly the property EdfExposure and
+     * Movement::applyJumpOut's CV note already rely on. A dead craft's SUBSYSTEMS are not damaged
+     * (a fighter is destroyed as a whole), so the engine still answers isDestroyed() false and the
+     * flight can still jump with craft 1 gone, which is the right answer.
+     *
+     * ⚠️ DO NOT STORE THE CHARGE ON A CRAFT THAT CAN DIE. Nothing here does - the vortex state is
+     * rebuilt on every load from the IndividualNote this engine writes - but if a per-flight fact
+     * ever has to outlive the sample fighter's system data it belongs in a note on the sample
+     * fighter, not in a column of its own.
+     *
+     * Readers: JumpEngine::getUnitJumpEngines (which is what every vortex sweep in the game goes
+     * through), JumpEngine::stripForJson (so all six icons read one charge) and
+     * Firing::validateVortexDeclaration (which normalises a declaration made on ANY craft onto this
+     * engine's id). Returns null for a flight with no jump engine, which is every other flight in
+     * the game. */
+    public function getFlightJumpEngine()
+    {
+        $sample = $this->getSampleFighter();
+        if (!$sample || !is_array($sample->systems)) return null;
+
+        foreach ($sample->systems as $system){
+            if ($system instanceof JumpEngine) return $system;
+        }
+
+        return null;
     }
 
     /* ================ JUMP_POINTS_PLAN.md Stage 6 - A FLIGHT CAN LEAVE THROUGH A JUMP POINT =====

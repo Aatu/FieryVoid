@@ -44,7 +44,7 @@ class Falchion extends MediumShip{
 		$this->addPrimarySystem($scanner);			
 		$this->addPrimarySystem(new Engine(5, 13, 0, 10, 2));
         //$this->addPrimarySystem(new SelfRepair(5, 6, 4)); //None shown on SCS
-		$this->addPrimarySystem(new JumpEngine(6, 9, 8, 12));
+		$this->addPrimarySystem((new JumpEngine(6, 9, 8, 12))->markAncient());
 		$this->addPrimarySystem(new GraviticThruster(6, 10, 0, 5, 3));
 		$this->addPrimarySystem(new GraviticThruster(6, 10, 0, 5, 4));			
              

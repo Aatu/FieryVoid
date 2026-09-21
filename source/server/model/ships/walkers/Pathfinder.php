@@ -8,11 +8,11 @@ class Pathfinder extends MediumShip{
 		$this->faction = "Walkers of Sigma-957";
         $this->phpclass = "Pathfinder";
         $this->shipClass = "Pathfinder";
-        $this->imagePath = "img/ships/WalkerScribe.png";
-        $this->canvasSize = 200;
+        $this->imagePath = "img/ships/WalkerPathfinder.png";
+        $this->canvasSize = 150;
 	    $this->isd = 'Ancient';
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
-		$this->variantOf = "NONE";
+		//$this->variantOf = "NONE";
 		$this->limited = 50;
 				
         $this->gravitic = true;
@@ -27,6 +27,10 @@ class Pathfinder extends MediumShip{
         $this->rollcost = 1;
         $this->pivotcost = 2;
 		$this->iniativebonus = 14 *5;
+		//Docking Bay box cost (WALKERS_OF_SIGMA_PLAN.md 3.14, D18): 12 boxes.
+		$this->unitSize = 1/12;
+
+		$this->fighters = array("Mapmaker Probes"=>6);
 
 		/*Walkers will use their own enhancement set */		
 		Enhancements::nonstandardEnhancementSet($this, 'WalkerShip');
@@ -39,7 +43,9 @@ class Pathfinder extends MediumShip{
 		$this->addPrimarySystem($scanner);			
 		$this->addPrimarySystem(new Engine(5, 15, 0, 10, 3));		
         $this->addPrimarySystem(new SelfRepair(6, 3, 2)); //armor, structure, output
-		$this->addPrimarySystem(new JumpEngine(6, 11, 9, 4));
+		$jumpEngine = new JumpEngine(6, 11, 9, 4);
+		$jumpEngine->markWalker(); //Stage 15: leaves at the END of the turn, untargetable while it waits, no failure roll
+		$this->addPrimarySystem($jumpEngine);
 		$this->addPrimarySystem(new GraviticThruster(6, 20, 0, 5, 3));
 		$this->addPrimarySystem(new GraviticThruster(6, 20, 0, 5, 4));		
 		

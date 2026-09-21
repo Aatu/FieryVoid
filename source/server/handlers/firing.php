@@ -136,6 +136,40 @@ class Firing
         if ($gamedata->phase != 1) return;      //see above - only judge fresh declarations
         if ($fire->turn != $gamedata->turn) return;
 
+        /* ⭐⭐ WALKERS_OF_SIGMA_PLAN.md §3.12 (Stage 13) - A FLIGHT'S DECLARATION IS NORMALISED ONTO
+           ITS ONE ENGINE, HERE, AND THIS IS THE ONLY PLACE THAT HAS TO KNOW.
+
+           Six Mapmakers carry six Jump Engines and the player clicks whichever craft's icon is
+           nearest the mouse - but "an entire flight opens 1 jump point, not one per fighter"
+           (user, D13), so the order is re-pointed at the SAMPLE fighter's engine before anything
+           judges it. Two things follow, and both of them are the rule rather than tidiness:
+
+             - THE CHARGE AND THE VORTEX ARE ASKED OF THE RIGHT ENGINE. Every test below reads
+               $weapon - hasOpenVortex, getVortexRechargeLoad, isDestroyed - and a sibling engine
+               that has never opened anything answers "fully charged, holding nothing" however
+               recently the flight jumped. Without this a flight could open a second jump point
+               next turn simply by declaring from a different craft.
+             - THE PERSISTED ORDER NAMES THE FLIGHT'S ENGINE. $fireOrders is the same array the
+               caller hands to submitFireorders, so rewriting weaponid here is what makes
+               JumpEngine::spawnDeclaredVortices - which asks getUnitJumpEngines, i.e. this engine
+               and no other - find the declaration at the end of Initial Orders.
+
+           ⚠️ A SECOND DECLARATION IS STILL REFUSED, and by the EXISTING rule: normalising both
+           orders onto one weaponid is exactly what the one-vortex-per-SHOOTER loop below already
+           catches (a fighter's shooterid is the FLIGHT's id), so the first survives and every later
+           one is dropped with the existing reason string. Nothing new was needed for D13.
+
+           ⚠️ NOT gated on damageclass: an exit declaration from a Mapmaker flight in hyperspace
+           takes getExitDeclarationBlock, whose own one-engine-per-unit rule wants the same
+           normalisation. */
+        if ($shooter instanceof FighterFlight){
+            $flightEngine = $shooter->getFlightJumpEngine();
+            if ($flightEngine){
+                $weapon = $flightEngine;
+                $fire->weaponid = $flightEngine->id;
+            }
+        }
+
         $reason = self::getVortexDeclarationBlock($fire, $weapon, $shooter, $gamedata, $fireOrders);
         if ($reason === null) return;           //legal - leave it alone
 
@@ -153,6 +187,13 @@ class Firing
      * a list. */
     private static function getVortexDeclarationBlock($fire, $weapon, $shooter, $gamedata, $fireOrders)
     {
+        /* ⭐ WALKERS_OF_SIGMA_PLAN.md §3.18 (Stage 20) - AN ABDUCTION IS NOT A VORTEX DECLARATION EITHER,
+           and it has to be taken FIRST: it lives on a Walker drive, which is a legacy engine, and the
+           legacy refusal below would drop every one of them. Its own list, returning, the way the exit
+           and gate branches are. */
+        if ($fire->damageclass === JumpEngine::ABDUCTION_CLASS)
+            return EdjdAbduction::getDeclarationBlock($fire, $weapon, $shooter, $gamedata, $fireOrders);
+
         /* ⭐⭐ REINFORCEMENTS_PLAN.md STAGE 9 - THE ARRIVAL BRANCH IS NOW ABOVE THE LEGACY REFUSAL,
            AND THE ORDER OF THESE TWO LINES IS THE WHOLE OF "SHADOWS PHASE IN" (user ruling
            2026-08-29).
@@ -275,6 +316,17 @@ class Firing
          * $weapon is the engine from the REAL gamedata load (see the caller), so its vortex state
          * has been rebuilt from the notes and these two questions can actually be answered. */
         if ($mode === JumpEngine::MAINTAIN_MODE){
+            /* ⭐⭐ WALKERS §3.12 (Stage 13, user ruling 2026-09-10) - A FIGHTER FLIGHT HAS NO
+               MAINTAIN: "as fighters, Mapmakers cannot hold a jump point open for more than 1 turn".
+               The client never offers the control (JumpEngine.canMaintainVortex refuses a flight),
+               so only a tampered POST arrives here - but without this line a forged mode-7 order
+               would be ACCEPTED and persisted, because every test below it passes on a flight: the
+               vortex is open, it formed last turn, the hex matches. It would change nothing (the
+               closure sweep asks getMaintainDeclaration, which refuses a flight independently) and
+               that is exactly the problem - a stored order that silently means nothing. */
+            if ($shooter instanceof FighterFlight)
+                return "a fighter flight cannot maintain a jump point";
+
             if (!$weapon->hasOpenVortex($gamedata->turn))
                 return "no open vortex to maintain";
 
@@ -843,8 +895,17 @@ class Firing
         $allInterceptWeapons = array();
         $allIncomingShots = array();
         foreach ($gamedata->ships as $ship) {
-            if($ship->getTurnDeployed($gamedata) > $gamedata->turn)	continue; //Ship not deployed yet. Remove to avoid problems.            
-            $interceptWeapons = self::getUnassignedInterceptors($gamedata, $ship);
+            if($ship->getTurnDeployed($gamedata) > $gamedata->turn)	continue; //Ship not deployed yet. Remove to avoid problems.
+            /* An Ancient ship jumping out this turn may not fire, and that includes interception
+               (JumpEngine::$ancientJump). Its own orders were withdrawn in prepareFiring, which runs
+               first; this is the half that would otherwise hand it fresh ones.
+               ⭐ Stage 19 (3.14g): a ship riding a Docking Bay's aft is the same case - D49's "can be
+               shot, cannot shoot" covers interception too, and the client stops offering the
+               declaration at the same time (SystemInfoButtons.isDockingRiderUnit). Without this the
+               engine would quietly hand a unit that may not fire a full set of intercept orders. */
+            $unarmed = self::isJumpingUnarmed($ship, $gamedata->turn)
+                || HangarOps::bayCarrierAttachedTo($ship, $gamedata) !== null;
+            $interceptWeapons = $unarmed ? array() : self::getUnassignedInterceptors($gamedata, $ship);
             $allInterceptWeapons = array_merge($allInterceptWeapons, $interceptWeapons);
             $incomingShots = $ship->getAllFireOrders($gamedata->turn);
             $allIncomingShots = array_merge($allIncomingShots, $incomingShots);
@@ -1436,6 +1497,11 @@ class Firing
         //been destroyed since, and the crit outlives it by a turn. The method self-gates on the
         //flight having any criticals at all, which is free for every ordinary flight.
         self::withdrawGroundedFighterFireOrders($gamedata);
+        //Stage 19 (3.14a): a Waymarker riding the Traveler's aft mid-dock holds no fire either.
+        self::withdrawFireFromDockingRiders($gamedata);
+
+        //An Ancient ship jumping out this turn may not fire (JumpEngine::$ancientJump) - see the method.
+        self::withdrawFireFromJumpingUnits($gamedata);
 
         $ambiguousFireOrders  = array();
         foreach ($gamedata->ships as $ship){
@@ -1679,6 +1745,12 @@ public static function firePreFiringWeapons($gamedata){
         //been destroyed since, and the crit outlives it by a turn. The method self-gates on the
         //flight having any criticals at all, which is free for every ordinary flight.
         self::withdrawGroundedFighterFireOrders($gamedata);
+        //Stage 19 (3.14a): a Waymarker riding the Traveler's aft mid-dock holds no fire either.
+        self::withdrawFireFromDockingRiders($gamedata);
+
+        //An Ancient ship jumping out this turn may not fire (JumpEngine::$ancientJump). This is also
+        //what catches a ballistic it declared in Initial Orders alongside its jump.
+        self::withdrawFireFromJumpingUnits($gamedata);
 
         //Uncontrolled Hunter-Killers that ended movement co-located with an enemy ram it
         //(no player to submit the ram order). Done before ram orders are gathered below.
@@ -1870,6 +1942,86 @@ public static function firePreFiringWeapons($gamedata){
        ⚠️ EdfFighterGrounded is a `oneturn` critical, so hasCritical() reports it exactly on the
        turn AFTER it was rolled - which is the rules' "will not be able to shoot the next turn"
        with no date arithmetic here. */
+    /* ⭐ AN ANCIENT SHIP JUMPING OUT MAY NOT FIRE (user ruling 2026-09-11, JumpEngine::$ancientJump):
+       "except as noted, the ship may not fire weapons while jumping into/out of a scenario" - and
+       the Walkers are the note (forbidsFireWhileJumping answers false for their drive).
+
+       The jump is a Jump-to-Hyperspace BOOST committed in Initial Orders, and the unit leaves at the
+       end of Firing (the boost sweep at the end of fireWeapons). So every order it holds this turn is
+       withdrawn here, before anything resolves - direct fire, a ballistic launched in Initial Orders,
+       a manual interception - and automateIntercept, which runs after prepareFiring, assigns it no
+       interception of its own (isJumpingUnarmed). It can still be SHOT, which is the rule too.
+
+       Left alone: rams (a collision, not the firing of a weapon), log-only orders, and the
+       selfIntercept consent marker, as every other withdrawal path in this file leaves it - with no
+       interception assigned it grants nothing.
+
+       ⚠️ ON THE ADVANCE PATH, NOT IN validateFireOrders. The boost and the orders arrive in the SAME
+       Initial Orders POST, and validateFireOrders judges them against the DB's copy of the ship
+       (arch_post_side_ship_reconstruction), which does not have this turn's power rows yet. The
+       client refuses the selection and drops existing orders when the boost is set
+       (JumpEngine.onBoostIncrease); this is what makes it a rule rather than a courtesy. */
+    private static function withdrawFireFromJumpingUnits($gamedata)
+    {
+        foreach ($gamedata->ships as $ship) {
+            if (!self::isJumpingUnarmed($ship, $gamedata->turn)) continue;
+
+            foreach ($ship->getAllFireOrders($gamedata->turn) as $fire) {
+                if ($fire->type === 'selfIntercept') continue;
+                if (self::isHyperspaceLogOrder($fire)) continue;
+                $weapon = $ship->getSystemById($fire->weaponid);
+                if ($weapon && !empty($weapon->isRammingAttack)) continue;
+
+                $fire->rejected = true;
+                self::detachFireOrder($ship, $fire);
+            }
+        }
+    }
+
+    /* Is $ship being taken out of the battle this turn by a drive that forbids it to fire? Empty in
+       virtually every game: one power scan of the unit's jump engines, and nothing more. */
+    private static function isJumpingUnarmed($ship, $turn)
+    {
+        $engine = JumpEngine::getUnitJumpingEngine($ship, $turn);
+        return $engine !== null && $engine->forbidsFireWhileJumping();
+    }
+
+    /* ⭐ WALKERS_OF_SIGMA_PLAN.md 3.14a (Stage 19) - A SHIP RIDING A DOCKING BAY MAY NOT FIRE
+       (user ruling 2026-09-12). A Waymarker clamped to the Traveler's aft for the middle turn of a
+       two-turn dock or launch is a ship under tow: it steers nothing, its arcs are meaningless
+       bolted to another hull, and the manoeuvre is what its crew are doing. It can still BE SHOT,
+       which is the rule too - and hits on the carrier's aft roll on it (Weapon::damageOneSheet).
+
+       Deliberately modelled on withdrawFireFromJumpingUnits directly above, down to the exclusions:
+       a ram is a collision rather than the firing of a weapon, a hyperspace log order is not a
+       shot, and a selfIntercept marker is consent. Interception is not separately suppressed -
+       nothing here is a gun that could be assigned one, and an order it already holds is withdrawn
+       by the sweep below like any other.
+
+       ⚠️ ON THE ADVANCE PATH, NOT IN validateFireOrders, for the same reason every withdrawal in
+       this file is. The ride BEGINS in the critical phase of the previous turn, so a POST-side ship
+       reconstructed without its carrier's notes (arch_post_side_ship_reconstruction) cannot answer
+       "am I riding anything"; here gamedata is loaded in full and the bay's shipsAttaching list is
+       real. The client refuses the selection as well (weaponManager), which is what makes this a
+       backstop rather than the only guard. */
+    private static function withdrawFireFromDockingRiders($gamedata)
+    {
+        foreach ($gamedata->ships as $ship) {
+            if (empty($ship->attached)) continue;   //the cheap exit: empty on every unit, every game
+            if (HangarOps::bayCarrierAttachedTo($ship, $gamedata) === null) continue;
+
+            foreach ($ship->getAllFireOrders($gamedata->turn) as $fire) {
+                if ($fire->type === 'selfIntercept') continue;
+                if (self::isHyperspaceLogOrder($fire)) continue;
+                $weapon = $ship->getSystemById($fire->weaponid);
+                if ($weapon && !empty($weapon->isRammingAttack)) continue;
+
+                $fire->rejected = true;
+                self::detachFireOrder($ship, $fire);
+            }
+        }
+    }
+
     private static function withdrawGroundedFighterFireOrders($gamedata)
     {
         foreach ($gamedata->ships as $ship) {
@@ -2084,6 +2236,13 @@ public static function firePreFiringWeapons($gamedata){
         //Enormous unit ram it here - see createFailedAttachRamOrders.
         self::createFailedAttachRamOrders($gamedata, $dbManager);
 
+        /* WALKERS_OF_SIGMA_PLAN.md §3.18 (Stage 20) - Extra-Dimensional Jump Drive abductions resolve
+           here: after every shot (a drive or a target destroyed this turn counts for nothing) and
+           BEFORE the boost-jump sweep below, so an abducted unit is already gone when that sweep looks
+           and the sweep's own structure test leaves it alone. The target "ended its movement" in the
+           field this load was built from, which is exactly the rule's moment. */
+        if ($gamedata->abductionCapable) EdjdAbduction::resolve($gamedata);
+
         /* Check if any ships have activated jump engines, and do this after all other fire (in case
            they or their jump engine got destroyed).
 
@@ -2104,18 +2263,15 @@ public static function firePreFiringWeapons($gamedata){
 
            isDestroyed() restates the filter getSystemsByName applied for free. doHyperspaceJump
            re-checks the engine's health and its host section itself, but a destroyed engine should
-           not reach it at all. */
-        foreach ($gamedata->ships as $ship) {
+           not reach it at all.
 
-            if (!is_array($ship->systems)) continue;
-            foreach($ship->systems as $jumpEngine){
-                if (!($jumpEngine instanceof JumpEngine)) continue;
-                if ($jumpEngine->isDestroyed()) continue;
-                //is it overloading?...
-                if( $jumpEngine->isOverloading($gamedata->turn) ){ //primed for entering hyperspace!
-                    $jumpEngine->doHyperspaceJump($ship, $gamedata); //Actually create damage entry to destroy ship.
-                }
-            }
+           ⭐ ONE ENGINE PER UNIT, FOUND BY JumpEngine::getUnitJumpingEngine (2026-09-11) - the same
+           reader Firing::withdrawFireFromJumpingUnits uses, so "who is leaving" and "who may not
+           fire" cannot disagree. It also descends into a FIGHTER FLIGHT's craft: a flight's systems
+           are craft, so the per-system loop this used to be never saw a Mapmaker probe's drive. */
+        foreach ($gamedata->ships as $ship) {
+            $jumpEngine = JumpEngine::getUnitJumpingEngine($ship, $gamedata->turn); //primed for entering hyperspace!
+            if ($jumpEngine) $jumpEngine->doHyperspaceJump($ship, $gamedata); //Actually create damage entry to destroy ship.
         }
 
     } //endof method fireWeapons

@@ -120,6 +120,34 @@ class SystemInfo extends React.Component {
             shadowBombAvailable = weaponManager.shadowFighterBombPool(ship, system, true);
         }
 
+        /* WALKERS_OF_SIGMA_PLAN.md 3.16 (Stage 18, D20): the Traveler's REACTOR tooltip says how
+           much of its available power came out of the ships in its Docking Bay and what surplus they
+           are pooling to get it. It cannot come from system.data:
+           that is built server-side per blueprint, while this moves the instant the player powers a
+           docked hull down. Same shape and the same reason as shadowBombAvailable above.
+           Drawn whenever there is a donor at all, INCLUDING when the grant is 0 - "3 pooled, +0" is
+           precisely what a player who has powered one system down needs to see.
+           Own-side only in effect, with no test for it here: an enemy viewer is masked out of
+           shipsDocked, so the summary reports no donors and the line is simply absent. */
+        var dockedPower = null;
+        if (system.outputType === "power" && window.shipManager && shipManager.power
+            && typeof shipManager.power.getDockedPowerSummary === "function") {
+            var dockedPowerSummary = shipManager.power.getDockedPowerSummary(ship);
+            if (dockedPowerSummary.donors > 0) dockedPower = dockedPowerSummary;
+        }
+
+        /* WALKERS_OF_SIGMA_PLAN.md 3.18 (Stage 20): a Walker jump drive declaring an abduction this turn
+           names its target (user request 2026-09-13). Read off the order itself, like the menu, so it
+           moves the instant the player re-targets or cancels. A lobby object has no orders - null. */
+        var abductionTarget = null;
+        if (typeof system.getAbductionOrder === 'function') {
+            var abductionOrder = system.getAbductionOrder();
+            if (abductionOrder) {
+                var abductee = gamedata.getShip(abductionOrder.targetid);
+                abductionTarget = abductee ? abductee.name : 'Unit ' + abductionOrder.targetid;
+            }
+        }
+
         let isUnrevealedMine = false;
         if (ship.mine) {
             var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
@@ -145,6 +173,12 @@ class SystemInfo extends React.Component {
                 {!isUnrevealedMine && Object.keys(system.data).map((key, i) => (key != specialName && !(key === 'Ammunition' && (system.name === 'GrapplingClaw' || system.name === 'Marines')) && getEntry(key, adjustDataDisplay(system, key), 'data' + i)))}
 
                 {shadowBombAvailable !== null && getEntry('Fighters available', shadowBombAvailable)}
+
+                {dockedPower && getEntry('Shared by docked ships',
+                    '+' + dockedPower.shared + ' of ' + dockedPower.surplus + ' pooled from '
+                    + dockedPower.donors + (dockedPower.donors === 1 ? ' ship' : ' ships'))}
+
+                {abductionTarget !== null && getEntry('Abduction target', abductionTarget)}
 
                 {Object.keys(specialEntry).length > 0 && <Entry key={`special-${reactKey++}`}><Header>Special: </Header>&nbsp;</Entry>}
                 {Object.keys(specialEntry).length > 0 &&

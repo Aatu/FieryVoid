@@ -68,7 +68,7 @@ class triadLesserTriumviron extends BaseShip{
 		$this->addAftSystem(new GraviticThruster(7, 10, 0, 4, 2));
 		$this->addAftSystem(new GraviticThruster(7, 10, 0, 4, 2));
         $this->addAftSystem(new SelfRepair(8, 12, 6)); //armor, structure, output
-		$this->addAftSystem(new JumpEngine(8, 25, 5, 8));        
+		$this->addAftSystem((new JumpEngine(8, 25, 5, 8))->markAncient());        
 
 		$hyperplasma = new HyperplasmaCutter(7, 16, 9, 270, 90);
 			$hyperplasma->displayName = 'Hyperplasma Cutter B';

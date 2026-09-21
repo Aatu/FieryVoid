@@ -84,6 +84,10 @@ class EdfExposure
         foreach ($gamedata->ships as $unit) {
             if ($unit->isDestroyed()) continue;
             if ($unit->isReinforcement()) continue; //still in hyperspace, and not on the map
+            /* TERRAIN IS NOT DRAINED (user ruling 2026-09-11). A jump point, an asteroid, a gate or an
+               Energy Draining Mine's own orb has no thrust, power, initiative or EW to lose, and the
+               field was hanging crits and a combat-log line on a jump point standing in it. */
+            if ($unit->isTerrain()) continue;
 
             $pos = $unit->getHexPos();
             if (!$pos) continue;

@@ -49,18 +49,38 @@ class MissileLauncher extends Weapon{
         );
     }
 
+    /* ⚠️⚠️ THIS LOOP REFLECTS EVERY PUBLIC PROPERTY ON Weapon, so a property added to the BASE
+       CLASS lands on every missile in every missile ship's payload whether it means anything
+       there or not. Ammo extends Weapon, which is what makes that happen and what makes this the
+       single most expensive place in the codebase to add a base-class property.
+       (The other half of that trap is arch_public_static_on_weapon: a public STATIC is reflected
+       here too, read as an instance property, and takes the whole payload down.)
+
+       $unusedOnAmmo is the exemption list: base-class flags that describe how a MOUNT behaves and
+       are meaningless on the round it fires. Nothing on the client reads any of them off an ammo
+       object - the mount's own copy is the one the maths uses. Keep it short, and add to it only
+       when a new Weapon property would otherwise be duplicated across every missile for nothing. */
+    private static $unusedOnAmmo = array(
+        //WALKERS OF SIGMA-957 (WALKERS_OF_SIGMA_PLAN.md 3.11, Stage 12): the flight-EW lock-on
+        //flag. Read in exactly two places, Weapon::calculateHitBase's FighterFlight branch and
+        //weaponManager.computeOEW, and both hold the WEAPON, never an ammo entry.
+        'useFlightEW' => true,
+    );
+
     public function stripForJson() {
         $strippedSystem = parent::stripForJson();
 
         // Ammo objects in missileArray are data containers without a ship unit reference,
         // so they can't use the full stripForJson() chain. Strip public properties directly,
         // skipping empty arrays to reduce JSON payload.
+        $skip = self::$unusedOnAmmo;
         $strippedSystem->missileArray = array_map(
-            function($missile) {
+            function($missile) use ($skip) {
                 $stripped = new stdClass();
                 $reflect = new ReflectionObject($missile);
                 foreach ($reflect->getProperties(ReflectionProperty::IS_PUBLIC) as $prop) {
                     $key = $prop->getName();
+                    if (isset($skip[$key])) continue;
                     $value = $missile->$key;
                     if (is_array($value) && empty($value)) continue;
                     if ($value === '') continue;

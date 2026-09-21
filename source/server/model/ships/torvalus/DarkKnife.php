@@ -49,7 +49,7 @@ class DarkKnife extends BaseShip{
         $this->addPrimarySystem(new SelfRepair(6, 12, 6)); //armor, structure, output
 		$this->addPrimarySystem(new ShadingField(6, 25, 6, 4, 0, 360));       
 		$this->addPrimarySystem(new TransverseDrive(5, 16, 5, 0, 360));
-		$this->addPrimarySystem(new JumpEngine(6, 25, 6, 8));        
+		$this->addPrimarySystem((new JumpEngine(6, 25, 6, 8))->markAncient());        
 		
 		
         $this->addFrontSystem(new VolleyLaser(5, 0, 0, 240, 120)); 

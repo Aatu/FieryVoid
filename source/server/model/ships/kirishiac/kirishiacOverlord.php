@@ -14,6 +14,7 @@ class kirishiacOverlord extends BaseShip{
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
 	    $this->notes = 'Atmospheric capable.';
         $this->variantOf = "Lordship";
+        $this->canvasSize = 300;        
 
         $this->gravitic = true;
 		$this->advancedArmor = true;   
@@ -49,7 +50,7 @@ class kirishiacOverlord extends BaseShip{
 		$scanner->markAdvanced();
 		$this->addPrimarySystem($scanner);			
         $this->addPrimarySystem(new Engine(7, 30, 0, 14, 4));
-        $this->addPrimarySystem(new JumpEngine(8, 25, 6, 8));
+        $this->addPrimarySystem((new JumpEngine(8, 25, 6, 8))->markAncient());
         $this->addPrimarySystem(new SelfRepair(7, 12, 6)); //armor, structure, output
 
 

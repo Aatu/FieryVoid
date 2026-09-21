@@ -1,10 +1,37 @@
 # Walkers of Sigma-957 — Implementation Plan
 
-New Ancient faction. Nine new systems, three of which need machinery FV does not have today.
-This document is the long-form record; update it as stages land.
+New Ancient faction. Nine new systems, three of which need machinery FV does not have today, plus a
+second wave (Stages 11–19, added 2026-09-08) covering Mapmaker electronic warfare, the Traveler's
+Docking Bay and the two Walker jump drives. This document is the long-form record; update it as
+stages land.
 
-**Status: Stages 0–9 COMPLETE (Stages 8 and 9 on 2026-09-06). Stage 10 (EW Detector) remains.**
-Written 2026-09-02 after a full survey of the existing seams.
+**Status: Stages 0–9 COMPLETE (Stages 8 and 9 on 2026-09-06), Stage 10 COMPLETE
+(10A the EW Detector's allowance 2026-09-09, 10B late EW allocation 2026-09-10) - so the FIRST
+WAVE IS FINISHED - Stage 11 (housekeeping) COMPLETE, STAGE 12 (Mapmaker Electronic Warfare) and
+STAGE 13 (Mapmaker Jump Engine) COMPLETE 2026-09-10, and STAGE 14 (the Mapmakers' Medium Lightning
+Array + the Mapmaker hangar rule) COMPLETE 2026-09-11 after two play-test passes (§3.13b, and the
+EW rules corrected from the rulebook text in §3.13c), and STAGE 15 (the Walker jump drive - promoted from
+Stage 18 on 2026-09-11, D32) COMPLETE 2026-09-11 and then REWORKED the same day (§3.17b - Ancient drives
+are legacy drives; the first build's deferred departure is gone), and STAGE 16 (the Traveler's Docking Bay) COMPLETE
+2026-09-11 with the Waymarker's two-turn procedure (§3.14a) deferred by the user (D35) - §3.14b, and
+STAGE 17 (the Traveler repairs what it carries) COMPLETE 2026-09-12 with three additions from the
+user's notes the same day (D42/D45 one list sorted by priority alone, docked rows marked by their ship name, D43 a docked unit's own Self Repair keeps running,
+D44 cobalt reinforcement rows) - §3.15a, and STAGE 18 (docked power sharing) COMPLETE 2026-09-12,
+built to both halves of §3.16 with the grant recorded as CLIENT-COMPUTED AND ADVISORY (D46) -
+§3.16a - and a play-test follow-up the same day that gave the OPPONENT the same figure by disclosing
+the bay's ship ids and nothing else (D47) - §3.16b, and STAGE 19 (the Waymarker's two-turn procedure,
+the aft-hit redirect, the hangar-manoeuvre label and what a stowed unit still projects) COMPLETE
+2026-09-12, finishing the one piece D35 had deferred out of Stage 16 and adding three rules from the
+user's notes the same day (D48 least damaged = most structure boxes remaining, D49 a rider can be shot
+but cannot shoot, D50 the banner goes on the unit and a NEW flight gets none, D51 left-click scrolls on
+ALL docked units, which withdraws a Stage 17 exception) - §3.14a / §3.14c / §3.14d, as built §3.14e.
+Stage 20 (the Extra-Dimensional Jump Drive) not
+started. ⚠️ Stages 12, 13
+and 14 all reshuffle `MapmakerProbes`'s positional system ids and MUST deploy together; append
+only after that. Stages 12–20 were added 2026-09-08 — the Mapmaker Sensor Probes' remaining abilities, the
+Traveler's Docking Bay / repair / power sharing, and the traveler and extra-dimensional jump
+drives.** Written 2026-09-02 after a full survey of the existing seams; re-surveyed 2026-09-08 for
+the second wave, whose rulings and control sheet arrived the same day (D11–D26; Q8–Q15 all answered).
 
 **Faction string is `Walkers of Sigma-957`** — plural, hyphenated, exactly as spelled here. It is
 the switch key in `gamelobby.js`, the directory-map key in `ShipLoader::getFactionDirMap()`, the
@@ -27,6 +54,56 @@ silent everywhere.
 | D8 | EDN corridor choice | **Deterministic, no UI** — but tie-broken toward the corridor a player would pick: prefer a hex containing an enemy unit. |
 | D9 | CPD adaptation vs Shading Field (2026-09-03) | Adaptation **may eat into the shaded bonus** — the Shading Field's whole defensive contribution, doubling included, is fair game. It has **no effect on the field's stealth/detection mechanics**. §3.4. |
 | D10 | CPD runtime cost (2026-09-03) | *"A rare weapon in the overall game"* — every process that makes it work sits **behind cheap gates**. One static boolean, `TacGamedata::$cpdAdaptationPresent`, and no autoload in a game without it. §3.4. |
+| D11 | Mapmaker EW pool size (2026-09-08) | **3 points per FLIGHT per turn**, not 3 per craft — *"like a ship"*, and every EW path in FV spends one per-unit pool. Confirmed 2026-09-08 (Q8). |
+| D12 | Mapmaker OEW vs enemy defensive EW (2026-09-08, extended after Q10; ⚠️ **CORRECTED 2026-09-11**) | The contest belongs to the **Light Chromatic Pulsar**: OB + `max(0, OEW − (DEW + BDEW + SDEW))`, then all three are zeroed - *"an EW bonus of +0 (not -2)"*. *"BDEW and SDEW are separate EW functions so would stack with the fighter's own DEW."* The **Medium Lightning Array** is NOT contested: it uses ship rules (D25). The first build had the contest on the Array; see §3.13c. §3.11. |
+| D13 | One jump point per Mapmaker flight (2026-09-08) | *"If one Jump Engine has a fireOrder they all do, but only generate ONE jump point."* ⭐ Already the law — `Firing::getVortexDeclarationBlock`'s one-vortex-per-**shooter** rule, and a fighter's shooter IS the flight. §3.12. |
+| D14 | Mapmakers need no hangars (2026-09-08) | A **custom hangar category**, `'Mapmaker Probes'`, exactly as the Torvalus Stiletto uses `'Stilettos'`. ⚠️⚠️ **CORRECTED 2026-09-10 (D31) — the second half of this ruling was wrong.** §3.10c. |
+| D31 | The 50% full-hangar rule DOES reach Mapmakers (2026-09-10) | *"While they can correctly be bought without any hangar, Walker ships are not exempt from the need to fill 50% of their hangar capacity e.g. `$fighters` with Mapmakers. At the moment fleet checker does not seem to be enforcing this."* So `noHangarRequired` lifts the **maximum only**: a fleet with no carrier may buy probes, and a Walker hull that declares Mapmaker Probe capacity must still have half of it filled. ⚠️ It also revealed that the two halves of the rule **never met**: the flag skipped the tally entirely and the hull's `hangarRequired` was left at `'fighters'`, so the capacity the four Walker hulls declare could not be filled by anything. §3.13a. |
+| D15 | Medium Lightning Array (fighter) group sizes (2026-09-08) | **3 and 6 only, within one flight.** 4 or 5 declaring fire as a single 3-group and the surplus is wasted; 6 fires either two 3-groups or one 6-group, chosen as a **firing mode**. Damaged craft may not contribute. §3.13. |
+| D16 | Weapon exclusivity inside a flight (2026-09-08) | **Flight-wide, not per craft.** If any Mapmaker fires the array, no Mapmaker may fire its Light Chromatic Pulsar that turn. §3.13. |
+| D17 | The Traveler's aft bay (2026-09-08) | Relabelled **Docking Bay** as its own `Hangar` subclass (not just a `displayName`) — it needs a class allow-list, multi-class box costs and a per-turn type lock, none of which an ordinary hangar has. **One craft TYPE per turn**, launch or recover. §3.14. |
+| D18 | Multi-box docking costs (2026-09-08, corrected after Q11) | Reuse `unitSize`, which already means "craft per box": Pathfinder `1/12`, Scribe `1/4`, Mapmaker `1`, Waymarker `1/24`. `HangarOps::boxesPerCraftForClass` turns those into 12 / 4 / 1 / 24 boxes with **no new arithmetic**, and all four fill the Traveler's 24-box bay exactly. §3.14. |
+| D19 | Traveler Self Repair serves docked units (2026-09-08) | One new gate property on `SelfRepair`, in the shape the Kirishiac orbital's `repairRestrictedTo` / `linkedOrbital` already established. Structure, C&C, critical effects and Self Repair systems — the last of which is an explicit exception to this class's own standing rule. §3.15. |
+| D20 | Docked power sharing rate (2026-09-08) | Every docked **ship's** reactor surplus is summed (never a flight's), divided by 4, floored, and added to the carrier's available power. Managing a docked ship's power during Initial Orders is a prerequisite and is the same stage. §3.16. |
+| D21 | Traveler jump drives fire on the way out (2026-09-08) | The unit does **not** leave when it enters the vortex; it stays until the end of the turn, shoots normally, and **cannot be targeted** during Pre-Firing or Firing. Its drive also suffers **no destruction roll** while in use. §3.17. **Every Walker hull, not only the Traveler** (D32). Built at Stage 15, §3.17a. |
+| D22 | EDJD abduction is note-persisted (2026-09-08) | Power-turns accumulate in `tac_individual_notes`, keyed by target, and "consecutive" is *"is there a note for the previous turn?"*. **No schema change**, and a gap needs no cleanup sweep — the same discipline that gives the Energy Draining Mine its one-turn life. §3.18. |
+| D23 | The Waymarker's two-turn dock (2026-09-08) | A Waymarker fills the whole bay (24 boxes) **and takes two turns to dock or launch instead of one**. ⭐ **OPTIONAL within Stage 16** — the other three craft need nothing new, this one needs an intermediate state, and §3.14 proposes reusing `attached` for it. Ship the stage without it if the intermediate state turns out to cost more than it is worth. |
+| D24 | Medium Lightning Array (fighter) stats (2026-09-08) | **Read from the control sheet**, not inferred: Electromagnetic, **Flash** mode, 4d10+12 at −1/3 hexes and FC +2/+4/+6 for the 3-group, 8d10+12 at −1/4 hexes and FC +5/+5/+4 for the 6-group, **RoF 1 per 4 turns** (`loadingtime = 4` — the brief's "2 turns" was a slip, corrected by the user 2026-09-08), and it may fire combined on turn 1. §3.13. |
+| D25 | The two Mapmaker weapons lock on differently (2026-09-08; ⚠️ **CORRECTED 2026-09-11** from the rulebook text) | Light Chromatic Pulsar = **Offensive Bonus + max(0, OEW − target defensive EW)**, defensive EW otherwise ignored, and never a no-lock penalty. Medium Lightning Array = **ship rules**: flight OEW added, the target's DEW/BDEW/SDEW applied as the ordinary to-hit penalty, fire control used, no offensive bonus, and no OEW doubles the range penalty *"as usual"*. *"Flight-level combat"* on the sheet is not an FV concept and means nothing beyond that. §3.11, §3.13, §3.13c. |
+| D26 | Flash collateral inside an Energy Draining Field (2026-09-08) | *"Flash damage always loses its collateral damage (friend or foe) ... unless the Lightning Array is boosted by the Wide Beam enhancement."* ⭐ Already how Stage 4 built it — `isHexInEdfField()` is team-blind and `edfSuppressesCollateral()` defaults to true — so `MedLightningArrayFtr` inherits it for free, and Wide Beam is a ship refit Mapmakers cannot buy. §3.13. |
+| D27 | Where "the end of the movement segment" is (2026-09-09) | *"The 'End of movement' in FV is essentially the start of Pre-Firing phase (if there is one) or start of Firing phase. If we restrict the late EW allocation to these phases and don't worry too much about the Movement phase for now that's fine."* ⭐⭐ **This deleted the hard half of Stage 10B**: with the window opening AFTER movement there is nothing to *declare*, so "a point declared and then carried out of range is lost" needs no declaration and no reconciliation — the allowance is simply recomputed at the post-movement hex. Phases **5 and 3 both**, sharing one budget. §3.8. |
+| D28 | What a saved EW point is drawn from (2026-09-09) | *"If a ship spends all their EW on non-DEW EW types, then they are unable to save a point of EW ... DEW is the only pool of unspent EW that saved EW can be drawn from in Pre-Firing/Firing."* So the allowance is `min(ladder, unspent pool)`, and the ship-window figure has to track the player's own clicking during Initial Orders rather than promising a point they have already spent. §3.8. |
+| D29 | The Wanderer's weapons begin charged (2026-09-09) | *"Unlike other Walker ships, the Wanderer phpclass ship's weapons DO start the battle fully charged."* An exception keyed on **phpclass**, hung on `Weapon::setInitialSystemData($ship)` rather than on `getStartLoading()`, which does not know its ship. §3.10e, Stage 11. |
+| D30 | Docked craft must be placeable on the Traveler's hex (2026-09-09) | *"Scribes, Waymarker and Pathfinders are all ships, which means they will not be eligible to stack on Traveler hex during Deployment at present. So we may need to loosen that restriction."* Loosened through the **existing** deploy-dock exemption in `getShipsInSameHex` (`pendingDeployDock` / `pendingLcvDeployDock`), never by weakening hull-versus-hull occupancy for everyone. §3.14, Stage 16. |
+| D32 | Every Walker jump drive leaves slowly, and it is a MARK (2026-09-11) | *"All Walker ships possess this ability, not just Traveler. So the best approach seems to be to mark the Jump Engine as Walker (in the same way we mark Scanner as 'Advanced')."* `JumpEngine::markWalker()` on the six Walker hulls - a flag, not the `TravelerJumpDrive` class §3.17 first proposed, so no autoload change and no system id moves. The Mapmaker flight's engine stays unmarked (§3.12: it *"works normally"*). The targeting rule reuses the Energy Draining Mine's untargetable mechanism (§3.10c) and gives it its server half at last. Promoted from Stage 18 to Stage 15 the same day. §3.17a. |
+| D33 | How a SHIP docks, and what damage does to it (2026-09-11) | **The LCV-rail rules, both halves.** Docking: the Traveler at speed 0, the ship ending its move in the Traveler's hex on the Traveler's heading with at least 1 thrust unspent - `canLCVDock`'s conditions, with its client-and-server thrust backstop. Damage: partial bay damage never removes a docked ship (probes are evicted first, as ever); the bay or the Traveler destroyed forces every docked ship out with the bay's damage + 2d10 to Structure and the launch initiative penalty. No landing damage. §3.14b. |
+| D34 | What a ship costs against the launch rate (2026-09-11) — ⚠️ **SUPERSEDED by D37 the same day** | **Its box cost**, not 1 per ship: the bay's 12 a turn is paid in boxes by a ship, so one Pathfinder uses a whole turn and three Scribes fill it. With it the one-type-per-turn rule (D17) mostly follows from arithmetic - any two ship classes together exceed 12 - leaving Scribes against Mapmakers as the case the lock actually decides. §3.14b. |
+| D48 | "Least damaged section" is MOST STRUCTURE BOXES REMAINING (2026-09-12) | The Waymarker's Front Structure is 60 and its Aft is 56, so the plausible readings disagree even on an undamaged hull. The user chose the raw remaining count - the number the player reads off the ship window - over proportion-remaining and over damage-taken, both of which tie on an unhurt hull and need a tiebreak of their own. So an undamaged Waymarker takes a redirected aft hit FORWARD, and swings aft only once the bow is five boxes worse off; ties go forward, the same side an unhurt hull picks. `HangarOps::leastDamagedFrontOrAft`. §3.14e. |
+| D49 | A riding Waymarker can be shot, but cannot shoot (2026-09-12) | It is a ship under tow for the middle turn of its two-turn procedure: steering nothing, arcs bolted to another hull, its crew doing the manoeuvre. It remains a normal target - which is the rule, and is also what makes the aft-hit redirect (D48) a supplement rather than the only way to hurt it. `Firing::withdrawFireFromDockingRiders`, modelled on the Ancient-jump withdrawal beside it, with `weaponManager.selectWeapon` refusing the selection client-side. §3.14e. |
+| D50 | The hangar-manoeuvre banner goes on the UNIT, and a new flight gets none (2026-09-12) | A fighter LAUNCH order names a phpclass and a size, so the flight it creates does not exist until the order resolves and there is nothing to label. Of the three options the user chose "on the unit only - skip new flights" rather than falling back to a banner on the carrier, which keeps *"this label is about the unit wearing it"* true with no exceptions. ⚠️ The gap is the ORDER SHAPE, not the unit's existence, so a RELAUNCHING docked flight is uncovered too; a future fix belongs in the order (a flight id), not in the reader. §3.14c. |
+| D52 | A riding Waymarker KEEPS its DEW (2026-09-12) | *"Waymarkers should also not use EW on transition Docking/Launching turns, nor should ships have the opportunity to use any targeted EW on it."* The ambiguity is that unspent sensor points become DEW automatically (`convertUnusedToDEW`), and an attacker with no lock takes a doubled range penalty - so the two halves pull opposite ways. The user chose: only ACTIVE allocations stop, DEW is untouched, nobody may lock it, and the attacker eats the ordinary no-lock penalty on top. A riding Waymarker is therefore HARDER to hit than usual, not easier - it is shielded by the manoeuvre rather than exposed by it. §3.14f. |
+| D51 | Left-click scrolls, right-click opens the window - on ALL docked units (2026-09-12) | *"Left-click is scroll only, right-click is open shipWindow on ALL docked units e.g. fighters, LCVs and Docking Bay ships."* This **withdraws Stage 17's own exception**, which argued that a docked FLIGHT has no hex of its own and should open its window on left-click. Its CARRIER has one, and that is the honest answer to "show me where this is". `shipManager.carrierHolding` grew the `hangarUsage.dockedFlightId` arm and `isOffBoardButOurs` lost its flight clause, leaving that predicate covering only a reinforcement in hyperspace - the one state genuinely inside no hull at all. §3.14e. |
+| D35 | The Waymarker's two-turn procedure (2026-09-11) | **Deferred**, as §3.14a suggested: the bay is built and proved with Scribes, Pathfinders/Guideships and Mapmakers. The Waymarker is in the bay's class list and costs 24 boxes, so it counts in the Fleet Checker (D36), but `DockingBay::DEFERRED_SHIP_CLASSES` keeps it out of every dock, launch and deploy-dock until §3.14a lands. ⚠️ **SUPERSEDED 2026-09-12 (Stage 19):** §3.14a landed, the deferred list is gone, and its replacement `TWO_TURN_SHIP_CLASSES` is a LABEL rather than a refusal. |
+| D36 | Docked ships count toward the Traveler's hangar requirement (2026-09-11) | *"Purchasing Waymarker (24), Pathfinder/Guideships (12) and Scribes (4) can help meet Traveler hangar capacity in Fleet Checker, along with Mapmaker fighters as usual. Since 24 of its 36 fighters slots are associated with its Aft Docking Bay system."* Every bought ship a Docking Bay in the fleet lists adds its box cost to that bay's `$fleetCheckCategory`, **capped at the fleet's total Docking Bay boxes** - a ship only counts for a bay it could sit in, so a lone Pathfinder cannot meet its own 6-probe minimum and three Pathfinders count 24, not 36, behind one Traveler. §3.14b. |
+| D37 | The Docking Bay's launch rate, corrected (2026-09-11, review of Stage 16) | *"It should be 12 Mapmakers OR 2 Scribes OR 1 Pathfinder."* A **per-class count**, launches and recoveries together, in `DockingBay::$shipLaunchRates` (Scribe 2, Pathfinder / Guideship / Waymarker 1); the Mapmakers keep `$output`. Replaces D34's box pricing, which gave three Scribes. §3.14b "Revisions". |
+| D38 | Fighters fill the side hangars first (2026-09-11) | *"Mapmakers should prioritise side hangars, since only the aft docking bay can store larger units."* `HangarOps::bayFillRank` / `HangarShared.bayFillRank`: reserved bays, then ordinary, then a Docking Bay, at every auto-fill and default-pick site. Also: docked weapons **recharge** as normal and an Energy Draining Mine restocks to its usual 3 - which the code already did; Stage 16's write-up had claimed otherwise without checking. |
+| D39 | LCV deploy-docking works the Docking Bay way (2026-09-11) | *"I prefer the way we dock ships to the Traveler MORE than the current implementation of LCV hangars where we have had to allow them to stack in a hex."* The LCV same-hex exemption and the un-dock snap are removed; an LCV deploy-docks from its carrier's DOCK button and is never placed on the carrier's hex. |
+| D47 | The opponent is told the IDS of the ships in a sharing bay (2026-09-12) | The docked-power grant was invisible to the Traveler's opponent, because `shipsDocked` is masked under the private-logistics gate and the grant is computed by each viewer's OWN client (D46). Of the two possible fixes the user chose **publish the ids**: the opponent's client then runs the identical function on the identical ships and reaches the identical number, which a server-side recomputation could not promise. ⚠️ On a SEPARATE key (`sharesDockedPowerIds`), because no client consumer of `shipsDocked` has ever met a partial entry and four of them read `boxes` / `phpclass` / `dockTurn` off those rows. Only on a bay that shares power. §3.16b. |
+| D40 | A reinforcement Traveler brings its ships aboard (2026-09-11) | *"Travelers brought into the game via 'Manage Reinforcements' cannot select Pathfinder, Guideship, Scribe ... only Mapmakers."* A legacy-drive opener's manifest now admits the ships its Docking Bay takes, packed with the fighters in one pass on both sides, and they arrive docked. |
+| D46 | The docked-power grant is client-computed and ADVISORY (2026-09-12) | §3.16 required an explicit written decision. **Advisory**, because there is no server twin of `getReactorPower` anywhere in the tree, `submitPower` validates nothing, and every power figure in Fiery Void is already a client number - a check here would be the codebase's only power validation and would still be reading a balance the server cannot compute. `DockingBay::$sharesDockedPower` therefore publishes the RULE and nothing on the server reads it. ⚠️ §3.16 asked for the tooltip to SAY it is advisory; it was written that way and the user TRIMMED that tail the same day, so the line is the figures alone - the disclosure lives here and on the faction page instead. Enforcing the balance is a cross-cutting project, not a Walkers stage. §3.16a. |
+| D53 | Abduction power is a DECLARATION with a power level, not the drive's boost (2026-09-12) | A Walker drive is a legacy drive: its boost is max level 1, costs 0, and IS Jump to Hyperspace, so §3.18's "power-turns are boost levels" no longer fits. The user chose a type-'ballistic' order, damageclass `abduction`, declared by selecting the drive and clicking the enemy, whose FIRING MODE is the power level (1-4). Each level costs the drive's `powerReq` again, charged on the client's reactor balance and advisory like D46. Setting Jump to Hyperspace withdraws it. §3.18a. |
+| D54 | ONLY THE INITIATOR must meet the two conditions (2026-09-12) | Contributors - a second EDJD, or a Pathfinder/Scribe - add their power whether or not the target is in THEIR field or their OEW beats its DEW. What the conditions decide is who ANCHORS the chain: it continues while at least one EDJD that met both on every turn of it meets them again. §3.18a. |
+| D55 | Friendly abduction is NOT built (2026-09-12) | It was in §3.18 from an earlier rules text, not in the rules the user supplied for Stage 20, and FV has no way to allocate OEW at a friendly unit. The server refuses a friendly target. |
+| D56 | The EDJD's detonation chance is HALVED (2026-09-12) | % of drive boxes lost, halved for an Ancient - the rule every other roll site applies. It rolls every turn the drive is abducting; `isJumpFailureImmune` is not overridden, so the same hull's own jump-out keeps its immunity. §3.18a. |
+| D57 | What a target CARRIES never counts toward its abduction cost (2026-09-13) | *"Hangar contents shouldn't contribute to cost at all, in preview or actual cost."* Flights in hangars, ships in a Docking Bay and a rail's LCV are all left out; only ATTACHED units add their ramming factor. This also made the published preview and the locked cost ONE figure, and withdrew the first build's two-figure answer to the masking problem (trap 60). §3.18a. |
+| D58 | A deactivated or destroyed drive CANCELS its abduction (2026-09-13) | *"The order itself should also be cancelled when Jump Drive is deactivated (or destroyed whilst in an attempt to abduct a ship)."* Client: `shipManager.power.onOfflineClicked` / `offlineAll` remove the order. Server: `EdjdAbduction::getCancellationReason` - drive boxes gone, its section destroyed this turn, or offline - writes a no-hold note and a "cancelled" log line; the drive delivers nothing and rolls no detonation. §3.18a. |
+| D59 | No line of sight is required (2026-09-13) | The declaration inherited `weaponManager.targetShip`'s blocked-LoS skip; an abduction-capable drive now sets `ignoresLoS` per instance beside `hasSpecialTargeting`. The server never tested LoS. |
+| D60 | A "Being abducted" ship-window banner (2026-09-13) | Purple, off the same `JumpEngine.getAbductionChain` reader as the tooltip line, in `ShipWindow.js` beside "Jumping to Hyperspace". |
+| D61 | An EDJD cannot abduct a FIGHTER FLIGHT (2026-09-13, play test 4352) | *"An EDJD cannot target fighter flights."* The first build did not block it on either side. Client: `JumpEngine.doSpecialTargeting` refuses a `flight` target with a message; server: `EdjdAbduction::getDeclarationBlock` returns "a fighter flight cannot be abducted", after the team check. A flight ATTACHED to a hull still adds its RF to that hull's cost (D57) and leaves with it. §3.18a. |
+| D62 | A held abduction CONTINUES by itself (2026-09-13, play test 4352) | *"If an abduction is successfully initiated then the relevant Jump Drive should automatically keep targeting until deactivated/destroyed."* Client-seeded, the way `repeatLastTurnPower` carries power forward: `JumpEngine::getLatestAbductionHold` publishes the drive's latest note as `abductionLastHold` {turn, targetid, level} when it delivered power, and `JumpEngine.continueAbductions` re-declares it at the start of Initial Orders if that turn was last turn, the chain is still published, and `canSelectForAbduction` passes (so deactivated, destroyed, uncharged or jumping drives stop). Supporting drives continue too. Not a server-written row: `submitFireorders` only INSERTS, so a pre-written row would duplicate on commit and survive a CANCEL. ⚠️ A page reload during Initial Orders re-seeds a cancelled order. §3.18a. |
+| D63 | An abduction COOLDOWN (2026-09-13) | User rulings: each drive - EDJD and supporting alike - recharges for its OWN jump delay (Wanderer 4, Traveler 6, Waymarker 6, Guideship 3, Pathfinder 4, Scribe 8), counted from the turn after THAT drive last took part, however its part ended: completed, collapsed on a failed condition, the target destroyed, or cancelled - but only a COMMITTED declaration counts, never one withdrawn before Initial Orders was committed. Built as `JumpEngine::getAbductionRechargeLoad` (latest `EDJD` note of any value; 0 on its own turn, then 1.. up to the delay), folded into `getVortexRechargeLoad` by `min` so every other engine is unchanged and the published `turnsloaded` carries it. A drive that delivered power last turn may still CONTINUE that same unit while recharging (`isContinuingAbduction` / client `getContinuableAbductionTargetId`) - so mid-chain it reads 1/delay and keeps going. The resolver now writes a no-hold note when the target is off the board, which is what makes "target destroyed" count. The Walker's own boost jump is not charge-gated and is unaffected. §3.18a. |
+| D64 | The FIRST turn only TAKES HOLD (2026-09-13, play test) | *"Power Turns should not start accumulating until the turn after the initial targeting has been successful."* It was possible to abduct a small ship on the declaration turn. Now a turn that STARTS a chain (fresh, or a restart after the prior anchors all failed) locks the cost and records the anchors but writes 0 halves for every declaration, and logs "takes hold ... power can be applied from next turn". Power counts from the next turn, which is also the first turn a SUPPORTING drive may declare: `EdjdAbduction::isHeldByTeam` (a chain as of last turn with an anchor on the shooter's team) at submit, `JumpEngine.getAbductionChain` on the client. Client `isAbductionPowered(order)` = a chain stands against the order's target: false -> no reactor draw, no halves, and `JumpEngineMenu` hides the Power row and shows a "Targeting" note. ⚠️ "Held" moved from `halves > 0` to `since > 0` in `getLatestAbductionHold` and `isContinuingAbduction`, or the targeting turn would never be continued. Read at the TARGET level: a second EDJD joining an abduction another EDJD took hold of applies power at once. A restart can still surprise a player - power paid on a turn the old anchors all failed is lost, which the client cannot foresee. §3.18a. |
+| D65 | The field and EW conditions are for TAKING HOLD only (2026-09-13) | *"The Energy Draining Field and more OEW than DEW conditions are only relevant for the initial targeting of a vessel for abduction. They should not be checked in subsequent turns after Abduction has begun."* `EdjdAbduction::resolveTarget` now decides CONTINUING first: a chain that stood last turn continues while at least one EDJD anchored on every turn of it has a WORKING declaration (not cancelled, not jumping) - `getConditionBlock` is never called. Only when no such EDJD is left is the turn a new attempt, judged on the conditions: a restart ("takes hold", the earlier abduction "lapsed") or a collapse naming the reason. So a chain now ends only when its holding EDJDs stop - a gap, a cancel, deactivation or destruction - never because the target moved out of the field or out-jammed it. This also retires the D64 surprise for the common case: a restart now needs every holding EDJD to have STOPPED, not merely failed a check. The menu's powered note no longer mentions the conditions. §3.18a. |
 
 Everything below assumes these.
 
@@ -2281,29 +2358,281 @@ watching player's session to disk every couple of seconds for as long as the shi
 refusal goes into `EdfNetLinks::$refusals` instead — an in-memory array, cleared at the top of
 `resolve()`, which is also why it needs no `DBManager` reset (§2.1's per-load-static trap).
 
-### 3.8 EW Detector
+### 3.8 EW Detector — **BUILT: Stage A 2026-09-09, Stage B 2026-09-10**
 
-`class EWDetector extends ShipSystem implements SpecialAbility` — `specialAbilities[] = "EWDetector"`.
+`class EWDetector extends ShipSystem implements SpecialAbility`, in `baseSystems.php` below
+`EnergyDrainingNet`. Control sheet (user, 2026-09-09): **health 20, power 6, range 20**.
 
-**Two stages, because the second one is expensive.**
+> *"The sensors on an EWD-equipped ship can detect the configuration of any enemy's EW suite and
+> instantaneously report it to the ship's fleet ... This system provides every friendly unit within
+> 20 hexes of the EW Detector the enhancement of Expert Scanner: all friendly ships may save one
+> point of EW for allocation as late in the combat turn as the end of the movement segment. The
+> effects are cumulative with multiple EW Detectors, but the efficiency degrades. The first four EW
+> Detectors allow the fleet to save 1 point of EW each. EW Detectors number 5-8 allow the fleet to
+> save 1/2 of a point each. All additional EW detectors allow only 1/4 of a point each. Round down
+> fractions of 1/4 and 1/2 and round up fractions of 3/4. If a vessel declares that it is saving an
+> EW point but ends its movement step out of range of the EW Detector, the point is lost. It is
+> possible to save ELINT EW points as well, as long as the ELINT vessel is within range both before
+> and after movement."*
 
-- **Stage A — the allowance.** A fleet sweep computes the saved-EW budget: detectors 1–4 give 1
-  each, 5–8 give ½ each, 9+ give ¼ each; round ¼ and ½ down, ¾ up. Ships must be in range of a
-  detector both before and after movement (ELINT included). Display the allowance; nothing yet
-  allocates it. Cheap, and immediately makes the system legible.
-- **Stage B — late allocation.** EW is submitted **only** in `InitialOrdersGamePhase::process`
-  ([InitialOrdersGamePhase.php:219](source/server/Phase/InitialOrdersGamePhase.php#L219)) and the
-  client hard-gates the UI on `gamedata.gamephase != 1`
-  ([ew.js:512](source/public/client/ew.js#L512)). Making one point allocatable at the end of
-  Movement means: an EW write path in `MovementGamePhase::process` (budget-clamped, additive only —
-  never allow a phase-2 submission to rewrite phase-1 allocations), the client gate relaxed to
-  exactly the saved allowance, and a masking review, since EW visibility is phase-conditional
-  (`deleteHiddenData`'s phase-1 guard).
+**Two stages, because the second one is expensive.** Both landed.
 
-⚠️ **Stage B changes a shared, load-bearing path for every faction in the game.** It is the
-highest-blast-radius item in this plan. Budget a full `masking` + `snapshot` harness pass for it
-alone. Without it the detector does nothing of value, so it cannot simply be dropped — but it
-should land last among the non-SCT work.
+- **Stage A — the allowance. DONE 2026-09-09.** A fleet sweep computes the saved-EW budget:
+  detectors 1–4 give 1 each, 5–8 give ½ each, 9+ give ¼ each; round ¼ and ½ down, ¾ up. The
+  allowance is displayed and nothing yet allocates it.
+- **Stage B — late allocation. DONE 2026-09-10.** The saved points are spendable in Pre-Firing and
+  Firing, clamped by the unspent (DEW) pool, with the same EW buttons the Initial Orders menu uses.
+
+⚠️ **Stage B changed a shared, load-bearing path for every faction in the game** — it was the
+highest-blast-radius item in this plan. It came out clean: replay harness **byte-identical** to the
+same run with the six server files stashed, all five checks including `masking` and `snapshot`.
+
+#### Two rulings that shaped Stage B (user, 2026-09-09)
+
+**R1 — WHERE "the end of the movement segment" IS.** *"The 'End of movement' in FV is essentially
+the start of Pre-Firing phase (if there is one) or start of Firing phase. If we restrict the late EW
+allocation to these phases and don't worry too much about the Movement phase for now that's fine."*
+
+⭐⭐ **This ruling is what made Stage B tractable, and it deleted a whole sub-problem.** The plan had
+budgeted for an EW write path in `MovementGamePhase::process` plus a separate "declare now, verify
+after you move" mechanism for *"if a vessel declares that it is saving an EW point but ends its
+movement step out of range … the point is lost"*. With the window opening AFTER movement there is
+**nothing to declare**: the allowance is simply recomputed at the unit's post-movement hex, and a
+ship that drifted out of range finds it is zero. The rule is enforced by the arithmetic already
+written for Stage A, asked at a different moment. No declaration, no reconciliation, no note.
+
+⚠️ **BOTH phases, sharing ONE budget.** Phase 5 is Pre-Firing and 3 is Firing. Gating on 5 alone
+would silently deny the allowance on any turn whose Initial Orders had nothing to activate —
+`InitialOrdersGamePhase::advance` jumps straight to phase 3 in that case, which is exactly the
+situation where a player has fewest units left. One budget across both, because the write diffs
+against what is already stored: points spent in Pre-Firing are stored rows by the time Firing opens,
+so only the remainder is still spendable.
+
+**R2 — WHAT THE POINT IS DRAWN FROM.** *"If a ship spends all their EW on non-DEW EW types, then
+they are unable to save a point of EW (and the EW panel should reflect this during EW orders, so it
+doesn't misleadingly show a player saving some EW points for later when in fact they've spent them
+all on non-DEW uses). Essentially DEW is the only pool of unspent EW that saved EW can be drawn
+from in Pre-Firing/Firing."*
+
+So the number that matters is **`min(ladder, unspent pool)`**, not the ladder. `EW::getDetectorAllowance`
+answers what the detectors offer, `EW::getSavedEwAllowance` answers what the ship can actually take
+up, and only the second is ever displayed or budgeted to.
+
+#### What Stage B built
+
+**The pool, and the one subtlety in it.** `EW::getUnspentEw` / `ew.getSavedEwPool` read the
+**committed DEW row** when one exists, and fall back to the derived remainder
+(`scannerOutput − allEWExceptDEW`) when it does not.
+
+- ⚠️ **There is no DEW row during Initial Orders.** `convertUnusedToDEW` writes it inside `doCommit`
+  ([gamedata.js:1948](source/public/client/gamedata.js#L1948)), so while the player is still
+  allocating there is nothing listed — and the derived fallback is what makes the panel's figure
+  fall as they spend, which is the half of R2 the user asked for explicitly.
+- ⚠️ **The committed row WINS when it exists**, because the client wrote it with `getEWLeft()`,
+  which also subtracts EW-boosted system boosts (Particle Impeders, Psionic Lances) that nothing
+  on the server re-derives. Reading the row is the only way the two ends agree on those hulls.
+- ⚠️ **`getDEW()` cannot tell "no row" from "a row reading 0"** — it returns 0 for both — and the two
+  mean opposite things to the write path (below). Hence `EW::hasCommittedDewRow`.
+
+⭐⭐ **THE LATE-WINDOW BOOKKEEPING IS ONE DERIVED NUMBER AND TWO BOUNDS.** This is the part worth
+carrying to any similar feature. Every point spent moves a point OUT of the unspent remainder, so:
+
+```
+spent      = pool − getEWLeft()          // pool is the ANCHOR; getEWLeft is live
+remaining  = allowance − spent
+```
+
+- The **upper** bound (`remaining ≥ cost`) is the budget.
+- The **lower** bound (`spent ≥ cost` before a de-allocate) is what stops the player undoing an
+  *Initial Orders* allocation in a phase where the server would ignore the removal anyway.
+
+No snapshot of the committed EW array, no per-entry marking, nothing a poll rebuilding
+`gamedata.ships` can get out of step with. ⚠️ **The anchor must be the committed pool, never
+`getEWLeft()`** — `getEWLeft()` falls by one with every point spent, so using it as the budget would
+shrink the budget as the budget was spent and each point would cost two.
+
+**The write.** `EW::submitLateEw`, called from `PreFiringGamePhase::process` and
+`FireGamePhase::process`, outside their per-ship loops.
+
+- ⚠️⚠️ **ADDITIVE ONLY, ENFORCED BY THE SHAPE OF THE DIFF RATHER THAN BY A CHECK.**
+  `EW::diffLateEw` emits only **positive** deltas against the stored rows, so a POST that removed or
+  reduced an Initial Orders allocation changes nothing at all. The one row driven downwards is the
+  ship's own DEW, which is not an allocation but the remainder the saved point is defined to come
+  out of.
+- ⚠️ **AN EXISTING ROW IS RAISED, NEVER DUPLICATED.** `getEWbyType()` and `getDEW()` return the
+  **first** matching row while `getOEW()` **sums** — so a second row for one (ship, turn, type,
+  target) would be counted by the shooting maths and ignored by everything else. Hence
+  `DBManager::adjustEwAmount` (UPDATE … LIMIT 1) beside `insertEwEntry`.
+- ⚠️ **IDEMPOTENT BY CONSTRUCTION.** A second submission in the same phase diffs the posted array
+  against rows that now already contain it, finds nothing, writes nothing.
+- ⚠️ **ALL OR NOTHING PER ENTRY.** A Disruption allocation is 3 points (4 on a `ConstrainedEW` hull)
+  and means nothing as a fragment, so a budget that cannot take the whole entry takes none of it.
+- ⚠️ **NO COMMITTED DEW ROW MEANS NO SPEND.** There is nothing to debit, and a spend that cannot be
+  debited is free EW. A flight never gets a row (`convertUnusedToDEW` returns early on one), which is
+  also the right answer — the rule is about ships.
+- ⚠️ **THE BUDGET IS RE-DERIVED SERVER-SIDE, NEVER FROM THE POST.** A POST-side ship carries whatever
+  movement the client sent, so its `getHexPos()` is client-controlled — and its EW array is the thing
+  being validated.
+- ⭐ **AND IT RELOADS NOTHING.** `Manager::submitGamedata` builds the authoritative gamedata with
+  `DBManager::getTacGamedata` and hands **that same object** to `process()` as `$gameData`; only
+  `$ships` is POST-side. Nothing earlier in either phase’s `process()` touches EW or a unit’s hex (a
+  Fire-phase combat pivot changes facing, not position), and the player cannot already have submitted
+  this phase because `hasAlreadySubmitted()` throws first — so a second load would be one of the
+  heaviest calls in a submit, spent to re-read what is already in hand. ⚠️ That
+  `InitialOrdersGamePhase::process` *does* re-load before `EW::validateEW` is not an inconsistency:
+  it has written power and notes earlier in the same method and needs to see them.
+
+**The UI.** The EW buttons the Initial Orders menu already carries are **reused verbatim**:
+`ShipTooltipInitialOrdersMenu.ewButtons` is now a named subset, and
+`ShipTooltipFireMenu.getAllButtons()` concatenates it while the late window is open.
+
+- ⭐ **ONE GATE, AT THE MENU LEVEL, NOT TWENTY CONDITIONS.** The button objects are *shared* between
+  the two menus, so a phase condition pushed into them would apply to Initial Orders too.
+  `ew.isLateEwWindowOpen` answers the whole question — right phase, my ship, not yet committed, and
+  an allowance worth something. The alternative was a second copy of twenty-two entries and their
+  fifteen condition helpers in `shipTooltipFireMenu.js`.
+- ⚠️ **The subset stops before `removeAllEW`.** "Remove All EW" clears the whole turn, Initial Orders
+  allocations included, and those are committed rows the late window cannot un-write — the button
+  would blank the panel and the next payload would put it all back. `ew.removeEW` refuses outside
+  phase 1 for the same reason.
+- ⚠️ `this.selectedShip` is routinely **null** in these menus and one throwing condition deletes the
+  whole tooltip, Open Ship Details included; `isLateEwWindowOpen(null)` is false, and the harness
+  asserts the null case explicitly.
+- The `Saved EW` row becomes **`remaining / total`** once the window opens, and is now suppressed on
+  a zero *allowance* rather than a zero *value* — a unit that has spent its whole budget still has
+  one, and the row vanishing at the moment it is used up would read as the feature breaking.
+
+**Initial Orders is bit-for-bit unchanged.** `ew.canAllocateEwNow` / `canDeallocateEwNow` open with
+an unconditional `return true` on phase 1 rather than with a condition that happens to pass — the
+phase has its own long-standing rules, including different `gamedata.waiting` handling on the assign
+and de-assign paths, and Stage B must not quietly move any of them.
+
+#### ⚠️ The masking review, and the one residual it leaves
+
+`deleteHiddenData` blanks enemy `EW` **only in phase 1** ([TacGamedata.php:1543](source/server/model/TacGamedata.php#L1543)).
+In phases 2, 5 and 3 an opponent's EW allocation has always been fully visible — that is not
+something Stage B introduced, and the aiming UI depends on it.
+
+**What Stage B does introduce is that EW can now CHANGE inside phases 5 and 3.** The review:
+
+- ⭐ **In ordinary play the change is invisible until the phase advances.** `Manager::getTacGamedata`
+  serves a body only when `DBManager::isNewGamedata` says turn, phase or activeship moved
+  ([Manager.php:654](source/server/controller/Manager.php#L654)). Both late phases run at
+  `activeship = -1`, so a poll inside a steady phase 5 or 3 returns `{}` and the opponent is served
+  nothing. By the time they see it, both players have committed.
+- ⚠️ **A deliberate page RELOAD would show it.** `game.php` calls `getTacGamedataJSON(..., force =
+  true)`, which bypasses the APCu cache — so an opponent who hard-refreshes after you have committed
+  and before they have would see your late allocation. The information is one EW point's worth, in a
+  phase where the rest of your EW is already public, and the rule this implements is explicitly
+  about *"enabling the ships to react to any change"* — so this was judged acceptable rather than
+  designed around.
+- **If it ever matters, the fix is a `phase` column on `tac_ew`** and a `deleteHiddenData` branch
+  dropping enemy rows written in the current phase. ⚠️⚠️ It is not free: `DBManager::submitEW`,
+  `insertEwEntry` and `adjustEwAmount` all use **positional** `INSERT INTO tac_ew VALUES (...)`, so
+  the column and all three writes must change in one edit, and the live migration must land before
+  the code.
+
+#### Exit criteria met
+
+**Stage A.** 77 server checks and 90 client checks green, including a **41-count ladder differential**
+in which the JS reads back the table the PHP wrote (so the two are compared over the same inputs
+rather than two independently-typed expectations, and the run asserts its own non-vacuity), the
+stage's own 1/4/5/8/9 tuple on both sides, inclusive-at-exactly-range geometry, per-system ranges,
+and the ladder exercised **end to end through the real sweep** at 13 detector counts.
+
+**Stage B.** **210 checks green across three throwaway harnesses** — 50 server, 135 client, 25
+tooltip-menu — covering the pool and its two sources, the clamp (including the R2 case: a ship that
+spent everything on non-DEW types saves nothing), the phase window, the diff in all six of its
+refusal modes, `submitLateEw` end to end against a recording DBManager (budget clamp, all-or-nothing
+Disruption, idempotence, wrong phase, another player's ship, and the no-detector fast path proving
+it never loads gamedata at all), the derived-bookkeeping invariant, both gates with Initial Orders
+asserted unchanged, the real `AssignOEW`/`assignEW`/`deassignEW`/`removeEW` paths end to end, and
+the menu split proved lossless **by object identity** with the null-selection case asserted.
+
+**Both.** `checkShipData.php` PASS — 0 new findings, the same 237 in baseline. Replay harness 119
+passed / 4 failed, and the same run with the six server files stashed is **byte-identical with
+timings normalised**, so zero drift on any of the five checks, `masking` and `snapshot` included.
+⚠️ The four failures are the known clean-tree baseline (4325, plus 3676 / 4249 / 4297 moved by the
+*Elite crew* and *Kelly Phaser* commits and never re-recorded).
+
+⚠️ **Two things a play test needs to know.** One detector grants 1 point, so the degrading ladder
+needs **four** Waymarkers to see the first bracket end and **nine** to reach the quarter-point one.
+And a ship that allocated all its EW during Initial Orders has nothing to save — that is R2 working,
+not the detector failing.
+
+#### What Stage A built
+
+**The system.** `EWDetector` carries a `$range` and nothing else — no output, no arc, no order. Its
+ctor takes `($armour, $maxhealth = 0, $powerReq = 0, $range = 0)` and 0 takes the control-sheet
+value, the same convention every other Walker system uses. `isEwDetectorActive()` is
+`!isDestroyed($turn - 1) && !isOfflineOnTurn($turn)`; `getDetectorRange()` returns 0 when it is not,
+which is what removes it from the count. Arcs are declared 0..360 so `addSystem()` cannot stamp the
+FRONT section's arc onto a front-mounted detector (`arch_addsystem_section_arc_trap`). Mounted on
+the **Waymarker's front** for testing, with hit-chart row `10 => "EW Detector"` in the FWD section —
+the row was already there, commented out.
+
+⚠️ **NO CRITICAL TABLE, deliberately.** The rules list none, and a plausible-looking invented entry
+would be a rule nobody wrote. Destruction and power-down are the whole of the damage model. If one
+is ever wanted, `getDetectorRange()` is the single place a ladder goes.
+
+⚠️ **THE RANGE IS PER SYSTEM, NOT A CONSTANT.** Every sweep asks the detector for its range rather
+than assuming 20, so a hull may mount a shorter- or longer-ranged one from a control sheet without a
+second class, and a future refit has one number to move.
+
+**The arithmetic**, in `EW::` beside `getBlanketDEW` — which is the same shape of sweep, every
+friendly unit within 20 hexes of an ELINT hull:
+
+```php
+EW::collectEwDetectors($gamedata, $turn)          // flat (team, pos, range) tuples, collected ONCE
+EW::savedEwAllowanceFromDetectors($count)         // the degrading ladder
+EW::countEwDetectorsCovering($detectors, $team, $position)
+EW::getSavedEwAllowance($gamedata, $ship, $detectors = null, $turn = null)
+```
+
+⭐ **THE LADDER IS COUNTED IN QUARTERS, AS INTEGERS, START TO FINISH.** Every term is a multiple of
+¼, so the whole rule is exact in integer arithmetic — and integer arithmetic is the only kind that
+can be *promised* identical in PHP and JavaScript. A float version works today and drifts the first
+time somebody adds a bracket. And the rounding rule collapses to one expression: down at ¼ and ½, up
+at ¾, is `floor(x + ¼)`, i.e. `(quarters + 1) intdiv 4`. Worked through: 1→1, 4→4, 5→4, 8→6, 9→6,
+10→6, 11→7, 12→7.
+
+⭐⭐ **AND THE CLIENT MIRRORS ALL OF IT — the one EW sweep in the game that is not server-only.** The
+rule is *"in range both before and after movement"*, and the after-movement position is a **plotted,
+uncommitted** one: the server has not been told about it and by definition cannot be, because the
+whole point of the allowance is that the player spends it at the end of the Movement segment on the
+strength of where they ended up. `shipManager.getShipPosition()` already follows the plot, so
+`ew.collectEwDetectors` / `savedEwAllowanceFromDetectors` / `countEwDetectorsCovering` /
+`getSavedEwAllowance` track the drag for free. The server keeps the authoritative copy for Stage B's
+validation. ⚠️ **MIRROR SET — a change to any one of the four is a change to its twin.**
+
+**Both sweeps defer every question behind the `instanceof` / name test**, exactly as
+`TacGamedata::setEdfHexes()` records: in all but a handful of games nothing is an EW Detector, and
+`getHexPos()`, `isDestroyed()` and `isReinforcement()` are not worth asking of a ship that carries
+none. Same three exclusions as the EDF sweep (destroyed, still in hyperspace, no position yet), plus
+the detector's own two (destroyed system, powered down).
+
+⚠️ **`range` and `effectiveRange` ride `stripForJson`, and they have to.** The client sweep needs the
+range live, and `range` is not one of the 21 keys the client constructor re-defaults
+(`arch_shipcompactor_key_stripping`). `effectiveRange` is the server's answer *after* destruction and
+power-down, so the client does not reimplement `isEwDetectorActive` — but the client still tests
+`systems.isDestroyed` and `power.isOffline` itself, because a player may power a detector down during
+Initial Orders and the server will not know until the phase commits, which is exactly the window in
+which the allowance is being read. `range` alone is the LOBBY fallback, since `stripForJson` is the
+in-game payload. `data` goes with them for TRAP 6 (client system fields are shared by reference
+across same-phpclass instances).
+
+**Display.** A gold `Saved EW` row at the bottom of the ship window's Electronic Warfare panel
+(`ShipWindowEw.getShipRows`), suppressed at zero. ⚠️ **OWN SIDE ONLY** — the number is a live read of
+where friendly detectors are, so rendering it on an enemy hull would answer *"how many EW Detectors
+cover this hex"* for a fleet the viewer is not in. Same ruling the stealth-toggle forecast carries;
+`isPlayerInGame()` guards the observer, who has no side.
+
+**The reading of "the fleet" that Stage A implements**, since the rules text says both things: the
+allowance is **PER SHIP**, equal to `degrade(number of friendly detectors covering THAT ship)`.
+*"This system provides every friendly unit within 20 hexes ... all friendly ships may save one point
+of EW"* is unambiguous; *"allow the fleet to save 1 point of EW each"* is read as *"allow the fleet's
+ships to save one more point each"*, with the "each" attaching to the detector. If the user rules the
+other way — a single pooled fleet budget — `getSavedEwAllowance` is the only body that changes.
 
 ### 3.9 Sensor Charge Transceiver — **BUILT 2026-09-06 (Stage 9)**
 
@@ -2475,6 +2804,9 @@ each one.
   confirm it. Drawn as `BallisticSprite`s rather than one `HexRegion` blanket because they are
   scattered (a region would be one loop per hex anyway) and because a sprite can carry TEXT — which
   is how a named hex says whose name it is.
+  ⚠️ **THE TEXT IS GONE as of Stage 11** (§3.10b, user ruling 2026-09-08: obscured by ship sprites,
+  and unreadable where several charges cross one hex). The marker SET is unchanged — a named
+  straight-through hex still earns its green hex — but a marker is now `{q, r}` and nothing else.
 - **The budget**, two rows of figures at the head, SELECTED-only, in the LoS ruler's idiom
   (`mathlib.drawRuler`). Hexes and manoeuvres, each as **spent-of-total**. ⚠️ The totals are
   DERIVED (`used + left`), never the class constants: boost levels are bought in Initial Orders and
@@ -2540,6 +2872,2607 @@ which lists the same six hexes in a different order. The order of that table is 
 of a direction index, so the wrong one gives the client a different compass and every leg but due
 east disagrees.
 
+### 3.10 Housekeeping — five corrections to shipped stages — **BUILT 2026-09-10 (Stage 11)**
+
+Five unrelated small items, collected because none of them is worth a stage of its own and all five
+are cheap. They land together as Stage 11.
+
+**As built.** All five, each provable on its own: 14 checks on the bracket arithmetic, 15 on the SCT
+markers, 11 + 14 on the untargetable pair (client and server), and the seeding demonstrated on real
+hulls both ways. `checkShipData.php` unchanged (238 findings / 237 baselined / **1 new error that
+is NOT ours** — see below); replay harness **119 passed, 4 failed**, exactly the four documented
+clean-tree failures (3676, 4249, 4297, 4325) and byte-identical to a stashed-tree run.
+
+⚠️⚠️ **AND THE HARNESS EARNED ITS KEEP ON A ONE-LINE CHANGE.** 3.10e's hull list started life as
+`public static $fullyChargedHullClasses` on `Weapon`, which broke **game 4151** outright:
+`MissileRack::stripForJson` walks its ammo objects with
+`ReflectionObject::getProperties(IS_PUBLIC)` and then reads each name as `$missile->$key`
+([missile.php:62](source/server/model/weapons/missile.php#L62)) — and **reflection lists public
+STATICS beside the instance properties**, so every missile-armed ship in the game threw
+*"Accessing static property LightBallisticTorpedo::$fullyChargedHullClasses as non static"* and
+lost its whole gamedata payload. ⭐ **A shared list on `Weapon` must be a `const` or `private
+static`, never a `public static`** — it is the same trap `ShipCompactor::annotateSystems` records
+in its other form ("a public property on Weapon lands on every ammo entry of every poll"), and a
+constant is neither iterated nor serialised. Nothing but the replay corpus would have found it:
+every unit test of the feature passed, on both trees.
+
+⚠️ **One pre-existing FAIL sits on top of this stage and is not part of it.** `checkShipData.php`
+reports `Wanderer :: location 1, roll 9 — no system named "EW Detector" on location 1`: the hull's
+front hit chart says `"EW Detector"` while `EWDetector::$displayName` is
+`"Electronic Warfare Detector"` (the Waymarker's chart, [Waymarker.php:114](source/server/model/ships/walkers/Waymarker.php#L114),
+spells it correctly). Every roll of 9 on the Wanderer's front chart is therefore silently rerouted
+to Structure and the EW Detector can never be hit. It fails identically on a stashed tree, so it
+came in with the hull; the fix is one string in
+[Wanderer.php:94](source/server/model/ships/walkers/Wanderer.php#L94).
+
+#### 3.10a The 50% deployment bracket — **BUILT 2026-09-10**
+
+**As built.** `units50 / points50 / limit50` beside the two existing sets, `limit50 = floor(calcPoints * 0.5)`,
+and a third report line with its own copy of the one-ship exception. The prose gained a fourth
+bracket in the availability list at [fleetchecker.php:164](source/public/fleetchecker.php#L164)
+("three categories" → four), and the "up to 33% ... on Limited units" sentence now says
+*Limited (33%)*, because with two Limited brackets "Limited" alone no longer names one.
+
+⭐ **THE "IT EXISTS TWICE" WARNING BELOW IS NOW STALE, AND THAT IS WORTH KNOWING BEFORE THE NEXT
+EDIT.** The second copy is `checkChoices_LEGACY`, and it is **inside a block comment** — `/*` at
+[gamelobby.js:4722](source/public/client/gamelobby.js#L4722) closing at
+[:5860](source/public/client/gamelobby.js#L5860), with a header that says it is kept verbatim and
+inert. So there is exactly ONE live fleet checker and it was the only one edited; a test asserts
+the archived copy did *not* grow a 50% bracket, which is the check that keeps the two from being
+confused again. The `oneOverAllowed` remark stands as a description of the archived copy.
+
+⚠️ Two rules stayed 10%-only, deliberately: the escort rule
+([gamelobby.js:1644](source/public/client/gamelobby.js#L1644)) is about Restricted units and now
+says so in a comment, and nothing else in the function learned about the new bracket.
+
+`Pathfinder` already carries `$this->limited = 50`
+([Pathfinder.php:16](source/server/model/ships/walkers/Pathfinder.php#L16)), and the buy list
+already prints "50%" — [gamelobby.js:2574](source/public/client/gamelobby.js#L2574) tests
+`limited > 0 && limited < 100` and shows whatever number it finds. **The fleet check does not**:
+it knows exactly two brackets.
+
+- `units10 / points10 / units33 / points33` are declared at
+  [gamelobby.js:1028](source/public/client/gamelobby.js#L1028), accumulated at
+  [1099–1107](source/public/client/gamelobby.js#L1099) and reported at
+  [1590–1626](source/public/client/gamelobby.js#L1590). Add a third set and
+  `limit50 = Math.floor(calcPoints * 0.5)`.
+- ⚠️⚠️ **THE FLEET CHECKER EXISTS TWICE IN THIS FILE.** The same three blocks appear again at
+  [4754](source/public/client/gamelobby.js#L4754), [4824](source/public/client/gamelobby.js#L4824)
+  and [5325](source/public/client/gamelobby.js#L5325), near-identical but not identical (the second
+  copy still consults the dead `oneOverAllowed` flag). Editing one and not the other produces a
+  lobby that passes a fleet the Fleet Checker fails, or the reverse, with nothing to say why.
+- ⚠️ **Two rules are 10%-only and must stay so**: the "one single ship is allowed to break limit"
+  exception applies per bracket (so 50% gets its own copy, correctly), but *"Restricted (10%) ship
+  present without escort"* ([1626](source/public/client/gamelobby.js#L1626)) is a rule about
+  10% units and must not learn about 50% ones.
+- The prose at [fleetchecker.php:111](source/public/fleetchecker.php#L111) lists the brackets and
+  [163](source/public/fleetchecker.php#L163) the occurrence bands; both need the 50% line.
+
+**Exit criterion:** a fleet containing one Pathfinder passes and fails at the right points cap on
+BOTH the lobby's live check and the standalone Fleet Checker, and no existing 10%/33% verdict moves
+anywhere in the 2,500-hull corpus.
+
+#### 3.10b The Sensor Charge Transceiver's green name — **BUILT 2026-09-10**
+
+**As built.** `getCourseMarkers` pushes `{q, r}` and nothing else — the `gamedata.getShip` lookup
+and the `text` key are both gone, so `add()` no longer takes a target id at all — and
+`buildCourseMarkers` calls `new BallisticSprite(position, 'hexGreen')` with no text argument, which
+falls through to the plain cached green-hex texture. `SCT_MARKER_TEXT_COLOUR` is deleted and the
+marker signature is hex-only.
+
+⭐ The marker SET is unchanged, and that is the half a test has to pin: a hex where the player named
+a unit while carrying straight on costs no manoeuvre and would otherwise have nothing on screen at
+all. 15 checks, run against the real method lifted out of `special.js`, with `gamedata.getShip`
+stubbed to **throw** — so a re-introduced name lookup fails loudly rather than quietly.
+
+User ruling 2026-09-08: *"somewhat useless, since it's obscured by ship sprites and would be hard to
+read if several SCT charges passed through the same hex."*
+
+The name is written by `SensorChargeTransceiver.prototype.getCourseMarkers`
+([special.js:2270](source/public/client/model/weapon/special.js#L2270)) — `text: target ?
+target.name : ""` — and drawn by `buildCourseMarkers`
+([BallisticIconContainer.js:655](source/public/client/renderer/icon/BallisticIconContainer.js#L655))
+in `SCT_MARKER_TEXT_COLOUR`. Stop supplying the name; the green hex stays.
+
+- ⚠️ **Keep the marker, drop the word.** The named-unit marker exists because "a waypoint that
+  carries straight on costs no manoeuvre, which is exactly what makes it a free way to pick a unit
+  out of a crowded hex" — the *hex* is still the only on-screen confirmation that a choice was
+  recorded there, and the `SCT|w:<n>|t:<id>` token still rides the order. Removing the marker as
+  well as the text would make the pick invisible. (Q9, confirmed 2026-09-08: *"keep hex but remove green text"*.)
+- The renderer's marker signature
+  ([BallisticIconContainer.js:755](source/public/client/renderer/icon/BallisticIconContainer.js#L755))
+  interpolates `marker.text`; with the text always empty it collapses to hex-only, which is still
+  correct — it changes whenever the marker SET changes, which is the only thing it has to do.
+- `SCT_MARKER_TEXT_COLOUR` becomes dead. Delete it rather than leaving a constant nothing reads.
+
+#### 3.10c The Energy Draining Mine cannot be shot at — **BUILT 2026-09-10**
+
+**As built**, as the section proposes: `BaseShip::isTargetableBy($shooter = null, $turn = false)`
+([ShipClasses.php:3248](source/server/model/ships/ShipClasses.php#L3248)) answering `empty($this->unTargetable)`,
+mirrored by `shipManager.isTargetable(ship)` ([ships.js:529](source/public/client/ships.js#L529))
+and consulted beside `Huge > 0` at **both** weaponManager sites — the tooltip line (which keeps
+saying just "Cannot Target", one refusal rather than a new reason) and the `targetShip` click.
+
+⭐ **ONE FACT, AND IT IS A SHIP PROPERTY RATHER THAN A METHOD OVERRIDE.** `public $unTargetable = true`
+is declared **only** on `SpawnEnergyDrainingMine`, so the server method and the client mirror read
+the same field and the 2,556 other hulls carry nothing new: the key rides the static blueprint
+verbatim (the generators `json_encode` the raw ship), which is how the client learns it without a
+`stripForJson` line, and its absence everywhere else is why the client test must be a **truthy**
+one. `empty()` rather than a plain property read, because on every other class the property does
+not exist. A ship-data corpus check confirms the compacted blueprint carries the key on the orb and
+on nothing else.
+
+⚠️ Verified NOT to touch the field: the orb still mounts its `EnergyDrainingField`, still answers
+`getEdfRadius`/`isEdfActive`, is still not `Enormous`, and still keeps its notes and its map disc.
+Ramming, collateral and area effects are untouched — nothing but the two deliberate-selection sites
+asks the question. The server-side refusal was built at Stage 15 (§3.17a): `Firing::validateFireOrders`
+now refuses a POSTed shot at the orb too.
+
+*"Can we hide the Energy Draining Mine from sight or at least prevent people targeting it (since
+there's no point in destroying it)"* — **prevent targeting, do not hide.**
+
+⭐ **Hiding it would delete the field.** The orb's icon *is* the field marker: the purple seven-hex
+disc labelled "Energy Drain Mine" added in Stage 6 is drawn from the unit. Its `notes` already say
+*"Destroying this probe has no in-game effect"*
+([SpawnEnergyDrainingMine.php:63](source/server/model/ships/terrain/SpawnEnergyDrainingMine.php#L63))
+and its Structure is indestructible; what is missing is only that the client still offers it as a
+target.
+
+The existing mechanism is the Moon one the user names: `weaponManager` refuses `ship.Huge > 0` in
+two places — the tooltip line at
+[weaponManager.js:817](source/public/client/weaponManager.js#L817) (`Cannot Target`) and the click
+itself at [3571](source/public/client/weaponManager.js#L3571). ⚠️ **It is client-only.** Nothing on
+the server refuses a fire order at a Huge unit at all, which is tolerable for a wasted shot and is
+*not* tolerable for §3.17, where a real rule depends on the refusal.
+
+So introduce the pair now and give it its server half in Stage 15 (**built 2026-09-11**, §3.17a):
+
+```php
+BaseShip::isTargetableBy($shooter, $turn)   // default true; false on the EDM orb
+```
+mirrored as `shipManager.isTargetable(ship)` and consulted alongside `Huge > 0` at both
+weaponManager sites.
+
+- ⚠️ **It must not reach the field.** `TacGamedata::setEdfHexes()` collects every `EdfSource`
+  regardless; nothing about targeting may gate that.
+- ⚠️ **It must not block ramming, collateral or area effects.** The orb is `Enormous = false` on
+  purpose (it does not auto-ram and does not block line of sight), and a blast that happens to
+  cover its hex still resolves against everything else standing there. This flag governs the
+  *deliberate selection of this unit as a target* and nothing else.
+
+#### 3.10d The faction entry in `factions-tiers.php` — **BUILT 2026-09-10**
+
+**As built**, at [factions-tiers.php:1803](source/public/factions-tiers.php#L1803) with its TOC line
+at [:98](source/public/factions-tiers.php#L98), in the Torvalus block's shape: an intro, then one
+`<h5>` per system — Electromagnetic Weaponry, Lightning Array / Medium Lightning Array, Wide-Beam,
+Chromatic Pulse Driver, Energy Draining Field, Extended Draining Field, Energy Draining Mine,
+Energy Draining Net, EW Detector, Sensor Charge Transceiver, Gravitic Drives — plus the hangar
+exemption, a Fleet Composition block (the Ancient brackets, the Pathfinder's 50% and the Walkers'
+own short enhancement list) and the hull roster.
+
+Two things it does that the section did not ask for and that the standing obligation needs:
+
+- an italic line under the intro saying the entry describes **what is implemented today**, so a
+  reader knows the page is a moving record rather than a design document;
+- a closing list of **what is not implemented yet** (the Mapmakers' EW, their Medium Lightning
+  Array and jump engine, the Traveler's Docking Bay, repair and power sharing, and both jump
+  drives). ⭐ The alternative is worse than an omission: the Mapmaker hull is already **buyable**,
+  and its array and jump engine are commented out in `populate()` with `//STAGE` markers, so a
+  player reading a systems list would otherwise buy a flight expecting a weapon that is not there.
+
+⚠️ Every figure in it was read out of the code rather than out of this plan (the hull costs and
+system lists from a constructed instance of each of the seven hulls, the drain dice from
+`EdfExposure`'s constants, the refit prices from the registry) — which is the only way an entry
+like this stays true.
+
+A `<h4 id="walkers">WALKERS OF SIGMA-957</h4>` block, placed after `#vorlons`
+([factions-tiers.php:1721](source/public/factions-tiers.php#L1721)) and before
+`<h3 id="otherfactions">` ([1802](source/public/factions-tiers.php#L1802)), plus one TOC line after
+the VORLON EMPIRE entry at [97](source/public/factions-tiers.php#L97).
+
+Written from what is **built**, not from what is planned — Lightning Array and Medium Lightning
+Array with their two firing modes and the Wide Beam toggle; the Chromatic Pulse Driver's Pulse and
+Scanning modes and the fleet-wide shield adaptation; the Energy Draining Field, fixed and variable,
+with its four drains and the targeting penalty; the Energy Draining Mine; the Energy Draining Net's
+corridors and closed areas; the two refits (`EDF_RANGE`, `SYS_WBLA`/`SYS_WBMLA`); the Sensor Charge
+Transceiver; and the hull roster (Traveler, Waymarker, Pathfinder, Scribe, Guideship, Mapmaker
+Sensor Probes). Model the structure on the Torvalus block at
+[1399](source/public/factions-tiers.php#L1399), which is the closest in shape — an Ancient faction
+with a hangar exemption to explain.
+
+⭐⭐ **AND IT IS NOW A STANDING OBLIGATION.** Every stage from here on adds a paragraph to this
+entry as part of its own exit criterion. A faction page written once and never updated is worse than
+none: players read it as authoritative and it silently describes a game that no longer exists.
+
+#### 3.10e The Wanderer's weapons DO begin the game fully charged — **BUILT 2026-09-10**
+
+**As built**, hung on `setInitialSystemData` exactly as the ⭐ below argues, in three parts:
+
+- `Weapon::getStartLoading()` now delegates to a new **`getFullStartLoading()`** carrying its old
+  body verbatim. That is what gives a class which overrides `getStartLoading()` (to seed less) a
+  way back to the unrestricted seed; nothing else changed for any of the ~2,500 weapons that do not.
+- `Weapon::setInitialSystemData($ship)` asks **`getStartLoadingForShip($ship)`**, which lifts the
+  restriction when `$this->seedsBelowFullCharge` **and** the hull is in
+  `Weapon::FULLY_CHARGED_HULL_CLASSES`. `getStartLoading()` keeps its no-argument signature for
+  HangarOps' four re-seeds and for `dualWeapon`/`duoWeapon`'s sub-weapons.
+- `protected $seedsBelowFullCharge = true` on **`MediumLightningArray`** and
+  **`ChromaticPulseDriver`** — the two classes that seed 1 instead of `normalload`. ⭐ One flag per
+  class rather than an override per class, so the exception logic is written once; and **protected**
+  because `json_encode` drops protected properties and a public flag would ride every one of the
+  ~57,000 system objects in the blueprint tree.
+
+⚠️ **The `EnergyDrainingMine` launcher is deliberately NOT in scope** and still opens the battle at
+1/3 on a Wanderer as on every other hull: it does not set the flag. The ruling and this section are
+about weapons that *charge*, and the launcher's seed is an ammunition count with a documented
+"turn 1 must not reload" rule of its own (§3.6). Flag it if the user wants 3/3 there too — it is one
+line.
+
+**Proven** on real hulls both ways: a Wanderer's three Chromatic Pulse Drivers seed 2/2 while a
+Traveler's and a Scribe's seed 1/2, and a Waymarker/Pathfinder Medium Lightning Array seeds 1/2
+until the same hull is asked with `phpclass` forced to `Wanderer`, when it seeds 2/2 — which also
+proves the mechanism reaches `MediumLightningArray`, a class no Wanderer currently mounts. See the
+public-static reflection trap at the head of §3.10 for the one thing that went wrong.
+
+User ruling 2026-09-09: *"Unlike other Walker ships, the Wanderer phpclass ship's weapons DO start
+the battle fully charged."*
+
+Every Walker weapon that charges over turns currently overrides `getStartLoading()` to seed less
+than `normalload` — the Lightning Array pair
+([specialWeapons.php:12562](source/server/model/weapons/specialWeapons.php#L12562)) and the
+Chromatic Pulse Driver ([pulse.php:1381](source/server/model/weapons/pulse.php#L1381)). The
+Wanderer is the exception, so that override has to become conditional on the mounting hull instead
+of absolute.
+
+⭐ **`getStartLoading()` is the wrong hook, because it does not know its ship.** Its one caller does:
+`Weapon::setInitialSystemData($ship)` ([weapon.php:1010](source/server/model/weapons/weapon.php#L1010))
+receives the hull and writes the result into `tac_systemdata`. Put the exception there — a
+`Weapon::$startsFullyChargedOnClasses`-style opt-out consulted against `$ship->phpclass`, or a plain
+override on the two Walker weapon classes — and `getStartLoading()` keeps its no-argument signature
+for every other caller in the tree (`HangarOps` re-seeds launched craft through it in four places,
+and `dualWeapon`/`duoWeapon` call it on their sub-weapons).
+
+- ⚠️ Key it on **`phpclass`**, not on faction: every other Walker hull shares
+  `"Walkers of Sigma-957"` and must keep the restricted seed.
+- ⚠️⚠️ `setInitialSystemData` runs **once, at ship creation**. An existing game does not re-seed, so
+  a play test needs a **fresh game**, not a reload — and any Wanderer already on a board keeps the
+  charge it was created with.
+
+**Exit criterion:** a newly created Wanderer's Lightning Array and Chromatic Pulse Driver report
+full charge on turn 1, while the same weapon classes on a Traveler still report their seeded value.
+
+### 3.11 Mapmaker Electronic Warfare
+
+*"Can use up to 3 OEW or DEW per turn, like a ship. Mapmakers are the only fighter unit that need
+this, so we should make sure it has a simple gate to prevent unnecessary work for all other
+fighters."*
+
+**THE GATE IS ONE PROPERTY.** `FighterFlight` gains `public $ewCapacity = 0;`, set to `3` on
+`MapmakerProbes` and left at 0 on every other flight in the game. Every branch this section adds
+opens with `$flight->ewCapacity > 0` (client: `ship.ewCapacity`), so an ordinary flight pays one
+falsy property read per site and nothing else. Mirrored to the client by `stripForJson` —
+⚠️ and it must actually be published, because `ShipCompactor` strips defaults and `undefined > 0`
+is false, which is the wanted answer (trap 8).
+
+**What already works, unmodified:**
+
+- `FighterFlight::getDEW($turn)` and `getOEW($target, $turn)`
+  ([FighterFlight.php:504](source/server/model/ships/FighterFlight.php#L504) and
+  [516](source/server/model/ships/FighterFlight.php#L516)) already read the flight's `EW` array.
+  The server-side storage for flight EW has existed all along; nothing has ever written to it.
+- Enemy masking is already right. `TacGamedata::deleteHiddenData` blanks `$ship->EW` wholesale for
+  every unit not owned by the viewing player during phase 1
+  ([TacGamedata.php:1545](source/server/model/TacGamedata.php#L1545)), flights included, so a
+  Mapmaker's declared OEW is hidden exactly as a ship's is.
+- **Mapmaker DEW is free.** *"Works exactly the same as ship DEW e.g. is ignored by fighters"* — a
+  shooter's "fighters ignore defensive EW" line is `$dew = 0` inside the `instanceof FighterFlight`
+  branch of the SHOOTER's hit calculation ([weapon.php:1741](source/server/model/weapons/weapon.php#L1741)),
+  which is untouched for everyone else. A Mapmaker's DEW is read off the flight by the ordinary
+  `$target->getDEW($turn)` line above it. Nothing to build.
+
+**What has to be built.**
+
+**1. The allowance, and ⚠️⚠️ THE NAME COLLISION THAT WILL BITE.**
+`ew.getScannerOutput(ship)` **already has a flight branch**
+([ew.js:9](source/public/client/ew.js#L9)) and it answers a *different question*: it returns
+`floor(offensivebonus / 2)` (full OB for a minesweeper) as the **mine-detection** allowance, which
+`assignEW` then spends on `"Detect Mines"` entries — and `getEWLeft` is
+"scanner output minus everything that is not DEW" ([ew.js:252](source/public/client/ew.js#L252)),
+which every assign path measures against.
+
+Adding 3 to that one number would let an ordinary fighter spend its mine-detection allowance on OEW
+**and** let a Mapmaker spend its OEW pool on mine detection, in both directions, silently.
+
+**Keep two pools.** `getScannerOutput` stays exactly as it is for flights; a new
+`ew.getFlightEwCapacity(ship)` (0 unless `ship.ewCapacity`) is consulted by the OEW/DEW paths only,
+with its own `ew.getFlightEwLeft(ship)` that counts only `OEW`/`DEW` entries. The server twin goes
+in `EW::getScannerOutput` ([EW.php:42](source/server/handlers/EW.php#L42)), which today has no
+flight branch at all and returns 0 for one.
+
+**2. The hit chance, server and client.** Inside the `instanceof FighterFlight` branch at
+[weapon.php:1735](source/server/model/weapons/weapon.php#L1735), gate on a new weapon property
+`$useFlightEW` (§3.13's array is its only user). **Only the `$oew` assignment changes** — the
+combat-pivot penalty and the rest of that branch stay exactly as they are (user, 2026-09-08:
+*"flight-level combat does not exist in FV"*):
+
+```
+ordinary fighter weapon   $oew = $effectiveOB + getOEW($target);
+                          $dew = $bdew = $sdew = 0;
+
+flight-EW weapon          $oew = max(0, getOEW($target) - ($dew + $bdew + $sdew));
+                          $dew = $bdew = $sdew = 0;
+```
+
+⭐ **The Light Chromatic Pulsar keeps its Offensive Bonus AND gains any OEW the flight allocated**
+(user ruling 2026-09-08: *"The LightChromaticPulsar DOES use Offensive Bonus (and any OEW)"*). So
+the first row is not "unchanged" — `getOEW()` returns 0 for every flight in the game today, which is
+what makes the added term free everywhere else, but on a Mapmaker it is real. The two rows are the
+whole difference between the faction's two fighter weapons: the Pulsar **adds** EW to its bonus and
+ignores defensive EW entirely; the Array **replaces** the bonus with EW and is contested by it.
+
+That contest is D12 — *"DEW can only cancel out Mapmaker's OEW to the normal hit chance against the
+target's defence profile"* — and (Q10, answered 2026-09-08) **blanket and supported defensive EW
+stack with the target's own DEW** inside the subtraction, because they are separate EW functions.
+The control sheet's *"Effected by DEW"* is that line, and it appears on the Array's sheet only.
+
+⚠️ The subtraction happens **before** the zeroing, and the `max(0, …)` is the whole rule: 3 OEW
+against 5 DEW is 0, never −2. Zeroing afterwards is what keeps the weapon from being *worse* than
+an ordinary fighter gun against a heavily screened target.
+
+⚠️ **Mirror in `weaponManager.calculateHitChange`**, which has its own fighter branch; a
+preview/resolution disagreement on a weapon whose whole point is the lock is the worst possible
+place to have one.
+
+**3. `convertUnusedToDEW` refuses flights outright** —
+`if (ship.flight) return false;` ([ew.js:181](source/public/client/ew.js#L181)). A Mapmaker's
+unspent points must become DEW the way a ship's do, so this needs the `ewCapacity` exception too.
+
+**4. The Initial Orders UI.** The OEW/DEW rows are hidden for a selected flight by `sourceNotFlight()`
+([shipTooltipInitialOrdersMenu.js:326](source/public/client/UI/shipTooltipInitialOrdersMenu.js#L326)).
+Relax it to `sourceNotFlight() || sourceIsEwFlight()`.
+⚠️ **Do not touch `notFlight()`** ([318](source/public/client/UI/shipTooltipInitialOrdersMenu.js#L318)) —
+it also refuses when the **target** is a flight, which is a separate and still-correct rule.
+
+**5. The flight window's EW block.** *"A new Electronic Warfare list should be added to
+flightWindow to show EW amounts (placed top-right, outside the normal flight icons is fine, and it
+can just be the same style as ship EW block)."*
+
+The flight branch of `ShipWindow.render`
+([ShipWindow.js:1768](source/public/client/UI/reactJs/shipWindow/ShipWindow.js#L1768)) renders
+header + `FighterList` + status strip; the ship branch renders `<ShipWindowEw ship={ship} />`
+([1872](source/public/client/UI/reactJs/shipWindow/ShipWindow.js#L1872)). Render the same component,
+gated on `ship.ewCapacity`.
+
+- ⚠️ `ShipWindowEw` builds a *ship's* row list — BDEW, CCEW, Detect Stealth, Detect Mines and the
+  per-target OEW/DIST/SOEW/SDEW rows. A flight has one meaningful subset (DEW plus its OEW target
+  rows). Give it a flight row list rather than letting `ew.getCCEW` and friends answer for a unit
+  they were never asked about.
+- ⚠️ **The flight window has no room.** `$variant="flight"` is capped at `400px`
+  ([ShipWindow.js:104](source/public/client/UI/reactJs/shipWindow/ShipWindow.js#L104)) and
+  `FighterList` wraps against that cap. Top-right *outside* the icons means either a wider flight
+  variant or an absolutely positioned block; the scale-to-fit budgets in
+  `project_shipwindow_redesign` decide which, and the resize grip has to keep working either way.
+
+**6. The cap is currently enforced nowhere on the server.** `EW::validateEW` returns `true`
+unconditionally ([EW.php:5](source/server/handlers/EW.php#L5)) — the ship-side budget check was
+disabled years ago for Constrained ELINT hulls. A flight-only clamp in
+`InitialOrdersGamePhase::process`, gated on `ewCapacity > 0`, costs every other unit one property
+read and is the only thing standing between a tampered client and unlimited fighter OEW.
+
+**Exit criterion:** a Mapmaker flight allocates 3 points across OEW and DEW and no more; an
+ordinary fighter flight's mine-detection allowance is byte-identical before and after; the hit
+chance for a `useFlightEW` shot agrees server↔client across a differential corpus spanning
+OEW 0–3 × DEW 0–6; and the enemy sees none of it during Initial Orders.
+
+### 3.11a Stage 12 as BUILT (2026-09-10)
+
+Built as specified above, with **three deliberate departures** — each one a case where following
+the section as written would have changed behaviour it never meant to touch.
+
+**1. The server twin is NOT a branch in `EW::getScannerOutput`.** The section put it there; that
+function has three other callers and every one of them would have inherited a meaning nobody asked
+for. `EW::getUnspentEw` would let the EW Detector's saved point be drawn out of a flight's OEW pool
+*and* count its `"Detect Mines"` rows — bought with Offensive Bonus, not with EW — as spending it;
+the Chameleon plausibility ceiling (`getDisguisedDEWFor`) is a question about hulls; and
+`JumpEngine::rollExitDeviation` reads it as a **sensor rating**, so a Mapmaker's jump-point exit
+scatter would have silently changed the day Stage 13 gives it a Jump Engine. Instead:
+`EW::getFlightEwCapacity` / `EW::getFlightEwLeft`, one caller each, gate still one property read.
+
+**2. `getEWLeft` needed the split too, in BOTH other directions.** The section protects the
+mine-detection allowance from being spent on OEW; the two reverse leaks were not mentioned and are
+just as real.
+
+- `ew.getEWLeft` counts "everything that is not DEW" as used, so a Mapmaker holding 3 OEW would have
+  watched its mine-detection allowance fall from 4 to 1. One `continue` on the flight-EW types,
+  behind the same `ewCapacity` gate.
+- ⭐ **And `ew.getEwLeftFor` had to test `ship.flight`, not `isFlightEwPool`** — the Stage 12 client
+  harness caught this one. Falling through to `getEWLeft()` for an ordinary flight answers with its
+  MINE-DETECTION allowance, so `ew.AssignOEW(kotha, target, 'OEW')` cheerfully wrote 2 points of OEW
+  paid for out of the Offensive Bonus. No button offers that (`sourceCanAllocateOEW` refuses a
+  flight with no pool) and `EW::clampFlightEw` drops it server-side regardless — but the rule is
+  *OEW and DEW always come out of the flight pool, and an ordinary flight's pool is 0*, and it has
+  to hold where the arithmetic is rather than only at the two places that happen to guard it today.
+
+**3. ⚠️⚠️ THE EW DETECTOR HAD AN IMPLICIT FLIGHT GUARD, AND STAGE 12 REMOVED IT — then the user
+ruled that it SHOULD be gone.** Stage 10A/10B's saved-EW rule was never gated on `!flight`: it did
+not need to be, because `getSavedEwAllowance` is clamped by `getUnspentEw`, which wants a
+**committed DEW row**, and no flight had ever had one (`convertUnusedToDEW` returned early on every
+flight). A Mapmaker now has one, so the guard was gone by accident; it was reinstated explicitly,
+flagged, and then **removed again on the user's ruling the same day: *"the effect applies to all
+Walker units"* (2026-09-10).**
+
+⭐ **AND NOTHING TESTS FOR A FLIGHT ANYWHERE ON THAT PATH, which is the point.** The ladder
+(`getDetectorAllowance`) is a question about POSITION and answers for any unit in range;
+`getSavedEwAllowance` then clamps it by what the unit actually has left to hold back. An ordinary
+flight has no EW pool, so that clamp answers 0 for it — the Mapmaker is the only flight in the game
+this reaches, and it is reached by arithmetic rather than by a special case.
+
+The one thing that DID need writing is the pool the late window measures against. Stage 10B's
+`getSavedEwPool` / `getLateEwSpent` both derived from `getEWLeft`, which on a flight answers about
+the **mine-detection allowance** — so a Mapmaker holding 4 points of mine detection would have read
+as having already spent its saved point. One helper, `ew.getUnspentEwLive` (JS) and the matching
+`FighterFlight` branch in `EW::getUnspentEw` (PHP), is what both now go through. The flight window
+shares the ship's `Saved EW` row rather than copying it (`getSavedEwRow`).
+
+**And one trap the section could not have predicted.** `useFlightEW` is a public property on
+`Weapon`, and `MissileRack::stripForJson` **reflects every public property on `Weapon` onto every
+missile in every missile ship's payload** (`Ammo extends Weapon`). The replay corpus caught it
+immediately — game 4151, 36 differing paths, all `missileArray/*/useFlightEW: added (false)`. Fixed
+with a named `$unusedOnAmmo` exemption list on `MissileRack`, which is now the documented home for
+the next base-class flag that means nothing on a round. This is the same function
+`arch_public_static_on_weapon` warns about; the static case crashes, the instance case merely bloats.
+
+**Also built, and not in the section:** `weaponManager.computeBaseDefenceBreakdown` reads a
+**Mapmaker's own DEW** when a ship shoots at it (`if (!target.flight) dew = ...` answered 0 for every
+flight). The server has always read it — `$target->getDEW($turn)` works on a `FighterFlight` — so the
+two agreed only because no flight had ever had a DEW row. That is D12's other half, *"Mapmaker DEW
+works exactly the same as ship DEW"*, and without it a ship's preview disagrees with its own
+resolution. `computeBaseDefenceBreakdown` also now returns `defensiveEwBeforeWaiver`, because the
+fighter waiver zeroes DEW/BDEW/SDEW **before** `computeOEW` runs and the contested lock needs the
+pre-waiver total.
+
+**Harnesses.** `tests/replay/walkersStage12Harness.php` (26 assertions: the gate, the two pools, the
+server clamp incl. a tampered ordinary flight, what `getDEW`/`getOEW` then read, the detector guard)
+and `tests/replay/walkersStage12ClientHarness.js` (59 assertions, real `ew.js` + `weaponManager.js`
+in a VM: the same rules plus the **whole OEW 0–3 × DEW 0–6 lock-on grid** for both weapon kinds).
+Replay corpus back to its four known clean-tree failures (3676, 4249, 4297, 4325).
+
+**What Stage 14 now inherits.** `public $useFlightEW = false;` on `Weapon` and the two-row rule in
+`Weapon::calculateHitBase`; `MedLightningArrayFtr` sets the flag and nothing else.
+
+### 3.12 The Mapmaker Jump Engine
+
+*"They also have their own Jump Engine system that works normally and has a recharge time of 10
+turns. For simplicity we should only let an entire flight of Mapmakers open 1 jump point, not one
+per fighter."*
+
+The line is already stubbed in the hull —
+`//$fighter->addAftSystem(new JumpEngine(0, 1, 0, 10));`
+([MapmakerProbes.php:56](source/server/model/ships/walkers/MapmakerProbes.php#L56)) — and the
+constructor's 4th argument is `$delay`, the B5W jump delay, which the class overwrites
+`loadingtime`/`turnsloaded` from. ⭐ **A recharge rule must read `$delay`, never `$loadingtime`**;
+that is a JUMP_GATES finding and it applies verbatim here.
+
+⭐⭐ **"ONLY ONE JUMP POINT PER FLIGHT" IS ALREADY THE LAW, AND THERE IS NOTHING TO BUILD FOR IT.**
+`Firing::getVortexDeclarationBlock` refuses any second declaration from the same **shooter** in the
+same turn — *"covers a second order on this engine and a second engine on the same hull alike"*
+([firing.php:238](source/server/handlers/firing.php#L238)) — and a fighter's fire order names the
+**flight** as its shooter. Six engines on six craft in one flight are six engines on one hull as far
+as that loop is concerned: the first declaration survives, every later one is dropped. The rule the
+user asked for is a property of where the check already sits.
+
+**What does have to be built:**
+
+**1. The charge is per SYSTEM and the rule is per FLIGHT.** After a jump, only the declaring
+fighter's engine is spent; its five siblings are still fully charged and could declare again next
+turn. Route every read and write through one accessor, `FighterFlight::getFlightJumpEngine()`,
+answering the **sample fighter's** engine — `getSampleFighter()` returns `$this->systems[1]`
+([FighterFlight.php:262](source/server/model/ships/FighterFlight.php#L262)) whether or not that
+craft is alive, which is exactly the stable identity this needs and is the same anchor
+`EdfExposure` and `Movement::applyJumpOut` already use for flight-wide records.
+
+⚠️ **Do not store the charge on a craft that can die.** If a per-flight charge ever needs to
+outlive the sample fighter's system data, it belongs in an `IndividualNote` on the sample fighter,
+not in a new column — the same "derive it on every load" discipline that gives the Energy Draining
+Mine its lifetime.
+
+**2. The client has never declared a vortex from a flight.** `weaponManager` builds the weapon list
+from the selected unit's systems; a flight's systems are `Fighter` objects and their weapons are one
+level below that. The on-map facing arrow, the `hextarget` click path and the suppressed firing-mode
+selector (`hideFiringModeSelector`) have all only ever run for a capital hull. **This is the whole
+stage.**
+
+**3. Three server questions the declaration asks that must be answerable for a flight.**
+`getVortexDeclarationBlock` calls `$weapon->isDestroyed($turn)`, `$weapon->isOfflineOnTurn($turn)`
+and `$shooter->getHexPos()`. The middle one is the risk: a fighter subsystem has no power rows at
+all, so confirm it answers `false` rather than throwing or reading a sibling's entry (trap 6 —
+client system fields are shared by reference across same-phpclass instances, and the server has its
+own version of that hazard in `Fighter` construction).
+
+**4. Leaving through the vortex is already done.** `Movement::applyJumpOut` grew its FighterFlight
+branch in JUMP_POINTS Stage 6 — one `HyperspaceJump` damage entry per craft, the CV note on the
+sample fighter, the `RammingAttack` log order shared
+([movement.php:461](source/server/handlers/movement.php#L461)). A Mapmaker flight flying into its
+own jump point needs no new code.
+
+**Exit criterion:** a Mapmaker flight opens exactly one jump point however many craft declare; a
+second declaration in the same turn is refused with the existing reason string; the engine reads 10
+turns of recharge from `$delay` on every craft; and the flight can fly out through its own vortex
+and is recorded as jumped, not killed.
+
+---
+
+### 3.12a As built — Stage 13, 2026-09-10
+
+Harnesses: `tests/replay/walkersStage13Harness.php` (59) and
+`tests/replay/walkersStage13ClientHarness.js` (35). Both **fatal on the pre-edit tree**.
+`checkShipData.php` PASS, 0 new findings (237 baselined). Replay harness 115/8, byte-identical to a
+`git stash push -- source/` run with timings normalised — the 8 are pre-existing on a clean tree
+(the four documented ones plus 3671/4256/4303/4328, which moved with the *ReducedRange crit for
+ballistics* and *Homing Missile* commits and have never been re-recorded).
+
+⭐⭐ **THE SECTION'S TWO HEADLINE CLAIMS WERE BOTH HALF-RIGHT, AND IT MATTERS WHICH HALF.**
+
+**"Only one jump point per flight is already the law and there is nothing to build for it."** The
+mechanism named is right — `Firing::getVortexDeclarationBlock`'s loop refuses a second declaration
+from the same **shooter**, and a fighter's `shooterid` really is the flight's id — but that loop
+tests `$shooter->getSystemById($other->weaponid) instanceof JumpEngine`, and it never gets the
+chance to speak unless the orders are *comparable*. The thing that makes D13 true is the
+**normalisation**: `validateVortexDeclaration` re-points `$fire->weaponid` at
+`FighterFlight::getFlightJumpEngine()` before the rule list runs. Two lines, and without them each
+craft's engine is judged on its own state — a fully charged engine holding no vortex — so a flight
+that jumped last turn could open a second doorway simply by clicking a different craft.
+
+**"The client has never declared a vortex from a flight. This is the whole stage."** It was the
+smaller half. Five SERVER sweeps walked `$ship->systems` looking for a `JumpEngine` and found
+nothing on a flight, because a flight's systems are *craft*: `spawnDeclaredVortices`,
+`closeExpiredVortices`, `hasVortexDeclaration`, the vortex-holder lookup and both reinforcement exit
+sweeps. The declaration would have validated, persisted, and then vanished — a commit that looks
+completely clean and does nothing. They all go through **`JumpEngine::getUnitJumpEngines($unit)`**
+now, which is the one place that answers "which engines speak for this unit" and which returns
+exactly ONE for a flight.
+
+⚠️ **THREE FINDINGS WORTH CARRYING.**
+
+1. **A FIGHTER SUBSYSTEM'S `this.ship` IS THE CRAFT, NOT THE FLIGHT — on the CLIENT.**
+   `SystemFactory` builds a hull's systems with `new window[name](args, ship)` but a fighter's with
+   `new window[name](args, fighter)`, so every `this.ship` in the client `JumpEngine` was reading an
+   object with a per-flight autoid for an id, no position, no team and no vortex. Every vortex
+   question — `getVortexHeldBy`, `isMyShip`, the range test — silently answered "no". The join back
+   is `flightid`, which `Fighter::stripForJson` has always published, and it is now one accessor,
+   `JumpEngine.prototype.getOwningUnit()`. **Any future per-unit behaviour on a fighter-mounted
+   system has this bug waiting for it.**
+
+2. **A NEW SHIP FLAG MUST BE A DECLARED PROPERTY, NOT A CONSTRUCTOR ASSIGNMENT.** `$this->noHangarRequired = true`
+   in the constructor is a *dynamic property*, deprecated since PHP 8.2 — one notice per Mapmaker
+   built, and the ship-data validator builds 2,580 of them. `public $noHangarRequired = true;` at
+   class level is the shape `SpawnEnergyDrainingMine::$unTargetable` already uses, and it rides the
+   static blueprint the same way. The exemption itself is **fleet-building only**: `HangarOps` is
+   deliberately not taught about it, because a Mapmaker still fills boxes the moment Stage 16's
+   Traveler bay carries one.
+
+3. **`BlueprintCache`'s SPAWNABLE-CLASS SCAN DOES NOT DESCEND INTO CRAFT EITHER.** It reads
+   `$system->spawnableClasses` off a hull's systems, which was free until a fighter-mounted weapon
+   could put a unit on the board. The Mapmaker's Jump Engine can, and without the descent the FIRST
+   jump point a Mapmaker flight ever opens has no blueprint to resolve against and draws as an empty
+   hex until the page is reloaded — exactly the failure `$spawnableClasses` exists to prevent.
+
+⭐ **WHAT MAKES "IF ONE HAS A fireOrder THEY ALL DO" TRUE ON SCREEN** is three small diverts, not a
+new concept: `JumpEngine::stripForJson` publishes the FLIGHT engine's charge and vortex counter on
+every craft (so six icons never disagree about one fact), and `weaponManager.hasFiringOrder` /
+`removeFiringOrder` ask the flight engine when the ship is a flight and the system is a `jumpEngine`
+(so all six read the one order, and the player can withdraw it from whichever icon they clicked).
+`targetHex` resolves to the flight engine before queuing and takes one declaration per pass.
+
+⭐⭐ **USER RULING 2026-09-10, AFTER PLAY TESTING — A FLIGHT HAS NO MAINTAIN AT ALL, AND ITS JUMP
+POINT IS OPEN FOR EXACTLY ONE TURN.** *"As fighters, Mapmakers cannot hold a jump point open for
+more than 1 turn, so we can default to showing 1/1 in their Jump engine output display on the turn
+the Jump Point is open, and don't have to check for maintaining power etc."*
+
+⚠️ **AND THE REASON IT NEEDED A RULE OF ITS OWN IS A VACUOUS PASS.** `getVortexPowerViolations`
+looks for systems drawing power, and a flight's are `Fighter` objects with `powerReq` 0 — so the
+all-systems-offline test that Maintain is built on **passes on a flight for free**. As first built,
+that read as "this unit satisfies the rule" when the truth is that the rule does not apply to it,
+and a Mapmaker could have held a doorway open for the full four turns at no cost. A test that
+cannot fail is not a test that passed.
+
+The rule is one predicate, `JumpEngine::isFlightMounted()` (mirrored on the client as
+`JumpEngine.prototype.isFlightMounted`, which asks the direct fact — `this.ship.fighter` — rather
+than resolving the flight, so it cannot be wrong when the lookup finds nothing), and four short
+consequences:
+
+- `getMaintainDeclaration()` refuses a flight outright, the same shape as its gate refusal. That
+  alone closes the vortex at the end of its first open turn.
+- `getVortexClosureReason()` gains a branch **for the log**, which is a persisted note and the only
+  explanation the player gets: *"a fighter flight cannot hold a jump point open"* rather than
+  *"not maintained"*, which reads like a mistake the player made.
+- `Firing::getVortexDeclarationBlock`'s Maintain branch refuses a flight at the wire — because
+  every test below it *passes* on one (the vortex is open, it formed last turn, the hex matches),
+  so a forged mode-7 order would otherwise be accepted and persisted while meaning nothing.
+- `stripForJson` sends `vortexMaxTurns = 1`, so the icon reads **1/1** rather than 1/4. The client's
+  fallback denominator is flight-aware too, so every path agrees.
+
+⭐ **And the client simply does not offer the control** (`canMaintainVortex` returns false for a
+flight), which is what makes "don't have to check for maintaining power" literally true: the power
+questions are never reached, rather than being answered specially. An earlier draft of this stage
+special-cased them instead — a `getFlightEngine()` accessor plus `ship.flight ? [] : …` guards in
+`doActivate`/`doDeactivate` — and all of it came back out under this ruling.
+
+⚠️ **THE FAILURE ROLL IS ALWAYS ZERO.** `openVortex` prices failure off `maxhealth - getRemainingHealth()`
+on the engine, and a fighter's SUBSYSTEMS are never damaged (a craft is destroyed as a whole), so a
+Mapmaker's drive can never fail. Same reason `getFlightJumpEngine` can safely answer the sample
+fighter's engine even when that craft is dead: the engine reads `isDestroyed()` false, which is what
+lets a flight with craft 1 gone still jump.
+
+⚠️ **THE POSITIONAL SYSTEM-ID TRAP FIRED, unavoidably.** Adding a system to each craft shifts every
+construction-order id after it — `Fighteradvsensors` 4→5, craft 2 5→6, and so on down the flight —
+so any game in progress with Mapmakers in it has stale per-system ids in `tac_critical` /
+`tac_systemdata`. Nothing can avoid that (a craft gaining a system shifts the next craft's id
+whatever the placement), and the only Mapmakers in existence are Stage 12's play tests.
+
+### 3.13 Medium Lightning Array, fighter mount — `MedLightningArrayFtr`
+
+**THE CONTROL SHEET (D4, supplied 2026-09-08).** Read from the sheet, nothing inferred:
+
+| | 3-Probe group | 6-Probe group |
+|---|---|---|
+| Guns | 1 per 3 craft | 1 per 6 craft |
+| Damage | **4d10 + 12** (16–52) | **8d10 + 12** (20–92) |
+| Range penalty | −1 per **3** hexes (`rangePenalty = 1/3`) | −1 per **4** hexes (`rangePenalty = 0.25`) |
+| Fire control | **+2 / +4 / +6** | **+5 / +5 / +4** |
+| Class | Electromagnetic | Electromagnetic |
+| Mode | **Flash** | **Flash** |
+| Rate of fire | **1 per 4 turns** | 1 per 4 turns |
+
+**Special:** *"Uses EW for lock-on. Effected by DEW. Does not use Flight-Level combat or Offensive
+Bonus. Cannot fire MLA and LCP in same turn. May fire in combined mode on first turn."*
+
+Six things the sheet settles or changes:
+
+- ⭐ **RATE OF FIRE IS 1 PER 4 TURNS**, so `loadingtime = 4`. The prose that came with this stage
+  said *"a recharge rate of 2 turns"*; the sheet won and the user confirmed it on 2026-09-08
+  (*"Ah yes, loading time is 4, my mistake"*). Recorded because the two sources disagreed in
+  writing and the next reader will find both.
+- ⭐ **`fireControl` is `array(fighters, mediums, capitals)`** in FV, so those read
+  `array(2, 4, 6)` and `array(5, 5, 4)`. Note the 6-group is BETTER against fighters and WORSE
+  against capitals than the 3-group — the modes are a real choice, not a strict upgrade, and any
+  "bigger is better" shortcut in the client's mode hinting would be wrong. Confirmed 2026-09-08.
+- ⚠️ **The flat +12 does NOT double.** 8d10+12 is not two lots of 4d10+12. Same shape as Stage 8's
+  finding that *"50% collateral must be computed from the damage, never by doubling the 25%
+  figure"* — write both profiles out, never derive one from the other.
+- ⭐⭐ **Mode: FLASH, AND IT SCORES NO COLLATERAL INSIDE *ANY* ENERGY DRAINING FIELD.** Not just an
+  enemy's — *"Flash damage always loses its collateral damage (friend or foe) in Energy Draining
+  Fields, unless the Lightning Array is boosted by the Wide Beam enhancement"* (user, 2026-09-08).
+
+  ⭐ **That is already exactly what Stage 4 built, and it costs this weapon no code at all.** The
+  test is `TacGamedata::isHexInEdfField()`, which is **deliberately team-blind** — the own-fleet
+  exemption belongs to `getEdfPenaltyHexes()` and the drain, not to this; a field dampening an
+  explosion is a property of the hex (§3.5, Stage 4b). The Wide Beam carve-out is the
+  `edfSuppressesCollateral()` hook Stage 8 added, which `LightningArray` overrides to return false
+  for a wide-beam shot and which **defaults to true for everything else**. Wide Beam is a
+  ship-system refit and is not offered to Mapmakers, so `MedLightningArrayFtr` simply inherits the
+  default and is silenced in every field on the board.
+
+  ⚠️ Which is one more reason **not** to extend `LightningArray` (see the subclass caution below):
+  inheriting its override would hand a fighter weapon a wide-beam exemption it can never legally
+  arm.
+
+  `HyperplasmaMatrix` is also a flight-combined **Flash** weapon and already carries the
+  self-immunity handling for a flight caught in its own splash at range 0
+  ([plasma.php:2380](source/server/model/weapons/plasma.php#L2380)). Read that before writing
+  `fire()`.
+- ⭐ **"May fire in combined mode on first turn"** is the DEFAULT, not an override.
+  `Weapon::getStartLoading()` returns a full charge
+  ([weapon.php:1011](source/server/model/weapons/weapon.php#L1011)); §1.2's *"does not begin the
+  game fully charged"* override is the thing NOT to add here.
+- ⭐ **"Does not use Flight-Level combat or Offensive Bonus" is ONE exclusion, not two.**
+  *"Flight-level combat does not exist in FV, so we can take that text to just mean that we use
+  Flight EW for this weapon, not Offensive Bonus"* (user, 2026-09-08). So the change inside the
+  `instanceof FighterFlight` block is the `$oew` assignment and nothing else — the combat-pivot
+  penalty and the rest of that branch stay exactly as they are. ⚠️ The earlier reading of this line,
+  which had the whole block skipped, was wrong; do not go looking for more to disable.
+
+**The shape: `NeutronBlaster`'s mode structure over `HyperplasmaMatrix`'s collection loop.**
+
+- **`NeutronBlaster`** ([customDevelopment.php:1189](source/server/model/weapons/customDevelopment.php#L1189))
+  is the tree's reference implementation of *"a firing mode names a group size, the stats differ per
+  size, and a mis-declared group auto-misses"*. It carries `blastersRequiredArray`, per-mode
+  `damageType` / `fireControl` / `rangePenalty` / `raking` arrays, an `isCombined` flag that turns a
+  subordinate order into a technical no-shot, and `alreadyConsidered` so one pass cannot claim a
+  partner twice ([1337](source/server/model/weapons/customDevelopment.php#L1337)). It combines
+  across **one ship's mounts**.
+- **`HyperplasmaMatrix`** ([plasma.php:2305](source/server/model/weapons/plasma.php#L2305)) is the
+  tree's only weapon that combines across a **flight**: `beforeFiringOrderResolution` walks
+  `$flight->systems` (the craft) and each craft's own systems (their weapons), elects the lowest-id
+  weapon holding an order as primary, and fully nullifies the rest —
+  `shots = 0, shotshit = 0, needed = 0, rolled = 100` — so they draw no log line, no animation and
+  no missed-shot display, with `calculateHitBase` and `fire` both short-circuiting on that exact
+  quadruple.
+
+Take NeutronBlaster's per-mode stat arrays and its "not enough partners, mark technical" branch, and
+reach for partners the way HyperplasmaMatrix does.
+
+**Group arithmetic (D15).** Modes `1 => "3-Probes"`, `2 => "6-Probes"` (shortened from "…Array" by the user after the first play test - the ids are what the code depends on). Within one flight,
+collect this turn's `normal` orders on `MedLightningArrayFtr` at the **same target and the same
+mode**; form `floor(n / needed)` complete groups; every leftover order becomes technical. A flight
+of six may fire two 3-groups (at the same or at different targets) or one 6-group; four or five
+declaring in mode 1 fire one 3-group and waste the rest, which is the ruling exactly.
+
+- ⚠️ **"Damaged fighters cannot contribute" is not `isDestroyed()`.** HyperplasmaMatrix's
+  `getAliveFighterCount` counts everything not destroyed
+  ([plasma.php:2277](source/server/model/weapons/plasma.php#L2277)); this weapon needs
+  `getRemainingHealth() >= maxhealth` on the craft. Copying the precedent's test is the obvious
+  mistake, and it is silent — a battered flight would simply keep firing at full strength.
+- ⚠️ **`$this->guns` padding and `Firing::automateIntercept`** (trap 11). One order carrying a 3- or
+  6-craft discharge must not present as three or six shots to the interception engine. Copy the
+  Slicer's comment and its skip for manual `intercept` orders; that exact bug produced 44 defensive
+  shots against 4 missiles in game 4306.
+
+**EW lock-on (D12).** `public $useFlightEW = true;` — the flag §3.11 introduces, and this weapon is
+its only consumer. ⭐ **Stage 14 therefore depends on Stage 12** and cannot ship before it.
+
+**Exclusivity (D16).** If any craft fires the array, no craft may fire its `LightChromaticPulsar`
+that turn, and the reverse. The check is **flight-wide**, not per craft.
+
+⚠️⚠️ **It needs a server half of its own.** Stage 8's finding stands: *nothing on the server refuses
+an offensive order from an unloaded weapon at all*, and by the same token nothing refuses a
+mis-paired one. The client refusal (in `weaponManager.targetShip`, with a reason, before the click
+lands) is the usable half; nullifying the later-declared kind in `beforeFiringOrderResolution` is
+the honest one.
+
+**Two mechanical traps in the hull itself:**
+
+- ⚠️ **Positional system ids** (trap 7). `MapmakerProbes::populate()` constructs
+  `LightChromaticPulsar`, then `RammingAttack`, then `Fighteradvsensors`, with the commented
+  placeholders between them. Every id after the insertion point shifts, on every Mapmaker in every
+  live game. Land Stages 12, 13 and 14 in **one deploy** so the reshuffle happens once, or append
+  the new systems at the end and accept a constructor order that no longer reads top to bottom.
+- ⚠️⚠️ **DO NOT EXTEND `LightningArray`.** `MediumLightningArray extends LightningArray`
+  ([specialWeapons.php:12500](source/server/model/weapons/specialWeapons.php#L12500)), which already
+  cost Stage 8 an explicit subclass exclusion in the Wide-Beam refit registry — and inheriting that
+  branch would give `MedLightningArrayFtr` two things it must not have: an entry in a refit registry
+  a fighter cannot buy from, and `LightningArray`'s `edfSuppressesCollateral()` override, which is
+  the wide-beam exemption from the field rule above (D26). Extend `Weapon` directly. If that is ever
+  revisited, **every `instanceof LightningArray` in the tree** has to be re-read first.
+
+**Exit criterion:** 3 and 6 combine and 1, 2, 4 and 5 do not; a damaged craft is excluded and its
+order goes technical; the flight cannot mix the two weapons in one turn on either side of the wire;
+the Array locks on with flight EW while the Pulsar keeps its offensive bonus **plus** any OEW
+(D25); both damage profiles are written out independently; `loadingtime = 4` survives a reload and
+the weapon can fire combined on turn 1; a shot into ANY Energy Draining Field scores no collateral,
+own team's included (D26); and the combined shot presents as ONE discharge to the interception
+engine.
+
+### 3.13a As built — Stage 14, 2026-09-10
+
+**215 checks green** across four throwaway harnesses — 99 server, 62 client, 43 fleet-check and an 11-check live-game probe — and
+all three **fail on a stashed tree** (the two node ones exit 1, the PHP one fatals: the class does
+not exist there). `checkShipData.php` **PASS, 0 new findings** against the same 237 baseline; replay
+harness **114 passed / 8 failed, byte-identical with timings normalised** to the same run with
+`source/` stashed — zero drift on all five checks, `masking` and `snapshot` included. (8 is the
+clean-tree count on this corpus today, exactly as Stage 13 recorded it.)
+
+`MedLightningArrayFtr` is at the end of `specialWeapons.php`, beside `LightChromaticPulsar`; the
+mount is uncommented in `MapmakerProbes::populate()` at the placeholder position, so Stages 12, 13
+and 14 land in **one deploy** and the positional-id reshuffle happens once. ⚠️ Confirmed against
+`C:\FV_env\DouglasChanges`: the deployed tree still has *both* the array and the Jump Engine
+commented out, so nothing live has moved yet. Anything landing after that deploy must be **appended**.
+
+⭐ **THE STATS NEEDED NO CLIENT MIRROR AT ALL**, which is the single biggest departure from what
+§3.13 implies. Everything the two modes change — fire control, range penalty, damage span — already
+travels as the engine's own per-mode arrays (`$fireControlArray` / `$rangePenaltyArray` and the
+min/max damage arrays that `Weapon::setSystemDataWindow` fills), and `Weapon.prototype.changeFiringMode`
+in `shipSystem.js` reads all of them. So the client half is **not** a second copy of the control
+sheet the way `LightningArray`'s six hand-mirrored tables are: it is the group rule and nothing else,
+and the ONE number it duplicates (`craftRequired`) is re-derived server-side anyway, so a drift costs
+a wrong warning and never a wrong shot. A test reads the PHP `const` out of the file and compares.
+
+⭐⭐ **AND THE REAL WORK WAS THE EXCLUSIVITY, NOT THE COMBINING.** The combining is
+`HyperplasmaMatrix`'s pattern almost verbatim. D16 is the part with no precedent: **it is
+flight-wide, and every exclusivity mechanism the codebase had is per-CRAFT**.
+`weaponManager.checkConflictingFireOrder` narrows to `getFighterBySystem(ship, weapon.id)` before it
+looks — correct for the `$exclusive` flag it enforces, and useless here, because it would happily let
+probe #2 fire the pulsar while probe #1 fired the array. So D16 needed a new predicate on both
+sheets, keyed on a new `flightExclusiveGroup` string declared on the two Mapmaker classes only.
+
+⚠️ **FOUR FINDINGS WORTH CARRYING.**
+
+1. **`Firing::fireWeapons` DOES NOT CALL `changeFiringMode`** — only `prepareFiring` does, once per
+   order, in an earlier loop. So by the time the dice are rolled `$this->firingMode` is whatever the
+   LAST hit-chance pass left behind, and a per-mode `getDamage()` that reads it is one order away
+   from rolling the wrong profile. One order per mount makes it harmless here today;
+   `getDamage($fireOrder)` reads `$fireOrder->firingMode` so it stays harmless. **`NeutronBlaster`
+   has the same latent bug** and it will bite the first time one mount carries two orders in
+   different modes.
+
+2. **AN UNTOUCHED FIRE ORDER LOOKS EXACTLY LIKE A RESOLVED PRIMARY.** `FireOrder`'s constructor
+   defaults `$shots = 1`, which is also what a formed group's primary carries — so the harness's
+   first "last turn's orders are left alone" assertion passed vacuously in both directions. It has
+   to be a **before/after snapshot**, not a classification. The same shape of mistake would make any
+   "we did not touch it" test on a fire order meaningless.
+
+3. **THE 50% RULE HAD TO BE SEEDED, NOT DERIVED** (D31). Marking the no-maximum categories from the
+   craft actually bought is right for the maximum and useless for the minimum: the case the rule
+   exists to forbid — a Traveler with no probes at all — is exactly the case where that set is
+   empty. `noHangarMaxCraftTypes` is therefore declared as `['Mapmaker Probes']` and *grown* by the
+   `$noHangarRequired` flag, so both halves are one array and both cases are right.
+
+⚠️ **AND ONE MIRROR-PAIR TRAP THE FIRST DRAFT WALKED INTO.** `weaponManager.hasFiringOrder()` is the
+obvious predicate for "has this weapon already declared", and it is the wrong one for D16: it answers
+true for a manual `intercept` order and for a `selfIntercept` marker as well. The server's own test
+filters to `type == 'normal'`, so using it would have refused, client-side, a declaration the server
+then happily allowed — a probe that has committed its pulsar to INTERCEPTION has not fired it, and
+D16 is a rule about firing. `getFlightExclusivityBlock` counts offensive orders itself, both sheets
+are tested on the same three order types, and the client harness stubs `hasFiringOrder` to **throw**
+so a re-introduced call fails loudly.
+
+**The fleet-check half, in three edits** (`gamelobby.js`, live copy only — the second copy is
+`checkChoices_LEGACY` inside a block comment, and a test asserts it did not grow either change):
+
+- `MapmakerProbes::$hangarRequired = "Mapmaker Probes"`. ⚠️ **This was the actual bug.** The four
+  Walker hulls declare `$fighters = array("Mapmaker Probes" => N)`, but the flight left
+  `hangarRequired` at the `'fighters'` default and so classified itself off its jinking limit as an
+  ordinary **medium** fighter (8 is medium, not heavy — the bands are ≥10 light, ≥8 medium, ≥6
+  heavy). The capacity and the craft were in two different buckets that could never meet.
+- the tally gate drops `&& !noHangarRequired`, so the probes are counted; the flag now records the
+  category in `noHangarMaxCraftTypes` instead.
+- the small-craft report row grows `scNoMaximum` / `scMinRequired`. **`'Fighter Squadrons'` is kept
+  byte-identical, unrounded halving included** — those capacities are fractional (0.5 on several
+  Star Wars hulls) and `Math.ceil` would move existing verdicts. The Mapmaker minimum IS
+  `Math.ceil(cap / 2)`, matching `minFtrRequired`, because it is the fighter rule applied to a
+  custom category. Every other custom category (Stilettos, Vipers, ...) is untouched.
+
+**Not built, deliberately:** `HyperplasmaMatrix`'s self-immunity at range 0. That is a rule of that
+weapon; the control sheet grants this one nothing of the kind, so a Mapmaker flight sharing a hex
+with its target takes the ordinary 25% collateral — or none, if the hex is in a draining field.
+
+**Still open for the user:** the flight's `pointCost` is unchanged at `210*6`. It has gained a real
+weapon and the number is a balance call, not a mechanic.
+
+
+#### 3.13b Play-test fixes — game 4347, 2026-09-10
+
+Two bugs, both found on the first shot fired in anger, and **neither one reachable by any unit test
+of the weapon**: one is a payload shape the harness's own fixtures papered over, the other only
+exists once a real target with real EW is on the board. Both are now covered — 62 client checks and
+an 11-check probe that loads game 4347 through the production path and runs the real
+`Weapon::calculateHitBase`.
+
+⚠️⚠️ **1. THE ARRAY COULD NOT BE TARGETED AT ALL.** `MedLightningArrayFtr.isCraftEligible` asked
+`shipManager.systems.getRemainingHealth(craft)`, which reads `system.damage.length` — and
+`ShipCompactor` strips an EMPTY damage array out of the payload entirely (`$emptyArrayKeys`,
+trap 8). So `craft.damage` is `undefined` on every craft that has not been hit, which is every craft
+in a fresh game, and the click threw before it ever reached the arc test.
+
+- **The safe read is `damageManager.getDamage(ship, system)`**, a `for..in` rather than an indexed
+  loop. It is also what `FighterIcon.js` uses to draw a craft's health bar, so the weapon and the
+  UI now read one number.
+- ⭐ **THE HARNESS FIXTURE IS WHAT HID IT.** Every fixture craft carried `damage: []`, which is
+  exactly the shape the payload never has. A fixture must be built from what the WIRE sends, not
+  from what the constructor declares — the regression test now `delete`s the key.
+- ⚠️ This is trap 8 in its second form: the first is "is the key stripped?", the second is "does the
+  reader survive it being absent?". `getRemainingHealth` does not, and it is used all over the
+  client — safely, because everywhere else it is handed a SYSTEM, and a system's damage array is
+  rebuilt by `SystemFactory`. A CRAFT is not.
+
+⭐⭐ **2. A `useFlightEW` SHOT WAS TAKING A NO-LOCK PENALTY, AND D12 FORBIDS IT.** The user's report:
+*"Offensive Bonus is correctly not being used ... but it is not getting the benefit of any OEW used
+by the Mapmaker flight, and as a result is attracting a No Lock penalty as well."*
+
+- **The OEW lookup was NOT the bug.** The probe proves `FighterFlight::getOEW` returns exactly the
+  row the player allocated. What cancels it is the target's defensive EW, which is D12/Q10 working:
+  in game 4347 the flight had 1 OEW against a Thentus carrying **7 DEW**, so `max(0, 1 − 7) = 0`.
+- ⚠️ **AND THAT IS THE ORDINARY CASE, NOT AN EDGE ONE.** A Mapmaker flight's whole pool is 3 points
+  and enemy capitals in that game carried **7 to 16 DEW**. A `useFlightEW` shot's lock is therefore
+  0 against any real warship, every time. Stage 12 could not see this because no weapon carried the
+  flag yet.
+- **The penalty is the part that is wrong.** D12 says enemy EW may cancel the lock back to the
+  ordinary fighter-versus-profile chance *"and no further"*, and a no-lock penalty is further: it
+  made the array strictly WORSE than an ordinary fighter weapon against the same target. Measured
+  at −5% at range 3 and it scales with range, because the penalty is a multiplier on the range
+  penalty rather than a flat modifier.
+- ⭐ **THE EXEMPTION USED TO EXIST AND WAS LOST.** The commented-out block immediately above the
+  no-lock calculation in `weapon.php` reads
+  `if (($oew < 1) && (!($shooter instanceof FighterFlight)))` — flights were exempt outright before
+  partial locks came in. Nothing could reach `$oew < 1` on a flight afterwards, because every
+  fighter weapon folds the offensive bonus into `$oew`, so the loss was invisible for years.
+- ⚠️ **GATED ON THE WEAPON, NOT ON `$shooter instanceof FighterFlight`.** An ordinary flight CAN
+  still reach `$oew = 0` — a `tmpsensordown` crit, or mine detection eating the whole bonus — and
+  has always taken the penalty when it does. Widening the exemption to every flight would move
+  games in the replay corpus; gating on `$useFlightEW` is free by construction, and the corpus run
+  confirms it (byte-identical).
+- **Mirror pair**: `Weapon::calculateHitBase` and `weaponManager.computeJammerNoLock`.
+
+⭐ **What the fix leaves standing, deliberately:** with the lock at 0 the array is a
+*profile-only* shot. It is not worse than an ordinary fighter weapon — the probe measures both at
+**75%** against the same Thentus at range 3, the array's fire control (+4 vs a medium) buying back
+exactly what the missing offensive bonus cost. That is the trade the sheet describes, and it is now
+the trade the engine makes.
+
+⚠️ **Still open for the user:** whether a 3-point flight pool contested by 7–16 points of capital
+DEW is the intended reading of *"Uses EW for lock-on. Effected by DEW."* The rule as built (D12) is
+being followed exactly; what it means in play is that the array's OEW only ever helps against
+lightly-EW'd targets — fighters, small craft, and hulls that spent their EW offensively.
+
+**Also this session:** the firing-mode labels were shortened by the user to `"3-Probes"` /
+`"6-Probes"`. Nothing reads the wording — the ids are what the code and the client depend on — and
+the harness now asserts the SHAPE rather than the strings, so the next re-word does not fail a test.
+
+#### 3.13c ⚠️⚠️ The Mapmaker EW rules CORRECTED from the rulebook text — 2026-09-11
+
+The user supplied the rulebook's own text and worked examples, and **D12 had been built on the
+wrong weapon**. The DEW contest belongs to the Pulsar. The Array uses plain ship rules. §3.13b
+item 2 (the no-lock exemption) was a patch over that mistake, so **it is reverted**.
+
+- **Medium Lightning Array:** *"The flight may not use its offensive bonus. To-hit rolls are
+  calculated using the MLA's fire control and the flight's OEW (range penalties doubled for lack of
+  a lock-on as usual)."* Worked example: *"16 (defensive rating) −4 (DEW) +2 (OEW) −6 (range) +5
+  (fire control) = 13"*. So the flight's OEW is added, and the target's DEW is subtracted as it would
+  be against a ship.
+- **Light Chromatic Pulsar:** *"It gains the bonus of its OEW minus the target's DEW (minimum bonus
+  of 0), but never doubles the range for lack of a lock-on"*, on top of the offensive bonus. For
+  example, 3 OEW against 5 DEW gives *"+0 (not −2)"*.
+
+**As built.** One gated branch per weapon kind, in the same mirror pair as before:
+
+| | Server: `Weapon::calculateHitBase` fighter branch | Client (`weaponManager.js`) |
+|---|---|---|
+| Pulsar (any non-`useFlightEW` fighter weapon) | `$oew = OB + max(0, flightOEW − (DEW+BDEW+SDEW))`, then all three are zeroed | `computeOEW` uses `defensiveEwBeforeWaiver` |
+| Array (`useFlightEW`) | `$oew = flightOEW`, and DEW/BDEW/SDEW are **not** zeroed | `computeBaseDefenceBreakdown` skips the waiver |
+| No-lock exemption | removed | removed from `computeJammerNoLock` |
+
+The Pulsar's term costs nothing anywhere else, because every other flight in the game has OEW 0,
+and `max(0, 0 − x)` is 0. The Pulsar still can never take a no-lock penalty: the bonus keeps its
+`$oew` at 1 or above, as it does for every fighter.
+
+**Game 4347 through the real pipeline** (Thentus, 7 DEW, range 3, flight OEW 1):
+
+| Shot | Hit chance now | Before this fix |
+|---|---|---|
+| Array, with the OEW point | **45%** (OEW +1, DEW −7) | 75% |
+| Array, OEW withdrawn | **35%** (no-lock penalty 0.99 applied) | — |
+| Pulsar | **70%** (OB 8 + max(0, 1 − 7) = 8) | — |
+
+**⚠️ Two decisions kept, for the user to confirm:**
+- The Pulsar's subtraction still stacks BDEW and SDEW with the target's DEW (Q10). The rulebook
+  line says only "the target's DEW".
+- The fighter-only terms around the lock are untouched: the combat-pivot −1 and the range-0 jinking
+  rule.
+
+**Evidence:**
+- Both PHP files lint clean.
+- `tests/replay/walkersStage12ClientHarness.js`: 90/0. The OEW 0–3 × DEW 0–6 grid now asserts the
+  lock **and** the profile total for both weapons, plus the rulebook examples.
+- `tests/tmp/stage14_client.js`: 62/0. The no-lock group is inverted. One assertion was re-pointed
+  at the user's reworded shortfall warning in `special.js`.
+- `tests/tmp/stage14_server.php`: 99/0.
+- `tests/tmp/stage14_ew_probe.php`: 15/0. It is rewritten for the corrected rule and gained a
+  "withdraw the OEW row" pass.
+- Replay: 114 passed / 8 failed. That is the same count as the recorded clean-tree state, and the
+  four newer failures are snapshot-only critical/range diffs.
+- ⚠️ **No Mapmaker game is in the replay corpus.** 4345 and 4347 exist locally but were never
+  recorded. The corpus therefore proves only that nothing else moved, and the game-4347 probe is
+  the real coverage.
+
+The "still open" item at the end of §3.13b is closed by this. A 3-point pool against 7–16 DEW is a
+to-hit penalty now, not a cancelled lock.
+
+### 3.14 The Traveler's Docking Bay — **BUILT 2026-09-11 (Stage 16), §3.14a deferred (D35) — as built in §3.14b**
+
+*"Aft hangar on the Traveler only should be relabelled as Docking Bay ... it can hold 2 Pathfinders
+(12 spaces each), 6 Scribes (4 spaces) and/or up to 24 Mapmakers (1 space). It can also dock a
+Waymarker (24 spaces) but the docking and launching procedure takes 2 turns instead of the usual
+one."* (Corrected 2026-09-08; the first statement of this listed the Waymarker at 12 boxes.)
+
+⭐ **THE NUMBERS FIT THE HULL EXACTLY, AND ALL FOUR FILL IT.** `Hangar`'s `$maxhealth` **is** its box
+count — `HangarOps::effectiveCapacity()` returns `getRemainingHealth()`
+([HangarOps.php:4559](source/server/model/systems/HangarOps.php#L4559)) — while `$output` is the
+shared launch-plus-land budget per turn, not capacity. The Traveler's aft bay is already
+`new Hangar(6, 24, 12)` ([Traveler.php:53](source/server/model/ships/walkers/Traveler.php#L53)):
+**24 boxes**, 12 movements a turn.
+
+| Craft | Class | Boxes each | Max in the bay | `unitSize` |
+|---|---|---|---|---|
+| Mapmaker Sensor Probe | `FighterFlight` | 1 | 24 | `1` |
+| Scribe | `MediumShip` | 4 | 6 | `1/4` |
+| Pathfinder | `MediumShip` | 12 | 2 | `1/12` |
+| Waymarker | `HeavyCombatVessel` | 24 | 1 (**two-turn procedure**, D23) | `1/24` |
+
+24 × 1, 6 × 4, 2 × 12 and 1 × 24 are all exactly 24, so the capacity rule needs no per-type cap at
+all — the box arithmetic *is* the rule, which is what Q11 was worrying about and is no longer a
+question. ⚠️ Note that box cost is **per phpclass, not per size class**: Pathfinder and Scribe are
+both `MediumShip` and cost 12 and 4. `boxesPerCraftForClass` is keyed by phpclass, so this is free —
+but any shortcut that infers cost from `shipSizeClass` would be wrong on this hull specifically.
+
+`$this->fighters = array("Mapmaker Probes" => 36)` on the hull is 24 aft plus the two 6-box side
+hangars, and stays as it is.
+
+**A subclass, not a `displayName` (D17).** `class DockingBay extends Hangar`, in `baseSystems.php`
+**below** the `Hangar` class — the file carries its own note about that
+([baseSystems.php:5112](source/server/model/systems/baseSystems.php#L5112)) — alongside `Catapult`,
+`FighterRail`, `ShadowHangar` and `DockingCollar`. It needs a class allow-list, multi-class box
+costs and a per-turn type lock; none of those is a label.
+
+⚠️ **THE HIT CHART.** The Traveler's aft row names `"Hangar"` at roll 11
+([Traveler.php:96](source/server/model/ships/walkers/Traveler.php#L96)). Renaming the system without
+moving the chart entry with it makes the bay **unhittable and silently rerouted to Structure** —
+the exact failure `checkShipData.php` exists to catch, and the one Stage 1 already hit on five
+rows. Change both, in the same edit, and let the validator confirm it.
+
+**Box costs come free from `unitSize` (D18).** `HangarOps::boxesPerCraftForClass`
+([HangarOps.php:1765](source/server/model/systems/HangarOps.php#L1765)) already returns
+`ceil(1 / unitSize)` for a `unitSize < 1` craft — the Vorlon Assault Fighter's 2 boxes come from
+`unitSize = 0.5` ([vorlonAssaultFighterFlight.php:40](source/server/model/ships/vorlons/vorlonAssaultFighterFlight.php#L40)).
+So Pathfinder `1/12`, Scribe `1/4`, Mapmaker `1` and Waymarker `1/24` yield 12, 4, 1 and 24 with
+**no new arithmetic anywhere**.
+
+⚠️ **`unitSize` is not free on a non-flight hull, though.** The lobby's fleet check divides by it
+([gamelobby.js:1392](source/public/client/gamelobby.js#L1392)) when a ship declares
+`hangarRequired`, and the server's shuttle accounting divides by it too
+([HangarOps.php:357](source/server/model/systems/HangarOps.php#L357)). Setting it on an HCV and a
+MediumShip that have never carried one is the part of this stage most likely to move a number
+somewhere else. The 2,500-hull corpus differential Stage 5 and Stage 8 both used is the guard.
+
+**Docking whole SHIPS is already a solved problem, once.** `DockingCollar` (the LCV rail) holds one
+LCV: `performLCVDock` sets `$lcv->removed = true; $lcv->removedTurn = $turn` and records the link in
+a per-rail `lcvDocked` note ([HangarOps.php:1396](source/server/model/systems/HangarOps.php#L1396));
+`performLCVLaunch` resurrects the ship at the carrier's hex, heading, facing and speed and re-inits
+its weapon data ([1440](source/server/model/systems/HangarOps.php#L1440)); the state round-trips
+through `generateIndividualNotes` / `onIndividualNotesLoaded`, which re-applies `$removed` on every
+load ([baseSystems.php:3970](source/server/model/systems/baseSystems.php#L3970)).
+
+⭐ **The Docking Bay is that rail with a LIST instead of one slot**, plus the box arithmetic above
+and a class allow-list. Everything genuinely hard about docking a ship inside a ship — the removal,
+the resurrection, the persistence, the carrier-destruction escape
+([HangarOps.php:6867](source/server/model/systems/HangarOps.php#L6867)) — is written.
+
+**The allow-list.** `hangarType = 'Mapmaker Probes'`, which is what `inferHangarType` would derive
+from the hull's `$fighters` declaration anyway, plus an explicit `$allowedFighterClasses`-style list
+extended to accept `Pathfinder`, `Scribe` and `Waymarker` **by phpclass**. The per-bay machinery is
+`HangarOps::hangarAcceptsFighterClass` / `hangarAcceptsCategory`
+([4676](source/server/model/systems/HangarOps.php#L4676) and
+[4564](source/server/model/systems/HangarOps.php#L4564)), which today only ever answer about
+`FighterFlight`s — teaching them to answer about a hull is the second half of the stage.
+
+**One TYPE per turn (D17).** *"Can only launch/recover one TYPE of craft per turn, so can't mix
+Scribes with Mapmakers."* The bay already tracks `launchedThisTurn` / `landedThisTurn`; add the
+claimed type beside them and refuse a second kind. ⚠️ It persists through the existing
+`hangarDockEvent` IndividualNote channel — **not** through Stage 8's
+`ShipSystem::saveFirePhaseDeclaration()` hook, which is Fire-phase-only by construction and would
+never see an Initial Orders or Movement hangar order.
+
+⚠️ **No new shipid-keyed table.** If one is ever added it must go into **both** `deleteGames()` and
+`leaveSlot()`, because leaving a slot deletes `tac_ship` alone and MariaDB recycles the id. Keeping
+the whole link in notes avoids the question.
+
+⚠️⚠️ **THREE OF THE FOUR DOCKABLE CRAFT ARE SHIPS, AND SHIPS MAY NOT DEPLOY ONTO AN OCCUPIED HEX.**
+(User, 2026-09-09.) Only the Mapmaker Sensor Probes are a `FighterFlight`; Scribe, Pathfinder and
+Waymarker are hulls, and the Deployment phase refuses to place a hull on a hex that already holds a
+unit — `shipManager.getShipsInSameHex` ([ships.js:927](source/public/client/ships.js#L927)) collects
+every non-destroyed unit whose position equals the candidate hex, and the Deployment strategy's
+`isBlocked` rules turn a non-empty list into a refusal. So a fleet that wants to start the battle
+with its Scribes already inside the Traveler cannot even be *placed*, quite apart from the docking
+machinery.
+
+⭐ **The exemption already exists in exactly the shape we need** — `getShipsInSameHex` skips
+`ship2.pendingDeployDock` (Hangar Ops Stage 7) and `ship2.pendingLcvDeployDock` (LCV Rails), both
+for the same reason: *"a unit queued for deployment-phase dock is logically inside a carrier's
+hangar, not on the board."* A Docking Bay deploy-dock is the third instance of that idea, not a new
+concept — so the restriction is loosened by making the bay's queued craft carry the same kind of
+marker, **not** by weakening the hull-versus-hull occupancy rule for everyone.
+
+- ⚠️ Skipping the craft is only half of it. The occupancy test is symmetric: the queued Scribe must
+  also not be *refused* when the player drops it onto the Traveler's hex in the first place, which
+  is the placement path rather than the collision list.
+- ⚠️ Keep it to the deploy-dock queue. Two Scribes that are simply both on the board must still
+  refuse to share a hex on turn 1 exactly as they do today; nothing here is a general permission for
+  ships to stack during Deployment.
+- ⚠️ The terrain branch must stay intact — a queued craft still cannot be dropped onto terrain, and
+  the Huge/`hexOffsets` collision arms of the same function are untouched.
+
+#### 3.14a The Waymarker's two-turn procedure — **BUILT 2026-09-12 (Stage 19)**; deferred from Stage 16 by D35, as built in §3.14e
+
+Everything above is one-turn docking, which is what the bay already does and what the other three
+craft need. The Waymarker needs an **intermediate state**: a turn in which it is neither on the
+board under its own control nor inside the bay. That is the only genuinely new idea in this stage,
+which is why it is severable — **build the bay first, prove it with the other three, then decide.**
+
+**The user's suggestion is the right mechanism.** FV already has a "riding on a host, not inside it"
+state: `attached`.
+
+- `$rider->attached[$host->id] = $location` with the mirror
+  `$host->hasAttached[$rider->id] = $location`, plus `attachedFacing` / `hasAttachedFacing` carrying
+  an entry-side hex offset ([ShipClasses.php:202](source/server/model/ships/ShipClasses.php#L202)).
+- It **persists with no schema change**, as `'Attached'` / `'Detached'` IndividualNotes read back in
+  `CnC::onIndividualNotesLoaded` ([baseSystems.php:3246](source/server/model/systems/baseSystems.php#L3246)) —
+  note value `shooterId=>location:facing`.
+- Movement is **mirrored for free**: `MovementGamePhase::advance` duplicates the host's movement
+  onto every attached unit as `'attached'`-type `MovementOrder`s
+  ([MovementGamePhase.php:273](source/server/Phase/MovementGamePhase.php#L273)), with the facing
+  offset and the rolled-host correction already handled.
+- Attached units are **carried into hyperspace with their host** by `Movement::resolveJumpOuts`, are
+  never rammed by it, and cannot exchange non-boarding fire with it — all of which is right for a
+  Waymarker in the middle of a docking manoeuvre.
+
+So the sequence is: **turn N** — the Waymarker is attached to the Traveler's aft location (2), moves
+with it, and is not yet in the bay; **turn N+1** — it is removed and its 24 boxes are claimed.
+Launching runs the same two steps backwards.
+
+⚠️⚠️ **Attached mirror rows are ALL type `attached`, which makes an attached unit invisible to every
+"entered a new hex" test in the codebase.** That is a known, load-bearing trap (it exists for
+breaching pods) and it is exactly what a half-docked Waymarker wants — but anything the intermediate
+state has to trigger (an EDF drain, a jump-out, a mine) has to be checked against that, not assumed.
+
+⚠️ **The boxes must be reserved on turn N, not N+1.** Otherwise a player attaches a Waymarker and
+fills the bay with Mapmakers in the same turn, and the arrival on N+1 has nowhere to go. Reserve at
+declaration; release only if the manoeuvre is abandoned or the Waymarker dies.
+
+⚠️ **`attached` is written today only by boarding-pod weapons**
+([specialWeapons.php:8928](source/server/model/weapons/specialWeapons.php#L8928)). A hangar writing
+it is new, and `weaponManager`'s attached-unit fire restrictions and `mathlib`'s attached-unit range
+special cases ([mathlib.php:84](source/server/lib/mathlib.php#L84)) will all start applying to a
+capital ship for the first time. Read each before assuming the state is inert.
+
+**Exit criterion:** the bay accepts 24 Mapmakers, 6 Scribes, 2 Pathfinders or 1 Waymarker and
+refuses the 25th, 7th, 3rd and 2nd; a mixed load fills to exactly 24 boxes; it refuses a Scribe on a
+turn a Mapmaker moved; a docked Scribe survives a reload with its damage, power and notes intact;
+the aft hit-chart row still finds the renamed system; the hull corpus differential shows no other
+ship's hangar accounting moving. **If 3.14a is built:** a Waymarker rides attached for exactly one
+turn each way, its boxes are reserved from declaration, and it moves with the Traveler while
+attached.
+
+#### 3.14b As built — Stage 16, 2026-09-11
+
+Four rulings opened the stage (D33–D35) and one arrived with it (D36): ships dock and suffer damage on
+the LCV-rail rules, a ship pays its BOXES against the launch rate, the Waymarker's two-turn procedure
+is deferred, and bought ships count toward the Traveler's hangar requirement.
+
+**The class.** `DockingBay extends Hangar` ([baseSystems.php](source/server/model/systems/baseSystems.php),
+after `DockingCollar`). ⭐ **`$name` stays `'hangar'`** (trap 37): twenty-nine client sites gate the
+fighter UI on the name and `SystemFactory` builds the client object from it, so the Mapmakers keep
+every fighter path and the client carries the bay as a plain `Hangar` with `isDockingBay` set. The
+hit chart matches `$displayName`, `"Docking Bay"`, and the Traveler's aft row moved with it. Constructor
+`(armour, boxes, rate, direction, dockableShipClasses, fleetCheckCategory)`; the Traveler mounts
+`new DockingBay(6, 24, 12, 0, ['Scribe','Pathfinder','Guideship','Waymarker'], 'Mapmaker Probes')` in
+the Hangar's own position, and every system id is proved unchanged against the committed hull.
+`hangarType` stays universal `'fighters'`: a typed bay would *reserve* the Mapmakers
+(`bayReservesFlight`) and pull them in ahead of the side bays.
+
+**The ship half is the LCV rail with a list**, in `HangarOps::*BayShip*` beside the LCV functions:
+`$shipsDocked` `[{shipId, phpclass, boxes, dockTurn, deploy?}]`, one change-detected `bayShipsDocked`
+note, `$removed` re-derived on every load; `bayShipDockOrder` / `bayShipLaunchOrder` notes resolved in
+the crit phase, deploy-docks resolved at commit. Box costs are the hulls' `unitSize` (D18: 1/4, 1/12,
+1/12, 1/24), inert everywhere else because the lobby reads a HULL's `unitSize` only when it sets
+`hangarRequired` - proved on all four, and `ceil(1/(1/12))` is exactly 12 in PHP and in JS after a
+JSON round trip.
+
+**One pool.** Fighters see the ships through `HangarOps::effectiveCapacity` and
+`HangarShared.effectiveHangarBoxes` - the two choke points - and two client dialog sites that had
+recomputed `maxhealth` inline now call the latter (trap 38). Ships see the fighters through
+`occupiedBoxes` / `hangarUsedBoxesOnBay`. Deploy-docks seed the POST-side bay from its DB twin and
+resolve ships BEFORE the parent's fighter packer, so a Mapmaker flight packed in the same commit finds
+the ships' boxes taken.
+
+**One type per turn (D17), decided from the orders when the notes load** (trap 40). The bay's own
+fighter orders win - *"it refuses a Scribe on a turn a Mapmaker moved"* - and the refused ship orders
+are logged at resolution. Otherwise ship orders claim the bay and `effectiveCapacity` reads 0 for it
+all turn, which is what keeps the carrier-level coalescer from routing Mapmakers in from a sibling bay;
+the claim is LATCHED because the orders are consumed as they resolve. Damage eviction subtracts the
+ships' boxes and never sees the lock. Between ship classes the lock is almost always the rate (D34).
+
+**Dock, launch, lose.** `canBayShipDock` is `canLCVDock` plus box room, the box-priced rate and the
+lock; `performBayShipLaunch` is `performLCVLaunch`'s placement and -50 initiative crit **without** its
+re-init (trap 41). A ship cannot launch on the turn a Firing-phase dock brought it in; a deploy-dock
+carries `deploy` and may. A destroyed bay or carrier forces every ship out with the bay's damage +
+2d10 (`LCVRailFragments`, the rail's replay-safe clear-and-persist); a carrier that jumped away is
+skipped, so its ships leave with it.
+
+**Deployment (D30).** A queued ship carries the LCV marker, `pendingLcvDeployDock` with `bay: true`,
+so every "inside a carrier, not on the board" test in the client applies unchanged - `getShipsInSameHex`
+first among them - and `unqueueLcvDeployDock` hands a bay ship to its own release, which does not snap
+it onto the carrier's hex the way an LCV is snapped. The server exempts it from the movement check via
+`collectQueuedDeployStartFlightIds`. DOCK is offered from `SelectFromShips` and
+`DeploymentPhaseStrategy.onShipClicked`; DEPLOY over an occupied hex stays refused.
+
+**The rest of the wiring.** The bay's payload keys are stripped before the ordinary hangar parser runs
+(trap 39); `shipsDocked` and the queued ship orders follow the enclosed-bay own-team mask, and
+`hideDeploymentDocks` un-removes a same-turn deploy-docked ship for everyone else; the fleet list's
+`isDepartedWithCarrier` walk knows a bay. UI: "Enter Hangar" on the ship (`confirm.bayShipDock`), and
+Docking Bay sections in the carrier's Recover, Launch and Deploy dialogs, each refusing fighters and
+ships through one bay in the same dialog.
+
+**The Fleet Checker (D36).** Credit per category = min(box cost of every bought ship some bay in the
+fleet lists, the fleet's total Docking Bay boxes), added in the live small-craft report loop and named in
+the row ("incl. N Docking Bay boxes of ships"). Anchored on live-only lines: the archived
+`checkChoices_LEGACY` block duplicates every other candidate.
+
+**Verification.** 111 server checks (`tests/replay/walkersStage16Harness.php`) and 98 client checks
+(`walkersStage16ClientHarness.js`, the real files under `vm`, the Walker blueprints read out of the
+regenerated statics, the Fleet Checker driven through its live slices), plus the Stage 14 fleet-check
+harness's 43 re-run as a regression - both new harnesses fail on the pre-stage tree. `checkShipData.php`
+PASS, 0 new against 237; autoload +1 line. **Hull differential over 2,727 classes, 2,675 hangars, 7,090
+facts: exactly five moved** - the four dockable hulls' box cost and the Traveler's aft system class -
+and no capacity did. **Replay:** the corpus is 133/1 on a clean tree (4347, pre-existing); with the
+stage the ten Traveler games (4329, 4331–4337, 4340, 4345) differ ONLY by four additive keys on the bay
+- `isDockingBay`, `dockableShipClasses`, `deferredShipClasses`, `shipsDocked` - and need re-recording.
+
+**Exit criterion.** 24 Mapmakers / 6 Scribes / 2 Pathfinders, and the 25th / 7th / 3rd refused ✓; the
+Waymarker's 1-of-1 is deferred (D35); a mixed load is exactly 24 ✓; a Scribe refused on a turn a
+Mapmaker moved ✓; the list and the removal round-trip a reload ✓ - the ship's own damage, power and
+notes live in ship-keyed rows the dock never touches, which the user's live reload should confirm; the
+renamed chart row ✓; no other hull's hangar accounting moved ✓; a queued ship placeable into the
+Traveler's hex while two hulls still refuse to share one ✓.
+
+**Not built, open for the user:** the Waymarker (§3.14a); a docked ship's weapons neither recharge nor
+reset while it is aboard (the LCV re-init was not reused - trap 41); a ship launches on the Traveler's
+own facing, not the bay's; and a dock order into a TEAMMATE's carrier sits on a system the player does
+not submit - the LCV and fighter dialogs share that, so it is unchanged here.
+
+**Revisions after review, 2026-09-11 (D37–D40).** ⚠️ The paragraph above about weapons was WRONG and
+was never checked: `Manager`'s turn-advance sweep calls `onAdvancingGamedata` on every system of
+every ship with no removed-ship filter, and `calculateLoadingFromLastTurn` tests only the weapon's own
+destruction - so a docked ship's weapons always recharged, and an Energy Draining Mine restocks on its
+cadence up to 3, exactly as the user asked. Proved now, not changed.
+- **Rate (D37).** `$shipLaunchRates` (constructor map `class => per turn`), `$shipsMovedThisTurn`,
+  `HangarOps::bayShipRateLeft` / `window.bayShipRateLeft`. Ships no longer touch the fighters'
+  `launchedThisTurn` / `landedThisTurn`. `bayBudgetLeft` is gone from both sides.
+- **Fill order (D38).** `bayFillRank` ranks reserved 0, ordinary 1, Docking Bay 2 - in
+  `sortBaysReservedFirst`, `eligibleHangarsForLanding`, `legacyBerthFits`, `distributeFlightAcrossHangars`,
+  `eligibleHangarsForFlight` and both fire-menu receiving-hangar lists. Every non-bay bay keeps the
+  rank it had, so no other hull's order moves.
+- **LCVs (D39).** `selIsLcvUnit` removed from `DeploymentPhaseStrategy` (both sites) and
+  `SelectFromShips`; `unqueueLcvDeployDock` no longer snaps. FAQ updated.
+- **Reinforcements (D40).** `JumpEngine::getLegacyRideHost` and its client mirror answer for any unit;
+  `legacyBerthFits` fits a ship into a Docking Bay beside the fighters' promised boxes;
+  `DeploymentDock.planFlightsIntoCarrier` packs ships and flights into one scratch map;
+  `autoPlaceArrivingReinforcements` queues a ship's bay dock and flags it `forcedDeployDock`, which the
+  bay's release path and un-dock section now honour.
+- **Net preview.** `PhaseStrategy.buildEdfNetPreview` skips a unit on a deploy-dock marker or still on
+  its `start` row, and answers an EMPTY preview (not `null`, which would fall back to the server's
+  stale map) when Nets exist but none is on the board; `refreshDeploymentUIForDeployStart` re-syncs it
+  on every dock and un-dock.
+- Verified: server harness 131, client 118, Stage 14 fleet check 43, all 0 failed. Full `-Check`:
+  autoload current, validator 0 new, replay 122 passed / 11 failed - the same ten Traveler games plus
+  the pre-existing 4347, and outside 4347 the only differences are FIVE additive keys on the bay (the
+  four above plus `shipLaunchRates`). 3676 skipped (the local game advanced a turn between runs).
+
+**Revisions after the second review, 2026-09-11.**
+- **Riders left on the map (game 4350).** `autoPlaceArrivingReinforcements` docks a legacy opener's
+  riders AFTER `activate()` has run `consumeGamedata` - the only pass that applies `shouldBeHidden` to
+  the icons - so they stood on their off-map `start` markers for the whole phase. It now re-runs
+  `consumeGamedata`, `syncAllEdfFields` and `syncEdfNetPreview` when anything went aboard. Mapmaker
+  riders had the same fault since Stage 15.
+- **Fields drawn at start markers.** `TacGamedata::setEdfHexes` skips a unit whose LAST movement row is
+  `start` - never placed; Generated Terrain (userid -5) exempt. It had been publishing Nets, and field
+  hexes into the map the rules read, at the off-map markers of turn-1, late-slot and arriving units.
+  Client twin `PhaseStrategy.isOffBoardForEdf` gates both overlays: the per-icon disc
+  (`syncAllEdfFields`, now re-synced on every Deployment placement and dock) and the Net preview. The
+  test is sound because a `start` row is only ever a unit's FIRST row: `submitMovement` never writes
+  one, and the DB holds none after turn 1.
+- **Greying instead of refusing (user request).** `confirm.bayShipBayProblem` is the one verdict -
+  fighter claim, type, room, rate - behind both `refitBayShipRows` (greys each unticked row that could
+  not be added, with a note after its label) and the OK-time guard. In the launch dialog a ticked ship
+  caps every fighter row at the craft drained from its OTHER bays first (`refitBayConflicts`), and the
+  fighters' live charges grey the ship rows. The recover dialog routes an auto-distributed flight round
+  a ship-held bay, drops that bay from pick-lists, and greys what is left (`refitRecoverConflicts`).
+  Queued fighter LAUNCHES no longer hide the bay's ships (`bayLaunchableShips`), and queued ship
+  launches no longer hide its fighters (`hangarLaunch`): the dialog shows both. The recover dialog's
+  auto-distribute also sorts by `bayFillRank` now.
+- Verified: server harness 135 (the new group 17 fails 2 with the fix stashed), client 138, Stage 14
+  fleet check 43, all 0 failed. Replay 122 passed / 11 failed, as before. A per-game tally: the ten
+  Traveler games differ only by the five bay keys; 4347 by those plus its drift, byte-identical to a
+  stashed tree; no `edf` line anywhere.
+- **Two older faults, fixed at the user's request the same day.**
+  - *The Deployment payload.* `setEdfHexes` runs in `onConstructed`, BEFORE `deleteHiddenData` strips
+    an opponent's this-turn deploy rows, so a phase -1 payload's `edfHexes` / `edfNetHexes` carried the
+    positions of Walkers the opponent had already committed. Nothing drew them, but the browser could
+    read them. `deleteHiddenData` now rebuilds the map after its phase -1 masking, gated on there being
+    a field. The masked unit is back on its `start` row, so it drops out.
+  - *Late arrivals.* A late-slot unit places its entry hex the turn before it arrives, and it projected
+    from there during that turn. `setEdfHexes` now skips `getTurnDeployed > turn`; the client twin
+    `isOffBoardForEdf` makes the same test, which also keeps such a unit's Net out of the Movement
+    preview (that preview walks hidden icons too).
+  - ⚠️ **Side effect, intended:** `getTurnDeployed` answers 999 for a SURRENDERED slot, so a surrendered
+    fleet stops projecting as well, like every other gate that treats it as gone. Seven surrendered
+    replay games (4329, 4331–4334, 4337, 4345) differ by exactly that: the surrendered fleet's
+    `edfHexes` (and one `edfNetHexes`), nothing else. Re-record those seven.
+  - Verified: server harness 141 (groups 18 and 19 added), client 140, 0 failed.
+
+
+---
+
+#### 3.14c The hangar-manoeuvre label — **BUILT 2026-09-12 (Stage 19)**
+
+*"We should add a new Docking with 'X' tooltip note, and a cyan status banner when ANY unit is
+ordered to enter (or leave) a Hangar during the Firing phase. Then use this new tooltip note/status
+banner to also indicate when a Waymarker is docking throughout the transitional docking/launching
+turn, instead of the normal 'Attached' note and status banner."* (User, 2026-09-12.)
+
+⭐ **ONE READER, TWO SURFACES.** `shipManager.getHangarManoeuvre(ship)` (ships.js) returns
+`{ text, dir, riding, carrier }` or null, and is read by the map tooltip (ShipTooltip.js) and by the
+ship window's banner stack (ShipWindow.js `getStatusBanners`). That is the contract
+`getArrivalIniPenalty` already records: a figure the two surfaces must never disagree about gets one
+function, not two.
+
+**What it answers for.** Any unit named in a queued Firing-phase hangar order — a flight recovering
+(`pendingDockOrders[].flightId`), a ship entering a Docking Bay (`pendingBayShipDockOrders[].shipId`),
+an LCV coming back to its rail, and the two ship-shaped cases going out — plus a Waymarker riding a
+Traveler's aft (`shipsAttaching`), which outranks a queued order on the same unit because it is the
+thing that is actually happening rather than the thing that has been asked for. Wording is
+**"Docking with &lt;carrier&gt;"** inbound and **"Launching from &lt;carrier&gt;"** outbound; the colour
+is the cyan this tooltip already gives Hangar Operations, Just Launched and Arrival Scatter, and the
+window already gives Deploying and Arrival Scatter — something benign the unit is *doing*, not damage.
+
+⚠️⚠️ **A NEW FLIGHT LAUNCHING HAS NO UNIT TO LABEL.** A fighter launch order names a *phpclass and a
+size*; the flight it creates does not exist until the order resolves, so there is nothing to hang a
+banner on. The user ruled this out of scope rather than moving the banner to the carrier ("on the unit
+only — skip new flights"), which keeps *"this label is about the unit wearing it"* true with no
+exceptions. A relaunch of an already-docked flight is a launch order of the same shape, so it is not
+covered either — the gap is the ORDER SHAPE, not the unit's existence, and a future fix belongs in the
+order (a flight id), not in the reader.
+
+⚠️ **IT REPLACES THE ATTACHED PAIR, IT DOES NOT SIT BESIDE THEM.** A riding Waymarker *is* `attached`,
+so without suppression the tooltip reads "Attached to Traveler [Aft]" in boarding green and the
+carrier reads "Ship is being Boarded!" in alert orange — a docking manoeuvre described as an enemy pod
+on the hull. Both surfaces now gate the attached line on `!(manoeuvre && manoeuvre.riding)`, and
+**both filter `hasAttached` through `shipManager.isDockingRider`** so a Traveler with a Waymarker on
+its aft and a real pod on its bow still says it is being boarded.
+
+**Masking is inherited, not re-implemented.** Queued orders ride the carrier's hangar system and are
+own-team-only (`Hangar::stripForJson`), so an opponent simply finds none — an intention to dock is a
+secret. `shipsAttaching` is published to EVERYONE, because the ride is on the map in plain sight and
+its aft-hit redirect is something an attacker must be able to reason about before they shoot.
+
+---
+
+#### 3.14d What a stowed unit still projects — **BUILT 2026-09-12 (Stage 19)**
+
+*"Energy Draining Fields are still operational for Docked craft in Traveler and docked ships with EW
+Detectors still contribute their Saved EW to ships within 20 hexes."* (User, 2026-09-12.)
+
+⭐⭐ **TWO RULES, ONE MISSING FACT.** Both sweeps — `TacGamedata::setEdfHexes` and
+`EW::collectEwDetectors` — opened with the identical four exclusions (destroyed, still in hyperspace,
+never placed, not arrived yet) written out twice, and `isDestroyed()` folds `removed` in, so a docked
+unit was excluded by the FIRST of them. The fix is one shared reader,
+**`HangarOps::projectionOriginFor($ship, $gamedata)`**, which returns the hex a unit projects FROM or
+null: its own, or **its carrier's** when it is stowed. Client twin: `shipManager.getProjectionOrigin`.
+
+⚠️ **THE CARRIER'S HEX, NEVER THE STOWED UNIT'S OWN.** A docked ship's last movement row is wherever it
+happened to dock, and stops being true the moment the Traveler moves. This is why the rule could not be
+a one-line relaxation of the `isDestroyed()` test: the exclusion and the position are the same problem.
+
+**Three homes, one walk.** `HangarOps::stowedInCarrier` — the server twin of
+`ajaxInterface.isDepartedWithCarrier` and of the client's `shipManager.carrierHolding` — finds a
+Docking Bay's `shipsDocked`, a rail's one `lcvDocked`, and a hangar's stored FLIGHTS under
+`hangarUsage[].dockedFlightId`.
+
+⭐ **`BaseShip::isDestroyedByDamage()` is the server twin the client has had since Hangar Ops** — "the
+same question asked of the damage alone". A stowed WRECK projects nothing, and `isDestroyed()` cannot
+tell one from a unit parked inside a hangar. ⚠️ **NOT a change to `isDestroyed()`**, and it must never
+become one; this is the third site in three stages to need that exact carve-out.
+
+⭐⭐ **THE DISC HAS A MASKED INPUT, AND THAT IS A PUBLISHED-TWIN PROBLEM (the Stage 18 D47 shape
+again).** A field projected from inside a hull has no icon of its own to draw a disc on, so the
+CARRIER's icon draws it — but deriving the radius from the bay's ship list gives the opponent nothing,
+because that list is masked, and they would then watch the drain apply over hexes with no disc on them.
+(The hexes themselves are public in `gamedata.edfHexes`; only the SOURCE is hidden.) So the server also
+publishes the finished number per hangar to everyone — `HangarOps::publishStowedEdfRadii` fills a
+**protected** `Hangar::$stowedEdfRadius` during `setEdfHexes`, sent by `stripForJson` only when
+non-zero — and `PhaseStrategy.getStowedEdfRadius` **maxes** it against the live walk. The owner gets a
+figure that follows the power they are allocating this phase; the opponent gets the committed one;
+neither can see a field that is not there. ⚠️ Protected rather than public on purpose: a public
+property rides the static blueprint, which would put a live per-turn number into a cached per-CLASS
+artefact.
+
+⚠️ **The EW half is safe under masking for a reason that will not generalise.** `collectEwDetectors`
+is mirrored on the client, and an enemy's docked list is masked — so their stowed detectors silently
+drop out of the client's sweep. That is harmless HERE and only here: the allowance is filtered to the
+viewer's own team (`countEwDetectorsCovering`), whose bays are disclosed to them. A future rule that
+reads the detector list across teams would need the published-twin treatment the EDF disc got.
+
+⚠️ **`EdfNetLinks::buildOccupancy` is deliberately NOT changed.** It counts units *standing in* a
+corridor for a tie-break; a stowed unit is not standing anywhere of its own, and its carrier is already
+counted.
+
+---
+
+#### 3.14e As built — Stage 19, 2026-09-12 — **STAGE COMPLETE** (signed off by the user after play testing, 2026-09-12; play-test fixes and refinements in §3.14f)
+
+Four rulings opened the stage, all the same day: **least damaged = most structure boxes remaining**;
+a riding Waymarker **can be shot, cannot shoot**; the leaving-side banner is **on the unit only, skip
+new flights**; and in the fleet list **left-click is scroll only, right-click is the ship window, on
+ALL docked units**.
+
+**The state machine.** `DockingBay::$shipsAttaching` — `[{shipId, phpclass, boxes, startTurn, dir}]`,
+`dir` being `'in'` or `'out'` — with its own change-detected `bayShipsAttaching` note beside
+`bayShipsDocked`. Everything else is in `HangarOps`' two-turn section: `beginBayShipAttach`,
+`releaseBayShipAttach`, `completeBayShipAttachments` and `releaseAllBayShipAttachments`.
+`performBayShipDock` and `performBayShipLaunch` divert a two-turn class onto the ride and are
+otherwise untouched, so a Scribe's path is byte-for-byte what it was.
+
+⭐ **THE CLAMP LIVES IN THE CARRIER'S CnC NOTES, THE LIST ONLY SAYS WHY.** `Attached` / `Detached`
+notes are what `CnC::onIndividualNotesLoaded` replays into `->attached` / `->hasAttached` on every
+load, exactly as a breaching pod's are. Keeping the two halves separate is what lets a rider that
+something ELSE detached — the CnC's own boarding sweep writes `Detached` when the host's structure at
+that location dies — be noticed as an **ABORT** rather than completed: the entry is dropped, the boxes
+released, and a Waymarker on its way IN stays on the board where it is.
+
+⭐ **`attached` MEANS BOARDING EVERYWHERE ELSE IN THE TREE**, so no Stage 19 rule may read it directly.
+`HangarOps::attachedBayShipFor` (carrier side), `bayCarrierAttachedTo` (rider side) and
+`shipManager.isDockingRider` (client) are the discriminators, and each opens with the empty-`attached`
+early-out so the whole question costs one array test in a game with no boarding in it.
+
+**Free from the ride, and this is why it was the right mechanism:** movement is mirrored by
+`MovementGamePhase::advance` and `Movement::setPreturnMovementStatusForShip`; the client already
+refuses to plot a move for an attached unit (movement.js, five sites); the pair is never rammed by its
+host; mathlib's same-hex bearing already knows the shape. Not one line of that was re-implemented.
+Facing offset **0**, and that is a fact rather than a simplification — `canBayShipDock` requires the
+docking ship to share the carrier's heading and `resurrectAtCarrier` puts a launch out on it.
+
+**Boxes are reserved from declaration**, through the one choke point: `HangarOps::dockedShipBoxes`
+counts `shipsAttaching` as well as `shipsDocked`, so `effectiveCapacity`, `bayFreeBoxesForShips` and
+the client's `HangarShared.bayShipBoxesHeld` all reserve without knowing they do. The **type lock
+lasts the whole manoeuvre**: `hasShipOrdersThisTurn()` answers true while anything is riding, which is
+the existing one-type-per-turn rule simply lasting as long as the manoeuvre does.
+
+**The -50 launch initiative is paid at SEPARATION, not at the attach.** An attached unit plots no
+movement of its own and its initiative decides nothing, so spending it a turn early would have bought
+nothing.
+
+⭐⭐ **THE AFT-HIT REDIRECT IS SEVEN LINES, AND WHERE IT SITS IS THE WHOLE DESIGN.** The SHOT is never
+redirected — only the hit that has already landed aft. Everything above the insertion point in
+`Weapon::damageOneSheet` has run against the carrier exactly as it would with no rider at all: the
+profile, the to-hit, `beforeDamage` and all 35 of its overrides, and the hit-location roll itself.
+Placed AFTER `$tmpLocation` resolves and BEFORE the Piercing structure count, so the Piercing, Raking
+and standard branches below are already talking about the Waymarker — that is what makes it seven lines
+rather than a fork of the function. The `DamageEntry` follows `$target`
+(`assignDamageReturnOverkill` files against `$target->id`), so the rows land on the Waymarker's own
+sheet and persist there. ⚠️ `$forcePrimary` shots are exempt: they are internal effects aimed at the
+carrier's Primary, not incoming fire that happened to strike the aft. ⚠️ A Piercing shot enters through
+the chosen section (`$facingLocation = $tmpLocation`) rather than re-rolling the rider's facing; its
+exit section is still derived from the bearing, so it behaves like a piercing shot once inside.
+
+**Least damaged = MOST STRUCTURE BOXES REMAINING** (`HangarOps::leastDamagedFrontOrAft`). On a
+Waymarker (Front 60, Aft 56) that means an undamaged hull takes the hit forward and swings aft only
+once the bow is five boxes worse off; ties go FORWARD, the same side an unhurt hull picks, so the rule
+never changes answer for an unhurt Waymarker. A destroyed section is never chosen.
+
+**The fire withdrawal** is `Firing::withdrawFireFromDockingRiders`, modelled on
+`withdrawFireFromJumpingUnits` directly above it down to the exclusions (a ram is a collision, a
+hyperspace log order is not a shot, a selfIntercept marker is consent), called from both
+`prepareFiring` and `preparePreFiring`. ⚠️ On the advance path, not in `validateFireOrders`: the ride
+BEGINS in the previous turn's critical phase, so a POST-side ship reconstructed without its carrier's
+notes cannot answer "am I riding anything". `weaponManager.selectWeapon` refuses the selection
+client-side, with the same ram exemption.
+
+**The fleet list (item 5).** `shipManager.carrierHolding` is now the ONE implementation on the client
+— `fleetListManager.carrierHolding` is a one-line delegate — and it grew the `hangarUsage
+.dockedFlightId` arm, so a docked FLIGHT resolves to its carrier like a docked hull. `isOffBoardButOurs`
+lost its `removed && flight` clause, so that row falls THROUGH to the carrier-scroll branch.
+⭐ **This withdraws Stage 17's own exception on purpose.** §3.15a argued a flight has no hex of its own
+and should open its window; the user's answer is that its CARRIER does, and that is the honest reply to
+"show me where this is". One list, one meaning per gesture: left-click scrolls, right-click and the ⓘ
+affordance open the window, on all three kinds of stowed unit. What is left in `isOffBoardButOurs` is
+the one state genuinely inside no hull at all — a reinforcement still in hyperspace.
+
+**Abandonment.** A destroyed bay or a destroyed carrier simply lets the rider go — deliberately with
+**no fragment damage**, unlike a ship forced out of the bay itself (`forceBayShipOut`): this one was
+never inside, it was clamped to the outside of the hull and is already on the board at the carrier's
+hex. There is no way to cancel a ride once it has begun; cancelling the ORDER before it resolves works
+as it does for any other craft.
+
+**Verification.** 123 server checks (`tests/replay/walkersStage19Harness.php`) - group 10 drives two whole
+turns through the REAL `DockingBay::criticalPhaseEffects`, so the completion pass, the order pass, their
+ORDER and the note round-trip are exercised rather than asserted from the source - and 71 client checks
+(`tests/replay/walkersStage19ClientHarness.js`, the real `hangarShared.js` / `ships.js` / `ew.js` /
+`fleetList.js` / `PhaseStrategy.js` under `vm`), both fatal on the pre-stage tree. `checkShipData.php`
+PASS, 0 new against 237; autoload unchanged; **statics unchanged** (`TWO_TURN_SHIP_CLASSES` is a const and
+`$stowedEdfRadius` is protected, so neither rides a blueprint, and `ShipCompactor` strips an empty
+`shipsAttaching`). **Replay: 120 passed / 13 failed — the SAME 13 games and the same count as the
+pre-stage tree**, so the stage adds no behavioural drift and no new failing game; the only Stage 19
+lines in the diff are `deferredShipClasses: removed` / `twoTurnShipClasses: added` on the ten Traveler
+games, beside Stage 17's `servicesDockedUnits` and Stage 18's `sharesDockedPower`. Re-record to accept.
+
+**Exit criterion (3.14a as written), all met:** a Waymarker rides `attached` for exactly one turn each
+way ✓; its boxes are reserved from declaration ✓; it moves with the Traveler while attached ✓ (through
+the existing mirror, proved by the facing offset and the movement lock-out rather than re-implemented).
+
+**Not built, open for the user:** a rider cannot be told to let go once the manoeuvre has begun; the
+completion is unconditional on the carrier's speed (an attached unit moves with it, so nothing is
+inconsistent, but the rules do not say either way); and a relaunching DOCKED flight still gets no
+banner, because a fighter launch order carries no unit id — see the ⚠️⚠️ in §3.14c.
+
+---
+
+
+---
+
+#### 3.14f Play-test fixes — game 4351, 2026-09-12 (same day)
+
+**1. ⚠️⚠️ THE RIDER SNAPPED BACK TO THE CARRIER'S START HEX WHEN THE FIRING PHASE OPENED, and the
+mirror had never run.** Both Waymarkers followed their Travelers on screen through the Movement
+phase — the client mirrors a plotted move live — and then stood at the hex the Traveler had *begun*
+the turn in. The DB says why: for turn 2 the Traveler had `move` + `end`, and the Waymarker had only
+its preturn `sync` row plus the dummy `end` that `MovementGamePhase::advance` gives every ship at
+the hex its last row names. No `attached` rows were ever written.
+
+⭐ **THE CAUSE IS ONE LINE, AND IT IS A LESSON ABOUT REUSED STATE.**
+`MovementGamePhase::process` built `$submittedShipIds` from *presence in the payload*:
+
+    foreach ($ships as $s) $submittedShipIds[$s->id] = true;
+
+and the mirror skips any attached unit in that set, so that a **detach** submission is not
+overwritten. But `ajaxInterface` sends an entry for **every ship the player owns**, and for an
+attached one it deliberately sends an **empty movement list** (the client refuses to plot a move for
+a unit riding a host). So a rider read as "moved itself" and the mirror was skipped.
+
+⭐⭐ **IT HAD NEVER SHOWN UP BECAUSE A BOARDING POD AND ITS HOST BELONG TO DIFFERENT PLAYERS** and are
+therefore never in one submission. The Traveler and its Waymarker are the first attached pair in the
+game on the **same side** — so reusing `attached` (trap 51) inherited a guard that had only ever
+been exercised across the table. The fix is to count only ships that submitted actual movement
+ROWS; an attached ship with a non-empty list is detaching, which is the case the skip exists for and
+still reads true.
+
+**2. EW is suspended on a rider, both ways** (user, same day). *"Waymarkers should also not use EW on
+transition Docking/Launching turns, nor should ships have the opportunity to use any targeted EW on
+it."*
+
+⚠️ **IT KEEPS ITS DEW (D52).** Only ACTIVE allocations stop — OEW, CCEW, DIST, JAM, SOEW, SDEW, BDEW
+and the two Detect types. Unspent points still fall into DEW through `convertUnusedToDEW` exactly as
+they do for every ship, so a riding Waymarker is no easier to hit than usual; what it loses is the
+ability to spend, and what its enemies lose is the lock. An attacker with no lock then takes the
+ordinary doubled range penalty, which is the engine's standing rule and is deliberately untouched.
+
+**Three layers, because EW has no server validation of its own.** `EW::validateEW()` returns true
+unconditionally, so:
+- `ew.isEwSuspended` gates `ew.AssignOEW` (first point, both ends) and `ew.assignEW` (the increment
+  path and every self-EW type), with DEW exempt.
+- The Initial Orders menu gains `sourceEwNotSuspended` / `targetEwNotSuspended` on **every EW row,
+  `remove` included** — nine adds, ten removes — so the whole EW panel is withdrawn from a rider
+  rather than half of it (trap 47). ⚠️ The first pass gated only the adds, on the grounds that a
+  remove with nothing to remove is a harmless no-op; the user extended it the same day, and the
+  wider version is both simpler to explain and impossible to strand a row with — a rider starts its
+  ride with no active rows at all, because the ride begins at the end of the PREVIOUS turn's Firing
+  phase, before the transitional turn's Initial Orders. ⚠️ `removeMultiOrder` lives in the same
+  table and is deliberately NOT gated: it is a firing-order control, not an EW one.
+- `EW::stripDockingRiderEw` runs beside `EW::clampFlightEw` in `InitialOrdersGamePhase::process` —
+  the one place the server already clamps an EW submission. ⚠️⚠️ It takes `$gd`, the **reloaded**
+  gamedata, because `$ship` there is the POST-side copy and has no attachment state at all
+  (arch_post_side_ship_reconstruction).
+
+⚠️ **`shipManager.isDockingRider` gained a load-bearing early-out.** It is now asked of both ends of
+every EW button and on every weapon click, so the fleet walk inside `getHangarManoeuvre` would run
+dozens of times per gesture. A rider is always `attached`, so one empty-object test rejects every
+unit in every game with no boarding and no docking manoeuvre in it.
+
+**3. ⚠️ THE FIRING MODE SELECTOR STILL OPENED ON A RIDER** (user report, same day). D49's "can be
+shot, cannot shoot" was already enforced at both ends — `weaponManager.selectWeapon` refuses the
+selection and `Firing::withdrawFireFromDockingRiders` drops anything past it — and every other
+weapon control in `SystemInfoButtons` vanished on its own, because they all read
+`hasFiringOrder` / `hasOrderForMode` and a rider holds none.
+
+⭐ **The firing-mode selector is the ONE weapon control in that menu that never asks whether a fire
+order exists.** It gates on the phase, the mode count and `hideFiringModeSelector` alone, so it
+survived every other guard by construction. `canChangeFiringMode`, `canSelfIntercept` and
+`canRemIntercept` now all refuse a rider (`isDockingRiderUnit`), which withdraws the whole
+`<FiringModeSelector>` block — the two intercept buttons are its children.
+
+⚠️ **THE SERVER HALF WENT WITH IT, and had to.** `Firing::automateIntercept` would otherwise have
+handed a unit that may not fire a full set of intercept orders. It now treats a docking rider as
+unarmed exactly as it treats a jumping Ancient (`isJumpingUnarmed`, one line away) — which is also
+the precedent that settles whether interception counts as firing: it does.
+
+**Verification.** The two harnesses grew to 142 server / 98 client, both still fatal on the pre-fix
+tree; `checkShipData.php` PASS, 0 new; replay unchanged against the pre-fix tree (119 passed / 13
+failed on both — games 4175, 4176 and 4350 SKIP for local database reasons that predate this work).
+
+**The faction page** (`factions-tiers.php`) is updated in the same pass: the Docking Bay section now
+lists the Waymarker among the bay's contents and in its launch rate, describes the two-turn ride and
+everything true of a rider (moves with the carrier, may not fire or intercept, may be shot, the aft
+redirect, no EW either way but keeps its DEW), notes that docked craft keep projecting their fields
+and detectors from the carrier's hex, describes the "Docking with X" banner and the stowed-row
+scroll — and the Waymarker is struck from the "not implemented yet" list, which now names only the
+Extra-Dimensional Jump Drive.
+
+---
+
+### 3.15 The Traveler repairs what it carries — **BUILT 2026-09-12 (Stage 17), as built in §3.15a**
+
+*"Traveler can use its SelfRepair to repair structure, CnC, Critical effects and SelfRepair systems
+for any ship it's carrying. New parameter for Self-repair system maybe, again this is the only ship
+in game that can do this so we need to gate behind a simple check for efficiency."*
+
+**The gate has a precedent on the very class it goes on.** `SelfRepair` already carries
+`$repairRestrictedTo`, `$outputDoubled` and `$linkedOrbital`
+([baseSystems.php:11444](source/server/model/systems/baseSystems.php#L11444)) for the Kirishiac
+Heavy Orbital — three properties whose whole job is "this one mount behaves differently, and every
+other Self Repair in the game pays one null check". Add a fourth in the same block:
+`public $servicesDockedUnits = false;`, set true only on the Traveler's mount.
+
+**The behaviour has a precedent too, and it is close.** `CoopStructureSelfRepair`
+([baseSystems.php:16666](source/server/model/systems/baseSystems.php#L16666)) already spends
+leftover repair points on **other units'** structure: it tiers the recipients, sorts their damaged
+blocks destroyed-first then most-damaged-first, and writes `DamageEntry` rows with a negative amount
+and an `$undestroy` flag straight onto the other ship's systems
+([16758](source/server/model/systems/baseSystems.php#L16758)). Three things differ here:
+
+1. **No range test at all.** The recipients are inside the carrier; `COOP_RANGE` has no analogue.
+2. **Four kinds of repair, not one.** Structure, C&C, critical effects and Self Repair systems —
+   which means the docked unit's damaged systems and its criticals both enter the Traveler's own
+   unified repair queue (`SelfRepair::criticalPhaseEffects`,
+   [11562](source/server/model/systems/baseSystems.php#L11562)), rather than the structure-only
+   block list the cooperative version builds.
+3. ⚠️ **It is an explicit exception to this class's own standing rule.** `SelfRepair`'s tooltip says
+   *"Cannot repair destroyed structure blocks or Self Repair systems"*
+   ([11487](source/server/model/systems/baseSystems.php#L11487)). The Traveler repairing a docked
+   ship's Self Repair is precisely the case that rule forbids, so the exception must be written
+   where the rule is, gated on `servicesDockedUnits`, and the tooltip must say so.
+
+⚠️⚠️ **A DOCKED UNIT IS `removed`, AND `removed` READS AS DESTROYED.** `BaseShip::isDestroyed()`
+with no argument answers true for any unit whose `$removed` is set — the finding
+`SpawnEnergyDrainingMine` carries in its own class comment. So the docked ship's own systems will
+never be reached by the ordinary per-ship sweep in `Criticals::setCriticals`, and the Traveler's
+Self Repair has to walk into them itself, exactly as `CoopStructureSelfRepair::repairBlocks` does.
+Confirm on the way that `submitDamages` persists rows filed against a removed ship — if it does not,
+the repair is applied in memory and lost on the next load, which looks like nothing happening.
+
+⚠️ **Decide whether the docked ship's OWN Self Repair still runs**, and say so in the code. If
+removed units are skipped by the sweep it does not, and the Traveler is its only source of repair;
+if they are not, both run and the same damage can be paid for twice out of two different pools.
+Whichever is true, it must be a decision rather than a discovery.
+
+**Exit criterion:** a damaged Scribe docked in the Traveler is repaired out of the Traveler's pool
+and not out of its own; the repair survives a reload; the Traveler's own systems still take
+priority under the existing queue order; a Self Repair on the docked ship is repairable and a
+Self Repair on any OTHER ship in the game still is not; and the 128-game replay corpus is unmoved.
+
+---
+
+### 3.15a As built — Stage 17, 2026-09-12
+
+Built to §3.15 with three additions from the user's notes of the same day (D42–D44) and one
+question the plan left open answered the other way from the plan's guess.
+
+**D42 — the docked units share the Traveler's ONE list, marked by name.** *"Perhaps the best way to
+add would be for damaged Structure, CnC, SelfRepair and Crits for docked craft to show up in
+Traveler's own SelfRepairList, but be clearly marked as to what ship they belong to, and at a lower
+priority than Traveler's own systems."* Built first as a **tier** — a field compared before priority
+so a docked row could never outrank an own one — and **D45 withdrew that the same day** after the
+user saw it:
+
+> *"You have made it a separate list that is always repaired last, but this should really be the
+> players choice, they may wish to prioritise repairing Docked ships. So can damage to dock ships
+> not be treated as a separate list and instead combined with the ship's own selfRepairList. The
+> cyan ship name should be enough for the player to distinguish between the two."*
+
+⭐ **So there is no tier and no floor.** A docked unit's entries go into the same queue and are
+sorted by **priority alone**, with the defaults doing the only separating they need (a docked C&C at
+9 naturally sits above the Traveler's thrusters at 4, and the player can move either). Override,
++/−, drag and Move-to-Top all work across the whole list in both directions: a docked row can be
+dragged above every one of ours, and the drop cascade rewrites a docked row's priority to make room
+for one of ours exactly as it would for a sibling. The **cyan ship name** on the row (`docked: true`
+→ `<OwnerTag>`) is the only thing that marks a docked entry out, which is precisely what the user
+asked for. The one residue of ownership is the deterministic tiebreak at the bottom of both sorts —
+`shipId`, with 0 for our own — and it only ever settles an exact tie.
+
+⚠️ The lesson generalises past this menu: *"whose damage matters more"* is a player judgement, and
+an engine that answers it for them reads as a bug even when it is defensible. Building the tier cost
+a clamp on three separate UI gestures; deleting it deleted all three.
+
+**D43 — a docked ship's own Self Repair keeps working.** §3.15 asked for this to be *decided*; the
+user decided it runs. ⚠️⚠️ It cannot run by itself: a docked unit is `removed`, `removed` reads as
+destroyed, and `Criticals::setCriticals` snapshots `$activeShips` with `isDestroyed()`, so nothing
+on a docked hull is swept at all. `HangarOps::runDockedShipsSelfRepair($carrier, $gamedata)` drives
+it, called from **two** places behind one transient guard (`DockingBay::$dockedSelfRepairDone`):
+the carrier's own Self Repair (first thing it does, so the docked unit's own points are spent before
+the Traveler's) and `DockingBay::criticalPhaseEffects` (which is what still runs when the carrier's
+Self Repair is destroyed). ⚠️ It skips a ship whose `removedTurn` is the current turn unless the
+entry is a `deploy` dock — a ship that flew in this turn WAS in the active snapshot and Pass 2 runs
+its systems in their own right, so repairing it here as well pays for the same damage twice.
+
+**D44 — reinforcement rows go cobalt.** `.fleetlistentry .hyperspace` is `#4a7fe0`, not the shared
+`#00b8e6`. Docked rows keep the cyan. It is the one deliberate exception to the "do not introduce a
+second blue" rule the other three stylesheets state, and each of them now says so.
+
+**What is offered on a docked unit**, mirrored exactly in `SelfRepair::gatherDockedUnitRepairs` and
+`SelfRepairList.getDockedRepairables`: damaged **Structure** (a destroyed block is still out of
+reach), damaged **C&C**, damaged **Self Repair** — the exception the standing rule forbids — and
+**every repairable critical on any system**, which is the literal reading of "Critical effects".
+Nothing else: a docked hull's weapons, thrusters and sensors are its own business, and only its own
+Self Repair can reach them.
+
+⚠️ **THE OVERRIDE KEY IS COMPOSITE.** The overrides live on the CARRIER's Self Repair, so a docked
+entry is keyed `d<shipid>:<sysid>` (and `d<shipid>:<sysid>-<critid>` for a critical) or two docked
+hulls would collide on a shared system id — as would a docked hull and the carrier. The note
+round-trip splits on `;` alone, so a `:` in the key is safe, and `notevalue` is varchar(4096). The
+"fully repaired, drop the override" branch had to start reading the JOB's key rather than
+`$systemToRepair->id`, or a docked Scribe's repair would clear the carrier's override of that id.
+
+⚠️ **The DamageEntry's shipid must name the DOCKED ship.** Each job carries its owning ship;
+`getNewDamages()`/`getUpdatedCriticals()` walk `$gamedata->ships` with no `removed` filter, so the
+rows persist — but filed against the carrier they would be applied to the wrong hull and vanish.
+
+⭐ **`servicesDockedUnits` travels on the WIRE as well as in the blueprint.** It is a public property
+so it reaches the static blueprint (and is in ShipCompactor's `$falseKeys`, with
+`dockedSelfRepairDone`, so nothing else pays for it), but `stripForJson` also sends it when true, so
+the menu does not wait on a statics regeneration. The cost is the stage's only replay drift.
+
+#### Play-test follow-ups — game 4350, same day
+
+**⚠️⚠️ A DOCKED SHIP'S WHOLE WINDOW WAS INERT, and it was one line.** The list rendered correctly
+(the user confirmed the docked Scribes' systems were showing on the Traveler), but clicking the
+docked ship's OWN Self Repair in its OWN window did nothing — and neither did anything else in that
+window. `SystemIcon.clickSystem`'s guard is
+`if (!preBattleDamage && (shipManager.isDestroyed(ship) || …)) return;`, and `isDestroyed` folds
+`removed` in, so every icon of every stowed unit had been dead since docking existed. The carve-out
+is one predicate the codebase already had a name for: **`shipManager.isDestroyedByDamage`** — the
+same question asked of the damage alone, whose whole purpose is telling "gone" from "parked out of
+sight" — so `stowed = ship.removed && !isDestroyedByDamage(ship)`. ⚠️⚠️ Again NOT a change to
+`isDestroyed` (§3.16's warning), and carved out at this one site only.
+⭐ A stowed unit is then **diverted straight to the info menu** rather than let through the rest of
+the handler: it may be managed (its repair queue now, its power in Stage 18) but it is inside a
+hangar, so it must not reach weapon selection, called shots, a hangar-launch dialog or an LCV rail.
+This is the prerequisite §3.16(a) predicted, arriving one stage early and from the other direction.
+⚠️ Noted in passing, NOT changed: the second half of that guard,
+`shipManager.isDestroyed(ship, system) && !system.clickableWhenDestroyed`, passes a system to a
+one-argument function — it is `isDestroyed(ship)` again, so `clickableWhenDestroyed` has never done
+anything there. Almost certainly meant to be `shipManager.systems.isDestroyed`.
+
+**Left-click on a stowed ship's fleet row scrolls to its CARRIER** (user, 2026-09-12), which is
+where the unit actually is — not to its own window, which was the first build's answer and made
+left-click mean two different things in one list. Right-click and the ⓘ affordance remain the
+window. `fleetListManager.carrierHolding(ship)` is the finder, deliberately the same walk as
+`ajaxInterface.isDepartedWithCarrier` (a rail's `lcvDocked`, a bay's `shipsDocked`, ids parsed
+because a spawned unit's id is a STRING), so it covers a rail-parked LCV as well. ⚠️ It sits ABOVE
+the `shouldBeHidden` guard, which reads every removed unit as destroyed and would otherwise make the
+branch unreachable. A docked FLIGHT is deliberately excluded: it has no hex of its own and its row
+has opened its window since Hangar Ops Stage 9.1.
+
+**Proof.** `tests/replay/walkersStage17Harness.php` (70 checks) + `walkersStage17ClientHarness.js`
+(57, including the real `SystemIcon.clickSystem` and `carrierHolding` lifted out of the live file by
+a source marker), both **fatal** on a stashed pre-stage tree; `checkShipData.php` PASS, 0 new
+against 237; statics and both client bundles regenerated. ⚠️ **Replay corpus: 135/0 clean, 121/14
+with the stage, and every one of the 14 diffs is the same single additive key**
+(`/ships/N/systems/N/servicesDockedUnits: added (true)`) — no damage, critical, movement, to-hit or
+masking drift anywhere. Re-record to accept it.
+
+---
+
+### 3.16 Docked units share power with the Traveler — **BUILT 2026-09-12 (Stage 18) — see §3.16a**
+
+*"Docked ships can share power with Traveler on a 1 power per 4 shared basis. We can access their
+SCS via the fleetList menu, but are not able to manage power at the moment during Initial Orders."*
+
+**Two halves, and the first is the prerequisite.**
+
+**(a) Managing a docked unit's power.** The block is `shipManager.isDestroyed(ship)` guarding every
+power mutation — `setOffline` refuses on it at
+[power.js:1167](source/public/client/power.js#L1167) and its siblings do the same — and a docked
+unit is `removed`, which that predicate reports as destroyed. Relax it through **one named
+predicate** (`shipManager.power.isPowerManageable(ship)`) used by the power paths only.
+
+⚠️⚠️ **NEVER BY CHANGING `isDestroyed`.** The same short-circuit stands in front of
+`shouldBeHidden`, the fleet list, the icon, the movement sequence and every "is this unit on the
+board" test in the client. Widening it would put a docked ship back on the map.
+
+⚠️ **The server half is the real blocker.** `InitialOrdersGamePhase::process` and `submitPower` have
+to accept power rows for a removed ship. Check whether the phase's ship loop skips removed units
+before assuming this is a client change.
+
+**(b) The transfer.** The Docking Bay asks each docked **ship** (never a flight) for its reactor
+surplus, sums them, floors the total over 4, and adds that to the Traveler's own available power.
+
+⚠️⚠️ **THERE IS NO SERVER TWIN OF `getReactorPower`.** The whole power balance is computed in the
+client ([power.js:493](source/public/client/power.js#L493)) and the server trusts the power entries
+it is sent; `Reactor::getOutput` answers only for one reactor on one hull. So the shared figure is a
+**client** number unless a server-side validator is written for it, and a plan that does not say so
+is a plan that ships an unvalidated power grant. Decide which, explicitly, and if the answer is
+"client only" then say in the tooltip that it is advisory.
+
+⚠️ **The dependency runs both ways.** A docked ship's surplus depends on what its owner has powered
+down, and the Traveler's budget depends on the sum — so the carrier's power display must recompute
+whenever any docked ship's allocation changes. One event in the shape of `ShipEwChanged`
+([ew.js:457](source/public/client/ew.js#L457)), never a poll.
+
+⚠️ **Trap 23 applies directly.** *Anything in `TacGamedata::onConstructed()` that reads a number an
+enhancement can move must run below the per-ship loop* — and "the sum of every docked reactor's
+output" is exactly such a number, because `BaseShip::onConstructed()` inside that loop is what
+applies enhancements. This is the third system in this plan to meet that trap; `setEdfHexes()`
+published a refitted field at its unenhanced radius for a whole stage before it was found.
+
+**Exit criterion:** a docked Scribe can be powered down during Initial Orders and the change
+persists across the commit; four points of docked surplus give the Traveler one and three give it
+none; a docked **flight** contributes nothing; and the figure recomputes live as the docked ship's
+allocation changes.
+
+---
+
+### 3.16a As built — Stage 18, 2026-09-12
+
+Built to §3.16, both halves, plus the explicit decision the exit criterion demanded.
+
+**D46 — THE GRANT IS CLIENT-COMPUTED AND ADVISORY, and that is a decision, not an omission.**
+§3.16 required this to be written down either way. It is advisory, because the alternative is not
+"add a validator" but "give Fiery Void a server-side power model it has never had":
+
+* There is **no server twin of `getReactorPower`** anywhere in the tree. `Reactor::getOutput`
+  answers for one reactor on one hull; nothing sums a ship's draws, boosts and overloads.
+* `DBManager::submitPower` validates **nothing** — it normalises, de-duplicates on
+  `shipid-systemid-type-turn` and inserts. `InitialOrdersGamePhase::process` merges every
+  system's `->power` and hands it straight over.
+* So **every power figure in the game is already a client number**. A server check on this one
+  grant would be the only power validation in the codebase, and it would still be reading a
+  balance it cannot compute.
+
+What follows from that: the flag `DockingBay::$sharesDockedPower` publishes the **rule** and not a
+figure — nothing on the server reads it. ⚠️ §3.16 asked for the tooltip to say the number is
+advisory; it was written that way and the user trimmed that tail the same day (see “Where the
+number shows” below), so the caveat lives in this record and nowhere on screen. If the balance is
+ever to be enforced, that is a cross-cutting project (one server-side
+`getReactorPower`, then the commit gate moves behind it) and not a Walkers stage.
+
+**(a) Managing a docked unit's power — one predicate, four call sites.**
+`shipManager.power.isPowerManageable(ship)` is `!shipManager.isDestroyedByDamage(ship)`, and it
+replaced `shipManager.isDestroyed(ship)` in `onOfflineClicked`, `onOnlineClicked`,
+`onOverloadClicked` and `onStopOverloadClicked`. On a unit that is on the board the two answer
+identically; on a `removed` one — a ship in the Docking Bay, a rail-parked LCV, a docked flight —
+the old guard said "destroyed" and returned. ⚠️⚠️ **Not a change to `isDestroyed`**, for every
+reason §3.16 gives; it is the same carve-out, with the same existing predicate, that Stage 17 made
+in `SystemIcon.clickSystem` (§3.15a).
+
+⭐ **The user's report named the symptom precisely and was worth believing literally:** *"I can
+click on a system in the docked ship's shipWindow and bring up the systemPowerSettings menu, but
+clicking its buttons does nothing."* Both halves were true and for different reasons. The MENU
+opens because none of `SystemInfoButtons`'s six gates (`canOffline`, `canOnline`, `canBoost`,
+`canDeBoost`, `canOverload`, `canStopOverload`) asks about the SHIP at all — they test the phase,
+the system and the player. The BUTTONS did nothing because the four mutations behind them each
+opened with the ship-level guard. ⭐ And **boost and unboost already worked**: `clickPlus` /
+`clickMinus` never had the guard, which is exactly what made the menu look half-broken rather than
+switched off.
+
+⚠️ **THE SERVER HALF NEEDED NOTHING, and that was worth checking rather than assuming** (§3.16 said
+so). `InitialOrdersGamePhase::process` loops `$ships` with no `removed` filter; `construcGamedata`
+loops `gamedata.ships` with no `removed` filter either, so a docked ship's systems are in the POST
+already; and `submitPower` inserts what it is given. A docked ship's power has therefore persisted
+correctly for as long as the Docking Bay has existed — the only thing missing was the ability to
+set it.
+
+⚠️ **What is still refused on a docked hull, deliberately:** ownership (`gamedata.isMyShip` and
+`ship.userid != gamedata.thisplayer` are separate guards and untouched, so an enemy's docked ship
+stays read-only), the phase (Initial Orders only), a cooldown-forced offline, a vortex-locked
+offline, `powerLocked`, and a system with a firing order. A WRECK is still refused everywhere.
+
+⚠️ **Found in passing and NOT fixed** (same reasoning as the sibling finding in §3.15a):
+`onStopOverloadClicked`'s guard read `shipManager.isDestroyed(ship) || shipManager.isDestroyed(ship,
+system)` — and `shipManager.isDestroyed` takes ONE argument, so the second clause has always been
+the first one again and has never asked anything about the system. Only the ship-level half was
+relaxed; turning the dead clause into a real system test would be a rules change on every hull in
+the game, and it is flagged here rather than folded in.
+
+**The commit gate was deliberately left alone.** `getShipsNegativePower` still skips removed units,
+so a docked hull cannot block a commit. It cannot inflate the grant either — a negative surplus is
+clamped to 0 per ship before the sum — and a docked ship has nothing a boost could spend power on
+(it cannot move, fire or hold EW). Adding it would be a new way to block a commit for no gain.
+
+**(b) The transfer — `shipManager.power.getDockedPowerSummary(carrier)`.**
+Returns `{donors, surplus, shared}`: every Docking Bay on the hull with `sharesDockedPower`, every
+SHIP in its `shipsDocked`, each one's own `getReactorPower`, surpluses summed and then
+`Math.floor(total / 4)`. `getDockedPowerShared` is the number alone, and `getReactorPower` adds it
+to the carrier's balance as the **last** thing it does — a grant from elsewhere is not a system's
+draw and must not go into the per-system loop.
+
+Five rules in the sum, each with a reason:
+
+| Rule | Why |
+|---|---|
+| SHIPS only, never a flight | D20. Docked fighters are not in `shipsDocked` at all (they ride `hangarUsage`), so the `flight` test is belt and braces. |
+| The donor is **not charged** | D20 is a transfer at a quarter rate, not a spend. Deducting the 4 would drop the donor's surplus and the next recompute would take the grant away again, oscillating. What the donor really pays is the powering-down its owner must do to have a surplus — which is why (a) is the same stage. |
+| A negative surplus contributes **0** | Clamped per ship, BEFORE the sum, so one over-boosted docked hull cannot drain the Traveler. |
+| A wreck, a dead reactor, a destroyed bay or an already-launched ship contribute nothing | A destroyed bay has already put its ships back on the board (`HangarOps::onDockingBayDestroyed`), and the `removed` test catches a unit that left this turn. |
+| An **enemy viewer computes 0**, and is meant to | `DockingBay::stripForJson` masks `shipsDocked` to `[]` outside the owning team, so the grant is invisible rather than leaked. For a number nothing enforces, that is the safe direction. |
+
+⚠️ **Trap 23 does NOT bite here, and that is why the figure is a function rather than a map.** §3.16
+warned that "the sum of every docked reactor's output" is exactly the kind of number that must not
+be computed in `TacGamedata::onConstructed()` above the per-ship enhancement loop. It is never
+computed on the server at all, and on the client it is derived live at every read — so there is no
+snapshot to be taken at the wrong moment.
+
+⚠️ **THE LIVE RECOMPUTE NEEDED NO NEW EVENT.** §3.16 called for "one event in the shape of
+`ShipEwChanged`". There already is one: every power mutation raises `SystemDataChanged`, whose
+handler ends in `shipWindowManager.update()`, which re-renders **every** open ship window — so
+powering a docked Scribe down moves the Traveler's reactor figure on the same click. Adding a
+second event would have been duplicate plumbing.
+
+⚠️ **A re-entrancy latch, for a cycle that should not exist.** `getReactorPower(donor)` calls back
+into the walk for the DONOR's own bays. A docked ship cannot itself hold docked ships today, so
+`dockedPowerWalk` can only ever break a cycle that is already a bug — but a stack overflow is not
+the way to find out that one has appeared.
+
+⚠️ **THE LOBBY HAS A DIFFERENT `gamedata.getShip`.** On `gamelobby.php` there is no `gamedata.js` at
+all: `gamelobby.js` defines its own `getShip(phpclass, faction)`, which answers with a BLUEPRINT.
+`power.js` is loaded on both pages, so the walk early-outs on `gamedata.gamephase === -2` as well as
+on an empty `shipsDocked` — either alone would do, and both are cheap.
+
+**Where the number shows.** The Traveler's reactor icon already reads `getReactorPower`, so the
+grant lands in the figure the player looks at with no display work at all. The explanation is a
+client-computed line on the **Reactor** tooltip — *"Shared by docked ships: +1 of 4 pooled from 1
+ship"* — modelled on `shadowBombAvailable`,
+which exists for the same reason (`system.data` is built server-side per blueprint and cannot carry
+a figure that moves per click). ⭐ It is drawn whenever there is a donor **even when the grant is
+0**: "3 pooled, +0" is precisely what a player who has powered one system down needs to see.
+⚠️ It first carried the tail *"(4 shared = 1 gained; advisory, not server-checked)"*, which §3.16
+asked for and **the user trimmed the same day** — so the rule is stated on the Docking Bay's own
+`Special` text and on the faction page, and the advisory caveat is stated only here. The bay's
+`Special` text can stay server-side because, unlike the figure, the rule does not move.
+
+**The play-test pass — two findings, 2026-09-12. The first was FIXED (§3.16b); the second is
+recorded and deliberately not built.**
+
+**(1) The OPPONENT did not see the grant, and it was a masking consequence rather than a bug.**
+`DockingBay::stripForJson` masks `shipsDocked` to `[]` for anyone outside the owning team —
+`isDisclosedToCurrentViewer`, the **private-logistics** gate that also hides ammo loads and hangar
+contents, and which does not open with age (only with the post-mortem). So the opponent's client
+finds no donors, contributes 0, and renders the Traveler's balance without the grant while the owner
+renders it with. Everything else lines up: the docked ship's own row IS in the opponent's payload
+(`removed: true` is published unconditionally; only hyperspace reinforcements are dropped from the
+list), and its power rows only reach the database at commit — so an opponent's view of any enemy's
+power is inherently post-commit, which is why the discrepancy shows up exactly when the user saw it.
+
+⭐ **THE WIDER FACT, which is the reason this is worth writing down:** every derived power figure in
+Fiery Void is computed by the VIEWER'S OWN CLIENT from the data that viewer is allowed to see. Until
+now every input to that computation was public, so the answer was the same for everybody. This is the
+first power figure with a MASKED input, and nothing in the code warns that masking an input silently
+changes a number two players are meant to agree on. Any future figure derived from private logistics
+has the same property.
+
+The option space is exactly two, and neither is free:
+
+| Fix | Cost |
+|---|---|
+| Publish the docked ship **ids** to every viewer, keeping `boxes`/`dockTurn`/`phpclass` masked (~3 lines in `stripForJson`). The opponent's client then runs the *same* `getDockedPowerSummary` and gets the *same* number — no duplication, no drift, and correctly post-commit for free. | It discloses the ASSOCIATION and the bay's occupancy count. The opponent already has the docked unit's full sheet and knows it is `removed`; what they gain is *which* hull holds it (nothing, against a fleet with one Traveler; something against two) and therefore the bay's remaining capacity. That is a deliberate Stage 16 information rule, so it is the user's call and not a refactor. |
+| Compute the grant **server-side** and publish the integer. | A second implementation of the power balance. ⚠️ `EdfExposure::getMaxAvailablePower` is already a partial mirror ("the server-side mirror of the client's `getReactorPower` at maximum shed — keep the two in step"), but it is a CEILING: it ignores per-turn offline rows, boost cost and overload draw, so it cannot answer this. A full mirror would then have to agree with the owner's live client figure at every moment, or the owner sees one number before commit and another after. |
+
+**The user chose the first (2026-09-12) — built as §3.16b below.**
+
+**(2) NOT BUILT — power management for a unit still in HYPERSPACE is one step away, and the step is
+not in `power.js`.** `isPowerManageable` already answers true for a reinforcement that has not arrived (it
+is not a wreck), and driving `SystemPowerSettings`'s handlers against one switches its systems off
+correctly. Two things stop the click reaching them:
+
+* `PhaseStrategy.onSystemClicked` opens with `if (shipManager.getTurnDeployed(ship) > gamedata.turn)
+  return;` — and `getTurnDeployed` is the 999 sentinel for a unit in hyperspace, so the system info
+  menu never opens at all. ⚠️ It is also the SURRENDER test (999 again), so relaxing it needs the
+  narrower predicate, not a widened comparison.
+* `SystemIcon.clickSystem`'s `stowed` divert is `ship.removed && !isDestroyedByDamage(ship)`, and a
+  hyperspace unit is not `removed` — so it would fall through into the select/target workflow it has
+  no business in, exactly what the divert exists to prevent for a docked ship.
+
+The window itself already opens (`fleetListManager.isOffBoardButOurs` returns true for a hyperspace
+reinforcement), so the feature is: one named "off-board but ours" predicate shared by those two
+sites. Not built — the user asked for it "at a later point" — and recorded here because Stage 18 is
+what made the power half of it free.
+
+---
+
+### 3.16b As built — the opponent's view of the grant (Stage 18 follow-up, 2026-09-12)
+
+**D47 — the bay discloses the IDS of the ships aboard, and only the ids, to a viewer outside the
+owning team.** The user's ruling on the choice above. It is the option that cannot drift: the
+opponent's client runs the SAME `getDockedPowerSummary` on the SAME docked ships and reaches the
+SAME number, which no server-side recomputation could promise.
+
+⚠️⚠️ **A SEPARATE KEY, NOT A PRUNED `shipsDocked`, and that is the whole safety of the change.**
+Until now an outside viewer's `shipsDocked` was ALWAYS `[]`, so no client consumer has ever met a
+partial entry — and `HangarShared`'s capacity maths, the fire-menu dock dialogs, `SelfRepairList`
+and `fleetListManager.carrierHolding` all read `boxes`, `phpclass` or `dockTurn` off these rows.
+Handing them id-only entries would have been a silent `NaN` in four places. So the ids ride
+`sharesDockedPowerIds`, a bare integer list that exactly one function reads;
+`getDockedPowerSummary` prefers the real list whenever it has one, so an owner can never
+double-count.
+
+⚠️ **Only on a bay that actually shares power.** An ordinary Docking Bay fitted to some other hull
+later stays fully masked — the disclosure is bought by the rule that needs it and by nothing else.
+
+⚠️ **`hideDeploymentDocks` still drops anything that docked THIS turn**, and must: concealing the
+dock EVENT is a stronger mask than this one (it is *where a unit went*, not what a reactor reads).
+⭐ In practice it costs nothing, and the reason is a timing fact worth keeping: the dock resolves in
+the Critical phase, AFTER that turn's Initial Orders — so by the next turn's orders, which is when
+the figure is actually managed, `dockTurn` is in the past and the entry is disclosed here. The only
+window where the two players can still differ is the back half of the docking turn itself, when
+nobody is allocating power.
+
+⭐ **What the opponent gains, precisely:** the association and the bay's occupancy count. They
+already had the docked unit's full sheet (only hyperspace reinforcements are dropped from the ship
+list) and already knew it was `removed`. The post-mortem was already total disclosure, and stays so
+— with the game over, `isDisclosedToCurrentViewer` returns the real list and the id key is not
+emitted at all.
+
+**Verification.** 19 checks in a server harness over the REAL `Traveler` and its REAL bay, fatal on
+the pre-change tree: the owner and a teammate get the full list and no id key; the opponent gets an
+EMPTY `shipsDocked` plus bare integer ids, no `dockTurn` and no per-entry `boxes` anywhere in the
+payload, and no queued dock/launch orders; a non-sharing bay discloses neither ids nor flag; an
+empty sharing bay emits no key; the post-mortem hands over the real list; and a build with NO viewer
+context — static ship generation — emits no id key, which is what keeps it out of the blueprints.
+Plus 9 client checks: the opponent reaching the owner's figure from the id list, two donors still
+summed-then-floored, the owner preferring `shipsDocked` and never counting a ship twice, and every
+per-ship exclusion (flight, unresolvable id, destroyed bay, missing flag) still applying to an entry
+that arrived as an id. ⭐ Replay corpus unchanged at 121/13 with the same two additive keys — the new
+one never appears, because the harness has no outside viewer.
+
+**Files:** `baseSystems.php` (`DockingBay::stripForJson`), `power.js` (`getDockedPowerSummary`
+reads either list).
+
+---
+
+**Files (Stage 18 proper):** `power.js` (the predicate, the four guards, the summary, the hook in `getReactorPower`),
+`SystemInfo.js` (the tooltip line), `baseSystems.php` (`DockingBay::$sharesDockedPower`, its
+`stripForJson` and its `Special` line), `ShipCompactor.php` (`$falseKeys`), `Traveler.php` (the flag
+on the instance — the bay moved to a local variable, so no system id moved).
+
+**Verification.** 134 checks green across three harnesses — 67 in a server-free harness over the REAL
+`power.js`, 48 in a React harness, and 19 in a server harness over the real `Traveler` (§3.16b). The
+React one bundles the whole `reactJs` tree, evaluates it at module scope, renders `SystemInfo` to
+static markup and drives `SystemPowerSettings`'s own handlers. All three are fatal on the tree they
+were written against (21/37, 23/9 and 14/5). ⭐ The React run reproduces the user's report exactly: on
+the old tree *"the menu OPENS for a DOCKED hull"* passes while *"Off actually switches it off"*
+fails. ⭐ A second play-test pass the same day added 16 more: the WHOLE click path for a stowed
+WEAPON (a real `SystemIcon.clickSystem` call relaying exactly one `SystemClicked` and no
+targeting event, then overcharge and stop-overcharge taken through the menu), the right-click
+“all systems of this name” pair on a docked hull, and the REINFORCEMENT boundary — a unit still in
+hyperspace is ALREADY power-manageable, so what stops it is the click path and not the power model
+(see finding (2) of the play-test pass below). `checkShipData.php` PASS, 0 new against 237. A **2,727-hull differential** over 58,548 facts
+(every system's `sharesDockedPower`, `isDockingBay`, `powerReq`, `output`, `outputMod` and
+`boostable`, plus every hangar's `Special` text) moved exactly **two lines**, both `Traveler|sys11`:
+the flag and the added sentence. Replay corpus 121/13 against the un-re-recorded baseline, every
+diff one of two additive keys (`servicesDockedUnits` from Stage 17, `sharesDockedPower` from this
+one) and no behavioural drift; autoload unchanged.
+
+### 3.17 The Walker jump drive — leaving slowly — **BUILT 2026-09-11 (Stage 15), rules 1 and 2 WITHDRAWN the same day — see §3.17b**
+
+*(Written 2026-09-08 as the "Traveler" drive and Stage 18. Promoted to Stage 15 on 2026-09-11 and
+widened to every Walker hull by D32. The design below is what was built, except where §3.17a says
+otherwise.)*
+
+> *"Some jump drives are even more advanced. In addition to the effects of advanced jump drives,
+> traveler drives deliver a coruscating field of crackling lightning, fading away into the center of
+> the resulting jump point. This operates as another advanced jump drive, except that the ship is
+> permitted to fire weapons on the same turn that it departs the map."*
+
+~~`class TravelerJumpDrive extends JumpEngine`. A new phpclass, never a flag on `JumpEngine` — system
+ids are construction order and a variant needs its own class (trap 7).~~ **SUPERSEDED by D32
+(2026-09-11): a flag, `JumpEngine::markWalker()`, on every Walker hull's engine**, the way a Scanner
+is marked Advanced. The trap-7 worry was misplaced: trap 7 is about REORDERING a constructor, and a
+flag set after construction reorders nothing, so no system id moves. `markLegacy()` and `markGate()`
+had already set the precedent. See §3.17a.
+
+Three rules, and each has exactly one seam.
+
+**1. The unit stays until the end of the turn.** Today `Movement::resolveJumpOuts` runs as the
+**first** statement of `MovementGamePhase::advance`
+([MovementGamePhase.php:23](source/server/Phase/MovementGamePhase.php#L23)) and destroys the primary
+structure there and then — and the comment says why it is first: *"a unit that has left then reads
+isDestroyed() for the rest of advance(), so it gets no dummy 'end' move, no post-move stealth check
+and holds no Pre-Firing slot open"*.
+
+A Walker unit needs the **opposite** of all three. So the deferral is a positive decision taken at
+that call site, not an omission: `resolveJumpOuts` skips a unit whose jump engine is a Traveler
+drive, records the pending departure, and `applyJumpOut` runs for it at the **end of the Firing
+phase** instead — where `JumpEngine::doHyperspaceJump` already runs
+([firing.php:2116](source/server/handlers/firing.php#L2116)), which puts both departure paths in the
+same place and keeps the combat log's ordering sane.
+
+⚠️ `applyJumpOut` is *"`doHyperspaceJump` MINUS THE FAILURE ROLL — the risk was taken when the
+vortex was opened, not when it is used"*
+([movement.php:461](source/server/handlers/movement.php#L461)). That stays true; rule 3 below is
+about the OPENER's roll, not the user's.
+
+**2. Enemies cannot target it during Pre-Firing or Firing.** This is §3.10c's `isTargetableBy` hook,
+with one ⭐ difference: **this one needs a real server refusal.** The Moon rule is client-only —
+`weaponManager` refuses the click and the server never asks — which is fine for a wasted shot at an
+indestructible probe and is not fine for a rule a player will plan around. A fire order naming a
+departing Walker is rejected in the submit path and in `Firing::prepareFiring`.
+
+- ⚠️ It must **not** stop the Walker shooting; that is the whole point of the rule.
+- ⚠️ It must **not** stop collateral, area effects or ramming reaching the hex it is standing in.
+- The departing state is **public** — the enemy has to be able to see why the click is refused — so
+  it rides `stripForJson` as a plain flag, not a per-viewer one. That is a deliberate call and the
+  opposite of the SCT's `hideNotesFromEnemies`.
+
+**3. No destruction roll while the drive is in use.**
+
+> *"Additionally, the ship suffers no chance of being destroyed if its jump system is damaged during
+> a turn that the drive is in use, though jump-out will be cancelled if the drive is completely
+> destroyed as normal."*
+
+⭐ **The hook already exists in exactly the right shape, facing the other way.**
+`JumpEngine::getCertainJumpFailureNote($ship, $gamedata)`
+([baseSystems.php:8198](source/server/model/systems/baseSystems.php#L8198)) returns a log line when
+a jump is doomed regardless of the dice and null otherwise — the Shadow Phasing Drive is its only
+user. Add the twin, `isJumpFailureImmune($ship, $gamedata)`, asked in the same place.
+
+⚠️⚠️ **STILL CONSUME THE d100.** The existing hook is asked *before* the roll rather than instead of
+it, and the comment says why: *"Dice draws are part of the game's random sequence and a rule that
+silently skipped one would make otherwise-identical games diverge."* An immunity that returns early
+would break the replay harness on every unrelated game in the corpus that happens to contain a
+Walker.
+
+⚠️⚠️ **THERE ARE THREE FAILURE SITES, NOT ONE.**
+
+| Site | What it does |
+|---|---|
+| `doHyperspaceJump` ([8095](source/server/model/systems/baseSystems.php#L8095)) | the legacy boost-to-jump path |
+| `rollVortexJumpFailure` ([8325](source/server/model/systems/baseSystems.php#L8325)) | the per-turn roll while a vortex is open, from `criticalPhaseEffects` |
+| `openVortex` ([7460](source/server/model/systems/baseSystems.php#L7460)) | computes the same percentage **for the log line only** |
+
+The immunity has to reach all three or it is half-applied and the log will contradict the outcome.
+Note that Ancients already halve the chance at two of them (`if ($ship->factionAge >= 3)`), so the
+Walker rule is "halved, then zeroed while in use", not a first exception.
+
+*"Cancelled if the drive is completely destroyed as normal"* is already the
+`getRemainingHealth() <= 0` early return at
+[8111](source/server/model/systems/baseSystems.php#L8111). Nothing to add.
+
+**Exit criterion:** a Traveler that enters a vortex is still on the board through Pre-Firing and
+Firing, fires normally, and is gone at the end of the turn; every enemy fire order naming it is
+refused on both sides of the wire; its drive rolls no failure while in use but a completely
+destroyed drive still cancels the jump; the d100 is drawn either way; and the replay corpus is
+byte-identical on games without a Walker.
+
+### 3.17b REWORKED — Stage 15, 2026-09-11 (supersedes §3.17 rules 1–2 and all of §3.17a)
+
+The user found the first build rested on a misreading of the Ancient jump rules. The rule as it
+actually stands (B5W):
+
+> *"Each Ancient One has its own method for traveling into hyperspace, but these are all listed on the
+> control sheet as a 'special jump drive' for consistency. The drive affects only the Ancient's ship
+> and nothing else (unless otherwise noted). As with a phasing drive, the jump drive is initiated at the
+> start of the turn and takes the ship out of (or into) the scenario by the turn's end, though the
+> vessel will be vulnerable to weapons fire in the interim. Except as noted, the ship may not fire
+> weapons while jumping into/out of a scenario. If the jump drive itself is damaged while the ship is
+> departing/arriving, it has only half the usual chance of detonating. Ancient jump drives cannot be
+> affected by vortex disruptors."*
+
+User rulings (2026-09-11): Kirishiac, Mindriders, Torvalus, Triad, **Thirdspace** and Walkers get
+legacy drives like the Shadow Phasing Drive, since they form no jump points; all of them (and the
+Shadows) are immune to the Vortex Disruptor, which now reaches only the **Vorlons and The System**; none
+may fire on the turn they jump — **except the Walkers, whose whole benefit is that they CAN, plus zero
+chance of drive failure**. The **Mapmaker probes go legacy too** (reversing §3.12's "works normally").
+There is no deferred departure and no untargetability: a jumping Ancient is on the board, and can be
+shot, until it leaves at the end of Firing like any boost-jumper.
+
+**REVERTED** (backup patch in the session scratchpad, `stage15_backup/stage15_full.patch`):
+`Movement::getDeferredJumpOutVortex` / `isOutOfReach` / `resolveDeferredJumpOuts` / `departWithAttached`
+/ `writeCancelledJumpOutLog`, the `resolveJumpOuts` skip, `JumpEngine::getUnitWalkerDrive`,
+`BaseShip::isTargetableBy`'s third argument, `Firing::isOrderAtUntargetableUnit` /
+`withdrawFireAtDepartingUnits` (⚠️ which also takes the Energy Draining Mine orb's server-side refusal
+back to client-only, as it was before Stage 15), the Disruptor's "waiting Walker" branch,
+`TacGamedata::hasLeftThroughVortex`'s Walker exemption, and every client twin (`carriesWalkerJumpDrive`,
+`isDeferredJumpOut`, the shooter-aware `isTargetable`, and the fleet-list / ajaxInterface / banner /
+`shouldBeHidden` sites). A committed `jumpout` row means "gone at the end of Movement" again.
+
+**BUILT:**
+
+- **`JumpEngine::markAncient()`** = `markLegacy()` + protected `$ancientJump`. One-liner
+  `(new JumpEngine(..))->markAncient()` in 36 ship files (Kirishiac 7, Mindriders 4, Torvalus 6, Triad
+  11, Thirdspace 8); `PhasingDrive`'s constructor calls it instead of `markLegacy()`. **`markWalker()`**
+  now = `markAncient()` + `$walkerJump`, on the six hulls and on every Mapmaker probe. A flag set after
+  construction moves no positional system id. `stripForJson` sends `ancientJump` / `walkerJump` only
+  when set; the legacy tooltip gained Ancient and Walker variants.
+- **No fire on the jump turn** (`JumpEngine::forbidsFireWhileJumping` = Ancient and not Walker).
+  Enforced at RESOLUTION by `Firing::withdrawFireFromJumpingUnits` (preparePreFiring + prepareFiring)
+  and an `isJumpingUnarmed` skip in `automateIntercept`, which runs after prepareFiring. ⚠️ Not in
+  `validateFireOrders`: the boost and the orders arrive in the same Initial Orders POST, and that path
+  judges them against the DB copy, which has no power rows for this turn yet. Rams, log orders and the
+  selfIntercept marker are left alone. Client: `JumpEngine.onBoostIncrease` (called by
+  `power.clickPlus`) withdraws the unit's orders when the jump is set, and `weaponManager.selectWeapon`
+  refuses new ones via `shipManager.movement.isJumpFireForbidden`.
+- ⭐ **`JumpEngine::getUnitJumpingEngine($unit, $turn)`** — the one "who is boosting to jump" reader,
+  shared by the end-of-Fire boost sweep and the withdrawal, and it **descends into every craft of a
+  flight** (the boost sits on whichever probe the player clicked). The sweep used to walk
+  `$ship->systems` and never saw a flight at all.
+- **`doHyperspaceJump` on a flight** — it had a null-structure fatal; now a flight leaves craft by craft
+  (Movement::applyJumpOut's shape) with the CV note on the sample fighter.
+- ⚠️ **The half-chance was missing on the boost path.** `openVortex` and `rollVortexJumpFailure` have
+  always halved for factionAge 3+; `doHyperspaceJump` never did. It does now, before the Walker zeroing
+  and with no return before the d100. This also changes the % a Shadow boost-jump quotes, which is the rule.
+- **Vortex Disruptor:** `isImmuneToDisruption` = carries an Ancient drive, or is factionAge 3+ and not in
+  `DISRUPTABLE_ANCIENT_FACTIONS` ('Vorlon Empire', 'The System'). Spared before the escape roll (no die
+  drawn). A doorway an Ancient drive holds does not collapse; a phase-in one reads as an empty-hex shot
+  so the log cannot confirm a hidden arrival.
+
+Harnesses rewritten: `tests/replay/walkersStage15Harness.php` (73) and
+`walkersStage15ClientHarness.js` (24), each group with a control that fails the other way. Gate:
+autoload current (no new class), `checkShipData.php` PASS with 0 new findings (237 baselined). Replay
+harness 80 passed / 42 failed: 34 of them differ ONLY by `ancientJump: added (true)` on an Ancient
+drive's payload - the intended additive key - and the other 8 (3671, 3676, 4249, 4256, 4297, 4303,
+4325, 4328) fail IDENTICALLY with `source/` stashed once those lines are removed, so they are
+pre-existing drift, not this change.
+
+**Open for the user:** arriving is also "jumping into a scenario", and whether an arriving Ancient may
+fire on its arrival turn was not touched. The Initial Orders commit summary lists ships jumping to
+hyperspace but still skips flights, so a jumping Mapmaker flight is not named there.
+
+#### 3.17c Refinements after play (2026-09-11, games 4347 and 4348)
+
+1. **A Mapmaker flight's drives boost as one** (4347: one probe boosted, the others read unboosted).
+   Client `JumpEngine.onBoostIncrease` / `onBoostDecrease` → `mirrorFlightBoost`, the Stiletto Shading
+   Field's "set one, set all" shape: a real type-2 power row on every live sibling engine, so each
+   travels with the ordinary submit, and "No" on any probe clears all of them. The server needed
+   nothing - `getUnitJumpingEngine` already takes the flight off any boosted craft.
+2. **A jumping non-Walker Ancient's Initial Orders are never written.**
+   `InitialOrdersGamePhase::dropFireOfJumpingShip` filters them out of `process()` before
+   `validateFireOrders`, reading the POST-side ship's own boost rows (the DB copy has none yet). So no
+   ballistic shows through Movement and Firing. Rams, log orders and older turns are kept;
+   `withdrawFireFromJumpingUnits` stays as the resolution-time backstop.
+3. **The Energy Draining Field no longer drains terrain** - a `isTerrain()` skip in
+   `EdfExposure::resolve`, the only site that acts on the unit standing in the field (the hit penalty
+   and the dampened-explosion rules are properties of the HEX).
+4. ⭐ **A legacy exit declaration vanished in the Firing phase** - `TacGamedata::hideSystemFireOrders`
+   strips every current-turn phase-3 order whose weapon has `$ballistic == false`, and `markLegacy()`
+   sets exactly that on every Shadow / Ancient / BSG / Star Wars drive, so the owner's `jumpexit` order
+   was taken for a direct-fire order. `jumpexit` is now exempt. (An ordinary exit survived only because
+   its engine is still `ballistic`.) The enemy's copy was never affected: `republishFormingExits` runs
+   before the strip.
+5. **One blue "Jump Point" per hex.** The exit marker says "Jump Point" in blue for every drive (no
+   more "Jump Point Forming" / "Reinforcements"), the pre-placed wave's marker is blue text too, and
+   `generateExitHexes` and `generateReinforcementHexes` share ONE claim set with the exit sweep first,
+   so a replay no longer stacks two labels on one hex. `formingExits[].phase` is still published but
+   nothing reads it.
+6. **"Jumping to Hyperspace"** tooltip line and ship-window banner now also show for any LEGACY drive set
+   to jump this turn (`shipManager.isJumpingToHyperspace`, via `getJumpingOutEngine` +
+   `isLegacyJumpEngine`), until the ship has gone. No leak: an enemy's power rows are stripped during
+   Initial Orders and public from Movement on.
+
+Harnesses: server 81, client 37 (both extended for all six). Existing harnesses green: reinforcements
+6/7/8/9 (server and client), legacy recharge, Vortex Disruptor (both), Stage 6.
+
+7. ⚠️ **Item 1 was still broken in play (4347), by TWO bugs, neither in the mirror itself.**
+   (a) Client `JumpEngine.getOwningUnit` asked for `gamedata.getShipById` behind a typeof guard - the
+   CLIENT HAS NO SUCH METHOD (only `getShip`; `getShipById` is the server's name) - so it fell back to
+   the craft on every real client, and every flight rule keyed off the owning unit, Stage 13's included,
+   answered "no". The Stage 15 client harness had stubbed `getShipById`, which is what hid it; it now
+   stubs `getShip` only. (b) `Manager::getShipsFromJSON` handed each FIGHTER system its whole power LIST
+   as one `setPower()` entry, in a duplicated block, so a POST-side fighter's `$power` held nested arrays.
+   `DBManager::submitPower` flattened them quietly; `dropFireOfJumpingShip` → `isOverloading` fataled
+   ("property turn on array"). Now one entry per call.
+8. **A legacy-drive opener's manifest** (Ancient drives, Phasing Drive, BSG / Star Wars / Trek drives -
+   they open no jump point, so nothing rides THROUGH them) **holds only fighter flights that fit its
+   hangars, and they arrive docked** (user ruling 2026-09-11).
+   - Client: `shipManager.movement.isLegacyOpener` / `getLegacyRideHost`;
+     `DeploymentDock.planFlightsIntoCarrier` (the real packer, non-mutating, via an `extraReserved` box
+     map); the manifest dialog lists only fighters that fit and greys rows as the hangars fill;
+     `autoPlaceArrivingReinforcements` queues the deploy-start dock instead of placing, and
+     `forcedDeployDock` stops the dock dialog, the DOCK button and un-queue undoing it.
+   - Server: `JumpEngine::isLegacyOpener` / `getLegacyRideHost`; `InitialOrdersGamePhase::legacyBerthFits`
+     (cumulative across the pass, same bay rules as HangarOps) in `persistManifest`; and
+     `validateReinforcementArrival` refuses a map position for such a flight. The Deployment dock is still
+     the authority - a flight that fails it stays unplaced and goes back to hyperspace, nothing spent.
+   - ⚠️ Harness trap: `ReflectionMethod::invoke` passes by VALUE, so a `&$reserved` argument never filled
+     and "20 flights fit in 36 boxes"; use `invokeArgs` with a real reference.
+
+Harnesses after 7-8: server 92, client 49. Replay 134/1 (4347 only, identical on a clean tree).
+
+### 3.17a As built — Stage 15, 2026-09-11 — ⚠️ SUPERSEDED by §3.17b; kept as the record of the first build
+
+Harnesses: `tests/replay/walkersStage15Harness.php` (73) and
+`tests/replay/walkersStage15ClientHarness.js` (34), both **fatal on the pre-edit tree**.
+`checkShipData.php` PASS, 0 new findings (237 baselined), identical to a stashed tree; autoload
+unchanged (no new class). Replay harness 114 passed / 8 failed, **byte-identical with timings
+normalised** to the same run with `source/` stashed. The 8 are the Stage 14 set, and the corpus holds
+no Walker jump-out, so that run proves only that nothing ELSE moved.
+
+**THE MARK (D32).** `JumpEngine::markWalker()` sets a protected `$walkerJump`, called in the six Walker
+hull files straight after construction (Traveler, Wanderer, Waymarker, Pathfinder, Guideship, Scribe),
+exactly as `$scanner->markAdvanced()` is two lines above it. Protected, so no static blueprint grows a
+key; `stripForJson` sends `walkerJump: true` on a Walker drive only; `setSystemDataWindow` swaps the
+failure sentence for the Walker rule. **The Mapmaker flight is NOT marked** - §3.12's ruling is that its
+engine *"works normally"* - but every helper below goes through `getUnitJumpEngines` (and the client's
+walks descend into craft), so marking it later is one line in `MapmakerProbes::populate()`.
+
+**ONE PREDICATE, AND NO STORED STATE.** `Movement::getDeferredJumpOutVortex($ship, $gamedata)` - "this
+unit entered a jump point this turn, legally, carrying a working Walker drive" - mirrored by
+`shipManager.movement.isDeferredJumpOut(ship)`. No note and no flag: the persisted `jumpout` movement
+order IS the record, so the answer is re-derived identically on every load, across the double gamedata
+load and in replay. "Working" is `JumpEngine::getUnitWalkerDrive()`, read off CURRENT state on purpose:
+- a Walker whose drive was lost on an EARLIER turn is not deferred - it leaves at the end of Movement
+  like any engineless ship (§2.5 of the jump-points plan: any unit may use any open vortex);
+- one whose drive is destroyed WHILE it waits stops answering, becomes an ordinary target for the rest
+  of the turn, and has its jump cancelled at the end of Firing - *"cancelled if the drive is completely
+  destroyed as normal"*.
+
+**RULE 1 - THE DEFERRAL.** `Movement::resolveJumpOuts` skips a unit `getUnitWalkerDrive` answers for, so
+it keeps its dummy `end` move, its post-move checks and its Pre-Firing slot. `Movement::resolveDeferredJumpOuts`
+runs at the end of `Firing::fireWeapons` (after `createFailedAttachRamOrders`, before the boost sweep)
+and takes it out through the same `applyJumpOut` - shared with its attached units through the new
+`departWithAttached` - so the records are the same three: the `HyperspaceJump` log order, the `jumped`
+CV note, the structure destroyed as a jump. It runs before `Criticals::setCriticals`, so a departed
+unit rolls no criticals and no jump failure. A cancelled jump writes a `JumpVortex` log line.
+
+**RULE 2 - THE REFUSAL, ON BOTH SIDES OF THE WIRE.** `BaseShip::isTargetableBy($shooter, $turn, $gamedata)`
+gained the third argument; given the board it asks `Movement::isOutOfReach`, which refuses the ENEMY
+only - the Walker's own side may still support it - and treats "no shooter" as refused.
+- **Submit:** `Firing::validateFireOrders` rejects and detaches any order naming an untargetable unit,
+  which also closes §3.10c's owed server half for the Energy Draining Mine orb.
+- **Resolution:** `Firing::withdrawFireAtDepartingUnits`, from `preparePreFiring` and `prepareFiring`. It
+  catches what the submit path cannot see coming - a ballistic declared in Initial Orders, before
+  anyone knew the unit would be in a jump point - and wastes it, exactly as a ballistic at any departed
+  ship is wasted. Gated on a departing set built from one movement scan per ship, empty in virtually
+  every game.
+- **Exempt everywhere:** intercept orders (their `targetid` names a fire order), hex-targeted orders
+  (area effects on the hex stand), log-only orders, and RAMS - §3.17's *"collisions reach whatever is in
+  the hex"*. ⚠️ The client refuses a deliberate ram CLICK like any other targeting, because
+  `weaponManager.targetShip` asks before it knows the weapon; the server lets ram orders through so
+  automatic collisions still resolve.
+- **Client:** `shipManager.isTargetable(ship, shooter)` at all four call sites - weaponManager's tooltip
+  line and `targetShip`, and both tooltip menus (the EW one is also the late-EW window).
+
+**RULE 3 - NO FAILURE ROLL.** `JumpEngine::isJumpFailureImmune($ship, $gamedata)` (protected, answers
+`$walkerJump`) at all three sites - `doHyperspaceJump`, `rollVortexJumpFailure`, `openVortex` (trap 33).
+Each ZEROES its percentage rather than returning, so the log quotes the 0% that applied and every d100
+is still drawn (trap 34; trap 35 for how that was proved). A roll of 1-100 against 0 always holds.
+⚠️ The EDJD must override the hook (§3.18).
+
+⚠️ **FOUR FINDINGS WORTH CARRYING.**
+
+1. **A COMMITTED JUMP-OUT MEANT "GONE" TO FOUR CLIENT SITES** (trap 36): `shouldBeHidden`, the fleet row,
+   `getJumpedDockedFlightIds` and ajaxInterface's docked-LCV walk - plus their SERVER twin,
+   `TacGamedata::hasLeftThroughVortex`, which would have painted a waiting Walker carrier's docked
+   flights `jumpedWithCarrier`. Left alone, the enemy would have stared at an empty hex that was
+   still shooting at them. ⭐ The fix is TWO predicates, not one:
+   `carriesWalkerJumpDrive` (any Walker drive, working or not) for everything PRESENTATIONAL, because
+   the server keeps such a unit on the board after its commit either way - waiting, or cancelled - and
+   `isDeferredJumpOut` (committed + working drive) for TARGETING and the banner. With one predicate, a
+   drive destroyed mid-turn would have hidden a ship the server was keeping.
+2. **THE VORTEX DISRUPTOR WOULD HAVE BEEN DODGED.** `getDeparturesThrough` searched wreckage only
+   (`isDestroyed && hasJumpedToHyperspace`), and a waiting Walker is neither - so the collapse would
+   have skipped it and it would then have left anyway at the end of Firing, immune to the one weapon
+   built to stop a jump. `hasLeftThroughVortex` now counts a deferred departer as inside the rift, and
+   its attached units with it. The Ancient escape roll applies as to anyone.
+3. **TRAP 34's "SAME RANDOM SEQUENCE" IS NOT THIS CODEBASE'S DICE** (trap 35): `Dice::d` is `random_int`.
+   The draw is kept by construction and asserted by the shape of the two method bodies.
+4. **THE TRAP-7 OBJECTION TO A FLAG WAS WRONG** - a flag set after construction reorders nothing - so
+   the user's mark-it-like-a-Scanner instinct was also the cheaper build: no class, no autoload
+   regeneration (which on live needs the maintenance gate), no id shift, and `phpclass` stays
+   `JumpEngine` for every game already in flight.
+
+**Rulings taken without asking, to confirm:** the Mapmaker stays unmarked; an Initial Orders ballistic
+at a departing Walker is wasted; a deliberate ram click at one is refused while server-side ram orders
+pass.
+
+**§3.18's "plain traveler drive" (the ½ power-turn contributor that may not initiate) now means ANY
+Walker drive** - `isWalkerJump()` - since D32 made that the whole population.
+
+---
+
+### 3.18 Extra-Dimensional Jump Drive — abduction — **BUILT 2026-09-12 (Stage 20), as built in §3.18a** (renumbered 2026-09-12 when the Waymarker's two-turn procedure landed as Stage 19)
+
+⚠️ The design below predates §3.17b, which made every Walker drive a LEGACY boost-to-jump drive. Where
+the two disagree - the subclass, power-turns as boost levels, friendly use, the `isJumpFailureImmune`
+override - §3.18a and D53-D56 are what was built.
+
+`class ExtraDimensionalJumpDrive extends JumpEngine`, calling `markWalker()` in its constructor (D32 -
+there is no `TravelerJumpDrive` to extend, and a subclass is right here because the EDJD genuinely adds
+behaviour, not just a flag). Every §3.17 rule applies unchanged,
+plus the ability to drag an enemy unit into hyperspace over several consecutive turns. **This is the
+largest single item left in the plan** and it should land last.
+
+**The state, and why it needs no schema change (D22).** An abduction is a running total of
+*power-turns* against one named target, which must be **consecutive**. That is one
+`IndividualNote` per turn on the EDJD: `notekey = 'EDJD'`, value `<targetId>:<powerTurns>:<cost>`.
+"Consecutive" is then *"is there a note for turn N−1 naming the same target?"* — and a gap needs no
+cleanup at all, because the chain is rebuilt from the notes on every load. Same discipline as the
+Energy Draining Mine's lifetime, and the same reason: nothing to persist, nothing to get wrong on a
+reload.
+
+⚠️ `notekey` and `notekey_human` are `varchar(40)` and an overflow is a fatal that aborts the whole
+submission (trap 4). The wide column is the **value**; keep the keys short.
+
+**The two conditions, checked every turn.**
+
+**1. The target ended its movement in an Energy Draining Field connected to the ship's own.**
+`TacGamedata::$edfHexes` is already keyed `'q,r' => ['teams' => [teamId => true]]`, published to the
+client and rebuilt every load (§2.1) — so "is the target standing in a field of my team" is one
+lookup, and *"extended through ED Mines or other ships"* comes free, because the EDN's corridors and
+filled areas and the EDM orbs' seven-hex discs are already IN that map (Stages 6 and 7).
+
+⚠️ **"Connected" is the half the map cannot answer.** Overlapping fields collapse into one hex entry
+deliberately — that IS the overlap rule — so the map does not record which source covers a hex. Two
+options:
+
+  - **(a)** flood-fill the team's own hexes outward from the EDJD ship's own field and require the
+    target's hex to be in that connected component. Pure post-processing of the published map, no
+    new publication, and it mirrors trivially on the client.
+  - **(b)** record a source id per hex, widening `$edfHexes` and everything that reads it.
+
+**Take (a).** It costs one traversal of a map that already exists, and (b) would change a payload
+five things consume.
+
+**2. More OEW at the target than the target's DEW,** *"including defensive but not offensive ELINT
+support"* — so the comparison is `$shooter->getOEW($target, $turn)` against
+`$target->getDEW($turn) + EW::getSupportedDEW(...) + EW::getBlanketDEW(...)`.
+⚠️ **Not** `+ EW::getSupportedOEW(...)` on the attacker's side; the rules exclude it by name and the
+helper sits two lines away from the ones that are included
+([EW.php:97](source/server/handlers/EW.php#L97)).
+
+**Power-turns.** *"A single power-turn is achieved by applying normal jump engine power (over the
+standard norm) for an entire turn. Two power-turns are achieved by applying normal jump engine power
+for two turns or by applying double power for a single turn."*
+
+⭐ That is boost levels, and **`boostEfficiency` is the EXTRA power one level costs, not a flag**
+(trap 19) — the exact correction Stage 5 had to make to the variable EDF, which had shipped its
+boost for free. Set it from `$powerReq` so double power really is double; one boost level is one
+power-turn per turn, two levels are two, and `maxBoostLevel` is the ceiling.
+
+**The cost.**
+
+| Target | Power-turns required |
+|---|---|
+| Any unit (shuttle up to Enormous) | `ceil(rammingFactor / 50)` |
+| …with advanced armour or better | `ceil(rammingFactor / 10)` |
+| Asteroid / Moon / Planetoid | `10 × radius³` — **out of scope** (Q13, 2026-09-08) |
+
+`BaseShip::getRammingFactor()` ([ShipClasses.php:4324](source/server/model/ships/ShipClasses.php#L4324))
+and `$this->advancedArmor` answer both rows. Docked or otherwise connected units add their ramming
+factors together — `$ship->attached` is the accessor, and the attached-movement mirror rows are all
+type `attached`, so do not try to find them by movement.
+
+⚠️⚠️ **THE RAMMING FACTOR MOVES WHILE THE ABDUCTION RUNS.** `getRammingFactor()` sums structure
+**as of the previous turn** and shrinks as the target is shot, so a target that is being abducted
+*and* shot gets cheaper every turn — the required total would change under the player mid-chain,
+which is unexplainable at the table and unstable in a replay. **Lock the cost at the first
+power-turn** and carry it in the note (that is the third field above). Q12 confirmed 2026-09-08: **locked**.
+
+**Contributors.** *"Multiple vessels may contribute ... as long as at least one has been affecting
+the target for the duration"*, and a plain traveler drive contributes at most **½ a power-turn** for
+double power in a turn and **may not initiate**. So the note records the initiator, and a
+contribution from a non-EDJD drive is worth 0.5 with no increase for more power.
+
+**Completion.** `Movement::applyJumpOut($target, $gamedata, $pubNotes)` — ⭐ it already handles
+hulls, flights and attached units, writes the `'jumped'` note with the combat value snapshotted
+*before* the structure is destroyed, and files the `RammingAttack` log order. *"Removed to
+Hyperspace for all intents and purposes as if it had left the game of its own accord via a jump
+point"* is that function's exact contract. Nothing new.
+
+**Friendly use.** *"Can also be used on friendly ships by allocating 1 EW point to a friendly, and
+automatically jump them to Hyperspace."* One OEW point at a friendly unit, same call, no
+power-turns, no chain.
+
+⚠️⚠️⚠️ **THE ONE PLACE §3.17 AND §3.18 CONTRADICT EACH OTHER.**
+
+> *"If the EDJD is damaged, critical rolls are performed every turn that the engine is active. The
+> EDJD must check for jump engine detonation as any other damaged jump drive would. Note that the
+> check must be performed every turn that the EDJD is active."*
+
+A Traveler drive suffers **no** destruction chance while in use (§3.17 rule 3). An EDJD suffers one
+**every turn** it is active. So `isJumpFailureImmune()` must return **false** while an abduction is
+running, and that is the single most important interaction between the two stages — the hook,
+`JumpEngine::isJumpFailureImmune()`, landed at Stage 15 answering `$walkerJump` - so §3.18's override is
+owed the day the EDJD is built, or the drive that is supposed to be riskiest becomes
+the safest in the game.
+
+**Exit criterion:** an abduction accumulates only while both conditions hold, resets on a gap,
+completes at exactly the locked cost, and removes the target through `applyJumpOut` with a `jumped`
+record rather than a kill; a second EDJD can contribute and a plain traveler drive can contribute
+½ and cannot initiate; a friendly jumps on one EW point; a damaged EDJD rolls for detonation on
+every active turn while the same hull's ordinary jump-out does not; and the whole chain survives a
+mid-abduction reload with no note sweep.
+
+### 3.18a As built — Stage 20, 2026-09-12
+
+**Who.** `JumpEngine::markExtraDimensional()` (= `markWalker()` + protected `$extraDimensional`) on the
+Wanderer, Traveler, Waymarker and Guideship. A flag, not the subclass above, for D32's reasons.
+`canJoinAbduction()` = any Walker drive on a HULL; a Pathfinder/Scribe contributes, a Mapmaker probe
+cannot (no power allocation). The payload carries `extraDimensional` and `abductionMaxPower` (4 on an
+EDJD, 2 on a supporting drive) only when they apply.
+
+**The order (D53).** Type `ballistic`, damageclass `abduction`, firing mode = power level. Client:
+`JumpEngine.canSelectForAbduction` lets `weaponManager.selectWeapon` past `autoFireOnly` and
+`SystemIcon.clickSystem` past its not-ballistic Initial Orders clause; the drive sets
+`hasSpecialTargeting` PER INSTANCE (keyed off `abductionMaxPower`), so `targetShip` diverts to
+`doSpecialTargeting`, which refuses friendly and terrain, replaces a previous abduction, and starts an
+EDJD at level 1 (a supporting drive at 2). `JumpEngineMenu` gained an Abduction panel: target, the
+−/+ level, what it costs, the published cost or progress, and CANCEL. Server:
+`Firing::getVortexDeclarationBlock` takes an `abduction` branch FIRST (the legacy refusal below it
+would drop every Walker order) → `EdjdAbduction::getDeclarationBlock`: Walker hull drive, ballistic,
+unit on board, drive intact/online/charged, enemy target on the board and targetable, level 1-4 (EDJD)
+or exactly 2 (supporting), one abduction per unit per turn. The two CONDITIONS are not judged at submit.
+
+**Power.** `JumpEngine.getAbductionPowerDraw` = level × `powerReq`, subtracted inside the online branch
+of `shipManager.power.getReactorPower`, so the commit gate refuses a deficit. Walker reactors read 0
+surplus, so paying means shutting weapons, fields or detectors down. Advisory, as D46.
+
+**Resolution** - `EdjdAbduction::resolve`, at the end of `Firing::fireWeapons`, before the boost-jump
+sweep, behind `TacGamedata::$abductionCapable`. Per target: every declaration on a WORKING drive (ship
+on board, drive intact this turn, online, unit not jumping) contributes - 2 halves per level for an
+EDJD, 1 half for a supporting drive. An EDJD QUALIFIES when (1) `isInConnectedField` - flood fill over
+the team's `edfHexes`, SEEDED from the hexes `edfSources` credits to that ship (option (a); a Walker
+whose own field is down is never connected) - and (2) `getOEW > getDEW + getSupportedDEW +
+getBlanketDEW`. The chain continues if a prior anchor qualifies again (D54), otherwise restarts when
+anything qualifies, otherwise nothing happens and the attempt is logged with its reason. At
+`halves >= 2 × cost` the target leaves through `Movement::applyJumpOut` (made public), attached units
+with it.
+
+**State (D22).** One `EDJD` note per working declaration per turn:
+`<targetId>:<halves>:<cost>:<since>:<anchor>`; a no-hold attempt writes `<targetId>:0:0:0:0`, which is
+also what makes a second run of the same turn a no-op. `JumpEngine::onIndividualNotesLoaded` claims
+them before the `jumped` fall-through and sets `TacGamedata::$abductionPresent` (reset in
+`DBManager::getSystemDataForShips`). `EdjdAbduction::getChains` rebuilds total, locked cost, start turn
+and the anchor intersection.
+
+**Cost.** `ceil(RF / 50)`, `/ 10` for advanced armour, plus the RF of ATTACHED units only - **D57**:
+nothing a target carries inside it counts; a flight is its live craft × per-craft RF. ⚠️ `getRammingFactor`
+sums the MAX structure of sections standing as of last turn, so it moves only when a section is lost -
+§3.18's "shrinks as it is shot" overstated it; the lock stays regardless.
+
+**Detonation (D56).** `JumpEngine::rollAbductionJumpFailure` from `criticalPhaseEffects`, on an EDJD
+with a declaration on a working drive: % boxes lost, halved for factionAge 3+, `JumpFailure` path.
+`isJumpFailureImmune` is not overridden.
+
+**Publication.** `TacGamedata::$abductions = {costs, chains}` (objects, never `[]`), copied by name in
+`gamedata.js`. `costs` is exactly the figure a chain would lock that turn (D57 removed the bay contents
+that had made it a preview).
+`hideSystemFireOrders` exempts `abduction` from the Firing-phase strip (a legacy drive is not
+ballistic - the `jumpexit` shape again). The map marker is purple "Abduction"; the target's tooltip
+shows "Being abducted: x/y power-turns"; the order is dropped from the INCOMING list; the per-turn log
+row is `Abduction` in `doShortLogText`; `JumpEngine.isSpentLocked` dims the drive and hides the
+remove button outside Initial Orders.
+
+**Verification.** `tests/replay/walkersStage20Harness.php` **89/0** and
+`walkersStage20ClientHarness.js` **57/0**, each fatal on its stashed pre-stage tree. The server
+harness drives the real `Firing::validateFireOrders`, the real resolve, a reload from the stored notes
+alone, and the detonation roll statistically (287/600 at a 45% chance, 530/600 with the halving off,
+0 on every control). `checkShipData.php` PASS, 0 new against 237; autoload +1 line (`EdjdAbduction`).
+Replay 116 passed / 16 failed against 119 / 13 on a stashed tree: every added line is one of three
+ADDITIVE keys (`abductions`, `extraDimensional`, `abductionMaxPower`) on Walker games, no movement,
+to-hit, damage or masking drift - re-record to accept.
+
+**Review revisions (user, 2026-09-13) - D57-D60.** The three observations the first build left open, and
+the cost, were all ruled on the next day: bay contents out of the cost (D57); deactivating the drive
+cancels the order on the client, and a destroyed or offline drive's declaration is logged as
+CANCELLED at resolution (D58); no line of sight (D59); a ship-window banner (D60). Server harness
+**96/0**, client **65/0** - each new client check proved by deleting its one edit and watching it fail.
+Replay unchanged: 116/16, the same three additive keys.
+
+**Play-test refinements (game 4352, user, 2026-09-13).** Six items, all UI except D61:
+(1) the CANCEL button sizes to its label (`$wide`) instead of the 24px square of a −/+ step; (2) the
+drive's icon lights ORANGE in Initial Orders while it holds an abduction, like a jump point
+declaration - `SystemIcon.isFiring` asks `getAbductionOrder` because `hasFiringOrder` cannot see the
+order on a legacy drive (trap 58 again); (3) the Abduction panel uses the Hyach purple palette, as its
+own components in `JumpEngineMenu.js` rather than overrides of `activationMenu.js`'s blue ones; (4) the
+panel shares the Power Settings panel's width - it was a fixed 190px, and is now `width: 100%` +
+`min-width: 190px` + `contain: inline-size`, so it asks the shrink-to-fit tooltip for 190px, adds
+nothing from its own text, and stretches to whatever the menu is (the vortex Maintain panel gets the
+same fix); (5) **D61**, fighter flights refused on both sides; (6) the system info tooltip lists
+"Abduction target: <name>" off the order itself (`SystemInfo.js`). Server harness **99/0**, client
+**66/0** - the flight checks fail with the block removed (97/2, 65/1); the menu and tooltip rendered to
+static markup, with the no-order case showing no line. No serialised field, so no replay run.
+**Second pass, same day:** CANCEL left the purple marker and ballistic line on the map, because
+`PhaseStrategy.onSystemDataChanged` (and `onShipTargeted`) only redraw the ballistic layer for a
+`ballistic` / `hextarget` / `canSplitShots` system - a Walker drive is none of them (trap 58 once more);
+both gates now also admit `abductionMaxPower`. And **D62**, a held abduction continues by itself.
+Server harness **104/0**, client **81/0**, each new check failing with its line undone; replay
+116/16, unchanged, `abductionLastHold` in no diff.
+**Third pass, same day - D63, the cooldown.** ⚠️ Two client gates had to learn the continuation
+exemption as well as `canSelectForAbduction`: `weaponManager.selectWeapon` and `weaponManager.targetShip`
+each test `isLoaded` themselves, so a recharging drive could be offered by the icon and then refused
+silently - the harness's `target()` helper sets the selection by hand and missed the selectWeapon half
+until a check through the real `selectWeapon` was added. Server **125/0**, client **92/0**; each of the
+seven edits undone on its own turns at least one check red; replay output byte-identical with timings
+stripped.
+**Fourth pass, same day - D64, the first turn only takes hold.** Seventeen server and eight client
+checks encoded power on the declaration turn and were rewritten to the new rule (completion now takes
+at least two turns; the anchor-swap restart lands at 0 halves). Server **135/0**, client **103/0**; each
+of the seven D64 edits undone on its own turns at least one check red; the menu rendered to static markup
+in all three states (EDJD targeting: no Power row + targeting note; EDJD next turn: stepper; Scribe
+joining: "Double power"); replay unchanged. `factions-tiers.php` rewritten for the targeting turn, the
+supporting-drive rule and the D63 cooldown.
+**Fifth pass, same day - D65, conditions for taking hold only.** Eight server checks encoded a per-turn
+condition test and were rewritten: the mid-chain collapse is now "the holding EDJD stops and a newcomer
+fails the conditions", the anchor swap now needs the old anchor to STOP, and two new checks prove a
+mid-chain target out of every field with OEW 1 < DEW 5 still counts (with a probe showing
+`getConditionBlock` would refuse that exact position, so the check is not vacuous). Server **138/0**, client
+**104/0**; re-checking the conditions on continuing turns turns four checks red; replay unchanged.
+`factions-tiers.php` updated.
+
 ---
 
 ## 4. Stages & exit criteria
@@ -2558,7 +5491,18 @@ Ordered so that each stage is independently shippable and the risky shared-path 
 | **7** ✅ | Energy Draining Net — **DONE 2026-09-05; play-test fix + live preview the same day** | **Play-test revision (game 4338):** the fill treated any *connected* group of 3+ Nets as a closed area, so three Waymarkers in a **chain** (#1–#2 at 2 hexes, #2–#3 at 3, #1–#3 at 5) filled hexes beside the chain that nothing enclosed — the user reported (1,0). *"Form a closed area"* needs a **cycle**, and the fix is the group's **2-core**: iteratively drop every Net with fewer than two links. A chain erases itself, a ring survives whole, a ring with a trailer keeps the ring. **Live preview added the same day:** deployment and movement now recompute the field client-side from PLOTTED positions (`model/EdfNetLinks.js`, a ported resolver) so the corridors and the filled area form as the ship is dragged; **advisory only** — nothing but the overlay reads it. Proven by a **12,000-board differential** against the PHP across three seeds, hex, team and attribution, zero mismatches, with the generator taught to emit rings deliberately after the coverage guard caught that 13,000 random boards had produced a single cap refusal between them. 68 server checks, 16 preview checks and 7 clustering checks green. **As first built:** replay harness 128 passed / 1 failed, byte-identical to the same run on a stashed tree (game 4325, the known clean-tree failure), so zero drift. `checkShipData.php`: 0 new errors. Pairwise links at 1/2/3 hexes and not at 4; the closed-area fill capped at `2N−1` with the corridors isolated out first so the refusal is provable as the *empty set* rather than "fewer hexes"; three collinear Nets still link. ⭐⭐ **Two departures from §3.7, both corrections.** Linking runs in `setEdfHexes()`, not in the §2.2 resolver — the section predates Stage 4's map, and a corridor computed at the Critical Hit step would have drained units while being invisible to the targeting penalty, the client's mirror and the overlay. And `HexZone::line()` is the wrong tool: it answers ONE line including both endpoints, while the rule hands the player a CHOICE between corridors, so all shortest paths are enumerated instead. ⚠️⚠️ Three findings worth carrying: **`Debug::log` cannot be used anywhere `setEdfHexes()` reaches** — it dumps `$_REQUEST` and `$_SESSION` to disk per call, and a fleet parked in an over-cap formation is a persistent state polled every couple of seconds, so the refusal is an in-memory array instead; **the map overlay must be split into connected clusters** because `HexRegion.buildRegionFromHexes` sizes its sweep from the farthest hex, and two lone Nets at opposite corners of the board would sweep 14,641 hexes to draw two; and **an over-cap area needs more Nets, not more spread** — three Nets at maximum spread have corridors that swallow their own interior, leaving 3 fill hexes against a cap of 5, so the refusal test had to go to a five-Net arc. ⚠️⚠️ And one bug caught by a smoke test rather than by any of the 51 checks that preceded it: **`powerReq` is a BLUEPRINT field that rides the per-class static bundle, not the poll payload** — so the crit-escalated requirement never reached the client until `stripForJson()` republished it per instance. Applies to any system whose criticals move a blueprint number. |
 | **8** ✅ | Wide-Beam enhancements — **DONE 2026-09-06; reworked twice the same day** | 143 server checks and 84 client checks green, plus a **2,578-hull corpus differential** on the offer tuples in which exactly TWO lines changed (Traveler gains one `SYS_WBLA` + one `SYS_WBMLA`; Waymarker gains one `SYS_WBMLA` per Medium array), and a replay-harness run of 127 passed / 1 failed that is byte-identical to the same run on a stashed tree (game 4325, the known clean-tree failure). `checkShipData.php` PASS, with the same 3 pre-existing warnings on both trees. Two registry entries at 300 / 200, `ages => array(3)`, `limit` 1; the per-die floor; the 50% / 25% collateral; the one-turn cooldown. ⭐⭐ **Reworked TWICE on the user's rulings.** It shipped as one extra firing mode; the user pointed out that the rules' *"in all modes"* means *whatever the discharge count*, so it became **four** modes (Combined / Single × normal / wide); then the four-entry selector was judged too clunky — *"mechanically that all seems to work perfectly, however the UI is a little bit clunky"* — and it is now **two firing modes plus a per-turn "Wide Beam" toggle** in the array's `<SystemActivation>` box, which is what the rules describe anyway (*"the lightning array may be configured to fire a wide beam"*). ⚠️⚠️ **Six findings worth carrying**, all in §3.3: **the Fire phase has never run the generic `generateIndividualNotes` sweep and must not start** — 34 of the ~80 overrides carry no phase guard at all — so the toggle's write is a new narrow `ShipSystem::saveFirePhaseDeclaration()` hook that does nothing by default; **that write cannot be gated on the refit**, because a POST-side ship is rebuilt without enhancements, so it writes unconditionally and the refit is re-checked at read time; **both toggle states are written and the highest note id wins**, since the load query cannot promise an order within a phase and writing only on arm strands a re-commit on a stale 1; the four-mode detour exposed a REAL bug — `getCombinableOrder` matched *"not Single Shots"* rather than *"this mode"*, so with two fusing modes a wide click silently converted a standing ordinary shot, cooldown and all, and the equality fix is kept; the cooldown had to zero **`overloadturns` as well as `turnsloaded`**, because `calculateLoading` increments `overloadturns` at every turn advance for EVERY weapon and `weaponManager.isLoaded` is an OR of the two; and **nothing on the server refuses an offensive order from an unloaded weapon at all**, so the cooldown needed a server half of its own. Plus two smaller ones: **`MediumLightningArray extends LightningArray`**, so the full array's refit needs an explicit subclass exclusion or every Medium is offered both at once on one mount; and **50% collateral must be computed from the damage**, never by doubling the 25% figure. |
 | **9** ✅ | Sensor Charge Transceiver — **DONE 2026-09-06** | 72 checks green in one harness covering both ends, plus a replay run of 127 passed / 1 failed that is **identical to the same run on a stashed clean tree** (game 4325, the known clean-tree failure) with timings normalised, and `checkShipData.php` PASS with the same 3 pre-existing warnings. The harness proves four things nothing else would catch: a **1,080-case geometry differential** on the three new `mathlib` helpers, PHP against the JS mirror, with 495 of the pairs on a hex axis and turn costs 0–3 all present; the resolver over a **12-course corpus** written as (bearing, length) legs rather than hexes; `beforeFiringOrderResolution` end to end against a real `TacGamedata` with a stand-in DBManager — every shot claiming its own database id, the informational row at `rolled 1 / shots 0`, the receiver's `DamageEntry` filed against that row and visible to `isDamagedOnTurn`; and the client's `measureLeg` accepting **exactly** what the server's resolver accepts, over the same corpus. ⭐ Every group asserts its own non-vacuity. ⚠️⚠️ **The test found one real bug that no amount of reading would have**: `calculateLoading` asked `getChargeOutcome` AFTER `parent::calculateLoading`, which calls `setLoading()` and writes `turnsloaded` back to 0 — so `isReadyToFire()` read 0, every charge looked as though an unloaded transceiver had sent it, and the fast recharge could never fire. The outcome is now taken before the parent runs. ⚠️ The icon is a **placeholder** (a copy of `sensorSpike.png`) until real art lands. **Play-test revisions 2026-09-06 (§3.9):** the reachable fan is HEXES rather than six lines; the course carries direction chevrons and the waypoint orders are suppressed from the ballistic layer (they were drawing a red hex and a white arrow each); green markers at the manoeuvre points, the head and any hex where a unit was named; a two-row spent-of-total budget label at the head while the weapon is selected; and the **choice between units sharing a hex is now the player's**, carried as `SCT|w:<n>|t:<id>` from a "Target Ship" tooltip button, advisory-only at resolution, with a new opt-in `Weapon::$hideNotesFromEnemies` so `hidetarget` blanks the token along with the x/y it already blanked. 68 client + 47 server checks green in a throwaway harness covering both ends, and a replay-harness run of 127 passed / 1 failed that is **byte-identical to the same run on a stashed clean tree** (game 4325, the known clean-tree failure) with timings normalised; `checkShipData.php` 0 new errors, the same 3 pre-existing warnings. **Play-test revisions 2026-09-07 (§3.9), client-only:** a refused hex click is now **silent** — `isHexOnFiringArc` owns both geometry refusals (off-axis, and an off-arc launch), measured from the **head** rather than the origin, and `measureLeg` keeps them with `reason` null so a replayed course still truncates identically; and **contact with a receiver finishes the course**, unselecting the weapon and zeroing its shots read-out through one shared `isCourseFinished` predicate. 49 checks green in a throwaway harness, which **fails 11 of them on the pre-edit bodies** — all 11 exactly the changed behaviours, with the "ran out of hexes" branch passing both ways. No server change, no serialised field, so no replay-harness run. |
-| **10** | EW Detector — Stage A then Stage B (§3.8) | Allowance correct at 1/4/5/8/9 detectors; phase-2 EW write is additive and budget-clamped; full `masking` + `snapshot` harness pass. |
+| **10A** ✅ | EW Detector, the allowance (§3.8) — **DONE 2026-09-09** | 77 server checks and 90 client checks green in a throwaway harness covering both ends, incl. a **41-count ladder differential** in which the JS reads back the table the PHP wrote (so both are compared over the same inputs, with the run asserting its own non-vacuity), the stage's 1/4/5/8/9 tuple on both sides, inclusive-at-exactly-range geometry, per-system ranges, and the ladder exercised **end to end through the real sweep** at 13 counts. `checkShipData.php` PASS, 0 new findings against the same 237 baseline; replay harness 123 passed / 4 failed, **byte-identical** to the same run on a tree with the three server files stashed (4325 is the known clean-tree failure; 3676 / 4249 / 4297 are pre-existing, moved by the *Elite crew* and *Kelly Phaser* commits and never re-recorded). ⭐⭐ **The one EW sweep in the game that is MIRRORED on the client**, because "in range both before and after movement" asks about a plotted, uncommitted position the server cannot have. ⭐ The ladder is counted in **quarters, as integers**, and the rounding rule collapses to `(quarters + 1) intdiv 4`. ⚠️ The allowance is **own-side only** in the UI, and per SHIP rather than a pooled fleet budget — see §3.8 for the reading. |
+| **10B** ✅ | EW Detector, late allocation (§3.8) — **DONE 2026-09-10** | **210 checks green across three throwaway harnesses** — 50 server, 135 client, 25 tooltip-menu — covering the pool and its two sources, the clamp, the phase window, the diff in all six refusal modes, `submitLateEw` end to end against a recording DBManager (budget clamp, all-or-nothing Disruption, idempotence, wrong phase, another player's ship, and the no-detector fast path proving it never loads gamedata at all), the derived-bookkeeping invariant, both gates with Initial Orders asserted unchanged, the real `AssignOEW`/`assignEW`/`deassignEW`/`removeEW` paths end to end, and the menu split proved lossless **by object identity** with the null-selection case asserted. `checkShipData.php` PASS, 0 new findings; replay harness 119 passed / 4 failed, **byte-identical with timings normalised** to the same run with the six server files stashed — zero drift on all five checks, `masking` and `snapshot` included. ⭐⭐ **User ruling R1 deleted the hard half of this stage**: "end of the movement segment" is the start of Pre-Firing (or of Firing), so there is nothing to DECLARE — the allowance is simply recomputed at the post-movement hex and a ship that drifted out of range finds it is zero. ⭐⭐ **The bookkeeping is one derived number and two bounds** — `spent = pool − getEWLeft()`, upper bound the budget, lower bound what stops an Initial Orders allocation being taken back — no snapshot, no per-entry marking. ⭐ **User ruling R2**: the point comes out of the unspent DEW pool alone, so the allowance is `min(ladder, pool)` and a ship that spent everything on non-DEW types saves nothing. ⚠️ The write is **additive by the shape of the diff**, raises existing rows rather than duplicating them (`getEWbyType` reads the first, `getOEW` sums), and is idempotent. ⚠️ The EW buttons are **reused verbatim** from the Initial Orders menu behind ONE menu-level gate. ⚠️ Masking verdict and its one residual (a deliberate mid-phase page reload) recorded in §3.8.
+| **11** ✅ | Housekeeping (§3.10) — 50% deployment bracket · SCT green name removed · Energy Draining Mine untargetable · the faction entry in `factions-tiers.php` · the Wanderer starts fully charged — **DONE 2026-09-10** | All five, each proved on its own: **54 checks green** across four throwaway harnesses (14 bracket, 15 SCT marker, 11 client + 14 server untargetable) plus the seeding demonstrated on real hulls both ways. `checkShipData.php` unchanged — 238 findings, 237 baselined, and the **1 new error is pre-existing on a stashed tree** (`Wanderer :: location 1, roll 9` names `"EW Detector"` where the class is `"Electronic Warfare Detector"`, so the system can never be hit; it came in with the hull and the fix is one string in [Wanderer.php:94](source/server/model/ships/walkers/Wanderer.php#L94)). Replay harness **119 passed / 4 failed**, exactly the documented clean-tree failures (3676, 4249, 4297, 4325), byte-identical to a stashed-tree run. ⚠️⚠️ **And the harness caught a real regression that every unit test of the feature missed**: §3.10e's hull list as a `public static` on `Weapon` broke every missile-armed ship in the game, because `MissileRack::stripForJson` walks its ammo with `ReflectionObject::getProperties(IS_PUBLIC)` — which lists public STATICS — and then reads each name as `$missile->$key`. It is a `const` now; see the head of §3.10. ⭐ Two smaller findings: **the fleet checker no longer exists twice** (the second copy is `checkChoices_LEGACY`, inside a block comment since the Item-5 simplification, and a test asserts it did not grow a 50% bracket), and **the untargetable flag is a ship PROPERTY declared only on the orb**, so it rides the static blueprint verbatim and the server method and client mirror read one fact. |
+| **12** ✅ | Mapmaker Electronic Warfare (§3.11, as built §3.11a; saved EW extended to Walker flights 2026-09-10) | 3 points per flight across OEW and DEW and no more; an ordinary flight's mine-detection allowance byte-identical before and after; hit chance agreeing server↔client over an OEW 0–3 × DEW 0–6 differential; enemy allocation invisible during Initial Orders; flight-window EW block rendering without breaking the scale-to-fit budget or the resize grip. |
+| **13** ✅ | Mapmaker Jump Engine (§3.12) + the Fleet Checker hangar exemption — **DONE 2026-09-10** | **94 checks green** across two throwaway harnesses — 59 server, 35 client — covering the 10-turn recharge read from `$delay`, the one-engine-per-flight accessor, the charge mirrored onto all six craft, the declaration normalised at the wire and the second one refused *with the existing reason string*, `hasVortexDeclaration` reaching a flight at all, and the blueprint scan; every group asserts its own non-vacuity and both harnesses **fatal on the pre-edit tree**. `checkShipData.php` PASS, 0 new findings against the same 237 baseline; replay harness 115 passed / 8 failed, **byte-identical with timings normalised** to the same run with `source/` stashed. ⭐⭐ **THE PLAN WAS RIGHT THAT "ONE JUMP POINT PER FLIGHT" NEEDED NO NEW RULE AND WRONG ABOUT WHY IT WORKED**: `Firing::getVortexDeclarationBlock`'s one-vortex-per-**shooter** loop does catch it — but only once both orders name the SAME engine, so the rule that makes D13 true is a two-line **weaponid normalisation** in `validateVortexDeclaration`, not the loop itself. ⭐⭐ **AND THE REAL WORK WAS NOT THE CLIENT** (§3.12 called it "the whole stage"): five server sweeps walked `$ship->systems` looking for a `JumpEngine` and found NOTHING on a flight, because a flight's systems are *craft*. They all go through the new `JumpEngine::getUnitJumpEngines()` now. ⚠️ Three findings worth carrying, all in §3.12. |
+| **14** ✅ | `MedLightningArrayFtr` (§3.13, as built §3.13a, play-test fixes §3.13b, EW rules corrected §3.13c) + the Mapmaker hangar rule (D31) — **COMPLETE 2026-09-11** (built 2026-09-10) | ⚠️⚠️ **2026-09-11: the Mapmaker EW rules were CORRECTED from the rulebook text (§3.13c)** — the Array uses plain ship EW rules (OEW added, target DEW/BDEW/SDEW as the ordinary to-hit penalty, no OB, no OEW = doubled range penalty as usual) and the Pulsar gets OB + max(0, OEW − defensive EW). That **reverted** the §3.13b no-lock exemption described below. Re-proved with the Stage 12 client grid (90/0), the Stage 14 client (62/0) and server (99/0) harnesses, and the game-4347 probe (15/0); replay 114 / 8, unchanged, though no Mapmaker game is in the corpus. | **215 checks green** across four throwaway harnesses — 99 server, 62 client, 43 fleet-check and an 11-check live-game probe — covering 3 and 6 combining while 1/2/4/5 go technical, two 3-groups at two targets, buckets split by target / called id / mode, a damaged probe excluded on `getRemainingHealth() >= maxhealth` (and asserted NOT destroyed, so the obvious shortcut is proved wrong), an uncharged array refused server-side, D16 resolved in both directions with the loser named in the log and proved to ignore intercept orders, the turn-1 full charge proved as an ABSENT override, `edfSuppressesCollateral` proved inherited (and `LightningArray`'s proved overridden, which is why this class must not extend it), and the fleet check driven through the REAL `gamelobby.js` slices for Mapmakers, Stilettos and Fighter Squadrons alike. Every harness fails on a stashed tree, and each play-test fix fails in isolation when its own line is reverted. `checkShipData.php` PASS, 0 new findings against the same 237 baseline; replay harness 114 passed / 8 failed, **byte-identical with timings normalised** to the same run with `source/` stashed — including after the `weapon.php` no-lock change, which every weapon in the game runs through. ⭐ **THE STATS NEEDED NO CLIENT MIRROR** — both modes differ only in fire control, range penalty and damage span, and all three already travel as the engine's generic per-mode arrays, so the client half is the group rule and nothing else. ⭐⭐ **THE REAL WORK WAS D16, NOT THE COMBINING**: the combining is `HyperplasmaMatrix`'s pattern, but every exclusivity mechanism in the tree is per-CRAFT (`checkConflictingFireOrder` narrows to `getFighterBySystem` before it looks), so flight-wide exclusivity needed a new predicate on both sheets keyed on a new `flightExclusiveGroup` string. ⚠️⚠️ **AND THE HANGAR FIX FOUND THAT THE TWO HALVES OF THE RULE HAD NEVER MET**: the four Walker hulls declare `"Mapmaker Probes"` capacity while the flight left `hangarRequired` at `'fighters'` and classified itself as an ordinary MEDIUM fighter, so nothing could ever fill it. ⚠️⚠️ **PLAY TEST 4347 THEN FOUND TWO MORE THAT NO UNIT TEST COULD**: an undamaged craft has NO `damage` key at all (ShipCompactor strips empty arrays) so `getRemainingHealth` threw and the weapon could not be targeted, and a `useFlightEW` shot was taking a no-lock penalty D12 forbids — see §3.13b. ⚠️ Four findings worth carrying in §3.13a, three more in §3.13b. |
+| **15** ✅ | Walker jump drive (§3.17, as built §3.17a) — **DONE 2026-09-11**, promoted from Stage 18 the same day; a `markWalker()` flag on every Walker hull (D32) | **107 checks green** across two harnesses — 73 server, 34 client — both fatal on the pre-edit tree: the mark on all six hulls and on nothing else; the deferral at the end of Movement, against an ordinary hull on the identical legal path which still leaves; the refusal at submit and at resolution (which also withdraws an Initial Orders ballistic), with the identical orders accepted at a Walker that is not leaving, and all four client call sites passing the shooter; departure at the end of Firing with its attached unit, and a cancellation when the drive dies while it waits; zero failures in 300 rolls from an engine that fails at once with the flag off; and the Vortex Disruptor catching the waiting Walker. `checkShipData.php` PASS, 0 new against 237; autoload unchanged; replay 114 / 8 **byte-identical with timings normalised** to a stashed tree. ⚠️ Four findings in §3.17a, and traps 35–36. |
+| **16** ✅ | The Traveler's Docking Bay (§3.14, as built §3.14b) — **DONE 2026-09-11**; the Waymarker's two-turn procedure (§3.14a) DEFERRED (D35) | **292 checks green after the review revisions (D37–D40)** - 131 server, 118 client, and the Stage 14 fleet-check harness's 43 as a regression - with both new harnesses failing on the pre-stage tree; `checkShipData.php` PASS, 0 new against 237; a **2,727-hull differential** in which exactly five facts moved (the four dockable hulls' box cost, the Traveler's aft system class) and no capacity did; replay corpus 133/1 on a clean tree, and with the stage the ten Traveler games differ ONLY by four additive keys. ⚠️ Five traps, 37–41. Criterion as written: 24 Mapmakers **or** 6 Scribes **or** 2 Pathfinders, with the 25th/7th/3rd refused and a mixed load filling to exactly 24 boxes; one craft type per turn; a docked Scribe surviving a reload with damage, power and notes intact; the aft hit-chart row still finding the renamed system (`checkShipData.php` clean); no other hull's hangar accounting moving in the corpus differential; a Scribe, Pathfinder or Waymarker queued for a deployment-phase dock placeable ON the Traveler's hex while two ordinary hulls still refuse to share one. **If §3.14a lands:** a Waymarker rides `attached` for exactly one turn each way with its 24 boxes reserved from declaration. |
+| **17** ✅ | Traveler Self Repair serves docked units (§3.15, as built §3.15a) — **DONE 2026-09-12**, two play-test follow-ups the same day | **127 checks green** — 70 server, 57 client — both harnesses fatal on a stashed pre-stage tree; `checkShipData.php` PASS, 0 new against 237. Criterion as written, all met: a damaged docked Scribe repaired out of the Traveler's pool (and its Thruster, which the Traveler may not touch, out of its own); every healing row filed against the DOCKED ship's id and marked updated, so it persists; the Traveler's own queue order unchanged and a priority of 99 on a docked row still beaten by an own row of 4; a docked Self Repair repaired and every other Self Repair in the game still refused. ⭐ Three additions from the user's notes the same day: **D42** one list, the docked rows marked by their ship name in cyan - first built with a TIER pinning them below every own row, which **D45 withdrew the same day**, so priority alone now decides and the player may put a docked hull first, **D43** a docked unit's OWN Self Repair keeps running — which needs driving, because `removed` reads as destroyed and `Criticals::setCriticals` never reaches it — and **D44** reinforcement fleet-list rows go cobalt so they cannot be read as docked. ⭐ Play-test (game 4350) then found the other half of D43: **a docked ship's whole ship window was inert**, because `SystemIcon.clickSystem`'s guard is `shipManager.isDestroyed(ship)` and that folds `removed` in — carved out with the existing `isDestroyedByDamage` predicate and diverted straight to the info menu, which is also §3.16(a)'s prerequisite arriving a stage early; and left-click on a stowed ship's fleet row now scrolls to its **carrier** rather than opening its window (right-click still does that). ⚠️ Replay corpus 135/0 clean vs 121/14 with the stage, **every diff the same single additive key** `servicesDockedUnits: added (true)` and nothing else — re-record to accept. |
+| **18** ✅ | Docked power sharing (§3.16, as built §3.16a, opponent view §3.16b) — **DONE 2026-09-12**, one play-test follow-up the same day | **134 checks green** — 67 server-free over the REAL `power.js`, 48 in a React harness, 19 in a server harness over the real `Traveler` that bundles the whole `reactJs` tree, evaluates it at module scope, renders `SystemInfo` to static markup and drives `SystemPowerSettings`'s own handlers — each fatal on the tree it was written against (21/37, 23/9, 14/5); `checkShipData.php` PASS, 0 new against 237; a **2,727-hull / 58,548-fact differential** in which exactly TWO lines moved, both `Traveler|sys11` (the flag and one tooltip sentence); replay 121/13 with every diff one of two ADDITIVE keys and no behavioural drift; autoload unchanged. Criterion as written, all met: a docked Scribe's power manageable during Initial Orders and persisted through the commit (the server half needed nothing — no `removed` filter in `InitialOrdersGamePhase::process`, `construcGamedata` or `submitPower`); four points of docked surplus giving the Traveler one and three giving none; flights contributing nothing; the figure recomputing live (on the existing `SystemDataChanged` → `shipWindowManager.update()`, no new event); and the decision written down as **D46 — client-computed and ADVISORY**. ⭐ Play-test follow-up: the OPPONENT saw the Traveler's balance WITHOUT the grant, because the grant is computed per viewer and `shipsDocked` is masked under the private-logistics gate — fixed by disclosing the bay's ship IDS on a separate key (**D47**, §3.16b), so both clients run one function and cannot drift. ⚠️ Three traps, 47–49, plus 50 on the masked-input fact; one adjacent defect flagged but deliberately not fixed; and power management for a unit still in HYPERSPACE left unbuilt but mapped. |
+| **19** ✅ | The Waymarker's two-turn procedure, the aft-hit redirect, the hangar-manoeuvre label and what a stowed unit projects (§3.14a / §3.14c / §3.14d, as built §3.14e) — **DONE 2026-09-12** | **240 checks green after the play-test fixes (§3.14f)** — 142 server (group 10 drives two whole turns through the real `criticalPhaseEffects`), 98 client over the real `hangarShared.js` / `ships.js` / `ew.js` / `fleetList.js` / `PhaseStrategy.js` under `vm` — both fatal on the pre-stage tree; `checkShipData.php` PASS, 0 new against 237; autoload and **statics both unchanged** (the class list is a const and `$stowedEdfRadius` is protected, so neither rides a blueprint); **replay 120 passed / 13 failed, the SAME 13 games and the same count as the pre-stage tree**, so the stage adds no behavioural drift and no new failing game — its only lines in the diff are `deferredShipClasses: removed` / `twoTurnShipClasses: added` on the ten Traveler games. Criterion as written (§3.14a), all met: a Waymarker rides `attached` for exactly one turn each way; its boxes are reserved from declaration through the single `dockedShipBoxes` choke point; it moves with the Traveler while attached, through the existing mirror rather than a re-implementation. ⭐ Four rulings the same day — **D48** least damaged = most boxes remaining, **D49** can be shot / cannot shoot, **D50** the banner goes on the unit and a new flight gets none, **D51** left-click scrolls on ALL docked units, which withdraws a Stage 17 exception. ⭐ Play-test (game 4351) then found two things the same day (§3.14f): ⚠️⚠️ **the movement mirror had never run for a rider**, because `MovementGamePhase::process` counted PRESENCE in the payload rather than submitted movement rows and the client sends every own ship with an empty list - invisible until now because a boarding pod and its host are never on the same side; EW is suspended on a rider both ways, with **D52** ruling that it KEEPS its DEW; and the FIRING MODE SELECTOR was the one weapon control in the menu that never asks whether a fire order exists, so it alone survived every other guard - withdrawn now along with the intercept pair it parents, and `automateIntercept` matched on the server. The faction page (`factions-tiers.php`) is updated and the Waymarker is struck from its not-implemented list. ⚠️ Six traps, 51–56. |
+| **20** ✅ | Extra-Dimensional Jump Drive (§3.18, as built §3.18a) — **BUILT 2026-09-12**, awaiting play test | **146 checks green** — 89 server, 57 client — each fatal on its stashed pre-stage tree; `checkShipData.php` PASS, 0 new against 237; autoload +1 (`EdjdAbduction`); replay 116/16 vs 119/13 clean, every added line one of three additive keys and no behavioural drift. Criterion as written: power-turns accumulate only while an initiating EDJD meets both conditions and restart after a gap; the cost is locked on the first turn (proved against a section destroyed mid-chain); completion at exactly the cost through `Movement::applyJumpOut`, attached units taken; a second EDJD and a Scribe contribute, the Scribe alone cannot carry it; a damaged EDJD rolls every abducting turn at half while the hull's own jump-out stays immune; the chain rebuilds from the stored notes alone. **Changed by ruling:** D53 a declaration with a power level instead of boost levels, D54 only the initiator meets the conditions, **D55 friendly use NOT built**, D56 detonation halved; review revisions 2026-09-13: D57 bay contents out of the cost, D58 deactivation/destruction cancels, D59 no line of sight, D60 a ship-window banner (harnesses now 96 + 65). The faction page gained its own section and the "not implemented" line is gone. ⚠️ Traps 57–60. |
 
 **Every stage:** run `fvbuild.ps1 -Check` (ship-data validator + replay harness). ⚠️ The baseline
 drifts on a clean tree — never read a pre-existing FAIL as your regression, and **never
@@ -2571,9 +5515,22 @@ added `TacGamedata->cpdAdaptation` and put a line into the four defensive-mod ag
 faction in the game runs through. It came out clean (130/1, the known 4325 failure), but the rule
 should be read as "any stage that touches a shared path", not as a fixed list.
 
+⭐⭐ **AND FROM STAGE 11 ON, EVERY STAGE UPDATES THE FACTION ENTRY** in `factions-tiers.php`
+(§3.10d). A faction page written once and never revised is worse than none — players read it as
+authoritative and it silently describes a game that no longer exists.
+
+⚠️ **The second wave is unusually shared-path heavy.** Stage 12 changes EW for a unit class that has
+never had it, Stage 16 changes `unitSize` and hangar accounting for hulls that have never used
+either, Stage 18 touches the power balance, and Stage 15 (built) changed when a unit leaves the board.
+Every one of those is "any stage that touches a shared path", so the harness `check` is mandatory on
+all of them — plus a `masking` pass on Stage 12 and a 2,500-hull corpus differential on Stage 16.
+
 **Each stage opens on a control sheet (D4)** — the user lands a Walker hull carrying a basic version
 of that stage's system, and the stats are read out of the hull file. Stages **0 and 1 need nothing**:
 Stage 0 is a pure code move and Stage 1 *is* the first test hull.
+
+⭐ **Stage 14's arrived on 2026-09-08** and is folded into §3.13 as a table rather than a hull, the
+way Stage 3's did. Everything still outstanding is listed in Q5.
 
 ---
 
@@ -2660,13 +5617,296 @@ Collected from the survey; each one has bitten this codebase before.
     the on-disk report list is the whole manifest entry. Intersect with `discoverGames()`'s query
     (~90 of the directories are dead games that were never in the manifest), and fall back to the
     DB row for a baseline that recorded a `HARNESS-ERROR` and so has no snapshot to read.
+26. ⚠️⚠️ **THE FLEET CHECK EXISTS TWICE IN `gamelobby.js`.** The bracket accumulator, the bracket
+    report and the hangar tallies all appear once around lines 1028–1930 and again around
+    4754–5710, near-identical but not identical — the second copy still consults the dead
+    `oneOverAllowed` flag. Any fleet-legality change has to land in both, or the lobby's live check
+    and the standalone Fleet Checker disagree with nothing on screen to say why (§3.10a).
+27. ⚠️ **A CUSTOM HANGAR CATEGORY HAS NO MINIMUM** — and for the Torvalus Stiletto that is still the
+    feature. `totalFtrH/M/L` feed `minFtrRequired = ceil(totalHangarAvailable / 2)` — the 50%
+    full-hangar rule — while a craft with its own `hangarRequired` string lands in `totalFtrOther`
+    and is reported "allowed up to N". Inventing a new size band instead of a new category would
+    silently re-impose the rule.
+    ⚠️⚠️ **BUT IT IS NO LONGER TRUE OF THE MAPMAKER (D31, 2026-09-10)**, and reading it that way is
+    what let the bug live: `'Mapmaker Probes'` now carries a 50% minimum *and* no maximum, and both
+    facts are read off one array, `noHangarMaxCraftTypes` (§3.13a). ⭐ **A MINIMUM SEEDED FROM A
+    DECLARED LIST, NOT DERIVED FROM THE FLEET** — the rule has to bite on an EMPTY carrier, which is
+    exactly the case where a set built from the craft actually bought is empty.
+28. ⚠️ **`ew.getScannerOutput()` ALREADY ANSWERS A DIFFERENT QUESTION FOR A FLIGHT.** It returns the
+    MINE-DETECTION allowance (`floor(offensivebonus / 2)`), and `getEWLeft` — which every assign
+    path measures against — is built on it. Adding a flight's OEW/DEW pool to that one number lets
+    an ordinary fighter spend mine detection on OEW and a Mapmaker spend OEW on mine detection, in
+    both directions, silently. Two pools, two functions (§3.11).
+29. ⚠️ **`Hangar`'s `$maxhealth` IS ITS CAPACITY IN BOXES; `$output` IS THE PER-TURN LAUNCH+LAND
+    BUDGET.** `HangarOps::effectiveCapacity()` returns `getRemainingHealth()`, so a damaged bay
+    holds less. Reading `$output` as capacity — the natural assumption from the constructor's
+    argument order — is off by a factor of two on the Traveler and by more elsewhere (§3.14).
+30. ⚠️ **`unitSize` IS READ BY THE FLEET CHECK AS WELL AS BY THE HANGAR.** Putting one on a hull
+    that has never carried one (an HCV, a MediumShip) changes `1 / lship.unitSize` in the lobby's
+    small-craft tally and `flightSize / unitSize` in the server's shuttle accounting at the same
+    time. The hull-corpus differential is the only guard (§3.14).
+31. ⚠️⚠️ **A DOCKED UNIT IS `removed`, AND `removed` READS AS DESTROYED EVERYWHERE.**
+    `BaseShip::isDestroyed()` with no argument is true for any removed unit, and the client's
+    `shipManager.isDestroyed` sits in front of the power paths, `shouldBeHidden`, the fleet list,
+    the icon and the movement sequence. Anything that has to reach a docked unit — repair, power,
+    a shared reactor sum — needs its own narrow predicate, never a change to `isDestroyed`
+    (§3.15, §3.16).
+32. ⚠️⚠️ **THERE IS NO SERVER TWIN OF `getReactorPower`.** The power balance is computed entirely in
+    `power.js`; the server trusts the entries it is sent, and `Reactor::getOutput` answers only for
+    one reactor on one hull. Any rule that GRANTS power — the docked-ship share, and anything like
+    it — is unvalidated unless a server-side check is written for it on purpose (§3.16).
+33. ⚠️⚠️ **A JUMP-FAILURE RULE HAS THREE SITES, AND ONE OF THEM ONLY WRITES THE LOG.**
+    `doHyperspaceJump` (the boost path), `rollVortexJumpFailure` (the per-turn roll while a vortex
+    is open) and `openVortex` (which recomputes the percentage purely for its log line). A change
+    applied to two of the three produces an outcome that contradicts what the combat log said would
+    happen (§3.17).
+34. ⚠️⚠️ **AN IMMUNITY MUST STILL CONSUME ITS DIE.** `getCertainJumpFailureNote` is asked BEFORE the
+    d100 rather than instead of it, on purpose: dice draws are part of the game's random sequence,
+    and skipping one makes otherwise-identical games diverge. Every new "this unit never fails"
+    rule inherits that constraint, or it breaks the replay harness on games that have nothing to do
+    with the feature (§3.17).
+35. ⭐ **TRAP 34'S RATIONALE IS WEAKER THAN IT READS, SO PROVE IT BY SHAPE.** `Dice::d` is `random_int`,
+    unseeded, so live play has no reproducible sequence to protect; the replay harness declares its
+    OWN seeded `Dice` ahead of autoload and re-seeds at fixed points. Keep the draw anyway (it is
+    free), but no test can show "the die is still drawn" by replaying a sequence. Assert instead that
+    the immunity only ZEROES the percentage and that no `return` sits between it and the draw (§3.17a).
+36. ⚠️⚠️ **A COMMITTED JUMP-OUT NO LONGER MEANS "GONE AT THE END OF MOVEMENT".** A Walker drive keeps
+    its unit on the board until the end of Firing (§3.17). Every site that read a committed
+    `jumpout` order as "it has left" had to learn otherwise: the client's sprite, fleet row,
+    docked-flight walk and docked-LCV walk (`carriesWalkerJumpDrive`), and the Vortex Disruptor,
+    which searched only wreckage. A new "has it left?" test must ask the REMOVAL (`isDestroyed` +
+    `hasJumpedToHyperspace`), or ask both questions.
+37. ⚠️ **A HANGAR SUBCLASS THAT MUST STILL CARRY FIGHTERS KEEPS `$name = 'hangar'`.** Twenty-nine
+    client sites gate the fighter launch/dock/recover UI on the name, and `SystemFactory` builds the
+    client object from it (`window[Capitalised(name)]`), so a new name silently takes the fighters'
+    UI away. Keep the name, add a discriminator flag, gate new client behaviour on the flag - the
+    ShadowHangar's precedent and now the Docking Bay's. The hit chart matches `$displayName`, which is
+    free to change and must move with the chart row in the same edit (§3.14b).
+38. ⚠️⚠️ **NOT EVERY FIGHTER CAPACITY SITE WENT THROUGH THE CHOKE POINT.** `HangarOps::effectiveCapacity`
+    and `HangarShared.effectiveHangarBoxes` are the two, but `shipTooltipFireMenu.js`'s dock AND
+    recover eligibility each recomputed `maxhealth - damage` inline and would never have seen a docked
+    ship. Both call `HangarShared` now. Grep for `maxhealth` before assuming a capacity rule reaches
+    every dialog (§3.14b).
+39. ⚠️⚠️ **THE ORDINARY HANGAR PARSER READS A PAYLOAD WITHOUT ITS OWN KEYS AS A LEGACY LAUNCH LIST**
+    and writes an EMPTY fighter launch order - which, latest note winning, cancels a real one. A Hangar
+    subclass that adds payload keys must take them out before calling the parent
+    (`DockingBay::doIndividualNotesTransfer`). The server harness proves the misfire on an ordinary
+    hangar as its control (§3.14b).
+40. ⭐ **A "ONE X PER TURN" LOCK MUST BE DECIDED FROM THE ORDERS AT LOAD, NOT BY WHOEVER RESOLVES
+    FIRST.** Hangar crit hooks run per bay in system order and the fighter coalescer runs once per
+    carrier from whichever bay reaches it first, so "first come" would be iteration order. And the lock
+    must be LATCHED: the orders are consumed as they resolve, and a lock that reads the live orders
+    reopens itself halfway through the pass. ⚠️ Keep it OUT of damage eviction, which reads boxes - a
+    lock expressed as "capacity 0" would there evict every craft aboard (§3.14b).
+41. ⚠️ **`performLCVLaunch`'s RE-INIT IS NOT SAFE FOR EVERY HULL.** It tops every Weapon to
+    `loadingtime`, which on a Walker hull would reset an Energy Draining Mine's STORE (its
+    `turnsloaded` is the mine count, Stage 6). System data loads as the latest row at or before the
+    turn, so a docked ship that is simply resurrected keeps exactly the state it docked with - which is
+    what the Docking Bay does (§3.14b).
+42. ⚠️⚠️ **NOTHING AT ALL RUNS ON A `removed` UNIT DURING THE CRITICAL PHASE.**
+    `Criticals::setCriticals` snapshots `$activeShips` through `isDestroyed()`, which answers true
+    for anything removed, so a docked ship's `testCritical`, `criticalPhaseEffects` and everything
+    hung off them stop the moment it docks. (`onAdvancingGamedata` is the opposite case and DOES
+    still run on it - §3.14b, group 16 - so "docked units are frozen" is false in general and true
+    for exactly this phase.) Anything a docked unit must keep doing needs a named driver on the
+    CARRIER, and that driver needs a guard for the ship that docked THIS turn: it WAS in the
+    snapshot, so it is about to be processed in its own right and doing it twice pays for the same
+    thing out of two pools. Stage 17's is `HangarOps::runDockedShipsSelfRepair`.
+43. ⚠️ **A cross-ship priority/override map needs a COMPOSITE key, and every read site must use the
+    job's key rather than the system's id.** `SelfRepair::$priorityChanges` was keyed by system id
+    alone; with docked units in the same list that collides between two docked hulls and between a
+    docked hull and the carrier. The subtle half is the WRITE side - the "fully repaired, drop the
+    override" branch read `$systemToRepair->id`, which would have cleared the carrier's own override
+    of that number. Carry the key in the job. (Format `d<shipid>:<sysid>[-<critid>]`; the note
+    round-trip splits on `;` only, and `notevalue` is varchar(4096).)
+44. ⚠️ **DO NOT RANK ANOTHER UNIT'S DAMAGE FOR THE PLAYER - BUILT AND WITHDRAWN THE SAME DAY (D42 →
+    D45).** Stage 17 first put the docked units in their own TIER, compared before priority so they
+    were always repaired last, which is what the brief literally said. Seeing it, the user withdrew
+    it: *"this should really be the player's choice, they may wish to prioritise repairing Docked
+    ships."* ⭐ Two things to carry: **"whose damage matters more" is a player judgement**, and an
+    engine that answers it reads as a bug even when the brief asked for it; and **a tier is far more
+    expensive than the three lines it looks like**, because every UI gesture that writes a priority
+    then has to be clamped to it - the drag's drop index, the drag's upward cascade, AND
+    Move-to-Top's "what is the maximum" - or the player sets a number and watches nothing move.
+    Deleting the tier deleted all three clamps. What replaced it is one list, one sort by priority,
+    and a per-row LABEL (the owning ship's name in cyan), which is all the separation a mixed list
+    of other people's systems actually needed.
+45. ⚠️⚠️ **A STOWED UNIT'S SHIP WINDOW IS DEAD TO THE TOUCH, and it is one line in
+    `SystemIcon.clickSystem`.** Its opening guard is `shipManager.isDestroyed(ship)`, which folds
+    `removed` in - so no icon of a docked ship, a docked flight or a rail-parked LCV has ever
+    responded to a click. The fix is NOT to widen `isDestroyed` (§3.16's ⚠️⚠️) but to use the
+    predicate the client already has for exactly this distinction, `shipManager.isDestroyedByDamage`
+    ("gone" vs "parked out of sight"), at that ONE site - and then to divert the stowed unit
+    straight to the info menu rather than let it fall through into weapon selection, called shots,
+    hangar dialogs and LCV rails, none of which mean anything from inside a hangar.
+46. ⭐ **"Off the board" is not one behaviour.** A fleet-list row for a docked FLIGHT opens its
+    window (it has no hex of its own); a row for a docked SHIP scrolls to its CARRIER (it does have
+    one - its carrier's); a row for a hyperspace reinforcement opens its window (there is no hex
+    yet). Left-click meaning "show me where this is" everywhere and right-click meaning "open it"
+    everywhere is what keeps the list legible; a state that quietly swaps the two reads as a bug.
+
+47. ⚠️⚠️ **A MENU WHOSE GATES DO NOT ASK ABOUT THE SHIP WILL OPEN ON A UNIT ITS OWN HANDLERS
+    REFUSE, and the player then reports "the buttons do nothing".** All six
+    `SystemInfoButtons` power gates (`canOffline`, `canOnline`, `canBoost`, `canDeBoost`,
+    `canOverload`, `canStopOverload`) test the PHASE, the SYSTEM and the PLAYER and never the
+    ship's state - while four of the mutations they lead to opened with
+    `shipManager.isDestroyed(ship)`. On a docked ship the menu therefore drew every button and
+    nothing happened when they were clicked (§3.16a). ⭐ Two generalising halves. First, when a
+    gate and its action disagree about eligibility, the SYMPTOM is always this one, so
+    "the menu appears but does nothing" should send you looking for a guard inside the handler,
+    not a missing one in the gate. Second, **a partial refusal is worse than a total one**: boost
+    and unboost worked all along because `clickPlus`/`clickMinus` never had the guard, which made
+    the panel look broken rather than switched off and cost a play-test to pin down.
+    ⚠️ The fix is a NAMED predicate used by the affected paths only
+    (`shipManager.power.isPowerManageable`), never a widening of `isDestroyed` - trap 45 and
+    §3.16 both say why, and this is now the second site to need the same carve-out.
+
+48. ⭐ **A DERIVED NUMBER THAT NOTHING PERSISTS IS IMMUNE TO TRAP 23, AND THAT IS A DESIGN OPTION.**
+    Trap 23 is about a number read in `TacGamedata::onConstructed()` above the per-ship
+    enhancement loop. "The sum of every docked reactor's surplus" is exactly that kind of
+    number - and §3.16 flagged it as the third system in this plan to meet the trap. It does not,
+    because it is never stored: it is a function evaluated at every read, on the client, from
+    live objects. ⚠️ The price is that it can only be as authoritative as the place it is
+    computed, which for power in Fiery Void is the CLIENT (D46: `submitPower` validates nothing
+    and there is no server twin of `getReactorPower`). ⭐ So the real ruling is: when a figure
+    has no server-side owner, choose between a cached snapshot that can be stale and a live
+    derivation that can only be advisory - and say in the tooltip which one the player is
+    looking at.
+
+49. ⚠️ **A "SHARED RESOURCE" MUST SAY WHETHER THE DONOR IS CHARGED, OR IT WILL OSCILLATE.** The
+    docked-power grant reads each donor's surplus and does NOT deduct it. Deducting would drop
+    the donor's surplus to 0, the next recompute would take the grant away, and the figure would
+    flip on every render - a live-derived number cannot spend from the source it is derived from.
+    ⚠️ Clamp each contributor at 0 BEFORE summing, too: without that, one over-boosted donor
+    silently taxes the recipient, which is the opposite of what "sharing" means. Both facts
+    generalise to any pooled figure computed from its contributors rather than stored.
+
+50. ⭐⭐ **EVERY DERIVED FIGURE IN THE CLIENT IS COMPUTED BY THE VIEWER FROM WHAT THE VIEWER MAY SEE,
+    SO A MASKED INPUT SILENTLY MAKES TWO PLAYERS DISAGREE - AND NOTHING WARNS YOU.** The
+    docked-power grant is the first POWER figure in Fiery Void with a masked input: the owner's
+    client summed the docked ships and the opponent's found none, so the same reactor read 7 and 6
+    on the two screens (user report 2026-09-12, §3.16b). Until then every input to a power figure
+    was public, so the question had never arisen.
+    ⭐ **The general rule this produced:** when a derived number is added, ask *who computes it and
+    what can they see* - and if any input is masked, the figure needs either a disclosure or an
+    explicit statement that it is owner-only. Masking has a direction here that is unlike every
+    other mask in the tree: the usual failure is showing too much, but a derived figure fails by
+    showing a DIFFERENT ANSWER, which reads as a bug rather than as concealment.
+    ⭐ **And the fix has a shape:** disclose the minimum INPUT and let both clients run the one
+    function, rather than recomputing the figure on the server. A server number would have to agree
+    with the owner's live client figure at every moment; one shared function cannot drift by
+    construction. ⚠️ `EdfExposure::getMaxAvailablePower` is a standing warning about the other
+    choice - it is a partial server mirror of `getReactorPower` whose own comment says "keep the two
+    in step", and it is a CEILING at maximum shed, blind to per-turn offline rows, boost cost and
+    overload draw, so it could not have answered this even though it looks as though it should.
+    ⚠️⚠️ **When you widen a mask, add a NEW key rather than pruning the masked one.** An outside
+    viewer's `shipsDocked` had ALWAYS been `[]`, so no client consumer had ever met a partial entry -
+    and four of them (`HangarShared` capacity, the fire-menu dock dialogs, `SelfRepairList`,
+    `fleetListManager.carrierHolding`) read `boxes`, `phpclass` or `dockTurn` off those rows. Pruning
+    would have been a silent `NaN` in all four. A separate key that exactly one function reads has
+    no blast radius at all.
+
+51. ⚠️⚠️ **`attached` MEANS BOARDING EVERYWHERE ELSE IN THE TREE.** A docking Waymarker and a
+    breaching pod are the same state to the movement mirror, to mathlib's same-hex bearing, to the
+    CnC's detach/destroy sweep, to Firing's spill-to-host rule and to the map tooltip - which read
+    "Ship is being Boarded!" off a docking manoeuvre until Stage 19 filtered it. **No Stage 19 rule
+    may key off `attached` alone**: the bay's own `shipsAttaching` list is the discriminator
+    (`HangarOps::attachedBayShipFor` / `bayCarrierAttachedTo`, `shipManager.isDockingRider`), and
+    each opens with the empty-`attached` early-out so the question is free in a game with no
+    boarding in it.
+    ⭐ **The corollary is what made the feature cheap:** movement mirroring, the client's five
+    movement lock-out sites and the never-rammed-by-your-host rule all came free BECAUSE it is the
+    same state. Reusing a state means inheriting every consumer of it - read them all first, then
+    decide which ones need the discriminator.
+
+52. ⭐ **A TWO-PART STATE WANTS ITS TWO HALVES IN DIFFERENT PLACES.** The `attached` clamp
+    round-trips through the CARRIER's CnC `Attached` / `Detached` notes; the bay's
+    `shipsAttaching` list only records that the ride is a docking one and whose boxes it holds.
+    Because they are separate, a rider that something ELSE detached - the CnC's boarding sweep
+    writes `Detached` the moment the host's structure at that location dies - is noticed as an
+    **ABORT** (entry dropped, boxes released, ship left on the board) instead of being completed
+    blind. A single fused record would have finished a dock for a ship attached to nothing.
+
+53. ⚠️⚠️ **`isDestroyed()` FOLDS `removed` IN, SO EVERY "OUT OF PLAY" SWEEP SILENTLY EXCLUDES A
+    DOCKED UNIT** - and the two that had to stop doing so (`TacGamedata::setEdfHexes`,
+    `EW::collectEwDetectors`) carried the identical four exclusions written out twice.
+    ⭐ **The fix is one shared reader that answers "where does this unit project FROM, or null"**
+    (`HangarOps::projectionOriginFor`, client twin `shipManager.getProjectionOrigin`), because the
+    exclusion and the POSITION are the same problem: a stowed unit's own last movement row is
+    wherever it happened to dock and stops being true the moment its carrier moves. Anything that
+    measures hexes from a unit must ask it.
+    ⚠️ `BaseShip::isDestroyedByDamage()` is now the server twin of a client predicate that has
+    existed since Hangar Ops - the THIRD site in three stages to need that exact carve-out (Stage
+    17's ship window, Stage 18's power menu, this) - and still never a change to `isDestroyed()`.
+    ⚠️ `EdfNetLinks::buildOccupancy` deliberately does NOT get the new reader: it counts units
+    *standing in* a corridor, a stowed unit stands nowhere of its own, and its carrier is already
+    counted.
+
+54. ⭐⭐ **A DERIVED FIGURE WITH A MASKED INPUT NEEDS A PUBLISHED TWIN, NOT A WIDER MASK** - trap 50's
+    shape, hit again in the very next stage and in a different subsystem, which is what makes it a
+    pattern rather than an incident. A field projected from INSIDE a hull has no icon of its own, so
+    the carrier's icon draws the disc - but the radius can only be derived from the bay's ship list,
+    which is masked, so the opponent would have watched the drain apply over hexes with no disc on
+    them. (The hexes are already public in `edfHexes`; only the SOURCE is hidden, which is exactly
+    why publishing the radius discloses nothing new.) The server publishes the finished number per
+    hangar to everyone and the client **MAXes** it against its own live walk: the owner gets a figure
+    that follows the power they are allocating this phase, the opponent gets the committed one.
+    ⚠️ `Hangar::$stowedEdfRadius` is **PROTECTED**. A public property rides the static blueprint,
+    which would put a live per-turn number into a cached per-CLASS artefact and add a key to every
+    hangar in the game; `stripForJson` reflects IS_PUBLIC only, so a protected field is invisible to
+    it and is copied by hand.
+    ⚠️ The EW half of the same ruling needed no twin, and the reason will not generalise: that
+    allowance is filtered to the viewer's own team, whose bays are disclosed to them. A rule that
+    read the detector list ACROSS teams would need the same treatment.
+
+55. ⚠️⚠️ **"IS THIS SHIP IN THE SUBMISSION" IS NOT "DID THIS SHIP MOVE".** `ajaxInterface` sends an
+    entry for EVERY ship the player owns, and for an ATTACHED one it deliberately sends an EMPTY
+    movement list - the client refuses to plot a move for a unit riding a host. So
+    `MovementGamePhase::process`'s `$submittedShipIds`, built from presence alone, read a rider as
+    having moved itself and skipped the mirror that copies the host's path onto it. The rider then
+    sat on its preturn `sync` row at the host's START hex for the whole Firing phase (game 4351).
+    ⭐⭐ **THE REASON IT HAD SURVIVED FOR YEARS IS THE REAL LESSON:** the guard exists so a DETACH
+    submission is not overwritten, and until Stage 19 every attached pair in the game was a boarding
+    pod and its victim - **different players, never in one submission**. Reusing a state (trap 51)
+    inherits every guard written for it, including the ones whose assumptions were never stated.
+    When you put an existing mechanism to a new use, list its consumers AND the conditions each of
+    them has silently been relying on.
+
+56. ⭐ **A PREDICATE THAT MOVES ONTO A HOT PATH NEEDS AN EARLY-OUT, AND THE RIGHT ONE IS A FACT ABOUT
+    THE RULE.** `shipManager.isDockingRider` was written for a banner (a handful of calls) and then
+    became the gate on both ends of every EW button in the Initial Orders menu and on every weapon
+    click - dozens of fleet walks per gesture. The fix is not a cache: a rider is ALWAYS `attached`,
+    so one empty-object test rejects every unit in every game with no boarding and no docking
+    manoeuvre in it, and it cannot go stale because it is the same fact the rule is made of.
+    ⚠️ The same shape appears in `EW::stripDockingRiderEw` (collect the rider ids ONCE per
+    submitting ship, not per EW row) and in `setEdfHexes` / `collectEwDetectors` (the `instanceof`
+    sweep comes first and every other question is deferred behind it).
+57. ⚠️⚠️ **A PLAN WRITTEN BEFORE A REWORK MUST BE RE-READ AGAINST IT.** §3.18 said "power-turns are
+    boost levels" - true of the vortex-era drive it was written for, and wrong the day §3.17b made
+    every Walker drive a legacy one whose ONLY boost level is the jump itself. Found by reading
+    `markLegacy()` before designing, not by reading the plan.
+58. ⚠️⚠️ **A LEGACY DRIVE IS INVISIBLE TO EVERY "IS THIS A BALLISTIC ORDER" TEST THAT READS THE WEAPON.**
+    `markLegacy()` sets `$ballistic = false`, so a type-`ballistic` order on one is (a) stripped from
+    every Firing-phase payload by `hideSystemFireOrders` - the `jumpexit` bug again, fixed the same way;
+    (b) never counted by `weaponManager.hasFiringOrder` in Initial Orders, so there is no generic remove
+    button and `canOffline` does not block it; (c) never selected by `SystemIcon`'s Initial Orders
+    clause. Ask the ORDER's type or damageclass, or give the system a predicate of its own.
+59. ⭐ **`hasSpecialTargeting` ON A PROTOTYPE CHANGES EVERY INSTANCE'S ICON CLICK.** `SystemIcon` treats
+    such a weapon's existing order as editable rather than committed. Set it per INSTANCE, keyed off a
+    payload field only the right instances carry (`abductionMaxPower`).
+60. ⭐ **WHEN A RULE'S INPUT IS MASKED, ASK WHETHER THE INPUT BELONGS IN THE RULE AT ALL.** The first
+    build summed docked units' ramming factors into the abduction cost, found that bay contents are
+    own-team-only, and answered with TWO figures - a published preview without them and a locked cost
+    with them. The user's ruling (D57) removed the input instead, and the two figures became one. Before
+    engineering around a masked input (trap 54's published twin, or a split figure), put the question
+    to the user.
 
 ---
 
-## 6. Open questions — ALL RESOLVED
+## 6. Open questions — ALL RESOLVED (Q1–Q15)
 
-Kept as the record of what was asked and why; the rulings are D5–D10 in §0 and are folded into the
-sections they affect.
+Kept as the record of what was asked and why; the rulings are D5–D10 (Q1–Q7) and D11–D26 (Q8–Q15)
+in §0, and are folded into the sections they affect. Nothing in this plan is waiting on an answer.
 
 **Q1 — EDF and concealment. → D5, out of scope.** The Walkers have no stealth function, so the
 question is academic. §2.1 records what would make it live again and where the guard would go.
@@ -2693,6 +5933,46 @@ stealth/detection mechanics. §3.4 — the bucket already does exactly this, so 
 **Q7 — What does this cost every other game? (raised 2026-09-03). → D10.** One static boolean and no
 autoload. §3.4 carries the table of what an ordinary game actually pays, and the gate has its own
 load-bearing test.
+**Q8 — Is the Mapmaker EW pool 3 per FLIGHT or 3 per CRAFT? (asked 2026-09-08). → ANSWERED: 3 per
+flight.** The hull's comment (*"Advanced Sensors w/ 3 EW"* on each `Fighter`,
+[MapmakerProbes.php:58](source/server/model/ships/walkers/MapmakerProbes.php#L58)) would have made a
+full flight 18; it does not. D11 stands as written, and the pool does not scale with surviving
+craft. §3.11.
+
+**Q9 — Does the SCT keep its green HEX at a named-unit waypoint? (asked 2026-09-08). → ANSWERED:
+yes.** *"Keep hex but remove green text."* §3.10b as written — the marker survives, only
+`marker.text` and `SCT_MARKER_TEXT_COLOUR` go.
+
+**Q10 — Do BDEW and SDEW join the Mapmaker's DEW subtraction? (asked 2026-09-08). → ANSWERED: yes.**
+*"BDEW and SDEW are separate EW functions so would stack with the fighter's own DEW."* The
+subtraction is `OEW − (DEW + BDEW + SDEW)`, floored at 0, and all three are then zeroed. D12 is
+extended accordingly, and it now agrees with the EDJD's own condition (§3.18) rather than differing
+from it. §3.11.
+
+**Q11 — Why only ONE Waymarker in a 24-box bay? (asked 2026-09-08). → ANSWERED: the 12 was a slip.**
+A Waymarker costs **24 boxes**, and the bay also holds **2 Pathfinders** at 12 each — which the
+first statement of the brief omitted. Every load now fills the 24-box bay exactly and no per-type
+cap is needed at all. The Waymarker's real condition is a **two-turn** dock/launch procedure (D23,
+§3.14a), optional within Stage 16.
+
+**Q12 — Is an abduction's cost locked or live? (asked 2026-09-08). → ANSWERED: locked.** Fixed at the
+first power-turn and carried in the note, so a target that is abducted *and* shot does not get
+cheaper as its ramming factor falls. §3.18.
+
+**Q13 — Do the terrain rows of the EDJD table matter? (asked 2026-09-08). → ANSWERED: out of scope
+for now.** *"Asteroid, Moon, Planetoid: 10 × radius³"* and *"Planet or larger: Unknown"* are not
+built. Terrain has no radius property in FV, `moonNew`'s ramming factor is 5,500, and nothing in the
+codebase would let a moon leave the board.
+
+**Q14 — Is the fighter Medium Lightning Array's reload 2 turns or 4? (raised 2026-09-08).
+→ ANSWERED: 4.** The brief said *"a recharge rate of 2 turns"* and the control sheet said
+**1 per 4 turns**; the sheet is right (*"Ah yes, loading time is 4, my mistake"*). `loadingtime = 4`.
+§3.13.
+
+**Q15 — Does anything else read *"Flight-Level combat"*? (asked 2026-09-08). → ANSWERED: no, the
+term has no FV meaning.** The sheet's *"Does not use Flight-Level combat or Offensive Bonus"* is one
+exclusion, not two: use flight EW instead of the offensive bonus, and change nothing else in the
+`instanceof FighterFlight` branch. D25. §3.13.
 
 ---
 
@@ -2706,3 +5986,8 @@ load-bearing test.
   harness.
 - **No blanket removal of the `factionAge` enhancement gate** — §3.3 narrows it instead, so no
   existing Ancient hull gains an enhancement it does not have today.
+- **No new hangar engine** — §3.14's Docking Bay is `DockingCollar`'s LCV dock with a list instead
+  of one slot; the removal, the resurrection and the persistence are already written.
+- **No new departure mechanism** — §3.17 does not add a phase or a turn step. It DEFERS an existing
+  removal from the top of `MovementGamePhase::advance` to the end of the Firing phase, where the
+  other departure path already runs.

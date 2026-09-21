@@ -62,7 +62,7 @@ class triadDemon extends BaseShip{
 		$this->addAftSystem(new GraviticThruster(7, 18, 0, 5, 2));
 		$this->addAftSystem(new GraviticThruster(7, 18, 0, 5, 2));
 		$this->addAftSystem(new GraviticThruster(7, 18, 0, 5, 2));
-		$this->addAftSystem(new JumpEngine(8, 25, 5, 8));        
+		$this->addAftSystem((new JumpEngine(8, 25, 5, 8))->markAncient());        
         $this->addAftSystem(new SelfRepair(8, 15, 7)); //armor, structure, output
 
         $this->addLeftSystem(new GraviticThruster(7, 25, 0, 8, 3)); 		

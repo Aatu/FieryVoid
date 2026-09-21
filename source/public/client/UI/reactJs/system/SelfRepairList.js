@@ -282,6 +282,19 @@ const CenteredListItem = styled(ListItem)`
     opacity: 0.7;
 `;
 
+/* ── Stage 17: the docked units (WALKERS_OF_SIGMA_PLAN.md 3.15) ──────────────────────
+   Whose ship this row belongs to, and the ONLY thing that marks a docked unit's entry out:
+   the list is one queue sorted by priority, so a Scribe's C&C sits wherever the player put
+   it, next to the Traveler's own systems (user, 2026-09-12). Without the name the list is a
+   pile of "Structure" and "C&C" rows with nothing to tell two Scribes apart.
+   #00b8e6 is FV's established "aboard" cyan - the same value the fleet list gives its
+   .docked rows and the ship window gives a docked orbital's health bar. */
+const OwnerTag = styled.span`
+    color: #00b8e6;
+    font-weight: normal;
+    margin-right: 4px;
+`;
+
 const InputField = styled.input`
     width: 20px;
     height: 16px;
@@ -365,6 +378,127 @@ class SelfRepairList extends React.Component {
     getEffectiveCriticalRepairCost(crit, sys) {
         if (sys.name === 'cnC') return 4;
         return crit.repairCost;
+    }
+
+    /* WALKERS_OF_SIGMA_PLAN.md 3.15 (Stage 17) - the SHIPS docked in this vessel's bays.
+       Mirror of HangarOps::runDockedShipsSelfRepair's walk: every Docking Bay on the hull,
+       every entry in its shipsDocked list, resolved through gamedata.
+       ⚠️ gamedata.getShip, NOT getShipById - the client has only the former
+       (arch_client_getship_vs_getshipbyid). Returns [] for every Self Repair in the game
+       but the Traveler's, which is the only mount with servicesDockedUnits. */
+    getDockedUnits() {
+        const { ship, system } = this.props;
+        if (!system.servicesDockedUnits) return [];
+        const out = [];
+        const shipSystems = Array.isArray(ship.systems) ? ship.systems : Object.values(ship.systems);
+        for (const sys of shipSystems) {
+            //HangarShared.isDockingBaySys is the same one boolean; read directly so this
+            //component depends on nothing but the system object it was handed.
+            if (!sys.isDockingBay || !Array.isArray(sys.shipsDocked)) continue;
+            for (const entry of sys.shipsDocked) {
+                const docked = gamedata.getShip(entry.shipId);
+                if (docked && out.indexOf(docked) === -1) out.push(docked);
+            }
+        }
+        return out;
+    }
+
+    /* The docked half of the queue - MIRROR OF SelfRepair::gatherDockedUnitRepairs, and it has
+       to stay one: this is where the player sets the priorities and that is what spends the
+       points. Same four categories (damaged Structure / C&C / Self Repair, plus every
+       repairable critical on ANY system), the same composite keys, the same defaults. These
+       rows are merged into the carrier's own list and sorted with them by priority alone; only
+       the cyan ship-name tag (`docked: true`) marks them out. */
+    getDockedRepairables() {
+        const { system } = this.props;
+        const items = [];
+
+        for (const docked of this.getDockedUnits()) {
+            const dockedSystems = Array.isArray(docked.systems) ? docked.systems : Object.values(docked.systems);
+            const prefix = 'd' + docked.id + ':';
+
+            for (const sys of dockedSystems) {
+                //'structure' / 'cnC' / 'SelfRepair' are the client names of the three server classes.
+                //The CnC family all carry name 'cnC' (see getEffectiveCriticalRepairCost above).
+                const serviceable = (sys.name === 'structure' || sys.name === 'cnC' || sys.name === 'SelfRepair');
+
+                // --- CRITICALS: offered on EVERY system, not just the serviceable three ---
+                if (!shipManager.systems.isDestroyed(docked, sys) && sys.repairPriority >= 1 && sys.criticals) {
+                    const sysCriticals = Array.isArray(sys.criticals) ? sys.criticals : Object.values(sys.criticals);
+                    for (const crit of sysCriticals) {
+                        if (crit.repairPriority === 0) continue;
+                        if (crit.turn >= gamedata.turn) continue;              // caused this turn
+                        if (crit.oneturn || (crit.turnend > 0)) continue;      // temporary / already fixed
+                        const critKey = prefix + sys.id + '-' + crit.id;
+                        let critPriority = crit.repairPriority || 0;
+                        let critOverridden = false;
+                        if (system.priorityChanges && (critKey in system.priorityChanges) && system.priorityChanges[critKey] >= 0) {
+                            critPriority = system.priorityChanges[critKey];
+                            critOverridden = true;
+                        } else if (critPriority < 10) {
+                            critPriority += sys.repairPriority;
+                        }
+                        if (critPriority < 1) continue;
+                        items.push({
+                            type: 'critical',
+                            sys: sys,
+                            crit: crit,
+                            ownerShip: docked,
+                            shipId: docked.id,
+                            docked: true,
+                            priority: critPriority,
+                            overridden: critOverridden,
+                            cost: this.getEffectiveCriticalRepairCost(crit, sys),
+                            id: sys.id,
+                            subId: crit.id,
+                            keyId: critKey
+                        });
+                    }
+                }
+
+                // --- SYSTEM DAMAGE: Structure, C&C and Self Repair only ---
+                if (!serviceable) continue;
+                if (sys.repairPriority === 0) continue;
+                const damage = shipManager.systems.getTotalDamage(sys);
+                if (damage <= 0) continue;
+
+                if (sys.name === 'structure') {
+                    if (shipManager.systems.isDestroyed(docked, sys)) continue; //destroyed Structure stays out of reach
+                } else {
+                    const blockLoc = (sys.structureHomeLocation !== undefined && sys.structureHomeLocation !== null) ? sys.structureHomeLocation : sys.location;
+                    if (blockLoc != 0) {
+                        const stru = shipManager.systems.getStructureSystem(docked, blockLoc);
+                        if (stru && shipManager.systems.isDestroyed(docked, stru)) continue;
+                    }
+                }
+
+                const sysKey = prefix + sys.id;
+                let basePriority = sys.repairPriority;
+                let isOverridden = false;
+                if (system.priorityChanges && (sysKey in system.priorityChanges) && system.priorityChanges[sysKey] >= 0) {
+                    basePriority = system.priorityChanges[sysKey];
+                    isOverridden = true;
+                }
+                if (basePriority < 1) continue;
+                if (!isOverridden && shipManager.systems.isDestroyed(docked, sys) && basePriority <= 10) basePriority += 10;
+
+                items.push({
+                    type: 'system',
+                    sys: sys,
+                    ownerShip: docked,
+                    shipId: docked.id,
+                    docked: true,
+                    priority: basePriority,
+                    overridden: isOverridden,
+                    damage: damage,
+                    maxHealth: sys.maxhealth,
+                    id: sys.id,
+                    subId: 0,
+                    keyId: sysKey
+                });
+            }
+        }
+        return items;
     }
 
     getRepairableSystems() {
@@ -455,6 +589,9 @@ class SelfRepairList extends React.Component {
                         type: 'critical',
                         sys: sys,
                         crit: crit,
+                        ownerShip: ship,   // Stage 17: whose item this is - always us
+                        shipId: 0,         // Stage 17: sorts ahead of any docked unit's real id
+                        docked: false,     // Stage 17: ours, so no cyan ship-name tag on the row
                         priority: critPriority,
                         overridden: critOverridden, // explicit override wins ties (mirror of server sort)
                         cost: this.getEffectiveCriticalRepairCost(crit, sys), //C&C crits cost 4 (mirror of server)
@@ -473,6 +610,9 @@ class SelfRepairList extends React.Component {
                 systems.push({
                     type: 'system',
                     sys: sys,
+                    ownerShip: ship,   // Stage 17
+                    shipId: 0,         // Stage 17
+                    docked: false,     // Stage 17
                     priority: basePriority,
                     overridden: isOverridden, // explicit override wins ties (mirror of server sort)
                     damage: damage,
@@ -484,10 +624,14 @@ class SelfRepairList extends React.Component {
             }
         }
 
-        // Concatenate first
-        const allItems = [...criticals, ...systems];
+        // Concatenate first. Stage 17 appends the docked units' items to the SAME list and the sort
+        // below treats them as equals - priority alone decides, so the player may put a docked
+        // Scribe's C&C above the Traveler's own hull if that is what they want (user, 2026-09-12).
+        // The cyan ship name on the row is what tells the two apart. Empty for every Self Repair
+        // but the Traveler's. Mirror of the server's sortUnifiedRepairQueue.
+        const allItems = [...criticals, ...systems, ...this.getDockedRepairables()];
 
-        // Sort Unified List: Priority (Desc) -> Explicit-override wins ties -> Visual Stability (Previous Order) -> ID/SubID (Asc)
+        // Sort Unified List: Priority (Desc) -> Explicit-override wins ties -> Visual Stability (Previous Order) -> Ship/ID/SubID (Asc)
         allItems.sort((a, b) => {
             if (a.priority !== b.priority) return b.priority - a.priority; // Higher priority first
 
@@ -509,7 +653,12 @@ class SelfRepairList extends React.Component {
                 }
             }
 
-            // Fallback / Deterministic Sort
+            // Fallback / Deterministic Sort. Stage 17 puts the owning SHIP first: the list can hold
+            // entries from several docked hulls and system ids are per-ship, so without it two
+            // docked units' systems would interleave on a shared id (mirror of the server). 0 is
+            // this vessel's own, so an exact tie still favours it - a tiebreak, not a rule.
+            const aShip = a.shipId || 0, bShip = b.shipId || 0;
+            if (aShip !== bShip) return aShip - bShip;
             if (a.id !== b.id) return a.id - b.id;
             return a.subId - b.subId;
         });
@@ -919,6 +1068,7 @@ class SelfRepairList extends React.Component {
         // Build the post-drop visual order (the grabbed row moved to dropIdx).
         const fromIdx = order.findIndex(it => it.keyId === keyId);
         if (fromIdx === -1) return;
+
         const items = order.slice();
         const [moved] = items.splice(fromIdx, 1);
         items.splice(dropIdx, 0, moved);
@@ -939,7 +1089,8 @@ class SelfRepairList extends React.Component {
         system.setOverride(keyId, assign);
 
         // Walk upward, bumping each colliding row so priorities stay strictly
-        // descending above the drop point.
+        // descending above the drop point. Stage 17: it walks over the carrier's OWN rows too -
+        // one list, so a docked unit's row dropped above them bumps them exactly as any other would.
         for (let i = dropIdx - 1; i >= 0; i--) {
             if (items[i].priority > assign) break; // already strictly above
             assign += 1;
@@ -1030,9 +1181,12 @@ class SelfRepairList extends React.Component {
                                 lineBefore = true;  // middle -> marker line
                             }
                         }
+                        //Stage 17: a docked unit's row is marked by its ship's name in cyan and by
+                        //nothing else - it sorts and drags exactly like one of our own.
+                        const owner = item.ownerShip || ship;
                         return (
                         <ListItem
-                            key={`${item.type}-${item.sys.id}${item.crit ? '-' + item.crit.id : ''}`}
+                            key={item.keyId}
                             data-keyid={item.keyId}
                             $dragging={isDragging}
                             $gapBefore={gapBefore}
@@ -1045,17 +1199,28 @@ class SelfRepairList extends React.Component {
                             <ItemInfo>
                                 {item.type === 'critical' ? (
                                     <>
-                                        <CriticalItemName>{item.sys.displayName} ({item.crit.description || item.crit.phpclass})</CriticalItemName>
+                                        <CriticalItemName>
+                                            {item.docked && <OwnerTag>{owner.name}:</OwnerTag>}
+                                            {item.sys.displayName} ({item.crit.description || item.crit.phpclass})
+                                        </CriticalItemName>
                                         <ItemStatus>
                                             Cost: {item.cost} <Divider /> Id: {item.sys.id}
                                         </ItemStatus>
                                     </>
                                 ) : (
                                     <>
-                                        {shipManager.systems.isDestroyed(ship, item.sys) ? (
-                                            <DestroyedItemName>{item.sys.displayName}</DestroyedItemName>
+                                        {/* Stage 17: `owner`, not `ship` - a docked row's system lives on
+                                            another hull and its health has to be read there. */}
+                                        {shipManager.systems.isDestroyed(owner, item.sys) ? (
+                                            <DestroyedItemName>
+                                                {item.docked && <OwnerTag>{owner.name}:</OwnerTag>}
+                                                {item.sys.displayName}
+                                            </DestroyedItemName>
                                         ) : (
-                                            <ItemName>{item.sys.displayName}</ItemName>
+                                            <ItemName>
+                                                {item.docked && <OwnerTag>{owner.name}:</OwnerTag>}
+                                                {item.sys.displayName}
+                                            </ItemName>
                                         )}
                                         <ItemStatus>
                                             HP: {shipManager.systems.getRemainingHealth(item.sys)} / {item.sys.maxhealth} <Divider /> Id: {item.sys.id}

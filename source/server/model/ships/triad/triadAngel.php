@@ -56,7 +56,7 @@ class triadAngel extends HeavyCombatVessel{
         $this->addAftSystem(new GraviticThruster(8, 15, 0, 4, 2));
         $this->addAftSystem(new GraviticThruster(8, 15, 0, 4, 2));
         $this->addAftSystem(new PhotonicPrismBeam(8, 24, 8, 90, 270));	
-		$this->addAftSystem(new JumpEngine(8, 15, 4, 8));        
+		$this->addAftSystem((new JumpEngine(8, 15, 4, 8))->markAncient());        
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 8, 75));

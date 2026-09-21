@@ -3896,6 +3896,15 @@ class Hangar extends ShipSystem{
 	public $launchedThisTurn = 0;         //resets each turn
 	public $landedThisTurn = 0;           //resets each turn
 	public $usagePopulated = false;       //idempotency guard — first hangar on a ship runs initial population once
+	/* WALKERS_OF_SIGMA_PLAN.md 3.14d (Stage 19). The largest Energy Draining Field radius projected
+	   by the units STOWED in this bay, filled by HangarOps::publishStowedEdfRadii during
+	   setEdfHexes() and sent by stripForJson() when it is non-zero. RENDERING ONLY - the hexes
+	   themselves are already in the public $edfHexes map, which is what every RULE reads.
+	   ⚠️ PROTECTED ON PURPOSE. A public property rides the static blueprint (ShipCompactor), which
+	   would put a live, per-turn number into a cached per-CLASS artefact and add a key to every
+	   hangar in the game. stripForJson reflects IS_PUBLIC only, so this is invisible to it and is
+	   copied by hand below. */
+	protected $stowedEdfRadius = 0;
 	private $lastSavedUsage = null;       //serialized snapshot of last persisted hangarUsage (avoids duplicate notes)
 	//Stage 15: per-carrier ordnance reload pool. Only the PRIMARY (first)
 	//hangar on a ship carries the spent counter — HangarOps::drawReload writes
@@ -4019,8 +4028,19 @@ class Hangar extends ShipSystem{
 			return ($a->id < $b->id) ? -1 : 1;
 		});
 
+		$launchTurns     = array(); //unit id => turn of its latest launch from THIS hangar
+		$deployDockTurns = array(); //unit id => turn it was deploy-start docked into THIS hangar
 		foreach ($this->individualNotes as $note){
-			if ($note->notekey === 'hangarUsage'){
+			if ($note->notekey === 'hangarLaunchEvent' || $note->notekey === 'hangarEscapeEvent'
+				|| $note->notekey === 'hangarDeployStartEvent'){
+				//Replay visibility, applied below. Every successful note's value LEADS with the
+				//unit's ship id (flight, LCV or bay ship); a failure reads 'fail:...', which casts to 0.
+				$unitId = (int)$note->notevalue;
+				if ($unitId > 0){
+					if ($note->notekey === 'hangarDeployStartEvent') $deployDockTurns[$unitId] = (int)$note->turn;
+					else $launchTurns[$unitId] = (int)$note->turn;
+				}
+			} else if ($note->notekey === 'hangarUsage'){
 				$decoded = json_decode($note->notevalue, true);
 				if (is_array($decoded)){
 					$this->hangarUsage = $decoded;
@@ -4152,6 +4172,8 @@ class Hangar extends ShipSystem{
 				if ($lcv) {
 					$lcv->removed = true;
 					$lcv->removedTurn = (int)($this->lcvDocked['dockTurn'] ?? $gamedata->turn);
+					//Deploy-docked: never on the board on its dock turn (see the flight rule below).
+					if (($deployDockTurns[$lcvId] ?? null) === $lcv->removedTurn) $lcv->removedTurn--;
 				}
 			}
 		}
@@ -4163,6 +4185,14 @@ class Hangar extends ShipSystem{
 				if (!$flight) continue;
 				$flight->removed = true;
 				if (isset($entry['dockedTurn'])) $flight->removedTurn = (int)$entry['dockedTurn'];
+				/* A DEPLOY-START dock happens before that turn's Movement, so the flight was never
+				   on the board on its dock turn. removedTurn means "replay shows it up to and
+				   including this turn" (BaseShip), so it is the turn BEFORE - otherwise the replay's
+				   docked-this-turn exception draws it at its off-board 'start' hex all turn (game
+				   7386). TacGamedata::hideDeploymentDocks accepts this value. */
+				if ($flight->removedTurn !== null && ($deployDockTurns[$flightId] ?? null) === $flight->removedTurn) {
+					$flight->removedTurn--;
+				}
 				//A fragment flight (partial-dock detachment) was born $removed at
 				//the dock turn and never existed on the board. $spawned isn't a
 				//tac_ship column, so restore it here from dockedTurn — the replay
@@ -4171,6 +4201,29 @@ class Hangar extends ShipSystem{
 				if (!empty($entry['fragment']) && isset($entry['dockedTurn'])) {
 					$flight->spawned = (int)$entry['dockedTurn'];
 				}
+			}
+		}
+
+		//Hangar Ops: stamp each unit this bay launched (or that escaped it) with its launch turn - see
+		//BaseShip::$hangarLaunchTurn. Latest wins across bays, as a unit can launch from several.
+		foreach ($launchTurns as $unitId => $launchTurn) {
+			$launched = $gamedata->getShipById($unitId);
+			if (!$launched) continue;
+			/* ⚠️ NOT every launch note means "was aboard all turn". A Docking Bay two-turn rider
+			   (WALKERS_OF_SIGMA_PLAN.md 3.14a) spends the turn clamped to the OUTSIDE of the hull, on
+			   the board, and still writes one when it lets go ('Docking bay launched ship' on
+			   completion, 'Manoeuvre abandoned', 'Ship released from destroyed carrier'). Its own
+			   'attached' rows for that turn give it away; a unit that really came out of a hull has
+			   nothing that turn but its launch 'deploy' row (and turn 1's creation 'start' marker).
+			   Only the launch turn's rows matter - hangarLaunchTurn is only ever compared against the
+			   loaded turn, whose rows are always loaded. */
+			$onBoard = false;
+			foreach ((array)$launched->movement as $move) {
+				if ((int)$move->turn === $launchTurn && $move->type !== 'deploy' && $move->type !== 'start') { $onBoard = true; break; }
+			}
+			if ($onBoard) continue;
+			if ($launched->hangarLaunchTurn === null || $launchTurn > $launched->hangarLaunchTurn) {
+				$launched->hangarLaunchTurn = $launchTurn;
 			}
 		}
 
@@ -4721,6 +4774,10 @@ class Hangar extends ShipSystem{
 		if ($hasLcvDeployStartKey) $this->pendingLcvDeployStartTransfer = $cleanLcvDeployStarts;
 	}
 
+	//Stage 19 (3.14d) - the one writer, HangarOps::publishStowedEdfRadii. A setter rather than a
+	//public property, for the blueprint reason recorded on the field itself.
+	public function setStowedEdfRadius($radius){ $this->stowedEdfRadius = max(0, (int)$radius); }
+
 	public function stripForJson(){
 		$strippedSystem = parent::stripForJson();
 		$strippedSystem->hangarType = $this->hangarType;
@@ -4771,6 +4828,12 @@ class Hangar extends ShipSystem{
 		if (!$disclosedUsage) $strippedSystem->hangarUsageHidden = true;
 		$strippedSystem->launchedThisTurn = $this->launchedThisTurn;
 		$strippedSystem->landedThisTurn = $this->landedThisTurn;
+		/* Stage 19 (3.14d): a docked unit's field is drawn as a disc on the CARRIER's icon, because
+		   the stowed unit has no icon of its own. Published to EVERY viewer - the field's hexes are
+		   already public in gamedata.edfHexes, so the radius discloses nothing that is not on the
+		   map, whereas deriving it from the masked ship list would have drawn the disc for one side
+		   of the table only. Omitted when zero, so no ordinary hangar pays a key for it. */
+		if ((int)$this->stowedEdfRadius > 0) $strippedSystem->stowedEdfRadius = (int)$this->stowedEdfRadius;
 		//Stage 15: only the primary hangar carries the carrier-level reload pool.
 		//Send capacity (from HANG_ORD) AND spent so the client can render
 		//remaining without needing to re-derive enhancement totals client-side.
@@ -5134,10 +5197,421 @@ class DockingCollar extends Hangar{
         //ShipSystem so we don't inherit Hangar's hangar/catapult Special block.
         ShipSystem::setSystemDataWindow($turn);
         $this->data["Special"]  = "External launch rail for LCVs.";
-        $this->data["Special"] .= "<br>LCVs can dock and launch from this system.";		
+        $this->data["Special"] .= "<br>LCVs can dock and launch from this system.";
         $this->data["Special"] .= "<br>Further details of Hangar Operations can be found in Fiery Void FAQ.";
     }
 
+}
+
+
+/* WALKERS_OF_SIGMA_PLAN.md 3.14 (Stage 16) - the Traveler's Docking Bay.
+
+   An ordinary hangar for fighters (the Mapmaker Probes use every fighter path unchanged) that ALSO
+   docks whole SHIPS by phpclass - Scribes, Pathfinders/Guideships and the Waymarker. The ship half
+   is DockingCollar's LCV dock with a LIST instead of one slot: a docked ship is removed from the
+   board, remembered in $shipsDocked, and resurrected at the carrier's hex on launch. All of that
+   logic lives in HangarOps::*BayShip* beside the LCV functions it mirrors.
+
+   ⭐ $name STAYS 'hangar' ON PURPOSE (ShadowHangar's precedent). Twenty-nine client sites gate the
+   fighter launch/dock/recover UI on name === 'hangar', and the Mapmakers need every one of them.
+   So the client builds a plain Hangar from this system and reads the isDockingBay flag instead.
+   $displayName is what the hit chart matches, which is why the chart row says "Docking Bay".
+
+   BOX ACCOUNTING. One pool of $maxhealth boxes, shared: a ship costs HangarOps::boxesPerCraftForClass
+   of its phpclass (unitSize 1/4, 1/12, 1/24 on the hulls, D18), a Mapmaker costs 1. Fighters see the
+   ships through HangarOps::effectiveCapacity, the one choke point every fighter dock gate reads; ships
+   see the fighters through occupiedBoxes. The LAUNCH RATE is per class (user, 2026-09-11): "12
+   Mapmakers OR 2 Scribes OR 1 Pathfinder" a turn, launches and recoveries together. Mapmakers keep
+   $output; each ship class has its own count in $shipLaunchRates.
+
+   ONE CRAFT TYPE PER TURN (D17), decided when the notes load - from the orders alone, so it cannot
+   depend on which bay's hook runs first. The bay's OWN fighter orders win ("it refuses a Scribe on a
+   turn a Mapmaker moved", plan 3.14): its ship orders are refused and logged. Otherwise ship orders
+   claim the bay, and it reports zero fighter capacity to every dock gate for the rest of the turn -
+   which is what stops the carrier-level coalescer routing a Mapmaker flight in from a sibling bay.
+
+   THE WAYMARKER'S TWO-TURN PROCEDURE (3.14a) is Stage 19, 2026-09-12. It does not go straight in:
+   it clamps to the carrier's AFT on `attached` for one whole turn each way, which is what
+   $shipsAttaching records and what HangarOps' two-turn section implements. TWO_TURN_SHIP_CLASSES
+   names the classes that take that route - a label now, not the refusal it used to be. */
+class DockingBay extends Hangar{
+    public $displayName = "Docking Bay";
+
+    public $isDockingBay = true;             //the discriminator; $name stays 'hangar' (see above)
+    public $dockableShipClasses = array();   //phpclasses of SHIPS this bay docks whole
+    //phpclass => ships of that class that may launch or be recovered per turn (together).
+    public $shipLaunchRates = array();
+    //The $fighters capacity category this bay's boxes belong to. Read by the lobby's Fleet Checker
+    //only: a bought ship that could dock here counts its boxes toward that category's 50% minimum.
+    public $fleetCheckCategory = '';
+    //[{shipId, phpclass, boxes, dockTurn}] - the ship half of the bay's contents.
+    public $shipsDocked = array();
+    /* WALKERS_OF_SIGMA_PLAN.md 3.14a (Stage 19) - THE WAYMARKER'S TWO-TURN PROCEDURE, mid-manoeuvre.
+       [{shipId, phpclass, boxes, startTurn, dir}] where dir is 'in' (docking) or 'out' (launching).
+       An entry here is a ship RIDING THE CARRIER'S AFT on `attached`: still on the board, moving with
+       the Traveler, unable to fire and unable to steer. Its boxes are RESERVED from the moment the
+       order resolves (HangarOps::dockedShipBoxes counts this list too), because the arrival on
+       startTurn + 1 must have somewhere to go - otherwise a player attaches a Waymarker and fills the
+       bay with Mapmakers in the same turn (plan 3.14a).
+       Persisted as its own change-detected `bayShipsAttaching` snapshot beside bayShipsDocked. The
+       `attached` link itself round-trips through the CARRIER's CnC Attached/Detached notes exactly as
+       a boarding pod's does; THIS list is what tells every other reader that the ride is a docking
+       manoeuvre and not a boarding action. */
+    public $shipsAttaching = array();
+    public $pendingBayShipDockOrder = null;   //latest bayShipDockOrder note for this turn
+    public $pendingBayShipLaunchOrder = null; //latest bayShipLaunchOrder note for this turn
+    //Transient, resolution-only: the ship phpclass that has used the bay this turn (type lock).
+    public $shipTypeThisTurn = null;
+    public $shipsMovedThisTurn = 0;   //transient: ships launched + recovered in this resolution pass
+    /*Stage 17 (3.15): transient once-per-resolution guard for HangarOps::runDockedShipsSelfRepair,
+    which has two callers - this bay and the carrier's own Self Repair - and must run exactly once,
+    before the carrier's queue is built. Not persisted and not serialised; fresh false each load.*/
+    public $dockedSelfRepairDone = false;
+    /*Stage 18 (3.16, D20): the SHIPS in this bay feed their reactor SURPLUS to the carrier at one
+    point per four, summed over the whole bay list and then floored. An instance flag, exactly like
+    the Traveler's SelfRepair::servicesDockedUnits, so an ordinary Docking Bay fitted to some other
+    hull later is not silently a power tap.
+    ⚠️⚠️ THE SUM IS A CLIENT NUMBER AND THERE IS NO SERVER TWIN OF IT. That is a recorded
+    decision, not an oversight - see WALKERS_OF_SIGMA_PLAN.md 3.16a. The whole power BALANCE in
+    Fiery Void is computed in power.js; the server trusts the power rows it is handed (submitPower
+    validates nothing against anything) and Reactor::getOutput answers only for one reactor on one
+    hull. So this flag publishes the RULE and not a figure: it tells the client which bay taps its
+    ships, and NOTHING ON THE SERVER READS IT. Enforcing the grant would mean computing a ship's
+    whole balance server-side first, which is a cross-cutting project and not a Walkers stage.*/
+    public $sharesDockedPower = false;
+    //Latched when the notes load, because the orders themselves are CONSUMED during resolution -
+    //and the fighter coalescer that runs after them must still find the bay closed.
+    private $shipsClaimedBayThisTurn = false;
+    private $refusedShipOrders = array();   //ship ids whose orders the type lock refused at load
+    private $lastSavedShipsDocked = null;
+    private $lastSavedShipsAttaching = null;
+    private $pendingBayShipDockTransfer = null;
+    private $pendingBayShipLaunchTransfer = null;
+    private $pendingBayShipDeployStartTransfer = null;
+
+    /* A const, not a public static - see the Stage 11 note on MissileRack::stripForJson.
+       Stage 19: the Waymarker moved OUT of a DEFERRED list (refused everywhere) into a TWO-TURN one -
+       accepted, but through the attached ride above. Nothing is deferred any more, so the old const is
+       gone, and `deferredShipClasses` on the wire is replaced by `twoTurnShipClasses`, which the client
+       reads to LABEL a row rather than to grey it out. */
+    const TWO_TURN_SHIP_CLASSES = array('Waymarker');
+
+    //$dockableShips: phpclass => ships of that class per turn, e.g. array('Scribe' => 2, 'Pathfinder' => 1).
+    function __construct($armour, $maxhealth, $output, $direction = 0, $dockableShips = array(), $fleetCheckCategory = ''){
+        parent::__construct($armour, $maxhealth, $output, $direction);
+        $this->shipLaunchRates = array();
+        foreach ((is_array($dockableShips) ? $dockableShips : array()) as $cls => $rate){
+            $this->shipLaunchRates[(string)$cls] = max(1, (int)$rate);
+        }
+        $this->dockableShipClasses = array_keys($this->shipLaunchRates);
+        $this->fleetCheckCategory = (string)$fleetCheckCategory;
+    }
+
+    /* Ship orders this turn claim the bay for ships (type lock). An empty order - a cancel - claims nothing. */
+    public function hasShipOrdersThisTurn(){
+        //Stage 19 (3.14a): a Waymarker riding the hull claims the bay for the WHOLE manoeuvre, not
+        //just the turn it was ordered. The bay is physically occupied by it, and the one-type-per-
+        //turn rule simply lasts as long as the manoeuvre does.
+        return $this->shipsClaimedBayThisTurn || !empty($this->shipsAttaching)
+            || !empty($this->pendingBayShipDockOrder) || !empty($this->pendingBayShipLaunchOrder);
+    }
+
+    /* A fighter dock or launch order on THIS bay this turn. An empty order (a cancel) is none. */
+    public function hasFighterOrdersThisTurn(){
+        foreach ((array)$this->pendingDockOrder as $o) if ((int)($o['count'] ?? 0) > 0) return true;
+        foreach ((array)$this->pendingLaunchOrder as $o) if ((int)($o['size'] ?? 0) > 0) return true;
+        return false;
+    }
+
+    /* Ship ids queued to START the game in this bay - read by DeploymentGamePhase, via
+       HangarOps::collectQueuedDeployStartFlightIds, BEFORE the notes are generated. */
+    public function getQueuedDeployDockShipIds(){
+        $ids = array();
+        if (!is_array($this->pendingBayShipDeployStartTransfer)) return $ids;
+        foreach ($this->pendingBayShipDeployStartTransfer as $order) $ids[] = (int)$order['shipId'];
+        return $ids;
+    }
+
+    public function onIndividualNotesLoaded($gamedata){
+        //Read this bay's own keys FIRST - the parent empties $this->individualNotes when it is done.
+        //Same chronological sort the parent uses (ids are monotonic; phase numbers are not).
+        $notes = $this->individualNotes;
+        usort($notes, function($a, $b){
+            if ($a->turn !== $b->turn) return ($a->turn < $b->turn) ? -1 : 1;
+            return ($a->id < $b->id) ? -1 : 1;
+        });
+        foreach ($notes as $note){
+            if ($note->notekey === 'bayShipsDocked'){
+                $decoded = json_decode($note->notevalue, true);
+                $this->shipsDocked = is_array($decoded) ? array_values($decoded) : array();
+                $this->lastSavedShipsDocked = $note->notevalue;
+            } else if ($note->notekey === 'bayShipsAttaching'){
+                //Stage 19 (3.14a): the ships riding the hull mid-manoeuvre. The `attached` link
+                //itself is replayed by the CARRIER's CnC from its own Attached/Detached notes; this
+                //is only the bay's record that the ride is a docking one, and whose boxes it holds.
+                $decoded = json_decode($note->notevalue, true);
+                $this->shipsAttaching = is_array($decoded) ? array_values($decoded) : array();
+                $this->lastSavedShipsAttaching = $note->notevalue;
+            } else if ($note->notekey === 'bayShipDockOrder' && $note->turn == $gamedata->turn){
+                $decoded = json_decode($note->notevalue, true);
+                if (is_array($decoded)) $this->pendingBayShipDockOrder = $decoded;
+            } else if ($note->notekey === 'bayShipLaunchOrder' && $note->turn == $gamedata->turn){
+                $decoded = json_decode($note->notevalue, true);
+                if (is_array($decoded)) $this->pendingBayShipLaunchOrder = $decoded;
+            }
+        }
+
+        parent::onIndividualNotesLoaded($gamedata);
+
+        //One craft TYPE per turn (see the class note). The client never lets a player queue both;
+        //this is the server's word on it. The bay's own fighter orders win; failing those, ship
+        //orders claim the bay (and effectiveCapacity then closes it to fighters).
+        $shipOrders = !empty($this->pendingBayShipDockOrder) || !empty($this->pendingBayShipLaunchOrder);
+        if ($shipOrders && $this->hasFighterOrdersThisTurn()){
+            foreach (array_merge((array)$this->pendingBayShipDockOrder, (array)$this->pendingBayShipLaunchOrder) as $o){
+                $this->refusedShipOrders[] = (int)($o['shipId'] ?? 0);
+            }
+            $this->pendingBayShipDockOrder = null;
+            $this->pendingBayShipLaunchOrder = null;
+            $shipOrders = false;
+        }
+        $this->shipsClaimedBayThisTurn = $shipOrders;
+
+        //A docked ship is off the board. $removed is not a column - it is re-derived here on every
+        //load, exactly as the LCV rail does for its one occupant.
+        foreach ($this->shipsDocked as $entry){
+            $id = (int)($entry['shipId'] ?? 0);
+            if ($id <= 0) continue;
+            $docked = $gamedata->getShipById($id);
+            if (!$docked) continue;
+            $docked->removed = true;
+            $docked->removedTurn = (int)($entry['dockTurn'] ?? $gamedata->turn);
+            //A ship that STARTED aboard was never on the board on its dock turn - see the same rule
+            //for flights in Hangar::onIndividualNotesLoaded.
+            if (!empty($entry['deploy'])) $docked->removedTurn--;
+        }
+    }
+
+    public function generateIndividualNotes($gamedata, $dbManager){
+        $ship = $this->getUnit();
+        $placed = $ship && $ship->getTurnPlaced($gamedata) <= $gamedata->turn;
+        if ($placed && !$ship->isDestroyed() && HangarOps::isFlowEnabled($gamedata->id)){
+            if ($this->pendingBayShipDockTransfer !== null){
+                $this->individualNotes[] = new IndividualNote(-1, $gamedata->id, $gamedata->turn, $gamedata->phase, $ship->id, $this->id,
+                    'bayShipDockOrder', 'Docking bay ship dock order', json_encode($this->pendingBayShipDockTransfer));
+                $this->pendingBayShipDockTransfer = null;
+            }
+            if ($this->pendingBayShipLaunchTransfer !== null){
+                $this->individualNotes[] = new IndividualNote(-1, $gamedata->id, $gamedata->turn, $gamedata->phase, $ship->id, $this->id,
+                    'bayShipLaunchOrder', 'Docking bay ship launch order', json_encode($this->pendingBayShipLaunchTransfer));
+                $this->pendingBayShipLaunchTransfer = null;
+            }
+            /* Deployment. THIS is the POST-side bay, which never loaded its notes - seed the ships
+               already aboard from the DB counterpart before anything is added, or the snapshot below
+               would replace the bay's contents with just this commit's docks. Also seeded when only
+               FIGHTERS deploy-dock, so the parent's fighter packer (effectiveCapacity) sees them.
+               Ships resolve BEFORE the parent's fighter deploy-docks on purpose: a Mapmaker flight
+               packed in the same commit then finds the ships' boxes already taken, rather than a
+               Pathfinder finding the Mapmakers in its way. */
+            if ($this->pendingBayShipDeployStartTransfer !== null || $this->pendingDeployStartTransfer !== null){
+                $dbBay = HangarOps::dbCounterpartBay($this, $ship, $gamedata);
+                if ($dbBay) $this->shipsDocked = array_values($dbBay->shipsDocked);
+            }
+            if ($this->pendingBayShipDeployStartTransfer !== null){
+                HangarOps::processBayShipDeployStartTransfer($this, $ship, $gamedata, $this->pendingBayShipDeployStartTransfer);
+                $this->pendingBayShipDeployStartTransfer = null;
+            }
+        }
+
+        parent::generateIndividualNotes($gamedata, $dbManager);
+
+        //Snapshot, change-detected - and written for a DESTROYED carrier too: a forced launch clears
+        //the list, and that cleared state must persist or the next load re-removes the ships.
+        if (!$placed) return;
+        //Stage 19 (3.14a): the riders' snapshot, same change-detected shape and the same reason -
+        //a CLEARED list (a manoeuvre completed or abandoned) must persist, or the next load
+        //re-reserves boxes for a ship that is already inside or already gone.
+        $attaching = json_encode(array_values($this->shipsAttaching));
+        if ($attaching !== $this->lastSavedShipsAttaching
+            && !($this->lastSavedShipsAttaching === null && empty($this->shipsAttaching))){
+            $this->individualNotes[] = new IndividualNote(-1, $gamedata->id, $gamedata->turn, $gamedata->phase, $ship->id, $this->id,
+                'bayShipsAttaching', 'Docking bay riders', $attaching);
+            $this->lastSavedShipsAttaching = $attaching;
+        }
+
+        $current = json_encode(array_values($this->shipsDocked));
+        if ($current === $this->lastSavedShipsDocked) return;
+        if ($this->lastSavedShipsDocked === null && empty($this->shipsDocked)) return;   //POST-side, nothing to say
+        $this->individualNotes[] = new IndividualNote(-1, $gamedata->id, $gamedata->turn, $gamedata->phase, $ship->id, $this->id,
+            'bayShipsDocked', 'Docking bay ships', $current);
+        $this->lastSavedShipsDocked = $current;
+    }
+
+    public function criticalPhaseEffects($ship, $gamedata){
+        //Ships first: a bay they have claimed is closed to fighters anyway, and a bay destroyed this
+        //turn must put its ships back on the board before the parent wipes its fighters. A destroyed CARRIER's ships
+        //are HangarOps::processDockingBayCarrierDestruction's, run from criticals.php (Pass 3).
+        if (!$ship->isDestroyed()){
+            //Ship orders the type lock refused at load: say so in the log, as a failed dock does.
+            foreach ($this->refusedShipOrders as $refusedId){
+                Manager::insertIndividualNote(new IndividualNote(-1, $gamedata->id, $gamedata->turn, $gamedata->phase, $ship->id, $this->id,
+                    'hangarDockEvent', 'Docking bay ship order refused', 'fail:' . $refusedId . ':bay already used by another craft type this turn'));
+            }
+            $this->refusedShipOrders = array();
+            if ($this->isDestroyed()){
+                HangarOps::onDockingBayDestroyed($this, $ship, $gamedata);
+            } else {
+                /*Stage 19 (3.14a): last turn's two-turn manoeuvres finish FIRST. They are the
+                previous turn's business, and a Waymarker separating frees the 24 boxes this turn's
+                orders may want - while one arriving must claim its slot before anything else does.*/
+                HangarOps::completeBayShipAttachments($this, $ship, $gamedata);
+                HangarOps::processBayShipDockOrders($this, $ship, $gamedata);
+                HangarOps::processBayShipLaunchOrders($this, $ship, $gamedata);
+                /*Stage 17 (3.15): the ships that are STILL aboard after this turn's traffic repair
+                themselves. Guarded, so it is a no-op when the carrier's own Self Repair already ran
+                it - this branch is what covers a carrier whose Self Repair is destroyed. AFTER the
+                launches on purpose: a ship that has just left the bay is on the board again and the
+                ordinary Pass 2 sweep will reach it in its own right.*/
+                HangarOps::runDockedShipsSelfRepair($ship, $gamedata);
+            }
+        }
+        parent::criticalPhaseEffects($ship, $gamedata);
+    }
+
+    /* The bay's own payload keys are taken out of the transfer before the parent sees it - the
+       parent reads a payload with none of ITS keys as a legacy launch list, and would then write an
+       empty fighter launch order over a real one. */
+    public function doIndividualNotesTransfer(){
+        $raw = $this->individualNotesTransfer;
+        $payload = (is_string($raw) && $raw !== '') ? json_decode($raw, true) : null;
+        if (is_array($payload)){
+            $touched = false;
+            if (array_key_exists('bayShipDocks', $payload)){
+                $this->pendingBayShipDockTransfer = self::cleanShipOrders($payload['bayShipDocks'], true);
+                unset($payload['bayShipDocks']);
+                $touched = true;
+            }
+            if (array_key_exists('bayShipLaunches', $payload)){
+                $this->pendingBayShipLaunchTransfer = self::cleanShipOrders($payload['bayShipLaunches'], false);
+                unset($payload['bayShipLaunches']);
+                $touched = true;
+            }
+            if (array_key_exists('bayShipDeployStarts', $payload)){
+                $this->pendingBayShipDeployStartTransfer = self::cleanShipOrders($payload['bayShipDeployStarts'], false);
+                unset($payload['bayShipDeployStarts']);
+                $touched = true;
+            }
+            if ($touched) $this->individualNotesTransfer = empty($payload) ? '' : json_encode($payload);
+        }
+        parent::doIndividualNotesTransfer();
+    }
+
+    /* [{shipId, thrustLeft?}] - anything else the client sends (its own box projection) is dropped;
+       the server prices every ship itself. */
+    private static function cleanShipOrders($orders, $withThrust){
+        $clean = array();
+        if (!is_array($orders)) return $clean;
+        foreach ($orders as $order){
+            if (!is_array($order)) continue;
+            $shipId = isset($order['shipId']) ? (int)$order['shipId'] : 0;
+            if ($shipId <= 0) continue;
+            $row = array('shipId' => $shipId);
+            if ($withThrust) $row['thrustLeft'] = isset($order['thrustLeft']) ? (int)$order['thrustLeft'] : 0;
+            $clean[] = $row;
+        }
+        return $clean;
+    }
+
+    public function stripForJson(){
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->isDockingBay = true;
+        $strippedSystem->dockableShipClasses = $this->dockableShipClasses;
+        $strippedSystem->shipLaunchRates = (object)$this->shipLaunchRates;   //a map, so never a JSON []
+        //Stage 19: no longer a refusal list. The client reads it to LABEL a row "(2-turn procedure)"
+        //and to word the confirmation, never to grey it out.
+        $strippedSystem->twoTurnShipClasses = self::TWO_TURN_SHIP_CLASSES;
+        //Stage 18 (3.16): sent on the wire as well as riding the static blueprint, for the same
+        //reason SelfRepair::servicesDockedUnits is - the tap then works before the statics are
+        //regenerated. ShipCompactor strips it from every bay on which it is false.
+        if ($this->sharesDockedPower) $strippedSystem->sharesDockedPower = true;
+        //An ENCLOSED bay, so its ships follow the same own-team mask as its hangarUsage (the parent
+        //has already raised hangarUsageHidden for everyone else), and so do its queued orders.
+        $disclosed = $this->isDisclosedToCurrentViewer();
+        $strippedSystem->shipsDocked = $disclosed ? array_values($this->shipsDocked) : array();
+        /* Stage 19 (3.14a): the RIDERS are published to EVERYONE, unlike the bay's contents.
+           Nothing about them is private - a Waymarker clamped to the Traveler's aft is on the map,
+           in the same hex, drawn and shootable, and the `attached` link the map tooltip reads is
+           already public. Masking it would only hide from the opponent WHY the ship they can see
+           is not steering, and would take the Aft-hit redirect (which they must be able to reason
+           about before they shoot) with it. */
+        //Only when there IS one, so an ordinary Docking Bay pays no key for it: absent and empty
+        //mean the same thing here (unlike shipsDocked, whose empty list also means "masked"), and
+        //every client reader is an Array.isArray() guard.
+        if (!empty($this->shipsAttaching)) $strippedSystem->shipsAttaching = array_values($this->shipsAttaching);
+        /* Stage 18 (3.16b, user ruling 2026-09-12): THE ONE THING AN OPPONENT IS TOLD ABOUT THE
+           CONTENTS OF A SHARING BAY - the ids of the ships aboard, and nothing else.
+
+           Why it exists: the docked-power grant is computed by EACH VIEWER'S OWN CLIENT
+           (D46 - shipManager.power.getDockedPowerSummary), so with shipsDocked masked to [] the
+           opponent found no donors and rendered the Traveler's reactor without the grant while its
+           owner rendered it with. Sending the ids lets the opponent's client run the IDENTICAL
+           function and reach the IDENTICAL number, which no server-side recomputation could
+           promise. The alternative - a second power balance on the server - is rejected in D46.
+
+           ⚠️ A SEPARATE KEY, NOT A PRUNED shipsDocked, and that is the whole safety of it. Until
+           now an outside viewer's shipsDocked was ALWAYS empty, so no client consumer has ever met
+           a partial entry; HangarShared's capacity maths, the fire-menu dock dialogs, SelfRepairList
+           and fleetListManager.carrierHolding all read 'boxes', 'phpclass' or 'dockTurn' off these
+           rows. Handing them id-only entries would be a silent NaN in four places. Only
+           getDockedPowerSummary reads this key, and it prefers the real list when it has one.
+
+           ⚠️ ONLY ON A BAY THAT ACTUALLY SHARES POWER. An ordinary Docking Bay fitted later stays
+           fully masked - the disclosure is bought by the rule that needs it and by nothing else.
+
+           ⚠️ hideDeploymentDocks HAS ALREADY DROPPED anything that docked THIS turn from this
+           viewer's copy, and must keep doing so: concealing the dock EVENT is a stronger mask than
+           this one (it is where a unit went, not what a reactor reads). In practice that costs
+           nothing - the dock resolves after Initial Orders, so by the next turn's orders, when the
+           figure is actually managed, dockTurn is in the past and the entry is disclosed here. */
+        if (!$disclosed && $this->sharesDockedPower && !empty($this->shipsDocked)){
+            $ids = array();
+            foreach ($this->shipsDocked as $entry){
+                $id = (int)($entry['shipId'] ?? 0);
+                if ($id > 0) $ids[] = $id;
+            }
+            if (!empty($ids)) $strippedSystem->sharesDockedPowerIds = $ids;
+        }
+        if ($disclosed){
+            if ($this->pendingBayShipDockOrder !== null)   $strippedSystem->pendingBayShipDockOrder   = $this->pendingBayShipDockOrder;
+            if ($this->pendingBayShipLaunchOrder !== null) $strippedSystem->pendingBayShipLaunchOrder = $this->pendingBayShipLaunchOrder;
+        }
+        return $strippedSystem;
+    }
+
+    public function setSystemDataWindow($turn){
+        parent::setSystemDataWindow($turn);
+        $ships = array();
+        foreach ($this->dockableShipClasses as $cls){
+            $label = $cls . ' (' . HangarOps::boxesPerCraftForClass($cls) . ' boxes, ' . $this->shipLaunchRates[$cls] . ' per turn';
+            if (in_array($cls, self::TWO_TURN_SHIP_CLASSES, true)) $label .= ', 2-turn procedure';
+            $ships[] = $label . ')';
+        }
+        $this->data["Type"] = ($this->fleetCheckCategory !== '' ? $this->fleetCheckCategory : 'Fighters') . ' + Ships';
+        $this->data["Special"]  = "Docking bay: carries fighters AND whole ships, sharing one pool of boxes.";
+        if (!empty($ships)) $this->data["Special"] .= "<br>Ships: " . implode(', ', $ships) . ".";
+        $this->data["Special"] .= "<br>Only ONE type of craft may launch or be recovered per turn: " . $this->output . " fighters, or the ships per turn listed above (launches and recoveries together).";
+        $this->data["Special"] .= "<br>A docking ship must end its move in this hex on the carrier's heading, with 1 thrust unspent, while the carrier is at speed 0.";
+        if (!empty(self::TWO_TURN_SHIP_CLASSES)){
+            $this->data["Special"] .= "<br>" . implode(' / ', self::TWO_TURN_SHIP_CLASSES) . ": docking and launching take TWO turns. The ship rides this vessel's aft for the intervening turn - it cannot steer or fire, and hits on this vessel's aft section are rolled on its own least damaged section instead.";
+        }
+        //Stage 18 (3.16): the RULE, not the running figure. The live "+N shared" total is shown on
+        //the carrier's Reactor tooltip instead, because it is computed client-side from what the
+        //player has powered down this turn - see the ⚠️⚠️ on $sharesDockedPower.
+        if ($this->sharesDockedPower){
+            $this->data["Special"] .= "<br>Docked SHIPS share power with this vessel: their reactor surpluses are summed and every 4 points gives this vessel 1 (rounded down). Manage a docked ship's own power from its ship window during Initial Orders; docked fighters share nothing.";
+        }
+        $this->data["Special"] .= "<br>Details of Hangar Operations can be found in Fiery Void FAQ.";
+    }
 }
 
 
@@ -5402,6 +5876,67 @@ class JumpEngine extends Weapon{
      * stripForJson sends). */
     protected $hasJumpRecharge = true;
 
+    /* ⭐⭐ AN ANCIENT "SPECIAL JUMP DRIVE" (user ruling 2026-09-11, from the B5W rules):
+     *
+     *   "Each Ancient One has its own method for traveling into hyperspace, but these are all listed
+     *    on the control sheet as a 'special jump drive' for consistency. The drive affects only the
+     *    Ancient's ship and nothing else. As with a phasing drive, the jump drive is initiated at the
+     *    start of the turn and takes the ship out of (or into) the scenario by the turn's end, though
+     *    the vessel will be vulnerable to weapons fire in the interim. Except as noted, the ship may
+     *    not fire weapons while jumping into/out of a scenario. If the jump drive itself is damaged
+     *    while the ship is departing/arriving, it has only half the usual chance of detonating.
+     *    Ancient jump drives cannot be affected by vortex disruptors."
+     *
+     * Set by markAncient(), which is markLegacy() PLUS this flag: an Ancient drive forms no jump
+     * point, so it is the legacy boost-to-jump engine. What this flag adds on top:
+     *   1. no fire on the turn it jumps out - Firing::withdrawFireFromJumpingUnits, and
+     *      Firing::automateIntercept assigns it no interception (forbidsFireWhileJumping);
+     *   2. the Vortex Disruptor cannot touch it - VortexDisruptor::hasAncientJumpDrive.
+     * The half-chance rule is keyed off factionAge at all three failure sites, as it always was.
+     *
+     * WHO CARRIES ONE: Shadows (PhasingDrive's constructor), Kirishiac, Mindriders, Torvalus, Triad,
+     * Thirdspace and the Walkers (markWalker). NOT the Vorlons and NOT The System, which keep ordinary
+     * vortex-opening engines - and so are the only factionAge 3+ units a Vortex Disruptor still
+     * reaches, through rollAncientEscape.
+     *
+     * ⚠️ PROTECTED, like $legacyJump and $gateJump: json_encode takes public properties only, so no
+     * static blueprint grows a key. The client learns it from stripForJson. */
+    protected $ancientJump = false;
+
+    /* ⭐ WALKERS_OF_SIGMA_PLAN.md §3.17 (Stage 15) - A WALKER JUMP DRIVE: an Ancient drive (above)
+     * with the Walkers' two exceptions (user ruling 2026-09-11):
+     *   - the ship MAY fire on the turn it jumps (forbidsFireWhileJumping answers false);
+     *   - it has NO chance of being destroyed by the drive failing (isJumpFailureImmune).
+     * Set by markWalker() on every Walker of Sigma-957 hull and on every Mapmaker probe, in the same
+     * way a Scanner is marked Advanced (D32): a flag, not a subclass, for the four reasons
+     * markLegacy() gives above. Protected for the same reason as $ancientJump. */
+    protected $walkerJump = false;
+
+    /* ⭐⭐ WALKERS_OF_SIGMA_PLAN.md §3.18 (Stage 20) - THE EXTRA-DIMENSIONAL JUMP DRIVE: a Walker drive
+     * that can also drag an ENEMY unit into hyperspace over several consecutive turns. Set by
+     * markExtraDimensional() on the Wanderer, Traveler, Waymarker and Guideship only; every other
+     * Walker hull's drive may CONTRIBUTE half a power-turn but never initiate (canJoinAbduction).
+     * The whole mechanic is EdjdAbduction (handlers/EdjdAbduction.php); this class carries the flag,
+     * the declaration and note readers, and the detonation roll. Protected like $walkerJump. */
+    protected $extraDimensional = false;
+
+    /* §3.18 - this drive's abduction record, one entry per turn it contributed to a chain, rebuilt
+     * from its 'EDJD' IndividualNotes on every load (onIndividualNotesLoaded) and never persisted any
+     * other way: turn => array(target, halves, cost, since, anchor). See EdjdAbduction for what each
+     * field means and why the chain needs no other storage (D22). Protected, so no blueprint key. */
+    protected $abductionNotes = array();
+
+    /* §3.18 - the abduction declaration's damageclass, the note key, and the highest power level an
+     * EDJD may apply in one turn. The damageclass is the discriminator every consumer keys off, the
+     * same way 'jumppoint' and 'jumpexit' are. CONSTANTS, never statics: a public static on a Weapon
+     * subclass is exactly what MissileRack's reflection mistakes for an instance property.
+     * ABDUCTION_MAX_POWER is a UI ceiling only - the rules name none, and every level costs the drive's
+     * whole powerReq again, so a Walker cannot reach it without shutting most of its ship down. It
+     * rides the payload as abductionMaxPower, so the client needs no copy of the number. */
+    const ABDUCTION_CLASS = 'abduction';
+    const ABDUCTION_NOTE = 'EDJD';
+    const ABDUCTION_MAX_POWER = 4;
+
 	//JumpEngine tactically  is not important at all!
 	public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
 
@@ -5557,6 +6092,266 @@ class JumpEngine extends Weapon{
     public function isLegacyJump()
     {
         return $this->legacyJump;
+    }
+
+    /* ⭐⭐ WALKERS_OF_SIGMA_PLAN.md §3.12 (Stage 13) - IS THIS ENGINE MOUNTED ON A FIGHTER FLIGHT?
+     *
+     * ONE PREDICATE, THREE RULES, and they are all the same rule seen from different ends
+     * (user ruling 2026-09-10: *"as fighters, Mapmakers cannot hold a jump point open for more
+     * than 1 turn"*):
+     *
+     *   1. NO MAINTAIN. getMaintainDeclaration refuses outright, so a flight's jump point closes at
+     *      the end of its first open turn whatever anybody declares - and a forged mode-7 order is
+     *      refused at the wire by Firing::getVortexDeclarationBlock as well.
+     *   2. THE COUNTER IS OUT OF 1, not out of MAX_VORTEX_TURNS - see stripForJson. A control that
+     *      reads "1/4" promises three turns the unit can never have.
+     *   3. AND THERE IS NOTHING TO ASK ABOUT POWER. The all-systems-offline half of Maintain is a
+     *      rule about a ship's power allocation; a flight has none, so the question never arises
+     *      rather than being answered vacuously (which is what it did before this ruling, and which
+     *      would have let a Mapmaker hold a doorway open for four turns for free).
+     *
+     * ⚠️ getUnit() is the FLIGHT for a fighter's subsystem - FighterFlight::addSystem calls
+     * setUnit($this) on the craft AND on each of its systems - not the craft. */
+    public function isFlightMounted()
+    {
+        return $this->getUnit() instanceof FighterFlight;
+    }
+
+    /* ⭐⭐ MARK THIS ENGINE AS AN ANCIENT SPECIAL JUMP DRIVE - see $ancientJump for the rule and who
+     * carries one.
+     *
+     * markLegacy() PLUS the Ancient flag. The drive forms no jump point, so it jumps the old way -
+     * boosted in Initial Orders ("Jump to Hyperspace"), gone at the end of that turn - and the flag
+     * adds the no-fire rule and the Vortex Disruptor immunity. Called from a ship file straight after
+     * the engine is built, in the one-liner form markLegacy() established:
+     *
+     *     $this->addPrimarySystem((new JumpEngine(8, 25, 6, 8))->markAncient());
+     *
+     * ⚠️ AFTER construction, never before, for the reason markLegacy() gives: it prunes the
+     * per-firing-mode arrays Weapon::__construct has already built. Returns $this. */
+    public function markAncient()
+    {
+        $this->markLegacy();
+        $this->ancientJump = true;
+        return $this;
+    }
+
+    /* Is this an Ancient special jump drive? True on a Walker drive too. See $ancientJump. */
+    public function isAncientJump()
+    {
+        return $this->ancientJump;
+    }
+
+    /* ⭐ WALKERS_OF_SIGMA_PLAN.md §3.17 (Stage 15) - MARK THIS ENGINE AS A WALKER JUMP DRIVE: an Ancient
+     * drive with the Walkers' two exceptions (see $walkerJump). Called from a ship file straight after
+     * the engine is built, exactly as a Scanner is marked Advanced:
+     *
+     *     $jumpEngine = new JumpEngine(7, 30, 12, 6);
+     *     $jumpEngine->markWalker();
+     *     $this->addPrimarySystem($jumpEngine);
+     *
+     * "This operates as another advanced jump drive, except that the ship is permitted to fire
+     * weapons on the same turn that it departs the map." Every Walker hull carries one (D32) and so
+     * does every Mapmaker probe (user ruling 2026-09-11: the Walkers form no jump points at all).
+     * Returns $this so the one-liner form works too. */
+    public function markWalker()
+    {
+        $this->markAncient();
+        $this->walkerJump = true;
+        $this->autoHit = true;
+        return $this;
+    }
+
+    /* Is this a Walker jump drive? See markWalker(). */
+    public function isWalkerJump()
+    {
+        return $this->walkerJump;
+    }
+
+    /* ⭐ WALKERS_OF_SIGMA_PLAN.md §3.18 (Stage 20) - MARK THIS ENGINE AS AN EXTRA-DIMENSIONAL JUMP DRIVE:
+     * a Walker drive (markWalker) that may also INITIATE an abduction. A flag and not the plan's
+     * `ExtraDimensionalJumpDrive extends JumpEngine` subclass, for D32's reasons: no autoload change,
+     * phpclass stays "JumpEngine" for every game already in flight, and no system id moves. Returns $this.
+     *
+     *     $jumpEngine = new JumpEngine(7, 30, 12, 6);
+     *     $jumpEngine->markExtraDimensional();
+     *     $this->addPrimarySystem($jumpEngine);
+     */
+    public function markExtraDimensional()
+    {
+        $this->markWalker();
+        $this->extraDimensional = true;
+        $this->displayName = "Extra-Dimensional Jump Drive";
+        return $this;
+    }
+
+    /* Is this an Extra-Dimensional Jump Drive? See markExtraDimensional(). */
+    public function isExtraDimensional()
+    {
+        return $this->extraDimensional;
+    }
+
+    /* §3.18 - MAY THIS DRIVE TAKE PART IN AN ABDUCTION AT ALL? Every Walker drive on a HULL: an EDJD
+     * initiates and contributes its full power, any other Walker drive contributes half a power-turn
+     * (user, 2026-09-12: "other Walker marked Jump Engines can contribute"). ⚠️ NOT a Mapmaker probe's -
+     * a fighter flight has no power allocation to apply to it, so there is nothing to contribute. */
+    public function canJoinAbduction()
+    {
+        return $this->walkerJump && !$this->isFlightMounted();
+    }
+
+    /* §3.18 - this drive's abduction declaration for $turn, or null. At most one survives validation
+     * (Firing's one-abduction-per-unit rule), and a detached order (a surrendered fleet, a docking
+     * rider) is simply not on the list any more, which is what makes it inactive everywhere. */
+    public function getAbductionDeclaration($turn)
+    {
+        foreach ($this->fireOrders as $fire){
+            if ($fire->damageclass !== self::ABDUCTION_CLASS) continue;
+            if ((int)$fire->turn !== (int)$turn) continue;
+            if (!empty($fire->rejected)) continue;
+            return $fire;
+        }
+        return null;
+    }
+
+    /* §3.18 - what one declaration is worth, in HALF power-turns (integers, so a Scribe's half is
+     * exact on both sides of the wire). An EDJD: its firing mode IS the power level - normal power
+     * for one power-turn, double for two - clamped to the ceiling. Any other Walker drive: "a maximum
+     * of 1/2 of a power-turn for double power ... increased power does not grant further benefits",
+     * and Firing refuses any level but double on one, so it is a flat 1. */
+    public function getAbductionHalves($fire)
+    {
+        if (!$this->canJoinAbduction() || !$fire) return 0;
+        if (!$this->extraDimensional) return 1;
+        return 2 * max(1, min(self::ABDUCTION_MAX_POWER, (int)$fire->firingMode));
+    }
+
+    //§3.18 - turn => parsed note, as restored by onIndividualNotesLoaded. Read by EdjdAbduction::getChains.
+    public function getAbductionNotes()
+    {
+        return $this->abductionNotes;
+    }
+
+    /* §3.18 - the LATEST turn this drive fed an abduction that HELD: array(turn, targetid, level), else
+     * null. "Held" is `since > 0` - the chain stood after that turn - and NOT halves > 0, because D64's
+     * first turn takes hold and delivers nothing. The level is read back from the halves the note stored
+     * (getAbductionHalves' inverse, at least 1 - so the turn after taking hold starts at normal power), and
+     * a supporting drive's is its fixed double. Only the latest note counts: a later no-hold or cancelled
+     * turn (since 0) means the chain ended. */
+    public function getLatestAbductionHold()
+    {
+        if (empty($this->abductionNotes)) return null;
+        $turn = max(array_keys($this->abductionNotes));
+        $note = $this->abductionNotes[$turn];
+        if ($note['since'] <= 0) return null;
+        $level = $this->extraDimensional ? max(1, min(self::ABDUCTION_MAX_POWER, intdiv($note['halves'], 2))) : 2;
+        return array('turn' => (int)$turn, 'targetid' => $note['target'], 'level' => $level);
+    }
+
+    /* ⭐ §3.18 (D63, user rulings 2026-09-13) - THE ABDUCTION COOLDOWN. A drive recharges for its own
+     * jump delay from the turn after it LAST TOOK PART in an abduction - each drive on its own, EDJD and
+     * supporting alike, however that part ended: completed, collapsed on a failed condition, cancelled
+     * (deactivated, destroyed, or the player committing a turn without it) or the target destroyed.
+     * "Took part" = a resolved declaration = any 'EDJD' note, 0 halves included; an order withdrawn
+     * before Initial Orders was committed wrote none and costs nothing.
+     *
+     * Same four-state shape as the jump point: never took part -> full; took part THIS turn -> 0;
+     * then 1 the turn after, climbing to the cap. Notes from later turns are ignored (a replay of an
+     * earlier turn). ⚠️ A drive still IN a chain reads 1 on the next turn too - continuing it is the
+     * exemption isContinuingAbduction grants, not a charge it has. */
+    public function getAbductionRechargeLoad($turn)
+    {
+        $turn   = (int)$turn;
+        $charge = $this->getVortexRechargeTime();
+        if (isset($this->abductionNotes[$turn])) return 0;
+
+        $last = null;
+        foreach (array_keys($this->abductionNotes) as $noteTurn){
+            if ((int)$noteTurn < $turn && ($last === null || (int)$noteTurn > $last)) $last = (int)$noteTurn;
+        }
+        if ($last === null) return $charge;
+        return min($charge, $turn - $last);
+    }
+
+    /* §3.18 (D63) - may this drive declare at $targetId on $turn WITHOUT a charge? Only to keep going:
+     * last turn it took part in an abduction of that same unit that HELD (since > 0 - see
+     * getLatestAbductionHold for why not halves). A drive that stops, or turns to anything else, waits
+     * out its recharge. */
+    public function isContinuingAbduction($turn, $targetId)
+    {
+        $turn = (int)$turn;
+        if (!isset($this->abductionNotes[$turn - 1])) return false;
+        $note = $this->abductionNotes[$turn - 1];
+        return $note['since'] > 0 && (int)$note['target'] === (int)$targetId;
+    }
+
+    /* ⭐ MAY THE UNIT NOT FIRE ON A TURN THIS DRIVE IS TAKING IT OUT? "Except as noted, the ship may
+     * not fire weapons while jumping into/out of a scenario" - and the Walkers are the note. Read by
+     * Firing::withdrawFireFromJumpingUnits and Firing::automateIntercept, and mirrored on the client
+     * by JumpEngine.forbidsFireWhileJumping. */
+    public function forbidsFireWhileJumping()
+    {
+        return $this->ancientJump && !$this->walkerJump;
+    }
+
+    /* ⭐ THE ENGINE TAKING $unit OUT OF THE BATTLE AT THE END OF $turn, or null: the first one with a
+     * Jump-to-Hyperspace boost committed for that turn (isOverloading reads power type 2, which
+     * despite the name is the BOOST record). ONE reader for the end-of-Fire sweep that performs the
+     * jump and for the Firing withdrawal that enforces the no-fire rule, so the two cannot disagree
+     * about which units are leaving.
+     *
+     * ⚠️⚠️ ON A FIGHTER FLIGHT IT DESCENDS INTO EVERY CRAFT - deliberately NOT getUnitJumpEngines'
+     * sample-fighter-only answer. The boost is a power row on whichever craft's engine the player set
+     * "Jump to Hyperspace" on, and nothing routes it to the sample fighter, so any craft's boost takes
+     * the whole flight. (The loop the sweep used to run - `$ship->systems` + instanceof - found
+     * nothing at all on a flight: its systems are craft.)
+     *
+     * A ship's destroyed engine is skipped - the sweep's long-standing filter, no-argument
+     * isDestroyed() and all. A craft's is not: a fighter's subsystem is never destroyed on its own,
+     * and doHyperspaceJump asks whether the FLIGHT is still flying. */
+    public static function getUnitJumpingEngine($unit, $turn)
+    {
+        if (!$unit || !is_array($unit->systems)) return null;
+
+        if ($unit instanceof FighterFlight){
+            foreach ($unit->systems as $craft){
+                if (!is_array($craft->systems)) continue;
+                foreach ($craft->systems as $system){
+                    if ($system instanceof JumpEngine && $system->isOverloading($turn)) return $system;
+                }
+            }
+            return null;
+        }
+
+        foreach ($unit->systems as $system){
+            if (!($system instanceof JumpEngine)) continue;
+            if ($system->isDestroyed()) continue;
+            if ($system->isOverloading($turn)) return $system;
+        }
+
+        return null;
+    }
+
+    /* ⭐ §3.17 - DOES THIS DRIVE CARRY NO CHANCE OF DESTROYING ITS SHIP? True on a Walker drive (user
+     * ruling 2026-09-11: "zero chance of being destroyed by Jump Engine failures"), false everywhere
+     * else.
+     *
+     * ⚠️⚠️ ASKED AT ALL THREE FAILURE SITES (plan trap 33): doHyperspaceJump - the one a Walker drive
+     * really uses, now that it is a legacy drive - plus rollVortexJumpFailure and openVortex, which a
+     * legacy drive can still reach through a phase-in doorway of its own (Reinforcements Stage 9).
+     * Each one ZEROES its percentage rather than returning early, so every d100 those methods ever
+     * drew is still drawn (trap 34) and the log reports the 0% that actually applied.
+     *
+     * ⭐ THE EXTRA-DIMENSIONAL JUMP DRIVE (§3.18, Stage 20) DOES NOT OVERRIDE THIS, although the plan
+     * said it would. Its rule - "the EDJD must check for jump engine detonation as any other damaged
+     * jump drive would ... every turn that the EDJD is active" - is a roll on a turn the drive is
+     * ABDUCTING, and an abducting drive cannot also be jumping out (EdjdAbduction::isDriveWorking), so
+     * none of the three sites here is ever reached on such a turn. The roll has a site of its own,
+     * rollAbductionJumpFailure, which never asks this hook - so the same hull's ordinary jump-out keeps
+     * its immunity and the abduction does not inherit it. */
+    protected function isJumpFailureImmune($ship, $gamedata)
+    {
+        return $this->walkerJump;
     }
 
     /* ================= JUMP GATES (PHASE 2) - THE FIXED-GATE ENGINE ===============
@@ -5863,6 +6658,15 @@ class JumpEngine extends Weapon{
        mysqli (plan section 5 trap 10) while the note's turns are int-cast. */
     public function getVortexRechargeLoad($turn)
     {
+        /* WALKERS §3.18 (Stage 20, D63) - the charge is ALSO spent by an abduction, so the load is the
+           lower of the two derivations. getAbductionRechargeLoad answers the full charge on any drive
+           that never fed an abduction, so every other engine's figure is exactly what it was. */
+        return min($this->getJumpPointRechargeLoad($turn), $this->getAbductionRechargeLoad($turn));
+    }
+
+    //The jump-point half of getVortexRechargeLoad - the whole of it before Stage 20.
+    protected function getJumpPointRechargeLoad($turn)
+    {
         $turn = (int)$turn;
 
         /* ⚠️ THE CAP IS THE RECHARGE TIME, AND ON A FIXED GATE THAT IS NOT $delay ALONE (plan
@@ -5912,8 +6716,7 @@ class JumpEngine extends Weapon{
        illegal hexes anyway, and the only way to reach it is a tampered POST. */
     public static function hasVortexDeclaration($ship, $turn){
         if (!$ship || !is_array($ship->systems)) return false;
-        foreach ($ship->systems as $system){
-            if (!($system instanceof JumpEngine)) continue;
+        foreach (self::getUnitJumpEngines($ship) as $system){
             /* ⭐⭐ JUMP GATES (PHASE 2) - DO NOT "FIX" THIS METHOD TO COVER GATES. IT IS A RULING.
                (JUMP_GATES_PLAN.md sections 2.1 and 3.3, trap 5; user ruling 2026-08-23.)
 
@@ -5989,6 +6792,46 @@ class JumpEngine extends Weapon{
         return $notes;
     }
 
+    /* ⭐⭐ WALKERS_OF_SIGMA_PLAN.md §3.12 (Stage 13) - EVERY JUMP ENGINE THAT SPEAKS FOR $unit.
+     *
+     * The one place in the codebase that answers "which engines does this unit have?", and it
+     * exists because a FIGHTER FLIGHT's engines are one level further down than every sweep in this
+     * file expected: $ship->systems on a flight is a list of Fighter objects, and their weapons are
+     * inside those. Every `foreach ($ship->systems as $system) if ($system instanceof JumpEngine)`
+     * loop therefore found NOTHING on a flight - the declaration would validate, persist, and then
+     * be silently dropped by the spawn sweep.
+     *
+     * ⭐ ON A FLIGHT IT ANSWERS EXACTLY ONE ENGINE - the sample fighter's - AND THAT IS THE RULE,
+     * not an optimisation: "only let an entire flight of Mapmakers open 1 jump point, not one per
+     * fighter" (user, D13). See FighterFlight::getFlightJumpEngine for why the sample fighter is
+     * the right anchor. A declaration made on ANY craft's engine is normalised onto this one at the
+     * wire by Firing::validateVortexDeclaration, so nothing downstream ever has to look at the
+     * siblings - and a stray order that somehow named one simply opens nothing, which is the safe
+     * failure rather than a vortex whose charge lives somewhere nobody reads.
+     *
+     * On everything else it is the plain loop it replaces, so every hull, gate and OSAT in the game
+     * gets a byte-identical answer.
+     *
+     * ⚠️ READ IT, DO NOT RE-WRITE THE LOOP. A new "find the jump engines" sweep that walks
+     * $ship->systems by hand is a sweep that does not work for flights, and the symptom - an order
+     * that commits cleanly and then does nothing at all - points nowhere near the loop. */
+    public static function getUnitJumpEngines($unit)
+    {
+        if (!$unit || !is_array($unit->systems)) return array();
+
+        if ($unit instanceof FighterFlight){
+            $engine = $unit->getFlightJumpEngine();
+            return $engine ? array($engine) : array();
+        }
+
+        $engines = array();
+        foreach ($unit->systems as $system){
+            if ($system instanceof JumpEngine) $engines[] = $system;
+        }
+
+        return $engines;
+    }
+
     /* ================= STAGE 3 - THE VORTEX UNIT ==================================
      *
      * THE SPAWN SWEEP. Every legal vortex declaration made this Initial Orders turns into a
@@ -6027,9 +6870,9 @@ class JumpEngine extends Weapon{
                future order shape cannot reintroduce the bug by accident. */
             if ($ship->isReinforcement()) continue;
 
-            foreach ($ship->systems as $system){
-                if (!($system instanceof JumpEngine)) continue;
-
+            //getUnitJumpEngines, not a bare loop over $ship->systems: a FIGHTER FLIGHT's engines sit
+            //one level down, inside its craft, and it answers the flight's ONE engine (Stage 13).
+            foreach (self::getUnitJumpEngines($ship) as $system){
                 $declaration = $system->getVortexDeclaration($gamedata->turn);
                 if (!$declaration) continue;
 
@@ -6329,9 +7172,7 @@ class JumpEngine extends Weapon{
             //Pre-battle damage can destroy a system, and in principle a whole unit, before turn 1.
             if ($ship->isDestroyed($turn)) continue;
 
-            foreach ($ship->systems as $system){
-                if (!($system instanceof JumpEngine)) continue;
-
+            foreach (self::getUnitJumpEngines($ship) as $system){
                 $declaration = $system->getExitDeclaration($turn);
                 if (!$declaration) continue;
 
@@ -6409,9 +7250,7 @@ class JumpEngine extends Weapon{
             if ($ship->isTerrain()) continue;            //gates are collectGateExits' half, below
             if (!$ship->isReinforcement()) continue;     //an opener rides its own doorway, so it is still in hyperspace
 
-            foreach ($ship->systems as $system){
-                if (!($system instanceof JumpEngine)) continue;
-
+            foreach (self::getUnitJumpEngines($ship) as $system){
                 /* THE SAME QUESTION THE GATE PASS ASKS, deliberately: is the jump point this engine
                    holds an EXIT, and will it still be open on the arrival turn. Stronger than the
                    bare hasOpenVortex the old combined sweep used - it also rejects an ENTRANCE,
@@ -6579,6 +7418,37 @@ class JumpEngine extends Weapon{
         }
     }
 
+    /* ⭐ REINFORCEMENTS - DOES $unit OPEN ITS WAY IN WITH A LEGACY DRIVE? (user ruling 2026-09-11.)
+     *
+     * An Ancient special jump drive, the Shadow Phasing Drive or a BSG / Star Wars / Trek drive phases its
+     * own ship in through a doorway nobody else can use - it opens no jump point - so its manifest may
+     * hold only FIGHTERS its hangars can take, and SHIPS its Docking Bay can (WALKERS_OF_SIGMA_PLAN.md
+     * 3.14b), and those arrive DOCKED inside it
+     * (InitialOrdersGamePhase::legacyBerthFits at the manifest, DeploymentGamePhase at arrival). A gate
+     * is never one. Goes through getUnitJumpEngines, so a Mapmaker flight's drive is found on its craft.
+     * Client mirror: shipManager.movement.isLegacyOpener. */
+    public static function isLegacyOpener($unit)
+    {
+        if (!$unit || $unit->isTerrain()) return false;
+        foreach (self::getUnitJumpEngines($unit) as $engine){
+            if ($engine->isLegacyJump()) return true;
+        }
+        return false;
+    }
+
+    /* The legacy-drive opener this unit is booked to arrive inside, or null - a fighter flight, or a
+     * ship a Docking Bay takes (WALKERS_OF_SIGMA_PLAN.md 3.14b); the manifest admits nothing else onto
+     * a legacy opener. Its own doorway (arrivalVia == its own id) is not a ride.
+     * Client mirror: shipManager.movement.getLegacyRideHost. */
+    public static function getLegacyRideHost($unit, $gamedata)
+    {
+        if (!$unit) return null;
+        if ($unit->arrivalVia === null || (int)$unit->arrivalVia === (int)$unit->id) return null;
+
+        $opener = $gamedata->getShipById((int)$unit->arrivalVia);
+        return self::isLegacyOpener($opener) ? $opener : null;
+    }
+
     /* ================= REINFORCEMENTS STAGE 7 - THE DOORWAY A UNIT ARRIVES THROUGH ==============
      *
      * ⭐ THE ONE QUESTION STAGE 7 ASKS, and both sides ask it: WHICH hex may this unit be placed in
@@ -6659,9 +7529,7 @@ class JumpEngine extends Weapon{
 
         if (!$opener || !is_array($opener->systems)) return null;
 
-        foreach ($opener->systems as $system){
-            if (!($system instanceof JumpEngine)) continue;
-
+        foreach (self::getUnitJumpEngines($opener) as $system){
             $scatter = $system->getVortexScatter();
             if ($scatter !== null) return $scatter;
         }
@@ -7321,6 +8189,17 @@ class JumpEngine extends Weapon{
            neither of which is a gate rule. */
         if ($this->gateJump) return null;
 
+        /* ⭐⭐ WALKERS §3.12 (Stage 13) - AND A FIGHTER FLIGHT HAS NO MAINTAIN EITHER (user ruling
+           2026-09-10): *"as fighters, Mapmakers cannot hold a jump point open for more than 1 turn"*.
+           The same shape as the gate refusal above and for a related reason - the rule Maintain is
+           built on is a SHIP's, and a flight cannot satisfy it.
+
+           ⚠️ IT MUST BE REFUSED, NOT LEFT TO FAIL NATURALLY. getVortexPowerViolations looks for
+           systems drawing power and a flight's craft draw none, so the all-systems-offline test
+           passes VACUOUSLY on one - which before this ruling would have let a Mapmaker hold a
+           doorway open for the full four turns at no cost at all. See isFlightMounted(). */
+        if ($this->isFlightMounted()) return null;
+
         foreach ($this->fireOrders as $fire){
             if ($fire->turn != $turn) continue;
             if (!empty($fire->rejected)) continue;
@@ -7351,6 +8230,15 @@ class JumpEngine extends Weapon{
     {
         $violations = array();
 
+        /* ⚠️⚠️ NEVER ASK THIS ABOUT A FIGHTER FLIGHT (Stage 13). It answers VACUOUSLY EMPTY on one -
+           a flight's systems are Fighter objects with powerReq 0, so there is nothing for the loop
+           below to find - which reads as "this unit satisfies the all-systems-offline rule" when the
+           truth is that the rule does not apply to it at all. That vacuous pass would have let a
+           Mapmaker hold a jump point open for four turns for free.
+           The rule is settled one level up instead: JumpEngine::isFlightMounted() refuses a flight's
+           Maintain outright (user ruling 2026-09-10), so this method is never reached for one.
+           Deliberately NOT routed through getUnitJumpEngines' flight descent either - this asks
+           about the SHIP's power draw, not about its engines. */
         foreach ($ship->systems as $system){
             if ($system instanceof JumpEngine) continue;
             if ($system instanceof Scanner) continue;
@@ -7431,8 +8319,7 @@ class JumpEngine extends Weapon{
         $holder = $gamedata->getShipById((int)$vortex->vortexHolderId);
         if (!$holder || !is_array($holder->systems)) return null;
 
-        foreach ($holder->systems as $system){
-            if (!($system instanceof JumpEngine)) continue;
+        foreach (self::getUnitJumpEngines($holder) as $system){
             if ($system->activeVortexId === null) continue;
             if ((int)$system->activeVortexId !== (int)$vortex->id) continue;
 
@@ -7471,6 +8358,10 @@ class JumpEngine extends Weapon{
 		$missingHealthPercentage = round(($healthDiff / $this->maxhealth) * 100);
 		//Ancients have half the normal chance of Jump Engine failure. 
 		if($ship->factionAge >= 3) $missingHealthPercentage = round($missingHealthPercentage / 2);		
+
+        //WALKERS §3.17 rule 3 (plan trap 33) - the log line must quote the 0% a Walker drive
+        //actually carries, or it contradicts rollVortexJumpFailure's outcome.
+        if ($this->isJumpFailureImmune($ship, $gamedata)) $missingHealthPercentage = 0;
 
         $distance = $ship->getHexPos()->distanceTo($vortex->getHexPos());
         self::writeVortexLogOrder($ship, $gamedata,
@@ -7752,9 +8643,9 @@ class JumpEngine extends Weapon{
         foreach ($gamedata->ships as $ship){
             if ($ship->isTerrain() && !self::holdsGateEngine($ship)) continue;
 
-            foreach ($ship->systems as $system){
-                if (!($system instanceof JumpEngine)) continue;
-
+            //Stage 13: a FIGHTER FLIGHT's engine is one level down, inside its craft, and only the
+            //sample fighter's speaks for the flight - see getUnitJumpEngines.
+            foreach (self::getUnitJumpEngines($ship) as $system){
                 $system->closeVortexIfDue($ship, $gamedata);
             }
         }
@@ -7887,6 +8778,15 @@ class JumpEngine extends Weapon{
         if ($distance > $this->range) return 'holder is ' . $distance . ' hexes away';
 
         if ($turn == $this->vortexOpenTurn) return null; //the turn it was declared - nothing more to ask
+
+        /* ⭐⭐ WALKERS §3.12 (Stage 13) - A FIGHTER FLIGHT'S JUMP POINT IS OPEN FOR EXACTLY ONE TURN
+           (user ruling 2026-09-10). getMaintainDeclaration already refuses a flight, so the line
+           below would close it anyway - this branch exists for the LOG, which is a persisted note
+           and the only explanation the player gets. "not maintained" reads like a mistake the
+           player made; this reads like the rule it is. Placed after the declaring-turn exemption so
+           the doorway still forms, and after destruction and range so those keep telling the better
+           story when they apply. */
+        if ($this->isFlightMounted()) return 'a fighter flight cannot hold a jump point open';
 
         if (!$this->getMaintainDeclaration($turn)) return 'not maintained';
 
@@ -8094,13 +8994,22 @@ class JumpEngine extends Weapon{
 
 	public function doHyperspaceJump($ship, $gamedata)
 	{
-		$reactorList = $ship->getSystemsByName('Reactor', true);
-		foreach($reactorList as $reactorCurr){     //Don't do Hyperspace jump for ships that have blown their own reactors!
-			if($reactorCurr->isDestroyed()) return;
-		}
+		/* ⭐ A FIGHTER FLIGHT CAN JUMP THIS WAY NOW - the Mapmaker probes' Walker drive (user ruling
+		   2026-09-11) - and it has neither anchor below: no reactor, and no primary structure
+		   (getStructureSystem returns null, so the unguarded ->isDestroyed() would be a fatal). A
+		   flight is gone when every craft is. The ship path is unchanged. */
+		$isFlight = ($ship instanceof FighterFlight);
+		if ($isFlight){
+			if ($ship->isDestroyed($gamedata->turn)) return;
+		}else{
+			$reactorList = $ship->getSystemsByName('Reactor', true);
+			foreach($reactorList as $reactorCurr){     //Don't do Hyperspace jump for ships that have blown their own reactors!
+				if($reactorCurr->isDestroyed()) return;
+			}
 
-		$primaryStruct = $ship->getStructureSystem(0); //If ship is otherwise destroyed also don't jump.
-		if($primaryStruct->isDestroyed()) return;
+			$primaryStruct = $ship->getStructureSystem(0); //If ship is otherwise destroyed also don't jump.
+			if($primaryStruct->isDestroyed()) return;
+		}
 
 		//The Jump Engine itself (and the section it sits on) must still be intact THIS turn.
 		//getSystemsByName's isDestroyed() filter only treats a section-mounted system as gone the
@@ -8118,6 +9027,17 @@ class JumpEngine extends Weapon{
 	
 		// Calculate the percentage of health missing
 		$missingHealthPercentage = round(($healthDiff / $maxhealth) * 100);
+
+		/* Ancients have half the normal chance of Jump Engine failure - "if the jump drive itself is
+		   damaged while the ship is departing/arriving, it has only half the usual chance of
+		   detonating" (user ruling 2026-09-11). openVortex and rollVortexJumpFailure have always
+		   carried this line; this site - the one an Ancient special jump drive actually jumps
+		   through - never did. */
+		if($ship->factionAge >= 3) $missingHealthPercentage = round($missingHealthPercentage / 2);
+
+		//WALKERS §3.17 - a Walker drive carries no chance of failure. ZEROED, not an early return,
+		//so the d100 below is still drawn (plan trap 34) and the log reports 0%.
+		if ($this->isJumpFailureImmune($ship, $gamedata)) $missingHealthPercentage = 0;
 
 		// Roll a D100
 		$d100Roll = Dice::d(100);
@@ -8161,8 +9081,36 @@ class JumpEngine extends Weapon{
 			$notekey = 'jumped';
 			$noteHuman = 'jumped';
 			$noteValue = $ship->calculateCombatValue();
-			$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gamedata->turn,$gamedata->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
-		}		
+			if ($isFlight){
+				//A flight's CV note lives on its SAMPLE fighter - FighterFlight::getCVBeforeJump reads it
+				//from there (Fighter::onIndividualNotesLoaded). Movement::applyJumpOut's convention.
+				$sample = $ship->getSampleFighter();
+				if ($sample) $sample->addIndividualNote(new IndividualNote(-1,TacGamedata::$currentGameID,$gamedata->turn,$gamedata->phase,$ship->id,$sample->id,$notekey,$noteHuman,$noteValue));
+			}else{
+				$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gamedata->turn,$gamedata->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+			}
+		}
+
+		if ($isFlight){
+			/* No primary structure to destroy: the flight goes CRAFT BY CRAFT, exactly as
+			   Movement::applyJumpOut takes one out, which is what FighterFlight::isDestroyed and
+			   FighterFlight::hasJumpedToHyperspace read back. */
+			foreach ($ship->systems as $craft){
+				if ($craft->isDestroyed($gamedata->turn)) continue; //already lost - nothing left to take
+				$damageEntry = new DamageEntry(
+					-1, $ship->id, -1, $gamedata->turn,
+					$craft->id, $craft->getRemainingHealth(), 0, 0, -1, true, false,
+					"", $fireOrderType
+				);
+				$damageEntry->updated = true;
+				if ($rammingSystem) { //so submitDamages can find the fire order this belongs to
+					$damageEntry->shooterid = $ship->id;
+					$damageEntry->weaponid = $rammingSystem->id;
+				}
+				$craft->damage[] = $damageEntry;
+			}
+			return;
+		}
 
 		// Destroy the primary structure in either event
 		$primaryStruct = $this->unit->getStructureSystem(0);
@@ -8230,7 +9178,30 @@ class JumpEngine extends Weapon{
 		   value of the ship that opened the exit. */
 		$scatterNotes = array();
 
+		/* ⭐ WALKERS §3.18 (Stage 20) - a FIFTH kind: one 'EDJD' note per turn this drive fed an
+		   abduction. Reset first, because a system object outlives a load (see restoreVortexScatter),
+		   and ⚠️ claimed here for the same reason the scatter note is - the fall-through below would
+		   otherwise take its value for the pre-jump combat value. */
+		$this->abductionNotes = array();
+
 		foreach ($this->individualNotes as $currNote) {
+			if ($currNote->notekey_human === self::ABDUCTION_NOTE){
+				$parts = explode(':', (string)$currNote->notevalue);
+				if (count($parts) >= 5){
+					$this->abductionNotes[(int)$currNote->turn] = array(
+						'target' => (int)$parts[0],
+						'halves' => (int)$parts[1],
+						'cost'   => (int)$parts[2],
+						'since'  => (int)$parts[3],
+						'anchor' => ((int)$parts[4] === 1),
+					);
+					//The per-load gate TacGamedata::onConstructed publishes chains behind. Reset in
+					//DBManager::getSystemDataForShips beside the CPD one, for the same reason (trap 1).
+					TacGamedata::$abductionPresent = true;
+				}
+				continue;
+			}
+
 			if ($currNote->notekey_human === 'Vortex'){
 				$vortexNotes[(string)$currNote->notekey] = $currNote;
 				continue;
@@ -8320,6 +9291,74 @@ class JumpEngine extends Weapon{
 		   ⚠️ JumpgateCapital's engine has TEN boxes, so each point of damage on it is a flat 10%
 		   chance of destroying the whole gate the next time it is signalled. */
 		$this->rollVortexJumpFailure($ship, $gamedata);
+
+		//WALKERS §3.18 (Stage 20) - a damaged EDJD risks detonation on every turn it is abducting.
+		if ($this->extraDimensional) $this->rollAbductionJumpFailure($ship, $gamedata);
+	}
+
+	/* ⭐⭐ WALKERS_OF_SIGMA_PLAN.md §3.18 (Stage 20) - THE EDJD'S DETONATION ROLL.
+	 *
+	 * "If the EDJD is damaged, critical rolls are performed every turn that the engine is active and
+	 * trying to abduct a ship to Hyperspace. The EDJD must check for jump engine detonation as any other
+	 * damaged jump drive would. Note that the check must be performed every turn that the EDJD is active."
+	 *
+	 * ACTIVE = a live declaration on a drive that is working this turn (EdjdAbduction::isDriveWorking),
+	 * whether or not the two conditions held and whether or not it anchored the chain: a drive pouring
+	 * power at a target is trying to abduct it. The percentage is the missing-box share, HALVED for an
+	 * Ancient (D56 - the same factionAge 3+ rule every other roll site applies).
+	 *
+	 * ⚠️⚠️ isJumpFailureImmune() IS NEVER ASKED HERE. That hook is the Walker drive's "no chance of
+	 * failure while in use" and it stays true for the hull's own jump-out; this rule is the one place
+	 * the EDJD gives it up. A plain Walker contributor never reaches this method at all (its drive is
+	 * not extraDimensional), which is its immunity holding.
+	 *
+	 * Same destruction path as rollVortexJumpFailure - 'JumpFailure' damageclass, RammingAttack log
+	 * order - so HangarOps' JumpFailure handling (every docked craft dies with the ship) applies
+	 * unchanged. Runs in Pass 2 of Criticals::setCriticals, i.e. AFTER the abduction resolved at the
+	 * end of Firing, so a detonation never cancels the power-turns the drive delivered this turn. */
+	protected function rollAbductionJumpFailure($ship, $gamedata)
+	{
+		$turn = (int)$gamedata->turn;
+		if ($this->getAbductionDeclaration($turn) === null) return;               //not abducting this turn
+		if (!EdjdAbduction::isDriveWorking($ship, $this, $gamedata)) return;      //not active - nothing to fail
+
+		$healthDiff = $this->maxhealth - $this->getRemainingHealth();
+		if ($healthDiff <= 0) return;                                             //an undamaged drive never fails
+
+		$primaryStruct = $ship->getStructureSystem(0);
+		if (!$primaryStruct || $primaryStruct->isDestroyed($turn)) return;        //already gone this turn
+
+		$missingHealthPercentage = round(($healthDiff / $this->maxhealth) * 100);
+		if ($ship->factionAge >= 3) $missingHealthPercentage = round($missingHealthPercentage / 2); //D56
+
+		if (Dice::d(100) > $missingHealthPercentage) return; //held
+
+		$rammingSystem = $ship->getSystemByName("RammingAttack");
+		if ($rammingSystem){
+			$newFireOrder = new FireOrder(
+				-1, "normal", $ship->id, $ship->id,
+				$rammingSystem->id, -1, $turn, 1,
+				100, 100, 1, 1, 0,
+				0, 0, 'JumpFailure', 10001
+			);
+			$newFireOrder->pubnotes = " overloads its Extra-Dimensional Jump Drive - damage to the drive destroys the ship ("
+				. $missingHealthPercentage . "% chance of failure).";
+			$newFireOrder->addToDB = true;
+			$rammingSystem->fireOrders[] = $newFireOrder;
+		}
+
+		$damageEntry = new DamageEntry(
+			-1, $ship->id, -1, $turn,
+			$primaryStruct->id, $primaryStruct->getRemainingHealth(), 0, 0, -1, true, false,
+			"", 'JumpFailure'
+		);
+		$damageEntry->updated = true;
+		if ($rammingSystem){
+			$damageEntry->shooterid = $ship->id;
+			$damageEntry->weaponid  = $rammingSystem->id;
+		}
+		$primaryStruct->damage[] = $damageEntry;
+		$this->vortexFailureApplied = true;
 	}
 
 	protected function rollVortexJumpFailure($ship, $gamedata)
@@ -8368,6 +9407,11 @@ class JumpEngine extends Weapon{
 		$missingHealthPercentage = round(($healthDiff / $this->maxhealth) * 100);
 		//Ancieents have half the normal chance of Jump Engine failure. 
 		if($ship->factionAge >= 3) $missingHealthPercentage = round($missingHealthPercentage / 2);
+
+		/* WALKERS §3.17 rule 3 - no chance of destruction while a Walker drive is in use. ZEROED
+		   rather than returned early: the d100 below is then still drawn exactly when it always was
+		   (plan trap 34), and a roll of 1-100 against 0 always holds. */
+		if ($this->isJumpFailureImmune($ship, $gamedata)) $missingHealthPercentage = 0;
 
 		if (Dice::d(100) > $missingHealthPercentage) return; //held
 
@@ -8445,6 +9489,31 @@ class JumpEngine extends Weapon{
            own Weapon constructor sets data["Weapon type"] from $weaponClass on load, so no caller
            that reads it can find it undefined. */
         if ($this->legacyJump){
+            if ($this->ancientJump){
+                /* An Ancient special jump drive ($ancientJump). Rules only - this text rides the STATIC
+                   blueprint (see setGateSystemDataWindow for why no live numbers belong in here). */
+                $this->data["Special"]  = "<br>Ancient jump drive - forms no jump point. Boost it in Initial Orders (Jump to Hyperspace) and the ship leaves the battle at the END of that turn, and can be fired on until it goes.";
+                if ($this->walkerJump){
+                    $this->data["Special"] .= "<br>Walker jump drive: the ship MAY fire normally on the turn it jumps, and the drive has NO chance of failure however damaged.";
+                    //WALKERS §3.18 (Stage 20). Rules only - this rides the static blueprint.
+                    if ($this->extraDimensional){
+                        $this->data["Special"] .= "<br>Extra-Dimensional Jump Drive: Can attempt to abduct ships into Hyperspace by targeting them durign Initial Orders, see Walkers in Factions-Tiers for more info.";
+                        //$this->data["Special"] .= "<br>A turn counts only if the target ENDS ITS MOVEMENT in an Energy Draining Field connected to this ship's own, and this ship's OEW on it is HIGHER than its DEW (including defensive ELINT support).";
+                        //$this->data["Special"] .= "<br>Turns must be consecutive. Cost: ramming factor / 50 power-turns (/ 10 against advanced armour), rounded up, adding anything ATTACHED to it (never what it carries inside); fixed on the first turn. Other Walker drives may add power once it has begun. The target is removed to hyperspace when the total is reached. No line of sight is needed.";
+                        //$this->data["Special"] .= "<br>If damaged, the drive rolls for detonation (half the % of boxes lost) on EVERY turn it is abducting. Deactivating or losing the drive cancels the abduction.";
+                    }elseif (!$this->isFlightMounted()){
+                        $this->data["Special"] .= "<br><b>Abduction support:</b> select it in Initial Orders and click a unit already being abducted to add half a power-turn for double power. It cannot begin an abduction.";
+                    }
+                }else{
+                    $this->data["Special"] .= "<br>The ship may NOT fire on the turn it jumps - no interception either.";
+                    $this->data["Special"] .= "<br>If the drive is damaged, the ship has HALF the usual chance of being destroyed as it jumps (the % of drive boxes lost, halved).";
+                }
+                $this->data["Special"] .= "<br>Cannot be affected by a Vortex Disruptor.";
+                $this->data["Special"] .= "<br>WARNING - Jumping to hyperspace REMOVES ship from rest of the battle.";
+                $this->data["Special"] .= "<br>SHOULD NOT be shut down for power (unless damaged >50% or if Desperate rules apply).";
+                ShipSystem::setSystemDataWindow($turn);
+                return;
+            }
             $this->data["Special"]  = "<br>Boost in Initial Orders to jump to hyperspace at end of turn.";
             $this->data["Special"] .= "<br>WARNING - Jumping to hyperspace REMOVES ship from rest of the battle.";
             $this->data["Special"] .= "<br>If Jump Engine is damaged, ship has a % chance of being destroyed opening jump point.";
@@ -8591,6 +9660,29 @@ class JumpEngine extends Weapon{
     public function stripForJson(){
         $strippedSystem = parent::stripForJson();
 
+        /* ⭐ THE ANCIENT AND WALKER FLAGS ($ancientJump / $walkerJump). The client needs both: a unit
+           whose Ancient drive is boosted to jump this turn may not pick a weapon
+           (shipManager.movement.isJumpFireForbidden), and setting the boost withdraws the fire
+           orders it already has (JumpEngine.onBoostIncrease) - unless it is a Walker drive. Sent
+           ONLY when set, so every other jump engine's payload is byte-identical, and above the Trek
+           early return so nothing can skip them. Public information: the tooltip says the same. */
+        if ($this->ancientJump) $strippedSystem->ancientJump = true;
+        if ($this->walkerJump){
+            $strippedSystem->walkerJump = true;
+            $strippedSystem->autoHit = true; //Walker jump engine can actually target enemies, just show 100% and leave to special calculations.            
+        }  
+        /* WALKERS §3.18 (Stage 20) - the EDJD flag, and the power ceiling on any drive that can join an
+           abduction, so the client's power control needs no copy of the constant. Only when set, so
+           every other engine's payload is byte-identical. */
+        if ($this->extraDimensional) $strippedSystem->extraDimensional = true;
+        if ($this->canJoinAbduction()) $strippedSystem->abductionMaxPower = $this->extraDimensional ? self::ABDUCTION_MAX_POWER : 2;
+        /* §3.18 - AN ABDUCTION THAT TOOK HOLD KEEPS GOING (user request 2026-09-13, play test 4352): the
+           drive's LATEST note, when its chain held (a no-hold or cancelled turn writes since 0), so the
+           client can re-declare it at the start of the next Initial Orders (JumpEngine.continueAbduction).
+           Public: it is last turn's declaration, which every viewer saw on the map and in the log. */
+        $lastHold = $this->getLatestAbductionHold();
+        if ($lastHold !== null) $strippedSystem->abductionLastHold = $lastHold;
+
         /* ⭐ THE ONE ENGINE THAT SENDS THE ORDINARY WEAPON PAYLOAD AND NOTHING ELSE IS THE TREK
            NACELLE (user ruling 2026-08-29 - see $hasJumpRecharge). Its 4th constructor argument is
            an IMPULSE RATING, not a jump delay, so getVortexRechargeLoad would answer with a charge
@@ -8607,16 +9699,34 @@ class JumpEngine extends Weapon{
 
         $turn = (int)TacGamedata::$currentTurn;   //(int): mysqli hands the turn back as a STRING
 
-        $strippedSystem->turnsloaded = $this->getVortexRechargeLoad($turn);
+        /* ⭐⭐ WALKERS_OF_SIGMA_PLAN.md §3.12 (Stage 13) - ON A FIGHTER FLIGHT, ALL SIX ENGINES SEND
+           THE FLIGHT'S ONE CHARGE. "If one Jump Engine has a fireOrder they all do" (user, D13), and
+           the charge is the visible half of that: the vortex state lives on the SAMPLE fighter's
+           engine alone (see FighterFlight::getFlightJumpEngine), so without this the craft that
+           opened the jump point would read 0/10 while its five siblings read 10/10 - six icons
+           disagreeing about one fact, and five of them inviting a declaration the server will refuse.
+
+           $source is $this on every hull, gate and OSAT in the game, so their payload is
+           byte-identical. It is also $this on the sample fighter itself.
+           ⚠️ getUnit() is the FLIGHT for a fighter's subsystem - FighterFlight::addSystem calls
+           setUnit($this) on the craft AND on each of its systems - not the craft. */
+        $source = $this;
+        $unit   = $this->getUnit();
+        if ($unit instanceof FighterFlight){
+            $flightEngine = $unit->getFlightJumpEngine();
+            if ($flightEngine) $source = $flightEngine;
+        }
+
+        $strippedSystem->turnsloaded = $source->getVortexRechargeLoad($turn);
         /* getVortexRechargeTime() rather than the raw max(1, (int)$this->delay) this used to send:
            the method IS that expression on a ship engine, so a ship's payload is byte-identical, and
            on a FIXED GATE it adds the reactor-damage term. Sending the undamaged number instead
            would leave the client's weaponManager.isLoaded test disagreeing with the server's own
            charge test in Firing::getGateSignalBlock - the Signal button would be offered and the
            claim then rejected, which is the worst of both. */
-        $strippedSystem->loadingtime = $this->getVortexRechargeTime();
+        $strippedSystem->loadingtime = $source->getVortexRechargeTime();
 
-        $age = $this->getVortexAge($turn);
+        $age = $source->getVortexAge($turn);
         if ($age !== null){
             $strippedSystem->vortexTurnsOpen = $age;
             /* ⭐ JUMP GATES (PHASE 2): a gate's jump point runs for the duration PROGRAMMED when it
@@ -8625,9 +9735,14 @@ class JumpEngine extends Weapon{
                ship-opened vortex, which is what keeps this byte-identical for Phase 1.
                ⚠️ Sent per instance from live state, never mirrored onto the system as a flag - two
                gates in one game must not read each other's hold (plan trap 9). */
-            $strippedSystem->vortexMaxTurns  = ($this->vortexHoldTurns !== null)
-                ? (int)$this->vortexHoldTurns
-                : self::MAX_VORTEX_TURNS;
+            /* ⭐⭐ WALKERS §3.12 (Stage 13) - AND A FIGHTER FLIGHT'S IS OUT OF 1 (user ruling
+               2026-09-10). A flight has no Maintain, so its jump point is open for exactly one turn
+               and the icon must say so: "1/1", not "1/4", which would promise three turns the unit
+               can never have. Read off the SOURCE engine like everything else in this block, so all
+               six craft agree. */
+            $strippedSystem->vortexMaxTurns  = ($source->vortexHoldTurns !== null)
+                ? (int)$source->vortexHoldTurns
+                : ($source->isFlightMounted() ? 1 : self::MAX_VORTEX_TURNS);
         }
 
         return $strippedSystem;
@@ -11445,6 +12560,16 @@ class SelfRepair extends ShipSystem{
 	public $repairRestrictedTo = null; //array of system ids this system may service; null = no restriction
 	public $outputDoubled = false; //docked Heavy Orbital: internal self repair works at double rate
 	public $linkedOrbital = null; //set by KirishiacHeavyOrbital::addOrbitalSystem - null on standard mounts
+
+	/*WALKERS_OF_SIGMA_PLAN.md 3.15 (Stage 17) - the Traveler's Docking Bay carries whole SHIPS, and
+	the Traveler's Self Repair services them. True ONLY on that one mount; every other Self Repair in
+	the game pays one boolean test for it, exactly as it pays one null check for $repairRestrictedTo.
+	What it services on a docked unit is NARROWER than a whole-ship pass - Structure, C&C, that unit's
+	own Self Repair, and criticals - but those entries go into the SAME queue as its own and are
+	sorted with them by priority alone: whether the Traveler fixes itself or its passengers first is
+	the player's call (user, 2026-09-12). Repairing a Self Repair is an explicit EXCEPTION to this
+	class's own standing rule, which is why the exception is written here, where the rule is.*/
+	public $servicesDockedUnits = false; //Traveler only: also repairs the ships docked in its bays
       
 	
 	//SelfRepair itself is most important to be repaired - as it's the condition of further repairs being effected!
@@ -11493,6 +12618,16 @@ class SelfRepair extends ShipSystem{
 			$this->data["Special"] .= "<br>Mounted on " . $this->linkedOrbital->displayName . ": only repairs systems on the orbital itself.";
 			$this->data["Special"] .= "<br>While the orbital is docked output is DOUBLED.";
 		}
+		/*Stage 17. The "cannot repair Self Repair systems" line above is contradicted for docked
+		units, so the exception is spelled out immediately under it rather than left to be found.*/
+		if ($this->servicesDockedUnits){
+			$this->data["Special"] .= "<br>Also repairs SHIPS docked in this vessel's docking bays: their Structure,";
+			$this->data["Special"] .= " C&amp;C, Self Repair and critical effects - Self Repair included, which is the one";
+			$this->data["Special"] .= " case the rule above does not cover.";
+			$this->data["Special"] .= "<br>Docked units are repaired out of THIS system's points and share ONE repair";
+			$this->data["Special"] .= " queue with this vessel's own systems - set the priorities however you like.";
+			$this->data["Special"] .= "<br>A docked ship's own Self Repair keeps working on its own hull as well.";
+		}
 	}
 
 	
@@ -11508,6 +12643,11 @@ class SelfRepair extends ShipSystem{
 
 	    /* sorts generated repair queue */
     public static function sortUnifiedRepairQueue($a, $b){
+        /*Stage 17 (WALKERS_OF_SIGMA_PLAN.md 3.15): ONE LIST. A docked unit's damage is sorted by
+        PRIORITY alongside this vessel's own, with no tier and no floor under it - repairing what it
+        carries before itself is the player's call to make, and the cyan ship name on the row is what
+        tells the two apart (user, 2026-09-12, revising the first build). The only thing that still
+        separates them is the ship tiebreak at the bottom, which only ever settles an exact tie.*/
 		if($a['priority'] !== $b['priority']){
             return $b['priority'] - $a['priority']; //higher priority first!
         }
@@ -11522,7 +12662,18 @@ class SelfRepair extends ShipSystem{
             return $aOv ? -1 : 1; //overridden entry first
         }
 
-        //Deterministic Sort: System ID then SubID
+        //Deterministic Sort: owning SHIP, then System ID, then SubID. The ship comes first because
+        //the queue can hold entries from SEVERAL docked units and system ids are per-ship - without
+        //it two docked hulls' systems would interleave on a shared id and the order would depend on
+        //which bay was walked first. 0 is this vessel's own, so on an exact tie its own damage still
+        //goes first; that is a tiebreak, not a rule, and any priority the player sets beats it.
+        //Absent = 0 on every entry of an ordinary queue, which is therefore unaffected.
+        $aShip = isset($a['shipId']) ? $a['shipId'] : 0;
+        $bShip = isset($b['shipId']) ? $b['shipId'] : 0;
+        if($aShip !== $bShip){
+            return $aShip - $bShip;
+        }
+
         if($a['id'] !== $b['id']){
             return $a['id'] - $b['id'];
         }
@@ -11575,6 +12726,15 @@ class SelfRepair extends ShipSystem{
         $repairQueue = array();
         $ship=$this->getUnit();
 
+		/*Stage 17 (WALKERS_OF_SIGMA_PLAN.md 3.15): a DOCKED unit is `removed`, and `removed` reads as
+		destroyed - so Criticals::setCriticals never reaches it and its OWN Self Repair would silently
+		stop working the moment it docked. The user's ruling is that it keeps working on its own hull,
+		so someone has to drive it, and the carrier is the only thing that knows the unit is there.
+		⭐ RUN IT FIRST, and out of the docked unit's own pool: what it fixes for itself is not billed
+		to the Traveler. DockingBay::criticalPhaseEffects calls the same helper (guarded, once per
+		resolution) so this still happens when the Traveler's own Self Repair is destroyed.*/
+		if ($this->servicesDockedUnits) HangarOps::runDockedShipsSelfRepair($ship, $gamedata);
+
         // 1. Gather Systems
 		foreach($ship->systems as $system){
 			if ( $system->maxhealth <= $system->getRemainingHealth() ) continue; //skip undamaged systems...
@@ -11617,6 +12777,9 @@ class SelfRepair extends ShipSystem{
 			    $repairQueue[] = array(
                     'type' => 'system',
                     'obj' => $system,
+                    'ship' => $ship,      // Stage 17: whose system this is - the DamageEntry is filed against it
+                    'shipId' => 0,        // Stage 17: 0 = this vessel's own; only ever a tiebreak (see the sort)
+                    'key' => $system->id, // Stage 17: the priorityChanges key (composite for docked units)
                     'priority' => $prio,
                     'overridden' => $isOverridden, // explicit override wins ties (see sortUnifiedRepairQueue)
                     'cost' => $toBeRepaired, // Needed for unified repair logic
@@ -11666,6 +12829,9 @@ class SelfRepair extends ShipSystem{
                     'type' => 'critical',
                     'obj' => $critDmg,
                     'sys' => $systemToRepair, // We need the system object to execute repair
+                    'ship' => $ship,     // Stage 17: whose critical this is
+                    'shipId' => 0,       // Stage 17: 0 = this vessel's own (tiebreak only)
+                    'key' => $compKey,   // Stage 17: the priorityChanges key
                     'priority' => $critPrio,
                     'overridden' => $critOverridden, // explicit override wins ties (see sortUnifiedRepairQueue)
                     'cost' => self::getEffectiveCriticalRepairCost($critDmg, $systemToRepair), //C&C crits cost 4 (B5W), everything else its own repairCost
@@ -11673,6 +12839,12 @@ class SelfRepair extends ShipSystem{
                     'subId' => $critDmg->id // SubID for sorting
                 );
             }
+        }
+
+        // 2b. Gather what the docked units need (Stage 17). Appended to the SAME queue and sorted
+        // with everything else by priority alone - see sortUnifiedRepairQueue.
+        if ($this->servicesDockedUnits){
+            foreach ($this->gatherDockedUnitRepairs($ship, $gamedata) as $job) $repairQueue[] = $job;
         }
 		
         // 3. Sort
@@ -11695,6 +12867,10 @@ class SelfRepair extends ShipSystem{
              } else {
                  // System Repair
                  $systemToRepair = $job['obj'];
+                 //Stage 17: the OWNER of the system, which is this vessel for a tier-0 job and a
+                 //docked unit for a tier-1 one. The DamageEntry's shipid must name it or the row is
+                 //filed against the wrong hull and the repair vanishes on the next load.
+                 $ownerShip = isset($job['ship']) ? $job['ship'] : $ship;
                  
 			    $currentDamage = $systemToRepair->maxhealth - $systemToRepair->getRemainingHealth( );
 			    $causedThisTurn = $systemToRepair->damageReceivedOnTurn($gamedata->turn);
@@ -11708,7 +12884,7 @@ class SelfRepair extends ShipSystem{
 					    $undestroy=true;
 				    }
 				    //actual healing entry
-				    $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $systemToRepair->id, -$toBeFixed, 0, 0, -1, false, $undestroy, 'SelfRepair', 'SelfRepair');
+				    $damageEntry = new DamageEntry(-1, $ownerShip->id, -1, $gamedata->turn, $systemToRepair->id, -$toBeFixed, 0, 0, -1, false, $undestroy, 'SelfRepair', 'SelfRepair');
 				    $damageEntry->updated = true;
 				    $systemToRepair->damage[] = $damageEntry;
 				    //mark repair points used
@@ -11717,12 +12893,16 @@ class SelfRepair extends ShipSystem{
 
 				    //Check if fully repaired, and if so remove from priority list!
 				    if ($systemToRepair->getRemainingHealth() >= $systemToRepair->maxhealth){
-					    if(array_key_exists($systemToRepair->id, $this->priorityChanges)){
-						    unset($this->priorityChanges[$systemToRepair->id]);
+					    //Stage 17: $job['key'] is the system id for our own systems and the composite
+					    //d<shipid>:<sysid> for a docked unit's - the two must never be confused, or a
+					    //docked Scribe's repair would clear the override on OUR system of that id.
+					    $overrideKey = isset($job['key']) ? $job['key'] : $systemToRepair->id;
+					    if(array_key_exists($overrideKey, $this->priorityChanges)){
+						    unset($this->priorityChanges[$overrideKey]);
 						    //and create note to remove it from DB/Client
 						    $notekey = 'override';
 						    $noteHuman = 'Repair priority override removed';
-						    $noteValue = $systemToRepair->id . ';-1';
+						    $noteValue = $overrideKey . ';-1';
 						    $this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gamedata->turn,$gamedata->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
 					    }
 				    }
@@ -11731,8 +12911,129 @@ class SelfRepair extends ShipSystem{
         }
 			
     } //endof function criticalPhaseEffects
-	
-	
+
+
+	/* ===================================================================================
+	   STAGE 17 - WHAT THE TRAVELER REPAIRS IN ITS BAYS (WALKERS_OF_SIGMA_PLAN.md 3.15)
+	   ===================================================================================
+	   Builds the docked half of the queue: one job per repairable item on each SHIP docked
+	   in $carrier's Docking Bays, which the caller appends to the carrier's own and sorts as
+	   one list. The CLIENT mirror (SelfRepairList.getDockedRepairables) builds the identical
+	   list from the identical facts - the two must agree, because the menu is what the player
+	   sets the priorities in and this is what spends the points.
+
+	   WHAT COUNTS, and it is deliberately narrower than a whole-ship pass (the user's brief:
+	   "structure, CnC, Critical effects and SelfRepair systems"):
+	     - damaged Structure blocks   (a DESTROYED one is still out of reach, same as always)
+	     - damaged C&C                (the whole CnC class family, as elsewhere)
+	     - damaged Self Repair        - the exception this stage exists for
+	     - every repairable critical on ANY of the docked unit's systems ("critical effects")
+	   Everything else on the docked hull - its weapons, thrusters, sensors - is not offered.
+
+	   ⚠️ THE KEY IS COMPOSITE. Overrides live on the CARRIER's Self Repair, so a docked entry
+	   needs the docked unit in its priorityChanges key or two docked hulls (or a docked hull
+	   and the carrier) would collide on a shared system id. The format is 'd<shipid>:<sysid>'
+	   and 'd<shipid>:<sysid>-<critid>'; the client builds the same strings, and the note
+	   round-trip splits on ';' alone so a ':' in the key is safe.
+
+	   ⚠️ A docked unit is `removed`, which reads as DESTROYED - so isDestroyed($turn) on its
+	   SYSTEMS is still the right question (that is per-system state) but any ship-level
+	   isDestroyed() test would refuse the whole unit. There is none here on purpose. */
+	private function gatherDockedUnitRepairs($carrier, $gamedata){
+		$jobs = array();
+		foreach ($carrier->systems as $bay){
+			if (empty($bay->isDockingBay) || !is_array($bay->shipsDocked)) continue;
+			foreach ($bay->shipsDocked as $entry){
+				$docked = $gamedata->getShipById((int)($entry['shipId'] ?? 0));
+				if (!$docked || !is_array($docked->systems)) continue;
+				$prefix = 'd' . $docked->id . ':';
+
+				foreach ($docked->systems as $system){
+					$serviceable = ($system instanceof Structure) || ($system instanceof CnC) || ($system instanceof SelfRepair);
+
+					//Criticals first - they are offered on EVERY system, not just the serviceable three.
+					if (!$system->isDestroyed($gamedata->turn) && $system->repairPriority >= 1){
+						foreach ($system->criticals as $critDmg){
+							if ($critDmg->repairPriority < 1) continue;
+							if ($critDmg->turn >= $gamedata->turn) continue;          //caused this turn (or later)
+							if ($critDmg->oneturn || ($critDmg->turnend > 0)) continue; //temporary, or already cleared
+							//The default: a critical inherits its system's priority unless it already
+							//carries one of its own (>=10), exactly as on the carrier's own hull. That
+							//default is all that separates a docked entry from ours - the queue is one
+							//list and the player may put either first.
+							$critKey = $prefix . $system->id . '-' . $critDmg->id;
+							$critPrio = $critDmg->repairPriority;
+							$critOverridden = false;
+							if (array_key_exists($critKey, $this->priorityChanges) && ($this->priorityChanges[$critKey] >= 0)){
+								$critPrio = $this->priorityChanges[$critKey];
+								$critOverridden = true;
+							}elseif ($critPrio < 10){
+								$critPrio += $system->repairPriority;
+							}
+							if ($critPrio < 1) continue; //player set it to "do not repair"
+							$jobs[] = array(
+								'type' => 'critical',
+								'obj' => $critDmg,
+								'sys' => $system,
+								'ship' => $docked,
+								'shipId' => (int)$docked->id,
+								'key' => $critKey,
+								'priority' => $critPrio,
+								'overridden' => $critOverridden,
+								'cost' => self::getEffectiveCriticalRepairCost($critDmg, $system),
+								'id' => $system->id,
+								'subId' => $critDmg->id
+							);
+						}
+					}
+
+					if (!$serviceable) continue;
+					if ($system->repairPriority < 1) continue;
+					if ($system->maxhealth <= $system->getRemainingHealth()) continue; //undamaged
+
+					if ($system instanceof Structure){
+						if ($system->isDestroyed($gamedata->turn)) continue; //destroyed Structure is out of reach, as ever
+					}else{
+						//A system in a blown section cannot be reached - the same rule the own-ship pass applies.
+						$strBlock = $docked->getStructureSystem($system->getStructureLocation());
+						if ($strBlock && $strBlock->isDestroyed($gamedata->turn)) continue;
+					}
+
+					$toBeRepaired = ($system->maxhealth - $system->getRemainingHealth()) - $system->damageReceivedOnTurn($gamedata->turn);
+					if ($toBeRepaired < 1) continue;
+
+					/*The player's override, then the destroyed bump - the same order and the same
+					"only if it was not overridden" rule the own-ship pass uses. A docked entry is
+					reordered exactly like one of our own, and can be set above them.*/
+					$sysKey = $prefix . $system->id;
+					$prio = $system->repairPriority;
+					$isOverridden = false;
+					if (array_key_exists($sysKey, $this->priorityChanges) && ($this->priorityChanges[$sysKey] >= 0)){
+						$prio = $this->priorityChanges[$sysKey];
+						$isOverridden = true;
+					}
+					if ($prio < 1) continue; //player set it to "do not repair"
+					if (!$isOverridden && ($prio <= 10) && $system->isDestroyed($gamedata->turn)) $prio += 10;
+
+					$jobs[] = array(
+						'type' => 'system',
+						'obj' => $system,
+						'ship' => $docked,
+						'shipId' => (int)$docked->id,
+						'key' => $sysKey,
+						'priority' => $prio,
+						'overridden' => $isOverridden,
+						'cost' => $toBeRepaired,
+						'maxhealth' => $system->maxhealth,
+						'id' => $system->id,
+						'subId' => 0
+					);
+				}
+			}
+		}
+
+		return $jobs;
+	}
 
 	/* this method generates additional non-standard informaction in the form of individual system notes
 	in this case: 
@@ -11793,9 +13094,18 @@ class SelfRepair extends ShipSystem{
         $strippedSystem->data = $this->data;
 		//$strippedSystem->output = $this->getOutput();	//actual output is constant, and outputMod is correctly shown in front end!
         if (isset($this->priorityChanges) && !empty($this->priorityChanges)) {
-            $strippedSystem->priorityChanges = $this->priorityChanges;
+            //Stage 17: cast, so this is always a JSON OBJECT. It is keyed by system id today and by
+            //'d<shipid>:<sysid>' for a docked unit's entries, and a PHP array only encodes as an
+            //object while its keys are not a 0..n-1 run - which is a property of the ids, not a
+            //guarantee. The client indexes it by key either way; the cast makes that true by
+            //construction (arch_php_empty_array_json).
+            $strippedSystem->priorityChanges = (object)$this->priorityChanges;
         }
         //$strippedSystem->priorityChanges = $this->priorityChanges;
+		/*Stage 17: the flag the client's Manage Repair Queue reads to know it should also offer the
+		ships in this vessel's bays. Sent on the WIRE rather than left to the static blueprint so it
+		works without regenerating the statics, and only when true, so nothing else pays for it.*/
+		if ($this->servicesDockedUnits) $strippedSystem->servicesDockedUnits = true;
 		if ($this->linkedOrbital !== null){ //mounted on a Kirishiac Heavy Orbital - dynamic per-load state
 			$strippedSystem->repairRestrictedTo = ($this->repairRestrictedTo !== null) ? array_values($this->repairRestrictedTo) : null; //Manage Repair Queue filter
 			$strippedSystem->outputDoubled = $this->outputDoubled;
@@ -12102,7 +13412,9 @@ class PhasingDrive extends JumpEngine{
      * effect, which is the same answer forwarding it would have given. */
     function __construct($armour, $maxhealth, $powerReq, $delay){
         parent::__construct($armour, $maxhealth, $powerReq, $delay);
-        $this->markLegacy();
+        //markAncient() since 2026-09-11: markLegacy() plus the Ancient special-jump-drive rules - no
+        //fire on the turn it jumps, and no Vortex Disruptor can touch it (see JumpEngine::$ancientJump).
+        $this->markAncient();
     }
 
     public function setSystemDataWindow($turn){
@@ -17314,4 +18626,123 @@ class EnergyDrainingNet extends ShipSystem implements SpecialAbility, EdfSource 
         return $strippedSystem;
     }
 }
+/**
+ * EW Detector - WALKERS_OF_SIGMA_PLAN.md 3.8 (Stage 10A).
+ * Control sheet: health 20, power 6, range 20.
+ *
+ * "The sensors on an EWD-equipped ship can detect the configuration of any enemy's EW suite and
+ * instantaneously report it to the ship's fleet, enabling the ships to react to any change and use
+ * it to their advantage. This system provides every friendly unit within 20 hexes of the EW
+ * Detector the enhancement of Expert Scanner: all friendly ships may save one point of EW for
+ * allocation as late in the combat turn as the end of the movement segment."
+ *
+ * ⭐ THE SYSTEM ITSELF DOES ALMOST NOTHING, AND THAT IS THE DESIGN. An EW Detector has no output,
+ * no arc and no order. What it grants is a FLEET-WIDE, RANGE-KEYED allowance that belongs to the
+ * ships receiving it, not to the detector - so the arithmetic lives in one place, EW::*, beside
+ * getBlanketDEW, which is the same shape of sweep (every friendly unit within 20 hexes of an ELINT
+ * hull). This class exists so the hull can mount it, so it can be shot, and so its tooltip can
+ * quote the rule.
+ *
+ * ⚠️ NO CRITICAL TABLE. The rules text lists none, and a plausible-looking invented entry would be
+ * a rule nobody wrote. Destruction and power-down are the whole of its damage model, which is what
+ * isEwDetectorActive() answers.
+ *
+ * ⚠️ THE RANGE IS PER SYSTEM, NOT A CONSTANT. Every sweep asks the DETECTOR for its range rather
+ * than assuming 20, so a hull may mount a shorter- or longer-ranged one from its control sheet
+ * without a second class - and so a future enhancement has one number to move.
+ */
+class EWDetector extends ShipSystem implements SpecialAbility {
+    public $name = "EWDetector";
+    public $displayName = "Electronic Warfare Detector";
+    public $iconPath = "EWDetector.png";
+    public $primary = true;
+
+    public $range = 20; //hexes; blueprint value, see the note above
+
+    /* Parameters: ($armour, $maxhealth, $powerReq, $range).
+       0 for maxhealth/powerReq/range takes the CONTROL SHEET values, exactly as every other Walker
+       system does, so a hull file can mount a basic version without inventing numbers. */
+    function __construct($armour, $maxhealth = 0, $powerReq = 0, $range = 0){
+        if ($maxhealth == 0) $maxhealth = 20;
+        if ($powerReq  == 0) $powerReq  = 6;
+        if ($range     == 0) $range     = 20;
+
+        parent::__construct($armour, $maxhealth, $powerReq, 0);
+
+        $this->range = (int)$range;
+
+        /* ⚠️ ADDSYSTEM SECTION-ARC TRAP (arch_addsystem_section_arc_trap): a system whose arcs are
+           BOTH 0 has its SECTION's arc stamped onto it by addSystem(), so a front-mounted detector
+           would advertise itself as a forward-facing system in the ship window. The detection is
+           omnidirectional, so declare 0..360 and the guard never fires. */
+        $this->startArc = 0;
+        $this->endArc   = 360;
+    }
+
+    /* Destroyed, or switched off in the power segment - all the same answer.
+       isDestroyed($turn-1), not isDestroyed($turn): a system killed THIS turn kept working for
+       this turn, the convention every other support system in the tree follows
+       (BaseShip::checkIsValidAffectingSystem, EnergyDrainingField::isEdfActive). */
+    public function isEwDetectorActive($turn = null){
+        if ($turn === null) $turn = TacGamedata::$currentTurn;
+        if ($this->isDestroyed($turn - 1)) return false;
+        if ($this->isOfflineOnTurn($turn)) return false;
+        return true;
+    }
+
+    /* Effective range after damage. There is no crit ladder (see the class note), so this is the
+       blueprint value or nothing - but every caller goes through it rather than reading ->range,
+       so a ladder could be added in exactly one place. */
+    public function getDetectorRange($turn = null){
+        if ($turn === null) $turn = TacGamedata::$currentTurn;
+        if (!$this->isEwDetectorActive($turn)) return 0;
+        return max(0, (int)$this->range);
+    }
+
+    /* SpecialAbility, so a ship can be asked "do you carry a detector" without walking systems.
+       Returns range + 1, so a crippled range-0 detector still reads as a truthy "yes" - the same
+       convention EnergyDrainingField uses.
+       ⚠️ hasSpecialAbility maps an ability to ONE system id, so it can never count the detectors on
+       a hull that mounts several. Every sweep in EW::* walks ->systems for that reason. */
+    public function getSpecialAbilityValue($args){
+        $turn = (is_array($args) && isset($args["turn"]) && $args["turn"] !== null)
+              ? $args["turn"] : TacGamedata::$currentTurn;
+        if (!$this->isEwDetectorActive($turn)) return 0;
+        return $this->getDetectorRange($turn) + 1;
+    }
+
+    public function setSystemDataWindow($turn){
+        parent::setSystemDataWindow($turn);
+
+        /* ⭐ THE RANGE GETS ITS OWN data KEY AND THE PROSE CARRIES NO NUMBER, for the reason
+           EnergyDrainingField::setSystemDataWindow records at length: a number buried in a
+           paragraph cannot be rewritten by the lobby, which has no server round trip. */
+        $this->data["Range"] = $this->range . ' hexes';
+
+        $this->data["Special"]  = "Detects the configuration of enemy EW suites and reports it to the fleet.";
+        $this->data["Special"] .= "<br>Every friendly unit within range may SAVE EW points from Initial Orders and allocate them as late as the end of the Movement segment.";
+        $this->data["Special"] .= "<br>Detectors are cumulative but degrade: the first four allow 1 saved point each, the fifth to eighth 1/2 each, and any beyond that 1/4 each. Fractions of 1/4 and 1/2 round down, 3/4 rounds up.";
+        $this->data["Special"] .= "<br>A unit that declares a saved point but ends its movement out of range loses it. ELINT points may be saved, but the ELINT vessel must be in range both before and after movement.";
+    }
+
+    /* ⚠️ THE RANGE HAS TO RIDE THE PER-SHIP PAYLOAD. The client mirrors the whole sweep (see
+       ew.getSavedEwAllowance), because the answer depends on where a ship ENDS its movement - a
+       position the server has not been told about yet, and the entire point of the rule. So the
+       client needs the detector's range live, and `range` is not one of the 21 keys the client
+       constructor re-defaults.
+       `data` goes with it because of TRAP 6 - client system fields are shared by reference across
+       same-phpclass instances, so two detectors on one hull would otherwise share one tooltip
+       object and the second built would win. */
+    public function stripForJson(){
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->range = $this->range;
+        $strippedSystem->data  = $this->data;
+        /* The range AFTER damage and power-down, so the client's sweep does not have to
+           reimplement isEwDetectorActive - one number, no maths. It reads 0 for a dead or
+           unpowered detector, which is exactly what excludes it from the count. */
+        $strippedSystem->effectiveRange = $this->getDetectorRange();
+        return $strippedSystem;
+    }
+}
+
 ?>

@@ -47,7 +47,7 @@ class BlackDagger extends BaseShip{
 		$this->addPrimarySystem(new Engine(6, 18, 0, 12, 4));
         $this->addPrimarySystem(new SelfRepair(6, 9, 4)); //armor, structure, output
 		$this->addPrimarySystem(new AlphaShadingField(6, 20, 2, 4, 0, 360));       
-		$this->addPrimarySystem(new JumpEngine(6, 20, 6, 14));        
+		$this->addPrimarySystem((new JumpEngine(6, 20, 6, 14))->markAncient());        
 		
         $this->addFrontSystem(new VolleyLaser(5, 0, 0, 240, 120));        
 

@@ -198,6 +198,14 @@ window.ReplayAnimationStrategy = function () {
                     }
                 }
 
+                // A unit launched at the END of this turn spent it aboard its carrier (see
+                // shipManager.shouldBeHidden). Its launch 'deploy' row would otherwise give it a
+                // movement, panning the camera to an empty hex.
+                if (member.hangarLaunchTurn != null && member.hangarLaunchTurn >= this.turn) {
+                    animatedShips[member.id] = true;
+                    return;
+                }
+
                 var icon = this.shipIconContainer.getByShip(member);
                 var detachMove = isDetachingPodAfterHost ? getDetachMove(member) : null;
                 var animation = new ShipMovementAnimation(icon, this.turn, this.shipIconContainer, detachMove);

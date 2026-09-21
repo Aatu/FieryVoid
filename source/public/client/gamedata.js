@@ -47,6 +47,11 @@ window.gamedata = {
        Net's field is the one field shape with no unit at its centre to hang a disc on - see
        BallisticIconContainer.generateEdfNetHexes. */
     edfNetHexes: null,
+    /* Walkers of Sigma-957 (WALKERS_OF_SIGMA_PLAN.md 3.18, Stage 20) - { costs: { <unitId>: power-turns },
+       chains: { <targetId>: { total, cost, since } } }, total in HALF power-turns. Published by
+       EdjdAbduction::publish; read by the jump engine's menu and the ship tooltip. NULL in every game
+       without a Walker hull drive. */
+    abductions: null,
     /* Walkers of Sigma-957 (Stage 7) - the SAME list, recomputed locally from PLOTTED positions so
        a player can see where their Nets will cover while they are still deciding where to move.
        Written by PhaseStrategy.syncEdfNetPreview, read only by
@@ -1944,16 +1949,29 @@ window.gamedata = {
             var EWRestrictedIncorrect = [];//RestrictedEW critical circumvented
             var EWLCVIncorrect = [];//LCV set too many EW to tasks other than OEW
             for (var shipID in myShips) {
-                if (!myShips[shipID].flight) {
-                    if (ew.convertUnusedToDEW(myShips[shipID]) != true) {
-                        EWIncorrect.push(myShips[shipID]);
+                /* ⭐ WALKERS OF SIGMA-957 (WALKERS_OF_SIGMA_PLAN.md 3.11, Stage 12): a Mapmaker's
+                   unspent flight EW has to become DEW at the commit exactly as a ship's does -
+                   and the gate that stopped that was HERE, at the call site, not only inside
+                   convertUnusedToDEW. The other two checks stay ship-only: checkRestrictedEW is
+                   about a C&C critical no flight can have, and checkLCVSensors about an LCV
+                   trait no flight carries. */
+                if (myShips[shipID].flight) {
+                    if (ew.isFlightEwPool(myShips[shipID])) {
+                        if (ew.convertUnusedToDEW(myShips[shipID]) != true) {
+                            EWIncorrect.push(myShips[shipID]);
+                        }
                     }
-                    if (ew.checkRestrictedEW(myShips[shipID]) != true) {
-                        EWRestrictedIncorrect.push(myShips[shipID]);
-                    }
-                    if (ew.checkLCVSensors(myShips[shipID]) != true) {
-                        EWLCVIncorrect.push(myShips[shipID]);
-                    }
+                    continue;
+                }
+
+                if (ew.convertUnusedToDEW(myShips[shipID]) != true) {
+                    EWIncorrect.push(myShips[shipID]);
+                }
+                if (ew.checkRestrictedEW(myShips[shipID]) != true) {
+                    EWRestrictedIncorrect.push(myShips[shipID]);
+                }
+                if (ew.checkLCVSensors(myShips[shipID]) != true) {
+                    EWLCVIncorrect.push(myShips[shipID]);
                 }
             }
 
@@ -2743,6 +2761,10 @@ getActiveShipName: function getActiveShipName() {
            edfHexes) and therefore easier to misread: the corridor between two Nets would drain
            and penalise while being invisible on the map. */
         gamedata.edfNetHexes = serverdata.edfNetHexes || null;
+        /* Walkers of Sigma-957 (Stage 20) - Extra-Dimensional Jump Drive cost previews and standing
+           abduction chains. Same named-key rule and the same null normalisation: the server omits the
+           key in every game without a Walker hull drive. */
+        gamedata.abductions = serverdata.abductions || null;
 
         shipManager.initiated = 0;
 

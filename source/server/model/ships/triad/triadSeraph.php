@@ -55,7 +55,7 @@ class triadSeraph extends MediumShip{
 		$this->addAftSystem(new GraviticThruster(8, 13, 0, 4, 2));
 		$this->addAftSystem(new GraviticThruster(8, 13, 0, 4, 2));
 		$this->addAftSystem(new GraviticThruster(8, 13, 0, 4, 2));
-		$this->addAftSystem(new JumpEngine(8, 15, 4, 10));        
+		$this->addAftSystem((new JumpEngine(8, 15, 4, 10))->markAncient());        
 	
         $this->addPrimarySystem(new Structure( 9, 75));
 		
