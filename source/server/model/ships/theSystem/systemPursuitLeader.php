@@ -1,17 +1,18 @@
 <?php
 
-class systemLightCruiser extends BaseShipNoAft{
+class systemPursuitLeader extends BaseShipNoAft{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 
-        $this->pointCost = 3500;
+        $this->pointCost = 2500;
         $this->faction = "The System";
-        $this->phpclass = "systemLightCruiser";
-        $this->imagePath = "img/ships/systemLightCruiser.png";
-        $this->shipClass = "Light Cruiser";
+        $this->phpclass = "systemPursuitLeader";
+        $this->imagePath = "img/ships/systemPursuitShip2.png";
+        $this->shipClass = "Pursuit Leader";
 		$this->shipSizeClass = 3;
 		$this->unofficial = true;
+        $this->limited = 10;
 
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
         $this->gravitic = true;
@@ -24,8 +25,8 @@ class systemLightCruiser extends BaseShipNoAft{
 		$this->critRollMod -= 2;
 		$this->enhancementOptionsDisabled[] = 'VULN_CRIT';
         
-        $this->forwardDefense = 15;
-        $this->sideDefense = 16;
+        $this->forwardDefense = 14;
+        $this->sideDefense = 17;
 
         $this->turncost = 0.5;
         $this->turndelaycost = 0.5;
@@ -33,8 +34,6 @@ class systemLightCruiser extends BaseShipNoAft{
         $this->rollcost = 5;
         $this->pivotcost = 3;
         $this->iniativebonus = 15;
-
-		$this->fighters = array("System Drone"=>6);
 
 		/*The System use their own enhancement set */		
 		Enhancements::nonstandardEnhancementSet($this, 'SystemShip');
@@ -44,37 +43,35 @@ class systemLightCruiser extends BaseShipNoAft{
 		$scanner = new Scanner(6, 22, 0, 11);
 			$scanner->markAdvanced();
 			$this->addPrimarySystem($scanner);			
-		$this->addPrimarySystem(new Engine(5, 12, 0, 14, 4));
+		$this->addPrimarySystem(new Engine(5, 12, 0, 12, 4));
 		$this->addPrimarySystem(new Hangar(5, 4, 2));
-		$this->addPrimarySystem(new ThirdspaceShieldGenerator(6, 15, 0, 30, 3, 8)); //$armor, $maxhealth, $power used, output, maxBoost, boostEfficiency
-        $this->addPrimarySystem(new SelfRepair(6, 8, 6)); //armor, structure, output
-		$this->addAftSystem(new GraviticThruster(5, 15, 0, 7, 2));
-		$this->addAftSystem(new GraviticThruster(5, 15, 0, 7, 2));
+		$this->addPrimarySystem(new ThirdspaceShieldGenerator(6, 15, 0, 30, 3, 6)); //$armor, $maxhealth, $power used, output, maxBoost, boostEfficiency
+        $this->addPrimarySystem(new SelfRepair(6, 7, 4)); //armor, structure, output
+		$this->addAftSystem(new GraviticThruster(5, 20, 0, 12, 2));
 		$this->addAftSystem(new JumpEngine(6, 25, 6, 8));        
+		$this->addAftSystem(new ThirdspaceShield(0, 140, 70, 90, 270, 'A'));	
 
-		$this->addFrontSystem(new GraviticThruster(5, 12, 0, 3, 1));
 		$this->addFrontSystem(new GraviticThruster(5, 12, 0, 3, 1));
 		$this->addFrontSystem(new GraviticThruster(5, 12, 0, 3, 1));
         $this->addFrontSystem(new FusionBomb(5, 9, 5, 240, 120));
-        $this->addFrontSystem(new SeekerTorp(5, 6, 5, 270, 90));
         $this->addFrontSystem(new PlasmaArray(5, 8, 4, 270, 90));
-		$this->addFrontSystem(new ThirdspaceShield(0, 160, 80, 300, 60, 'F'));	
+        $this->addFrontSystem(new HvyNeutronCannon(6, 16, 9, 330, 30));
+        $this->addFrontSystem(new SeekerTorp(5, 6, 5, 0, 360));
+		$this->addFrontSystem(new ThirdspaceShield(0, 140, 70, 270, 90, 'F'));	
 		
-		$this->addLeftSystem(new GraviticThruster(5, 25, 0, 8, 3));
-        $this->addLeftSystem(new NeutronBeam(5, 14, 8, 300, 60));
-        $this->addLeftSystem(new PlasmaArray(5, 8, 4, 180, 360));
-		$this->addLeftSystem(new ThirdspaceShield(0, 200, 100, 180, 300, 'L'));			
+		$this->addLeftSystem(new GraviticThruster(5, 20, 0, 6, 3));
+        $this->addLeftSystem(new PlasmaArray(5, 8, 4, 240, 60));
+        $this->addLeftSystem(new PlasmaArray(5, 8, 4, 120, 300));
 
-		$this->addRightSystem(new GraviticThruster(5, 25, 0, 8, 4));
-        $this->addRightSystem(new NeutronBeam(5, 14, 8, 300, 60));
-        $this->addRightSystem(new PlasmaArray(5, 8, 4, 0, 180));
- 		$this->addRightSystem(new ThirdspaceShield(0, 200, 100, 60, 180, 'R'));
+		$this->addRightSystem(new GraviticThruster(5, 20, 0, 6, 4));
+        $this->addRightSystem(new PlasmaArray(5, 8, 4, 300, 120));
+        $this->addRightSystem(new PlasmaArray(5, 8, 4, 60, 240));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 6, 60));
-        $this->addLeftSystem(new Structure( 6, 65));
-        $this->addRightSystem(new Structure( 6, 65));
-        $this->addPrimarySystem(new Structure( 6, 50));
+        $this->addFrontSystem(new Structure( 6, 40));
+        $this->addLeftSystem(new Structure( 6, 55));
+        $this->addRightSystem(new Structure( 6, 55));
+        $this->addPrimarySystem(new Structure( 6, 45));
     
             $this->hitChart = array(
         		0=> array(
@@ -90,24 +87,23 @@ class systemLightCruiser extends BaseShipNoAft{
         				20 => "C&C",
         		),
         		1=> array(
-        				5 => "Thruster",
-        				7 => "Fusion Bomb",
-        				9 => "Seeker Torpedo",
-        				11 => "Plasma Array",
+        				4 => "Thruster",
+        				6 => "Fusion Bomb",
+        				9 => "Heavy Neutron Cannon",
+						10 => "Seeker Torpedo",
+        				12 => "Plasma Array",
         				18 => "Structure",
         				20 => "Primary",
         		),
         		3=> array(
         				5 => "Thruster",
-        				8 => "Neutron Beam",
-        				10 => "Plasma Array",
+        				9 => "Plasma Array",
         				18 => "Structure",
         				20 => "Primary",
         		),
         		4=> array(
         				5 => "Thruster",
-        				8 => "Neutron Beam",
-        				10 => "Plasma Array",
+        				9 => "Plasma Array",
         				18 => "Structure",
         				20 => "Primary",
         		),
