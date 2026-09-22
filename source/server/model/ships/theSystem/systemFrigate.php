@@ -63,7 +63,7 @@ class systemFrigate extends MediumShip{
 		$this->addAftSystem(new ThirdspaceShield(0, 80, 40, 90, 270, 'A'));		
 		$this->addAftSystem(new JumpEngine(6, 10, 6, 15));        
        
-        $this->addPrimarySystem(new Structure( 6, 75));
+        $this->addPrimarySystem(new Structure( 6, 60));
 
 		$this->hitChart = array(
                 0=> array(

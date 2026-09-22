@@ -51,24 +51,25 @@ class systemDestroyer extends HeavyCombatVessel{
 		$this->addFrontSystem(new GraviticThruster(5, 10, 0, 5, 1));
 		$this->addFrontSystem(new GraviticThruster(5, 10, 0, 5, 1));
         $this->addFrontSystem(new FusionBomb(5, 9, 5, 240, 120));
-        $this->addFrontSystem(new SeekerTorp(5, 6, 5, 270, 90));
-        $this->addFrontSystem(new SeekerTorp(5, 6, 5, 270, 90));
-        $this->addFrontSystem(new SeekerTorp(5, 6, 5, 270, 90));
+        $this->addFrontSystem(new HvySeekerTorp(5, 8, 6, 240, 60));
+        $this->addFrontSystem(new HvySeekerTorp(5, 8, 6, 240, 60));
+        $this->addFrontSystem(new HvySeekerTorp(5, 8, 6, 300, 120));
+        $this->addFrontSystem(new HvySeekerTorp(5, 8, 6, 300, 120));
         $this->addFrontSystem(new PlasmaArray(5, 8, 4, 270, 90));
-		$this->addFrontSystem(new ThirdspaceShield(0, 120, 60, 270, 90, 'F'));	
+		$this->addFrontSystem(new ThirdspaceShield(0, 100, 50, 270, 90, 'F'));	
 
 		$this->addAftSystem(new GraviticThruster(5, 18, 0, 5, 2));
 		$this->addAftSystem(new GraviticThruster(5, 18, 0, 5, 2));
-        $this->addAftSystem(new SeekerTorp(5, 6, 5, 90, 270));
-        $this->addAftSystem(new SeekerTorp(5, 6, 5, 90, 270));
-		$this->addAftSystem(new ThirdspaceShield(0, 120, 60, 90, 270, 'A'));		
+        $this->addAftSystem(new HvySeekerTorp(5, 8, 6, 90, 270));
+        $this->addAftSystem(new HvySeekerTorp(5, 8, 6, 90, 270));
+		$this->addAftSystem(new ThirdspaceShield(0, 100, 50, 90, 270, 'A'));		
 		$this->addAftSystem(new JumpEngine(6, 15, 6, 12));        
         $this->addAftSystem(new PlasmaArray(5, 8, 4, 90, 270));
     
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 6, 65));
-        $this->addAftSystem(new Structure( 6, 60));
-        $this->addPrimarySystem(new Structure( 6, 60));
+        $this->addFrontSystem(new Structure( 6, 55));
+        $this->addAftSystem(new Structure( 6, 50));
+        $this->addPrimarySystem(new Structure( 6, 50));
         
         $this->hitChart = array(
                 0=> array(
@@ -86,7 +87,7 @@ class systemDestroyer extends HeavyCombatVessel{
                     5 => "Thruster",
                     7 => "Fusion Bomb",
                     9 => "Plasma Array",
-                    12 => "Seeker Torpedo",
+                    12 => "Heavy Seeker Torpedo",
                     18 => "Structure",
                     20 => "Primary",
                 ),
@@ -94,7 +95,7 @@ class systemDestroyer extends HeavyCombatVessel{
                     5 => "Thruster",
                     7 => "Jump Engine",
 					9 => "Plasma Array",
-					11 => "Seeker Torpedo",
+					11 => "Heavy Seeker Torpedo",
                     18 => "Structure",
                     20 => "Primary",
 			),

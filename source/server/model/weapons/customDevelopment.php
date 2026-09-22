@@ -1626,7 +1626,40 @@ class NeutronCannon extends Laser{
 
 }  // endof NeutronCannon
 
+class HvyNeutronCannon extends Laser{
+    	public $name = "HvyNeutronCannon";
+        public $displayName = "Heavy Neutron Cannon";
+		public $iconPath = "NeutronCannon.png";
+        public $animation = "laser";
+        public $animationColor = array(98, 127, 82);
+		public $raking = 20;
+        public $priority = 8;		
 
+		public $factionAge = 3; //Ancient
+
+        public $loadingtime = 3;
+			
+        public $rangePenalty = 0.33;
+        public $fireControl = array(-5, 2, 4); // fighters, <=mediums, <=capitals 
+
+	    public $weaponClass = "Electromagnetic"; 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 15;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 9;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+		
+    	public function getDamage($fireOrder){        return Dice::d(10, 7)+30;   }
+        public function setMinDamage(){     $this->minDamage = 37 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 100 ;      }
+
+}  // endof HvyNeutronCannon
 
 class PlasmaArray extends Plasma{
     	public $name = "PlasmaArray";
@@ -1761,8 +1794,6 @@ class PlasmaArray extends Plasma{
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
-	    //ignores half armor (as a Plasma weapon should!) - now handled by standard routines
-    	
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
 			if (!isset($this->data["Special"])) {
@@ -1773,12 +1804,62 @@ class PlasmaArray extends Plasma{
 
 		}
         
-        
-        public function getDamage($fireOrder){        return Dice::d(10, 2);   }
-        public function setMinDamage(){     $this->minDamage = 2;      }
+        public function getDamage($fireOrder){        return Dice::d(10, 1) + 10;   }
+        public function setMinDamage(){     $this->minDamage = 11;      }
         public function setMaxDamage(){     $this->maxDamage = 20;      }
     
     }//endof class Seeker
+	
+	    class HvySeekerTorp extends Torpedo{
+        public $name = "HvySeekerTorp";
+        public $displayName = "Heavy Seeker Torpedo";
+        public $iconPath = "HvySeekerTorp.png";
+        public $range = 60;
+        public $distanceRange = 75;
+        public $loadingtime = 2;
+
+		public $factionAge = 3; //Ancient
+        
+        public $weaponClass = "Ballistic"; //deals Plasma, not Ballistic, damage. Should be Ballistic(Plasma), but I had to choose ;)
+        public $damageType = "Standard"; 
+        
+        public $fireControl = array(null, 2, 3); // fighters, <mediums, <capitals 
+        
+        public $trailColor = array(98, 127, 82);
+        public $animation = "ball";
+        public $animationColor = array(98, 127, 82);
+        public $animationExplosionScale = 0.7;
+        public $projectilespeed = 11;
+        public $animationWidth = 10;
+        public $trailLength = 10;
+        public $priority = 4; 
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 8;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 6;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+
+		}
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 2) + 10;   }
+        public function setMinDamage(){     $this->minDamage = 13;      }
+        public function setMaxDamage(){     $this->maxDamage = 30;      }
+    
+    }//endof class HvySeeker
 
 
 
