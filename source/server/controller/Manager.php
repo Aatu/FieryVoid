@@ -664,6 +664,9 @@ class Manager{
                 $gamedata = self::$dbManager->getTacGamedata($userid, $gameid);
                 if ($gamedata == null)
                     return null;
+
+                self::healStuckMovementActivation($gamedata);
+
                 //print(var_dump($gamedata));
                 $gamedata->prepareForPlayer();
                 //Line below skips deployment Phase on Turn 1 for late-deploying slots - DK                
@@ -1682,6 +1685,41 @@ class Manager{
         if ($handOverMovement) {
             self::handOverMovementActivation($gdS, $activeBefore);
         }
+    }
+
+    /* Self-heal for a Movement-phase activation stuck on ship(s) that getActiveships() no
+       longer resolves - normally because their slot surrendered, but the hand-off above never
+       ran. That hand-off is reachable ONLY from completeSurrender(), i.e. only when a surrender
+       goes through submitTacGamedata(); a slot marked `surrendered` any other way (a direct DB
+       edit fixing an unreachable player, a future admin "kick" action, anything that doesn't
+       call completeSurrender()) leaves `activeship` pointing at ships that can never submit
+       again, and the game hangs on Movement forever with no automatic recovery. Game 6132,
+       2026-09-22: exactly this, fixed by hand with a one-off script - this is that fix made
+       permanent.
+
+       Called from getTacGamedata() on every ordinary gamedata reload, so a stuck game repairs
+       itself the next time ANYONE loads it - no one-off script needed next time. Cheap and
+       idempotent: one count() against ships already in memory, and a no-op whenever the
+       activation still resolves to at least one real ship (the overwhelming majority of
+       Movement-phase polls). Gated on status "ACTIVE" so a game that ended mid-phase (surrender
+       that finished the game deliberately skips the hand-off - see $gameEnded above) is never
+       woken back up. */
+    private static function healStuckMovementActivation(TacGamedata $gamedata)
+    {
+        if ($gamedata->status !== "ACTIVE") return;
+        if (!($gamedata->getPhase() instanceof MovementGamePhase)) return;
+        if ($gamedata->activeship === -1 || $gamedata->activeship === null) return;
+        if (count($gamedata->getActiveships()) > 0) return;
+
+        $staleIds = is_array($gamedata->activeship) ? $gamedata->activeship : [$gamedata->activeship];
+        $staleShips = array_values(array_filter(array_map(
+            fn($id) => $gamedata->getShipById($id),
+            $staleIds
+        )));
+
+        if (empty($staleShips)) return; // ids resolve to no ship at all - nothing to hand off from
+
+        self::handOverMovementActivation($gamedata, $staleShips);
     }
 
     /* Pass the Movement Phase activation on from a fleet that has just surrendered mid-phase.
