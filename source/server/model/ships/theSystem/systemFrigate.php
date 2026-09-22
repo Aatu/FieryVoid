@@ -63,7 +63,7 @@ class systemFrigate extends MediumShip{
 		$this->addAftSystem(new ThirdspaceShield(0, 80, 40, 90, 270, 'A'));		
 		$this->addAftSystem((new JumpEngine(6, 10, 6, 15))->markLegacy()); //HYPERSPACE_IMPROVEMENTS_PLAN.md 10 A2 - out of B5 jump-point mechanics (Stage H4)
        
-        $this->addPrimarySystem(new Structure( 6, 75));
+        $this->addPrimarySystem(new Structure( 6, 60));
 
 		$this->hitChart = array(
                 0=> array(
