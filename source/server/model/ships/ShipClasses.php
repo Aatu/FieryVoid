@@ -89,6 +89,15 @@ class BaseShip {
        client's claim in its own field means $reinforcement always means "the DB said so", which is
        what all ~80 getTurnDeployed call sites assume. NOT a tac_ship column. */
     public $reinforcementClaim = false;
+    /* HYPERSPACE_IMPROVEMENTS_PLAN.md STAGE H6a/H6b - THE MANIFEST'S ARRIVAL ORDER, AS CLAIMED:
+       array('speed' => int|null, 'carrier' => int|null), or null when the POST said nothing.
+       Written only by Manager::getShipsFromJSON and read only by InitialOrdersGamePhase::
+       persistManifest, which validates it and writes the 'ArrivalOrder' note that
+       JumpEngine::placeArrivingReinforcements reads once.
+       ⚠️ PROTECTED, NOT PUBLIC LIKE ITS NEIGHBOURS. A public property - even a null one - lands in
+       every static blueprint (the generators json_encode the raw ship), and nothing on the client
+       reads this back. */
+    protected $arrivalOrderClaim = null;
     public $unavailable = false;
     public $minesweeperbonus = 0;
     public $base = false;
@@ -142,6 +151,31 @@ class BaseShip {
 
 	public $toHitBonus = 0; //Used to increase hit chance of all weapons fired by a ship e.g. Elite Crew / Markab enhancements.		
     public $critRollMod = 0; //penalty to critical damage roll: positive means crit is more likely, negative less likely (for all systems)
+
+	/* ⭐ ELITE / POOR CREW - HOW MANY LEVELS OF CREW QUALITY THIS HULL BOUGHT.
+	   Positive = Elite Crew levels, negative = Poor Crew levels, 0 = an ordinary crew. Set once,
+	   from Enhancements::setEnhancementsShip, which is the ONLY writer - both enhancements share
+	   this one signed number so every rule below is written once instead of as two mirror-image
+	   branches that can drift apart.
+
+	   What reads it, and where each rule actually lives:
+	     - TURN DELAY .... Movement::calculateTurndelay (server) and movement.js
+	                       calculateTurndelay / calculateTurndelayAtMove (client), both through
+	                       getCrewTurnDelayModifier(). The client is handed the derived number as
+	                       'crewTurnDelayMod' by Enhancements::addShipEnhancementsForJSON.
+	     - WEAPON DICE ... Weapon::getFinalDamage, through getCrewDieDamageBonus().
+	     - JUMP DELAY .... applied ONCE at enhancement time to each JumpEngine's $delay
+	                       (JumpEngine::applyCrewJumpDelayModifier) - nothing reads this property
+	                       at jump time.
+	     - HANGAR RATE ... applied ONCE at enhancement time to each Hangar's $output.
+	     - ARMED SHUTTLES  HangarOps::crewBlocksArmedShuttles / crewArmedShuttleUpgrades.
+
+	   ⭐ PROTECTED, NOT PUBLIC, and that is deliberate: json_encode serialises public properties
+	   only, and the static blueprint generator encodes a PRISTINE ship on which this is always 0 -
+	   so a public default would add a dead key to every one of the ~2,500 blueprints under
+	   source/public/static/json for nothing. ShipCompactor strips false and empty-array defaults
+	   but NOT zeroes (its "D" rule was deliberately never built), so the key would survive. */
+	protected $crewQuality = 0;
 
 	
 	public $halfPhaseThrust = 0; //needed for half phasing; equal to thrust from two BioThrusters on a given ship; 0 for ships that cannot half phase, eg. vast majority
@@ -1721,6 +1755,44 @@ class BaseShip {
     {
         return (isset($this->enabledSpecialAbilities[$ability]));
     }
+
+	/* ===================== ELITE / POOR CREW - THE FIVE READ SITES =====================
+	   See $crewQuality above for what the number means and who writes it. Everything below is a
+	   derivation of that one number, named so the rule can be grepped for rather than re-derived
+	   at each site. */
+
+	//Signed crew level: >0 Elite, <0 Poor. The ONE place anything outside Enhancements should ask.
+	public function getCrewQuality(){
+		return (int)$this->crewQuality;
+	}
+
+	//Enhancements::setEnhancementsShip only. ADDITIVE, because the two enhancements are separate
+	//switch cases and a hull that somehow carried both would otherwise have one silently win.
+	public function addCrewQuality($levels){
+		$this->crewQuality = (int)$this->crewQuality + (int)$levels;
+	}
+
+	/* FLAT modifier applied to a turn's computed TURN DELAY - not to turndelaycost, which is a
+	   RATE. Elite Crew shortens the delay by one per level (floored at 1, never to 0); Poor Crew
+	   lengthens it by one per level. Both are the same expression because $crewQuality is signed:
+	   Elite +2 gives -2, Poor -2 gives +2.
+	   ⚠ The FLOOR AT 1 and the "only when a delay was actually incurred" test do NOT live here -
+	   they belong to the arithmetic at each call site, which differs between the server's
+	   Movement::calculateTurndelay (already floors non-flights at 1) and the client's two
+	   functions. This returns the modifier and nothing else. */
+	public function getCrewTurnDelayModifier(){
+		return -(int)$this->crewQuality;
+	}
+
+	/* Points added to EVERY DAMAGE DIE this unit's weapons roll, capped at the die's own maximum
+	   ("if you rolled a 9 on a d10 it would be treated as a 10, but a 10 is not improved").
+	   Elite Crew only - Poor Crew has no damage clause at all, so this is never negative.
+	   Spent by Weapon::getFinalDamage, which hands it to Dice::$perDieBonus for the duration of
+	   one getDamage() call; a weapon that computes its damage from a formula rather than dice
+	   (AntimatterConverter's 4X+2, say) therefore gains nothing, which is correct. */
+	public function getCrewDieDamageBonus(){
+		return max(0, (int)$this->crewQuality);
+	}
 
     public function getSpecialAbilitySystem($ability)
     {
@@ -3393,6 +3465,18 @@ public function getAllEWExceptDEW($turn){
 	   answering true: from then on it is an ordinary unit with a late deploy turn. */
 	public function isReinforcement(){
 		return $this->reinforcement && $this->arrivalTurn === null;
+	}
+
+	//Stage H6 - see $arrivalOrderClaim. Null speed / carrier = the POST did not say.
+	public function setArrivalOrderClaim($speed, $carrier){
+		$this->arrivalOrderClaim = array(
+			'speed'   => ($speed === null) ? null : (int)$speed,
+			'carrier' => ($carrier === null) ? null : (int)$carrier,
+		);
+	}
+
+	public function getArrivalOrderClaim(){
+		return $this->arrivalOrderClaim;
 	}
 
 	/* ⭐ IS THIS UNIT ON THE BOARD FROM TURN 1 NO MATTER WHAT THE SLOT OR THE FLAG SAYS?

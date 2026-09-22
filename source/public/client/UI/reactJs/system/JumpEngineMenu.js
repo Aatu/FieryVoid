@@ -24,6 +24,12 @@ import { Container, Header, Row, Label, Controls, Note, ActionButton } from './a
  * deliberately absent on the turn the vortex was declared (it has not formed yet) and on the turn
  * the four-turn cap closes it (maintaining could not change the outcome).
  *
+ * ⭐⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md §4 (Stage H3) - EXCEPT ON A CAPACITOR-FED VORLON DRIVE, which
+ * has no four-turn cap and so has no last turn: the toggle stays offered for as long as the jump
+ * point is paid for. Its half of the rule is an UPKEEP out of the Power Capacitor rather than the
+ * all-systems-dark shutdown, so this control shuts nothing down on one and restores nothing - see
+ * the note text below, and JumpEngine::$vortexUpkeep for the three rulings behind it.
+ *
  * ⭐ WALKERS_OF_SIGMA_PLAN.md §3.18 (Stage 20) - AND THE ABDUCTION PANEL. A Walker drive holding an
  * abduction order this turn shows its target, the power level (an Extra-Dimensional Jump Drive steps
  * it; a supporting drive's is fixed at double), what the level costs the reactor, and the cost and
@@ -177,6 +183,13 @@ class JumpEngineMenu extends Component {
     renderMaintain() {
         const { system } = this.props;
         const isMaintaining = system.isMaintainingVortex();
+        /* ⭐⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md §4 (Stage H3) - THE VORLON DRIVE'S NOTE IS A DIFFERENT
+           RULE, not a softer wording of the same one. A capacitor-fed drive pays its powerReq out of
+           the Power Capacitor for every turn the jump point is held (R4) and has no four-turn limit
+           (R5), so neither half of the standard note is true for it: nothing is shut down, and it
+           does not close on its own. The cost is stated because the reactor balance reserves it and
+           the player has to leave the power for it. */
+        const upkeep = system.chargesVortexUpkeep() ? system.getVortexUpkeepCost() : 0;
 
         return (
             <React.Fragment>
@@ -198,9 +211,13 @@ class JumpEngineMenu extends Component {
                     </Controls>
                 </Row>
                 <Note>
-                    {isMaintaining
-                        ? 'Held open. All powered systems except the Scanner are shut down this turn.'
-                        : 'Closes at end of turn unless maintained. Shuts down all powered systems except the Scanner.'}
+                    {upkeep > 0
+                        ? (isMaintaining
+                            ? 'Held open. ' + upkeep + ' power is drawn from the Power Capacitor at end of turn. No turn limit while it is paid.'
+                            : 'Closes at end of turn unless maintained. Costs ' + upkeep + ' power from the Power Capacitor on each turn it is used - no systems are shut down, and nothing is drawn on a turn it is idle.')
+                        : (isMaintaining
+                            ? 'Held open. All powered systems except the Scanner are shut down this turn.'
+                            : 'Closes at end of turn unless maintained. Shuts down all powered systems except the Scanner.')}
                 </Note>
             </React.Fragment>
         );
@@ -227,7 +244,17 @@ class JumpEngineMenu extends Component {
                 + 'So far ' + window.JumpEngine.formatAbductionHalves(chain.total) + ' of ' + chain.cost + ' power-turns.';
             //D65: the field and EW conditions were for taking hold only - nothing to meet from here on.
         } else {
-            note = 'Targeting: takes hold if the target ends its move in your connected field and your OEW beats its DEW.'
+            /* §3.18b: terrain does not move, and a multi-hex asteroid or a moon needs its WHOLE footprint
+               inside the field rather than one hex - which is a rule the player has to be told before
+               spending a turn taking hold. Mirrors EdjdAbduction::getConditionBlock's two messages. */
+            const terrain = Boolean(target) && gamedata.isTerrain(target.shipSizeClass, target.userid);
+            const multiHex = Boolean(target) && (((target.hexOffsets || []).length > 0) || target.Huge > 0);
+            const condition = terrain
+                ? 'Targeting: takes hold if ' + (multiHex ? 'every hex it occupies is' : 'it is')
+                  + ' inside your connected field and your OEW beats its DEW.'
+                : 'Targeting: takes hold if the target ends its move in your connected field and your OEW beats its DEW.';
+
+            note = condition
                 + ' Power can be applied from next turn'
                 + (preview !== null ? ', and ' + preview + ' power-turns will abduct it.' : '.');
         }

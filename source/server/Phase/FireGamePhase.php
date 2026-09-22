@@ -43,9 +43,10 @@ class FireGamePhase implements Phase
         // an instant earlier the answer is yes in both cases, which would stamp a wave for a turn
         // its doorway does not exist on. See JumpEngine::stampExitManifests.
         //
-        // AND BEFORE the slot loop at the bottom, which asks getTurnDeployed to decide who gets a
-        // Deployment phase next turn - the arrival turns stamped here are exactly what that
-        // question needs to see (Stage 7).
+        // HYPERSPACE_IMPROVEMENTS_PLAN.md STAGE H6 - the wave these arrival turns bring no longer gets a
+        // Deployment phase to walk through its doorway in: JumpEngine::placeArrivingReinforcements
+        // places, docks or sends back every one of them at the start of next turn, from
+        // Manager::changeTurn, and the slot loop below no longer grants a phase for them.
         JumpEngine::stampExitManifests($servergamedata, $dbManager);
 
 
@@ -120,18 +121,19 @@ class FireGamePhase implements Phase
             if (!$needsPhase && $slot->depavailable == $gameData->turn+1
                 && !$servergamedata->slotHasPlacedShips($slot->slot)) $needsPhase = true;
 
-            /* REINFORCEMENTS_PLAN.md STAGE 7 - the wave that just got an arrival turn needs a
-               Deployment phase to walk through its doorway in. Nothing above can produce it: a
-               reinforcement's arrival turn is decided in play by the exit it rides, and
-               depavailable (which is what every clause above is built on) knows nothing about it.
+            /* ⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md STAGE H6c - NO CLAUSE FOR A WAVE ARRIVING THROUGH A JUMP
+               POINT. Stage 7 granted DEPLOYMENT: REINFORCEMENTS here for it (hasReinforcementsArriving);
+               the phase had nothing left to decide once speed and "start in hangar" moved into the Jump
+               Manifest, and the server now places the wave itself at the start of next turn
+               (JumpEngine::placeArrivingReinforcements, from Manager::changeTurn). A slot that ALSO has
+               a real placement next turn still gets its phase from the clauses above - and the arrival
+               is already on the board by then (DeploymentGamePhase::validateDeployment skips it). */
 
-               ⚠️ ASKED OF $servergamedata, NEVER $gameData. stampExitManifests ran a few lines
-               above this loop and stamped its arrival turns onto that object and the database; the
-               outer $gameData was loaded before the Firing phase resolved and still believes every
-               reinforcement is in hyperspace. Ask the wrong one and the whole wave silently misses
-               the only turn its exit is open on. */
-            if (!$needsPhase
-                && $servergamedata->hasReinforcementsArriving($slot->playerid, $gameData->turn+1)) {
+            /* ⭐ H6 follow-up (user ruling 2026-09-19) - THE ONE EXCEPTION: a Hyach arrival with its
+               Specialists still to choose. They are chosen only in a Deployment phase, and the Initial
+               Orders ones must be usable on the arrival turn - see TacGamedata::hasArrivingSpecialistChoices.
+               The unit is already placed when the phase opens; the phase is only for the choice. */
+            if (!$needsPhase && $servergamedata->hasArrivingSpecialistChoices($slot->slot, $gameData->turn+1)) {
                 $needsPhase = true;
             }
 

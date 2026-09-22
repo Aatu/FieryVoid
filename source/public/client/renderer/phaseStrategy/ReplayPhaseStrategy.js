@@ -132,6 +132,17 @@ window.ReplayPhaseStrategy = function () {
         this.showShipTooltip(ship, payload, menu, false);
     };
 
+    /* NOTHING IS SELECTABLE IN A REPLAY. selectShip above already declines to select - a
+       replay is a recording, so clicking a hull shows its tooltip and nothing more - but
+       that is the MAP's door, and PROGRAMMATIC selection comes through canSelectShip
+       instead (PhaseStrategy.onScrollToShip and onOpenShipWindowFor). Without this the
+       fleet list's rows and the confirm dialogs' ship links would select during playback,
+       which no click on the board can do. Same reasoning as MovementPhaseStrategy's
+       override: the answer is whatever a click on the board would have done here. */
+    ReplayPhaseStrategy.prototype.canSelectShip = function (ship) {
+        return false;
+    };
+
     ReplayPhaseStrategy.prototype.setSelectShip = function (ship, payload) {
     };
 

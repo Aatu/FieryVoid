@@ -316,7 +316,10 @@ const liveShipStats = (ship) => {
         if (ship.submarine && move.isGoingBackwards(ship)) turnRate = turnRate * 1.33;
 
         const turnCost = Math.max(1, Math.ceil(speed * turnRate)) + lcv;
-        const turnDelay = Math.ceil(speed * delayRate) + lcv;
+        /*ELITE / POOR CREW: the flat crew modifier on the DELAY only (-1 per Elite level, floored
+          at 1; +1 per Poor level) - a crew's training does not change a turn's thrust cost. Same
+          order as movement.js calculateTurndelayAtMove: crew first, LCV surcharge after.*/
+        const turnDelay = move.applyCrewTurnDelay(ship, Math.ceil(speed * delayRate)) + lcv;
 
         /*thrust for this turn, with the rate it came from in parens - the ship tooltip's
           format. One deliberate divergence: the parenthesised turn rate here is the

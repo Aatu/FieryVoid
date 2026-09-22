@@ -148,8 +148,13 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
       <li><strong>Elite Crew</strong>
         <ul class="circle-list">
             <li>Effect: +1 to hit with all weapons, +5 Initiative, +2 Engine, +1 Sensors, +2 Reactor power, -5% Defence Rating, -1 to critical results</li>
+            <li>Effect: all weapons do +1 damage <em>per die</em>, although no die can exceed its maximum yield &mdash; a 9 on a d10 becomes a 10, but a 10 is not improved. Weapons whose damage is a formula rather than a dice roll (the Antimatter Converter's 4X+2, for instance) are unaffected.</li>
+            <li>Effect: whenever the ship turns, its Turn Delay is reduced by 1, to a minimum of 1. This is a flat reduction to the delay the turn actually costs, not a change to the ship's turn delay rate.</li>
+            <li>Effect: the ship's jump delay is reduced by 20% (fractions of 0.5 or more round up).</li>
+            <li>Effect: if the ship has any default shuttles, one of them is upgraded to the cheapest armed shuttle in that faction's listing, free &mdash; effectively a free Convert to Armed Shuttle. Factions with no armed shuttle of their own get the Civilian armed shuttle instead. The upgraded shuttle starts the battle docked in the hangar and launches normally; it takes a box the ship already had, so hangar capacity is unchanged.</li>
             <li>Points Cost: +40% of ship cost (second time: +60%)</li>
             <li>Limit: 2</li>
+            <li>Notes: every effect above is per level, so a ship bought Elite Crew twice gets -2 Turn Delay (still to a minimum of 1), +2 damage per die, a jump delay cut twice by 20% (to 64% of the original), and two upgraded shuttles.</li>
         </ul>      
       </li>
       <li><strong>Ordnance Reserve</strong>
@@ -219,8 +224,13 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
       <li><strong>Poor Crew</strong>
         <ul class="circle-list">
             <li>Effect: -1 to hit with all weapons, -5 Initiative, -1 Engine, -1 Sensors, -1 Reactor power, +5% Defence Ratings, +2 to critical rolls</li>
+            <li>Effect: whenever the ship turns, its Turn Delay is increased by 1 &mdash; a turn delay of 3 hexes becomes 4.</li>
+            <li>Effect: hangar launch/dock capacity is halved (rounded up). This is the bay's launch-and-land rate per turn; the number of craft the hangar can HOLD is unchanged, so the ship keeps its full complement but cycles it half as fast.</li>
+            <li>Effect: the ship's jump delay is increased by 20% (fractions of 0.5 or more round up).</li>
+            <li>Effect: the ship cannot carry armed shuttles. Its default shuttle slots are not counted as armed-shuttle capacity by the Fleet Checker, and it receives no free upgrade. It still gets its ordinary unarmed default shuttles.</li>
             <li>Points Cost: -15% of ship cost (-10% if selected a second time)</li>
             <li>Limit: 2</li>
+            <li>Notes: every effect above is per level, so a ship bought Poor Crew twice gets +2 Turn Delay, a hangar rate quartered, and a jump delay lengthened twice by 20% (to 144% of the original).</li>
         </ul>      
       </li> 
       <li><strong>Sluggish</strong>

@@ -909,13 +909,19 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                         Without either, your reinforcements sit in hyperspace for the whole battle and their points are wasted &mdash; the lobby warns you
                         before you click Ready.</li>
                     <li><b>What the enemy sees.</b> Nothing but a line in your fleet list reading <i>Reinforcements &mdash; N units, X pts</i>. Not which hulls,
-                        not what they carry, not who can open a jump point. You see your own in full.</li>
+                        not what they carry, not who can open a jump point. You see your own in full and can manage their power systems during Initial Orders by bringing up their ship window from Fleet Info tab.</li>
                     <li><b>Calling them in.</b> During <b>Initial Orders</b>, press <b>Manage Reinforcements</b>. Every jump-capable unit you have in hyperspace is
                         listed; choose one, press <b>Choose Hex</b>, click the hex you want the jump point to open in, set the <b>facing</b> with the arrow
                         control, and then tick the units that will ride through it &mdash; the <b>Jump Point Manifest</b>. The opening ship always rides its own
                         jump point. A unit already riding somebody else's is greyed out; you can withdraw a declaration from the same menu and start again.
                         To change your mind about <i>who rides</i> without giving up the jump point itself, select the row and press <b>Jump Manifest</b> &mdash;
-                        it reopens the same tick list.</li>
+                        it reopens the same tick list. Right-click any row, or its <b>&#9432;</b>, to open that unit's ship window.</li>
+                    <li><b>How they come out.</b> The manifest also sets each unit's <b>Speed</b> as it leaves hyperspace (0&ndash;10, including the opening
+                        ship's own), and the speed you pick counts for that turn's initiative. For a fighter flight &mdash; or a ship a Docking Bay takes
+                        &mdash; pick a carrier from its <b>Hangar</b> list to have it start the battle aboard that ship: the opening ship, or another unit
+                        riding the <i>same</i> jump point (which of the carrier's hangars it goes into is worked out for you). The room is shared, so a
+                        carrier that is full shows <i>(no room)</i>, and un-ticking a carrier takes back whatever was riding in it (the manifest says so and
+                        puts it on the map instead).</li>
                     <li><b>The declaration is public once orders are committed</b> &mdash; everyone sees a <span style="color:#00b8e6;"><b>blue hex</b></span> with a
                         facing arrow at the hex you named, for the rest of that turn. That warning is the price of arriving somewhere useful, and it is the same
                         deal a Delayed Deployment Slot gets.</li>
@@ -926,13 +932,21 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                         the facing as well. An Ancient fleet with a base on the map arrives precisely about 40% of the time; a young race with a sensor rating of
                         10 is precise only on a natural 1. The Combat Log names the band, the roll and the distance, so you can see which happened. The jump
                         point never forms inside terrain or an Enormous unit &mdash; if the dice put it there it is nudged to the nearest legal hex.</li>
-                    <li><b>Arriving.</b> On the <i>next</i> turn the owner gets a <b>Deployment Phase</b>. The wave places itself in the jump point's hex on the
-                        jump point's facing, stacked, and all you set is each unit's <b>speed</b>. Anything you leave unplaced goes back to hyperspace with
-                        nothing spent, and can be called in again later. A ship's jump point is <b>one-shot</b>: it closes at the end of the arrival turn, and the
-                        drive can then be used normally (including to open a way out).</li>
+                    <li><b>Arriving.</b> At the start of the <i>next</i> turn the wave is simply there &mdash; there is no Deployment Phase for it. Every unit
+                        stands in the jump point's hex on the jump point's facing, stacked, at the speed you chose in the manifest, and anything you ticked for a
+                        hangar is already aboard its carrier. If the jump point is no longer there, the units go back to hyperspace with nothing spent, and can be
+                        called in again later. A Hyach ship arriving this way still gets a short <b>Deployment Phase</b> on its arrival turn &mdash; it is
+                        already in place &mdash; to choose its <b>Specialists</b>, which it can then use from that turn's Initial Orders. A ship's jump point closes at the end of the arrival turn <b>unless the ship maintains it</b>:
+                        once it is on the board it can hold the jump point open exactly as it would a way out &mdash; <b>Maintain Vortex</b> on the Jump Engine, which
+                        shuts down all its powered systems except the Scanner, for at most four turns open (a Vorlon pays its drive's power from the Power Capacitor
+                        instead, with no turn limit, and also pays it on the turn the jump point forms). On every turn it is maintained, <b>Manage Reinforcements</b>
+                        lists it with <b>Select Reinforcements</b> so another wave can come through next turn; turning Maintain off cancels that wave. A damaged drive rolls for failure on every turn it maintains the jump point,
+                        though never on the turn it forms. Once it closes, the drive recharges and can then be used normally (including to open a way out).</li>
                     <li><b>Arriving is disorderly.</b> A wave that comes out of hyperspace off course spends the turn sorting itself out: on its <b>arrival turn
                         only</b>, every unit that rode that jump point takes an <b>initiative penalty of 1 per hex it scattered, plus 2 for every 60&deg; the
-                        facing was turned</b>. A precise arrival costs nothing at all, which is one more reason the modifiers above are worth having.</li>
+                        facing was turned</b>. A precise arrival costs nothing at all, which is one more reason the modifiers above are worth having. Only the
+                        first wave is disordered: a later wave through a jump point that is being held open comes out of a doorway that has already formed, and
+                        takes no penalty.</li>
                     <li><b>Jump Gates.</b> A fixed Jump Gate can be signalled to open a jump point <i>inward</i> instead of outward: click the gate in Initial
                         Orders and choose <b>Signal Gate for Arrival</b>, which opens the same Manifest window. A gate's jump point does not deviate &mdash; it
                         opens in the gate's own mouth, on the gate's own facing, with no initiative penalty &mdash; and it stays open for its programmed hold, so
@@ -943,7 +957,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                     <li><b>Shadows and other phasing hulls.</b> A Shadow ship does not tear a vortex open &mdash; it fades out, and from now on it fades back
                         <b>in</b> the same way. It declares a hex exactly as anything else does and its arrival marker reads <b>REINFORCEMENTS</b>, but no jump
                         point terrain ever appears: the ships simply <i>are</i> there on the arrival turn. Everything else &mdash; the deviation roll, the manifest,
-                        the Deployment Phase, the initiative penalty &mdash; is identical. Such a drive still cannot open a way <i>out</i>; it uses the old
+                        the arrival speed, the initiative penalty &mdash; is identical, except that only fighters its hangars can take (and ships its Docking Bay
+                        can) may ride with it, and they always arrive aboard. Such a drive still cannot open a way <i>out</i>; it uses the old
                         one-click Jump to Hyperspace for that.</li>
                     <li><b>You cannot go back out the way you came.</b> A blue Jump Point Exit is one-way. To leave the battle you need a yellow Jump Point
                         Entrance, which means opening one with a drive that has recharged.</li>

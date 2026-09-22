@@ -85,6 +85,9 @@ window.weaponManager = {
             if (weaponManager.hasFiringOrder(ship, weapon) && !weapon.multiModeSplit) continue;
 
             if (weapon.firingMode == modeSet) continue;
+            //A weapon whose own selector is hidden (e.g. a Sustained weapon mid-sequence) must not be
+            //switched by a right-click on a sibling's grid either.
+            if (weapon.hideFiringModeSelector) continue;
             //Replicate canChangeFiringMode logic
             if (!((gamedata.gamephase === 1 && weapon.ballistic) || (gamedata.gamephase === 5 && weapon.preFires) || (gamedata.gamephase === 3 && !weapon.ballistic && !weapon.preFires))) continue;
 
@@ -890,10 +893,25 @@ window.weaponManager = {
                     value = weapon.firingModes[value];
                     var keys = Object.keys(weapon.firingModes);
 
+                    /* ⭐ WALKERS §3.18b (user ruling 2026-09-20) - A WALKER JUMP DRIVE DECLARES AN
+                       ABDUCTION, NOT A SHOT. It has no hit chance worth quoting, and since terrain
+                       became abductable it is the one system that may aim at Huge multi-hex terrain -
+                       so without this line the tooltip would answer "Cannot Target" on exactly the
+                       target the click is about to accept. Ahead of the refusal below, which still
+                       holds for every other weapon in the selection. */
+                    var abductionLine = typeof weapon.canSelectForAbduction === 'function'
+                        && weapon.canSelectForAbduction(selectedShip)
+                        && typeof JumpEngine !== 'undefined'
+                        && JumpEngine.isAbductableTarget(ship)
+                        //The same team test doSpecialTargeting opens with - and false for terrain, whoever bought it.
+                        && !gamedata.isMyorMyTeamShip(ship);
+
                     //!isTargetable: a unit there is no point in shooting at (the Energy Draining
                     //Mine's orb - plan 3.10c). Same refusal as Huge terrain, and deliberately in
                     //the same line: what the player needs is one "Cannot Target", not a new reason.
-                    if (ship.Huge > 0 || !shipManager.isTargetable(ship) || attachedUnitHidden || attachedWeaponHidden || clawBlindSpot) { //Cannot Target larger terrain or POds that are attached to non-facing sides
+                    if (abductionLine) {
+                        $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hexTargeted"> Abduction</span></div>').appendTo(f);
+                    } else if (ship.Huge > 0 || !shipManager.isTargetable(ship) || attachedUnitHidden || attachedWeaponHidden || clawBlindSpot) { //Cannot Target larger terrain or POds that are attached to non-facing sides
                         $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="cannotTarget"> Cannot Target</span></div>').appendTo(f);
                     } else if (loSBlocked) {
                         // LOS is blocked - only display the blocked message
@@ -2904,9 +2922,11 @@ window.weaponManager = {
     setModeForFireOrder: function setModeForFireOrder(weapon, fireOrder) {
         if (!weapon || !fireOrder) return null;
         var previous = weapon.firingMode;
-        //A multiModeSplit weapon holds orders in both modes at once - there is no single mode to
-        //switch it to, and the display paths already leave it alone.
-        if (weapon.multiModeSplit) return previous;
+        //A multiModeSplit weapon holds orders in several modes at once, so it is left alone unless it
+        //opts in with displaysOrdersInOwnMode: one whose per-mode numbers follow its firingMode (the
+        //Vorlon Lightning Gun, the Heavy Slicer) is safe to switch per ORDER, now that every caller
+        //restores it - and restoreFiringMode lets it rebuild its own readouts afterwards.
+        if (weapon.multiModeSplit && !weapon.displaysOrdersInOwnMode) return previous;
 
         var wanted = fireOrder.firingMode;
         var guard = weapon.firingModes ? Object.keys(weapon.firingModes).length : 1;
@@ -2920,14 +2940,20 @@ window.weaponManager = {
     restoreFiringMode: function restoreFiringMode(weapon, mode) {
         if (!weapon || mode === null || mode === undefined) return;
         if (weapon.firingMode === mode) return;
-        if (typeof weapon.setFiringMode === 'function') {
-            weapon.setFiringMode(mode);
-            if (weapon.firingMode === mode) return;
-        }
+        if (typeof weapon.setFiringMode === 'function') weapon.setFiringMode(mode);
         //Fallback for a weapon whose only way round is changeFiringMode (a magazine-fed rack skips
         //the modes it holds no ammo for) - same bound as above.
         var guard = weapon.firingModes ? Object.keys(weapon.firingModes).length : 1;
         while (weapon.firingMode !== mode && guard-- > 0) weapon.changeFiringMode();
+
+        //Both switches ran updateFiringModeData, which rewrites the generic per-mode readouts
+        //("Damage", "Fire control", "Loading"). An opted-in multiModeSplit weapon may keep its own
+        //versions of those - the Heavy Slicer's pool-based damage and its charge-dependent Piercing
+        //fire control - so let it rebuild them, or the ship window shows the generic ones until
+        //something else happens to re-run initializationUpdate.
+        if (weapon.displaysOrdersInOwnMode && typeof weapon.initializationUpdate === 'function') {
+            weapon.initializationUpdate();
+        }
     },
 
     /* Where an incoming shot is bearing FROM, in hex coordinates.
@@ -3761,7 +3787,13 @@ window.weaponManager = {
 
         if (shipManager.isDestroyed(selectedShip)) return;
         if (selectedShip.mine && ship.mine) return;  //Mine can't shoot mines.
-        if (ship.Huge > 0) return; //Do not allow targeting of large muti-hex terrain.
+        /* ⭐ WALKERS §3.18b (user ruling 2026-09-20) - LARGE MULTI-HEX TERRAIN CANNOT BE SHOT AT, WITH
+           EXACTLY ONE EXCEPTION: an Extra-Dimensional Jump Drive may ABDUCT it. So the blanket refusal
+           that stood on this line became a PER-WEAPON one in the loop below - every other weapon still
+           skips a Huge target silently, as it always did - and the function only bails outright when
+           nothing in the selection could abduct anything. */
+        var hugeTarget = ship.Huge > 0;
+        if (hugeTarget && !weaponManager.hasAbductionSelection(selectedShip)) return;
         if (!shipManager.isTargetable(ship)) return; //Nothing to gain by shooting it - see plan 3.10c.
         if (!selectedShip.flight && shipManager.isDisabled(selectedShip)) return;
         if (weaponManager.isHidden(selectedShip)) return; //Block invisible ships from firing where appropriate.
@@ -3797,6 +3829,11 @@ window.weaponManager = {
             var weapon = gamedata.selectedSystems[i];
 
             if (typeof weapon.afterTargetingPass === 'function') passHooks.push(weapon);
+
+            //WALKERS §3.18b: the other half of the Huge-terrain rule above. A moon or a multi-hex
+            //asteroid is a legal target for an abduction and for nothing else, so every other weapon
+            //skips it here - silently, exactly as the blanket refusal used to do for the whole click.
+            if (hugeTarget && !(typeof weapon.canSelectForAbduction === 'function' && weapon.canSelectForAbduction(selectedShip))) continue;
 
             // Attachment firing restriction: Flights attached to anything, or non-flights targeting their host.
             if (selectedShip.attached && Object.keys(selectedShip.attached).length > 0) {
@@ -5034,7 +5071,20 @@ window.weaponManager = {
         for (var i in fires) {
             var fire = fires[i];
             var weapon = shipManager.systems.getSystem(ship, fire.weaponid);
-            //Added Persistent effect check below, as was preventing cancel moves when non-ballistic Plasma Web generated a plasma cloud in Intial Orders - DK 09.24 
+
+            /* ⚠️⚠️ A LEGACY JUMP DRIVE'S DECLARATION IS NOT A SHOT (user report 2026-09-20, game 4371).
+               markLegacy() clears `ballistic` on every Walker, Ancient and Shadow drive, so an ABDUCTION
+               and a hyperspace EXIT - both type-'ballistic' orders declared in Initial Orders that
+               resolve at the END of the turn - read as declared direct fire in the test below, and the
+               ship silently lost its CANCEL MOVE icon for the whole Movement phase (this function is
+               what UI.shipMovement gates that icon on). An ordinary drive's 'jumppoint' order needs no
+               exemption because its engine is still ballistic - which is exactly why opening a vortex
+               never showed the bug and abducting always did.
+               ⭐ The SAME two damageclasses, for the same reason, are exempted in
+               TacGamedata::hideSystemFireOrders. Keep the two lists in step. */
+            if (fire.damageclass === 'abduction' || fire.damageclass === 'jumpexit') continue;
+
+            //Added Persistent effect check below, as was preventing cancel moves when non-ballistic Plasma Web generated a plasma cloud in Intial Orders - DK 09.24
             if (fire.turn == gamedata.turn && !fire.rolled && !weapon.ballistic && fire.notes != 'PersistentEffect') {
                 return false;
             }
@@ -5565,7 +5615,10 @@ window.weaponManager = {
             //other entry here it is a log line wearing a fire order's clothes - there is no shot,
             //no target and no damage - so the log prints its sentence alone rather than "firing 1x
             //Ramming Attack ... 1/1 shots hit" at a ship nobody shot at.
-            "HyperspaceJump", "JumpFailure", "JumpVortex", "SelfDestruct", "ContainmentBreach",
+            //JumpVortexExit is the BLUE doorway's twin of JumpVortex, split off so the combat log
+            //can head the two in different colours (HYPERSPACE_IMPROVEMENTS_PLAN.md Item 1). It is
+            //the same kind of order and belongs on this list for the same reason.
+            "HyperspaceJump", "JumpFailure", "JumpVortex", "JumpVortexExit", "SelfDestruct", "ContainmentBreach",
             "Reactor", "Sabotage", "WreakHavoc", "Capture", "Rescue", "LimpetBore",
             "MagazineExplosion", "NoHangar", "TerrainCollision", "HalfPhase", "TranverseCrit", "Boarding",
             //EdfExposure (WALKERS_OF_SIGMA_PLAN.md 2.2): the Energy Draining Field's per-unit drain
@@ -5860,6 +5913,16 @@ window.weaponManager = {
     hasHexWeaponsSelected: function hasHexWeaponsSelected() {
         return gamedata.selectedSystems.some(function (system) {
             return system instanceof Weapon && system.hextarget === true;
+        });
+    },
+
+    /* WALKERS §3.18b - is anything in the current selection an abduction-capable Walker jump drive?
+       The one system in the game that may aim at Huge (multi-hex) terrain, which is why targetShip
+       asks before applying the refusal that holds for everything else. canSelectForAbduction carries
+       the phase, ownership, damage, power and charge rules, so there is nothing to restate here. */
+    hasAbductionSelection: function hasAbductionSelection(shooter) {
+        return gamedata.selectedSystems.some(function (system) {
+            return typeof system.canSelectForAbduction === 'function' && system.canSelectForAbduction(shooter);
         });
     },
 

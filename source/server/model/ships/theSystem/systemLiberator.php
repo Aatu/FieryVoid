@@ -65,7 +65,7 @@ class systemLiberator extends BaseShip{
         $this->addAftSystem(new PlasmaDriver(5, 6, 6, 120, 240));
         $this->addAftSystem(new SeekerTorp(5, 6, 5, 90, 270));
 		$this->addAftSystem(new ThirdspaceShield(0, 160, 80, 150, 210, 'A'));		
-		$this->addAftSystem(new JumpEngine(6, 25, 6, 8));        
+		$this->addAftSystem((new JumpEngine(6, 25, 6, 8))->markLegacy()); //HYPERSPACE_IMPROVEMENTS_PLAN.md 10 A2 - out of B5 jump-point mechanics (Stage H4)
 		
 		$this->addLeftSystem(new GraviticThruster(5, 15, 0, 4, 3));
 		$this->addLeftSystem(new GraviticThruster(5, 15, 0, 4, 3));

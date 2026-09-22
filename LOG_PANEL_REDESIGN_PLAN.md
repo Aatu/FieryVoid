@@ -378,3 +378,90 @@ Same information, restructured. No change to what is read out of `gamedata`.
    Reset EW control.
 6. **Stage 2e** touches the live replay path. Ship it with Stage 2, or hold it until the rest is
    live-stable?
+
+---
+
+## 4. Post-completion refinements (2026-09-17)
+
+Four items the user asked for once the plan above was in play. All client-side; no server
+change, so the replay harness is unaffected.
+
+### 4.1 SAVE FLEET is now OPTIONS
+
+`#fleetSaveTab` → `#optionsTab`, `#fleetsave` → `#gameoptions`, and Save Fleet becomes the
+LAST SECTION of that panel rather than the whole of it. The new part above it is a list of
+per-player checkboxes, the first being **Show Initiative Overlay** (on by default).
+
+- `client/gameOptions.js` (new) owns it. ⭐ **Adding another option is one entry in its
+  `OPTIONS` array and nothing else** — the row, its default, its persistence and the
+  read-back through `gameOptions.get()` all fall out of that entry, and `game.php` carries
+  an empty `#gameOptionsList` rather than any per-option markup.
+- Persistence is `localStorage` under `fv.gameOptions.v1`, exactly like the panel's other
+  preferences (`botPanel` heights, `fleetList` filters, `combatLog` filters). None of it is
+  an order, so none of it goes to the server.
+- ⚠️ **`savedFleets.refreshSavePanel` had to stop hiding the TAB.** It hid `#fleetSaveTab`
+  for a viewer with no units of their own, which was right when the tab *was* Save Fleet;
+  it now hides `#fleetSavePanel`, or an observer would lose the display options with it.
+- The overlay gate lives in `ShipIcon.prototype.setIniOrderLabel` — the single door every
+  path to `ShipIniOrderSprite` goes through (`FlightIcon` inherits it). Toggling calls
+  `MovementPhaseStrategy.refreshNotMovedMarkers` plus `webglScene.requestRender()`
+  (`arch_render_loop_idle_gating`). It suppresses the NUMBER only; the neutral dotted
+  "not moved" ring is `setNotMoved` and is untouched.
+
+### 4.2 The whole fleet list flashed on entering the INFO tab
+
+`.rowflash` was added by `revealShipRow` and never taken off again, so every row selected
+since the turn's rebuild still carried it. **A CSS animation restarts when its element goes
+from `display:none` back to rendered** — which is exactly what `botPanel` does to
+`#gameinfo` — so they all re-fired together, worst in the Firing phase simply because by
+then the most rows had accumulated one. Now: sweep the class off every row on each reveal
+(catches `prefers-reduced-motion`, where `animation:none` means `animationend` never
+fires), and retire it with a one-shot `animationend` on the row being flashed.
+
+### 4.3 The Ini column would not sort the worded states
+
+`data-sort-ini` was stamped once at build time with the numeric initiative and never
+updated, so once `setRowState` wrote "Docked" / "Hyperspace" / "Jumped" / "Destroyed" into
+the column it was sorting on a number no longer printed anywhere in it. `setRowState` now
+writes the DISPLAYED value, and `applySort` grew a mixed comparator for `ini`: numbers
+against numbers, words against words, numbers first — a unit that still has an initiative
+is still in the battle. (`value` keeps the plain numeric path, split out of the shared
+branch.)
+
+### 4.4 The selected row keeps its TEAM rail
+
+`.fleetlistline.is-selected` no longer repaints `border-left-color` to `--fv-accent`. The
+rail runs unbroken down a whole slot, so a blue segment in the middle of it read as a row
+belonging to somebody else. The fill is the selection, exactly as the fill is the hover.
+
+### 4.5 A fleet-list row now selects the ship, as a map click does
+
+Left-click already scrolled to the unit; right-click / the ⓘ already opened its window.
+Both now also make it the **selected ship**, on the same terms a click on the board would
+(user, 2026-09-17).
+
+- **Left-click** passes `{ select: true }` into `doScrollToShip`, which is the flag
+  `PhaseStrategy.onScrollToShip` has always understood — the same one the confirm-dialog
+  ship links already used. No new path.
+- **Right-click / ⓘ** keeps going through the `OpenShipWindowFor` event (it must: that is
+  the only door that opens a window for a docked flight or a hyperspace reinforcement,
+  both of which `onShipRightClicked` turns away at its `shouldBeHidden` guard). The event
+  carries `select: true`, and `PhaseStrategy.onOpenShipWindowFor` applies **the same three
+  guards as `onScrollToShip`** — has an icon, not `shouldBeHidden`, passes `canSelectShip`.
+  So an off-board unit opens its window and is simply not selected, which is the honest
+  answer for a unit that is not on the board to select.
+- ⭐ **`canSelectShip` is the whole rule**, and it already existed for exactly this: "so
+  programmatic selection obeys the same rule the player would hit on the board." Base =
+  your own ships; `MovementPhaseStrategy` = only ships active in the current step. A row
+  can therefore neither declare a fire order nor jump the movement sequence.
+- ⚠️ **`ReplayPhaseStrategy` needed `canSelectShip → false`.** Its `selectShip` override
+  already declined to select, but that is the MAP's door; programmatic selection comes
+  through `canSelectShip`, which it did not override. Without this, fleet-list rows (and,
+  already today, confirm-dialog links) would select during playback, which no click on the
+  board can do.
+- ⚠️ A **stowed** unit's row scrolls to its CARRIER (Stage 19), so `select` there selects
+  the carrier — the unit actually standing on the board. Pre-existing pass-through, now
+  reachable from a row.
+- Not included: the ship tooltip menu a map left-click also pops. That needs a screen
+  position the row does not have; `setSelectedShip` is the selection primitive and is what
+  every other programmatic path uses.

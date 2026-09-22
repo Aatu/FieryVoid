@@ -37,6 +37,37 @@ shipManager.movement = {
         return (ship && ship.dockedLCVs) ? (parseInt(ship.dockedLCVs, 10) || 0) : 0;
     },
 
+    // ELITE / POOR CREW: a FLAT modifier on the delay a turn costs this ship - Elite Crew
+    // shortens it by 1 per level (never below 1), Poor Crew lengthens it by 1 per level. It is
+    // NOT a change to ship.turndelaycost, which is the RATE the readouts print in parentheses.
+    // The server sends ship.crewTurnDelayMod only when it is non-zero (Enhancements::
+    // addShipEnhancementsForJSON), so an ordinary hull answers 0 here.
+    getCrewTurnDelayModifier: function getCrewTurnDelayModifier(ship) {
+        return (ship && ship.crewTurnDelayMod) ? (parseInt(ship.crewTurnDelayMod, 10) || 0) : 0;
+    },
+
+    // The rule itself, in ONE place, because four call sites need it and they do their
+    // surrounding arithmetic differently: calculateTurndelay (post-overthrust),
+    // calculateTurndelayAtMove (the required-delay seed), and the two readouts that print a
+    // turn's delay (UI/ShipTooltip.js and reactJs/shipWindow/ShipNotesPanel.js).
+    //
+    // The two directions are NOT symmetrical, and that asymmetry is the whole of the rule:
+    //  - POOR CREW always adds. "Whenever the ship turns, it adds 1 to turn delay" - even where
+    //    overthrust had shortened the turn to nothing, which is the case its own clause covers.
+    //  - ELITE CREW only ever reduces a delay that EXISTS, and never past 1. Without the
+    //    "turndelay > 0" test a turn already shortened to 0 delay by overthrust would come back
+    //    as 1 - the enhancement making the ship worse, which is the bug this guard exists for.
+    //
+    // Server twin: Movement::calculateTurndelay, where the floor is that function's own
+    // pre-existing clamp to 1.
+    applyCrewTurnDelay: function applyCrewTurnDelay(ship, turndelay) {
+        var mod = shipManager.movement.getCrewTurnDelayModifier(ship);
+        if (mod === 0) return turndelay;
+        if (mod > 0) return turndelay + mod;              //Poor Crew
+        if (turndelay <= 0) return turndelay;             //Elite Crew cannot create a delay
+        return Math.max(1, turndelay + mod);              //Elite Crew, floored at 1
+    },
+
     isManeuverBlockedByAttachment: function (ship) {
         if (ship.hasAttached && Object.keys(ship.hasAttached).length > 0) {
             for (var attachedId in ship.hasAttached) {
@@ -723,8 +754,12 @@ shipManager.movement = {
     getJumpingOutEngine: function getJumpingOutEngine(ship) {
         if (!ship || !ship.systems) return null;
 
+        /* Stage H4 - isJumpBoost, not a bare boost test: on an Ancient-charging drive a boost may be
+           EXTRA CHARGING, which takes nobody anywhere (JumpEngine::isJumpOutBoost is the server's twin). */
         var isJumping = function (system) {
-            return Boolean(system && system.name === 'jumpEngine' && shipManager.power.getBoost(system));
+            if (!system || system.name !== 'jumpEngine') return false;
+            if (typeof system.isJumpBoost === 'function') return system.isJumpBoost();
+            return Boolean(shipManager.power.getBoost(system));
         };
 
         for (var i in ship.systems) {
@@ -856,6 +891,37 @@ shipManager.movement = {
         }
 
         return null;
+    },
+
+    /* ⭐⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md STAGE H5 - THE BLUE EXIT THIS SHIP IS HOLDING AND MAY
+       MAINTAIN, or null. The client mirror of JumpEngine::getHeldExitEngine.
+
+       A ship that came out through its own exit now holds it exactly as it would hold an entrance:
+       Maintain keeps it open (without the four-turn cap on a Vorlon), and every turn it is held it can
+       bring another wave through. So the Maintain toggle, the "your jump point closes" commit warning
+       and the Manage Reinforcements menu all need to find it - and getVortexHeldBy cannot, because it
+       is ENTRANCE-ONLY by design (see isJumpVortex). This is the exit half, asked beside it, never
+       folded into it.
+
+       NOT for a GATE (a gate runs its programmed hold and has no Maintain), NOT for a phase-in doorway
+       (a legacy drive's, one-shot and invisible), and NOT while the ship is still in hyperspace - its
+       exit is forming, and the opener has no hex to hold it from. getExitHeldBy supplies the rest of
+       the window: formed (spawned <= turn) and not yet closed. */
+    getMaintainableExitHeldBy: function getMaintainableExitHeldBy(ship) {
+        if (!ship) return null;
+        if (typeof gamedata.isJumpGate === 'function' && gamedata.isJumpGate(ship)) return null;
+
+        /* The exit FIRST, and only then whether the ship is on the board. ⚠️ ORDER IS LOAD-BEARING: this runs
+           from JumpEngine.getHeldVortex, which the ship window's system icon asks - in the LOBBY too, where
+           there is no game slot and getTurnDeployed throws on playerManager.getSlotById's null (the
+           JUMP_GATES_PLAN.md trap 11 shape; user report 2026-09-19, lobby Details on a Vorlon). There are no
+           exits in a lobby, so asking for one first never reaches getTurnDeployed there. */
+        var exit = shipManager.movement.getExitHeldBy(ship.id);
+        if (!exit || shipManager.movement.isPhaseInVortex(exit)) return null;
+
+        if (shipManager.getTurnDeployed(ship) > gamedata.turn) return null;   //still in hyperspace
+
+        return exit;
     },
 
     /* The facing an arriving reinforcement is FORCED onto, or null if it has no doorway.
@@ -3076,6 +3142,11 @@ shipManager.movement = {
         var turndelay = 0;
         if (setMoveNo >= 0) {
             turndelay = Math.ceil(ship.movement[setMoveNo].speed * shipManager.movement.getTurnDelayCost(ship)); //delay at current speed - at least as many moves are required for turn delay to be satisfied
+            //ELITE / POOR CREW: the flat crew modifier moves the REQUIRED delay, before the
+            //moves already made (and the overthrust credited as moves, below) are subtracted
+            //from it. Ahead of the LCV surcharge so an Elite Crew can never eat a docked LCV's
+            //penalty instead of the ship's own delay. See applyCrewTurnDelay.
+            turndelay = shipManager.movement.applyCrewTurnDelay(ship, turndelay);
             //LCV Rails: each docked LCV adds +1 to the required turn delay (only
             //meaningful when a turn was actually made — gated by didTurn below).
             turndelay += shipManager.movement.getDockedLcvTurnSurcharge(ship);
@@ -3170,6 +3241,11 @@ shipManager.movement = {
         if (ship.flight) return turndelay; //Marcin Sawicki: fighters are NOT exception to delay rules! But so far fighters cannot overthrust...
         turndelay -= shipManager.movement.calculateExtraThrustSpent(ship, movement);
         if (turndelay < 0) turndelay = 0; //Marcin Sawicki: just in case, no negative values
+        //ELITE / POOR CREW: applied after the overthrust reduction and its zero-clamp, so
+        //"reduced by 1 to a minimum of 1" is measured against the delay this turn actually
+        //incurred - and so an already-zeroed delay is not resurrected as 1. See
+        //applyCrewTurnDelay for why the two directions are not symmetrical.
+        turndelay = shipManager.movement.applyCrewTurnDelay(ship, turndelay);
         //LCV Rails: each docked LCV adds +1 to the turn delay (flat, on top of the
         //base delay — the ship's turndelaycost rate is unchanged). Applied after the
         //overthrust reduction + zero-clamp so it always extends the delay.

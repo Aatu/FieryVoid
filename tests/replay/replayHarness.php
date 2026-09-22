@@ -68,10 +68,21 @@ require_once $FV_ROOT . '/source/autoload.php';
 // random_int, which cannot be seeded). Declared BEFORE any game class loads,
 // so the autoloader never pulls in the real one. Same API; seedable.
 class Dice {
+    /* ⚠⚠ MIRROR PAIR with the real Dice (source/server/lib/dice.php). This stub REPLACES that
+       class outright, so any property or rule added there has to be added here too or the game
+       code fails outright - an Elite Crew's "+1 per die, capped at the die's face" is applied by
+       Weapon::getFinalDamage writing this static, and without the declaration every damage roll
+       in the corpus dies with "Access to undeclared static property". Keep the capping rule
+       identical as well, or the harness would record damage the game would never deal. */
+    public static $perDieBonus = 0;
+
     public static function d($max, $times = 1) {
         $total = 0;
+        $bonus = (int)self::$perDieBonus;
         for ($i = 0; $i < $times; $i++) {
-            $total += mt_rand(1, (int)$max);
+            $roll = mt_rand(1, (int)$max);
+            if ($bonus > 0) $roll = min((int)$max, $roll + $bonus);
+            $total += $roll;
         }
         return $total;
     }

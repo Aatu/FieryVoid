@@ -776,6 +776,14 @@ MolecularSlicerBeamH.prototype.calculateSpecialHitChanceMod = function (shooter,
 	return mod;
 };
 
+/* Piercing and Raking shots can stand side by side (below full charge), and their fire control differs
+   by mode, as does the +4 Piercing-below-full-charge correction in calculateSpecialHitChanceMod above -
+   both read this.firingMode. So the display paths may switch the Slicer into a shot's OWN mode to price
+   it (weaponManager.setModeForFireOrder); restoreFiringMode then re-runs initializationUpdate to put
+   back the pool-based "Damage" and the Piercing fire-control readout the switch overwrote. Without this
+   the INCOMING list priced a Raking shot with Piercing fire control once the Slicer was switched back. */
+MolecularSlicerBeamH.prototype.displaysOrdersInOwnMode = true;
+
 // H inherits doMultipleFireOrders from L now that L handles grouping and delegation.
 // We only need to override isLegalToFireMode.
 MolecularSlicerBeamH.prototype.isLegalToFireMode = function (shooter) {

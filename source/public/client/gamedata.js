@@ -1088,6 +1088,12 @@ window.gamedata = {
                 //The two hangar routes are arrivals too, into a hold rather than onto a hex.
                 if (arrival.pendingDeployDock || arrival.pendingLcvDeployDock) continue;
                 if (arrival.deploymove) continue;
+                /* HYPERSPACE_IMPROVEMENTS_PLAN.md H6c - placed or docked by the SERVER at the start of the
+                   turn (JumpEngine::placeArrivingReinforcements), before this phase existed: a committed
+                   deploy row, or aboard its carrier. Neither has a client-side deploymove, and both are
+                   out of hyperspace - naming them here would be telling the player the opposite of true. */
+                if (arrival.removed) continue;
+                if ((arrival.movement || []).some(function (m) { return m.type === 'deploy' && m.turn == gamedata.turn; })) continue;
 
                 leftInHyperspace.push(arrival);
             }
@@ -1148,9 +1154,15 @@ window.gamedata = {
                                 }
                             }
                         } else if (myShips[ship].systems[syst].name == "jumpEngine") {
-                            for (var pow in myShips[ship].systems[syst].power) {
-                                if (myShips[ship].systems[syst].power[pow].turn == gamedata.turn && myShips[ship].systems[syst].power[pow].type == 2) {
-                                    jumping.push(myShips[ship]);
+                            //HYPERSPACE_IMPROVEMENTS_PLAN.md 5 (Stage H4): a boost may be EXTRA CHARGING, which is no jump.
+                            var jumpSystem = myShips[ship].systems[syst];
+                            if (typeof jumpSystem.isJumpBoost === 'function') {
+                                if (jumpSystem.isJumpBoost()) jumping.push(myShips[ship]);
+                            } else {
+                                for (var pow in myShips[ship].systems[syst].power) {
+                                    if (myShips[ship].systems[syst].power[pow].turn == gamedata.turn && myShips[ship].systems[syst].power[pow].type == 2) {
+                                        jumping.push(myShips[ship]);
+                                    }
                                 }
                             }
                         } else if (myShips[ship].systems[syst].name == "adaptiveArmorController") {
@@ -1177,7 +1189,11 @@ window.gamedata = {
                        no other way of seeing coming. getVortexHeldBy returns null on the turn a
                        vortex was declared (it has not formed yet), so a fresh declaration never
                        warns about itself. */
-                    var heldVortex = shipManager.movement.getVortexHeldBy(myShips[ship]);
+                    /* ⭐ STAGE H5 - AND THE BLUE EXIT A SHIP CAME OUT THROUGH, which it now holds exactly
+                       as it would an entrance (getVortexHeldBy stays entrance-only by design, so the
+                       exit is asked beside it). Let go, it closes tonight and takes any next wave with it. */
+                    var heldVortex = shipManager.movement.getVortexHeldBy(myShips[ship])
+                        || shipManager.movement.getMaintainableExitHeldBy(myShips[ship]);
                     if (heldVortex) {
                         var jumpEngine = shipManager.systems.getSystemByName(myShips[ship], "jumpEngine");
                         var maintaining = jumpEngine && typeof jumpEngine.isMaintainingVortex === 'function'
@@ -1669,7 +1685,11 @@ window.gamedata = {
                 }
             }
 
-            if (hasNoFO.length == 0 && hasSplitFO.length == 0 && notLaunchedFighters.length == 0) { //No warnings at all.
+            //Lightning Cannon / Lightning Gun shots declared without enough weapons to combine. One faction
+            //comparison per ship for any non-Vorlon fleet - see VorlonLightningCombination in special.js.
+            var lightningWarning = VorlonLightningCombination.getCommitWarning(myShips);
+
+            if (hasNoFO.length == 0 && hasSplitFO.length == 0 && notLaunchedFighters.length == 0 && lightningWarning === '') { //No warnings at all.
                 confirm.confirm('<span class="commit-confirm-q">Are you sure you wish to COMMIT YOUR FIRE ORDERS?</span>', gamedata.doCommit);
             } else {
                 var html = '';
@@ -1703,6 +1723,10 @@ window.gamedata = {
                         html += gamedata.shipNameSpan(notLaunchedFighters[ship]);
                         html += "<br>";
                     }
+                }
+                if (lightningWarning !== '') {
+                    if (html != '') html += "<br>";
+                    html += lightningWarning;
                 }
                 //confirm.confirm(html + "<br>Are you sure you wish to COMMIT YOUR FIRE ORDERS?", gamedata.doCommit);
                 confirm.confirm(

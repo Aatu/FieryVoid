@@ -672,8 +672,15 @@ window.fleetListManager = {
             deploys
         );
 
-        // Add ship click handler
-        $(".clickable", fleetlistentry).on("click", fleetListManager.doScrollToShip);
+        /* Add ship click handler. `select: true` since 2026-09-17 (user): a row click now
+           does what a map click does - it scrolls to the unit AND makes it the selected
+           ship. The rule is not applied here: onScrollToShip runs it through canSelectShip,
+           which is each phase's own answer to "could the player have selected this by
+           clicking it on the board?", so a row can neither declare a fire order nor jump the
+           movement sequence. Same flag the confirm-dialog ship links already pass. */
+        $(".clickable", fleetlistentry).on("click", function (e) {
+            fleetListManager.doScrollToShip(e, { select: true });
+        });
     },
 
     /* ONE source for the three commit-state chips, shared by the initial build and by
@@ -730,9 +737,11 @@ window.fleetListManager = {
     },
 
 
-    //`options.select` additionally makes the ship the selected ship once the camera
-    //arrives (see PhaseStrategy.onScrollToShip). Off by default, so a fleet list row
-    //keeps behaving as it always has - scroll only.
+    //`options.select` additionally makes the ship the selected ship once the camera arrives
+    //(see PhaseStrategy.onScrollToShip). Both callers pass it: a fleet list row and a
+    //confirm-dialog ship name both mean "take me to this one so I can do something about it".
+    //⚠️ In the carrier branch below it selects the CARRIER, which is the unit actually
+    //standing on the board - a stowed unit is not there to be selected.
     doScrollToShip: function doScrollToShip(e, options) {
         e.stopPropagation();
 
@@ -863,9 +872,17 @@ window.fleetListManager = {
     openShipWindowFor: function openShipWindowFor(ship) {
         if (!ship) return;
         if (!gamedata.isMyorMyTeamShip(ship) && shipManager.shouldBeHidden(ship)) return;
-        //OpenShipWindowFor rather than onShipRightClicked: the latter also SELECTS the
-        //ship, which a fleet-list row has no business doing.
-        window.webglScene.customEvent('OpenShipWindowFor', { ship: ship });
+        /* OpenShipWindowFor rather than onShipRightClicked, still: the window must open for
+           units a map right-click could never reach at all - a docked flight, a reinforcement
+           in hyperspace - and onShipRightClicked turns every one of those away at its
+           shouldBeHidden guard.
+
+           `select: true` since 2026-09-17 (user): on top of the window, a right-click or the
+           (i) affordance now selects the unit as a map right-click does. The flag is
+           unconditional here and the RULE lives in onOpenShipWindowFor, which holds it to the
+           same canSelectShip test as a left-click - so the units named above open their
+           window and are simply not selected, because they are not on the board to select. */
+        window.webglScene.customEvent('OpenShipWindowFor', { ship: ship, select: true });
     },
 
     //Hangar Ops: ids of docked flights whose carrier jumped to hyperspace. A
@@ -956,6 +973,15 @@ window.fleetListManager = {
         }
         row.addClass(state);
         row.find(".initiative").html(label);
+
+        /* ⭐ THE SORT KEY FOLLOWS THE LABEL (user report, 2026-09-17). data-sort-ini was
+           stamped once at build time with the unit's NUMERIC initiative and never touched
+           again, so once this method replaced the number in the Ini column with "Docked" or
+           "Hyperspace" the column sorted on a number that was no longer written anywhere in
+           it - the worded rows scattered through the numeric ones at whatever initiative they
+           happened to have had. Write what is DISPLAYED; applySort reads it and puts the
+           worded states after the numbers. */
+        row.closest(".fleetlistline").attr("data-sort-ini", label);
 
         /* ⭐ `unitrow` is taken away for DESTROYED and JUMPED only (user, 2026-08-31).
            The line is not on-the-board vs off it - it is GONE FROM THE BATTLE vs YOURS AND
@@ -1161,9 +1187,31 @@ window.fleetListManager = {
             arr.sort(function (a, b) {
                 if (!key) return ord(a) - ord(b);
                 var r;
-                if (key === "ini" || key === "value") {
-                    r = (parseFloat(a.getAttribute("data-sort-" + key)) || 0)
-                        - (parseFloat(b.getAttribute("data-sort-" + key)) || 0);
+                if (key === "ini") {
+                    /* MIXED COLUMN: most rows hold a movement-group NUMBER, but an out-of-play
+                       one holds a WORD instead ("Docked", "Jumped", "Hyperspace", "Destroyed" -
+                       setRowState writes whichever it painted). parseFloat answers NaN for those,
+                       and the old "|| 0" turned every one of them into initiative ZERO, which is
+                       why they would not sort. Numbers sort against each other, words sort against
+                       each other, and the numbers come first: a unit that still has an initiative
+                       is still in the battle. */
+                    var an = parseFloat(a.getAttribute("data-sort-ini"));
+                    var bn = parseFloat(b.getAttribute("data-sort-ini"));
+                    var aIsNum = !isNaN(an);
+                    var bIsNum = !isNaN(bn);
+
+                    if (aIsNum && bIsNum) {
+                        r = an - bn;
+                    } else if (aIsNum !== bIsNum) {
+                        r = aIsNum ? -1 : 1;
+                    } else {
+                        var aw = String(a.getAttribute("data-sort-ini") || "").toLowerCase();
+                        var bw = String(b.getAttribute("data-sort-ini") || "").toLowerCase();
+                        r = aw < bw ? -1 : (aw > bw ? 1 : 0);
+                    }
+                } else if (key === "value") {
+                    r = (parseFloat(a.getAttribute("data-sort-value")) || 0)
+                        - (parseFloat(b.getAttribute("data-sort-value")) || 0);
                 } else {
                     var av = a.getAttribute("data-sort-" + key) || "";
                     var bv = b.getAttribute("data-sort-" + key) || "";
@@ -1291,13 +1339,27 @@ window.fleetListManager = {
 
         body.find(".fleetlistline.is-selected").removeClass("is-selected");
 
+        /* ⚠️ THE FLASH CLASS HAS TO COME OFF AGAIN (user report, 2026-09-17: the whole list
+           flashed on every visit to the INFO tab, most visibly in the Firing phase). .rowflash
+           used to be left on every row that had been selected since the turn's rebuild, and a
+           CSS animation RESTARTS whenever its element goes from display:none back to rendered -
+           which is exactly what botPanel does to #gameinfo when the tab is opened. So all of
+           those rows fired their flash again, together, and the further into the turn the more
+           of them there were.
+
+           Both arms are needed. The sweep catches rows whose animation never ended (reduced
+           motion sets animation:none, so animationend never fires for them); the one-shot below
+           retires the class on the row being flashed now. */
+        body.find(".fleetlistline.rowflash").removeClass("rowflash");
+
         var line = fleetListManager.fleetRow(ship).closest(".fleetlistline");
         if (!line.length) return;
         line.addClass("is-selected");
 
-        //Restart the flash animation on a row that already carries the class.
-        line.removeClass("rowflash");
+        //Reflow between the sweep above and the class below, so re-selecting a row that is
+        //still mid-flash restarts the animation instead of doing nothing.
         void line.get(0).offsetWidth;
+        line.one("animationend", function () { line.removeClass("rowflash"); });
         line.addClass("rowflash");
 
         if ($("#gameinfo").is(":visible") && line.get(0).scrollIntoView) {

@@ -549,6 +549,33 @@ var TrekPhaserKelly = function TrekPhaserKelly(json, ship) {
 TrekPhaserKelly.prototype = Object.create(Weapon.prototype);
 TrekPhaserKelly.prototype.constructor = TrekPhaserKelly;
 
+var TrekPhaserKellyType7 = function TrekPhaserKellyType7(json, ship) {
+    Weapon.call(this, json, ship);
+    //Part-way through a Sustained sequence (S1) the phaser is committed to Sustained mode - a Normal
+    //shot would throw away the second Sustained shot. Rebuilt from the server's overloadshots on every
+    //gamedata update, so it lifts itself once the sequence ends.
+    if (this.isSustainLocked()) this.hideFiringModeSelector = true;
+};
+TrekPhaserKellyType7.prototype = Object.create(Weapon.prototype);
+TrekPhaserKellyType7.prototype.constructor = TrekPhaserKellyType7;
+
+TrekPhaserKellyType7.prototype.isSustainLocked = function () {
+    return this.overloadshots > 0 && this.overloadshots < this.extraoverloadshotsArray[1];
+};
+
+TrekPhaserKellyType7.prototype.initializationUpdate = function () {
+    var ship = this.ship;
+    if (gamedata.gamephase !== -2 && shipManager.power.isOverloading(ship, this) && Object.keys(this.sustainedTarget).length > 0) {
+        const targetId = Object.keys(this.sustainedTarget)[0];
+        const target = gamedata.getShip(targetId);
+        this.data["Current Target"] = target.name;
+    } else {
+        delete this.data["Current Target"];
+    }
+
+    return this;
+};
+
 var TrekShieldProjectionKelly = function TrekShieldProjectionKelly(json, ship) {
     ShipSystem.call(this, json, ship);
     this.defensiveType = "none";

@@ -5937,6 +5937,86 @@ class JumpEngine extends Weapon{
     const ABDUCTION_NOTE = 'EDJD';
     const ABDUCTION_MAX_POWER = 4;
 
+    /* ⭐⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md §4 (Stage H3) - A CAPACITOR-FED JUMP DRIVE: the Vorlon rule.
+     *
+     * "Vorlon Jump Engines normally do use power (the only system onboard that does so)" - the comment
+     * every Vorlon ship file carries beside a drive built with powerReq 0. H3 gives the eleven of them
+     * their real numbers (8 on the Planet Killer, 6 on the Strike Cruiser / Heavy Cruiser / Heavy
+     * Carrier, 5 on the other seven - user, 2026-09-17) and this flag is what makes the number mean
+     * something beyond the ordinary allocation.
+     *
+     * ⭐⭐ IT IS A PER-USE COST, NEVER A STANDING ONE (user ruling 2026-09-18, correcting the plan).
+     * The drive draws its powerReq ONLY on a turn it is actually used - the turn it OPENS a jump
+     * point, and every turn it MAINTAINS one. An idle Vorlon drive costs its ship nothing at all.
+     *
+     * ⚠️⚠️ THAT TAKES A DELIBERATE GIVE-BACK ON THE CLIENT, because a Vorlon's
+     * MagGravReactorTechnical sets fixedPower and shipManager.power.getReactorPower therefore
+     * subtracts EVERY online system's powerReq as a standing cost - and after H3 this drive is the
+     * only Vorlon system with a non-zero one. getReactorPower hands that back before charging the
+     * use. Built the other way first (2026-09-18): every Vorlon silently lost 5-8 power a turn while
+     * holding no jump point at all.
+     *
+     * WHAT IT CHANGES, and all three are rulings R4-R6 of that plan:
+     *   R4. THE UPKEEP REPLACES THE ALL-SYSTEMS-DARK MAINTAIN RULE. A Vorlon holding a jump point open
+     *       pays its drive's powerReq again out of the Power Capacitor and fights on; it does NOT also
+     *       have to shut every powered system down. getVortexPowerViolations is never consulted for one.
+     *   R5. AND THE UPKEEP OVERRIDES MAX_VORTEX_TURNS. A paid jump point is held INDEFINITELY, so the
+     *       four-turn cap does not run - which is also why getVortexAge stops clamping for one, and why
+     *       stripForJson sends it no vortexMaxTurns: a bounded counter would claim the doorway was about
+     *       to close from turn 4 onwards, every turn, forever.
+     *   R6. FAILING TO PAY CLOSES IT, with a closure reason of its own - 'jump point not powered'.
+     *
+     * ⭐ IT IS A PROPERTY OF THE DRIVE, NEVER OF THE FACTION STRING. Set by markCapacitorFed() from the
+     * eleven Vorlon ship files, the same way markAncient() is set. `$ship->faction === "Vorlon Empire"`
+     * would be the third such string test in the tree and would break the moment somebody builds a
+     * custom Vorlon-derived faction - which is exactly what a faction directory is for.
+     *
+     * ⭐ ASK chargesVortexUpkeep(), NOT THIS FLAG. A drive marked capacitor-fed on a hull with no Power
+     * Capacitor has nothing to pay from; that predicate answers false for it and the drive then behaves
+     * as an ordinary B5 jump engine - cap, all-systems-dark and all - which is the only fallback that
+     * neither holds the doorway open forever nor closes it for a reason the player cannot act on.
+     *
+     * ⚠️ PROTECTED, like $legacyJump / $ancientJump / $gateJump: json_encode takes public properties only
+     * and the static generator encodes the CONSTRUCTED ship, so a public default would cost 776 blueprint
+     * entries. The client learns it from stripForJson, and only on the drives that have it. */
+    protected $vortexUpkeep = false;
+
+    /* ⭐⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md §5 (Stage H4) - BOOSTING THE RECHARGE.
+     *
+     * An Ancient's drive (factionAge 3+ - see hasAdvancedCharging) may be boosted while it RECHARGES:
+     * "each time the listed amount of extra power is applied, the jump engine is considered to have
+     * been operating for an additional turn". Boost N buys N extra turns of charging (R3), at most
+     * CHARGE_BOOST_MAX in one turn, for the drive's powerReq per level.
+     *
+     * ⭐ THE BOOST CARRIER IS SHARED WITH "JUMP TO HYPERSPACE" (R2), and the charge at the START of the
+     * turn is what says which one a boost is: fully charged -> a jump (isJumpOutBoost), recharging ->
+     * extra charging (getChargeBoostMax). The two states cannot both hold, which is what makes one
+     * carrier safe.
+     *
+     * turn => level, one entry per turn a boost bought charge, rebuilt on every load from this
+     * drive's 'ChargeBoost' IndividualNotes (onIndividualNotesLoaded) and written at the end of the
+     * turn it was bought (generateIndividualNotes, phase 4).
+     *
+     * ⚠️⚠️ WHY A NOTE AND NOT THE BOOST ROWS THEMSELVES, which is what the plan sketched: the server
+     * loads tac_power for THIS turn and LAST turn only (DBManager::getPowerForShips), so a boost
+     * bought three turns ago is simply not there to count. The note is the same shape of answer the
+     * EDJD's abduction record gives the same problem.
+     *
+     * Protected like every other piece of vortex state: json_encode takes public properties only. */
+    protected $chargeBoostNotes = array();
+
+    /* Is this engine's CURRENT vortex a legacy drive's PHASE-IN doorway (SpawnJumpPointPhaseIn)? Set by
+     * restoreVortexState, which is where the vortex unit is resolved; read only by getCertainCloseTurn.
+     * Protected, so no payload key.
+     * ⚠️ Stage H5 NARROWED THIS from "any doorway IN": a ship-held blue exit may now be maintained, so
+     * its closing turn is no longer certain. Only the phase-in doorway is still one-shot. */
+    protected $vortexIsPhaseIn = false;
+
+    //§5 R3 - "boost N => N+1 turns of charging, capped at 4 turns in any one turn".
+    const CHARGE_BOOST_MAX = 3;
+    //The note key, both columns - well inside notekey_human's varchar(40).
+    const CHARGE_BOOST_NOTE = 'ChargeBoost';
+
 	//JumpEngine tactically  is not important at all!
 	public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
 
@@ -6191,6 +6271,119 @@ class JumpEngine extends Weapon{
         return $this->extraDimensional;
     }
 
+    /* ⭐⭐ STAGE H3 - MARK THIS ENGINE AS CAPACITOR-FED: it pays an UPKEEP out of the ship's Power
+     * Capacitor for every turn it holds a jump point open, and in exchange is exempt from the
+     * all-systems-dark Maintain rule and from the four-turn cap. See $vortexUpkeep for the rule and
+     * for why this is a flag on the DRIVE rather than a test on the faction string.
+     *
+     * Called from a ship file straight after the engine is built, in the one-liner form markAncient()
+     * established:
+     *
+     *     $this->addAftSystem((new JumpEngine(5, 16, 5, 12, 12))->markCapacitorFed());
+     *
+     * ⚠️ IT DOES NOT SET THE POWER REQUIREMENT. The upkeep IS the drive's powerReq - the 3rd
+     * constructor argument - so the number stays where every other system's does and the power icon,
+     * getReactorPower and the lobby blueprint all read it without knowing this flag exists. Marking a
+     * drive whose powerReq is 0 costs nothing and buys nothing, which is the honest answer for one.
+     *
+     * Returns $this. */
+    public function markCapacitorFed()
+    {
+        $this->vortexUpkeep = true;
+        return $this;
+    }
+
+    /* ⭐ DOES THIS DRIVE ACTUALLY CHARGE AN UPKEEP? THE PREDICATE EVERY READER ASKS - never the raw
+     * flag, and never the powerReq alone. Three things have to be true together:
+     *
+     *   1. the drive is marked capacitor-fed (markCapacitorFed);
+     *   2. its powerReq is a real number - a 0-power drive has no upkeep to pay, so the R4/R5/R6
+     *      rules would be a pure gift: no cap, no all-systems-dark, and nothing owed for either;
+     *   3. there IS a Power Capacitor to pay from. All eleven Vorlon hulls that carry a drive carry
+     *      one, so this is about a custom hull that marked the drive and forgot the capacitor. Such a
+     *      drive falls back to the ORDINARY B5 rules rather than being given a free indefinite jump
+     *      point or being closed every turn for a reason its owner cannot act on.
+     *
+     * ⭐ ONE AUTHORITY, BOTH ENDS. stripForJson publishes `vortexUpkeep` off this same method, so the
+     * client's mirror cannot answer differently from the server for a hull the server would not charge.
+     *
+     * ⚠️ A FIGHTER FLIGHT IS EXCLUDED, for §3.12's reason: a flight has no power allocation and no
+     * capacitor of its own, so there is nothing to pay the upkeep from. getUpkeepCapacitor answers
+     * null on one anyway (a Fighter's systems hold no PowerCapacitor), so this falls out rather than
+     * needing a branch - stated here because it is the kind of thing that is re-derived wrongly. */
+    public function chargesVortexUpkeep()
+    {
+        if (!$this->vortexUpkeep) return false;
+        if ((int)$this->powerReq <= 0) return false;
+        return $this->getUpkeepCapacitor() !== null;
+    }
+
+    /* WHAT ONE TURN OF HOLDING THE JUMP POINT COSTS: "the same as their normal power required"
+     * (user request, Item 6). Named rather than inlined because the client mirrors the number in
+     * JumpEngine.getVortexUpkeepDraw and the tooltip prints it. 0 when this drive charges nothing,
+     * so a caller can subtract it unconditionally. */
+    public function getVortexUpkeepCost()
+    {
+        return $this->chargesVortexUpkeep() ? (int)$this->powerReq : 0;
+    }
+
+    /* THE POWER CAPACITOR THIS DRIVE DRAWS ITS UPKEEP FROM, or null.
+     *
+     * ⚠️ A DESTROYED CAPACITOR IS NOT A CAPACITOR. getSystemByName hands back the system whatever
+     * state it is in, and a destroyed one holds nothing and can pay nothing - which is a real and
+     * rather good way to lose a jump point, so it must read as "cannot pay" (R6) and not as "this
+     * hull was never capacitor-fed" (which would silently hand the drive the four-turn cap and the
+     * all-systems-dark rule back in the middle of a game).
+     * ⭐ Hence the two are asked separately: chargesVortexUpkeep() tests the FITTING (does this hull
+     * have one at all), payVortexUpkeep() tests the STATE. A hull with no capacitor in its blueprint
+     * is a build error; a hull whose capacitor has just been shot out is play.
+     *
+     * getUnit(), not $this->unit: on a fighter's subsystem the unit is the FLIGHT (§3.12). */
+    protected function getUpkeepCapacitor()
+    {
+        $unit = $this->getUnit();
+        if (!$unit || !is_array($unit->systems)) return null;
+
+        foreach ($unit->systems as $system){
+            if ($system instanceof PowerCapacitor) return $system;
+        }
+
+        return null;
+    }
+
+    /* ⭐⭐ R6 - CAN THIS DRIVE PAY THIS TURN'S UPKEEP, AND IF SO, SPEND IT.
+     *
+     * Returns true when the jump point stays open. Called exactly once per engine per turn, from
+     * getVortexClosureReason inside closeVortexIfDue - which is itself guarded three ways over, so
+     * a double advance() cannot charge twice.
+     *
+     * ⚠️⚠️ THE DRAW IS THE SERVER'S, AND THE CLIENT MUST NOT ALSO SPEND IT. PowerCapacitor's stored
+     * power comes from the FRONT END (powerReceivedFromFrontEnd, out of
+     * PowerCapacitor.doIndividualNotesTransfer, which is shipManager.power.getReactorPower plus the
+     * regeneration) - so the client subtracting the upkeep in getReactorPower AND this drawing it
+     * here would charge the same power twice. The client therefore RESERVES it (so the player cannot
+     * allocate it away and the commit gate names them if they try) and adds it straight back into the
+     * figure it stores. The spend happens here, once, at the end of the turn - exactly the way Vorlon
+     * weapon fire already spends from the capacitor in calculateHitBase.
+     *
+     * ⚠️ doDrawPower, not setPowerHeld. It adds to $powerReceivedFromBackEnd, which the Firing phase's
+     * generateIndividualNotes turns into the stored figure a few lines later in FireGamePhase::advance
+     * (closeExpiredVortices runs BEFORE that loop - that ordering is what makes this land at all). */
+    protected function payVortexUpkeep($turn)
+    {
+        $cost = $this->getVortexUpkeepCost();
+        if ($cost <= 0) return true;                    //nothing owed - cannot fail
+
+        $capacitor = $this->getUpkeepCapacitor();
+        //Shot out between the declaration and the end of the turn: nothing left to pay from (R6).
+        if (!$capacitor || $capacitor->isDestroyed($turn)) return false;
+
+        if (!$capacitor->canDrawPower($cost)) return false;
+
+        $capacitor->doDrawPower($cost);
+        return true;
+    }
+
     /* §3.18 - MAY THIS DRIVE TAKE PART IN AN ABDUCTION AT ALL? Every Walker drive on a HULL: an EDJD
      * initiates and contributes its full power, any other Walker drive contributes half a power-turn
      * (user, 2026-09-12: "other Walker marked Jump Engines can contribute"). ⚠️ NOT a Mapmaker probe's -
@@ -6294,9 +6487,119 @@ class JumpEngine extends Weapon{
         return $this->ancientJump && !$this->walkerJump;
     }
 
+    /* ⭐⭐ STAGE H4 - DOES THIS DRIVE CHARGE THE ANCIENT WAY? The drives of factionAge 3+ units: the
+     * Vorlons, The System, and every Ancient / Walker legacy drive. Two things follow, and both are
+     * rulings (§10 A4, R2):
+     *   1. it cannot be USED AT ALL until it is fully charged - jumping out included (isJumpOutBoost);
+     *   2. while it recharges it may be boosted to charge faster (getChargeBoostMax).
+     * ⭐ A young-race drive (Trek, BSG, Star Wars, every B5 younger race) answers false and keeps its
+     * boost-means-jump behaviour unconditionally - zero behaviour change for those hulls.
+     *
+     * Asked at READ time through getUnit(), the way getVortexRechargeTime resolves the gate term:
+     * factionAge is a SHIP property and this is a system question. Not on the Trek Nacelle (its 4th
+     * argument is no recharge at all - $hasJumpRecharge) and never on a fixed gate (signalled, not
+     * boosted). A Mapmaker's drive answers for its FLIGHT's age - getUnit() is the flight. */
+    public function hasAdvancedCharging()
+    {
+        if (!$this->hasJumpRecharge) return false;
+        if ($this->gateJump) return false;
+        $unit = $this->getUnit();
+        return $unit && (int)$unit->factionAge >= 3;
+    }
+
+    /* The engine whose CHARGE this one reports. Itself on every hull; on a fighter craft, the flight's
+     * one engine that holds the vortex state (FighterFlight::getFlightJumpEngine) - the same routing
+     * stripForJson uses, so the gate reads the charge every craft's icon shows. */
+    protected function getChargeSource()
+    {
+        $unit = $this->getUnit();
+        if ($unit instanceof FighterFlight){
+            $flightEngine = $unit->getFlightJumpEngine();
+            if ($flightEngine) return $flightEngine;
+        }
+        return $this;
+    }
+
+    /* ⭐ STAGE H4 - THE MOST A BOOST ON $turn MAY BUY, in extra turns of charging, or 0 when a boost on
+     * $turn buys nothing. Non-zero only while the JUMP-POINT recharge is running:
+     *   - the drive charges the Ancient way (hasAdvancedCharging);
+     *   - it is not on a fighter flight - refused outright, as Maintain is (§5; a flight's drives mirror
+     *     one boost, which is a JUMP, and a Mapmaker's powerReq is 0 so a charge would be free);
+     *   - it has spent a charge, and the jump point that spent it closes at the end of $turn at the
+     *     latest - the charge does not move while one stands, and a boost on a turn it will still be
+     *     standing afterwards would buy nothing. ⭐ THE CLOSING TURN ITSELF COUNTS (user report
+     *     2026-09-18, game 4349): the recharge walk credits it (getJumpPointRechargeLoad), so an Ancient
+     *     that has just PHASED IN may boost on its arrival turn, whose doorway closes at its end
+     *     whatever anybody declares - see getCertainCloseTurn;
+     *   - and there is charge left that the boost can actually add. Capped at CHARGE_BOOST_MAX (R3) and
+     *     at what finishes the charge BY NEXT TURN: at 7/8 the drive reads 8/8 next turn unboosted, so a
+     *     boost there would be power for nothing and is not offered at all.
+     * ⚠️ THE ABDUCTION COOLDOWN IS NOT CHARGEABLE (§5 trap): a drive waiting out only that reads 0 here,
+     * because getJumpPointRechargeLoad is already full.
+     * One authority for both ends: stripForJson publishes it as chargeBoostMax, and
+     * generateIndividualNotes clamps what it credits to it. */
+    public function getChargeBoostMax($turn)
+    {
+        if (!$this->hasAdvancedCharging()) return 0;
+        if ($this->isFlightMounted()) return 0;
+
+        $turn = (int)$turn;
+        if ($this->vortexOpenTurn === null) return 0;                            //never spent a charge
+        if ((int)$this->vortexOpenTurn > $turn) return 0;                        //a later one, from an earlier replay turn
+        $closeTurn = $this->getCertainCloseTurn();
+        if ($closeTurn === null || $turn < $closeTurn) return 0;                 //still standing after this turn
+
+        $left = $this->getVortexRechargeTime() - $this->getJumpPointRechargeLoad($turn) - 1;
+        return max(0, min(self::CHARGE_BOOST_MAX, $left));
+    }
+
+    /* ⭐ STAGE H4 - THE TURN AT WHOSE END THIS ENGINE'S JUMP POINT CLOSES, if that is already CERTAIN,
+     * else null. The recorded closure when there is one. Otherwise, only a legacy drive's PHASE-IN
+     * doorway: it closes at the end of the turn after it formed - the arrival turn - whatever anybody
+     * declares (getVortexClosureReason's exit branch), and its opener is on the board by then. Every
+     * other standing jump point may yet be maintained, so it is uncertain and answers null.
+     * ⭐ Stage H5 narrowed this from every ship-held exit: a blue exit may now be maintained from its
+     * arrival turn on, exactly as an entrance is, so only SpawnJumpPointPhaseIn is still certain. */
+    protected function getCertainCloseTurn()
+    {
+        if ($this->vortexOpenTurn === null) return null;
+        if ((int)$this->vortexCloseTurn >= 0) return (int)$this->vortexCloseTurn;
+        if ($this->vortexIsPhaseIn && !$this->gateJump) return (int)$this->vortexOpenTurn + 1;
+        return null;
+    }
+
+    //The charge a boost on $turn bought, in extra turns (0 when none). See $chargeBoostNotes.
+    public function getRechargeBoostLevel($turn)
+    {
+        $turn = (int)$turn;
+        return isset($this->chargeBoostNotes[$turn]) ? (int)$this->chargeBoostNotes[$turn] : 0;
+    }
+
+    /* ⭐⭐ STAGE H4 - IS THIS DRIVE'S BOOST ON $turn A JUMP TO HYPERSPACE? The narrow reader every
+     * "who is leaving" question now asks, instead of the bare isOverloading() it used to be.
+     *
+     *   - only a LEGACY drive leaves this way. A Vorlon drive opens jump points; its boost is only ever
+     *     extra charging, and without this line every Vorlon that boosted its drive would leave the
+     *     battle at the end of the Fire phase (the §5 trap);
+     *   - an Ancient-charging drive must be FULLY CHARGED at the start of the turn (§10 A4). While it
+     *     recharges its boost is extra charging, and the drive cannot jump at all;
+     *   - every other legacy drive - Trek, BSG, Star Wars - jumps on the boost exactly as before.
+     * The charge is read from getChargeSource(), so every craft of a flight answers alike. */
+    public function isJumpOutBoost($turn)
+    {
+        if (!$this->legacyJump) return false;
+        if ($this->isFlightMounted()) return true;        
+        if (!$this->isOverloading($turn)) return false;
+        if (!$this->hasAdvancedCharging()) return true;
+
+        $source = $this->getChargeSource();
+        return $source->getVortexRechargeLoad($turn) >= $source->getVortexRechargeTime();
+    }
+
     /* ⭐ THE ENGINE TAKING $unit OUT OF THE BATTLE AT THE END OF $turn, or null: the first one with a
-     * Jump-to-Hyperspace boost committed for that turn (isOverloading reads power type 2, which
-     * despite the name is the BOOST record). ONE reader for the end-of-Fire sweep that performs the
+     * Jump-to-Hyperspace boost committed for that turn (isJumpOutBoost - Stage H4: a legacy drive's
+     * boost, and on an Ancient-charging drive only once it is fully charged; power type 2 is the
+     * BOOST record). ONE reader for the end-of-Fire sweep that performs the
      * jump and for the Firing withdrawal that enforces the no-fire rule, so the two cannot disagree
      * about which units are leaving.
      *
@@ -6317,7 +6620,7 @@ class JumpEngine extends Weapon{
             foreach ($unit->systems as $craft){
                 if (!is_array($craft->systems)) continue;
                 foreach ($craft->systems as $system){
-                    if ($system instanceof JumpEngine && $system->isOverloading($turn)) return $system;
+                    if ($system instanceof JumpEngine && $system->isJumpOutBoost($turn)) return $system;
                 }
             }
             return null;
@@ -6326,7 +6629,7 @@ class JumpEngine extends Weapon{
         foreach ($unit->systems as $system){
             if (!($system instanceof JumpEngine)) continue;
             if ($system->isDestroyed()) continue;
-            if ($system->isOverloading($turn)) return $system;
+            if ($system->isJumpOutBoost($turn)) return $system;
         }
 
         return null;
@@ -6683,7 +6986,25 @@ class JumpEngine extends Weapon{
         $closeTurn = (int)$this->vortexCloseTurn;
         if ($closeTurn < 0 || $turn <= $closeTurn) return 0;      //open, or closing at the end of this turn
 
-        return min($charge, $turn - $closeTurn);                  //recharging, from the turn AFTER it closed
+        /* ⚠️ A DRIVE THAT NEVER BOUGHT CHARGE ANSWERS EXACTLY WHAT IT ALWAYS DID - the closed form,
+           untouched - so every replay snapshot of an unboosted drive is bit-for-bit unchanged. */
+        if (empty($this->chargeBoostNotes)) return min($charge, $turn - $closeTurn);   //recharging, from the turn AFTER it closed
+
+        /* ⭐⭐ STAGE H4 - THE SAME CLIMB, WALKED FORWARD, with each turn's boost credited at the END of
+           the turn that bought it: every turn from the CLOSING turn on adds 1 plus that turn's boost -
+           which is why the turn after the closure reads 1 (the closing turn's own +1). The closing
+           turn's boost counts too: on a phase-in doorway's arrival turn the closure is certain, so a
+           boost there is offered (getChargeBoostMax) and must be credited.
+           "Strictly before $turn" is load-bearing - a boost that counted toward its own turn could
+           complete the charge and flip its own meaning from charging to jumping mid-turn (§5 rule 2).
+           With no boost in the range the walk IS the closed form above. A note from before the
+           closing turn belongs to an earlier cycle and is outside the range; one from $turn or later
+           (an earlier replay turn) likewise. */
+        $load = 0;
+        for ($t = $closeTurn; $t < $turn && $load < $charge; $t++){
+            $load = min($charge, $load + 1 + $this->getRechargeBoostLevel($t));
+        }
+        return $load;
     }
 
     /* How many turns the vortex this engine holds has been OPEN as of $turn, or null when it holds
@@ -6691,7 +7012,13 @@ class JumpEngine extends Weapon{
        a unit can fly into it, up to MAX_VORTEX_TURNS.
 
        This is the counter Stage 5 used to smuggle out through $turnsloaded. It now travels as a
-       field of its own (see stripForJson) so that the loading state can mean loading. */
+       field of its own (see stripForJson) so that the loading state can mean loading.
+
+       ⭐ STAGE H3 / R5 - AND IT DOES NOT CLAMP ON A CAPACITOR-FED DRIVE. That drive has no four-turn
+       cap (see getVortexClosureReason), so clamping here would freeze the counter at 4 and a Vorlon
+       jump point held for eight turns would read "4" on its seventh. The denominator is dropped for
+       the same reason - stripForJson sends no vortexMaxTurns for one, and the icon draws an
+       open-ended count instead. */
     public function getVortexAge($turn)
     {
         $turn = (int)$turn;
@@ -6700,7 +7027,10 @@ class JumpEngine extends Weapon{
         if ((int)$this->vortexOpenTurn > $turn) return null;      //a later vortex, from an earlier replay turn
         if (!$this->hasOpenVortex($turn)) return null;            //closed - the engine is free again
 
-        return min($turn - (int)$this->vortexOpenTurn, self::MAX_VORTEX_TURNS);
+        $age = $turn - (int)$this->vortexOpenTurn;
+        if ($this->chargesVortexUpkeep()) return $age;
+
+        return min($age, self::MAX_VORTEX_TURNS);
     }
 
     /* Has $ship declared a vortex on $turn? Public static because the CONCEALMENT systems need to
@@ -6832,6 +7162,55 @@ class JumpEngine extends Weapon{
         return $engines;
     }
 
+    /* ⭐ ELITE / POOR CREW - THE JUMP DELAY, MOVED ONCE AND STORED, NOT RE-DERIVED PER READ.
+     *
+     * Elite Crew: "the jump delay time of the ship is reduced by 20% (round fractions of 0.5 or
+     * more up)". Poor Crew: the same 20% the other way, "for each level of Poor Crew". Called from
+     * Enhancements::setEnhancementsShip once per load, through
+     * JumpEngine::getUnitJumpEngines($ship) so a flight-mounted drive is found the same way every
+     * other rule finds it - never by sweeping $ship->systems directly.
+     *
+     * ⭐ IT WRITES $delay, WHICH IS THE ONLY DURABLE FIELD. $loadingtime is overwritten from the
+     * stored tac_systemdata row by Weapon::setLoading on every load, which is precisely why
+     * getVortexRechargeTime() - the ONE authority for "how many turns does a vortex take to
+     * charge", and the number stripForJson sends the client as loadingtime - reads $delay and
+     * nothing else. The other two are set to match so anything reading them before setLoading
+     * runs sees a consistent engine.
+     *
+     * ⚠⚠ REFUSED ON A DRIVE WITH NO JUMP RECHARGE, and that guard is the whole reason this is a
+     * method on JumpEngine rather than three lines in the enhancement switch: the Star Trek
+     * Nacelle passes an IMPULSE RATING as its 4th constructor argument, not a jump delay, and
+     * TrekWarpDrive feeds TrekImpulseDrive's sublight thrust off it. Scaling it by 0.8 would
+     * quietly re-rate a Trek ship's engines. $hasJumpRecharge is protected, so only this class can
+     * ask - see its declaration.
+     *
+     * Per level and COMPOUNDING (0.8 twice = 0.64, not 0.6), with the round-half-up applied at
+     * each step, because the rules state the reduction per level rather than as a total. PHP's
+     * round() is half-away-from-zero, which on a positive delay is exactly "fractions of 0.5 or
+     * more round up". Floored at 1: a drive that recharges instantly is a state the rest of the
+     * vortex code does not model (see the max(1, ...) in the constructor).
+     *
+     * $levels is the SIGNED crew quality - positive Elite (shorter), negative Poor (longer). */
+    public function applyCrewJumpDelayModifier($levels)
+    {
+        $levels = (int)$levels;
+        if ($levels === 0) return;
+        if (!$this->hasJumpRecharge) return;   //Trek Nacelle: the 4th ctor argument is not a delay
+
+        $delay = (int)$this->delay;
+        if ($delay <= 0) return;               //nothing to scale - markLegacy/markGate zero it
+
+        $factor = ($levels > 0) ? 0.8 : 1.2;
+        $steps  = abs($levels);
+        for ($i = 0; $i < $steps; $i++){
+            $delay = max(1, (int)round($delay * $factor));
+        }
+
+        $this->delay       = $delay;
+        $this->loadingtime = $delay;
+        $this->turnsloaded = $delay;
+    }
+
     /* ================= STAGE 3 - THE VORTEX UNIT ==================================
      *
      * THE SPAWN SWEEP. Every legal vortex declaration made this Initial Orders turns into a
@@ -6894,6 +7273,11 @@ class JumpEngine extends Weapon{
          * a row rather than fail loudly. */
         if ($dbManager === null) return;
 
+        /* ⚠️ 'JumpVortex' ONLY, AND NOT ALSO 'JumpVortexExit' (Item 1, 2026-09-17). This sweep runs
+           FIRST of the three in advance() - before openSignalledGates and spawnExitVortices - so no
+           exit or gate line exists yet to pick up, and both of those sweeps submit the orders THEY
+           wrote through their own $logOrders array. Widening this test would make the narrowing the
+           comment above describes pointless and duplicate every one of their rows. */
         $logOrders = array();
         foreach ($gamedata->getNewFireOrders() as $fire){
             if ($fire->damageclass === 'JumpVortex') $logOrders[] = $fire;
@@ -7225,9 +7609,9 @@ class JumpEngine extends Weapon{
      *     before that sweep has run, $vortexCloseTurn is still -1 and holdsExitOpenOn answers YES -
      *     so a whole wave would be stamped for a turn on which its doorway no longer exists, get a
      *     Deployment phase with no legal hex in it, and be stuck there.
-     *   - A SHIP'S exit is one-shot and closes at the end of the arrival turn. Asked before the
-     *     closure, a rider that stayed behind would have its berth renewed for another turn instead
-     *     of refunded.
+     *   - A SHIP'S exit closes at the end of the arrival turn unless its opener MAINTAINS it (Stage
+     *     H5). Asked before the closure, a berth on an exit that was let go would be renewed for
+     *     another turn instead of refunded.
      *
      * ⭐ AND $opened IS REBUILT FROM THE BOARD, not carried over from the spawn half. The two sweeps
      * now run in different phases off different gamedata loads, so there is nothing to carry; the
@@ -7248,7 +7632,17 @@ class JumpEngine extends Weapon{
 
         foreach ($gamedata->ships as $ship){
             if ($ship->isTerrain()) continue;            //gates are collectGateExits' half, below
-            if (!$ship->isReinforcement()) continue;     //an opener rides its own doorway, so it is still in hyperspace
+
+            /* TWO KINDS OF SHIP OPENER. A reinforcement still in hyperspace, whose exit formed this
+               turn - it rides its own doorway, so it is stamped from this list. And (⭐ Stage H5) a
+               unit ON THE BOARD that came out through its exit and has MAINTAINED it: its doorway
+               takes a fresh wave on every turn it is held, exactly as a gate's does, and its riders
+               are stamped from this list too. The opener itself is on the board, so
+               stampArrivingReinforcements' reinforcement filter leaves it alone.
+               closeExpiredVortices has already run, so an exit that was NOT maintained - or broke
+               the range, the cap, the dark rule or the upkeep - answers false below and its berths
+               are refunded, which is the server half of "turning Maintain off cancels the wave". */
+            if (!$ship->isReinforcement() && !self::getHeldExitEngine($ship, $gamedata, $turn)) continue;
 
             foreach (self::getUnitJumpEngines($ship) as $system){
                 /* THE SAME QUESTION THE GATE PASS ASKS, deliberately: is the jump point this engine
@@ -7326,6 +7720,45 @@ class JumpEngine extends Weapon{
         if (!($vortex instanceof SpawnJumpPointExit)) return false;
 
         return ((int)$vortex->spawned <= (int)$turn);
+    }
+
+    /* ⭐⭐ STAGE H5 - IS THIS ENGINE HOLDING A BLUE EXIT THAT IT MAY MAINTAIN, standing on $turn?
+     *
+     * A ship's own exit that has FORMED ($spawned <= $turn, so not on its forming turn) and has not
+     * closed. Neither a gate's (a gate has no Maintain - it runs a programmed hold) nor a legacy drive's
+     * (its SpawnJumpPointPhaseIn is one-shot and a legacy drive has no Maintain either). Whether the
+     * OPENER is on the board is the caller's question - see getHeldExitEngine, which asks both.
+     *
+     * The client mirror is shipManager.movement.getMaintainableExitHeldBy. */
+    public function holdsMaintainableExit($gamedata, $turn)
+    {
+        if ($this->gateJump || $this->legacyJump) return false;
+        if (!$this->hasOpenVortex($turn)) return false;
+
+        $vortex = $gamedata->getShipById((int)$this->activeVortexId);
+        if (!($vortex instanceof SpawnJumpPointExit)) return false;
+        if ($vortex instanceof SpawnJumpPointPhaseIn) return false;
+
+        return ((int)$vortex->spawned <= (int)$turn);
+    }
+
+    /* ⭐⭐ STAGE H5 - THE ENGINE ON $unit HOLDING A MAINTAINABLE BLUE EXIT ON $turn, or null. The unit has
+     * to be ON THE BOARD - it arrived through that exit and holds it from a hex - which is what separates
+     * it from a reinforcement still in hyperspace, whose forming exit is stampExitManifests' first case.
+     * Three readers: stampExitManifests (does the doorway take next turn's wave), the Initial Orders
+     * manifest (may a berth name this unit) and the Deployment phase's release (does an unplaced rider
+     * keep its berth). Through getUnitJumpEngines, never a raw systems sweep. */
+    public static function getHeldExitEngine($unit, $gamedata, $turn)
+    {
+        if (!$unit || $unit->isTerrain()) return null;
+        if ($unit->getTurnDeployed($gamedata) > (int)$turn) return null;   //still in hyperspace
+        if ($unit->isDestroyed($turn)) return null;
+
+        foreach (self::getUnitJumpEngines($unit) as $engine){
+            if ($engine->holdsMaintainableExit($gamedata, $turn)) return $engine;
+        }
+
+        return null;
     }
 
     /* Does anybody in this game hold a berth that might need clearing? Asked only when NO exit
@@ -7424,7 +7857,8 @@ class JumpEngine extends Weapon{
      * own ship in through a doorway nobody else can use - it opens no jump point - so its manifest may
      * hold only FIGHTERS its hangars can take, and SHIPS its Docking Bay can (WALKERS_OF_SIGMA_PLAN.md
      * 3.14b), and those arrive DOCKED inside it
-     * (InitialOrdersGamePhase::legacyBerthFits at the manifest, DeploymentGamePhase at arrival). A gate
+     * (InitialOrdersGamePhase::legacyBerthFits at the manifest, placeArrivingReinforcements at arrival
+     * since Stage H6). A gate
      * is never one. Goes through getUnitJumpEngines, so a Mapmaker flight's drive is found on its craft.
      * Client mirror: shipManager.movement.isLegacyOpener. */
     public static function isLegacyOpener($unit)
@@ -7531,7 +7965,18 @@ class JumpEngine extends Weapon{
 
         foreach (self::getUnitJumpEngines($opener) as $system){
             $scatter = $system->getVortexScatter();
-            if ($scatter !== null) return $scatter;
+            if ($scatter === null) continue;
+
+            /* ⭐ STAGE H5 (user ruling 2026-09-19) - THE FIRST WAVE ONLY. A maintained exit takes a
+               fresh wave every turn it is held, and a later wave comes out of a doorway that has
+               already FORMED - it did not scatter, so nothing disorders it, exactly as nothing
+               disorders a wave through a gate. The first wave is the one arriving on the turn after
+               the doorway formed. Compared on the UNIT's arrival turn rather than the turn being
+               loaded, so the answer does not depend on which side of the turn boundary the
+               initiative roll asks it from. */
+            if ((int)$unit->arrivalTurn !== (int)$system->vortexOpenTurn + 1) return null;
+
+            return $scatter;
         }
 
         return null;
@@ -7550,6 +7995,321 @@ class JumpEngine extends Weapon{
         if ($unit->arrivalTurn === null) return false;
 
         return ((int)$unit->arrivalTurn === (int)$gamedata->turn);
+    }
+
+    /* ============ HYPERSPACE_IMPROVEMENTS_PLAN.md STAGE H6 - THE WAVE PLACES ITSELF, ON THE SERVER ============
+     *
+     * The DEPLOYMENT: REINFORCEMENTS phase had three jobs left (plan §7): the player set each arrival's
+     * SPEED, flights riding a legacy opener were docked into it, and a unit whose doorway had gone went
+     * back to hyperspace. The first two are now decided a turn earlier, in the Jump Manifest, and this
+     * does all three with no phase at all.
+     *
+     * ⭐ THE ARRIVAL ORDER. What the manifest decided for one rider beyond "which doorway": the speed it
+     * comes out at (H6a) and the carrier it STARTS INSIDE, if any (H6b). One 'ArrivalOrder' note per
+     * rider per Initial Orders commit, value "speed:carrierId" (0 = onto the map), written by
+     * InitialOrdersGamePhase::persistManifest after it has validated both, and read ONCE, by
+     * placeArrivingReinforcements. From then on the deploy row (or the hangar entry) is the authority
+     * and the note is history - plan §10 A3: nothing else may ever read it.
+     *
+     * ⚠️ HOSTED ON A STRUCTURE (or a flight's first craft), NEVER ON A JUMP ENGINE. The engine's
+     * onIndividualNotesLoaded takes any note it does not recognise for the pre-jump combat value;
+     * Structure and Fighter ignore keys they do not know. The reader goes to the database by ship id,
+     * so no loader has to claim the key either. */
+    const ARRIVAL_ORDER_NOTE = 'ArrivalOrder';
+    //The 0-10 the retired phase's accel arrows allowed (shipManager.movement.doDeploymentAccel).
+    const ARRIVAL_SPEED_MAX = 10;
+
+    public static function getArrivalNoteHost($unit)
+    {
+        if (!$unit || !is_array($unit->systems)) return null;
+
+        if ($unit instanceof FighterFlight){
+            foreach ($unit->systems as $craft) if ($craft instanceof Fighter) return $craft;
+            return null;
+        }
+
+        $structure = $unit->getStructureSystem(0);
+        if ($structure) return $structure;
+        foreach ($unit->systems as $system) if ($system instanceof Structure) return $system;
+
+        return null;
+    }
+
+    /* ⚠️ THE SPEED IS PLAYER-SUPPLIED AND BECOMES A MOVEMENT ROW's `speed`, so it is clamped both when
+     * it is written and when it is read. 0 on a base or an OSAT, as shipManager.movement.deploy has
+     * always forced (neither can be a reinforcement today - alwaysDeploysTurnOne - but a clamp that
+     * leaned on that would be one refactor from a hole). */
+    public static function clampArrivalSpeed($unit, $speed)
+    {
+        if ($unit->osat || $unit->base) return 0;
+        return max(0, min(self::ARRIVAL_SPEED_MAX, (int)$speed));
+    }
+
+    /* The speed a unit comes out at when its manifest said nothing - a game that was mid-flight when this
+     * deployed, or a berth kept from an earlier turn. Its last movement row's speed, which is exactly
+     * what the retired phase's placement started from (shipManager.movement.deploy copies it). */
+    public static function getDefaultArrivalSpeed($unit)
+    {
+        $last = $unit->getLastMovement();
+        return self::clampArrivalSpeed($unit, $last ? (int)$last->speed : 0);
+    }
+
+    public static function makeArrivalOrderNote($unit, $gamedata, $speed, $carrierId)
+    {
+        $host = self::getArrivalNoteHost($unit);
+        if (!$host) return null;
+
+        return new IndividualNote(-1, $gamedata->id, $gamedata->turn, $gamedata->phase, $unit->id, $host->id,
+            self::ARRIVAL_ORDER_NOTE, 'Arrival order',
+            self::clampArrivalSpeed($unit, $speed) . ':' . max(0, (int)$carrierId));
+    }
+
+    /* The LATEST arrival order on $unit, as array('speed' => int|null, 'carrier' => int|null). Null speed
+     * means "none written" (take getDefaultArrivalSpeed); null carrier means "onto the map". Latest by
+     * turn, then by note id - persistManifest writes one per commit, so the newest is the manifest that
+     * got this unit its arrival turn. */
+    public static function readArrivalOrder($unit, $gamedata, $dbManager)
+    {
+        $order = array('speed' => null, 'carrier' => null);
+        if ($dbManager === null || !method_exists($dbManager, 'getIndividualNotesForShip')) return $order;
+
+        $latest = null;
+        foreach ($dbManager->getIndividualNotesForShip($gamedata, (int)$gamedata->turn, (int)$unit->id) as $note){
+            if ($note->notekey !== self::ARRIVAL_ORDER_NOTE) continue;
+            if ($latest === null || (int)$note->turn > (int)$latest->turn
+                || ((int)$note->turn === (int)$latest->turn && (int)$note->id > (int)$latest->id)) $latest = $note;
+        }
+        if ($latest === null) return $order;
+
+        $parts = explode(':', (string)$latest->notevalue);
+        $order['speed'] = self::clampArrivalSpeed($unit, (int)$parts[0]);
+        $carrier = isset($parts[1]) ? (int)$parts[1] : 0;
+        $order['carrier'] = ($carrier > 0) ? $carrier : null;
+
+        return $order;
+    }
+
+    /* ⭐ SEND $unit BACK TO HYPERSPACE WITH NOTHING SPENT (REINFORCEMENTS_PLAN.md §2.4, "goes back to
+     * unassigned"). Moved here from DeploymentGamePhase::releaseUnplacedReinforcements, which still
+     * calls it, so the two ways a unit can now fail to arrive cannot disagree about what that means.
+     * Returns whether the berth was kept.
+     *
+     * ⚠️ arrivalTurn MUST BE CLEARED, not just arrivalVia. Left set, the unit reads as an ordinary ship
+     * that deployed on a turn now in the past - on the board, shootable, and standing at the off-map
+     * 'start' marker its slot gave it, for the rest of the game.
+     *
+     * ⭐⭐ A GATE BERTH IS KEPT, A SHIP BERTH IS NOT (Stage 8) - a gate's doorway may have turns left on
+     * its programmed hold - and (⭐ Stage H5, user ruling 2026-09-19) nor is a berth on a ship holding its
+     * blue exit open. OPTIMISTICALLY: the authorities come later and are unchanged - the Initial Orders
+     * commit writes the berth NULL unless the opener re-declares Maintain
+     * (InitialOrdersGamePhase::collectHeldExitOpeners), and stampExitManifests refunds it if the exit then
+     * closes. arrivalTurn is cleared in every case: keeping a berth is not staying an arrival.
+     *
+     * $dbManager is UNTYPED so the harnesses can drive this with a write-capturing stub. */
+    public static function returnToHyperspace($unit, $gamedata, $dbManager)
+    {
+        $unit->arrivalTurn = null;
+        if ($dbManager !== null) $dbManager->setShipArrivalTurn($unit->id, null);
+
+        //getShipById, never a posted object: isTerrain() is a blueprint property.
+        $opener = ($unit->arrivalVia === null) ? null : $gamedata->getShipById((int)$unit->arrivalVia);
+        $keepsBerth = ($opener !== null && $opener->isTerrain());
+
+        //getHeldExitEngine asks whether the opener is ON THE BOARD, so an opener sent back in this same
+        //pass does not keep its riders' berths.
+        if (!$keepsBerth && $opener !== null && (int)$opener->id !== (int)$unit->id
+            && self::getHeldExitEngine($opener, $gamedata, (int)$gamedata->turn)) $keepsBerth = true;
+
+        if (!$keepsBerth){
+            $unit->arrivalVia = null;
+            if ($dbManager !== null) $dbManager->setShipArrivalVia($unit->id, null);
+        }
+
+        Debug::log("Jump point exit: ship {$unit->id} was not brought out and returns to hyperspace"
+            . ($keepsBerth ? ", keeping its berth on {$unit->arrivalVia}" : "")
+            . " (game {$gamedata->id}, turn {$gamedata->turn}).");
+
+        return $keepsBerth;
+    }
+
+    /* ⭐⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md STAGE H6c - EVERY UNIT ARRIVING THIS TURN, PLACED OR DOCKED OR
+     * SENT BACK, with no Deployment phase for any of it.
+     *
+     * Called once, from Manager::changeTurn, off the reload of the NEW turn and before initiative is
+     * rolled. ⚠️ NOT from FireGamePhase::advance, where the plan first put it: that load is turn N, and
+     * every question below is "arriving on THIS turn" - getArrivalVortex, the doorway's formed window,
+     * and the hangar dock's own "flight and carrier are both placing this turn" gates
+     * (HangarOps::validateDeployBayOrders) all answer no a turn early. From changeTurn this sees the load
+     * the retired phase used to act on - turn N+1, phase -1, arrivals stamped - so the deploy rows, the
+     * hangar entries and their notes come out exactly as that phase wrote them, and replay reads them the
+     * same way.
+     *
+     * THREE PASSES, IN THIS ORDER:
+     *   1. everything coming out ONTO THE MAP gets a 'deploy' row at its doorway, on the doorway's facing
+     *      (heading too - validateReinforcementArrival's rule), at the speed its manifest chose;
+     *      a unit whose doorway has gone goes back to hyperspace;
+     *   2. everything STARTING INSIDE A CARRIER is docked into it - the carrier must have come out in
+     *      pass 1, through the same doorway. A flight riding a LEGACY opener is aboard by rule (user
+     *      ruling 2026-09-11) whatever its note says. A refused dock sends the unit back, as the retired
+     *      phase's dock did;
+     *   3. each carrier that took anything persists its hangar snapshot through its own
+     *      generateIndividualNotes - the same change-detected tail the Deployment phase wrote it through.
+     *
+     * ⚠️ THE MOVE IS PUSHED ONTO THE IN-MEMORY SHIP AS WELL AS WRITTEN: generateIniative runs next, off
+     * this same object, and getSpeed() reads the last movement row. That is what takes the old -50 for
+     * speed 0 off a wave that chose a speed (plan §7 H6a - a balance change, flagged there).
+     *
+     * IDEMPOTENT: a unit already carrying this turn's deploy row, or already aboard (removed), is skipped.
+     * $dbManager is untyped for the harness. Returns the ids placed / docked / released. */
+    public static function placeArrivingReinforcements($gamedata, $dbManager = null)
+    {
+        $result = array('placed' => array(), 'docked' => array(), 'released' => array());
+        if (!$gamedata->rules || !$gamedata->rules->hasRuleName('allowReinforcements')) return $result;
+
+        $turn = (int)$gamedata->turn;
+
+        $arrivals = array();
+        foreach ($gamedata->ships as $unit){
+            if (!self::isArrivingReinforcement($unit, $gamedata)) continue;
+            if ($unit->alwaysDeploysTurnOne()) continue;
+            if ($unit->isDestroyed()) continue;
+            if ($unit->removed) continue;                          //already aboard - a second pass
+            if (self::hasDeployMoveOn($unit, $turn)) continue;      //already out - a second pass
+
+            $order = self::readArrivalOrder($unit, $gamedata, $dbManager);
+            $legacyHost = self::getLegacyRideHost($unit, $gamedata);
+            if ($legacyHost) $order['carrier'] = (int)$legacyHost->id;   //aboard by rule, not by choice
+
+            $arrivals[] = array('unit' => $unit, 'order' => $order);
+        }
+
+        //1. Onto the map. Carriers are in this pass, so pass 2 can dock into them.
+        $out = array();
+        foreach ($arrivals as $arrival){
+            if ($arrival['order']['carrier'] !== null) continue;
+            $unit = $arrival['unit'];
+
+            $vortex = self::getArrivalVortex($unit, $gamedata);
+            if ($vortex === null){
+                self::returnToHyperspace($unit, $gamedata, $dbManager);
+                $result['released'][] = (int)$unit->id;
+                continue;
+            }
+
+            $speed = ($arrival['order']['speed'] === null)
+                ? self::getDefaultArrivalSpeed($unit) : $arrival['order']['speed'];
+            $facing = (int)$vortex->getLastMovement()->facing;
+
+            $move = new MovementOrder(null, "deploy", $vortex->getHexPos(), 0, 0,
+                $speed, $facing, $facing, false, $turn, 0, 0);
+            $unit->movement[] = $move;
+            if ($dbManager !== null) $dbManager->insertMovement($gamedata->id, $unit->id, $move);
+
+            $out[(int)$unit->id] = true;
+            $result['placed'][] = (int)$unit->id;
+        }
+
+        /* 2. Into a carrier. SHIPS BEFORE FLIGHTS, the Deployment phase's own order
+           (DockingBay::generateIndividualNotes): a Pathfinder claims its Docking Bay boxes first, and a
+           Mapmaker flight packed after it finds them taken rather than the other way round. */
+        $docking = array();
+        foreach ($arrivals as $arrival){
+            if ($arrival['order']['carrier'] === null) continue;
+            if ($arrival['unit'] instanceof FighterFlight) $docking[] = $arrival;
+            else array_unshift($docking, $arrival);
+        }
+
+        $touched = array();
+        foreach ($docking as $arrival){
+            $unit = $arrival['unit'];
+            $carrier = $gamedata->getShipById($arrival['order']['carrier']);
+
+            if (!self::canCarryArrival($carrier, $unit, $out) || !self::dockArrival($unit, $carrier, $gamedata)){
+                self::returnToHyperspace($unit, $gamedata, $dbManager);
+                $result['released'][] = (int)$unit->id;
+                continue;
+            }
+
+            $touched[(int)$carrier->id] = $carrier;
+            $result['docked'][] = (int)$unit->id;
+        }
+
+        //3. Persist what went aboard.
+        foreach ($touched as $carrier){
+            foreach (HangarOps::collectHangars($carrier) as $hangar){
+                $hangar->generateIndividualNotes($gamedata, $dbManager);
+                if ($dbManager !== null) $hangar->saveIndividualNotes($dbManager);
+            }
+        }
+
+        return $result;
+    }
+
+    //A deploy row for $turn already on this unit, as DeploymentGamePhase::validateDeployment reads them.
+    public static function hasDeployMoveOn($unit, $turn)
+    {
+        if (!is_array($unit->movement)) return false;
+        foreach ($unit->movement as $move){
+            if ($move->type == "deploy" && (int)$move->turn === (int)$turn) return true;
+        }
+        return false;
+    }
+
+    /* May $carrier take $unit aboard as it arrives? It must be the rider's own, have come out onto the
+     * map in pass 1 (not sent back, not itself aboard something), and have come through the SAME
+     * doorway - it is either the doorway's opener or another rider of it. The hangar rules themselves
+     * are the dock's (HangarOps), asked next. */
+    protected static function canCarryArrival($carrier, $unit, array $out)
+    {
+        if (!$carrier || (int)$carrier->id === (int)$unit->id) return false;
+        if ((int)$carrier->userid !== (int)$unit->userid) return false;
+        if (!isset($out[(int)$carrier->id])) return false;
+
+        $door = ($unit->arrivalVia === null) ? (int)$unit->id : (int)$unit->arrivalVia;
+        $carrierDoor = ($carrier->arrivalVia === null) ? (int)$carrier->id : (int)$carrier->arrivalVia;
+
+        return (int)$carrier->id === $door || $carrierDoor === $door;
+    }
+
+    /* Put $unit aboard $carrier through the Deployment phase's own dock path, which is the authority on
+     * every hangar rule: HangarOps::validateDeployBayOrders + performDeployStartDockFromOrders for a
+     * flight, processBayShipDeployStartTransfer for a ship a Docking Bay takes. The carrier is both the
+     * "POST-side" and the "DB-side" ship here - there is only the one load - which every one of them
+     * accepts. True when it is aboard. */
+    protected static function dockArrival($unit, $carrier, $gamedata)
+    {
+        if ($unit instanceof FighterFlight){
+            $entryHost = HangarOps::primaryHangar($carrier);
+            if (!$entryHost) return false;
+
+            //Fill order = the dock's own (reserved bays first, a Docking Bay last), which is the order
+            //persistManifest's fit check and the client's planFlightsIntoCarrier promised.
+            $bayOrders = array();
+            foreach (HangarOps::sortBaysReservedFirst(HangarOps::collectHangars($carrier), $unit) as $bay){
+                if (!empty($bay->isLCVRail)) continue;
+                $bayOrders[] = array('hangar' => $bay, 'count' => null);
+            }
+
+            $reason = null;
+            if (!HangarOps::validateDeployBayOrders($carrier, $carrier, $unit, $bayOrders, $gamedata, $reason)){
+                Manager::insertIndividualNote(new IndividualNote(-1, $gamedata->id, $gamedata->turn, $gamedata->phase,
+                    $carrier->id, $entryHost->id, 'hangarDeployStartEvent', 'Hangar deploy-start dock failed',
+                    'fail:' . $unit->id . ':' . ($reason ?? 'unknown')));
+                return false;
+            }
+
+            return HangarOps::performDeployStartDockFromOrders($entryHost, $carrier, $unit, $bayOrders, $gamedata, $carrier) > 0;
+        }
+
+        foreach (HangarOps::collectHangars($carrier) as $bay){
+            if (empty($bay->isDockingBay) || $bay->isDestroyed()) continue;
+            if (!HangarOps::bayDocksShipClass($bay, (string)$unit->phpclass)) continue;
+
+            HangarOps::processBayShipDeployStartTransfer($bay, $carrier, $gamedata, array(array('shipId' => (int)$unit->id)));
+            if (HangarOps::findBayShipEntry($bay, $unit->id) !== null) return true;
+        }
+
+        return false;
     }
 
     /* THIS ENGINE'S EXIT DECLARATION FOR $turn, or null. The mirror of getVortexDeclaration and
@@ -7665,7 +8425,8 @@ class JumpEngine extends Weapon{
             //$opens . " - sensors " . $scatter['sensors'] . ", roll " . $scatter['roll']
 			$opens . "- rolled " . $scatter['roll']
             . " (" . $scatter['band'] . "). It forms " . $where . $turned
-            . ", and the units riding it arrive through it next turn.");
+            . ", and the units riding it arrive through it next turn.",
+            true);   //Item 1: a BLUE doorway - the log line takes the arriving colour
         if ($log && is_array($logOrders)) $logOrders[] = $log;
 
         Debug::log("Jump point exit: ship {$opener->id} opens vortex {$vortex->id} at "
@@ -8055,7 +8816,10 @@ class JumpEngine extends Weapon{
             $log = self::writeVortexLogOrder($gate, $gamedata,
                 " refuses the signal from " . self::playerLabel($userId, $gamedata) . ": their nearest unit is "
                 . $distance . ($distance == 1 ? " hex" : " hexes") . " away, against "
-                . $distances[$winner] . " for " . self::playerLabel($winner, $gamedata) . ".");
+                . $distances[$winner] . " for " . self::playerLabel($winner, $gamedata) . ".",
+                //Item 1: coloured by the doorway the gate actually opened, which is what this
+                //refusal is the consequence of - there is no vortex of the LOSER's to colour by.
+                $exit);
             if ($log) $logOrders[] = $log;
         }
 
@@ -8064,7 +8828,8 @@ class JumpEngine extends Weapon{
         if ($hold < (int)$claims[$winner]['hold']){
             $log = self::writeVortexLogOrder($gate, $gamedata,
                 " cannot hold its jump point for " . (int)$claims[$winner]['hold'] . " turns - reactor damage caps it at "
-                . $hold . ($hold == 1 ? " turn" : " turns") . ".");
+                . $hold . ($hold == 1 ? " turn" : " turns") . ".",
+                $exit);   //Item 1: the doorway this hold belongs to
             if ($log) $logOrders[] = $log;
         }
 
@@ -8514,7 +9279,8 @@ class JumpEngine extends Weapon{
             . ($exit ? "an ARRIVAL jump point" : "its jump point") . " for "
             . $hold . ($hold == 1 ? " turn" : " turns")
             . ". It forms at the end of this turn and can be "
-            . ($exit ? "arrived through" : "entered") . " from next turn.");
+            . ($exit ? "arrived through" : "entered") . " from next turn.",
+            $exit);   //Item 1: the sentence already branches on it, and so does the colour
         if ($log) $logOrders[] = $log;
 
         return true;
@@ -8587,8 +9353,27 @@ class JumpEngine extends Weapon{
      * it, so the log prints the sentence alone rather than "firing 1x Ramming Attack ... 1/1 shots
      * hit" at a ship that was never shot at.
      *
+     * ⭐⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md §2 (Item 1, user request 2026-09-17) - AND THE CLASS IS
+     * SPLIT IN TWO, BECAUSE THE LOG HAS TO COLOUR THE TWO DOORWAYS DIFFERENTLY. The combat log
+     * heads these entries HYPERSPACE: rather than FIRE:, in the SAME colours the map markers use -
+     * #e1b000 yellow for a yellow jump point (leaving) and #00b8e6 cobalt for a blue one
+     * (arriving) - and until now every vortex line, yellow and blue, ship and gate, carried the
+     * one class 'JumpVortex' with nothing to tell them apart. Parsing the sentence was the
+     * alternative and is not one.
+     *
+     * ⚠️ $isExit IS PASSED, NOT DERIVED, AND THAT IS NOT LAZINESS. Two of the six callers write
+     * their line BEFORE any vortex exists - the gate claim refusal and the reactor-damage hold
+     * clamp, both in resolveGateClaims - so there is nothing to ask `instanceof` of. They pass the
+     * $exit flag the claim itself carried. The one caller that CAN derive it (recordVortexClosure)
+     * does, from its own $activeVortexId.
+     *
+     * ⚠️ ANYTHING MATCHING ON THE CLASS NAME MUST LEARN BOTH. Today that is
+     * Firing::isHyperspaceLogOrder (the four gathers) and weaponManager.doShortLogText (the log
+     * wording). Miss the first and a blue doorway's own log line is re-resolved as a ram, four
+     * times, on the turns after it was written - the Stage 4 trap, exactly.
+     *
      * No damage entry, deliberately: nothing is being hurt. */
-    protected static function writeVortexLogOrder($ship, $gamedata, $pubNotes)
+    protected static function writeVortexLogOrder($ship, $gamedata, $pubNotes, $isExit = false)
     {
         $rammingSystem = $ship->getSystemByName("RammingAttack");
         if (!$rammingSystem) return null;   //every ship has one, and BaseShip gives a jump gate one too
@@ -8597,7 +9382,7 @@ class JumpEngine extends Weapon{
             -1, "normal", $ship->id, $ship->id,
             $rammingSystem->id, -1, $gamedata->turn, 1,
             100, 100, 1, 1, 0,
-            0, 0, 'JumpVortex', 10001
+            0, 0, ($isExit ? 'JumpVortexExit' : 'JumpVortex'), 10001
         );
         $newFireOrder->pubnotes = $pubNotes;
         $newFireOrder->addToDB = true;
@@ -8745,9 +9530,33 @@ class JumpEngine extends Weapon{
            So ONE-SHOT IS A SHIP'S RULE. A gate falls through to getGateVortexClosureReason below,
            which is where the hold lives, and which already closes a gate vortex of either flavour.
            Trap 5 is unaffected: a gate's engine is released by the hold expiring, and a gate that
-           never closed its jump point would be broken for Phase 2 entrances too. */
+           never closed its jump point would be broken for Phase 2 entrances too.
+
+           ⭐⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md STAGE H5 - AND NOW ONE-SHOT ONLY UNTIL THE OPENER ARRIVES.
+           From the arrival turn a ship's blue exit is held EXACTLY AS AN ENTRANCE IS: it falls through
+           to the ship list below - destroyed, the four-turn cap, range, Maintain, and then either the
+           all-systems-dark rule or, on a Vorlon, the upkeep with no cap (user, 2026-09-19: "Vorlons ...
+           should act in the same way as Younger Races in that regard, albeit without the 4 turn limit").
+           Everything on that list is answerable now, because the opener came out through its own
+           doorway and has a hex. Trap 5 still holds: the cap closes a young race's exit, and a Vorlon's
+           closes the turn it stops being paid for (R6). Three things stay one-shot, in order:
+             - the FORMING turn. The opener is still in hyperspace, so there is nothing to hold it with.
+               ⭐ But a Vorlon PAYS for forming it (user ruling 2026-09-19, reversing H3's free exit):
+               opening a jump point is using the drive, whichever way the doorway faces. Failing to pay
+               closes it on the turn it formed, which is how "it never forms" is expressed - the wave's
+               berths are then refunded by stampExitManifests.
+             - a legacy drive's PHASE-IN doorway. It is invisible, carries only docked fighters, and a
+               legacy drive has no Maintain (getMaintainDeclaration refuses it) - plan trap 3.
+             - an opener that did NOT come through (its placement was released back to hyperspace). It
+               has no hex to measure the range from, and nothing to maintain with. */
         if ($vortex instanceof SpawnJumpPointExit && !$this->isGateJump()){
-            return ($turn > (int)$this->vortexOpenTurn) ? 'reinforcements have arrived' : null;
+            if ((int)$turn <= (int)$this->vortexOpenTurn){
+                if ($this->chargesVortexUpkeep() && !$this->payVortexUpkeep($turn)) return 'jump point not powered';
+                return null;
+            }
+            if ($vortex instanceof SpawnJumpPointPhaseIn) return 'no longer maintained';
+            if ($ship->getTurnDeployed($gamedata) > (int)$turn) return 'no longer maintained';
+            //From the arrival turn on: the ordinary ship list below.
         }
 
         /* ⭐⭐ JUMP GATES (PHASE 2) - THE GATE BRANCH, TAKEN FIRST AND RETURNING, because a gate's
@@ -8772,12 +9581,38 @@ class JumpEngine extends Weapon{
             return $ship->hasJumpedToHyperspace() ? 'holder left through a vortex' : 'holder destroyed';
         }
 
-        if ($turn >= $this->vortexOpenTurn + self::MAX_VORTEX_TURNS) return 'four-turn limit reached';
+        /* ⭐⭐ STAGE H3 / R5 - A CAPACITOR-FED DRIVE HAS NO CAP. A Vorlon jump point is held for as
+           long as the upkeep is paid (user ruling 2026-09-17), so the four-turn limit must not run
+           for one - it is the rule the upkeep REPLACES, along with the all-systems-dark rule below.
+           Asked through chargesVortexUpkeep(), so a marked drive with no Power Capacitor to pay from
+           keeps the cap it has today rather than getting an indefinite jump point for nothing. */
+        if (!$this->chargesVortexUpkeep()
+            && $turn >= $this->vortexOpenTurn + self::MAX_VORTEX_TURNS) return 'four-turn limit reached';
 
         $distance = $ship->getHexPos()->distanceTo($vortex->getHexPos());
         if ($distance > $this->range) return 'holder is ' . $distance . ' hexes away';
 
-        if ($turn == $this->vortexOpenTurn) return null; //the turn it was declared - nothing more to ask
+        if ($turn == $this->vortexOpenTurn){
+            /* ⭐⭐ STAGE H3 (user ruling 2026-09-18) - OPENING COSTS WHAT HOLDING COSTS. A Vorlon
+               jump drive draws power ONLY on a turn it is actually used, and opening a jump point is
+               using it: idle turns are free, the opening turn costs powerReq, and every maintained
+               turn costs it again (the branch further down).
+
+               ⚠️ THIS IS NOT THE SAME EXEMPTION AS THE ONE ON THE NEXT LINE. The opening turn is
+               exempt from MAINTAIN and from the all-systems-dark rule - "opening a jump point costs
+               nothing and does not stop the ship fighting" (JUMP_POINTS_PLAN.md §2.4) - and that is
+               still true for everybody, Vorlons included. What it is not exempt from is the Vorlon
+               drive's own power draw, which is a different bill entirely.
+
+               ⚠️ A BLUE EXIT NEVER REACHES HERE, but it is charged all the same: the exit branch near
+               the top of this method returns on its forming turn and takes the same payment there
+               (Stage H5, user ruling 2026-09-19 - it was free under H3). The client agrees -
+               JumpEngine.isUsingVortexThisTurn counts a 'jumpexit' declaration as well as a
+               'jumppoint' one. */
+            if ($this->chargesVortexUpkeep() && !$this->payVortexUpkeep($turn)) return 'jump point not powered';
+
+            return null; //the turn it was declared - nothing more to ask
+        }
 
         /* ⭐⭐ WALKERS §3.12 (Stage 13) - A FIGHTER FLIGHT'S JUMP POINT IS OPEN FOR EXACTLY ONE TURN
            (user ruling 2026-09-10). getMaintainDeclaration already refuses a flight, so the line
@@ -8789,6 +9624,22 @@ class JumpEngine extends Weapon{
         if ($this->isFlightMounted()) return 'a fighter flight cannot hold a jump point open';
 
         if (!$this->getMaintainDeclaration($turn)) return 'not maintained';
+
+        /* ⭐⭐ STAGE H3 / R4 + R6 - THE CAPACITOR-FED BRANCH, AND IT RETURNS.
+           A Vorlon pays its drive's powerReq out of the Power Capacitor for this turn and fights on:
+           the all-systems-dark test below is the rule the upkeep REPLACES, not a second bill (R4,
+           user ruling 2026-09-17). If the capacitor cannot cover it - drained by weapon fire, halved
+           or emptied by a critical, or shot out altogether - the jump point closes with a reason of
+           its own (R6), which is the only place in this method that spends anything.
+
+           ⚠️ BELOW THE OPENING-TURN BRANCH AND BELOW THE MAINTAIN TEST, deliberately. The opening turn
+           pays in its own branch above (and a blue exit's forming turn in the exit branch), and a
+           doorway nobody declared Maintain on is closing anyway - charging for it would take power for
+           a turn the drive got no upkeep out of. */
+        if ($this->chargesVortexUpkeep()){
+            if (!$this->payVortexUpkeep($turn)) return 'jump point not powered';
+            return null;
+        }
 
         $violations = self::getVortexPowerViolations($ship, $turn);
         if (!empty($violations)){
@@ -8865,8 +9716,17 @@ class JumpEngine extends Weapon{
          * this feature a player can act on ("systems left online: Heavy Laser; ...") and it was
          * Stage 5's first reported gap. FireGamePhase::advance submits new fire orders after this
          * sweep, so the order needs no submit of its own - unlike the opening one. */
+        /* Item 1: the ONE caller that can derive its own colour, and it should - the vortex it is
+           closing is still on the board at this point (closure is end-of-turn, and the unit is
+           removed a turn later), so `instanceof` answers for both flavours and for the invisible
+           phase-in subclass as well. Defensive on a null: a note that outlived its unit closes as
+           an ordinary yellow line rather than throwing, which is the same charity
+           getVortexClosureReason's first branch extends. */
+        $closing = ($this->activeVortexId === null) ? null : $gamedata->getShipById((int)$this->activeVortexId);
+
         self::writeVortexLogOrder($ship, $gamedata,
-            " loses its jump point at the end of this turn - " . $reason . ".");
+            " loses its jump point at the end of this turn - " . $reason . ".",
+            $closing instanceof SpawnJumpPointExit);
 
         /*Debug::log("Jump vortex " . $this->activeVortexId . " (opened turn " . $this->vortexOpenTurn
             . " by ship " . $ship->id . ", game " . $gamedata->id . ") closes at the end of turn "
@@ -8920,6 +9780,7 @@ class JumpEngine extends Weapon{
         //is. Ordering makes it academic in practice (loads happen before firing, never after), but
         //leaving one of the per-vortex fields out of the reset is how the next one drifts.
         $this->vortexDisrupted   = false;
+        $this->vortexIsPhaseIn   = false;
 
         foreach ($vortexNotes as $note){
             //LIMIT 3: the closure reason is free text and can contain commas.
@@ -8955,6 +9816,8 @@ class JumpEngine extends Weapon{
             $this->vortexOpenTurn    = $openTurn;
             $this->vortexCloseTurn   = $closeTurn;
             $this->vortexCloseReason = $reason;
+            //Stage H4/H5 - whether it is a phase-in doorway (still one-shot), for getCertainCloseTurn.
+            $this->vortexIsPhaseIn   = ($vortex instanceof SpawnJumpPointPhaseIn);
         }
 
         /* ⭐ JUMP GATES (PHASE 2) - THE HOLD, keyed by the SAME vortex id, applied AFTER the loop
@@ -9184,7 +10047,16 @@ class JumpEngine extends Weapon{
 		   otherwise take its value for the pre-jump combat value. */
 		$this->abductionNotes = array();
 
+		/* ⭐ STAGE H4 - a SIXTH kind: one 'ChargeBoost' note per turn a boost bought this drive extra
+		   charge (see $chargeBoostNotes). Reset and claimed for the same two reasons as the EDJD's. */
+		$this->chargeBoostNotes = array();
+
 		foreach ($this->individualNotes as $currNote) {
+			if ($currNote->notekey_human === self::CHARGE_BOOST_NOTE){
+				$this->chargeBoostNotes[(int)$currNote->turn] = max(0, (int)$currNote->notevalue);
+				continue;
+			}
+
 			if ($currNote->notekey_human === self::ABDUCTION_NOTE){
 				$parts = explode(':', (string)$currNote->notevalue);
 				if (count($parts) >= 5){
@@ -9228,6 +10100,48 @@ class JumpEngine extends Weapon{
 		//needs, and for the same reason.
 		$this->restoreVortexScatter($scatterNotes);
 	}//endof onIndividualNotesLoaded
+
+	/* ⭐⭐ STAGE H4 - RECORD THE CHARGE A BOOST BOUGHT THIS TURN, at the END of the turn.
+	 *
+	 * Phase 4 is FireGamePhase::advance, and nothing else: it reloads the game ($servergamedata), so
+	 * the vortex state and every earlier 'ChargeBoost' note are loaded, and this turn's power rows are
+	 * there to read. Every other phase runs this hook on POST-side ships, which have neither
+	 * (arch_post_side_ship_reconstruction) - so the phase test is what keeps it off them.
+	 *
+	 * ⭐ THE SERVER DECIDES WHAT THE BOOST WAS WORTH, not the row: only up to getChargeBoostMax, which
+	 * is 0 on a drive that was fully charged (its boost was a JUMP), still holding a jump point, only
+	 * cooling down from an abduction, on a flight, or young-race. A tampered POST cannot buy more than
+	 * CHARGE_BOOST_MAX, nor charge that would not count. After closeExpiredVortices, deliberately: a
+	 * jump point closing THIS turn reads as still standing, and a boost on it buys nothing.
+	 *
+	 * An offline or destroyed drive is not charging. Idempotent: a second advance() over the same turn
+	 * finds the note the first one wrote and writes nothing. */
+	public function generateIndividualNotes($gamedata, $dbManager)
+	{
+		parent::generateIndividualNotes($gamedata, $dbManager);
+		if ((int)$gamedata->phase !== 4) return;
+
+		$turn = (int)$gamedata->turn;
+		if (isset($this->chargeBoostNotes[$turn])) return;
+
+		$boost = 0;
+		foreach ($this->power as $power){
+			if ((int)$power->turn === $turn && (int)$power->type === 2) $boost += (int)$power->amount;
+		}
+		if ($boost <= 0) return;
+
+		if ($this->isDestroyed($turn) || $this->isOfflineOnTurn($turn)) return;
+
+		$level = min($boost, $this->getChargeBoostMax($turn));
+		if ($level <= 0) return;
+
+		$unit = $this->getUnit();
+		if (!$unit) return;
+
+		$this->individualNotes[] = new IndividualNote(-1, TacGamedata::$currentGameID, $turn, $gamedata->phase,
+			$unit->id, $this->id, self::CHARGE_BOOST_NOTE, self::CHARGE_BOOST_NOTE, $level);
+		$this->chargeBoostNotes[$turn] = $level;
+	}
 
 	/* ⭐ REINFORCEMENTS STAGE 6 - the scatter half of the note restore, keyed by vortex ship id
 	   exactly as the other two are.
@@ -9389,10 +10303,18 @@ class JumpEngine extends Weapon{
 		   fixed gate rolls on the turn it opens a jump point of EITHER flavour (user ruling
 		   2026-08-23, offered as an exemption and deliberately not taken).
 
-		   After the two cheap tests above, so the ship lookup is only paid when a roll is pending. */
+		   After the two cheap tests above, so the ship lookup is only paid when a roll is pending.
+
+		   ⭐⭐ STAGE H5 (user ruling 2026-09-19) - THE EXEMPTION IS THE FORMING TURN'S, NOT THE EXIT'S.
+		   Once the opener is on the board it may MAINTAIN its exit, and maintaining one asks exactly
+		   what maintaining an entrance asks of the drive - so a Maintain turn rolls like any other.
+		   The original ruling was written when an exit could not be maintained at all ("on N+1 it was
+		   opened on N and has no Maintain"), and this keeps it for the case it was about: the turn the
+		   doorway forms, with its opener still in hyperspace. A phase-in doorway never gets here with
+		   a Maintain (getMaintainDeclaration refuses a legacy drive). */
 		if (!$this->gateJump){
 			$openVortex = $gamedata->getShipById((int)$this->activeVortexId);
-			if ($openVortex instanceof SpawnJumpPointExit) return;
+			if ($openVortex instanceof SpawnJumpPointExit && !$this->getMaintainDeclaration($turn)) return;
 		}
 
 		//An undamaged drive never fails. Same measure doHyperspaceJump uses for the boost path.
@@ -9502,19 +10424,21 @@ class JumpEngine extends Weapon{
                         //$this->data["Special"] .= "<br>Turns must be consecutive. Cost: ramming factor / 50 power-turns (/ 10 against advanced armour), rounded up, adding anything ATTACHED to it (never what it carries inside); fixed on the first turn. Other Walker drives may add power once it has begun. The target is removed to hyperspace when the total is reached. No line of sight is needed.";
                         //$this->data["Special"] .= "<br>If damaged, the drive rolls for detonation (half the % of boxes lost) on EVERY turn it is abducting. Deactivating or losing the drive cancels the abduction.";
                     }elseif (!$this->isFlightMounted()){
-                        $this->data["Special"] .= "<br><b>Abduction support:</b> select it in Initial Orders and click a unit already being abducted to add half a power-turn for double power. It cannot begin an abduction.";
+                        $this->data["Special"] .= "<br>Abduction support:</b> select it in Initial Orders and click a unit already being abducted to add half a power-turn for double power. It cannot begin an abduction.";
                     }
                 }else{
                     $this->data["Special"] .= "<br>The ship may NOT fire on the turn it jumps - no interception either.";
                     $this->data["Special"] .= "<br>If the drive is damaged, the ship has HALF the usual chance of being destroyed as it jumps (the % of drive boxes lost, halved).";
                 }
                 $this->data["Special"] .= "<br>Cannot be affected by a Vortex Disruptor.";
+                $this->data["Special"] .= $this->getAdvancedChargingText();
                 $this->data["Special"] .= "<br>WARNING - Jumping to hyperspace REMOVES ship from rest of the battle.";
                 $this->data["Special"] .= "<br>SHOULD NOT be shut down for power (unless damaged >50% or if Desperate rules apply).";
                 ShipSystem::setSystemDataWindow($turn);
                 return;
             }
             $this->data["Special"]  = "<br>Boost in Initial Orders to jump to hyperspace at end of turn.";
+            $this->data["Special"] .= $this->getAdvancedChargingText();
             $this->data["Special"] .= "<br>WARNING - Jumping to hyperspace REMOVES ship from rest of the battle.";
             $this->data["Special"] .= "<br>If Jump Engine is damaged, ship has a % chance of being destroyed opening jump point.";
             $this->data["Special"] .= "<br>SHOULD NOT be shut down for power (unless damaged >50% or if Desperate rules apply).";
@@ -9542,6 +10466,19 @@ class JumpEngine extends Weapon{
         $this->data["Special"]  = "<br>Select this system in Initial Orders and target a hex within " . $this->range . " hexes.";
         $this->data["Special"] .= "Set the vortex FACING with the on-map arrow, then confirm. The jump point forms at the end of that turn and can be entered from the NEXT turn.";
         $this->data["Special"] .= "<br>A damaged Jump Engine may fail: at the end of every turn it opens or maintains a jump point, the ship is destroyed on a d100 roll at or under the percentage of Jump Engine boxes lost.";
+        /* ⭐⭐ STAGE H3 - THE VORLON UPKEEP, STATED WHERE THE PLAYER MEETS IT. Two rules of this
+           tooltip's text are simply untrue for a capacitor-fed drive - the four-turn cap and the
+           all-systems-dark requirement - so the sentence replaces them rather than being appended to
+           them. Asked through chargesVortexUpkeep(), which is the same predicate the closure sweep
+           reads, so the tooltip cannot promise a rule the server will not apply. */
+        if ($this->chargesVortexUpkeep()){
+            $cost = $this->getVortexUpkeepCost();
+            $this->data["Special"] .= "<br>POWER: this drive draws " . $cost . " power from the Power Capacitor ONLY on a turn it is used.";
+            $this->data["Special"] .= "<br>UPKEEP: The ship does NOT have to shut its systems down to hold the jump point open, and jump point turn";
+        }
+        //Stage H3 follow-up (user request 2026-09-18): JumpEngine.continueVortexMaintain re-declares it each turn.
+        $this->data["Special"] .= "<br>Once you set Maintain, it carries over to the following turns automatically until you turn it OFF.";
+        $this->data["Special"] .= $this->getAdvancedChargingText();
         $this->data["Special"] .= "<br>See FAQ for full rules for Jump Drives.";
         $this->data["Special"] .= "<br>SHOULD NOT be shut down for power (unless damaged >50% or if Desperate rules apply).";
 		/* ShipSystem, not parent. Weapon::setSystemDataWindow appends a gun's tooltip block -
@@ -9555,6 +10492,23 @@ class JumpEngine extends Weapon{
 		ShipSystem::setSystemDataWindow($turn);
 		$this->data["Weapon type"] = $this->weaponClass;
 		$this->data["Range"] = $this->range;
+    }
+
+    /* ⭐ STAGE H4 (§10 A4) - THE CHARGING RULE, STATED WHERE THE PLAYER MEETS IT, so a drive that
+     * refuses to jump while it recharges is a rule they can read rather than a surprise. '' on every
+     * drive hasAdvancedCharging() does not cover. Rules and the per-level cost only - this text rides
+     * the STATIC blueprint (see setGateSystemDataWindow for why no live numbers belong in here). */
+    protected function getAdvancedChargingText()
+    {
+        if (!$this->hasAdvancedCharging()) return '';
+
+        $use  = $this->legacyJump ? "jump to hyperspace" : "open a jump point";
+        $text = "<br><b>RECHARGE:</b> this drive cannot " . $use . " until it is FULLY recharged.";
+        if ($this->isFlightMounted()) return $text;
+
+        $text .= " While it recharges, boost it in Initial Orders (Extra Charging): each level adds a turn of charging, up to "
+            . self::CHARGE_BOOST_MAX . " a turn, for " . (int)$this->powerReq . " power per level.";
+        return $text;
     }
 
     /* ⭐ THE FIXED GATE TOOLTIP (JUMP_GATES_PLAN.md Stage 5). Its own text, not a variant of the
@@ -9584,29 +10538,6 @@ class JumpEngine extends Weapon{
         //is the gate's base recharge whatever hull it is mounted on.
         $recharge = max(1, (int)$this->delay);
         $maxHold  = self::MAX_VORTEX_TURNS;
-
-        /*$this->data["Special"]  = "<br><b>SIGNALLING THE GATE.</b> In Initial Orders, CLICK THE GATE - no ship needs to be";
-        $this->data["Special"] .= " selected. The button is offered if you have any live unit within " . $this->range . " hexes of it;";
-        $this->data["Special"] .= " which unit does not matter, and NO line of sight is needed. Signalling never reveals a";
-        $this->data["Special"] .= " stealthed, shaded or cloaked unit. ANY player may signal ANY gate, including one the enemy bought.";
-        $this->data["Special"] .= "<br><b>THE DURATION.</b> Set how many turns to hold the jump point open - 1 to " . $maxHold;
-        $this->data["Special"] .= " on an undamaged gate - and press SIGNAL. It cannot be changed afterwards: there is no Maintain. The jump point";
-        $this->data["Special"] .= " forms at the end of that turn and can be entered from the NEXT turn.";
-        $this->data["Special"] .= "<br><b>THE FACING CANNOT BE CHOSEN.</b> The vortex always takes the GATE'S OWN facing, set when";
-        $this->data["Special"] .= " the gate was placed. The arrow drawn over the gate is its mouth: a unit must be TRAVELLING";
-        $this->data["Special"] .= " INTO that side on the step that carries it into the hex, then press Jump to Hyperspace.";
-        $this->data["Special"] .= " Movement ends there and the unit leaves the battle keeping its full combat value.";
-        $this->data["Special"] .= "<br><b>CONTESTED GATES.</b> If several players signal the same gate in one turn, the one whose";
-        $this->data["Special"] .= " nearest unit is CLOSEST wins - the owner has no priority - and an exact tie is rolled off.";
-        $this->data["Special"] .= " The winner's duration is used; the losers lose nothing but the turn's claim.";
-        $this->data["Special"] .= "<br><b>RECHARGE.</b> Opening a jump point spends the gate's whole charge. It recharges from the";
-        $this->data["Special"] .= " turn after that jump point closes, 1 per turn, and cannot be signalled again until it reads";
-        $this->data["Special"] .= " " . $recharge . "/" . $recharge . " on this system's icon.";
-        $this->data["Special"] .= "<br><b>DAMAGE.</b> The gate's condition is its REACTOR. Every 3 points of damage on it adds a";
-        $this->data["Special"] .= " turn to the recharge, every 15 points costs a turn off the longest hold, and losing the";
-        $this->data["Special"] .= " reactor entirely destroys the gate.";
-        $this->data["Special"] .= "<br>A DAMAGED Jump Engine may fail: at the end of a turn the gate opens a jump point, the gate";
-        $this->data["Special"] .= " is destroyed on a d100 roll at or under the percentage of Jump Engine boxes lost.";*/
 
 		$this->data["Special"]  = "<br>Gate can be signalled to open by any unit within " . $this->range . " hexes";
         $this->data["Special"] .= "<br>Set how many turns to hold the jump point open - 1 to " . $maxHold . ". It cannot be changed afterwards and the jump point forms at the end of that turn and can be entered from the NEXT turn.";
@@ -9692,9 +10623,8 @@ class JumpEngine extends Weapon{
            ⚠️ THIS USED TO TEST $legacyJump, AND THAT WAS THE BUG. Stage 9 gave every legacy drive a
            way to phase IN, so a Phasing Drive / Hyperdrive / FTL Drive spends and recovers its
            charge exactly as a B5 Jump Engine does - and short-circuiting here left all of them
-           drawing a flat 1/1 while the real state moved underneath. The vortex counter block below
-           is right for them too: a phase-in doorway is a vortex, invisible or not, and its holder's
-           icon should count it. */
+           drawing a flat 1/1 while the real state moved underneath. (The vortex counter block below
+           used to be "right for them too" - it is not, see the Stage H4 note there.) */
         if (!$this->hasJumpRecharge) return $strippedSystem;
 
         $turn = (int)TacGamedata::$currentTurn;   //(int): mysqli hands the turn back as a STRING
@@ -9726,7 +10656,55 @@ class JumpEngine extends Weapon{
            claim then rejected, which is the worst of both. */
         $strippedSystem->loadingtime = $source->getVortexRechargeTime();
 
-        $age = $source->getVortexAge($turn);
+        /* ⭐⭐ STAGE H4 - THE ANCIENT CHARGING RULE, and the client's whole knowledge of it.
+             advancedCharging - this drive cannot be used until fully charged, jumping out included
+                                (the client's mirror of isJumpOutBoost reads it with the pair above);
+             chargeBoostMax   - THIS turn, a boost is EXTRA CHARGING, up to this many levels: the
+                                stepper replaces "Jump to Hyperspace" and the reactor pays powerReq a
+                                level. Absent = a boost means nothing but a jump (or nothing at all).
+           Both sent ONLY when they mean something, so every young-race drive's payload is
+           byte-identical. Off $source, like the pair above, so the craft of a flight agree - though a
+           flight never has a chargeBoostMax (getChargeBoostMax refuses one outright). */
+        if ($source->hasAdvancedCharging()){
+            $strippedSystem->advancedCharging = true;
+            $chargeBoostMax = $source->getChargeBoostMax($turn);
+            if ($chargeBoostMax > 0) $strippedSystem->chargeBoostMax = $chargeBoostMax;
+        }
+
+        /* ⭐⭐ STAGE H3 - THE CAPACITOR-FED FLAG, and it is the CLIENT'S whole knowledge of the Vorlon
+           upkeep rule. Three client sites read it and every one of them would otherwise be wrong on a
+           Vorlon: the Maintain toggle must stay offered past the four-turn cap that no longer applies
+           (JumpEngine.canMaintainVortex), the toggle must NOT black the ship out and lock it down
+           (shipManager.power.getVortexMaintainBlockers / isVortexLockedOffline), and the reactor
+           balance must reserve the draw on a turn the drive is USED while GIVING BACK the standing
+           cost fixedPower would otherwise take from a Vorlon (JumpEngine.getVortexUpkeepDraw, plus
+           the give-back in shipManager.power.getReactorPower - this drive has no standing cost).
+
+           `vortexUpkeepCost` rides along so the client needs no copy of the arithmetic - it is the
+           drive's own powerReq, but saying so twice is how the two ends drift apart.
+
+           ⭐ SENT ONLY WHEN THE DRIVE ACTUALLY CHARGES, off the same chargesVortexUpkeep() the server
+           rules read, so a marked drive on a hull with no Power Capacitor publishes nothing and the
+           client keeps the ordinary behaviour the server will also give it. Every other jump engine's
+           payload stays byte-identical - the convention ancientJump, walkerJump and abductionLastHold
+           all follow.
+           ⚠️ Read off $source, like everything else in this block, so all six craft of a flight would
+           agree - though a flight can never answer true here (a Fighter holds no PowerCapacitor). */
+        if ($source->chargesVortexUpkeep()){
+            $strippedSystem->vortexUpkeep     = true;
+            $strippedSystem->vortexUpkeepCost = $source->getVortexUpkeepCost();
+        }
+
+        /* ⭐ STAGE H4 follow-up (user report 2026-09-18, game 4349) - A LEGACY DRIVE NEVER COUNTS A JUMP
+           POINT. Ancients (and every other legacy drive) hold no jump points open; the doorway one phases
+           in through is an invisible SpawnJumpPointPhaseIn that stands only for its arrival turn, and on
+           that turn the icon read "1/4" - a Maintain counter for something that cannot be maintained. With
+           no counter the icon falls through to the charge, "0/N" on arrival, which is what matters: the
+           drive has just spent it (JumpEngine.getVortexIconLoad / SystemIcon.getText).
+           ⭐ A REAL entrance held by a drive reverted to legacy mid-game (The System, markLegacy'd in H4,
+           with a jump point already open) still shows its counter: the client's fallback derives it from
+           the vortex unit, and getVortexHeldBy finds entrances only - never a phase-in doorway. */
+        $age = $this->legacyJump ? null : $source->getVortexAge($turn);
         if ($age !== null){
             $strippedSystem->vortexTurnsOpen = $age;
             /* ⭐ JUMP GATES (PHASE 2): a gate's jump point runs for the duration PROGRAMMED when it
@@ -9740,9 +10718,19 @@ class JumpEngine extends Weapon{
                and the icon must say so: "1/1", not "1/4", which would promise three turns the unit
                can never have. Read off the SOURCE engine like everything else in this block, so all
                six craft agree. */
-            $strippedSystem->vortexMaxTurns  = ($source->vortexHoldTurns !== null)
-                ? (int)$source->vortexHoldTurns
-                : ($source->isFlightMounted() ? 1 : self::MAX_VORTEX_TURNS);
+            /* ⭐⭐ STAGE H3 / R5 - AND A CAPACITOR-FED DRIVE SENDS NO DENOMINATOR AT ALL. There is no
+               cap on it, so there is no number to count out of: "4/4" on a Vorlon jump point that is
+               going nowhere would claim it was about to close, every turn from the fourth onwards,
+               for as long as the player kept paying. Absent is the honest answer, and the client's
+               getVortexIconLoad draws an open-ended counter when it is missing - the same "emitted
+               only when it means something" convention arrivalIniPenalty and abductionLastHold use.
+               ⚠️ A GATE STILL SENDS ITS HOLD even if its drive were ever marked: the programmed hold
+               is a real cap and the gate branch of getVortexClosureReason still enforces it. */
+            if ($source->vortexHoldTurns !== null){
+                $strippedSystem->vortexMaxTurns = (int)$source->vortexHoldTurns;
+            } elseif (!$source->chargesVortexUpkeep()){
+                $strippedSystem->vortexMaxTurns = $source->isFlightMounted() ? 1 : self::MAX_VORTEX_TURNS;
+            }
         }
 
         return $strippedSystem;
@@ -13683,6 +14671,20 @@ class PowerCapacitor extends ShipSystem{
     public $boostEfficiency = 0;
 	protected $active = false; //To track in Front End whether system was ever activate this turn during Deployment, since boost can be toggled during Firing Phase.
 	private $doubled = false; //Passed from Front End, to generate note to double Self Repair output at end of turn.		
+
+	/* HAS THIS TURN'S RECHARGE ALREADY BEEN BANKED? (HYPERSPACE_IMPROVEMENTS_PLAN.md Stage H3 follow-up,
+	   user report 2026-09-18, game 4348.)
+
+	   The recharge is added to the stored figure at the COMMIT of Initial Orders (the front end posts
+	   balance + regeneration, see PowerCapacitor.doIndividualNotesTransfer), which is when the phase-1
+	   'powerStored' note is written. The client shows the recharge from the START of Initial Orders
+	   instead, so it has to know whether the figure it was sent has had this turn's recharge added
+	   yet - otherwise a player who commits and then reloads while waiting sees it added twice.
+
+	   True exactly when a 'powerStored' note from THIS turn, phase 1 or later, has been applied. The
+	   turn-1 Deployment fill is phase -1, so it does not count: the first Initial Orders still tops up.
+	   Protected, so no blueprint key; sent from stripForJson only when true. */
+	protected $rechargedThisTurn = false;
 	
 /*
 	1-17: No effect.
@@ -13819,6 +14821,8 @@ capacitor is completely emptied.
 			switch($currNote->notekey){
 				case 'powerStored': //power that should be stored at this moment
 					$this->setPowerHeld($currNote->notevalue);
+					//Stage H3 follow-up: this turn's recharge is banked once the Initial Orders note exists - see $rechargedThisTurn.
+					if ((int)$currNote->turn === (int)$gamedata->turn && (int)$currNote->phase >= 1) $this->rechargedThisTurn = true;
 					break;								
 			}
 		}
@@ -13936,7 +14940,8 @@ capacitor is completely emptied.
         }		
 		//$strippedSystem->individualNotesTransfer = $this->individualNotesTransfer;
 		$strippedSystem->active = $this->active;
-		$strippedSystem->doubled = $this->doubled;					
+		$strippedSystem->doubled = $this->doubled;
+		if ($this->rechargedThisTurn) $strippedSystem->rechargedThisTurn = true; //only when true - see the property					
         return $strippedSystem;
     }
 

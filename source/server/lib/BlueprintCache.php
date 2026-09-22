@@ -145,6 +145,19 @@ class BlueprintCache
             if ($factionShuttle !== null) $spawnableClasses[] = $factionShuttle;
             $factionMsw = HangarOps::minesweepingShuttleClassForFactionName($faction);
             if ($factionMsw !== null) $spawnableClasses[] = $factionMsw;
+            /* ELITE CREW's free armed shuttle sits in a hangar as an ordinary hangarUsage record,
+               so launching it rebuilds the flight from window.staticShips[faction][phpclass] -
+               and a class with no blueprint there launches as "undefined" (the 2026-07-12
+               category-shuttle bug, howto_add_faction_default_shuttle step 7).
+
+               Preloaded for EVERY faction with a hangar rather than only for hulls that actually
+               bought Elite Crew, exactly as the minesweeping twin above already is: enhancement
+               counts do not reach this layer (the client is sent a tooltip STRING, not the
+               options array, and it is masked for an enemy), and the alternative is a per-ship
+               signal threaded through the cache key for one small blueprint. Never null - an
+               unmapped faction falls back to the Civilian genericArmedShuttle, which the rules
+               call for and which is NOT one of Hangar's preload defaults. */
+            $spawnableClasses[] = HangarOps::armedShuttleClassForFactionName($faction);
         }
 
         if (!empty($spawnableClasses)) {

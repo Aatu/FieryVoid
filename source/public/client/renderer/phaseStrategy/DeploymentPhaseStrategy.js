@@ -43,7 +43,13 @@ window.DeploymentPhaseStrategy = function () {
         //Say WHY there is nothing to place when the whole phase was a wave arriving. Only when
         //there is genuinely nothing else outstanding - a late slot placing on the same turn still
         //has real deployment to do and the header must not claim otherwise.
-        this.setPhaseHeader(arrived.length > 0 && onlyOptionalPlacementsRemain(gamedata)
+        //HYPERSPACE_IMPROVEMENTS_PLAN.md H6 follow-up: the SERVER has usually placed the wave already
+        //(arrived is then empty) and the phase exists for a Hyach arrival's Specialists - still a wave's
+        //phase, so it is counted too.
+        var waveHere = arrived.length > 0 || gamedata.ships.some(function (s) {
+            return gamedata.isMyShip(s) && shipManager.isArrivingReinforcement(s) && !shipManager.isDestroyed(s);
+        });
+        this.setPhaseHeader(waveHere && onlyOptionalPlacementsRemain(gamedata)
             ? "DEPLOYMENT: REINFORCEMENTS"
             : "DEPLOYMENT");
 
@@ -121,6 +127,14 @@ window.DeploymentPhaseStrategy = function () {
 
     /* ⭐ REINFORCEMENTS_PLAN.md STAGE 7 - AN ARRIVAL PLACES ITSELF (user request 2026-08-28).
      *
+     * ⭐⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md STAGE H6 - AND NOW THE SERVER DOES IT, BEFORE THIS PHASE EXISTS.
+     * JumpEngine::placeArrivingReinforcements places, docks or sends back every arrival at the start of
+     * its arrival turn, at the speed its Jump Manifest chose, and no DEPLOYMENT: REINFORCEMENTS phase is
+     * granted for it any more. So this finds nothing to do in any game started after H6: when a phase
+     * does run on an arrival turn (the slot also has a real placement), every arrival already carries its
+     * deploy row or is aboard its carrier. What it still serves is a game caught part-way through the old
+     * phase when H6 was deployed. Kept, not deleted, for that.
+     *
      * There was never a choice to make. A reinforcement may stand in exactly one hex on exactly one
      * facing - the jump point it is riding decided both, a turn ago and by dice - so asking the
      * player to click that hex was ceremony, and ceremony that misbehaved: the doorway is Terrain,
@@ -159,6 +173,10 @@ window.DeploymentPhaseStrategy = function () {
             if (ship.pendingDeployDock || ship.pendingLcvDeployDock) continue;
             if (ship.deploymove) continue;                //already placed in this page load
             if (hasDeployMoveThisTurn(ship)) continue;    //...or on a load after the commit
+            //HYPERSPACE_IMPROVEMENTS_PLAN.md H6c - or by the SERVER, which now places and docks every wave
+            //itself at the start of the turn (JumpEngine::placeArrivingReinforcements). A placed unit is
+            //caught by the line above; one it docked is aboard already, and must not be queued again.
+            if (ship.removed) continue;
 
             /* ⭐ A FIGHTER RIDING A LEGACY DRIVE ARRIVES IN ITS HANGAR (user ruling 2026-09-11). The
                drive phased its own ship in and opened no jump point, so there is no hex for anything

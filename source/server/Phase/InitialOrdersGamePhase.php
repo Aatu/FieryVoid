@@ -143,10 +143,20 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
      *
      * Left in: the drive's own orders (a legacy drive has none, but a stale client might send one
      * that validateFireOrders should judge), rams (a collision, not firing - the server lets them
-     * stand at resolution too) and log-only orders. */
-    private static function dropFireOfJumpingShip($ship, $orders, $turn)
+     * stand at resolution too) and log-only orders.
+     *
+     * ⚠️⚠️ STAGE H4 - AND THE QUESTION IS NOW ASKED OF THE DB COPY ($gd), NOT THE POST-SIDE SHIP.
+     * "Is this boost a jump?" needs the drive's CHARGE (JumpEngine::isJumpOutBoost), and the charge is
+     * derived from the vortex and 'ChargeBoost' notes - which a POST-side ship never has loaded, so on
+     * it every drive reads fully charged, and a recharging Ancient that boosted for EXTRA CHARGING would
+     * have every order it declared silently dropped as though it were leaving. $gd is reloaded AFTER
+     * the power loop above has submitted this POST's rows (submitPower runs before either reload), so
+     * it has this turn's boost AND the notes. The POST-side ship is the fallback only if the lookup
+     * finds nothing. */
+    private static function dropFireOfJumpingShip($ship, $orders, $turn, $gd = null)
     {
-        $engine = JumpEngine::getUnitJumpingEngine($ship, $turn);
+        $source = ($gd && $gd->getShipById($ship->id)) ? $gd->getShipById($ship->id) : $ship;
+        $engine = JumpEngine::getUnitJumpingEngine($source, $turn);
         if (!$engine || !$engine->forbidsFireWhileJumping()) return $orders;
 
         $kept = array();
@@ -333,7 +343,7 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
 
             //An Ancient ship that has set its drive to jump out may not fire this turn, so what it
             //declared is never written - see the method.
-            if ($gateEngineOrders === null) $orders = self::dropFireOfJumpingShip($ship, $orders, $gameData->turn);
+            if ($gateEngineOrders === null) $orders = self::dropFireOfJumpingShip($ship, $orders, $gameData->turn, $gd);
 
             if (Firing::validateFireOrders($orders, $gd)){
                 $dbManager->submitFireorders($gameData->id, $orders, $gameData->turn, $gameData->phase);
@@ -365,6 +375,9 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
      *   2. arrivalVia must name a unit of theirs that is ALSO still in hyperspace
      *   3. that named unit must hold a legal 'jumpexit' declaration for THIS turn
      *
+     * ⭐ OR (STAGE H5) arrivalVia names a unit of theirs ON THE BOARD that is holding its blue exit open
+     * with a Maintain declaration made in this same submission - see collectHeldExitOpeners.
+     *
      * ⭐ OR (STAGE 8) arrivalVia names a FIXED GATE that is a doorway in - see collectGateOpeners.
      * A gate is the one opener a player does not own, does not have in hyperspace and may not even
      * have signalled themselves, so it cannot be found by the ship sweep below and is collected
@@ -386,7 +399,9 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
      * nothing changed keeps an ordinary turn's DB traffic at zero.
      */
     /* ⭐ CAN $unit RIDE ABOARD LEGACY OPENER $opener, beside what $reserved already promises? (user
-     * ruling 2026-09-11 - see JumpEngine::isLegacyOpener.) A FIGHTER FLIGHT whose whole flight fits the
+     * ruling 2026-09-11 - see JumpEngine::isLegacyOpener.) ⭐ Stage H6b made it the fit check for ANY
+     * carrier a rider asks to start inside (persistArrivalOrders) - the name is kept (two Walkers harnesses reflect on it); nothing
+     * in it was ever legacy-specific. A FIGHTER FLIGHT whose whole flight fits the
      * opener's hangars, or a SHIP one of its Docking Bays takes, with room (WALKERS_OF_SIGMA_PLAN.md
      * 3.14b, user 2026-09-11). On success its boxes are added to $reserved, so the next berth in the
      * pass sees them taken - the cumulative check the client's manifest dialog makes with
@@ -463,10 +478,12 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
 
         //What each unit CLAIMED, keyed by ship id. Absent means "no berth".
         $claims = array();
+        $orderClaims = array();   //Stage H6 - the speed / carrier claimed beside each berth
         foreach ($ships as $ship){
             if ($ship->userid != $gameData->forPlayer) continue;
             if ($ship->arrivalVia === null) continue;
             $claims[(int)$ship->id] = (int)$ship->arrivalVia;
+            if ($ship->getArrivalOrderClaim() !== null) $orderClaims[(int)$ship->id] = $ship->getArrivalOrderClaim();
         }
 
         //Which of this player's hyperspace units hold a live exit declaration this turn. Read
@@ -491,8 +508,10 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
         }
 
         self::collectGateOpeners($gd, $gameData, $openers);
+        self::collectHeldExitOpeners($gd, $gameData, $openers);
 
         $reserved = array();   //per LEGACY opener: hangar id => boxes promised earlier in this pass
+        $berths = array();     //Stage H6 - unit id => opener id, for every berth this pass accepted
 
         foreach ($gd->ships as $unit){
             if ($unit->userid != $gameData->forPlayer) continue;
@@ -513,6 +532,9 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
                 }
             }
 
+            //BEFORE the "nothing changed" skip: an unchanged berth still carries this commit's arrival order.
+            if ($wanted !== null) $berths[(int)$unit->id] = $wanted;
+
             $current = ($unit->arrivalVia === null) ? null : (int)$unit->arrivalVia;
             if ($current === $wanted) continue; //nothing to write
 
@@ -523,6 +545,79 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
                 . ($wanted === null ? 'NULL' : $wanted)
                 . " (game {$gameData->id}, turn {$gameData->turn}, player {$gameData->forPlayer}).");
         }
+
+        self::persistArrivalOrders($gd, $gameData, $dbManager, $berths, $orderClaims);
+    }
+
+    /* ⭐⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md STAGES H6a / H6b - HOW EACH RIDER COMES OUT: its speed, and
+     * whether it starts inside a carrier. One 'ArrivalOrder' note per accepted berth whose POST said
+     * anything (JumpEngine::makeArrivalOrderNote), read once by JumpEngine::placeArrivingReinforcements
+     * at the start of the arrival turn. A berth with nothing said comes out at its default speed.
+     *
+     * ⚠️ THE SPEED IS CLAMPED (makeArrivalOrderNote), and the carrier is RE-FITTED here rather than
+     * believed. "Start in hangar" is legal only if the rider fits in the cumulative room left in a
+     * carrier that arrives through the SAME doorway on the same turn - the opener itself when it is
+     * coming out of hyperspace, or another rider - beside everything already promised to that carrier
+     * earlier in this pass (legacyBerthFits, the same packer the legacy opener's manifest has used since
+     * 2026-09-11, walked in $gd->ships order, which is the order the client's dialog lists and packs
+     * them). A carrier claim that fails is not a refusal of the berth: the rider still comes through,
+     * onto the map. The dock at arrival (HangarOps) is the final authority.
+     *
+     * A LEGACY opener's riders are aboard it by rule and were fitted in persistManifest's own pass; their
+     * carrier is written as the opener whatever the POST said. */
+    private static function persistArrivalOrders(TacGamedata $gd, TacGamedata $gameData, $dbManager, array $berths, array $orderClaims)
+    {
+        if (empty($berths)) return;
+
+        //No carrier inside a carrier: a rider asking to start in a hangar cannot be one itself. ⚠️ NOT the
+        //opener (booked on its own doorway): its carrier claim is ignored below - it holds the doorway -
+        //so counting it here would let a forged claim bar the opener from carrying its own riders.
+        $wantsHangar = array();
+        foreach ($orderClaims as $id => $claim){
+            if (isset($berths[$id]) && $berths[$id] !== (int)$id && $claim['carrier'] !== null) $wantsHangar[$id] = true;
+        }
+
+        $reserved = array();   //carrier id => (hangar id => boxes promised earlier in this pass)
+
+        foreach ($gd->ships as $unit){
+            $id = (int)$unit->id;
+            if (!isset($berths[$id])) continue;
+
+            $door   = $berths[$id];
+            $legacy = ($door !== $id) && JumpEngine::isLegacyOpener($gd->getShipById($door));
+            $claim  = isset($orderClaims[$id]) ? $orderClaims[$id] : null;
+            if ($claim === null && !$legacy) continue;
+
+            $speed = ($claim !== null && $claim['speed'] !== null) ? $claim['speed'] : JumpEngine::getDefaultArrivalSpeed($unit);
+
+            $carrier = 0;
+            if ($legacy){
+                $carrier = $door;
+            } else if ($claim !== null && $claim['carrier'] !== null && $door !== $id){
+                $host = $gd->getShipById($claim['carrier']);
+                if (self::canCarryRider($host, $unit, $door, $berths, $wantsHangar, $gameData)){
+                    if (!isset($reserved[(int)$host->id])) $reserved[(int)$host->id] = array();
+                    if (self::legacyBerthFits($unit, $host, $reserved[(int)$host->id])) $carrier = (int)$host->id;
+                }
+            }
+
+            $note = JumpEngine::makeArrivalOrderNote($unit, $gameData, $speed, $carrier);
+            if ($note !== null) $dbManager->insertIndividualNote($note);
+        }
+    }
+
+    /* May $host carry $unit out of hyperspace? It must be this player's own, not the rider itself, not
+     * wanting a hangar of its own, and ARRIVING THROUGH THE SAME DOORWAY: either the doorway's opener
+     * coming out of hyperspace (it booked itself - a gate or a ship holding its exit is on the board and
+     * never books itself, so neither qualifies), or another rider accepted onto it in this pass. */
+    private static function canCarryRider($host, $unit, $door, array $berths, array $wantsHangar, TacGamedata $gameData)
+    {
+        if (!$host || (int)$host->id === (int)$unit->id) return false;
+        if ($host->userid != $gameData->forPlayer) return false;
+        if (isset($wantsHangar[(int)$host->id])) return false;
+        if (!isset($berths[(int)$host->id]) || $berths[(int)$host->id] !== $door) return false;
+
+        return true;
     }
 
     /* ⭐⭐ REINFORCEMENTS_PLAN.md STAGE 8 - EVERY FIXED GATE THAT COULD BE THIS PLAYER'S DOORWAY IN,
@@ -592,6 +687,42 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
                     break 2;
                 }
             }
+        }
+    }
+
+    /* ⭐⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md STAGE H5 - EVERY UNIT OF THIS PLAYER'S ON THE BOARD THAT IS
+     * HOLDING ITS BLUE EXIT OPEN FOR ANOTHER WAVE, added to $openers. A ship-held exit now behaves like a
+     * gate's: it may bring a fresh wave on every turn it is held.
+     *
+     * ⭐ AND "HELD" MEANS THIS TURN'S MAINTAIN DECLARATION, WHICH ARRIVED IN THIS SAME POST. The two
+     * decisions are made in one Initial Orders phase - keep the jump point open, and who comes through
+     * it next turn - and a player who books a wave and then turns Maintain off has cancelled the wave
+     * (the user's own statement of the ordering problem, plan section 6). Both halves are in hand here:
+     * the fire orders were validated and written before this runs, so $gd's engine carries the Maintain
+     * order exactly when it survived validation. No Maintain, no opener - and every berth naming the
+     * unit is written as NULL below, which is the existing refund path with nothing spent.
+     *
+     * ⚠️ THE SERVER IS THE AUTHORITY, THE CLIENT IS LENIENT (the REINFORCEMENTS_PLAN.md rule for "is this
+     * berth still good?"): JumpEngine.doDeactivate clears the riders and says so, and the menu greys the
+     * doorway while Maintain is off, but neither is trusted - this is what decides. And it is not the
+     * last word either: an exit that is maintained but then breaks the range, the cap, the dark rule or
+     * the upkeep closes at end of turn, and JumpEngine::stampExitManifests refunds its berths then.
+     *
+     * OWN UNITS ONLY. A gate belongs to nobody and anybody may ride it; a ship's exit is held by its
+     * owner's drive, and a teammate's Maintain would arrive in a different POST - the ordering above
+     * could not be kept. */
+    private static function collectHeldExitOpeners(TacGamedata $gd, TacGamedata $gameData, Array &$openers)
+    {
+        $turn = (int)$gameData->turn;
+
+        foreach ($gd->ships as $unit){
+            if ($unit->userid != $gameData->forPlayer) continue;
+
+            $engine = JumpEngine::getHeldExitEngine($unit, $gd, $turn);
+            if (!$engine) continue;
+            if (!$engine->getMaintainDeclaration($turn)) continue;
+
+            $openers[(int)$unit->id] = true;
         }
     }
 
