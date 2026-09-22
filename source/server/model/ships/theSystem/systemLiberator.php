@@ -79,11 +79,11 @@ class systemLiberator extends BaseShip{
         $this->addRightSystem(new PlasmaDriver(5, 6, 6, 0, 120));
  		$this->addRightSystem(new ThirdspaceShield(0, 300, 150, 30, 150, 'R'));
        
-        $this->addFrontSystem(new Structure( 6, 80));
-        $this->addAftSystem(new Structure( 6, 70));
-        $this->addLeftSystem(new Structure( 6, 80));
-        $this->addRightSystem(new Structure( 6, 80));
-        $this->addPrimarySystem(new Structure( 7, 70));
+        $this->addFrontSystem(new Structure( 6, 65));
+        $this->addAftSystem(new Structure( 6, 55));
+        $this->addLeftSystem(new Structure( 6, 65));
+        $this->addRightSystem(new Structure( 6, 65));
+        $this->addPrimarySystem(new Structure( 7, 55));
 		
 		$this->hitChart = array(
                 0=> array(
