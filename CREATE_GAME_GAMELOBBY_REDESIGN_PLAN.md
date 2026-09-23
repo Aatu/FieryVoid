@@ -7,6 +7,13 @@ Planning document only — nothing in this plan has been built yet. Covers two p
 Also covers the ship **buy / edit / bulk-buy confirm dialogs** (`client/UI/confirm.js`,
 `styles/confirm.css`) reached from Gamelobby's purchase panel — added 2026-09-22, see §10.
 
+**Read §11 before implementing anything.** A Design-canvas mockup pass (2026-09-22) validated
+and corrected a number of decisions in this plan — most significantly the faction-picker
+architecture (§4.3), several real-code facts about how the Store ship list and team colours
+actually render that weren't in the original audit, and a few UI decisions this plan guessed
+wrong the first time. Where §11 and an earlier section disagree, §11 is the corrected version;
+the earlier sections have been patched in place where practical, but §11 is the complete record.
+
 Companion to `GAMES_PAGE_REDESIGN_PLAN.md` and `VISUAL_UNIFICATION_PLAN.md` — this plan
 **reuses** the visual language those two established (the `--fv-*` tokens in
 `styles/tokens.css`, the "contact readout" card grammar in `styles/gamesPanel.css`) rather than
@@ -116,10 +123,18 @@ Nothing new needs inventing — reuse the games.php "contact readout" grammar wh
 - `.fv-btn` family (from `gamesPanel.css`) for Next/Back/Confirm, replacing the legacy
   `.btn-create-submit` one-off styling.
 - **New signature element for this pair of pages:** a left-edge accent rail per section, keyed
-  to *topic* rather than urgency (Game Options = `--fv-accent` blue, Scenario =
-  `--fv-warn` amber, Teams/Map = `--fv-own` green) — reusing tokens that already exist. The
-  wizard's step indicator (§3.1) then reads as "which coloured rail am I in," the same way a
-  games.php card's rail tells you your-turn vs waiting at a glance.
+  to *topic*. **Final rail assignment, settled across the mockup rounds (supersedes the initial
+  guess in this bullet):** the wizard's STEP-INDICATOR tab bar is simplest — Steps 1-3 always
+  `--fv-accent` blue, Confirm always `--fv-own` green, regardless of which step's content you're
+  looking at (this is the one place "urgency"-style colour, not topic colour, won this argument).
+  Inside each step, content cards use: Game Options = `--fv-accent` blue; Scenario Description =
+  `--fv-purple` (a new token, not urgency-coded — kept deliberately distinct from Gamelobby's own
+  Scenario cards, which stayed blue); Teams & Map = `--fv-own` green for Team A's card/map zone,
+  `--fv-enemy` red for Team B's (NOT `--fv-ally` blue — see §11.4, this was wrong for a full
+  round before the real team-colour semantics were confirmed). On the CONFIRM step's summary
+  cards specifically, all three cards (Game Options/Scenario Description/Teams & Map) are
+  `--fv-accent` blue, uniformly — an explicit later correction, not amber/green as an earlier
+  mockup pass had them. See §11 for the rest of what the mockup settled and corrected.
 
 ---
 
@@ -210,8 +225,9 @@ that blocks moving forward (e.g. a team needs ≥1 slot) shows inline using the 
 ### 3.3 Step 2 — Scenario Description, restructured
 
 Every existing field stays (tier, requirements, custom factions, forbidden factions,
-enhancements, borders, called shots, victory conditions, additional info) — the ask is
-presentation, not content.
+enhancements, borders, victory conditions, additional info) — the ask is presentation, not
+content. **Called Shots is dropped** (user decision, confirmed against the mockup 2026-09-22) —
+do not carry that field into the structured `scenario` JSON below.
 
 - Lay out as a **card grid** (2 columns desktop, 1 column mobile): each field gets its own
   small card — an eyebrow label plus its control — instead of a flat list of label/select rows.
@@ -226,7 +242,7 @@ presentation, not content.
   ```
   scenario: {
     tier, tierCustom, fleetRequirements, customFactions, forbiddenFactions,
-    enhancements, enhancementsPoints, mapBorders, calledShots,
+    enhancements, enhancementsPoints, mapBorders,
     victoryConditions, victoryCustom, additionalInfo
   }
   ```
@@ -276,34 +292,60 @@ contract change from the wizard itself.
 
 ### 4.2 Map Preview
 
-Modestly bump the canvas (400×300 → ~480×360) now that the scenario column no longer competes
-for the same visual weight, add the legend from §3.4, and label deployment zones with team
-names/colours pulled from the same helpers tokens.css already calls out as the runtime twins
-for this exact job (`gamedata.getTeamColorVars` / `getMutedTeamColorRGB`) — reuse, don't
-reinvent a second colour path.
+**Reversed from this section's original guess, per the mockup (§11.3):** the top of Gamelobby
+ended up as a three-column row — **Teams | Scenario Description | Map Preview** — rather than a
+two-column Scenario/Map row with Teams full-width below. In three columns Map Preview is the
+*narrowest* of the three (its own share, with Scenario Description and Map Preview stretched to
+match each other's height, while Teams sits at its own natural height beside them) — so the
+canvas actually gets SMALLER than today's 400×300, not bigger. Still gets the legend (deployment
+zones + terrain markers) below the map. Team colours for the deployment-zone labels/overlays are
+**not** `gamedata.getTeamColorVars`/`getMutedTeamColorRGB` (no such function was found this
+session) — see §11.4 for the real, verified team-colour functions and which one applies to a
+2-team vs. 3+-team game.
 
 ### 4.3 Faction picker overhaul
 
 Current state: flat six-group outline list, `[+]`/`[-]` text toggles, no search
-(`gamelobby.js:2448-2541`).
+(`gamelobby.js:2448-2541`), with the ship list (all categories, all variants) rendered inline
+underneath whichever faction is expanded — see §11.2 for exactly how deep that nesting really
+goes (base hulls + every variant, not just base hulls as an earlier mockup pass wrongly assumed).
 
-- **Add a search box** above the list ("Filter factions…") wired into the SAME filter pipeline
-  the tier/custom checkboxes already drive (gamelobby.php:852-861) — one filter pipeline, two
-  inputs feeding it, not a second competing mechanism.
-- **Split "Custom Factions" into sub-groups** (Nexus, Escalation Wars, Other Universe /
-  thematic packs) as asked. The data already carries this — the per-faction directory names
+**Architecture revised from this section's original shape, validated across 3 mockup rounds —
+this is the single biggest structural change to come out of the mockup pass:** picking a
+faction and browsing that faction's ships are now two SEPARATE steps, on both desktop and
+mobile — not "inline accordion on desktop, combobox sheet on mobile" as first planned here.
+
+- **The Store/purchase panel shows ONLY the currently-active faction's ships**, scoped, never
+  the full group→faction tree. A compact "[Faction name] · Switch Faction ▾" context bar sits
+  above the ship list; the ship list itself is flat (category → base hull → nested variants),
+  no faction-level nesting at all once a faction is picked.
+- **A dedicated Faction Picker — same shape on desktop and mobile** — is where the six-group
+  tree actually lives: search box pinned at top, the six groups (Custom Factions still split
+  into its Nexus/Escalation Wars/Other Universe sub-groups, unchanged from the original ask),
+  each faction a row, **stopping at faction level** — no ship/category nesting inside the
+  picker at all. Desktop opens it as a centred modal; mobile opens it as a full-height sheet.
+  Picking a row closes the picker and scopes the Store panel to that faction.
+- **Tier/Custom filters and the faction randomiser (§4.5) live IN the picker**, not above the
+  ship list — they scope which FACTIONS are selectable, not which ships show, so they belong
+  where faction-picking actually happens.
+- **Add a search box** inside the picker ("Filter factions…"), wired into the same filter
+  pipeline the tier/custom checkboxes already drive (gamelobby.php:852-861).
+- **Split "Custom Factions" into sub-groups** (Nexus, Escalation Wars, Other Universe) as asked
+  — unchanged from the original plan. The data already carries this (per-faction directory names
   under `model/ships/` are literally `Nexus*`, `Escalation*`, `BSG*`,
-  `ZStarWars`/`ZTrek*`/`StarWarsCloneWars`, etc. (project map §3). Add a small lookup table
-  (faction name → sub-group label) beside the existing `forceCustomGroup` override list
-  (`gamelobby.js:2465`) — same mechanism, one more level of grouping applied only inside the
-  Custom bucket; the five official-faction groups are untouched.
-- **Mobile-first shape:** collapse the whole picker to a single combobox-style control on
-  narrow viewports — tapping it opens a full-height sheet (search box pinned at top, grouped
-  list beneath) rather than a long inline accordion the player has to scroll past to reach the
-  ship list below it. Desktop keeps the current inline accordion — it already works there —
-  and just gains the search box.
+  `ZStarWars`/`ZTrek*`/`StarWarsCloneWars`, etc., project map §3) — add a lookup table beside the
+  existing `forceCustomGroup` override list (`gamelobby.js:2465`), applied only inside the
+  Custom bucket. **Custom Factions gets a distinct yellow accent** (matches the mockup's
+  `--fv-warn` treatment) in the picker; every other (non-custom, non-selected) faction row
+  shares one neutral rail colour — no more one-colour-per-faction, simplified after mockup
+  feedback ("for now," may return as a per-faction thing later).
 - Group headers get a real disclosure triangle + a larger tap target (today: a plain `[+]`/
-  `[-]` text glyph, `gamelobby.js:2497`) — small change, meaningfully better on touch.
+  `[-]` text glyph, `gamelobby.js:2497`) — unchanged from the original ask.
+- **Ship-level "Show Custom" is a SEPARATE toggle from the picker's faction-level "Show
+  Custom."** `applyCustomShipFilter` (gamelobby.js ~2966, `#toggleCustom`) hides any
+  fully-CUSTOM ship (`ship.unofficial === true`, not `'S'`/SEMI-CUSTOM) inside an otherwise
+  official faction's ship list, independent of which factions are selectable. The mockup's
+  Store panel does not yet have a control for this — flagged as a gap to design, not built.
 
 ### 4.4 In-Service Date filter
 
@@ -321,7 +363,9 @@ Replace the three external Wheel-of-Names links (gamelobby.php:674-680) with an 
 **"Randomise My Faction"** control:
 
 - A button plus a small toggle ("Restrict to: current tier filters / all allowed factions")
-  sitting next to the tier checkboxes it reads from.
+  sitting **inside the Faction Picker** (§4.3's dedicated modal/sheet), next to the tier
+  checkboxes it reads from — not next to the ship-browsing panel, since picking now happens in
+  the picker, not the Store view.
 - Fully client-side: the faction list is already loaded and already tier/custom-tagged
   (`gamelobby.js:2448-2541`) — the randomiser picks a random entry from whatever the CURRENT
   filter state resolves to, so it can never suggest a faction the scenario forbids, then opens
@@ -378,7 +422,9 @@ patch file (e.g. `db/addGameScenarioJson.sql`, `db/addGameInServiceDate.sql`,
 
 ## 7. Staged build-out
 
-Each stage is independently shippable and testable on its own.
+Each stage is independently shippable and testable on its own. **Stages 1-3 (Create Game) have
+a user-approved visual reference** — the mockup canvas's 4 wizard-step artboards (§11) — build
+against those directly rather than re-deriving layout from this section's prose description.
 
 - **Stage 0 — Shared groundwork.** No user-visible change: add the three additive columns
   (§6, minus the password join-flow work), stub the shared `scenarioCard.js` renderer. Lets
@@ -429,9 +475,14 @@ Each stage is independently shippable and testable on its own.
    contract; mixing presentation-only fields into it risks an unrelated rule-parsing
    regression later.
 4. **Terrain extensibility:** a generic repeatable "Terrain Features" list vs. one more
-   hardcoded checkbox+dropdown pair for Dust and Meteorites alone. Picked: generic list
-   (§3.2) — barely more work now, and it's literally what "build menu with adding more in
-   future" asks for.
+   hardcoded row per type. **Reversed after the mockup (see §11.6):** the mockup built FIXED
+   rows — one row per known terrain type (Asteroids, Moons Small/Medium/Large, Dust Clouds,
+   Meteorites), no "+ Add Terrain Feature" affordance — and the user approved that shape across
+   two rounds without asking for the generic add-row UI back. This still maps cleanly onto
+   `GameRules.php`'s real extension pattern (one new Rule class per terrain type, e.g.
+   `DustAndMeteoritesRule`) — "extensible" turns out to mean "cheap to add a new fixed row +
+   Rule class when a type ships," not "player-facing generic add-a-row control." Build the fixed
+   list, not the generic repeater.
 
 ---
 
@@ -543,3 +594,157 @@ collapsed rather than open; this is a guess pending your eye on how the sections
 up once built. Easy to retune as a single constant once it's in front of real ship data (a
 heavily-loaded capital ship vs. a bare fighter will want different defaults, which is exactly
 why it's a per-section count check rather than a global one).
+
+### 10.5 Refinements from the mockup pass
+
+- **A "Base Hull" line item** sits above the accordion sections, showing the ship's own point
+  cost, so the sticky total is arithmetically transparent (base + every section's subtotal =
+  the total shown) rather than an unexplained number.
+- **Ammo & Ordnance rows are NOT colour-coded by ammo type.** Today's dialog prepends a
+  coloured `<span>` per ammo tier (amber/cyan per §10.1's audit) — drop this in the redesign.
+  Every action link and every row label in this dialog family reads in one consistent colour;
+  colour-per-category was tried in the mockup and explicitly rejected.
+
+---
+
+## 11. Mockup findings (Design-canvas pass, 2026-09-22) — read before implementing
+
+Canvas: https://claude.ai/artifact/4z8DSdV35K2AxZ5VmUkG1w — a Design-canvas mockup covering all
+4 Create Game wizard steps, Gamelobby's main screen, both faction pickers (desktop modal +
+mobile sheet), the Buy Ship accordion dialog, a with/without-Reinforcements bought-fleet
+comparison, and a 4-team panel variant. **Create Game (all 4 steps) is user-approved and closed
+as of this pass** ("I am content for now with Create Game design"); Gamelobby is still open to
+further iteration. Read the canvas directly for exact layout/copy before implementing — this
+section is the durable facts extracted from it, not a substitute for looking at it.
+
+This section supersedes anything above it in this document where the two disagree (several
+earlier assumptions — faction-picker shape, map-preview sizing direction, terrain UI shape, rail
+colours, team colours — turned out wrong or were revised after real-code verification; the
+corrections are already folded into §2/§3.3/§4.2/§4.3/§4.5/§8 above, this section is the
+supporting detail and the parts that don't have an obvious home elsewhere in the doc).
+
+### 11.1 Real category order and open/closed defaults for the Store ship list
+
+The 7 size-class categories render in this order top-to-bottom — **Mines, Immobile Structures,
+Capital Ships, Heavy Combat Vessels, Medium Ships, Light Combat Vessels, Fighters** (ending with
+Fighters) — the reverse of the array order `sizeClassHeaders` is declared in
+(`gamelobby.js:2783`), because the render loop walks it backwards. Default open/closed: Capital
+Ships, Heavy Combat Vessels, Medium Ships and Fighters start open; Light Combat Vessels,
+Immobile Structures and Mines start closed (a category's own ship rows still sort correctly
+whether or not it starts collapsed). Within an open category, base hulls sort by cost
+DESCENDING, except Mines, which sorts alphabetically
+(`orderShipListOnPV` vs `orderShipListOnName`, gamelobby.js:2412/2824).
+
+### 11.2 Variants are real, independently-purchasable rows — get this right the first time
+
+**This was gotten wrong twice during the mockup pass before a user screenshot of the live game
+settled it — do not re-derive, this is verified against primary source.** A ship variant
+(`ship.variantOf != ''`, an alternate loadout of a base hull) is NOT hidden inside a "pick your
+loadout" step of a Buy dialog. It is its own row, indented directly under its base hull, with
+its own independent "Add to fleet"/"Show details" links — exactly like a base hull, just styled
+differently. The real render function is **`parseShips`, `gamelobby.js:2764-2930`** — there is a
+dead, never-invoked "old, simple version" of the same function name at lines 2679-2698 that
+caused the first misread; confirm which `parseShips` is actually called before trusting a
+reading of this area again. Nesting mechanism: an outer loop walks cost-sorted base hulls only
+(`if (ship.variantOf != '') continue;` at line 2858 — this only stops a variant from being used
+as an outer anchor, it does not hide it); a separate inner loop
+(`gamelobby.js:2885-2914`) re-scans the full ship list for every variant of that base hull and
+appends each one immediately beneath it, in the base hull's own category regardless of the
+variant's own `shipSizeClass`.
+
+**Visual treatment** (`prepareClassName`, gamelobby.js:2701-2740, cross-checked against a
+live-game screenshot): base hull name → **bold**, colour `#90b1ee`. Variant name → **italic +
+indented**, colour `#578bec` — two distinct blue shades, this is the actual distinction, not a
+single shared "dim" colour. Category header text: `#d0dbec` (`.categoryType`, `lobby.css:234`).
+Action links ("Add to fleet"/"Show details"): `#DEEBFF` (`.store .ship .clickable`,
+`lobby.css:364`).
+
+**Every ship name carries a real "(TAG)" suffix**, built from three ship-object fields (no
+lookup table): rarity letter from `ship.occurence` (misspelled in the codebase, not
+"occurrence") — common→C, uncommon→U, rare→R, unique→Q; an optional `NN%` from `ship.limited`
+shown only when `0 < limited < 100`; and `SEMI-CUSTOM` (`ship.unofficial === 'S'`) or `CUSTOM`
+(`ship.unofficial === true`, boolean). A fully-CUSTOM (not semi-custom) variant is hidden by
+default — see §4.3's ship-level "Show Custom" note. Fighters additionally carry a
+`[H]`/`[M]`/`[L]`/`[U]`/`[SHF]` size badge (`getFighterSizeTag`, gamelobby.js:2745-2761) and a
+per-unit cost note for squadron purchases, e.g. "348p (58 ea.)".
+
+### 11.3 Gamelobby top-of-page: three columns, Teams first
+
+Final layout, left to right: **Teams | Scenario Description | Map Preview**. Teams sits at its
+own natural height; Scenario Description and Map Preview are the two that visually match height
+(nested in their own sub-row) — Teams is deliberately NOT forced to match, since its height
+varies with team/slot count. With 3+ teams, the Teams panel grids into 2 columns (same pattern
+as the separate 4-team artboard) instead of stacking indefinitely — not demonstrated live in the
+2-team mockup artboard, since that would require actually showing a 3+-team scenario there.
+Scenario Description's own internal order: the "Game Rules" chip row (Ladder/Sim.
+Movement/Mines/etc., one pill per active rule) sits ABOVE the fact-card grid, not below it — an
+explicit reorder request. A subtlety worth remembering for any stretched/flex-matched card
+layout: if a panel gets force-stretched taller than its own content, `justify-content:
+space-between` on its content does NOT close the resulting gap — it just relocates the gap to
+BETWEEN the panel's own children. The actual fix is to not force-stretch panels whose content
+heights are allowed to differ (`align-items: flex-start` on the row, not `stretch`).
+
+### 11.4 Team colours — verified against `gamedata.js`, do not invent
+
+**2-team games** use the RELATIVE mine/ally/enemy scheme already established everywhere else in
+the app (combat log, ship icons, `getFleetHeaderColorRGB`): green = your own team, red = the
+OTHER team (enemy), blue = "ally" — which specifically means *same team, different player slot*,
+never "the other team." A viewing participant's own team is always green; the other of the two
+teams is always red — never blue, however tempting "give team B its own colour" looks. Tokens:
+`--fv-own`/`--fv-own-signal` (green) and `--fv-enemy`/`--fv-enemy-signal` (red), already in
+`tokens.css`.
+
+**3+ team games use a completely separate, ABSOLUTE per-team-index palette**
+(`teamBaseColorsMultiTeam`, `gamedata.js`): 1 Green / 2 Orange / 3 Cyan / 4 Purple / 5 Yellow /
+6 Blue / 7 Magenta / 8 Red — do not reuse the 2-team own/ally/enemy tokens for a 3+-team
+context; they mean something different there (there's no single unambiguous "ally"/"enemy" once
+more than 2 teams exist). `tokens.css` has no ready-made tokens for team-index 2-8; the mockup
+added local `--fv-team2`/`--fv-team3`/`--fv-team4` (`#ff9628`/`#28e6e6`/`#aa5ae6`) for its
+4-team demo artboard — worth promoting to real `tokens.css` entries if this palette gets used
+more than once in the real build.
+
+**Reinforcements' real colour is `#00b8e6` cyan** — found in `gamedata.js` comments ("FV's 'not
+here yet' cyan, the same value as the blue Jump Point marker and the fleet list's hyperspace
+rows"), not an invented colour. "Main Fleet" (the non-Reinforcements bought-ship group header)
+is not this colour and isn't green either — settled on the page's own chrome blue (`--fv-accent`)
+specifically so it's visually distinct from the more saturated Reinforcements cyan while still
+"fitting the page's colour scheme."
+
+### 11.5 Bought-ship rows: name vs. shipClass, and the action-link colour rule
+
+**A bought ship shows its player-given name AND its hull class as two separate pieces of text**,
+per the real template (`gamelobby.js:943-949`, classes `.shipname`/`.shiptype`): `ship.name`
+(defaults to `ship.shipClass` until the player renames it) rendered bold, `ship.shipClass` (the
+hull's display name, e.g. "G'Quan Heavy Cruiser") rendered normal-weight, same base text colour,
+`padding-left:3px`, in a fixed `min-width:150px` name column so classes align down the list
+(`lobby.css:286-308`). This is NOT the same axis as the Store's size-CATEGORY grouping
+(Fighters/Medium/Heavy/Capital/etc) — conflating the two was an error caught mid-mockup.
+
+**Every clickable action link in the Purchase Fleet panel — Show Details, Add to Fleet, Details,
+Edit, Copy, Reinforcement⇄Main Fleet, and Remove — shares ONE colour.** An earlier mockup pass
+gave "Remove" its own red, which the user explicitly rejected as clashing; there is no
+destructive-action colour distinction in this part of the redesign, unlike normal web-app
+convention.
+
+### 11.6 Small, settled UI decisions worth carrying into the build
+
+- No checkmark (✓) glyphs on completed wizard-step tabs — tried, explicitly removed.
+- No "new" tags/badges next to newly-added fields (Private Game, In-Service Date, Dust
+  Clouds/Meteorites) — tried, explicitly removed; the fields just look like any other field.
+- **A checkbox that reveals a dependent control** (Simultaneous Movement's bracket-count
+  dropdown, default 8; Desperate Measures' which-teams-affected dropdown, default "Both Teams")
+  is INLINE, appended right after the row's own label text, one line tall — same established
+  pattern as "Ladder Game *View Ladder*" already uses in the same card, not a separate flex
+  column beside the checkbox (that shape was tried, looked bad — the dropdown visually
+  stretched to the row's full label+caption height as a flex sibling of the caption block, and
+  was dropped after a screenshot showed exactly why). The dependent control is only present in
+  the markup at all when its checkbox is checked in that mockup's state — an unchecked row (e.g.
+  Desperate Measures) shows no dropdown, with the caption text itself naming what ticking would
+  reveal and its default, since a static mock can't show a live show/hide toggle. **In-Service
+  Date**, which has no boolean checkbox (blank = off), instead puts its year input as the FIRST
+  element in the row, left-aligned to the same x-position every other row's checkbox starts at —
+  not indented behind a blank spacer div (tried, didn't actually align), and not floated to the
+  right edge of the container (the original placement, also wrong).
+- Terrain Features card: single column of rows (label + count dropdown each), not the two-column
+  grid an earlier pass tried — the two-column split stopped being necessary once the card moved
+  beside Rules & Options instead of spanning the step's full width.
