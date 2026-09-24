@@ -127,9 +127,36 @@ if (!$isKnownPoll) {
 
 // Global limiter (Non-Fast-Polls)
 if (!$isKnownPoll) {
-    apcu_add($keyGlobal, 0, $ttlGlobal);
     do {
+        // ⚠️ The apcu_add MUST be inside the loop. It used to sit above it, and that was a
+        // bug that could only ever fire while the limiter was actually engaged:
+        //
+        //   - apcu_cas() FAILS on a key that does not exist (verified against real APCu,
+        //     not read from the docs — it returns false and does not create the key).
+        //   - $keyGlobal carries a $ttlGlobal-second TTL, and neither apcu_add on an
+        //     existing key nor apcu_cas refreshes it, so the key expires $ttlGlobal
+        //     seconds after CREATION regardless of traffic (also verified).
+        //
+        // With the add above the loop, nothing inside it could recreate a key that expired
+        // mid-spin. Every subsequent apcu_fetch returned false, every apcu_cas failed, and
+        // the request burned its full 1-second budget before being handed a 503 — while
+        // the counter it was queueing for was, in truth, empty.
+        //
+        // Exposure was roughly 1-in-30 (a 1s spin against a 30s TTL) and ONLY for requests
+        // already waiting in the queue, i.e. exactly when shedding the wrong request costs
+        // the most. Re-adding here means a vanished key is rebuilt at 0 and the very same
+        // iteration acquires cleanly.
+        //
+        // This is a no-op on the overwhelmingly common path: apcu_add against a key that
+        // exists returns false and changes nothing, including the TTL. It therefore does
+        // NOT alter the 30s counter reset, which is a separate (and largely benign)
+        // property -- see CHAT_DB_RESILIENCE_PLAN item 9, problem 3.
+        apcu_add($keyGlobal, 0, $ttlGlobal);
+
         $count = apcu_fetch($keyGlobal);
+        // $count can still be false if the key expires in the microseconds between the add
+        // and the fetch. apcu_cas then fails, and the next iteration's add rebuilds it --
+        // so the worst case is one 50ms sleep, not the old full-budget spin.
         if ($count === false || $count < $maxGlobal) {
             if (apcu_cas($keyGlobal, (int)$count, (int)$count + 1)) {
                 $globalAcquired = true;

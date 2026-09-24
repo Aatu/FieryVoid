@@ -1481,6 +1481,17 @@ if (ballistic.damageclass === 'Sweeping' || ballistic.damageclass === 'HPC-subor
 								? 'Maintaining Jump Point'
 								: 'Jump Point Forming');
 						textColour = '#e1b000';
+
+						/* ⭐ STAGE H5 - MAINTAINING A BLUE EXIT IS DRAWN BLUE. Yellow = leaving, blue =
+						   arriving is the one colour rule this whole feature keeps (user ruling
+						   2026-09-17), and a ship holding the exit it came out through is keeping a
+						   doorway IN open - the marker sits on the blue vortex, so yellow would read as
+						   the wrong kind of jump point. */
+						if (!isGateSignal && parseInt(ballistic.firingMode, 10) === 7
+							&& shipManager.movement.getMaintainableExitHeldBy(shooter)) {
+							targetType = 'hexBlue';
+							textColour = '#00b8e6';
+						}
 						break;
 
 					/* ⭐ REINFORCEMENTS_PLAN.md STAGE 8 - THE ARRIVAL CLAIM, IN BLUE. Yellow =

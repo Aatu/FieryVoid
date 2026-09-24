@@ -5128,9 +5128,9 @@ class VorlonLightningCannon extends Weapon{
 		$this->data["Special"] .= "<br> - 3 Prongs: 12 Power, 4d10+32 Raking(15), -1.65/hex"; 
 		$this->data["Special"] .= "<br> - 4 Prongs: 24 Power, 8d10+64 Raking(20), -1.25/hex"; 
 		$this->data["Special"] .= "<br> - 3 Prongs Piercing: 12 Power, 4d10+32 Piercing, -1.65/hex"; 
-		$this->data["Special"] .= "<br> - 4 Prongs Piercing: 24 Power, 8d10+64 Piercing, -1.25/hex"; 
-		$this->data["Special"] .= "<br>If weapon is mis-declared (shot is declared but not enough prongs are allocated in appropriate mode) shot will automatically miss and Power will NOT be drained."; 
-		$this->data["Special"] .= "<br>You must explicitly order this weapon to intercept.";		
+		$this->data["Special"] .= "<br> - 4 Prongs Piercing: 24 Power, 8d10+64 Piercing, -1.25/hex";
+		$this->data["Special"] .= "<br>If weapon is mis-declared (shot is declared but not enough prongs are allocated in appropriate mode) the shot fires as 1 Prong instead, and draws that mode's 1 Power.";
+		$this->data["Special"] .= "<br>You must explicitly order this weapon to intercept.";
 	}
 		
 		
@@ -5267,16 +5267,23 @@ class VorlonLightningCannon extends Weapon{
 				}				
 				$doDrain = true;
 				$doCalculate = true;
-			}else{//not enough weapons to combine in this mode - mark combined and effectively don't fire
-				$notes = "technical fire order - weapon mis-declared";
-				$fireOrder->chosenLocation = 0; //tylko techniczne i tak
-				$fireOrder->needed = 0;
-				$fireOrder->shots = 0;
-				$fireOrder->notes = $notes;
-				$fireOrder->updated = true;
-				$this->doNotIntercept = true;
-				$doDrain = false;
-				$doCalculate = false;
+			}else{//not enough weapons to combine in this mode - fall back to a single prong (user ruling, 2026-09-20)
+				//The shot is NOT cancelled: it fires as 1 Prong at the same target, for that mode's 1 Power.
+				//The order's mode is rewritten (and persisted - updateFireOrders writes firingmode), so the hit
+				//chance, damage, log and replay all describe the shot that was actually fired. Same ruling as
+				//VorlonLightningGunSplit; the client warns about it at commit (VorlonLightningCombination).
+				$fireOrder->firingMode = 1;
+				$this->changeFiringMode(1);
+				//prepareFiring set the resolution priority from the DECLARED mode before calling this -
+				//re-derive it exactly as it does, now that the mode has changed.
+				$target = $gamedata->getShipById($fireOrder->targetid);
+				$fireOrder->priority = ($target instanceof FighterFlight) ? $this->priorityAF : $this->priority;
+				$fireOrder->pubnotes .= " Not enough Lightning Cannons combined - fired as 1 Prong.";
+				$powerRequired = $this->powerRequiredArray[1];
+				$prongsNeeded = $powerRequired[0];
+				$powerPerProng = $powerRequired[1];
+				$doDrain = true;
+				$doCalculate = true;
 			}
 		}
 		
@@ -5934,6 +5941,356 @@ class VorlonLightningGun2 extends Weapon{
 	}
 
 }//endof class VorlonLightningGun2
+
+
+
+
+/* Vorlon primordial primary weapon - ONE system per Lightning Gun, with two guns.
+
+   Tabletop: a single gun fires Light (1 prong, Standard) up to twice per turn. 2 guns combine for
+   Medium (Raking), 3 for Heavy (Raking 15 or Piercing), 4 for Mega (Raking 20 or Piercing) - each also
+   up to twice per turn. Power is paid for each shot separately; every mode is uninterceptable.
+
+   Each click declares ONE shot (= one prong) in the mode the gun is sitting in (canSplitShots), and
+   multiModeSplit keeps the mode selector open afterwards, so the two shots may go to different targets
+   in different modes. Each shot is its own 'Sweeping' order, which is what lists it - with its mode -
+   in the target's INCOMING list.
+
+   COMBINING. A shot in an N-prong mode takes one prong from each of N DIFFERENT Lightning Guns on the
+   ship, all declared at the same target, called system and mode. The first such order resolved LEADS:
+   it claims N-1 partner orders (which become technical - no roll, no damage, no power) and drains the
+   whole shot's power. A lead that cannot find enough partners is mis-declared and FALLS BACK to a
+   1 Prong shot at the same target, drawing that mode's 1 Power (user ruling, 2026-09-19 - the retired
+   pair and the Lightning Cannon cancel such a shot instead). A gun never partners its own other shot
+   ("two lightning guns may combine"), so two Medium shots need two guns firing twice each, exactly as
+   in tabletop. The client warns about mis-declared shots at commit (VorlonLightningCombination in
+   special.js), and that warning mirrors findPartnerOrders - keep the two in step.
+
+   ⚠️ Combination state is per ORDER, not per weapon: the retired pair used weapon-level flags
+   (isCombined / alreadyConsidered), which cannot work once one system holds two orders. It lives in
+   $orderRoles on each gun, rebuilt every beforeFiringOrderResolution. */
+class VorlonLightningGunSplit extends Weapon{
+	public $name = "VorlonLightningGunSplit";
+	public $displayName = "Lightning Gun";
+
+	public $animation = "laser";
+	public $animationColor = array(195, 235, 195);
+
+	public $loadingtime = 1;
+	public $normalload = 2; //accelerator property only so that it must be explicitly ordered to intercept
+
+	public $uninterceptable = true; //Lightning Gun is uninterceptable
+	public $intercept = 4; //intercept rating -4
+
+	//Two shots per turn, declared one at a time and each in its own mode - see the class comment.
+	public $guns = 2;
+	public $canSplitShots = true;
+	//Protected on Weapon and not published by the base stripForJson - see stripForJson below.
+	protected $multiModeSplit = true;
+
+	public $firingMode = 1;
+	public $firingModes = array(
+		1 => "1Prong",
+		2 => "2Prongs",
+		3 => "3Prongs",
+		4 => "4Prongs",
+		5 => "P3Piercing",
+		6 => "Q4Piercing"
+	);
+
+	public $priority = 5; //medium Standard weapon - for single fire...
+	public $priorityArray = array(1=>5, 2=>8, 3=>7, 4=>7, 5=>2, 6=>2); //single fire is Medium Standard, double Light Raking, 3/4 Heavy Raking, 5/6 Piercing)
+	public $rangePenalty = 1;
+	public $rangePenaltyArray = array(1=>1, 2=>0.5, 3=>0.33, 4=>0.33, 5=>0.33, 6=>0.33);
+	public $fireControl = array(7, 4, 4); // fighters, <=mediums, <=capitals
+	public $fireControlArray = array( 1=>array(7, 4, 4), 2=>array(3,4,4), 3=>array(0,4,4), 4=>array(null,4,4), 5=>array(null,0,0), 6=>array(null,0,0) ); // fighters, <mediums, <capitals ; Piercing shots incorporate Piercing shot penalty into FC
+
+	//number of prongs/power required to fire - PER PRONG! (the client bills each gun its own prong's share)
+	public $powerRequiredArray = array( 1=>array(1,1), 2=>array(2,1.5), 3=>array(3,3), 4=>array(4,4.5), 5=>array(3,3), 6=>array(4,4.5) );
+
+	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	public $damageTypeArray = array( 1=>"Standard", 2=>"Raking", 3=>"Raking", 4=>"Raking", 5=>"Piercing", 6=>"Piercing" );
+	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+
+	//rake size array
+	public $raking = 10;//more in higher modes
+	public $rakingArray = array( 1=>10, 2=>10, 3=>15, 4=>20, 5=>15, 6=>20 );
+
+	//What each of this gun's orders turned into this resolution - see the class comment.
+	const ROLE_LEAD = 'lead';               //fires the shot (alone, or leading a combination)
+	const ROLE_COMBINED = 'combined';       //a prong claimed by another gun's lead order
+	const ROLE_MISDECLARED = 'misdeclared'; //led, but not enough guns joined it - fired as 1 Prong instead
+	const ROLE_EXCESS = 'excess';           //more shots than the gun has (stale or hand-edited POST)
+	protected $orderRoles = array(); //order key => ROLE_*; never persisted, never serialised
+
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $orientation ) //$orientation is 'L'eft or 'R'ight - regarding graphics
+	{
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+			$maxhealth = 11;
+		}
+		if ( $powerReq == 0 ){
+			$powerReq = 0;
+		}
+		$this->iconPath = "VorlonLightningGun".$orientation.".png";
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+		$this->addTag('Lightning Gun'); //needed to properly allocate hits on Vorlon ships, where most of these weapons are used
+	}
+
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= "Uninterceptable. Fires up to twice per turn, at the same or different targets - each shot may use a different firing mode.";
+		$this->data["Special"] .= "<br>Heavier modes combine a shot from several DIFFERENT Lightning Guns. A gun cannot combine its own two shots.";
+		$this->data["Special"] .= "<br>Firing modes available:";
+		$this->data["Special"] .= "<br> - 1 Prong: 1 Power, 1d5+8 Standard, -5/hex";
+		$this->data["Special"] .= "<br> - 2 Prongs: 3 Power, 1d10+16 Raking(10), -2.5/hex";
+		$this->data["Special"] .= "<br> - 3 Prongs: 9 Power, 2d10+32 Raking(15), -1.65/hex";
+		$this->data["Special"] .= "<br> - 4 Prongs: 18 Power, 4d10+64 Raking(20), -1.65/hex";
+		$this->data["Special"] .= "<br> - 3 Prongs Piercing: 9 Power, 2d10+32 Piercing, -1.65/hex";
+		$this->data["Special"] .= "<br> - 4 Prongs Piercing: 18 Power, 4d10+64 Piercing, -1.65/hex";
+		//$this->data["Special"] .= "<br>A shot declared without enough Lightning Guns combined fires as 1 Prong instead (and draws 1 Power).";
+		$this->data["Special"] .= "<br>You must explicitly order this weapon to intercept costing 1 Power each.";
+	}
+
+	public function getDamage($fireOrder){
+		switch($this->firingMode){
+			case 1:
+				return Dice::d(5, 1)+8;
+				break;
+			case 2:
+				return Dice::d(10, 1)+16;
+				break;
+			case 3:
+				return Dice::d(10, 2)+32;
+				break;
+			case 4:
+				return Dice::d(10, 4)+64;
+				break;
+			case 5:
+				return Dice::d(10, 2)+32;
+				break;
+			case 6:
+				return Dice::d(10, 4)+64;
+				break;
+			default: //should never go here
+				return Dice::d(5, 1)+8;
+				break;
+		}
+	}
+
+	public function setMinDamage(){
+		switch($this->firingMode){
+			case 1:
+				$this->minDamage = 9;
+				break;
+			case 2:
+				$this->minDamage = 17;
+				break;
+			case 3:
+				$this->minDamage = 34;
+				break;
+			case 4:
+				$this->minDamage = 68;
+				break;
+			case 5:
+				$this->minDamage = 34;
+				break;
+			case 6:
+				$this->minDamage = 68;
+				break;
+			default: //should never go here
+				$this->minDamage = 9;
+				break;
+		}
+	}
+
+	public function setMaxDamage(){
+		switch($this->firingMode){
+			case 1:
+				$this->maxDamage = 13;
+				break;
+			case 2:
+				$this->maxDamage = 26;
+				break;
+			case 3:
+				$this->maxDamage = 52;
+				break;
+			case 4:
+				$this->maxDamage = 104;
+				break;
+			case 5:
+				$this->maxDamage = 52;
+				break;
+			case 6:
+				$this->maxDamage = 104;
+				break;
+			default: //should never go here
+				$this->maxDamage = 13;
+				break;
+		}
+	}
+
+	/* Keyed by DB id where there is one - the replay harness resolves CLONES of each order, and an
+	   object key would not recognise a clone of a claimed partner. Falls back to object identity for
+	   an order that has not been saved yet. */
+	protected function getOrderKey($fireOrder){
+		return ($fireOrder->id > 0) ? 'id' . $fireOrder->id : 'obj' . spl_object_id($fireOrder);
+	}
+
+	protected function getOrderRole($fireOrder){
+		$key = $this->getOrderKey($fireOrder);
+		return isset($this->orderRoles[$key]) ? $this->orderRoles[$key] : null;
+	}
+
+	protected function setOrderRole($fireOrder, $role){
+		$this->orderRoles[$this->getOrderKey($fireOrder)] = $role;
+	}
+
+	/* Runs for every system before ANY hit chance is calculated, so the role map starts empty for
+	   every gun. Also the server-side half of "two shots per turn": the client stops at $guns, and
+	   anything beyond it here never rolls and never draws power. */
+	public function beforeFiringOrderResolution($gamedata){
+		parent::beforeFiringOrderResolution($gamedata);
+		$this->orderRoles = array();
+		$shotsDeclared = 0;
+		foreach ($this->fireOrders as $order){
+			if ($order->type != 'normal') continue;
+			if ($order->turn != $gamedata->turn) continue;
+			$shotsDeclared++;
+			if ($shotsDeclared > $this->guns) $this->setOrderRole($order, self::ROLE_EXCESS);
+		}
+	}
+
+	/* The other guns' orders this shot combines with: one per DIFFERENT Lightning Gun (never this
+	   gun's own other shot), same target, same called system, same mode, and not already spoken for.
+	   prepareFiring walks orders in a fixed sequence and every order it has passed already holds a
+	   role, so partners are always orders it has not reached yet. */
+	protected function findPartnerOrders($gamedata, $leadOrder, $partnersNeeded){
+		$partners = array();
+		$gunsUsed = array($this->id => true);
+		$ship = $this->getUnit();
+		foreach ($ship->getAllFireOrders($gamedata->turn) as $order){
+			if (count($partners) >= $partnersNeeded) break;
+			if ($order === $leadOrder) continue;
+			if ($order->type != 'normal') continue;
+			if ($order->targetid != $leadOrder->targetid) continue;
+			if ($order->calledid != $leadOrder->calledid) continue;
+			if ($order->firingMode != $leadOrder->firingMode) continue;
+			$gun = $ship->getSystemById($order->weaponid);
+			if (!($gun instanceof VorlonLightningGunSplit)) continue;
+			if (isset($gunsUsed[$gun->id])) continue;
+			if ($gun->getOrderRole($order) !== null) continue;
+			$gunsUsed[$gun->id] = true;
+			$partners[] = array('gun' => $gun, 'order' => $order);
+		}
+		return $partners;
+	}
+
+	/* An order that never rolls, deals no damage and draws no power. It keeps rolled = 0, so the
+	   combat log and replay (weaponManager.isResolvedFireOrder) skip it: a combined shot reads as the
+	   one leading shot. */
+	protected function makeTechnicalOrder($fireOrder, $notes){
+		$fireOrder->chosenLocation = 0;
+		$fireOrder->needed = 0;
+		$fireOrder->shots = 0;
+		$fireOrder->notes = $notes;
+		$fireOrder->updated = true;
+	}
+
+	//hit chance calculation is standard - but this is also where the shot is combined and its Power
+	//drawn from the Capacitor (once, on the leading order, for all of its prongs)
+	public function calculateHitBase($gamedata, $fireOrder){
+		$this->changeFiringMode($fireOrder->firingMode);
+
+		$role = $this->getOrderRole($fireOrder);
+		if ($role === self::ROLE_COMBINED){
+			$this->makeTechnicalOrder($fireOrder, "technical fire order - prong combined into another Lightning Gun's shot");
+			return;
+		}
+		if ($role === self::ROLE_EXCESS){
+			$this->makeTechnicalOrder($fireOrder, "technical fire order - more shots declared than the gun has");
+			return;
+		}
+		$this->setOrderRole($fireOrder, self::ROLE_LEAD); //from here on it can no longer be claimed as a partner
+
+		$powerRequired = isset($this->powerRequiredArray[$fireOrder->firingMode]) ? $this->powerRequiredArray[$fireOrder->firingMode] : array(1, 1);
+		$prongsNeeded = $powerRequired[0];
+		$powerPerProng = $powerRequired[1];
+
+		if ($prongsNeeded > 1){
+			$partners = $this->findPartnerOrders($gamedata, $fireOrder, $prongsNeeded - 1);
+			if (count($partners) < ($prongsNeeded - 1)){
+				//Mis-declared: not enough guns joined, so this prong fires on its own as a 1 Prong shot.
+				//The order's mode is REWRITTEN (and persisted - updateFireOrders writes firingmode), so the
+				//hit chance, damage, log and replay all describe the shot that was actually fired.
+				$this->setOrderRole($fireOrder, self::ROLE_MISDECLARED);
+				$fireOrder->firingMode = 1;
+				$this->changeFiringMode(1);
+				//prepareFiring set the resolution priority from the DECLARED mode before calling this -
+				//re-derive it exactly as it does, now that the mode has changed.
+				$target = $gamedata->getShipById($fireOrder->targetid);
+				$fireOrder->priority = ($target instanceof FighterFlight) ? $this->priorityAF : $this->priority;
+				$fireOrder->pubnotes .= " Not enough Lightning Guns combined - fired as 1 Prong.";
+				$prongsNeeded = $this->powerRequiredArray[1][0];
+				$powerPerProng = $this->powerRequiredArray[1][1];
+			}else{
+				foreach ($partners as $partner){
+					$partner['gun']->setOrderRole($partner['order'], self::ROLE_COMBINED);
+				}
+			}
+		}
+
+		$capacitor = $this->unit->getSystemByName("PowerCapacitor");
+		if($capacitor){ //else something is wrong - weapon is put on a ship without Power Capacitor!
+			$capacitor->doDrawPower($powerPerProng * $prongsNeeded); //drain for ALL combined prongs!
+		}
+		parent::calculateHitBase($gamedata, $fireOrder); //standard hit chance calculation
+	}//endof function calculateHitBase
+
+	/* ⚠️ Firing::fireWeapons resolves every order only AFTER every calculateHitBase has run, so the
+	   gun is still sitting in whichever mode it calculated LAST. With two shots in different modes
+	   that would roll one shot's damage, rake and damage type against the other's mode. */
+	public function fire($gamedata, $fireOrder){
+		$this->changeFiringMode($fireOrder->firingMode);
+		parent::fire($gamedata, $fireOrder);
+	}
+
+	/* drain power when firing defensively
+	*/
+	public function fireDefensively($gamedata, $interceptedWeapon)
+	{
+		$capacitor = $this->unit->getSystemByName("PowerCapacitor");
+		if($capacitor){ //else something is wrong - weapon is put on a ship without Power Capacitor!
+			$capacitor->doDrawPower(1);
+		}
+		parent::fireDefensively($gamedata, $interceptedWeapon);
+	}
+
+	/*can intercept anything only if Capacitor holds enough Power...*/
+	public function canInterceptAtAll($gd, $fire, $shooter, $target, $interceptingShip, $firingweapon)
+	{
+		$powerIsAvailable = false;
+		$capacitor = $this->unit->getSystemByName("PowerCapacitor");
+		if($capacitor){ //else something is wrong - weapon is put on a ship without Power Capacitor!
+			if($capacitor->canDrawPower(1)) $powerIsAvailable = true;
+		}
+		return $powerIsAvailable;
+	}
+
+	public function stripForJson(){
+		$strippedSystem = parent::stripForJson();
+		//$multiModeSplit is protected on Weapon and the base stripForJson does not publish it - without
+		//this the client locks the firing-mode selector as soon as the first shot is declared.
+		$strippedSystem->multiModeSplit = $this->multiModeSplit;
+		return $strippedSystem;
+	}
+
+}//endof class VorlonLightningGunSplit
 
 
 

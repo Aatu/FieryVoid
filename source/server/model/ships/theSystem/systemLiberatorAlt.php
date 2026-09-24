@@ -65,7 +65,7 @@ class systemLiberatorAlt extends BaseShip{
         $this->addAftSystem(new PlasmaArray(5, 8, 4, 90, 270));
         $this->addAftSystem(new SeekerTorp(5, 6, 5, 90, 270));
 		$this->addAftSystem(new ThirdspaceShield(0, 160, 80, 150, 210, 'A'));		
-		$this->addAftSystem(new JumpEngine(6, 25, 6, 8));        
+		$this->addAftSystem((new JumpEngine(6, 25, 6, 8))->markLegacy()); //HYPERSPACE_IMPROVEMENTS_PLAN.md 10 A2 - out of B5 jump-point mechanics (Stage H4)
 		
 		$this->addLeftSystem(new GraviticThruster(5, 15, 0, 4, 3));
 		$this->addLeftSystem(new GraviticThruster(5, 15, 0, 4, 3));
@@ -79,11 +79,11 @@ class systemLiberatorAlt extends BaseShip{
         $this->addRightSystem(new PlasmaArray(5, 8, 4, 0, 180));
  		$this->addRightSystem(new ThirdspaceShield(0, 300, 150, 30, 150, 'R'));
        
-        $this->addFrontSystem(new Structure( 6, 80));
-        $this->addAftSystem(new Structure( 6, 70));
-        $this->addLeftSystem(new Structure( 6, 80));
-        $this->addRightSystem(new Structure( 6, 80));
-        $this->addPrimarySystem(new Structure( 7, 70));
+        $this->addFrontSystem(new Structure( 6, 65));
+        $this->addAftSystem(new Structure( 6, 55));
+        $this->addLeftSystem(new Structure( 6, 65));
+        $this->addRightSystem(new Structure( 6, 65));
+        $this->addPrimarySystem(new Structure( 7, 55));
 		
 		$this->hitChart = array(
                 0=> array(

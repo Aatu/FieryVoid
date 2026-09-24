@@ -129,9 +129,33 @@ class DBManager
         }
     }
 
+    /**
+     * Release the connection. Safe to call more than once, and safe to call at all.
+     *
+     * It was neither until 2026-09-17. mysqli_close() was called unconditionally, and
+     * __destruct() calls this method — so ANY explicit close() was followed by a second
+     * close() at destruct time, and under PHP 8 mysqli_close() on an already-closed handle
+     * throws Error: "mysqli object is already closed". Not a warning: an uncaught Error.
+     *
+     * Nothing in the app called close(), which is the only reason this was never seen
+     * (DBManager.php:2681 has one commented out). It mattered because
+     * CHAT_DB_RESILIENCE_PLAN item 8 proposes calling close() early on gamedata.php's hot
+     * path; doing that against the old code fataled the request at shutdown, every time.
+     * Verified in the php container before the fix — see that item for the measurement
+     * that then talked item 8 out of itself.
+     *
+     * Nulling the handle is also what makes a later reconnect possible rather than a use
+     * of a dead handle: query()/insert()/update() all test $this->connection first, so
+     * they now raise their own clean "connection failed" exception instead of an Error
+     * from inside mysqli.
+     */
     public function close()
     {
+        if ($this->connection === null)
+            return;
+
         mysqli_close($this->connection);
+        $this->connection = null;
     }
 
     public function getActiveGames() {
@@ -2240,6 +2264,19 @@ class DBManager
             foreach ($movements as $movement) {
 
                 if ($movement->type == "start" || $movement->turn != $turn)
+                    continue;
+
+                /* A 'deploy' row that already has a DATABASE ID is an echo, never a new move (fixed
+                   2026-09-19). The client posts back every movement row dated the current turn, committed
+                   ones included, so every unit placed this turn - every ship on turn 1, every arrival from
+                   hyperspace - sent its deploy row back with its Movement orders and got it inserted a
+                   SECOND time (game 4367: every one of them). No deploy row is ever meant to come through
+                   here: DeploymentGamePhase, JumpEngine::placeArrivingReinforcements and the hangar / mine /
+                   vortex spawns all write theirs with insertMovement / Manager::insertSingleMovement.
+                   isMovementAlreadySubmitted and deleteMovement already leave 'deploy' out for the same
+                   reason. Keyed on the id, not the type alone, so a genuinely new row (id -1 / 0) would
+                   still be written. */
+                if ($movement->type == "deploy" && (int)$movement->id > 0)
                     continue;
 
                 //Transient forced JINKS (Gravitic Augmenter free jinks) are re-added in-memory
@@ -5066,7 +5103,7 @@ public function setLastTimeChatChecked($userid, $gameid)
     public function deleteOldChatMessages()
     {
         /* The cutoff is computed on the RIGHT of the comparison, never by wrapping the
-           column. This used to read `DATE_ADD(time, INTERVAL 3 DAY) < NOW()`, which
+           column. This used to read `DATE_ADD(time, INTERVAL 5 DAY) < NOW()`, which
            selects exactly the same rows but is not sargable: a column inside a function
            cannot be matched against an index, so no index on `time` could ever be used
            however the table was defined.
@@ -5086,7 +5123,7 @@ public function setLastTimeChatChecked($userid, $gameid)
             DELETE FROM
                 chat
             WHERE
-                time < NOW() - INTERVAL 3 DAY
+                time < NOW() - INTERVAL 5 DAY
         ");
 
         if ($stmt) {
@@ -5187,13 +5224,17 @@ public function setLastTimeChatChecked($userid, $gameid)
 
     public function getLadderHistory($playerid)
     {
+        // Ordered by when the match FINISHED, not when it was created. lg.recorded_at is
+        // stamped as registerLadderResult() writes the result, whereas g.id is creation
+        // order, so a long-running game used to sort above later matches that had already
+        // ended. lg.id breaks ties between two results recorded in the same second.
         $sql = "SELECT g.id, g.name, lg.status, p_opp.username as opponent_name, p_opp.id as opponent_id
                 FROM tac_ladder_games lg
                 JOIN tac_game g ON lg.gameid = g.id
                 LEFT JOIN tac_ladder_games lg_opp ON lg_opp.gameid = g.id AND lg_opp.playerid != lg.playerid
                 LEFT JOIN player p_opp ON lg_opp.playerid = p_opp.id
                 WHERE lg.playerid = $playerid
-                ORDER BY g.id DESC
+                ORDER BY lg.recorded_at DESC, lg.id DESC
                 LIMIT 20";
         return $this->query($sql);
     }

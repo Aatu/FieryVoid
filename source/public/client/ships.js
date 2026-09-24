@@ -1481,6 +1481,50 @@ window.shipManager = {
         return (parseInt(ship.arrivalTurn, 10) === gamedata.turn);
     },
 
+    /* ⭐⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md §3 (Item 5, user request 2026-09-17) - MAY THIS UNIT BE
+       GIVEN A POWER ALLOCATION WHILE IT IS STILL IN HYPERSPACE?
+
+       A reinforcement waits in hyperspace for a doorway, and while it waits its crew have nothing
+       to do but set the ship up for the battle it is about to drop into - power systems down,
+       overload the guns so they arrive fully charged in Sustain mode. Nothing about that needs a
+       hex, and the server has always accepted it: InitialOrdersGamePhase::process walks every ship
+       of the posting player and calls submitPower with NO deploy-turn filter, and ajaxInterface
+       already posts system.power for every own ship. The only thing standing in the way was a
+       CLICK - PhaseStrategy.onSystemClicked swallowed it before the system menu could open.
+
+       ⭐⭐ POWER ONLY, NEVER EW (user ruling 2026-09-17): *"ships in Hyperspace will not use EW,
+       just power management."* This predicate is therefore consulted at POWER sites and nowhere
+       else - onSystemClicked, and the four commit-gate sweeps in power.js. It is deliberately NOT
+       wired into ew.js, into the "CHECK for NO EW" arm of the commit checklist, into
+       PhaseStrategy.isOffBoardForEdf (a unit in hyperspace still projects no Energy Draining
+       Field) or into shouldBeHidden (it still has no icon; its ship window is reached from the
+       fleet list). If a future site wants it, the question to ask first is whether that site is
+       about power.
+
+       ⚠️ THE arrivalTurn TEST IS "STILL IN HYPERSPACE", and it is the same one
+       BaseShip::isReinforcement makes: null/undefined means no exit has been assigned yet. Once
+       the Stage 6 sweep stamps an arrival turn the unit stops being a hyperspace unit and becomes
+       an ordinary one with a late deploy turn, which reaches its power controls through the
+       Deployment phase like any other late arrival - so this must answer false for it, or the two
+       routes would both be open on the arrival turn.
+
+       ⚠️ PHASE 1 ONLY. Every control this unlocks (SystemPowerSettings' Off/On, Boost and
+       Overcharge) is already gated on gamedata.gamephase === 1, so widening any further phase
+       would open a menu whose every button is dead.
+
+       ⚠️ NO ORDERS COME OUT OF THIS. weaponManager.selectWeapon and targetHex measure range from
+       getHexPos(), and a unit in hyperspace has none, so they already fail closed - which is what
+       keeps this a power change and not an orders change. */
+    canManagePowerFromHyperspace: function canManagePowerFromHyperspace(ship) {
+        if (!ship || ship.reinforcement !== true) return false;
+        if (ship.arrivalTurn !== null && ship.arrivalTurn !== undefined) return false;
+        if (typeof gamedata === 'undefined') return false;
+        if (gamedata.replay || gamedata.gamephase !== 1) return false;
+        if (!gamedata.isMyShip(ship)) return false;
+
+        return !shipManager.isDestroyed(ship);
+    },
+
     /* ⭐ REINFORCEMENTS_PLAN.md STAGE 9 - HOW MUCH INITIATIVE THIS UNIT IS LOSING FOR COMING OUT
        OF HYPERSPACE OFF COURSE, as a negative number, or 0.
 

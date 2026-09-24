@@ -454,8 +454,10 @@ class Weapon extends ShipSystem
 			//Don't send empty arrays/strings in JSON payload
 			if ($this->stowed) $strippedSystem->stowed = true; //non-operational (Kirishiac Orbital docked)
 			if (!empty($this->turnsloadedArray)) $strippedSystem->turnsloadedArray = $this->turnsloadedArray;
-			if ($this->overloadturns !== 0) $strippedSystem->overloadturns = $this->overloadturns;
-			if ($this->overloadshots !== 0) $strippedSystem->overloadshots = $this->overloadshots;
+			//Sustained (alwaysoverloading) classes default these to NON-zero, and game.php fills an
+			//absent key from the static blueprint - so their 0 must be sent, or it reads as e.g. "S2".
+			if ($this->overloadturns !== 0 || $this->alwaysoverloading) $strippedSystem->overloadturns = $this->overloadturns;
+			if ($this->overloadshots !== 0 || $this->alwaysoverloading) $strippedSystem->overloadshots = $this->overloadshots;
 			if ($this->extraoverloadshots !== 0) $strippedSystem->extraoverloadshots = $this->extraoverloadshots;
 			if (!empty($this->extraoverloadshotsArray)) $strippedSystem->extraoverloadshotsArray = $this->extraoverloadshotsArray;
 			$strippedSystem->fireOrders = $this->fireOrders;         
@@ -3068,7 +3070,34 @@ throw new Exception("getSystemArmourAdaptive! $ss");	*/
 
     protected function getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder)
     {          
-        $damage = $this->getDamage($fireOrder);      
+        /* ⭐ ELITE CREW - "+1 POINT OF DAMAGE PER DIE", AND THIS IS THE ONLY PLACE IT CAN GO.
+           getDamage() is overridden ~900 times across the weapon tree and rolls its dice inline;
+           this method is the one choke point every one of those rolls passes through on its way to
+           a target (Weapon::beforeDamage, plus the handful of classes that call getFinalDamage
+           themselves - customNexus, gravitic, specialWeapons, torpedo). Dice::$perDieBonus caps
+           each die at its own face value; see the property for why the bonus cannot be added to
+           the returned total instead.
+
+           ⚠ SET AND RESTORED AROUND EXACTLY ONE CALL, in a finally, because it is a static:
+           anything getDamage() does downstream that rolls for a reason OTHER than this shot's
+           damage would otherwise inherit the bonus too, and so would every later roll in the
+           request if getDamage() threw. Restores the PREVIOUS value rather than 0 so a nested
+           getFinalDamage (an AoE child order resolved inside a parent's damage call) cannot strip
+           its parent's bonus on the way out.
+
+           ⚠ READ OFF $shooter, NOT $this->unit: a ballistic's damage is resolved from the object
+           that owns the shot, and $shooter is what every other rule in this method already judges
+           (getDamageMod's range and EDF terms both take it). A crew's training belongs to the unit
+           that fired, so the two must agree. Flights and mines answer 0 - ELITE_CREW is only ever
+           offered to ships (Enhancements::setEnhancementOptionsShip). */
+        $dieBonus = ($shooter instanceof BaseShip) ? $shooter->getCrewDieDamageBonus() : 0;
+        $previousDieBonus = Dice::$perDieBonus;
+        Dice::$perDieBonus = $dieBonus;
+        try {
+            $damage = $this->getDamage($fireOrder);
+        } finally {
+            Dice::$perDieBonus = $previousDieBonus;
+        }
         $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);                
         $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
 		
@@ -3359,6 +3388,11 @@ full Advanced Armor effects (by rules) for reference:
     {
         return null;    
     }     
+
+    public function hasSustainedCooldown()
+    {
+        return true;    
+    }         
 
     public function isLoSBlocked($shooterPos, $targetPos, $gamedata) {
         //$blockedLosHex = $gamedata->getBlockedHexes();

@@ -770,6 +770,23 @@
 				return $turndelay;
             
             $turndelay -= self::calculateExtraThrustSpent($ship, $move);
+
+            /* ELITE / POOR CREW - a FLAT modifier on the delay this turn costs, never on
+               turndelaycost (which is the RATE, and is what the SCS and the tooltip print in
+               parentheses). Elite Crew: "whenever the ship turns, its Turn Delay value is reduced
+               by 1 to a minimum of 1"; Poor Crew: "it adds 1 to turn delay amount". One per level
+               of either, and one expression for both - getCrewTurnDelayModifier() is signed.
+
+               ⭐ PLACED BEFORE THE EXISTING FLOOR, which is what implements "to a minimum of 1"
+               without a second clamp of its own. A hull with an ordinary crew answers 0 here, so
+               every existing figure is unchanged to the byte.
+
+               ⚠ MIRROR PAIR with movement.js applyCrewTurnDelay(), which the client calls from
+               BOTH calculateTurndelay and calculateTurndelayAtMove. The client's copy needs a
+               floor and an "only when a delay was actually incurred" test of its own because its
+               two functions do not share this one's unconditional floor - see the comment there. */
+            $turndelay += $ship->getCrewTurnDelayModifier();
+
             if ($turndelay < 1)
                 $turndelay = 1;
                 

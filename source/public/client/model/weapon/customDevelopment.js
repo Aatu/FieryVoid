@@ -184,6 +184,12 @@ var NeutronCannon = function NeutronCannon(json, ship) {
 NeutronCannon.prototype = Object.create(Laser.prototype);
 NeutronCannon.prototype.constructor = NeutronCannon;
 
+var HvyNeutronCannon = function HvyNeutronCannon(json, ship) {
+    Laser.call(this, json, ship);
+};
+HvyNeutronCannon.prototype = Object.create(Laser.prototype);
+HvyNeutronCannon.prototype.constructor = HvyNeutronCannon;
+
 var PlasmaArray = function PlasmaArray(json, ship) {
     Plasma.call(this, json, ship);
 };
@@ -201,3 +207,9 @@ var SeekerTorp = function  SeekerTorp(json, ship) {
 };
 SeekerTorp.prototype = Object.create(Weapon.prototype);
 SeekerTorp.prototype.constructor =  SeekerTorp;
+
+var HvySeekerTorp = function  HvySeekerTorp(json, ship) {
+    Torpedo.call(this, json, ship);
+};
+HvySeekerTorp.prototype = Object.create(Weapon.prototype);
+HvySeekerTorp.prototype.constructor =  HvySeekerTorp;

@@ -323,7 +323,7 @@ only screen and (max-height: 500px) and (orientation: landscape) {
 #logcontainer #gameinfo,
 #logcontainer #chat,
 #logcontainer #globalchat,
-#logcontainer #fleetsave,
+#logcontainer #gameoptions,
 #logcontainer #declarations {
     z-index: 10001;
 }
@@ -852,6 +852,23 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     color: #c54120;
 }
 
+/* HYPERSPACE_IMPROVEMENTS_PLAN.md Item 1 - THE HYPERSPACE HEADER, in the colours of the map
+   markers it is reporting. #e1b000 is the yellow BallisticIconContainer paints a departure jump
+   point in; #00b8e6 is FV's established "not here yet" cyan, the blue of an arrival doorway, the
+   .docked rows and the [Deploys on Turn N] header. DO NOT introduce a third blue or a second
+   yellow here - the reader is looking at the same two colours on the map.
+
+   ⚠️ These two win over the inline style attribute only because combatLog.js writes an EMPTY one
+   for a hyperspace entry. Every other entry's header is team-coloured inline, which no stylesheet
+   rule can (or should) beat - see the note in logFireOrders. */
+#log .logheader.hyperspace.leaving {
+    color: #e1b000;
+}
+
+#log .logheader.hyperspace.arriving {
+    color: #00b8e6;
+}
+
 #log .damage {
     color: #c54120;
 }
@@ -1280,10 +1297,14 @@ only screen and (max-height: 500px) and (orientation: landscape) {
 }
 
 /* The currently selected ship's row, marked and flashed by
-   fleetListManager.revealShipRow. */
+   fleetListManager.revealShipRow.
+
+   ⚠️ THE RAIL STAYS THE TEAM COLOUR (user, 2026-09-17). Selection used to repaint it
+   --fv-accent, which broke the one thing the rail is for: it runs unbroken down a whole
+   slot, so a blue segment in the middle of it read as a row belonging to somebody else.
+   The fill is the selection, exactly as the fill is the hover. */
 .fleetlist .fleetlistline.is-selected {
     background: rgba(139, 202, 242, 0.10);
-    border-left-color: var(--fv-accent);
 }
 
 @keyframes fvRowFlash {
@@ -1523,13 +1544,21 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     max-width: 68ch;
 }
 
-/* ══ 6. SAVE FLEET ══════════════════════════════════════════════════════════════════ */
+/* ══ 6. OPTIONS (display preferences + SAVE FLEET) ══════════════════════════════════
+   The tab was SAVE FLEET and held one button. It is OPTIONS now: client/gameOptions.js
+   renders a checkbox row per registered preference into #gameOptionsList, and the Save
+   Fleet block sits underneath them as a section of the same panel.
 
-#logcontainer #fleetsave {
+   ⭐ THE SCROLL PANE MOVED UP ONE LEVEL, to #gameOptionsPanel. It used to be
+   #fleetSavePanel, which is now only the last section inside it - leaving the pane there
+   would have scrolled the Save Fleet text under a fixed set of checkboxes instead of
+   scrolling the panel. */
+
+#logcontainer #gameoptions {
     overflow: hidden;
 }
 
-#fleetSavePanel {
+#gameOptionsPanel {
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
@@ -1538,6 +1567,63 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     font-style: normal;
     color: var(--fv-text);
     max-width: 640px;
+}
+
+/* ── The checkbox rows ─────────────────────────────────────────────────────────────
+   A whole row is the label, so the text is part of the hit target rather than something
+   beside it - these are 13px lines in a 150px panel and a bare 13px box is a poor target
+   on a phone. The hover fill is the fleet list's, so a list of switches in this panel
+   behaves like a list of rows in that one. */
+.fv-opt-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 6px;
+    margin: 0 -6px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.fv-opt-row:hover {
+    background: var(--fv-card-hover);
+}
+
+/* accent-color paints the native control in the panel's own blue and costs nothing else:
+   a hand-built switch here would need its own focus ring, its own keyboard handling and a
+   second set of states, none of which this panel has an opinion about. */
+.fv-opt-check {
+    accent-color: var(--fv-accent);
+    width: 14px;
+    height: 14px;
+    margin: 0;
+    flex: 0 0 auto;
+    cursor: pointer;
+}
+
+.fv-opt-label {
+    min-width: 0;
+}
+
+/* The section heading that separates Save Fleet from the switches above it. Chrome caps,
+   the same micro-label scale the rest of the panel uses for a thing that names a group
+   rather than saying something. */
+.fv-opt-heading {
+    margin: 14px 0 6px 0;
+    padding-top: 10px;
+    border-top: 1px solid var(--fv-line-soft);
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--fv-text-dim);
+}
+
+/* First child only in the degenerate case where the options list is empty - the divider
+   would otherwise sit at the very top of the panel with nothing above it to divide. */
+#gameOptionsList:empty+#fleetSavePanel .fv-opt-heading {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
 }
 
 #fleetSavePanel p {

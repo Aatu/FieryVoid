@@ -121,7 +121,10 @@ class ShipInfo extends React.Component {
 				   2026-07-23); the map tooltip's "Defence (F/S)" line adds the range/EW
 				   modified chance on top of these*/}
 				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Profile - Front/Side: </Header>{ship.forwardDefense * 5}/{ship.sideDefense * 5}</Entry>}
-				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Thrust per turn: </Header>{ship.freethrust}</Entry>}
+				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Initiative: </Header>{ship.iniativebonus}</Entry>}
+				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Thrust: </Header>{ship.freethrust}</Entry>}
+				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Turn Cost: </Header>{ship.turncost}</Entry>}										
+				{ship.flight && isRevealed && ship.turndelay && <Entry key={reactKey++}><Header>Turn Delay: </Header>{ship.turndelaycost}</Entry>}											
 				{ship.flight && isRevealed && <Entry key={reactKey++}>&nbsp;</Entry>}
 
 				{Object.keys(notes).length > 0 && <Entry key={reactKey++}><Header>NOTES:</Header>&nbsp;</Entry>}

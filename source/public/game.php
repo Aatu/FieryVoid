@@ -234,6 +234,9 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     <script defer src="client/lib/HexagonMath.js"></script>
     <script defer src="client/lib/AbstractCanvas.js"></script>
     <script defer src="client/Settings.js"></script>
+    <!-- Before every renderer file on purpose: ShipIcon asks gameOptions whether to draw the
+         initiative badge, and icons are built inside webglScene.init. -->
+    <script defer src="client/gameOptions.js"></script>
     <script defer src="client/uiEventRelay.js"></script>
     <script defer src="client/renderer/webglHexGridRenderer.js"></script>
     <script defer src="client/renderer/canvasHexGridRenderer.js"></script>
@@ -835,8 +838,8 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
         <div id="declarationsTab" data-select="#declarations" class="logUiEntry"> <!-- fire and EW declarations review -->
             <span>DECLARATIONS</span>
         </div>
-        <div id="fleetSaveTab" data-select="#fleetsave" class="logUiEntry"> <!-- save this game's fleet for reuse -->
-            <span>SAVE FLEET</span>
+        <div id="optionsTab" data-select="#gameoptions" class="logUiEntry"> <!-- display options + save this game's fleet for reuse -->
+            <span>OPTIONS</span>
         </div>
         <!-- Was the literal string "Click!". A chevron plus a real title / aria-expanded
              pair says the same thing without needing a word for it; botPanel.js flips
@@ -898,17 +901,31 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 	?>
     </div>
 
-    <!-- Save Current Fleet (PREBATTLE_DAMAGE_PLAN.md §7.3). Colours come from
-         styles/tokens.css only - no new :root block. -->
-    <div id="fleetsave" class="logPanelEntry" style="display:none;">
-        <div id="fleetSavePanel">
-            <p>
-                Saves your surviving ships, their enhancements, ammo, and their current battle
-                damage and critical effects as a reusable fleet list. Load it from the game
-                lobby to continue a campaign.
-            </p>
-            <p id="fleetSaveSummary"></p>
-            <input type="button" id="fleetSaveButton" class="fv-log-chip fv-log-chip--link" value="Save Current Fleet">
+    <!-- OPTIONS: the player's own display preferences, with Save Current Fleet
+         (PREBATTLE_DAMAGE_PLAN.md §7.3) underneath them. Colours come from
+         styles/tokens.css only - no new :root block.
+
+         The checkbox rows are NOT written here: client/gameOptions.js renders one per entry
+         in its own OPTIONS list, so adding another is one entry there and no markup at all.
+
+         ⚠️ THE TAB IS ALWAYS AVAILABLE NOW. It used to be SAVE FLEET, and savedFleets.js hid
+         the whole tab from a viewer with no units of their own - which would now take the
+         display options away with it. It hides #fleetSavePanel instead. -->
+    <div id="gameoptions" class="logPanelEntry" style="display:none;">
+        <div id="gameOptionsPanel">
+            <!-- gameOptions.js appends one .fv-opt-row per registered option here. -->
+            <div id="gameOptionsList"></div>
+
+            <div id="fleetSavePanel">
+                <h4 class="fv-opt-heading">Save Fleet</h4>
+                <p>
+                    Saves your surviving ships, their enhancements, ammo, and their current battle
+                    damage and critical effects as a reusable fleet list. Load it from the game
+                    lobby to continue a campaign.
+                </p>
+                <p id="fleetSaveSummary"></p>
+                <input type="button" id="fleetSaveButton" class="fv-log-chip fv-log-chip--link" value="Save Current Fleet">
+            </div>
         </div>
     </div>
 

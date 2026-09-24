@@ -235,8 +235,8 @@ class Enhancements{
 	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
 		  $enhName = 'Elite Crew';
 		  $enhLimit = 2;	
-		  $enhPrice = ceil($ship->pointCost*0.4); //+40%	  
-		  $enhPriceStep = ceil($ship->pointCost*0.2); //+20% of base, for total price of 60% for second level
+		  $enhPrice = ceil($ship->pointCost*0.5); //+50%	  
+		  $enhPriceStep = ceil($ship->pointCost*0.25); //+25% of base, for total price of 125% for two levels
 		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  //technical ID, human readable name, number taken, maximum number to take, price for one, price increase for each further, is an option (rather than enhancement)
 	  }	 
@@ -816,13 +816,12 @@ class Enhancements{
 		}
 
 	  //Poor Crew (official but modified): -5 Initiative, -1 Engine, -1 Sensors, -1 Reactor power, +1 Profile, +2 to critical results, -1 to hit all weapons
-	  //cost: -15% of ship cost (second time: -10%)
 	  $enhID = 'POOR_CREW';
 	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
 		  $enhName = 'Poor Crew';
 		  $enhLimit = 2;	
-		  $enhPrice = -ceil($ship->pointCost*0.15); //-15%	  
-		  $enhPriceStep = -ceil($enhPrice/3); //+5%, for total price of -10% for second level
+		  $enhPrice = -ceil($ship->pointCost*0.25); //-25%	  
+		  $enhPriceStep = -ceil($enhPrice*0.4); //+10%, for total price of -40% for second level
 		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 	  }
 	  
@@ -2273,6 +2272,45 @@ class Enhancements{
 	   }//endof function setEnhancementsFighter
   
 	
+	   /* ⭐ ELITE / POOR CREW - JUMP DELAY, ±20% PER LEVEL. $levels is the SIGNED crew quality:
+	      positive Elite (delay shortens), negative Poor (delay lengthens). The arithmetic, the
+	      rounding and the two guards that matter all live in JumpEngine::applyCrewJumpDelayModifier
+	      - this is only the sweep.
+
+	      ⚠ THROUGH getUnitJumpEngines(), NEVER a bare foreach over $ship->systems: on a hull whose
+	      drive is flight-mounted (the Walkers) the engines are systems of a CRAFT, and a direct
+	      sweep sees none of them. That helper is the one place that knows the difference. */
+	   private static function applyCrewJumpDelay($ship, $levels){
+		   if ((int)$levels === 0) return;
+		   foreach (JumpEngine::getUnitJumpEngines($ship) as $engine){
+			   $engine->applyCrewJumpDelayModifier($levels);
+		   }
+	   }
+
+	   /* ⭐ POOR CREW - "HANGAR LAUNCH/DOCK CAPACITY IS HALVED", once per level.
+	      A Hangar's $output is the SHARED launch+land budget per turn (launchedThisTurn +
+	      landedThisTurn <= output); its CAPACITY in boxes is remaining health and is deliberately
+	      untouched, so a Poor Crew carrier still holds its full complement - it just cycles it
+	      half as fast. Every capacity gate reads $output directly (HangarOps::canHangarLaunch /
+	      canHangarReceive / the rail budgets), and ShipSystem::stripForJson sends $output
+	      unconditionally, so the halved figure reaches the client with no extra plumbing.
+
+	      ceil(), so a bay never drops to 0 and becomes unusable; compounding per level, so x2 Poor
+	      Crew quarters the rate. Bays already at 1 or 0 are left alone - a CATAPULT is a
+	      single-craft rail with no output budget at all (see HangarOps::effectiveCapacity), and
+	      max(1, ceil(0/2)) would hand it a budget it never had. */
+	   private static function halveHangarRate($ship, $levels){
+		   $levels = (int)$levels;
+		   if ($levels <= 0) return;
+		   foreach ($ship->systems as $system){
+			   if (!($system instanceof Hangar)) continue;
+			   for ($i = 0; $i < $levels; $i++){
+				   if ((int)$system->output <= 1) break; //already at the floor (or a catapult's 0)
+				   $system->output = (int)ceil($system->output / 2);
+			   }
+		   }
+	   }
+
 	   /*enhancements for ships - actual applying of chosen enhancements
 	   */
 	   private static function setEnhancementsShip($ship){
@@ -2354,6 +2392,21 @@ class Enhancements{
 						break;
 
 					case 'ELITE_CREW': //Elite Crew: +5 Initiative, +2 Engine, +1 Sensors, +2 Reactor power, -1 Profile, -1 to critical results, +1 to hit all weapons
+						/* ⭐ THE FOUR ORIGINAL-B5W CLAUSES THIS PORT USED TO SKIP (added 2026-09-20).
+						   All four scale per level, like every other Elite Crew effect here:
+						     1. turn delay -1 per level, floored at 1 .... $crewQuality, read by
+						        Movement::calculateTurndelay and movement.js applyCrewTurnDelay;
+						     2. +1 damage per DIE per level, capped at the die's face ... $crewQuality,
+						        read by Weapon::getFinalDamage via Dice::$perDieBonus;
+						     3. jump delay -20% per level ................ applied right here, once,
+						        to the hull's jump engines;
+						     4. one default shuttle per level upgraded to the faction's armed shuttle
+						        ... HangarOps::crewArmedShuttleUpgrades, at hangar population time.
+						   Only 3 is done in this block; 1, 2 and 4 are derivations of $crewQuality,
+						   which is set below. */
+						$ship->addCrewQuality($enhCount);
+						self::applyCrewJumpDelay($ship, $enhCount);
+
 						//fixed values
 						$ship->forwardDefense -= $enhCount;
 						$ship->sideDefense -= $enhCount;
@@ -2729,6 +2782,19 @@ class Enhancements{
 						break;								
 
 					case 'POOR_CREW': //Poor Crew: -1 Engine, -1 Sensors, -1 Reactor power, +1 Profile, +2 to critical results, -5 Initiative, -1 to hit all weapons
+						/* ⭐ THE FOUR ORIGINAL-B5W CLAUSES THIS PORT USED TO SKIP (added 2026-09-20),
+						   the mirror of the Elite Crew block above and scaling per level the same way:
+						     1. turn delay +1 per level ................. $crewQuality (negative);
+						     2. hangar launch/dock rate halved per level  applied right here;
+						     3. jump delay +20% per level ............... applied right here;
+						     4. no armed shuttles, bought or berthed .... $crewQuality, read by
+						        HangarOps::crewBlocksArmedShuttles and the lobby's Fleet Checker.
+						   ⚠ Poor Crew has NO damage clause - getCrewDieDamageBonus() clamps at 0 so
+						   the negative level can never become a penalty per die. */
+						$ship->addCrewQuality(-$enhCount);
+						self::applyCrewJumpDelay($ship, -$enhCount);
+						self::halveHangarRate($ship, $enhCount);
+
 						//fixed values
 						$ship->forwardDefense += $enhCount;
 						$ship->sideDefense += $enhCount;
@@ -2776,8 +2842,15 @@ class Enhancements{
 							}
 						}  
 						if($strongestSystem != null){ //Reactor actually exists to be enhanced! although it has to ;)
-							$strongestSystem->output -= $enhCount;
-						}						
+							$strongestSystem->output -= $enhCount*2;
+						}		
+						
+						//modify thruster ratings as well! - of all thrusters
+						foreach ($ship->systems as $system){
+							if ($system instanceof Thruster){
+								$system->output -= $enhCount;
+							}
+						} 						
 						break;
 						
 					case 'MINE_MULTI': //Flexible Targeting for Mines
@@ -3102,6 +3175,17 @@ class Enhancements{
 							$strippedShip->sideDefense = $ship->sideDefense;
 							$strippedShip->iniativebonus = $ship->iniativebonus;
 							$strippedShip->toHitBonus = $ship->toHitBonus;	///Just in case needed on Front End.							
+							/* The client's WHOLE knowledge of this hull's crew quality: a flat turn-delay
+							   modifier (-1 per Elite level, +1 per Poor level), read by movement.js
+							   applyCrewTurnDelay and by the two readouts that print a turn's delay
+							   (UI/ShipTooltip.js, reactJs/shipWindow/ShipNotesPanel.js). Sent ONLY from
+							   these two cases, so an ordinary hull's payload is unchanged - the same
+							   convention dockedLCVs uses for the other flat turn-delay surcharge.
+							   Nothing else about the crew needs to cross: the die bonus is resolved
+							   server-side, and the jump delay and hangar rate are already baked into
+							   the JumpEngine's loadingtime and the Hangar's output by the time
+							   stripForJson runs. */
+							$strippedShip->crewTurnDelayMod = $ship->getCrewTurnDelayModifier();
 							break;
 
 						case 'MARK_FERV': //Markab Religious Fervor: Initiative and Profiles modified
@@ -3126,6 +3210,7 @@ class Enhancements{
 							$strippedShip->sideDefense = $ship->sideDefense;
 							$strippedShip->iniativebonus = $ship->iniativebonus;
 							$strippedShip->toHitBonus = $ship->toHitBonus;	///Just in case needed on Front End.								
+							$strippedShip->crewTurnDelayMod = $ship->getCrewTurnDelayModifier();
 							break;							
 						
 						case 'SLUGGISH': //Sluggish: Initiative  modified

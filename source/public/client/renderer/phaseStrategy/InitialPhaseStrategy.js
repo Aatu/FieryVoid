@@ -20,6 +20,8 @@ window.InitialPhaseStrategy = function () {
         //WALKERS §3.18 (Stage 20): an abduction that took hold last turn is re-declared. After the power
         //copy on purpose - a drive left offline must read offline - and before the icons and windows draw.
         if (typeof JumpEngine !== 'undefined' && typeof JumpEngine.continueAbductions === 'function') JumpEngine.continueAbductions();
+        //HYPERSPACE H3 follow-up: a jump point that was maintained last turn is re-declared, same reason, same place.
+        if (typeof JumpEngine !== 'undefined' && typeof JumpEngine.continueVortexMaintains === 'function') JumpEngine.continueVortexMaintains();
         this.changeAnimationStrategy(new window.IdleAnimationStrategy(shipIcons, gamedata.turn));
 
         PhaseStrategy.prototype.activate.call(this, shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene, shipWindowManager);
@@ -221,6 +223,15 @@ window.InitialPhaseStrategy = function () {
         //selection that is one weapon short. selectWeapon now fires SystemDataChanged itself
         //immediately after the push, and that arrives at this strategy's inherited handler with
         //the selection complete. Switching the selected ship above is all this handler still owns.
+    };
+
+    /* HYPERSPACE_IMPROVEMENTS_PLAN.md H5 follow-up - an open Manage Reinforcements dialog re-reads its
+       rows. Maintain on/off, a drive powered down: every change that opens or greys a held exit's row
+       raises SystemDataChanged, and the dialog stays open beside the ship window it was made in. A
+       no-op when the dialog is closed. */
+    InitialPhaseStrategy.prototype.onSystemDataChanged = function (payload) {
+        PhaseStrategy.prototype.onSystemDataChanged.call(this, payload);
+        if (window.ReinforcementEntry && typeof ReinforcementEntry.refreshMenu === 'function') ReinforcementEntry.refreshMenu();
     };
 
     InitialPhaseStrategy.prototype.onSystemTargeted = function (payload) { //25.11.23 - Added onSystemTargeted here to allow Called Shots in Initial Orders phase e.g. Limpet Bore.

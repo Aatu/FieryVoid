@@ -293,10 +293,14 @@ class SystemPowerSettings extends Component {
 
         const isReactor = system.name === 'reactor';
         const isJumpEngine = system.name === 'jumpEngine';
+        /* HYPERSPACE_IMPROVEMENTS_PLAN.md §5 (Stage H4) - while an Ancient-charging drive RECHARGES, its
+           boost is EXTRA CHARGING (up to JumpEngine.getChargeBoostMax levels, set per turn by the server),
+           so it gets the ordinary - 0 + stepper instead of the one-click Jump to Hyperspace Yes/No. */
+        const isChargeBoost = isJumpEngine && typeof system.getChargeBoostMax === 'function' && system.getChargeBoostMax() > 0;
 
         let boostLabel = "Boost Level";
         if (isReactor) boostLabel = "Self-Destruct";
-        if (isJumpEngine) boostLabel = "Jump to Hyperspace";
+        if (isJumpEngine) boostLabel = isChargeBoost ? "Extra Charging" : "Jump to Hyperspace";
 
         return (
             <Container>
@@ -315,7 +319,7 @@ class SystemPowerSettings extends Component {
                 {showBoost && (
                     <Row>
                         <Label>{boostLabel}</Label>
-                        {(isReactor || isJumpEngine) ? (
+                        {(isReactor || (isJumpEngine && !isChargeBoost)) ? (
                             <Controls>
                                 <ActionButton
                                     onClick={() => this.handleBoost()}

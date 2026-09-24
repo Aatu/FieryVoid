@@ -339,16 +339,26 @@ class Firing
             if (!($vortex instanceof SpawnJumpPoint))
                 return "this ship's vortex unit is gone";
 
-            /* REINFORCEMENTS_PLAN.md §2.6 / §2.3 - AN EXIT HAS NO MAINTAIN. It is one-shot:
-               it forms at the end of the turn it was declared, delivers its manifest on the next,
-               and closes at the end of that one whatever anybody declares. The client never offers
-               the control (isJumpVortex stays entrance-only, so JumpEngine.canMaintainVortex cannot see
-               an exit), so only a tampered POST arrives here - but without this line a forged
-               mode-7 order would hold an exit open indefinitely, and the ship that opened it
-               could never open anything else (trap 5).
-               Same shape and same reasoning as getMaintainDeclaration's gate refusal. */
-            if ($vortex instanceof SpawnJumpPointExit)
-                return "a jump point exit is one-shot and cannot be maintained";
+            /* ⭐⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md STAGE H5 - A SHIP'S BLUE EXIT MAY NOW BE MAINTAINED,
+               from the turn its opener arrives, exactly as an entrance is (and on a Vorlon without the
+               four-turn cap, paid from the capacitor - user, 2026-09-19). What used to be a blanket
+               refusal of every exit narrows to the two that still cannot be held:
+
+                 - a legacy drive's PHASE-IN doorway. Invisible, one-shot, and a legacy drive has no
+                   Maintain (the isLegacyJump refusal above already catches it - this names the rule
+                   in case a future drive ever holds one without the flag);
+                 - an exit whose opener is still IN HYPERSPACE - it was released rather than placed.
+                   Its getHexPos() is its slot's 'start' marker, a fiction, so the range test above
+                   measured nothing real.
+
+               The end-of-turn half is getVortexClosureReason's exit branch, which falls through to
+               the ship list from the arrival turn on. Trap 5 is still kept - by the four-turn cap on
+               a young race's exit and by the upkeep (R6) on a Vorlon's. */
+            if ($vortex instanceof SpawnJumpPointPhaseIn)
+                return "a phase-in doorway is one-shot and cannot be maintained";
+
+            if ($vortex instanceof SpawnJumpPointExit && $shooter->getTurnDeployed($gamedata) > (int)$gamedata->turn)
+                return "the opener is still in hyperspace and cannot hold its jump point exit";
 
             if (!$vortex->getHexPos()->equals($target))
                 return "maintain must target this ship's own vortex hex";
@@ -1716,7 +1726,11 @@ public static function firePreFiringWeapons($gamedata){
     public static function isHyperspaceLogOrder($fire){
         return $fire->damageclass === 'HyperspaceJump'
             || $fire->damageclass === 'JumpFailure'
-            || $fire->damageclass === 'JumpVortex';   //STAGE 6 - a jump point opening or closing
+            || $fire->damageclass === 'JumpVortex'        //STAGE 6 - a YELLOW jump point opening or closing
+            //HYPERSPACE_IMPROVEMENTS_PLAN.md Item 1 - and the BLUE one, split off so the combat log
+            //can colour the two doorways differently. Same order, same inertness; only the class
+            //name differs, so it must be skipped by the four gathers exactly as its twin is.
+            || $fire->damageclass === 'JumpVortexExit';
     }
 
     public static function prepareFiring($gamedata, $dbManager = null){
@@ -2256,10 +2270,13 @@ public static function firePreFiringWeapons($gamedata){
            families that markLegacy() now puts back on the boost path, so the two had to be fixed
            together. Any future "find the jump engines" sweep should test instanceof, never a name.
 
-           NOT narrowed to isLegacyJump(): a boost committed on a NON-legacy engine before the
-           Stage 2 deploy must still resolve (that is the whole reason Stage 2 left this code in
-           place - see JumpEngine::$boostable). isOverloading() is the real gate, and a non-legacy
-           engine can no longer be given a new boost, so it never fires for one by accident.
+           ⭐⭐ NARROWED TO LEGACY DRIVES SINCE HYPERSPACE_IMPROVEMENTS_PLAN.md STAGE H4, and it had to
+           be. This used to rest on isOverloading() alone, safe only because a non-legacy engine
+           could not be boosted; H4 lets a Vorlon drive boost to charge faster, and every Vorlon that
+           did would have left the battle here. JumpEngine::isJumpOutBoost is the gate now: a legacy
+           drive's boost, and on an Ancient-charging drive only once it is fully charged. (The
+           pre-Stage-2 committed boost this once had to honour resolved at the end of its own turn,
+           a month before H4.)
 
            isDestroyed() restates the filter getSystemsByName applied for free. doHyperspaceJump
            re-checks the engine's health and its host section itself, but a destroyed engine should

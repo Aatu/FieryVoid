@@ -35,8 +35,31 @@ window.PhaseStrategy = function () {
         this.uiManager = new window.UIManager($("body")[0]);
     }
 
+    /* `payload.select` additionally makes the ship the selected ship, for callers where
+       clicking its name means "this is the one I want to act on" - the fleet list's rows
+       (user, 2026-09-17). OFF BY DEFAULT and it matters: the map's own tooltip menu opens a
+       window for a ship that is already selected or targeted (shipTooltipMenu.js), and must
+       not steal the selection out from under itself.
+
+       THE SAME THREE GUARDS AS onScrollToShip, in the same order and for the same reasons:
+       setSelectedShip calls getByShip(...).setSelected, which throws for a unit with no icon
+       (a docked flight, a hyperspace reinforcement); shouldBeHidden keeps an undetected enemy
+       and an undeployed hull out; and canSelectShip carries each phase's own rule, so a row
+       click can neither declare a fire order nor jump the movement sequence.
+
+       ⚠️ The guards are around the SELECTION, never around the window. Opening a window
+       reveals no board position, which is the only thing those guards exist to protect - and
+       for a docked unit the window is the only route to its contents at all. */
     PhaseStrategy.prototype.onOpenShipWindowFor = function (payload) {
         this.shipWindowManager.open(payload.ship);
+
+        if (!payload.select || !payload.ship) return;
+        if (!this.shipIconContainer.getById(payload.ship.id)) return;
+        if (shipManager.shouldBeHidden(payload.ship)) return;
+
+        if (this.canSelectShip(payload.ship)) {
+            this.setSelectedShip(payload.ship);
+        }
     }
 
     PhaseStrategy.prototype.onCloseShipWindow = function (payload) {
@@ -235,6 +258,19 @@ window.PhaseStrategy = function () {
 
         this.uiManager.hideWeaponList();
         this.hideSystemInfo(true);
+
+        /* ⭐ AND EVERY WEAPON ARC COMES DOWN, WHATEVER hideSystemInfo DID (HYPERSPACE_IMPROVEMENTS_PLAN.md
+           H5 follow-up, play test 4367). hideSystemInfo only sweeps arcs while an info panel is open, and
+           the deselect above cannot do it either: its unSelectWeapon raises SystemDataChanged, which
+           PhaseDirector.relayEvent drops because this strategy is already inactive. So a SELECTED
+           arc-when-selected system - a Jump Engine clicked in Initial Orders - left its yellow reach disc
+           on the map into the phases after, until something next hovered a system. The new phase draws
+           whatever arcs it wants itself. */
+        this.hoveredArcSystem = null;
+        if (this.shipIconContainer) {
+            this.shipIconContainer.getArray().forEach(function (icon) { icon.hideWeaponArcs(); });
+        }
+
         this.shipWindowManager.closeAll();
 
         this.shipIconContainer.getArray(icon => {
@@ -1739,7 +1775,19 @@ window.PhaseStrategy = function () {
             return;
         }
 
-        if (shipManager.getTurnDeployed(ship) > gamedata.turn) return;
+        /* ⭐⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md §3 (Item 5) - A REINFORCEMENT WAITING IN HYPERSPACE
+           IS THE ONE EXCEPTION, and it was this line that made the reported symptom ("I can bring
+           up the shipWindow but none of the systems I click on respond during Initial Orders"):
+           the click was swallowed here, before showSystemInfo, so the system menu never opened at
+           all. A unit in hyperspace answers 999 to getTurnDeployed, exactly as a surrendered fleet
+           does, so it was caught by the same guard that stops a late-slot ship being fiddled with
+           while it stands at its entry hex.
+
+           The guard is right for everything else and stays. canManagePowerFromHyperspace is
+           narrow: my own reinforcement, no arrival turn yet, Initial Orders, not a replay - see
+           its comment in ships.js, including why it is a POWER permission and not an EW one. */
+        if (shipManager.getTurnDeployed(ship) > gamedata.turn
+            && !shipManager.canManagePowerFromHyperspace(ship)) return;
 
         this.showSystemInfo(ship, system, element, true);
         PhaseStrategy.prototype.onSystemDataChanged.call(this, { ship: ship, system: system });

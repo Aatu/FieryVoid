@@ -9,7 +9,7 @@ class Wanderer extends BaseShip{
         $this->phpclass = "Wanderer";
         $this->shipClass = "The Wanderer";
         $this->imagePath = "img/ships/WalkerTraveler.png";
-        $this->canvasSize = 225;
+        $this->canvasSize = 250;
 	    $this->isd = 'Ancient';
         $this->shipSizeClass = 3; 
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
@@ -31,7 +31,7 @@ class Wanderer extends BaseShip{
 
 		//Has Elite Crew stats
 		$this->notes = "Elite Crew";
-		$this->notes .= "WEapons begin battle fully charged";		
+		$this->notes .= "<br>Weapons begin battle fully charged";		
 		$this->critRollMod = -1;
 		$this->toHitBonus = 1;		
 

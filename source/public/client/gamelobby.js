@@ -1414,7 +1414,18 @@ window.gamedata = {
 					if (!foundDefault) {
 						totalHangarOther.push(new Array(defaultKey, defaultShuttles.count));
 					}
-					totalShuttleCapacity += defaultShuttles.count;
+					//POOR CREW "cannot purchase Armed Shuttles, or accommodate them in Fleet Checker":
+					//this hull contributes NO armed-shuttle berths to the fleet. It still RECEIVES its
+					//own (unarmed) default shuttles, which is why only totalShuttleCapacity is skipped
+					//and the totalHangarOther entry above is left alone - that entry is reported in the
+					//Breaching Pods & Shuttles section, not used as armed-shuttle capacity.
+					//Server twins: HangarOps::defaultShuttleLeftoverBoxes and
+					//suppressDefaultShuttlesForArmed, which make the same exclusion when apportioning
+					//bought armed shuttles across carriers - the two MUST agree or the lobby and the
+					//game will disagree about how many default shuttles a carrier ends up holding.
+					if (!window.HangarShared.crewBlocksArmedShuttles(lship)) {
+						totalShuttleCapacity += defaultShuttles.count;
+					}
 					if (defaultShuttleKeyList.indexOf(defaultKey) === -1) {
 						defaultShuttleKeyList.push(defaultKey);
 					}
@@ -5249,7 +5260,18 @@ window.gamedata = {
 					if (!foundDefault) {
 						totalHangarOther.push(new Array(defaultKey, defaultShuttles.count));
 					}
-					totalShuttleCapacity += defaultShuttles.count;
+					//POOR CREW "cannot purchase Armed Shuttles, or accommodate them in Fleet Checker":
+					//this hull contributes NO armed-shuttle berths to the fleet. It still RECEIVES its
+					//own (unarmed) default shuttles, which is why only totalShuttleCapacity is skipped
+					//and the totalHangarOther entry above is left alone - that entry is reported in the
+					//Breaching Pods & Shuttles section, not used as armed-shuttle capacity.
+					//Server twins: HangarOps::defaultShuttleLeftoverBoxes and
+					//suppressDefaultShuttlesForArmed, which make the same exclusion when apportioning
+					//bought armed shuttles across carriers - the two MUST agree or the lobby and the
+					//game will disagree about how many default shuttles a carrier ends up holding.
+					if (!window.HangarShared.crewBlocksArmedShuttles(lship)) {
+						totalShuttleCapacity += defaultShuttles.count;
+					}
 					if (defaultShuttleKeyList.indexOf(defaultKey) === -1) {
 						defaultShuttleKeyList.push(defaultKey);
 					}

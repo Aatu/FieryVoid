@@ -364,7 +364,39 @@ window.HangarShared = (function () {
         return 'Hangar';
     }
 
+    // ---- ELITE / POOR CREW (Enhancements ELITE_CREW / POOR_CREW) ----
+    // Signed crew level for a ship: >0 Elite, <0 Poor, 0 ordinary. Read off the
+    // enhancementOptions tuple (ID, name, count, ...) because that is the ONE
+    // representation both pages have - the lobby builds its ships from the static
+    // blueprint and never sees a server-side crew field, and the derived value the
+    // game screen IS sent (ship.crewTurnDelayMod) is a turn-delay modifier, not a level.
+    // Mirrors BaseShip::getCrewQuality (PHP).
+    function crewQualityOf(ship) {
+        if (!ship || !Array.isArray(ship.enhancementOptions)) return 0;
+        var level = 0;
+        for (var i = 0; i < ship.enhancementOptions.length; i++) {
+            var row = ship.enhancementOptions[i];
+            if (!row) continue;
+            var count = parseInt(row[2], 10) || 0;
+            if (count <= 0) continue;
+            if (row[0] === 'ELITE_CREW') level += count;
+            else if (row[0] === 'POOR_CREW') level -= count;
+        }
+        return level;
+    }
+
+    // "Poor Crew cannot purchase Armed Shuttles, or accommodate them in Fleet Checker."
+    // Such a hull's default-shuttle pool contributes NO armed-shuttle berths to the fleet,
+    // though it still receives its own (unarmed) default shuttles. Server twin:
+    // HangarOps::crewBlocksArmedShuttles, which makes the same exclusion on the two
+    // server-side paths that apportion bought armed shuttles across carriers.
+    function crewBlocksArmedShuttles(ship) {
+        return crewQualityOf(ship) < 0;
+    }
+
     return {
+        crewQualityOf:             crewQualityOf,
+        crewBlocksArmedShuttles:   crewBlocksArmedShuttles,
         isDockHangar:              isDockHangar,
         isCatapultSys:             isCatapultSys,
         effectiveHangarBoxes:      effectiveHangarBoxes,

@@ -1171,6 +1171,18 @@ window.ajaxInterface = {
                    writes NULL for anything it does not believe. */
                 if (ship.arrivalVia !== null && ship.arrivalVia !== undefined) {
                     newShip.arrivalVia = ship.arrivalVia;
+
+                    /* HYPERSPACE_IMPROVEMENTS_PLAN.md STAGE H6a/H6b - how it comes out: the speed, and
+                       the carrier it starts inside (ReinforcementEntry's Jump Manifest). Claims, like the
+                       berth itself: InitialOrdersGamePhase::persistManifest clamps the one and re-fits
+                       the other. Sent only when the manifest set them, so a berth the dialog never
+                       touched keeps whatever order the server already holds. */
+                    if (ship.arrivalSpeed !== null && ship.arrivalSpeed !== undefined) {
+                        newShip.arrivalSpeed = ship.arrivalSpeed;
+                        if (ship.arrivalHangar !== null && ship.arrivalHangar !== undefined) {
+                            newShip.arrivalHangar = ship.arrivalHangar;
+                        }
+                    }
                 }
 
                 /* Reinforcements (REINFORCEMENTS_PLAN.md §4 Stage 1). Read ONLY by

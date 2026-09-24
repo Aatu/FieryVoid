@@ -23,6 +23,26 @@ window.combatLog = {
     //Commented out below for now, but I'll keep the idea in for now.
     COLLAPSE_ROWS_OVER: 4,
 
+    /* ⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md Item 1 - WHICH FIRE ORDERS ARE HYPERSPACE EVENTS, and
+       which WAY through hyperspace each one goes. The value is a CSS class suffix, not a colour:
+       logPanel.css owns the two literals (#e1b000 / #00b8e6), which are the same values the map
+       markers use. See the note at the header in logFireOrders for why this exists.
+
+         leaving  - out of the battle. A yellow jump point opening or closing (JumpVortex), a ship
+                    completing its jump (HyperspaceJump), and a drive failing while it tried
+                    (JumpFailure). The arrival path never writes any of the three.
+         arriving - into the battle. A blue doorway opening or closing (JumpVortexExit), including
+                    an Ancient / Shadow / BSG / Star Wars hull phasing in through one of its own.
+
+       ⚠️ A DAMAGECLASS ADDED HERE MUST ALSO BE ADDED TO weaponManager.doShortLogText, or the entry
+       will head HYPERSPACE: and then go on to describe itself as a Ramming Attack that hit. */
+    HYPERSPACE_LOG_KINDS: {
+        'JumpVortex': 'leaving',
+        'HyperspaceJump': 'leaving',
+        'JumpFailure': 'leaving',
+        'JumpVortexExit': 'arriving'
+    },
+
     /* ⭐ SERVER-AUTHORED pubnotes CANNOT COLOUR A SHIP NAME, BECAUSE THE COLOUR IS PER-VIEWER.
        gamedata.getShipLogColorCss answers in the READER's terms - green for mine, blue for an
        ally, red for an enemy in a 2-team game, the absolute team palette for an observer - and
@@ -271,11 +291,37 @@ window.combatLog = {
         // for the observer / 2-team / 3+-team rule it follows.
         var fireColor = gamedata.getShipLogColorCss(ship);
 
+        /* ⭐⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md §2 (Item 1, user request 2026-09-17) - A HYPERSPACE
+           EVENT IS NOT FIRE, AND THE HEADER SAYS SO.
+
+           Opening a jump point, closing one, and leaving through one are not shots - they are log
+           lines wearing a fire order's clothes (writeVortexLogOrder / doHyperspaceJump), which is
+           why doShortLogText already suppresses the "firing 1x Ramming Attack" wording for every
+           one of them. The header was the last place the entry still claimed to be an attack.
+
+           ⭐ THE COLOUR FOLLOWS THE MAP MARKER, and that is the whole rule: #e1b000 is the yellow
+           BallisticIconContainer paints a departure jump point in, #00b8e6 is the blue it paints an
+           arrival one in. A player reading the log is looking at the same two colours on the map.
+           Do not introduce a third blue or a second yellow for this - both values are quoted in
+           tactical.css and logPanel.css already, and the rule those files state holds here.
+
+           ⚠️ THIS IS THE ONE HEADER THAT IS NOT TEAM-COLOURED. Every other entry takes the
+           SHOOTER's allegiance colour (fireColor above). Trading that away is deliberate and it is
+           affordable for exactly one reason: the 3px allegiance rail on the entry comes from the
+           same source and is untouched, so the owner of the event is still readable at a glance.
+           If the rail is ever restyled, this decision has to be revisited with it. */
+        var hyperspaceKind = combatLog.HYPERSPACE_LOG_KINDS[fire.damageclass] || null;
+        var headerLabel = hyperspaceKind ? 'HYPERSPACE: ' : 'FIRE: ';
+        var headerClass = hyperspaceKind ? 'logheader hyperspace ' + hyperspaceKind : 'logheader fire';
+        //The hyperspace colours live in logPanel.css, keyed off the class - an inline literal here
+        //would be a fourth copy of two values the stylesheets already own.
+        var headerStyle = hyperspaceKind ? '' : fireColor;
+
         /* The entry's OPENING TAG is assembled at the very bottom of this function, not
            here: the collapse class depends on how many damage rows come out of the loop
            below, and the rail colour is easier to read next to the header colour it comes
            from. `html` is the entry's INNER markup from this point on. */
-        var html = '<span class="logheader fire" style="' + fireColor + '">FIRE: </span><span>';
+        var html = '<span class="' + headerClass + '" style="' + headerStyle + '">' + headerLabel + '</span><span>';
         html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name + '</span>';
 
         var counttext = count > 1 ? count + "x " : "";

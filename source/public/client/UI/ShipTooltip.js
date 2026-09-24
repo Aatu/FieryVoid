@@ -563,7 +563,12 @@ window.ShipTooltip = function () {
             //DELAY is genuinely 0 at speed 0 (a stationary ship has no delay), so
             //it is not clamped.
             var turncost = Math.max(1, Math.ceil(speed * baseTurnCost)) + lcvTurnSurcharge;
-            var turnDelayCost = Math.ceil(speed * shipManager.movement.getTurnDelayCost(ship)) + lcvTurnSurcharge;
+            //ELITE / POOR CREW: the same flat modifier the movement engine applies (-1 per Elite
+            //level, floored at 1; +1 per Poor level), on the DELAY only - a crew's training does
+            //not change what a turn costs in thrust. Applied before the LCV surcharge, matching
+            //movement.js calculateTurndelayAtMove.
+            var turnDelayCost = shipManager.movement.applyCrewTurnDelay(ship,
+                Math.ceil(speed * shipManager.movement.getTurnDelayCost(ship))) + lcvTurnSurcharge;
 
             this.addEntryElement('Pivot cost: ' + ship.pivotcost + ' Roll cost: ' + ship.rollcost, ship.flight !== true);
             this.addEntryElement('Pivot cost: ' + ship.pivotcost + ' Combat pivot cost: ' + Math.ceil(ship.pivotcost * 1.5), ship.flight === true);

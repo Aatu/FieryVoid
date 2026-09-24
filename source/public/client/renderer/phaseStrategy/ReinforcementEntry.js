@@ -16,7 +16,9 @@
  *             |       \-> manifest dialog     doorway - re-open the passenger list without taking
  *             |                              the jump point back first (2026-09-02). The manifest
  *             |                              has its own way back HERE, so the two are a loop
- *             |-> "Select Reinforcements" . a GATE whose jump point is already open (Stage 8)
+ *             |-> "Select Reinforcements" . a GATE whose jump point is already open (Stage 8), or
+ *             |       |                     a ship of mine ON THE BOARD maintaining the blue exit
+ *             |       |                     it arrived through (HYPERSPACE_IMPROVEMENTS_PLAN.md H5)
  *             |       \-> manifest dialog ..... who rides through, this turn
  *             |-> "Withdraw Gate Signal" .. a gate this client claimed for arrival this turn
  *             \-> "Choose Hex" ............ the map is armed; the next click is the exit hex
@@ -221,7 +223,7 @@ window.ReinforcementEntry = (function () {
        gets a vortex is simply never stamped with an arrival turn (plan §3.1). */
     function clearManifest(openerId) {
         myHyperspaceUnits().forEach(function (ship) {
-            if (ship.arrivalVia == openerId) ship.arrivalVia = null;
+            if (ship.arrivalVia == openerId) unbook(ship);
         });
     }
 
@@ -231,7 +233,71 @@ window.ReinforcementEntry = (function () {
         var keep = manifestRiders(opener);
         myHyperspaceUnits().forEach(function (ship) {
             if (ship.id == opener.id) return;
-            if (ship.arrivalVia == opener.id && keep.indexOf(ship) === -1) ship.arrivalVia = null;
+            if (ship.arrivalVia == opener.id && keep.indexOf(ship) === -1) unbook(ship);
+        });
+    }
+
+    /* A berth and everything that rides with it. HYPERSPACE_IMPROVEMENTS_PLAN.md H6a/H6b put two fields
+       beside arrivalVia - the speed the unit comes out at and the carrier it starts inside - and a berth
+       taken away must take them too, or a later booking would post a hangar on a ship it no longer
+       arrives with. Every un-booking in this file goes through here. */
+    function unbook(ship) {
+        ship.arrivalVia = null;
+        ship.arrivalSpeed = null;
+        ship.arrivalHangar = null;
+    }
+
+    /* ⭐ STAGE H6a - THE SPEED A UNIT COMES OUT AT, now chosen in the manifest because there is no
+       DEPLOYMENT: REINFORCEMENTS phase left to choose it in. What the player picked last time, or else
+       the speed of its last movement row - which is exactly what the retired phase's placement started
+       from (shipManager.movement.deploy copies it). 0-10, the range that phase's arrows allowed; the
+       server clamps it again (JumpEngine::clampArrivalSpeed), since a POST can say anything. */
+    var ARRIVAL_SPEED_MAX = 10;
+
+    function clampArrivalSpeed(ship, speed) {
+        if (ship.osat || ship.base) return 0;
+        var n = parseInt(speed, 10);
+        if (isNaN(n)) n = 0;
+        return Math.max(0, Math.min(ARRIVAL_SPEED_MAX, n));
+    }
+
+    function arrivalSpeedOf(ship) {
+        if (ship.arrivalSpeed !== null && ship.arrivalSpeed !== undefined) return clampArrivalSpeed(ship, ship.arrivalSpeed);
+        var moves = Array.isArray(ship.movement) ? ship.movement : [];
+        var last = moves.length > 0 ? moves[moves.length - 1] : null;
+        return clampArrivalSpeed(ship, last ? last.speed : 0);
+    }
+
+    /* ---------------------------------------------------------------- the ship window (user 2026-09-19) */
+
+    /* ⭐ RIGHT-CLICK A ROW, OR ITS ⓘ, AND THE SHIP'S WINDOW OPENS - the fleet list's two gestures, for the
+       same reason: a reinforcement in hyperspace has no icon to right-click, and the window is the only
+       place to look at what it carries before deciding whether it rides, how fast, and in whose hangar.
+       fleetListManager.openShipWindowFor is the one route, and the one entitlement test - a gate belongs
+       to somebody else and still opens, because it is on the board for everyone to see. */
+    function infoIconHtml() {
+        return '<span class="reinforcementRowInfo" title="Open ship window" role="button">&#9432;</span>';
+    }
+
+    function openShipWindow(shipId) {
+        if (shipId === null || shipId === undefined || shipId === '') return;
+        var ship = gamedata.getShip(shipId);
+        if (!ship || !window.fleetListManager || typeof fleetListManager.openShipWindowFor !== 'function') return;
+        fleetListManager.openShipWindowFor(ship);
+    }
+
+    /* Bound ONCE on a dialog's root, delegated, because both dialogs re-render their rows in place.
+       ⚠️ preventDefault on the ⓘ is load-bearing: the rows are <label>s, and a click anywhere inside a
+       label activates its control - without it, opening a window would also tick or pick the row. */
+    function bindShipWindowGestures(e) {
+        e.on("contextmenu", ".reinforcementRow[data-shipid]", function (ev) {
+            ev.preventDefault();
+            openShipWindow($(this).attr("data-shipid"));
+        });
+        e.on("click", ".reinforcementRowInfo", function (ev) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            openShipWindow($(this).closest(".reinforcementRow").attr("data-shipid"));
         });
     }
 
@@ -282,6 +348,55 @@ window.ReinforcementEntry = (function () {
         return DeploymentDock.planFlightsIntoCarrier(opener, flights);
     }
 
+    /* ⭐⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md STAGE H6b - WHO STARTS INSIDE WHOM, for a whole manifest. It is a
+       property of the MANIFEST and not of one row (plan §7 H6b): un-ticking a carrier moves or evicts the
+       craft riding its hangars, so the dialog re-runs this on every change.
+
+       Hosts are the opener (when it is itself arriving - $openerArrives) and every ticked rider that is not
+       going aboard something itself: no carrier inside a carrier. ⭐ THE PLAYER PICKS THE CARRIER (user
+       request 2026-09-19 - the Hangar dropdown), and this only checks the pick: every passenger goes into the
+       host it chose, packed in LIST ORDER beside the ones before it with planFlightsIntoCarrier's own
+       cumulative packer (legacyFits) - the order InitialOrdersGamePhase::persistArrivalOrders re-fits them in
+       on the server. Which of a carrier's hangars it ends up in is still the dock's own auto-allocation. A
+       pick naming something that is no host (un-ticked, itself aboard something, itself) or with no room
+       left is EVICTED. A LEGACY opener is the only host its riders ever have, whatever was picked.
+
+       Pure: the two callbacks say what is ticked and which carrier (an id, or null for none) each rider
+       picked, so the dialog passes its controls and a harness passes whatever it likes.
+       Returns { carrierOf: {riderId: hostShip}, evicted: [rider, ...], hosts: [ship, ...] }. */
+    function planManifestHangars(opener, riders, openerArrives, legacy, isTicked, chosenCarrier) {
+        var ticked = riders.filter(isTicked);
+        var pickOf = function (s) {
+            if (legacy) return opener.id;
+            var c = chosenCarrier(s);
+            return (c === null || c === undefined || c === '') ? null : c;
+        };
+
+        var hosts = (openerArrives ? [opener] : [])
+            .concat(legacy ? [] : ticked.filter(function (s) { return pickOf(s) === null; }));
+        var hostById = {};
+        hosts.forEach(function (h) { hostById[String(h.id)] = h; });
+
+        var plan = { carrierOf: {}, evicted: [], hosts: hosts };
+        var aboard = {};
+
+        ticked.forEach(function (ship) {
+            var pick = pickOf(ship);
+            if (pick === null) return;
+
+            var host = hostById[String(pick)];
+            if (!host || host.id == ship.id) { plan.evicted.push(ship); return; }
+
+            var list = (aboard[host.id] || []).concat([ship]);
+            if (legacyFits(host, list).indexOf(parseInt(ship.id, 10)) === -1) { plan.evicted.push(ship); return; }
+
+            aboard[host.id] = list;
+            plan.carrierOf[ship.id] = host;
+        });
+
+        return plan;
+    }
+
     /* ---------------------------------------------------------------- the stranding check */
 
     /* Is this unit actually leaving hyperspace this turn? Being ON a manifest is not enough: the
@@ -299,6 +414,11 @@ window.ReinforcementEntry = (function () {
            somebody else entirely, and the only thing this turn's claim proves is that one is about
            to form. gateDoorway() answers both cases and is the single place that rule lives. */
         if (gamedata.isJumpGate(opener)) return !!gateDoorway(opener);
+
+        /* STAGE H5 - A SHIP ON THE BOARD HOLDING ITS EXIT honours a berth only while it is being
+           MAINTAINED this turn: let go, the doorway closes at the end of the turn and the wave named
+           now would arrive to nothing. The server rule is the same (collectHeldExitOpeners). */
+        if (heldExitOn(opener)) return heldExitTakesAWave(opener);
 
         return !!declarationOn(opener);
     }
@@ -365,6 +485,9 @@ window.ReinforcementEntry = (function () {
         var left = waiting.filter(function (ship) { return !ridingOut(ship); });
         if (left.some(canOpen)) return [];
         if (anyLiveGate()) return [];
+        //Stage H5 - a ship holding its exit open this turn may hold it for the next wave too. As loose
+        //as the gate test above, for the same reason: silence is the right way to be wrong here.
+        if (heldExitCandidates().some(heldExitTakesAWave)) return [];
 
         return left;
     }
@@ -467,6 +590,63 @@ window.ReinforcementEntry = (function () {
 
             return !!gateExitOn(unit) || !!gateClaimOn(unit);
         });
+    }
+
+    /* ------------------------------------------------ ships holding their exit open (Stage H5) */
+
+    /* ⭐⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md STAGE H5 - THE THIRD KIND OF DOORWAY: A SHIP OF MINE, ON THE
+     * BOARD, HOLDING OPEN THE BLUE EXIT IT CAME OUT THROUGH.
+     *
+     * From its arrival turn a ship holds its exit exactly as it would an entrance - Maintain on the
+     * Jump Engine keeps it open (without the four-turn cap on a Vorlon, paid from the capacitor) - and
+     * every turn it is held it can bring another wave through. So it sits in this menu the way a gate
+     * does: already open, nothing to aim, and "Select Reinforcements" is the only thing to do with it.
+     *
+     * ⭐ THE DIFFERENCE FROM A GATE IS THAT THE PLAYER DECIDES, THIS TURN, WHETHER IT STAYS OPEN. A wave
+     * named now arrives next turn, so the doorway is only offered while this turn's Maintain is ON.
+     * Off, the row is greyed and says what to do; turning Maintain off after naming a wave un-books it
+     * (JumpEngine.releaseHeldExitManifest). The server is the authority either way -
+     * InitialOrdersGamePhase::collectHeldExitOpeners refuses a berth on an unmaintained exit.
+     *
+     * ⚠️ Like every reader in this file, these take a LIVE ship object and re-read it - see _openerId. */
+
+    function heldExitOn(ship) {
+        if (!ship || !gamedata.isMyShip(ship) || shipManager.isDestroyed(ship)) return null;
+        //Guarded: harnesses drive this module against a stubbed shipManager.movement.
+        if (typeof shipManager.movement.getMaintainableExitHeldBy !== 'function') return null;
+        return shipManager.movement.getMaintainableExitHeldBy(ship);
+    }
+
+    //This turn's Maintain declaration, on whichever of the ship's drives made it.
+    function heldExitMaintained(ship) {
+        return typeof shipManager.power.isMaintainingVortex === 'function' && shipManager.power.isMaintainingVortex(ship);
+    }
+
+    //Could Maintain be declared on it at all this turn? False on a young race's four-turn cap turn, out
+    //of range, or with the drive offline - JumpEngine.canMaintainVortex is the single place that decides.
+    function heldExitMaintainable(ship) {
+        for (var i in ship.systems) {
+            var s = ship.systems[i];
+            if (s && s.name === 'jumpEngine' && typeof s.canMaintainVortex === 'function' && s.canMaintainVortex()) return true;
+        }
+        return false;
+    }
+
+    function heldExitTakesAWave(ship) {
+        return !!heldExitOn(ship) && heldExitMaintained(ship);
+    }
+
+    function heldExitCandidates() {
+        return gamedata.ships.filter(function (unit) { return !!heldExitOn(unit); });
+    }
+
+    /* Un-book everything riding $openerId's doorway, and hand back who it was. The one caller is
+       JumpEngine.releaseHeldExitManifest, when Maintain is turned off on a held exit. */
+    function releaseManifest(openerId) {
+        var released = manifestOf(openerId);
+        released.forEach(unbook);
+        if (released.length > 0) gamedata.drawIniGUI();
+        return released;
     }
 
     /* ---------------------------------------------------------------- the hex-click mode */
@@ -750,10 +930,11 @@ window.ReinforcementEntry = (function () {
     function manageReinforcements() {
         var candidates = openerCandidates();
         var gates      = gateCandidates();
+        var held       = heldExitCandidates();   //Stage H5
 
-        if (candidates.length === 0 && gates.length === 0) {
-            confirm.error("None of your reinforcements can open a jump point, and no jump gate is "
-                + "holding one open for you.");
+        if (candidates.length === 0 && gates.length === 0 && held.length === 0) {
+            confirm.error("None of your reinforcements can open a jump point, and no jump gate or "
+                + "ship of yours is holding one open for you.");
             return;
         }
 
@@ -764,8 +945,8 @@ window.ReinforcementEntry = (function () {
            no confirmation is not something a player should be able to trip over.
            ⚠️ AND NOT WHEN A GATE IS LISTED (Stage 8). With a doorway standing there is a second
            real answer, so the shortcut would be choosing for the player - and it would choose the
-           harder-to-reverse of the two. */
-        if (gates.length === 0 && candidates.length === 1 && !declarationOn(candidates[0])) {
+           harder-to-reverse of the two. The same goes for a ship holding its exit open (Stage H5). */
+        if (gates.length === 0 && held.length === 0 && candidates.length === 1 && !declarationOn(candidates[0])) {
             activate(candidates[0]);
             return;
         }
@@ -851,6 +1032,7 @@ window.ReinforcementEntry = (function () {
         //DELEGATED on the dialog root and bound ONCE: render() replaces every row, so a handler
         //bound to the inputs themselves would die with the markup it was attached to.
         e.on("change", "input[name='reinforcementOpener']", syncLabel);
+        bindShipWindowGestures(e);
 
         $(".confirmok", e).on("click", function () {
             var id = $("input[name='reinforcementOpener']:checked", e).val();
@@ -893,6 +1075,21 @@ window.ReinforcementEntry = (function () {
                 return;
             }
 
+            /* ⭐ STAGE H5 - A SHIP HOLDING ITS EXIT, the gate branch's twin and for the same reason
+               taken before isMine(): the ship is on the board, not in hyperspace. Its one action is the
+               manifest, and only while Maintain is on - re-read here, since the player may have turned
+               it off in the ship window while this dialog stood. */
+            if (heldExitOn(live)) {
+                if (heldExitTakesAWave(live)) {
+                    highlight(null);
+                    e.remove();
+                    showManifestDialog(live);
+                    return;
+                }
+                render(live.id);
+                return;
+            }
+
             if (!isMine(live)) { highlight(null); e.remove(); return; }
 
             if (declarationOn(live)) {
@@ -928,7 +1125,8 @@ window.ReinforcementEntry = (function () {
             var live = gamedata.getShip(id);
             if (!live) { highlight(null); e.remove(); return; }
 
-            var doorway = gamedata.isJumpGate(live) ? !!gateDoorway(live) : !!declarationOn(live);
+            var doorway = gamedata.isJumpGate(live) ? !!gateDoorway(live)
+                : (heldExitOn(live) ? heldExitTakesAWave(live) : !!declarationOn(live));
             if (!doorway) { render(live.id); return; }
 
             highlight(null);
@@ -940,8 +1138,28 @@ window.ReinforcementEntry = (function () {
         //nothing, so deactivate() is never reached on this path.
         $(".confirmcancel", e).on("click", function () { highlight(null); e.remove(); });
 
+        /* ⭐ STAGE H5 FOLLOW-UP - THE DIALOG IS NOT MODAL, SO WHAT CHANGES OUTSIDE IT HAS TO REACH IT
+           (user report 2026-09-19). The ship window stays live beside it, and turning Maintain on or
+           off there is exactly what opens or greys a held exit's row - which went on showing the old
+           state until the menu was closed and reopened. refreshMenu() (from
+           InitialPhaseStrategy.onSystemDataChanged) re-renders on the selected row.
+           ⚠️ Every close path is a bare e.remove(), so "is it still open" is asked of the DOM rather
+           than tracked at each of them. */
+        _menuRefresh = function () {
+            if (!document.body.contains(e[0])) { _menuRefresh = null; return; }
+            var checked = $("input[name='reinforcementOpener']:checked", e);
+            render(checked.length > 0 ? checked.val() : null);
+        };
+
         render(null);
         e.appendTo("body").fadeIn(250);
+    }
+
+    //The open Manage Reinforcements dialog's re-render, or null. Set by manageReinforcements.
+    var _menuRefresh = null;
+
+    function refreshMenu() {
+        if (_menuRefresh) _menuRefresh();
     }
 
     /* THE WHOLE WAVE, IN TWO GROUPS (user request 2026-08-28). Every unit of mine still in
@@ -978,7 +1196,11 @@ window.ReinforcementEntry = (function () {
 
            GATES COME FIRST because a standing doorway is the cheaper thing to use: it costs no
            drive, no charge and no hex, and it is usually what the player opened the menu for. */
-        var rows = gateCandidates().map(gateRow).concat(openerCandidates().map(openerRow));
+        //Stage H5 - a ship holding its exit open sits beside the gates: the same kind of row, a
+        //doorway already standing that costs no drive, charge or hex to use.
+        var rows = gateCandidates().map(gateRow)
+            .concat(heldExitCandidates().map(heldExitRow))
+            .concat(openerCandidates().map(openerRow));
 
         var pickIndex = -1;
         for (var i = 0; i < rows.length; i++) {
@@ -995,7 +1217,7 @@ window.ReinforcementEntry = (function () {
 
             return '<label class="reinforcementRow'
                 + (row.open ? ' reinforcementRowOpen' : '')
-                + (row.blocked ? ' reinforcementRowRiding' : '') + '">'
+                + (row.blocked ? ' reinforcementRowRiding' : '') + '" data-shipid="' + ship.id + '">'
                 + '<input type="radio" name="reinforcementOpener" value="' + ship.id + '"'
                 + ' data-action="' + row.action + '"'
                 + ' data-gate="' + (row.gate ? '1' : '0') + '"'
@@ -1010,6 +1232,7 @@ window.ReinforcementEntry = (function () {
                     : '')
                 + '</span>'
                 + '<span class="reinforcementRowClass">' + row.detail + '</span>'
+                + infoIconHtml()
                 + '</label>';
         }).join('');
 
@@ -1027,9 +1250,11 @@ window.ReinforcementEntry = (function () {
             gate:      false,
             open:      !!order,
             blocked:   !!host,
-            //A standing declaration is a manifest that can be re-opened - but only while there is
-            //somebody left to put on it. See manifestRiders and the Jump Manifest button.
-            manifest:  !!order && manifestRiders(ship).length > 0,
+            //A standing declaration is a manifest that can be re-opened. ⭐ Stage H6a: ALWAYS, now -
+            //the manifest carries the drive's OWN arrival speed, so it is worth opening even with
+            //nobody left to put on it. (A gate's or a held exit's still needs riders - it is not
+            //itself arriving.)
+            manifest:  !!order,
             action:    order ? 'Withdraw Jump Point' : 'Choose Hex',
             tag:       order ? 'OPENING' : (host ? 'RIDING' : null),
             tagRiding: !!host && !order,
@@ -1086,7 +1311,36 @@ window.ReinforcementEntry = (function () {
             manifest: false,
             action: 'Select Reinforcements',
             tag: takesAWave ? 'OPEN' : null, tagRiding: false,
-            detail: takesAWave ? ('jump point open &mdash; ' + riderText) : 'jump point closes this turn'
+            detail: takesAWave ? ('Jump point maintained &mdash; ' + riderText) : 'Jump point closes this turn'
+        };
+    }
+
+    /* ⭐⭐ STAGE H5 - A SHIP HOLDING ITS EXIT OPEN. The gate row's shape, and the same three states,
+       except that whether the doorway lasts into next turn is THIS player's choice this turn:
+
+         MAINTAINED ........................ SELECT REINFORCEMENTS, tagged OPEN.
+         NOT MAINTAINED, but it could be ... greyed: turn Maintain on (the Jump Engine's own menu) and
+             the row opens. Not done from here, because on a young race Maintain also takes the whole
+             ship dark - a side effect no manifest button should have.
+         CANNOT BE MAINTAINED this turn .... greyed: it closes this turn. A young race's four-turn cap,
+             the ship out of range of its doorway, or the drive offline.
+
+       ⚠️ manifest FALSE, as on the gate's open row: the primary button already IS the manifest. */
+    function heldExitRow(ship) {
+        var takesAWave = heldExitTakesAWave(ship);
+        var riders = manifestOf(ship.id).length;
+
+        var detail;
+        if (takesAWave) detail = 'jump point open &mdash; ' + riders + ' unit' + (riders === 1 ? '' : 's');
+        else if (heldExitMaintainable(ship)) detail = 'Maintain the jump point to use next turn';
+        else detail = 'jump point closes this turn';
+
+        return {
+            ship: ship, gate: false, open: takesAWave, blocked: !takesAWave,
+            manifest: false,
+            action: 'Select Reinforcements',
+            tag: takesAWave ? 'OPEN' : null, tagRiding: false,
+            detail: detail
         };
     }
 
@@ -1111,7 +1365,7 @@ window.ReinforcementEntry = (function () {
         var rows = passengers.map(function (ship) {
             var host = ridingWith(ship);
 
-            return '<label class="reinforcementRow reinforcementRowPassenger">'
+            return '<label class="reinforcementRow reinforcementRowPassenger" data-shipid="' + ship.id + '">'
                 + '<input type="radio" name="reinforcementPassenger" value="' + ship.id + '" disabled>'
                 + '<span class="reinforcementRowMain">'
                 + '<span class="reinforcementRowName">' + ship.name + '</span>'
@@ -1119,6 +1373,7 @@ window.ReinforcementEntry = (function () {
                 + '</span>'
                 + '<span class="reinforcementRowClass">'
                 + (host ? 'riding ' + host.name : ship.shipClass) + '</span>'
+                + infoIconHtml()
                 + '</label>';
         }).join('');
 
@@ -1126,12 +1381,22 @@ window.ReinforcementEntry = (function () {
             + rows;
     }
 
-    /* WHO RIDES THROUGH. Any number, including none but the opener, and including units with no
-       jump engine of their own (§2.2) - which is the whole point: one drive brings a wave.
+    /* WHO RIDES THROUGH, AND HOW EACH COMES OUT. Any number, including none but the opener, and
+       including units with no jump engine of their own (§2.2) - which is the whole point: one drive
+       brings a wave.
 
        Offered only for units that are NOT already assigned to a DIFFERENT exit this turn. A
        unit can only ride one doorway, and silently moving it would undo a choice the player has
-       already made on another opener. */
+       already made on another opener.
+
+       ⭐⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md STAGE H6 - THIS DIALOG NOW DECIDES EVERYTHING THE
+       DEPLOYMENT: REINFORCEMENTS PHASE USED TO, because that phase is gone: the server places the wave
+       itself at the start of the arrival turn (JumpEngine::placeArrivingReinforcements).
+         H6a - each unit's SPEED coming out, 0-10, including the opener's own (a fixed first row);
+         H6b - "START IN HANGAR": a fighter flight, or a ship a Docking Bay takes, may arrive inside a
+               carrier coming through the SAME doorway on the same turn - the opener, or another rider.
+       Both travel with the berth (ajaxInterface) as claims, and InitialOrdersGamePhase::
+       persistArrivalOrders clamps the one and re-fits the other before anything is written. */
     function showManifestDialog(opener) {
         /* ⭐ STAGE 8 - THE SAME DIALOG SERVES A GATE, and the only differences are words. A gate is
            not itself arriving (it is a fixture on the board, not a unit in hyperspace), so nothing
@@ -1140,27 +1405,25 @@ window.ReinforcementEntry = (function () {
            is never in myHyperspaceUnits(), so the self-exclusion simply never matches one - which is
            why this is a wording branch and not a structural one. */
         var isGateDoor = gamedata.isJumpGate(opener);
+        //Stage H5 - a ship on the board holding its exit open. Like a gate it is not itself arriving,
+        //so only the words differ (it is never in myHyperspaceUnits, so it is never in its own list).
+        var isHeldDoor = !isGateDoor && !!heldExitOn(opener);
         var legacy = isLegacyOpener(opener);
+
+        /* ⭐ STAGE H6a - A DRIVE IN HYPERSPACE COMES OUT THROUGH ITS OWN DOORWAY, so it chooses its own
+           arrival speed here: a fixed first row, and the reason this dialog now opens even when there is
+           nobody else to name. A gate or a ship holding its exit open is on the board already - no row. */
+        var openerArrives = !isGateDoor && !isHeldDoor;
 
         var riders = manifestRiders(opener);
 
-        /* ⭐ THREE WAYS THE LIST COMES BACK EMPTY, and they are three different facts (the third is
-           new with the 2026-09-02 ruling below, which lets a gate be signalled for arrival by a
-           player with nothing of their own waiting - so "they are all riding something else" is no
-           longer the only reason a gate can have nobody to offer). A drive is never in this case in
-           the same sense: it always rides its own doorway, so the message is about IT. */
-        if (riders.length === 0) {
-            /*if (legacy) { //This warning was more annoying than helpful, removed for now - DK
-                //Anything booked here that cannot ride (a non-fighter) is let go, as applyManifest would.
-                clearManifestExceptOpener(opener);
-                confirm.warning("<b>" + opener.name + "</b> jumps in through its own drive and opens no jump "
-                    + "point, so it can bring only fighters that fit in its hangars - and none of yours "
-                    + "that are waiting do.");
-                gamedata.drawIniGUI();
-                return;
-            }*/
-            confirm.warning(!isGateDoor
-                ? "<b>" + opener.name + "</b> will open a jump point and arrive through it next turn."
+        /* ⭐ TWO WAYS THE LIST COMES BACK EMPTY FOR A DOORWAY THAT IS NOT ITSELF ARRIVING, and they are
+           different facts (the 2026-09-02 ruling lets a gate be signalled for arrival by a player with
+           nothing of their own waiting). A drive in hyperspace no longer lands here: it has its own row. */
+        if (riders.length === 0 && !openerArrives) {
+            confirm.warning(isHeldDoor
+                ? "<b>" + opener.name + "</b> is holding its jump point open, but everything you have in "
+                  + "hyperspace is already riding another one."
                 : (myHyperspaceUnits().length === 0
                     ? "<b>" + opener.name + "</b> will open a jump point, but you have nothing in "
                       + "hyperspace to bring through it."
@@ -1170,28 +1433,111 @@ window.ReinforcementEntry = (function () {
             return;
         }
 
-        var rows = riders.map(function (ship) {
-            return '<label class="reinforcementRow">'
+        /* THE CARRIERS THAT COULD EVER TAKE A RIDER - the opener if it is coming out itself, and any other
+           rider - whatever is ticked right now. Decides whether a row shows a Hangar control at all (a capital
+           ship with no Docking Bay to go into would otherwise carry a dropdown that can never be used). A
+           LEGACY opener is the only carrier its riders ever have. */
+        var potentialHosts = (openerArrives ? [opener] : []).concat(riders);
+        var HS = window.HangarShared;
+
+        function canHost(host, ship) {
+            if (!HS || !host || host.id == ship.id || !Array.isArray(host.systems)) return false;
+            return host.systems.some(function (sys) {
+                if (!sys) return false;
+                return ship.flight ? HS.isDockHangar(sys) : HS.bayDocksShipClass(sys, ship);
+            });
+        }
+
+        function canEverDock(ship) {
+            if (legacy) return true;
+            return potentialHosts.some(function (host) { return canHost(host, ship); });
+        }
+
+        /* ⭐ SPEED - a number box between small − and + buttons (user request 2026-09-19: the browser's own
+           spinner took half the box, so it is hidden - tactical.css). A <span> and NOT a <label>: a label's
+           control is its FIRST labelable descendant, and a <button> is one, so clicking the word "Speed"
+           would have clicked the minus. */
+        function speedControlHtml(ship) {
+            var id = ship.id;
+            return '<span class="reinforcementSpeedPick" title="The speed it comes out of hyperspace at">Speed:'
+                + '<button type="button" class="reinforcementSpeedStep" data-shipid="' + id + '" data-step="-1"'
+                + ' title="Slower">&minus;</button>'
+                + '<input type="number" class="reinforcementSpeed" data-shipid="' + id + '" min="0" max="'
+                + ARRIVAL_SPEED_MAX + '" step="1" value="' + arrivalSpeedOf(ship) + '">'
+                + '<button type="button" class="reinforcementSpeedStep" data-shipid="' + id + '" data-step="1"'
+                + ' title="Faster">+</button>'
+                + '</span>';
+        }
+
+        /* ⭐ HANGAR - a dropdown of the carriers it could start inside, 'None' by default (user request
+           2026-09-19). The player picks the SHIP; which of that ship's hangars the craft go into is still the
+           dock's own auto-allocation (HangarOps::performDeployStartDockFromOrders on arrival). Built empty and
+           filled by refit(), because who can carry depends on the ticks and is rebuilt on every change. The
+           pick itself rides in data-picked, so a rebuild cannot lose it. */
+        function hangarControlHtml(ship) {
+            //An empty cell of the same width keeps the Speed column lined up down the list.
+            if (!canEverDock(ship)) return '<span class="reinforcementHangarPick"></span>';
+
+            var picked = legacy ? opener.id
+                : ((ship.arrivalVia == opener.id && ship.arrivalHangar !== null && ship.arrivalHangar !== undefined)
+                    ? ship.arrivalHangar : '');
+            return '<label class="reinforcementHangarPick">Hangar:'
+                + '<select class="reinforcementHangar" data-shipid="' + ship.id + '" data-picked="' + picked + '"'
+                + (legacy ? ' disabled' : '') + '><option value="">None</option></select></label>';
+        }
+
+        //The opener's own row: always riding (its drive holds the doorway), so its box is ticked and fixed.
+        var openerRowHtml = !openerArrives ? '' :
+            '<div class="reinforcementRow reinforcementManifestRow reinforcementRowOpen" data-shipid="' + opener.id + '">'
+            + '<span class="reinforcementRowPick">'
+            + '<input type="checkbox" checked disabled>'
+            + '<span class="reinforcementRowMain">'
+            + '<span class="reinforcementRowName">' + opener.name + '</span>'
+            + '<span class="reinforcementRowSub">'
+            + (legacy ? 'phases in through its own drive' : 'opens the jump point') + '</span>'
+            + '</span></span>'
+            + '<span class="reinforcementArrival"><span class="reinforcementHangarPick"></span>'
+            + speedControlHtml(opener) + '</span>'
+            + infoIconHtml()
+            + '</div>';
+
+        /* ⚠️ A <div> ROW WITH A <label> INSIDE IT, not the whole row as a label like the menu's: the row
+           holds three controls, and a click anywhere in a label activates its FIRST control - so picking a
+           Hangar, or clicking into Speed, would also have toggled the ride. Only the name toggles the ride. */
+        var rows = openerRowHtml + riders.map(function (ship) {
+            return '<div class="reinforcementRow reinforcementManifestRow" data-shipid="' + ship.id + '">'
+                + '<label class="reinforcementRowPick">'
                 + '<input type="checkbox" class="reinforcementRider" value="' + ship.id + '"'
                 + (ship.arrivalVia == opener.id ? ' checked' : '') + '>'
                 + '<span class="reinforcementRowMain">'
                 + '<span class="reinforcementRowName">' + ship.name + '</span>'
-                + '</span>'
-                + '<span class="reinforcementRowClass">' + ship.shipClass + '</span>'
-                + '</label>';
-        }).join('');
+                + '<span class="reinforcementRowSub">' + ship.shipClass + '</span>'
+                + '</span></label>'
+                + '<span class="reinforcementArrival">' + hangarControlHtml(ship) + speedControlHtml(ship) + '</span>'
+                + infoIconHtml()
+                + '</div>';
+        }).join('') + '<div class="reinforcementManifestNote"></div>';
+
+        var how = legacy
+            ? " Set the speed it comes out at."
+            : " Set the speed each comes out at, or pick a Hangar to start a unit inside a carrier arriving "
+              + "with it.";
 
         var e = confirm.fleetDialogShell(
             "Jump Point Manifest",
-            isGateDoor
+            (isGateDoor
                 ? opener.name + " holds a jump point open. Which of your reinforcements ride "
                   + "through it? They arrive next turn, and the gate can bring another wave on "
                   + "every turn it holds the doorway."
+                : isHeldDoor
+                ? opener.name + " is holding its jump point open. Which of your reinforcements ride "
+                  + "through it? They arrive next turn, and it can bring another wave on every turn "
+                  + "it is maintained."
                 : (legacy
                     ? opener.name + " jumps in through its own drive and opens no jump point. Only fighters "
                       + "that fit in its hangars, and ships its Docking Bay can hold, can come with it - "
                       + "and they arrive docked."
-                    : opener.name + " arrives through this jump point. Which others ride with it?"),
+                    : opener.name + " arrives through this jump point. Which others ride with it?")) + how,
             rows, "Confirm");
 
         //Same width as the menu it was opened from - see .reinforcementDialog in tactical.css.
@@ -1202,50 +1548,155 @@ window.ReinforcementEntry = (function () {
         //explicit Cancel would only be ambiguous about whether it undid the declaration too.
         $(".confirmcancel", e).remove();
 
+        function riderBox(ship)      { return $(".reinforcementRider[value='" + ship.id + "']", e); }
+        function hangarSelect(ship)  { return $(".reinforcementHangar[data-shipid='" + ship.id + "']", e); }
+        function pickOf(ship) {
+            var v = hangarSelect(ship).attr("data-picked");
+            return (v === undefined || v === '') ? null : v;
+        }
+        function setPick(ship, v) { hangarSelect(ship).attr("data-picked", (v === null || v === undefined) ? '' : String(v)); }
+
+        /* The ticks and picks as they stand, handed to planManifestHangars. ($pretendId, $pretendHost) plans
+           ONE rider as if it were ticked and had picked that carrier: the question each dropdown option asks
+           ("is there room for it in THIS ship, beside what is already promised?"). An empty `evicted` means
+           yes - for it AND for everyone else, so an option that would bump another passenger is not offered. */
+        function planHangars(pretendId, pretendHost) {
+            return planManifestHangars(opener, riders, openerArrives, legacy,
+                function (s) { return s.id == pretendId || riderBox(s).is(':checked'); },
+                function (s) { return s.id == pretendId ? pretendHost : pickOf(s); });
+        }
+
+        /* Every row's controls follow the plan. ⚠️ AND A PICK THAT HAS JUST BECOME IMPOSSIBLE IS TAKEN BACK AND
+           SAID (plan §7 H6b: "un-tick and warn"), not left showing for the server to refuse: a passenger whose
+           carrier was un-ticked, or went aboard something itself, or has no room left, goes back to None and
+           will arrive on the map - or, on a legacy opener, comes off the manifest altogether, because there
+           is no map for it to arrive on. */
+        function refit() {
+            var plan = planHangars(null, null);
+            var notes = [];
+
+            if (plan.evicted.length > 0) {
+                plan.evicted.forEach(function (ship) {
+                    if (legacy) {
+                        riderBox(ship).prop('checked', false);
+                        notes.push('<b>' + ship.name + '</b> no longer fits aboard ' + opener.name
+                            + ' and stays in hyperspace.');
+                    } else {
+                        setPick(ship, null);
+                        notes.push('<b>' + ship.name + '</b> can no longer start in that hangar and will come out '
+                            + 'onto the map.');
+                    }
+                });
+                plan = planHangars(null, null);
+            }
+
+            //Who is carrying somebody: such a rider cannot go aboard anything itself (no carrier in a carrier).
+            var carrying = {};
+            Object.keys(plan.carrierOf).forEach(function (id) { carrying[String(plan.carrierOf[id].id)] = true; });
+
+            riders.forEach(function (ship) {
+                var isTicked = riderBox(ship).is(':checked');
+                var host = plan.carrierOf[ship.id] || null;
+                var $sel = hangarSelect(ship);
+
+                if (legacy) {
+                    //A row that would not fit beside the ones already ticked cannot be ticked at all.
+                    var fits = isTicked || planHangars(ship.id, opener.id).evicted.length === 0;
+                    riderBox(ship).prop('disabled', !fits).attr('title', fits ? '' : 'No room left in its hangars');
+                    $sel.html('<option value="' + opener.id + '">' + opener.name + '</option>')
+                        .val(String(opener.id))
+                        .attr('title', 'Arrives docked in ' + opener.name);
+                } else if ($sel.length) {
+                    var current = pickOf(ship);
+                    var options = '<option value="">None</option>';
+                    var anyRoom = false;
+
+                    plan.hosts.forEach(function (candidate) {
+                        if (!canHost(candidate, ship)) return;
+                        var isCurrent = current !== null && String(candidate.id) === String(current);
+                        var room = isCurrent || planHangars(ship.id, candidate.id).evicted.length === 0;
+                        if (room) anyRoom = true;
+                        options += '<option value="' + candidate.id + '"' + (room ? '' : ' disabled') + '>'
+                            //+ candidate.name + (room ? '' : ' (no room)') + '</option>';
+                            + candidate.name + '</option>';                            
+                    });
+
+                    var busy = !!carrying[String(ship.id)];
+                    $sel.html(options).val(current === null ? '' : String(current));
+                    $sel.prop('disabled', !isTicked || busy || (!anyRoom && current === null));
+                    $sel.attr('title', host ? 'Starts in the hangar of ' + host.name
+                        : (!isTicked ? 'Tick it to ride first'
+                        : (busy ? 'It is carrying others, so it cannot start in a hangar itself'
+                        : (anyRoom ? 'Start inside a carrier arriving with it' : 'No carrier arriving with it has room'))));
+                }
+
+                //Aboard something, it has no speed of its own to choose.
+                $(".reinforcementSpeed[data-shipid='" + ship.id + "'], .reinforcementSpeedStep[data-shipid='" + ship.id + "']", e)
+                    .prop('disabled', !isTicked || !!host);
+            });
+
+            $(".reinforcementManifestNote", e).html(notes.join('<br>')).toggle(notes.length > 0);
+        }
+
+        e.on("change", ".reinforcementRider", refit);
+        e.on("change", ".reinforcementHangar", function () {
+            $(this).attr("data-picked", $(this).val());
+            refit();
+        });
+
+        //The number box accepts anything the keyboard gives it; the manifest does not.
+        e.on("change", ".reinforcementSpeed", function () {
+            var unit = gamedata.getShip($(this).attr("data-shipid"));
+            this.value = clampArrivalSpeed(unit || {}, this.value);
+        });
+
+        //The − and + either side of it. The opener's pair works too: its row is not a rider, so refit never
+        //disables it.
+        e.on("click", ".reinforcementSpeedStep", function (ev) {
+            ev.preventDefault();
+            if (this.disabled) return;
+            var id = $(this).attr("data-shipid");
+            var $input = $(".reinforcementSpeed[data-shipid='" + id + "']", e);
+            if ($input.prop('disabled')) return;
+            var now = parseInt($input.val(), 10);
+            if (isNaN(now)) now = 0;
+            $input.val(clampArrivalSpeed(gamedata.getShip(id) || {}, now + parseInt($(this).attr("data-step"), 10)));
+        });
+
+        bindShipWindowGestures(e);
+
         //THE TICK LIST, WRITTEN. Both buttons run it - see the Back button for why neither of them
         //discards. Split out only so the two cannot drift apart.
         function applyManifest() {
+            var plan = planHangars(null, null);
+
             var chosen = {};
             $(".reinforcementRider:checked", e).each(function () { chosen[$(this).val()] = true; });
+            var speeds = {};
+            $(".reinforcementSpeed", e).each(function () { speeds[$(this).attr("data-shipid")] = $(this).val(); });
             e.remove();
 
-            //A legacy opener's berths must all fit TOGETHER, in list order, exactly as the Deployment
-            //phase will dock them - so trim to what does, whatever the dialog let through.
+            //A legacy opener's berths must all fit TOGETHER, in list order, exactly as the arrival will
+            //dock them - so only what the plan found room for rides at all.
             if (legacy) {
-                var fit = {};
-                legacyFits(opener, riders.filter(function (s) { return chosen[s.id]; }))
-                    .forEach(function (id) { fit[id] = true; });
-                chosen = fit;
+                Object.keys(chosen).forEach(function (id) { if (!plan.carrierOf[id]) delete chosen[id]; });
                 //...and anything booked here that is not a rider at all (a non-fighter) is let go.
                 clearManifestExceptOpener(opener);
             }
 
             riders.forEach(function (ship) {
-                if (chosen[ship.id]) ship.arrivalVia = opener.id;
-                else if (ship.arrivalVia == opener.id) ship.arrivalVia = null;
+                if (chosen[ship.id]) {
+                    ship.arrivalVia = opener.id;
+                    ship.arrivalSpeed = clampArrivalSpeed(ship, speeds[ship.id]);
+                    ship.arrivalHangar = plan.carrierOf[ship.id] ? parseInt(plan.carrierOf[ship.id].id, 10) : null;
+                } else if (ship.arrivalVia == opener.id) {
+                    unbook(ship);
+                }
             });
 
-            gamedata.drawIniGUI();
-        }
+            if (openerArrives) opener.arrivalSpeed = clampArrivalSpeed(opener, speeds[opener.id]);
 
-        /* A legacy opener's hangars fill as rows are ticked: a row that would no longer fit beside the
-           ones already ticked is greyed, so the player can never tick a set the dock would refuse. */
-        if (legacy) {
-            var refit = function () {
-                var ticked = riders.filter(function (s) {
-                    return $(".reinforcementRider[value='" + s.id + "']", e).is(':checked');
-                });
-                $(".reinforcementRider", e).each(function () {
-                    if (this.checked) { this.disabled = false; this.title = ''; return; }
-                    var value = this.value;
-                    var candidate = riders.filter(function (s) { return s.id == value; })[0];
-                    var fits = !!candidate && legacyFits(opener, ticked.concat([candidate])).length === ticked.length + 1;
-                    this.disabled = !fits;
-                    this.title = fits ? '' : 'No room left in its hangars';
-                });
-            };
-            $(".reinforcementRider", e).on("change", refit);
-            refit();
+            gamedata.drawIniGUI();
         }
 
         $(".confirmok", e).on("click", applyManifest);
@@ -1273,6 +1724,7 @@ window.ReinforcementEntry = (function () {
                 manageReinforcements();
             });
 
+        refit();
         e.appendTo("body").fadeIn(250);
     }
 
@@ -1365,6 +1817,13 @@ window.ReinforcementEntry = (function () {
         //to answer gamedata.canSignalJumpGateForArrival; that rule was dropped on 2026-09-02, so it
         //is exported now only as the module's public "what is still waiting" reader.)
         showGateManifest: showGateManifest,
-        clearGateManifest: clearGateManifest
+        clearGateManifest: clearGateManifest,
+        //STAGE H5 - JumpEngine.releaseHeldExitManifest's, when Maintain is turned off on a held exit.
+        releaseManifest: releaseManifest,
+        //STAGE H5 follow-up - InitialPhaseStrategy.onSystemDataChanged's, so an open menu follows Maintain.
+        refreshMenu: refreshMenu,
+        //STAGE H6 - the manifest's hangar planner and arrival-speed rule, exported for the client harness.
+        planManifestHangars: planManifestHangars,
+        arrivalSpeedOf: arrivalSpeedOf
     };
 })();

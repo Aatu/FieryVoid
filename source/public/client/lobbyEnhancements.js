@@ -106,6 +106,34 @@ window.lobbyEnhancements = {
 		}
 	},
 
+	/* ELITE / POOR CREW - the jump delay, ±20% per level. $levels is the SIGNED crew quality:
+	   positive Elite (delay shortens), negative Poor (delay lengthens).
+
+	   ⚠⚠ MIRROR PAIR with JumpEngine::applyCrewJumpDelayModifier (PHP), which owns the rule.
+	   Three things have to stay identical or the lobby will advertise a recharge the game does not
+	   give: the COMPOUNDING per level (0.8 twice is 0.64, not 0.6), the ROUNDING (halves up, which
+	   is PHP round() on a positive number and Math.round() here), and the FLOOR at 1.
+
+	   ⚠ The server's $hasJumpRecharge guard - the Star Trek Nacelle, whose 4th constructor
+	   argument is an impulse rating rather than a jump delay - has NO client-side twin, because
+	   the flag is protected and never rides the blueprint. It does not need one: this only
+	   rewrites loadingtime/turnsloaded, which a Nacelle's tooltip does not use as a jump delay,
+	   and the authoritative number in game is derived server-side from $delay. */
+	applyCrewJumpDelay: function applyCrewJumpDelay(ship, levels) {
+		levels = parseInt(levels, 10) || 0;
+		if (levels === 0) return;
+		var factor = (levels > 0) ? 0.8 : 1.2;
+		var steps = Math.abs(levels);
+		for (let system of ship.systems) {
+			if (system.name != "jumpEngine") continue;
+			var delay = parseInt(system.loadingtime, 10) || 0;
+			if (delay <= 0) continue;
+			for (var i = 0; i < steps; i++) delay = Math.max(1, Math.round(delay * factor));
+			system.loadingtime = delay;
+			system.turnsloaded = delay;
+		}
+	},
+
 	setEnhancementsShip: function setEnhancementsShip(ship) {
 
 		// Ammo magazine is necessary for some options
@@ -225,6 +253,11 @@ window.lobbyEnhancements = {
 									system.output += enhCount;
 								}
 							}
+
+							// Jump delay -20% per level, rounding halves up (mirror of
+							// JumpEngine::applyCrewJumpDelayModifier). Compounding, like the
+							// server's loop - 0.8 twice is 0.64, not 0.6.
+							this.applyCrewJumpDelay(ship, enhCount);
 							//ship.notes += "<br>Elite Crew (" + enhCount + ")";
 						}
 						ship.eliteEnh = true;
@@ -605,6 +638,24 @@ window.lobbyEnhancements = {
 							}
 							if (strongestPReact != null) {
 								strongestPReact.output -= enhCount;
+							}
+
+							// Jump delay +20% per level (mirror of
+							// JumpEngine::applyCrewJumpDelayModifier).
+							this.applyCrewJumpDelay(ship, -enhCount);
+
+							// Hangar launch/dock rate halved per level. A hangar's output is the
+							// shared launch+land budget per turn; its CAPACITY in boxes is
+							// untouched, so the carrier still holds a full complement. ceil() and
+							// the <= 1 guard match Enhancements::halveHangarRate - a catapult has
+							// no output budget at all and must not be handed one.
+							for (let system of ship.systems) {
+								if (system.name != "hangar") continue;
+								for (let lvl = 0; lvl < enhCount; lvl++) {
+									let out = parseInt(system.output, 10) || 0;
+									if (out <= 1) break;
+									system.output = Math.ceil(out / 2);
+								}
 							}
 							//ship.notes += "<br>Poor Crew (" + enhCount + ")";
 						}

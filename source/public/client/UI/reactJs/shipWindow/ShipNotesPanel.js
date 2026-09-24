@@ -316,7 +316,10 @@ const liveShipStats = (ship) => {
         if (ship.submarine && move.isGoingBackwards(ship)) turnRate = turnRate * 1.33;
 
         const turnCost = Math.max(1, Math.ceil(speed * turnRate)) + lcv;
-        const turnDelay = Math.ceil(speed * delayRate) + lcv;
+        /*ELITE / POOR CREW: the flat crew modifier on the DELAY only (-1 per Elite level, floored
+          at 1; +1 per Poor level) - a crew's training does not change a turn's thrust cost. Same
+          order as movement.js calculateTurndelayAtMove: crew first, LCV surcharge after.*/
+        const turnDelay = move.applyCrewTurnDelay(ship, Math.ceil(speed * delayRate)) + lcv;
 
         /*thrust for this turn, with the rate it came from in parens - the ship tooltip's
           format. One deliberate divergence: the parenthesised turn rate here is the
@@ -419,13 +422,15 @@ class ShipNotesPanel extends React.Component {
                     <Block>
                         <BlockTitle>Flight Stats</BlockTitle>
                         <StatRow><StatLabel>Armor F/S/A</StatLabel><StatValue>{shipManager.systems.getFlightArmour(ship)}</StatValue></StatRow>
-                        <StatRow><StatLabel>Off. bonus</StatLabel><StatValue>{ship.offensivebonus * 5}</StatValue></StatRow>
+                        <StatRow><StatLabel>Offensive bonus</StatLabel><StatValue>{ship.offensivebonus * 5}</StatValue></StatRow>
                         {/*flights carry forwardDefense/sideDefense exactly like ships (the
                            lobby resets them from the blueprint on edit, and FtrPetals-style
                            systems mutate them live), so the profile reads the same way as
                            ManoeuvreStats' - user request 2026-07-23*/}
                         <StatRow><StatLabel>Profile - Front / Side</StatLabel><StatValue>{ship.forwardDefense * 5}/{ship.sideDefense * 5}</StatValue></StatRow>
                         <StatRow><StatLabel>Thrust</StatLabel><StatValue>{ship.freethrust}</StatValue></StatRow>
+                        <StatRow><StatLabel>Turn Cost / Delay</StatLabel><StatValue>{ship.turncost} / {ship.turndelaycost == 0 ? 0 : ship.turndelaycost}</StatValue></StatRow>
+                        {<StatRow><StatLabel>Accel. / Pivot / Roll</StatLabel><StatValue>{ship.accelcost} / {ship.pivotcost} / {ship.rollcost}</StatValue></StatRow>}                                            
                         <StatRow><StatLabel>Initiative</StatLabel><StatValue>{ship.iniativebonus}</StatValue></StatRow>
                     </Block>
                 )}

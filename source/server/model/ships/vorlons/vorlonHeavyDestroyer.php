@@ -61,7 +61,7 @@ class VorlonHeavyDestroyer extends HeavyCombatVessel{
 
         $this->addAftSystem(new EMShield(4, 6, 0, 4, 120, 300));
         $this->addAftSystem(new EMShield(4, 6, 0, 4, 60, 240));
-		$this->addAftSystem(new JumpEngine(5, 16, 0, 12, 12));//Vorlon Jump Engines normally do use power (the only system onboard that does so), but still are counted as base running costs - in FV I simplify to 0 power requirement. 5th argument = jump point projection range: Vorlon Empire hulls reach 12 hexes, not the standard 4 (JUMP_POINTS_PLAN.md section 2.1)
+		$this->addAftSystem((new JumpEngine(5, 16, 5, 12, 12))->markCapacitorFed());//HYPERSPACE_IMPROVEMENTS_PLAN.md Stage H3 (user, 2026-09-17): the real Vorlon power requirement, and markCapacitorFed() is what makes it an UPKEEP - the drive pays it again out of the Power Capacitor for every turn it holds its jump point open, and in exchange is exempt from the all-systems-dark Maintain rule and from the four-turn cap (JumpEngine::$vortexUpkeep). 5th argument = jump point projection range: Vorlon Empire hulls reach 12 hexes, not the standard 4 (JUMP_POINTS_PLAN.md section 2.1)
         $this->addAftSystem(new GraviticThruster(5, 11, 0, 3, 2));
         $this->addAftSystem(new GraviticThruster(5, 11, 0, 3, 2));
         $this->addAftSystem(new GraviticThruster(5, 11, 0, 3, 2));

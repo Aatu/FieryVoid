@@ -485,11 +485,15 @@ VorlonLightningCannon.prototype.initializationUpdate = function() {
 	var isFiring = weaponManager.hasFiringOrder(this.ship, this);
     if (isFiring) {
 		var firing = weaponManager.getFiringOrder(this.ship, this);
-		this.powerReq = this.powerRequiredArray[firing.firingMode][1]; //element is array Number of prongs/Power)		
+		this.powerReq = this.powerRequiredArray[firing.firingMode][1]; //element is array Number of prongs/Power)
 	}
-    this.outputDisplay = "1/1";    
+    this.outputDisplay = "1/1";
     return this;
 };
+
+//Commit-time mis-declaration warning - see VorlonLightningCombination below.
+VorlonLightningCannon.prototype.combinesProngs = true;
+VorlonLightningCannon.prototype.misdeclaredOutcome = '';
 
 
 var VorlonLtDischargeGun = function VorlonLtDischargeGun(json, ship) {
@@ -546,6 +550,284 @@ VorlonLightningGun2.prototype.initializationUpdate = function() {
 	}
     this.outputDisplay = "1/1";    
     return this;
+};
+
+/* Vorlon Lightning Gun - ONE system with two guns (VorlonLightningGunSplit in specialWeapons.php).
+   Every click declares one shot - one prong - in the mode the gun is sitting in, and multiModeSplit
+   keeps the mode selector open, so the two shots may go at different targets in different modes.
+   Combining prongs from several guns into one heavier shot is resolved SERVER-side, so nothing here
+   needs to know about it: the player declares one shot per gun at the same target in the same mode. */
+var VorlonLightningGunSplit = function VorlonLightningGunSplit(json, ship) {
+	Weapon.call(this, json, ship);
+};
+VorlonLightningGunSplit.prototype = Object.create(Weapon.prototype);
+VorlonLightningGunSplit.prototype.constructor = VorlonLightningGunSplit;
+
+VorlonLightningGunSplit.prototype.initializationUpdate = function () {
+	var ship = this.ship;
+	// Turns systems back on after Capacitor was double charged the previous turn
+	if (!this.reactivated && gamedata.gamephase === 1 && shipManager.power.isOffline(ship, this)) {
+		shipManager.power.setOnline(ship, this);
+		this.reactivated = true;
+	}
+
+	// Power is paid per SHOT, and each gun is billed its own prong's share of every shot it takes part
+	// in - so the guns of one combined shot add up to that shot's full cost, which is what the server
+	// drains (once, from the leading order). Interception is not billed here: the server only
+	// intercepts while the Capacitor can still pay its 1 Power.
+	this.powerReq = 0;
+	for (var i = 0; i < this.fireOrders.length; i++) {
+		var fire = this.fireOrders[i];
+		if (fire.type !== 'normal' || fire.turn != gamedata.turn) continue;
+		var req = this.powerRequiredArray[fire.firingMode];
+		if (req) this.powerReq += req[1];
+	}
+
+	if (gamedata.gamephase == 3) {
+		this.data["Shots Remaining"] = this.getShotsRemaining();
+	} else {
+		delete this.data["Shots Remaining"];
+	}
+	this.outputDisplay = "1/1";
+	return this;
+};
+
+/* Shots spent this turn - offensive and manual intercept orders alike. A selfIntercept marker is
+   consent only and spends nothing (the server's gun accounting cancels it out the same way). */
+VorlonLightningGunSplit.prototype.getShotsUsed = function () {
+	var used = 0;
+	for (var i = 0; i < this.fireOrders.length; i++) {
+		var fire = this.fireOrders[i];
+		if (fire.type === 'selfIntercept' || fire.turn != gamedata.turn) continue;
+		used++;
+	}
+	return used;
+};
+
+VorlonLightningGunSplit.prototype.getShotsRemaining = function () {
+	return Math.max(0, this.guns - this.getShotsUsed());
+};
+
+/* One click = one shot. RETURNED rather than pushed: weaponManager.targetShip pushes it, asks
+   checkFinished() and unselects the gun once both shots are spent. */
+VorlonLightningGunSplit.prototype.doMultipleFireOrders = function (shooter, target, system) {
+	if (this.getShotsRemaining() <= 0) return [];
+
+	var calledid = -1;
+	if (system && weaponManager.canWeaponCall(this)) {
+		var calledSystem = system;
+		while (calledSystem.parentId > 0) {
+			calledSystem = shipManager.systems.getSystem(target, calledSystem.parentId);
+		}
+		calledid = calledSystem.id;
+	}
+
+	var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
+	if (chance < 1) return [];
+
+	return [{
+		id: this.getNewOrderId(shooter),
+		type: 'normal',
+		shooterid: shooter.id,
+		targetid: target.id,
+		weaponid: this.id,
+		calledid: calledid,
+		turn: gamedata.turn,
+		firingMode: this.firingMode,
+		shots: 1,
+		x: "null",
+		y: "null",
+		//'Sweeping' and "Split" are what put the shot - and its mode - in the target's INCOMING list
+		//(weaponManager.getAllBallisticsAgainst) and draw its ballistic line; same pair as the Discharge
+		//Gun and the Lightning Array.
+		damageclass: 'Sweeping',
+		chance: chance,
+		hitmod: 0,
+		notes: "Split"
+	}];
+};
+
+/* "<ship>_<weapon>_<n>", skipping any n already taken: withdrawing an earlier order (or the
+   selfIntercept marker) shortens the array, and length+1 would then repeat a live order's id. */
+VorlonLightningGunSplit.prototype.getNewOrderId = function (shooter) {
+	var n = this.fireOrders.length + 1;
+	var taken = function (id) {
+		return this.fireOrders.some(function (fire) { return fire.id === id; });
+	}.bind(this);
+	while (taken(shooter.id + "_" + this.id + "_" + n)) n++;
+	return shooter.id + "_" + this.id + "_" + n;
+};
+
+VorlonLightningGunSplit.prototype.checkFinished = function () {
+	return this.getShotsRemaining() <= 0;
+};
+
+/* ── Withdrawing a shot ─────────────────────────────────────────────────────────────────────────
+   multiModeSplit hands both withdrawals to the weapon (weaponManager.removeFiringOrderMulti and
+   removeFiringOrder only divert here), so the events are ours to fire. One click takes back the most
+   recent shot in the mode the gun is sitting in - the ship window only offers the button when that
+   mode HAS a shot - and failing that the most recent shot in any mode, which is what the enemy ship
+   tooltip's button (it passes the target and asks no mode question) needs. */
+VorlonLightningGunSplit.prototype.removeMultiModeSplit = function (ship, target) {
+	var mode = parseInt(this.firingMode, 10);
+	var index = -1;
+	for (var i = this.fireOrders.length - 1; i >= 0; i--) {
+		var fire = this.fireOrders[i];
+		if (fire.type !== 'normal' || fire.weaponid != this.id || fire.turn != gamedata.turn) continue;
+		if (target && fire.targetid != target.id) continue;
+		if (parseInt(fire.firingMode, 10) === mode) { index = i; break; }
+		if (index < 0) index = i;
+	}
+	if (index < 0) return;
+
+	var removed = this.fireOrders.splice(index, 1)[0];
+	webglScene.customEvent('SystemDataChanged', { ship: ship, system: this });
+	webglScene.customEvent('SplitOrderRemoved', { shooter: ship, target: target || gamedata.getShip(removed.targetid) });
+};
+
+//Everything this gun has declared this turn, selfIntercept marker included - what removeFiringOrder
+//would have done itself for a weapon without multiModeSplit.
+VorlonLightningGunSplit.prototype.removeAllMultiModeSplit = function (ship) {
+	for (var i = this.fireOrders.length - 1; i >= 0; i--) {
+		if (this.fireOrders[i].weaponid == this.id) this.fireOrders.splice(i, 1);
+	}
+	webglScene.customEvent('SystemDataChanged', { ship: ship, system: this });
+};
+
+/* ── Interception ────────────────────────────────────────────────────────────────────────────────
+   Effective loading time is max(loadingtime, normalload) = 2, so the gun needs a selfIntercept marker
+   before the server will use it, and because canSplitShots is true weaponManager asks the weapon
+   whether it may place one. One marker is consent for every unused shot - a second buys nothing. */
+VorlonLightningGunSplit.prototype.checkSelfInterceptSystem = function () {
+	for (var i = 0; i < this.fireOrders.length; i++) {
+		if (this.fireOrders[i].type === 'selfIntercept') return false;
+	}
+	return this.getShotsRemaining() > 0;
+};
+
+VorlonLightningGunSplit.prototype.doMultipleSelfIntercept = function (ship) {
+	if (!this.checkSelfInterceptSystem()) return;
+	this.fireOrders.push({
+		id: this.getNewOrderId(ship),
+		type: "selfIntercept",
+		shooterid: ship.id,
+		targetid: ship.id,
+		weaponid: this.id,
+		calledid: -1,
+		turn: gamedata.turn,
+		firingMode: this.getInterceptOrderMode(),
+		shots: 1,
+		x: "null",
+		y: "null",
+		addToDB: true,
+		damageclass: this.data["Weapon type"] ? this.data["Weapon type"].toLowerCase() : 'electromagnetic'
+	});
+	webglScene.customEvent('SystemDataChanged', { ship: ship, system: this });
+};
+
+//An interception is always a single prong, whatever mode the gun is set to - so the order reads
+//honestly in the log. The rating is a flat ->intercept, so the mode changes nothing else.
+VorlonLightningGunSplit.prototype.getInterceptOrderMode = function () { return 1; };
+
+/* The two shots can sit in different modes, and each mode is nothing but a row of the per-mode arrays
+   (fire control, range penalty, damage), so the display paths may switch the gun into a shot's OWN
+   mode to describe it (weaponManager.setModeForFireOrder, which always restores it). Without this the
+   INCOMING list priced a shot declared in Q4Piercing at whatever mode the gun was switched to since. */
+VorlonLightningGunSplit.prototype.displaysOrdersInOwnMode = true;
+
+//Commit-time mis-declaration warning - see VorlonLightningCombination below.
+VorlonLightningGunSplit.prototype.combinesProngs = true;
+VorlonLightningGunSplit.prototype.misdeclaredOutcome = '';
+
+
+/* ── Commit-time warning: Lightning shots that will not combine ───────────────────────────────────
+   The Lightning Cannon and the Lightning Gun both fuse several weapons' orders into one heavier shot
+   SERVER-side, at resolution (calculateHitBase on VorlonLightningCannon / VorlonLightningGunSplit). A
+   shot declared in an N-prong mode without N weapons behind it is only found out there - the Cannon's
+   then does not fire, the Gun's falls back to 1 Prong. This replays the same pairing here, so
+   gamedata.commitOrders can say so BEFORE the player commits.
+
+   ⚡ GATED TO COST NEXT TO NOTHING, since these weapons are rare: one faction comparison per ship turns
+   away every non-Vorlon ship before a single system is read (both weapons exist only on Vorlon Empire
+   hulls - widen FACTION if that ever changes), and on a Vorlon ship only systems flagged combinesProngs
+   that actually hold orders are looked at.
+
+   ⚠️ MIRRORS THE SERVER'S GREEDY PAIRING - keep the two in step:
+     - orders are walked in the server's sequence (systems by id, then each weapon's orders in
+       declaration order) and the first unclaimed order LEADS;
+     - its partners are LATER unclaimed orders of the SAME weapon class, same target, called system and
+       mode, one per weapon (a Lightning Gun never pairs with its own other shot; a Cannon holds a
+       single order, so for it that rule changes nothing);
+     - a lead that fails is still claimed, so it cannot become anybody's partner either. */
+var VorlonLightningCombination = {
+	FACTION: "Vorlon Empire",
+
+	/* Every order on this ship that will not find enough partners, as {weapon, fireOrder}. */
+	getMisdeclaredShots: function (ship) {
+		if (!ship || ship.flight || ship.faction !== this.FACTION) return [];
+
+		var orders = [];
+		for (var i = 0; i < ship.systems.length; i++) {
+			var weapon = ship.systems[i];
+			if (!weapon || !weapon.combinesProngs || !weapon.fireOrders || weapon.fireOrders.length === 0) continue;
+			for (var j = 0; j < weapon.fireOrders.length; j++) {
+				var fire = weapon.fireOrders[j];
+				if (fire.type !== 'normal' || fire.turn != gamedata.turn) continue;
+				orders.push({ weapon: weapon, fireOrder: fire });
+			}
+		}
+
+		var claimed = [];
+		var misdeclared = [];
+		for (var l = 0; l < orders.length; l++) {
+			if (claimed[l]) continue;
+			claimed[l] = true;
+			var lead = orders[l];
+			var req = lead.weapon.powerRequiredArray ? lead.weapon.powerRequiredArray[lead.fireOrder.firingMode] : null;
+			var prongs = req ? req[0] : 1;
+			if (prongs < 2) continue;
+
+			var partners = [];
+			var weaponsUsed = {};
+			weaponsUsed[lead.weapon.id] = true;
+			for (var p = l + 1; p < orders.length && partners.length < prongs - 1; p++) {
+				var other = orders[p];
+				if (claimed[p] || weaponsUsed[other.weapon.id]) continue;
+				if (other.weapon.name !== lead.weapon.name) continue;
+				if (other.fireOrder.targetid != lead.fireOrder.targetid) continue;
+				if (other.fireOrder.calledid != lead.fireOrder.calledid) continue;
+				if (other.fireOrder.firingMode != lead.fireOrder.firingMode) continue;
+				weaponsUsed[other.weapon.id] = true;
+				partners.push(p);
+			}
+			if (partners.length < prongs - 1) {
+				misdeclared.push(lead);
+			} else {
+				for (var k = 0; k < partners.length; k++) claimed[partners[k]] = true;
+			}
+		}
+		return misdeclared;
+	},
+
+	/* The commit dialog's paragraph for these ships, or '' when there is nothing to warn about. */
+	getCommitWarning: function (ships) {
+		var lines = '';
+		for (var s = 0; s < ships.length; s++) {
+			var ship = ships[s];
+			var shots = this.getMisdeclaredShots(ship);
+			for (var i = 0; i < shots.length; i++) {
+				var weapon = shots[i].weapon;
+				var fire = shots[i].fireOrder;
+				var target = gamedata.getShip(fire.targetid);
+				lines += gamedata.shipNameSpan(ship, ship.name) + ': ' + weapon.displayName
+					+ ' (' + weapon.firingModes[fire.firingMode] + ')'
+					+ (target ? ' at ' + target.name : '')
+					+ ' ' + weapon.misdeclaredOutcome + '<br>';
+			}
+		}
+		if (lines === '') return '';
+		return 'These shots will not combine properly:<br><span style="color: rgba(255, 255, 255, 0.692); font-weight: normal">' + lines + '</span>';
+	}
 };
 
 var VorlonDischargePulsar = function VorlonDischargePulsar(json, ship) {

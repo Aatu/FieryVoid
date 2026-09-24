@@ -1153,18 +1153,118 @@ var JumpEngine = function JumpEngine(json, ship) {
 		   targetShip's blocked-LoS skip drops the click silently. Same per-instance keying, same reason. */
 		this.ignoresLoS = true;
 	}
+	/* ⭐⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md §5 (Stage H4) - WHAT A BOOST MEANS ON THIS DRIVE THIS TURN,
+	   decided ONCE, from the payload's start-of-turn charge (R2). Only on a drive that charges the Ancient
+	   way (advancedCharging, JumpEngine::hasAdvancedCharging); every other engine keeps its blueprint
+	   boostable / maxBoostLevel untouched. Per INSTANCE and primitives only, so no shared-reference trap -
+	   the same shape AmmoMissileRackTriad.changeFiringMode uses to switch its boost on and off.
+	     recharging, chargeBoostMax sent -> EXTRA CHARGING: boostable, up to that many levels (a Vorlon
+	                                        drive is not boostable in its blueprint - this is what lets it);
+	     recharging, nothing to buy       -> NO BOOST AT ALL: it may not jump until charged (§10 A4), and a
+	                                        boost could not add charge (a jump point still standing, only
+	                                        the abduction cooldown running, a flight, or one turn short);
+	     fully charged                     -> the blueprint's answer: Jump to Hyperspace on a legacy drive,
+	                                        nothing on a Vorlon's. One level - it is a Yes/No. */
+	if (this.advancedCharging) {
+		var chargeBoostMax = parseInt(this.chargeBoostMax, 10) || 0;
+		if (chargeBoostMax > 0) {
+			this.boostable = true;
+			this.maxBoostLevel = chargeBoostMax;
+		} else if (!this.isChargedForJump()) {
+			this.boostable = false;
+		} else {
+			this.maxBoostLevel = 1;
+		}
+	}
 };
 JumpEngine.prototype = Object.create(Weapon.prototype);
 JumpEngine.prototype.constructor = JumpEngine;
 
 JumpEngine.prototype.initializationUpdate = function () {
-	if (shipManager.power.isBoosted(this.ship, this)) {
+	/* Stage H4 - "JUMP" only when the boost IS the jump. On an Ancient-charging drive the boost may be
+	   EXTRA CHARGING instead, and then the icon keeps its "charge / recharge time" counter (outputDisplay
+	   0 falls through to it). Asked of THIS turn's boost on such a drive: isBoosted's Deployment-phase
+	   look at last turn would call last turn's charge boost a jump - a drive still on the board did not
+	   jump. Every other drive is exactly as before. */
+	var jumping = this.hasAdvancedCharging() ? this.isJumpBoost() : shipManager.power.isBoosted(this.ship, this);
+	if (jumping) {
 		this.outputDisplay = "JUMP";
 	} else {
 		this.outputDisplay = this.output;
 	}
 	return this;
 }
+
+/* ===== HYPERSPACE_IMPROVEMENTS_PLAN.md §5 (Stage H4) - BOOSTING THE RECHARGE ======================
+
+   An Ancient's drive (factionAge 3+: Vorlons, The System, every Ancient / Walker drive) cannot be used
+   at all until fully charged - jumping out included - and while it recharges it may be BOOSTED to
+   charge faster: boost N = N extra turns of charging, credited at the END of the turn, up to 3 a turn,
+   for the drive's powerReq per level. Every rule's authority is the server (JumpEngine::isJumpOutBoost,
+   getChargeBoostMax, the 'ChargeBoost' note); these read what it published and nothing else. */
+
+//Mirror of JumpEngine::hasAdvancedCharging(). `advancedCharging` rides the payload only when true.
+JumpEngine.prototype.hasAdvancedCharging = function () {
+	return Boolean(this.advancedCharging);
+};
+
+/* How many levels of EXTRA CHARGING a boost may buy THIS turn, or 0 when a boost buys none - the server's
+   JumpEngine::getChargeBoostMax, published as chargeBoostMax only when non-zero. */
+JumpEngine.prototype.getChargeBoostMax = function () {
+	if (!this.hasAdvancedCharging()) return 0;
+	return parseInt(this.chargeBoostMax, 10) || 0;
+};
+
+/* Is the drive charged enough to be USED this turn? Always, on a drive that does not charge the Ancient way
+   (its boost-jump never had a charge test); otherwise the start-of-turn charge, which is what the server's
+   isJumpOutBoost reads. turnsloaded already carries the abduction cooldown (getVortexRechargeLoad). */
+JumpEngine.prototype.isChargedForJump = function () {
+	if (this.isFlightMounted()) return true;
+	if (!this.hasAdvancedCharging()) return true;
+	return !(parseInt(this.turnsloaded, 10) < parseInt(this.loadingtime, 10));
+};
+
+//Is this turn's boost EXTRA CHARGING? The two meanings cannot both hold (R2): chargeBoostMax is only
+//ever published for a drive that is NOT charged.
+JumpEngine.prototype.isChargeBoost = function () {
+	return this.getChargeBoostMax() > 0 && shipManager.power.getBoost(this) > 0;
+};
+
+/* ⭐ IS THIS TURN'S BOOST A JUMP TO HYPERSPACE? Mirror of JumpEngine::isJumpOutBoost, and what every
+   client "who is leaving" question asks instead of a bare boost test: the commit checklist
+   (gamedata.js), shipManager.movement.getJumpingOutEngine (and through it isJumpingToHyperspace and
+   isJumpFireForbidden), onBoostIncrease and the "JUMP" read-out. A legacy drive only - a Vorlon's boost is
+   only ever charging - and on an Ancient-charging drive only once it is charged. */
+JumpEngine.prototype.isJumpBoost = function () {
+	if (!(shipManager.power.getBoost(this) > 0)) return false;
+	if (!shipManager.movement.isLegacyJumpEngine(this)) return false;
+	return this.isChargedForJump();
+};
+
+/* ⭐ WHAT EXTRA CHARGING COSTS THE REACTOR THIS TURN: "the same as their normal power required", per level
+   (user request, Item 2) - the drive's powerReq again for each level, and 0 on every drive that is not
+   charging. It is THE BOOST'S PRICE: shipManager.power.countBoostPowerUsed returns it for a jump engine,
+   so getReactorPower charges it and PowerCapacitor.initializationUpdate adds it back after the commit,
+   like any other boost. (Charged beside the abduction draw instead, it was subtracted a second time after
+   the commit - game 4348, "cost 22".)
+   ⚠️ NEVER boostEfficiency: that is what the JUMP boost costs, it is 0, and 195 young-race hulls rely on it.
+   ⭐ ONE PAYER, THE FRONT END. Unlike the H3 upkeep there is no server draw, so on a Vorlon this is spent
+   by the capacitor storing less at the commit (PowerCapacitor.doIndividualNotesTransfer) - which is why it
+   is NOT in getVortexUpkeepReserved's add-back. */
+JumpEngine.prototype.getChargeBoostPowerDraw = function () {
+	if (!this.isChargeBoost()) return 0;
+	return Math.min(shipManager.power.getBoost(this), this.getChargeBoostMax()) * (this.powerReq || 0);
+};
+
+/* ⚠️⚠️ HOW MUCH OF LAST TURN'S BOOST shipManager.power.copyLastTurnPower MAY CARRY INTO THIS TURN.
+   It copies every power row forward, boosts included - and on an Ancient-charging drive a charge boost
+   carried onto a turn the drive is fully charged IS A JUMP TO HYPERSPACE: the ship would leave the battle
+   on a click the player made for something else. So a boost carries only while the drive is still
+   charging, and never more than can still count; 0 drops it. Any other drive: unchanged. */
+JumpEngine.prototype.getRepeatableBoost = function (amount) {
+	if (!this.hasAdvancedCharging()) return amount;
+	return Math.min(amount, this.getChargeBoostMax());
+};
 
 JumpEngine.prototype.hasMaxBoost = function () {
 	return true;
@@ -1213,9 +1313,21 @@ JumpEngine.prototype.getOwningUnit = function () {
 	return host;
 };
 
-//The open vortex this ship is holding, or null. Also the source of the target hex.
+/* The open vortex this ship is holding, or null. Also the source of the target hex.
+
+   ⭐ STAGE H5 - AN ENTRANCE, OR THE SHIP'S OWN BLUE EXIT ONCE IT HAS COME OUT THROUGH IT. From its
+   arrival turn a ship holds its exit exactly as it would an entrance, so every reader of this - the
+   Maintain toggle (canMaintainVortex / declareVortexMaintain), its carry-forward
+   (continueVortexMaintain), the icon counter's fallback and SystemInfoButtons' "holding a vortex, no
+   fire-order buttons" - is right for it unchanged. The exit half is asked SECOND and separately:
+   getVortexHeldBy stays entrance-only by design (see shipManager.movement.isJumpVortex).
+   Guarded, because harnesses drive this file against a stubbed shipManager.movement. */
 JumpEngine.prototype.getHeldVortex = function () {
-	return shipManager.movement.getVortexHeldBy(this.getOwningUnit());
+	var unit = this.getOwningUnit();
+	var entrance = shipManager.movement.getVortexHeldBy(unit);
+	if (entrance) return entrance;
+	if (typeof shipManager.movement.getMaintainableExitHeldBy !== 'function') return null;
+	return shipManager.movement.getMaintainableExitHeldBy(unit);
 };
 
 /* STAGE 6 - WHAT THE SYSTEM ICON SHOWS, when it should show something other than the ordinary
@@ -1245,10 +1357,16 @@ JumpEngine.prototype.getVortexIconLoad = function () {
 	   ⭐ AND ON A FIGHTER FLIGHT IT IS 1 (WALKERS §3.12, Stage 13, user ruling 2026-09-10): a flight
 	   has no Maintain, so its jump point is open for exactly one turn and the icon reads "1/1". The
 	   server sends that denominator too; this only decides what the FALLBACK below counts out of. */
+	/* ⭐⭐ STAGE H3 / R5 - AND A CAPACITOR-FED (VORLON) DRIVE HAS NO DENOMINATOR AT ALL. Its jump
+	   point stands for as long as the upkeep is paid, so there is no number to count out of:
+	   stripForJson sends no vortexMaxTurns for one and the counter reads "3" rather than "3/4",
+	   which would have claimed the doorway was about to close every turn from the fourth onwards.
+	   ⚠️ Tested BEFORE the fallback below, which would otherwise clamp the derived age to 4. */
+	var openEnded = this.chargesVortexUpkeep() && (this.vortexMaxTurns === undefined || this.vortexMaxTurns === null);
 	var max = this.vortexMaxTurns || (this.isFlightMounted() ? 1 : 4);
 
 	if (this.vortexTurnsOpen !== undefined && this.vortexTurnsOpen !== null) {
-		return this.vortexTurnsOpen + "/" + max;
+		return openEnded ? String(this.vortexTurnsOpen) : this.vortexTurnsOpen + "/" + max;
 	}
 
 	var vortex = this.getHeldVortex();
@@ -1256,6 +1374,8 @@ JumpEngine.prototype.getVortexIconLoad = function () {
 
 	var age = gamedata.turn - vortex.spawned + 1;
 	if (age < 0) return null;
+
+	if (openEnded) return String(age);
 
 	return Math.min(age, max) + "/" + max;
 };
@@ -1266,6 +1386,79 @@ JumpEngine.prototype.getVortexIconLoad = function () {
    wrong even when the flight lookup finds nothing (the lobby, a mid-poll payload). */
 JumpEngine.prototype.isFlightMounted = function () {
 	return Boolean(this.ship && this.ship.fighter);
+};
+
+/* ⭐⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md §4 (Stage H3) - IS THIS A CAPACITOR-FED (VORLON) JUMP DRIVE?
+   Mirror of JumpEngine::chargesVortexUpkeep(), and it reads the SERVER'S answer rather than
+   re-deriving one: `vortexUpkeep` is published by JumpEngine::stripForJson only on a drive the
+   server will actually charge (marked, non-zero powerReq, and a Power Capacitor on the hull to pay
+   from), so the two ends cannot disagree about which drives the rule applies to.
+
+   ⚠️ ABSENT ON EVERY OTHER JUMP ENGINE IN THE GAME, and on this one in the LOBBY - the flag rides
+   the in-game payload, not the static blueprint (a public property would have cost 776 of them).
+   Everything keyed off it therefore falls back to the ordinary B5 behaviour by construction, which
+   is what a lobby object and a pre-H3 payload both need. */
+JumpEngine.prototype.chargesVortexUpkeep = function () {
+	return Boolean(this.vortexUpkeep);
+};
+
+/* What one turn of holding the jump point costs: the drive's own powerReq, sent alongside the flag
+   so the number lives in one place (JumpEngine::getVortexUpkeepCost). 0 when nothing is charged, so
+   a caller can subtract it unconditionally. */
+JumpEngine.prototype.getVortexUpkeepCost = function () {
+	if (!this.chargesVortexUpkeep()) return 0;
+	return parseInt(this.vortexUpkeepCost, 10) || (this.powerReq || 0);
+};
+
+/* ⭐ IS THIS DRIVE BEING USED ON A JUMP POINT THIS TURN? An OPENING declaration (firing modes 1-6,
+   the six vortex facings), a MAINTAIN one (mode 7) - both 'jumppoint' - or (⭐ Stage H5) a blue EXIT
+   declaration from hyperspace, 'jumpexit'. All three are the drive in use.
+
+   ⭐⭐ THE EXIT IS CHARGED NOW (user ruling 2026-09-19, reversing H3): opening a jump point is using
+   the drive whichever way the doorway faces, so a Vorlon forming its exit from hyperspace pays powerReq
+   exactly as it would opening an entrance. The server takes it in getVortexClosureReason's exit branch
+   on the forming turn. Maintaining the exit once the ship is on the board is an ordinary mode-7
+   'jumppoint' order and was always counted.
+
+   ⚠️ THE DAMAGECLASS IS STILL THE TEST, NOT THE MODE: any other order type on this system (an
+   abduction carries 'abduction', a gate claim 'gateexit' on a gate's engine) stays excluded for free. */
+JumpEngine.prototype.isUsingVortexThisTurn = function () {
+	for (var i in this.fireOrders) {
+		var fire = this.fireOrders[i];
+		if (fire.turn != gamedata.turn) continue;
+		var damageclass = String(fire.damageclass).toLowerCase();
+		if (damageclass !== 'jumppoint' && damageclass !== 'jumpexit') continue;
+		return true;
+	}
+
+	return false;
+};
+
+/* ⭐⭐ WHAT THE JUMP DRIVE TAKES OFF THE REACTOR BALANCE THIS TURN - a RESERVATION, not a payment.
+   Read by shipManager.power.getReactorPower, which is the whole balance and what the Initial Orders
+   commit gate reads (getCapacitorShipsNegativePower), so a Vorlon that has allocated its capacitor
+   away is asked to power something down before it may commit. Same shape and same site as the EDJD's
+   getAbductionPowerDraw.
+
+   ⭐ IT IS A PER-USE COST AND THE ONLY ONE THIS DRIVE HAS (user ruling 2026-09-18): powerReq on a
+   turn the drive OPENS or MAINTAINS a jump point, and 0 on every other turn - an idle Vorlon drive
+   costs its ship nothing at all. getReactorPower gives back the standing draw fixedPower would
+   otherwise have taken; see the note at that site, which is the other half of this.
+
+   ⚠️⚠️ THE SERVER IS WHAT ACTUALLY SPENDS IT, at the end of the turn, in
+   JumpEngine::payVortexUpkeep. This figure must therefore be ADDED BACK into the power the capacitor
+   stores - see PowerCapacitor.doIndividualNotesTransfer - or the same power is charged twice: once
+   here, by shrinking the stored figure the front end posts, and again there. The reservation
+   constrains the ALLOCATION; the spend is the server's.
+
+   ⚠️ A DECLARATION THE SERVER THEN REFUSES (an illegal hex) is reserved for and never spent, so the
+   player keeps the power and is out by one turn's reservation. That is the safe direction, and the
+   alternative - reserving nothing until the doorway exists - would let them allocate away the very
+   power the opening needs. */
+JumpEngine.prototype.getVortexUpkeepDraw = function () {
+	if (!this.chargesVortexUpkeep()) return 0;
+	if (!this.isUsingVortexThisTurn()) return 0;
+	return this.getVortexUpkeepCost();
 };
 
 /* ⭐ AN ANCIENT SPECIAL JUMP DRIVE (user ruling 2026-09-11) - mirror of JumpEngine::isAncientJump().
@@ -1299,13 +1492,20 @@ JumpEngine.prototype.forbidsFireWhileJumping = function () {
    The drive itself holds no orders (a legacy engine is autoFireOnly), and on a flight
    getOwningUnit is the flight, whose weapons are one level down on the craft. */
 JumpEngine.prototype.onBoostIncrease = function () {
-	this.mirrorFlightBoost(true);
-
 	/* §3.18 (Stage 20) - a Walker drive's boost IS its jump, and it cannot pour the same power into an
 	   abduction as well: setting the jump withdraws this turn's abduction, the way Maintain withdraws a
 	   shot. The server ignores a jumping unit's abduction anyway (EdjdAbduction::isDriveWorking), and
-	   canSelectForAbduction refuses a new one while the boost stands. */
+	   canSelectForAbduction refuses a new one while the boost stands. (Stage H4: a charging boost too -
+	   canSelectForAbduction refuses on ANY boost, so the drive does one thing a turn either way.) */
 	if (this.getAbductionOrder()) this.removeAbductionOrder();
+
+	/* ⭐⭐ STAGE H4 - EXTRA CHARGING IS NOT A JUMP, AND THIS IS WHERE THAT MATTERS MOST. Everything
+	   below is the jump's: withdraw every fire order on the unit and mirror the boost across a flight.
+	   Run it for a charge boost and a Vorlon that speeds its recharge silently loses every shot it had
+	   declared. (A flight never charges - chargeBoostMax is never sent for one - so nothing to mirror.) */
+	if (!this.isJumpBoost()) return;
+
+	this.mirrorFlightBoost(true);
 
 	if (!this.forbidsFireWhileJumping()) return;
 
@@ -1506,13 +1706,21 @@ JumpEngine.prototype.doSpecialTargeting = function (shooter, target, system) {
 		confirm.error("Only an <b>enemy</b> unit can be abducted by an Extra-Dimensional Jump Drive.");
 		return false;
 	}
-	if (gamedata.isTerrain(target.shipSizeClass, target.userid)) {
-		confirm.error("Terrain cannot be abducted.");
-		return false;
-	}
 	//An EDJD cannot target fighter flights (user ruling 2026-09-13) - EdjdAbduction::getDeclarationBlock agrees.
 	if (target.flight) {
 		confirm.error("A fighter flight cannot be abducted.");
+		return false;
+	}
+	/* ⭐ §3.18b (user ruling 2026-09-20) - TERRAIN CAN BE ABDUCTED, and the blanket "Terrain cannot be
+	   abducted" that stood here is gone. An asteroid, a moon, a fixed jump gate and a shipyard are all
+	   objects the drive can take hold of; terrain belongs to nobody, so the friendly refusal above lets
+	   it straight through (gamedata.isMyorMyTeamShip is false for every terrain unit outside deployment)
+	   and the server agrees by exempting terrain from its own team test. What is still refused is a unit
+	   that is not an object at all - a jump point - and anything untargetable. */
+	if (!JumpEngine.isAbductableTarget(target)) {
+		confirm.error(shipManager.movement.isAnyJumpVortex(target)
+			? "A <b>jump point</b> cannot be abducted - there is nothing standing there to take hold of."
+			: "This unit cannot be abducted.");
 		return false;
 	}
 	//D64: a supporting drive only joins an abduction an EDJD has already taken hold of (EdjdAbduction::isHeldByTeam).
@@ -1604,6 +1812,57 @@ JumpEngine.prototype.continueAbduction = function () {
 	return true;
 };
 
+/* ⭐ A MAINTAINED JUMP POINT STAYS MAINTAINED (user request 2026-09-18, play test 4348) - "if a player
+   decided to maintain a Jump Point with their Jump Engine, then the Jump Engine should continue to
+   maintain this automatically when Initial Orders load the following turn(s) until they decide to
+   manually toggle it off". Same shape and same call site as continueAbduction above.
+
+   ⭐ LAST TURN'S ORDER IS NOT AVAILABLE, AND IS NOT NEEDED. Only the current turn's fire orders reach a
+   system (DBManager::getFireOrdersForShips loads one turn), so "was Maintain declared last turn" cannot
+   be read off the mode-7 order. It is DERIVED instead, and exactly: a jump point still open now that was
+   not opened last turn survived last turn ONLY because it was maintained - on any turn after its opening
+   turn, an undeclared jump point closes at the end of it (JumpEngine::getVortexClosureReason). In client
+   terms `spawned` is openTurn + 1, so "not opened last turn" is gamedata.turn > vortex.spawned.
+
+   ⚠️ SO THE FIRST MAINTAIN IS ALWAYS THE PLAYER'S. On the first turn a jump point is open (turn ==
+   spawned) nothing has been maintained yet and nothing is re-declared - opening a jump point is not a
+   decision to hold it.
+
+   Everything else is canActivate's, which is why it is asked rather than restated: the owner's unit,
+   intact, the drive powered and in range, and NOT on an ordinary drive's four-turn cap turn (there
+   maintaining changes nothing - a capacitor-fed Vorlon drive has no cap and is offered indefinitely).
+   It runs AFTER repeatLastTurnPower, so a drive left offline last turn reads offline here and stops.
+
+   An ordinary client-side declaration from then on: OFF withdraws it and the commit gate prices it (a
+   Vorlon whose capacitor cannot cover the upkeep is named at the commit and turns it off or powers
+   down). On an ordinary ship declareVortexMaintain also takes the ship dark again, which repeatLastTurnPower
+   has mostly done already. ⚠️ A page reload during Initial Orders re-seeds it - nothing server-side
+   records the OFF until the commit, exactly as for continueAbduction. */
+JumpEngine.prototype.continueVortexMaintain = function () {
+	if (this.isMaintainingVortex()) return false;
+
+	var vortex = this.getHeldVortex();
+	if (!vortex || vortex.spawned === undefined || vortex.spawned === null || vortex.spawned === -1) return false;
+	if (!(gamedata.turn > parseInt(vortex.spawned, 10))) return false;   //first open turn - the player's call
+
+	return this.declareVortexMaintain() !== null;
+};
+
+//Every own jump engine's continueVortexMaintain - InitialPhaseStrategy.activate, beside continueAbductions.
+JumpEngine.continueVortexMaintains = function () {
+	if (typeof gamedata === 'undefined' || gamedata.gamephase !== 1) return 0;
+	var count = 0;
+	for (var i in gamedata.ships) {
+		var ship = gamedata.ships[i];
+		if (!ship || ship.flight || !gamedata.isMyShip(ship)) continue;   //a flight has no Maintain (Stage 13)
+		for (var j in ship.systems) {
+			var system = ship.systems[j];
+			if (system && typeof system.continueVortexMaintain === 'function' && system.continueVortexMaintain()) count++;
+		}
+	}
+	return count;
+};
+
 //Every own Walker drive's continueAbduction - InitialPhaseStrategy.activate, right after repeatLastTurnPower.
 JumpEngine.continueAbductions = function () {
 	if (typeof gamedata === 'undefined' || gamedata.gamephase !== 1) return 0;
@@ -1637,6 +1896,23 @@ JumpEngine.prototype.setAbductionPowerLevel = function (level) {
 	level = Math.max(1, Math.min(max, parseInt(level, 10) || 1));
 	if (parseInt(order.firingMode, 10) === level) return false;
 	order.firingMode = level;
+	return true;
+};
+
+/* ⭐⭐ §3.18b (user ruling 2026-09-20) - MAY THIS UNIT BE DRAGGED INTO HYPERSPACE AT ALL? The client
+   mirror of EdjdAbduction::isAbductableTerrain and the two refusals that sit beside it in
+   getDeclarationBlock, held in ONE place because three sites ask and they must not drift apart:
+   doSpecialTargeting (the click), weaponManager.targetShip (whose blanket Huge-terrain refusal now has
+   this one exception) and the targeting tooltip's line for the drive.
+
+   ⚠️ NO TEAM TEST HERE. Terrain belongs to nobody - gamedata.isMyorMyTeamShip answers false for every
+   terrain unit outside deployment, whoever bought it - and whether an ordinary unit is a legal target
+   is the caller's question, not this one's. */
+JumpEngine.isAbductableTarget = function (target) {
+	if (!target) return false;
+	if (target.flight) return false;                                                    //D61
+	if (!shipManager.isTargetable(target)) return false;                                //the Energy Draining Mine's orb
+	if (shipManager.movement.isAnyJumpVortex(target)) return false;                     //a hole in space, not an object
 	return true;
 };
 
@@ -1723,7 +1999,12 @@ JumpEngine.prototype.canMaintainVortex = function () {
 	var vortex = this.getHeldVortex();
 	if (!vortex) return false;
 
-	if (gamedata.turn >= vortex.spawned + 3) return false;   //its last turn - see above
+	/* ⭐⭐ STAGE H3 / R5 - THE CAP TEST MUST NOT RUN ON A CAPACITOR-FED (VORLON) DRIVE. There is no
+	   four-turn cap on one, so "its last turn" never arrives - and without this guard the toggle
+	   would vanish on spawned+3 and the player would silently lose the control that keeps a jump
+	   point they are paying for open. This is the single highest-consequence line of H3's client
+	   half: everything else here would merely look wrong. */
+	if (!this.chargesVortexUpkeep() && gamedata.turn >= vortex.spawned + 3) return false;   //its last turn - see above
 
 	//Out of range NOW is refused by the server's declaration test too. (Straying out of range
 	//LATER, during Movement, closes the vortex at end of turn - that one is not preventable here.)
@@ -1748,11 +2029,25 @@ JumpEngine.prototype.canDeactivate = function () {
    end of the turn, which is a long way from the mistake. shipManager.power.setOnline then refuses
    to bring any of them back while the declaration stands. */
 JumpEngine.prototype.doActivate = function () {
-	if (!this.canActivate()) return;
+	var hex = this.declareVortexMaintain();
+	if (!hex) return;
+
+	var ship = this.getOwningUnit();
+	webglScene.customEvent('SystemDataChanged', { ship: ship, system: this });
+	webglScene.customEvent('HexTargeted', { shooter: ship, hexagon: hex });   //draw the marker on the vortex hex
+};
+
+/* THE DECLARATION ITSELF - the order and the shutdown, and nothing that draws. Split out of doActivate
+   (Stage H3 follow-up) so continueVortexMaintain can re-declare at the start of Initial Orders without
+   firing UI events at a phase strategy that has not activated yet: the ballistic marker is rebuilt from
+   the fire orders when it does (PhaseStrategy -> ballisticIconContainer.consumeGamedata).
+   Returns the vortex hex on success, null when Maintain cannot be declared. */
+JumpEngine.prototype.declareVortexMaintain = function () {
+	if (!this.canActivate()) return null;
 
 	var ship = this.getOwningUnit();
 	var vortex = this.getHeldVortex();
-	if (!vortex) return;
+	if (!vortex) return null;
 
 	var hex = shipManager.getShipPosition(vortex);
 
@@ -1772,6 +2067,11 @@ JumpEngine.prototype.doActivate = function () {
 		damageclass: this.data["Weapon type"].toLowerCase()
 	});
 
+	/* ⭐⭐ STAGE H3 / R4 - A CAPACITOR-FED (VORLON) DRIVE SHUTS NOTHING DOWN. It pays an upkeep out
+	   of the Power Capacitor INSTEAD of taking the ship dark, so this loop must not run for one -
+	   getVortexMaintainBlockers answers with an empty list for it, which is what makes this a
+	   statement of the rule here rather than a second copy of it. The reservation the player has to
+	   cover is shown instead, by getVortexUpkeepDraw through the reactor balance. */
 	var blockers = shipManager.power.getVortexMaintainBlockers(ship);
 	for (var i in blockers) {
 		var system = blockers[i];
@@ -1786,8 +2086,7 @@ JumpEngine.prototype.doActivate = function () {
 		system.power.push({ id: null, shipid: ship.id, systemid: system.id, type: 1, turn: gamedata.turn, amount: 0 });
 	}
 
-	webglScene.customEvent('SystemDataChanged', { ship: ship, system: this });
-	webglScene.customEvent('HexTargeted', { shooter: ship, hexagon: hex });   //draw the marker on the vortex hex
+	return hex;
 };
 
 /* Turn Maintain OFF: withdraw the declaration, then give the ship its power back.
@@ -1805,6 +2104,17 @@ JumpEngine.prototype.doDeactivate = function () {
 
 	var ship = this.getOwningUnit();
 	this.removeVortexMaintainOrder();
+	this.releaseHeldExitManifest(ship);
+
+	/* ⭐⭐ STAGE H3 / R4 - AND NOTHING TO RESTORE ON A CAPACITOR-FED (VORLON) DRIVE, because
+	   doActivate shut nothing down. The restore below is deliberately BROAD (see the note above), so
+	   running it here would switch on every system the player had powered down by hand - turning
+	   Maintain off would silently undo their whole power plan. The declaration is withdrawn above,
+	   which is the entire job on one of these. */
+	if (this.chargesVortexUpkeep()) {
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: this });
+		return;
+	}
 
 	for (var i in ship.systems) {
 		var system = ship.systems[i];
@@ -1819,6 +2129,29 @@ JumpEngine.prototype.doDeactivate = function () {
 	}
 
 	webglScene.customEvent('SystemDataChanged', { ship: ship, system: this });
+};
+
+/* ⭐⭐ STAGE H5 - TURNING MAINTAIN OFF ON A HELD BLUE EXIT CANCELS THE WAVE BOOKED THROUGH IT.
+   Both decisions are made in the same Initial Orders: hold the doorway open, and who comes through it
+   next turn. A doorway let go closes at the end of this turn, so a berth on it can never be honoured -
+   this un-books those riders and names them, which is FEEDBACK, not enforcement. The server is the
+   authority (InitialOrdersGamePhase::collectHeldExitOpeners writes a berth as NULL unless the opener
+   re-declared Maintain in the same commit); this only stops the player committing a manifest they
+   would then watch vanish.
+   An entrance has no riders, and a ship still in hyperspace has no Maintain to turn off, so this is a
+   no-op everywhere but a held exit. Guarded on the module: harnesses and the lobby load this file
+   without ReinforcementEntry. */
+JumpEngine.prototype.releaseHeldExitManifest = function (ship) {
+	if (!ship || !window.ReinforcementEntry || typeof ReinforcementEntry.releaseManifest !== 'function') return;
+	if (typeof shipManager.movement.getMaintainableExitHeldBy !== 'function') return;
+	if (!shipManager.movement.getMaintainableExitHeldBy(ship)) return;
+
+	var released = ReinforcementEntry.releaseManifest(ship.id);
+	if (released.length === 0) return;
+
+	var names = released.map(function (unit) { return '<b>' + unit.name + '</b>'; }).join(', ');
+	confirm.warning(ship.name + "'s jump point will close at the end of this turn, so nothing can come "
+		+ "through it next turn. Taken off its manifest and left waiting in hyperspace: " + names + ".");
 };
 
 var Structure = function Structure(json, ship) {
@@ -3482,6 +3815,8 @@ PowerCapacitor.prototype.initializationUpdate = function () {
 		regeneration -= 1; //system will automatically add boostlevel to output display in this case...
 	}
 	this.output = regeneration;
+	//Stage H3 follow-up: this turn's recharge is shown from the START of Initial Orders - see getTurnStartTopUp.
+	effectiveOutput += this.getTurnStartTopUp();
 	if (gamedata.gamephase > 1) {//later phases - actually ADD power used by other systems - that's boosts that are already subtracted from power held!
 		//ACTUALLY only Engine and Sensors can have meaningful boosts; still, check everything except obvious exceptions
 		this.ship.systems.forEach(function (systemToCheck) {
@@ -3503,6 +3838,36 @@ PowerCapacitor.prototype.getRegeneration = function () {
 	if (this.active) regeneration += this.nominalOutput; //Double if weapons/shields have been shutdown.
 	return regeneration;
 };
+/* ⭐⭐ THE RECHARGE, SHOWN FROM THE START OF INITIAL ORDERS (HYPERSPACE_IMPROVEMENTS_PLAN.md Stage H3
+   follow-up, user report 2026-09-18, game 4348).
+
+   "New power is produced in the Initial Orders phase" - but the 2021 rework adds the recharge to the
+   stored figure only at the COMMIT (doIndividualNotesTransfer posts balance + regeneration), so for the
+   whole of Initial Orders the reactor showed LAST turn's leftovers. Anything drawn at the end of a turn
+   - weapon fire, and from H3 the Vorlon jump-drive upkeep - therefore read as missing at the start of
+   the next one, although the capacitor was about to refill: a Heavy Cruiser that paid 6 to hold its
+   jump point opened the next turn on 26 instead of 32, every turn.
+
+   This is how much of this turn's recharge fits before the cap - min(stored + recharge, max) - stored -
+   shown on top of the stored power in Initial Orders only. It is 0:
+     - outside Initial Orders (the recharge was banked at the commit and is IN powerCurr by then);
+     - once this turn's recharge HAS been banked (rechargedThisTurn, from the server - a player who
+       commits and then reloads while waiting would otherwise see it counted twice);
+     - on a capacitor already at or above its maximum (never NEGATIVE: a damaged capacitor holding more
+       than its shrunken maximum is not reduced by the display, only by the server's cap).
+
+   ⚠️ SINCE THE H4 FOLLOW-UP (user ruling 2026-09-18, game 4348) THIS IS THE RECHARGE, FULL STOP:
+   doIndividualNotesTransfer banks the balance as displayed, so the stored figure is what was LEFT after
+   this turn's recharge and allocations, and a full capacitor no longer absorbs Initial Orders spending
+   up to its recharge for free (which the first version of this deliberately preserved). The commit gate
+   (getCapacitorShipsNegativePower) reads the same balance, so it cannot bank below zero. */
+PowerCapacitor.prototype.getTurnStartTopUp = function () {
+	if (typeof gamedata === 'undefined' || gamedata.gamephase !== 1) return 0;
+	if (this.rechargedThisTurn) return 0;
+	var stored = this.powerCurr || 0;
+	var max = (this.powerMax === undefined || this.powerMax === null) ? stored : this.powerMax;
+	return Math.max(0, Math.min(stored + this.getRegeneration(), max) - stored);
+};
 PowerCapacitor.prototype.hasMaxBoost = function () {
 	return true;
 };
@@ -3513,7 +3878,30 @@ PowerCapacitor.prototype.doIndividualNotesTransfer = function () { //prepare ind
 	this.individualNotesTransfer = Array();
 	//note power currently remaining ON REACTOR as charge held
 	var powerRemaining = shipManager.power.getReactorPower(this.ship, this);
-	powerRemaining = powerRemaining + this.getRegeneration();
+	/* ⭐⭐ HYPERSPACE_IMPROVEMENTS_PLAN.md §4 (Stage H3) - THE JUMP-POINT UPKEEP IS PUT BACK, AND
+	   THAT IS NOT A REFUND. This line is the whole reason the upkeep is charged exactly once.
+
+	   getReactorPower subtracts the upkeep (JumpEngine.getVortexUpkeepDraw) so the player can see
+	   what holding their jump point costs and cannot allocate it away - the commit gate names them
+	   if they try. But this function is not a display: what it returns becomes the capacitor's
+	   STORED power on the server (powerReceivedFromFrontEnd -> setPowerHeld), and the SERVER is what
+	   actually spends the upkeep, at the end of the turn, in JumpEngine::payVortexUpkeep. Leave the
+	   subtraction in here and the same power is taken twice - once by shrinking what is stored, and
+	   again by the closure sweep drawing from what is left.
+
+	   So: the reservation constrains the ALLOCATION, the power stays in the capacitor, and the
+	   server takes it. Exactly 0 on every other ship in the game - only a Vorlon drive opening or
+	   maintaining a jump point this turn (a blue exit included, from Stage H5) answers anything but 0. */
+	powerRemaining = powerRemaining + shipManager.power.getVortexUpkeepReserved(this.ship);
+	/* ⭐⭐ Stage H4 follow-up (user ruling 2026-09-18, game 4348) - THE CAPACITOR BANKS WHAT IS LEFT.
+	   The balance above already holds this turn's recharge, capped at the maximum (getTurnStartTopUp),
+	   so it is posted as it stands: min(stored + recharge, max) - allocations. "32 - 18 = 14 on turn 4,
+	   then 14 + 14 = 28 at the start of turn 5."
+	   It used to take the top-up back out and add the FULL recharge instead - the pre-H3 banking,
+	   min(stored - allocations + recharge, max) - which on a full or nearly full capacitor let Initial
+	   Orders spending up to the recharge cost nothing at all: 32 - 18 banked 28, and turn 5 opened on 32.
+	   The two agree whenever the recharge fits under the cap, which is why the H3 play test (upkeep only,
+	   added back above) never told them apart. */
 	powerRemaining = Math.min(powerRemaining, this.powerMax);
 	//this.individualNotesTransfer.push(powerRemaining);
 	this.individualNotesTransfer = {

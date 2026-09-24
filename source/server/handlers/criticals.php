@@ -101,7 +101,7 @@ class Criticals{
                     //for last segment of Sustained shot - force shutdown!
                     if(!$system->isOfflineOnTurn()){
                         $newExtraShots = $system->overloadshots - 1;
-                        if( $newExtraShots == 0 ) {
+                        if( $newExtraShots == 0 && $system->hasSustainedCooldown()) {
                             $crit = new ForcedOfflineOneTurn(-1, $ship->id, $system->id, "ForcedOfflineOneTurn", $gamedata->turn);
                             $crit->updated = true;
                             $crit->newCrit = true; //force save even if crit is not for current turn
