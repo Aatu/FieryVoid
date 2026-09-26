@@ -348,10 +348,11 @@ window.BallisticIconContainer = function () {
 		return hexes;
 	}
 
-	//Dust Fields and Meteor Swarms - Create Game's terrain counts / terrain maps (DustField,
-	//MeteorSwarm), and the Triad Asteroid Salvo's spawns (spawn*). By phpclass: it is on every
-	//ship, blueprint or not.
-	const FIELD_TERRAIN_CLASSES = ['DustField', 'MeteorSwarm', 'spawnDustField', 'spawnMeteoroid'];
+	//Dust Fields and Meteor Swarms - Create Game's terrain counts / terrain maps (DustField, the
+	//multi-hex DustCloud*, MeteorSwarm), and the Triad Asteroid Salvo's spawns (spawn*). By phpclass:
+	//it is on every ship, blueprint or not.
+	const FIELD_TERRAIN_CLASSES = ['DustField', 'DustCloudThreeHex', 'DustCloudFiveHex', 'DustCloudSevenHex',
+		'MeteorSwarm', 'spawnDustField', 'spawnMeteoroid'];
 	function isFieldTerrain(ship) {
 		return FIELD_TERRAIN_CLASSES.includes(ship.phpclass);
 	}

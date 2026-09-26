@@ -23,7 +23,11 @@ class BuyingGamePhase implements Phase
                     if ($ship instanceof asteroidMNew) return 30;
                     if ($ship instanceof asteroidSNew) return 20;
                     //Last: they may sit next to anything already placed, and nothing placed
-                    //after them has to keep its distance from them.
+                    //after them has to keep its distance from them. The multi-hex Dust Clouds
+                    //(DustField subclasses) go before the single hexes, biggest first.
+                    if ($ship instanceof DustCloudSevenHex) return 13;
+                    if ($ship instanceof DustCloudFiveHex) return 12;
+                    if ($ship instanceof DustCloudThreeHex) return 11;
                     if ($ship instanceof DustField || $ship instanceof MeteorSwarm) return 10;
                     return 0;
                 };
@@ -428,15 +432,25 @@ public function addMoons($gameData, $dbManager, $smallCount, $mediumCount, $larg
     }
 }
 
-    /* DustAndMeteorsRule: one single-hex unit per count - DustField / MeteorSwarm, the terrain
-       counterparts of the Triad Asteroid Salvo's spawns, with the same collisions and no LoS block.
-       Placed in advance() by the same random pass as the rest of the terrain, under a looser
-       spacing rule - see isDustOrMeteors(). */
+    /* DustAndMeteorsRule: one unit per count - DustField / MeteorSwarm, the terrain counterparts of
+       the Triad Asteroid Salvo's spawns, with the same collisions and no LoS block. Placed in
+       advance() by the same random pass as the rest of the terrain, under a looser spacing rule -
+       see isDustOrMeteors().
+       One Dust unit in six is a multi-hex Dust Cloud of 3, 5 or 7 hexes (a die picks), as one
+       random asteroid in six is a 2- or 3-hex one in addAsteroids; the rest are single Dust Fields. */
     public function addDustAndMeteors($gameData, $dbManager, $dustCount, $meteorCount, $slot, $dustOffset = 0, $meteorOffset = 0)
     {
+        $clouds = floor($dustCount / 6);
         for ($i = 1; $i <= $dustCount; $i++) {
-            //$dust = new spawnDustField($gameData->id, -5, "Dust Field #" . ($i + $dustOffset), $slot);
-            $dust = new DustField($gameData->id, -5, "Dust Field", $slot);            
+            if ($i <= $clouds) {
+                $size = Dice::d(3, 1);
+                if ($size == 1) $dust = new DustCloudThreeHex($gameData->id, -5, "Dust Cloud", $slot);
+                else if ($size == 2) $dust = new DustCloudFiveHex($gameData->id, -5, "Dust Cloud", $slot);
+                else $dust = new DustCloudSevenHex($gameData->id, -5, "Dust Cloud", $slot);
+            } else {
+                //$dust = new spawnDustField($gameData->id, -5, "Dust Field #" . ($i + $dustOffset), $slot);
+                $dust = new DustField($gameData->id, -5, "Dust Field", $slot);
+            }
             $dbManager->submitShip($gameData->id, $dust, -5);
         }
 
