@@ -44,7 +44,7 @@ window.scenarioCard = {
         },
         {
             key: "customFactions", label: "Custom Factions / Units", factLabel: "Custom Factions",
-            options: ["Allowed", "Custom factions allowed", "Custom ships in official factions allowed", "Not allowed"],
+            options: ["Allowed", "Custom factions allowed", "Custom ships in official factions only", "Not allowed"],
             help: "Whether fan-made factions, and custom ships added to official factions, may be used."
         },
         {
@@ -61,12 +61,12 @@ window.scenarioCard = {
         },
         {
             key: "mapBorders", label: "Map Borders", factLabel: "Map Borders",
-            options: ["Unit ending movement out of map is destroyed", "Unit leaving map is destroyed"],
+            options: ["Cannot end movement outside of map", "Cannot leave map at all"],
             help: "What happens to a unit that goes off the edge of the map."
         },
         {
             key: "victoryConditions", label: "Victory Conditions", factLabel: "Victory Conditions",
-            options: ["More forces remaining after Turn 12", "Last unit on map", "Last ship on map", "Other"],
+            options: ["Mose Points after Turn 12", "Last unit on map", "Last ship on map", "Other"],
             otherKey: "victoryCustom",
             help: "How the game is won."
         },
