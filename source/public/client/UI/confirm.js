@@ -910,10 +910,10 @@ window.confirm = {
             + '</div>'
             + '<div class="buyDialogBody">'
             + '<div class="buyDialogUnit"></div>'
-            + '<div class="buyDialogBase"><span class="buyDialogBaseLabel"></span><span class="buyDialogBaseCost"></span></div>'
-            + '<div class="buyDialogFilter" hidden>'
-            + '<input type="search" class="buyFilterInput" aria-label="Filter the rows below" autocomplete="off" spellcheck="false" enterkeyhint="next">'
-            + '</div>'
+            //+ '<div class="buyDialogBase"><span class="buyDialogBaseLabel"></span><span class="buyDialogBaseCost"></span></div>'
+            //+ '<div class="buyDialogFilter" hidden>'
+            //+ '<input type="search" class="buyFilterInput" aria-label="Filter the rows below" autocomplete="off" spellcheck="false" enterkeyhint="next">'
+            //+ '</div>'
             + '<div class="buyDialogSections">' + sections + '</div>'
             + '<p class="buyFilterEmpty" hidden>Nothing here matches <q></q>.</p>'
             + '</div>'
@@ -1359,6 +1359,32 @@ window.confirm = {
         $(".buySectionBadge", section).text(text).toggleClass("is-taken", taken > 0);
     },
 
+    /* Onto the page: priced, pinned, faded in. Shared by all three dialogs. */
+    openBuyDialog: function openBuyDialog(e) {
+        e.appendTo("body");
+        confirm.getTotalCost();
+        confirm.anchorBuyDialog(e);
+        e.fadeIn(250);
+    },
+
+    /* The window opens CENTRED, as every .confirm does - then its top is pinned where centring put it
+       (.is-anchored + --buy-top), so folding a section or filtering only moves the BOTTOM edge up
+       (user, 2026-09-26: centred, the whole window slid down to re-centre on every fold). It opens at
+       its tallest - every section open, nothing filtered - so it never needs to grow below that.
+
+       Measured in the containing block's own terms - the used `top` (50% of it) less half the border
+       box - so page scroll and a phone's zoomed-out visual viewport do not enter into it. It has to be
+       displayed for a moment to be measured, and is hidden again in the same task, before anything
+       paints; fadeIn then shows it. */
+    anchorBuyDialog: function anchorBuyDialog(e) {
+        var el = e[0];
+        el.style.display = "block";
+        var top = parseFloat(window.getComputedStyle(el).top) - el.offsetHeight / 2;
+        el.style.display = "";
+        el.style.setProperty("--buy-top", Math.max(0, Math.round(top)) + "px");
+        e.addClass("is-anchored");
+    },
+
     getVariableSize: function getVariableSize(ship) {
         //if (ship.flight && !ship.superheavy) { //superheavy is no longer a good marker
         if (ship.flight && ship.maxFlightSize != 1) { //max flight size = 1 indicates single superheavy fighter
@@ -1369,7 +1395,11 @@ window.confirm = {
     /* A new ship or flight, off the Store. */
     showShipBuy: function showShipBuy(ship, callback) {
         var unit = ship.flight ? 'Flight' : 'Ship';
-        var e = confirm.buyDialogShell(ship, { title: 'Buy ' + unit, okLabel: 'Buy ' + unit });
+        //"Buy G'Quan Heavy Cruiser" (user, 2026-09-26) - the head names the class, the button the act.
+        var e = confirm.buyDialogShell(ship, {
+            title: 'Buy ' + confirm.escapeBuyText(ship.shipClass),
+            okLabel: 'Buy ' + unit
+        });
 
         var fixedSmallFlight = ship.maxFlightSize >= 2 && ship.maxFlightSize < 6;
         var pointCost = ship.pointCost;
@@ -1393,9 +1423,7 @@ window.confirm = {
         $(".confirmok", e).on("click", callback);
         $(".confirmok", e).data("shipclass", ship.phpclass);
 
-        var a = e.appendTo("body");
-        confirm.getTotalCost();
-        a.fadeIn(250);
+        confirm.openBuyDialog(e);
     },
 
     /* A bought ship or flight re-opened: to EDIT it (gamedata.doEditShip), or with mode 'copy' to
@@ -1430,9 +1458,7 @@ window.confirm = {
         $(".confirmok", e).data("ship", ship);
         $(".confirmok", e).data("originalShipData", originalShipData);
 
-        var a = e.appendTo("body");
-        confirm.getTotalCost();
-        a.fadeIn(250);
+        confirm.openBuyDialog(e);
     },
 
     /* The bulk purchase dialog - quantity, enhancements applied to every unit in the row, and no
@@ -1505,9 +1531,7 @@ window.confirm = {
             $(".confirmok", e).data("originalShipData", confirm.snapshotShip(ship));
         }
 
-        var a = e.appendTo("body");
-        confirm.getTotalCost();
-        a.fadeIn(250);
+        confirm.openBuyDialog(e);
     },
 
     /* ── Saved-fleet dialogs ──────────────────────────────────────────────────────────

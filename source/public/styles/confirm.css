@@ -1363,6 +1363,8 @@
     overflow: hidden;
     text-align: left;
     font-size: 13px;
+    /* Not the page's 1.5 (gamesNew.css), which put ~8px of leading into every two-line row. */
+    line-height: 1.3;
     color: var(--fv-text);
     /* .lb-modal-panel's gradient, but OPAQUE: that panel's 0.98 sits on a dimming overlay, while
        the dim here is a shadow drawn only OUTSIDE the box - so directly behind the dialog the page
@@ -1387,20 +1389,33 @@
     max-height: 88vh;
 }
 
+/* Opened centred, then pinned at that top (confirm.anchorBuyDialog): folding a section or filtering
+   moves only the bottom edge up, where centred the whole window slid down to re-centre. The cap keeps
+   the bottom 6vh clear if the browser window is made shorter while it is open; min() keeps a window
+   that opened full height at exactly its centred 88vh (the pinned top is rounded to a whole pixel). */
+.confirm.buyDialog.is-anchored {
+    top: var(--buy-top);
+    transform: translateX(-50%);
+}
+
+.confirm.buyDialog.is-anchored .buyDialogFrame {
+    max-height: min(88vh, calc(100vh - var(--buy-top) - 6vh));
+}
+
 .confirm.buyDialog .buyDialogHead {
     display: flex;
     flex: none;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding: 6px 8px 6px 16px;
+    padding: 3px 6px 3px 16px;
     background: linear-gradient(180deg, rgba(73, 103, 145, 0.58), rgba(73, 103, 145, 0.22));
     border-bottom: 1px solid #2a6b8f;
 }
 
 .confirm.buyDialog .buyDialogHeading {
     min-width: 0;
-    padding: 3px 0;
+    padding: 2px 0;
 }
 
 .confirm.buyDialog .buyDialogTitle {
@@ -1410,6 +1425,7 @@
     letter-spacing: 1.4px;
     text-transform: uppercase;
     color: var(--fv-text-bright);
+    overflow-wrap: anywhere; /* "Buy <class>": a long class wraps rather than push the × off */
 }
 
 .confirm.buyDialog .buyDialogSub {
@@ -1425,12 +1441,12 @@
     flex: none;
     align-items: center;
     justify-content: center;
-    width: 34px;
-    height: 34px;
+    width: 30px;
+    height: 30px;
     margin: 0;
     padding: 0;
     font-family: Arial, sans-serif;
-    font-size: 26px;
+    font-size: 24px;
     line-height: 1;
     color: #8296a8;
     background: none;
@@ -1445,7 +1461,7 @@
 .confirm.buyDialog .buyDialogBody {
     flex: 1 1 auto;
     min-height: 0;
-    padding: 14px 16px 12px;
+    padding: 10px 16px 8px;
     overflow-y: auto;
 }
 
@@ -1480,7 +1496,7 @@
    Faction Picker's search box (gameLobby.css .lb-picker-search) in this window. ── */
 
 .confirm.buyDialog .buyDialogFilter {
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .confirm.buyDialog .buyDialogFilter[hidden] {
@@ -1490,7 +1506,7 @@
 .confirm.buyDialog .buyFilterInput {
     display: block;
     width: 100%;
-    height: 34px;
+    height: 30px;
     margin: 0;
     padding: 4px 8px;
     font-family: Arial, Helvetica, sans-serif;
@@ -1519,7 +1535,7 @@
 }
 
 .confirm.buyDialog .buyFilterEmpty {
-    margin: 2px 4px 8px;
+    margin: 2px 4px 6px;
     font-size: 12px;
     color: var(--fv-text-dim);
 }
@@ -1531,7 +1547,9 @@
 /* ── The unit: name, flight size, quantity ── */
 
 .confirm.buyDialog .buyDialogUnit {
-    margin-bottom: 10px;
+    padding: 2px 4px 8px;
+    border-bottom: 1px solid var(--fv-line-soft);    
+    margin-bottom: 8px;
 }
 
 .confirm.buyDialog .buyDialogUnit:empty {
@@ -1539,14 +1557,16 @@
 }
 
 .confirm.buyDialog .buyNameRow {
-    margin-bottom: 4px;
+    margin-bottom: 2px;
 }
 
 .confirm.buyDialog .buyFieldLabel {
+    font-family: var(--fv-display);        
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 3px;
     font-size: 11px;
     letter-spacing: 0.6px;
+    font-weight: bold;
     text-transform: uppercase;
     color: var(--fv-text-dim);
 }
@@ -1563,7 +1583,7 @@
 
 .confirm.buyDialog #buyShipName {
     width: 100%;
-    padding: 7px 10px;
+    padding: 5px 10px;
 }
 
 .confirm.buyDialog input[type="text"]:focus {
@@ -1583,8 +1603,8 @@
     align-items: baseline;
     justify-content: space-between;
     gap: 12px;
-    margin-bottom: 12px;
-    padding: 4px 4px 12px;
+    margin-bottom: 8px;
+    padding: 2px 4px 8px;
     border-bottom: 1px solid var(--fv-line-soft);
 }
 
@@ -1612,7 +1632,7 @@
    size categories), so every fold on the page opens the same way. ── */
 
 .confirm.buyDialog .buySection {
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     border: 1px solid var(--fv-line-soft);
     border-radius: 2px;
     overflow: hidden;
@@ -1624,7 +1644,7 @@
     gap: 10px;
     width: 100%;
     margin: 0;
-    padding: 9px 12px;
+    padding: 6px 12px;
     font-family: var(--fv-display);
     font-size: 10.5px;
     font-weight: 700;
@@ -1713,11 +1733,11 @@
 }
 
 .confirm.buyDialog .buySectionBody {
-    padding: 2px 12px 4px;
+    padding: 0 12px 1px;
 }
 
 .confirm.buyDialog .buySectionNote {
-    margin: 8px 0 2px;
+    margin: 6px 0 0;
     font-size: 11.5px;
     color: var(--fv-text-dim);
 }
@@ -1729,7 +1749,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 7px 0;
+    padding: 5px 0;
     font-size: 12.5px;
     border-bottom: 1px solid #0e222c;
 }
@@ -1765,7 +1785,7 @@
 
 .confirm.buyDialog .buyRowNote {
     display: block;
-    margin-top: 2px;
+    margin-top: 1px;
     font-size: 11px;
     color: var(--fv-text-dim);
 }
@@ -1894,7 +1914,7 @@
 
 .confirm.buyDialog .buyDialogFoot {
     flex: none;
-    padding: 10px 16px 14px;
+    padding: 6px 16px 8px;
     background: rgba(4, 22, 28, 0.85);
     border-top: 1px solid var(--fv-line-soft);
 }
@@ -1905,7 +1925,7 @@
     align-items: baseline;
     justify-content: flex-end;
     gap: 4px 24px;
-    margin-bottom: 10px;
+    margin-bottom: 6px;
 }
 
 .confirm.buyDialog .buyDialogTotal {
@@ -1939,7 +1959,8 @@
 }
 
 /* The buttons: Create Game's green for the purchase, a quiet outline for Cancel. They are real
-   <button>s now, but keep the .confirmok / .confirmcancel classes every caller binds to. */
+   <button>s now, but keep the .confirmok / .confirmcancel classes every caller binds to. 28px tall
+   (user: the 36px of Stage 9 made the foot far taller than it needs to be); 40px on touch. */
 .confirm.buyDialog .ui {
     position: static;
     display: flex;
@@ -1958,9 +1979,9 @@
     width: auto;
     height: auto;
     min-width: 130px;
-    min-height: 36px;
+    min-height: 28px;
     margin: 0;
-    padding: 8px 18px;
+    padding: 4px 16px;
     font-family: var(--fv-display);
     font-size: 10.5px;
     font-weight: 700;
@@ -2012,22 +2033,30 @@
         max-height: calc(100vh - 16px);
     }
 
+    .confirm.buyDialog.is-anchored .buyDialogFrame {
+        max-height: min(calc(100vh - 16px), calc(100vh - var(--buy-top) - 8px));
+    }
+
     @supports (height: 100dvh) {
         .confirm.buyDialog .buyDialogFrame {
             max-height: calc(100dvh - 16px);
         }
+
+        .confirm.buyDialog.is-anchored .buyDialogFrame {
+            max-height: min(calc(100dvh - 16px), calc(100dvh - var(--buy-top) - 8px));
+        }
     }
 
     .confirm.buyDialog .buyDialogHead {
-        padding: 4px 4px 4px 12px;
+        padding: 2px 4px 2px 12px;
     }
 
     .confirm.buyDialog .buyDialogBody {
-        padding: 12px 12px 10px;
+        padding: 8px 12px 6px;
     }
 
     .confirm.buyDialog .buySectionBody {
-        padding: 2px 10px 4px;
+        padding: 0 10px 1px;
     }
 
     .confirm.buyDialog .buyRowCost {
@@ -2035,7 +2064,7 @@
     }
 
     .confirm.buyDialog .buyDialogFoot {
-        padding: 10px 12px 12px;
+        padding: 6px 12px 8px;
     }
 
     .confirm.buyDialog .ui .confirmok,
@@ -2066,7 +2095,7 @@
     }
 
     .confirm.buyDialog .buyFilterInput {
-        height: 40px;
+        height: 36px;
     }
 
     /* 16px on everything that takes typing: iOS zooms the page into any smaller field on focus. */
@@ -2080,16 +2109,16 @@
     }
 
     .confirm.buyDialog .buySectionHead {
-        min-height: 44px;
+        min-height: 40px;
     }
 
     .confirm.buyDialog .buyDialogClose {
-        width: 44px;
-        height: 44px;
+        width: 40px;
+        height: 40px;
     }
 
     .confirm.buyDialog .ui .confirmok,
     .confirm.buyDialog .ui .confirmcancel {
-        min-height: 44px;
+        min-height: 40px;
     }
 }

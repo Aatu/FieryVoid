@@ -1983,3 +1983,53 @@ escapes with node; check the bytes (`cat -A`) after writing any `\u` escape into
 
 **Not verified:** a real touch device / iOS (the native search field's own clear button there); Firefox
 (no native clear button — Escape still clears).
+
+**Same-day follow-ups.** The user's own edits, committed with Stage 10: the head's subtitle (`Class ·
+Faction · ISD`) commented out in `buyDialogShell`, the "Base Hull —" prefix dropped from that line's
+label (`paintBuySummary`), and the name label now "Enter Name". Then, at the user's ask, a **compaction
+pass** (`confirm.css` only) — the foot was far taller than it needed to be, and the window should show
+more rows before scrolling:
+
+- The dialog sets `line-height: 1.3`. It had inherited the page's 1.5 (gamesNew.css), which put ~8px of
+  leading into every two-line row — the biggest single cost.
+- Buttons 36 → 28px tall (padding 4px 16px); the gap total → buttons 10 → 6px; list → total 11 → 7px;
+  foot padding 6 / 8.
+- Head padding 3px, close box 30px; body padding 10 / 8; name box padding 5px; the Base Hull line and
+  every section / filter gap tightened (8 → 6px); section heads 34 → 28px; rows padding 7 → 5px; the
+  filter box 34 → 30px.
+- Touch: buttons, section heads and the close box 44 → 40px, the filter box 40 → 36px; steppers stay
+  36px (they set a phone row's height).
+
+Measured on the Verloka Mine Cruiser (desktop 1600 × 1000 / phone 390 × 844, same 88vh / full-height
+window): foot 95 → 70px / 101 → 82px, head 47 → 37 / 53 → 45, a noted row 52 → 42.5 / 52 → 47, rows
+in view before scrolling **10 → 14 / 8 → 11**. Stage 10's driver 31/31; Stage 9's driver, updated for the
+user's edits and the 40px touch sizes (`s9b.mjs`, this session's scratchpad), 47/47. Test games
+4413-4417 deleted.
+
+Then (user): **the Buy dialog's head names the class** — "Buy G'Quan Heavy Cruiser", "Buy BA Starfox
+Fighters" — in place of "Buy Ship" / "Buy Flight" (`showShipBuy`; the button keeps "Buy Ship" /
+"Buy Flight"). The class is escaped (`escapeBuyText`) — the shell writes the title as HTML. The title
+takes `overflow-wrap: anywhere`: the longest class in the game, Raiders' "Narn Privateer L'Karus
+Raider Cruiser (2244 refit)", is one line on desktop and two on a 390px phone, clear of the close box.
+Edit / Copy / Bulk titles unchanged. `title.mjs` 6/6, `s9b.mjs` (titles updated) 47/47; games
+4418-4419 deleted.
+
+Then (user): **folding a section made the whole window jump** — `.confirm` is centred (`top: 50%` +
+`translate(-50%, -50%)`), so every fold re-centred it and the top slid down. Now all three dialogs open
+through `confirm.openBuyDialog` (append → `getTotalCost` → `anchorBuyDialog` → fadeIn): the window is
+measured where centring puts it — the used `top` less half its border box, both in the containing
+block's own terms, so page scroll and a phone's zoomed-out visual viewport do not enter into it — and
+pinned there (`.is-anchored`, `--buy-top`, `translateX(-50%)` only). Folding and filtering then move
+only the BOTTOM edge. It opens at its tallest (every section open, nothing filtered), so it never needs
+to grow below that; the frame's cap is `min(88vh, 100vh − top − 6vh)` (phone: `min(100dvh − 16px,
+100dvh − top − 8px)`), so a full-height window keeps exactly its old size and position and a browser
+window made shorter while it is open keeps the bottom on screen. A short window (D'Shal mines) still
+opens centred. Verified (`anchor.mjs`, 18/18, desktop + phone): no jump between the first painted frame
+and the settled one, same top after folds / filter / clear, from a page scrolled 1200px, on Edit, and
+with the viewport cut to 700px while open.
+
+Also the user's own edit, same day: the **Base Hull line is commented out** of `buyDialogShell` (the
+§10.5 "base + subtotals = total" line). Nothing breaks — `setBuyBase` / `paintBuySummary` write to an
+empty set — but `s9b.mjs`'s ten Base Hull read-backs now fail (they read 0 / ""); the totals they print
+all still add up. `s10.mjs` measures the filter against whatever sits above it now: 31/31. Games
+4420-4424 deleted.
