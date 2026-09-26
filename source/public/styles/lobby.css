@@ -233,10 +233,10 @@
     font-size: 13px;
 }
 
+/* A custom ship in an official faction's Store list: the Custom Factions yellow of the Faction
+   Picker and both Show Custom ticks (--fv-warn), not a brighter yellow of its own. */
 .highlight-custom-ship {
-    color: rgba(255, 255, 0, 0.767);
-    /* Or any other color you want for custom factions  #FFA080 */
-    /*color: #FFA080;*/
+    color: var(--fv-warn);
 }
 
 .mediumSize {

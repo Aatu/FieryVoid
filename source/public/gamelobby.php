@@ -915,14 +915,21 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 					<input type="search" id="factionSearch" class="lb-input" placeholder="Filter factions…"
 					       aria-label="Filter factions" autocomplete="off" enterkeyhint="go">
 				</div>
+				<!-- The tier and Custom filters are CHIPS, any number on at once (user): each is a label round
+				     its old, visually hidden checkbox, which is still the state every handler reads and
+				     the thing the keyboard toggles. All / None set every tier chip at once
+				     (gamedata.setAllTierFilters) and read pressed while that is the state. -->
 				<div class="lb-picker-filters">
-					<label class="lb-check"><input type="checkbox" class="tier-filter" data-tier="Tier 1" checked>Tier 1</label>
-					<label class="lb-check"><input type="checkbox" class="tier-filter" data-tier="Tier 2" checked>Tier 2</label>
-					<label class="lb-check"><input type="checkbox" class="tier-filter" data-tier="Tier 3" checked>Tier 3</label>
-					<label class="lb-check"><input type="checkbox" class="tier-filter" data-tier="Tier Ancients" checked>Ancients</label>
-					<label class="lb-check"><input type="checkbox" class="tier-filter" data-tier="Tier Other" checked>Other</label>
+					<button type="button" class="lb-chip lb-tier-all" id="lbTierAll" aria-pressed="true">All</button>
+					<button type="button" class="lb-chip lb-tier-none" id="lbTierNone" aria-pressed="false">None</button>
 					<span class="lb-bar-sep" aria-hidden="true">|</span>
-					<label class="lb-check lb-check--custom"><input type="checkbox" id="toggleCustom" class="yellow-tick">Show Custom</label>
+					<label class="lb-chip lb-chip--check"><input type="checkbox" class="tier-filter" data-tier="Tier 1" checked>Tier 1</label>
+					<label class="lb-chip lb-chip--check"><input type="checkbox" class="tier-filter" data-tier="Tier 2" checked>Tier 2</label>
+					<label class="lb-chip lb-chip--check"><input type="checkbox" class="tier-filter" data-tier="Tier 3" checked>Tier 3</label>
+					<label class="lb-chip lb-chip--check"><input type="checkbox" class="tier-filter" data-tier="Tier Ancients" checked>Ancients</label>
+					<label class="lb-chip lb-chip--check"><input type="checkbox" class="tier-filter" data-tier="Tier Other" checked>Other</label>
+					<span class="lb-bar-sep" aria-hidden="true">|</span>
+					<label class="lb-chip lb-chip--check lb-chip--custom"><input type="checkbox" id="toggleCustom" class="yellow-tick">Custom</label>
 					<!-- ⚠️ DIRECTLY AFTER ITS OWN CHECKBOX, and it has to stay there. This dropdown is shown
 					     and hidden by #toggleCustom (it is the "which customs?" half of that one control),
 					     so the two read as one thing only while they are adjacent (user report 2026-08-28). -->

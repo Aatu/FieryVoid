@@ -9,17 +9,21 @@
  * decides WHAT is drawn - the map's size, the zones and their colours, the pre-placed terrain -
  * and this file decides how.
  *
- * The look is the mockup's Teams & Map artboard (plan §11): the map a dark well under a faint
- * grid, each deployment zone a light wash of its colour behind a dashed edge, labelled in the
+ * The look is the mockup's Teams & Map artboard (plan §11): the map a dark well under its faint
+ * hex grid, each deployment zone a light wash of its colour behind a dashed edge, labelled in the
  * corner nearest the map's rim, and terrain as grey discs of its real size. Colours are
  * tokens.css values written out, because a canvas cannot read var().
+ *
+ * Drawn in the game's own proportions (final refinements, plan §12.12): pointy-top hexes, a row
+ * ROW x a hex's width below the last, as coordinateConverter.fromHexToGame lays them out and
+ * webglHexGridRenderer / DeploymentPhaseStrategy size the map and the zones - so a 42 x 30 map is
+ * the wide box the game draws, not 42:30.
  */
 window.mapPreview = {
 
     COLORS: {
         well: "#04161c",        //--fv-well
-        grid: "#0b2330",        //a shade above --fv-card, which vanishes once the canvas is scaled down
-        axis: "#15374a",        //the centre lines, between the grid and the rim
+        hex: "#0f2c3a",         //the hex grid: a shade above --fv-card, under everything else
         rim: "#215a7a",         //--fv-line
         terrain: "90, 106, 118" //#5a6a76, as rgb for the alpha
     },
@@ -28,6 +32,9 @@ window.mapPreview = {
     //so the thin lines stay sharp however CSS scales the canvas (width 100%, height auto).
     WIDTH: 545,
     PIXEL_RATIO: 2,
+
+    //Row pitch over a hex's width: 1.5 x the hex size against sqrt(3) x it.
+    ROW: Math.sqrt(3) / 2,
 
     /* Team colours, as the game itself picks them (plan §11.4; gamedata.js, which neither page
        loads - ⚠️ keep in step with its teamBaseColors / teamBaseColorsMultiTeam):
@@ -123,9 +130,10 @@ window.mapPreview = {
         var colors = mapPreview.COLORS;
         var mapWidth = map.width || 1;
         var mapHeight = map.height || 1;
+        var row = mapPreview.ROW;
 
         var width = mapPreview.WIDTH;
-        var height = Math.round(width * Math.min(1, Math.max(0.45, mapHeight / mapWidth)));
+        var height = Math.round(width * Math.min(1, Math.max(0.45, mapHeight * row / mapWidth)));
         var ratio = mapPreview.PIXEL_RATIO;
         if (canvas.width !== width * ratio || canvas.height !== height * ratio) {
             canvas.width = width * ratio; //resizing also clears it
@@ -134,9 +142,10 @@ window.mapPreview = {
         ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
         ctx.clearRect(0, 0, width, height);
 
+        //scale = one hex's width; a row is row x that.
         var margin = 1; //room for the rim's own line
-        var scale = Math.min((width - margin * 2) / mapWidth, (height - margin * 2) / mapHeight);
-        var mapW = mapWidth * scale, mapH = mapHeight * scale;
+        var scale = Math.min((width - margin * 2) / mapWidth, (height - margin * 2) / (mapHeight * row));
+        var mapW = mapWidth * scale, mapH = mapHeight * row * scale;
         var left = (width - mapW) / 2, top = (height - mapH) / 2;
         var centerX = left + mapW / 2, centerY = top + mapH / 2;
         var snap = function (v) { return Math.round(v * ratio) / ratio; }; //a 1px line (ratio device px) centred here is sharp
@@ -144,7 +153,11 @@ window.mapPreview = {
         //Hex column x -> canvas. The map's true centre is half a hex left of x = 0 (plan §12.3), so
         //x sits half a hex right of where the box would put it; y runs up the map, in rows.
         var toX = function (x) { return centerX + (x + 0.5) * scale; };
-        var toY = function (y) { return centerY - y * scale; };
+        var toY = function (y) { return centerY - y * row * scale; };
+        //Hex (q, r) -> canvas: an odd row sits half a hex left (fromHexToGame).
+        var hexToCanvas = function (q, r) {
+            return { x: toX(q - 0.5 * (r & 1)), y: toY(r) };
+        };
 
         ctx.save();
         ctx.fillStyle = colors.well;
@@ -153,28 +166,7 @@ window.mapPreview = {
         ctx.rect(left, top, mapW, mapH);
         ctx.clip(); //zones and terrain past the rim are cut there, as the game cuts them
 
-        //A grid every few hexes - about 24px apart at any map size - on the centre lines, which
-        //are drawn a little brighter.
-        var step = [1, 2, 3, 4, 5, 10, 20].find(function (n) { return n * scale >= 24; }) || 20;
-        var pitch = step * scale;
-        var k, x, y;
-        ctx.lineWidth = 1;
-        for (k = -Math.ceil(mapW / 2 / pitch); k <= Math.ceil(mapW / 2 / pitch); k++) {
-            x = snap(centerX + k * pitch);
-            ctx.strokeStyle = k === 0 ? colors.axis : colors.grid;
-            ctx.beginPath();
-            ctx.moveTo(x, top);
-            ctx.lineTo(x, top + mapH);
-            ctx.stroke();
-        }
-        for (k = -Math.ceil(mapH / 2 / pitch); k <= Math.ceil(mapH / 2 / pitch); k++) {
-            y = snap(centerY + k * pitch);
-            ctx.strokeStyle = k === 0 ? colors.axis : colors.grid;
-            ctx.beginPath();
-            ctx.moveTo(left, y);
-            ctx.lineTo(left + mapW, y);
-            ctx.stroke();
-        }
+        mapPreview.paintHexGrid(ctx, scale, Math.ceil(mapW / 2 / scale) + 2, Math.ceil(mapH / 2 / (row * scale)) + 1, hexToCanvas);
 
         var labels = [];
         (map.zones || []).forEach(function (zone) {
@@ -186,7 +178,7 @@ window.mapPreview = {
 
             var rgb = zone.rgb.join(",");
             var zx = toX(zxHex - w / 2), zy = toY(zyHex + h / 2);
-            var zw = w * scale, zh = h * scale;
+            var zw = w * scale, zh = h * row * scale;
 
             ctx.fillStyle = "rgba(" + rgb + ", 0.14)";
             ctx.fillRect(zx, zy, zw, zh);
@@ -218,10 +210,7 @@ window.mapPreview = {
             }
         });
 
-        //Hex (q, r) -> canvas, on the same axes as the zones (an odd row sits half a hex left).
-        mapPreview.paintTerrain(ctx, scale, map.terrain, function (q, r) {
-            return { x: toX(q - 0.5 * (r & 1)), y: toY(r) };
-        });
+        mapPreview.paintTerrain(ctx, scale, map.terrain, hexToCanvas);
 
         //Labels last, over the terrain: in the zone's corner nearest the map's rim, running on
         //into the map when the zone is narrower than the label. Sized to read about 10px as SHOWN:
@@ -279,6 +268,33 @@ window.mapPreview = {
         ctx.strokeRect(snap(left) + 0.5, snap(top) + 0.5, snap(mapW) - 1, snap(mapH) - 1); //just inside the map
     },
 
+    /* The hex grid under everything: every hex within `cols` columns and `rows` rows of the centre,
+       as one path and one stroke, so an edge two hexes share is no darker than the rest. Pointy-top
+       hexes `scale` wide, a corner at the top and bottom. The lines thin as the hexes shrink on the
+       biggest maps, so the grid stays a texture under the zones rather than a mesh over them. */
+    paintHexGrid: function paintHexGrid(ctx, scale, cols, rows, hexToCanvas) {
+        var radius = scale / Math.sqrt(3); //centre to corner
+        var corners = [];
+        for (var k = 0; k < 6; k++) {
+            var angle = (60 * k + 30) * Math.PI / 180;
+            corners.push({ x: radius * Math.cos(angle), y: radius * Math.sin(angle) });
+        }
+
+        ctx.save();
+        ctx.beginPath();
+        for (var r = -rows; r <= rows; r++) {
+            for (var q = -cols; q <= cols; q++) {
+                var c = hexToCanvas(q, r);
+                ctx.moveTo(c.x + corners[5].x, c.y + corners[5].y);
+                for (k = 0; k < 6; k++) ctx.lineTo(c.x + corners[k].x, c.y + corners[k].y);
+            }
+        }
+        ctx.strokeStyle = mapPreview.COLORS.hex;
+        ctx.lineWidth = Math.min(1, scale / 12);
+        ctx.stroke();
+        ctx.restore();
+    },
+
     /* Grey markers of each unit's real size: a disc for a moon, a dot per hex for the rest. A
        marker big enough to carry one gets the mockup's halo - a fainter ring INSIDE the unit's
        footprint, so a moon still reads at its true size. Dust / meteor fields: fainter, no halo. */
@@ -298,7 +314,13 @@ window.mapPreview = {
                     hexes.push(mapPreview.rotatedHex(unit, offset, unit.h || 0));
                 });
             }
-            var radius = Math.max((type.offsets ? 0.5 : type.huge + 0.5) * scale * (type.moon ? 1 : 0.8), 1.5);
+            //A moon's disc has the AREA of its hexes (3n² + 3n + 1 of them, each sqrt(3)/2 x scale²):
+            //one circle cannot also match both the flat-sided width and the pointed height of a hex
+            //disc. Anything else is a dot inside each of its hexes.
+            var n = type.huge || 0;
+            var radius = type.moon
+                ? Math.sqrt((3 * n * n + 3 * n + 1) * Math.sqrt(3) / (2 * Math.PI)) * scale
+                : Math.max(0.4 * scale, 1.5);
             var halo = (type.field || radius < 6) ? 0 : Math.min(6, radius * 0.3);
 
             hexes.forEach(function (hex) {

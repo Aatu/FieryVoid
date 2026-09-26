@@ -832,8 +832,10 @@ textarea.cg-input {
   min-width: 0;
 }
 
+/* The card's full width on a desktop (user: the map was too small here at 400px); capped for the
+   one-column layout under 900px, where the card is the whole page wide. */
 .cg-sum-card .cg-map-frame {
-  max-width: 400px;
+  max-width: 560px;
 }
 
 .cg-page #sumMap {

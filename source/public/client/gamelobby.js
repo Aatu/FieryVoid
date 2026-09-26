@@ -2475,9 +2475,10 @@ window.gamedata = {
 	   Picking a faction and browsing its ships are two steps. The picker (#lbFactionPicker, a window
 	   on a desktop and a full-screen sheet on a phone) holds the six groups and stops at FACTION
 	   level; choosing a row closes it and scopes the Store column to that one faction
-	   (selectStoreFaction). The tier / Show Custom boxes live in the picker because they decide which
+	   (selectStoreFaction). The tier / Custom chips live in the picker because they decide which
 	   factions can be picked, and filterFactionList applies them together with its search box. Its
-	   footer is the faction randomiser (rollFaction, Stage 7). */
+	   footer is the faction randomiser (rollFaction, Stage 7). The groups run down two or three
+	   columns on a desktop, each group whole (final refinements, plan §12.12). */
 
 	//Custom Factions only: the sub-group a custom faction's name puts it in (plan §4.3); the picker
 	//lists them alphabetically. Babylon 5 Wars has no test - it takes every custom faction the others do not
@@ -2502,6 +2503,10 @@ window.gamedata = {
 	parseFactions: function parseFactions(jsonFactions) {
 		var list = $("#factionList");
 		list.empty();
+		//The groups flow down two or three columns (gameLobby.css .lb-picker-cols), none split between
+		//two. Their own box, inside the scrolling list: a multi-column box given the list's fixed height
+		//would overflow into extra columns off to the side instead of scrolling.
+		var columns = $('<div class="lb-picker-cols"></div>').appendTo(list);
 		let factionList = [];
 
 		const groups = {
@@ -2594,7 +2599,7 @@ window.gamedata = {
 				});
 			}
 
-			list.append(group);
+			columns.append(group);
 		}
 
 		gamedata.allShips = factionList;
@@ -2612,6 +2617,9 @@ window.gamedata = {
 		if (!list.length) return;
 
 		var tiers = $(".tier-filter:checked").map(function () { return $(this).attr("data-tier"); }).get();
+		//All / None read pressed while every tier chip - or none - is on.
+		$("#lbTierAll").attr("aria-pressed", tiers.length === $(".tier-filter").length ? "true" : "false");
+		$("#lbTierNone").attr("aria-pressed", tiers.length === 0 ? "true" : "false");
 		var showCustom = $("#toggleCustom").is(":checked");
 		var onlyCustom = showCustom && $("#customSelect").val() === "showOnlyCustom";
 		var search = String($("#factionSearch").val() || "").trim().toLowerCase();
@@ -2639,6 +2647,13 @@ window.gamedata = {
 		$("#lbRollFaction").prop("disabled", !anyShown);
 		var rolled = gamedata.rolledFactionRow();
 		if (gamedata.rolledFaction !== null && (!rolled || rolled.hidden)) gamedata.showRolledFaction(null);
+	},
+
+	//The picker's All / None chips: every tier chip on, or every one off. Custom is left as it is - it
+	//is a different question (which customs may be picked, with its own mode and warning).
+	setAllTierFilters: function setAllTierFilters(on) {
+		$(".tier-filter").prop("checked", !!on);
+		gamedata.filterFactionList();
 	},
 
 	/* The randomiser (plan §4.5, Stage 7), in place of the three off-site Wheel of Names links. It
@@ -2889,14 +2904,26 @@ window.gamedata = {
 			gamedata.closeLobbyModal(open.attr("id"));
 		});
 
+		//A group's header opens and closes it. The columns rebalance as it grows or shrinks, which can
+		//carry the header into another column, out of sight - so the list scrolls it back into view
+		//(the list itself: scrollIntoView could also move the page under the window).
 		$("#factionList").on("click", ".lb-fgroup-head", function () {
 			var group = $(this).parent().toggleClass("is-collapsed");
 			$(this).attr("aria-expanded", group.hasClass("is-collapsed") ? "false" : "true");
+
+			var list = document.getElementById("factionList");
+			var head = this.getBoundingClientRect(), box = list.getBoundingClientRect();
+			if (head.top < box.top) list.scrollTop -= box.top - head.top;
+			else if (head.bottom > box.bottom) list.scrollTop += head.bottom - box.bottom;
 		}).on("click", ".lb-faction", function () {
 			gamedata.showRolledFaction(null); //a faction is picked: the roll has done its job
 			gamedata.selectStoreFaction(this.getAttribute("data-faction"));
 			gamedata.closeLobbyModal("lbFactionPicker");
 		});
+
+		//The tier chips' All / None.
+		$("#lbTierAll").on("click", gamedata.setAllTierFilters.bind(gamedata, true));
+		$("#lbTierNone").on("click", gamedata.setAllTierFilters.bind(gamedata, false));
 
 		//The randomiser, and its Choose - the rolled row's own click.
 		$("#lbRollFaction").on("click", gamedata.rollFaction);

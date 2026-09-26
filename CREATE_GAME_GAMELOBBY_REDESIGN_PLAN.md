@@ -2033,3 +2033,73 @@ Also the user's own edit, same day: the **Base Hull line is commented out** of `
 empty set — but `s9b.mjs`'s ten Base Hull read-backs now fail (they read 0 / ""); the totals they print
 all still add up. `s10.mjs` measures the filter against whatever sits above it now: 31/31. Games
 4420-4424 deleted.
+
+### 12.12 Final refinements (user, 2026-09-26)
+
+After Stage 10, a last round from the user's review of the finished pages. No schema change. Three new
+ship classes (autoload + statics regenerated with `fvbuild -Server`); both legacy bundles rebuilt.
+
+- **Faction Picker: two or three columns** (`gameLobby.css .lb-picker-cols`). The window is 1000px wide
+  (was 540), `min(900px, 88vh)` tall. `parseFactions` puts the groups in an inner `.lb-picker-cols` box
+  inside the scrolling `#factionList` - ⚠️ a multi-column box with the list's fixed height would
+  overflow into extra columns off to the right instead of scrolling. Groups `break-inside: avoid`;
+  Custom Factions may break BETWEEN its sub-groups (never inside one, never straight after its header),
+  so with customs shown and opened the sub-groups spread over two columns. Groups are spaced by margin,
+  not a rule line (a rule at a column top would dangle). Columns rebalance as groups open and close, so
+  a header click scrolls the list (not `scrollIntoView` - it can move the page) to keep that header in
+  view. One column on a phone. Measured at 1600 × 1000: [Major + League] [Minor + Ancients] [Other],
+  list 812px of content in a 644px view (was one ~1700px column).
+- **Filter chips** in place of the checkboxes: All · None | Tier 1 · Tier 2 · Tier 3 · Ancients · Other
+  | Custom (+ its Show Customs select, still right after it). Any number on at once. Each chip is a
+  `<label class="lb-chip lb-chip--check">` round its OLD checkbox (`.tier-filter` / `#toggleCustom`,
+  visually hidden, still focusable - Space toggles it), so every handler and the customs-allowed default
+  are untouched; the ticked look is `:has(> input:checked)` (the Custom chip yellow). ⚠️ That selector
+  must outrank `.lb-chip:hover:not(:disabled)` (0,3,0) - hence `.lb-chip.lb-chip--check:has(...)` -
+  or a chip under the pointer hides that the click just toggled it. All / None
+  (`gamedata.setAllTierFilters`) set the five TIER chips only - my call: Custom is a different question
+  with its own mode and not-allowed warning, and None + Custom would list nothing anyway (the tier and
+  custom filters are ANDed). Both read pressed while that is the state (`filterFactionList`).
+- **Group header colours**: the official groups' headers are `--fv-accent` (was `--fv-text`, the faction
+  names' colour); the Custom sub-group headers (Babylon 5 Wars, Escalation Wars, Nexus, Other Universe)
+  now use the group headers' own type (display face, 10.5px, caps) in `--fv-warn`, indented.
+- **Map Preview shows the hex grid** (`mapPreview.paintHexGrid`, both pages) - and is now drawn in the
+  GAME's proportions: rows are `ROW` = √3/2 of a hex's width apart (pointy-top, odd rows half a hex left,
+  as `coordinateConverter.fromHexToGame`; the game sizes the map box and the zones in hex widths ×
+  row heights). So a 42 × 30 map is 0.619 as tall as wide (was 0.714), zones and terrain move with it,
+  and the old square grid and centre lines are gone. Moon discs now have the AREA of their hexes (a
+  circle cannot match both the flat-sided width and the pointed height of a hex disc); the other markers
+  are unchanged. Grid lines thin below a 12px hex (the 60 × 40 and open maps).
+- **Create Game Confirm step: bigger map** - `.cg-sum-card .cg-map-frame` 400 → 560px max, i.e. the card's
+  full width on a desktop (539 × 333, was 400 × 247); the cap keeps the stacked (< 900px) layout sane.
+- **Dust Clouds** (user ask; user picked three sizes): `DustCloudThreeHex` / `DustCloudFiveHex` /
+  `DustCloudSevenHex` in `ships/terrain`, each `extends DustField` - so its collision (`DustCollision`,
+  speed / 2, once a turn per target across all dust), no LoS block and no ram are inherited, not copied.
+  `Huge = 1` + `hexOffsets` for the 3 (centre, NW, W - the triangular asteroid's shape) and the 5 (centre,
+  NE, NW, W, SW); `Huge = 1` alone for the 7 (the disc). Points 3 / 5 / 7. `addDustAndMeteors` makes
+  `floor(dust / 6)` of the Dust count clouds, a d3 picking the size - the random asteroids' 2/3-hex mix;
+  placement weights 13 / 12 / 11 put them before the single Dust Fields (10), biggest first, under Dust's
+  "may touch other terrain, never share a hex" rule. `BallisticIconContainer.FIELD_TERRAIN_CLASSES` lists
+  them, so they get the dim white hexes. Images `img/ships/dustCloud{Three,Five,Seven}Hex.png` were drawn
+  FROM dust.png (one tile per hex, clipped to the hex, at dust.png's own 2.56 px per game unit), centre hex
+  at the image centre and north up at facing 0 - the irregular asteroids' convention - on a 660px image
+  for `canvasSize` 520. Not added to the Terrain Maps' `TerrainLayoutRule` types (not asked).
+- **Purchase Fleet**: a custom ship of an official faction is `--fv-warn` (lobby.css `.highlight-custom-ship`,
+  was rgba(255,255,0,.77)) - the Show Custom ticks' and Custom Factions' yellow; the cost stands 30px
+  clear of Add to fleet (`.lb-ship-cost` margin-right 18px + the row's 12px gap; was 12px).
+
+**Verified:** real local site over CDP as player 211 in lobby 4381 (Asteroid Belt) / 4386 (5 teams), and
+Create Game as player 3 - lobby driver 17/17 (canvas ratio, 3 columns, no group split with customs shown
+and every sub-group open, header colours and type, chips: single toggle, None, pick-from-nothing, two at
+once, All, keyboard Space + focus ring, Custom chip + mode select + warning, cost gap 30px, custom-ship
+yellow); phone 3/3 (one-column sheet, 32px chips, map inside 390); Create Game Confirm map 539px, no
+sideways scroll desktop or phone; native-resolution canvases checked by eye (dots in hex centres, 2/3-hex
+asteroids in adjacent hexes). Dust Clouds (stub `DBManager`, no DB writes): the one-in-six mix for dust
+0/5/6/12/17/48, all three sizes over 300 rolls, each footprint 3/5/7 distinct hexes within 1 of its
+centre at all six facings through `RammingAttack::getTerrainOccupiedHexes`, and 20 full `advance()`
+passes (3 moons, 12 asteroids, 48 dust, 10 meteor swarms on 42 × 30): no shared hex, every cloud placed,
+none off the map. `checkShipData` PASS - its 10 new warnings are "no hit chart for locations 1/2" on the
+three clouds (inherited from Dust Field) and on Dust Field / Meteor Swarm themselves, none in the baseline
+yet. Replay harness: 119 pass, 5 fail - 4251 (known) and 4345 / 4347 / 4349 / 4350, IDENTICAL with the
+server changes stashed (Ancient fighters' notes text), so not from this round.
+**Not verified:** a Dust Cloud in a live game (its icon and dim hexes on game.php, a ship flying through
+one) - create a game with Dust ≥ 6.

@@ -782,8 +782,8 @@
   color: var(--fv-accent);
 }
 
-/* A checkbox and its label - the picker's tier / Show Custom boxes, and the Purchase bar's Show
-   Custom. The text is the bar's dim label text ("Filter by:") in both places (user, Stage 5). */
+/* A checkbox and its label - the Purchase bar's Show Custom, in the bar's dim label text ("Filter
+   by:"; user, Stage 5). The Faction Picker's tier / Custom boxes are chips now (.lb-chip--check). */
 .lb-check {
   display: inline-flex;
   align-items: center;
@@ -1005,6 +1005,47 @@
 }
 
 .lb-chip:focus-visible {
+  outline: 2px solid var(--fv-accent);
+  outline-offset: 2px;
+}
+
+/* The Faction Picker's tier / Custom chips, any number on at once: a label round its checkbox,
+   which stays the state every handler reads - hidden from sight, not from the keyboard or a screen
+   reader. Pressed while ticked; the Custom chip in the Custom Factions yellow. */
+.lb-chip--check {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  line-height: normal;
+  user-select: none;
+}
+
+.lb-chip--check > input[type="checkbox"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* .lb-chip twice over: the ticked state has to outrank .lb-chip:hover, or a chip under the pointer
+   would not show that the click just turned it on or off. */
+.lb-chip.lb-chip--check:has(> input:checked) {
+  color: var(--fv-accent);
+  background: rgba(139, 202, 242, 0.18);
+  border-color: var(--fv-accent);
+}
+
+.lb-chip.lb-chip--custom:has(> input:checked) {
+  color: var(--fv-warn);
+  background: rgba(225, 176, 0, 0.14);
+  border-color: var(--fv-warn);
+}
+
+.lb-chip--check:has(> input:focus-visible) {
   outline: 2px solid var(--fv-accent);
   outline-offset: 2px;
 }
@@ -1245,10 +1286,12 @@
 }
 
 /* Cost and links stay together, on the right - on the name's line while it fits, under it when
-   it does not. The links are the same width on every row, so the costs line up above them. */
+   it does not. The links are the same width on every row, so the costs line up above them. The
+   cost stands well clear of Add to fleet, so it reads as its own column (user). */
 .lb-ship-cost {
   flex: none;
   margin-left: auto;
+  margin-right: 18px;
   font-family: var(--fv-mono);
   font-size: 12px;
   color: var(--fv-text-accent);
@@ -1639,10 +1682,11 @@ body.lb-modal-open {
 
 /* ── The Faction Picker ────────────────────────────────────────────────────── */
 
-/* A fixed height, so the window does not jump about as the filters change what it lists. */
+/* A fixed height, so the window does not jump about as the filters change what it lists. Wide
+   enough for three columns of groups (.lb-picker-cols). */
 .lb-picker-panel {
-  max-width: 540px;
-  height: min(780px, 88vh);
+  max-width: 1000px;
+  height: min(900px, 88vh);
 }
 
 .lb-picker-search {
@@ -1667,9 +1711,13 @@ body.lb-modal-open {
   flex: none;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px 12px;
+  gap: 8px 6px;
   padding: 4px 16px 12px;
   border-bottom: 1px solid var(--fv-rule);
+}
+
+.lb-picker-filters .lb-bar-sep {
+  margin: 0 4px;
 }
 
 /* Shown by #toggleCustom's handler. Holds the Show Customs / Show Only Customs select and its ▼. */
@@ -1808,28 +1856,52 @@ body.lb-modal-open {
   display: none;
 }
 
+/* The groups run down as many columns as fit - three on a desktop, one on a phone - and no group
+   is split between two (user). Custom Factions may break BETWEEN its sub-groups, never inside one,
+   and never straight after its own header. Groups are spaced by margin rather than a rule: a
+   margin at the top of a column is dropped, a rule there would dangle. */
+.lb-picker-cols {
+  columns: 3 15.5rem;
+  column-gap: 24px;
+}
+
+.lb-picker-cols > .lb-fgroup,
+.lb-fgroup--sub {
+  break-inside: avoid;
+}
+
+.lb-picker-cols > .lb-fgroup--custom {
+  break-inside: auto;
+}
+
+.lb-fgroup--custom > .lb-fgroup-head {
+  break-after: avoid;
+}
+
+.lb-picker-cols > .lb-fgroup + .lb-fgroup {
+  margin-top: 12px;
+}
+
+/* A group's header: the page's accent blue, so it stands apart from the near-white faction names
+   under it (user); Custom Factions and its sub-groups take the custom yellow instead. */
 .lb-fgroup-head {
   display: flex;
   align-items: center;
   gap: 8px;
   width: 100%;
   margin: 0;
-  padding: 9px 6px;
+  padding: 8px 6px;
   font-family: var(--fv-display);
   font-size: 10.5px;
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
   text-align: left;
-  color: var(--fv-text);
+  color: var(--fv-accent);
   background: none;
   border: 0;
-  border-top: 1px solid #0c1a24;
+  border-bottom: 1px solid var(--fv-rule);
   cursor: pointer;
-}
-
-.lb-picker-list > .lb-fgroup:first-child > .lb-fgroup-head {
-  border-top: 0;
 }
 
 .lb-fgroup.is-collapsed > .lb-fgroup-body {
@@ -1847,14 +1919,11 @@ body.lb-modal-open {
   box-shadow: inset 3px 0 0 var(--fv-warn);
 }
 
+/* A Custom sub-group (Babylon 5 Wars, Nexus...): the group header's own type, in the custom yellow,
+   set in under Custom Factions (user). */
 .lb-fgroup--sub > .lb-fgroup-head {
-  padding: 7px 6px 7px 23px;
-  font-family: var(--fv-mono);
-  font-size: 12px;
-  font-weight: 400;
-  letter-spacing: 0;
-  text-transform: none;
-  color: var(--fv-text);
+  padding-left: 23px;
+  color: var(--fv-warn);
   box-shadow: inset 3px 0 0 var(--fv-warn);
 }
 
@@ -2130,7 +2199,7 @@ body.lb-modal-open {
     flex-basis: 100%;
   }
 
-  /* The Show Custom half of the tier row starts its own line here; its divider would dangle. */
+  /* The picker's chips wrap onto two lines here, where a divider would dangle at a line's end. */
   .lb-picker-filters .lb-bar-sep {
     display: none;
   }
