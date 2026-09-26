@@ -62,10 +62,16 @@ jQuery(function ($) {
     createGame.readTerrain();
 
     // In-Service Date: a year, so digits only and four at most (the lobby's own ISD box does the same).
+    // The box is shown only while its checkbox is ticked.
     $("#inServiceDate").on("input", function () {
         const digits = this.value.replace(/\D/g, "").slice(0, 4);
         if (digits !== this.value) this.value = digits;
     });
+    $("#inServiceDateCheck").on("change", function () {
+        createGame.showInServiceDate();
+        if (this.checked) $("#inServiceDate").trigger("focus");
+    });
+    createGame.showInServiceDate(); //a restored form may arrive ticked
 
     // Private Game: the password box (and Show) only while Require password is ticked.
     createGame.initPrivateGame();
@@ -1731,8 +1737,8 @@ window.createGame = {
             }
             //A short year would lock the lobby's ISD filter below every unit there is.
             const isd = String($("#inServiceDate").val() || "").trim();
-            if (isd && !(/^\d{4}$/.test(isd) && parseInt(isd, 10) >= 1000)) {
-                return { message: "In-Service Date: enter a four-digit year, or leave it blank.", field: "#inServiceDate" };
+            if ($("#inServiceDateCheck").is(":checked") && !(/^\d{4}$/.test(isd) && parseInt(isd, 10) >= 1000)) {
+                return { message: "In-Service Date: enter a four-digit year, or untick In-Service Date.", field: "#inServiceDate" };
             }
         }
 
@@ -1777,11 +1783,16 @@ window.createGame = {
         $("#createGameForm [aria-invalid='true']").removeAttr("aria-invalid");
     },
 
-    //The In-Service Date cutoff as a year, or null for none (blank). It is not a rule: it is posted
-    //on its own and stored in tac_game.in_service_date (plan §4.4).
+    //The In-Service Date cutoff as a year, or null for none (unticked, or blank). It is not a rule: it
+    //is posted on its own and stored in tac_game.in_service_date (plan §4.4).
     readInServiceDate: function readInServiceDate() {
+        if (!$("#inServiceDateCheck").is(":checked")) return null;
         const year = parseInt(String($("#inServiceDate").val() || "").trim(), 10);
         return year > 0 ? year : null;
+    },
+
+    showInServiceDate: function showInServiceDate() {
+        $("#inServiceDateWrap").toggle($("#inServiceDateCheck").is(":checked"));
     },
 
     /* ── Private Game (plan §3.2, Stage 8) ──────────────────────────────────────────────────────
@@ -1945,7 +1956,8 @@ window.createGame = {
             v: createGame.PRESET_VERSION,
             gamename: String($("#gamename").val() || ""),
             background: $("input[name='background']:checked").val() || "",
-            inServiceDate: String($("#inServiceDate").val() || "").trim(),
+            //blank while unticked, so a saved year always means ticked (and older settings read the same)
+            inServiceDate: $("#inServiceDateCheck").is(":checked") ? String($("#inServiceDate").val() || "").trim() : "",
             //the tick only - a password never goes into localStorage
             privateGame: $("#privateGameCheck").is(":checked"),
             checks: checks,
@@ -1981,8 +1993,11 @@ window.createGame = {
 
         if (typeof settings.gamename === "string" && settings.gamename.trim()) $("#gamename").val(settings.gamename);
 
-        //Blank for settings saved before the field existed - they had no cutoff.
-        $("#inServiceDate").val(settings.inServiceDate == null ? "" : String(settings.inServiceDate).replace(/\D/g, "").slice(0, 4));
+        //Blank for settings saved before the field existed - they had no cutoff. A year means ticked.
+        const inServiceDate = settings.inServiceDate == null ? "" : String(settings.inServiceDate).replace(/\D/g, "").slice(0, 4);
+        $("#inServiceDate").val(inServiceDate);
+        $("#inServiceDateCheck").prop("checked", inServiceDate !== "");
+        createGame.showInServiceDate();
 
         //Private: the tick comes back, the password does not (it was never saved) - one already typed
         //stays, and Next asks for one if the box is empty. Settings saved before Stage 8 were public.

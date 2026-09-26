@@ -278,14 +278,21 @@
                 </div>
               </div>
 
-              <!-- In-Service Date (plan §3.2 / §4.4, Stage 6): no checkbox - blank is off - so the year
-                   box sits where the others' boxes do (§11.6). Stored as tac_game.in_service_date. -->
-              <div class="cg-check-row cg-isd-row">
-                <input id="inServiceDate" class="cg-input cg-input--year" type="text" name="inServiceDate"
-                       inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="e.g. 2258"
-                       autocomplete="off" aria-describedby="inServiceDateHelp">
+              <!-- In-Service Date (plan §3.2 / §4.4, Stage 6): a checkbox like the others; ticked, the year
+                   box appears after the label, as Simultaneous Movement's and Desperate Scenario's controls
+                   do (user, §12.15). Stored as tac_game.in_service_date. -->
+              <div class="cg-check-row">
+                <input id="inServiceDateCheck" type="checkbox" name="inServiceDateCheck">
                 <div class="cg-check-body">
-                  <label for="inServiceDate" class="cg-check-label">In-Service Date</label>
+                  <div class="cg-check-line">
+                    <label for="inServiceDateCheck" class="cg-check-label">In-Service Date</label>
+                    <span id="inServiceDateWrap" class="cg-dep">
+                      <label for="inServiceDate" class="cg-sr">In-Service Date year</label>
+                      <input id="inServiceDate" class="cg-input cg-input--inline cg-input--year" type="text" name="inServiceDate"
+                             inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="e.g. 2258"
+                             autocomplete="off" aria-describedby="inServiceDateHelp">
+                    </span>
+                  </div>
                   <div class="cg-caption" id="inServiceDateHelp">Locks the lobby's ISD filter to this year, so only units in service by then can be bought.</div>
                 </div>
               </div>

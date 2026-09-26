@@ -341,8 +341,8 @@ textarea.cg-input {
   width: 130px;
 }
 
-/* In-Service Date: a year box standing where the rows above have their checkbox (plan §11.6). In em,
-   so it keeps fitting "e.g. 2258" once a phone's 16px type applies. */
+/* In-Service Date: the year box its checkbox reveals after the label (§12.15). In em, so it keeps
+   fitting "e.g. 2258" once a phone's 16px type applies. */
 .cg-input--year {
   flex: none;
   width: 6.75em;

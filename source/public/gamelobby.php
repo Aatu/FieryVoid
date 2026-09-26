@@ -395,7 +395,7 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
                 var allowed = description.match(/CUSTOM FACTIONS \/ UNITS:\s*Allowed/i);
 
                 if (!allowed && !customWarningShown && gamedata.rules && gamedata.rules.fleetTest !== 1) {
-                     window.confirm.warning("Custom Factions and/or Units not allowed in this match. <br>Please check Scenario Description");
+                     window.confirm.warning("Custom Units are not allowed in this game! <br>Please read Scenario Description");
                      customWarningShown = true;
                 }
             }
@@ -534,10 +534,11 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
         </div>-->
 <main class="container"></main>        
 		<?php
-		/* ── Top of the page (CREATE_GAME_GAMELOBBY_REDESIGN_PLAN.md §4.1 / §4.2 / §11.3, Stage 4) ──
-		   The game's name, then one row: Map Preview | Scenario Description | Teams. Teams and the
-		   Map Preview are filled by gamelobby.js on every poll; the rule chips (under the map) and the
-		   Scenario Description's structured facts once, on load (gamedata.renderScenarioPanel).
+		/* ── The page (CREATE_GAME_GAMELOBBY_REDESIGN_PLAN.md §4.1 / §4.2 / §11.3, Stage 4; §12.13) ──
+		   The game's name, then two rows: Map Preview | Scenario Description over the Game Rules strip,
+		   beside Teams; then Purchase Fleet | Your Fleet (§12.14). Teams and the Map Preview are
+		   filled by gamelobby.js on every poll; the rule chips and the Scenario Description's
+		   structured facts once, on load (gamedata.renderScenarioPanel).
 		   A Fleet Builder lobby has no teams, no map and no scenario - only the reference links. */
 
 		/* The reference pages - the same three as game.php's USEFUL LINKS. (The three off-site
@@ -605,28 +606,39 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 			<div class="lb-titlebar">
 				<!-- The game name is player-supplied and stored unescaped, so it must be escaped here. -->
 				<h1 class="lb-title"><?php print($isFleetTest ? 'Fleet Builder' : htmlspecialchars($gamelobbydata->name)); ?></h1>
-				<button type="button" class="lb-btn lb-btn--leave leave">Leave Game</button>
+				<div class="lb-title-actions">
+				<?php if (!$isFleetTest): ?>
+					<!-- Folds the Map Preview / Scenario Description / Game Rules section away, so the Store
+					     starts near the top of the page; remembered per game in this browser
+					     (gamedata.initBriefToggle). -->
+					<button type="button" class="lb-btn lb-brief-toggle" id="lbBriefToggle"
+					        aria-expanded="true" aria-controls="lbBrief"
+					        title="Show or hide the map, the scenario and the game rules">Map &amp; Scenario</button>
+				<?php endif; ?>
+					<button type="button" class="lb-btn lb-btn--leave leave">Leave Game</button>
+				</div>
 			</div>
 
-		<?php if ($isFleetTest): ?>
+			<!-- Two rows (plan §12.14, the user's layout): Map Preview | Scenario Description (the same
+			     height) over the Game Rules strip - one container (§12.15) - beside Teams, which is never
+			     taller than they are together, and scrolls inside when it has more; then Purchase Fleet
+			     (as wide as its longest row) | Your Fleet, their tops level. One column on a phone: Teams,
+			     the briefing, Your Fleet, the Store. -->
+			<?php if ($isFleetTest): ?>
 			<section class="lb-panel lb-builder" aria-labelledby="lbBuilderHead">
 				<h2 class="lb-panel-head" id="lbBuilderHead"><span>Rules &amp; Info</span></h2>
 				<?php print($lobbyLinks); ?>
 			</section>
-		<?php else: ?>
-			<div class="lb-row">
-				<!-- Every panel keeps its own height. The Map Preview, usually the tallest, leads; stacked
-				     on a narrower screen, Scenario Description comes before it (gameLobby.css). -->
-				<div class="lb-pair">
+			<?php else: ?>
+			<div class="lb-upper">
+				<!-- Map Preview | Scenario Description, always the same height (user), then the Game Rules
+				     chips in a strip under both. -->
+				<div class="lb-brief" id="lbBrief">
 					<section class="lb-panel lb-map" aria-labelledby="lbMapHead">
 						<h2 class="lb-panel-head" id="lbMapHead"><span>Map Preview</span><span class="lb-panel-meta"><?php print($mapSizeText); ?></span></h2>
 						<div class="lb-panel-body">
 							<div class="lb-map-frame"><canvas id="mapPreview" width="545" height="390" aria-hidden="true"></canvas></div>
 							<div class="lb-legend" id="lbMapLegend"></div>
-						</div>
-						<div class="lb-rules">
-							<span class="lb-rules-label" id="lbRulesLabel">Game rules</span>
-							<ul class="fv-rule-chips" id="lbRuleChips" aria-labelledby="lbRulesLabel"></ul>
 						</div>
 					</section>
 
@@ -637,192 +649,202 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 						?></div>
 						<?php print($lobbyLinks); ?>
 					</section>
-				</div>
 
-				<section class="lb-panel lb-teams" aria-labelledby="lbTeamsHead">
-					<h2 class="lb-panel-head" id="lbTeamsHead"><span>Teams</span><span class="lb-panel-meta" id="lbTeamsMeta"></span></h2>
-					<div class="lb-panel-body">
-						<div class="lb-teams-grid" id="lobbyTeamsContainer">
-							<!-- Teams injected by JS (gamedata.createSlots) -->
+					<section class="lb-panel lb-rules-panel" aria-labelledby="lbRulesLabel">
+						<div class="lb-rules">
+							<span class="lb-rules-label" id="lbRulesLabel">Game rules</span>
+							<ul class="fv-rule-chips" id="lbRuleChips" aria-labelledby="lbRulesLabel"></ul>
 						</div>
-					</div>
-				</section>
-			</div>
-		<?php endif; ?>
-		</div>
-
-		<?php
-		/* ── Purchase Fleet (CREATE_GAME_GAMELOBBY_REDESIGN_PLAN.md §4.3, Stage 5) ──────────────────
-		   The panel's head carries the points; one bar holds the ship filters (left) and the fleet
-		   tools (right); then the two columns - the STORE, which shows ONE faction's ships at a time,
-		   picked in the Faction Picker further down, and the FLEET being bought.
-		   ⚠️ The wrapper keeps .buy (gamedata.enableBuy show()s / hide()s it for the viewer's own slot)
-		   and .buy-panel-container (hidden until then). It is a plain block on purpose: show() on a
-		   hidden element writes display:block, which would break a flex panel. */
-		?>
-<div class="lb-buy-wrap buy buy-panel-container">
-	<section class="lb-panel lb-buy" aria-labelledby="lbBuyHead">
-		<div class="lb-panel-head lb-buy-head">
-			<h2 class="lb-buy-title" id="lbBuyHead">Purchase Fleet</h2>
-			<!-- gamedata.calculateFleet writes .current / .max / .remaining and shows or hides the
-			     units and the "pts left" part (an unlimited slot has neither). -->
-			<div class="lb-buy-points">
-				<span class="current">0</span><span class="lb-buy-slash">/</span><span class="max">0</span><?php if ($isFleetTest): ?>
-				<!-- Fleet Builder only. The slot itself is always unlimited server-side,
-				     so this optional cap is purely a client-side yardstick: it drives the
-				     points readout, the affordability checks and the Fleet Checker's
-				     bracket/hull limits (gamedata.getMaxPoints). It sits exactly where
-				     the word "Unlimited" does, and calculateFleet swaps the two - the
-				     value is NEVER written into .max, which is rewritten on every
-				     recalculation and would eat the field mid-keystroke. -->
-				<input type="number" id="maxPointsInput" class="max-points-input" value="3500"
-				       min="0" step="50" style="display:none" aria-label="Maximum fleet points"><?php endif; ?><span class="max-points-units">pts</span><?php if ($isFleetTest): ?>
-				<input type="checkbox" id="unlimitedPointsToggle" class="yellow-tick unlimited-points-toggle"
-				       checked title="Unlimited points - untick to build against a fixed limit"
-				       aria-label="Unlimited points">
-				<?php endif; ?>
-				<span class="remaining-points-container"><span class="lb-buy-dot" aria-hidden="true">·</span><span class="remaining">0</span> <span class="remaining-points-units">pts left</span></span>
-			</div>
-		</div>
-
-		<!-- Row 1: the Store's ship filters. The text fields apply when Enter is pressed (the handlers
-		     are at the top of this file); Reset Filters clears them and this row's Show Custom. The
-		     Faction Picker's filters are its own (All / No Filters, which set those, were removed from
-		     here in Stage 5). -->
-		<div class="lb-buy-bar">
-			<div class="lb-buy-filters">
-				<span class="lb-bar-label">Filter by:</span>
-				<label class="lb-field">
-					<span>Name</span>
-					<input type="text" id="nameFilter" value="" class="lb-input lb-input--name">
-				</label>
-				<!-- Cost filter: hides anything costing MORE than the figure typed. -->
-				<label class="lb-field">
-					<span>Cost</span>
-					<input type="text" id="costFilter" value="" class="lb-input lb-input--num"
-					       inputmode="numeric" pattern="[0-9]*">
-				</label>
-				<?php if ($inServiceDate !== null): ?>
-				<!-- Locked to the game's In-Service Date (plan §4.4, Stage 6): the same field, pre-filled
-				     and readonly, so gamedata.applyCustomShipFilter filters by it exactly as by a typed
-				     year, from the first faction loaded, and Reset Filters leaves it be. -->
-				<label class="lb-field lb-field--locked" title="Fixed by the scenario's In-Service Date">
-					<span>ISD</span>
-					<input type="text" id="isdFilter" value="<?php print((int)$inServiceDate); ?>" class="lb-input lb-input--num"
-					       readonly>
-					<i class="fa-solid fa-lock lb-lock" aria-hidden="true"></i>
-				</label>
-				<?php else: ?>
-				<label class="lb-field">
-					<span>ISD</span>
-					<input type="text" id="isdFilter" value="" class="lb-input lb-input--num"
-					       inputmode="numeric" pattern="[0-9]*">
-				</label>
-				<?php endif; ?>
-				<!-- The Store's own Show Custom (user, Stage 5): the CUSTOM ships an official faction
-				     carries. The Faction Picker's box (#toggleCustom) is a separate setting - which
-				     factions can be picked. -->
-				<label class="lb-check lb-check--custom"><input type="checkbox" id="toggleCustomShips" class="yellow-tick">Show Custom</label>
-				<span class="lb-bar-sep" aria-hidden="true">|</span>
-				<button type="button" class="lb-chip resetFilters">Reset Filters</button>
-			</div>
-		</div>
-
-		<!-- Row 2: the Store's size categories (gamedata.showStoreCategory; data-cat is parseShips'
-		     category index), in the Store's own top-to-bottom order | the fleet tools. -->
-		<div class="lb-buy-bar">
-			<div class="lb-cat-chips" role="group" aria-label="Show one category of ships">
-				<span class="lb-bar-label">Show:</span>
-				<button type="button" class="lb-chip lb-cat-chip" data-cat="" aria-pressed="true">All</button>
-				<button type="button" class="lb-chip lb-cat-chip" data-cat="6" aria-pressed="false">Mines</button>
-				<button type="button" class="lb-chip lb-cat-chip" data-cat="5" aria-pressed="false">Structures</button>
-				<button type="button" class="lb-chip lb-cat-chip" data-cat="4" aria-pressed="false">Capital</button>
-				<button type="button" class="lb-chip lb-cat-chip" data-cat="3" aria-pressed="false">Heavy</button>
-				<button type="button" class="lb-chip lb-cat-chip" data-cat="2" aria-pressed="false">Medium</button>
-				<button type="button" class="lb-chip lb-cat-chip" data-cat="1" aria-pressed="false">Light Combat</button>
-				<button type="button" class="lb-chip lb-cat-chip" data-cat="0" aria-pressed="false">Fighters</button>
-			</div>
-
-			<div class="lb-buy-tools">
-				<!-- A bare <input> gave phone keyboards a "Next" action key, because the page has
-				     more focusable fields after it (the chat panel), so pressing it moved focus
-				     there instead of firing the keydown handler and the fleet never loaded.
-				     The <form> is what actually fixes it: an input inside its OWN single-field
-				     form gets implicit submission, so the action key becomes Go/Enter rather than
-				     Next — no submit button is needed for that (HTML implicit submission), and
-				     there deliberately isn't one. enterkeyhint labels the key, inputmode/pattern
-				     bring up the numeric pad. -->
-				<form class="fleet-id-form" id="fleetIdForm" action="#" onsubmit="return false;">
-					<label class="lb-field">
-						<span>Load Fleet by #ID</span>
-						<input type="text" id="fleetIdInput" value="" class="lb-input lb-input--id"
-						       inputmode="numeric" pattern="[0-9]*" enterkeyhint="go"
-						       autocomplete="off" aria-label="Load fleet by ID">
-					</label>
-				</form>
-
-				<!-- Load a Fleet, Save Fleet and Ready: one equal-width set (.lb-buy-tools .lb-btn).
-				     The second Save Fleet / Ready (the others close the panel, a long scroll away on a
-				     phone) share the .savebutton / .readybutton hooks, so the single handler bound at the
-				     top of this file drives both. -->
-				<div class="saved-fleet-wrapper">
-					<button type="button" id="fleetDropdownButton" class="lb-btn fleet-dropdown-btn">LOAD A FLEET</button>
-					<div id="fleetDropdownList" class="fleet-dropdown-list">
-						<!-- populated dynamically -->
-					</div>
+					</section>
 				</div>
-				<button type="button" class="lb-btn lb-btn--save savebutton">Save Fleet</button>
-				<?php if(!$isFleetTest): ?>
-				<button type="button" class="lb-btn lb-btn--ready readybutton">Ready</button>
-				<?php endif; ?>
-			</div>
-		</div>
 
-		<div class="lb-buy-cols">
-			<!-- The Store: ONE faction's ships (gamedata.selectStoreFaction), under a bar naming it.
-			     #store holds one .lb-store-faction per faction loaded so far - switching back to one
-			     is instant - and only the chosen one is shown. -->
-			<div class="lb-store">
-				<div class="lb-col-label">Store</div>
-				<div class="lb-store-bar" id="lbStoreBar">
-					<div class="lb-store-current">
-						<div class="lb-store-name" id="lbStoreFaction">No faction chosen</div>
-						<div class="lb-store-meta" id="lbStoreMeta">Choose a faction to see its ships.</div>
-					</div>
-					<button type="button" class="lb-btn lb-btn--small" id="lbSwitchFaction"
-					        aria-haspopup="dialog" aria-controls="lbFactionPicker">Choose Faction</button>
+				<!-- A stretched box as tall as the briefing beside it, holding Teams at its own height up to
+				     that (gameLobby.css .lb-teams-slot). -->
+				<div class="lb-teams-slot">
+					<section class="lb-panel lb-teams" aria-labelledby="lbTeamsHead">
+						<h2 class="lb-panel-head" id="lbTeamsHead"><span>Teams</span><span class="lb-panel-meta" id="lbTeamsMeta"></span></h2>
+						<div class="lb-panel-body">
+							<div class="lb-teams-grid" id="lobbyTeamsContainer">
+								<!-- Teams injected by JS (gamedata.createSlots) -->
+							</div>
+						</div>
+					</section>
 				</div>
-				<div id="store" class="lb-store-list"></div>
 			</div>
-
-			<!-- ⚠️ `store` stays on the FLEET column: lobby.css styles the bought rows through it
-			     (.store .ship, .store span, .store .ship .clickable), as it did when both columns
-			     sat in one table.store. The Store column itself no longer carries it. -->
-			<div class="lb-fleet store">
-				<!-- REINFORCEMENTS_PLAN.md 2.1 - the BUY MODE: everything added to the fleet while it is
-				     ticked is bought as a reinforcement and waits in hyperspace.
-				     ⭐ THIS CHECKBOX IS THE STATE THE WHOLE FEATURE READS - buyingReinforcement() asks it,
-				     applyReinforcementRule forces it off without the rule. Its control is the MAIN FLEET /
-				     REINFORCEMENTS headers in the fleet list below (gamedata.setBuyTarget writes it,
-				     applyFleetGrouping reads it back). The "Buy as Reinforcement" box that was a second
-				     control was removed (user, Stage 5), so it is hidden - but it stays: it IS the state. -->
-				<input type="checkbox" id="reinforcementModeToggle" hidden>
-				<div class="lb-col-label">Fleet</div>
-				<div id="fleet" class="subpanel fleet-panel-style"></div>
-			</div>
-		</div>
-
-		<div class="lb-buy-actions">
-			<!-- Check opens the Fleet Correctness Report window (#fleetcheck, below), which carries the
-			     link to the Fleet Checker rules. -->
-			<button type="button" class="lb-btn lb-btn--check checkbutton" aria-haspopup="dialog" aria-controls="fleetcheck">Check</button>
-			<button type="button" class="lb-btn lb-btn--save savebutton">Save Fleet</button>
-			<?php if(!$isFleetTest): ?>
-			<button type="button" class="lb-btn lb-btn--ready readybutton">Ready</button>
 			<?php endif; ?>
+
+			<div class="lb-lower">
+				<?php
+				/* ── Purchase Fleet (CREATE_GAME_GAMELOBBY_REDESIGN_PLAN.md §4.3, Stage 5; §12.13) ──────
+				   The Store's filters, then the STORE, which shows ONE faction's ships at a time, picked
+				   in the Faction Picker further down. The fleet being bought, the points and the fleet
+				   tools are Your Fleet, beside it.
+				   ⚠️ The wrapper keeps .buy (gamedata.enableBuy show()s / hide()s it for the viewer's own
+				   slot) and .buy-panel-container (hidden until then). It is a plain block on purpose:
+				   show() on a hidden element writes display:block, which would break a flex panel. */
+				?>
+				<div class="lb-buy-wrap buy buy-panel-container">
+					<section class="lb-panel lb-buy" aria-labelledby="lbBuyHead">
+						<h2 class="lb-panel-head" id="lbBuyHead"><span>Purchase Fleet</span></h2>
+
+						<!-- Row 1: the Store's ship filters. The text fields apply when Enter is pressed (the
+						     handlers are at the top of this file); Reset Filters clears them and this row's Show
+						     Custom. The Faction Picker's filters are its own. -->
+						<div class="lb-buy-bar">
+							<div class="lb-buy-filters">
+								<span class="lb-bar-label">Filter by:</span>
+								<label class="lb-field">
+									<span>Name</span>
+									<input type="text" id="nameFilter" value="" class="lb-input lb-input--name">
+								</label>
+								<!-- Cost filter: hides anything costing MORE than the figure typed. -->
+								<label class="lb-field">
+									<span>Cost</span>
+									<input type="text" id="costFilter" value="" class="lb-input lb-input--num"
+									       inputmode="numeric" pattern="[0-9]*">
+								</label>
+								<?php if ($inServiceDate !== null): ?>
+								<!-- Locked to the game's In-Service Date (plan §4.4, Stage 6): the same field, pre-filled
+								     and readonly, so gamedata.applyCustomShipFilter filters by it exactly as by a typed
+								     year, from the first faction loaded, and Reset Filters leaves it be. -->
+								<label class="lb-field lb-field--locked" title="Fixed by the scenario's In-Service Date">
+									<span>ISD</span>
+									<input type="text" id="isdFilter" value="<?php print((int)$inServiceDate); ?>" class="lb-input lb-input--num"
+									       readonly>
+									<i class="fa-solid fa-lock lb-lock" aria-hidden="true"></i>
+								</label>
+								<?php else: ?>
+								<label class="lb-field">
+									<span>ISD</span>
+									<input type="text" id="isdFilter" value="" class="lb-input lb-input--num"
+									       inputmode="numeric" pattern="[0-9]*">
+								</label>
+								<?php endif; ?>
+								<!-- The Store's own Show Custom (user, Stage 5): the CUSTOM ships an official faction
+								     carries. The Faction Picker's box (#toggleCustom) is a separate setting - which
+								     factions can be picked. -->
+								<label class="lb-check lb-check--custom"><input type="checkbox" id="toggleCustomShips" class="yellow-tick">Show Custom</label>
+								<span class="lb-bar-sep" aria-hidden="true">|</span>
+								<button type="button" class="lb-chip resetFilters">Reset Filters</button>
+							</div>
+						</div>
+
+						<!-- Row 2: the Store's size categories (gamedata.showStoreCategory; data-cat is
+						     parseShips' category index), in the Store's own top-to-bottom order. -->
+						<div class="lb-buy-bar">
+							<div class="lb-cat-chips" role="group" aria-label="Show one category of ships">
+								<span class="lb-bar-label">Show:</span>
+								<button type="button" class="lb-chip lb-cat-chip" data-cat="" aria-pressed="true">All</button>
+								<button type="button" class="lb-chip lb-cat-chip" data-cat="6" aria-pressed="false">Mines</button>
+								<button type="button" class="lb-chip lb-cat-chip" data-cat="5" aria-pressed="false">Structures</button>
+								<button type="button" class="lb-chip lb-cat-chip" data-cat="4" aria-pressed="false">Capital</button>
+								<button type="button" class="lb-chip lb-cat-chip" data-cat="3" aria-pressed="false">Heavy</button>
+								<button type="button" class="lb-chip lb-cat-chip" data-cat="2" aria-pressed="false">Medium</button>
+								<button type="button" class="lb-chip lb-cat-chip" data-cat="1" aria-pressed="false">Light Combat</button>
+								<button type="button" class="lb-chip lb-cat-chip" data-cat="0" aria-pressed="false">Fighters</button>
+							</div>
+						</div>
+
+						<!-- The Store: ONE faction's ships (gamedata.selectStoreFaction), under a bar naming it.
+						     #store holds one .lb-store-faction per faction loaded so far - switching back to one
+						     is instant - and only the chosen one is shown. -->
+						<div class="lb-store">
+							<div class="lb-store-bar" id="lbStoreBar">
+								<div class="lb-store-current">
+									<div class="lb-store-name" id="lbStoreFaction">No faction chosen</div>
+									<div class="lb-store-meta" id="lbStoreMeta">Choose a faction to see its ships.</div>
+								</div>
+								<button type="button" class="lb-btn lb-btn--small" id="lbSwitchFaction"
+								        aria-haspopup="dialog" aria-controls="lbFactionPicker">Choose Faction</button>
+							</div>
+							<div id="store" class="lb-store-list"></div>
+						</div>
+					</section>
+				</div>
+
+				<!-- Your Fleet: the points, the fleet being bought, and every fleet tool - one set now
+				     (it used to be two, top and bottom of Purchase Fleet): the panel stays in view as the
+				     Store scrolls, and on a phone it sits above the Store. Hidden with Purchase Fleet
+				     until the viewer holds a slot - the same .buy wrapper. -->
+				<div class="lb-fleet-wrap buy buy-panel-container">
+					<section class="lb-panel lb-buy lb-fleetpanel" aria-labelledby="lbFleetHead">
+						<div class="lb-panel-head lb-buy-head">
+							<h2 class="lb-buy-title" id="lbFleetHead">Your Fleet</h2>
+							<!-- gamedata.calculateFleet writes .current / .max / .remaining and shows or hides the
+							     units and the "pts left" part (an unlimited slot has neither). -->
+							<div class="lb-buy-points">
+								<span class="current">0</span><span class="lb-buy-slash">/</span><span class="max">0</span><?php if ($isFleetTest): ?>
+								<!-- Fleet Builder only. The slot itself is always unlimited server-side,
+								     so this optional cap is purely a client-side yardstick: it drives the
+								     points readout, the affordability checks and the Fleet Checker's
+								     bracket/hull limits (gamedata.getMaxPoints). It sits exactly where
+								     the word "Unlimited" does, and calculateFleet swaps the two - the
+								     value is NEVER written into .max, which is rewritten on every
+								     recalculation and would eat the field mid-keystroke. -->
+								<input type="number" id="maxPointsInput" class="max-points-input" value="3500"
+								       min="0" step="50" style="display:none" aria-label="Maximum fleet points"><?php endif; ?><span class="max-points-units">pts</span><?php if ($isFleetTest): ?>
+								<input type="checkbox" id="unlimitedPointsToggle" class="yellow-tick unlimited-points-toggle"
+								       checked title="Unlimited points - untick to build against a fixed limit"
+								       aria-label="Unlimited points">
+								<?php endif; ?>
+								<span class="remaining-points-container"><span class="lb-buy-dot" aria-hidden="true">·</span><span class="remaining">0</span> <span class="remaining-points-units">pts left</span></span>
+							</div>
+						</div>
+
+						<!-- ⚠️ `store` stays on the FLEET's box: lobby.css styles the bought rows through it
+						     (.store .ship, .store span, .store .ship .clickable), as it did when both columns
+						     sat in one table.store. The Store itself does not carry it. -->
+						<div class="lb-fleet store">
+							<!-- REINFORCEMENTS_PLAN.md 2.1 - the BUY MODE: everything added to the fleet while it is
+							     ticked is bought as a reinforcement and waits in hyperspace.
+							     ⭐ THIS CHECKBOX IS THE STATE THE WHOLE FEATURE READS - buyingReinforcement() asks it,
+							     applyReinforcementRule forces it off without the rule. Its control is the MAIN FLEET /
+							     REINFORCEMENTS headers in the fleet list below (gamedata.setBuyTarget writes it,
+							     applyFleetGrouping reads it back). The "Buy as Reinforcement" box that was a second
+							     control was removed (user, Stage 5), so it is hidden - but it stays: it IS the state. -->
+							<input type="checkbox" id="reinforcementModeToggle" hidden>
+							<div id="fleet" class="subpanel fleet-panel-style"></div>
+						</div>
+
+						<div class="lb-fleet-tools">
+							<!-- A bare <input> gave phone keyboards a "Next" action key, because the page has
+							     more focusable fields after it (the chat panel), so pressing it moved focus
+							     there instead of firing the keydown handler and the fleet never loaded.
+							     The <form> is what actually fixes it: an input inside its OWN single-field
+							     form gets implicit submission, so the action key becomes Go/Enter rather than
+							     Next — no submit button is needed for that (HTML implicit submission), and
+							     there deliberately isn't one. enterkeyhint labels the key, inputmode/pattern
+							     bring up the numeric pad. -->
+							<form class="fleet-id-form" id="fleetIdForm" action="#" onsubmit="return false;">
+								<label class="lb-field">
+									<span>Load Fleet by #ID</span>
+									<input type="text" id="fleetIdInput" value="" class="lb-input lb-input--id"
+									       inputmode="numeric" pattern="[0-9]*" enterkeyhint="go"
+									       autocomplete="off" aria-label="Load fleet by ID">
+								</label>
+							</form>
+
+							<!-- Two by two: Load a Fleet · Save Fleet, Check · Ready. Check opens the Fleet
+							     Correctness Report window (#fleetcheck, below), which carries the link to the Fleet
+							     Checker rules. -->
+							<div class="lb-fleet-btns">
+								<div class="saved-fleet-wrapper">
+									<button type="button" id="fleetDropdownButton" class="lb-btn fleet-dropdown-btn">LOAD A FLEET</button>
+									<div id="fleetDropdownList" class="fleet-dropdown-list">
+										<!-- populated dynamically -->
+									</div>
+								</div>
+								<button type="button" class="lb-btn lb-btn--save savebutton">Save Fleet</button>
+								<button type="button" class="lb-btn lb-btn--check checkbutton" aria-haspopup="dialog" aria-controls="fleetcheck">Check</button>
+								<?php if(!$isFleetTest): ?>
+								<button type="button" class="lb-btn lb-btn--ready readybutton">Ready</button>
+								<?php endif; ?>
+							</div>
+						</div>
+					</section>
+				</div>
+			</div>
 		</div>
-	</section>
-</div>
 
     <script>
         let cachedFleets = [];

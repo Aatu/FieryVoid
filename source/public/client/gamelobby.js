@@ -890,8 +890,9 @@ window.gamedata = {
 		var h = $('<div class="ship bought' + reinforcementClass + ' slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '">' +
 			damageBadge +
 			'<span class="shipname name">' + display.name + '</span>' +
-			'<span class="boughtShiptype">' + displayType + '</span>' +
-			'<span class="boughtPointCost">' + display.cost + 'p</span>' +
+			//Class and cost in one box, so a narrow fleet column wraps them onto a line together.
+			'<span class="boughtClassCost"><span class="boughtShiptype">' + displayType + '</span>' +
+			'<span class="boughtPointCost">' + display.cost + 'p</span></span>' +
 			enhancementHtml +
 			gamedata.rowActionsHtml(ship) +
 			'</div>');
@@ -2290,8 +2291,9 @@ window.gamedata = {
 			var h = $('<div class="ship bought' + reinforcementClass + ' slotid_' + ship.slot + ' shipid_' + ship.id + '" data-shipindex="' + ship.id + '">' +
 				damageBadge +
 				'<span class="shipname name">' + display.name + '</span>' +
-				'<span class="boughtShiptype">' + displayType + '</span>' +
-				'<span class="boughtPointCost">' + display.cost + 'p</span>' +
+				//Class and cost in one box, so a narrow fleet column wraps them onto a line together.
+				'<span class="boughtClassCost"><span class="boughtShiptype">' + displayType + '</span>' +
+				'<span class="boughtPointCost">' + display.cost + 'p</span></span>' +
 				enhancementHtml +
 				gamedata.rowActionsHtml(ship) +
 				'</div>');
@@ -2503,9 +2505,7 @@ window.gamedata = {
 	parseFactions: function parseFactions(jsonFactions) {
 		var list = $("#factionList");
 		list.empty();
-		//The groups flow down two or three columns (gameLobby.css .lb-picker-cols), none split between
-		//two. Their own box, inside the scrolling list: a multi-column box given the list's fixed height
-		//would overflow into extra columns off to the side instead of scrolling.
+		//The groups are built here, then dealt into fixed columns by layoutPickerColumns.
 		var columns = $('<div class="lb-picker-cols"></div>').appendTo(list);
 		let factionList = [];
 
@@ -2604,8 +2604,72 @@ window.gamedata = {
 
 		gamedata.allShips = factionList;
 
+		gamedata.pickerColumnCount = 0; //a new list: deal it out afresh
+		gamedata.layoutPickerColumns();
 		gamedata.filterFactionList();
 		gamedata.markStoreFaction();
+	},
+
+	/* The picker's groups run down two or three columns on a desktop - and STAY in the column they
+	   were dealt into (user: they must not jump about as groups open or the filters thin them out,
+	   which a CSS multi-column box does as it rebalances). So the columns are dealt once, in list
+	   order and none split, from each group's FULL size - every faction row, Custom's sub-groups
+	   counted closed, as it opens - which no filter, search or disclosure changes. Only the window's
+	   width does (1 column on a phone, 2, 3): it is dealt again when that count changes. */
+	pickerColumnCount: 0,
+
+	pickerColumnsWanted: function pickerColumnsWanted() {
+		if (!window.matchMedia) return 1;
+		if (window.matchMedia("(min-width: 860px)").matches) return 3;
+		if (window.matchMedia("(min-width: 560px)").matches) return 2;
+		return 1;
+	},
+
+	layoutPickerColumns: function layoutPickerColumns() {
+		var holder = $("#factionList > .lb-picker-cols");
+		if (!holder.length) return;
+		var count = gamedata.pickerColumnsWanted();
+		if (count === gamedata.pickerColumnCount) return;
+		gamedata.pickerColumnCount = count;
+
+		//In list order, whichever column each sits in now.
+		var groups = holder.find(".lb-fgroup").filter(function () { return !$(this).hasClass("lb-fgroup--sub"); }).get();
+		//A group's height in rows: its header (with the gap above it) and its rows as it opens.
+		var weights = groups.map(function (group) {
+			var subs = $(group).find(".lb-fgroup--sub").length;
+			return 1.5 + (subs ? subs * 1.1 : $(group).find(".lb-faction").length);
+		});
+
+		//The split into `count` runs, in order, whose tallest run is shortest - and of those, the most
+		//even (least sum of squares). Six groups and three columns at most, so every pair of cut
+		//points is simply tried.
+		var sum = function (from, to) { var s = 0; for (var i = from; i < to; i++) s += weights[i]; return s; };
+		var n = groups.length, best = null;
+		var consider = function (ends) {
+			var from = 0, tallest = 0, squares = 0;
+			ends.forEach(function (end) { var h = sum(from, end); tallest = Math.max(tallest, h); squares += h * h; from = end; });
+			if (!best || tallest < best.tallest || (tallest === best.tallest && squares < best.squares)) {
+				best = { ends: ends, tallest: tallest, squares: squares };
+			}
+		};
+		if (count === 1 || n <= 1) {
+			consider([n]);
+		} else if (count === 2) {
+			for (var a = 1; a < n; a++) consider([a, n]);
+		} else {
+			for (var i = 1; i < n; i++) {
+				for (var j = i; j < n; j++) consider([i, j, n]);
+			}
+		}
+		best = best.ends;
+
+		var start = 0;
+		var made = best.map(function (end) {
+			var column = $('<div class="lb-picker-col"></div>').append(groups.slice(start, end));
+			start = end;
+			return column;
+		});
+		holder.empty().append(made).css("--picker-cols", String(best.length));
 	},
 
 	/* The picker's filters: a row shows when its tier is ticked, it passes Show Custom (and its
@@ -2879,8 +2943,39 @@ window.gamedata = {
 		if (opener && document.contains(opener) && opener.focus) opener.focus();
 	},
 
+	/* The title bar's Map & Scenario button folds the Map Preview / Scenario Description / Game Rules
+	   section away, so the Store starts near the top of the page (plan §12.13). Remembered per game in
+	   this browser only - a convenience: where storage is unavailable it simply opens every time. */
+	initBriefToggle: function initBriefToggle() {
+		var button = document.getElementById("lbBriefToggle");
+		var brief = document.getElementById("lbBrief");
+		if (!button || !brief) return; //Fleet Builder has neither
+		var key = "fv.lobbyBriefClosed." + gamedata.gameid;
+
+		var show = function (open) {
+			brief.hidden = !open;
+			button.setAttribute("aria-expanded", open ? "true" : "false");
+		};
+
+		var closed = false;
+		try { closed = window.localStorage.getItem(key) === "1"; } catch (e) { /* no storage */ }
+		show(!closed);
+
+		button.addEventListener("click", function () {
+			var open = brief.hidden;
+			show(open);
+			//Its zone labels are sized for the width the map is SHOWN at, which was none while folded.
+			if (open) gamedata.drawMapPreview();
+			try {
+				if (open) window.localStorage.removeItem(key);
+				else window.localStorage.setItem(key, "1");
+			} catch (e) { /* no storage */ }
+		});
+	},
+
 	//Called once from gamelobby.php's ready handler.
 	initPurchasePanel: function initPurchasePanel() {
+		gamedata.initBriefToggle();
 		$("#lbSwitchFaction").on("click", gamedata.openFactionPicker);
 
 		$(".lb-modal").on("click", function (e) {
@@ -2904,22 +2999,24 @@ window.gamedata = {
 			gamedata.closeLobbyModal(open.attr("id"));
 		});
 
-		//A group's header opens and closes it. The columns rebalance as it grows or shrinks, which can
-		//carry the header into another column, out of sight - so the list scrolls it back into view
-		//(the list itself: scrollIntoView could also move the page under the window).
 		$("#factionList").on("click", ".lb-fgroup-head", function () {
 			var group = $(this).parent().toggleClass("is-collapsed");
 			$(this).attr("aria-expanded", group.hasClass("is-collapsed") ? "false" : "true");
-
-			var list = document.getElementById("factionList");
-			var head = this.getBoundingClientRect(), box = list.getBoundingClientRect();
-			if (head.top < box.top) list.scrollTop -= box.top - head.top;
-			else if (head.bottom > box.bottom) list.scrollTop += head.bottom - box.bottom;
 		}).on("click", ".lb-faction", function () {
 			gamedata.showRolledFaction(null); //a faction is picked: the roll has done its job
 			gamedata.selectStoreFaction(this.getAttribute("data-faction"));
 			gamedata.closeLobbyModal("lbFactionPicker");
 		});
+
+		//The picker's columns are dealt again only when the window's width changes their number.
+		if (window.matchMedia) {
+			["(min-width: 860px)", "(min-width: 560px)"].forEach(function (query) {
+				var mq = window.matchMedia(query);
+				var relayout = function () { gamedata.layoutPickerColumns(); };
+				if (mq.addEventListener) mq.addEventListener("change", relayout);
+				else if (mq.addListener) mq.addListener(relayout);
+			});
+		}
 
 		//The tier chips' All / None.
 		$("#lbTierAll").on("click", gamedata.setAllTierFilters.bind(gamedata, true));

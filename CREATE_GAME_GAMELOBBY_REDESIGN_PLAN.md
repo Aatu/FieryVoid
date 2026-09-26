@@ -2103,3 +2103,135 @@ yet. Replay harness: 119 pass, 5 fail - 4251 (known) and 4345 / 4347 / 4349 / 43
 server changes stashed (Ancient fighters' notes text), so not from this round.
 **Not verified:** a Dust Cloud in a live game (its icon and dim hexes on game.php, a ship flying through
 one) - create a game with Dust ≥ 6.
+
+### 12.13 Lobby layout: main | side, locked picker columns (user, 2026-09-26)
+
+Client only (`gamelobby.php`, `client/gamelobby.js`, `styles/gameLobby.css`, `styles/lobby.css`); the lobby
+legacy bundle rebuilt. Decided with the user from §12.12's measurements - the Fleet column beside a
+~1750px Store was ~1650px of empty column, four times the top row's dead space - and two picks: the
+side column holds **Teams + Your Fleet** (Teams alone would leave that column empty below 226px), and the
+Game Rules chips go in a **strip under Map | Scenario** (in either panel they add ~150-200px to it).
+
+- **Two columns** inside `.lb-top` (1422px): `.lb-layout` grid `1fr | 420px`. MAIN: `.lb-brief` (Map Preview |
+  Scenario Description, `align-items: start`, then `.lb-rules-panel` across both - label left, chips beside),
+  then Purchase Fleet. SIDE: Teams, then **Your Fleet** (`.lb-fleet-wrap.buy`, `position: sticky; top:
+  10px`; the side column stretches to the main one's height, which is what gives the sticky room). Measured
+  at 1600: main 986, Map 368 / Scenario 393 tall, rules strip 111. The Purchase panel moved inside
+  `.lb-top` - its old 1422px width rule is gone.
+- **Purchase Fleet is the Store only**: filter bar, category-chip bar, Store (full main width - no row
+  wraps). The points readout, `#reinforcementModeToggle`, `#fleet` (still inside `.lb-fleet.store` -
+  lobby.css styles the rows through `.store`) and every tool moved to Your Fleet: head "Your Fleet" +
+  points (Fleet Builder's cap box too); foot Load Fleet by #ID, then a 2 × 2 grid Load a Fleet · Save Fleet /
+  Check · Ready. **One set of Save / Ready / Check now** - the old top-bar and bottom-bar duplicates are gone
+  (handlers are class-bound, so nothing else changed). The panel is at most `100vh - 20px`: the list
+  scrolls inside (chat scrollbar), head and tools stay. `.lb-panel`'s `overflow: hidden` is lifted on it so
+  the saved-fleet menu can open UPWARDS past the list: `.saved-fleet-wrapper` is static there, so the menu
+  is placed against the whole tools box (panel-wide) - a panel pinned to the window has nothing below it.
+  Both sections carry `.lb-buy`, so the purchase-scoped button rules dress both.
+- **Bought rows** in the 388px column: `.ship.bought` is a wrapping flex row there - name, then class and
+  cost in ONE box (`.boughtClassCost`, new span in both row builders; `row.find(".boughtPointCost")` still
+  finds the cost) - so class and cost drop to their own line together, never "…Cruiser" + a stray "900p".
+  An empty `#fleet` says "No ships yet. Add to fleet in the Store puts them here."
+- **Map & Scenario** button in the title bar (`gamedata.initBriefToggle`, `aria-expanded`, ▲ / ▼ like Load a
+  Fleet): folds `#lbBrief` away so the Store starts at the top (678 → 146px); remembered per game in
+  localStorage (`fv.lobbyBriefClosed.<gameid>`, try/catch - no storage just means open). Reopening redraws
+  the map (its labels are sized for the width it is shown at). My call over §12.12's "auto-fold after the
+  first purchase": folding content above the pointer mid-purchase would jump the Store under it.
+- **Narrower**: ≤1180px side 360px and the brief stacks Scenario / Map / Rules; ≤960px side 320px; ≤760px one
+  column - `.lb-main` / `.lb-side` become `display: contents` and the panels are ordered Teams, Scenario,
+  Map, Rules, **Your Fleet (above the Store, not sticky)**, Store.
+- **Action links in `--fv-accent`** (user): the Store's Add to fleet · Show details (`.lb-linkbtn`) and the
+  fleet rows' Details · Edit · Copy · (Reinforcement) · Remove (lobby.css `.store .ship .clickable`, was
+  #DEEBFF); hover white + underline.
+- **Faction Picker columns are LOCKED** (user: groups jumped between columns as the multi-column box
+  rebalanced on every open/close and filter). `gamedata.layoutPickerColumns` deals the six groups into
+  `.lb-picker-col` boxes (a grid, `--picker-cols`) once per list, in order and whole, from each group's FULL
+  size - every faction row, Custom's sub-groups counted closed - so no filter, search or disclosure moves
+  anything; a column the filters empty stays empty. The split minimises the tallest column, ties going to
+  the most even (least sum of squares): at 3 columns **[Major, League] [Minor] [Ancients, Other, Custom]**.
+  Column count by viewport (3 ≥ 860px, 2 ≥ 560px, else 1), re-dealt only when a `matchMedia` change moves it.
+  The header click's scroll-into-view (needed only while groups could move) is gone.
+
+**Verified** (real local site over CDP): `layout.mjs` 18/18 - desktop columns and heights, three real
+purchases landing in Your Fleet, link colours, Your Fleet pinned at 10px with its tools on screen after
+scrolling 1600px, the saved-fleet menu opening upwards on screen, fold / reload-still-folded / reopen, the
+picker's deal and every group staying put through Tier 1 off + Custom on + all sub-groups opened + Minor
+closed, an observer (no Purchase / Your Fleet), Fleet Builder (Rules & Info over the Store, no Ready, cap
+box in the head), 1100px, phone order; `rows.mjs` 3/3 (class + cost together on four rows, Check opens and
+Escape closes the report with focus back); §12.12's `lobby.mjs` 17/17 and `phone.mjs` 3/3 with their
+picker selectors updated for the column boxes.
+**Not verified:** Save Fleet and Ready clicked for real (they write), a real touch device.
+
+### 12.14 Lobby layout reshaped: two rows (user, 2026-09-26) - supersedes §12.13's column layout
+
+User feedback on §12.13 in play: Purchase Fleet too wide and Your Fleet too narrow; Your Fleet started at a
+different height for every team count and sat apart from the Store; panels at different heights read as
+cluttered. The user's shape, built as asked (`gamelobby.php` + `gameLobby.css` only - no JS change):
+
+- **Upper row** `.lb-upper` (grid `1fr | 420px`): `.lb-brief` - Map Preview | Scenario Description **at one
+  height** (the brief grid now stretches them; Scenario's links pinned to its foot with `margin-top: auto`,
+  the map keeps its picture at the top) over the Game Rules strip - beside **Teams**. Teams keeps its own
+  height but is **never taller than the brief**; past that its list scrolls inside (chat scrollbar). How:
+  Teams sits in `.lb-teams-slot`, stretched to the row with `contain: size`, so Teams' own height is left
+  out of the row's and the brief alone sizes it; Teams inside is `max-height: 100%` (a stretched grid
+  item's height is definite, so the percentage resolves). Measured at 1600: 2 teams 226px under a 518px
+  brief; 8 teams capped at exactly the brief's 484px, list 718 in 448 visible; 5 teams 430 = brief 430.
+- **Lower row** `.lb-lower` (grid `1.25fr | 1fr`, the share Store | Fleet had as one panel): Purchase Fleet
+  | Your Fleet, **tops level**, always 14px under the brief whatever the team count (781 | 625 at 1600).
+  Your Fleet is still pinned 10px down while the Store scrolls; in the wider panel every bought row is
+  one line again.
+- **Folded** (Map & Scenario hidden): `.lb-upper:has(> .lb-brief[hidden])` - one column, the slot's
+  containment and the cap lifted, the teams laid side by side (`auto-fill` 18rem) - a Teams strip across
+  the top, then the lower row.
+- ≤1180px: Teams 360px, the brief stacked (Scenario / Map / Rules), lower `1.6fr | 1fr`. ≤760px: both rows
+  one column, Teams first at its whole height, Your Fleet over the Store, not pinned. Fleet Builder: Rules
+  & Info, then the lower row.
+
+**Verified** (real local site over CDP): `layout2.mjs` 14/14 - equal Map / Scenario, links at the foot,
+Teams short with 2 teams, capped and scrolling with 8, within the brief with 5, lower row level and at the
+same place for 2 / 5 / 8 teams, 1.25 : 1, three purchases one line each, pinned Your Fleet, fold, observer,
+Fleet Builder, 1100px, phone; §12.12 / §12.13 drivers `lobby.mjs` 17/17, `rows.mjs` 3/3, `phone.mjs` 3/3.
+
+### 12.15 More refinements (user, 2026-09-27)
+
+Client only (`creategame.php`, `client/UI/createGame.js`, `styles/createGame.css`, `styles/gameLobby.css`, one
+comment in `gamelobby.php`). No bundle to rebuild: Create Game loads its script unbundled, and no lobby JS changed.
+
+- **Create Game: In-Service Date is a checkbox** like the other Rules & Options (supersedes §11.6's "year box
+  where the checkbox would be"). `#inServiceDateCheck`; ticked, `#inServiceDateWrap` (`.cg-dep`) shows the year
+  box INLINE AFTER the label - the same place, gap and height as Simultaneous Movement's and Desperate
+  Scenario's selects - and focuses it. The user wrote "to the left of the header ... like Simultaneous
+  Movement"; I followed the Sim Move pattern (right of the label). `readInServiceDate` is null while
+  unticked (a year typed and then unticked is kept in the box but never posted); Next refuses ticked + not a
+  four-digit year ("enter a four-digit year, or untick In-Service Date"). Save Settings writes the year only
+  while ticked, so a saved year MEANS ticked - `applySettings` ticks from it, and presets saved before this
+  (year or blank) load the same way. No new preset field.
+- **Store width** (`.lb-lower`): measured every faction's widest Store row (name + cost + links) with the Store's
+  Show Custom on: 676px (12 Colonies of Kobol's Marine Assault Raptor), Earth Alliance (Early) 658 (the Atlas
+  flights), Brakiri only 531; 75 of 87 factions fit in 600. Purchase Fleet is now `min(732px, 55%)` - that
+  row + the Store's 52px of frame + 4 spare - and Your Fleet the rest: 732 | 674 at 1600 (was 781 | 625).
+  Below a 1331px row the 55% is the old 1.25 : 1 share; ≤1180px is still 1.6 : 1 (where some names wrap,
+  as before). Fonts differ by platform - a row that does not fit wraps its cost and links, as it always could.
+- **Store line spacing**: `.lb-ship` `line-height: 1.3` (it inherited the page's 1.5) and 3px padding - rows 24px,
+  were 29 (the pre-redesign Store was ~21). About 20% more ships per screen.
+- **Own slot: no blue rail** (`.lb-slot.selected` box-shadow gone) - it clashed with the team rail beside it; the
+  blue border and tint still mark it.
+- **Map | Scenario | Rules as ONE container**: `.lb-brief` wears the panel frame (border, radius, shadow,
+  gradient; no gap) and the three panels inside it lose theirs, keeping a 1px dividing line each (Scenario's
+  left edge, the rules strip's top; stacked ≤1180px, the map's top instead). Brief 503px, was 518.
+- **Purchase Fleet and Your Fleet level at load**: `.lb-lower:has(#store:empty)` stretches both (their panels
+  `height: 100%`) - until a faction is chosen there is nothing to pin Your Fleet against. At 1600 both 296px
+  (Purchase was 222). Once the Store has a faction the row goes back to `start` and Your Fleet is pinned as
+  before. ⚠️ Found on the way (§12.14's): the phone's one-column flex kept the grid's `align-items: start`, so
+  Your Fleet shrank to its content (294 of 354px) - `align-items: stretch` in the ≤760px rule.
+
+**Verified** (real local site over CDP): Create Game `isd.mjs` 13/13 desktop (checkbox lined up with the others,
+box after the label and focused, same gap and height as Sim Move's select, blank + ticked refused, digits only,
+unticked = no cutoff and Next passes, Confirm chip "In-Service Date: 2258", save ticked / unticked, load both
+and an older preset); phone 12/13 - the one miss is Sim Move's own select wrapping under its longer label there,
+as before. Lobby `lobby15.mjs` 1600 17/17 (one frame, touching panels, dividers, no rail, level at load with the
+tools at the foot, 732 | 674, EA Early / 12 Colonies / Brakiri every row one line and 24px with Show Custom on,
+back to own heights after a pick, pinned while scrolled, folded level, 8 teams capped); 1100 and phone - the
+brief's stacked dividers, level at load, widths steady on the phone before and after a pick. §12.14's
+`layout2.mjs` 12/14 - the two misses are this round's by design (rules strip now touches the map; 732px, not
+1.25 : 1).

@@ -220,15 +220,17 @@
     color: #DEEBFF;
 }
 
+/* The fleet rows' Details · Edit · Copy · (Reinforcement) · Remove: the accent blue, the Store's
+   Add to fleet · Show details colour too (gameLobby.css .lb-linkbtn) - brightening on hover. */
 .store .ship .clickable {
     cursor: pointer;
-    color: #DEEBFF;
+    color: var(--fv-accent);
     font-size: 13px;
 }
 
 .store .ship .clickable:hover {
     cursor: pointer;
-    color: #DEEBFF;
+    color: var(--fv-text-bright);
     text-decoration: underline;
     font-size: 13px;
 }

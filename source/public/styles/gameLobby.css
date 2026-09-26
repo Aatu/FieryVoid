@@ -8,7 +8,9 @@
  * Tokens only; tokens.css is the one :root. Linked after lobby.css and gamesNew.css, which it
  * overrides where the two meet (the slot row, #mapPreview).
  *
- * MOBILE: three columns while they fit, then Scenario-over-Map beside Teams, then one column.
+ * Since §12.13 the page is two columns: MAIN (Map | Scenario over the Game Rules strip, then
+ * Purchase Fleet) and SIDE (Teams over Your Fleet, which stays in view). MOBILE: Scenario over Map
+ * at <= 1180px, then one column at <= 760px.
  *
  * Stage 5 added the Purchase Fleet panel (.lb-buy: Store | Fleet, the Store scoped to one
  * faction), the two lobby windows (.lb-modal: the Faction Picker and the Fleet Correctness
@@ -148,37 +150,147 @@
   color: var(--fv-text-dim);
 }
 
-/* ── The row: Map Preview | Scenario Description | Teams ───────────────────── */
-
-/* Every panel keeps its own height. Stretching one to match a taller neighbour only opens a gap
-   inside it; the Map Preview, usually the tallest, leads so the row steps down left to right. */
-.lb-row {
-  display: flex;
-  align-items: flex-start;
+/* ── The page: two rows (plan §12.13, reshaped by the user in §12.14) ────────────────────────
+   UPPER: Map Preview | Scenario Description over the Game Rules strip, beside Teams. LOWER:
+   Purchase Fleet | Your Fleet, their tops level, Your Fleet staying in view the length of the
+   Store. So the lower row starts at the same place however many teams there are. */
+.lb-upper {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 420px;
   gap: 16px;
+  align-items: start;
 }
 
-/* A slot row's natural width - player, meta line, Ready + Leave Slot on one line - not a share of
-   the row: the width it gives up goes to the Map Preview. */
-.lb-teams {
-  flex: 0 0 380px;
+/* Map Preview | Scenario Description at ONE height (user): the row stretches both - the map keeps
+   its picture at the top, the scenario its links at the foot. The Game Rules strip under both.
+   ONE container (user, §12.15): no gaps - the briefing wears the panel frame and the three panels
+   inside it only a dividing line each. */
+.lb-brief {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  background: linear-gradient(180deg, rgba(27, 45, 62, 0.94), rgba(18, 32, 45, 0.94));
+  border: 1px solid #2a6b8f;
+  border-radius: 6px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(139, 202, 242, 0.1);
+  overflow: hidden;
 }
 
-.lb-pair {
-  display: flex;
-  flex: 1 1 0;
-  align-items: flex-start;
+.lb-brief[hidden] {
+  display: none;
+}
+
+.lb-brief > .lb-panel {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.lb-brief > .lb-scenario {
+  border-left: 1px solid #2a6b8f;
+}
+
+.lb-scenario > .lb-links {
+  margin-top: auto;
+}
+
+.lb-brief > .lb-rules-panel {
+  grid-column: 1 / -1;
+  border-top: 1px solid #2a6b8f;
+}
+
+/* Teams at its own height but never taller than the briefing beside it (user): past that its list
+   scrolls. The slot is stretched to the row, and `contain: size` keeps Teams' own height out of the
+   row's - so the briefing alone decides it - and Teams is capped at 100% of the slot. */
+.lb-teams-slot {
+  align-self: stretch;
+  min-height: 0;
+  contain: size;
+}
+
+.lb-teams-slot > .lb-teams {
+  max-height: 100%;
+}
+
+.lb-teams > .lb-panel-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* Map & Scenario folded away: nothing is left beside Teams to cap it, so it takes the row at its own
+   height, its teams side by side. */
+.lb-upper:has(> .lb-brief[hidden]) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.lb-upper:has(> .lb-brief[hidden]) > .lb-teams-slot {
+  contain: none;
+}
+
+.lb-upper:has(> .lb-brief[hidden]) .lb-teams {
+  max-height: none;
+}
+
+.lb-upper:has(> .lb-brief[hidden]) .lb-teams-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+  gap: 14px 16px;
+}
+
+/* LOWER: Purchase Fleet no wider than its longest row needs (user, §12.15) - 732px is the widest
+   Store row of any faction, 676px (12 Colonies of Kobol's Marine Assault Raptor; Earth Alliance
+   (Early)'s Atlas flights 658), plus the Store's 52px of frame and 4 to spare - and Your Fleet the
+   rest. Narrower, the 55% it had as 1.25 : 1. Your Fleet is pinned 10px under the top of the window
+   as the Store scrolls, never taller than the window: its list scrolls inside, its tools stay put. */
+.lb-lower {
+  display: grid;
+  grid-template-columns: minmax(0, min(732px, 55%)) minmax(0, 1fr);
   gap: 16px;
-  min-width: 0;
+  align-items: start;
 }
 
-.lb-scenario {
-  flex: 1 1 0;
+.lb-fleet-wrap {
+  position: sticky;
+  top: 10px;
 }
 
-/* Scenario Description keeps the width it had beside a wider Teams; the Map takes the rest. */
-.lb-map {
-  flex: 1.05 1 0;
+/* Until a faction is chosen the Store is empty and there is nothing to pin Your Fleet against:
+   both panels take the row's height, so they open level at the foot as well as the top (user). */
+.lb-lower:has(#store:empty) {
+  align-items: stretch;
+}
+
+.lb-lower:has(#store:empty) > .buy > .lb-panel {
+  height: 100%;
+}
+
+/* The title bar's buttons: Map & Scenario, then Leave Game. */
+.lb-title-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+/* The arrow Load a Fleet wears: up while the section is open (it folds up), down while folded. */
+.lb-brief-toggle::after {
+  content: "\25B2";
+  margin-left: 10px;
+  font-family: Arial, sans-serif;
+  font-size: 9px;
+  color: var(--fv-text-dim);
+}
+
+.lb-brief-toggle[aria-expanded="false"]::after {
+  content: "\25BC";
+}
+
+.lb-brief-toggle:hover {
+  color: #fff;
+  background: rgba(198, 226, 255, 0.14);
+  border-color: var(--fv-accent);
 }
 
 /* ── Teams ─────────────────────────────────────────────────────────────────── */
@@ -247,11 +359,11 @@
   border: 1px dashed var(--fv-line-scs);
 }
 
-/* The slot whose fleet the Purchase panel is showing - the viewer's own. */
+/* The slot whose fleet the Purchase panel is showing - the viewer's own. No rail of its own: the
+   team's rail beside it is enough (user). */
 .lb-slot.selected {
   background: rgba(139, 202, 242, 0.1);
   border-color: var(--fv-accent);
-  box-shadow: inset 3px 0 0 var(--fv-accent);
 }
 
 .lb-slot span {
@@ -522,66 +634,93 @@
   border-radius: 50%;
 }
 
-/* The Game Rules chips (scenarioCard.css), under the map and its legend. Labelled, since the
-   panel's head no longer says what they are. */
+/* The Game Rules chips (scenarioCard.css): a strip under the Map Preview and Scenario Description,
+   its label on the left and the chips wrapping beside it. */
 .lb-rules {
-  padding: 12px 16px 14px;
-  border-top: 1px solid var(--fv-line-soft);
+  display: flex;
+  align-items: baseline;
+  gap: 8px 12px;
+  padding: 10px 16px;
 }
 
 .lb-rules-label {
-  display: block;
-  margin-bottom: 8px;
+  flex: none;
+}
+
+.lb-rules .fv-rule-chips {
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 /* ── Narrower screens ──────────────────────────────────────────────────────── */
 
-/* Scenario Description over Map Preview, beside Teams - which shares the width again, up to its
-   desktop size. */
+/* A narrower Teams, and Scenario Description over Map Preview over the rules: side by side in what
+   is left, the scenario's facts would wrap line after line. */
 @media screen and (max-width: 1180px) {
-  .lb-teams {
-    flex: 1 1 0;
-    max-width: 380px;
+  .lb-upper {
+    grid-template-columns: minmax(0, 1fr) 360px;
   }
 
-  .lb-pair {
-    flex: 1.8 1 0;
-    flex-direction: column;
-    align-items: stretch;
+  .lb-brief {
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .lb-pair > .lb-panel {
-    flex: none;
-  }
-
-  /* Stacked, nothing sits beside the map, so its height no longer decides the order. */
   .lb-scenario {
     order: -1;
   }
+
+  /* Stacked, the dividing lines run across: under the scenario, under the map. */
+  .lb-brief > .lb-scenario {
+    border-left: 0;
+  }
+
+  .lb-brief > .lb-map {
+    border-top: 1px solid #2a6b8f;
+  }
+
+  /* The Store takes more of the width, so its rows keep to one line longer (as when Store | Fleet
+     were one panel). */
+  .lb-lower {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  }
 }
 
-/* One column: Teams (first - it is where a phone player takes a slot), Scenario Description,
-   Map Preview. */
+/* One column: Teams (first - it is where a phone player takes a slot), Scenario Description, Map
+   Preview, Game Rules; then Your Fleet (with Load / Save / Check / Ready) over the Store. Teams
+   at its whole height again, and Your Fleet no longer pinned. */
 @media screen and (max-width: 760px) {
-  .lb-row {
+  /* stretch: the rows' `start` would shrink Your Fleet to its content's width here (294 of 354px) */
+  .lb-upper,
+  .lb-lower {
+    display: flex;
     flex-direction: column;
     align-items: stretch;
+    gap: 14px;
   }
 
-  .lb-teams,
-  .lb-pair {
-    flex: none;
-  }
-
-  .lb-teams {
+  .lb-teams-slot {
     order: -1;
-    max-width: none;
+    contain: none;
+  }
+
+  .lb-teams-slot > .lb-teams {
+    max-height: none;
+  }
+
+  .lb-fleet-wrap {
+    order: -1;
+    position: static;
   }
 
   .lb-panel-body,
   .lb-rules {
     padding-left: 12px;
     padding-right: 12px;
+  }
+
+  .lb-rules {
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .lb-links {
@@ -606,24 +745,11 @@
   }
 }
 
-/* ══ Purchase Fleet (plan §4.3, Stage 5) ══════════════════════════════════════════════════════
-   The head carries the points; one bar holds the ship filters and the fleet tools; then Store |
-   Fleet; then the actions. The Store shows ONE faction's ships, picked in the Faction Picker
-   (.lb-picker below), and grows to fit them - no scroll box of its own. */
-
-.lb-buy-wrap {
-  box-sizing: border-box;
-  /* The width .lb-top has, so the two line up. */
-  width: 1422px;
-  max-width: calc(100% - 20px);
-  margin: 0 auto 12px;
-}
-
-.lb-buy-wrap *,
-.lb-buy-wrap *::before,
-.lb-buy-wrap *::after {
-  box-sizing: border-box;
-}
+/* ══ Purchase Fleet and Your Fleet (plan §4.3, Stage 5; §12.13) ═══════════════════════════════
+   Purchase Fleet, in the main column: two bars of Store filters, then the Store - ONE faction's
+   ships, picked in the Faction Picker (.lb-picker below), growing to fit them, no scroll box of its
+   own. Your Fleet, beside it: the points in its head, the fleet being bought, and the
+   fleet tools at its foot. Both inside .lb-top, whose box-sizing rule covers them. */
 
 .lb-buy-head {
   flex-wrap: wrap;
@@ -698,7 +824,7 @@
   cursor: pointer;
 }
 
-/* ── The bar: ship filters | fleet tools ───────────────────────────────────── */
+/* ── The bars: ship filters, then the size categories ─────────────────────── */
 
 .lb-buy-bar {
   display: flex;
@@ -709,16 +835,11 @@
   border-bottom: 1px solid var(--fv-line-soft);
 }
 
-.lb-buy-filters,
-.lb-buy-tools {
+.lb-buy-filters {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px 10px;
-}
-
-.lb-buy-tools {
-  margin-left: auto;
 }
 
 .lb-bar-sep {
@@ -807,16 +928,6 @@
   accent-color: var(--fv-warn);
 }
 
-/* Load a Fleet, Save Fleet and Ready: one equal-width set (user, Stage 5). */
-.lb-buy-tools .lb-btn {
-  width: 150px;
-  min-height: 30px;
-  padding: 6px 14px;
-}
-
-.lb-buy-tools .saved-fleet-wrapper {
-  margin-left: 0;
-}
 
 /* The saved-fleet menu button: lobby.css gives it its old 140 x 27 box and its arrow, which gets
    room of its own here. */
@@ -1056,34 +1167,10 @@
   color: var(--fv-text-dim);
 }
 
-/* ── Store | Fleet ─────────────────────────────────────────────────────────── */
-
-/* The Store has the wider share, so a row - name, cost, both links - stays on one line. */
-.lb-buy-cols {
-  display: flex;
-}
+/* ── The Store ─────────────────────────────────────────────────────────────── */
 
 .lb-store {
-  flex: 1.25 1 0;
-  min-width: 0;
   padding: 12px 16px 14px;
-  border-right: 1px solid var(--fv-line-soft);
-}
-
-.lb-fleet {
-  flex: 1 1 0;
-  min-width: 0;
-  padding: 12px 16px 14px;
-}
-
-.lb-col-label {
-  margin: 0 0 8px;
-  font-family: var(--fv-display);
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: var(--fv-text-dim);
 }
 
 /* The Store's faction, and the way to change it. Accent rail once one is chosen; yellow for a
@@ -1249,13 +1336,15 @@
 /* One design. prepareClassName makes a base design's name bold and a variant's italic; the
    variant row is indented under its base and keeps the deeper blue, and ONLY its name is
    italic - the cost and the links are not (user, Stage 5). */
+/* Its own line height, not the page's 1.5: a row is 24px, was 29 (user, §12.15). */
 .lb-ship {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   gap: 2px 12px;
-  padding: 4px 4px 4px 24px;
+  padding: 3px 4px 3px 24px;
   font-size: 13px;
+  line-height: 1.3;
   border-bottom: 1px solid #0c1a24;
 }
 
@@ -1291,9 +1380,10 @@
 .lb-ship-cost {
   flex: none;
   margin-left: auto;
-  margin-right: 18px;
+  margin-right: 25px;
   font-family: var(--fv-mono);
   font-size: 12px;
+  font-weight: bold;
   color: var(--fv-text-accent);
   white-space: nowrap;
 }
@@ -1306,11 +1396,13 @@
   white-space: nowrap;
 }
 
+/* Add to fleet · Show details: the accent blue, as are the fleet rows' Details · Edit · Copy ·
+   Remove (lobby.css .store .ship .clickable) - one colour for every Purchase Fleet action (user). */
 .lb-linkbtn {
   margin: 0;
   padding: 0;
   font-size: 12px;
-  color: var(--fv-text);
+  color: var(--fv-accent);
   background: none;
   border: 0;
   cursor: pointer;
@@ -1325,6 +1417,27 @@
   color: var(--fv-line-scs);
 }
 
+/* ── Your Fleet ────────────────────────────────────────────────────────────── */
+
+/* Never taller than the window (less the 10px it is pinned at, top and bottom): the list scrolls
+   inside, the head and the tools stay. Not clipped at its edge, so the Load a Fleet menu can open
+   past it - the head and foot round their own corners instead. */
+.lb-fleetpanel {
+  max-height: calc(100vh - 20px);
+  overflow: visible;
+}
+
+.lb-fleetpanel > .lb-panel-head {
+  border-radius: 5px 5px 0 0;
+}
+
+.lb-fleet {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 10px 12px;
+  overflow-y: auto;
+}
+
 /* The fleet being bought: the Store's well. Its rows are lobby.css's, through .store. */
 .lb-fleet #fleet {
   min-height: 48px;
@@ -1335,21 +1448,100 @@
   border-radius: 3px;
 }
 
-/* ── Actions ───────────────────────────────────────────────────────────────── */
-
-.lb-buy-actions {
+/* A bought row in Your Fleet's width (lobby.css draws it; #fleet is right-aligned): the name,
+   then the class with the cost on the right - class and cost (one box, .boughtClassCost) dropping
+   to a line of their own together when they do not fit beside the name - and the enhancements and
+   the actions under them, full width. */
+.lb-fleet .ship.bought {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
-  padding: 12px 16px;
-  background: rgba(4, 22, 28, 0.7);
-  border-top: 1px solid var(--fv-line-soft);
+  align-items: baseline;
+  text-align: left;
 }
 
-.lb-buy-actions .lb-btn {
-  min-width: 130px;
+.lb-fleet .ship.bought .shipname {
+  margin-right: 10px;
+}
+
+.lb-fleet .ship.bought .boughtClassCost {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: baseline;
+  min-width: 0;
+}
+
+.lb-fleet .ship.bought .boughtShiptype {
+  flex: 1 1 auto;
+  margin-left: 0;
+}
+
+.lb-fleet .ship.bought .boughtPointCost {
+  margin-left: auto;
+  padding-left: 10px;
+  white-space: nowrap;
+}
+
+.lb-fleet .ship.bought .ship-enhancements,
+.lb-fleet .ship.bought .ship-actions {
+  flex-basis: 100%;
+}
+
+/* Nothing bought yet - and no MAIN FLEET / REINFORCEMENTS headers, which only a game with
+   reinforcements draws. */
+.lb-fleet #fleet:empty::before {
+  content: "No ships yet. Add to fleet in the Store puts them here.";
+  display: block;
+  padding: 12px 6px;
+  font-size: 12px;
+  text-align: left;
+  color: var(--fv-text-dim);
+}
+
+/* The tools at its foot: Load Fleet by #ID, then Load a Fleet · Save Fleet / Check · Ready. */
+.lb-fleet-tools {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px 12px;
+  background: rgba(4, 22, 28, 0.7);
+  border-top: 1px solid var(--fv-line-soft);
+  border-radius: 0 0 5px 5px;
+  position: relative;
+}
+
+.lb-fleet-tools .lb-field {
+  justify-content: space-between;
+  width: 100%;
+}
+
+.lb-fleet-btns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.lb-fleet-btns .lb-btn {
+  width: 100%;
+  min-height: 30px;
+  padding: 6px 10px;
+}
+
+/* Static, so the saved-fleet menu is placed against the whole tools box (.lb-fleet-tools) rather
+   than the half-width button: it opens UPWARDS from there, over the fleet list, as wide as the
+   panel - the foot of a panel pinned to the window has nothing below it to open into. */
+.lb-fleet-btns .saved-fleet-wrapper {
+  position: static;
+  margin-left: 0;
+}
+
+.lb-fleet-tools #fleetDropdownList {
+  top: auto;
+  right: 0;
+  bottom: calc(100% + 4px);
+  left: 0;
+  width: auto;
+  max-width: none;
 }
 
 /* Check wears games.php's Recent Games colours (.fv-btn--recent), Save Fleet its fleet blue
@@ -1494,6 +1686,8 @@ body.lb-modal-open {
 .lb-modal::-webkit-scrollbar,
 .lb-modal-body::-webkit-scrollbar,
 .lb-picker-list::-webkit-scrollbar,
+.lb-fleet::-webkit-scrollbar,
+.lb-teams > .lb-panel-body::-webkit-scrollbar,
 #fleetDropdownList::-webkit-scrollbar {
   width: 8px;
 }
@@ -1501,6 +1695,8 @@ body.lb-modal-open {
 .lb-modal::-webkit-scrollbar-track,
 .lb-modal-body::-webkit-scrollbar-track,
 .lb-picker-list::-webkit-scrollbar-track,
+.lb-fleet::-webkit-scrollbar-track,
+.lb-teams > .lb-panel-body::-webkit-scrollbar-track,
 #fleetDropdownList::-webkit-scrollbar-track {
   background: transparent;
 }
@@ -1508,6 +1704,8 @@ body.lb-modal-open {
 .lb-modal::-webkit-scrollbar-thumb,
 .lb-modal-body::-webkit-scrollbar-thumb,
 .lb-picker-list::-webkit-scrollbar-thumb,
+.lb-fleet::-webkit-scrollbar-thumb,
+.lb-teams > .lb-panel-body::-webkit-scrollbar-thumb,
 #fleetDropdownList::-webkit-scrollbar-thumb {
   background: var(--fv-scroll-thumb);
   border-radius: 4px;
@@ -1516,6 +1714,8 @@ body.lb-modal-open {
 .lb-modal::-webkit-scrollbar-thumb:hover,
 .lb-modal-body::-webkit-scrollbar-thumb:hover,
 .lb-picker-list::-webkit-scrollbar-thumb:hover,
+.lb-fleet::-webkit-scrollbar-thumb:hover,
+.lb-teams > .lb-panel-body::-webkit-scrollbar-thumb:hover,
 #fleetDropdownList::-webkit-scrollbar-thumb:hover {
   background: var(--fv-scroll-thumb-hover);
 }
@@ -1524,6 +1724,8 @@ body.lb-modal-open {
   .lb-modal,
   .lb-modal-body,
   .lb-picker-list,
+  .lb-fleet,
+  .lb-teams > .lb-panel-body,
   #fleetDropdownList {
     scrollbar-width: thin;
     scrollbar-color: var(--fv-scroll-thumb) transparent;
@@ -1856,29 +2058,22 @@ body.lb-modal-open {
   display: none;
 }
 
-/* The groups run down as many columns as fit - three on a desktop, one on a phone - and no group
-   is split between two (user). Custom Factions may break BETWEEN its sub-groups, never inside one,
-   and never straight after its own header. Groups are spaced by margin rather than a rule: a
-   margin at the top of a column is dropped, a rule there would dangle. */
+/* The groups in fixed columns - three on a desktop, one on a phone - dealt by
+   gamedata.layoutPickerColumns (--picker-cols), whole, and never moved between columns as groups
+   open or filters thin them (user). A column the filters empty stays, empty. The gap between two
+   groups is only there while a SHOWN group sits above - a hidden one would leave a gap at the top. */
 .lb-picker-cols {
-  columns: 3 15.5rem;
+  display: grid;
+  grid-template-columns: repeat(var(--picker-cols, 1), minmax(0, 1fr));
   column-gap: 24px;
+  align-items: start;
 }
 
-.lb-picker-cols > .lb-fgroup,
-.lb-fgroup--sub {
-  break-inside: avoid;
+.lb-picker-col {
+  min-width: 0;
 }
 
-.lb-picker-cols > .lb-fgroup--custom {
-  break-inside: auto;
-}
-
-.lb-fgroup--custom > .lb-fgroup-head {
-  break-after: avoid;
-}
-
-.lb-picker-cols > .lb-fgroup + .lb-fgroup {
+.lb-picker-col > .lb-fgroup:not([hidden]) ~ .lb-fgroup {
   margin-top: 12px;
 }
 
@@ -2104,38 +2299,27 @@ body.lb-modal-open {
 
 /* ── Purchase Fleet and the windows on narrower screens ────────────────────── */
 
-/* Still side by side: the Store takes more of the width, so its rows keep to one line longer. */
-@media screen and (max-width: 1180px) {
-  .lb-store {
-    flex-grow: 1.6;
-  }
-}
-
-/* Store over Fleet. */
+/* One column (the layout above puts Your Fleet over the Store): Your Fleet is no longer pinned, so
+   it grows to its whole list, and everything takes the phone gutter. */
 @media screen and (max-width: 760px) {
-  .lb-buy-cols {
-    flex-direction: column;
+  .lb-fleetpanel {
+    max-height: none;
   }
 
-  .lb-store {
-    border-right: 0;
-    border-bottom: 1px solid var(--fv-line-soft);
+  .lb-fleet {
+    overflow-y: visible;
   }
 
   .lb-buy-bar,
   .lb-store,
   .lb-fleet,
-  .lb-buy-actions {
+  .lb-fleet-tools {
     padding-left: 12px;
     padding-right: 12px;
   }
-
-  .lb-buy-tools {
-    margin-left: 0;
-  }
 }
 
-/* A phone: the windows take the whole screen, and the three action buttons share a row. */
+/* A phone: the windows take the whole screen. */
 @media screen and (max-width: 600px) {
   .lb-modal {
     padding: 0;
@@ -2148,41 +2332,6 @@ body.lb-modal-open {
     max-height: none;
     border: 0;
     border-radius: 0;
-  }
-
-  /* Load by #ID on its own line; the three equal buttons share the next one. */
-  .lb-buy-tools .fleet-id-form {
-    flex-basis: 100%;
-  }
-
-  /* A basis wider than a button's padding: at 0 the padded buttons would start 28px ahead of the
-     unpadded menu wrapper and stay that much wider. */
-  .lb-buy-tools > .lb-btn,
-  .lb-buy-tools .saved-fleet-wrapper {
-    flex: 1 1 4.5rem;
-    min-width: 0;
-  }
-
-  /* A third of a phone each: tighter type, so "Load a Fleet" keeps to one line. */
-  .lb-buy-tools .lb-btn {
-    width: 100%;
-    padding-left: 4px;
-    padding-right: 4px;
-    font-size: 8.5px;
-    letter-spacing: 0.4px;
-  }
-
-  .lb-buy .fleet-dropdown-btn {
-    padding-right: 16px;
-  }
-
-  .lb-buy .fleet-dropdown-btn::after {
-    right: 5px;
-  }
-
-  .lb-buy-actions .lb-btn {
-    flex: 1 1 0;
-    min-width: 0;
   }
 
   .lb-ship {
@@ -2202,13 +2351,6 @@ body.lb-modal-open {
   /* The picker's chips wrap onto two lines here, where a divider would dangle at a line's end. */
   .lb-picker-filters .lb-bar-sep {
     display: none;
-  }
-
-  /* Load a Fleet is the LEFT third of its row here: the menu opens rightwards from it. */
-  #fleetDropdownList {
-    right: auto;
-    left: 0;
-    width: calc(100vw - 40px);
   }
 }
 
@@ -2235,8 +2377,8 @@ body.lb-modal-open {
     height: 34px;
   }
 
-  /* The bar's buttons and chips are compact on a desktop; a finger needs more. */
-  .lb-buy-tools .lb-btn {
+  /* Your Fleet's buttons and the chips are compact on a desktop; a finger needs more. */
+  .lb-fleet-btns .lb-btn {
     min-height: 40px;
   }
 
