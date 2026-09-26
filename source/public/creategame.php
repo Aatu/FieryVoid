@@ -296,12 +296,12 @@
             <div class="cg-card">
               <h3 class="cg-card-label">Terrain Features</h3>
               <div class="cg-caption">Placed at random when the game starts.</div>              
-              <div class="cg-terrain-row"><label for="asteroidsSelect">Asteroids</label><?php print(cgCountCombo('asteroidsSelect', 'Asteroids', 48, $fieldPresets)); ?></div>
-              <div class="cg-terrain-row"><label for="moonsSmallSelect">Moons (Small)</label><?php print(cgCountCombo('moonsSmallSelect', 'Small Moons', 5, $moonPresets)); ?></div>
-              <div class="cg-terrain-row"><label for="moonsMediumSelect">Moons (Medium)</label><?php print(cgCountCombo('moonsMediumSelect', 'Medium Moons', 4, $moonPresets)); ?></div>
-              <div class="cg-terrain-row"><label for="moonsLargeSelect">Moons (Large)</label><?php print(cgCountCombo('moonsLargeSelect', 'Large Moons', 2, $moonPresets)); ?></div>
               <div class="cg-terrain-row"><label for="dustSelect">Dust Field</label><?php print(cgCountCombo('dustSelect', 'Dust', DustAndMeteorsRule::$maxDust, $fieldPresets)); ?></div>
-              <div class="cg-terrain-row"><label for="meteorsSelect">Meteor Swarms</label><?php print(cgCountCombo('meteorsSelect', 'Meteor Swarms', DustAndMeteorsRule::$maxMeteors, $fieldPresets)); ?></div>
+              <div class="cg-terrain-row"><label for="meteorsSelect">Meteor Swarms</label><?php print(cgCountCombo('meteorsSelect', 'Meteor Swarms', DustAndMeteorsRule::$maxMeteors, $fieldPresets)); ?></div>              
+              <div class="cg-terrain-row"><label for="asteroidsSelect">Asteroids</label><?php print(cgCountCombo('asteroidsSelect', 'Asteroids', 48, $fieldPresets)); ?></div>
+              <div class="cg-terrain-row"><label for="moonsSmallSelect">Small Moons</label><?php print(cgCountCombo('moonsSmallSelect', 'Small Moons', 5, $moonPresets)); ?></div>
+              <div class="cg-terrain-row"><label for="moonsMediumSelect">Medium Moons</label><?php print(cgCountCombo('moonsMediumSelect', 'Medium Moons', 4, $moonPresets)); ?></div>
+              <div class="cg-terrain-row"><label for="moonsLargeSelect">Large Moons</label><?php print(cgCountCombo('moonsLargeSelect', 'Large Moons', 2, $moonPresets)); ?></div>
               <!-- Filled by createGame.setTerrainLayout() while a Map Template with its own terrain is picked. -->
               <div id="terrainLayoutNote" class="cg-caption cg-terrain-note" hidden></div>
             </div>
