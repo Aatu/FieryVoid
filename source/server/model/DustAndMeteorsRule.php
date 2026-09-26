@@ -15,7 +15,7 @@
 class DustAndMeteorsRule implements JsonSerializable {
 
     public static $maxDust = 48; //same ceiling as asteroids 
-    public static $maxMeteors = 48; //same ceiling as asteroids   
+    public static $maxMeteors = 36; //same ceiling as asteroids   
 
     private $dust;
     private $meteors;
