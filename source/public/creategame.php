@@ -286,7 +286,7 @@
                        autocomplete="off" aria-describedby="inServiceDateHelp">
                 <div class="cg-check-body">
                   <label for="inServiceDate" class="cg-check-label">In-Service Date</label>
-                  <div class="cg-caption" id="inServiceDateHelp">Locks the lobby's ISD filter to this year, so only units in service by then can be bought. Blank = no cutoff.</div>
+                  <div class="cg-caption" id="inServiceDateHelp">Locks the lobby's ISD filter to this year, so only units in service by then can be bought.</div>
                 </div>
               </div>
             </div>
