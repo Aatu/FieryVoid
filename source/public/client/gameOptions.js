@@ -35,7 +35,7 @@ window.gameOptions = (function () {
         },
         {
             key: "playSoundEffects",
-            label: "Play Sound Effects during Replay",
+            label: "Play sound during Replay",
             title: "Replay sound effects. When off, every replay starts muted - the speaker button on the map still turns them on for that replay",
             def: true,
             onChange: applySoundEffects

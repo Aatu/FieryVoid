@@ -1521,7 +1521,7 @@
 /* Check wears games.php's Recent Games colours (.fv-btn--recent), Save Fleet its fleet blue
    (.fv-btn--fleet) and Ready Create Game's green (.fv-btn--create) - one family of buttons. */
 .lb-btn--check {
-  background: rgba(61, 92, 92, 0.5);
+  background: rgba(0, 77, 102, 0.692);
   border-color: var(--fv-line-scs);
 }
 
@@ -1539,8 +1539,8 @@
 .lb-buy .lb-btn:hover,
 .lb-modal .lb-btn:hover {
   color: #fff;
-  background: rgba(198, 226, 255, 0.14);
-  border-color: var(--fv-accent);
+    background: rgba(139, 202, 242, 0.14);
+    border-color: rgba(139, 202, 242, 0.55);
 }
 
 .lb-buy .lb-btn--ready:hover {

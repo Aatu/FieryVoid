@@ -838,7 +838,7 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 									</div>
 								</div>
 								<button type="button" class="lb-btn lb-btn--save savebutton">Save Fleet</button>
-								<button type="button" class="lb-btn lb-btn--check checkbutton" aria-haspopup="dialog" aria-controls="fleetcheck">Check</button>
+								<button type="button" class="lb-btn lb-btn--check checkbutton" aria-haspopup="dialog" aria-controls="fleetcheck">Check Fleet</button>
 								<?php if(!$isFleetTest): ?>
 								<button type="button" class="lb-btn lb-btn--ready readybutton">Ready</button>
 								<?php endif; ?>
