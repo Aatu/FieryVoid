@@ -832,7 +832,7 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 							     Checker rules. -->
 							<div class="lb-fleet-btns">
 								<div class="saved-fleet-wrapper">
-									<button type="button" id="fleetDropdownButton" class="lb-btn fleet-dropdown-btn">LOAD A FLEET</button>
+									<button type="button" id="fleetDropdownButton" class="lb-btn fleet-dropdown-btn">LOAD FLEET</button>
 									<div id="fleetDropdownList" class="fleet-dropdown-list">
 										<!-- populated dynamically -->
 									</div>

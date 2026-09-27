@@ -392,7 +392,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
       <ul>
         <li><strong>Repeater Gunsights</strong>
             <ul class="circle-list">
-                <li>Now a System Enhancement, bought for each Particle Repeater separately - see <a href="#systemrefits">Available Refits</a>.</li>
+                <li>A System Enhancement, bought for each Particle Repeater separately - see <a href="#systemrefits">Available Refits</a>.</li>
             </ul>
         </li>
       </ul>

@@ -14,7 +14,7 @@
    (user ruling 2026-09-23) - they just never share a hex with it. */
 class DustAndMeteorsRule implements JsonSerializable {
 
-    public static $maxDust = 48; //same ceiling as asteroids 
+    public static $maxDust = 36; //same ceiling as asteroids 
     public static $maxMeteors = 36; //same ceiling as asteroids   
 
     private $dust;
