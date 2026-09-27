@@ -1755,7 +1755,7 @@ window.gamedata = {
 		var sumVar = 0;
 		for (var j in shipTable) {
 			var currHull = shipTable[j];
-			checkResult += " <i>" + currHull.name + "</i><br>";
+			checkResult += " <b>" + currHull.name + "</b><br>";
 			checkResult += " - Total: " + currHull.Total;
 			//if ((!currHull.isFtr) && (!currHull.hangarRequired)){ //fighter total is not limited; also, let's not limit units requiring hangar slots! (this isn't in the rules but I think LCV logic demands it)
 			if (!currHull.hangarRequired) { //actually there MAY be hangarless fighters - they should be limited per hull (well, per flight) just like ships!
@@ -1905,7 +1905,7 @@ window.gamedata = {
 		checkResult += "<br> Total Hangar Usage: " + totalFtrPresent;
 		checkResult += " (select between " + minFtrRequired + " and " + totalHangarAvailable + ")";
 		if ((totalFtrXL > 0) || (totalHangarXL > 0)) { //add disclaimer because sums will not add up straight
-			checkResult += " <i>[Note - Ultralights only use half a hangar slot]</i>";
+			checkResult += " [Note - Ultralights only use half a hangar slot]";
 		}
 		if (totalFtrPresent > totalHangarAvailable || totalFtrPresent < minFtrRequired) { //fighter total is not within limits
 			checkResult += R_FAILURE;
@@ -1925,7 +1925,7 @@ window.gamedata = {
 		var fighterRows = [
 			{ label: "Ultralight Fighters", ftr: totalFtrXL,
 			  hangar: (totalHangarH + totalHangarM + totalHangarL + hangarConversionNet) * 2 + totalHangarXL,
-			  disclaimer: ((totalFtrXL > 0) || (totalHangarXL > 0)) ? " <i>[Ultralights only require half a normal hangar slot]</i>" : "" },
+			  disclaimer: ((totalFtrXL > 0) || (totalHangarXL > 0)) ? " [Ultralights only require half a normal hangar slot]" : "" },
 			{ label: "Light Fighters", ftr: totalFtrL,
 			  hangar: totalHangarH + totalHangarM + totalHangarL + hangarConversionNet, disclaimer: "" },
 			{ label: "Medium Fighters", ftr: totalFtrM,
@@ -3309,7 +3309,7 @@ window.gamedata = {
 		displayName = displayName + ' (' + addOn + ')';
 		//A variant's row is indented by the Store's CSS (.lb-ship.variant); only its NAME is italic.
 		if (ship.variantOf != '') {
-			displayName = '<i>' + displayName + '</i>';
+			displayName = '<b>' + displayName + '</b>';
 		} else {
 			displayName = '<b>' + displayName + '</b>';
 		}
