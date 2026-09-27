@@ -23,6 +23,10 @@ class PreFiringGamePhase implements Phase
         $dbManager->updateFireOrders($servergamedata->getUpdatedFireOrders());
 
         $dbManager->submitDamages($servergamedata->id, $servergamedata->turn, $servergamedata->getNewDamages());
+        //Criticals raised while resolving this phase - by damage (eg. MissileLost, a fighter shedding a
+        //missile to a collision) or otherwise - were silently dropped before. Only new ones are written, as
+        //in the Fire Phase; the damage-driven critical ROLLS still happen once, in the Fire Phase.
+        $dbManager->submitCriticals($servergamedata->id, $servergamedata->getUpdatedCriticals(), $servergamedata->turn);
 
         $gameData->setPhase(3);
         $gameData->setActiveship(-1);
