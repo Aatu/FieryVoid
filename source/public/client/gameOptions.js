@@ -32,6 +32,13 @@ window.gameOptions = (function () {
             title: "The movement-group number drawn over every unit that has not moved yet",
             def: true,
             onChange: repaintIniOverlay
+        },
+        {
+            key: "playSoundEffects",
+            label: "Play Sound Effects during Replay",
+            title: "Replay sound effects. When off, every replay starts muted - the speaker button on the map still turns them on for that replay",
+            def: true,
+            onChange: applySoundEffects
         }
     ];
 
@@ -86,6 +93,18 @@ window.gameOptions = (function () {
         if (window.webglScene && webglScene.requestRender) {
             webglScene.requestRender();
         }
+    }
+
+    /* The same switch the speaker button in the map's EW strip throws: gamedata.playAudio,
+       which every effect sound checks as it fires. "soundToggled" is how that button learns
+       the value changed under it (ReplayPhaseStrategy.onToggleSound raises the same event).
+
+       The button stays a per-replay override and does NOT write back here - this option is
+       the standing preference, applied on replay ENTRY by ReplayPhaseStrategy.activate. */
+    function applySoundEffects(value) {
+        if (!window.gamedata) return;
+        gamedata.playAudio = value;
+        window.dispatchEvent(new CustomEvent("soundToggled"));
     }
 
     return {
