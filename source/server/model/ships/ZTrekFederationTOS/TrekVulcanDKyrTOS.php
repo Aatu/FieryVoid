@@ -5,7 +5,7 @@ class TrekVulcanDkyrTOS extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 840;
-	$this->faction = "ZStarTrek (TOS) Federation";
+	$this->faction = "StarTrek (TOS) Federation";
         $this->phpclass = "TrekVulcanDkyrTOS";
         $this->imagePath = "img/ships/StarTrek/VulcanDKyr.png";
         $this->shipClass = "Vulcan D'Kyr Cruiser (TOS era)";

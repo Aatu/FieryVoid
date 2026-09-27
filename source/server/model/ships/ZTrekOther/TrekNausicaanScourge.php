@@ -5,7 +5,7 @@ class TrekNausicaanScourge extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 575;
-	$this->faction = "ZTrek Playtest Other Factions";
+	$this->faction = "Trek Playtest Other Factions";
         $this->phpclass = "TrekNausicaanScourge";
         $this->imagePath = "img/ships/StarTrek/NausicaanScourge.png";
         $this->shipClass = "Nausicaan Scourge Cruiser";

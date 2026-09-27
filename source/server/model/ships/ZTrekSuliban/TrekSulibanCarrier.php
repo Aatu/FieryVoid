@@ -5,7 +5,7 @@ class TrekSulibanCarrier extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 450;
-        $this->faction = "ZStarTrek (early) Suliban";
+        $this->faction = "StarTrek (early) Suliban";
         $this->phpclass = "TrekSulibanCarrier";
         $this->imagePath = "img/ships/StarTrek/SulibanCarrier.png";
         $this->shipClass = "Suliban Carrier";

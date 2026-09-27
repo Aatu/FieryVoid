@@ -5,7 +5,7 @@ class swLancer extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 300;
-	$this->faction = "ZStarWars";
+	$this->faction = "StarWars";
         $this->phpclass = "swLancer";
         $this->imagePath = "img/starwars/lancer.png";
 	    $this->canvasSize = 100;

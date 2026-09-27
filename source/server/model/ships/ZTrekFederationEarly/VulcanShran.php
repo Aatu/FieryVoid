@@ -5,7 +5,7 @@ class VulcanShran extends BaseShipNoAft{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 485;
-	$this->faction = "ZStarTrek (early) Federation";
+	$this->faction = "StarTrek (early) Federation";
         $this->phpclass = "VulcanShran";
         $this->imagePath = "img/ships/StarTrek/VulcanShran.png";
         $this->shipClass = "Vulcan Sh'Ran Cruiser";

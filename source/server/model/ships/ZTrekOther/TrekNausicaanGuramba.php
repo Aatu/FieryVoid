@@ -5,7 +5,7 @@ class TrekNausicaanGuramba extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 900;
-        $this->faction = "ZTrek Playtest Other Factions";
+        $this->faction = "Trek Playtest Other Factions";
         $this->phpclass = "TrekNausicaanGuramba";
         $this->imagePath = "img/ships/StarTrek/NausicaanGuramba.png";
         $this->shipClass = "Nausicaan Guramba Siege Ship";

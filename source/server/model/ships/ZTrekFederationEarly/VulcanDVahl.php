@@ -5,7 +5,7 @@ class VulcanDVahl extends LCV{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 240;
-        $this->faction = "ZStarTrek (early) Federation";
+        $this->faction = "StarTrek (early) Federation";
         $this->phpclass = "VulcanDVahl";
         $this->imagePath = "img/ships/StarTrek/VulcanDVahl.png";
         $this->shipClass = "Vulcan D'Vahl Light Explorer";

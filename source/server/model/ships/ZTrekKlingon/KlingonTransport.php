@@ -5,7 +5,7 @@ class KlingonTransport extends LCV{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 225;
-        $this->faction = "ZStarTrek Klingon";
+        $this->faction = "StarTrek Klingon";
         $this->phpclass = "KlingonTransport";
         $this->imagePath = "img/ships/StarTrek/KlingonTransport.png";
         $this->shipClass = "Klingon Transport";

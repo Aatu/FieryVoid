@@ -6,7 +6,7 @@ class swMonCalMC80 extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 1600;
-	$this->faction = "ZStarWars";
+	$this->faction = "StarWars";
         $this->phpclass = "swMonCalMC80";
         $this->imagePath = "img/starwars/mc80.png";
         $this->shipClass = "Mon Calamari MC80 Battlecruiser";

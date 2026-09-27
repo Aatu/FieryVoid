@@ -5,7 +5,7 @@ class TrekNausicaanGliderEarlySHF extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 62 *6; //for 6
-        $this->faction = "ZTrek Playtest Other Factions";
+        $this->faction = "Trek Playtest Other Factions";
         $this->phpclass = "TrekNausicaanGliderEarlySHF";
         $this->imagePath = "img/ships/StarTrek/NausicaanGlider.png";
         $this->shipClass = "Nausicaan Gliders (Early)";

@@ -6,7 +6,7 @@ class swVictorySD extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 1050;
-	$this->faction = "ZStarWars";
+	$this->faction = "StarWars";
         $this->phpclass = "swVictorySD";
         $this->imagePath = "img/starwars/victory1.png";
         $this->shipClass = "Victory Star Destroyer";

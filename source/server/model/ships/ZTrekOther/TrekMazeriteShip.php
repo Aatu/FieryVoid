@@ -4,7 +4,7 @@ class TrekMazeriteShip extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 240;
-        $this->faction = "ZTrek Playtest Other Factions";
+        $this->faction = "Trek Playtest Other Factions";
         $this->phpclass = "TrekMazeriteShip";
         $this->imagePath = "img/ships/StarTrek/MazeriteShip.png";
         $this->shipClass = "Mazerite Ship";

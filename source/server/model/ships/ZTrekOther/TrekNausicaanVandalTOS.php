@@ -5,7 +5,7 @@ class TrekNausicaanVandalTOS extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 450;
-        $this->faction = "ZTrek Playtest Other Factions";
+        $this->faction = "Trek Playtest Other Factions";
         $this->phpclass = "TrekNausicaanVandalTOS";
         $this->imagePath = "img/ships/StarTrek/NausicaanVandal.png";
         $this->shipClass = "Nausicaan Vandal Destroyer (Upgraded)";

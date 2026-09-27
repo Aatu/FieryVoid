@@ -5,7 +5,7 @@ class zzftrUglyXTIE extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 18*6; //with torpedo launcher it's supposed to be 20*6;
-        $this->faction = "ZStarWars";
+        $this->faction = "StarWars";
         $this->phpclass = "zzftrUglyXTIE";
         $this->shipClass = "Uglies X-TIE Bombers";
         $this->variantOf = "Uglies TIE-X Fighters";

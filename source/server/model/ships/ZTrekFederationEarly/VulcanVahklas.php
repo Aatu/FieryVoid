@@ -5,7 +5,7 @@ class VulcanVahklas extends LCV{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 290;
-        $this->faction = "ZStarTrek (early) Federation";
+        $this->faction = "StarTrek (early) Federation";
         $this->phpclass = "VulcanVahklas";
         $this->imagePath = "img/ships/StarTrek/VulcanVahklas.png";
         $this->shipClass = "Vulcan Vah'Klas Frigate";

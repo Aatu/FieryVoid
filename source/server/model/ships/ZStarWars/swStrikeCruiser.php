@@ -5,7 +5,7 @@ class swStrikeCruiser extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 675;
-	$this->faction = "ZStarWars";
+	$this->faction = "StarWars";
         $this->phpclass = "swStrikeCruiser";
         $this->imagePath = "img/starwars/StrikeCruiser.png";
         $this->shipClass = "Strike Cruiser";

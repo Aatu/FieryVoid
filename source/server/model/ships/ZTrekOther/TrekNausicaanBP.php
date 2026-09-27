@@ -6,7 +6,7 @@ class TrekNausicaanBP extends FighterFlight
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 34 *6;
-		$this->faction = "ZTrek Playtest Other Factions";
+		$this->faction = "Trek Playtest Other Factions";
 		$this->phpclass = "TrekNausicaanBP";
 		$this->shipClass = "Nausicaan Breaching Pods"; //generic breaching pods, not (yet) very modified for in-universe use
 		$this->imagePath = "img/ships/StarTrek/NausicaanShefalitayal.png";

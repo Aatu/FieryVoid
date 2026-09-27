@@ -5,7 +5,7 @@ class TrekFederationDreadnought extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 730;
-	$this->faction = "ZStarTrek (TOS) Federation";
+	$this->faction = "StarTrek (TOS) Federation";
         $this->phpclass = "TrekFederationDreadnought";
         $this->imagePath = "img/ships/StarTrek/FederationDN.png";
         $this->shipClass = "Dreadnought";

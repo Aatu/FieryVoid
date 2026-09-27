@@ -5,7 +5,7 @@ class TrekSulibanHelix extends VreeCapital{
 		parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 1100;
-        $this->faction = "ZStarTrek (early) Suliban";
+        $this->faction = "StarTrek (early) Suliban";
         $this->phpclass = "TrekSulibanHelix";
         $this->imagePath = "img/ships/StarTrek/SulibanHelix.png";
         $this->shipClass = "Suliban Helix";

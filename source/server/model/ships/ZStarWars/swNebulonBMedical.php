@@ -6,7 +6,7 @@ class swNebulonBMedical extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 360;
-	$this->faction = "ZStarWars";
+	$this->faction = "StarWars";
         $this->phpclass = "swNebulonBMedical";
         $this->imagePath = "img/starwars/nebulonb.png";
 	    //$this->canvasSize = 100;
