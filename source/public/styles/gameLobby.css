@@ -247,7 +247,7 @@
 .lb-lower {
   display: grid;
   grid-template-columns: minmax(0, min(732px, 55%)) minmax(0, 1fr);
-  gap: 16px;
+  gap: 8px;
   align-items: start;
 }
 
@@ -360,10 +360,12 @@
 }
 
 /* The slot whose fleet the Purchase panel is showing - the viewer's own. No rail of its own: the
-   team's rail beside it is enough (user). */
+   team's rail beside it is enough (user). Border and tint in the TEAM's colour (--rail), not the
+   page blue, which washed out Leave Slot's red; the tint is mixed into the slot's own dark fill,
+   so it stays as dark under the buttons as any other taken slot. */
 .lb-slot.selected {
-  background: rgba(139, 202, 242, 0.1);
-  border-color: var(--fv-accent);
+  background: color-mix(in srgb, var(--rail) 14%, #081420);
+  border-color: var(--rail);
 }
 
 .lb-slot span {
@@ -766,14 +768,17 @@
   color: var(--fv-text-accent);
 }
 
-/* "0 / 3500 pts · 3500 pts left" - gamedata.calculateFleet writes the numbers and hides "pts"
-   and "pts left" for an unlimited slot. */
+/* ONE figure (user, §12.17): "3500 pts left", or for a slot with no limit "691 pts" spent -
+   gamedata.calculateFleet shows whichever applies. Fleet Builder puts its cap controls in front.
+   line-height 1: at the page's 1.5 its 13px line was taller
+   than the 10.5px title's and made this head 5px taller than Purchase Fleet's beside it (user). */
 .lb-buy-points {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0 5px;
   font-size: 13px;
+  line-height: 1;
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: none;
@@ -785,23 +790,14 @@
   font-family: var(--fv-mono);
 }
 
-.lb-buy-slash,
 .lb-buy-dot {
   color: var(--fv-text-dim);
 }
 
-.lb-buy-points .remaining-points-container {
-  font-weight: 400;
-  color: var(--fv-text-dim);
-}
-
+/* The figure in the head's own bright --fv-text-accent (lobby.css paints .remaining its old #90b1ee). */
 .lb-buy-points .remaining-points-container .remaining,
 .lb-buy-points .remaining-points-container .remaining-points-units {
   color: inherit;
-}
-
-.lb-buy-dot {
-  margin-right: 5px;
 }
 
 /* calculateFleet's "Unlimited" - lobby.css sizes it for the old 20px readout. */
@@ -809,10 +805,13 @@
   font-size: inherit;
 }
 
-/* Fleet Builder's cap. base.css nudges every checkbox 2px down; two classes outrank it. */
+/* Fleet Builder's cap. base.css nudges every checkbox 2px down; two classes outrank it. The box
+   overhangs the title's line by 3px each way (negative margin) rather than making the head taller
+   than Purchase Fleet's. */
 .lb-buy-points .max-points-input {
   width: 76px;
-  height: 24px;
+  height: 22px;
+  margin: -3px 0;
   padding: 1px 4px;
   font-size: 13px;
   text-align: right;
@@ -902,32 +901,6 @@
   font-size: 11px;
   color: var(--fv-accent);
 }
-
-/* A checkbox and its label - the Purchase bar's Show Custom, in the bar's dim label text ("Filter
-   by:"; user, Stage 5). The Faction Picker's tier / Custom boxes are chips now (.lb-chip--check). */
-.lb-check {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin: 0;
-  font-size: 12px;
-  color: var(--fv-text-dim);
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-.lb-check input[type="checkbox"] {
-  top: 0;
-  margin: 0;
-  cursor: pointer;
-}
-
-/* Show Custom ticks in the Custom Factions yellow (the picker's --fv-warn rail), not base.css's
-   pure yellow-tick. */
-.lb-check input.yellow-tick:checked {
-  accent-color: var(--fv-warn);
-}
-
 
 /* The saved-fleet menu button: lobby.css gives it its old 140 x 27 box and its arrow, which gets
    room of its own here. */
@@ -1120,9 +1093,9 @@
   outline-offset: 2px;
 }
 
-/* The Faction Picker's tier / Custom chips, any number on at once: a label round its checkbox,
-   which stays the state every handler reads - hidden from sight, not from the keyboard or a screen
-   reader. Pressed while ticked; the Custom chip in the Custom Factions yellow. */
+/* The Faction Picker's tier / Custom chips and the Purchase bar's Custom, any number on at once: a
+   label round its checkbox, which stays the state every handler reads - hidden from sight, not from
+   the keyboard or a screen reader. Pressed while ticked; a Custom chip in the Custom Factions yellow. */
 .lb-chip--check {
   display: inline-flex;
   align-items: center;
@@ -1510,8 +1483,9 @@
   position: relative;
 }
 
+/* The box straight after its label, at .lb-field's own 6px (user) - not pushed to the far edge. */
 .lb-fleet-tools .lb-field {
-  justify-content: space-between;
+  justify-content: flex-start;
   width: 100%;
 }
 

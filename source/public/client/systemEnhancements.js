@@ -46,6 +46,7 @@ window.systemEnhancements = {
 	LABELS: {
 		SYS_ADT: 'Advanced Defensive Targeting',
 		SYS_GSGT: 'Gunsights',
+		SYS_RGSGT: 'Repeater Gunsights',
 		SYS_HSHLD: 'Hardened Shields',
 		SYS_HARM: 'Hardened Armour',
 		SYS_THR: 'Improved Thrust Rating',
@@ -416,6 +417,16 @@ window.systemEnhancements = {
 				case 'SYS_WBMLA':
 					self.rememberBase(system, 'wideBeamFitted');
 					system.wideBeamFitted = true;
+					break;
+
+				/* Repeater Gunsights - the split-fire capability, two booleans. The in-game rule
+				   that a damaged repeater loses them lives server-side only (sysEnhApplyRGSGT);
+				   the lobby has nothing that fires, so there is nothing for it to decide here. */
+				case 'SYS_RGSGT':
+					self.rememberBase(system, 'canSplitShots');
+					self.rememberBase(system, 'specialHitChanceCalculation');
+					system.canSplitShots = true;
+					system.specialHitChanceCalculation = true;
 					break;
 
 				case 'SYS_HSHLD':

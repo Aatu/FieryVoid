@@ -1284,6 +1284,22 @@ class Manager{
                     );
                     $storedSysEnhTotal += (float)$entry[5];
                 }
+                /* Repeater Gunsights moved from the ship-level GUNSIGHT to one SYS_RGSGT per
+                   Particle Repeater (2026-09-27). A fleet saved before carries the old row, which
+                   no ship-level option matches any more - so it would drop, with its points still
+                   inside pointCostEnh. Carried across instead, at the same 12 a repeater: counted
+                   into $storedSysEnhTotal, so the split below takes them out of pointCostEnh. */
+                foreach ($shipEnh as $enhEntry) {
+                    if ($enhEntry[0] !== 'GUNSIGHT' || (int)$enhEntry[1] < 1) continue;
+                    $legacyRows = Enhancements::legacyRepeaterGunsightRows($ship);
+                    foreach ($legacyRows as $legacyRow) {
+                        $storedSysEnh[] = $legacyRow;
+                        $storedSysEnhTotal += (float)$legacyRow[4];
+                    }
+                    if ($legacyRows) {
+                        $sysEnhNotices[] = $ship->name . ': Repeater Gunsights are now bought per Particle Repeater - moved onto each of its repeaters.';
+                    }
+                }
                 if ($storedSysEnh) {
                     $cleanSysEnh = Enhancements::sanitiseSystemEnhancements($ship, $storedSysEnh);
                     $ship->systemEnhancements = $cleanSysEnh['rows'];

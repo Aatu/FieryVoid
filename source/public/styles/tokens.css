@@ -103,7 +103,7 @@
      DIRECTLY, which beats an inherited face regardless of specificity. Anything
      below has to be applied to the element itself, not to an ancestor. */
   --fv-mono: Consolas, "Lucida Console", monospace;   /* theme.fonts.mono        */
-  --fv-display: "Orbitron", sans-serif;               /* @imported by gamesNew.css */
+  --fv-display: "Orbitron", sans-serif;               /* @imported by gamesNew.css; theme.fonts.display */
   --fv-hero: "Bruno Ace SC", sans-serif;              /* @imported by gamesNew.css */
 
   /* ── Geometry ──────────────────────────────────────────────────────────────

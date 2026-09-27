@@ -2235,3 +2235,62 @@ back to own heights after a pick, pinned while scrolled, folded level, 8 teams c
 brief's stacked dividers, level at load, widths steady on the phone before and after a pick. §12.14's
 `layout2.mjs` 12/14 - the two misses are this round's by design (rules strip now touches the map; 732px, not
 1.25 : 1).
+
+### 12.16 Refinements 3 (user, 2026-09-27)
+
+`gamelobby.php`, `styles/gameLobby.css`, `styles/createGame.css`, `client/gamelobby.js`, the lobby's React damage
+menus (`system/menuControls.js`, `ApplyDamageMenu.js`, `CriticalEffectsSection.js`, `SystemEnhancementsSection.js`,
+`SystemInfoMenu.js`, `shipWindow/FighterDamageMenu.js`, `shipWindow/MineDamageMenu.js`, `styled/theme.js`), one
+comment in `tokens.css`, and the `$this->faction` line of 130 ship files. Built: `npx vite build` (UI.bundle.js),
+`FV_NO_MINIFY=1 node scripts/bundle-legacy.js`, `fvbuild.ps1 -Statics`.
+
+- **Own slot in the team's colour**: `.lb-slot.selected` border = the team's `--rail`, fill = 14% of it mixed into
+  the slot's own `#081420` (`color-mix`) - the page blue washed out Leave Slot's red.
+- **Load Fleet by #ID**: the box straight after its label (`.lb-fleet-tools .lb-field` `flex-start`, was
+  `space-between`).
+- **Purchase bar's Show Custom is a `Custom` chip**: the picker's markup (`.lb-chip--check.lb-chip--custom` round
+  the same `#toggleCustomShips` checkbox, so every handler and Reset Filters are unchanged); yellow when on. The
+  `.lb-check` rules it used are deleted (nothing else used them).
+- **Your Fleet head = Purchase Fleet head** (33.8px, was 38.5): `.lb-buy-points` `line-height: 1` (its 13px line
+  at the page's 1.5 set the height). Fleet Builder's cap field is 22px with `margin: -3px 0`, overhanging the
+  title's line instead of growing the head. ⚠️ On a phone, Fleet Builder with the cap SHOWN still wraps its head
+  to two lines (title + points will not fit 352px) - as before.
+- **Create Game In-Service Date box**: exactly the label's line (18.75px; `.cg-input.cg-input--year`, two classes
+  to beat the coarse-pointer `min-height: 36px`) and `display: block` - sat on its wrapper's text baseline it made
+  the line 2px taller even at 18.75. Ticking no longer moves the label, caption or row (desktop and phone). It no
+  longer matches Sim Move's 28px select (§12.15's `isd.mjs` check of that fails by design).
+- **Damage menus in the lobby look** (ApplyDamageMenu = Enhancements / Damage / Critical Effects; the fighter and
+  mine menus share its chassis, so they moved with it): `MENU_CHROME` = `.lb-panel` (opaque navy gradient, `#2a6b8f`
+  frame, 6px corners, shadow; `bg`/`titleBg` are GRADIENTS now - paint with `background`); section bars wear the
+  Buy dialog's section-head band (Orbitron caps, 3px left bar, wash) in each section's ink, and the bar colour runs
+  on down the rows as a 3px rail (`SECTION_INK.*.bar/wash/title`, new). Bronze / teal / rust kept; Damage moved
+  from the 202° slate to a 190° teal, since the chassis is now a 201° navy. Tickers 20px, 2px corners; picker 22px;
+  `MenuHeader` = the panel-head band; Apply-to-all = Orbitron caps. `SystemInfoMenu` draws NO frame round the menu
+  in the lobby (`$bare` at `gamephase === -2`; game.php untouched). `theme.fonts.display` added (Orbitron) - lobby
+  surfaces only, game.php does not load it.
+- **No 'Z' on the Star Trek / Star Wars factions**: `ZStarTrek (TOS) Federation` / `(early) Federation` / `(early)
+  Suliban` / `Klingon` → `StarTrek ...`, `ZStarWars` → `StarWars`, `ZTrek Playtest Other Factions` → `Trek Playtest
+  Other Factions` (directories unchanged); `getPowerRating` cases and the picker's Other Universe regex follow.
+  Safe for running games: no table stores a faction (ships rebuild from `phpclass`), and every faction comparison
+  is ship-to-ship. The ONE persisted copy is a Walkers CPD scan note (`CPDSCAN`, `notekey_human` = the target's
+  faction): a running game where a CPD already scanned one of these fleets would lose that adaptation. None
+  locally. Deploy needs the statics regenerated (a missing JSON falls back to the slow live build); old `Z*.json`
+  files are orphans. Replay corpus games 4255 and 4308 now differ ONLY by these faction strings - re-record them.
+  Not touched: `customs/layoutTest.php` ("ZNexus Velrax"), the `files/FV_factions.txt` / `FV_tiers.txt` texts.
+
+**Verified** (real local site over CDP): `r16.mjs` 9/9 at 1600 (team-coloured slot, box 6px after its label,
+chip = Reset Filters' height, yellow when on, Reset unticks it, heads equal incl. Fleet Builder capped), phone 8/9
+(the Fleet Builder wrap above); `isd16.mjs` 3/3 desktop and phone; menus by screenshot (`menu.mjs`, `menu2.mjs`,
+no JS errors); `zfac.mjs` 7/7 (all six listed with their tiers, Other Universe, three Stores load). §12.15's
+`lobby15.mjs` 15/17 - the misses are this round's slot colour and the user's own 8px `.lb-lower` gap.
+
+### 12.17 Your Fleet shows one figure (user, 2026-09-27)
+
+The head's "0 / 3500 pts · 3500 pts left" wrapped; it now shows ONE figure in the head's bright `--fv-text-accent`, bold:
+**"3500 pts left"**, or for a slot with no limit the points SPENT, **"691 pts"** (my call - with no limit there is nothing
+"left", and dropping the spent total would leave an unlimited slot with no fleet total anywhere). `gamelobby.php` markup:
+`.lb-buy-spent` (holds `.current`) + `.remaining-points-container`, and `calculateFleet` toggles `.lb-buy-spent` on
+`maxPoints == -1` (it already toggled the other). `.max` / the slash are gone outside Fleet Builder; Fleet Builder keeps its cap
+controls IN FRONT of the figure: "Unlimited [x] · 691 pts", or "[3500] pts [ ] · 2809 pts left". `.lb-buy-slash` rules deleted.
+Head still 33.8px = Purchase Fleet's in all four cases on desktop; on a phone Fleet Builder with the cap field showing still wraps.
+Verified with `r17.mjs` (desktop 13/13, phone 12/12 - it also covers WEAPON_ENHANCEMENTS_PLAN.md §13, Repeater Gunsights).

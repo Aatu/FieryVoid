@@ -63,6 +63,9 @@ const theme = {
     fonts: {
         body: "arial",
         mono: 'Consolas, "Lucida Console", monospace', //numeric readouts - SCS datasheet feel
+        //--fv-display - the lobby's panel and section titles. Only pages that @import it
+        //(gamesNew.css) have it: game.php does NOT, so reach for it only on lobby surfaces.
+        display: '"Orbitron", sans-serif',
     },
     //Corner radii (roadmap item 6). THE tell that a surface belongs to the old world or
     //the new one: the SCS ship windows are square, the chrome around them used to be

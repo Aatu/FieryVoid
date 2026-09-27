@@ -1547,7 +1547,7 @@
 /* ── The unit: name, flight size, quantity ── */
 
 .confirm.buyDialog .buyDialogUnit {
-    padding: 2px 4px 8px;
+    padding: 2px 0px 8px;
     border-bottom: 1px solid var(--fv-line-soft);    
     margin-bottom: 8px;
 }
@@ -1563,7 +1563,8 @@
 .confirm.buyDialog .buyFieldLabel {
     font-family: var(--fv-display);        
     display: block;
-    margin-bottom: 3px;
+    margin-bottom: 5px;
+    padding-left: 3px;
     font-size: 11px;
     letter-spacing: 0.6px;
     font-weight: bold;
@@ -1575,7 +1576,7 @@
     margin: 0;
     font-family: Arial, Helvetica, sans-serif;
     font-size: 13px;
-    color: var(--fv-text-bright);
+    color: var(--fv-text);
     background: #081420;
     border: 1px solid var(--fv-line-soft);
     border-radius: 2px;

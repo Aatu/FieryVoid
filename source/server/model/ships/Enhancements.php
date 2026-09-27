@@ -350,22 +350,10 @@ class Enhancements{
 	  } 
 
 	  
-	  $enhID = 'GUNSIGHT';
-	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
-		  $enhName = 'Repeater Gunsights';
-		  $count = 0;	 
-		  foreach ($ship->systems as $system){
-			if ($system instanceof ParticleRepeater){
-				$count++;
-			}
-		  }  
-		  if($count > 0){ //ship is actually equipped with a Particle Repeater(s)	  
-			  $enhPrice = 12 * $count;	
-			  $enhPriceStep = 0; 
-			  $enhLimit = 1;	  
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
-		  }
-	  }
+	  /* Repeater Gunsights (GUNSIGHT) is no longer OFFERED here (user, 2026-09-27): it is bought per
+	     Particle Repeater now, as the system enhancement SYS_RGSGT. Its 'GUNSIGHT' apply and JSON cases
+	     below stay, for units bought under it in games already running; a SAVED fleet carrying it is
+	     converted on load (Manager::loadSavedFleet, legacyRepeaterGunsightRows). */
 
 	  //Improved Blaster Thrust: reduces the thrust needed to boost each
 	  //Hypergraviton Blaster to 4 (from 6). Only offered on ships that actually
@@ -2491,7 +2479,7 @@ class Enhancements{
 						}
 						break;	
 
-					case 'GUNSIGHT'://Split fire: allows Particle Repeaters to split their shots.
+					case 'GUNSIGHT'://Split fire: allows Particle Repeaters to split their shots. LEGACY - no longer offered, see SYS_RGSGT; kept for units bought under it.
 						foreach ($ship->systems as $system){
 							if ($system instanceof ParticleRepeater){
 								$damageTaken = $system->maxhealth - ($system->getRemainingHealth()); //Check for damge taken.
@@ -3506,6 +3494,20 @@ class Enhancements{
 			//isModified is what makes weapon::stripForJson re-send fireControl at all - see §2.2.
 			'serialise' => array('fireControl','fireControlArray','isModified','data'),
 		),
+		/* Repeater Gunsights - the Drazi split-fire refit (user, 2026-09-27), moved here from the
+		   ship-level GUNSIGHT, which bought it for every Particle Repeater at once at 12 each. Same
+		   rule and same price, one repeater at a time.
+		   ⚠️ NOT SYS_GSGT. That is the generic +1 fire control "Gunsights", which a Repeater is
+		   offered as well - hence the longer label, the ship-level option's own name. */
+		'SYS_RGSGT' => array(
+			'label'     => 'Repeater Gunsights',
+			'eligible'  => 'sysEnhEligibleRGSGT',
+			'price'     => 'sysEnhPriceRGSGT',
+			'limit'     => 'sysEnhLimitOne',
+			'apply'     => 'sysEnhApplyRGSGT',
+			'ages'      => array(1, 2),
+			'serialise' => array('canSplitShots','specialHitChanceCalculation'),
+		),
 		'SYS_HSHLD' => array(
 			'label'     => 'Hardened Shields',
 			'eligible'  => 'sysEnhEligibleHSHLD',
@@ -3930,6 +3932,44 @@ class Enhancements{
 			if($fc === null) continue;
 			$fireControl[$i] = (int)$fc + (int)$count;
 		}
+	}
+
+	/* ------------------------------------------------------------------ SYS_RGSGT */
+
+	/* What the ship-level GUNSIGHT charged per repeater, and so what one costs here. */
+	const REPEATER_GUNSIGHT_PRICE = 12;
+
+	private static function sysEnhEligibleRGSGT($ship, $system){
+		return ($system instanceof ParticleRepeater);
+	}
+
+	private static function sysEnhPriceRGSGT($ship, $system, $level){
+		return self::REPEATER_GUNSIGHT_PRICE;
+	}
+
+	/* The ship-level rule, per repeater: one that has taken even a point of damage has lost its
+	   gunsights. Damage is there to read - setSystemEnhancements runs from BaseShip::onConstructed,
+	   after DBManager::getTacShips has loaded tac_damage (pre-battle damage included). */
+	private static function sysEnhApplyRGSGT($ship, $system, $count){
+		if(!($system instanceof ParticleRepeater)) return;
+		if($system->getRemainingHealth() < $system->maxhealth) return;
+		$system->specialHitChanceCalculation = true;
+		$system->canSplitShots = true;
+	}
+
+	/* A SAVED fleet's ship-level GUNSIGHT as the per-system rows that replaced it: one SYS_RGSGT
+	   per Particle Repeater, each claimed at the 12 it cost inside the old whole-ship price, so
+	   Manager::loadSavedFleet moves exactly those points from the ship-level bucket to the system
+	   one and the fleet costs what it did. Purchase tuples, for sanitiseSystemEnhancements. */
+	public static function legacyRepeaterGunsightRows($ship){
+		$rows = array();
+		if(!is_object($ship) || empty($ship->systems)) return $rows;
+		foreach($ship->systems as $system){
+			if(!($system instanceof ParticleRepeater)) continue;
+			$rows[] = array('SYS_RGSGT', self::systemEnhancementLabel('SYS_RGSGT'), 1, 1,
+				self::REPEATER_GUNSIGHT_PRICE, 0, (int)$system->id, (string)$system->name);
+		}
+		return $rows;
 	}
 
 	/* ------------------------------------------------------------------ SYS_HSHLD */

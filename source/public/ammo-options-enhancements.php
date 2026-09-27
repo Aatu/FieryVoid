@@ -392,11 +392,9 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
       <ul>
         <li><strong>Repeater Gunsights</strong>
             <ul class="circle-list">
-                <li>Effect: Allows Particle Repeaters to split their shots within a 1 hex radius, and target different fighters in a flight.</li>
-                <li>Points Cost: 12pts per Particle Repeater</li>
-                <li>Limit: N/A</li>
-            </ul>      
-        </li> 
+                <li>Now a System Enhancement, bought for each Particle Repeater separately - see <a href="#systemrefits">Available Refits</a>.</li>
+            </ul>
+        </li>
       </ul>
     <a class="back-to-top" href="#top">↩ Back to Top</a>              
 
@@ -595,6 +593,15 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>Limit: 1</li>
             <li>Notes: Weapons only. A handful of utility mounts that roll no meaningful attack - the Abbai Shield Projector, Aegis Sensor Pod, Combat
               Transporter, Grappling Claw, Gravitic Shifter, Grome Targeting Array - are excluded, as the refit would do nothing for them.</li>
+        </ul>
+      </li>
+      <li><strong>Repeater Gunsights</strong>
+        <ul class="circle-list">
+            <li>Effect: That Particle Repeater may split its shots between targets within a 1 hex radius, and between different fighters in a flight.</li>
+            <li>Points Cost: 12 per Particle Repeater.</li>
+            <li>Limit: 1</li>
+            <li>Notes: Particle Repeaters only (the Drazi Freehold). A repeater that has taken any damage at all loses its gunsights. Not the same refit
+              as Gunsights above, which a Particle Repeater may take as well.</li>
         </ul>
       </li>
       <li><strong>Hardened Shields</strong>

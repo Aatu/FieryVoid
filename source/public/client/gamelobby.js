@@ -290,25 +290,25 @@ window.gamedata = {
 			case 'Star Trek (Kelly)':
 				powerRating = 'Tier 1; Custom faction';
 				break;				
-			case 'ZStarTrek (TOS) Federation':
+			case 'StarTrek (TOS) Federation':
 				powerRating = 'Tier 2; Custom faction';
 				break;
-			case 'ZStarTrek (early) Federation':
+			case 'StarTrek (early) Federation':
 				powerRating = 'Tier 3; Custom faction';
 				break;
-			case 'ZStarTrek Klingon':
+			case 'StarTrek Klingon':
 				powerRating = 'Tier 2; Custom faction';
 				break;
-			case 'ZStarTrek (early) Suliban':
+			case 'StarTrek (early) Suliban':
 				powerRating = 'Tier 3; Custom faction';
 				break;
-			case 'ZStarWars':
+			case 'StarWars':
 				powerRating = 'Tier 2, Custom faction';
 				break;
 			case 'Star Wars Clone Wars':
 				powerRating = 'Tier 2, Custom faction, Playtest';
 				break;
-			case 'ZTrek Playtest Other Factions':
+			case 'Trek Playtest Other Factions':
 				powerRating = 'Tier 2; Custom faction';
 				break;
 			case 'What If':
@@ -2396,6 +2396,10 @@ window.gamedata = {
 		$('.max-points-input').toggle(capIsEditable);
 		$('.max').toggle(!capIsEditable);
 
+		//Your Fleet shows ONE figure: points left, or with no limit points spent (.lb-buy-spent).
+		//.max exists only in Fleet Builder, beside its cap controls.
+		$('.lb-buy-spent').toggle(maxPoints == -1);
+
 		if (maxPoints == -1) {
 			$('.max').html('<span class="unlimited-points-text2">Unlimited</span>');
 			$('.max-points-units').hide();
@@ -2490,7 +2494,7 @@ window.gamedata = {
 		{ name: "Babylon 5 Wars", test: null },
 		{ name: "Nexus", test: /^Nexus\b/ },
 		{ name: "Escalation Wars", test: /^Escalation Wars\b/ },
-		{ name: "Other Universe", test: /^(BSG|12 Colonies of Kobol|Star Trek|Star Wars|ZStarTrek|ZStarWars|ZTrek)\b|^The System$/ }
+		{ name: "Other Universe", test: /^(BSG|12 Colonies of Kobol|Star Trek|Star Wars|StarTrek|StarWars|Trek)\b|^The System$/ }
 	],
 
 	//The short tier tag on a picker row.

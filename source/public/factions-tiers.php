@@ -524,7 +524,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         Their distinctive HCV layout with outer hulls on port and starboard instead of the traditional front and aft layout, is very notable for producing surprisingly resilient ships.</p>
        <h5>Repeater Gunsights</h5>
             <ul>
-<li>Ships equipped with Particle Repeaters can purchased this option in Fleet Selection.  Repeaters armed with gunsights are able to split their shots between different enemy units within a 1 hex radius of their original target,
+<li>Ships equipped with Particle Repeaters can purchase this option in Fleet Selection, for each Particle Repeater separately, as a System Enhancement from the ship window.  Repeaters armed with gunsights are able to split their shots between different enemy units within a 1 hex radius of their original target,
                 and different fighters within the same flights.  If the Particle Repeater takes any damage at all, it loses its gunsight ability.  All other rules relating to the Particle Repeater remain the same.</li>
                            
     </ul>

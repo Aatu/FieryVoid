@@ -342,10 +342,19 @@ textarea.cg-input {
 }
 
 /* In-Service Date: the year box its checkbox reveals after the label (§12.15). In em, so it keeps
-   fitting "e.g. 2258" once a phone's 16px type applies. */
-.cg-input--year {
+   fitting "e.g. 2258" once a phone's 16px type applies. Exactly as tall as the label's line (12.5px
+   at the page's 1.5), so ticking the box does not push the label down (user, §12.16) - on a phone
+   too, hence two classes, to outrank the coarse-pointer min-height on .cg-input--inline. A block,
+   so its wrapper (#inServiceDateWrap, a flex item) is exactly its height: sat on the wrapper's
+   text baseline it came out 2px taller. */
+.cg-input.cg-input--year {
+  display: block;
   flex: none;
   width: 6.75em;
+  height: 18.75px;
+  min-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 /* No native spinners on the number inputs (plan §11): they are tiny on desktop, useless on a

@@ -722,8 +722,8 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 								<?php endif; ?>
 								<!-- The Store's own Show Custom (user, Stage 5): the CUSTOM ships an official faction
 								     carries. The Faction Picker's box (#toggleCustom) is a separate setting - which
-								     factions can be picked. -->
-								<label class="lb-check lb-check--custom"><input type="checkbox" id="toggleCustomShips" class="yellow-tick">Show Custom</label>
+								     factions can be picked. A chip like the picker's Custom, round the same checkbox. -->
+								<label class="lb-chip lb-chip--check lb-chip--custom"><input type="checkbox" id="toggleCustomShips" class="yellow-tick">Custom</label>
 								<span class="lb-bar-sep" aria-hidden="true">|</span>
 								<button type="button" class="lb-chip resetFilters">Reset Filters</button>
 							</div>
@@ -770,10 +770,11 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 					<section class="lb-panel lb-buy lb-fleetpanel" aria-labelledby="lbFleetHead">
 						<div class="lb-panel-head lb-buy-head">
 							<h2 class="lb-buy-title" id="lbFleetHead">Your Fleet</h2>
-							<!-- gamedata.calculateFleet writes .current / .max / .remaining and shows or hides the
-							     units and the "pts left" part (an unlimited slot has neither). -->
+							<!-- ONE figure (user, §12.17 - "0 / 3500 pts · 3500 pts left" wrapped): the points LEFT, or
+							     for a slot with no limit the points SPENT. gamedata.calculateFleet writes .current /
+							     .remaining and shows whichever applies. Fleet Builder puts its cap controls in front. -->
 							<div class="lb-buy-points">
-								<span class="current">0</span><span class="lb-buy-slash">/</span><span class="max">0</span><?php if ($isFleetTest): ?>
+								<?php if ($isFleetTest): ?>
 								<!-- Fleet Builder only. The slot itself is always unlimited server-side,
 								     so this optional cap is purely a client-side yardstick: it drives the
 								     points readout, the affordability checks and the Fleet Checker's
@@ -781,13 +782,15 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 								     the word "Unlimited" does, and calculateFleet swaps the two - the
 								     value is NEVER written into .max, which is rewritten on every
 								     recalculation and would eat the field mid-keystroke. -->
-								<input type="number" id="maxPointsInput" class="max-points-input" value="3500"
-								       min="0" step="50" style="display:none" aria-label="Maximum fleet points"><?php endif; ?><span class="max-points-units">pts</span><?php if ($isFleetTest): ?>
+								<span class="max">0</span><input type="number" id="maxPointsInput" class="max-points-input" value="3500"
+								       min="0" step="50" style="display:none" aria-label="Maximum fleet points"><span class="max-points-units">pts</span>
 								<input type="checkbox" id="unlimitedPointsToggle" class="yellow-tick unlimited-points-toggle"
 								       checked title="Unlimited points - untick to build against a fixed limit"
 								       aria-label="Unlimited points">
+								<span class="lb-buy-dot" aria-hidden="true">·</span>
 								<?php endif; ?>
-								<span class="remaining-points-container"><span class="lb-buy-dot" aria-hidden="true">·</span><span class="remaining">0</span> <span class="remaining-points-units">pts left</span></span>
+								<span class="lb-buy-spent"><span class="current">0</span> pts</span>
+								<span class="remaining-points-container"><span class="remaining">0</span> <span class="remaining-points-units">pts left</span></span>
 							</div>
 						</div>
 
