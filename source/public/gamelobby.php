@@ -319,6 +319,9 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
                 //Nothing is declared pre-game, so both are flatly false.
                 isInterceptOnly: function(){return false},
                 canManuallyInterceptWith: function(){return false},
+                //Meteor Defence (METEOR_DEFENCE_PLAN.md) - SystemIcon's amber "committed" state, read on
+                //every render with no phase guard. Nothing is declared pre-game.
+                hasMeteorDefence: function(){return false},
                 getWeaponCurrentLoading: function(weapon)
                 {
                     /* Weapons enter the game fully loaded, so the icon load counter
@@ -1052,7 +1055,7 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
         <div class="slot lb-slot">
             <div class="lb-slot-main">
                 <div class="lb-slot-player">
-                    <span class="playername"></span><span class="lb-slot-open">[OPEN]</Open></span>
+                    <!--<span class="playername"></span><span class="lb-slot-open">[OPEN]</Open></span>-->
                 </div>
                 <div class="lb-slot-meta">
                     <span class="value name"></span>

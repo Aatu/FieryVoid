@@ -4771,9 +4771,8 @@ window.gamedata = {
 		//carrying damaged or crippled units says so out loud. confirm.confirm renders HTML.
 		var readyMessage = "Are you sure you wish to ready your fleet?";
 		if (window.battleDamage && battleDamage.fleetHasDamage()) {
-			//The dialog around this is .confirm.error - 16px bold #c94b1d - which shouted
-			//the whole sentence in warning colours. Only NOTE: is the warning; the rest is
-			//ordinary body text, so it carries its own class (see confirm.css).
+			//Only WARNING: is the warning; the rest is ordinary body text, so it carries its
+			//own class (see confirm.css .prebattle-note).
 			readyMessage += '<span class="prebattle-note">'
 				+ '<span class="prebattle-note-label">WARNING:</span> '
 				+ 'This fleet includes units with pre-battle damage and/or critical effects.'

@@ -17,7 +17,8 @@ class MeteorSwarm extends Terrain {
         $this->isd = 0;
         $this->notes = "Units entering this hex roll to detemine number of Meteroid hits.";
         $this->notes .= "<br>Meteoroid damage = 1d10 + target speed.";
-        $this->notes .= "<br>Deals Standard damage.";        
+        $this->notes .= "<br>Deals Standard damage.";
+        $this->notes .= "<br>Meteor Defence: weapons declared in Initial Orders, and covering the direction of motion, reduce each meteor's damage by their intercept rating.";
         $this->occurence = "common";
         $this->base = true;
         $this->smallBase = true;

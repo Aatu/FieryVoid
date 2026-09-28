@@ -559,6 +559,10 @@ window.weaponManager = {
         //right-click) at this single chokepoint.
         if (typeof weapon.isSpentLocked === 'function' && weapon.isSpentLocked()) return;
 
+        //Declared against meteors in Initial Orders: committed for the whole turn (METEOR_DEFENCE_PLAN.md
+        //D1) - it may neither fire nor intercept. Same single chokepoint as the lock above.
+        if (weaponManager.hasMeteorDefence(ship, weapon)) return;
+
 
         if (ship.shipSizeClass < 0) {
             for (var i = 0; i < ship.systems.length; i++) {
@@ -3637,6 +3641,7 @@ window.weaponManager = {
         if ((weapon.intercept < 1) && !(weaponManager.canWeaponInterceptAtAll(weapon)) || (loadingTimeActual <= 1)) return false;//cannot intercept or quick to recharge anyway and will be auto-assigned
         if (weapon.ballistic && !(weaponManager.canWeaponInterceptAtAll(weapon))) return false;//no interception using ballistic weapons    
         if (weaponManager.hasFiringOrder(ship, weapon) && !weapon.canSplitShots) return false;//already declared and can't split shots.
+        if (weaponManager.hasMeteorDefence(ship, weapon)) return false;//committed against meteors for the whole turn
         if (!weaponManager.isLoaded(weapon)) return false;//not ready to fire
         if (weapon.canSplitShots) {
             var canSelfIntercept = weapon.checkSelfInterceptSystem(); //Look to weapon itself now, to see if any special criteria should apply.
@@ -3776,6 +3781,134 @@ window.weaponManager = {
         }
 
         return canIntercept;
+    },
+
+
+    /* ===== METEOR DEFENCE (METEOR_DEFENCE_PLAN.md) =================================================
+       A weapon declared in Initial Orders to defend its unit against meteors. When the unit then enters
+       a Meteor Swarm, the declared guns that cover its direction of motion reduce each meteor's damage
+       by their intercept rating (resolved server-side in Pre-Firing, RammingAttack::defendAgainstMeteor).
+       The declaration is a 'meteorDefence' order naming the unit itself, and it commits the weapon for
+       the WHOLE turn whether or not a meteor ever arrives: it cannot fire or intercept, and a slow
+       weapon loses its charge (D1, D4). It is not a firing order, so hasFiringOrder and its siblings
+       look past it - hasMeteorDefence is the question to ask instead. */
+    isMeteorDefenceOrder: function isMeteorDefenceOrder(fire) {
+        return Boolean(fire) && fire.type === 'meteorDefence';
+    },
+
+    getMeteorDefenceOrder: function getMeteorDefenceOrder(weapon) {
+        if (!weapon || !weapon.fireOrders) return null;
+        for (var i = 0; i < weapon.fireOrders.length; i++) {
+            var fire = weapon.fireOrders[i];
+            if (weaponManager.isMeteorDefenceOrder(fire) && fire.turn == gamedata.turn) return fire;
+        }
+        return null;
+    },
+
+    hasMeteorDefence: function hasMeteorDefence(ship, weapon) {
+        return weaponManager.getMeteorDefenceOrder(weapon) !== null;
+    },
+
+    /* The client mirror of Firing::getMeteorDefenceBlock - the normal intercept identification without
+       the consent rule, because the declaration IS the consent. */
+    canDeclareMeteorDefence: function canDeclareMeteorDefence(ship, weapon) {
+        if (gamedata.gamephase !== 1) return false; //"announced at the start of the turn"
+        if (!ship || !weapon || !weapon.weapon) return false;
+        if (!gamedata.isMyShip(ship)) return false;
+        if (!gamedata.hasMeteorSwarm()) return false; //D7
+        if (shipManager.isDestroyed(ship)) return false;
+        if (shipManager.isDockingRider(ship)) return false; //may not fire - interception included
+        if (shipManager.movement.isJumpFireForbidden(ship)) return false; //an Ancient jumping out fires nothing
+        if (weapon.stowed) return false;
+        if (shipManager.systems.isDestroyed(ship, weapon)) return false;
+        if (ship.flight) {
+            var fighter = shipManager.systems.getFighterBySystem(ship, weapon.id);
+            if (!fighter || shipManager.systems.isDestroyed(ship, fighter)) return false;
+        }
+        if (shipManager.power.isOffline(ship, weapon)) return false;
+        if (!weaponManager.isLoaded(weapon)) return false;
+
+        //Already declared, or anything else this turn - a missile rack cannot both launch and defend.
+        if (weaponManager.hasMeteorDefence(ship, weapon)) return false;
+        var counts = weaponManager.countCurrentTurnOrders(weapon);
+        if (counts.offensive + counts.intercept + counts.selfIntercept > 0) return false;
+
+        var mode = weaponManager.getInterceptModeFor(weapon);
+        if (mode === null) return false;
+        if (weaponManager.getInterceptRatingInMode(weapon, mode) < 1) return false;
+        return weaponManager.ammoAvailableForIntercept(ship, weapon, mode); //an Interceptor round aboard
+    },
+
+    onDeclareMeteorDefence: function onDeclareMeteorDefence(ship, weapon) {
+        if (!weaponManager.canDeclareMeteorDefence(ship, weapon)) return; //last check whether weapon is eligible for that!
+        //The mode it defends in - a launcher's Interceptor mode. Stamped on the order only: the weapon
+        //object is shared between same-class systems, so its own mode is left alone.
+        var mode = weaponManager.getInterceptModeFor(weapon);
+        if (weaponManager.isSelectedWeapon(weapon)) weaponManager.unSelectWeapon(ship, weapon);
+        weapon.fireOrders.push({
+            id: ship.id + "_" + weapon.id + "_" + (weapon.fireOrders.length + 1),
+            type: 'meteorDefence',
+            shooterid: ship.id,
+            targetid: ship.id,
+            weaponid: weapon.id,
+            calledid: -1,
+            turn: gamedata.turn,
+            firingMode: mode,
+            shots: weapon.guns, //every gun is committed (D5); the server sets this authoritatively
+            shotshit: 0,
+            rolled: 0,
+            x: "null",
+            y: "null",
+            damageclass: 'MeteorDefence'
+        });
+        webglScene.customEvent('SystemDataChanged', { ship: ship, system: weapon });
+    },
+
+    /*declare meteor defence for all similar eligible weapons - every craft's, for a flight*/
+    onDeclareMeteorDefenceAll: function onDeclareMeteorDefenceAll(ship, weapon) {
+        weaponManager.getSimilarWeapons(ship, weapon).forEach(function (otherWeapon) {
+            weaponManager.onDeclareMeteorDefence(ship, otherWeapon); //checks eligibility itself
+        });
+    },
+
+    canRemoveMeteorDefence: function canRemoveMeteorDefence(ship, weapon) {
+        if (gamedata.gamephase !== 1) return false; //binding once Initial Orders are committed
+        if (!ship || !weapon || !gamedata.isMyShip(ship)) return false;
+        return weaponManager.hasMeteorDefence(ship, weapon);
+    },
+
+    removeMeteorDefence: function removeMeteorDefence(ship, weapon) {
+        if (!weaponManager.canRemoveMeteorDefence(ship, weapon)) return;
+        for (var i = weapon.fireOrders.length - 1; i >= 0; i--) {
+            if (weaponManager.isMeteorDefenceOrder(weapon.fireOrders[i]) && weapon.fireOrders[i].turn == gamedata.turn) {
+                weapon.fireOrders.splice(i, 1);
+            }
+        }
+        webglScene.customEvent('SystemDataChanged', { ship: ship, system: weapon });
+    },
+
+    removeMeteorDefenceAll: function removeMeteorDefenceAll(ship, weapon) {
+        weaponManager.getSimilarWeapons(ship, weapon).forEach(function (otherWeapon) {
+            weaponManager.removeMeteorDefence(ship, otherWeapon);
+        });
+    },
+
+    //Every weapon on the unit - on every craft, for a flight - sharing this one's BASE displayName (see
+    //stripPairingSuffix), this one included. The grouping the "all similar weapons" actions use.
+    getSimilarWeapons: function getSimilarWeapons(ship, weapon) {
+        var allWeapons = [];
+        if (ship.flight) {
+            allWeapons = ship.systems
+                .map(fighter => fighter.systems)
+                .reduce((all, weapons) => all.concat(weapons), [])
+                .filter(system => system.weapon);
+        } else {
+            allWeapons = ship.systems.filter(system => system.weapon);
+        }
+        var baseName = weaponManager.stripPairingSuffix(weapon.displayName);
+        return allWeapons.filter(function (other) {
+            return weaponManager.stripPairingSuffix(other.displayName) === baseName;
+        });
     },
 
 
@@ -4885,6 +5018,9 @@ window.weaponManager = {
             //vanish off the map (its DB row lives on, so the icon simply came back on the next
             //poll - which is worse, not better).
             if (weaponManager.isHomingReattack(system.fireOrders[i])) continue;
+            //A Meteor Defence declaration has its own remove button (Initial Orders only) and is binding
+            //after that, so clearing fire orders must not take it with them.
+            if (weaponManager.isMeteorDefenceOrder(system.fireOrders[i])) continue;
             if (system.fireOrders[i].weaponid == system.id) {
                 system.fireOrders.splice(i, 1);
             }
@@ -5002,6 +5138,9 @@ window.weaponManager = {
         for (var i in system.fireOrders) {
             var fire = system.fireOrders[i];
             if (weaponManager.isHomingReattack(fire)) continue; //in flight, not declared - see isHomingReattack
+            //A Meteor Defence declaration is not a firing order - see hasMeteorDefence, which is what the
+            //icon, the selection gate and the menu ask about it instead.
+            if (weaponManager.isMeteorDefenceOrder(fire)) continue;
             if (fire.weaponid == system.id && fire.turn == gamedata.turn && !fire.rolled) {
                 if ((gamedata.gamephase == 1 || gamedata.gamephase == 3) && system.ballistic || gamedata.gamephase == 3 && !system.ballistic || gamedata.gamephase == 5 && system.preFires) {
                     if (fire.type == "selfIntercept") {
@@ -5017,6 +5156,7 @@ window.weaponManager = {
         for (var i in system.fireOrders) {
             var fire = system.fireOrders[i];
             if (weaponManager.isHomingReattack(fire)) continue; //in flight, not declared
+            if (weaponManager.isMeteorDefenceOrder(fire)) continue; //not a firing order
             if (fire.weaponid == system.id && fire.turn == gamedata.turn && !fire.rolled) {
                 if ((gamedata.gamephase == 1 || gamedata.gamephase == 3) && system.ballistic || gamedata.gamephase == 3 && !system.ballistic || gamedata.gamephase == 5 && system.preFires) {
                     if (fire.firingMode == system.firingMode) {
@@ -5033,6 +5173,7 @@ window.weaponManager = {
         for (var i in system.fireOrders) {
             var fire = system.fireOrders[i];
             if (weaponManager.isHomingReattack(fire)) continue; //in flight, not declared
+            if (weaponManager.isMeteorDefenceOrder(fire)) continue; //names its own unit, but aims at nothing
             if (fire.weaponid == system.id && fire.turn == gamedata.turn && !fire.rolled && fire.targetid == target.id) {
                 if ((gamedata.gamephase == 1 || gamedata.gamephase == 3) && system.ballistic || gamedata.gamephase == 3 && !system.ballistic || gamedata.gamephase == 5 && system.preFires) {
                     return true;
@@ -5098,6 +5239,7 @@ window.weaponManager = {
         var fires = weaponManager.getAllFireOrders(ship);
         for (var i in fires) {
             var fire = fires[i];
+            if (weaponManager.isMeteorDefenceOrder(fire)) continue; //not a firing order
             if (fire.weaponid == system.id && fire.turn == gamedata.turn && !fire.rolled) return fire;
         }
 

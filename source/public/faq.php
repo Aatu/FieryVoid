@@ -819,6 +819,18 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                     <li>To withdraw, clear that weapon's fire orders from the ship window in the usual way.</li>
                 </ul>
             </li>
+            <li>Meteor Defence — using your defensive weapons against a Meteor Swarm.  This is declared in <strong>Initial Orders only</strong>, and is only offered while a Meteor Swarm is on the map:
+                <ul class="circle-list">
+                    <li>Open an intercept-capable weapon's menu in the ship window and click the shield with the comet (&#9732;).  Right-click declares every similar weapon on the unit, or on every craft of a flight.  A missile rack qualifies if it carries Interceptor missiles.
+                        The red shield withdraws the declaration, until you commit your orders.</li>
+                    <li>A declared weapon is <strong>committed for the whole turn</strong>, whether or not a meteor ever arrives: it cannot fire, and it cannot intercept in the Firing phase, manually or automatically.  Its icon turns amber with a &#9732;.
+                        A weapon that takes more than one turn to load loses its charge, just as if it had fired.</li>
+                    <li>When the unit enters a Meteor Swarm, each meteor that strikes has its damage reduced by the Intercept Rating of the declared weapons used against it — a rating of -10% blocks 2 points.  The meteor still hits; only its damage is reduced.</li>
+                    <li>Only weapons whose arc covers the unit's direction of motion into the swarm can defend.  Each gun takes one meteor a turn.  The best weapons are used first, and only until that meteor is cancelled, so the swarm's later meteors — and a second swarm — can still be defended against.</li>
+                    <li>An Interceptor missile is only spent when it is actually used against a meteor.</li>
+                    <li>Your opponent cannot see which weapons you declared until the swarms have been resolved.  The combat log then records how many weapons defended and how much damage they blocked.</li>
+                </ul>
+            </li>
             <li>What can be intercepted, either way:
                 <ul class="circle-list">
                     <li>Fire aimed at the intercepting unit itself, provided the shot comes from within the weapon's firing arc.  Arcs are measured from where the shot is coming <em>from</em> — for a ballistic that is the hex it was

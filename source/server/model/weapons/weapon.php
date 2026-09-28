@@ -899,11 +899,23 @@ class Weapon extends ShipSystem
     {
         //if ($this instanceof DualWeapon && isset($this->turnsFired[$turn])) return true;
         foreach ($this->fireOrders as $fire) {
+            if ($fire->type === 'meteorDefence') continue; //defensive fire, like interception - it must not reveal a stealthed unit
             if ( (strpos($fire->type, 'ntercept') == false) && $fire->weaponid == $this->id && $fire->turn == $turn) {
                 return true;
-            } 
+            }
         }
         return false;
+    }
+
+    /* This weapon's Meteor Defence declaration for $turn, or null (METEOR_DEFENCE_PLAN.md). A declared
+       weapon is committed for the WHOLE turn, whether or not a meteor ever arrives (D1): it may not fire
+       or intercept, and firedOnTurn() already counts the declaration, so it also loses its charge (D4). */
+    public function getMeteorDefenceOrder($turn)
+    {
+        foreach ($this->fireOrders as $fire) {
+            if ($fire->type === 'meteorDefence' && $fire->turn == $turn) return $fire;
+        }
+        return null;
     }
 
     public function formatFCValue($fc)

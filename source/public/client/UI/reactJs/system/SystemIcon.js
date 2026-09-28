@@ -64,6 +64,20 @@ const EnhancementStar = styled.div`
     text-shadow: black 0 0 3px, black 0 0 3px, black 0 0 3px;
 `;
 
+/* ☄ - "committed to meteor defence this turn", top RIGHT so it never sits on the enhancement star.
+   The amber state colour alone would leave it to colour vision. */
+const MeteorBadge = styled.div`
+    position: absolute;
+    top: 0px;
+    right: 1px;
+    z-index: 1;
+    pointer-events: none;
+    font-size: 11px;
+    line-height: 11px;
+    color: #ffd27a;
+    text-shadow: black 0 0 3px, black 0 0 3px, black 0 0 3px;
+`;
+
 const System = styled.div`
     position: relative;
     box-sizing: border-box;
@@ -73,6 +87,8 @@ const System = styled.div`
    border: ${props => {
         if (props.$firing && props.$calledShot) {
             return '2px solid #ff3366'; // Called shot - magenta border
+        } else if (props.$meteorDefence) {
+            return '1px solid #d9a441'; // Committed to meteor defence for the turn - amber, not the offensive orange
         } else if (props.$firing && props.$intercepting) {
             return '1px solid #52b352'; // Interception only - green, not the offensive orange
         } else if (props.$firing) {
@@ -92,6 +108,8 @@ const System = styled.div`
      background-color:  ${props => {
         if (props.$selected) {
             return '#4e6c91';
+        } else if (props.$meteorDefence) {
+            return '#5c4318'; //dark amber - committed to meteor defence, may not fire or intercept this turn
         } else if (props.$firing && props.$intercepting) {
             return '#2f7a3a'; //green - this weapon has committed to interception only
         } else if (props.$firing) {
@@ -113,6 +131,8 @@ const System = styled.div`
             return '0px 0px 15px #0099ff';
         } else if (props.$firing && props.$calledShot) {
             return '0px 0px 12px #ff3366'; // Called shot glow
+        } else if (props.$meteorDefence) {
+            return '0px 0px 12px #d9a441'; // Meteor defence glow
         } else if (props.$firing && props.$intercepting) {
             return '0px 0px 15px #52b352'; // Interception-only glow
         } else if (props.$firing) {
@@ -561,6 +581,7 @@ class SystemIcon extends React.Component {
                 $selected={isSelected(system)}
                 $firing={isFiring(ship, system)}
                 $intercepting={isIntercepting(ship, system)}
+                $meteorDefence={isMeteorDefence(ship, system)}
                 $calledShot={isCalledShot(ship, system)}
                 $boosted={isBoosted(ship, system)}
                 $off={isOff(system)}
@@ -568,6 +589,7 @@ class SystemIcon extends React.Component {
                 $orderPending={hasPendingDockOrder(system)}
             >
                 {renderBadges(ship, system)}
+                {isMeteorDefence(ship, system) && <MeteorBadge title="Committed to meteor defence this turn">☄</MeteorBadge>}
                 <SystemText>{getText(ship, system)}</SystemText>
                 {/*A destroyed system shows an EMPTY bar, matching the non-interactive
                    render above. It cannot just read getStructureLeft: a system destroyed
@@ -611,6 +633,12 @@ const isDeclaringAbduction = (system) => gamedata.gamephase === 1
    intercept (a split-shot mount spending one gun each way) stays orange - it IS shooting at
    someone. */
 const isIntercepting = (ship, system) => weaponManager.isInterceptOnly(ship, system);
+
+/* Declared against meteors in Initial Orders (METEOR_DEFENCE_PLAN.md). NOT $firing: the weapon is
+   not shooting at anything, and reading orange would tell the player it is. It is committed for the
+   whole turn all the same - it cannot be selected to fire or intercept - so it gets a state of its own,
+   amber with a comet badge. */
+const isMeteorDefence = (ship, system) => Boolean(system.weapon) && weaponManager.hasMeteorDefence(ship, system);
 
 const isCalledShot = (ship, system) => {
     if (!system.weapon || !weaponManager.hasFiringOrder(ship, system)) return false;

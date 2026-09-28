@@ -1527,7 +1527,12 @@ class DBManager
   		if (($fire->type == "ballistic") && ($phase != 1) &&  ($fire->addToDB != true)) //28 Sept 2023 - Amended to enable Multimissile to shows multiple shots in Combat Log.
                 continue;
 
-            if ($fire->type != "ballistic" && $phase == 1)
+            /* METEOR_DEFENCE_PLAN.md §2.1 - a Meteor Defence declaration is made in Initial Orders and
+               written THEN AND NEVER AGAIN. The client re-posts every order it holds in the Fire Phase
+               (trap T4), so without the second half it would be inserted a second time there. */
+            if ($fire->type == "meteorDefence") {
+                if ($phase != 1) continue;
+            } else if ($fire->type != "ballistic" && $phase == 1)
                 continue;
 
   		    if (($fire->type == "prefiring") && ($phase != 5))

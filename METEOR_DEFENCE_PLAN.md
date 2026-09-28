@@ -5,8 +5,9 @@ meteors this turn**. When the unit then enters a Meteor Swarm, the declared weap
 meteor's damage by their intercept rating. A declared weapon is committed for the whole turn: it cannot
 fire or intercept in the Fire Phase, whether or not a meteor ever arrives.
 
-Status: **PLANNED — nothing built; every decision settled.** Written 2026-09-27, after an automatic
-version was built and then removed (§0.1).
+Status: **BUILT — Stages 0-4 (2026-09-28), not yet played live (Stage 5, §6).** Written 2026-09-27,
+after an automatic version was built and then removed (§0.1). Where the build differs from the text
+below, see §8.
 
 ## The rule (B5W)
 
@@ -333,3 +334,38 @@ private function defendAgainstMeteor($target, $meteorOrder, $meteorDamage, $game
 ⚠️ Set a launcher to the marker's `firingMode` before `canInterceptAtAll` and `fireDefensively`, and put
 its mode back afterwards. Both read the current mode to find the Interceptor round, as
 `automateIntercept` does for manual intercept orders.
+
+---
+
+## 8. As built (2026-09-28)
+
+Built as planned. Where the build departs from, or adds to, the text above:
+
+- **§2.1:** POSTed orders never carry `addToDB` (`Manager::getShipsFromJSON` does not read it). So
+  `submitFireorders` writes a `meteorDefence` order in phase 1 unconditionally, as it does a
+  `ballistic`, and in no other phase. A player commits phase 1 once (`hasAlreadySubmitted`).
+- **Validation:** the server also normalises a legal declaration: `targetid` is the unit itself,
+  `shots` is the weapon's guns in the declared mode, `damageclass` is `MeteorDefence`, and nothing
+  is blocked yet. Eligibility lives in `Firing::getMeteorDefenceBlock`. A jumping Ancient's
+  declaration never reaches it, because `InitialOrdersGamePhase::dropFireOfJumpingShip` drops it first.
+- **T6:** `getUnassignedInterceptors` and `validateManualIntercept` skip a declared weapon outright
+  (`Weapon::getMeteorDefenceOrder`), rather than doing gun arithmetic.
+- **Not in the plan: `Weapon::firedOffensivelyOnTurn` ignores the declaration.** Otherwise declaring
+  would reveal a stealthed unit, as offensive fire does.
+- **Not in the plan: the replay harness's `damage` gather skips the declaration too.** Its
+  `shotshit` counts meteors blocked, so the harness would replay it as hits.
+- **Not in the plan: `declarations.js` skips it.** It would list as the unit firing at itself.
+- **§1.3:** the arc test uses the declared mode, and so do the rating and the round drawn. Each
+  weapon is put back in its own mode afterwards. The Triad's doubling applies before defence. A meteor that defence
+  cancels entirely writes no damage entry. A meteor order with no `brg:` note is defended by nothing.
+- **Client:** the declaration is not a firing order. `hasFiringOrder`, `hasOrderForMode`,
+  `hasTargetedThisShip`, `getFiringOrder` and `removeFiringOrder` all look past it, and
+  `weaponManager.hasMeteorDefence` is the question to ask instead. `selectWeapon` refuses a
+  declared weapon, as do `canSelfInterceptSingle` and `canChangeFiringMode`. Powering a declared
+  weapon down withdraws the declaration, as it already cancels a jump drive's abduction
+  (`power.js`). Icon: amber with a ☄ badge. Buttons: the plain shield with a ☄ to declare, the red
+  shield to withdraw. Right-click acts on all similar weapons in both cases.
+- **Verified** with a scratch script (`c:\tmp\meteordefence_test.php`: game 4425, forced dice,
+  rolled back). It covers test-matrix rows 1-8 and 12 server-side, plus validation (declaration
+  and phase 3/5 drop) and masking per viewer and phase. The replay harness output is unchanged.
+  Rows 9-11 (the opponent's view in play, the client's refusals) await the live test.
