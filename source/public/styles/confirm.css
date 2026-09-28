@@ -59,19 +59,32 @@
     background: var(--fv-scroll-thumb-hover);
 }
 
+/* The shell confirm.confirm / error / confirmWithOptions / confirmOrSurrender / exception all
+   build on - so the lobby's Ready prompt and every game.php commit warning. It was a 3px red
+   border over 16px BOLD #c94b1d text, which made an ordinary "are you sure?" read as an alarm
+   (user, 2026-09-28). Now the site's window language, as .confirm.warning and .fleetDialog
+   already are: SCS well, SCS border, body text on the tokens. What IS a warning inside one
+   carries its own class (.prebattle-note-label below). */
 .confirm.error {
-    /*border: 1px solid #defbff44; */
-    border: 3px solid #812323;
-    color: #c94b1d;
+    background-color: var(--fv-well);
+    border: 2px solid var(--fv-line-scs);
+    color: var(--fv-text);
     font-family: arial;
     font-size: 16px;
-    font-weight: bold;   
-    padding-top: 15px;     
+    padding-top: 15px;
 }
 
+/* The multi-value and hangar dialogs are ALSO built on .confirm.error and paint their own
+   skin over it, but took the old shell's 16px bold as their base text - which they keep. */
+.confirm.error.multi-value-confirm {
+    font-weight: bold;
+}
+
+/* Ship names were the one un-bolded thing in a bold sentence; with the sentence now normal
+   weight, they flip to carry the emphasis. */
 .confirm.error .ship-name {
-    color: rgba(255, 255, 255, 0.692);
-    font-weight: normal;
+    color: var(--fv-text-bright);
+    font-weight: bold;
 }
 
 /* Ship names the dialog listed that map to a real unit on the board: clicking one scrolls
@@ -89,6 +102,85 @@
 .confirm .ship-name.clickable:hover {
     color: rgb(106, 195, 255);
     text-decoration-color: rgb(106, 195, 255);
+}
+
+/* confirm.error / confirm / confirmOrSurrender (.promptDialog): labelled buttons in place of the
+   ok.png / cancel.png icons (user, 2026-09-28). Confirm keeps its old place on the left and
+   Cancel on the right; a lone OK centres; the surrender icon sits between them. Green is the
+   buy dialog's purchase button, red the lobby's Leave Game (gameLobby.css .lb-btn--leave).
+   Arial, not --fv-display: game.php does not load Orbitron. */
+.confirm.promptDialog .ui {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin: 14px 0 0;
+}
+
+.confirm.promptDialog .ui .confirmok,
+.confirm.promptDialog .ui .confirmcancel {
+    position: static;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    height: auto;
+    min-width: 130px;
+    min-height: 28px;
+    margin: 0;
+    padding: 4px 16px;
+    font-family: arial;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.1px;
+    text-transform: uppercase;
+    background-image: none;
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+.confirm.promptDialog .ui .confirmok:only-child {
+    margin: 0 auto;
+}
+
+.confirm.promptDialog .ui .confirmok {
+    color: #e6f4e6;
+    background-color: rgba(60, 122, 60, 0.5);
+    border: 1px solid #66b266;
+}
+
+.confirm.promptDialog .ui .confirmok:hover {
+    color: #fff;
+    background-color: rgba(82, 179, 82, 0.6);
+    border-color: #8cd48c;
+}
+
+.confirm.promptDialog .ui .confirmcancel {
+    color: #f3dcd8;
+    background-color: rgba(122, 33, 33, 0.6);
+    border: 1px solid #a77272;
+}
+
+.confirm.promptDialog .ui .confirmcancel:hover {
+    color: #fff;
+    background-color: #8e2a2ae3;
+}
+
+.confirm.promptDialog .ui .surrender {
+    position: static;
+    flex: none;
+}
+
+.confirm.promptDialog .ui button:focus-visible {
+    outline: 2px solid var(--fv-accent);
+    outline-offset: 2px;
+}
+
+@media (pointer: coarse) {
+    .confirm.promptDialog .ui .confirmok,
+    .confirm.promptDialog .ui .confirmcancel {
+        min-height: 40px;
+    }
 }
 
 /* The "Are you sure you wish to COMMIT…" question line in the commit-confirm
@@ -1325,9 +1417,9 @@
 /* ── Pre-battle damage note in the lobby's Ready confirm ────────────────────────────
    gamedata.onReadyClicked appends this line when the fleet carries pre-battle damage or
    critical effects (PREBATTLE_DAMAGE_PLAN.md D1). It lands inside confirm.confirm's
-   `.confirm.error` shell, which is 16px BOLD #c94b1d - so the whole sentence read as an
-   alarm rather than as the footnote it is (user report 2026-08-08). Only the NOTE: label
-   is a warning; the sentence after it is body text on the shared tokens. */
+   `.confirm.error` shell, which was 16px BOLD #c94b1d until 2026-09-28 - so the whole
+   sentence read as an alarm rather than as the footnote it is (user report 2026-08-08). Only
+   the NOTE: label is a warning; the sentence after it is body text on the shared tokens. */
 .confirm .prebattle-note {
     display: block;
     margin-top: 14px;

@@ -920,8 +920,8 @@ window.confirm = {
             + '<div class="buyDialogFoot">'
             + '<div class="buyDialogTotals">' + totals + '</div>'
             + '<div class="ui">'
-            + '<button type="button" class="confirmcancel">Cancel</button>'
             + '<button type="button" class="confirmok">' + opts.okLabel + '</button>'
+            + '<button type="button" class="confirmcancel">Cancel</button>'
             + '</div>'
             + '</div>'
             + '</div>'
@@ -1694,8 +1694,12 @@ window.confirm = {
 
 
 
+    /* error / confirm / confirmOrSurrender carry .promptDialog: labelled buttons (green OK /
+       Confirm, red Cancel) in place of the ok.png / cancel.png icons, painted in confirm.css.
+       The hangar and allocation dialogs are .confirm.error too, which is why the buttons key
+       off their own class rather than off .error. */
     error: function error(msg, callback) {
-        var e = $('<div class="confirm error"><div class="ui"><div class="confirmok" style="margin:auto;"></div></div></div>');
+        var e = $('<div class="confirm error promptDialog"><div class="ui"><button type="button" class="confirmok">OK</button></div></div>');
         $('<span>' + msg + '</span>').prependTo(e);
         //$('<span>ERROR</span></br>').prependTo(e);
         //$('<div class="message"><span>Name your new '+ship.shipClass+'</span></div>').prependTo(e);
@@ -1711,7 +1715,7 @@ window.confirm = {
     },
 
     confirm: function confirm(msg, callback, cancelCallback) {
-        var e = $('<div class="confirm error"><div class="ui"><div class="confirmok"></div><div class="confirmcancel"></div></div></div>');
+        var e = $('<div class="confirm error promptDialog"><div class="ui"><button type="button" class="confirmok">Confirm</button><button type="button" class="confirmcancel">Cancel</button></div></div>');
         //var e = $('<div class="confirm error"><div class="ui"><div class="confirmok" style="margin:auto;"></div></div></div>');
         $('<span>' + msg + '</span>').prependTo(e);
         //$('<span>ERROR</span></br>').prependTo(e);
@@ -1773,7 +1777,7 @@ window.confirm = {
     },
 
     confirmOrSurrender: function confirmOrSurrender(msg, callbackCommit, callbackSurrender) {
-        var e = $('<div class="confirm error"><div class="ui"><div class="confirmok"></div><div class="surrender"></div><div class="confirmcancel"></div></div></div>');
+        var e = $('<div class="confirm error promptDialog"><div class="ui"><button type="button" class="confirmok">Confirm</button><div class="surrender"></div><button type="button" class="confirmcancel">Cancel</button></div></div>');
         $('<span>' + msg + '</span>').prependTo(e);
 
         $(".ok", e).on("click", callbackCommit);
