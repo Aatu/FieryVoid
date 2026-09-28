@@ -357,10 +357,21 @@ window.BallisticIconContainer = function () {
 		return FIELD_TERRAIN_CLASSES.includes(ship.phpclass);
 	}
 
-	function generateTerrainHexes(gamedata) {
-		if (gamedata.gamephase === -1) return; //Don't bother during Deployment phase.
+	/* Not on the board yet: its only row is the off-map 'start' marker its slot gave it. During
+	   Deployment that is every terrain unit a player bought until its owner places it - and every
+	   ENEMY one throughout, since the server strips enemy placements in phase -1 - so drawing it
+	   would lay a footprint over the deployment box. Generated Terrain (userid -5, which includes the
+	   Triad's spawns) is placed BY its 'start' row, the exemption PhaseStrategy.isOffBoardForEdf makes. */
+	function isUnplacedTerrain(ship) {
+		if (ship.userid == -5) return false;
+		const lastMove = ship.movement[ship.movement.length - 1];
+		return !lastMove || lastMove.type === 'start';
+	}
 
-		gamedata.ships.filter(ship => ((ship.Enormous && ship.shipSizeClass == 5) || isFieldTerrain(ship)) && !shipManager.isDestroyed(ship)).forEach(ship => {
+	const TERRAIN_KEY_PREFIX = 'terrain:';
+
+	function generateTerrainHexes(gamedata) {
+		gamedata.ships.filter(ship => ((ship.Enormous && ship.shipSizeClass == 5) || isFieldTerrain(ship)) && !shipManager.isDestroyed(ship) && !isUnplacedTerrain(ship)).forEach(ship => {
 			const position = shipManager.getShipPosition(ship);
 			const move = shipManager.movement.getLastCommitedMove(ship);
 			const facing = move ? move.facing : 0;
@@ -368,13 +379,35 @@ window.BallisticIconContainer = function () {
 			const dim = isFieldTerrain(ship) ? FIELD_TERRAIN_DIM : 1;
 
 			//position + facing fix the footprint, so an unmoved moon is never rebuilt
-			syncSceneObject.call(this, 'terrain:' + ship.id, `${position.q},${position.r}|${facing}|${hexes.length}`, () => {
+			syncSceneObject.call(this, TERRAIN_KEY_PREFIX + ship.id, `${position.q},${position.r}|${facing}|${hexes.length}`, () => {
 				const overlay = buildHexRegionOverlay.call(this, position, hexes, 'hexWhite', dim);
 
 				return overlay && { object: overlay, release: window.HexRegion.dispose };
 			});
 		});
 	}
+
+	/* Deployment: placing or turning a terrain unit is a local 'deploy' move, and nothing on that
+	   path runs consumeGamedata - so its footprint stayed put until the next poll (the reason terrain
+	   hexes used to be switched off in Deployment altogether). PhaseStrategy.onShipMovementChanged
+	   calls this instead. Marks and sweeps only the terrain keys, as refreshSensorChargeCourses does
+	   its own, so ballistics and every other overlay are left alone. The caller requests the frame. */
+	BallisticIconContainer.prototype.refreshTerrainHexes = function (gamedata) {
+		const isTerrainKey = key => key.startsWith(TERRAIN_KEY_PREFIX);
+
+		this.sceneObjects.forEach((entry, key) => {
+			if (isTerrainKey(key)) entry.used = false;
+		});
+
+		generateTerrainHexes.call(this, gamedata);
+
+		this.sceneObjects.forEach((entry, key) => {
+			if (!isTerrainKey(key) || entry.used) return;
+
+			releaseSceneObject.call(this, entry);
+			this.sceneObjects.delete(key);
+		});
+	};
 
 	/* WALKERS OF SIGMA-957 (WALKERS_OF_SIGMA_PLAN.md 3.7, Stage 7) - the Energy Draining NET field.
 
