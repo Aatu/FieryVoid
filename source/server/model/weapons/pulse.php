@@ -122,9 +122,33 @@ class ScatterPulsar extends Pulse{
         
         public function getDamage($fireOrder){        return 6;   }
     }
+	
+	
+class ScatterPulsarFtr extends Pulse{
+        public $name = "ScatterPulsarFtr";
+        public $displayName = "Scatter Pulsar";
+		public $iconPath = "scatterPulsar.png";
+
+		public $rof = 3;
+        public $grouping = 25;
+        public $maxpulses = 6;
+        
+        public $loadingtime = 1;
+        public $intercept = 2;
+        public $priority = 3;
+        
+        public $rangePenalty = 2;
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+        
+		function __construct($startArc, $endArc, $nrOfShots = 1){
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return 6;   }
+}
     
-
-
 
 class QuadPulsar extends Pulse{
         public $name = "quadPulsar";

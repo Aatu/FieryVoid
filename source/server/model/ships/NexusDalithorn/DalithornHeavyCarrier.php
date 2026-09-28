@@ -1,23 +1,23 @@
 <?php
-class DalithornHeavyJumpDreadnought extends BaseShip{
+class DalithornHeavyCarrier extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 460;
+	$this->pointCost = 535;
 	$this->faction = "Nexus Dalithorn Commonwealth";
-        $this->phpclass = "DalithornHeavyJumpDreadnought";
+        $this->phpclass = "DalithornHeavyCarrier";
         $this->imagePath = "img/ships/Nexus/Dalithorn_JumpDreadnought2.png";
-        $this->shipClass = "Threnk Heavy Jump Dreadnought";
+        $this->shipClass = "Taldreth Heavy Carrier";
 			$this->variantOf = "Dalithor Heavy Dreadnought";
-			$this->occurence = "uncommon";
+			$this->occurence = "rare";
  		$this->shipSizeClass = 3;
 		$this->canvasSize = 175; //img has 200px per side
 		$this->unofficial = true;
 
-        $this->fighters = array("superheavy"=>2);
+        $this->fighters = array("superheavy"=>4);
 
-		$this->isd = 2098;
+		$this->isd = 2107;
         
         $this->forwardDefense = 14;
         $this->sideDefense = 15;
@@ -42,7 +42,8 @@ class DalithornHeavyJumpDreadnought extends BaseShip{
 		$this->addFrontSystem(new NexusMinigun(2, 4, 1, 300, 120));
 		$this->addFrontSystem(new NexusAutocannon(3, 4, 1, 240, 60));
 		$this->addFrontSystem(new NexusAutocannon(3, 4, 1, 300, 120));
-		$this->addFrontSystem(new JumpEngine(4, 20, 8, 45));
+		$this->addFrontSystem(new NexusCoilgun(2, 10, 4, 330, 30));
+		$this->addFrontSystem(new NexusCoilgun(2, 10, 4, 330, 30));
 
         $this->addAftSystem(new Thruster(3, 10, 0, 2, 2));
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
@@ -54,12 +55,12 @@ class DalithornHeavyJumpDreadnought extends BaseShip{
         $this->addAftSystem(new Catapult(1, 6));
         $this->addAftSystem(new Catapult(1, 6));
 
-        $this->addLeftSystem(new NexusMediumChemicalLaser(3, 7, 2, 300, 360));
+        $this->addLeftSystem(new Catapult(1, 6));
         $this->addLeftSystem(new NexusGasGun(2, 7, 2, 180, 360));
 		$this->addLeftSystem(new NexusProtector(2, 4, 1, 180, 360));
         $this->addLeftSystem(new Thruster(3, 14, 0, 4, 3));
 
-        $this->addRightSystem(new NexusMediumChemicalLaser(3, 7, 2, 0, 60));
+        $this->addRightSystem(new Catapult(1, 6));
         $this->addRightSystem(new NexusGasGun(2, 7, 2, 0, 180));
 		$this->addRightSystem(new NexusProtector(2, 4, 1, 0, 180));
         $this->addRightSystem(new Thruster(3, 14, 0, 4, 4));
@@ -84,7 +85,7 @@ class DalithornHeavyJumpDreadnought extends BaseShip{
 			1=> array(
 					5 => "Thruster",
 					7 => "Minigun",
-					9 => "Jump Engine",
+					9 => "Coilgun",
 					11 => "Autocannon",
 					18 => "Structure",
 					20 => "Primary",
@@ -99,7 +100,7 @@ class DalithornHeavyJumpDreadnought extends BaseShip{
 			),
 			3=> array(
 					4 => "Thruster",
-					6 => "Medium Chemical Laser",
+					6 => "Catapult",
 					8 => "Gas Gun",
 					10 => "Protector",
 					18 => "Structure",
@@ -107,7 +108,7 @@ class DalithornHeavyJumpDreadnought extends BaseShip{
 			),
 			4=> array(
 					4 => "Thruster",
-					6 => "Medium Chemical Laser",
+					6 => "Catapult",
 					8 => "Gas Gun",
 					10 => "Protector",
 					18 => "Structure",

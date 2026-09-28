@@ -1,19 +1,19 @@
 <?php
-class DalithornHeavySupportFrigate extends MediumShip{
+class DalithornMissileFrigate extends MediumShip{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 260;
+        $this->pointCost = 325;
         $this->faction = "Nexus Dalithorn Commonwealth";
-        $this->phpclass = "DalithornHeavySupportFrigate";
+        $this->phpclass = "DalithornMissileFrigate";
         $this->imagePath = "img/ships/Nexus/Dalithorn_SupportFrigate2.png";
-        $this->shipClass = "Drenval Heavy Support Frigate";
+        $this->shipClass = "Sentrul Missile Frigate";
 			$this->variantOf = "Omethiron Heavy Frigate";
-			$this->occurence = "uncommon";
+			$this->occurence = "rare";
 		$this->unofficial = true;
         $this->canvasSize = 100;
-	    $this->isd = 2108;
+	    $this->isd = 2110;
 
         $this->fighters = array("superheavy"=>1);
         
@@ -27,7 +27,7 @@ class DalithornHeavySupportFrigate extends MediumShip{
         $this->pivotcost = 1;
         $this->iniativebonus = 60;
          
-        $this->addPrimarySystem(new Reactor(4, 12, 0, 0));
+        $this->addPrimarySystem(new Reactor(4, 11, 0, 0));
         $this->addPrimarySystem(new CnC(4, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 10, 3, 5));
         $this->addPrimarySystem(new Engine(4, 12, 0, 8, 2));
@@ -36,9 +36,9 @@ class DalithornHeavySupportFrigate extends MediumShip{
         $this->addPrimarySystem(new Thruster(2, 14, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(2, 14, 0, 4, 4));        
         
-		$this->addFrontSystem(new Catapult(1, 6));
-		$this->addFrontSystem(new NexusMinigun(2, 4, 1, 240, 60));
-		$this->addFrontSystem(new NexusMinigun(2, 4, 1, 300, 120));
+        $this->addFrontSystem(new NexusLaserMissile(2, 6, 1, 300, 60));
+		$this->addFrontSystem(new NexusProtector(2, 4, 1, 300, 60));
+        $this->addFrontSystem(new NexusLaserMissile(2, 6, 1, 300, 60));
         $this->addFrontSystem(new Thruster(3, 8, 0, 2, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 2, 1));
 	    
@@ -52,7 +52,6 @@ class DalithornHeavySupportFrigate extends MediumShip{
        
         $this->addPrimarySystem(new Structure(4, 48));
 
-
 	//d20 hit chart
 	$this->hitChart = array(
 		
@@ -60,16 +59,16 @@ class DalithornHeavySupportFrigate extends MediumShip{
 			8 => "Thruster",
 			10 => "Magazine",
 			12 => "Scanner",
-			15 => "Engine",
+			16 => "Engine",
 			17 => "Hangar",
 			19 => "Reactor",
 			20 => "C&C",
 		),
 
 		1=> array(
-			4 => "Thruster",
-			6 => "Catapult",
-			8 => "Minigun",
+			6 => "Thruster",
+			7 => "Protector",
+			11 => "Laser Missile",
 			17 => "Structure",
 			20 => "Primary",
 		),

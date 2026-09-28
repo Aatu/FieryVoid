@@ -29,7 +29,7 @@ class DalithornSmallScoutRefit extends MediumShip{
          
         $this->addPrimarySystem(new Reactor(3, 9, 0, 0));
         $this->addPrimarySystem(new CnC(3, 8, 0, 0));
-        $this->addPrimarySystem(new ELINTScanner(3, 10, 4, 4));
+        $this->addPrimarySystem(new ELINTScanner(3, 10, 4, 5));
         $this->addPrimarySystem(new Engine(3, 12, 0, 6, 3));
         $this->addPrimarySystem(new Hangar(1, 1, 1));
 		$this->addPrimarySystem(new Magazine(3, 10));
