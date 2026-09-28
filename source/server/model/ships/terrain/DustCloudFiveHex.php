@@ -4,7 +4,7 @@ class DustCloudFiveHex extends DustField {
 
     function __construct($id, $userid, $name, $slot) {
         parent::__construct($id, $userid, $name, $slot);
-        $this->pointCost = 5;
+        $this->pointCost = 1;
         $this->phpclass = "DustCloudFiveHex";
         $this->imagePath = "img/ships/dustCloudFiveHex.png";
         $this->canvasSize = 520;
@@ -17,8 +17,10 @@ class DustCloudFiveHex extends DustField {
             ['q' => 0, 'r' => -1]  // SW hex
         ];
         $this->notes = "Occupies multiple hexes.";
-        $this->notes .= "<br>Units entering its hexes take damage.";
-        $this->notes .= "<br>Deals target speed / 2 damage.";
+        $this->notes .= "<br>Units take damage for EACH of its hexes they enter.";
+        $this->notes .= "<br>Ships: speed / 2, to the Structure of the side entering the hex (Primary if none).";
+        $this->notes .= "<br>Fighters: (speed - 10) / 3, to every craft.";
+        $this->notes .= "<br>Standard damage. Armor applies, shields do not.";
     }
 }
 ?>

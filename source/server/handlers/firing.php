@@ -2437,13 +2437,13 @@ public static function firePreFiringWeapons($gamedata){
         // - Terrain collisions: RammingAttack::beforePreFiringOrderResolution already creates
         //   a SEPARATE collision order for the host itself, so spilling the pod's order onto
         //   it as well made a host dragging a pod through an asteroid field take collision
-        //   damage twice.
+        //   damage twice. Every class of terrain hit, dust and meteors included.
         $spillsToHost = $target
             && !empty($target->attached)
             && $target instanceof FighterFlight
             && !$weapon->doesSkipAttachedHostHit()
-            && $fire->damageclass !== 'TerrainCollision'
-            && $fire->damageclass !== 'TerrainCrash';
+            && !in_array($fire->damageclass, array('TerrainCollision', 'TerrainCrash', 'DustCollision',
+                'MeteoroidCollision', 'WaveformCollision', 'SingularityCollision'), true);
 
         if ($spillsToHost) {
             $hostShipId = key($target->attached);

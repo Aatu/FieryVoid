@@ -2,7 +2,6 @@
 class DustField extends Terrain {
     public $isDustField = true;
     public $terrainCollisionType = 'DustCollision';
-    public static $dustDamagedThisTurn = array();
 
     function __construct($id, $userid, $name, $slot) {
         parent::__construct($id, $userid, $name, $slot);
@@ -17,7 +16,9 @@ class DustField extends Terrain {
         $this->iniativebonus = -200;
         $this->isd = 0;
         $this->notes = "Units entering this hex take damage.";
-        $this->notes .= "<br>Deals target speed / 2 damage.";
+        $this->notes .= "<br>Ships: speed / 2, to the Structure of the side entering the hex (Primary if none).";
+        $this->notes .= "<br>Fighters: (speed - 10) / 3, to every craft.";
+        $this->notes .= "<br>Standard damage. Armor applies, shields do not.";
         $this->occurence = "common";
         $this->base = true;
         $this->smallBase = true;
@@ -39,8 +40,10 @@ class DustField extends Terrain {
         );
     }
 
-    public static function getDustDamage($speed) {
-        return floor($speed / 2);
+    //Per hex entered, fractions dropped - see RammingAttack's DustCollision handling for where it lands.
+    public static function getDustDamage($speed, $isFlight = false) {
+        if ($isFlight) return max(0, floor(($speed - 10) / 3));
+        return max(0, floor($speed / 2));
     }
 }
 ?>
