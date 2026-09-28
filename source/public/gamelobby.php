@@ -1055,7 +1055,7 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
         <div class="slot lb-slot">
             <div class="lb-slot-main">
                 <div class="lb-slot-player">
-                    <!--<span class="playername"></span><span class="lb-slot-open">[OPEN]</Open></span>-->
+                    <span class="playername"></span><!--<span class="lb-slot-open">[OPEN]</Open></span>-->
                 </div>
                 <div class="lb-slot-meta">
                     <span class="value name"></span>
