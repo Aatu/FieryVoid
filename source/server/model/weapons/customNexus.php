@@ -5375,7 +5375,8 @@ class NexusHeavyAssaultCannonBattery extends Weapon{
         public $damageType = "Standard"; 
         public $weaponClass = "Laser"; 
         
-        function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 2){
+        function __construct($startArc, $endArc, $damagebonus, $nrOfShots){
+//        function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 2){
             $this->damagebonus = $damagebonus;
             $this->defaultShots = $nrOfShots;
             $this->shots = $nrOfShots;
