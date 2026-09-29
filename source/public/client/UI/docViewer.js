@@ -42,7 +42,7 @@
     /* Image placeholders: the grey "image pending" boxes that mark where a picture is wanted. They
        show by default so the gaps are easy to find; set this to false to hide any that have not
        been filled yet (a deploy that should not show them), without touching the documents. */
-    var SHOW_IMAGE_PLACEHOLDERS = false;
+    var SHOW_IMAGE_PLACEHOLDERS = true;
 
     /* The five documents, in tab order. `page` is the standalone page (and the name a link uses),
        `src` the content file. */

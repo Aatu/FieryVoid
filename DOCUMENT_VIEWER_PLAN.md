@@ -153,14 +153,14 @@ A placeholder is a `figure.fvd-fig--ph` that names its file in `data-img` and it
 
 ```html
 <!-- before -->
-<figure class="fvd-fig fvd-fig--ph fvd-fig--side" data-img="img/docs/faq/ruler.jpg" data-ratio="4:3">
+<figure class="fvd-fig fvd-fig--ph fvd-fig--side" data-img="img/docViewer/ruler.jpg" data-ratio="4:3">
   <div class="fvd-ph">Screenshot: the Ruler Tool measuring from one hex to another, ...</div>
   <figcaption>Measuring range and line of sight.</figcaption>
 </figure>
 
 <!-- after -->
 <figure class="fvd-fig fvd-fig--side">
-  <img src="img/docs/faq/ruler.jpg" alt="The Ruler Tool measuring range and line of sight">
+  <img src="img/docViewer/ruler.jpg" alt="The Ruler Tool measuring range and line of sight">
   <figcaption>Measuring range and line of sight.</figcaption>
 </figure>
 ```
@@ -170,8 +170,8 @@ A placeholder is a `figure.fvd-fig--ph` that names its file in `data-img` and it
   side. The shape in the list below is a guide only; once in, a picture keeps its own proportions.
 - **Format.** JPG at about 75% quality, ideally under ~250 KB each. A flat-colour UI screenshot may
   be smaller as PNG; any web format works if the extension is changed in both places.
-- **Filenames are case-sensitive on live** (Linux). Use exactly the paths listed, all lower case,
-  under `source/public/img/docs/`.
+- **Filenames are case-sensitive on live** (Linux). Use exactly the names listed, all lower case,
+  in the one flat folder `source/public/img/docViewer/`.
 - **To replace an image later, use a new filename.** Images are served with a one-year cache, and
   these `<img>`s do not carry the `?v=` deploy buster, so a returning player would keep seeing a
   picture swapped under the same name.
@@ -179,7 +179,10 @@ A placeholder is a `figure.fvd-fig--ph` that names its file in `data-img` and it
   every unfilled placeholder, caption included, for a deploy that goes out before all the pictures
   are in. Search never indexes the briefs.
 
-### 5.2 Shot list: 37 pictures
+### 5.2 Shot list: 36 pictures, all in (2026-09-29)
+
+All 36 sit flat in `img/docViewer/`, not in the per-document folders named below. #32 was dropped
+because the user ruled that the entry reads fine without it, so no placeholder is left in any document.
 
 Shape "side" means a smaller picture floated beside the text. A screenshot of a real game reads
 better than an empty test map.
@@ -224,7 +227,7 @@ better than an empty test map.
 | 29 | minefield.jpg | 16:9 | Mines & Minesweeping | Deploy Minefield in the Deployment Phase: the chosen area on the map with mines scattered in it. |
 | 30 | skin-dance.jpg | 4:3 side | Skin Dancing | A small, agile ship ending its move in the same hex as an Enormous unit (a base), about to skin dance. |
 | 31 | terrain.jpg | 16:9 | Terrain | A map with asteroids, a moon, a dust cloud and a meteor swarm, and a ship's path passing close by. |
-| 32 | damage-types.jpg | 16:7 | Weapon Damage Types | **A diagram, not a screenshot:** where each damage type lands. Standard hits one system; Raking hits several in one section; Piercing hits the facing section, Primary and the far section; Flash hits the target plus 25% to everything else in the hex. |
+| 32 | ~~damage-types.jpg~~ **dropped** | 16:7 | Weapon Damage Types | **A diagram, not a screenshot:** where each damage type lands. Standard hits one system; Raking hits several in one section; Piercing hits the facing section, Primary and the far section; Flash hits the target plus 25% to everything else in the hex. |
 
 **Ammo & Options**, in `img/docs/ammo/`:
 
@@ -454,8 +457,8 @@ braces are unchanged and `php -l` is clean.
   - an old link such as `faq.php#ladder` pasted into the address bar.
 - Read the Starter Guide through; it took the heaviest edit. Check the §6.3 changes and the new
   Terrain text.
-- Supply the §5.2 pictures, or set `SHOW_IMAGE_PLACEHOLDERS = false` for a deploy that goes out
-  before they are in.
+- ~~Supply the §5.2 pictures~~ Done 2026-09-29. `source/public/img/docViewer/` is untracked, so
+  `git add` it by name.
 - Commit, adding the three untracked paths by name. EW.php is a separate, gameplay-affecting
   change and may deserve its own commit.
 

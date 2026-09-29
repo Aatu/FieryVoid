@@ -12,7 +12,7 @@
   on any element makes faq.php#x land on it. Never use id= (the window is dropped into other
   pages, whose ids it must not collide with).
   Links: to another document href="factions-tiers.php#shadows"; within this one href="#mines".
-  Pictures: <figure class="fvd-fig"><img src="img/docs/..." alt="..."><figcaption>..</figcaption></figure>.
+  Pictures: <figure class="fvd-fig"><img src="img/docViewer/..." alt="..."><figcaption>..</figcaption></figure>.
   A picture still to be supplied is a placeholder - fvd-fig--ph, the file it should become in
   data-img, what it should show inside <div class="fvd-ph">. Swap it for the <img> when it arrives.
   Useful blocks: <ol class="fvd-steps"> numbered steps; <dl class="fvd-defs"> term / meaning;
@@ -23,8 +23,8 @@
 <!-- ════════════════════════════════ GENERAL ════════════════════════════════ -->
 
 <section data-key="general" data-title="General Notes" data-group="General">
-  <figure class="fvd-fig fvd-fig--ph" data-img="img/docs/faq/battle.jpg">
-    <div class="fvd-ph">A striking battle screenshot: two fleets exchanging fire in mid-game, weapon effects visible.</div>
+  <figure class="fvd-fig">
+    <img src="img/docViewer/battle.jpg" alt="Two fleets exchanging fire in mid-game">
     <figcaption>Fiery Void: Babylon 5 Wars, online.</figcaption>
   </figure>
   <p class="fvd-lede">Fiery Void is an online adaptation of the <b>Babylon 5 Wars</b> tabletop game by Agents of Gaming
@@ -150,9 +150,8 @@
   </table>
 
   <h3>Ship windows</h3>
-  <figure class="fvd-fig fvd-fig--ph" data-img="img/docs/faq/ship-window-controls.jpg">
-    <div class="fvd-ph">Screenshot: a ship window (the SCS that opens when you right-click a unit) with its title bar,
-      corner resize grip and the Hit Chart / Ship Art / Ship Stats / Notes buttons.</div>
+  <figure class="fvd-fig">
+    <img src="img/docViewer/ship-window-controls.jpg" alt="A ship window with its title bar, resize grip and buttons">
     <figcaption>A ship window's controls.</figcaption>
   </figure>
   <p>The ship window is the Ship Control Sheet (SCS) that opens when you right-click a unit.</p>
@@ -197,9 +196,8 @@
   <p class="fvd-lede">The Info Panel is the tabbed panel along the bottom-left of the battle screen. Its six tabs share
     one body, so only one is on screen at a time: <b>COMBAT LOG</b>, <b>FLEET INFO</b>, <b>GAME CHAT</b>, <b>CHAT</b>,
     <b>DECLARATIONS</b> and <b>SAVE FLEET</b>.</p>
-  <figure class="fvd-fig fvd-fig--ph" data-img="img/docs/faq/info-panel.jpg">
-    <div class="fvd-ph">Screenshot: the Info Panel at the bottom of the battle screen - the tab strip, with the COMBAT
-      LOG tab open on a turn's firing log.</div>
+  <figure class="fvd-fig">
+    <img src="img/docViewer/info-panel.jpg" alt="The Info Panel with the combat log open">
     <figcaption>The Info Panel, on the COMBAT LOG tab.</figcaption>
   </figure>
   <p>Click a tab to switch to it. A tab is only a view - switching tabs never changes your orders.</p>
@@ -307,9 +305,8 @@
 </section>
 
 <section data-key="ruler" data-title="Ruler Tool" data-group="Interface &amp; Site">
-  <figure class="fvd-fig fvd-fig--ph fvd-fig--side" data-img="img/docs/faq/ruler.jpg" data-ratio="4:3">
-    <div class="fvd-ph">Screenshot: the Ruler Tool measuring from one hex to another, showing the distance and whether
-      line of sight is blocked.</div>
+  <figure class="fvd-fig fvd-fig--side">
+    <img src="img/docViewer/ruler.jpg" alt="The Ruler Tool measuring distance and line of sight">
     <figcaption>Measuring range and line of sight.</figcaption>
   </figure>
   <p>The Ruler Tool measures the distance between any two hexes on the map, and shows whether line of sight between
@@ -361,9 +358,8 @@
   </div>
 
   <h3>How it works in practice</h3>
-  <figure class="fvd-fig fvd-fig--ph fvd-fig--side" data-img="img/docs/faq/discord-dm.jpg" data-ratio="4:3">
-    <div class="fvd-ph">Screenshot: a turn-notification DM from the Fiery Void bot in Discord, naming the game, turn and
-      phase, with its link.</div>
+  <figure class="fvd-fig fvd-fig--side">
+    <img src="img/docViewer/discord-dm.jpg" alt="A Fiery Void turn notification in Discord">
     <figcaption>A turn notification in Discord.</figcaption>
   </figure>
   <ul>
@@ -457,9 +453,8 @@
     shared can only be loaded by the player who saved them.</p>
 
   <h3>Saving a fleet from a game in progress</h3>
-  <figure class="fvd-fig fvd-fig--ph" data-img="img/docs/faq/save-fleet-tab.jpg" data-ratio="16:7">
-    <div class="fvd-ph">Screenshot: the SAVE FLEET tab of a game's Info Panel - the summary line of how many units will
-      be saved, the "temporary critical effects" tick box and the Save Current Fleet button.</div>
+  <figure class="fvd-fig">
+    <img src="img/docViewer/save-fleet-tab.jpg" alt="The Save Fleet tab of the Info Panel">
     <figcaption>Saving a fleet's survivors from the battle screen.</figcaption>
   </figure>
   <p>In any game, open the <b>SAVE FLEET</b> tab of the Info Panel (beside COMBAT LOG, DECLARATIONS and the chats). It
@@ -487,9 +482,8 @@
     choice, every time you load it.</p>
 
   <h3>Applying battle damage by hand</h3>
-  <figure class="fvd-fig fvd-fig--ph fvd-fig--side" data-img="img/docs/faq/apply-damage.jpg" data-ratio="3:4">
-    <div class="fvd-ph">Screenshot: the menu opened by clicking a system in Fleet Selection - its Damage section
-      (remaining-boxes value, Destroy tick box) and a Critical Effects list.</div>
+  <figure class="fvd-fig fvd-fig--side">
+    <img src="img/docViewer/apply-damage.jpg" alt="The system menu in Fleet Selection with its Damage and Critical Effects sections">
     <figcaption>Damaging a bought ship before the battle.</figcaption>
   </figure>
   <p>In Fleet Selection, any unit <b>you have bought</b> can be damaged before the battle starts. No rule gates this -
@@ -540,9 +534,8 @@
 <section data-key="boarding" data-title="Boarding Actions" data-group="Rules &amp; Mechanics">
   <p class="fvd-lede">Many factions have Breaching Pods and Grappling Claws, which carry marines that can board enemy
     ships.</p>
-  <figure class="fvd-fig fvd-fig--ph" data-img="img/docs/faq/boarding.jpg">
-    <div class="fvd-ph">Screenshot: breaching pods attached to an enemy ship's section, with a pod's marine mission
-      options (Capture / Sabotage / Rescue) showing.</div>
+  <figure class="fvd-fig">
+    <img src="img/docViewer/boarding.jpg" alt="Breaching pods attached to an enemy ship, with marine mission options">
     <figcaption>Breaching pods attached to an enemy hull.</figcaption>
   </figure>
 
@@ -707,8 +700,8 @@
 </section>
 
 <section data-key="called" data-title="Called Shots" data-group="Rules &amp; Mechanics">
-  <figure class="fvd-fig fvd-fig--ph fvd-fig--side" data-img="img/docs/faq/called-shot.jpg" data-ratio="4:3">
-    <div class="fvd-ph">Screenshot: an enemy ship's SCS with one of its systems picked as a called-shot target.</div>
+  <figure class="fvd-fig fvd-fig--side">
+    <img src="img/docViewer/called-shot.jpg" alt="An enemy ship's SCS with a system picked as a called-shot target">
     <figcaption>Picking a system for a called shot.</figcaption>
   </figure>
   <ul>
@@ -759,9 +752,8 @@
       deploy later. A slot containing any of these <i>and</i> delayed units gets a Turn 1 Deployment Phase for them and a
       second one later for the delayed units.</li>
   </ul>
-  <figure class="fvd-fig fvd-fig--ph" data-img="img/docs/faq/jump-point-marker.jpg" data-ratio="16:7">
-    <div class="fvd-ph">Screenshot: the blue Jump Point hexes marking where a delayed slot's units will arrive next
-      turn.</div>
+  <figure class="fvd-fig">
+    <img src="img/docViewer/jump-point-marker.jpg" alt="Blue jump point hexes marking where delayed units will arrive">
     <figcaption>The warning your opponents get: blue Jump Point hexes.</figcaption>
   </figure>
 </section>
@@ -773,9 +765,8 @@
   <p>To allocate EW, select your ship and click an enemy or friendly unit to bring up the relevant EW buttons, then use
     Add / Remove (right-click sets a function to its maximum or to zero - see <a href="#useful">Hot Keys</a>). EW lines
     are drawn on the map and can be toggled with the <kbd>W</kbd> / <kbd>X</kbd> / <kbd>Y</kbd> keys.</p>
-  <figure class="fvd-fig fvd-fig--ph" data-img="img/docs/faq/elint.jpg">
-    <div class="fvd-ph">Screenshot: an ELINT ship allocating support EW - the SOEW / SDEW / BDEW buttons on a friendly
-      ship - with EW lines drawn on the map.</div>
+  <figure class="fvd-fig">
+    <img src="img/docViewer/elint.jpg" alt="An ELINT ship allocating support EW, with EW lines on the map">
     <figcaption>ELINT support on a friendly ship.</figcaption>
   </figure>
 
@@ -882,9 +873,8 @@
   <p class="fvd-lede">Carriers can launch and recover their fighters, shuttles and other small craft <i>during</i> a
     battle, and can start the battle with them docked inside rather than placed on the map. The options appear
     automatically on any ship with hangar space.</p>
-  <figure class="fvd-fig fvd-fig--ph" data-img="img/docs/faq/hangar-launch.jpg">
-    <div class="fvd-ph">Screenshot: a carrier's tooltip menu with its Launch button, and the launch window listing the
-      stored flights and shuttles.</div>
+  <figure class="fvd-fig">
+    <img src="img/docViewer/hangar-launch.jpg" alt="A carrier's Launch window listing stored flights and shuttles">
     <figcaption>Launching craft from a carrier.</figcaption>
   </figure>
 
@@ -1114,9 +1104,8 @@
 
   <h3>Manual interception</h3>
   <p>Putting your own weapons on a specific incoming shot. This is declared in the <b>Firing phase only</b>:</p>
-  <figure class="fvd-fig fvd-fig--ph" data-img="img/docs/faq/incoming-list.jpg" data-ratio="16:9">
-    <div class="fvd-ph">Screenshot: a ship tooltip's INCOMING list in the Firing phase, with one row's hit chance
-      underlined in blue, ready to click to intercept it.</div>
+  <figure class="fvd-fig">
+    <img src="img/docViewer/incoming-list.jpg" alt="A ship tooltip's INCOMING list, ready to click to intercept">
     <figcaption>The INCOMING list: click an underlined hit chance to intercept that shot.</figcaption>
   </figure>
   <ol class="fvd-steps">
@@ -1207,9 +1196,8 @@
   </dl>
 
   <h3>Opening a jump point</h3>
-  <figure class="fvd-fig fvd-fig--ph" data-img="img/docs/faq/jump-point.jpg">
-    <div class="fvd-ph">Screenshot: the Jump Engine selected, its yellow reach overlay on the map, and a yellow 'Jump Point
-      Forming' hex with its facing arrow.</div>
+  <figure class="fvd-fig">
+    <img src="img/docViewer/jump-point.jpg" alt="A Jump Engine's reach overlay and a forming jump point">
     <figcaption>Declaring a jump point: the reach overlay and the facing arrow.</figcaption>
   </figure>
   <ol class="fvd-steps">
@@ -1305,9 +1293,8 @@
   </ul>
 
   <h3>Calling them in</h3>
-  <figure class="fvd-fig fvd-fig--ph" data-img="img/docs/faq/manage-reinforcements.jpg">
-    <div class="fvd-ph">Screenshot: the Manage Reinforcements window in Initial Orders - a jump-capable ship chosen, its
-      target hex set, and the Jump Point Manifest with units ticked, speeds and carriers set.</div>
+  <figure class="fvd-fig">
+    <img src="img/docViewer/manage-reinforcements.jpg" alt="The Manage Reinforcements window and its Jump Point Manifest">
     <figcaption>Manage Reinforcements and the Jump Point Manifest.</figcaption>
   </figure>
   <ol class="fvd-steps">
@@ -1419,9 +1406,8 @@
       random within an area you choose. Mines can go anywhere on the map, as long as it is not within 10 hexes of an enemy
       deployment zone.</li>
   </ul>
-  <figure class="fvd-fig fvd-fig--ph" data-img="img/docs/faq/minefield.jpg">
-    <div class="fvd-ph">Screenshot: Deploy Minefield in the Deployment Phase - the chosen area on the map with mines
-      scattered in it.</div>
+  <figure class="fvd-fig">
+    <img src="img/docViewer/minefield.jpg" alt="A minefield being deployed on the map">
     <figcaption>Laying a minefield.</figcaption>
   </figure>
 
@@ -1487,9 +1473,8 @@
 <section data-key="skindancing" data-title="Skin Dancing" data-group="Rules &amp; Mechanics">
   <p class="fvd-lede">Skin dancing is flying just metres above the surface of a large unit or base - a very dangerous
     manoeuvre, performed only by the most agile ships.</p>
-  <figure class="fvd-fig fvd-fig--ph fvd-fig--side" data-img="img/docs/faq/skin-dance.jpg" data-ratio="4:3">
-    <div class="fvd-ph">Screenshot: a small, agile ship ending its move in the same hex as an Enormous unit (a base),
-      about to skin dance.</div>
+  <figure class="fvd-fig fvd-fig--side">
+    <img src="img/docViewer/skin-dance.jpg" alt="A small ship in the same hex as an Enormous unit, about to skin dance">
     <figcaption>Skin dancing over a base.</figcaption>
   </figure>
 
@@ -1574,9 +1559,8 @@
 </section>
 
 <section data-key="terrain" data-title="Terrain" data-group="Rules &amp; Mechanics">
-  <figure class="fvd-fig fvd-fig--ph" data-img="img/docs/faq/terrain.jpg">
-    <div class="fvd-ph">Screenshot: a map with asteroids, a moon, a dust cloud and a meteor swarm, and a ship's path
-      passing close by.</div>
+  <figure class="fvd-fig">
+    <img src="img/docViewer/terrain.jpg" alt="A map with asteroids, a moon, a dust cloud and a meteor swarm">
     <figcaption>Asteroids, a moon, dust and a meteor swarm on the map.</figcaption>
   </figure>
   <dl class="fvd-defs">
@@ -1636,12 +1620,6 @@
     menu to switch, or right-click it to switch every similar weapon that has no orders yet. <b>Linked</b> and
     <b>Sustained</b> are a little different from the rest - they are extra rules layered on top of a weapon's damage
     type, rather than damage types of their own.</p>
-  <figure class="fvd-fig fvd-fig--ph" data-img="img/docs/faq/damage-types.jpg" data-ratio="16:7">
-    <div class="fvd-ph">Diagram: where each damage type lands on a ship - Standard (one system), Raking (several systems
-      in one section), Piercing (the facing section, Primary and the far section) and Flash (the target plus 25% to
-      everything else in the hex).</div>
-    <figcaption>How the damage types spread their damage.</figcaption>
-  </figure>
 
   <h3>Standard</h3>
   <p>The simplest damage type, and the one the others are measured against.</p>
