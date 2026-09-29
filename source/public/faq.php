@@ -55,6 +55,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li><a href="#stealth">Stealth Ships</a></li>
                 <li><a href="#terrain">Terrain</a></li>  
                 <li><a href="#useful">Useful Controls</a></li>
+                <li><a href="#firingmodes">Weapon Firing Modes</a></li>
                 <li><a href="#disclaimer">Disclaimer</a></li>                                                                      
             </ul>     
       </li>                                                                 
@@ -1189,7 +1190,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 </ul>
             </li>
             <br>
-            <li><b>Ship Window (the Ship Control Sheer (SCS) that opens when you -rightclick a unit):</b>
+            <li><b>Ship Window (the Ship Control Sheet (SCS) that opens when you -rightclick a unit):</b>
                 <ul class="circle-list">
                     <li>Drag the title bar - Move the window around the screen.  On a computer the next window you open on that side of the screen appears where you left the last one (until you reload the page).</li>
                     <li>Drag the bottom corner grip - Resize the window.  The grip is on the corner facing away from the edge the window is docked to (bottom-right for a left-hand window, bottom-left for a right-hand one), so you always drag outwards to make it bigger; a right-hand window stops growing at the left edge of the screen.  The size you settle on is used by every later window on that side of the screen - the two sides are remembered separately - and is kept on your device for your next session, so you can set it once to suit your screen (Note- drag it with your finger on touchscreen).</li>
@@ -1211,7 +1212,87 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                     <li>Right-click on + and - Movement Icons -  Will set the speed of the ship to maximum (Speed 10) or the minimum (Speed 0) in a single click.</li>                        
                 </ul>
             </li>
-            <br>                                                        
+            <br>
+        </ul>
+        <a class="back-to-top" href="#top">↩ Back to Top</a>
+
+        <h3 id="firingmodes" >Weapon Firing Modes</h3>
+        <p>A weapon's <b>firing mode</b> decides what its damage actually does once it lands.  Hover over a weapon in the
+           ship window and its mode is shown as <b>Damage type</b>.  Some weapons have more than one mode (the Minbari Neutron Laser, for example, can fire as Raking or Piercing):
+           click the mode button in the weapon's menu to switch, or right-click it to switch every similar weapon that has no orders yet.
+           Note - <b>Linked</b> and <b>Sustained</b> are a little different from the rest &mdash; they are extra rules layered on top of a weapon's damage type rather than a damage type of their own.</p>
+        <ul>
+            <li><b>Standard:</b> The simplest mode, and the one the others are measured against.
+                <ul class="circle-list">
+                    <li>The whole shot lands on <b>one system</b>, rolled on the hit chart of the section facing the shooter.  Against a fighter flight, it hits one fighter.</li>
+                    <li>The system's armour is subtracted once, and the rest is dealt as damage.</li>
+                    <li>If there is damage left over after the system is destroyed, it spills over (<i>overkills</i>) into that section's Structure, and from there into Primary Structure.</li>
+                </ul>
+            </li>
+            <br>
+
+            <li><b>Flash:</b> An explosion rather than a beam, so it hurts everything nearby &mdash; a Plasma Wave torpedo, for example.
+                <ul class="circle-list">
+                    <li>The target is hit exactly as it would be by a Standard shot.</li>
+                    <li>On top of that, <b>every other unit in the same hex</b> takes a 25& of the shot's damage, <b>friend or foe</b> (each unit's own armour still applies).  Mines are unaffected.</li>
+                    <li>Against a fighter flight, the fighter that was hit takes full damage and every other fighter in the flight takes a quarter.</li>
+                    <li>Overkill does not go to Structure.  Instead it is rolled again on the hit chart, and Flash damage cannot penetrate to Primary systems until all systems on an external strucutre block are destroyed.</li>
+                    <li>Think twice before firing one at an enemy that is sharing a hex with your own fighters!</li>
+                </ul>
+            </li>
+            <br>
+
+            <li><b>Linked:</b> Mostly found on fighter guns mounted in pairs or threes, such as the Plasma Blaster.
+                <ul class="circle-list">
+                    <li>All the shots share <b>one to-hit roll</b>, so they either all hit or all miss.</li>
+                    <li>Every shot that hits strikes the <b>same system</b> (or, against a flight, the same fighter).</li>
+                    <li>Each shot's damage is still worked out separately, so the target's armour is subtracted from every shot.</li>
+                </ul>
+            </li>
+            <br>
+
+            <li><b>Piercing:</b> A shot that punches straight through the target and out the far side.
+                <ul class="circle-list">
+                    <li>Against a ship with more than one Structure block, the damage is split into <b>three parts</b>: one for the section facing the shooter, one for the Primary section,
+                        and one for the section on the opposite side.</li>
+                    <li>If the shot goes in and out through the same section (for example, a Heavy Combat Vessel hit from the side), it is split into <b>two parts</b> instead: that section and Primary.</li>
+                    <li>Damage left over after destroying a system is <b>lost</b> &mdash; Piercing shots never overkill.</li>
+                    <li>Against smaller units with only one Structure block (Medium Ships and below), there is nothing to pass through: the shot lands as a single hit, and its damage is reduced by 10%.</li>
+                    <li>Piercing modes usually cannot be aimed at fighters at all.</li>
+                </ul>
+            </li>
+            <br>
+
+            <li><b>Pulse:</b> A rapid burst of identical bolts, such as the Medium Pulse Cannon.
+                <ul class="circle-list">
+                    <li>The whole burst makes <b>one to-hit roll</b>.  If that misses, every pulse misses.</li>
+                    <li>If it hits, the weapon scores a random number of pulses, plus a bonus pulse for every step the roll beat the number it needed, up to a maximum.
+                        The weapon's tooltip spells it out: <i>"Pulse mode: D5, +1/20%, max. 6 pulses"</i> means 1&ndash;5 hits, plus one more for every full 20% the roll was under the target number, but never more than 6.</li>
+                    <li>Each pulse is a separate hit that does its full damage and picks its own system, so a good roll can spread damage across a ship &mdash; or across several fighters in a flight.</li>
+                    <li>Interception lowers the chance to hit, which also cuts down the bonus pulses.</li>
+                </ul>
+            </li>
+            <br>
+
+            <li><b>Raking:</b> A beam that is swept across the target, typical of Lasers.
+                <ul class="circle-list">
+                    <li>The damage is broken into chunks called <b>rakes</b>, normally 10 points each (the weapon's tooltip says so if its rakes are a different size).  A 27-point hit, for example, becomes rakes of 10, 10 and 7.</li>
+                    <li>Each rake rolls for its own system in the same section, so one shot can damage several systems.</li>
+                    <li>Armour only has to be cut through once.  If a later rake strikes a system that an earlier rake has already hit, the armour already cut through does not count again.</li>
+                    <li>Against fighters, Raking works just like Standard &mdash; all of the damage goes onto one fighter.</li>
+                </ul>
+            </li>
+            <br>
+
+            <li><b>Sustained:</b> A beam that is held on the target over several turns.
+                <ul class="circle-list">
+                    <li>Some weapons, such as the Heavy Laser, can be <b>overcharged</b> in Initial Orders; after a full recharge cycle spent overcharging, their next shot is Sustained.  A few, such as the Particle Cutter, are always in Sustained mode.</li>
+                    <li>A Sustained weapon fires on <b>consecutive turns</b>, usually two (some manage three).  It must keep firing in its normal mode each turn, or the rest of the sequence is lost.</li>
+                    <li>If a shot hits, next turn's shot at the <b>same target hits automatically</b> and cannot be intercepted.  If it misses, or you switch targets, the next shot rolls to hit as normal.</li>
+                    <li>Follow-up shots ignore any armour that earlier shots have already cut through on the systems they hit, and the target's shields do not reduce them a second time.</li>
+                    <li>After its final shot the weapon is <b>forced offline for one turn</b> to cool down, and then starts recharging from scratch.</li>
+                </ul>
+            </li>
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
