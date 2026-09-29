@@ -61,7 +61,7 @@ window.scenarioCard = {
         },
         {
             key: "mapBorders", label: "Map Borders", factLabel: "Map Borders",
-            options: ["Cannot end movement outside of map", "Cannot leave map at all"],
+            options: ["Can't end movement outside map", "Cannot leave map at all"],
             help: "What happens to a unit that goes off the edge of the map."
         },
         {
