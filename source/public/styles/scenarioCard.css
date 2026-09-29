@@ -32,6 +32,7 @@
   background: var(--fv-card);
   border: 1px solid var(--fv-line-soft);
   border-left: var(--fv-log-rail) solid var(--rail, var(--fv-accent));
+    /*border-left: var(--fv-log-rail) solid var(--fv-purple);*/  
   box-sizing: border-box;
 }
 
