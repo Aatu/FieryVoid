@@ -71,6 +71,10 @@
         <link href="<?php echo AssetLoader::getAssetUrl('styles/gamesNew.css'); ?>" rel="stylesheet" type="text/css">
         <link href="<?php echo AssetLoader::getAssetUrl('styles/createGame.css'); ?>" rel="stylesheet" type="text/css">
         <link href="<?php echo AssetLoader::getAssetUrl('styles/scenarioCard.css'); ?>" rel="stylesheet" type="text/css">
+        <!-- The DATA ARCHIVE window: the Online Ladder window's FAQ link opens it over the form
+             instead of leaving the page (client/UI/docViewer.js). -->
+        <link href="<?php echo AssetLoader::getAssetUrl('styles/docViewer.css'); ?>" rel="stylesheet" type="text/css">
+        <script defer src="<?php echo AssetLoader::getAssetUrl('client/UI/docViewer.js'); ?>"></script>
         <script src="<?php echo AssetLoader::getAssetUrl('client/lib/jquery-4.0.0.min.js'); ?>"></script>
 <!--		<script src="client/helper.js"></script>-->
         <script src="client/mathlib.js"></script>

@@ -1,0 +1,1739 @@
+<!--
+  FIERY VOID DATA ARCHIVE - FAQ
+  Shown by client/UI/docViewer.js (the in-page window) and by faq.php (the same viewer, filling the
+  page). Edit the words here; nothing else needs to change.
+
+  Each <section> is one entry in the window's left-hand list:
+    data-key    the entry's id - also its link: faq.php#ladder. Keep it stable; other pages and old
+                Discord posts link to these (faq.php#ladder, faq.php#notifications, faq.php#interception).
+    data-title  the entry's name in the list and its heading.
+    data-group  the list heading it sits under (consecutive entries share one heading).
+  Inside an entry: <h3> sub-headings are listed under the entry while it is open; data-anchor="x"
+  on any element makes faq.php#x land on it. Never use id= (the window is dropped into other
+  pages, whose ids it must not collide with).
+  Links: to another document href="factions-tiers.php#shadows"; within this one href="#mines".
+  Pictures: <figure class="fvd-fig"><img src="img/docs/..." alt="..."><figcaption>..</figcaption></figure>.
+  A picture still to be supplied is a placeholder - fvd-fig--ph, the file it should become in
+  data-img, what it should show inside <div class="fvd-ph">. Swap it for the <img> when it arrives.
+  Useful blocks: <ol class="fvd-steps"> numbered steps; <dl class="fvd-defs"> term / meaning;
+  <table class="fvd-roll"> a dice table; <div class="fvd-note"> (also --tip, --warn) with an
+  optional <span class="fvd-note-label">.
+-->
+
+<!-- ════════════════════════════════ GENERAL ════════════════════════════════ -->
+
+<section data-key="general" data-title="General Notes" data-group="General">
+  <figure class="fvd-fig fvd-fig--ph" data-img="img/docs/faq/battle.jpg">
+    <div class="fvd-ph">A striking battle screenshot: two fleets exchanging fire in mid-game, weapon effects visible.</div>
+    <figcaption>Fiery Void: Babylon 5 Wars, online.</figcaption>
+  </figure>
+  <p class="fvd-lede">Fiery Void is an online adaptation of the <b>Babylon 5 Wars</b> tabletop game by Agents of Gaming
+    (heads bowed to you, AoG!).</p>
+  <p>So there is no rulebook for Fiery Void itself: the rules are freely available under the name <b>Advent of Galactic
+    Wars</b>, hosted at the <a href="http://b5warsvault.wikidot.com/">B5Wars Vault</a>. If you know those rules, you
+    should be able to play Fiery Void once you have got to grips with the online interface.</p>
+  <p>The game will seem very complex at first, but don't worry: start with the basics and dig deeper at your own pace,
+    and you will be a lion of the galaxy soon enough. The <a href="starterGuide.php">Starter Guide</a> walks you
+    through a first game.</p>
+  <p>For your first game, we suggest asking a more experienced player for a tutorial - in the in-game chat, or on our
+    <a href="https://discord.gg/4jXarWusp4">Discord</a> (the link is on the main page). It shouldn't be hard to find a
+    volunteer to explain the basics, and any other questions about the game are welcome on Discord too!</p>
+</section>
+
+<section data-key="differences" data-title="Differences from Babylon 5 Wars" data-group="General">
+  <ul>
+    <li>A lot has been automated compared to B5 Wars, such as dice rolling. Players have a little less control over
+      certain minutiae, but overall the game is more streamlined.</li>
+    <li>By default the game is played on a fixed, rectangular map. Nothing about the map's edges is enforced - it is up
+      to the players to make sure ships leaving the map behave as disengaged.</li>
+    <li>Fiery Void does not enforce the standard fleet design rules, but you can still check a fleet against them with
+      the <b>Check</b> button in Fleet Selection (see <a href="fleetchecker.php">Fleet Checker</a>).</li>
+    <li>The game mechanics use d100 rolls instead of d20, so most values are shown as percentages (1 point on a d20 is
+      5%).</li>
+    <li>There are no separate Power and Electronic Warfare phases. Both are part of a single Initial Orders phase, along
+      with ballistic firing, which happens after the initiative roll.</li>
+  </ul>
+
+  <h3>Electronic Warfare</h3>
+  <ul>
+    <li><b>CCEW</b> provides a lock on all enemy fighters within 10 hexes.</li>
+    <li>Most activities that need several EW points can be done in fractions. Blanket DEW, for example, gives 5% per 4
+      points allocated, so 3 points give around 4%.</li>
+    <li><b>Disruption EW:</b> enemy target locks are affected equally by the fraction of DIST used - 1 point of DIST
+      (which costs 3 EW points) against 3 separate OEW locks reduces each by 0.33 points.</li>
+    <li><b>Disruption EW:</b> CCEW counts as one OEW target and is affected accordingly.</li>
+    <li><b>Disruption EW:</b> a target lock weaker than 1 point but worth at least half a point gives a half-lock -
+      range penalties are multiplied by 1.5 instead of being doubled.</li>
+    <li><b>DEW below 0:</b> the B5 Wars rule that only a ship's own DEW can take its profile below 0 does not apply in
+      Fiery Void.</li>
+    <li>EW is covered in more detail under <a href="#elint">ELINT &amp; Electronic Warfare</a>.</li>
+  </ul>
+
+  <h3>Movement</h3>
+  <ul>
+    <li><b>Snap turns</b> are made as consecutive but separate turns. The turn delay is taken from the first turn only,
+      so shorten the first turn to shorten the snap turn.</li>
+    <li><b>Extended turns</b> - turns spread across several game turns - are not implemented.</li>
+  </ul>
+
+  <h3>Firing and weapons</h3>
+  <dl class="fvd-defs">
+    <dt>Firing order</dt>
+    <dd>Each weapon has a priority number that decides when it fires, except ramming attacks, which always go first.
+      Players cannot change the order.</dd>
+    <dt>Target section</dt>
+    <dd>Chosen automatically from the target's profiles and remaining structure. All fire from the same ship hits the
+      same section, and primary sections are avoided while there is an alternative.</dd>
+    <dt>System hit</dt>
+    <dd>In-arc systems are hit before off-arc ones. Damage is assumed to come from the direction of the shot.</dd>
+    <dt>Targeting fighters</dt>
+    <dd>The algorithm minimises the expected overall damage. You can target an individual fighter by hand, but it counts
+      as a called shot, at -40% to hit.</dd>
+    <dt>Fighter dropouts</dt>
+    <dd>Happen during critical hit resolution, after firing at ships.</dd>
+    <dt>Interception</dt>
+    <dd>Automatic, taking on the most powerful incoming shots first. Weapons with a 1-turn recharge intercept
+      automatically if they have not fired; others must be selected by hand (see <a href="#interception">Interception</a>).</dd>
+    <dt>Ballistic damage</dt>
+    <dd>Resolved during normal fire resolution at the end of the turn, rather than in a separate ballistic damage
+      sub-phase.</dd>
+    <dt>Fighter escorts</dt>
+    <dd>Fighters can intercept ballistics aimed at a ship they are escorting if they start and end their movement in its
+      hex.</dd>
+    <dt>Ballistics &amp; jammers</dt>
+    <dd>Power and missile launches are simultaneous, so disabling a jammer affects missile launches from the next turn,
+      not the current one.</dd>
+    <dt>Multi-mode weapons</dt>
+    <dd>Simplified: they may switch modes freely (Guardian Array) or be boosted for free in Initial Orders (EA
+      Interceptors).</dd>
+    <dt>Firing modes</dt>
+    <dd>Always visible, so opponents can see missile types immediately.</dd>
+  </dl>
+</section>
+
+<!-- ════════════════════════════ INTERFACE & SITE ═══════════════════════════ -->
+
+<section data-key="useful" data-title="Hot Keys &amp; Useful Controls" data-group="Interface &amp; Site">
+  <p class="fvd-lede">A few controls that help you get the best out of Fiery Void. On a touchscreen, a long press does
+    the job of a right-click.</p>
+
+  <h3>Hot keys</h3>
+  <table>
+    <thead><tr><th>Key</th><th>Does</th></tr></thead>
+    <tbody>
+      <tr><td><kbd>W</kbd></td><td>Show all Electronic Warfare (EW)</td></tr>
+      <tr><td><kbd>X</kbd></td><td>Show friendly EW</td></tr>
+      <tr><td><kbd>Y</kbd></td><td>Show enemy EW</td></tr>
+      <tr><td><kbd>F</kbd></td><td>Show friendly ballistic fire</td></tr>
+      <tr><td><kbd>E</kbd></td><td>Show enemy ballistic fire</td></tr>
+      <tr><td><kbd>H</kbd></td><td>Show hex numbers</td></tr>
+      <tr><td><kbd>R</kbd></td><td>Ruler Tool on / off</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Right-click actions</h3>
+  <table>
+    <thead><tr><th>Right-click</th><th>Does</th></tr></thead>
+    <tbody>
+      <tr><td>A unit</td><td>Selects it (if it is yours) and opens its controls</td></tr>
+      <tr><td>A weapon</td><td>Selects all identical weapons (all of a flight's fighter guns, for example)</td></tr>
+      <tr><td>A power button</td><td>Switches all identical systems on or off</td></tr>
+      <tr><td>An EW Add button</td><td>Sets that EW type to the most available</td></tr>
+      <tr><td>An EW Remove button</td><td>Sets that EW type to zero</td></tr>
+      <tr><td>Firing mode</td><td>Changes the mode of all similar weapons that have no orders yet</td></tr>
+      <tr><td>Defensive fire</td><td>Enables defensive fire on all similar weapons that have no orders yet</td></tr>
+      <tr><td>Cancel Move</td><td>Cancels all of the unit's current moves</td></tr>
+      <tr><td>Cancel Firing Order</td><td>Cancels the fire orders of all similar weapons</td></tr>
+      <tr><td>Move Forward</td><td>Moves forward using all remaining movement</td></tr>
+      <tr><td>Jink + / -</td><td>Sets jinking to the most allowed / to 0</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Ship windows</h3>
+  <figure class="fvd-fig fvd-fig--ph" data-img="img/docs/faq/ship-window-controls.jpg">
+    <div class="fvd-ph">Screenshot: a ship window (the SCS that opens when you right-click a unit) with its title bar,
+      corner resize grip and the Hit Chart / Ship Art / Ship Stats / Notes buttons.</div>
+    <figcaption>A ship window's controls.</figcaption>
+  </figure>
+  <p>The ship window is the Ship Control Sheet (SCS) that opens when you right-click a unit.</p>
+  <ul>
+    <li><b>Drag the title bar</b> to move the window. On a computer, the next window you open on that side of the
+      screen appears where you left the last one (until you reload the page).</li>
+    <li><b>Drag the corner grip</b> to resize the window. The grip is on the corner facing away from the edge the window
+      is docked to (bottom-right for a left-hand window, bottom-left for a right-hand one), so you always drag outwards
+      to make it bigger; a right-hand window stops growing at the left edge of the screen. The size you choose is used by
+      every later window on that side of the screen - the two sides are remembered separately - and is kept on your
+      device for next time, so you can set it once to suit your screen. On a touchscreen, drag it with your finger.</li>
+    <li><b>Double-click the corner grip or the title bar</b> to reset the window to its normal size (double-tap on a
+      touchscreen). The title bar does it too, so you can always get back even if a window is so large its corner is off
+      the screen.</li>
+    <li><b>Phones and tablets:</b> windows are scaled to fit your screen automatically before any resizing of your own,
+      with extra size in portrait, where space is tightest. Anything that does not fit scrolls inside the window, and
+      the title bar stays pinned to the top so it can always be dragged.</li>
+    <li><b>Hit Chart / Ship Art / Ship Stats / Notes:</b> click a button to open its panel, and click anywhere outside
+      to close it (Ship Stats and Notes also peek open when you point at them). Ship Stats shows this turn's actual turn
+      cost, turn delay, profile and initiative, with any figure the current situation has changed shown in yellow.</li>
+    <li><b>Ship Art</b> shows the unit's artwork in full colour in place of its sections; click the button again to go
+      back.</li>
+    <li><b>Point at a system</b> to show its details in the info panel. On a touchscreen, press and hold - a plain tap is
+      the action (power, firing, repair and so on).</li>
+    <li><b>Click the artwork behind the sections</b> to show the unit's own details rather than a system's.</li>
+  </ul>
+
+  <h3>During deployment</h3>
+  <ul>
+    <li><b>Shift + left-click</b> deploys a ship straight into a hex other units already occupy (long press on a
+      touchscreen). It must still be a valid deployment: fighters and mines can stack with ships, but ships cannot be
+      deployed with other ships.</li>
+    <li><b>Double left-click</b> selects a single unit in a hex straight away when you already have a deployable unit
+      selected (if the hex holds several units you still pick from the list). It makes selecting quicker when your
+      selected unit is a fighter flight or a mine.</li>
+    <li><b>Right-click the + or - movement icons</b> to set the ship's speed to the maximum (10) or minimum (0) in one
+      click.</li>
+  </ul>
+</section>
+
+<section data-key="infopanel" data-title="Info Panel" data-group="Interface &amp; Site">
+  <p class="fvd-lede">The Info Panel is the tabbed panel along the bottom-left of the battle screen. Its six tabs share
+    one body, so only one is on screen at a time: <b>COMBAT LOG</b>, <b>FLEET INFO</b>, <b>GAME CHAT</b>, <b>CHAT</b>,
+    <b>DECLARATIONS</b> and <b>SAVE FLEET</b>.</p>
+  <figure class="fvd-fig fvd-fig--ph" data-img="img/docs/faq/info-panel.jpg">
+    <div class="fvd-ph">Screenshot: the Info Panel at the bottom of the battle screen - the tab strip, with the COMBAT
+      LOG tab open on a turn's firing log.</div>
+    <figcaption>The Info Panel, on the COMBAT LOG tab.</figcaption>
+  </figure>
+  <p>Click a tab to switch to it. A tab is only a view - switching tabs never changes your orders.</p>
+
+  <h3>Sizing the panel</h3>
+  <ul>
+    <li><b>Drag the panel's top edge</b> up or down to set its height. The edge lights up when you point at it (on a
+      touchscreen, drag it with your finger).</li>
+    <li><b>The chevron (&#9650; / &#9660;)</b> at the right-hand end of the tab strip, or a <b>double-click on the top
+      edge</b>, switches between the compact and the tall panel. Opening the tall panel also tucks the initiative drawer
+      out of the way.</li>
+    <li>The compact and tall heights are remembered <i>separately</i> and kept on your device for next time - so you can
+      have one size for glancing at the log and another for going through a whole turn.</li>
+    <li>Expanding or collapsing the panel leaves you on the tab you were reading.</li>
+    <li>On phones, and on short landscape screens, the panel shrinks to its tab strip until you tap the chevron, and
+      only the selected tab is drawn while it is closed - there is not room for six tabs and a map.</li>
+    <li><b>Right-clicking inside the panel</b> no longer opens your browser's own menu, so a right-click aimed at a unit
+      that lands slightly low does not cover the game with it. The game's own right-click actions still work (a
+      right-click on a fleet-list row still opens that unit's ship window). The browser menu is still there in a text
+      box, so you can paste into chat, and when you have selected some text, so you can copy a log line out to
+      Discord.</li>
+  </ul>
+
+  <h3>COMBAT LOG</h3>
+  <p>What happened, this turn and in every turn before it.</p>
+  <ul>
+    <li>During a replay the log fills in <i>live</i> as the turn plays out. The rest of the time it shows the printed log
+      of whichever turn you have selected.</li>
+    <li><b>&#9664; TURN n &#9654;</b> steps back and forth through the turns; the arrows grey out at either end. The
+      <b>Live</b> button appears only while you are looking at an older turn, and takes you back to the current one.</li>
+    <li><b>Sort:</b> <i>Resolution</i> is the order the game actually resolved the fire in - what you want while
+      following a replay. <i>Attacker</i> and <i>Target</i> regroup the same entries by who was shooting or who was
+      being shot at, which is usually easier to read afterwards. On a narrow screen the three buttons become a
+      dropdown.</li>
+    <li><b>All / Mine / Enemy</b> chooses whose fire to show.</li>
+    <li><b>Hits</b> shows only fire that scored at least one hit, for when a big turn is mostly misses.</li>
+    <li><b>Find</b> filters the turn down to a ship or a weapon by name.</li>
+    <li>The readout to the left of the Find box names the current phase and, while a filter is on, how many fire groups
+      it is hiding - so a filtered log never looks like a quiet turn.</li>
+    <li>Reading the colours: ship names are pale, and the <i>target</i> of each shot is drawn in its team colour, since
+      who was shot at is what the eye looks for. Damage is red, criticals are amber, and shield absorption is blue.</li>
+  </ul>
+
+  <h3>FLEET INFO</h3>
+  <p>Every fleet in the battle, one block per player.</p>
+  <ul>
+    <li>Each block's header shows the <b>team</b> (coloured by allegiance), the <b>player's name</b>, the fleet's
+      <b>current / base points</b>, and a chip saying where that player is up to: <i>Orders committed</i>, <i>Waiting
+      for Movement orders</i>, <i>Surrendered T5</i>, or <i>Deploys T3</i> for a slot that has not arrived yet. <b>Click
+      the header</b> to collapse or expand that fleet.</li>
+    <li><b>Click a column head</b> (Ship Name, Class, Type, Ini, Value) to sort by it; click again to reverse, and a
+      third time to go back to initiative order. Your choice is remembered.</li>
+    <li><b>Left-click a unit row</b> to scroll the map to that unit.</li>
+    <li><b>Right-click a unit row</b> to open its <b>ship window</b> without selecting the unit or moving the map (long
+      press on a touchscreen). You can also click the <b>&#9432;</b> that appears at the right-hand end of a row when you
+      point at it - the easier target on a phone.</li>
+    <li>Units that are off the board but still yours - <b>docked flights</b> and <b>reinforcements waiting in
+      hyperspace</b> - open their ship window on <i>either</i> click, since there is nowhere to scroll to. For a docked
+      flight, that window is the only way to see what is actually in the bay.</li>
+    <li><b>Destroyed and jumped units are inert</b>: no highlight and no window. They are gone from the battle, and there
+      is nothing left to inspect.</li>
+    <li><b>On map only</b> hides everything not currently on the board - destroyed, jumped, docked, and reinforcements
+      still in hyperspace - and hides a whole fleet block when nothing in it is left to show. Mines <i>are</i> on the
+      map, so they stay.</li>
+    <li>The <b>team dropdown</b> narrows the list to one team.</li>
+    <li>The readout recounts fleets and units against whatever filters are on, so it always describes what is actually
+      on screen.</li>
+    <li>The <b>FAQ</b>, <b>Ammo &amp; Options</b> and <b>Factions</b> buttons open those documents in this Data
+      Archive window, over the game.</li>
+  </ul>
+
+  <h3>GAME CHAT and CHAT</h3>
+  <ul>
+    <li><b>GAME CHAT</b> is this battle only, and everyone in the game can read it - the place to agree a house rule,
+      warn an opponent you will be slow, or ask what a system does.</li>
+    <li><b>CHAT</b> is the site-wide channel, the same one as on the main page.</li>
+    <li>A tab turns <b>amber</b> when an unread message arrives on it, so you can leave both closed and still not miss
+      anything.</li>
+  </ul>
+
+  <h3>DECLARATIONS</h3>
+  <p>A read-out of the orders currently on the table. This is the tab to check <i>before</i> you commit: an unspent EW
+    point or a weapon aimed at the wrong ship is far easier to spot here than in a dozen separate ship windows.</p>
+  <ul>
+    <li><b>Side: Own / Enemy</b> - whose orders to list.</li>
+    <li><b>Show: EW / Fire</b> - electronic warfare allocations, or firing orders.</li>
+    <li><b>By: Source / Target</b> - grouped under the unit <i>doing</i> it, or the unit it is being done <i>to</i>. So
+      <i>Own + Fire + By Source</i> is your ships and what each of them is shooting at, while <i>Enemy + Fire + By
+      Target</i> is your ships and what is shooting at them. The same pairing works for EW: what you are emitting, versus
+      what is being pointed at you.</li>
+    <li>The <b>EW</b> view lists every point each unit is emitting or receiving, with a <b>per-unit total</b>, so you can
+      see at a glance whether a ship still has EW left to allocate. The <b>Fire</b> view reads like "4x Heavy Laser
+      &rarr; Vorchan 45-60%": how many guns, at whom, and the to-hit range.</li>
+    <li><b>Briefing</b> (far right) replaces the panel with the game's name, the rules of engagement in play (Friendly
+      fire, Mines, Reinforcements, Desperate) and the scenario text. Press it again to go back to the view you were on.
+      The three filter groups dim while it is up, because none of them means anything for a briefing.</li>
+    <li>This tab only ever shows what your own game data already contains, so it cannot reveal an opponent's orders any
+      earlier than the rest of the interface does.</li>
+  </ul>
+
+  <h3>SAVE FLEET</h3>
+  <p>Saves your surviving ships - with their enhancements, remaining ammunition, battle damage and critical effects - as
+    a reusable fleet list. Load it in Fleet Selection to carry a campaign on into the next battle. See
+    <a href="#savedfleets">Battle Damage &amp; Saving Fleets</a> for exactly what is and is not carried over.</p>
+</section>
+
+<section data-key="ruler" data-title="Ruler Tool" data-group="Interface &amp; Site">
+  <figure class="fvd-fig fvd-fig--ph fvd-fig--side" data-img="img/docs/faq/ruler.jpg" data-ratio="4:3">
+    <div class="fvd-ph">Screenshot: the Ruler Tool measuring from one hex to another, showing the distance and whether
+      line of sight is blocked.</div>
+    <figcaption>Measuring range and line of sight.</figcaption>
+  </figure>
+  <p>The Ruler Tool measures the distance between any two hexes on the map, and shows whether line of sight between
+    them is blocked.</p>
+  <ol class="fvd-steps">
+    <li>Turn it on with the <kbd>R</kbd> key, or the eye button on the right-hand side of the screen.</li>
+    <li>Left-click the hex to measure from, then move the mouse around the map to check the distance and line of sight
+      to other hexes.</li>
+    <li>Right-click to reset the starting hex.</li>
+  </ol>
+</section>
+
+<section data-key="notifications" data-title="Discord Turn Notifications" data-group="Interface &amp; Site">
+  <p class="fvd-lede">Fiery Void games often run over days or weeks, so it is easy to miss the moment one starts waiting
+    on you. If you like, the <b>Fiery Void bot</b> can send you a <b>direct message on Discord</b> whenever one of your
+    games needs you.</p>
+  <p>It is completely <b>opt-in</b>: nothing is ever sent unless you link your Discord account, and you can unlink at
+    any time.</p>
+
+  <h3>Before you start</h3>
+  <p>Two things must be true, or the bot cannot reach you:</p>
+  <ul>
+    <li>You must be a member of the <a href="https://discord.gg/4jXarWusp4">Fiery Void Discord server</a> - Discord only
+      lets a bot message people who share a server with it.</li>
+    <li>You must allow DMs from that server: right-click the Fiery Void server icon &rarr; <b>Privacy Settings</b>
+      &rarr; turn on <b>Allow direct messages from server members</b>.</li>
+  </ul>
+  <p>Don't worry that the bot always shows as <i>offline</i> in the member list - that is normal. It only sends
+    messages; it never logs in or reads your chat.</p>
+
+  <h3>Setting it up</h3>
+  <p>A one-off that takes a minute:</p>
+  <ol class="fvd-steps">
+    <li><b>Find your Discord user ID.</b> In Discord go to <b>User Settings &rarr; Developer</b> and turn on
+      <b>Developer Mode</b>. Then right-click your own name (in a chat or the member list) and choose <b>Copy User ID</b>.
+      It is a long number of 17-20 digits - <i>not</i> your username.</li>
+    <li><b>Paste it into Fiery Void.</b> On the main page, click <b>Set-Up Discord Notifications</b> in the top-right
+      corner, paste your Discord user ID into the box, and click <b>Send verification code</b>.</li>
+    <li><b>Check your Discord DMs.</b> The Fiery Void bot sends you a <b>6-digit code</b>, valid for <b>10 minutes</b>.</li>
+    <li><b>Enter the code</b> back on the notifications page and click <b>Verify</b>. You're linked.</li>
+    <li>Optionally, click <b>Send test ping</b> to prove a DM reaches you.</li>
+  </ol>
+  <div class="fvd-note">
+    <span class="fvd-note-label">Why is there a code?</span>
+    <p>Your Discord user ID is not a secret - anyone who shares a server with you can copy it. Without a check, somebody
+      could type <i>your</i> ID into <i>their</i> Fiery Void account and have the bot send you reminders for their games.
+      Because the code is only ever sent to the true owner of the ID, only you can finish the link. A Discord account
+      can be linked to <b>one</b> Fiery Void account at a time.</p>
+  </div>
+
+  <h3>How it works in practice</h3>
+  <figure class="fvd-fig fvd-fig--ph fvd-fig--side" data-img="img/docs/faq/discord-dm.jpg" data-ratio="4:3">
+    <div class="fvd-ph">Screenshot: a turn-notification DM from the Fiery Void bot in Discord, naming the game, turn and
+      phase, with its link.</div>
+    <figcaption>A turn notification in Discord.</figcaption>
+  </figure>
+  <ul>
+    <li>You are messaged when a game <b>needs something from you</b> - exactly the same condition that highlights a game
+      in your games list. That covers every phase, including Fleet Selection, Deployment, Initial Orders, Movement and
+      Firing.</li>
+    <li>The DM names the <b>game, the turn and the phase</b>, and links straight to the game.</li>
+    <li>You get <b>one DM each time a game becomes blocked on you</b> - not one per phase. Once a game is waiting on you
+      nothing more can happen until you act, so you will not be spammed.</li>
+    <li>You are <b>never pinged for your own moves</b>, and <b>not while you are actively playing</b>: if the game has
+      seen you in the last 5 minutes, it assumes you are already there. Two players trading moves in real time get no
+      DMs at all.</li>
+    <li>Nothing is sent for games that have finished or been surrendered.</li>
+  </ul>
+
+  <h3>Turning it off</h3>
+  <p>Go back to <b>Set-Up Discord Notifications</b> and click <b>Unlink</b> - the pings stop immediately. To use a
+    different Discord account, unlink first and then verify the new ID.</p>
+
+  <h3>Troubleshooting</h3>
+  <dl class="fvd-defs">
+    <dt>No code arrived</dt>
+    <dd>Nearly always your DM privacy setting, or you are not in the Fiery Void Discord server. Fix those (see
+      <i>Before you start</i>) and request another code.</dd>
+    <dt>"Incorrect code"</dt>
+    <dd>Make sure you are using the newest code. After a few wrong attempts the code is cancelled for safety - just
+      request a fresh one.</dd>
+    <dt>"That code has expired"</dt>
+    <dd>Codes last 10 minutes; request another.</dd>
+    <dt>"Please wait a few seconds"</dt>
+    <dd>There is a short cooldown between code requests, so the feature cannot be abused to spam someone.</dd>
+    <dt>DMs closed</dt>
+    <dd>A test ping may show up as a mention in the <b>#turn-pings</b> channel instead, where that fallback has been set
+      up. Opening your DMs is the better fix.</dd>
+  </dl>
+</section>
+
+<section data-key="ladder" data-title="Online Ladder" data-group="Interface &amp; Site">
+  <p class="fvd-lede">The Online Ladder is there mainly to help players set up well-balanced, interesting games - and
+    to provide some bragging rights along the way.</p>
+  <p>It works like a handicap in golf: the difference in rating between the two players is added as a percentage bonus
+    to the lower-rated player's points. A difference of 5 rating means the lower-rated player gets 5% extra points!</p>
+
+  <h3>Setting up a ladder game</h3>
+  <ul>
+    <li>Create a game as usual and tick <b>Ladder Game</b>. The <b>View Ladder</b> button beside it shows the current
+      ratings, and can work out the points difference against a particular player and fill the team slots with those
+      values.</li>
+    <li>Or set up an open ladder game without it, setting the points in the team slots as usual: when a player takes the
+      other slot, their points are adjusted automatically.</li>
+    <li>Either way, decide the details of the game (points, map, standard or simultaneous movement and so on), then
+      create it. Ladder games are competitive matches, so only two players can take part, with one slot per team.</li>
+  </ul>
+
+  <h3>Results</h3>
+  <p>When the game ends with one player surrendering (after at least one whole turn has been played), the winner's
+    ranking goes up by one on the ladder and the loser's goes down by the same amount.</p>
+  <p>To see a player's match history over the last three months - your own included - click <b>View Ladder</b> on the
+    main page, then click their name.</p>
+</section>
+
+<!-- ═══════════════════════════ RULES & MECHANICS ═══════════════════════════ -->
+
+<section data-key="savedfleets" data-title="Battle Damage &amp; Saving Fleets" data-group="Rules &amp; Mechanics">
+  <p class="fvd-lede">A saved fleet is a reusable shopping list: the units you bought, the enhancements and ammunition
+    you gave them, and - if you want - the <b>battle damage and critical effects they are carrying</b>.</p>
+  <p>That last part means you can save a fleet at the end of one battle and start the next with exactly the ships that
+    survived it, dents and all - which is what makes linked scenarios and campaigns possible. You can also apply damage
+    by hand in Fleet Selection, to set up a scenario without having fought the previous game.</p>
+
+  <h3>Saving a fleet in Fleet Selection</h3>
+  <p>Build your fleet as normal, click <b>Save Fleet</b> in the Your Fleet panel, give the fleet a name and click Save.
+    It is then available in this and every future game (as long as you have enough points to buy it) from the
+    <b>Load a Fleet</b> menu.</p>
+  <ul>
+    <li>Terrain is never saved, even if you placed it yourself - a fleet list is ships, and the scenario provides the
+      scenery.</li>
+    <li>Mines bought in bulk are saved as a bulk purchase, so ten mines come back as ten mines rather than one.</li>
+  </ul>
+
+  <h3>Loading a saved fleet</h3>
+  <p>Pick a slot, open <b>Load a Fleet</b> and click the fleet you want: the whole fleet is bought into your slot in one
+    go. If the fleet costs more points than you have left, the load is refused outright rather than partly applied.
+    Units the scenario does not allow - mines in a game without mines, or units that entered service after the game's
+    In-Service Date - are left out, the rest of the fleet loads, and you are told what was left out.</p>
+
+  <h3>Sharing fleets and loading by ID</h3>
+  <p>Every saved fleet has a unique ID number. If the fleet is marked as shared - you can set this when you save it, or
+    toggle it later with the padlock symbol in the list - you can give its ID to another player. They load it by typing
+    the number into the <b>Load Fleet by #ID</b> box and pressing Enter (or Go, on a phone). Fleets that have not been
+    shared can only be loaded by the player who saved them.</p>
+
+  <h3>Saving a fleet from a game in progress</h3>
+  <figure class="fvd-fig fvd-fig--ph" data-img="img/docs/faq/save-fleet-tab.jpg" data-ratio="16:7">
+    <div class="fvd-ph">Screenshot: the SAVE FLEET tab of a game's Info Panel - the summary line of how many units will
+      be saved, the "temporary critical effects" tick box and the Save Current Fleet button.</div>
+    <figcaption>Saving a fleet's survivors from the battle screen.</figcaption>
+  </figure>
+  <p>In any game, open the <b>SAVE FLEET</b> tab of the Info Panel (beside COMBAT LOG, DECLARATIONS and the chats). It
+    tells you how many of your units will be saved, and <b>Save Current Fleet</b> saves them as a normal saved fleet -
+    but with all their accumulated damage and critical effects attached.</p>
+  <ul>
+    <li>The tab is available in <b>every phase</b>, and in finished games and replays too, so you can go back to a
+      completed battle and save the winning side's survivors.</li>
+    <li>Only <b>survivors</b> are saved. Destroyed ships, ships that docked into a hangar and left the battle, and mines
+      you have already laid are all left out; the summary line says how many were excluded.</li>
+    <li>Fighters are never saved as wrecks. A flight of six that lost two craft is saved as a flight of <b>four</b>
+      damaged fighters - and since you are buying fewer craft next time, it costs proportionally less.</li>
+    <li>By default only <b>lasting</b> wounds are saved. Tick <i>"Also save temporary critical effects"</i> to carry
+      one-turn effects over as well: they apply during turn 1 of the next battle and then expire. Marine and boarding
+      markers are never saved - they belong to the battle you just fought.</li>
+    <li>The fleet is named after the game and turn by default (for example <i>Second Contact T7</i>), which is what tells
+      two saves of the same fleet apart in the list. Type over it if you prefer.</li>
+  </ul>
+
+  <h3>Loading a damaged fleet</h3>
+  <p>A fleet carrying battle damage or critical effects has a spanner icon in the fleet list. When you load it you are
+    asked <b>two separate questions</b>: <i>Include saved battle damage</i> and <i>Include saved critical effects</i>.
+    Both are ticked by default, and each is only offered if the fleet actually has that kind of state. So the same fleet
+    can be reloaded pristine, damaged but uncritted, critted but repaired, or exactly as it ended the last battle - your
+    choice, every time you load it.</p>
+
+  <h3>Applying battle damage by hand</h3>
+  <figure class="fvd-fig fvd-fig--ph fvd-fig--side" data-img="img/docs/faq/apply-damage.jpg" data-ratio="3:4">
+    <div class="fvd-ph">Screenshot: the menu opened by clicking a system in Fleet Selection - its Damage section
+      (remaining-boxes value, Destroy tick box) and a Critical Effects list.</div>
+    <figcaption>Damaging a bought ship before the battle.</figcaption>
+  </figure>
+  <p>In Fleet Selection, any unit <b>you have bought</b> can be damaged before the battle starts. No rule gates this -
+    it is on the honour system, and meant for scenarios, campaigns and "what if" games. Open the ship's window and:</p>
+  <ul>
+    <li><b>Damage a system:</b> click its icon to open a small menu with <b>Damage</b> and <b>Critical Effects</b>
+      sections (on a system that can take refits, a gold <b>Enhancements</b> section sits above them - see
+      <a href="ammo-options-enhancements.php#usingsystemenhancements">System Enhancements</a>). The
+      number shown is the <b>remaining</b> structure boxes, not the damage - the same number you would read off the
+      SCS. Use the - and + buttons, type a value, or roll the mouse wheel over the box (up repairs, down damages). Tick
+      <b>Destroy</b> to knock the system out completely; untick it and the system comes back at the value you had dialled
+      in before.</li>
+    <li><b>Damage a section's Structure:</b> click the coloured <b>section header bar</b> (the one showing the section's
+      name and structure total) - Structure has no icon of its own, so that bar is its icon. Destroying a section's
+      Structure destroys the systems in that section, exactly as it would in a real game. (Vree saucers are the
+      exception: their outer structure blocks are a ring around the disc, not the compartments the systems sit in, so
+      losing one does not take its systems with it.)</li>
+    <li><b>Add critical effects:</b> under the damage row is a <i>Critical Effects</i> list. Use <b>+ Add effect&hellip;</b>
+      to choose an effect that system can genuinely suffer, and the - / + buttons to change how many of it the system
+      carries. Tick <b>All</b> to widen the list with effects that apply to any system. Some effects only ever apply
+      once, and the + button greys out when you reach that limit. Dropping an effect to zero leaves its row on screen, so
+      you can put it straight back.</li>
+    <li><b>Damage a fighter flight:</b> click the flight's <b>health bar</b>. You get one row per craft, so you can wound
+      individual fighters, plus <b>Apply Fighter 1 to all</b> to copy the first row across the flight. Critical effects
+      are set <b>once for the whole flight</b>, not per craft. There is no Destroy option - a dead fighter is simply one
+      fewer in the flight, so use <b>Edit</b> on the flight to reduce its size instead.</li>
+    <li><b>Damage bulk-bought mines:</b> click the mine's structure bar. You get one row per mine in the purchase, plus
+      <b>Apply Mine 1 to all</b>. Mines take structure damage only and cannot be destroyed - a mine you lost is one you
+      did not buy.</li>
+  </ul>
+
+  <h3>Things worth knowing</h3>
+  <ul>
+    <li>Any unit carrying pre-battle damage or critical effects has a <b>spanner</b> icon in your fleet list, so you can
+      see at a glance which ships are going in wounded.</li>
+    <li><b>Damage does not make a ship cheaper.</b> A crippled Omega costs exactly what a fresh one does. (A shrunken
+      fighter flight does cost less, but only because it is fewer fighters.)</li>
+    <li>Clicking <b>Ready</b> with damaged units in your fleet adds a note to the confirmation, so nobody readies a
+      wounded fleet by accident.</li>
+    <li>If you <b>Edit</b> a flight and change its size - or change how many mines are in a bulk purchase - any damage
+      you applied to it is cleared, and you are told so. The damage is stored per craft, and there is no honest way to
+      re-map it onto a different number of craft.</li>
+    <li>Everything you apply here goes into the game exactly as if it had been inflicted on an earlier turn: your
+      opponents can see it once the game starts, and the ships behave accordingly from Deployment onwards.</li>
+  </ul>
+</section>
+
+<section data-key="boarding" data-title="Boarding Actions" data-group="Rules &amp; Mechanics">
+  <p class="fvd-lede">Many factions have Breaching Pods and Grappling Claws, which carry marines that can board enemy
+    ships.</p>
+  <figure class="fvd-fig fvd-fig--ph" data-img="img/docs/faq/boarding.jpg">
+    <div class="fvd-ph">Screenshot: breaching pods attached to an enemy ship's section, with a pod's marine mission
+      options (Capture / Sabotage / Rescue) showing.</div>
+    <figcaption>Breaching pods attached to an enemy hull.</figcaption>
+  </figure>
+
+  <h3>Buying breaching pods</h3>
+  <p>In Fleet Selection you can buy one pod for every Medium Ship or HCV with hangar space for medium fighters, heavy
+    fighters or assault shuttles; two for every such Capital Ship; and four for Enormous units or bases. Assault ships
+    (those with "Assault" in their name) can carry double these allowances, if they have the hangar space.</p>
+
+  <h3>Attaching</h3>
+  <ul>
+    <li>In battle, a pod can try to attach to an enemy ship in the same hex and deliver its marines on a mission -
+      Capture Ship, Sabotage or Rescue - during the Firing Phase.</li>
+    <li>A pod rolls to attach on a d10, like a normal weapon rolling to hit, but the calculation is very different.
+      Attaching succeeds automatically if the pod is moving faster than its target and the speed difference is no more
+      than the pod's thrust rating; if the difference is greater than its thrust rating, it simply cannot attach. If the
+      target is moving faster, each point of speed difference is -10% to attach.</li>
+    <li>Pods cannot attach to ships with Advanced Armor, and certain factions, such as the Llort, have +1 to attach.</li>
+  </ul>
+
+  <h3>How many can attach</h3>
+  <ul>
+    <li>Attachment is limited <b>per structure section</b>: at most two Breaching Pods may attach to any one section. So
+      a hull's total follows how many sections it actually has - a Capital Ship takes 2 per facing, an HCV 2 forward and
+      2 aft, a Medium Ship 2 in total, and a Drazi Stormfalcon (which has no aft structure) takes 6 rather than 8.</li>
+    <li>On a vessel with exterior structure blocks, the Primary section can only be reached once the exterior structure
+      facing the pod has been destroyed, and it then holds <b>two pods for every destroyed exterior section</b> - so a
+      Capital Ship that has lost both its sides can carry four on its Primary, two through each breach. Medium Ships,
+      LCVs and OSATs have no exterior structure blocks at all, so for them Primary is simply the hull and holds the usual
+      two.</li>
+    <li>An overall ceiling by hull size applies on top of this, so a vessel with an unusual number of sections (such as
+      a six-sided Vree saucer) never exceeds what its class allows: <b>12</b> for bases and Enormous units, <b>8</b> for
+      Capital Ships, <b>4</b> for HCVs and <b>2</b> for Medium Ships and smaller. LCVs and OSATs are a special case and
+      take only a <b>single attached craft</b>, delivering one marine contingent.</li>
+    <li>If more units try to attach or deliver marines than these limits allow, the extra attempts automatically
+      fail.</li>
+    <li>Grappling Claw ships are limited to <b>one per structure section</b>, and a section held by a Grappling Claw
+      admits no Breaching Pods at all. Beyond that, only one vessel may grapple a Medium Ship or HCV, and a Capital Ship
+      may be grappled by only two, which must attach to opposite ends. Bases and Enormous units have no overall limit -
+      one claw per section is their only restriction.</li>
+  </ul>
+
+  <h3>While attached</h3>
+  <ul>
+    <li>A Breaching Pod stays attached to the structure block it hit until it chooses to Detach in the Movement Phase, or
+      until the vessel is destroyed (as long as the pod's own structure location is not destroyed too). If the structure
+      block a pod is attached to is destroyed before it detaches, the pod is automatically destroyed.</li>
+    <li>While attached, a pod matches its host's speed and heading and suffers -10 Initiative. When it detaches, it
+      automatically faces away from its host.</li>
+    <li>Units can shoot at attached pods if they are in arc of the pod's structure location, rolling to hit as normal -
+      but any shot aimed at a pod also automatically hits the vessel it is attached to. Weapons that can never damage a
+      ship are the exception: hex-targeted weapons such as the Pak'ma'ra Plasma Web damage the pod only, and leave its
+      host untouched.</li>
+    <li>A unit that ends its movement in the same hex as an Enormous unit and fails to attach to it - or does not try to
+      attach at all - <b>rams</b> it instead, resolved at the end of the Firing Phase. Units that attach successfully
+      never ram their host. Since bases do not move, attaching to one always succeeds, so only an attachment that is
+      actively <i>blocked</i> (a full section, Advanced Armor, an Ancient hull) leads to a ram.</li>
+  </ul>
+
+  <h3>Delivering marines</h3>
+  <p>After attaching, the pod tries to deliver its marines with another d10 roll on the table below, with a base 50%
+    chance to board. Depending on the roll, marines who fail may be lost or return safely to their pod.</p>
+  <table class="fvd-roll">
+    <caption>Delivery table (d10)</caption>
+    <tbody>
+      <tr><td>1-5</td><td>Marines successfully delivered.</td></tr>
+      <tr><td>6-8</td><td>Marines fended off, but return safely to their pod.</td></tr>
+      <tr><td>9+</td><td>Marines fended off and eliminated.</td></tr>
+    </tbody>
+  </table>
+  <p>Modifiers to the delivery roll:</p>
+  <ul>
+    <li><b>+20% success:</b> Yolu-specific bonus.</li>
+    <li><b>+10% success:</b> Elite marines / Llort / target has Poor Crew / boarding the target's Primary section
+      directly.</li>
+    <li><b>-10% success:</b> Narn or Gaim defenders / target has Elite Crew or the Markab's Religious Fervor.</li>
+  </ul>
+
+  <h3>Missions</h3>
+  <p>Marines who board a vessel start on their mission from the end of the following turn. Mission rolls can have
+    modifiers too:</p>
+  <ul>
+    <li><b>+10% success:</b> Elite marines / target has Poor Crew.</li>
+    <li><b>-10% success:</b> Narn or Gaim defenders / target has Elite Crew or the Markab's Religious Fervor.</li>
+    <li>Sabotage and Rescue only: a further -10% for every two turns the marines have been active aboard the enemy
+      vessel.</li>
+  </ul>
+
+  <h4>Capture</h4>
+  <p>The marines fight the defending marine contingents directly (the defenders are shown in the C&amp;C's tooltip).
+    This is simplified from the tabletop: each attacker makes just two rolls, one to see if it eliminates a defender (50%
+    base chance) and one to see if it is eliminated (25% base chance). If the attackers defeat every defender, the enemy
+    ship is disabled for the rest of the battle, as long as at least one attacking marine unit is still aboard. After a
+    successful capture one marine unit stays on the ship, and the rest return to attached Breaching Pods if there are
+    any.</p>
+
+  <h4>Sabotage</h4>
+  <p>In this firing mode marines can try to damage a specific system on an enemy ship (making a called shot against it
+    under the usual rules). Or, if Desperate rules are in effect, they can target the ship itself rather than a system
+    and <b>Wreak Havoc</b> - inflicting minor damage to a Primary system, or penalties to the ship's EW, Initiative,
+    Thrust or Defence Profile. Either way, the marines roll a d10 on the table below.</p>
+  <table class="fvd-roll">
+    <caption>Sabotage table (d10)</caption>
+    <tbody>
+      <tr><td>1</td><td>3d6 damage to the target system.</td></tr>
+      <tr><td>2-3</td><td>1d6 damage to the target system; marines not eliminated.</td></tr>
+      <tr><td>4-5</td><td>1d6 damage to the target system; marines eliminated.</td></tr>
+      <tr><td>6-8</td><td>No effect; the marines try again next turn.</td></tr>
+      <tr><td>9+</td><td>No effect; marines eliminated.</td></tr>
+    </tbody>
+  </table>
+  <table class="fvd-roll">
+    <caption>Wreak Havoc table (d10)</caption>
+    <tbody>
+      <tr><td>1</td><td>1d6 damage to a non-Structure system on the Primary hit chart.</td></tr>
+      <tr><td>2</td><td>Ship's Initiative reduced by 5-30 next turn.</td></tr>
+      <tr><td>3</td><td>EW reduced by 1d3 next turn.</td></tr>
+      <tr><td>4</td><td>Ship's Initiative reduced by 5-30 next turn.</td></tr>
+      <tr><td>5</td><td>Ship's Defence Profiles increased by 5 next turn.</td></tr>
+      <tr><td>6-8</td><td>No effect; the marines try again next turn.</td></tr>
+      <tr><td>9+</td><td>No effect; marines eliminated.</td></tr>
+    </tbody>
+  </table>
+  <p>Marines who destroy their target system return to an attached Breaching Pod if one is available; otherwise, if
+    they have not been eliminated, they switch to a Wreak Havoc mission on the enemy vessel.</p>
+
+  <h4>Rescue</h4>
+  <p>For scenarios only. The marines attach their pod and board as normal; from the following turn, the Combat Log
+    reports on the rescue each turn.</p>
+  <table class="fvd-roll">
+    <caption>Rescue table</caption>
+    <tbody>
+      <tr><td>1-2</td><td>Rescue successful; the marines survive and return to a Breaching Pod if one is available.</td></tr>
+      <tr><td>3-4</td><td>Rescue successful, but the marines are eliminated.</td></tr>
+      <tr><td>5-6</td><td>Rescue fails this turn; the marines try again next turn.</td></tr>
+      <tr><td>7+</td><td>Rescue fails; marines eliminated.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Grappling claws</h3>
+  <p>Some ships carry Grappling Claws, which attach and deliver marines largely under the same rules, with a few notable
+    differences:</p>
+  <ul>
+    <li>The attached unit cannot manoeuvre, but its host may, if the host is the same size as the attached ship or
+      larger. The host's turn cost and turn delay become the sum of both units' values (a ship with a 1/3 turn cost
+      attached to one with a 2/3 turn cost gives a total of around 1). The target unit moves the whole group when its
+      turn comes in the initiative order, and may manoeuvre normally.</li>
+    <li>No more than one ship can grapple a Medium Ship or Heavy Combat Vessel. Two can grapple a Capital Ship, but they
+      must be at opposite ends. One unit can attach to each section of an Enormous base.</li>
+    <li>If the structure a ship has grappled is destroyed during the battle (or the host itself is destroyed), the
+      claw-equipped vessel breaks free and any claws still attached are destroyed. The destruction of either ship does
+      not otherwise affect the other.</li>
+    <li>Once a ship has grappled its target, the target's hull blocks all fire through the claw's firing arcs (the
+      attached ship cannot fire at its target, for safety reasons). Weapons that can fire into other arcs, or more widely,
+      can still shoot at targets there. The host is not prevented from firing any weapon, except at the attached
+      unit.</li>
+    <li>If a Grappling Claw is destroyed while it still holds marine units, they transfer to any surviving Grappling
+      Claws on the ship. Marines in Grappling Claws count towards the marines defending the ship if an opponent tries to
+      capture it.</li>
+    <li>The automatic extra hit on the host does not apply to shots at attached Grappling Claw ships.</li>
+    <li>Grappling Claw ships do not automatically face away from their host when they detach.</li>
+  </ul>
+</section>
+
+<section data-key="called" data-title="Called Shots" data-group="Rules &amp; Mechanics">
+  <figure class="fvd-fig fvd-fig--ph fvd-fig--side" data-img="img/docs/faq/called-shot.jpg" data-ratio="4:3">
+    <div class="fvd-ph">Screenshot: an enemy ship's SCS with one of its systems picked as a called-shot target.</div>
+    <figcaption>Picking a system for a called shot.</figcaption>
+  </figure>
+  <ul>
+    <li>Called shots are possible in Fiery Void, as long as the weapon can make them. Ballistic weapons cannot, for
+      example - with the exception of the Kor-Lyan Limpet Bore Torpedo.</li>
+    <li>To make a called shot, select the weapon you want to fire, then right-click the enemy ship to open its SCS and
+      click the system you want to target. As long as every other condition is met (the system can be targeted by called
+      shots, it is in the firing ship's arc and so on), it is now targeted, and your weapon's icon turns orange as usual
+      to show it is locked in.</li>
+    <li>Called shots are usually made at -40% to hit, although some weapons get a bonus here, such as the Dilgar Point
+      Pulsar.</li>
+  </ul>
+</section>
+
+<section data-key="delayed" data-title="Delayed Deployment Slot" data-group="Rules &amp; Mechanics">
+  <div class="fvd-note fvd-note--warn">
+    <span class="fvd-note-label">Not the same as Reinforcements</span>
+    <p>A Delayed Deployment Slot is a <i>scenario</i> setting: the game is created knowing that a whole player slot turns
+      up on a fixed turn, whatever happens in the battle, wherever its deployment zone allows.
+      <a href="#reinforcements">Reinforcements</a> are bought by a player out of their own points, wait in hyperspace with
+      no arrival turn at all, and only appear when one of their own jump-capable ships (or a jump gate) opens a jump point
+      for them - on any turn, or never. Delayed Deployment is decided before the game starts; Reinforcements are
+      played.</p>
+  </div>
+  <ul>
+    <li>Set it up in Create Game, by setting a player slot's <b>Deploys Turn</b> field to the turn you want that slot to
+      deploy - or "jump in". Ships cannot jump into hexes occupied by terrain or Enormous units, so make the deployment
+      zone large enough!</li>
+    <li><b>You choose your entry hexes a turn early.</b> A slot set to deploy on Turn 5 gets its Deployment Phase on
+      <b>Turn 4</b>, where you position every arriving unit exactly as you would on Turn 1. Your units do not actually
+      arrive until Turn 5 - until then they cannot be seen, targeted, moved or fired, and take no part in any other
+      phase. A slot set to deploy on Turn 2 therefore picks its hexes during the normal Turn 1 Deployment Phase, alongside
+      everyone else.</li>
+    <li><b>Your opponents get one turn of warning.</b> From the moment you commit that Deployment Phase, every hex you
+      chose is marked on the map for <i>all</i> players with a blue <b>Jump Point</b> hex. Arrivals no longer
+      materialise out of nowhere: the enemy can see where a jump point is about to open, and has a turn to react. Only the
+      hex is revealed, not what is coming through it (though the fleet list has always shown what a delayed slot
+      contains, under a <i>[Deploys on Turn N]</i> header). A Jump Point appears even for stealthed units - the jump point
+      itself is visible, even if what arrives through it may not be.</li>
+    <li>Any unit that has not arrived yet shows a cyan <b>Deploying on Turn N</b> banner in its ship window, and is listed
+      in the fleet list under a <i>[Deploys on Turn N]</i> header.</li>
+    <li>Fighters and LCVs in a delayed slot can be <b>deployed inside the hangars and rails</b> of a carrier from the same
+      slot, arranged in that slot's Deployment Phase in the usual way.</li>
+    <li>Ships that would normally set systems on Turn 1 (Hyach Specialists, for example) set them in their Deployment
+      Phase - the turn they pick their entry hexes, not the turn they arrive. Systems set in Initial Orders (such as
+      Vorlon Adaptive Armor) are set as normal on the turn the unit arrives.</li>
+    <li>Terrain, bases and OSATs cannot deploy later in the game: they always deploy on Turn 1, even in a slot set to
+      deploy later. A slot containing any of these <i>and</i> delayed units gets a Turn 1 Deployment Phase for them and a
+      second one later for the delayed units.</li>
+  </ul>
+  <figure class="fvd-fig fvd-fig--ph" data-img="img/docs/faq/jump-point-marker.jpg" data-ratio="16:7">
+    <div class="fvd-ph">Screenshot: the blue Jump Point hexes marking where a delayed slot's units will arrive next
+      turn.</div>
+    <figcaption>The warning your opponents get: blue Jump Point hexes.</figcaption>
+  </figure>
+</section>
+
+<section data-key="elint" data-title="ELINT &amp; Electronic Warfare" data-group="Rules &amp; Mechanics">
+  <p class="fvd-lede">Every ship with a working Scanner generates Electronic Warfare (EW) points each turn, allocated in
+    Initial Orders. Dedicated <b>ELINT vessels</b> - those carrying an <b>ELINT Scanner</b> - can also perform several
+    longer-ranged sensor operations on top of the standard EW functions.</p>
+  <p>To allocate EW, select your ship and click an enemy or friendly unit to bring up the relevant EW buttons, then use
+    Add / Remove (right-click sets a function to its maximum or to zero - see <a href="#useful">Hot Keys</a>). EW lines
+    are drawn on the map and can be toggled with the <kbd>W</kbd> / <kbd>X</kbd> / <kbd>Y</kbd> keys.</p>
+  <figure class="fvd-fig fvd-fig--ph" data-img="img/docs/faq/elint.jpg">
+    <div class="fvd-ph">Screenshot: an ELINT ship allocating support EW - the SOEW / SDEW / BDEW buttons on a friendly
+      ship - with EW lines drawn on the map.</div>
+    <figcaption>ELINT support on a friendly ship.</figcaption>
+  </figure>
+
+  <h3>Standard EW (any ship with a Scanner)</h3>
+  <dl class="fvd-defs">
+    <dt>Offensive EW (OEW)</dt>
+    <dd>A target lock on a single enemy unit that improves your fire control against it (reducing range and tracking
+      penalties). Allocate more points for a stronger lock.</dd>
+    <dt>Defensive EW (DEW)</dt>
+    <dd>Lowers your own ship's defensive profile, making it harder to hit. Any EW left unallocated at the end of Initial
+      Orders is automatically applied as DEW.</dd>
+    <dt>Close Combat EW (CCEW)</dt>
+    <dd>A lock on <i>all</i> enemy fighters within 10 hexes at once. Counts as a single OEW target when it comes to being
+      disrupted.</dd>
+    <dt>Mine Detection</dt>
+    <dd>Only when mines are present - see <a href="#mines">Mines</a>.</dd>
+  </dl>
+
+  <h3>ELINT functions (ELINT Scanner only)</h3>
+  <p>Most of these work at 30 hexes' range, checked when they are declared (Initial Orders) and again at the moment of
+    firing - so a target that moves out of range, or a line of sight that becomes blocked, can make the support lapse.</p>
+  <dl class="fvd-defs">
+    <dt>Supported OEW (SOEW)</dt>
+    <dd>Lends a friendly ship half of the ELINT's offensive lock against a chosen target. The target must be within 30
+      hexes of the ELINT at the moment of firing, and the supported ship within 30 hexes both when it is declared and at
+      firing. Needs line of sight from the ELINT to both the target and the supported ship. Fighter flights get only half
+      the usual benefit.</dd>
+    <dt>Supported DEW (SDEW)</dt>
+    <dd>Boosts a friendly ship's defensive EW by 1 for every 2 points allocated. Range 30 hexes, checked at declaration
+      and at firing.</dd>
+    <dt>Blanket Protection (BDEW)</dt>
+    <dd>Gives <i>all</i> friendly units within 20 hexes (fighters included) +1 DEW for every 4 points allocated. It
+      cannot be combined with any other ELINT activity on the same ship that turn.</dd>
+    <dt>Disruption (DIST)</dt>
+    <dd>Degrades an enemy's sensors: reduces a target enemy ship's OEW and CCEW by 1 for every 3 EW points allocated
+      (1 point of DIST). The
+      reduction is split evenly between that ship's offensive locks (CCEW counts as one lock), and cannot take a lock
+      below 0. Range 30 hexes, checked at declaration and at firing.</dd>
+    <dt>Detect Stealth</dt>
+    <dd>Increases this ship's stealth-detection range by 2 hexes per point allocated. Only offered when the enemy has
+      stealth-capable ships in the game (see <a href="#stealth">Stealth Ships</a>).</dd>
+  </dl>
+
+  <h3>Jamming Hunter-Killers (JAM)</h3>
+  <p>ELINT vessels can also jam the command-link guidance of enemy <b>remotely-controlled fighter flights</b>, such as
+    the Orieni <i>Shining Star</i> Hunter-Killers.</p>
+  <ul>
+    <li>In Initial Orders, select your ELINT ship and click an enemy Hunter-Killer flight to bring up the <b>Add / Remove
+      Jamming</b> buttons. Jamming can only be applied to remote-controlled flights, within <b>30 hexes</b> of the
+      ELINT.</li>
+    <li>Jamming costs <b>1 EW point</b> per point applied, and counts as offensive EW when it comes to <i>being</i>
+      disrupted by an enemy ELINT's DIST.</li>
+    <li>It is resolved in the Critical Hits phase: each jammed flight rolls a d20, with <b>+1 for every point of Jamming
+      beyond the first</b>, on the table below.</li>
+  </ul>
+  <table class="fvd-roll">
+    <caption>Jamming table (d20 + 1 per extra point)</caption>
+    <tbody>
+      <tr><td>1-14</td><td>No effect.</td></tr>
+      <tr><td>15-16</td><td>-10 Initiative next turn.</td></tr>
+      <tr><td>17-18</td><td>-20 Initiative next turn.</td></tr>
+      <tr><td>19-20</td><td><b>Control Lost</b> for one turn (the flight becomes Uncontrolled), plus -20 Initiative.</td></tr>
+      <tr><td>21</td><td>Control Lost plus -10 Initiative, and <b>1 Hunter-Killer drops out</b> of the flight.</td></tr>
+      <tr><td>22+</td><td>Control Lost plus -10 Initiative, and <b>2 Hunter-Killers drop out</b>.</td></tr>
+    </tbody>
+  </table>
+  <ul>
+    <li><b>Uncontrolled flights</b> can no longer be steered by their player. They operate semi-autonomously instead:
+      a further -15 Initiative, jinking defensively for 2, and heading for the nearest enemy ship to <b>ram</b> it if they
+      reach its hex. An Uncontrolled flight has a red <i>UNCONTROLLED</i> note in its tooltip.</li>
+    <li>Jamming cannot stop a Hunter-Killer from completing a ram - but any surviving fighters in the flight are still
+      disrupted as normal on the following turn the jamming is applied. A jamming roll is only skipped if the whole flight
+      has already been destroyed.</li>
+  </ul>
+
+  <h3>Advanced &amp; Improved Sensors</h3>
+  <p>Some factions field ships with upgraded sensors. <b>Improved Sensors</b> halve the effectiveness of enemy Jammers.
+    <b>Advanced Sensors</b> ignore Jammers entirely, and also ignore enemy Blanket Protection, SDEW and Disruption, as
+    well as defensive systems that lower a target's profile (shields, E-Web and so on).</p>
+</section>
+
+<section data-key="enormous" data-title="Enormous Units" data-group="Rules &amp; Mechanics">
+  <ul>
+    <li>Some units, such as terrain, are classed as Enormous. They block line of sight if any part of a shot would pass
+      through their hex.</li>
+    <li>Ships that end their movement in the same hex as an Enormous unit automatically try to ram it (fighters are
+      exempt).</li>
+    <li>Energy Mine damage, Mass Driver targeting and the power from an Improved Reactor also take Enormous size into
+      account.</li>
+  </ul>
+</section>
+
+<section data-key="escorts" data-title="Fighter Escorts" data-group="Rules &amp; Mechanics">
+  <ul>
+    <li>Fighters can escort a friendly ship in the same hex, using their guns to help intercept ballistic weapons aimed
+      at it.</li>
+    <li>To escort a ship, the fighters must start <b>and</b> end their movement in its hex. When they do, they intercept
+      ballistics on its behalf, as long as all the other conditions for interception hold: their weapons have an
+      intercept rating, the incoming shot is in arc, the fighters are not jinking, and so on.</li>
+  </ul>
+</section>
+
+<section data-key="hangar" data-title="Hangar Operations" data-group="Rules &amp; Mechanics">
+  <p class="fvd-lede">Carriers can launch and recover their fighters, shuttles and other small craft <i>during</i> a
+    battle, and can start the battle with them docked inside rather than placed on the map. The options appear
+    automatically on any ship with hangar space.</p>
+  <figure class="fvd-fig fvd-fig--ph" data-img="img/docs/faq/hangar-launch.jpg">
+    <div class="fvd-ph">Screenshot: a carrier's tooltip menu with its Launch button, and the launch window listing the
+      stored flights and shuttles.</div>
+    <figcaption>Launching craft from a carrier.</figcaption>
+  </figure>
+
+  <h3>Default shuttles</h3>
+  <ul>
+    <li>Any hangar space not already taken by fighters, assault shuttles or breaching pods is filled automatically with
+      <b>Shuttles</b> (or <b>Minesweeping Shuttles</b>, on ships with a minesweeper bonus).</li>
+    <li>Point at a <b>Hangar</b> system in the ship's SCS to see what it starts with - for example <i>"Carrying: 2 / 14
+      slots"</i> - and a list of the stored craft.</li>
+  </ul>
+
+  <h3>Deployment</h3>
+  <p>In the Deployment Phase you can deploy fighters inside a ship's hangar: click the ship's hex and choose the blue
+    <b>Dock...</b> option. If the fighters are already deployed in the carrier's hex, you can instead use the ship's
+    <b>Deploy Flights in Hangar</b> tooltip button, or click the Hangar system icon in its SCS. Reinforcement flights
+    arriving on later turns can dock into an already-deployed carrier the same way. Some fighters, such as Orieni
+    Hunter-Killers, MUST start the game deployed in hangars.</p>
+
+  <h3>Launching craft (Firing Phase)</h3>
+  <ul>
+    <li>Select one of your carriers and click the <b>Launch</b> button in its tooltip menu. A window lets you pick which
+      stored craft to launch, and how many.</li>
+    <li>Shuttles are stored individually, but can be launched as a single flight of 1-6. Fighters launch as their stored
+      flight (subject to the usual partial-flight rules).</li>
+    <li>The launch resolves at the <b>end of the turn</b>: the new flight appears in the carrier's hex with its heading
+      and speed, facing the carrier's facing (plus an offset for side hangars).</li>
+    <li>You cannot launch from a carrier that is pivoting or rolling that turn.</li>
+  </ul>
+
+  <h3>Recovering and docking (Firing Phase)</h3>
+  <ul>
+    <li>Select one of your fighter flights and click <b>Dock</b>, or use the carrier's <b>Recover</b> button to pull
+      craft in from the carrier's side.</li>
+    <li>A flight can only dock into a carrier in the <b>same hex</b>, on the <b>same heading</b>, at a compatible speed:
+      the carrier must be at least as fast as the flight, and the speed difference within the flight's thrust
+      rating.</li>
+    <li>The carrier needs a free hangar slot of a compatible type, must not be pivoting or rolling, and the hangar must
+      not be destroyed.</li>
+    <li>If more than one eligible carrier is in the hex, you are asked to pick one. If a hangar cannot hold the whole
+      flight, you are offered a split - dock some now and leave the rest in space.</li>
+    <li>Like launching, docking resolves at the end of the turn.</li>
+  </ul>
+
+  <h3>Capacity and penalties</h3>
+  <ul>
+    <li><b>Launch / land budget:</b> each hangar has a per-turn capacity (its <i>output</i>) <b>shared</b> between
+      launching and landing. A hangar with an output of 6 can launch 6 craft, recover 6, or any mix (launch 4 and
+      recover 2, say) in one turn.</li>
+    <li><b>Initiative penalties:</b> hangar operations are disruptive. A carrier that launches and/or recovers craft
+      suffers <b>-20 Initiative</b> the following turn (just once, however many craft it moved). A freshly launched
+      flight suffers <b>-50 Initiative</b> the turn after it launches. Both penalties clear by themselves.</li>
+    <li><b>Compatible hangar types:</b> craft can only be stored in slots that fit them. Universal fighter bays take any
+      size of combat fighter (and shuttles), but Assault Shuttles and Breaching Pods need their own dedicated slots, and
+      custom-named fighters (such as Thunderbolts) are limited by each carrier's own capacity for that type.</li>
+    <li><b>Hangar damage:</b> if a hangar takes damage, stored craft are destroyed along with it - empty slots and
+      shuttles are lost first, then the cheaper craft.</li>
+  </ul>
+
+  <h3>When a carrier is destroyed</h3>
+  <p>When a carrier is destroyed (other than by jumping to hyperspace), some of its docked fighters and shuttles may
+    scramble out before the wreck goes up. The game rolls a d20:</p>
+  <table class="fvd-roll">
+    <caption>Hangar escape (d20)</caption>
+    <tbody>
+      <tr><td>1-5</td><td>No craft escape.</td></tr>
+      <tr><td>6-10</td><td>A quarter of the docked craft escape (rounded down).</td></tr>
+      <tr><td>11-18</td><td>Half escape (rounded down).</td></tr>
+      <tr><td>19-20</td><td>All docked craft escape.</td></tr>
+    </tbody>
+  </table>
+  <ul>
+    <li>Only combat fighters, armed shuttle variants, Assault Shuttles and Breaching Pods can escape. The escapees are
+      chosen by combat value (the most expensive craft first).</li>
+    <li>They appear in the carrier's final hex with its heading and speed, facing its final facing plus their hangar's
+      launch direction, and suffer the usual -50 Initiative on their first turn (as if freshly launched).</li>
+    <li>Craft aboard a carrier that successfully jumped to hyperspace do NOT roll - they go with the jump and keep their
+      full combat value.</li>
+  </ul>
+
+  <h3>Rearming docked craft</h3>
+  <p>A flight that stays docked for a full turn automatically rearms its limited-ammunition weapons before
+    relaunching:</p>
+  <ul>
+    <li><b>Matter weapons</b> (Slug Cannon, Gatling Gun and so on) regain 1 round per weapon per turn while docked, up to
+      their starting load. This is free and automatic - no cost to the carrier.</li>
+    <li><b>Missiles</b> need a <b>Ballistic Ordnance Reserve</b> bought for the carrier (see below). One missile per
+      fighter per turn is restocked automatically, the most expensive type first, from the shared pool.</li>
+    <li><b>Marines (Breaching Pods)</b> need <b>Extra Marine Contingents</b> bought for the carrier (see below). One
+      marine unit per pod per turn is restocked automatically while docked, from the shared pool.</li>
+    <li>The turn a flight docks does not count: rearming starts on its first full turn inside the hangar.</li>
+    <li>When a flight is split on relaunch, the fighters with the most missiles (the ones that were restocked) are the
+      ones launched first.</li>
+  </ul>
+
+  <h3>Ballistic Ordnance Reserve</h3>
+  <p>Carriers in missile-using factions can buy an Ordnance Reserve enhancement in Fleet Selection, of up to 200
+    points.</p>
+  <ul>
+    <li>The pool is <b>shared across the whole carrier</b>, and shown in the Hangar system's tooltip as <i>"Ordnance
+      Reserve: X / Y pts"</i>.</li>
+    <li>Each turn a missile or torpedo flight is docked (having been in for a full turn), the carrier spends points from
+      the reserve equal to the <b>PV of the missile type</b> being restocked. The most expensive type is always refilled
+      first.</li>
+    <li>The pool is <b>one-way</b>: spent points do not come back during the battle.</li>
+    <li>Only carriers with combat fighter hangar slots (not small hangars holding only shuttles) are offered the
+      Ordnance Reserve.</li>
+  </ul>
+
+  <h3>Extra Marine Contingents</h3>
+  <p>Any ship can buy Extra Marine Contingents in Fleet Selection: a pool of additional marine units used to restock
+    docked Breaching Pods.</p>
+  <ul>
+    <li>Each contingent costs <b>10 points</b> and is a single marine unit.</li>
+    <li>Limit per ship: <b>1% of the ship's base Combat Point value</b>, rounded up (a 600-PV ship can buy up to 6).</li>
+    <li>The pool is <b>shared across the whole carrier</b>, and shown in the Hangar system's tooltip as <i>"Marine
+      Contingents: X / Y"</i>.</li>
+    <li>Each turn a Breaching Pod flight has been docked for a full turn, it restocks one marine unit per pod from the
+      pool, up to each pod's starting load (including any Extra Marine Units bought as an enhancement).</li>
+    <li>The pool is <b>one-way</b>: spent points do not come back during the battle.</li>
+  </ul>
+
+  <h3>Catapults</h3>
+  <p>Some carriers have a Catapult instead of (or as well as) a standard hangar: a fixed, forward-firing launch rail that
+    holds and launches a single superheavy fighter.</p>
+  <ul>
+    <li>A catapult holds <b>exactly one</b> superheavy fighter; no other craft may launch from it or dock into it.</li>
+    <li>Its boxes are structural hit points only, not extra capacity - so, unlike a normal hangar's, extra boxes do not
+      hold shuttles.</li>
+    <li><b>Launching:</b> a catapult always launches its fighter straight ahead (at the carrier's current facing), with
+      <b>no</b> initiative penalty - neither the usual -50 on the launched flight nor the -20 on the carrier. Launching
+      works even if the catapult is damaged or destroyed.</li>
+    <li><b>Recovery:</b> the fighter can only dock back into the catapult if it enters the carrier's hex from the
+      <b>rear</b> - its heading must match the carrier's facing (it overtakes the carrier from behind). Like launching,
+      recovery works however damaged the catapult is, but the carrier still suffers the usual -20 Initiative the
+      following turn.</li>
+    <li><b>Landing on a damaged catapult:</b> if any catapult boxes are destroyed when the fighter lands, it takes damage
+      equal to the number of destroyed boxes. If it survives, it is stored with its damage and can be relaunched normally
+      later. If the landing destroys it, it still counts as recovered and stored - but it can <b>never be relaunched</b>:
+      the wreck blocks the catapult for the rest of the battle, and no replacement can be loaded.</li>
+  </ul>
+
+  <h3>Fighter Rails</h3>
+  <p>Some carriers have external Fighter Rails instead of, or as well as, standard hangar bays.</p>
+  <ul>
+    <li><b>Capacity:</b> a rail's structure is also its capacity - a 6-structure rail carries up to 6 fighters. Rail boxes
+      are part of the carrier's structure block they sit on, not a separate pool of hit points, so they add no hit points
+      to the ship.</li>
+    <li><b>Compatible craft:</b> combat fighters only (the type the ship's design declares, such as light fighters) - no
+      shuttles, assault shuttles or breaching pods.</li>
+    <li><b>Launching:</b> each fighter on a rail launches independently, like a normal hangar. The carrier suffers the
+      usual <b>-20 Initiative</b> the following turn, but the launched flight gets <b>no -50 Initiative penalty</b> - it
+      launches straight off the rail with no disorientation.</li>
+    <li><b>Recovery:</b> fighters dock back onto a rail exactly as into a normal hangar - same hex, matching heading and
+      speed - and the carrier still suffers -20 Initiative the following turn.</li>
+    <li><b>Rearming</b> takes <b>twice as long</b> as in a standard hangar, because the airlocks between the rails and the
+      carrier's interior are narrow: a docked flight starts rearming on its second full turn on the rail.</li>
+    <li><b>Structure damage (d20):</b> whenever the structure block a rail is attached to takes damage in a turn, an
+      unmodified d20 is rolled at the end of that turn. On a natural <b>16-20</b>, one whole rail on that structure is
+      destroyed (the smallest remaining rail is chosen automatically). Any fighters on it immediately try to escape, using
+      the carrier-destruction escape table above - but escapees <b>do</b> suffer the -50 Initiative the following turn:
+      a forced evacuation is not a clean launch.</li>
+    <li><b>Structure destroyed:</b> if the structure block itself is destroyed, every rail attached to it is destroyed at
+      the same time, and each rail's fighters roll to escape on the same d20 table.</li>
+    <li><b>Deployment:</b> flights too large for any one rail are spread across several automatically (a 9-fighter
+      flight on a carrier with 6-box and 3-box rails splits 6 + 3).</li>
+  </ul>
+
+  <h3>LCV Rails</h3>
+  <p>Some carriers (such as the Deneth <i>Deliverer</i>) have LCV Rails: external docking collars that carry a whole
+    Light Combat Vessel rather than a fighter flight. An LCV is a full ship in its own right, so an LCV Rail behaves
+    differently from a fighter hangar.</p>
+  <ul>
+    <li><b>Capacity:</b> each LCV Rail holds <b>exactly one</b> LCV. Unlike Fighter Rails, an LCV Rail is an ordinary
+      targetable system with its own hit points, its own entry on the carrier's hit chart, and it can be destroyed by
+      direct fire.</li>
+    <li><b>Compatible craft:</b> LCVs only. Fighters, shuttles and other small craft cannot dock to them, and an LCV
+      cannot dock into an ordinary hangar or fighter rail.</li>
+    <li><b>Docking:</b> the LCV must end its move in the <b>same hex</b> as the carrier, on a <b>matching heading</b>,
+      with the carrier <b>stationary</b>, and with at least <b>1 thrust unspent</b>. Dock with the LCV's own <b>Enter
+      Hangar</b> button or the carrier's <b>Recover</b> button; you can choose <b>which rail</b> (Forward, Port,
+      Starboard and so on) it docks onto.</li>
+    <li><b>Launching:</b> a launched LCV is placed back in the carrier's hex with the carrier's facing and speed, and
+      suffers <b>-50 Initiative</b> the following turn (it is briefly disoriented after release).</li>
+    <li><b>Penalties while docked:</b> carrying LCVs makes a ship more sluggish. For <i>each</i> LCV docked, the carrier
+      suffers <b>-10 Initiative</b>, and <b>+1 thrust</b> to the cost of a turn <i>and</i> to its turn delay. (The ship's
+      printed turn cost does not change - only the thrust actually paid each turn: a carrier with four LCVs docked pays
+      four extra thrust to turn.)</li>
+    <li><b>No rearming:</b> unlike fighters in a hangar, a docked LCV does <b>not</b> rearm or reload - it simply sits on
+      the rail until launched.</li>
+    <li><b>Landing on a damaged rail:</b> if the rail has taken damage when the LCV docks, the LCV takes Structure damage
+      equal to the rail's damage.</li>
+    <li><b>Rail destroyed while occupied:</b> the LCV is <b>forced to launch</b>, and takes Structure damage equal to the
+      rail's lost hit points <b>plus 2d10</b> Matter damage from the debris.</li>
+    <li><b>Carrier destroyed:</b> every docked LCV escapes the same way - forced to launch, taking the rail's damage plus
+      2d10.</li>
+    <li><b>Deployment:</b> an LCV may not share a hex with another ship during deployment. To start the battle docked,
+      select the LCV and click its carrier: the DOCK button puts it straight onto a chosen rail without placing it on
+      the map. You can undock a deploy-docked LCV from the carrier's <b>Deploy Flights in Hangar</b> menu before
+      committing; it then goes back to wherever it was placed, or waits to be placed.</li>
+  </ul>
+</section>
+
+<section data-key="interception" data-title="Interception" data-group="Rules &amp; Mechanics">
+  <p class="fvd-lede">Interception is defensive fire that makes an incoming shot harder to hit. Every weapon that can
+    do it has an <b>Intercept Rating</b>.</p>
+  <p>When several weapons are put on the <i>same</i> shot, each one after the first is generally worth 5% less than its
+    rating, cumulatively: three -20% weapons give -20%, -15% and -10%, for -45% in total rather than -60%. This
+    degradation <b>does not apply against ballistic weapons</b> (missiles, captor mines) - every weapon assigned to a
+    missile is worth its full rating.</p>
+
+  <h3>Automatic interception</h3>
+  <ul>
+    <li>This is the default, and needs nothing from you. When the Firing phase resolves, the game gathers every
+      intercept-capable weapon that has <i>not</i> fired that turn and assigns it to the incoming shots itself.</li>
+    <li>Firing a weapon offensively takes it out of the defensive pool for the turn: interception is always paid for with
+      weapons you chose not to shoot with.</li>
+    <li>Weapons that take <b>more than one turn to load</b> are only used automatically if you first give your consent
+      with a self-intercept marker - the green shield icon on the weapon in its ship window, in the Firing phase. Without
+      it, the game will not spend a slow-charging weapon on defence.</li>
+    <li>Missile racks that reload in one turn and carry Interceptor missiles are switched to their interceptor mode and
+      used automatically, drawing rounds from the magazine as they go. Racks with a longer loading time follow the marker
+      rule above.</li>
+    <li>Automatic interception is the only way to intercept non-ballistic weapons, since you know nothing of those attacks
+      until the Firing phase has resolved.</li>
+    <li>Mines do not intercept at all unless they carry the Command Controller enhancement.</li>
+  </ul>
+
+  <h3>Manual interception</h3>
+  <p>Putting your own weapons on a specific incoming shot. This is declared in the <b>Firing phase only</b>:</p>
+  <figure class="fvd-fig fvd-fig--ph" data-img="img/docs/faq/incoming-list.jpg" data-ratio="16:9">
+    <div class="fvd-ph">Screenshot: a ship tooltip's INCOMING list in the Firing phase, with one row's hit chance
+      underlined in blue, ready to click to intercept it.</div>
+    <figcaption>The INCOMING list: click an underlined hit chance to intercept that shot.</figcaption>
+  </figure>
+  <ol class="fvd-steps">
+    <li>Click one of your own units to select it and open its tooltip. The <b>INCOMING</b> list at the bottom is every
+      ballistic shot currently aimed at it, grouped under the ship that fired, written as "2x Heavy Missile (Class-H)".</li>
+    <li>Select the weapon(s) you want to commit in the ship window, exactly as you would to fire them.</li>
+    <li>The hit chance at the end of the row <i>is</i> the button. When your selection can legally commit to that row, the
+      number is underlined in blue and the cursor becomes a pointer - click it to declare.</li>
+  </ol>
+  <ul>
+    <li>Hover over the hit chance at any time for the full to-hit breakdown, and - when it is refusing - the reason
+      (<i>No interceptor selected</i>, <i>Uninterceptable</i>, <i>No selected weapon can reach this shot</i> and so
+      on).</li>
+    <li>The hit chance drops as you commit, and the breakdown gains a <i>Declared interception</i> line. That number is
+      <b>your own declared orders only</b>: automatic interception is worked out after the turn is committed and is
+      deliberately not previewed, and your allies' uncommitted orders are not in your game data. It is not floored at
+      zero either - a shot reading -25% is one you have already spent more on than it was worth.</li>
+    <li>Clicking a grouped row spends your selection greedily, best interceptor first: it stacks weapons on one shot of
+      the group until that shot is fully suppressed, then moves on to the next. Use the &#9654; caret to expand the group
+      into one row per shot when you would rather place each weapon yourself.</li>
+    <li>A weapon selected to intercept manually cannot also fire offensively, and is not in the automatic pool either. So
+      you cannot declare a manual intercept with a weapon <i>and</i> use its Self Intercept shield to put it in the
+      automatic pool.</li>
+    <li>Weapons that can split their shots (Twin and Quad Arrays, Discharge Guns and so on) spend <b>one gun</b> per
+      manual intercept; the rest are still free to fire, to intercept something else, or to be left to the automation. A
+      weapon that cannot split commits all of its guns to the one shot you point it at.</li>
+    <li>Missile racks and other weapons that declare in an earlier phase can be hand-assigned in the Firing phase too, as
+      long as they have fired nothing at all that turn. Ammunition is checked against the magazine before the order is
+      offered.</li>
+    <li>To withdraw, clear that weapon's fire orders from the ship window in the usual way.</li>
+  </ul>
+
+  <h3 data-anchor="meteordefence">Meteor Defence</h3>
+  <p>Using your defensive weapons against a Meteor Swarm (how swarms strike is under <a href="#terrain">Terrain</a>).
+    This is declared in <b>Initial Orders only</b>, and is only offered while a Meteor Swarm is on the map:</p>
+  <ul>
+    <li>Open an intercept-capable weapon's menu in the ship window and click the shield with the comet (&#9732;).
+      Right-click declares every similar weapon on the unit, or on every craft of a flight. A missile rack qualifies if it
+      carries Interceptor missiles. The red shield withdraws the declaration, until you commit your orders.</li>
+    <li>A declared weapon is <b>committed for the whole turn</b>, whether or not a meteor ever arrives: it cannot fire,
+      and cannot intercept in the Firing phase, manually or automatically. Its icon turns amber with a &#9732;. A weapon
+      that takes more than one turn to load loses its charge, just as if it had fired.</li>
+    <li>When the unit enters a Meteor Swarm, each meteor that strikes has its damage reduced by the Intercept Rating of
+      the declared weapons used against it - a rating of -10% blocks 2 points. The meteor still hits; only its damage is
+      reduced.</li>
+    <li>Only weapons whose arc covers the unit's direction of motion into the swarm can defend. Each gun takes one meteor
+      a turn. The best weapons are used first, and only until that meteor is cancelled, so the swarm's later meteors - and
+      a second swarm - can still be defended against.</li>
+    <li>An Interceptor missile is only spent when it is actually used against a meteor.</li>
+    <li>Your opponent cannot see which weapons you declared until the swarms have been resolved. The combat log then
+      records how many weapons defended, and how much damage they blocked.</li>
+  </ul>
+
+  <h3>What can be intercepted</h3>
+  <ul>
+    <li>Fire aimed at the intercepting unit itself, as long as the shot comes from within the weapon's firing arc. Arcs
+      are measured from where the shot comes <i>from</i> - for a ballistic, that is the hex it was launched from, not
+      wherever the shooter has moved to since.</li>
+    <li>Fire aimed at a <i>friendly</i> unit - but only by weapons with the free-intercept trait, and only when the
+      protected unit lies between them and the incoming shot. Covering someone else is normally left to the automation,
+      since the INCOMING list is shown on your own units' tooltips.</li>
+    <li>Fighter flights may protect the ship they are escorting from ballistic fire, if they end their movement in its hex
+      and were in the same hex as the ship at the start of the turn. A flight cannot cover another flight.</li>
+    <li>Some attacks cannot be intercepted at all: laser weapons tend to be uninterceptable, for example, and proximity
+      mines, rams and Molecular Slicers are others. Those rows refuse, with a reason, rather than disappearing from the
+      list.</li>
+  </ul>
+  <div class="fvd-note">
+    <p>The Molecular Slicer prices interception out of its damage pool rather than per gun, and has its own way of
+      declaring it - see the Shadow Association entry in <a href="factions-tiers.php#shadows">Factions &amp; Tiers</a>.</p>
+  </div>
+</section>
+
+<section data-key="jump" data-title="Jump Drives" data-group="Rules &amp; Mechanics">
+  <p class="fvd-lede">A ship with a Jump Drive can <b>open a jump point</b> - a vortex into hyperspace that appears in a
+    nearby hex for up to four turns - so that units can leave the battle by <b>flying into it</b>. Any unit may use any
+    <i>open</i> jump point, including an enemy's, and including units with no Jump Drive of their own.</p>
+
+  <h3>Two kinds of jump point</h3>
+  <p>The colour tells you which. They are named from hyperspace's point of view, not the battle's:</p>
+  <dl class="fvd-defs">
+    <dt><span class="fvd-c-entrance">Jump Point Entrance</span></dt>
+    <dd>Yellow: a doorway <i>into</i> hyperspace. Units fly into it to <b>leave</b> the battle. It is the one a ship opens
+      with its own Jump Drive, and everything in this entry is about it.</dd>
+    <dt><span class="fvd-c-exit">Jump Point Exit</span></dt>
+    <dd>Blue: a doorway <i>out of</i> hyperspace. <a href="#reinforcements">Reinforcements</a> <b>arrive</b> through it.
+      Nothing can go the other way - there is no Jump to Hyperspace button on a blue vortex, whoever opened it.</dd>
+  </dl>
+
+  <h3>Opening a jump point</h3>
+  <figure class="fvd-fig fvd-fig--ph" data-img="img/docs/faq/jump-point.jpg">
+    <div class="fvd-ph">Screenshot: the Jump Engine selected, its yellow reach overlay on the map, and a yellow 'Jump Point
+      Forming' hex with its facing arrow.</div>
+    <figcaption>Declaring a jump point: the reach overlay and the facing arrow.</figcaption>
+  </figure>
+  <ol class="fvd-steps">
+    <li>In <b>Initial Orders</b>, select the Jump Engine in the ship window. It behaves like any other hex-targeted
+      weapon: hovering it shows its reach as a <span class="fvd-c-entrance">yellow</span> overlay on the map, and the
+      overlay stays up while it is selected.</li>
+    <li>Right-click a target hex within <b>4 hexes</b> and choose <b>Target selected weapons on hexagon</b>. You need line
+      of sight to the hex, and it must be clear of terrain, other jump points and Enormous units. Ships in the hex, friend
+      or foe, do not block it.</li>
+    <li>A control appears on the hex with a <b>facing arrow</b> and two turn buttons. <b>The facing is the doorway</b> -
+      the hex side a unit has to come <i>through</i> to use the jump point. Step it round, then press OK.</li>
+  </ol>
+  <ul>
+    <li>Clicking away, or deselecting the Jump Engine, abandons the whole thing and no order is made. The facing cannot
+      be changed afterwards; to re-aim, remove the fire order and declare again.</li>
+    <li>The declaration is private until all players commit their Initial Orders. It then shows to everyone as a
+      <span class="fvd-c-entrance">yellow</span> <b>Jump Point Forming</b> hex with the facing arrow over it, and the ship
+      reads <b>Jumping to Hyperspace</b> in its own tooltip and ship window.</li>
+    <li>A jump point <b>cannot be entered on the turn it is declared</b>: it forms at the end of that turn, and is open
+      from the next.</li>
+    <li>Opening a jump point <b>reveals a stealthed or cloaked ship</b>, just as using non-DEW EW does - a Shading Field
+      or Cloaking Device drops for that turn.</li>
+  </ul>
+
+  <h3>Using a jump point</h3>
+  <ul>
+    <li>In the <b>Movement</b> phase, plot the unit's path so that it <i>enters</i> the jump point's hex through the side
+      the arrow points at, then press <b>Jump to Hyperspace</b> on the unit's tooltip. Its movement ends there (any
+      remaining thrust is lost), and it is removed at the end of the phase.</li>
+    <li>It is judged on the actual step that carried it into the hex, so a <b>sideslip</b> through the correct side
+      works - and a unit that has been sitting in the hex since an earlier turn is judged on the step that first put it
+      there.</li>
+    <li>Fighter flights may use a jump point too. Attached pods and docked craft go out with their host.</li>
+    <li>A unit that leaves through a jump point <b>keeps its full combat value</b> - it escaped, it was not destroyed -
+      and its fleet-list row reads <span class="fvd-c-jumped">Jumped</span> rather than Destroyed. Craft docked aboard a
+      carrier that jumps go with it, and do not make the carrier-destruction escape roll.</li>
+  </ul>
+
+  <h3>Keeping it open</h3>
+  <ul>
+    <li><b>Maintaining:</b> a jump point closes at the end of <i>every</i> turn unless its holder declares Maintain. Use
+      the blue <b>Jump Point</b> ON/OFF switch in the Jump Engine's own system menu, in Initial Orders. Switching it ON
+      makes the declaration <i>and</i> shuts the ship down for the turn - everything with a power cost except the Scanner
+      and the Jump Engine itself - which is the price of holding the jump point open. Those systems cannot be switched
+      back on until you switch Maintain OFF again.</li>
+    <li>A jump point also closes at the end of the turn if its holder <b>ends the turn more than 4 hexes away</b>, is
+      <b>destroyed</b>, or <b>leaves the battle</b> (through this jump point or any other). It closes regardless after
+      <b>four turns open</b>. Whatever the reason, it stays usable for the whole of the turn it closes on, and the reason
+      is printed in that turn's Combat Log. The Initial Orders commit window warns you before you lose one you could
+      still have kept.</li>
+  </ul>
+
+  <h3>Recharging</h3>
+  <p>Opening a jump point spends the drive's whole charge. While a jump point stands, the Jump Engine's icon shows
+    <b>N/4</b> - the turns it has been open, out of four; the rest of the time it shows the ordinary charge counter. The
+    drive starts a scenario fully charged, drops to zero when it opens a jump point, and recharges at 1 per turn from the
+    turn <i>after</i> that jump point closes. It cannot open another until it is full again, which takes different times
+    on different hulls (a Centauri Primus, for example, needs 16 turns).</p>
+
+  <h3>Damaged Jump Drives</h3>
+  <ul>
+    <li><b>Damaged Jump Drives are dangerous.</b> At the end of every turn a ship opens or maintains a jump point, it
+      rolls d100 against the percentage of its Jump Engine boxes lost. Roll at or under it and the ship is destroyed
+      outright - with any docked craft, which get no escape roll. The Combat Log records it. The risk is taken by the ship
+      <i>opening</i> the jump point; units flying through one never roll.</li>
+    <li>The Jump Drive usually cannot be turned off unless it is seriously damaged, though some scenarios allow it. The
+      game warns you if you try to deactivate it improperly (for example without Desperate rules, or before it is 50%
+      damaged).</li>
+  </ul>
+</section>
+
+<section data-key="reinforcements" data-title="Reinforcements" data-group="Rules &amp; Mechanics">
+  <p class="fvd-lede">When the host ticks <b>Reinforcements Allowed</b> in Create Game, players may buy part of their
+    fleet as reinforcements: units that start the battle in <b>hyperspace</b> and come out of a
+    <span class="fvd-c-exit">Jump Point Exit</span> that one of their own ships opens during the game.</p>
+  <p>They come out of the same points as the rest of the fleet - a reinforcement is not free, it is a ship you have
+    chosen not to bring to the party yet. They are <i>not</i> the same as a <a href="#delayed">Delayed Deployment
+    Slot</a>, which arrives on a fixed turn set before the game began.</p>
+
+  <h3>Buying them</h3>
+  <ul>
+    <li>In Fleet Selection the fleet has two groups, <b>MAIN FLEET</b> and <b>REINFORCEMENTS</b>. Pick the group before
+      you buy, or use the <i>Reinforce</i> link on a bought row to move a unit between them. Saved fleets remember which
+      group each unit was in.</li>
+    <li>Terrain, bases and OSATs cannot be reinforcements - they always deploy on Turn 1 - and the lobby will not let you
+      put them in the group.</li>
+    <li><b>Bring a way in.</b> At least one reinforcement needs a <b>Jump Drive</b> of its own, or your side needs a
+      <b>Jump Gate</b> on the map. Without either, your reinforcements sit in hyperspace for the whole battle and their
+      points are wasted - the lobby warns you before you click Ready.</li>
+    <li><b>What the enemy sees:</b> nothing but a line in your fleet list reading <i>Reinforcements - N units, X pts</i>.
+      Not which hulls, not what they carry, not who can open a jump point. You see your own in full, and can manage their
+      power during Initial Orders by opening their ship windows from the FLEET INFO tab.</li>
+  </ul>
+
+  <h3>Calling them in</h3>
+  <figure class="fvd-fig fvd-fig--ph" data-img="img/docs/faq/manage-reinforcements.jpg">
+    <div class="fvd-ph">Screenshot: the Manage Reinforcements window in Initial Orders - a jump-capable ship chosen, its
+      target hex set, and the Jump Point Manifest with units ticked, speeds and carriers set.</div>
+    <figcaption>Manage Reinforcements and the Jump Point Manifest.</figcaption>
+  </figure>
+  <ol class="fvd-steps">
+    <li>In <b>Initial Orders</b>, press <b>Manage Reinforcements</b>. Every jump-capable unit you have in hyperspace is
+      listed; choose one and press <b>Choose Hex</b>.</li>
+    <li>Click the hex you want the jump point to open in, and set its <b>facing</b> with the arrow control.</li>
+    <li>Tick the units that will ride through it - the <b>Jump Point Manifest</b>. The opening ship always rides its own
+      jump point, and a unit already riding somebody else's is greyed out.</li>
+  </ol>
+  <ul>
+    <li>You can withdraw a declaration from the same window and start again. To change <i>who rides</i> without giving up
+      the jump point itself, select the row and press <b>Jump Manifest</b> - it reopens the same tick list. Right-click
+      any row, or its <b>&#9432;</b>, to open that unit's ship window.</li>
+    <li>The manifest also sets each unit's <b>Speed</b> as it leaves hyperspace (0-10, the opening ship's included), and
+      the speed you pick counts for that turn's initiative.</li>
+    <li>For a fighter flight - or a ship a Docking Bay can take - pick a carrier from its <b>Hangar</b> list to have it
+      arrive aboard that ship: the opening ship, or another unit riding the <i>same</i> jump point (which of the carrier's
+      hangars it goes into is worked out for you). The room is shared, so a carrier that is full shows <i>(no room)</i>,
+      and unticking a carrier takes back whatever was riding in it (the manifest says so, and puts it on the map
+      instead).</li>
+    <li><b>The declaration is public once orders are committed</b>: everyone sees a <span class="fvd-c-exit">blue hex</span>
+      with a facing arrow at the hex you named, for the rest of that turn. That warning is the price of arriving somewhere
+      useful - the same deal a Delayed Deployment Slot gets.</li>
+  </ul>
+
+  <h3>Where it forms: the deviation roll</h3>
+  <p><b>You will probably miss.</b> At the end of the turn the jump point forms, and where it forms is a <b>deviation
+    roll</b> against the opening ship's <b>sensor rating</b>: a d20, modified by:</p>
+  <ul>
+    <li><b>-1</b> for the Minbari Federation;</li>
+    <li><b>-5</b> for an Ancient race (Vorlon, Shadow);</li>
+    <li><b>-3</b> for a friendly base or OSAT on the map;</li>
+    <li><b>-1</b> for a friendly ELINT vessel.</li>
+  </ul>
+  <p>A low roll arrives exactly where you aimed; a high one scatters 1d3, 1d6, 1d10 or 2d10+2 hexes in a random
+    direction, and the worst two bands turn the facing as well. An Ancient fleet with a base on the map arrives precisely
+    about 40% of the time; a young race with a sensor rating of 10 is precise only on a natural 1. The Combat Log names the
+    band, the roll and the distance, so you can see what happened. The jump point never forms inside terrain or an
+    Enormous unit - if the dice put it there, it is nudged to the nearest legal hex.</p>
+
+  <h3>Arriving</h3>
+  <ul>
+    <li>At the start of the <i>next</i> turn the wave is simply there - there is no Deployment Phase for it. Every unit
+      stands in the jump point's hex on the jump point's facing, stacked, at the speed you chose in the manifest, and
+      anything you ticked for a hangar is already aboard its carrier. If the jump point is no longer there, the units go
+      back to hyperspace with nothing spent, and can be called in again later.</li>
+    <li>A Hyach ship arriving this way still gets a short <b>Deployment Phase</b> on its arrival turn - it is already in
+      place - to choose its <b>Specialists</b>, which it can then use from that turn's Initial Orders.</li>
+    <li><b>Arriving is disorderly.</b> A wave that comes out of hyperspace off course spends the turn sorting itself out:
+      on its <b>arrival turn only</b>, every unit that rode that jump point takes an <b>initiative penalty of 1 per hex it
+      scattered, plus 2 for every 60&deg; the facing was turned</b>. A precise arrival costs nothing at all - one more
+      reason the modifiers above are worth having. Only the first wave is disordered: a later wave through a jump point
+      that is being held open comes out of a doorway that has already formed, and takes no penalty.</li>
+  </ul>
+
+  <h3>Holding the exit open</h3>
+  <ul>
+    <li>A ship's jump point closes at the end of the arrival turn <b>unless the ship maintains it</b>. Once on the board it
+      can hold its jump point open exactly as it would a way out - <b>Maintain Vortex</b> on the Jump Engine, which shuts
+      down all its powered systems except the Scanner, for at most four turns open. (A Vorlon pays its drive's power from
+      the Power Capacitor instead, with no turn limit, and also pays it on the turn the jump point forms.)</li>
+    <li>On every turn it is maintained, <b>Manage Reinforcements</b> lists it with <b>Select Reinforcements</b>, so another
+      wave can come through next turn; turning Maintain off cancels that wave.</li>
+    <li>A damaged drive rolls for failure on every turn it maintains the jump point, though never on the turn it forms.
+      Once the jump point closes, the drive recharges and can then be used normally (including to open a way out).</li>
+  </ul>
+
+  <h3>Jump Gates</h3>
+  <p>A fixed Jump Gate can be signalled to open a jump point <i>inward</i> instead of outward: click the gate in Initial
+    Orders and choose <b>Signal Gate for Arrival</b>, which opens the same Manifest window.</p>
+  <ul>
+    <li>A gate's jump point does not deviate - it opens in the gate's own mouth, on the gate's own facing, with no
+      initiative penalty - and it stays open for its programmed hold, so it can bring a fresh wave through on
+      <i>every</i> turn it stands. Pick the gate up again from Manage Reinforcements on later turns.</li>
+    <li>A gate belongs to nobody. If two players signal the same gate in the same turn, the one whose nearest unit is
+      closest wins it, and the loser's manifest goes back to hyperspace with nothing spent. While the contest is live only
+      the nearest side's marker is shown on the gate, so you can see whether you are going to get it.</li>
+  </ul>
+
+  <h3>Shadows and other phasing hulls</h3>
+  <p>A Shadow ship does not tear a vortex open - it fades out, and now fades back <b>in</b> the same way. It declares a
+    hex exactly as anything else does, and its arrival marker reads <b>REINFORCEMENTS</b>, but no jump point terrain ever
+    appears: the ships simply <i>are</i> there on the arrival turn. Everything else - the deviation roll, the manifest,
+    the arrival speed, the initiative penalty - is identical, except that only fighters its hangars can take (and ships
+    its Docking Bay can) may ride with it, and they always arrive aboard. Such a drive still cannot open a way
+    <i>out</i>; it uses the old one-click Jump to Hyperspace for that.</p>
+
+  <div class="fvd-note fvd-note--warn">
+    <span class="fvd-note-label">One-way</span>
+    <p>You cannot go back out the way you came. A blue Jump Point Exit is one-way: to leave the battle you need a yellow
+      Jump Point Entrance, which means opening one with a drive that has recharged.</p>
+  </div>
+</section>
+
+<section data-key="mines" data-title="Mines &amp; Minesweeping" data-group="Rules &amp; Mechanics">
+  <p class="fvd-lede">There are three types of mine in Fiery Void - Captor, Direct Energy Weapon (DEW) and Proximity -
+    described below.</p>
+
+  <h3>Buying and deploying mines</h3>
+  <ul>
+    <li>In a game with <b>Mines Allowed</b> ticked in Create Game, you can buy mines in Fleet Selection from your
+      faction's list.</li>
+    <li>Unlike ships, mines can be bought in batches: <b>Add to fleet</b> lets you choose how many of that type to buy,
+      along with any enhancements (see Mine Enhancements in
+      <a href="ammo-options-enhancements.php#mineEnhancements">Ammo, Options &amp; Enhancements</a>).</li>
+    <li>Taking any mines at all costs a 100-point premium, plus +10% to the unit cost of all mines for each type of mine
+      taken after the first (of the three: Captor, DEW and Proximity).</li>
+    <li>Once the game starts you can place mines one by one, or use <b>Deploy Minefield</b> to scatter any number at
+      random within an area you choose. Mines can go anywhere on the map, as long as it is not within 10 hexes of an enemy
+      deployment zone.</li>
+  </ul>
+  <figure class="fvd-fig fvd-fig--ph" data-img="img/docs/faq/minefield.jpg">
+    <div class="fvd-ph">Screenshot: Deploy Minefield in the Deployment Phase - the chosen area on the map with mines
+      scattered in it.</div>
+    <figcaption>Laying a minefield.</figcaption>
+  </figure>
+
+  <h3>Mine ranges</h3>
+  <p>Once deployed, mines are stealthed: they cannot be seen by enemies until they attack or are detected. On the turn a
+    mine is deployed or spawned you can tailor its ranges - against Capitals/HCVs, MCVs/LCVs and Fighters - from 0 up to
+    its maximum, by clicking the mine's weapon icon in the Deployment or Pre-Turn Orders phase. Once set, the ranges apply
+    for the rest of the game; if you do not set them, they stay at their maximum. The propagate buttons in the Mine
+    Settings menu set the ranges of every mine of the same type at once.</p>
+
+  <h3>Detecting mines</h3>
+  <p>To detect mines, assign EW to <b>Detect Mines</b> in Initial Orders - an option that only appears if your opponent
+    has mines in the game. Fighters and shuttles can do this too, converting their Offensive Bonus (OB) into Detect Mines
+    points at 10 OB per point (OB used this way is not available for firing later in the turn). Detection depends on:</p>
+  <ul>
+    <li>the Detect Mines EW assigned;</li>
+    <li>any Minesweeper Bonus;</li>
+    <li>the distance to the hidden enemy mine;</li>
+    <li>the mine's signature.</li>
+  </ul>
+  <p>Detection happens at the END of each committed Movement segment - not <i>during</i> a unit's movement, so that
+    players cannot detect a mine and then take their moves back. A mine is revealed if your Detect Mines EW plus
+    Minesweeper Bonus is GREATER THAN the distance to the mine plus the mine's signature.</p>
+  <p>Detecting a mine does not tell you what type it is: to find out, scan it with at least 1 OEW after it has been
+    detected.</p>
+
+  <h3>Shooting at mines</h3>
+  <p>On top of the usual modifiers, a few apply only to mines:</p>
+  <ul>
+    <li>All mines have a basic profile of 60, minus 5 per point of signature - so a mine with Signature 3 has a basic
+      profile of 45.</li>
+    <li>The firing ship's Detect Mines EW for the turn is added to any Minesweeper Bonus it has, and acts as a "general
+      lock-on".</li>
+    <li>If that general lock-on is greater than the mine's distance plus signature, the difference (times 5) is added to
+      your hit chance. For example: with 10 EW on mine detection, a Signature 1 mine at range 3 needs 4 to detect, so the
+      detecting ship has +6 (times 5) to hit it - +30%. It still suffers the double range penalty if it has no OEW lock-on
+      on the mine, as usual.</li>
+    <li>Unless a mine has the Command Controller enhancement, it does not use its weapons to intercept.</li>
+  </ul>
+
+  <h3>How mines attack</h3>
+  <p>All mines automatically attack the first unit that comes into range - allies included, unless the mine or mine
+    launcher has the Identify Friend or Foe enhancement.</p>
+  <dl class="fvd-defs">
+    <dt>Captor mines</dt>
+    <dd>Launch at the first viable target that comes within range during movement, then resolve the attack as a ballistic
+      weapon in the Firing Phase - so they can be intercepted like other ballistics. Units with Jammers halve the range at
+      which a captor mine attacks them. A captor mine is destroyed whether it hits or not. The Kor-Lyan and the WotCR
+      Abbai have ships with Ballistic Mine Launchers, which can leave lingering captor mines if they do not find a target
+      straight away.</dd>
+    <dt>Proximity mines</dt>
+    <dd>Explode and damage the first viable target that comes within range during movement, resolving the attack just
+      before the Firing Phase, like terrain collisions. They always hit their target, and are destroyed after
+      attacking.</dd>
+    <dt>DEW mines</dt>
+    <dd>Carry weapons, which they fire automatically at the first viable target they meet in the Movement phase; the
+      attacks are resolved normally in the Firing Phase. A DEW mine is detected once it fires, and must normally fire all
+      its weapons at the same target. With no EW of its own it gets no weapon lock, but it does get an accuracy bonus to
+      its shots. Once detected, its signature drops to a lower value.</dd>
+  </dl>
+</section>
+
+<section data-key="skindancing" data-title="Skin Dancing" data-group="Rules &amp; Mechanics">
+  <p class="fvd-lede">Skin dancing is flying just metres above the surface of a large unit or base - a very dangerous
+    manoeuvre, performed only by the most agile ships.</p>
+  <figure class="fvd-fig fvd-fig--ph fvd-fig--side" data-img="img/docs/faq/skin-dance.jpg" data-ratio="4:3">
+    <div class="fvd-ph">Screenshot: a small, agile ship ending its move in the same hex as an Enormous unit (a base),
+      about to skin dance.</div>
+    <figcaption>Skin dancing over a base.</figcaption>
+  </figure>
+
+  <h3>Who can skin dance</h3>
+  <p>Any unit able to skin dance automatically tries to when it ends its movement in the same hex as an Enormous unit
+    (but not a terrain unit, where the normal collision rules in <a href="#terrain">Terrain</a> apply instead). To be
+    eligible, a unit:</p>
+  <ul>
+    <li>must be a Medium Ship or smaller, and agile (fighters and shuttles count as agile for this). There are rare
+      exceptions, such as Torvalus capital ships;</li>
+    <li>cannot be stationary, while the Enormous unit cannot be moving faster than Speed 5 - and if the Enormous unit is
+      moving, the dancer must be moving in the same direction or the exact opposite one;</li>
+    <li>must not be a unit designed to ram, such as the Orieni Hunter-Killer drones.</li>
+  </ul>
+
+  <h3>The roll</h3>
+  <p>Eligible ships roll a d20 just before the Firing Phase, and must roll 15 or less to succeed. Modifiers:</p>
+  <ul>
+    <li>+1 for each 2 points of speed (or part of 2) the dancer is going above Speed 5.</li>
+    <li>+5 if either unit is rolling or pivoting. These add up: a dancer rolling while its target pivots is +10. A rotating
+      base does not count as pivoting.</li>
+    <li>+1 for each point of thrust rating the dancer has lost with destroyed thrusters (wherever they are) - a ship that
+      has lost two of its 4-rating aft thrusters is +8.</li>
+    <li>+3 for each level a skin-dancing fighter is jinking.</li>
+    <li>-1 for a fighter flight with a navigator.</li>
+  </ul>
+
+  <h3>Results</h3>
+  <ul>
+    <li>If the roll fails by 5 or less (a modified 16-20), the dance is aborted with no ill effects and no chance of a ram.
+      On a 21 or higher, the dancer smashes into the Enormous unit's hull. For fighters, one fighter at random crashes into
+      the hull while the others break away; the survivors cannot fire (even defensively) or guide weapons that turn, being
+      too busy pulling out of the manoeuvre.</li>
+    <li>A successful dancer cannot be fired on by enemy units unless they skin dance over the same target too - except by
+      ballistic weapons launched at it earlier in the turn. The vessel being skimmed cannot fire at the dancer either, nor
+      fire defensively against its weapons, because the dancer is inside its weapons' tracking zones.</li>
+    <li>The dancer's forward-firing weapons (those that can legally fire into the row of hexes directly ahead) all
+      automatically roll the best result on their to-hit dice - a 1 on the d100 - so they hit in almost every case. In fact
+      those weapons may not fire at any other target (except other skin dancers, against which they fire normally) unless
+      they can fire outside the 120&deg; forward area. If they can, they may choose another eligible target instead. The
+      skimmed unit may use intercept fire and other defensive devices normally.</li>
+    <li>Fighters cannot guide missiles or other ballistic weapons at a target while skin dancing (even the unit they are
+      dancing over), even with a navigator: the pilot and crew are too busy flying the fighter and its onboard
+      weapons.</li>
+  </ul>
+</section>
+
+<section data-key="stealth" data-title="Stealth Ships" data-group="Rules &amp; Mechanics">
+  <p class="fvd-lede">Stealth ships are invisible at long range until they reveal themselves or are detected.</p>
+  <ul>
+    <li>They reveal themselves automatically by using any EW ability except Defensive EW (DEW), or by firing their
+      weapons.</li>
+    <li>They can also be detected once they get close to an enemy vessel, if there is line of sight. Detection happens at
+      the start of the Firing Phase and depends on both ship type and sensor rating: an undetected stealth ship within
+      detection range at that point becomes detected.</li>
+  </ul>
+  <table>
+    <thead><tr><th>Detecting unit</th><th>Detection range</th></tr></thead>
+    <tbody>
+      <tr><td>Base</td><td>5 &times; Sensor Rating</td></tr>
+      <tr><td>ELINT ship</td><td>3 &times; Sensor Rating</td></tr>
+      <tr><td>Other ship</td><td>2 &times; Sensor Rating</td></tr>
+      <tr><td>Fighter</td><td>Offensive Bonus</td></tr>
+    </tbody>
+  </table>
+  <ul>
+    <li>When an opponent has stealth ships, ELINT ships can spend EW on <b>Detect Stealth</b> to add 2 hexes of detection
+      range per point.</li>
+    <li>A detected stealth ship can become undetected again by breaking line of sight with ALL enemy vessels at the end of
+      a turn, and not firing any weapons.</li>
+    <li>If its scanner or computer system is destroyed, its defence increases by 15% for the rest of the battle.</li>
+    <li>Stealth ships also get the same benefits as Minbari Jammer-equipped ships beyond a certain distance: for ships, a
+      double range penalty beyond 12 hexes (4 for fighters, 24 for bases); for stealth fighters, a double range penalty
+      beyond 5 hexes, and ballistic launches restricted beyond 5 hexes.</li>
+    <li>Stealth fighters cannot become fully invisible - they only get the jammer / no-lock effects.</li>
+  </ul>
+  <div class="fvd-note">
+    <p>These rules cover stealth for the younger Babylon 5 races, such as the Hyach. For other factions' stealth
+      mechanics - the Torvalus, for example - see the faction notes in
+      <a href="factions-tiers.php#torvalus">Factions &amp; Tiers</a>.</p>
+  </div>
+</section>
+
+<section data-key="terrain" data-title="Terrain" data-group="Rules &amp; Mechanics">
+  <figure class="fvd-fig fvd-fig--ph" data-img="img/docs/faq/terrain.jpg">
+    <div class="fvd-ph">Screenshot: a map with asteroids, a moon, a dust cloud and a meteor swarm, and a ship's path
+      passing close by.</div>
+    <figcaption>Asteroids, a moon, dust and a meteor swarm on the map.</figcaption>
+  </figure>
+  <dl class="fvd-defs">
+    <dt>Asteroids</dt>
+    <dd>Single hex only. Added in Create Game, or by hand from the Terrain faction's list. They block line of sight, and
+      cause 1d10 &times; Speed raking damage to any unit that moves through them or ends its movement in their hex. The
+      damage is dealt just before the Firing Phase.</dd>
+    <dt>Moons / large asteroids</dt>
+    <dd>Anything larger than an asteroid - occupying several hexes. Units moving into their area automatically crash into
+      them, during the Pre-Firing Phase.</dd>
+    <dt>Dust fields and dust clouds</dt>
+    <dd>Added in Create Game with the <b>Dust</b> count, and placed at random: most are a single hex, but about one in
+      six is a Dust Cloud of 3, 5 or 7 hexes. Dust does not block line of sight. Every dust hex a unit enters damages
+      it, during the Pre-Firing Phase:
+      <ul>
+        <li>Ships take <b>speed / 2</b> (fractions dropped) to the Structure of the side that entered the hex - the
+          Primary Structure if that side has none.</li>
+        <li>Fighters and shuttles take <b>(speed - 10) / 3</b> (fractions dropped) on every craft, so a flight at speed
+          12 or less takes nothing.</li>
+        <li>It is Standard damage with no hit chart roll: armour applies, shields do not.</li>
+      </ul>
+    </dd>
+    <dt>Meteor Swarms</dt>
+    <dd>Added in Create Game with the <b>Meteor Swarms</b> count, one hex each, placed at random (a swarm shows on the map
+      as a Meteoroid Swarm). Like dust, a swarm does not block line of sight. A unit that enters a swarm's hex rolls a
+      d20 on the table below, during the Pre-Firing Phase, to see how many meteors strike it: -1 to the roll at speed 4
+      or less, +1 at speed 13 or more. Each meteor is its own Standard hit for <b>1d10 + the unit's speed</b>, on the
+      side it entered through, rolled on that section's hit chart - armour and shields apply as normal. Declared
+      defensive fire can blunt them: see <a href="#meteordefence">Meteor Defence</a>.</dd>
+    <dt>Placing it yourself</dt>
+    <dd>For full control over where terrain goes, create an extra player slot for yourself when setting up the game and
+      buy the terrain you want from the Terrain faction (under Other). With a wide enough deployment zone, you can then
+      place it like any other unit on Turn 1.</dd>
+  </dl>
+  <table class="fvd-roll" data-anchor="meteorchart">
+    <caption>Meteors striking a unit that enters a swarm (d20)</caption>
+    <thead>
+      <tr><th>d20</th><th class="fvd-num">Flights</th><th class="fvd-num">Light &amp; Medium</th><th class="fvd-num">Heavy</th><th class="fvd-num">Capital</th><th class="fvd-num">Enormous</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1-12</td><td class="fvd-num">0</td><td class="fvd-num">0</td><td class="fvd-num">0</td><td class="fvd-num">0</td><td class="fvd-num">0</td></tr>
+      <tr><td>13-14</td><td class="fvd-num">0</td><td class="fvd-num">0</td><td class="fvd-num">0</td><td class="fvd-num">0</td><td class="fvd-num">1</td></tr>
+      <tr><td>15</td><td class="fvd-num">0</td><td class="fvd-num">0</td><td class="fvd-num">0</td><td class="fvd-num">1</td><td class="fvd-num">1</td></tr>
+      <tr><td>16</td><td class="fvd-num">0</td><td class="fvd-num">0</td><td class="fvd-num">1</td><td class="fvd-num">1</td><td class="fvd-num">1</td></tr>
+      <tr><td>17</td><td class="fvd-num">0</td><td class="fvd-num">1</td><td class="fvd-num">1</td><td class="fvd-num">1</td><td class="fvd-num">2</td></tr>
+      <tr><td>18</td><td class="fvd-num">0</td><td class="fvd-num">1</td><td class="fvd-num">1</td><td class="fvd-num">2</td><td class="fvd-num">2</td></tr>
+      <tr><td>19</td><td class="fvd-num">1</td><td class="fvd-num">1</td><td class="fvd-num">2</td><td class="fvd-num">2</td><td class="fvd-num">2</td></tr>
+      <tr><td>20</td><td class="fvd-num">1</td><td class="fvd-num">2</td><td class="fvd-num">2</td><td class="fvd-num">2</td><td class="fvd-num">3</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section data-key="damagetypes" data-title="Weapon Damage Types" data-group="Rules &amp; Mechanics">
+  <p class="fvd-lede">A weapon's <b>damage type</b> decides what its damage actually does once it lands.</p>
+  <p>Point at a weapon in the ship window and its mode is shown as <b>Damage type</b>. Some weapons have more than one
+    (the Minbari Neutron Laser can fire as Raking or Piercing, for example): click the firing mode button in the weapon's
+    menu to switch, or right-click it to switch every similar weapon that has no orders yet. <b>Linked</b> and
+    <b>Sustained</b> are a little different from the rest - they are extra rules layered on top of a weapon's damage
+    type, rather than damage types of their own.</p>
+  <figure class="fvd-fig fvd-fig--ph" data-img="img/docs/faq/damage-types.jpg" data-ratio="16:7">
+    <div class="fvd-ph">Diagram: where each damage type lands on a ship - Standard (one system), Raking (several systems
+      in one section), Piercing (the facing section, Primary and the far section) and Flash (the target plus 25% to
+      everything else in the hex).</div>
+    <figcaption>How the damage types spread their damage.</figcaption>
+  </figure>
+
+  <h3>Standard</h3>
+  <p>The simplest damage type, and the one the others are measured against.</p>
+  <ul>
+    <li>The whole shot lands on <b>one system</b>, rolled on the hit chart of the section facing the shooter. Against a
+      fighter flight, it hits one fighter.</li>
+    <li>The system's armour is subtracted once, and the rest is dealt as damage.</li>
+    <li>Any damage left over once the system is destroyed spills over (<i>overkills</i>) into that section's Structure,
+      and from there into the Primary Structure.</li>
+  </ul>
+
+  <h3>Flash</h3>
+  <p>An explosion rather than a beam, so it hurts everything nearby - a Plasma Wave torpedo or a Mag Gun, for
+    example.</p>
+  <ul>
+    <li>The target is hit exactly as by a Standard shot.</li>
+    <li>On top of that, <b>every other unit in the same hex</b> - <b>friend or foe</b> - takes 25% of the shot's damage
+      (each unit's own armour still applies). Mines are unaffected.</li>
+    <li>Against a fighter flight, the fighter hit takes the full damage, and every other fighter in the flight takes a
+      quarter.</li>
+    <li>Overkill does not go to Structure: it is rolled again on the hit chart instead. Flash damage cannot reach Primary
+      systems until every system on an outer structure block has been destroyed.</li>
+    <li>Think twice before firing one at an enemy sharing a hex with your own fighters!</li>
+  </ul>
+
+  <h3>Linked</h3>
+  <p>Mostly found on fighter guns mounted in pairs or threes, such as the Plasma Blaster.</p>
+  <ul>
+    <li>All the shots share <b>one to-hit roll</b>, so they either all hit or all miss.</li>
+    <li>Every shot that hits strikes the <b>same system</b> (or, against a flight, the same fighter).</li>
+    <li>Each shot's damage is still worked out separately, so the target's armour is subtracted from every shot.</li>
+  </ul>
+
+  <h3>Piercing</h3>
+  <p>A shot that punches straight through the target and out the far side.</p>
+  <ul>
+    <li>Against a ship with more than one Structure block, the damage is split into <b>three parts</b>: one for the
+      section facing the shooter, one for the Primary section, and one for the section on the opposite side.</li>
+    <li>If the shot goes in and out through the same section (a Heavy Combat Vessel hit from the side, for example), it is
+      split into <b>two parts</b> instead: that section and Primary.</li>
+    <li>Damage left over after destroying a system is <b>lost</b> - Piercing shots never overkill.</li>
+    <li>Against smaller units with only one Structure block (Medium Ships and below) there is nothing to pass through:
+      the shot lands as a single hit, and its damage is reduced by 10%.</li>
+    <li>Piercing damage usually cannot be aimed at fighters at all.</li>
+  </ul>
+
+  <h3>Pulse</h3>
+  <p>A rapid burst of identical bolts, such as the Medium Pulse Cannon.</p>
+  <ul>
+    <li>The whole burst makes <b>one to-hit roll</b>. If it misses, every pulse misses.</li>
+    <li>If it hits, the weapon scores a random number of pulses, plus a bonus pulse for every step the roll beat the number
+      it needed, up to a maximum. The weapon's tooltip spells it out: <i>"Pulse damage: D5, +1/20%, max. 6 pulses"</i>
+      means 1-5 hits, plus one more for every full 20% the roll was under the target number - but never more than 6.</li>
+    <li>Each pulse is a separate hit that does its full damage and picks its own system, so a good roll can spread damage
+      across a ship - or across several fighters in a flight.</li>
+    <li>Interception lowers the chance to hit, and so also cuts down the bonus pulses.</li>
+  </ul>
+
+  <h3>Raking</h3>
+  <p>A beam swept across the target, typical of lasers.</p>
+  <ul>
+    <li>The damage is broken into chunks called <b>rakes</b>, normally 10 points each (the weapon's tooltip says so if its
+      rakes are a different size). A 27-point hit, for example, becomes rakes of 10, 10 and 7.</li>
+    <li>Each rake rolls for its own system in the same section, so one shot can damage several systems.</li>
+    <li>Armour only has to be cut through once: if a later rake strikes a system an earlier rake has already hit, the
+      armour already cut through does not count again.</li>
+    <li>Against fighters, Raking works just like Standard - all the damage goes on one fighter.</li>
+  </ul>
+
+  <h3>Sustained</h3>
+  <p>A beam held on the target over several turns.</p>
+  <ul>
+    <li>Some weapons, such as the Heavy Laser, can be <b>overcharged</b> in Initial Orders: after a full recharge cycle
+      spent overcharging, their next shot is Sustained. A few, such as the Particle Cutter, are always in Sustained
+      mode.</li>
+    <li>A Sustained weapon fires on <b>consecutive turns</b>, usually two (some manage three). It must keep firing in its
+      default mode each turn (usually raking), or the rest of the sequence is lost.</li>
+    <li>If a shot hits, next turn's shot at the <b>same target hits automatically</b> and cannot be intercepted. If it
+      misses, or you switch targets, the next shot rolls to hit as normal.</li>
+    <li>Follow-up shots ignore any armour earlier shots have already cut through on the systems they hit, and the target's
+      shields do not reduce them a second time.</li>
+    <li>After its final shot the weapon is <b>forced offline for one turn</b> to cool down, then starts recharging from
+      scratch.</li>
+  </ul>
+</section>
+
+<!-- ═════════════════════════════════ LEGAL ═════════════════════════════════ -->
+
+<section data-key="disclaimer" data-title="Disclaimer" data-group="Legal">
+  <p>This project is a non-commercial, fan-made adaptation inspired by Babylon 5 Wars, originally published by Agents of
+    Gaming under licence from Warner Bros. This website, its content and the associated game are not affiliated with,
+    authorised by, endorsed by, or connected in any way to Warner Bros., Agents of Gaming, or any other rights holders.
+    'Babylon 5' and all related names, logos and material are trademarks and/or copyrighted properties of their
+    respective owners.</p>
+</section>

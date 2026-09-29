@@ -199,6 +199,9 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
         <link href="<?php echo AssetLoader::getAssetUrl('styles/scenarioCard.css'); ?>" rel="stylesheet" type="text/css">
         <!-- The redesigned top of the page (Stage 4). After lobby.css and gamesNew.css, which it overrides. -->
         <link href="<?php echo AssetLoader::getAssetUrl('styles/gameLobby.css'); ?>" rel="stylesheet" type="text/css">
+        <!-- The DATA ARCHIVE window (client/UI/docViewer.js, bundled below): the FAQ, Factions & Tiers,
+             Ammo & Options and Fleet Checker links open it over the lobby instead of a new tab. -->
+        <link href="<?php echo AssetLoader::getAssetUrl('styles/docViewer.css'); ?>" rel="stylesheet" type="text/css">
         <!-- jQuery + jQuery-UI self-hosted (same-origin HTTP/2 + cache-control, no 3rd-party
              TLS). Both kept SYNCHRONOUS: the lobby's synchronous client/*.js scripts run
              during parse and expect $.fn.draggable present, so jQuery-UI must not defer
@@ -248,6 +251,7 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
         <script src="client/UI/gameInfo.js"></script>
         <script src="client/UI/scenarioCard.js"></script>
         <script src="client/UI/mapPreview.js"></script>
+        <script src="client/UI/docViewer.js"></script>
         <script src="client/model/ship.js"></script>
         <script src="client/model/shipSystem.js"></script>
         <script src="client/model/systemFactory.js"></script>
@@ -544,9 +548,11 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 		   structured facts once, on load (gamedata.renderScenarioPanel).
 		   A Fleet Builder lobby has no teams, no map and no scenario - only the reference links. */
 
-		/* The reference pages - the same three as game.php's USEFUL LINKS. (The three off-site
-		   random-faction wheels that sat under them are gone: the Faction Picker has its own
-		   randomiser, plan §4.5, Stage 7.) */
+		/* The reference pages - the same three as game.php's USEFUL LINKS. A plain click opens them in
+		   the DATA ARCHIVE window over the lobby (client/UI/docViewer.js matches the href); the
+		   target=_blank is only the fallback for a middle-click, or if the script is missing. (The
+		   three off-site random-faction wheels that sat under them are gone: the Faction Picker has
+		   its own randomiser, plan §4.5, Stage 7.) */
 		$lobbyLinks = '
 		<div class="lb-links">
 		  <div class="lb-links-row">

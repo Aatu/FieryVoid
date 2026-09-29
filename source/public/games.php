@@ -56,6 +56,10 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
   <!-- Page-scoped: the games panel + Recent Games window. Kept out of gamesNew.css,
        which 12 pages share. -->
   <link href="<?php echo AssetLoader::getAssetUrl('styles/gamesPanel.css'); ?>" rel="stylesheet" type="text/css">
+  <!-- The DATA ARCHIVE window: the Starter Guide, FAQ, Factions & Tiers and Ammo & Options links
+       below open it over this page instead of a new tab (client/UI/docViewer.js). -->
+  <link href="<?php echo AssetLoader::getAssetUrl('styles/docViewer.css'); ?>" rel="stylesheet" type="text/css">
+  <script defer src="<?php echo AssetLoader::getAssetUrl('client/UI/docViewer.js'); ?>"></script>
   <script src="<?php echo AssetLoader::getAssetUrl('client/lib/jquery-4.0.0.min.js'); ?>"></script>
   <script src="client/games.js"></script>
   <script src="client/ajaxInterface.js"></script>

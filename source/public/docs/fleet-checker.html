@@ -1,0 +1,196 @@
+<!--
+  FIERY VOID DATA ARCHIVE - FLEET CHECKER RULES
+  Shown by client/UI/docViewer.js (the in-page window) and by fleetchecker.php (the same viewer,
+  filling the page). Edit the words here; nothing else needs to change.
+
+  Each <section> is one entry in the window's left-hand list:
+    data-key    the entry's id - also its link: fleetchecker.php#variants. Keep it stable.
+    data-title  the entry's name in the list and its heading.
+    data-group  the list heading it sits under (consecutive entries share one heading).
+  Inside an entry: <h3> sub-headings are listed under the entry while it is open; data-anchor="x"
+  on any element makes fleetchecker.php#x land on it. Never use id= (the window is dropped into
+  other pages, whose ids it must not collide with).
+  Links: to another document href="faq.php#ladder"; within this one href="#variants".
+  Pictures: <figure class="fvd-fig"><img src="img/docs/..." alt="..."><figcaption>..</figcaption></figure>.
+  A picture still to be supplied is a placeholder - fvd-fig--ph, the file it should become in
+  data-img, what it should show inside <div class="fvd-ph">. Swap it for the <img> when it arrives.
+-->
+
+<section data-key="general" data-title="General Notes" data-group="Overview">
+  <p class="fvd-lede">The Fleet Checker tells you whether your fleet meets the standard fleet composition
+    rules, and highlights anything that needs a manual check or your opponent's agreement.</p>
+
+  <figure class="fvd-fig fvd-fig--ph" data-img="img/docs/fleet/fleet-check-report.jpg">
+    <div class="fvd-ph">Screenshot: the Fleet Correctness Report window in Fleet Selection (Your Fleet &rarr; Check),
+      showing a mix of green OK and red FAILURE lines.</div>
+    <figcaption>The Fleet Correctness Report - open it with Check in the Your Fleet panel.</figcaption>
+  </figure>
+
+  <p>It is advice, not a gate. If you would rather not follow these rules, or need something different for a
+    scenario, the game will not stop you - as long as your fleet stays within its points allowance. Just make sure
+    you and your opponent are on the same page, and have fun!</p>
+  <p>For a standard, reasonably balanced match, though, it is a good idea to stick to the Fleet Checker's rules.</p>
+</section>
+
+<section data-key="b5wrsComp" data-title="Babylon 5 Wars Rules" data-group="Composition Rules">
+  <p class="fvd-lede">AoG created a set of tournament rules so that players could compete on fair terms. Fleets
+    built to them tend to be well-rounded and make for fair battles, so they are worth using outside tournaments too.</p>
+
+  <h3>Assumptions</h3>
+  <ul>
+    <li>A 3500-point game.</li>
+    <li>A fixed 42&times;30 map.</li>
+    <li>Each player uses only one faction.</li>
+    <li>No Ancient or ISA fleets.</li>
+  </ul>
+
+  <h3>The original rules</h3>
+  <ul>
+    <li>At least one Jump Drive.</li>
+    <li>At least one Capital Ship.</li>
+    <li>Every unit of LCV size or smaller must have hangar space in the fleet - you cannot bring fighters based elsewhere.</li>
+    <li>At least half of the fighter hangars must be filled, so you cannot bring (too many) empty carriers. This only
+      applies to actual fighters, not to other craft such as assault shuttles or LCVs.</li>
+    <li>Deployment restrictions observed (see <a href="#deployment">Deployment Restrictions</a>).</li>
+    <li>Variant restrictions observed (see <a href="#variants">Variant Restrictions</a>).</li>
+    <li>At most two Uncommon units and one Rare unit in the fleet, on top of the variant restrictions.</li>
+    <li>At most three ships based on the same hull (fighters and other small craft are exempt).</li>
+    <li>No static objects (bases, OSATs, mines...).</li>
+    <li>Only genuine combat units - no transports (not even military ones) and no diplomatic ships.</li>
+    <li>Some factions were deemed not tournament-legal - notably the ISA (an all-White Star fleet) and the Ancients.</li>
+  </ul>
+</section>
+
+<section data-key="FVcomp" data-title="Fiery Void Rules" data-group="Composition Rules">
+  <p class="fvd-lede">Fiery Void modifies the rules above so that they balance different fleet sizes and Ancient
+    fleets. This tailoring is the FV team's own and is not official B5 Wars in any way, although it was inspired by
+    the tournament rules.</p>
+
+  <p>For a balanced game under these rules, it is best to use:</p>
+  <ul>
+    <li>A fixed 42&times;30 map (or similar).</li>
+    <li>One faction per player.</li>
+    <li>Fleets of a similar power level on both sides - <a href="factions-tiers.php#tiers">Factions &amp; Tiers</a>
+      groups the available fleets into subjective power levels suitable for balanced pickup battles.</li>
+  </ul>
+
+  <h3 data-anchor="FVchecks">What the Fleet Checker checks</h3>
+  <ul>
+    <li>At least one Jump Drive.</li>
+    <li>A minimum number of Capital Ships (you can take more) - see the table below.</li>
+    <li>Most units of LCV size or smaller need hangar space in the fleet. There are exceptions, especially for custom
+      factions from other universes.</li>
+    <li>At least half of the fighter hangars must be filled. This only applies to regular fighters - not to assault
+      shuttles, LCVs or even SHFs. A few craft that can be bought <i>without</i> any hangar space still fill their own
+      hangar category, and that category must be half full in the same way - Walker Mapmaker Sensor Probes are the
+      example.</li>
+    <li>At most one flight smaller than 6 craft (only checked for craft whose maximum flight size is 6 or more).</li>
+    <li>Variant restrictions observed (see <a href="#variants">Variant Restrictions</a>).</li>
+    <li>Deployment restrictions observed (see <a href="#deployment">Deployment Restrictions</a>).</li>
+    <li>Uncommon and Rare units are limited across the whole fleet, on top of the variant restrictions - see the table below.</li>
+    <li>A maximum number of ships that are variants of the same hull (units that need hangar space are exempt) - see the table below.</li>
+    <li>No static objects (bases, OSATs).</li>
+    <li>No non-combat units (freighters, exploration ships, VIP transports...).</li>
+    <li>Non-standard elements (enhancements, custom units, Special variants) are pointed out to you, but they do not
+      mark the fleet as incorrect.</li>
+  </ul>
+
+  <h3>Limits that scale with fleet size</h3>
+  <table>
+    <thead>
+      <tr><th>Rule</th><th>Young races</th><th>Ancients</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Capital Ships (minimum)</td><td>1 per 5000 points; none required below 3000 points</td><td>1 per 15000 points; none required below 5000 points</td></tr>
+      <tr><td>Uncommon units (maximum)</td><td>2 up to 3500 points, plus 1 per further full 1000 points (the 3rd is unlocked at 4500)</td><td>2 up to 8000 points, plus 1 per further full 4000 points (the 3rd is unlocked at 12000)</td></tr>
+      <tr><td>Rare units (maximum)</td><td colspan="2">Half the Uncommon allowance, rounded down</td></tr>
+      <tr><td>Ships on the same hull (maximum)</td><td>1 per full 1100 points, minimum 2</td><td>1 per full 3000 points, minimum 2</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section data-key="variants" data-title="Variant Restrictions" data-group="Restrictions">
+  <p class="fvd-lede">Every unit in the game has a variant rating, in one of these categories:</p>
+
+  <figure class="fvd-fig fvd-fig--ph fvd-fig--side" data-img="img/docs/fleet/store-tags.jpg" data-ratio="4:3">
+    <div class="fvd-ph">Close-up of a few Store rows in Fleet Selection showing the rating tags after the ship
+      names, e.g. (C), (U), (R 33%).</div>
+    <figcaption>A unit's ratings appear in brackets after its name in the Store.</figcaption>
+  </figure>
+
+  <dl class="fvd-defs">
+    <dt>Common (C)</dt>
+    <dd>A common example of what is built on a given hull. No limit.</dd>
+    <dt>Uncommon (U)</dt>
+    <dd>Not as common - found in numbers only alongside their more mundane cousins. For every three units of a given
+      hull, or fraction thereof, one may be Uncommon.</dd>
+    <dt>Rare (R)</dt>
+    <dd>Very rare units, almost never deployed in numbers (often command variants). One in every three Uncommon slots
+      may be taken by a Rare unit instead.</dd>
+    <dt>Unique (Q)</dt>
+    <dd>Only very few exist - possibly just one. Treat them as Rare for fleet selection, with the added limit that no
+      more than one may be present.</dd>
+    <dt>Special (X)</dt>
+    <dd>Non-standard restrictions that need the player's attention; the actual restriction is in the unit's
+      description. The Fleet Checker will NOT check these correctly, but points them out with a note.</dd>
+  </dl>
+
+  <h3>How many of each</h3>
+  <p>What this means for the number of restricted units on one hull:</p>
+  <table>
+    <thead>
+      <tr><th class="fvd-num">Ships on the hull</th><th class="fvd-num">Any rating</th><th class="fvd-num">Uncommon or Common</th><th class="fvd-num">Common</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="fvd-num">1</td><td class="fvd-num">1</td><td class="fvd-num">-</td><td class="fvd-num">-</td></tr>
+      <tr><td class="fvd-num">2</td><td class="fvd-num">1</td><td class="fvd-num">-</td><td class="fvd-num">1</td></tr>
+      <tr><td class="fvd-num">3</td><td class="fvd-num">1</td><td class="fvd-num">-</td><td class="fvd-num">2</td></tr>
+      <tr><td class="fvd-num">4</td><td class="fvd-num">1</td><td class="fvd-num">1</td><td class="fvd-num">2</td></tr>
+      <tr><td class="fvd-num">5</td><td class="fvd-num">1</td><td class="fvd-num">1</td><td class="fvd-num">3</td></tr>
+      <tr><td class="fvd-num">6</td><td class="fvd-num">1</td><td class="fvd-num">1</td><td class="fvd-num">4</td></tr>
+      <tr><td class="fvd-num">7</td><td class="fvd-num">1</td><td class="fvd-num">2</td><td class="fvd-num">4</td></tr>
+      <tr><td class="fvd-num">8</td><td class="fvd-num">1</td><td class="fvd-num">2</td><td class="fvd-num">5</td></tr>
+      <tr><td class="fvd-num">9</td><td class="fvd-num">1</td><td class="fvd-num">2</td><td class="fvd-num">6</td></tr>
+    </tbody>
+  </table>
+  <p>From the 10th ship you start again.</p>
+
+  <h3>Fighters</h3>
+  <p>The rule is exactly the same for fighters, but you count whole flights instead of individual craft.</p>
+  <div class="fvd-note fvd-note--warn">
+    <span class="fvd-note-label">Sportsmanship</span>
+    <p>Please do not abuse variable flight sizes - keep your restricted flights the same size as the regular ones!
+      The checker will let you take two full-sized Rare flights alongside eight single-craft Common "flights", but it
+      really is not good sportsmanship.</p>
+  </div>
+</section>
+
+<section data-key="deployment" data-title="Deployment Restrictions" data-group="Restrictions">
+  <p class="fvd-lede">Every unit in the game also has an availability rating:</p>
+
+  <dl class="fvd-defs">
+    <dt>Unlimited (100%)</dt>
+    <dd>The unit is common in its fleet.</dd>
+    <dt>Limited (50%)</dt>
+    <dd>Common enough, but still should not make up the bulk of a fleet (mostly used by Ancient fleets).</dd>
+    <dt>Limited (33%)</dt>
+    <dd>Mostly specialist support units, such as dedicated missile ships and ELINT ships.</dd>
+    <dt>Restricted (10%)</dt>
+    <dd>The rarest units, such as the newest or experimental designs and the largest battleships.</dd>
+    <dt>Unique (Q)</dt>
+    <dd>Only very few exist - possibly just one. Treat them as Rare for fleet selection, with the added limit that no
+      more than one may be present.</dd>
+    <dt>Special (X)</dt>
+    <dd>Non-standard restrictions that need the player's attention; the actual restriction is in the unit's
+      description. The Fleet Checker will NOT check these correctly, but points them out with a note.</dd>
+  </dl>
+
+  <p>Put simply, the total value of the units in a category cannot exceed its percentage of your fleet allowance - for
+    example, you can spend up to 33% of it on Limited (33%) units. Two further rules apply:</p>
+  <ul>
+    <li>If you have only one unit in a category, it may exceed the limit (mainly so that such units can be taken in
+      small battles).</li>
+    <li>A Restricted unit needs another unit as an escort - such rare vessels are not usually allowed to wander about
+      on their own.</li>
+  </ul>
+</section>
