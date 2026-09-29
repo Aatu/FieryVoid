@@ -2411,12 +2411,14 @@ window.weaponManager = {
         }
 
         //Sustained-overload weapons auto-hit/auto-miss based on previous turn target
+        //The stored value is last turn's shotshit, so a multi-shot order (Type 7 Phaser, shots=2) can
+        //store 2 - hence >= 1, matching the server's calculateHitBase, not === 1.
         if (shipManager.power.isOverloading(shooter, weapon)) {
             if (weapon.sustainedTarget && Object.keys(weapon.sustainedTarget).length > 0) {
                 if (weapon.firingMode !== 1) return makeResult(0, { breakdownReason: 'Sustained: wrong firing mode' });
                 if (!weapon.sustainedTarget.hasOwnProperty(target.id)) {
                     return makeResult(0, { breakdownReason: 'Sustained: wrong target' });
-                } else if (weapon.sustainedTarget[target.id] === 1) {
+                } else if (weapon.sustainedTarget[target.id] >= 1) {
                     return makeResult(100, { autoHit: true, breakdownReason: 'Sustained: auto-hit' });
                 }
             }
