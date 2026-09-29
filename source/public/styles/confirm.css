@@ -68,10 +68,11 @@
 .confirm.error {
     background-color: var(--fv-well);
     border: 2px solid var(--fv-line-scs);
-    color: var(--fv-text);
+    color: var(--fv-text-dim);
     font-family: arial;
     font-size: 16px;
     padding-top: 15px;
+    font-weight: bold;    
 }
 
 /* The multi-value and hangar dialogs are ALSO built on .confirm.error and paint their own
@@ -84,7 +85,7 @@
    weight, they flip to carry the emphasis. */
 .confirm.error .ship-name {
     color: var(--fv-text-bright);
-    font-weight: bold;
+    font-weight: normal;
 }
 
 /* Ship names the dialog listed that map to a real unit on the board: clicking one scrolls
@@ -114,7 +115,7 @@
     justify-content: space-between;
     align-items: center;
     gap: 10px;
-    margin: 14px 0 0;
+    margin: 20px 10px 0 10px;
 }
 
 .confirm.promptDialog .ui .confirmok,
