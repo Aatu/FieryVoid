@@ -9,7 +9,7 @@ class BrixadiiFastCourier extends BaseShipNoAft{
         $this->phpclass = "BrixadiiFastCourier";
         $this->imagePath = "img/ships/Nexus/brixadii_warship.png";
 			$this->canvasSize = 165; //img has 200px per side
-        $this->shipClass = "Brixadii Fast Courier";
+        $this->shipClass = "Brixadii Mirea Fast Courier";
 		$this->unofficial = true;
 		$this->isd = 2114;
          

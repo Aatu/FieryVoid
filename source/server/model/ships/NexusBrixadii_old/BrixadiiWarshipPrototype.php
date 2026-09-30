@@ -9,7 +9,7 @@ class BrixadiiWarshipPrototype extends BaseShipNoAft{
         $this->phpclass = "BrixadiiWarshipPrototype";
         $this->imagePath = "img/ships/Nexus/brixadii_warship.png";
 			$this->canvasSize = 165; //img has 200px per side
-        $this->shipClass = "Warship Prototype";
+        $this->shipClass = "Kraxen Warship Prototype";
 			$this->variantOf = "Warship";
 			$this->occurence = "common";		
 			$this->limited = 10;

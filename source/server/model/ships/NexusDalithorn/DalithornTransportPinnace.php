@@ -7,7 +7,7 @@ class DalithornTransportPinnace extends FighterFlight{
         $this->pointCost = 40*6;
         $this->faction = "Nexus Support Units";
         $this->phpclass = "DalithornTransportPinnace";
-        $this->shipClass = "Dalithorn Transport Pinnace";
+        $this->shipClass = "Dalithorn Seranthor Transport Pinnace";
         $this->imagePath = "img/ships/Nexus/Dalithorn_Pinnace2.png";
 		$this->unofficial = true;
 	    $this->isd = 2117;

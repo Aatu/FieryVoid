@@ -9,8 +9,8 @@ class DalithornStationEarly extends SmallStarBaseFourSections{
 		$this->smallBase = true;
 		$this->faction = "Nexus Dalithorn Commonwealth (early)";
 		$this->phpclass = "DalithornStationEarly";
-		$this->shipClass = "Early Station";
-			$this->variantOf = "Station";
+		$this->shipClass = "Caldorithorn Early Station";
+			$this->variantOf = "Caldorithorn Station";
 			$this->occurence = "common";
 		$this->imagePath = "img/ships/Nexus/Dalithorn_Station2.png";
 		$this->canvasSize = 140; 

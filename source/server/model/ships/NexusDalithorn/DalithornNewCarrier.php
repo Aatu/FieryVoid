@@ -9,8 +9,8 @@ class DalithornNewCarrier extends HeavyCombatVessel{
         $this->phpclass = "DalithornNewCarrier";
         $this->imagePath = "img/ships/Nexus/Dalithorn_Carrier2.png";
 		$this->canvasSize = 125; //img has 200px per side
-        $this->shipClass = "New Carrier";
-			$this->variantOf = "Light Cruiser";
+        $this->shipClass = "Aldrithoron New Carrier";
+			$this->variantOf = "Haveroth Light Cruiser";
 			$this->occurence = "uncommon";
 		$this->unofficial = true;
         $this->isd = 2113;

@@ -12,6 +12,7 @@ class proxMineCB extends Mine{
 			$this->occurence = "common";
 			$this->variantOf = "Conviction-A Proximity Mine";
         $this->isd = 1881;
+		$this->unofficial = true;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;

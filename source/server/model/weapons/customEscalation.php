@@ -1625,7 +1625,76 @@ class EWLightPlasmaMine extends MissileFB
     
     }//endof class EWNuclearTorpedo
 
+    class EWNuclearMine extends Torpedo{
+        public $name = "EWNuclearMine";
+        public $displayName = "Nuclear Mine";
+        public $iconPath = "EWNuclearTorpedo.png";
+        public $range = 1;
+        public $loadingtime = 4;
+        public $ammunition = 2;
+        public $uninterceptable = true;        
+        
+        public $weaponClass = "Plasma"; //deals Plasma, not Ballistic, damage. Should be Ballistic(Plasma), but I had to choose ;)
+        public $damageType = "Flash"; 
+        
+        public $fireControl = array(-5, 1, 2); // fighters, <mediums, <capitals 
+        
+        public $trailColor = array(75, 230, 90);
+        public $animation = "trail";
+        public $animationColor = array(75, 230, 90);
+        public $animationExplosionScale = 0.6;
+        public $projectilespeed = 11;
+        public $animationWidth = 10;
+        public $trailLength = 10;
+        public $priority = 1; //Flash! should strike first (?)
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 1;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 3;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= "Ignores half of armor.";
+            $this->data["Ammunition"] = $this->ammunition;
+		}
 
+        public function stripForJson() {
+            $strippedSystem = parent::stripForJson();
+    
+            $strippedSystem->ammunition = $this->ammunition;
+           
+            return $strippedSystem;
+        }
+
+        public function setAmmo($firingMode, $amount){
+            $this->ammunition = $amount;
+        }
+        
+       public function fire($gamedata, $fireOrder){ //note ammo usage
+            parent::fire($gamedata, $fireOrder);
+            $ship = $gamedata->getShipById($fireOrder->shooterid);
+            $ammo = $this->ammunition;			
+            $this->ammunition--; //Deduct round just fired
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);			
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 6);   }
+        public function setMinDamage(){     $this->minDamage = 6;      }
+        public function setMaxDamage(){     $this->maxDamage = 60;      }
+    
+    }//endof class EWNuclearTorpedoMine
 
     class EWRangedNuclearTorpedo extends EWNuclearTorpedo{
 

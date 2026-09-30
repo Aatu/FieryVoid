@@ -43,7 +43,7 @@ class QomYominTelNan extends FighterFlight{
             $fighter->imagePath = "img/ships/Nexus/makar_tolmor2.png";
             $fighter->iconPath = "img/ships/Nexus/makar_tolmor_large2.png";
 
-	        $light = new NexusSmallXrayLaser(300, 60, 3); //$startArc, $endArc, $nrOfShots
+	        $light = new NexusSmallXrayLaser(300, 60, 3, 1); //$startArc, $endArc, $nrOfShots
 	        $fighter->addFrontSystem($light);
 			
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack			

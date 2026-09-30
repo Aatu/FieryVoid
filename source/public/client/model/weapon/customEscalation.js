@@ -207,6 +207,12 @@ var EWNuclearTorpedo = function  EWNuclearTorpedo(json, ship) {
 EWNuclearTorpedo.prototype = Object.create(Weapon.prototype);
 EWNuclearTorpedo.prototype.constructor =  EWNuclearTorpedo;
 
+var EWNuclearMine = function  EWNuclearMine(json, ship) {
+    Weapon.call(this, json, ship);
+};
+EWNuclearMine.prototype = Object.create(Weapon.prototype);
+EWNuclearMine.prototype.constructor =  EWNuclearMine;
+
 var EWRangedNuclearTorpedo = function  EWRangedNuclearTorpedo(json, ship) {
     Weapon.call(this, json, ship);
 };

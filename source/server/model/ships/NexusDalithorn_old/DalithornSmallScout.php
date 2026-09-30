@@ -8,7 +8,7 @@ class DalithornSmallScout extends MediumShip{
         $this->faction = "Nexus Dalithorn Commonwealth (early)";
         $this->phpclass = "DalithornSmallScout";
         $this->imagePath = "img/ships/Nexus/Dalithorn_SmallScout2.png";
-        $this->shipClass = "Small Scout";
+        $this->shipClass = "Caldrus Small Scout";
 //			$this->variantOf = "Frigate";
 //			$this->occurence = "common";
 		$this->unofficial = true;

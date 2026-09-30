@@ -9,7 +9,7 @@ class DalithornPrototypeJumpcruiser extends HeavyCombatVessel{
         $this->phpclass = "DalithornPrototypeJumpcruiser";
         $this->imagePath = "img/ships/Nexus/Dalithorn_PrototypeJumpship2.png";
 			$this->canvasSize = 135; //img has 200px per side
-        $this->shipClass = "Prototype Jumpship";
+        $this->shipClass = "Thenivon Prototype Jumpship";
         $this->limited = 10;
 			$this->unofficial = true;
         $this->isd = 2048;

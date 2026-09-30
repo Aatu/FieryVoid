@@ -11,6 +11,7 @@ class proxMineIlvhassaA extends Mine{
         $this->shipClass = "Ilvhassa-A Proximity Mine";
 			$this->occurence = "common";
         $this->isd = 1900;
+		$this->unofficial = true;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;
