@@ -649,7 +649,7 @@ class LightScattergun extends ScatterGun{
 	public $intercept = 2;	
 	public $rangePenalty = 2; //-2/hex	
 	public $priority = 4;
-
+    public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
 	//temporary private variables
 	private $multiplied = false;
 	private $alreadyIntercepted = array();
