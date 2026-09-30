@@ -7,7 +7,7 @@ class DalithornTugRefit extends MediumShip{
         $this->pointCost = 85;
         $this->faction = "Nexus Support Units";
         $this->phpclass = "DalithornTugRefit";
-        $this->imagePath = "img/ships/Nexus/Dalithorn_Frigate2.png";
+        $this->imagePath = "img/ships/Nexus/dalithorn_tug.png";
         $this->shipClass = "Dalithorn Drenthim Tug (2113)";
 			$this->variantOf = "Dalithorn Drenthim Tug";
 			$this->occurence = "common";

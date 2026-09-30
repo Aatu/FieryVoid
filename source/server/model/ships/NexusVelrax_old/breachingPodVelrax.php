@@ -1,21 +1,21 @@
 <?php
-class breachingPodBrixadii extends FighterFlight{
+class breachingPodVelrax extends FighterFlight{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 40 * 6;
-        $this->faction = "Nexus Brixadii Clans (early)";
-        $this->phpclass = "breachingPodBrixadii";
-        $this->shipClass = "Zrenix Breaching Pods";
-        $this->imagePath = "img/ships/Nexus/brixadiiBP.png";
-        $this->isd = 2035;
+        $this->pointCost = 30 * 6;
+        $this->faction = "Nexus Velrax Republic (early)";
+        $this->phpclass = "breachingPodVelrax";
+        $this->shipClass = "Korveth Breaching Pods";
+        $this->imagePath = "img/ships/Nexus/velraxBP.png";
+        $this->isd = 2005;
         
 	    $this->notes = 'Atmospheric.';
         
-        $this->forwardDefense = 7;
-        $this->sideDefense = 8;
-        $this->freethrust = 8;
+        $this->forwardDefense = 9;
+        $this->sideDefense = 9;
+        $this->freethrust = 6;
         $this->offensivebonus = 1;
         $this->jinkinglimit = 0;
         $this->pivotcost = 2; //shuttles have pivot cost higher        
@@ -25,7 +25,7 @@ class breachingPodBrixadii extends FighterFlight{
         $this->hangarRequired = 'Breaching Pods'; //for fleet check   
 		$this->unitSize = 1; 		
 		
-    	$this->iniativebonus = 11 * 5;
+    	$this->iniativebonus = 9 * 5;
 		$this->notes = "Bonus to attaching to enemy ships.";	
         $this->populate();
     
@@ -41,11 +41,11 @@ class breachingPodBrixadii extends FighterFlight{
         $toAdd = $new - $current;
 
         for ($i = 0; $i < $toAdd; $i++){
-            $armour = array(1, 1, 1, 1);
-            $fighter = new Fighter("breachingPodBrixadii", $armour, 16, $this->id);
-            $fighter->displayName = "Zrenix";
-            $fighter->imagePath = "img/ships/Nexus/brixadiiBP.png";
-            $fighter->iconPath = "img/ships/Nexus/brixadiiBP_large.png";
+            $armour = array(3, 3, 3, 3);
+            $fighter = new Fighter("breachingPodVelrax", $armour, 16, $this->id);
+            $fighter->displayName = "Korveth";
+            $fighter->imagePath = "img/ships/Nexus/velraxBP.png";
+            $fighter->iconPath = "img/ships/Nexus/velraxBP_large.png";
 
 			$fighter->addFrontSystem(new Marines(0, 360, 0, false)); //startarc, endarc, damagebonus, elite.
 

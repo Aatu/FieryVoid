@@ -7,7 +7,7 @@ class BrixadiiFreighter2110 extends MediumShip{
         $this->pointCost = 100;
         $this->faction = "Nexus Support Units";
         $this->phpclass = "BrixadiiFreighter2110";
-        $this->imagePath = "img/ships/Nexus/brixadii_pursuit_frigate.png";
+        $this->imagePath = "img/ships/Nexus/brixadii_strategic_transport.png";
 		$this->canvasSize = 100; //img has 200px per side
         $this->shipClass = "Brixadii Vreltix Civilian Freighter (2110)";
 			$this->variantOf = "Brixadii Vreltix Civilian Freighter";

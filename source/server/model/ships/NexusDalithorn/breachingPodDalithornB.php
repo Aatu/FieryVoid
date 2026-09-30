@@ -8,7 +8,7 @@ class breachingPodDalithornB extends FighterFlight{
         $this->faction = "Nexus Dalithorn Commonwealth";
         $this->phpclass = "breachingPodDalithornB";
         $this->shipClass = "Havedrin Breaching Pods";
-        $this->imagePath = "img/ships/Lamprey.png";
+        $this->imagePath = "img/ships/Nexus/DalithornBP.png";
         $this->isd = 1912;
         
 	    $this->notes = 'Atmospheric.';
@@ -44,8 +44,8 @@ class breachingPodDalithornB extends FighterFlight{
             $armour = array(2, 2, 2, 2);
             $fighter = new Fighter("breachingPodDalithornB", $armour, 16, $this->id);
             $fighter->displayName = "Havedrin";
-            $fighter->imagePath = "img/ships/Lamprey.png";
-            $fighter->iconPath = "img/ships/Lamprey_large.png";
+            $fighter->imagePath = "img/ships/Nexus/DalithornBP.png";
+            $fighter->iconPath = "img/ships/Nexus/DalithornBP_large.png";
 
 			$fighter->addFrontSystem(new Marines(0, 360, 0, false)); //startarc, endarc, damagebonus, elite.
 

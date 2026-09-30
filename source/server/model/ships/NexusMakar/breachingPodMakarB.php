@@ -8,7 +8,7 @@ class breachingPodMakarB extends FighterFlight{
         $this->faction = "Nexus Makar Federation";
         $this->phpclass = "breachingPodMakarB";
         $this->shipClass = "Kurren Breaching Pods";
-        $this->imagePath = "img/ships/Lamprey.png";
+        $this->imagePath = "img/ships/Nexus/makarBP.png";
         $this->isd = 2047;
         
 	    $this->notes = 'Atmospheric.';
@@ -44,8 +44,8 @@ class breachingPodMakarB extends FighterFlight{
             $armour = array(3, 3, 3, 3);
             $fighter = new Fighter("breachingPodMakar", $armour, 16, $this->id);
             $fighter->displayName = "Kurren";
-            $fighter->imagePath = "img/ships/Lamprey.png";
-            $fighter->iconPath = "img/ships/Lamprey_large.png";
+            $fighter->imagePath = "img/ships/Nexus/makarBP.png";
+            $fighter->iconPath = "img/ships/Nexus/makarBP_large.png";
 
 			$fighter->addFrontSystem(new Marines(0, 360, 0, false)); //startarc, endarc, damagebonus, elite.
 

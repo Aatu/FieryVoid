@@ -8,7 +8,7 @@ class breachingPodBrixadiiB extends FighterFlight{
         $this->faction = "Nexus Brixadii Clans";
         $this->phpclass = "breachingPodBrixadii";
         $this->shipClass = "Zrenix Breaching Pods";
-        $this->imagePath = "img/ships/Lamprey.png";
+        $this->imagePath = "img/ships/Nexus/brixadiiBP.png";
         $this->isd = 2035;
         
 	    $this->notes = 'Atmospheric.';
@@ -44,8 +44,8 @@ class breachingPodBrixadiiB extends FighterFlight{
             $armour = array(1, 1, 1, 1);
             $fighter = new Fighter("breachingPodBrixadiiB", $armour, 16, $this->id);
             $fighter->displayName = "Zrenix";
-            $fighter->imagePath = "img/ships/Lamprey.png";
-            $fighter->iconPath = "img/ships/Lamprey_large.png";
+            $fighter->imagePath = "img/ships/Nexus/brixadiiBP.png";
+            $fighter->iconPath = "img/ships/Nexus/brixadiiBP_large.png";
 
 			$fighter->addFrontSystem(new Marines(0, 360, 0, false)); //startarc, endarc, damagebonus, elite.
 

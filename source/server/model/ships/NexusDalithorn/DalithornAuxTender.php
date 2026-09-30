@@ -7,7 +7,7 @@ class DalithornAuxTender extends MediumShip{
         $this->pointCost = 200;
         $this->faction = "Nexus Support Units";
         $this->phpclass = "DalithornAuxTender";
-        $this->imagePath = "img/ships/Nexus/Dalithorn_Frigate2.png";
+        $this->imagePath = "img/ships/Nexus/dalithorn_tug.png";
         $this->shipClass = "Cavernoth Auxiliary Tender";
 			$this->variantOf = "Dalithorn Drenthim Tug";
 			$this->occurence = 'Q'; //Unique

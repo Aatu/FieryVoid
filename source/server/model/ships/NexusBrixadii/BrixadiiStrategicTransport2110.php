@@ -7,7 +7,7 @@ class BrixadiiStrategicTransport2110 extends HeavyCombatVessel{
         $this->pointCost = 165;
         $this->faction = "Nexus Support Units";
         $this->phpclass = "BrixadiiStrategicTransport2110";
-        $this->imagePath = "img/ships/Nexus/brixadii_battle_destroyer.png";
+        $this->imagePath = "img/ships/Nexus/brixadii_strategic_transport.png";
 			$this->canvasSize = 125; //img has 200px per side
         $this->shipClass = "Brixadii Marrgex Strategic Transport (2110)";
 			$this->variantOf = "Brixadii Marrgex Strategic Transport";

@@ -7,7 +7,7 @@ class BrixadiiSupplyPost2114 extends OSAT{
 		$this->pointCost = 210;
         $this->faction = "Nexus Brixadii Clans";       
         $this->phpclass = "BrixadiiSupplyPost2114";
-        $this->imagePath = "img/ships/EscalationWars/SshelathKaumlar.png";
+        $this->imagePath = "img/ships/Nexus/brixadii_supply_post.png";
         $this->shipClass = "Norivar Supply Post (2114)";
         $this->isd = 2114;
 		$this->unofficial = true;

@@ -7,7 +7,7 @@ class BrixadiiGunSat extends MicroSAT{
         $this->faction = "Nexus Brixadii Clans";
         $this->phpclass = "BrixadiiGunSat";
         $this->shipClass = "Rivex Gun Sat Cluster";
-        $this->imagePath = "img/ships/Nexus/Dalithorn_Microsat2.png";
+        $this->imagePath = "img/ships/Nexus/brixadii_gunsat.png";
 		$this->unofficial = true;
         
 		$this->isd = 2109;
@@ -39,8 +39,8 @@ class BrixadiiGunSat extends MicroSAT{
             $armour = array(3, 3, 3, 3);
             $fighter = new Fighter("Rivex", $armour, 24, $this->id);
             $fighter->displayName = "Microsat";
-            $fighter->imagePath = "img/ships/Nexus/Dalithorn_Microsat2.png";
-            $fighter->iconPath = "img/ships/Nexus/Dalithorn_Microsat_Large2.png"; 
+            $fighter->imagePath = "img/ships/Nexus/brixadii_gunsat.png";
+            $fighter->iconPath = "img/ships/Nexus/brixadii_gunsat_large.png"; 
 		            
 			$leftgun = new ScatterPulsarFtr(270, 90, 1);
 			$fighter->addFrontSystem($leftgun);
