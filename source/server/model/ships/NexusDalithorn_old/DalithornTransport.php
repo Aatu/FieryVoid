@@ -9,7 +9,7 @@ class DalithornTransport extends HeavyCombatVessel{
         $this->phpclass = "DalithornTransport";
         $this->imagePath = "img/ships/Nexus/Dalithorn_Transport2.png";
 		$this->canvasSize = 125; //img has 200px per side
-        $this->shipClass = "Dalithorn Military Transport";
+        $this->shipClass = "Dalithorn Talveth Military Transport";
 		$this->unofficial = true;
         $this->isd = 2021;
 

@@ -10,8 +10,8 @@ class dewMineTorrok extends Mine{
         $this->imagePath = "img/ships/eaMine.png";
         $this->shipClass = "Torrok DEW Mine";
 		$this->occurence = "common";
-		//$this->variantOf = 'NONE';
         $this->isd = 1921;
+		$this->unofficial = true;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;

@@ -8,8 +8,8 @@ class DalithornFrigateRefit extends MediumShip{
         $this->faction = "Nexus Dalithorn Commonwealth (early)";
         $this->phpclass = "DalithornFrigateRefit";
         $this->imagePath = "img/ships/Nexus/Dalithorn_Frigate2.png";
-        $this->shipClass = "Frigate (2044)";
-			$this->variantOf = "Frigate";
+        $this->shipClass = "Grendithorn Frigate (2044)";
+			$this->variantOf = "Grendithorn Frigate";
 			$this->occurence = "common";
 		$this->unofficial = true;
         $this->canvasSize = 100;
@@ -27,7 +27,7 @@ class DalithornFrigateRefit extends MediumShip{
          
         $this->addPrimarySystem(new Reactor(3, 9, 0, 0));
         $this->addPrimarySystem(new CnC(3, 8, 0, 0));
-        $this->addPrimarySystem(new Scanner(3, 10, 3, 4));
+        $this->addPrimarySystem(new Scanner(3, 10, 3, 5));
         $this->addPrimarySystem(new Engine(3, 12, 0, 6, 3));
         $this->addPrimarySystem(new Hangar(1, 1, 1));
 		$this->addPrimarySystem(new Magazine(3, 10));

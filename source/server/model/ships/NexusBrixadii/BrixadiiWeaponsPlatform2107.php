@@ -9,7 +9,7 @@ class BrixadiiWeaponsPlatform2107 extends OSAT{
         $this->phpclass = "BrixadiiWeaponsPlatform2107";
         $this->imagePath = "img/ships/Nexus/brixadii_osat_single_mount.png";
 			$this->canvasSize = 90; //img has 100px per side
-        $this->shipClass = "Brixadii Weapons Platform (2107)";
+        $this->shipClass = "Tor'xii Weapons Platform (2107)";
 		$this->limited = 33;
 		$this->unofficial = true;
 		$this->isd = 2107;

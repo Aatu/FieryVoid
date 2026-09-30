@@ -9,8 +9,8 @@ class BrixadiiPoliceEscort extends LCV{
         $this->phpclass = "BrixadiiPoliceEscort";
         $this->imagePath = "img/ships/Nexus/brixadii_police_frigate.png";
 			$this->canvasSize = 70; //img has 200px per side
-        $this->shipClass = "Police Escort";
-			$this->variantOf = "Police Frigate (2108)";
+        $this->shipClass = "Orexan Police Escort";
+			$this->variantOf = "Loxena Police Frigate (2108)";
 			$this->occurence = "common";
 		//$this->variantOf = "Police Frigate";
 		$this->unofficial = true;

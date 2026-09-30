@@ -12,6 +12,7 @@ class dewMineWB extends Mine{
 			$this->variantOf = "Watcher-A DEW Mine";
 			$this->occurence = "common";
         $this->isd = 1883;
+		$this->unofficial = true;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;

@@ -9,7 +9,7 @@ class BrixadiiAttackFrigate extends MediumShip{
         $this->phpclass = "BrixadiiAttackFrigate";
         $this->imagePath = "img/ships/Nexus/brixadii_attack_frigate.png";
 			$this->canvasSize = 100; //img has 200px per side
-        $this->shipClass = "Attack Frigate";
+        $this->shipClass = "Herax Attack Frigate";
 //			$this->variantOf = "Pursuit Frigate";
 //			$this->occurence = "common";
 		$this->unofficial = true;

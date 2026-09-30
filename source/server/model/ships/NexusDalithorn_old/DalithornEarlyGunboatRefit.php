@@ -9,8 +9,8 @@ class DalithornEarlyGunboatRefit extends LCV{
         $this->phpclass = "DalithornEarlyGunboatRefit";
         $this->imagePath = "img/ships/Nexus/Dalithorn_EarlyGunboat2.png";
 		$this->canvasSize = 70; //img has 200px per side
-        $this->shipClass = "Early Gunboat (2038)";
-			$this->variantOf = "Early Gunboat";
+        $this->shipClass = "Ymveth Early Gunboat (2038)";
+			$this->variantOf = "Ymveth Early Gunboat";
 			$this->occurence = "common";
 		$this->unofficial = true;
 		$this->isd = 2038;

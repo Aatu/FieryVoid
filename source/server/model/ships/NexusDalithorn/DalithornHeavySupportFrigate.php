@@ -8,8 +8,8 @@ class DalithornHeavySupportFrigate extends MediumShip{
         $this->faction = "Nexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornHeavySupportFrigate";
         $this->imagePath = "img/ships/Nexus/Dalithorn_SupportFrigate2.png";
-        $this->shipClass = "Heavy Support Frigate";
-			$this->variantOf = "Heavy Frigate";
+        $this->shipClass = "Drenval Heavy Support Frigate";
+			$this->variantOf = "Omethiron Heavy Frigate";
 			$this->occurence = "uncommon";
 		$this->unofficial = true;
         $this->canvasSize = 100;
@@ -47,8 +47,8 @@ class DalithornHeavySupportFrigate extends MediumShip{
         $this->addAftSystem(new Thruster(1, 5, 0, 2, 2));    
 		$this->addAftSystem(new NexusProtector(1, 4, 1, 180, 60));
 		$this->addAftSystem(new NexusProtector(1, 4, 1, 300, 180));
-		$this->addAftSystem(new NexusAutocannon(2, 4, 1, 240, 60));
-		$this->addAftSystem(new NexusAutocannon(2, 4, 1, 300, 120));
+		$this->addAftSystem(new NexusMinigun(2, 4, 1, 240, 60));
+		$this->addAftSystem(new NexusMinigun(2, 4, 1, 300, 120));
        
         $this->addPrimarySystem(new Structure(4, 48));
 
@@ -77,7 +77,7 @@ class DalithornHeavySupportFrigate extends MediumShip{
 		2=> array(
 			6 => "Thruster",
 			8 => "Protector",
-			10 => "Autocannon",
+			10 => "Minigun",
 			17 => "Structure",
 			20 => "Primary",
 		),

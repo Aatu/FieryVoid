@@ -9,7 +9,7 @@ class DalithornWarStation extends SmallStarBaseFourSections{
 		$this->smallBase = true;
 		$this->faction = "Nexus Dalithorn Commonwealth";
 		$this->phpclass = "DalithornWarStation";
-		$this->shipClass = "War Station";
+		$this->shipClass = "Taliventhor War Station";
 		$this->imagePath = "img/ships/Nexus/Dalithorn_Station2.png";
 		$this->canvasSize = 140; 
 		$this->unofficial = true;

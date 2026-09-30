@@ -11,6 +11,7 @@ class proxMineStoka extends Mine{
         $this->shipClass = "Stoka Proximity Mine";
 			$this->occurence = "common";
         $this->isd = 1875;
+		$this->unofficial = true;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;

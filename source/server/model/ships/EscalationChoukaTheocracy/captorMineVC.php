@@ -11,8 +11,8 @@ class captorMineVC extends Mine{
         $this->shipClass = "Vedas-C Captor Mine";
 			$this->variantOf = "Vedas-A Captor Mine";
 			$this->occurence = "common";
-		//$this->variantOf = 'NONE';
         $this->isd = 1882;
+		$this->unofficial = true;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;
