@@ -924,9 +924,8 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
             <div id="fleetSavePanel">
                 <h4 class="fv-opt-heading">Save Fleet</h4>
                 <p>
-                    Saves your surviving ships, their enhancements, ammo, and their current battle
-                    damage and critical effects as a reusable fleet list. Load it from the game
-                    lobby to continue a campaign.
+                    Saves your current ships, enhancements, ammo, and battle
+                    damage. Load it from the game lobby.
                 </p>
                 <p id="fleetSaveSummary"></p>
                 <input type="button" id="fleetSaveButton" class="fv-log-chip fv-log-chip--link" value="Save Current Fleet">
