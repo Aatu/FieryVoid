@@ -9,8 +9,8 @@ class BrixadiiWarshipEscort extends BaseShipNoAft{
         $this->phpclass = "BrixadiiWarshipEscort";
         $this->imagePath = "img/ships/Nexus/brixadii_warship.png";
 			$this->canvasSize = 165; //img has 200px per side
-        $this->shipClass = "Warship Escort";
-			$this->variantOf = "Warship (2108)";
+        $this->shipClass = "Ostrex Warship Escort";
+			$this->variantOf = "Kraxen Warship (2108)";
 			$this->occurence = "uncommon";
 			$this->limited = 10;
 		$this->unofficial = true;

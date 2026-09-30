@@ -18,6 +18,12 @@ var ScatterPulsar = function ScatterPulsar(json, ship) {
 ScatterPulsar.prototype = Object.create(Pulse.prototype);
 ScatterPulsar.prototype.constructor = ScatterPulsar;
 
+var ScatterPulsarFtr = function ScatterPulsarFtr(json, ship) {
+    Pulse.call(this, json, ship);
+};
+ScatterPulsarFtr.prototype = Object.create(Pulse.prototype);
+ScatterPulsarFtr.prototype.constructor = ScatterPulsarFtr;
+
 var QuadPulsar = function QuadPulsar(json, ship) {
     Pulse.call(this, json, ship);
 };

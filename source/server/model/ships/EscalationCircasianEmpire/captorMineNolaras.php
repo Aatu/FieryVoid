@@ -10,8 +10,8 @@ class captorMineNolaras extends Mine{
         $this->imagePath = "img/ships/eaMine.png";
         $this->shipClass = "Nolaras Captor Mine";
 		$this->occurence = "common";
-		//$this->variantOf = 'NONE';
         $this->isd = 1920;
+		$this->unofficial = true;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;

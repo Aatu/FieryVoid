@@ -9,7 +9,7 @@ class DalithornLaserMissileOSAT extends OSAT{
         $this->phpclass = "DalithornLaserMissileOSAT";
         $this->imagePath = "img/ships/Nexus/Dalithorn_LaserMissileOSAT2.png";
 			$this->canvasSize = 90; //img has 100px per side
-        $this->shipClass = "Laser Missile OSAT";
+        $this->shipClass = "Jestorin OSAT";
 		$this->unofficial = true;
 		$this->isd = 2057;
         

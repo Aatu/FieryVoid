@@ -12,6 +12,7 @@ class spawnCaptorMineVC extends Mine{
 		$this->occurence = "common";
 		$this->variantOf = 'NONE';
         $this->isd = 1875;
+		$this->unofficial = true;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;

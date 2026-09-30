@@ -8,7 +8,7 @@ class BrixadiiLauncherPlatformBase extends OSAT{
 		$this->faction = 'Nexus Brixadii Clans (early)';
         $this->phpclass = "BrixadiiLauncherPlatformBase";
         $this->imagePath = "img/ships/Nexus/brixadii_osat_dual_mount.png";
-        $this->shipClass = "Brixadii Launcher Platform";
+        $this->shipClass = "Grexan Launcher Platform";
 			$this->canvasSize = 90;
 		$this->unofficial = true;
 		$this->isd = 2060;

@@ -8,7 +8,7 @@ class BrixadiiSentinelPlatform2107 extends OSAT{
 		$this->faction = 'Nexus Brixadii Clans';
         $this->phpclass = "BrixadiiSentinelPlatform2107";
         $this->imagePath = "img/ships/Nexus/brixadii_osat_dual_mount.png";
-        $this->shipClass = "Brixadii Sentinel Platform (2107)";
+        $this->shipClass = "Kranixtin Sentinel Platform (2107)";
 		$this->canvasSize = 90;
 		$this->unofficial = true;
 		$this->isd = 2107;

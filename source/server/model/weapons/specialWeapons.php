@@ -8597,6 +8597,7 @@ class PulsarMine extends Weapon{
 
 
 
+
 class Marines extends Weapon implements SpecialAbility{
 	public $name = "Marines";
 	public $displayName = "Marines";
@@ -9475,6 +9476,14 @@ class Marines extends Weapon implements SpecialAbility{
 	
 }//endof Marines
 
+
+class ExtraMarines extends Marines {
+	public $name = "ExtraMarines";
+	public $displayName = "Marines";
+	public $iconPath = "Marines.png";
+	
+	public $ammunition = 3; //limited number of Marine contingents.
+}
 
 
 class GrapplingClaw extends Weapon implements SpecialAbility{

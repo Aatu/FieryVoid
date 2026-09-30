@@ -8,8 +8,8 @@ class DalithornHeavyCommandFrigate extends MediumShip{
         $this->faction = "Nexus Dalithorn Commonwealth";
         $this->phpclass = "DalithornHeavyCommandFrigate";
         $this->imagePath = "img/ships/Nexus/Dalithorn_CommandFrigate2.png";
-        $this->shipClass = "Heavy Command Frigate";
-			$this->variantOf = "Heavy Frigate";
+        $this->shipClass = "Taluvion Heavy Command Frigate";
+			$this->variantOf = "Omethiron Heavy Frigate";
 			$this->occurence = "rare";
 		$this->unofficial = true;
         $this->canvasSize = 100;

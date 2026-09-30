@@ -6,7 +6,7 @@ class DalithornMicrosat extends MicroSAT{
         $this->pointCost = 100*6;
         $this->faction = "Nexus Dalithorn Commonwealth (early)";
         $this->phpclass = "DalithornMicrosat";
-        $this->shipClass = "Laser MicroSAT Cluster";
+        $this->shipClass = "Drescor Laser MicroSAT Cluster";
         $this->imagePath = "img/ships/Nexus/Dalithorn_Microsat2.png";
 		$this->unofficial = true;
         

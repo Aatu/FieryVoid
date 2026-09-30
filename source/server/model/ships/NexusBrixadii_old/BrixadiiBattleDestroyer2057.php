@@ -9,8 +9,8 @@ class BrixadiiBattleDestroyer2057 extends HeavyCombatVessel{
         $this->phpclass = "BrixadiiBattleDestroyer2057";
         $this->imagePath = "img/ships/Nexus/brixadii_battle_destroyer.png";
 			$this->canvasSize = 125; //img has 200px per side
-        $this->shipClass = "Battle Destroyer (2057)";
-			$this->variantOf = "Battle Destroyer";
+        $this->shipClass = "Draxen Battle Destroyer (2057)";
+			$this->variantOf = "Draxen Battle Destroyer";
 			$this->occurence = "common";
 		$this->unofficial = true;
         $this->isd = 2057;

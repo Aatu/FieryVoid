@@ -9,7 +9,7 @@ class BrixadiiJumpScout extends BaseShipNoAft{
         $this->phpclass = "BrixadiiJumpScout";
         $this->imagePath = "img/ships/Nexus/brixadii_warship.png";
 			$this->canvasSize = 165; //img has 200px per side
-        $this->shipClass = "Jump Scout";
+        $this->shipClass = "Morgex Jump Scout";
 			$this->limited = 10;
 		$this->unofficial = true;
 		$this->isd = 2060;
