@@ -3171,15 +3171,9 @@ shipManager.movement = {
             }
             if (shipManager.movement.isTurn(movement)) { //this is last turn - no point looking any further!
                 didTurn = true;
-                //when multiple turns are done one after another, it's a snap turn by agile ship (with turn shortening happening at FIRST step) 
-                //(or speed 0 when it doesn't matter)
-                //so go back to first turn made in sequence and calculate extra thrust spent for it instead of actual turn found
-                var prevNo = moveNo - 1;
-                while ((prevNo >= 0) && (shipManager.movement.isTurn(ship.movement[prevNo]))) {
-                    movement = ship.movement[prevNo];
-                    prevNo--;
-                }
-                movesDone += shipManager.movement.calculateExtraThrustSpent(ship, movement); //calculate turn shortening as moves done
+                //when multiple turns are done one after another, it's a snap turn by agile ship (or speed 0 when it doesn't matter)
+                //- one shared delay, shortened by extra thrust paid on ANY turn of the sequence
+                movesDone += shipManager.movement.calculateTurnSequenceExtraThrust(ship, moveNo); //calculate turn shortening as moves done
                 break;//while
             }
             if (movesDone >= turndelay) { //at this point turn delay is satisfied, no need to look further!
@@ -3239,7 +3233,13 @@ shipManager.movement = {
         if (shipManager.movement.getTurnDelayCost(ship) == 0) return 0;
         var turndelay = Math.ceil(speed * shipManager.movement.getTurnDelayCost(ship));
         if (ship.flight) return turndelay; //Marcin Sawicki: fighters are NOT exception to delay rules! But so far fighters cannot overthrust...
-        turndelay -= shipManager.movement.calculateExtraThrustSpent(ship, movement);
+        //agile snap turn: shortening already paid on earlier turns of the same sequence counts here too
+        var moveNo = ship.movement.lastIndexOf(movement);
+        if (moveNo >= 0 && shipManager.movement.isTurn(movement)) {
+            turndelay -= shipManager.movement.calculateTurnSequenceExtraThrust(ship, moveNo);
+        } else {
+            turndelay -= shipManager.movement.calculateExtraThrustSpent(ship, movement);
+        }
         if (turndelay < 0) turndelay = 0; //Marcin Sawicki: just in case, no negative values
         //ELITE / POOR CREW: applied after the overthrust reduction and its zero-clamp, so
         //"reduced by 1 to a minimum of 1" is measured against the delay this turn actually
@@ -3257,6 +3257,17 @@ shipManager.movement = {
         var reg = shipManager.movement.calculateThrustStillReq(ship, movement, true); //third parameter: calculating overthrusting
         var extra = 0 - reg[0];
         if (extra < 0) extra = 0;
+        return extra;
+    },
+
+    //Extra thrust spent over a run of consecutive turns ending at moveNo (an agile ship's snap turn
+    //shares ONE turn delay, and turn shortening may be paid on any of its steps).
+    calculateTurnSequenceExtraThrust: function calculateTurnSequenceExtraThrust(ship, moveNo) {
+        var extra = 0;
+        while (moveNo >= 0 && shipManager.movement.isTurn(ship.movement[moveNo])) {
+            extra += shipManager.movement.calculateExtraThrustSpent(ship, ship.movement[moveNo]);
+            moveNo--;
+        }
         return extra;
     },
 
