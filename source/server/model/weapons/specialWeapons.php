@@ -2413,7 +2413,8 @@ class RammingAttack extends Weapon{
 	private $damageModRolled = 0;
 
 	private $gamedata = null; //gamedata is needed in places normally unavailable - this variable will be filled before any calculations happen!
-	
+	private $meteorDefence = null; //tally for the swarm order being resolved - see resolveMeteors(); null at any other time
+
 	 protected $possibleCriticals = array(); //shouldn't be hit ever, but if it is, should not suffer any criticals
 	
 	//preventing double ramming
@@ -2453,14 +2454,14 @@ class RammingAttack extends Weapon{
 		if($deployTurn > $gamedata->turn) return;  //Ship not deployed yet, don't ram anything!			
 	
 		//First let's check if any units moved through this Terrain unit and create appropriate fireOrders.		
-		if($shooter->isTerrain() && !$shooter->isDestroyed() && $shooter->Enormous){ //Only Enormous terrain (asteroids/moons) collides; bases like shipyards/jumpgates do not.
+		if($shooter->isTerrain() && !$shooter->isDestroyed() && ($shooter->Enormous || !empty($shooter->isDustField) || !empty($shooter->isMeteoroid))){ //Only Enormous terrain (asteroids/moons) collides; bases like shipyards/jumpgates do not.
 			$relevantShips = array();
 
 			//Make a list of relevant ships e.g. this ship and enemy fighters in the game.
 			foreach($gamedata->ships as $ship){
 				if($ship->isDestroyed()) continue; //Ignore destroyed ships
 				if($ship->isTerrain()) continue;	//Don't add other terrain.
-				if($ship instanceof spawnMeteoroid || $ship instanceof spawnDustField) continue; // GTS_Triad
+				//if($ship instanceof spawnMeteoroid || $ship instanceof spawnDustField) continue; // GTS_Triad - These are marked as Terrain in isTerrain already - DK
 				if($ship->getTurnDeployed($gamedata) > $gamedata->turn)	continue; //Ship not deployed yet.		
 				if($this->isPhasedThroughTerrain($ship, $shooter, $gamedata)) continue; //Half-phased Shadow ships slip straight through terrain, provided they don't stop inside it.
 					//if ($ship instanceof FighterFlight && $shooter->Huge == 0) continue; //Not doing fighters except for very large terrain, change if and when skindancing introduced.	
@@ -2468,7 +2469,9 @@ class RammingAttack extends Weapon{
 			}
 
 			$terrrainPosition = $shooter->getHexPos();
-			$collisiontargets = $this->checkForCollisions($relevantShips,  $gamedata, $terrrainPosition, $shooter);
+			$hexEntries = array();
+			$bearings = array();
+			$collisiontargets = $this->checkForCollisions($relevantShips,  $gamedata, $terrrainPosition, $shooter, $hexEntries, $bearings);
 
 			foreach($collisiontargets as $targetid=>$location){
 				$target = $gamedata->getShipById($targetid);
@@ -2502,20 +2505,41 @@ $newFireOrder->notes = "loc:" . ($location ?: 1);
 						$newFireOrder->addToDB = true;
 						$this->fireOrders[] = $newFireOrder;
 					}       
-				}else{						
-					$newFireOrder = new FireOrder(
-						-1, "prefiring", $shooter->id, $target->id,
-						$this->id, -1, $gamedata->turn, 1,
-						0, 0, 1, 0, 0,
-						$targetMovement->position->q, $targetMovement->position->r, $type, -1
-					);
-//					$newFireOrder->chosenLocation = $location;									
-$newFireOrder->chosenLocation = $location ?: 1;
-$newFireOrder->notes = "loc:" . ($location ?: 1);
-					$newFireOrder->pubnotes = "<br>COLLISION! Ship collided with terrain during its movement!";
-					$newFireOrder->addToDB = true;
-					$this->fireOrders[] = $newFireOrder;			
-				}	
+				}else{
+					//Dust damages once for EVERY hex of it the unit enters - each hex of a multi-hex Dust Cloud
+					//included - so it gets an order per hex, each struck on the side that entered THAT hex. Its
+					//damage depends on speed alone, so a unit too slow to be hurt (most fighters) gets no order
+					//at all rather than a "hit" for 0.
+					$orderLocations = array($location);
+					if ($type === 'DustCollision') {
+						if ($shooter::getDustDamage($target->getSpeed(), $target instanceof FighterFlight) <= 0) continue;
+						$orderLocations = $hexEntries[$targetid] ?? array($location);
+					}
+					$ordersToCreate = count($orderLocations);
+
+					foreach ($orderLocations as $n => $orderLocation) {
+						$newFireOrder = new FireOrder(
+							-1, "prefiring", $shooter->id, $target->id,
+							$this->id, -1, $gamedata->turn, 1,
+							0, 0, 1, 0, 0,
+							$targetMovement->position->q, $targetMovement->position->r, $type, -1
+						);
+//						$newFireOrder->chosenLocation = $location;
+$newFireOrder->chosenLocation = $orderLocation ?: 1;
+$newFireOrder->notes = "loc:" . ($orderLocation ?: 1);
+						//Meteor defence (METEOR_DEFENCE_PLAN.md §2.6) reads the direction of motion back from here.
+						if ($type === 'MeteoroidCollision') $newFireOrder->notes .= " brg:" . ((((int)($bearings[$targetid] ?? 0)) % 360 + 360) % 360);
+						if ($n == 0) { //one line per terrain unit in the log, however many hexes it was entered through
+							if ($type === 'DustCollision') {
+								$newFireOrder->pubnotes = "<br>DUST! Unit passed through " . $ordersToCreate . " dust " . ($ordersToCreate == 1 ? "hex" : "hexes") . " during its movement.";
+							} else {
+								$newFireOrder->pubnotes = "<br>COLLISION! Ship collided with terrain during its movement!";
+							}
+						}
+						$newFireOrder->addToDB = true;
+						$this->fireOrders[] = $newFireOrder;
+					}
+				}
 			}	
 		}
 
@@ -2796,7 +2820,14 @@ $newFireOrder->notes = "loc:" . ($location ?: 1);
 	}//endof isHexTransit()
 
 
-	private function checkForCollisions($relevantShips, $gamedata, $terrainPosition, $thisShip){
+	/* Returns shipid => location struck. Also fills $hexEntries: shipid => one location per hex of this
+	   terrain the unit ENTERED this turn - the section facing the hex it moved into, so a slide or a pivoted
+	   ship strikes with whatever side leads. Only Dust reads it (it damages once per hex); every other
+	   terrain collides once whatever the count.
+	   And $bearings: shipid => the unit's direction of motion into the terrain, relative to its facing,
+	   measured to the hex ENTERED (METEOR_DEFENCE_PLAN.md §2.6 / T9 - not to a multi-hex terrain's centre).
+	   Meteor defence reads it back off the order's notes to decide which declared guns cover the strike. */
+	private function checkForCollisions($relevantShips, $gamedata, $terrainPosition, $thisShip, &$hexEntries = array(), &$bearings = array()){
 	    $collisiontargets = array(); // Initialize array for fighters to be fired at.
 		//$thisShip = $this->getUnit();
 		
@@ -2824,10 +2855,13 @@ $newFireOrder->notes = "loc:" . ($location ?: 1);
 							}
 		
 							if ($match) {
+								$entryBearing = $this->getTempBearing($previousPosition, $shipMove->position, $ship, $previousFacing); //bearing to the hex actually entered, not to the terrain's centre hex
+								$hexEntries[$ship->id][] = $this->getCollisionLocation($entryBearing, $ship);
 								if (!isset($collisiontargets[$ship->id])) {
 									$relativeBearing = $this->getTempBearing($previousPosition, $terrainPosition, $ship, $previousFacing);
 									$location = $this->getCollisionLocation($relativeBearing, $ship);
 									$collisiontargets[$ship->id] = $location; // Add to array to be targeted.
+									$bearings[$ship->id] = $entryBearing;
 								}
 							}
 						}
@@ -2855,6 +2889,8 @@ $newFireOrder->notes = "loc:" . ($location ?: 1);
 								$relativeBearing = $this->getTempBearing($previousPosition, $terrainPosition, $ship, $previousFacing);
 								$location = $this->getCollisionLocation($relativeBearing, $ship);
 								$collisiontargets[$ship->id] = $location; // Add to array to be targeted.
+								$hexEntries[$ship->id][] = $location;
+								$bearings[$ship->id] = $relativeBearing; //single hex: the terrain's hex IS the hex entered
 							}
 						}
 
@@ -3018,15 +3054,7 @@ $newFireOrder->notes = "loc:" . ($location ?: 1);
 			}	
 		}
 
-if($fireOrder->damageclass == 'WaveformCollision' && $this->getDamage($fireOrder) <= 0) return; // GTS
-// Skip duplicate dust fire orders silently - only first hex counts
-if ($fireOrder->damageclass == 'DustCollision') {
-    if (isset(spawnDustField::$dustDamagedThisTurn[$fireOrder->targetid]) && 
-        spawnDustField::$dustDamagedThisTurn[$fireOrder->targetid] == $gamedata->turn) {
-        $fireOrder->shotshit = 0;
-        return;
-    }
-}
+		if($fireOrder->damageclass == 'WaveformCollision' && $this->getDamage($fireOrder) <= 0) return; // GTS
 		parent::fire($gamedata, $fireOrder);
 
 		if($fireOrder->shotshit > 0){
@@ -3136,25 +3164,27 @@ if($fireOrder->damageclass == 'MeteoroidCollision' || $fireOrder->damageclass ==
 			
 			
         }else if($fireOrder->damageclass == 'MeteoroidCollision'){ // GTS
+            //ONE meteor - beforeDamage rolls how many strike and resolves each as its own Standard hit.
             $targetMove = $target->getLastMovement(); // GTS
             $targetSpeed = $targetMove ? $targetMove->speed : 1; // GTS
-            $modifier = 0; // GTS
-            if($targetSpeed <= 4) $modifier = -1; // GTS
-            if($targetSpeed > 12) $modifier = 1; // GTS
-            $hits = spawnMeteoroid::rollMeteorChart($target->shipSizeClass, ($target instanceof FighterFlight), $modifier); // GTS
-            if($hits <= 0) return 0; // GTS
-            $damage = 0; // GTS
-            for($h = 0; $h < $hits; $h++) $damage += spawnMeteoroid::getMeteorDamage($targetSpeed); // GTS
-            if(empty($target->advancedArmor)) $damage *= 2; // GTS - double damage for non-advanced armor
+            $damage = $shooter::getMeteorDamage($targetSpeed); //the swarm's own class carries the formula: Meteor Swarm d10 + speed, the Triad's d6 + speed / 2
+            //factionAge is read off the TERRAIN unit: a weapon never inherits its unit's, so this weapon's own is always 1
+            if(empty($target->advancedArmor) && $shooter->factionAge >= 3) $damage *= 2; // GTS - double damage for non-advanced armor for TRIAD generated terrain
+            //Defensive fire comes off AFTER the Triad's doubling: "all damage caused by that meteor is reduced".
+            if ($this->meteorDefence !== null) { //resolving a swarm order - see resolveMeteors
+                $blocked = min($damage, $this->defendAgainstMeteor($target, $fireOrder, $damage, $gd));
+                $this->meteorDefence['blocked'] += $blocked;
+                $this->meteorDefence['cancelled'] = ($blocked > 0) && ($blocked >= $damage);
+                $damage -= $blocked;
+            }
             return $damage; // GTS
 
 		}else if($fireOrder->damageclass == 'DustCollision'){ // GTS
-            if(isset(spawnDustField::$dustDamagedThisTurn[$target->id]) && spawnDustField::$dustDamagedThisTurn[$target->id] == $gd->turn) return 0; // GTS
-            spawnDustField::$dustDamagedThisTurn[$target->id] = $gd->turn; // GTS
+            //One order per dust hex entered - see beforePreFiringOrderResolution - so no once-a-turn limit here.
             $targetMove = $target->getLastMovement(); // GTS
             $targetSpeed = $targetMove ? $targetMove->speed : 0; // GTS
-            $damage = spawnDustField::getDustDamage($targetSpeed); // GTS
-            if(empty($target->advancedArmor)) $damage *= 2; // GTS - double damage for non-advanced armor
+            $damage = $shooter::getDustDamage($targetSpeed, $target instanceof FighterFlight); //the dust unit's own class carries the formula
+            if(empty($target->advancedArmor) && $shooter->factionAge >= 3) $damage *= 2; // GTS - double damage for non-advanced armor for TRIAD generated terrain (the terrain unit's factionAge, as above)
             return $damage; // GTS
 
 
@@ -3198,6 +3228,183 @@ if($fireOrder->damageclass == 'MeteoroidCollision' || $fireOrder->damageclass ==
 			return $damage;
 		}				     
 	}//endof function getDamage
+
+
+	/* DUST AND METEORS are Standard hits, not the ram's 10-point rakes (user, 2026-09-27).
+
+	   DUST (B5W): "For ships, divide their speed by 2, drop fractions, and apply the result directly to
+	   the forward structure (or, if there is no forward structure, the primary structure). For fighters
+	   and shuttles, subtract 10 from their speed, divide this by 3, drop fractions, and apply the result
+	   to the fighter's structure." Armour applies as normal (user). "Directly" is read as no hit chart
+	   (damageOneSheet) and no shield - the target's getDamageMod is skipped here. The side struck is the one
+	   that entered the hex, like any terrain collision (user) - not always the forward one - so a slide or a
+	   pivoted ship takes it on whatever section leads.
+
+	   METEORS: the swarm's chart says how many strike, and each is its own Standard hit on the section
+	   the unit entered through (chosenLocation), rolled on that section's hit chart, shields as normal. */
+	protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){
+		if (($fireOrder->damageclass != 'DustCollision') && ($fireOrder->damageclass != 'MeteoroidCollision')) {
+			parent::beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
+			return;
+		}
+		$rammingDamageType = $this->damageType;
+		$this->damageType = 'Standard';
+		try {
+			if ($fireOrder->damageclass == 'DustCollision') {
+				$damage = $this->getDamageMod($this->getDamage($fireOrder), $shooter, $target, $pos, $gamedata); //the weapon's own modifiers only
+				$this->damage($target, $shooter, $fireOrder, $gamedata, $damage);
+			} else {
+				$this->resolveMeteors($target, $shooter, $fireOrder, $pos, $gamedata);
+			}
+		} finally {
+			$this->damageType = $rammingDamageType;
+		}
+	}
+
+	private function resolveMeteors($target, $shooter, $fireOrder, $pos, $gamedata){
+		$swarm = $this->unit;
+		$targetMove = $target->getLastMovement();
+		$targetSpeed = $targetMove ? $targetMove->speed : 1;
+		$modifier = 0;
+		if ($targetSpeed <= 4) $modifier = -1;
+		if ($targetSpeed > 12) $modifier = 1;
+		$hits = $swarm::rollMeteorChart($target->shipSizeClass, ($target instanceof FighterFlight), $modifier);
+		if ($hits <= 0) {
+			$fireOrder->pubnotes .= "<br>No meteors struck.";
+			return;
+		}
+		$fireOrder->pubnotes .= "<br>" . $hits . ($hits == 1 ? " meteor struck." : " meteors struck.");
+
+		//Weapon::beforeDamage, per meteor, with one difference: a meteor that declared defensive fire
+		//cancelled outright writes no damage entry at all.
+		$this->meteorDefence = array('blocked' => 0, 'weapons' => array(), 'cancelled' => false);
+		try {
+			for ($h = 0; $h < $hits; $h++) {
+				if ($target->isDestroyed()) break;
+				$this->meteorDefence['cancelled'] = false;
+				$damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder); //-> getDamage: one meteor, less defensive fire
+				if ($this->meteorDefence['cancelled']) continue;
+				$this->damage($target, $shooter, $fireOrder, $gamedata, $damage);
+			}
+
+			$defenders = count($this->meteorDefence['weapons']);
+			if ($defenders > 0) {
+				$fireOrder->pubnotes .= "<br>Defensive fire against meteors: " . $defenders . ($defenders == 1 ? " weapon" : " weapons")
+					. " reduced meteor damage by " . $this->meteorDefence['blocked'] . ".";
+			}
+		} finally {
+			$this->meteorDefence = null;
+		}
+	}
+
+	/* METEOR DEFENCE (METEOR_DEFENCE_PLAN.md). B5W: "Defensive weapons that face the direction of motion
+	   can be set up to defend against meteors during movement. This must be announced at the start of the
+	   turn ... If weapons are targeted on a meteor, all damage caused by that meteor is reduced by the total
+	   interception rating of all weapons used against it." FV's rating is the d20 figure,
+	   getInterceptRating() - a fifth of the % the client shows.
+
+	   The candidates are the struck unit's weapons carrying a 'meteorDefence' declaration made in Initial
+	   Orders - nothing else is ever used, and every declared weapon is committed for the turn whether or
+	   not it is used here (D1). Of those, a gun defends when its weapon is still intact (an earlier
+	   collision this phase may have taken it out), its arc covers the unit's direction of motion into the
+	   swarm (D6 - the brg:N note, written when the order was made) and it has not already taken a meteor
+	   this turn. Guns go best rating first, one per step, until this meteor is cancelled (D2), so a swarm's
+	   later meteors - and a second swarm - still find defenders.
+
+	   ⭐ THE DECLARATION IS THE LEDGER. Each gun spent bumps its declaration's shotshit, out of ->shots
+	   guns, and marks it updated; PreFiringGamePhase::advance writes that back, so what each weapon blocked
+	   persists and a second swarm this phase sees the guns already gone.
+
+	   A gun spent pays as an interception does - fireDefensively() draws an Interceptor round (only for a
+	   gun actually used, D8) and applies any backlash critical; Pre-Firing saves both. Returns the damage
+	   the defenders could block, which may exceed the meteor's. */
+	private function defendAgainstMeteor($target, $meteorOrder, $meteorDamage, $gamedata){
+		if ($meteorDamage <= 0) return 0;
+		if (!preg_match('/brg:(\d+)/', $meteorOrder->notes, $m)) return 0; //no direction of motion recorded - nothing can be judged to cover it
+		$bearing = (int)$m[1];
+
+		$weapons = array();
+		if ($target instanceof FighterFlight) { //a flight's declared fighter weapons defend the flight (§1.4)
+			foreach ($target->systems as $fighter) {
+				if ($fighter == null || $fighter->isDestroyed()) continue;
+				foreach ($fighter->systems as $system) $weapons[] = $system;
+			}
+		} else {
+			$weapons = $target->systems;
+		}
+
+		$guns = array(); //one entry per gun still free to take a meteor
+		$modesToRestore = array();
+		foreach ($weapons as $weapon) {
+			if (!($weapon instanceof Weapon)) continue;
+			$declaration = $weapon->getMeteorDefenceOrder($gamedata->turn);
+			if ($declaration === null) continue;
+			if ($weapon->isDestroyed()) continue;
+			if ($declaration->shotshit >= $declaration->shots) continue; //every gun already used
+
+			//Arcs, rating and - for a launcher - which round is drawn all depend on the DECLARED mode. The
+			//weapon stays in it until the allocation below is done, and is then put back, as
+			//automateIntercept does for a manual intercept order.
+			if (isset($weapon->firingModes[$declaration->firingMode]) && $weapon->firingMode != $declaration->firingMode) {
+				$modesToRestore[] = array($weapon, $weapon->firingMode);
+				$weapon->changeFiringMode($declaration->firingMode);
+			}
+
+			$useSplitArcs = $weapon->splitArcs && !$weapon->isArcRestricted(); //as Firing::isLegalIntercept
+			if (!mathlib::isInAnyArc($bearing, $weapon->startArc, $weapon->endArc,
+				$useSplitArcs ? ($weapon->startArcArray ?? []) : [], $useSplitArcs ? ($weapon->endArcArray ?? []) : [])) continue;
+
+			$rating = $weapon->getInterceptRating($gamedata->turn);
+			if ($rating <= 0) continue;
+
+			for ($g = $declaration->shotshit; $g < $declaration->shots; $g++) {
+				$guns[] = array('declaration' => $declaration, 'weapon' => $weapon, 'rating' => $rating);
+			}
+		}
+		usort($guns, function ($a, $b) { return $b['rating'] <=> $a['rating']; });
+
+		$reduction = 0;
+		foreach ($guns as $gun) {
+			if ($reduction >= $meteorDamage) break;
+			$weapon = $gun['weapon'];
+			$declaration = $gun['declaration'];
+			if ($declaration->shotshit >= $declaration->shots) continue;
+			//asked per gun rather than when the list was built: an Interceptor magazine runs down as rounds are drawn
+			if (!$weapon->canInterceptAtAll($gamedata, $meteorOrder, $this->unit, $target, $target, $this)) continue;
+
+			$reduction += $gun['rating'];
+			$declaration->shotshit++;
+			$declaration->updated = true;
+			$weapon->fireDefensively($gamedata, $meteorOrder);
+			if ($this->meteorDefence !== null) $this->meteorDefence['weapons'][$target->id . '_' . $weapon->id] = true;
+		}
+
+		foreach ($modesToRestore as $restore) $restore[0]->changeFiringMode($restore[1]);
+
+		return $reduction;
+	}//endof defendAgainstMeteor()
+
+	//Overridden rather than beforeDamage alone so the Chameleon mirror pass (Weapon::damage) lands dust the same way on the phantom sheet.
+	protected function damageOneSheet($target, $shooter, $fireOrder, $gamedata, $damage, $forcePrimary = false){
+		if ($fireOrder->damageclass != 'DustCollision') {
+			parent::damageOneSheet($target, $shooter, $fireOrder, $gamedata, $damage, $forcePrimary);
+			return;
+		}
+		if ($target->isDestroyed()) return;
+		if ($target instanceof FighterFlight) { //every craft flew through it, so every craft takes the full amount
+			foreach ($target->systems as $fighter) {
+				if ($fighter == null || $fighter->isDestroyed()) continue;
+				$this->doDamage($target, $shooter, $fighter, $damage, $fireOrder, null, $gamedata, false, 0);
+			}
+			return;
+		}
+		//The section that entered the dust hex, set when the order was made. The Chameleon mirror pass clears
+		//it so a phantom picks its own section, exactly as Weapon::damageOneSheet does.
+		$location = ($fireOrder->chosenLocation > 0) ? $fireOrder->chosenLocation : $target->getHitSection($shooter, $fireOrder->turn);
+		$structure = $target->getStructureSystem($location); //that section's Structure - PRIMARY when it has none (MCVs, or a side without its own)
+		if ($structure == null) return;
+		$this->doDamage($target, $shooter, $structure, $damage, $fireOrder, null, $gamedata, false, $structure->location);
+	}
 
 	public function getReturnDamage($fireOrder){    //damage that ramming unit suffers itself - using same modifier as actual attack! (already set)   
 		$gd = $this->gamedata;
@@ -11978,16 +12185,16 @@ class spawnMeteoroid extends Terrain {
         parent::__construct($id, $userid, $name, $slot);
         $this->pointCost = 0;
         $this->faction = "Terrain";
-        $this->factionAge = 1;
         $this->phpclass = "spawnMeteoroid";
-        $this->imagePath = "img/ships/asteroidField3.png";
+        $this->imagePath = "img/ships/meteorSwarm.png";
         $this->canvasSize = 200;
-        $this->shipClass = "Meteoroid Field";
-        $this->Enormous = true;
+        $this->shipClass = "Meteoroid Swarm";
+        $this->Enormous = false;
         $this->iniativebonus = -200;
         $this->isd = 0;
         $this->notes = "Units entering this hex roll d20 on the Meteoroid chart.";
         $this->notes .= "<br>Meteoroid hit damage = 1d6 + (unit speed / 2). Standard damage. Armor applies.";
+        $this->notes .= "<br>Meteor Defence: weapons declared in Initial Orders, and covering the direction of motion, reduce each meteor's damage by their intercept rating.";
         $this->occurence = "common";
         $this->base = true;
         $this->smallBase = true;
@@ -11999,6 +12206,7 @@ class spawnMeteoroid extends Terrain {
         $this->accelcost = 0;
         $this->rollcost = 0;
         $this->pivotcost = 0;
+		$this->factionAge = 3;
         Enhancements::nonstandardEnhancementSet($this, 'Terrain');
         $this->addPrimarySystem(new OSATCnC(10, 1, 0, 0));
         $this->addPrimarySystem(new Structure(8, 300));
@@ -12047,22 +12255,22 @@ class spawnMeteoroid extends Terrain {
 class spawnDustField extends Terrain {
     public $isDustField = true;
     public $terrainCollisionType = 'DustCollision';
-    public static $dustDamagedThisTurn = array();
 
     function __construct($id, $userid, $name, $slot) {
         parent::__construct($id, $userid, $name, $slot);
         $this->pointCost = 0;
         $this->faction = "Terrain";
-        $this->factionAge = 1;
         $this->phpclass = "spawnDustField";
         $this->imagePath = "img/ships/dust.png";
         $this->canvasSize = 200;
         $this->shipClass = "Dust Field";
-        $this->Enormous = true;
+        $this->Enormous = false;
         $this->iniativebonus = -200;
         $this->isd = 0;
         $this->notes = "Units entering this hex take dust damage.";
-        $this->notes .= "<br>Single damage roll per turn: speed / 2 (drop fractions).";
+        $this->notes .= "<br>Ships: speed / 2, to the Structure of the side entering the hex (Primary if none).";
+        $this->notes .= "<br>Fighters: (speed - 10) / 3, to every craft.";
+        $this->notes .= "<br>Standard damage. Armor applies, shields do not.";
         $this->occurence = "common";
         $this->base = true;
         $this->smallBase = true;
@@ -12074,6 +12282,7 @@ class spawnDustField extends Terrain {
         $this->accelcost = 0;
         $this->rollcost = 0;
         $this->pivotcost = 0;
+		$this->factionAge = 3;		
         Enhancements::nonstandardEnhancementSet($this, 'Terrain');
         $this->addPrimarySystem(new OSATCnC(10, 1, 0, 0));
         $this->addPrimarySystem(new Structure(8, 300));
@@ -12082,8 +12291,10 @@ class spawnDustField extends Terrain {
         );
     }
 
-    public static function getDustDamage($speed) {
-        return floor($speed / 2);
+    //Per hex entered, fractions dropped - the same rule as DustField.
+    public static function getDustDamage($speed, $isFlight = false) {
+        if ($isFlight) return max(0, floor(($speed - 10) / 3));
+        return max(0, floor($speed / 2));
     }
 }
 

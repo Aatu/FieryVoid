@@ -64,9 +64,13 @@ const Container = styled.div`
     box-sizing: border-box;
     /*Fill and frame from ./menuControls, shared with the fighter and mine editors - see the
       note there on why the title bar is no longer the old teal, and why none of the three
-      carries an element opacity any more.*/
-    background-color: ${MENU_CHROME.bg};
+      carries an element opacity any more. overflow: hidden so the section bars keep to the
+      rounded corners.*/
+    background: ${MENU_CHROME.bg};
     border: 1px solid ${MENU_CHROME.line};
+    border-radius: ${MENU_CHROME.radius};
+    box-shadow: ${MENU_CHROME.shadow};
+    overflow: hidden;
 `;
 
 /* No header component here any more - see the sketch above. MenuHeader still lives in
@@ -77,7 +81,7 @@ const Row = styled.div`
     display: flex;
     align-items: center;
     gap: 5px;
-    padding: 4px 6px;
+    padding: 5px 8px 5px 10px;
     font-size: 11px;
     color: ${MENU_CHROME.text};
 `;

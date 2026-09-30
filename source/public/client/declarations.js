@@ -331,6 +331,7 @@ window.declarations = {
 		  var weapon = actSys;
 		  var order = actSys.fireOrders[fireNo]; 
 		  if (order.turn != gamedata.turn) continue;
+		  if (order.type === 'meteorDefence') continue; //a Meteor Defence declaration aims at nothing - it would list as fire at itself
 		  if (order.type.indexOf('ntercept') == -1){ //this is actual offensive fire! skip 'intercept' and 'selfIntercept' orders
 		    var dispFireEntry = new dispFireNew();
 		    dispFireEntry.wpnName = weapon.displayName + ' ('+ weapon.firingModes[order.firingMode] +')';

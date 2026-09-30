@@ -1,0 +1,520 @@
+<!--
+  FIERY VOID DATA ARCHIVE - STARTER GUIDE ("How to Play Fiery Void")
+  Shown by client/UI/docViewer.js (the in-page window) and by starterGuide.php (the same viewer,
+  filling the page). Edit the words here; nothing else needs to change.
+
+  Each <section> is one entry in the window's left-hand list:
+    data-key    the entry's id - also its link: starterGuide.php#deployment. Keep it stable.
+    data-title  the entry's name in the list and its heading.
+    data-group  the list heading it sits under (consecutive entries share one heading).
+  Inside an entry: <h3> sub-headings are listed under the entry while it is open; data-anchor="x"
+  on any element makes starterGuide.php#x land on it. Never use id= (the window is dropped into
+  other pages, whose ids it must not collide with).
+  Links: to another document href="faq.php#hangar"; within this one href="#deployment".
+  Pictures: <figure class="fvd-fig"><img src="img/docViewer/..." alt="..."><figcaption>..</figcaption></figure>.
+  A picture still to be supplied is a placeholder - fvd-fig--ph, the file it should become in
+  data-img, what it should show inside <div class="fvd-ph">. Swap it for the <img> when it arrives.
+  Useful blocks: <ol class="fvd-steps"> numbered steps; <dl class="fvd-defs"> term / meaning;
+  <div class="fvd-note"> (also --tip, --warn) with an optional <span class="fvd-note-label">.
+-->
+
+<section data-key="creating-account" data-title="Creating an Account" data-group="Getting Started">
+  <ol class="fvd-steps">
+    <li>Go to the Fiery Void website.</li>
+    <li>If you do not have an account yet, click <b>Register new account</b> on the log-in page and choose a
+      username and password.</li>
+    <li>Log in with your username and password.</li>
+  </ol>
+  <p>New to the game? The <a href="faq.php#general">FAQ</a> has tips on getting a first game going, and the
+    <a href="https://discord.gg/4jXarWusp4">Fiery Void Discord</a> is the place to ask for help.</p>
+</section>
+
+<section data-key="joining-starting-game" data-title="Joining a Game" data-group="Getting Started">
+  <figure class="fvd-fig">
+    <img src="img/docViewer/join-games.jpg" alt="The Games panel: Your Games, Join Games and the Actions column">
+    <figcaption>Open games wait under Join Games on the main page.</figcaption>
+  </figure>
+
+  <ol class="fvd-steps">
+    <li>On the main page, look under <b>Join Games</b> for a game to join, and click it.</li>
+    <li>Check the game's <b>Scenario Description</b>: its creator may have set restrictions, such as "tournament
+      rules" or "no Minbari".</li>
+    <li>Click <b>Take Slot</b> on a free slot.</li>
+  </ol>
+  <p>Once you have a slot you can choose your fleet - skip ahead to
+    <a href="#selecting-your-fleet">Selecting Your Fleet</a>.</p>
+  <p>No games listed under Join Games? Create one of your own (see <a href="#creating-a-game">Creating a Game</a>).</p>
+</section>
+
+<section data-key="creating-a-game" data-title="Creating a Game" data-group="Getting Started">
+  <figure class="fvd-fig">
+    <img src="img/docViewer/create-game.jpg" alt="Create Game, Step 1: Game Options">
+    <figcaption>Create Game walks you through four steps; the defaults are fine for a first game.</figcaption>
+  </figure>
+
+  <ol class="fvd-steps">
+    <li>Click <b>Create Game</b> on the main page.</li>
+    <li>Give the game a name that says what it is - for example <i>Centauri (me) vs Narn (you)</i> or
+      <i>All Welcome 5000 pts</i>.</li>
+    <li>Choose a different background picture if you like.</li>
+    <li>The default settings - two teams of one slot, 3500 points each - are fine for your first game, so go straight
+      on to <b>Confirm &amp; Create Game</b>. You are taken to Fleet Selection, and as the creator you are put in the
+      first slot automatically.</li>
+  </ol>
+
+  <h3>More advanced settings</h3>
+  <ul>
+    <li><b>A larger map:</b> choose a bigger Map Template, such as Base Assault, or No Boundaries. It gives more room
+      to manoeuvre, but gives ships and races with long-range weapons a relative advantage.</li>
+    <li><b>Add Slot</b> adds another player slot to a team. Use it to add more players to the game, or to give
+      yourself a second slot for part of your fleet that arrives later in the game (a
+      <a href="faq.php#delayed">Delayed Deployment Slot</a>).</li>
+  </ul>
+</section>
+
+<section data-key="selecting-your-fleet" data-title="Selecting Your Fleet" data-group="Getting Started">
+  <figure class="fvd-fig">
+    <img src="img/docViewer/fleet-selection.jpg" alt="Fleet Selection: the Purchase Fleet store beside Your Fleet">
+    <figcaption>Fleet Selection: the Store on the left, your fleet on the right.</figcaption>
+  </figure>
+
+  <h3>Buying ships</h3>
+  <ol class="fvd-steps">
+    <li>In the <b>Purchase Fleet</b> panel, click <b>Choose Faction</b> and pick a faction to list its ships. Each
+      ship's point cost is shown beside it, with its variants listed underneath in a darker font.
+      <b>Show details</b> opens a ship's control sheet (see <a href="#ship-control-sheet">Ship Tooltip &amp; SCS</a>).</li>
+    <li>Click <b>Add to fleet</b>. A window opens where you can rename the ship and choose any options or
+      enhancements available to it (usually for a points cost). Confirm the purchase to add it to your fleet.</li>
+    <li>The ship appears in <b>Your Fleet</b> and your points total goes up. Every bought ship has Details, Edit,
+      Copy and Remove links.</li>
+  </ol>
+  <p>Fighter flights are bought on their own, and you can set how many fighters are in a flight. Full flights are
+    usually better, unless you are squeezing the last few points out of your fleet.</p>
+
+  <figure class="fvd-fig fvd-fig--side">
+    <img src="img/docViewer/buy-dialog.jpg" alt="The buy window for one ship, with its Enhancements section and total cost">
+    <figcaption>Buying a ship: name it, add options, confirm.</figcaption>
+  </figure>
+
+  <h3>Saved fleets</h3>
+  <p>To get started quickly, load a ready-made fleet: open <b>Load a Fleet</b>, choose one of the default fleets,
+    then click <b>Ready</b>.</p>
+  <p>As you get to know Fiery Void you can add your own: build a fleet and click <b>Save Fleet</b>, and from then on it
+    is listed under Load a Fleet too.</p>
+
+  <h3>Fleet building conventions</h3>
+  <p>A few conventions are not enforced, but should generally be followed in pick-up games unless you agree
+    otherwise. They are often called "tournament rules", and the <b>Check</b> button shows how your fleet measures up
+    at any time (the full rules are in <a href="fleetchecker.php">Fleet Checker</a>). The main points:</p>
+  <ul>
+    <li>Each side should have at least one capital ship.</li>
+    <li>Each side should have at least one ship with a jump engine - a blue hexagonal icon on a ship's SCS. Most
+      capital ships have one, and sometimes a Heavy Combat Vessel or even a Medium Ship does. One is enough: it
+      explains how the fleet got to the fight!</li>
+    <li>Fighters can only be taken if the fleet has ships with the hangar space to carry all of them into battle.</li>
+    <li>Any ship that can carry fighters should bring at least half its maximum load. An Earth Alliance Omega
+      Destroyer carries 24 fighters, for example, so it must bring at least 12. Two ships that each carry one flight
+      (two Hyperions, say) can share a single full flight to meet the half-hangar minimum for both.</li>
+    <li>Special fighters (Rutarians, Thunderbolts and so on) need a ship that can carry that kind of fighter - a
+      Dargan or Balvarix for Rutarians, an Omega or Warlock for Thunderbolts.</li>
+    <li>Only one flight per side may have fewer than 6 fighters.</li>
+  </ul>
+  <div class="fvd-note fvd-note--tip">
+    <span class="fvd-note-label">Tip</span>
+    <p>You are unlikely to hit the points limit exactly, but you should get within 100 points of it. Enhancements on
+      specific ships are a good way to use up the last few points and make your fleet stronger.</p>
+  </div>
+
+  <h3>Ready</h3>
+  <p>When you are happy with your fleet, click <b>Ready</b> and confirm. The game begins once every slot is ready. If
+    it does not load by itself, go back to the main page and click the game under <b>Your Games</b>.</p>
+</section>
+
+<section data-key="ship-control-sheet" data-title="Ship Tooltip &amp; SCS" data-group="Know Your Ships">
+  <p class="fvd-lede">Once a game has started, these are the two main places to find out about your ships.</p>
+
+  <h3 data-anchor="shiptooltip">Ship tooltip</h3>
+  <figure class="fvd-fig fvd-fig--side">
+    <img src="img/docViewer/ship-tooltip.jpg" alt="A selected ship's tooltip showing defences, turn cost, initiative and speed">
+    <figcaption>A ship's tooltip.</figcaption>
+  </figure>
+  <p>Point at a ship, or left-click to select it, to show its tooltip:</p>
+  <dl class="fvd-defs">
+    <dt>Ship name</dt>
+    <dd>The name its player gave it when building the fleet.</dd>
+    <dt>Defence rating</dt>
+    <dd>Front-aft / sides: the % chance for a shot to hit the ship before any other adjustments. Defensive EW lowers the
+      "current" figure below the "base" one by 5% per point.</dd>
+    <dt>Turn cost / delay</dt>
+    <dd>The turn cost times the ship's current speed is the thrust needed to turn one hex side; the turn delay is how
+      many hexes it must move before it can turn again.</dd>
+    <dt>Initiative</dt>
+    <dd>The ship's place in this turn's initiative order. Initiative is rolled on 1d100 plus any adjustments (for ship
+      type and so on); lower initiative moves earlier.</dd>
+    <dt>Speed</dt>
+    <dd>How many hexes the ship moves in the Movement phase unless it accelerates or decelerates. In brackets is its
+      acceleration rating - the thrust cost to change speed by 1. Any turn delay carried over from the last turn is
+      listed too.</dd>
+  </dl>
+
+  <h3 data-anchor="scs">Ship Control Sheet (SCS)</h3>
+  <p>Right-click a ship to open its SCS: a window showing all of its systems as icons, with the front of the ship at
+    the top. Weapons are red; other systems are generally blue, with some exceptions.</p>
+  <figure class="fvd-fig">
+    <img src="img/docViewer/scs.jpg" alt="A ship's SCS with damaged, powered-down and charging systems">
+    <figcaption>A Ship Control Sheet.</figcaption>
+  </figure>
+  <ul>
+    <li><b>Health:</b> a dark green bar along the bottom of each icon shows the system's remaining structure. It turns
+      orange when the system is critically damaged, and is empty (with the whole icon dimmed) once it is destroyed. A
+      lightning bolt over an icon means the system is powered down.</li>
+    <li><b>Charging:</b> a weapon shows its charge as turns charged / turns needed, and is ready to fire when the two
+      numbers match. A weapon that is not ready has a haze over its icon.</li>
+    <li><b>Details:</b> point at a system to see all of its information, including the effects of any critical
+      damage.</li>
+    <li><b>Structure:</b> each section's structure is shown in its header bar as current / maximum, then its armour -
+      <code>540/600 A8</code>, for example.</li>
+  </ul>
+  <p>You need the SCS to change power settings in Initial Orders, and to fire weapons in the Fire Orders phase.</p>
+  <p>Right-click a fighter flight for the same view of the flight: each fighter's remaining / total structure, and
+    whether it has been destroyed or has disengaged. Point at a fighter's weapons to see their details.</p>
+</section>
+
+<section data-key="deployment" data-title="Deployment" data-group="Playing a Turn">
+  <div class="fvd-note">
+    <span class="fvd-note-label">Moving around the map</span>
+    <p>Zoom in and out with the mouse wheel. Hold down the right mouse button to drag the map.</p>
+  </div>
+
+  <figure class="fvd-fig">
+    <img src="img/docViewer/deployment.jpg" alt="The Deployment Phase: a deployment zone with one ship placed">
+    <figcaption>Placing a ship in your deployment zone.</figcaption>
+  </figure>
+
+  <ol class="fvd-steps">
+    <li>A new game starts in the <b>Deployment Phase</b>. Left-click one of your ships to select it (a circle marks it),
+      then left-click a hex inside your deployment zone to place it there.</li>
+    <li>Set its starting speed (0 to 10) with the + and - beside the forward green arrow, which starts at 5. You can
+      also start facing a direction other than towards the enemy, using the curved green arrows.</li>
+    <li>When all your ships are placed, click the green <b>Ready</b> tick at the top of the screen. The title bar
+      changes from Deployment to Waiting for turn.</li>
+  </ol>
+  <p>Once every player has deployed, the first turn begins: the bar on the left shows the ships' initiative order, and
+    the title bar reads Initial Orders.</p>
+  <ul>
+    <li>Fighter flights are deployed on the map, or docked inside a carrier's hangar - see
+      <a href="faq.php#hangar">Hangar Operations</a>.</li>
+    <li>A slot set to deploy later in the game takes no part in the Turn 1 deployment. It gets a Deployment Phase of its
+      own when its turn comes (see <a href="faq.php#delayed">Delayed Deployment Slot</a>).</li>
+  </ul>
+</section>
+
+<section data-key="game-turn" data-title="The Game Turn" data-group="Playing a Turn">
+  <p class="fvd-lede">Every game turn runs through the same phases, in this order:</p>
+  <ul class="fvd-flow">
+    <li class="is-optional"><span class="fvd-flow-name">Pre-Turn Orders</span><span class="fvd-flow-note">only when needed</span></li>
+    <li><span class="fvd-flow-name">Initial Orders</span><span class="fvd-flow-note">power, EW, ballistics</span></li>
+    <li><span class="fvd-flow-name">Movement</span><span class="fvd-flow-note">ship by ship</span></li>
+    <li class="is-optional"><span class="fvd-flow-name">Pre-Firing Orders</span><span class="fvd-flow-note">only when needed</span></li>
+    <li><span class="fvd-flow-name">Fire Orders</span><span class="fvd-flow-note">assign weapons</span></li>
+  </ul>
+  <dl class="fvd-defs">
+    <dt>Pre-Turn Orders</dt>
+    <dd>Decisions some factions make at the very start of the turn. Only happens when there is such a decision to make.</dd>
+    <dt>Initial Orders</dt>
+    <dd>Adjust power, assign EW and fire ballistic weapons.</dd>
+    <dt>Movement</dt>
+    <dd>Move your ships: accelerate or decelerate, move, slide, turn, pivot and roll.</dd>
+    <dt>Pre-Firing Orders</dt>
+    <dd>Some special weapons fire before all the others; when they do, this phase happens.</dd>
+    <dt>Fire Orders</dt>
+    <dd>Assign weapons to fire.</dd>
+  </dl>
+  <p>All the players complete each phase at the same time - except Movement, which is done one ship at a time (or in
+    groups, when Simultaneous Movement is in use).</p>
+
+  <figure class="fvd-fig">
+    <img src="img/docViewer/title-bar.jpg" alt="The battle screen title bar showing the phase and the commit tick">
+    <figcaption>The title bar names the phase; the green tick commits your orders.</figcaption>
+  </figure>
+  <p>When you have finished a phase for all your ships - or finished moving one ship or flight - click the green tick in
+    the title bar at the top of the screen. A box pops up to confirm or cancel: click its green tick to confirm.</p>
+</section>
+
+<section data-key="preturn-phase" data-title="Pre-Turn Orders" data-group="Playing a Turn">
+  <p>Some factions have special rules or abilities that need a decision at the very start of the turn, before Initial
+    Orders. If one of your ships has a system or ability like this, you are given the chance to make that decision in
+    the Pre-Turn Orders phase.</p>
+  <p>The phase only happens when there is a decision to make; otherwise the turn starts straight away with Initial
+    Orders.</p>
+</section>
+
+<section data-key="initial-orders" data-title="Phase 1: Initial Orders" data-group="Playing a Turn">
+  <p class="fvd-lede">In Initial Orders you set each ship up for the turn:</p>
+  <ul>
+    <li><b>Electronic Warfare</b> - assign the ship's sensor rating to EW functions.</li>
+    <li><b>Ballistic weapons</b> - missiles, torpedoes and Energy Mines <b>must</b> be fired in Initial Orders.</li>
+    <li><b>Power</b> - turn systems off for extra power, and use spare power to boost systems such as the sensors or
+      engines.</li>
+  </ul>
+  <p>By default each ship keeps last turn's power settings, and all of its EW starts on Defensive EW.</p>
+  <p>When all your ships are done, click the green tick in the title bar and confirm; the title changes to Waiting for
+    turn. Once every player has committed, the Movement phase begins with the first ship in the initiative order.</p>
+
+  <h3 data-anchor="ew">Electronic Warfare (EW)</h3>
+  <figure class="fvd-fig fvd-fig--side">
+    <img src="img/docViewer/ew-buttons.jpg" alt="An enemy ship's tooltip with OEW buttons during Initial Orders">
+    <figcaption>Assigning OEW to an enemy ship.</figcaption>
+  </figure>
+  <p>Left-click one of your ships to select it. Its EW assignments are shown in its tooltip, and in a box to the right
+    of its SCS.</p>
+  <dl class="fvd-defs">
+    <dt>Defensive EW (DEW)</dt>
+    <dd>Makes your ship harder to hit, by everything except fighters.</dd>
+    <dt>Close Combat EW (CCEW)</dt>
+    <dd>A bonus to hit any fighters that come within 10 hexes.</dd>
+    <dt>Offensive EW (OEW)</dt>
+    <dd>Select an enemy ship to see its OEW buttons. OEW gives you a bonus to hit that ship, and just 1 point gives you a
+      lock-on. Without a lock-on an enemy ship is very hard to hit: weapon range penalties against it are doubled.</dd>
+  </dl>
+  <p>Share the ship's EW points between DEW, CCEW and each of its OEW lock-ons with the + and - buttons in the ship
+    tooltips.</p>
+  <div class="fvd-note fvd-note--tip">
+    <span class="fvd-note-label">EW tips</span>
+    <ul>
+      <li>It is wise to lock on to no more than 1-3 enemy ships at a time.</li>
+      <li>Some captains alternate between "turtling" (all EW on defence) and a "hard lock" (all EW as OEW on a single
+        target), especially at long range.</li>
+      <li>Others prefer a balanced approach: half on DEW, and 1-2 points of OEW on 2-3 targets.</li>
+      <li>A few points of CCEW are a good idea when enemy fighters are around, even just as a deterrent.</li>
+    </ul>
+  </div>
+
+  <h3 data-anchor="ballistics">Ballistic weapons</h3>
+  <ol class="fvd-steps">
+    <li>Right-click one of your ships or flights to open its SCS, and select one or more ballistic weapons.</li>
+    <li>Point at a target ship. If it is in arc and range, each weapon's % chance to hit is shown - it may still change
+      after EW assignments and defensive fire.</li>
+    <li>Left-click to fire. A red targeting reticle appears beside the target; your opponent sees it once Initial
+      Orders are over.</li>
+  </ol>
+  <figure class="fvd-fig">
+    <img src="img/docViewer/ballistic-launch.jpg" alt="Targeting a missile launch at an enemy ship">
+    <figcaption>Targeting ballistic weapons in Initial Orders.</figcaption>
+  </figure>
+  <p>For hex-targeted weapons (such as Narn Energy Mines), select the weapon and click the target hex. Only your team
+    sees the hex; the enemy just sees that something was fired.</p>
+  <p>The Ballistic Lines buttons on the right-hand side of the screen switch ballistic lines on and off. Enemy
+    ballistic attacks become visible once both players have committed their Initial Orders.</p>
+
+  <h3 data-anchor="power">Power management</h3>
+  <p>Managing power is optional, and new players should probably skip it at first: it is certainly useful when done
+    well, but it can backfire when done badly. If you want to try it:</p>
+  <ol class="fvd-steps">
+    <li>Right-click a ship to open its SCS.</li>
+    <li>Left-click systems to turn them off with their red power button. A lightning bolt marks a powered-down system,
+      and the Reactor's value goes up to match.</li>
+    <li>Use the + button on boostable systems, such as the Scanner or Engine, to give them extra power. Their number
+      goes up and the Reactor's reserve goes down.</li>
+  </ol>
+  <div class="fvd-note fvd-note--warn">
+    <span class="fvd-note-label">Negative power</span>
+    <p>If a ship's power rating is negative - from a Reactor critical hit, for example, or a ship built with a power
+      deficit such as the White Star - you cannot commit your Initial Orders until you have turned off enough systems to
+      bring the Reactor to 0 or more.</p>
+  </div>
+  <p>Fighter flights cannot adjust power or EW, so they have nothing to do in this phase unless they carry ballistic
+    weapons.</p>
+  <div class="fvd-note fvd-note--tip">
+    <span class="fvd-note-label">Power tips</span>
+    <ul>
+      <li>Prefer turning off weapons with a recharge rate of 1, for flexibility.</li>
+      <li>If you need to, turn off rear-facing weapons before forward ones.</li>
+      <li>By convention, Jump Engines are only powered down once they are more than 50% damaged, except in desperate
+        scenarios.</li>
+    </ul>
+  </div>
+</section>
+
+<section data-key="movement-phase" data-title="Phase 2: Movement Orders" data-group="Playing a Turn">
+  <p class="fvd-lede">Ships move one at a time, in initiative order. When it is your ship's turn, green arrows appear
+    around it for each move it can make - point at one to see what it does.</p>
+  <figure class="fvd-fig">
+    <img src="img/docViewer/movement-arrows.jpg" alt="A ship surrounded by its green movement arrows, with the thrust window open">
+    <figcaption>A ship's movement options.</figcaption>
+  </figure>
+  <p>The ship's tooltip shows its current movement figures too: turn cost, turn delay, pivot cost, roll cost,
+    acceleration cost, thrust remaining and so on.</p>
+  <ul>
+    <li>A ship must always move exactly its Speed in hexes - no more, no less. The large green arrow at its front
+      disappears once it has.</li>
+    <li>Anything that needs thrust (everything except moving straight forward) opens a window at the bottom of the
+      screen, where the thrust is assigned to your thrusters. Usually the game assigns it for you and you just click the
+      green arrow in the box - or the red cancel circle to think again.</li>
+    <li>Sometimes you must assign the thrust yourself, usually because there is a choice of thrusters (pivoting,
+      rolling), because some thrusters are damaged or destroyed, or because you are overthrusting - putting more thrust
+      through a thruster than its rating, which may critically damage it at the end of the turn.</li>
+    <li>Click the red Cancel Move icon behind your ship to take back your moves one at a time; right-click it to undo
+      the whole move.</li>
+  </ul>
+  <p>When the move is complete, a green tick appears in the title bar. Click it and confirm: the title shows Waiting for
+    turn, and the next ship in the initiative order takes its move.</p>
+
+  <h3 data-anchor="adjustspeed">Adjusting speed</h3>
+  <ul>
+    <li>Speed can only be changed before any other manoeuvre. Use the + and - near the straight green arrow at the
+      front of your ship, and watch the turn cost and turn delay change with it.</li>
+    <li>You cannot decelerate if your bow thrusters are destroyed, or accelerate if your aft thrusters are destroyed.
+      Pivoting can help, but it is not an easy manoeuvre to get right.</li>
+    <li>Once you make any manoeuvre (moving forward included) the + and - disappear, and you cannot change speed again
+      this turn - unless you take back all your moves with the Cancel Move icon and start again.</li>
+    <li>After adjusting speed you may move, slide, turn, pivot and/or roll.</li>
+  </ul>
+
+  <h3 data-anchor="movingforward">Moving forward</h3>
+  <ul>
+    <li>Click the large green arrow, usually at the front of your ship, to move forward one hex. Right-click it to move
+      forward as many hexes as you have left.</li>
+  </ul>
+
+  <h3 data-anchor="sliding">Sliding</h3>
+  <ul>
+    <li>Left-click one of the shorter green arrows to slide: the ship moves one hex diagonally forward without changing
+      its facing, for a thrust cost of 1/5 of its speed.</li>
+    <li>You cannot slide if the opposite side thruster is destroyed, and you must make a normal forward move before
+      sliding again.</li>
+  </ul>
+
+  <h3 data-anchor="turning">Turning</h3>
+  <ul>
+    <li>Click one of the single curved arrows to turn. You may assign extra thrust to shorten the turn delay this turn
+      leaves you with; extra thrust goes to the opposite side thruster first, then the aft thrusters.</li>
+    <li>The turn arrow disappears until you may turn again - that is, until you have moved forward as many hexes as your
+      current turn delay. Turn delay can carry over into the next game turn.</li>
+    <li>You cannot turn if the opposite side thruster is destroyed. If all your aft thrusters are destroyed, you can only
+      turn when your speed is low enough for the turn cost to be 1 (paid with the opposite side thruster).</li>
+    <li>When moving backwards, use your bow thrusters in place of the aft thrusters for turning.</li>
+  </ul>
+
+  <h3 data-anchor="pivoting">Pivoting</h3>
+  <ul>
+    <li>A pivot changes a ship's facing without changing its direction of movement. Click the two overlapping curved
+      green arrows in the direction you want to pivot, then assign thrust by hand to thrusters on two adjacent sides -
+      once you pick one thruster, the game tells you which other to use.</li>
+    <li>This starts a pivot of one hex side per turn, which carries on until you click the overlapping curved blue arrows
+      to stop it. A ship cannot pivot faster than that unless it is Agile, but it may start and stop a pivot in the same
+      turn.</li>
+    <li>While pivoting - and while pivoted 60 or 120 degrees, even with the pivot stopped - a ship cannot accelerate or
+      turn, and cannot decelerate unless it has a Gravitic engine (the Minbari, for example).</li>
+    <li>Once the ship has pivoted 180 degrees and stopped, or pivoted back to 0 degrees and stopped, it may accelerate,
+      decelerate and turn again.</li>
+    <li>Pivoting is usually used after the bow thrusters have been destroyed, to turn 180 degrees and decelerate with the
+      aft thrusters. It takes three turns to pivot all the way round, and you can only start decelerating on the fourth,
+      so it needs very careful planning - or desperation!</li>
+    <li>Fighters can save unused thrust for combat pivots in the Fire Orders phase, to change direction after the
+      Movement phase - but each pivot then costs 2 thrust instead of 1.</li>
+  </ul>
+
+  <h3 data-anchor="rolling">Rolling</h3>
+  <ul>
+    <li>Click the circular arrow behind the ship to start a roll, and the blue icon to stop it. A roll takes a whole turn
+      unless the ship is Agile, so its sides do not swap until the next turn.</li>
+    <li>While rolling, a ship swaps its port and starboard facings every turn. It cannot normally turn, pivot or slide,
+      but it can change speed.</li>
+    <li>A ship can make an Emergency Roll while pivoting if it has to, but it is risky: it forces a critical roll on the
+      ship's C&amp;C.</li>
+  </ul>
+
+  <h3 data-anchor="jinking">Jinking (fighters only)</h3>
+  <ul>
+    <li>A fighter flight has a jagged "lightning bolt" trailing its icon, with + and - buttons. Use + to assign thrust to
+      jinking.</li>
+    <li>Each level of jinking lowers the chance to hit the flight by 5% - but lowers the flight's own chance to hit by the
+      same amount.</li>
+    <li>Fighters in the same hex as enemy fighters are dogfighting: they ignore the defensive benefit of their target
+      flight's jinking (but not if they are jinking themselves).</li>
+  </ul>
+</section>
+
+<section data-key="prefiring-phase" data-title="Phase 3: Pre-Firing Orders" data-group="Playing a Turn">
+  <p>A few special systems - such as the Torvalus Transverse Drive - fire before all other weapons. If one of your ships
+    has such a system and it is ready to fire, you are given the chance to use it in Pre-Firing Orders.</p>
+  <p>They are fired exactly as described under <a href="#firing-phase">Firing Orders</a>, but their effects are fully
+    resolved before anyone gets to fire anything else.</p>
+</section>
+
+<section data-key="firing-phase" data-title="Phase 4: Firing Orders" data-group="Playing a Turn">
+  <p class="fvd-lede" data-anchor="howtofire">Firing takes three steps: select your weapons, check their chance to hit,
+    and target.</p>
+  <figure class="fvd-fig">
+    <img src="img/docViewer/fire-orders.jpg" alt="Selected weapons and their chances to hit an enemy ship">
+    <figcaption>Selecting weapons and checking the odds.</figcaption>
+  </figure>
+
+  <h3 data-anchor="selectingweapons">Selecting weapons</h3>
+  <ul>
+    <li>Right-click one of your ships or flights to open its SCS. Pointing at a weapon shows its firing arc around the
+      ship, including its maximum effective range - handy for deciding which weapons to fire at which targets.</li>
+    <li>Click each weapon you want to fire, once; it turns blue. Or right-click a weapon to select every active weapon of
+      the same name.</li>
+  </ul>
+
+  <h3 data-anchor="hitchances">Chance to hit</h3>
+  <ul>
+    <li>Point at a target ship. Each selected weapon's % chance to hit is listed below the ship's information (you may
+      need to drag the map up to see it, depending on where the target is).</li>
+    <li>This is the actual chance to hit, allowing for the target's defensive EW, your offensive EW, the weapon's fire
+      control against that type of target, and the range penalty. Hover over it in the targeting tooltip for the full
+      breakdown. The only thing it leaves out is the enemy ship's defensive fire.</li>
+    <li>A negative chance to hit is shown as "- XX%". A weapon that does not have the target in arc, has no line of sight
+      or is out of range shows a message instead (such as "Not in arc"), and cannot fire at that target.</li>
+  </ul>
+
+  <h3 data-anchor="designatingfire">Targeting</h3>
+  <ul>
+    <li>Happy with the odds? Left-click the target reticle in the enemy ship's tooltip. Your selected weapons turn orange
+      to show they are assigned to fire.</li>
+    <li>From then on the chance to hit is no longer shown (except for Ballistic or Split Targeted weapons).</li>
+    <li>Repeat these steps for each weapon you want to fire this turn, at the same enemy or at different ones.</li>
+  </ul>
+
+  <h3 data-anchor="firingmode">Firing modes</h3>
+  <figure class="fvd-fig fvd-fig--side">
+    <img src="img/docViewer/firing-modes.jpg" alt="A multi-mode weapon in the SCS with its firing-mode letters">
+    <figcaption>Firing-mode letters on a weapon icon.</figcaption>
+  </figure>
+  <ul>
+    <li>Some weapons have alternative firing modes - a Battle Laser can fire in Raking or Piercing mode, for example.
+      Left-click such a weapon and letters appear at the top right of its icon.</li>
+    <li>Click the right-most letter to cycle through the modes.</li>
+  </ul>
+
+  <h3 data-anchor="defensivefire">Defensive fire</h3>
+  <ul>
+    <li>Weapons with an intercept rating and a 1-turn recharge that have not been assigned to fire will automatically
+      fire defensively at incoming enemy fire within their arcs. To see what was applied, hover over a "chance to hit"
+      with a dotted underline in the Combat Log.</li>
+    <li>Lasers and some other weapons cannot be intercepted. Particle weapons (pulse weapons included) and plasma weapons
+      can, as can most others. The <a href="faq.php#interception">FAQ</a> has the full rules.</li>
+  </ul>
+
+  <h3 data-anchor="combatpivots">Combat pivots</h3>
+  <ul>
+    <li>A fighter flight with thrust left over may make a Combat Pivot in the Fire Orders phase to bring its weapons to
+      bear - often on fighters that moved later in the initiative order.</li>
+    <li>Click the crossed curved green arrows in the direction you want to pivot; a pivot in combat usually costs 2
+      thrust instead of 1. Once you are facing the right way, assign fire orders as normal.</li>
+  </ul>
+
+  <h3>Finishing the turn</h3>
+  <ul>
+    <li>If you do not want to fire at all (everything is out of range or arc, say), just click the green tick at the top
+      of the screen - the game will not move on until you do.</li>
+    <li>Once all your ships and flights have their fire orders, click the green tick in the title bar and confirm; the
+      title shows Waiting for turn. As in the other phases, the game moves on once every player has committed - this
+      time to the next turn.</li>
+    <li>To see what happened, click <b>Replay</b>: Fiery Void takes you back to the previous turn and shows the Firing
+      phase as an animation. For a quicker look, the <b>COMBAT LOG</b> tab at the bottom of the screen lets you read
+      the firing log of earlier turns.</li>
+  </ul>
+</section>

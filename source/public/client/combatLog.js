@@ -954,6 +954,8 @@ window.combatLog = {
 
         incomingFire.forEach(function (fire) {
             if (fire.type === "intercept" || fire.type === "selfIntercept") return;
+            //A Meteor Defence declaration is not a shot: its result is told by the swarm's collision entry.
+            if (fire.type === "meteorDefence") return;
 
             const ship = gamedata.getShip(fire.shooterid);
             const weapon = shipManager.systems.getSystem(ship, fire.weaponid);

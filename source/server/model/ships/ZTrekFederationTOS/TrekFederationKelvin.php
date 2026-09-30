@@ -5,7 +5,7 @@ class TrekFederationKelvin extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 425;
-        $this->faction = "ZStarTrek (TOS) Federation";
+        $this->faction = "StarTrek (TOS) Federation";
         $this->phpclass = "TrekFederationKelvin";
         $this->imagePath = "img/ships/StarTrek/FederationKelvin.png";
         $this->shipClass = "Kelvin Destroyer";

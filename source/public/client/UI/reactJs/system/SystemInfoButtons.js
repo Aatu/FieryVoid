@@ -48,6 +48,15 @@ const Button = styled.div`
     user-select: none;
 `;
 
+//The comet drawn over the shields tells the Meteor Defence pair from the self-intercept pair.
+const MeteorGlyph = styled.span`
+    color: #ffd27a;
+    font-size: 16px;
+    line-height: 1;
+    text-shadow: black 0 0 3px, black 0 0 3px;
+    pointer-events: none;
+`;
+
 class SystemInfoButtons extends React.Component {
 	constructor(props) {
 		super(props);
@@ -274,6 +283,40 @@ class SystemInfoButtons extends React.Component {
 		weaponManager.removeSelfInterceptSingle(ship, system);
 		//if(system.canSplitShots) var finished = system.checkFinished(); //Do not close system info buttons if player can still selfintercept
 		//if(finished) webglScene.customEvent('CloseSystemInfo');
+	}
+
+	/*declare this weapon to defend against meteors this turn (Initial Orders) - METEOR_DEFENCE_PLAN.md*/
+	declareMeteorDefence(e) {
+		e.stopPropagation(); e.preventDefault();
+		const { ship, system } = this.props;
+		if (!canMeteorDefence(ship, system)) {
+			return;
+		}
+		weaponManager.onDeclareMeteorDefence(ship, system);
+		webglScene.customEvent('CloseSystemInfo');
+	}
+	/*...and every similar eligible weapon on the unit (every craft's, for a flight)*/
+	declareMeteorDefenceAll(e) {
+		e.stopPropagation(); e.preventDefault();
+		const { ship, system } = this.props;
+		weaponManager.onDeclareMeteorDefenceAll(ship, system);
+		webglScene.customEvent('CloseSystemInfo');
+	}
+
+	remMeteorDefence(e) {
+		e.stopPropagation(); e.preventDefault();
+		const { ship, system } = this.props;
+		if (!canRemMeteorDefence(ship, system)) {
+			return;
+		}
+		weaponManager.removeMeteorDefence(ship, system);
+		webglScene.customEvent('CloseSystemInfo');
+	}
+	remMeteorDefenceAll(e) {
+		e.stopPropagation(); e.preventDefault();
+		const { ship, system } = this.props;
+		weaponManager.removeMeteorDefenceAll(ship, system);
+		webglScene.customEvent('CloseSystemInfo');
 	}
 
 	/* Dead code: activation is rendered via the <SystemActivation> component (see render()),
@@ -576,6 +619,8 @@ class SystemInfoButtons extends React.Component {
 					<FiringModeSelector ship={ship} system={system} showModes={Boolean(canChangeFiringMode(ship, system))}>
 						{canSelfIntercept(ship, system) && <Button title="Allow interception (RMB = All systems selected)" onClick={this.declareSelfIntercept.bind(this)} onContextMenu={this.declareSelfInterceptAll.bind(this)} img="./img/addSelfIntercept.png"></Button>}
 						{canRemIntercept(ship, system) && <Button title="Remove an intercept order" onClick={this.remSelfIntercept.bind(this)} onContextMenu={this.remSelfIntercept.bind(this)} img="./img/remSelfIntercept.png"></Button>}
+						{canMeteorDefence(ship, system) && <Button title="Meteor Defence: commit this weapon to defend against meteors this turn - it cannot fire or intercept (RMB = all similar weapons)" onClick={this.declareMeteorDefence.bind(this)} onContextMenu={this.declareMeteorDefenceAll.bind(this)} img="./img/selfIntercept.png"><MeteorGlyph>☄</MeteorGlyph></Button>}
+						{canRemMeteorDefence(ship, system) && <Button title="Remove Meteor Defence (RMB = all similar weapons)" onClick={this.remMeteorDefence.bind(this)} onContextMenu={this.remMeteorDefenceAll.bind(this)} img="./img/remSelfIntercept.png"><MeteorGlyph>☄</MeteorGlyph></Button>}
 						{canRemoveFireOrderMulti(ship, system) && <Button title="Remove last fire order" onClick={this.removeFireOrderMulti.bind(this)} img="./img/unfiringSmall.png"></Button>}
 						{canRemoveFireOrder(ship, system) && <Button title="Remove all fire orders (RMB = All weapons selected)" onClick={this.removeFireOrder.bind(this)} onContextMenu={this.removeFireOrderAll.bind(this)} img="./img/firing.png"></Button>}
 					</FiringModeSelector>
@@ -858,7 +903,8 @@ export const canDoAnything = (ship, system) => {
 		|| canOverload(ship, system) || canStopOverload(ship, system) || canBoost(ship, system)
 		|| canDeBoost(ship, system) || canAddShots(ship, system) || canReduceShots(ship, system) || canRemoveFireOrderMulti(ship, system)
 		|| canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system)
-		|| canSelfIntercept(ship, system) || canRemIntercept(ship, system) || canAA(ship, system) || canBFCP(ship, system) || canSpec(ship, system) || canTSShield(ship, system)
+		|| canSelfIntercept(ship, system) || canRemIntercept(ship, system) || canMeteorDefence(ship, system) || canRemMeteorDefence(ship, system)
+		|| canAA(ship, system) || canBFCP(ship, system) || canSpec(ship, system) || canTSShield(ship, system)
 		|| canThoughtShield(ship, system) || canTSShieldGen(ship, system) || canThoughtShieldGen(ship, system)
 		|| canSelfRepairList(ship, system) || canActivate(ship, system) || canDeactivate(ship, system) || canPowerCapacitor(ship, system) || canJumpEngineMenu(ship, system) || canSystemActivation(ship, system) || canSelectAllWeapons(ship, system)
 		|| canMineSettings(ship, system) || canProxMineSettings(ship, system) || canGraviticAugmenter(ship, system) || canMinorThoughtPulsar(ship, system);
@@ -972,7 +1018,7 @@ const canRemoveFireOrder = (ship, system) => system.weapon && weaponManager.hasF
    matches: see the isJumpingUnarmed line there. */
 const isDockingRiderUnit = (ship) => !!(window.shipManager && shipManager.isDockingRider(ship));
 
-const canChangeFiringMode = (ship, system) => system.weapon && !ship.mine && !system.stowed && !system.hideFiringModeSelector && !isDockingRiderUnit(ship) && system.name !== 'GraviticAugmenter' && system.name !== 'MinorThoughtPulsar' && ((gamedata.gamephase === 1 && system.ballistic) || (gamedata.gamephase === 5 && system.preFires) || (gamedata.gamephase === 3 && !system.ballistic && !system.preFires)) && (!weaponManager.hasFiringOrder(ship, system) || system.multiModeSplit) && (Object.keys(system.firingModes).length > 1);
+const canChangeFiringMode = (ship, system) => system.weapon && !ship.mine && !system.stowed && !system.hideFiringModeSelector && !isDockingRiderUnit(ship) && system.name !== 'GraviticAugmenter' && system.name !== 'MinorThoughtPulsar' && ((gamedata.gamephase === 1 && system.ballistic) || (gamedata.gamephase === 5 && system.preFires) || (gamedata.gamephase === 3 && !system.ballistic && !system.preFires)) && (!weaponManager.hasFiringOrder(ship, system) || system.multiModeSplit) && !weaponManager.hasMeteorDefence(ship, system) && (Object.keys(system.firingModes).length > 1);
 
 //can declare eligibility for interception: charged, recharge time >1 turn, intercept rating >0, no firing order
 const canSelfIntercept = (ship, system) => system.weapon && !isDockingRiderUnit(ship) && weaponManager.canSelfInterceptSingle(ship, system);
@@ -986,7 +1032,14 @@ const canRemIntercept = (ship, system) => system.weapon && system.canSplitShots 
    is reason enough to draw it. The grid's own gate (canChangeFiringMode) still decides showModes,
    which is what keeps the "Select Firing Mode" header off a box that is only hosting buttons. */
 const canWeaponMenu = (ship, system) => canChangeFiringMode(ship, system) || canSelfIntercept(ship, system)
-	|| canRemIntercept(ship, system) || canRemoveFireOrderMulti(ship, system) || canRemoveFireOrder(ship, system);
+	|| canRemIntercept(ship, system) || canMeteorDefence(ship, system) || canRemMeteorDefence(ship, system)
+	|| canRemoveFireOrderMulti(ship, system) || canRemoveFireOrder(ship, system);
+
+/* METEOR_DEFENCE_PLAN.md - declare, or withdraw, a weapon's defence against meteors. Initial Orders only,
+   and only while a Meteor Swarm is on the map; weaponManager holds the rules. Both sit in the same box as
+   the intercept pair, which is the closest thing they are. */
+const canMeteorDefence = (ship, system) => system.weapon && weaponManager.canDeclareMeteorDefence(ship, system);
+const canRemMeteorDefence = (ship, system) => system.weapon && weaponManager.canRemoveMeteorDefence(ship, system);
 
 //GraviticAugmenter excluded: its Activate/Deactivate lives in its own green menu, not the generic SystemActivation box.
 //jumpEngine joins the exclusions: its activation pair is the Maintain toggle, which JumpEngineMenu

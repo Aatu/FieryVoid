@@ -69,7 +69,7 @@ const CritRow = styled.div`
     align-items: center;
     justify-content: space-between;
     gap: 6px;
-    padding: 2px 8px;
+    padding: 3px 8px 3px 10px;
     font-size: 11px;
     color: ${theme.colors.warningSoft};
     user-select: none;
@@ -170,7 +170,7 @@ const AddRow = styled.div`
     display: flex;
     align-items: center;
     gap: 4px;
-    padding: 3px 8px 4px;
+    padding: 4px 8px 6px 10px;
 `;
 
 const AddSelect = styled.select`
@@ -179,20 +179,25 @@ const AddSelect = styled.select`
       it claiming its longest option's width once the menu's max-width has bounded it.*/
     min-width: 0;
     width: 100%;
-    height: 18px;
+    height: 22px;
     box-sizing: border-box;
-    padding: 0 2px;
+    margin: 0;
+    padding: 0 4px;
     font-family: inherit;
-    font-size: 10px;
+    font-size: 11px;
     color: ${MENU_CHROME.text};
-    background-color: ${MENU_CHROME.well};
+    /*the lobby's own input fill (.lb-input), not the number well*/
+    background-color: ${MENU_CHROME.btnBg};
     /*Takes the section's ink like the tickers above it - it is the widest control in the
       section, so leaving it on the chassis border was the one thing that still read as
       unpainted once the tickers went rust.*/
     border: 1px solid ${SECTION_INK.crit.rail};
+    border-radius: 2px;
     outline: none;
+    cursor: pointer;
 
     &:focus { border-color: ${SECTION_INK.crit.btnText}; }
+    &:disabled { cursor: default; }
 `;
 
 const AllToggle = styled.label`

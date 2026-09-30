@@ -11,7 +11,9 @@ class EwButtons extends React.Component {
         this.state = {
             losToggled: false,
             hexToggled: false,
-            soundToggled: true,
+            // NOT a hard-coded true: a page that opens straight into replay may already have
+            // been muted by the OPTIONS tab preference before this component mounted.
+            soundToggled: gamedata.playAudio !== false,
             bgToggled: false,
             ebToggled: false,
             fbToggled: false,

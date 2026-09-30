@@ -5,7 +5,7 @@ class KlingonKTochShuttle extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 35 *6; //for 6
-        $this->faction = "ZStarTrek Klingon";
+        $this->faction = "StarTrek Klingon";
         $this->phpclass = "KlingonKTochShuttle";
         $this->shipClass = "K'Toch Shuttle Flight";
         $this->imagePath = "img/ships/StarTrek/KlingonKTochShuttle.png";

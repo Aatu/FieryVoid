@@ -112,8 +112,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $action = $_POST["action"];
         
         if ( $action == 'takeslot' && isset($_POST["gameid"]) && isset($_POST["slotid"])){
-            Manager::takeSlot($_SESSION["user"], $_POST["gameid"], $_POST["slotid"]);
-            $ret = Manager::getTacGamedataJSON($_POST["gameid"], $_SESSION["user"], -1, 0, -1, true);
+            // A private game (CREATE_GAME_GAMELOBBY_REDESIGN_PLAN.md Stage 8): no slot until the
+            // player has entered its password on gamelobby.php (or already holds a slot there).
+            if (Manager::isGameLocked($_SESSION["user"], $_POST["gameid"])) {
+                $ret = json_encode(array('error' => 'This game is private. Open it again from the Games page and enter its password to take a slot.'));
+            } else if (!Manager::takeSlot($_SESSION["user"], $_POST["gameid"], $_POST["slotid"])) {
+                // Taken by another player (perhaps a moment ago), or the game has started.
+                $ret = json_encode(array('error' => 'That slot cannot be taken: another player has it, or the game has already started.'));
+            } else {
+                $ret = Manager::getTacGamedataJSON($_POST["gameid"], $_SESSION["user"], -1, 0, -1, true);
+            }
         }
 		
 		if ($action == 'leaveslot' && isset($_POST["slotid"]) && isset($_POST["gameid"])){

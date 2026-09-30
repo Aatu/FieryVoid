@@ -363,6 +363,21 @@
   color: var(--fv-accent);
 }
 
+/* A password-protected game in Join Games (Stage 8): the lobby's private padlock yellow. */
+.fv-tag--private {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--fv-warn);
+}
+
+.fv-tag-icon {
+  flex: none;
+  width: 7px;
+  height: 8.5px;
+  margin-top: -1px;
+}
+
 /* Only Recent Games builds a "done" tag, so this needs no scoping. Outlined like the other
    quiet tags — a filled red would out-shout the YOU tag on the same row. */
 .fv-tag--done {

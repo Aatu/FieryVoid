@@ -5,7 +5,7 @@ class AndorianKumariCommand extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 525;
-	$this->faction = "ZStarTrek (early) Federation";
+	$this->faction = "StarTrek (early) Federation";
         $this->phpclass = "AndorianKumariCommand";
         $this->imagePath = "img/ships/StarTrek/AndorianCruiser.png";
         $this->shipClass = "Andorian Kumari Command Cruiser";

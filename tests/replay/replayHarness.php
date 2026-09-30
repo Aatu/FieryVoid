@@ -430,6 +430,7 @@ class ReplayHarness {
                 if ($fire->turn != $turn) continue;
                 // mirror Firing::preparePreFiring's skip rules
                 if ($fire->type === 'intercept' || $fire->type === 'selfIntercept' || $fire->type === 'ballistic') continue;
+                if (Firing::isDeclarationOnly($fire)) continue; // a meteor defence declaration - not a shot
                 if ($fire->targetid === null || $fire->targetid <= 0) continue; // hex-targeted / no target
                 $weapon = $ship->getSystemById($fire->weaponid);
                 if (!($weapon instanceof Weapon)) continue;
@@ -686,6 +687,8 @@ class ReplayHarness {
                 if ($fire->turn != $turn) continue;
                 // intercepts never allocate damage of their own; mirrors Firing::fireWeapons
                 if ($fire->type === 'intercept' || $fire->type === 'selfIntercept') continue;
+                // a meteor defence declaration's shotshit counts meteors BLOCKED, not hits it scored
+                if (Firing::isDeclarationOnly($fire)) continue;
                 if ((int)$fire->shotshit <= 0) continue;             // nothing landed
                 if ($fire->targetid === null || $fire->targetid <= 0) continue; // hex-targeted
                 $weapon = $ship->getSystemById($fire->weaponid);

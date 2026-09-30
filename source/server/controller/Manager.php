@@ -175,6 +175,32 @@ class Manager{
         return null; // Always return *something*
     }
     
+    /* The lobby's scenario, as array('scenario' => ..., 'inServiceDate' => ...):
+       - scenario: the Scenario Description, tac_game.scenario as its stored JSON TEXT, or null for a
+         game created before it existed (the lobby then parses `description` as it always did). Kept
+         as text - the page hands it to scenarioCard.normalise - so the JSON_NUMERIC_CHECK on every
+         gamedata payload can never rewrite the player's free text inside it (plan §12.1 trap 1).
+       - inServiceDate: the In-Service Date cutoff (tac_game.in_service_date), an int year, or null
+         for none - which the lobby's ISD ship filter is locked to (plan §4.4).
+       Read on their own, not through TacGamedata: neither changes after creation, so the lobby needs
+       them once per page load rather than on every poll, and game.php never needs them. */
+    public static function getGameScenario($gameid){
+        $none = array('scenario' => null, 'inServiceDate' => null);
+        try {
+            self::initDBManager();
+            $row = self::$dbManager->getGameScenario((int)$gameid);
+            $scenario = $row['scenario'];
+            $inServiceDate = ($row['inServiceDate'] === null) ? 0 : (int)$row['inServiceDate'];
+            return array(
+                'scenario' => (is_string($scenario) && trim($scenario) !== '') ? $scenario : null,
+                'inServiceDate' => ($inServiceDate > 0) ? $inServiceDate : null
+            );
+        } catch(Exception $e) {
+            Debug::error($e);
+            return $none; //the lobby falls back to the description, as for an old game, and no cutoff
+        }
+    }
+
     public static function getGameLobbyDataJSON($userid, $gameid){
         try {
             $timestamp = 0;
@@ -370,6 +396,9 @@ class Manager{
         $background = $data["background"];
         $gamespace = $data["gamespace"];
         $description = $data["description"];
+        $scenario = self::cleanScenario($data["scenario"] ?? null);
+        $inServiceDate = self::cleanInServiceDate($data["inServiceDate"] ?? null);
+        $passwordHash = self::hashGamePassword($data["password"] ?? null);
         $slots = array();
         $pointsA = $data["slots"][0]["points"];
         $poinstB = $data["slots"][1]["points"];
@@ -382,9 +411,13 @@ class Manager{
         try {
             self::initDBManager();
             self::$dbManager->startTransaction();
-            $gameid = self::$dbManager->createGame($gamename, $background, $slots, $userid, $gamespace, $description, json_encode($rules));
+            $gameid = self::$dbManager->createGame($gamename, $background, $slots, $userid, $gamespace, $description, json_encode($rules), $scenario, $inServiceDate, $passwordHash);
             //SystemData::initSystemData(0, $gameid);
-            self::takeSlot($userid, $gameid, 1);
+            //No password asked: a private game's password is checked in slot.php, not in takeSlot,
+            //and the creator needs none for their own game. A brand-new game's slot 1 is always free,
+            //so a refusal means something is badly wrong - roll the game back rather than leave it empty.
+            if (!self::takeSlot($userid, $gameid, 1))
+                throw new Exception("Manager::createGame: could not seat the creator in slot 1 of game $gameid");
             self::$dbManager->endTransaction(false);
             return $gameid;
         }
@@ -395,13 +428,156 @@ class Manager{
     
     }
     
+    /* The submitted Scenario Description -> the JSON text stored in tac_game.scenario, or null
+       when there is none (the Fleet Builder sends none). CREATE_GAME_GAMELOBBY_REDESIGN_PLAN.md
+       §3.3 / §12.
+
+       Known keys only - the list is scenarioCard.FIELDS in client/UI/scenarioCard.js, which is
+       the storage contract; keep the two in step. Every value is stored as a trimmed string and
+       capped, and it is rendered escaped, so option values are NOT checked against the dropdown
+       lists: an unknown one costs nothing, and a new option needs no server change.
+
+       json_encode's DEFAULT flags on purpose: they escape every non-ASCII character as \uXXXX,
+       and the connection charset is 3-byte utf8, which cannot store an emoji.
+       INVALID_UTF8_SUBSTITUTE keeps one bad byte from dropping the whole scenario. */
+    private static $scenarioKeys = array(
+        'tier', 'tierCustom', 'fleetRequirements', 'fleetRequirementsCustom', 'customFactions',
+        'forbiddenFactions', 'enhancements', 'enhancementsPoints', 'mapBorders',
+        'victoryConditions', 'victoryCustom', 'additionalInfo'
+    );
+
+    public static function cleanScenario($raw){
+        if (!is_array($raw)) return null;
+
+        $clean = array('v' => 1);
+        foreach (self::$scenarioKeys as $key) {
+            if (!isset($raw[$key]) || !is_scalar($raw[$key])) continue;
+
+            $value = trim((string)$raw[$key]);
+            if ($key === 'enhancementsPoints') {
+                $value = substr(preg_replace('/[^0-9]/', '', $value), 0, 6);
+            } else {
+                $value = mb_substr($value, 0, ($key === 'additionalInfo') ? 4000 : 200);
+            }
+            if ($value !== '') $clean[$key] = $value;
+        }
+        if (count($clean) === 1) return null; //only the version
+
+        $json = json_encode($clean, JSON_INVALID_UTF8_SUBSTITUTE);
+        return ($json === false) ? null : $json;
+    }
+
+    /* The submitted In-Service Date -> tac_game.in_service_date: a year of one to four digits, or
+       null for no cutoff (blank, 0, anything else - and the Fleet Builder, which sends none). The
+       lobby locks its ISD ship filter to it. CREATE_GAME_GAMELOBBY_REDESIGN_PLAN.md §3.2 / §4.4. */
+    public static function cleanInServiceDate($raw){
+        if (!is_scalar($raw) || is_bool($raw) || !preg_match('/^\s*(\d{1,4})\s*$/', (string)$raw, $match)) return null;
+        $year = (int)$match[1];
+        return ($year > 0) ? $year : null;
+    }
+
+    /* ── Private games (CREATE_GAME_GAMELOBBY_REDESIGN_PLAN.md §3.2, Stage 8) ─────────────────────
+       A private game has a password (tac_game.password_hash, password_hash(PASSWORD_DEFAULT) - the
+       player accounts' scheme). Until a player enters it, gamelobby.php shows them a password form
+       instead of the lobby and slot.php refuses them a slot. A player who holds a slot in the game
+       (its creator, from the start) never needs it; one who has entered it keeps the game unlocked
+       for the rest of their session ($_SESSION['unlockedGames']).
+       The hash is read by getGameAccess alone and never leaves this class: not into TacGamedata,
+       the games list (only a "private" flag) or any payload (plan §12.1 trap 5).
+       It guards the lobby PAGE and the slot, not the data: chatdata.php and gamedata.php serve any
+       game to any logged-in player, as they always have (spectating). */
+    const GAME_PASSWORD_MAX_LENGTH = 64;
+    const GAME_PASSWORD_TRIES = 10;          //wrong passwords per player and game...
+    const GAME_PASSWORD_TRIES_WINDOW = 900;  //...in this many seconds (APCu; none without it)
+
+    /* The password as it is compared: trimmed - it is passed on by hand, and a space picked up in
+       a copy and paste must not lock anybody out - and cut to 64 characters, and to bcrypt's 72
+       bytes. Creation and entry both come through here, so a longer paste still matches. '' = none. */
+    public static function normaliseGamePassword($raw){
+        if (!is_string($raw)) return '';
+        $password = mb_substr(trim($raw), 0, self::GAME_PASSWORD_MAX_LENGTH);
+        while (strlen($password) > 72) $password = mb_substr($password, 0, -1);
+        return $password;
+    }
+
+    //The submitted password -> the hash stored for a private game, or null for a public one.
+    public static function hashGamePassword($raw){
+        $password = self::normaliseGamePassword($raw);
+        return ($password === '') ? null : password_hash($password, PASSWORD_DEFAULT);
+    }
+
+    /* The game as far as its lobby's door is concerned, or null when there is no such game:
+       array('name', 'status', 'private', 'member', 'locked') - `locked` = private, and this player
+       neither holds a slot in it nor has entered its password this session. */
+    public static function getGameAccess($userid, $gameid){
+        if (!is_numeric($userid) || !is_numeric($gameid)) return null;
+        self::initDBManager();
+        $row = self::$dbManager->getGameAccess((int)$gameid, (int)$userid);
+        if (!$row) return null;
+
+        $private = ($row['passwordHash'] !== null);
+        return array(
+            'name' => $row['name'],
+            'status' => $row['status'],
+            'private' => $private,
+            'member' => $row['member'],
+            'locked' => $private && !$row['member'] && !self::isGameUnlocked($gameid)
+        );
+    }
+
+    public static function isGameLocked($userid, $gameid){
+        $access = self::getGameAccess($userid, $gameid);
+        return $access !== null && $access['locked'];
+    }
+
+    public static function isGameUnlocked($gameid){
+        return !empty($_SESSION['unlockedGames'][(int)$gameid]);
+    }
+
+    /* Remember that this player entered the game's password. ⚠️ Writes $_SESSION: the caller must
+       not have closed the session yet (gamelobby.php closes it early on purpose). */
+    public static function markGameUnlocked($gameid){
+        if (!isset($_SESSION['unlockedGames']) || !is_array($_SESSION['unlockedGames'])) {
+            $_SESSION['unlockedGames'] = array();
+        }
+        $_SESSION['unlockedGames'][(int)$gameid] = true;
+    }
+
+    /* A password typed into gamelobby.php's form: 'ok' (right, or the game is not private),
+       'wrong', or 'throttled' - too many wrong ones lately, and this one was not even checked. */
+    public static function checkGamePassword($userid, $gameid, $raw){
+        if (!is_numeric($userid) || !is_numeric($gameid)) return 'wrong';
+        self::initDBManager();
+        $row = self::$dbManager->getGameAccess((int)$gameid, (int)$userid);
+        if (!$row) return 'wrong';
+        if ($row['passwordHash'] === null) return 'ok';
+
+        $key = self::getCachePrefix() . 'gamepassword_fail_' . (int)$gameid . '_' . (int)$userid;
+        $useApcu = function_exists('apcu_fetch');
+        if ($useApcu && (int)apcu_fetch($key) >= self::GAME_PASSWORD_TRIES) return 'throttled';
+
+        $password = self::normaliseGamePassword($raw);
+        if ($password !== '' && password_verify($password, $row['passwordHash'])) {
+            if ($useApcu) apcu_delete($key);
+            return 'ok';
+        }
+
+        if ($useApcu) {
+            apcu_add($key, 0, self::GAME_PASSWORD_TRIES_WINDOW); //the window starts at the first miss
+            apcu_inc($key);
+        }
+        return 'wrong';
+    }
+
+    //True, or false when the slot cannot be taken (DBManager::takeSlot: no such slot, the game has
+    //left its lobby, or another player holds it).
     public static function takeSlot($userid, $gameid, $slot){
-        
+
         try {
             self::initDBManager();
             //self::$dbManager->startTransaction();
             $ret = self::$dbManager->takeSlot($userid, $gameid, $slot);
-            self::touchGame($gameid);
+            if ($ret) self::touchGame($gameid);
             return $ret;
             //self::$dbManager->endTransaction();
             
@@ -1107,6 +1283,22 @@ class Manager{
                         $entry[2], $entry[4], (int)$entry[3], 0, (float)$entry[5], 0, (int)$entry[0], $entry[1]
                     );
                     $storedSysEnhTotal += (float)$entry[5];
+                }
+                /* Repeater Gunsights moved from the ship-level GUNSIGHT to one SYS_RGSGT per
+                   Particle Repeater (2026-09-27). A fleet saved before carries the old row, which
+                   no ship-level option matches any more - so it would drop, with its points still
+                   inside pointCostEnh. Carried across instead, at the same 12 a repeater: counted
+                   into $storedSysEnhTotal, so the split below takes them out of pointCostEnh. */
+                foreach ($shipEnh as $enhEntry) {
+                    if ($enhEntry[0] !== 'GUNSIGHT' || (int)$enhEntry[1] < 1) continue;
+                    $legacyRows = Enhancements::legacyRepeaterGunsightRows($ship);
+                    foreach ($legacyRows as $legacyRow) {
+                        $storedSysEnh[] = $legacyRow;
+                        $storedSysEnhTotal += (float)$legacyRow[4];
+                    }
+                    if ($legacyRows) {
+                        $sysEnhNotices[] = $ship->name . ': Repeater Gunsights are now bought per Particle Repeater - moved onto each of its repeaters.';
+                    }
                 }
                 if ($storedSysEnh) {
                     $cleanSysEnh = Enhancements::sanitiseSystemEnhancements($ship, $storedSysEnh);

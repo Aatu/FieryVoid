@@ -2513,7 +2513,8 @@ class BaseShip {
 			//mark if not a combat unit!
 			if(!$this->isCombatUnit) $this->notes .= '<br>Non-combatant!';
 			//required hangar
-			if($this->hangarRequired!='') { 
+			//$noHangarRequired is declared on FighterFlight only; LCVs/gunboats set hangarRequired too, so use empty()
+			if($this->hangarRequired != '' && empty($this->noHangarRequired)) {
                 $this->notes .= '<br>Requires hangar space: ' . ucfirst(strtolower($this->hangarRequired));		
 				if($this->unitSize!=1){
                     $slotSize = 1 / $this->unitSize;

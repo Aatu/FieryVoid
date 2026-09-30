@@ -56,6 +56,10 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
   <!-- Page-scoped: the games panel + Recent Games window. Kept out of gamesNew.css,
        which 12 pages share. -->
   <link href="<?php echo AssetLoader::getAssetUrl('styles/gamesPanel.css'); ?>" rel="stylesheet" type="text/css">
+  <!-- The DATA ARCHIVE window: the Starter Guide, FAQ, Factions & Tiers and Ammo & Options links
+       below open it over this page instead of a new tab (client/UI/docViewer.js). -->
+  <link href="<?php echo AssetLoader::getAssetUrl('styles/docViewer.css'); ?>" rel="stylesheet" type="text/css">
+  <script defer src="<?php echo AssetLoader::getAssetUrl('client/UI/docViewer.js'); ?>"></script>
   <script src="<?php echo AssetLoader::getAssetUrl('client/lib/jquery-4.0.0.min.js'); ?>"></script>
   <script src="client/games.js"></script>
   <script src="client/ajaxInterface.js"></script>
@@ -152,10 +156,11 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       <h3>Latest Updates</h3>
       <ul class="updates-list">
         <!--<li style="--update-colour: #e05b52;"><span class="update-title">Merry Christmas from Fiery Void!</span></li>-->
-        <li><span class="update-title">WALKERS OF SIGMA-957</span>Search the galaxy and explore new ways to destroy your opponenets with this new Ancient faction!</li>         
-        <li><span class="update-title">THE TRIAD</span>New bizarre and terrifying Ancient faction for you to enjoy, courtesy of Geoffrey (with thanks also to PaulUK for images).</li>        
-        <li><span class="update-title">Hyperspace Mechanics</span>A wide number of improvements made to a number of Hyperspace Reinforcements mechanics, more details in FAQ.</li>
-        <li><span class="update-title">Info Panel Redesign</span>Combat Log, Fleet Info and Declarations tabs are more user friendly, new Options tab and Panel height can now be manually resized.</li>                                    
+        <li><span class="update-title">Create Game/Fleet Selection Redesign</span>Improvements to UI and features in Create Game and Fleet Selections screens.</li>        
+        <li><span class="update-title">Walker of Sigma-957</span>Search the galaxy and explore new ways to destroy your opponents with this new Ancient faction!</li>         
+        <li><span class="update-title">The Triad</span>New bizarre and terrifying Ancient faction for you to enjoy, courtesy of Geoffrey (with thanks also to PaulUK for images).</li> 
+        <li><span class="update-title">Nexus: Mine Warfare</span>Mines and minesweepers added for the Nexus Brixadii, Dalithorn, Makar, and Velrax factions (thanks to Geoffrey).</li>             
+        <li><span class="update-title">Hyperspace Mechanics</span>A wide number of improvements made to a number of Hyperspace Reinforcements mechanics, more details in FAQ.</li>                                   
         <li><span class="update-title">Discord Notifications</span>You can now add your Discord account details in 'Set-Up Discord Notifications' to get a message when it's your turn. See Fiery Void FAQ for details!</li>
         <!--<li><span class="update-title">General Fixes</span>Many other small bug fixes/updates. Thanks for the reports!</li>-->
       </ul>

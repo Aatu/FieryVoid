@@ -5,7 +5,7 @@ class KlingonD7 extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 565;
-	$this->faction = "ZStarTrek Klingon";
+	$this->faction = "StarTrek Klingon";
     $this->phpclass = "KlingonD7";
     $this->imagePath = "img/ships/StarTrek/KlingonD7.png";
     $this->shipClass = "Klingon D7 Cruiser";

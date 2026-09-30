@@ -5,7 +5,7 @@ class TrekSulibanCellshipSmall extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 25 *6; //for 6; a bit add-on for not requiring carrier
-        $this->faction = "ZStarTrek (early) Suliban";
+        $this->faction = "StarTrek (early) Suliban";
         $this->phpclass = "TrekSulibanCellshipSmall";
         $this->shipClass = "Suliban Small Cellships";
         $this->imagePath = "img/ships/StarTrek/SulibanCellship.png";

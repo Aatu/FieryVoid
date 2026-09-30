@@ -966,10 +966,11 @@ window.ajaxInterface = {
                     return;
                 }
 
-                // ✅ Handle application-level errors
+                // ✅ Handle application-level errors - slot.php's own refusals are written for the
+                // player (a private game's slot before its password), so show them as they are.
                 if (response && response.error) {
                     console.warn("Slot action error:", response.error);
-                    ajaxInterface.errorAjax(xhr, textStatus, response.error);
+                    window.confirm.error($("<div>").text(String(response.error)).html(), function () { });
                     return;
                 }
 

@@ -28,7 +28,8 @@ import {
 const Total = styled.div`
     display: flex;
     justify-content: flex-end;
-    padding: 2px 8px 4px;
+    padding: 1px 8px 5px 10px;
+    font-family: ${theme.fonts.mono};
     font-size: 10px;
     color: ${theme.colors.enhText};
     opacity: 0.85;

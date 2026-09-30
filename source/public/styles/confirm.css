@@ -16,7 +16,9 @@
  * across 5 values, and they are overwhelmingly signals rather than chrome - amber
  * rgb(224,185,57), red #ff7070, accent blue rgb(106,195,255), plus #DEFBFF and #bdbdbd
  * for text. All of them were chosen to read on `black` and all still read on --fv-well,
- * which is barely different in luminance, so the reskin does not strand them.
+ * which is barely different in luminance, so the reskin does not strand them. (The amber
+ * and the accent blue were the buy dialogs' "(OPTION)" / "(AMMO)" prefixes; the
+ * Create Game & Gamelobby redesign's Stage 9 dropped both - see .buyDialog at the foot.)
  */
 .confirm {
     padding: 10px 10px 10px 10px;
@@ -57,219 +59,32 @@
     background: var(--fv-scroll-thumb-hover);
 }
 
-.confirm .missileselect {
-    /*border: 1px solid #defbff44; */
-    border: 1px solid #496791;
-    color: #DEEBFF;
-    padding: 3px 5px;
-    position: relative;
-    margin-top: 8px;
-    margin-bottom: 10px;
-    background-color: #123D73 !important;
-    -moz-box-shadow: 0px 0px 5px #0099ff;
-    -webkit-box-shadow: 0px 0px 5px #0099ff;
-    box-shadow: 0px 0px 5px #123D73;
-}
-
-.confirm .missileSelectItem {
-    /*padding-left: 5em;*/
-}
-
-.missileSelectItem {
-    text-align: left;
-    vertical-align: middle;
-    margin-bottom: 8px;
-}
-
-.missileSelectItem .selectText {
-    padding-left: 10px;
-    display: inline-block;
-    width: 83%;
-    vertical-align: middle;
-}
-
-.missileSelectItem .selectButtons {
-    vertical-align: middle;
-    display: inline-block;
-}
-
-.missileSelectItem .selectAmount {
-    display: inline-block;
-    width: 7%;
-    border: 1px solid #496791;
-    background-color: #072731;
-    padding: 3px 5px;
-    text-align: right;
-    vertical-align: middle;
-}
-
-/*
- * Choice-valued enhancement option (currently only the Chameleon disguise): a dropdown takes the
- * place of the +/- spinner, so the value box has to hold a ship class name rather than a two-digit
- * count. Applied by confirm.applyEnhancementChoiceWidget, which adds .enhChoiceItem to the row.
- *
- * The dropdown ends on the same right edge as the +/- spinners of the counted rows above and
- * below it, so the stack reads as one column. That falls out of the arithmetic rather than being
- * eyeballed: the row is .selectText | .selectAmount | .selectButtons in that order, so the
- * dropdown has to absorb the spinner column's 14px (.plusButton is 12px wide + 1px border each
- * side). 45% + 45% = the counted row's 83% + 7%, and the spinner column is emptied by collapsing
- * it to zero width while LEAVING IT IN FLOW - display:none would also swallow the inline
- * whitespace gap beside it and pull the dropdown 4-ish px left of the spinners.
- * .selectAmount keeps its inherited border and padding so the two box models match exactly.
- */
-.missileSelectItem.enhChoiceItem .selectText {
-    width: 45%;
-}
-
-.missileSelectItem.enhChoiceItem .selectAmount {
-    width: calc(45% + 14px);
-    text-align: left;
-}
-
-.missileSelectItem.enhChoiceItem .selectButtons {
-    visibility: hidden;
-    width: 0;
-    overflow: hidden;
-}
-
-.missileSelectItem.enhChoiceItem .selectAmount select {
-    width: 100%;
-    padding: 0;
-    border: none;
-    background-color: transparent;
-    color: #DEEBFF;
-    font: inherit;
-}
-
-/* The open dropdown list is drawn by the OS on a white background, so its text has to be dark -
-   the light colour above applies to the closed control sitting on the dark .selectAmount box. */
-.missileSelectItem.enhChoiceItem .selectAmount select option {
-    color: #000;
-    background-color: #fff;
-}
-
-.fighterAmount {
-    display: inline-block;
-    width: 7%;
-    border: 1px solid #496791;
-    background-color: #072731;
-    padding: 3px 5px;
-    text-align: right;
-    vertical-align: middle;
-}
-
-.totalUnitCost {
-    font-weight: bold;
-    display: inline-block;
-    text-align: right;
-    margin-left: 70px;
-    margin-top: 10px;
-    width: 77%;
-    vertical-align: middle;
-}
-
-.totalUnitCostText {
-    font-weight: bold;
-    display: inline-block;
-    text-align: right;
-    margin-right: 15px;
-    width: 77%;
-    vertical-align: middle;
-}
-
-.totalUnitCost .totalUnitCostAmount {
-    display: inline-block;
-    width: 9.5%;
-    border: 1px solid #496791;
-    background-color: #072731;
-    padding: 3px 5px;
-    text-align: right;
-    vertical-align: middle;
-}
-
-.missileSelectItem table {
-    border-spacing: 0px;
-    empty-cells: show;
-    display: inline-block;
-    vertical-align: middle;
-}
-
-.missileSelectItem table td {
-    padding: 0;
-    line-height: 0;
-}
-
-
-.missileSelectItem .minusButton {
-    display: block;
-    border: 1px solid #496791;
-    width: 12px;
-    height: 12px;
-    position: relative;
-    background-image: url(../img/minussquare.png);
-    cursor: pointer;
-}
-
-.missileSelectItem .plusButton {
-    display: block;
-    border: 1px solid #496791;
-    width: 12px;
-    height: 12px;
-    position: relative;
-    background-image: url(../img/plussquare.png);
-    cursor: pointer;
-    margin-bottom: 3px;
-}
-
-.confirm .missileSelectItem .combo input {
-    width: 92px;
-    background-color: #cfc;
-    height: 1.5em;
-    z-index: 0;
-}
-
-.confirm .missileSelectItem .combo ul {
-    padding: 1px;
-    border: 2px solid #ccc;
-    width: 89px;
-    background-color: #cfc;
-    position: absolute;
-    right: 3px;
-    top: 1.5em;
-    display: none;
-    z-index: 1;
-}
-
-.confirm .missileSelectItem .combo li {
-    display: block;
-    width: 100%;
-}
-
-.confirm .missileSelectItem .combo {
-    position: relative;
-    width: 190px;
-    text-align: left;
-    padding: 0;
-    margin: 0;
-}
-
-.confirm .missileSelectItem .combo * {
-    padding: 0;
-    margin: 0;
-}
-
+/* The shell confirm.confirm / error / confirmWithOptions / confirmOrSurrender / exception all
+   build on - so the lobby's Ready prompt and every game.php commit warning. It was a 3px red
+   border over 16px BOLD #c94b1d text, which made an ordinary "are you sure?" read as an alarm
+   (user, 2026-09-28). Now the site's window language, as .confirm.warning and .fleetDialog
+   already are: SCS well, SCS border, body text on the tokens. What IS a warning inside one
+   carries its own class (.prebattle-note-label below). */
 .confirm.error {
-    /*border: 1px solid #defbff44; */
-    border: 3px solid #812323;
-    color: #c94b1d;
+    background-color: var(--fv-well);
+    border: 2px solid var(--fv-line-scs);
+    color: var(--fv-text-dim);
     font-family: arial;
     font-size: 16px;
-    font-weight: bold;   
-    padding-top: 15px;     
+    padding-top: 15px;
+    font-weight: bold;    
 }
 
+/* The multi-value and hangar dialogs are ALSO built on .confirm.error and paint their own
+   skin over it, but took the old shell's 16px bold as their base text - which they keep. */
+.confirm.error.multi-value-confirm {
+    font-weight: bold;
+}
+
+/* Ship names were the one un-bolded thing in a bold sentence; with the sentence now normal
+   weight, they flip to carry the emphasis. */
 .confirm.error .ship-name {
-    color: rgba(255, 255, 255, 0.692);
+    color: var(--fv-text-bright);
     font-weight: normal;
 }
 
@@ -288,6 +103,85 @@
 .confirm .ship-name.clickable:hover {
     color: rgb(106, 195, 255);
     text-decoration-color: rgb(106, 195, 255);
+}
+
+/* confirm.error / confirm / confirmOrSurrender (.promptDialog): labelled buttons in place of the
+   ok.png / cancel.png icons (user, 2026-09-28). Confirm keeps its old place on the left and
+   Cancel on the right; a lone OK centres; the surrender icon sits between them. Green is the
+   buy dialog's purchase button, red the lobby's Leave Game (gameLobby.css .lb-btn--leave).
+   Arial, not --fv-display: game.php does not load Orbitron. */
+.confirm.promptDialog .ui {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin: 20px 10px 0 10px;
+}
+
+.confirm.promptDialog .ui .confirmok,
+.confirm.promptDialog .ui .confirmcancel {
+    position: static;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    height: auto;
+    min-width: 130px;
+    min-height: 28px;
+    margin: 0;
+    padding: 4px 16px;
+    font-family: arial;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.1px;
+    text-transform: uppercase;
+    background-image: none;
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+.confirm.promptDialog .ui .confirmok:only-child {
+    margin: 0 auto;
+}
+
+.confirm.promptDialog .ui .confirmok {
+    color: #e6f4e6;
+    background-color: rgba(60, 122, 60, 0.5);
+    border: 1px solid #66b266;
+}
+
+.confirm.promptDialog .ui .confirmok:hover {
+    color: #fff;
+    background-color: rgba(82, 179, 82, 0.6);
+    border-color: #8cd48c;
+}
+
+.confirm.promptDialog .ui .confirmcancel {
+    color: #f3dcd8;
+    background-color: rgba(122, 33, 33, 0.6);
+    border: 1px solid #a77272;
+}
+
+.confirm.promptDialog .ui .confirmcancel:hover {
+    color: #fff;
+    background-color: #8e2a2ae3;
+}
+
+.confirm.promptDialog .ui .surrender {
+    position: static;
+    flex: none;
+}
+
+.confirm.promptDialog .ui button:focus-visible {
+    outline: 2px solid var(--fv-accent);
+    outline-offset: 2px;
+}
+
+@media (pointer: coarse) {
+    .confirm.promptDialog .ui .confirmok,
+    .confirm.promptDialog .ui .confirmcancel {
+        min-height: 40px;
+    }
 }
 
 /* The "Are you sure you wish to COMMIT…" question line in the commit-confirm
@@ -1326,6 +1220,71 @@
     line-height: 1.5;
 }
 
+/* "Units Not Loaded" - the units a saved-fleet load left out (gamedata.showLeftOutNotice, through
+   confirm.fleetNoticeHtml). Each left-out unit is a row in the Fleet Checker report's "bad" look
+   (gameLobby.css .fc-line--bad): red rail, faint red tint, the name in red. */
+.confirm.fleetDialog .fleetNoticeLead {
+    font-weight: 700;
+    color: var(--fv-text-bright);
+}
+
+.confirm.fleetDialog .fleetDialogBody p.fleetNoticeLead,
+.confirm.fleetDialog .fleetDialogBody p.fleetNoticeReason {
+    margin-bottom: 10px;
+}
+
+.confirm.fleetDialog .fleetNoticeYear {
+    font-family: var(--fv-mono);
+    font-weight: 700;
+    color: var(--fv-text-bright);
+}
+
+/* A long list scrolls inside the window rather than pushing its Close button off the screen. */
+.confirm.fleetDialog .fleetNoticeList {
+    max-height: 45vh;
+    margin: 0 0 10px;
+    padding: 0;
+    overflow-y: auto;
+    list-style: none;
+}
+
+.confirm.fleetDialog .fleetNoticeItem {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 5px 8px;
+    background: rgba(224, 72, 63, 0.08);
+    border-left: 2px solid var(--fv-enemy-signal);
+}
+
+.confirm.fleetDialog .fleetNoticeItem + .fleetNoticeItem {
+    margin-top: 2px;
+}
+
+.confirm.fleetDialog .fleetNoticeName {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-weight: 700;
+    color: var(--fv-enemy);
+    overflow-wrap: anywhere;
+}
+
+/* The hull, under a player-given name (only when the two differ). */
+.confirm.fleetDialog .fleetNoticeClass {
+    display: block;
+    font-size: 12px;
+    font-weight: normal;
+    color: var(--fv-text-dim);
+}
+
+.confirm.fleetDialog .fleetNoticeMeta {
+    flex: 0 0 auto;
+    font-family: var(--fv-mono);
+    font-size: 12px;
+    color: var(--fv-enemy);
+    white-space: nowrap;
+}
+
 .confirm.fleetDialog .fleetDialogLabel {
     display: block;
     margin-bottom: 5px;
@@ -1459,9 +1418,9 @@
 /* ── Pre-battle damage note in the lobby's Ready confirm ────────────────────────────
    gamedata.onReadyClicked appends this line when the fleet carries pre-battle damage or
    critical effects (PREBATTLE_DAMAGE_PLAN.md D1). It lands inside confirm.confirm's
-   `.confirm.error` shell, which is 16px BOLD #c94b1d - so the whole sentence read as an
-   alarm rather than as the footnote it is (user report 2026-08-08). Only the NOTE: label
-   is a warning; the sentence after it is body text on the shared tokens. */
+   `.confirm.error` shell, which was 16px BOLD #c94b1d until 2026-09-28 - so the whole
+   sentence read as an alarm rather than as the footnote it is (user report 2026-08-08). Only
+   the NOTE: label is a warning; the sentence after it is body text on the shared tokens. */
 .confirm .prebattle-note {
     display: block;
     margin-top: 14px;
@@ -1475,4 +1434,785 @@
 .confirm .prebattle-note .prebattle-note-label {
     font-weight: bold;
     color: #c94b1d;
+}
+
+/* ── Buy / Edit / Bulk-Buy ship dialogs ─────────────────────────────────────────────────────────
+ * confirm.showShipBuy / showShipEdit / showBuyBulk, all built by confirm.buyDialogShell
+ * (CREATE_GAME_GAMELOBBY_REDESIGN_PLAN.md §10, Stage 9). They only ever open on gamelobby.php, so
+ * they wear the lobby windows' look (gameLobby.css .lb-modal-panel - the Faction Picker and the
+ * Fleet Report) and may use --fv-display: Orbitron is @imported by gamesNew.css, which that page
+ * links. Every font-family is set on the element itself, because gamesNew.css's
+ * `* { font-family: Arial }` beats an inherited face.
+ *
+ * Head / body / foot in a flex column on .buyDialogFrame, and only the body scrolls - which is
+ * what keeps the total in view. The column is on the FRAME rather than on .confirm itself because
+ * jQuery's fadeIn() writes display:block onto the element it reveals. */
+.confirm.buyDialog {
+    width: 600px;
+    max-width: calc(100vw - 32px);
+    max-height: none;
+    box-sizing: border-box;
+    padding: 0;
+    overflow: hidden;
+    text-align: left;
+    font-size: 13px;
+    /* Not the page's 1.5 (gamesNew.css), which put ~8px of leading into every two-line row. */
+    line-height: 1.3;
+    color: var(--fv-text);
+    /* .lb-modal-panel's gradient, but OPAQUE: that panel's 0.98 sits on a dimming overlay, while
+       the dim here is a shadow drawn only OUTSIDE the box - so directly behind the dialog the page
+       is at full brightness, and 2% of the Store's text visibly ghosted through the rows. */
+    background: linear-gradient(180deg, rgb(27, 45, 62), rgb(18, 32, 45));
+    border: 1px solid #2a6b8f;
+    border-radius: 6px;
+    /* The second shadow is the lobby windows' dimmed page (.lb-modal), as a shadow so that it
+       leaves with the dialog - every close path is a bare $(".confirm").remove(). */
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 0 100vmax rgba(2, 6, 10, 0.72);
+}
+
+.confirm.buyDialog *,
+.confirm.buyDialog *::before,
+.confirm.buyDialog *::after {
+    box-sizing: border-box;
+}
+
+.confirm.buyDialog .buyDialogFrame {
+    display: flex;
+    flex-direction: column;
+    max-height: 88vh;
+}
+
+/* Opened centred, then pinned at that top (confirm.anchorBuyDialog): folding a section or filtering
+   moves only the bottom edge up, where centred the whole window slid down to re-centre. The cap keeps
+   the bottom 6vh clear if the browser window is made shorter while it is open; min() keeps a window
+   that opened full height at exactly its centred 88vh (the pinned top is rounded to a whole pixel). */
+.confirm.buyDialog.is-anchored {
+    top: var(--buy-top);
+    transform: translateX(-50%);
+}
+
+.confirm.buyDialog.is-anchored .buyDialogFrame {
+    max-height: min(88vh, calc(100vh - var(--buy-top) - 6vh));
+}
+
+.confirm.buyDialog .buyDialogHead {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 3px 6px 3px 16px;
+    background: linear-gradient(180deg, rgba(73, 103, 145, 0.58), rgba(73, 103, 145, 0.22));
+    border-bottom: 1px solid #2a6b8f;
+}
+
+.confirm.buyDialog .buyDialogHeading {
+    min-width: 0;
+    padding: 2px 0;
+}
+
+.confirm.buyDialog .buyDialogTitle {
+    font-family: var(--fv-display);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--fv-text-bright);
+    overflow-wrap: anywhere; /* "Buy <class>": a long class wraps rather than push the × off */
+}
+
+.confirm.buyDialog .buyDialogSub {
+    margin-top: 3px;
+    font-family: var(--fv-mono);
+    font-size: 11px;
+    color: var(--fv-text-dim);
+    overflow-wrap: anywhere;
+}
+
+.confirm.buyDialog .buyDialogClose {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    font-size: 24px;
+    line-height: 1;
+    color: #8296a8;
+    background: none;
+    border: 0;
+    cursor: pointer;
+}
+
+.confirm.buyDialog .buyDialogClose:hover {
+    color: #fff;
+}
+
+.confirm.buyDialog .buyDialogBody {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 10px 16px 8px;
+    overflow-y: auto;
+}
+
+/* The lobby windows' scrollbar (gameLobby.css). Firefox gets the same colours the standard way -
+   only there, because a Chromium that sees scrollbar-color drops the pseudo-elements. */
+.confirm.buyDialog .buyDialogBody::-webkit-scrollbar {
+    width: 8px;
+}
+
+.confirm.buyDialog .buyDialogBody::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.confirm.buyDialog .buyDialogBody::-webkit-scrollbar-thumb {
+    background: var(--fv-scroll-thumb);
+    border-radius: 4px;
+}
+
+.confirm.buyDialog .buyDialogBody::-webkit-scrollbar-thumb:hover {
+    background: var(--fv-scroll-thumb-hover);
+}
+
+@supports not selector(::-webkit-scrollbar) {
+    .confirm.buyDialog .buyDialogBody {
+        scrollbar-width: thin;
+        scrollbar-color: var(--fv-scroll-thumb) transparent;
+    }
+}
+
+/* ── The filter box (Stage 10, confirm.filterBuyRows): just above the first section's head, under
+   the Base Hull line (user - first built at the top of the window), as wide as the sections - the
+   Faction Picker's search box (gameLobby.css .lb-picker-search) in this window. ── */
+
+.confirm.buyDialog .buyDialogFilter {
+    margin-bottom: 6px;
+}
+
+.confirm.buyDialog .buyDialogFilter[hidden] {
+    display: none;
+}
+
+.confirm.buyDialog .buyFilterInput {
+    display: block;
+    width: 100%;
+    height: 30px;
+    margin: 0;
+    padding: 4px 8px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    color: var(--fv-text);
+    background: #081420;
+    border: 1px solid var(--fv-line-soft);
+    border-radius: 2px;
+    /* iOS draws a search field rounded and padded in its own style without this. */
+    -webkit-appearance: textfield;
+    appearance: textfield;
+}
+
+.confirm.buyDialog .buyFilterInput::-webkit-search-decoration {
+    -webkit-appearance: none;
+}
+
+.confirm.buyDialog .buyFilterInput::placeholder {
+    color: var(--fv-text-dim);
+    opacity: 1;
+}
+
+.confirm.buyDialog .buyFilterInput:focus {
+    outline: none;
+    border-color: var(--fv-accent);
+}
+
+.confirm.buyDialog .buyFilterEmpty {
+    margin: 2px 4px 6px;
+    font-size: 12px;
+    color: var(--fv-text-dim);
+}
+
+.confirm.buyDialog .buyFilterEmpty q {
+    color: var(--fv-text);
+}
+
+/* ── The unit: name, flight size, quantity ── */
+
+.confirm.buyDialog .buyDialogUnit {
+    padding: 2px 0px 8px;
+    border-bottom: 1px solid var(--fv-line-soft);    
+    margin-bottom: 8px;
+}
+
+.confirm.buyDialog .buyDialogUnit:empty {
+    display: none;
+}
+
+.confirm.buyDialog .buyNameRow {
+    margin-bottom: 2px;
+}
+
+.confirm.buyDialog .buyFieldLabel {
+    font-family: var(--fv-display);        
+    display: block;
+    margin-bottom: 5px;
+    padding-left: 3px;
+    font-size: 11px;
+    letter-spacing: 0.6px;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: var(--fv-text-dim);
+}
+
+.confirm.buyDialog input[type="text"] {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    color: var(--fv-text);
+    background: #081420;
+    border: 1px solid var(--fv-line-soft);
+    border-radius: 2px;
+}
+
+.confirm.buyDialog #buyShipName {
+    width: 100%;
+    padding: 5px 10px;
+}
+
+.confirm.buyDialog input[type="text"]:focus {
+    outline: none;
+    border-color: var(--fv-accent);
+}
+
+/* A unit row has no cost of its own - the Base Hull line under it carries that. */
+.confirm.buyDialog .buyDialogUnit .buyRowCost {
+    display: none;
+}
+
+/* ── Base Hull: what the sections' subtotals are added to ── */
+
+.confirm.buyDialog .buyDialogBase {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+    padding: 2px 4px 8px;
+    border-bottom: 1px solid var(--fv-line-soft);
+}
+
+.confirm.buyDialog .buyDialogBaseLabel {
+    min-width: 0;
+    font-family: var(--fv-display);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--fv-text-dim);
+    overflow-wrap: anywhere;
+}
+
+.confirm.buyDialog .buyDialogBaseCost {
+    flex: none;
+    font-family: var(--fv-mono);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--fv-text-accent);
+    white-space: nowrap;
+}
+
+/* ── The accordion sections. The disclosure box is the lobby's own (.lb-disclosure, the Store's
+   size categories), so every fold on the page opens the same way. ── */
+
+.confirm.buyDialog .buySection {
+    margin-bottom: 6px;
+    border: 1px solid var(--fv-line-soft);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.confirm.buyDialog .buySectionHead {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    margin: 0;
+    padding: 6px 12px;
+    font-family: var(--fv-display);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-align: left;
+    /* The Purchase panel's MAIN FLEET band (lobby.css .fleet-group-header, user 2026-09-26): bright
+       title, a #90b1ee wash fading off the text, a solid accent bar flush against the title - on the
+       LEFT here, since these titles are left-aligned (MAIN FLEET's sits right, beside its right-
+       aligned text). The wash is background-IMAGE so hover can change the colour layer under it. */
+    color: var(--fv-text-bright);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
+    background-color: rgba(144, 177, 238, 0.12);
+    background-image: linear-gradient(to right, rgba(144, 177, 238, 0.22), rgba(144, 177, 238, 0) 70%);
+    border: 0;
+    border-left: 3px solid #90b1ee;
+    border-radius: 0;
+    cursor: pointer;
+}
+
+.confirm.buyDialog .buySectionHead:hover {
+    background-color: rgba(144, 177, 238, 0.22);
+}
+
+.confirm.buyDialog .buySectionHead[aria-expanded="true"] {
+    border-bottom: 1px solid rgba(144, 177, 238, 0.45);
+}
+
+/* A section the filter leaves nothing in: folded and dimmed, with no band to click - but its badge
+   still says what is bought in it (after :hover, so hovering does not light it back up). */
+.confirm.buyDialog .buySectionHead:disabled {
+    color: var(--fv-text-dim);
+    text-shadow: none;
+    background-color: transparent;
+    background-image: none;
+    border-left-color: var(--fv-line-scs);
+    cursor: default;
+}
+
+.confirm.buyDialog .buySectionHead:disabled .buyDisclosure {
+    opacity: 0.45;
+}
+
+.confirm.buyDialog .buySectionTitle {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-family: inherit;
+}
+
+.confirm.buyDialog .buySectionBadge {
+    flex: none;
+    font-family: var(--fv-mono);
+    font-size: 10.5px;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--fv-text-dim);
+    white-space: nowrap;
+}
+
+.confirm.buyDialog .buySectionBadge.is-taken {
+    color: var(--fv-text-accent);
+}
+
+.confirm.buyDialog .buyDisclosure {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 15px;
+    height: 15px;
+    border: 1px solid var(--fv-line-scs);
+    border-radius: 2px;
+}
+
+.confirm.buyDialog .buyDisclosure::before {
+    content: "\25B8";
+    font-family: Arial, sans-serif;
+    font-size: 9px;
+    line-height: 1;
+    color: var(--fv-accent);
+}
+
+.confirm.buyDialog [aria-expanded="true"] > .buyDisclosure::before {
+    content: "\25BE";
+}
+
+.confirm.buyDialog .buySectionBody {
+    padding: 0 12px 1px;
+}
+
+.confirm.buyDialog .buySectionNote {
+    margin: 6px 0 0;
+    font-size: 11.5px;
+    color: var(--fv-text-dim);
+}
+
+/* ── One row: name over its price note | cost | − value +  (the cost left of the spinner, so every
+   spinner and dropdown shares one right edge) ── */
+
+.confirm.buyDialog .buyRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 0;
+    font-size: 12.5px;
+    border-bottom: 1px solid #0e222c;
+}
+
+.confirm.buyDialog .buyRow:last-child,
+.confirm.buyDialog .buyRow.is-lastShown {
+    border-bottom: 0;
+}
+
+/* Filtered out: hidden, but still in the dialog - what it holds is still bought. */
+.confirm.buyDialog .buyRow.is-filtered {
+    display: none;
+}
+
+.confirm.buyDialog .selectText {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.confirm.buyDialog .buyRowName {
+    display: block;
+    color: var(--fv-text);
+    overflow-wrap: anywhere;
+}
+
+.confirm.buyDialog .buyRowName label {
+    cursor: pointer;
+}
+
+.confirm.buyDialog .buyRow.is-taken .buyRowName {
+    color: var(--fv-text-bright);
+}
+
+.confirm.buyDialog .buyRowNote {
+    display: block;
+    margin-top: 1px;
+    font-size: 11px;
+    color: var(--fv-text-dim);
+}
+
+.confirm.buyDialog .buyRowNote:empty {
+    display: none;
+}
+
+.confirm.buyDialog .buyRowQty {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 4px;
+}
+
+.confirm.buyDialog .buyRowQty button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1;
+    color: var(--fv-text);
+    background: #081420;
+    border: 1px solid var(--fv-line-soft);
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+/* Hover only where there is one: on a touch screen a tapped stepper would otherwise stay lit. */
+@media (hover: hover) {
+    .confirm.buyDialog .buyRowQty button:hover {
+        color: var(--fv-text-bright);
+        background: rgba(198, 226, 255, 0.1);
+        border-color: var(--fv-accent);
+    }
+}
+
+/* The value box: typed into (an enhancement), or only stepped (missiles, flight size). */
+.confirm.buyDialog .selectAmount,
+.confirm.buyDialog .fighterAmount,
+.confirm.buyDialog #bulkQuantity {
+    display: inline-block;
+    min-width: 36px;
+    height: 24px;
+    padding: 0 6px;
+    font-family: var(--fv-mono);
+    font-size: 12.5px;
+    line-height: 22px;
+    text-align: center;
+    color: var(--fv-text-bright);
+    background: #000;
+    border: 1px solid var(--fv-line-soft);
+    border-radius: 2px;
+    white-space: nowrap;
+}
+
+.confirm.buyDialog #bulkQuantity {
+    width: 52px;
+}
+
+.confirm.buyDialog .selectAmount[contenteditable="true"] {
+    cursor: text;
+}
+
+.confirm.buyDialog .selectAmount:focus {
+    outline: none;
+    border-color: var(--fv-accent);
+}
+
+.confirm.buyDialog .buyRowCost {
+    flex: none;
+    width: 64px;
+    font-family: var(--fv-mono);
+    font-size: 12px;
+    text-align: right;
+    color: var(--fv-text-accent);
+    white-space: nowrap;
+}
+
+/* A cost that comes OFF the total (Poor Crew, Sluggish). */
+.confirm.buyDialog .buyRowCost.is-saving {
+    color: var(--fv-own);
+}
+
+/* Choice-valued option (the Chameleon disguise, confirm.applyEnhancementChoiceWidget): a dropdown
+   in place of the spinner, widened across the - / + buttons it hides so it ends where they do. */
+.confirm.buyDialog .enhChoiceItem .buyRowQty {
+    flex: 0 1 50%;
+    min-width: 0;
+}
+
+.confirm.buyDialog .enhChoiceItem .buyRowQty button {
+    display: none;
+}
+
+.confirm.buyDialog .enhChoiceItem .selectAmount {
+    width: 100%;
+    padding: 0;
+    text-align: left;
+}
+
+.confirm.buyDialog .enhChoiceSelect {
+    width: 100%;
+    height: 22px;
+    margin: 0;
+    padding: 0 4px;
+    font-family: Arial, sans-serif;
+    font-size: 12.5px;
+    color: var(--fv-text);
+    background: transparent;
+    border: 0;
+}
+
+/* The open list is drawn by the OS on a white background, so its text has to be dark. */
+.confirm.buyDialog .enhChoiceSelect option {
+    color: #000;
+    background: #fff;
+}
+
+/* ── The foot: the total on a row of its own over the buttons, right-aligned (user, Stage 9) ── */
+
+.confirm.buyDialog .buyDialogFoot {
+    flex: none;
+    padding: 6px 16px 8px;
+    background: rgba(4, 22, 28, 0.85);
+    border-top: 1px solid var(--fv-line-soft);
+}
+
+.confirm.buyDialog .buyDialogTotals {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: flex-end;
+    gap: 4px 24px;
+    margin-bottom: 6px;
+}
+
+.confirm.buyDialog .buyDialogTotal {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.confirm.buyDialog .buyDialogTotalLabel {
+    font-family: var(--fv-mono);
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--fv-text-dim);
+}
+
+.confirm.buyDialog .buyDialogTotalValue,
+.confirm.buyDialog .buyDialogTotalValue span {
+    font-family: var(--fv-mono);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--fv-text-accent);
+}
+
+/* The bulk dialog's Per Unit figure: the working, not the answer. */
+.confirm.buyDialog .buyDialogTotal--unit .buyDialogTotalValue,
+.confirm.buyDialog .buyDialogTotal--unit .buyDialogTotalValue span {
+    font-size: 13px;
+    font-weight: 400;
+}
+
+/* The buttons: Create Game's green for the purchase, a quiet outline for Cancel. They are real
+   <button>s now, but keep the .confirmok / .confirmcancel classes every caller binds to. 28px tall
+   (user: the 36px of Stage 9 made the foot far taller than it needs to be); 40px on touch. */
+.confirm.buyDialog .ui {
+    position: static;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin: 0;
+    color: inherit;
+}
+
+.confirm.buyDialog .ui .confirmok,
+.confirm.buyDialog .ui .confirmcancel {
+    position: static;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    height: auto;
+    min-width: 130px;
+    min-height: 28px;
+    margin: 0;
+    padding: 4px 16px;
+    font-family: var(--fv-display);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 1.1px;
+    text-transform: uppercase;
+    background-image: none;
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+.confirm.buyDialog .ui .confirmcancel {
+    color: var(--fv-text-dim);
+    background-color: transparent;
+    border: 1px solid var(--fv-line-soft);
+}
+
+.confirm.buyDialog .ui .confirmcancel:hover {
+    color: var(--fv-text-bright);
+    background-color: rgba(198, 226, 255, 0.08);
+    border-color: var(--fv-accent);
+}
+
+.confirm.buyDialog .ui .confirmok {
+    color: #e6f4e6;
+    background-color: rgba(60, 122, 60, 0.671);
+    border: 1px solid #66b266;
+}
+
+.confirm.buyDialog .ui .confirmok:hover {
+    color: #fff;
+    background-color: rgba(82, 179, 82, 0.5);
+    border-color: #8cd48c;
+}
+
+.confirm.buyDialog button:focus-visible,
+.confirm.buyDialog .selectAmount:focus-visible {
+    outline: 2px solid var(--fv-accent);
+    outline-offset: -2px;
+}
+
+/* A phone: the window takes nearly the whole screen and the two buttons share the row. */
+@media (max-width: 600px) {
+    .confirm.buyDialog {
+        width: calc(100vw - 16px);
+        max-width: calc(100vw - 16px);
+    }
+
+    .confirm.buyDialog .buyDialogFrame {
+        max-height: calc(100vh - 16px);
+    }
+
+    .confirm.buyDialog.is-anchored .buyDialogFrame {
+        max-height: min(calc(100vh - 16px), calc(100vh - var(--buy-top) - 8px));
+    }
+
+    @supports (height: 100dvh) {
+        .confirm.buyDialog .buyDialogFrame {
+            max-height: calc(100dvh - 16px);
+        }
+
+        .confirm.buyDialog.is-anchored .buyDialogFrame {
+            max-height: min(calc(100dvh - 16px), calc(100dvh - var(--buy-top) - 8px));
+        }
+    }
+
+    .confirm.buyDialog .buyDialogHead {
+        padding: 2px 4px 2px 12px;
+    }
+
+    .confirm.buyDialog .buyDialogBody {
+        padding: 8px 12px 6px;
+    }
+
+    .confirm.buyDialog .buySectionBody {
+        padding: 0 10px 1px;
+    }
+
+    .confirm.buyDialog .buyRowCost {
+        width: 56px;
+    }
+
+    .confirm.buyDialog .buyDialogFoot {
+        padding: 6px 12px 8px;
+    }
+
+    .confirm.buyDialog .ui .confirmok,
+    .confirm.buyDialog .ui .confirmcancel {
+        flex: 1 1 0;
+        min-width: 0;
+    }
+}
+
+/* Touch: fingertip-sized steppers, section heads and buttons. */
+@media (pointer: coarse) {
+    .confirm.buyDialog .buyRowQty button {
+        width: 36px;
+        height: 36px;
+        font-size: 18px;
+    }
+
+    .confirm.buyDialog .selectAmount,
+    .confirm.buyDialog .fighterAmount,
+    .confirm.buyDialog #bulkQuantity {
+        min-width: 40px;
+        height: 36px;
+        line-height: 34px;
+    }
+
+    .confirm.buyDialog .enhChoiceSelect {
+        height: 34px;
+    }
+
+    .confirm.buyDialog .buyFilterInput {
+        height: 36px;
+    }
+
+    /* 16px on everything that takes typing: iOS zooms the page into any smaller field on focus. */
+    .confirm.buyDialog #buyShipName,
+    .confirm.buyDialog .buyFilterInput,
+    .confirm.buyDialog #bulkQuantity,
+    .confirm.buyDialog .selectAmount,
+    .confirm.buyDialog .fighterAmount,
+    .confirm.buyDialog .enhChoiceSelect {
+        font-size: 16px;
+    }
+
+    .confirm.buyDialog .buySectionHead {
+        min-height: 40px;
+    }
+
+    .confirm.buyDialog .buyDialogClose {
+        width: 40px;
+        height: 40px;
+    }
+
+    .confirm.buyDialog .ui .confirmok,
+    .confirm.buyDialog .ui .confirmcancel {
+        min-height: 40px;
+    }
 }

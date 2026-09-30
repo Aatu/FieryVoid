@@ -4,7 +4,7 @@ class swGallofreeEscort extends LCV{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 100;
-        $this->faction = "ZStarWars";
+        $this->faction = "StarWars";
 	$this->phpclass = "swGallofreeEscort";
 	$this->shipClass = "GR-75 Gallofree Escort";
         $this->imagePath = "img/starwars/GallofreeMediumTransport.png";

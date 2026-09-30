@@ -365,17 +365,20 @@
                 if($losBlocked) continue; //Line of sight blocked to one of the relevant units, skip.                  
 
                 if($elint->hasSpecialAbility("ConstrainedEW")){//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.
-        	        $fdew = $elint->getEWByType("DIST", $gamedata->turn, $ship) / 4 ;	
-				}else{	
-        	        $fdew = $elint->getEWByType("DIST", $gamedata->turn, $ship) / 3 ;//NOT *0.25;
+                    $fdew = $elint->getEWByType("DIST", $gamedata->turn, $ship) / 4 ;
+                }else{
+                    $fdew = $elint->getEWByType("DIST", $gamedata->turn, $ship) / 3 ;//NOT *0.25;
+                }
 
                 //if (fdew > amount)
                 $amount += $fdew;
             }
+            //Both returns sit AFTER the loop: every ELINT in range contributes. (From 2024-08 to 2026-09 a
+            //misplaced brace put them inside it, so the first ELINT found - either team - decided the result
+            //and a ConstrainedEW ELINT never counted. The client twin, ew.getDistruptionEW, was always right.)
             if ($num > 0) return $amount/$num;
             return 0; //NOT $amount;
-    		 }
-		}
+        }
 		/* ============================================================================================
 		   WALKERS OF SIGMA-957 - EW DETECTOR (WALKERS_OF_SIGMA_PLAN.md 3.8, Stage 10A)
 		   Client mirror: ew.collectEwDetectors / ew.savedEwAllowanceFromDetectors /

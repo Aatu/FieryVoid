@@ -88,28 +88,10 @@
     padding-right: 5px;
 }
 
-.slot .status {
-    display: none;
-}
-
-.slot.ready .status {
-    display: inline;
-}
-
-.slot .status {
-    color: #00d100;
-    /* Bright green */
-    font-weight: bold;
-    /* Makes the text bold */
-}
-
-.slot .playername {
-    font-size: 14px;
-    color: #DEEBFF;
-    /* Original value  #496791 */
-    font-weight: bold;
-    /* Makes the text bold */
-}
+/* The lobby's slot row - its Ready badge, player name and the Take Slot / Select / Leave Slot
+   buttons, with the .taken / .ready / .selected states that show and hide them - is styled in
+   gameLobby.css since the Stage 4 redesign (CREATE_GAME_GAMELOBBY_REDESIGN_PLAN.md). The old
+   rules for them are gone from here: two carried !important, and all were lobby-only. */
 
 .clickable {
     cursor: pointer;
@@ -117,19 +99,6 @@
 
 .clickable:hover {
     text-decoration: underline;
-}
-
-.takeslot {
-    color: red;
-    font-weight: bold;
-    margin-bottom: 5px;
-    margin-left: -5px;
-    vertical-align: auto;
-    font-size: 13px !important;
-}
-
-.taken .takeslot {
-    display: none;
 }
 
 .points-bracket-style,
@@ -147,60 +116,6 @@
     margin-left: 20px;
 }
 
-.factiongroup-header {
-    font-weight: bold;
-    font-size: 18px;
-    margin: 12px 5px 5px 0px;
-    color: #6495ED;
-    font-family: "Bruno Ace SC", sans-serif;
-}
-
-.factiongroup-header.clickable {
-    cursor: pointer;
-}
-
-.factiongroup-header .faction-toggle-icon {
-    display: inline-block;
-    width: 25px;
-    /* Increased slightly for better spacing */
-    text-align: center;
-    font-family: monospace;
-    /* Mono font ensures [+] and [-] are same width */
-    color: #6495ED;
-    /* Matching header color */
-    font-weight: bold;
-    margin-right: 6px;
-    padding-left: 5px;
-    vertical-align: top;
-    position: relative;
-    top: -1px;
-}
-
-.store .faction {
-    cursor: pointer;
-}
-
-.store .factionname {
-    font-size: 16px;
-    color: #f2f7ff;
-    font-weight: 525;
-}
-
-.store .factionname .faction-toggle-icon {
-    display: inline-block;
-    width: 25px;
-    text-align: center;
-    font-family: monospace;
-    color: #b4bdca;
-    font-weight: bold;
-    cursor: pointer;
-    margin-right: 0px;
-    vertical-align: top;
-    position: relative;
-    top: -1px;
-    padding-left: 15px;
-}
-
 .store .ship {
     color: #90b1ee;
     /* previous value #81a7ec */
@@ -209,66 +124,10 @@
     font-size: 14px;
 }
 
-.store .shipsizehdr {
-    color: #d0dbec;
-    margin-left: 20px;
-    margin-top: 3px;
-    margin-bottom: 3px;
-    font-size: 14px;
-}
-
-.store .shipsizehdr .toggleicon {
-    display: inline-block;
-    width: 25px;
-    text-align: center;
-    font-family: monospace;
-    color: #b4bdca;
-    font-weight: bold;
-    cursor: pointer;
-    margin-right: 3px;
-    vertical-align: top;
-    position: relative;
-    top: -1px;
-}
-
-.categoryType {
-    padding-left: 1px !important;
-    font-weight: bold;
-    color: #d0dbec;
-}
-
-.category-container {
-    margin-left: 20px;
-    padding-left: 0px;
-    padding-bottom: 2px;
-}
-
-.pointcost {
-    padding-left: 5px !important;
-}
-
 .fightersize {
     font-weight: bold;
     padding-left: 0px !important;
     padding-right: 3px;
-}
-
-.store .storeship {
-    /*color:#a3c0f5;*/
-    color: #90b1ee;
-    /* previous value #81a7ec */
-    margin-right: 5px;
-    margin-left: 20px;
-    font-size: 14px;
-    font-weight: normal;
-}
-
-.store .variant {
-    /*color:#8989fd; */
-    color: #578bec;
-    margin-right: 15px;
-    margin-left: 20px;
-    font-size: 14px;
 }
 
 /* Container for the whole ship entry */
@@ -361,29 +220,25 @@
     color: #DEEBFF;
 }
 
+/* The fleet rows' Details · Edit · Copy · (Reinforcement) · Remove: the accent blue, the Store's
+   Add to fleet · Show details colour too (gameLobby.css .lb-linkbtn) - brightening on hover. */
 .store .ship .clickable {
     cursor: pointer;
-    color: #DEEBFF;
+    color: var(--fv-accent);
     font-size: 13px;
 }
 
 .store .ship .clickable:hover {
     cursor: pointer;
-    color: #DEEBFF;
+    color: var(--fv-text-bright);
     text-decoration: underline;
     font-size: 13px;
 }
 
-.faction-display-name.custom-faction {
-    color: rgba(255, 255, 0, 0.774);
-    /* Or any other color you want for custom factions */
-    /*color: #FFA080;*/
-}
-
+/* A custom ship in an official faction's Store list: the Custom Factions yellow of the Faction
+   Picker and both Show Custom ticks (--fv-warn), not a brighter yellow of its own. */
 .highlight-custom-ship {
-    color: rgba(255, 255, 0, 0.767);
-    /* Or any other color you want for custom factions  #FFA080 */
-    /*color: #FFA080;*/
+    color: var(--fv-warn);
 }
 
 .mediumSize {
@@ -409,84 +264,11 @@
 }
 
 
-.leaveslot {
-    position: absolute;
-    right: 3px;
-    /* sits to the left of the 10px icon at right:5px */
-    top: 1px;
-    /* align vertically with the icon */
-    cursor: pointer;
-    /* so it feels clickable like the icon */
-    color: #DEEBFF !important;
-    cursor: pointer;
-    border-radius: 3px;
-    transition: background 0.2s;
-    margin-top: 2px !important;
-    background: #7a2121;
-    font-size: 0.85em;
-    /* Smaller than Add Team */
-    border: 1px solid #a77272;
-    width: auto;
-    text-align: center;
-    box-sizing: border-box;
-    height: auto;
-    line-height: normal;
-    padding: 2px 8px;
-    display: inline-block;
-    vertical-align: middle;
-}
-
 .value {
     /*color:#6e9cdc; Original value  #496791 */
     color: #90b1ee;
     /* previous value #81a7ec */
 }
-
-.selectslot {
-    color: orange;
-    display: none;
-}
-
-.taken .selectslot {
-
-    display: inline;
-}
-
-.slot.selected .selectslot {
-    display: none;
-}
-
-.slot.selected {
-    background-color: rgb(18, 61, 115, 0.7);
-    -moz-box-shadow: 0px 0px 1px #0099ff;
-    -webkit-box-shadow: 0px 0px 1px #0099ff;
-    box-shadow: 0px 0px 1px #0099ff;
-
-}
-
-.store .shipshidden .ship {
-    display: none;
-}
-
-.store .shipshidden .category-container {
-    display: none !important;
-}
-
-.store .shipshidden .shipsizehdr {
-    display: none;
-}
-
-.store .factionname .tooltip {
-    font-size: 12px;
-    color: #496791;
-    display: none;
-}
-
-
-.store .factionname:hover .tooltip {
-    display: inline;
-}
-
 
 
 .fleet-dropdown-container {
@@ -535,38 +317,6 @@
     transform: translateY(-50%);
     /* vertical centering */
     pointer-events: none;
-}
-
-/* Dropdown list */
-#fleetDropdownList {
-    display: none;
-    /* hidden by default */
-    position: absolute;
-    right: 0;
-    top: 100%;
-    background: white;
-    border: 1px solid #215a7a;
-    border-radius: 3px;
-    z-index: 1000;
-    min-width: 350px;
-    max-height: 200px;
-    overflow-y: auto;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-    font-size: 12px;
-    color: #000000ff;
-}
-
-.Load-Fleet-by-ID {
-    margin-right: 2px;
-    font-size: 14px;
-}
-
-.fleetIdInput {
-    width: 40px;
-    height: 16px;
-    text-align: right;
-    margin-right: 5px;
-    margin-left: 2px;
 }
 
 /* The ID field is wrapped in a one-input <form> so a phone keyboard offers Go/Enter
@@ -633,294 +383,14 @@
     display: none;
 }
 
-.buy-header-flex {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    margin-top: 15px;
-}
-
-.buy-header-title-style {
-    margin-left: 5px;
-    padding-right: 15px;
-}
-
-.points-bracket-style {
-    margin-left: 2px;
-}
-
-.filter-container-style {
-    margin-top: 0px;
-    margin-left: 5px;
-    font-size: 14px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-right: 0px;
-    /* Add some padding on the right for the points */
-}
-
-.all-filters-link {
-    margin-right: 5px;
-    text-decoration: underline;
-    color: #8bcaf2;
-    font-size: 14px;    
-}
-
-.filter-pipe-separator {
-    margin-right: 5px;
-    font-size: 16px;
-    font-weight: bold;
-}
-
-.no-filters-link {
-    text-decoration: underline;
-    margin-right: 5px;
-    color: #8bcaf2;
-    font-size: 14px;    
-}
-
-/* "Filter by: Name [..] Cost [..] ISD [..]" - one lead-in label, then three fields.
-   The three label wrappers share their spacing so the row reads as one control. */
-.filter-by-text {
-    margin-right: 4px;
-    font-size: 14px;
-}
-
-.name-filter-label-style,
-.cost-filter-label-style,
-.isd-filter-label-style {
-    margin-left: 5px;
-    margin-top: 3px;
-}
-
-.filter-by-name-text,
-.filter-by-cost-text,
-.filter-by-isd-text {
-    margin-right: 2px;
-    font-size: 14px;
-}
-
-.name-input-style {
-    height: 14px;
-    width: 120px;
-}
-
-.cost-input-style,
-.isd-input-style {
-    width: 36px;
-    height: 14px;
-    text-align: right;
-}
-
-/* The points readout at the right of the filter row: "1200 / Unlimited pts [x]".
-   These pieces were four different font sizes (.panelsubheader 20px,
-   .unlimited-points-text2 18px, the cap input, the checkbox) and each was trying to find
-   its own baseline, so nothing lined up. A flex row with align-items: center makes the
-   alignment independent of the sizes, and one font-size across the group keeps the
-   figures, the word "Unlimited", the cap field and "pts" reading as one line of text. */
-.points-readout {
-    display: flex;
-    align-items: center;
-}
-
-/* Flex drops the whitespace between items, so siblings space themselves - except "pts",
-   which stays glued to the figure it belongs to ("3500pts", as it always read). */
-.points-readout > * + * {
-    margin-left: 5px;
-}
-
-.points-readout .max-points-units {
-    margin-left: 1px;
-}
-
-.points-readout .panelsubheader,
-.points-readout .unlimited-points-text2 {
-    font-size: 18px;
-    line-height: 1;
-}
-
-/* Fleet Builder points cap. Sized and weighted like the "Unlimited" text it replaces, so
-   the header does not jump as the two swap. */
-.max-points-input {
-    width: 76px;
-    padding: 1px 3px;
-    text-align: right;
-    font-size: 16px;
-    font-weight: bold;
-    line-height: 1;
-}
-
-/* ⚠️ base.css has a GLOBAL `input[type="checkbox"] { position: relative; top: 2px }`,
-   which would push this 2px below the centre the flex row just established. Two classes
-   (0,2,0) outrank that attribute selector (0,1,1), so an explicit value wins without
-   !important and every other checkbox on the page keeps the global nudge. */
-.points-readout .unlimited-points-toggle {
-    top: 0;
-    margin: 0 0 0 8px;
-    cursor: pointer;
-}
-
-.reset-isd-link-style {
-    text-decoration: underline;
-    margin-left: 3px;
-    font-size: 12px;
-    color: #8bcaf2;
-}
-
-.tier-filters-row {
-    display: flex;
-    align-items: center;
-    font-size: 12px;
-    margin-top: 3px;
-    flex-wrap: nowrap;
-}
-
-.tier-label-style {
-    margin-left: 5px;
-    font-size: 14px;
-}
-
-.tier-pipe-separator {
-    margin-left: 6px;
-    margin-right: 6px;
-    font-size: 16px;
-    font-weight: bold;
-}
-
-.custom-dropdown-style {
-    display: none;
-    margin-left: 10px;
-}
-
-.fleet-loading-container {
-    display: flex;
-    align-items: center;
-    margin-left: auto;
-    font-size: 12px;
-    gap: 6px;
-}
-
-.fleet-id-label-container {
-    margin-left: 5px;
-    margin-top: 0px;
-    display: flex;
-    align-items: center;
-}
-
 .saved-fleet-wrapper {
     position: relative;
     margin-left: auto;
     font-size: 12px;
 }
 
-.store-layout-table {
-    width: 100%;
-    margin-top: 5px;
-}
-
-.store-left-col {
-    width: 50%;
-}
-
-.store-right-col {
-    width: 50%;
-    vertical-align: top;
-}
-
 .fleet-panel-style {
     text-align: right;
-}
-
-.action-buttons-row {
-    text-align: right;
-    margin-top: 8px;
-}
-
-/* Top-of-page Ready + Save Fleet buttons — they sit to the right of the 'Load a Saved
-   Fleet' dropdown in .fleet-loading-container. Intentionally independent of .btn /
-   .btn-success-lobby so they can be styled without affecting the buttons at the bottom
-   of the buy panel. The three controls in that row are one EQUAL-WIDTH set (150px, the
-   dropdown's width above), so the row reads as a group rather than three odd sizes. */
-.readybutton-top,
-.savebutton-top {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    border-radius: 4px;
-    padding: 5px 10px;
-    font-size: 13px;
-    cursor: pointer;
-    user-select: none;
-    box-sizing: border-box;
-    min-width: 120px;
-    width: 120px;
-    height: 27px;
-    margin-left: 5px;
-    line-height: normal;
-}
-
-.readybutton-top {
-    background: #3c7a3c;
-    border: 1px solid #66b266;
-}
-
-.readybutton-top:hover {
-    background: #4d944d;
-}
-
-/* The second SAVE FLEET, beside the fleet loader. Same blue as .btn-primary-lobby, the
-   class its twin at the bottom of the buy panel uses. */
-.savebutton-top {
-    background: #215a7a;
-    border: 1px solid #7298a7;
-}
-
-.savebutton-top:hover {
-    background: #2b7099;
-}
-
-/* SMALL SCREENS: the top row used to keep its fixed 150px/27px/13px while the buttons at
-   the bottom of the buy panel shrank (gamesNew.css collapses every .btn-*-lobby to
-   auto-width 0.9em with 3px 5px padding at 600px), so the two Ready buttons on the same
-   page were visibly different sizes (user report 2026-08-08). Same numbers here, so the
-   whole row matches the bottom of the panel. */
-@media screen and (max-width: 600px) {
-
-    .fleet-dropdown-btn,
-    .readybutton-top,
-    .savebutton-top {
-        font-size: 0.9em;
-        width: auto;
-        min-width: 90px;
-        height: auto;
-        line-height: normal;
-        padding: 3px 5px;
-    }
-
-    /* the ▼ sits 6px in from a now much narrower button - pad the label clear of it */
-    .fleet-dropdown-btn {
-        padding-right: 16px;
-    }
-
-    .fleet-loading-container {
-        flex-wrap: wrap;
-        gap: 4px;
-    }
-}
-
-.fleet-checker-link-style {
-    font-size: 14px;
-}
-
-.fleet-check-panel-container {
-    display: none;
-}
-
-.fleet-check-text-style {
-    display: block;
 }
 
 .deployment-preview-wrapper {
@@ -1026,13 +496,6 @@
     min-width: 480px;
 }
 
-.factionsubgroup-header {
-    margin-left: 20px;
-}
-
-.factionsubgroup-header + .faction-group-container {
-    margin-left: 20px;
-}
 /* ── Reinforcements (REINFORCEMENTS_PLAN.md §4 Stage 1) ─────────────────────────────────
    #00b8e6 is FV's established "not here yet" cyan - the same value logPanel.css gives the
    fleet list's .docked rows and the [Deploys on Turn N] header, and tactical.css the blue
@@ -1041,25 +504,6 @@
    ⚠️ No :root block here, and none anywhere but styles/tokens.css. The cyan is written as a
    literal because its two siblings in tactical.css are literals too; if it ever earns a
    token, all three move together ([[project_visual_unification]]).                        */
-
-/* The buy-mode checkbox in the store's filter strip. base.css gives .yellow-tick the store's
-   own accent; a reinforcement is not a filter, so it takes the cyan instead - and the label
-   itself lights up while the mode is on, because "everything I buy now goes to hyperspace"
-   is a state a player must not be able to forget they left switched on. */
-input[type="checkbox"].cyan-tick:checked {
-    accent-color: #00b8e6;
-}
-
-.tier-label-style.reinforcement-mode-label {
-    cursor: pointer;
-}
-
-/* :has() degrades gracefully - a browser without it simply drops this one rule and the
-   player still sees the cyan tick itself, which is the state they must not miss. */
-.tier-label-style.reinforcement-mode-label:has(#reinforcementModeToggle:checked) {
-    color: #00b8e6;
-    font-weight: bold;
-}
 
 /* The two group headers inside #fleet. Written and REMOVED by gamedata.applyFleetGrouping;
    they carry no `ship` class and no action-link classes, because #fleet's click handlers are

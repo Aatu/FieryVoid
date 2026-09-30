@@ -1,0 +1,159 @@
+/*
+ * scenarioCard.css - the Scenario Description fact grid and the Game Rules chips built by
+ * client/UI/scenarioCard.js.
+ * CREATE_GAME_GAMELOBBY_REDESIGN_PLAN.md §3.3 / §4.1. Linked on creategame.php and gamelobby.php.
+ *
+ * Tokens only - tokens.css is the one :root block; never declare another here.
+ *
+ * Deliberately NOT gamesPanel.css's .fv-card. That one is games.php's clickable <a> card (hover
+ * fill, focus ring, a --rail that defaults to the idle state), and gamesPanel.css is not linked on
+ * either of these pages. Same grammar - card fill, soft border, the 3px rail - without the
+ * interaction states a read-only fact must not advertise.
+ */
+
+.fv-scn-grid {
+  --fv-scn-gap: 12px;
+  display: grid;
+  /* At most TWO columns, dropping to one once a column would be narrower than 11rem.
+     Keyed to the grid's OWN width, not the viewport's: the same grid sits in a third-width
+     lobby column on a desktop, a full-width wizard card and a 390px phone, and a media query
+     can only see the last of those. A browser without max() drops the whole declaration and
+     gets one column - the phone layout, which is the safe way round. */
+  grid-template-columns: repeat(auto-fill, minmax(max(11rem, calc((100% - var(--fv-scn-gap)) / 2)), 1fr));
+  gap: var(--fv-scn-gap);
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.fv-scn-fact {
+  /* min-width: 0 lets a long unbroken value wrap instead of widening its whole track */
+  min-width: 0;
+  padding: 10px 12px;
+  background: var(--fv-card);
+  border: 1px solid var(--fv-line-soft);
+  border-left: var(--fv-log-rail) solid var(--rail, var(--fv-accent));
+    /*border-left: var(--fv-log-rail) solid var(--fv-purple);*/  
+  box-sizing: border-box;
+}
+
+.fv-scn-fact--wide {
+  grid-column: 1 / -1;
+}
+
+/* font-family on the element itself: gamesNew.css's `* { font-family: Arial }` matches every
+   element directly, so an inherited display face would lose to it. */
+.fv-scn-label {
+  margin: 0 0 5px;
+  font-family: var(--fv-display);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+  color: var(--fv-text-dim);
+}
+
+.fv-scn-value {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--fv-text);
+  /* player-typed text: a long URL or faction list must break rather than overflow on a phone */
+  overflow-wrap: anywhere;
+}
+
+/* Additional Info keeps the creator's line breaks - as text, never as markup. */
+.fv-scn-value--multiline {
+  white-space: pre-line;
+}
+
+/* Plain: the facts already sit INSIDE a card carrying the rail (the wizard's Summary step), and
+   cards inside a card read as clutter - so drop each fact's chrome and keep the type. */
+.fv-scn-grid--plain .fv-scn-fact {
+  padding: 0;
+  background: none;
+  border: 0;
+}
+
+.fv-scn-grid--plain .fv-scn-label {
+  margin-bottom: 3px;
+  font-size: 8.5px;
+  letter-spacing: 1px;
+}
+
+/* ── Game Rules chips (scenarioCard.ruleChips) ─────────────────────────────────
+   The lobby's Game Rules row and the wizard's Summary step - one look, one set of colours, so
+   the Summary really is a preview of the lobby. Colour by kind (user, 2026-09-25): Ladder takes
+   games.php's ladder gold, terrain white, Simultaneous Movement green, Reinforcements cyan, Mines
+   purple, Private Game yellow (Stage 8), and everything else the page's own blue. Each kind only
+   sets the three --chip values. */
+
+.fv-rule-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fv-rule-chip {
+  --chip: var(--fv-text-accent);
+  --chip-fill: rgba(139, 202, 242, 0.1);
+  --chip-line: var(--fv-line-scs);
+  padding: 4px 9px;
+  font-family: var(--fv-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.3px;
+  color: var(--chip);
+  background: var(--chip-fill);
+  border: 1px solid var(--chip-line);
+  border-radius: 2px;
+}
+
+.fv-rule-chip--ladder {
+  --chip: var(--fv-ladder);
+  --chip-fill: rgba(230, 172, 0, 0.1);
+  --chip-line: rgba(230, 172, 0, 0.6);
+}
+
+.fv-rule-chip--terrain {
+  --chip: var(--fv-text-bright);
+  --chip-fill: rgba(255, 255, 255, 0.06);
+  --chip-line: rgba(255, 255, 255, 0.5);
+}
+
+/* The landing page's green pair: the #52b352 signal for the line, its pastel for the text
+   (the signal itself is only ~3.4:1 as text on the card fill). */
+.fv-rule-chip--simmove {
+  --chip: var(--fv-mine-soft);
+  --chip-fill: rgba(82, 179, 82, 0.12);
+  --chip-line: rgba(82, 179, 82, 0.75);
+}
+
+/* #00b8e6 is FV's "not here yet" cyan - the Buy as Reinforcement toggle, the fleet list's
+   hyperspace rows and the Jump Point marker (see lobby.css). It has no token; do not add a
+   second cyan. */
+.fv-rule-chip--reinforcements {
+  --chip: #00b8e6;
+  --chip-fill: rgba(0, 184, 230, 0.1);
+  --chip-line: rgba(0, 184, 230, 0.6);
+}
+
+.fv-rule-chip--mines {
+  --chip: var(--fv-purple);
+  --chip-fill: rgba(178, 140, 240, 0.1);
+  --chip-line: rgba(178, 140, 240, 0.6);
+}
+
+/* A password-protected game (Stage 8): the yellow of the Load a Fleet menu's private padlock. */
+.fv-rule-chip--private {
+  --chip: var(--fv-warn);
+  --chip-fill: rgba(225, 176, 0, 0.1);
+  --chip-line: rgba(225, 176, 0, 0.6);
+}
+
+.fv-rule-chip--none {
+  --chip: var(--fv-text-dim);
+  --chip-fill: none;
+  border-style: dashed;
+}

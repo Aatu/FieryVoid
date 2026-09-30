@@ -59,8 +59,18 @@ window.ReplayAnimationStrategy = function () {
         return this;
     };
 
+    /* DONE IS PER DIRECTION. A replay that has played to its end sits PAST endTime, and one
+       rewound to its start sits BELOW 0 - and the next Play/Rewind starts from exactly there,
+       because fastSeek re-baselines the clock so the first frame moves it by 0. A direction-blind
+       test therefore answered "done" on that first frame and ReplayPhaseStrategy.render paused
+       it again at once: Rewind did nothing from the end, and Play nothing from a full rewind.
+       Only the edge you are travelling TOWARDS can finish the replay. (Paused reads as forward -
+       pause() clears goingBack - and a paused replay re-pausing is harmless.) */
     ReplayAnimationStrategy.prototype.isDone = function () {
-        return this.endTime < this.totalAnimationTime || this.totalAnimationTime < 0;
+        if (this.goingBack) {
+            return this.totalAnimationTime < 0;
+        }
+        return this.endTime < this.totalAnimationTime;
     };
 
     ReplayAnimationStrategy.prototype.update = function () {

@@ -45,17 +45,32 @@ import theme from '../styled/theme';
  *
  * ⚠️ NO element `opacity` anywhere that reads these - the translucency is entirely in bg's
  * alpha. See the note on theme.colors.overlayBgSoft: element opacity fades TEXT as well, and
- * stacking the two compounds. */
+ * stacking the two compounds.
+ *
+ * ⭐ THE LOBBY'S PANEL LOOK (user request 2026-09-27, CREATE_GAME_GAMELOBBY_REDESIGN_PLAN.md
+ * §12.16). These menus only ever open in the lobby, so the chassis now wears gamelobby's
+ * .lb-panel: its navy gradient (OPAQUE, as the Buy dialog's is - it floats over the ship
+ * window), its #2a6b8f frame, 6px corners and shadow, and its panel-head band for the title.
+ * That puts the chrome back on a blue, which is what the note above warned about - so the
+ * sections do not lean on the chassis being grey any more: each bar carries its own solid
+ * rail and wash (SECTION_INK below), the same band the Buy dialog's section heads wear.
+ * `bg` and `titleBg` are gradients now: paint them with `background`, never
+ * `background-color`. */
 export const MENU_CHROME = {
-    bg: 'rgba(8, 12, 16, 0.96)',    //body fill. Alpha only - never pair with element opacity
-    line: '#33414f',                //frame, section-break rules, control borders
-    titleBg: '#1b242e',             //MenuHeader fill (the fighter and mine menus; see below)
-    text: '#c7d3de',                //body text - the chassis answer to theme.colors.chromeText
-    dim: '#6c7a87',                 //secondary labels - the chassis answer to theme.colors.textDim
-    btnBg: '#161d25',               //ticker fill
-    btnText: '#aebac6',             //ticker glyph, a shade under `text` so ± never outshouts a label
-    well: '#05080b',                //number-input fill
-    focus: '#4d6070',               //focused input border
+    bg: 'linear-gradient(180deg, rgb(27, 45, 62), rgb(18, 32, 45))',   //.lb-panel's fill, opaque
+    line: '#2a6b8f',                //.lb-panel's frame - frame, section-break rules, control borders
+    radius: '6px',                  //.lb-panel's corners
+    shadow: '0 8px 28px rgba(0, 0, 0, 0.6)',
+    //.lb-panel-head's band, made OPAQUE over the panel (its 0.58 / 0.22 of #496791 over the navy):
+    //the fighter and mine menus pin their title while the rows scroll underneath it.
+    titleBg: 'linear-gradient(180deg, rgb(54, 79, 110), rgb(36, 57, 80))',
+    title: '#c6e2ff',               //--fv-text-accent - the panel-head title
+    text: '#deebff',                //--fv-text
+    dim: '#8ca5c0',                 //--fv-text-dim
+    btnBg: '#081420',               //ticker fill - the lobby's input and stepper fill
+    btnText: '#deebff',             //ticker glyph
+    well: '#000000',                //number-input fill - the Buy dialog's value box
+    focus: '#8bcaf2',               //focused input border - --fv-accent
 };
 
 /* ⭐ THE SECTION INKS. One entry per section, and every coloured thing that section owns is
@@ -79,20 +94,35 @@ export const MENU_CHROME = {
  * depend on whatever the tooltip happens to be floating over.
  *
  * Both SectionBody and ActionButton/ValueInput take one of these as $ink and read the part
- * they need, so a section is one object at one call site and cannot half-change. */
+ * they need, so a section is one object at one call site and cannot half-change.
+ *
+ * The lobby look (2026-09-27) added three parts per section - the BAND its bar wears (`bar`,
+ * `wash`, `title`: the Buy dialog's section head, in this section's ink) - and moved Damage from
+ * the 202° slate to a 190° teal, because the chassis is a 201° navy now and the old slate sat on
+ * it like part of the frame. `bar` is also the stripe down the section's rows (SectionBody), so
+ * the bar's left edge runs on unbroken; `rail` stays the dimmer control border. */
 export const SECTION_INK = {
     enh: {
         rail: theme.colors.enhLine,     //#8a6d3b - bronze, from the shared gold set
+        bar: '#c39a52',
+        wash: theme.colors.enhBg,       //rgba(169, 128, 56, 0.30)
+        title: theme.colors.enhTitle,   //#e8cf93
         btnBg: '#292114',
-        btnText: theme.colors.enhTitle, //#e8cf93
+        btnText: theme.colors.enhTitle,
     },
     damage: {
-        rail: '#3d7a9c',                //the Damage bar's own hairline
-        btnBg: '#142129',
-        btnText: '#a4cde3',
+        rail: '#2f7f92',
+        bar: '#4cb8d0',
+        wash: 'rgba(58, 159, 181, 0.26)',
+        title: '#e0f5fa',
+        btnBg: '#0f262d',
+        btnText: '#b6e3ee',
     },
     crit: {
-        rail: '#a85c33',                //the Critical Effects bar's own hairline
+        rail: '#a85c33',
+        bar: '#dd7643',
+        wash: 'rgba(168, 92, 51, 0.34)',
+        title: '#ffe8dc',
         btnBg: '#291914',
         btnText: '#eab99e',
     },
@@ -102,16 +132,19 @@ export const SECTION_INK = {
    the components below need only one code path. */
 const CHASSIS_INK = {
     rail: MENU_CHROME.line,
+    bar: MENU_CHROME.line,
     btnBg: MENU_CHROME.btnBg,
     btnText: MENU_CHROME.btnText,
 };
 const inkOf = props => props.$ink || CHASSIS_INK;
 
+/* 10px in on the left: clear of the section's 3px stripe (SectionBody), as the lobby's rows sit
+   clear of their panel's edge. */
 export const MenuRow = styled.div`
     display: flex;
     align-items: center;
     gap: 5px;
-    padding: 4px 6px;
+    padding: 4px 8px 4px 10px;
     font-size: 11px;
     color: ${props => props.$gold ? theme.colors.enhText : MENU_CHROME.text};
 `;
@@ -154,16 +187,19 @@ export const MenuHint = styled.span`
    already marked with rather than a fourth value to keep in step. */
 export const ActionButton = styled.div`
     width: 24px;
-    height: 18px;
+    height: 20px;
     flex: 0 0 24px;
+    box-sizing: border-box;
     background: ${props => inkOf(props).btnBg};
     border: 1px solid ${props => inkOf(props).rail};
+    border-radius: 2px;
     color: ${props => inkOf(props).btnText};
     cursor: pointer;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 10px;
+    font-size: 12px;
+    line-height: 1;
     opacity: 0.9;
     user-select: none;
 
@@ -192,8 +228,9 @@ export const ActionButton = styled.div`
 export const ValueInput = styled.input`
     flex: 0 0 44px;
     width: 44px;
-    height: 18px;
+    height: 20px;
     box-sizing: border-box;
+    margin: 0;
     padding: 0;
     text-align: center;
     font-family: ${theme.fonts.mono};
@@ -201,6 +238,7 @@ export const ValueInput = styled.input`
     color: ${props => props.$destroyed ? '#ff8a80' : '#ffffff'};
     background-color: ${MENU_CHROME.well};
     border: 1px solid ${props => inkOf(props).rail};
+    border-radius: 2px;
     outline: none;
 
     &:focus {
@@ -222,16 +260,24 @@ export const ValueInput = styled.input`
    title was pure restatement. FighterDamageMenu and MineDamageMenu keep theirs: they have ONE
    section each, so the title is the only thing naming the window.
    That is also why SectionBar drops its top hairline when it is first (see below): with no
-   title above it, the topmost bar butts straight onto the container's own border. */
+   title above it, the topmost bar butts straight onto the container's own border.
+
+   Worn like gamelobby's .lb-panel-head (2026-09-27): its band, Orbitron caps, the accent title,
+   left-aligned. z-index for $sticky: base.css makes every checkbox position: relative, and a
+   later positioned box paints over an earlier one as the rows scroll under the title. */
 export const MenuHeader = styled.div`
-    padding: 3px;
-    background-color: ${MENU_CHROME.titleBg};
+    padding: 6px 10px 5px;
+    background: ${MENU_CHROME.titleBg};
     border-bottom: 1px solid ${MENU_CHROME.line};
-    color: ${MENU_CHROME.text};
-    text-align: center;
-    font-size: 12px;
-    font-weight: bold;
-    ${props => props.$sticky ? 'position: sticky; top: 0;' : ''}
+    color: ${MENU_CHROME.title};
+    text-align: left;
+    font-family: ${theme.fonts.display};
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    user-select: none;
+    ${props => props.$sticky ? 'position: sticky; top: 0; z-index: 1;' : ''}
 `;
 
 /* ⭐ THE THREE SECTION BARS, in one place so they cannot drift.
@@ -262,11 +308,28 @@ export const MenuHeader = styled.div`
  * token nothing else reads is just indirection. If a fourth section bar ever appears in
  * another file, move all three at once.
  */
+
+/* The band every section bar wears (2026-09-27): the Buy dialog's section head - Orbitron caps
+   on a wash that fades off the title, a solid 3px bar on the left - in the section's own ink.
+   7px + the 3px bar puts the title on the same 10px line as the rows' text beneath it. */
+const band = ink => `
+    color: ${ink.title};
+    background-color: ${ink.wash};
+    background-image: linear-gradient(to right, ${ink.wash}, rgba(0, 0, 0, 0) 75%);
+    border-left: 3px solid ${ink.bar};
+    border-top: 1px solid ${ink.rail};
+    border-bottom: 1px solid ${ink.rail};
+`;
+
 const SectionBar = styled.div`
-    padding: 3px;
-    text-align: center;
-    font-size: 10px;
-    letter-spacing: 0.5px;
+    padding: 5px 10px 4px 7px;
+    text-align: left;
+    font-family: ${theme.fonts.display};
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
     user-select: none;
 
     /*ApplyDamageMenu has no title bar any more, so whichever bar comes first butts straight
@@ -278,7 +341,7 @@ const SectionBar = styled.div`
     }
 `;
 
-/* ⭐ THE RAIL. A 2px stripe of the section's own ink down the left of its ROWS, so the
+/* ⭐ THE RAIL. A stripe of the section's own ink down the left of its ROWS, so the
  * section colour does not stop dead at the bar.
  *
  * Before this, each section was identified by a 14px stripe and nothing else - every row
@@ -287,10 +350,13 @@ const SectionBar = styled.div`
  * comes from how far it REACHES rather than from how loud the bar is, which is what lets the
  * bars stay exactly as tuned while the chrome around them goes quiet.
  *
+ * 3px of the bar's own colour since 2026-09-27: it carries the bar's left edge straight on
+ * down, so bar and rows read as one block per section.
+ *
  * ⚠️ box-shadow, not border-left, and not a tinted background:
- *   - a border would shift every row 2px right and mean compensating padding in five
+ *   - a border would shift every row right and mean compensating padding in five
  *     different components; an inset shadow paints over padding the rows already have.
- *   - a background wash would carry its own alpha on top of MENU_CHROME.bg's 0.96, and
+ *   - a background wash would carry its own alpha on top of the chassis fill, and
  *     alpha compounding is the trap theme.colors.overlayBgSoft exists to warn about.
  */
 export const SectionBody = styled.div`
@@ -301,39 +367,25 @@ export const SectionBody = styled.div`
     min-width: 0;
     max-width: 100%;
     box-sizing: border-box;
-    box-shadow: inset 2px 0 0 ${props => inkOf(props).rail};
+    box-shadow: inset 3px 0 0 ${props => inkOf(props).bar};
 `;
 
 /* Bought equipment. Bronze, and the ✦ that marks the whole feature. */
 export const EnhSectionHeader = styled(SectionBar)`
-    background-color: ${theme.colors.enhBg};
-    border-top: 1px solid ${theme.colors.enhLine};
-    border-bottom: 1px solid ${theme.colors.enhLine};
-    color: ${theme.colors.enhTitle};
+    ${band(SECTION_INK.enh)}
 `;
 
-/* Structure. The teal-slate this menu has always worn, lifted a stop (round 1b) - at
-   #1b3b50 the bar sank into the menu body and read as a caption rather than a section
-   head. Untouched by the 2026-08-16 pass: it now reads as a section rather than as a
-   slightly greener chassis purely because the chassis stopped being blue. */
+/* Structure. Teal - taken off the old 202° slate (#23506b) when the chassis became the lobby's
+   201° navy, where the slate would have read as more frame rather than as a section. */
 export const DamageSectionHeader = styled(SectionBar)`
-    background-color: #23506b;
-    border-top: 1px solid ${SECTION_INK.damage.rail};
-    border-bottom: 1px solid ${SECTION_INK.damage.rail};
-    color: #e8f2ff;
+    ${band(SECTION_INK.damage)}
 `;
 
-/* Malfunctions. Rust - the Damage bar's own L28/S51 taken across the wheel to 14°, so the
-   two bars are one geometry in two inks. It is the dark end of the game's critical orange
-   (theme.colors.healthCrit #ed6738), which is what the crit rows beneath it are already
-   painted in, so the bar and its body finally name the same thing.
-   The title goes warm-white for the same reason the fill does: two signals of one difference
-   read more clearly than one. */
+/* Malfunctions. Rust - the dark end of the game's critical orange (theme.colors.healthCrit
+   #ed6738), which is what the crit rows beneath it are already painted in, so the bar and its
+   body name the same thing. */
 export const CritSectionHeader = styled(SectionBar)`
-    background-color: #6d3823;
-    border-top: 1px solid ${SECTION_INK.crit.rail};
-    border-bottom: 1px solid ${SECTION_INK.crit.rail};
-    color: #ffece2;
+    ${band(SECTION_INK.crit)}
 `;
 
 /* The hard visual break between two editors sharing one menu - they must not read as one
