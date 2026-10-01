@@ -236,7 +236,12 @@ window.MovementPhaseStrategy = function () {
 
         var icon = this.shipIconContainer.getByShip(this.shipThrustUIState.ship);
         var position = window.coordinateConverter.fromGameToViewPort(icon.getPosition());
-        jQuery("#thrustUIContainer").css({ left: position.x + 'px', top: position.y + 'px' })
+        var container = jQuery("#thrustUIContainer").css({ left: position.x + 'px', top: position.y + 'px' })[0];
+
+        //Tells the React panel (shipThrust/ShipThrust.js, THRUST_RELAYOUT_EVENT) that it has moved:
+        //on a zoom the thruster ring is resized to hug the ship, and the panel is placed against it.
+        //Fired even when the position is unchanged - a ship at the centre of a zoom does not move.
+        if (container) container.dispatchEvent(new CustomEvent('fv-thrust-relayout'));
 
         return true;
     }

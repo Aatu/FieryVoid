@@ -210,6 +210,13 @@ class MovementGamePhase implements Phase
 					// movement so orientation-dependent checks (pivots) see the plotted
 					// path, run the validator, then keep only the sanitised result.
 					$activeShipMovementBackup = $activeShip->movement;
+
+					// EXTENDED TURNS (EXTENDED_TURNS_PLAN.md §2.3) - FIRST, on the movement exactly as
+					// the client submitted it, so validateThrustPayment then judges payment on what
+					// survives (T12). The stored movement is passed alongside because the turn being
+					// completed was begun LAST turn, and the POST carries this turn only.
+					$ship->movement = Movement::validateExtendedTurn($activeShip, $ship->movement, $activeShipMovementBackup, $gameData->turn);
+
 					$activeShip->movement = $ship->movement;
 					$ship->movement = Movement::validateThrustPayment($activeShip, $gameData->turn);
 					$activeShip->movement = $activeShipMovementBackup;

@@ -41,6 +41,21 @@ const theme = {
         enhTitle: "#e8cf93",                    //Enhancements section-bar title - a shade brighter
         enhBg: "rgba(169, 128, 56, 0.30)",      //Enhancements section-bar fill
         enhLine: "#8a6d3b",                     //Enhancements border / divider - bronze
+        /* THE GREEN SET - the control-menu look the Gravitic Augmenter menu introduced, and the
+           thrust panel (shipThrust/ShipThrust.js) took on by user request 2026-10-01. Extracted
+           from GraviticAugmenterMenu.js's literals when the second surface needed it, for the same
+           reason as the gold set above: two files copying hex values is how two surfaces drift.
+           ⚠️ greenBg is a FILL with its own alpha. Never add element opacity on top of it - it
+           would fade the text as well, and the two compound. */
+        greenBg: "rgba(8, 28, 12, 0.92)",       //panel body
+        greenLine: "#3f8a3f",                   //panel frame, title border, dividers
+        greenTitleBg: "#16401b",                //title bar fill
+        greenText: "#e6ffe6",                   //title and button text
+        greenLabel: "#bdf0bd",                  //row labels, sub-labels
+        greenBtnBg: "#1b5e20",                  //button fill
+        greenBtnLine: "#2e7d32",                //button border; also the hover / active FILL
+        greenBtnLineHover: "#66bb6a",           //button border on hover / active
+        greenGlow: "#4caf50",                   //active button glow
         custom: "#cccc00",
 
         //HISTORICAL - the 2011 map-overlay skin. Stage 4 converged every surface that wore

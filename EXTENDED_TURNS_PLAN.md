@@ -7,8 +7,9 @@ flying straight, and **completes the turn at the very start of its next movement
 The same project restyles the Apply Thrust panel and the movement-icon hover labels into the unified
 look. That restyle comes first (Stage 0) because both extended-turn panels are built on top of it.
 
-Status: **PLAN — nothing built. Decisions ruled by the user on 2026-10-01** (see Rulings). One new
-question, D12, is open but does not block anything. Ready for Stage 0.
+Status: **Stages 0, 1 and 2 BUILT 2026-10-01, uncommitted, awaiting the user's in-game tests (15, 18).
+Stages 3-6 not started.** Decisions ruled by the user on 2026-10-01 (see Rulings). D12 is open but does
+not block anything. As-built notes and deviations: §8.1.
 
 ## The rule (B5W)
 
@@ -442,6 +443,64 @@ Each stage can be tested on its own. Stages 0 and 1 can also be deployed on thei
 | **6** | Playtest in a fresh two-player local game, then add it to the replay corpus (merge recipe) | — | harness green, with the new game included |
 
 Nothing gets committed. The user reviews each stage's diff and commits it themselves.
+
+### 8.1 As built (2026-10-01): Stages 0-2
+Each stage touches its own files, so each can be committed on its own: Stage 0 is `ShipThrust.js`,
+`moveTooltip.js` and `tactical.css`; Stage 1 is `movement.php`, `MovementGamePhase.php` and
+`replayHarness.php`; Stage 2 is `movement.js`.
+
+Deviations from the text above:
+- **D9 detection (§3.3, T17).** Engine Shorted always takes the engine offline, but writes the preturn
+  `speedchange` row only on a d20 roll of 15 or more (`Engine::doEngineShorted`). Keying on the row alone
+  would label most shorts `'thrust'`. `hasEngineShortedSince` also accepts an `EngineShorted` critical
+  dated on or after the begin turn.
+- **The box (§3.3).** `canToggleExtendedTurn` / `setExtendedTurn` became `getExtendedTurnToggle(ship, move)`,
+  which returns `null` (no box) or `{checked, enabled, hint}`, and `setExtendedTurn(ship, on)`. The box has
+  three states, not two. `qualifiesForExtendedTurn` is `canBeginExtendedTurn` without the D1-A thrust test;
+  the box asks it, the map icon asks `canBeginExtendedTurn`.
+- **`validateExtendedTurn` takes an optional fifth argument, `&$findings`**, which receives one line per
+  finding. The replay harness prints them, and the synthetic cases assert on them.
+- **Panel (§4.2).** The desktop panel is 260px wide: four text buttons do not fit in one row at 230px. On
+  desktop it flips above the ship when there is no room below. The panel is clamped by measurement
+  (`placePanel`), because the transformed container is the containing block even for `position: fixed`.
+  A MutationObserver re-clamps it when `repositionThrustUi` moves the container with jQuery. Rows that
+  are overpaid show an "Extra thrust +N" line.
+- §11's `hasTurned` typo (`"turneleft"`) is already fixed in the current code.
+- **Panel revised by the user (2026-10-01), superseding parts of §4.2 and §4.4:**
+  - It wears the Gravitic Augmenter menu's green. That set moved into `theme.js` as `theme.colors.green*`,
+    and `GraviticAugmenterMenu.js` now reads it too, with identical values.
+  - It is compact: 180px wide on desktop, 240px docked on phones.
+  - **AUTO and RESET are gone.** Its buttons are CONFIRM then CANCEL. To keep every manoeuvre pre-filled,
+    jinks, rolls, emergency rolls, Contraction and turn-into-pivot now call `autoAssignThrust` when they
+    open the panel, as turns, slips and speed changes already did. Pivots still never auto-assign
+    (`autoAssignThrust` skips them by design).
+  - **Stage 3's mock-up in §4.2 shows [AUTO] [RESET]. Drop them.**
+- **Panel placement and boxes, revised by the user (2026-10-01), superseding §4.5:**
+  - **There is no bottom-docked phone layout any more.** At every size the panel sits against the thruster
+    ring. It goes below the ring, else above, else right, else left, whichever fits first on screen.
+  - The ring follows zoom. Ship icons keep their world size, so zoomed out the old fixed ring (columns at
+    60px, rows at 80px) and the panel 125px down stood far from a few-pixel hull. `getRingOffsets` now
+    pulls the ring in to hug the unit's circle. It never goes further out than the old layout, and it is
+    held off only far enough that tiles cannot collide. The panel also keeps clear of the hull itself,
+    out to that same old reach.
+  - `MovementPhaseStrategy.repositionThrustUi` fires `fv-thrust-relayout` on the container after it moves
+    it. This replaced a MutationObserver, which missed zooms on a ship at the centre of the zoom: such a
+    ship does not move.
+  - Tile boxes: **orange** means a click is taken and pays thrust the manoeuvre still needs. **Green**
+    means a click is taken as extra thrust, which shortens a turn's delay. No box means the click would be
+    refused. "Taken" is `shipManager.movement.wouldAcceptThrust`, a dry run of `assignThrust` that puts the
+    row back exactly.
+  - starter-guide.html's movement bullets now describe the panel beside the ship, Confirm/Cancel and the
+    two box colours. `img/docViewer/movement-arrows.jpg` still shows the old panel and needs re-shooting.
+
+Proof so far:
+- **Stage 1:** 20 synthetic cases, all as planned in log-only and in enforce mode. Full replay `check`:
+  the eight known failures, plus 4302. 4302 is data drift (the game moved from phase 2 to 3) and was
+  byte-identical with Stage 1 stashed.
+- **Stage 2:** 41 console checks in a real local game page with every POST blocked (4347, a gravitic
+  Traveler; 4256, a Vree Xonn). The checks cover the box both ways, D2, D4, the map-icon begin, a faked N+1
+  completion, the dry run leaving no row, and all three cancel reasons.
+- **Stage 0:** headless render at desktop and phone width. Tests 15 and 18 in a real game are still owed.
 
 ## 9. Test matrix
 Play these in fresh local games, then check `tac_shipmovement` for that game ID.

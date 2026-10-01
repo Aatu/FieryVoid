@@ -134,6 +134,29 @@ body {
     position: relative;
 }
 
+/* The hover label over a movement icon ("Turn Right", "Stop Pivoting", ...), built by
+   UI/moveTooltip.js and appended to <body>. EXTENDED_TURNS_PLAN.md §4.6: it used to be styled
+   twice over in inline styles that disagreed (a #2c3e50 16px-bold template that .css() then
+   overrode with #333 12px, and a #ccc span inside both). It now wears the map tooltip's tokens,
+   so it reads as the same family as the ship tooltip it sits beside - rounded on purpose, like
+   both map tooltips (--fv-radius-tooltip).
+   top/left are still set inline by moveTooltip.js, which follows the mouse.
+   ⚠️ The translucency is in the FILL; do not add element opacity (alpha compounding). jQuery's
+   fadeIn animates opacity UP to 1, so it does not compound. */
+.fv-movetooltip {
+    position: absolute;
+    z-index: 1000;
+    padding: 4px 6px;
+    font-family: arial;
+    font-size: 12px;
+    line-height: 1.2;
+    white-space: nowrap;
+    color: var(--fv-text-bright);
+    background-color: var(--fv-overlay-soft);
+    border-radius: var(--fv-radius-tooltip);
+    pointer-events: none;
+}
+
 /* JUMP_POINTS_PLAN.md Stage 2b - the vortex facing control. Structurally identical to
    #shipMovementUI above (absolutely positioned container anchored to a map position, absolutely
    positioned icon children, same stacking level) and kept as its own block rather than merged

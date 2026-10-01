@@ -17,7 +17,9 @@
  *   movement  - Movement::validateThrustPayment replayed over every ship-turn
  *               (enforcement forced ON in-memory only). Catches regressions in
  *               thrust/maneuver math: every recorded legal move must stay legal.
- *   tohit     - Weapon::calculateHitBase recomputed for every recorded direct
+ *               Plus a Movement::validateExtendedTurn line for any ship-turn that
+ *               carries (or owes) an extended turn - and only those.
+ *   tohit    - Weapon::calculateHitBase recomputed for every recorded direct
  *               fire order, per turn, against as-of-turn state. Catches
  *               regressions in hit-chance math (arcs, range, EW, jink, modes).
  *   damage    - damage AND critical resolution replayed per turn. The turn's own
@@ -382,6 +384,9 @@ class ReplayHarness {
                 }
                 $lines[] = sprintf('t%d ship%d moves=%d %s | %s',
                     $turn, $ship->id, $turnMoves, $verdict, $before);
+
+                $extendedLine = $this->buildExtendedTurnLine($ship, $turn);
+                if ($extendedLine !== null) $lines[] = $extendedLine;
             }
         } finally {
             if ($hadFlag) {
@@ -389,6 +394,42 @@ class ReplayHarness {
             }
         }
         return $lines;
+    }
+
+    /* Movement::validateExtendedTurn over one ship-turn (EXTENDED_TURNS_PLAN.md §2.6), run with the
+       same in-memory enforcement as the line above. Written ONLY when the turn carries a begin,
+       completion or cancellation row, or owes a turn begun at T-1 - so a corpus with no extended
+       turns in it keeps a byte-identical movement.txt. The turn's rows are CLONED: enforcement can
+       rewrite a begin row's value in place, and these objects are the ship's own. */
+    private function buildExtendedTurnLine($ship, $turn) {
+        if (!method_exists('Movement', 'validateExtendedTurn')) return null;
+
+        $submitted = array();
+        $relevant = Movement::getOwedExtendedTurn($ship->movement, $turn) !== null;
+        foreach ($ship->movement as $move) {
+            if ($move->turn != $turn) continue;
+            $submitted[] = clone $move;
+            if (Movement::isExtendedTurnStart($move) || $move->type === 'extendTurnCancel' || $move->value === 'extendedTurn') {
+                $relevant = true;
+            }
+        }
+        if (!$relevant) return null;
+
+        $before = $this->serializeMovement($submitted);
+        $findings = array();
+        ob_start();
+        try {
+            $after = Movement::validateExtendedTurn($ship, $submitted, $ship->movement, $turn, $findings);
+            $afterSer = $this->serializeMovement($after);
+            $verdict = ($afterSer === $before) ? 'LEGAL' : "REBUILT >> " . $afterSer;
+        } catch (Throwable $e) {
+            $verdict = 'ERROR(' . $this->describeThrowable($e) . ')';
+        } finally {
+            ob_end_clean();
+        }
+
+        return sprintf('t%d ship%d validateExtendedTurn %s | findings: %s | %s',
+            $turn, $ship->id, $verdict, empty($findings) ? 'none' : implode('; ', $findings), $before);
     }
 
     private function serializeMovement($movement) {

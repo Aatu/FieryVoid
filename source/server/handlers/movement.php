@@ -180,12 +180,26 @@
                 return $ship->movement;
             }
 
-            // Rebuild the tail: the ship must still cover its full speed in hexes, so
-            // coast straight along its last legal heading for the remaining hexes, then
-            // end. Anchor on the last accepted move (its pre-maneuver position/heading/
+            // Anchor on the last accepted move (its pre-maneuver position/heading/
             // facing/speed); fall back to the ship's last committed move if nothing this
             // turn was accepted (illegal maneuver was the very first move).
             $anchor = $lastLegal ?: $ship->getLastMovement();
+            $sanitised = self::rebuildStraightTail($sanitised, $anchor, $hexesUsed, $turn);
+
+            debug::log("validateThrustPayment: rejected illegal '" . $illegalType
+                . "' maneuver for ship " . $ship->id . " turn " . $turn
+                . " (unpaid required thrust); rebuilt straight-line movement to full speed ("
+                . ($anchor ? (int)$anchor->speed : 0) . " hexes).");
+
+            return $sanitised;
+        }
+
+        /* Rebuild the tail of a truncated turn: the ship must still cover its full speed in
+         * hexes, so it coasts straight along $anchor's heading for the hexes it has left, then
+         * ends. $anchor is the last move kept (its position/heading/facing/speed); $hexesUsed is
+         * how many hexes the kept moves already covered. Returns $sanitised with the tail added.
+         * Shared by validateThrustPayment and validateExtendedTurn (EXTENDED_TURNS_PLAN.md §2.4). */
+        private static function rebuildStraightTail($sanitised, $anchor, $hexesUsed, $turn){
             if ($anchor){
                 $speed   = (int)$anchor->speed;
                 $heading = (int)$anchor->heading;
@@ -213,11 +227,6 @@
                     false, $turn, 0, 0
                 );
             }
-
-            debug::log("validateThrustPayment: rejected illegal '" . $illegalType
-                . "' maneuver for ship " . $ship->id . " turn " . $turn
-                . " (unpaid required thrust); rebuilt straight-line movement to full speed ("
-                . ($anchor ? (int)$anchor->speed : 0) . " hexes).");
 
             return $sanitised;
         }
@@ -552,6 +561,348 @@
                 }
                 $primaryStruct->damage[] = $damageEntry;
             }
+        }
+
+
+        /* ================ EXTENDED TURNS ================================================
+         * EXTENDED_TURNS_PLAN.md Stage 1 (§2). A ship that cannot (or should not) pay for a whole
+         * turn pays at least a quarter of it on turn N and names the side, keeps flying straight,
+         * and completes the turn as the FIRST order of turn N+1. Three movement rows carry it:
+         *
+         *   begin         turn N    extendTurnLeft / extendTurnRight; facing and heading unchanged;
+         *                           requiredThrust = the full turn; value = what is still owed, BY
+         *                           ROLE, as JSON {"any":a,"rear":r,"side":s}.
+         *   completion    turn N+1  an ordinary turnleft / turnright on the same side with
+         *                           value 'extendedTurn' - so turn delay, shortening, payment
+         *                           validation and replay all treat it as the turn it is.
+         *   cancellation  turn N+1  extendTurnCancel, forced by the client when completion is
+         *                           physically impossible; value = 'thrusters' | 'thrust' |
+         *                           'engineShorted'.
+         *
+         * The begin is deliberately NOT a turn type: the turn delay would start at it, and
+         * validateThrustPayment would reject it as an underpaid turn. Turn N's begin row is
+         * available at N+1 because getMovesForShips loads turn T-1 - nothing may look for it at
+         * N+2.
+         *
+         * movement.js (shipManager.movement) is the client half and offers only what passes here.
+         */
+
+        /* EXTENDED_TURNS_PLAN.md D4 (user ruling 2026-10-01): the row types a ship may NOT add between
+           beginning an extended turn and the end of that turn. "A manoeuvre is a turn, pivot or roll."
+           Edit this list to change the ruling.
+           - 'move' must never be listed: the whole point is that the ship keeps moving.
+           - 'speedchange' need not be: a speed change must come before any other order anyway.
+           - the extended-turn types are listed so a ship can begin only one at a time.
+           ⚠️ MIRROR PAIR with shipManager.movement.extendedTurnBlockedTypes (movement.js). Change one
+           and not the other and the client will offer an order the server logs as illegal, or refuse
+           one it would accept. */
+        public static $extendedTurnBlockedTypes = array(
+            'turnleft', 'turnright', 'pivotleft', 'pivotright', 'roll', 'extendTurnLeft', 'extendTurnRight'
+        );
+
+        public static function isExtendedTurnStart($move){
+            return $move->type === 'extendTurnLeft' || $move->type === 'extendTurnRight';
+        }
+
+        /* The begin row carried over from last turn - the extended turn owed THIS turn - or null. */
+        public static function getOwedExtendedTurn($movement, $turn){
+            if (!is_array($movement)) return null;
+
+            $owed = null;
+            foreach ($movement as $move){
+                if ($move->turn == $turn - 1 && self::isExtendedTurnStart($move)) $owed = $move;
+            }
+
+            return $owed;
+        }
+
+        /* The amount still owed as written into a begin row's value at CONFIRM: array with keys
+           any / rear / side, or null when the value does not read as one. */
+        public static function readExtendedTurnSnapshot($begin){
+            if (!is_string($begin->value)) return null;
+
+            $data = json_decode($begin->value, true);
+            if (!is_array($data)) return null;
+
+            $snapshot = array();
+            foreach (array('any', 'rear', 'side') as $role){
+                if (!isset($data[$role]) || !is_numeric($data[$role])) return null;
+                $snapshot[$role] = (int)$data[$role];
+            }
+
+            return $snapshot;
+        }
+
+        /* Total thrust a requirement asks for (C in the plan). */
+        private static function getExtendedTurnCost($requiredThrust){
+            $cost = 0;
+            if (!is_array($requiredThrust)) return 0;
+            foreach ($requiredThrust as $req){
+                if ($req > 0) $cost += (int)$req;
+            }
+
+            return $cost;
+        }
+
+        /* What the server's own arithmetic says is still unpaid on a begin row, by role: the "either"
+         * slot, the aft pair (slots 1+2) and the side pair (slots 3+4). A turn's requirement only
+         * ever uses one slot of each pair, so the pair sums need no knowledge of which way round the
+         * ship was.
+         *
+         * ⚠️ RAW thrust (T3): the server ignores HalfEfficiency and FirstThrustIgnored, so it counts at
+         * least as much paid as the client did, and its remainder is never larger than an honest
+         * client's. That is why every check built on this one is a LOWER bound. */
+        private static function getExtendedTurnRawRemainder($ship, $begin){
+            if (!is_array($begin->requiredThrust) || !is_array($begin->assignedThrust)){
+                return array('any' => 0, 'rear' => 0, 'side' => 0);
+            }
+
+            $stillReq = self::calculateThrustStillReq($ship, $begin, true);
+            $owed = function($slot) use ($stillReq){
+                return isset($stillReq[$slot]) ? max(0, (int)$stillReq[$slot]) : 0;
+            };
+
+            return array(
+                'any'  => $owed(0),
+                'rear' => $owed(1) + $owed(2),
+                'side' => $owed(3) + $owed(4),
+            );
+        }
+
+        /* True when the completion's requirement asks for exactly the snapshot, role by role (null
+           counts as 0). The client maps the roles onto the thrusters doing each job at N+1 - after a
+           roll or pivot that changes which ones (D10, T10) - and the pair sums do not care which. */
+        private static function completionMatchesSnapshot($completion, $snapshot){
+            $req = is_array($completion->requiredThrust) ? $completion->requiredThrust : array();
+            $slot = function($i) use ($req){ return isset($req[$i]) ? (int)$req[$i] : 0; };
+
+            return $slot(0) === $snapshot['any']
+                && $slot(1) + $slot(2) === $snapshot['rear']
+                && $slot(3) + $slot(4) === $snapshot['side'];
+        }
+
+        /* Did anything happen to the ship's thrust between the begin and now that could make
+           completion physically impossible? A thruster or engine destroyed, or any critical on
+           one, from the begin turn onwards. Feeds the cancellation tripwire only. */
+        private static function hasThrustChangedSince($ship, $beginTurn){
+            foreach ($ship->systems as $system){
+                if (!($system instanceof Thruster) && !($system instanceof Engine)) continue;
+
+                if ($system->isDestroyed() && !$system->isDestroyed($beginTurn - 1)) return true;
+
+                foreach ($system->criticals as $critical){
+                    if ($critical->turn >= $beginTurn) return true;
+                }
+            }
+
+            return false;
+        }
+
+        /* Engine Shorted this turn: doStuckEngine writes a PRETURN speedchange (D9). */
+        private static function hasEngineShortedThisTurn($movement, $turn){
+            if (!is_array($movement)) return false;
+
+            foreach ($movement as $move){
+                if ($move->turn == $turn && $move->preturn && $move->type === 'speedchange') return true;
+            }
+
+            return false;
+        }
+
+        /* Keep $movement[0 .. $index-1] and rebuild the rest of the turn as straight moves, exactly
+           as validateThrustPayment does for an underpaid manoeuvre. */
+        private static function truncateExtendedTurn($ship, $movement, $index, $turn){
+            $kept = array_slice($movement, 0, $index);
+            $hexesUsed = 0;
+            foreach ($kept as $move){
+                if ($move->turn == $turn && ($move->type === 'move' || $move->type === 'slipleft' || $move->type === 'slipright')) $hexesUsed++;
+            }
+
+            $anchor = !empty($kept) ? end($kept) : $ship->getLastMovement();
+
+            return self::rebuildStraightTail($kept, $anchor, $hexesUsed, $turn);
+        }
+
+        /* Called from MovementGamePhase::process, BEFORE validateThrustPayment (T12), so it sees the
+         * movement exactly as the client submitted it and validateThrustPayment then judges payment
+         * on what survives.
+         *
+         *   $ship       the AUTHORITATIVE ship (systems, damage, criticals)
+         *   $submitted  this turn's movement as POSTed
+         *   $history    the authoritative ship's stored movement, which holds turn T-1's begin row
+         *   $findings   optional: receives one line per finding, for the replay harness and tests
+         *
+         * Shares validateThrustPayment's log-only switch. While $enforceThrustValidation is false it
+         * logs what it WOULD do and returns $submitted unchanged. Preturn rows and forced rows are
+         * skipped by every check, except that a forced cancellation is what (e) and (h) look for.
+         *
+         * Deliberately NOT checked (§2.1): the turn cost itself. The server recomputes no turn's
+         * cost, so a client that understates it can already understate an ordinary turn; extended
+         * turns open no new hole. And only LOWER bounds are checked (T3) - paying too much is not a
+         * way to cheat, and an upper bound could flag an honest client. */
+        public static function validateExtendedTurn($ship, $submitted, $history, $turn, &$findings = null){
+            $findings = array();
+            if (!is_array($submitted)) return $submitted;
+
+            $movement = array_values($submitted);
+            $owed = self::getOwedExtendedTurn($history, $turn);
+
+            $relevant = $owed !== null;
+            foreach ($movement as $move){
+                if ($move->turn == $turn && (self::isExtendedTurnStart($move) || $move->type === 'extendTurnCancel')) $relevant = true;
+            }
+            if (!$relevant) return $submitted; //the common case: nothing to look at
+
+            $enforce = self::$enforceThrustValidation;
+            $isPlayerRow = function($move) use ($turn){
+                return $move->turn == $turn && !$move->preturn && empty($move->forced);
+            };
+            $find = function($line) use (&$findings, $enforce){
+                $findings[] = $line;
+                error_log('validateExtendedTurn' . ($enforce ? '' : '[LOG-ONLY]: WOULD') . ' ' . $line);
+            };
+
+            /* ---- TURN N: the begin ---- */
+
+            //(a) at most one begin this turn: keep the first.
+            $beginIndex = null;
+            foreach ($movement as $i => $move){
+                if (!$isPlayerRow($move) || !self::isExtendedTurnStart($move)) continue;
+                if ($beginIndex === null){ $beginIndex = $i; continue; }
+                $find("drop a second extended-turn begin (row " . $i . ") for ship " . $ship->id . " turn " . $turn);
+                if ($enforce) $movement[$i] = null;
+            }
+            if ($enforce) $movement = array_values(array_filter($movement, function($move){ return $move !== null; }));
+
+            if ($beginIndex !== null){
+                $begin = $movement[$beginIndex];
+
+                //A row without both thrust arrays cannot be judged (and calculateThrustStillReq would
+                //warn on it, which Manager's error handler turns into an exception): drop it.
+                if (!is_array($begin->requiredThrust) || !is_array($begin->assignedThrust)){
+                    $find("drop a malformed extended-turn begin (no thrust arrays) for ship " . $ship->id . " turn " . $turn);
+                    if ($enforce) array_splice($movement, $beginIndex, 1);
+                    $beginIndex = null;
+                }
+            }
+
+            if ($beginIndex !== null){
+                $cost = self::getExtendedTurnCost($begin->requiredThrust);
+                $remainder = self::getExtendedTurnRawRemainder($ship, $begin);
+                $paid = $cost - array_sum($remainder);
+
+                //(c) at least a quarter of the cost paid now, and a cost worth extending.
+                if ($cost < 2 || $paid < ceil($cost / 4)){
+                    $find("drop an extended-turn begin paying " . $paid . " of " . $cost . " (minimum " . ceil($cost / 4) . ", cost at least 2) for ship " . $ship->id . " turn " . $turn);
+                    //The begin changed nothing geometric, so every later move is still valid.
+                    if ($enforce){
+                        array_splice($movement, $beginIndex, 1);
+                        $beginIndex = null;
+                    }
+                }
+            }
+
+            if ($beginIndex !== null){
+                //(d) the amount owed may not be smaller, role by role, than the server's own remainder.
+                $snapshot = self::readExtendedTurnSnapshot($begin);
+                $short = $snapshot === null;
+                if (!$short){
+                    foreach ($remainder as $role => $amount){
+                        if ($snapshot[$role] < $amount) $short = true;
+                    }
+                }
+                if ($short){
+                    $corrected = array();
+                    foreach ($remainder as $role => $amount){
+                        $corrected[$role] = max($amount, $snapshot === null ? 0 : $snapshot[$role]);
+                    }
+                    $find("raise extended-turn snapshot " . var_export($begin->value, true) . " to " . json_encode($corrected) . " for ship " . $ship->id . " turn " . $turn);
+                    if ($enforce) $begin->value = json_encode($corrected);
+                }
+
+                //(b) no manoeuvre on the blocked list after the begin (D4).
+                for ($i = $beginIndex + 1; $i < count($movement); $i++){
+                    $move = $movement[$i];
+                    if (!$isPlayerRow($move) || !in_array($move->type, self::$extendedTurnBlockedTypes, true)) continue;
+                    $find("truncate at '" . $move->type . "' after an extended-turn begin for ship " . $ship->id . " turn " . $turn . " and rebuild straight");
+                    if ($enforce) $movement = self::truncateExtendedTurn($ship, $movement, $i, $turn);
+                    break;
+                }
+            }
+
+            /* ---- TURN N+1: the completion or the cancellation ---- */
+
+            if ($owed !== null){
+                $right = $owed->type === 'extendTurnRight';
+
+                //(e) the first order must be the completion or a cancellation. The server cannot pay
+                //for the player, so a missing one is treated as cancelled and only logged.
+                $first = null;
+                foreach ($movement as $move){
+                    if ($move->turn != $turn || $move->preturn) continue;
+                    if (!empty($move->forced) && $move->type !== 'extendTurnCancel') continue; //forced pivots come first (T19)
+                    $first = $move;
+                    break;
+                }
+                $isCompletion = function($move){
+                    return ($move->type === 'turnleft' || $move->type === 'turnright') && $move->value === 'extendedTurn';
+                };
+                if (!$first || ($first->type !== 'extendTurnCancel' && !$isCompletion($first))){
+                    $find("note ship " . $ship->id . " turn " . $turn . " owes an extended turn but its first order is "
+                        . ($first ? "'" . $first->type . "'" : "missing") . " (treated as cancelled)");
+                }
+
+                //(f) the completion asks for exactly what was owed, on the side that was named.
+                foreach ($movement as $i => $move){
+                    if (!$isPlayerRow($move) || !$isCompletion($move)) continue;
+                    $snapshot = self::readExtendedTurnSnapshot($owed);
+                    if ($snapshot === null) $snapshot = self::getExtendedTurnRawRemainder($ship, $owed);
+                    $sameSide = ($move->type === 'turnright') === $right;
+                    if (!$sameSide || !self::completionMatchesSnapshot($move, $snapshot)){
+                        $find("truncate at an extended-turn completion asking for " . json_encode($move->requiredThrust)
+                            . ($sameSide ? "" : " on the wrong side") . " when " . json_encode($snapshot) . " was owed, for ship "
+                            . $ship->id . " turn " . $turn . ", and rebuild straight");
+                        if ($enforce) $movement = self::truncateExtendedTurn($ship, $movement, $i, $turn);
+                    }
+                    break;
+                }
+
+                //(g) no speed change at any point of the turn after an extended turn (R4, D6),
+                //completed or cancelled. Engine Shorted's own row is preturn (T17) and skipped.
+                foreach ($movement as $i => $move){
+                    if (!$isPlayerRow($move) || $move->type !== 'speedchange') continue;
+                    $find("truncate at a speed change on the turn after an extended turn for ship " . $ship->id . " turn " . $turn . " and rebuild straight at the old speed");
+                    if ($enforce) $movement = self::truncateExtendedTurn($ship, $movement, $i, $turn);
+                    break;
+                }
+            }
+
+            //(h) cancellation tripwire - LOG-ONLY PERMANENTLY. Cancelling is allowed only when
+            //completion is physically impossible, and the server's thrust maths ignores criticals
+            //(T3), so it cannot judge that; it can only notice when nothing at all has changed. That
+            //also catches D12 (boost left off or power run short to make completion impossible).
+            foreach ($movement as $move){
+                if ($move->turn != $turn || $move->type !== 'extendTurnCancel') continue;
+                if ($owed === null){
+                    $findings[] = "tripwire: ship " . $ship->id . " turn " . $turn . " cancelled an extended turn it did not owe";
+                } else if (!self::hasEngineShortedThisTurn($movement, $turn) && !self::hasEngineShortedThisTurn($history, $turn)
+                    && !self::hasThrustChangedSince($ship, $owed->turn)){
+                    $findings[] = "tripwire: ship " . $ship->id . " turn " . $turn . " cancelled an extended turn ('" . $move->value
+                        . "') with nothing changed since the begin";
+                } else {
+                    break;
+                }
+                error_log('validateExtendedTurn[TRIPWIRE] ' . end($findings));
+                break;
+            }
+
+            if (!$enforce) return $submitted;
+
+            if (!empty($findings)){
+                debug::log("validateExtendedTurn: ship " . $ship->id . " turn " . $turn . ": " . implode('; ', $findings));
+            }
+
+            return $movement;
         }
 
 
