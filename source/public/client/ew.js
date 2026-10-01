@@ -943,6 +943,8 @@ window.ew = {
             var elint = gamedata.ships[i];
             if (elint == ship || !shipManager.isElint(elint)) continue;
 
+            if (!ew.checkInELINTDistance(ship, elint, 30)) continue; //DIST only works within 30 hexes - mirrors EW::getDistruptionEW
+
             if (blockedLosHex && blockedLosHex.length > 0) {
                 var loSBlocked = mathlib.isLoSBlocked(shipManager.getShipPosition(elint), shipManager.getShipPosition(ship), blockedLosHex);
                 if (loSBlocked) continue; //Line of sight blocked to one of the relevant units, skip.
