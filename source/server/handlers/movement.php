@@ -632,7 +632,7 @@
             foreach ($ship->movement as $move){
                 if ($move->turn != $turn)
                     continue;
-                if ($move->type == "turneleft" || $move->type == "turnright" )
+                if ($move->type == "turnleft" || $move->type == "turnright" )
                     return true;
            }
             return false;
