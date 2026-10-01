@@ -445,6 +445,7 @@
   align-items: center;
   justify-content: center;
   min-height: 26px;
+  min-width: 90px;
   margin: 0;
   padding: 4px 9px;
   font-family: var(--fv-display);
@@ -466,19 +467,21 @@
 }
 
 .lb-pill--take {
-  color: var(--fv-accent);
-  background: rgba(139, 202, 242, 0.2);
-  border-color: var(--fv-accent);
+  color: var(--fv-greenText);
+  background: rgba(60, 122, 60, 0.4);
+  border-color: #66bb6a
 }
 
 .lb-pill--take:hover {
   color: var(--fv-text-bright);
-  background: rgba(139, 202, 242, 0.32);
+  background: rgba(82, 179, 82, 0.5);
+  border-color: #8cd48c;
 }
 
 .lb-pill--leave {
   color: #e8b4ad;
   border-color: #a77272;
+  background: rgba(122, 33, 33, 0.3);  
 }
 
 .lb-pill--leave:hover {
