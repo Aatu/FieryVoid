@@ -1738,7 +1738,7 @@
     gap: 10px;
     width: 100%;
     margin: 0;
-    padding: 6px 12px;
+    padding: 6px 8px;
     font-family: var(--fv-display);
     font-size: 10.5px;
     font-weight: 700;
@@ -1765,6 +1765,7 @@
 
 .confirm.buyDialog .buySectionHead[aria-expanded="true"] {
     border-bottom: 1px solid rgba(144, 177, 238, 0.45);
+    margin-bottom: 3px;
 }
 
 /* A section the filter leaves nothing in: folded and dimmed, with no band to click - but its badge
