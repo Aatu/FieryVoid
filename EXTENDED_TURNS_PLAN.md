@@ -7,9 +7,11 @@ flying straight, and **completes the turn at the very start of its next movement
 The same project restyles the Apply Thrust panel and the movement-icon hover labels into the unified
 look. That restyle comes first (Stage 0) because both extended-turn panels are built on top of it.
 
-Status: **Stages 0, 1 and 2 BUILT 2026-10-01, uncommitted, awaiting the user's in-game tests (15, 18).
-Stages 3-6 not started.** Decisions ruled by the user on 2026-10-01 (see Rulings). D12 is open but does
-not block anything. As-built notes and deviations: §8.1.
+Status: **ALL STAGES BUILT. Stages 0-2 are committed (16a7be9cc). Stages 3-6 were built 2026-10-01 and are
+uncommitted.** The user played the first extended turn in game 4430, which is now in the replay corpus.
+The rest of the test matrix (§9) is still the user's to play. Decisions ruled by the user on 2026-10-01
+(see Rulings). D12 is open but does not block anything. As-built notes and deviations: §8.1 (Stages 0-2),
+§8.2 (Stages 3-4), §8.3 (Stages 5-6).
 
 ## The rule (B5W)
 
@@ -501,6 +503,88 @@ Proof so far:
   Traveler; 4256, a Vree Xonn). The checks cover the box both ways, D2, D4, the map-icon begin, a faked N+1
   completion, the dry run leaving no row, and all three cancel reasons.
 - **Stage 0:** headless render at desktop and phone width. Tests 15 and 18 in a real game are still owed.
+
+### 8.2 As built (2026-10-01): Stages 3-4
+Stage 3 is `ShipThrust.js` only. Stage 4 is `game.php`, `shipMovement.js`, `ShipMovementCallbacks.js`,
+`MovementPhaseStrategy.js` and `gamedata.js`, plus one removed line in `movement.js` (`setExtendedTurn`,
+below). `tactical.css` is not touched after all: the icon colour is drawn, not filtered.
+
+Deviations from the text above:
+- **Begin-mode panel (§4.2, §4.3).** The per-direction rows stay as `paid/required`, but on a begin
+  the unpaid part is shown in cyan (`statusPending`, "owed next turn"), not orange ("still needed"). Under
+  them: Turn cost, Paying now (min ⌈C/4⌉) with a meter ticked at the minimum, Owed next turn (the
+  total; the direction rows already show the split), Engine thrust left, and a one-line note. There is no
+  separate "Aft 2 · Port 5" line, because it would not fit 180px.
+- **Titles.** "Begin Extended Turn" and "Complete Extended Turn" put the side on a second line (`\n`,
+  `PanelTitle` is `white-space: pre`). On one line they would overflow 180px, and wrapping put the "·" at
+  the start of line two.
+- **The box.** The tick is drawn with CSS, not a ✓ glyph. When the box is locked, its hint is printed
+  under it as well as in the `title`. The row is 32px tall on touch screens.
+- **Icon colour (§5.1), as revised by the user (2026-10-01).** The plan said a green begin icon and a cyan
+  completion icon, but `turnleft.png`/`turnright.png` are already green. A lime/cyan CSS-filter version was
+  built first, then replaced at the user's request: **both icons are ORANGE**. The turn arrows' art is
+  painted in one colour on the canvas (`drawUIimage`'s new optional `tint`, a `source-atop` fill). It is set
+  by **`UI.shipMovement.extendedTurnColour`** at the top of `shipMovement.js`, default `#ff8c00`. That is the
+  one place to change it. There is no CSS for these icons. Their opacity is **`UI.shipMovement.extendedTurnOpacity`**
+  next to it (default 1, as drawn). The begin panel's "owed next turn" figures (the total and the
+  direction rows' unpaid part) also use `extendedTurnColour`: `ShipThrust.js` reads it at render, in place
+  of the cyan first built.
+- **The icons stay hidden under an open panel (user report, 2026-10-01).** Ticking or unticking the box used
+  to bring back Move, Slip and Cancel under the panel, and every click flipped them. `setExtendedTurn` fired
+  `ShipMovementChanged`, and `PhaseStrategy.redrawMovementUI` only hides the ring when it is showing, so
+  with the ring already hidden it redrew it. `setExtendedTurn` no longer fires that event. Nothing else
+  needed it while the row is uncommitted, and CONFIRM and CANCEL both fire it.
+- **One completion handler** serves both completion icons, because the side was named at the begin.
+- Ship icons consume **committed** rows only, so the thruster ring is always drawn at the committed
+  facing. Neither a begin nor a box toggle can leave it out of date.
+
+Proof: 41 checks in a real local game page (4347, gravitic Traveler, every POST blocked), driven through
+the real icons, tiles, box and buttons. They cover:
+- the D1-C box both ways, and D2 through the tiles;
+- the commit-dialog line;
+- Cancel Last Move;
+- the map-icon begin, with its box locked;
+- a faked N+1 showing the completion icon as the only icon, then the completion panel and commit;
+- `PhaseStrategy.update()` cancelling an unpayable turn exactly once.
+
+Headless screenshots at desktop and 390px phone width.
+
+Observation, not changed: on a phone, an open Order of Battle panel draws over the thrust panel. This
+has been true since Stage 0's placement and applies to every manoeuvre.
+
+### 8.3 As built (2026-10-01): Stages 5-6
+- **One reader:** `shipManager.movement.getExtendedTurnStatus(ship)` (`movement.js`). It returns null,
+  `{cancelled: false, text: 'Making Extended Turn (port|starboard)'}` from the begin until the completion,
+  or `{cancelled: true, text: 'Extended Turn Cancelled — Thrusters Lost | Not Enough Thrust | Engine
+  Shorted · No speed change this turn'}` for the rest of the turn it was cancelled in. The map tooltip and
+  the ship window both read it, the same pattern as `shipManager.getHangarManoeuvre`.
+- **Map tooltip** (`ShipTooltip.js`): the limegreen note, beside Rolled and Half-Phased. Not shown for a
+  cancellation (D5 puts that in the ship window only).
+- **Ship window** (`ShipWindow.js` `getStatusBanners`): green `statusOk` while in progress, amber
+  `statusAlert` after a cancellation. Placed after Jumping to Hyperspace. `StatusBanner` uppercases it.
+- **Docs:** the FAQ entry now gives the rule instead of "not implemented", and the starter guide's
+  Turning section has a bullet. `movement-arrows.jpg` needed **no** re-shoot: it shows the arrows with no
+  thrust panel at all. Its alt text claimed "with the thrust window open", so the alt text was corrected.
+- **Replay** was verified, not changed. In 4430's replay of turn 3 the G'Quan's path has no segment for
+  the begin row, so there is no stutter. Turn 4 opens with a −60° turn in hex 8,2, its starting hex, then
+  the moves.
+- **Stage 6:** the user's playtest is **game 4430** (G'Quan Heavy Cruiser #2, ship 877514).
+  - Turn 3: `extendTurnLeft` at speed 7, cost 5, paid 2, snapshot `{"any":1,"rear":2,"side":0}`.
+  - Turn 4: `turnleft` with value `extendedTurn` as the first row, requirement `[1,null,2,null,0]`, facing
+    3→2 in the starting hex, speed unchanged.
+  - No `validateExtendedTurn` line in the server log for it.
+  - It was added to the corpus with the merge recipe: back up `manifest.json`, `record --games=4430`,
+    merge. Its `movement.txt` shows `validateExtendedTurn LEGAL | findings: none` for turns 3 and 4, and
+    `validateThrustPayment` LEGAL with enforcement on.
+  - Full `check`: 110 passed, 9 failed. The 9 are exactly the known set
+    ([[arch_replay_corpus_known_failures]]). 4430 passes.
+
+Proof for 3-5 together: 54 checks in a real local game page (4347, every POST blocked), driven through the
+real icons, tiles, box and buttons. Besides §8.2's checks they cover:
+- the ring staying hidden through tick, untick and re-tick;
+- the canvas pixels of both icons reading exactly `#ff8c00`, with the plain arrows still green;
+- the status reader, tooltip and banner at turn N, at a faked N+1, after completion (all gone) and after
+  an automatic cancellation (amber banner, no tooltip note).
 
 ## 9. Test matrix
 Play these in fresh local games, then check `tac_shipmovement` for that game ID.

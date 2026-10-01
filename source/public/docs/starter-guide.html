@@ -340,7 +340,7 @@
   <p class="fvd-lede">Ships move one at a time, in initiative order. When it is your ship's turn, green arrows appear
     around it for each move it can make - point at one to see what it does.</p>
   <figure class="fvd-fig">
-    <img src="img/docViewer/movement-arrows.jpg" alt="A ship surrounded by its green movement arrows, with the thrust window open">
+    <img src="img/docViewer/movement-arrows.jpg" alt="A ship surrounded by its green movement arrows">
     <figcaption>A ship's movement options.</figcaption>
   </figure>
   <p>The ship's tooltip shows its current movement figures too: turn cost, turn delay, pivot cost, roll cost,
@@ -397,6 +397,11 @@
     <li>You cannot turn if the opposite side thruster is destroyed. If all your aft thrusters are destroyed, you can only
       turn when your speed is low enough for the turn cost to be 1 (paid with the opposite side thruster).</li>
     <li>When moving backwards, use your bow thrusters in place of the aft thrusters for turning.</li>
+    <li>A ship that cannot afford a turn may make an <b>extended turn</b> instead, paying for it over two game turns:
+      an orange arrow appears where the turn arrow would be. Pay at least a quarter of the cost now; the ship keeps its
+      facing for the rest of the turn. At the start of next turn's movement, click the orange arrow first to pay the
+      rest and turn. You cannot change speed on that turn. On a turn you can afford, ticking Make Extended Turn on the
+      thrust panel does the same, which is useful to avoid overthrusting.</li>
   </ul>
 
   <h3 data-anchor="pivoting">Pivoting</h3>

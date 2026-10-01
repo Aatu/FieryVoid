@@ -73,7 +73,15 @@
   <ul>
     <li><b>Snap turns</b> are made as consecutive but separate turns. The turn delay is taken from the first turn only,
       so shorten the first turn to shorten the snap turn.</li>
-    <li><b>Extended turns</b> - turns spread across several game turns - are not implemented.</li>
+    <li><b>Extended turns</b> - a ship (not a fighter) that cannot afford a turn, or would overthrust to pay for it, may
+      spread the turn over two game turns. Where the turn arrow cannot be offered, an orange arrow begins an extended
+      turn; on a turn you can afford, tick <i>Make Extended Turn</i> on the thrust panel instead. Pay at least a quarter
+      of the turn cost now, and never all of it. The ship keeps its facing and may not turn, pivot or roll again that
+      turn. At the start of its next movement, before any other order, click the orange arrow to pay the rest: the ship
+      turns in the hex where it starts, and the turn delay counts from there. Extra thrust paid then shortens the
+      delay as usual. The ship cannot change speed on that turn. If the rest can no longer be paid (thrusters lost,
+      not enough thrust, or the engine shorted), the turn is cancelled automatically and the thrust already spent is
+      lost. A cancellation is never voluntary.</li>
   </ul>
 
   <h3>Firing and weapons</h3>

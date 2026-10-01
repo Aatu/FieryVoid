@@ -142,10 +142,13 @@ body {
    both map tooltips (--fv-radius-tooltip).
    top/left are still set inline by moveTooltip.js, which follows the mouse.
    ⚠️ The translucency is in the FILL; do not add element opacity (alpha compounding). jQuery's
-   fadeIn animates opacity UP to 1, so it does not compound. */
+   fadeIn animates opacity UP to 1, so it does not compound.
+   z-index: above the icons it labels (#shipMovementUI, 7000) and the thrust panel (#thrustUIContainer,
+   7002). It was 1000, under both, which the old opaque label mostly hid by standing clear of the
+   icons; the see-through fill made it show. */
 .fv-movetooltip {
     position: absolute;
-    z-index: 1000;
+    z-index: 7010;
     padding: 4px 6px;
     font-family: arial;
     font-size: 12px;

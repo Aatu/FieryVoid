@@ -609,7 +609,27 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
         <div id="turnleft" class="movement-icon" data-movement-type="Turn Left">
             <canvas id="turnleftcanvas" width="40" height="40"></canvas>
         </div>
-        
+
+        <!-- EXTENDED_TURNS_PLAN.md §5.1 - drawn in the turn arrows' places, with the turn arrows'
+             art painted in UI.shipMovement.extendedTurnColour (shipMovement.js). Four elements rather
+             than relabelled turn arrows: moveTooltip.js reads data-movement-type through jQuery
+             .data(), which caches it. -->
+        <div id="extendTurnRight" class="movement-icon" data-movement-type="Begin Extended Turn">
+            <canvas id="extendTurnRightCanvas" width="40" height="40"></canvas>
+        </div>
+
+        <div id="extendTurnLeft" class="movement-icon" data-movement-type="Begin Extended Turn">
+            <canvas id="extendTurnLeftCanvas" width="40" height="40"></canvas>
+        </div>
+
+        <div id="completeExtendTurnRight" class="movement-icon" data-movement-type="Complete Extended Turn">
+            <canvas id="completeExtendTurnRightCanvas" width="40" height="40"></canvas>
+        </div>
+
+        <div id="completeExtendTurnLeft" class="movement-icon" data-movement-type="Complete Extended Turn">
+            <canvas id="completeExtendTurnLeftCanvas" width="40" height="40"></canvas>
+        </div>
+
         <div id="turnIntoPivotLeft" class="movement-icon" data-movement-type="Turn Into Pivot">
             <canvas id="turnIntoPivotLeftCanvas" width="40" height="40"></canvas>
         </div>

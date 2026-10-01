@@ -4,6 +4,16 @@ window.UI = {
 
     shipMovement: {
 
+        /* ⭐ THE EXTENDED-TURN ARROW COLOUR (EXTENDED_TURNS_PLAN.md §5.1). Both the Begin and the Complete
+           Extended Turn icons are the turn arrows' own art painted in this colour; change it here.
+           Any CSS colour string works ("#ff8c00", "orange", "rgb(255, 140, 0)").
+           The thrust panel's "owed next turn" figures use this colour too (ShipThrust.js). */
+        extendedTurnColour: "#ff8c00",
+
+        /* ...and their opacity, 0 (invisible) to 1 (as drawn). 1 matches the other movement icons,
+           whose art is itself slightly see-through. Applies to the icons only, not the panel text. */
+        extendedTurnOpacity: 0.7,
+
         iniated: false,
         moveElement: null,
         turnleftElement: null,
@@ -33,6 +43,11 @@ window.UI = {
             UI.shipMovement.speedElement = UI.shipMovement.moveElement.find(".speedvalue");
             UI.shipMovement.turnleftElement = $("#turnleft", ui);
             UI.shipMovement.turnrightElement = $("#turnright", ui);
+
+            UI.shipMovement.extendTurnLeftElement = $("#extendTurnLeft", ui);
+            UI.shipMovement.extendTurnRightElement = $("#extendTurnRight", ui);
+            UI.shipMovement.completeExtendTurnLeftElement = $("#completeExtendTurnLeft", ui);
+            UI.shipMovement.completeExtendTurnRightElement = $("#completeExtendTurnRight", ui);
 
             UI.shipMovement.graviticTurnLeftElement = $("#graviticTurnLeft", ui);
             UI.shipMovement.graviticTurnRightElement = $("#graviticTurnRight", ui);            
@@ -79,6 +94,11 @@ window.UI = {
 
             UI.shipMovement.turnrightElement.on("click touchstart", UI.shipMovement.turnrightCallback);
             UI.shipMovement.turnleftElement.on("click touchstart", UI.shipMovement.turnleftCallback);
+
+            UI.shipMovement.extendTurnRightElement.on("click touchstart", UI.shipMovement.extendTurnRightCallback);
+            UI.shipMovement.extendTurnLeftElement.on("click touchstart", UI.shipMovement.extendTurnLeftCallback);
+            UI.shipMovement.completeExtendTurnRightElement.on("click touchstart", UI.shipMovement.completeExtendTurnCallback);
+            UI.shipMovement.completeExtendTurnLeftElement.on("click touchstart", UI.shipMovement.completeExtendTurnCallback);
             UI.shipMovement.sliprightElement.on("click touchstart", UI.shipMovement.sliprightCallback);
             UI.shipMovement.slipleftElement.on("click touchstart", UI.shipMovement.slipleftCallback);
 
@@ -243,6 +263,22 @@ window.UI = {
             UI.shipMovement.callbackHandler.turnCallback(e, right);
         },
 
+        extendTurnRightCallback: function extendTurnRightCallback(e) {
+            e.stopPropagation();
+            UI.shipMovement.callbackHandler.extendTurnCallback(e, true);
+        },
+
+        extendTurnLeftCallback: function extendTurnLeftCallback(e) {
+            e.stopPropagation();
+            UI.shipMovement.callbackHandler.extendTurnCallback(e, false);
+        },
+
+        //One handler for both sides: the side was named when the turn was begun.
+        completeExtendTurnCallback: function completeExtendTurnCallback(e) {
+            e.stopPropagation();
+            UI.shipMovement.callbackHandler.completeExtendTurnCallback(e);
+        },
+
         moveCallback: function moveCallback(e) {
             UI.shipMovement.callbackHandler.moveCallback(e);
         },
@@ -348,6 +384,17 @@ window.UI = {
             angle = mathlib.addToDirection(shipHeading, -60);
             dis = 60;
 
+            /* EXTENDED TURNS (EXTENDED_TURNS_PLAN.md §5.2). Both icons stand in a turn arrow's spot:
+               - begin, where the whole turn is unaffordable (D1-A: canBeginExtendedTurn asks !canTurn,
+                 so the arrow and the begin icon never both apply);
+               - complete, on the side named last turn. While a turn is owed every other gate is shut
+                 (extendedTurnForbids), so this is the only icon on screen until it is completed or
+                 cancelled. Asked once here: its payability test is a dry run of assignThrust. */
+            var completeExtendSide = null;
+            if (shipManager.movement.canCompleteExtendedTurn(ship)) {
+                completeExtendSide = shipManager.movement.getOwedExtendedTurn(ship).type === 'extendTurnRight';
+            }
+
             //TURN LEFT
             var turnleft = UI.shipMovement.turnleftElement;
             if (shipManager.movement.canTurn(ship, false)) {
@@ -355,6 +402,7 @@ window.UI = {
             } else {
                 turnleft.hide();
             }
+            UI.shipMovement.drawExtendedTurnIcons(ship, false, completeExtendSide, pos, s, dis * 1.4, angle, shipHeading);
 
             dis = 85;
 
@@ -394,6 +442,7 @@ window.UI = {
             } else {
                 turnright.hide();
             }
+            UI.shipMovement.drawExtendedTurnIcons(ship, true, completeExtendSide, pos, s, dis * 1.4, angle, shipHeading);
 
 
 
@@ -669,6 +718,31 @@ window.UI = {
             return true;
         },
 
+        /* The begin and completion icons for one side, in that side's turn-arrow spot. completeSide:
+           true / false - the side an owed turn is completed on - or null when there is none to complete. */
+        drawExtendedTurnIcons: function drawExtendedTurnIcons(ship, right, completeSide, pos, s, dis, angle, shipHeading) {
+            var begin = right ? UI.shipMovement.extendTurnRightElement : UI.shipMovement.extendTurnLeftElement;
+            var complete = right ? UI.shipMovement.completeExtendTurnRightElement : UI.shipMovement.completeExtendTurnLeftElement;
+            var art = right ? "img/turnright.png" : "img/turnleft.png";
+
+            var colour = UI.shipMovement.extendedTurnColour;
+            //Element opacity is safe here: the icon holds no text and nothing translucent is layered on it.
+            begin.css("opacity", UI.shipMovement.extendedTurnOpacity);
+            complete.css("opacity", UI.shipMovement.extendedTurnOpacity);
+
+            if (shipManager.movement.canBeginExtendedTurn(ship, right)) {
+                UI.shipMovement.drawUIElement(begin, pos.x, pos.y, s, dis, angle, art, right ? "extendTurnRightCanvas" : "extendTurnLeftCanvas", shipHeading, undefined, colour);
+            } else {
+                begin.hide();
+            }
+
+            if (completeSide === right) {
+                UI.shipMovement.drawUIElement(complete, pos.x, pos.y, s, dis, angle, art, right ? "completeExtendTurnRightCanvas" : "completeExtendTurnLeftCanvas", shipHeading, undefined, colour);
+            } else {
+                complete.hide();
+            }
+        },
+
         reposition: function reposition(position, heading) {
             var element = UI.shipMovement.uiElement;
 
@@ -694,17 +768,26 @@ window.UI = {
         // box is the size of the clickable div; s is the size the icon is drawn at.
         // They are the same unless a caller asks for hit slop, in which case the
         // icon is centred in the larger box rather than sitting in its corner.
-        drawUIimage: function drawUIimage(canvas, path, s, angle, box) {
+        // tint (optional): a CSS colour the drawn art is painted in, keeping its shape and
+        // its own transparency (the extended-turn arrows; see extendedTurnColour).
+        drawUIimage: function drawUIimage(canvas, path, s, angle, box, tint) {
             var img = new Image();
             img.src = path;
 
             $(img).on("load", function () {
                 graphics.clearSmallCanvas(canvas);
                 graphics.drawAndRotate(canvas, box, box, s * 2, s * 2, angle, img);
+                if (tint) {
+                    canvas.save();
+                    canvas.globalCompositeOperation = "source-atop";
+                    canvas.fillStyle = tint;
+                    canvas.fillRect(0, 0, canvas.canvas.width, canvas.canvas.height);
+                    canvas.restore();
+                }
             });
         },
 
-        drawUIElement: function drawUIElement(e, x, y, s, dis, angle, path, canvasid, shipHeading, hit) {
+        drawUIElement: function drawUIElement(e, x, y, s, dis, angle, path, canvasid, shipHeading, hit, tint) {
             var box = hit || s;
             var UIpos = mathlib.getPointInDirection(dis, -angle, x, y);
             e.css("top", UIpos.y - y - box * 0.5 + "px").css("left", UIpos.x - x - box * 0.5 + "px");
@@ -713,7 +796,7 @@ window.UI = {
             //$("#"+canvaid).css("top", "px").css("left", "px");
 
             var canvas = window.graphics.getCanvas(canvasid);
-            UI.shipMovement.drawUIimage(canvas, path, s, shipHeading, box);
+            UI.shipMovement.drawUIimage(canvas, path, s, shipHeading, box, tint);
         },
 
         hide: function hide() {

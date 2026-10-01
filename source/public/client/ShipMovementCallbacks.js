@@ -157,6 +157,17 @@ window.ShipMovementCallbacks = function () {
         this.updateCallback({ ship: this.ship });
     };
 
+    //EXTENDED_TURNS_PLAN.md §5.3 - both open the thrust panel on the new row.
+    ShipMovementCallbacks.prototype.extendTurnCallback = function (e, right) {
+        shipManager.movement.doBeginExtendedTurn(this.ship, right);
+        this.updateCallback({ ship: this.ship });
+    };
+
+    ShipMovementCallbacks.prototype.completeExtendTurnCallback = function (e) {
+        shipManager.movement.doCompleteExtendedTurn(this.ship);
+        this.updateCallback({ ship: this.ship });
+    };
+
     ShipMovementCallbacks.prototype.graviticTurnRightCallback = function (e) {
         e.stopPropagation();
         this.graviticTurnCallback(e, true);

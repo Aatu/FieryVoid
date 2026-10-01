@@ -313,6 +313,13 @@ window.ShipTooltip = function () {
             toDisplay += 'Half-Phased; ';
             rollPivotModifier -= 50;
         }
+        /* EXTENDED_TURNS_PLAN.md Stage 5 (D8) - public, in the tooltip's limegreen, from the begin
+           until the completion. getExtendedTurnStatus is the reader shared with the ship window's
+           banners, which also carry a cancellation; the tooltip shows only the turn in progress. */
+        var extendedTurn = (!ship.flight) ? shipManager.movement.getExtendedTurnStatus(ship) : null; //fighters cannot make one (R1)
+        if (extendedTurn && !extendedTurn.cancelled) {
+            toDisplay += '<span style="color:orange;">' + extendedTurn.text + '</span>; ';
+        }
         if (ship.trueStealth) {
             //Two turns can qualify now that placement and arrival are separate: the turn the unit
             //picks its entry hex, and the turn it actually arrives (when a late slot gets its own

@@ -12,7 +12,11 @@ import theme from "../styled/theme";
 
    User request 2026-10-01: the panel wears the Gravitic Augmenter menu's green (theme.colors.green*),
    is compact, and has only CONFIRM and CANCEL. AUTO and RESET are gone: thrust is auto-assigned when
-   the panel opens, and resetting every thruster to zero was not useful. */
+   the panel opens, and resetting every thruster to zero was not useful.
+
+   Stage 3 (§4.3) gave it three modes, read off the row itself (getMode): an ordinary manoeuvre, the
+   BEGIN of an extended turn (paid in part now, owed next turn), and its COMPLETION next turn. The
+   AssignThrust event and MovementPhaseStrategy.onAssignThrust are unchanged. */
 
 //Fired on #thrustUIContainer by MovementPhaseStrategy.repositionThrustUi once it has moved the box.
 //⚠️ That legacy file spells it out as a string literal - keep the two in step.
@@ -107,16 +111,19 @@ const Thruster = styled.div`
         width: 40px;
         height: 40px;
         z-index: -1;
+        /* thrusterGreen*.png: the ship window's blue thruster1*.png with only the blue body repainted
+           in the panel's green (theme.colors.greenLine, shading kept) - the red critical bands are
+           untouched, which a CSS hue-rotate could not do (it turned them purple). */
         background-image: ${props => {
         switch (props.$crits) {
             case 11:
-                return 'url(img/systemicons/thruster1-critical12.png);'
+                return 'url(img/systemicons/thrusterGreen-critical12.png);'
             case 10:
-                return 'url(img/systemicons/thruster1-critical1.png);'
+                return 'url(img/systemicons/thrusterGreen-critical1.png);'
             case 1:
-                return 'url(img/systemicons/thruster1-critical2.png);'
+                return 'url(img/systemicons/thrusterGreen-critical2.png);'
             default:
-                return 'url(img/systemicons/thruster1.png);'
+                return 'url(img/systemicons/thrusterGreen.png);'
         }
     }}
         background-size: cover;
@@ -226,7 +233,8 @@ const ThrustPanel = styled.div`
     user-select: none;
 `;
 
-//The Augmenter menu's Header: centred, bold, on the darker green bar.
+/* The Augmenter menu's Header: centred, bold, on the darker green bar. `pre`, not `nowrap`: the
+   extended-turn titles are too long for 180px, so getTitle puts their side on a second line. */
 const PanelTitle = styled.div`
     box-sizing: border-box;
     padding: 3px 6px;
@@ -234,7 +242,7 @@ const PanelTitle = styled.div`
     font-size: 11px;
     font-weight: bold;
     text-align: center;
-    white-space: nowrap;
+    white-space: pre;
     overflow: hidden;
     text-overflow: ellipsis;
     color: ${theme.colors.greenText};
@@ -260,7 +268,13 @@ const StatLabel = styled.span`
     white-space: nowrap;
 `;
 
-/* $state: 'ok' (paid in full), 'open' (still owed) or nothing (plain readout). */
+/* The extended-turn orange: the SAME value as the map's extended-turn arrows, which is set in one place,
+   UI.shipMovement.extendedTurnColour (shipMovement.js). Read at render, so changing it there changes
+   both. The fallback only covers a page without the legacy movement UI. */
+const extendedTurnColour = () => (window.UI && window.UI.shipMovement && window.UI.shipMovement.extendedTurnColour) || '#ff8c00';
+
+/* $state: 'ok' (paid in full), 'open' (still needed now), 'owed' (left for next turn, on the begin
+   of an extended turn - in the extended-turn orange) or nothing (plain readout). */
 const StatValue = styled.span`
     font-family: ${theme.fonts.mono};
     font-size: 11px;
@@ -268,8 +282,86 @@ const StatValue = styled.span`
     color: ${props => {
         if (props.$state === 'ok') return theme.colors.statusOk;
         if (props.$state === 'open') return theme.colors.warning;
+        if (props.$state === 'owed') return extendedTurnColour();
         return theme.colors.greenText;
     }};
+`;
+
+//A line of explanation under the figures.
+const Note = styled.div`
+    padding: 2px 0 1px;
+    font-size: 10px;
+    line-height: 1.25;
+    color: ${theme.colors.greenLabel};
+`;
+
+/* How much of an extended turn's cost is being paid now. The tick marks the minimum, a quarter of
+   the cost (D3). The bar is two segments (user request 2026-10-01): green for the thrust paid this
+   turn, then the extended-turn orange for the rest - what is owed next turn, matching the orange
+   "Owed next turn" figure. Positions and widths are inline styles: a styled-components prop would
+   mint a class per value. */
+const Meter = styled.div`
+    position: relative;
+    height: 4px;
+    margin: 2px 0 3px;
+    background-color: rgba(0, 0, 0, 0.45);
+    border: 1px solid ${theme.colors.greenLine};
+`;
+
+const MeterFill = styled.div`
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background-color: ${props => props.$owed ? extendedTurnColour() : theme.colors.statusOk};
+`;
+
+const MeterTick = styled.div`
+    position: absolute;
+    top: -3px;
+    bottom: -3px;
+    width: 1px;
+    background-color: ${theme.colors.greenText};
+`;
+
+/* The Make Extended Turn box (D1-C, D2). $locked: it cannot be unticked, because a normal turn is
+   unaffordable; the reason is printed under it. 32px tall on touch screens, like the buttons. */
+const ToggleRow = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 3px;
+    min-height: 16px;
+    font-size: 10px;
+    color: ${theme.colors.greenText};
+    cursor: ${props => props.$locked ? 'not-allowed' : 'pointer'};
+
+    @media (pointer: coarse) {
+        min-height: 32px;
+    }
+`;
+
+/* The tick is drawn (two borders of a rotated box), not a ✓ glyph, which several Windows fonts lack. */
+const ToggleBox = styled.span`
+    position: relative;
+    flex: 0 0 auto;
+    width: 10px;
+    height: 10px;
+    box-sizing: border-box;
+    border: 1px solid ${props => props.$locked ? theme.colors.greenLine : theme.colors.greenBtnLineHover};
+    background-color: ${props => props.$checked ? theme.colors.greenBtnLine : 'rgba(0, 0, 0, 0.45)'};
+
+    ${props => props.$checked && `
+    &::after {
+        content: "";
+        position: absolute;
+        left: 2.5px;
+        top: 0;
+        width: 3px;
+        height: 6px;
+        border-right: 1.5px solid ${theme.colors.greenText};
+        border-bottom: 1.5px solid ${theme.colors.greenText};
+        transform: rotate(45deg);
+    }`}
 `;
 
 const Rule = styled.div`
@@ -336,11 +428,24 @@ const ROW_ORDER = [1, 2, 3, 4, 0];
 
 const sideName = right => right ? 'Starboard' : 'Port';
 
+/* EXTENDED_TURNS_PLAN.md §4.3: 'begin' is turn N of an extended turn (paid in part, owed next turn),
+   'complete' is the turn row that pays the rest at N+1, 'normal' is everything else. */
+const getMode = movement => {
+    if (shipManager.movement.isExtendedTurnStart(movement)) return 'begin';
+    if (shipManager.movement.isExtendedTurnCompletion(movement)) return 'complete';
+    return 'normal';
+};
+
 const getTitle = (ship, movement) => {
     switch (movement.type) {
+        //Two lines: neither fits the title bar on one (PanelTitle is white-space: pre).
+        case 'extendTurnLeft':
+        case 'extendTurnRight':
+            return 'Begin Extended Turn\n' + sideName(movement.type === 'extendTurnRight');
         case 'turnleft':
         case 'turnright':
             if (movement.value === 'turnIntoPivot') return 'Turn into Pivot · ' + sideName(movement.type === 'turnright');
+            if (movement.value === 'extendedTurn') return 'Complete Extended Turn\n' + sideName(movement.type === 'turnright');
             return 'Turn ' + sideName(movement.type === 'turnright');
         case 'pivotleft':
         case 'pivotright':
@@ -510,12 +615,35 @@ class ShipThrust extends React.Component {
         window.shipManager.movement.cancelAssignThrustEvent(this.props.ship)
     };
 
+    //The Make Extended Turn box. setExtendedTurn converts the row and re-opens this panel on it.
+    toggleExtendedTurn(toggle) {
+        if (!toggle.enabled) return;
+        window.shipManager.movement.setExtendedTurn(this.props.ship, !toggle.checked);
+    };
+
     render() {
         const { ship, position, rotation, totalRequired, remainginRequired, movement } = this.props;
         const ringRotation = Math.round(Math.abs(rotation));
         const { rows, extra } = getRequirementRows(totalRequired, remainginRequired);
-        const done = isFullyPaid(remainginRequired);
-        const stillNeeded = rows.filter(row => row.open > 0).map(row => `${row.label} ${row.open}`).join(' · ');
+        const mode = getMode(movement);
+        const toggle = shipManager.movement.getExtendedTurnToggle(ship, movement);
+
+        /* CONFIRM is enabled on exactly the test doneAssignThrust will make. A begin is never paid in
+           full: it needs at least a quarter of the cost now and at least one point left for next
+           turn (D2, D3), and what is left is shown as owed, not as missing. */
+        let done, notReady;
+        let payment = null;
+        if (mode === 'begin') {
+            payment = shipManager.movement.getExtendedTurnStartPayment(ship, movement);
+            done = payment.valid;
+            notReady = payment.paid < payment.minimum
+                ? `Pay at least ${payment.minimum} now (${payment.paid} so far)`
+                : 'Leave at least 1 thrust owed for next turn';
+        } else {
+            done = isFullyPaid(remainginRequired);
+            notReady = 'Still needed: ' + rows.filter(row => row.open > 0).map(row => `${row.label} ${row.open}`).join(' · ');
+        }
+        const rowState = row => row.open === 0 ? 'ok' : (mode === 'begin' ? 'owed' : 'open');
 
         return (
             <ThrustUIContainer ref={this.containerRef} onMouseOver={(e) => e.preventDefault()} onContextMenu={(e) => e.preventDefault()} id="thrustUIContainer" style={{ left: `${position.x}px`, top: `${position.y}px` }}>
@@ -543,20 +671,35 @@ class ShipThrust extends React.Component {
                         {rows.map(row => (
                             <StatRow key={`thrust-row-${row.slot}`}>
                                 <StatLabel>{row.label}</StatLabel>
-                                <StatValue $state={row.open > 0 ? 'open' : 'ok'}>{row.paid}/{row.required}</StatValue>
+                                <StatValue $state={rowState(row)}>{row.paid}/{row.required}</StatValue>
                             </StatRow>
                         ))}
                         {extra > 0 &&
                             <StatRow><StatLabel>Extra thrust</StatLabel><StatValue $state="ok">+{extra}</StatValue></StatRow>}
                         <Rule />
-                        <StatRow><StatLabel>Engine thrust left</StatLabel><StatValue>{shipManager.movement.getRemainingEngineThrust(ship)}</StatValue></StatRow>
+                        {payment && getExtendedTurnPayment(payment)}
+                        <StatRow><StatLabel>Engine thrust</StatLabel><StatValue>{shipManager.movement.getRemainingEngineThrust(ship)}</StatValue></StatRow>
                         {getTurnDelay(ship, movement)}
+                        {mode === 'begin' && <Note>Completes on next turn's movement</Note>}
+                        {mode === 'complete' && <Note>Begun last turn</Note>}
+                        {toggle && (
+                            <>
+                                <ToggleRow
+                                    $locked={!toggle.enabled}
+                                    title={toggle.enabled ? (toggle.checked ? 'Make a normal turn instead' : 'Pay part of this turn now and the rest next turn') : toggle.hint}
+                                    onClick={() => this.toggleExtendedTurn(toggle)}>
+                                    <ToggleBox $checked={toggle.checked} $locked={!toggle.enabled} />
+                                    Make Extended Turn
+                                </ToggleRow>
+                                {!toggle.enabled && toggle.hint && <Note>{toggle.hint}</Note>}
+                            </>
+                        )}
                     </PanelBody>
                     <ButtonRow>
                         <PanelButton
                             $primary
                             disabled={!done}
-                            title={done ? 'Confirm this manoeuvre' : `Still needed: ${stillNeeded}`}
+                            title={done ? 'Confirm this manoeuvre' : notReady}
                             onClick={done ? this.ready.bind(this) : undefined}>
                             Confirm
                         </PanelButton>
@@ -576,6 +719,29 @@ const getTurnDelay = (ship, movement) => {
 
     const turndelay = shipManager.movement.calculateTurndelay(ship, movement, movement.speed);
     return (<StatRow><StatLabel>Turn delay</StatLabel><StatValue>{turndelay}</StatValue></StatRow>)
+}
+
+/* The begin of an extended turn: what is being paid now against the minimum, a meter with the
+   minimum ticked, and what will be owed next turn. `payment` is getExtendedTurnStartPayment's. */
+const getExtendedTurnPayment = payment => {
+    const enough = payment.paid >= payment.minimum;
+    const owed = payment.owed.any + payment.owed.rear + payment.owed.side;
+    const percent = value => (payment.cost > 0 ? Math.min(100, Math.max(0, value / payment.cost * 100)) : 0) + '%';
+    return (
+        <>
+            <StatRow><StatLabel>Turn cost</StatLabel><StatValue>{payment.cost}</StatValue></StatRow>
+            <StatRow>
+                <StatLabel>Paying now (min {payment.minimum})</StatLabel>
+                <StatValue $state={enough ? 'ok' : 'open'}>{payment.paid}</StatValue>
+            </StatRow>
+            <Meter title={`At least ${payment.minimum} now, at most ${payment.cost - 1}`}>
+                <MeterFill style={{ left: 0, width: percent(payment.paid) }} />
+                <MeterFill $owed style={{ left: percent(payment.paid), width: percent(payment.cost - payment.paid) }} />
+                <MeterTick style={{ left: percent(payment.minimum) }} />
+            </Meter>
+            <StatRow><StatLabel>Thrust owed next turn</StatLabel><StatValue $state="owed">{owed}</StatValue></StatRow>
+        </>
+    );
 }
 
 /* A direction's tiles are drawn only when the manoeuvre asks for that direction (null means

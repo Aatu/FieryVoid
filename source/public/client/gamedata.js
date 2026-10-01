@@ -1463,6 +1463,7 @@ window.gamedata = {
         else if (gamedata.gamephase == 2) {
             var zeroSpeedShips = [];
             var leavingBattle = [];
+            var extendingTurn = [];
             var activeShips = gamedata.getActiveShips();
             var html = '';
 
@@ -1479,6 +1480,12 @@ window.gamedata = {
                     if (ship.userid == gamedata.thisplayer && shipManager.movement.hasJumpedOut(ship)) {
                         leavingBattle.push(ship);
                     }
+                    /* EXTENDED_TURNS_PLAN.md §5.5 - the one commitment the player cannot take back
+                       next turn: the turn must then be completed before anything else, and it is
+                       cancelled only when that is physically impossible (R6). */
+                    if (ship.userid == gamedata.thisplayer && shipManager.movement.getExtendedTurnStart(ship)) {
+                        extendingTurn.push(ship);
+                    }
                 }
             }
 
@@ -1488,6 +1495,15 @@ window.gamedata = {
 
                 for (var k in leavingBattle) {
                     html += gamedata.shipNameSpan(leavingBattle[k], leavingBattle[k].name) + '<br>';
+                }
+            }
+
+            if (extendingTurn.length > 0) {
+                html += "<br>";
+                html += "The following ships are beginning an EXTENDED TURN, which must be completed at the start of next turn's movement: <br>";
+
+                for (var x in extendingTurn) {
+                    html += gamedata.shipNameSpan(extendingTurn[x], extendingTurn[x].name) + '<br>';
                 }
             }
 

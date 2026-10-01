@@ -257,6 +257,12 @@ window.MovementPhaseStrategy = function () {
         gamedata.getMyActiveShips().forEach(function (ship) {
             shipManager.movement.doForcedPivot(ship, true);
 
+            /* EXTENDED_TURNS_PLAN.md §5.4 - an extended turn owed from last turn that can no longer be
+               paid is cancelled here, with no pop-up (D5). Idempotent, like doForcedPivot.
+               ⚠️ AFTER doForcedPivot (T19): its payability dry run must see the facing a gravitic
+               ship's continuing pivot leaves. */
+            shipManager.movement.doForcedExtendedTurnCancel(ship);
+
             if (ship.base && (!ship.nonRotating)) {
                 shipManager.movement.doRotate(ship, true);
 

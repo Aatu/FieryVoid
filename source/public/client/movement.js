@@ -3257,8 +3257,13 @@ shipManager.movement = {
             move.animated = false;
         }
 
+        /* Re-opens the panel on the converted row, and nothing else. Deliberately NO
+           ShipMovementChanged: the map's movement icons are already hidden while the panel is open,
+           and that event would redraw them (PhaseStrategy.redrawMovementUI only hides them when they
+           are showing) - letting the player click other orders under an open panel. Nothing else
+           needs it while the row is uncommitted: ship icons consume committed rows only, and CONFIRM
+           and CANCEL both fire it. */
         shipManager.movement.updateAssignThrust(ship);
-        webglScene.customEvent("ShipMovementChanged", { ship: ship });
         return true;
     },
 
@@ -3463,6 +3468,31 @@ shipManager.movement = {
             value: reason
         };
         return true;
+    },
+
+    /* EXTENDED_TURNS_PLAN.md Stage 5 (§6) - THE ONE READER behind the map tooltip's note and the ship
+       window's banners, so the two can never disagree. Returns null, or:
+         { cancelled: false, text: 'Making Extended Turn (starboard)' }  from the begin until the
+             completion is committed or the turn is cancelled (D8). Public: an opponent sees it once
+             the begin is revealed, and loses it once the completion is (both are masked like any
+             other move until their bracket resolves).
+         { cancelled: true, text: 'Extended Turn Cancelled - ...' }  for the rest of the turn the
+             cancellation was made in (D5). The ship window shows it; the tooltip does not.
+       Derived from the rows each time (T8). */
+    getExtendedTurnStatus: function getExtendedTurnStatus(ship) {
+        var cancel = shipManager.movement.getExtendedTurnCancel(ship);
+        if (cancel) {
+            var reasons = { thrusters: 'Thrusters Lost', thrust: 'Not Enough Thrust', engineShorted: 'Engine Shorted' };
+            return {
+                cancelled: true,
+                text: 'Extended Turn Cancelled — ' + (reasons[cancel.value] || 'Cannot Be Completed') + ' · No speed change this turn'
+            };
+        }
+
+        var begin = shipManager.movement.getExtendedTurnStart(ship);
+        if (!begin && shipManager.movement.isExtendedTurnOutstanding(ship)) begin = shipManager.movement.getOwedExtendedTurn(ship);
+        if (!begin) return null;
+        return { cancelled: false, text: 'Making Extended Turn (' + (begin.type === 'extendTurnRight' ? 'Starboard' : 'Port') + ')' };
     },
 
 
