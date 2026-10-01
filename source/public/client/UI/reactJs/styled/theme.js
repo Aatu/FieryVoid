@@ -100,9 +100,17 @@ const theme = {
     //be sized independently and came out 35 / 35 / 46. Change btn/btnSmall and you must
     //change those tokens - and --fv-hud-strip, which reserves the row's width so the
     //header cannot grow underneath these buttons.
+    //
+    //`gap` is the space between neighbouring buttons in the top-right row; every `right:`
+    //offset in FullScreen / BackToLobby / Surrender is arithmetic on btn + gap. The small
+    //gap is tighter than the desktop one because Back to Lobby made the row four buttons
+    //wide, which is a squeeze beside the phase header on a portrait phone. Change either
+    //gap and --fv-hud-strip / --fv-hud-strip-small must follow.
     hud: {
         btn: "36px",                            //button box, desktop
         btnSmall: "25px",                       //button box, phones + short landscape
+        gap: "10px",                            //space between top-right row buttons, desktop
+        gapSmall: "5px",                        //the same, phones + short landscape
         icon: "26px",                           //inline SVG inside the box (~58%)
         iconSmall: "17px",
         glyph: "30px",                          //text glyph inside the box (~71% - see above)

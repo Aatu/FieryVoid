@@ -206,6 +206,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
                 window.UIManagerInstance = new window.UIManager($("body")[0]);
                 window.UIManagerInstance.PlayerSettings(window.Settings);
+                window.UIManagerInstance.BackToLobby();                
                 window.UIManagerInstance.FullScreen();
                 window.UIManagerInstance.Surrender();
                 window.UIManagerInstance.EwButtons();
@@ -556,8 +557,13 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 <div id="systemInfoReact"></div>
 <div id="weaponList"></div>
 <div id="showEwButtons"></div>
-<div id="surrender"></div>
+<!-- The top-right HUD row, in screen order left to right. The order matters only for the
+     drop shadows: they fall down-right, and a later mount paints over an earlier one's, so
+     each button has to come after its left-hand neighbour or that neighbour's shadow lands
+     on it - visible on phones, where the gap is only a few pixels. -->
+<div id="backToLobby"></div>
 <div id="fullScreen"></div>
+<div id="surrender"></div>
 <div id="playerSettings"></div>
 <div id="shipThrust"></div>
 <div id="pagecontainer" oncontextmenu="return false;">
