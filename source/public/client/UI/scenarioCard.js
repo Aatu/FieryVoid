@@ -66,7 +66,7 @@ window.scenarioCard = {
         },
         {
             key: "victoryConditions", label: "Victory Conditions", factLabel: "Victory Conditions",
-            options: ["Mose Points after Turn 12", "Last unit on map", "Last ship on map", "Other"],
+            options: ["Most Points after Turn 12", "Last unit on map", "Last ship on map", "Other"],
             otherKey: "victoryCustom",
             help: "How the game is won."
         },
