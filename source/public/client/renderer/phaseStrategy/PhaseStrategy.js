@@ -1888,6 +1888,22 @@ window.PhaseStrategy = function () {
         window.dispatchEvent(new CustomEvent("BackgroundToggled"));
     };
 
+    //Escape by default (Settings.CloseAllWindows): every ship window, the ship tooltip, the
+    //system info panel and the hex stack picker come down in one press. The picker's own Esc
+    //closes it and lets the key carry on to here, so the rest follow it. A confirm dialog
+    //over the map owns the key - nothing beneath it is torn down.
+    PhaseStrategy.prototype.onCloseAllWindows = function (payload) {
+        if (payload.up) return;
+        if ($(".confirm:visible").length) return;
+
+        this.hideShipTooltip(this.shipTooltip);
+        this.hideSelectFromShips(this.selectFromShips);
+        this.hideSystemInfo(true);
+        this.shipWindowManager.closeAll();
+        //same sweep onCloseShipWindow does - a window closed under the cursor leaves its wedge
+        this.onStructureMouseOut();
+    };
+
     function toggleBallisticLines(ships, payload) {
         this.ballisticIconContainer.toggleBallisticLines(ships);
         if (!this.gamedata.replay) this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
