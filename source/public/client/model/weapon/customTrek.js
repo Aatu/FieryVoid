@@ -289,6 +289,13 @@ CloakingDevice.prototype.doIndividualNotesTransfer = function () {
     }
 };
 
+//Save Orders (SAVE_ORDERS_PLAN.md §1.4, Stage 6): the Pre-Turn toggle.
+CloakingDevice.prototype.draftStateKeys = ['active'];
+CloakingDevice.prototype.draftStatePhases = [-1];
+CloakingDevice.prototype.afterDraftRestore = function () {
+    this.initializationUpdate();   //outputDisplay
+};
+
 /*What the server's checkStealthNextPhase (customTrek.php) will record when the
   Deployment/Pre-Turn phase advances, judged against the CURRENT cloak toggle: an
   uncloaked ship is marked detected by every enemy team, a cloaked one only by teams

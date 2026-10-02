@@ -98,6 +98,13 @@ window.phaseDirector = function () {
         }
 
         this.phaseStrategy = new phaseStrategy(this.coordinateConverter).activate(this.shipIconContainer, this.ewIconContainer, this.ballisticIconContainer, gamedata, scene, this.shipWindowManager, onDoneCallback);
+
+        /* Save Orders (SAVE_ORDERS_PLAN.md §1.3). A draft game.php inlined goes back in HERE, after
+           activate() - which has just re-copied last turn's power and re-declared any standing
+           abduction or maintained vortex - so the restore can replace this turn's entries rather
+           than be added to (trap T3). One site for all three phase strategies; the draft is spent on
+           first use. Also keeps the OPTIONS block in step with replay, waiting and phase changes. */
+        if (window.savedOrders) savedOrders.onStrategyActivated(gamedata, this.phaseStrategy);
     }
 
     return phaseDirector;

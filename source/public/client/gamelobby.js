@@ -5269,7 +5269,7 @@ window.gamedata = {
 				gamedata.populateFleetDropdown(cachedFleets);
 				confirm.fleetNotice("Fleet availability changed to " + setting + ".");
 			} else {
-				console.error("Load failed:", ships);
+				console.error("Availability change failed:", response);
 				confirm.fleetNotice("Failed to change fleet availability.");
 			}
 		});

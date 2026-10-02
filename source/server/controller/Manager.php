@@ -1490,46 +1490,67 @@ class Manager{
         return $out;
     }
 
-    public static function deleteSavedFleet($id) {
+    /* Delete one of $userid's own saved fleets. Returns JSON: {listId, success: true}, or an error
+       object when the id is not one of that player's fleets (nothing is deleted then). */
+    public static function deleteSavedFleet($id, $userid) {
         try {
-            self::initDBManager(); 
+            if (!is_numeric($id) || !is_numeric($userid) || (int)$userid <= 0)
+                throw new Exception("Fleet ID missing");
+
+            self::initDBManager();
             self::$dbManager->startTransaction();
 
-            self::$dbManager->deleteSavedFleet($id);
+            $deleted = self::$dbManager->deleteSavedFleet((int)$id, (int)$userid);
 
             self::$dbManager->endTransaction(false);
+
+            if ($deleted < 1)
+                throw new Exception("That fleet is not one of your saved fleets.");
+
             return json_encode([
-                'id' => $id,
+                'listId' => (int)$id,
                 'success' => true
             ]);
 
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             if (self::$dbManager !== null) self::$dbManager->endTransaction(true);
             $logid = Debug::error($e);
-            return [];
+            return json_encode([
+                'error' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'logid' => $logid
+            ]);
         }
-    }   
+    }
 
-    public static function changeAvailabilityFleet($id): array {
+    /* Toggle one of $userid's own saved fleets between shared and private. */
+    public static function changeAvailabilityFleet($id, $userid): array {
         try {
-            self::initDBManager(); 
+            if (!is_numeric($id) || !is_numeric($userid) || (int)$userid <= 0)
+                throw new Exception("Fleet ID missing");
+
+            self::initDBManager();
             self::$dbManager->startTransaction();
 
-            $newStatus = self::$dbManager->changeAvailabilityFleet($id);
+            $newStatus = self::$dbManager->changeAvailabilityFleet((int)$id, (int)$userid);
 
             self::$dbManager->endTransaction(false);
+
+            if ($newStatus === null)
+                throw new Exception("That fleet is not one of your saved fleets.");
+
             return [
-                'id'        => $id,
+                'id'        => (int)$id,
                 'success'   => true,
                 'newStatus' => $newStatus
             ];
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             if (self::$dbManager !== null) self::$dbManager->endTransaction(true);
             $logid = Debug::error($e);
             return [
                 'id'      => $id,
                 'success' => false,
-                'error'   => 'Failed to toggle fleet availability.'
+                'error'   => $e->getMessage()
             ];
         }
     }
@@ -1618,6 +1639,156 @@ class Manager{
         return $ships;
     }
 
+
+    /* ======================================================================================
+       SAVE ORDERS (SAVE_ORDERS_PLAN.md §2, Stage 1) - park a half-finished phase and finish
+       it later, on any device.
+
+       A draft is an opaque client snapshot. Nothing on the server interprets it: saveOrders
+       validates WHO may store one and WHEN, getSavedOrdersJSON hands it back to its author
+       only, and the client applies it only to that author's own ships. The commit path is
+       untouched and still validates every order, so a forged draft can do nothing a forged
+       commit POST could not already attempt.
+
+       A draft is valid for exactly one (game, player, turn, phase). Within that window
+       nothing on the server can change the player's own ships - the phase cannot advance
+       without their commit - and outside it the row is ignored (plan §0.6), so a stale row
+       left behind by a failed cleanup is harmless.
+       ====================================================================================== */
+
+    /** Phases a draft can be saved in: Initial Orders, Pre-Firing and Firing (ruling D2), and
+        Deployment / Pre-Turn Orders (Stages 5-6). Movement commits per activation and has none. */
+    private static $savedOrdersPhases = array(-1, 1, 5, 3);
+
+    /** The largest draft accepted, in bytes of JSON text. */
+    private static $savedOrdersMaxBytes = 1048576;
+
+    /* Store the player's draft for the current phase, overwriting any earlier one (D4).
+       $orders is the draft as JSON TEXT, exactly as the client wrote it. Returns JSON:
+       {"savedAt": <unix time>} or an error object. No touchGame - nobody else needs to know. */
+    public static function saveOrders($gameid, $userid, $turn, $phase, $orders) {
+        try {
+            //1. getTacGame interpolates the id straight into its SQL.
+            if (!is_numeric($gameid) || !is_numeric($userid))
+                throw new Exception("Omitting required data");
+            $gameid = (int)$gameid;
+            $userid = (int)$userid;
+            if ($gameid <= 0 || $userid <= 0)
+                throw new Exception("Omitting required data");
+
+            self::initDBManager();
+
+            //2. The game exists and is being played.
+            $game = self::$dbManager->getTacGame($gameid, $userid);
+            if (!$game || $game->status !== "ACTIVE")
+                throw new Exception("This game is not in progress.");
+
+            //3. The player holds a slot. Slots only, no ship load - hasAlreadySubmitted below
+            //   reads nothing else.
+            $game->slots = self::$dbManager->getSlotsInGame($gameid);
+            if (count($game->getSlotsByPlayerId($userid)) == 0)
+                throw new Exception("You are not playing in this game.");
+
+            //4. The orders belong to the phase the game is in, and it is one that can be saved.
+            if (!is_numeric($turn) || !is_numeric($phase)
+                || (int)$turn !== (int)$game->turn || (int)$phase !== (int)$game->phase)
+                throw new Exception("The game has moved on since these orders were given, so they cannot be saved.");
+            if (!in_array((int)$game->phase, self::$savedOrdersPhases, true))
+                throw new Exception("Orders cannot be saved in the Movement phase.");
+
+            //5. Nothing left to save once the phase is committed.
+            if ($game->hasAlreadySubmitted($userid))
+                throw new Exception("Your orders for this phase are already committed.");
+
+            //6. A JSON object of a sane size. Decoded as OBJECTS, not as an associative array:
+            //   that keeps every empty {} an object on the way back out, where an array decode
+            //   would re-encode it as [] (arch_php_empty_array_json).
+            if (!is_string($orders) || $orders === '' || strlen($orders) > self::$savedOrdersMaxBytes)
+                throw new Exception("The saved orders are missing or too large.");
+            $draft = json_decode($orders);
+            if (!is_object($draft))
+                throw new Exception("The saved orders could not be read.");
+
+            /* Re-encoded with json_encode's DEFAULT flags, which keep the stored text pure ASCII
+               (\uXXXX escapes): the connection charset is 3-byte utf8 (db/createGameRedesign.sql).
+               Never JSON_UNESCAPED_UNICODE, and never JSON_NUMERIC_CHECK, which would rewrite
+               any numeric-looking string inside the draft. */
+            $json = json_encode($draft);
+            if ($json === false)
+                throw new Exception("The saved orders could not be read.");
+
+            $savedAt = time();
+            self::$dbManager->saveOrders($gameid, $userid, (int)$game->turn, (int)$game->phase, $savedAt, $json);
+
+            return json_encode(array("savedAt" => $savedAt));
+        } catch (Throwable $e) {
+            $logid = Debug::error($e);
+            return json_encode(array("error" => $e->getMessage(), "code" => $e->getCode(), "logid" => $logid));
+        }
+    }
+
+    /* Delete the player's draft - the OPTIONS tab's "Discard Saved Orders" (plan §1.8).
+       Allowed whatever the phase, so a stray row can always be removed. */
+    public static function clearSavedOrders($gameid, $userid) {
+        try {
+            if (!is_numeric($gameid) || !is_numeric($userid) || (int)$gameid <= 0 || (int)$userid <= 0)
+                throw new Exception("Omitting required data");
+
+            self::initDBManager();
+            self::$dbManager->deleteSavedOrders((int)$gameid, (int)$userid);
+
+            return json_encode(array("cleared" => true));
+        } catch (Throwable $e) {
+            $logid = Debug::error($e);
+            return json_encode(array("error" => $e->getMessage(), "code" => $e->getCode(), "logid" => $logid));
+        }
+    }
+
+    /* game.php's inline `window.fvSavedOrders` (plan §1.6): {"savedAt": <unix time>, "draft": {...}}
+       when the player has a draft for exactly this turn and phase, otherwise the literal 'null'.
+       Returns text that is safe to print inside a <script> element.
+
+       ⚠️ NEVER THROWS (plan trap T6). A missing table - the live DB before db/savedOrders.sql
+       is applied - or a corrupt row must cost the player their draft, never the game screen. */
+    public static function getSavedOrdersJSON($gameid, $userid, $turn, $phase) {
+        try {
+            if (!is_numeric($gameid) || !is_numeric($userid) || !is_numeric($turn) || !is_numeric($phase))
+                return 'null';
+            if ((int)$gameid <= 0 || (int)$userid <= 0 || !in_array((int)$phase, self::$savedOrdersPhases, true))
+                return 'null';
+
+            self::initDBManager();
+            $row = self::$dbManager->getSavedOrders((int)$gameid, (int)$userid);
+            if (!$row || $row['turn'] !== (int)$turn || $row['phase'] !== (int)$phase)
+                return 'null';
+
+            //Objects, not an associative array, for the same {} -> [] reason as saveOrders.
+            $draft = json_decode($row['orders']);
+            if (!is_object($draft))
+                return 'null';
+
+            //The JSON_HEX_* flags keep "</script>" and quotes inside the draft from ending the
+            //inline <script> early.
+            $json = json_encode(array("savedAt" => $row['savedat'], "draft" => $draft),
+                JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+
+            return ($json === false) ? 'null' : $json;
+        } catch (Throwable $e) {
+            Debug::error($e);
+            return 'null';
+        }
+    }
+
+    /* Housekeeping after a commit or a surrender: the player's draft is obsolete. Swallows any
+       failure on purpose - it runs after the commit's transaction has closed, and a row left
+       behind can never be applied (see the block comment above saveOrders). */
+    private static function deleteSavedOrdersQuietly($gameid, $userid) {
+        try {
+            self::$dbManager->deleteSavedOrders((int)$gameid, (int)$userid);
+        } catch (Throwable $e) {
+            Debug::error($e);
+        }
+    }
 
     public static function submitTacGamedata($gameid, $userid, $turn, $phase, $activeship, $ships, $status, $slotid = 0){
         try {
@@ -1763,6 +1934,7 @@ class Manager{
 
                 self::$dbManager->endTransaction(false);
                 self::$dbManager->releasePlayerSubmitLock($gameid, $userid);
+                self::deleteSavedOrdersQuietly($gameid, $userid); //Save Orders: nothing left to finish
                 self::touchGame($gameid);
 
                 if (class_exists('DiscordNotifier')) DiscordNotifier::flush(self::$dbManager, $gdS, $userid);
@@ -1801,9 +1973,13 @@ class Manager{
             }
                         
             self::$dbManager->endTransaction(false);
-            
+
             self::$dbManager->releasePlayerSubmitLock($gameid, $userid);
-            
+
+            //Save Orders (SAVE_ORDERS_PLAN.md §2): the committed orders supersede the player's
+            //draft. After the transaction on purpose - housekeeping must never fail a commit.
+            self::deleteSavedOrdersQuietly($gameid, $userid);
+
             //Debug("GAME: $gameid Player: $userid SUBMIT OK");
             
             self::touchGame($gameid);

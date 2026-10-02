@@ -889,53 +889,65 @@ class DBManager
         return $byShip;
     }
 
-    public function changeAvailabilityFleet(int $id): int {
-        try {
-            // Toggle the value
-            $stmt = $this->connection->prepare(
-                "UPDATE tac_saved_list
-                SET isPublic = CASE WHEN isPublic = 1 THEN 0 ELSE 1 END
-                WHERE id = ?"
-            );
-            $stmt->bind_param('i', $id);
-            $stmt->execute();
-            $stmt->close();
-
-            // Fetch the new value
-            $stmt = $this->connection->prepare(
-                "SELECT isPublic FROM tac_saved_list WHERE id = ?"
-            );
-            $stmt->bind_param('i', $id);
-            $stmt->execute();
-
-            $newValue = 0;
-            $stmt->bind_result($newValue);
-            $stmt->fetch();
-            $stmt->close();
-
-            return (int) $newValue;
-
-        } catch (Exception $e) {
-            throw $e;
+    /* Toggles a saved fleet between shared and private, only if it belongs to $userid. Returns the new
+       isPublic value, or null when $id is not one of that player's fleets (nothing changes then).
+       Same owner-in-the-WHERE rule as deleteSavedFleet below: the id alone used to be enough, so anyone
+       could make another player's private fleet loadable by id. */
+    public function changeAvailabilityFleet(int $id, int $userid): ?int {
+        // Toggle the value
+        $stmt = $this->connection->prepare(
+            "UPDATE tac_saved_list
+            SET isPublic = CASE WHEN isPublic = 1 THEN 0 ELSE 1 END
+            WHERE id = ? AND userid = ?"
+        );
+        if (!$stmt) {
+            throw new Exception("Prepare failed: " . $this->connection->error);
         }
+        $stmt->bind_param('ii', $id, $userid);
+        $stmt->execute();
+        $changed = $stmt->affected_rows;
+        $stmt->close();
+
+        if ($changed < 1) return null;
+
+        // Fetch the new value
+        $stmt = $this->connection->prepare(
+            "SELECT isPublic FROM tac_saved_list WHERE id = ? AND userid = ?"
+        );
+        $stmt->bind_param('ii', $id, $userid);
+        $stmt->execute();
+
+        $newValue = 0;
+        $stmt->bind_result($newValue);
+        $stmt->fetch();
+        $stmt->close();
+
+        return (int) $newValue;
     }
 
-    public function deleteSavedFleet($id) {
-        try{
-            $stmt = $this->connection->prepare(
-                "DELETE FROM 
-                    tac_saved_list
-                WHERE
-                    id = ?"
-            );
-            if ($stmt) {
-                $stmt->bind_param('i', $id);
-                $stmt->execute();
-                $stmt->close();
-            }
-        } catch (Exception $e) {
-            throw $e;
+    /* Deletes a saved fleet only if it belongs to $userid, and returns how many lists went (0 or 1).
+       The owner test is in the WHERE clause on purpose: the id alone used to be enough, so anyone -
+       logged in or not - could delete any player's fleet by posting its (sequential, shareable) id.
+       The default fleets (userid 0) can never match a real player, so they cannot be deleted here.
+       The list's ships, enhancements, ammo, damage and criticals go with it through their FKs. */
+    public function deleteSavedFleet($id, $userid) {
+        $stmt = $this->connection->prepare(
+            "DELETE FROM
+                tac_saved_list
+            WHERE
+                id = ? AND userid = ?"
+        );
+
+        if (!$stmt) {
+            throw new Exception("Prepare failed: " . $this->connection->error);
         }
+
+        $stmt->bind_param('ii', $id, $userid);
+        $stmt->execute();
+        $deleted = $stmt->affected_rows;
+        $stmt->close();
+
+        return $deleted;
     }
 
     public function deleteEmptyGames()
@@ -4837,13 +4849,28 @@ class DBManager
 
 			//individual system notes
             $stmt = $this->connection->prepare(
-                "DELETE FROM 
+                "DELETE FROM
                     tac_individual_notes
                 WHERE
                     gameid = ?"
             );
             $this->executeGameDeleteStatement($stmt, $ids);
-		
+
+			/* Saved Orders (SAVE_ORDERS_PLAN.md §2). ⚠️ GUARDED, unlike every table above. This
+			   method runs on EVERY game.php load (getTacGamedata with turn null -> deleteOldGames),
+			   and global.php turns the mysqli warning from a failed prepare into an ErrorException -
+			   so if db/savedOrders.sql has not reached this database yet, an unguarded prepare here
+			   would take the game screen down for every player. A missing table has nothing to
+			   delete, so it is skipped and logged instead. */
+            if (count($ids) > 0) {
+                try {
+                    $stmt = $this->connection->prepare("DELETE FROM tac_savedorders WHERE gameid = ?");
+                    $this->executeGameDeleteStatement($stmt, $ids);
+                } catch (Throwable $e) {
+                    Debug::error($e);
+                }
+            }
+
         } catch (Exception $e) {
             throw $e;
         }
@@ -4858,6 +4885,86 @@ class DBManager
             }
             $stmt->close();
         }
+    }
+
+    /* ------------------------------------------------------------------------------------
+       Saved Orders (SAVE_ORDERS_PLAN.md §2) - one parked, uncommitted phase per player per
+       game. No game logic reads this table: Manager::saveOrders validates and writes it,
+       game.php hands the row back to its author, and a commit or surrender deletes it.
+       ------------------------------------------------------------------------------------ */
+
+    /* Insert or overwrite the player's draft (ruling D4: one per player per game, no history).
+       $orders is JSON text that Manager::saveOrders has already validated and re-encoded. */
+    public function saveOrders($gameid, $playerid, $turn, $phase, $savedat, $orders)
+    {
+        $stmt = $this->connection->prepare(
+            "INSERT INTO tac_savedorders (gameid, playerid, turn, phase, savedat, orders)
+            VALUES (?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+                turn = VALUES(turn),
+                phase = VALUES(phase),
+                savedat = VALUES(savedat),
+                orders = VALUES(orders)"
+        );
+
+        if (!$stmt) {
+            throw new Exception("Prepare failed: " . $this->connection->error);
+        }
+
+        $stmt->bind_param('iiiiis', $gameid, $playerid, $turn, $phase, $savedat, $orders);
+
+        if (!$stmt->execute()) {
+            $error = $stmt->error;
+            $stmt->close();
+            throw new Exception("Execute failed: " . $error);
+        }
+
+        $stmt->close();
+    }
+
+    /* The player's draft row as ['turn', 'phase', 'savedat', 'orders'], or null when there is
+       none. Whether it still applies (same turn and phase as the game) is the caller's call. */
+    public function getSavedOrders($gameid, $playerid)
+    {
+        $row = null;
+
+        $stmt = $this->connection->prepare(
+            "SELECT turn, phase, savedat, orders FROM tac_savedorders WHERE gameid = ? AND playerid = ?"
+        );
+
+        if (!$stmt) {
+            throw new Exception("Prepare failed: " . $this->connection->error);
+        }
+
+        $stmt->bind_param('ii', $gameid, $playerid);
+        $stmt->bind_result($turn, $phase, $savedat, $orders);
+        $stmt->execute();
+        if ($stmt->fetch()) {
+            $row = array(
+                'turn' => (int)$turn,
+                'phase' => (int)$phase,
+                'savedat' => (int)$savedat,
+                'orders' => $orders
+            );
+        }
+        $stmt->close();
+
+        return $row;
+    }
+
+    public function deleteSavedOrders($gameid, $playerid)
+    {
+        $stmt = $this->connection->prepare(
+            "DELETE FROM tac_savedorders WHERE gameid = ? AND playerid = ?"
+        );
+
+        if (!$stmt) {
+            throw new Exception("Prepare failed: " . $this->connection->error);
+        }
+
+        $stmt->bind_param('ii', $gameid, $playerid);
+        $stmt->execute();
+        $stmt->close();
     }
 
     public function removePowerEntriesForTurn($gameid, $shipid, $systemid, $turn)

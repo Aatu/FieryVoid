@@ -502,6 +502,24 @@ CREATE TABLE `tac_systemdata` (
 
 
 --
+-- Table structure for table `tac_savedorders`
+-- Save Orders: one parked, uncommitted phase per player per game. See db/savedOrders.sql.
+--
+
+DROP TABLE IF EXISTS `tac_savedorders`;
+
+CREATE TABLE `tac_savedorders` (
+  `gameid`   int(11)    NOT NULL,
+  `playerid` int(11)    NOT NULL,
+  `turn`     int(11)    NOT NULL,
+  `phase`    int(11)    NOT NULL,
+  `savedat`  int(11)    NOT NULL,
+  `orders`   mediumtext NOT NULL,
+  PRIMARY KEY (`gameid`, `playerid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+--
 -- Table structure for table `tac_saved_list`
 --
 

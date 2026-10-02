@@ -2696,12 +2696,22 @@ getActiveShipName: function getActiveShipName() {
         }
     },
 
+    /* The Save Orders floppy (SAVE_ORDERS_PLAN.md §1.5) rides on these two, so it follows the tick
+       everywhere - waiting, replay, phase changes - with no visibility logic of its own. Shown only
+       in the phases a draft can be kept in; .fv-save-shown widens the bar's icon reservation while
+       it is, so Movement and Deployment keep their one-icon width. */
     showCommitButton: function showCommitButton() {
         $(".committurn").show();
+
+        var saveable = Boolean(window.savedOrders && savedOrders.isSavePhase(gamedata.gamephase));
+        $(".saveturn").toggle(saveable);
+        $("#phaseheader").toggleClass("fv-save-shown", saveable);
     },
 
     hideCommitButton: function hideCommitButton() {
         $(".committurn").hide();
+        $(".saveturn").hide();
+        $("#phaseheader").removeClass("fv-save-shown");
     },
 
     /* showSurrenderButton/hideSurrenderButton are GONE (2026-08-03). Surrender is no longer a
@@ -2840,6 +2850,8 @@ getActiveShipName: function getActiveShipName() {
            instead: this is the one place ships actually arrive, and it also keeps the
            "N units will be saved" line honest as units die during the battle. */
         if (window.savedFleets) savedFleets.refreshSavePanel();
+        //...and the Saved Orders block above it (SAVE_ORDERS_PLAN.md §1.8), same short-circuit.
+        if (window.savedOrders) savedOrders.refreshPanel();
 
         gamedata.checkGameStatus();
     },

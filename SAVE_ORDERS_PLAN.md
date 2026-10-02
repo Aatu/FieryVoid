@@ -4,9 +4,11 @@ A floppy-disk button beside the green commit tick. It stores the orders a player
 the current phase **without committing them**. When that player opens the game again (same device or
 another), the page puts those orders back exactly as they were, and they carry on and commit as normal.
 
-Status: **planned, nothing built.** All six decisions were ruled by the user on 2026-10-02 (see
-Rulings), so Stage 0 can start whenever the user decides to go ahead. Stages 0-4 are the core and go
-live together; Stages 5-6 (Deployment) are postponed; Stage 7 (Movement) is optional.
+Status: **Stages 0-6 BUILT 2026-10-02, uncommitted.** Stages 0-4 were play-tested by the user the same
+day (game 4437, Initial Orders) and Stages 5-6 (Deployment) end to end against the local site (game
+4434). All six decisions were ruled by the user (see Rulings). Stage 7 (Movement) is optional and not
+started. What the build changed or added compared with the plan below is in §7 - read it before testing
+or extending.
 
 ## Why orders vanish today
 
@@ -346,7 +348,7 @@ in the OPTIONS tab.
 **Release:** Stages 0-4 go live together. Apply `db/savedOrders.sql` to the live DB before uploading
 the PHP (T10).
 
-### Stage 5 (postponed) — Deployment: placement
+### Stage 5 — Deployment: placement (BUILT 2026-10-02 - see §7.5)
 - What a Deployment commit sends: this turn's `deploy` movement rows. DeploymentGamePhase::process
   validates them (`validateDeployment`) and inserts them.
 - On the client, placement is tracked by the deploy rows, `ship.deploymove`, and a base's rotation (the
@@ -355,7 +357,7 @@ the PHP (T10).
 - The restore has to move the deployment icons as well as the data, and leave DeploymentPhaseStrategy's
   own "still to place" bookkeeping consistent.
 
-### Stage 6 (postponed, ships with 5) — Deployment: system settings
+### Stage 6 — Deployment: system settings (BUILT 2026-10-02 - see §7.5)
 Through the Stage 3 mechanism:
 - mine ranges: `CaptorMine`, `ProximityMine`, `MineControllerDEW` (`mineSet` and the ranges);
 - stealth: `CloakingDevice`, `ShadingField` (`active`);
@@ -447,3 +449,124 @@ Through the Stage 3 mechanism:
 Rough size: Stages 0-2 are about one session; Stage 3 is about one more, most of it confirming each
 class's fields in play. Stage 4 is small. Stages 5-6 together are about one session; Stage 7 is
 unsized until its value is confirmed.
+
+## 7. Build notes (2026-10-02, Stages 0-4)
+
+Everything in §2-§3 for Stages 0-4 is built as written, except where this section says otherwise.
+
+### 7.1 Where the build departs from the plan, and why
+- **`deleteGames()` guards its `tac_savedorders` DELETE** (try/catch, and only when there are ids).
+  `game.php` calls `getTacGamedata` with turn null, which runs `deleteOldGames` → `deleteGames` on
+  **every page load**, and global.php turns a failed `prepare` into an exception. Unguarded, a live DB
+  without the table would have taken the game screen down for everybody (new trap T14).
+- **Cleanup runs after the commit's transaction**, through `Manager::deleteSavedOrdersQuietly`, which
+  swallows and logs any failure. A failing housekeeping DELETE inside the transaction would have
+  rolled the player's commit back.
+- **The draft travels as a JSON *string* inside the POST body**, the way `submitGamedata` sends
+  `ships`. `saveOrders.php` decodes the body as an array, which would turn every `{}` in the draft into
+  `[]`; the server decodes the draft itself as objects for the same reason (new trap T15).
+- **Unowned jump gates.** Any player may signal a fixed gate in Initial Orders and `construcGamedata`
+  posts that order even on an enemy-owned gate, so an own-ships-only draft would have dropped it. The
+  draft carries such a gate as `{ gate: true, sys: { <engineId>: { fire } } }`, phase 1 only, and the
+  restore touches only that gate's `jumpEngine` orders. (Safe for the same reason as §0.6: every
+  current-turn order on a gate in a phase-1 payload is this client's own.)
+- **Every own ship gets a draft entry, even an empty one, and the restore resets every system of a
+  drafted ship**, not just the systems the draft lists. That is what keeps an order the player
+  removed before saving removed - e.g. a re-declared abduction or vortex maintain cancelled in Initial
+  Orders. A ship the draft does not list is left alone.
+- **A weapon's mode goes back through `weaponManager.restoreFiringMode`** (→ `setFiringMode`, or a
+  bounded `changeFiringMode` cycle), never a bare assignment: the mode switch rebuilds range, fire
+  control, damage and the info readouts (T9).
+- **The bar's two-icon reservation is dynamic.** `showCommitButton` / `hideCommitButton` toggle
+  `#phaseheader.fv-save-shown` with the floppy (80px desktop, 70px on both phone layouts), so Movement
+  and Deployment keep the one-icon 45px and their ship name is not squeezed for nothing. Measured under
+  CDP emulation at 1280, 390 portrait and 844×390 landscape: both icons inside the bar, clear of the
+  phase text.
+- **The notice is `width: max-content`** between `min(400px, 90%)` and `90%`: one line on a desktop or a
+  landscape phone, wrapping at the banner's width in portrait.
+- **The blocking overlay's label is swapped** to "SAVING ORDERS..." / "DISCARDING SAVED ORDERS..." for
+  the length of the request; "TRANSMITTING ORDERS..." would read as a commit.
+- **The OPTIONS block also refreshes from the PhaseDirector hook**, so it follows replay entry and exit
+  and the switch to waiting, none of which run `parseServerData`.
+
+### 7.2 Stage 3 - the fields as confirmed
+| Class | Phases | What is kept |
+|---|---|---|
+| ChameleonSensors | 1 | `active` |
+| Hangar (+ Catapult, FighterRail, Shadow hangar) | 3 | `pendingLaunchOrders`, `pendingDockOrders`, both `*Dirty`; a Docking Bay's `pendingBayShipDock/LaunchOrders` + `*Dirty`. `afterDraftRestore` → `refreshHangarTooltip` |
+| DockingCollar | 3 | its OWN `pendingLcvDockOrders`, `pendingLcvLaunchOrders` + `*Dirty` (it extends Hangar, so it must override the list) |
+| KirishiacOrbital | 3 | `active`, then `updateDockingStatus()`. Deployment's half waits for Stage 6 |
+| AdaptiveArmorController | 1 | `availableAA`, `allocatedAA`, `currchangedAA`, `AAtotal_used`, `AApreallocated_used`, **`pressignedReset`** - the last stops `initializationUpdate`'s once-per-page reset re-running over restored counters. Then `refreshData()` |
+| HyachComputer | 1 | `allocatedBFCP`, `BFCPtotal_used`, then `refreshData()` |
+| HyachSpecialists | 1, 3 | **A replay, not a field copy.** `doUse()` changes the SHIP (defence, reactor/scanner/engine output, to-hit bonus, weapon readouts), so the draft records which Specialists are `allocated` this phase and the restore calls `doUse()` for each behind `canUse()`. Not in Pre-Firing: its `process()` saves no notes |
+| SelfRepair | 1 | `priorityChanges` |
+| StructureSelfRepair (+ Coop) | 1 | `repairOrder` |
+| ShieldReinforcement | 1 | `reinforceAmount` (derived from the boost on init, but nothing guarantees an init between restore and commit) |
+| ThirdspaceShield (+ ThoughtShield) | 1 | `currentHealth`, then `initializationUpdate()` |
+| **ThirdspaceShieldGenerator** (+ ThoughtShieldGenerator) | 1 | **`storedCapacity`** - not in the plan's list. Every shield point moves through it, and the commit warns when it is not zero |
+| FtrPetals, FtrGravShield | 1 | `active` |
+| LightningArray | 3 | `active`, then `initializationUpdate()` (the orders come back already priced) |
+
+### 7.3 Two new traps
+- **T14.** `DBManager::deleteGames()` runs on every `game.php` load. Anything added to it that can
+  throw takes the game screen down; guard it.
+- **T15.** A JSON POST body decoded as an array turns every `{}` inside it into `[]`. A map-shaped
+  payload must travel as a string inside the body and be decoded as objects.
+
+### 7.4 Verified, and still owed
+- Verified: `php -l` on the four PHP files (in a throwaway `fieryvoid-php` container - the dev
+  environment was down); the server's JSON round trip (`{}` kept, stored text pure ASCII, no `</script>`
+  in the inline global, `"0012"` kept a string); `node --check` on every edited JS file and both
+  rebuilt legacy bundles; an esbuild parse of `tactical.css` and `logPanel.css`; a vm harness that
+  loads the real model files and checks save → reload → activation → restore in phases 1, 5 and 3 (90
+  checks: EW, power, fire orders, modes, pivots, gate signals, AA, hangar queues, shields, petals,
+  Lightning Array; stale, wrong-version, waiting and second-apply cases) - itself proved by three
+  injected regressions - and a second one for the Specialists replay (14 checks, no double bonus).
+- Since then (same day): `fvbuild.ps1 -Check` passed in full (autoload up to date, no new ship-data
+  findings, replay corpus 132/0). The user's game 4437 (Initial Orders) was loaded headlessly as its
+  player with every POST blocked: re-capturing the page straight after the restore reproduced the
+  stored draft exactly, with the notice, floppy title and OPTIONS status all correct.
+- Still owed: the rest of the play-test matrix in §5.
+- Deploy: apply `db/savedOrders.sql` to the live DB **before** uploading the PHP (T10). Locally,
+  apply it to the Docker DB before testing.
+
+### 7.5 Stages 5-6 - Deployment (built 2026-10-02)
+- **Phase -1 is a save phase** everywhere: `Manager::$savedOrdersPhases`, the `game.php` read and the
+  client's `isSavePhase`. The phase is "Deployment" or "Pre-Turn Orders" in the status line, the same
+  split the phase header makes.
+- **The floppy shows from the start of Deployment** (`savedOrders.syncButton`, run from the
+  PhaseDirector hook), not with the tick. Deployment's tick stays hidden until every unit has a legal
+  placement, and the point of saving there is to stop before that. Waiting and replay still remove it.
+- **Placement (Stage 5):** every uncommitted row of this turn on an own unit - in practice the one
+  `deploy` row, which carries the speed and turn-arrow edits and a base's rotation in its `value`. The
+  restore drops this turn's id -1 rows (including the ones activation just made for an arriving wave),
+  appends the draft's, and re-points `ship.deploymove` at the restored row object: `deploy()` and the
+  arrows edit that object in place, so a copy would cut them off.
+- **The unit markers for a deploy-start dock** (`pendingDeployDock`, `pendingLcvDeployDock` - which also
+  marks a Docking Bay ship, with `bay: true` - and `forcedDeployDock`) travel as the draft's `dock`
+  record and are set or deleted to match it.
+- **After a Deployment restore** the client calls `window.refreshDeploymentUIForDeployStart()`, the
+  helper the deploy-dock dialog already uses: it re-runs the commit gate against the restored
+  placements, hides docked units' icons, and refreshes the EDF previews and hangar tooltips.
+- **Stage 6 system settings**, all through the Stage 3 mechanism:
+
+| Class | What is kept in phase -1 |
+|---|---|
+| Hangar (+ Docking Bay, Catapult, Rail) | `pendingDeployStartOrders`, `pendingBayShipDeployStartOrders` + their `*Dirty` |
+| DockingCollar | `pendingLcvDeployStartOrders` + `*Dirty` |
+| CaptorMine | `allocatedRanges`, `mineSet` (the flag the commit's "ranges not set" warning reads), then `refreshData()` |
+| ProximityMine | `allocatedShipTypes`, `mineSet`, then `refreshData()` |
+| MineControllerDEW | `allocatedRanges` (flat or per weapon), `mineSet`, then `refreshData()` |
+| CloakingDevice | `active`, then `initializationUpdate()` |
+| ShadingField | `active` |
+| KirishiacOrbital | `active` (now phases -1 and 3) |
+| HyachSpecialists | the PICKS (`currSelectedSpec` = `selected`), replayed through `canSelect()` / `doSelect()` |
+
+- **Checked, and needing nothing:** Adaptive Armor, Power Capacitor and Plasma Battery all write
+  Deployment notes, but from server-side state alone - the commit reads no client input for them.
+- **Verified:** a vm harness for Deployment (26 checks: placements, speed, facing, base rotation, mine
+  ranges, cloak, a flight queued aboard a carrier, `deploymove` identity, an activation-placed arrival
+  replaced rather than duplicated), proved by three injected regressions; the Specialists harness grew
+  six checks for the picks; and an end-to-end run on the real local site (game 4434, player 210): 21
+  units placed and five mines ranged through the page, Save posted for real, a fresh page load
+  restored it identically, the test row then removed through `clear`. `php -l` clean on all changed PHP.

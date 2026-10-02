@@ -1577,6 +1577,7 @@ only screen and (max-height: 500px) and (orientation: landscape) {
 }
 
 #gameOptionsList,
+#savedOrdersPanel,
 #fleetSavePanel {
     max-width: 616px;
 }
@@ -1631,18 +1632,25 @@ only screen and (max-height: 500px) and (orientation: landscape) {
 }
 
 /* First child only in the degenerate case where the options list is empty - the divider
-   would otherwise sit at the very top of the panel with nothing above it to divide. */
-#gameOptionsList:empty+#fleetSavePanel .fv-opt-heading {
+   would otherwise sit at the very top of the panel with nothing above it to divide.
+   ⚠️ AN ADJACENT-SIBLING RULE, so it names whatever section comes straight after the list.
+   That is the Saved Orders block now (SAVE_ORDERS_PLAN.md §1.8, trap T11); it used to be
+   #fleetSavePanel, and left pointing there it would have silently stopped matching. */
+#gameOptionsList:empty+#savedOrdersPanel .fv-opt-heading {
     margin-top: 0;
     padding-top: 0;
     border-top: 0;
 }
 
+/* The Saved Orders block (between the switches and Save Fleet) is built exactly like the
+   Save Fleet block, so the two share every rule below. */
+#savedOrdersPanel p,
 #fleetSavePanel p {
     margin: 0 0 8px 0;
     line-height: 1.4;
 }
 
+#savedOrdersStatus,
 #fleetSaveSummary {
     color: var(--fv-text-dim);
     font-size: 12px;
@@ -1665,11 +1673,16 @@ only screen and (max-height: 500px) and (orientation: landscape) {
 
    Disabled stays: savedFleets.js disables this whenever there is nothing saveable, and the
    chip grammar dims nothing on its own (it only declines to repaint the label, via
-   .fv-log-chip:hover:not(:disabled)). */
+   .fv-log-chip:hover:not(:disabled)).
+
+   Discard Saved Orders (SAVE_ORDERS_PLAN.md §1.8) is the panel's second action and is built
+   the same way, so it shares both rules; savedOrders.js disables it while nothing is saved. */
+#savedOrdersDiscard,
 #fleetSaveButton {
     margin-top: 2px;
 }
 
+#savedOrdersDiscard:disabled,
 #fleetSaveButton:disabled {
     opacity: 0.4;
     cursor: not-allowed;

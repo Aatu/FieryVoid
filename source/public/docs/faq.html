@@ -203,7 +203,7 @@
 <section data-key="infopanel" data-title="Info Panel" data-group="Interface &amp; Site">
   <p class="fvd-lede">The Info Panel is the tabbed panel along the bottom-left of the battle screen. Its six tabs share
     one body, so only one is on screen at a time: <b>COMBAT LOG</b>, <b>FLEET INFO</b>, <b>GAME CHAT</b>, <b>CHAT</b>,
-    <b>DECLARATIONS</b> and <b>SAVE FLEET</b>.</p>
+    <b>DECLARATIONS</b> and <b>OPTIONS</b>.</p>
   <figure class="fvd-fig">
     <img src="img/docViewer/info-panel.jpg" alt="The Info Panel with the combat log open">
     <figcaption>The Info Panel, on the COMBAT LOG tab.</figcaption>
@@ -306,10 +306,44 @@
       earlier than the rest of the interface does.</li>
   </ul>
 
-  <h3>SAVE FLEET</h3>
-  <p>Saves your surviving ships - with their enhancements, remaining ammunition, battle damage and critical effects - as
-    a reusable fleet list. Load it in Fleet Selection to carry a campaign on into the next battle. See
-    <a href="#savedfleets">Battle Damage &amp; Saving Fleets</a> for exactly what is and is not carried over.</p>
+  <h3>OPTIONS</h3>
+  <p>Your own settings for this screen, and two things you can save.</p>
+  <ul>
+    <li><b>Show Initiative Overlay</b> - the movement-group number drawn over every unit that has not moved yet.</li>
+    <li><b>Play sound during Replay</b> - when off, every replay starts muted; the speaker button on the map still turns
+      the sound on for that replay. Both settings are kept on your device.</li>
+    <li><b>Saved Orders</b> - shows whether you have orders saved for the current phase, and lets you discard them. See
+      <a href="#savedorders">Saving Orders for Later</a>.</li>
+    <li><b>Save Fleet</b> - saves your surviving ships, with their enhancements, remaining ammunition, battle damage and
+      critical effects, as a reusable fleet list. Load it in Fleet Selection to carry a campaign on into the next
+      battle. See <a href="#savedfleets">Battle Damage &amp; Saving Fleets</a> for exactly what is and is not carried
+      over.</li>
+  </ul>
+</section>
+
+<section data-key="savedorders" data-title="Saving Orders for Later" data-group="Interface &amp; Site">
+  <p class="fvd-lede">Halfway through a big phase and need to stop? The <b>floppy-disk button</b> beside the green tick
+    saves the orders you have given so far <i>without</i> committing them. Open the game again later - on this device or
+    any other - and your orders are put back exactly as you left them, ready to finish and commit as normal.</p>
+  <ul>
+    <li>It works in <b>Deployment</b> (and Pre-Turn Orders), <b>Initial Orders</b>, <b>Pre-Firing Orders</b> and <b>Fire
+      Orders</b> - every phase but Movement, which already commits one ship at a time. In Deployment the Save button
+      is there from the start, before every unit has been placed.</li>
+    <li>A save keeps everything you have ordered in that phase: where you have placed your units, with their facing,
+      speed and a base's rotation; power, EW, fire orders and firing modes, combat pivots, the Jump Manifest; and the
+      settings of special systems such as Adaptive Armor, Self-Repair priorities, Specialists, shield energy, mine
+      ranges, cloaking and shading, and hangar launches and docking - including units set to start the battle
+      aboard a carrier.</li>
+    <li>It covers <b>the current phase only</b>. Each save replaces the one before, and nothing is kept once the phase
+      is over.</li>
+    <li>Saving is not committing: the game still waits for you, and your opponents never see your saved orders.</li>
+    <li>When you come back, a line under the phase banner tells you when the restored orders were saved. Pointing at the
+      Save button shows the time of your last save as well.</li>
+    <li><b>Committing clears your saved copy</b>, so the next phase always starts fresh.</li>
+    <li>To throw a save away, open the <b>OPTIONS</b> tab at the bottom of the screen and click <b>Discard Saved
+      Orders</b>. This resets every order you have given this phase - including anything you have not saved - and
+      reloads the game.</li>
+  </ul>
 </section>
 
 <section data-key="ruler" data-title="Ruler Tool" data-group="Interface &amp; Site">
@@ -462,14 +496,14 @@
 
   <h3>Saving a fleet from a game in progress</h3>
   <figure class="fvd-fig">
-    <img src="img/docViewer/save-fleet-tab.jpg" alt="The Save Fleet tab of the Info Panel">
+    <img src="img/docViewer/save-fleet-tab.jpg" alt="The Save Fleet section of the Info Panel">
     <figcaption>Saving a fleet's survivors from the battle screen.</figcaption>
   </figure>
-  <p>In any game, open the <b>SAVE FLEET</b> tab of the Info Panel (beside COMBAT LOG, DECLARATIONS and the chats). It
-    tells you how many of your units will be saved, and <b>Save Current Fleet</b> saves them as a normal saved fleet -
-    but with all their accumulated damage and critical effects attached.</p>
+  <p>In any game, open the <b>OPTIONS</b> tab of the Info Panel (beside COMBAT LOG, DECLARATIONS and the chats). Its
+    <b>Save Fleet</b> section tells you how many of your units will be saved, and <b>Save Current Fleet</b> saves them as
+    a normal saved fleet - but with all their accumulated damage and critical effects attached.</p>
   <ul>
-    <li>The tab is available in <b>every phase</b>, and in finished games and replays too, so you can go back to a
+    <li>Save Fleet is available in <b>every phase</b>, and in finished games and replays too, so you can go back to a
       completed battle and save the winning side's survivors.</li>
     <li>Only <b>survivors</b> are saved. Destroyed ships, ships that docked into a hangar and left the battle, and mines
       you have already laid are all left out; the summary line says how many were excluded.</li>

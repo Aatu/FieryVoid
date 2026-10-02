@@ -581,6 +581,14 @@ body {
     padding-right: 10px;
 }
 
+/* Save Orders (SAVE_ORDERS_PLAN.md §1.5): the floppy sits LEFT of the tick, so while it shows the
+   bar reserves room for two icons - 10px inset + two 25px icons with their 10px cell padding.
+   gamedata.showCommitButton / hideCommitButton toggle the class together with the floppy, so
+   Movement and Deployment, which never show it, keep the one-icon 45px above. */
+#phaseheader.fv-save-shown {
+    padding-right: 80px;
+}
+
 .centeredvaluecontainer {
     position: relative;
     text-align: center;
@@ -606,6 +614,15 @@ body {
     width: 25px;
     height: 25px;
     background-image: url(../img/ok.png);
+    cursor: pointer;
+    background-size: cover;
+}
+
+/* The Save Orders floppy - same box as the tick beside it. */
+.save {
+    width: 25px;
+    height: 25px;
+    background-image: url(../img/save.png);
     cursor: pointer;
     background-size: cover;
 }
@@ -648,6 +665,37 @@ body {
     font-weight: 400;
 
     text-align: center;
+}
+
+/* Save Orders' passive notice (SAVE_ORDERS_PLAN.md §1.3, ruling D3): one line in the phase
+   banner's own look, placed directly beneath it by client/savedOrders.js showNotice (or where the
+   banner sits, when it is not up). It fades in and out on its own and never takes a click meant
+   for the map - pointer-events: none. Its own element on purpose: a line inside #infowindow would
+   turn up again when informFire reuses the banner during replays. */
+#savedOrdersNotice {
+    display: none;
+    position: absolute;
+    left: 50%;
+    top: 130px;
+    transform: translateX(-50%);
+    box-sizing: border-box;
+    /* As wide as its line needs - never narrower than the banner above it, never wider than the
+       banner's own 90% cap, wrapping on a phone. A plain auto width would shrink-to-fit against
+       the HALF of the page right of left:50%, and wrap at ~195px on a phone. */
+    width: max-content;
+    min-width: min(400px, 90%);
+    max-width: 90%;
+    padding: 4px 10px;
+    border-radius: 7px;
+    background-color: black;
+    opacity: 0.65;
+    color: var(--fv-text);
+    font-family: arial;
+    font-size: 13px;
+    line-height: 1.35;
+    text-align: center;
+    z-index: 10000;
+    pointer-events: none;
 }
 
 .shipclickable {
@@ -1269,10 +1317,18 @@ body {
     /* Scale down OK/Cancel buttons if they appear in the phase header.
        (Surrender left this table on 2026-08-03 — it is a top-right HUD button now.) */
     #phaseheader .ok,
-    #phaseheader .cancel {
+    #phaseheader .cancel,
+    #phaseheader .save {
         width: 18px;
         height: 18px;
         background-size: cover;
+    }
+
+    /* Two 18px icons with their cells, 5px in from the edge (Save Orders - see the desktop rule).
+       It has to be restated here: the desktop rule's class makes it outrank the plain
+       #phaseheader padding above. */
+    #phaseheader.fv-save-shown {
+        padding-right: 70px;
     }
 
     #iniGui {
@@ -1367,10 +1423,18 @@ body {
     }
 
     #phaseheader .ok,
-    #phaseheader .cancel {
+    #phaseheader .cancel,
+    #phaseheader .save {
         width: 18px;
         height: 18px;
         background-size: cover;
+    }
+
+    /* Two 18px icons with their cells, 5px in from the edge (Save Orders - see the desktop rule).
+       It has to be restated here: the desktop rule's class makes it outrank the plain
+       #phaseheader padding above. */
+    #phaseheader.fv-save-shown {
+        padding-right: 70px;
     }
 
     /* iniGui / initiative list — same shrink as portrait so it doesn't
