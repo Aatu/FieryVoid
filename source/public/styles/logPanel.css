@@ -729,32 +729,36 @@ only screen and (max-height: 500px) and (orientation: landscape) {
 
 /* The panels' scroll panes. tactical.css still styles #gameinfo / #combatLogContainer /
    #declarationsContainer scrollbars, but none of those three is the scroller any more —
-   these four are. Same tokens, so they look identical. */
+   these five are. Same tokens, so they look identical. */
 #logLive::-webkit-scrollbar,
 #LogActual::-webkit-scrollbar,
 #fleetListBody::-webkit-scrollbar,
-#declarationsActual::-webkit-scrollbar {
+#declarationsActual::-webkit-scrollbar,
+#gameOptionsPanel::-webkit-scrollbar {
     width: 10px;
 }
 
 #logLive::-webkit-scrollbar-track,
 #LogActual::-webkit-scrollbar-track,
 #fleetListBody::-webkit-scrollbar-track,
-#declarationsActual::-webkit-scrollbar-track {
+#declarationsActual::-webkit-scrollbar-track,
+#gameOptionsPanel::-webkit-scrollbar-track {
     background: var(--fv-scroll-track);
 }
 
 #logLive::-webkit-scrollbar-thumb,
 #LogActual::-webkit-scrollbar-thumb,
 #fleetListBody::-webkit-scrollbar-thumb,
-#declarationsActual::-webkit-scrollbar-thumb {
+#declarationsActual::-webkit-scrollbar-thumb,
+#gameOptionsPanel::-webkit-scrollbar-thumb {
     background: var(--fv-scroll-thumb);
 }
 
 #logLive::-webkit-scrollbar-thumb:hover,
 #LogActual::-webkit-scrollbar-thumb:hover,
 #fleetListBody::-webkit-scrollbar-thumb:hover,
-#declarationsActual::-webkit-scrollbar-thumb:hover {
+#declarationsActual::-webkit-scrollbar-thumb:hover,
+#gameOptionsPanel::-webkit-scrollbar-thumb:hover {
     background: var(--fv-scroll-thumb-hover);
 }
 
@@ -1558,15 +1562,23 @@ only screen and (max-height: 500px) and (orientation: landscape) {
     overflow: hidden;
 }
 
+/* The pane spans the full panel width so its scrollbar sits on the panel's right edge, like
+   the fleet list's and the declarations'. The 640px reading-width cap is on its CHILDREN -
+   on the pane itself it parked the scrollbar mid-panel. */
 #gameOptionsPanel {
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
+    overflow-x: hidden;
     padding: 8px 12px;
     font-size: 13px;
     font-style: normal;
     color: var(--fv-text);
-    max-width: 640px;
+}
+
+#gameOptionsList,
+#fleetSavePanel {
+    max-width: 616px;
 }
 
 /* ── The checkbox rows ─────────────────────────────────────────────────────────────
