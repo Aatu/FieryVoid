@@ -4,11 +4,15 @@ A floppy-disk button beside the green commit tick. It stores the orders a player
 the current phase **without committing them**. When that player opens the game again (same device or
 another), the page puts those orders back exactly as they were, and they carry on and commit as normal.
 
-Status: **Stages 0-6 BUILT 2026-10-02, uncommitted.** Stages 0-4 were play-tested by the user the same
-day (game 4437, Initial Orders) and Stages 5-6 (Deployment) end to end against the local site (game
-4434). All six decisions were ruled by the user (see Rulings). Stage 7 (Movement) is optional and not
-started. What the build changed or added compared with the plan below is in §7 - read it before testing
-or extending.
+Status: **Stages 0-6 BUILT 2026-10-02 and committed (78dcc05d1). Stage 7 (Movement) BUILT 2026-10-03,
+uncommitted.** Stages 0-4 were play-tested by the user (game 4437, Initial Orders) and Stages 5-6
+(Deployment) end to end against the local site (game 4434). Stage 7 is verified by a vm harness only
+(§7.6) and still needs a play-test. All six decisions were ruled by the user (see Rulings); Stage 7 went
+ahead on the user's word that players do stop part-way through an activation. What the build changed or
+added compared with the plan below is in §7 - read it before testing or extending.
+
+A follow-up that builds on Stage 7 - tabletop mine detection at every hex, with the movement up to a
+detection locked - is planned separately in `MINE_DETECTION_PLAN.md`.
 
 ## Why orders vanish today
 
@@ -366,7 +370,7 @@ Through the Stage 3 mechanism:
 - Specialist picks (the Deployment commit refuses without them);
 - `KirishiacOrbital` (`active`; it also transfers in phase -1).
 
-### Stage 7 (optional) — Movement
+### Stage 7 (optional) — Movement (BUILT 2026-10-03 - see §7.6)
 - Movement commits per activation: the active ship, or a whole initiative category under
   `SimultaneousMovementRule`. A save would hold that activation's uncommitted rows: moves, turns,
   pivots, rolls, speed changes with their `assignedThrust`, Extended Turn begin/complete rows, and
@@ -429,6 +433,26 @@ Through the Stage 3 mechanism:
 16. **An older save:** a save made on an earlier day shows the day in the notice and in the OPTIONS
     line.
 
+Movement (Stage 7):
+
+17. **One ship, standard movement:** accelerate, move, turn (thrust auto-assigned), pivot, roll, slip.
+    Save, reload: the plot is back where it was, the movement icons sit at its end, and the thrust
+    readouts match. Cancel back through two restored steps, re-plot, commit: `tac_shipmovement`
+    matches a control game plotted the same way without a reload.
+18. **Simultaneous movement:** two of your ships in one group, one plotted fully and one part-way.
+    Save, reload, finish, commit. Then, with an opponent in the same group: they commit while your
+    save is parked, you reload - your plot still comes back.
+19. **Thrust panel open:** start a turn, leave its panel open, save, reload - that turn is gone and
+    everything before it is there.
+20. **Specialists and contraction:** a Hyach Engine Specialist used while moving, and a Mindrider
+    contraction. Save, reload: the thrust budget, contraction level and defence match; cancelling
+    the contraction takes it back to where the turn began.
+21. **A detaching pod:** detach and move off, save, reload: still detached, still moved.
+22. **Floppy and OPTIONS:** while you hold the activation the floppy shows from the start, before the
+    tick; once you commit (waiting) both go and the OPTIONS block hides.
+23. **Stale row:** save in one ship's activation, commit it, put the row back by hand, open your next
+    activation - nothing is restored and OPTIONS says nothing is saved.
+
 ## 6. Files
 
 | File | Stage | Change |
@@ -445,6 +469,11 @@ Through the Stage 3 mechanism:
 | `source/public/styles/logPanel.css` | 2 | Saved Orders block (T11) |
 | `source/public/client/model/shipSystem.js` + the §1.4 class files | 3 | draft hooks |
 | `source/public/docs/faq.html`, `starter-guide.html` | 4 | text |
+| `source/public/client/savedOrders.js` | 7 | Movement capture / restore, floppy without the tick |
+| `source/public/client/gamedata.js` | 7 | `hideCommitButton` keeps the floppy in Movement |
+| `source/public/client/model/system/baseSystems.js` | 7 | Hyach Specialists also kept in phase 2 |
+| `source/server/controller/Manager.php`, `source/public/game.php` | 7 | phase 2 allowed; activation check |
+| `source/public/styles/tactical.css`, docs | 7 | comment; FAQ and starter-guide text |
 
 Rough size: Stages 0-2 are about one session; Stage 3 is about one more, most of it confirming each
 class's fields in play. Stage 4 is small. Stages 5-6 together are about one session; Stage 7 is
@@ -570,3 +599,74 @@ Everything in §2-§3 for Stages 0-4 is built as written, except where this sect
   six checks for the picks; and an end-to-end run on the real local site (game 4434, player 210): 21
   units placed and five mines ranged through the page, Save posted for real, a fresh page load
   restored it identically, the test row then removed through `clear`. `php -l` clean on all changed PHP.
+
+### 7.6 Stage 7 - Movement (built 2026-10-03)
+- **Go-ahead (user, 2026-10-03):** players do stop part-way through an activation - one ship's move is
+  many separate orders, and under `SimultaneousMovementRule` a whole group of ships is being plotted at
+  once.
+- **Phase 2 is a save phase** everywhere: `Manager::$savedOrdersPhases`, the `game.php` read, the client's
+  `isSavePhase`, and the OPTIONS status line ("Movement").
+- **A Movement draft belongs to an ACTIVATION, not just the turn and phase.** The draft carries
+  `active` - this player's own active ship ids, sorted - and the restore runs only when that list equals
+  the player's current active ships. Only their OWN: under simultaneous movement every other player's
+  units leave `gamedata.activeship` as those players commit, so the whole list changes under a draft
+  that is still good. A mismatch can only be a row a failed cleanup left behind after an earlier
+  activation was committed; it is ignored silently and not remembered (OPTIONS really has nothing saved
+  for this activation).
+- **What is kept:** for each own ship of the activation, this turn's id -1 rows (the player's), up to
+  the first row still waiting for its thrust (`commit` false - the thrust panel is open on it; it cannot
+  be reopened on a fresh page, and nothing can be plotted after it). Rows the server sent are never
+  touched: they have real ids, or none at all - the Gravitic Augmenter's transient free jink is id
+  `null`. Forced rows that activation itself adds (a base's rotation, a gravitic ship's continuing pivot,
+  an Extended Turn cancel) are kept too, and the restore swaps them for the copies rather than doubling
+  them. No EW, power or fire orders: the Movement commit sends none.
+- **A unit riding a host is not drafted** (attached and not detached): it gives no orders of its own and
+  its rows are the host's, mirrored by `PhaseStrategy.onShipMovementChanged`, which the host's restore
+  fires. A pod that has detached this turn is drafted like any other unit.
+- **Beside the rows, three things are put back** (`applyPlottedMoves`):
+  - `assignedThrust` is a sparse array keyed by thruster id, and JSON turns its holes into nulls. Its
+    readers skip holes but not nulls: `revertAutoThrust` (the cancel button) subtracts each null from
+    the `channeled` of whatever system has that id - NaN on an engine - and `calculateAssignedThrust`
+    turns "nothing assigned" into 0 in the payment arithmetic. Rebuilt with its holes (new trap T16).
+    Positions are rebuilt as `hexagon.Offset`, as a click makes them.
+  - a committed contraction has already moved the Mindrider engine's level, the hull's defence and the
+    Thought Shields' armour (`amendContractValue`, run by `doneAssignThrust`) - replayed once per row;
+  - a detach sets `ship.detached`.
+  Then each thruster's `channeled` is recomputed from the rows (`refreshMovementCaches`).
+  `ship.currentturndelay` is deliberately left alone: the click paths write it, but its only reader is
+  `adjustTurnDelay`, which nothing calls - every gate recomputes the delay from the rows.
+- **Hyach Specialists are kept in Movement** (`draftStatePhases` now `[-1, 1, 2, 3]`): Engine,
+  Maneuvering and Thruster can be used there, Movement's `process()` writes their notes, and an Engine
+  Specialist's thrust is what the restored moves were paid with. Same replay through `canUse()` /
+  `doUse()` as in the other phases.
+- **After the restore the strategy re-picks its unit** (`MovementPhaseStrategy.selectActiveShip`):
+  activation chose and drew icons for the first unit with movement left BEFORE the rows came back.
+- **The floppy shows from the start of Movement**, before the tick, like Deployment
+  (`savedOrders.syncButton`, now phases -1 and 2). Movement hides the tick after every step that leaves
+  movement unspent, so `gamedata.hideCommitButton` now asks `savedOrders.keepsButtonWithoutTick()` and
+  leaves the floppy while the player can save; it goes when they start waiting. The bar keeps its
+  two-icon room all phase, so the phase text does not jump as the tick comes and goes. Measured under CDP
+  emulation (header replica, long ship name): text clear of the icons and on one line at 1280, 390
+  portrait and 844x390 landscape; in portrait the phase and ship name, already truncated before this,
+  lose about four more characters.
+- **Server: an activation check replaces the commit check** in `Manager::saveOrders`. `hasAlreadySubmitted`
+  never fires in Movement (a slot's `lastphase` stays at Initial Orders until the phase ends), so phase 2
+  asks `holdsMovementActivation` - one of the player's slots is not `waiting`. Movement clears `waiting`
+  for exactly the players whose units are active, and it is the same flag `game.php` reads before
+  inlining a draft. The cleanup after a commit already ran for every phase, Movement included.
+- **Discard's confirm** now says it resets the orders "that are not yet committed", because in Movement
+  the activations already committed this phase stay as they are. Same wording in the FAQ.
+- **Verified:** a vm harness that loads the real model files and the real `ships.js`, `systems.js`,
+  `criticals.js`, `power.js` and `movement.js`, plots through the real functions (speed change, moves, a
+  paid turn, an Engine Specialist, a flight's jink, a contraction, a detach, a base's activation
+  rotation, a second turn left with its panel open), saves, rebuilds the page from server state, runs
+  activation, restores, and compares - then cancels back through restored rows. 53 checks, each of five
+  injected regressions caught by exactly the checks it should trip (nulls left in `assignedThrust`, no
+  contraction replay, no activation guard, pending row captured, `detached` not set). The core (90),
+  Deployment (26) and Specialists (20) harnesses still pass. `php -l` clean on `Manager.php` and
+  `game.php`; `node --check` clean on every changed file and on the rebuilt legacy bundles.
+- **Still owed:** a play-test of §5 items 17-23 on the local site.
+- **New trap:**
+  - **T16.** A movement row's `assignedThrust` is sparse, keyed by thruster id. A JSON round trip leaves
+    nulls where the holes were, and the readers treat a null as an entry. Anything that stores and
+    restores movement rows must rebuild the holes.

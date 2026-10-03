@@ -7,8 +7,9 @@
   the current phase WITHOUT committing them. When they open the game again - here or
   on another device - the page puts those orders back exactly as they were, and they
   carry on and commit as normal. Initial Orders (1), Pre-Firing (5) and Firing (3)
-  (ruling D2), and Deployment / Pre-Turn Orders (-1, Stages 5-6). Never Movement, which
-  commits one activation at a time.
+  (ruling D2), Deployment / Pre-Turn Orders (-1, Stages 5-6) and Movement (2, Stage 7).
+  Movement commits one ACTIVATION at a time, so a Movement draft belongs to the activation
+  it was saved in (draft.active) as well as to the turn and phase.
 
   ⭐ THE INVARIANT (plan §1.1): a restored draft puts the client back into exactly
   the state it was in when Save was clicked, for the order kinds that phase's commit
@@ -35,9 +36,10 @@
   applyPending consumes on first use. Nothing else carries a draft.
 
   Draft format, version 1 (plan §1.2) - keyed by ship, system and fighter id:
-    { v, turn, phase, ships: { <shipid>: {
-        EW:   [this turn's EW entries],
-        move: [this turn's uncommitted combat pivots (Firing), or deploy rows (Deployment)]
+    { v, turn, phase, active (Movement only: this player's active ship ids), ships: { <shipid>: {
+        EW:   [this turn's EW entries]                                 (not in Movement)
+        move: [this turn's uncommitted combat pivots (Firing), deploy rows (Deployment),
+               or plotted moves (Movement)]
         ship: { arrivalVia, arrivalSpeed, arrivalHangar }       (Initial Orders only)
         dock: { pendingDeployDock, pendingLcvDeployDock, forcedDeployDock }   (Deployment only)
         sys:  { <systemid>: { power, fire, mode, state } },
@@ -63,7 +65,7 @@ window.savedOrders = {
 
 	isSavePhase: function isSavePhase(phase) {
 		phase = Number(phase);
-		return phase === -1 || phase === 1 || phase === 5 || phase === 3;
+		return phase === -1 || phase === 1 || phase === 2 || phase === 5 || phase === 3;
 	},
 
 	//The deploy-dock markers a unit carries while it is queued to start the battle inside a carrier
@@ -77,6 +79,7 @@ window.savedOrders = {
 				return (window.shipManager && shipManager.hasShipsToDeployThisTurn(gamedata.thisplayer))
 					? "Deployment" : "Pre-Turn Orders";
 			case 1: return "Initial Orders";
+			case 2: return "Movement";
 			case 5: return "Pre-Firing";
 			case 3: return "Firing";
 		}
@@ -84,13 +87,39 @@ window.savedOrders = {
 	},
 
 	/* Could this viewer save right now? A player in the game, in a live game, in a saveable phase,
-	   with orders still to give - the moments the commit tick shows in phases 1, 5 and 3. */
+	   with orders still to give - the moments the commit tick shows in phases 1, 5 and 3. In
+	   Movement that means holding the activation with a unit of their own to plot: a player whose
+	   only active unit is a drifting Uncontrolled HK has nothing to keep (getMyActiveShips leaves
+	   it out). */
 	canSaveNow: function canSaveNow() {
 		if (!window.gamedata || !gamedata.gameid) return false;
 		if (gamedata.replay || gamedata.waiting) return false;
 		if (gamedata.status !== "ACTIVE") return false;
 		if (!savedOrders.isSavePhase(gamedata.gamephase)) return false;
-		return gamedata.isPlayerInGame();
+		if (!gamedata.isPlayerInGame()) return false;
+		if (Number(gamedata.gamephase) === 2) return gamedata.getMyActiveShips().length > 0;
+		return true;
+	},
+
+	/* MOVEMENT (Stage 7): the activation a draft belongs to - this player's own active units, by id,
+	   sorted. Only their OWN: under SimultaneousMovementRule every other player's units leave
+	   gamedata.activeship as those players commit, so the whole list changes under a draft that is
+	   still perfectly good. This player's share cannot change until they commit, and a commit
+	   deletes the draft. */
+	activeIds: function activeIds() {
+		return gamedata.getMyActiveShips().map(function (ship) {
+			return Number(ship.id);
+		}).sort(function (a, b) {
+			return a - b;
+		});
+	},
+
+	/* Is this unit riding a host? It gives no orders of its own (construcGamedata posts it an empty
+	   list), and its rows are the host's mirrored by PhaseStrategy.onShipMovementChanged - so a draft
+	   leaves it alone and the host's restore re-mirrors it. A pod that has DETACHED this turn plots
+	   for itself and is drafted like any other unit. */
+	isRiding: function isRiding(ship) {
+		return Object.keys(ship.attached || {}).length !== 0 && !ship.detached;
 	},
 
 	/* Does the server hold a copy for the phase on screen? Only as far as this page knows: a save
@@ -143,6 +172,18 @@ window.savedOrders = {
 		var phase = Number(gamedata.gamephase);
 		var draft = { v: savedOrders.VERSION, turn: turn, phase: phase, ships: {} };
 
+		/* MOVEMENT (Stage 7): the units of the activation and nothing else. Every other unit of this
+		   player's has either committed its movement already or will get an activation of its own,
+		   and a draft entry for it would replace that unit's rows on restore. */
+		if (phase === 2) {
+			draft.active = savedOrders.activeIds();
+			gamedata.getMyActiveShips().forEach(function (ship) {
+				if (savedOrders.isRiding(ship)) return;
+				draft.ships[ship.id] = savedOrders.captureShip(ship, turn, phase);
+			});
+			return savedOrders.copy(draft);
+		}
+
 		for (var i in gamedata.ships) {
 			var ship = gamedata.ships[i];
 			if (!ship) continue;
@@ -164,11 +205,33 @@ window.savedOrders = {
 	captureShip: function captureShip(ship, turn, phase) {
 		var rec = {};
 
-		var ew = savedOrders.thisTurn(ship.EW, turn);
+		//The Movement commit sends no EW (MovementGamePhase::process stores movement and system notes
+		//only), and this turn's EW was settled in Initial Orders.
+		var ew = (phase === 2) ? [] : savedOrders.thisTurn(ship.EW, turn);
 		if (ew.length) rec.EW = ew;
 
-		//Firing is the only one of the three phases whose commit carries movement - the combat
-		//pivots (movement.js doPivot). A row the server sent has a real id; only id -1 is ours.
+		/* Movement (Stage 7): the activation's plotted rows - moves, turns, pivots, rolls, slips, speed
+		   changes and jinks with the thrust assigned to each, Extended Turn begin / complete / cancel
+		   rows, contraction, a detach, a jump-out, and the forced rows activation itself added (a
+		   base's rotation, a gravitic ship's continuing pivot), which the restore swaps for these
+		   copies rather than doubling. A row the server sent has a real id - or none at all, like the
+		   Gravitic Augmenter's transient free jink - so only id -1 rows are the player's.
+		   It stops at the first row still waiting for its thrust (commit false: the thrust panel is
+		   open on it). The panel cannot be brought back on a fresh page, and nothing can be plotted
+		   after such a row anyway - the movement icons hide until it is paid or cancelled. */
+		if (phase === 2) {
+			var plotted = [];
+			for (var p = 0; p < (ship.movement || []).length; p++) {
+				var step = ship.movement[p];
+				if (!step || step.turn != turn || step.id != -1 || step.preturn) continue;
+				if (step.commit == false) break;
+				plotted.push(step);
+			}
+			if (plotted.length) rec.move = plotted;
+		}
+
+		//Of the three core phases only Firing's commit carries movement - the combat pivots
+		//(movement.js doPivot). A row the server sent has a real id; only id -1 is ours.
 		if (phase === 3) {
 			var moves = [];
 			for (var m = 0; m < (ship.movement || []).length; m++) {
@@ -259,7 +322,9 @@ window.savedOrders = {
 			}
 		}
 
-		var fire = savedOrders.thisTurn(system.fireOrders, turn);
+		//Movement gives no fire orders: this turn's ballistic launches were committed in Initial Orders,
+		//and the Movement commit does not send any.
+		var fire = (phase === 2) ? [] : savedOrders.thisTurn(system.fireOrders, turn);
 		if (fire.length) {
 			rec.fire = fire;
 			any = true;
@@ -326,6 +391,13 @@ window.savedOrders = {
 		if (!draft || draft.v !== savedOrders.VERSION) return;   //a format this page cannot read
 		if (Number(draft.turn) !== Number(gd.turn) || Number(draft.phase) !== Number(gd.gamephase)) return;
 
+		/* MOVEMENT: one turn and phase hold many activations, so the draft must also be this one's.
+		   A commit deletes the draft, so a mismatch is only ever a row that cleanup failed to remove -
+		   from an activation already committed, whose units now carry their real rows. Applying it
+		   would plot those moves a second time. Ignored silently, and not remembered: OPTIONS truly
+		   has nothing saved for this activation, and the next save or commit replaces the row. */
+		if (Number(gd.gamephase) === 2 && !savedOrders.sameIds(draft.active, savedOrders.activeIds())) return;
+
 		//The server copy exists whatever happens below - remember it so OPTIONS can discard it.
 		savedOrders.rememberSave(pending.savedAt, gd.turn, gd.gamephase);
 
@@ -370,8 +442,10 @@ window.savedOrders = {
 				continue;
 			}
 
-			//The same ownership test construcGamedata applies to what it posts.
-			if (!ship || ship.userid !== gamedata.thisplayer) {
+			//The same ownership test construcGamedata applies to what it posts - and in Movement the
+			//unit must be one of this activation's, the only units whose rows the commit stores.
+			if (!ship || ship.userid !== gamedata.thisplayer
+				|| (phase === 2 && gamedata.getMyActiveShips().indexOf(ship) === -1)) {
 				skipped += savedOrders.countShipOrders(rec);
 				continue;
 			}
@@ -390,8 +464,16 @@ window.savedOrders = {
 		var skipped = 0;
 		var moved = false;
 
-		if (!Array.isArray(ship.EW)) ship.EW = [];
-		savedOrders.replaceThisTurn(ship.EW, turn, rec.EW);
+		//Movement leaves EW alone: its commit sends none, and this turn's entries are the server's.
+		if (phase !== 2) {
+			if (!Array.isArray(ship.EW)) ship.EW = [];
+			savedOrders.replaceThisTurn(ship.EW, turn, rec.EW);
+		}
+
+		if (phase === 2 && Array.isArray(ship.movement)) {
+			savedOrders.applyPlottedMoves(ship, rec.move || [], turn);
+			moved = true;
+		}
 
 		if (phase === 3 && Array.isArray(ship.movement)) {
 			for (var m = ship.movement.length - 1; m >= 0; m--) {
@@ -477,14 +559,90 @@ window.savedOrders = {
 			skipped += savedOrders.countUnseen(sys, seen);
 		}
 
+		if (phase === 2 && Array.isArray(ship.movement)) savedOrders.refreshMovementCaches(ship);
+
 		return { skipped: skipped, moved: moved };
 	},
 
+	/* MOVEMENT (Stage 7): this turn's plotted rows become exactly the draft's, and everything the
+	   client keeps BESIDE the rows is brought back into line with them. The rows themselves are the
+	   whole order - every gate (remaining movement and thrust, turn delay, pivoting, rolling, Extended
+	   Turns, jump-out) reads them afresh - but three things are not derived from them:
+	   - assignedThrust is a SPARSE array keyed by thruster id, and JSON turned its holes into nulls.
+	     Its readers skip holes but not nulls: revertAutoThrust (the cancel button) subtracts each
+	     null from the `channeled` of whatever system has that id - NaN on an engine - and
+	     calculateAssignedThrust turns "nothing assigned" into 0 in the payment arithmetic. Rebuilt
+	     with its holes, as the click made it.
+	   - a committed contraction has already moved the Mindrider engine's level, the hull's defence and
+	     the Thought Shields' armour (amendContractValue, from doneAssignThrust). Replayed once per row.
+	   - a detaching pod carries `detached`, which the mirror, the gates and construcGamedata read.
+	   The thrusters' running totals are refreshed afterwards, by refreshMovementCaches. */
+	applyPlottedMoves: function applyPlottedMoves(ship, moves, turn) {
+		for (var r = ship.movement.length - 1; r >= 0; r--) {
+			var row = ship.movement[r];
+			if (row && row.turn == turn && row.id == -1 && !row.preturn) ship.movement.splice(r, 1);
+		}
+
+		var rows = savedOrders.copy(moves);
+		var detached = false;
+		for (var i = 0; i < rows.length; i++) {
+			var move = rows[i];
+			//A click puts a hexagon.Offset here, and the map icons call .equals() on positions.
+			if (move.position && window.hexagon && hexagon.Offset) move.position = new hexagon.Offset(move.position);
+			move.assignedThrust = savedOrders.sparse(move.assignedThrust);
+			ship.movement.push(move);
+			if (move.type === "detach") detached = true;
+		}
+
+		if (detached) ship.detached = true;
+
+		for (var c = 0; c < rows.length; c++) {
+			if (rows[c].type === "contract" && rows[c].commit) shipManager.movement.amendContractValue(ship, rows[c].value);
+		}
+	},
+
+	/* The running value the client keeps beside a ship's rows: each thruster's `channeled`, which
+	   autoAssignThrust resets from the rows and revertAutoThrust subtracts from. (ship.currentturndelay
+	   is NOT one: the click paths write it, but its only reader is adjustTurnDelay, which nothing calls -
+	   every gate recomputes the delay from the rows.) */
+	refreshMovementCaches: function refreshMovementCaches(ship) {
+		if (ship.flight) return;
+		for (var s in ship.systems) {
+			var thruster = ship.systems[s];
+			if (thruster && thruster.displayName == "Thruster") {
+				thruster.channeled = shipManager.movement.getAmountChanneledReal(ship, thruster);
+			}
+		}
+	},
+
+	/* An array with JSON's nulls turned back into holes - see applyPlottedMoves. */
+	sparse: function sparse(list) {
+		if (!Array.isArray(list)) return [];
+		var out = [];
+		for (var i = 0; i < list.length; i++) {
+			if (list[i] !== null && list[i] !== undefined) out[i] = list[i];
+		}
+		return out;
+	},
+
+	sameIds: function sameIds(a, b) {
+		if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
+		var x = a.map(Number).sort(function (p, q) { return p - q; });
+		var y = b.map(Number).sort(function (p, q) { return p - q; });
+		for (var i = 0; i < x.length; i++) {
+			if (x[i] !== y[i]) return false;
+		}
+		return true;
+	},
+
 	/* One system: this turn's fire orders (and, in Initial Orders, its power) become exactly the
-	   draft's - nothing at all when the draft has no record for it. */
+	   draft's - nothing at all when the draft has no record for it. Movement touches neither: only a
+	   system's settings (Hyach Specialists used while moving) come back there. */
 	applySystem: function applySystem(ship, system, rec, turn, phase) {
-		if (!Array.isArray(system.fireOrders)) system.fireOrders = [];
-		savedOrders.replaceThisTurn(system.fireOrders, turn, rec ? rec.fire : null);
+		if (phase !== 2) {
+			if (!Array.isArray(system.fireOrders)) system.fireOrders = [];
+			savedOrders.replaceThisTurn(system.fireOrders, turn, rec ? rec.fire : null);
+		}
 
 		if (phase === 1) {
 			if (!Array.isArray(system.power)) system.power = [];
@@ -572,6 +730,14 @@ window.savedOrders = {
 			fleetListManager.updateFleetList();
 		}
 
+		/* Movement: activation selected a unit and drew its movement icons before the rows came back,
+		   picking the first unit that still had movement to give - which, with every unit's rows
+		   restored, may now be one that has finished. The strategy's own pick, run again, lands on the
+		   unit a fresh activation would have chosen and redraws its icons where the rows now end. */
+		if (Number(gamedata.gamephase) === 2 && strategy && typeof strategy.selectActiveShip === "function") {
+			strategy.selectActiveShip();
+		}
+
 		/* Deployment: the helper the deploy-dock dialog uses after it moves units in or out of a
 		   carrier - it re-runs the commit gate (validateAllDeployment), hides docked units' icons and
 		   shows the rest, refreshes the EDF previews and every hangar's "Carrying" line. Activation
@@ -581,14 +747,29 @@ window.savedOrders = {
 		}
 	},
 
-	/* The floppy normally rides on gamedata.showCommitButton. Deployment is the exception: its tick
-	   stays hidden until every unit has a legal placement, and the point of saving there is to stop
-	   BEFORE that - so in phase -1 the floppy shows on its own whenever this player can save.
-	   hideCommitButton (waiting) and the replay header still take it away. */
+	/* The floppy normally rides on gamedata.showCommitButton. Deployment and Movement are the
+	   exceptions: their tick stays hidden until every unit has a legal placement / has used all its
+	   movement, and the point of saving there is to stop BEFORE that - so in phases -1 and 2 the
+	   floppy shows on its own whenever this player can save. Waiting (hideCommitButton, see
+	   keepsButtonWithoutTick) and the replay header still take it away. */
 	syncButton: function syncButton() {
-		if (Number(gamedata.gamephase) !== -1 || !savedOrders.canSaveNow()) return;
+		if (!savedOrders.showsWithoutTick(gamedata.gamephase) || !savedOrders.canSaveNow()) return;
 		$(".saveturn").show();
 		$("#phaseheader").addClass("fv-save-shown");
+	},
+
+	showsWithoutTick: function showsWithoutTick(phase) {
+		phase = Number(phase);
+		return phase === -1 || phase === 2;
+	},
+
+	/* gamedata.hideCommitButton asks this before it takes the floppy away with the tick. Movement
+	   hides the tick after every plotted step that leaves movement unspent, which would take the
+	   floppy with it all phase long; it stays for as long as this player can still save, and goes
+	   when they start waiting. (Deployment never hides the tick once shown, so syncButton alone
+	   covers it.) */
+	keepsButtonWithoutTick: function keepsButtonWithoutTick() {
+		return Number(gamedata.gamephase) === 2 && savedOrders.canSaveNow();
 	},
 
 	/* ============================== SAVE ============================== */
@@ -645,8 +826,9 @@ window.savedOrders = {
 	discard: function discard() {
 		if (savedOrders.busy) return;
 
-		window.confirm.confirm("Discard your saved orders? This also resets every order you have given this phase, "
-			+ "including changes you have not saved, and reloads the game.", function () {
+		//"not yet committed": in Movement the activations already committed this phase stay as they are.
+		window.confirm.confirm("Discard your saved orders? This also resets every order you have given this phase "
+			+ "that is not yet committed, including changes you have not saved, and reloads the game.", function () {
 			savedOrders.busy = true;
 			savedOrders.showOverlay("DISCARDING SAVED ORDERS...");
 

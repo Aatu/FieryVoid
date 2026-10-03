@@ -1653,12 +1653,14 @@ class Manager{
        A draft is valid for exactly one (game, player, turn, phase). Within that window
        nothing on the server can change the player's own ships - the phase cannot advance
        without their commit - and outside it the row is ignored (plan §0.6), so a stale row
-       left behind by a failed cleanup is harmless.
+       left behind by a failed cleanup is harmless. Movement commits one ACTIVATION at a
+       time, so a Movement draft also names the activation it belongs to, and the client
+       ignores it in any other (Stage 7).
        ====================================================================================== */
 
-    /** Phases a draft can be saved in: Initial Orders, Pre-Firing and Firing (ruling D2), and
-        Deployment / Pre-Turn Orders (Stages 5-6). Movement commits per activation and has none. */
-    private static $savedOrdersPhases = array(-1, 1, 5, 3);
+    /** Phases a draft can be saved in: Initial Orders, Pre-Firing and Firing (ruling D2),
+        Deployment / Pre-Turn Orders (Stages 5-6) and Movement (Stage 7). */
+    private static $savedOrdersPhases = array(-1, 1, 2, 5, 3);
 
     /** The largest draft accepted, in bytes of JSON text. */
     private static $savedOrdersMaxBytes = 1048576;
@@ -1694,11 +1696,20 @@ class Manager{
                 || (int)$turn !== (int)$game->turn || (int)$phase !== (int)$game->phase)
                 throw new Exception("The game has moved on since these orders were given, so they cannot be saved.");
             if (!in_array((int)$game->phase, self::$savedOrdersPhases, true))
-                throw new Exception("Orders cannot be saved in the Movement phase.");
+                throw new Exception("Orders cannot be saved in this phase.");
 
             //5. Nothing left to save once the phase is committed.
             if ($game->hasAlreadySubmitted($userid))
                 throw new Exception("Your orders for this phase are already committed.");
+
+            /* 5b. Movement: hasAlreadySubmitted never fires there (a slot's lastphase stays at
+               Initial Orders until the phase ends), so ask instead whether this player holds the
+               activation. Movement clears `waiting` for exactly the players whose units are
+               active (setNextActiveShip, SimultaneousMovementRule::setActiveShipPlayersNotWaiting)
+               and sets it again when they commit - the same flag game.php reads before inlining a
+               draft, and already loaded with the slots above. */
+            if ((int)$game->phase === 2 && !self::holdsMovementActivation($game, $userid))
+                throw new Exception("You can save your movement only while it is your turn to move.");
 
             //6. A JSON object of a sane size. Decoded as OBJECTS, not as an associative array:
             //   that keeps every empty {} an object on the way back out, where an array decode
@@ -1725,6 +1736,17 @@ class Manager{
             $logid = Debug::error($e);
             return json_encode(array("error" => $e->getMessage(), "code" => $e->getCode(), "logid" => $logid));
         }
+    }
+
+    /* Movement (Stage 7): does this player hold the activation - is one of their slots NOT
+       waiting? Reads only the slots saveOrders has already loaded. A NULL `waiting` (the
+       column defaults to TRUE and nothing writes NULL) is treated as waiting, so a slot this
+       cannot read refuses the save rather than allowing it. */
+    private static function holdsMovementActivation($game, $userid) {
+        foreach ($game->getSlotsByPlayerId($userid) as $slot) {
+            if ($slot->waiting !== null && !$slot->waiting) return true;
+        }
+        return false;
     }
 
     /* Delete the player's draft - the OPTIONS tab's "Discard Saved Orders" (plan §1.8).

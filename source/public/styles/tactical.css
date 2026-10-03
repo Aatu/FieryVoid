@@ -583,8 +583,10 @@ body {
 
 /* Save Orders (SAVE_ORDERS_PLAN.md §1.5): the floppy sits LEFT of the tick, so while it shows the
    bar reserves room for two icons - 10px inset + two 25px icons with their 10px cell padding.
-   gamedata.showCommitButton / hideCommitButton toggle the class together with the floppy, so
-   Movement and Deployment, which never show it, keep the one-icon 45px above. */
+   gamedata.showCommitButton / hideCommitButton toggle the class together with the floppy, so a
+   phase that shows neither keeps the one-icon 45px above. Deployment and Movement show the floppy
+   before the tick (savedOrders.syncButton) and keep the two-icon room the whole time, so the
+   phase text does not jump each time the tick comes and goes. */
 #phaseheader.fv-save-shown {
     padding-right: 80px;
 }

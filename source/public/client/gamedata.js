@@ -2699,7 +2699,8 @@ getActiveShipName: function getActiveShipName() {
     /* The Save Orders floppy (SAVE_ORDERS_PLAN.md §1.5) rides on these two, so it follows the tick
        everywhere - waiting, replay, phase changes - with no visibility logic of its own. Shown only
        in the phases a draft can be kept in; .fv-save-shown widens the bar's icon reservation while
-       it is, so Movement and Deployment keep their one-icon width. */
+       it is. The one exception is Movement (Stage 7): its tick comes and goes with every plotted
+       step, and the floppy stays while the player can still save - savedOrders.keepsButtonWithoutTick. */
     showCommitButton: function showCommitButton() {
         $(".committurn").show();
 
@@ -2710,6 +2711,7 @@ getActiveShipName: function getActiveShipName() {
 
     hideCommitButton: function hideCommitButton() {
         $(".committurn").hide();
+        if (window.savedOrders && savedOrders.keepsButtonWithoutTick()) return;
         $(".saveturn").hide();
         $("#phaseheader").removeClass("fv-save-shown");
     },

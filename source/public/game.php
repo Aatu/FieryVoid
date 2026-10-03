@@ -57,7 +57,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     $savedOrdersJSON = 'null';
     if ($serverdata !== null && $thisplayer > 0 && isset($serverdata->id, $serverdata->turn, $serverdata->phase)
         && empty($serverdata->waiting) && ($serverdata->status ?? '') === 'ACTIVE'
-        && in_array((int)$serverdata->phase, array(-1, 1, 5, 3), true)) {
+        && in_array((int)$serverdata->phase, array(-1, 1, 2, 5, 3), true)) {
         $savedOrdersJSON = Manager::getSavedOrdersJSON($serverdata->id, $thisplayer, $serverdata->turn, $serverdata->phase);
     }
 ?>
@@ -457,7 +457,8 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
         <table class="uitable">
             <tr>
             <!-- Save Orders (SAVE_ORDERS_PLAN.md §1.5): shown and hidden with the tick by
-                 gamedata.showCommitButton / hideCommitButton (and, in Deployment, by savedOrders.syncButton). -->
+                 gamedata.showCommitButton / hideCommitButton (and, in Deployment and Movement, by
+                 savedOrders.syncButton, so it shows before the tick does). -->
             <td class="saveturn" style="display:none"><div class="save" title="Save orders"></div></td>
             <td class="committurn" style="display:none"><div class="ok" ></div></td>
             <td class="cancelturn" style="display:none"><div class="cancel" ></div></td>

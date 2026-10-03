@@ -3632,11 +3632,13 @@ HyachSpecialists.prototype.doIndividualNotesTransfer = function () {
    commit the Specialist while the client went on computing EW, power and hit chances without it.
    The draft therefore records WHICH Specialists were used this phase - exactly what the commit
    sends (`allocated`, code 2) - and the restore replays doUse() for each, behind canUse(), so every
-   side effect lands the way the player's own click put it there. Initial Orders and Firing: the
-   two phases whose commit writes the notes (Pre-Firing's process() saves none).
+   side effect lands the way the player's own click put it there. Initial Orders, Movement and
+   Firing: the phases whose commit writes the notes (Pre-Firing's process() saves none). Movement
+   (Stage 7) is where Engine, Maneuvering and Thruster may be used, and an Engine Specialist's thrust
+   is what the restored moves were paid with.
    Deployment (Stage 6) keeps the PICKS instead - `selected`, code 1, the Deployment commit refuses
    without them - and replays doSelect() behind canSelect() the same way. */
-HyachSpecialists.prototype.draftStatePhases = [-1, 1, 3];
+HyachSpecialists.prototype.draftStatePhases = [-1, 1, 2, 3];
 
 HyachSpecialists.prototype.getDraftState = function (phase) {
 	if (this.draftStatePhases.indexOf(phase) === -1) return null;
