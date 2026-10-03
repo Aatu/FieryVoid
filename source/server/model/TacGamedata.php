@@ -69,6 +69,13 @@ class TacGamedata {
       a load that never reached onConstructed() masks rather than discloses.*/
     public static $currentGameFinished = false;
 
+    /*Every loaded fire order of an alwaysHideFireOrders weapon (the Ballistic Mine Launcher family), as
+      [ship, weapon, order]. Filled by onConstructed()'s fire-order loop, which already resolves each
+      order's weapon, so hideLaidMineLaunches walks this short list - empty in nearly every game -
+      instead of every system of every ship. Private: stripForJson builds its own object, so it never
+      reaches a payload.*/
+    private $mineLaunchOrders = array();
+
     public $id, $turn, $phase, $activeship, $name, $status, $points, $background, $creator, $gamespace, $description;
     public $ships = array();
     public $slots = array();
@@ -335,11 +342,17 @@ class TacGamedata {
         $this->doSortShips();
 
         $i = 0;
+        $this->mineLaunchOrders = array();
         foreach ($this->ships as $ship){
             $fireOrders = $ship->getAllFireOrders();
             foreach($fireOrders as $fire){
                 if (Firing::isDeclarationOnly($fire)) continue; //a rack's Meteor Defence declaration launches nothing
                 $weapon = $ship->getSystemById($fire->weaponid);
+                //Mine launches, for hideLaidMineLaunches - see $mineLaunchOrders. `ballistic` first: a
+                //property read that rules out almost every order before the getter is reached.
+                if ($weapon->ballistic && $weapon instanceof Weapon && $weapon->getAlwaysHideFireOrders()){
+                    $this->mineLaunchOrders[] = array($ship, $weapon, $fire);
+                }
                 if (($this->phase >= 2) && $weapon->ballistic && $fire->turn == $this->turn){
                     $movement = $ship->getLastTurnMovement($fire->turn);
 
@@ -1015,17 +1028,19 @@ class TacGamedata {
         if (!$all) {
             $this->deleteHiddenData();
         } else if (!self::$currentGameFinished) {
-            /* MINE_DETECTION_PLAN.md Stage 0 - THE ONE MASK THE HISTORY PATH KEEPS. $all is the
-               replay of a past turn (Manager::getReplayGameData is its only caller), and skipping
-               deleteHiddenData there is right for fire orders and EW, which are public once their
-               turn has resolved. A mine's position never becomes public with age: every past-turn
-               load carries each mine's deploy row, so an unfound enemy mine was readable straight
-               out of any earlier turn's replay. Mines do not move, so masking them at every turn
-               is always correct, and the test is the live path's own (the viewer's team in the
-               mine's `detected` list, as loaded for that turn - a mine found or fired that turn
-               stays visible). Mines only: the same hole for stealth SHIPS needs its own ruling
-               (arch_info_bleed_masking). A finished or surrendered game discloses everything. */
+            /* MINE_DETECTION_PLAN.md Stage 0 - THE MASKS THE HISTORY PATH KEEPS. $all is the
+               replay of a past turn (Manager::getReplayGameData is its only caller, and the printed
+               combat log reads its past turns through it too), and skipping deleteHiddenData there
+               is right for fire orders and EW, which are public once their turn has resolved. A
+               mine's position never becomes public with age: every past-turn load carries each
+               mine's deploy row, so an unfound enemy mine was readable straight out of any earlier
+               turn's replay. Mines do not move, so masking them at every turn is always correct,
+               and the test is the live path's own (the viewer's team in the mine's `detected` list,
+               as loaded for that turn - a mine found or fired that turn stays visible). Mines only:
+               the same hole for stealth SHIPS needs its own ruling (arch_info_bleed_masking). A
+               finished or surrendered game discloses everything. */
             $this->hideStealthShipMovement(true);
+            $this->hideLaidMineLaunches(); //...and the launch that laid a mine names its hex too
         }
         $this->markJumpedDockedFlights(); //after deleteHiddenData: it reads the MASKED movement (see the method)
         /* Walkers of Sigma-957 (WALKERS_OF_SIGMA_PLAN.md 3.4) - the "Scanned by Walkers"
@@ -1986,6 +2001,42 @@ class TacGamedata {
             //Re-index so json_encode still emits an ARRAY - a transient move appended after
             //the pivot (e.g. the Augmenter's forced jink) would otherwise leave a key gap.
             $ship->movement = array_values($ship->movement);
+        }
+    }
+
+    /* MINE_DETECTION_PLAN.md Stage 0 - WHERE A LAUNCHED MINE CAME TO REST. History path only (see
+       prepareForPlayer). A Ballistic Mine Launcher shot (and ChoukaMineLauncher's, which extends it)
+       that finds nothing in range leaves a loitering captor mine on the hex it landed on -
+       createLoiteringMine deploys it at the order's x/y. hidetarget blanks that hex only while the
+       launch turn is current (hideSystemFireOrders), so the replay of the launch turn carried it, and
+       after a deviation the pubnotes printed in the combat log named it as well ("deviation from 8 3
+       to 9 0.").
+       A launch that DID find a target is left alone: its SecondAttack is public, no mine stays behind,
+       and the explosion is drawn from that hex. That is the same test the client's replay uses to skip
+       a lone launch (getAlwaysHideFireOrders + no SecondAttack - weaponManager.getAllHexTargetedBallistics,
+       BallisticIconContainer), so the client already draws nothing for what this blanks; "null" is the
+       hidetarget convention every reader already accepts. Owner and teammates keep the real hex.
+       Walks only $mineLaunchOrders, gathered by onConstructed's existing fire-order loop. */
+    private function hideLaidMineLaunches() {
+        if (empty($this->mineLaunchOrders)) return; //no mine launcher fired in the loaded turn
+
+        $playerTeam = $this->getPlayerTeam();
+
+        foreach ($this->mineLaunchOrders as list($ship, $weapon, $fire)) {
+            if ($ship->userid == $this->forPlayer || $ship->team == $playerTeam) continue;
+            if ((int)$fire->targetid !== -1) continue; //only the launch is aimed at a hex
+
+            $attacked = false;
+            foreach ($weapon->fireOrders as $other) {
+                if ($other->turn == $fire->turn && $other->damageclass == 'SecondAttack') $attacked = true;
+            }
+            if ($attacked) continue;
+
+            $fire->x = "null";
+            $fire->y = "null";
+            if (is_string($fire->pubnotes)) {
+                $fire->pubnotes = preg_replace('/\s*deviation from -?\d+ -?\d+ to -?\d+ -?\d+\.?/i', '', $fire->pubnotes);
+            }
         }
     }
 
