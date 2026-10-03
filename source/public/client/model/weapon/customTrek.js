@@ -550,11 +550,74 @@ var TrekPhotonTorpKelly = function TrekPhotonTorpKelly(json, ship) {
 TrekPhotonTorpKelly.prototype = Object.create(Weapon.prototype);
 TrekPhotonTorpKelly.prototype.constructor = TrekPhotonTorpKelly;
 
+
 var TrekPhaserKelly = function TrekPhaserKelly(json, ship) {
     Weapon.call(this, json, ship);
 };
 TrekPhaserKelly.prototype = Object.create(Weapon.prototype);
 TrekPhaserKelly.prototype.constructor = TrekPhaserKelly;
+
+TrekPhaserKelly.prototype.clearBoost = function () {
+	for (var i in system.power) {
+		var power = system.power[i];
+		if (power.turn != gamedata.turn) continue;
+
+		if (power.type == 2) {
+			system.power.splice(i, 1);
+
+			return;
+		}
+	}
+};
+
+TrekPhaserKelly.prototype.hasMaxBoost = function () {
+	return true;
+};
+
+TrekPhaserKelly.prototype.getMaxBoost = function () {
+	return this.maxBoostLevel;
+};
+
+TrekPhaserKelly.prototype.initBoostableInfo = function () {
+	switch (shipManager.power.getBoost(this)) {
+		case 0:
+			this.data["Damage"] = '6 - 36';
+			this.data["Boostlevel"] = '0';
+			break;
+		case 1:
+			this.data["Damage"] = '7 - 42';
+			this.data["Boostlevel"] = '1';
+			break;
+		case 2:
+			this.data["Damage"] = '8 - 48';
+			this.data["Boostlevel"] = '2';
+			break;
+		case 3:
+			this.data["Damage"] = '9 - 54';
+			this.data["Boostlevel"] = '3';
+			break;
+		case 4:
+			this.data["Damage"] = '10 - 60';
+			this.data["Boostlevel"] = '4';
+			break;
+		case 5:
+			this.data["Damage"] = '11 - 66';
+			this.data["Boostlevel"] = '5';
+			break;
+		case 6:
+			this.data["Damage"] = '12 - 72';
+			this.data["Boostlevel"] = '6';
+			break;            
+		default:
+			this.data["Damage"] = '6 - 36';
+			this.data["Boostlevel"] = '0';
+			break;
+	}
+	return this;
+};
+
+
+
 
 var TrekPhaserKellyType7 = function TrekPhaserKellyType7(json, ship) {
     Weapon.call(this, json, ship);
@@ -582,6 +645,70 @@ TrekPhaserKellyType7.prototype.initializationUpdate = function () {
 
     return this;
 };
+
+TrekPhaserKellyType7.prototype.clearBoost = function () {
+	for (var i in system.power) {
+		var power = system.power[i];
+		if (power.turn != gamedata.turn) continue;
+
+		if (power.type == 2) {
+			system.power.splice(i, 1);
+
+			return;
+		}
+	}
+};
+
+TrekPhaserKellyType7.prototype.hasMaxBoost = function () {
+	return true;
+};
+
+TrekPhaserKellyType7.prototype.getMaxBoost = function () {
+	return this.maxBoostLevel;
+};
+
+TrekPhaserKellyType7.prototype.initBoostableInfo = function () {
+	switch (shipManager.power.getBoost(this)) {
+		case 0:
+			this.data["Damage"] = '7 - 42';
+			this.data["Boostlevel"] = '0';
+			break;
+		case 1:
+			this.data["Damage"] = '8 - 48';
+			this.data["Boostlevel"] = '2';
+			break;
+		case 2:
+			this.data["Damage"] = '9 - 54';
+			this.data["Boostlevel"] = '3';
+			break;
+		case 3:
+			this.data["Damage"] = '10 - 60';
+			this.data["Boostlevel"] = '4';
+			break;
+		case 4:
+			this.data["Damage"] = '11 - 66';
+			this.data["Boostlevel"] = '5';
+			break;
+		case 5:
+			this.data["Damage"] = '12 - 72';
+			this.data["Boostlevel"] = '6';
+			break;  
+		case 6:
+			this.data["Damage"] = '13 - 78';
+			this.data["Boostlevel"] = '7';
+			break;     
+		case 7:
+			this.data["Damage"] = '14 - 84';
+			this.data["Boostlevel"] = '8';
+			break;                                 
+		default:
+			this.data["Damage"] = '7 - 42';
+			this.data["Boostlevel"] = '0';
+			break;
+	}
+	return this;
+};
+
 
 var TrekShieldProjectionKelly = function TrekShieldProjectionKelly(json, ship) {
     ShipSystem.call(this, json, ship);
